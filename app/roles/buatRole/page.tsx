@@ -39,9 +39,9 @@ export default function BuatRolePage() {
     fetchPermissions();
   }, []);
 
-  const handleCheckbox = (id: string) => {
+  const handleCheckbox = (nama: string) => {
     setSelectedPermissions((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+      prev.includes(nama) ? prev.filter((p) => p !== nama) : [...prev, nama]
     );
   };
 
@@ -49,7 +49,7 @@ export default function BuatRolePage() {
     if (selectedPermissions.length === permissions.length) {
       setSelectedPermissions([]);
     } else {
-      setSelectedPermissions(permissions.map((p) => p._id));
+      setSelectedPermissions(permissions.map((p) => p.nama));
     }
   };
 

@@ -41,7 +41,7 @@ export default function BuatTokoPage() {
 
       sessionStorage.setItem("accessToken", res.accessToken);
 
-      router.push("/dashboard");
+      router.push("/setup/buatOwner");
     } catch (err: any) {
       setError(err.message || "Gagal membuat toko");
     } finally {
