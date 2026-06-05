@@ -29,7 +29,9 @@ export default function BuatRolePage() {
   const queryClient = useQueryClient();
 
   const [mounted, setMounted] = useState(false);
-  const [loadingTemplateId, setLoadingTemplateId] = useState<string | null>(null);
+  const [loadingTemplateId, setLoadingTemplateId] = useState<string | null>(
+    null,
+  );
 
   // Dibaca di useEffect agar tidak terjadi hydration mismatch.
   // SSR tidak punya sessionStorage, sehingga nilai level harus 0 dulu
@@ -47,17 +49,19 @@ export default function BuatRolePage() {
   }, []);
 
   // QUERY: MASTER PERMISSION
-  const { data: allPermissions = [], isLoading: permissionsLoading } = useQuery({
-    queryKey: queryKeys.permissions,
-    queryFn: async () => {
-      const res = await apiClient.get<GetPermissionsResponse>(
-        "/permission",
-        undefined,
-        "pengguna",
-      );
-      return res.data;
+  const { data: allPermissions = [], isLoading: permissionsLoading } = useQuery(
+    {
+      queryKey: queryKeys.permissions,
+      queryFn: async () => {
+        const res = await apiClient.get<GetPermissionsResponse>(
+          "/permission",
+          undefined,
+          "pengguna",
+        );
+        return res.data;
+      },
     },
-  });
+  );
 
   // MUTATION: CREATE ROLE DARI TEMPLATE
   const createRoleMutation = useMutation({
@@ -65,7 +69,9 @@ export default function BuatRolePage() {
       // Map nama permission → _id
       const finalPermissionIds = template.permissions
         .map((nama) => {
-          const matched = allPermissions.find((p: Permission) => p.nama === nama);
+          const matched = allPermissions.find(
+            (p: Permission) => p.nama === nama,
+          );
           return matched ? matched._id : null;
         })
         .filter(Boolean) as string[];
@@ -90,10 +96,10 @@ export default function BuatRolePage() {
       router.push("/dashboard/pengaturan/roles");
     },
     onError: (err: any, template) => {
-      // Reset loading state agar tombol bisa diklik lagi
       setLoadingTemplateId(null);
-      toast.error("Gagal membuat posisi", {
-        description: err.message || `Tidak dapat membuat posisi "${template.namaRole}".`,
+      toast.error(`Gagal membuat role "${template.namaRole}"`, {
+        description:
+          "Pastikan level dan wewenang yang ditetapkan tidak melebihi hak akses Anda.",
       });
     },
   });
@@ -259,7 +265,8 @@ export default function BuatRolePage() {
           <div className="space-y-0.5">
             <p className="text-sm font-medium">Buat Posisi Kustom</p>
             <p className="text-xs text-muted-foreground">
-              Tentukan sendiri nama, level, dan wewenang yang dimiliki posisi ini.
+              Tentukan sendiri nama, level, dan wewenang yang dimiliki posisi
+              ini.
             </p>
           </div>
           <Button
