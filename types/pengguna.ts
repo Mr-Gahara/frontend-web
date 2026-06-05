@@ -1,52 +1,42 @@
-// --- Sub-types ---
 
-export interface Pengguna {
+import { Role } from "./role";
+export interface PenggunaRole {
+  _id: string;
+  namaRole: string;
+}
+
+export interface PenggunaItem {
   _id: string;
   nama: string;
+  nomorHp?: string;
+  status: "aktif" | "non-aktif";
+  aksesType: ("app" | "web")[];
+  fotoKaryawan?: string | null;
   tenantID: string;
-  roleID: string;
+  // backend bisa return string ATAU object populate
+  roleID: string | Role;
   tokenVersion: number;
   createdAt: string;
   updatedAt: string;
 }
 
-// --- Request / Response ---
-
-export interface RegisterOwnerRequest {
+export interface PenggunaRequest {
   nama: string;
-  pin: string;
-}
-
-export interface RegisterOwnerResponse {
-  message: string;
-  accessToken: string;
-  refreshToken: string;
-  data: {
-    _id: string;
-    nama: string;
-    role: string;
-  };
-}
-
-export interface PinLoginRequest {
-  nama: string;
-  pin: string;
-}
-
-export interface PinLoginResponse {
-  message: string;
-  accessToken: string;
-  refreshToken: string;
-  data: {
-    nama: string;
-    role: string;
-  };
-}
-
-// JWT payload setelah decode penggunaToken
-export interface PenggunaSession {
-  id: string;
-  tenantID: string;
+  pin?: string;             // Digunakan HANYA untuk Create/Pembuatan Staf baru
+  pinLama?: string;         // Tambahan: Untuk Update PIN mandiri
+  pinBaru?: string;         // Tambahan: Untuk Update PIN mandiri
+  nomorHp?: string;
   roleID: string;
-  version: number;
+  status: "aktif" | "non-aktif";
+  aksesType: ("app" | "web")[]; // PERUBAHAN: Tanda '?' dihapus karena sekarang wajib
+}
+
+export interface GetPenggunaResponse {
+  message: string;
+  data: PenggunaItem[];
+}
+
+export interface PenggunaResponse {
+  message: string;
+  data: PenggunaItem;
 }

@@ -1,20 +1,4 @@
-export type DeviceType = "primary" | "secondary";
-export type DeviceAction = "added" | "removed" | "promoted" | "demoted";
 export type AkunRole = "client" | "admin";
-
-export interface Device {
-  deviceID: string;
-  type: DeviceType;
-  tokenVersion: number;
-  lastUsed: string;
-}
-
-export interface DeviceHistory {
-  deviceID: string;
-  type: string;
-  action: DeviceAction;
-  timestamp: string;
-}
 
 export interface Akun {
   _id: string;
@@ -22,10 +6,6 @@ export interface Akun {
   email: string;
   role: AkunRole;
   tenantID: string | null;
-  device: Device[];
-  maxPrimaryDevice: number;
-  maxDevice: number;
-  deviceHistory: DeviceHistory[];
   createdAt: string;
   updatedAt: string;
 }
@@ -46,20 +26,45 @@ export interface RegisterResponse {
 export interface LoginRequest {
   email: string;
   password: string;
-  deviceID: string;
 }
 
-// Sesuai response aktual backend
+export interface TenantEntry {
+  tenantID: string;
+  namaToko: string;
+}
+
 export interface AkunSession {
-  id: string;// bukan _id
+  id: string;
+  username: string | null;
   email: string;
   role: AkunRole;
-  tenantID: string | null;
-  currentDevice: string;
+  status: "aktif" | "non-aktif";
+  daftarTenant: TenantEntry[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface LoginResponse {
   message: string;
   accessToken: string;
+  requireSetup: boolean;
   data: AkunSession;
+}
+
+export interface PenggunaSession {
+  _id: string;
+  nama: string;
+  tenantID: string;
+  role: {
+    _id: string;
+    nama: string;
+    level: number;
+  };
+}
+
+// Opsional: Jika backend punya endpoint login khusus untuk pengguna (Staff/Owner)
+export interface LoginPenggunaResponse {
+  message: string;
+  accessToken: string;
+  data: PenggunaSession;
 }
