@@ -137,7 +137,10 @@ export default function PenjualanPage() {
   const [filters, setFilters] = useState<PenjualanFilterParams>(emptyFilter);
   const [appliedFilters, setAppliedFilters] =
     useState<PenjualanFilterParams>(emptyFilter);
+
+  // STATE UNTUK DIALOG
   const [deleteTarget, setDeleteTarget] = useState<Penjualan | null>(null);
+  const [voidTarget, setVoidTarget] = useState<Penjualan | null>(null);
 
   // QUERY PENJUALAN
   const {
@@ -169,20 +172,18 @@ export default function PenjualanPage() {
     }
   }, [error]);
 
-  // MUTATION DELETE
+  // MUTATION HAPUS PENJUALAN (HANYA UNTUK DRAFT)
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       return await apiClient.delete(`/penjualan/${id}`, undefined, "pengguna");
     },
     onSuccess: () => {
-      toast.success("Berhasil", {
-        description: "Penjualan berhasil dihapus.",
-      });
+      toast.success("Berhasil", { description: "Penjualan berhasil dihapus." });
       queryClient.invalidateQueries({ queryKey: queryKeys.penjualan });
       setDeleteTarget(null);
     },
     onError: (err: any) => {
-      toast.error("Gagal", {
+      toast.error("Gagal Menghapus", {
         description: err.message || "Gagal menghapus penjualan.",
       });
     },
@@ -190,13 +191,43 @@ export default function PenjualanPage() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    await deleteMutation.mutateAsync(deleteTarget._id);
+    const targetId = deleteTarget._id || (deleteTarget as any).id;
+    await deleteMutation.mutateAsync(targetId);
   };
 
-  const handleApplyFilter = () => {
-    setAppliedFilters({ ...filters });
+  // MUTATION UBAH STATUS (VOID)
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: any }) => {
+      return await apiClient.put(
+        `/penjualan/${id}`,
+        payload,
+        undefined,
+        "pengguna",
+      );
+    },
+    onSuccess: () => {
+      toast.success("Berhasil", { description: "Penjualan berhasil di-void." });
+      queryClient.invalidateQueries({ queryKey: queryKeys.penjualan });
+      setVoidTarget(null);
+    },
+    onError: (err: any) => {
+      toast.error("Gagal Memproses", {
+        description: err.message || "Gagal melakukan void penjualan.",
+      });
+    },
+  });
+
+  const handleVoid = async () => {
+    if (!voidTarget) return;
+    const targetId = voidTarget._id || (voidTarget as any).id;
+    await updateStatusMutation.mutateAsync({
+      id: targetId,
+      payload: { statusPenjualan: "VOID" },
+    });
   };
 
+  // HANDLER FILTER
+  const handleApplyFilter = () => setAppliedFilters({ ...filters });
   const handleResetFilter = () => {
     setFilters(emptyFilter);
     setAppliedFilters(emptyFilter);
@@ -280,7 +311,21 @@ export default function PenjualanPage() {
             Status Bayar
           </span>
         ),
-        cell: ({ row }) => badgeStatusBayar(row.original.statusBayar),
+        cell: ({ row }) => {
+          // Manipulasi visual UI: Jika transaksi VOID, paksa status bayar terlihat "Batal"
+          if (row.original.statusPenjualan === "VOID") {
+            return (
+              <Badge
+                variant="outline"
+                className="bg-slate-100 text-slate-500 border-slate-200"
+              >
+                Batal
+              </Badge>
+            );
+          }
+          // Jika tidak, tampilkan status aslinya
+          return badgeStatusBayar(row.original.statusBayar);
+        },
       },
       {
         accessorKey: "statusPenjualan",
@@ -295,7 +340,12 @@ export default function PenjualanPage() {
         id: "aksi",
         header: () => <div className="text-right text-xs">Aksi</div>,
         cell: ({ row }) => {
+          // Aturan main: Jika BUKAN DRAFT, maka HANYA BISA LIHAT DETAIL
           const isDraft = row.original.statusPenjualan === "DRAFT";
+
+          // Fallback ID yang aman
+          const targetId = row.original._id || (row.original as any).id;
+
           return (
             <div className="flex justify-end">
               <DropdownMenu>
@@ -308,33 +358,50 @@ export default function PenjualanPage() {
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-48">
+                  {/* OPSI LIHAT DETAIL (Selalu Muncul) */}
                   <DropdownMenuItem
-                    className="cursor-pointer"
+                    className="cursor-pointer font-medium"
                     onClick={() =>
-                      router.push(`/dashboard/penjualan/${row.original._id}`)
+                      router.push(`/dashboard/penjualan/${targetId}`)
                     }
                   >
                     Lihat Detail
                   </DropdownMenuItem>
+
+                  {/* SEMUA OPSI DI BAWAH INI HANYA MUNCUL JIKA STATUS MASIH DRAFT */}
                   {isDraft && (
                     <>
+                      <DropdownMenuSeparator />
+
+                      {/* OPSI TERIMA PENJUALAN (Routing ke Pembayaran) */}
                       <DropdownMenuItem
-                        className="cursor-pointer"
+                        className="cursor-pointer text-emerald-600 focus:text-emerald-700 focus:bg-emerald-50 font-medium"
                         onClick={() =>
                           router.push(
-                            `/dashboard/penjualan/${row.original._id}/edit`,
+                            `/dashboard/penjualan/${targetId}/pembayaran`,
                           )
                         }
                       >
-                        Edit
+                        Terima Penjualan (Bayar)
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
+
+                      {/* OPSI VOID */}
                       <DropdownMenuItem
-                        className="cursor-pointer text-red-500 focus:text-red-500"
+                        className="cursor-pointer text-amber-600 focus:text-amber-700 focus:bg-amber-50 font-medium"
+                        onClick={() => setVoidTarget(row.original)}
+                      >
+                        Void Penjualan
+                      </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
+
+                      {/* OPSI HAPUS */}
+                      <DropdownMenuItem
+                        className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10 font-medium"
                         onClick={() => setDeleteTarget(row.original)}
                       >
-                        Hapus
+                        Hapus Permanen
                       </DropdownMenuItem>
                     </>
                   )}
@@ -370,7 +437,6 @@ export default function PenjualanPage() {
       {/* Filter Bar */}
       <div className="rounded-xl border bg-card p-4 shadow-sm">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {/* No Referensi */}
           <Input
             placeholder="Cari no. referensi..."
             value={filters.noReferensi ?? ""}
@@ -378,8 +444,6 @@ export default function PenjualanPage() {
               setFilters({ ...filters, noReferensi: e.target.value })
             }
           />
-
-          {/* Status Bayar */}
           <Select
             value={filters.statusBayar ?? "ALL"}
             onValueChange={(val) =>
@@ -408,7 +472,6 @@ export default function PenjualanPage() {
             </SelectContent>
           </Select>
 
-          {/* Status Penjualan */}
           <Select
             value={filters.statusPenjualan ?? "ALL"}
             onValueChange={(val) =>
@@ -438,7 +501,6 @@ export default function PenjualanPage() {
             </SelectContent>
           </Select>
 
-          {/* Jenis Transaksi */}
           <Select
             value={filters.jenisTransaksi ?? "ALL"}
             onValueChange={(val) =>
@@ -465,7 +527,6 @@ export default function PenjualanPage() {
             </SelectContent>
           </Select>
 
-          {/* Jenis Penjualan */}
           <Select
             value={filters.jenisPenjualan ?? "ALL"}
             onValueChange={(val) =>
@@ -495,7 +556,6 @@ export default function PenjualanPage() {
             </SelectContent>
           </Select>
 
-          {/* Start Date */}
           <div className="space-y-1">
             <label className="text-xs text-muted-foreground">
               Dari Tanggal
@@ -509,7 +569,6 @@ export default function PenjualanPage() {
             />
           </div>
 
-          {/* End Date */}
           <div className="space-y-1">
             <label className="text-xs text-muted-foreground">
               Sampai Tanggal
@@ -523,7 +582,6 @@ export default function PenjualanPage() {
             />
           </div>
 
-          {/* Aksi Filter */}
           <div className="flex items-end gap-2">
             <Button
               onClick={handleApplyFilter}
@@ -556,7 +614,46 @@ export default function PenjualanPage() {
         />
       </div>
 
-      {/* DELETE DIALOG */}
+      {/* DIALOG VOID PENJUALAN */}
+      <AlertDialog
+        open={!!voidTarget}
+        onOpenChange={(open) => {
+          if (!open) setVoidTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Void Penjualan {voidTarget?.noReferensi}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Tindakan ini akan membatalkan transaksi secara permanen (menjadi
+              VOID) dan membatalkan sesi <i>booking</i> (jika ada). Jika
+              transaksi ini sudah ada pembayarannya, Anda harus melakukan void
+              pada data pembayarannya terlebih dahulu.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={updateStatusMutation.isPending}
+              className="cursor-pointer"
+            >
+              Batal
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleVoid}
+              disabled={updateStatusMutation.isPending}
+              className="cursor-pointer bg-orange-600 hover:bg-orange-700 focus:ring-orange-600"
+            >
+              {updateStatusMutation.isPending
+                ? "Memproses..."
+                : "Ya, Void Penjualan"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* DIALOG HAPUS PENJUALAN */}
       <AlertDialog
         open={!!deleteTarget}
         onOpenChange={(open) => {
