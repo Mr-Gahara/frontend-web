@@ -105,9 +105,7 @@ export default function PelangganPage() {
     return { total, memberCount, korporatCount };
   }, [pelangganList]);
 
-  // ==========================================
   // MUTATIONS
-  // ==========================================
 
   const createMutation = useMutation({
     mutationFn: async (payload: PelangganRequest) => {
@@ -139,9 +137,7 @@ export default function PelangganPage() {
     },
   });
 
-  // ==========================================
   // HANDLERS
-  // ==========================================
 
   // Buka dialog edit dari row tabel
   const openEdit = (item: Pelanggan) => {
@@ -222,9 +218,7 @@ export default function PelangganPage() {
     }
   };
 
-  // ==========================================
   // TABLE COLUMNS (Untuk DataTable)
-  // ==========================================
   const columns: ColumnDef<Pelanggan>[] = [
     {
       accessorKey: "namaPelanggan",
@@ -277,7 +271,7 @@ export default function PelangganPage() {
         const tipe = row.getValue("tipePelanggan") as string;
         const colorClass =
           tipe === "member"
-            ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+            ? "bg-emerald-700 text-slate-50 font-bold dark:bg-emerald-900/30 dark:text-emerald-400"
             : tipe === "korporat"
               ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
               : "bg-primary/10 text-primary";
@@ -351,9 +345,7 @@ export default function PelangganPage() {
       {/* BENTO LAYOUT GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* ========================================== */}
         {/* WIDGET STATISTIK (TOP ROW)                 */}
-        {/* ========================================== */}
         <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="rounded-xl border bg-card p-6 shadow-sm flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -386,9 +378,7 @@ export default function PelangganPage() {
           </div>
         </div>
 
-        {/* ========================================== */}
         {/* WIDGET DAFTAR PELANGGAN (KIRI - MAIN)      */}
-        {/* ========================================== */}
         <div className="rounded-xl border bg-card p-6 shadow-sm lg:col-span-8 flex flex-col gap-4">
           <h2 className="text-sm font-semibold">Daftar Pelanggan</h2>
           <DataTable
@@ -401,9 +391,7 @@ export default function PelangganPage() {
           />
         </div>
 
-        {/* ========================================== */}
         {/* WIDGET TAMBAH PELANGGAN (KANAN - SIDEBAR)  */}
-        {/* ========================================== */}
         <div className="rounded-xl border bg-card p-6 shadow-sm lg:col-span-4 lg:sticky lg:top-6">
           <div className="mb-4">
             <h2 className="text-sm font-semibold">Tambah Pelanggan Cepat</h2>

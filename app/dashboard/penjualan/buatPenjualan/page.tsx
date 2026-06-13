@@ -6,11 +6,7 @@ import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { decodeJWT } from "@/lib/decodeToken";
-import {
-  PenjualanRequest,
-  ItemPenjualanRequest,
-  GetPelangganResponse,
-} from "@/types/penjualan";
+import { PenjualanRequest, ItemPenjualanRequest } from "@/types/penjualan";
 import { GetProdukResponse } from "@/types/produk";
 import { useDebounce } from "@/hooks/use-debounce";
 import { formatRupiah } from "@/lib/format";
@@ -20,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Command,
   CommandEmpty,
@@ -58,6 +55,7 @@ import {
   Trash2,
   CalendarIcon,
   Clock3,
+  Tag,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -65,17 +63,18 @@ import { id as localeID } from "date-fns/locale";
 
 interface ItemState extends ItemPenjualanRequest {
   jumlahStr: string;
+  diskonItemIDs: string[]; // State array ID Diskon Item
 }
 
 const emptyItem = (): ItemState => ({
   produkID: "",
   jumlah: 1,
   jumlahStr: "1",
+  diskonItemIDs: [],
 });
 
 export default function BuatPenjualanPage() {
   useAuthGuard();
-
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -92,18 +91,18 @@ export default function BuatPenjualanPage() {
   const [jenisPenjualan, setJenisPenjualan] = useState<
     "dine-in" | "takeaway" | "booking"
   >("dine-in");
-
   const [tanggalInput, setTanggalInput] = useState<Date>(new Date());
   const now = new Date();
   const [hour, setHour] = useState(String(now.getHours()).padStart(2, "0"));
   const [minute, setMinute] = useState(
     String(now.getMinutes()).padStart(2, "0"),
   );
-
-  const simpanDraft = true; // Force selalu true
   const [keterangan, setKeterangan] = useState("");
   const [items, setItems] = useState<ItemState[]>([emptyItem()]);
+  const [diskonGlobalIDs, setDiskonGlobalIDs] = useState<string[]>([]); // State Diskon Global
   const [formError, setFormError] = useState("");
+
+  const simpanDraft = true;
 
   // ALERT DIALOG STATE
   const [showConfirm, setShowConfirm] = useState(false);
@@ -111,23 +110,24 @@ export default function BuatPenjualanPage() {
     null,
   );
 
-  // COMBOBOX STATE
+  // COMBOBOX & POPOVER STATE
   const [openPelanggan, setOpenPelanggan] = useState(false);
   const [pelangganSearch, setPelangganSearch] = useState("");
   const [openProduk, setOpenProduk] = useState<number | null>(null);
+  const [openDiskonItem, setOpenDiskonItem] = useState<number | null>(null);
+  const [openDiskonGlobal, setOpenDiskonGlobal] = useState(false);
 
-  // QUERY PELANGGAN
-  const { data: pelangganList = [], error: pelangganError } = useQuery({
+  // --- QUERY FETCHING ---
+  const { data: pelangganList = [] } = useQuery({
     queryKey: queryKeys.pelanggan,
     queryFn: async () => {
       const res = await apiClient.get<any>("/pelanggan", undefined, "pengguna");
-      const fetchedData = res.data?.data || res.data || [];
-      return Array.isArray(fetchedData) ? fetchedData : [];
+      const fetched = res.data?.data || res.data || [];
+      return Array.isArray(fetched) ? fetched : [];
     },
   });
 
-  // QUERY PRODUK
-  const { data: produkList = [], error: produkError } = useQuery({
+  const { data: produkList = [] } = useQuery({
     queryKey: queryKeys.produk,
     queryFn: async () => {
       const res = await apiClient.get<GetProdukResponse>(
@@ -139,15 +139,42 @@ export default function BuatPenjualanPage() {
     },
   });
 
-  // ERROR TOASTS
-  useEffect(() => {
-    if (pelangganError) {
-      toast.error("Gagal", { description: "Gagal memuat daftar pelanggan." });
-    }
-    if (produkError) {
-      toast.error("Gagal", { description: "Gagal memuat daftar produk." });
-    }
-  }, [pelangganError, produkError]);
+  // Fetch Diskon (Semua)
+  const { data: diskonList = [] } = useQuery({
+    queryKey: ["diskon-aktif"],
+    queryFn: async () => {
+      const res = await apiClient.get<any>("/diskon", undefined, "pengguna");
+      return (res.data?.data || res.data || []) as any[];
+    },
+  });
+
+  // Fetch Pajak (Semua)
+  const { data: pajakList = [] } = useQuery({
+    queryKey: ["pajak-aktif"],
+    queryFn: async () => {
+      const res = await apiClient.get<any>("/pajak", undefined, "pengguna");
+      return (res.data?.data || res.data || []) as any[];
+    },
+  });
+
+  // --- FILTERING AKTIF SAJA ---
+  const activeDiskonItem = useMemo(
+    () =>
+      diskonList.filter((d) => d.status === "Aktif" && d.cakupan === "Item"),
+    [diskonList],
+  );
+  const activeDiskonGlobal = useMemo(
+    () =>
+      diskonList.filter((d) => d.status === "Aktif" && d.cakupan === "Global"),
+    [diskonList],
+  );
+  const activePajakGlobal = useMemo(
+    () =>
+      pajakList
+        .filter((p) => p.statusPajak === true && p.tipePajak === false)
+        .sort((a, b) => (a.prioritas || 0) - (b.prioritas || 0)),
+    [pajakList],
+  );
 
   // DEBOUNCE SEARCH PELANGGAN
   const debouncedPelangganSearch = useDebounce(pelangganSearch, 300);
@@ -159,20 +186,46 @@ export default function BuatPenjualanPage() {
     );
   }, [pelangganList, debouncedPelangganSearch]);
 
-  // HELPERS ITEM
+  // --- HELPER LOGIKA "BISA DIGABUNG" ---
+  const toggleDiskonSelection = (
+    currentIds: string[],
+    newId: string,
+    availableList: any[],
+  ) => {
+    const target = availableList.find((d) => (d._id || d.id) === newId);
+    if (!target) return currentIds;
+
+    // Toggle (Unselect)
+    if (currentIds.includes(newId))
+      return currentIds.filter((id) => id !== newId);
+
+    // Jika diskon baru BUKAN tipe yang bisa digabung, reset seluruhnya ke dia saja
+    if (!target.bisaDigabung) return [newId];
+
+    // Cek apakah diskon yang *sudah terpilih* ada yang tidak bisa digabung
+    const currentSelected = availableList.filter((d) =>
+      currentIds.includes(d._id || d.id),
+    );
+    const hasNonGabung = currentSelected.some((d) => !d.bisaDigabung);
+    if (hasNonGabung) return [newId]; // Paksa ganti
+
+    return [...currentIds, newId];
+  };
+
+  // --- ITEM HANDLERS ---
   const addItem = () => setItems((prev) => [...prev, emptyItem()]);
   const removeItem = (index: number) =>
     setItems((prev) => prev.filter((_, i) => i !== index));
 
   const handlePilihProduk = useCallback((index: number, produkID: string) => {
     setItems((prev) => {
-      const existingIndex = prev.findIndex(
+      const exist = prev.findIndex(
         (item, i) => i !== index && item.produkID === produkID,
       );
-      if (existingIndex !== -1) {
+      if (exist !== -1) {
         return prev
           .map((item, i) => {
-            if (i !== existingIndex) return item;
+            if (i !== exist) return item;
             const newJumlah = item.jumlah + prev[index].jumlah;
             return { ...item, jumlah: newJumlah, jumlahStr: String(newJumlah) };
           })
@@ -202,27 +255,133 @@ export default function BuatPenjualanPage() {
     );
   };
 
+  const toggleItemDiskon = (index: number, diskonId: string) => {
+    setItems((prev) =>
+      prev.map((item, i) => {
+        if (i !== index) return item;
+        return {
+          ...item,
+          diskonItemIDs: toggleDiskonSelection(
+            item.diskonItemIDs,
+            diskonId,
+            activeDiskonItem,
+          ),
+        };
+      }),
+    );
+  };
+
   const getProdukNama = (produkID: string) =>
     produkList.find((p) => p._id === produkID)?.namaProduk ?? "";
-  const getSubtotal = (item: ItemState) => {
-    const produk = produkList.find((p) => p._id === item.produkID);
-    return produk ? produk.hargaJual * item.jumlah : 0;
-  };
-  const totalEstimasi = useMemo(
-    () => items.reduce((acc, item) => acc + getSubtotal(item), 0),
-    [items, produkList],
-  );
 
-  // MUTATION CREATE
+  // ==========================================
+  //  ENGINE SIMULASI KALKULASI FRONTEND (OPSI A)
+  // ==========================================
+  const calc = useMemo(() => {
+    let grandTotalItem = 0;
+
+    // 1. Hitung Item & Diskon Item
+    const itemsCalc = items.map((item) => {
+      // (Asumsi produk menggunakan _id bawaan atau disesuaikan jika perlu)
+      const produk = produkList.find(
+        (p) => (p._id || (p as any).id) === item.produkID,
+      );
+      const subTotal = (item.jumlah || 1) * (produk?.hargaJual || 0);
+      let running = subTotal;
+      let totalDiskonItem = 0;
+
+      // PERBAIKAN: Gunakan ekstraksi ID aman di sini
+      const selectedDiskon = activeDiskonItem.filter((d) =>
+        item.diskonItemIDs.includes(d._id || d.id),
+      );
+      for (const d of selectedDiskon) {
+        let potong =
+          d.tipe === "persen"
+            ? Math.ceil((running * d.nilai) / 100)
+            : d.nilai || 0;
+        if (potong > running) potong = running;
+        totalDiskonItem += potong;
+        running -= potong;
+      }
+
+      grandTotalItem += running;
+      return { subTotal, totalDiskonItem, totalHarga: running };
+    });
+
+    // 2. Hitung Diskon Global
+    let runningGlobal = grandTotalItem;
+    let totalDiskonGlobal = 0;
+
+    // PERBAIKAN: Gunakan ekstraksi ID aman di sini
+    const selectedDiskonGlobal = activeDiskonGlobal.filter((d) =>
+      diskonGlobalIDs.includes(d._id || d.id),
+    );
+
+    for (const d of selectedDiskonGlobal) {
+      let potong =
+        d.tipe === "persen"
+          ? Math.ceil((runningGlobal * d.nilai) / 100)
+          : d.nilai || 0;
+      if (potong > runningGlobal) potong = runningGlobal;
+      totalDiskonGlobal += potong;
+      runningGlobal -= potong;
+    }
+
+    // 3. Hitung Pajak Transaksi Global
+    const dasarSetelahDiskon = runningGlobal;
+    let runningTotalPajak = dasarSetelahDiskon;
+    let totalPajak = 0;
+    const rincianPajak = [];
+
+    for (const p of activePajakGlobal) {
+      let nilaiPajak = 0;
+      if (p.modelPerhitungan === 1) {
+        // Inclusive
+        nilaiPajak =
+          (runningTotalPajak / (1 + p.tarifPajak / 100)) * (p.tarifPajak / 100);
+      } else if (p.modelPerhitungan === 2) {
+        // Exclusive
+        nilaiPajak = dasarSetelahDiskon * (p.tarifPajak / 100);
+        runningTotalPajak += nilaiPajak;
+      } else if (p.modelPerhitungan === 3) {
+        // Compound
+        nilaiPajak = runningTotalPajak * (p.tarifPajak / 100);
+        runningTotalPajak += nilaiPajak;
+      }
+
+      totalPajak += Math.round(nilaiPajak);
+      rincianPajak.push({
+        namaPajak: p.namaPajak,
+        nominal: Math.round(nilaiPajak),
+        tipe: p.modelPerhitungan === 1 ? "Inc" : "Exc",
+      });
+    }
+
+    return {
+      itemsCalc,
+      grandTotalItem,
+      totalDiskonGlobal,
+      rincianPajak,
+      totalPajak,
+      grandTotal: Math.round(runningTotalPajak),
+    };
+  }, [
+    items,
+    produkList,
+    activeDiskonItem,
+    activeDiskonGlobal,
+    diskonGlobalIDs,
+    activePajakGlobal,
+  ]);
+
+  // --- SUBMIT LOGIC ---
   const createMutation = useMutation({
     mutationFn: async (payload: PenjualanRequest) => {
       return await apiClient.post("/penjualan", payload, undefined, "pengguna");
     },
     onSuccess: () => {
       toast.success("Berhasil", {
-        description: simpanDraft
-          ? "Penjualan berhasil disimpan sebagai draft."
-          : "Penjualan berhasil dibuat.",
+        description: "Penjualan berhasil dibuat (Draft).",
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.penjualan });
       router.push("/dashboard/penjualan");
@@ -234,33 +393,15 @@ export default function BuatPenjualanPage() {
     },
   });
 
-  // SUBMIT FORM (Hanya validasi dan set state Pop-up)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
 
-    if (!currentUserId) {
-      setFormError(
-        "Sesi kasir tidak terdeteksi. Silakan muat ulang atau login kembali.",
-      );
-      return;
-    }
-    if (!pelangganID) {
-      setFormError("Silakan pilih pelanggan terlebih dahulu.");
-      return;
-    }
-    if (!tanggalInput) {
-      setFormError("Tanggal transaksi wajib diisi.");
-      return;
-    }
-    if (items.some((item) => !item.produkID)) {
-      setFormError("Semua baris item harus memiliki produk yang dipilih.");
-      return;
-    }
-    if (items.some((item) => item.jumlah < 1)) {
-      setFormError("Jumlah item minimal 1.");
-      return;
-    }
+    if (!currentUserId) return setFormError("Sesi kasir tidak terdeteksi.");
+    if (!pelangganID)
+      return setFormError("Silakan pilih pelanggan terlebih dahulu.");
+    if (items.some((item) => !item.produkID))
+      return setFormError("Semua baris item harus memiliki produk.");
 
     const tanggalTransaksi = new Date(tanggalInput);
     tanggalTransaksi.setHours(Number(hour), Number(minute), 0);
@@ -271,24 +412,24 @@ export default function BuatPenjualanPage() {
       jenisTransaksi: "INVOICE",
       jenisPenjualan,
       tanggalTransaksi: tanggalTransaksi.toISOString(),
-      itemPenjualan: items.map(({ produkID, jumlah }) => ({
+      itemPenjualan: items.map(({ produkID, jumlah, diskonItemIDs }) => ({
         produkID,
         jumlah,
+        diskonItemIDs: diskonItemIDs.length > 0 ? diskonItemIDs : undefined,
       })),
+      diskonGlobalIDs: diskonGlobalIDs.length > 0 ? diskonGlobalIDs : undefined,
       keterangan: keterangan || undefined,
       simpanDraft,
     };
 
     setPendingPayload(payload);
-    setShowConfirm(true); // Memunculkan Pop-up
+    setShowConfirm(true);
   };
 
-  // EKSEKUSI API SETELAH KONFIRMASI POP-UP
   const executeCreate = async () => {
     if (!pendingPayload) return;
     await createMutation.mutateAsync(pendingPayload);
     setShowConfirm(false);
-    setPendingPayload(null);
   };
 
   return (
@@ -298,7 +439,7 @@ export default function BuatPenjualanPage() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
+          className="w-fit cursor-pointer px-0 text-muted-foreground hover:bg-transparent"
           onClick={() => router.push("/dashboard/penjualan")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -316,9 +457,7 @@ export default function BuatPenjualanPage() {
         onSubmit={handleSubmit}
         className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
       >
-        {/* ======================= */}
-        {/* KOLOM KIRI (UTAMA)      */}
-        {/* ======================= */}
+        {/* ================= KOLOM KIRI (UTAMA) ================= */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           {/* INFO TRANSAKSI */}
           <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
@@ -354,7 +493,6 @@ export default function BuatPenjualanPage() {
                 </SelectContent>
               </Select>
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Tanggal Transaksi</label>
@@ -378,51 +516,30 @@ export default function BuatPenjualanPage() {
                       onSelect={(date) => {
                         if (date) setTanggalInput(date);
                       }}
-                      captionLayout="dropdown"
-                      startMonth={new Date(2010, 0)}
-                      endMonth={new Date(new Date().getFullYear() + 1, 11)}
                     />
                   </PopoverContent>
                 </Popover>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Jam Transaksi</label>
-                <div className="flex h-12 w-full items-center gap-2 rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-within:ring-1 focus-within:ring-ring">
-                  <Clock3 className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div className="flex h-12 w-full items-center gap-2 rounded-md border px-3 text-sm focus-within:ring-1 focus-within:ring-ring">
+                  <Clock3 className="h-4 w-4 text-muted-foreground" />
                   <input
                     type="text"
-                    inputMode="numeric"
                     maxLength={2}
                     className="w-10 bg-transparent text-center font-medium outline-none"
                     value={hour}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (/^\d*$/.test(val)) {
-                        if (Number(val) <= 23) setHour(val);
-                        else if (val.length === 2) setHour("23");
-                      }
-                    }}
-                    onBlur={() =>
-                      setHour((prev) => (prev ? prev.padStart(2, "0") : "00"))
-                    }
+                    onChange={(e) => setHour(e.target.value)}
+                    onBlur={() => setHour((p) => p.padStart(2, "0"))}
                   />
                   <span className="font-medium text-muted-foreground">:</span>
                   <input
                     type="text"
-                    inputMode="numeric"
                     maxLength={2}
                     className="w-10 bg-transparent text-center font-medium outline-none"
                     value={minute}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (/^\d*$/.test(val)) {
-                        if (Number(val) <= 59) setMinute(val);
-                        else if (val.length === 2) setMinute("59");
-                      }
-                    }}
-                    onBlur={() =>
-                      setMinute((prev) => (prev ? prev.padStart(2, "0") : "00"))
-                    }
+                    onChange={(e) => setMinute(e.target.value)}
+                    onBlur={() => setMinute((p) => p.padStart(2, "0"))}
                   />
                 </div>
               </div>
@@ -449,13 +566,15 @@ export default function BuatPenjualanPage() {
                 const selectedProduk = produkList.find(
                   (p) => p._id === item.produkID,
                 );
+                const itemCalc = calc.itemsCalc[index];
+
                 return (
                   <div
                     key={index}
-                    className="rounded-lg border p-4 space-y-3 bg-muted/30"
+                    className="rounded-lg border p-4 space-y-4 bg-muted/20"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-muted-foreground">
+                    <div className="flex items-center justify-between border-b border-muted pb-2">
+                      <span className="text-xs font-semibold text-muted-foreground">
                         Item #{index + 1}
                       </span>
                       {items.length > 1 && (
@@ -463,14 +582,15 @@ export default function BuatPenjualanPage() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 cursor-pointer text-red-500 hover:bg-red-50"
+                          className="h-7 w-7 text-red-500 hover:bg-red-50"
                           onClick={() => removeItem(index)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
                     </div>
-                    <div className="space-y-1.5 flex flex-col">
+
+                    <div className="space-y-1.5">
                       <label className="text-xs font-medium">Produk</label>
                       <Popover
                         open={openProduk === index}
@@ -487,7 +607,7 @@ export default function BuatPenjualanPage() {
                             {item.produkID
                               ? getProdukNama(item.produkID)
                               : "Pilih produk..."}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent
@@ -501,44 +621,30 @@ export default function BuatPenjualanPage() {
                                 Produk tidak ditemukan.
                               </CommandEmpty>
                               <CommandGroup>
-                                {produkList.map((p) => {
-                                  const sudahDipilih =
-                                    item.produkID !== p._id &&
-                                    items.some(
-                                      (it, i) =>
-                                        i !== index && it.produkID === p._id,
-                                    );
-                                  return (
-                                    <CommandItem
-                                      key={p._id}
-                                      value={p.namaProduk}
-                                      onSelect={() =>
-                                        handlePilihProduk(index, p._id)
-                                      }
-                                      className="cursor-pointer"
-                                    >
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          item.produkID === p._id
-                                            ? "opacity-100"
-                                            : "opacity-0",
-                                        )}
-                                      />
-                                      <span className="flex-1">
-                                        {p.namaProduk}
-                                      </span>
-                                      {sudahDipilih && (
-                                        <span className="ml-2 text-xs text-muted-foreground">
-                                          +jumlah
-                                        </span>
+                                {produkList.map((p) => (
+                                  <CommandItem
+                                    key={p._id}
+                                    onSelect={() =>
+                                      handlePilihProduk(index, p._id)
+                                    }
+                                    className="cursor-pointer"
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        item.produkID === p._id
+                                          ? "opacity-100"
+                                          : "opacity-0",
                                       )}
-                                      <span className="ml-2 text-xs text-muted-foreground">
-                                        {formatRupiah(p.hargaJual)}
-                                      </span>
-                                    </CommandItem>
-                                  );
-                                })}
+                                    />
+                                    <span className="flex-1">
+                                      {p.namaProduk}
+                                    </span>
+                                    <span className="ml-2 text-xs text-muted-foreground">
+                                      {formatRupiah(p.hargaJual)}
+                                    </span>
+                                  </CommandItem>
+                                ))}
                               </CommandGroup>
                             </CommandList>
                           </Command>
@@ -551,13 +657,13 @@ export default function BuatPenjualanPage() {
                         <label className="text-xs font-medium">Jumlah</label>
                         <Input
                           type="number"
-                          className="no-spinner bg-background"
                           min={1}
                           value={item.jumlahStr}
                           onChange={(e) =>
                             handleJumlahChange(index, e.target.value)
                           }
                           onBlur={() => handleJumlahBlur(index)}
+                          className="bg-background no-spinner"
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -572,13 +678,123 @@ export default function BuatPenjualanPage() {
                       </div>
                     </div>
 
+                    {/* Diskon Item */}
                     {selectedProduk && (
-                      <div className="flex justify-end">
-                        <span className="text-xs text-muted-foreground">
-                          Subtotal:{" "}
-                          <span className="font-medium text-foreground">
-                            {formatRupiah(getSubtotal(item))}
+                      <div className="space-y-2 pt-1">
+                        <div className="flex justify-between items-center">
+                          <label className="text-xs font-medium flex items-center gap-1.5">
+                            <Tag className="h-3.5 w-3.5 text-muted-foreground" />{" "}
+                            Diskon Produk
+                          </label>
+                          <Popover
+                            open={openDiskonItem === index}
+                            onOpenChange={(o) =>
+                              setOpenDiskonItem(o ? index : null)
+                            }
+                          >
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-xs cursor-pointer"
+                              >
+                                Pilih Diskon
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent align="end" className="w-64 p-0">
+                              <Command>
+                                <CommandInput placeholder="Cari diskon item..." />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    Belum ada diskon aktif.
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {activeDiskonItem.map((d, idx) => {
+                                      // EKSTRAKSI ID AMAN
+                                      const targetId = d._id || d.id;
+                                      const isSelected =
+                                        item.diskonItemIDs.includes(targetId);
+                                      const safeKey =
+                                        targetId || `item-diskon-${idx}`;
+
+                                      return (
+                                        <CommandItem
+                                          key={safeKey}
+                                          onSelect={() =>
+                                            toggleItemDiskon(index, targetId)
+                                          }
+                                          className="cursor-pointer"
+                                        >
+                                          <div className="flex flex-1 items-center gap-2">
+                                            <div
+                                              className={cn(
+                                                "flex h-4 w-4 items-center justify-center rounded-sm border",
+                                                isSelected
+                                                  ? "bg-primary border-primary"
+                                                  : "border-muted-foreground/30",
+                                              )}
+                                            >
+                                              {isSelected && (
+                                                <Check className="h-3 w-3 text-primary-foreground" />
+                                              )}
+                                            </div>
+                                            <span>{d.namaDiskon}</span>
+                                          </div>
+                                          <Badge
+                                            variant="secondary"
+                                            className="text-[10px]"
+                                          >
+                                            {d.tipe === "persen"
+                                              ? `${d.nilai}%`
+                                              : "Rp"}
+                                          </Badge>
+                                        </CommandItem>
+                                      );
+                                    })}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+
+                        {item.diskonItemIDs.length > 0 && (
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {item.diskonItemIDs.map((id, idx) => {
+                              const d = activeDiskonItem.find(
+                                (x) => (x._id || x.id) === id,
+                              );
+                              if (!d) return null;
+                              const safeKey =
+                                d._id || d.id || `badge-item-${idx}`;
+                              return (
+                                <Badge
+                                  key={safeKey}
+                                  variant="secondary"
+                                  className="bg-rose-50 text-rose-600 border-rose-100 text-[10px]"
+                                >
+                                  {d.namaDiskon} (
+                                  {d.tipe === "persen"
+                                    ? `${d.nilai}%`
+                                    : formatRupiah(d.nilai)}
+                                  )
+                                </Badge>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedProduk && (
+                      <div className="flex flex-col items-end gap-1 pt-2 border-t border-muted">
+                        {itemCalc.totalDiskonItem > 0 && (
+                          <span className="text-xs text-rose-500 line-through">
+                            {formatRupiah(itemCalc.subTotal)}
                           </span>
+                        )}
+                        <span className="text-sm font-semibold text-foreground">
+                          {formatRupiah(itemCalc.totalHarga)}
                         </span>
                       </div>
                     )}
@@ -589,15 +805,12 @@ export default function BuatPenjualanPage() {
           </div>
         </div>
 
-        {/* ======================= */}
-        {/* KOLOM KANAN (SIDEBAR)   */}
-        {/* ======================= */}
+        {/* ================= KOLOM KANAN (SIDEBAR) ================= */}
         <div className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-6">
           {/* PELANGGAN */}
           <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
             <h2 className="text-sm font-semibold">Pelanggan</h2>
-            <div className="space-y-2 flex flex-col">
-              <label className="text-sm font-medium">Pilih Pelanggan</label>
+            <div className="space-y-2">
               <Popover open={openPelanggan} onOpenChange={setOpenPelanggan}>
                 <PopoverTrigger asChild>
                   <Button
@@ -611,7 +824,7 @@ export default function BuatPenjualanPage() {
                           (p: any) => (p._id || p.id) === pelangganID,
                         )?.namaPelanggan ?? "Pelanggan tidak ditemukan")
                       : "Pilih pelanggan..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -627,12 +840,11 @@ export default function BuatPenjualanPage() {
                     <CommandList>
                       <CommandEmpty>Pelanggan tidak ditemukan.</CommandEmpty>
                       <CommandGroup>
-                        {filteredPelanggan.map((p: any, index: number) => {
+                        {filteredPelanggan.map((p: any) => {
                           const idPelanggan = p._id || p.id;
                           return (
                             <CommandItem
-                              key={idPelanggan || `pelanggan-combo-${index}`}
-                              value={idPelanggan || `value-${index}`}
+                              key={idPelanggan}
                               onSelect={() => {
                                 setPelangganID(idPelanggan);
                                 setOpenPelanggan(false);
@@ -663,82 +875,200 @@ export default function BuatPenjualanPage() {
             </div>
           </div>
 
-          {/* RINGKASAN */}
-          <div className="rounded-xl border bg-card p-6 shadow-sm space-y-3">
-            <h2 className="text-sm font-semibold">Ringkasan</h2>
-            <div className="space-y-2 text-sm">
-              {items.map((item, index) => {
-                const produk = produkList.find((p) => p._id === item.produkID);
-                if (!produk) return null;
-                return (
-                  <div
-                    key={index}
-                    className="flex justify-between text-muted-foreground"
-                  >
-                    <span>
-                      {produk.namaProduk} × {item.jumlah}
-                    </span>
-                    <span>{formatRupiah(getSubtotal(item))}</span>
-                  </div>
-                );
-              })}
-              <div className="border-t pt-2 flex justify-between font-medium">
-                <span>Estimasi Total</span>
-                <span>{formatRupiah(totalEstimasi)}</span>
+          {/* DISKON GLOBAL & KETERANGAN */}
+          <div className="rounded-xl border bg-card p-6 shadow-sm space-y-5">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold flex items-center gap-1.5">
+                  <Tag className="h-4 w-4 text-muted-foreground" /> Diskon
+                </h2>
+                <Popover
+                  open={openDiskonGlobal}
+                  onOpenChange={setOpenDiskonGlobal}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs cursor-pointer"
+                    >
+                      Pilih Diskon
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-64 p-0">
+                    <Command>
+                      <CommandInput placeholder="Cari diskon transaksi..." />
+                      <CommandList>
+                        <CommandEmpty>Belum ada diskon aktif.</CommandEmpty>
+                        <CommandGroup>
+                          {activeDiskonGlobal.map((d, index) => {
+                            const targetId = d._id || d.id; // Ekstraksi ID aman
+                            const isSelected =
+                              diskonGlobalIDs.includes(targetId);
+                            const safeKey =
+                              targetId || `global-diskon-${index}`;
+                            return (
+                              <CommandItem
+                                key={safeKey}
+                                onSelect={() =>
+                                  setDiskonGlobalIDs((prev) =>
+                                    toggleDiskonSelection(
+                                      prev,
+                                      targetId,
+                                      activeDiskonGlobal,
+                                    ),
+                                  )
+                                }
+                                className="cursor-pointer"
+                              >
+                                <div className="flex flex-1 items-center gap-2">
+                                  <div
+                                    className={cn(
+                                      "flex h-4 w-4 items-center justify-center rounded-sm border",
+                                      isSelected
+                                        ? "bg-primary border-primary"
+                                        : "border-muted-foreground/30",
+                                    )}
+                                  >
+                                    {isSelected && (
+                                      <Check className="h-3 w-3 text-primary-foreground" />
+                                    )}
+                                  </div>
+                                  <span>{d.namaDiskon}</span>
+                                </div>
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[10px]"
+                                >
+                                  {d.tipe === "persen" ? `${d.nilai}%` : "Rp"}
+                                </Badge>
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Total final termasuk pajak dan diskon akan dihitung oleh sistem.
-              </p>
-            </div>
-          </div>
 
-          {/* KETERANGAN */}
-          <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
-            <h2 className="text-sm font-semibold">Informasi Tambahan</h2>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
+              {diskonGlobalIDs.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {diskonGlobalIDs.map((id, idx) => {
+                    const d = activeDiskonGlobal.find(
+                      (x) => (x._id || x.id) === id,
+                    );
+                    if (!d) return null;
+                    const safeKey = d._id || d.id || `badge-global-${idx}`; // Fallback aman
+                    return (
+                      <Badge
+                        key={safeKey}
+                        variant="secondary"
+                        className="bg-rose-50 text-rose-600 border-rose-100 text-[11px] px-2 py-0.5"
+                      >
+                        {d.namaDiskon} (
+                        {d.tipe === "persen"
+                          ? `${d.nilai}%`
+                          : formatRupiah(d.nilai)}
+                        )
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2 border-t pt-4">
+              <label className="text-sm font-semibold">
                 Keterangan (Opsional)
               </label>
               <Input
                 value={keterangan}
                 onChange={(e) => setKeterangan(e.target.value)}
-                placeholder="Catatan tambahan"
+                placeholder="Catatan transaksi..."
+                className="text-sm"
               />
+            </div>
+          </div>
+
+          {/* RINGKASAN TAGIHAN */}
+          <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
+            <h2 className="text-sm font-semibold border-b pb-3">
+              Ringkasan Tagihan
+            </h2>
+            <div className="space-y-2.5 text-sm">
+              <div className="flex justify-between text-muted-foreground">
+                <span>Subtotal Produk</span>
+                <span className="font-medium text-foreground">
+                  {formatRupiah(calc.grandTotalItem)}
+                </span>
+              </div>
+
+              {calc.totalDiskonGlobal > 0 && (
+                <div className="flex justify-between text-rose-500">
+                  <span>Total Diskon</span>
+                  <span>-{formatRupiah(calc.totalDiskonGlobal)}</span>
+                </div>
+              )}
+
+              {calc.rincianPajak.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  {calc.rincianPajak.map((p, idx) => (
+                    <div
+                      key={idx}
+                      className="flex justify-between text-muted-foreground text-xs"
+                    >
+                      <span>Pajak: {p.namaPajak}</span>
+                      <span>
+                        {p.tipe === "Inc" ? "(Termasuk)" : ""}{" "}
+                        {formatRupiah(p.nominal)}
+                      </span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between text-muted-foreground font-medium border-t border-dashed pt-1 mt-1">
+                    <span>Total Pajak</span>
+                    <span>{formatRupiah(calc.totalPajak)}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="border-t pt-3 mt-1 flex justify-between items-center">
+                <span className="text-base font-bold">Total Estimasi</span>
+                <span className="text-lg font-bold text-primary">
+                  {formatRupiah(calc.grandTotal)}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ======================= */}
-        {/* AKSI & ERROR MESSAGE    */}
-        {/* ======================= */}
+        {/* ================= AKSI & SUBMIT ================= */}
         <div className="lg:col-span-12 flex flex-col gap-3">
           {formError && (
             <p className="text-sm font-medium text-destructive">{formError}</p>
           )}
           <div className="flex items-center justify-end gap-3 rounded-xl border bg-card p-4 shadow-sm">
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push("/dashboard/penjualan")}
-                disabled={createMutation.isPending}
-                className="cursor-pointer"
-              >
-                Batal
-              </Button>
-              <Button
-                type="submit"
-                disabled={createMutation.isPending}
-                className="cursor-pointer"
-              >
-                {createMutation.isPending ? "Memproses..." : "Buat Penjualan"}
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/dashboard/penjualan")}
+              disabled={createMutation.isPending}
+              className="cursor-pointer"
+            >
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              disabled={createMutation.isPending}
+              className="cursor-pointer"
+            >
+              {createMutation.isPending ? "Memproses..." : "Buat Penjualan"}
+            </Button>
           </div>
         </div>
       </form>
 
-      {/* DIALOG KONFIRMASI (Tampil Setelah Validasi Form Berhasil) */}
+      {/* DIALOG KONFIRMASI */}
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
