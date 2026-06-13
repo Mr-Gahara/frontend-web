@@ -220,7 +220,7 @@ export default function BuatRolePage() {
                     </p>
 
                     {reason ? (
-                      <p className="text-xs text-destructive/70 text-right max-w-[160px] leading-snug">
+                      <p className="text-xs text-destructive/70 text-right max-w-40 leading-snug">
                         {reason}
                       </p>
                     ) : (

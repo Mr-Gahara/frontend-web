@@ -309,7 +309,22 @@ async function request<T>(
     try {
       const error = await res.json();
 
-      errorMessage = error.message || errorMessage;
+      // Tangkap format error array (biasanya dari express-validator)
+      if (error.errors && Array.isArray(error.errors)) {
+        errorMessage = error.errors
+          .map((e: any) => e.msg || e.message || JSON.stringify(e))
+          .join(", ");
+      }
+      // Tangkap format error object (biasanya dari Mongoose ValidationError)
+      else if (error.errors && typeof error.errors === "object") {
+        errorMessage = Object.values(error.errors)
+          .map((e: any) => e.message || e)
+          .join(", ");
+      }
+      // Tangkap format standar
+      else {
+        errorMessage = error.message || error.error || errorMessage;
+      }
     } catch {
       /**
        * ignore parse error

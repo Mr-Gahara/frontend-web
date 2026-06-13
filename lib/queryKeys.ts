@@ -11,7 +11,11 @@ export const queryKeys = {
   produkDetail: (id: string) => ["produk", "detail", id] as const,
 
   permissions: ["permissions"] as const,
-  
+
   roleDetail: (id: string) => ["role", "detail", id] as const,
   penggunaDetail: (id: string) => ["pengguna", "detail", id] as const,
+
+  penjualan: ["penjualan"] as const,
+  penjualanDetail: (id: string) => ["penjualan", "detail", id] as const,
+  pelanggan: ["pelanggan"] as const,
 };
