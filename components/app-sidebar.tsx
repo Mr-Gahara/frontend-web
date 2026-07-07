@@ -18,6 +18,7 @@ import {
   ChevronRight,
   ChevronsUpDown,
   GalleryVerticalEnd,
+  Ticket
 } from "lucide-react";
 import {
   Sidebar,
@@ -173,7 +174,7 @@ const menuGroups: MenuGroup[] = [
     items: [
       {
         label: "Modul Laporan",
-        href: "/dashboard/laporan",
+        href: "/dashboard/keuangan/ringkasanLabaRugi",
         icon: FileText,
         permission: "read-laporan",
       },
@@ -183,28 +184,21 @@ const menuGroups: MenuGroup[] = [
     grup: null,
     items: [
       {
+        label: "Promo",
+        href: "/dashboard/diskon",
+        icon: Ticket,
+      },
+    ]
+  },
+    {
+    grup: null,
+    items: [
+      {
         label: "Pengaturan",
         href: "/dashboard/pengaturan",
         icon: Settings,
-        permission: "update-tenant",
-        subItems: [
-          {
-            label: "Pajak",
-            href: "/dashboard/pengaturan/pajak",
-            // permission: "update-tenant", // Sesuai seed, atau buat khusus read-pajak
-          },
-          {
-            label: "Diskon",
-            href: "/dashboard/pengaturan/diskon",
-          },
-          {
-            label: "Role",
-            href: "/dashboard/pengaturan/roles",
-            permission: "read-role",
-          },
-        ],
       },
-    ],
+    ]
   },
 ];
 
@@ -272,7 +266,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" className="border-none [&>div]:border-none" {...props}>
       {/* HEADER */}
       <SidebarHeader>
         <SidebarMenu>

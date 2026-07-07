@@ -31,7 +31,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Wallet, CreditCard, Banknote, ReceiptText } from "lucide-react";
+import {
+  ArrowLeft,
+  Wallet,
+  CreditCard,
+  Banknote,
+  ReceiptText,
+} from "lucide-react";
 
 const formatRupiah = (angka: number) =>
   new Intl.NumberFormat("id-ID", {
@@ -45,7 +51,7 @@ export default function BuatPembayaranPage() {
   const router = useRouter();
   const params = useParams();
   const queryClient = useQueryClient();
-  
+
   const penjualanID = params.id as string;
 
   // --- STATE FORM ---
@@ -57,44 +63,69 @@ export default function BuatPembayaranPage() {
   const [formError, setFormError] = useState("");
 
   // --- 1. FETCH DATA PENJUALAN ---
-  const { data: penjualan, isLoading: loadingPenjualan, error: errorPenjualan } = useQuery({
+  const {
+    data: penjualan,
+    isLoading: loadingPenjualan,
+    error: errorPenjualan,
+  } = useQuery({
     queryKey: [...queryKeys.penjualan, penjualanID],
     queryFn: async () => {
-      const res = await apiClient.get<any>(`/penjualan/${penjualanID}`, undefined, "pengguna");
+      const res = await apiClient.get<any>(
+        `/penjualan/${penjualanID}`,
+        undefined,
+        "pengguna",
+      );
       return (res.data?.data || res.data) as Penjualan;
     },
     enabled: !!penjualanID,
   });
 
-  // --- 2. MOCK FETCH AKUN KAS (TODO: Ganti endpoint saat backend siap) ---
+  // --- 2. FETCH AKUN KAS ASLI ---
   const { data: akunKasList = [] } = useQuery({
-    queryKey: ["akunKasMock"],
+    queryKey: queryKeys.akunKas,
     queryFn: async () => {
-      // return await apiClient.get<any>("/akun-kas", undefined, "pengguna");
-      return [
-        { _id: "kas-01", namaAkun: "Laci Kasir Utama" },
-        { _id: "kas-02", namaAkun: "Rekening BCA (Perusahaan)" },
-      ];
+      // Perhatikan penulisan endpoint yang sudah kita perbaiki: "/akunkas" (tanpa tanda hubung)
+      const res = await apiClient.get<{ data: any[] } | any[]>(
+        "/akunkas",
+        undefined,
+        "pengguna",
+      );
+
+      let rawData: any[] = [];
+      if (Array.isArray(res)) rawData = res;
+      else if (res && "data" in res && Array.isArray(res.data))
+        rawData = res.data;
+
+      return rawData.filter((a) => a.status === "aktif");
     },
   });
 
-  // --- 3. MOCK FETCH METODE PEMBAYARAN (TODO: Ganti endpoint saat backend siap) ---
+  // --- 3. FETCH METODE PEMBAYARAN ASLI ---
   const { data: metodeList = [] } = useQuery({
-    queryKey: ["metodePembayaranMock"],
+    queryKey: queryKeys.metodePembayaran || ["metode-pembayaran"],
     queryFn: async () => {
-      // return await apiClient.get<any>("/metode-pembayaran", undefined, "pengguna");
-      return [
-        { _id: "met-01", namaMetode: "Tunai / Cash", isAutomated: false },
-        { _id: "met-02", namaMetode: "Transfer BCA", isAutomated: false },
-        { _id: "met-03", namaMetode: "QRIS Dinamis", isAutomated: true },
-      ];
+      // Perhatikan penulisan endpoint yang sudah kita perbaiki: "/metodepembayaran" (tanpa tanda hubung)
+      const res = await apiClient.get<{ data: any[] } | any[]>(
+        "/metodepembayaran",
+        undefined,
+        "pengguna",
+      );
+
+      let rawData: any[] = [];
+      if (Array.isArray(res)) rawData = res;
+      else if (res && "data" in res && Array.isArray(res.data))
+        rawData = res.data;
+
+      return rawData.filter((m) => m.isActive !== false);
     },
   });
 
   // ERROR HANDLER
   useEffect(() => {
     if (errorPenjualan) {
-      toast.error("Gagal Memuat", { description: "Data penjualan tidak ditemukan." });
+      toast.error("Gagal Memuat", {
+        description: "Data penjualan tidak ditemukan.",
+      });
       router.push("/dashboard/penjualan");
     }
   }, [errorPenjualan, router]);
@@ -102,7 +133,12 @@ export default function BuatPembayaranPage() {
   // MUTASI CREATE PEMBAYARAN
   const createPembayaranMutation = useMutation({
     mutationFn: async (payload: PembayaranRequest) => {
-      return await apiClient.post("/pembayaran", payload, undefined, "pengguna");
+      return await apiClient.post(
+        "/pembayaran",
+        payload,
+        undefined,
+        "pengguna",
+      );
     },
     onSuccess: () => {
       toast.success("Berhasil", { description: "Pembayaran sukses dicatat." });
@@ -112,7 +148,9 @@ export default function BuatPembayaranPage() {
       router.push(`/dashboard/penjualan/${penjualanID}`);
     },
     onError: (err: any) => {
-      toast.error("Gagal", { description: err.message || "Transaksi pembayaran ditolak sistem." });
+      toast.error("Gagal", {
+        description: err.message || "Transaksi pembayaran ditolak sistem.",
+      });
       setShowConfirm(false);
     },
   });
@@ -123,11 +161,18 @@ export default function BuatPembayaranPage() {
 
     const nominal = parseInt(jumlahBayarStr.replace(/\D/g, ""), 10);
 
-    if (!akunKasID) return setFormError("Silakan pilih Akun Kas tujuan penerimaan pembayaran.");
-    if (!metodePembayaranID) return setFormError("Silakan pilih Metode Pembayaran.");
-    if (isNaN(nominal) || nominal <= 0) return setFormError("Jumlah pembayaran tidak valid.");
+    if (!akunKasID)
+      return setFormError(
+        "Silakan pilih Akun Kas tujuan penerimaan pembayaran.",
+      );
+    if (!metodePembayaranID)
+      return setFormError("Silakan pilih Metode Pembayaran.");
+    if (isNaN(nominal) || nominal <= 0)
+      return setFormError("Jumlah pembayaran tidak valid.");
     if (penjualan && nominal > penjualan.sisaTagihan) {
-      return setFormError(`Jumlah bayar tidak boleh melebihi sisa tagihan (${formatRupiah(penjualan.sisaTagihan)}).`);
+      return setFormError(
+        `Jumlah bayar tidak boleh melebihi sisa tagihan (${formatRupiah(penjualan.sisaTagihan)}).`,
+      );
     }
 
     setShowConfirm(true);
@@ -153,7 +198,12 @@ export default function BuatPembayaranPage() {
   const sisaTagihan = penjualan?.sisaTagihan || 0;
   const sisaSetelahBayar = Math.max(0, sisaTagihan - nominalInput);
 
-  if (loadingPenjualan) return <div className="p-8 text-center text-muted-foreground">Memuat data tagihan...</div>;
+  if (loadingPenjualan)
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        Memuat data tagihan...
+      </div>
+    );
   if (!penjualan) return null;
 
   return (
@@ -171,59 +221,93 @@ export default function BuatPembayaranPage() {
         </Button>
         <div className="flex justify-between items-end">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight">Terima Pembayaran</h1>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Terima Pembayaran
+            </h1>
             <p className="text-sm text-muted-foreground">
-              Catat penerimaan pembayaran untuk No. Referensi: <span className="font-mono text-foreground">{penjualan.noReferensi}</span>
+              Catat penerimaan pembayaran untuk No. Referensi:{" "}
+              <span className="font-mono text-foreground">
+                {penjualan.noReferensi}
+              </span>
             </p>
           </div>
           <div className="text-right hidden sm:block">
             <p className="text-xs text-muted-foreground">Tanggal Transaksi</p>
-            <p className="font-medium text-sm">{format(new Date(penjualan.tanggalTransaksi), "dd MMM yyyy", { locale: localeID })}</p>
+            <p className="font-medium text-sm">
+              {format(new Date(penjualan.tanggalTransaksi), "dd MMM yyyy", {
+                locale: localeID,
+              })}
+            </p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
         {/* PANEL KIRI: FORM INPUT PEMBAYARAN */}
         <div className="lg:col-span-7 flex flex-col gap-6">
-          <form onSubmit={handleValidation} className="rounded-xl border bg-card p-6 shadow-sm space-y-5">
+          <form
+            onSubmit={handleValidation}
+            className="rounded-xl border bg-card p-6 shadow-sm space-y-5"
+          >
             <div className="flex items-center gap-2 border-b pb-3 mb-2">
               <Wallet className="h-5 w-5 text-muted-foreground" />
-              <h2 className="font-semibold text-foreground">Detail Penerimaan Pembayaran</h2>
+              <h2 className="font-semibold text-foreground">
+                Detail Penerimaan Pembayaran
+              </h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Pilihan Akun Kas */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Akun Kas Tujuan <span className="text-red-500">*</span></label>
+                <label className="text-sm font-medium">
+                  Akun Kas Tujuan <span className="text-red-500">*</span>
+                </label>
                 <Select value={akunKasID} onValueChange={setAkunKasID}>
                   <SelectTrigger className="w-full cursor-pointer">
                     <SelectValue placeholder="Pilih akun kas..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {akunKasList.map((kas: any) => (
-                      <SelectItem key={kas._id} value={kas._id} className="cursor-pointer">
-                        {kas.namaAkun}
-                      </SelectItem>
-                    ))}
+                    {akunKasList.map((kas: any) => {
+                      const validId = kas._id || kas.id;
+                      return (
+                        <SelectItem
+                          key={validId}
+                          value={validId}
+                          className="cursor-pointer"
+                        >
+                          {kas.namaAkun}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Pilihan Metode Pembayaran */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Metode Pembayaran <span className="text-red-500">*</span></label>
-                <Select value={metodePembayaranID} onValueChange={setMetodePembayaranID}>
+                <label className="text-sm font-medium">
+                  Metode Pembayaran <span className="text-red-500">*</span>
+                </label>
+                <Select
+                  value={metodePembayaranID}
+                  onValueChange={setMetodePembayaranID}
+                >
                   <SelectTrigger className="w-full cursor-pointer">
                     <SelectValue placeholder="Pilih metode..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {metodeList.map((metode: any) => (
-                      <SelectItem key={metode._id} value={metode._id} className="cursor-pointer">
-                        {metode.namaMetode}
-                      </SelectItem>
-                    ))}
+                    {metodeList.map((metode: any) => {
+                      const validId = metode._id || metode.id;
+                      return (
+                        <SelectItem
+                          key={validId}
+                          value={validId}
+                          className="cursor-pointer"
+                        >
+                          {metode.namaPembayaran || metode.namaMetode}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
@@ -231,7 +315,9 @@ export default function BuatPembayaranPage() {
 
             {/* Input Nominal */}
             <div className="space-y-2 pt-2">
-              <label className="text-sm font-medium">Jumlah Diterima (Rp) <span className="text-red-500">*</span></label>
+              <label className="text-sm font-medium">
+                Jumlah Diterima (Rp) <span className="text-red-500">*</span>
+              </label>
               <div className="flex gap-3">
                 <Input
                   type="text"
@@ -242,26 +328,39 @@ export default function BuatPembayaranPage() {
                   onChange={(e) => {
                     // Hanya izinkan angka, diformat rapi saat diketik
                     const raw = e.target.value.replace(/\D/g, "");
-                    setJumlahBayarStr(raw ? new Intl.NumberFormat("id-ID").format(parseInt(raw, 10)) : "");
+                    setJumlahBayarStr(
+                      raw
+                        ? new Intl.NumberFormat("id-ID").format(
+                            parseInt(raw, 10),
+                          )
+                        : "",
+                    );
                   }}
                 />
-                <Button 
-                  type="button" 
-                  variant="secondary" 
+                <Button
+                  type="button"
+                  variant="secondary"
                   className="h-12 px-6 cursor-pointer bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                  onClick={() => setJumlahBayarStr(new Intl.NumberFormat("id-ID").format(sisaTagihan))}
+                  onClick={() =>
+                    setJumlahBayarStr(
+                      new Intl.NumberFormat("id-ID").format(sisaTagihan),
+                    )
+                  }
                 >
                   Bayar Uang Pas
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Masukkan nominal angka. Maksimal setara dengan total sisa tagihan.
+                Masukkan nominal angka. Maksimal setara dengan total sisa
+                tagihan.
               </p>
             </div>
 
             {/* Catatan */}
             <div className="space-y-2 pt-2">
-              <label className="text-sm font-medium">Catatan Pembayaran (Opsional)</label>
+              <label className="text-sm font-medium">
+                Catatan Pembayaran (Opsional)
+              </label>
               <Input
                 value={catatan}
                 onChange={(e) => setCatatan(e.target.value)}
@@ -276,12 +375,14 @@ export default function BuatPembayaranPage() {
             )}
 
             <div className="pt-4 border-t">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full h-12 text-base cursor-pointer bg-primary hover:bg-primary/90"
                 disabled={penjualan.sisaTagihan <= 0}
               >
-                {penjualan.sisaTagihan <= 0 ? "Tagihan Sudah Lunas" : "Proses Pembayaran"}
+                {penjualan.sisaTagihan <= 0
+                  ? "Tagihan Sudah Lunas"
+                  : "Proses Pembayaran"}
               </Button>
             </div>
           </form>
@@ -292,52 +393,73 @@ export default function BuatPembayaranPage() {
           <div className="rounded-xl border bg-card p-6 shadow-sm space-y-5">
             <div className="flex items-center gap-2 border-b pb-3">
               <ReceiptText className="h-5 w-5 text-muted-foreground" />
-              <h2 className="font-semibold text-foreground">Ringkasan Tagihan</h2>
+              <h2 className="font-semibold text-foreground">
+                Ringkasan Tagihan
+              </h2>
             </div>
-            
+
             <div className="space-y-3 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>Total Tagihan Awal</span>
-                <span className="font-medium text-foreground">{formatRupiah(penjualan.totalTagihan)}</span>
+                <span className="font-medium text-foreground">
+                  {formatRupiah(penjualan.totalTagihan)}
+                </span>
               </div>
               <div className="flex justify-between text-emerald-600">
                 <span>Telah Dibayar Sebelumnya</span>
                 <span>{formatRupiah(penjualan.totalDibayar)}</span>
               </div>
-              
+
               <div className="border-t pt-3 flex justify-between items-center">
-                <span className="text-base font-bold text-rose-600">Sisa Tagihan</span>
-                <span className="text-xl font-bold text-rose-600">{formatRupiah(penjualan.sisaTagihan)}</span>
+                <span className="text-base font-bold text-rose-600">
+                  Sisa Tagihan
+                </span>
+                <span className="text-xl font-bold text-rose-600">
+                  {formatRupiah(penjualan.sisaTagihan)}
+                </span>
               </div>
             </div>
 
             {/* Simulasi Setelah Pembayaran Ini */}
             {nominalInput > 0 && (
               <div className="bg-muted p-4 rounded-lg space-y-2 mt-4">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Simulasi Setelah Pembayaran</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                  Simulasi Setelah Pembayaran
+                </p>
                 <div className="flex justify-between text-sm">
                   <span>Akan Dibayar</span>
-                  <span className="font-medium">{formatRupiah(nominalInput)}</span>
+                  <span className="font-medium">
+                    {formatRupiah(nominalInput)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm font-semibold border-t border-muted-foreground/20 pt-2">
                   <span>Sisa Hutang Baru</span>
-                  <span className={sisaSetelahBayar === 0 ? "text-emerald-600" : "text-rose-600"}>
+                  <span
+                    className={
+                      sisaSetelahBayar === 0
+                        ? "text-emerald-600"
+                        : "text-rose-600"
+                    }
+                  >
                     {formatRupiah(sisaSetelahBayar)}
                   </span>
                 </div>
               </div>
             )}
           </div>
-          
+
           <div className="rounded-xl border bg-amber-50 border-amber-200 p-4 shadow-sm flex items-start gap-3">
             <Banknote className="h-5 w-5 text-amber-600 mt-0.5" />
             <div className="text-sm text-amber-800">
               <p className="font-semibold mb-1">Peringatan Audit Kasir</p>
-              <p>Pastikan nominal yang diketik sesuai dengan uang fisik atau saldo mutasi bank yang Anda terima. Aksi ini akan mempengaruhi laporan neraca tutup kas Anda.</p>
+              <p>
+                Pastikan nominal yang diketik sesuai dengan uang fisik atau
+                saldo mutasi bank yang Anda terima. Aksi ini akan mempengaruhi
+                laporan neraca tutup kas Anda.
+              </p>
             </div>
           </div>
         </div>
-
       </div>
 
       {/* DIALOG KONFIRMASI */}
@@ -346,19 +468,28 @@ export default function BuatPembayaranPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Konfirmasi Pembayaran</AlertDialogTitle>
             <AlertDialogDescription>
-              Anda akan mencatat pembayaran sebesar <strong className="text-foreground">{formatRupiah(nominalInput)}</strong> ke dalam sistem. Lanjutkan?
+              Anda akan mencatat pembayaran sebesar{" "}
+              <strong className="text-foreground">
+                {formatRupiah(nominalInput)}
+              </strong>{" "}
+              ke dalam sistem. Lanjutkan?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={createPembayaranMutation.isPending} className="cursor-pointer">
+            <AlertDialogCancel
+              disabled={createPembayaranMutation.isPending}
+              className="cursor-pointer"
+            >
               Batal
             </AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={executePayment} 
-              disabled={createPembayaranMutation.isPending} 
+            <AlertDialogAction
+              onClick={executePayment}
+              disabled={createPembayaranMutation.isPending}
               className="cursor-pointer bg-primary"
             >
-              {createPembayaranMutation.isPending ? "Memproses..." : "Ya, Catat Pembayaran"}
+              {createPembayaranMutation.isPending
+                ? "Memproses..."
+                : "Ya, Catat Pembayaran"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

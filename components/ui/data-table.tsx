@@ -32,7 +32,7 @@ interface DataTableProps<TData, TValue> {
   searchPlaceholder?: string;
 }
 
-export function DataTable<TData, TValue,>({
+export function DataTable<TData, TValue>({
   columns,
   data,
   loading = false,
@@ -66,23 +66,24 @@ export function DataTable<TData, TValue,>({
         <div className="flex items-center gap-2">
           <Input
             placeholder={searchPlaceholder}
+            suppressHydrationWarning
             value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
             onChange={(e) => table.getColumn(searchKey)?.setFilterValue(e.target.value)}
-            className="max-w-sm text-sm"
+            className="max-w-sm text-sm bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50 h-11 rounded-xl px-4 font-medium"
           />
         </div>
       )}
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-lg border border-border">
+      {/* Table Wrapper - Diubah warnanya agar "Pop Out" dari background card */}
+      <div className="overflow-hidden rounded-xl border border-[#041E3F]/10 bg-[#FFFAF3] shadow-sm">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-secondary hover:bg-secondary">
+              <TableRow key={headerGroup.id} className="bg-[#041E3F]/3 hover:bg-[#041E3F]/3 border-b-[#041E3F]/10">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="text-xs font-semibold text-muted-foreground"
+                    className="text-xs font-bold text-[#041E3F]/60 uppercase tracking-wider h-12"
                   >
                     {header.isPlaceholder
                       ? null
@@ -95,21 +96,21 @@ export function DataTable<TData, TValue,>({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={columns.length} className="h-32 text-center text-sm font-medium text-[#041E3F]/60">
                   Memuat data...
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={columns.length} className="h-32 text-center text-sm font-medium text-[#041E3F]/60">
                   {emptyMessage}
                 </TableCell>
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="border-b border-border last:border-0">
+                <TableRow key={row.id} className="border-b border-[#041E3F]/10 last:border-0 hover:bg-[#041E3F]/2 transition-colors">
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="text-sm">
+                    <TableCell key={cell.id} className="text-sm px-4 py-3">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -121,29 +122,29 @@ export function DataTable<TData, TValue,>({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">
+      <div className="flex items-center justify-between mt-1">
+        <p className="text-xs font-semibold text-[#041E3F]/60">
           {table.getFilteredRowModel().rows.length} total data
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="text-xs cursor-pointer"
+            className="text-xs cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent font-bold rounded-lg h-9"
           >
             Previous
           </Button>
-          <span className="text-xs text-muted-foreground">
-            Halaman {table.getState().pagination.pageIndex + 1} dari {table.getPageCount()}
+          <span className="text-xs font-semibold text-[#041E3F]/60">
+            Halaman {table.getState().pagination.pageIndex + 1} dari {table.getPageCount() || 1}
           </span>
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="text-xs cursor-pointer"
+            className="text-xs cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent font-bold rounded-lg h-9"
           >
             Next
           </Button>

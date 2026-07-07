@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
-import { SidebarTrigger } from "@/components/ui/sidebar"; // Impor Trigger bawaan
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function Topbar() {
   const [currentDate, setCurrentDate] = useState<string>("");
@@ -18,40 +18,21 @@ export default function Topbar() {
   }, []);
 
   return (
-    <header
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "1.25rem 2rem",
-        backgroundColor: "#f5f5f5",
-        borderBottom: "1px solid #e5e7eb",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+    <header className="flex justify-between items-center px-8 py-5 bg-transparent z-10">
+      <div className="flex items-center gap-4">
         {/* Tombol Trigger Shadcn UI */}
         <SidebarTrigger 
-          className="bg-[#1a1a1a] text-white hover:bg-neutral-800 hover:text-white cursor-pointer" 
+          className="bg-[#0A2947] text-white hover:bg-[#0A2947]/80 hover:text-white cursor-pointer transition-colors" 
         />
         
-        <span style={{ fontSize: "1rem", fontWeight: 600, color: "#111827" }}>
+        <span className="text-base font-semibold text-gray-800">
           {currentDate}
         </span>
       </div>
 
       <div>
         <button
-          style={{
-            background: "#1a1a1a",
-            border: "none",
-            cursor: "pointer",
-            padding: "0.5rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#ffffff",
-            borderRadius: "0.375rem",
-          }}
+          className="flex items-center justify-center p-2.5 bg-[#0A2947] hover:bg-[#0A2947]/80 text-white rounded-lg transition-colors cursor-pointer border-none shadow-sm"
         >
           <Bell size={20} />
         </button>

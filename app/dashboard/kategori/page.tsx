@@ -64,9 +64,7 @@ export default function KategoriPage() {
 
   const queryClient = useQueryClient();
 
-  // =========================
   // QUERY: GET KATEGORI
-  // =========================
   const {
     data = [],
     isLoading: loading,
@@ -94,9 +92,7 @@ export default function KategoriPage() {
     }
   }, [error]);
 
-  // =========================
   // MUTATION: SAVE KATEGORI (CREATE/UPDATE)
-  // =========================
   const saveKategoriMutation = useMutation({
     mutationFn: async ({ id, data }: { id?: string; data: KategoriRequest }) => {
       if (id) {
@@ -128,9 +124,7 @@ export default function KategoriPage() {
     },
   });
 
-  // =========================
   // MUTATION: DELETE KATEGORI (+) KONSISTENSI
-  // =========================
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       return await apiClient.delete(`/kategori/${id}`, undefined, "pengguna");
@@ -149,9 +143,7 @@ export default function KategoriPage() {
     },
   });
 
-  // =========================
   // HANDLERS
-  // =========================
   const openCreate = () => {
     setEditTarget(null);
     setForm(emptyForm);
@@ -181,9 +173,7 @@ export default function KategoriPage() {
     await deleteMutation.mutateAsync(deleteTarget._id);
   };
 
-  // =========================
   // TABLE COLUMNS (+) PERFORMA FIX (useMemo)
-  // =========================
   const columns = useMemo<ColumnDef<Kategori>[]>(
     () => [
       {

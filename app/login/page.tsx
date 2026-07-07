@@ -64,7 +64,7 @@ export default function LoginPage() {
         </div>
 
         {/* Form Input */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-4" suppressHydrationWarning>
           {/* Input Email */}
           <div className="space-y-2">
             <label
@@ -77,6 +77,7 @@ export default function LoginPage() {
               id="email"
               name="email"
               type="email"
+              suppressHydrationWarning
               value={form.email}
               onChange={handleChange}
               placeholder="nama@perusahaan.com"
@@ -98,6 +99,7 @@ export default function LoginPage() {
               id="password"
               name="password"
               type="password"
+              suppressHydrationWarning
               value={form.password}
               onChange={handleChange}
               placeholder="••••••••"

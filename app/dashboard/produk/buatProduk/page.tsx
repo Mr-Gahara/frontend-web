@@ -270,7 +270,7 @@ export default function BuatProdukPage() {
           )}
 
           {/* Aksi Tombol */}
-          <div className="mt-2 flex justify-end gap-3 border-t pt-4">
+          <div className="mt-2 flex justify-between gap-3 border-t pt-4">
             <Button
               type="button"
               variant="outline"

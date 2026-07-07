@@ -139,7 +139,6 @@ export default function PelangganPage() {
 
   // HANDLERS
 
-  // Buka dialog edit dari row tabel
   const openEdit = (item: Pelanggan) => {
     setEditTarget(item);
     setEditForm({
@@ -153,7 +152,6 @@ export default function PelangganPage() {
     setShowEditDialog(true);
   };
 
-  // Submit Update
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setEditError("");
@@ -176,7 +174,6 @@ export default function PelangganPage() {
     }
   };
 
-  // Trigger pop-up konfirmasi simpan baru
   const handleCreateRequest = (e: React.FormEvent) => {
     e.preventDefault();
     if (!createForm.namaPelanggan.trim()) {
@@ -186,7 +183,6 @@ export default function PelangganPage() {
     setShowConfirmCreate(true);
   };
 
-  // Eksekusi simpan baru setelah dikonfirmasi
   const executeCreate = async () => {
     const payload: PelangganRequest = {
       namaPelanggan: createForm.namaPelanggan,
@@ -198,7 +194,6 @@ export default function PelangganPage() {
     await createMutation.mutateAsync(payload);
   };
 
-  // Eksekusi Hapus
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -218,7 +213,7 @@ export default function PelangganPage() {
     }
   };
 
-  // TABLE COLUMNS (Untuk DataTable)
+  // TABLE COLUMNS
   const columns: ColumnDef<Pelanggan>[] = [
     {
       accessorKey: "namaPelanggan",
@@ -226,7 +221,7 @@ export default function PelangganPage() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-0 text-xs font-semibold text-muted-foreground hover:bg-transparent"
+          className="h-auto p-0 text-xs font-semibold text-[#041E3F]/60 hover:text-[#041E3F] hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <span>Nama Pelanggan</span>
@@ -235,9 +230,9 @@ export default function PelangganPage() {
       ),
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-medium text-foreground">{row.getValue("namaPelanggan")}</span>
+          <span className="font-medium text-[#041E3F]">{row.getValue("namaPelanggan")}</span>
           {row.original.alamat && (
-            <span className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+            <span className="text-xs text-[#041E3F]/60 line-clamp-1 mt-0.5">
               {row.original.alamat}
             </span>
           )}
@@ -246,11 +241,11 @@ export default function PelangganPage() {
     },
     {
       accessorKey: "nomorHp",
-      header: () => <span className="text-xs font-semibold text-muted-foreground">Kontak</span>,
+      header: () => <span className="text-xs font-semibold text-[#041E3F]/60">Kontak</span>,
       cell: ({ row }) => (
         <div className="flex flex-col space-y-1">
-          <span className="text-xs">{row.getValue("nomorHp") || "-"}</span>
-          {row.original.email && <span className="text-xs text-muted-foreground">{row.original.email}</span>}
+          <span className="text-xs text-[#041E3F]">{row.getValue("nomorHp") || "-"}</span>
+          {row.original.email && <span className="text-xs text-[#041E3F]/60">{row.original.email}</span>}
         </div>
       ),
     },
@@ -260,7 +255,7 @@ export default function PelangganPage() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-0 text-xs font-semibold text-muted-foreground hover:bg-transparent"
+          className="h-auto p-0 text-xs font-semibold text-[#041E3F]/60 hover:text-[#041E3F] hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <span>Tipe</span>
@@ -269,15 +264,16 @@ export default function PelangganPage() {
       ),
       cell: ({ row }) => {
         const tipe = row.getValue("tipePelanggan") as string;
+        // Penyesuaian aksen warna agar masuk dengan Navy & Cream
         const colorClass =
           tipe === "member"
-            ? "bg-emerald-700 text-slate-50 font-bold dark:bg-emerald-900/30 dark:text-emerald-400"
+            ? "bg-amber-100 text-amber-700 font-bold dark:bg-amber-900/30 dark:text-amber-400"
             : tipe === "korporat"
-              ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-              : "bg-primary/10 text-primary";
+              ? "bg-sky-100 text-sky-700 font-bold dark:bg-sky-900/30 dark:text-sky-400"
+              : "bg-[#041E3F]/10 text-[#041E3F] font-bold";
 
         return (
-          <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${colorClass}`}>
+          <span className={`rounded-full px-2.5 py-0.5 text-xs capitalize ${colorClass}`}>
             {tipe}
           </span>
         );
@@ -289,7 +285,7 @@ export default function PelangganPage() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-0 text-xs font-semibold text-muted-foreground hover:bg-transparent"
+          className="h-auto p-0 text-xs font-semibold text-[#041E3F]/60 hover:text-[#041E3F] hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <span>Poin</span>
@@ -297,29 +293,29 @@ export default function PelangganPage() {
         </Button>
       ),
       cell: ({ row }) => (
-        <span className="font-mono text-sm font-medium">{row.getValue("poinLoyalitas")}</span>
+        <span className="font-mono text-sm font-medium text-[#041E3F]">{row.getValue("poinLoyalitas")}</span>
       ),
     },
     {
       id: "aksi",
-      header: () => <div className="text-right text-xs">Aksi</div>,
+      header: () => <div className="text-right text-xs text-[#041E3F]/60">Aksi</div>,
       cell: ({ row }) => {
         return (
           <div className="flex justify-end">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer">
+                <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer text-[#041E3F]/70 hover:text-[#041E3F] hover:bg-[#041E3F]/5">
                   <MoreHorizontal className="h-4 w-4" />
                   <span className="sr-only">Buka menu</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem className="cursor-pointer" onClick={() => openEdit(row.original)}>
+              <DropdownMenuContent align="end" className="bg-[#F2EAE1] border-[#041E3F]/10">
+                <DropdownMenuItem className="cursor-pointer text-[#041E3F] hover:bg-[#041E3F]/5" onClick={() => openEdit(row.original)}>
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-[#041E3F]/10" />
                 <DropdownMenuItem
-                  className="cursor-pointer text-destructive focus:text-destructive"
+                  className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10"
                   onClick={() => setDeleteTarget(row.original)}
                 >
                   Hapus
@@ -336,8 +332,8 @@ export default function PelangganPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8">
       {/* Header */}
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Manajemen Pelanggan</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-[#041E3F]">Manajemen Pelanggan</h1>
+        <p className="text-sm font-medium text-[#6c5d4c]/60">
           Kelola data pelanggan, keanggotaan, dan informasi kontak.
         </p>
       </div>
@@ -347,40 +343,40 @@ export default function PelangganPage() {
         
         {/* WIDGET STATISTIK (TOP ROW)                 */}
         <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="rounded-xl border bg-card p-6 shadow-sm flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <div className="rounded-xl border border-[#041E3F]/10 bg-[#F2EAE1] p-6 shadow-sm flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#cbb193] text-[#67543d]">
               <Users className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Total Pelanggan</p>
-              <h3 className="text-2xl font-bold">{stats.total}</h3>
+              <p className="text-sm font-bold text-[#6c5d4c]">Total Pelanggan</p>
+              <h3 className="text-2xl font-bold text-[#6c5d4c]">{stats.total}</h3>
             </div>
           </div>
           
-          <div className="rounded-xl border bg-card p-6 shadow-sm flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
+          <div className="rounded-xl border border-[#041E3F]/10 bg-[#F2EAE1] p-6 shadow-sm flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FFBF00]/70 text-[#a55f30]">
               <Crown className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Pelanggan Member</p>
-              <h3 className="text-2xl font-bold">{stats.memberCount}</h3>
+              <p className="text-sm font-bold text-[#6c5d4c]">Pelanggan Member</p>
+              <h3 className="text-2xl font-bold text-[#6c5d4c]">{stats.memberCount}</h3>
             </div>
           </div>
 
-          <div className="rounded-xl border bg-card p-6 shadow-sm flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10 text-blue-500">
+          <div className="rounded-xl border border-[#041E3F]/10 bg-[#F2EAE1] p-6 shadow-sm flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F62440]/70 text-white">
               <MapPin className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Klien Korporat</p>
-              <h3 className="text-2xl font-bold">{stats.korporatCount}</h3>
+              <p className="text-sm font-bold text-[#6c5d4c]">Klien Korporat</p>
+              <h3 className="text-2xl font-bold text-[#6c5d4c]">{stats.korporatCount}</h3>
             </div>
           </div>
         </div>
 
         {/* WIDGET DAFTAR PELANGGAN (KIRI - MAIN)      */}
-        <div className="rounded-xl border bg-card p-6 shadow-sm lg:col-span-8 flex flex-col gap-4">
-          <h2 className="text-sm font-semibold">Daftar Pelanggan</h2>
+        <div className="rounded-xl border border-[#041E3F]/10 bg-[#F2EAE1] p-6 shadow-sm lg:col-span-8 flex flex-col gap-4">
+          <h2 className="text-sm font-semibold text-[#041E3F]">Daftar Pelanggan</h2>
           <DataTable
             columns={columns}
             data={pelangganList}
@@ -392,74 +388,78 @@ export default function PelangganPage() {
         </div>
 
         {/* WIDGET TAMBAH PELANGGAN (KANAN - SIDEBAR)  */}
-        <div className="rounded-xl border bg-card p-6 shadow-sm lg:col-span-4 lg:sticky lg:top-6">
+        <div className="rounded-xl border border-[#041E3F]/10 bg-[#F2EAE1] p-6 shadow-sm lg:col-span-4 lg:sticky lg:top-6">
           <div className="mb-4">
-            <h2 className="text-sm font-semibold">Tambah Pelanggan Cepat</h2>
-            <p className="text-xs text-muted-foreground mt-1">
+            <h2 className="text-sm font-semibold text-[#041E3F]">Tambah Pelanggan Cepat</h2>
+            <p className="text-xs text-[#041E3F]/60 mt-1">
               Tambahkan data pelanggan baru langsung dari panel ini.
             </p>
           </div>
 
           <form onSubmit={handleCreateRequest} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium">Nama Pelanggan <span className="text-red-500">*</span></label>
+              <label className="text-xs font-medium text-[#041E3F]">Nama Pelanggan <span className="text-red-500">*</span></label>
               <Input
                 value={createForm.namaPelanggan}
                 onChange={(e) => setCreateForm({ ...createForm, namaPelanggan: e.target.value })}
                 placeholder="Misal: Budi Santoso"
+                className="bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50"
                 required
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium">Tipe Pelanggan</label>
+              <label className="text-xs font-medium text-[#041E3F]">Tipe Pelanggan</label>
               <Select
                 value={createForm.tipePelanggan}
                 onValueChange={(val) => setCreateForm({ ...createForm, tipePelanggan: val as "umum" | "member" | "korporat" })}
               >
-                <SelectTrigger className="w-full cursor-pointer">
+                <SelectTrigger className="w-full cursor-pointer bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus:ring-[#041E3F]/50">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="umum" className="cursor-pointer">Umum</SelectItem>
-                  <SelectItem value="member" className="cursor-pointer">Member</SelectItem>
-                  <SelectItem value="korporat" className="cursor-pointer">Korporat</SelectItem>
+                <SelectContent className="bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F]">
+                  <SelectItem value="umum" className="cursor-pointer hover:bg-[#041E3F]/5">Umum</SelectItem>
+                  <SelectItem value="member" className="cursor-pointer hover:bg-[#041E3F]/5">Member</SelectItem>
+                  <SelectItem value="korporat" className="cursor-pointer hover:bg-[#041E3F]/5">Korporat</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium">Nomor WhatsApp / HP</label>
+              <label className="text-xs font-medium text-[#041E3F]">Nomor WhatsApp / HP</label>
               <Input
                 value={createForm.nomorHp}
                 onChange={(e) => setCreateForm({ ...createForm, nomorHp: e.target.value })}
                 placeholder="Misal: 08123456789"
+                className="bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50"
                 type="tel"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium">Email (Opsional)</label>
+              <label className="text-xs font-medium text-[#041E3F]">Email (Opsional)</label>
               <Input
                 value={createForm.email}
                 onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
                 placeholder="Misal: budi@email.com"
+                className="bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50"
                 type="email"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium">Alamat (Opsional)</label>
+              <label className="text-xs font-medium text-[#041E3F]">Alamat (Opsional)</label>
               <Input
                 value={createForm.alamat}
                 onChange={(e) => setCreateForm({ ...createForm, alamat: e.target.value })}
                 placeholder="Misal: Jl. Sudirman No. 123"
+                className="bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50"
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full cursor-pointer mt-2"
+              className="w-full cursor-pointer mt-2 bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90"
               disabled={createMutation.isPending}
             >
               Simpan Pelanggan
@@ -469,27 +469,23 @@ export default function PelangganPage() {
 
       </div>
 
-      {/* ========================================== */}
-      {/* MODAL DIALOGS                              */}
-      {/* ========================================== */}
-
       {/* DIALOG KONFIRMASI SIMPAN PELANGGAN BARU */}
       <AlertDialog open={showConfirmCreate} onOpenChange={setShowConfirmCreate}>
-        <AlertDialogContent>
+        <AlertDialogContent className="border-[#041E3F]/10 bg-[#F2EAE1]">
           <AlertDialogHeader>
-            <AlertDialogTitle>Simpan Pelanggan Baru?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-[#041E3F]">Simpan Pelanggan Baru?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[#041E3F]/70">
               Apakah Anda yakin ingin menambahkan <strong>{createForm.namaPelanggan}</strong> ke dalam daftar pelanggan?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={createMutation.isPending} className="cursor-pointer">
+            <AlertDialogCancel disabled={createMutation.isPending} className="cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent">
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={executeCreate}
               disabled={createMutation.isPending}
-              className="cursor-pointer"
+              className="cursor-pointer bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90"
             >
               {createMutation.isPending ? "Menyimpan..." : "Ya, Simpan"}
             </AlertDialogAction>
@@ -499,83 +495,87 @@ export default function PelangganPage() {
 
       {/* DIALOG EDIT PELANGGAN */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md border-[#041E3F]/10 bg-[#F2EAE1]">
           <DialogHeader>
-            <DialogTitle>Edit Pelanggan</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[#041E3F]">Edit Pelanggan</DialogTitle>
+            <DialogDescription className="text-[#041E3F]/70">
               Perbarui informasi data pelanggan di bawah ini.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleEditSubmit} className="mt-4 flex flex-col gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">
+              <label className="text-sm font-medium text-[#041E3F]">
                 Nama Pelanggan <span className="text-red-500">*</span>
               </label>
               <Input
                 value={editForm.namaPelanggan}
                 onChange={(e) => setEditForm({ ...editForm, namaPelanggan: e.target.value })}
                 placeholder="Misal: Budi Santoso"
+                className="bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Tipe Pelanggan</label>
+              <label className="text-sm font-medium text-[#041E3F]">Tipe Pelanggan</label>
               <Select
                 value={editForm.tipePelanggan}
                 onValueChange={(val: "umum" | "member" | "korporat") =>
                   setEditForm({ ...editForm, tipePelanggan: val })
                 }
               >
-                <SelectTrigger className="w-full cursor-pointer">
+                <SelectTrigger className="w-full cursor-pointer bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus:ring-[#041E3F]/50">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="umum" className="cursor-pointer">Umum</SelectItem>
-                  <SelectItem value="member" className="cursor-pointer">Member</SelectItem>
-                  <SelectItem value="korporat" className="cursor-pointer">Korporat</SelectItem>
+                <SelectContent className="bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F]">
+                  <SelectItem value="umum" className="cursor-pointer hover:bg-[#041E3F]/5">Umum</SelectItem>
+                  <SelectItem value="member" className="cursor-pointer hover:bg-[#041E3F]/5">Member</SelectItem>
+                  <SelectItem value="korporat" className="cursor-pointer hover:bg-[#041E3F]/5">Korporat</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Nomor WhatsApp / HP <span className="text-muted-foreground font-normal">(opsional)</span>
+              <label className="text-sm font-medium text-[#041E3F]">
+                Nomor WhatsApp / HP <span className="text-[#041E3F]/50 font-normal">(opsional)</span>
               </label>
               <Input
                 value={editForm.nomorHp ?? ""}
                 onChange={(e) => setEditForm({ ...editForm, nomorHp: e.target.value })}
                 placeholder="Misal: 08123456789"
+                className="bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50"
                 type="tel"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Email <span className="text-muted-foreground font-normal">(opsional)</span>
+              <label className="text-sm font-medium text-[#041E3F]">
+                Email <span className="text-[#041E3F]/50 font-normal">(opsional)</span>
               </label>
               <Input
                 value={editForm.email ?? ""}
                 onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                 placeholder="Misal: budi@email.com"
+                className="bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50"
                 type="email"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Alamat <span className="text-muted-foreground font-normal">(opsional)</span>
+              <label className="text-sm font-medium text-[#041E3F]">
+                Alamat <span className="text-[#041E3F]/50 font-normal">(opsional)</span>
               </label>
               <Input
                 value={editForm.alamat ?? ""}
                 onChange={(e) => setEditForm({ ...editForm, alamat: e.target.value })}
                 placeholder="Misal: Jl. Sudirman No. 123"
+                className="bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50"
               />
             </div>
 
             {editError && (
-              <p className="text-sm text-destructive font-medium bg-destructive/10 px-3 py-2 rounded-md">
+              <p className="text-sm text-red-600 font-medium bg-red-500/10 px-3 py-2 rounded-md border border-red-500/20">
                 {editError}
               </p>
             )}
@@ -586,14 +586,14 @@ export default function PelangganPage() {
                 variant="outline"
                 onClick={() => setShowEditDialog(false)}
                 disabled={updateMutation.isPending}
-                className="cursor-pointer"
+                className="cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent"
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 disabled={updateMutation.isPending}
-                className="cursor-pointer"
+                className="cursor-pointer bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90"
               >
                 {updateMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
               </Button>
@@ -609,21 +609,21 @@ export default function PelangganPage() {
           if (!open) setDeleteTarget(null);
         }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="border-[#041E3F]/10 bg-[#F2EAE1]">
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus pelanggan {deleteTarget?.namaPelanggan}?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-[#041E3F]">Hapus pelanggan {deleteTarget?.namaPelanggan}?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[#041E3F]/70">
               Tindakan ini tidak dapat dibatalkan. Riwayat transaksi mungkin tetap tersimpan di sistem, namun data profil ini akan dihapus.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting} className="cursor-pointer">
+            <AlertDialogCancel disabled={deleting} className="cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent">
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
-              className="cursor-pointer bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="cursor-pointer bg-red-600 text-white hover:bg-red-700"
             >
               {deleting ? "Menghapus..." : "Hapus"}
             </AlertDialogAction>

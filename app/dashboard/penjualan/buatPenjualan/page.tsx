@@ -57,7 +57,7 @@ import {
   Clock3,
   Tag,
 } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/calendar";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 
@@ -1047,7 +1047,7 @@ export default function BuatPenjualanPage() {
           {formError && (
             <p className="text-sm font-medium text-destructive">{formError}</p>
           )}
-          <div className="flex items-center justify-end gap-3 rounded-xl border bg-card p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4 shadow-sm">
             <Button
               type="button"
               variant="outline"

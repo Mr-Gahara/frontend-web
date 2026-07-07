@@ -136,7 +136,7 @@ export default function PenggunaLoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-4" suppressHydrationWarning>
           <div className="space-y-2">
             <label
               htmlFor="nama"
@@ -149,6 +149,7 @@ export default function PenggunaLoginPage() {
               id="nama"
               name="nama"
               type="text"
+              suppressHydrationWarning
               value={form.nama}
               onChange={handleChange}
               placeholder="Contoh: Ridho"
@@ -170,6 +171,7 @@ export default function PenggunaLoginPage() {
               id="pin"
               name="pin"
               type="password"
+              suppressHydrationWarning
               value={form.pin}
               onChange={handleChange}
               placeholder="6 Digit PIN"
