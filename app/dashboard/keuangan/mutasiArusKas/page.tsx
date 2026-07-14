@@ -7,13 +7,7 @@ import { Download, TrendingUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { KeuanganNavTabs } from "../components/keuangan-nav-tabs";
-import { KeuanganSummaryCards } from "../components/keuangan-summary-cards";
-
-// ---------------------------------------------------------------------------
 // Types
-// ---------------------------------------------------------------------------
-
 type TipeMutasi = "masuk" | "keluar";
 type KategoriMutasi =
   | "penjualan"
@@ -33,11 +27,7 @@ type MutasiArusKas = {
   referensiModel?: string;
   createdAt: string;
 };
-
-// ---------------------------------------------------------------------------
 // Mock data mutasi — diganti fetch real saat backend MutasiArusKas tersedia
-// ---------------------------------------------------------------------------
-
 const MOCK_MUTASI: MutasiArusKas[] = [
   {
     _id: "1",
@@ -85,11 +75,7 @@ const MOCK_MUTASI: MutasiArusKas[] = [
     createdAt: "2025-10-28T12:00:00.000Z",
   },
 ];
-
-// ---------------------------------------------------------------------------
 // Helper
-// ---------------------------------------------------------------------------
-
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -123,31 +109,27 @@ function FilterToggle({
   return (
     <button
       onClick={() => onClick(filter)}
-      className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+      className={`px-4 py-1.5 text-sm font-bold rounded-md transition-colors cursor-pointer ${
         isActive
-          ? "bg-background text-foreground shadow-sm"
-          : "text-muted-foreground hover:text-foreground"
+          ? "bg-[#FFFAF3] text-[#0A2947] shadow-sm"
+          : "text-[#0A2947]/50 hover:text-[#0A2947]"
       }`}
     >
       {children}
     </button>
   );
 }
-
-// ---------------------------------------------------------------------------
 // Kolom DataTable
-// ---------------------------------------------------------------------------
-
 const columns: ColumnDef<MutasiArusKas>[] = [
   {
     accessorKey: "createdAt",
     header: () => (
-      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <span className="text-xs font-bold text-[#0A2947]/60 uppercase tracking-wider">
         Tanggal
       </span>
     ),
     cell: ({ row }) => (
-      <span className="text-sm whitespace-nowrap text-foreground">
+      <span className="text-sm font-semibold whitespace-nowrap text-[#0A2947]">
         {formatTanggal(row.original.createdAt)}
       </span>
     ),
@@ -155,7 +137,7 @@ const columns: ColumnDef<MutasiArusKas>[] = [
   {
     accessorKey: "tipe",
     header: () => (
-      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <span className="text-xs font-bold text-[#0A2947]/60 uppercase tracking-wider">
         Tipe Mutasi
       </span>
     ),
@@ -163,10 +145,10 @@ const columns: ColumnDef<MutasiArusKas>[] = [
       const isMasuk = row.original.tipe === "masuk";
       return (
         <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium border ${
+          className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold shadow-sm ${
             isMasuk
-              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-              : "bg-red-500/10 text-red-400 border-red-500/20"
+              ? "bg-[#718355] text-[#FFFAF3]"
+              : "bg-[#D4A373] text-[#FFFAF3]"
           }`}
         >
           {isMasuk ? "Masuk" : "Keluar"}
@@ -177,12 +159,12 @@ const columns: ColumnDef<MutasiArusKas>[] = [
   {
     accessorKey: "kategori",
     header: () => (
-      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <span className="text-xs font-bold text-[#0A2947]/60 uppercase tracking-wider">
         Kategori
       </span>
     ),
     cell: ({ row }) => (
-      <span className="text-sm capitalize text-muted-foreground">
+      <span className="text-sm font-semibold capitalize text-[#0A2947]/80">
         {row.original.kategori.replace(/-/g, " ")}
       </span>
     ),
@@ -190,12 +172,12 @@ const columns: ColumnDef<MutasiArusKas>[] = [
   {
     accessorKey: "deskripsi",
     header: () => (
-      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <span className="text-xs font-bold text-[#0A2947]/60 uppercase tracking-wider">
         Deskripsi
       </span>
     ),
     cell: ({ row }) => (
-      <span className="text-sm text-muted-foreground">
+      <span className="text-sm font-medium text-[#0A2947]/70">
         {row.original.deskripsi ?? "-"}
       </span>
     ),
@@ -203,12 +185,12 @@ const columns: ColumnDef<MutasiArusKas>[] = [
   {
     accessorKey: "akunKasID",
     header: () => (
-      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <span className="text-xs font-bold text-[#0A2947]/60 uppercase tracking-wider">
         Akun
       </span>
     ),
     cell: ({ row }) => (
-      <span className="text-sm text-foreground">
+      <span className="text-sm font-bold text-[#0A2947]">
         {row.original.akunKasID.namaAkun}
       </span>
     ),
@@ -216,7 +198,7 @@ const columns: ColumnDef<MutasiArusKas>[] = [
   {
     accessorKey: "jumlah",
     header: () => (
-      <div className="text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <div className="text-right text-xs font-bold text-[#0A2947]/60 uppercase tracking-wider">
         Jumlah
       </div>
     ),
@@ -224,8 +206,8 @@ const columns: ColumnDef<MutasiArusKas>[] = [
       const isMasuk = row.original.tipe === "masuk";
       return (
         <div
-          className={`text-right text-sm font-medium whitespace-nowrap ${
-            isMasuk ? "text-emerald-400" : "text-red-400"
+          className={`text-right text-sm font-black whitespace-nowrap ${
+            isMasuk ? "text-[#718355]" : "text-[#D4A373]"
           }`}
         >
           {isMasuk ? "+ " : "- "}
@@ -235,11 +217,7 @@ const columns: ColumnDef<MutasiArusKas>[] = [
     },
   },
 ];
-
-// ---------------------------------------------------------------------------
 // Page utama
-// ---------------------------------------------------------------------------
-
 export default function MutasiArusKasPage() {
   const [filterTipe, setFilterTipe] = useState<FilterTipe>("semua");
 
@@ -266,37 +244,17 @@ export default function MutasiArusKasPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
-        <h1 className="text-2xl font-semibold text-zinc-900">
-          Manajemen Keuangan
-        </h1>
-        <Button
-          variant="secondary"
-          className="bg-[#424242] text-white hover:bg-[#525252] border-none shadow-sm"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Export Laporan
-        </Button>
-      </div>
-      {/* Summary cards */}
-      <KeuanganSummaryCards/>
-
-      {/* Navigasi tab keuangan */}
-      <KeuanganNavTabs />
-
-
       {/* Tabel mutasi */}
-      <div className="bg-card rounded-2xl p-6 shadow-sm flex flex-col w-full">
+      <div className="bg-[#F2EAE1] border border-[#0A2947]/10 rounded-2xl p-6 shadow-sm flex flex-col w-full">
         {/* Toolbar tabel */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <h2 className="text-lg font-semibold tracking-wide text-foreground">
+            <h2 className="text-lg font-bold tracking-wide text-[#0A2947]">
               Laporan Mutasi Arus Kas
             </h2>
 
             {/* Filter toggle */}
-            <div className="flex rounded-lg p-1 border border-border bg-muted">
+            <div className="flex rounded-lg p-1 border border-[#0A2947]/10 bg-[#0A2947]/5">
               <FilterToggle
                 active={filterTipe}
                 filter="semua"
@@ -321,13 +279,16 @@ export default function MutasiArusKasPage() {
             </div>
           </div>
 
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            className="border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 cursor-pointer"
+          >
             <Download className="w-4 h-4 mr-2" />
             Download CSV
           </Button>
         </div>
 
-        {/* DataTable dengan override styling dark */}
+        {/* DataTable */}
         <DataTable
           columns={columns}
           data={filteredData}

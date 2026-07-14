@@ -63,15 +63,21 @@ function SummaryCardItem({ card }: { card: SummaryCard }) {
   const nilai = data ?? 0;
 
   return (
-    <div className="bg-[#424242] p-5 rounded-xl text-white flex flex-col justify-between shadow-sm min-h-27.5">
+    // Background Cream konsisten
+    <div className="bg-[#F2EAE1] p-5 rounded-2xl text-[#0A2947] flex flex-col justify-between shadow-sm min-h-27.5 border border-[#0A2947]/10">
       <div className="flex justify-between items-center mb-4">
-        <p className="text-sm font-medium text-zinc-300">{card.title}</p>
-        <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-md">
-          <TrendingUp className="w-3 h-3 text-emerald-400" />
-          <span className="text-xs text-emerald-400 font-medium">—</span>
+        {/* Teks title dengan sedikit transparansi */}
+        <p className="text-sm font-medium text-[#0A2947]/70">{card.title}</p>
+        
+        {/* Badge menggunakan aksen Sage Green agar serasi dengan card Cream */}
+        <div className="flex items-center gap-1 bg-[#718355]/10 px-2 py-1 rounded-md">
+          <TrendingUp className="w-3 h-3 text-[#718355]" />
+          <span className="text-xs text-[#718355] font-bold">—</span>
         </div>
       </div>
-      <h3 className="text-2xl font-bold tracking-tight">
+      
+      {/* Angka dengan warna Navy pekat untuk kontras di atas Cream */}
+      <h3 className="text-2xl font-black tracking-tight text-[#0A2947]">
         {nilai === 0 ? "Rp 0" : formatRupiah(nilai)}
       </h3>
     </div>

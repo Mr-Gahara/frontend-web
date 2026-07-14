@@ -9,7 +9,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import { Role, GetRolesResponse, GetPermissionsResponse } from "@/types/role";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Plus, Shield, ShieldHalf } from "lucide-react";
+import { Loader2, Plus, Shield, ShieldHalf, ArrowLeft } from "lucide-react"; // Ditambahkan ArrowLeft
 import {
   AlertDialog,
   AlertDialogAction,
@@ -151,15 +151,11 @@ export default function RolesPage() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-
-    // Ambil _id jika ada, jika tidak fallback ke id tanpa menggunakan 'any'
     const targetId = (deleteTarget as any)._id || (deleteTarget as any).id;
-
     if (!targetId) {
       toast.error("Gagal", { description: "ID posisi tidak valid." });
       return;
     }
-
     await deleteMutation.mutateAsync(targetId);
   };
 
@@ -168,45 +164,58 @@ export default function RolesPage() {
   const isLoading = rolesLoading || permissionsLoading;
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-foreground">
-            Posisi & Hak Akses
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Kelola jabatan karyawan dan batasan wewenang mereka di sistem.
-          </p>
-        </div>
+    <div className="max-w-4xl mx-auto py-8 px-4 flex flex-col gap-6">
+      
+      {/* HEADER DENGAN TOMBOL BACK */}
+      <div className="flex flex-col gap-4 mb-2">
         <Button
-          onClick={() => router.push("/dashboard/pengaturan/roles/buatRole")}
-          className="cursor-pointer"
+          variant="ghost"
+          size="sm"
+          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold"
+          onClick={() => router.push("/dashboard/pengaturan")}
         >
-          <Plus className="mr-2 h-4 w-4" />
-          Tambah Posisi
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Kembali ke Laman Pengaturan
         </Button>
+
+        {/* PERBAIKAN RESPONSIVE HEADER: flex-col di mobile, flex-row di desktop */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+              Posisi & Hak Akses
+            </h1>
+            <p className="text-sm font-medium text-[#0A2947]/60">
+              Kelola jabatan karyawan dan batasan wewenang mereka di sistem.
+            </p>
+          </div>
+          <Button
+            onClick={() => router.push("/dashboard/pengaturan/roles/buatRole")}
+            className="cursor-pointer bg-[#0A2947] font-bold text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm w-full sm:w-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Tambah Posisi
+          </Button>
+        </div>
       </div>
 
       {isLoading && (
         <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
-          <p className="text-sm text-muted-foreground">Memuat data posisi...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-[#0A2947]/60 mb-4" />
+          <p className="text-sm font-bold text-[#0A2947]/60">Memuat data posisi...</p>
         </div>
       )}
 
       {!isLoading && roles.length === 0 && (
-        <div className="text-center py-12 border rounded-xl bg-card shadow-sm">
-          <p className="text-sm text-muted-foreground">
+        <div className="text-center py-12 border border-[#0A2947]/10 rounded-2xl bg-[#F2EAE1] shadow-sm">
+          <p className="text-sm font-bold text-[#0A2947]/60">
             Belum ada posisi karyawan yang dibuat.
           </p>
         </div>
       )}
 
       {roles.length > 0 && permissionsMaster.length > 0 && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           {roles.map((role, index) => {
-            // Bulletproof Identity Check
             const roleIdentifier =
               (role as any)._id || (role as any).id || `fallback-role-${index}`;
             const isExpanded = expandedRoles.has(roleIdentifier);
@@ -244,34 +253,41 @@ export default function RolesPage() {
             return (
               <div
                 key={roleIdentifier}
-                className="border border-border rounded-xl p-5 bg-card shadow-sm transition-all hover:shadow-md"
+                // Dibalut dengan warna Cream Gelap
+                className="border border-[#0A2947]/10 rounded-2xl p-5 md:p-6 bg-[#F2EAE1] shadow-sm transition-all hover:shadow-md hover:border-[#0A2947]/30"
               >
-                {/* Header & Aksi */}
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1.5 pr-4">
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-base text-card-foreground capitalize">
+                {/* PERBAIKAN RESPONSIVE CARD HEADER */}
+                {/* flex-col di mobile, flex-row di layar lebih besar (sm) */}
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                  
+                  {/* Bagian Judul dan Deskripsi */}
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-bold text-lg text-[#0A2947] capitalize">
                         {role.namaRole}
                       </p>
                       {role.level !== undefined && (
-                        <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold border border-primary/20">
+                        // Menggunakan warna Mustard untuk Badge Level
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#D4A373] text-white text-xs font-bold shadow-sm">
                           Level {role.level}
                         </span>
                       )}
                     </div>
                     {role.deskripsi ? (
-                      <p className="text-sm text-muted-foreground font-medium">
+                      <p className="text-sm text-[#0A2947]/70 font-medium leading-relaxed">
                         {role.deskripsi}
                       </p>
                     ) : (
-                      <p className="text-sm text-muted-foreground italic">
+                      <p className="text-sm text-[#0A2947]/50 italic font-medium">
                         Tidak ada deskripsi pekerjaan.
                       </p>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-xs text-muted-foreground bg-secondary border border-border px-2.5 py-1 rounded-md font-medium">
+                  {/* Bagian Aksi (Jumlah Akses, Edit, Hapus) */}
+                  {/* flex-wrap membiarkan elemen turun ke bawah jika layar sempit */}
+                  <div className="flex flex-wrap items-center gap-3 shrink-0">
+                    <span className="text-xs text-[#0A2947] bg-[#FFFAF3] border border-[#0A2947]/10 px-3 py-1.5 rounded-lg font-bold shadow-sm">
                       {safeRolePerms.length} / {allowedPermissionsMaster.length}{" "}
                       Akses
                     </span>
@@ -282,26 +298,27 @@ export default function RolesPage() {
                         )
                       }
                       disabled={!canManage}
-                      className="text-sm font-semibold text-primary hover:underline cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
+                      className="text-sm font-bold text-[#0A2947] hover:underline cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => setDeleteTarget(role)}
                       disabled={!canManage}
-                      className="text-sm font-semibold text-destructive hover:underline cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
+                      className="text-sm font-bold text-red-600/60 hover:underline cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
                     >
                       Hapus
                     </button>
                   </div>
                 </div>
 
-                <div className="mt-4 p-3 bg-muted/30 rounded-lg border border-muted">
-                  <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+                {/* Garis Besar Wewenang (Area Khusus) */}
+                <div className="mt-5 p-4 bg-[#FFFAF3] rounded-xl border border-[#0A2947]/5 shadow-inner">
+                  <p className="text-xs font-bold text-[#0A2947]/50 mb-3 uppercase tracking-wider">
                     Garis Besar Wewenang
                   </p>
                   {summaries.length === 0 ? (
-                    <p className="text-sm text-muted-foreground italic">
+                    <p className="text-sm text-[#0A2947]/50 italic font-medium">
                       Tidak memiliki hak akses apa pun.
                     </p>
                   ) : (
@@ -309,10 +326,12 @@ export default function RolesPage() {
                       {summaries.map((s, idx) => (
                         <span
                           key={s.grup || idx}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${
                             s.isFullAccess
-                              ? "bg-green-50 text-green-700 border-green-200"
-                              : "bg-amber-50 text-amber-700 border-amber-200"
+                              // Sage Green untuk Akses Penuh
+                              ? "bg-[#718355] text-[#FFFAF3]"
+                              // Mustard untuk Akses Sebagian
+                              : "bg-[#D4A373] text-[#0A2947]"
                           }`}
                         >
                           {s.isFullAccess ? (
@@ -329,11 +348,12 @@ export default function RolesPage() {
                   )}
                 </div>
 
+                {/* Detail Wewenang (Accordion) */}
                 {safeRolePerms.length > 0 && (
-                  <div className="mt-3">
+                  <div className="mt-4">
                     <button
                       onClick={() => toggleExpand(roleIdentifier)}
-                      className="text-xs font-semibold text-primary hover:underline cursor-pointer"
+                      className="text-xs font-bold text-[#0A2947]/60 hover:text-[#0A2947] hover:underline cursor-pointer transition-colors"
                     >
                       {isExpanded
                         ? "Sembunyikan Detail Wewenang"
@@ -341,7 +361,7 @@ export default function RolesPage() {
                     </button>
 
                     {isExpanded && (
-                      <div className="flex flex-wrap gap-1.5 mt-2 p-3 bg-secondary/50 rounded-lg border border-border">
+                      <div className="flex flex-wrap gap-2 mt-3 p-4 bg-[#0A2947]/5 rounded-xl border border-[#0A2947]/10">
                         {safeRolePerms.map((p: any, pIndex: number) => {
                           const permName = typeof p === "object" ? p.nama : p;
                           const permKey =
@@ -352,7 +372,7 @@ export default function RolesPage() {
                           return (
                             <span
                               key={permKey || `fallback-perm-${pIndex}`}
-                              className="text-xs px-2 py-1 rounded-md bg-background border border-border text-foreground"
+                              className="text-xs px-2.5 py-1.5 rounded-lg bg-[#FFFAF3] border border-[#0A2947]/10 text-[#0A2947] font-semibold shadow-sm"
                             >
                               {masterData?.deskripsi || permName}
                             </span>
@@ -368,28 +388,29 @@ export default function RolesPage() {
         </div>
       )}
 
+      {/* DIALOG HAPUS */}
       <AlertDialog
         open={!!deleteTarget}
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null);
         }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
           <AlertDialogHeader>
-            <AlertDialogTitle>
+            <AlertDialogTitle className="text-[#0A2947]">
               Hapus posisi {deleteTarget?.namaRole}?
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
               Karyawan yang terikat dengan posisi ini akan kehilangan seluruh
               aksesnya ke sistem. Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="cursor-pointer">
+            <AlertDialogCancel className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 bg-transparent font-bold">
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
-              className="cursor-pointer bg-red-600 hover:bg-red-700"
+              className="cursor-pointer bg-red-600 hover:bg-red-700 text-white font-bold"
               onClick={handleDelete}
               disabled={deleteMutation.isPending}
             >

@@ -18,7 +18,7 @@ import {
   ChevronRight,
   ChevronsUpDown,
   GalleryVerticalEnd,
-  Ticket
+  Ticket,
 } from "lucide-react";
 import {
   Sidebar,
@@ -129,21 +129,11 @@ const menuGroups: MenuGroup[] = [
     items: [
       {
         label: "Modul Inventaris",
-        href: "/dashboard/inventaris",
+        // PERUBAHAN DI SINI: Langsung arahkan ke default tab produk
+        href: "/dashboard/inventaris/produk",
         icon: Package,
-        permission: "read-inventory", // Disamakan dengan seed
-        subItems: [
-          {
-            label: "Kategori",
-            href: "/dashboard/kategori",
-            permission: "read-kategori",
-          },
-          {
-            label: "Produk",
-            href: "/dashboard/produk",
-            permission: "read-produk",
-          },
-        ],
+        permission: "read-inventory",
+        // subItems DIHAPUS karena Produk & Kategori sudah menggunakan Navigasi Tabs di dalam halamannya
       },
     ],
   },
@@ -188,9 +178,9 @@ const menuGroups: MenuGroup[] = [
         href: "/dashboard/diskon",
         icon: Ticket,
       },
-    ]
+    ],
   },
-    {
+  {
     grup: null,
     items: [
       {
@@ -198,7 +188,7 @@ const menuGroups: MenuGroup[] = [
         href: "/dashboard/pengaturan",
         icon: Settings,
       },
-    ]
+    ],
   },
 ];
 
@@ -266,7 +256,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-none [&>div]:border-none" {...props}>
+    <Sidebar
+      collapsible="icon"
+      className="border-none [&>div]:border-none"
+      {...props}
+    >
       {/* HEADER */}
       <SidebarHeader>
         <SidebarMenu>

@@ -21,10 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// ---------------------------------------------------------------------------
 // Helper
-// ---------------------------------------------------------------------------
-
 function formatRupiahInput(value: string): string {
   const angka = value.replace(/\D/g, "");
   if (!angka) return "";
@@ -35,10 +32,7 @@ function parseRupiah(value: string): number {
   return Number(value.replace(/\D/g, "")) || 0;
 }
 
-// ---------------------------------------------------------------------------
 // Page
-// ---------------------------------------------------------------------------
-
 export default function BuatAkunKasPage() {
   useAuthGuard();
   const router = useRouter();
@@ -98,7 +92,6 @@ export default function BuatAkunKasPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-8">
-
       {/* Header */}
       <div className="flex flex-col gap-4">
         <Button
@@ -115,7 +108,9 @@ export default function BuatAkunKasPage() {
             <TipeIcon className="w-6 h-6 text-foreground" />
           </div>
           <div className="space-y-0.5">
-            <h1 className="text-2xl font-bold tracking-tight">Tambah Akun Kas</h1>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Tambah Akun Kas
+            </h1>
             <p className="text-sm text-muted-foreground">
               Daftarkan rekening bank atau kas fisik baru ke sistem.
             </p>
@@ -125,7 +120,6 @@ export default function BuatAkunKasPage() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
         {/* Informasi Dasar */}
         <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
           <h2 className="text-sm font-semibold">Informasi Akun</h2>
@@ -203,9 +197,7 @@ export default function BuatAkunKasPage() {
             <Input
               placeholder="Catatan tambahan untuk akun ini..."
               value={form.keterangan ?? ""}
-              onChange={(e) =>
-                setForm({ ...form, keterangan: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, keterangan: e.target.value })}
               className="bg-background"
             />
           </div>
@@ -233,7 +225,9 @@ export default function BuatAkunKasPage() {
                   onChange={(e) => {
                     const raw = e.target.value.replace(/\D/g, "");
                     setSaldoDisplay(
-                      raw ? new Intl.NumberFormat("id-ID").format(Number(raw)) : "",
+                      raw
+                        ? new Intl.NumberFormat("id-ID").format(Number(raw))
+                        : "",
                     );
                   }}
                   className="bg-background pl-9"

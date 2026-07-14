@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard"; // (+) SECURITY FIX
+import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
 import {
   Kategori,
@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowUpDown, MoreHorizontal, Plus } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Plus, Tag } from "lucide-react";
 
 const emptyForm: KategoriRequest = {
   namaKategori: "",
@@ -50,21 +50,16 @@ const emptyForm: KategoriRequest = {
 };
 
 export default function KategoriPage() {
-  // 1. PROTEKSI HALAMAN
   useAuthGuard();
 
-  // Dialog form
   const [showDialog, setShowDialog] = useState(false);
   const [editTarget, setEditTarget] = useState<Kategori | null>(null);
   const [form, setForm] = useState<KategoriRequest>(emptyForm);
   const [formError, setFormError] = useState("");
-
-  // Delete dialog
   const [deleteTarget, setDeleteTarget] = useState<Kategori | null>(null);
 
   const queryClient = useQueryClient();
 
-  // QUERY: GET KATEGORI
   const {
     data = [],
     isLoading: loading,
@@ -75,7 +70,7 @@ export default function KategoriPage() {
       const res = await apiClient.get<GetKategoriResponse>(
         "/kategori",
         undefined,
-        "pengguna"
+        "pengguna",
       );
       return res.data;
     },
@@ -92,22 +87,27 @@ export default function KategoriPage() {
     }
   }, [error]);
 
-  // MUTATION: SAVE KATEGORI (CREATE/UPDATE)
   const saveKategoriMutation = useMutation({
-    mutationFn: async ({ id, data }: { id?: string; data: KategoriRequest }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id?: string;
+      data: KategoriRequest;
+    }) => {
       if (id) {
         return await apiClient.put<KategoriResponse>(
           `/kategori/${id}`,
           data,
           undefined,
-          "pengguna"
+          "pengguna",
         );
       }
       return await apiClient.post<KategoriResponse>(
         "/kategori",
         data,
         undefined,
-        "pengguna"
+        "pengguna",
       );
     },
     onSuccess: (_, variables) => {
@@ -124,15 +124,12 @@ export default function KategoriPage() {
     },
   });
 
-  // MUTATION: DELETE KATEGORI (+) KONSISTENSI
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       return await apiClient.delete(`/kategori/${id}`, undefined, "pengguna");
     },
     onSuccess: () => {
-      toast.success("Berhasil", {
-        description: "Kategori berhasil dihapus.",
-      });
+      toast.success("Berhasil", { description: "Kategori berhasil dihapus." });
       queryClient.invalidateQueries({ queryKey: queryKeys.kategori });
       setDeleteTarget(null);
     },
@@ -142,25 +139,6 @@ export default function KategoriPage() {
       });
     },
   });
-
-  // HANDLERS
-  const openCreate = () => {
-    setEditTarget(null);
-    setForm(emptyForm);
-    setFormError("");
-    setShowDialog(true);
-  };
-
-  const openEdit = (item: Kategori) => {
-    setEditTarget(item);
-    setForm({
-      namaKategori: item.namaKategori,
-      kodeKategori: item.kodeKategori,
-      keterangan: item.keterangan || "",
-    });
-    setFormError("");
-    setShowDialog(true);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -173,7 +151,6 @@ export default function KategoriPage() {
     await deleteMutation.mutateAsync(deleteTarget._id);
   };
 
-  // TABLE COLUMNS (+) PERFORMA FIX (useMemo)
   const columns = useMemo<ColumnDef<Kategori>[]>(
     () => [
       {
@@ -182,54 +159,49 @@ export default function KategoriPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-xs font-semibold text-muted-foreground hover:bg-transparent cursor-pointer"
+            className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] cursor-pointer"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            <span>Nama Kategori</span>
-            <ArrowUpDown className="ml-1 h-3 w-3" />
+            Nama Kategori <ArrowUpDown className="ml-1 h-3 w-3" />
           </Button>
         ),
         cell: ({ row }) => (
-          <span className="font-medium text-foreground">
-            {row.getValue("namaKategori")}
+          <span className="font-bold text-[#0A2947]">
+            {row.original.namaKategori}
           </span>
         ),
       },
       {
         accessorKey: "kodeKategori",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto p-0 text-xs font-semibold text-muted-foreground hover:bg-transparent cursor-pointer"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            <span>Kode</span>
-            <ArrowUpDown className="ml-1 h-3 w-3" />
-          </Button>
+        header: () => (
+          <span className="text-xs font-bold text-[#0A2947]/60">Kode</span>
         ),
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-muted-foreground">
-            {row.getValue("kodeKategori")}
+          <span className="font-mono text-xs font-bold text-[#0A2947]/70">
+            {row.original.kodeKategori}
           </span>
         ),
       },
       {
         accessorKey: "keterangan",
         header: () => (
-          <span className="text-xs font-semibold text-muted-foreground">
+          <span className="text-xs font-bold text-[#0A2947]/60">
             Keterangan
           </span>
         ),
         cell: ({ row }) => (
-          <span className="text-sm text-muted-foreground">
-            {row.getValue("keterangan") || "-"}
+          <span className="text-sm font-medium text-[#0A2947]/70">
+            {row.original.keterangan || "-"}
           </span>
         ),
       },
       {
         id: "aksi",
-        header: () => <div className="text-right text-xs">Aksi</div>,
+        header: () => (
+          <div className="text-right text-xs font-bold text-[#0A2947]/60">
+            Aksi
+          </div>
+        ),
         cell: ({ row }) => (
           <div className="flex justify-end">
             <DropdownMenu>
@@ -237,22 +209,32 @@ export default function KategoriPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 cursor-pointer"
+                  className="h-8 w-8 cursor-pointer text-[#0A2947]/70 hover:text-[#0A2947] hover:bg-[#0A2947]/5"
                 >
                   <MoreHorizontal className="h-4 w-4" />
-                  <span className="sr-only">Buka menu</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent
+                align="end"
+                className="bg-[#FFFAF3] border-[#0A2947]/10"
+              >
                 <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() => openEdit(row.original)}
+                  className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+                  onClick={() => {
+                    setEditTarget(row.original);
+                    setForm({
+                      namaKategori: row.original.namaKategori,
+                      kodeKategori: row.original.kodeKategori,
+                      keterangan: row.original.keterangan || "",
+                    });
+                    setShowDialog(true);
+                  }}
                 >
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-[#0A2947]/10" />
                 <DropdownMenuItem
-                  className="cursor-pointer text-red-500 focus:text-red-500"
+                  className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10 font-bold"
                   onClick={() => setDeleteTarget(row.original)}
                 >
                   Hapus
@@ -263,52 +245,65 @@ export default function KategoriPage() {
         ),
       },
     ],
-    []
+    [],
   );
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
-      {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Kelola Kategori</h1>
-          <p className="text-sm text-muted-foreground">
-            Kelola seluruh data kategori produk.
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg shadow-sm">
+            <Tag className="w-6 h-6 text-[#0A2947]" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+              Kelola Kategori
+            </h1>
+            <p className="text-sm font-medium text-[#0A2947]/60">
+              Kelola seluruh data kategori produk.
+            </p>
+          </div>
         </div>
-        <Button onClick={openCreate} className="cursor-pointer">
-          <Plus className="mr-2 h-4 w-4" />
-          Tambah Kategori
+        <Button
+          onClick={() => {
+            setEditTarget(null);
+            setForm(emptyForm);
+            setShowDialog(true);
+          }}
+          className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold"
+        >
+          <Plus className="mr-2 h-4 w-4" /> Tambah Kategori
         </Button>
       </div>
 
-      {/* Table */}
-      <DataTable
-        columns={columns}
-        data={data}
-        loading={loading}
-        emptyMessage="Belum ada kategori."
-        searchKey="namaKategori"
-        searchPlaceholder="Cari nama kategori..."
-      />
+      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm">
+        <DataTable
+          columns={columns}
+          data={data}
+          loading={loading}
+          emptyMessage="Belum ada kategori."
+          searchKey="namaKategori"
+          searchPlaceholder="Cari nama kategori..."
+        />
+      </div>
 
-      {/* Dialog Form */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-[#FFFAF3] border-[#0A2947]/10">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-[#0A2947]">
               {editTarget ? "Edit Kategori" : "Tambah Kategori"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-[#0A2947]/60 font-medium">
               {editTarget
                 ? "Perbarui data kategori yang sudah ada."
                 : "Isi form berikut untuk menambahkan kategori baru."}
             </DialogDescription>
           </DialogHeader>
-
           <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Nama Kategori</label>
+              <label className="text-sm font-bold text-[#0A2947]">
+                Nama Kategori
+              </label>
               <Input
                 value={form.namaKategori}
                 onChange={(e) =>
@@ -316,10 +311,13 @@ export default function KategoriPage() {
                 }
                 placeholder="Masukkan nama kategori"
                 required
+                className="bg-white border-[#0A2947]/20"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Kode Kategori</label>
+              <label className="text-sm font-bold text-[#0A2947]">
+                Kode Kategori
+              </label>
               <Input
                 value={form.kodeKategori}
                 onChange={(e) =>
@@ -327,37 +325,39 @@ export default function KategoriPage() {
                 }
                 placeholder="Masukkan kode kategori"
                 required
+                className="bg-white border-[#0A2947]/20"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Keterangan</label>
+              <label className="text-sm font-bold text-[#0A2947]">
+                Keterangan
+              </label>
               <Input
                 value={form.keterangan}
                 onChange={(e) =>
                   setForm({ ...form, keterangan: e.target.value })
                 }
                 placeholder="Keterangan tambahan (opsional)"
+                className="bg-white border-[#0A2947]/20"
               />
             </div>
-
             {formError && (
-              <p className="text-sm text-destructive">{formError}</p>
+              <p className="text-sm font-bold text-red-600">{formError}</p>
             )}
-
             <div className="flex justify-end gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setShowDialog(false)}
                 disabled={saveKategoriMutation.isPending}
-                className="cursor-pointer"
+                className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 disabled={saveKategoriMutation.isPending}
-                className="cursor-pointer"
+                className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold"
               >
                 {saveKategoriMutation.isPending ? "Menyimpan..." : "Simpan"}
               </Button>
@@ -366,32 +366,29 @@ export default function KategoriPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
       <AlertDialog
         open={!!deleteTarget}
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null);
         }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
           <AlertDialogHeader>
-            <AlertDialogTitle>
+            <AlertDialogTitle className="text-[#0A2947]">
               Hapus kategori {deleteTarget?.namaKategori}?
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              Tindakan ini tidak dapat dibatalkan. Data kategori akan dihapus
-              secara permanen dari sistem.
+            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+              Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
-
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending} className="cursor-pointer">
+            <AlertDialogCancel className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold">
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleteMutation.isPending}
-              className="cursor-pointer bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              className="cursor-pointer bg-red-600 hover:bg-red-700 text-white font-bold"
             >
               {deleteMutation.isPending ? "Menghapus..." : "Lanjutkan"}
             </AlertDialogAction>

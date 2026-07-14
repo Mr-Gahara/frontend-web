@@ -12,8 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AkunKas } from "@/types/akunKas";
-import { KeuanganNavTabs } from "../components/keuangan-nav-tabs";
-import { KeuanganSummaryCards } from "../components/keuangan-summary-cards";
 
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
@@ -25,19 +23,19 @@ function formatRupiah(value: number): string {
 
 function AkunKasCardSkeleton() {
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 flex flex-col justify-between min-h-45">
+    <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 flex flex-col justify-between min-h-45 shadow-sm">
       <div>
         <div className="flex justify-between items-start mb-4">
-          <Skeleton className="h-12 w-12 rounded-lg" />
-          <Skeleton className="h-5 w-20 rounded-full" />
+          <Skeleton className="h-12 w-12 rounded-lg bg-[#0A2947]/10" />
+          <Skeleton className="h-5 w-20 rounded-full bg-[#0A2947]/10" />
         </div>
-        <Skeleton className="h-5 w-40 mb-2" />
-        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-5 w-40 mb-2 bg-[#0A2947]/10" />
+        <Skeleton className="h-4 w-28 bg-[#0A2947]/10" />
       </div>
       <div>
-        <div className="h-px w-full bg-border my-4" />
-        <Skeleton className="h-3 w-24 mb-2" />
-        <Skeleton className="h-8 w-36" />
+        <div className="h-px w-full bg-[#0A2947]/10 my-4" />
+        <Skeleton className="h-3 w-24 mb-2 bg-[#0A2947]/10" />
+        <Skeleton className="h-8 w-36 bg-[#0A2947]/10" />
       </div>
     </div>
   );
@@ -67,23 +65,6 @@ export default function AkunKasPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
-        <h1 className="text-2xl font-semibold">Manajemen Keuangan</h1>
-        <Button
-          variant="secondary"
-          className="bg-[#424242] text-white hover:bg-[#525252] border-none shadow-sm"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Export Laporan
-        </Button>
-      </div>
-
-      <KeuanganSummaryCards />
-
-      {/* Navigasi tab keuangan */}
-      <KeuanganNavTabs />
-
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -120,12 +101,12 @@ export default function AkunKasPage() {
             <AkunKasCardSkeleton />
           </>
         ) : akunKasList.length === 0 ? (
-          <div className="col-span-full rounded-2xl border border-dashed border-border bg-muted/50 p-16 text-center">
-            <Wallet className="w-10 h-10 text-muted-foreground mx-auto mb-4" />
-            <p className="text-sm font-medium text-foreground mb-1">
+          <div className="col-span-full rounded-2xl border border-dashed border-[#0A2947]/20 bg-[#F2EAE1] p-16 text-center shadow-sm">
+            <Wallet className="w-10 h-10 text-[#D4A373] mx-auto mb-4" />
+            <p className="text-sm font-semibold text-[#0A2947] mb-1">
               Belum ada Akun Kas
             </p>
-            <p className="text-xs text-muted-foreground mb-6">
+            <p className="text-xs text-[#0A2947]/70 mb-6">
               Tambahkan rekening bank atau kas fisik pertama Anda untuk mulai
               mencatat arus keuangan.
             </p>
@@ -133,10 +114,7 @@ export default function AkunKasPage() {
         ) : (
           akunKasList.map((akun, index) => {
             if (!akun._id) {
-              console.warn(
-                `_id hilang di indeks ${index}. Data asli:`,
-                akun,
-              );
+              console.warn(`_id hilang di indeks ${index}. Data asli:`, akun);
             }
 
             const Icon = akun.tipeAkun === "Rekening Bank" ? Landmark : Wallet;
@@ -144,45 +122,54 @@ export default function AkunKasPage() {
 
             return (
               <div
-                // Fallback: Gunakan _id jika ada, atau gunakan kombinasi string dan index jika _id undefined
                 key={akun._id || `akunkas-fallback-${index}`}
-                className="rounded-2xl border border-border bg-card p-6 flex flex-col justify-between min-h-45 shadow-sm"
+                className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 flex flex-col justify-between min-h-45 shadow-sm hover:border-[#0A2947]/30 transition-colors"
               >
                 <div>
                   <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 bg-muted rounded-lg">
-                      <Icon className="w-6 h-6 text-primary" />
+                    {/* Kotak Penetral Cream, Ikon Mustard */}
+                    <div className="p-3 bg-[#FFFAF3] rounded-lg shadow-sm">
+                      <Icon className="w-6 h-6 text-[#D4A373]" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary">{akun.tipeAkun}</Badge>
+                      {/* Badge Sage Green, Teks Cream */}
+                      <Badge
+                        variant="secondary"
+                        className="bg-[#718355] text-[#FFFAF3] hover:bg-[#718355]/90 border-none shadow-sm"
+                      >
+                        {akun.tipeAkun}
+                      </Badge>
                       {!isAktif && (
                         <Badge
                           variant="secondary"
-                          className="bg-red-100 text-red-600 hover:bg-red-100 border-none"
+                          className="bg-red-900/10 text-red-600 hover:bg-red-900/10 border-none shadow-sm"
                         >
                           Non-Aktif
                         </Badge>
                       )}
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold tracking-tight">
+                  {/* Teks Utama Navy */}
+                  <h3 className="text-lg font-bold tracking-tight text-[#0A2947]">
                     {akun.namaAkun}
                   </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-sm font-medium text-[#0A2947]/70 mt-1">
                     {akun.nomorAkun || "-"}
                   </p>
                   {akun.keterangan && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                    <p className="text-xs text-[#0A2947]/60 mt-1 line-clamp-1">
                       {akun.keterangan}
                     </p>
                   )}
                 </div>
                 <div>
-                  <div className="h-px w-full bg-border my-4" />
-                  <p className="text-xs font-medium text-muted-foreground mb-1 tracking-wider uppercase">
+                  {/* Garis Navy Transparan */}
+                  <div className="h-px w-full bg-[#0A2947]/10 my-4" />
+                  {/* Label Mustard, Nominal Navy */}
+                  <p className="text-xs font-bold text-[#D4A373] mb-1 tracking-wider uppercase">
                     Saldo Saat Ini
                   </p>
-                  <p className="text-2xl font-bold tracking-tight">
+                  <p className="text-2xl font-black tracking-tight text-[#0A2947]">
                     {formatRupiah(akun.saldo ?? 0)}
                   </p>
                 </div>

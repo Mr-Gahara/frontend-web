@@ -29,7 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowUpDown, MoreHorizontal, Plus } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Plus, Package } from "lucide-react";
 
 // Helper untuk format Rupiah
 const formatRupiah = (angka: number) => {
@@ -41,7 +41,7 @@ const formatRupiah = (angka: number) => {
 };
 
 export default function ProdukPage() {
-  // 1. PROTEKSI HALAMAN (SECURITY FIX)
+  // 1. PROTEKSI HALAMAN
   useAuthGuard();
 
   const router = useRouter();
@@ -111,7 +111,7 @@ export default function ProdukPage() {
   };
 
   // =========================
-  // TABLE COLUMNS (PERFORMANCE FIX: Dibungkus dengan useMemo)
+  // TABLE COLUMNS (DISELARASKAN DENGAN PALET WARNA)
   // =========================
   const columns = useMemo<ColumnDef<Produk>[]>(
     () => [
@@ -121,7 +121,7 @@ export default function ProdukPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-xs font-semibold text-muted-foreground hover:bg-transparent cursor-pointer"
+            className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] cursor-pointer"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Nama Produk
@@ -129,56 +129,69 @@ export default function ProdukPage() {
           </Button>
         ),
         cell: ({ row }) => (
-          <span className="font-medium">{row.original.namaProduk}</span>
+          <span className="font-bold text-[#0A2947]">{row.original.namaProduk}</span>
         ),
       },
       {
         accessorKey: "kategori",
         header: () => (
-          <span className="text-xs font-semibold text-muted-foreground">
+          <span className="text-xs font-bold text-[#0A2947]/60">
             Kategori
           </span>
         ),
         cell: ({ row }) => {
           const catID = row.original.kategoriID;
-          // Handle populated kategoriID atau fallback ke string kategori
           const namaKategori =
             typeof catID === "object" && catID !== null
               ? catID.namaKategori
               : row.original.kategori || "-";
-          return <span>{String(namaKategori)}</span>;
+          return <span className="font-medium text-[#0A2947]/80 capitalize">{String(namaKategori)}</span>;
         },
       },
       {
         accessorKey: "hargaDasar",
         header: () => (
-          <span className="text-xs font-semibold text-muted-foreground">
+          <span className="text-xs font-bold text-[#0A2947]/60">
             Harga Dasar
           </span>
         ),
-        cell: ({ row }) => <span>{formatRupiah(row.original.hargaDasar)}</span>,
+        cell: ({ row }) => <span className="font-medium text-[#0A2947]/70 font-mono">{formatRupiah(row.original.hargaDasar)}</span>,
       },
       {
         accessorKey: "hargaJual",
         header: () => (
-          <span className="text-xs font-semibold text-muted-foreground">
+          <span className="text-xs font-bold text-[#0A2947]/60">
             Harga Jual
           </span>
         ),
-        cell: ({ row }) => <span>{formatRupiah(row.original.hargaJual)}</span>,
+        cell: ({ row }) => <span className="font-bold text-[#718355] font-mono">{formatRupiah(row.original.hargaJual)}</span>,
       },
       {
         accessorKey: "stok",
         header: () => (
-          <span className="text-xs font-semibold text-muted-foreground">
+          <span className="text-xs font-bold text-[#0A2947]/60">
             Stok
           </span>
         ),
-        cell: ({ row }) => <span>{row.original.stok}</span>,
+        cell: ({ row }) => {
+          const stok = row.original.stok;
+          const isHabis = stok <= 0;
+          return (
+            <span
+              className={`rounded-md px-2 py-0.5 text-xs font-bold shadow-sm ${
+                isHabis
+                  ? "bg-red-100 text-red-700"
+                  : "bg-[#0A2947]/10 text-[#0A2947]"
+              }`}
+            >
+              {stok} item
+            </span>
+          );
+        },
       },
       {
         id: "aksi",
-        header: () => <div className="text-right text-xs">Aksi</div>,
+        header: () => <div className="text-right text-xs font-bold text-[#0A2947]/60">Aksi</div>,
         cell: ({ row }) => (
           <div className="flex justify-end">
             <DropdownMenu>
@@ -186,26 +199,27 @@ export default function ProdukPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 cursor-pointer"
+                  className="h-8 w-8 cursor-pointer text-[#0A2947]/70 hover:text-[#0A2947] hover:bg-[#0A2947]/5"
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="bg-[#FFFAF3] border-[#0A2947]/10">
                 <DropdownMenuItem
-                  className="cursor-pointer"
+                  className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
                   onClick={() =>
-                    router.push(`/dashboard/produk/${row.original._id}/edit`)
+                    // [BUG FIX]: Memperbaiki rute edit yang sebelumnya salah
+                    router.push(`/dashboard/inventaris/produk/${row.original._id}/edit`)
                   }
                 >
-                  Edit
+                  Edit Produk
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="bg-[#0A2947]/10" />
                 <DropdownMenuItem
-                  className="cursor-pointer text-red-500 focus:text-red-500"
+                  className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10 font-bold"
                   onClick={() => setDeleteTarget(row.original)}
                 >
-                  Hapus
+                  Hapus Produk
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -213,30 +227,35 @@ export default function ProdukPage() {
         ),
       },
     ],
-    [router] // Dependency array: fungsi dan state yang dipanggil di dalam kolom
+    [router] 
   );
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Data Produk</h1>
-          <p className="text-sm text-muted-foreground">
-            Kelola daftar produk, harga, dan stok toko Anda.
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg shrink-0 shadow-sm">
+            <Package className="w-6 h-6 text-[#D4A373]" /> {/* Ikon Mustard */}
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">Data Produk</h1>
+            <p className="text-sm font-medium text-[#0A2947]/60">
+              Kelola daftar produk, harga, dan stok toko Anda.
+            </p>
+          </div>
         </div>
         <Button
-          onClick={() => router.push("/dashboard/produk/buatProduk")}
-          className="cursor-pointer"
+          onClick={() => router.push("/dashboard/inventaris/produk/buatProduk")}
+          className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm w-full sm:w-auto font-bold"
         >
           <Plus className="mr-2 h-4 w-4" />
           Tambah Produk
         </Button>
       </div>
 
-      {/* Tabel */}
-      <div className="w-full">
+      {/* Tabel Wrapper (Card Cream Gelap) */}
+      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col gap-4 w-full">
         <DataTable
           columns={columns}
           data={produkList}
@@ -254,24 +273,24 @@ export default function ProdukPage() {
           if (!open) setDeleteTarget(null);
         }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
           <AlertDialogHeader>
-            <AlertDialogTitle>
+            <AlertDialogTitle className="text-[#0A2947]">
               Hapus produk {deleteTarget?.namaProduk}?
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
               Tindakan ini akan menghapus produk secara permanen dari sistem. 
               Apakah Anda yakin?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="cursor-pointer">
+          <AlertDialogFooter className="pt-2">
+            <AlertDialogCancel className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold">
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleteMutation.isPending}
-              className="cursor-pointer bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              className="cursor-pointer bg-red-600 text-white hover:bg-red-700 font-bold"
             >
               {deleteMutation.isPending ? "Menghapus..." : "Hapus"}
             </AlertDialogAction>

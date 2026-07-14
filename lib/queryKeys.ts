@@ -16,4 +16,6 @@ export const queryKeys = {
   penjualan: ["penjualan"] as const,
   penjualanDetail: (id: string) => ["penjualan", "detail", id] as const,
   pelanggan: ["pelanggan"] as const,
+  absensiMonitoring: (tanggal: string) =>
+    ["absensi-monitoring", tanggal] as const,
 };

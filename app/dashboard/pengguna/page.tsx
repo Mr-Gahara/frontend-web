@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useEffect, useState, useMemo } from "react";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -56,6 +57,7 @@ const emptyForm: PenggunaRequest = {
 };
 
 export default function PenggunaPage() {
+  useAuthGuard();
   const token = typeof window !== "undefined" ? sessionStorage.getItem("penggunaToken") : null;
   const payload = token ? decodeJWT(token) : null;
   const currentUserId = payload?._id || payload?.id || "";
@@ -181,24 +183,24 @@ export default function PenggunaPage() {
     {
       accessorKey: "nama",
       header: ({ column }) => (
-        <Button variant="ghost" size="sm" className="h-auto p-0 text-xs font-semibold text-[#041E3F]/60 hover:text-[#041E3F] hover:bg-transparent" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+        <Button variant="ghost" size="sm" className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-transparent" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
           <span>Nama Pengguna</span> <ArrowUpDown className="ml-1 h-3 w-3" />
         </Button>
       ),
-      cell: ({ row }) => <span className="font-medium text-[#041E3F]">{row.getValue("nama")}</span>,
+      cell: ({ row }) => <span className="font-bold text-[#0A2947]">{row.getValue("nama")}</span>,
     },
     {
       accessorKey: "nomorHp",
       header: ({ column }) => (
-        <Button variant="ghost" size="sm" className="h-auto p-0 text-xs font-semibold text-[#041E3F]/60 hover:text-[#041E3F] hover:bg-transparent" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+        <Button variant="ghost" size="sm" className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-transparent" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
           <span>Nomor HP</span> <ArrowUpDown className="ml-1 h-3 w-3" />
         </Button>
       ),
-      cell: ({ row }) => <span className="font-mono text-xs text-[#041E3F]/70">{row.getValue("nomorHp") || "-"}</span>,
+      cell: ({ row }) => <span className="font-mono text-xs font-medium text-[#0A2947]/70">{row.getValue("nomorHp") || "-"}</span>,
     },
     {
       id: "role",
-      header: () => <span className="text-xs font-semibold text-[#041E3F]/60">Role</span>,
+      header: () => <span className="text-xs font-bold text-[#0A2947]/60">Role</span>,
       accessorFn: (row) => {
         if (typeof row.roleID === "object" && row.roleID !== null) return (row.roleID as any).namaRole || "-";
         if (typeof row.roleID === "string") {
@@ -207,15 +209,16 @@ export default function PenggunaPage() {
         }
         return "-";
       },
-      cell: ({ row }) => <span className="text-sm capitalize text-[#041E3F]">{row.getValue("role") as string}</span>,
+      cell: ({ row }) => <span className="text-sm font-semibold capitalize text-[#0A2947]">{row.getValue("role") as string}</span>,
     },
     {
       accessorKey: "statusPengguna",
-      header: () => <div className="text-xs font-semibold text-[#041E3F]/60">Status</div>,
+      header: () => <div className="text-xs font-bold text-[#0A2947]/60">Status</div>,
       cell: ({ row }) => {
         const isActive = row.original.status === "aktif";
         return (
-          <span className={`rounded-full px-2 py-1 text-xs font-medium ${isActive ? "bg-green-100 text-green-700" : "bg-[#041E3F]/10 text-[#041E3F]/60"}`}>
+          // PALET WARNA: Menggunakan Sage Green untuk status Aktif
+          <span className={`rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${isActive ? "bg-[#718355] text-[#FFFAF3]" : "bg-[#0A2947]/10 text-[#0A2947]/60"}`}>
             {isActive ? "Aktif" : "Non-Aktif"}
           </span>
         );
@@ -223,7 +226,7 @@ export default function PenggunaPage() {
     },
     {
       id: "aksi",
-      header: () => <div className="text-right text-xs text-[#041E3F]/60">Aksi</div>,
+      header: () => <div className="text-right text-xs font-bold text-[#0A2947]/60">Aksi</div>,
       cell: ({ row }) => {
         const targetId = (row.original as any)._id || (row.original as any).id;
         let targetLevel = 0;
@@ -241,13 +244,13 @@ export default function PenggunaPage() {
           <div className="flex justify-end">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer text-[#041E3F]/70 hover:text-[#041E3F] hover:bg-[#041E3F]/5">
+                <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer text-[#0A2947]/70 hover:text-[#0A2947] hover:bg-[#0A2947]/5">
                   <MoreHorizontal className="h-4 w-4" /> <span className="sr-only">Buka menu</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#FFFAF3] border-[#041E3F]/10">
-                <DropdownMenuItem className="cursor-pointer text-[#041E3F] hover:bg-[#041E3F]/5" onClick={() => openEdit(row.original)} disabled={!canEdit}>Edit</DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#041E3F]/10" />
+              <DropdownMenuContent align="end" className="bg-[#FFFAF3] border-[#0A2947]/10">
+                <DropdownMenuItem className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5" onClick={() => openEdit(row.original)} disabled={!canEdit}>Edit</DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-[#0A2947]/10" />
                 <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10" onClick={() => setDeleteTarget(row.original)} disabled={!canDelete}>Hapus</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -262,8 +265,8 @@ export default function PenggunaPage() {
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#041E3F]">Kelola Pengguna</h1>
-          <p className="text-sm text-[#041E3F]/60">Kelola seluruh entitas akun dan hak akses platform.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">Kelola Pengguna</h1>
+          <p className="text-sm text-[#0A2947]/60 font-medium">Kelola seluruh entitas akun dan hak akses platform.</p>
         </div>
         <Button onClick={openCreate} className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm">
           <Plus className="mr-2 h-4 w-4" /> Tambah Pengguna
@@ -275,7 +278,8 @@ export default function PenggunaPage() {
         
         {/* WIDGET KIRI: KARYAWAN AKTIF */}
         <div className="col-span-1 md:col-span-12 xl:col-span-3 xl:row-span-2 flex h-full min-h-125">
-          <WidgetActiveUsers />
+          {/* PERUBAHAN: Lempar penggunaList agar bisa mencocokkan Role karyawan di dalam widget */}
+          <WidgetActiveUsers penggunaList={penggunaList} roleList={roleList} />
         </div>
 
         {/* WIDGET TENGAH: TOTAL USERS DARK CARD */}
@@ -290,9 +294,8 @@ export default function PenggunaPage() {
 
         {/* TABEL DATA */}
         <div className="col-span-1 md:col-span-12 xl:col-span-9 flex flex-col h-full min-h-112.5">
-          {/* PERUBAHAN DI SINI: bg-[#FFFAF3] menjadi bg-[#F2EAE1] */}
-          <div className="rounded-xl border border-[#041E3F]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col gap-4 grow h-full">
-            <h2 className="text-lg font-semibold text-[#041E3F] mb-1">Daftar Pengguna Sistem</h2>
+          <div className="rounded-xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col gap-4 grow h-full">
+            <h2 className="text-lg font-bold text-[#0A2947] mb-1">Daftar Pengguna Sistem</h2>
             <DataTable
               columns={columns}
               data={penggunaList}
@@ -324,14 +327,14 @@ export default function PenggunaPage() {
 
       {/* DIALOG HAPUS */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
-        <AlertDialogContent className="border-[#041E3F]/10 bg-[#FFFAF3]">
+        <AlertDialogContent className="border-[#0A2947]/10 bg-[#FFFAF3]">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#041E3F]">Hapus pengguna {deleteTarget?.nama}?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#041E3F]/70">Tindakan ini tidak dapat dibatalkan. Pengguna akan dihapus secara permanen dari sistem.</AlertDialogDescription>
+            <AlertDialogTitle className="text-[#0A2947]">Hapus pengguna {deleteTarget?.nama}?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[#0A2947]/70">Tindakan ini tidak dapat dibatalkan. Pengguna akan dihapus secara permanen dari sistem.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting} className="cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent">Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="cursor-pointer bg-red-600 text-white hover:bg-red-700">{deleting ? "Menghapus..." : "Hapus"}</AlertDialogAction>
+            <AlertDialogCancel disabled={deleting} className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 bg-transparent font-bold">Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="cursor-pointer bg-red-600 text-white hover:bg-red-700 font-bold">{deleting ? "Menghapus..." : "Hapus"}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

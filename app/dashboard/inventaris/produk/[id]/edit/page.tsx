@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, ChevronsUpDown, Loader2, Edit3 } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -57,7 +57,7 @@ export default function EditProdukPage() {
   // QUERY 1: KATEGORI
   const {
     data: kategoriList = [],
-    isLoading: isLoadingKategori, // <-- 1. Ambil status loading
+    isLoading: isLoadingKategori, 
     error: kategoriError,
   } = useQuery({
     queryKey: queryKeys.kategori,
@@ -75,7 +75,7 @@ export default function EditProdukPage() {
   const {
     data: produkDetail,
     isLoading: isLoadingDetail,
-    isFetching: isFetchingDetail, // <-- Tambahkan pendeteksi aktivitas jaringan asli
+    isFetching: isFetchingDetail, 
     error: detailError,
   } = useQuery({
     queryKey: queryKeys.produkDetail(produkId),
@@ -90,12 +90,10 @@ export default function EditProdukPage() {
     },
   });
 
-  // 2. STATE PELINDUNG INFINITE LOOP
   const [isInitialized, setIsInitialized] = useState(false);
 
   // EFFECT: MENGISI FORM SAAT DATA PRODUK TIBA
   useEffect(() => {
-    // 3. Pastikan detail produk ada, kategori selesai loading, dan form belum pernah diinisialisasi
     if (produkDetail && !isLoadingKategori && !isInitialized) {
       let catId =
         typeof produkDetail.kategoriID === "object" &&
@@ -126,7 +124,6 @@ export default function EditProdukPage() {
       setHargaDasarInput(String(produkDetail.hargaDasar || 0));
       setHargaJualInput(String(produkDetail.hargaJual || 0));
 
-      // Kunci gemboknya agar useEffect ini tidak pernah mengeksekusi setForm lagi
       setIsInitialized(true);
     }
   }, [produkDetail, kategoriList, isLoadingKategori, isInitialized]);
@@ -170,7 +167,8 @@ export default function EditProdukPage() {
         queryKey: queryKeys.produkDetail(produkId),
       });
 
-      router.push("/dashboard/produk");
+      // [BUG FIX]: Rute yang benar
+      router.push("/dashboard/inventaris/produk");
     },
     onError: (err: any) => {
       setFormError(err.message || "Gagal memperbarui produk.");
@@ -190,15 +188,13 @@ export default function EditProdukPage() {
     await updateProdukMutation.mutateAsync(form);
   };
 
-  // Hanya tampilkan loading jika data belum ada (isLoading) DAN sistem benar-benar sedang mencari (isFetching)
-  // Ini mencegah UI terjebak jika query tiba-tiba 'disabled' karena bug Next.js back-navigation
   const isMencariData = isLoadingDetail && isFetchingDetail;
 
   if (isMencariData || !produkId) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
+        <Loader2 className="h-8 w-8 animate-spin text-[#0A2947]/60" />
+        <p className="text-sm font-bold text-[#0A2947]/60">
           {!produkId ? "Menyesuaikan rute..." : "Memuat detail produk..."}
         </p>
       </div>
@@ -207,20 +203,21 @@ export default function EditProdukPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
+      {/* Tombol Kembali & Header */}
       <div className="flex flex-col gap-4">
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
-          onClick={() => router.push("/dashboard/produk")}
+          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          onClick={() => router.push("/dashboard/inventaris/produk")} // [BUG FIX]
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali ke Daftar Produk
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Edit Produk</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">Edit Produk</h1>
+          <p className="text-sm font-medium text-[#0A2947]/60">
             Perbarui informasi produk{" "}
             {produkDetail?.namaProduk ? `"${produkDetail.namaProduk}"` : "Anda"}
             .
@@ -228,43 +225,55 @@ export default function EditProdukPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border bg-card p-6 shadow-sm">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      {/* Form Utama (Dibungkus Dark Cream) */}
+      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] shadow-sm">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6 p-6 sm:p-8">
+          
+          <div className="flex items-center gap-2 mb-2">
+            <Edit3 className="h-5 w-5 text-[#D4A373]" /> {/* Ikon Mustard */}
+            <h3 className="text-base font-bold text-[#0A2947]">Informasi Produk</h3>
+          </div>
+
+          {/* Nama Produk */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Nama Produk</label>
+            <label className="text-sm font-bold text-[#0A2947]">Nama Produk <span className="text-red-500">*</span></label>
             <Input
               value={form.namaProduk}
               onChange={(e) => setForm({ ...form, namaProduk: e.target.value })}
               placeholder="Contoh: Kopi Susu Gula Aren"
               required
+              className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
             />
           </div>
 
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium">Kategori</label>
+          {/* Kategori (Combobox / Searchable Dropdown) */}
+          <div className="space-y-2 flex flex-col">
+            <label className="text-sm font-bold text-[#0A2947]">Kategori <span className="text-red-500">*</span></label>
             <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   role="combobox"
                   aria-expanded={openCombobox}
-                  className="w-full justify-between font-normal cursor-pointer"
+                  className="w-full justify-between cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5"
                 >
-                  {form.kategoriID
-                    ? kategoriList.find((kat) => kat._id === form.kategoriID)
-                        ?.namaKategori || "Kategori tidak ditemukan"
-                    : "Pilih kategori produk..."}
+                  <span className={form.kategoriID ? "font-bold" : "font-normal text-[#0A2947]/50"}>
+                    {form.kategoriID
+                      ? kategoriList.find((kat) => kat._id === form.kategoriID)
+                          ?.namaKategori || "Kategori tidak ditemukan"
+                      : "Pilih kategori produk..."}
+                  </span>
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent
-                className="w-[--radix-popover-trigger-width] p-0"
+                className="w-[--radix-popover-trigger-width] p-0 border-[#0A2947]/10"
                 align="start"
               >
-                <Command>
-                  <CommandInput placeholder="Cari kategori..." />
+                <Command className="bg-[#FFFAF3]">
+                  <CommandInput placeholder="Cari kategori..." className="text-[#0A2947]" />
                   <CommandList>
-                    <CommandEmpty>Kategori tidak ditemukan.</CommandEmpty>
+                    <CommandEmpty className="py-6 text-center text-sm text-[#0A2947]/60 font-medium">Kategori tidak ditemukan.</CommandEmpty>
                     <CommandGroup>
                       {kategoriList.map((kat) => (
                         <CommandItem
@@ -274,11 +283,11 @@ export default function EditProdukPage() {
                             setForm({ ...form, kategoriID: kat._id });
                             setOpenCombobox(false);
                           }}
-                          className="cursor-pointer"
+                          className="cursor-pointer text-[#0A2947] aria-selected:bg-[#0A2947]/5 font-medium"
                         >
                           <Check
                             className={cn(
-                              "mr-2 h-4 w-4",
+                              "mr-2 h-4 w-4 text-[#718355]",
                               form.kategoriID === kat._id
                                 ? "opacity-100"
                                 : "opacity-0",
@@ -294,12 +303,15 @@ export default function EditProdukPage() {
             </Popover>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="h-px w-full bg-[#0A2947]/10 my-2" />
+
+          {/* Grid Harga Dasar & Harga Jual */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Harga Dasar (Rp)</label>
+              <label className="text-sm font-bold text-[#0A2947]">Harga Dasar (Rp) <span className="text-red-500">*</span></label>
               <Input
                 type="number"
-                className="no-spinner"
+                className="no-spinner bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
                 min={0}
                 value={hargaDasarInput}
                 onChange={(e) => {
@@ -312,13 +324,14 @@ export default function EditProdukPage() {
                 }}
                 required
               />
+              <p className="text-xs font-medium text-[#0A2947]/50">Modal belanja/produksi per item.</p>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Harga Jual (Rp)</label>
+              <label className="text-sm font-bold text-[#0A2947]">Harga Jual (Rp) <span className="text-red-500">*</span></label>
               <Input
                 type="number"
-                className="no-spinner"
+                className="no-spinner bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
                 min={0}
                 value={hargaJualInput}
                 onChange={(e) => {
@@ -331,49 +344,58 @@ export default function EditProdukPage() {
                 }}
                 required
               />
+              <p className="text-xs font-medium text-[#0A2947]/50">Harga yang ditawarkan ke pelanggan.</p>
             </div>
           </div>
 
+          <div className="h-px w-full bg-[#0A2947]/10 my-2" />
+
+          {/* URL Gambar Produk */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">
-              Link Gambar Produk (Opsional)
-            </label>
+            <label className="text-sm font-bold text-[#0A2947]">Link Gambar Produk <span className="text-[#0A2947]/50 font-medium">(Opsional)</span></label>
             <Input
               value={form.gambarProduk || ""}
               onChange={(e) =>
                 setForm({ ...form, gambarProduk: e.target.value })
               }
-              placeholder="Masukkan URL gambar produk"
+              placeholder="https://example.com/gambar.jpg"
+              className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
             />
           </div>
 
+          {/* Keterangan */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Keterangan (Opsional)</label>
+            <label className="text-sm font-bold text-[#0A2947]">Keterangan <span className="text-[#0A2947]/50 font-medium">(Opsional)</span></label>
             <Input
               value={form.keterangan || ""}
               onChange={(e) => setForm({ ...form, keterangan: e.target.value })}
               placeholder="Tambahkan catatan singkat mengenai produk ini"
+              className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
             />
           </div>
 
+          {/* Pesan Error */}
           {formError && (
-            <p className="text-sm font-medium text-destructive">{formError}</p>
+             <div className="rounded-md bg-red-500/10 p-3 text-sm font-bold text-red-600 border border-red-500/20">
+              {formError}
+            </div>
           )}
 
-          <div className="mt-2 flex justify-end gap-3 border-t pt-4">
+          {/* Aksi Tombol */}
+          <div className="mt-4 flex justify-end gap-3 border-t border-[#0A2947]/10 pt-6">
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push("/dashboard/produk")}
+              onClick={() => router.push("/dashboard/inventaris/produk")} // [BUG FIX]
               disabled={updateProdukMutation.isPending}
-              className="cursor-pointer"
+              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
             >
               Batal
             </Button>
             <Button
               type="submit"
               disabled={updateProdukMutation.isPending || isLoadingDetail}
-              className="cursor-pointer"
+              className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold px-6"
             >
               {updateProdukMutation.isPending
                 ? "Menyimpan Perubahan..."

@@ -2,38 +2,36 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeftRight, LineChart, FileText } from "lucide-react";
+import { Package, Tags } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   {
-    label: "Ringkasan Laba/Rugi",
-    href: "/dashboard/keuangan/ringkasanLabaRugi",
-    icon: LineChart,
+    label: "Daftar Produk",
+    href: "/dashboard/inventaris/produk",
+    icon: Package,
   },
   {
-    label: "Mutasi & Arus Kas",
-    href: "/dashboard/keuangan/mutasiArusKas",
-    icon: ArrowLeftRight,
-  },
-  {
-    label: "Akun Kas & Bank",
-    href: "/dashboard/keuangan/akunkas",
-    icon: FileText,
+    label: "Kategori Produk",
+    href: "/dashboard/inventaris/kategori", 
+    icon: Tags,
   },
 ];
 
-export function KeuanganNavTabs() {
+export function InventarisNavTabs() {
   const pathname = usePathname();
 
   return (
-    <div className="w-full">
+    <div className="w-full mb-6">
       <nav
         className="flex flex-row overflow-x-auto overflow-y-hidden w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        aria-label="Navigasi Keuangan"
+        aria-label="Navigasi Inventaris"
       >
         {tabs.map(({ label, href, icon: Icon }) => {
-          const isActive = pathname === href;
+          // Sedikit trik: pakai startsWith biar pas lu masuk ke /produk/buatProduk
+          // tab "Daftar Produk" nya tetep nyala (aktif).
+          const isActive = pathname.startsWith(href); 
+          
           return (
             <Link
               key={href}
@@ -41,8 +39,8 @@ export function KeuanganNavTabs() {
               className={cn(
                 "flex flex-1 items-center justify-center gap-2 py-3 px-1 text-sm font-bold whitespace-nowrap transition-all border-b-4 rounded-none bg-transparent cursor-pointer -mb-px focus-visible:ring-0 focus-visible:outline-none",
                 isActive
-                  ? "border-[#0A2947] text-[#0A2947] shadow-none"
-                  : "border-transparent text-[#0A2947]/50 hover:text-[#0A2947] hover:bg-transparent",
+                  ? "border-zinc-900 text-zinc-900 shadow-none"
+                  : "border-transparent text-zinc-500 hover:text-zinc-700 hover:bg-transparent",
               )}
             >
               <Icon className="w-4 h-4" />

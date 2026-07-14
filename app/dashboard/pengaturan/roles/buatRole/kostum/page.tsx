@@ -283,7 +283,7 @@ export default function BuatRoleKostumPage() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
+          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
           onClick={() => router.push("/dashboard/pengaturan/roles/buatRole")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -291,21 +291,24 @@ export default function BuatRoleKostumPage() {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
             Tambah Posisi Kustom
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm font-medium text-[#0A2947]/60">
             Buat jabatan baru dan tentukan batasan wewenang kerjanya.
           </p>
         </div>
       </div>
 
-      {/* Form */}
-      <div className="rounded-xl border bg-card p-6 shadow-sm">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      {/* Form Card */}
+      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-7">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Nama Posisi / Jabatan</label>
+            <label className="text-sm font-bold text-[#0A2947]">
+              Nama Posisi / Jabatan
+            </label>
             <Input
+              className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
               value={namaRole}
               onChange={(e) => setNamaRole(e.target.value)}
               placeholder="Contoh: Manajer Toko, Kasir Depan, Barista"
@@ -314,13 +317,12 @@ export default function BuatRoleKostumPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">
+            <label className="text-sm font-bold text-[#0A2947]">
               Deskripsi Pekerjaan{" "}
-              <span className="text-muted-foreground font-normal">
-                (opsional)
-              </span>
+              <span className="text-[#0A2947]/50 font-medium">(opsional)</span>
             </label>
             <Input
+              className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
               value={deskripsi}
               onChange={(e) => setDeskripsi(e.target.value)}
               placeholder="Contoh: Bertanggung jawab atas transaksi penjualan dan laporan kas harian"
@@ -328,17 +330,19 @@ export default function BuatRoleKostumPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Level</label>
+            <label className="text-sm font-bold text-[#0A2947]">
+              Level Otoritas
+            </label>
             <Input
               type="number"
-              className="no-spinner"
+              className="no-spinner bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
               value={level}
               onChange={(e) => setLevel(e.target.value)}
               placeholder="Contoh: 100"
               required
             />
             {currentUserLevel > 0 && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs font-medium text-[#0A2947]/60 mt-1">
                 Level harus antara 1 hingga {currentUserLevel - 1}. Semakin
                 tinggi angka, semakin tinggi otoritas jabatan.
               </p>
@@ -346,13 +350,13 @@ export default function BuatRoleKostumPage() {
           </div>
 
           {/* Area Hak Akses */}
-          <div className="flex flex-col gap-3 pt-2">
+          <div className="flex flex-col gap-4 pt-4 border-t border-[#0A2947]/10 mt-2">
             <div className="flex items-center justify-between">
               <div>
-                <label className="text-sm font-medium">
+                <label className="text-sm font-bold text-[#0A2947]">
                   Wewenang Menu Sistem
                 </label>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs font-medium text-[#0A2947]/60 mt-1">
                   {selectedPermissions.length} dari {allowedPermissions.length}{" "}
                   pilihan aktif.
                 </p>
@@ -362,7 +366,7 @@ export default function BuatRoleKostumPage() {
                 variant="outline"
                 size="sm"
                 onClick={handleSelectAllGlobal}
-                className="h-8 text-xs cursor-pointer"
+                className="h-8 text-xs font-bold cursor-pointer transition-colors border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 shadow-sm"
                 disabled={permissionsLoading}
               >
                 {selectedPermissions.length === allowedPermissions.length &&
@@ -373,14 +377,15 @@ export default function BuatRoleKostumPage() {
             </div>
 
             {permissionsLoading ? (
-              <div className="flex h-32 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-muted/20">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
+              <div className="flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[#0A2947]/20 bg-[#FFFAF3]">
+                <Loader2 className="h-6 w-6 animate-spin text-[#0A2947]/40" />
+                <p className="text-sm font-bold text-[#0A2947]/60">
                   Memuat daftar wewenang...
                 </p>
               </div>
             ) : (
-              <div className="rounded-lg border border-border bg-card overflow-hidden">
+              // Kotak Wewenang
+              <div className="rounded-xl border border-[#0A2947]/10 bg-[#FFFAF3] overflow-hidden shadow-inner">
                 {Object.entries(groupedPermissions).map(([grup, items], i) => {
                   const itemNames = items.map((item) => item.nama);
                   const isGroupAllSelected = itemNames.every((name) =>
@@ -390,15 +395,15 @@ export default function BuatRoleKostumPage() {
                   return (
                     <div
                       key={grup}
-                      className={`px-4 py-4 ${
+                      className={`px-5 py-5 ${
                         i < Object.keys(groupedPermissions).length - 1
-                          ? "border-b border-border"
+                          ? "border-b border-[#0A2947]/10"
                           : ""
                       }`}
                     >
                       {/* Header Grup Kategori */}
-                      <div className="flex items-center justify-between mb-4 border-b border-muted pb-1.5">
-                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                      <div className="flex items-center justify-between mb-5 border-b border-[#0A2947]/5 pb-2">
+                        <p className="text-xs font-bold text-[#0A2947]/50 uppercase tracking-wider">
                           {grup}
                         </p>
                         <Button
@@ -406,7 +411,11 @@ export default function BuatRoleKostumPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSelectGroup(items)}
-                          className="h-6 px-2 text-xs font-semibold text-primary hover:bg-primary/5 cursor-pointer"
+                          className={`h-7 px-3 text-[11px] font-bold rounded-md transition-colors cursor-pointer ${
+                            isGroupAllSelected
+                              ? "text-[#D4A373] hover:bg-[#D4A373]/10" // Mustard untuk Kosongkan
+                              : "text-[#718355] hover:bg-[#718355]/10" // Sage Green untuk Pilih
+                          }`}
                         >
                           {isGroupAllSelected
                             ? "Kosongkan Grup"
@@ -415,7 +424,7 @@ export default function BuatRoleKostumPage() {
                       </div>
 
                       {/* Item di dalam Kategori */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-8">
                         {items.map((permission) => (
                           <div
                             key={permission._id}
@@ -429,16 +438,17 @@ export default function BuatRoleKostumPage() {
                               onCheckedChange={() =>
                                 handleCheckbox(permission.nama)
                               }
-                              className="mt-0.5 cursor-pointer"
+                              // PERBAIKAN: Tambah data-[state=checked]:text-[#FFFAF3] di ujung
+                              className="mt-0.5 cursor-pointer border-[#0A2947]/30 data-[state=checked]:bg-[#0A2947] data-[state=checked]:border-[#0A2947] data-[state=checked]:text-[#FFFAF3]"
                             />
                             <div className="grid gap-1 leading-none">
                               <label
                                 htmlFor={permission._id}
-                                className="text-sm font-medium cursor-pointer text-foreground"
+                                className="text-sm font-bold cursor-pointer text-[#0A2947]"
                               >
                                 {permission.deskripsi || permission.nama}
                               </label>
-                              <p className="text-xs text-muted-foreground font-mono">
+                              <p className="text-xs font-medium text-[#0A2947]/50 font-mono">
                                 {permission.nama}
                               </p>
                             </div>
@@ -453,11 +463,11 @@ export default function BuatRoleKostumPage() {
           </div>
 
           {formError && (
-            <p className="text-sm font-medium text-destructive">{formError}</p>
+            <p className="text-sm font-bold text-red-600 px-2">{formError}</p>
           )}
 
-          {/* Tombol Aksi */}
-          <div className="flex justify-end gap-3 border-t pt-5 mt-2">
+          {/* Tombol Aksi Bawah */}
+          <div className="flex justify-end gap-3 border-t border-[#0A2947]/10 pt-6 mt-2">
             <Button
               type="button"
               variant="outline"
@@ -465,17 +475,18 @@ export default function BuatRoleKostumPage() {
                 router.push("/dashboard/pengaturan/roles/buatRole")
               }
               disabled={createRoleMutation.isPending}
-              className="cursor-pointer"
+              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
             >
               Batal
             </Button>
+            {/* Tombol Utama pakai Navy */}
             <Button
               type="submit"
               disabled={createRoleMutation.isPending || permissionsLoading}
-              className="cursor-pointer"
+              className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm px-6"
             >
               {createRoleMutation.isPending
-                ? "Menyimpan Posisi..."
+                ? "Menyimpan..."
                 : "Simpan Posisi Baru"}
             </Button>
           </div>
@@ -489,30 +500,31 @@ export default function BuatRoleKostumPage() {
           if (!open) setWarningDialog(null);
         }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
+            <AlertDialogTitle className="flex items-center gap-2 text-[#0A2947]">
+              {/* Icon Peringatan pakai Mustard */}
+              <AlertTriangle className="h-5 w-5 text-[#D4A373]" />
               Peringatan Hak Akses Vital
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm leading-relaxed">
+            <AlertDialogDescription className="text-sm font-medium text-[#0A2947]/70 leading-relaxed pt-2">
               Anda mencoba menonaktifkan hak akses dasar{" "}
-              <strong>{warningDialog?.nama}</strong>.
+              <strong className="text-[#0A2947]">{warningDialog?.nama}</strong>.
               <br />
               <br />
               {warningDialog?.penjelasan}
               <br />
               <br />
-              Apakah Anda yakin ingin tetap menghapus hak akses ini untuk staff
+              Apakah Anda yakin ingin tetap menghapus hak akses ini untuk staf
               Anda?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="cursor-pointer">
+          <AlertDialogFooter className="pt-2">
+            <AlertDialogCancel className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold">
               Batal (Tetap Aktifkan)
             </AlertDialogCancel>
             <AlertDialogAction
-              className="cursor-pointer bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              className="cursor-pointer bg-red-600 text-white hover:bg-red-700 font-bold"
               onClick={confirmUncheckBasic}
             >
               Ya, Hapus Akses
