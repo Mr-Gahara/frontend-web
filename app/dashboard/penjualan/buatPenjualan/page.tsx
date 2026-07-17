@@ -56,6 +56,10 @@ import {
   CalendarIcon,
   Clock3,
   Tag,
+  Receipt,
+  Users,
+  ShoppingCart,
+  Calculator,
 } from "lucide-react";
 import { Calendar } from "@/components/calendar";
 import { format } from "date-fns";
@@ -275,14 +279,13 @@ export default function BuatPenjualanPage() {
     produkList.find((p) => p._id === produkID)?.namaProduk ?? "";
 
   // ==========================================
-  //  ENGINE SIMULASI KALKULASI FRONTEND (OPSI A)
+  //  ENGINE SIMULASI KALKULASI FRONTEND
   // ==========================================
   const calc = useMemo(() => {
     let grandTotalItem = 0;
 
     // 1. Hitung Item & Diskon Item
     const itemsCalc = items.map((item) => {
-      // (Asumsi produk menggunakan _id bawaan atau disesuaikan jika perlu)
       const produk = produkList.find(
         (p) => (p._id || (p as any).id) === item.produkID,
       );
@@ -290,7 +293,6 @@ export default function BuatPenjualanPage() {
       let running = subTotal;
       let totalDiskonItem = 0;
 
-      // PERBAIKAN: Gunakan ekstraksi ID aman di sini
       const selectedDiskon = activeDiskonItem.filter((d) =>
         item.diskonItemIDs.includes(d._id || d.id),
       );
@@ -312,7 +314,6 @@ export default function BuatPenjualanPage() {
     let runningGlobal = grandTotalItem;
     let totalDiskonGlobal = 0;
 
-    // PERBAIKAN: Gunakan ekstraksi ID aman di sini
     const selectedDiskonGlobal = activeDiskonGlobal.filter((d) =>
       diskonGlobalIDs.includes(d._id || d.id),
     );
@@ -336,15 +337,12 @@ export default function BuatPenjualanPage() {
     for (const p of activePajakGlobal) {
       let nilaiPajak = 0;
       if (p.modelPerhitungan === 1) {
-        // Inclusive
         nilaiPajak =
           (runningTotalPajak / (1 + p.tarifPajak / 100)) * (p.tarifPajak / 100);
       } else if (p.modelPerhitungan === 2) {
-        // Exclusive
         nilaiPajak = dasarSetelahDiskon * (p.tarifPajak / 100);
         runningTotalPajak += nilaiPajak;
       } else if (p.modelPerhitungan === 3) {
-        // Compound
         nilaiPajak = runningTotalPajak * (p.tarifPajak / 100);
         runningTotalPajak += nilaiPajak;
       }
@@ -433,21 +431,21 @@ export default function BuatPenjualanPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
       {/* Header */}
       <div className="flex flex-col gap-4">
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-muted-foreground hover:bg-transparent"
+          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
           onClick={() => router.push("/dashboard/penjualan")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali ke Daftar Penjualan
         </Button>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Buat Penjualan</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">Buat Penjualan</h1>
+          <p className="text-sm font-medium text-[#0A2947]/60">
             Isi detail transaksi untuk membuat struk/invoice penjualan baru.
           </p>
         </div>
@@ -459,84 +457,70 @@ export default function BuatPenjualanPage() {
       >
         {/* ================= KOLOM KIRI (UTAMA) ================= */}
         <div className="lg:col-span-8 flex flex-col gap-6">
+          
           {/* INFO TRANSAKSI */}
-          <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
-            <h2 className="text-sm font-semibold">Informasi Transaksi</h2>
+          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm space-y-5">
+            <h2 className="text-base font-bold text-[#0A2947] flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-[#D4A373]" />
+              Informasi Transaksi
+            </h2>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Jenis Penjualan</label>
+              <label className="text-sm font-bold text-[#0A2947]">Jenis Penjualan</label>
               <Select
                 value={jenisPenjualan}
                 onValueChange={(val) => setJenisPenjualan(val as any)}
               >
-                <SelectTrigger className="w-full h-12 cursor-pointer font-semibold">
+                <SelectTrigger className="w-full h-12 cursor-pointer font-bold bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    value="dine-in"
-                    className="cursor-pointer py-3 font-medium"
-                  >
-                    Dine-in
-                  </SelectItem>
-                  <SelectItem
-                    value="takeaway"
-                    className="cursor-pointer py-3 font-medium"
-                  >
-                    Takeaway
-                  </SelectItem>
-                  <SelectItem
-                    value="booking"
-                    className="cursor-pointer py-3 font-medium"
-                  >
-                    Booking
-                  </SelectItem>
+                <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                  <SelectItem value="dine-in" className="cursor-pointer py-3 font-bold hover:bg-[#0A2947]/5">Dine-in</SelectItem>
+                  <SelectItem value="takeaway" className="cursor-pointer py-3 font-bold hover:bg-[#0A2947]/5">Takeaway</SelectItem>
+                  <SelectItem value="booking" className="cursor-pointer py-3 font-bold hover:bg-[#0A2947]/5">Booking</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Tanggal Transaksi</label>
+                <label className="text-sm font-bold text-[#0A2947]">Tanggal Transaksi</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full h-12 justify-start text-left font-medium cursor-pointer"
+                      className="w-full h-12 justify-start text-left font-bold cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]"
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {format(tanggalInput, "dd MMMM yyyy", {
-                        locale: localeID,
-                      })}
+                      <CalendarIcon className="mr-2 h-4 w-4 text-[#D4A373]" />
+                      {format(tanggalInput, "dd MMMM yyyy", { locale: localeID })}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 border-[#0A2947]/10 bg-[#FFFAF3]" align="start">
                     <Calendar
                       mode="single"
                       selected={tanggalInput}
-                      onSelect={(date) => {
-                        if (date) setTanggalInput(date);
-                      }}
+                      onSelect={(date) => { if (date) setTanggalInput(date); }}
                     />
                   </PopoverContent>
                 </Popover>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Jam Transaksi</label>
-                <div className="flex h-12 w-full items-center gap-2 rounded-md border px-3 text-sm focus-within:ring-1 focus-within:ring-ring">
-                  <Clock3 className="h-4 w-4 text-muted-foreground" />
+                <label className="text-sm font-bold text-[#0A2947]">Jam Transaksi</label>
+                <div className="flex h-12 w-full items-center gap-2 rounded-md border border-[#0A2947]/20 bg-[#FFFAF3] px-3 focus-within:ring-1 focus-within:ring-[#0A2947]">
+                  <Clock3 className="h-4 w-4 text-[#D4A373]" />
                   <input
                     type="text"
                     maxLength={2}
-                    className="w-10 bg-transparent text-center font-medium outline-none"
+                    className="w-10 bg-transparent text-center font-bold text-[#0A2947] outline-none"
                     value={hour}
                     onChange={(e) => setHour(e.target.value)}
                     onBlur={() => setHour((p) => p.padStart(2, "0"))}
                   />
-                  <span className="font-medium text-muted-foreground">:</span>
+                  <span className="font-bold text-[#0A2947]">:</span>
                   <input
                     type="text"
                     maxLength={2}
-                    className="w-10 bg-transparent text-center font-medium outline-none"
+                    className="w-10 bg-transparent text-center font-bold text-[#0A2947] outline-none"
                     value={minute}
                     onChange={(e) => setMinute(e.target.value)}
                     onBlur={() => setMinute((p) => p.padStart(2, "0"))}
@@ -547,34 +531,35 @@ export default function BuatPenjualanPage() {
           </div>
 
           {/* ITEM PENJUALAN */}
-          <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
+          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold">Item Penjualan</h2>
+              <h2 className="text-base font-bold text-[#0A2947] flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5 text-[#D4A373]" />
+                Item Penjualan
+              </h2>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={addItem}
-                className="cursor-pointer"
+                className="cursor-pointer border-[#0A2947]/20 bg-[#FFFAF3] text-[#0A2947] font-bold hover:bg-[#0A2947]/5 shadow-sm"
               >
-                <Plus className="mr-1 h-3 w-3" /> Tambah Item
+                <Plus className="mr-1 h-3.5 w-3.5" /> Tambah Item
               </Button>
             </div>
 
             <div className="flex flex-col gap-4">
               {items.map((item, index) => {
-                const selectedProduk = produkList.find(
-                  (p) => p._id === item.produkID,
-                );
+                const selectedProduk = produkList.find((p) => p._id === item.produkID);
                 const itemCalc = calc.itemsCalc[index];
 
                 return (
                   <div
                     key={index}
-                    className="rounded-lg border p-4 space-y-4 bg-muted/20"
+                    className="rounded-xl border border-[#0A2947]/10 p-5 space-y-4 bg-[#FFFAF3] shadow-inner"
                   >
-                    <div className="flex items-center justify-between border-b border-muted pb-2">
-                      <span className="text-xs font-semibold text-muted-foreground">
+                    <div className="flex items-center justify-between border-b border-[#0A2947]/5 pb-3">
+                      <span className="text-xs font-bold text-[#0A2947]/50 uppercase tracking-widest">
                         Item #{index + 1}
                       </span>
                       {items.length > 1 && (
@@ -582,65 +567,52 @@ export default function BuatPenjualanPage() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-red-500 hover:bg-red-50"
+                          className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
                           onClick={() => removeItem(index)}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium">Produk</label>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-[#0A2947]">Produk</label>
                       <Popover
                         open={openProduk === index}
-                        onOpenChange={(open) =>
-                          setOpenProduk(open ? index : null)
-                        }
+                        onOpenChange={(open) => setOpenProduk(open ? index : null)}
                       >
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
                             role="combobox"
-                            className="w-full justify-between font-normal cursor-pointer bg-background"
+                            className="w-full justify-between font-bold cursor-pointer bg-white border-[#0A2947]/20 text-[#0A2947]"
                           >
-                            {item.produkID
-                              ? getProdukNama(item.produkID)
-                              : "Pilih produk..."}
+                            <span className={item.produkID ? "" : "text-[#0A2947]/40 font-medium"}>
+                              {item.produkID ? getProdukNama(item.produkID) : "Pilih produk..."}
+                            </span>
                             <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent
-                          className="w-[--radix-popover-trigger-width] p-0"
-                          align="start"
-                        >
-                          <Command>
-                            <CommandInput placeholder="Cari produk..." />
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-[#0A2947]/10" align="start">
+                          <Command className="bg-[#FFFAF3]">
+                            <CommandInput placeholder="Cari produk..." className="text-[#0A2947]" />
                             <CommandList>
-                              <CommandEmpty>
-                                Produk tidak ditemukan.
-                              </CommandEmpty>
+                              <CommandEmpty className="py-6 text-center text-sm font-medium text-[#0A2947]/60">Produk tidak ditemukan.</CommandEmpty>
                               <CommandGroup>
                                 {produkList.map((p) => (
                                   <CommandItem
                                     key={p._id}
-                                    onSelect={() =>
-                                      handlePilihProduk(index, p._id)
-                                    }
-                                    className="cursor-pointer"
+                                    onSelect={() => handlePilihProduk(index, p._id)}
+                                    className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-medium"
                                   >
                                     <Check
                                       className={cn(
-                                        "mr-2 h-4 w-4",
-                                        item.produkID === p._id
-                                          ? "opacity-100"
-                                          : "opacity-0",
+                                        "mr-2 h-4 w-4 text-[#718355]",
+                                        item.produkID === p._id ? "opacity-100" : "opacity-0"
                                       )}
                                     />
-                                    <span className="flex-1">
-                                      {p.namaProduk}
-                                    </span>
-                                    <span className="ml-2 text-xs text-muted-foreground">
+                                    <span className="flex-1">{p.namaProduk}</span>
+                                    <span className="ml-2 text-xs font-bold text-[#0A2947]/50">
                                       {formatRupiah(p.hargaJual)}
                                     </span>
                                   </CommandItem>
@@ -652,101 +624,77 @@ export default function BuatPenjualanPage() {
                       </Popover>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-medium">Jumlah</label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-[#0A2947]">Jumlah</label>
                         <Input
                           type="number"
                           min={1}
                           value={item.jumlahStr}
-                          onChange={(e) =>
-                            handleJumlahChange(index, e.target.value)
-                          }
+                          onChange={(e) => handleJumlahChange(index, e.target.value)}
                           onBlur={() => handleJumlahBlur(index)}
-                          className="bg-background no-spinner"
+                          className="bg-white border-[#0A2947]/20 text-[#0A2947] font-bold no-spinner"
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-medium">
-                          Harga Satuan
-                        </label>
-                        <div className="flex h-9 items-center rounded-md border bg-muted px-3 text-sm text-muted-foreground">
-                          {selectedProduk
-                            ? formatRupiah(selectedProduk.hargaJual)
-                            : "-"}
+                      <div className="space-y-2">
+                        <label className="text-sm font-bold text-[#0A2947]">Harga Satuan</label>
+                        <div className="flex h-10 items-center rounded-md border border-[#0A2947]/10 bg-[#0A2947]/5 px-3 text-sm font-bold text-[#0A2947]/70 font-mono">
+                          {selectedProduk ? formatRupiah(selectedProduk.hargaJual) : "-"}
                         </div>
                       </div>
                     </div>
 
                     {/* Diskon Item */}
                     {selectedProduk && (
-                      <div className="space-y-2 pt-1">
+                      <div className="space-y-2 pt-2">
                         <div className="flex justify-between items-center">
-                          <label className="text-xs font-medium flex items-center gap-1.5">
-                            <Tag className="h-3.5 w-3.5 text-muted-foreground" />{" "}
-                            Diskon Produk
+                          <label className="text-xs font-bold flex items-center gap-1.5 text-[#0A2947]">
+                            <Tag className="h-3.5 w-3.5 text-[#D4A373]" /> Diskon Produk
                           </label>
                           <Popover
                             open={openDiskonItem === index}
-                            onOpenChange={(o) =>
-                              setOpenDiskonItem(o ? index : null)
-                            }
+                            onOpenChange={(o) => setOpenDiskonItem(o ? index : null)}
                           >
                             <PopoverTrigger asChild>
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-7 text-xs cursor-pointer"
+                                className="h-7 text-xs cursor-pointer font-bold border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5"
                               >
                                 Pilih Diskon
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent align="end" className="w-64 p-0">
-                              <Command>
-                                <CommandInput placeholder="Cari diskon item..." />
+                            <PopoverContent align="end" className="w-64 p-0 border-[#0A2947]/10">
+                              <Command className="bg-[#FFFAF3]">
+                                <CommandInput placeholder="Cari diskon item..." className="text-[#0A2947]" />
                                 <CommandList>
-                                  <CommandEmpty>
-                                    Belum ada diskon aktif.
-                                  </CommandEmpty>
+                                  <CommandEmpty className="py-4 text-center text-xs font-medium text-[#0A2947]/60">Belum ada diskon aktif.</CommandEmpty>
                                   <CommandGroup>
                                     {activeDiskonItem.map((d, idx) => {
-                                      // EKSTRAKSI ID AMAN
                                       const targetId = d._id || d.id;
-                                      const isSelected =
-                                        item.diskonItemIDs.includes(targetId);
-                                      const safeKey =
-                                        targetId || `item-diskon-${idx}`;
+                                      const isSelected = item.diskonItemIDs.includes(targetId);
+                                      const safeKey = targetId || `item-diskon-${idx}`;
 
                                       return (
                                         <CommandItem
                                           key={safeKey}
-                                          onSelect={() =>
-                                            toggleItemDiskon(index, targetId)
-                                          }
-                                          className="cursor-pointer"
+                                          onSelect={() => toggleItemDiskon(index, targetId)}
+                                          className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-medium"
                                         >
                                           <div className="flex flex-1 items-center gap-2">
+                                            {/* Checkbox Custom untuk CommandItem */}
                                             <div
                                               className={cn(
                                                 "flex h-4 w-4 items-center justify-center rounded-sm border",
-                                                isSelected
-                                                  ? "bg-primary border-primary"
-                                                  : "border-muted-foreground/30",
+                                                isSelected ? "bg-[#0A2947] border-[#0A2947]" : "border-[#0A2947]/30"
                                               )}
                                             >
-                                              {isSelected && (
-                                                <Check className="h-3 w-3 text-primary-foreground" />
-                                              )}
+                                              {isSelected && <Check className="h-3 w-3 text-[#FFFAF3]" />}
                                             </div>
                                             <span>{d.namaDiskon}</span>
                                           </div>
-                                          <Badge
-                                            variant="secondary"
-                                            className="text-[10px]"
-                                          >
-                                            {d.tipe === "persen"
-                                              ? `${d.nilai}%`
-                                              : "Rp"}
+                                          <Badge className="text-[10px] bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373] border-none font-bold">
+                                            {d.tipe === "persen" ? `${d.nilai}%` : "Rp"}
                                           </Badge>
                                         </CommandItem>
                                       );
@@ -761,23 +709,14 @@ export default function BuatPenjualanPage() {
                         {item.diskonItemIDs.length > 0 && (
                           <div className="flex flex-wrap gap-2 pt-1">
                             {item.diskonItemIDs.map((id, idx) => {
-                              const d = activeDiskonItem.find(
-                                (x) => (x._id || x.id) === id,
-                              );
+                              const d = activeDiskonItem.find((x) => (x._id || x.id) === id);
                               if (!d) return null;
-                              const safeKey =
-                                d._id || d.id || `badge-item-${idx}`;
                               return (
                                 <Badge
-                                  key={safeKey}
-                                  variant="secondary"
-                                  className="bg-rose-50 text-rose-600 border-rose-100 text-[10px]"
+                                  key={d._id || d.id || `badge-item-${idx}`}
+                                  className="bg-[#D4A373] text-[#0A2947] border-none hover:bg-[#D4A373] text-[10px] font-bold shadow-sm"
                                 >
-                                  {d.namaDiskon} (
-                                  {d.tipe === "persen"
-                                    ? `${d.nilai}%`
-                                    : formatRupiah(d.nilai)}
-                                  )
+                                  {d.namaDiskon} ({d.tipe === "persen" ? `${d.nilai}%` : formatRupiah(d.nilai)})
                                 </Badge>
                               );
                             })}
@@ -787,13 +726,13 @@ export default function BuatPenjualanPage() {
                     )}
 
                     {selectedProduk && (
-                      <div className="flex flex-col items-end gap-1 pt-2 border-t border-muted">
+                      <div className="flex flex-col items-end gap-1 pt-3 border-t border-[#0A2947]/5 mt-2">
                         {itemCalc.totalDiskonItem > 0 && (
-                          <span className="text-xs text-rose-500 line-through">
+                          <span className="text-xs text-rose-500 line-through font-mono">
                             {formatRupiah(itemCalc.subTotal)}
                           </span>
                         )}
-                        <span className="text-sm font-semibold text-foreground">
+                        <span className="text-sm font-bold text-[#0A2947] font-mono">
                           {formatRupiah(itemCalc.totalHarga)}
                         </span>
                       </div>
@@ -807,9 +746,12 @@ export default function BuatPenjualanPage() {
 
         {/* ================= KOLOM KANAN (SIDEBAR) ================= */}
         <div className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-6">
+          
           {/* PELANGGAN */}
-          <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
-            <h2 className="text-sm font-semibold">Pelanggan</h2>
+          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm space-y-4">
+            <h2 className="text-base font-bold text-[#0A2947] flex items-center gap-2">
+              <Users className="w-5 h-5 text-[#D4A373]" /> Pelanggan
+            </h2>
             <div className="space-y-2">
               <Popover open={openPelanggan} onOpenChange={setOpenPelanggan}>
                 <PopoverTrigger asChild>
@@ -817,28 +759,27 @@ export default function BuatPenjualanPage() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={openPelanggan}
-                    className="w-full justify-between font-normal cursor-pointer"
+                    className="w-full justify-between font-bold cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]"
                   >
-                    {pelangganID
-                      ? (pelangganList.find(
-                          (p: any) => (p._id || p.id) === pelangganID,
-                        )?.namaPelanggan ?? "Pelanggan tidak ditemukan")
-                      : "Pilih pelanggan..."}
+                    <span className={pelangganID ? "" : "text-[#0A2947]/50 font-medium"}>
+                      {pelangganID
+                        ? (pelangganList.find((p: any) => (p._id || p.id) === pelangganID)
+                            ?.namaPelanggan ?? "Pelanggan tidak ditemukan")
+                        : "Pilih pelanggan..."}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent
-                  className="w-[--radix-popover-trigger-width] p-0"
-                  align="start"
-                >
-                  <Command shouldFilter={false}>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-[#0A2947]/10" align="start">
+                  <Command shouldFilter={false} className="bg-[#FFFAF3]">
                     <CommandInput
                       placeholder="Cari pelanggan..."
                       value={pelangganSearch}
                       onValueChange={setPelangganSearch}
+                      className="text-[#0A2947]"
                     />
                     <CommandList>
-                      <CommandEmpty>Pelanggan tidak ditemukan.</CommandEmpty>
+                      <CommandEmpty className="py-4 text-center text-xs font-medium text-[#0A2947]/60">Pelanggan tidak ditemukan.</CommandEmpty>
                       <CommandGroup>
                         {filteredPelanggan.map((p: any) => {
                           const idPelanggan = p._id || p.id;
@@ -850,18 +791,16 @@ export default function BuatPenjualanPage() {
                                 setOpenPelanggan(false);
                                 setPelangganSearch("");
                               }}
-                              className="cursor-pointer"
+                              className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-medium"
                             >
                               <Check
                                 className={cn(
-                                  "mr-2 h-4 w-4",
-                                  pelangganID === idPelanggan
-                                    ? "opacity-100"
-                                    : "opacity-0",
+                                  "mr-2 h-4 w-4 text-[#718355]",
+                                  pelangganID === idPelanggan ? "opacity-100" : "opacity-0"
                                 )}
                               />
                               <span>{p.namaPelanggan}</span>
-                              <span className="ml-auto text-xs text-muted-foreground capitalize">
+                              <span className="ml-auto text-xs font-bold text-[#0A2947]/50 capitalize">
                                 {p.tipePelanggan}
                               </span>
                             </CommandItem>
@@ -876,70 +815,55 @@ export default function BuatPenjualanPage() {
           </div>
 
           {/* DISKON GLOBAL & KETERANGAN */}
-          <div className="rounded-xl border bg-card p-6 shadow-sm space-y-5">
+          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm space-y-5">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold flex items-center gap-1.5">
-                  <Tag className="h-4 w-4 text-muted-foreground" /> Diskon
+                <h2 className="text-base font-bold text-[#0A2947] flex items-center gap-2">
+                  <Tag className="h-4 w-4 text-[#D4A373]" /> Diskon Global
                 </h2>
-                <Popover
-                  open={openDiskonGlobal}
-                  onOpenChange={setOpenDiskonGlobal}
-                >
+                <Popover open={openDiskonGlobal} onOpenChange={setOpenDiskonGlobal}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-7 text-xs cursor-pointer"
+                      className="h-7 text-xs cursor-pointer font-bold border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5"
                     >
                       Pilih Diskon
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent align="end" className="w-64 p-0">
-                    <Command>
-                      <CommandInput placeholder="Cari diskon transaksi..." />
+                  <PopoverContent align="end" className="w-64 p-0 border-[#0A2947]/10">
+                    <Command className="bg-[#FFFAF3]">
+                      <CommandInput placeholder="Cari diskon transaksi..." className="text-[#0A2947]" />
                       <CommandList>
-                        <CommandEmpty>Belum ada diskon aktif.</CommandEmpty>
+                        <CommandEmpty className="py-4 text-center text-xs font-medium text-[#0A2947]/60">Belum ada diskon aktif.</CommandEmpty>
                         <CommandGroup>
                           {activeDiskonGlobal.map((d, index) => {
-                            const targetId = d._id || d.id; // Ekstraksi ID aman
-                            const isSelected =
-                              diskonGlobalIDs.includes(targetId);
-                            const safeKey =
-                              targetId || `global-diskon-${index}`;
+                            const targetId = d._id || d.id; 
+                            const isSelected = diskonGlobalIDs.includes(targetId);
+                            const safeKey = targetId || `global-diskon-${index}`;
                             return (
                               <CommandItem
                                 key={safeKey}
                                 onSelect={() =>
                                   setDiskonGlobalIDs((prev) =>
-                                    toggleDiskonSelection(
-                                      prev,
-                                      targetId,
-                                      activeDiskonGlobal,
-                                    ),
+                                    toggleDiskonSelection(prev, targetId, activeDiskonGlobal)
                                   )
                                 }
-                                className="cursor-pointer"
+                                className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-medium"
                               >
                                 <div className="flex flex-1 items-center gap-2">
+                                  {/* Checkbox Custom */}
                                   <div
                                     className={cn(
                                       "flex h-4 w-4 items-center justify-center rounded-sm border",
-                                      isSelected
-                                        ? "bg-primary border-primary"
-                                        : "border-muted-foreground/30",
+                                      isSelected ? "bg-[#0A2947] border-[#0A2947]" : "border-[#0A2947]/30"
                                     )}
                                   >
-                                    {isSelected && (
-                                      <Check className="h-3 w-3 text-primary-foreground" />
-                                    )}
+                                    {isSelected && <Check className="h-3 w-3 text-[#FFFAF3]" />}
                                   </div>
                                   <span>{d.namaDiskon}</span>
                                 </div>
-                                <Badge
-                                  variant="secondary"
-                                  className="text-[10px]"
-                                >
+                                <Badge className="text-[10px] bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373] border-none font-bold">
                                   {d.tipe === "persen" ? `${d.nilai}%` : "Rp"}
                                 </Badge>
                               </CommandItem>
@@ -955,22 +879,14 @@ export default function BuatPenjualanPage() {
               {diskonGlobalIDs.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {diskonGlobalIDs.map((id, idx) => {
-                    const d = activeDiskonGlobal.find(
-                      (x) => (x._id || x.id) === id,
-                    );
+                    const d = activeDiskonGlobal.find((x) => (x._id || x.id) === id);
                     if (!d) return null;
-                    const safeKey = d._id || d.id || `badge-global-${idx}`; // Fallback aman
                     return (
                       <Badge
-                        key={safeKey}
-                        variant="secondary"
-                        className="bg-rose-50 text-rose-600 border-rose-100 text-[11px] px-2 py-0.5"
+                        key={d._id || d.id || `badge-global-${idx}`}
+                        className="bg-[#D4A373] text-[#0A2947] border-none hover:bg-[#D4A373] text-[11px] px-2.5 py-1 font-bold shadow-sm"
                       >
-                        {d.namaDiskon} (
-                        {d.tipe === "persen"
-                          ? `${d.nilai}%`
-                          : formatRupiah(d.nilai)}
-                        )
+                        {d.namaDiskon} ({d.tipe === "persen" ? `${d.nilai}%` : formatRupiah(d.nilai)})
                       </Badge>
                     );
                   })}
@@ -978,63 +894,55 @@ export default function BuatPenjualanPage() {
               )}
             </div>
 
-            <div className="space-y-2 border-t pt-4">
-              <label className="text-sm font-semibold">
-                Keterangan (Opsional)
-              </label>
+            <div className="space-y-2 border-t border-[#0A2947]/10 pt-4">
+              <label className="text-sm font-bold text-[#0A2947]">Keterangan <span className="font-medium text-[#0A2947]/50">(Opsional)</span></label>
               <Input
                 value={keterangan}
                 onChange={(e) => setKeterangan(e.target.value)}
                 placeholder="Catatan transaksi..."
-                className="text-sm"
+                className="text-sm bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
               />
             </div>
           </div>
 
           {/* RINGKASAN TAGIHAN */}
-          <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
-            <h2 className="text-sm font-semibold border-b pb-3">
-              Ringkasan Tagihan
+          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#0A2947] text-[#FFFAF3] p-6 shadow-md space-y-4">
+            <h2 className="text-sm font-bold border-b border-[#FFFAF3]/20 pb-3 flex items-center gap-2 uppercase tracking-widest text-[#D4A373]">
+              <Calculator className="w-4 h-4" /> Ringkasan
             </h2>
-            <div className="space-y-2.5 text-sm">
-              <div className="flex justify-between text-muted-foreground">
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between text-[#FFFAF3]/80 font-medium">
                 <span>Subtotal Produk</span>
-                <span className="font-medium text-foreground">
-                  {formatRupiah(calc.grandTotalItem)}
-                </span>
+                <span className="font-mono text-[#FFFAF3]">{formatRupiah(calc.grandTotalItem)}</span>
               </div>
 
               {calc.totalDiskonGlobal > 0 && (
-                <div className="flex justify-between text-rose-500">
+                <div className="flex justify-between text-rose-300 font-bold">
                   <span>Total Diskon</span>
-                  <span>-{formatRupiah(calc.totalDiskonGlobal)}</span>
+                  <span className="font-mono">-{formatRupiah(calc.totalDiskonGlobal)}</span>
                 </div>
               )}
 
               {calc.rincianPajak.length > 0 && (
-                <div className="space-y-1.5 pt-1">
+                <div className="space-y-1.5 pt-2">
                   {calc.rincianPajak.map((p, idx) => (
-                    <div
-                      key={idx}
-                      className="flex justify-between text-muted-foreground text-xs"
-                    >
+                    <div key={idx} className="flex justify-between text-[#FFFAF3]/60 text-xs font-medium">
                       <span>Pajak: {p.namaPajak}</span>
-                      <span>
-                        {p.tipe === "Inc" ? "(Termasuk)" : ""}{" "}
-                        {formatRupiah(p.nominal)}
+                      <span className="font-mono">
+                        {p.tipe === "Inc" ? "(Inc) " : ""}{formatRupiah(p.nominal)}
                       </span>
                     </div>
                   ))}
-                  <div className="flex justify-between text-muted-foreground font-medium border-t border-dashed pt-1 mt-1">
+                  <div className="flex justify-between text-[#FFFAF3]/80 font-bold border-t border-[#FFFAF3]/20 border-dashed pt-2 mt-2">
                     <span>Total Pajak</span>
-                    <span>{formatRupiah(calc.totalPajak)}</span>
+                    <span className="font-mono">{formatRupiah(calc.totalPajak)}</span>
                   </div>
                 </div>
               )}
 
-              <div className="border-t pt-3 mt-1 flex justify-between items-center">
-                <span className="text-base font-bold">Total Estimasi</span>
-                <span className="text-lg font-bold text-primary">
+              <div className="border-t border-[#FFFAF3]/20 pt-4 mt-2 flex justify-between items-end">
+                <span className="text-sm font-bold text-[#FFFAF3]">Total Estimasi</span>
+                <span className="text-2xl font-black text-[#718355] leading-none font-mono">
                   {formatRupiah(calc.grandTotal)}
                 </span>
               </div>
@@ -1045,22 +953,22 @@ export default function BuatPenjualanPage() {
         {/* ================= AKSI & SUBMIT ================= */}
         <div className="lg:col-span-12 flex flex-col gap-3">
           {formError && (
-            <p className="text-sm font-medium text-destructive">{formError}</p>
+            <p className="text-sm font-bold text-red-600 bg-red-50 p-3 rounded-xl border border-red-100">{formError}</p>
           )}
-          <div className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-4 shadow-sm">
             <Button
               type="button"
               variant="outline"
               onClick={() => router.push("/dashboard/penjualan")}
               disabled={createMutation.isPending}
-              className="cursor-pointer"
+              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
             >
               Batal
             </Button>
             <Button
               type="submit"
               disabled={createMutation.isPending}
-              className="cursor-pointer"
+              className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold px-8 shadow-sm"
             >
               {createMutation.isPending ? "Memproses..." : "Buat Penjualan"}
             </Button>
@@ -1070,25 +978,21 @@ export default function BuatPenjualanPage() {
 
       {/* DIALOG KONFIRMASI */}
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
           <AlertDialogHeader>
-            <AlertDialogTitle>Buat Transaksi Penjualan?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Apakah Anda yakin detail transaksi sudah benar? Data akan disimpan
-              sebagai transaksi baru yang belum dibayar.
+            <AlertDialogTitle className="text-[#0A2947]">Buat Transaksi Penjualan?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+              Apakah Anda yakin detail transaksi sudah benar? Data akan disimpan sebagai transaksi baru yang belum dibayar.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              disabled={createMutation.isPending}
-              className="cursor-pointer"
-            >
+            <AlertDialogCancel disabled={createMutation.isPending} className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold">
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={executeCreate}
               disabled={createMutation.isPending}
-              className="cursor-pointer"
+              className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold"
             >
               {createMutation.isPending ? "Memproses..." : "Ya, Lanjutkan"}
             </AlertDialogAction>

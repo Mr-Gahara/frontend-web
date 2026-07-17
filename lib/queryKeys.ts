@@ -8,6 +8,13 @@ export const queryKeys = {
   metodePembayaran: ["metodePembayaran"] as const,
   akunKas: ["akunKas"] as const,
 
+  // Modul Inventory & Stock Opname
+  stockOpname: ["stockOpname"] as const,
+  stockOpnameDetail: (id: string) => ["stockOpname", "detail", id] as const,
+  stockAdjustment: ["stockAdjustment"] as const,
+  stockAdjustmentDetail: (id: string) =>
+    ["stockAdjustment", "detail", id] as const,
+
   produkPajak: (produkId: string) => ["produk-pajak", produkId] as const,
   produkDetail: (id: string) => ["produk", "detail", id] as const,
   permissions: ["permissions"] as const,
@@ -18,4 +25,7 @@ export const queryKeys = {
   pelanggan: ["pelanggan"] as const,
   absensiMonitoring: (tanggal: string) =>
     ["absensi-monitoring", tanggal] as const,
+
+  bahanBaku: ["bahan-baku"] as const,
+  bahanBakuDetail: (id: string) => ["bahan-baku", "detail", id] as const,
 };

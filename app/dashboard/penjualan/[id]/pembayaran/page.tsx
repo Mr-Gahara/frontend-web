@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
@@ -34,7 +34,6 @@ import {
 import {
   ArrowLeft,
   Wallet,
-  CreditCard,
   Banknote,
   ReceiptText,
 } from "lucide-react";
@@ -84,7 +83,6 @@ export default function BuatPembayaranPage() {
   const { data: akunKasList = [] } = useQuery({
     queryKey: queryKeys.akunKas,
     queryFn: async () => {
-      // Perhatikan penulisan endpoint yang sudah kita perbaiki: "/akunkas" (tanpa tanda hubung)
       const res = await apiClient.get<{ data: any[] } | any[]>(
         "/akunkas",
         undefined,
@@ -104,7 +102,6 @@ export default function BuatPembayaranPage() {
   const { data: metodeList = [] } = useQuery({
     queryKey: queryKeys.metodePembayaran || ["metode-pembayaran"],
     queryFn: async () => {
-      // Perhatikan penulisan endpoint yang sudah kita perbaiki: "/metodepembayaran" (tanpa tanda hubung)
       const res = await apiClient.get<{ data: any[] } | any[]>(
         "/metodepembayaran",
         undefined,
@@ -144,7 +141,6 @@ export default function BuatPembayaranPage() {
       toast.success("Berhasil", { description: "Pembayaran sukses dicatat." });
       queryClient.invalidateQueries({ queryKey: queryKeys.penjualan });
       queryClient.invalidateQueries({ queryKey: ["pembayaran"] });
-      // Redirect kembali ke halaman detail penjualan
       router.push(`/dashboard/penjualan/${penjualanID}`);
     },
     onError: (err: any) => {
@@ -187,7 +183,7 @@ export default function BuatPembayaranPage() {
       jumlahBayar: nominal,
       tanggalBayar: new Date().toISOString(),
       catatan: catatan.trim() || undefined,
-      status: "PAID", // Secara default kita asumsikan kasir menerima pembayaran tuntas
+      status: "PAID",
     };
 
     await createPembayaranMutation.mutateAsync(payload);
@@ -200,8 +196,11 @@ export default function BuatPembayaranPage() {
 
   if (loadingPenjualan)
     return (
-      <div className="p-8 text-center text-muted-foreground">
-        Memuat data tagihan...
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0A2947] border-t-transparent"></div>
+        <p className="text-sm font-bold text-[#0A2947]/60">
+          Memuat data tagihan...
+        </p>
       </div>
     );
   if (!penjualan) return null;
@@ -209,11 +208,11 @@ export default function BuatPembayaranPage() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
       {/* HEADER */}
-      <div className="flex flex-col gap-4 border-b pb-6">
+      <div className="flex flex-col gap-4">
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
+          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
           onClick={() => router.back()}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -221,19 +220,19 @@ export default function BuatPembayaranPage() {
         </Button>
         <div className="flex justify-between items-end">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
               Terima Pembayaran
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm font-medium text-[#0A2947]/60">
               Catat penerimaan pembayaran untuk No. Referensi:{" "}
-              <span className="font-mono text-foreground">
+              <span className="font-bold font-mono text-[#0A2947]">
                 {penjualan.noReferensi}
               </span>
             </p>
           </div>
           <div className="text-right hidden sm:block">
-            <p className="text-xs text-muted-foreground">Tanggal Transaksi</p>
-            <p className="font-medium text-sm">
+            <p className="text-xs font-bold text-[#0A2947]/60">Tanggal Transaksi</p>
+            <p className="font-bold text-sm text-[#0A2947]">
               {format(new Date(penjualan.tanggalTransaksi), "dd MMM yyyy", {
                 locale: localeID,
               })}
@@ -247,33 +246,33 @@ export default function BuatPembayaranPage() {
         <div className="lg:col-span-7 flex flex-col gap-6">
           <form
             onSubmit={handleValidation}
-            className="rounded-xl border bg-card p-6 shadow-sm space-y-5"
+            className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm space-y-6"
           >
-            <div className="flex items-center gap-2 border-b pb-3 mb-2">
-              <Wallet className="h-5 w-5 text-muted-foreground" />
-              <h2 className="font-semibold text-foreground">
+            <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3 mb-2">
+              <Wallet className="h-5 w-5 text-[#D4A373]" />
+              <h2 className="font-bold text-[#0A2947]">
                 Detail Penerimaan Pembayaran
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Pilihan Akun Kas */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">
+                <label className="text-sm font-bold text-[#0A2947]">
                   Akun Kas Tujuan <span className="text-red-500">*</span>
                 </label>
                 <Select value={akunKasID} onValueChange={setAkunKasID}>
-                  <SelectTrigger className="w-full cursor-pointer">
+                  <SelectTrigger className="w-full cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-medium">
                     <SelectValue placeholder="Pilih akun kas..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
                     {akunKasList.map((kas: any) => {
                       const validId = kas._id || kas.id;
                       return (
                         <SelectItem
                           key={validId}
                           value={validId}
-                          className="cursor-pointer"
+                          className="cursor-pointer hover:bg-[#0A2947]/5 font-medium"
                         >
                           {kas.namaAkun}
                         </SelectItem>
@@ -285,24 +284,24 @@ export default function BuatPembayaranPage() {
 
               {/* Pilihan Metode Pembayaran */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">
+                <label className="text-sm font-bold text-[#0A2947]">
                   Metode Pembayaran <span className="text-red-500">*</span>
                 </label>
                 <Select
                   value={metodePembayaranID}
                   onValueChange={setMetodePembayaranID}
                 >
-                  <SelectTrigger className="w-full cursor-pointer">
+                  <SelectTrigger className="w-full cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-medium">
                     <SelectValue placeholder="Pilih metode..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
                     {metodeList.map((metode: any) => {
                       const validId = metode._id || metode.id;
                       return (
                         <SelectItem
                           key={validId}
                           value={validId}
-                          className="cursor-pointer"
+                          className="cursor-pointer hover:bg-[#0A2947]/5 font-medium"
                         >
                           {metode.namaPembayaran || metode.namaMetode}
                         </SelectItem>
@@ -313,34 +312,30 @@ export default function BuatPembayaranPage() {
               </div>
             </div>
 
+            <div className="h-px w-full bg-[#0A2947]/10" />
+
             {/* Input Nominal */}
             <div className="space-y-2 pt-2">
-              <label className="text-sm font-medium">
+              <label className="text-sm font-bold text-[#0A2947]">
                 Jumlah Diterima (Rp) <span className="text-red-500">*</span>
               </label>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Input
                   type="text"
                   inputMode="numeric"
-                  className="text-lg font-bold h-12"
+                  className="text-lg font-bold h-12 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]"
                   placeholder="0"
                   value={jumlahBayarStr}
                   onChange={(e) => {
-                    // Hanya izinkan angka, diformat rapi saat diketik
                     const raw = e.target.value.replace(/\D/g, "");
                     setJumlahBayarStr(
-                      raw
-                        ? new Intl.NumberFormat("id-ID").format(
-                            parseInt(raw, 10),
-                          )
-                        : "",
+                      raw ? new Intl.NumberFormat("id-ID").format(parseInt(raw, 10)) : "",
                     );
                   }}
                 />
                 <Button
                   type="button"
-                  variant="secondary"
-                  className="h-12 px-6 cursor-pointer bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                  className="h-12 px-6 cursor-pointer bg-[#718355]/10 text-[#718355] hover:bg-[#718355]/20 font-bold border-none shadow-none shrink-0"
                   onClick={() =>
                     setJumlahBayarStr(
                       new Intl.NumberFormat("id-ID").format(sisaTagihan),
@@ -350,34 +345,35 @@ export default function BuatPembayaranPage() {
                   Bayar Uang Pas
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs font-medium text-[#0A2947]/50 mt-1">
                 Masukkan nominal angka. Maksimal setara dengan total sisa
                 tagihan.
               </p>
             </div>
 
             {/* Catatan */}
-            <div className="space-y-2 pt-2">
-              <label className="text-sm font-medium">
-                Catatan Pembayaran (Opsional)
+            <div className="space-y-2 pt-2 border-t border-[#0A2947]/10 mt-2">
+              <label className="text-sm font-bold text-[#0A2947]">
+                Catatan Pembayaran <span className="text-[#0A2947]/50 font-medium">(Opsional)</span>
               </label>
               <Input
                 value={catatan}
                 onChange={(e) => setCatatan(e.target.value)}
                 placeholder="Misal: Pembayaran DP 50% via Transfer"
+                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-medium"
               />
             </div>
 
             {formError && (
-              <p className="text-sm font-medium text-destructive bg-destructive/10 p-3 rounded-md">
+              <p className="text-sm font-bold text-red-600 bg-red-50 p-3 rounded-xl border border-red-100">
                 {formError}
               </p>
             )}
 
-            <div className="pt-4 border-t">
+            <div className="pt-6 border-t border-[#0A2947]/10">
               <Button
                 type="submit"
-                className="w-full h-12 text-base cursor-pointer bg-primary hover:bg-primary/90"
+                className="w-full h-14 text-base cursor-pointer bg-[#718355] text-[#FFFAF3] hover:bg-[#718355]/90 font-bold shadow-sm"
                 disabled={penjualan.sisaTagihan <= 0}
               >
                 {penjualan.sisaTagihan <= 0
@@ -390,31 +386,31 @@ export default function BuatPembayaranPage() {
 
         {/* PANEL KANAN: RINGKASAN TAGIHAN (Sticky) */}
         <div className="lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-6">
-          <div className="rounded-xl border bg-card p-6 shadow-sm space-y-5">
-            <div className="flex items-center gap-2 border-b pb-3">
-              <ReceiptText className="h-5 w-5 text-muted-foreground" />
-              <h2 className="font-semibold text-foreground">
+          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#0A2947] text-[#FFFAF3] p-6 sm:p-8 shadow-md space-y-5">
+            <div className="flex items-center gap-2 border-b border-[#FFFAF3]/20 pb-3 uppercase tracking-widest text-[#D4A373]">
+              <ReceiptText className="h-4 w-4" />
+              <h2 className="font-bold text-sm">
                 Ringkasan Tagihan
               </h2>
             </div>
 
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between text-muted-foreground">
+              <div className="flex justify-between text-[#FFFAF3]/80 font-medium">
                 <span>Total Tagihan Awal</span>
-                <span className="font-medium text-foreground">
+                <span className="font-mono text-[#FFFAF3]">
                   {formatRupiah(penjualan.totalTagihan)}
                 </span>
               </div>
-              <div className="flex justify-between text-emerald-600">
-                <span>Telah Dibayar Sebelumnya</span>
-                <span>{formatRupiah(penjualan.totalDibayar)}</span>
+              <div className="flex justify-between text-[#718355] font-bold">
+                <span>Telah Dibayar</span>
+                <span className="font-mono">{formatRupiah(penjualan.totalDibayar)}</span>
               </div>
 
-              <div className="border-t pt-3 flex justify-between items-center">
-                <span className="text-base font-bold text-rose-600">
+              <div className="border-t border-[#FFFAF3]/20 pt-4 flex justify-between items-center">
+                <span className="text-base font-bold text-rose-300">
                   Sisa Tagihan
                 </span>
-                <span className="text-xl font-bold text-rose-600">
+                <span className="text-xl font-black text-rose-300 font-mono">
                   {formatRupiah(penjualan.sisaTagihan)}
                 </span>
               </div>
@@ -422,24 +418,24 @@ export default function BuatPembayaranPage() {
 
             {/* Simulasi Setelah Pembayaran Ini */}
             {nominalInput > 0 && (
-              <div className="bg-muted p-4 rounded-lg space-y-2 mt-4">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+              <div className="bg-[#FFFAF3]/10 p-5 rounded-xl space-y-3 mt-6 border border-[#FFFAF3]/5">
+                <p className="text-[10px] font-bold text-[#FFFAF3]/50 uppercase tracking-widest mb-2">
                   Simulasi Setelah Pembayaran
                 </p>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm font-medium text-[#FFFAF3]/80">
                   <span>Akan Dibayar</span>
-                  <span className="font-medium">
+                  <span className="font-mono text-[#FFFAF3]">
                     {formatRupiah(nominalInput)}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm font-semibold border-t border-muted-foreground/20 pt-2">
+                <div className="flex justify-between text-sm font-bold border-t border-[#FFFAF3]/20 pt-3">
                   <span>Sisa Hutang Baru</span>
                   <span
-                    className={
+                    className={`font-mono text-lg ${
                       sisaSetelahBayar === 0
-                        ? "text-emerald-600"
-                        : "text-rose-600"
-                    }
+                        ? "text-[#718355]" // Sage Green
+                        : "text-rose-300"
+                    }`}
                   >
                     {formatRupiah(sisaSetelahBayar)}
                   </span>
@@ -448,11 +444,13 @@ export default function BuatPembayaranPage() {
             )}
           </div>
 
-          <div className="rounded-xl border bg-amber-50 border-amber-200 p-4 shadow-sm flex items-start gap-3">
-            <Banknote className="h-5 w-5 text-amber-600 mt-0.5" />
-            <div className="text-sm text-amber-800">
-              <p className="font-semibold mb-1">Peringatan Audit Kasir</p>
-              <p>
+          <div className="rounded-2xl border border-[#D4A373]/30 bg-[#FFFAF3] p-5 shadow-sm flex items-start gap-4">
+            <div className="p-2 bg-[#D4A373]/10 rounded-lg shrink-0">
+              <Banknote className="h-5 w-5 text-[#D4A373]" />
+            </div>
+            <div className="text-sm text-[#0A2947]/70">
+              <p className="font-bold text-[#0A2947] mb-1">Peringatan Audit Kasir</p>
+              <p className="font-medium leading-relaxed">
                 Pastikan nominal yang diketik sesuai dengan uang fisik atau
                 saldo mutasi bank yang Anda terima. Aksi ini akan mempengaruhi
                 laporan neraca tutup kas Anda.
@@ -464,12 +462,12 @@ export default function BuatPembayaranPage() {
 
       {/* DIALOG KONFIRMASI */}
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
           <AlertDialogHeader>
-            <AlertDialogTitle>Konfirmasi Pembayaran</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-[#0A2947]">Konfirmasi Pembayaran</AlertDialogTitle>
+            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
               Anda akan mencatat pembayaran sebesar{" "}
-              <strong className="text-foreground">
+              <strong className="text-[#0A2947] font-mono text-base">
                 {formatRupiah(nominalInput)}
               </strong>{" "}
               ke dalam sistem. Lanjutkan?
@@ -478,14 +476,14 @@ export default function BuatPembayaranPage() {
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={createPembayaranMutation.isPending}
-              className="cursor-pointer"
+              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
             >
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={executePayment}
               disabled={createPembayaranMutation.isPending}
-              className="cursor-pointer bg-primary"
+              className="cursor-pointer bg-[#718355] hover:bg-[#718355]/90 text-[#FFFAF3] font-bold"
             >
               {createPembayaranMutation.isPending
                 ? "Memproses..."

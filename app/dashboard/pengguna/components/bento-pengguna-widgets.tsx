@@ -78,7 +78,7 @@ export function WidgetActiveUsers({
               <div key={staf.penggunaID || idx} className="flex flex-col gap-1.5 rounded-lg border border-[#0A2947]/10 bg-[#FFFAF3] p-3 hover:border-[#0A2947]/30 transition-colors shadow-sm">
                 <div className="flex justify-between items-start">
                   <p className="text-sm font-bold text-[#0A2947] truncate pr-2">{staf.nama}</p>
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-[#D4A373] bg-[#D4A373]/10 px-2 py-0.5 rounded-full shrink-0">
+                  <div className="flex items-center gap-1 text-[10px] font-bold text-white bg-[#718355] px-2 py-0.5 rounded-full shrink-0">
                     <Clock className="h-3 w-3" />
                     {jamMasuk}
                   </div>

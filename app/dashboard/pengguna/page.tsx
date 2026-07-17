@@ -249,9 +249,9 @@ export default function PenggunaPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-[#FFFAF3] border-[#0A2947]/10">
-                <DropdownMenuItem className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5" onClick={() => openEdit(row.original)} disabled={!canEdit}>Edit</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer font-bold text-[#0A2947] hover:bg-[#0A2947]/5" onClick={() => openEdit(row.original)} disabled={!canEdit}>Edit</DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-[#0A2947]/10" />
-                <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10" onClick={() => setDeleteTarget(row.original)} disabled={!canDelete}>Hapus</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10" onClick={() => setDeleteTarget(row.original)} disabled={!canDelete}>Hapus</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -268,7 +268,7 @@ export default function PenggunaPage() {
           <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">Kelola Pengguna</h1>
           <p className="text-sm text-[#0A2947]/60 font-medium">Kelola seluruh entitas akun dan hak akses platform.</p>
         </div>
-        <Button onClick={openCreate} className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm">
+        <Button onClick={openCreate} className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold">
           <Plus className="mr-2 h-4 w-4" /> Tambah Pengguna
         </Button>
       </div>

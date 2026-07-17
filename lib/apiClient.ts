@@ -233,7 +233,6 @@ async function request<T>(
 export const apiClient = {
   get: <T>(endpoint: string, options?: RequestInit, tokenType?: TokenType) =>
     request<T>(endpoint, { method: "GET", ...options }, true, tokenType),
-
   post: <T>(
     endpoint: string,
     body: unknown,
@@ -246,7 +245,6 @@ export const apiClient = {
       true,
       tokenType,
     ),
-
   put: <T>(
     endpoint: string,
     body: unknown,
@@ -259,264 +257,18 @@ export const apiClient = {
       true,
       tokenType,
     ),
-
+  patch: <T>(
+    endpoint: string,
+    body: unknown,
+    options?: RequestInit,
+    tokenType?: TokenType,
+  ) =>
+    request<T>(
+      endpoint,
+      { method: "PATCH", body: JSON.stringify(body), ...options },
+      true,
+      tokenType,
+    ),
   delete: <T>(endpoint: string, options?: RequestInit, tokenType?: TokenType) =>
     request<T>(endpoint, { method: "DELETE", ...options }, true, tokenType),
 };
-
-// const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-// type TokenType = "akun" | "pengguna";
-
-// /**
-//  * Custom Error Class agar status HTTP tidak hilang
-//  */
-// export class ApiError extends Error {
-//   status: number;
-//   constructor(message: string, status: number) {
-//     super(message);
-//     this.status = status;
-//     this.name = "ApiError";
-//   }
-// }
-
-// function determineTokenKey(
-//   endpoint: string,
-//   explicitTokenType?: TokenType,
-// ): "accessToken" | "penggunaToken" {
-//   if (explicitTokenType) {
-//     return explicitTokenType === "pengguna" ? "penggunaToken" : "accessToken";
-//   }
-
-//   // Pengecualian spesifik: Token Akun
-//   const isAccountEndpoint =
-//     endpoint.includes("/pengguna/pin-login") ||
-//     endpoint.includes("/pengguna/register-owner");
-
-//   if (isAccountEndpoint) {
-//     return "accessToken";
-//   }
-
-//   // Cek operasional dengan regex atau pattern yang lebih ketat
-//   const isPenggunaEndpoint =
-//     /^\/pengguna(?:\/|$)/.test(endpoint) ||
-//     /^\/device(?:\/|$)/.test(endpoint) ||
-//     /^\/role(?:\/|$)/.test(endpoint) ||
-//     /^\/permission(?:\/|$)/.test(endpoint);
-
-//   if (isPenggunaEndpoint) {
-//     return "penggunaToken";
-//   }
-
-//   return "accessToken";
-// }
-
-// function getAuthHeaders(
-//   key: "accessToken" | "penggunaToken",
-// ): Record<string, string> {
-//   if (typeof window === "undefined") return {};
-
-//   let token = sessionStorage.getItem(key);
-//   if (token === "undefined" || token === "null") token = null;
-
-//   return token ? { Authorization: `Bearer ${token}` } : {};
-// }
-
-// // State untuk Refresh Queue
-// let isRefreshing = false;
-// let refreshQueue: Array<(token: string) => void> = [];
-
-// let isRefreshingPengguna = false;
-// let refreshPenggunaQueue: Array<(token: string) => void> = [];
-
-// async function tryRefreshPenggunaToken(): Promise<string | null> {
-//   if (isRefreshingPengguna) {
-//     return new Promise((resolve) => {
-//       refreshPenggunaQueue.push((token) => resolve(token));
-//     });
-//   }
-
-//   isRefreshingPengguna = true;
-
-//   try {
-//     const res = await fetch(`${BASE_URL}/pengguna/pin-refresh`, {
-//       method: "POST",
-//       credentials: "include",
-//       headers: { "Content-Type": "application/json" },
-//     });
-
-//     if (!res.ok) throw new Error("Refresh token pengguna invalid");
-
-//     const data = await res.json();
-//     const newToken = data.data.accessToken;
-
-//     sessionStorage.setItem("penggunaToken", newToken);
-//     refreshPenggunaQueue.forEach((cb) => cb(newToken));
-//     refreshPenggunaQueue = [];
-
-//     return newToken;
-//   } catch {
-//     sessionStorage.removeItem("penggunaToken");
-//     if (typeof window !== "undefined") window.location.href = "/login/pengguna";
-//     return null;
-//   } finally {
-//     isRefreshingPengguna = false;
-//   }
-// }
-
-// async function tryRefreshToken(): Promise<string | null> {
-//   if (isRefreshing) {
-//     return new Promise((resolve) => {
-//       refreshQueue.push((token) => resolve(token));
-//     });
-//   }
-
-//   isRefreshing = true;
-
-//   try {
-//     const res = await fetch(`${BASE_URL}/akun/auth/refreshtoken`, {
-//       method: "POST",
-//       credentials: "include",
-//       headers: { "Content-Type": "application/json" },
-//     });
-
-//     if (!res.ok) throw new Error("Refresh token invalid");
-
-//     const data = await res.json();
-//     const newToken = data.accessToken;
-
-//     sessionStorage.setItem("accessToken", newToken);
-//     refreshQueue.forEach((cb) => cb(newToken));
-//     refreshQueue = [];
-
-//     return newToken;
-//   } catch {
-//     sessionStorage.removeItem("accessToken");
-//     sessionStorage.removeItem("penggunaToken");
-//     localStorage.removeItem("akun");
-
-//     if (typeof window !== "undefined") window.location.href = "/login";
-//     return null;
-//   } finally {
-//     isRefreshing = false;
-//   }
-// }
-
-// async function request<T>(
-//   endpoint: string,
-//   options?: RequestInit,
-//   retry = true,
-//   explicitTokenType?: TokenType,
-// ): Promise<T> {
-//   const { headers: extraHeaders, ...restOptions } = options || {};
-//   const activeKey = determineTokenKey(endpoint, explicitTokenType);
-
-//   // Deteksi apakah body adalah FormData (untuk upload file)
-//   const isFormData = restOptions.body instanceof FormData;
-
-//   // Jika FormData, browser akan otomatis set Content-Type dan boundary.
-//   // DILARANG set Content-Type manual untuk FormData.
-//   const baseHeaders: Record<string, string> = {
-//     ...getAuthHeaders(activeKey),
-//     ...(extraHeaders as Record<string, string>),
-//   };
-
-//   if (!isFormData) {
-//     baseHeaders["Content-Type"] = "application/json";
-//   }
-
-//   const res = await fetch(`${BASE_URL}${endpoint}`, {
-//     credentials: "include",
-//     headers: baseHeaders,
-//     ...restOptions,
-//   });
-
-//   if (
-//     res.status === 401 &&
-//     retry &&
-//     activeKey === "penggunaToken" &&
-//     !endpoint.includes("/pengguna/pin-refresh")
-//   ) {
-//     const newToken = await tryRefreshPenggunaToken();
-//     if (newToken) return request<T>(endpoint, options, false, explicitTokenType);
-//     throw new ApiError("Sesi pengguna telah berakhir.", 401);
-//   }
-
-//   if (
-//     res.status === 401 &&
-//     retry &&
-//     activeKey === "accessToken" &&
-//     !endpoint.includes("/auth/refreshtoken")
-//   ) {
-//     const newToken = await tryRefreshToken();
-//     if (newToken) return request<T>(endpoint, options, false, explicitTokenType);
-//     throw new ApiError("Sesi akun telah berakhir.", 401);
-//   }
-
-//   if (!res.ok) {
-//     let errorMessage = "Terjadi kesalahan server.";
-//     try {
-//       const error = await res.json();
-//       if (error.errors && Array.isArray(error.errors)) {
-//         errorMessage = error.errors.map((e: any) => e.msg || e.message || JSON.stringify(e)).join(", ");
-//       } else if (error.errors && typeof error.errors === "object") {
-//         errorMessage = Object.values(error.errors).map((e: any) => e.message || e).join(", ");
-//       } else {
-//         errorMessage = error.message || error.error || errorMessage;
-//       }
-//     } catch {
-//       // Abaikan parse error
-//     }
-
-//     // Gunakan Custom Error agar status HTTP bisa ditangkap komponen
-//     throw new ApiError(errorMessage, res.status);
-//   }
-
-//   return res.json() as Promise<T>;
-// }
-
-// export const apiClient = {
-//   get: <T>(endpoint: string, options?: RequestInit, tokenType?: TokenType) =>
-//     request<T>(endpoint, { method: "GET", ...options }, true, tokenType),
-
-//   post: <T>(
-//     endpoint: string,
-//     body: unknown,
-//     options?: RequestInit,
-//     tokenType?: TokenType,
-//   ) => {
-//     const isFormData = body instanceof FormData;
-//     return request<T>(
-//       endpoint,
-//       {
-//         method: "POST",
-//         body: isFormData ? body : JSON.stringify(body),
-//         ...options,
-//       },
-//       true,
-//       tokenType,
-//     );
-//   },
-
-//   put: <T>(
-//     endpoint: string,
-//     body: unknown,
-//     options?: RequestInit,
-//     tokenType?: TokenType,
-//   ) => {
-//     const isFormData = body instanceof FormData;
-//     return request<T>(
-//       endpoint,
-//       {
-//         method: "PUT",
-//         body: isFormData ? body : JSON.stringify(body),
-//         ...options,
-//       },
-//       true,
-//       tokenType,
-//     );
-//   },
-
-//   delete: <T>(endpoint: string, options?: RequestInit, tokenType?: TokenType) =>
-//     request<T>(endpoint, { method: "DELETE", ...options }, true, tokenType),
-// };

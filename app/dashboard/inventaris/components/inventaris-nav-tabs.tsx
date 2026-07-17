@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Package, Tags } from "lucide-react";
+import { Package, Tags, ClipboardCheck, Scale, BoxIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
@@ -15,6 +15,21 @@ const tabs = [
     label: "Kategori Produk",
     href: "/dashboard/inventaris/kategori", 
     icon: Tags,
+  },
+    {
+    label: "Bahan Baku",
+    href: "/dashboard/inventaris/bahanBaku",
+    icon: BoxIcon
+  },
+  {
+    label: "Stok Opname",
+    href: "/dashboard/inventaris/stockOpname", 
+    icon: ClipboardCheck,
+  },
+  {
+    label: "Penyesuaian Stok",
+    href: "/dashboard/inventaris/stockAdjustment", 
+    icon: Scale,
   },
 ];
 
@@ -37,10 +52,10 @@ export function InventarisNavTabs() {
               key={href}
               href={href}
               className={cn(
-                "flex flex-1 items-center justify-center gap-2 py-3 px-1 text-sm font-bold whitespace-nowrap transition-all border-b-4 rounded-none bg-transparent cursor-pointer -mb-px focus-visible:ring-0 focus-visible:outline-none",
+                "flex flex-1 items-center justify-center gap-2 py-3 px-4 text-sm font-bold whitespace-nowrap transition-all border-b-4 rounded-none bg-transparent cursor-pointer -mb-px focus-visible:ring-0 focus-visible:outline-none",
                 isActive
-                  ? "border-zinc-900 text-zinc-900 shadow-none"
-                  : "border-transparent text-zinc-500 hover:text-zinc-700 hover:bg-transparent",
+                  ? "border-[#0A2947] text-[#0A2947] shadow-none"
+                  : "border-transparent text-[#0A2947]/50 hover:text-[#0A2947]/80 hover:bg-transparent hover:border-[#0A2947]/20",
               )}
             >
               <Icon className="w-4 h-4" />

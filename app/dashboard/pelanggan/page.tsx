@@ -310,12 +310,12 @@ export default function PelangganPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-[#F2EAE1] border-[#041E3F]/10">
-                <DropdownMenuItem className="cursor-pointer text-[#041E3F] hover:bg-[#041E3F]/5" onClick={() => openEdit(row.original)}>
+                <DropdownMenuItem className="cursor-pointer font-bold text-[#041E3F]/80 focus:bg-[#8d8377]/20" onClick={() => openEdit(row.original)}>
                   Edit
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-[#041E3F]/10" />
                 <DropdownMenuItem
-                  className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10"
+                  className="cursor-pointer font-bold text-red-600/60 focus:text-red-700 focus:bg-red-500/10"
                   onClick={() => setDeleteTarget(row.original)}
                 >
                   Hapus
