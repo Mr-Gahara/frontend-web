@@ -7,6 +7,7 @@ import { Download, TrendingUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
+
 // Types
 type TipeMutasi = "masuk" | "keluar";
 type KategoriMutasi =
@@ -27,7 +28,8 @@ type MutasiArusKas = {
   referensiModel?: string;
   createdAt: string;
 };
-// Mock data mutasi — diganti fetch real saat backend MutasiArusKas tersedia
+
+// Mock data mutasi
 const MOCK_MUTASI: MutasiArusKas[] = [
   {
     _id: "1",
@@ -75,6 +77,7 @@ const MOCK_MUTASI: MutasiArusKas[] = [
     createdAt: "2025-10-28T12:00:00.000Z",
   },
 ];
+
 // Helper
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
@@ -109,7 +112,8 @@ function FilterToggle({
   return (
     <button
       onClick={() => onClick(filter)}
-      className={`px-4 py-1.5 text-sm font-bold rounded-md transition-colors cursor-pointer ${
+      // Menghapus whitespace-nowrap dan menambahkan flex center agar teks rata tengah jika terpaksa dibungkus
+      className={`px-1 sm:px-4 py-1.5 text-xs sm:text-sm font-bold rounded-md transition-colors cursor-pointer w-full flex items-center justify-center text-center ${
         isActive
           ? "bg-[#FFFAF3] text-[#0A2947] shadow-sm"
           : "text-[#0A2947]/50 hover:text-[#0A2947]"
@@ -119,6 +123,7 @@ function FilterToggle({
     </button>
   );
 }
+
 // Kolom DataTable
 const columns: ColumnDef<MutasiArusKas>[] = [
   {
@@ -164,7 +169,7 @@ const columns: ColumnDef<MutasiArusKas>[] = [
       </span>
     ),
     cell: ({ row }) => (
-      <span className="text-sm font-semibold capitalize text-[#0A2947]/80">
+      <span className="text-sm font-semibold capitalize whitespace-nowrap text-[#0A2947]/80">
         {row.original.kategori.replace(/-/g, " ")}
       </span>
     ),
@@ -177,7 +182,7 @@ const columns: ColumnDef<MutasiArusKas>[] = [
       </span>
     ),
     cell: ({ row }) => (
-      <span className="text-sm font-medium text-[#0A2947]/70">
+      <span className="text-sm font-medium text-[#0A2947]/70 min-w-30 block">
         {row.original.deskripsi ?? "-"}
       </span>
     ),
@@ -190,7 +195,7 @@ const columns: ColumnDef<MutasiArusKas>[] = [
       </span>
     ),
     cell: ({ row }) => (
-      <span className="text-sm font-bold text-[#0A2947]">
+      <span className="text-sm font-bold whitespace-nowrap text-[#0A2947]">
         {row.original.akunKasID.namaAkun}
       </span>
     ),
@@ -217,22 +222,10 @@ const columns: ColumnDef<MutasiArusKas>[] = [
     },
   },
 ];
+
 // Page utama
 export default function MutasiArusKasPage() {
   const [filterTipe, setFilterTipe] = useState<FilterTipe>("semua");
-
-  // TODO: Ganti MOCK_MUTASI dengan fetch real saat endpoint tersedia
-  // const { data: mutasiList = [], isLoading } = useQuery({
-  //   queryKey: queryKeys.mutasiArusKas,
-  //   queryFn: async () => {
-  //     const res = await apiClient.get<MutasiArusKas[]>(
-  //       "/mutasi-arus-kas",
-  //       undefined,
-  //       "pengguna"
-  //     );
-  //     return Array.isArray(res) ? res : [];
-  //   },
-  // });
 
   const mutasiList = MOCK_MUTASI;
   const isLoading = false;
@@ -243,18 +236,19 @@ export default function MutasiArusKasPage() {
   }, [mutasiList, filterTipe]);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
       {/* Tabel mutasi */}
-      <div className="bg-[#F2EAE1] border border-[#0A2947]/10 rounded-2xl p-6 shadow-sm flex flex-col w-full">
+      <div className="bg-[#F2EAE1] border border-[#0A2947]/10 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col w-full overflow-hidden">
+        
         {/* Toolbar tabel */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <h2 className="text-lg font-bold tracking-wide text-[#0A2947]">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
+            <h2 className="text-base sm:text-lg font-bold tracking-wide text-[#0A2947]">
               Laporan Mutasi Arus Kas
             </h2>
 
-            {/* Filter toggle */}
-            <div className="flex rounded-lg p-1 border border-[#0A2947]/10 bg-[#0A2947]/5">
+            {/* Filter toggle menggunakan Grid untuk seluler */}
+            <div className="grid grid-cols-3 sm:flex w-full sm:w-auto rounded-lg p-1 border border-[#0A2947]/10 bg-[#0A2947]/5">
               <FilterToggle
                 active={filterTipe}
                 filter="semua"
@@ -267,34 +261,38 @@ export default function MutasiArusKasPage() {
                 filter="masuk"
                 onClick={setFilterTipe}
               >
-                Uang Masuk
+                {/* Kata 'Uang' disembunyikan di layar HP, muncul di layar besar */}
+                <span className="hidden sm:inline">Uang&nbsp;</span>Masuk
               </FilterToggle>
               <FilterToggle
                 active={filterTipe}
                 filter="keluar"
                 onClick={setFilterTipe}
               >
-                Uang Keluar
+                {/* Kata 'Uang' disembunyikan di layar HP, muncul di layar besar */}
+                <span className="hidden sm:inline">Uang&nbsp;</span>Keluar
               </FilterToggle>
             </div>
           </div>
 
           <Button
             variant="outline"
-            className="border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 cursor-pointer"
+            className="w-full md:w-auto border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 cursor-pointer"
           >
             <Download className="w-4 h-4 mr-2" />
             Download CSV
           </Button>
         </div>
 
-        {/* DataTable */}
-        <DataTable
-          columns={columns}
-          data={filteredData}
-          loading={isLoading}
-          emptyMessage="Belum ada data mutasi arus kas."
-        />
+        {/* DataTable Wrapper untuk memastikan horizontal scroll aman */}
+        <div className="w-full overflow-x-auto">
+          <DataTable
+            columns={columns}
+            data={filteredData}
+            loading={isLoading}
+            emptyMessage="Belum ada data mutasi arus kas."
+          />
+        </div>
       </div>
     </div>
   );

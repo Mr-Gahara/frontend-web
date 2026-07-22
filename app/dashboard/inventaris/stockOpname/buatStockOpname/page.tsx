@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
@@ -9,6 +9,11 @@ import { queryKeys } from "@/lib/queryKeys";
 import { CreateOpnameRequest } from "@/types/stockOpname";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
+// --- Form & Validation ---
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,28 +25,57 @@ import {
   FileText,
   Save,
   AlertTriangle,
-  Settings
+  Settings,
 } from "lucide-react";
 
-// Interface untuk struktur response standard dari backend lo
+// Interface untuk struktur response standard dari backend
 interface ApiResponse<T> {
   success: boolean;
   message?: string;
   data: T;
 }
 
+// --- ZOD SCHEMA ---
+const opnameSchema = z.object({
+  locationID: z
+    .string()
+    .min(1, "Lokasi tidak valid. Silakan setup lokasi terlebih dahulu."),
+  picID: z
+    .string()
+    .min(1, "Sesi login tidak valid. Data penanggung jawab tidak ditemukan."),
+  catatan: z.string().optional(),
+});
+
+type OpnameFormInput = z.input<typeof opnameSchema>;
+type OpnameFormOutput = z.output<typeof opnameSchema>;
+
 export default function BuatStockOpnamePage() {
   useAuthGuard();
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  // --- STATE FORM ---
+  // State untuk label (hanya untuk keperluan visual)
   const [currentUserName, setCurrentUserName] = useState("Memuat data Anda...");
-  const [locationID, setLocationID] = useState("");
   const [locationName, setLocationName] = useState("Memuat lokasi aktif...");
-  const [picID, setPicID] = useState("");
-  const [catatan, setCatatan] = useState("");
-  const [formError, setFormError] = useState("");
+
+  // --- REACT HOOK FORM ---
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<OpnameFormInput, any, OpnameFormOutput>({
+    resolver: zodResolver(opnameSchema),
+    defaultValues: {
+      locationID: "",
+      picID: "",
+      catatan: "",
+    },
+  });
+
+  const watchLocationID = watch("locationID");
+  const watchPicID = watch("picID");
 
   // --- MENGAMBIL USER ID & NAMA DENGAN AMAN DARI TOKEN ---
   useEffect(() => {
@@ -49,65 +83,66 @@ export default function BuatStockOpnamePage() {
     if (token) {
       const payloadToken = decodeJWT(token);
       const id = payloadToken?._id || payloadToken?.id || "";
-      const nama = payloadToken?.nama || payloadToken?.name || "Anda (Pengguna Saat Ini)";
-      
-      setPicID(id);
+      const nama =
+        payloadToken?.nama || payloadToken?.name || "Anda (Pengguna Saat Ini)";
+
+      setValue("picID", id);
       setCurrentUserName(nama);
     }
-  }, []);
+  }, [setValue]);
 
   // --- FETCH DATA LOKASI AKTIF DARI BACKEND ---
-  const { data: activeLocation = null, isLoading: isLoadingLokasi } = useQuery<any>({
-    // GANTI QUERY KEY: Biar cache lama yang nyimpen array ke-hapus/terganti
-    queryKey: ["lokasi-current-active-tenant"],
-    queryFn: async () => {
-      try {
-        const res = await apiClient.get<any>(
-          "/location/current", 
-          undefined, 
-          "pengguna"
-        );
-        
-        // Bulletproof extractor: Jaga-jaga kalau backend bungkus response-nya beda-beda
-        const raw = res?.data?.data || res?.data || res;
-        
-        // Kalau ternyata array (fallback), ambil index 0. Kalau object, return object-nya langsung.
-        if (Array.isArray(raw)) {
-          return raw.length > 0 ? raw[0] : null;
+  const { data: activeLocation = null, isLoading: isLoadingLokasi } =
+    useQuery<any>({
+      queryKey: ["lokasi-current-active-tenant"],
+      queryFn: async () => {
+        try {
+          const res = await apiClient.get<any>(
+            "/location/current",
+            undefined,
+            "pengguna"
+          );
+          // Bulletproof extractor
+          const raw = res?.data?.data || res?.data || res;
+          if (Array.isArray(raw)) {
+            return raw.length > 0 ? raw[0] : null;
+          }
+          return raw || null;
+        } catch (error) {
+          return null;
         }
-        return raw || null;
-      } catch (error) {
-        return null;
-      }
-    },
-    refetchOnMount: true, // Paksa refresh data tiap buka laman ini
-  });
+      },
+      refetchOnMount: true, // Paksa refresh data tiap buka laman ini
+    });
 
   // --- AUTO-SET LOKASI BILA DATA TERSEDIA ---
   useEffect(() => {
     if (!isLoadingLokasi) {
-      // Pastikan activeLocation punya id yang valid (bisa id atau _id dari mongoose)
       if (activeLocation && (activeLocation.id || activeLocation._id)) {
         const idLoc = activeLocation.id || activeLocation._id;
-        const namaLoc = activeLocation.nama || activeLocation.namaLokasi || activeLocation.namaToko || "Lokasi Aktif";
+        const namaLoc =
+          activeLocation.nama ||
+          activeLocation.namaLokasi ||
+          activeLocation.namaToko ||
+          "Lokasi Aktif";
         const tipeLoc = activeLocation.tipe || "Outlet";
 
-        setLocationID(idLoc);
+        setValue("locationID", idLoc);
         setLocationName(`${namaLoc} (${tipeLoc})`);
       } else {
-        setLocationID("");
+        setValue("locationID", "");
         setLocationName("");
       }
     }
-  }, [activeLocation, isLoadingLokasi]);
+  }, [activeLocation, isLoadingLokasi, setValue]);
 
   // --- MUTASI CREATE DRAFT OPNAME ---
   const createMutation = useMutation({
     mutationFn: async (payload: CreateOpnameRequest) => {
       return await apiClient.post<ApiResponse<{ _id?: string; id?: string }>>(
-        "/stockopname", 
-        payload, 
-        undefined, 
+        "/stockopname",
+        payload,
+        undefined,
         "pengguna"
       );
     },
@@ -116,7 +151,7 @@ export default function BuatStockOpnamePage() {
         description: "Sistem telah mengambil snapshot stok saat ini.",
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname });
-      
+
       // Mengambil ID untuk redirect
       const newOpnameId = res.data?._id || res.data?.id || (res as any)?._id;
       if (newOpnameId) {
@@ -126,31 +161,32 @@ export default function BuatStockOpnamePage() {
       }
     },
     onError: (err: any) => {
-      setFormError(
-        err.message || 
-        "Gagal membuat draft opname. Pastikan ada item di lokasi tersebut."
-      );
+      toast.error("Gagal Memproses", {
+        description:
+          err.message ||
+          "Gagal membuat draft opname. Pastikan ada item di lokasi tersebut.",
+      });
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError("");
-
-    if (!locationID) return setFormError("Lokasi tidak valid. Silakan setup lokasi terlebih dahulu.");
-    if (!picID) return setFormError("Sesi login tidak valid. Data penanggung jawab tidak ditemukan.");
+  // --- HANDLER SUBMIT DARI RHF ---
+  const onSubmit = (data: OpnameFormOutput) => {
+    // Validasi pencegahan ganda (walau Zod sudah handle)
+    if (!data.locationID || !data.picID) return;
 
     const payload: CreateOpnameRequest = {
-      locationID,
-      picID,
-      catatan: catatan.trim() || undefined,
+      locationID: data.locationID,
+      picID: data.picID,
+      catatan: data.catatan?.trim() || undefined,
     };
 
     createMutation.mutate(payload);
   };
 
   // Validasi: Lokasi dianggap kosong kalau fetch selesai TAPI data null ATAU tidak ada id valid
-  const isLocationEmpty = !isLoadingLokasi && (!activeLocation || (!activeLocation.id && !activeLocation._id));
+  const isLocationEmpty =
+    !isLoadingLokasi &&
+    (!activeLocation || (!activeLocation.id && !activeLocation._id));
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
@@ -174,7 +210,8 @@ export default function BuatStockOpnamePage() {
               Buat Draft Opname
             </h1>
             <p className="text-sm font-medium text-[#0A2947]/60">
-              Inisiasi sesi opname baru. Sistem otomatis mendeteksi Outlet/Gudang aktif Anda.
+              Inisiasi sesi opname baru. Sistem otomatis mendeteksi
+              Outlet/Gudang aktif Anda.
             </p>
           </div>
         </div>
@@ -185,13 +222,17 @@ export default function BuatStockOpnamePage() {
         <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 shadow-sm flex flex-col items-center text-center gap-4">
           <AlertTriangle className="w-10 h-10 text-rose-500" />
           <div>
-            <h2 className="text-lg font-bold text-rose-700">Lokasi / Gudang Belum Diatur</h2>
+            <h2 className="text-lg font-bold text-rose-700">
+              Lokasi / Gudang Belum Diatur
+            </h2>
             <p className="text-sm font-medium text-rose-600/80 mt-1 max-w-md">
-              Sistem tidak dapat menemukan data lokasi untuk outlet/gudang yang sedang Anda akses saat ini. Anda harus mengatur profil lokasi terlebih dahulu sebelum melakukan Stok Opname.
+              Sistem tidak dapat menemukan data lokasi untuk outlet/gudang yang
+              sedang Anda akses saat ini. Anda harus mengatur profil lokasi
+              terlebih dahulu sebelum melakukan Stok Opname.
             </p>
           </div>
           <Button
-            onClick={() => router.push("/dashboard/pengaturan/lokasi")} 
+            onClick={() => router.push("/dashboard/pengaturan/lokasi")}
             className="cursor-pointer bg-rose-600 text-white hover:bg-rose-700 font-bold shadow-sm mt-2"
           >
             <Settings className="w-4 h-4 mr-2" /> Setup Lokasi Sekarang
@@ -202,8 +243,10 @@ export default function BuatStockOpnamePage() {
       {/* FORM SECTION */}
       {!isLocationEmpty && (
         <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] shadow-sm overflow-hidden">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6 p-6 sm:p-8">
-            
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-6 p-6 sm:p-8"
+          >
             <div className="space-y-5">
               {/* Read-Only Lokasi (Auto-detect Tenant) */}
               <div className="space-y-2">
@@ -212,11 +255,22 @@ export default function BuatStockOpnamePage() {
                   Lokasi Audit / Gudang
                 </label>
                 <div className="flex items-center w-full h-12 px-4 bg-[#0A2947]/5 border border-[#0A2947]/10 rounded-lg text-[#0A2947]/60 font-bold cursor-not-allowed">
-                  {isLoadingLokasi ? "Memeriksa lokasi aktif..." : locationName}
+                  {isLoadingLokasi
+                    ? "Memeriksa lokasi aktif..."
+                    : locationName}
                 </div>
-                <p className="text-xs font-medium text-[#0A2947]/50 mt-1">
-                  Sistem otomatis mendeteksi bahwa Anda sedang beroperasi di lokasi ini.
-                </p>
+                <div className="min-h-4">
+                  {errors.locationID ? (
+                    <span className="text-xs font-bold text-rose-500">
+                      {errors.locationID.message}
+                    </span>
+                  ) : (
+                    <p className="text-xs font-medium text-[#0A2947]/50 mt-1">
+                      Sistem otomatis mendeteksi bahwa Anda sedang beroperasi
+                      di lokasi ini.
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Read-Only PIC */}
@@ -228,32 +282,36 @@ export default function BuatStockOpnamePage() {
                 <div className="flex items-center w-full h-12 px-4 bg-[#0A2947]/5 border border-[#0A2947]/10 rounded-lg text-[#0A2947]/60 font-bold cursor-not-allowed">
                   {currentUserName}
                 </div>
-                <p className="text-xs font-medium text-[#0A2947]/50 mt-1">
-                  Sistem otomatis mencatat Anda sebagai PIC sesi opname ini.
-                </p>
+                <div className="min-h-4">
+                  {errors.picID ? (
+                    <span className="text-xs font-bold text-rose-500">
+                      {errors.picID.message}
+                    </span>
+                  ) : (
+                    <p className="text-xs font-medium text-[#0A2947]/50 mt-1">
+                      Sistem otomatis mencatat Anda sebagai PIC sesi opname
+                      ini.
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Input Catatan */}
               <div className="space-y-2 pt-2 border-t border-[#0A2947]/10 mt-2">
                 <label className="text-sm font-bold text-[#0A2947] flex items-center gap-2">
                   <FileText className="h-4 w-4 text-[#D4A373]" />
-                  Catatan Opname <span className="text-[#0A2947]/50 font-medium">(Opsional)</span>
+                  Catatan Opname{" "}
+                  <span className="text-[#0A2947]/50 font-medium">
+                    (Opsional)
+                  </span>
                 </label>
                 <Input
-                  value={catatan}
-                  onChange={(e) => setCatatan(e.target.value)}
+                  {...register("catatan")}
                   placeholder="Misal: Audit rutin akhir bulan..."
-                  className="bg-[#FFFAF3] h-12 border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-medium"
+                  className="bg-[#FFFAF3] h-12 border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-medium focus-visible:ring-1 focus-visible:ring-[#0A2947]"
                 />
               </div>
             </div>
-
-            {/* Error Message */}
-            {formError && (
-              <div className="rounded-xl bg-red-500/10 p-4 text-sm font-bold text-red-600 border border-red-500/20 mt-2 shadow-sm">
-                {formError}
-              </div>
-            )}
 
             {/* Action Buttons */}
             <div className="flex items-center justify-end gap-3 pt-6 border-t border-[#0A2947]/10 mt-4">
@@ -268,8 +326,13 @@ export default function BuatStockOpnamePage() {
               </Button>
               <Button
                 type="submit"
-                // Tombol di-disable kalau id lokasi kosong, id pic kosong, atau masih loading
-                disabled={createMutation.isPending || !locationID || !picID || isLoadingLokasi}
+                // Tombol di-disable kalau locationID/picID kosong (belum termuat dari API/Token) atau sedang submit
+                disabled={
+                  createMutation.isPending ||
+                  !watchLocationID ||
+                  !watchPicID ||
+                  isLoadingLokasi
+                }
                 className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold h-11 px-6 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {createMutation.isPending ? (

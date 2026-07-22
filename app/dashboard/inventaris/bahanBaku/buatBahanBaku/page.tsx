@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { BahanBakuRequest, SatuanBahan } from "@/types/bahanBaku";
+import { BahanBakuRequest, SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
+
+import { useForm, Controller, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,32 +24,63 @@ import {
 import { ArrowLeft, PackagePlus, Info, Save } from "lucide-react";
 
 // Opsi satuan sesuai dengan model backend
-const SATUAN_OPTIONS: SatuanBahan[] = ["kg", "gram", "liter", "ml", "pcs", "pak", "unit"];
+
+
+// --- ZOD SCHEMA ---
+const bahanBakuSchema = z.object({
+  namaBahan: z.string().min(1, "Nama bahan baku wajib diisi"),
+  satuan: z.enum(SATUAN_BAHAN_OPTIONS, { message: "Silakan pilih satuan" }),
+  stok: z.coerce.number().min(0, "Stok tidak boleh negatif").default(0),
+  minimalStok: z.coerce
+    .number()
+    .min(0, "Batas stok minimum tidak boleh negatif")
+    .default(0),
+});
+
+type BahanBakuFormInput = z.input<typeof bahanBakuSchema>;
+type BahanBakuFormOutput = z.output<typeof bahanBakuSchema>;
 
 export default function BuatBahanBakuPage() {
   useAuthGuard();
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const [form, setForm] = useState<BahanBakuRequest>({
-    namaBahan: "",
-    satuan: "gram", // Default value
-    stok: 0,
-    minimalStok: 0,
+  // --- REACT HOOK FORM ---
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<BahanBakuFormInput, any, BahanBakuFormOutput>({
+    resolver: zodResolver(bahanBakuSchema),
+    defaultValues: {
+      namaBahan: "",
+      satuan: "gram",
+      stok: 0,
+      minimalStok: 0,
+    },
   });
 
-  const [stokInput, setStokInput] = useState("");
-  const [minimalStokInput, setMinimalStokInput] = useState("");
-  const [formError, setFormError] = useState("");
+  const currentSatuan = useWatch({ control, name: "satuan" });
 
   // --- MUTATION CREATE ---
-  const createMutation = useMutation({
+  const createMutation = useMutation<any, Error, BahanBakuRequest>({
     mutationFn: async (payload: BahanBakuRequest) => {
       try {
-        return await apiClient.post("/bahan-baku", payload, undefined, "pengguna");
+        return await apiClient.post(
+          "/bahan-baku",
+          payload,
+          undefined,
+          "pengguna",
+        );
       } catch (error) {
         // Fallback jika endpoint backend menggunakan camelCase
-        return await apiClient.post("/bahanBaku", payload, undefined, "pengguna");
+        return await apiClient.post(
+          "/bahanBaku",
+          payload,
+          undefined,
+          "pengguna",
+        );
       }
     },
     onSuccess: () => {
@@ -57,23 +91,15 @@ export default function BuatBahanBakuPage() {
       router.push("/dashboard/inventaris/bahanBaku");
     },
     onError: (err: any) => {
-      setFormError(err.message || "Gagal menyimpan bahan baku.");
+      toast.error("Gagal Menyimpan", {
+        description: err.message || "Terjadi kesalahan saat menyimpan data.",
+      });
     },
   });
 
   // --- HANDLER SUBMIT ---
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError("");
-
-    if (!form.namaBahan.trim()) {
-      return setFormError("Nama bahan baku wajib diisi.");
-    }
-    if (!form.satuan) {
-      return setFormError("Silakan pilih satuan bahan baku.");
-    }
-
-    createMutation.mutate(form);
+  const onSubmit = (data: BahanBakuFormOutput) => {
+    createMutation.mutate(data);
   };
 
   return (
@@ -81,6 +107,7 @@ export default function BuatBahanBakuPage() {
       {/* HEADER SECTION */}
       <div className="flex flex-col gap-4">
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
@@ -102,11 +129,15 @@ export default function BuatBahanBakuPage() {
 
       {/* FORM SECTION (Dark Cream Card) */}
       <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] shadow-sm overflow-hidden">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 p-6 sm:p-8">
-          
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-6 p-6 sm:p-8"
+        >
           <div className="flex items-center gap-2 mb-2">
             <PackagePlus className="h-5 w-5 text-[#D4A373]" />
-            <h3 className="text-base font-bold text-[#0A2947]">Informasi Dasar</h3>
+            <h3 className="text-base font-bold text-[#0A2947]">
+              Informasi Dasar
+            </h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -116,89 +147,109 @@ export default function BuatBahanBakuPage() {
                 Nama Bahan Baku <span className="text-red-500">*</span>
               </label>
               <Input
-                value={form.namaBahan}
-                onChange={(e) => setForm({ ...form, namaBahan: e.target.value })}
+                {...register("namaBahan")}
                 placeholder="Contoh: Biji Kopi Arabica, Susu Segar, dsb."
-                required
-                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 h-12"
+                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 h-12 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
               />
+              <div className="min-h-4">
+                {errors.namaBahan && (
+                  <span className="text-xs font-bold text-rose-500">
+                    {errors.namaBahan.message}
+                  </span>
+                )}
+              </div>
             </div>
-
             {/* Satuan */}
             <div className="space-y-2">
               <label className="text-sm font-bold text-[#0A2947]">
                 Satuan <span className="text-red-500">*</span>
               </label>
-              <Select
-                value={form.satuan}
-                onValueChange={(val: SatuanBahan) => setForm({ ...form, satuan: val })}
-              >
-                <SelectTrigger className="w-full h-12 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-bold">
-                  <SelectValue placeholder="Pilih Satuan..." />
-                </SelectTrigger>
-                <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
-                  {SATUAN_OPTIONS.map((satuan) => (
-                    <SelectItem
-                      key={satuan}
-                      value={satuan}
-                      className="cursor-pointer hover:bg-[#0A2947]/5 font-bold"
-                    >
-                      {satuan}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name="satuan"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="w-full h-12 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-bold focus:ring-1 focus:ring-[#0A2947]">
+                      <SelectValue placeholder="Pilih Satuan..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                      {SATUAN_BAHAN_OPTIONS.map((satuan) => (
+                        <SelectItem
+                          key={satuan}
+                          value={satuan}
+                          className="cursor-pointer hover:bg-[#0A2947]/5 font-bold"
+                        >
+                          {satuan}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <div className="min-h-4">
+                {errors.satuan && (
+                  <span className="text-xs font-bold text-rose-500">
+                    {errors.satuan.message}
+                  </span>
+                )}
+              </div>
             </div>
-            
             <div className="hidden sm:block"></div> {/* Spacer untuk grid */}
-
             {/* Stok Awal */}
             <div className="space-y-2">
               <label className="text-sm font-bold text-[#0A2947]">
-                Stok Awal <span className="text-[#0A2947]/50 font-medium">(Opsional)</span>
+                Stok Awal{" "}
+                <span className="text-[#0A2947]/50 font-medium">
+                  (Opsional)
+                </span>
               </label>
               <div className="relative">
                 <Input
                   type="number"
-                  min={0}
-                  step="any"
+                  {...register("stok")}
                   placeholder="0"
-                  value={stokInput}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setStokInput(val);
-                    setForm({ ...form, stok: val === "" ? 0 : Number(val) });
-                  }}
-                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-mono font-bold h-12 pr-16 no-spinner"
+                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-mono font-bold h-12 pr-16 focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#0A2947]/40 pointer-events-none">
-                  {form.satuan}
+                  {currentSatuan}
                 </div>
               </div>
+              <div className="min-h-4">
+                {errors.stok && (
+                  <span className="text-xs font-bold text-rose-500">
+                    {errors.stok.message}
+                  </span>
+                )}
+              </div>
             </div>
-
             {/* Batas Stok Minimum */}
             <div className="space-y-2">
               <label className="text-sm font-bold text-[#0A2947]">
-                Batas Stok Minimum <span className="text-[#0A2947]/50 font-medium">(Opsional)</span>
+                Batas Stok Minimum{" "}
+                <span className="text-[#0A2947]/50 font-medium">
+                  (Opsional)
+                </span>
               </label>
               <div className="relative">
                 <Input
                   type="number"
-                  min={0}
-                  step="any"
+                  {...register("minimalStok")}
                   placeholder="0"
-                  value={minimalStokInput}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setMinimalStokInput(val);
-                    setForm({ ...form, minimalStok: val === "" ? 0 : Number(val) });
-                  }}
-                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-mono font-bold h-12 pr-16 no-spinner"
+                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-mono font-bold h-12 pr-16 focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#0A2947]/40 pointer-events-none">
-                  {form.satuan}
+                  {currentSatuan}
                 </div>
+              </div>
+              <div className="min-h-4">
+                {errors.minimalStok && (
+                  <span className="text-xs font-bold text-rose-500">
+                    {errors.minimalStok.message}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -207,16 +258,15 @@ export default function BuatBahanBakuPage() {
           <div className="flex items-start gap-2 bg-[#0A2947]/5 p-4 rounded-xl border border-[#0A2947]/10 mt-2">
             <Info className="w-5 h-5 text-[#D4A373] shrink-0 mt-0.5" />
             <p className="text-xs font-medium text-[#0A2947]/70 leading-relaxed">
-              <strong className="font-bold text-[#0A2947]">Fungsi Batas Stok Minimum:</strong> Sistem akan memberikan peringatan (label <i>Stok Kritis</i>) di Daftar Bahan Baku jika stok aktual sama dengan atau kurang dari angka minimum ini. Berguna sebagai pengingat waktu belanja agar bahan tidak kehabisan.
+              <strong className="font-bold text-[#0A2947]">
+                Fungsi Batas Stok Minimum:
+              </strong>{" "}
+              Sistem akan memberikan peringatan (label <i>Stok Kritis</i>) di
+              Daftar Bahan Baku jika stok aktual sama dengan atau kurang dari
+              angka minimum ini. Berguna sebagai pengingat waktu belanja agar
+              bahan tidak kehabisan.
             </p>
           </div>
-
-          {/* Error Message */}
-          {formError && (
-            <div className="rounded-xl bg-red-500/10 p-4 text-sm font-bold text-red-600 border border-red-500/20 shadow-sm">
-              {formError}
-            </div>
-          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-6 border-t border-[#0A2947]/10 mt-4">
@@ -235,15 +285,15 @@ export default function BuatBahanBakuPage() {
               className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm h-11 w-full sm:w-auto px-6"
             >
               {createMutation.isPending ? (
-                "Menyimpan..."
+                <span className="flex items-center gap-2">Menyimpan...</span>
               ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4 text-[#D4A373]" /> Simpan Bahan Baku
-                </>
+                <span className="flex items-center gap-2">
+                  <Save className="mr-2 h-4 w-4 text-[#D4A373]" /> Simpan Bahan
+                  Baku
+                </span>
               )}
             </Button>
           </div>
-
         </form>
       </div>
     </div>

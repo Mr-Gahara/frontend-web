@@ -16,14 +16,12 @@ export default function DashboardLayout({
   useAuthGuard();
   const pathname = usePathname();
 
-  // SISTEM PEMUSNAH MUTLAK (RADIX UI ORPHANED PORTALS)
   useEffect(() => {
-    document.body.style.pointerEvents = "";
-    document.body.removeAttribute("data-scroll-locked");
-    const orphanedPortals = document.querySelectorAll("[data-radix-portal]");
-    orphanedPortals.forEach((portal) => {
-      portal.remove();
-    });
+    // Hanya membersihkan kunci scroll jika tersangkut, biarkan portal menutup secara mandiri (animasi)
+    setTimeout(() => {
+        document.body.style.pointerEvents = "";
+        document.body.removeAttribute("data-scroll-locked");
+    }, 500); // Beri waktu 500ms agar animasi Radix UI selesai dahulu
   }, [pathname]);
 
   return (
@@ -36,7 +34,7 @@ export default function DashboardLayout({
         <div className="flex flex-1 flex-col p-3 pr-4 md:p-4 md:pr-6 overflow-hidden h-screen bg-transparent">
           
           {/* 3. Area Konten Utama: Warna cream, rounded corners, dan shadow tipis */}
-          <main className="flex flex-1 flex-col min-w-0 bg-[#FFFAF3] rounded-[2rem] overflow-hidden shadow-xl relative border border-white/10">
+          <main className="flex flex-1 flex-col min-w-0 bg-[#FFFAF3] rounded-[2rem] overflow-hidden shadow-xl relative">
             <Topbar />
             
             {/* Area scroll hanya ada di dalam kotak konten ini */}

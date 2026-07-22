@@ -34,6 +34,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
+  useSidebar, // <-- 1. IMPORT HOOK INI TUAN
 } from "@/components/ui/sidebar";
 import {
   Collapsible,
@@ -69,16 +70,6 @@ type MenuGroup = {
 };
 
 const menuGroups: MenuGroup[] = [
-  // {
-  //   grup: null,
-  //   items: [
-  //     {
-  //       label: "Menu Utama",
-  //       href: "/dashboard",
-  //       icon: Home,
-  //     },
-  //   ],
-  // },
   {
     grup: null,
     items: [
@@ -87,28 +78,16 @@ const menuGroups: MenuGroup[] = [
         href: "/dashboard",
         icon: LayoutDashboard,
       },
-      // {
-      //   label: "Titik Penjualan (POS)",
-      //   href: "/dashboard/pos",
-      //   icon: MonitorSmartphone,
-      //   permission: "read-penjualan",
-      // },
-      // {
-      //   label: "Manajemen Booking",
-      //   href: "/dashboard/booking",
-      //   icon: CalendarDays,
-      //   permission: "read-booking",
-      // },
     ],
   },
   {
     grup: null,
     items: [
       {
-        label: "Modul Keuangan",
+        label: "Keuangan",
         href: "/dashboard/keuangan",
         icon: CircleDollarSign,
-        permission: "read-akunkas", // Sesuai dengan seed permission Anda
+        permission: "read-akunkas",
         subItems: [
           {
             label: "Penjualan",
@@ -118,7 +97,7 @@ const menuGroups: MenuGroup[] = [
           {
             label: "Pengeluaran",
             href: "/dashboard/pengeluaran",
-            permission: "read-pembayaran", // Disesuaikan dengan seed
+            permission: "read-pembayaran",
           },
         ],
       },
@@ -128,12 +107,10 @@ const menuGroups: MenuGroup[] = [
     grup: null,
     items: [
       {
-        label: "Modul Inventaris",
-        // PERUBAHAN DI SINI: Langsung arahkan ke default tab produk
-        href: "/dashboard/inventaris/produk",
-        icon: Package,
-        permission: "read-inventory",
-        // subItems DIHAPUS karena Produk & Kategori sudah menggunakan Navigasi Tabs di dalam halamannya
+        label: "Sesi Booking & Reservasi",
+        href: "/dashboard/reservasi",
+        icon: UserCircle,
+        permission: "read-booking",
       },
     ],
   },
@@ -141,7 +118,18 @@ const menuGroups: MenuGroup[] = [
     grup: null,
     items: [
       {
-        label: "Modul Tim & Staff",
+        label: "Modul Inventaris",
+        href: "/dashboard/inventaris/produk",
+        icon: Package,
+        permission: "read-inventory",
+      },
+    ],
+  },
+  {
+    grup: null,
+    items: [
+      {
+        label: "karyawan & Staff",
         href: "/dashboard/pengguna",
         icon: Users,
         permission: "read-pengguna",
@@ -152,7 +140,7 @@ const menuGroups: MenuGroup[] = [
     grup: null,
     items: [
       {
-        label: "Modul Pelanggan",
+        label: "Pelanggan",
         href: "/dashboard/pelanggan",
         icon: UserCircle,
         permission: "read-pelanggan",
@@ -163,7 +151,7 @@ const menuGroups: MenuGroup[] = [
     grup: null,
     items: [
       {
-        label: "Modul Laporan",
+        label: "Laporan",
         href: "/dashboard/keuangan/ringkasanLabaRugi",
         icon: FileText,
         permission: "read-laporan",
@@ -197,8 +185,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const [namaUser, setNamaUser] = useState("");
   const [posisiUser, setPosisiUser] = useState("");
-  const [namaToko, setNamaToko] = useState(""); // State baru untuk nama toko
+  const [namaToko, setNamaToko] = useState("");
   const [permissions, setPermissions] = useState<string[]>([]);
+
+  // --- 2. PANGGIL HOOK SIDEBAR ---
+  const { setOpenMobile, isMobile } = useSidebar();
 
   useEffect(() => {
     const fetchSidebarUserData = async () => {
@@ -209,20 +200,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         const payload = decodeJWT(penggunaToken);
         if (!payload || !payload.id) return;
 
-        // 1. Set data fallback awal dari JWT agar tidak kosong saat loading
         setNamaUser(payload.nama || "Pengguna");
         setPosisiUser(payload.role || "");
         setNamaToko(payload.tenantName || "Nama Toko");
         setPermissions(payload.permissions || []);
 
-        // 2. Ambil data terupdate langsung dari database (Sama seperti Laman Profil)
         const response = await apiClient.get<{ data: any }>(
           `/pengguna/${payload.id}`,
           undefined,
-          "pengguna",
+          "pengguna"
         );
 
-        // 3. Timpa nama dengan data asli terupdate dari database
         if (response && response.data) {
           const userDb = response.data;
           setNamaUser(userDb.nama || payload.nama || "Pengguna");
@@ -241,8 +229,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     } catch {}
     try {
       await apiClient.post("/akun/auth/logout", {});
-    } catch {
-    } finally {
+    } catch {}
+    finally {
       sessionStorage.removeItem("penggunaToken");
       sessionStorage.removeItem("accessToken");
       localStorage.removeItem("akun");
@@ -253,6 +241,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const hasPermission = (permission?: string) => {
     if (!permission) return true;
     return permissions.includes(permission);
+  };
+
+  // --- 3. FUNGSI NAVIGASI YANG MENUTUP SIDEBAR DI MOBILE ---
+  const handleNavigation = (href: string) => {
+    router.push(href);
+    if (isMobile) {
+      setOpenMobile(false);
+    }
   };
 
   return (
@@ -273,8 +269,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <GalleryVerticalEnd className="size-4 " />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight text-slate-50 hover:text-slate-900">
-                <span className="truncate font-semibold">{namaToko}</span>{" "}
-                {/* Dinamis dari Token */}
+                <span className="truncate font-semibold">{namaToko}</span>
                 <span className="truncate text-xs">Dashboard</span>
               </div>
             </SidebarMenuButton>
@@ -286,7 +281,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         {menuGroups.map((group, gi) => {
           const visibleItems = group.items.filter((item) =>
-            hasPermission(item.permission),
+            hasPermission(item.permission)
           );
 
           if (visibleItems.length === 0) return null;
@@ -299,7 +294,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu>
                 {visibleItems.map((item) => {
                   const visibleSubItems = item.subItems?.filter((sub) =>
-                    hasPermission(sub.permission),
+                    hasPermission(sub.permission)
                   );
 
                   const hasSubItems =
@@ -342,7 +337,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                       href={subItem.href}
                                       onClick={(e) => {
                                         e.preventDefault();
-                                        router.push(subItem.href);
+                                        handleNavigation(subItem.href); // <-- GUNAKAN FUNGSI BARU DI SINI
                                       }}
                                     >
                                       <span>{subItem.label}</span>
@@ -362,7 +357,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <SidebarMenuButton
                         tooltip={item.label}
                         isActive={pathname === item.href}
-                        onClick={() => router.push(item.href)}
+                        onClick={() => handleNavigation(item.href)} // <-- GUNAKAN FUNGSI BARU DI SINI
                         className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer"
                       >
                         <item.icon />
@@ -387,7 +382,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   size="lg"
                   className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! text-slate-50! hover:text-slate-900! data-[state=open]:text-slate-900! cursor-pointer"
                 >
-                  {/* Perubahan ke Avatar Bulat Sempurna Shadcn UI */}
                   <Avatar className="h-8 w-8">
                     <AvatarImage
                       src="https://github.com/shadcn.png"
@@ -416,7 +410,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 sideOffset={4}
               >
                 <DropdownMenuItem
-                  onClick={() => router.push("/dashboard/profil")} // Ganti ke "/dashboard/profil" jika Anda mengikuti saran saya, Sir.
+                  onClick={() => handleNavigation("/dashboard/profil")} // <-- GUNAKAN JUGA DI MENU PROFIL
                   className="cursor-pointer"
                 >
                   <User className="mr-2 size-4" />

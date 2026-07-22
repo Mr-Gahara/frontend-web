@@ -28,4 +28,10 @@ export const queryKeys = {
 
   bahanBaku: ["bahan-baku"] as const,
   bahanBakuDetail: (id: string) => ["bahan-baku", "detail", id] as const,
+
+  // Modul Reservasi & Aset
+  tarif: ["tarif"] as const,
+  tarifDetail: (id: string) => ["tarif", "detail", id] as const,
+
+  tipeAset: ["tipeAset"] as const,
 };

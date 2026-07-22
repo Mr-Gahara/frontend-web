@@ -7,7 +7,14 @@ import { queryKeys } from "@/lib/queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 
+// --- Form & Validation ---
+import { useForm, Controller, useFieldArray, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+// --- Components ---
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,27 +49,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 
 // --- TIPE DATA LOKAL ---
-const SATUAN_OPTIONS = ["gram", "ml", "pcs", "kg", "liter"];
+const SATUAN_OPTIONS = ["gram", "ml", "pcs", "kg", "liter"] as const;
 
-interface ResepItem {
-  bahanBakuID: string;
-  jumlah: number;
-  satuan: string;
-}
+// --- ZOD SCHEMA ---
+const resepSchema = z.object({
+  bahanBakuID: z.string().min(1, "Bahan baku harus dipilih"),
+  jumlah: z.coerce.number().min(0.01, "Jumlah harus lebih dari 0"),
+  satuan: z.enum(SATUAN_OPTIONS, { message: "Satuan tidak valid" }),
+});
 
-interface ProdukRequestPayload {
-  namaProduk: string;
-  hargaDasar: number;
-  hargaJual: number;
-  kategoriID: string;
-  keterangan?: string;
-  gambarProduk?: string;
-  stok?: number;
-  resep?: ResepItem[];
-}
+const produkSchema = z.object({
+  namaProduk: z.string().min(1, "Nama produk wajib diisi"),
+  kategoriID: z.string().min(1, "Kategori wajib dipilih"),
+  gambarProduk: z.string().optional().default(""),
+  keterangan: z.string().optional().default(""),
+  hargaDasar: z.coerce.number().min(0, "Harga dasar tidak boleh negatif"),
+  hargaJual: z.coerce.number().min(0, "Harga jual tidak boleh negatif"),
+  stok: z.coerce.number().min(0, "Stok tidak boleh negatif").default(0),
+  resep: z.array(resepSchema).default([]),
+});
+
+type ProdukFormInput = z.input<typeof produkSchema>;
+type ProdukFormOutput = z.output<typeof produkSchema>;
 
 export default function EditProdukPage() {
   useAuthGuard();
@@ -71,25 +81,49 @@ export default function EditProdukPage() {
   const queryClient = useQueryClient();
 
   const produkId = params.id as string;
+  const [openCombobox, setOpenCombobox] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const [form, setForm] = useState<ProdukRequestPayload>({
-    namaProduk: "",
-    hargaDasar: 0,
-    hargaJual: 0,
-    kategoriID: "",
-    keterangan: "",
-    gambarProduk: "",
-    stok: 0,
-    resep: [],
+  // --- REACT HOOK FORM ---
+  const {
+    register,
+    control,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<ProdukFormInput, any, ProdukFormOutput>({
+    resolver: zodResolver(produkSchema),
+    defaultValues: {
+      namaProduk: "",
+      kategoriID: "",
+      gambarProduk: "",
+      keterangan: "",
+      hargaDasar: 0,
+      hargaJual: 0,
+      stok: 0,
+      resep: [],
+    },
   });
 
-  const [hargaDasarInput, setHargaDasarInput] = useState("");
-  const [hargaJualInput, setHargaJualInput] = useState("");
-  const [stokInput, setStokInput] = useState("");
-  const [formError, setFormError] = useState("");
-  const [openCombobox, setOpenCombobox] = useState(false);
+  // --- DYNAMIC FIELDS UNTUK RESEP (useFieldArray) ---
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "resep",
+  });
 
-  // --- QUERY 1: KATEGORI ---
+  // Mengawasi seluruh resep untuk logika disable input Stok
+  const watchedResep = useWatch({ control, name: "resep" }) || [];
+  const hasResep = watchedResep.length > 0;
+
+  // Efek samping: Jika resep ada, paksa stok menjadi 0 di form
+  useEffect(() => {
+    if (hasResep && isInitialized) {
+      setValue("stok", 0);
+    }
+  }, [hasResep, setValue, isInitialized]);
+
+  // --- FETCH KATEGORI ---
   const {
     data: kategoriList = [],
     isLoading: isLoadingKategori,
@@ -101,9 +135,35 @@ export default function EditProdukPage() {
       const raw = res.data?.data || res.data || [];
       return Array.isArray(raw) ? raw : [];
     },
+    staleTime: 5 * 60 * 1000,
   });
 
-  // --- QUERY 2: DETAIL PRODUK ---
+  // --- FETCH BAHAN BAKU ---
+  const { data: bahanBakuList = [] } = useQuery({
+    queryKey: queryKeys.bahanBaku,
+    queryFn: async () => {
+      try {
+        const res = await apiClient.get<any>(
+          "/bahan-baku",
+          undefined,
+          "pengguna"
+        );
+        const raw = res.data?.data || res.data || [];
+        return Array.isArray(raw) ? raw : [];
+      } catch (error) {
+        const res = await apiClient.get<any>(
+          "/bahanBaku",
+          undefined,
+          "pengguna"
+        );
+        const raw = res.data?.data || res.data || [];
+        return Array.isArray(raw) ? raw : [];
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // --- FETCH DETAIL PRODUK ---
   const {
     data: produkDetail,
     isLoading: isLoadingDetail,
@@ -113,146 +173,119 @@ export default function EditProdukPage() {
     queryKey: queryKeys.produkDetail(produkId),
     enabled: !!produkId,
     queryFn: async () => {
-      const res = await apiClient.get<any>(`/produk/${produkId}`, undefined, "pengguna");
+      const res = await apiClient.get<any>(
+        `/produk/${produkId}`,
+        undefined,
+        "pengguna"
+      );
       return res.data?.data || res.data;
     },
   });
 
-  // --- QUERY 3: BAHAN BAKU ---
-  const { data: bahanBakuList = [] } = useQuery({
-    queryKey: ["bahan-baku"],
-    queryFn: async () => {
-      try {
-        const res = await apiClient.get<any>("/bahan-baku", undefined, "pengguna");
-        const raw = res.data?.data || res.data || [];
-        return Array.isArray(raw) ? raw : [];
-      } catch (error) {
-        const res = await apiClient.get<any>("/bahanBaku", undefined, "pengguna");
-        const raw = res.data?.data || res.data || [];
-        return Array.isArray(raw) ? raw : [];
-      }
-    },
-  });
-
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // --- EFFECT: INITIALIZE FORM ---
+  // --- EFFECT: PREFILL FORM ---
   useEffect(() => {
     if (produkDetail && !isLoadingKategori && !isInitialized) {
+      // 1. Resolve Category ID
       let catId =
-        typeof produkDetail.kategoriID === "object" && produkDetail.kategoriID !== null
+        typeof produkDetail.kategoriID === "object" &&
+        produkDetail.kategoriID !== null
           ? (produkDetail.kategoriID as any)._id
           : String(produkDetail.kategoriID || "");
 
+      // Fallback text matching (if legacy data)
       if (!catId && produkDetail.kategori && kategoriList.length > 0) {
         const matchedCategory = kategoriList.find(
-          (k: any) => k.namaKategori.toLowerCase() === produkDetail.kategori?.toLowerCase()
+          (k: any) =>
+            k.namaKategori.toLowerCase() ===
+            produkDetail.kategori?.toLowerCase()
         );
         if (matchedCategory) catId = matchedCategory._id;
       }
 
-      setForm({
+      // 2. Resolve Resep
+      let parsedResep: any[] = [];
+      if (produkDetail.resep && Array.isArray(produkDetail.resep)) {
+        parsedResep = produkDetail.resep.map((r: any) => {
+          let extractedId = "";
+          if (typeof r.bahanBakuID === "object" && r.bahanBakuID !== null) {
+            extractedId = String(r.bahanBakuID._id || r.bahanBakuID.id || "");
+          } else {
+            extractedId = String(r.bahanBakuID || "");
+          }
+          return {
+            bahanBakuID: extractedId,
+            jumlah: Number(r.jumlah || 0),
+            satuan: String(r.satuan || "gram"),
+          };
+        });
+      }
+
+      // 3. Update RHF State
+      reset({
         namaProduk: produkDetail.namaProduk || "",
+        kategoriID: catId,
+        gambarProduk: produkDetail.gambarProduk || "",
+        keterangan: produkDetail.keterangan || "",
         hargaDasar: produkDetail.hargaDasar || 0,
         hargaJual: produkDetail.hargaJual || 0,
-        kategoriID: catId,
-        keterangan: produkDetail.keterangan || "",
-        gambarProduk: produkDetail.gambarProduk || "",
         stok: produkDetail.stok || 0,
-        resep: produkDetail.resep || [], // Catatan: Pastikan backend mengirim field ini
+        resep: parsedResep,
       });
-
-      setHargaDasarInput(String(produkDetail.hargaDasar || 0));
-      setHargaJualInput(String(produkDetail.hargaJual || 0));
-      setStokInput(String(produkDetail.stok || 0));
 
       setIsInitialized(true);
     }
-  }, [produkDetail, kategoriList, isLoadingKategori, isInitialized]);
+  }, [produkDetail, kategoriList, isLoadingKategori, isInitialized, reset]);
 
   // ERROR TOASTS
   useEffect(() => {
-    if (kategoriError) toast.error("Gagal", { description: "Gagal memuat daftar kategori." });
-    if (detailError) toast.error("Gagal", { description: "Produk tidak ditemukan." });
+    if (kategoriError)
+      toast.error("Gagal", { description: "Gagal memuat daftar kategori." });
+    if (detailError)
+      toast.error("Gagal", { description: "Produk tidak ditemukan." });
   }, [kategoriError, detailError]);
 
-  // --- HANDLER RESEP DINAMIS ---
-  const addResepRow = () => {
-    setForm((prev) => ({
-      ...prev,
-      resep: [...(prev.resep || []), { bahanBakuID: "", jumlah: 0, satuan: "gram" }],
-    }));
-  };
-
-  const removeResepRow = (index: number) => {
-    setForm((prev) => {
-      const newResep = [...(prev.resep || [])];
-      newResep.splice(index, 1);
-      return { ...prev, resep: newResep };
-    });
-  };
-
-  const updateResepRow = (index: number, field: keyof ResepItem, value: any) => {
-    setForm((prev) => {
-      const newResep = [...(prev.resep || [])];
-      newResep[index] = { ...newResep[index], [field]: value };
-      
-      if (field === "bahanBakuID") {
-        const selectedBahan = bahanBakuList.find((b: any) => b._id === value);
-        if (selectedBahan && selectedBahan.satuan) {
-          newResep[index].satuan = selectedBahan.satuan;
-        }
-      }
-      return { ...prev, resep: newResep };
-    });
-  };
-
   // --- MUTATION UPDATE PRODUK ---
-  const updateProdukMutation = useMutation({
-    mutationFn: async (payload: ProdukRequestPayload) => {
-      return await apiClient.put(`/produk/${produkId}`, payload, undefined, "pengguna");
+  const updateProdukMutation = useMutation<any, Error, ProdukFormOutput>({
+    mutationFn: async (payload: ProdukFormOutput) => {
+      return await apiClient.put(
+        `/produk/${produkId}`,
+        payload,
+        undefined,
+        "pengguna"
+      );
     },
     onSuccess: () => {
-      toast.success("Berhasil", { description: "Perubahan produk berhasil disimpan." });
+      toast.success("Berhasil", {
+        description: "Perubahan produk berhasil disimpan.",
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.produk });
-      queryClient.invalidateQueries({ queryKey: queryKeys.produkDetail(produkId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.produkDetail(produkId),
+      });
       router.push("/dashboard/inventaris/produk");
     },
     onError: (err: any) => {
-      setFormError(err.message || "Gagal memperbarui produk.");
+      toast.error("Gagal Menyimpan", {
+        description: err.message || "Gagal memperbarui produk.",
+      });
     },
   });
 
   // --- HANDLER SUBMIT ---
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError("");
+  const onSubmit = (data: ProdukFormOutput) => {
+    const payload = { ...data };
 
-    if (!form.kategoriID) return setFormError("Silakan pilih kategori produk terlebih dahulu.");
-
-    // Validasi Resep
-    if (form.resep && form.resep.length > 0) {
-      for (let i = 0; i < form.resep.length; i++) {
-        const r = form.resep[i];
-        if (!r.bahanBakuID) return setFormError(`Bahan baku pada baris ke-${i + 1} belum dipilih.`);
-        if (r.jumlah <= 0) return setFormError(`Jumlah bahan pada baris ke-${i + 1} harus lebih dari 0.`);
-      }
-    }
-
-    const payload = { ...form };
-    
-    // Jika resep dikosongkan, kita kirim array kosong agar di backend tersetting ulang ke barang tanpa resep
     if (!payload.resep || payload.resep.length === 0) {
-      payload.resep = [];
+      payload.resep = []; // Kirim array kosong agar backend menghapus resep
     } else {
       payload.stok = 0; // Biarkan backend override lewat resep
     }
 
-    await updateProdukMutation.mutateAsync(payload);
+    updateProdukMutation.mutate(payload);
   };
 
+  // --- LOADING STATES ---
   const isMencariData = isLoadingDetail && isFetchingDetail;
-  const hasResep = form.resep && form.resep.length > 0;
 
   if (isMencariData || !produkId) {
     return (
@@ -270,6 +303,7 @@ export default function EditProdukPage() {
       {/* Tombol Kembali & Header */}
       <div className="flex flex-col gap-4">
         <Button
+          type="button"
           variant="ghost"
           size="sm"
           className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
@@ -280,102 +314,154 @@ export default function EditProdukPage() {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">Edit Produk</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+            Edit Produk
+          </h1>
           <p className="text-sm font-medium text-[#0A2947]/60">
-            Perbarui informasi produk {produkDetail?.namaProduk ? `"${produkDetail.namaProduk}"` : ""}.
+            Perbarui informasi produk{" "}
+            {produkDetail?.namaProduk ? `"${produkDetail.namaProduk}"` : ""}.
           </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         {/* GRID UTAMA: Info Produk & Harga */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
           {/* KOLOM KIRI: Info Dasar */}
           <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm flex flex-col gap-5">
             <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
               <Edit3 className="h-5 w-5 text-[#D4A373]" />
-              <h3 className="text-base font-bold text-[#0A2947]">Informasi Utama</h3>
+              <h3 className="text-base font-bold text-[#0A2947]">
+                Informasi Utama
+              </h3>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">Nama Produk <span className="text-red-500">*</span></label>
+              <label className="text-sm font-bold text-[#0A2947]">
+                Nama Produk <span className="text-red-500">*</span>
+              </label>
               <Input
-                value={form.namaProduk}
-                onChange={(e) => setForm({ ...form, namaProduk: e.target.value })}
+                {...register("namaProduk")}
                 placeholder="Contoh: Kopi Susu Gula Aren"
-                required
-                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
+                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
               />
+              <div className="min-h-4">
+                {errors.namaProduk && (
+                  <span className="text-xs font-bold text-rose-500">
+                    {errors.namaProduk.message}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2 flex flex-col">
-              <label className="text-sm font-bold text-[#0A2947]">Kategori <span className="text-red-500">*</span></label>
-              <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openCombobox}
-                    className="w-full justify-between cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5"
-                  >
-                    <span className={form.kategoriID ? "font-bold" : "font-normal text-[#0A2947]/50"}>
-                      {form.kategoriID
-                        ? kategoriList.find((kat: any) => kat._id === form.kategoriID)?.namaKategori || "Kategori tidak ditemukan"
-                        : "Pilih kategori produk..."}
-                    </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-[#0A2947]/10" align="start">
-                  <Command className="bg-[#FFFAF3]">
-                    <CommandInput placeholder="Cari kategori..." className="text-[#0A2947]" />
-                    <CommandList>
-                      <CommandEmpty className="py-6 text-center text-sm text-[#0A2947]/60 font-medium">Kategori tidak ditemukan.</CommandEmpty>
-                      <CommandGroup>
-                        {kategoriList.map((kat: any) => (
-                          <CommandItem
-                            key={kat._id}
-                            value={kat.namaKategori}
-                            onSelect={() => {
-                              setForm({ ...form, kategoriID: kat._id });
-                              setOpenCombobox(false);
-                            }}
-                            className="cursor-pointer text-[#0A2947] aria-selected:bg-[#0A2947]/5 font-medium"
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4 text-[#718355]",
-                                form.kategoriID === kat._id ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {kat.namaKategori}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <label className="text-sm font-bold text-[#0A2947]">
+                Kategori <span className="text-red-500">*</span>
+              </label>
+              <Controller
+                name="kategoriID"
+                control={control}
+                render={({ field }) => (
+                  <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={openCombobox}
+                        className="w-full justify-between cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 focus:ring-1 focus:ring-[#0A2947]"
+                      >
+                        <span
+                          className={
+                            field.value
+                              ? "font-bold"
+                              : "font-normal text-[#0A2947]/50"
+                          }
+                        >
+                          {field.value
+                            ? kategoriList.find(
+                                (kat: any) => kat._id === field.value
+                              )?.namaKategori || "Kategori tidak ditemukan"
+                            : "Pilih kategori produk..."}
+                        </span>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[--radix-popover-trigger-width] p-0 border-[#0A2947]/10"
+                      align="start"
+                    >
+                      <Command className="bg-[#FFFAF3]">
+                        <CommandInput
+                          placeholder="Cari kategori..."
+                          className="text-[#0A2947]"
+                        />
+                        <CommandList>
+                          <CommandEmpty className="py-6 text-center text-sm text-[#0A2947]/60 font-medium">
+                            Kategori tidak ditemukan.
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {kategoriList.map((kat: any) => (
+                              <CommandItem
+                                key={kat._id}
+                                value={kat.namaKategori}
+                                onSelect={() => {
+                                  field.onChange(kat._id);
+                                  setOpenCombobox(false);
+                                }}
+                                className="cursor-pointer text-[#0A2947] aria-selected:bg-[#0A2947]/5 font-medium"
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4 text-[#718355]",
+                                    field.value === kat._id
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                {kat.namaKategori}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              <div className="min-h-4">
+                {errors.kategoriID && (
+                  <span className="text-xs font-bold text-rose-500">
+                    {errors.kategoriID.message}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">Link Gambar Produk <span className="text-[#0A2947]/50 font-medium">(Opsional)</span></label>
+              <label className="text-sm font-bold text-[#0A2947]">
+                Link Gambar Produk{" "}
+                <span className="text-[#0A2947]/50 font-medium">
+                  (Opsional)
+                </span>
+              </label>
               <Input
-                value={form.gambarProduk || ""}
-                onChange={(e) => setForm({ ...form, gambarProduk: e.target.value })}
+                {...register("gambarProduk")}
                 placeholder="https://example.com/gambar.jpg"
-                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
+                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">Keterangan <span className="text-[#0A2947]/50 font-medium">(Opsional)</span></label>
+              <label className="text-sm font-bold text-[#0A2947]">
+                Keterangan{" "}
+                <span className="text-[#0A2947]/50 font-medium">
+                  (Opsional)
+                </span>
+              </label>
               <Input
-                value={form.keterangan || ""}
-                onChange={(e) => setForm({ ...form, keterangan: e.target.value })}
+                {...register("keterangan")}
                 placeholder="Catatan singkat mengenai produk ini..."
-                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
+                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
               />
             </div>
           </div>
@@ -384,86 +470,106 @@ export default function EditProdukPage() {
           <div className="flex flex-col gap-6">
             <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col gap-5">
               <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-                <span className="h-5 w-5 rounded-full bg-[#D4A373] text-white flex items-center justify-center font-bold text-xs">$</span>
-                <h3 className="text-base font-bold text-[#0A2947]">Manajemen Harga</h3>
+                <span className="h-5 w-5 rounded-full bg-[#D4A373] text-white flex items-center justify-center font-bold text-xs">
+                  $
+                </span>
+                <h3 className="text-base font-bold text-[#0A2947]">
+                  Manajemen Harga
+                </h3>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947]">Harga Dasar (Rp) <span className="text-red-500">*</span></label>
+                <label className="text-sm font-bold text-[#0A2947]">
+                  Harga Dasar (Rp) <span className="text-red-500">*</span>
+                </label>
                 <Input
                   type="number"
-                  className="no-spinner bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold"
-                  min={0}
+                  {...register("hargaDasar")}
+                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   placeholder="0"
-                  value={hargaDasarInput}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setHargaDasarInput(value);
-                    setForm({ ...form, hargaDasar: value === "" ? 0 : Number(value) });
-                  }}
-                  required
                 />
-                <p className="text-xs font-medium text-[#0A2947]/50">Modal belanja/produksi per item.</p>
+                <div className="min-h-4 flex flex-col justify-start">
+                  {errors.hargaDasar ? (
+                    <span className="text-xs font-bold text-rose-500">
+                      {errors.hargaDasar.message}
+                    </span>
+                  ) : (
+                    <p className="text-xs font-medium text-[#0A2947]/50">
+                      Modal belanja/produksi per item.
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947]">Harga Jual (Rp) <span className="text-red-500">*</span></label>
+                <label className="text-sm font-bold text-[#0A2947]">
+                  Harga Jual (Rp) <span className="text-red-500">*</span>
+                </label>
                 <Input
                   type="number"
-                  className="no-spinner bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold"
-                  min={0}
+                  {...register("hargaJual")}
+                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   placeholder="0"
-                  value={hargaJualInput}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setHargaJualInput(value);
-                    setForm({ ...form, hargaJual: value === "" ? 0 : Number(value) });
-                  }}
-                  required
                 />
-                <p className="text-xs font-medium text-[#0A2947]/50">Harga yang ditawarkan ke pelanggan.</p>
+                <div className="min-h-4 flex flex-col justify-start">
+                  {errors.hargaJual ? (
+                    <span className="text-xs font-bold text-rose-500">
+                      {errors.hargaJual.message}
+                    </span>
+                  ) : (
+                    <p className="text-xs font-medium text-[#0A2947]/50">
+                      Harga yang ditawarkan ke pelanggan.
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
             <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col gap-5">
               <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
                 <PackagePlus className="h-5 w-5 text-[#D4A373]" />
-                <h3 className="text-base font-bold text-[#0A2947]">Stok Sistem</h3>
+                <h3 className="text-base font-bold text-[#0A2947]">
+                  Stok Sistem
+                </h3>
               </div>
               <div className="space-y-2">
                 <Input
                   type="number"
-                  className="no-spinner bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                  min={0}
+                  {...register("stok")}
+                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947] disabled:opacity-50 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   placeholder="0"
-                  value={hasResep ? "" : stokInput}
                   disabled={hasResep}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setStokInput(value);
-                    setForm({ ...form, stok: value === "" ? 0 : Number(value) });
-                  }}
                 />
                 <div className="flex items-start gap-2 mt-2">
                   <Info className="w-4 h-4 text-[#0A2947]/50 shrink-0 mt-0.5" />
-                  <p className="text-xs font-medium text-[#0A2947]/60 leading-relaxed">
-                    {hasResep 
-                      ? "Input stok dinonaktifkan karena produk menggunakan resep. Stok terhitung otomatis dari bahan baku." 
-                      : "Edit stok produk. Disarankan merubah stok melalui jurnal Penyesuaian / Stok Opname agar riwayat tercatat."}
-                  </p>
+                  <div className="flex flex-col gap-1 min-h-4">
+                    {errors.stok ? (
+                      <span className="text-xs font-bold text-rose-500">
+                        {errors.stok.message}
+                      </span>
+                    ) : (
+                      <p className="text-xs font-medium text-[#0A2947]/60 leading-relaxed">
+                        {hasResep
+                          ? "Input stok dinonaktifkan karena produk menggunakan resep. Stok terhitung otomatis dari bahan baku."
+                          : "Edit stok produk. Disarankan merubah stok melalui jurnal Penyesuaian / Stok Opname agar riwayat tercatat."}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* SECTION: RESEP BAHAN BAKU */}
+        {/* SECTION: RESEP BAHAN BAKU (USE FIELD ARRAY) */}
         <div className="rounded-2xl border border-[#0A2947]/10 bg-[#FFFAF3] shadow-sm overflow-hidden flex flex-col">
           <div className="p-6 border-b border-[#0A2947]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#F2EAE1]">
             <div>
               <div className="flex items-center gap-2">
                 <ChefHat className="h-5 w-5 text-[#D4A373]" />
-                <h3 className="text-base font-bold text-[#0A2947]">Resep & Komposisi (BOM)</h3>
+                <h3 className="text-base font-bold text-[#0A2947]">
+                  Resep & Komposisi (BOM)
+                </h3>
               </div>
               <p className="text-xs font-medium text-[#0A2947]/60 mt-1">
                 Ubah resep jika ada penyesuaian penggunaan komposisi.
@@ -471,7 +577,9 @@ export default function EditProdukPage() {
             </div>
             <Button
               type="button"
-              onClick={addResepRow}
+              onClick={() =>
+                append({ bahanBakuID: "", jumlah: 0, satuan: "gram" })
+              }
               className="cursor-pointer bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/90 font-bold shadow-sm h-9"
             >
               <Plus className="w-4 h-4 mr-2" /> Tambah Bahan
@@ -479,11 +587,15 @@ export default function EditProdukPage() {
           </div>
 
           <div className="p-6">
-            {!form.resep || form.resep.length === 0 ? (
+            {fields.length === 0 ? (
               <div className="text-center py-8 px-4 border-2 border-dashed border-[#0A2947]/10 rounded-xl bg-white/50">
                 <ChefHat className="w-8 h-8 text-[#0A2947]/20 mx-auto mb-2" />
-                <p className="text-sm font-bold text-[#0A2947]/50">Tidak ada resep yang ditambahkan.</p>
-                <p className="text-xs font-medium text-[#0A2947]/40 mt-1">Produk ini saat ini berstatus sebagai barang jadi.</p>
+                <p className="text-sm font-bold text-[#0A2947]/50">
+                  Tidak ada resep yang ditambahkan.
+                </p>
+                <p className="text-xs font-medium text-[#0A2947]/40 mt-1">
+                  Produk ini saat ini berstatus sebagai barang jadi.
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -495,67 +607,136 @@ export default function EditProdukPage() {
                   <div className="col-span-1 text-center">Aksi</div>
                 </div>
 
-                {form.resep.map((item, index) => (
-                  <div key={index} className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start sm:items-center p-4 sm:p-2 border sm:border-none border-[#0A2947]/10 rounded-xl sm:rounded-none bg-white sm:bg-transparent shadow-sm sm:shadow-none">
-                    
+                {fields.map((field, index) => (
+                  <div
+                    key={field.id}
+                    className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start p-4 sm:p-2 border sm:border-none border-[#0A2947]/10 rounded-xl sm:rounded-none bg-white sm:bg-transparent shadow-sm sm:shadow-none"
+                  >
                     {/* Pilih Bahan Baku */}
                     <div className="col-span-1 sm:col-span-5">
-                      <label className="text-xs font-bold text-[#0A2947] mb-1.5 block sm:hidden">Bahan Baku</label>
-                      <Select
-                        value={item.bahanBakuID}
-                        onValueChange={(val) => updateResepRow(index, "bahanBakuID", val)}
-                      >
-                        <SelectTrigger className="w-full bg-white border-[#0A2947]/20 text-[#0A2947] font-bold h-10">
-                          <SelectValue placeholder="Pilih bahan..." />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
-                          {bahanBakuList.length === 0 ? (
-                            <div className="p-2 text-sm text-center font-medium text-[#0A2947]/50">Data kosong...</div>
-                          ) : (
-                            bahanBakuList.map((bb: any) => (
-                              <SelectItem key={bb._id} value={bb._id} className="cursor-pointer hover:bg-[#0A2947]/5 font-bold">
-                                {bb.namaBahan} <span className="font-medium text-xs text-[#0A2947]/50 ml-1">({bb.satuan})</span>
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
+                      <label className="text-xs font-bold text-[#0A2947] mb-1.5 block sm:hidden">
+                        Bahan Baku
+                      </label>
+                      <Controller
+                        name={`resep.${index}.bahanBakuID`}
+                        control={control}
+                        render={({ field: selectField }) => (
+                          <Select
+                            onValueChange={(val) => {
+                              selectField.onChange(val);
+                              const selectedBahan = bahanBakuList.find(
+                                (b: any) => b._id === val
+                              );
+                              if (selectedBahan && selectedBahan.satuan) {
+                                setValue(
+                                  `resep.${index}.satuan`,
+                                  selectedBahan.satuan
+                                );
+                              }
+                            }}
+                            value={selectField.value}
+                          >
+                            <SelectTrigger
+                              className={cn(
+                                "w-full bg-white border-[#0A2947]/20 text-[#0A2947] font-bold h-10 focus:ring-1 focus:ring-[#0A2947]",
+                                errors.resep?.[index]?.bahanBakuID &&
+                                  "border-rose-500"
+                              )}
+                            >
+                              <SelectValue placeholder="Pilih bahan..." />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
+                              {bahanBakuList.length === 0 ? (
+                                <div className="p-2 text-sm text-center font-medium text-[#0A2947]/50">
+                                  Data kosong...
+                                </div>
+                              ) : (
+                                bahanBakuList.map((bb: any) => (
+                                  <SelectItem
+                                    key={bb._id}
+                                    value={bb._id}
+                                    className="cursor-pointer hover:bg-[#0A2947]/5 font-bold"
+                                  >
+                                    {bb.namaBahan}{" "}
+                                    <span className="font-medium text-xs text-[#0A2947]/50 ml-1">
+                                      ({bb.satuan})
+                                    </span>
+                                  </SelectItem>
+                                ))
+                              )}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                      {errors.resep?.[index]?.bahanBakuID && (
+                        <span className="text-[10px] font-bold text-rose-500 mt-1 block">
+                          {errors.resep[index]?.bahanBakuID?.message}
+                        </span>
+                      )}
                     </div>
 
                     {/* Jumlah */}
-                    <div className="col-span-1 sm:col-span-3 flex gap-2">
-                      <div className="w-full">
-                        <label className="text-xs font-bold text-[#0A2947] mb-1.5 block sm:hidden">Jumlah</label>
-                        <Input
-                          type="number"
-                          min={0}
-                          step="any"
-                          value={item.jumlah === 0 ? "" : item.jumlah}
-                          onChange={(e) => updateResepRow(index, "jumlah", Number(e.target.value))}
-                          placeholder="0"
-                          className="w-full text-center bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold h-10"
-                        />
-                      </div>
+                    <div className="col-span-1 sm:col-span-3">
+                      <label className="text-xs font-bold text-[#0A2947] mb-1.5 block sm:hidden">
+                        Jumlah
+                      </label>
+                      <Input
+                        type="number"
+                        {...register(`resep.${index}.jumlah`)}
+                        className={cn(
+                          "w-full text-center bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold h-10 focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                          errors.resep?.[index]?.jumlah && "border-rose-500"
+                        )}
+                        placeholder="0"
+                      />
+                      {errors.resep?.[index]?.jumlah && (
+                        <span className="text-[10px] font-bold text-rose-500 mt-1 block text-center sm:text-left">
+                          {errors.resep[index]?.jumlah?.message}
+                        </span>
+                      )}
                     </div>
 
                     {/* Satuan */}
                     <div className="col-span-1 sm:col-span-3">
-                      <label className="text-xs font-bold text-[#0A2947] mb-1.5 block sm:hidden">Satuan</label>
-                      <Select
-                        value={item.satuan}
-                        onValueChange={(val) => updateResepRow(index, "satuan", val)}
-                      >
-                        <SelectTrigger className="w-full bg-white border-[#0A2947]/20 text-[#0A2947] font-bold h-10">
-                          <SelectValue placeholder="Satuan" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
-                          {SATUAN_OPTIONS.map((sat) => (
-                            <SelectItem key={sat} value={sat} className="cursor-pointer hover:bg-[#0A2947]/5 font-bold">
-                              {sat}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <label className="text-xs font-bold text-[#0A2947] mb-1.5 block sm:hidden">
+                        Satuan
+                      </label>
+                      <Controller
+                        name={`resep.${index}.satuan`}
+                        control={control}
+                        render={({ field: selectField }) => (
+                          <Select
+                            onValueChange={selectField.onChange}
+                            value={selectField.value}
+                          >
+                            <SelectTrigger
+                              className={cn(
+                                "w-full bg-white border-[#0A2947]/20 text-[#0A2947] font-bold h-10 focus:ring-1 focus:ring-[#0A2947]",
+                                errors.resep?.[index]?.satuan &&
+                                  "border-rose-500"
+                              )}
+                            >
+                              <SelectValue placeholder="Satuan" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
+                              {SATUAN_OPTIONS.map((sat) => (
+                                <SelectItem
+                                  key={sat}
+                                  value={sat}
+                                  className="cursor-pointer hover:bg-[#0A2947]/5 font-bold"
+                                >
+                                  {sat}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                      {errors.resep?.[index]?.satuan && (
+                        <span className="text-[10px] font-bold text-rose-500 mt-1 block">
+                          {errors.resep[index]?.satuan?.message}
+                        </span>
+                      )}
                     </div>
 
                     {/* Aksi Hapus */}
@@ -563,26 +744,18 @@ export default function EditProdukPage() {
                       <Button
                         type="button"
                         variant="ghost"
-                        onClick={() => removeResepRow(index)}
+                        onClick={() => remove(index)}
                         className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 h-10 w-10 p-0"
                       >
                         <Trash2 className="w-5 h-5" />
                       </Button>
                     </div>
-
                   </div>
                 ))}
               </div>
             )}
           </div>
         </div>
-
-        {/* Pesan Error Global */}
-        {formError && (
-          <div className="rounded-xl bg-red-500/10 p-4 text-sm font-bold text-red-600 border border-red-500/20 shadow-sm text-center">
-            {formError}
-          </div>
-        )}
 
         {/* Aksi Tombol */}
         <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[#0A2947]/10 mt-2">
@@ -600,7 +773,9 @@ export default function EditProdukPage() {
             disabled={updateProdukMutation.isPending || isLoadingDetail}
             className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold h-12 w-full sm:w-auto px-8"
           >
-            {updateProdukMutation.isPending ? "Menyimpan Perubahan..." : "Simpan Perubahan"}
+            {updateProdukMutation.isPending
+              ? "Menyimpan Perubahan..."
+              : "Simpan Perubahan"}
           </Button>
         </div>
       </form>

@@ -13,6 +13,7 @@ import {
 } from "recharts";
 
 import { Button } from "@/components/ui/button";
+
 // Types
 type FilterPeriode = "harian" | "mingguan" | "bulanan";
 
@@ -20,6 +21,7 @@ type DataPoint = {
   label: string;
   nilai: number;
 };
+
 // Dummy data statis
 const DUMMY_HARIAN: DataPoint[] = Array.from({ length: 25 }, (_, i) => ({
   label: i < 24 ? `${String(i).padStart(2, "0")}:00` : "23:59",
@@ -51,6 +53,7 @@ const DUMMY_BULANAN: DataPoint[] = Array.from({ length: 30 }, (_, i) => ({
     12800000,
   ][i],
 }));
+
 // Helper
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
@@ -59,6 +62,7 @@ function formatRupiah(value: number): string {
     minimumFractionDigits: 0,
   }).format(value);
 }
+
 // Custom Tooltip
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -71,6 +75,7 @@ function CustomTooltip({ active, payload, label }: any) {
     </div>
   );
 }
+
 // Filter toggle
 function PeriodeToggle({
   active,
@@ -87,16 +92,18 @@ function PeriodeToggle({
   return (
     <button
       onClick={() => onClick(value)}
-      className={`px-4 py-1.5 text-sm font-bold rounded-md transition-colors cursor-pointer ${
+      // Padding diperkecil (px-1), ukuran teks responsif ekstrem (10px untuk HP terkecil), dan truncate
+      className={`px-1 sm:px-4 py-1.5 text-[10px] min-[375px]:text-xs sm:text-sm font-bold rounded-md transition-colors cursor-pointer w-full flex items-center justify-center text-center overflow-hidden ${
         isActive
           ? "bg-[#718355] text-[#FFFAF3] shadow-sm"
           : "text-[#0A2947]/60 hover:text-[#0A2947]"
       }`}
     >
-      {children}
+      <span className="truncate w-full">{children}</span>
     </button>
   );
 }
+
 // Page
 export default function RingkasanLabaRugiPage() {
   const [periode, setPeriode] = useState<FilterPeriode>("bulanan");
@@ -109,7 +116,7 @@ export default function RingkasanLabaRugiPage() {
 
   const totalNilai = useMemo(
     () => data.reduce((acc, d) => acc + d.nilai, 0),
-    [data],
+    [data]
   );
 
   const labelPeriode = {
@@ -119,18 +126,19 @@ export default function RingkasanLabaRugiPage() {
   }[periode];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
       {/* Chart card */}
-      <div className="bg-[#F2EAE2] border border-[#0A2947]/10 rounded-2xl p-6 text-[#0A2947] shadow-sm flex flex-col w-full gap-6">
+      <div className="bg-[#F2EAE2] border border-[#0A2947]/10 rounded-2xl p-5 sm:p-6 text-[#0A2947] shadow-sm flex flex-col w-full gap-6 overflow-hidden">
+        
         {/* Toolbar chart */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-3">
             {/* Kotak Cream dengan Ikon Mustard */}
-            <div className="p-2 bg-[#D4A373] rounded-lg shadow-sm">
+            <div className="p-2 bg-[#D4A373] rounded-lg shadow-sm shrink-0">
               <LineChartIcon className="w-5 h-5 text-[#FFFAF3]" />
             </div>
             <div>
-              <h2 className="text-base font-bold tracking-wide text-[#0A2947]">
+              <h2 className="text-base sm:text-lg font-bold tracking-wide text-[#0A2947]">
                 Arus Kas &amp; Laba Bersih
               </h2>
               <p className="text-xs text-[#0A2947]/70 font-medium">
@@ -139,8 +147,8 @@ export default function RingkasanLabaRugiPage() {
             </div>
           </div>
 
-          {/* Filter periode dengan border transparan Navy */}
-          <div className="flex bg-[#675a41]/20 rounded-lg p-1 border border-[#0A2947]/10 shadow-inner">
+          {/* Filter periode: Dibuat w-full & grid di mobile agar tombol berjejer rata tanpa tumpah */}
+          <div className="grid grid-cols-3 sm:flex w-full md:w-auto bg-[#675a41]/20 rounded-lg p-1 border border-[#0A2947]/10 shadow-inner gap-0.5 sm:gap-0">
             <PeriodeToggle active={periode} value="harian" onClick={setPeriode}>
               Harian
             </PeriodeToggle>
@@ -163,7 +171,7 @@ export default function RingkasanLabaRugiPage() {
 
         {/* Total nilai */}
         <div>
-          <p className="text-3xl font-black tracking-tight text-[#0A2947]">
+          <p className="text-2xl sm:text-3xl font-black tracking-tight text-[#0A2947]">
             {formatRupiah(totalNilai)}
           </p>
           <div className="flex items-center gap-1 mt-1">
@@ -175,14 +183,15 @@ export default function RingkasanLabaRugiPage() {
         </div>
 
         {/* Chart */}
-        <div className="w-full h-100">
+        {/* Tinggi disetel dinamis: 250px di HP, 350px/400px di layar lebar */}
+        <div className="w-full h-62.5 sm:h-87.5 md:h-100 mt-2">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={data}
-              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              // Margin bawah ditambah agar teks XAxis (tanggal) tidak terpotong
+              margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
             >
               <defs>
-                {/* ID diubah dan gradient disesuaikan ke warna Sage Green */}
                 <linearGradient id="gradienSage" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#718355" stopOpacity={0.4} />
                   <stop offset="95%" stopColor="#718355" stopOpacity={0} />
@@ -199,11 +208,12 @@ export default function RingkasanLabaRugiPage() {
                 tick={{
                   fill: "#0A2947",
                   opacity: 0.6,
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: 600,
                 }}
                 axisLine={false}
                 tickLine={false}
+                tickMargin={12} // Memberikan jarak antara garis bawah dan label teks
                 interval={
                   periode === "harian" ? 4 : periode === "bulanan" ? 4 : 0
                 }

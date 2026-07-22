@@ -1,11 +1,8 @@
-export type SatuanBahan =
-  | "kg"
-  | "gram"
-  | "liter"
-  | "ml"
-  | "pcs"
-  | "pak"
-  | "unit";
+// 1. Definisikan array nyatanya di sini
+export const SATUAN_BAHAN_OPTIONS = ["kg", "gram", "liter", "ml", "pcs", "pak", "unit"] as const;
+
+// 2. Ekstrak otomatis menjadi tipe (Tidak perlu tulis ulang manual!)
+export type SatuanBahan = typeof SATUAN_BAHAN_OPTIONS[number];
 
 export interface BahanBaku {
   _id: string;
