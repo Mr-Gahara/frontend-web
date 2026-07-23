@@ -43,7 +43,7 @@ const badgeStatusOpname = (status: StatusOpname) => {
     REJECTED: "bg-rose-100 text-rose-700 border-none shadow-sm", // Light Red
     CANCELLED: "bg-[#0A2947]/10 text-[#0A2947]/60 border-none shadow-sm", // Navy Muted
   };
-  
+
   const labels: Record<StatusOpname, string> = {
     DRAFT: "Draft",
     SUBMITTED: "Menunggu Review",
@@ -75,7 +75,7 @@ export default function StockOpnamePage() {
       if (statusFilter !== "ALL") {
         url += `?status=${statusFilter}`;
       }
-      
+
       const res = await apiClient.get<any>(url, undefined, "pengguna");
       const fetched = res.data?.data || res.data || [];
       return Array.isArray(fetched) ? (fetched as StockOpname[]) : [];
@@ -123,20 +123,21 @@ export default function StockOpnamePage() {
         ),
         cell: ({ row }) => (
           <span className="text-xs sm:text-sm font-medium text-[#0A2947]/70 hidden sm:inline">
-            {formatTanggal(row.original.tanggal)}
+            {formatTanggal(row.original.tanggal || row.original.createdAt)}
           </span>
         ),
       },
       {
-        accessorKey: "locationID",
+        accessorKey: "lokasi", // Ganti dari locationID ke lokasi
         header: () => (
           <span className="text-xs font-bold text-[#0A2947]/60 hidden md:inline">
-            Lokasi ID
+            Lokasi
           </span>
         ),
         cell: ({ row }) => (
-          <span className="hidden md:inline text-xs sm:text-sm font-medium text-[#0A2947]/80 font-mono">
-            {row.original.locationID}
+          <span className="hidden md:inline text-xs sm:text-sm font-medium text-[#0A2947]/80">
+            {/* Membaca dari objek relasi mapper */}
+            {row.original.lokasi?.nama || "Lokasi Tidak Diketahui"}
           </span>
         ),
       },
@@ -155,7 +156,8 @@ export default function StockOpnamePage() {
           </div>
         ),
         cell: ({ row }) => {
-          const targetId = row.original._id;
+          // Ganti dari row.original._id menjadi row.original.id
+          const targetId = row.original.id; 
           return (
             <div className="flex justify-end">
               <Button
@@ -194,7 +196,9 @@ export default function StockOpnamePage() {
         </div>
         <div className="flex shrink-0">
           <Button
-            onClick={() => router.push("/dashboard/inventaris/stockOpname/buatStockOpname")}
+            onClick={() =>
+              router.push("/dashboard/inventaris/stockOpname/buatStockOpname")
+            }
             size="sm"
             className="cursor-pointer gap-1.5 bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm w-full sm:w-auto"
           >
@@ -212,18 +216,50 @@ export default function StockOpnamePage() {
           </label>
           <Select
             value={statusFilter}
-            onValueChange={(val) => setStatusFilter(val as StatusOpname | "ALL")}
+            onValueChange={(val) =>
+              setStatusFilter(val as StatusOpname | "ALL")
+            }
           >
             <SelectTrigger className="cursor-pointer w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-bold">
               <SelectValue placeholder="Semua Status" />
             </SelectTrigger>
             <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
-              <SelectItem value="ALL" className="cursor-pointer font-bold hover:bg-[#0A2947]/5">Semua Status</SelectItem>
-              <SelectItem value="DRAFT" className="cursor-pointer font-bold hover:bg-[#0A2947]/5">Draft</SelectItem>
-              <SelectItem value="SUBMITTED" className="cursor-pointer font-bold hover:bg-[#0A2947]/5">Menunggu Review</SelectItem>
-              <SelectItem value="APPROVED" className="cursor-pointer font-bold hover:bg-[#0A2947]/5">Disetujui</SelectItem>
-              <SelectItem value="REJECTED" className="cursor-pointer font-bold hover:bg-[#0A2947]/5">Ditolak</SelectItem>
-              <SelectItem value="CANCELLED" className="cursor-pointer font-bold hover:bg-[#0A2947]/5">Dibatalkan</SelectItem>
+              <SelectItem
+                value="ALL"
+                className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+              >
+                Semua Status
+              </SelectItem>
+              <SelectItem
+                value="DRAFT"
+                className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+              >
+                Draft
+              </SelectItem>
+              <SelectItem
+                value="SUBMITTED"
+                className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+              >
+                Menunggu Review
+              </SelectItem>
+              <SelectItem
+                value="APPROVED"
+                className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+              >
+                Disetujui
+              </SelectItem>
+              <SelectItem
+                value="REJECTED"
+                className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+              >
+                Ditolak
+              </SelectItem>
+              <SelectItem
+                value="CANCELLED"
+                className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+              >
+                Dibatalkan
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>

@@ -176,7 +176,6 @@ export default function BuatStockOpnamePage() {
 
     const payload: CreateOpnameRequest = {
       locationID: data.locationID,
-      picID: data.picID,
       catatan: data.catatan?.trim() || undefined,
     };
 

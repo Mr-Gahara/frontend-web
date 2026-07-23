@@ -16,7 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Scale, ArrowUpDown, Eye } from "lucide-react";
 
-const formatTanggal = (iso: string) => {
+// FIX: Izinkan null/undefined untuk tanggal
+const formatTanggal = (iso: string | null | undefined) => {
   if (!iso) return "-";
   return format(new Date(iso), "dd MMM yyyy, HH:mm", { locale: localeID });
 };
@@ -81,11 +82,16 @@ export default function StockAdjustmentListPage() {
         header: () => (
           <span className="text-xs font-bold text-[#0A2947]/60">Sumber / Referensi</span>
         ),
-        cell: ({ row }) => (
-          <Badge variant="outline" className="bg-[#FFFAF3] text-[#0A2947] font-bold border-[#0A2947]/20">
-            {row.original.referenceType.replace("_", " ")}
-          </Badge>
-        ),
+        cell: ({ row }) => {
+          // FIX: Defensive fallback jika backend mapper tidak mengembalikan referenceType
+          const refType = row.original.nomorAdjustment || "STOCK_OPNAME";
+          
+          return (
+            <Badge variant="outline" className="bg-[#FFFAF3] text-[#0A2947] font-bold border-[#0A2947]/20">
+              {refType.replace(/_/g, " ")}
+            </Badge>
+          );
+        },
       },
       {
         id: "aksi",
@@ -93,7 +99,9 @@ export default function StockAdjustmentListPage() {
           <div className="text-right text-xs font-bold text-[#0A2947]/60">Aksi</div>
         ),
         cell: ({ row }) => {
-          const targetId = row.original._id;
+          // FIX: Sesuaikan dengan mapper backend yang mengubah _id menjadi id
+          const targetId = row.original.id || (row.original as any)._id;
+          
           return (
             <div className="flex justify-end">
               <Button
@@ -114,7 +122,7 @@ export default function StockAdjustmentListPage() {
   );
 
   return (
-    <div className="mx-auto flex w-full flex-col gap-6">
+    <div className="mx-auto flex w-full flex-col gap-6 px-4 py-8">
       {/* HEADER SECTION */}
       <div className="flex items-center gap-3">
         <div className="p-2 bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg shadow-sm hidden sm:block">

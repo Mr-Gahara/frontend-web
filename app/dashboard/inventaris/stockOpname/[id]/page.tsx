@@ -41,7 +41,7 @@ import {
 } from "lucide-react";
 
 // --- HELPERS ---
-const formatTanggal = (iso: string) => {
+const formatTanggal = (iso: string | null) => {
   if (!iso) return "-";
   return format(new Date(iso), "dd MMM yyyy, HH:mm", { locale: localeID });
 };
@@ -111,9 +111,10 @@ export default function StockOpnameDetailPage() {
   useEffect(() => {
     if (opname && (opname.status === "DRAFT" || opname.status === "REJECTED")) {
       const initialMap: Record<string, { qtyPhysical: string; catatanItem: string }> = {};
-      opname.items.forEach((item) => {
-        initialMap[item._id] = {
-          qtyPhysical: item.qtyPhysical !== null ? String(item.qtyPhysical) : "",
+      // FIX: Gunakan opname.items?.forEach dan ambil itemId
+      opname.items?.forEach((item) => {
+        initialMap[item.itemId] = {
+          qtyPhysical: item.qtyPhysical !== null && item.qtyPhysical !== undefined ? String(item.qtyPhysical) : "",
           catatanItem: item.catatanItem || "",
         };
       });
@@ -133,7 +134,6 @@ export default function StockOpnameDetailPage() {
           catatanItem: data.catatanItem.trim() || undefined,
         })),
       };
-      // Return type sesuai struktur full StockOpname dari backend
       return await apiClient.patch<StockOpname>(
         `/stockopname/${opnameID}/items`, 
         payload, 
@@ -151,7 +151,6 @@ export default function StockOpnameDetailPage() {
   // 2. Submit for Review
   const submitMutation = useMutation({
     mutationFn: async () => {
-      // Sesuai postman: kembaliannya ID, nomor, dan status
       return await apiClient.patch<{ _id: string; nomorOpname: string; status: StatusOpname }>(
         `/stockopname/${opnameID}/submit`, 
         {}, 
@@ -170,7 +169,6 @@ export default function StockOpnameDetailPage() {
   // 3. Approve
   const approveMutation = useMutation({
     mutationFn: async () => {
-      // Sesuai postman: kembaliannya object opname dan adjustment
       return await apiClient.patch<{ opname: StockOpname; adjustment: StockAdjustment }>(
         `/stockopname/${opnameID}/approve`,
         { alasan: approveAlasan.trim() || "Disetujui oleh manajer" },
@@ -189,7 +187,6 @@ export default function StockOpnameDetailPage() {
   // 4. Reject
   const rejectMutation = useMutation({
     mutationFn: async () => {
-      // Sesuai postman: kembaliannya info status rejected dan catatannya
       return await apiClient.patch<{ _id: string; status: StatusOpname; catatanReview: string }>(
         `/stockopname/${opnameID}/reject`,
         { catatanReview: rejectCatatan.trim() || "Ditolak. Harap hitung ulang." },
@@ -209,7 +206,6 @@ export default function StockOpnameDetailPage() {
   // 5. Cancel
   const cancelMutation = useMutation({
     mutationFn: async () => {
-      // Sesuai postman: kembaliannya sekedar ID dan status cancelled
       return await apiClient.patch<{ _id: string; status: StatusOpname }>(
         `/stockopname/${opnameID}/cancel`, 
         {}, 
@@ -296,12 +292,12 @@ export default function StockOpnameDetailPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           {badgeStatusOpname(opname.status)}
           
-          {/* Tautan ke Adjustment Jika Approved */}
-          {opname.status === "APPROVED" && opname.stockAdjustmentID && (
+          {/* FIX: Tautan ke Adjustment menggunakan properti relasi */}
+          {opname.status === "APPROVED" && opname.stockAdjustment?.id && (
             <Button
               size="sm"
               className="bg-[#718355] hover:bg-[#718355]/90 text-[#FFFAF3] font-bold shadow-sm"
-              onClick={() => router.push(`/dashboard/inventaris/stockAdjustment/${opname.stockAdjustmentID}`)}
+              onClick={() => router.push(`/dashboard/inventaris/stockAdjustment/${opname.stockAdjustment?.id}`)}
             >
               <Scale className="w-4 h-4 mr-2" />
               Lihat Jurnal Penyesuaian
@@ -332,16 +328,18 @@ export default function StockOpnameDetailPage() {
               <p className="text-[#0A2947]/60 font-bold text-xs mb-1 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5" /> Lokasi / Gudang
               </p>
-              <p className="font-semibold text-[#0A2947] font-mono">
-                {opname.locationID}
+              {/* FIX: Ambil dari relasi lokasi */}
+              <p className="font-semibold text-[#0A2947]">
+                {opname.lokasi?.nama || opname.lokasi?.id || "-"}
               </p>
             </div>
             <div>
               <p className="text-[#0A2947]/60 font-bold text-xs mb-1 flex items-center gap-1">
                 <User className="w-3.5 h-3.5" /> PIC / Staf
               </p>
+              {/* FIX: Ambil dari relasi pic */}
               <p className="font-semibold text-[#0A2947]">
-                {(opname as any).picName || opname.picID}
+                {opname.pic?.nama || "-"}
               </p>
             </div>
           </div>
@@ -406,9 +404,10 @@ export default function StockOpnameDetailPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#0A2947]/5 bg-[#FFFAF3]">
-              {opname.items.map((item) => {
+              {/* FIX: Tambahkan optional chaining pada opname.items */}
+              {opname.items?.map((item) => {
                 // Menentukan display value untuk stok fisik
-                const localData = editedItems[item._id];
+                const localData = editedItems[item.itemId];
                 const displayQtyPhys = isEditable ? (localData?.qtyPhysical ?? "") : (item.qtyPhysical ?? "-");
                 
                 // Menghitung selisih real-time saat edit
@@ -419,13 +418,13 @@ export default function StockOpnameDetailPage() {
                   const phys = Number(localData?.qtyPhysical || 0);
                   diffDisplay = phys - item.qtySystemSnapshot;
                   isMismatch = diffDisplay !== 0;
-                } else if (!isEditable && item.qtyPhysical !== null) {
+                } else if (!isEditable && item.qtyPhysical !== null && item.qtyPhysical !== undefined) {
                   diffDisplay = item.qtyPhysical - item.qtySystemSnapshot;
                   isMismatch = diffDisplay !== 0;
                 }
 
                 return (
-                  <tr key={item._id} className="hover:bg-[#0A2947]/5 transition-colors">
+                  <tr key={item.itemId} className="hover:bg-[#0A2947]/5 transition-colors">
                     <td className="px-5 py-4">
                       <p className="font-bold text-[#0A2947]">{item.namaSnapshot}</p>
                       <p className="text-xs text-[#0A2947]/50 font-medium">Satuan: {item.satuanSnapshot}</p>
@@ -442,7 +441,7 @@ export default function StockOpnameDetailPage() {
                           inputMode="numeric"
                           placeholder="0"
                           value={localData?.qtyPhysical ?? ""}
-                          onChange={(e) => handleInputPhysical(item._id, e.target.value)}
+                          onChange={(e) => handleInputPhysical(item.itemId, e.target.value)}
                           className="w-full text-center font-bold font-mono bg-white border-[#0A2947]/20 focus-visible:ring-[#0A2947]"
                         />
                       ) : (
@@ -473,7 +472,7 @@ export default function StockOpnameDetailPage() {
                       {isEditable ? (
                         <Input
                           value={localData?.catatanItem ?? ""}
-                          onChange={(e) => handleItemChange(item._id, "catatanItem", e.target.value)}
+                          onChange={(e) => handleItemChange(item.itemId, "catatanItem", e.target.value)}
                           placeholder="Jika ada selisih, beri alasan..."
                           className={`w-full text-sm bg-white border-[#0A2947]/20 focus-visible:ring-[#0A2947] ${
                             isMismatch && !(localData?.catatanItem) ? "border-rose-300 bg-rose-50 placeholder:text-rose-300" : ""
@@ -488,6 +487,15 @@ export default function StockOpnameDetailPage() {
                   </tr>
                 );
               })}
+              
+              {/* Fallback Jika tidak ada item */}
+              {(!opname.items || opname.items.length === 0) && (
+                 <tr>
+                   <td colSpan={5} className="text-center py-6 text-[#0A2947]/50 font-medium">
+                      Tidak ada data item dalam dokumen opname ini.
+                   </td>
+                 </tr>
+              )}
             </tbody>
           </table>
         </div>

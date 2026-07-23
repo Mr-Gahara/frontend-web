@@ -49,7 +49,6 @@ import {
 } from "@/components/ui/select";
 
 // --- TIPE DATA LOKAL ---
-// Pastikan ini di-sync dengan backend/types jika ada
 const SATUAN_OPTIONS = ["gram", "ml", "pcs", "kg", "liter"] as const;
 
 // --- ZOD SCHEMA ---
@@ -188,14 +187,12 @@ export default function BuatProdukPage() {
 
   // --- HANDLER SUBMIT ---
   const onSubmit = (data: ProdukFormOutput) => {
-    // Backend logic: Jika resep kosong, delete properti resep.
-    // Jika ada resep, stok diatur 0.
     const payload = { ...data };
 
     if (!payload.resep || payload.resep.length === 0) {
       delete (payload as any).resep;
     } else {
-      payload.stok = 0; // Backend akan override lewat `calculatePotentialStock`
+      payload.stok = 0; 
     }
 
     createProdukMutation.mutate(payload);
@@ -282,8 +279,9 @@ export default function BuatProdukPage() {
                         >
                           {field.value
                             ? kategoriList.find(
-                                (kat: any) => kat._id === field.value
-                              )?.namaKategori
+                                // FIX: Defensif cek id atau _id
+                                (kat: any) => String(kat.id || kat._id) === field.value
+                              )?.namaKategori || "Pilih kategori..."
                             : "Pilih kategori produk..."}
                         </span>
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -303,27 +301,31 @@ export default function BuatProdukPage() {
                             Kategori tidak ditemukan.
                           </CommandEmpty>
                           <CommandGroup>
-                            {kategoriList.map((kat: any) => (
-                              <CommandItem
-                                key={kat._id}
-                                value={kat.namaKategori}
-                                onSelect={() => {
-                                  field.onChange(kat._id);
-                                  setOpenCombobox(false);
-                                }}
-                                className="cursor-pointer text-[#0A2947] aria-selected:bg-[#0A2947]/5 font-medium"
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4 text-[#718355]",
-                                    field.value === kat._id
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {kat.namaKategori}
-                              </CommandItem>
-                            ))}
+                            {kategoriList.map((kat: any) => {
+                              // FIX: Amankan identifier key
+                              const katId = String(kat.id || kat._id);
+                              return (
+                                <CommandItem
+                                  key={katId}
+                                  value={kat.namaKategori}
+                                  onSelect={() => {
+                                    field.onChange(katId);
+                                    setOpenCombobox(false);
+                                  }}
+                                  className="cursor-pointer text-[#0A2947] aria-selected:bg-[#0A2947]/5 font-medium"
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4 text-[#718355]",
+                                      field.value === katId
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {kat.namaKategori}
+                                </CommandItem>
+                              );
+                            })}
                           </CommandGroup>
                         </CommandList>
                       </Command>
@@ -528,14 +530,14 @@ export default function BuatProdukPage() {
                           <Select
                             onValueChange={(val) => {
                               selectField.onChange(val);
-                              // Auto-fill satuan based on bahan baku
+                              // FIX: Amankan id lookup
                               const selectedBahan = bahanBakuList.find(
-                                (b: any) => b._id === val
+                                (b: any) => String(b.id || b._id) === String(val)
                               );
                               if (selectedBahan && selectedBahan.satuan) {
                                 setValue(
                                   `resep.${index}.satuan`,
-                                  selectedBahan.satuan
+                                  selectedBahan.satuan as typeof SATUAN_OPTIONS[number]
                                 );
                               }
                             }}
@@ -556,18 +558,22 @@ export default function BuatProdukPage() {
                                   Data kosong...
                                 </div>
                               ) : (
-                                bahanBakuList.map((bb: any) => (
-                                  <SelectItem
-                                    key={bb._id}
-                                    value={bb._id}
-                                    className="cursor-pointer hover:bg-[#0A2947]/5 font-bold"
-                                  >
-                                    {bb.namaBahan}{" "}
-                                    <span className="font-medium text-xs text-[#0A2947]/50 ml-1">
-                                      ({bb.satuan})
-                                    </span>
-                                  </SelectItem>
-                                ))
+                                bahanBakuList.map((bb: any) => {
+                                  // FIX: Amankan key dan value
+                                  const bbId = String(bb.id || bb._id);
+                                  return (
+                                    <SelectItem
+                                      key={bbId}
+                                      value={bbId}
+                                      className="cursor-pointer hover:bg-[#0A2947]/5 font-bold"
+                                    >
+                                      {bb.namaBahan}{" "}
+                                      <span className="font-medium text-xs text-[#0A2947]/50 ml-1">
+                                        ({bb.satuan})
+                                      </span>
+                                    </SelectItem>
+                                  );
+                                })
                               )}
                             </SelectContent>
                           </Select>

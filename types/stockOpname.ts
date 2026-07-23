@@ -1,7 +1,28 @@
-export type StatusOpname = "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED" | "CANCELLED";
+export type StatusOpname =
+  | "DRAFT"
+  | "SUBMITTED"
+  | "APPROVED"
+  | "REJECTED"
+  | "CANCELLED";
+
+export interface RelasiBase {
+  id: string;
+  nama: string | null;
+}
+
+export interface LokasiRelasi extends RelasiBase {
+  tipe: string | null;
+  alamat?: string;
+}
+
+export interface StockAdjustmentRelasi {
+  id: string;
+  nomorAdjustment: string | null;
+  tanggal: string | null;
+}
 
 export interface StockOpnameItem {
-  _id: string;
+  itemId: string;
   bahanBakuID: string | null;
   barangInventoryID: string | null;
   namaSnapshot: string;
@@ -9,50 +30,55 @@ export interface StockOpnameItem {
   qtySystemSnapshot: number;
   qtyPhysical: number | null;
   varianceSnapshot: number | null;
-  catatanItem?: string;
+  adaSelisih: boolean;
+  catatanItem: string | null;
 }
 
 export interface StockOpname {
-  _id: string;
+  id: string;
+  tenantID: string | null;
   nomorOpname: string;
-  locationID: string;
-  tanggal: string;
-  picID: string;
   status: StatusOpname;
-  items: StockOpnameItem[];
-  catatan?: string;
-  tenantID: string;
-  reviewerID?: string;
-  catatanReview?: string;
-  stockAdjustmentID?: string;
+  tanggal: string | null;
+  lokasi: LokasiRelasi | null;
+  pic: RelasiBase | null;
+  reviewer: RelasiBase | null;
+  items?: StockOpnameItem[];
+  catatan: string | null;
+  catatanReview: string | null;
+  stockAdjustment: StockAdjustmentRelasi | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface StockAdjustmentItem {
+  itemId: string;
   bahanBakuID: string | null;
-  namaSnapshot: string;
-  satuanSnapshot: string;
-  qtySnapshot: number;
-  qtyCurrent: number;
+  barangInventoryID: string | null;
+  namaSnapshot: string | null;
+  satuanSnapshot: string | null;
+  qtySebelum: number;
   qtyPhysical: number;
-  qtyDifference: number;
+  qtyAdjustment: number;
+  catatanItem: string | null;
 }
 
 export interface StockAdjustment {
-  _id: string;
+  id: string;
+  tenantID: string | null;
   nomorAdjustment: string;
-  tanggal: string;
-  locationID: string;
-  picID: string;
-  referenceType: string;
-  referenceID: string;
-  alasan?: string;
-  items: StockAdjustmentItem[];
+  tanggal: string | null;
+  lokasi: LokasiRelasi | null;
+  pic: RelasiBase | null;
+  stockOpnameID: string | null;
+  items?: StockAdjustmentItem[];
+  catatan: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
-// PAYLOAD REQUESTS
 export interface CreateOpnameRequest {
   locationID: string;
-  picID: string;
   catatan?: string;
 }
 
@@ -67,6 +93,6 @@ export interface UpdatePhysicalRequest {
 }
 
 export interface ReviewOpnameRequest {
-  alasan?: string;        // Digunakan saat Approve
-  catatanReview?: string; // Digunakan saat Reject
+  alasan?: string;
+  catatanReview?: string;
 }

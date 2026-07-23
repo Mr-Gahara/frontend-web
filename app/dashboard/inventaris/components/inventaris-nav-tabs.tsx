@@ -31,6 +31,11 @@ const tabs = [
     href: "/dashboard/inventaris/stockAdjustment", 
     icon: Scale,
   },
+  {
+    label: "Stok Real-time",
+    href: "/dashboard/inventaris/stok",
+    icon: BoxIcon,
+  },
 ];
 
 export function InventarisNavTabs() {

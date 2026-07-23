@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { BahanBakuRequest, SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
+import { SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
 
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,66 +22,59 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, PackagePlus, Info, Save, MapPin } from "lucide-react";
+import { ArrowLeft, PackageCheck, Info, Save, Loader2, Ban } from "lucide-react";
 
 // --- ZOD SCHEMA ---
-const bahanBakuSchema = z.object({
+// Stok tetap ada di schema agar bisa di-reset untuk tampilan, tapi tidak akan kita kirim ulang ke backend
+const bahanBakuEditSchema = z.object({
   namaBahan: z.string().min(1, "Nama bahan baku wajib diisi"),
   satuan: z.enum(SATUAN_BAHAN_OPTIONS, { message: "Silakan pilih satuan" }),
-  stok: z.coerce.number().min(0, "Stok tidak boleh negatif").default(0),
+  stok: z.coerce.number().min(0).default(0),
   minimalStok: z.coerce
     .number()
     .min(0, "Batas stok minimum tidak boleh negatif")
     .default(0),
 });
 
-type BahanBakuFormInput = z.input<typeof bahanBakuSchema>;
-type BahanBakuFormOutput = z.output<typeof bahanBakuSchema>;
+type BahanBakuEditFormInput = z.input<typeof bahanBakuEditSchema>;
+type BahanBakuEditFormOutput = z.output<typeof bahanBakuEditSchema>;
 
-export default function BuatBahanBakuPage() {
+export default function EditBahanBakuPage() {
   useAuthGuard();
   const router = useRouter();
+  const params = useParams();
+  const bahanId = params.id as string;
   const queryClient = useQueryClient();
 
-  const [activeLocationId, setActiveLocationId] = useState<string>("");
-  const [locationName, setLocationName] = useState<string>("Memeriksa lokasi...");
-
-  // --- FETCH DATA LOKASI AKTIF (CRITICAL FOR HYBRID DESIGN) ---
-  const { data: activeLocation = null, isLoading: isLoadingLokasi } = useQuery<any>({
-    queryKey: ["lokasi-current-active-tenant"],
+  // --- FETCH DETAIL DATA ---
+  const {
+    data: detailBahan,
+    isLoading: isLoadingDetail,
+    isError: isErrorDetail,
+  } = useQuery({
+    queryKey: [...queryKeys.bahanBaku, "detail", bahanId],
     queryFn: async () => {
       try {
-        const res = await apiClient.get<any>("/location/current", undefined, "pengguna");
-        const raw = res?.data?.data || res?.data || res;
-        return Array.isArray(raw) ? (raw.length > 0 ? raw[0] : null) : (raw || null);
+        const res = await apiClient.get<any>(`/bahan-baku/${bahanId}`, undefined, "pengguna");
+        return res.data?.data || res.data;
       } catch (error) {
-        return null;
+        // Fallback endpoint camelCase
+        const res = await apiClient.get<any>(`/bahanBaku/${bahanId}`, undefined, "pengguna");
+        return res.data?.data || res.data;
       }
     },
-    refetchOnMount: true,
+    enabled: !!bahanId,
   });
-
-  useEffect(() => {
-    if (!isLoadingLokasi) {
-      if (activeLocation && (activeLocation.id || activeLocation._id)) {
-        const idLoc = activeLocation.id || activeLocation._id;
-        const namaLoc = activeLocation.nama || activeLocation.namaLokasi || "Lokasi Aktif";
-        setActiveLocationId(idLoc);
-        setLocationName(namaLoc);
-      } else {
-        setLocationName("Lokasi tidak ditemukan");
-      }
-    }
-  }, [activeLocation, isLoadingLokasi]);
 
   // --- REACT HOOK FORM ---
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors },
-  } = useForm<BahanBakuFormInput, any, BahanBakuFormOutput>({
-    resolver: zodResolver(bahanBakuSchema),
+    reset,
+    formState: { errors, isDirty },
+  } = useForm<BahanBakuEditFormInput, any, BahanBakuEditFormOutput>({
+    resolver: zodResolver(bahanBakuEditSchema),
     defaultValues: {
       namaBahan: "",
       satuan: "gram",
@@ -92,40 +85,70 @@ export default function BuatBahanBakuPage() {
 
   const currentSatuan = useWatch({ control, name: "satuan" });
 
-  // --- MUTATION CREATE ---
-  const createMutation = useMutation<any, Error, BahanBakuRequest>({
-    mutationFn: async (payload: BahanBakuRequest) => {
+  // Sinkronisasi data ke form saat selesai fetch
+  useEffect(() => {
+    if (detailBahan) {
+      reset({
+        namaBahan: detailBahan.namaBahan || "",
+        satuan: detailBahan.satuan || "gram",
+        stok: detailBahan.stok || 0,
+        minimalStok: detailBahan.minimalStok || 0,
+      });
+    }
+  }, [detailBahan, reset]);
+
+  // --- MUTATION UPDATE ---
+  const updateMutation = useMutation({
+    mutationFn: async (payload: Partial<BahanBakuEditFormOutput>) => {
       try {
-        return await apiClient.post("/bahan-baku", payload, undefined, "pengguna");
+        return await apiClient.put(`/bahan-baku/${bahanId}`, payload, undefined, "pengguna");
       } catch (error) {
-        return await apiClient.post("/bahanBaku", payload, undefined, "pengguna");
+        return await apiClient.put(`/bahanBaku/${bahanId}`, payload, undefined, "pengguna");
       }
     },
     onSuccess: () => {
-      toast.success("Berhasil Menambahkan", {
-        description: "Bahan baku baru berhasil disimpan dan diinjeksi ke Inventory.",
+      toast.success("Berhasil Diperbarui", {
+        description: "Perubahan master data bahan baku telah disimpan.",
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku });
-      // Invalidate inventory agar tabel Stok Real-time langsung terupdate
-      queryClient.invalidateQueries({ queryKey: ["inventory"] }); 
+      queryClient.invalidateQueries({ queryKey: ["inventory"] }); // Update tabel stok
       router.push("/dashboard/inventaris/bahanBaku");
     },
     onError: (err: any) => {
-      toast.error("Gagal Menyimpan", {
+      toast.error("Gagal Memperbarui", {
         description: err.message || "Terjadi kesalahan saat menyimpan data.",
       });
     },
   });
 
   // --- HANDLER SUBMIT ---
-  const onSubmit = (data: BahanBakuFormOutput) => {
-    // Gabungkan data form dengan locationID yang terdeteksi
-    const payload: BahanBakuRequest = {
-      ...data,
-      locationID: activeLocationId || undefined, // Dikirim agar backend bisa inject ke Inventory
-    };
-    createMutation.mutate(payload);
+  const onSubmit = (data: BahanBakuEditFormOutput) => {
+    // Kita BUANG property 'stok' dari payload agar tidak menimpa stok yang sedang berjalan di backend.
+    const { stok, ...safePayload } = data;
+    updateMutation.mutate(safePayload);
   };
+
+  // --- RENDER CONDITIONS ---
+  if (isLoadingDetail) {
+    return (
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-[#0A2947]/60" />
+        <p className="text-sm font-bold text-[#0A2947]/60">Memuat data bahan baku...</p>
+      </div>
+    );
+  }
+
+  if (isErrorDetail || !detailBahan) {
+    return (
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-[#0A2947]">
+        <Ban className="h-10 w-10 text-rose-500" />
+        <p className="font-bold">Data bahan baku tidak ditemukan.</p>
+        <Button onClick={() => router.push("/dashboard/inventaris/bahanBaku")} variant="outline">
+          Kembali ke Daftar
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
@@ -144,10 +167,10 @@ export default function BuatBahanBakuPage() {
 
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
-            Tambah Bahan Baku
+            Edit Bahan Baku
           </h1>
           <p className="text-sm font-medium text-[#0A2947]/60">
-            Masukkan detail persediaan bahan mentah baru ke dalam sistem.
+            Perbarui informasi master data bahan baku.
           </p>
         </div>
       </div>
@@ -158,21 +181,11 @@ export default function BuatBahanBakuPage() {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-6 p-6 sm:p-8"
         >
-          <div className="flex items-center justify-between mb-2 border-b border-[#0A2947]/10 pb-4">
-            <div className="flex items-center gap-2">
-              <PackagePlus className="h-5 w-5 text-[#D4A373]" />
-              <h3 className="text-base font-bold text-[#0A2947]">
-                Informasi Dasar
-              </h3>
-            </div>
-            
-            {/* Visual Indicator: Lokasi Injeksi Inventory */}
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#0A2947]/5 rounded-lg border border-[#0A2947]/10">
-              <MapPin className="w-3.5 h-3.5 text-[#D4A373]" />
-              <span className="text-xs font-bold text-[#0A2947]/70">
-                Lokasi Stok: {locationName}
-              </span>
-            </div>
+          <div className="flex items-center gap-2 mb-2 border-b border-[#0A2947]/10 pb-4">
+            <PackageCheck className="h-5 w-5 text-[#D4A373]" />
+            <h3 className="text-base font-bold text-[#0A2947]">
+              Informasi Dasar
+            </h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -206,7 +219,7 @@ export default function BuatBahanBakuPage() {
                 render={({ field }) => (
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <SelectTrigger className="w-full h-12 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-bold focus:ring-1 focus:ring-[#0A2947]">
                       <SelectValue placeholder="Pilih Satuan..." />
@@ -236,41 +249,28 @@ export default function BuatBahanBakuPage() {
             
             <div className="hidden sm:block"></div> {/* Spacer untuk grid */}
             
-            {/* Stok Awal */}
+            {/* Stok Aktual (Read-Only) */}
             <div className="space-y-2">
               <label className="text-sm font-bold text-[#0A2947]">
-                Stok Awal{" "}
-                <span className="text-[#0A2947]/50 font-medium">
-                  (Opsional)
-                </span>
+                Stok Global Saat Ini
               </label>
               <div className="relative">
                 <Input
                   type="number"
                   {...register("stok")}
-                  placeholder="0"
-                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-mono font-bold h-12 pr-16 focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  disabled
+                  className="bg-[#0A2947]/5 border-[#0A2947]/10 text-[#0A2947]/60 font-mono font-bold h-12 pr-16 disabled:cursor-not-allowed disabled:opacity-100"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#0A2947]/40 pointer-events-none">
                   {currentSatuan}
                 </div>
-              </div>
-              <div className="min-h-4">
-                {errors.stok && (
-                  <span className="text-xs font-bold text-rose-500">
-                    {errors.stok.message}
-                  </span>
-                )}
               </div>
             </div>
             
             {/* Batas Stok Minimum */}
             <div className="space-y-2">
               <label className="text-sm font-bold text-[#0A2947]">
-                Batas Stok Minimum{" "}
-                <span className="text-[#0A2947]/50 font-medium">
-                  (Opsional)
-                </span>
+                Batas Stok Minimum <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <Input
@@ -293,15 +293,15 @@ export default function BuatBahanBakuPage() {
             </div>
           </div>
 
-          {/* Helper Text / Tooltip Batas Stok */}
-          <div className="flex items-start gap-2 bg-[#0A2947]/5 p-4 rounded-xl border border-[#0A2947]/10 mt-2">
-            <Info className="w-5 h-5 text-[#D4A373] shrink-0 mt-0.5" />
-            <p className="text-xs font-medium text-[#0A2947]/70 leading-relaxed">
-              <strong className="font-bold text-[#0A2947]">
-                Integrasi Inventory Otomatis:
-              </strong>{" "}
-              Bahan baku yang Anda buat akan langsung diteruskan ke tabel <i>Stok Real-time</i> di lokasi <b>{locationName}</b> dengan angka awal yang Anda tentukan di atas.
-            </p>
+          {/* Helper Text Mengapa Stok Di-disable */}
+          <div className="flex items-start gap-2 bg-blue-50 p-4 rounded-xl border border-blue-100 mt-2">
+            <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+            <div className="text-xs font-medium text-blue-800 leading-relaxed">
+              <strong className="font-bold">Kenapa Stok tidak bisa diubah di sini?</strong>
+              <p className="mt-1">
+                Sesuai standar operasional, angka stok fisik harus dijaga integritasnya. Jika Anda menemukan selisih atau ingin mengubah angka stok yang sedang berjalan, gunakan menu <span className="font-bold text-blue-900 cursor-pointer hover:underline" onClick={() => router.push("/dashboard/inventaris/stok")}>Stok Real-time (Quick Opname)</span> agar perubahan tersebut tercatat di Jurnal Stok.
+              </p>
+            </div>
           </div>
 
           {/* Action Buttons */}
@@ -310,21 +310,23 @@ export default function BuatBahanBakuPage() {
               type="button"
               variant="outline"
               onClick={() => router.push("/dashboard/inventaris/bahanBaku")}
-              disabled={createMutation.isPending}
+              disabled={updateMutation.isPending}
               className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold h-11 w-full sm:w-auto px-6"
             >
               Batal
             </Button>
             <Button
               type="submit"
-              disabled={createMutation.isPending || isLoadingLokasi || !activeLocationId}
-              className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm h-11 w-full sm:w-auto px-6"
+              disabled={updateMutation.isPending || !isDirty}
+              className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm h-11 w-full sm:w-auto px-6 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {createMutation.isPending ? (
-                <span className="flex items-center gap-2">Menyimpan...</span>
+              {updateMutation.isPending ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Menyimpan...
+                </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  <Save className="mr-2 h-4 w-4 text-[#D4A373]" /> Simpan Bahan Baku
+                  <Save className="mr-2 h-4 w-4 text-[#D4A373]" /> Simpan Perubahan
                 </span>
               )}
             </Button>

@@ -8,6 +8,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
+import { BahanBakuCombobox } from "../../../components/bahanBakuCombobox";
+import { SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
 
 // --- Form & Validation ---
 import { useForm, Controller, useFieldArray, useWatch } from "react-hook-form";
@@ -50,14 +52,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// --- TIPE DATA LOKAL ---
-const SATUAN_OPTIONS = ["gram", "ml", "pcs", "kg", "liter"] as const;
-
 // --- ZOD SCHEMA ---
 const resepSchema = z.object({
   bahanBakuID: z.string().min(1, "Bahan baku harus dipilih"),
   jumlah: z.coerce.number().min(0.01, "Jumlah harus lebih dari 0"),
-  satuan: z.enum(SATUAN_OPTIONS, { message: "Satuan tidak valid" }),
+  satuan: z.enum(SATUAN_BAHAN_OPTIONS, { 
+    message: "Satuan wajib dipilih dan harus valid", // <-- Cukup gunakan 'message' di sini, Sir
+  }),
 });
 
 const produkSchema = z.object({
@@ -106,7 +107,6 @@ export default function EditProdukPage() {
     },
   });
 
-  // --- DYNAMIC FIELDS UNTUK RESEP (useFieldArray) ---
   const { fields, append, remove } = useFieldArray({
     control,
     name: "resep",
@@ -116,14 +116,7 @@ export default function EditProdukPage() {
   const watchedResep = useWatch({ control, name: "resep" }) || [];
   const hasResep = watchedResep.length > 0;
 
-  // Efek samping: Jika resep ada, paksa stok menjadi 0 di form
-  useEffect(() => {
-    if (hasResep && isInitialized) {
-      setValue("stok", 0);
-    }
-  }, [hasResep, setValue, isInitialized]);
-
-  // --- FETCH KATEGORI ---
+  // FETCH KATEGORI
   const {
     data: kategoriList = [],
     isLoading: isLoadingKategori,
@@ -138,8 +131,12 @@ export default function EditProdukPage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // --- FETCH BAHAN BAKU ---
-  const { data: bahanBakuList = [] } = useQuery({
+  // FETCH BAHAN BAKU
+  const {
+    data: bahanBakuList = [],
+    isLoading: isLoadingBahanBaku,
+    isError: isBahanBakuError,
+  } = useQuery({
     queryKey: queryKeys.bahanBaku,
     queryFn: async () => {
       try {
@@ -150,7 +147,7 @@ export default function EditProdukPage() {
         );
         const raw = res.data?.data || res.data || [];
         return Array.isArray(raw) ? raw : [];
-      } catch (error) {
+      } catch {
         const res = await apiClient.get<any>(
           "/bahanBaku",
           undefined,
@@ -163,7 +160,7 @@ export default function EditProdukPage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // --- FETCH DETAIL PRODUK ---
+  // FETCH DETAIL PRODUK
   const {
     data: produkDetail,
     isLoading: isLoadingDetail,
@@ -184,7 +181,12 @@ export default function EditProdukPage() {
 
   // --- EFFECT: PREFILL FORM ---
   useEffect(() => {
-    if (produkDetail && !isLoadingKategori && !isInitialized) {
+    if (
+      produkDetail &&
+      !isLoadingKategori &&
+      !isLoadingBahanBaku &&
+      !isInitialized
+    ) {
       // 1. Resolve Category ID
       let catId =
         typeof produkDetail.kategoriID === "object" &&
@@ -234,7 +236,14 @@ export default function EditProdukPage() {
 
       setIsInitialized(true);
     }
-  }, [produkDetail, kategoriList, isLoadingKategori, isInitialized, reset]);
+  }, [
+    produkDetail,
+    kategoriList,
+    isLoadingKategori,
+    isLoadingBahanBaku,
+    isInitialized,
+    reset,
+  ]);
 
   // ERROR TOASTS
   useEffect(() => {
@@ -242,7 +251,9 @@ export default function EditProdukPage() {
       toast.error("Gagal", { description: "Gagal memuat daftar kategori." });
     if (detailError)
       toast.error("Gagal", { description: "Produk tidak ditemukan." });
-  }, [kategoriError, detailError]);
+    if (isBahanBakuError)
+      toast.error("Gagal", { description: "Gagal memuat daftar bahan baku." });
+  }, [kategoriError, detailError, isBahanBakuError]);
 
   // --- MUTATION UPDATE PRODUK ---
   const updateProdukMutation = useMutation<any, Error, ProdukFormOutput>({
@@ -343,7 +354,10 @@ export default function EditProdukPage() {
               <Input
                 {...register("namaProduk")}
                 placeholder="Contoh: Kopi Susu Gula Aren"
-                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
+                className={cn(
+                  "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]",
+                  errors.namaProduk && "border-rose-500"
+                )}
               />
               <div className="min-h-4">
                 {errors.namaProduk && (
@@ -368,7 +382,10 @@ export default function EditProdukPage() {
                         variant="outline"
                         role="combobox"
                         aria-expanded={openCombobox}
-                        className="w-full justify-between cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 focus:ring-1 focus:ring-[#0A2947]"
+                        className={cn(
+                          "w-full justify-between cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 focus:ring-1 focus:ring-[#0A2947]",
+                          errors.kategoriID && "border-rose-500"
+                        )}
                       >
                         <span
                           className={
@@ -478,15 +495,33 @@ export default function EditProdukPage() {
                 </h3>
               </div>
 
+              {/* Implementasi Controller untuk Auto-Format Rupiah */}
               <div className="space-y-2">
                 <label className="text-sm font-bold text-[#0A2947]">
                   Harga Dasar (Rp) <span className="text-red-500">*</span>
                 </label>
-                <Input
-                  type="number"
-                  {...register("hargaDasar")}
-                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  placeholder="0"
+                <Controller
+                  name="hargaDasar"
+                  control={control}
+                  render={({ field }) => {
+                    const numericValue = Number(field.value) || 0;
+                    const displayValue = numericValue === 0 ? "" : new Intl.NumberFormat("id-ID").format(numericValue);
+                    return (
+                      <Input
+                        placeholder="0"
+                        value={displayValue}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\D/g, "");
+                          field.onChange(raw ? Number(raw) : 0);
+                        }}
+                        className={cn(
+                          "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947]",
+                          errors.hargaDasar && "border-rose-500"
+                        )}
+                        inputMode="numeric"
+                      />
+                    );
+                  }}
                 />
                 <div className="min-h-4 flex flex-col justify-start">
                   {errors.hargaDasar ? (
@@ -505,11 +540,28 @@ export default function EditProdukPage() {
                 <label className="text-sm font-bold text-[#0A2947]">
                   Harga Jual (Rp) <span className="text-red-500">*</span>
                 </label>
-                <Input
-                  type="number"
-                  {...register("hargaJual")}
-                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  placeholder="0"
+                <Controller
+                  name="hargaJual"
+                  control={control}
+                  render={({ field }) => {
+                    const numericValue = Number(field.value) || 0;
+                    const displayValue = numericValue === 0 ? "" : new Intl.NumberFormat("id-ID").format(numericValue);
+                    return (
+                      <Input
+                        placeholder="0"
+                        value={displayValue}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\D/g, "");
+                          field.onChange(raw ? Number(raw) : 0);
+                        }}
+                        className={cn(
+                          "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947]",
+                          errors.hargaJual && "border-rose-500"
+                        )}
+                        inputMode="numeric"
+                      />
+                    );
+                  }}
                 />
                 <div className="min-h-4 flex flex-col justify-start">
                   {errors.hargaJual ? (
@@ -621,51 +673,19 @@ export default function EditProdukPage() {
                         name={`resep.${index}.bahanBakuID`}
                         control={control}
                         render={({ field: selectField }) => (
-                          <Select
-                            onValueChange={(val) => {
-                              selectField.onChange(val);
-                              const selectedBahan = bahanBakuList.find(
-                                (b: any) => b._id === val
-                              );
-                              if (selectedBahan && selectedBahan.satuan) {
-                                setValue(
-                                  `resep.${index}.satuan`,
-                                  selectedBahan.satuan
-                                );
-                              }
-                            }}
-                            value={selectField.value}
-                          >
-                            <SelectTrigger
-                              className={cn(
-                                "w-full bg-white border-[#0A2947]/20 text-[#0A2947] font-bold h-10 focus:ring-1 focus:ring-[#0A2947]",
-                                errors.resep?.[index]?.bahanBakuID &&
-                                  "border-rose-500"
-                              )}
-                            >
-                              <SelectValue placeholder="Pilih bahan..." />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
-                              {bahanBakuList.length === 0 ? (
-                                <div className="p-2 text-sm text-center font-medium text-[#0A2947]/50">
-                                  Data kosong...
-                                </div>
-                              ) : (
-                                bahanBakuList.map((bb: any) => (
-                                  <SelectItem
-                                    key={bb._id}
-                                    value={bb._id}
-                                    className="cursor-pointer hover:bg-[#0A2947]/5 font-bold"
-                                  >
-                                    {bb.namaBahan}{" "}
-                                    <span className="font-medium text-xs text-[#0A2947]/50 ml-1">
-                                      ({bb.satuan})
-                                    </span>
-                                  </SelectItem>
-                                ))
-                              )}
-                            </SelectContent>
-                          </Select>
+                          <BahanBakuCombobox
+                            value={selectField.value ?? field.bahanBakuID ?? ""}
+                            onChange={selectField.onChange}
+                            onSatuanChange={(satuan) =>
+                              setValue(
+                                `resep.${index}.satuan`,
+                                satuan as (typeof SATUAN_BAHAN_OPTIONS)[number]
+                              )
+                            }
+                            bahanBakuList={bahanBakuList}
+                            isLoading={isLoadingBahanBaku}
+                            hasError={!!errors.resep?.[index]?.bahanBakuID}
+                          />
                         )}
                       />
                       {errors.resep?.[index]?.bahanBakuID && (
@@ -688,6 +708,7 @@ export default function EditProdukPage() {
                           errors.resep?.[index]?.jumlah && "border-rose-500"
                         )}
                         placeholder="0"
+                        step="any"
                       />
                       {errors.resep?.[index]?.jumlah && (
                         <span className="text-[10px] font-bold text-rose-500 mt-1 block text-center sm:text-left">
@@ -719,7 +740,7 @@ export default function EditProdukPage() {
                               <SelectValue placeholder="Satuan" />
                             </SelectTrigger>
                             <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
-                              {SATUAN_OPTIONS.map((sat) => (
+                              {SATUAN_BAHAN_OPTIONS.map((sat) => (
                                 <SelectItem
                                   key={sat}
                                   value={sat}
@@ -758,20 +779,21 @@ export default function EditProdukPage() {
         </div>
 
         {/* Aksi Tombol */}
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[#0A2947]/10 mt-2">
+        {/* REVISI: Menggunakan flex-col-reverse agar tombol Simpan berada di atas Batal di layar HP */}
+        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-6 border-t border-[#0A2947]/10 mt-2">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push("/dashboard/inventaris/produk")}
             disabled={updateProdukMutation.isPending || isLoadingDetail}
-            className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold h-12 w-full sm:w-auto px-8"
+            className="w-full sm:w-auto cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold px-8"
           >
             Batal
           </Button>
           <Button
             type="submit"
             disabled={updateProdukMutation.isPending || isLoadingDetail}
-            className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold h-12 w-full sm:w-auto px-8"
+            className="w-full sm:w-auto cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold px-8"
           >
             {updateProdukMutation.isPending
               ? "Menyimpan Perubahan..."

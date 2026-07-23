@@ -5,7 +5,8 @@ export const SATUAN_BAHAN_OPTIONS = ["kg", "gram", "liter", "ml", "pcs", "pak", 
 export type SatuanBahan = typeof SATUAN_BAHAN_OPTIONS[number];
 
 export interface BahanBaku {
-  _id: string;
+  _id?: string;
+  id?: string;
   tenantID: string;
   namaBahan: string;
   stok: number;
@@ -21,4 +22,14 @@ export interface BahanBakuRequest {
   stok?: number;
   minimalStok?: number;
   satuan: SatuanBahan;
+  locationID?: string;
+}
+
+export interface BahanBakuComboboxProps {
+  value: string;
+  onChange: (val: string) => void;
+  onSatuanChange: (satuan: string) => void;
+  bahanBakuList: any[];
+  isLoading: boolean;
+  hasError: boolean;
 }

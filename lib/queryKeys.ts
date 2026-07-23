@@ -25,9 +25,10 @@ export const queryKeys = {
   pelanggan: ["pelanggan"] as const,
   absensiMonitoring: (tanggal: string) =>
     ["absensi-monitoring", tanggal] as const,
-
   bahanBaku: ["bahan-baku"] as const,
   bahanBakuDetail: (id: string) => ["bahan-baku", "detail", id] as const,
+  inventory: ["inventory"] as const,
+  inventoryDetail: (id: string) => ["inventory", id] as const,
 
   // Modul Reservasi & Aset
   tarif: ["tarif"] as const,

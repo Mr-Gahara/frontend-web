@@ -48,22 +48,21 @@ export default function DaftarBahanBakuPage() {
     data: bahanBakuList = [],
     isLoading,
     isError,
-  } = useQuery<BahanBaku[]>({
+  } = useQuery<any[]>({ // Menggunakan any[] sementara agar fleksibel membaca id / _id
     queryKey: queryKeys.bahanBaku,
     queryFn: async () => {
-      // Menangani camelCase atau kebab-case endpoint jika ada inkonsistensi
       try {
         const res = await apiClient.get<any>(
           "/bahan-baku",
           undefined,
-          "pengguna",
+          "pengguna"
         );
         return res.data?.data || res.data || [];
       } catch (error) {
         const res = await apiClient.get<any>(
           "/bahanBaku",
           undefined,
-          "pengguna",
+          "pengguna"
         );
         return res.data?.data || res.data || [];
       }
@@ -77,13 +76,13 @@ export default function DaftarBahanBakuPage() {
         return await apiClient.delete(
           `/bahan-baku/${id}`,
           undefined,
-          "pengguna",
+          "pengguna"
         );
       } catch (error) {
         return await apiClient.delete(
           `/bahanBaku/${id}`,
           undefined,
-          "pengguna",
+          "pengguna"
         );
       }
     },
@@ -118,7 +117,7 @@ export default function DaftarBahanBakuPage() {
 
   // --- FILTERING ---
   const filteredList = bahanBakuList.filter((item) =>
-    item.namaBahan.toLowerCase().includes(searchQuery.toLowerCase()),
+    (item.namaBahan || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -219,11 +218,13 @@ export default function DaftarBahanBakuPage() {
                 </tr>
               ) : (
                 filteredList.map((item) => {
+                  // FIX: Defensively extract the ID whether it's mapped as `id` or raw `_id`
+                  const currentId = item.id || item._id;
                   const isKritis = item.stok <= item.minimalStok;
 
                   return (
                     <tr
-                      key={item._id}
+                      key={currentId}
                       className="hover:bg-[#0A2947]/5 transition-colors"
                     >
                       <td className="px-6 py-4">
@@ -231,7 +232,7 @@ export default function DaftarBahanBakuPage() {
                           {item.namaBahan}
                         </p>
                         <p className="text-xs font-medium text-[#0A2947]/50 mt-0.5">
-                          ID: {item._id.substring(0, 8)}
+                          ID: {currentId?.substring(0, 8)}
                         </p>
                       </td>
 
@@ -265,7 +266,7 @@ export default function DaftarBahanBakuPage() {
                             size="sm"
                             onClick={() =>
                               router.push(
-                                `/dashboard/inventaris/bahanBaku/${item._id}/edit`,
+                                `/dashboard/inventaris/bahanBaku/${currentId}/edit`,
                               )
                             }
                             className="h-8 px-3 text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-[#0A2947]/10"
@@ -275,7 +276,7 @@ export default function DaftarBahanBakuPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDeleteClick(item._id)}
+                            onClick={() => handleDeleteClick(currentId)}
                             className="h-8 px-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50"
                           >
                             <Trash2 className="w-4 h-4" />

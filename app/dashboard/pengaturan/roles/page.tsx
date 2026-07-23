@@ -137,14 +137,14 @@ export default function RolesPage() {
     },
     onSuccess: () => {
       toast.success("Berhasil", {
-        description: "Posisi karyawan telah dihapus.",
+        description: "Role berhasil dihapus.",
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.roles });
       setDeleteTarget(null);
     },
     onError: (err: any) => {
       toast.error("Gagal", {
-        description: err.message || "Gagal menghapus posisi.",
+        description: err.message || "Gagal menghapus rolenp.",
       });
     },
   });
