@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarClock, History, Layers, Tags } from "lucide-react";
+import { Box, CalendarClock, History, Layers, Tags } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
@@ -12,14 +12,14 @@ const tabs = [
     icon: CalendarClock,
   },
   {
-    label: "Riwayat Sesi",
-    href: "/dashboard/reservasi/riwayat",
-    icon: History,
-  },
-  {
     label: "Aset (Meja/Unit)",
     href: "/dashboard/reservasi/aset",
     icon: Layers,
+  },
+  {
+    label: "Tipe Aset",
+    href: "/dashboard/reservasi/tipeAset",
+    icon: Box,
   },
   {
     label: "Tarif Harga",

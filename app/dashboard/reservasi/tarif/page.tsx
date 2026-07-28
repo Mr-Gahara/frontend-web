@@ -402,7 +402,7 @@ export default function DaftarTarifPage() {
                               `/dashboard/reservasi/tarif/${item._id || item.id}/edit`,
                             )
                           }
-                          className="h-8 px-3 transition-colors hover:bg-[#F2EAE1] hover:text-[#0A2947]"
+                          className="h-8 px-3 transition-colors hover:bg-[#F2EAE1] hover:text-[#0A2947] font-bold"
                           style={{ color: `${COLORS.navy}80` }}
                         >
                           <Edit className="w-4 h-4 mr-2" /> Edit

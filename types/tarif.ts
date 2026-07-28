@@ -1,5 +1,5 @@
 export interface TipeAsetRef {
-  _id: string;
+  id: string;
   namaTipeAset: string;
 }
 

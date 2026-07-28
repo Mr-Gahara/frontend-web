@@ -103,7 +103,6 @@ export default function BuatTarifPage() {
     register,
     handleSubmit,
     control,
-    watch,
     formState: { errors },
   } = useForm<TarifFormInput, any, TarifFormOutput>({
     resolver: zodResolver(tarifSchema),
@@ -121,7 +120,7 @@ export default function BuatTarifPage() {
     },
   });
 
-  const basisPerhitungan = useWatch({ control, name: "basisPerhitungan"});
+  const basisPerhitungan = useWatch({ control, name: "basisPerhitungan" });
 
   const {
     data: tipeAsetList = [],
@@ -131,11 +130,11 @@ export default function BuatTarifPage() {
     queryKey: queryKeys.tipeAset,
     queryFn: async () => {
       const res = await apiClient.get<{ data: TipeAsetRef[] }>(
-        "/tipe-aset",
+        "/tipeAset",
         undefined,
         "pengguna",
       );
-      return res.data || [];
+      return Array.isArray(res.data) ? res.data : [];
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -404,7 +403,7 @@ export default function BuatTarifPage() {
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold"
                     style={{ color: `${COLORS.navy}60` }}
                   >
-                    {basisPerhitungan === "per jam" ? "Jam" : "Sesi"}
+                    menit
                   </span>
                 </div>
                 <div className="min-h-4">
@@ -698,10 +697,10 @@ export default function BuatTarifPage() {
                       <>
                         {tipeAsetList.map((aset: TipeAsetRef) => {
                           const values = field.value ?? [];
-                          const isChecked = values.includes(aset._id);
+                          const isChecked = values.includes(aset.id);
                           return (
                             <label
-                              key={aset._id}
+                              key={aset.id}
                               className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${isChecked ? "bg-white shadow-sm" : "hover:bg-black/5"}`}
                               style={{
                                 borderColor: isChecked
@@ -713,10 +712,10 @@ export default function BuatTarifPage() {
                                 checked={isChecked}
                                 onCheckedChange={(checked) => {
                                   if (checked === true) {
-                                    field.onChange([...values, aset._id]);
+                                    field.onChange([...values, aset.id]);
                                   } else {
                                     field.onChange(
-                                      values.filter((val) => val !== aset._id),
+                                      values.filter((val) => val !== aset.id),
                                     );
                                   }
                                 }}

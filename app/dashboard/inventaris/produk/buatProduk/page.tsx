@@ -8,6 +8,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
+import { BahanBakuCombobox } from "../../components/bahanBakuCombobox";
+import { SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku"; // <-- FIX 1: Import Satuan dari Types
 
 // --- Form & Validation ---
 import { useForm, Controller, useFieldArray, useWatch } from "react-hook-form";
@@ -17,6 +19,7 @@ import * as z from "zod";
 // --- Components ---
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   ArrowLeft,
   Check,
@@ -48,14 +51,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// --- TIPE DATA LOKAL ---
-const SATUAN_OPTIONS = ["gram", "ml", "pcs", "kg", "liter"] as const;
-
 // --- ZOD SCHEMA ---
 const resepSchema = z.object({
   bahanBakuID: z.string().min(1, "Bahan baku harus dipilih"),
   jumlah: z.coerce.number().min(0.01, "Jumlah harus lebih dari 0"),
-  satuan: z.enum(SATUAN_OPTIONS, { message: "Satuan tidak valid" }),
+  satuan: z.enum(SATUAN_BAHAN_OPTIONS, { message: "Satuan tidak valid" }),
 });
 
 const produkSchema = z.object({
@@ -66,6 +66,7 @@ const produkSchema = z.object({
   hargaDasar: z.coerce.number().min(0, "Harga dasar tidak boleh negatif"),
   hargaJual: z.coerce.number().min(0, "Harga jual tidak boleh negatif"),
   stok: z.coerce.number().min(0, "Stok tidak boleh negatif").default(0),
+  isUnlimitedStok: z.boolean().default(false),
   resep: z.array(resepSchema).default([]),
 });
 
@@ -96,6 +97,7 @@ export default function BuatProdukPage() {
       hargaDasar: 0,
       hargaJual: 0,
       stok: 0,
+      isUnlimitedStok: false,
       resep: [],
     },
   });
@@ -106,16 +108,20 @@ export default function BuatProdukPage() {
     name: "resep",
   });
 
-  // Mengawasi seluruh resep untuk logika disable input Stok
+  // Mengawasi seluruh resep dan checkbox unlimited
   const watchedResep = useWatch({ control, name: "resep" }) || [];
+  const isUnlimitedStok = useWatch({ control, name: "isUnlimitedStok" });
   const hasResep = watchedResep.length > 0;
 
-  // Efek samping: Jika resep ada, paksa stok menjadi 0 di form
+  // Efek samping: Manajemen Paksa Stok
   useEffect(() => {
-    if (hasResep) {
+    if (hasResep || isUnlimitedStok) {
       setValue("stok", 0);
     }
-  }, [hasResep, setValue]);
+    if (hasResep && isUnlimitedStok) {
+      setValue("isUnlimitedStok", false);
+    }
+  }, [hasResep, isUnlimitedStok, setValue]);
 
   // --- FETCH KATEGORI ---
   const { data: kategoriList = [], error: kategoriError } = useQuery({
@@ -129,24 +135,15 @@ export default function BuatProdukPage() {
   });
 
   // --- FETCH BAHAN BAKU ---
-  const { data: bahanBakuList = [] } = useQuery({
+  const { data: bahanBakuList = [], isLoading: isLoadingBahanBaku } = useQuery({
     queryKey: queryKeys.bahanBaku,
     queryFn: async () => {
       try {
-        const res = await apiClient.get<any>(
-          "/bahan-baku",
-          undefined,
-          "pengguna"
-        );
+        const res = await apiClient.get<any>("/bahan-baku", undefined, "pengguna");
         const raw = res.data?.data || res.data || [];
         return Array.isArray(raw) ? raw : [];
       } catch (error) {
-        // Fallback endpoint camelCase
-        const res = await apiClient.get<any>(
-          "/bahanBaku",
-          undefined,
-          "pengguna"
-        );
+        const res = await apiClient.get<any>("/bahanBaku", undefined, "pengguna");
         const raw = res.data?.data || res.data || [];
         return Array.isArray(raw) ? raw : [];
       }
@@ -193,6 +190,11 @@ export default function BuatProdukPage() {
       delete (payload as any).resep;
     } else {
       payload.stok = 0; 
+      payload.isUnlimitedStok = false; 
+    }
+
+    if (payload.isUnlimitedStok) {
+      payload.stok = 0;
     }
 
     createProdukMutation.mutate(payload);
@@ -279,7 +281,6 @@ export default function BuatProdukPage() {
                         >
                           {field.value
                             ? kategoriList.find(
-                                // FIX: Defensif cek id atau _id
                                 (kat: any) => String(kat.id || kat._id) === field.value
                               )?.namaKategori || "Pilih kategori..."
                             : "Pilih kategori produk..."}
@@ -302,7 +303,6 @@ export default function BuatProdukPage() {
                           </CommandEmpty>
                           <CommandGroup>
                             {kategoriList.map((kat: any) => {
-                              // FIX: Amankan identifier key
                               const katId = String(kat.id || kat._id);
                               return (
                                 <CommandItem
@@ -387,11 +387,28 @@ export default function BuatProdukPage() {
                 <label className="text-sm font-bold text-[#0A2947]">
                   Harga Dasar (Rp) <span className="text-red-500">*</span>
                 </label>
-                <Input
-                  type="number"
-                  {...register("hargaDasar")}
-                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  placeholder="0"
+                <Controller
+                  name="hargaDasar"
+                  control={control}
+                  render={({ field }) => {
+                    const numericValue = Number(field.value) || 0;
+                    const displayValue = numericValue === 0 ? "" : new Intl.NumberFormat("id-ID").format(numericValue);
+                    return (
+                      <Input
+                        placeholder="0"
+                        value={displayValue}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\D/g, "");
+                          field.onChange(raw ? Number(raw) : 0);
+                        }}
+                        className={cn(
+                          "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947]",
+                          errors.hargaDasar && "border-rose-500"
+                        )}
+                        inputMode="numeric"
+                      />
+                    );
+                  }}
                 />
                 <div className="min-h-4 flex flex-col justify-start">
                   {errors.hargaDasar ? (
@@ -410,11 +427,28 @@ export default function BuatProdukPage() {
                 <label className="text-sm font-bold text-[#0A2947]">
                   Harga Jual (Rp) <span className="text-red-500">*</span>
                 </label>
-                <Input
-                  type="number"
-                  {...register("hargaJual")}
-                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  placeholder="0"
+                <Controller
+                  name="hargaJual"
+                  control={control}
+                  render={({ field }) => {
+                    const numericValue = Number(field.value) || 0;
+                    const displayValue = numericValue === 0 ? "" : new Intl.NumberFormat("id-ID").format(numericValue);
+                    return (
+                      <Input
+                        placeholder="0"
+                        value={displayValue}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\D/g, "");
+                          field.onChange(raw ? Number(raw) : 0);
+                        }}
+                        className={cn(
+                          "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947]",
+                          errors.hargaJual && "border-rose-500"
+                        )}
+                        inputMode="numeric"
+                      />
+                    );
+                  }}
                 />
                 <div className="min-h-4 flex flex-col justify-start">
                   {errors.hargaJual ? (
@@ -431,19 +465,49 @@ export default function BuatProdukPage() {
             </div>
 
             <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col gap-5">
-              <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-                <PackagePlus className="h-5 w-5 text-[#D4A373]" />
-                <h3 className="text-base font-bold text-[#0A2947]">
-                  Stok Awal
-                </h3>
+              <div className="flex items-center justify-between border-b border-[#0A2947]/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <PackagePlus className="h-5 w-5 text-[#D4A373]" />
+                  <h3 className="text-base font-bold text-[#0A2947]">
+                    Stok Awal
+                  </h3>
+                </div>
               </div>
+              
               <div className="space-y-2">
+                <div className="flex items-center space-x-2 mb-3 bg-[#FFFAF3] p-3 rounded-xl border border-[#0A2947]/10">
+                  <Controller
+                    name="isUnlimitedStok"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="unlimited"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={hasResep} 
+                        className="data-[state=checked]:bg-[#718355] data-[state=checked]:text-white border-[#0A2947]/30"
+                      />
+                    )}
+                  />
+                  <div className="space-y-1 leading-none">
+                    <label
+                      htmlFor="unlimited"
+                      className="text-sm font-bold text-[#0A2947] cursor-pointer"
+                    >
+                      Produk Tanpa Stok (Unlimited)
+                    </label>
+                    <p className="text-[10px] font-medium text-[#0A2947]/50">
+                      Aktifkan jika produk ini berupa layanan (jasa) atau stok tidak terbatas.
+                    </p>
+                  </div>
+                </div>
+
                 <Input
                   type="number"
                   {...register("stok")}
                   className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947] disabled:opacity-50 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   placeholder="0"
-                  disabled={hasResep}
+                  disabled={hasResep || isUnlimitedStok}
                 />
                 <div className="flex items-start gap-2 mt-2">
                   <Info className="w-4 h-4 text-[#0A2947]/50 shrink-0 mt-0.5" />
@@ -455,8 +519,10 @@ export default function BuatProdukPage() {
                     ) : (
                       <p className="text-xs font-medium text-[#0A2947]/60 leading-relaxed">
                         {hasResep
-                          ? "Input stok dinonaktifkan karena Anda menggunakan Resep. Stok akan dihitung secara otomatis oleh sistem berdasarkan persediaan bahan baku."
-                          : "Masukkan stok awal (opsional). Anda dapat membiarkannya 0 dan melakukan Stok Opname nanti."}
+                          ? "Input stok dinonaktifkan karena Anda menggunakan Resep. Stok dihitung otomatis dari bahan baku."
+                          : isUnlimitedStok 
+                            ? "Stok dinonaktifkan karena produk ini berstatus Unlimited (Tanpa batas)." 
+                            : "Masukkan stok awal. Anda dapat membiarkannya 0 dan melakukan Stok Opname nanti."}
                       </p>
                     )}
                   </div>
@@ -527,56 +593,19 @@ export default function BuatProdukPage() {
                         name={`resep.${index}.bahanBakuID`}
                         control={control}
                         render={({ field: selectField }) => (
-                          <Select
-                            onValueChange={(val) => {
-                              selectField.onChange(val);
-                              // FIX: Amankan id lookup
-                              const selectedBahan = bahanBakuList.find(
-                                (b: any) => String(b.id || b._id) === String(val)
-                              );
-                              if (selectedBahan && selectedBahan.satuan) {
-                                setValue(
-                                  `resep.${index}.satuan`,
-                                  selectedBahan.satuan as typeof SATUAN_OPTIONS[number]
-                                );
-                              }
-                            }}
-                            defaultValue={selectField.value}
-                          >
-                            <SelectTrigger
-                              className={cn(
-                                "w-full bg-white border-[#0A2947]/20 text-[#0A2947] font-bold h-10 focus:ring-1 focus:ring-[#0A2947]",
-                                errors.resep?.[index]?.bahanBakuID &&
-                                  "border-rose-500"
-                              )}
-                            >
-                              <SelectValue placeholder="Pilih bahan..." />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
-                              {bahanBakuList.length === 0 ? (
-                                <div className="p-2 text-sm text-center font-medium text-[#0A2947]/50">
-                                  Data kosong...
-                                </div>
-                              ) : (
-                                bahanBakuList.map((bb: any) => {
-                                  // FIX: Amankan key dan value
-                                  const bbId = String(bb.id || bb._id);
-                                  return (
-                                    <SelectItem
-                                      key={bbId}
-                                      value={bbId}
-                                      className="cursor-pointer hover:bg-[#0A2947]/5 font-bold"
-                                    >
-                                      {bb.namaBahan}{" "}
-                                      <span className="font-medium text-xs text-[#0A2947]/50 ml-1">
-                                        ({bb.satuan})
-                                      </span>
-                                    </SelectItem>
-                                  );
-                                })
-                              )}
-                            </SelectContent>
-                          </Select>
+                          <BahanBakuCombobox
+                            value={selectField.value ?? field.bahanBakuID ?? ""}
+                            onChange={selectField.onChange}
+                            onSatuanChange={(satuan) =>
+                              setValue(
+                                `resep.${index}.satuan`,
+                                satuan as (typeof SATUAN_BAHAN_OPTIONS)[number]
+                              )
+                            }
+                            bahanBakuList={bahanBakuList}
+                            isLoading={isLoadingBahanBaku}
+                            hasError={!!errors.resep?.[index]?.bahanBakuID}
+                          />
                         )}
                       />
                       {errors.resep?.[index]?.bahanBakuID && (
@@ -599,6 +628,7 @@ export default function BuatProdukPage() {
                           errors.resep?.[index]?.jumlah && "border-rose-500"
                         )}
                         placeholder="0"
+                        step="any"
                       />
                       {errors.resep?.[index]?.jumlah && (
                         <span className="text-[10px] font-bold text-rose-500 mt-1 block text-center sm:text-left">
@@ -630,7 +660,7 @@ export default function BuatProdukPage() {
                               <SelectValue placeholder="Satuan" />
                             </SelectTrigger>
                             <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
-                              {SATUAN_OPTIONS.map((sat) => (
+                              {SATUAN_BAHAN_OPTIONS.map((sat) => (
                                 <SelectItem
                                   key={sat}
                                   value={sat}
@@ -669,20 +699,21 @@ export default function BuatProdukPage() {
         </div>
 
         {/* Aksi Tombol */}
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[#0A2947]/10 mt-2">
+        {/* FIX 2: flex-col-reverse untuk responsivitas Mobile */}
+        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-6 border-t border-[#0A2947]/10 mt-2">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push("/dashboard/inventaris/produk")}
             disabled={createProdukMutation.isPending}
-            className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold h-12 w-full sm:w-auto px-8"
+            className="w-full sm:w-auto cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold h-12 px-8"
           >
             Batal
           </Button>
           <Button
             type="submit"
             disabled={createProdukMutation.isPending}
-            className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold h-12 w-full sm:w-auto px-8"
+            className="w-full sm:w-auto cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold h-12 px-8"
           >
             {createProdukMutation.isPending
               ? "Menyimpan Data..."

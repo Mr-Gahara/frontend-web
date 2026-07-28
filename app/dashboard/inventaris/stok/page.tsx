@@ -344,7 +344,7 @@ export default function StokInventoryPage() {
               type="number"
               value={minStockModal.inputValue}
               onChange={(e) => setMinStockModal(prev => ({ ...prev, inputValue: e.target.value ? Number(e.target.value) : "" }))}
-              className="bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold focus-visible:ring-[#0A2947]"
+              className="bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold focus-visible:ring-[#0A2947] no-spinner"
             />
           </div>
           <DialogFooter>
@@ -383,7 +383,7 @@ export default function StokInventoryPage() {
                 type="number"
                 value={opnameModal.fisikAktual}
                 onChange={(e) => setOpnameModal(prev => ({ ...prev, fisikAktual: e.target.value ? Number(e.target.value) : "" }))}
-                className="bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold focus-visible:ring-[#0A2947]"
+                className="bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold focus-visible:ring-[#0A2947] no-spinner"
                 placeholder="Masukkan hitungan fisik riil..."
               />
             </div>

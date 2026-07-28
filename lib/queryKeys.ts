@@ -35,4 +35,7 @@ export const queryKeys = {
   tarifDetail: (id: string) => ["tarif", "detail", id] as const,
 
   tipeAset: ["tipeAset"] as const,
+  aset: ["aset"] as const,
+
+  sesiBooking: (tanggal: string) => ["sesi-booking", tanggal] as const,
 };

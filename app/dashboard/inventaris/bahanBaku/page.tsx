@@ -253,7 +253,7 @@ export default function DaftarBahanBakuPage() {
                             Kritis
                           </Badge>
                         ) : (
-                          <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none shadow-sm px-2.5 py-1">
+                          <Badge className="bg-[#718355] text-[#FFFAF3] font-bold border-none shadow-sm px-2.5 py-1">
                             <CheckCircle2 className="w-3 h-3 mr-1.5" /> Aman
                           </Badge>
                         )}
@@ -269,7 +269,7 @@ export default function DaftarBahanBakuPage() {
                                 `/dashboard/inventaris/bahanBaku/${currentId}/edit`,
                               )
                             }
-                            className="h-8 px-3 text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-[#0A2947]/10"
+                            className="h-8 px-3 text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-[#0A2947]/10 font-bold"
                           >
                             <Edit className="w-4 h-4 mr-2" /> Edit
                           </Button>

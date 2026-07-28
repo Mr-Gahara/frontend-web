@@ -29,7 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowUpDown, MoreHorizontal, Plus, Package } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Plus, Package, Infinity } from "lucide-react"; // <-- Import Infinity Icon
 
 // Helper untuk format Rupiah
 const formatRupiah = (angka: number) => {
@@ -37,7 +37,7 @@ const formatRupiah = (angka: number) => {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
-  }).format(angka);
+  }).format(angka || 0);
 };
 
 export default function ProdukPage() {
@@ -64,7 +64,7 @@ export default function ProdukPage() {
         undefined,
         "pengguna"
       );
-      return res.data;
+      return res.data || [];
     },
   });
 
@@ -102,6 +102,7 @@ export default function ProdukPage() {
       toast.error("Gagal", {
         description: err.message || "Gagal menghapus produk.",
       });
+      setDeleteTarget(null);
     },
   });
 
@@ -111,7 +112,7 @@ export default function ProdukPage() {
   };
 
   // =========================
-  // TABLE COLUMNS (DISELARASKAN DENGAN PALET WARNA)
+  // TABLE COLUMNS
   // =========================
   const columns = useMemo<ColumnDef<Produk>[]>(
     () => [
@@ -175,13 +176,25 @@ export default function ProdukPage() {
         ),
         cell: ({ row }) => {
           const stok = row.original.stok;
+          const isUnlimited = row.original.isUnlimitedStok;
           const isHabis = stok <= 0;
+
+          // --- LOGIKA BARU UNTUK UNLIMITED STOK ---
+          if (isUnlimited) {
+            return (
+              <span className="inline-flex items-center gap-1 rounded-md bg-[#D4A373]/10 px-2 py-0.5 text-xs font-bold text-[#D4A373] shadow-sm border border-[#D4A373]/20">
+                <Infinity className="w-3.5 h-3.5" /> Unlimited
+              </span>
+            );
+          }
+
+          // Render Normal
           return (
             <span
               className={`rounded-md px-2 py-0.5 text-xs font-bold shadow-sm ${
                 isHabis
-                  ? "bg-red-100 text-red-700"
-                  : "bg-[#0A2947]/10 text-[#0A2947]"
+                  ? "bg-red-100 text-red-700 border border-red-200"
+                  : "bg-[#0A2947]/5 text-[#0A2947] border border-[#0A2947]/10"
               }`}
             >
               {stok} item
@@ -204,11 +217,10 @@ export default function ProdukPage() {
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#FFFAF3] border-[#0A2947]/10">
+              <DropdownMenuContent align="end" className="bg-[#FFFAF3] border-[#0A2947]/10 min-w-37.5">
                 <DropdownMenuItem
                   className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
                   onClick={() =>
-                    // [BUG FIX]: Memperbaiki rute edit yang sebelumnya salah
                     router.push(`/dashboard/inventaris/produk/${row.original._id}/edit`)
                   }
                 >
@@ -236,7 +248,7 @@ export default function ProdukPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg shrink-0 shadow-sm">
-            <Package className="w-6 h-6 text-[#D4A373]" /> {/* Ikon Mustard */}
+            <Package className="w-6 h-6 text-[#D4A373]" /> 
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">Data Produk</h1>
@@ -284,7 +296,10 @@ export default function ProdukPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="pt-2">
-            <AlertDialogCancel className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold">
+            <AlertDialogCancel 
+              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              disabled={deleteMutation.isPending}
+            >
               Batal
             </AlertDialogCancel>
             <AlertDialogAction

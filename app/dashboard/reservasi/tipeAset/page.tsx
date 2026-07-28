@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
-import { Aset, StatusAset } from "@/types/aset";
+import { TipeAset } from "@/types/tipeAset";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -27,15 +27,14 @@ import {
   Search,
   Edit,
   Trash2,
-  Box,
   AlertTriangle,
   ServerCrash,
-  CheckCircle2,
-  Wrench,
-  PlayCircle,
+  Layers,
+  Tags,
 } from "lucide-react";
+import { queryKeys } from "@/lib/queryKeys";
 
-export default function AsetPage() {
+export default function TipeAsetPage() {
   useAuthGuard();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -43,92 +42,61 @@ export default function AsetPage() {
   // --- STATE ---
   const [searchQuery, setSearchQuery] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedAset, setSelectedAset] = useState<Aset | null>(null);
+  const [selectedTipeAset, setSelectedTipeAset] = useState<TipeAset | null>(
+    null,
+  );
 
-  // --- FETCH DATA ASET ---
+  // --- FETCH DATA TIPE ASET ---
   const {
-    data: asetList = [],
+    data: tipeAsetList = [],
     isLoading,
     isError,
-  } = useQuery<Aset[]>({
-    queryKey: ["aset"],
+  } = useQuery<TipeAset[]>({
+    queryKey: queryKeys.tipeAset,
     queryFn: async () => {
-      const res = await apiClient.get<any>("/aset", undefined, "pengguna");
-
-      // Validasi ekstra: Cegah caching dari response yang gagal/kosong
-      if (!res) return [];
-
-      const raw = res.data?.data || res.data || [];
-      return Array.isArray(raw) ? raw : [];
+      const res = await apiClient.get<{ data: TipeAset[] }>(
+        "/tipeAset",
+        undefined,
+        "pengguna",
+      );
+      return Array.isArray(res.data) ? res.data : [];
     },
-    // KOREKSI UTAMA:
-    // Memaksa query untuk mengabaikan cache lama dan selalu mengambil data
-    // terbaru dari server setiap kali Anda menavigasi ke halaman ini.
-    refetchOnMount: "always",
-    // Opsional namun disarankan: Refetch saat Anda kembali membuka tab browser
-    refetchOnWindowFocus: true,
   });
 
   // --- MUTATION DELETE ---
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiClient.delete(`/aset/${id}`, undefined, "pengguna");
+      return await apiClient.delete(`/tipAset/${id}`, undefined, "pengguna");
     },
     onSuccess: () => {
-      toast.success("Dihapus", { description: "Data aset berhasil dihapus." });
-      queryClient.invalidateQueries({ queryKey: ["aset"] });
+      toast.success("Dihapus", {
+        description: "Data Tipe Aset berhasil dihapus.",
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tipeAset });
       setIsDeleteModalOpen(false);
-      setSelectedAset(null);
+      setSelectedTipeAset(null);
     },
     onError: (err: any) => toast.error("Gagal", { description: err.message }),
   });
 
   // --- HANDLERS ---
-  const handleDeleteClick = (aset: Aset) => {
-    setSelectedAset(aset);
+  const handleDeleteClick = (tipeAset: TipeAset) => {
+    setSelectedTipeAset(tipeAset);
     setIsDeleteModalOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (selectedAset) {
-      await deleteMutation.mutateAsync(selectedAset.id);
+    if (selectedTipeAset) {
+      // Prioritaskan id dari mapper, fallback ke _id
+      const idToDetele = selectedTipeAset.id || selectedTipeAset._id;
+      if (idToDetele) {
+        await deleteMutation.mutateAsync(idToDetele);
+      }
     }
   };
 
-  // --- RENDER HELPERS ---
-  const renderStatusBadge = (status: StatusAset) => {
-    switch (status) {
-      case "tersedia":
-        return (
-          <Badge className="bg-[#718355] text-[#FFFAF3] font-bold border-none shadow-sm px-2.5 py-1">
-            <CheckCircle2 className="w-3 h-3 mr-1.5" /> Tersedia
-          </Badge>
-        );
-      case "digunakan":
-        return (
-          <Badge className="bg-[#0A2947] text-[#FFFAF3]/91 font-bold border-none shadow-sm px-2.5 py-1">
-            <PlayCircle className="w-3 h-3 mr-1.5" /> Digunakan (Booking)
-          </Badge>
-        );
-      case "perbaikan":
-        return (
-          <Badge className="bg-[#af8861] text-[#FFFAF3] font-bold border-none shadow-sm px-2.5 py-1">
-            <Wrench className="w-3 h-3 mr-1.5" /> Perbaikan
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="outline" className="px-2.5 py-1">
-            {status}
-          </Badge>
-        );
-    }
-  };
-
-  const safeAsetList = Array.isArray(asetList) ? asetList : [];
-
-  const filteredList = safeAsetList.filter((item) =>
-    item?.namaAset?.toLowerCase().includes((searchQuery || "").toLowerCase()),
+  const filteredList = tipeAsetList.filter((item) =>
+    item.namaTipeAset.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -137,23 +105,26 @@ export default function AsetPage() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-[#F2EAE1] border border-[#0A2947]/10 rounded-xl shrink-0 shadow-sm">
-            <Box className="w-7 h-7 text-[#D4A373]" />
+            <Layers className="w-7 h-7 text-[#D4A373]" />
           </div>
           <div className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
-              Manajemen Aset
+              Tipe Aset & Kategori
             </h1>
             <p className="text-sm font-medium text-[#0A2947]/60">
-              Kelola meja, lapangan, ruangan, atau fasilitas yang dapat disewa.
+              Kelompokkan aset Anda berdasarkan tipe untuk mempermudah
+              pengaturan tarif.
             </p>
           </div>
         </div>
 
         <Button
-          onClick={() => router.push("/dashboard/reservasi/aset/buatAset")}
+          onClick={() =>
+            router.push("/dashboard/reservasi/tipeAset/buatTipeAset")
+          }
           className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm h-11 px-6 w-full sm:w-auto"
         >
-          <Plus className="w-4 h-4 mr-2 text-[#D4A373]" /> Tambah Aset Baru
+          <Plus className="w-4 h-4 mr-2 text-[#D4A373]" /> Tambah Tipe Aset
         </Button>
       </div>
 
@@ -162,14 +133,14 @@ export default function AsetPage() {
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0A2947]/40" />
           <Input
-            placeholder="Cari nama aset..."
+            placeholder="Cari nama tipe aset..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/40 font-medium h-11"
           />
         </div>
         <div className="text-sm font-bold text-[#0A2947]/60 bg-white/50 px-4 py-2 rounded-lg border border-[#0A2947]/10 w-full sm:w-auto text-center">
-          Total: {filteredList.length} Aset
+          Total: {filteredList.length} Tipe
         </div>
       </div>
 
@@ -179,9 +150,11 @@ export default function AsetPage() {
           <table className="w-full text-sm text-left">
             <thead className="bg-[#F2EAE1] text-[#0A2947]/60 border-b border-[#0A2947]/10 uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="px-6 py-4 font-bold">Nama Aset</th>
-                <th className="px-6 py-4 font-bold">Kategori / Tipe</th>
-                <th className="px-6 py-4 font-bold text-center">Status</th>
+                <th className="px-6 py-4 font-bold">Nama Tipe Aset</th>
+                <th className="px-6 py-4 font-bold">Deskripsi</th>
+                <th className="px-6 py-4 font-bold text-center">
+                  Relasi Tarif
+                </th>
                 <th className="px-6 py-4 font-bold text-right">Aksi</th>
               </tr>
             </thead>
@@ -204,7 +177,7 @@ export default function AsetPage() {
                     className="px-6 py-12 text-center text-rose-500 font-bold"
                   >
                     <ServerCrash className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                    Gagal memuat data aset.
+                    Gagal memuat data tipe aset.
                   </td>
                 </tr>
               ) : filteredList.length === 0 ? (
@@ -212,12 +185,12 @@ export default function AsetPage() {
                   <td colSpan={4} className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">
                       <div className="h-12 w-12 rounded-xl bg-[#0A2947]/5 flex items-center justify-center">
-                        <Box className="w-6 h-6 text-[#0A2947]/30" />
+                        <Layers className="w-6 h-6 text-[#0A2947]/30" />
                       </div>
                       <p className="text-sm font-bold text-[#0A2947]/50 mt-2">
                         {searchQuery
-                          ? "Tidak ada aset yang cocok dengan pencarian."
-                          : "Belum ada master data aset."}
+                          ? "Tidak ada tipe aset yang cocok dengan pencarian."
+                          : "Belum ada master data tipe aset."}
                       </p>
                     </div>
                   </td>
@@ -225,34 +198,40 @@ export default function AsetPage() {
               ) : (
                 filteredList.map((item) => (
                   <tr
-                    key={item.id}
+                    key={item.id || item._id}
                     className="hover:bg-[#0A2947]/5 transition-colors"
                   >
                     <td className="px-6 py-4">
                       <p className="font-bold text-[#0A2947]">
-                        {item.namaAset}
-                      </p>
-                      <p className="text-xs font-medium text-[#0A2947]/50 mt-0.5 font-mono">
-                        ID: {item.id.substring(0, 8)}
+                        {item.namaTipeAset}
                       </p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-bold text-[#0A2947]/80 bg-[#0A2947]/5 px-2.5 py-1 rounded-md text-xs">
-                        {item.dataAset?.namaTipeAset || "Tipe Tidak Diketahui"}
-                      </span>
+                      <p className="font-medium text-[#0A2947]/70 line-clamp-2 max-w-xs">
+                        {item.deskripsi || (
+                          <span className="italic opacity-50">
+                            Tidak ada deskripsi
+                          </span>
+                        )}
+                      </p>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      {renderStatusBadge(item.status)}
+                      <Badge
+                        variant="outline"
+                        className="bg-[#0A2947]/5 text-[#0A2947] border-none shadow-sm px-2.5 py-1 font-bold"
+                      >
+                        <Tags className="w-3 h-3 mr-1.5" />
+                        {item.dataTarif?.length || 0} Tarif Terhubung
+                      </Badge>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
-                          // Mengarahkan ke rute Edit yang benar
                           onClick={() =>
                             router.push(
-                              `/dashboard/reservasi/aset/${item.id}/edit`,
+                              `/dashboard/reservasi/tipeAset/${item.id || item._id}/edit`,
                             )
                           }
                           className="h-8 px-3 cursor-pointer text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-[#0A2947]/10 font-bold"
@@ -282,12 +261,12 @@ export default function AsetPage() {
         <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-rose-600 flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5" /> Hapus Data Aset?
+              <AlertTriangle className="w-5 h-5" /> Hapus Tipe Aset?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
-              Aset <b>{selectedAset?.namaAset}</b> akan dihapus secara permanen.
-              Pastikan aset ini tidak sedang terhubung dengan riwayat transaksi
-              yang penting.
+              Tipe <b>{selectedTipeAset?.namaTipeAset}</b> akan dihapus secara
+              permanen. Sistem secara otomatis akan melepas (<i>unassign</i>)
+              tipe ini dari daftar Tarif yang terhubung. Apakah Anda yakin?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -302,7 +281,7 @@ export default function AsetPage() {
               disabled={deleteMutation.isPending}
               className="bg-rose-600 text-[#FFFAF3] hover:bg-rose-700 font-bold cursor-pointer border-none shadow-sm"
             >
-              {deleteMutation.isPending ? "Menghapus..." : "Ya, Hapus Aset"}
+              {deleteMutation.isPending ? "Menghapus..." : "Ya, Hapus Tipe"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

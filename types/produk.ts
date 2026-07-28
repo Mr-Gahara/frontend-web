@@ -15,6 +15,7 @@ export interface Produk {
   hargaJual: number;
   hargaDasar: number;
   stok: number;
+  isUnlimitedStok?: boolean;
   kategori?: String;
   kategoriID: string | KategoriPopulated;
   keterangan?: string;
@@ -31,9 +32,11 @@ export interface ProdukRequest {
   hargaJual: number;
   hargaDasar: number;
   kategoriID: string;
+  stok?: number;
+  isUnlimitedStok?: boolean;
   keterangan?: string;
   gambarProduk?: string;
-  resep?: ResepItem[]; // opsional — siap untuk pengembangan resep berikutnya
+  resep?: ResepItem[];
 }
  
 export interface GetProdukResponse {
