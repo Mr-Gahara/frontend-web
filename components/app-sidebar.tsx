@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { decodeJWT } from "@/lib/decodeToken";
 import { apiClient } from "@/lib/apiClient";
+import { LokasiListResponse } from "@/types/location";
+
+// Impor Ikon (Tambahan ikon untuk Gudang/WMS)
 import {
   LayoutDashboard,
   User,
@@ -19,7 +22,15 @@ import {
   ChevronsUpDown,
   GalleryVerticalEnd,
   Ticket,
+  Building2,
+  Warehouse,
+  PlusCircle,
+  ArrowRightLeft,
+  Truck,
+  BookOpen,
+  ClipboardList
 } from "lucide-react";
+
 import {
   Sidebar,
   SidebarContent,
@@ -34,22 +45,27 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
-  useSidebar, // <-- 1. IMPORT HOOK INI TUAN
+  useSidebar,
 } from "@/components/ui/sidebar";
+
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+// --- TIPE DATA ---
 type SubMenuItem = {
   label: string;
   href: string;
@@ -69,111 +85,168 @@ type MenuGroup = {
   items: MenuItem[];
 };
 
-const menuGroups: MenuGroup[] = [
+// --- 1. DEFINISI MENU OUTLET (TELAH DIKELOMPOKKAN) ---
+const outletMenus: MenuGroup[] = [
   {
     grup: null,
     items: [
       {
         label: "Dashboard",
-        href: "/dashboard",
+        href: "/dashboard/outlet",
         icon: LayoutDashboard,
       },
     ],
   },
   {
-    grup: null,
+    grup: "Operasional",
+    items: [
+      {
+        label: "Sesi Booking & Reservasi",
+        href: "/dashboard/outlet/reservasi",
+        icon: UserCircle,
+        permission: "read-booking",
+      },
+      {
+        label: "Promo & Diskon",
+        href: "/dashboard/outlet/diskon",
+        icon: Ticket,
+      },
+    ],
+  },
+  {
+    grup: "Keuangan & Laporan",
     items: [
       {
         label: "Keuangan",
-        href: "/dashboard/keuangan",
+        href: "/dashboard/outlet/keuangan",
         icon: CircleDollarSign,
         permission: "read-akunkas",
         subItems: [
           {
             label: "Penjualan",
-            href: "/dashboard/penjualan",
+            href: "/dashboard/outlet/penjualan",
             permission: "read-penjualan",
           },
           {
             label: "Pengeluaran",
-            href: "/dashboard/pengeluaran",
+            href: "/dashboard/outlet/pengeluaran",
             permission: "read-pembayaran",
           },
         ],
       },
-    ],
-  },
-  {
-    grup: null,
-    items: [
-      {
-        label: "Sesi Booking & Reservasi",
-        href: "/dashboard/reservasi",
-        icon: UserCircle,
-        permission: "read-booking",
-      },
-    ],
-  },
-  {
-    grup: null,
-    items: [
-      {
-        label: "Modul Inventaris",
-        href: "/dashboard/inventaris/produk",
-        icon: Package,
-        permission: "read-inventory",
-      },
-    ],
-  },
-  {
-    grup: null,
-    items: [
-      {
-        label: "karyawan & Staff",
-        href: "/dashboard/pengguna",
-        icon: Users,
-        permission: "read-pengguna",
-      },
-    ],
-  },
-  {
-    grup: null,
-    items: [
-      {
-        label: "Pelanggan",
-        href: "/dashboard/pelanggan",
-        icon: UserCircle,
-        permission: "read-pelanggan",
-      },
-    ],
-  },
-  {
-    grup: null,
-    items: [
       {
         label: "Laporan",
-        href: "/dashboard/keuangan/ringkasanLabaRugi",
+        href: "/dashboard/outlet/keuangan/ringkasanLabaRugi",
         icon: FileText,
         permission: "read-laporan",
       },
     ],
   },
   {
-    grup: null,
+    grup: "Manajemen Stok",
     items: [
       {
-        label: "Promo",
-        href: "/dashboard/diskon",
-        icon: Ticket,
+        label: "Modul Inventaris",
+        href: "/dashboard/outlet/inventaris/produk",
+        icon: Package,
+        permission: "read-inventory-outlet",
       },
     ],
   },
   {
+    grup: "Manajemen & Relasi",
+    items: [
+      {
+        label: "Pelanggan",
+        href: "/dashboard/outlet/pelanggan",
+        icon: UserCircle,
+        permission: "read-pelanggan",
+      },
+      {
+        label: "Karyawan & Staff",
+        href: "/dashboard/outlet/pengguna",
+        icon: Users,
+        permission: "read-pengguna",
+      },
+      {
+        label: "Pengaturan Outlet",
+        href: "/dashboard/outlet/pengaturan",
+        icon: Settings,
+      },
+    ],
+  },
+];
+
+// --- 2. DEFINISI MENU GUDANG (WMS) ---
+const gudangMenus: MenuGroup[] = [
+  {
     grup: null,
     items: [
       {
-        label: "Pengaturan",
-        href: "/dashboard/pengaturan",
+        label: "Dashboard WMS",
+        href: "/dashboard/gudang",
+        icon: LayoutDashboard,
+      },
+    ],
+  },
+  {
+    grup: "Manajemen Inventaris",
+    items: [
+      {
+        label: "Barang Gudang",
+        href: "/dashboard/gudang/inventaris",
+        icon: Package,
+        permission: "read-inventory-gudang",
+      },
+      {
+        label: "Jurnal Stok",
+        href: "/dashboard/gudang/jurnalStok",
+        icon: BookOpen,
+        permission: "read-jurnal-stok",
+      },
+      {
+        label: "Stock Opname",
+        href: "/dashboard/gudang/stockOpname",
+        icon: ClipboardList,
+        permission: "read-stock-opname",
+      },
+    ],
+  },
+  {
+    grup: "Distribusi & WMS",
+    items: [
+      {
+        label: "Pengajuan Stok",
+        href: "/dashboard/gudang/pengajuanStok",
+        icon: FileText,
+        permission: "read-pengajuan-stok",
+      },
+      {
+        label: "Transfer Stok",
+        href: "/dashboard/gudang/transferStok",
+        icon: ArrowRightLeft,
+        permission: "read-transfer-stok",
+      },
+      {
+        label: "Pengiriman Stok",
+        href: "/dashboard/gudang/pengirimanStok",
+        icon: Truck,
+        permission: "read-pengiriman-stok",
+      },
+    ],
+  },
+  {
+    grup: "Manajemen",
+    items: [
+      {
+        label: "Petugas Gudang",
+        href: "/dashboard/gudang/pengguna",
+        icon: Users,
+        permission: "read-pengguna",
+      },
+      {
+        label: "Pengaturan Gudang",
+        href: "/dashboard/gudang/pengaturan",
         icon: Settings,
       },
     ],
@@ -183,16 +256,21 @@ const menuGroups: MenuGroup[] = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
   const pathname = usePathname();
+  const { setOpenMobile, isMobile } = useSidebar();
+
+  // State Pengguna & Hak Akses
   const [namaUser, setNamaUser] = useState("");
   const [posisiUser, setPosisiUser] = useState("");
   const [namaToko, setNamaToko] = useState("");
   const [permissions, setPermissions] = useState<string[]>([]);
+  const [role, setRole] = useState<string>("");
 
-  // --- 2. PANGGIL HOOK SIDEBAR ---
-  const { setOpenMobile, isMobile } = useSidebar();
+  // State Evaluasi Lokasi
+  const [hasGudang, setHasGudang] = useState<boolean>(false);
+  const [isLoadingLokasi, setIsLoadingLokasi] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchSidebarUserData = async () => {
+    const fetchSidebarData = async () => {
       try {
         const penggunaToken = sessionStorage.getItem("penggunaToken");
         if (!penggunaToken) return;
@@ -200,34 +278,44 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         const payload = decodeJWT(penggunaToken);
         if (!payload || !payload.id) return;
 
+        // Set Data Dasar JWT
         setNamaUser(payload.nama || "Pengguna");
         setPosisiUser(payload.role || "");
+        setRole(payload.role || "");
         setNamaToko(payload.tenantName || "Nama Toko");
         setPermissions(payload.permissions || []);
 
-        const response = await apiClient.get<{ data: any }>(
-          `/pengguna/${payload.id}`,
-          undefined,
-          "pengguna"
-        );
+        // 1. Fetch Pembaruan Nama dari DB
+        apiClient
+          .get<{ data: any }>(`/pengguna/${payload.id}`, undefined, "pengguna")
+          .then((res) => {
+            if (res && res.data) setNamaUser(res.data.nama || payload.nama);
+          })
+          .catch(() => {});
 
-        if (response && response.data) {
-          const userDb = response.data;
-          setNamaUser(userDb.nama || payload.nama || "Pengguna");
-        }
+        // 2. Fetch Ketersediaan Lokasi Gudang
+        apiClient
+          .get<LokasiListResponse>("/location", undefined, "pengguna")
+          .then((res) => {
+            const gudangExists = res.data?.some((loc) => loc.tipe === "Gudang");
+            setHasGudang(!!gudangExists);
+          })
+          .catch(() => {})
+          .finally(() => {
+            setIsLoadingLokasi(false);
+          });
       } catch (err) {
-        console.error("Gagal memuat data user di sidebar:", err);
+        console.error("Gagal memuat data di sidebar:", err);
+        setIsLoadingLokasi(false);
       }
     };
 
-    fetchSidebarUserData();
+    fetchSidebarData();
   }, []);
 
   const handleLogout = async () => {
     try {
       await apiClient.post("/pengguna/pin-logout", {}, undefined, "pengguna");
-    } catch {}
-    try {
       await apiClient.post("/akun/auth/logout", {});
     } catch {}
     finally {
@@ -238,12 +326,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   };
 
-  const hasPermission = (permission?: string) => {
-    if (!permission) return true;
-    return permissions.includes(permission);
-  };
-
-  // --- 3. FUNGSI NAVIGASI YANG MENUTUP SIDEBAR DI MOBILE ---
   const handleNavigation = (href: string) => {
     router.push(href);
     if (isMobile) {
@@ -251,34 +333,111 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   };
 
+  const hasPermission = (permission?: string) => {
+    if (role === "Owner") return true;
+    if (!permission) return true;
+    return permissions.includes(permission);
+  };
+
+  // --- LOGIKA TOGGLE MENU AKTIF ---
+  const isGudangWorkspace = pathname.startsWith("/dashboard/gudang");
+  const activeMenus = isGudangWorkspace ? gudangMenus : outletMenus;
+  const currentWorkspaceName = isGudangWorkspace ? "Gudang Ops." : "Outlet Ops.";
+
+  // Evaluasi visibilitas tombol Workspace Switcher
+  const canAccessOutlet = role === "Owner" || permissions.includes("read-dashboard-outlet");
+  const canAccessGudang = role === "Owner" || permissions.includes("read-dashboard-gudang");
+  const canCreateLocation = role === "Owner" || permissions.includes("create-location");
+
   return (
     <Sidebar
       collapsible="icon"
       className="border-none [&>div]:border-none"
       {...props}
     >
-      {/* HEADER */}
+      {/* HEADER: WORKSPACE SWITCHER */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! cursor-pointer"
-            >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-emerald-700 text-sidebar-primary-foreground">
-                <GalleryVerticalEnd className="size-4 " />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight text-slate-50 hover:text-slate-900">
-                <span className="truncate font-semibold">{namaToko}</span>
-              </div>
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! cursor-pointer"
+                >
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-emerald-700 text-sidebar-primary-foreground">
+                    <GalleryVerticalEnd className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight text-slate-50 hover:text-slate-900 transition-colors">
+                    <span className="truncate font-semibold">{namaToko}</span>
+                    <span className="truncate text-xs text-slate-50/70 group-hover:text-slate-500">
+                      {currentWorkspaceName}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4 text-slate-50/70 group-hover:text-slate-500" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                align="start"
+                side="bottom"
+                sideOffset={4}
+              >
+                <DropdownMenuLabel className="text-xs text-muted-foreground">
+                  Pilih Ruang Kerja
+                </DropdownMenuLabel>
+                
+                {/* Opsi Outlet */}
+                {canAccessOutlet && (
+                  <DropdownMenuItem
+                    onClick={() => handleNavigation("/dashboard/outlet")}
+                    className={`cursor-pointer ${!isGudangWorkspace ? "bg-accent" : ""}`}
+                  >
+                    <Building2 className="mr-2 size-4 text-emerald-600" />
+                    <div className="flex flex-col">
+                      <span className="font-medium">Ruang Outlet</span>
+                      <span className="text-[10px] text-muted-foreground">Dasbor Kasir & Penjualan</span>
+                    </div>
+                  </DropdownMenuItem>
+                )}
+
+                {/* Opsi Gudang */}
+                {canAccessGudang && hasGudang && !isLoadingLokasi && (
+                  <DropdownMenuItem
+                    onClick={() => handleNavigation("/dashboard/gudang")}
+                    className={`cursor-pointer ${isGudangWorkspace ? "bg-accent" : ""}`}
+                  >
+                    <Warehouse className="mr-2 size-4 text-emerald-600" />
+                    <div className="flex flex-col">
+                      <span className="font-medium">Ruang Gudang</span>
+                      <span className="text-[10px] text-muted-foreground">WMS & Inventaris Pusat</span>
+                    </div>
+                  </DropdownMenuItem>
+                )}
+
+                {/* Opsi Setup Gudang (Hanya jika belum ada Gudang) */}
+                {!hasGudang && canCreateLocation && !isLoadingLokasi && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => handleNavigation("/dashboard/gudang/setup")}
+                      className="cursor-pointer text-amber-600 focus:bg-amber-50 focus:text-amber-700"
+                    >
+                      <PlusCircle className="mr-2 size-4" />
+                      <span className="font-medium">Setup Gudang Baru</span>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
-      {/* CONTENT */}
+      {/* CONTENT: DYNAMIC MENU (OUTLET ATAU GUDANG) */}
       <SidebarContent>
-        {menuGroups.map((group, gi) => {
+        {activeMenus.map((group, gi) => {
           const visibleItems = group.items.filter((item) =>
             hasPermission(item.permission)
           );
@@ -288,7 +447,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           return (
             <SidebarGroup key={gi}>
               {group.grup && (
-                <SidebarGroupLabel>{group.grup}</SidebarGroupLabel>
+                <SidebarGroupLabel className="text-slate-50/50 uppercase tracking-wider text-[10px] mt-2">
+                  {group.grup}
+                </SidebarGroupLabel>
               )}
               <SidebarMenu>
                 {visibleItems.map((item) => {
@@ -296,9 +457,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     hasPermission(sub.permission)
                   );
 
-                  const hasSubItems =
-                    visibleSubItems && visibleSubItems.length > 0;
-
+                  const hasSubItems = visibleSubItems && visibleSubItems.length > 0;
                   const isParentActive =
                     pathname === item.href ||
                     visibleSubItems?.some((sub) => pathname.includes(sub.href));
@@ -336,7 +495,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                       href={subItem.href}
                                       onClick={(e) => {
                                         e.preventDefault();
-                                        handleNavigation(subItem.href); // <-- GUNAKAN FUNGSI BARU DI SINI
+                                        handleNavigation(subItem.href);
                                       }}
                                     >
                                       <span>{subItem.label}</span>
@@ -356,7 +515,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <SidebarMenuButton
                         tooltip={item.label}
                         isActive={pathname === item.href}
-                        onClick={() => handleNavigation(item.href)} // <-- GUNAKAN FUNGSI BARU DI SINI
+                        onClick={() => handleNavigation(item.href)}
                         className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer"
                       >
                         <item.icon />
@@ -379,37 +538,45 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! text-slate-50! hover:text-slate-900! data-[state=open]:text-slate-900! cursor-pointer"
+                  className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! text-slate-50! hover:text-slate-900! data-[state=open]:text-slate-900! cursor-pointer transition-colors"
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage
                       src="https://github.com/shadcn.png"
                       alt={namaUser || "Avatar Pengguna"}
                     />
-                    <AvatarFallback className="bg-neutral-600 text-xs font-bold">
+                    <AvatarFallback className="bg-neutral-600 text-xs font-bold text-white">
                       {namaUser ? namaUser.substring(0, 2).toUpperCase() : "US"}
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate active:text-slate-900! font-semibold">
+                    <span className="truncate font-semibold group-data-[state=open]:text-slate-900">
                       {namaUser || "Nama Pengguna"}
                     </span>
-                    <span className="truncate text-xs text-muted-foreground">
+                    <span className="truncate text-xs text-slate-50/70 group-data-[state=open]:text-slate-500">
                       {posisiUser || "Position"}
                     </span>
                   </div>
-                  <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
+                  <ChevronsUpDown className="ml-auto size-4 text-slate-50/70 group-data-[state=open]:text-slate-500" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
+              
               <DropdownMenuContent
                 className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
                 side="bottom"
                 align="end"
                 sideOffset={4}
               >
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{namaUser}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{role}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => handleNavigation("/dashboard/profil")} // <-- GUNAKAN JUGA DI MENU PROFIL
+                  onClick={() => handleNavigation("/dashboard/profil")}
                   className="cursor-pointer"
                 >
                   <User className="mr-2 size-4" />
@@ -418,7 +585,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="text-red-500 focus:text-white focus:bg-red-400 cursor-pointer"
+                  className="text-red-500 focus:text-white focus:bg-red-500 cursor-pointer"
                 >
                   <LogOut className="mr-2 size-4" />
                   Logout

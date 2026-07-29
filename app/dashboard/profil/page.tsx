@@ -114,7 +114,7 @@ export default function ProfilPage() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.penggunaDetail(userId),
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengguna });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengguna() });
     },
     onError: (err: any) => {
       toast.error("Gagal", {
