@@ -407,6 +407,7 @@ export default function BuatReservasiPage() {
           err?.message ??
           "Terjadi kesalahan.");
       toast.error("Gagal Menyimpan", { description });
+      queryClient.invalidateQueries({ queryKey: ["sesi-booking-multi"] });
     },
   });
 

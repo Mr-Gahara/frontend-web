@@ -127,6 +127,9 @@ export default function DetailTransferStokGudangPage({
     onError: (err: any) => {
       toast.error("Gagal Mengirim Barang", { description: err.message });
       setShowConfirmKirim(false);
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.transferStokDetail(id),
+      });
     },
   });
 
@@ -152,6 +155,9 @@ export default function DetailTransferStokGudangPage({
     onError: (err: any) => {
       toast.error("Gagal Membatalkan", { description: err.message });
       setShowConfirmBatal(false);
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.transferStokDetail(id),
+      });
     },
   });
 

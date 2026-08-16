@@ -137,6 +137,7 @@ export default function DetailPengajuanStokGudangPage({
     onError: (err: any) => {
       toast.error("Gagal Menyetujui", { description: err.message });
       setShowConfirmApprove(false);
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStokDetail(id) });
     },
   });
 
