@@ -7,7 +7,7 @@ import { decodeJWT } from "@/lib/decodeToken";
 import { apiClient } from "@/lib/apiClient";
 import { LokasiListResponse } from "@/types/location";
 
-// Impor Ikon (Tambahan ikon untuk Gudang/WMS)
+// Impor Ikon (Tambahan ikon Archive untuk Data Barang)
 import {
   LayoutDashboard,
   User,
@@ -28,7 +28,8 @@ import {
   ArrowRightLeft,
   Truck,
   BookOpen,
-  ClipboardList
+  ClipboardList,
+  Archive
 } from "lucide-react";
 
 import {
@@ -85,7 +86,7 @@ type MenuGroup = {
   items: MenuItem[];
 };
 
-// --- 1. DEFINISI MENU OUTLET (TELAH DIKELOMPOKKAN) ---
+// --- 1. DEFINISI MENU OUTLET (TELAH DIRESTUKTURISASI) ---
 const outletMenus: MenuGroup[] = [
   {
     grup: null,
@@ -142,15 +143,43 @@ const outletMenus: MenuGroup[] = [
       },
     ],
   },
+  // KELOMPOK BARU: INVENTARIS YANG DIPECAH 3
   {
-    grup: "Manajemen Stok",
+    grup: "Manajemen Inventaris",
     items: [
       {
-        label: "Modul Inventaris",
-        href: "/dashboard/outlet/inventaris/produk",
-        icon: Package,
+        label: "Data Barang",
+        href: "/dashboard/outlet/inventaris-data", // Href semu untuk parent
+        icon: Archive,
         permission: "read-inventory-outlet",
+        subItems: [
+          { label: "Produk Jualan", href: "/dashboard/outlet/inventaris/produk" },
+          { label: "Kategori", href: "/dashboard/outlet/inventaris/kategori" },
+          { label: "Bahan Baku / Resep", href: "/dashboard/outlet/inventaris/bahanBaku" },
+        ]
       },
+      {
+        label: "Pantau Stok",
+        href: "/dashboard/outlet/inventaris-pantau", // Href semu untuk parent
+        icon: ClipboardList,
+        permission: "read-inventory-outlet",
+        subItems: [
+          { label: "Stok Saat Ini", href: "/dashboard/outlet/inventaris/stok" },
+          { label: "Hitung Fisik", href: "/dashboard/outlet/inventaris/stockOpname" },
+          { label: "Koreksi Selisih", href: "/dashboard/outlet/inventaris/stockAdjustment" },
+          { label: "Riwayat Pergerakan", href: "/dashboard/outlet/inventaris/jurnalStok" },
+        ]
+      },
+      {
+        label: "Suplai Gudang",
+        href: "/dashboard/outlet/inventaris-suplai", // Href semu untuk parent
+        icon: Truck,
+        permission: "read-inventory-outlet",
+        subItems: [
+          { label: "Minta Barang", href: "/dashboard/outlet/inventaris/pengajuanStok" },
+          { label: "Terima Barang", href: "/dashboard/outlet/inventaris/penerimaanBarang" },
+        ]
+      }
     ],
   },
   {
@@ -278,14 +307,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         const payload = decodeJWT(penggunaToken);
         if (!payload || !payload.id) return;
 
-        // Set Data Dasar JWT
         setNamaUser(payload.nama || "Pengguna");
         setPosisiUser(payload.role || "");
         setRole(payload.role || "");
         setNamaToko(payload.tenantName || "Nama Toko");
         setPermissions(payload.permissions || []);
 
-        // 1. Fetch Pembaruan Nama dari DB
         apiClient
           .get<{ data: any }>(`/pengguna/${payload.id}`, undefined, "pengguna")
           .then((res) => {
@@ -293,7 +320,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           })
           .catch(() => {});
 
-        // 2. Fetch Ketersediaan Lokasi Gudang
         apiClient
           .get<LokasiListResponse>("/location", undefined, "pengguna")
           .then((res) => {
@@ -339,23 +365,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return permissions.includes(permission);
   };
 
-  // --- LOGIKA TOGGLE MENU AKTIF ---
   const isGudangWorkspace = pathname.startsWith("/dashboard/gudang");
   const activeMenus = isGudangWorkspace ? gudangMenus : outletMenus;
   const currentWorkspaceName = isGudangWorkspace ? "Gudang Ops." : "Outlet Ops.";
 
-  // Evaluasi visibilitas tombol Workspace Switcher
   const canAccessOutlet = role === "Owner" || permissions.includes("read-dashboard-outlet");
   const canAccessGudang = role === "Owner" || permissions.includes("read-dashboard-gudang");
   const canCreateLocation = role === "Owner" || permissions.includes("create-location");
 
   return (
-    <Sidebar
-      collapsible="icon"
-      className="border-none [&>div]:border-none"
-      {...props}
-    >
-      {/* HEADER: WORKSPACE SWITCHER */}
+    <Sidebar collapsible="icon" className="border-none [&>div]:border-none" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -378,22 +397,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                align="start"
-                side="bottom"
-                sideOffset={4}
-              >
-                <DropdownMenuLabel className="text-xs text-muted-foreground">
-                  Pilih Ruang Kerja
-                </DropdownMenuLabel>
+              <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" align="start" side="bottom" sideOffset={4}>
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Pilih Ruang Kerja</DropdownMenuLabel>
                 
-                {/* Opsi Outlet */}
                 {canAccessOutlet && (
-                  <DropdownMenuItem
-                    onClick={() => handleNavigation("/dashboard/outlet")}
-                    className={`cursor-pointer ${!isGudangWorkspace ? "bg-accent" : ""}`}
-                  >
+                  <DropdownMenuItem onClick={() => handleNavigation("/dashboard/outlet")} className={`cursor-pointer ${!isGudangWorkspace ? "bg-accent" : ""}`}>
                     <Building2 className="mr-2 size-4 text-emerald-600" />
                     <div className="flex flex-col">
                       <span className="font-medium">Ruang Outlet</span>
@@ -402,12 +410,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </DropdownMenuItem>
                 )}
 
-                {/* Opsi Gudang */}
                 {canAccessGudang && hasGudang && !isLoadingLokasi && (
-                  <DropdownMenuItem
-                    onClick={() => handleNavigation("/dashboard/gudang")}
-                    className={`cursor-pointer ${isGudangWorkspace ? "bg-accent" : ""}`}
-                  >
+                  <DropdownMenuItem onClick={() => handleNavigation("/dashboard/gudang")} className={`cursor-pointer ${isGudangWorkspace ? "bg-accent" : ""}`}>
                     <Warehouse className="mr-2 size-4 text-emerald-600" />
                     <div className="flex flex-col">
                       <span className="font-medium">Ruang Gudang</span>
@@ -416,14 +420,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </DropdownMenuItem>
                 )}
 
-                {/* Opsi Setup Gudang (Hanya jika belum ada Gudang) */}
                 {!hasGudang && canCreateLocation && !isLoadingLokasi && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => handleNavigation("/dashboard/gudang/setup")}
-                      className="cursor-pointer text-amber-600 focus:bg-amber-50 focus:text-amber-700"
-                    >
+                    <DropdownMenuItem onClick={() => handleNavigation("/dashboard/gudang/setup")} className="cursor-pointer text-amber-600 focus:bg-amber-50 focus:text-amber-700">
                       <PlusCircle className="mr-2 size-4" />
                       <span className="font-medium">Setup Gudang Baru</span>
                     </DropdownMenuItem>
@@ -435,13 +435,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
 
-      {/* CONTENT: DYNAMIC MENU (OUTLET ATAU GUDANG) */}
       <SidebarContent>
         {activeMenus.map((group, gi) => {
-          const visibleItems = group.items.filter((item) =>
-            hasPermission(item.permission)
-          );
-
+          const visibleItems = group.items.filter((item) => hasPermission(item.permission));
           if (visibleItems.length === 0) return null;
 
           return (
@@ -453,30 +449,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               )}
               <SidebarMenu>
                 {visibleItems.map((item) => {
-                  const visibleSubItems = item.subItems?.filter((sub) =>
-                    hasPermission(sub.permission)
-                  );
-
+                  const visibleSubItems = item.subItems?.filter((sub) => hasPermission(sub.permission));
                   const hasSubItems = visibleSubItems && visibleSubItems.length > 0;
+
+                  // FIX: Gunakan exact match atau URL children (startsWith) agar tidak salah deteksi irisan URL
                   const isParentActive =
                     pathname === item.href ||
-                    visibleSubItems?.some((sub) => pathname.includes(sub.href));
+                    visibleSubItems?.some((sub) => pathname === sub.href || pathname.startsWith(`${sub.href}/`));
 
                   if (hasSubItems) {
                     return (
-                      <Collapsible
-                        key={item.href}
-                        asChild
-                        defaultOpen={isParentActive}
-                        className="group/collapsible"
-                      >
+                      <Collapsible key={item.href} asChild defaultOpen={isParentActive} className="group/collapsible">
                         <SidebarMenuItem>
                           <CollapsibleTrigger asChild>
-                            <SidebarMenuButton
-                              tooltip={item.label}
-                              isActive={isParentActive}
-                              className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer"
-                            >
+                            <SidebarMenuButton tooltip={item.label} isActive={isParentActive} className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer">
                               <item.icon />
                               <span>{item.label}</span>
                               <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -484,25 +470,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           </CollapsibleTrigger>
                           <CollapsibleContent>
                             <SidebarMenuSub>
-                              {visibleSubItems.map((subItem) => (
-                                <SidebarMenuSubItem key={subItem.href}>
-                                  <SidebarMenuSubButton
-                                    asChild
-                                    isActive={pathname === subItem.href}
-                                    className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer"
-                                  >
-                                    <a
-                                      href={subItem.href}
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        handleNavigation(subItem.href);
-                                      }}
-                                    >
-                                      <span>{subItem.label}</span>
-                                    </a>
-                                  </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                              ))}
+                              {visibleSubItems.map((subItem) => {
+                                // FIX: Menjaga menu tetap aktif saat berada di halaman detail (misal: /pengajuanStok/[id])
+                                const isSubActive = pathname === subItem.href || pathname.startsWith(`${subItem.href}/`);
+                                return (
+                                  <SidebarMenuSubItem key={subItem.href}>
+                                    <SidebarMenuSubButton asChild isActive={isSubActive} className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer">
+                                      <a href={subItem.href} onClick={(e) => { e.preventDefault(); handleNavigation(subItem.href); }}>
+                                        <span>{subItem.label}</span>
+                                      </a>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                );
+                              })}
                             </SidebarMenuSub>
                           </CollapsibleContent>
                         </SidebarMenuItem>
@@ -512,12 +492,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        tooltip={item.label}
-                        isActive={pathname === item.href}
-                        onClick={() => handleNavigation(item.href)}
-                        className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer"
-                      >
+                      <SidebarMenuButton tooltip={item.label} isActive={pathname === item.href} onClick={() => handleNavigation(item.href)} className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer">
                         <item.icon />
                         <span>{item.label}</span>
                       </SidebarMenuButton>
@@ -530,44 +505,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         })}
       </SidebarContent>
 
-      {/* FOOTER */}
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! text-slate-50! hover:text-slate-900! data-[state=open]:text-slate-900! cursor-pointer transition-colors"
-                >
+                <SidebarMenuButton size="lg" className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! text-slate-50! hover:text-slate-900! data-[state=open]:text-slate-900! cursor-pointer transition-colors">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage
-                      src="https://github.com/shadcn.png"
-                      alt={namaUser || "Avatar Pengguna"}
-                    />
+                    <AvatarImage src="https://github.com/shadcn.png" alt={namaUser || "Avatar Pengguna"} />
                     <AvatarFallback className="bg-neutral-600 text-xs font-bold text-white">
                       {namaUser ? namaUser.substring(0, 2).toUpperCase() : "US"}
                     </AvatarFallback>
                   </Avatar>
-
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold group-data-[state=open]:text-slate-900">
-                      {namaUser || "Nama Pengguna"}
-                    </span>
-                    <span className="truncate text-xs text-slate-50/70 group-data-[state=open]:text-slate-500">
-                      {posisiUser || "Position"}
-                    </span>
+                    <span className="truncate font-semibold group-data-[state=open]:text-slate-900">{namaUser || "Nama Pengguna"}</span>
+                    <span className="truncate text-xs text-slate-50/70 group-data-[state=open]:text-slate-500">{posisiUser || "Position"}</span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4 text-slate-50/70 group-data-[state=open]:text-slate-500" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="bottom"
-                align="end"
-                sideOffset={4}
-              >
+              <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="bottom" align="end" sideOffset={4}>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{namaUser}</p>
@@ -575,20 +532,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => handleNavigation("/dashboard/profil")}
-                  className="cursor-pointer"
-                >
-                  <User className="mr-2 size-4" />
-                  Profil
+                <DropdownMenuItem onClick={() => handleNavigation("/dashboard/profil")} className="cursor-pointer">
+                  <User className="mr-2 size-4" /> Profil
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="text-red-500 focus:text-white focus:bg-red-500 cursor-pointer"
-                >
-                  <LogOut className="mr-2 size-4" />
-                  Logout
+                <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-white focus:bg-red-500 cursor-pointer">
+                  <LogOut className="mr-2 size-4" /> Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

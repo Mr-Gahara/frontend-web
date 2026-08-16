@@ -63,16 +63,21 @@ export default function StokInventoryPage() {
   }>({ isOpen: false, data: null, fisikAktual: "", catatan: "" });
 
   // --- Queries ---
-  // Fetch Lokasi (Gudang/Outlet)
+  // Fetch Lokasi (Khusus Outlet)
   const { data: lokasiList = [], isLoading: isLoadingLokasi } = useQuery({
-    queryKey: ["lokasi"],
+    queryKey: ["lokasi", "outlet-only"],
     queryFn: async () => {
       try {
-        const res = await apiClient.get<any>("/lokasi", undefined, "pengguna");
+        const res = await apiClient.get<any>(
+          "/location",
+          undefined,
+          "pengguna",
+        );
         const raw = res.data?.data || res.data || [];
-        return Array.isArray(raw) ? raw : [];
+        const allLocations = Array.isArray(raw) ? raw : [];
+        return allLocations.filter((loc: any) => loc.tipe === "Outlet");
       } catch (err) {
-        return []; // Fallback jika endpoint lokasi belum ada
+        return [];
       }
     },
     staleTime: 5 * 60 * 1000,
@@ -88,22 +93,29 @@ export default function StokInventoryPage() {
         params.locationID = selectedLocation;
       }
 
-      const res = await apiClient.get<any>(
-        "/inventory",
-        params,
-        "pengguna"
-      );
+      const res = await apiClient.get<any>("/inventory", params, "pengguna");
       const raw = res.data?.data || res.data || [];
       return Array.isArray(raw) ? (raw as Inventory[]) : [];
     },
   });
 
-  // --- Derived Data (Client-side filtering for Critical Stock) ---
+  // --- SAFE GUARDS (Anti-Ghost Cache) ---
+  // Memastikan bahwa data yang dilempar oleh React Query Cache benar-benar sebuah Array
+  const safeLokasiList = Array.isArray(lokasiList) ? lokasiList : [];
+  
   const filteredInventory = useMemo(() => {
+    // Tembok Pertahanan: Pastikan inventoryData selalu Array sebelum di-filter
+    let result = Array.isArray(inventoryData) ? inventoryData : [];
+    
+    // 1. Pastikan hanya data Outlet yang boleh masuk ke tabel ini
+    result = result.filter((inv) => inv.lokasi?.tipe === "Outlet");
+
+    // 2. Filter Tab Kritis
     if (filterTab === "CRITICAL") {
-      return inventoryData.filter((inv) => inv.isStokKritis);
+      result = result.filter((inv) => inv.isStokKritis);
     }
-    return inventoryData;
+
+    return result;
   }, [inventoryData, filterTab]);
 
   // --- Mutations ---
@@ -113,35 +125,52 @@ export default function StokInventoryPage() {
         `/inventory/${payload.id}/minimum-stok`,
         { stokMinimum: payload.stokMinimum },
         undefined,
-        "pengguna"
+        "pengguna",
       );
     },
     onSuccess: () => {
-      toast.success("Berhasil", { description: "Batas minimum stok diperbarui." });
+      toast.success("Berhasil", {
+        description: "Batas minimum stok diperbarui.",
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.inventory() });
       setMinStockModal({ isOpen: false, data: null, inputValue: "" });
     },
     onError: (err: any) => {
-      toast.error("Gagal", { description: err.message || "Gagal mengupdate stok minimum." });
+      toast.error("Gagal", {
+        description: err.message || "Gagal mengupdate stok minimum.",
+      });
     },
   });
 
   const submitOpnameMutation = useMutation({
-    mutationFn: async (payload: { id: string; fisikAktual: number; catatan: string }) => {
+    mutationFn: async (payload: {
+      id: string;
+      fisikAktual: number;
+      catatan: string;
+    }) => {
       return await apiClient.post(
         `/inventory/${payload.id}/opname`,
         { fisikAktual: payload.fisikAktual, catatan: payload.catatan },
         undefined,
-        "pengguna"
+        "pengguna",
       );
     },
     onSuccess: () => {
-      toast.success("Opname Berhasil", { description: "Stok fisik telah disesuaikan." });
+      toast.success("Opname Berhasil", {
+        description: "Stok fisik telah disesuaikan.",
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.inventory() });
-      setOpnameModal({ isOpen: false, data: null, fisikAktual: "", catatan: "" });
+      setOpnameModal({
+        isOpen: false,
+        data: null,
+        fisikAktual: "",
+        catatan: "",
+      });
     },
     onError: (err: any) => {
-      toast.error("Gagal", { description: err.message || "Gagal menyesuaikan stok fisik." });
+      toast.error("Gagal", {
+        description: err.message || "Gagal menyesuaikan stok fisik.",
+      });
     },
   });
 
@@ -186,19 +215,28 @@ export default function StokInventoryPage() {
               className="pl-9 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus-visible:ring-[#0A2947]"
             />
           </div>
-          
+
           <Select value={selectedLocation} onValueChange={setSelectedLocation}>
             <SelectTrigger className="w-full sm:w-48 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-semibold focus:ring-[#0A2947]">
               <MapPin className="w-4 h-4 mr-2 text-[#D4A373]" />
               <SelectValue placeholder="Pilih Lokasi" />
             </SelectTrigger>
             <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
-              <SelectItem value="all" className="font-bold cursor-pointer">Semua Lokasi</SelectItem>
-              {lokasiList.map((lok: any) => (
-                <SelectItem key={lok._id} value={lok._id} className="cursor-pointer font-medium">
-                  {lok.nama}
-                </SelectItem>
-              ))}
+              <SelectItem value="all" className="font-bold cursor-pointer">
+                Semua Lokasi
+              </SelectItem>
+              {safeLokasiList.map((lok: any) => {
+                const locationId = lok._id || lok.id;
+                return (
+                  <SelectItem
+                    key={locationId}
+                    value={locationId}
+                    className="cursor-pointer font-medium"
+                  >
+                    {lok.nama}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -211,9 +249,9 @@ export default function StokInventoryPage() {
           onClick={() => setFilterTab("ALL")}
           className={cn(
             "rounded-full px-6 font-bold transition-all",
-            filterTab === "ALL" 
-              ? "bg-[#0A2947] text-white hover:bg-[#0A2947]/90" 
-              : "text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-[#0A2947]/5"
+            filterTab === "ALL"
+              ? "bg-[#0A2947] text-white hover:bg-[#0A2947]/90"
+              : "text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-[#0A2947]/5",
           )}
         >
           Semua Stok
@@ -223,9 +261,9 @@ export default function StokInventoryPage() {
           onClick={() => setFilterTab("CRITICAL")}
           className={cn(
             "rounded-full px-6 font-bold transition-all flex items-center gap-2",
-            filterTab === "CRITICAL" 
-              ? "bg-rose-500 text-white hover:bg-rose-600" 
-              : "text-rose-500/70 hover:text-rose-600 hover:bg-rose-50"
+            filterTab === "CRITICAL"
+              ? "bg-rose-500 text-white hover:bg-rose-600"
+              : "text-rose-500/70 hover:text-rose-600 hover:bg-rose-50",
           )}
         >
           <AlertTriangle className="w-4 h-4" />
@@ -250,30 +288,48 @@ export default function StokInventoryPage() {
               {isLoadingInventory ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
-                    <td className="px-6 py-4"><Skeleton className="h-5 w-48 bg-[#0A2947]/10" /></td>
-                    <td className="px-6 py-4"><Skeleton className="h-5 w-32 bg-[#0A2947]/10" /></td>
-                    <td className="px-6 py-4"><Skeleton className="h-5 w-20 mx-auto bg-[#0A2947]/10" /></td>
-                    <td className="px-6 py-4"><Skeleton className="h-5 w-20 mx-auto bg-[#0A2947]/10" /></td>
-                    <td className="px-6 py-4"><Skeleton className="h-8 w-28 ml-auto bg-[#0A2947]/10" /></td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-5 w-48 bg-[#0A2947]/10" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-5 w-32 bg-[#0A2947]/10" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-5 w-20 mx-auto bg-[#0A2947]/10" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-5 w-20 mx-auto bg-[#0A2947]/10" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-8 w-28 ml-auto bg-[#0A2947]/10" />
+                    </td>
                   </tr>
                 ))
               ) : filteredInventory.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-[#0A2947]/50 font-medium">
+                  <td
+                    colSpan={5}
+                    className="px-6 py-12 text-center text-[#0A2947]/50 font-medium"
+                  >
                     <Package className="w-12 h-12 mx-auto mb-3 text-[#0A2947]/20" />
                     Tidak ada data stok yang ditemukan.
                   </td>
                 </tr>
               ) : (
                 filteredInventory.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-[#FFFAF3] transition-colors">
+                  <tr
+                    key={inv.id}
+                    className="hover:bg-[#FFFAF3] transition-colors"
+                  >
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="font-bold text-[#0A2947]">
                           {inv.item?.nama || "Item Tidak Dikenal"}
                         </span>
                         <span className="text-xs font-medium text-[#0A2947]/50">
-                          {inv.item?.tipeItem === "BAHAN_BAKU" ? "Bahan Baku" : "Barang Inventory"}
+                          {inv.item?.tipeItem === "BAHAN_BAKU"
+                            ? "Bahan Baku"
+                            : "Barang Inventory"}
                         </span>
                       </div>
                     </td>
@@ -282,14 +338,24 @@ export default function StokInventoryPage() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex flex-col items-center gap-1">
-                        <span className={cn(
-                          "text-base font-mono font-bold",
-                          inv.isStokKritis ? "text-rose-600" : "text-[#0A2947]"
-                        )}>
-                          {inv.stok} <span className="text-xs font-sans">{inv.item?.satuan || "pcs"}</span>
+                        <span
+                          className={cn(
+                            "text-base font-mono font-bold",
+                            inv.isStokKritis
+                              ? "text-rose-600"
+                              : "text-[#0A2947]",
+                          )}
+                        >
+                          {inv.stok}{" "}
+                          <span className="text-xs font-sans">
+                            {inv.item?.satuan || "pcs"}
+                          </span>
                         </span>
                         {inv.isStokKritis && (
-                          <Badge variant="outline" className="text-[10px] bg-rose-50 text-rose-600 border-rose-200">
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] bg-rose-50 text-rose-600 border-rose-200"
+                          >
                             Kritis
                           </Badge>
                         )}
@@ -304,7 +370,13 @@ export default function StokInventoryPage() {
                           variant="ghost"
                           size="icon"
                           className="w-7 h-7 text-[#0A2947]/40 hover:text-[#D4A373] hover:bg-[#D4A373]/10 cursor-pointer"
-                          onClick={() => setMinStockModal({ isOpen: true, data: inv, inputValue: inv.stokMinimum })}
+                          onClick={() =>
+                            setMinStockModal({
+                              isOpen: true,
+                              data: inv,
+                              inputValue: inv.stokMinimum,
+                            })
+                          }
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </Button>
@@ -314,7 +386,14 @@ export default function StokInventoryPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setOpnameModal({ isOpen: true, data: inv, fisikAktual: inv.stok, catatan: "" })}
+                        onClick={() =>
+                          setOpnameModal({
+                            isOpen: true,
+                            data: inv,
+                            fisikAktual: inv.stok,
+                            catatan: "",
+                          })
+                        }
                         className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold shadow-sm"
                       >
                         <Scale className="w-4 h-4 mr-2 text-[#D4A373]" />
@@ -330,29 +409,57 @@ export default function StokInventoryPage() {
       </div>
 
       {/* MODAL: EDIT MINIMUM STOK */}
-      <Dialog open={minStockModal.isOpen} onOpenChange={(open) => !open && setMinStockModal(prev => ({ ...prev, isOpen: false }))}>
+      <Dialog
+        open={minStockModal.isOpen}
+        onOpenChange={(open) =>
+          !open && setMinStockModal((prev) => ({ ...prev, isOpen: false }))
+        }
+      >
         <DialogContent className="bg-[#FFFAF3] border-[#0A2947]/10 sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#0A2947] font-bold">Atur Batas Minimum Stok</DialogTitle>
+            <DialogTitle className="text-[#0A2947] font-bold">
+              Atur Batas Minimum Stok
+            </DialogTitle>
             <DialogDescription className="text-[#0A2947]/60 font-medium">
-              Sistem akan memberikan peringatan jika stok {minStockModal.data?.item?.nama} menyentuh atau berada di bawah batas ini.
+              Sistem akan memberikan peringatan jika stok{" "}
+              {minStockModal.data?.item?.nama} menyentuh atau berada di bawah
+              batas ini.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-2">
-            <label className="text-sm font-bold text-[#0A2947]">Stok Minimum ({minStockModal.data?.item?.satuan || "pcs"})</label>
+            <label className="text-sm font-bold text-[#0A2947]">
+              Stok Minimum ({minStockModal.data?.item?.satuan || "pcs"})
+            </label>
             <Input
               type="number"
               value={minStockModal.inputValue}
-              onChange={(e) => setMinStockModal(prev => ({ ...prev, inputValue: e.target.value ? Number(e.target.value) : "" }))}
+              onChange={(e) =>
+                setMinStockModal((prev) => ({
+                  ...prev,
+                  inputValue: e.target.value ? Number(e.target.value) : "",
+                }))
+              }
               className="bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold focus-visible:ring-[#0A2947] no-spinner"
             />
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setMinStockModal(prev => ({ ...prev, isOpen: false }))} className="font-bold text-[#0A2947]/60">
+            <Button
+              variant="ghost"
+              onClick={() =>
+                setMinStockModal((prev) => ({ ...prev, isOpen: false }))
+              }
+              className="font-bold text-[#0A2947]/60"
+            >
               Batal
             </Button>
-            <Button onClick={handleUpdateMinStock} disabled={updateMinStockMutation.isPending} className="bg-[#0A2947] text-white hover:bg-[#0A2947]/90 font-bold">
-              {updateMinStockMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            <Button
+              onClick={handleUpdateMinStock}
+              disabled={updateMinStockMutation.isPending}
+              className="bg-[#0A2947] text-white hover:bg-[#0A2947]/90 font-bold"
+            >
+              {updateMinStockMutation.isPending && (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              )}
               Simpan Perubahan
             </Button>
           </DialogFooter>
@@ -360,39 +467,67 @@ export default function StokInventoryPage() {
       </Dialog>
 
       {/* MODAL: QUICK OPNAME */}
-      <Dialog open={opnameModal.isOpen} onOpenChange={(open) => !open && setOpnameModal(prev => ({ ...prev, isOpen: false }))}>
+      <Dialog
+        open={opnameModal.isOpen}
+        onOpenChange={(open) =>
+          !open && setOpnameModal((prev) => ({ ...prev, isOpen: false }))
+        }
+      >
         <DialogContent className="bg-[#FFFAF3] border-[#0A2947]/10 sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#0A2947] font-bold">Penyesuaian Fisik (Quick Opname)</DialogTitle>
+            <DialogTitle className="text-[#0A2947] font-bold">
+              Penyesuaian Fisik (Quick Opname)
+            </DialogTitle>
             <DialogDescription className="text-[#0A2947]/60 font-medium">
-              Koreksi stok aktual untuk {opnameModal.data?.item?.nama}. Selisih akan otomatis dicatat pada Jurnal Stok.
+              Koreksi stok aktual untuk {opnameModal.data?.item?.nama}. Selisih
+              akan otomatis dicatat pada Jurnal Stok.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="flex flex-col gap-4 py-4">
             <div className="bg-[#0A2947]/5 p-3 rounded-lg border border-[#0A2947]/10 flex justify-between items-center">
-              <span className="text-sm font-bold text-[#0A2947]/70">Stok Tercatat di Sistem:</span>
+              <span className="text-sm font-bold text-[#0A2947]/70">
+                Stok Tercatat di Sistem:
+              </span>
               <span className="font-mono font-bold text-[#0A2947] text-lg">
-                {opnameModal.data?.stok} <span className="text-sm font-sans">{opnameModal.data?.item?.satuan}</span>
+                {opnameModal.data?.stok}{" "}
+                <span className="text-sm font-sans">
+                  {opnameModal.data?.item?.satuan}
+                </span>
               </span>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">Stok Fisik Sebenarnya <span className="text-rose-500">*</span></label>
+              <label className="text-sm font-bold text-[#0A2947]">
+                Stok Fisik Sebenarnya <span className="text-rose-500">*</span>
+              </label>
               <Input
                 type="number"
                 value={opnameModal.fisikAktual}
-                onChange={(e) => setOpnameModal(prev => ({ ...prev, fisikAktual: e.target.value ? Number(e.target.value) : "" }))}
+                onChange={(e) =>
+                  setOpnameModal((prev) => ({
+                    ...prev,
+                    fisikAktual: e.target.value ? Number(e.target.value) : "",
+                  }))
+                }
                 className="bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold focus-visible:ring-[#0A2947] no-spinner"
                 placeholder="Masukkan hitungan fisik riil..."
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">Alasan / Catatan Penyesuaian <span className="text-rose-500">*</span></label>
+              <label className="text-sm font-bold text-[#0A2947]">
+                Alasan / Catatan Penyesuaian{" "}
+                <span className="text-rose-500">*</span>
+              </label>
               <Input
                 value={opnameModal.catatan}
-                onChange={(e) => setOpnameModal(prev => ({ ...prev, catatan: e.target.value }))}
+                onChange={(e) =>
+                  setOpnameModal((prev) => ({
+                    ...prev,
+                    catatan: e.target.value,
+                  }))
+                }
                 className="bg-white border-[#0A2947]/20 text-[#0A2947] focus-visible:ring-[#0A2947]"
                 placeholder="Contoh: Barang tumpah, kemasan rusak..."
               />
@@ -400,11 +535,27 @@ export default function StokInventoryPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpnameModal(prev => ({ ...prev, isOpen: false }))} className="font-bold text-[#0A2947]/60">
+            <Button
+              variant="ghost"
+              onClick={() =>
+                setOpnameModal((prev) => ({ ...prev, isOpen: false }))
+              }
+              className="font-bold text-[#0A2947]/60"
+            >
               Batal
             </Button>
-            <Button onClick={handleSubmitOpname} disabled={submitOpnameMutation.isPending || opnameModal.fisikAktual === "" || opnameModal.catatan.trim() === ""} className="bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/90 font-bold">
-              {submitOpnameMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            <Button
+              onClick={handleSubmitOpname}
+              disabled={
+                submitOpnameMutation.isPending ||
+                opnameModal.fisikAktual === "" ||
+                opnameModal.catatan.trim() === ""
+              }
+              className="bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/90 font-bold"
+            >
+              {submitOpnameMutation.isPending && (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              )}
               Eksekusi Koreksi
             </Button>
           </DialogFooter>

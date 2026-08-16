@@ -109,7 +109,7 @@ export default function TipeAsetPage() {
           </div>
           <div className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
-              Tipe Aset & Kategori
+              Kategori Aset
             </h1>
             <p className="text-sm font-medium text-[#0A2947]/60">
               Kelompokkan aset Anda berdasarkan tipe untuk mempermudah
@@ -124,7 +124,7 @@ export default function TipeAsetPage() {
           }
           className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm h-11 px-6 w-full sm:w-auto"
         >
-          <Plus className="w-4 h-4 mr-2 text-[#D4A373]" /> Tambah Tipe Aset
+          <Plus className="w-4 h-4 mr-2 text-[#D4A373]" /> Tambah Kategori
         </Button>
       </div>
 
@@ -133,7 +133,7 @@ export default function TipeAsetPage() {
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0A2947]/40" />
           <Input
-            placeholder="Cari nama tipe aset..."
+            placeholder="Cari kategori..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/40 font-medium h-11"
@@ -150,7 +150,7 @@ export default function TipeAsetPage() {
           <table className="w-full text-sm text-left">
             <thead className="bg-[#F2EAE1] text-[#0A2947]/60 border-b border-[#0A2947]/10 uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="px-6 py-4 font-bold">Nama Tipe Aset</th>
+                <th className="px-6 py-4 font-bold">Nama Kategori</th>
                 <th className="px-6 py-4 font-bold">Deskripsi</th>
                 <th className="px-6 py-4 font-bold text-center">
                   Relasi Tarif

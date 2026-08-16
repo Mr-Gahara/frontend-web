@@ -1,0 +1,364 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "@/lib/apiClient";
+import { queryKeys } from "@/lib/queryKeys";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { id as localeID } from "date-fns/locale";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/calendar";
+import { 
+  ArrowLeft, 
+  Save, 
+  Plus, 
+  Trash2, 
+  MapPin, 
+  Package, 
+  CalendarClock,
+  CalendarIcon
+} from "lucide-react";
+
+// --- Types ---
+type RequestItem = {
+  id_lokal: string; // Hanya untuk key di frontend
+  bahanBakuID: string;
+  jumlah: string;
+  satuan: string;
+};
+
+export default function BuatPengajuanStokPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  // --- Form State ---
+  const [dariLocationID, setDariLocationID] = useState<string>("");
+  const [keLocationID, setKeLocationID] = useState<string>("");
+  const [catatan, setCatatan] = useState<string>("");
+  const [tanggalKebutuhan, setTanggalKebutuhan] = useState<Date | undefined>(undefined);
+  const [items, setItems] = useState<RequestItem[]>([
+    { id_lokal: crypto.randomUUID(), bahanBakuID: "", jumlah: "", satuan: "" },
+  ]);
+
+  // --- Queries ---
+  // 1. Fetch Lokasi (Memisahkan Outlet dan Gudang)
+  const { data: lokasiList = [], isLoading: isLoadingLokasi } = useQuery({
+    queryKey: queryKeys.lokasi,
+    queryFn: async () => {
+      const res = await apiClient.get<any>("/location", undefined, "pengguna");
+      return (res.data?.data || res.data || []) as any[];
+    },
+  });
+
+  const outletList = lokasiList.filter((l) => l.tipe === "Outlet");
+  const gudangList = lokasiList.filter((l) => l.tipe === "Gudang");
+
+  // 2. Fetch Master Bahan Baku
+  const { data: bahanBakuList = [], isLoading: isLoadingBahan } = useQuery({
+    queryKey: queryKeys.bahanBaku,
+    queryFn: async () => {
+      const res = await apiClient.get<any>("/bahanBaku", undefined, "pengguna");
+      return (res.data?.data || res.data || []) as any[];
+    },
+  });
+
+  // --- Mutations ---
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      // Validasi Manual
+      if (!dariLocationID || !keLocationID) throw new Error("Lokasi asal dan tujuan wajib diisi.");
+      const validItems = items.filter((i) => i.bahanBakuID && i.jumlah && Number(i.jumlah) > 0);
+      if (validItems.length === 0) throw new Error("Minimal harus ada 1 barang dengan jumlah valid.");
+
+      const payload = {
+        jenisPengajuan: "PERMINTAAN",
+        dariLocationID,
+        keLocationID,
+        catatan,
+        tanggalKebutuhan: tanggalKebutuhan ? tanggalKebutuhan.toISOString() : undefined,
+        items: validItems.map(item => ({
+          bahanBakuID: item.bahanBakuID,
+          jumlah: Number(item.jumlah),
+          satuan: item.satuan || "pcs",
+        }))
+      };
+
+      return await apiClient.post<any>("/pengajuanStok", payload, undefined, "pengguna");
+    },
+    onSuccess: () => {
+      toast.success("Draft Pengajuan Disimpan", { 
+        description: "Pengajuan berhasil dibuat dan siap untuk ditinjau sebelum dikirim." 
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok() });
+      router.push("/dashboard/outlet/inventaris/pengajuanStok");
+    },
+    onError: (err: any) => {
+      toast.error("Gagal Menyimpan", { description: err.message });
+    }
+  });
+
+  // --- Handlers ---
+  const handleAddItem = () => {
+    setItems((prev) => [
+      ...prev,
+      { id_lokal: crypto.randomUUID(), bahanBakuID: "", jumlah: "", satuan: "" },
+    ]);
+  };
+
+  const handleRemoveItem = (id_lokal: string) => {
+    setItems((prev) => prev.filter((i) => i.id_lokal !== id_lokal));
+  };
+
+  const handleItemChange = (id_lokal: string, field: keyof RequestItem, value: string) => {
+    setItems((prev) =>
+      prev.map((item) => {
+        if (item.id_lokal === id_lokal) {
+          const updatedItem = { ...item, [field]: value };
+          
+          // Auto-fill satuan jika bahan baku dipilih
+          if (field === "bahanBakuID") {
+            const selectedBahan = bahanBakuList.find(b => (b._id || b.id) === value);
+            if (selectedBahan) updatedItem.satuan = selectedBahan.satuan || "";
+          }
+          
+          return updatedItem;
+        }
+        return item;
+      })
+    );
+  };
+
+  return (
+    <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-4xl mx-auto">
+      {/* HEADER */}
+      <div className="flex flex-col gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Kembali ke Daftar Pengajuan
+        </Button>
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+            Buat Draft Pengajuan Stok
+          </h1>
+          <p className="text-sm font-medium text-[#0A2947]/60">
+            Pilih barang yang dibutuhkan dan simpan sebagai DRAFT sebelum diajukan ke Gudang.
+          </p>
+        </div>
+      </div>
+
+      {/* SECTION 1: RUTE LOGISTIK */}
+      <div className="rounded-2xl border border-[#0A2947]/10 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
+          <MapPin className="h-5 w-5 text-[#D4A373]" />
+          <h2 className="font-bold text-[#0A2947]">Rute Logistik</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-[#0A2947]">Diminta Dari (Outlet Anda) <span className="text-rose-500">*</span></label>
+            <Select value={dariLocationID} onValueChange={setDariLocationID} disabled={isLoadingLokasi}>
+              <SelectTrigger className="w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus:ring-[#0A2947]">
+                <SelectValue placeholder="Pilih Outlet Anda..." />
+              </SelectTrigger>
+              <SelectContent>
+                {outletList.map((loc) => (
+                  <SelectItem key={loc._id || loc.id} value={loc._id || loc.id} className="font-medium cursor-pointer">
+                    {loc.nama}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-[#0A2947]">Tujuan Permintaan (Gudang Pusat) <span className="text-rose-500">*</span></label>
+            <Select value={keLocationID} onValueChange={setKeLocationID} disabled={isLoadingLokasi}>
+              <SelectTrigger className="w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus:ring-[#0A2947]">
+                <SelectValue placeholder="Pilih Gudang..." />
+              </SelectTrigger>
+              <SelectContent>
+                {gudangList.map((loc) => (
+                  <SelectItem key={loc._id || loc.id} value={loc._id || loc.id} className="font-medium cursor-pointer">
+                    {loc.nama}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 2: DAFTAR BARANG YANG DIMINTA */}
+      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-[#0A2947]/10 pb-3">
+          <div className="flex items-center gap-2">
+            <Package className="h-5 w-5 text-[#D4A373]" />
+            <h2 className="font-bold text-[#0A2947]">Daftar Kebutuhan Barang</h2>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleAddItem}
+            className="border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold shadow-sm h-8 cursor-pointer"
+          >
+            <Plus className="w-4 h-4 mr-1" /> Tambah Baris
+          </Button>
+        </div>
+
+        <div className="space-y-3 pt-2">
+          {items.map((item) => (
+            <div key={item.id_lokal} className="flex flex-col sm:flex-row items-start sm:items-end gap-3 bg-white p-3 rounded-xl border border-[#0A2947]/10">
+              {/* Kolom Bahan Baku */}
+              <div className="w-full sm:flex-1 space-y-1.5">
+                <label className="text-xs font-bold text-[#0A2947]/70">Pilih Barang <span className="text-rose-500">*</span></label>
+                <Select 
+                  value={item.bahanBakuID} 
+                  onValueChange={(val) => handleItemChange(item.id_lokal, "bahanBakuID", val)}
+                  disabled={isLoadingBahan}
+                >
+                  <SelectTrigger className="w-full bg-transparent border-[#0A2947]/20 focus:ring-[#0A2947]">
+                    <SelectValue placeholder="Pilih..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {bahanBakuList.map((bahan) => (
+                      <SelectItem key={bahan._id || bahan.id} value={bahan._id || bahan.id} className="cursor-pointer">
+                        {bahan.namaBahan}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Kolom QTY */}
+              <div className="w-full sm:w-32 space-y-1.5">
+                <label className="text-xs font-bold text-[#0A2947]/70">Jumlah <span className="text-rose-500">*</span></label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={item.jumlah}
+                  onChange={(e) => handleItemChange(item.id_lokal, "jumlah", e.target.value)}
+                  className="bg-transparent border-[#0A2947]/20 focus-visible:ring-[#0A2947] font-mono font-bold no-spinner"
+                />
+              </div>
+
+              {/* Kolom Satuan (Read Only) */}
+              <div className="w-full sm:w-32 space-y-1.5">
+                <label className="text-xs font-bold text-[#0A2947]/70">Satuan</label>
+                <Input
+                  type="text"
+                  readOnly
+                  value={item.satuan || "-"}
+                  className="bg-[#0A2947]/5 border-transparent font-medium text-[#0A2947]/50 cursor-not-allowed"
+                  tabIndex={-1}
+                />
+              </div>
+
+              {/* Tombol Hapus */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleRemoveItem(item.id_lokal)}
+                disabled={items.length === 1}
+                className="w-10 h-10 text-rose-500 hover:bg-rose-50 hover:text-rose-700 cursor-pointer shrink-0"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* SECTION 3: INFORMASI TAMBAHAN */}
+      <div className="rounded-2xl border border-[#0A2947]/10 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
+          <CalendarClock className="h-5 w-5 text-[#D4A373]" />
+          <h2 className="font-bold text-[#0A2947]">Informasi Pengiriman</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          {/* Kolom Tanggal Custom */}
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-[#0A2947]">Tanggal Kebutuhan (Opsional)</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    "w-full h-10 justify-start text-left font-bold cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]",
+                    !tanggalKebutuhan && "text-[#0A2947]/50"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 text-[#D4A373]" />
+                  {tanggalKebutuhan ? format(tanggalKebutuhan, "dd MMMM yyyy", { locale: localeID }) : "Pilih tanggal..."}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 border-[#0A2947]/10 bg-[#FFFAF3]" align="start">
+                <Calendar
+                  mode="single"
+                  selected={tanggalKebutuhan}
+                  onSelect={(date) => { if (date) setTanggalKebutuhan(date); }}
+                />
+              </PopoverContent>
+            </Popover>
+            <p className="text-[10px] text-[#0A2947]/50 font-medium">Batas waktu maksimal barang harus tiba di Outlet.</p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-[#0A2947]">Catatan / Pesan ke Gudang</label>
+            <Textarea
+              placeholder="Misal: Tolong kirimkan batch produksi terbaru..."
+              value={catatan}
+              onChange={(e) => setCatatan(e.target.value)}
+              className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus-visible:ring-[#0A2947] font-medium resize-none"
+              rows={3}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* FOOTER ACTIONS */}
+      <div className="flex justify-end gap-3 pt-2">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="font-bold text-[#0A2947]/60 hover:text-[#0A2947] cursor-pointer"
+        >
+          Batal
+        </Button>
+        <Button
+          onClick={() => createMutation.mutate()}
+          disabled={createMutation.isPending || !dariLocationID || !keLocationID}
+          className="bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-md cursor-pointer"
+        >
+          <Save className="w-4 h-4 mr-2" /> 
+          {createMutation.isPending ? "Menyimpan..." : "Simpan sebagai Draft"}
+        </Button>
+      </div>
+
+    </div>
+  );
+}

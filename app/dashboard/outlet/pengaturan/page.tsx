@@ -55,7 +55,7 @@ export default function PengaturanPage() {
             <Settings className="w-6 h-6 text-[#0A2947]" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-[#0A2947] wrap-break-words">
-            Pengaturan Sistem
+            Pengaturan Outlet
           </h1>
         </div>
         <p className="text-sm font-medium text-[#0A2947]/60 ml-11 md:pr-12 wrap-break-words">

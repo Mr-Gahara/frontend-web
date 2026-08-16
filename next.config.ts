@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   allowedDevOrigins: [
     "*.ngrok-free.app",  // wildcard semua ngrok URL
+    "192.168.1.12",
+    "100.89.5.127",
+    "archlinux.tail5e846b.ts.net"
   ],
   async rewrites() {
     return [

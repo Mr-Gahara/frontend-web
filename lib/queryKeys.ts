@@ -31,6 +31,21 @@ export const queryKeys = {
   stockAdjustmentDetail: (id: string) =>
     ["stockAdjustment", "detail", id] as const,
 
+  pengajuanStok: (params?: Record<string, any>) =>
+    params && Object.keys(params).length > 0
+      ? (["pengajuanStok", params] as const)
+      : (["pengajuanStok"] as const),
+  pengajuanStokDetail: (id: string) => ["pengajuanStok", "detail", id] as const,
+
+  transferStok: (params?: Record<string, any>) =>
+    params && Object.keys(params).length > 0
+      ? (["transferStok", params] as const)
+      : (["transferStok"] as const),
+  transferStokDetail: (id: string) => ["transferStok", "detail", id] as const,
+
+  jurnalStok: () => ["jurnalStok"],
+  jurnalStokDetail: (id: string) => [...queryKeys.jurnalStok(), "detail", id],
+
   produk: ["produk"] as const,
   produkPajak: (produkId: string) => ["produk-pajak", produkId] as const,
   produkDetail: (id: string) => ["produk", "detail", id] as const,
@@ -52,4 +67,9 @@ export const queryKeys = {
   sesiBooking: (tanggal: string) => ["sesi-booking", tanggal] as const,
 
   lokasi: ["lokasi"] as const,
+
+  laporanLabaRugi: (params?: Record<string, any>) =>
+    params && Object.keys(params).length > 0
+      ? (["laporanLabaRugi", params] as const)
+      : (["laporanLabaRugi"] as const),
 };

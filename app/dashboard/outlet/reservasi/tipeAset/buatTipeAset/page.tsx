@@ -28,8 +28,8 @@ import {
 const tipeAsetSchema = z.object({
   namaTipeAset: z
     .string()
-    .min(1, "Nama Tipe Aset wajib diisi")
-    .min(2, "Nama Tipe Aset minimal 2 karakter"), // Menyesuaikan validasi backend
+    .min(1, "Nama Kategori Aset wajib diisi")
+    .min(2, "Nama Kategori Aset minimal 2 karakter"), // Menyesuaikan validasi backend
   deskripsi: z.string().optional(),
 });
 
@@ -61,14 +61,14 @@ export default function BuatTipeAsetPage() {
     },
     onSuccess: () => {
       toast.success("Berhasil", {
-        description: "Tipe Aset baru berhasil ditambahkan.",
+        description: "Kategori Aset baru berhasil ditambahkan.",
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.tipeAset });
       router.push("/dashboard/outlet/reservasi/tipeAset");
     },
     onError: (err: any) => {
       toast.error("Gagal Menyimpan", {
-        description: err.message || "Gagal menambahkan Tipe Aset baru.",
+        description: err.message || "Gagal menambahkan Kategori Aset baru.",
       });
     },
   });
@@ -96,12 +96,12 @@ export default function BuatTipeAsetPage() {
           onClick={() => router.push("/dashboard/outlet/reservasi/tipeAset")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Kembali ke Daftar Tipe Aset
+          Kembali ke Daftar Kategori Aset
         </Button>
 
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
-            Tambah Tipe Aset
+            Tambah Kategori Aset Baru
           </h1>
           <p className="text-sm font-medium text-[#0A2947]/60">
             Buat kategori atau tipe baru untuk mengelompokkan aset/fasilitas yang Anda sewakan.
@@ -115,13 +115,13 @@ export default function BuatTipeAsetPage() {
           <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
             <Layers className="h-5 w-5 text-[#D4A373]" />
             <h3 className="text-base font-bold text-[#0A2947]">
-              Detail Informasi Tipe
+              Detail Informasi Kategori Aset
             </h3>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-[#0A2947]">
-              Nama Tipe Aset <span className="text-rose-500">*</span>
+              Nama Kategori Aset <span className="text-rose-500">*</span>
             </label>
             <Input
               {...register("namaTipeAset")}
@@ -156,7 +156,7 @@ export default function BuatTipeAsetPage() {
               className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947] resize-none"
             />
             <p className="text-[10px] font-medium text-[#0A2947]/50">
-              Gunakan untuk menyimpan spesifikasi khusus tipe ini agar staf mengetahui perbedaannya.
+              Gunakan untuk menyimpan spesifikasi khusus kategori ini agar staf mengetahui perbedaannya.
             </p>
           </div>
         </div>
@@ -177,7 +177,7 @@ export default function BuatTipeAsetPage() {
             disabled={createMutation.isPending}
             className="w-full sm:w-auto cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold h-12 px-8"
           >
-            {createMutation.isPending ? "Menyimpan Data..." : "Simpan Tipe Aset"}
+            {createMutation.isPending ? "Menyimpan Data..." : "Simpan Kategori Aset"}
           </Button>
         </div>
       </form>

@@ -52,6 +52,7 @@ export interface ItemPenjualan {
 export interface Penjualan {
   _id: string;
   tenantID: string;
+  locationID: string | null;
   noReferensi: string;
   dataPengguna: DataPengguna;
   dataPelanggan: DataPelanggan;
@@ -86,6 +87,7 @@ export interface ItemPenjualanRequest {
 }
 
 export interface PenjualanRequest {
+  locationID: string;
   pelangganID: string;
   penggunaID: string;
   jenisTransaksi: JenisTransaksi;
@@ -101,6 +103,7 @@ export interface PenjualanRequest {
 }
 
 export interface PenjualanUpdateRequest {
+  locationID?: string;
   pelangganID?: string;
   tanggalTransaksi?: string;
   itemPenjualan?: ItemPenjualanRequest[];

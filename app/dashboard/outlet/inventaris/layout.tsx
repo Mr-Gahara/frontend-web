@@ -1,4 +1,3 @@
-import { InventarisNavTabs } from "@/app/dashboard/outlet/inventaris/components/inventaris-nav-tabs"; // Sesuaikan path
 
 export default function InventarisLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,9 +9,6 @@ export default function InventarisLayout({ children }: { children: React.ReactNo
           Kelola daftar produk, kategori, harga, dan stok toko Anda.
         </p>
       </div>
-
-      {/* Navigasi Tabs untuk semua anak halaman */}
-      <InventarisNavTabs />
 
       {/* Konten halamannya (Tabel Produk, Form, atau Tabel Kategori) */}
       <div className="w-full">

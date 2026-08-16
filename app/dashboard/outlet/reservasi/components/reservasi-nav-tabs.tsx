@@ -17,7 +17,7 @@ const tabs = [
     icon: Layers,
   },
   {
-    label: "Tipe Aset",
+    label: "Kategori Aset",
     href: "/dashboard/outlet/reservasi/tipeAset",
     icon: Box,
   },

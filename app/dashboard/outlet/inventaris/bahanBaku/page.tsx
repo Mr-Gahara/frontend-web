@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { BahanBaku } from "@/types/bahanBaku";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Inventory } from "@/types/inventory";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +33,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Package,
+  Loader2
 } from "lucide-react";
 
 export default function DaftarBahanBakuPage() {
@@ -40,50 +43,61 @@ export default function DaftarBahanBakuPage() {
 
   // --- STATE ---
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 500);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedBahanId, setSelectedBahanId] = useState<string | null>(null);
 
-  // --- FETCH DATA ---
-  const {
-    data: bahanBakuList = [],
-    isLoading,
-    isError,
-  } = useQuery<any[]>({ // Menggunakan any[] sementara agar fleksibel membaca id / _id
-    queryKey: queryKeys.bahanBaku,
+  // --- FETCH LOKASI OUTLET ---
+  const { data: outletId, isLoading: isLoadingLokasi } = useQuery({
+    queryKey: ["lokasi", "outlet-only"],
     queryFn: async () => {
       try {
-        const res = await apiClient.get<any>(
-          "/bahan-baku",
-          undefined,
-          "pengguna"
-        );
-        return res.data?.data || res.data || [];
-      } catch (error) {
-        const res = await apiClient.get<any>(
-          "/bahanBaku",
-          undefined,
-          "pengguna"
-        );
-        return res.data?.data || res.data || [];
+        const res = await apiClient.get<any>("/location", undefined, "pengguna");
+        const raw = res.data?.data || res.data || [];
+        const locations = Array.isArray(raw) ? raw : [];
+        
+        // Asumsi: Ambil lokasi pertama yang bertipe Outlet
+        const outlet = locations.find((loc: any) => loc.tipe === "Outlet");
+        const finalId = outlet?._id || outlet?.id;
+        return finalId ? finalId : null;
+      } catch (err) {
+        return null;
       }
     },
+    staleTime: 5 * 60 * 1000,
   });
 
-  // --- MUTATION HAPUS ---
+  // --- FETCH DATA INVENTORY OUTLET ---
+  const {
+    data: inventoryList = [],
+    isLoading: isLoadingInventory,
+    isError,
+  } = useQuery({
+    queryKey: [...queryKeys.inventory(outletId || "outlet"), debouncedSearch],
+    queryFn: async () => {
+      const params: Record<string, string> = { 
+        locationID: outletId,
+      };
+      if (debouncedSearch) params.search = debouncedSearch;
+
+      const res = await apiClient.get<any>(
+        "/inventory",
+        params,
+        "pengguna"
+      );
+      const raw = res.data?.data || res.data || [];
+      return Array.isArray(raw) ? (raw as Inventory[]) : [];
+    },
+    enabled: !!outletId,
+  });
+
+  // --- MUTATION HAPUS (Target: Master Data) ---
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       try {
-        return await apiClient.delete(
-          `/bahan-baku/${id}`,
-          undefined,
-          "pengguna"
-        );
+        return await apiClient.delete(`/bahan-baku/${id}`, undefined, "pengguna");
       } catch (error) {
-        return await apiClient.delete(
-          `/bahanBaku/${id}`,
-          undefined,
-          "pengguna"
-        );
+        return await apiClient.delete(`/bahanBaku/${id}`, undefined, "pengguna");
       }
     },
     onSuccess: () => {
@@ -91,6 +105,7 @@ export default function DaftarBahanBakuPage() {
         description: "Data bahan baku telah dihapus dari sistem.",
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory(outletId || "outlet") });
       setDeleteModalOpen(false);
       setSelectedBahanId(null);
     },
@@ -115,10 +130,12 @@ export default function DaftarBahanBakuPage() {
     }
   };
 
-  // --- FILTERING ---
-  const filteredList = bahanBakuList.filter((item) =>
-    (item.namaBahan || "").toLowerCase().includes(searchQuery.toLowerCase())
+  // --- FILTERING (Client-side fallback) ---
+  const filteredList = inventoryList.filter((inv) =>
+    (inv.item?.nama || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const isLoading = isLoadingLokasi || isLoadingInventory;
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
@@ -133,8 +150,7 @@ export default function DaftarBahanBakuPage() {
               Bahan Baku
             </h1>
             <p className="text-sm font-medium text-[#0A2947]/60">
-              Kelola stok persediaan bahan mentah untuk keperluan produksi atau
-              resep.
+              Kelola persediaan bahan mentah di outlet ini untuk keperluan produksi.
             </p>
           </div>
         </div>
@@ -154,7 +170,7 @@ export default function DaftarBahanBakuPage() {
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0A2947]/40" />
           <Input
-            placeholder="Cari nama bahan baku..."
+            placeholder="Cari nama bahan baku di outlet ini..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/40 font-medium h-11"
@@ -172,35 +188,30 @@ export default function DaftarBahanBakuPage() {
             <thead className="bg-[#F2EAE1] text-[#0A2947]/60 border-b border-[#0A2947]/10 uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="px-6 py-4 font-bold">Nama Bahan Baku</th>
-                <th className="px-6 py-4 font-bold text-center">
-                  Stok Saat Ini
-                </th>
-                <th className="px-6 py-4 font-bold text-center">
-                  Minimal Stok
-                </th>
+                <th className="px-6 py-4 font-bold text-center">Stok Saat Ini</th>
+                <th className="px-6 py-4 font-bold text-center">Minimal Stok</th>
                 <th className="px-6 py-4 font-bold text-center">Status</th>
                 <th className="px-6 py-4 font-bold text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#0A2947]/5">
               {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0A2947] border-t-transparent"></div>
-                      <p className="text-sm font-bold text-[#0A2947]/60">
-                        Memuat data...
-                      </p>
-                    </div>
-                  </td>
-                </tr>
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={i}>
+                    <td className="px-6 py-4"><Skeleton className="h-5 w-48 bg-[#0A2947]/10" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-5 w-20 mx-auto bg-[#0A2947]/10" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-5 w-20 mx-auto bg-[#0A2947]/10" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-6 w-20 mx-auto rounded-full bg-[#0A2947]/10" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-8 w-24 ml-auto bg-[#0A2947]/10" /></td>
+                  </tr>
+                ))
               ) : isError ? (
                 <tr>
                   <td
                     colSpan={5}
                     className="px-6 py-12 text-center text-rose-500 font-bold"
                   >
-                    Gagal memuat data bahan baku. Silakan muat ulang halaman.
+                    Gagal memuat data inventaris outlet. Silakan muat ulang halaman.
                   </td>
                 </tr>
               ) : filteredList.length === 0 ? (
@@ -211,43 +222,43 @@ export default function DaftarBahanBakuPage() {
                       <p className="text-sm font-bold text-[#0A2947]/50">
                         {searchQuery
                           ? "Tidak ada bahan baku yang cocok dengan pencarian."
-                          : "Belum ada data bahan baku."}
+                          : "Belum ada data stok bahan baku di outlet ini."}
                       </p>
                     </div>
                   </td>
                 </tr>
               ) : (
-                filteredList.map((item) => {
-                  // FIX: Defensively extract the ID whether it's mapped as `id` or raw `_id`
-                  const currentId = item.id || item._id;
-                  const isKritis = item.stok <= item.minimalStok;
+                filteredList.map((inv) => {
+                  // Ekstraksi ID Master Data untuk keperluan Edit/Hapus
+                  const masterId = inv.item?.id;
+                  if (!masterId) return null;
 
                   return (
                     <tr
-                      key={currentId}
+                      key={inv.id}
                       className="hover:bg-[#0A2947]/5 transition-colors"
                     >
                       <td className="px-6 py-4">
                         <p className="font-bold text-[#0A2947]">
-                          {item.namaBahan}
+                          {inv.item?.nama || "Item Tidak Dikenal"}
                         </p>
                         <p className="text-xs font-medium text-[#0A2947]/50 mt-0.5">
-                          ID: {currentId?.substring(0, 8)}
+                          ID: {masterId.substring(0, 8)}
                         </p>
                       </td>
 
                       <td className="px-6 py-4 text-center">
                         <span className="font-mono font-bold text-[#0A2947] bg-[#0A2947]/5 px-2 py-1 rounded-md">
-                          {item.stok} {item.satuan}
+                          {inv.stok} {inv.item?.satuan || ""}
                         </span>
                       </td>
 
                       <td className="px-6 py-4 text-center text-[#0A2947]/60 font-mono font-bold">
-                        {item.minimalStok} {item.satuan}
+                        {inv.stokMinimum} {inv.item?.satuan || ""}
                       </td>
 
                       <td className="px-6 py-4 text-center">
-                        {isKritis ? (
+                        {inv.isStokKritis ? (
                           <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100 border-none shadow-sm px-2.5 py-1">
                             <AlertTriangle className="w-3 h-3 mr-1.5" /> Stok
                             Kritis
@@ -266,17 +277,17 @@ export default function DaftarBahanBakuPage() {
                             size="sm"
                             onClick={() =>
                               router.push(
-                                `/dashboard/outlet/inventaris/bahanBaku/${currentId}/edit`,
+                                `/dashboard/outlet/inventaris/bahanBaku/${masterId}/edit`,
                               )
                             }
                             className="h-8 px-3 text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-[#0A2947]/10 font-bold"
                           >
-                            <Edit className="w-4 h-4 mr-2" /> Edit
+                            <Edit className="w-4 h-4 mr-2" /> Edit Master
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDeleteClick(currentId)}
+                            onClick={() => handleDeleteClick(masterId)}
                             className="h-8 px-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -300,7 +311,7 @@ export default function DaftarBahanBakuPage() {
               <AlertTriangle className="w-5 h-5" /> Hapus Bahan Baku?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
-              Data bahan baku yang dihapus tidak dapat dikembalikan. Pastikan
+              Data master bahan baku yang dihapus tidak dapat dikembalikan dan akan hilang dari seluruh lokasi. Pastikan
               bahan baku ini tidak sedang digunakan pada resep produk manapun.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -316,7 +327,7 @@ export default function DaftarBahanBakuPage() {
               disabled={deleteMutation.isPending}
               className="bg-rose-600 text-[#FFFAF3] hover:bg-rose-700 font-bold cursor-pointer border-none shadow-sm"
             >
-              {deleteMutation.isPending ? "Menghapus..." : "Ya, Hapus"}
+              {deleteMutation.isPending ? "Menghapus..." : "Ya, Hapus Data Master"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

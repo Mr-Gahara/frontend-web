@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
 
-import { useForm, Controller, useWatch } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
@@ -22,18 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, PackageCheck, Info, Save, Loader2, Ban } from "lucide-react";
+import { ArrowLeft, PackageCheck, Save, Loader2, Ban } from "lucide-react";
 
 // --- ZOD SCHEMA ---
-// Stok tetap ada di schema agar bisa di-reset untuk tampilan, tapi tidak akan kita kirim ulang ke backend
+// Hanya fokus pada identitas Master Data
 const bahanBakuEditSchema = z.object({
   namaBahan: z.string().min(1, "Nama bahan baku wajib diisi"),
   satuan: z.enum(SATUAN_BAHAN_OPTIONS, { message: "Silakan pilih satuan" }),
-  stok: z.coerce.number().min(0).default(0),
-  minimalStok: z.coerce
-    .number()
-    .min(0, "Batas stok minimum tidak boleh negatif")
-    .default(0),
 });
 
 type BahanBakuEditFormInput = z.input<typeof bahanBakuEditSchema>;
@@ -78,12 +73,8 @@ export default function EditBahanBakuPage() {
     defaultValues: {
       namaBahan: "",
       satuan: "gram",
-      stok: 0,
-      minimalStok: 0,
     },
   });
-
-  const currentSatuan = useWatch({ control, name: "satuan" });
 
   // Sinkronisasi data ke form saat selesai fetch
   useEffect(() => {
@@ -91,15 +82,13 @@ export default function EditBahanBakuPage() {
       reset({
         namaBahan: detailBahan.namaBahan || "",
         satuan: detailBahan.satuan || "gram",
-        stok: detailBahan.stok || 0,
-        minimalStok: detailBahan.minimalStok || 0,
       });
     }
   }, [detailBahan, reset]);
 
   // --- MUTATION UPDATE ---
   const updateMutation = useMutation({
-    mutationFn: async (payload: Partial<BahanBakuEditFormOutput>) => {
+    mutationFn: async (payload: BahanBakuEditFormOutput) => {
       try {
         return await apiClient.put(`/bahan-baku/${bahanId}`, payload, undefined, "pengguna");
       } catch (error) {
@@ -111,7 +100,8 @@ export default function EditBahanBakuPage() {
         description: "Perubahan master data bahan baku telah disimpan.",
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku });
-      queryClient.invalidateQueries({ queryKey: ["inventory"] }); // Update tabel stok
+      // Update tabel stok agar nama/satuan baru langsung tercermin di inventory
+      queryClient.invalidateQueries({ queryKey: ["inventory"] }); 
       router.push("/dashboard/outlet/inventaris/bahanBaku");
     },
     onError: (err: any) => {
@@ -123,9 +113,7 @@ export default function EditBahanBakuPage() {
 
   // --- HANDLER SUBMIT ---
   const onSubmit = (data: BahanBakuEditFormOutput) => {
-    // Kita BUANG property 'stok' dari payload agar tidak menimpa stok yang sedang berjalan di backend.
-    const { stok, ...safePayload } = data;
-    updateMutation.mutate(safePayload);
+    updateMutation.mutate(data);
   };
 
   // --- RENDER CONDITIONS ---
@@ -167,10 +155,10 @@ export default function EditBahanBakuPage() {
 
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
-            Edit Bahan Baku
+            Edit Master Bahan Baku
           </h1>
           <p className="text-sm font-medium text-[#0A2947]/60">
-            Perbarui informasi master data bahan baku.
+            Perbarui informasi identitas master data bahan baku.
           </p>
         </div>
       </div>
@@ -209,7 +197,7 @@ export default function EditBahanBakuPage() {
             </div>
             
             {/* Satuan */}
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <label className="text-sm font-bold text-[#0A2947]">
                 Satuan <span className="text-red-500">*</span>
               </label>
@@ -245,62 +233,6 @@ export default function EditBahanBakuPage() {
                   </span>
                 )}
               </div>
-            </div>
-            
-            <div className="hidden sm:block"></div> {/* Spacer untuk grid */}
-            
-            {/* Stok Aktual (Read-Only) */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
-                Stok Global Saat Ini
-              </label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  {...register("stok")}
-                  disabled
-                  className="bg-[#0A2947]/5 border-[#0A2947]/10 text-[#0A2947]/60 font-mono font-bold h-12 pr-16 disabled:cursor-not-allowed disabled:opacity-100"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#0A2947]/40 pointer-events-none">
-                  {currentSatuan}
-                </div>
-              </div>
-            </div>
-            
-            {/* Batas Stok Minimum */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
-                Batas Stok Minimum <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  {...register("minimalStok")}
-                  placeholder="0"
-                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-mono font-bold h-12 pr-16 focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-[#0A2947]/40 pointer-events-none">
-                  {currentSatuan}
-                </div>
-              </div>
-              <div className="min-h-4">
-                {errors.minimalStok && (
-                  <span className="text-xs font-bold text-rose-500">
-                    {errors.minimalStok.message}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Helper Text Mengapa Stok Di-disable */}
-          <div className="flex items-start gap-2 bg-blue-50 p-4 rounded-xl border border-blue-100 mt-2">
-            <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-            <div className="text-xs font-medium text-blue-800 leading-relaxed">
-              <strong className="font-bold">Kenapa Stok tidak bisa diubah di sini?</strong>
-              <p className="mt-1">
-                Sesuai standar operasional, angka stok fisik harus dijaga integritasnya. Jika Anda menemukan selisih atau ingin mengubah angka stok yang sedang berjalan, gunakan menu <span className="font-bold text-blue-900 cursor-pointer hover:underline" onClick={() => router.push("/dashboard/outlet/inventaris/stok")}>Stok Real-time (Quick Opname)</span> agar perubahan tersebut tercatat di Jurnal Stok.
-              </p>
             </div>
           </div>
 

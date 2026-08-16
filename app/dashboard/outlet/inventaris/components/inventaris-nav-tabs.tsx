@@ -36,6 +36,16 @@ const tabs = [
     href: "/dashboard/outlet/inventaris/stok",
     icon: BoxIcon,
   },
+  {
+    label: "Pengajuan Stok",
+    href: "/dashboard/outlet/inventaris/pengajuanStok",
+    icon: BoxIcon,
+  },
+  {
+    label: "Penerimaan Barang",
+    href: "/dashboard/outlet/inventaris/penerimaanBarang",
+    icon: BoxIcon,
+  },
 ];
 
 export function InventarisNavTabs() {

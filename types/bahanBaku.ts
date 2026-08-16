@@ -9,8 +9,6 @@ export interface BahanBaku {
   id?: string;
   tenantID: string;
   namaBahan: string;
-  stok: number;
-  minimalStok: number;
   satuan: SatuanBahan;
   availableUnits?: string[]; // Hasil dari getAvailableUnits backend
   createdAt: string;
@@ -19,8 +17,6 @@ export interface BahanBaku {
 
 export interface BahanBakuRequest {
   namaBahan: string;
-  stok?: number;
-  minimalStok?: number;
   satuan: SatuanBahan;
   locationID?: string;
 }

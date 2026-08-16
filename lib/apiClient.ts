@@ -231,8 +231,36 @@ async function request<T>(
 }
 
 export const apiClient = {
-  get: <T>(endpoint: string, options?: RequestInit, tokenType?: TokenType) =>
-    request<T>(endpoint, { method: "GET", ...options }, true, tokenType),
+  // UPGRADE: Fungsi GET kini otomatis mengubah parameter object menjadi Query String URL
+  get: <T>(
+    endpoint: string,
+    params?: Record<string, any>,
+    tokenType?: TokenType,
+    options?: RequestInit
+  ) => {
+    let url = endpoint;
+
+    // Jika ada parameter yang dikirim (bukan undefined/null)
+    if (params && Object.keys(params).length > 0) {
+      const searchParams = new URLSearchParams();
+      
+      Object.entries(params).forEach(([key, value]) => {
+        // Abaikan nilai kosong agar URL tetap bersih
+        if (value !== undefined && value !== null && value !== "") {
+          searchParams.append(key, String(value));
+        }
+      });
+
+      const queryString = searchParams.toString();
+      if (queryString) {
+        // Cek apakah endpoint sudah punya tanda tanya sebelumnya
+        url += (url.includes("?") ? "&" : "?") + queryString;
+      }
+    }
+
+    return request<T>(url, { method: "GET", ...options }, true, tokenType);
+  },
+
   post: <T>(
     endpoint: string,
     body: unknown,
@@ -245,6 +273,7 @@ export const apiClient = {
       true,
       tokenType,
     ),
+    
   put: <T>(
     endpoint: string,
     body: unknown,
@@ -257,6 +286,7 @@ export const apiClient = {
       true,
       tokenType,
     ),
+    
   patch: <T>(
     endpoint: string,
     body: unknown,
@@ -269,6 +299,10 @@ export const apiClient = {
       true,
       tokenType,
     ),
-  delete: <T>(endpoint: string, options?: RequestInit, tokenType?: TokenType) =>
-    request<T>(endpoint, { method: "DELETE", ...options }, true, tokenType),
+    
+  delete: <T>(
+    endpoint: string,
+    options?: RequestInit,
+    tokenType?: TokenType
+  ) => request<T>(endpoint, { method: "DELETE", ...options }, true, tokenType),
 };
