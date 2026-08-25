@@ -29,7 +29,11 @@ import {
   Truck,
   BookOpen,
   ClipboardList,
-  Archive
+  Archive,
+  CalendarDays,
+  CalendarRange,
+  Clock,
+  CalendarClock,
 } from "lucide-react";
 
 import {
@@ -153,10 +157,16 @@ const outletMenus: MenuGroup[] = [
         icon: Archive,
         permission: "read-inventory-outlet",
         subItems: [
-          { label: "Produk Jualan", href: "/dashboard/outlet/inventaris/produk" },
+          {
+            label: "Produk Jualan",
+            href: "/dashboard/outlet/inventaris/produk",
+          },
           { label: "Kategori", href: "/dashboard/outlet/inventaris/kategori" },
-          { label: "Bahan Baku / Resep", href: "/dashboard/outlet/inventaris/bahanBaku" },
-        ]
+          {
+            label: "Bahan Baku / Resep",
+            href: "/dashboard/outlet/inventaris/bahanBaku",
+          },
+        ],
       },
       {
         label: "Pantau Stok",
@@ -165,10 +175,19 @@ const outletMenus: MenuGroup[] = [
         permission: "read-inventory-outlet",
         subItems: [
           { label: "Stok Saat Ini", href: "/dashboard/outlet/inventaris/stok" },
-          { label: "Hitung Fisik", href: "/dashboard/outlet/inventaris/stockOpname" },
-          { label: "Koreksi Selisih", href: "/dashboard/outlet/inventaris/stockAdjustment" },
-          { label: "Riwayat Pergerakan", href: "/dashboard/outlet/inventaris/jurnalStok" },
-        ]
+          {
+            label: "Hitung Fisik",
+            href: "/dashboard/outlet/inventaris/stockOpname",
+          },
+          {
+            label: "Koreksi Selisih",
+            href: "/dashboard/outlet/inventaris/stockAdjustment",
+          },
+          {
+            label: "Riwayat Pergerakan",
+            href: "/dashboard/outlet/inventaris/jurnalStok",
+          },
+        ],
       },
       {
         label: "Suplai Gudang",
@@ -176,10 +195,39 @@ const outletMenus: MenuGroup[] = [
         icon: Truck,
         permission: "read-inventory-outlet",
         subItems: [
-          { label: "Minta Barang", href: "/dashboard/outlet/inventaris/pengajuanStok" },
-          { label: "Terima Barang", href: "/dashboard/outlet/inventaris/penerimaanBarang" },
-        ]
-      }
+          {
+            label: "Minta Barang",
+            href: "/dashboard/outlet/inventaris/pengajuanStok",
+          },
+          {
+            label: "Terima Barang",
+            href: "/dashboard/outlet/inventaris/penerimaanBarang",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    grup: "Manajemen Shift",
+    items: [
+      {
+        label: "Kalender Jadwal",
+        href: "/dashboard/outlet/jadwal",
+        icon: CalendarDays,
+        // permission: "read-jadwal-shift-outlet",
+      },
+      {
+        label: "Pola Roster",
+        href: "/dashboard/outlet/pola-roster",
+        icon: CalendarRange,
+        // permission: "read-pola-roster-outlet",
+      },
+      {
+        label: "Master Shift",
+        href: "/dashboard/outlet/shift",
+        icon: Clock,
+        // permission: "read-shift-outlet",
+      },
     ],
   },
   {
@@ -265,6 +313,29 @@ const gudangMenus: MenuGroup[] = [
     ],
   },
   {
+    grup: "Manajemen Shift",
+    items: [
+      {
+        label: "Kalender Jadwal",
+        href: "/dashboard/gudang/jadwal",
+        icon: CalendarDays,
+        // permission: "read-jadwal-shift-gudang",
+      },
+      {
+        label: "Pola Roster",
+        href: "/dashboard/gudang/pola-roster",
+        icon: CalendarRange,
+        // permission: "read-pola-roster-gudang",
+      },
+      {
+        label: "Master Shift",
+        href: "/dashboard/gudang/shift",
+        icon: Clock,
+        // permission: "read-shift-gudang",
+      },
+    ],
+  },
+  {
     grup: "Manajemen",
     items: [
       {
@@ -343,8 +414,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     try {
       await apiClient.post("/pengguna/pin-logout", {}, undefined, "pengguna");
       await apiClient.post("/akun/auth/logout", {});
-    } catch {}
-    finally {
+    } catch {
+    } finally {
       sessionStorage.removeItem("penggunaToken");
       sessionStorage.removeItem("accessToken");
       localStorage.removeItem("akun");
@@ -367,14 +438,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const isGudangWorkspace = pathname.startsWith("/dashboard/gudang");
   const activeMenus = isGudangWorkspace ? gudangMenus : outletMenus;
-  const currentWorkspaceName = isGudangWorkspace ? "Gudang Ops." : "Outlet Ops.";
+  const currentWorkspaceName = isGudangWorkspace
+    ? "Gudang Ops."
+    : "Outlet Ops.";
 
-  const canAccessOutlet = role === "Owner" || permissions.includes("read-dashboard-outlet");
-  const canAccessGudang = role === "Owner" || permissions.includes("read-dashboard-gudang");
-  const canCreateLocation = role === "Owner" || permissions.includes("create-location");
+  const canAccessOutlet =
+    role === "Owner" || permissions.includes("read-dashboard-outlet");
+  const canAccessGudang =
+    role === "Owner" || permissions.includes("read-dashboard-gudang");
+  const canCreateLocation =
+    role === "Owner" || permissions.includes("create-location");
 
   return (
-    <Sidebar collapsible="icon" className="border-none [&>div]:border-none" {...props}>
+    <Sidebar
+      collapsible="icon"
+      className="border-none [&>div]:border-none"
+      {...props}
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -396,26 +476,43 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <ChevronsUpDown className="ml-auto size-4 text-slate-50/70 group-hover:text-slate-500" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              
-              <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" align="start" side="bottom" sideOffset={4}>
-                <DropdownMenuLabel className="text-xs text-muted-foreground">Pilih Ruang Kerja</DropdownMenuLabel>
-                
+
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                align="start"
+                side="bottom"
+                sideOffset={4}
+              >
+                <DropdownMenuLabel className="text-xs text-muted-foreground">
+                  Pilih Ruang Kerja
+                </DropdownMenuLabel>
+
                 {canAccessOutlet && (
-                  <DropdownMenuItem onClick={() => handleNavigation("/dashboard/outlet")} className={`cursor-pointer ${!isGudangWorkspace ? "bg-accent" : ""}`}>
+                  <DropdownMenuItem
+                    onClick={() => handleNavigation("/dashboard/outlet")}
+                    className={`cursor-pointer ${!isGudangWorkspace ? "bg-accent" : ""}`}
+                  >
                     <Building2 className="mr-2 size-4 text-emerald-600" />
                     <div className="flex flex-col">
                       <span className="font-medium">Ruang Outlet</span>
-                      <span className="text-[10px] text-muted-foreground">Dasbor Kasir & Penjualan</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        Dasbor Kasir & Penjualan
+                      </span>
                     </div>
                   </DropdownMenuItem>
                 )}
 
                 {canAccessGudang && hasGudang && !isLoadingLokasi && (
-                  <DropdownMenuItem onClick={() => handleNavigation("/dashboard/gudang")} className={`cursor-pointer ${isGudangWorkspace ? "bg-accent" : ""}`}>
+                  <DropdownMenuItem
+                    onClick={() => handleNavigation("/dashboard/gudang")}
+                    className={`cursor-pointer ${isGudangWorkspace ? "bg-accent" : ""}`}
+                  >
                     <Warehouse className="mr-2 size-4 text-emerald-600" />
                     <div className="flex flex-col">
                       <span className="font-medium">Ruang Gudang</span>
-                      <span className="text-[10px] text-muted-foreground">WMS & Inventaris Pusat</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        WMS & Inventaris Pusat
+                      </span>
                     </div>
                   </DropdownMenuItem>
                 )}
@@ -423,7 +520,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {!hasGudang && canCreateLocation && !isLoadingLokasi && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => handleNavigation("/dashboard/gudang/setup")} className="cursor-pointer text-amber-600 focus:bg-amber-50 focus:text-amber-700">
+                    <DropdownMenuItem
+                      onClick={() =>
+                        handleNavigation("/dashboard/gudang/setup")
+                      }
+                      className="cursor-pointer text-amber-600 focus:bg-amber-50 focus:text-amber-700"
+                    >
                       <PlusCircle className="mr-2 size-4" />
                       <span className="font-medium">Setup Gudang Baru</span>
                     </DropdownMenuItem>
@@ -437,7 +539,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent>
         {activeMenus.map((group, gi) => {
-          const visibleItems = group.items.filter((item) => hasPermission(item.permission));
+          const visibleItems = group.items.filter((item) =>
+            hasPermission(item.permission),
+          );
           if (visibleItems.length === 0) return null;
 
           return (
@@ -449,20 +553,36 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               )}
               <SidebarMenu>
                 {visibleItems.map((item) => {
-                  const visibleSubItems = item.subItems?.filter((sub) => hasPermission(sub.permission));
-                  const hasSubItems = visibleSubItems && visibleSubItems.length > 0;
+                  const visibleSubItems = item.subItems?.filter((sub) =>
+                    hasPermission(sub.permission),
+                  );
+                  const hasSubItems =
+                    visibleSubItems && visibleSubItems.length > 0;
 
                   // FIX: Gunakan exact match atau URL children (startsWith) agar tidak salah deteksi irisan URL
                   const isParentActive =
                     pathname === item.href ||
-                    visibleSubItems?.some((sub) => pathname === sub.href || pathname.startsWith(`${sub.href}/`));
+                    visibleSubItems?.some(
+                      (sub) =>
+                        pathname === sub.href ||
+                        pathname.startsWith(`${sub.href}/`),
+                    );
 
                   if (hasSubItems) {
                     return (
-                      <Collapsible key={item.href} asChild defaultOpen={isParentActive} className="group/collapsible">
+                      <Collapsible
+                        key={item.href}
+                        asChild
+                        defaultOpen={isParentActive}
+                        className="group/collapsible"
+                      >
                         <SidebarMenuItem>
                           <CollapsibleTrigger asChild>
-                            <SidebarMenuButton tooltip={item.label} isActive={isParentActive} className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer">
+                            <SidebarMenuButton
+                              tooltip={item.label}
+                              isActive={isParentActive}
+                              className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer"
+                            >
                               <item.icon />
                               <span>{item.label}</span>
                               <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -472,11 +592,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             <SidebarMenuSub>
                               {visibleSubItems.map((subItem) => {
                                 // FIX: Menjaga menu tetap aktif saat berada di halaman detail (misal: /pengajuanStok/[id])
-                                const isSubActive = pathname === subItem.href || pathname.startsWith(`${subItem.href}/`);
+                                const isSubActive =
+                                  pathname === subItem.href ||
+                                  pathname.startsWith(`${subItem.href}/`);
                                 return (
                                   <SidebarMenuSubItem key={subItem.href}>
-                                    <SidebarMenuSubButton asChild isActive={isSubActive} className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer">
-                                      <a href={subItem.href} onClick={(e) => { e.preventDefault(); handleNavigation(subItem.href); }}>
+                                    <SidebarMenuSubButton
+                                      asChild
+                                      isActive={isSubActive}
+                                      className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer"
+                                    >
+                                      <a
+                                        href={subItem.href}
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          handleNavigation(subItem.href);
+                                        }}
+                                      >
                                         <span>{subItem.label}</span>
                                       </a>
                                     </SidebarMenuSubButton>
@@ -492,7 +624,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton tooltip={item.label} isActive={pathname === item.href} onClick={() => handleNavigation(item.href)} className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer">
+                      <SidebarMenuButton
+                        tooltip={item.label}
+                        isActive={pathname === item.href}
+                        onClick={() => handleNavigation(item.href)}
+                        className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer"
+                      >
                         <item.icon />
                         <span>{item.label}</span>
                       </SidebarMenuButton>
@@ -510,33 +647,58 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton size="lg" className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! text-slate-50! hover:text-slate-900! data-[state=open]:text-slate-900! cursor-pointer transition-colors">
+                <SidebarMenuButton
+                  size="lg"
+                  className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! text-slate-50! hover:text-slate-900! data-[state=open]:text-slate-900! cursor-pointer transition-colors"
+                >
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="https://github.com/shadcn.png" alt={namaUser || "Avatar Pengguna"} />
+                    <AvatarImage
+                      src="https://github.com/shadcn.png"
+                      alt={namaUser || "Avatar Pengguna"}
+                    />
                     <AvatarFallback className="bg-neutral-600 text-xs font-bold text-white">
                       {namaUser ? namaUser.substring(0, 2).toUpperCase() : "US"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold group-data-[state=open]:text-slate-900">{namaUser || "Nama Pengguna"}</span>
-                    <span className="truncate text-xs text-slate-50/70 group-data-[state=open]:text-slate-500">{posisiUser || "Position"}</span>
+                    <span className="truncate font-semibold group-data-[state=open]:text-slate-900">
+                      {namaUser || "Nama Pengguna"}
+                    </span>
+                    <span className="truncate text-xs text-slate-50/70 group-data-[state=open]:text-slate-500">
+                      {posisiUser || "Position"}
+                    </span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4 text-slate-50/70 group-data-[state=open]:text-slate-500" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="bottom" align="end" sideOffset={4}>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="bottom"
+                align="end"
+                sideOffset={4}
+              >
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{namaUser}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{role}</p>
+                    <p className="text-sm font-medium leading-none">
+                      {namaUser}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {role}
+                    </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleNavigation("/dashboard/profil")} className="cursor-pointer">
+                <DropdownMenuItem
+                  onClick={() => handleNavigation("/dashboard/profil")}
+                  className="cursor-pointer"
+                >
                   <User className="mr-2 size-4" /> Profil
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-white focus:bg-red-500 cursor-pointer">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-red-500 focus:text-white focus:bg-red-500 cursor-pointer"
+                >
                   <LogOut className="mr-2 size-4" /> Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
