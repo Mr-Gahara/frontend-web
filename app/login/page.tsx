@@ -32,14 +32,19 @@ export default function LoginPage() {
 
       const res = await apiClient.post<LoginResponse>("/akun/auth/login", form);
 
+      // Onboarding toko hanya tersedia di aplikasi mobile. Sesi tidak disimpan
+      // agar pengguna tanpa toko tidak tertahan di alur web.
+      if (res.requireSetup) {
+        setError(
+          "Akun ini belum memiliki toko. Selesaikan pembuatan toko melalui aplikasi Tachyon POS, lalu login kembali di sini.",
+        );
+        return;
+      }
+
       sessionStorage.setItem("accessToken", res.accessToken);
       localStorage.setItem("akun", JSON.stringify(res.data));
 
-      if (res.requireSetup) {
-        router.push("/setup/buatToko");
-      } else {
-        router.push("/login/pengguna");
-      }
+      router.push("/login/pengguna");
     } catch (err: any) {
       setError(
         err.message ||

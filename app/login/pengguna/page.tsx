@@ -13,7 +13,7 @@ export default function PenggunaLoginPage() {
   const [form, setForm] = useState({
     nama: "",
     pin: "",
-    // loginType: "web",
+    loginType: "web",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,13 +37,14 @@ export default function PenggunaLoginPage() {
      */
     const payload = decodeJWT(accessToken);
 
+    const isExpired = payload?.exp ? payload.exp * 1000 < Date.now() : false;
+
     /**
      * Token rusak / invalid
      */
-    if (!payload || !payload.id) {
+    if (!payload || !payload.id || isExpired) {
       sessionStorage.removeItem("accessToken");
       sessionStorage.removeItem("penggunaToken");
-
       router.replace("/login");
       return;
     }
@@ -83,7 +84,14 @@ export default function PenggunaLoginPage() {
   }, [router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    let value = e.target.value;
+
+    // Filter otomatis: Jika yang diubah adalah PIN, hapus semua karakter non-angka
+    if (e.target.name === "pin") {
+      value = value.replace(/\D/g, "");
+    }
+
+    setForm({ ...form, [e.target.name]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -136,7 +144,13 @@ export default function PenggunaLoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} method="POST" action="#" className="space-y-4" suppressHydrationWarning>
+        <form
+          onSubmit={handleSubmit}
+          method="POST"
+          action="#"
+          className="space-y-4"
+          suppressHydrationWarning
+        >
           <div className="space-y-2">
             <label
               htmlFor="nama"

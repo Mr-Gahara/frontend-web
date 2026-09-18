@@ -184,7 +184,8 @@ async function request<T>(
     res.status === 401 &&
     retry &&
     activeKey === "penggunaToken" &&
-    !endpoint.includes("/pengguna/pin-refresh")
+    !endpoint.includes("/pengguna/pin-refresh") &&
+    !endpoint.includes("/pengguna/pin-login")
   ) {
     const newToken = await tryRefreshPenggunaToken();
     if (newToken) return request<T>(endpoint, options, false, explicitTokenType);
@@ -196,7 +197,9 @@ async function request<T>(
     res.status === 401 &&
     retry &&
     activeKey === "accessToken" &&
-    !endpoint.includes("/auth/refreshtoken")
+    !endpoint.includes("/auth/refreshtoken") &&
+    !endpoint.includes("/akun/auth/login") &&
+    !endpoint.includes("/pengguna/pin-login")
   ) {
     const newToken = await tryRefreshToken();
     if (newToken) return request<T>(endpoint, options, false, explicitTokenType);
