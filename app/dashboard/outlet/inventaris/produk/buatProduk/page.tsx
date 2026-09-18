@@ -109,9 +109,9 @@ export default function BuatProdukPage() {
   });
 
   // Mengawasi seluruh resep dan checkbox unlimited
-  const watchedResep = useWatch({ control, name: "resep" }) || [];
+  // const watchedResep = useWatch({ control, name: "resep" }) || [];
   const isUnlimitedStok = useWatch({ control, name: "isUnlimitedStok" });
-  const hasResep = watchedResep.length > 0;
+  const hasResep = fields.length > 0;
 
   // Efek samping: Manajemen Paksa Stok
   useEffect(() => {
@@ -139,11 +139,19 @@ export default function BuatProdukPage() {
     queryKey: queryKeys.bahanBaku,
     queryFn: async () => {
       try {
-        const res = await apiClient.get<any>("/bahan-baku", undefined, "pengguna");
+        const res = await apiClient.get<any>(
+          "/bahan-baku",
+          undefined,
+          "pengguna",
+        );
         const raw = res.data?.data || res.data || [];
         return Array.isArray(raw) ? raw : [];
       } catch (error) {
-        const res = await apiClient.get<any>("/bahanBaku", undefined, "pengguna");
+        const res = await apiClient.get<any>(
+          "/bahanBaku",
+          undefined,
+          "pengguna",
+        );
         const raw = res.data?.data || res.data || [];
         return Array.isArray(raw) ? raw : [];
       }
@@ -189,8 +197,8 @@ export default function BuatProdukPage() {
     if (!payload.resep || payload.resep.length === 0) {
       delete (payload as any).resep;
     } else {
-      payload.stok = 0; 
-      payload.isUnlimitedStok = false; 
+      payload.stok = 0;
+      payload.isUnlimitedStok = false;
     }
 
     if (payload.isUnlimitedStok) {
@@ -239,10 +247,14 @@ export default function BuatProdukPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label
+                className="text-sm font-bold text-[#0A2947]"
+                htmlFor="namaProduk"
+              >
                 Nama Produk <span className="text-red-500">*</span>
               </label>
               <Input
+                id="namaProduk"
                 {...register("namaProduk")}
                 placeholder="Contoh: Kopi Susu Gula Aren"
                 className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
@@ -281,7 +293,8 @@ export default function BuatProdukPage() {
                         >
                           {field.value
                             ? kategoriList.find(
-                                (kat: any) => String(kat.id || kat._id) === field.value
+                                (kat: any) =>
+                                  String(kat.id || kat._id) === field.value,
                               )?.namaKategori || "Pilih kategori..."
                             : "Pilih kategori produk..."}
                         </span>
@@ -319,7 +332,7 @@ export default function BuatProdukPage() {
                                       "mr-2 h-4 w-4 text-[#718355]",
                                       field.value === katId
                                         ? "opacity-100"
-                                        : "opacity-0"
+                                        : "opacity-0",
                                     )}
                                   />
                                   {kat.namaKategori}
@@ -343,13 +356,17 @@ export default function BuatProdukPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label
+                className="text-sm font-bold text-[#0A2947]"
+                htmlFor="gambarProduk"
+              >
                 Link Gambar Produk{" "}
                 <span className="text-[#0A2947]/50 font-medium">
                   (Opsional)
                 </span>
               </label>
               <Input
+                id="gambarProduk"
                 {...register("gambarProduk")}
                 placeholder="https://example.com/gambar.jpg"
                 className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
@@ -357,13 +374,17 @@ export default function BuatProdukPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label
+                className="text-sm font-bold text-[#0A2947]"
+                htmlFor="keteranganProduk"
+              >
                 Keterangan{" "}
                 <span className="text-[#0A2947]/50 font-medium">
                   (Opsional)
                 </span>
               </label>
               <Input
+                id="keteranganProduk"
                 {...register("keterangan")}
                 placeholder="Catatan singkat mengenai produk ini..."
                 className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
@@ -384,7 +405,10 @@ export default function BuatProdukPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947]">
+                <label
+                  className="text-sm font-bold text-[#0A2947]"
+                  htmlFor="hargaDasar"
+                >
                   Harga Dasar (Rp) <span className="text-red-500">*</span>
                 </label>
                 <Controller
@@ -392,9 +416,13 @@ export default function BuatProdukPage() {
                   control={control}
                   render={({ field }) => {
                     const numericValue = Number(field.value) || 0;
-                    const displayValue = numericValue === 0 ? "" : new Intl.NumberFormat("id-ID").format(numericValue);
+                    const displayValue =
+                      numericValue === 0
+                        ? ""
+                        : new Intl.NumberFormat("id-ID").format(numericValue);
                     return (
                       <Input
+                        id="hargaDasar"
                         placeholder="0"
                         value={displayValue}
                         onChange={(e) => {
@@ -403,7 +431,7 @@ export default function BuatProdukPage() {
                         }}
                         className={cn(
                           "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947]",
-                          errors.hargaDasar && "border-rose-500"
+                          errors.hargaDasar && "border-rose-500",
                         )}
                         inputMode="numeric"
                       />
@@ -424,7 +452,10 @@ export default function BuatProdukPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947]">
+                <label
+                  className="text-sm font-bold text-[#0A2947]"
+                  htmlFor="hargaJual"
+                >
                   Harga Jual (Rp) <span className="text-red-500">*</span>
                 </label>
                 <Controller
@@ -432,9 +463,13 @@ export default function BuatProdukPage() {
                   control={control}
                   render={({ field }) => {
                     const numericValue = Number(field.value) || 0;
-                    const displayValue = numericValue === 0 ? "" : new Intl.NumberFormat("id-ID").format(numericValue);
+                    const displayValue =
+                      numericValue === 0
+                        ? ""
+                        : new Intl.NumberFormat("id-ID").format(numericValue);
                     return (
                       <Input
+                        id="hargaJual"
                         placeholder="0"
                         value={displayValue}
                         onChange={(e) => {
@@ -443,7 +478,7 @@ export default function BuatProdukPage() {
                         }}
                         className={cn(
                           "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947]",
-                          errors.hargaJual && "border-rose-500"
+                          errors.hargaJual && "border-rose-500",
                         )}
                         inputMode="numeric"
                       />
@@ -473,7 +508,7 @@ export default function BuatProdukPage() {
                   </h3>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center space-x-2 mb-3 bg-[#FFFAF3] p-3 rounded-xl border border-[#0A2947]/10">
                   <Controller
@@ -481,10 +516,11 @@ export default function BuatProdukPage() {
                     control={control}
                     render={({ field }) => (
                       <Checkbox
+                        key={`unlimited-${hasResep}`}
                         id="unlimited"
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        disabled={hasResep} 
+                        disabled={hasResep}
                         className="data-[state=checked]:bg-[#718355] data-[state=checked]:text-white border-[#0A2947]/30"
                       />
                     )}
@@ -497,12 +533,14 @@ export default function BuatProdukPage() {
                       Produk Tanpa Stok (Unlimited)
                     </label>
                     <p className="text-[10px] font-medium text-[#0A2947]/50">
-                      Aktifkan jika produk ini berupa layanan (jasa) atau stok tidak terbatas.
+                      Aktifkan jika produk ini berupa layanan (jasa) atau stok
+                      tidak terbatas.
                     </p>
                   </div>
                 </div>
 
                 <Input
+                  id="stokAwal"
                   type="number"
                   {...register("stok")}
                   className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947] disabled:opacity-50 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -520,8 +558,8 @@ export default function BuatProdukPage() {
                       <p className="text-xs font-medium text-[#0A2947]/60 leading-relaxed">
                         {hasResep
                           ? "Input stok dinonaktifkan karena Anda menggunakan Resep. Stok dihitung otomatis dari bahan baku."
-                          : isUnlimitedStok 
-                            ? "Stok dinonaktifkan karena produk ini berstatus Unlimited (Tanpa batas)." 
+                          : isUnlimitedStok
+                            ? "Stok dinonaktifkan karena produk ini berstatus Unlimited (Tanpa batas)."
                             : "Masukkan stok awal. Anda dapat membiarkannya 0 dan melakukan Stok Opname nanti."}
                       </p>
                     )}
@@ -599,7 +637,7 @@ export default function BuatProdukPage() {
                             onSatuanChange={(satuan) =>
                               setValue(
                                 `resep.${index}.satuan`,
-                                satuan as (typeof SATUAN_BAHAN_OPTIONS)[number]
+                                satuan as (typeof SATUAN_BAHAN_OPTIONS)[number],
                               )
                             }
                             bahanBakuList={bahanBakuList}
@@ -625,7 +663,7 @@ export default function BuatProdukPage() {
                         {...register(`resep.${index}.jumlah`)}
                         className={cn(
                           "w-full text-center bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold h-10 focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-                          errors.resep?.[index]?.jumlah && "border-rose-500"
+                          errors.resep?.[index]?.jumlah && "border-rose-500",
                         )}
                         placeholder="0"
                         step="any"
@@ -654,7 +692,7 @@ export default function BuatProdukPage() {
                               className={cn(
                                 "w-full bg-white border-[#0A2947]/20 text-[#0A2947] font-bold h-10 focus:ring-1 focus:ring-[#0A2947]",
                                 errors.resep?.[index]?.satuan &&
-                                  "border-rose-500"
+                                  "border-rose-500",
                               )}
                             >
                               <SelectValue placeholder="Satuan" />

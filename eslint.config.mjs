@@ -13,6 +13,26 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  // Kode aplikasi tidak boleh mengimpor file test, fixture, atau mock,
+  // baik milik proyek maupun milik paket di node_modules. Mencegah
+  // kecelakaan auto-import dari IDE.
+  {
+    files: ["app/**", "components/**", "hooks/**", "lib/**", "types/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/__tests__/**", "**/__fixtures__/**", "**/__mocks__/**"],
+              message:
+                "Jangan mengimpor file test, fixture, atau mock ke kode aplikasi.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;
