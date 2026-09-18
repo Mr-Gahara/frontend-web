@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import "@testing-library/jest-dom";
@@ -29,23 +29,20 @@ describe("Integration - PolaFormDialog", () => {
   it("harus merender form default dengan 7 hari siklus (Happy Path)", () => {
     render(<PolaFormDialog {...defaultProps} />);
     
-    // Cek judul dialog
     expect(screen.getByText("Buat Pola Roster")).toBeInTheDocument();
-    
-    // Cek default value siklus (7) ter-render
     expect(screen.getByDisplayValue("7")).toBeInTheDocument();
-    
-    // Cek kalkulasi text informasi array ter-render
     expect(screen.getByText("7 Hari Terdeteksi")).toBeInTheDocument();
   });
 
   it("harus menampilkan error jika form disubmit tanpa Nama Pola (Unhappy Path - Internal Validation)", () => {
     render(<PolaFormDialog {...defaultProps} />);
     
-    const submitButton = screen.getByRole("button", { name: /simpan pola roster/i });
-    
-    // Bypass validasi HTML5 (required) untuk mengetes logika setErrorMsg di dalam fungsi handleSubmit Tuan
-    fireEvent.submit(submitButton);
+    // Alih-alih fireEvent.submit pada button, kita targetkan DOM form-nya langsung.
+    // Ini lebih dapat diandalkan untuk mem-bypass atribut 'required' pada JSDOM.
+    const formElement = document.getElementById('pola-form');
+    if (formElement) {
+        fireEvent.submit(formElement);
+    }
 
     // Memastikan pesan error buatan Anda muncul di layar
     expect(screen.getByText("Nama Pola wajib diisi.")).toBeInTheDocument();
@@ -56,23 +53,27 @@ describe("Integration - PolaFormDialog", () => {
     const user = userEvent.setup();
     render(<PolaFormDialog {...defaultProps} />);
     
-    // 1. Mengisi Nama Pola
-    const namaInput = screen.getByLabelText(/nama pola roster/i);
+    // Karena label tidak memiliki atribut 'htmlFor', getByLabelText akan gagal.
+    // Kita gunakan getByPlaceholderText atau mencari input di sekitar label.
+    // Mencari input Nama Pola berdasarkan placeholder (strategi yang lebih aman):
+    const namaInput = screen.getByPlaceholderText(/Misal: Reguler 5-2/i);
     await user.type(namaInput, "Pola Satpam");
 
-    // 2. Mengubah Siklus menjadi 2 hari
-    const siklusInput = screen.getByLabelText(/siklus \(hari\)/i);
+    // Mencari input Siklus. Karena tidak ada placeholder, kita ambil input yang nilainya saat ini "7"
+    const siklusInput = screen.getByDisplayValue("7");
     await user.clear(siklusInput);
     await user.type(siklusInput, "2");
 
     // Memastikan jumlah baris otomatis terpotong menjadi 2
     expect(screen.getByText("2 Hari Terdeteksi")).toBeInTheDocument();
 
-    // 3. Submit Form
-    const submitButton = screen.getByRole("button", { name: /simpan pola roster/i });
-    fireEvent.submit(submitButton);
+    // Submit Form melalui form element
+    const formElement = document.getElementById('pola-form');
+    if (formElement) {
+        fireEvent.submit(formElement);
+    }
 
-    // 4. Memastikan format payload yang dikirim ke backend sudah disanitasi (hanya 2 hari, dan libur)
+    // Memastikan format payload yang dikirim ke backend sudah disanitasi
     expect(mockOnSubmit).toHaveBeenCalledTimes(1);
     expect(mockOnSubmit).toHaveBeenCalledWith({
       namaPola: "Pola Satpam",

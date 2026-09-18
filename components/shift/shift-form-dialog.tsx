@@ -103,6 +103,8 @@ export function ShiftFormDialog({
       // Jika total menit jam pulang <= jam masuk, otomatis ini lintas hari
       if (pH * 60 + pM <= mH * 60 + mM) {
         setIsLintasHari(true);
+      } else {
+        setIsLintasHari(false); // [PERBAIKAN] Kembalikan ke false jika shift berjalan normal (siang hari)
       }
     }
   }, [masukHour, masukMinute, pulangHour, pulangMinute]);
@@ -184,6 +186,7 @@ export function ShiftFormDialog({
             </div>
           </div>
           <button
+            aria-label="Batal"
             onClick={() => onOpenChange(false)}
             className="flex items-center justify-center p-2 rounded-md text-[#041E3F] hover:bg-[#041E3F]/10 transition-colors cursor-pointer"
           >

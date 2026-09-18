@@ -38,8 +38,8 @@ interface PolaUtamaProps {
   dataPola: PolaRosterItem[];
   masterShiftList: MasterShiftItem[];
   isLoading: boolean;
-  onSave: (data: PolaRosterRequest, id?: string) => void;
-  onDelete: (id: string) => void;
+  onSave: (data: PolaRosterRequest, id?: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
   isSaving?: boolean;
   isDeleting?: boolean;
 }
@@ -307,7 +307,15 @@ export default function PolaUtama({
         onOpenChange={setFormOpen}
         editTarget={selectedPola}
         masterShiftList={masterShiftList}
-        onSubmit={(data) => onSave(data, selectedPola?.id || selectedPola?._id)}
+        onSubmit={async (data) => {
+          try {
+            // [PERBAIKAN] Gunakan await agar dialog menunggu API selesai
+            await onSave(data, selectedPola?.id || selectedPola?._id);
+            setFormOpen(false); // Hanya tertutup jika API sukses
+          } catch (error) {
+            // Jika API gagal (misal 500 error), dialog tetap terbuka
+          }
+        }}
         isPending={isSaving}
       />
 
@@ -315,7 +323,15 @@ export default function PolaUtama({
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         targetPola={selectedPola}
-        onConfirm={() => onDelete(selectedPola?.id || selectedPola?._id || "")}
+        onConfirm={async () => {
+          try {
+            // [PERBAIKAN] Gunakan await
+            await onDelete(selectedPola?.id || selectedPola?._id || "");
+            setDeleteOpen(false); // Hanya tertutup jika API sukses
+          } catch (error) {
+            // Jika API gagal, dialog tetap terbuka
+          }
+        }}
         isPending={isDeleting}
       />
     </div>
