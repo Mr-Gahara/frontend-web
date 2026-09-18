@@ -149,8 +149,9 @@ export default function PenggunaFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-[#041E3F]">Nama Lengkap</label>
+            <label className="text-sm font-bold text-[#041E3F]" htmlFor="nama">Nama Lengkap</label>
             <Input
+              id="nama"
               value={form.nama}
               onChange={(e) => setForm({ ...form, nama: e.target.value })}
               placeholder="Masukkan nama pengguna"
@@ -161,10 +162,11 @@ export default function PenggunaFormDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#041E3F]">
+              <label className="text-sm font-bold text-[#041E3F]" htmlFor="nomorHp">
                 Nomor HP <span className="text-[#041E3F]/50 font-semibold">(opsional)</span>
               </label>
               <Input
+                id="nomorHp"
                 value={form.nomorHp ?? ""}
                 onChange={(e) => setForm({ ...form, nomorHp: e.target.value })}
                 placeholder="081234..."
@@ -174,11 +176,19 @@ export default function PenggunaFormDialog({
 
             {(!isSelf || isOwner) ? (
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#041E3F]">PIN Keamanan</label>
+                <label className="text-sm font-bold text-[#041E3F]" htmlFor="pin">PIN Keamanan</label>
                 <Input
+                  id="pin"
                   type="password"
+                  inputMode="numeric"
+                  maxLength={6}
                   value={form.pin ?? ""}
-                  onChange={(e) => setForm({ ...form, pin: e.target.value })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      pin: e.target.value.replace(/\D/g, "").slice(0, 6),
+                    })
+                  }
                   placeholder={editTarget ? "Kosongkan jika tetap" : "Masukkan PIN"}
                   className="bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50 font-medium h-12 rounded-xl px-4"
                   required={!editTarget}

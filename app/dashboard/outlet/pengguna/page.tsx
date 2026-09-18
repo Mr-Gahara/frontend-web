@@ -53,7 +53,7 @@ const emptyForm: PenggunaRequest = {
   nomorHp: "",
   roleID: "",
   status: "aktif",
-  aksesType: ["app"],
+  aksesType: ["web"],
 };
 
 export default function PenggunaPage() {
@@ -214,8 +214,10 @@ export default function PenggunaPage() {
     if (targetId && (!formData.pin || formData.pin.trim() === "")) {
       delete formData.pin;
     } else if (formData.pin && formData.pin.trim() !== "") {
-      if (!/^\d+$/.test(formData.pin)) {
-        setFormError("PIN harus berupa angka seluruhnya.");
+      // Selaras dengan backend (minimal 6 digit angka) dan input login
+      // yang membatasi PIN maksimal 6 karakter: PIN wajib tepat 6 digit.
+      if (!/^\d{6}$/.test(formData.pin)) {
+        setFormError("PIN harus terdiri dari 6 digit angka.");
         return;
       }
     }
@@ -387,7 +389,9 @@ export default function PenggunaPage() {
                 <DropdownMenuSeparator className="bg-[#0A2947]/10" />
                 <DropdownMenuItem
                   className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10"
-                  onClick={() => setDeleteTarget(row.original)}
+                  onClick={() => {
+                    if (canDelete) setDeleteTarget(row.original);
+                  }}
                   disabled={!canDelete}
                 >
                   Hapus

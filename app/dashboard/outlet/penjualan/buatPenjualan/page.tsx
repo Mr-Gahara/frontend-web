@@ -686,10 +686,11 @@ export default function BuatPenjualanPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-bold text-[#0A2947]">
+                        <label className="text-sm font-bold text-[#0A2947]" htmlFor={`jumlah-${index}`}>
                           Jumlah
                         </label>
                         <Input
+                          id={`jumlah-${index}`}
                           type="number"
                           min={1}
                           value={item.jumlahStr}
@@ -1028,13 +1029,14 @@ export default function BuatPenjualanPage() {
             </div>
 
             <div className="space-y-2 border-t border-[#0A2947]/10 pt-4">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-[#0A2947]" htmlFor="keterangan">
                 Keterangan{" "}
                 <span className="font-medium text-[#0A2947]/50">
                   (Opsional)
                 </span>
               </label>
               <Input
+                id="keterangan"
                 value={keterangan}
                 onChange={(e) => setKeterangan(e.target.value)}
                 placeholder="Catatan transaksi..."

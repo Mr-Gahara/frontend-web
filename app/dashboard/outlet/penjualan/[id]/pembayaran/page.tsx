@@ -316,11 +316,12 @@ export default function BuatPembayaranPage() {
 
             {/* Input Nominal */}
             <div className="space-y-2 pt-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-[#0A2947]" htmlFor="jumlahBayar">
                 Jumlah Diterima (Rp) <span className="text-red-500">*</span>
               </label>
               <div className="flex flex-col sm:flex-row gap-3">
                 <Input
+                  id="jumlahBayar"
                   type="text"
                   inputMode="numeric"
                   className="text-lg font-bold h-12 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]"
@@ -353,10 +354,11 @@ export default function BuatPembayaranPage() {
 
             {/* Catatan */}
             <div className="space-y-2 pt-2 border-t border-[#0A2947]/10 mt-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-[#0A2947]" htmlFor="catatanBayar">
                 Catatan Pembayaran <span className="text-[#0A2947]/50 font-medium">(Opsional)</span>
               </label>
               <Input
+                id="catatanBayar"
                 value={catatan}
                 onChange={(e) => setCatatan(e.target.value)}
                 placeholder="Misal: Pembayaran DP 50% via Transfer"
