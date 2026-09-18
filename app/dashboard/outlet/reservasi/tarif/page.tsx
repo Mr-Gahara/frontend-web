@@ -107,7 +107,8 @@ export default function DaftarTarifPage() {
     setDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (selectedTarifId) {
       deleteMutation.mutate(selectedTarifId);
     }
@@ -162,7 +163,9 @@ export default function DaftarTarifPage() {
           />
         </div>
         <Button
-          onClick={() => router.push("/dashboard/outlet/reservasi/tarif/buatTarif")}
+          onClick={() =>
+            router.push("/dashboard/outlet/reservasi/tarif/buatTarif")
+          }
           className="w-full sm:w-auto font-bold h-11 px-6 shadow-sm hover:-translate-y-0.5 transition-transform"
           style={{ background: COLORS.navy, color: COLORS.cream }}
         >

@@ -66,7 +66,7 @@ export default function TipeAsetPage() {
   // --- MUTATION DELETE ---
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiClient.delete(`/tipAset/${id}`, undefined, "pengguna");
+      return await apiClient.delete(`/tipeAset/${id}`, undefined, "pengguna");
     },
     onSuccess: () => {
       toast.success("Dihapus", {
@@ -85,12 +85,14 @@ export default function TipeAsetPage() {
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = async () => {
+  // Tambahkan parameter event dan cegah penutupan otomatis
+  const confirmDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+
     if (selectedTipeAset) {
-      // Prioritaskan id dari mapper, fallback ke _id
-      const idToDetele = selectedTipeAset.id || selectedTipeAset._id;
-      if (idToDetele) {
-        await deleteMutation.mutateAsync(idToDetele);
+      const idToDelete = selectedTipeAset.id || selectedTipeAset._id;
+      if (idToDelete) {
+        await deleteMutation.mutateAsync(idToDelete);
       }
     }
   };

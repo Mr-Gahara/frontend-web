@@ -89,7 +89,8 @@ export default function AsetPage() {
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = async () => {
+  const confirmDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
     if (selectedAset) {
       await deleteMutation.mutateAsync(selectedAset.id);
     }
@@ -150,7 +151,9 @@ export default function AsetPage() {
         </div>
 
         <Button
-          onClick={() => router.push("/dashboard/outlet/reservasi/aset/buatAset")}
+          onClick={() =>
+            router.push("/dashboard/outlet/reservasi/aset/buatAset")
+          }
           className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm h-11 px-6 w-full sm:w-auto"
         >
           <Plus className="w-4 h-4 mr-2 text-[#D4A373]" /> Tambah Aset Baru
