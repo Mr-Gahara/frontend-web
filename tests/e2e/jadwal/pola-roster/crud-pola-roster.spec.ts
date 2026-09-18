@@ -59,7 +59,7 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
   // ----------------------------------------------------------
   // [1] HAPPY PATH: Full CRUD Lifecycle
   // ----------------------------------------------------------
-  test("happy path: siklus lengkap tambah → cari → nonaktifkan (soft delete)", async ({
+  test("happy path: siklus lengkap tambah → cari → hapus permanen", async ({
     page,
   }) => {
     const ts = Date.now();
@@ -91,7 +91,6 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
       const row = getPolaRow(page, namaBaru);
       await expect(row).toBeVisible({ timeout: 10_000 });
       await expect(row).toContainText("3 Hari");
-      await expect(row).toContainText("Aktif");
     });
 
     await test.step("Cari Pola Roster", async () => {
@@ -103,36 +102,29 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
     // Langkah edit dipisah ke test [1b] yang ditandai fixme: backend saat ini
     // menolak setiap update yang membawa detailSiklus.
 
-    await test.step("Non-Aktifkan Pola Roster (Soft Delete)", async () => {
+    await test.step("Hapus Pola Roster", async () => {
       const row = getPolaRow(page, namaBaru);
       await row.getByRole("cell").last().getByRole("button").click();
-      await page.getByRole("menuitem", { name: /non-aktifkan/i }).click();
+      await page.getByRole("menuitem", { name: /hapus pola/i }).click();
 
+      // Pola roster adalah template: backend menghapusnya permanen.
+      // Dialog wajib menyatakan hal itu dengan jujur.
       const alertDialog = page.getByRole("alertdialog");
       await expect(alertDialog).toBeVisible();
+      await expect(alertDialog).toContainText(/permanen/i);
       await alertDialog
-        .getByRole("button", { name: /ya, non-aktifkan/i })
+        .getByRole("button", { name: /ya, hapus permanen/i })
         .click();
 
       await expect(
-        page.getByText(/pola roster berhasil dinonaktifkan/i),
+        page.getByText(/pola roster berhasil dihapus/i),
       ).toBeVisible({ timeout: 10_000 });
     });
 
-    await test.step("Verifikasi Soft Delete di Tab Non-Aktif", async () => {
-      // Buka filter status
-      await page.getByRole("combobox").first().click();
-      await page.getByRole("option", { name: /^non-aktif$/i }).click();
-
-      const inactiveRow = getPolaRow(page, namaBaru);
-      await expect(inactiveRow).toBeVisible({ timeout: 10_000 });
-      await expect(inactiveRow).toContainText("Non-Aktif");
-
-      // Pastikan opsi non-aktifkan tidak muncul lagi di menu dropdown Edit
-      await inactiveRow.getByRole("cell").last().getByRole("button").click();
-      await expect(
-        page.getByRole("menuitem", { name: /non-aktifkan/i }),
-      ).not.toBeVisible();
+    await test.step("Verifikasi pola hilang dari tabel", async () => {
+      await expect(getPolaRow(page, namaBaru)).toHaveCount(0, {
+        timeout: 10_000,
+      });
     });
   });
 
@@ -229,7 +221,7 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
     ).toBeVisible();
 
     // Verifikasi header tabel
-    const headers = ["Nama Pola", "Siklus", "Preview Pola", "Status", "Aksi"];
+    const headers = ["Nama Pola", "Siklus", "Preview Pola", "Aksi"];
     for (const header of headers) {
       await expect(
         page.getByRole("columnheader", { name: new RegExp(header, "i") }),
@@ -283,42 +275,9 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
   });
 
   // ----------------------------------------------------------
-  // [5] FILTERING
+  // [5] DIALOG BATAL
   // ----------------------------------------------------------
-  test("filter: memilah data berdasarkan status pola", async ({ page }) => {
-    await test.step("Filter Aktif", async () => {
-      // Pilih "Aktif" di filter Status
-      await page.getByRole("combobox").first().click();
-      await page.getByRole("option", { name: /^aktif$/i }).click();
-
-      // Seluruh row yang tampil (jika bukan row kosong) harus memiliki teks "Aktif"
-      const rows = page.locator("tbody tr");
-      const count = await rows.count();
-
-      for (let i = 0; i < count; i++) {
-        if (
-          (await rows
-            .nth(i)
-            .getByText(/tidak ada pola roster/i)
-            .count()) === 0
-        ) {
-          await expect(rows.nth(i)).toContainText("Aktif");
-        }
-      }
-    });
-
-    await test.step("Kembali ke filter Semua Status", async () => {
-      const select = page.getByRole("combobox").first();
-      await select.click();
-      await page.getByRole("option", { name: /semua status/i }).click();
-      await expect(select).toContainText("Semua Status");
-    });
-  });
-
-  // ----------------------------------------------------------
-  // [6] DIALOG BATAL
-  // ----------------------------------------------------------
-  test("dialog hapus: klik batal mencegah proses penonaktifan pola", async ({
+  test("dialog hapus: klik batal mencegah penghapusan pola", async ({
     page,
   }) => {
     const namaPola = `Pola Batal Hapus ${Date.now()}`;
@@ -335,7 +294,7 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
     // Buka menu Hapus
     const row = getPolaRow(page, namaPola);
     await row.getByRole("cell").last().getByRole("button").click();
-    await page.getByRole("menuitem", { name: /non-aktifkan/i }).click();
+    await page.getByRole("menuitem", { name: /hapus pola/i }).click();
 
     // Batal Hapus
     const alertDialog = page.getByRole("alertdialog");
@@ -343,6 +302,5 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
 
     await expect(alertDialog).toBeHidden();
     await expect(row).toBeVisible();
-    await expect(row).toContainText("Aktif");
   });
 });

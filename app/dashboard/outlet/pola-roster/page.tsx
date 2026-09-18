@@ -152,14 +152,14 @@ export default function PolaRosterOutletPage() {
     },
     onSuccess: () => {
       toast.success("Berhasil", {
-        description: "Pola Roster berhasil dinonaktifkan.",
+        description: "Pola Roster berhasil dihapus.",
       });
       queryClient.invalidateQueries({ queryKey: ["pola-roster"] });
     },
     onError: (err: any) => {
-      toast.error("Gagal Menonaktifkan", {
+      toast.error("Gagal Menghapus", {
         description:
-          err.message || "Terjadi kesalahan saat menonaktifkan Pola Roster.",
+          err.message || "Terjadi kesalahan saat menghapus Pola Roster.",
       });
     },
   });

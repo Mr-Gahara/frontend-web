@@ -11,7 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArchiveX } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { PolaRosterItem } from "@/types/pola-roster";
 
 interface PolaDeleteDialogProps {
@@ -36,20 +36,19 @@ export function PolaDeleteDialog({
       <AlertDialogContent className="border-[#041E3F]/10 bg-[#FFFAF3] sm:max-w-112.5 rounded-2xl p-6 shadow-xl">
         <AlertDialogHeader className="flex flex-col items-center gap-2 text-center sm:text-left sm:items-start sm:flex-row">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0">
-            <ArchiveX className="h-6 w-6 text-red-600 stroke-[2px]" />
+            <Trash2 className="h-6 w-6 text-red-600 stroke-[2px]" />
           </div>
 
           <div className="flex flex-col gap-1.5 mt-2 sm:mt-0">
             <AlertDialogTitle className="text-xl font-bold text-[#041E3F]">
-              Non-Aktifkan Pola Roster?
+              Hapus Pola Roster?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm font-semibold leading-relaxed text-[#041E3F]/70">
-              Anda yakin ingin menonaktifkan{" "}
-              <strong>{targetPola.namaPola}</strong>?
+              Pola <strong>{targetPola.namaPola}</strong> akan dihapus
+              permanen dan tidak dapat dikembalikan.
               <br />
               <br />
-              Pola ini tidak akan bisa digunakan lagi untuk Auto-Generate jadwal
-              di masa depan.
+              Jadwal karyawan yang sudah dibuat dari pola ini tidak terpengaruh.
             </AlertDialogDescription>
           </div>
         </AlertDialogHeader>
@@ -69,7 +68,7 @@ export function PolaDeleteDialog({
             disabled={isPending}
             className="w-full sm:w-auto h-11 cursor-pointer bg-red-600 text-white hover:bg-red-700 font-bold rounded-xl m-0 shadow-sm"
           >
-            {isPending ? "Menonaktifkan..." : "Ya, Non-Aktifkan"}
+            {isPending ? "Menghapus..." : "Ya, Hapus Permanen"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

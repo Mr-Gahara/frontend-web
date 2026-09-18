@@ -4,13 +4,6 @@ import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -22,7 +15,7 @@ import {
   Plus,
   MoreHorizontal,
   Edit,
-  ArchiveX,
+  Trash2,
   CalendarRange,
   Loader2,
   RefreshCw,
@@ -56,9 +49,6 @@ export default function PolaUtama({
 }: PolaUtamaProps) {
   // --- STATE LOKAL ---
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<
-    "Semua" | "Aktif" | "Non-Aktif"
-  >("Semua");
 
   const [formOpen, setFormOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -66,15 +56,10 @@ export default function PolaUtama({
 
   // --- FILTERING ---
   const filteredData = useMemo(() => {
-    return dataPola.filter((pola) => {
-      const matchSearch = pola.namaPola
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
-      const matchStatus =
-        filterStatus === "Semua" || pola.status === filterStatus;
-      return matchSearch && matchStatus;
-    });
-  }, [dataPola, searchQuery, filterStatus]);
+    return dataPola.filter((pola) =>
+      pola.namaPola.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [dataPola, searchQuery]);
 
   // --- HELPER: GET NAMA SHIFT ---
   const getShiftLabel = (shiftID: string) => {
@@ -117,31 +102,6 @@ export default function PolaUtama({
             className="pl-9 h-11 bg-[#FFFAF3] border-[#041E3F]/15 text-[#041E3F] focus-visible:ring-[#041E3F]/50 rounded-xl font-medium"
           />
         </div>
-
-        <div className="w-full sm:w-48">
-          <Select
-            value={filterStatus}
-            onValueChange={(val: any) => setFilterStatus(val)}
-          >
-            <SelectTrigger className="w-full bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus:ring-[#041E3F]/50 font-bold h-11 rounded-xl px-4">
-              <SelectValue placeholder="Semua Status" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F] font-medium rounded-xl">
-              <SelectItem value="Semua" className="cursor-pointer font-bold">
-                Semua Status
-              </SelectItem>
-              <SelectItem value="Aktif" className="cursor-pointer font-bold">
-                Aktif
-              </SelectItem>
-              <SelectItem
-                value="Non-Aktif"
-                className="cursor-pointer font-bold text-red-600 focus:text-red-700"
-              >
-                Non-Aktif
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
       {/* 3. TABEL DATA */}
@@ -156,12 +116,10 @@ export default function PolaUtama({
                 <th className="p-4 font-bold text-[#041E3F]/70 uppercase tracking-wider text-xs w-[15%]">
                   Siklus
                 </th>
-                <th className="p-4 font-bold text-[#041E3F]/70 uppercase tracking-wider text-xs w-[40%]">
+                <th className="p-4 font-bold text-[#041E3F]/70 uppercase tracking-wider text-xs w-[55%]">
                   Preview Pola
                 </th>
-                <th className="p-4 font-bold text-[#041E3F]/70 uppercase tracking-wider text-xs w-[15%] text-center">
-                  Status
-                </th>
+
                 <th className="p-4 font-bold text-[#041E3F]/70 uppercase tracking-wider text-xs w-[10%] text-right">
                   Aksi
                 </th>
@@ -171,7 +129,7 @@ export default function PolaUtama({
             <tbody className="divide-y divide-[#041E3F]/5">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="h-32 text-center align-middle">
+                  <td colSpan={4} className="h-32 text-center align-middle">
                     <div className="flex flex-col items-center justify-center text-[#041E3F]/50">
                       <Loader2 className="h-6 w-6 animate-spin mb-2" />
                       <span className="text-sm font-bold">
@@ -183,7 +141,7 @@ export default function PolaUtama({
               ) : filteredData.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     className="h-32 text-center align-middle text-[#041E3F]/50 text-sm font-bold"
                   >
                     Tidak ada pola roster yang ditemukan.
@@ -238,18 +196,6 @@ export default function PolaUtama({
                       </div>
                     </td>
 
-                    <td className="p-4 text-center">
-                      <span
-                        className={`inline-flex items-center justify-center rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${
-                          pola.status === "Aktif"
-                            ? "bg-[#718355] text-[#FFFAF3]"
-                            : "bg-[#041E3F]/10 text-[#041E3F]/60"
-                        }`}
-                      >
-                        {pola.status || "Aktif"}
-                      </span>
-                    </td>
-
                     <td className="p-4 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -275,21 +221,16 @@ export default function PolaUtama({
                             <Edit className="mr-2 h-4 w-4" /> Edit Pola
                           </DropdownMenuItem>
 
-                          {(pola.status === "Aktif" || !pola.status) && (
-                            <>
-                              <DropdownMenuSeparator className="bg-[#041E3F]/5" />
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedPola(pola);
-                                  setDeleteOpen(true);
-                                }}
-                                className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10 rounded-lg m-1"
-                              >
-                                <ArchiveX className="mr-2 h-4 w-4" />{" "}
-                                Non-Aktifkan
-                              </DropdownMenuItem>
-                            </>
-                          )}
+                          <DropdownMenuSeparator className="bg-[#041E3F]/5" />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedPola(pola);
+                              setDeleteOpen(true);
+                            }}
+                            className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10 rounded-lg m-1"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" /> Hapus Pola
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -312,7 +253,7 @@ export default function PolaUtama({
             // [PERBAIKAN] Gunakan await agar dialog menunggu API selesai
             await onSave(data, selectedPola?.id || selectedPola?._id);
             setFormOpen(false); // Hanya tertutup jika API sukses
-          } catch (error) {
+          } catch {
             // Jika API gagal (misal 500 error), dialog tetap terbuka
           }
         }}
@@ -328,7 +269,7 @@ export default function PolaUtama({
             // [PERBAIKAN] Gunakan await
             await onDelete(selectedPola?.id || selectedPola?._id || "");
             setDeleteOpen(false); // Hanya tertutup jika API sukses
-          } catch (error) {
+          } catch {
             // Jika API gagal, dialog tetap terbuka
           }
         }}

@@ -12,7 +12,6 @@ export interface PolaRosterItem {
   _id?: string;
   namaPola: string;
   siklusHari: number;
-  status?: "Aktif" | "Non-Aktif";
   detailSiklus: DetailSiklusItem[];
 }
 
