@@ -3,10 +3,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { queryKeys } from "@/lib/queryKeys";
-import { Produk, GetProdukResponse } from "@/types/produk";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDaftarProduk, useHapusProduk } from "@/features/produk/hooks";
+import { pesanError } from "@/lib/api/error";
+import type { Produk } from "@/types/produk";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 
@@ -45,7 +44,6 @@ export default function ProdukPage() {
   useAuthGuard();
 
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const [deleteTarget, setDeleteTarget] = useState<Produk | null>(null);
 
@@ -56,17 +54,7 @@ export default function ProdukPage() {
     data: produkList = [],
     isLoading: produkLoading,
     error: produkError,
-  } = useQuery({
-    queryKey: queryKeys.produk.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<GetProdukResponse>(
-        "/produk",
-        undefined,
-        "pengguna"
-      );
-      return res.data || [];
-    },
-  });
+  } = useDaftarProduk();
 
   // =========================
   // ERROR TOAST
@@ -74,10 +62,7 @@ export default function ProdukPage() {
   useEffect(() => {
     if (produkError) {
       toast.error("Gagal", {
-        description:
-          produkError instanceof Error
-            ? produkError.message
-            : "Gagal memuat data produk.",
+        description: pesanError(produkError, "Gagal memuat data produk."),
       });
     }
   }, [produkError]);
@@ -85,30 +70,22 @@ export default function ProdukPage() {
   // =========================
   // MUTATION DELETE
   // =========================
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return await apiClient.delete(`/produk/${id}`, undefined, "pengguna");
-    },
-    onSuccess: () => {
-      toast.success("Berhasil", {
-        description: "Produk berhasil dihapus.",
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.produk.semua,
-      });
-      setDeleteTarget(null);
-    },
-    onError: (err: any) => {
-      toast.error("Gagal", {
-        description: err.message || "Gagal menghapus produk.",
-      });
-      setDeleteTarget(null);
-    },
-  });
+  const deleteMutation = useHapusProduk();
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    await deleteMutation.mutateAsync(deleteTarget._id);
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      toast.success("Berhasil", {
+        description: "Produk berhasil dihapus.",
+      });
+    } catch (err) {
+      toast.error("Gagal", {
+        description: pesanError(err, "Gagal menghapus produk."),
+      });
+    } finally {
+      setDeleteTarget(null);
+    }
   };
 
   // =========================
@@ -141,12 +118,8 @@ export default function ProdukPage() {
           </span>
         ),
         cell: ({ row }) => {
-          const catID = row.original.kategoriID;
-          const namaKategori =
-            typeof catID === "object" && catID !== null
-              ? catID.namaKategori
-              : row.original.kategori || "-";
-          return <span className="font-medium text-[#0A2947]/80 capitalize">{String(namaKategori)}</span>;
+          const namaKategori = row.original.kategori || "-";
+          return <span className="font-medium text-[#0A2947]/80 capitalize">{namaKategori}</span>;
         },
       },
       {
@@ -221,7 +194,7 @@ export default function ProdukPage() {
                 <DropdownMenuItem
                   className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
                   onClick={() =>
-                    router.push(`/dashboard/outlet/inventaris/produk/${row.original._id}/edit`)
+                    router.push(`/dashboard/outlet/inventaris/produk/${row.original.id}/edit`)
                   }
                 >
                   Edit Produk

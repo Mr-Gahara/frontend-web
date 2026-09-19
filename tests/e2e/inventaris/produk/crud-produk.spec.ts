@@ -314,6 +314,70 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
   });
 
   // ----------------------------------------------------------
+  // [4a] EDIT: Halaman edit terisi data produk dari server
+  // ----------------------------------------------------------
+  test("edit: halaman edit terisi data produk dari server", async ({
+    page,
+  }) => {
+    const namaProduk = "Produk E2E Prefill";
+
+    await test.step("Login, navigasi, dan buat produk", async () => {
+      await login(page);
+      await bukaHalamanProduk(page);
+      await tambahProdukBaru(page, namaProduk);
+    });
+
+    await test.step("Buka halaman edit dan periksa isian awal", async () => {
+      const searchInput = page.getByPlaceholder(/cari nama produk/i);
+      await searchInput.fill(namaProduk);
+
+      const row = page
+        .getByRole("row", { name: new RegExp(namaProduk, "i") })
+        .first();
+      await klikTombolAksiProduk(row);
+      await page.getByRole("menuitem", { name: /edit produk/i }).click();
+      await page.waitForURL("**/edit");
+
+      await expect(page.getByLabel(/nama produk/i)).toHaveValue(namaProduk);
+      await expect(page.getByLabel(/harga dasar/i)).toHaveValue(/10\.?000/);
+      await expect(page.getByLabel(/harga jual/i)).toHaveValue(/15\.?000/);
+    });
+
+    await test.step("Cleanup", async () => {
+      await bukaHalamanProduk(page);
+      await hapusProduk(page, namaProduk);
+    });
+  });
+
+  // ----------------------------------------------------------
+  // [4b] HAPUS: Konfirmasi hapus, produk hilang dari tabel
+  // ----------------------------------------------------------
+  test("hapus: konfirmasi hapus → produk hilang dari tabel", async ({
+    page,
+  }) => {
+    const namaProduk = "Produk E2E Hapus Tuntas";
+
+    await test.step("Login, navigasi, dan buat produk", async () => {
+      await login(page);
+      await bukaHalamanProduk(page);
+      await tambahProdukBaru(page, namaProduk);
+    });
+
+    await test.step("Hapus produk lewat dialog konfirmasi", async () => {
+      await hapusProduk(page, namaProduk);
+    });
+
+    await test.step("Verifikasi baris hilang dari tabel", async () => {
+      const searchInput = page.getByPlaceholder(/cari nama produk/i);
+      await searchInput.fill(namaProduk);
+      await expect(
+        page.getByRole("row", { name: new RegExp(namaProduk, "i") }),
+      ).toHaveCount(0);
+      await expect(page.getByText(/belum ada produk/i)).toBeVisible();
+    });
+  });
+
+  // ----------------------------------------------------------
   // [5] UNHAPPY: Submit form buat produk tanpa nama → error validasi
   // ----------------------------------------------------------
   test("unhappy: submit form buat produk tanpa nama → pesan error muncul", async ({

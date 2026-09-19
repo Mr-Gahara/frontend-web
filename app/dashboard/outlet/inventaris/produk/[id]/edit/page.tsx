@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { apiClient } from "@/lib/apiClient";
 import { EP } from "@/lib/api/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
+import { useProduk } from "@/features/produk/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -172,18 +173,7 @@ export default function EditProdukPage() {
     isLoading: isLoadingDetail,
     isFetching: isFetchingDetail,
     error: detailError,
-  } = useQuery({
-    queryKey: queryKeys.produk.detail(produkId),
-    enabled: !!produkId,
-    queryFn: async () => {
-      const res = await apiClient.get<any>(
-        `/produk/${produkId}`,
-        undefined,
-        "pengguna",
-      );
-      return res.data?.data || res.data;
-    },
-  });
+  } = useProduk(produkId);
 
   // --- EFFECT: PREFILL FORM ---
   useEffect(() => {

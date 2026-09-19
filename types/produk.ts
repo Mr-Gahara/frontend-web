@@ -3,30 +3,33 @@ export interface ResepItem {
   jumlah: number;
   satuan: "gram" | "ml" | "pcs" | "kg" | "liter";
 }
- 
-export interface KategoriPopulated {
-  _id: string;
-  namaKategori: string;
+
+/** Pajak yang melekat pada produk, hasil lookup di produkService. */
+export interface PajakProduk {
+  id: string;
+  namaPajak: string;
 }
- 
+
 export interface Produk {
-  _id: string;
+  id: string;
   namaProduk: string;
   hargaJual: number;
   hargaDasar: number;
   stok: number;
   isUnlimitedStok?: boolean;
-  kategori?: String;
-  kategoriID: string | KategoriPopulated;
+  /** Nama kategori hasil lookup; kosong bila kategorinya sudah dihapus. */
+  kategori?: string;
+  /** Id kategori mentah; produkService tidak mem-populate field ini. */
+  kategoriID: string;
   keterangan?: string;
   gambarProduk?: string | null;
   resep: ResepItem[];
-  pajak: string[];
-  tenantID: string;
-  createdAt: string;
-  updatedAt: string;
+  pajakList: PajakProduk[];
+  /** Bernilai null pada respons detail. */
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
- 
+
 export interface ProdukRequest {
   namaProduk: string;
   hargaJual: number;
@@ -37,19 +40,4 @@ export interface ProdukRequest {
   keterangan?: string;
   gambarProduk?: string;
   resep?: ResepItem[];
-}
- 
-export interface GetProdukResponse {
-  success: boolean;
-  data: Produk[];
-}
- 
-export interface ProdukResponse {
-  success: boolean;
-  data: Produk;
-}
-
-export interface GetKategoriResponse {
-  success: boolean;
-  data: KategoriPopulated[];
 }

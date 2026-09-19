@@ -7,7 +7,7 @@ import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { PenjualanRequest, ItemPenjualanRequest } from "@/types/penjualan";
-import { GetProdukResponse } from "@/types/produk";
+import { useDaftarProduk } from "@/features/produk/hooks";
 import { useDebounce } from "@/hooks/use-debounce";
 import { formatRupiah } from "@/lib/format";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -127,17 +127,7 @@ export default function BuatPenjualanPage() {
     },
   });
 
-  const { data: produkList = [] } = useQuery({
-    queryKey: queryKeys.produk.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<GetProdukResponse>(
-        "/produk",
-        undefined,
-        "pengguna",
-      );
-      return res.data;
-    },
-  });
+  const { data: produkList = [] } = useDaftarProduk();
 
   // Fetch Diskon (Semua)
   const { data: diskonList = [] } = useQuery({
@@ -272,7 +262,7 @@ export default function BuatPenjualanPage() {
   };
 
   const getProdukNama = (produkID: string) =>
-    produkList.find((p) => p._id === produkID)?.namaProduk ?? "";
+    produkList.find((p) => p.id === produkID)?.namaProduk ?? "";
 
   // ==========================================
   //  ENGINE SIMULASI KALKULASI FRONTEND
@@ -283,7 +273,7 @@ export default function BuatPenjualanPage() {
     // 1. Hitung Item & Diskon Item
     const itemsCalc = items.map((item) => {
       const produk = produkList.find(
-        (p) => (p._id || (p as any).id) === item.produkID,
+        (p) => p.id === item.produkID,
       );
       const subTotal = (item.jumlah || 1) * (produk?.hargaJual || 0);
       let running = subTotal;
@@ -576,7 +566,7 @@ export default function BuatPenjualanPage() {
             <div className="flex flex-col gap-4">
               {items.map((item, index) => {
                 const selectedProduk = produkList.find(
-                  (p) => p._id === item.produkID,
+                  (p) => p.id === item.produkID,
                 );
                 const itemCalc = calc.itemsCalc[index];
 
@@ -648,16 +638,16 @@ export default function BuatPenjualanPage() {
                               <CommandGroup>
                                 {produkList.map((p) => (
                                   <CommandItem
-                                    key={p._id}
+                                    key={p.id}
                                     onSelect={() =>
-                                      handlePilihProduk(index, p._id)
+                                      handlePilihProduk(index, p.id)
                                     }
                                     className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-medium"
                                   >
                                     <Check
                                       className={cn(
                                         "mr-2 h-4 w-4 text-[#718355]",
-                                        item.produkID === p._id
+                                        item.produkID === p.id
                                           ? "opacity-100"
                                           : "opacity-0",
                                       )}

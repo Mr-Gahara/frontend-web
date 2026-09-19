@@ -14,7 +14,7 @@ import {
   ProdukPajakRequest,
 } from "@/types/pajak";
 
-import { GetProdukResponse } from "@/types/produk";
+import { useDaftarProduk } from "@/features/produk/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
@@ -117,13 +117,7 @@ export default function PajakPage() {
   });
 
   // QUERY PRODUK
-  const { data: produkList = [], error: produkError } = useQuery({
-    queryKey: queryKeys.produk.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<GetProdukResponse>("/produk", undefined, "pengguna");
-      return res.data;
-    },
-  });
+  const { data: produkList = [], error: produkError } = useDaftarProduk();
 
   // QUERY RELASI
   const {
@@ -369,7 +363,7 @@ export default function PajakPage() {
                 </SelectTrigger>
                 <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
                   {produkList.map((produk) => (
-                    <SelectItem key={produk._id} value={produk._id} className="cursor-pointer hover:bg-[#0A2947]/5">
+                    <SelectItem key={produk.id} value={produk.id} className="cursor-pointer hover:bg-[#0A2947]/5">
                       {produk.namaProduk}
                     </SelectItem>
                   ))}
