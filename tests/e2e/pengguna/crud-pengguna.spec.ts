@@ -678,3 +678,48 @@ test.describe("E2E - Siklus Hidup Pengguna (CRUD)", () => {
     });
   });
 });
+
+test.describe("E2E - Pengguna Gudang", () => {
+  test.setTimeout(120_000);
+
+  test("tabel gudang diperbarui setelah menambah pengguna", async ({ page }) => {
+    // Regresi: halaman gudang sebelumnya menginvalidasi cache pengguna
+    // outlet, sehingga tabelnya tidak ikut diperbarui setelah perubahan.
+    // Kedua halaman kini memakai satu komponen bersama.
+    await login(page);
+    await page.goto("http://localhost:3000/dashboard/gudang/pengguna");
+    await expect(page.getByRole("heading", { name: /pengguna/i }).first()).toBeVisible({
+      timeout: 15_000,
+    });
+
+    const nama = `Staf Gudang ${Date.now()}`;
+
+    await page.getByRole("button", { name: /tambah pengguna/i }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+
+    await dialog.getByLabel(/nama lengkap/i).fill(nama);
+    await dialog.getByLabel(/pin keamanan/i).fill("123456");
+
+    // Role wajib dipilih sebelum simpan. Dialog memiliki dua Select
+    // (role dan status), sehingga trigger dipilih lewat placeholder-nya.
+    await dialog.getByText("Pilih role").click();
+    await page.getByRole("option").first().click();
+
+    await dialog.getByRole("button", { name: /simpan/i }).click();
+
+    // Tanpa invalidasi yang benar, baris ini tidak akan pernah muncul.
+    // Tabel dimuat ulang setelah simpan, jadi tunggu permintaan itu selesai
+    // sebelum menyaring, agar pencarian tidak berjalan atas data lama.
+    await page.waitForResponse(
+      (r) => r.url().includes("/pengguna?workspace=gudang") && r.status() === 200,
+      { timeout: 15_000 },
+    );
+    await page.getByPlaceholder(/cari nama pengguna/i).fill(nama);
+    await expect(
+      page.getByRole("row", { name: new RegExp(nama, "i") }).first(),
+    ).toBeVisible({ timeout: 15_000 });
+
+    await bersihkanPengguna(page, nama);
+  });
+});

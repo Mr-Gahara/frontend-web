@@ -1,23 +1,25 @@
 
+import { Entitas, Timestamps } from "./api";
 import { Role } from "./role";
-export interface PenggunaRole {
-  _id: string;
+
+export interface PenggunaRole extends Entitas {
   namaRole: string;
 }
 
-export interface PenggunaItem {
-  _id: string;
+/**
+ * Respons GET /pengguna, sesuai docs/kontrak-api.md bagian 3.3.
+ * Identitas sudah dinormalkan menjadi id oleh lib/api/normalize.ts.
+ */
+export interface PenggunaItem extends Entitas, Timestamps {
   nama: string;
   nomorHp?: string;
   status: "aktif" | "non-aktif";
   aksesType: ("app" | "web")[];
   fotoKaryawan?: string | null;
   tenantID: string;
-  // backend bisa return string ATAU object populate
+  /** Backend mengirim string atau objek hasil populate, tergantung endpoint. */
   roleID: string | Role;
   tokenVersion: number;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface PenggunaRequest {

@@ -79,8 +79,7 @@ export function WidgetActiveUsers({
         ) : (
           activeUsersAPI.map((staf: any, idx: number) => {
             const matchedUser = penggunaList.find(
-              (p) =>
-                (p as any).id === staf.penggunaID || p._id === staf.penggunaID,
+              (p) => p.id === staf.penggunaID,
             );
             let roleName = "Staff";
 
@@ -94,7 +93,7 @@ export function WidgetActiveUsers({
                 const foundRole = roleList.find(
                   (r) =>
                     (r as any).id === matchedUser.roleID ||
-                    r._id === matchedUser.roleID,
+                    r.id === matchedUser.roleID,
                 );
                 if (foundRole) roleName = foundRole.namaRole;
               }

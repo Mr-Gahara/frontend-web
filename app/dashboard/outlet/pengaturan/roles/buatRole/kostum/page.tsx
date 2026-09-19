@@ -105,7 +105,7 @@ export default function BuatRoleKostumPage() {
 
       const foundMyRole = roles.find(
         (r: Role) =>
-          r.namaRole === tokenRoleStr || r._id === tokenPayload?.roleID,
+          r.namaRole === tokenRoleStr || r.id === tokenPayload?.roleID,
       );
       if (foundMyRole) return foundMyRole.level;
       if (tokenRoleStr === "Owner") return 100;
@@ -253,7 +253,7 @@ export default function BuatRoleKostumPage() {
     const finalPermissionIds = selectedPermissions
       .map((nama) => {
         const matched = allPermissions.find((p) => p.nama === nama);
-        return matched ? matched._id : null;
+        return matched ? matched.id : null;
       })
       .filter(Boolean) as string[];
 
@@ -420,11 +420,11 @@ export default function BuatRoleKostumPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-8">
                         {items.map((permission) => (
                           <div
-                            key={permission._id}
+                            key={permission.id}
                             className="flex items-start space-x-3"
                           >
                             <Checkbox
-                              id={permission._id}
+                              id={permission.id}
                               checked={selectedPermissions.includes(
                                 permission.nama,
                               )}
@@ -436,7 +436,7 @@ export default function BuatRoleKostumPage() {
                             />
                             <div className="grid gap-1 leading-none">
                               <label
-                                htmlFor={permission._id}
+                                htmlFor={permission.id}
                                 className="text-sm font-bold cursor-pointer text-[#0A2947]"
                               >
                                 {permission.deskripsi || permission.nama}

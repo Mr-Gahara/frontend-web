@@ -1,5 +1,10 @@
-export interface Permission {
-  _id: string;
+import { Entitas } from "./api";
+
+/**
+ * Respons GET /permission. Identitas sudah dinormalkan menjadi id
+ * oleh lib/api/normalize.ts.
+ */
+export interface Permission extends Entitas {
   nama: string;
   grup: string;
   deskripsi?: string;
@@ -13,13 +18,14 @@ export interface BuatRoleRequest {
   namaRole: string;
   deskripsi?: string;
   level: number;
-  permissions: string[]; // array of permission _id
+  /** Daftar id permission. */
+  permissions: string[];
 }
 
 export interface BuatRoleResponse {
   message: string;
   data: {
-    _id: string;
+    id: string;
     namaRole: string;
     deskripsi: string | null;
     level: number;
@@ -27,8 +33,8 @@ export interface BuatRoleResponse {
   };
 }
 
-export interface Role {
-  _id: string;
+/** Respons GET /role, sesuai docs/kontrak-api.md bagian 3.3. */
+export interface Role extends Entitas {
   namaRole: string;
   deskripsi: string | null;
   level: number;

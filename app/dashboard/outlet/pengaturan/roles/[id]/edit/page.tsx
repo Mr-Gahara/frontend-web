@@ -117,7 +117,7 @@ export default function EditRolePage() {
 
       const foundMyRole = roles.find(
         (r: Role) =>
-          r.namaRole === tokenRoleStr || r._id === tokenPayload?.roleID,
+          r.namaRole === tokenRoleStr || r.id === tokenPayload?.roleID,
       );
       if (foundMyRole) return foundMyRole.level;
       if (tokenRoleStr === "Owner") return 100;
@@ -307,7 +307,7 @@ export default function EditRolePage() {
     const finalPermissionIds = finalPermissionsNames
       .map((nama) => {
         const matched = allPermissions.find((p) => p.nama === nama);
-        return matched ? matched._id : null;
+        return matched ? matched.id : null;
       })
       .filter(Boolean) as string[];
 
@@ -476,11 +476,11 @@ export default function EditRolePage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-8">
                         {items.map((permission) => (
                           <div
-                            key={permission._id}
+                            key={permission.id}
                             className="flex items-start space-x-3"
                           >
                             <Checkbox
-                              id={`edit-${permission._id}`}
+                              id={`edit-${permission.id}`}
                               checked={selectedPermissions.includes(
                                 permission.nama,
                               )}
@@ -491,7 +491,7 @@ export default function EditRolePage() {
                             />
                             <div className="grid gap-1 leading-none">
                               <label
-                                htmlFor={`edit-${permission._id}`}
+                                htmlFor={`edit-${permission.id}`}
                                 className="text-sm font-bold cursor-pointer text-[#0A2947]"
                               >
                                 {permission.deskripsi || permission.nama}

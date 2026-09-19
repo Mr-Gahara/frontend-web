@@ -91,7 +91,7 @@ export default function RolesPage() {
       const tokenRoleStr = tokenPayload?.role;
 
       const foundMyRole = roles.find(
-        (r) => r.namaRole === tokenRoleStr || r._id === tokenPayload?.roleID,
+        (r) => r.namaRole === tokenRoleStr || r.id === tokenPayload?.roleID,
       );
       if (foundMyRole) return foundMyRole.level;
       if (tokenRoleStr === "Owner") return 100;
@@ -358,7 +358,7 @@ export default function RolesPage() {
                         {safeRolePerms.map((p: any, pIndex: number) => {
                           const permName = typeof p === "object" ? p.nama : p;
                           const permKey =
-                            typeof p === "object" ? p._id || p.id || p.nama : p;
+                            typeof p === "object" ? p.id || p.id || p.nama : p;
                           const masterData = allowedPermissionsMaster.find(
                             (m) => m.nama === permName,
                           );

@@ -64,7 +64,7 @@ export default function BuatRolePage() {
           const matched = allPermissions.find(
             (p: Permission) => p.nama === nama,
           );
-          return matched ? matched._id : null;
+          return matched ? matched.id : null;
         })
         .filter(Boolean) as string[];
 

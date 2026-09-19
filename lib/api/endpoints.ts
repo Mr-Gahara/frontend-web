@@ -27,7 +27,9 @@ export const EP = {
     list: "/role",
     detail: (id: string) => `/role/${id}`,
   },
-  permission: "/permission",
+  permission: {
+    list: "/permission",
+  },
 
   produk: {
     list: "/produk",
