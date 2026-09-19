@@ -20,6 +20,7 @@ import {
   tokenPengguna,
 } from "@/lib/auth/session";
 import { refreshTerkoordinasi } from "@/lib/auth/sessionChannel";
+import { ApiError } from "@/lib/api/error";
 
 type TokenType = "akun" | "pengguna";
 
@@ -195,7 +196,7 @@ async function request<T>(
   ) {
     const newToken = await refreshTerkoordinasi("pengguna", tryRefreshPenggunaToken);
     if (newToken) return request<T>(endpoint, options, false, explicitTokenType);
-    throw new Error("Sesi pengguna telah berakhir.");
+    throw new ApiError(401, "Sesi pengguna telah berakhir.");
   }
 
   // Token A expired
@@ -209,31 +210,42 @@ async function request<T>(
   ) {
     const newToken = await refreshTerkoordinasi("akun", tryRefreshToken);
     if (newToken) return request<T>(endpoint, options, false, explicitTokenType);
-    throw new Error("Sesi akun telah berakhir.");
+    throw new ApiError(401, "Sesi akun telah berakhir.");
   }
 
   if (!res.ok) {
-    let errorMessage = "Terjadi kesalahan server.";
+    let pesan = "Terjadi kesalahan server.";
+    let daftarError: string[] = [];
+    let kode: string | undefined;
 
     try {
       const error = await res.json();
 
       if (error.errors && Array.isArray(error.errors)) {
-        errorMessage = error.errors
-          .map((e: any) => e.msg || e.message || JSON.stringify(e))
-          .join(", ");
+        daftarError = error.errors.map((e: any) =>
+          typeof e === "string" ? e : e.msg || e.message || JSON.stringify(e),
+        );
       } else if (error.errors && typeof error.errors === "object") {
-        errorMessage = Object.values(error.errors)
-          .map((e: any) => e.message || e)
-          .join(", ");
-      } else {
-        errorMessage = error.message || error.error || errorMessage;
+        daftarError = Object.values(error.errors).map((e: any) =>
+          typeof e === "string" ? e : e.message || String(e),
+        );
       }
+
+      pesan = error.message || error.error || pesan;
+      kode = typeof error.code === "string" ? error.code : undefined;
     } catch {
-      // ignore parse error
+      // Respons tanpa JSON: pertahankan pesan umum.
     }
 
-    throw new Error(errorMessage);
+    // Akun atau toko yang dibekukan, dan pengguna yang dinonaktifkan, tidak
+    // dapat dipulihkan dengan mencoba ulang. Sesi diakhiri agar pengguna
+    // tidak terjebak pada halaman yang seluruh datanya ditolak.
+    if (res.status === 403 && /dinonaktifkan|dibekukan|tidak aktif/i.test(pesan)) {
+      akhiriSesi();
+      if (typeof window !== "undefined") window.location.href = "/login";
+    }
+
+    throw new ApiError(res.status, pesan, daftarError, kode);
   }
 
   return res.json() as Promise<T>;

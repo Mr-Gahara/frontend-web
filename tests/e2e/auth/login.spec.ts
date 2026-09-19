@@ -291,6 +291,39 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
 // =============================================================================
 // SUITE 3 — Perilaku sesi: token di memori, pemulihan lewat cookie refresh
 // =============================================================================
+test.describe("E2E — Penanganan 403 akun dibekukan", () => {
+  test("sesi diakhiri dan kembali ke /login saat backend menjawab 403 dibekukan", async ({
+    page,
+  }) => {
+    await siapkanSesiAkun(page);
+    await page.getByLabel(/nama/i).fill("Ridho");
+    await page.getByLabel(/pin/i).fill("123456");
+    await page.getByRole("button", { name: /masuk|login/i }).click();
+    await page.waitForURL("**/dashboard/**", { timeout: 15_000 });
+
+    // Backend membekukan akun setelah sesi berjalan. Mencoba ulang tidak ada
+    // gunanya, sehingga sesi diakhiri dan pengguna dikembalikan ke login.
+    await page.route("**/api/**", (route) => {
+      const url = route.request().url();
+      if (/\/api\/(akun|pengguna)\/(auth|pin)/.test(url)) return route.continue();
+      return route.fulfill({
+        status: 403,
+        contentType: "application/json",
+        body: JSON.stringify({
+          status: "error",
+          message: "Akses ditolak. Akun bisnis sedang dibekukan atau tidak aktif.",
+        }),
+      });
+    });
+
+    // Halaman dashboard outlet tidak memanggil API, jadi buka halaman yang
+    // memuat data agar 403 benar-benar melewati apiClient.
+    await page.goto("http://localhost:3000/dashboard/outlet/inventaris/produk");
+    await expect(page).toHaveURL(/.*\/login$/, { timeout: 20_000 });
+  });
+});
+
+
 test.describe("E2E — Sesi lintas muat halaman", () => {
   test("sesi bertahan setelah halaman di-reload", async ({ page }) => {
     await siapkanSesiAkun(page);

@@ -4,7 +4,7 @@
  * Dibangun di atas lib/apiClient.ts agar halaman lama tetap berjalan
  * selama migrasi bertahap. Perbedaannya:
  *   - mengembalikan data yang sudah dinormalkan, bukan envelope mentah
- *   - melempar ApiError lengkap dengan status dan daftar errors
+ *   - meneruskan ApiError lengkap dengan status dan daftar errors
  *   - token pengguna menjadi default, karena seluruh endpoint bisnis
  *     memakainya (docs/kontrak-api.md bagian 2.2)
  *
@@ -18,19 +18,13 @@ import { unwrap, type HasilApi } from "./normalize";
 
 type TokenType = "akun" | "pengguna";
 
-/**
- * apiClient lama melempar Error biasa berisi pesan gabungan. Status HTTP
- * tidak tersedia di sana, sehingga dipulihkan dari pola pesan yang
- * dikenal. Ini sementara: setelah tahap sesi, ApiError dibuat langsung
- * dari respons fetch beserta status aslinya.
- */
+/** apiClient sudah melempar ApiError; sisanya kegagalan jaringan. */
 function keApiError(e: unknown): ApiError {
   if (e instanceof ApiError) return e;
-  const pesan = e instanceof Error ? e.message : "Terjadi kesalahan server.";
-  if (/sesi (pengguna|akun) telah berakhir/i.test(pesan)) {
-    return new ApiError(401, pesan);
-  }
-  return new ApiError(0, pesan);
+  return new ApiError(
+    0,
+    e instanceof Error ? e.message : "Terjadi kesalahan jaringan.",
+  );
 }
 
 async function jalankan<T>(fn: () => Promise<unknown>): Promise<HasilApi<T>> {

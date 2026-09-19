@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/apiClient";
 import { setTokenAkun, setTokenPengguna } from "@/lib/auth/session";
+import { isRateLimited, pesanError } from "@/lib/api/error";
 import { LoginResponse } from "@/types/auth";
 
 import { Mail, Lock, Loader2, AlertCircle } from "lucide-react";
@@ -45,11 +46,24 @@ export default function LoginPage() {
       setTokenAkun(res.accessToken);
 
       router.push("/login/pengguna");
-    } catch (err: any) {
-      setError(
-        err.message ||
-          "Autentikasi gagal. Mohon periksa kembali email dan sandi Anda.",
-      );
+    } catch (err: unknown) {
+      if (isRateLimited(err)) {
+        // 429: percobaan login dibatasi backend. Pesan dibedakan agar
+        // pengguna tahu ini sementara, bukan kesalahan kredensial.
+        setError(
+          pesanError(
+            err,
+            "Terlalu banyak percobaan login. Coba lagi beberapa saat lagi.",
+          ),
+        );
+      } else {
+        setError(
+          pesanError(
+            err,
+            "Autentikasi gagal. Mohon periksa kembali email dan sandi Anda.",
+          ),
+        );
+      }
     } finally {
       setLoading(false);
     }
