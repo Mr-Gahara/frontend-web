@@ -156,7 +156,7 @@ tercatat tidak lagi diperiksa, atau bentuk respons berbeda dari tipe.
 | Modul | Commit | Status |
 |---|---|---|
 | Pengguna | `7275d14` | Selesai |
-| Role | (commit modul ini) | Selesai |
+| Role | `e17c572` | Selesai |
 | Produk dan kategori | - | **Berikutnya** |
 | Inventaris (stok, jurnal, opname) | - | Belum |
 | Penjualan dan pembayaran | - | Belum |
