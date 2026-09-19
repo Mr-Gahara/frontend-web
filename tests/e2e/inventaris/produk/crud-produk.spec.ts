@@ -180,7 +180,7 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
       await page.getByLabel(/produk tanpa stok/i).click();
 
       // Gunakan id langsung karena tidak ada htmlFor yang terpasang ke label stok
-      await expect(page.locator("#stokAwal")).toBeDisabled();
+      await expect(page.getByRole("spinbutton", { name: /stok awal/i })).toBeDisabled();
 
       await page.getByRole("button", { name: /simpan produk baru/i }).click();
       await expect(
@@ -240,7 +240,7 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
       await page.getByPlaceholder("0").last().fill("100");
 
       // Verifikasi: setelah ada resep, stok harus disabled
-      await expect(page.locator("#stokAwal")).toBeDisabled();
+      await expect(page.getByRole("spinbutton", { name: /stok awal/i })).toBeDisabled();
 
       // Verifikasi: checkbox unlimited harus disabled
       await expect(page.getByLabel(/produk tanpa stok/i)).toBeDisabled();
@@ -374,6 +374,126 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
         page.getByRole("row", { name: new RegExp(namaProduk, "i") }),
       ).toHaveCount(0);
       await expect(page.getByText(/belum ada produk/i)).toBeVisible();
+    });
+  });
+
+  // ----------------------------------------------------------
+  // [4c] EDIT: Produk tanpa resep, stok tidak kembali ke 0
+  // ----------------------------------------------------------
+  test("edit produk tanpa resep: stok tidak kembali ke 0", async ({ page }) => {
+    const namaAwal = "Produk E2E Stok Tetap";
+    const namaUpdate = "Produk E2E Stok Tetap Diubah";
+
+    await test.step("Login dan buat produk dengan stok 25", async () => {
+      await login(page);
+      await bukaHalamanProduk(page);
+      await bukaBuatProduk(page);
+      await isiFormDasarProduk(page, {
+        nama: namaAwal,
+        hargaDasar: "10000",
+        hargaJual: "15000",
+      });
+      await page.getByRole("spinbutton", { name: /stok awal/i }).fill("25");
+      await page.getByRole("button", { name: /simpan produk baru/i }).click();
+      await expect(
+        page.getByText(/produk baru berhasil ditambahkan/i),
+      ).toBeVisible();
+      await page.waitForURL("**/inventaris/produk");
+    });
+
+    await test.step("Edit nama saja lalu simpan", async () => {
+      await page.getByPlaceholder(/cari nama produk/i).fill(namaAwal);
+      const row = page
+        .getByRole("row", { name: new RegExp(namaAwal, "i") })
+        .first();
+      await klikTombolAksiProduk(row);
+      await page.getByRole("menuitem", { name: /edit produk/i }).click();
+      await page.waitForURL("**/edit");
+      await expect(
+        page.getByRole("spinbutton", { name: /stok sistem/i }),
+      ).toHaveValue("25");
+
+      const namaInput = page.getByLabel(/nama produk/i);
+      await namaInput.clear();
+      await namaInput.fill(namaUpdate);
+      await page.getByRole("button", { name: /simpan perubahan/i }).click();
+      await expect(
+        page.getByText(/perubahan produk berhasil disimpan/i),
+      ).toBeVisible();
+      await page.waitForURL("**/inventaris/produk");
+    });
+
+    await test.step("Buka edit lagi: nama baru dan stok tetap 25", async () => {
+      await page.getByPlaceholder(/cari nama produk/i).fill(namaUpdate);
+      const row = page
+        .getByRole("row", { name: new RegExp(namaUpdate, "i") })
+        .first();
+      await klikTombolAksiProduk(row);
+      await page.getByRole("menuitem", { name: /edit produk/i }).click();
+      await page.waitForURL("**/edit");
+      await expect(page.getByLabel(/nama produk/i)).toHaveValue(namaUpdate);
+      await expect(
+        page.getByRole("spinbutton", { name: /stok sistem/i }),
+      ).toHaveValue("25");
+    });
+
+    await test.step("Cleanup", async () => {
+      await bukaHalamanProduk(page);
+      await hapusProduk(page, namaUpdate);
+    });
+  });
+
+  // ----------------------------------------------------------
+  // [4d] EDIT: Resep dihapus seluruhnya, petunjuk stok muncul
+  // ----------------------------------------------------------
+  test("edit produk: resep dihapus seluruhnya → petunjuk stok muncul", async ({
+    page,
+  }) => {
+    const namaProduk = "Produk E2E Resep Dihapus";
+
+    await test.step("Login dan buat produk dengan resep", async () => {
+      await login(page);
+      await bukaHalamanProduk(page);
+      await bukaBuatProduk(page);
+      await isiFormDasarProduk(page, {
+        nama: namaProduk,
+        hargaDasar: "10000",
+        hargaJual: "15000",
+      });
+      await page.getByRole("button", { name: /tambah bahan/i }).click();
+      await page.getByRole("combobox").nth(1).click();
+      await page
+        .getByRole("option", { name: /\((gram|ml|pcs|kg|liter)\)/i })
+        .first()
+        .click();
+      await page.locator("input[name=\"resep.0.jumlah\"]").fill("1");
+      await page.getByRole("button", { name: /simpan produk baru/i }).click();
+      await expect(
+        page.getByText(/produk baru berhasil ditambahkan/i),
+      ).toBeVisible();
+      await page.waitForURL("**/inventaris/produk");
+    });
+
+    await test.step("Buka edit dan hapus seluruh resep", async () => {
+      await page.getByPlaceholder(/cari nama produk/i).fill(namaProduk);
+      const row = page
+        .getByRole("row", { name: new RegExp(namaProduk, "i") })
+        .first();
+      await klikTombolAksiProduk(row);
+      await page.getByRole("menuitem", { name: /edit produk/i }).click();
+      await page.waitForURL("**/edit");
+
+      const tombolHapus = page.locator("button.text-rose-500").first();
+      await tombolHapus.click();
+      await expect(tombolHapus).not.toBeVisible();
+      await expect(
+        page.getByText(/stok akan menjadi 0 setelah resep dihapus/i),
+      ).toBeVisible();
+    });
+
+    await test.step("Cleanup", async () => {
+      await bukaHalamanProduk(page);
+      await hapusProduk(page, namaProduk);
     });
   });
 

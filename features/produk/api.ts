@@ -11,10 +11,14 @@
 
 import { apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
-import type { Produk } from "@/types/produk";
+import type { Produk, ProdukRequest } from "@/types/produk";
 
 export const produkApi = {
   daftar: () => apiData.get<Produk[]>(EP.produk.list),
   detail: (id: string) => apiData.get<Produk>(EP.produk.detail(id)),
+  buat: (payload: ProdukRequest) =>
+    apiData.post<Produk>(EP.produk.list, payload),
+  perbarui: (id: string, payload: ProdukRequest) =>
+    apiData.put<Produk>(EP.produk.detail(id), payload),
   hapus: (id: string) => apiData.delete<unknown>(EP.produk.detail(id)),
 };

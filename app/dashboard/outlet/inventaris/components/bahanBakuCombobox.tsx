@@ -28,12 +28,7 @@ export function BahanBakuCombobox({
 }: BahanBakuComboboxProps) {
   const [open, setOpen] = useState(false);
 
-  // FIX: Defensively check for both _id and id, and explicitly cast to String
-  // to prevent type mismatches (e.g., ObjectIDs returned as raw objects).
-  const selected = (bahanBakuList as any[]).find((b) => {
-    const currentId = b?._id || b?.id;
-    return currentId && String(currentId) === String(value);
-  });
+  const selected = bahanBakuList.find((b) => b.id === value);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -73,9 +68,8 @@ export function BahanBakuCombobox({
               Bahan tidak ditemukan.
             </CommandEmpty>
             <CommandGroup>
-              {(bahanBakuList as any[]).map((bb) => {
-                // FIX: Safely extract ID for the render loop as well
-                const itemId = String(bb?._id || bb?.id || "");
+              {bahanBakuList.map((bb) => {
+                const itemId = bb.id;
 
                 return (
                   <CommandItem
