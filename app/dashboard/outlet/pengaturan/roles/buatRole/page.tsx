@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { queryKeys } from "@/lib/queryKeys";
-import { GetPermissionsResponse, Permission } from "@/types/role";
-import { useSession } from "@/lib/auth/useSession";
+import {
+  useDaftarPermission,
+  useDaftarRole,
+  useLevelPenggunaAktif,
+  useSimpanRole,
+} from "@/features/role/hooks";
 import { ROLE_TEMPLATES, RoleTemplate } from "@/lib/roleTemplates";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -26,80 +27,65 @@ export default function BuatRolePage() {
   useAuthGuard();
 
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const [mounted, setMounted] = useState(false);
   const [loadingTemplateId, setLoadingTemplateId] = useState<string | null>(
     null,
   );
-
-  const { pengguna } = useSession();
   // Level tidak tersedia di token pengguna; Owner selalu level tertinggi.
-  const currentUserLevel = pengguna?.role === "Owner" ? 100 : 0;
+  // Level pengguna aktif dicari dari daftar role, karena token hanya
+  // membawa nama role. Sebelumnya hanya Owner yang mendapat level,
+  // sehingga seluruh template terkunci bagi pengguna lain.
+  const { data: roles = [] } = useDaftarRole();
+  const currentUserLevel = useLevelPenggunaAktif(roles);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   // QUERY: MASTER PERMISSION
-  const { data: allPermissions = [], isLoading: permissionsLoading } = useQuery(
-    {
-      queryKey: queryKeys.permissions.semua,
-      queryFn: async () => {
-        const res = await apiClient.get<GetPermissionsResponse>(
-          "/permission",
-          undefined,
-          "pengguna",
-        );
-        return res.data;
-      },
-    },
-  );
+  const { data: allPermissions = [], isLoading: permissionsLoading } =
+    useDaftarPermission();
 
-  // MUTATION: CREATE ROLE DARI TEMPLATE
-  const createRoleMutation = useMutation({
-    mutationFn: async (template: RoleTemplate) => {
-      const finalPermissionIds = template.permissions
-        .map((nama) => {
-          const matched = allPermissions.find(
-            (p: Permission) => p.nama === nama,
-          );
-          return matched ? matched.id : null;
-        })
-        .filter(Boolean) as string[];
+  const createRoleMutation = useSimpanRole();
 
-      return await apiClient.post(
-        "/role",
-        {
+  const buatDariTemplate = (template: RoleTemplate) => {
+    // Template menyimpan nama izin; backend meminta id.
+    const finalPermissionIds = template.permissions
+      .map((nama) => allPermissions.find((p) => p.nama === nama)?.id ?? null)
+      .filter(Boolean) as string[];
+
+    createRoleMutation.mutate(
+      {
+        data: {
           namaRole: template.namaRole,
           deskripsi: template.deskripsi,
           permissions: finalPermissionIds,
           level: template.level,
         },
-        undefined,
-        "pengguna",
-      );
-    },
-    onSuccess: (_, template) => {
-      toast.success("Posisi berhasil dibuat", {
-        description: `Posisi "${template.namaRole}" telah ditambahkan dari template.`,
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.roles.semua });
-      router.push("/dashboard/outlet/pengaturan/roles");
-    },
-    onError: (err: any, template) => {
-      setLoadingTemplateId(null);
-      toast.error(`Gagal membuat role "${template.namaRole}"`, {
-        description:
-          "Pastikan level dan wewenang yang ditetapkan tidak melebihi hak akses Anda.",
-      });
-    },
-  });
+      },
+      {
+        onSuccess: () => {
+          toast.success("Posisi berhasil dibuat", {
+            description: `Posisi "${template.namaRole}" telah ditambahkan dari template.`,
+          });
+          router.push("/dashboard/outlet/pengaturan/roles");
+        },
+        onError: () => {
+          setLoadingTemplateId(null);
+          toast.error(`Gagal membuat role "${template.namaRole}"`, {
+            description:
+              "Pastikan level dan wewenang yang ditetapkan tidak melebihi hak akses Anda.",
+          });
+        },
+      },
+    );
+  };
 
   const handleUseTemplate = (template: RoleTemplate) => {
     if (loadingTemplateId) return;
     setLoadingTemplateId(template.id);
-    createRoleMutation.mutate(template);
+    buatDariTemplate(template);
   };
 
   const isDisabled = (template: RoleTemplate) => {

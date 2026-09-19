@@ -1,13 +1,17 @@
 "use client";
 
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { useSession } from "@/lib/auth/useSession";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiClient } from "@/lib/apiClient";
-import { queryKeys } from "@/lib/queryKeys";
-import { Role, GetRolesResponse, GetPermissionsResponse } from "@/types/role";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useDaftarPermission,
+  useDaftarRole,
+  useHapusRole,
+  useLevelPenggunaAktif,
+} from "@/features/role/hooks";
+import { Permission, Role } from "@/types/role";
+import { pesanError } from "@/lib/api/error";
+import { IZIN_TERLARANG } from "@/features/role/constants";
 import { toast } from "sonner";
 import { Loader2, Plus, Shield, ShieldHalf, ArrowLeft } from "lucide-react"; // Ditambahkan ArrowLeft
 import {
@@ -22,17 +26,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
-const RESTRICTED_PERMS = [
-  "create-permission",
-  "update-permission",
-  "delete-permission",
-];
-
 export default function RolesPage() {
   useAuthGuard();
 
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const [mounted, setMounted] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Role | null>(null);
@@ -50,58 +47,19 @@ export default function RolesPage() {
     });
   };
 
-  // QUERY 1: MASTER PERMISSION
   const { data: permissionsMaster = [], isLoading: permissionsLoading } =
-    useQuery({
-      queryKey: queryKeys.permissions.semua,
-      queryFn: async () => {
-        const res = await apiClient.get<GetPermissionsResponse>(
-          "/permission",
-          undefined,
-          "pengguna",
-        );
-        return res.data;
-      },
-    });
+    useDaftarPermission();
 
-  // QUERY 2: ROLES
   const {
     data: roles = [],
     isLoading: rolesLoading,
     error: rolesError,
-  } = useQuery({
-    queryKey: queryKeys.roles.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<GetRolesResponse>(
-        "/role",
-        undefined,
-        "pengguna",
-      );
-      return res.data;
-    },
-  });
+  } = useDaftarRole();
 
-  const { pengguna } = useSession();
-  const tokenPayload = pengguna;
-
-  const currentUserLevel = useMemo(() => {
-    // role pada token pengguna berupa nama role (string), tanpa level.
-    // Level diambil dari daftar role yang dimuat halaman ini.
-    if (roles.length > 0) {
-      const tokenRoleStr = tokenPayload?.role;
-
-      const foundMyRole = roles.find(
-        (r) => r.namaRole === tokenRoleStr || r.id === tokenPayload?.roleID,
-      );
-      if (foundMyRole) return foundMyRole.level;
-      if (tokenRoleStr === "Owner") return 100;
-    }
-
-    return 0;
-  }, [tokenPayload, roles]);
+  const currentUserLevel = useLevelPenggunaAktif(roles);
 
   const allowedPermissionsMaster = permissionsMaster.filter(
-    (p) => !RESTRICTED_PERMS.includes(p.nama),
+    (p) => !IZIN_TERLARANG.includes(p.nama),
   );
 
   const groupMap = allowedPermissionsMaster.reduce(
@@ -124,32 +82,24 @@ export default function RolesPage() {
     }
   }, [rolesError]);
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return await apiClient.delete(`/role/${id}`);
-    },
-    onSuccess: () => {
-      toast.success("Berhasil", {
-        description: "Role berhasil dihapus.",
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.roles.semua });
-      setDeleteTarget(null);
-    },
-    onError: (err: any) => {
-      toast.error("Gagal", {
-        description: err.message || "Gagal menghapus rolenp.",
-      });
-    },
-  });
+  const deleteMutation = useHapusRole();
 
-  const handleDelete = async () => {
+  const hapusRole = (id: string) =>
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success("Berhasil", { description: "Role berhasil dihapus." });
+        setDeleteTarget(null);
+      },
+      onError: (err) => {
+        toast.error("Gagal", {
+          description: pesanError(err, "Gagal menghapus role."),
+        });
+      },
+    });
+
+  const handleDelete = () => {
     if (!deleteTarget) return;
-    const targetId = (deleteTarget as any)._id || (deleteTarget as any).id;
-    if (!targetId) {
-      toast.error("Gagal", { description: "ID posisi tidak valid." });
-      return;
-    }
-    await deleteMutation.mutateAsync(targetId);
+    hapusRole(deleteTarget.id);
   };
 
   if (!mounted) return null;
@@ -209,19 +159,18 @@ export default function RolesPage() {
       {roles.length > 0 && permissionsMaster.length > 0 && (
         <div className="flex flex-col gap-5">
           {roles.map((role, index) => {
-            const roleIdentifier =
-              (role as any)._id || (role as any).id || `fallback-role-${index}`;
+            const roleIdentifier = role.id || `fallback-role-${index}`;
             const isExpanded = expandedRoles.has(roleIdentifier);
 
-            const safeRolePerms = (role.permissions || []).filter((p: any) => {
+            const safeRolePerms = (role.permissions || []).filter((p: string | Permission) => {
               const permName = typeof p === "object" ? p.nama : p;
-              return !RESTRICTED_PERMS.includes(permName);
+              return !IZIN_TERLARANG.includes(permName);
             });
 
             const canManage = role.level < currentUserLevel;
 
             const roleGroupCounts = safeRolePerms.reduce(
-              (acc, p: any) => {
+              (acc, p: string | Permission) => {
                 const permName = typeof p === "object" ? p.nama : p;
                 const masterData = allowedPermissionsMaster.find(
                   (m) => m.nama === permName,
@@ -355,7 +304,7 @@ export default function RolesPage() {
 
                     {isExpanded && (
                       <div className="flex flex-wrap gap-2 mt-3 p-4 bg-[#0A2947]/5 rounded-xl border border-[#0A2947]/10">
-                        {safeRolePerms.map((p: any, pIndex: number) => {
+                        {safeRolePerms.map((p: string | Permission, pIndex: number) => {
                           const permName = typeof p === "object" ? p.nama : p;
                           const permKey =
                             typeof p === "object" ? p.id || p.id || p.nama : p;

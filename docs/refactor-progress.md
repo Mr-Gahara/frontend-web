@@ -156,8 +156,8 @@ tercatat tidak lagi diperiksa, atau bentuk respons berbeda dari tipe.
 | Modul | Commit | Status |
 |---|---|---|
 | Pengguna | `7275d14` | Selesai |
-| Role | - | **Berikutnya** |
-| Produk dan kategori | - | Belum |
+| Role | (commit modul ini) | Selesai |
+| Produk dan kategori | - | **Berikutnya** |
 | Inventaris (stok, jurnal, opname) | - | Belum |
 | Penjualan dan pembayaran | - | Belum |
 | Reservasi | - | Belum |
@@ -231,7 +231,7 @@ queryKeys.produk.detail(id)     // ["produk", "detail", id]
 ```
 
 ### `features/<modul>/`
-Pola yang sudah terbukti di bahan baku dan pengguna:
+Pola yang sudah terbukti di bahan baku, pengguna, dan role:
 
 - `api.ts` — pemanggilan endpoint memakai `apiData` dan `EP`
 - `hooks.ts` — `useQuery` dan `useMutation`, termasuk aturan invalidasi
@@ -245,7 +245,7 @@ Isi tiap `features/` yang sudah ada:
 | `bahan-baku` | `api.ts`, `hooks.ts`, `schema.ts` | Modul percontohan Fase 2 |
 | `inventaris` | `api.ts`, `hooks.ts` | Lintas halaman inventaris; memuat `useLokasiBertipe` dan `useDaftarInventory` |
 | `pengguna` | `api.ts`, `hooks.ts`, `halaman-pengguna.tsx` | Komponen halaman dipakai outlet dan gudang |
-| `role` | `api.ts`, `hooks.ts` | Memuat `useDaftarRole`, `useRole`, `useDaftarPermission`, `useSimpanRole`, `useHapusRole`, `useLevelPenggunaAktif`; halamannya belum dimigrasikan |
+| `role` | `api.ts`, `hooks.ts`, `constants.ts`, `form-role.tsx` | `form-role.tsx` dipakai halaman edit dan kostum; `useLevelPenggunaAktif` dipakai lintas modul |
 
 Cara memeriksa apakah sebuah modul sudah dimigrasikan: ada folder
 `features/<modul>/`, dan halamannya tidak lagi memanggil `apiClient`.
@@ -261,7 +261,7 @@ Cara memeriksa apakah sebuah modul sudah dimigrasikan: ada folder
 
 ## 4. Langkah migrasi satu modul
 
-Urutan yang dipakai pada bahan baku dan pengguna, dan terbukti menjaga
+Urutan yang dipakai pada bahan baku, pengguna, dan role, dan terbukti menjaga
 `tsc` tetap hijau di tiap langkah:
 
 1. **Petakan keadaan.** Hitung baris tiap berkas, cari pemakaian `apiClient`,
@@ -319,6 +319,11 @@ sulit dibaca daripada dua berkas terpisah. Dalam hal itu, cukup bagikan lapisan
 4. **Field yang dipakai service tetapi tidak ada di validator** harus diperiksa sebelum dihapus dari payload (lihat `docs/kontrak-api.md` bagian 1, butir keterbatasan).
 5. **Bug backend tidak diperbaiki dari sini.** Frontend menyesuaikan diri, lalu temuan ditulis untuk tim backend setelah commit bersih.
 6. **Setiap tahap harus hijau dan bisa di-commit.** Tipe dan pemakaiannya berubah dalam satu commit.
+7. **Satu prop untuk satu tujuan.** Pada komponen bersama, jangan memakai satu
+   nilai untuk dua maksud yang kebetulan sama di salah satu mode. Pada modul
+   role, `urlKembali` sempat dipakai sebagai tujuan tombol kembali sekaligus
+   tujuan setelah menyimpan, sehingga halaman kostum kembali ke pilih template
+   alih-alih ke daftar posisi.
 
 ---
 
@@ -326,13 +331,13 @@ sulit dibaca daripada dua berkas terpisah. Dalam hal itu, cukup bagikan lapisan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 
-| Hal | Jumlah awal | Catatan |
-|---|---|---|
-| Pemakaian `any` | 302 | Berkurang tiap modul yang dimigrasikan |
-| Pola `id \|\| _id` | 90 | Hilang saat tipe modul diperbaiki |
-| `useAuthGuard()` berulang di halaman | 49 | Belum disentuh; rencananya dipindah ke layout |
-| Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | Ditunda ke tahap desain token tersendiri |
-| Berkas di atas 700 baris | 7 | Berkurang lewat pemindahan ke `features/` |
+| Hal | Awal | Setelah modul role | Catatan |
+|---|---|---|---|
+| Pemakaian `any` | 302 | 134 | Berkurang tiap modul yang dimigrasikan |
+| Kemunculan `_id` | - | 169 | Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id || _id` |
+| `useAuthGuard()` berulang di halaman | 49 | 48 | Belum disentuh; rencananya dipindah ke layout |
+| Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
+| Berkas di atas 700 baris | 7 | 8 | Bertambah karena berkas lain tumbuh; berkurang saat modulnya dimigrasikan |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
@@ -434,8 +439,8 @@ Suite e2e penuh memakan 8 sampai 12 menit karena berjalan dengan satu worker
 dan memakai backend sungguhan. Untuk pekerjaan sehari-hari cukup jalankan spec
 modul yang sedang dikerjakan.
 
-**Baseline per commit `7275d14`**: 76 test unit dan integrasi lolos,
-136 e2e lolos, 3 skipped (test.fixme yang menunggu backend). Angka ini
+**Baseline per modul role**: 76 test unit dan integrasi lolos,
+143 e2e lolos, 3 skipped (test.fixme yang menunggu backend). Angka ini
 pembanding untuk memastikan tidak ada yang hilang diam-diam.
 
 ### Menelusuri kegagalan e2e
@@ -498,6 +503,58 @@ Konteks proyek dibagikan dengan menjalankan perintah terminal dan menempel
 outputnya, bukan dengan mengunggah berkas. Karena itu setiap perintah harus
 ringkas outputnya: batasi jumlah baris, potong lebar dengan `cut -c1-110`,
 dan hindari pager.
+
+### Urutan debug kegagalan e2e
+
+Urutan ini terbukti paling cepat; melompatinya justru memperlama.
+
+1. **Apakah request-nya terkirim?** Ambil trace jaringan lebih dulu. Ini
+   memisahkan masalah UI dari masalah data, dan sering langsung menjawab.
+2. **Bila tidak terkirim**: cari yang menghalangi, yaitu validasi form,
+   tombol yang disabled, atau selector yang salah.
+3. **Bila terkirim dan berhasil**: masalahnya di assertion atau di waktu.
+
+Pola kegagalan yang berulang:
+
+| Gejala | Penyebab yang paling sering |
+|---|---|
+| Timeout menunggu elemen | Selector tebakan; ambil teks sebenarnya dari kode komponen |
+| Request tidak terkirim sama sekali | Validasi menahan submit, atau tombol disabled |
+| Request berhasil tetapi UI tidak berubah | Balapan dengan pemuatan ulang daftar |
+| Lolos sendirian, gagal saat diulang | Elemen yang sempat disabled, atau data menumpuk |
+
+Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena
+tombol hapus sempat disabled sampai daftar role selesai dimuat (level
+pengguna diturunkan dari daftar itu). Tiga dugaan sebelumnya keliru, dan
+satu di antaranya memperburuk keadaan. Trace jaringan menjawabnya dalam
+satu putaran.
+
+### Disiplin saat menerapkan perubahan
+
+Kesalahan yang pernah terjadi dan cara menghindarinya:
+
+- **Jangan mengubah test dua kali tanpa bukti baru.** Bila perbaikan
+  pertama tidak menolong, ambil bukti sebelum mencoba yang kedua.
+- **Kembalikan perubahan yang memperburuk, segera.** Menumpuk perbaikan di
+  atas perubahan yang salah membuat penyebabnya makin sulit dikenali.
+- **Verifikasi keadaan akhir, bukan keluaran `OK` dari skrip.** Sebuah skrip
+  dapat melaporkan berhasil padahal tidak mengubah apa pun; periksa
+  berkasnya dengan grep atau sed.
+- **Ambil selector dari kode komponen sebelum menulis spec**, bukan
+  menebaknya. Satu perintah grep untuk teks tombol, label, dan placeholder
+  menghemat banyak putaran.
+- **Tulis spec untuk alur yang akan diubah sebelum migrasi selesai.** Bug
+  navigasi pada modul role baru ketahuan berjam-jam setelah kodenya jadi.
+- **Blok perintah dijaga pendek dan bertujuan tunggal.** Blok panjang
+  kadang tertempel dua kali atau terpotong di terminal, dan kegagalannya
+  tidak selalu terlihat.
+- **Untuk blok besar, ganti berbasis nomor baris**, dengan memeriksa isi
+  baris sebagai pengaman. Pencocokan teks panjang mudah gagal hanya karena
+  indentasi meleset dua spasi.
+- **Hindari skrip pembersih otomatis berbasis keluaran ESLint.** Dua kali
+  dicoba dan dua kali gagal (escaping regex berlapis, lalu execSync yang
+  melempar saat ESLint keluar dengan kode bukan nol). Membaca daftarnya
+  lalu mengganti blok import secara langsung lebih cepat dan pasti.
 
 ### Kapan berhenti dan bertanya
 
@@ -638,56 +695,56 @@ Bila dokumen ini mulai terasa panjang, pecah bagian 7 menjadi berkas tersendiri
 hanya demi keringkasan: dokumen ini menggantikan ingatan, dan bagian yang
 dibuang akan menjadi pertanyaan berulang di sesi berikutnya.
 
-## 12. Pekerjaan berikutnya: modul role
+## 12. Pekerjaan berikutnya: modul produk dan kategori
 
-Empat berkas. Hitung ulang jumlah barisnya sebelum mulai, karena angka di
-bawah diambil sebelum migrasi tipe pada commit `7275d14`:
+Empat berkas, 2.350 baris. Dua di antaranya adalah berkas terbesar di
+seluruh proyek.
 
 | Berkas | Baris | Isi |
 |---|---|---|
-| `roles/page.tsx` | 416 | Daftar role |
-| `roles/buatRole/page.tsx` | 263 | Pilih template role |
-| `roles/buatRole/kostum/page.tsx` | 530 | Form role baru |
-| `roles/[id]/edit/page.tsx` | 584 | Form edit role |
+| `produk/page.tsx` | 316 | Daftar produk |
+| `produk/buatProduk/page.tsx` | 755 | Form produk baru |
+| `produk/[id]/edit/page.tsx` | 879 | Form edit produk |
+| `kategori/page.tsx` | 400 | Daftar dan kelola kategori |
 
 ### Temuan awal
 
-Halaman **edit** dan **kostum** identik sekitar dua pertiga (187 baris berbeda
-dari 584 dan 530). Yang membedakan:
-
-| Aspek | Edit | Kostum |
-|---|---|---|
-| Data awal | `GET /role/:id` | Konstanta `BASIC_PERMISSIONS` |
-| Mutation | PUT | POST |
-| Permission terlarang | `RESTRICTED_PERMS` disaring dari tampilan, tetapi dipertahankan saat menyimpan lewat `hiddenExistingPerms` | Tidak ada |
-| Dialog wewenang dasar | Tidak ada | Ada |
-| Judul, tombol kembali, pesan | Berbeda | Berbeda |
-| JSX form dan daftar permission | Sama | Sama |
-
-### Rencana
-
-1. `features/role/form-role.tsx` sebagai komponen bersama, menerima judul, `roleId` opsional, nilai awal, izin awal terpilih, dan penanganan permission tersembunyi.
-2. Halaman edit dan kostum menjadi pemanggil tipis, seperti halaman pengguna.
-3. `roles/page.tsx` dan `buatRole/page.tsx` memakai hooks dari `features/role/hooks.ts` yang sudah ada.
+- Halaman **buat** dan **edit** produk berbeda 292 baris dari total 1.634,
+  jadi sekitar 82 persen isinya sama. Keduanya kandidat kuat untuk komponen
+  form bersama, dengan pola yang sama seperti `form-role.tsx`.
+- Tersisa 37 kemunculan `apiClient`, `any`, dan `_id` di keempat berkas.
+- Tidak ada folder `components/produk/`, sehingga seluruh UI ada di halaman.
+- `features/bahan-baku` sudah ada dan dipakai form produk untuk resep, jadi
+  periksa dulu apa yang bisa dipakai ulang sebelum menulis yang baru.
 
 ### Yang harus hati-hati
 
-`RESTRICTED_PERMS` dan `hiddenExistingPerms` bukan sekadar tampilan: permission
-terlarang yang sudah dimiliki sebuah role **harus ikut terkirim saat menyimpan**,
-kalau tidak, izin itu hilang diam-diam. Pastikan perilaku ini terjaga di
-komponen bersama, dan tambahkan skenario e2e yang memverifikasinya.
-
-Belum ada spec e2e untuk modul role.
+- **Resep produk** menyimpan daftar bahan baku beserta takarannya. Kontrak
+  menyebut `resep` sebagai field opsional pada `POST /produk`, dan bentuk
+  itemnya perlu dipastikan dari `docs/kontrak-api.md` bagian 3.3 sebelum
+  menulis tipenya.
+- **`isUnlimitedStok` dan resep saling terkait**: produk dengan resep tidak
+  dapat ditandai stok tak terbatas. Aturan ini sudah diperbaiki pada Fase 0
+  dan harus tetap terjaga.
+- **Produk memakai `_id` pada respons** (kontrak bagian 3.3), sehingga tipenya
+  perlu diperbaiki lebih dulu seperti pada modul lain.
+- **Pajak produk** dikelola lewat endpoint terpisah (`/produkpajak`), yang
+  tidak memeriksa izin sama sekali di backend.
 
 ### Spec rujukan
 
 Untuk meniru pola penulisan test, lihat:
 
-- `tests/e2e/pengguna/crud-pengguna.spec.ts` — helper `login`,
-  `bersihkanPengguna`, pencarian tabel sebelum memeriksa baris, dan skenario
-  lintas ruang kerja
+- `tests/e2e/roles/crud-role.spec.ts` — komponen form bersama dengan dua mode,
+  helper `kartuRole` untuk menemukan kartu beserta tombol aksinya, dan
+  menunggu tombol siap sebelum mengklik
+- `tests/e2e/pengguna/crud-pengguna.spec.ts` — pencarian tabel sebelum
+  memeriksa baris, dan skenario lintas ruang kerja
 - `tests/e2e/inventaris/bahanBaku/crud-bahan-baku.spec.ts` — alur lengkap
   tambah, cari, edit, hapus dalam satu test dengan `test.step`
+
+Spec produk yang sudah ada: `tests/e2e/inventaris/produk/`. Periksa dulu apa
+yang sudah tercakup sebelum menambah skenario.
 
 Catatan: `tests/helpers/storage.ts` masih membaca `sessionStorage` dan sudah
 tidak relevan sejak token dipindah ke memori. Berkas itu belum dibersihkan.
