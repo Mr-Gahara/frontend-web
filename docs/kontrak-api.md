@@ -21,6 +21,7 @@ Bagian 3 sampai 5 dan Lampiran A dibangkitkan dari bukti, bukan ditulis tangan:
 Keterbatasan:
 
 - Validasi yang hanya ada di service tidak tertangkap; operasi seperti itu tercatat memakai skema model.
+- Daftar field pada bagian 4 berasal dari validator, sedangkan validator hanya memeriksa dan tidak membuang field lain. Service dapat memakai field di luar daftar itu, seperti `locationID` pada `POST /bahanbaku`. Sebelum sebuah field dihapus dari payload frontend, periksa dulu pemakaiannya di service.
 - Bentuk respons operasi tulis tidak diambil dengan memanggil endpoint, agar data tidak berubah.
 - Dokumen ini berlaku untuk commit acuan di atas. Bila backend berubah, bagian 3 sampai 5 dan Lampiran A perlu dibangkitkan ulang.
 
@@ -551,6 +552,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validateBahanBakuPayload (validators/bahanBakuValidator.js)
 - Wajib dari klien: `namaBahan`
 - Field lain yang dikenali: `satuan`, `stok`
+- Tidak diperiksa validator tetapi dipakai service: `locationID` (lokasi tujuan injeksi stok awal; tanpa ini backend memakai lokasi default tenant)
 - Nilai sah: `VALID_UNITS`: kg, gram, liter, ml, pcs, pak, unit
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
@@ -787,6 +789,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validateBahanBakuPayload (validators/bahanBakuValidator.js)
 - Wajib dari klien: `namaBahan`
 - Field lain yang dikenali: `satuan`, `stok`
+- Tidak diperiksa validator tetapi dipakai service: `locationID` (lokasi tujuan injeksi stok awal; tanpa ini backend memakai lokasi default tenant)
 - Nilai sah: `VALID_UNITS`: kg, gram, liter, ml, pcs, pak, unit
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
