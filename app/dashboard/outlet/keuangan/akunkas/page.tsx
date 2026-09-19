@@ -45,7 +45,7 @@ export default function AkunKasPage() {
   useAuthGuard();
 
   const { data: akunKasList = [], isLoading } = useQuery({
-    queryKey: queryKeys.akunKas,
+    queryKey: queryKeys.akunKas.semua,
     queryFn: async (): Promise<AkunKas[]> => {
       const res = await apiClient.get<{ data: AkunKas[] } | AkunKas[]>(
         "/akunkas",

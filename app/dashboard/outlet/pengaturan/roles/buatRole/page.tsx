@@ -44,7 +44,7 @@ export default function BuatRolePage() {
   // QUERY: MASTER PERMISSION
   const { data: allPermissions = [], isLoading: permissionsLoading } = useQuery(
     {
-      queryKey: queryKeys.permissions,
+      queryKey: queryKeys.permissions.semua,
       queryFn: async () => {
         const res = await apiClient.get<GetPermissionsResponse>(
           "/permission",
@@ -84,7 +84,7 @@ export default function BuatRolePage() {
       toast.success("Posisi berhasil dibuat", {
         description: `Posisi "${template.namaRole}" telah ditambahkan dari template.`,
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.roles });
+      queryClient.invalidateQueries({ queryKey: queryKeys.roles.semua });
       router.push("/dashboard/outlet/pengaturan/roles");
     },
     onError: (err: any, template) => {

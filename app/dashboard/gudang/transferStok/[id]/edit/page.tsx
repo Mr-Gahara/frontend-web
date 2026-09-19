@@ -41,7 +41,7 @@ export default function EditTransferStokGudangPage({
 
   // --- Queries ---
   const { data: detail, isLoading } = useQuery({
-    queryKey: queryKeys.transferStokDetail(id),
+    queryKey: queryKeys.transferStok.detail(id),
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/transferStok/${id}`,
@@ -96,9 +96,9 @@ export default function EditTransferStokGudangPage({
       toast.success("Revisi Berhasil", {
         description: "Kuantitas Surat Jalan telah diperbarui.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.transferStok() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.transferStok.daftar() });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.transferStokDetail(id),
+        queryKey: queryKeys.transferStok.detail(id),
       });
       router.push(`/dashboard/gudang/transferStok/${id}`);
     },

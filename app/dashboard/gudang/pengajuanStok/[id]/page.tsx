@@ -102,7 +102,7 @@ export default function DetailPengajuanStokGudangPage({
 
   // --- Queries ---
   const { data: detail, isLoading } = useQuery({
-    queryKey: queryKeys.pengajuanStokDetail(id),
+    queryKey: queryKeys.pengajuanStok.detail(id),
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/pengajuanStok/${id}`,
@@ -128,16 +128,16 @@ export default function DetailPengajuanStokGudangPage({
         description:
           res.message || "Dokumen siap diproses ke tahap Surat Jalan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.daftar() });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.pengajuanStokDetail(id),
+        queryKey: queryKeys.pengajuanStok.detail(id),
       });
       setShowConfirmApprove(false);
     },
     onError: (err: any) => {
       toast.error("Gagal Menyetujui", { description: err.message });
       setShowConfirmApprove(false);
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStokDetail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.detail(id) });
     },
   });
 
@@ -155,9 +155,9 @@ export default function DetailPengajuanStokGudangPage({
       toast.success("Pengajuan Ditolak", {
         description: "Penolakan dan alasannya telah dikirim ke Outlet.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.daftar() });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.pengajuanStokDetail(id),
+        queryKey: queryKeys.pengajuanStok.detail(id),
       });
       setShowRejectModal(false);
       setAlasanTolak("");
@@ -186,7 +186,7 @@ export default function DetailPengajuanStokGudangPage({
         description: "Draft pengiriman telah disiapkan.",
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.pengajuanStokDetail(id),
+        queryKey: queryKeys.pengajuanStok.detail(id),
       });
 
       // Auto-redirect ke laman Surat Jalan yang baru terbentuk

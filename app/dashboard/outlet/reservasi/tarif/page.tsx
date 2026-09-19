@@ -60,7 +60,7 @@ export default function DaftarTarifPage() {
     isLoading,
     isError,
   } = useQuery<Tarif[]>({
-    queryKey: queryKeys.tarif,
+    queryKey: queryKeys.tarif.semua,
     queryFn: async () => {
       const res = await apiClient.get<{ data: Tarif[] }>(
         "/tarif",
@@ -78,7 +78,7 @@ export default function DaftarTarifPage() {
     },
     onSuccess: () => {
       toast.success("Tarif Berhasil Dihapus");
-      queryClient.invalidateQueries({ queryKey: queryKeys.tarif });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tarif.semua });
       setDeleteModalOpen(false);
       setSelectedTarifId(null);
     },

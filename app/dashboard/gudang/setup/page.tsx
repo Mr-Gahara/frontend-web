@@ -63,7 +63,7 @@ export default function GudangSetupPage() {
         description: "Sistem WMS Anda kini siap digunakan.",
       });
       // INVALIDASI CACHE LOKASI
-      queryClient.invalidateQueries({ queryKey: queryKeys.lokasi });
+      queryClient.invalidateQueries({ queryKey: queryKeys.lokasi.semua });
       
       // Tendang ke halaman utama gudang
       router.replace("/dashboard/gudang");

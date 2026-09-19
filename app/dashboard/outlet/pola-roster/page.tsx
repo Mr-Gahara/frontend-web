@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { queryKeys } from "@/lib/queryKeys";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import PolaUtama from "@/components/pola-roster/pola-utama";
@@ -25,7 +26,7 @@ export default function PolaRosterOutletPage() {
     isLoading: loadPola,
     isError: errPola,
   } = useQuery({
-    queryKey: ["pola-roster", "outlet"],
+    queryKey: queryKeys.polaRoster.daftar({ workspace: "outlet" }),
     queryFn: () =>
       apiClient.get<{ data: any[] }>(
         "/polaRoster?workspace=outlet",
@@ -40,7 +41,7 @@ export default function PolaRosterOutletPage() {
     isLoading: loadShift,
     isError: errShift,
   } = useQuery({
-    queryKey: ["shift", "aktif", "outlet"],
+    queryKey: queryKeys.shift.daftar({ status: "Aktif", workspace: "outlet" }),
     queryFn: () =>
       apiClient.get<{ data: any[] }>(
         "/shift?status=Aktif&workspace=outlet",
@@ -136,7 +137,7 @@ export default function PolaRosterOutletPage() {
         description: `Pola Roster berhasil ${variables.id ? "diperbarui" : "ditambahkan"}.`,
       });
       // Memaksa tabel refresh secara instan
-      queryClient.invalidateQueries({ queryKey: ["pola-roster"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.polaRoster.semua });
     },
     onError: (err: any) => {
       toast.error("Gagal Menyimpan", {
@@ -154,7 +155,7 @@ export default function PolaRosterOutletPage() {
       toast.success("Berhasil", {
         description: "Pola Roster berhasil dihapus.",
       });
-      queryClient.invalidateQueries({ queryKey: ["pola-roster"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.polaRoster.semua });
     },
     onError: (err: any) => {
       toast.error("Gagal Menghapus", {

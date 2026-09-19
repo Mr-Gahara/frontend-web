@@ -48,7 +48,7 @@ export default function PenerimaanBarangOutletPage() {
   // --- Queries ---
   // 1. Dapatkan ID Lokasi Outlet
   const { data: outletId, isLoading: isLoadingLokasi } = useQuery({
-    queryKey: ["lokasi", "outlet-only"],
+    queryKey: queryKeys.lokasi.daftar({ tipe: "Outlet" }),
     queryFn: async () => {
       try {
         const res = await apiClient.get<any>("/location", undefined, "pengguna");
@@ -66,7 +66,7 @@ export default function PenerimaanBarangOutletPage() {
 
   // 2. Fetch Seluruh Transfer Stok (Auto Polling tiap 30 detik untuk pantau truk)
   const { data: semuaTransfer = [], isLoading: isLoadingTransfers } = useQuery({
-    queryKey: queryKeys.transferStok(),
+    queryKey: queryKeys.transferStok.daftar(),
     queryFn: async () => {
       const res = await apiClient.get<any>("/transferStok", undefined, "pengguna");
       const raw = res.data?.data || res.data || [];

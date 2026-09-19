@@ -66,7 +66,7 @@ export default function EksekusiPenerimaanBarangPage({
 
   // --- Queries ---
   const { data: detail, isLoading } = useQuery({
-    queryKey: [...queryKeys.transferStok(), "detail", id],
+    queryKey: [...queryKeys.transferStok.daftar(), "detail", id],
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/transferStok/${id}`,
@@ -165,10 +165,10 @@ export default function EksekusiPenerimaanBarangPage({
           "Stok Outlet telah diperbarui dan Jurnal Stok telah dicatat.",
       });
       // Invalidate semua data terkait WMS
-      queryClient.invalidateQueries({ queryKey: queryKeys.transferStok() });
-      queryClient.invalidateQueries({ queryKey: ["inventory"] });
-      queryClient.invalidateQueries({ queryKey: ["jurnalStok"] });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.transferStok.daftar() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.semua });
+      queryClient.invalidateQueries({ queryKey: queryKeys.jurnalStok.semua });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.daftar() });
 
       router.push("/dashboard/outlet/inventaris/penerimaanBarang");
     },

@@ -65,7 +65,7 @@ export default function StokInventoryPage() {
   // --- Queries ---
   // Fetch Lokasi (Khusus Outlet)
   const { data: lokasiList = [], isLoading: isLoadingLokasi } = useQuery({
-    queryKey: ["lokasi", "outlet-only"],
+    queryKey: queryKeys.lokasi.daftar({ tipe: "Outlet" }),
     queryFn: async () => {
       try {
         const res = await apiClient.get<any>(
@@ -85,7 +85,7 @@ export default function StokInventoryPage() {
 
   // Fetch Inventory List
   const { data: inventoryData = [], isLoading: isLoadingInventory } = useQuery({
-    queryKey: [...queryKeys.inventory(), debouncedSearch, selectedLocation],
+    queryKey: [...queryKeys.inventory.daftar(), debouncedSearch, selectedLocation],
     queryFn: async () => {
       const params: Record<string, string> = {};
       if (debouncedSearch) params.search = debouncedSearch;
@@ -132,7 +132,7 @@ export default function StokInventoryPage() {
       toast.success("Berhasil", {
         description: "Batas minimum stok diperbarui.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar() });
       setMinStockModal({ isOpen: false, data: null, inputValue: "" });
     },
     onError: (err: any) => {
@@ -159,7 +159,7 @@ export default function StokInventoryPage() {
       toast.success("Opname Berhasil", {
         description: "Stok fisik telah disesuaikan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar() });
       setOpnameModal({
         isOpen: false,
         data: null,

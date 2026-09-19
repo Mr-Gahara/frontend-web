@@ -135,7 +135,7 @@ export default function EditTarifPage() {
     isLoading: isLoadingTarif,
     isError: isErrorTarif,
   } = useQuery({
-    queryKey: queryKeys.tarifDetail(tarifId!),
+    queryKey: queryKeys.tarif.detail(tarifId!),
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/tarif/${tarifId}`,
@@ -174,7 +174,7 @@ export default function EditTarifPage() {
   const { data: tipeAsetList = [], isLoading: isLoadingAset } = useQuery<
     TipeAsetRef[]
   >({
-    queryKey: queryKeys.tipeAset,
+    queryKey: queryKeys.tipeAset.semua,
     queryFn: async () => {
       const res = await apiClient.get<{ data: TipeAsetRef[] }>(
         "/tipeAset",
@@ -200,7 +200,7 @@ export default function EditTarifPage() {
       toast.success("Berhasil Diperbarui", {
         description: "Perubahan data tarif telah tersimpan di sistem.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tarif });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tarif.semua });
       router.push("/dashboard/outlet/reservasi/tarif");
     },
     onError: (error: any) => {

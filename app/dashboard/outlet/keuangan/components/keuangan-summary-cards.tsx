@@ -44,8 +44,8 @@ function SummaryCardItem({ card }: { card: SummaryCard }) {
   // 1. Tentukan Query Key berdasarkan sumber data
   const dynamicQueryKey =
     card.source === "laporan"
-      ? [...queryKeys.laporanLabaRugi({ periode: "bulanan" }), startBulan, endBulan]
-      : [...queryKeys.akunKas, "summary-total"];
+      ? [...queryKeys.laporan.labaRugi({ periode: "bulanan" }), startBulan, endBulan]
+      : [...queryKeys.akunKas.semua, "summary-total"];
 
   // 2. FETCH DATA MENTAH (Simpan Array ke Cache, bukan hasil jumlahnya)
   const { data: rawData } = useQuery({

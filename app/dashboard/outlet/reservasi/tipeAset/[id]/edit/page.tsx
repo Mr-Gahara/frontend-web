@@ -68,7 +68,7 @@ export default function EditTipeAsetPage() {
     isLoading: isLoadingTipeAset,
     isError: isErrorTipeAset,
   } = useQuery({
-    queryKey: [...queryKeys.tipeAset, tipeAsetId],
+    queryKey: [...queryKeys.tipeAset.semua, tipeAsetId],
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/tipeAset/${tipeAsetId}`,
@@ -104,7 +104,7 @@ export default function EditTipeAsetPage() {
       toast.success("Berhasil Diperbarui", {
         description: "Perubahan Tipe Aset telah tersimpan di sistem.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tipeAset });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tipeAset.semua });
       router.push("/dashboard/outlet/reservasi/tipeAset");
     },
     onError: (err: any) => {

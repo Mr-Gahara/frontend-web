@@ -63,7 +63,7 @@ export default function BuatTipeAsetPage() {
       toast.success("Berhasil", {
         description: "Kategori Aset baru berhasil ditambahkan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tipeAset });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tipeAset.semua });
       router.push("/dashboard/outlet/reservasi/tipeAset");
     },
     onError: (err: any) => {

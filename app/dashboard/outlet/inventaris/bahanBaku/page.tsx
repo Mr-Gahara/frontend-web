@@ -50,7 +50,7 @@ export default function DaftarBahanBakuPage() {
 
   // --- FETCH LOKASI OUTLET ---
   const { data: outletId, isLoading: isLoadingLokasi } = useQuery({
-    queryKey: ["lokasi", "outlet-only"],
+    queryKey: queryKeys.lokasi.daftar({ tipe: "Outlet" }),
     queryFn: async () => {
       try {
         const res = await apiClient.get<any>("/location", undefined, "pengguna");
@@ -74,7 +74,7 @@ export default function DaftarBahanBakuPage() {
     isLoading: isLoadingInventory,
     isError,
   } = useQuery({
-    queryKey: [...queryKeys.inventory(outletId || "outlet"), debouncedSearch],
+    queryKey: [...queryKeys.inventory.daftar(outletId || "outlet"), debouncedSearch],
     queryFn: async () => {
       const params: Record<string, string> = { 
         locationID: outletId,
@@ -101,8 +101,8 @@ export default function DaftarBahanBakuPage() {
       toast.success("Berhasil Dihapus", {
         description: "Data bahan baku telah dihapus dari sistem.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory(outletId || "outlet") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku.semua });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar(outletId || "outlet") });
       setDeleteModalOpen(false);
       setSelectedBahanId(null);
     },

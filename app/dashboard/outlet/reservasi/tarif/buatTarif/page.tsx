@@ -127,7 +127,7 @@ export default function BuatTarifPage() {
     isLoading: isLoadingAset,
     isError: isErrorAset,
   } = useQuery<TipeAsetRef[]>({
-    queryKey: queryKeys.tipeAset,
+    queryKey: queryKeys.tipeAset.semua,
     queryFn: async () => {
       const res = await apiClient.get<{ data: TipeAsetRef[] }>(
         "/tipeAset",
@@ -147,7 +147,7 @@ export default function BuatTarifPage() {
       toast.success("Tarif Berhasil Dibuat", {
         description: "Data tarif baru telah tersimpan di sistem.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tarif });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tarif.semua });
       router.push("/dashboard/outlet/reservasi/tarif");
     },
     onError: (error: any) => {

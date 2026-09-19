@@ -30,7 +30,7 @@ export default function StockAdjustmentListPage() {
   // PERBAIKAN: Tambahkan explicit type <StockAdjustment[]> agar DataTable tidak error
   const { data: adjustmentList = [], isLoading } = useQuery<StockAdjustment[]>({
     // PERBAIKAN: Panggil fungsinya dengan tanda kurung ()
-    queryKey: queryKeys.stockAdjustment(),
+    queryKey: queryKeys.stockAdjustment.daftar(),
     queryFn: async () => {
       const res = await apiClient.get<any>("/stockopname/adjustments", undefined, "pengguna");
       const fetched = res.data?.data || res.data || [];

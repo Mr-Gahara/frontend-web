@@ -52,7 +52,7 @@ export default function TipeAsetPage() {
     isLoading,
     isError,
   } = useQuery<TipeAset[]>({
-    queryKey: queryKeys.tipeAset,
+    queryKey: queryKeys.tipeAset.semua,
     queryFn: async () => {
       const res = await apiClient.get<{ data: TipeAset[] }>(
         "/tipeAset",
@@ -72,7 +72,7 @@ export default function TipeAsetPage() {
       toast.success("Dihapus", {
         description: "Data Tipe Aset berhasil dihapus.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tipeAset });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tipeAset.semua });
       setIsDeleteModalOpen(false);
       setSelectedTipeAset(null);
     },

@@ -60,7 +60,7 @@ export default function MetodePembayaranListPage() {
 
   // 1. FETCH DATA METODE
   const { data = [], isLoading: loadingMetode, error } = useQuery({
-    queryKey: queryKeys.metodePembayaran || ["metode-pembayaran"],
+    queryKey: queryKeys.metodePembayaran.semua || ["metode-pembayaran"],
     queryFn: async (): Promise<MetodePembayaran[]> => {
       try {
         const res = await apiClient.get<any>("/metodepembayaran", undefined, "pengguna");
@@ -74,7 +74,7 @@ export default function MetodePembayaranListPage() {
 
   // 2. [PERBAIKAN BUG]: FETCH MASTER AKUN KAS UNTUK MENCOCOKKAN NAMA DI TABEL
   const { data: akunKasList = [], isLoading: loadingAkun } = useQuery({
-    queryKey: queryKeys.akunKas,
+    queryKey: queryKeys.akunKas.semua,
     queryFn: async (): Promise<AkunKas[]> => {
       try {
         const res = await apiClient.get<any>("/akunkas", undefined, "pengguna");
@@ -93,7 +93,7 @@ export default function MetodePembayaranListPage() {
     mutationFn: async (id: string) => await apiClient.delete(`/metodepembayaran/${id}`, undefined, "pengguna"),
     onSuccess: () => {
       toast.success("Berhasil", { description: "Metode pembayaran telah dihapus dari sistem." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.metodePembayaran || ["metode-pembayaran"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.metodePembayaran.semua || ["metode-pembayaran"] });
       setDeleteTarget(null);
     },
     onError: (err: any) => toast.error("Gagal Menghapus", { description: err.message || "Gagal menghapus metode." }),

@@ -43,7 +43,7 @@ export default function EditMetodePembayaranPage() {
 
   // 1. FETCH DETAIL DATA METODE UNTUK EDIT
   const { data: metode, isLoading: loadingMetode } = useQuery({
-    queryKey: [...(queryKeys.metodePembayaran || ["metode-pembayaran"]), id],
+    queryKey: [...(queryKeys.metodePembayaran.semua || ["metode-pembayaran"]), id],
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/metodepembayaran/${id}`,
@@ -56,7 +56,7 @@ export default function EditMetodePembayaranPage() {
 
   // 2. FETCH MASTER AKUN KAS (UNTUK DROPDOWN OPTIONS)
   const { data: akunKasList = [], isLoading: loadingAkun } = useQuery({
-    queryKey: queryKeys.akunKas,
+    queryKey: queryKeys.akunKas.semua,
     queryFn: async (): Promise<AkunKas[]> => {
       try {
         const res = await apiClient.get<{ data: AkunKas[] } | AkunKas[]>(
@@ -139,7 +139,7 @@ export default function EditMetodePembayaranPage() {
         description: "Metode pembayaran telah diperbarui.",
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.metodePembayaran || ["metode-pembayaran"],
+        queryKey: queryKeys.metodePembayaran.semua || ["metode-pembayaran"],
       });
       router.push("/dashboard/outlet/pengaturan/metodePembayaran");
     },

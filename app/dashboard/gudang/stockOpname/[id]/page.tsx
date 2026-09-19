@@ -99,7 +99,7 @@ export default function StockOpnameGudangDetailPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: queryKeys.stockOpnameDetail(opnameID),
+    queryKey: queryKeys.stockOpname.detail(opnameID),
     queryFn: async () => {
       const res = await apiClient.get<any>(`/stockopname/${opnameID}`, undefined, "pengguna");
       return (res.data?.data || res.data) as StockOpname;
@@ -142,7 +142,7 @@ export default function StockOpnameGudangDetailPage() {
     },
     onSuccess: () => {
       toast.success("Tersimpan", { description: "Input stok fisik berhasil disimpan sementara." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname.daftar() });
     },
     onError: (err: any) => toast.error("Gagal menyimpan", { description: err.message }),
   });
@@ -159,7 +159,7 @@ export default function StockOpnameGudangDetailPage() {
     },
     onSuccess: () => {
       toast.success("Berhasil Diajukan", { description: "Sesi opname telah dikunci dan diajukan ke Kepala Gudang." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname.daftar() });
       setShowSubmitModal(false);
     },
     onError: (err: any) => toast.error("Gagal mengajukan", { description: err.message }),
@@ -177,7 +177,7 @@ export default function StockOpnameGudangDetailPage() {
     },
     onSuccess: () => {
       toast.success("Opname Disetujui", { description: "Penyesuaian stok berhasil dieksekusi oleh sistem." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname.daftar() });
       setShowApproveModal(false);
     },
     onError: (err: any) => toast.error("Gagal menyetujui", { description: err.message }),
@@ -195,7 +195,7 @@ export default function StockOpnameGudangDetailPage() {
     },
     onSuccess: () => {
       toast.success("Opname Ditolak", { description: "Sesi dikembalikan ke staf untuk direvisi." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname.daftar() });
       setShowRejectModal(false);
       setRejectCatatan("");
     },
@@ -214,7 +214,7 @@ export default function StockOpnameGudangDetailPage() {
     },
     onSuccess: () => {
       toast.success("Dibatalkan", { description: "Sesi opname gudang ini telah dibatalkan permanen." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname.daftar() });
       setShowCancelModal(false);
     },
     onError: (err: any) => toast.error("Gagal membatalkan", { description: err.message }),

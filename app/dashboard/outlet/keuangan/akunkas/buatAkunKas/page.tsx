@@ -79,7 +79,7 @@ export default function BuatAkunKasPage() {
       toast.success("Berhasil", {
         description: "Akun Kas baru telah ditambahkan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.akunKas });
+      queryClient.invalidateQueries({ queryKey: queryKeys.akunKas.semua });
       router.push("/dashboard/outlet/keuangan/akunkas");
     },
     onError: (err: any) => {

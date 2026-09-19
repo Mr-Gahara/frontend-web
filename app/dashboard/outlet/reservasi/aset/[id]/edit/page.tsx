@@ -83,7 +83,7 @@ function EditAsetForm({
       toast.success("Berhasil Diperbarui", {
         description: "Perubahan data aset telah tersimpan di sistem.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.aset });
+      queryClient.invalidateQueries({ queryKey: queryKeys.aset.semua });
       router.push("/dashboard/outlet/reservasi/aset");
     },
     onError: (err: any) => {
@@ -323,7 +323,7 @@ export default function EditAsetPage() {
     isLoading: isLoadingAset,
     isError: isErrorAset,
   } = useQuery({
-    queryKey: [...queryKeys.aset, asetId],
+    queryKey: [...queryKeys.aset.semua, asetId],
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/aset/${asetId}`,
@@ -338,7 +338,7 @@ export default function EditAsetPage() {
   const { data: tipeAsetList = [], isLoading: isLoadingTipeAset } = useQuery<
     TipeAset[]
   >({
-    queryKey: queryKeys.tipeAset,
+    queryKey: queryKeys.tipeAset.semua,
     queryFn: async () => {
       const res = await apiClient.get<{ data: any[] }>(
         "/tipeAset",

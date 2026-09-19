@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { queryKeys } from "@/lib/queryKeys";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import ShiftUtama from "@/components/shift/shift-utama";
@@ -16,7 +17,7 @@ export default function MasterShiftOutletPage() {
 
   // --- 1. FETCHING DATA (READ) ---
   const { data: resShift, isLoading } = useQuery({
-    queryKey: ["shift", "outlet"],
+    queryKey: queryKeys.shift.daftar({ workspace: "outlet" }),
     queryFn: async () => {
       // Kita panggil tanpa filter status agar tabel bisa menampilkan yang Aktif & Non-Aktif
       const res = await apiClient.get<{ data: any[] }>(
@@ -76,7 +77,7 @@ export default function MasterShiftOutletPage() {
         description: `Master shift berhasil ${variables.id ? "diperbarui" : "ditambahkan"}.`,
       });
       // Memaksa TanStack menarik data terbaru dari server
-      queryClient.invalidateQueries({ queryKey: ["shift"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.shift.semua });
     },
     onError: (err: any) => {
       toast.error("Gagal Menyimpan", {
@@ -96,7 +97,7 @@ export default function MasterShiftOutletPage() {
       toast.success("Berhasil", {
         description: "Shift berhasil dinonaktifkan dan diarsipkan.",
       });
-      queryClient.invalidateQueries({ queryKey: ["shift"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.shift.semua });
     },
     onError: (err: any) => {
       toast.error("Gagal Menonaktifkan", {

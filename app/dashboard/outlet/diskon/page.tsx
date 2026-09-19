@@ -89,7 +89,7 @@ export default function DiskonPage() {
     error,
   } = useQuery({
     queryKey: [
-      ...queryKeys.diskon,
+      ...queryKeys.diskon.semua,
       {
         status: filterStatus,
         cakupan: filterCakupan,
@@ -152,7 +152,7 @@ export default function DiskonPage() {
           : "Diskon berhasil ditambahkan.",
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.diskon,
+        queryKey: queryKeys.diskon.semua,
       });
       setShowDialog(false);
     },
@@ -170,7 +170,7 @@ export default function DiskonPage() {
         description: "Diskon berhasil dihapus.",
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.diskon,
+        queryKey: queryKeys.diskon.semua,
       });
       setDeleteTarget(null);
     },

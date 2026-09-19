@@ -48,7 +48,7 @@ export default function BuatMetodePembayaranPage() {
   });
 
   const { data: akunKasList = [], isLoading: loadingAkun } = useQuery({
-    queryKey: queryKeys.akunKas,
+    queryKey: queryKeys.akunKas.semua,
     queryFn: async (): Promise<AkunKas[]> => {
       try {
         const res = await apiClient.get<{ data: AkunKas[] } | AkunKas[]>("/akunkas", undefined, "pengguna");
@@ -67,7 +67,7 @@ export default function BuatMetodePembayaranPage() {
     mutationFn: async (data: MetodePembayaranRequest) => await apiClient.post("/metodepembayaran", data, undefined, "pengguna"),
     onSuccess: () => {
       toast.success("Berhasil", { description: "Metode pembayaran baru telah ditambahkan." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.metodePembayaran });
+      queryClient.invalidateQueries({ queryKey: queryKeys.metodePembayaran.semua });
       router.push("/dashboard/outlet/pengaturan/metodePembayaran");
     },
     onError: (err: any) => setFormError(err.message || "Gagal menyimpan metode pembayaran."),

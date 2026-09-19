@@ -40,7 +40,7 @@ export default function StockAdjustmentDetailPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: queryKeys.stockAdjustmentDetail(adjustmentID as string),
+    queryKey: queryKeys.stockAdjustment.detail(adjustmentID as string),
     queryFn: async () => {
       // FIX 1: Endpoint yang benar berdasarkan router backend Anda
       const res = await apiClient.get<any>(

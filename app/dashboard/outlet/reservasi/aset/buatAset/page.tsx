@@ -61,7 +61,7 @@ export default function BuatAsetPage() {
   const { data: tipeAsetList = [], isLoading: isLoadingTipeAset } = useQuery<
     TipeAsetRef[]
   >({
-    queryKey: queryKeys.tipeAset,
+    queryKey: queryKeys.tipeAset.semua,
     queryFn: async () => {
       const res = await apiClient.get<{ data: any[] }>(
         "/tipeAset",
@@ -82,7 +82,7 @@ export default function BuatAsetPage() {
       toast.success("Berhasil", {
         description: "Data aset baru telah ditambahkan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.aset });
+      queryClient.invalidateQueries({ queryKey: queryKeys.aset.semua });
       router.push("/dashboard/outlet/reservasi/aset");
     },
     onError: (err: any) => {

@@ -75,7 +75,7 @@ export default function PengajuanStokGudangPage() {
 
   // --- Queries ---
   const { data: daftarPengajuan = [], isLoading } = useQuery({
-    queryKey: queryKeys.pengajuanStok({
+    queryKey: queryKeys.pengajuanStok.daftar({
       status: activeTab !== "ALL" ? activeTab : undefined,
     }),
     queryFn: async () => {

@@ -77,7 +77,7 @@ export default function PelangganPage() {
     isLoading: pelangganLoading,
     error: pelangganError,
   } = useQuery({
-    queryKey: queryKeys.pelanggan,
+    queryKey: queryKeys.pelanggan.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>("/pelanggan", undefined, "pengguna");
       const fetchedData = res.data?.data || res.data || [];
@@ -113,7 +113,7 @@ export default function PelangganPage() {
     },
     onSuccess: () => {
       toast.success("Berhasil", { description: "Pelanggan baru berhasil ditambahkan." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pelanggan });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pelanggan.semua });
       setCreateForm(emptyForm);
       setShowConfirmCreate(false);
     },
@@ -129,7 +129,7 @@ export default function PelangganPage() {
     },
     onSuccess: () => {
       toast.success("Berhasil", { description: "Data pelanggan berhasil diperbarui." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pelanggan });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pelanggan.semua });
       setShowEditDialog(false);
     },
     onError: (err: any) => {
@@ -202,7 +202,7 @@ export default function PelangganPage() {
       const targetId = (deleteTarget as any)._id || (deleteTarget as any).id;
       await apiClient.delete(`/pelanggan/${targetId}`, undefined, "pengguna");
       toast.success("Berhasil", { description: "Pelanggan berhasil dihapus." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pelanggan });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pelanggan.semua });
       setDeleteTarget(null);
     } catch (err: any) {
       toast.error("Gagal", {

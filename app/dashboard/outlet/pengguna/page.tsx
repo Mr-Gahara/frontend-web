@@ -75,7 +75,7 @@ export default function PenggunaPage() {
     isLoading: penggunaLoading,
     error: penggunaError,
   } = useQuery({
-    queryKey: queryKeys.pengguna("outlet"),
+    queryKey: queryKeys.pengguna.daftar("outlet"),
     queryFn: async () => {
       const res = await apiClient.get<GetPenggunaResponse>(
         "/pengguna?workspace=outlet",
@@ -87,7 +87,7 @@ export default function PenggunaPage() {
   });
 
   const { data: roleList = [] } = useQuery({
-    queryKey: queryKeys.roles,
+    queryKey: queryKeys.roles.semua,
     queryFn: async () => {
       const res = await apiClient.get<GetRolesResponse>(
         "/role",
@@ -156,7 +156,7 @@ export default function PenggunaPage() {
           ? "Pengguna berhasil diperbarui."
           : "Pengguna berhasil ditambahkan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengguna("outlet") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengguna.daftar("outlet") });
       setShowDialog(false);
     },
     onError: (err: any) => {
@@ -242,7 +242,7 @@ export default function PenggunaPage() {
       const targetId = (deleteTarget as any).id || (deleteTarget as any)._id;
       await apiClient.delete(`/pengguna/${targetId}`, undefined, "pengguna");
       toast.success("Berhasil", { description: "Pengguna berhasil dihapus." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengguna("outlet") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengguna.daftar("outlet") });
       setDeleteTarget(null);
     } catch (err: any) {
       toast.error("Gagal", {

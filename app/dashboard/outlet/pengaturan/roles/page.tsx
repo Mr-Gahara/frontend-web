@@ -53,7 +53,7 @@ export default function RolesPage() {
   // QUERY 1: MASTER PERMISSION
   const { data: permissionsMaster = [], isLoading: permissionsLoading } =
     useQuery({
-      queryKey: queryKeys.permissions,
+      queryKey: queryKeys.permissions.semua,
       queryFn: async () => {
         const res = await apiClient.get<GetPermissionsResponse>(
           "/permission",
@@ -70,7 +70,7 @@ export default function RolesPage() {
     isLoading: rolesLoading,
     error: rolesError,
   } = useQuery({
-    queryKey: queryKeys.roles,
+    queryKey: queryKeys.roles.semua,
     queryFn: async () => {
       const res = await apiClient.get<GetRolesResponse>(
         "/role",
@@ -132,7 +132,7 @@ export default function RolesPage() {
       toast.success("Berhasil", {
         description: "Role berhasil dihapus.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.roles });
+      queryClient.invalidateQueries({ queryKey: queryKeys.roles.semua });
       setDeleteTarget(null);
     },
     onError: (err: any) => {

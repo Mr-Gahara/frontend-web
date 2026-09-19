@@ -49,7 +49,7 @@ export default function BuatBahanBakuPage() {
 
   // --- FETCH DATA LOKASI AKTIF (CRITICAL FOR HYBRID DESIGN) ---
   const { data: activeLocation = null, isLoading: isLoadingLokasi } = useQuery<any>({
-    queryKey: ["lokasi-current-active-tenant"],
+    queryKey: queryKeys.lokasi.aktif(),
     queryFn: async () => {
       try {
         const res = await apiClient.get<any>("/location/current", undefined, "pengguna");
@@ -102,9 +102,9 @@ export default function BuatBahanBakuPage() {
       toast.success("Berhasil Menambahkan", {
         description: "Bahan baku baru berhasil disimpan dan diinjeksi ke Inventory.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku });
+      queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku.semua });
       // Invalidate inventory agar tabel Stok Real-time langsung terupdate
-      queryClient.invalidateQueries({ queryKey: ["inventory"] }); 
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.semua }); 
       router.push("/dashboard/outlet/inventaris/bahanBaku");
     },
     onError: (err: any) => {

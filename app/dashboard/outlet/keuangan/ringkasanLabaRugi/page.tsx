@@ -111,7 +111,7 @@ export default function RingkasanLabaRugiPage() {
     isError,
   } = useQuery({
     // Tambahkan start & end ke queryKey agar cache browser tidak tertukar
-    queryKey: [...queryKeys.laporanLabaRugi({ periode }), start, end],
+    queryKey: [...queryKeys.laporan.labaRugi({ periode }), start, end],
     queryFn: async (): Promise<LaporanLabaRugiData[]> => {
       // Suntikkan tanggal ke URL Backend
       const res = await apiClient.get<any>(

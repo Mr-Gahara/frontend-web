@@ -126,7 +126,7 @@ export default function BuatProdukPage() {
 
   // --- FETCH KATEGORI ---
   const { data: kategoriList = [], error: kategoriError } = useQuery({
-    queryKey: queryKeys.kategori,
+    queryKey: queryKeys.kategori.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>("/kategori", undefined, "pengguna");
       const raw = res.data?.data || res.data || [];
@@ -137,7 +137,7 @@ export default function BuatProdukPage() {
 
   // --- FETCH BAHAN BAKU ---
   const { data: bahanBakuList = [], isLoading: isLoadingBahanBaku } = useQuery({
-    queryKey: queryKeys.bahanBaku,
+    queryKey: queryKeys.bahanBaku.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>(
         EP.bahanBaku.list,
@@ -171,7 +171,7 @@ export default function BuatProdukPage() {
       toast.success("Berhasil", {
         description: "Produk baru berhasil ditambahkan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.produk });
+      queryClient.invalidateQueries({ queryKey: queryKeys.produk.semua });
       router.push("/dashboard/outlet/inventaris/produk");
     },
     onError: (err: any) => {

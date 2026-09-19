@@ -136,7 +136,7 @@ export default function DasborTimelinePage() {
     isLoading: asetLoading,
     isError: asetError,
   } = useQuery<AsetListApiResponse>({
-    queryKey: queryKeys.aset,
+    queryKey: queryKeys.aset.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>("/aset", undefined, "pengguna");
       if (!res) return { data: [] };
@@ -156,7 +156,7 @@ export default function DasborTimelinePage() {
     isLoading: bookingLoading,
     isError: bookingError,
   } = useQuery<SesiBookingListApiResponse>({
-    queryKey: ["sesi-booking", tanggalParam],
+    queryKey: queryKeys.sesiBooking.daftar(tanggalParam),
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/sesiBooking?tanggal=${tanggalParam}`,

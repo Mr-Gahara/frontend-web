@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
+import { queryKeys } from "@/lib/queryKeys";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import JadwalUtama from "@/components/jadwal/jadwal-utama";
@@ -53,7 +54,7 @@ export default function JadwalOutletPage() {
     isLoading: loadKaryawan,
     isError: errKaryawan,
   } = useQuery({
-    queryKey: ["pengguna", "outlet"],
+    queryKey: queryKeys.pengguna.daftar("outlet"),
     queryFn: () =>
       apiClient.get<{ data: any[] }>(
         "/pengguna?workspace=outlet",
@@ -63,7 +64,7 @@ export default function JadwalOutletPage() {
   });
 
   const { data: resShift, isLoading: loadShift } = useQuery({
-    queryKey: ["shift", "aktif"],
+    queryKey: queryKeys.shift.daftar({ status: "Aktif" }),
     queryFn: () =>
       apiClient.get<{ data: any[] }>(
         "/shift?status=Aktif",
@@ -73,7 +74,7 @@ export default function JadwalOutletPage() {
   });
 
   const { data: resPola, isLoading: loadPola } = useQuery({
-    queryKey: ["pola-roster"],
+    queryKey: queryKeys.polaRoster.semua,
     queryFn: () =>
       apiClient.get<{ data: any[] }>("/polaRoster", undefined, "pengguna"),
   });
@@ -83,7 +84,7 @@ export default function JadwalOutletPage() {
     isLoading: loadJadwal,
     isError: errJadwal,
   } = useQuery({
-    queryKey: ["jadwal-shift", startDate, endDate],
+    queryKey: queryKeys.jadwalShift.daftar({ startDate, endDate }),
     queryFn: () =>
       apiClient.get<{ data: any[] }>(
         `/jadwalShift?startDate=${startDate}&endDate=${endDate}`,
@@ -106,7 +107,7 @@ export default function JadwalOutletPage() {
         toast.success("Jadwal Berhasil Dibuat", {
           description: "Jadwal shift baru telah diterapkan.",
         });
-        queryClient.invalidateQueries({ queryKey: ["jadwal-shift"] });
+        queryClient.invalidateQueries({ queryKey: queryKeys.jadwalShift.semua });
       },
       onError: (err: any) => {
         toast.error("Gagal Menyimpan", {
@@ -130,7 +131,7 @@ export default function JadwalOutletPage() {
         toast.success("Jadwal Diperbarui", {
           description: "Perubahan jadwal telah disimpan.",
         });
-        queryClient.invalidateQueries({ queryKey: ["jadwal-shift"] });
+        queryClient.invalidateQueries({ queryKey: queryKeys.jadwalShift.semua });
       },
       onError: (err: Error) => {
         toast.error("Gagal Memperbarui", {
@@ -149,7 +150,7 @@ export default function JadwalOutletPage() {
         toast.success("Jadwal Dihapus", {
           description: "Jadwal telah dihapus dari sistem.",
         });
-        queryClient.invalidateQueries({ queryKey: ["jadwal-shift"] });
+        queryClient.invalidateQueries({ queryKey: queryKeys.jadwalShift.semua });
       },
       onError: (err: Error) => {
         toast.error("Gagal Menghapus", {

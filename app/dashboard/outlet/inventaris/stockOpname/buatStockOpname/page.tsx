@@ -89,7 +89,7 @@ export default function BuatStockOpnamePage() {
   // --- FETCH DATA LOKASI AKTIF DARI BACKEND ---
   const { data: activeLocation = null, isLoading: isLoadingLokasi } =
     useQuery<any>({
-      queryKey: ["lokasi-current-active-tenant"],
+      queryKey: queryKeys.lokasi.aktif(),
       queryFn: async () => {
         try {
           const res = await apiClient.get<any>(
@@ -145,7 +145,7 @@ export default function BuatStockOpnamePage() {
       toast.success("Draft Opname Berhasil Dibuat", {
         description: "Sistem telah mengambil snapshot stok saat ini.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname.daftar() });
 
       // Mengambil ID untuk redirect
       const newOpnameId = res.data?._id || res.data?.id || (res as any)?._id;

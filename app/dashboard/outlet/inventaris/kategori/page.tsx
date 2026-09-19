@@ -65,7 +65,7 @@ export default function KategoriPage() {
     isLoading: loading,
     error,
   } = useQuery({
-    queryKey: queryKeys.kategori,
+    queryKey: queryKeys.kategori.semua,
     queryFn: async () => {
       const res = await apiClient.get<GetKategoriResponse>(
         "/kategori",
@@ -116,7 +116,7 @@ export default function KategoriPage() {
           ? "Kategori berhasil diperbarui."
           : "Kategori berhasil ditambahkan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.kategori });
+      queryClient.invalidateQueries({ queryKey: queryKeys.kategori.semua });
       setShowDialog(false);
     },
     onError: (err: any) => {
@@ -130,7 +130,7 @@ export default function KategoriPage() {
     },
     onSuccess: () => {
       toast.success("Berhasil", { description: "Kategori berhasil dihapus." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.kategori });
+      queryClient.invalidateQueries({ queryKey: queryKeys.kategori.semua });
       setDeleteTarget(null);
     },
     onError: (err: any) => {

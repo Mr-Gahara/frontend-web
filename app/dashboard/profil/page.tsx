@@ -53,7 +53,7 @@ export default function ProfilPage() {
 
   // --- useQuery: fetch profil ---
   const { data: profilData, isLoading } = useQuery({
-    queryKey: queryKeys.penggunaDetail(userId),
+    queryKey: queryKeys.pengguna.detail(userId),
     queryFn: async () => {
       const res = await apiClient.get<{ data: PenggunaItem }>(
         `/pengguna/${userId}`,
@@ -99,9 +99,9 @@ export default function ProfilPage() {
       setPinLama("");
       setPinBaru("");
       queryClient.invalidateQueries({
-        queryKey: queryKeys.penggunaDetail(userId),
+        queryKey: queryKeys.pengguna.detail(userId),
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengguna() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengguna.daftar() });
     },
     onError: (err: any) => {
       toast.error("Gagal", {

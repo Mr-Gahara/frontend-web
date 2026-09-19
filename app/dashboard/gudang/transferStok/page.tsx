@@ -73,7 +73,7 @@ export default function TransferStokGudangPage() {
 
   // --- Queries ---
   const { data: daftarTransfer = [], isLoading } = useQuery({
-    queryKey: queryKeys.transferStok({
+    queryKey: queryKeys.transferStok.daftar({
       status: activeTab !== "ALL" ? activeTab : undefined,
     }),
     queryFn: async () => {

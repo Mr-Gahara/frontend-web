@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { queryKeys } from "@/lib/queryKeys";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
@@ -35,7 +36,7 @@ export default function AutoGenerateJadwalPage() {
     isLoading: loadKaryawan,
     isError: errKaryawan,
   } = useQuery({
-    queryKey: ["pengguna", "outlet"],
+    queryKey: queryKeys.pengguna.daftar("outlet"),
     queryFn: () =>
       apiClient.get<{ data: any[] }>(
         "/pengguna?workspace=outlet",
@@ -50,7 +51,7 @@ export default function AutoGenerateJadwalPage() {
     isLoading: loadShift,
     isError: errShift,
   } = useQuery({
-    queryKey: ["shift", "aktif"],
+    queryKey: queryKeys.shift.daftar({ status: "Aktif" }),
     queryFn: () =>
       apiClient.get<{ data: any[] }>(
         "/shift?status=Aktif",
@@ -65,7 +66,7 @@ export default function AutoGenerateJadwalPage() {
     isLoading: loadPola,
     isError: errPola,
   } = useQuery({
-    queryKey: ["pola-roster"],
+    queryKey: queryKeys.polaRoster.semua,
     queryFn: () =>
       apiClient.get<{ data: any[] }>("/polaRoster", undefined, "pengguna"),
   });
@@ -135,7 +136,7 @@ export default function AutoGenerateJadwalPage() {
         "pengguna",
       );
 
-      queryClient.invalidateQueries({ queryKey: ["jadwal-shift"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.jadwalShift.semua });
 
       // Sukses! Lempar kembali ke halaman kalender
       router.push("/dashboard/outlet/jadwal");

@@ -237,7 +237,7 @@ export default function BuatReservasiPage() {
   const { data: pelangganList = [], isLoading: loadPelanggan } = useQuery<
     PelangganItem[]
   >({
-    queryKey: queryKeys.pelanggan,
+    queryKey: queryKeys.pelanggan.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>("/pelanggan", undefined, "pengguna");
       if (!res) return [];
@@ -249,7 +249,7 @@ export default function BuatReservasiPage() {
   });
 
   const { data: asetList = [], isLoading: loadAset } = useQuery<Aset[]>({
-    queryKey: queryKeys.aset,
+    queryKey: queryKeys.aset.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>("/aset", undefined, "pengguna");
       if (!res) return [];
@@ -262,7 +262,7 @@ export default function BuatReservasiPage() {
 
   // KOREKSI: Ambil list diskon dari server untuk fitur diskon
   const { data: diskonList = [] } = useQuery({
-    queryKey: ["diskon-aktif"],
+    queryKey: queryKeys.diskon.daftar({ status: "Aktif" }),
     queryFn: async () => {
       const res = await apiClient.get<any>("/diskon", undefined, "pengguna");
       return (res.data?.data || res.data || []) as any[];
@@ -287,7 +287,7 @@ export default function BuatReservasiPage() {
   }, [waktuStates]);
 
   const { data: bookingData = [] } = useQuery({
-    queryKey: ["sesi-booking-multi", uniqueDates],
+    queryKey: queryKeys.sesiBooking.banyakTanggal(uniqueDates),
     queryFn: async () => {
       const allBookings: SesiBookingResponse[] = [];
       for (const date of uniqueDates) {
@@ -388,8 +388,8 @@ export default function BuatReservasiPage() {
       toast.success("Reservasi Berhasil!", {
         description: "Invoice penjualan telah terbuat secara otomatis.",
       });
-      queryClient.invalidateQueries({ queryKey: ["booking"] });
-      queryClient.invalidateQueries({ queryKey: ["penjualan"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sesiBooking.semua });
+      queryClient.invalidateQueries({ queryKey: queryKeys.penjualan.semua });
       const idPenjualan =
         res?.data?.data?.penjualanID ?? res?.data?.penjualanID;
       router.push(
@@ -407,7 +407,7 @@ export default function BuatReservasiPage() {
           err?.message ??
           "Terjadi kesalahan.");
       toast.error("Gagal Menyimpan", { description });
-      queryClient.invalidateQueries({ queryKey: ["sesi-booking-multi"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sesiBooking.semua });
     },
   });
 

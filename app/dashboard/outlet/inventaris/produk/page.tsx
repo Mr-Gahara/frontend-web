@@ -57,7 +57,7 @@ export default function ProdukPage() {
     isLoading: produkLoading,
     error: produkError,
   } = useQuery({
-    queryKey: queryKeys.produk,
+    queryKey: queryKeys.produk.semua,
     queryFn: async () => {
       const res = await apiClient.get<GetProdukResponse>(
         "/produk",
@@ -94,7 +94,7 @@ export default function ProdukPage() {
         description: "Produk berhasil dihapus.",
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.produk,
+        queryKey: queryKeys.produk.semua,
       });
       setDeleteTarget(null);
     },

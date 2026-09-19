@@ -150,7 +150,7 @@ export default function PenjualanPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: [...queryKeys.penjualan, appliedFilters],
+    queryKey: [...queryKeys.penjualan.semua, appliedFilters],
     queryFn: async () => {
       const qs = buildQueryString(appliedFilters);
       const res = await apiClient.get<GetPenjualanResponse>(
@@ -179,7 +179,7 @@ export default function PenjualanPage() {
     },
     onSuccess: () => {
       toast.success("Berhasil", { description: "Penjualan berhasil dihapus." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.penjualan });
+      queryClient.invalidateQueries({ queryKey: queryKeys.penjualan.semua });
       setDeleteTarget(null);
     },
     onError: (err: any) => {
@@ -206,7 +206,7 @@ export default function PenjualanPage() {
     },
     onSuccess: () => {
       toast.success("Berhasil", { description: "Penjualan berhasil di-void." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.penjualan });
+      queryClient.invalidateQueries({ queryKey: queryKeys.penjualan.semua });
       setVoidTarget(null);
     },
     onError: (err: any) => {

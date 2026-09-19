@@ -48,7 +48,7 @@ export default function JurnalStokOutletPage() {
   // --- Queries ---
   // 1. Ambil Identitas Lokasi Outlet Saat Ini
   const { data: activeLocation = null, isLoading: isLoadingLokasi } = useQuery<any>({
-    queryKey: ["lokasi-current-active-tenant"],
+    queryKey: queryKeys.lokasi.aktif(),
     queryFn: async () => {
       try {
         const res = await apiClient.get<any>("/location/current", undefined, "pengguna");
@@ -68,7 +68,7 @@ export default function JurnalStokOutletPage() {
 
   // 2. Ambil Seluruh Data Jurnal Stok
   const { data: rawData = [], isLoading: isLoadingJurnal } = useQuery({
-    queryKey: queryKeys.jurnalStok(),
+    queryKey: queryKeys.jurnalStok.daftar(),
     queryFn: async () => {
       const res = await apiClient.get<any>("/jurnalStok", undefined, "pengguna");
       const data = res.data?.data || res.data || [];

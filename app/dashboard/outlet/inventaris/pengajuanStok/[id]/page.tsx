@@ -93,7 +93,7 @@ export default function DetailPengajuanStokPage({
 
   // --- Queries ---
   const { data: detail, isLoading } = useQuery({
-    queryKey: queryKeys.pengajuanStokDetail(id),
+    queryKey: queryKeys.pengajuanStok.detail(id),
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/pengajuanStok/${id}`,
@@ -118,9 +118,9 @@ export default function DetailPengajuanStokPage({
       toast.success("Berhasil Diajukan", {
         description: "Permintaan stok telah dikirim ke Gudang Pusat.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.daftar() });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.pengajuanStokDetail(id),
+        queryKey: queryKeys.pengajuanStok.detail(id),
       });
       setShowConfirmSubmit(false);
     },

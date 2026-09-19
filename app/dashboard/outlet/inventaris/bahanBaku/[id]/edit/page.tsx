@@ -48,7 +48,7 @@ export default function EditBahanBakuPage() {
     isLoading: isLoadingDetail,
     isError: isErrorDetail,
   } = useQuery({
-    queryKey: [...queryKeys.bahanBaku, "detail", bahanId],
+    queryKey: [...queryKeys.bahanBaku.semua, "detail", bahanId],
     queryFn: async () => {
       const res = await apiClient.get<any>(EP.bahanBaku.detail(bahanId), undefined, "pengguna");
       return res.data?.data || res.data;
@@ -90,9 +90,9 @@ export default function EditBahanBakuPage() {
       toast.success("Berhasil Diperbarui", {
         description: "Perubahan master data bahan baku telah disimpan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku });
+      queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku.semua });
       // Update tabel stok agar nama/satuan baru langsung tercermin di inventory
-      queryClient.invalidateQueries({ queryKey: ["inventory"] }); 
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.semua }); 
       router.push("/dashboard/outlet/inventaris/bahanBaku");
     },
     onError: (err: any) => {

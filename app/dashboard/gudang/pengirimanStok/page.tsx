@@ -46,7 +46,7 @@ export default function PengirimanStokGudangPage() {
   // --- Queries ---
   // Halaman ini KHUSUS hanya memanggil data yang berstatus DIKIRIM (In-Transit)
   const { data: daftarPengiriman = [], isLoading } = useQuery({
-    queryKey: queryKeys.transferStok({ status: "DIKIRIM" }),
+    queryKey: queryKeys.transferStok.daftar({ status: "DIKIRIM" }),
     queryFn: async () => {
       const res = await apiClient.get<any>(
         "/transferStok",

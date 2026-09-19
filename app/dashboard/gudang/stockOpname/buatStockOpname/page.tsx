@@ -94,7 +94,7 @@ export default function BuatStockOpnameGudangPage() {
 
   // --- FETCH DATA SEMUA GUDANG DARI BACKEND ---
   const { data: gudangList = [], isLoading: isLoadingLokasi } = useQuery<any[]>({
-    queryKey: ["lokasi-gudang-all"],
+    queryKey: queryKeys.lokasi.daftar({ tipe: "Gudang" }),
     queryFn: async () => {
       try {
         const res = await apiClient.get<any>(
@@ -136,7 +136,7 @@ export default function BuatStockOpnameGudangPage() {
       toast.success("Draft Opname Berhasil Dibuat", {
         description: "Sistem telah mengambil snapshot stok gudang saat ini.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.stockOpname.daftar() });
 
       // PERUBAHAN RUTE: Redirect ke Laman Eksekusi Gudang
       const newOpnameId = res.data?._id || res.data?.id || (res as any)?._id;

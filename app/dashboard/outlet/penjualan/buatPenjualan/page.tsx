@@ -119,7 +119,7 @@ export default function BuatPenjualanPage() {
 
   // --- QUERY FETCHING ---
   const { data: pelangganList = [] } = useQuery({
-    queryKey: queryKeys.pelanggan,
+    queryKey: queryKeys.pelanggan.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>("/pelanggan", undefined, "pengguna");
       const fetched = res.data?.data || res.data || [];
@@ -128,7 +128,7 @@ export default function BuatPenjualanPage() {
   });
 
   const { data: produkList = [] } = useQuery({
-    queryKey: queryKeys.produk,
+    queryKey: queryKeys.produk.semua,
     queryFn: async () => {
       const res = await apiClient.get<GetProdukResponse>(
         "/produk",
@@ -141,7 +141,7 @@ export default function BuatPenjualanPage() {
 
   // Fetch Diskon (Semua)
   const { data: diskonList = [] } = useQuery({
-    queryKey: ["diskon-aktif"],
+    queryKey: queryKeys.diskon.daftar({ status: "Aktif" }),
     queryFn: async () => {
       const res = await apiClient.get<any>("/diskon", undefined, "pengguna");
       return (res.data?.data || res.data || []) as any[];
@@ -150,7 +150,7 @@ export default function BuatPenjualanPage() {
 
   // Fetch Pajak (Semua)
   const { data: pajakList = [] } = useQuery({
-    queryKey: ["pajak-aktif"],
+    queryKey: queryKeys.pajak.daftar(),
     queryFn: async () => {
       const res = await apiClient.get<any>("/pajak", undefined, "pengguna");
       return (res.data?.data || res.data || []) as any[];
@@ -377,7 +377,7 @@ export default function BuatPenjualanPage() {
       toast.success("Berhasil", {
         description: "Penjualan berhasil dibuat (Draft).",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.penjualan });
+      queryClient.invalidateQueries({ queryKey: queryKeys.penjualan.semua });
       router.push("/dashboard/outlet/penjualan");
     },
     onError: (err: any) => {

@@ -67,7 +67,7 @@ export default function EditPengajuanStokPage({
 
   // --- Queries ---
   const { data: detail, isLoading: isLoadingDetail } = useQuery({
-    queryKey: queryKeys.pengajuanStokDetail(id),
+    queryKey: queryKeys.pengajuanStok.detail(id),
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/pengajuanStok/${id}`,
@@ -79,7 +79,7 @@ export default function EditPengajuanStokPage({
   });
 
   const { data: lokasiList = [], isLoading: isLoadingLokasi } = useQuery({
-    queryKey: queryKeys.lokasi,
+    queryKey: queryKeys.lokasi.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>("/location", undefined, "pengguna");
       return (res.data?.data || res.data || []) as any[];
@@ -87,7 +87,7 @@ export default function EditPengajuanStokPage({
   });
 
   const { data: bahanBakuList = [], isLoading: isLoadingBahan } = useQuery({
-    queryKey: queryKeys.bahanBaku,
+    queryKey: queryKeys.bahanBaku.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>("/bahanBaku", undefined, "pengguna");
       return (res.data?.data || res.data || []) as any[];
@@ -155,9 +155,9 @@ export default function EditPengajuanStokPage({
       toast.success("Perubahan Disimpan", {
         description: "Draft pengajuan berhasil diperbarui.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.daftar() });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.pengajuanStokDetail(id),
+        queryKey: queryKeys.pengajuanStok.detail(id),
       });
       router.push(`/dashboard/outlet/inventaris/pengajuanStok/${id}`);
     },

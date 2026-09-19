@@ -138,7 +138,7 @@ export default function EditProdukPage() {
     isLoading: isLoadingKategori,
     error: kategoriError,
   } = useQuery({
-    queryKey: queryKeys.kategori,
+    queryKey: queryKeys.kategori.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>("/kategori", undefined, "pengguna");
       const raw = res.data?.data || res.data || [];
@@ -153,7 +153,7 @@ export default function EditProdukPage() {
     isLoading: isLoadingBahanBaku,
     isError: isBahanBakuError,
   } = useQuery({
-    queryKey: queryKeys.bahanBaku,
+    queryKey: queryKeys.bahanBaku.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>(
         EP.bahanBaku.list,
@@ -173,7 +173,7 @@ export default function EditProdukPage() {
     isFetching: isFetchingDetail,
     error: detailError,
   } = useQuery({
-    queryKey: queryKeys.produkDetail(produkId),
+    queryKey: queryKeys.produk.detail(produkId),
     enabled: !!produkId,
     queryFn: async () => {
       const res = await apiClient.get<any>(
@@ -276,9 +276,9 @@ export default function EditProdukPage() {
       toast.success("Berhasil", {
         description: "Perubahan produk berhasil disimpan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.produk });
+      queryClient.invalidateQueries({ queryKey: queryKeys.produk.semua });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.produkDetail(produkId),
+        queryKey: queryKeys.produk.detail(produkId),
       });
       router.push("/dashboard/outlet/inventaris/produk");
     },

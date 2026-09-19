@@ -46,7 +46,7 @@ export default function JurnalStokGudangPage() {
 
   // --- Queries ---
   const { data: rawData = [], isLoading } = useQuery({
-    queryKey: queryKeys.jurnalStok(),
+    queryKey: queryKeys.jurnalStok.daftar(),
     queryFn: async () => {
       const res = await apiClient.get<any>("/jurnalStok", undefined, "pengguna");
       const data = res.data?.data || res.data || [];

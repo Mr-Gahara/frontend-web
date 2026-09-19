@@ -63,7 +63,7 @@ export default function EditRolePage() {
   // QUERY 1: MASTER PERMISSION
   const { data: allPermissions = [], isLoading: permissionsLoading } = useQuery(
     {
-      queryKey: queryKeys.permissions,
+      queryKey: queryKeys.permissions.semua,
       queryFn: async () => {
         const res = await apiClient.get<GetPermissionsResponse>(
           "/permission",
@@ -81,7 +81,7 @@ export default function EditRolePage() {
     isLoading: isLoadingDetail,
     error: detailError,
   } = useQuery({
-    queryKey: queryKeys.roleDetail(roleId),
+    queryKey: queryKeys.roles.detail(roleId),
     enabled: !!roleId,
     queryFn: async () => {
       const res = await apiClient.get<GetRoleDetailResponse>(
@@ -95,7 +95,7 @@ export default function EditRolePage() {
 
   // QUERY 3: ROLES (untuk derivasi currentUserLevel via fallback)
   const { data: roles = [] } = useQuery({
-    queryKey: queryKeys.roles,
+    queryKey: queryKeys.roles.semua,
     queryFn: async () => {
       const res = await apiClient.get<GetRolesResponse>(
         "/role",
@@ -191,8 +191,8 @@ export default function EditRolePage() {
       toast.success("Berhasil", {
         description: "Perubahan posisi berhasil disimpan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.roles });
-      queryClient.invalidateQueries({ queryKey: queryKeys.roleDetail(roleId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.roles.semua });
+      queryClient.invalidateQueries({ queryKey: queryKeys.roles.detail(roleId) });
       router.push("/dashboard/outlet/pengaturan/roles");
     },
     onError: (err: any) => {

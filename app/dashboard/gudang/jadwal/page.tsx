@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { queryKeys } from "@/lib/queryKeys";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import JadwalUtama from "@/components/jadwal/jadwal-utama";
@@ -55,7 +56,7 @@ export default function JadwalGudangPage() {
     isLoading: loadKaryawan,
     isError: errKaryawan,
   } = useQuery({
-    queryKey: ["pengguna", "gudang"],
+    queryKey: queryKeys.pengguna.daftar("gudang"),
     queryFn: () =>
       apiClient.get<{ data: any[] }>(
         "/pengguna?workspace=gudang", // ✅ Menggunakan parameter query yang benar
@@ -66,7 +67,7 @@ export default function JadwalGudangPage() {
 
   // B. Fetch Master Shift (Hanya yang Aktif)
   const { data: resShift, isLoading: loadShift } = useQuery({
-    queryKey: ["shift", "aktif", "gudang"], // KEY BERBEDA
+    queryKey: queryKeys.shift.daftar({ status: "Aktif", workspace: "gudang" }), // KEY BERBEDA
     queryFn: () =>
       apiClient.get<{ data: any[] }>(
         "/shift?status=Aktif",
@@ -77,7 +78,7 @@ export default function JadwalGudangPage() {
 
   // C. Fetch Pola Roster
   const { data: resPola, isLoading: loadPola } = useQuery({
-    queryKey: ["pola-roster", "gudang"], // KEY BERBEDA
+    queryKey: queryKeys.polaRoster.daftar({ workspace: "gudang" }), // KEY BERBEDA
     queryFn: () =>
       apiClient.get<{ data: any[] }>("/polaRoster", undefined, "pengguna"),
   });
@@ -88,7 +89,7 @@ export default function JadwalGudangPage() {
     isLoading: loadJadwal,
     isError: errJadwal,
   } = useQuery({
-    queryKey: ["jadwal-shift", "gudang", startDate, endDate], // KEY BERBEDA
+    queryKey: queryKeys.jadwalShift.daftar({ workspace: "gudang", startDate, endDate }), // KEY BERBEDA
     queryFn: () =>
       apiClient.get<{ data: any[] }>(
         `/jadwalShift?startDate=${startDate}&endDate=${endDate}`,

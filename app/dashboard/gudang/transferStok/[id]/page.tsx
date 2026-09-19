@@ -90,7 +90,7 @@ export default function DetailTransferStokGudangPage({
 
   // --- Queries ---
   const { data: detail, isLoading } = useQuery({
-    queryKey: queryKeys.transferStokDetail(id),
+    queryKey: queryKeys.transferStok.detail(id),
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/transferStok/${id}`,
@@ -117,18 +117,18 @@ export default function DetailTransferStokGudangPage({
           res.message ||
           "Stok gudang telah terpotong. Menunggu konfirmasi outlet.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.transferStok() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.transferStok.daftar() });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.transferStokDetail(id),
+        queryKey: queryKeys.transferStok.detail(id),
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory() }); // Refresh stok
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar() }); // Refresh stok
       setShowConfirmKirim(false);
     },
     onError: (err: any) => {
       toast.error("Gagal Mengirim Barang", { description: err.message });
       setShowConfirmKirim(false);
       queryClient.invalidateQueries({
-        queryKey: queryKeys.transferStokDetail(id),
+        queryKey: queryKeys.transferStok.detail(id),
       });
     },
   });
@@ -146,9 +146,9 @@ export default function DetailTransferStokGudangPage({
       toast.success("Surat Jalan Dibatalkan", {
         description: res.message || "Dokumen pengiriman telah dibatalkan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.transferStok() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.transferStok.daftar() });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.transferStokDetail(id),
+        queryKey: queryKeys.transferStok.detail(id),
       });
       setShowConfirmBatal(false);
     },
@@ -156,7 +156,7 @@ export default function DetailTransferStokGudangPage({
       toast.error("Gagal Membatalkan", { description: err.message });
       setShowConfirmBatal(false);
       queryClient.invalidateQueries({
-        queryKey: queryKeys.transferStokDetail(id),
+        queryKey: queryKeys.transferStok.detail(id),
       });
     },
   });

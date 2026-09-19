@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { queryKeys } from "@/lib/queryKeys";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
@@ -51,7 +52,7 @@ export default function AsetPage() {
     isLoading,
     isError,
   } = useQuery<Aset[]>({
-    queryKey: ["aset"],
+    queryKey: queryKeys.aset.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>("/aset", undefined, "pengguna");
 
@@ -76,7 +77,7 @@ export default function AsetPage() {
     },
     onSuccess: () => {
       toast.success("Dihapus", { description: "Data aset berhasil dihapus." });
-      queryClient.invalidateQueries({ queryKey: ["aset"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.aset.semua });
       setIsDeleteModalOpen(false);
       setSelectedAset(null);
     },

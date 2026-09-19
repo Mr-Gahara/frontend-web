@@ -9,7 +9,7 @@ export function useMonitoringAbsensi(tanggal: Date) {
   const tanggalStr = format(tanggal, "yyyy-MM-dd");
 
   return useQuery({
-    queryKey: queryKeys.absensiMonitoring(tanggalStr),
+    queryKey: queryKeys.absensi.monitoring(tanggalStr),
     queryFn: () =>
       apiClient.get<{ data: MonitoringAbsensiResponse }>(
         `/absensi/monitoring?tanggal=${tanggalStr}`,

@@ -109,7 +109,7 @@ export default function PajakPage() {
     isLoading: pajakLoading,
     error: pajakError,
   } = useQuery({
-    queryKey: queryKeys.pajak,
+    queryKey: queryKeys.pajak.semua,
     queryFn: async () => {
       const res = await apiClient.get<GetPajakResponse>("/pajak", undefined, "pengguna");
       return res.data;
@@ -118,7 +118,7 @@ export default function PajakPage() {
 
   // QUERY PRODUK
   const { data: produkList = [], error: produkError } = useQuery({
-    queryKey: queryKeys.produk,
+    queryKey: queryKeys.produk.semua,
     queryFn: async () => {
       const res = await apiClient.get<GetProdukResponse>("/produk", undefined, "pengguna");
       return res.data;
@@ -131,7 +131,7 @@ export default function PajakPage() {
     isLoading: relasiLoading,
     error: relasiError,
   } = useQuery({
-    queryKey: queryKeys.produkPajak(selectedProduk),
+    queryKey: queryKeys.produk.pajak(selectedProduk),
     enabled: !!selectedProduk,
     queryFn: async () => {
       const res = await apiClient.get<GetPajakByProdukResponse>(`/produkpajak/${selectedProduk}`, undefined, "pengguna");
@@ -160,7 +160,7 @@ export default function PajakPage() {
     },
     onSuccess: (_, variables) => {
       toast.success("Berhasil", { description: variables.id ? "Pajak berhasil diperbarui." : "Pajak berhasil ditambahkan." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pajak });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pajak.semua });
       setShowDialog(false);
     },
     onError: (err: any) => setFormError(err.message || "Gagal menyimpan data."),
@@ -170,7 +170,7 @@ export default function PajakPage() {
     mutationFn: async (id: string) => await apiClient.delete(`/pajak/${id}`, undefined, "pengguna"),
     onSuccess: () => {
       toast.success("Berhasil", { description: "Pajak berhasil dihapus." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pajak });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pajak.semua });
       setDeleteTarget(null);
     },
     onError: (err: any) => toast.error("Gagal", { description: err.message || "Gagal menghapus pajak." }),
@@ -180,7 +180,7 @@ export default function PajakPage() {
     mutationFn: async (payload: ProdukPajakRequest) => await apiClient.post("/produkpajak", payload, undefined, "pengguna"),
     onSuccess: () => {
       toast.success("Berhasil", { description: "Pajak berhasil ditambahkan ke produk." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.produkPajak(selectedProduk) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.produk.pajak(selectedProduk) });
       setSelectedPajakRelasi("");
     },
     onError: (err: any) => toast.error("Gagal", { description: err.message || "Gagal assign pajak." }),
@@ -190,7 +190,7 @@ export default function PajakPage() {
     mutationFn: async (relasiID: string) => await apiClient.delete(`/produkpajak/${relasiID}`, undefined, "pengguna"),
     onSuccess: () => {
       toast.success("Berhasil", { description: "Relasi pajak berhasil dilepas." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.produkPajak(selectedProduk) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.produk.pajak(selectedProduk) });
     },
     onError: (err: any) => toast.error("Gagal", { description: err.message || "Gagal menghapus relasi." }),
   });

@@ -77,7 +77,7 @@ export default function GudangInventoryPage() {
 
   // 1. Ambil ID Gudang terlebih dahulu
   const { data: gudangId, isLoading: isLoadingLokasi } = useQuery({
-    queryKey: ["lokasi", "gudang-only"],
+    queryKey: queryKeys.lokasi.daftar({ tipe: "Gudang" }),
     queryFn: async () => {
       try {
         const res = await apiClient.get<any>("/location", undefined, "pengguna");
@@ -95,7 +95,7 @@ export default function GudangInventoryPage() {
 
   // 2. Fetch Inventory Gudang
   const { data: inventoryData = [], isLoading: isLoadingInventory } = useQuery({
-    queryKey: [...queryKeys.inventory(gudangId || "gudang"), debouncedSearch],
+    queryKey: [...queryKeys.inventory.daftar(gudangId || "gudang"), debouncedSearch],
     queryFn: async () => {
       const params: Record<string, string> = { locationID: gudangId };
       if (debouncedSearch) params.search = debouncedSearch;
@@ -109,7 +109,7 @@ export default function GudangInventoryPage() {
 
   // 3. Fetch Master Bahan Baku (Untuk Dropdown Tambah Barang)
   const { data: masterBahanBaku = [], isLoading: isLoadingMaster } = useQuery({
-    queryKey: queryKeys.bahanBaku,
+    queryKey: queryKeys.bahanBaku.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>(EP.bahanBaku.list, undefined, "pengguna");
       return res.data?.data || res.data || [];
@@ -150,7 +150,7 @@ export default function GudangInventoryPage() {
       toast.success("Barang Berhasil Ditambahkan", {
         description: "Stok baru telah terdaftar di Gudang Pusat.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory(gudangId || "gudang") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar(gudangId || "gudang") });
       setAddItemModal(false);
       setNewItem({ bahanBakuID: "", stok: "", stokMinimum: "" });
     },
@@ -170,7 +170,7 @@ export default function GudangInventoryPage() {
     },
     onSuccess: () => {
       toast.success("Berhasil", { description: "Batas minimum stok diperbarui." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory(gudangId || "gudang") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar(gudangId || "gudang") });
       setMinStockModal({ isOpen: false, data: null, inputValue: "" });
     }
   });
@@ -186,7 +186,7 @@ export default function GudangInventoryPage() {
     },
     onSuccess: () => {
       toast.success("Opname Berhasil", { description: "Stok fisik telah disesuaikan." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory(gudangId || "gudang") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar(gudangId || "gudang") });
       setOpnameModal({ isOpen: false, data: null, fisikAktual: "", catatan: "" });
     }
   });

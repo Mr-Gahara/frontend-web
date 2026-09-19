@@ -67,7 +67,7 @@ export default function BuatPembayaranPage() {
     isLoading: loadingPenjualan,
     error: errorPenjualan,
   } = useQuery({
-    queryKey: [...queryKeys.penjualan, penjualanID],
+    queryKey: [...queryKeys.penjualan.semua, penjualanID],
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/penjualan/${penjualanID}`,
@@ -81,7 +81,7 @@ export default function BuatPembayaranPage() {
 
   // --- 2. FETCH AKUN KAS ASLI ---
   const { data: akunKasList = [] } = useQuery({
-    queryKey: queryKeys.akunKas,
+    queryKey: queryKeys.akunKas.semua,
     queryFn: async () => {
       const res = await apiClient.get<{ data: any[] } | any[]>(
         "/akunkas",
@@ -100,7 +100,7 @@ export default function BuatPembayaranPage() {
 
   // --- 3. FETCH METODE PEMBAYARAN ASLI ---
   const { data: metodeList = [] } = useQuery({
-    queryKey: queryKeys.metodePembayaran || ["metode-pembayaran"],
+    queryKey: queryKeys.metodePembayaran.semua || ["metode-pembayaran"],
     queryFn: async () => {
       const res = await apiClient.get<{ data: any[] } | any[]>(
         "/metodepembayaran",
@@ -139,8 +139,8 @@ export default function BuatPembayaranPage() {
     },
     onSuccess: () => {
       toast.success("Berhasil", { description: "Pembayaran sukses dicatat." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.penjualan });
-      queryClient.invalidateQueries({ queryKey: ["pembayaran"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.penjualan.semua });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pembayaran.semua });
       router.push(`/dashboard/outlet/penjualan/${penjualanID}`);
     },
     onError: (err: any) => {

@@ -69,7 +69,7 @@ export default function StockOpnamePage() {
 
   // --- QUERY FETCH DATA ---
   const { data: opnameList = [], isLoading } = useQuery({
-    queryKey: [...queryKeys.stockOpname(), statusFilter],
+    queryKey: [...queryKeys.stockOpname.daftar(), statusFilter],
     queryFn: async () => {
       let url = "/stockopname";
       if (statusFilter !== "ALL") {

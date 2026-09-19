@@ -137,7 +137,7 @@ export default function DetailPenjualanPage() {
     isLoading: loadingPenjualan,
     error: errorPenjualan,
   } = useQuery({
-    queryKey: [...queryKeys.penjualan, idPenjualan],
+    queryKey: [...queryKeys.penjualan.semua, idPenjualan],
     queryFn: async () => {
       const res = await apiClient.get<any>(
         `/penjualan/${idPenjualan}`,
@@ -151,7 +151,7 @@ export default function DetailPenjualanPage() {
 
   // 2. QUERY DAFTAR PEMBAYARAN
   const { data: allPembayaran = [], isLoading: loadingPembayaran } = useQuery({
-    queryKey: ["pembayaran"],
+    queryKey: queryKeys.pembayaran.semua,
     queryFn: async () => {
       const res = await apiClient.get<any>(
         "/pembayaran",
@@ -190,7 +190,7 @@ export default function DetailPenjualanPage() {
       toast.success("Berhasil Difinalisasi", {
         description: "Status penjualan menjadi FINAL dan stok telah dipotong.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.penjualan });
+      queryClient.invalidateQueries({ queryKey: queryKeys.penjualan.semua });
       setShowFinalizeConfirm(false);
     },
     onError: (err: any) => {

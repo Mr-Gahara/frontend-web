@@ -69,7 +69,7 @@ export default function BuatRoleKostumPage() {
   // QUERY: MASTER PERMISSION
   const { data: allPermissions = [], isLoading: permissionsLoading } = useQuery(
     {
-      queryKey: queryKeys.permissions,
+      queryKey: queryKeys.permissions.semua,
       queryFn: async () => {
         const res = await apiClient.get<GetPermissionsResponse>(
           "/permission",
@@ -83,7 +83,7 @@ export default function BuatRoleKostumPage() {
 
   // QUERY: ROLES (untuk derivasi currentUserLevel via fallback)
   const { data: roles = [] } = useQuery({
-    queryKey: queryKeys.roles,
+    queryKey: queryKeys.roles.semua,
     queryFn: async () => {
       const res = await apiClient.get<GetRolesResponse>(
         "/role",
@@ -139,7 +139,7 @@ export default function BuatRoleKostumPage() {
       toast.success("Berhasil", {
         description: "Posisi karyawan baru telah berhasil dibuat.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.roles });
+      queryClient.invalidateQueries({ queryKey: queryKeys.roles.semua });
       router.push("/dashboard/outlet/pengaturan/roles");
     },
     onError: (err: any) => {

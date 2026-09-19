@@ -60,7 +60,7 @@ export default function PengajuanStokOutletPage() {
 
   // --- Queries ---
   const { data: daftarPengajuan = [], isLoading } = useQuery({
-    queryKey: queryKeys.pengajuanStok({ status: activeTab !== "ALL" ? activeTab : undefined }),
+    queryKey: queryKeys.pengajuanStok.daftar({ status: activeTab !== "ALL" ? activeTab : undefined }),
     queryFn: async () => {
       const params: Record<string, string> = {};
       if (activeTab !== "ALL") params.status = activeTab;
