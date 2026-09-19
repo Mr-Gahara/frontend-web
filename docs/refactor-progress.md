@@ -308,6 +308,7 @@ sulit dibaca daripada dua berkas terpisah. Dalam hal itu, cukup bagikan lapisan
 - ESLint tanpa error pada berkas modul itu (peringatan warisan boleh tersisa)
 - Tidak ada lagi `apiClient`, `any`, maupun `_id` di halaman modul itu
 - Spec e2e modul lolos, termasuk skenario baru untuk perilaku yang berubah
+- Pelajaran dari debug dan perbaikan selama modul ini sudah dicatat di bagian 7
 - Sudah di-commit dan di-push
 - Dokumen ini diperbarui
 
@@ -396,6 +397,8 @@ polanya salah.
 - Pola glob yang tidak cocok menghasilkan `no matches found` dan menghentikan
   perintah. Untuk mencari berkas hasil test, pakai
   `ls -t test-results/*/trace.zip | head -1`.
+- Argumen berpola seperti `--include=*.ts` pada grep juga terkena ekspansi
+  glob. Kutip polanya: `--include='*.ts'`.
 
 ### Catatan form (React Hook Form dan Zod)
 
@@ -581,6 +584,29 @@ diperiksa, bukan pada dugaan dari gejala. Bila sebuah dugaan muncul, verifikasi
 dulu dengan perintah, baru lanjut. Beberapa kali dugaan yang masuk akal ternyata
 salah, dan pemeriksaan singkat mencegah bug baru.
 
+### Belajar dari setiap putaran
+
+Setiap debug, penelusuran masalah, dan perbaikan adalah bahan untuk
+mempercepat putaran berikutnya. Begitu satu masalah selesai, jawab tiga
+pertanyaan ini sebelum melangkah:
+
+1. **Apa yang memperlambat?** Dugaan yang meleset, perintah yang outputnya
+   terlalu panjang atau gagal, bukti yang diambil terlambat, atau langkah
+   yang diulang.
+2. **Apa yang akan menemukannya lebih cepat?** Perintah, urutan pemeriksaan,
+   atau sumber bukti yang seharusnya dipakai lebih dulu.
+3. **Apakah itu akan berulang?** Bila ya, catat di dokumen ini pada bagian
+   yang sesuai: pola kegagalan ke tabel di "Urutan debug kegagalan e2e",
+   kesalahan penerapan ke "Disiplin saat menerapkan perubahan", perintah baru
+   ke "Perintah verifikasi yang biasa dipakai", dan kebiasaan alat ke catatan
+   Playwright, form, atau shell.
+
+Catatan ditulis dalam commit modul yang sama, selagi konteksnya masih segar.
+Tulis sebagai aturan yang dapat langsung diterapkan beserta contoh nyata
+singkat, bukan sebagai kronologi kejadian. Bila catatan lama terbukti keliru
+atau ada cara yang lebih cepat, perbarui catatan itu alih-alih menambah
+catatan baru yang bertentangan.
+
 ### Kredensial uji
 
 - Akun: `toko@gmail.com` / `Toko1234`
@@ -676,7 +702,8 @@ Yang berubah setiap kali:
 Yang ditambahkan bila ada:
 
 - **Keputusan rancangan baru** yang berlaku lintas modul, ke bagian 5
-- **Pelajaran teknis baru** (Playwright, form, shell), ke bagian 7
+- **Pelajaran dari setiap debug, penelusuran, dan perbaikan**, ke bagian 7
+  mengikuti aturan "Belajar dari setiap putaran"
 - **Temuan backend baru**, ke bagian 8 dan 10
 - **Keputusan produk**, ke bagian 2 di bawah fase terkait
 
