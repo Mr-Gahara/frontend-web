@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "@/lib/auth/useSession";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
-import { decodeJWT } from "@/lib/decodeToken";
 import { queryKeys } from "@/lib/queryKeys";
 import { CreateOpnameRequest } from "@/types/stockOpname";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -78,18 +78,13 @@ export default function BuatStockOpnamePage() {
   const watchPicID = watch("picID");
 
   // --- MENGAMBIL USER ID & NAMA DENGAN AMAN DARI TOKEN ---
-  useEffect(() => {
-    const token = sessionStorage.getItem("penggunaToken");
-    if (token) {
-      const payloadToken = decodeJWT(token);
-      const id = payloadToken?._id || payloadToken?.id || "";
-      const nama =
-        payloadToken?.nama || payloadToken?.name || "Anda (Pengguna Saat Ini)";
+  const { pengguna } = useSession();
 
-      setValue("picID", id);
-      setCurrentUserName(nama);
-    }
-  }, [setValue]);
+  useEffect(() => {
+    if (!pengguna) return;
+    setValue("picID", pengguna.id);
+    setCurrentUserName(pengguna.nama || "Anda (Pengguna Saat Ini)");
+  }, [pengguna, setValue]);
 
   // --- FETCH DATA LOKASI AKTIF DARI BACKEND ---
   const { data: activeLocation = null, isLoading: isLoadingLokasi } =

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSession } from "@/lib/auth/useSession";
 import { useParams, useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { decodeJWT } from "@/lib/decodeToken";
 import { Penjualan, StatusBayar, StatusPenjualan } from "@/types/penjualan";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -127,13 +127,9 @@ export default function DetailPenjualanPage() {
 
   const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
 
-  const token =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("penggunaToken")
-      : null;
-  const payloadToken = token ? decodeJWT(token) : null;
-  const currentLocationId =
-    payloadToken?.locationID || payloadToken?.lokasiID || "";
+  const { pengguna } = useSession();
+  // Lokasi tidak tersedia di token pengguna; backend menentukannya dari sesi.
+  const currentLocationId = "";
 
   // 1. QUERY DETAIL PENJUALAN
   const {

@@ -1,77 +1,71 @@
-import { renderHook } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useAuthGuard } from '@/app/hooks/useAuthGuard'; 
-import { useRouter } from 'next/navigation';
-import { decodeJWT } from '@/lib/decodeToken';
+import { renderHook } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { useAuthGuard } from "@/app/hooks/useAuthGuard";
+import { useRouter } from "next/navigation";
+import { setTokenPengguna, tandaiKeluar } from "@/lib/auth/session";
 
-// 1. Memalsukan (Mocking) Router Next.js
-vi.mock('next/navigation', () => ({
-  useRouter: vi.fn(),
-}));
+vi.mock("next/navigation", () => ({ useRouter: vi.fn() }));
 
-// 2. Memalsukan fungsi dekode agar kita bisa memanipulasi payload sesuka hati
-vi.mock('@/lib/decodeToken', () => ({
-  decodeJWT: vi.fn(),
-}));
+/**
+ * Membuat JWT palsu yang dapat didekode decodeJWT (tanpa verifikasi tanda tangan).
+ * Bentuk payload mengikuti token pengguna backend: id, tenantID, role, permissions.
+ */
+function jwtPalsu(payload: Record<string, unknown>): string {
+  const encode = (s: string) =>
+    Buffer.from(s).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  return `${encode(JSON.stringify({ alg: "HS256" }))}.${encode(JSON.stringify(payload))}.palsu`;
+}
 
-describe('Hooks - useAuthGuard', () => {
+describe("useAuthGuard", () => {
   const mockReplace = vi.fn();
 
   beforeEach(() => {
-    // Bersihkan semua jejak sebelum setiap test dimulai
     vi.clearAllMocks();
-    sessionStorage.clear();
-    // Beritahu mock useRouter untuk mereturn fungsi replace palsu kita
-    (useRouter as any).mockReturnValue({ replace: mockReplace });
+    (useRouter as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ replace: mockReplace });
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+  it("tidak redirect selama sesi masih dipulihkan", () => {
+    // Status awal store adalah "memuat": pemulihan lewat cookie belum selesai.
+    // Redirect di tahap ini akan melempar pengguna yang sebenarnya punya sesi.
+    const { result } = renderHook(() => useAuthGuard());
 
-  it('harus redirect ke /login jika accessToken tidak ada di sessionStorage', () => {
-    renderHook(() => useAuthGuard());
-    
-    // Ekspektasi: Karena session kosong, router.replace harus dipanggil dengan "/login"
-    expect(mockReplace).toHaveBeenCalledWith('/login');
-  });
-
-  it('harus redirect ke /login jika payload token tidak valid (tidak ada id)', () => {
-    sessionStorage.setItem('accessToken', 'token-palsu');
-    (decodeJWT as any).mockReturnValue({}); // Simulasi payload kosong
-    
-    renderHook(() => useAuthGuard());
-    expect(mockReplace).toHaveBeenCalledWith('/login');
-  });
-
-  it('harus membersihkan sesi dan redirect ke /login jika tidak memiliki tenantID (belum setup toko)', () => {
-    sessionStorage.setItem('accessToken', 'token-palsu');
-    (decodeJWT as any).mockReturnValue({ id: 'user-123' }); // Ada ID, tapi tidak ada tenantID
-    
-    renderHook(() => useAuthGuard());
-    
-    // Memastikan sessionStorage.clear() benar-benar dieksekusi
-    expect(sessionStorage.getItem('accessToken')).toBeNull(); 
-    expect(mockReplace).toHaveBeenCalledWith('/login');
-  });
-
-  it('harus redirect ke /login/pengguna jika penggunaToken tidak ada atau invalid', () => {
-    sessionStorage.setItem('accessToken', 'token-palsu');
-    (decodeJWT as any).mockReturnValue({ id: 'user-123', tenantID: 'toko-abc' }); 
-    // Kita sengaja tidak set penggunaToken
-    
-    renderHook(() => useAuthGuard());
-    expect(mockReplace).toHaveBeenCalledWith('/login/pengguna');
-  });
-
-  it('harus mengizinkan akses (tidak melakukan redirect) jika semua token dan payload valid', () => {
-    sessionStorage.setItem('accessToken', 'token-palsu');
-    sessionStorage.setItem('penggunaToken', 'token-karyawan-palsu');
-    (decodeJWT as any).mockReturnValue({ id: 'user-123', tenantID: 'toko-abc' });
-    
-    renderHook(() => useAuthGuard());
-    
-    // Ekspektasi: Fungsi replace tidak pernah dipanggil sama sekali
     expect(mockReplace).not.toHaveBeenCalled();
+    expect(result.current.status).toBe("memuat");
+    expect(result.current.siap).toBe(false);
+  });
+
+  it("redirect ke /login saat pemulihan selesai tanpa sesi", () => {
+    tandaiKeluar();
+    renderHook(() => useAuthGuard());
+
+    expect(mockReplace).toHaveBeenCalledWith("/login");
+  });
+
+  it("tidak redirect saat sesi pengguna tersedia", () => {
+    setTokenPengguna(
+      jwtPalsu({ id: "u1", tenantID: "t1", role: "Kasir", permissions: ["read-produk"] }),
+    );
+    const { result } = renderHook(() => useAuthGuard());
+
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(result.current.siap).toBe(true);
+  });
+
+  it("redirect ke /login saat sesi dicabut setelah sebelumnya masuk", () => {
+    setTokenPengguna(jwtPalsu({ id: "u1", tenantID: "t1", role: "Owner", permissions: [] }));
+    const { rerender } = renderHook(() => useAuthGuard());
+    expect(mockReplace).not.toHaveBeenCalled();
+
+    tandaiKeluar();
+    rerender();
+
+    expect(mockReplace).toHaveBeenCalledWith("/login");
+  });
+
+  it("mengabaikan token tanpa tenantID: sesi dianggap tidak sah", () => {
+    setTokenPengguna(jwtPalsu({ id: "u1", role: "Kasir", permissions: [] }));
+    renderHook(() => useAuthGuard());
+
+    expect(mockReplace).toHaveBeenCalledWith("/login");
   });
 });

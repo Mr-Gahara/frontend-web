@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/apiClient";
+import { setTokenAkun, setTokenPengguna } from "@/lib/auth/session";
 import { LoginResponse } from "@/types/auth";
 
 import { Mail, Lock, Loader2, AlertCircle } from "lucide-react";
@@ -28,7 +29,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      sessionStorage.removeItem("penggunaToken");
+      setTokenPengguna(null);
 
       const res = await apiClient.post<LoginResponse>("/akun/auth/login", form);
 
@@ -41,8 +42,7 @@ export default function LoginPage() {
         return;
       }
 
-      sessionStorage.setItem("accessToken", res.accessToken);
-      localStorage.setItem("akun", JSON.stringify(res.data));
+      setTokenAkun(res.accessToken);
 
       router.push("/login/pengguna");
     } catch (err: any) {

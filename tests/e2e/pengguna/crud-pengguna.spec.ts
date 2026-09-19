@@ -583,7 +583,11 @@ test.describe("E2E - Siklus Hidup Pengguna (CRUD)", () => {
     });
 
     await test.step("Verifikasi field yang dibatasi", async () => {
-      await expect(page.getByLabel(/pin keamanan/i)).not.toBeVisible();
+      // Pengguna uji adalah Owner, dan Owner boleh mengubah PIN-nya sendiri
+      // (kondisi !isSelf || isOwner di pengguna-form-dialog). Sebelumnya field
+      // ini selalu tersembunyi karena isOwner dihitung dari role.nama, padahal
+      // role pada token berupa string, sehingga nilainya selalu false.
+      await expect(page.getByLabel(/pin keamanan/i)).toBeVisible();
 
       const comboboxes = page.getByRole("combobox");
 

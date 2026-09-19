@@ -12,6 +12,15 @@ const COMMON_HEADERS: Record<string, string> = {
   "ngrok-skip-browser-warning": "true",
 };
 
+import {
+  setTokenAkun,
+  setTokenPengguna,
+  akhiriSesi,
+  tokenAkun,
+  tokenPengguna,
+} from "@/lib/auth/session";
+import { refreshTerkoordinasi } from "@/lib/auth/sessionChannel";
+
 type TokenType = "akun" | "pengguna";
 
 /**
@@ -55,24 +64,15 @@ function determineTokenKey(
 function getAuthHeaders(
   key: "accessToken" | "penggunaToken",
 ): Record<string, string> {
-  if (typeof window === "undefined") {
-    return {};
-  }
-
-  let token = sessionStorage.getItem(key);
-
-  if (token === "undefined" || token === "null") {
-    token = null;
-  }
-
+  const token = key === "accessToken" ? tokenAkun() : tokenPengguna();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 let isRefreshing = false;
-let refreshQueue: Array<(token: string) => void> = [];
+let refreshQueue: Array<(token: string | null) => void> = [];
 
 let isRefreshingPengguna = false;
-let refreshPenggunaQueue: Array<(token: string) => void> = [];
+let refreshPenggunaQueue: Array<(token: string | null) => void> = [];
 
 /**
  * Refresh Token C (pengguna/web)
@@ -91,6 +91,8 @@ async function tryRefreshPenggunaToken(): Promise<string | null> {
       method: "POST",
       credentials: "include",
       headers: { ...COMMON_HEADERS },
+      // Body kosong wajib: backend menjawab 500 bila req.body undefined.
+      body: "{}",
     });
 
     if (!res.ok) throw new Error("Refresh token pengguna invalid");
@@ -98,13 +100,17 @@ async function tryRefreshPenggunaToken(): Promise<string | null> {
     const data = await res.json();
     const newToken = data.data.accessToken;
 
-    sessionStorage.setItem("penggunaToken", newToken);
+    setTokenPengguna(newToken);
     refreshPenggunaQueue.forEach((cb) => cb(newToken));
     refreshPenggunaQueue = [];
 
     return newToken;
   } catch {
-    sessionStorage.removeItem("penggunaToken");
+    setTokenPengguna(null);
+    // Penunggu di antrean di-resolve dengan null agar request mereka
+    // tidak menggantung selamanya saat refresh gagal.
+    refreshPenggunaQueue.forEach((cb) => cb(null));
+    refreshPenggunaQueue = [];
     if (typeof window !== "undefined") {
       window.location.href = "/login/pengguna";
     }
@@ -138,15 +144,15 @@ async function tryRefreshToken(): Promise<string | null> {
     const data = await res.json();
     const newToken = data.accessToken;
 
-    sessionStorage.setItem("accessToken", newToken);
+    setTokenAkun(newToken);
     refreshQueue.forEach((cb) => cb(newToken));
     refreshQueue = [];
 
     return newToken;
   } catch {
-    sessionStorage.removeItem("accessToken");
-    sessionStorage.removeItem("penggunaToken");
-    localStorage.removeItem("akun");
+    akhiriSesi();
+    refreshQueue.forEach((cb) => cb(null));
+    refreshQueue = [];
     if (typeof window !== "undefined") {
       window.location.href = "/login";
     }
@@ -187,7 +193,7 @@ async function request<T>(
     !endpoint.includes("/pengguna/pin-refresh") &&
     !endpoint.includes("/pengguna/pin-login")
   ) {
-    const newToken = await tryRefreshPenggunaToken();
+    const newToken = await refreshTerkoordinasi("pengguna", tryRefreshPenggunaToken);
     if (newToken) return request<T>(endpoint, options, false, explicitTokenType);
     throw new Error("Sesi pengguna telah berakhir.");
   }
@@ -201,7 +207,7 @@ async function request<T>(
     !endpoint.includes("/akun/auth/login") &&
     !endpoint.includes("/pengguna/pin-login")
   ) {
-    const newToken = await tryRefreshToken();
+    const newToken = await refreshTerkoordinasi("akun", tryRefreshToken);
     if (newToken) return request<T>(endpoint, options, false, explicitTokenType);
     throw new Error("Sesi akun telah berakhir.");
   }

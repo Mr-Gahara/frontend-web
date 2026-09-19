@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { decodeJWT } from "@/lib/decodeToken";
+import { useSession } from "@/lib/auth/useSession";
 import { apiClient } from "@/lib/apiClient";
 import { LokasiListResponse } from "@/types/location";
 
@@ -14,23 +14,23 @@ export default function GudangLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const { status, permissions, pengguna, sudahMasuk } = useSession();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkGudangAccess = async () => {
-      const token = sessionStorage.getItem("penggunaToken");
-      
-      if (!token) {
+      // Tunggu pemulihan sesi selesai sebelum memutuskan.
+      if (status === "memuat") return;
+
+      if (!sudahMasuk) {
         router.push("/login");
         return;
       }
 
-      const payload = decodeJWT(token);
-      const permissions = payload?.permissions || [];
-      const role = payload?.role;
-
-      const isOwner = role === "Owner";
-      const hasGudangAccess = isOwner || permissions.includes("read-dashboard-gudang");
+      // Owner memegang seluruh permission di backend, sehingga pemeriksaan
+      // berbasis permission sudah mencakupnya.
+      const isOwner = pengguna?.role === "Owner";
+      const hasGudangAccess = permissions.includes("read-dashboard-gudang");
 
       // BLOKIR JIKA TIDAK ADA IZIN DASBOR GUDANG
       if (!hasGudangAccess) {
@@ -84,7 +84,7 @@ export default function GudangLayout({
     };
 
     checkGudangAccess();
-  }, [router, pathname]);
+  }, [router, pathname, status, sudahMasuk, permissions, pengguna]);
 
   // Layar loading khusus saat melakukan fetch API ke /lokasi
   if (isLoading || !isAuthorized) {

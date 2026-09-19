@@ -1,8 +1,8 @@
 "use client";
 
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
+import { useSession } from "@/lib/auth/useSession";
 import { useEffect, useMemo, useState } from "react";
-import { decodeJWT } from "@/lib/decodeToken";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -81,21 +81,14 @@ export default function RolesPage() {
     },
   });
 
-  const token =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("penggunaToken")
-      : null;
-  const tokenPayload = token ? decodeJWT(token) : null;
+  const { pengguna } = useSession();
+  const tokenPayload = pengguna;
 
   const currentUserLevel = useMemo(() => {
-    const levelFromToken = tokenPayload?.role?.level ?? 0;
-    if (levelFromToken) return levelFromToken;
-
+    // role pada token pengguna berupa nama role (string), tanpa level.
+    // Level diambil dari daftar role yang dimuat halaman ini.
     if (roles.length > 0) {
-      const tokenRoleStr =
-        typeof tokenPayload?.role === "string"
-          ? tokenPayload.role
-          : tokenPayload?.role?.nama;
+      const tokenRoleStr = tokenPayload?.role;
 
       const foundMyRole = roles.find(
         (r) => r.namaRole === tokenRoleStr || r._id === tokenPayload?.roleID,
@@ -105,7 +98,7 @@ export default function RolesPage() {
     }
 
     return 0;
-  }, [token, roles]);
+  }, [tokenPayload, roles]);
 
   const allowedPermissionsMaster = permissionsMaster.filter(
     (p) => !RESTRICTED_PERMS.includes(p.nama),

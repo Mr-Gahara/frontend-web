@@ -1,10 +1,10 @@
 "use client";
 
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
+import { useSession } from "@/lib/auth/useSession";
 import { useEffect, useState, useMemo } from "react";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { decodeJWT } from "@/lib/decodeToken";
 
 import {
   PenggunaItem,
@@ -58,12 +58,8 @@ const emptyForm: PenggunaRequest = {
 
 export default function PenggunaPage() {
   useAuthGuard();
-  const token =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("penggunaToken")
-      : null;
-  const payload = token ? decodeJWT(token) : null;
-  const currentUserId = payload?._id || payload?.id || "";
+  const { pengguna } = useSession();
+  const currentUserId = pengguna?.id ?? "";
 
   const [showDialog, setShowDialog] = useState(false);
   const [editTarget, setEditTarget] = useState<PenggunaItem | null>(null);
@@ -103,22 +99,20 @@ export default function PenggunaPage() {
   });
 
   const currentUserLevel = useMemo(() => {
-    const levelFromToken = payload?.role?.level ?? 0;
-    if (levelFromToken) return levelFromToken;
-
+    // role pada token pengguna berupa nama role (string), tanpa level.
+    // Level diambil dari daftar role yang dimuat halaman ini.
     if (roleList.length > 0) {
-      const tokenRoleStr =
-        typeof payload?.role === "string" ? payload.role : payload?.role?.nama;
       const foundMyRole = roleList.find(
-        (r: Role) => r.namaRole === tokenRoleStr || r._id === payload?.roleID,
+        (r: Role) =>
+          r.namaRole === pengguna?.role || r._id === pengguna?.roleID,
       );
       if (foundMyRole) return foundMyRole.level;
-      if (tokenRoleStr === "Owner") return 100;
+      if (pengguna?.role === "Owner") return 100;
     }
     return 0;
-  }, [token, roleList]);
+  }, [pengguna, roleList]);
 
-  const isOwner = payload?.role?.nama === "Owner";
+  const isOwner = pengguna?.role === "Owner";
   const isSelf = editTarget
     ? ((editTarget as any)._id || (editTarget as any).id) === currentUserId
     : false;
@@ -460,21 +454,26 @@ export default function PenggunaPage() {
         </div>
       </div>
 
-      {/* DIALOG FORM */}
-      <PenggunaFormDialog
-        showDialog={showDialog}
-        setShowDialog={setShowDialog}
-        editTarget={editTarget}
-        form={form}
-        setForm={setForm}
-        formError={formError}
-        handleSubmit={handleSubmit}
-        isPending={savePenggunaMutation.isPending}
-        isSelf={isSelf}
-        isOwner={isOwner}
-        roleList={roleList}
-        currentUserLevel={currentUserLevel}
-      />
+      {/* DIALOG FORM
+          Dialog baru dirender setelah identitas pengguna tersedia. Tanpa ini,
+          isSelf bernilai false pada render pertama karena sesi masih dipulihkan,
+          sehingga field PIN sempat tampil saat pengguna mengedit akunnya sendiri. */}
+      {currentUserId && (
+        <PenggunaFormDialog
+          showDialog={showDialog}
+          setShowDialog={setShowDialog}
+          editTarget={editTarget}
+          form={form}
+          setForm={setForm}
+          formError={formError}
+          handleSubmit={handleSubmit}
+          isPending={savePenggunaMutation.isPending}
+          isSelf={isSelf}
+          isOwner={isOwner}
+          roleList={roleList}
+          currentUserLevel={currentUserLevel}
+        />
+      )}
 
       {/* DIALOG HAPUS */}
       <AlertDialog

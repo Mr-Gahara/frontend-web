@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { decodeJWT } from "@/lib/decodeToken";
+import { akhiriSesi } from "@/lib/auth/session";
+import { useSession } from "@/lib/auth/useSession";
 import { apiClient } from "@/lib/apiClient";
 import { LokasiListResponse } from "@/types/location";
 
@@ -368,26 +369,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // State Evaluasi Lokasi
   const [hasGudang, setHasGudang] = useState<boolean>(false);
   const [isLoadingLokasi, setIsLoadingLokasi] = useState<boolean>(true);
+  const { pengguna } = useSession();
 
   useEffect(() => {
     const fetchSidebarData = async () => {
       try {
-        const penggunaToken = sessionStorage.getItem("penggunaToken");
-        if (!penggunaToken) return;
+        if (!pengguna) return;
 
-        const payload = decodeJWT(penggunaToken);
-        if (!payload || !payload.id) return;
-
-        setNamaUser(payload.nama || "Pengguna");
-        setPosisiUser(payload.role || "");
-        setRole(payload.role || "");
-        setNamaToko(payload.tenantName || "Nama Toko");
-        setPermissions(payload.permissions || []);
+        setNamaUser(pengguna.nama || "Pengguna");
+        setPosisiUser(pengguna.role || "");
+        setRole(pengguna.role || "");
+        setNamaToko(pengguna.tenantName || "Nama Toko");
+        setPermissions(pengguna.permissions);
 
         apiClient
-          .get<{ data: any }>(`/pengguna/${payload.id}`, undefined, "pengguna")
+          .get<{ data: any }>(`/pengguna/${pengguna.id}`, undefined, "pengguna")
           .then((res) => {
-            if (res && res.data) setNamaUser(res.data.nama || payload.nama);
+            if (res && res.data) setNamaUser(res.data.nama || pengguna.nama);
           })
           .catch(() => {});
 
@@ -416,9 +414,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       await apiClient.post("/akun/auth/logout", {});
     } catch {
     } finally {
-      sessionStorage.removeItem("penggunaToken");
-      sessionStorage.removeItem("accessToken");
-      localStorage.removeItem("akun");
+      akhiriSesi();
       router.push("/login");
     }
   };

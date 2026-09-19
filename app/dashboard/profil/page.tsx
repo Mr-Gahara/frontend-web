@@ -1,15 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { useSession } from "@/lib/auth/useSession";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { queryKeys } from "@/lib/queryKeys";
-import { decodeJWT } from "@/lib/decodeToken";
 import { apiClient } from "@/lib/apiClient";
 import { toast } from "sonner";
 import { PenggunaItem } from "@/types/pengguna";
-import { AkunSession } from "@/types/auth";
 import {
   User,
   Lock,
@@ -35,24 +34,12 @@ export default function ProfilPage() {
   }, []);
 
   // 1. Ekstrak data dari token JWT (PERBAIKAN: Defensif membaca 'id' atau '_id')
-  const token =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("penggunaToken")
-      : null;
-  const payload = token ? decodeJWT(token) : null;
-
-  // Mencegah kegagalan baca ID
-  const userId = payload?._id || payload?.id || "";
-  const namaFromToken = payload?.nama || "";
-
-  // Mencegah kegagalan baca Role jika struktur di token ternyata masih string
-  const roleFromToken = payload?.role?.nama || payload?.role || "Staf";
-  const akunRaw =
-    typeof window !== "undefined" ? localStorage.getItem("akun") : null;
-  const akunSession: AkunSession | null = akunRaw ? JSON.parse(akunRaw) : null;
-  const namaTokoFromToken =
-    akunSession?.daftarTenant?.find((t) => t.tenantID === payload?.tenantID)
-      ?.namaToko || "Toko";
+  const { pengguna } = useSession();
+  const userId = pengguna?.id ?? "";
+  const namaFromToken = pengguna?.nama ?? "";
+  const roleFromToken = pengguna?.role || "Staf";
+  // Nama toko diambil dari payload token pengguna.
+  const namaTokoFromToken = pengguna?.tenantName || "Toko";
 
   // 2. PRE-POPULATE
   const [nama, setNama] = useState(namaFromToken);

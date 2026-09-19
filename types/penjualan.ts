@@ -87,7 +87,8 @@ export interface ItemPenjualanRequest {
 }
 
 export interface PenjualanRequest {
-  locationID: string;
+  /** Opsional: backend menentukan lokasi dari sesi bila tidak dikirim. */
+  locationID?: string;
   pelangganID: string;
   penggunaID: string;
   jenisTransaksi: JenisTransaksi;

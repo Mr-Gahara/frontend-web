@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useSession } from "@/lib/auth/useSession";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
@@ -12,7 +13,6 @@ import {
   Permission,
   Role,
 } from "@/types/role";
-import { decodeJWT } from "@/lib/decodeToken";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
@@ -94,21 +94,14 @@ export default function BuatRoleKostumPage() {
     },
   });
 
-  const token =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("penggunaToken")
-      : null;
-  const tokenPayload = token ? decodeJWT(token) : null;
+  const { pengguna } = useSession();
+  const tokenPayload = pengguna;
 
   const currentUserLevel = useMemo(() => {
-    const levelFromToken = tokenPayload?.role?.level ?? 0;
-    if (levelFromToken) return levelFromToken;
-
+    // role pada token pengguna berupa nama role (string), tanpa level.
+    // Level diambil dari daftar role yang dimuat halaman ini.
     if (roles.length > 0) {
-      const tokenRoleStr =
-        typeof tokenPayload?.role === "string"
-          ? tokenPayload.role
-          : tokenPayload?.role?.nama;
+      const tokenRoleStr = tokenPayload?.role;
 
       const foundMyRole = roles.find(
         (r: Role) =>
@@ -119,7 +112,7 @@ export default function BuatRoleKostumPage() {
     }
 
     return 0;
-  }, [token, roles]);
+  }, [tokenPayload, roles]);
 
   // LOGIKA RBAC KLIEN
   const allowedPermissions = useMemo(() => {

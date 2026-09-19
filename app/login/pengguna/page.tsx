@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/apiClient";
-import { decodeJWT } from "@/lib/decodeToken";
+import { akhiriSesi, setTokenPengguna } from "@/lib/auth/session";
+import { useSession } from "@/lib/auth/useSession";
 import { User, Lock, Loader2, AlertCircle } from "lucide-react";
 
 export default function PenggunaLoginPage() {
@@ -18,70 +19,33 @@ export default function PenggunaLoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const { status, pengguna, sudahMasuk, adaTokenAkun } = useSession();
+
   useEffect(() => {
-    /**
-     * Ambil Token A
-     */
-    const accessToken = sessionStorage.getItem("accessToken");
+    // Sesi dipulihkan lewat cookie refresh oleh SessionProvider, jadi
+    // halaman ini hanya bereaksi terhadap hasilnya.
+    if (status === "memuat") return;
 
-    /**
-     * Tidak ada Token A
-     */
-    if (!accessToken || accessToken === "undefined" || accessToken === "null") {
-      router.replace("/login");
-      return;
-    }
-
-    /**
-     * Decode JWT
-     */
-    const payload = decodeJWT(accessToken);
-
-    const isExpired = payload?.exp ? payload.exp * 1000 < Date.now() : false;
-
-    /**
-     * Token rusak / invalid
-     */
-    if (!payload || !payload.id || isExpired) {
-      sessionStorage.removeItem("accessToken");
-      sessionStorage.removeItem("penggunaToken");
-      router.replace("/login");
-      return;
-    }
-
-    /**
-     * Akun belum onboarding tenant
-     * Web tidak menangani setup tenant
-     */
-    if (!payload.tenantID) {
-      setError(
-        "Akun ini belum memiliki toko aktif. Silakan lakukan setup awal melalui aplikasi mobile terlebih dahulu.",
-      );
-
-      return;
-    }
-
-    /**
-     * Cek Token C
-     */
-    const penggunaToken = sessionStorage.getItem("penggunaToken");
-
-    /**
-     * Bersihkan token sampah
-     */
-    if (penggunaToken === "undefined" || penggunaToken === "null") {
-      sessionStorage.removeItem("penggunaToken");
-      return;
-    }
-
-    /**
-     * Jika Token C valid,
-     * langsung masuk dashboard
-     */
-    if (penggunaToken) {
+    // Sudah punya sesi pengguna: langsung ke dashboard.
+    if (sudahMasuk) {
       router.replace("/dashboard");
+      return;
     }
-  }, [router]);
+
+    // Tanpa token akun, PIN tidak dapat dikirim (pin-login memerlukannya),
+    // sehingga halaman ini tidak ada gunanya dan pengguna dikembalikan.
+    if (!adaTokenAkun) {
+      router.replace("/login");
+      return;
+    }
+
+    // Akun tanpa toko tidak dapat memakai web; onboarding ada di aplikasi.
+    if (pengguna && !pengguna.tenantID) {
+      setError(
+        "Akun ini belum memiliki toko. Selesaikan pembuatan toko melalui aplikasi Tachyon POS.",
+      );
+    }
+  }, [status, sudahMasuk, pengguna, adaTokenAkun, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
@@ -121,7 +85,7 @@ export default function PenggunaLoginPage() {
         throw new Error("Token pengguna gagal diterbitkan.");
       }
 
-      sessionStorage.setItem("penggunaToken", tokenC);
+      setTokenPengguna(tokenC);
 
       router.push("/dashboard");
     } catch (err: any) {
@@ -222,8 +186,16 @@ export default function PenggunaLoginPage() {
         <div className="text-center text-xs text-muted-foreground">
           Bukan bagian dari toko ini?{" "}
           <span
-            onClick={() => {
-              sessionStorage.clear();
+            onClick={async () => {
+              // Logout ke backend wajib dipanggil: tanpa itu cookie refresh
+              // akun tetap berlaku dan sesi dapat dipulihkan kembali oleh
+              // siapa pun yang membuka aplikasi di perangkat ini.
+              try {
+                await apiClient.post("/akun/auth/logout", {});
+              } catch {
+                // Sesi lokal tetap diakhiri walau permintaan logout gagal.
+              }
+              akhiriSesi();
               router.push("/login");
             }}
             className="text-primary hover:underline font-medium cursor-pointer"

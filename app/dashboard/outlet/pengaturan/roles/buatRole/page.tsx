@@ -6,7 +6,7 @@ import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { GetPermissionsResponse, Permission } from "@/types/role";
-import { decodeJWT } from "@/lib/decodeToken";
+import { useSession } from "@/lib/auth/useSession";
 import { ROLE_TEMPLATES, RoleTemplate } from "@/lib/roleTemplates";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -33,16 +33,12 @@ export default function BuatRolePage() {
     null,
   );
 
-  const [currentUserLevel, setCurrentUserLevel] = useState<number>(0);
+  const { pengguna } = useSession();
+  // Level tidak tersedia di token pengguna; Owner selalu level tertinggi.
+  const currentUserLevel = pengguna?.role === "Owner" ? 100 : 0;
 
   useEffect(() => {
     setMounted(true);
-    const token = sessionStorage.getItem("penggunaToken");
-    if (token) {
-      const payload = decodeJWT(token);
-      const level = payload?.role?.level ?? payload?.level ?? 0;
-      setCurrentUserLevel(level);
-    }
   }, []);
 
   // QUERY: MASTER PERMISSION

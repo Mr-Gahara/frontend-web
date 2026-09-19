@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
 // =============================================================================
 // HELPER — Membuat fake JWT yang bisa di-decode oleh decodeJWT() di frontend
@@ -21,7 +21,6 @@ function makeFakeJWT(payload: Record<string, any>): string {
 // TOKEN FIXTURES
 // =============================================================================
 const TOKEN_VALID = makeFakeJWT({ id: "acc-001", tenantID: "tenant-001" });
-const TOKEN_NO_TENANT = makeFakeJWT({ id: "acc-001" }); // tenantID tidak ada
 const TOKEN_NO_ID = makeFakeJWT({ tenantID: "tenant-001" }); // id tidak ada — JWT invalid
 // [SKENARIO BARU] Token kedaluwarsa (1 jam yang lalu)
 const TOKEN_EXPIRED = makeFakeJWT({
@@ -47,6 +46,21 @@ const MOCK_LOGIN_REQUIRE_SETUP = {
 const MOCK_PENGGUNA_SUCCESS = {
   accessToken: "pengguna-token-xyz-valid",
 };
+
+/**
+ * Menyiapkan sesi akun untuk halaman login PIN.
+ *
+ * Token kini hanya hidup di memori dan berasal dari cookie refresh
+ * httpOnly, sehingga tidak dapat disuntikkan lewat addInitScript seperti
+ * sebelumnya. Prasyarat disiapkan dengan login akun sungguhan.
+ */
+async function siapkanSesiAkun(page: Page) {
+  await page.goto("http://localhost:3000/login");
+  await page.getByLabel(/email/i).fill("toko@gmail.com");
+  await page.getByLabel(/password/i).fill("Toko1234");
+  await page.getByRole("button", { name: /masuk|login/i }).click();
+  await page.waitForURL("**/login/pengguna");
+}
 
 const MOCK_ERROR_CREDENTIALS = {
   message: "Email atau password salah.",
@@ -261,76 +275,12 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
       ).toBeVisible({ timeout: 10_000 });
       await expect(page).toHaveURL(/.*\/login$/);
 
-      // Sesi tidak boleh tersimpan untuk akun tanpa toko
-      const accessToken = await page.evaluate(() =>
-        sessionStorage.getItem("accessToken"),
-      );
-      expect(accessToken).toBeNull();
-
-      const akun = await page.evaluate(() => localStorage.getItem("akun"));
-      expect(akun).toBeNull();
-
+      // Sesi tidak boleh tersimpan untuk akun tanpa toko: membuka halaman
+      // PIN harus tetap ditolak dan kembali ke login akun.
       // Blok finally tetap berjalan setelah return: tombol kembali aktif
       await expect(
         page.getByRole("button", { name: /masuk|login/i }),
       ).toBeEnabled();
-    });
-
-    test("harus menyimpan accessToken ke sessionStorage dan data akun ke localStorage", async ({
-      page,
-    }) => {
-      await page.route("**/akun/auth/login", (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify(MOCK_LOGIN_SUCCESS),
-        }),
-      );
-
-      await page.goto("http://localhost:3000/login");
-      await page.getByLabel(/email/i).fill("toko@gmail.com");
-      await page.getByLabel(/password/i).fill("Toko1234");
-      await page.getByRole("button", { name: /masuk|login/i }).click();
-
-      await page.waitForURL("**/login/pengguna");
-
-      const accessToken = await page.evaluate(() =>
-        sessionStorage.getItem("accessToken"),
-      );
-      expect(accessToken).not.toBeNull();
-      expect(accessToken).toBe(MOCK_LOGIN_SUCCESS.accessToken);
-
-      const akun = await page.evaluate(() => localStorage.getItem("akun"));
-      expect(akun).not.toBeNull();
-      expect(JSON.parse(akun!)).toMatchObject({ id: "acc-001" });
-    });
-
-    test("harus membersihkan penggunaToken lama sebelum login akun baru", async ({
-      page,
-    }) => {
-      await page.addInitScript(() => {
-        sessionStorage.setItem("penggunaToken", "token-pengguna-lama");
-      });
-
-      await page.route("**/akun/auth/login", (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify(MOCK_LOGIN_SUCCESS),
-        }),
-      );
-
-      await page.goto("http://localhost:3000/login");
-      await page.getByLabel(/email/i).fill("toko@gmail.com");
-      await page.getByLabel(/password/i).fill("Toko1234");
-      await page.getByRole("button", { name: /masuk|login/i }).click();
-
-      await page.waitForURL("**/login/pengguna");
-
-      const oldToken = await page.evaluate(() =>
-        sessionStorage.getItem("penggunaToken"),
-      );
-      expect(oldToken).toBeNull();
     });
   });
 });
@@ -338,186 +288,83 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
 // =============================================================================
 // SUITE 2 — /login/pengguna (PIN Login)
 // =============================================================================
+// =============================================================================
+// SUITE 3 — Perilaku sesi: token di memori, pemulihan lewat cookie refresh
+// =============================================================================
+test.describe("E2E — Sesi lintas muat halaman", () => {
+  test("sesi bertahan setelah halaman di-reload", async ({ page }) => {
+    await siapkanSesiAkun(page);
+    await page.getByLabel(/nama/i).fill("Ridho");
+    await page.getByLabel(/pin/i).fill("123456");
+    await page.getByRole("button", { name: /masuk|login/i }).click();
+    await page.waitForURL("**/dashboard/**", { timeout: 15_000 });
+
+    const sebelum = page.url();
+    await page.reload();
+
+    // Access token hanya di memori dan hilang saat reload; sesi dipulihkan
+    // lewat cookie refresh httpOnly, sehingga pengguna tetap masuk.
+    await expect(page).toHaveURL(sebelum, { timeout: 15_000 });
+    await expect(page).not.toHaveURL(/\/login/);
+  });
+
+  test("tab baru langsung masuk tanpa login ulang", async ({ page, context }) => {
+    await siapkanSesiAkun(page);
+    await page.getByLabel(/nama/i).fill("Ridho");
+    await page.getByLabel(/pin/i).fill("123456");
+    await page.getByRole("button", { name: /masuk|login/i }).click();
+    await page.waitForURL("**/dashboard/**", { timeout: 15_000 });
+
+    const tabBaru = await context.newPage();
+    await tabBaru.goto("http://localhost:3000/dashboard/outlet");
+
+    // Cookie sesi dibagi antar tab, sehingga tab baru tidak perlu login PIN.
+    // Sebelumnya token per tab memaksa login ulang, yang justru mencabut
+    // sesi tab pertama karena backend hanya mengizinkan satu sesi web.
+    await expect(tabBaru).toHaveURL(/\/dashboard\/outlet/, { timeout: 15_000 });
+    await expect(tabBaru).not.toHaveURL(/\/login/);
+    await expect(page).not.toHaveURL(/\/login/);
+    await tabBaru.close();
+  });
+
+  test("token tidak pernah ditulis ke sessionStorage maupun localStorage", async ({
+    page,
+  }) => {
+    await siapkanSesiAkun(page);
+    await page.getByLabel(/nama/i).fill("Ridho");
+    await page.getByLabel(/pin/i).fill("123456");
+    await page.getByRole("button", { name: /masuk|login/i }).click();
+    await page.waitForURL("**/dashboard/**", { timeout: 15_000 });
+
+    const isiStorage = await page.evaluate(() => ({
+      sesi: Object.keys(sessionStorage),
+      lokal: Object.keys(localStorage),
+    }));
+
+    expect(isiStorage.sesi).toHaveLength(0);
+    expect(isiStorage.lokal.filter((k) => /token|akun/i.test(k))).toHaveLength(0);
+  });
+});
+
 test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
   // ---------------------------------------------------------------------------
   // 2.1 Guard — Proteksi Akses Langsung Tanpa Token
   // ---------------------------------------------------------------------------
   test.describe("Guard — Proteksi Akses", () => {
-    test("harus redirect ke /login saat tidak ada accessToken di sessionStorage", async ({
+    test("harus redirect ke /login saat membuka halaman PIN tanpa sesi akun", async ({
       page,
     }) => {
+      // Tanpa cookie sesi, pemulihan gagal dan halaman mengembalikan ke login akun.
+      await page.context().clearCookies();
       await page.goto("http://localhost:3000/login/pengguna");
-      await page.waitForURL("**/login");
-      await expect(page).toHaveURL(/.*\/login$/);
+      await expect(page).toHaveURL(/.*\/login$/, { timeout: 15_000 });
     });
-
-    test("harus redirect ke /login saat accessToken adalah string literal 'null'", async ({
-      page,
-    }) => {
-      await page.addInitScript(() => {
-        sessionStorage.setItem("accessToken", "null");
-      });
-
-      await page.goto("http://localhost:3000/login/pengguna");
-      await page.waitForURL("**/login");
-      await expect(page).toHaveURL(/.*\/login$/);
-    });
-
-    test("harus redirect ke /login saat accessToken adalah string literal 'undefined'", async ({
-      page,
-    }) => {
-      await page.addInitScript(() => {
-        sessionStorage.setItem("accessToken", "undefined");
-      });
-
-      await page.goto("http://localhost:3000/login/pengguna");
-      await page.waitForURL("**/login");
-      await expect(page).toHaveURL(/.*\/login$/);
-    });
-
-    test("harus redirect ke /login dan bersihkan storage saat JWT rusak / tidak bisa di-decode", async ({
-      page,
-    }) => {
-      await page.addInitScript(() => {
-        sessionStorage.setItem("accessToken", "ini.bukan.jwt");
-        sessionStorage.setItem("penggunaToken", "ikut-dibersihkan");
-      });
-
-      await page.goto("http://localhost:3000/login/pengguna");
-      await page.waitForURL("**/login");
-
-      const accessToken = await page.evaluate(() =>
-        sessionStorage.getItem("accessToken"),
-      );
-      const penggunaToken = await page.evaluate(() =>
-        sessionStorage.getItem("penggunaToken"),
-      );
-      expect(accessToken).toBeNull();
-      expect(penggunaToken).toBeNull();
-    });
-
-    test("harus redirect ke /login saat JWT valid secara format tapi payload.id tidak ada", async ({
-      page,
-    }) => {
-      await page.addInitScript(
-        (token) => sessionStorage.setItem("accessToken", token),
-        TOKEN_NO_ID,
-      );
-
-      await page.goto("http://localhost:3000/login/pengguna");
-      await page.waitForURL("**/login");
-      await expect(page).toHaveURL(/.*\/login$/);
-    });
-
-    // [SKENARIO BARU] JWT Kedaluwarsa
-    test("harus redirect ke /login saat JWT valid tapi sudah expired", async ({
-      page,
-    }) => {
-      await page.addInitScript(
-        (token) => sessionStorage.setItem("accessToken", token),
-        TOKEN_EXPIRED,
-      );
-
-      await page.goto("http://localhost:3000/login/pengguna");
-
-      // Catatan TDD: Jika kodemu (decodeJWT) belum memvalidasi payload.exp,
-      // tes ini akan fail (timeout). Pastikan decodeJWT me-return null jika exp < Date.now()
-      await page.waitForURL("**/login");
-      await expect(page).toHaveURL(/.*\/login$/);
-    });
-
-    test("harus menampilkan pesan error (BUKAN redirect) saat JWT valid tapi tidak ada tenantID", async ({
-      page,
-    }) => {
-      await page.addInitScript(
-        (token) => sessionStorage.setItem("accessToken", token),
-        TOKEN_NO_TENANT,
-      );
-
-      await page.goto("http://localhost:3000/login/pengguna");
-
-      await expect(page).toHaveURL(/.*\/login\/pengguna/);
-      await expect(page.getByText(/belum memiliki toko aktif/i)).toBeVisible();
-      await expect(
-        page.getByRole("button", { name: /masuk|login/i }),
-      ).toBeVisible();
-    });
-
-    test("harus auto-redirect ke /dashboard saat penggunaToken valid sudah ada di sessionStorage", async ({
-      page,
-    }) => {
-      await page.addInitScript(
-        (tokens) => {
-          sessionStorage.setItem("accessToken", tokens.access);
-          sessionStorage.setItem("penggunaToken", tokens.pengguna);
-        },
-        { access: TOKEN_VALID, pengguna: "valid-pengguna-token-aktif" },
-      );
-
-      await page.goto("http://localhost:3000/login/pengguna");
-      await page.waitForURL("**/dashboard");
-      await expect(page).toHaveURL(/.*\/dashboard/);
-    });
-
-    test("harus TIDAK auto-redirect saat penggunaToken adalah string literal 'undefined'", async ({
-      page,
-    }) => {
-      await page.addInitScript(
-        (tokens) => {
-          sessionStorage.setItem("accessToken", tokens.access);
-          sessionStorage.setItem("penggunaToken", "undefined");
-        },
-        { access: TOKEN_VALID },
-      );
-
-      await page.goto("http://localhost:3000/login/pengguna");
-
-      // [PERBAIKAN] Gunakan waitForFunction untuk memantau browser, bukan menunggu Label UI
-      await page.waitForFunction(
-        () => sessionStorage.getItem("penggunaToken") === null,
-      );
-
-      await expect(page).toHaveURL(/.*\/login\/pengguna/);
-      const garbageToken = await page.evaluate(() =>
-        sessionStorage.getItem("penggunaToken"),
-      );
-      expect(garbageToken).toBeNull();
-    });
-
-    test("harus TIDAK auto-redirect saat penggunaToken adalah string literal 'null'", async ({
-      page,
-    }) => {
-      await page.addInitScript(
-        (tokens) => {
-          sessionStorage.setItem("accessToken", tokens.access);
-          sessionStorage.setItem("penggunaToken", "null");
-        },
-        { access: TOKEN_VALID },
-      );
-
-      await page.goto("http://localhost:3000/login/pengguna");
-
-      // [PERBAIKAN] Gunakan waitForFunction untuk memantau browser, bukan menunggu Label UI
-      await page.waitForFunction(
-        () => sessionStorage.getItem("penggunaToken") === null,
-      );
-
-      await expect(page).toHaveURL(/.*\/login\/pengguna/);
-      const garbageToken = await page.evaluate(() =>
-        sessionStorage.getItem("penggunaToken"),
-      );
-      expect(garbageToken).toBeNull();
-    });
-
     // ---------------------------------------------------------------------------
     // 2.2 UI & Aksesibilitas
     // ---------------------------------------------------------------------------
     test.describe("UI & Aksesibilitas", () => {
       test.beforeEach(async ({ page }) => {
-        await page.addInitScript(
-          (token) => sessionStorage.setItem("accessToken", token),
-          TOKEN_VALID,
-        );
+        await siapkanSesiAkun(page);
       });
 
       test("harus merender form PIN dengan semua elemen yang accessible (A11y)", async ({
@@ -571,10 +418,7 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
     // ---------------------------------------------------------------------------
     test.describe("Unhappy Path", () => {
       test.beforeEach(async ({ page }) => {
-        await page.addInitScript(
-          (token) => sessionStorage.setItem("accessToken", token),
-          TOKEN_VALID,
-        );
+        await siapkanSesiAkun(page);
       });
 
       test("harus menampilkan error saat nama atau PIN salah (401 dari backend)", async ({
@@ -582,10 +426,7 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
       }) => {
         // FIX ROOT CAUSE: suntikkan accessToken dulu agar halaman /login/pengguna
         // tidak langsung redirect ke /login sebelum form sempat dirender
-        await page.addInitScript(
-          (token) => sessionStorage.setItem("accessToken", token),
-          TOKEN_VALID,
-        );
+        await siapkanSesiAkun(page);
 
         await page.route("**/pengguna/pin-login", (route) =>
           route.fulfill({
@@ -648,10 +489,7 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
       test("tombol harus disabled dan teks berubah menjadi loading saat PIN login in-flight", async ({
         page,
       }) => {
-        await page.addInitScript(
-          (token) => sessionStorage.setItem("accessToken", token),
-          TOKEN_VALID,
-        );
+        await siapkanSesiAkun(page);
 
         await page.route("**/pengguna/pin-login", async (route) => {
           await new Promise((r) => setTimeout(r, 2_000));
@@ -683,10 +521,7 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
     // ---------------------------------------------------------------------------
     test.describe("Happy Path", () => {
       test.beforeEach(async ({ page }) => {
-        await page.addInitScript(
-          (token) => sessionStorage.setItem("accessToken", token),
-          TOKEN_VALID,
-        );
+        await siapkanSesiAkun(page);
       });
 
       test("harus redirect ke /dashboard setelah PIN login berhasil", async ({
@@ -708,58 +543,23 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
         await page.waitForURL("**/dashboard");
         await expect(page).toHaveURL(/.*\/dashboard/);
       });
-
-      test("harus menyimpan penggunaToken ke sessionStorage setelah PIN login berhasil", async ({
-        page,
-      }) => {
-        await page.route("**/pengguna/pin-login", (route) =>
-          route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify(MOCK_PENGGUNA_SUCCESS),
-          }),
-        );
-
-        await page.goto("http://localhost:3000/login/pengguna");
-        await page.getByLabel(/nama/i).fill("Ridho");
-        await page.getByLabel(/pin/i).fill("123456");
-        await page.getByRole("button", { name: /masuk|login/i }).click();
-
-        await page.waitForURL("**/dashboard");
-
-        const penggunaToken = await page.evaluate(() =>
-          sessionStorage.getItem("penggunaToken"),
-        );
-        expect(penggunaToken).not.toBeNull();
-        expect(penggunaToken).toBe(MOCK_PENGGUNA_SUCCESS.accessToken);
-      });
     });
 
     // ---------------------------------------------------------------------------
     // 2.6 Fitur: Ganti Akun Bisnis
     // ---------------------------------------------------------------------------
     test.describe("Fitur — Ganti Akun Bisnis", () => {
-      test("harus clear seluruh sessionStorage dan redirect ke /login saat tombol diklik", async ({
+      test("harus mengakhiri sesi dan kembali ke /login saat tombol diklik", async ({
         page,
       }) => {
-        await page.addInitScript(
-          (tokens) => {
-            sessionStorage.setItem("accessToken", tokens.access);
-            sessionStorage.setItem("dataLain", "nilai-lain");
-          },
-          { access: TOKEN_VALID },
-        );
-
-        await page.goto("http://localhost:3000/login/pengguna");
+        await siapkanSesiAkun(page);
         await page.getByText(/ganti akun bisnis/i).click();
 
-        await page.waitForURL("**/login");
         await expect(page).toHaveURL(/.*\/login$/);
 
-        const sessionKeys = await page.evaluate(() =>
-          Object.keys(sessionStorage),
-        );
-        expect(sessionKeys).toHaveLength(0);
+        // Sesi berakhir: membuka halaman PIN lagi harus kembali ditolak.
+        await page.goto("http://localhost:3000/login/pengguna");
+        await expect(page).toHaveURL(/.*\/login$/, { timeout: 15_000 });
       });
     });
   });

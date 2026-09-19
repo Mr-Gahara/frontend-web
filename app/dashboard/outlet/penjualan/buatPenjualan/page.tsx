@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useSession } from "@/lib/auth/useSession";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { decodeJWT } from "@/lib/decodeToken";
 import { PenjualanRequest, ItemPenjualanRequest } from "@/types/penjualan";
 import { GetProdukResponse } from "@/types/produk";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -83,14 +83,8 @@ export default function BuatPenjualanPage() {
   const queryClient = useQueryClient();
 
   // EKSTRAKSI ID PENGGUNA (KASIR)
-  const token =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("penggunaToken")
-      : null;
-  const payloadToken = token ? decodeJWT(token) : null;
-  const currentUserId = payloadToken?._id || payloadToken?.id || "";
-  const currentLocationId =
-    payloadToken?.locationID || payloadToken?.lokasiID || "";
+  const { pengguna } = useSession();
+  const currentUserId = pengguna?.id ?? "";
 
   // FORM STATE
   const [pelangganID, setPelangganID] = useState("");
@@ -407,7 +401,6 @@ export default function BuatPenjualanPage() {
     tanggalTransaksi.setHours(Number(hour), Number(minute), 0);
 
     const payload: PenjualanRequest = {
-      locationID: currentLocationId || undefined,
       penggunaID: currentUserId,
       pelangganID,
       jenisTransaksi: "INVOICE",

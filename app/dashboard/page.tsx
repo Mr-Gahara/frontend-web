@@ -2,35 +2,28 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { decodeJWT } from "@/lib/decodeToken";
+import { useSession } from "@/lib/auth/useSession";
 
 const DashboardPage = () => {
   const router = useRouter();
   
   useAuthGuard();
+  const { permissions, sudahMasuk } = useSession();
 
   useEffect(() => {
-    // Ambil token untuk membedah izin (permissions)
-    const token = sessionStorage.getItem("penggunaToken");
-    if (!token) return; // Jika kosong, biarkan useAuthGuard yang bekerja melempar ke /login
+    // Tunggu pemulihan sesi selesai sebelum memutuskan tujuan.
+    if (!sudahMasuk) return;
 
-    const payload = decodeJWT(token);
-    const permissions = payload?.permissions || [];
-    const role = payload?.role;
-    
-    // Prioritas 1 & 2: Owner bebas masuk ke Outlet sebagai default, atau Staf dengan izin Outlet
-    if (role === "Owner" || permissions.includes("read-dashboard-outlet")) {
+    // Owner memegang seluruh permission di backend, sehingga pemeriksaan
+    // berbasis permission sudah mencakupnya tanpa perlu cek nama role.
+    if (permissions.includes("read-dashboard-outlet")) {
       router.replace("/dashboard/outlet");
-    } 
-    // Prioritas 3: Staf murni Gudang (Tidak punya akses Outlet, tapi punya akses Gudang)
-    else if (permissions.includes("read-dashboard-gudang")) {
+    } else if (permissions.includes("read-dashboard-gudang")) {
       router.replace("/dashboard/gudang");
-    } 
-    // Prioritas 4: Staf tanpa akses ke dasbor mana pun (Hanya bisa akses global)
-    else {
+    } else {
       router.replace("/dashboard/profil");
     }
-  }, [router]);
+  }, [sudahMasuk, permissions, router]);
 
   // Kembalikan UI kosong dengan indikator loading yang elegan
   // karena user hanya akan melihat halaman ini selama beberapa milidetik
