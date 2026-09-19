@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { akhiriSesi } from "@/lib/auth/session";
 import { useSession } from "@/lib/auth/useSession";
+import { bolehBukaGrup, bolehBukaHalaman } from "@/lib/auth/permissions";
 import { apiClient } from "@/lib/apiClient";
 import { LokasiListResponse } from "@/types/location";
 
@@ -75,14 +76,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 type SubMenuItem = {
   label: string;
   href: string;
-  permission?: string;
 };
 
 type MenuItem = {
   label: string;
   href: string;
   icon: React.ElementType;
-  permission?: string;
   subItems?: SubMenuItem[];
 };
 
@@ -110,7 +109,6 @@ const outletMenus: MenuGroup[] = [
         label: "Sesi Booking & Reservasi",
         href: "/dashboard/outlet/reservasi",
         icon: UserCircle,
-        permission: "read-booking",
       },
       {
         label: "Promo & Diskon",
@@ -126,17 +124,14 @@ const outletMenus: MenuGroup[] = [
         label: "Keuangan",
         href: "/dashboard/outlet/keuangan",
         icon: CircleDollarSign,
-        permission: "read-akunkas",
         subItems: [
           {
             label: "Penjualan",
             href: "/dashboard/outlet/penjualan",
-            permission: "read-penjualan",
           },
           {
             label: "Pengeluaran",
             href: "/dashboard/outlet/pengeluaran",
-            permission: "read-pembayaran",
           },
         ],
       },
@@ -144,7 +139,6 @@ const outletMenus: MenuGroup[] = [
         label: "Laporan",
         href: "/dashboard/outlet/keuangan/ringkasanLabaRugi",
         icon: FileText,
-        permission: "read-laporan",
       },
     ],
   },
@@ -156,7 +150,6 @@ const outletMenus: MenuGroup[] = [
         label: "Data Barang",
         href: "/dashboard/outlet/inventaris-data", // Href semu untuk parent
         icon: Archive,
-        permission: "read-inventory-outlet",
         subItems: [
           {
             label: "Produk Jualan",
@@ -173,7 +166,6 @@ const outletMenus: MenuGroup[] = [
         label: "Pantau Stok",
         href: "/dashboard/outlet/inventaris-pantau", // Href semu untuk parent
         icon: ClipboardList,
-        permission: "read-inventory-outlet",
         subItems: [
           { label: "Stok Saat Ini", href: "/dashboard/outlet/inventaris/stok" },
           {
@@ -194,7 +186,6 @@ const outletMenus: MenuGroup[] = [
         label: "Suplai Gudang",
         href: "/dashboard/outlet/inventaris-suplai", // Href semu untuk parent
         icon: Truck,
-        permission: "read-inventory-outlet",
         subItems: [
           {
             label: "Minta Barang",
@@ -215,19 +206,16 @@ const outletMenus: MenuGroup[] = [
         label: "Kalender Jadwal",
         href: "/dashboard/outlet/jadwal",
         icon: CalendarDays,
-        // permission: "read-jadwal-shift-outlet",
       },
       {
         label: "Pola Roster",
         href: "/dashboard/outlet/pola-roster",
         icon: CalendarRange,
-        // permission: "read-pola-roster-outlet",
       },
       {
         label: "Master Shift",
         href: "/dashboard/outlet/shift",
         icon: Clock,
-        // permission: "read-shift-outlet",
       },
     ],
   },
@@ -238,13 +226,11 @@ const outletMenus: MenuGroup[] = [
         label: "Pelanggan",
         href: "/dashboard/outlet/pelanggan",
         icon: UserCircle,
-        permission: "read-pelanggan",
       },
       {
         label: "Karyawan & Staff",
         href: "/dashboard/outlet/pengguna",
         icon: Users,
-        permission: "read-pengguna",
       },
       {
         label: "Pengaturan Outlet",
@@ -274,19 +260,16 @@ const gudangMenus: MenuGroup[] = [
         label: "Barang Gudang",
         href: "/dashboard/gudang/inventaris",
         icon: Package,
-        permission: "read-inventory-gudang",
       },
       {
         label: "Jurnal Stok",
         href: "/dashboard/gudang/jurnalStok",
         icon: BookOpen,
-        permission: "read-jurnal-stok",
       },
       {
         label: "Stock Opname",
         href: "/dashboard/gudang/stockOpname",
         icon: ClipboardList,
-        permission: "read-stock-opname",
       },
     ],
   },
@@ -297,19 +280,16 @@ const gudangMenus: MenuGroup[] = [
         label: "Pengajuan Stok",
         href: "/dashboard/gudang/pengajuanStok",
         icon: FileText,
-        permission: "read-pengajuan-stok",
       },
       {
         label: "Transfer Stok",
         href: "/dashboard/gudang/transferStok",
         icon: ArrowRightLeft,
-        permission: "read-transfer-stok",
       },
       {
         label: "Pengiriman Stok",
         href: "/dashboard/gudang/pengirimanStok",
         icon: Truck,
-        permission: "read-pengiriman-stok",
       },
     ],
   },
@@ -320,19 +300,16 @@ const gudangMenus: MenuGroup[] = [
         label: "Kalender Jadwal",
         href: "/dashboard/gudang/jadwal",
         icon: CalendarDays,
-        // permission: "read-jadwal-shift-gudang",
       },
       {
         label: "Pola Roster",
         href: "/dashboard/gudang/pola-roster",
         icon: CalendarRange,
-        // permission: "read-pola-roster-gudang",
       },
       {
         label: "Master Shift",
         href: "/dashboard/gudang/shift",
         icon: Clock,
-        // permission: "read-shift-gudang",
       },
     ],
   },
@@ -343,7 +320,6 @@ const gudangMenus: MenuGroup[] = [
         label: "Petugas Gudang",
         href: "/dashboard/gudang/pengguna",
         icon: Users,
-        permission: "read-pengguna",
       },
       {
         label: "Pengaturan Gudang",
@@ -426,11 +402,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   };
 
-  const hasPermission = (permission?: string) => {
-    if (role === "Owner") return true;
-    if (!permission) return true;
-    return permissions.includes(permission);
-  };
+  /**
+   * Kelayakan menu ditentukan oleh izin yang benar-benar diwajibkan backend
+   * untuk endpoint yang dipanggil halamannya (lib/auth/permissions.ts),
+   * bukan oleh nama permission yang ditulis di definisi menu.
+   *
+   * Pemeriksaan nama role dihapus: Owner memegang seluruh permission di
+   * backend, sehingga pemeriksaan berbasis daftar permission sudah mencakupnya.
+   */
+  const bolehLihatItem = (item: MenuItem) =>
+    item.subItems?.length
+      ? bolehBukaGrup(
+          item.subItems.map((s) => s.href),
+          permissions,
+        )
+      : bolehBukaHalaman(item.href, permissions);
 
   const isGudangWorkspace = pathname.startsWith("/dashboard/gudang");
   const activeMenus = isGudangWorkspace ? gudangMenus : outletMenus;
@@ -439,11 +425,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     : "Outlet Ops.";
 
   const canAccessOutlet =
-    role === "Owner" || permissions.includes("read-dashboard-outlet");
+    permissions.includes("read-dashboard-outlet");
   const canAccessGudang =
-    role === "Owner" || permissions.includes("read-dashboard-gudang");
+    permissions.includes("read-dashboard-gudang");
   const canCreateLocation =
-    role === "Owner" || permissions.includes("create-location");
+    permissions.includes("create-location");
 
   return (
     <Sidebar
@@ -536,7 +522,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         {activeMenus.map((group, gi) => {
           const visibleItems = group.items.filter((item) =>
-            hasPermission(item.permission),
+            bolehLihatItem(item),
           );
           if (visibleItems.length === 0) return null;
 
@@ -550,7 +536,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu>
                 {visibleItems.map((item) => {
                   const visibleSubItems = item.subItems?.filter((sub) =>
-                    hasPermission(sub.permission),
+                    bolehBukaHalaman(sub.href, permissions),
                   );
                   const hasSubItems =
                     visibleSubItems && visibleSubItems.length > 0;
