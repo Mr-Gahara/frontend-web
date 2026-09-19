@@ -6,8 +6,8 @@ Dokumen ini adalah sumber kebenaran kontrak antara frontend-web dan backend-js: 
 
 | Repo | Commit acuan |
 |---|---|
-| backend-js | 22e4d8a (2026-09-18) docs: alur autentikasi, tenant, dan perangkat untuk tim frontend |
-| frontend-web | 06857e1 (2026-09-18) fix(pengguna): PIN tepat 6 digit, guard hapus konsisten, dan aksesibilitas form penjualan |
+| backend-js | 4310d1c (2026-09-18) fix(pengguna): hapus pengguna tidak lagi gagal acak dan riwayat absensi dijaga |
+| frontend-web | 668951d (2026-09-18) docs(kontrak): kontrak API backend untuk frontend web berbasis bukti |
 
 Bagian 3 sampai 5 dan Lampiran A dibangkitkan dari bukti, bukan ditulis tangan:
 
@@ -81,31 +81,31 @@ Daftar "Wajib dari klien" di bagian 4 sudah mengecualikan field ini.
 
 Frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A).
 
-Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom Envelope dan ID hanya terisi untuk GET yang diambil sampelnya.
+Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`; contoh `/diskon` berarti `/api/diskon`. Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom Envelope dan ID hanya terisi untuk GET yang diambil sampelnya.
 
 ### 3.1 Tabel endpoint per modul
 
-#### `/api/absensi`
+#### `/absensi`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | GET | `/absensi/monitoring` | authPengguna | - | `{ data }` | - | 1 file |
 
-#### `/api/akun`
+#### `/akun`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | POST | `/akun/auth/login` | public | - | - | - | 1 file |
 | POST | `/akun/auth/logout` | public | - | - | - | 1 file |
 
-#### `/api/akunkas`
+#### `/akunkas`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | GET | `/akunkas` | authPengguna | `read-akunkas` | `{ data }` | `id` | 6 file |
 | POST | `/akunkas` | authPengguna | `create-akunkas` | - | - | 1 file |
 
-#### `/api/aset`
+#### `/aset`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -115,7 +115,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/aset/:id` | authPengguna | `update-aset` | - | - | 1 file |
 | DELETE | `/aset/:id` | authPengguna | `delete-aset` | - | - | 1 file |
 
-#### `/api/bahan-baku`
+#### `/bahan-baku`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -125,7 +125,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/bahan-baku/:param` | tidak ada di backend | - | - | - | 1 file |
 | DELETE | `/bahan-baku/:param` | tidak ada di backend | - | - | - | 1 file |
 
-#### `/api/bahanbaku`
+#### `/bahanbaku`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -135,7 +135,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/bahanbaku/:id` | authPengguna | `update-bahan` | - | - | 1 file |
 | DELETE | `/bahanbaku/:id` | authPengguna | `delete-bahan` | - | - | 1 file |
 
-#### `/api/diskon`
+#### `/diskon`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -144,7 +144,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/diskon/:id` | authPengguna | `update-diskon` | - | - | 1 file |
 | DELETE | `/diskon/:id` | authPengguna | `delete-diskon` | - | - | 1 file |
 
-#### `/api/inventory`
+#### `/inventory`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -153,7 +153,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PATCH | `/inventory/:id/minimum-stok` | authPengguna | `update-inventory-minimum` | - | - | 2 file |
 | POST | `/inventory/:id/opname` | authPengguna | `opname-inventory` | - | - | 2 file |
 
-#### `/api/jadwalshift`
+#### `/jadwalshift`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -163,13 +163,13 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | DELETE | `/jadwalshift/:id` | authPengguna | - | - | - | 1 file |
 | POST | `/jadwalshift/bulk` | authPengguna | - | - | - | 1 file |
 
-#### `/api/jurnalstok`
+#### `/jurnalstok`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | GET | `/jurnalstok` | authPengguna | `read-jurnal-stok` | `{ data }` | `_id`, `_id` bersarang | 2 file |
 
-#### `/api/kategori`
+#### `/kategori`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -178,13 +178,13 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/kategori/:id` | authPengguna | `update-kategori` | - | - | 1 file |
 | DELETE | `/kategori/:id` | authPengguna | `delete-kategori` | - | - | 1 file |
 
-#### `/api/laporan`
+#### `/laporan`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | GET | `/laporan/laba-rugi` | authPengguna | - | `{ data, message, success }` | - | 2 file |
 
-#### `/api/location`
+#### `/location`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -192,7 +192,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | POST | `/location` | authPengguna | `create-location` | - | - | 1 file |
 | GET | `/location/current` | authPengguna | `read-location` | `{ data, success }` | `id` | 3 file |
 
-#### `/api/metodepembayaran`
+#### `/metodepembayaran`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -202,7 +202,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/metodepembayaran/:id` | authPengguna | `update-metode-pembayaran` | - | - | 1 file |
 | DELETE | `/metodepembayaran/:id` | authPengguna | `delete-metode-pembayaran` | - | - | 1 file |
 
-#### `/api/pajak`
+#### `/pajak`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -211,7 +211,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/pajak/:id` | authPengguna | - | - | - | 1 file |
 | DELETE | `/pajak/:id` | authPengguna | - | - | - | 1 file |
 
-#### `/api/pelanggan`
+#### `/pelanggan`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -220,14 +220,14 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/pelanggan/:id` | authPengguna | `update-pelanggan` | - | - | 1 file |
 | DELETE | `/pelanggan/:id` | authPengguna | `delete-pelanggan` | - | - | 1 file |
 
-#### `/api/pembayaran`
+#### `/pembayaran`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | GET | `/pembayaran` | authPengguna | `read-pembayaran` | `{ data }` | `id` | 1 file |
 | POST | `/pembayaran` | authPengguna | `create-pembayaran` | - | - | 1 file |
 
-#### `/api/pengajuanstok`
+#### `/pengajuanstok`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -239,7 +239,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PATCH | `/pengajuanstok/:id/reject` | authPengguna | `reject-pengajuan-stok` | - | - | 1 file |
 | PATCH | `/pengajuanstok/:id/submit` | authPengguna | `update-pengajuan-stok` | - | - | 1 file |
 
-#### `/api/pengguna`
+#### `/pengguna`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -251,7 +251,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | POST | `/pengguna/pin-logout` | authPengguna | - | - | - | 1 file |
 | POST | `/pengguna/register-pengguna` | authPengguna | `create-pengguna` | - | - | 2 file |
 
-#### `/api/penjualan`
+#### `/penjualan`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -261,13 +261,13 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/penjualan/:id` | authPengguna | `update-penjualan` | - | - | 2 file |
 | DELETE | `/penjualan/:id` | authPengguna | `delete-penjualan` | - | - | 1 file |
 
-#### `/api/permission`
+#### `/permission`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | GET | `/permission` | authEither | - | `{ data, message }` | `_id`, `__v` | 4 file |
 
-#### `/api/polaroster`
+#### `/polaroster`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -276,7 +276,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/polaroster/:id` | authPengguna | - | - | - | 1 file |
 | DELETE | `/polaroster/:id` | authPengguna | - | - | - | 1 file |
 
-#### `/api/produk`
+#### `/produk`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -286,7 +286,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/produk/:id` | authPengguna | `update-produk` | - | - | 1 file |
 | DELETE | `/produk/:id` | authPengguna | `delete-produk` | - | - | 1 file |
 
-#### `/api/produkpajak`
+#### `/produkpajak`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -294,7 +294,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | GET | `/produkpajak/:targetid` | authPengguna | - | - | - | 1 file |
 | DELETE | `/produkpajak/:id` | authPengguna | - | - | - | 1 file |
 
-#### `/api/role`
+#### `/role`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -304,14 +304,14 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/role/:id` | authPengguna | `update-role` | - | - | 1 file |
 | DELETE | `/role/:id` | authPengguna | `delete-role` | - | - | 1 file |
 
-#### `/api/sesibooking`
+#### `/sesibooking`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | GET | `/sesibooking` | authPengguna | `read-booking` | `{ data }` | - | 2 file |
 | POST | `/sesibooking` | authPengguna | `create-booking` | - | - | 1 file |
 
-#### `/api/shift`
+#### `/shift`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -320,7 +320,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/shift/:id` | authPengguna | - | - | - | 1 file |
 | DELETE | `/shift/:id` | authPengguna | - | - | - | 1 file |
 
-#### `/api/stockopname`
+#### `/stockopname`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -334,7 +334,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | GET | `/stockopname/adjustments` | authPengguna | `read-stock-adjustment` | `{ count, data, success }` | `id` | 1 file |
 | GET | `/stockopname/adjustments/:id` | authPengguna | `read-stock-adjustment` | `{ data, success }` | `id` | 1 file |
 
-#### `/api/tarif`
+#### `/tarif`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -344,7 +344,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/tarif/:id` | authPengguna | `update-tarif` | - | - | 1 file |
 | DELETE | `/tarif/:id` | authPengguna | `delete-tarif` | - | - | 1 file |
 
-#### `/api/tipeaset`
+#### `/tipeaset`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
@@ -354,7 +354,7 @@ Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom En
 | PUT | `/tipeaset/:id` | authPengguna | `update-tipe-aset` | - | - | 1 file |
 | DELETE | `/tipeaset/:id` | authPengguna | `delete-tipe-aset` | - | - | 1 file |
 
-#### `/api/transferstok`
+#### `/transferstok`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
