@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/apiClient";
+import { EP } from "@/lib/api/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -138,23 +139,13 @@ export default function BuatProdukPage() {
   const { data: bahanBakuList = [], isLoading: isLoadingBahanBaku } = useQuery({
     queryKey: queryKeys.bahanBaku,
     queryFn: async () => {
-      try {
-        const res = await apiClient.get<any>(
-          "/bahan-baku",
-          undefined,
-          "pengguna",
-        );
-        const raw = res.data?.data || res.data || [];
-        return Array.isArray(raw) ? raw : [];
-      } catch (error) {
-        const res = await apiClient.get<any>(
-          "/bahanBaku",
-          undefined,
-          "pengguna",
-        );
-        const raw = res.data?.data || res.data || [];
-        return Array.isArray(raw) ? raw : [];
-      }
+      const res = await apiClient.get<any>(
+        EP.bahanBaku.list,
+        undefined,
+        "pengguna",
+      );
+      const raw = res.data?.data || res.data || [];
+      return Array.isArray(raw) ? raw : [];
     },
     staleTime: 5 * 60 * 1000,
   });

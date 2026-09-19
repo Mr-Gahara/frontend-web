@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
+import { EP } from "@/lib/api/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -60,7 +61,7 @@ export default function DaftarBahanBakuPage() {
         const outlet = locations.find((loc: any) => loc.tipe === "Outlet");
         const finalId = outlet?._id || outlet?.id;
         return finalId ? finalId : null;
-      } catch (err) {
+      } catch {
         return null;
       }
     },
@@ -94,11 +95,7 @@ export default function DaftarBahanBakuPage() {
   // --- MUTATION HAPUS (Target: Master Data) ---
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      try {
-        return await apiClient.delete(`/bahan-baku/${id}`, undefined, "pengguna");
-      } catch (error) {
-        return await apiClient.delete(`/bahanBaku/${id}`, undefined, "pengguna");
-      }
+      return await apiClient.delete(EP.bahanBaku.detail(id), undefined, "pengguna");
     },
     onSuccess: () => {
       toast.success("Berhasil Dihapus", {

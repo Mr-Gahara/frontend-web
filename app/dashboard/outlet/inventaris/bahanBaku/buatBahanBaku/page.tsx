@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
+import { EP } from "@/lib/api/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -54,7 +55,7 @@ export default function BuatBahanBakuPage() {
         const res = await apiClient.get<any>("/location/current", undefined, "pengguna");
         const raw = res?.data?.data || res?.data || res;
         return Array.isArray(raw) ? (raw.length > 0 ? raw[0] : null) : (raw || null);
-      } catch (error) {
+      } catch {
         return null;
       }
     },
@@ -95,11 +96,7 @@ export default function BuatBahanBakuPage() {
   // --- MUTATION CREATE ---
   const createMutation = useMutation<any, Error, BahanBakuRequest>({
     mutationFn: async (payload: BahanBakuRequest) => {
-      try {
-        return await apiClient.post("/bahan-baku", payload, undefined, "pengguna");
-      } catch (error) {
-        return await apiClient.post("/bahanBaku", payload, undefined, "pengguna");
-      }
+      return await apiClient.post(EP.bahanBaku.list, payload, undefined, "pengguna");
     },
     onSuccess: () => {
       toast.success("Berhasil Menambahkan", {

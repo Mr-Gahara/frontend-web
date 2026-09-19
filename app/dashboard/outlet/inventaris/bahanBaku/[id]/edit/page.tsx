@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
+import { EP } from "@/lib/api/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -49,14 +50,8 @@ export default function EditBahanBakuPage() {
   } = useQuery({
     queryKey: [...queryKeys.bahanBaku, "detail", bahanId],
     queryFn: async () => {
-      try {
-        const res = await apiClient.get<any>(`/bahan-baku/${bahanId}`, undefined, "pengguna");
-        return res.data?.data || res.data;
-      } catch (error) {
-        // Fallback endpoint camelCase
-        const res = await apiClient.get<any>(`/bahanBaku/${bahanId}`, undefined, "pengguna");
-        return res.data?.data || res.data;
-      }
+      const res = await apiClient.get<any>(EP.bahanBaku.detail(bahanId), undefined, "pengguna");
+      return res.data?.data || res.data;
     },
     enabled: !!bahanId,
   });
@@ -89,11 +84,7 @@ export default function EditBahanBakuPage() {
   // --- MUTATION UPDATE ---
   const updateMutation = useMutation({
     mutationFn: async (payload: BahanBakuEditFormOutput) => {
-      try {
-        return await apiClient.put(`/bahan-baku/${bahanId}`, payload, undefined, "pengguna");
-      } catch (error) {
-        return await apiClient.put(`/bahanBaku/${bahanId}`, payload, undefined, "pengguna");
-      }
+      return await apiClient.put(EP.bahanBaku.detail(bahanId), payload, undefined, "pengguna");
     },
     onSuccess: () => {
       toast.success("Berhasil Diperbarui", {

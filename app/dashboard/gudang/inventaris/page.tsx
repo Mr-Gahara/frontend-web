@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
+import { EP } from "@/lib/api/endpoints";
 import { queryKeys } from "@/lib/queryKeys";
 import { useDebounce } from "@/hooks/use-debounce";
 import { toast } from "sonner";
@@ -85,7 +86,7 @@ export default function GudangInventoryPage() {
         const gudang = locations.find((loc: any) => loc.tipe === "Gudang");
         const finalId = gudang?._id || gudang?.id;
         return finalId ? finalId : null;
-      } catch (err) {
+      } catch {
         return null;
       }
     },
@@ -110,13 +111,8 @@ export default function GudangInventoryPage() {
   const { data: masterBahanBaku = [], isLoading: isLoadingMaster } = useQuery({
     queryKey: queryKeys.bahanBaku,
     queryFn: async () => {
-      try {
-        const res = await apiClient.get<any>("/bahan-baku", undefined, "pengguna");
-        return res.data?.data || res.data || [];
-      } catch (err) {
-        const res = await apiClient.get<any>("/bahanBaku", undefined, "pengguna");
-        return res.data?.data || res.data || [];
-      }
+      const res = await apiClient.get<any>(EP.bahanBaku.list, undefined, "pengguna");
+      return res.data?.data || res.data || [];
     },
     // Query ini hanya aktif jika modal tambah barang dibuka agar hemat bandwidth
     enabled: addItemModal, 
