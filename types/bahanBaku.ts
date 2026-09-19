@@ -29,6 +29,11 @@ export interface BahanBakuRequest {
   /** Stok awal, diinjeksi backend ke inventory saat bahan baku dibuat. */
   stok?: number;
   /**
+   * Batas stok minimum entri inventory yang dibuat backend saat bahan baku
+   * ditambahkan. Dibaca bahanBakuService, tidak diperiksa validator.
+   */
+  stokMinimum?: number;
+  /**
    * Lokasi tujuan injeksi stok awal. Tidak diperiksa validator, tetapi
    * dibaca bahanBakuService: bila tidak dikirim, backend memakai lokasi
    * default tenant, sehingga stok bisa mendarat di lokasi yang keliru.

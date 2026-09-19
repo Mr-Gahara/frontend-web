@@ -13,7 +13,12 @@
  * sehingga invalidateQueries pada akar membatalkan seluruh turunannya.
  */
 
-type Filter = Record<string, unknown> | undefined;
+/**
+ * Filter query. Sengaja bertipe object, bukan Record<string, unknown>,
+ * agar interface bernama (misalnya FilterInventory) dapat dipakai langsung;
+ * TypeScript tidak memberi index signature implisit pada interface.
+ */
+type Filter = object | undefined;
 type Workspace = "outlet" | "gudang" | "keduanya" | string;
 
 const kunci = <T extends readonly unknown[]>(k: T) => k;

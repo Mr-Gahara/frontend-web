@@ -552,7 +552,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validateBahanBakuPayload (validators/bahanBakuValidator.js)
 - Wajib dari klien: `namaBahan`
 - Field lain yang dikenali: `satuan`, `stok`
-- Tidak diperiksa validator tetapi dipakai service: `locationID` (lokasi tujuan injeksi stok awal; tanpa ini backend memakai lokasi default tenant)
+- Tidak diperiksa validator tetapi dipakai service: `locationID` (lokasi tujuan injeksi stok awal; tanpa ini backend memakai lokasi default tenant), `stokMinimum` (batas minimum entri inventory yang dibuat)
 - Nilai sah: `VALID_UNITS`: kg, gram, liter, ml, pcs, pak, unit
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`

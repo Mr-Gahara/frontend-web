@@ -1,15 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useHapusBahanBaku } from "@/features/bahan-baku/hooks";
+import { useDaftarInventory, useLokasiBertipe } from "@/features/inventaris/hooks";
+import { pesanError } from "@/lib/api/error";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { EP } from "@/lib/api/endpoints";
-import { queryKeys } from "@/lib/queryKeys";
 import { useDebounce } from "@/hooks/use-debounce";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Inventory } from "@/types/inventory";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,87 +31,48 @@ import {
   Box,
   AlertTriangle,
   CheckCircle2,
-  Package,
-  Loader2
+  Package
 } from "lucide-react";
 
 export default function DaftarBahanBakuPage() {
   useAuthGuard();
   const router = useRouter();
-  const queryClient = useQueryClient();
-
   // --- STATE ---
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 500);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedBahanId, setSelectedBahanId] = useState<string | null>(null);
 
-  // --- FETCH LOKASI OUTLET ---
-  const { data: outletId, isLoading: isLoadingLokasi } = useQuery({
-    queryKey: queryKeys.lokasi.daftar({ tipe: "Outlet" }),
-    queryFn: async () => {
-      try {
-        const res = await apiClient.get<any>("/location", undefined, "pengguna");
-        const raw = res.data?.data || res.data || [];
-        const locations = Array.isArray(raw) ? raw : [];
-        
-        // Asumsi: Ambil lokasi pertama yang bertipe Outlet
-        const outlet = locations.find((loc: any) => loc.tipe === "Outlet");
-        const finalId = outlet?._id || outlet?.id;
-        return finalId ? finalId : null;
-      } catch {
-        return null;
-      }
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+  // Halaman ini menampilkan stok bahan baku pada satu lokasi outlet.
+  const { lokasiId: outletId, isLoading: isLoadingLokasi } = useLokasiBertipe("Outlet");
 
-  // --- FETCH DATA INVENTORY OUTLET ---
   const {
     data: inventoryList = [],
     isLoading: isLoadingInventory,
     isError,
-  } = useQuery({
-    queryKey: [...queryKeys.inventory.daftar(outletId || "outlet"), debouncedSearch],
-    queryFn: async () => {
-      const params: Record<string, string> = { 
-        locationID: outletId,
-      };
-      if (debouncedSearch) params.search = debouncedSearch;
+  } = useDaftarInventory({ locationID: outletId, search: debouncedSearch });
 
-      const res = await apiClient.get<any>(
-        "/inventory",
-        params,
-        "pengguna"
-      );
-      const raw = res.data?.data || res.data || [];
-      return Array.isArray(raw) ? (raw as Inventory[]) : [];
-    },
-    enabled: !!outletId,
-  });
+  // Menghapus bahan baku juga menghapus entri inventorinya di backend;
+  // invalidasi keduanya ditangani hook.
+  const deleteMutation = useHapusBahanBaku();
 
-  // --- MUTATION HAPUS (Target: Master Data) ---
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return await apiClient.delete(EP.bahanBaku.detail(id), undefined, "pengguna");
-    },
-    onSuccess: () => {
-      toast.success("Berhasil Dihapus", {
-        description: "Data bahan baku telah dihapus dari sistem.",
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku.semua });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar(outletId || "outlet") });
-      setDeleteModalOpen(false);
-      setSelectedBahanId(null);
-    },
-    onError: (error: any) => {
-      toast.error("Gagal Menghapus", {
-        description: error.message || "Terjadi kesalahan saat menghapus data.",
-      });
-      setDeleteModalOpen(false);
-      setSelectedBahanId(null);
-    },
-  });
+  const hapusBahanBaku = (id: string) =>
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        toast.success("Berhasil Dihapus", {
+          description: "Data bahan baku telah dihapus dari sistem.",
+        });
+        setDeleteModalOpen(false);
+        setSelectedBahanId(null);
+      },
+      onError: (err) => {
+        toast.error("Gagal Menghapus", {
+          description: pesanError(err, "Terjadi kesalahan saat menghapus data."),
+        });
+        setDeleteModalOpen(false);
+        setSelectedBahanId(null);
+      },
+    });
 
   // --- HANDLER HAPUS ---
   const handleDeleteClick = (id: string) => {
@@ -285,6 +244,7 @@ export default function DaftarBahanBakuPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteClick(masterId)}
+                            aria-label="Hapus bahan baku"
                             className="h-8 px-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50"
                           >
                             <Trash2 className="w-4 h-4" />

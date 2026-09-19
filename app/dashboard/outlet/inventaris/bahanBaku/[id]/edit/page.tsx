@@ -3,16 +3,14 @@
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { EP } from "@/lib/api/endpoints";
-import { queryKeys } from "@/lib/queryKeys";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
+import { useBahanBaku, usePerbaruiBahanBaku } from "@/features/bahan-baku/hooks";
+import { bahanBakuSchema, type BahanBakuForm } from "@/features/bahan-baku/schema";
+import { pesanError } from "@/lib/api/error";
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,36 +23,18 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, PackageCheck, Save, Loader2, Ban } from "lucide-react";
 
-// --- ZOD SCHEMA ---
-// Hanya fokus pada identitas Master Data
-const bahanBakuEditSchema = z.object({
-  namaBahan: z.string().min(1, "Nama bahan baku wajib diisi"),
-  satuan: z.enum(SATUAN_BAHAN_OPTIONS, { message: "Silakan pilih satuan" }),
-});
-
-type BahanBakuEditFormInput = z.input<typeof bahanBakuEditSchema>;
-type BahanBakuEditFormOutput = z.output<typeof bahanBakuEditSchema>;
-
 export default function EditBahanBakuPage() {
   useAuthGuard();
   const router = useRouter();
   const params = useParams();
   const bahanId = params.id as string;
-  const queryClient = useQueryClient();
 
-  // --- FETCH DETAIL DATA ---
+  // Fetch, mutation, dan invalidasi cache ditangani features/bahan-baku.
   const {
     data: detailBahan,
     isLoading: isLoadingDetail,
     isError: isErrorDetail,
-  } = useQuery({
-    queryKey: [...queryKeys.bahanBaku.semua, "detail", bahanId],
-    queryFn: async () => {
-      const res = await apiClient.get<any>(EP.bahanBaku.detail(bahanId), undefined, "pengguna");
-      return res.data?.data || res.data;
-    },
-    enabled: !!bahanId,
-  });
+  } = useBahanBaku(bahanId);
 
   // --- REACT HOOK FORM ---
   const {
@@ -63,8 +43,8 @@ export default function EditBahanBakuPage() {
     control,
     reset,
     formState: { errors, isDirty },
-  } = useForm<BahanBakuEditFormInput, any, BahanBakuEditFormOutput>({
-    resolver: zodResolver(bahanBakuEditSchema),
+  } = useForm<BahanBakuForm>({
+    resolver: zodResolver(bahanBakuSchema),
     defaultValues: {
       namaBahan: "",
       satuan: "gram",
@@ -75,36 +55,28 @@ export default function EditBahanBakuPage() {
   useEffect(() => {
     if (detailBahan) {
       reset({
-        namaBahan: detailBahan.namaBahan || "",
-        satuan: detailBahan.satuan || "gram",
+        namaBahan: detailBahan.namaBahan,
+        satuan: detailBahan.satuan,
       });
     }
   }, [detailBahan, reset]);
 
-  // --- MUTATION UPDATE ---
-  const updateMutation = useMutation({
-    mutationFn: async (payload: BahanBakuEditFormOutput) => {
-      return await apiClient.put(EP.bahanBaku.detail(bahanId), payload, undefined, "pengguna");
-    },
-    onSuccess: () => {
-      toast.success("Berhasil Diperbarui", {
-        description: "Perubahan master data bahan baku telah disimpan.",
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku.semua });
-      // Update tabel stok agar nama/satuan baru langsung tercermin di inventory
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.semua }); 
-      router.push("/dashboard/outlet/inventaris/bahanBaku");
-    },
-    onError: (err: any) => {
-      toast.error("Gagal Memperbarui", {
-        description: err.message || "Terjadi kesalahan saat menyimpan data.",
-      });
-    },
-  });
+  const updateMutation = usePerbaruiBahanBaku(bahanId);
 
-  // --- HANDLER SUBMIT ---
-  const onSubmit = (data: BahanBakuEditFormOutput) => {
-    updateMutation.mutate(data);
+  const onSubmit = (data: BahanBakuForm) => {
+    updateMutation.mutate(data, {
+      onSuccess: () => {
+        toast.success("Berhasil Diperbarui", {
+          description: "Perubahan master data bahan baku telah disimpan.",
+        });
+        router.push("/dashboard/outlet/inventaris/bahanBaku");
+      },
+      onError: (err) => {
+        toast.error("Gagal Memperbarui", {
+          description: pesanError(err, "Terjadi kesalahan saat menyimpan data."),
+        });
+      },
+    });
   };
 
   // --- RENDER CONDITIONS ---
@@ -170,10 +142,11 @@ export default function EditBahanBakuPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Nama Bahan Baku */}
             <div className="space-y-2 sm:col-span-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label htmlFor="namaBahan" className="text-sm font-bold text-[#0A2947]">
                 Nama Bahan Baku <span className="text-red-500">*</span>
               </label>
               <Input
+                id="namaBahan"
                 {...register("namaBahan")}
                 placeholder="Contoh: Biji Kopi Arabica, Susu Segar, dsb."
                 className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 h-12 focus-visible:ring-1 focus-visible:ring-[#0A2947]"

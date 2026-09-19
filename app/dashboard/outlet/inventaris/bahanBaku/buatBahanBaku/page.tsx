@@ -1,18 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { EP } from "@/lib/api/endpoints";
-import { queryKeys } from "@/lib/queryKeys";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { BahanBakuRequest, SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
+import { useBuatBahanBaku, useLokasiAktif } from "@/features/bahan-baku/hooks";
+import { bahanBakuSchema, type BahanBakuForm } from "@/features/bahan-baku/schema";
+import { pesanError } from "@/lib/api/error";
 
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,55 +22,17 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, PackagePlus, Info, Save, MapPin } from "lucide-react";
 
-// --- ZOD SCHEMA ---
-const bahanBakuSchema = z.object({
-  namaBahan: z.string().min(1, "Nama bahan baku wajib diisi"),
-  satuan: z.enum(SATUAN_BAHAN_OPTIONS, { message: "Silakan pilih satuan" }),
-  stok: z.coerce.number().min(0, "Stok tidak boleh negatif").default(0),
-  minimalStok: z.coerce
-    .number()
-    .min(0, "Batas stok minimum tidak boleh negatif")
-    .default(0),
-});
-
-type BahanBakuFormInput = z.input<typeof bahanBakuSchema>;
-type BahanBakuFormOutput = z.output<typeof bahanBakuSchema>;
-
 export default function BuatBahanBakuPage() {
   useAuthGuard();
   const router = useRouter();
-  const queryClient = useQueryClient();
+  // Lokasi aktif menentukan tujuan injeksi stok awal di backend.
+  // Respons sudah ternormalisasi (id, bukan _id) oleh lapisan API.
+  const { data: activeLocation, isLoading: isLoadingLokasi } = useLokasiAktif();
 
-  const [activeLocationId, setActiveLocationId] = useState<string>("");
-  const [locationName, setLocationName] = useState<string>("Memeriksa lokasi...");
-
-  // --- FETCH DATA LOKASI AKTIF (CRITICAL FOR HYBRID DESIGN) ---
-  const { data: activeLocation = null, isLoading: isLoadingLokasi } = useQuery<any>({
-    queryKey: queryKeys.lokasi.aktif(),
-    queryFn: async () => {
-      try {
-        const res = await apiClient.get<any>("/location/current", undefined, "pengguna");
-        const raw = res?.data?.data || res?.data || res;
-        return Array.isArray(raw) ? (raw.length > 0 ? raw[0] : null) : (raw || null);
-      } catch {
-        return null;
-      }
-    },
-    refetchOnMount: true,
-  });
-
-  useEffect(() => {
-    if (!isLoadingLokasi) {
-      if (activeLocation && (activeLocation.id || activeLocation._id)) {
-        const idLoc = activeLocation.id || activeLocation._id;
-        const namaLoc = activeLocation.nama || activeLocation.namaLokasi || "Lokasi Aktif";
-        setActiveLocationId(idLoc);
-        setLocationName(namaLoc);
-      } else {
-        setLocationName("Lokasi tidak ditemukan");
-      }
-    }
-  }, [activeLocation, isLoadingLokasi]);
+  const activeLocationId = activeLocation?.id ?? "";
+  const locationName = isLoadingLokasi
+    ? "Memeriksa lokasi..."
+    : (activeLocation?.nama ?? "Lokasi tidak ditemukan");
 
   // --- REACT HOOK FORM ---
   const {
@@ -81,47 +40,41 @@ export default function BuatBahanBakuPage() {
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<BahanBakuFormInput, any, BahanBakuFormOutput>({
+  } = useForm<BahanBakuForm>({
     resolver: zodResolver(bahanBakuSchema),
     defaultValues: {
       namaBahan: "",
       satuan: "gram",
       stok: 0,
-      minimalStok: 0,
+      stokMinimum: 0,
     },
   });
 
   const currentSatuan = useWatch({ control, name: "satuan" });
 
-  // --- MUTATION CREATE ---
-  const createMutation = useMutation<any, Error, BahanBakuRequest>({
-    mutationFn: async (payload: BahanBakuRequest) => {
-      return await apiClient.post(EP.bahanBaku.list, payload, undefined, "pengguna");
-    },
-    onSuccess: () => {
-      toast.success("Berhasil Menambahkan", {
-        description: "Bahan baku baru berhasil disimpan dan diinjeksi ke Inventory.",
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku.semua });
-      // Invalidate inventory agar tabel Stok Real-time langsung terupdate
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.semua }); 
-      router.push("/dashboard/outlet/inventaris/bahanBaku");
-    },
-    onError: (err: any) => {
-      toast.error("Gagal Menyimpan", {
-        description: err.message || "Terjadi kesalahan saat menyimpan data.",
-      });
-    },
-  });
+  const createMutation = useBuatBahanBaku();
 
-  // --- HANDLER SUBMIT ---
-  const onSubmit = (data: BahanBakuFormOutput) => {
-    // Gabungkan data form dengan locationID yang terdeteksi
+  const onSubmit = (data: BahanBakuForm) => {
+    // locationID menentukan lokasi injeksi stok awal di backend; tanpa itu
+    // backend memakai lokasi default tenant.
     const payload: BahanBakuRequest = {
       ...data,
-      locationID: activeLocationId || undefined, // Dikirim agar backend bisa inject ke Inventory
+      locationID: activeLocationId || undefined,
     };
-    createMutation.mutate(payload);
+    createMutation.mutate(payload, {
+      onSuccess: () => {
+        toast.success("Berhasil Menambahkan", {
+          description:
+            "Bahan baku baru berhasil disimpan dan diinjeksi ke Inventory.",
+        });
+        router.push("/dashboard/outlet/inventaris/bahanBaku");
+      },
+      onError: (err) => {
+        toast.error("Gagal Menyimpan", {
+          description: pesanError(err, "Terjadi kesalahan saat menyimpan data."),
+        });
+      },
+    });
   };
 
   return (
@@ -175,10 +128,11 @@ export default function BuatBahanBakuPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Nama Bahan Baku */}
             <div className="space-y-2 sm:col-span-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-[#0A2947]" htmlFor="namaBahan">
                 Nama Bahan Baku <span className="text-red-500">*</span>
               </label>
               <Input
+                id="namaBahan"
                 {...register("namaBahan")}
                 placeholder="Contoh: Biji Kopi Arabica, Susu Segar, dsb."
                 className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 h-12 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
@@ -235,7 +189,7 @@ export default function BuatBahanBakuPage() {
             
             {/* Stok Awal */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-[#0A2947]" htmlFor="stok">
                 Stok Awal{" "}
                 <span className="text-[#0A2947]/50 font-medium">
                   (Opsional)
@@ -243,8 +197,9 @@ export default function BuatBahanBakuPage() {
               </label>
               <div className="relative">
                 <Input
+                  id="stok"
                   type="number"
-                  {...register("stok")}
+                  {...register("stok", { valueAsNumber: true })}
                   placeholder="0"
                   className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-mono font-bold h-12 pr-16 focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
@@ -263,7 +218,7 @@ export default function BuatBahanBakuPage() {
             
             {/* Batas Stok Minimum */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-[#0A2947]" htmlFor="stokMinimum">
                 Batas Stok Minimum{" "}
                 <span className="text-[#0A2947]/50 font-medium">
                   (Opsional)
@@ -271,8 +226,9 @@ export default function BuatBahanBakuPage() {
               </label>
               <div className="relative">
                 <Input
+                  id="stokMinimum"
                   type="number"
-                  {...register("minimalStok")}
+                  {...register("stokMinimum", { valueAsNumber: true })}
                   placeholder="0"
                   className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-mono font-bold h-12 pr-16 focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
@@ -281,9 +237,9 @@ export default function BuatBahanBakuPage() {
                 </div>
               </div>
               <div className="min-h-4">
-                {errors.minimalStok && (
+                {errors.stokMinimum && (
                   <span className="text-xs font-bold text-rose-500">
-                    {errors.minimalStok.message}
+                    {errors.stokMinimum.message}
                   </span>
                 )}
               </div>
