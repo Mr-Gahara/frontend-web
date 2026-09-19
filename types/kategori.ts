@@ -1,24 +1,16 @@
 export interface Kategori {
-  _id: string;
+  id: string;
   namaKategori: string;
   kodeKategori: string;
-  keterangan?: string;
-  tenantID: string;
+  keterangan?: string | null;
+  /** Di-populate backend dengan nama toko. */
+  tenantID?: { id: string; namaToko: string };
   createdAt: string;
   updatedAt: string;
 }
- 
+
 export interface KategoriRequest {
   namaKategori: string;
   kodeKategori: string;
   keterangan?: string;
-}
- 
-export interface GetKategoriResponse {
-  data: Kategori[];
-}
- 
-export interface KategoriResponse {
-  message: string;
-  data: Kategori;
 }

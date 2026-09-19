@@ -118,7 +118,7 @@ export default function ProdukPage() {
           </span>
         ),
         cell: ({ row }) => {
-          const namaKategori = row.original.kategori || "-";
+          const namaKategori = row.original.kategori || "Tanpa kategori";
           return <span className="font-medium text-[#0A2947]/80 capitalize">{namaKategori}</span>;
         },
       },

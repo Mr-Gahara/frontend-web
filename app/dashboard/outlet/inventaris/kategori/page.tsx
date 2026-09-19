@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
+import { useSession } from "@/lib/auth/useSession";
+import { pesanError } from "@/lib/api/error";
+import { pesanErrorKategori } from "@/features/kategori/pesan";
 import {
-  Kategori,
-  KategoriRequest,
-  GetKategoriResponse,
-  KategoriResponse,
-} from "@/types/kategori";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/queryKeys";
+  useDaftarKategori,
+  useHapusKategori,
+  useSimpanKategori,
+} from "@/features/kategori/hooks";
+import { skemaKategori, type NilaiFormKategori } from "@/features/kategori/schema";
+import { useDaftarProduk } from "@/features/produk/hooks";
+import { bolehBacaProduk } from "@/features/produk/izin";
+import type { Kategori } from "@/types/kategori";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
@@ -43,7 +48,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowUpDown, MoreHorizontal, Plus, Tag } from "lucide-react";
 
-const emptyForm: KategoriRequest = {
+const nilaiKosong: NilaiFormKategori = {
   namaKategori: "",
   kodeKategori: "",
   keterangan: "",
@@ -54,101 +59,109 @@ export default function KategoriPage() {
 
   const [showDialog, setShowDialog] = useState(false);
   const [editTarget, setEditTarget] = useState<Kategori | null>(null);
-  const [form, setForm] = useState<KategoriRequest>(emptyForm);
   const [formError, setFormError] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Kategori | null>(null);
 
-  const queryClient = useQueryClient();
-
   const {
-    data = [],
-    isLoading: loading,
-    error,
-  } = useQuery({
-    queryKey: queryKeys.kategori.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<GetKategoriResponse>(
-        "/kategori",
-        undefined,
-        "pengguna",
-      );
-      return res.data;
-    },
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<NilaiFormKategori>({
+    resolver: zodResolver(skemaKategori),
+    defaultValues: nilaiKosong,
   });
+
+  const { data = [], isLoading: loading, error } = useDaftarKategori();
+  const saveKategoriMutation = useSimpanKategori();
+  const deleteMutation = useHapusKategori();
+
+  // Hitungan pemakaian kategori oleh produk, untuk mencegah hapus kategori
+  // yang masih dipakai. Backend tidak memeriksanya (kategoriService.delete),
+  // sehingga penghapusan meninggalkan produk tanpa kategori. Hitungan hanya
+  // diandalkan bila daftar produk boleh dibaca dan sudah termuat; selain itu
+  // dialog hapus menampilkan peringatan.
+  const { permissions } = useSession();
+  const bolehHitungPemakaian = bolehBacaProduk(permissions);
+  const { data: produkList = [], isSuccess: produkTermuat } = useDaftarProduk({
+    enabled: bolehHitungPemakaian,
+  });
+  const pemakaianKategori = useMemo(() => {
+    const hitung = new Map<string, number>();
+    for (const produk of produkList) {
+      hitung.set(produk.kategoriID, (hitung.get(produk.kategoriID) ?? 0) + 1);
+    }
+    return hitung;
+  }, [produkList]);
+  const pemakaianDiketahui = bolehHitungPemakaian && produkTermuat;
+  const jumlahPemakaian = deleteTarget
+    ? (pemakaianKategori.get(deleteTarget.id) ?? 0)
+    : 0;
+  const kategoriDipakai = pemakaianDiketahui && jumlahPemakaian > 0;
+  const pesanHapus = kategoriDipakai
+    ? "Kategori ini masih dipakai " + jumlahPemakaian + " produk. Pindahkan produk tersebut ke kategori lain sebelum menghapus."
+    : pemakaianDiketahui
+      ? "Tindakan ini tidak dapat dibatalkan."
+      : "Tindakan ini tidak dapat dibatalkan. Produk yang masih memakai kategori ini akan kehilangan kategorinya dan perlu dipilihkan kategori baru saat diedit.";
 
   useEffect(() => {
     if (error) {
       toast.error("Gagal", {
-        description:
-          error instanceof Error
-            ? error.message
-            : "Gagal memuat data kategori.",
+        description: pesanError(error, "Gagal memuat data kategori."),
       });
     }
   }, [error]);
 
-  const saveKategoriMutation = useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id?: string;
-      data: KategoriRequest;
-    }) => {
-      if (id) {
-        return await apiClient.put<KategoriResponse>(
-          `/kategori/${id}`,
-          data,
-          undefined,
-          "pengguna",
-        );
-      }
-      return await apiClient.post<KategoriResponse>(
-        "/kategori",
-        data,
-        undefined,
-        "pengguna",
-      );
-    },
-    onSuccess: (_, variables) => {
+  // Form diisi ulang setiap kali dialog dibuka: dari kategori yang diedit,
+  // atau nilai kosong untuk kategori baru.
+  useEffect(() => {
+    if (!showDialog) return;
+    reset(
+      editTarget
+        ? {
+            namaKategori: editTarget.namaKategori,
+            kodeKategori: editTarget.kodeKategori,
+            keterangan: editTarget.keterangan ?? "",
+          }
+        : nilaiKosong,
+    );
+  }, [showDialog, editTarget, reset]);
+
+  const simpan = async (nilai: NilaiFormKategori) => {
+    setFormError("");
+    try {
+      await saveKategoriMutation.mutateAsync({ id: editTarget?.id, data: nilai });
       toast.success("Berhasil", {
-        description: variables.id
+        description: editTarget
           ? "Kategori berhasil diperbarui."
           : "Kategori berhasil ditambahkan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.kategori.semua });
       setShowDialog(false);
-    },
-    onError: (err: any) => {
-      setFormError(err.message || "Gagal menyimpan data.");
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return await apiClient.delete(`/kategori/${id}`, undefined, "pengguna");
-    },
-    onSuccess: () => {
-      toast.success("Berhasil", { description: "Kategori berhasil dihapus." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.kategori.semua });
-      setDeleteTarget(null);
-    },
-    onError: (err: any) => {
-      toast.error("Gagal", {
-        description: err.message || "Gagal menghapus kategori.",
-      });
-    },
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError("");
-    await saveKategoriMutation.mutateAsync({ id: editTarget?._id, data: form });
+    } catch (err) {
+      setFormError(
+        pesanErrorKategori(err, "Gagal menyimpan data.", {
+          nilai,
+          daftar: data,
+          idDiedit: editTarget?.id,
+        }),
+      );
+    }
   };
 
-  const handleDelete = async () => {
+  // Dialog hapus bertahan selama mutation berjalan dan hanya tertutup bila
+  // berhasil (keputusan Fase 0); saat gagal, dialog tetap terbuka.
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
     if (!deleteTarget) return;
-    await deleteMutation.mutateAsync(deleteTarget._id);
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      toast.success("Berhasil", { description: "Kategori berhasil dihapus." });
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error("Gagal", {
+        description: pesanError(err, "Gagal menghapus kategori."),
+      });
+    }
   };
 
   const columns = useMemo<ColumnDef<Kategori>[]>(
@@ -222,11 +235,7 @@ export default function KategoriPage() {
                   className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
                   onClick={() => {
                     setEditTarget(row.original);
-                    setForm({
-                      namaKategori: row.original.namaKategori,
-                      kodeKategori: row.original.kodeKategori,
-                      keterangan: row.original.keterangan || "",
-                    });
+                    setFormError("");
                     setShowDialog(true);
                   }}
                 >
@@ -267,7 +276,7 @@ export default function KategoriPage() {
         <Button
           onClick={() => {
             setEditTarget(null);
-            setForm(emptyForm);
+            setFormError("");
             setShowDialog(true);
           }}
           className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold"
@@ -299,44 +308,44 @@ export default function KategoriPage() {
                 : "Isi form berikut untuk menambahkan kategori baru."}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
+          <form onSubmit={handleSubmit(simpan)} className="mt-4 flex flex-col gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label htmlFor="namaKategori" className="text-sm font-bold text-[#0A2947]">
                 Nama Kategori
               </label>
               <Input
-                value={form.namaKategori}
-                onChange={(e) =>
-                  setForm({ ...form, namaKategori: e.target.value })
-                }
+                id="namaKategori"
+                {...register("namaKategori")}
                 placeholder="Masukkan nama kategori"
-                required
+                aria-invalid={Boolean(errors.namaKategori)}
                 className="bg-white border-[#0A2947]/20"
               />
+              {errors.namaKategori && (
+                <p className="text-sm font-bold text-red-600">{errors.namaKategori.message}</p>
+              )}
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label htmlFor="kodeKategori" className="text-sm font-bold text-[#0A2947]">
                 Kode Kategori
               </label>
               <Input
-                value={form.kodeKategori}
-                onChange={(e) =>
-                  setForm({ ...form, kodeKategori: e.target.value })
-                }
+                id="kodeKategori"
+                {...register("kodeKategori")}
                 placeholder="Masukkan kode kategori"
-                required
+                aria-invalid={Boolean(errors.kodeKategori)}
                 className="bg-white border-[#0A2947]/20"
               />
+              {errors.kodeKategori && (
+                <p className="text-sm font-bold text-red-600">{errors.kodeKategori.message}</p>
+              )}
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label htmlFor="keteranganKategori" className="text-sm font-bold text-[#0A2947]">
                 Keterangan
               </label>
               <Input
-                value={form.keterangan}
-                onChange={(e) =>
-                  setForm({ ...form, keterangan: e.target.value })
-                }
+                id="keteranganKategori"
+                {...register("keterangan")}
                 placeholder="Keterangan tambahan (opsional)"
                 className="bg-white border-[#0A2947]/20"
               />
@@ -378,7 +387,7 @@ export default function KategoriPage() {
               Hapus kategori {deleteTarget?.namaKategori}?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
-              Tindakan ini tidak dapat dibatalkan.
+              {pesanHapus}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -387,7 +396,7 @@ export default function KategoriPage() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={deleteMutation.isPending}
+              disabled={deleteMutation.isPending || kategoriDipakai}
               className="cursor-pointer bg-red-600 hover:bg-red-700 text-white font-bold"
             >
               {deleteMutation.isPending ? "Menghapus..." : "Lanjutkan"}

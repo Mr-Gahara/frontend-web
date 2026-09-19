@@ -13,10 +13,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { produkApi } from "./api";
 import { queryKeys } from "@/lib/queryKeys";
 
-export function useDaftarProduk() {
+export function useDaftarProduk(opsi: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.produk.daftar(),
     queryFn: produkApi.daftar,
+    enabled: opsi.enabled ?? true,
   });
 }
 
