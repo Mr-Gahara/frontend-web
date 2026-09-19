@@ -178,19 +178,6 @@ langsung dari halaman.
 agar migrasi dapat berjalan per modul tanpa memecahkan halaman lain. Jangan
 menyapu seluruh pemakaian `apiClient` sekaligus; ganti bersama modulnya.
 
-### `lib/api/endpoints.ts`
-Konstanta path, lowercase kanonik sesuai mount path backend. Endpoint
-berparameter berupa fungsi: `EP.produk.detail(id)`.
-
-### `lib/api/client.ts`
-`apiData` dan `api`. Mengembalikan data yang sudah dinormalkan dan melempar
-`ApiError`. Token pengguna menjadi default.
-
-```ts
-apiData.get<Produk[]>(EP.produk.list)
-apiData.post<Produk>(EP.produk.list, payload)
-```
-
 ### `lib/apiClient.ts` dan `lib/api/client.ts`
 
 Dua nama yang mirip dan mudah tertukar:
@@ -203,6 +190,19 @@ Dua nama yang mirip dan mudah tertukar:
 
 Halaman yang sudah dimigrasikan tidak memanggil keduanya secara langsung,
 melainkan lewat hook di `features/`.
+
+### `lib/api/endpoints.ts`
+Konstanta path, lowercase kanonik sesuai mount path backend. Endpoint
+berparameter berupa fungsi: `EP.produk.detail(id)`.
+
+### `lib/api/client.ts`
+`apiData` dan `api`. Mengembalikan data yang sudah dinormalkan dan melempar
+`ApiError`. Token pengguna menjadi default.
+
+```ts
+apiData.get<Produk[]>(EP.produk.list)
+apiData.post<Produk>(EP.produk.list, payload)
+```
 
 ### `lib/api/error.ts`
 `ApiError` dengan `status`, `message`, `errors[]`, `code`. Helper:
