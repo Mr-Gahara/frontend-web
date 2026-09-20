@@ -155,7 +155,7 @@ export default function EditPengajuanStokPage({
       toast.success("Perubahan Disimpan", {
         description: "Draft pengajuan berhasil diperbarui.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.daftar() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.semua });
       queryClient.invalidateQueries({
         queryKey: queryKeys.pengajuanStok.detail(id),
       });

@@ -82,7 +82,7 @@ export const IZIN_HALAMAN: Record<string, readonly Izin[]> = {
   "/dashboard/outlet/inventaris/stockOpname": [IZIN.stockOpname, IZIN.location],
   "/dashboard/outlet/inventaris/stockAdjustment": [IZIN.stockAdjustment],
   "/dashboard/outlet/inventaris/jurnalStok": [IZIN.jurnalStok, IZIN.location],
-  "/dashboard/outlet/inventaris/pengajuanStok": [IZIN.pengajuanStok],
+  "/dashboard/outlet/inventaris/pengajuanStok": [IZIN.pengajuanStok, IZIN.location],
   "/dashboard/outlet/inventaris/penerimaanBarang": [IZIN.location, IZIN.transferStok],
 
   // Jadwal outlet: izin shift, pola roster, dan jadwal belum ada di backend,

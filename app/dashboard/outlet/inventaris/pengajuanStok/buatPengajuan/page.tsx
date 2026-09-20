@@ -107,7 +107,7 @@ export default function BuatPengajuanStokPage() {
       toast.success("Draft Pengajuan Disimpan", { 
         description: "Pengajuan berhasil dibuat dan siap untuk ditinjau sebelum dikirim." 
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.daftar() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.semua });
       router.push("/dashboard/outlet/inventaris/pengajuanStok");
     },
     onError: (err: any) => {

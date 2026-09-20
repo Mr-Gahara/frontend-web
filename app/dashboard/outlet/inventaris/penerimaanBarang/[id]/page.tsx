@@ -168,7 +168,7 @@ export default function EksekusiPenerimaanBarangPage({
       queryClient.invalidateQueries({ queryKey: queryKeys.transferStok.daftar() });
       queryClient.invalidateQueries({ queryKey: queryKeys.inventory.semua });
       queryClient.invalidateQueries({ queryKey: queryKeys.jurnalStok.semua });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.daftar() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.semua });
 
       router.push("/dashboard/outlet/inventaris/penerimaanBarang");
     },

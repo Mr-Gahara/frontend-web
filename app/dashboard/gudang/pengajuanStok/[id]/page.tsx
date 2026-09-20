@@ -128,7 +128,7 @@ export default function DetailPengajuanStokGudangPage({
         description:
           res.message || "Dokumen siap diproses ke tahap Surat Jalan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.daftar() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.semua });
       queryClient.invalidateQueries({
         queryKey: queryKeys.pengajuanStok.detail(id),
       });
@@ -155,7 +155,7 @@ export default function DetailPengajuanStokGudangPage({
       toast.success("Pengajuan Ditolak", {
         description: "Penolakan dan alasannya telah dikirim ke Outlet.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.daftar() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.semua });
       queryClient.invalidateQueries({
         queryKey: queryKeys.pengajuanStok.detail(id),
       });

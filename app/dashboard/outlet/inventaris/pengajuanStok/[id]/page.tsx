@@ -118,7 +118,7 @@ export default function DetailPengajuanStokPage({
       toast.success("Berhasil Diajukan", {
         description: "Permintaan stok telah dikirim ke Gudang Pusat.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.daftar() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.semua });
       queryClient.invalidateQueries({
         queryKey: queryKeys.pengajuanStok.detail(id),
       });
