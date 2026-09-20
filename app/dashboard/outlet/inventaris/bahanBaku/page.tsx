@@ -66,11 +66,10 @@ export default function DaftarBahanBakuPage() {
         setSelectedBahanId(null);
       },
       onError: (err) => {
+        // Dialog tetap terbuka agar pengguna dapat mencoba lagi (keputusan Fase 0).
         toast.error("Gagal Menghapus", {
           description: pesanError(err, "Terjadi kesalahan saat menghapus data."),
         });
-        setDeleteModalOpen(false);
-        setSelectedBahanId(null);
       },
     });
 
@@ -81,9 +80,7 @@ export default function DaftarBahanBakuPage() {
   };
 
   const confirmDelete = () => {
-    if (selectedBahanId) {
-      deleteMutation.mutate(selectedBahanId);
-    }
+    if (selectedBahanId) hapusBahanBaku(selectedBahanId);
   };
 
   // --- FILTERING (Client-side fallback) ---
@@ -280,7 +277,11 @@ export default function DaftarBahanBakuPage() {
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmDelete}
+              onClick={(e) => {
+                // AlertDialogAction menutup dialog secara bawaan; ditahan sampai hapus berhasil.
+                e.preventDefault();
+                confirmDelete();
+              }}
               disabled={deleteMutation.isPending}
               className="bg-rose-600 text-[#FFFAF3] hover:bg-rose-700 font-bold cursor-pointer border-none shadow-sm"
             >
