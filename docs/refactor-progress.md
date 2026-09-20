@@ -19,6 +19,7 @@ cd ~/Documents/frontend-web && cat docs/refactor-progress.md && git log --onelin
 Riwayat commit adalah bagian dari konteks: alasan di balik tiap keputusan
 tercatat lengkap di pesan commit, bukan hanya di dokumen ini. Untuk pertanyaan
 tentang endpoint, bentuk data, atau izin, rujuk `docs/kontrak-api.md`.
+Pastikan juga helper di `/tmp` masih ada (bagian 7, Helper penggantian).
 
 **Pastikan `git status` bersih sebelum memulai modul baru.** Bila ada perubahan
 yang belum di-commit, selesaikan atau buang dulu, agar `git diff` tetap dapat
@@ -49,12 +50,12 @@ bukan mock, sehingga akan gagal bila backend mati.
 | Direktori | Isi |
 |---|---|
 | `app/` | Rute Next.js. Idealnya tipis: tata letak dan interaksi saja |
-| `features/<modul>/` | Api, hooks, schema, dan komponen halaman bersama per modul |
+| `features/<modul>/` | Api, hooks, schema, komponen halaman dan form bersama, serta fungsi murni per modul |
 | `components/` | Komponen UI yang dipakai lintas modul, termasuk shadcn di `components/ui/` |
 | `lib/` | Fondasi: `api/`, `auth/`, `queryKeys.ts`, `apiClient.ts`, `decodeToken.ts` |
 | `types/` | Tipe respons dan payload, diturunkan dari kontrak |
 | `tests/e2e/` | Playwright, memakai backend sungguhan |
-| `tests/unit/` | Vitest untuk fondasi dan hook |
+| `tests/unit/` | Vitest untuk fondasi, hook, dan fungsi murni di `features/` |
 | `docs/` | `kontrak-api.md` dan dokumen ini |
 
 ### Konvensi penamaan dan bahasa
@@ -68,14 +69,18 @@ bukan mock, sehingga akan gagal bila backend mati.
   - Helper: `bolehBukaHalaman`, `pesanError`, `tandaiKeluar`, `akhiriSesi`
 - **Komponen halaman bersama**: `halaman-<modul>.tsx`, diekspor sebagai
   `Halaman<Modul>`.
+- **Komponen form bersama** untuk mode buat dan edit: `form-<modul>.tsx`,
+  misalnya `form-role.tsx` dan `form-produk.tsx` (diekspor sebagai `FormProduk`).
 - **Tanpa emoji atau simbol dekoratif** di kode maupun dokumen.
 
 ### Komponen per modul
 
 Selain `components/ui/` (shadcn), ada komponen khusus modul yang dipakai
 halaman: `components/pengguna/`, `components/shift/`, `components/pola-roster/`,
-dan lainnya. Saat memigrasikan sebuah modul, periksa juga komponennya, karena
-pola `any` dan `_id` sering bersembunyi di sana.
+dan lainnya. Ada juga komponen di dalam folder rute, misalnya
+`app/dashboard/outlet/inventaris/components/`, `keuangan/components/`, dan
+`reservasi/components/`. Saat memigrasikan sebuah modul, periksa juga
+komponennya, karena pola `any` dan `_id` sering bersembunyi di sana.
 
 ### Autentikasi
 
@@ -113,11 +118,11 @@ Keputusan produk yang dihasilkan dan tidak boleh dibalik tanpa pembahasan:
   di `app`, `components`, `hooks`, `lib`, dan `types`.
 
 ### Fase 1 — Audit kontrak API
-Commit `668951d`, `7f05c24`. Hasilnya `docs/kontrak-api.md` (1226 baris):
+Commit `668951d`, `7f05c24`. Hasilnya `docs/kontrak-api.md` (1226 baris saat dibuat):
 246 route backend, bentuk respons tiap endpoint, aturan payload, kebutuhan izin
 per halaman, dan daftar ketidaksesuaian.
 
-**Dokumen ini adalah acuan utama.** Setiap keputusan tentang endpoint, bentuk
+**Kontrak itu adalah acuan utama.** Setiap keputusan tentang endpoint, bentuk
 data, atau izin harus diturunkan dari sana, bukan dari dugaan.
 
 Cara membacanya sesuai keperluan:
@@ -157,13 +162,26 @@ tercatat tidak lagi diperiksa, atau bentuk respons berbeda dari tipe.
 |---|---|---|
 | Pengguna | `7275d14` | Selesai |
 | Role | `e17c572` | Selesai |
-| Produk dan kategori | - | **Berikutnya** |
-| Inventaris (stok, jurnal, opname) | - | Belum |
+| Produk dan kategori | `53414dd`, `e0366c1`, `06f8fd8` | Selesai |
+| Inventaris (stok, jurnal, opname) | - | **Berikutnya** |
 | Penjualan dan pembayaran | - | Belum |
 | Reservasi | - | Belum |
 | Keuangan | - | Belum |
 | Jadwal dan shift | - | Belum |
 | Gudang | - | Belum |
+
+Keputusan produk dari modul produk dan kategori:
+
+- **Hapus kategori yang masih dipakai produk dicegah di frontend.** Dialog
+  menyebut jumlah produk dan menonaktifkan Lanjutkan. Bila pengguna tidak
+  boleh membaca produk, dialog hanya memperingatkan.
+- **Produk yang kategorinya sudah dihapus** tampil "Tanpa kategori" dan harus
+  dipilihkan kategori baru sebelum disimpan.
+- **Satuan resep dibatasi** ke gram, ml, pcs, kg, dan liter, sesuai validator
+  backend.
+- **Bug stok saat edit produk ditangani di frontend**: resep hanya dikirim bila
+  perlu. Bila resep dihapus seluruhnya, backend tetap menjadikan stok 0, dan
+  form memberi petunjuk agar stok diatur ulang.
 
 ---
 
@@ -177,6 +195,12 @@ langsung dari halaman.
 `lib/api/client.ts` dibangun sebagai pembungkus di atasnya, bukan pengganti,
 agar migrasi dapat berjalan per modul tanpa memecahkan halaman lain. Jangan
 menyapu seluruh pemakaian `apiClient` sekaligus; ganti bersama modulnya.
+
+**`apiClient` lama tidak menormalkan `_id`.** Mengganti tipe sebuah entitas ke
+`id` mengharuskan seluruh pembacanya, termasuk di modul lain, pindah ke hook
+`features/` dalam commit yang sama. Bila tidak, `tsc` tetap hijau tetapi
+halaman membaca `id` yang tidak ada saat runtime. Contoh: tipe `Produk` juga
+dibaca halaman pajak dan buat penjualan.
 
 ### `lib/apiClient.ts` dan `lib/api/client.ts`
 
@@ -211,8 +235,9 @@ dan `pesanError(err, fallback)` untuk menampilkan pesan.
 
 ### `lib/api/normalize.ts`
 `unwrap` membuka keenam bentuk envelope backend; `normalizeId` mengubah `_id`
-menjadi `id` secara rekursif dan membuang `__v`. **Tipe di `types/` selalu
-memakai `id`, tidak pernah `_id`.**
+menjadi `id` secara rekursif dan membuang `__v`. **Tipe di `types/` wajib
+memakai `id`, tidak pernah `_id`.** Tipe modul yang belum dimigrasikan
+diperbaiki bersama modulnya (bagian 4, langkah 3).
 
 ### `lib/auth/`
 - `session.ts` — store token dan payload di memori. `tandaiKeluar()` hanya mengakhiri sesi pengguna; `akhiriSesi()` mengakhiri keduanya (logout).
@@ -231,12 +256,14 @@ queryKeys.produk.detail(id)     // ["produk", "detail", id]
 ```
 
 ### `features/<modul>/`
-Pola yang sudah terbukti di bahan baku, pengguna, dan role:
+Pola yang sudah terbukti di bahan baku, pengguna, role, produk, dan kategori:
 
 - `api.ts` — pemanggilan endpoint memakai `apiData` dan `EP`
 - `hooks.ts` — `useQuery` dan `useMutation`, termasuk aturan invalidasi
 - `schema.ts` — skema Zod untuk form
 - `halaman-*.tsx` — komponen halaman bersama bila outlet dan gudang memakai halaman yang sama
+- `form-*.tsx` — komponen form bersama untuk mode buat dan edit
+- `payload.ts`, `pesan.ts`, `izin.ts` — fungsi murni untuk penyusunan payload, penerjemahan pesan error, dan aturan izin endpoint (bagian 5, butir 9 dan 10)
 
 Isi tiap `features/` yang sudah ada:
 
@@ -246,6 +273,8 @@ Isi tiap `features/` yang sudah ada:
 | `inventaris` | `api.ts`, `hooks.ts` | Lintas halaman inventaris; memuat `useLokasiBertipe` dan `useDaftarInventory` |
 | `pengguna` | `api.ts`, `hooks.ts`, `halaman-pengguna.tsx` | Komponen halaman dipakai outlet dan gudang |
 | `role` | `api.ts`, `hooks.ts`, `constants.ts`, `form-role.tsx` | `form-role.tsx` dipakai halaman edit dan kostum; `useLevelPenggunaAktif` dipakai lintas modul |
+| `produk` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `izin.ts`, `form-produk.tsx` | `form-produk.tsx` dipakai halaman buat dan edit; `useDaftarProduk` dipakai halaman kategori, pajak, dan buat penjualan; `bolehBacaProduk` menerima `read-produk` atau `akses-pos` |
+| `kategori` | `api.ts`, `hooks.ts`, `schema.ts`, `pesan.ts` | `useDaftarKategori` dipakai form produk; `pesan.ts` menentukan field duplikat karena respons backend tidak dapat diandalkan |
 
 Cara memeriksa apakah sebuah modul sudah dimigrasikan: ada folder
 `features/<modul>/`, dan halamannya tidak lagi memanggil `apiClient`.
@@ -261,12 +290,14 @@ Cara memeriksa apakah sebuah modul sudah dimigrasikan: ada folder
 
 ## 4. Langkah migrasi satu modul
 
-Urutan yang dipakai pada bahan baku, pengguna, dan role, dan terbukti menjaga
-`tsc` tetap hijau di tiap langkah:
+Urutan yang dipakai pada bahan baku, pengguna, role, produk, dan kategori, dan
+terbukti menjaga `tsc` tetap hijau di tiap langkah:
 
 1. **Petakan keadaan.** Hitung baris tiap berkas, cari pemakaian `apiClient`,
    `any`, `_id`, dan `queryKey`. Bila ada dua halaman serupa (outlet dan
    gudang), bandingkan dengan `diff` untuk mengetahui apakah keduanya kembar.
+   Bila modul belum punya spec e2e, tulis spec pembanding untuk perilaku yang
+   ada dan jalankan terhadap kode lama sebelum mengubah apa pun.
 2. **Periksa kontrak.** Buka `docs/kontrak-api.md` bagian 3.1, 3.3, dan 4 untuk
    modul itu. Bila ada field yang meragukan, periksa validator dan service
    backend sebelum memutuskan.
@@ -274,7 +305,9 @@ Urutan yang dipakai pada bahan baku, pengguna, dan role, dan terbukti menjaga
    nyata. Jalankan `tsc`; error yang muncul adalah peta migrasinya. Bereskan
    seluruh error itu dulu (umumnya penggantian `_id` menjadi `id`) sampai `tsc`
    hijau kembali, sebelum melangkah ke berkas `features/`. Dengan begitu tiap
-   langkah tetap dapat di-commit.
+   langkah tetap dapat di-commit. `tsc` hijau belum berarti aman bila pembaca
+   entitas itu masih memakai `apiClient` lama, karena data mentahnya masih
+   membawa `_id` (bagian 3).
 4. **Buat `features/<modul>/api.ts`** memakai `apiData` dan `EP`.
 5. **Buat `features/<modul>/hooks.ts`**, termasuk aturan invalidasi. Bila satu
    perubahan memengaruhi modul lain (misalnya bahan baku memengaruhi
@@ -308,13 +341,15 @@ sulit dibaca daripada dua berkas terpisah. Dalam hal itu, cukup bagikan lapisan
 - ESLint tanpa error pada berkas modul itu (peringatan warisan boleh tersisa)
 - Tidak ada lagi `apiClient`, `any`, maupun `_id` di halaman modul itu
 - Spec e2e modul lolos, termasuk skenario baru untuk perilaku yang berubah
+- Vitest penuh dan suite e2e penuh lolos sebelum commit, dibandingkan dengan baseline
 - Pelajaran dari debug dan perbaikan selama modul ini sudah dicatat di bagian 7
 - Sudah di-commit dan di-push
-- Dokumen ini diperbarui
+- Dokumen ini, dan `docs/kontrak-api.md` bila ada perubahan kontrak, diperbarui
+  lalu diperiksa ulang utuh sebelum commit (bagian 11)
 
 ## 5. Keputusan rancangan yang mengikat
 
-1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena respons sudah dinormalkan. Pola `id || _id` tidak boleh ditulis lagi.
+1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.
 2. **Owner tidak diperlakukan khusus** lewat pengecekan nama role. Backend memberi Owner seluruh permission, sehingga pemeriksaan berbasis daftar permission sudah mencakupnya. Pengecualian: `useLevelPenggunaAktif` memakai nama role untuk menentukan level 100, karena token tidak membawa level.
 3. **Invalidasi memakai akar domain** bila perubahan bisa memengaruhi beberapa varian.
 4. **Field yang dipakai service tetapi tidak ada di validator** harus diperiksa sebelum dihapus dari payload (lihat `docs/kontrak-api.md` bagian 1, butir keterbatasan).
@@ -325,6 +360,17 @@ sulit dibaca daripada dua berkas terpisah. Dalam hal itu, cukup bagikan lapisan
    role, `urlKembali` sempat dipakai sebagai tujuan tombol kembali sekaligus
    tujuan setelah menyimpan, sehingga halaman kostum kembali ke pilih template
    alih-alih ke daftar posisi.
+8. **Form yang diisi dari data server dipasang setelah data itu termuat**, dengan
+   nilai awal lewat `defaultValues`, bukan diisi ulang dengan `reset` di
+   effect. Hook detailnya memuat ulang saat halaman dibuka
+   (`refetchOnMount: "always"`), karena `defaultValues` hanya dibaca sekali dan
+   `isFetchedAfterMount` tidak pernah true bila cache masih segar.
+9. **Aturan izin endpoint yang tidak sederhana** (misalnya menerima salah satu
+   dari beberapa izin) diletakkan di `features/<modul>/izin.ts`, bukan ditulis
+   ulang di halaman pemakainya.
+10. **Logika yang menangani ketidakselarasan backend** (payload, pesan error)
+    ditulis sebagai fungsi murni (`payload.ts`, `pesan.ts`) agar dapat diuji
+    unit dan mudah dibersihkan setelah backend diperbaiki.
 
 ---
 
@@ -332,13 +378,13 @@ sulit dibaca daripada dua berkas terpisah. Dalam hal itu, cukup bagikan lapisan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 
-| Hal | Awal | Setelah modul role | Catatan |
+| Hal | Awal | Setelah modul produk | Catatan |
 |---|---|---|---|
-| Pemakaian `any` | 302 | 134 | Berkurang tiap modul yang dimigrasikan |
-| Kemunculan `_id` | - | 169 | Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id || _id` |
+| Pemakaian `any` | 302 | 122 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di bagian 11). Berkurang tiap modul yang dimigrasikan |
+| Kemunculan `_id` | - | 147 | Dihitung di `app`, `components`, dan `features` (perintah di bagian 11), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id || _id` |
 | `useAuthGuard()` berulang di halaman | 49 | 48 | Belum disentuh; rencananya dipindah ke layout |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
-| Berkas di atas 700 baris | 7 | 8 | Bertambah karena berkas lain tumbuh; berkurang saat modulnya dimigrasikan |
+| Berkas di atas 700 baris | 7 | 7 | Sempat 8 karena berkas lain tumbuh; kembali 7 setelah form produk disatukan. Berkurang saat modulnya dimigrasikan |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
@@ -351,18 +397,26 @@ dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 2. Blok perintah siap tempel yang menerapkannya (menjalankannya adalah persetujuan).
 3. Perintah verifikasi: `tsc`, ESLint, dan pemeriksaan hasil.
 4. Menjalankan test yang ada, menambah skenario untuk perubahan itu, menjalankan ulang.
-5. Setelah lolos: `git add`, commit dengan pesan lengkap (masalah, keputusan rancangan beserta alasan, dampak, pengujian), lalu push.
+5. Sebelum commit: vitest penuh dan suite e2e penuh, dibandingkan dengan
+   baseline. Seluruhnya harus lolos, bukan hanya spec modul.
+6. Setelah lolos: `git add`, commit dengan pesan lengkap (masalah, keputusan rancangan beserta alasan, dampak, pengujian), lalu push.
 
-Tidak ada perubahan yang diterapkan tanpa persetujuan. Komparasi selalu
-dikirim lebih dulu, dan menjalankan blok perintah itulah bentuk persetujuannya.
-Setelah dijalankan, hasilnya diverifikasi sebelum melangkah ke perubahan
-berikutnya.
+Tidak ada perubahan yang diterapkan tanpa persetujuan. Komparasi dan blok
+penerapnya dikirim dalam respons yang sama, dan menjalankan blok itulah bentuk
+persetujuannya. Setelah dijalankan, hasilnya diverifikasi sebelum melangkah ke
+perubahan berikutnya.
 
 ### Aturan blok perintah
 
 - Hanya berisi perintah, tanpa baris komentar atau judul di dalamnya.
 - Efisien, tidak memakai pager, output ringkas dan mudah disalin.
-- Berkas baru dibuat lewat terminal, bukan diedit manual.
+- Berkas baru diberikan sebagai isi lengkap untuk dibuat manual, tanpa perintah
+  terminal. Perubahan pada berkas yang sudah ada tetap lewat terminal karena
+  harus presisi. Pengecualian: berkas baru yang dibangun dari salinan berkas
+  lama (misalnya komponen form bersama) dibuat dengan `cp` lalu diubah lewat
+  helper, agar isi lamanya tidak diketik ulang.
+- Satu blok untuk satu berkas atau satu tujuan. Blok yang panjang tidak dapat
+  dijalankan sekaligus dan mudah terpotong saat ditempel.
 
 ### Helper penggantian
 
@@ -385,6 +439,70 @@ console.log("OK");
 Untuk penggantian di banyak berkas, kumpulkan pasangan dalam array dan tulis
 berkas hanya bila seluruhnya cocok.
 
+Sejak modul produk, tiga helper disimpan di `/tmp`. Folder itu dapat
+dikosongkan sistem (misalnya saat komputer dinyalakan ulang), sehingga helper
+bisa hilang di antara sesi dan skrip gagal dengan
+`Cannot find module '/tmp/ganti.js'`. Periksa dengan `ls /tmp/ganti.js`
+sebelum blok pertama sesi, dan buat ulang bila hilang:
+
+```bash
+cat > /tmp/ganti.js <<'EOF'
+const fs = require("fs");
+module.exports = (f, pasangan, rapikan) => {
+  let isi = fs.readFileSync(f, "utf8");
+  for (const [lama, baru] of pasangan) {
+    const n = isi.split(lama).length - 1;
+    if (n === 1) {
+      isi = isi.replace(lama, () => baru);
+      continue;
+    }
+    console.error("GAGAL " + f + " (" + n + "): " + lama.slice(0, 70).replace(/\n/g, " | "));
+    process.exit(1);
+  }
+  if (rapikan) isi = isi.replace(/^[ \t]+$/gm, "").replace(/\n{3,}/g, "\n\n").replace(/\s*$/, "\n");
+  fs.writeFileSync(f, isi);
+  console.log("OK " + f + " (" + pasangan.length + " pasangan)");
+};
+EOF
+cat > /tmp/ganti-baris.js <<'EOF'
+const fs = require("fs");
+module.exports = (f, awal, akhir, iAwal, iAkhir, baru) => {
+  const baris = fs.readFileSync(f, "utf8").split("\n");
+  const a = baris.indexOf(awal);
+  const z = baris.indexOf(akhir, a);
+  if (a !== iAwal || z !== iAkhir) {
+    console.error("GAGAL jangkar " + f + " " + a + " " + z);
+    process.exit(1);
+  }
+  baris.splice(a, z - a + 1, baru);
+  fs.writeFileSync(f, baris.join("\n"));
+  console.log("OK " + f + " baris " + (a + 1) + "-" + (z + 1));
+};
+EOF
+cat > /tmp/hitung-eslint.js <<'EOF'
+let d = "";
+process.stdin.on("data", (c) => (d += c)).on("end", () => {
+  const r = JSON.parse(d || "[]");
+  console.log(r.reduce((s, x) => s + x.errorCount, 0));
+});
+EOF
+```
+
+- `ganti.js`: dipanggil dengan ``node -e 'require("/tmp/ganti.js")("berkas", [[`lama`, `baru`]])'``.
+  Berkas hanya ditulis bila setiap pasangan cocok tepat satu kali. Argumen
+  ketiga `true` merapikan baris kosong berlebih.
+- `ganti-baris.js`: mengganti rentang baris dari jangkar awal sampai jangkar
+  akhir, dengan indeks yang diharapkan sebagai pengaman. Indeks diambil dari
+  `grep -n` yang mencetak kedua jangkar di blok yang sama (nomor baris dikurangi
+  satu).
+- `hitung-eslint.js`: menjumlahkan error dari `eslint -f json`.
+- Di dalam template literal skrip, backtick dan tanda dolar yang diikuti kurung
+  kurawal ditulis dengan escape, dan tanda miring terbalik ditulis ganda agar
+  sampai ke berkas. Hindari kutip bersarang di konten yang disisipkan.
+- Untuk menyisipkan kutip tunggal ke dalam argumen `node -e '...'`, tulis
+  `'"'"'` (tutup kutip, kutip tunggal di dalam kutip ganda, buka kutip lagi),
+  atau pakai skrip heredoc berisi string JavaScript.
+
 **Catatan penting**: blok panjang kadang tertempel dua kali di terminal. Bila
 sebuah penggantian melaporkan 0 kecocokan padahal seharusnya ada, periksa dulu
 apakah perubahannya sudah masuk dari tempelan pertama, sebelum menyimpulkan
@@ -392,11 +510,19 @@ polanya salah.
 
 ### Catatan shell (zsh)
 
-- Heredoc yang memuat tanda `!` memicu history expansion. Jalankan
-  `setopt nobanghist` lebih dulu, atau hindari `!` di dalam heredoc.
+- Tanda `!` di dalam kutip tunggal (`node -e '...'`) dan di heredoc
+  berdelimiter kutip (`<<'EOF'`) terbukti aman: skrip modul produk yang
+  memuat `!==` berjalan normal. Di luar dua bentuk itu, jalankan
+  `setopt nobanghist` lebih dulu atau hindari `!`. Contoh yang pernah terjadi:
+  pola grep berkutip ganda yang memuat `!` membuat zsh menunggu masukan
+  (`dquote>`) dan menyisipkan perintah dari riwayat.
 - Pola glob yang tidak cocok menghasilkan `no matches found` dan menghentikan
-  perintah. Untuk mencari berkas hasil test, pakai
-  `ls -t test-results/*/trace.zip | head -1`.
+  perintah. Pesan itu datang dari zsh sendiri, sehingga `2>/dev/null` tidak
+  meredamnya. Untuk berkas yang mungkin tidak ada, pakai `find`, misalnya
+  `find test-results -name trace.zip | head -1`. Folder `test-results`
+  dikosongkan di setiap run, sehingga hasilnya selalu dari run terakhir.
+- Path berisi `[id]` selalu dikutip, karena kurung siku dibaca sebagai pola glob.
+- Perintah git yang dapat membuka pager ditulis `git --no-pager`.
 - Argumen berpola seperti `--include=*.ts` pada grep juga terkena ekspansi
   glob. Kutip polanya: `--include='*.ts'`.
 
@@ -407,6 +533,12 @@ polanya salah.
 - Untuk input angka, pakai `z.number()` di skema dan
   `register("field", { valueAsNumber: true })` di komponen. Tanpa itu, nilai
   terkirim sebagai string dan validasi menahan submit tanpa pesan yang terlihat.
+- Bila isian kosong harus bernilai 0 (bukan NaN), pakai `setValueAs: keAngka`
+  dari `features/produk/schema.ts` sebagai pengganti `valueAsNumber`.
+- Hindari `.default()` di skema form. Ia juga membuat tipe input dan output
+  berbeda. Nilai awal diberikan lewat `defaultValues`.
+- Input yang judulnya bukan `label` (misalnya `h3`) dihubungkan lewat
+  `aria-labelledby`, sehingga tetap dapat dipilih dengan nama aksesibel.
 - Skema buat dan edit disatukan bila entitasnya sama; field yang hanya relevan
   saat membuat dibuat opsional.
 - Setiap `label` wajib punya `htmlFor` dan input punya `id` yang sepadan.
@@ -428,23 +560,32 @@ npx playwright test tests/e2e/<modul> -g "<potongan judul>" --reporter=line 2>&1
 npx playwright test tests/e2e/<modul> -g "<potongan judul>" --repeat-each 3 --reporter=line 2>&1 | tail -3
 ```
 
+Membandingkan jumlah error ESLint sebuah berkas terhadap `HEAD`, untuk
+memisahkan error baru dari error warisan (memakai `/tmp/hitung-eslint.js`):
+
+```bash
+f=path/ke/berkas.tsx; echo "sekarang:$(npx eslint "$f" -f json 2>/dev/null | node /tmp/hitung-eslint.js) HEAD:$(git show "HEAD:$f" | npx eslint --stdin --stdin-filename "$f" -f json 2>/dev/null | node /tmp/hitung-eslint.js)"
+```
+
 Ringkasan e2e dengan daftar kegagalan:
 
 ```bash
 npx playwright test tests/e2e --reporter=json > /tmp/p.json 2>/dev/null; node -e '
 const r=require("/tmp/p.json");const s=r.stats;
-console.log(`e2e passed:${s.expected} failed:${s.unexpected} skipped:${s.skipped}`);
+console.log(`e2e passed:${s.expected} failed:${s.unexpected} flaky:${s.flaky} skipped:${s.skipped}`);
 const jalan=(su)=>su.forEach(x=>{(x.specs||[]).forEach(sp=>sp.tests.forEach(t=>t.results.forEach(res=>{if(res.status==="failed"||res.status==="timedOut")console.log("GAGAL: "+sp.title.slice(0,80))})));if(x.suites)jalan(x.suites)});
 jalan(r.suites);'
 ```
 
 Suite e2e penuh memakan 8 sampai 12 menit karena berjalan dengan satu worker
-dan memakai backend sungguhan. Untuk pekerjaan sehari-hari cukup jalankan spec
-modul yang sedang dikerjakan.
+dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
+sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
+wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per modul role**: 76 test unit dan integrasi lolos,
-143 e2e lolos, 3 skipped (test.fixme yang menunggu backend). Angka ini
-pembanding untuk memastikan tidak ada yang hilang diam-diam.
+**Baseline per modul produk dan kategori** (commit `06f8fd8`): 89 test unit dan
+integrasi lolos, 156 e2e lolos, 3 skipped: dua `test.fixme` yang menunggu
+backend (bagian 8) dan satu `test.skip` bersyarat di spec aset reservasi.
+Angka ini pembanding untuk memastikan tidak ada yang hilang diam-diam.
 
 ### Menelusuri kegagalan e2e
 
@@ -452,7 +593,7 @@ Jangan menebak selector. Ambil bukti:
 
 ```bash
 npx playwright test tests/e2e/<modul> -g "<nama test>" --trace on --reporter=line > /dev/null 2>&1
-T=$(ls -t test-results/*/trace.zip | head -1)
+T=$(find test-results -name trace.zip | head -1)
 unzip -p "$T" '*.network' | T="$T" node -e '
 const { execSync } = require("child_process");
 const ambil = (sha) => execSync(`unzip -p "${process.env.T}" "resources/${sha}"`).toString();
@@ -466,7 +607,12 @@ for (const l of require("fs").readFileSync(0, "utf8").split("\n").filter(Boolean
 }'
 ```
 
-Snapshot DOM saat gagal ada di `test-results/*/error-context.md`.
+Untuk melihat body yang dikirim, cetak juga `s.request.postData` (isinya di
+`text`, atau di `_sha1` yang dibaca dengan `ambil`). Pada modul produk, cara ini
+membuktikan PUT dikirim tanpa `resep`.
+
+Snapshot DOM saat gagal ada di `error-context.md` di dalam folder test yang
+gagal; cari dengan `find test-results -name error-context.md`.
 
 ### Mengambil informasi dari backend
 
@@ -478,6 +624,15 @@ BE=~/Documents/backend-js
 grep -rn "checkPermission" "$BE/routes/<modul>Route.js" | cut -c1-120
 grep -n "wajib\|allowlist\|enum" "$BE/validators/<modul>Validator.js" | cut -c1-120
 grep -rn "<namaField>" "$BE/services/<modul>Service.js" | cut -c1-140
+```
+
+Untuk menilai apakah sebuah perilaku backend disengaja, lihat riwayatnya. Pada
+modul produk, `blame` menunjukkan bahwa pemeriksaan resep yang berbeda di
+`create` dan `update` berasal dari satu commit yang sama:
+
+```bash
+git -C "$BE" --no-pager blame -L <awal>,<akhir> services/<modul>Service.js | cut -c1-120
+git -C "$BE" --no-pager log --format='%h %ad %s' --date=short -5 -- services/<modul>Service.js | cut -c1-120
 ```
 
 Tiga lapis yang harus dibedakan, karena sering tidak sejalan:
@@ -525,6 +680,9 @@ Pola kegagalan yang berulang:
 | Request tidak terkirim sama sekali | Validasi menahan submit, atau tombol disabled |
 | Request berhasil tetapi UI tidak berubah | Balapan dengan pemuatan ulang daftar |
 | Lolos sendirian, gagal saat diulang | Elemen yang sempat disabled, atau data menumpuk |
+| Gagal beruntun setelah satu kegagalan | Data sisa dari test yang gagal sebelum cleanup; bersihkan dulu, atau pakai nama unik per run |
+| Gagal tepat setelah perubahan kode, lalu hilang | Belum dapat dipastikan; jalankan `--repeat-each 5` sebelum menyimpulkan selesai |
+| Halaman tertahan di loader | Kondisi pemuatan yang tidak pernah terpenuhi; periksa trace, apakah request yang ditunggu benar-benar terkirim |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena
 tombol hapus sempat disabled sampai daftar role selesai dimuat (level
@@ -558,6 +716,18 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   dicoba dan dua kali gagal (escaping regex berlapis, lalu execSync yang
   melempar saat ESLint keluar dengan kode bukan nol). Membaca daftarnya
   lalu mengganti blok import secara langsung lebih cepat dan pasti.
+- **Angka pengaman untuk penggantian berbasis baris diambil dari `grep -n`**
+  yang mencetak jangkar di blok yang sama, bukan dihitung dengan mata dari
+  output sebelumnya. Pada modul produk, hitungan manual dua kali meleset satu
+  baris.
+- **Jangan membuat blok yang bergantung pada penanda sementara dari blok
+  lain.** Cari sasaran dari isi kode yang memang ada, agar urutan blok tidak
+  menentukan hasil.
+- **Bentuk pesan error backend dipastikan dari respons nyata** (trace atau
+  cache kontrak) sebelum dipetakan di frontend. Pada kategori, service menyebut
+  field yang salah, dan hal itu baru ketahuan dari trace.
+- **Jangan menyimpulkan selesai dari satu run yang lolos** bila sebelumnya ada
+  kegagalan. Jalankan ulang dengan `--repeat-each`.
 
 ### Kapan berhenti dan bertanya
 
@@ -601,11 +771,11 @@ pertanyaan ini sebelum melangkah:
    ke "Perintah verifikasi yang biasa dipakai", dan kebiasaan alat ke catatan
    Playwright, form, atau shell.
 
-Catatan ditulis dalam commit modul yang sama, selagi konteksnya masih segar.
-Tulis sebagai aturan yang dapat langsung diterapkan beserta contoh nyata
-singkat, bukan sebagai kronologi kejadian. Bila catatan lama terbukti keliru
-atau ada cara yang lebih cepat, perbarui catatan itu alih-alih menambah
-catatan baru yang bertentangan.
+Catatan ditulis dalam commit modul yang sama atau commit dokumen penutup
+modul itu, selagi konteksnya masih segar. Tulis sebagai aturan yang dapat
+langsung diterapkan beserta contoh nyata singkat, bukan sebagai kronologi
+kejadian. Bila catatan lama terbukti keliru atau ada cara yang lebih cepat,
+perbarui catatan itu alih-alih menambah catatan baru yang bertentangan.
 
 ### Kredensial uji
 
@@ -625,6 +795,15 @@ catatan baru yang bertentangan.
 - Jangan menjadikan perpindahan halaman sebagai penanda keberhasilan bila
   mutation-nya sendiri bisa gagal; periksa efeknya pada data, misalnya
   hilangnya baris dari tabel.
+- `page.route` hanya dipakai untuk mensimulasikan kegagalan yang tidak dapat
+  dibuat backend secara deterministik, dan hanya untuk method serta path yang
+  diperlukan. Request lain tetap ke backend sungguhan, dan intersepsi dilepas
+  dengan `page.unroute` setelah dipakai.
+- Nama data uji dibuat unik per run (misalnya akhiran dari `Date.now()`), agar
+  data sisa dari run yang gagal tidak memicu penolakan duplikat.
+- Nilai input berformat rupiah diperiksa dengan pola, misalnya
+  `toHaveValue(/15\.?000/)`, bukan string persis, karena tampilannya diubah
+  oleh format ribuan.
 
 ---
 
@@ -636,6 +815,11 @@ Menunggu perbaikan backend:
 |---|---|
 | Edit pola roster | Validator memakai `this.siklusHari` dalam konteks `findOneAndUpdate` |
 | Hapus pengguna | `Promise.all` paralel di dalam transaksi MongoDB |
+
+Selain itu, `tests/e2e/reservasi/aset/crud-aset.spec.ts` memuat satu
+`test.skip` bersyarat: skenario itu dilewati bila tidak ada aset berstatus
+digunakan di database. Skip ini bukan penantian backend, tetapi ikut terhitung
+di angka skipped pada baseline.
 
 ---
 
@@ -651,8 +835,9 @@ Urutannya:
    dapat dibersihkan setelah backend diperbaiki.
 4. **Bila perilaku tidak dapat diakali**, tandai skenario ujinya `test.fixme`
    dengan keterangan apa yang ditunggu, lalu catat di bagian 8 dokumen ini.
-5. **Setelah commit bersih**, tulis laporan untuk tim backend di
-   `~/Documents/catatan-backend/`.
+5. **Setelah commit bersih**, tulis laporan untuk tim backend sebagai teks siap
+   salin di percakapan. Berkasnya di `~/Documents/catatan-backend/` dibuat
+   sendiri oleh pemilik proyek, bukan lewat terminal.
 
 Bentuk tiap temuan dalam laporan:
 
@@ -668,13 +853,19 @@ prioritas.
 
 ## 10. Catatan untuk tim backend
 
-Tersimpan di `~/Documents/catatan-backend/`:
+Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
 
 - `README.md` — temuan 1 sampai 6 dari Fase 1
 - `catatan-lanjutan-backend-hapus-pengguna-dan-aturan-pin.md` — temuan 7 sampai 9
 - Laporan Fase 2 — 13 temuan, sudah diserahkan ke tim backend
+- Laporan modul produk dan kategori — 8 temuan, disusun 20 September 2026:
+  stok tertimpa 0 saat edit produk, hapus kategori tanpa pemeriksaan
+  pemakaian, keberadaan kategori tidak diperiksa, field duplikat kategori yang
+  salah, satuan resep lebih sempit dari satuan bahan baku, cache daftar produk
+  tidak dibersihkan saat kategori berubah, detail produk tanpa timestamp, dan
+  import tidak terpakai
 
-Cakupan laporan terakhir: `pin-refresh` 500 tanpa body, `GET /shift`
+Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi
 tidak ada di validator, envelope tidak seragam, identitas tidak seragam,
 33 endpoint tanpa `checkPermission`, 17 permission tanpa route, nama permission
@@ -688,6 +879,19 @@ universal, dan konfirmasi kebijakan sesi web tunggal.
 Perbarui setelah setiap modul selesai dan sudah di-commit, sebagai commit
 tersendiri atau disatukan dengan commit modulnya.
 
+**Sebelum commit pembaruan dokumen ini atau `docs/kontrak-api.md`, isi utuh
+kedua berkas dibaca ulang** (dikirim ke percakapan) sampai benar, valid,
+lengkap, detail, dan relevan, dan pemeriksaan diulang setelah setiap
+perbaikan. Setiap pembaruan tidak boleh setengah-setengah: baca kedua berkas
+dari awal sampai akhir, cari setiap bagian yang sudah tidak relevan,
+tertinggal, atau bertentangan dengan keadaan sekarang, lalu ganti seluruhnya
+sampai valid, relevan, benar, detail, dan lengkap, bukan hanya menambah
+kalimat di bagian yang baru disentuh. Setiap pemeriksaan melaporkan seluruh
+temuan sekaligus: fakta yang tidak sesuai bukti, kalimat yang bertentangan
+antarbagian atau antarberkas, angka dan rujukan bagian yang tertinggal, serta
+pelajaran yang belum tercatat. Pada modul produk dan kategori, pemeriksaan
+yang dicicil per bagian butuh lebih dari lima putaran perbaikan.
+
 Yang berubah setiap kali:
 
 | Bagian | Perubahan |
@@ -697,14 +901,16 @@ Yang berubah setiap kali:
 | 6, metrik | Perbarui bila angkanya berubah cukup jauh |
 | 7, baseline test | Perbarui jumlah test dan commit acuannya |
 | 8, test fixme | Tambah atau hapus bila ada perubahan |
-| 12 | Ganti seluruhnya dengan modul berikutnya beserta pemetaan awalnya |
+| 12 | Ganti seluruhnya dengan modul berikutnya beserta pemetaan awalnya. Bila pemetaan belum sempat diambil, cantumkan perintahnya sebagai langkah pertama sesi berikutnya |
 
 Yang ditambahkan bila ada:
 
 - **Keputusan rancangan baru** yang berlaku lintas modul, ke bagian 5
 - **Pelajaran dari setiap debug, penelusuran, dan perbaikan**, ke bagian 7
   mengikuti aturan "Belajar dari setiap putaran"
-- **Temuan backend baru**, ke bagian 8 dan 10
+- **Temuan backend baru**, ke bagian 8 dan 10, serta ke `docs/kontrak-api.md` bagian 6
+- **Perubahan kontrak** yang ditemukan saat migrasi (izin, payload, bentuk
+  respons), ke `docs/kontrak-api.md` bagian 3 sampai 5
 - **Keputusan produk**, ke bagian 2 di bawah fase terkait
 
 Perintah untuk menyiapkan angka baru:
@@ -714,6 +920,7 @@ cd ~/Documents/frontend-web
 grep -rc ": any" app components lib features | grep -v ":0" | awk -F: "{s+=\$2} END {print \"any: \" s}"
 grep -rc "_id" app components features | grep -v ":0" | awk -F: "{s+=\$2} END {print \"_id: \" s}"
 grep -rlc "useAuthGuard()" app | wc -l
+find app components features -name "*.tsx" -o -name "*.ts" | xargs wc -l | sort -rn | awk '$1>700 && $2!="total"' | wc -l
 npx vitest run 2>&1 | grep "Tests "
 ```
 
@@ -722,56 +929,74 @@ Bila dokumen ini mulai terasa panjang, pecah bagian 7 menjadi berkas tersendiri
 hanya demi keringkasan: dokumen ini menggantikan ingatan, dan bagian yang
 dibuang akan menjadi pertanyaan berulang di sesi berikutnya.
 
-## 12. Pekerjaan berikutnya: modul produk dan kategori
+## 12. Pekerjaan berikutnya: modul inventaris
 
-Empat berkas, 2.350 baris. Dua di antaranya adalah berkas terbesar di
-seluruh proyek.
+Cakupan: halaman inventaris outlet selain produk, kategori, dan bahan baku
+(stok, jurnal stok, stock opname, stock adjustment, pengajuan stok, penerimaan
+barang), beserta halaman gudang yang namanya kembar (inventaris, jurnal stok,
+stock opname, pengajuan stok, transfer stok, pengiriman stok).
 
-| Berkas | Baris | Isi |
-|---|---|---|
-| `produk/page.tsx` | 316 | Daftar produk |
-| `produk/buatProduk/page.tsx` | 755 | Form produk baru |
-| `produk/[id]/edit/page.tsx` | 879 | Form edit produk |
-| `kategori/page.tsx` | 400 | Daftar dan kelola kategori |
+### Pemetaan awal
 
-### Temuan awal
+Belum diambil. Jalankan di awal sesi dan isi bagian ini sebelum mulai:
 
-- Halaman **buat** dan **edit** produk berbeda 292 baris dari total 1.634,
-  jadi sekitar 82 persen isinya sama. Keduanya kandidat kuat untuk komponen
-  form bersama, dengan pola yang sama seperti `form-role.tsx`.
-- Tersisa 37 kemunculan `apiClient`, `any`, dan `_id` di keempat berkas.
-- Tidak ada folder `components/produk/`, sehingga seluruh UI ada di halaman.
-- `features/bahan-baku` sudah ada dan dipakai form produk untuk resep, jadi
-  periksa dulu apa yang bisa dipakai ulang sebelum menulis yang baru.
+```bash
+find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep -vE "produk|kategori|bahanBaku|pengguna|jadwal|pengaturan|setup|gudang/page.tsx" | sort | while read f; do printf "%-58s %4s  apiClient:%s any:%s _id:%s\n" "${f#app/dashboard/}" "$(wc -l < "$f")" "$(grep -c apiClient "$f")" "$(grep -cE ': any|as any|<any' "$f")" "$(grep -c _id "$f")"; done
+```
 
-### Yang harus hati-hati
+```bash
+for p in jurnalStok/page.tsx stockOpname/page.tsx "stockOpname/[id]/page.tsx" stockOpname/buatStockOpname/page.tsx pengajuanStok/page.tsx "pengajuanStok/[id]/page.tsx"; do a="app/dashboard/outlet/inventaris/$p"; b="app/dashboard/gudang/$p"; echo "$p  beda:$(diff "$a" "$b" | grep -c '^[<>]')  total:$(cat "$a" "$b" | wc -l)"; done
+wc -l features/inventaris/*.ts app/dashboard/outlet/inventaris/components/*.tsx | tail -5; ls tests/e2e/inventaris
+```
 
-- **Resep produk** menyimpan daftar bahan baku beserta takarannya. Kontrak
-  menyebut `resep` sebagai field opsional pada `POST /produk`, dan bentuk
-  itemnya perlu dipastikan dari `docs/kontrak-api.md` bagian 3.3 sebelum
-  menulis tipenya.
-- **`isUnlimitedStok` dan resep saling terkait**: produk dengan resep tidak
-  dapat ditandai stok tak terbatas. Aturan ini sudah diperbaiki pada Fase 0
-  dan harus tetap terjaga.
-- **Produk memakai `_id` pada respons** (kontrak bagian 3.3), sehingga tipenya
-  perlu diperbaiki lebih dulu seperti pada modul lain.
-- **Pajak produk** dikelola lewat endpoint terpisah (`/produkpajak`), yang
-  tidak memeriksa izin sama sekali di backend.
+### Yang sudah diketahui
+
+- `features/inventaris` sudah ada (`useLokasiBertipe`, `useDaftarInventory`)
+  dan dipakai halaman bahan baku.
+- Kontrak bagian 3.3: `GET /jurnalstok` memakai `_id`, dan field referensi
+  `bahanBakuID` serta `locationID` berisi objek hasil populate. Tipe mengikuti
+  bentuk nyata, bukan nama field.
+- Kontrak bagian 6 butir 10: 22 operasi tulis tanpa validator, sebagian besar
+  di stok (pengajuan, transfer, opname). Periksa service sebelum menentukan
+  payload.
+- Halaman pengiriman stok gudang memakai `/transferstok`, yang mewajibkan
+  `read-transfer-stok` (kontrak bagian 5).
+- Bagian 5 kontrak untuk halaman yang belum dimigrasikan masih mencerminkan
+  keadaan sebelum Fase 2. Gate yang berlaku sekarang ada di
+  `lib/auth/permissions.ts` (`IZIN_HALAMAN`); periksa di sana.
+- Belum ada spec e2e untuk halaman inventaris selain bahan baku, produk, dan
+  kategori. Tulis spec pembanding lebih dulu, seperti pada modul kategori.
+- Bandingkan halaman outlet dan gudang yang kembar dengan `diff` sebelum
+  memutuskan menyatukannya (bagian 4, Kapan halaman disatukan).
+- `app/dashboard/outlet/inventaris/components/` berisi `bahanBakuCombobox.tsx`
+  (sudah bebas `any` dan `_id` sejak modul produk) dan `inventaris-nav-tabs.tsx`.
 
 ### Spec rujukan
 
-Untuk meniru pola penulisan test, lihat:
+- `tests/e2e/inventaris/kategori/crud-kategori.spec.ts`: spec pembanding yang
+  ditulis sebelum migrasi, nama dan kode unik per run, dan simulasi kegagalan
+  dengan `page.route` hanya untuk satu method dan path.
+- `tests/e2e/inventaris/produk/crud-produk.spec.ts`: form bersama dua mode,
+  input tanpa label dipilih lewat nama aksesibel (`aria-labelledby`), dan
+  pemeriksaan data setelah halaman edit dibuka ulang.
 
-- `tests/e2e/roles/crud-role.spec.ts` — komponen form bersama dengan dua mode,
-  helper `kartuRole` untuk menemukan kartu beserta tombol aksinya, dan
-  menunggu tombol siap sebelum mengklik
-- `tests/e2e/pengguna/crud-pengguna.spec.ts` — pencarian tabel sebelum
-  memeriksa baris, dan skenario lintas ruang kerja
-- `tests/e2e/inventaris/bahanBaku/crud-bahan-baku.spec.ts` — alur lengkap
-  tambah, cari, edit, hapus dalam satu test dengan `test.step`
+### Utang kecil dari modul produk
 
-Spec produk yang sudah ada: `tests/e2e/inventaris/produk/`. Periksa dulu apa
-yang sudah tercakup sebelum menambah skenario.
+- Dialog hapus di halaman daftar produk masih tertutup saat hapus gagal
+  (perilaku lama dipertahankan di `53414dd`), bertentangan dengan keputusan
+  Fase 0. Samakan dengan halaman kategori: `preventDefault`, tertutup hanya
+  saat berhasil, tetap terbuka saat gagal.
+- Skenario 4d di spec produk membuka pemilih bahan baku dengan
+  `getByRole("combobox").nth(1)`, bertentangan dengan catatan Playwright di
+  bagian 7. Ganti dengan tombol berteks "Pilih bahan..." saat spec produk
+  disentuh lagi.
+- Spec produk memakai nama produk tetap. Satu kegagalan sebelum cleanup
+  membuat run berikutnya gagal karena nama duplikat, dan hal itu terjadi pada
+  modul ini. Pakai akhiran unik per run seperti spec kategori.
+- `features/produk/form-produk.tsx` mengimpor `BahanBakuCombobox` dari
+  `app/dashboard/outlet/inventaris/components/`, sehingga `features/`
+  bergantung pada `app/`. Pindahkan komponen itu ke `features/bahan-baku`
+  atau `components/` saat modul inventaris menyentuhnya.
 
 Catatan: `tests/helpers/storage.ts` masih membaca `sessionStorage` dan sudah
 tidak relevan sejak token dipindah ke memori. Berkas itu belum dibersihkan.

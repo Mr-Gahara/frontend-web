@@ -23,6 +23,8 @@ Keterbatasan:
 - Validasi yang hanya ada di service tidak tertangkap; operasi seperti itu tercatat memakai skema model.
 - Daftar field pada bagian 4 berasal dari validator, sedangkan validator hanya memeriksa dan tidak membuang field lain. Service dapat memakai field di luar daftar itu, seperti `locationID` pada `POST /bahanbaku`. Sebelum sebuah field dihapus dari payload frontend, periksa dulu pemakaiannya di service.
 - Bentuk respons operasi tulis tidak diambil dengan memanggil endpoint, agar data tidak berubah.
+- Analisis statis route hanya membaca argumen pertama `checkPermission`. Route yang menerima salah satu dari beberapa izin perlu dikoreksi manual; `GET /produk` dan `GET /produk/:id` (`read-produk` atau `akses-pos`) sudah dikoreksi pada 20 September 2026.
+- Analisis statis frontend hanya menangkap panggilan `apiClient`. Untuk modul yang sudah dipindah ke `features/`, pemanggilan terpusat di `features/<modul>/api.ts`, sehingga kolom "Dipakai di" di bagian 3.1 tidak lagi mencerminkan jumlah halaman pemakai. Bagian 5 untuk modul itu diperbarui manual.
 - Dokumen ini berlaku untuk commit acuan di atas. Bila backend berubah, bagian 3 sampai 5 dan Lampiran A perlu dibangkitkan ulang.
 
 ## 2. Aturan umum
@@ -55,18 +57,18 @@ Semua error berbentuk `{ status: "error", message, errors? }`; `errors` hanya ad
 | 401 | Token kedaluwarsa atau sesi diambil alih | Refresh sekali; bila gagal, kembali ke login |
 | 403 | Izin ditolak, pengguna nonaktif, atau tenant/akun dibekukan | Jangan refresh; tampilkan pesan akses ditolak |
 | 404 | Data tidak ada atau id tidak valid | Tampilkan keadaan tidak ditemukan |
-| 409 | Duplikat atau data masih dipakai | Tampilkan pesan konflik |
+| 409 | Duplikat atau data masih dipakai | Tampilkan pesan konflik. Tidak semua modul memakainya: duplikat kategori dijawab 400 (bagian 6 butir 14) |
 | 429 | Terlalu banyak percobaan login | Tampilkan waktu tunggu |
 
 Login PIN untuk aplikasi dapat menjawab 200 dengan `success: false` (perangkat menunggu persetujuan). Web tidak terdampak, tetapi lapisan API tetap memeriksa `success` bila ada.
 
 ### 2.4 Envelope respons
 
-Semua respons GET yang sukses memuat `data`. Kunci lain tidak seragam antarmodul (`success`, `message`, `count`, `total`). Lapisan API frontend mengambil `data` sebagai isi dan menyeragamkan `count` atau `total` menjadi satu nama. Kolom Envelope di bagian 3 menunjukkan kunci yang benar-benar dikirim.
+Semua respons GET yang sukses memuat `data`. Kunci lain tidak seragam antarmodul (`success`, `message`, `count`, `total`). Lapisan API frontend mengambil `data` sebagai isi dan menyeragamkan `count` atau `total` menjadi satu nama. Kolom Envelope di bagian 3 menunjukkan kunci yang benar-benar dikirim. Pembukaan envelope ini, dan normalisasi identitas di 2.5, hanya dilakukan `lib/api/client.ts`. Halaman yang masih memakai klien lama `lib/apiClient.ts` menerima respons mentah, termasuk `_id`.
 
 ### 2.5 Identitas dan field referensi
 
-- Sebagian modul memakai `id`, sebagian `_id`, dan sebagian mencampur keduanya (`id` di tingkat atas, `_id` di objek bertingkat). Beberapa masih membawa `__v`. Lapisan API frontend menormalkan `_id` menjadi `id` secara rekursif dan membuang `__v`, sehingga seluruh aplikasi hanya mengenal `id`.
+- Sebagian modul memakai `id`, sebagian `_id`, dan sebagian mencampur keduanya (`id` di tingkat atas, `_id` di objek bertingkat). Beberapa masih membawa `__v`. `lib/api/client.ts` menormalkan `_id` menjadi `id` secara rekursif dan membuang `__v`, sehingga halaman yang memakai lapisan itu hanya mengenal `id`. Halaman yang masih memakai klien lama menerima `_id` apa adanya (2.4).
 - Nama field referensi tidak selalu mencerminkan isinya. Contoh: `bahanBakuID` dan `locationID` di jurnal stok berisi objek hasil populate, dan `dataAset` di aset berisi tipe aset. Tipe frontend mengikuti bentuk nyata di bagian 3.3, bukan nama field.
 
 ### 2.6 Field yang diisi server
@@ -80,7 +82,7 @@ Daftar "Wajib dari klien" di bagian 4 sudah mengecualikan field ini.
 
 ## 3. Endpoint yang dipakai frontend
 
-Frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A).
+Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A).
 
 Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`; contoh `/diskon` berarti `/api/diskon`. Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom Envelope dan ID hanya terisi untuk GET yang diambil sampelnya.
 
@@ -281,9 +283,9 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/produk` | authPengguna | `read-produk` | `{ data, success }` | `_id` | 3 file |
+| GET | `/produk` | authPengguna | `read-produk` atau `akses-pos` | `{ data, success }` | `_id` | 3 file |
 | POST | `/produk` | authPengguna | `create-produk` | - | - | 1 file |
-| GET | `/produk/:id` | authPengguna | `read-produk` | `{ data, success }` | `_id` | 1 file |
+| GET | `/produk/:id` | authPengguna | `read-produk` atau `akses-pos` | `{ data, success }` | `_id` | 1 file |
 | PUT | `/produk/:id` | authPengguna | `update-produk` | - | - | 1 file |
 | DELETE | `/produk/:id` | authPengguna | `delete-produk` | - | - | 1 file |
 
@@ -600,6 +602,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: tanpa validator, dibatasi skema `models/kategoriModel.js`
 - Wajib dari klien: -
 - Field lain yang dikenali: `namaKategori`, `kodeKategori`, `keterangan`
+- Duplikat nama atau kode: 400 `{ errors: ["tenantID sudah digunakan di tenant ini"] }` tanpa `message`; field yang bentrok tidak disebut (bagian 6 butir 14)
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -703,6 +706,9 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validateProdukPayload (validators/produkValidator.js)
 - Wajib dari klien: `namaProduk`, `hargaJual`, `hargaDasar`, `kategoriID`
 - Field lain yang dikenali: `resep`, `isUnlimitedStok`
+- Tidak diperiksa validator tetapi dipakai service: `stok`, `gambarProduk`, `keterangan` (payload diteruskan utuh ke `Produk.create`)
+- Nilai sah satuan resep: gram, ml, pcs, kg, liter (lebih sempit dari satuan bahan baku)
+- `kategoriID` hanya diperiksa formatnya, bukan keberadaannya (bagian 6 butir 13)
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -814,6 +820,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: tanpa validator, dibatasi skema `models/kategoriModel.js`
 - Wajib dari klien: -
 - Field lain yang dikenali: `namaKategori`, `kodeKategori`, `keterangan`
+- Duplikat nama atau kode: 400 `{ errors: ["tenantID sudah digunakan di tenant ini"] }` tanpa `message`, sama seperti `POST /kategori` (bagian 6 butir 14)
 - Diisi server: -
 
 #### `PUT /metodepembayaran/:id`
@@ -876,6 +883,10 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validateProdukPayload (validators/produkValidator.js)
 - Wajib dari klien: `namaProduk`, `hargaJual`, `hargaDasar`, `kategoriID`
 - Field lain yang dikenali: `resep`, `isUnlimitedStok`
+- Tidak diperiksa validator tetapi dipakai service: `stok`, `gambarProduk`, `keterangan`
+- `resep` yang dikirim, termasuk array kosong, membuat stok dihitung ulang dari resep; resep kosong menjadikan stok 0. Kirim `resep` hanya bila perlu (bagian 6 butir 11)
+- Nilai sah satuan resep: gram, ml, pcs, kg, liter
+- `kategoriID` hanya diperiksa formatnya, bukan keberadaannya (bagian 6 butir 13)
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -918,7 +929,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 ## 5. Kebutuhan izin per halaman
 
-Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual.
+Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual. Baris produk dan kategori diperbarui manual setelah migrasi (20 September 2026); baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
 | Menu | Gate saat ini | Endpoint GET di halaman | Permission dibutuhkan | Penilaian |
 |---|---|---|---|---|
@@ -930,8 +941,8 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/outlet/pengeluaran` | `read-pembayaran` | - | - | Data dimuat lewat komponen, periksa manual |
 | `/dashboard/outlet/keuangan/ringkasanLabaRugi` | `read-laporan` | `/laporan/laba-rugi` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/inventaris-data` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
-| `/dashboard/outlet/inventaris/produk` | - | `/produk` | `read-produk` | Tanpa gate, endpoint berizin |
-| `/dashboard/outlet/inventaris/kategori` | - | `/kategori` | `read-kategori` | Tanpa gate, endpoint berizin |
+| `/dashboard/outlet/inventaris/produk` | `read-produk` | `/produk` | `read-produk` atau `akses-pos` | Sejalan |
+| `/dashboard/outlet/inventaris/kategori` | `read-kategori` | `/kategori`, `/produk` | `read-kategori`; `/produk` opsional (`read-produk` atau `akses-pos`) untuk hitungan pemakaian | Sejalan |
 | `/dashboard/outlet/inventaris/bahanBaku` | - | `/location`, `/inventory` | `read-location`, `read-inventory` | Tanpa gate, endpoint berizin |
 | `/dashboard/outlet/inventaris-pantau` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/stok` | - | `/location`, `/inventory` | `read-location`, `read-inventory` | Tanpa gate, endpoint berizin |
@@ -962,7 +973,7 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 
 ## 6. Ketidakselarasan yang tercatat
 
-Setiap butir di bawah sudah diverifikasi dari kode atau respons backend. Kolom Pemilik menunjukkan sisi yang perlu bertindak.
+Setiap butir di bawah sudah diverifikasi dari kode atau respons backend. Kolom Pemilik menunjukkan sisi yang perlu bertindak. Butir 11 sampai 17 diperiksa terhadap kode backend pada 19 sampai 20 September 2026, bukan terhadap commit acuan di bagian 1; nomor barisnya dapat bergeser bila backend berubah.
 
 | No | Temuan | Bukti | Pemilik | Status |
 |---|---|---|---|---|
@@ -976,6 +987,13 @@ Setiap butir di bawah sudah diverifikasi dari kode atau respons backend. Kolom P
 | 8 | `GET /api/shift` tanpa query string menjawab 500 `Cannot access 'data' before initialization` | Panggilan langsung ke backend lokal; frontend selalu mengirim query sehingga belum terdampak | Backend | Catatan backend berikutnya |
 | 9 | README backend menyatakan validator memakai allowlist, tetapi penolakan field tak dikenal hanya ada di tenant, akun, transfer stok, inventory, absensi (absen pulang), pengajuan stok, dan lokasi | Grep pesan "tidak diizinkan" di `validators/` | Backend | Catatan dokumentasi backend |
 | 10 | 22 operasi tulis tanpa validator; sebagian meneruskan `req.body` utuh ke service sementara skemanya memuat field sensitif seperti `status`, `disetujuiOleh`, dan `reviewerID` | Bagian 4 (operasi bertanda skema model) | Backend | Potensi mass assignment, perlu verifikasi di service sebelum dilaporkan sebagai bug |
+| 11 | `PUT /produk/:id` memeriksa `if (payload.resep)`, sehingga `resep: []` menjadikan stok 0 dan produk tanpa resep tidak dapat dijual | `produkService` baris 185 dan 209, `inventoryService` sekitar baris 228, trace PUT | Backend | Laporan modul produk dan kategori; frontend hanya mengirim resep bila perlu |
+| 12 | Hapus kategori tidak memeriksa produk yang memakainya | `kategoriService.delete` baris 109 sampai 115 | Backend | Laporan modul produk dan kategori; frontend mencegah hapus bila produk dapat dibaca |
+| 13 | `kategoriID` produk hanya diperiksa formatnya | `produkValidator` baris 72 sampai 76 | Backend | Laporan modul produk dan kategori; form produk menolak kategori yang tidak ada |
+| 14 | Duplikat kategori dijawab 400 dengan field `tenantID` | Trace `POST /api/kategori`; `kategoriService` baris 69 dan 101 | Backend | Laporan modul produk dan kategori; frontend menentukan field dari daftar kategori |
+| 15 | Satuan resep produk (5) lebih sempit dari satuan bahan baku (7) | `produkValidator` baris 88, `bahanBakuValidator` | Backend | Laporan modul produk dan kategori; perlu keputusan |
+| 16 | Cache daftar produk (TTL 120 detik) tidak dibersihkan saat kategori berubah | `produkService` baris 67 dan 118, `kategoriService` baris 64, 96, dan 113 | Backend | Laporan modul produk dan kategori |
+| 17 | Detail produk mengirim `createdAt` dan `updatedAt` bernilai null | Cache kontrak `GET /produk/:param` | Backend | Laporan modul produk dan kategori |
 
 ## Lampiran A. Seluruh route backend
 
@@ -1174,9 +1192,9 @@ Setiap butir di bawah sudah diverifikasi dari kode atau respons backend. Kolom P
 | POST | `/produkpajak` | authPengguna | - | ya | `produkPajakRoute.js` |
 | DELETE | `/produkpajak/:id` | authPengguna | - | ya | `produkPajakRoute.js` |
 | GET | `/produkpajak/:targetid` | authPengguna | - | ya | `produkPajakRoute.js` |
-| GET | `/produk` | authPengguna | `read-produk` | ya | `produkRoutes.js` |
+| GET | `/produk` | authPengguna | `read-produk` atau `akses-pos` | ya | `produkRoutes.js` |
 | POST | `/produk` | authPengguna | `create-produk` | ya | `produkRoutes.js` |
-| GET | `/produk/:id` | authPengguna | `read-produk` | ya | `produkRoutes.js` |
+| GET | `/produk/:id` | authPengguna | `read-produk` atau `akses-pos` | ya | `produkRoutes.js` |
 | PUT | `/produk/:id` | authPengguna | `update-produk` | ya | `produkRoutes.js` |
 | DELETE | `/produk/:id` | authPengguna | `delete-produk` | ya | `produkRoutes.js` |
 | GET | `/role` | authPengguna | `read-role` | ya | `roleRoute.js` |
