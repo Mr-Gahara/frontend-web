@@ -34,3 +34,10 @@ export interface QuickOpnamePayload {
   fisikAktual: number;
   catatan?: string;
 }
+
+export interface TambahInventoryPayload {
+  bahanBakuID: string;
+  locationID: string;
+  stok: number;
+  stokMinimum: number;
+}

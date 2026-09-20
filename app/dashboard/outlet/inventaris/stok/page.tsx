@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/apiClient";
-import { queryKeys } from "@/lib/queryKeys";
 import { useDebounce } from "@/hooks/use-debounce";
+import { pesanError } from "@/lib/api/error";
+import {
+  useDaftarInventory,
+  useDaftarLokasi,
+  useOpnameInventory,
+  useUbahStokMinimum,
+} from "@/features/inventaris/hooks";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Inventory } from "@/types/inventory";
@@ -40,7 +44,6 @@ import {
 } from "lucide-react";
 
 export default function StokInventoryPage() {
-  const queryClient = useQueryClient();
 
   // --- Filter States ---
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,49 +67,21 @@ export default function StokInventoryPage() {
 
   // --- Queries ---
   // Fetch Lokasi (Khusus Outlet)
-  const { data: lokasiList = [], isLoading: isLoadingLokasi } = useQuery({
-    queryKey: queryKeys.lokasi.daftar({ tipe: "Outlet" }),
-    queryFn: async () => {
-      try {
-        const res = await apiClient.get<any>(
-          "/location",
-          undefined,
-          "pengguna",
-        );
-        const raw = res.data?.data || res.data || [];
-        const allLocations = Array.isArray(raw) ? raw : [];
-        return allLocations.filter((loc: any) => loc.tipe === "Outlet");
-      } catch (err) {
-        return [];
-      }
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data: semuaLokasi = [], isLoading: isLoadingLokasi } = useDaftarLokasi();
+  const lokasiOutlet = useMemo(
+    () => semuaLokasi.filter((lokasi) => lokasi.tipe === "Outlet"),
+    [semuaLokasi],
+  );
 
   // Fetch Inventory List
-  const { data: inventoryData = [], isLoading: isLoadingInventory } = useQuery({
-    queryKey: [...queryKeys.inventory.daftar(), debouncedSearch, selectedLocation],
-    queryFn: async () => {
-      const params: Record<string, string> = {};
-      if (debouncedSearch) params.search = debouncedSearch;
-      if (selectedLocation && selectedLocation !== "all") {
-        params.locationID = selectedLocation;
-      }
-
-      const res = await apiClient.get<any>("/inventory", params, "pengguna");
-      const raw = res.data?.data || res.data || [];
-      return Array.isArray(raw) ? (raw as Inventory[]) : [];
-    },
+  const { data: inventoryData = [], isLoading: isLoadingInventory } = useDaftarInventory({
+    locationID: selectedLocation !== "all" ? selectedLocation : undefined,
+    search: debouncedSearch || undefined,
   });
 
-  // --- SAFE GUARDS (Anti-Ghost Cache) ---
-  // Memastikan bahwa data yang dilempar oleh React Query Cache benar-benar sebuah Array
-  const safeLokasiList = Array.isArray(lokasiList) ? lokasiList : [];
-  
   const filteredInventory = useMemo(() => {
-    // Tembok Pertahanan: Pastikan inventoryData selalu Array sebelum di-filter
-    let result = Array.isArray(inventoryData) ? inventoryData : [];
-    
+    let result = inventoryData;
+
     // 1. Pastikan hanya data Outlet yang boleh masuk ke tabel ini
     result = result.filter((inv) => inv.lokasi?.tipe === "Outlet");
 
@@ -119,47 +94,25 @@ export default function StokInventoryPage() {
   }, [inventoryData, filterTab]);
 
   // --- Mutations ---
-  const updateMinStockMutation = useMutation({
-    mutationFn: async (payload: { id: string; stokMinimum: number }) => {
-      return await apiClient.patch(
-        `/inventory/${payload.id}/minimum-stok`,
-        { stokMinimum: payload.stokMinimum },
-        undefined,
-        "pengguna",
-      );
-    },
+  const updateMinStockMutation = useUbahStokMinimum({
     onSuccess: () => {
       toast.success("Berhasil", {
         description: "Batas minimum stok diperbarui.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar() });
       setMinStockModal({ isOpen: false, data: null, inputValue: "" });
     },
-    onError: (err: any) => {
+    onError: (err) => {
       toast.error("Gagal", {
-        description: err.message || "Gagal mengupdate stok minimum.",
+        description: pesanError(err, "Gagal mengupdate stok minimum."),
       });
     },
   });
 
-  const submitOpnameMutation = useMutation({
-    mutationFn: async (payload: {
-      id: string;
-      fisikAktual: number;
-      catatan: string;
-    }) => {
-      return await apiClient.post(
-        `/inventory/${payload.id}/opname`,
-        { fisikAktual: payload.fisikAktual, catatan: payload.catatan },
-        undefined,
-        "pengguna",
-      );
-    },
+  const submitOpnameMutation = useOpnameInventory({
     onSuccess: () => {
       toast.success("Opname Berhasil", {
         description: "Stok fisik telah disesuaikan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar() });
       setOpnameModal({
         isOpen: false,
         data: null,
@@ -167,9 +120,9 @@ export default function StokInventoryPage() {
         catatan: "",
       });
     },
-    onError: (err: any) => {
+    onError: (err) => {
       toast.error("Gagal", {
-        description: err.message || "Gagal menyesuaikan stok fisik.",
+        description: pesanError(err, "Gagal menyesuaikan stok fisik."),
       });
     },
   });
@@ -225,8 +178,8 @@ export default function StokInventoryPage() {
               <SelectItem value="all" className="font-bold cursor-pointer">
                 Semua Lokasi
               </SelectItem>
-              {safeLokasiList.map((lok: any) => {
-                const locationId = lok._id || lok.id;
+              {lokasiOutlet.map((lok) => {
+                const locationId = lok.id;
                 return (
                   <SelectItem
                     key={locationId}

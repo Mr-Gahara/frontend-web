@@ -1,11 +1,16 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/apiClient";
-import { EP } from "@/lib/api/endpoints";
-import { queryKeys } from "@/lib/queryKeys";
 import { useDebounce } from "@/hooks/use-debounce";
+import { pesanError } from "@/lib/api/error";
+import {
+  useDaftarInventory,
+  useLokasiBertipe,
+  useOpnameInventory,
+  useTambahInventory,
+  useUbahStokMinimum,
+} from "@/features/inventaris/hooks";
+import { useDaftarBahanBaku } from "@/features/bahan-baku/hooks";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Inventory } from "@/types/inventory";
@@ -44,7 +49,6 @@ import {
 } from "lucide-react";
 
 export default function GudangInventoryPage() {
-  const queryClient = useQueryClient();
 
   // --- Filter States ---
   const [searchTerm, setSearchTerm] = useState("");
@@ -76,47 +80,15 @@ export default function GudangInventoryPage() {
   // --- DEPENDENT QUERIES ---
 
   // 1. Ambil ID Gudang terlebih dahulu
-  const { data: gudangId, isLoading: isLoadingLokasi } = useQuery({
-    queryKey: queryKeys.lokasi.daftar({ tipe: "Gudang" }),
-    queryFn: async () => {
-      try {
-        const res = await apiClient.get<any>("/location", undefined, "pengguna");
-        const raw = res.data?.data || res.data || [];
-        const locations = Array.isArray(raw) ? raw : [];
-        const gudang = locations.find((loc: any) => loc.tipe === "Gudang");
-        const finalId = gudang?._id || gudang?.id;
-        return finalId ? finalId : null;
-      } catch {
-        return null;
-      }
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+  const { lokasiId: gudangId, isLoading: isLoadingLokasi } = useLokasiBertipe("Gudang");
 
   // 2. Fetch Inventory Gudang
-  const { data: inventoryData = [], isLoading: isLoadingInventory } = useQuery({
-    queryKey: [...queryKeys.inventory.daftar(gudangId || "gudang"), debouncedSearch],
-    queryFn: async () => {
-      const params: Record<string, string> = { locationID: gudangId };
-      if (debouncedSearch) params.search = debouncedSearch;
-
-      const res = await apiClient.get<any>("/inventory", params, "pengguna");
-      const raw = res.data?.data || res.data || [];
-      return Array.isArray(raw) ? (raw as Inventory[]) : [];
-    },
-    enabled: !!gudangId,
-  });
+  const { data: inventoryData = [], isLoading: isLoadingInventory } = useDaftarInventory(
+    gudangId ? { locationID: gudangId, search: debouncedSearch || undefined } : null,
+  );
 
   // 3. Fetch Master Bahan Baku (Untuk Dropdown Tambah Barang)
-  const { data: masterBahanBaku = [], isLoading: isLoadingMaster } = useQuery({
-    queryKey: queryKeys.bahanBaku.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<any>(EP.bahanBaku.list, undefined, "pengguna");
-      return res.data?.data || res.data || [];
-    },
-    // Query ini hanya aktif jika modal tambah barang dibuka agar hemat bandwidth
-    enabled: addItemModal, 
-  });
+  const { data: masterBahanBaku = [], isLoading: isLoadingMaster } = useDaftarBahanBaku();
 
   // --- Derived Data (Client-side filtering) ---
   const filteredInventory = useMemo(() => {
@@ -126,8 +98,8 @@ export default function GudangInventoryPage() {
 
   // FILTER CERDAS: Hanya tampilkan master data yang BELUM ada di Gudang
   const availableBahanBaku = useMemo(() => {
-    return masterBahanBaku.filter((bb: any) => {
-      const masterId = bb._id || bb.id;
+    return masterBahanBaku.filter((bb) => {
+      const masterId = bb.id;
       // Cek apakah ID Master ini sudah ada di tabel inventory Gudang
       const isExist = inventoryData.some((inv) => inv.item?.id === masterId);
       return !isExist;
@@ -135,60 +107,58 @@ export default function GudangInventoryPage() {
   }, [masterBahanBaku, inventoryData]);
 
   // --- Mutations ---
-  const addItemMutation = useMutation({
-    mutationFn: async () => {
-      if (!gudangId) throw new Error("ID Gudang tidak ditemukan.");
-      const payload = {
-        bahanBakuID: newItem.bahanBakuID,
-        locationID: gudangId,
-        stok: Number(newItem.stok) || 0,
-        stokMinimum: Number(newItem.stokMinimum) || 0,
-      };
-      return await apiClient.post("/inventory", payload, undefined, "pengguna");
-    },
+  const addItemMutation = useTambahInventory({
     onSuccess: () => {
       toast.success("Barang Berhasil Ditambahkan", {
         description: "Stok baru telah terdaftar di Gudang Pusat.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar(gudangId || "gudang") });
       setAddItemModal(false);
       setNewItem({ bahanBakuID: "", stok: "", stokMinimum: "" });
     },
-    onError: (err: any) => {
-      toast.error("Gagal Menambahkan Barang", { description: err.message });
-    }
+    onError: (err) => {
+      toast.error("Gagal Menambahkan Barang", {
+        description: pesanError(err, "Gagal menambahkan barang ke gudang."),
+      });
+    },
   });
 
-  const updateMinStockMutation = useMutation({
-    mutationFn: async (payload: { id: string; stokMinimum: number }) => {
-      return await apiClient.patch(
-        `/inventory/${payload.id}/minimum-stok`,
-        { stokMinimum: payload.stokMinimum },
-        undefined,
-        "pengguna"
-      );
-    },
+  const tambahBarang = () => {
+    if (!gudangId) {
+      toast.error("Gagal Menambahkan Barang", {
+        description: "ID Gudang tidak ditemukan.",
+      });
+      return;
+    }
+    addItemMutation.mutate({
+      bahanBakuID: newItem.bahanBakuID,
+      locationID: gudangId,
+      stok: Number(newItem.stok) || 0,
+      stokMinimum: Number(newItem.stokMinimum) || 0,
+    });
+  };
+
+  const updateMinStockMutation = useUbahStokMinimum({
     onSuccess: () => {
       toast.success("Berhasil", { description: "Batas minimum stok diperbarui." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar(gudangId || "gudang") });
       setMinStockModal({ isOpen: false, data: null, inputValue: "" });
-    }
+    },
+    onError: (err) => {
+      toast.error("Gagal", {
+        description: pesanError(err, "Gagal mengupdate stok minimum."),
+      });
+    },
   });
 
-  const submitOpnameMutation = useMutation({
-    mutationFn: async (payload: { id: string; fisikAktual: number; catatan: string }) => {
-      return await apiClient.post(
-        `/inventory/${payload.id}/opname`,
-        { fisikAktual: payload.fisikAktual, catatan: payload.catatan },
-        undefined,
-        "pengguna"
-      );
-    },
+  const submitOpnameMutation = useOpnameInventory({
     onSuccess: () => {
       toast.success("Opname Berhasil", { description: "Stok fisik telah disesuaikan." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.inventory.daftar(gudangId || "gudang") });
       setOpnameModal({ isOpen: false, data: null, fisikAktual: "", catatan: "" });
-    }
+    },
+    onError: (err) => {
+      toast.error("Gagal", {
+        description: pesanError(err, "Gagal menyesuaikan stok fisik."),
+      });
+    },
   });
 
   // --- Render Loading Global ---
@@ -405,8 +375,8 @@ export default function GudangInventoryPage() {
                       Semua master data sudah ada di gudang.
                     </div>
                   ) : (
-                    availableBahanBaku.map((bb: any) => (
-                      <SelectItem key={bb._id || bb.id} value={bb._id || bb.id} className="font-bold cursor-pointer hover:bg-emerald-50">
+                    availableBahanBaku.map((bb) => (
+                      <SelectItem key={bb.id} value={bb.id} className="font-bold cursor-pointer hover:bg-emerald-50">
                         {bb.namaBahan} <span className="text-xs text-[#0A2947]/50 font-normal">({bb.satuan})</span>
                       </SelectItem>
                     ))
@@ -444,7 +414,7 @@ export default function GudangInventoryPage() {
               Batal
             </Button>
             <Button
-              onClick={() => addItemMutation.mutate()}
+              onClick={() => tambahBarang()}
               disabled={addItemMutation.isPending || !newItem.bahanBakuID}
               className="bg-emerald-700 text-white hover:bg-emerald-800 font-bold cursor-pointer shadow-sm"
             >

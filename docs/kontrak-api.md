@@ -385,7 +385,7 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /bahanbaku`: availableUnits[], createdAt, id, namaBahan, satuan, tenantID, updatedAt
 - `GET /bahanbaku/:param`: availableUnits[], createdAt, id, namaBahan, satuan, tenantID, updatedAt
 - `GET /diskon`: bisaDigabung, cakupan, createdAt, id, namaDiskon, nilai, status, tenantID, tipe, updatedAt
-- `GET /inventory`: createdAt, id, isStokKritis, item{id, nama, satuan, tipeItem}, lokasi{id, nama, tipe}, stok, stokMinimum, tenantID, updatedAt
+- `GET /inventory`: createdAt, id, isStokKritis, item{id, nama, satuan, tipeItem}, lokasi{id, nama, tipe}, stok, stokMinimum, tenantID, updatedAt (query yang dibaca service: `locationID`, `kategori`, `search`; tanpa `locationID` mengirim stok seluruh lokasi tenant)
 - `GET /jadwalshift`: catatan, id, isLibur, karyawan{id, namaLengkap, role}, shift{id, isLintasHari, jamMasuk, jamPulang, namaShift, status}, tanggalKerja
 - `GET /jurnalstok`: _id, alasan, bahanBakuID{_id, namaBahan, satuan}, createdAt, dicatatOleh{_id, nama}, jumlah, keterangan, locationID{_id, nama, tipe}, tanggal, tenantID, tipeKoreksi, updatedAt
 - `GET /kategori`: __v, _id, createdAt, keterangan, kodeKategori, namaKategori, tenantID{_id, namaToko}, updatedAt
@@ -425,6 +425,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PATCH /inventory/:id/minimum-stok`
 
 - Aturan: tanpa validator, dibatasi skema `models/inventoryModel.js`
+- Dibaca service dari body: `stokMinimum` (ditolak bila negatif)
 - Wajib dari klien: -
 - Field lain yang dikenali: `bahanBakuID`, `barangInventoryID`, `locationID`, `stok`, `stokMinimum`
 - Diisi server: -
@@ -571,6 +572,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /inventory`
 
 - Aturan: tanpa validator, dibatasi skema `models/inventoryModel.js`
+- Item yang sudah terdaftar di lokasi yang sama ditolak: satu catatan stok per item per lokasi (`inventoryService` sekitar baris 24)
 - Wajib dari klien: -
 - Field lain yang dikenali: `bahanBakuID`, `barangInventoryID`, `locationID`, `stok`, `stokMinimum`
 - Dibaca controller dari body: `-`
@@ -579,6 +581,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /inventory/:id/opname`
 
 - Aturan: tanpa validator, dibatasi skema `models/inventoryModel.js`
+- Dibaca service dari body: `fisikAktual` (stok menjadi nilai ini) dan `catatan` (keterangan pencatatan, bawaan "Koreksi stok fisik")
 - Wajib dari klien: -
 - Field lain yang dikenali: `bahanBakuID`, `barangInventoryID`, `locationID`, `stok`, `stokMinimum`
 - Diisi server: -
@@ -929,7 +932,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 ## 5. Kebutuhan izin per halaman
 
-Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual. Baris produk, kategori, stock adjustment, dan jurnal stok diperbarui manual setelah migrasi (20 September 2026); baris lain mencerminkan keadaan saat kontrak dibangkitkan.
+Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual. Baris pengguna, produk, kategori, bahan baku, stok, stock adjustment, jurnal stok, dan inventaris gudang diperbarui manual dari `IZIN_HALAMAN` setelah migrasi (20 September 2026); baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
 | Menu | Gate saat ini | Endpoint GET di halaman | Permission dibutuhkan | Penilaian |
 |---|---|---|---|---|
@@ -943,9 +946,9 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/outlet/inventaris-data` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/produk` | `read-produk` | `/produk` | `read-produk` atau `akses-pos` | Sejalan |
 | `/dashboard/outlet/inventaris/kategori` | `read-kategori` | `/kategori`, `/produk` | `read-kategori`; `/produk` opsional (`read-produk` atau `akses-pos`) untuk hitungan pemakaian | Sejalan |
-| `/dashboard/outlet/inventaris/bahanBaku` | - | `/location`, `/inventory` | `read-location`, `read-inventory` | Tanpa gate, endpoint berizin |
+| `/dashboard/outlet/inventaris/bahanBaku` | `read-location`, `read-inventory` | `/location`, `/inventory` | `read-location`, `read-inventory` | Sejalan |
 | `/dashboard/outlet/inventaris-pantau` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
-| `/dashboard/outlet/inventaris/stok` | - | `/location`, `/inventory` | `read-location`, `read-inventory` | Tanpa gate, endpoint berizin |
+| `/dashboard/outlet/inventaris/stok` | `read-location`, `read-inventory` | `/location`, `/inventory` | `read-location`, `read-inventory` | Sejalan |
 | `/dashboard/outlet/inventaris/stockOpname` | - | - | - | Data dimuat lewat komponen, periksa manual |
 | `/dashboard/outlet/inventaris/stockAdjustment` | `read-stock-adjustment` | `/stockopname/adjustments`, `/stockopname/adjustments/:id` | `read-stock-adjustment` | Sejalan |
 | `/dashboard/outlet/inventaris/jurnalStok` | `read-jurnal-stok`, `read-location` | `/jurnalstok`, `/location/current` | `read-jurnal-stok`, `read-location` | Sejalan |
@@ -956,10 +959,10 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/outlet/pola-roster` | - | `/shift`, `/polaroster` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/shift` | - | `/shift` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/pelanggan` | `read-pelanggan` | `/pelanggan` | - | Backend tidak memeriksa izin |
-| `/dashboard/outlet/pengguna` | `read-pengguna` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sebagian: butuh juga `read-role` |
+| `/dashboard/outlet/pengguna` | `read-pengguna`, `read-role` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sejalan |
 | `/dashboard/outlet/pengaturan` | - | - | - | Data dimuat lewat komponen, periksa manual |
 | `/dashboard/gudang` | - | - | - | Data dimuat lewat komponen, periksa manual |
-| `/dashboard/gudang/inventaris` | `read-inventory-gudang` | `/location`, `/inventory`, `/bahan-baku`, `/bahanbaku` | `read-location`, `read-inventory`, `?`, `read-bahan` | Tidak sejalan |
+| `/dashboard/gudang/inventaris` | `read-location`, `read-inventory`, `read-bahan` | `/location`, `/inventory`, `/bahanbaku` | `read-location`, `read-inventory`, `read-bahan` | Sejalan |
 | `/dashboard/gudang/jurnalStok` | `read-jurnal-stok` | `/jurnalstok` | `read-jurnal-stok` | Sejalan |
 | `/dashboard/gudang/stockOpname` | `read-stock-opname` | - | - | Data dimuat lewat komponen, periksa manual |
 | `/dashboard/gudang/pengajuanStok` | `read-pengajuan-stok` | `/pengajuanstok` | `read-pengajuan-stok` | Sejalan |
@@ -968,7 +971,7 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/gudang/jadwal` | - | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Tanpa gate, endpoint berizin |
 | `/dashboard/gudang/pola-roster` | - | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/gudang/shift` | - | - | - | Tidak ada halaman (grup menu atau rute kosong) |
-| `/dashboard/gudang/pengguna` | `read-pengguna` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sebagian: butuh juga `read-role` |
+| `/dashboard/gudang/pengguna` | `read-pengguna`, `read-role` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sejalan |
 | `/dashboard/gudang/pengaturan` | - | - | - | Data dimuat lewat komponen, periksa manual |
 
 ## 6. Ketidakselarasan yang tercatat

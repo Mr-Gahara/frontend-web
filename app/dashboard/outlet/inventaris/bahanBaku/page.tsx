@@ -50,7 +50,7 @@ export default function DaftarBahanBakuPage() {
     data: inventoryList = [],
     isLoading: isLoadingInventory,
     isError,
-  } = useDaftarInventory({ locationID: outletId, search: debouncedSearch });
+  } = useDaftarInventory(outletId ? { locationID: outletId, search: debouncedSearch } : null);
 
   // Menghapus bahan baku juga menghapus entri inventorinya di backend;
   // invalidasi keduanya ditangani hook.
