@@ -134,7 +134,7 @@ queryKeys.produk.detail(id)     // ["produk", "detail", id]
 
 ### `features/<modul>/`
 Pola yang sudah terbukti di bahan baku, pengguna, role, produk, kategori,
-stock adjustment, jurnal stok, stok, dan stock opname:
+stock adjustment, jurnal stok, stok, stock opname, dan daftar pengajuan stok:
 
 - `api.ts` — pemanggilan endpoint memakai `apiData` dan `EP`
 - `hooks.ts` — `useQuery` dan `useMutation`, termasuk aturan invalidasi. Hook mutation menerima `onSuccess` dan `onError` dari halaman untuk toast dan reset dialog (`keputusan.md` butir 13)
@@ -148,7 +148,7 @@ Isi tiap `features/` yang sudah ada:
 | Folder | Berkas | Catatan |
 |---|---|---|
 | `bahan-baku` | `api.ts`, `hooks.ts`, `schema.ts` | Modul percontohan Fase 2. Lokasi dan stok diambil dari `features/inventaris`; `useDaftarBahanBaku` juga dipakai inventaris gudang untuk master bahan baku |
-| `inventaris` | `api.ts`, `hooks.ts`, `lokasi.ts`, `cakupan.ts`, `pemilih-lokasi-outlet.tsx`, `pesan-lokasi.tsx` | Lintas halaman inventaris; dipakai bahan baku, jurnal stok, stok outlet, inventaris gudang, dan stock opname. Lokasi: `useDaftarLokasi` dan `useLokasiBertipe` berbagi kunci `lokasi.daftar()`, sedangkan `useLokasiAktif` menyeragamkan cache lewat `lokasiTunggal`. Stok: `useDaftarInventory` (argumen `null` berarti belum siap; tanpa `locationID` berarti semua lokasi), `useUbahStokMinimum`, `useOpnameInventory`, dan `useTambahInventory`. Cakupan: `useCakupanLokasiOutlet` (owner seluruh outlet, staf lokasi aktif) dengan fungsi murni `tentukanCakupan` dan `lingkupOutlet`, serta komponen `PemilihLokasiOutlet` dan `PesanLokasi`. Satu-satunya tempat hook lokasi, inventory, dan cakupan |
+| `inventaris` | `api.ts`, `hooks.ts`, `lokasi.ts`, `cakupan.ts`, `pemilih-lokasi-outlet.tsx`, `pesan-lokasi.tsx` | Lintas halaman inventaris; dipakai bahan baku, jurnal stok, stok outlet, inventaris gudang, stock opname, dan pengajuan stok. Lokasi: `useDaftarLokasi` dan `useLokasiBertipe` berbagi kunci `lokasi.daftar()`, sedangkan `useLokasiAktif` menyeragamkan cache lewat `lokasiTunggal`. Stok: `useDaftarInventory` (argumen `null` berarti belum siap; tanpa `locationID` berarti semua lokasi), `useUbahStokMinimum`, `useOpnameInventory`, dan `useTambahInventory`. Cakupan: `useCakupanLokasiOutlet` (owner seluruh outlet, staf lokasi aktif) dengan fungsi murni `tentukanCakupan` dan `lingkupOutlet`, serta komponen `PemilihLokasiOutlet` dan `PesanLokasi`. Satu-satunya tempat hook lokasi, inventory, dan cakupan |
 | `pengguna` | `api.ts`, `hooks.ts`, `halaman-pengguna.tsx` | Komponen halaman dipakai outlet dan gudang |
 | `role` | `api.ts`, `hooks.ts`, `constants.ts`, `form-role.tsx` | `form-role.tsx` dipakai halaman edit dan kostum; `useLevelPenggunaAktif` dipakai lintas modul |
 | `produk` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `izin.ts`, `form-produk.tsx` | `form-produk.tsx` dipakai halaman buat dan edit; `useDaftarProduk` dipakai halaman kategori, pajak, dan buat penjualan; `bolehBacaProduk` menerima `read-produk` atau `akses-pos` |
@@ -156,6 +156,7 @@ Isi tiap `features/` yang sudah ada:
 | `stock-adjustment` | `api.ts`, `hooks.ts`, `tampilan.ts` | Hanya baca; `useStockAdjustment` tidak mengulang permintaan saat 404; `tampilan.ts` menampilkan `-` untuk nilai yang salah dari mapper backend, dikendalikan `MAPPER_ADJUSTMENT_SUDAH_BENAR` |
 | `jurnal-stok` | `api.ts`, `hooks.ts`, `filter.ts`, `tampilan.ts`, `halaman-jurnal-stok.tsx` | Hanya baca; komponen halaman dipakai outlet dan gudang, dibedakan lewat `ruang`, `lingkup` (satu lokasi atau tipe lokasi), `penghalang`, dan `pemilihLokasi` (owner di ruang outlet) |
 | `stock-opname` | `api.ts`, `hooks.ts`, `payload.ts`, `izin.ts`, `halaman-daftar-stock-opname.tsx`, `halaman-detail-stock-opname.tsx`, `form-buat-stock-opname.tsx` | Ketiga komponen dipakai outlet dan gudang lewat `ruang` dan `TEKS`. Daftar menerima `lingkup` dan `pemilihLokasi`; form buat menerima `sumberLokasi` (tetap atau pilih). `payload.ts` hanya mengirim hitungan yang terisi; `izin.ts` memuat `bolehHitungOpname` dan `bolehTinjauOpname`; `useStockOpname` tidak mengulang permintaan saat 404 |
+| `pengajuan-stok` | `api.ts`, `hooks.ts`, `filter.ts`, `izin.ts`, `halaman-daftar-pengajuan-stok.tsx` | Komponen daftar dipakai outlet dan gudang lewat `ruang` dan `TEKS` (tab, label status, kolom lokasi, tombol baris), `lingkup`, `pemilihLokasi`, dan `penghalang`. `filter.ts` menyaring per ruang (tipe lokasi, draf, pencarian); `izin.ts` mencerminkan aturan status per izin di `pengajuanStokService.getAll`. Detail, edit, dan buat belum dimigrasikan |
 
 Cara memeriksa apakah sebuah modul sudah dimigrasikan: halamannya tidak lagi
 memanggil `apiClient`, dan lapisan datanya ada di `features/<modul>/` atau di
@@ -171,8 +172,8 @@ memanggil `apiClient`, dan lapisan datanya ada di `features/<modul>/` atau di
 ## Langkah migrasi satu modul
 
 Urutan yang dipakai pada bahan baku, pengguna, role, produk, kategori, stock
-adjustment, jurnal stok, stok, dan stock opname, dan terbukti menjaga `tsc`
-tetap hijau di tiap langkah:
+adjustment, jurnal stok, stok, stock opname, dan daftar pengajuan stok, dan
+terbukti menjaga `tsc` tetap hijau di tiap langkah:
 
 1. **Petakan keadaan.** Hitung baris tiap berkas, cari pemakaian `apiClient`,
    `any`, `_id`, dan `queryKey`. Bila ada dua halaman serupa (outlet dan

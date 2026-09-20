@@ -276,6 +276,14 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   komentar kode dan spec (`bagian N`, nama berkas lama) ikut di-grep dan
   diperbarui. Cara ini membuktikan kelengkapan pemecahan dokumentasi dalam
   satu putaran.
+- **Skrip penerap tidak bergantung pada berkas yang harus dibuat manual di
+  luar bloknya.** Pada pengajuan stok, skrip membaca dua halaman dari `/tmp`
+  yang belum dibuat, lalu berhenti di tengah. Berkas yang ditulis ulang utuh
+  memakai heredoc di blok yang sama.
+- **Invalidasi memakai akar domain, bukan `daftar()` tanpa argumen.** Kunci
+  daftar selalu membawa objek filter, sehingga `daftar()` (filter
+  `undefined`) tidak mengenai daftar mana pun. Terjadi di stock opname dan
+  pengajuan stok.
 
 ## Kapan berhenti dan bertanya
 

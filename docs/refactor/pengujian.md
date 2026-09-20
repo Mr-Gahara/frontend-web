@@ -45,8 +45,8 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per commit cakupan lokasi** (commit `6ca6da8`): 113 test unit dan
-integrasi lolos, 193 e2e lolos, 4 skipped: dua `test.fixme` yang menunggu
+**Baseline per daftar pengajuan stok** (commit `59e10a1`): 118 test unit dan
+integrasi lolos, 203 e2e lolos, 4 skipped: dua `test.fixme` yang menunggu
 backend dan dua `test.skip` bersyarat data (Test yang ditandai fixme dan skip
 bersyarat, di bawah). Angka ini pembanding untuk memastikan tidak ada yang
 hilang diam-diam. Angka skipped dapat berubah bila data uji berubah; periksa
@@ -159,6 +159,10 @@ satu putaran.
 - Simulasi kegagalan GET dengan `page.route` (misalnya status 500) butuh
   timeout sekitar 20 detik pada assertion pesan error, karena TanStack Query
   mengulang permintaan beberapa kali sebelum query dinyatakan gagal.
+- Spec pembanding mencocokkan path API tanpa membedakan huruf besar kecil
+  (`/\/api\/pengajuanstok/i`). Halaman lama memanggil `/pengajuanStok`,
+  sedangkan `features/` memakai konstanta kanonik lowercase; spec yang peka
+  huruf gagal setelah migrasi padahal perilakunya sama.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -195,6 +199,10 @@ Urutan debug kegagalan e2e di atas).
   (`tests/unit/features/inventaris/cakupan.test.ts`), karena satu-satunya akun
   uji (Ridho) berperan Owner. Butuh akun staf dengan lokasi aktif untuk
   menambahkannya ke e2e.
+- **Tab pengajuan stok yang disembunyikan menurut izin** hanya teruji di
+  unit test (`tests/unit/features/pengajuan-stok/pengajuan-stok.test.ts`),
+  dengan alasan yang sama: aturannya hanya berlaku bagi petugas transfer
+  tanpa izin setujui.
 - **Approve stock opname yang berhasil** tidak diuji e2e, karena mengubah
   stok sungguhan. Yang diuji hanya jalur gagalnya.
 - **Tambah barang gudang yang berhasil** tidak diuji e2e, karena UI tidak
@@ -233,5 +241,10 @@ Urutan debug kegagalan e2e di atas).
   dan baris tabel dipilih menurut urutan respons.
 - `tests/e2e/inventaris/stockOpname/draft-stok-opname.spec.ts`: bukti bug
   simpan sebagian (isi payload diperiksa) dan dokumen yang tidak ditemukan.
+- `tests/e2e/inventaris/pengajuanStok/lihat-pengajuan-stok.spec.ts`: path API
+  dicocokkan tanpa membedakan huruf besar kecil agar berlaku sebelum dan
+  sesudah migrasi, harapan dihitung per ruang dengan aturan yang sama
+  dengan tampilan (`dariOutlet`, `diGudang`), dan label tab diambil dari
+  kode.
 - `tests/e2e/inventaris/bahanBaku/hapus-bahan-baku.spec.ts`: dialog yang harus
   tetap terbuka saat operasi gagal.

@@ -5,7 +5,7 @@ const path = require("path");
 const { daftarDokumen, bacaBaris, relatif, jalankan } = require("./umum.cjs");
 
 // Nama berkas yang terlalu umum untuk dijadikan istilah.
-const UMUM = new Set(["page", "layout", "index", "route", "api", "hooks", "schema", "payload", "izin", "tampilan", "filter", "pesan", "types", "constants", "lokasi"]);
+const UMUM = new Set(["page", "layout", "index", "route", "api", "hooks", "schema", "payload", "izin", "tampilan", "filter", "pesan", "types", "constants", "lokasi", "permissions", "queryKeys", "endpoints", "client", "error", "normalize", "session"]);
 
 /** Istilah dari berkas yang diubah sebuah commit (tanpa docs/). */
 function istilahDariCommit(rev) {

@@ -158,7 +158,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/pengajuanstok` | authPengguna | `read-pengajuan-stok` | `{ data, success }` | `id` | 2 file |
+| GET | `/pengajuanstok` | authPengguna | `read-pengajuan-stok` | `{ data, success }` | `id` | `features/pengajuan-stok` (query `status`, `locationID`) |
 | POST | `/pengajuanstok` | authPengguna | `create-pengajuan-stok` | - | - | 1 file |
 | GET | `/pengajuanstok/:id` | authPengguna | `read-pengajuan-stok` | `{ data, success }` | `id` | 3 file |
 | PUT | `/pengajuanstok/:id` | authPengguna | `update-pengajuan-stok` | - | - | 1 file |
@@ -322,7 +322,7 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /pajak`: _id, createdAt, modelPerhitungan, namaPajak, prioritas, statusPajak, tarifPajak, tenantID, tipePajak, updatedAt
 - `GET /pelanggan`: alamat, createdAt, email, id, namaPelanggan, nomorHp, poinLoyalitas, tenantID, tipePelanggan, updatedAt
 - `GET /pembayaran`: akunKasID, catatan, createdAt, gatewayPaymentID, id, jumlahBayar, metodePembayaranID, noReferensi, penjualanID, qrString, status, tanggalBayar, tenantID, updatedAt
-- `GET /pengajuanstok`: catatan, catatanPenolakan, createdAt, dariLokasi{id, nama, tipe}, dimintaOleh{id, nama}, disetujuiOleh, ditolakOleh, id, items[], jenisPengajuan, keLokasi{id, nama, tipe}, nomorPengajuan, status, tanggalApprove, tanggalKebutuhan, tanggalReject, tenantID, transferStokID, updatedAt
+- `GET /pengajuanstok`: catatan, catatanPenolakan, createdAt, dariLokasi{id, nama, tipe}, dimintaOleh{id, nama}, disetujuiOleh, ditolakOleh, id, items[], jenisPengajuan, keLokasi{id, nama, tipe}, nomorPengajuan, status, tanggalApprove, tanggalKebutuhan, tanggalReject, tenantID, transferStokID, updatedAt (query yang dibaca service: `status`, `jenisPengajuan`, dan `locationID` untuk lokasi asal atau tujuan; status dibatasi menurut izin, `temuan.md` butir 21)
 - `GET /pengajuanstok/:param`: catatan, catatanPenolakan, createdAt, dariLokasi{id, nama, tipe}, dimintaOleh{id, nama}, disetujuiOleh, ditolakOleh, id, items[], jenisPengajuan, keLokasi{id, nama, tipe}, nomorPengajuan, status, tanggalApprove, tanggalKebutuhan, tanggalReject, tenantID, transferStokID, updatedAt
 - `GET /pengguna`: aksesType[], fotoKaryawan, id, nama, nomorHp, role, roleID, status
 - `GET /pengguna/:param`: aksesType[], fotoKaryawan, id, nama, nomorHp, role, roleID, status

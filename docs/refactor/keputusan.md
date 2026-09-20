@@ -78,7 +78,8 @@ Tidak boleh dibalik tanpa pembahasan:
   `useLevelPenggunaAktif` (keputusan rancangan butir 2). Pembatasan ini hanya di
   tampilan, karena backend mengirim data seluruh tenant kepada pemegang izin
   baca (`kontrak/temuan.md` butir 20). Aturan yang sama diterapkan juga ke
-  jurnal stok dan stok outlet dalam commit cakupan lokasi.
+  jurnal stok dan stok outlet dalam commit cakupan lokasi, dan ke daftar
+  pengajuan stok (`59e10a1`).
 - **Membuat opname di outlet tetap memakai lokasi aktif** untuk semua
   pengguna, termasuk owner, karena opname adalah hitungan fisik di tempat.
 - **Tombol aksi disembunyikan sesuai izin**: `submit-stock-opname` untuk
@@ -94,6 +95,24 @@ Tidak boleh dibalik tanpa pembahasan:
 - **Detail membedakan dokumen yang tidak ditemukan dari kegagalan memuat.**
 - **Gate daftar stock opname outlet ditambah `read-location`**, karena
   cakupan staf memanggil `/location/current`.
+
+### Submodul pengajuan stok
+
+- **Daftar outlet mengikuti cakupan outlet**: owner melihat seluruh outlet
+  dengan pemilih lokasi, staf hanya pengajuan dari lokasi aktifnya.
+- **Daftar gudang menampilkan pengajuan ke seluruh lokasi bertipe Gudang**
+  untuk MVP. Kelak beralih ke per gudang (owner seluruh gudang dengan
+  pemilih, petugas gudang hanya gudangnya), dikerjakan sebagai satu commit
+  untuk seluruh halaman gudang agar aturannya seragam (`status.md`, Setelah
+  modul inventaris).
+- **Draf tidak pernah tampil di ruang gudang**, karena belum diajukan dan
+  belum menjadi urusan gudang.
+- **Tab status yang selalu kosong karena izin disembunyikan.** Backend
+  hanya mengirim status tertentu kepada petugas transfer tanpa izin setujui
+  (`kontrak/temuan.md` butir 21); tab lainnya disembunyikan lewat
+  `features/pengajuan-stok/izin.ts`.
+- **Kegagalan memuat daftar tampil sebagai pesan**, sejalan dengan
+  keputusan submodul jurnal stok.
 
 ## Keputusan rancangan yang mengikat
 

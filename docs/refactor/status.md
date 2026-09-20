@@ -48,7 +48,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Inventaris: stok dan inventaris gudang | `ad590f9` | Selesai |
 | Inventaris: stock opname | `fc3f220` | Selesai |
 | Cakupan lokasi owner dan staf: jurnal stok dan stok outlet | `6ca6da8` | Selesai |
-| Inventaris: pengajuan stok, lalu transfer, pengiriman, dan penerimaan | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Inventaris: pengajuan stok, lalu transfer, pengiriman, dan penerimaan | `59e10a1` (daftar pengajuan) | **Berikutnya** (lihat Pekerjaan berikutnya): detail, edit, dan buat pengajuan |
 | Penjualan dan pembayaran | - | Belum |
 | Reservasi | - | Belum |
 | Keuangan | - | Belum |
@@ -85,7 +85,7 @@ terkecil (`arsitektur.md`, Langkah migrasi satu modul, langkah 7).
 | 2 | Jurnal stok | outlet dan gudang: daftar | 617 | Selesai (`98735d4`) |
 | 3 | Stok dan inventaris | `outlet/inventaris/stok`, `gudang/inventaris` | 1.094 | Selesai (`ad590f9`) |
 | 4 | Stock opname | outlet dan gudang: daftar, detail, buat | 2.544 | Selesai (`fc3f220`) |
-| 5 | Pengajuan stok | outlet: daftar, detail, edit, buat; gudang: daftar, detail | 2.298 | **Berikutnya** |
+| 5 | Pengajuan stok | outlet: daftar, detail, edit, buat; gudang: daftar, detail | 2.298 | **Berikutnya**: daftar selesai (`59e10a1`); detail, edit, dan buat menyusul |
 | 6 | Transfer, pengiriman, penerimaan | gudang: transfer (daftar, detail, edit), pengiriman; outlet: penerimaan (daftar, detail) | 1.950 | Belum |
 
 ### Pemetaan awal (20 September 2026)
@@ -95,11 +95,9 @@ baris dan jumlah baris yang memuat pola lama.
 
 | Halaman | Baris | apiClient | any | _id | queryKey |
 |---|---|---|---|---|---|
-| `outlet/inventaris/pengajuanStok` | 210 | 2 | 1 | 0 | 2 |
 | `outlet/inventaris/pengajuanStok/[id]` | 369 | 3 | 3 | 0 | 4 |
 | `outlet/inventaris/pengajuanStok/[id]/edit` | 504 | 5 | 7 | 7 | 6 |
 | `outlet/inventaris/pengajuanStok/buatPengajuan` | 363 | 4 | 6 | 4 | 4 |
-| `gudang/pengajuanStok` | 264 | 2 | 1 | 0 | 2 |
 | `gudang/pengajuanStok/[id]` | 588 | 5 | 7 | 1 | 8 |
 | `gudang/transferStok` | 267 | 2 | 1 | 0 | 2 |
 | `gudang/transferStok/[id]` | 484 | 4 | 5 | 0 | 9 |
@@ -113,19 +111,19 @@ dibanding total baris keduanya):
 
 | Halaman | Beda / total | Penilaian awal |
 |---|---|---|
-| `pengajuanStok` | 161 / 474 | Periksa bedanya |
 | `pengajuanStok/[id]` | 373 / 957 | Peran berbeda (outlet mengajukan, gudang menyetujui); kemungkinan tetap terpisah |
 
 Angka `diff` tidak cukup untuk memutuskan. Jurnal stok (341 dari 617 baris
-berbeda, hampir seluruhnya teks) dan stock opname (perbedaan kecil tersebar di
-34 hunk) tetap disatukan, sedangkan stok dan inventaris gudang (perbedaan
+berbeda, hampir seluruhnya teks), stock opname (perbedaan kecil tersebar di
+34 hunk), dan daftar pengajuan stok (161 dari 474: teks, tab, dan dua kolom)
+tetap disatukan, sedangkan stok dan inventaris gudang (perbedaan
 perilaku tersebar di seluruh berkas) hanya berbagi lapisan `features/`. Baca
 isi perbedaannya lewat `diff` tanpa baris `className` sebelum memutuskan.
 
 Perintah untuk mengulang pemetaan:
 
 ```bash
-find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep -vE "produk|kategori|bahanBaku|pengguna|jadwal|pengaturan|setup|stockAdjustment|jurnalStok|stockOpname|inventaris/stok|gudang/inventaris/page.tsx|gudang/page.tsx" | sort | while read f; do printf "%-58s %4s  apiClient:%s any:%s _id:%s qk:%s\n" "${f#app/dashboard/}" "$(wc -l < "$f")" "$(grep -c apiClient "$f")" "$(grep -cE ': any|as any|<any' "$f")" "$(grep -c _id "$f")" "$(grep -cE 'queryKey' "$f")"; done
+find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep -vE "produk|kategori|bahanBaku|pengguna|jadwal|pengaturan|setup|stockAdjustment|jurnalStok|stockOpname|inventaris/stok|gudang/inventaris/page.tsx|gudang/page.tsx|outlet/inventaris/pengajuanStok/page.tsx|gudang/pengajuanStok/page.tsx" | sort | while read f; do printf "%-58s %4s  apiClient:%s any:%s _id:%s qk:%s\n" "${f#app/dashboard/}" "$(wc -l < "$f")" "$(grep -c apiClient "$f")" "$(grep -cE ': any|as any|<any' "$f")" "$(grep -c _id "$f")" "$(grep -cE 'queryKey' "$f")"; done
 ```
 
 ### Yang sudah diketahui
@@ -160,6 +158,33 @@ find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep 
   di akhir run).
 - `app/dashboard/outlet/inventaris/components/` berisi `bahanBakuCombobox.tsx`
   (sudah bebas `any` dan `_id` sejak modul produk) dan `inventaris-nav-tabs.tsx`.
+- Pengajuan stok (daftar selesai di `59e10a1`):
+  - `pengajuanStokService.getAll` membaca `status`, `jenisPengajuan`, dan
+    `locationID` (dicocokkan dengan lokasi asal atau tujuan).
+  - Aturan status per izin di service baris 30 sampai 47 dicerminkan di
+    `features/pengajuan-stok/izin.ts`; keduanya diperbarui bersama.
+  - `jenisPengajuan` `PENGIRIMAN` tidak dipakai backend maupun frontend:
+    semua pengajuan adalah permintaan dari outlet ke gudang.
+  - Halaman buat memilih lokasi asal dari seluruh outlet, bukan lokasi
+    aktif. Perlu keputusan produk saat halaman buat dimigrasikan.
+  - `pengajuanStok.detail(id)` masih diisi bentuk mentah oleh detail outlet,
+    edit, dan detail gudang. Migrasikan ketiganya bersama agar kunci itu
+    tidak berisi dua bentuk data.
+  - Usulan tertunda: daftar outlet tidak menampilkan outlet asal, sehingga
+    owner di pilihan "Semua Outlet" tidak dapat membedakan outlet pengaju.
+
+### Setelah modul inventaris: cakupan per gudang
+
+Keputusan pengajuan stok (`keputusan.md`): ruang gudang memakai seluruh
+lokasi bertipe Gudang untuk MVP, lalu beralih ke per gudang. Peralihan
+dikerjakan sebagai satu commit untuk seluruh halaman gudang (stock opname,
+jurnal stok, inventaris, pengajuan, transfer), agar aturannya seragam:
+
+- `useCakupanLokasiOutlet` digeneralisasi menjadi cakupan per tipe lokasi:
+  owner melihat seluruh gudang dengan pemilih, petugas gudang hanya
+  gudangnya.
+- `PemilihLokasiOutlet` menerima tipe lokasi.
+- Setiap halaman gudang disesuaikan, beserta spec-nya.
 
 ### Utang kecil dari modul produk
 

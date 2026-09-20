@@ -95,6 +95,9 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
 - Laporan submodul stock opname — 2 temuan, disusun 20 September 2026:
   simpan hitungan menolak isian kosong sehingga simpan sementara sebagian
   tidak mungkin, dan data tidak dibatasi per lokasi (perlu keputusan)
+- Laporan submodul pengajuan stok (daftar) — 1 temuan, disusun 20 September
+  2026: status yang disembunyikan menurut izin dijawab daftar kosong tanpa
+  keterangan, sehingga klien harus mencerminkan aturan service
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi
