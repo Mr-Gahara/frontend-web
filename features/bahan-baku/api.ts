@@ -9,7 +9,6 @@
 import { apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
 import type { BahanBaku, BahanBakuRequest } from "@/types/bahanBaku";
-import type { Lokasi } from "@/types/location";
 
 export const bahanBakuApi = {
   daftar: () => apiData.get<BahanBaku[]>(EP.bahanBaku.list),
@@ -18,10 +17,4 @@ export const bahanBakuApi = {
   perbarui: (id: string, payload: BahanBakuRequest) =>
     apiData.put<BahanBaku>(EP.bahanBaku.detail(id), payload),
   hapus: (id: string) => apiData.delete<unknown>(EP.bahanBaku.detail(id)),
-};
-
-export const lokasiApi = {
-  /** Lokasi aktif pengguna, dipakai sebagai tujuan injeksi stok awal. */
-  aktif: () => apiData.get<Lokasi>(EP.location.current),
-  daftar: () => apiData.get<Lokasi[]>(EP.location.list),
 };

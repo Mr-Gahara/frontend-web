@@ -6,6 +6,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { inventoryApi, lokasiApi, type FilterInventory } from "./api";
+import { lokasiTunggal } from "./lokasi";
 import { queryKeys } from "@/lib/queryKeys";
 import type { TipeLokasi } from "@/types/location";
 
@@ -39,4 +40,18 @@ export function useDaftarInventory(filter: FilterInventory, aktif = true) {
     queryFn: () => inventoryApi.daftar(filter),
     enabled: aktif && !!filter.locationID,
   });
+}
+
+/**
+ * Lokasi kerja pengguna saat ini (/location/current), diseragamkan lewat
+ * lokasiTunggal karena kunci cache ini dapat terbagi dengan halaman lama.
+ */
+export function useLokasiAktif() {
+  const { data, ...sisa } = useQuery({
+    queryKey: queryKeys.lokasi.aktif(),
+    queryFn: lokasiApi.aktif,
+    staleTime: 5 * 60 * 1000,
+  });
+  const lokasi = lokasiTunggal(data);
+  return { ...sisa, lokasi, lokasiId: lokasi?.id ?? "" };
 }

@@ -929,7 +929,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 ## 5. Kebutuhan izin per halaman
 
-Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual. Baris produk, kategori, dan stock adjustment diperbarui manual setelah migrasi (20 September 2026); baris lain mencerminkan keadaan saat kontrak dibangkitkan.
+Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual. Baris produk, kategori, stock adjustment, dan jurnal stok diperbarui manual setelah migrasi (20 September 2026); baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
 | Menu | Gate saat ini | Endpoint GET di halaman | Permission dibutuhkan | Penilaian |
 |---|---|---|---|---|
@@ -948,7 +948,7 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/outlet/inventaris/stok` | - | `/location`, `/inventory` | `read-location`, `read-inventory` | Tanpa gate, endpoint berizin |
 | `/dashboard/outlet/inventaris/stockOpname` | - | - | - | Data dimuat lewat komponen, periksa manual |
 | `/dashboard/outlet/inventaris/stockAdjustment` | `read-stock-adjustment` | `/stockopname/adjustments`, `/stockopname/adjustments/:id` | `read-stock-adjustment` | Sejalan |
-| `/dashboard/outlet/inventaris/jurnalStok` | - | `/jurnalstok`, `/location/current` | `read-jurnal-stok`, `read-location` | Tanpa gate, endpoint berizin |
+| `/dashboard/outlet/inventaris/jurnalStok` | `read-jurnal-stok`, `read-location` | `/jurnalstok`, `/location/current` | `read-jurnal-stok`, `read-location` | Sejalan |
 | `/dashboard/outlet/inventaris-suplai` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/pengajuanStok` | - | `/pengajuanstok` | `read-pengajuan-stok` | Tanpa gate, endpoint berizin |
 | `/dashboard/outlet/inventaris/penerimaanBarang` | - | `/location`, `/transferstok` | `read-location`, `read-transfer-stok` | Tanpa gate, endpoint berizin |

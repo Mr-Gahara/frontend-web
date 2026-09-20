@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { toast } from "sonner";
 import { BahanBakuRequest, SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
-import { useBuatBahanBaku, useLokasiAktif } from "@/features/bahan-baku/hooks";
+import { useBuatBahanBaku } from "@/features/bahan-baku/hooks";
+import { useLokasiAktif } from "@/features/inventaris/hooks";
 import { bahanBakuSchema, type BahanBakuForm } from "@/features/bahan-baku/schema";
 import { pesanError } from "@/lib/api/error";
 
@@ -27,7 +28,7 @@ export default function BuatBahanBakuPage() {
   const router = useRouter();
   // Lokasi aktif menentukan tujuan injeksi stok awal di backend.
   // Respons sudah ternormalisasi (id, bukan _id) oleh lapisan API.
-  const { data: activeLocation, isLoading: isLoadingLokasi } = useLokasiAktif();
+  const { lokasi: activeLocation, isLoading: isLoadingLokasi } = useLokasiAktif();
 
   const activeLocationId = activeLocation?.id ?? "";
   const locationName = isLoadingLokasi

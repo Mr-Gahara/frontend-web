@@ -9,7 +9,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { bahanBakuApi, lokasiApi } from "./api";
+import { bahanBakuApi } from "./api";
 import { queryKeys } from "@/lib/queryKeys";
 import type { BahanBakuRequest } from "@/types/bahanBaku";
 
@@ -25,14 +25,6 @@ export function useBahanBaku(id: string) {
     queryKey: queryKeys.bahanBaku.detail(id),
     queryFn: () => bahanBakuApi.detail(id),
     enabled: !!id,
-  });
-}
-
-export function useLokasiAktif() {
-  return useQuery({
-    queryKey: queryKeys.lokasi.aktif(),
-    queryFn: lokasiApi.aktif,
-    staleTime: 5 * 60 * 1000,
   });
 }
 

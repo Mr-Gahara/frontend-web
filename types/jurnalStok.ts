@@ -1,32 +1,22 @@
 export type TipeKoreksi = "Masuk" | "Keluar";
 export type AlasanJurnal = "Stok Opname" | "Rusak/Hilang" | "Transfer Gudang" | "Lainnya";
 
+/**
+ * Bentuk respons GET /jurnalstok setelah dinormalkan lib/api/client.ts.
+ * bahanBakuID, dicatatOleh, dan locationID berisi objek hasil populate,
+ * dan bernilai null bila data acuannya sudah dihapus.
+ */
 export interface JurnalStok {
-  _id?: string;
-  id?: string;
-  bahanBakuID: {
-    _id: string;
-    id?: string;
-    namaBahan: string;
-    satuan: string;
-  };
-  tanggal: string; // ISO Date string
+  id: string;
+  bahanBakuID: { id: string; namaBahan: string; satuan: string } | null;
+  tanggal: string;
   tipeKoreksi: TipeKoreksi;
   jumlah: number;
   alasan: AlasanJurnal;
   keterangan?: string | null;
-  dicatatOleh: {
-    _id: string;
-    id?: string;
-    nama: string;
-  };
-  locationID: {
-    _id: string;
-    id?: string;
-    nama: string;
-    tipe: string;
-  };
+  dicatatOleh: { id: string; nama: string } | null;
+  locationID: { id: string; nama: string; tipe: string } | null;
   tenantID: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
