@@ -2,7 +2,7 @@
  * Normalisasi respons backend.
  *
  * Dua masalah yang ditangani, keduanya terdokumentasi di
- * docs/kontrak-api.md bagian 2.4 dan 2.5:
+ * docs/kontrak/README.md bagian 2.4 dan 2.5:
  *
  * 1. Envelope tidak seragam. Enam variasi ditemukan pada sampel respons:
  *    { data }, { data, success }, { count, data, success },
@@ -53,7 +53,7 @@ export interface HasilApi<T> {
  *
  * Melempar ApiError bila backend menjawab 200 dengan success: false,
  * yang dipakai login PIN aplikasi untuk perangkat menunggu persetujuan
- * (docs/kontrak-api.md bagian 2.3).
+ * (docs/kontrak/README.md bagian 2.3).
  */
 export function unwrap<T>(respons: unknown): HasilApi<T> {
   if (!objekBiasa(respons)) {

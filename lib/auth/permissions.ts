@@ -11,7 +11,7 @@
  *   - banyak menu inventaris tanpa gate sama sekali, sehingga pengguna
  *     melihat menu lalu mendapat 403 saat halaman memuat data
  *
- * Peta di bawah diturunkan dari docs/kontrak-api.md bagian 5: untuk setiap
+ * Peta di bawah diturunkan dari docs/kontrak/izin-halaman.md bagian 5: untuk setiap
  * halaman, izin yang benar-benar diwajibkan backend bagi endpoint yang
  * dipanggil halaman itu.
  */

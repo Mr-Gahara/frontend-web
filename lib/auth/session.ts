@@ -67,7 +67,7 @@ export const tokenPengguna = () => sesi.tokenPengguna;
 
 /**
  * Mengubah payload token pengguna menjadi bentuk yang dipakai aplikasi.
- * Sumber bentuk: docs/kontrak-api.md, bagian membaca izin.
+ * Sumber bentuk: docs/kontrak/README.md, bagian membaca izin.
  */
 function keSesiPengguna(token: string): PenggunaSesi | null {
   const p = decodeJWT(token);

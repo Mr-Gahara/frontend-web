@@ -6,7 +6,7 @@
  * tidak membedakan huruf besar kecil, tetapi frontend memakai satu
  * bentuk kanonik agar tidak ada lagi variasi penulisan yang tersebar.
  *
- * Sumber: docs/kontrak-api.md bagian 3.
+ * Sumber: docs/kontrak/endpoint.md bagian 3.
  */
 
 export const EP = {

@@ -89,7 +89,7 @@ test.describe("Alur stock opname outlet", () => {
 
     await test.step("isi seluruh hitungan sama dengan stok sistem, lalu simpan", async () => {
       // Penunggu dipasang setelah dokumen baru ter-commit: respons detail
-      // sebelum muat ulang sudah dibuang isinya (bagian 7, catatan Playwright).
+      // sebelum muat ulang sudah dibuang isinya (docs/refactor/pengujian.md, catatan Playwright).
       await page.reload({ waitUntil: "commit" });
       detail = await page.waitForResponse(getDetail(id)).then(async (r) => {
         expect(r.status()).toBe(200);

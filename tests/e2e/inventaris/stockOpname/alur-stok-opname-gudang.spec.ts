@@ -91,7 +91,7 @@ test.describe("Alur stock opname gudang", () => {
     });
 
     await test.step("isi seluruh hitungan sama dengan stok sistem, lalu simpan", async () => {
-      // Penunggu dipasang setelah dokumen baru ter-commit (bagian 7, catatan Playwright).
+      // Penunggu dipasang setelah dokumen baru ter-commit (docs/refactor/pengujian.md, catatan Playwright).
       await page.reload({ waitUntil: "commit" });
       detail = await page.waitForResponse(getDetail(id)).then(async (r) => {
         expect(r.status()).toBe(200);

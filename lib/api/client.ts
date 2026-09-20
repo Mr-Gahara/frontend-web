@@ -6,7 +6,7 @@
  *   - mengembalikan data yang sudah dinormalkan, bukan envelope mentah
  *   - meneruskan ApiError lengkap dengan status dan daftar errors
  *   - token pengguna menjadi default, karena seluruh endpoint bisnis
- *     memakainya (docs/kontrak-api.md bagian 2.2)
+ *     memakainya (docs/kontrak/README.md bagian 2.2)
  *
  * Penanganan sesi (refresh 401, pengalihan ke login) masih di apiClient
  * dan akan dipindahkan pada tahap sesi.

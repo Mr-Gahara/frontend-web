@@ -7,7 +7,7 @@
  * ditangani khusus.
  *
  * Bentuk error backend: { status: "error", message, errors? }
- * Sumber: docs/kontrak-api.md bagian 2.3.
+ * Sumber: docs/kontrak/README.md bagian 2.3.
  */
 
 export class ApiError extends Error {
