@@ -409,8 +409,8 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /produk/:param`: _id, createdAt, gambarProduk, hargaDasar, hargaJual, isUnlimitedStok, kategori, kategoriID, keterangan, namaProduk, pajakList[], resep[], stok, updatedAt
 - `GET /role`: deskripsi, id, level, namaRole, permissions[]
 - `GET /role/:param`: deskripsi, id, level, namaRole, permissions[]
-- `GET /stockopname/adjustments`: catatan, createdAt, id, items[], lokasi{id, nama, tipe}, nomorAdjustment, pic{id, nama}, stockOpnameID, tanggal, tenantID, updatedAt
-- `GET /stockopname/adjustments/:param`: catatan, createdAt, id, items[], lokasi{alamat, id, nama, tipe}, nomorAdjustment, pic{id, nama}, stockOpnameID, tanggal, tenantID, updatedAt
+- `GET /stockopname/adjustments`: catatan, createdAt, id, items[], lokasi{id, nama, tipe}, nomorAdjustment, pic{id, nama}, stockOpnameID, tanggal, tenantID, updatedAt (`items` kosong pada sampel daftar; `catatan` dan `stockOpnameID` tidak dapat dipercaya, bagian 6 butir 18)
+- `GET /stockopname/adjustments/:param`: catatan, createdAt, id, items[], lokasi{alamat, id, nama, tipe}, nomorAdjustment, pic{id, nama}, stockOpnameID, tanggal, tenantID, updatedAt (`catatan`, `stockOpnameID`, `items[].qtySebelum`, dan `items[].qtyAdjustment` tidak dapat dipercaya, bagian 6 butir 18)
 - `GET /tarif`: basisPerhitungan, createdAt, dataAset[], durasiMinimum, harga, hariAktif[], id, isActive, jamMulai, jamSelesai, namaTarif, prioritas, tenantID, updatedAt
 - `GET /tarif/:param`: basisPerhitungan, createdAt, dataAset[], durasiMinimum, harga, hariAktif[], id, isActive, jamMulai, jamSelesai, namaTarif, prioritas, tenantID, updatedAt
 - `GET /tipeaset`: createdAt, dataTarif[], deskripsi, id, namaTipeAset, tenantID, updatedAt
@@ -929,7 +929,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 ## 5. Kebutuhan izin per halaman
 
-Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual. Baris produk dan kategori diperbarui manual setelah migrasi (20 September 2026); baris lain mencerminkan keadaan saat kontrak dibangkitkan.
+Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual. Baris produk, kategori, dan stock adjustment diperbarui manual setelah migrasi (20 September 2026); baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
 | Menu | Gate saat ini | Endpoint GET di halaman | Permission dibutuhkan | Penilaian |
 |---|---|---|---|---|
@@ -947,7 +947,7 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/outlet/inventaris-pantau` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/stok` | - | `/location`, `/inventory` | `read-location`, `read-inventory` | Tanpa gate, endpoint berizin |
 | `/dashboard/outlet/inventaris/stockOpname` | - | - | - | Data dimuat lewat komponen, periksa manual |
-| `/dashboard/outlet/inventaris/stockAdjustment` | - | `/stockopname/adjustments` | `read-stock-adjustment` | Tanpa gate, endpoint berizin |
+| `/dashboard/outlet/inventaris/stockAdjustment` | `read-stock-adjustment` | `/stockopname/adjustments`, `/stockopname/adjustments/:id` | `read-stock-adjustment` | Sejalan |
 | `/dashboard/outlet/inventaris/jurnalStok` | - | `/jurnalstok`, `/location/current` | `read-jurnal-stok`, `read-location` | Tanpa gate, endpoint berizin |
 | `/dashboard/outlet/inventaris-suplai` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/pengajuanStok` | - | `/pengajuanstok` | `read-pengajuan-stok` | Tanpa gate, endpoint berizin |
@@ -973,7 +973,7 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 
 ## 6. Ketidakselarasan yang tercatat
 
-Setiap butir di bawah sudah diverifikasi dari kode atau respons backend. Kolom Pemilik menunjukkan sisi yang perlu bertindak. Butir 11 sampai 17 diperiksa terhadap kode backend pada 19 sampai 20 September 2026, bukan terhadap commit acuan di bagian 1; nomor barisnya dapat bergeser bila backend berubah.
+Setiap butir di bawah sudah diverifikasi dari kode atau respons backend. Kolom Pemilik menunjukkan sisi yang perlu bertindak. Butir 11 sampai 18 diperiksa terhadap kode backend pada 19 sampai 20 September 2026, bukan terhadap commit acuan di bagian 1; nomor barisnya dapat bergeser bila backend berubah.
 
 | No | Temuan | Bukti | Pemilik | Status |
 |---|---|---|---|---|
@@ -994,6 +994,7 @@ Setiap butir di bawah sudah diverifikasi dari kode atau respons backend. Kolom P
 | 15 | Satuan resep produk (5) lebih sempit dari satuan bahan baku (7) | `produkValidator` baris 88, `bahanBakuValidator` | Backend | Laporan modul produk dan kategori; perlu keputusan |
 | 16 | Cache daftar produk (TTL 120 detik) tidak dibersihkan saat kategori berubah | `produkService` baris 67 dan 118, `kategoriService` baris 64, 96, dan 113 | Backend | Laporan modul produk dan kategori |
 | 17 | Detail produk mengirim `createdAt` dan `updatedAt` bernilai null | Cache kontrak `GET /produk/:param` | Backend | Laporan modul produk dan kategori |
+| 18 | Mapper stock adjustment membaca `qtySebelum`, `qtyAdjustment`, `stockOpnameID`, dan `catatan`, padahal model menyimpan `qtyCurrent`, `qtyDifference`, `referenceID`, dan `alasan`; `referenceType` tidak dikirim. Akibatnya saldo sistem dan koreksi selalu 0, sedangkan sumber opname dan alasan selalu null | `mappers/stockOpnameMapper.js` baris 167, 169, 190, 192; `models/stockAdjustmentModel.js` (`qtyCurrent`, `qtyDifference`, `referenceType`); `stockOpnameService` baris 418 sampai 427; cache kontrak `GET /stockopname/adjustments/:param` (`qtySebelum` 0, `qtyPhysical` 35000, `qtyAdjustment` 0) | Backend | Laporan submodul stock adjustment; frontend menampilkan `-` lewat `features/stock-adjustment/tampilan.ts` |
 
 ## Lampiran A. Seluruh route backend
 

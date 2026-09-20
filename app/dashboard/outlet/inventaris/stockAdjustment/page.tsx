@@ -3,40 +3,20 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { queryKeys } from "@/lib/queryKeys";
-import { StockAdjustment } from "@/types/stockOpname";
-import { useQuery } from "@tanstack/react-query";
-import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
-import { id as localeID } from "date-fns/locale";
+import type { StockAdjustment } from "@/types/stockOpname";
+import type { ColumnDef } from "@tanstack/react-table";
+import { useDaftarStockAdjustment } from "@/features/stock-adjustment/hooks";
+import { formatTanggalAdjustment } from "@/features/stock-adjustment/tampilan";
 
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Scale, ArrowUpDown, Eye } from "lucide-react";
-
-// FIX: Izinkan null/undefined untuk tanggal
-const formatTanggal = (iso: string | null | undefined) => {
-  if (!iso) return "-";
-  return format(new Date(iso), "dd MMM yyyy, HH:mm", { locale: localeID });
-};
 
 export default function StockAdjustmentListPage() {
   useAuthGuard();
   const router = useRouter();
 
-  // --- QUERY FETCH DATA ---
-  // PERBAIKAN: Tambahkan explicit type <StockAdjustment[]> agar DataTable tidak error
-  const { data: adjustmentList = [], isLoading } = useQuery<StockAdjustment[]>({
-    // PERBAIKAN: Panggil fungsinya dengan tanda kurung ()
-    queryKey: queryKeys.stockAdjustment.daftar(),
-    queryFn: async () => {
-      const res = await apiClient.get<any>("/stockopname/adjustments", undefined, "pengguna");
-      const fetched = res.data?.data || res.data || [];
-      return Array.isArray(fetched) ? (fetched as StockAdjustment[]) : [];
-    },
-  });
+  const { data: adjustmentList = [], isLoading } = useDaftarStockAdjustment();
 
   // --- COLUMNS DEFINITION ---
   const columns = useMemo<ColumnDef<StockAdjustment>[]>(
@@ -75,25 +55,9 @@ export default function StockAdjustmentListPage() {
         ),
         cell: ({ row }) => (
           <span className="text-sm font-medium text-[#0A2947]/70">
-            {formatTanggal(row.original.tanggal)}
+            {formatTanggalAdjustment(row.original.tanggal)}
           </span>
         ),
-      },
-      {
-        accessorKey: "referenceType",
-        header: () => (
-          <span className="text-xs font-bold text-[#0A2947]/60">Sumber / Referensi</span>
-        ),
-        cell: ({ row }) => {
-          // FIX: Defensive fallback jika backend mapper tidak mengembalikan referenceType
-          const refType = row.original.nomorAdjustment || "STOCK_OPNAME";
-          
-          return (
-            <Badge variant="outline" className="bg-[#FFFAF3] text-[#0A2947] font-bold border-[#0A2947]/20">
-              {refType.replace(/_/g, " ")}
-            </Badge>
-          );
-        },
       },
       {
         id: "aksi",
@@ -101,16 +65,14 @@ export default function StockAdjustmentListPage() {
           <div className="text-right text-xs font-bold text-[#0A2947]/60">Aksi</div>
         ),
         cell: ({ row }) => {
-          // FIX: Sesuaikan dengan mapper backend yang mengubah _id menjadi id
-          const targetId = row.original.id || (row.original as any)._id;
-          
+
           return (
             <div className="flex justify-end">
               <Button
                 variant="outline"
                 size="sm"
                 className="cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold shadow-sm h-8 px-3"
-                onClick={() => router.push(`/dashboard/outlet/inventaris/stockAdjustment/${targetId}`)}
+                onClick={() => router.push(`/dashboard/outlet/inventaris/stockAdjustment/${row.original.id}`)}
               >
                 <Eye className="w-3.5 h-3.5 mr-1.5" />
                 Lihat Audit Trail

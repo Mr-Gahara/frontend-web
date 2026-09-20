@@ -2,18 +2,19 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { queryKeys } from "@/lib/queryKeys";
-import { StockAdjustment } from "@/types/stockOpname";
-import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { id as localeID } from "date-fns/locale";
+import { isNotFound } from "@/lib/api/error";
+import { useStockAdjustment } from "@/features/stock-adjustment/hooks";
+import {
+  MAPPER_ADJUSTMENT_SUDAH_BENAR,
+  formatKoreksi,
+  formatTanggalAdjustment,
+  susunBarisItem,
+} from "@/features/stock-adjustment/tampilan";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
-  Scale,
   Calendar,
   MapPin,
   User,
@@ -22,36 +23,13 @@ import {
   ArchiveRestore,
 } from "lucide-react";
 
-// --- HELPERS ---
-const formatTanggal = (iso: string | null | undefined) => {
-  if (!iso) return "-";
-  return format(new Date(iso), "dd MMM yyyy, HH:mm", { locale: localeID });
-};
-
 export default function StockAdjustmentDetailPage() {
   useAuthGuard();
   const router = useRouter();
   const params = useParams();
   const adjustmentID = params.id as string;
 
-  // --- FETCH DATA ADJUSTMENT ---
-  const {
-    data: adjustment,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: queryKeys.stockAdjustment.detail(adjustmentID as string),
-    queryFn: async () => {
-      // FIX 1: Endpoint yang benar berdasarkan router backend Anda
-      const res = await apiClient.get<any>(
-        `/stockopname/adjustments/${adjustmentID}`,
-        undefined,
-        "pengguna",
-      );
-      return (res.data?.data || res.data) as StockAdjustment;
-    },
-    enabled: !!adjustmentID,
-  });
+  const { data: adjustment, isLoading, error } = useStockAdjustment(adjustmentID);
 
   // --- RENDER CONDITIONS ---
   if (isLoading) {
@@ -66,11 +44,14 @@ export default function StockAdjustmentDetailPage() {
   }
 
   if (error || !adjustment) {
+    const tidakAda = !error || isNotFound(error);
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-[#0A2947]">
         <Ban className="h-10 w-10 text-rose-500" />
         <p className="font-bold">
-          Jurnal Penyesuaian tidak ditemukan atau terjadi kesalahan server.
+          {tidakAda
+            ? "Jurnal Penyesuaian tidak ditemukan."
+            : "Gagal memuat Jurnal Penyesuaian. Coba muat ulang halaman."}
         </p>
         <Button
           onClick={() => router.push("/dashboard/outlet/inventaris/stockAdjustment")}
@@ -81,11 +62,6 @@ export default function StockAdjustmentDetailPage() {
       </div>
     );
   }
-
-  // Fallback untuk referensi tipe jika kosong
-  const refTypeLabel = (
-    adjustment.nomorAdjustment || "MANUAL_CORRECTION"
-  ).replace(/_/g, " ");
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
@@ -135,7 +111,7 @@ export default function StockAdjustmentDetailPage() {
                 <Calendar className="w-3.5 h-3.5" /> Tanggal Eksekusi
               </p>
               <p className="font-semibold text-[#0A2947]">
-                {formatTanggal(adjustment.tanggal)}
+                {formatTanggalAdjustment(adjustment.tanggal)}
               </p>
             </div>
             <div>
@@ -154,12 +130,6 @@ export default function StockAdjustmentDetailPage() {
                 {adjustment.pic?.nama || "-"}
               </p>
             </div>
-            <div>
-              <p className="text-[#0A2947]/60 font-bold text-xs mb-1 flex items-center gap-1">
-                <Scale className="w-3.5 h-3.5" /> Sumber Dokumen
-              </p>
-              <p className="font-bold text-[#D4A373]">{refTypeLabel}</p>
-            </div>
           </div>
         </div>
 
@@ -171,7 +141,9 @@ export default function StockAdjustmentDetailPage() {
           </div>
           <div className="flex-1 p-4 bg-white/60 rounded-xl border border-[#0A2947]/5 min-h-25">
             <p className="text-sm font-bold text-[#0A2947]/40 italic leading-relaxed">
-              "{adjustment.catatan || "Tidak ada alasan spesifik yang dicantumkan."}"
+              {MAPPER_ADJUSTMENT_SUDAH_BENAR
+                ? `"${adjustment.catatan || "Tidak ada alasan spesifik yang dicantumkan."}"`
+                : "Alasan belum dikirim server."}
             </p>
           </div>
         </div>
@@ -183,6 +155,11 @@ export default function StockAdjustmentDetailPage() {
           <h2 className="font-bold text-[#0A2947]">
             Rekapitulasi Perubahan Saldo Fisik
           </h2>
+          {!MAPPER_ADJUSTMENT_SUDAH_BENAR && (
+            <p className="text-xs font-medium text-[#0A2947]/60">
+              Saldo sistem dan koreksi belum dikirim server.
+            </p>
+          )}
         </div>
 
         <div className="overflow-x-auto">
@@ -202,56 +179,45 @@ export default function StockAdjustmentDetailPage() {
             </thead>
             <tbody className="divide-y divide-[#0A2947]/5">
               {adjustment.items?.map((item) => {
-                // FIX 2: Silent Bypass untuk Backend Mapper Bug.
-                // Jika qtySebelum/Adjustment bernilai 0 atau tidak ada, kita paksa baca dari raw Schema Property.
-                const qtySistem =
-                  item.qtySebelum || (item as any).qtyCurrent || 0;
-                const qtyKoreksi =
-                  item.qtyAdjustment || (item as any).qtyDifference || 0;
-                const qtyFisik = item.qtyPhysical ?? 0;
-
-                const isPlus = qtyKoreksi > 0;
-                const isMinus = qtyKoreksi < 0;
+                const baris = susunBarisItem(item);
+                const warnaKoreksi =
+                  baris.arah === "tambah"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : baris.arah === "kurang"
+                      ? "bg-rose-100 text-rose-700"
+                      : "bg-[#0A2947]/10 text-[#0A2947]";
 
                 return (
                   <tr
-                    key={item.itemId}
+                    key={baris.itemId}
                     className="hover:bg-[#0A2947]/5 transition-colors"
                   >
                     <td className="px-5 py-4">
-                      <p className="font-bold text-[#0A2947]">
-                        {item.namaSnapshot}
-                      </p>
+                      <p className="font-bold text-[#0A2947]">{baris.nama}</p>
                       <p className="text-xs text-[#0A2947]/50 font-medium">
-                        Satuan: {item.satuanSnapshot}
+                        Satuan: {baris.satuan}
                       </p>
                     </td>
 
                     <td className="px-5 py-4 text-center font-bold text-[#0A2947]/60 font-mono">
-                      {qtySistem}
+                      {baris.qtySistem ?? "-"}
                     </td>
 
                     <td className="px-5 py-4 text-center font-bold text-[#0A2947] font-mono bg-[#0A2947]/5">
-                      {qtyFisik}
+                      {baris.qtyFisik}
                     </td>
 
                     <td className="px-5 py-4 text-center">
                       <Badge
                         variant="outline"
-                        className={`border-none font-bold font-mono px-2 py-0.5 ${
-                          qtyKoreksi === 0
-                            ? "bg-[#0A2947]/10 text-[#0A2947]"
-                            : isPlus
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-rose-100 text-rose-700"
-                        }`}
+                        className={`border-none font-bold font-mono px-2 py-0.5 ${warnaKoreksi}`}
                       >
-                        {isPlus ? `+${qtyKoreksi}` : qtyKoreksi}
+                        {formatKoreksi(baris.qtyKoreksi)}
                       </Badge>
                     </td>
 
                     <td className="px-5 py-4 text-sm font-medium text-[#0A2947]/70 italic line-clamp-2">
-                      {item.catatanItem || "-"}
+                      {baris.catatan}
                     </td>
                   </tr>
                 );
