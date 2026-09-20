@@ -1,39 +1,36 @@
 "use client";
 
-import { useMemo, type ReactNode } from "react";
-import { AlertTriangle } from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
 import HalamanJurnalStok from "@/features/jurnal-stok/halaman-jurnal-stok";
 import type { LingkupJurnal } from "@/features/jurnal-stok/filter";
-import { useLokasiAktif } from "@/features/inventaris/hooks";
-
-function PesanLokasi({ judul, isi }: { judul: string; isi: string }) {
-  return (
-    <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 shadow-sm flex flex-col items-center text-center gap-4 py-12">
-      <AlertTriangle className="w-12 h-12 text-rose-500" />
-      <div>
-        <h2 className="text-xl font-bold text-rose-700">{judul}</h2>
-        <p className="text-sm font-medium text-rose-600/80 mt-1 max-w-md mx-auto">{isi}</p>
-      </div>
-    </div>
-  );
-}
+import { useCakupanLokasiOutlet } from "@/features/inventaris/hooks";
+import { lingkupOutlet, SEMUA_OUTLET } from "@/features/inventaris/cakupan";
+import PemilihLokasiOutlet from "@/features/inventaris/pemilih-lokasi-outlet";
+import PesanLokasi from "@/features/inventaris/pesan-lokasi";
 
 export default function JurnalStokOutletPage() {
-  const { lokasi, lokasiId, isLoading, isError } = useLokasiAktif();
-  const lingkup = useMemo<LingkupJurnal | null>(
-    () => (lokasiId ? { lokasiID: lokasiId } : null),
-    [lokasiId],
-  );
+  // Owner melihat seluruh outlet (dengan pemilih); staf hanya lokasi aktifnya.
+  const cakupan = useCakupanLokasiOutlet();
+  const [pilihanLokasi, setPilihanLokasi] = useState<string>(SEMUA_OUTLET);
+
+  // Jurnal disaring di klien, jadi lingkup diterjemahkan ke bentuk LingkupJurnal.
+  const lingkup = useMemo<LingkupJurnal | null>(() => {
+    const hasil = lingkupOutlet(cakupan, pilihanLokasi);
+    if (!hasil) return null;
+    return hasil.locationID
+      ? { lokasiID: hasil.locationID }
+      : { tipeLokasi: hasil.tipeLokasi ?? "Outlet" };
+  }, [cakupan, pilihanLokasi]);
 
   let penghalang: ReactNode = null;
-  if (isError) {
+  if (cakupan.status === "gagal") {
     penghalang = (
       <PesanLokasi
         judul="Gagal Memuat Lokasi Outlet"
         isi="Lokasi kerja Anda tidak dapat dimuat. Periksa koneksi, lalu muat ulang halaman."
       />
     );
-  } else if (!isLoading && !lokasiId) {
+  } else if (cakupan.status === "staf" && !cakupan.lokasiId) {
     penghalang = (
       <PesanLokasi
         judul="Identitas Outlet Tidak Ditemukan"
@@ -42,16 +39,35 @@ export default function JurnalStokOutletPage() {
     );
   }
 
+  let namaCakupan = "Outlet Saat Ini";
+  if (cakupan.status === "owner") {
+    namaCakupan =
+      pilihanLokasi === SEMUA_OUTLET
+        ? "seluruh outlet"
+        : (cakupan.lokasiOutlet.find((l) => l.id === pilihanLokasi)?.nama ?? "outlet terpilih");
+  } else if (cakupan.status === "staf" && cakupan.lokasi) {
+    namaCakupan = cakupan.lokasi.nama;
+  }
+
   return (
     <HalamanJurnalStok
       ruang="outlet"
       lingkup={lingkup}
-      memuatLingkup={isLoading}
+      memuatLingkup={cakupan.status === "memuat"}
       penghalang={penghalang}
+      pemilihLokasi={
+        cakupan.status === "owner" ? (
+          <PemilihLokasiOutlet
+            lokasiOutlet={cakupan.lokasiOutlet}
+            nilai={pilihanLokasi}
+            onUbah={setPilihanLokasi}
+          />
+        ) : undefined
+      }
       deskripsi={
         <>
           CCTV Operasional: Melacak riwayat masuk-keluar barang khusus di{" "}
-          <strong className="text-[#0A2947]">{lokasi?.nama ?? "Outlet Saat Ini"}</strong>.
+          <strong className="text-[#0A2947]">{namaCakupan}</strong>.
         </>
       }
     />

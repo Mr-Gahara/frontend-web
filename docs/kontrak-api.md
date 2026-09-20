@@ -24,7 +24,7 @@ Keterbatasan:
 - Daftar field pada bagian 4 berasal dari validator, sedangkan validator hanya memeriksa dan tidak membuang field lain. Service dapat memakai field di luar daftar itu, seperti `locationID` pada `POST /bahanbaku`. Sebelum sebuah field dihapus dari payload frontend, periksa dulu pemakaiannya di service.
 - Bentuk respons operasi tulis tidak diambil dengan memanggil endpoint, agar data tidak berubah.
 - Analisis statis route hanya membaca argumen pertama `checkPermission`. Route yang menerima salah satu dari beberapa izin perlu dikoreksi manual; `GET /produk` dan `GET /produk/:id` (`read-produk` atau `akses-pos`) sudah dikoreksi pada 20 September 2026.
-- Analisis statis frontend hanya menangkap panggilan `apiClient`. Untuk modul yang sudah dipindah ke `features/`, pemanggilan terpusat di `features/<modul>/api.ts`, sehingga kolom "Dipakai di" di bagian 3.1 tidak lagi mencerminkan jumlah halaman pemakai. Bagian 5 untuk modul itu diperbarui manual.
+- Analisis statis frontend hanya menangkap panggilan `apiClient` dengan path tertulis. Path yang disusun dinamis terlewat, sehingga `GET /stockopname` sempat tercatat tidak dipakai (dikoreksi 20 September 2026). Untuk modul yang sudah dipindah ke `features/`, pemanggilan terpusat di `features/<modul>/api.ts`, sehingga kolom "Dipakai di" di bagian 3.1 tidak lagi mencerminkan jumlah halaman pemakai. Bagian 5 untuk modul itu diperbarui manual.
 - Dokumen ini berlaku untuk commit acuan di atas. Bila backend berubah, bagian 3 sampai 5 dan Lampiran A perlu dibangkitkan ulang.
 
 ## 2. Aturan umum
@@ -327,7 +327,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/stockopname` | authPengguna | `read-stock-opname` | - | `id` | `features/stock-opname` (query `status`, `locationID`) |
+| GET | `/stockopname` | authPengguna | `read-stock-opname` | - | - | `features/stock-opname` (query `status`, `locationID`; bentuk item di 3.3) |
 | POST | `/stockopname` | authPengguna | `create-stock-opname` | - | - | 2 file |
 | GET | `/stockopname/:id` | authPengguna | `read-stock-opname` | - | - | 2 file |
 | PATCH | `/stockopname/:id/approve` | authPengguna | `review-stock-opname` | - | - | 2 file |
@@ -955,10 +955,10 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/outlet/inventaris/kategori` | `read-kategori` | `/kategori`, `/produk` | `read-kategori`; `/produk` opsional (`read-produk` atau `akses-pos`) untuk hitungan pemakaian | Sejalan |
 | `/dashboard/outlet/inventaris/bahanBaku` | `read-location`, `read-inventory` | `/location`, `/inventory` | `read-location`, `read-inventory` | Sejalan |
 | `/dashboard/outlet/inventaris-pantau` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
-| `/dashboard/outlet/inventaris/stok` | `read-location`, `read-inventory` | `/location`, `/inventory` | `read-location`, `read-inventory` | Sejalan |
+| `/dashboard/outlet/inventaris/stok` | `read-location`, `read-inventory` | `/location`, `/location/current`, `/inventory` | `read-location`, `read-inventory` | Sejalan |
 | `/dashboard/outlet/inventaris/stockOpname` | `read-stock-opname`, `read-location` | `/stockopname`, `/location`, `/location/current` | `read-stock-opname`, `read-location` | Sejalan |
 | `/dashboard/outlet/inventaris/stockAdjustment` | `read-stock-adjustment` | `/stockopname/adjustments`, `/stockopname/adjustments/:id` | `read-stock-adjustment` | Sejalan |
-| `/dashboard/outlet/inventaris/jurnalStok` | `read-jurnal-stok`, `read-location` | `/jurnalstok`, `/location/current` | `read-jurnal-stok`, `read-location` | Sejalan |
+| `/dashboard/outlet/inventaris/jurnalStok` | `read-jurnal-stok`, `read-location` | `/jurnalstok`, `/location`, `/location/current` | `read-jurnal-stok`, `read-location` | Sejalan |
 | `/dashboard/outlet/inventaris-suplai` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/pengajuanStok` | - | `/pengajuanstok` | `read-pengajuan-stok` | Tanpa gate, endpoint berizin |
 | `/dashboard/outlet/inventaris/penerimaanBarang` | - | `/location`, `/transferstok` | `read-location`, `read-transfer-stok` | Tanpa gate, endpoint berizin |
@@ -1006,7 +1006,7 @@ Setiap butir di bawah sudah diverifikasi dari kode atau respons backend. Kolom P
 | 17 | Detail produk mengirim `createdAt` dan `updatedAt` bernilai null | Cache kontrak `GET /produk/:param` | Backend | Laporan modul produk dan kategori |
 | 18 | Mapper stock adjustment membaca `qtySebelum`, `qtyAdjustment`, `stockOpnameID`, dan `catatan`, padahal model menyimpan `qtyCurrent`, `qtyDifference`, `referenceID`, dan `alasan`; `referenceType` tidak dikirim. Akibatnya saldo sistem dan koreksi selalu 0, sedangkan sumber opname dan alasan selalu null | `mappers/stockOpnameMapper.js` baris 167, 169, 190, 192; `models/stockAdjustmentModel.js` (`qtyCurrent`, `qtyDifference`, `referenceType`); `stockOpnameService` baris 418 sampai 427; cache kontrak `GET /stockopname/adjustments/:param` (`qtySebelum` 0, `qtyPhysical` 35000, `qtyAdjustment` 0) | Backend | Laporan submodul stock adjustment; frontend menampilkan `-` lewat `features/stock-adjustment/tampilan.ts` |
 | 19 | Pembaruan item stock opname menolak `qtyPhysical` kosong, sehingga hitungan yang baru sebagian tidak dapat disimpan; pesan errornya "tidak boleh kurang dari 0" walau isiannya kosong | `stockOpnameService` sekitar baris 235; frontend lama mengirim `null` untuk isian kosong | Backend | Laporan submodul stock opname; frontend hanya mengirim item yang terisi (`features/stock-opname/payload.ts`) |
-| 20 | Data stock opname (dan data stok lain) dikirim untuk seluruh lokasi tenant kepada pemegang izin baca; pembatasan staf ke lokasi aktif hanya ada di tampilan web | `stockOpnameService.getAll` baris 150 sampai 155: `locationID` hanya filter opsional dari query | Perlu keputusan | Laporan submodul stock opname; web membatasi staf lewat `useCakupanLokasiOutlet` |
+| 20 | Data stock opname (dan data stok lain) dikirim untuk seluruh lokasi tenant kepada pemegang izin baca; pembatasan staf ke lokasi aktif hanya ada di tampilan web | `stockOpnameService.getAll` baris 150 sampai 155: `locationID` hanya filter opsional dari query | Backend, perlu keputusan produk | Laporan submodul stock opname; web membatasi staf lewat `useCakupanLokasiOutlet` |
 
 ## Lampiran A. Seluruh route backend
 

@@ -167,9 +167,9 @@ tercatat tidak lagi diperiksa, atau bentuk respons berbeda dari tipe.
 | Inventaris: jurnal stok | `98735d4` | Selesai |
 | Bahan baku: perbaikan dialog hapus | `50e8815` | Selesai |
 | Inventaris: stok dan inventaris gudang | `ad590f9` | Selesai |
-| Inventaris: stock opname | `refactor(stock-opname)`; hash diisi pada pembaruan dokumen berikutnya | Selesai |
-| Cakupan lokasi owner dan staf: jurnal stok dan stok outlet | - | **Berikutnya** (bagian 12) |
-| Inventaris: pengajuan, transfer | - | Belum |
+| Inventaris: stock opname | `fc3f220` | Selesai |
+| Cakupan lokasi owner dan staf: jurnal stok dan stok outlet | `refactor(cakupan-lokasi)`; hash diisi pada pembaruan dokumen berikutnya | Selesai |
+| Inventaris: pengajuan stok, lalu transfer, pengiriman, dan penerimaan | - | **Berikutnya** (bagian 12) |
 | Penjualan dan pembayaran | - | Belum |
 | Reservasi | - | Belum |
 | Keuangan | - | Belum |
@@ -210,8 +210,9 @@ Keputusan produk dari submodul stok dan inventaris gudang:
   pesan.** Sebelumnya dialog tetap terbuka tanpa keterangan apa pun.
 - **Perilaku lain dipertahankan**: catatan opname tetap wajib, opname tanpa
   selisih tetap diizinkan, dan pilihan "Semua Lokasi" di outlet tetap
-  menampilkan stok seluruh lokasi bertipe Outlet. Pembatasan untuk staf
-  menyusul lewat keputusan cakupan dari submodul stock opname.
+  menampilkan stok seluruh lokasi bertipe Outlet. Sejak commit cakupan
+  lokasi, pilihan itu hanya untuk owner; staf dibatasi ke lokasi aktif tanpa
+  pemilih.
 
 Keputusan produk dari submodul stock opname:
 
@@ -220,8 +221,8 @@ Keputusan produk dari submodul stock opname:
   aktifnya. Dokumen gudang tetap di ruang gudang. Owner dikenali lewat
   `useLevelPenggunaAktif` (bagian 5 butir 2). Pembatasan ini hanya di
   tampilan, karena backend mengirim data seluruh tenant kepada pemegang izin
-  baca (kontrak bagian 6 butir 20). Aturan yang sama diterapkan ke jurnal
-  stok dan stok outlet dalam commit terpisah (bagian 12).
+  baca (kontrak bagian 6 butir 20). Aturan yang sama diterapkan juga ke
+  jurnal stok dan stok outlet dalam commit cakupan lokasi.
 - **Membuat opname di outlet tetap memakai lokasi aktif** untuk semua
   pengguna, termasuk owner, karena opname adalah hitungan fisik di tempat.
 - **Tombol aksi disembunyikan sesuai izin**: `submit-stock-opname` untuk
@@ -332,7 +333,7 @@ Isi tiap `features/` yang sudah ada:
 | `produk` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `izin.ts`, `form-produk.tsx` | `form-produk.tsx` dipakai halaman buat dan edit; `useDaftarProduk` dipakai halaman kategori, pajak, dan buat penjualan; `bolehBacaProduk` menerima `read-produk` atau `akses-pos` |
 | `kategori` | `api.ts`, `hooks.ts`, `schema.ts`, `pesan.ts` | `useDaftarKategori` dipakai form produk; `pesan.ts` menentukan field duplikat karena respons backend tidak dapat diandalkan |
 | `stock-adjustment` | `api.ts`, `hooks.ts`, `tampilan.ts` | Hanya baca; `useStockAdjustment` tidak mengulang permintaan saat 404; `tampilan.ts` menampilkan `-` untuk nilai yang salah dari mapper backend, dikendalikan `MAPPER_ADJUSTMENT_SUDAH_BENAR` |
-| `jurnal-stok` | `api.ts`, `hooks.ts`, `filter.ts`, `tampilan.ts`, `halaman-jurnal-stok.tsx` | Hanya baca; komponen halaman dipakai outlet dan gudang, dibedakan lewat `ruang`, `lingkup` (lokasi aktif atau tipe lokasi), dan `penghalang` |
+| `jurnal-stok` | `api.ts`, `hooks.ts`, `filter.ts`, `tampilan.ts`, `halaman-jurnal-stok.tsx` | Hanya baca; komponen halaman dipakai outlet dan gudang, dibedakan lewat `ruang`, `lingkup` (satu lokasi atau tipe lokasi), `penghalang`, dan `pemilihLokasi` (owner di ruang outlet) |
 | `stock-opname` | `api.ts`, `hooks.ts`, `payload.ts`, `izin.ts`, `halaman-daftar-stock-opname.tsx`, `halaman-detail-stock-opname.tsx`, `form-buat-stock-opname.tsx` | Ketiga komponen dipakai outlet dan gudang lewat `ruang` dan `TEKS`. Daftar menerima `lingkup` dan `pemilihLokasi`; form buat menerima `sumberLokasi` (tetap atau pilih). `payload.ts` hanya mengirim hitungan yang terisi; `izin.ts` memuat `bolehHitungOpname` dan `bolehTinjauOpname`; `useStockOpname` tidak mengulang permintaan saat 404 |
 
 Cara memeriksa apakah sebuah modul sudah dimigrasikan: halamannya tidak lagi
@@ -664,13 +665,13 @@ memisahkan error baru dari error warisan (memakai `~/.cache/frontend-web/alat/hi
 f=path/ke/berkas.tsx; echo "sekarang:$(npx eslint "$f" -f json 2>/dev/null | node ~/.cache/frontend-web/alat/hitung-eslint.js) HEAD:$(git show "HEAD:$f" | npx eslint --stdin --stdin-filename "$f" -f json 2>/dev/null | node ~/.cache/frontend-web/alat/hitung-eslint.js)"
 ```
 
-Ringkasan e2e dengan daftar kegagalan:
+Ringkasan e2e dengan daftar kegagalan dan judul test yang dilewati:
 
 ```bash
 npx playwright test tests/e2e --reporter=json > /tmp/p.json 2>/dev/null; node -e '
 const r=require("/tmp/p.json");const s=r.stats;
 console.log(`e2e passed:${s.expected} failed:${s.unexpected} flaky:${s.flaky} skipped:${s.skipped}`);
-const jalan=(su)=>su.forEach(x=>{(x.specs||[]).forEach(sp=>sp.tests.forEach(t=>t.results.forEach(res=>{if(res.status==="failed"||res.status==="timedOut")console.log("GAGAL: "+sp.title.slice(0,80))})));if(x.suites)jalan(x.suites)});
+const jalan=(su)=>su.forEach(x=>{(x.specs||[]).forEach(sp=>sp.tests.forEach(t=>t.results.forEach(res=>{if(res.status==="failed"||res.status==="timedOut")console.log("GAGAL: "+sp.title.slice(0,80));if(res.status==="skipped")console.log("SKIP: "+sp.title.slice(0,80))})));if(x.suites)jalan(x.suites)});
 jalan(r.suites);'
 ```
 
@@ -679,8 +680,8 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per submodul stock opname** (commit `refactor(stock-opname)`): 113
-test unit dan integrasi lolos, 192 e2e lolos, 4 skipped: dua `test.fixme` yang
+**Baseline per commit cakupan lokasi** (commit `refactor(cakupan-lokasi)`): 113
+test unit dan integrasi lolos, 193 e2e lolos, 4 skipped: dua `test.fixme` yang
 menunggu backend dan dua `test.skip` bersyarat data (bagian 8). Angka ini pembanding
 untuk memastikan tidak ada yang hilang diam-diam. Angka skipped dapat berubah
 bila data uji berubah; periksa judul test yang dilewati sebelum menyimpulkan
@@ -874,6 +875,10 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   memang dari backend, di laporan untuk tim backend. Sebelum menyebut
   penyebabnya backend, pastikan dari kode: pada stock opname, pembatalan DRAFT
   ternyata diizinkan backend dan hanya dibatasi tampilan frontend.
+- **Saat menyaring keluaran Playwright, jangan ikutkan pola yang menangkap
+  baris progres** (misalnya `›`). Baris progres menghabiskan jatah `head`
+  sebelum ringkasan tercetak. Untuk ringkasan, pakai pola
+  `"  [0-9]+ (passed|failed|skipped)"`.
 
 ### Kapan berhenti dan bertanya
 
@@ -988,7 +993,6 @@ terhitung di angka skipped pada baseline:
 |---|---|
 | `reservasi/aset/crud-aset.spec.ts` | Tidak ada aset berstatus digunakan |
 | `inventaris/stok/lihat-stok.spec.ts`, tab kritis gudang | Tidak ada stok gudang yang kritis (terjadi pada data uji sekarang) |
-
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
@@ -1133,26 +1137,9 @@ terkecil (bagian 4 langkah 7).
 | 1 | Stock adjustment | outlet: daftar, detail | 431 | Selesai (`a52afbf`) |
 | 2 | Jurnal stok | outlet dan gudang: daftar | 617 | Selesai (`98735d4`) |
 | 3 | Stok dan inventaris | `outlet/inventaris/stok`, `gudang/inventaris` | 1.094 | Selesai (`ad590f9`) |
-| 4 | Stock opname | outlet dan gudang: daftar, detail, buat | 2.544 | Selesai |
-| 5 | Pengajuan stok | outlet: daftar, detail, edit, buat; gudang: daftar, detail | 2.298 | Belum |
+| 4 | Stock opname | outlet dan gudang: daftar, detail, buat | 2.544 | Selesai (`fc3f220`) |
+| 5 | Pengajuan stok | outlet: daftar, detail, edit, buat; gudang: daftar, detail | 2.298 | **Berikutnya** |
 | 6 | Transfer, pengiriman, penerimaan | gudang: transfer (daftar, detail, edit), pengiriman; outlet: penerimaan (daftar, detail) | 1.950 | Belum |
-
-### Langkah berikutnya: cakupan lokasi di jurnal stok dan stok outlet
-
-Keputusan cakupan dari submodul stock opname (bagian 2) diterapkan ke dua
-halaman outlet yang sudah dimigrasikan, sebagai commit tersendiri sebelum
-submodul 5:
-
-- **Jurnal stok outlet** saat ini menampilkan lokasi aktif untuk semua
-  pengguna. Owner harus bisa melihat seluruh outlet lewat
-  `PemilihLokasiOutlet`, sedangkan staf tetap lokasi aktif. Kotak pesan lokasi
-  di halamannya diganti `PesanLokasi` dari `features/inventaris`.
-- **Stok outlet** saat ini menampilkan seluruh outlet dengan pemilih untuk
-  semua pengguna. Staf harus dibatasi ke lokasi aktif tanpa pemilih.
-- Keduanya memakai `useCakupanLokasiOutlet` dan `lingkupOutlet`. Gate halaman
-  disesuaikan bila halaman mulai memanggil `/location/current`.
-- Spec jurnal stok dan stok diperbarui untuk skenario owner. Jalur staf hanya
-  teruji di unit test (lihat utang pengujian).
 
 ### Pemetaan awal (20 September 2026)
 
@@ -1252,8 +1239,9 @@ find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep 
   tabel terhadap isi respons.
 - `tests/e2e/inventaris/jurnalStok/lihat-jurnal-stok.spec.ts`: halaman outlet
   dan gudang yang berbagi komponen, jumlah baris tabel dihitung dari respons
-  server, filter Radix Select dibuka lewat teks nilainya, dan simulasi
-  kegagalan GET dengan `page.route`.
+  server, filter Radix Select dibuka lewat teks nilainya, simulasi kegagalan
+  GET dengan `page.route`, dan skenario owner (seluruh outlet, pilih satu
+  outlet).
 - `tests/e2e/inventaris/stok/lihat-stok.spec.ts`: penunggu dipasang setelah
   `goto(..., { waitUntil: "commit" })`, harapan dihitung dari respons
   permintaan itu sendiri, operasi tulis yang mengembalikan nilai semula,

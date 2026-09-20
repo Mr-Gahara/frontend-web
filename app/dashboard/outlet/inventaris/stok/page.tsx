@@ -4,11 +4,12 @@ import { useState, useMemo } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { pesanError } from "@/lib/api/error";
 import {
+  useCakupanLokasiOutlet,
   useDaftarInventory,
-  useDaftarLokasi,
   useOpnameInventory,
   useUbahStokMinimum,
 } from "@/features/inventaris/hooks";
+import PesanLokasi from "@/features/inventaris/pesan-lokasi";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Inventory } from "@/types/inventory";
@@ -66,18 +67,22 @@ export default function StokInventoryPage() {
   }>({ isOpen: false, data: null, fisikAktual: "", catatan: "" });
 
   // --- Queries ---
-  // Fetch Lokasi (Khusus Outlet)
-  const { data: semuaLokasi = [], isLoading: isLoadingLokasi } = useDaftarLokasi();
-  const lokasiOutlet = useMemo(
-    () => semuaLokasi.filter((lokasi) => lokasi.tipe === "Outlet"),
-    [semuaLokasi],
-  );
+  // Cakupan lokasi: owner memilih "Semua Lokasi" atau satu outlet; staf selalu
+  // lokasi aktifnya, tanpa pemilih.
+  const cakupan = useCakupanLokasiOutlet();
+  const isLoadingLokasi = cakupan.status === "memuat";
+  const lokasiOutlet = cakupan.status === "owner" ? cakupan.lokasiOutlet : [];
+  const filterLokasi =
+    cakupan.status === "owner"
+      ? { locationID: selectedLocation !== "all" ? selectedLocation : undefined }
+      : cakupan.status === "staf" && cakupan.lokasiId
+        ? { locationID: cakupan.lokasiId }
+        : null;
 
-  // Fetch Inventory List
-  const { data: inventoryData = [], isLoading: isLoadingInventory } = useDaftarInventory({
-    locationID: selectedLocation !== "all" ? selectedLocation : undefined,
-    search: debouncedSearch || undefined,
-  });
+  // Fetch Inventory List (null berarti belum siap: tidak ada permintaan)
+  const { data: inventoryData = [], isLoading: isLoadingInventory } = useDaftarInventory(
+    filterLokasi ? { ...filterLokasi, search: debouncedSearch || undefined } : null,
+  );
 
   const filteredInventory = useMemo(() => {
     let result = inventoryData;
@@ -169,6 +174,7 @@ export default function StokInventoryPage() {
             />
           </div>
 
+          {cakupan.status === "owner" && (
           <Select value={selectedLocation} onValueChange={setSelectedLocation}>
             <SelectTrigger className="w-full sm:w-48 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-semibold focus:ring-[#0A2947]">
               <MapPin className="w-4 h-4 mr-2 text-[#D4A373]" />
@@ -192,8 +198,22 @@ export default function StokInventoryPage() {
               })}
             </SelectContent>
           </Select>
+          )}
         </div>
       </div>
+
+      {cakupan.status === "gagal" && (
+        <PesanLokasi
+          judul="Gagal Memuat Lokasi Outlet"
+          isi="Lokasi kerja Anda tidak dapat dimuat. Periksa koneksi, lalu muat ulang halaman."
+        />
+      )}
+      {cakupan.status === "staf" && !cakupan.lokasiId && (
+        <PesanLokasi
+          judul="Identitas Outlet Tidak Ditemukan"
+          isi="Lokasi kerja Anda saat ini belum dikonfigurasi, sehingga stok tidak dapat ditampilkan. Harap periksa pengaturan profil lokasi Anda."
+        />
+      )}
 
       {/* QUICK TABS */}
       <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-4">

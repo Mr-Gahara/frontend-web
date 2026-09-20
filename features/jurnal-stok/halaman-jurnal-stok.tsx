@@ -70,6 +70,8 @@ interface Props {
   penghalang?: ReactNode;
   /** True selama data yang menentukan lingkup (misalnya lokasi aktif) dimuat. */
   memuatLingkup?: boolean;
+  /** Pemilih lokasi di bilah filter (owner di ruang outlet). */
+  pemilihLokasi?: ReactNode;
 }
 
 export default function HalamanJurnalStok({
@@ -78,6 +80,7 @@ export default function HalamanJurnalStok({
   deskripsi,
   penghalang,
   memuatLingkup = false,
+  pemilihLokasi,
 }: Props) {
   const teks = TEKS[ruang];
   const [cari, setCari] = useState("");
@@ -109,6 +112,7 @@ export default function HalamanJurnalStok({
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          {pemilihLokasi}
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0A2947]/40" />
             <Input

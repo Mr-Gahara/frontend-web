@@ -7,7 +7,7 @@ type Relasi = { _id?: string; id?: string };
 type JurnalMentah = Relasi & {
   tipeKoreksi: "Masuk" | "Keluar";
   bahanBakuID: (Relasi & { namaBahan: string }) | null;
-  locationID: (Relasi & { tipe: string }) | null;
+  locationID: (Relasi & { tipe: string; nama?: string }) | null;
 };
 
 // ============================================================
@@ -86,18 +86,26 @@ test.describe("Jurnal stok", () => {
     await login(page);
   });
 
-  test("outlet: hanya menampilkan jurnal di lokasi aktif", async ({ page }) => {
-    const { jurnal, lokasiAktif } = await bukaJurnal(page, URL_OUTLET, true);
-    test.skip(!lokasiAktif, "Pengguna uji tidak punya lokasi aktif");
+  test("owner: seluruh outlet tanpa jurnal gudang", async ({ page }) => {
+    const { jurnal } = await bukaJurnal(page, URL_OUTLET);
+    await periksaJumlahBaris(page, jurnal.filter((j) => j.locationID?.tipe === "Outlet").length);
+  });
 
-    const harapan = jurnal.filter((j) => idDari(j.locationID) === lokasiAktif);
-    await periksaJumlahBaris(page, harapan.length);
+  test("owner: pilih satu outlet menyaring jurnal outlet itu", async ({ page }) => {
+    const { jurnal } = await bukaJurnal(page, URL_OUTLET);
+    const target = jurnal.find((j) => j.locationID?.tipe === "Outlet" && j.locationID?.nama);
+    test.skip(!target, "Belum ada jurnal outlet");
+    const idTarget = idDari(target!.locationID);
+
+    await page.getByText("Semua Outlet", { exact: true }).click();
+    await page.getByRole("option", { name: target!.locationID!.nama!, exact: true }).click();
+    await periksaJumlahBaris(page, jurnal.filter((j) => idDari(j.locationID) === idTarget).length);
   });
 
   test("outlet: filter arah menyaring barang keluar", async ({ page }) => {
-    const { jurnal, lokasiAktif } = await bukaJurnal(page, URL_OUTLET, true);
-    const diLokasi = jurnal.filter((j) => idDari(j.locationID) === lokasiAktif);
-    test.skip(diLokasi.length === 0, "Belum ada jurnal di lokasi aktif");
+    const { jurnal } = await bukaJurnal(page, URL_OUTLET);
+    const diLokasi = jurnal.filter((j) => j.locationID?.tipe === "Outlet");
+    test.skip(diLokasi.length === 0, "Belum ada jurnal outlet");
 
     await page.getByText("Semua Arah", { exact: true }).click();
     await page.getByRole("option", { name: "Barang Keluar" }).click();
@@ -109,10 +117,10 @@ test.describe("Jurnal stok", () => {
   });
 
   test("outlet: pencarian menyaring berdasarkan nama barang", async ({ page }) => {
-    const { jurnal, lokasiAktif } = await bukaJurnal(page, URL_OUTLET, true);
-    const diLokasi = jurnal.filter((j) => idDari(j.locationID) === lokasiAktif);
+    const { jurnal } = await bukaJurnal(page, URL_OUTLET);
+    const diLokasi = jurnal.filter((j) => j.locationID?.tipe === "Outlet");
     const nama = diLokasi.find((j) => j.bahanBakuID?.namaBahan)?.bahanBakuID?.namaBahan;
-    test.skip(!nama, "Belum ada jurnal bernama barang di lokasi aktif");
+    test.skip(!nama, "Belum ada jurnal outlet bernama barang");
 
     await page.getByPlaceholder("Cari nama barang...").fill(nama!);
 
@@ -145,8 +153,9 @@ test.describe("Jurnal stok", () => {
     await page.unroute(pola);
   });
 
-  test("outlet: gagal memuat lokasi aktif dibedakan dari lokasi yang belum dikonfigurasi", async ({ page }) => {
-    const pola = "**/api/location/current";
+  test("outlet: gagal memuat daftar lokasi dibedakan dari lokasi yang belum dikonfigurasi", async ({ page }) => {
+    // Owner memakai daftar lokasi; jalur staf (/location/current) diuji di unit test cakupan.
+    const pola = "**/api/location";
     await page.route(pola, (route) =>
       route.request().method() === "GET"
         ? route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ status: "error", message: "uji" }) })
