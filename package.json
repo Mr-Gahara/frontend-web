@@ -12,7 +12,9 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:unit": "vitest",
-    "test:unit:ui": "vitest --ui"
+    "test:unit:ui": "vitest --ui",
+    "docs:periksa": "node scripts/dokumen/periksa.cjs",
+    "docs:dampak": "node scripts/dokumen/dampak.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

@@ -1,6 +1,6 @@
 # Keputusan
 
-Sifat perubahan: **Jarang**: bertambah saat ada keputusan baru. Butir yang sudah ada **tetap**.
+Sifat perubahan: **Jarang**: bertambah saat ada keputusan baru. Butir lama boleh dilengkapi, tetapi tidak dibalik tanpa pembahasan.
 
 Dua jenis keputusan yang mengikat pekerjaan refactor:
 

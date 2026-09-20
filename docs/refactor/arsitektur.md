@@ -25,6 +25,7 @@ dan urutan migrasi satu modul.
 | `tests/e2e/` | Playwright, memakai backend sungguhan |
 | `tests/unit/` | Vitest untuk fondasi, hook, dan fungsi murni di `features/` |
 | `docs/` | `README.md` (titik masuk), `refactor/`, dan `kontrak/` |
+| `scripts/` | Alat pengembangan; `scripts/dokumen/` memeriksa dokumentasi (`npm run docs:periksa`, `npm run docs:dampak`) |
 
 ### Konvensi penamaan dan bahasa
 

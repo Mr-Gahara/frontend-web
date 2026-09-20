@@ -192,8 +192,8 @@ Untuk kode, informasi diambil bertahap, bukan dengan `cat` seluruh berkas:
    baris dari peta itu.
 
 Satu blok pengambilan dijaga di bawah sekitar 100 baris keluaran. Pengecualian:
-pembaruan dokumentasi memakai isi utuh berkas yang berubah (`docs/README.md`),
-agar pemeriksaannya cukup sekali.
+pemeriksaan dokumentasi yang strukturnya berubah besar memakai isi utuh berkas
+yang berubah (`docs/README.md`), agar pemeriksaannya cukup sekali.
 
 ## Disiplin saat menerapkan perubahan
 

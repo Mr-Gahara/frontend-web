@@ -43,7 +43,7 @@ bukan mock, sehingga akan gagal bila backend mati.
 |---|---|---|
 | `README.md` | Memulai sesi, peta dokumen, cara memperbarui dokumentasi | **Tetap**, kecuali peta dokumen saat berkas bertambah |
 | `refactor/status.md` | Fase yang sudah selesai, tabel Fase 3, metrik, pekerjaan berikutnya, utang kecil | **Sering**: setiap modul |
-| `refactor/keputusan.md` | Keputusan produk per modul dan keputusan rancangan bernomor | **Jarang**: bertambah saat ada keputusan baru. Butir yang sudah ada **tetap** |
+| `refactor/keputusan.md` | Keputusan produk per modul dan keputusan rancangan bernomor | **Jarang**: bertambah saat ada keputusan baru. Butir lama boleh dilengkapi, tetapi tidak dibalik tanpa pembahasan |
 | `refactor/arsitektur.md` | Konteks proyek, fondasi, daftar `features/`, langkah migrasi | **Sering** untuk daftar `features/`; bagian lain **jarang** |
 | `refactor/cara-kerja.md` | Alur perubahan, aturan blok perintah, helper, catatan shell dan form, disiplin | **Jarang**: bertambah saat ada pelajaran. Alur dan aturan blok perintah **tetap** |
 | `refactor/pengujian.md` | Perintah verifikasi, baseline, debug e2e, catatan Playwright, fixme dan skip, utang pengujian, spec rujukan | **Sering**: baseline dan spec rujukan setiap modul |
@@ -74,26 +74,21 @@ Berkas dan bagian bertanda **Tetap** tidak disentuh dalam pembaruan biasa.
 Bila sebuah pembaruan tampak menuntut perubahan di sana, sampaikan dulu
 alasannya dan tunggu perintah pemilik proyek.
 
-**Sebelum commit, isi utuh setiap berkas dokumentasi yang berubah dibaca
-ulang** (dikirim ke percakapan lewat `cat`, atau diunggah bila terlalu panjang
-untuk ditempel) sampai benar, valid, lengkap, detail, dan
-relevan. Setiap pembaruan tidak boleh setengah-setengah: baca berkas yang
-berubah dari awal sampai akhir, periksa juga kesesuaiannya dengan berkas lain
-yang dirujuknya, cari setiap bagian yang sudah tidak relevan, tertinggal, atau
-bertentangan dengan keadaan sekarang, lalu ganti seluruhnya. Setiap
-pemeriksaan melaporkan seluruh temuan sekaligus: fakta yang tidak sesuai
-bukti, kalimat yang bertentangan antarbagian atau antarberkas, angka dan
-rujukan yang tertinggal, serta pelajaran yang belum tercatat. Pada modul
-produk dan kategori, pemeriksaan yang dicicil per bagian butuh lebih dari
-lima putaran perbaikan.
+**Sebelum commit, setiap perubahan dokumentasi diperiksa sampai benar, valid,
+lengkap, detail, dan relevan.** Pembaruan tidak boleh setengah-setengah:
+setiap baris yang menyebut hal yang berubah dinilai ulang, termasuk di berkas
+lain, lalu yang sudah tidak relevan, tertinggal, atau bertentangan diganti
+seluruhnya. Setiap pemeriksaan melaporkan seluruh temuan sekaligus: fakta yang
+tidak sesuai bukti, kalimat yang bertentangan antarbagian atau antarberkas,
+angka dan rujukan yang tertinggal, serta pelajaran yang belum tercatat. Pada
+modul produk dan kategori, pemeriksaan yang dicicil per bagian butuh lebih
+dari lima putaran perbaikan.
 
-Kerapian diperiksa dengan `node scripts/periksa-dokumen.cjs`: tabel terputus,
-baris kepanjangan, baris kosong ganda, blok kode tidak tertutup, rujukan ke
-berkas yang tidak ada, nama berkas lama, dan label sifat perubahan. Keluarannya
-hanya temuan, sehingga isi utuh tidak perlu dikirim ulang untuk memeriksa
-kerapian. Perbaikan susulan setelah pemeriksaan utuh cukup diverifikasi lewat
-pemeriksa itu ditambah baris yang berubah (`git diff -U1 docs`), bukan isi utuh.
-Pemeriksaan utuh tetap dilakukan saat struktur dokumentasi berubah besar.
+Bentuk, fakta yang dapat dihitung, dan bagian Tetap diperiksa mesin; kebenaran
+isi terhadap perilaku terbaru dinilai lewat pencarian dampak. Isi utuh berkas
+yang berubah hanya dikirim (lewat `cat`, atau diunggah bila terlalu panjang)
+saat struktur dokumentasi berubah besar. Lihat Pemeriksa dokumentasi dan Tata
+cara pembaruan per modul di bawah.
 
 Blok commit dokumen diawali `grep -q` atas teks perbaikan terakhir, lalu
 `git add` dirangkai dengan `&&`, sehingga commit tidak berjalan bila blok
@@ -142,3 +137,50 @@ Jangan memangkas isi dokumentasi hanya demi keringkasan: dokumentasi ini
 menggantikan ingatan, dan bagian yang dibuang akan menjadi pertanyaan berulang
 di sesi berikutnya. Bila satu berkas mulai terlalu panjang, pecah lagi menurut
 sifat perubahannya, lalu perbarui peta dokumen di atas.
+
+## Pemeriksa dokumentasi
+
+Pemeriksa ada di `scripts/dokumen/`, satu berkas per tugas, dan dijalankan
+lewat npm:
+
+| Perintah | Memeriksa | Kapan |
+|---|---|---|
+| `npm run --silent docs:periksa` | Bentuk (tabel terputus, baris kepanjangan, baris kosong ganda, blok kode tidak tertutup, rujukan `.md` yang tidak ada, nama berkas lama, label sifat perubahan), fakta (path kode yang disebut, hash commit, judul commit sementara, tabel `features/` beserta berkasnya, satu **Berikutnya** per tabel status), dan bagian **Tetap** terhadap `HEAD` | Setiap perubahan dokumentasi, dan sebagai gerbang di blok commit |
+| `npm run --silent docs:periksa -- --metrik` | Ditambah metrik di `status.md`, dihitung ulang dan dibandingkan | Otomatis bila `status.md` sedang diubah (menutup modul); manual dengan opsi ini |
+| `npm run --silent docs:periksa -- --izinkan-tetap` | Sama, tanpa penjaga bagian Tetap | Hanya bila pemilik proyek memerintahkan perubahan di bagian Tetap |
+| `npm run --silent docs:dampak -- --commit <hash> "istilah"` | Seluruh baris dokumentasi yang menyebut berkas yang diubah commit itu, termasuk bentuk prosanya (`jurnalStok` dan `jurnal-stok` juga dicari sebagai "jurnal stok"), dan istilah tambahan | Setiap menutup modul, sebelum menyusun pembaruan dokumentasi |
+
+Pemeriksa keluar dengan kode gagal bila ada temuan, sehingga blok commit
+berhenti sebelum `git add`. Yang tidak dapat diperiksanya: apakah sebuah
+kalimat masih benar terhadap perilaku terbaru, apakah keputusan atau pelajaran
+sudah tercatat, dan apakah isi antarberkas bertentangan. Ketiganya dinilai
+lewat pencarian dampak dan diff.
+
+## Tata cara pembaruan per modul
+
+1. **Kode selesai dan di-commit** (`refactor/cara-kerja.md`, Alur setiap
+   perubahan). Angka dari suite penuh dicatat: vitest, e2e lolos, dan skipped.
+2. **Laporan backend**, bila ada temuan, disusun setelah commit bersih
+   (`refactor/backend.md`).
+3. **Pencarian dampak**:
+   `npm run --silent docs:dampak -- --commit <hash> "istilah"`. Istilah
+   perilaku ditambahkan manual bila perubahannya tidak terlihat dari nama
+   berkas, misalnya "Semua Lokasi" atau "owner".
+4. **Penilaian dampak dan daftar perubahan.** Setiap baris hasil pencarian
+   dinilai: masih benar, perlu diperbarui, atau perlu dihapus. Baris
+   bertanda `[judul]` berarti seluruh bagian di bawah judul itu ikut dinilai.
+   Hasilnya dilaporkan sebagai tabel berkas, baris, dan penilaian, bersama daftar
+   perubahan per berkas (tabel "Yang berubah setiap kali" di atas).
+   Perubahan di bagian **Tetap** disebut terpisah dan menunggu perintah
+   pemilik proyek.
+5. **Blok penerap** dijalankan pemilik proyek. Blok berhenti tanpa menulis
+   bila ada teks lama yang tidak cocok tepat satu kali.
+6. **Verifikasi**: `npm run --silent docs:periksa` (metrik ikut dihitung karena
+   `status.md` berubah), lalu
+   `git --no-pager diff -U1 docs | grep -E '^[-+][^-+]' | cut -c1-120` untuk
+   melihat persis baris yang berubah. Diff dicocokkan dengan daftar di langkah
+   4 dan dengan bukti: keluaran test, `git log`, dan kode.
+7. **Pemeriksaan utuh** hanya bila struktur berubah besar (berkas baru atau
+   bagian dipindah). Seluruh temuan dilaporkan dalam satu putaran.
+8. **Commit** dengan gerbang di awal blok: `grep -q` atas teks perbaikan
+   terakhir, lalu `npm run --silent docs:periksa`.
