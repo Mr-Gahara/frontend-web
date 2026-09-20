@@ -166,13 +166,13 @@ tercatat tidak lagi diperiksa, atau bentuk respons berbeda dari tipe.
 | Inventaris: stock adjustment | `a52afbf` | Selesai |
 | Inventaris: jurnal stok | `98735d4` | Selesai |
 | Bahan baku: perbaikan dialog hapus | `50e8815` | Selesai |
-| Inventaris: stok dan inventaris gudang | `refactor(stok)`; hash diisi pada pembaruan dokumen berikutnya | Selesai |
+| Inventaris: stok dan inventaris gudang | `ad590f9` | Selesai |
 | Inventaris: stock opname, pengajuan, transfer | - | **Berikutnya** (bagian 12) |
 | Penjualan dan pembayaran | - | Belum |
 | Reservasi | - | Belum |
 | Keuangan | - | Belum |
 | Jadwal dan shift | - | Belum |
-| Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang dijadwalkan di modul inventaris (bagian 12); pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
+| Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang dikerjakan di modul inventaris (bagian 12): jurnal stok dan inventaris gudang sudah, stock opname, pengajuan, transfer, dan pengiriman belum; pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
 
 Keputusan produk dari modul produk dan kategori:
 
@@ -297,7 +297,7 @@ Isi tiap `features/` yang sudah ada:
 
 | Folder | Berkas | Catatan |
 |---|---|---|
-| `bahan-baku` | `api.ts`, `hooks.ts`, `schema.ts` | Modul percontohan Fase 2; lokasi aktif diambil dari `useLokasiAktif` di `features/inventaris` |
+| `bahan-baku` | `api.ts`, `hooks.ts`, `schema.ts` | Modul percontohan Fase 2. Lokasi dan stok diambil dari `features/inventaris`; `useDaftarBahanBaku` juga dipakai inventaris gudang untuk master bahan baku |
 | `inventaris` | `api.ts`, `hooks.ts`, `lokasi.ts` | Lintas halaman inventaris; dipakai bahan baku, jurnal stok, stok outlet, dan inventaris gudang. Lokasi: `useDaftarLokasi` dan `useLokasiBertipe` berbagi kunci `lokasi.daftar()`, sedangkan `useLokasiAktif` menyeragamkan cache lewat `lokasiTunggal`. Stok: `useDaftarInventory` (argumen `null` berarti belum siap; tanpa `locationID` berarti semua lokasi), `useUbahStokMinimum`, `useOpnameInventory`, dan `useTambahInventory`. Satu-satunya tempat hook lokasi dan inventory |
 | `pengguna` | `api.ts`, `hooks.ts`, `halaman-pengguna.tsx` | Komponen halaman dipakai outlet dan gudang |
 | `role` | `api.ts`, `hooks.ts`, `constants.ts`, `form-role.tsx` | `form-role.tsx` dipakai halaman edit dan kostum; `useLevelPenggunaAktif` dipakai lintas modul |
@@ -306,8 +306,9 @@ Isi tiap `features/` yang sudah ada:
 | `stock-adjustment` | `api.ts`, `hooks.ts`, `tampilan.ts` | Hanya baca; `useStockAdjustment` tidak mengulang permintaan saat 404; `tampilan.ts` menampilkan `-` untuk nilai yang salah dari mapper backend, dikendalikan `MAPPER_ADJUSTMENT_SUDAH_BENAR` |
 | `jurnal-stok` | `api.ts`, `hooks.ts`, `filter.ts`, `tampilan.ts`, `halaman-jurnal-stok.tsx` | Hanya baca; komponen halaman dipakai outlet dan gudang, dibedakan lewat `ruang`, `lingkup` (lokasi aktif atau tipe lokasi), dan `penghalang` |
 
-Cara memeriksa apakah sebuah modul sudah dimigrasikan: ada folder
-`features/<modul>/`, dan halamannya tidak lagi memanggil `apiClient`.
+Cara memeriksa apakah sebuah modul sudah dimigrasikan: halamannya tidak lagi
+memanggil `apiClient`, dan lapisan datanya ada di `features/<modul>/` atau di
+`features/` lintas modul (halaman stok memakai `features/inventaris`).
 
 ### `components/providers/`
 
@@ -414,6 +415,9 @@ sulit dibaca daripada dua berkas terpisah. Dalam hal itu, cukup bagikan lapisan
     sana. Sebelum membuat hook baru, grep kunci cache dan endpoint-nya di seluruh
     `features/`. Pada jurnal stok, `useLokasiAktif` ternyata sudah ada di
     `features/bahan-baku` dengan kunci yang sama, lalu disatukan.
+    Periksa juga halaman lama yang mengisi kunci yang sama lewat `apiClient`:
+    bila bentuk datanya berbeda, pakai kunci lain (`useLokasiBertipe` pindah ke
+    `lokasi.daftar()`) atau seragamkan lewat fungsi murni (`lokasiTunggal`).
 13. **Hook mutation menerima callback halaman.** `onSuccess` dan `onError` dari
     halaman dipakai untuk toast dan reset dialog, sedangkan pemanggilan API dan
     invalidasi tetap di hook. Dengan begitu variabel mutation dan JSX yang
@@ -639,7 +643,7 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per submodul stok** (commit `refactor(stok)`): 104 test unit dan
+**Baseline per submodul stok** (commit `ad590f9`): 104 test unit dan
 integrasi lolos, 181 e2e lolos, 4 skipped: dua `test.fixme` yang menunggu
 backend dan dua `test.skip` bersyarat data (bagian 8). Angka ini pembanding
 untuk memastikan tidak ada yang hilang diam-diam. Angka skipped dapat berubah
@@ -816,8 +820,12 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   Reporter itu mencetak kode kontrol `ESC[1A` dan `ESC[2K` (naik baris, hapus
   baris) yang tetap lolos lewat `tail`, sehingga keluaran `tsc`, ESLint, atau
   vitest di blok yang sama tampak hilang. Buang kodenya dengan
-  `sed 's/\x1b\[[0-9;]*[A-Za-z]//g'`, atau jalankan Playwright paling akhir. Terbukti dengan
-  `cat -v` pada modul stok.
+  `sed 's/\x1b\[[0-9;]*[A-Za-z]//g'`, atau jalankan Playwright paling
+  akhir. Terbukti dengan `cat -v` pada modul stok.
+- **Setiap dialog konfirmasi diuji juga jalur gagalnya**, dengan `page.route`
+  pada method dan path operasinya. Bug hapus bahan baku (`50e8815`) lolos
+  karena spec lama hanya menguji hapus yang berhasil, sedangkan dialog yang
+  tertutup sebelum waktunya baru terlihat saat operasi gagal.
 
 ### Kapan berhenti dan bertanya
 
@@ -875,7 +883,7 @@ perbarui catatan itu alih-alih menambah catatan baru yang bertentangan.
 
 ### Catatan Playwright
 
-- Radix Select: buka lewat teks placeholder-nya (misalnya "Pilih role"), bukan `getByRole("combobox").nth()`, karena Radix merender trigger beserta select tersembunyi.
+- Radix Select: buka lewat teks yang sedang tampil di trigger, yaitu placeholder (misalnya "Pilih role") atau nilai terpilih (misalnya "Semua Lokasi"), bukan `getByRole("combobox").nth()`, karena Radix merender trigger beserta select tersembunyi.
 - Setelah mutation, tunggu permintaan pemuatan ulang selesai sebelum memeriksa tabel, agar tidak berlomba dengan invalidasi cache.
 - Toast Sonner menutup sendiri; jangan jadikan satu-satunya bukti keberhasilan.
 - Isi Select sebelum input angka, karena perubahan Select memicu render ulang.
@@ -1009,6 +1017,11 @@ antarbagian atau antarberkas, angka dan rujukan bagian yang tertinggal, serta
 pelajaran yang belum tercatat. Pada modul produk dan kategori, pemeriksaan
 yang dicicil per bagian butuh lebih dari lima putaran perbaikan.
 
+Blok commit dokumen diawali `grep -q` atas teks perbaikan terakhir, lalu
+`git add` dirangkai dengan `&&`, sehingga commit tidak berjalan bila blok
+perbaikan belum dijalankan. Pada submodul stok, commit sempat berjalan
+sebelum blok perbaikan dokumen, dan butuh commit susulan.
+
 Yang berubah setiap kali:
 
 | Bagian | Perubahan |
@@ -1057,7 +1070,7 @@ terkecil (bagian 4 langkah 7).
 |---|---|---|---|---|
 | 1 | Stock adjustment | outlet: daftar, detail | 431 | Selesai (`a52afbf`) |
 | 2 | Jurnal stok | outlet dan gudang: daftar | 617 | Selesai (`98735d4`) |
-| 3 | Stok dan inventaris | `outlet/inventaris/stok`, `gudang/inventaris` | 1.094 | Selesai |
+| 3 | Stok dan inventaris | `outlet/inventaris/stok`, `gudang/inventaris` | 1.094 | Selesai (`ad590f9`) |
 | 4 | Stock opname | outlet dan gudang: daftar, detail, buat | 2.544 | **Berikutnya** |
 | 5 | Pengajuan stok | outlet: daftar, detail, edit, buat; gudang: daftar, detail | 2.298 | Belum |
 | 6 | Transfer, pengiriman, penerimaan | gudang: transfer (daftar, detail, edit), pengiriman; outlet: penerimaan (daftar, detail) | 1.950 | Belum |
