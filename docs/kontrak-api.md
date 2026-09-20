@@ -57,7 +57,7 @@ Semua error berbentuk `{ status: "error", message, errors? }`; `errors` hanya ad
 | 401 | Token kedaluwarsa atau sesi diambil alih | Refresh sekali; bila gagal, kembali ke login |
 | 403 | Izin ditolak, pengguna nonaktif, atau tenant/akun dibekukan | Jangan refresh; tampilkan pesan akses ditolak |
 | 404 | Data tidak ada atau id tidak valid | Tampilkan keadaan tidak ditemukan |
-| 409 | Duplikat atau data masih dipakai | Tampilkan pesan konflik. Tidak semua modul memakainya: duplikat kategori dijawab 400 (bagian 6 butir 14) |
+| 409 | Duplikat atau data masih dipakai | Tampilkan pesan konflik. Tidak semua modul memakainya: duplikat kategori dijawab 400 (bagian 6 butir 14), sedangkan opname aktif ganda di satu lokasi dijawab 409 (bagian 4, `POST /stockopname`) |
 | 429 | Terlalu banyak percobaan login | Tampilkan waktu tunggu |
 
 Login PIN untuk aplikasi dapat menjawab 200 dengan `success: false` (perangkat menunggu persetujuan). Web tidak terdampak, tetapi lapisan API tetap memeriksa `success` bila ada.
@@ -327,6 +327,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
+| GET | `/stockopname` | authPengguna | `read-stock-opname` | - | `id` | `features/stock-opname` (query `status`, `locationID`) |
 | POST | `/stockopname` | authPengguna | `create-stock-opname` | - | - | 2 file |
 | GET | `/stockopname/:id` | authPengguna | `read-stock-opname` | - | - | 2 file |
 | PATCH | `/stockopname/:id/approve` | authPengguna | `review-stock-opname` | - | - | 2 file |
@@ -409,6 +410,7 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /produk/:param`: _id, createdAt, gambarProduk, hargaDasar, hargaJual, isUnlimitedStok, kategori, kategoriID, keterangan, namaProduk, pajakList[], resep[], stok, updatedAt
 - `GET /role`: deskripsi, id, level, namaRole, permissions[]
 - `GET /role/:param`: deskripsi, id, level, namaRole, permissions[]
+- `GET /stockopname` dan `GET /stockopname/:param` (dari `mappers/stockOpnameMapper.js`, bukan dari sampel cache kontrak; sekurang-kurangnya): catatan, catatanReview, id, items[] (itemId, namaSnapshot, satuanSnapshot, qtySystemSnapshot, qtyPhysical, varianceSnapshot, adaSelisih, catatanItem), lokasi{id, nama, tipe}, nomorOpname, pic{id, nama}, reviewer, status, stockAdjustment, tanggal
 - `GET /stockopname/adjustments`: catatan, createdAt, id, items[], lokasi{id, nama, tipe}, nomorAdjustment, pic{id, nama}, stockOpnameID, tanggal, tenantID, updatedAt (`items` kosong pada sampel daftar; `catatan` dan `stockOpnameID` tidak dapat dipercaya, bagian 6 butir 18)
 - `GET /stockopname/adjustments/:param`: catatan, createdAt, id, items[], lokasi{alamat, id, nama, tipe}, nomorAdjustment, pic{id, nama}, stockOpnameID, tanggal, tenantID, updatedAt (`catatan`, `stockOpnameID`, `items[].qtySebelum`, dan `items[].qtyAdjustment` tidak dapat dipercaya, bagian 6 butir 18)
 - `GET /tarif`: basisPerhitungan, createdAt, dataAset[], durasiMinimum, harga, hariAktif[], id, isActive, jamMulai, jamSelesai, namaTarif, prioritas, tenantID, updatedAt
@@ -463,6 +465,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PATCH /stockopname/:id/cancel`
 
 - Aturan: tanpa validator, dibatasi skema `models/stockOpnameModel.js`
+- Diizinkan dari DRAFT, SUBMITTED, atau REJECTED; APPROVED dan CANCELLED ditolak (`stockOpnameService.cancel`)
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorOpname`, `locationID`, `tanggal`, `reviewerID`, `status`, `items`, `catatan`, `catatanReview`, `stockAdjustmentID`
 - Diisi server: `picID`
@@ -470,6 +473,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PATCH /stockopname/:id/items`
 
 - Aturan: tanpa validator, dibatasi skema `models/stockOpnameModel.js`
+- Hanya untuk status DRAFT atau REJECTED. Setiap item yang dikirim wajib punya `qtyPhysical` angka tidak negatif; `null` ditolak 400 dengan pesan "qtyPhysical tidak boleh kurang dari 0." (bagian 6 butir 19). Item yang tidak dikirim tidak berubah
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorOpname`, `locationID`, `tanggal`, `reviewerID`, `status`, `items`, `catatan`, `catatanReview`, `stockAdjustmentID`
 - Dibaca controller dari body: `items`
@@ -486,6 +490,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PATCH /stockopname/:id/submit`
 
 - Aturan: tanpa validator, dibatasi skema `models/stockOpnameModel.js`
+- Hanya dari DRAFT atau REJECTED, dan ditolak bila masih ada item tanpa `qtyPhysical`
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorOpname`, `locationID`, `tanggal`, `reviewerID`, `status`, `items`, `catatan`, `catatanReview`, `stockAdjustmentID`
 - Diisi server: `picID`
@@ -752,6 +757,8 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /stockopname`
 
 - Aturan: tanpa validator, dibatasi skema `models/stockOpnameModel.js`
+- Dibaca service: `locationID` dan `catatan`; item diambil otomatis dari seluruh inventory di lokasi itu
+- Opname aktif (DRAFT atau SUBMITTED) di lokasi yang sama ditolak 409 dengan pesan yang menyebut nomor dan statusnya
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorOpname`, `locationID`, `tanggal`, `reviewerID`, `status`, `items`, `catatan`, `catatanReview`, `stockAdjustmentID`
 - Dibaca controller dari body: `-`
@@ -932,7 +939,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 ## 5. Kebutuhan izin per halaman
 
-Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual. Baris pengguna, produk, kategori, bahan baku, stok, stock adjustment, jurnal stok, dan inventaris gudang diperbarui manual dari `IZIN_HALAMAN` setelah migrasi (20 September 2026); baris lain mencerminkan keadaan saat kontrak dibangkitkan.
+Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual. Baris pengguna, produk, kategori, bahan baku, stok, stock adjustment, jurnal stok, inventaris gudang, dan stock opname diperbarui manual dari `IZIN_HALAMAN` setelah migrasi (20 September 2026); baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
 | Menu | Gate saat ini | Endpoint GET di halaman | Permission dibutuhkan | Penilaian |
 |---|---|---|---|---|
@@ -949,7 +956,7 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/outlet/inventaris/bahanBaku` | `read-location`, `read-inventory` | `/location`, `/inventory` | `read-location`, `read-inventory` | Sejalan |
 | `/dashboard/outlet/inventaris-pantau` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/stok` | `read-location`, `read-inventory` | `/location`, `/inventory` | `read-location`, `read-inventory` | Sejalan |
-| `/dashboard/outlet/inventaris/stockOpname` | - | - | - | Data dimuat lewat komponen, periksa manual |
+| `/dashboard/outlet/inventaris/stockOpname` | `read-stock-opname`, `read-location` | `/stockopname`, `/location`, `/location/current` | `read-stock-opname`, `read-location` | Sejalan |
 | `/dashboard/outlet/inventaris/stockAdjustment` | `read-stock-adjustment` | `/stockopname/adjustments`, `/stockopname/adjustments/:id` | `read-stock-adjustment` | Sejalan |
 | `/dashboard/outlet/inventaris/jurnalStok` | `read-jurnal-stok`, `read-location` | `/jurnalstok`, `/location/current` | `read-jurnal-stok`, `read-location` | Sejalan |
 | `/dashboard/outlet/inventaris-suplai` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
@@ -964,7 +971,7 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/gudang` | - | - | - | Data dimuat lewat komponen, periksa manual |
 | `/dashboard/gudang/inventaris` | `read-location`, `read-inventory`, `read-bahan` | `/location`, `/inventory`, `/bahanbaku` | `read-location`, `read-inventory`, `read-bahan` | Sejalan |
 | `/dashboard/gudang/jurnalStok` | `read-jurnal-stok` | `/jurnalstok` | `read-jurnal-stok` | Sejalan |
-| `/dashboard/gudang/stockOpname` | `read-stock-opname` | - | - | Data dimuat lewat komponen, periksa manual |
+| `/dashboard/gudang/stockOpname` | `read-stock-opname` | `/stockopname` | `read-stock-opname` | Sejalan |
 | `/dashboard/gudang/pengajuanStok` | `read-pengajuan-stok` | `/pengajuanstok` | `read-pengajuan-stok` | Sejalan |
 | `/dashboard/gudang/transferStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/gudang/pengirimanStok` | `read-pengiriman-stok` | `/transferstok` | `read-transfer-stok` | Tidak sejalan |
@@ -976,7 +983,7 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 
 ## 6. Ketidakselarasan yang tercatat
 
-Setiap butir di bawah sudah diverifikasi dari kode atau respons backend. Kolom Pemilik menunjukkan sisi yang perlu bertindak. Butir 11 sampai 18 diperiksa terhadap kode backend pada 19 sampai 20 September 2026, bukan terhadap commit acuan di bagian 1; nomor barisnya dapat bergeser bila backend berubah.
+Setiap butir di bawah sudah diverifikasi dari kode atau respons backend. Kolom Pemilik menunjukkan sisi yang perlu bertindak. Butir 11 sampai 20 diperiksa terhadap kode backend pada 19 sampai 20 September 2026, bukan terhadap commit acuan di bagian 1; nomor barisnya dapat bergeser bila backend berubah.
 
 | No | Temuan | Bukti | Pemilik | Status |
 |---|---|---|---|---|
@@ -998,6 +1005,8 @@ Setiap butir di bawah sudah diverifikasi dari kode atau respons backend. Kolom P
 | 16 | Cache daftar produk (TTL 120 detik) tidak dibersihkan saat kategori berubah | `produkService` baris 67 dan 118, `kategoriService` baris 64, 96, dan 113 | Backend | Laporan modul produk dan kategori |
 | 17 | Detail produk mengirim `createdAt` dan `updatedAt` bernilai null | Cache kontrak `GET /produk/:param` | Backend | Laporan modul produk dan kategori |
 | 18 | Mapper stock adjustment membaca `qtySebelum`, `qtyAdjustment`, `stockOpnameID`, dan `catatan`, padahal model menyimpan `qtyCurrent`, `qtyDifference`, `referenceID`, dan `alasan`; `referenceType` tidak dikirim. Akibatnya saldo sistem dan koreksi selalu 0, sedangkan sumber opname dan alasan selalu null | `mappers/stockOpnameMapper.js` baris 167, 169, 190, 192; `models/stockAdjustmentModel.js` (`qtyCurrent`, `qtyDifference`, `referenceType`); `stockOpnameService` baris 418 sampai 427; cache kontrak `GET /stockopname/adjustments/:param` (`qtySebelum` 0, `qtyPhysical` 35000, `qtyAdjustment` 0) | Backend | Laporan submodul stock adjustment; frontend menampilkan `-` lewat `features/stock-adjustment/tampilan.ts` |
+| 19 | Pembaruan item stock opname menolak `qtyPhysical` kosong, sehingga hitungan yang baru sebagian tidak dapat disimpan; pesan errornya "tidak boleh kurang dari 0" walau isiannya kosong | `stockOpnameService` sekitar baris 235; frontend lama mengirim `null` untuk isian kosong | Backend | Laporan submodul stock opname; frontend hanya mengirim item yang terisi (`features/stock-opname/payload.ts`) |
+| 20 | Data stock opname (dan data stok lain) dikirim untuk seluruh lokasi tenant kepada pemegang izin baca; pembatasan staf ke lokasi aktif hanya ada di tampilan web | `stockOpnameService.getAll` baris 150 sampai 155: `locationID` hanya filter opsional dari query | Perlu keputusan | Laporan submodul stock opname; web membatasi staf lewat `useCakupanLokasiOutlet` |
 
 ## Lampiran A. Seluruh route backend
 
@@ -1216,7 +1225,7 @@ Setiap butir di bawah sudah diverifikasi dari kode atau respons backend. Kolom P
 | GET | `/shift/:id` | authPengguna | - | - | `shiftRoute.js` |
 | PUT | `/shift/:id` | authPengguna | - | ya | `shiftRoute.js` |
 | DELETE | `/shift/:id` | authPengguna | - | ya | `shiftRoute.js` |
-| GET | `/stockopname` | authPengguna | `read-stock-opname` | - | `stockOpnameRoute.js` |
+| GET | `/stockopname` | authPengguna | `read-stock-opname` | ya | `stockOpnameRoute.js` |
 | POST | `/stockopname` | authPengguna | `create-stock-opname` | ya | `stockOpnameRoute.js` |
 | GET | `/stockopname/:id` | authPengguna | `read-stock-opname` | ya | `stockOpnameRoute.js` |
 | PATCH | `/stockopname/:id/approve` | authPengguna | `review-stock-opname` | ya | `stockOpnameRoute.js` |

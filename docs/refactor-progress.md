@@ -19,7 +19,7 @@ cd ~/Documents/frontend-web && cat docs/refactor-progress.md && git log --onelin
 Riwayat commit adalah bagian dari konteks: alasan di balik tiap keputusan
 tercatat lengkap di pesan commit, bukan hanya di dokumen ini. Untuk pertanyaan
 tentang endpoint, bentuk data, atau izin, rujuk `docs/kontrak-api.md`.
-Pastikan juga helper di `/tmp` masih ada (bagian 7, Helper penggantian).
+Pastikan juga helper di `~/.cache/frontend-web/alat/` masih ada (bagian 7, Helper penggantian).
 
 **Pastikan `git status` bersih sebelum memulai modul baru.** Bila ada perubahan
 yang belum di-commit, selesaikan atau buang dulu, agar `git diff` tetap dapat
@@ -167,12 +167,14 @@ tercatat tidak lagi diperiksa, atau bentuk respons berbeda dari tipe.
 | Inventaris: jurnal stok | `98735d4` | Selesai |
 | Bahan baku: perbaikan dialog hapus | `50e8815` | Selesai |
 | Inventaris: stok dan inventaris gudang | `ad590f9` | Selesai |
-| Inventaris: stock opname, pengajuan, transfer | - | **Berikutnya** (bagian 12) |
+| Inventaris: stock opname | `refactor(stock-opname)`; hash diisi pada pembaruan dokumen berikutnya | Selesai |
+| Cakupan lokasi owner dan staf: jurnal stok dan stok outlet | - | **Berikutnya** (bagian 12) |
+| Inventaris: pengajuan, transfer | - | Belum |
 | Penjualan dan pembayaran | - | Belum |
 | Reservasi | - | Belum |
 | Keuangan | - | Belum |
 | Jadwal dan shift | - | Belum |
-| Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang dikerjakan di modul inventaris (bagian 12): jurnal stok dan inventaris gudang sudah, stock opname, pengajuan, transfer, dan pengiriman belum; pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
+| Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang dikerjakan di modul inventaris (bagian 12): jurnal stok, inventaris gudang, dan stock opname sudah, pengajuan, transfer, dan pengiriman belum; pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
 
 Keputusan produk dari modul produk dan kategori:
 
@@ -208,7 +210,33 @@ Keputusan produk dari submodul stok dan inventaris gudang:
   pesan.** Sebelumnya dialog tetap terbuka tanpa keterangan apa pun.
 - **Perilaku lain dipertahankan**: catatan opname tetap wajib, opname tanpa
   selisih tetap diizinkan, dan pilihan "Semua Lokasi" di outlet tetap
-  menampilkan stok seluruh lokasi bertipe Outlet.
+  menampilkan stok seluruh lokasi bertipe Outlet. Pembatasan untuk staf
+  menyusul lewat keputusan cakupan dari submodul stock opname.
+
+Keputusan produk dari submodul stock opname:
+
+- **Cakupan lokasi di ruang outlet mengikuti peran.** Owner melihat seluruh
+  outlet dengan pemilih lokasi (bawaan "Semua Outlet"); staf hanya lokasi
+  aktifnya. Dokumen gudang tetap di ruang gudang. Owner dikenali lewat
+  `useLevelPenggunaAktif` (bagian 5 butir 2). Pembatasan ini hanya di
+  tampilan, karena backend mengirim data seluruh tenant kepada pemegang izin
+  baca (kontrak bagian 6 butir 20). Aturan yang sama diterapkan ke jurnal
+  stok dan stok outlet dalam commit terpisah (bagian 12).
+- **Membuat opname di outlet tetap memakai lokasi aktif** untuk semua
+  pengguna, termasuk owner, karena opname adalah hitungan fisik di tempat.
+- **Tombol aksi disembunyikan sesuai izin**: `submit-stock-opname` untuk
+  menghitung dan mengajukan, `review-stock-opname` untuk menyetujui, menolak,
+  dan membatalkan (bagian 5 butir 14).
+- **Pembatalan tersedia untuk DRAFT, SUBMITTED, dan REJECTED** bagi pemegang
+  izin tinjau, sejalan dengan backend. Sebelumnya hanya dari SUBMITTED.
+- **Simpan sementara hanya mengirim hitungan yang terisi**, karena backend
+  menolak isian kosong (kontrak bagian 6 butir 19). Bila belum ada hitungan,
+  pesan tampil tanpa memanggil backend.
+- **Dialog aksi hanya tertutup saat berhasil**; saat gagal tetap terbuka
+  beserta isiannya (keputusan Fase 0).
+- **Detail membedakan dokumen yang tidak ditemukan dari kegagalan memuat.**
+- **Gate daftar stock opname outlet ditambah `read-location`**, karena
+  cakupan staf memanggil `/location/current`.
 
 ---
 
@@ -284,7 +312,7 @@ queryKeys.produk.detail(id)     // ["produk", "detail", id]
 
 ### `features/<modul>/`
 Pola yang sudah terbukti di bahan baku, pengguna, role, produk, kategori,
-stock adjustment, jurnal stok, dan stok:
+stock adjustment, jurnal stok, stok, dan stock opname:
 
 - `api.ts` — pemanggilan endpoint memakai `apiData` dan `EP`
 - `hooks.ts` — `useQuery` dan `useMutation`, termasuk aturan invalidasi. Hook mutation menerima `onSuccess` dan `onError` dari halaman untuk toast dan reset dialog (bagian 5 butir 13)
@@ -298,13 +326,14 @@ Isi tiap `features/` yang sudah ada:
 | Folder | Berkas | Catatan |
 |---|---|---|
 | `bahan-baku` | `api.ts`, `hooks.ts`, `schema.ts` | Modul percontohan Fase 2. Lokasi dan stok diambil dari `features/inventaris`; `useDaftarBahanBaku` juga dipakai inventaris gudang untuk master bahan baku |
-| `inventaris` | `api.ts`, `hooks.ts`, `lokasi.ts` | Lintas halaman inventaris; dipakai bahan baku, jurnal stok, stok outlet, dan inventaris gudang. Lokasi: `useDaftarLokasi` dan `useLokasiBertipe` berbagi kunci `lokasi.daftar()`, sedangkan `useLokasiAktif` menyeragamkan cache lewat `lokasiTunggal`. Stok: `useDaftarInventory` (argumen `null` berarti belum siap; tanpa `locationID` berarti semua lokasi), `useUbahStokMinimum`, `useOpnameInventory`, dan `useTambahInventory`. Satu-satunya tempat hook lokasi dan inventory |
+| `inventaris` | `api.ts`, `hooks.ts`, `lokasi.ts`, `cakupan.ts`, `pemilih-lokasi-outlet.tsx`, `pesan-lokasi.tsx` | Lintas halaman inventaris; dipakai bahan baku, jurnal stok, stok outlet, inventaris gudang, dan stock opname. Lokasi: `useDaftarLokasi` dan `useLokasiBertipe` berbagi kunci `lokasi.daftar()`, sedangkan `useLokasiAktif` menyeragamkan cache lewat `lokasiTunggal`. Stok: `useDaftarInventory` (argumen `null` berarti belum siap; tanpa `locationID` berarti semua lokasi), `useUbahStokMinimum`, `useOpnameInventory`, dan `useTambahInventory`. Cakupan: `useCakupanLokasiOutlet` (owner seluruh outlet, staf lokasi aktif) dengan fungsi murni `tentukanCakupan` dan `lingkupOutlet`, serta komponen `PemilihLokasiOutlet` dan `PesanLokasi`. Satu-satunya tempat hook lokasi, inventory, dan cakupan |
 | `pengguna` | `api.ts`, `hooks.ts`, `halaman-pengguna.tsx` | Komponen halaman dipakai outlet dan gudang |
 | `role` | `api.ts`, `hooks.ts`, `constants.ts`, `form-role.tsx` | `form-role.tsx` dipakai halaman edit dan kostum; `useLevelPenggunaAktif` dipakai lintas modul |
 | `produk` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `izin.ts`, `form-produk.tsx` | `form-produk.tsx` dipakai halaman buat dan edit; `useDaftarProduk` dipakai halaman kategori, pajak, dan buat penjualan; `bolehBacaProduk` menerima `read-produk` atau `akses-pos` |
 | `kategori` | `api.ts`, `hooks.ts`, `schema.ts`, `pesan.ts` | `useDaftarKategori` dipakai form produk; `pesan.ts` menentukan field duplikat karena respons backend tidak dapat diandalkan |
 | `stock-adjustment` | `api.ts`, `hooks.ts`, `tampilan.ts` | Hanya baca; `useStockAdjustment` tidak mengulang permintaan saat 404; `tampilan.ts` menampilkan `-` untuk nilai yang salah dari mapper backend, dikendalikan `MAPPER_ADJUSTMENT_SUDAH_BENAR` |
 | `jurnal-stok` | `api.ts`, `hooks.ts`, `filter.ts`, `tampilan.ts`, `halaman-jurnal-stok.tsx` | Hanya baca; komponen halaman dipakai outlet dan gudang, dibedakan lewat `ruang`, `lingkup` (lokasi aktif atau tipe lokasi), dan `penghalang` |
+| `stock-opname` | `api.ts`, `hooks.ts`, `payload.ts`, `izin.ts`, `halaman-daftar-stock-opname.tsx`, `halaman-detail-stock-opname.tsx`, `form-buat-stock-opname.tsx` | Ketiga komponen dipakai outlet dan gudang lewat `ruang` dan `TEKS`. Daftar menerima `lingkup` dan `pemilihLokasi`; form buat menerima `sumberLokasi` (tetap atau pilih). `payload.ts` hanya mengirim hitungan yang terisi; `izin.ts` memuat `bolehHitungOpname` dan `bolehTinjauOpname`; `useStockOpname` tidak mengulang permintaan saat 404 |
 
 Cara memeriksa apakah sebuah modul sudah dimigrasikan: halamannya tidak lagi
 memanggil `apiClient`, dan lapisan datanya ada di `features/<modul>/` atau di
@@ -322,8 +351,8 @@ memanggil `apiClient`, dan lapisan datanya ada di `features/<modul>/` atau di
 ## 4. Langkah migrasi satu modul
 
 Urutan yang dipakai pada bahan baku, pengguna, role, produk, kategori, stock
-adjustment, jurnal stok, dan stok, dan terbukti menjaga `tsc` tetap hijau di
-tiap langkah:
+adjustment, jurnal stok, stok, dan stock opname, dan terbukti menjaga `tsc`
+tetap hijau di tiap langkah:
 
 1. **Petakan keadaan.** Hitung baris tiap berkas, cari pemakaian `apiClient`,
    `any`, `_id`, dan `queryKey`. Bila ada dua halaman serupa (outlet dan
@@ -382,7 +411,7 @@ sulit dibaca daripada dua berkas terpisah. Dalam hal itu, cukup bagikan lapisan
 ## 5. Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.
-2. **Owner tidak diperlakukan khusus** lewat pengecekan nama role. Backend memberi Owner seluruh permission, sehingga pemeriksaan berbasis daftar permission sudah mencakupnya. Pengecualian: `useLevelPenggunaAktif` memakai nama role untuk menentukan level 100, karena token tidak membawa level.
+2. **Owner tidak diperlakukan khusus** lewat pengecekan nama role. Backend memberi Owner seluruh permission, sehingga pemeriksaan berbasis daftar permission sudah mencakupnya. Pengecualian: `useLevelPenggunaAktif` memakai nama role untuk menentukan level 100, karena token tidak membawa level. Cakupan data lintas lokasi di ruang outlet juga mengikuti level itu (100 berarti owner) lewat `useCakupanLokasiOutlet`; halaman tidak memeriksa nama role sendiri.
 3. **Invalidasi memakai akar domain** bila perubahan bisa memengaruhi beberapa varian. Kunci akar (`semua`) hanya untuk invalidasi, tidak untuk menyimpan data: halaman gudang lama memakai `queryKeys.bahanBaku.semua` sebagai kunci data master bahan baku.
 4. **Field yang dipakai service tetapi tidak ada di validator** harus diperiksa sebelum dihapus dari payload (lihat `docs/kontrak-api.md` bagian 1, butir keterbatasan).
 5. **Bug backend tidak diperbaiki dari sini.** Frontend menyesuaikan diri, lalu temuan ditulis untuk tim backend setelah commit bersih.
@@ -423,6 +452,11 @@ sulit dibaca daripada dua berkas terpisah. Dalam hal itu, cukup bagikan lapisan
     invalidasi tetap di hook. Dengan begitu variabel mutation dan JSX yang
     memanggil `.mutate()` atau `.isPending` tidak perlu diubah saat migrasi.
     Contoh: `useUbahStokMinimum({ onSuccess, onError })` di `features/inventaris`.
+14. **Tombol aksi mengikuti izin endpoint-nya, bukan hanya status dokumen.**
+    Status menentukan tahap, izin menentukan siapa yang boleh bertindak.
+    Tombol yang izinnya tidak dimiliki pengguna disembunyikan, dan aturannya
+    diletakkan di `features/<modul>/izin.ts` (butir 9). Contoh:
+    `bolehHitungOpname` dan `bolehTinjauOpname` di `features/stock-opname`.
 
 ---
 
@@ -430,11 +464,11 @@ sulit dibaca daripada dua berkas terpisah. Dalam hal itu, cukup bagikan lapisan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 
-| Hal | Awal | Setelah submodul stok | Catatan |
+| Hal | Awal | Setelah submodul stock opname | Catatan |
 |---|---|---|---|
-| Pemakaian `any` | 302 | 114 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di bagian 11). Berkurang tiap modul yang dimigrasikan |
-| Kemunculan `_id` | - | 137 | Dihitung di `app`, `components`, dan `features` (perintah di bagian 11), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id || _id` |
-| `useAuthGuard()` berulang di halaman | 49 | 48 | Belum disentuh; rencananya dipindah ke layout |
+| Pemakaian `any` | 302 | 101 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di bagian 11). Berkurang tiap modul yang dimigrasikan |
+| Kemunculan `_id` | - | 120 | Dihitung di `app`, `components`, dan `features` (perintah di bagian 11), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id || _id` |
+| `useAuthGuard()` berulang di halaman | 49 | 42 | Dihitung di `app/` saja. Turun karena halaman stock opname menjadi tipis dan pemanggilannya pindah ke komponen di `features/`, bukan karena dipindah ke layout. Rencananya tetap dipindah ke layout |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
 | Berkas di atas 700 baris | 7 | 7 | Sempat 8 karena berkas lain tumbuh; kembali 7 setelah form produk disatukan. Berkurang saat modulnya dimigrasikan |
 
@@ -491,14 +525,16 @@ console.log("OK");
 Untuk penggantian di banyak berkas, kumpulkan pasangan dalam array dan tulis
 berkas hanya bila seluruhnya cocok.
 
-Sejak modul produk, tiga helper disimpan di `/tmp`. Folder itu dapat
-dikosongkan sistem (misalnya saat komputer dinyalakan ulang), sehingga helper
-bisa hilang di antara sesi dan skrip gagal dengan
-`Cannot find module '/tmp/ganti.js'`. Periksa dengan `ls /tmp/ganti.js`
-sebelum blok pertama sesi, dan buat ulang bila hilang:
+Tiga helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan dengan cache
+kontrak. Sampai submodul stok, helper disimpan di `/tmp`, dan folder itu dua
+kali dikosongkan sistem dalam sehari: sekali membuat perbaikan dokumen tidak
+masuk sebelum commit (`b0d11d2` menyusulkannya). Skrip sekali pakai tetap di
+`/tmp`. Periksa dengan `ls ~/.cache/frontend-web/alat` sebelum blok pertama sesi, dan buat
+ulang bila hilang:
 
 ```bash
-cat > /tmp/ganti.js <<'EOF'
+mkdir -p ~/.cache/frontend-web/alat
+cat > ~/.cache/frontend-web/alat/ganti.js <<'EOF'
 const fs = require("fs");
 module.exports = (f, pasangan, rapikan) => {
   let isi = fs.readFileSync(f, "utf8");
@@ -516,7 +552,7 @@ module.exports = (f, pasangan, rapikan) => {
   console.log("OK " + f + " (" + pasangan.length + " pasangan)");
 };
 EOF
-cat > /tmp/ganti-baris.js <<'EOF'
+cat > ~/.cache/frontend-web/alat/ganti-baris.js <<'EOF'
 const fs = require("fs");
 module.exports = (f, awal, akhir, iAwal, iAkhir, baru) => {
   const baris = fs.readFileSync(f, "utf8").split("\n");
@@ -531,7 +567,7 @@ module.exports = (f, awal, akhir, iAwal, iAkhir, baru) => {
   console.log("OK " + f + " baris " + (a + 1) + "-" + (z + 1));
 };
 EOF
-cat > /tmp/hitung-eslint.js <<'EOF'
+cat > ~/.cache/frontend-web/alat/hitung-eslint.js <<'EOF'
 let d = "";
 process.stdin.on("data", (c) => (d += c)).on("end", () => {
   const r = JSON.parse(d || "[]");
@@ -540,7 +576,7 @@ process.stdin.on("data", (c) => (d += c)).on("end", () => {
 EOF
 ```
 
-- `ganti.js`: dipanggil dengan ``node -e 'require("/tmp/ganti.js")("berkas", [[`lama`, `baru`]])'``.
+- `ganti.js`: dipanggil dengan ``node -e 'require(process.env.HOME + "/.cache/frontend-web/alat/ganti.js")("berkas", [[`lama`, `baru`]])'``.
   Berkas hanya ditulis bila setiap pasangan cocok tepat satu kali. Argumen
   ketiga `true` merapikan baris kosong berlebih.
 - `ganti-baris.js`: mengganti rentang baris dari jangkar awal sampai jangkar
@@ -622,10 +658,10 @@ npx playwright test tests/e2e/<modul> -g "<potongan judul>" --repeat-each 3 --re
 ```
 
 Membandingkan jumlah error ESLint sebuah berkas terhadap `HEAD`, untuk
-memisahkan error baru dari error warisan (memakai `/tmp/hitung-eslint.js`):
+memisahkan error baru dari error warisan (memakai `~/.cache/frontend-web/alat/hitung-eslint.js`):
 
 ```bash
-f=path/ke/berkas.tsx; echo "sekarang:$(npx eslint "$f" -f json 2>/dev/null | node /tmp/hitung-eslint.js) HEAD:$(git show "HEAD:$f" | npx eslint --stdin --stdin-filename "$f" -f json 2>/dev/null | node /tmp/hitung-eslint.js)"
+f=path/ke/berkas.tsx; echo "sekarang:$(npx eslint "$f" -f json 2>/dev/null | node ~/.cache/frontend-web/alat/hitung-eslint.js) HEAD:$(git show "HEAD:$f" | npx eslint --stdin --stdin-filename "$f" -f json 2>/dev/null | node ~/.cache/frontend-web/alat/hitung-eslint.js)"
 ```
 
 Ringkasan e2e dengan daftar kegagalan:
@@ -643,12 +679,13 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per submodul stok** (commit `ad590f9`): 104 test unit dan
-integrasi lolos, 181 e2e lolos, 4 skipped: dua `test.fixme` yang menunggu
-backend dan dua `test.skip` bersyarat data (bagian 8). Angka ini pembanding
+**Baseline per submodul stock opname** (commit `refactor(stock-opname)`): 113
+test unit dan integrasi lolos, 192 e2e lolos, 4 skipped: dua `test.fixme` yang
+menunggu backend dan dua `test.skip` bersyarat data (bagian 8). Angka ini pembanding
 untuk memastikan tidak ada yang hilang diam-diam. Angka skipped dapat berubah
 bila data uji berubah; periksa judul test yang dilewati sebelum menyimpulkan
-ada yang hilang.
+ada yang hilang. Setiap run suite penuh menambah tiga dokumen stock opname
+berstatus CANCELLED (bagian 8).
 
 ### Menelusuri kegagalan e2e
 
@@ -759,7 +796,8 @@ Pola kegagalan yang berulang:
 | Gagal tepat setelah perubahan kode, lalu hilang | Belum dapat dipastikan; jalankan `--repeat-each 5` sebelum menyimpulkan selesai |
 | Halaman tertahan di loader | Kondisi pemuatan yang tidak pernah terpenuhi; periksa trace, apakah request yang ditunggu benar-benar terkirim |
 | Klik habis waktu padahal tombol terlihat | Tombol `disabled` oleh validasi form, misalnya catatan wajib; baca kondisi `disabled` di kode sebelum mengubah spec |
-| `response.json` gagal dengan `No resource with given identifier found` | Penunggu menangkap respons milik halaman sebelumnya yang sudah dibuang; pasang penunggu setelah `goto(..., { waitUntil: "commit" })` |
+| `response.json` gagal dengan `No resource with given identifier found` | Penunggu menangkap respons milik halaman sebelumnya yang sudah dibuang; pasang penunggu setelah `goto(..., { waitUntil: "commit" })` atau `reload(...)` yang sama |
+| Skenario tulis `skipped` padahal kode tidak berubah | Dokumen aktif sisa run yang gagal menghalangi pembuatan (409). Baca pesan `POST` di trace (backend menyebut nomornya), lalu batalkan dokumen itu dari halaman detail |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena
 tombol hapus sempat disabled sampai daftar role selesai dimuat (level
@@ -826,6 +864,16 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   pada method dan path operasinya. Bug hapus bahan baku (`50e8815`) lolos
   karena spec lama hanya menguji hapus yang berhasil, sedangkan dialog yang
   tertutup sebelum waktunya baru terlihat saat operasi gagal.
+- **Nama tombol untuk selector diambil dari snapshot DOM (`error-context.md`)
+  atau baris kode utuh**, bukan dari hasil ekstraksi regex. Pola
+  `[A-Za-z ...]` memotong "Setujui & Sesuaikan Stok" menjadi "Setujui" tanpa
+  tanda apa pun, dan spec alur stock opname sempat gagal karena itu.
+- **Test tidak pernah diubah hanya agar lolos.** Bila sebuah skenario tidak
+  dapat berjalan karena keadaan data atau menunggu backend, biarkan `skipped`
+  atau gagal dengan alasan yang terlihat, lalu catat di bagian 8 dan, bila
+  memang dari backend, di laporan untuk tim backend. Sebelum menyebut
+  penyebabnya backend, pastikan dari kode: pada stock opname, pembatalan DRAFT
+  ternyata diizinkan backend dan hanya dibatasi tampilan frontend.
 
 ### Kapan berhenti dan bertanya
 
@@ -909,8 +957,10 @@ perbarui catatan itu alih-alih menambah catatan baru yang bertentangan.
   server dengan `page.waitForResponse`, lalu bandingkan tampilan dengan isi
   respons itu. Bila halaman sebelumnya (misalnya dashboard setelah login)
   memanggil endpoint yang sama, pasang penunggu setelah
-  `page.goto(url, { waitUntil: "commit" })`; bila tidak, respons halaman lama
-  ikut tertangkap dan isinya sudah dibuang. Untuk aksi klik, pasang penunggu
+  `page.goto(url, { waitUntil: "commit" })` atau
+  `page.reload({ waitUntil: "commit" })`; bila tidak, respons halaman lama
+  ikut tertangkap dan isinya sudah dibuang. Pada stock opname, aturan ini
+  terlupa di `reload` dan menggagalkan spec alur. Untuk aksi klik, pasang penunggu
   sebelum klik. Baca isi respons segera, seperti helper `tunggu` di spec stok.
 - Spec untuk operasi tulis mengembalikan data ke nilai semula, misalnya batas
   minimum dinaikkan 1 lalu dikembalikan, dan opname dikirim dengan fisik sama
@@ -939,9 +989,18 @@ terhitung di angka skipped pada baseline:
 | `reservasi/aset/crud-aset.spec.ts` | Tidak ada aset berstatus digunakan |
 | `inventaris/stok/lihat-stok.spec.ts`, tab kritis gudang | Tidak ada stok gudang yang kritis (terjadi pada data uji sekarang) |
 
-Skenario lain di spec stok, stock adjustment, jurnal stok, dan hapus bahan
-baku juga dilewati bila datanya kosong, tetapi tidak terjadi pada data uji
-sekarang.
+| `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
+
+Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
+hapus bahan baku juga dilewati bila datanya kosong, tetapi tidak terjadi pada
+data uji sekarang.
+
+Ketiga spec tulis stock opname membuat dokumen baru di setiap run dan
+menutupnya sebagai CANCELLED, sehingga dokumen CANCELLED bertambah tiga per
+run suite penuh. Bila spec gagal di tengah, dokumennya tertinggal aktif dan
+run berikutnya dilewati sampai dokumen itu dibatalkan dari halaman detail.
+Nomornya dapat dibaca dari pesan `POST /api/stockopname` di trace (bagian 7,
+Urutan debug kegagalan e2e).
 
 ---
 
@@ -989,6 +1048,9 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
 - Laporan submodul stock adjustment — 1 temuan, disusun 20 September 2026:
   mapper membaca empat field yang tidak ada di model dan tidak mengirim
   `referenceType`
+- Laporan submodul stock opname — 2 temuan, disusun 20 September 2026:
+  simpan hitungan menolak isian kosong sehingga simpan sementara sebagian
+  tidak mungkin, dan data tidak dibatasi per lokasi (perlu keputusan)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi
@@ -1071,9 +1133,26 @@ terkecil (bagian 4 langkah 7).
 | 1 | Stock adjustment | outlet: daftar, detail | 431 | Selesai (`a52afbf`) |
 | 2 | Jurnal stok | outlet dan gudang: daftar | 617 | Selesai (`98735d4`) |
 | 3 | Stok dan inventaris | `outlet/inventaris/stok`, `gudang/inventaris` | 1.094 | Selesai (`ad590f9`) |
-| 4 | Stock opname | outlet dan gudang: daftar, detail, buat | 2.544 | **Berikutnya** |
+| 4 | Stock opname | outlet dan gudang: daftar, detail, buat | 2.544 | Selesai |
 | 5 | Pengajuan stok | outlet: daftar, detail, edit, buat; gudang: daftar, detail | 2.298 | Belum |
 | 6 | Transfer, pengiriman, penerimaan | gudang: transfer (daftar, detail, edit), pengiriman; outlet: penerimaan (daftar, detail) | 1.950 | Belum |
+
+### Langkah berikutnya: cakupan lokasi di jurnal stok dan stok outlet
+
+Keputusan cakupan dari submodul stock opname (bagian 2) diterapkan ke dua
+halaman outlet yang sudah dimigrasikan, sebagai commit tersendiri sebelum
+submodul 5:
+
+- **Jurnal stok outlet** saat ini menampilkan lokasi aktif untuk semua
+  pengguna. Owner harus bisa melihat seluruh outlet lewat
+  `PemilihLokasiOutlet`, sedangkan staf tetap lokasi aktif. Kotak pesan lokasi
+  di halamannya diganti `PesanLokasi` dari `features/inventaris`.
+- **Stok outlet** saat ini menampilkan seluruh outlet dengan pemilih untuk
+  semua pengguna. Staf harus dibatasi ke lokasi aktif tanpa pemilih.
+- Keduanya memakai `useCakupanLokasiOutlet` dan `lingkupOutlet`. Gate halaman
+  disesuaikan bila halaman mulai memanggil `/location/current`.
+- Spec jurnal stok dan stok diperbarui untuk skenario owner. Jalur staf hanya
+  teruji di unit test (lihat utang pengujian).
 
 ### Pemetaan awal (20 September 2026)
 
@@ -1082,12 +1161,6 @@ baris dan jumlah baris yang memuat pola lama.
 
 | Halaman | Baris | apiClient | any | _id | queryKey |
 |---|---|---|---|---|---|
-| `outlet/inventaris/stockOpname` | 290 | 2 | 1 | 1 | 2 |
-| `outlet/inventaris/stockOpname/[id]` | 658 | 7 | 6 | 3 | 7 |
-| `outlet/inventaris/stockOpname/buatStockOpname` | 346 | 3 | 4 | 5 | 3 |
-| `gudang/stockOpname` | 263 | 2 | 1 | 0 | 2 |
-| `gudang/stockOpname/[id]` | 644 | 7 | 6 | 3 | 7 |
-| `gudang/stockOpname/buatStockOpname` | 343 | 3 | 5 | 5 | 3 |
 | `outlet/inventaris/pengajuanStok` | 210 | 2 | 1 | 0 | 2 |
 | `outlet/inventaris/pengajuanStok/[id]` | 369 | 3 | 3 | 0 | 4 |
 | `outlet/inventaris/pengajuanStok/[id]/edit` | 504 | 5 | 7 | 7 | 6 |
@@ -1101,57 +1174,41 @@ baris dan jumlah baris yang memuat pola lama.
 | `outlet/inventaris/penerimaanBarang` | 218 | 3 | 3 | 1 | 3 |
 | `outlet/inventaris/penerimaanBarang/[id]` | 500 | 3 | 4 | 8 | 6 |
 
-Tidak ada pasangan halaman outlet dan gudang yang benar-benar kembar (baris
-beda menurut `diff` dibanding total baris keduanya):
+Pasangan halaman outlet dan gudang yang tersisa (baris beda menurut `diff`
+dibanding total baris keduanya):
 
 | Halaman | Beda / total | Penilaian awal |
 |---|---|---|
-| `stockOpname/[id]` | 64 / 1302 | Hampir kembar, kandidat komponen bersama |
-| `stockOpname` | 79 / 553 | Mirip, periksa bedanya |
-| `stockOpname/buatStockOpname` | 162 / 689 | Periksa bedanya |
 | `pengajuanStok` | 161 / 474 | Periksa bedanya |
 | `pengajuanStok/[id]` | 373 / 957 | Peran berbeda (outlet mengajukan, gudang menyetujui); kemungkinan tetap terpisah |
 
-Angka `diff` tidak cukup untuk memutuskan. Pada jurnal stok, 341 dari 617
-baris berbeda, tetapi hampir seluruhnya teks dan indentasi, sehingga kedua
-halaman tetap berbagi satu komponen. Sebaliknya, pada stok dan inventaris
-gudang, perbedaannya tersebar di seluruh berkas dan menyangkut perilaku
-(pemilih lokasi, tambah barang), sehingga yang dibagi hanya lapisan
-`features/`. Baca isi perbedaannya sebelum memutuskan.
+Angka `diff` tidak cukup untuk memutuskan. Jurnal stok (341 dari 617 baris
+berbeda, hampir seluruhnya teks) dan stock opname (perbedaan kecil tersebar di
+34 hunk) tetap disatukan, sedangkan stok dan inventaris gudang (perbedaan
+perilaku tersebar di seluruh berkas) hanya berbagi lapisan `features/`. Baca
+isi perbedaannya lewat `diff` tanpa baris `className` sebelum memutuskan.
 
 Perintah untuk mengulang pemetaan:
 
 ```bash
-find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep -vE "produk|kategori|bahanBaku|pengguna|jadwal|pengaturan|setup|stockAdjustment|jurnalStok|inventaris/stok|gudang/inventaris/page.tsx|gudang/page.tsx" | sort | while read f; do printf "%-58s %4s  apiClient:%s any:%s _id:%s qk:%s\n" "${f#app/dashboard/}" "$(wc -l < "$f")" "$(grep -c apiClient "$f")" "$(grep -cE ': any|as any|<any' "$f")" "$(grep -c _id "$f")" "$(grep -cE 'queryKey' "$f")"; done
+find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep -vE "produk|kategori|bahanBaku|pengguna|jadwal|pengaturan|setup|stockAdjustment|jurnalStok|stockOpname|inventaris/stok|gudang/inventaris/page.tsx|gudang/page.tsx" | sort | while read f; do printf "%-58s %4s  apiClient:%s any:%s _id:%s qk:%s\n" "${f#app/dashboard/}" "$(wc -l < "$f")" "$(grep -c apiClient "$f")" "$(grep -cE ': any|as any|<any' "$f")" "$(grep -c _id "$f")" "$(grep -cE 'queryKey' "$f")"; done
 ```
 
 ### Yang sudah diketahui
 
-- `features/inventaris` memuat seluruh hook lokasi dan stok (bagian 3) dan
-  sudah dipakai bahan baku, jurnal stok, stok outlet, dan inventaris gudang.
-  Pakai hook itu; jangan membuat hook lokasi atau inventory baru (bagian 5
-  butir 12). Mutation baru mengikuti pola callback halaman (butir 13).
+- `features/inventaris` memuat seluruh hook lokasi, stok, dan cakupan
+  (bagian 3). Pakai itu; jangan membuat hook lokasi, inventory, atau cakupan
+  baru (bagian 5 butir 12). Mutation baru mengikuti pola callback halaman
+  (butir 13), dan tombol aksi mengikuti izin (butir 14).
 - Kunci `queryKeys.lokasi.daftar({ tipe })` masih diisi lewat `apiClient`
-  dengan bentuk mentah oleh `outlet/inventaris/penerimaanBarang` (Outlet) dan
-  `gudang/stockOpname/buatStockOpname` (Gudang). `features/` memakai
-  `lokasi.daftar()` tanpa filter, sehingga tidak tertimpa. Ganti keduanya
-  dengan `useLokasiBertipe` atau `useDaftarLokasi` di submodul 4 dan 6.
-- `outlet/inventaris/stockOpname/buatStockOpname/page.tsx` (sekitar baris 92)
-  masih mengisi kunci `queryKeys.lokasi.aktif()` lewat `apiClient` dengan
-  bentuk mentah. `lokasiTunggal` menangani itu untuk sementara; ganti dengan
-  `useLokasiAktif` di submodul 4.
-- Tombol ke detail adjustment di `outlet/inventaris/stockOpname/[id]/page.tsx`
-  (sekitar baris 300) mengarah ke `/dashboard/inventaris/stockAdjustment/...`
-  tanpa `outlet/`, sehingga halaman tujuan tidak ada. Perbaiki di submodul 4.
-- Halaman detail stock opname outlet dan gudang memakai tipe `StockAdjustment`
-  untuk respons approve. Tipe itu tidak diubah di submodul 1, sehingga keduanya
-  tidak terdampak.
+  dengan bentuk mentah oleh `outlet/inventaris/penerimaanBarang` (Outlet).
+  `features/` memakai `lokasi.daftar()` tanpa filter, sehingga tidak
+  tertimpa. Ganti di submodul 6.
 - Di luar `components/ui`, halaman inventaris hanya mengimpor
   `components/calendar.tsx` (240 baris, 2 `any`). Bereskan di submodul yang
   memakainya.
-- Kontrak bagian 6 butir 10: 22 operasi tulis tanpa validator, sebagian besar
-  di stok (pengajuan, transfer, opname). Periksa service sebelum menentukan
-  payload.
+- Kontrak bagian 6 butir 10: operasi tulis tanpa validator, sebagian besar di
+  stok (pengajuan dan transfer). Periksa service sebelum menentukan payload.
 - Halaman pengiriman stok gudang memakai `/transferstok`, yang mewajibkan
   `read-transfer-stok` (kontrak bagian 5).
 - Kontrak bagian 5 sudah diselaraskan dengan `IZIN_HALAMAN` untuk halaman
@@ -1162,14 +1219,24 @@ find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep 
   `new RegExp(search, "i")` langsung dari masukan pengguna. Dugaannya,
   karakter seperti `(` membuat pencarian stok dijawab 500. Buktikan lewat e2e
   atau trace sebelum dilaporkan ke backend atau ditangani di frontend.
-- Happy path tambah barang gudang sengaja tidak diuji e2e, karena UI tidak
-  punya cara menghapus entri inventory yang terbentuk. Yang diuji hanya jalur
-  batal dan gagal.
 - Spec e2e yang sudah ada di `tests/e2e/inventaris`: bahan baku, produk,
-  kategori, stock adjustment, jurnal stok, dan stok. Submodul 4 sampai 6 butuh
-  spec pembanding lebih dulu.
+  kategori, stock adjustment, jurnal stok, stok, dan stock opname. Submodul 5
+  dan 6 butuh spec pembanding lebih dulu. Pengajuan dan transfer juga punya
+  alur tulis; pakai pola spec alur stock opname (dokumen baru per run, ditutup
+  di akhir run).
 - `app/dashboard/outlet/inventaris/components/` berisi `bahanBakuCombobox.tsx`
   (sudah bebas `any` dan `_id` sejak modul produk) dan `inventaris-nav-tabs.tsx`.
+
+### Utang pengujian
+
+- **Jalur staf pada cakupan lokasi** hanya teruji di unit test
+  (`tests/unit/features/inventaris/cakupan.test.ts`), karena satu-satunya akun
+  uji (Ridho) berperan Owner. Butuh akun staf dengan lokasi aktif untuk
+  menambahkannya ke e2e.
+- **Approve stock opname yang berhasil** tidak diuji e2e, karena mengubah
+  stok sungguhan. Yang diuji hanya jalur gagalnya.
+- **Tambah barang gudang yang berhasil** tidak diuji e2e, karena UI tidak
+  punya cara menghapus entri inventory yang terbentuk.
 
 ### Spec rujukan
 
@@ -1189,9 +1256,18 @@ find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep 
   kegagalan GET dengan `page.route`.
 - `tests/e2e/inventaris/stok/lihat-stok.spec.ts`: penunggu dipasang setelah
   `goto(..., { waitUntil: "commit" })`, harapan dihitung dari respons
-  permintaan itu sendiri (termasuk pencarian dan pilih lokasi), operasi tulis
-  yang mengembalikan nilai semula, aturan tombol nonaktif, dan jalur gagal
-  tambah barang dengan `page.route` pada POST saja.
+  permintaan itu sendiri, operasi tulis yang mengembalikan nilai semula,
+  aturan tombol nonaktif, dan jalur gagal tambah barang dengan `page.route`
+  pada POST saja.
+- `tests/e2e/inventaris/stockOpname/lihat-stok-opname.spec.ts`: tabel
+  berpaginasi diperiksa lewat dokumen pertama dari respons, dan skenario owner
+  (seluruh outlet, pilih satu outlet).
+- `tests/e2e/inventaris/stockOpname/alur-stok-opname.spec.ts` dan
+  `alur-stok-opname-gudang.spec.ts`: alur tulis lengkap dengan `test.step`,
+  dokumen baru per run yang ditutup di akhir, skip bila backend menjawab 409,
+  dan baris tabel dipilih menurut urutan respons.
+- `tests/e2e/inventaris/stockOpname/draft-stok-opname.spec.ts`: bukti bug
+  simpan sebagian (isi payload diperiksa) dan dokumen yang tidak ditemukan.
 - `tests/e2e/inventaris/bahanBaku/hapus-bahan-baku.spec.ts`: dialog yang harus
   tetap terbuka saat operasi gagal.
 

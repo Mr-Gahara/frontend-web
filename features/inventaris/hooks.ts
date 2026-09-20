@@ -13,6 +13,10 @@ import {
 import { inventoryApi, lokasiApi, type FilterInventory } from "./api";
 import { lokasiTunggal } from "./lokasi";
 import type { TambahInventoryPayload } from "@/types/inventory";
+import { useMemo } from "react";
+import { useSession } from "@/lib/auth/useSession";
+import { useLevelPenggunaAktif } from "@/features/role/hooks";
+import { tentukanCakupan, type CakupanLokasiOutlet } from "./cakupan";
 import { queryKeys } from "@/lib/queryKeys";
 import type { TipeLokasi } from "@/types/location";
 
@@ -122,4 +126,31 @@ export function useTambahInventory(opsi: OpsiMutasi<TambahInventoryPayload> = {}
     },
     onError: opsi.onError,
   });
+}
+
+/**
+ * Cakupan lokasi halaman di ruang outlet: owner (level 100 dari
+ * useLevelPenggunaAktif) melihat seluruh outlet, staf hanya lokasi aktif.
+ * Pembatasan ini hanya di tampilan; backend mengirim data seluruh tenant
+ * kepada pemegang izin baca.
+ */
+export function useCakupanLokasiOutlet(): CakupanLokasiOutlet {
+  const { sedangMemuat } = useSession();
+  const owner = useLevelPenggunaAktif() === 100;
+  const daftar = useDaftarLokasi();
+  const aktif = useLokasiAktif();
+
+  return useMemo(
+    () =>
+      tentukanCakupan({
+        sesiMemuat: sedangMemuat,
+        owner,
+        daftarLokasi: daftar.data,
+        gagalDaftar: daftar.isError,
+        lokasiAktif: aktif.lokasi,
+        memuatAktif: aktif.isLoading,
+        gagalAktif: aktif.isError,
+      }),
+    [sedangMemuat, owner, daftar.data, daftar.isError, aktif.lokasi, aktif.isLoading, aktif.isError],
+  );
 }
