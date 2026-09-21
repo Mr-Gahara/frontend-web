@@ -13,7 +13,7 @@ dan seluruh isi `kontrak/` di `docs/kontrak-api.md`.
 Kirim ini sebagai pesan pertama:
 
 ```bash
-cd ~/Documents/frontend-web && cat docs/README.md docs/refactor/*.md && git log --oneline -12 && git status --short
+cd ~/Documents/frontend-web && cat docs/README.md docs/refactor/*.md && git --no-pager log --oneline -12 && git status --short
 ```
 
 Riwayat commit adalah bagian dari konteks: alasan di balik tiap keputusan
@@ -176,10 +176,13 @@ lewat pencarian dampak dan diff.
 5. **Blok penerap** dijalankan pemilik proyek. Blok berhenti tanpa menulis
    bila ada teks lama yang tidak cocok tepat satu kali.
 6. **Verifikasi**: `npm run --silent docs:periksa` (metrik ikut dihitung karena
-   `status.md` berubah), lalu
-   `git --no-pager diff -U1 docs | grep -E '^[-+][^-+]' | cut -c1-120` untuk
-   melihat persis baris yang berubah. Diff dicocokkan dengan daftar di langkah
-   4 dan dengan bukti: keluaran test, `git log`, dan kode.
+   `status.md` berubah), lalu perintah diff di bawah untuk melihat persis
+   baris yang berubah, termasuk butir daftar. Diff dicocokkan dengan daftar di
+   langkah 4 dan dengan bukti: keluaran test, `git log`, dan kode.
+
+```bash
+   git --no-pager diff -U0 docs | grep -E '^[-+]' | grep -vE '^(\+\+\+|---) ' | cut -c1-120
+```
 7. **Pemeriksaan utuh** hanya bila struktur berubah besar (berkas baru atau
    bagian dipindah). Seluruh temuan dilaporkan dalam satu putaran.
 8. **Commit** dengan gerbang di awal blok: `grep -q` atas teks perbaikan

@@ -409,10 +409,10 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   tersambung ke teks baru; baseline di `pengujian.md` sempat menjadi satu
   baris kepanjangan karena itu.
 - **Filter diff dokumentasi tidak boleh membuang butir daftar.** Pola
-  `^[-+][^-+]` di langkah 6 tata cara (`docs/README.md`, bagian Tetap)
+  `^[-+][^-+]` yang sempat dipakai di langkah 6 tata cara (`docs/README.md`)
   membuang setiap baris yang diawali `-- ` atau `+- `, sehingga butir daftar
-  yang berubah tidak terlihat saat verifikasi. Sampai perintah itu diganti
-  atas perintah pemilik proyek, pakai
+  yang berubah tidak terlihat saat verifikasi. Sejak 21 September 2026, atas
+  perintah pemilik proyek, langkah itu memakai
   `grep -E '^[-+]' | grep -vE '^(\+\+\+|---) '` setelah
   `git --no-pager diff -U0 docs`.
 
