@@ -9,7 +9,8 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { TransferStok } from "@/types/transferStok";
+import { TransferStok, type TransferItem } from "@/types/transferStok";
+import { susunPayloadTerima, type ItemPayloadTerima } from "@/features/transfer-stok/payload";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,7 +46,7 @@ const formatTanggal = (iso: string | null) => {
 // --- Types Khusus Halaman Ini ---
 type FormItem = {
   _id: string;
-  bahanBakuID: any;
+  bahanBaku: TransferItem["bahanBaku"];
   qtyKirim: number;
   qtyTerima: number;
   catatanItem: string;
@@ -81,15 +82,15 @@ export default function EksekusiPenerimaanBarangPage({
   useEffect(() => {
     if (detail?.items && detail.status === "DIKIRIM") {
       setItems(
-        detail.items.map((item: any) => {
+        detail.items.map((item) => {
           // Fallback cerdas: Jika crypto diblokir browser (karena HTTP), gunakan Math.random
           const safeId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" 
             ? crypto.randomUUID() 
             : `temp-${Math.random().toString(36).substring(2, 11)}`;
 
           return {
-            _id: item._id || safeId,
-            bahanBakuID: item.bahanBakuID,
+            _id: safeId,
+            bahanBaku: item.bahanBaku,
             qtyKirim: item.qtyKirim,
             qtyTerima: item.qtyKirim, // Default: Anggap semua barang utuh
             catatanItem: item.catatanItem || "",
@@ -136,22 +137,7 @@ export default function EksekusiPenerimaanBarangPage({
 
   // --- Mutations ---
   const terimaMutation = useMutation({
-    mutationFn: async () => {
-      const payload = {
-        status: "DITERIMA",
-        items: items
-          .filter((i) => i.bahanBakuID) // FIX: Buang "Barang Hantu" yang master datanya sudah dihapus agar backend tidak crash
-          .map((i) => ({
-            bahanBakuID: i.bahanBakuID?._id || i.bahanBakuID?.id || (typeof i.bahanBakuID === "string" ? i.bahanBakuID : ""),
-            qtyKirim: i.qtyKirim,
-            qtyTerima: i.qtyTerima,
-            catatanItem: i.catatanItem,
-          })),
-
-
-        tanggalTerima: new Date().toISOString(),
-      };
-
+    mutationFn: async (payload: { items: ItemPayloadTerima[] }) => {
       return await apiClient.patch(
         `/transferStok/${id}/terima`,
         payload,
@@ -165,7 +151,7 @@ export default function EksekusiPenerimaanBarangPage({
           "Stok Outlet telah diperbarui dan Jurnal Stok telah dicatat.",
       });
       // Invalidate semua data terkait WMS
-      queryClient.invalidateQueries({ queryKey: queryKeys.transferStok.daftar() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.transferStok.semua });
       queryClient.invalidateQueries({ queryKey: queryKeys.inventory.semua });
       queryClient.invalidateQueries({ queryKey: queryKeys.jurnalStok.semua });
       queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.semua });
@@ -173,8 +159,8 @@ export default function EksekusiPenerimaanBarangPage({
       router.push("/dashboard/outlet/inventaris/penerimaanBarang");
     },
     onError: (err: any) => {
+      // Dialog tetap terbuka saat gagal (keputusan Fase 0).
       toast.error("Gagal Memproses Penerimaan", { description: err.message });
-      setShowConfirmModal(false);
     },
   });
 
@@ -295,13 +281,13 @@ export default function EksekusiPenerimaanBarangPage({
                           Item #{index + 1}
                         </span>
                         <h3 className="font-bold text-[#0A2947] text-base leading-tight">
-                          {item.bahanBakuID?.namaBahan ||
+                          {item.bahanBaku?.namaBahan ||
                             "Master Data Terhapus"}
                         </h3>
                         <p className="text-xs font-medium text-[#0A2947]/50 mt-1">
                           Dikirim Gudang:{" "}
                           <strong className="text-[#0A2947]">
-                            {item.qtyKirim} {item.bahanBakuID?.satuan}
+                            {item.qtyKirim} {item.bahanBaku?.satuan}
                           </strong>
                         </p>
                       </div>
@@ -333,7 +319,7 @@ export default function EksekusiPenerimaanBarangPage({
                               )}
                             />
                             <span className="text-sm font-bold text-[#0A2947]/50 shrink-0 w-8">
-                              {item.bahanBakuID?.satuan}
+                              {item.bahanBaku?.satuan}
                             </span>
                           </div>
                         </div>
@@ -484,7 +470,16 @@ export default function EksekusiPenerimaanBarangPage({
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => terimaMutation.mutate()}
+              onClick={(e) => {
+                // Dialog hanya tertutup lewat navigasi setelah berhasil (keputusan Fase 0).
+                e.preventDefault();
+                const hasil = susunPayloadTerima(detail.items, items);
+                if (!hasil.ok) {
+                  toast.error("Penerimaan Ditahan", { description: hasil.pesan });
+                  return;
+                }
+                terimaMutation.mutate(hasil.payload);
+              }}
               disabled={terimaMutation.isPending}
               className="cursor-pointer bg-emerald-600 text-[#FFFAF3] hover:bg-emerald-700 font-bold border-none"
             >
