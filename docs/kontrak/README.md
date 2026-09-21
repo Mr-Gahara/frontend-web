@@ -25,7 +25,10 @@ data, atau izin harus diturunkan dari sini, bukan dari dugaan.
 Kontrak terikat pada commit backend `4310d1c` (18 September 2026). Bagian
 inventory dan stock opname di `endpoint.md`, `payload.md`, `izin-halaman.md`,
 dan `temuan.md` dikoreksi manual terhadap backend `f27f093` (origin/yoga,
-20 September 2026) pada 21 September 2026. Bila
+20 September 2026) pada 21 September 2026. Pada hari yang sama, bagian
+transfer stok dan validator inventory di `endpoint.md`, `payload.md`, dan
+`temuan.md` dikoreksi terhadap backend `9cd1439` (branch `ridho` yang
+menggabungkan origin/yoga `f0b7157`). Bila
 backend berubah cukup jauh, `endpoint.md`, `payload.md`, `izin-halaman.md`,
 dan `route-backend.md` perlu dibangkitkan ulang; bagian 1 di bawah menjelaskan
 cara pembangkitannya. Gejala bahwa kontrak sudah tertinggal: endpoint yang
@@ -51,7 +54,7 @@ Bagian 3 sampai 5 dan Lampiran A (`endpoint.md`, `payload.md`, `izin-halaman.md`
 
 Keterbatasan:
 
-- Validasi yang hanya ada di service tidak tertangkap; operasi seperti itu tercatat memakai skema model. Termasuk validator di `validators/` yang dipanggil dari service, bukan route: stock opname memanggil lima validator dari service (`POST /stockopname`, `PATCH /stockopname/:id/items`, `.../approve`, `.../reject`, dan query kedua daftar), dikoreksi manual di `payload.md` pada 21 September 2026. Sebelum menyimpulkan sebuah operasi tidak divalidasi atau sebuah validator tidak terpakai, cari pemanggilnya di seluruh backend, termasuk `services/`.
+- Validasi yang hanya ada di service tidak tertangkap; operasi seperti itu tercatat memakai skema model. Termasuk validator di `validators/` yang dipanggil dari service, bukan route: stock opname memanggil lima validator dari service (`POST /stockopname`, `PATCH /stockopname/:id/items`, `.../approve`, `.../reject`, dan query kedua daftar), dikoreksi manual di `payload.md` pada 21 September 2026; transfer stok memanggil `validateTransferPayload` dari service untuk `POST` dan `PUT`, dikoreksi pada tanggal yang sama. Sebelum menyimpulkan sebuah operasi tidak divalidasi atau sebuah validator tidak terpakai, cari pemanggilnya di seluruh backend, termasuk `services/`.
 - Daftar field pada bagian 4 (`payload.md`) berasal dari validator, sedangkan validator hanya memeriksa dan tidak membuang field lain. Service dapat memakai field di luar daftar itu, seperti `locationID` pada `POST /bahanbaku`. Sebelum sebuah field dihapus dari payload frontend, periksa dulu pemakaiannya di service.
 - Bentuk respons operasi tulis tidak diambil dengan memanggil endpoint, agar data tidak berubah.
 - Analisis statis route hanya membaca argumen pertama `checkPermission`. Route yang menerima salah satu dari beberapa izin perlu dikoreksi manual; `GET /produk` dan `GET /produk/:id` (`read-produk` atau `akses-pos`) sudah dikoreksi pada 20 September 2026, dan `GET /inventory` (`read-inventory`, `read-inventory-gudang`, atau `read-inventory-outlet`) pada 21 September 2026. Sapuan seluruh route pada tanggal itu, termasuk pemanggilan yang argumennya dipecah ke beberapa baris, hanya menemukan satu route lain yang berizin ganda, yaitu `PATCH /jurnalstok/wms/*`, yang tidak dipakai frontend. Lampiran A (`route-backend.md`) belum mencerminkan koreksi inventory karena bertanda Tetap.
@@ -107,6 +110,6 @@ Semua respons GET yang sukses memuat `data`. Kunci lain tidak seragam antarmodul
 Backend mengisi sendiri field berikut dari token pengguna; frontend tidak mengirimnya:
 
 - `tenantID` pada hampir semua operasi create.
-- `dataPengguna` (sesi booking), `dimintaOleh` (pengajuan stok), `picID` (stock opname), `pengirimID` (transfer stok), dan `dicatatOleh` (pembelian stok).
+- `dataPengguna` (sesi booking), `dimintaOleh` (pengajuan stok), `picID` (stock opname), `pengirimID` (buat dan kirim transfer stok), `penerimaID` (terima transfer stok), dan `dicatatOleh` (pembelian stok).
 
 Daftar "Wajib dari klien" di bagian 4 (`payload.md`) sudah mengecualikan field ini.

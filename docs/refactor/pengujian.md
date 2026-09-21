@@ -61,17 +61,18 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per migrasi pengajuan stok** (commit `90eb935`): 135 test
-unit dan integrasi lolos, 207 e2e lolos, 5 skipped: tiga `test.fixme` yang
+**Baseline per perbaikan penerimaan** (commit `dec9d01`): 140 test unit
+dan integrasi lolos, 208 e2e lolos, 6 skipped: empat `test.fixme` yang
 menunggu backend dan dua `test.skip` bersyarat data (Test yang ditandai
-fixme dan skip bersyarat, di bawah). Diukur terhadap backend lokal di branch
-`ridho` yang digabung dengan `yoga`, dengan data pengajuan development yang
-sudah dibalik ke arah yang benar (`status.md`).
+fixme dan skip bersyarat, di bawah). Diukur terhadap backend lokal
+`9cd1439` (branch `ridho` yang menggabungkan origin/yoga `f0b7157`).
 Angka ini pembanding untuk memastikan tidak ada yang
 hilang diam-diam. Angka skipped dapat berubah bila data uji berubah; periksa
 judul test yang dilewati sebelum menyimpulkan
 ada yang hilang. Setiap run suite penuh menambah tiga dokumen stock opname
-berstatus CANCELLED (Test yang ditandai fixme dan skip bersyarat, di bawah).
+berstatus CANCELLED, serta satu surat jalan BATAL dan dua entri jurnal
+gudang dari spec penerimaan (Test yang ditandai fixme dan skip bersyarat,
+di bawah).
 
 ## Kredensial uji
 
@@ -206,6 +207,26 @@ satu putaran.
   `page.route` yang menjawab gagal hanya untuk method dan path itu: isi
   permintaan dibaca dari `page.waitForRequest`, lalu pesan gagal di UI
   diperiksa. Contoh: skenario payload buat di spec daftar pengajuan stok.
+- Setiap navigasi penuh (`goto`, `reload`) memulihkan sesi lewat
+  `pin-refresh`, dan token yang dipegang spec sebelum refresh itu dijawab
+  401 "Sesi tidak valid". Spec yang memanggil API dengan `page.request`
+  mengambil token dari respons `pin-refresh` pemuatan halaman, lalu
+  menggantinya setiap kali halaman melakukan `pin-refresh` lagi. Token dari
+  permintaan pertama yang membawa `Authorization` tidak dipakai, karena
+  bisa milik halaman sebelumnya. Contoh: `bukaDenganAuth` di spec
+  penerimaan.
+- Persiapan data lewat API memeriksa status setiap langkah dan menyertakan
+  pesan backend. `test.skip` hanya dipakai bila memang tidak ada data yang
+  layak; kegagalan persiapan sebagian menggagalkan test setelah dokumen
+  yang sempat tercipta dibatalkan. Pada spec penerimaan, `skip` sempat
+  menelan `GET` yang dijawab 401 dan meninggalkan surat jalan DIKIRIM.
+- Pemeriksaan di blok `finally` memakai `expect.soft`. Pengecualian yang
+  dilempar di `finally` menggantikan kegagalan asli test, sehingga
+  penyebabnya hilang dari laporan: pada spec penerimaan, kegagalan
+  selector sempat tertutup oleh kegagalan pembatalan.
+- Spec pembanding memakai `expect.soft` untuk setiap perilaku yang akan
+  diubah, agar seluruh perbedaan dengan kode lama terlapor dalam satu run.
+  Pemeriksaan keras hanya untuk syarat jalannya skenario.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -216,6 +237,7 @@ Menunggu perbaikan backend:
 | Edit pola roster | Validator memakai `this.siklusHari` dalam konteks `findOneAndUpdate` |
 | Hapus pengguna | `Promise.all` paralel di dalam transaksi MongoDB |
 | Hitungan tersimpan dapat dikosongkan kembali (`inventaris/stockOpname/draft-stok-opname.spec.ts`) | Validator stock opname menerima `qtyPhysical` null (`kontrak/temuan.md` butir 22). Badannya berupa penanda; skenario ditulis saat `SERVER_TERIMA_HITUNGAN_KOSONG` dibalik |
+| Jumlah diterima 0 terkirim apa adanya (`inventaris/penerimaanBarang/terima-penerimaan.spec.ts`) | Backend berhenti menghitung stok masuk dengan `qtyTerima \|\| qtyKirim` (`kontrak/temuan.md` butir 30). Badannya lengkap; jalankan setelah `SERVER_TERIMA_JUMLAH_NOL` dibalik |
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
 terhitung di angka skipped pada baseline:
@@ -224,6 +246,12 @@ terhitung di angka skipped pada baseline:
 |---|---|
 | `reservasi/aset/crud-aset.spec.ts` | Tidak ada aset berstatus digunakan |
 | `inventaris/stok/lihat-stok.spec.ts`, tab kritis gudang | Tidak ada stok gudang yang kritis (terjadi pada data uji sekarang) |
+| `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
+| `inventaris/penerimaanBarang/terima-penerimaan.spec.ts` | Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup. Kegagalan persiapan lain menggagalkan test, bukan melewatinya |
+
+Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
+hapus bahan baku juga dilewati bila datanya kosong, tetapi tidak terjadi pada
+data uji sekarang.
 
 Kegagalan yang belum terjelaskan:
 
@@ -231,16 +259,14 @@ Kegagalan yang belum terjelaskan:
   login** setelah `page.goto` kedua, dua kali pada 21 September 2026, saat
   spec itu berjalan bersama test lain. Tidak terulang dalam 9 run test itu
   sendirian maupun dalam urutan berkasnya, dan tidak pada suite penuh
-  `90eb935`. `playwright.config.ts` memakai `workers: 1`, sehingga bukan
+  `90eb935` maupun `dec9d01`. `playwright.config.ts` memakai `workers: 1`,
+  sehingga bukan
   benturan login paralel; pada run yang lolos, refresh sesi setelah login
   selalu berstatus 200. Bila terulang, jalankan dengan
   `--trace retain-on-failure` dan cari `refreshtoken` atau `pin-refresh`
-  berstatus 401 di trace.
-| `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
-
-Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
-hapus bahan baku juga dilewati bila datanya kosong, tetapi tidak terjadi pada
-data uji sekarang.
+  berstatus 401 di trace. Kemungkinan terkait: navigasi penuh menjalankan
+  `pin-refresh` dan membuat token sebelumnya dijawab 401 (Catatan
+  Playwright); belum dibuktikan untuk kasus ini.
 
 Ketiga spec tulis stock opname membuat dokumen baru di setiap run dan
 menutupnya sebagai CANCELLED, sehingga dokumen CANCELLED bertambah tiga per
@@ -266,6 +292,12 @@ Urutan debug kegagalan e2e di atas).
   tidak dapat dihapus). Yang diuji hanya jalur gagalnya.
 - **Tambah barang gudang yang berhasil** tidak diuji e2e, karena UI tidak
   punya cara menghapus entri inventory yang terbentuk.
+- **Terima penerimaan yang berhasil** tidak diuji e2e, karena menambah stok
+  outlet secara permanen dan surat jalan DITERIMA tidak dapat dibatalkan.
+  Yang diuji hanya jalur gagalnya beserta isi payload.
+- **Item tanpa master bahan baku pada penerimaan** hanya teruji di unit
+  test (`tests/unit/features/transfer-stok/payload.test.ts`), karena
+  membuat datanya berarti menghapus master bahan baku.
 - **`tests/helpers/storage.ts`** masih membaca `sessionStorage` dan sudah
   tidak relevan sejak token dipindah ke memori. Berkas itu belum dibersihkan.
 - **Pengosongan hitungan stock opname** baru berupa penanda `test.fixme`
@@ -327,3 +359,9 @@ Urutan debug kegagalan e2e di atas).
   ditangkap dari permintaan halaman.
 - `tests/e2e/inventaris/bahanBaku/hapus-bahan-baku.spec.ts`: dialog yang harus
   tetap terbuka saat operasi gagal.
+- `tests/e2e/inventaris/penerimaanBarang/terima-penerimaan.spec.ts`: surat
+  jalan disiapkan lewat API dari pengajuan yang layak dan ditutup di
+  `finally`, token API mengikuti `pin-refresh` halaman, payload terima
+  dibaca dari permintaan yang dijawab gagal lewat `page.route`, penahanan
+  dibuktikan dengan penghitung request, dan `test.fixme` berbadan lengkap
+  untuk perilaku yang menunggu backend.

@@ -286,7 +286,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/transferstok` | authPengguna | `read-transfer-stok` | `{ count, data, success }` | `id` | 3 file |
+| GET | `/transferstok` | authPengguna | `read-transfer-stok` | `{ count, data, success }` | `id` | 3 file (query `status` dikirim web tetapi diabaikan backend, `temuan.md` butir 33) |
 | POST | `/transferstok` | authPengguna | `create-transfer-stok` | - | - | `features/transfer-stok/api.ts` |
 | GET | `/transferstok/:id` | authPengguna | `read-transfer-stok` | `{ data, success }` | `id` | 3 file |
 | PUT | `/transferstok/:id` | authPengguna | `create-transfer-stok` | - | - | 1 file |
@@ -341,5 +341,5 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /tarif/:param`: basisPerhitungan, createdAt, dataAset[], durasiMinimum, harga, hariAktif[], id, isActive, jamMulai, jamSelesai, namaTarif, prioritas, tenantID, updatedAt
 - `GET /tipeaset`: createdAt, dataTarif[], deskripsi, id, namaTipeAset, tenantID, updatedAt
 - `GET /tipeaset/:param`: createdAt, dataTarif[], deskripsi, id, namaTipeAset, tenantID, updatedAt
-- `GET /transferstok`: createdAt, dariLokasi{id, nama, tipe}, id, items[], keLokasi{id, nama, tipe}, nomorTransfer, penerima{id, nama}, pengajuanStokID, pengirim{id, nama}, status, tanggalKirim, tanggalTerima, tenantID, updatedAt
-- `GET /transferstok/:param`: createdAt, dariLokasi{id, nama, tipe}, id, items[], keLokasi{id, nama, tipe}, nomorTransfer, penerima{id, nama}, pengajuanStokID, pengirim{id, nama}, status, tanggalKirim, tanggalTerima, tenantID, updatedAt
+- `GET /transferstok`: createdAt, dariLokasi{id, nama, tipe}, id, items[], keLokasi{id, nama, tipe}, nomorTransfer, penerima{id, nama}, pengajuanStokID, pengirim{id, nama}, status, tanggalKirim, tanggalTerima, tenantID, updatedAt (dari `mappers/transferStokMapper.js` baris 49 sampai 75: setiap item berisi bahanBaku{id, namaBahan, satuan}, qtyKirim, qtyTerima, selisih yaitu qtyTerima dikurangi qtyKirim, dan catatanItem; qtyKirim dan qtyTerima dalam satuan dasar bahan baku. Tidak ada `bahanBakuID` di respons (`temuan.md` butir 28), dan `bahanBaku` null bila master bahan bakunya terhapus, karena populate menghasilkan null dan id-nya ikut hilang (butir 29). Service tidak membaca query apa pun, butir 33)
+- `GET /transferstok/:param`: createdAt, dariLokasi{id, nama, tipe}, id, items[], keLokasi{id, nama, tipe}, nomorTransfer, penerima{id, nama}, pengajuanStokID, pengirim{id, nama}, status, tanggalKirim, tanggalTerima, tenantID, updatedAt (bentuk item sama dengan daftar)

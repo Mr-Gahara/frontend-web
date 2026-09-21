@@ -13,6 +13,11 @@ const BUKAN_DOKUMEN = /^(error-context|catatan-lanjutan-[a-z-]+)\.md$/;
 
 const prosa = (s) => s.trim() !== "" && !/^(\||#|\s*```)/.test(s);
 const awalDaftar = (s) => /^\s*([-*]|\d+\.)\s/.test(s);
+// Baris pemisah tabel Markdown, misalnya |---|---|.
+const PEMISAH = /^\|(\s*:?-+:?\s*\|)+\s*$/;
+// Jumlah kolom sebuah baris tabel. Pipa yang di-escape (\|) adalah isi sel,
+// bukan batas kolom; pipa tanpa escape di dalam kode tetap memecah sel GFM.
+const jumlahKolom = (s) => s.replace(/\\\|/g, "").split("|").length - 2;
 
 function periksaBentuk(berkas) {
   const temuan = [];
@@ -23,6 +28,7 @@ function periksaBentuk(berkas) {
       temuan.push(temuanBaru(f, 3, "label sifat perubahan tidak ada di bawah judul"));
     }
     let pagar = 0;
+    let kolomHeader = 0;
     baris.forEach((b, i) => {
       if (b.pagar) {
         pagar++;
@@ -34,6 +40,18 @@ function periksaBentuk(berkas) {
 
       if (b.teks.startsWith("|") && sebelum === "" && teks(i - 2).startsWith("|")) {
         temuan.push(temuanBaru(f, b.nomor, "tabel terputus", b.teks));
+      } else if (b.teks.startsWith("|") && !sebelum.startsWith("|") && !PEMISAH.test(sesudah)) {
+        // Awal tabel wajib diikuti baris pemisah. Baris tabel yang terpisah dari
+        // tabelnya oleh butir daftar atau paragraf tertangkap di sini, di mana pun
+        // letaknya; aturan di atas hanya menangkap satu baris kosong di antaranya
+        // (pengujian.md, 21 September 2026).
+        temuan.push(temuanBaru(f, b.nomor, "baris tabel tanpa header", b.teks));
+      }
+      if (b.teks.startsWith("|")) {
+        if (!sebelum.startsWith("|")) kolomHeader = jumlahKolom(b.teks);
+        else if (jumlahKolom(b.teks) !== kolomHeader) {
+          temuan.push(temuanBaru(f, b.nomor, "jumlah kolom berbeda dari header", b.teks));
+        }
       }
       if (b.teks === "" && sebelum === "" && i > 0) temuan.push(temuanBaru(f, b.nomor, "baris kosong ganda"));
 

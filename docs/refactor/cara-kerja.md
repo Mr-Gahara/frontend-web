@@ -168,6 +168,10 @@ const berkas = {};
 const gagal = [];
 for (const { berkas: f, lama, baru } of pasangan) {
   if (!(f in berkas)) berkas[f] = fs.readFileSync(f, "utf8");
+  if (baru !== lama && baru.includes(lama) && berkas[f].includes(baru)) {
+    gagal.push("SUDAH DITERAPKAN " + f + ": " + baru.slice(0, 70).replace(/\n/g, " | "));
+    continue;
+  }
   const n = berkas[f].split(lama).length - 1;
   if (n !== 1) {
     gagal.push("GAGAL " + f + " (" + n + "): " + lama.slice(0, 70).replace(/\n/g, " | "));
@@ -204,7 +208,11 @@ EOF
   berdelimiter kutip yang berbeda dari `EOF` bila isinya memuat heredoc.
   Seluruh pasangan diperiksa lebih dulu dan setiap kegagalan dilaporkan
   sekaligus; tidak ada berkas yang ditulis bila satu pasangan tidak cocok
-  tepat satu kali.
+  tepat satu kali. Pasangan yang teks barunya memuat teks lamanya (sisipan
+  di sekitar jangkar) ditolak dengan `SUDAH DITERAPKAN` bila teks baru itu
+  sudah ada di berkas, sehingga blok yang tertempel atau dijalankan dua kali
+  tidak menyisipkan ulang. Tanpa pengaman ini, `bentuk.cjs` sempat berisi
+  setiap sisipan dua kali (21 September 2026).
 - Di dalam template literal skrip, backtick dan tanda dolar yang diikuti kurung
   kurawal ditulis dengan escape, dan tanda miring terbalik ditulis ganda agar
   sampai ke berkas. Hindari kutip bersarang di konten yang disisipkan.
@@ -246,6 +254,15 @@ polanya salah.
 - Nama identifier di pola `grep` memakai batas kata `\b`, agar tidak
   menangkap nama yang memuatnya (`ItemAdjustment` ikut menangkap
   `BarisItemAdjustment`).
+- Teks berbentuk URL yang ditempel ke terminal diberi garis miring terbalik
+  oleh `url-quote-magic` zsh, termasuk di dalam heredoc berdelimiter kutip:
+  titik koma sesudah URL di skrip `/tmp/sj-api.js` tertulis `\;` dan
+  skripnya gagal. Di blok tempel, URL ditulis terpecah
+  (`"http:/" + "/localhost"`), lalu baris pertama berkas diperiksa dengan
+  `head -1`.
+- `ls` di mesin pemilik proyek adalah alias `lsd`, yang tidak mengenal opsi
+  GNU seperti `--time-style`. Pakai `command ls` bila opsi `ls` asli
+  dibutuhkan.
 
 ## Catatan form (React Hook Form dan Zod)
 
@@ -444,6 +461,25 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   kesimpulan**, termasuk dugaan yang terasa cocok dengan semua pengamatan.
   Kehilangan sesi pada spec alur pengajuan sempat diduga benturan login
   paralel, lalu terbantah oleh `workers: 1` di konfigurasi Playwright.
+- **Skrip basis data memutus koneksi di `finally`.** Keluar lebih awal lewat
+  `return` sebelum `mongoose.disconnect()` membuat Node menunggu tanpa
+  batas; skrip tinjau surat jalan sempat menggantung pada jalur "tidak ada
+  surat jalan DIKIRIM" dan disangka pengujian yang macet.
+- **Teks tombol yang sebaris dengan ikon ikut hilang bila keluaran disaring
+  dari baris `className`.** Ambil baris itu utuh dengan `sed -n` pada nomor
+  baris yang hilang dari keluaran. Pada submodul 6, judul "Finalisasi
+  Kedatangan" sempat dipakai sebagai nama tombol karena baris tombolnya
+  ("Konfirmasi Terima Barang") tersaring, padahal aturan nama tombol di
+  atas sudah ada.
+- **Asal kerusakan data dicari juga dari riwayat berkas penentunya.** Pada
+  penerimaan, `git log --follow` membuktikan halaman web belum ada saat
+  surat jalan yang rusak diterima, sehingga penyebabnya kemungkinan klien
+  lain yang memakai backend yang sama.
+- **Pasangan penggantian yang teks barunya memuat teks lamanya tidak
+  idempoten.** Menjalankannya dua kali menyisipkan ulang, karena jangkarnya
+  masih ada tepat satu kali. `ganti-blok.js` kini menolaknya dengan
+  `SUDAH DITERAPKAN`; dengan `ganti.js`, periksa hasilnya dengan grep
+  jumlah kemunculan sebelum melangkah.
 
 ## Kapan berhenti dan bertanya
 
@@ -462,6 +498,12 @@ Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:
 
 Sampaikan pilihan secara ringkas beserta alasan condongnya ke mana, lalu
 tunggu jawaban.
+
+Keputusan perbaikan tidak diajukan satu per satu selagi informasi masih
+dikumpulkan (pemilik proyek, 21 September 2026). Kumpulkan bukti sampai
+cukup, lalu ajukan seluruh temuan yang memerlukan keputusan sekaligus:
+masalahnya sekarang, opsi solusi, dan rekomendasi beserta alasannya.
+Sebelum keputusan diambil, tidak ada perbaikan yang diterapkan.
 
 ## Keputusan berdasar bukti
 

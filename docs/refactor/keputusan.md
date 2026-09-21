@@ -169,6 +169,43 @@ Tidak boleh dibalik tanpa pembahasan:
 - **Revisi hanya untuk DRAFT** di halaman edit, walau backend masih
   mengizinkan APPROVED dan PENDING diubah (`kontrak/temuan.md` butir 25).
 
+### Submodul transfer, pengiriman, dan penerimaan
+
+Diputuskan pemilik proyek pada 21 September 2026, dengan satu prinsip yang
+mengikat seluruhnya (keputusan rancangan butir 17): frontend hanya
+memperbaiki bagiannya sendiri dan ditulis untuk kontrak yang benar; setiap
+bug backend dilaporkan dan tidak diakali agar test lolos.
+
+- **Penerimaan yang mengosongkan surat jalan diperbaiki sebagai commit
+  tersendiri sebelum migrasi** (`dec9d01`, `kontrak/temuan.md` butir 28),
+  mengikuti preseden arah lokasi pengajuan (`08d0a73`).
+- **Jumlah diterima 0 ditahan dengan pesan** selama backend menghitungnya
+  sebagai diterima penuh (butir 30). Penahanan dikendalikan
+  `SERVER_TERIMA_JUMLAH_NOL` di `features/transfer-stok/payload.ts`, dan
+  payload sudah membawa 0 apa adanya. Konsekuensi yang diterima: surat jalan
+  yang salah satu barangnya tidak diterima sama sekali tertahan DIKIRIM.
+- **Item yang master bahan bakunya terhapus menahan penerimaan** (butir 29).
+  Aturan ini tidak dikendalikan konstanta, karena payload yang benar untuk
+  item itu baru ada bila kontrak terima berubah.
+- **Spec memakai data sungguhan yang dibuat dan ditutup sendiri.** Surat
+  jalan dibuat dari pengajuan APPROVED atau PENDING tanpa surat jalan,
+  dikirim lewat API bila skenarionya butuh DIKIRIM, dan dibatalkan di akhir,
+  sehingga pengajuannya kembali ke PENDING. Kirim dan terima hanya diuji
+  jalur gagalnya lewat `page.route`; batal dari DIKIRIM lewat API hanya
+  dipakai membersihkan data uji.
+- **Daftar penerimaan outlet mengikuti cakupan outlet**: owner seluruh
+  outlet dengan pemilih, staf hanya lokasi aktifnya (dikerjakan saat
+  migrasi).
+- **Batal surat jalan di web hanya untuk PENDING**, walau backend menerima
+  batal dari DIKIRIM, karena stok gudang langsung dikembalikan saat barang
+  masih di perjalanan (butir 36).
+- **Surat jalan development yang rusak dibiarkan** sebagai bukti untuk tim
+  backend (butir 29).
+- **Halaman pengiriman dan daftar transfer gudang tetap dua halaman** dan
+  hanya berbagi lapisan `features/`: pengiriman memantau surat jalan
+  DIKIRIM dengan lama perjalanan dan polling, sedangkan daftar transfer
+  adalah arsip bertab (`arsitektur.md`, Kapan halaman disatukan).
+
 ## Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.
@@ -234,3 +271,13 @@ Tidak boleh dibalik tanpa pembahasan:
     halaman. Dengan begitu `bolehBukaHalaman` dan `bolehBukaGrup` tetap satu
     pintu untuk sidebar dan gate halaman. Aturan izin untuk tombol dan data
     di dalam halaman tetap di `features/<modul>/izin.ts` (butir 9 dan 14).
+17. **Frontend hanya memperbaiki bagiannya sendiri, ditulis untuk kontrak
+    yang benar.** Bug backend dilaporkan dengan bukti, bukan diakali agar
+    test lolos. Penanganan sementara hanya dipakai bila perilaku backend
+    merusak data, dan dikendalikan satu konstanta bila membaliknya cukup
+    untuk kembali ke kontrak yang benar (butir 11). Test yang membuktikan
+    perilaku benar ditulis lengkap sebagai `test.fixme`. Bila tidak ada
+    payload yang benar selama kontrak backend belum berubah, penahanannya
+    ditulis sebagai aturan beserta syarat pencabutannya, bukan konstanta.
+    Contoh: `SERVER_TERIMA_JUMLAH_NOL` dan penahanan item tanpa master di
+    `features/transfer-stok/payload.ts` (pemilik proyek, 21 September 2026).

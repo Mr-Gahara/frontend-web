@@ -145,7 +145,7 @@ lewat npm:
 
 | Perintah | Memeriksa | Kapan |
 |---|---|---|
-| `npm run --silent docs:periksa` | Bentuk (tabel terputus, baris kepanjangan, baris kosong ganda, blok kode tidak tertutup, rujukan `.md` yang tidak ada, nama berkas lama, label sifat perubahan), fakta (path kode yang disebut, hash commit, judul commit sementara, tabel `features/` beserta berkasnya, satu **Berikutnya** per tabel status), dan bagian **Tetap** terhadap `HEAD` | Setiap perubahan dokumentasi, dan sebagai gerbang di blok commit |
+| `npm run --silent docs:periksa` | Bentuk (tabel terputus, baris tabel tanpa header, jumlah kolom yang berbeda dari header, baris kepanjangan, baris kosong ganda, blok kode tidak tertutup, rujukan `.md` yang tidak ada, nama berkas lama, label sifat perubahan), fakta (path kode yang disebut, hash commit, judul commit sementara, tabel `features/` beserta berkasnya, satu **Berikutnya** per tabel status), dan bagian **Tetap** terhadap `HEAD` | Setiap perubahan dokumentasi, dan sebagai gerbang di blok commit |
 | `npm run --silent docs:periksa -- --metrik` | Ditambah metrik di `status.md`, dihitung ulang dan dibandingkan | Otomatis bila `status.md` sedang diubah (menutup modul); manual dengan opsi ini |
 | `npm run --silent docs:periksa -- --izinkan-tetap` | Sama, tanpa penjaga bagian Tetap | Hanya bila pemilik proyek memerintahkan perubahan di bagian Tetap |
 | `npm run --silent docs:dampak -- --commit <hash> "istilah"` | Seluruh baris dokumentasi yang menyebut berkas yang diubah commit itu, termasuk bentuk prosanya (`jurnalStok` dan `jurnal-stok` juga dicari sebagai "jurnal stok"), dan istilah tambahan | Setiap menutup modul, sebelum menyusun pembaruan dokumentasi |

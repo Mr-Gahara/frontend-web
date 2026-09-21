@@ -22,9 +22,19 @@ grep -nE 'populate\(' "$BE/services/<modul>Service.js" | cut -c1-140
 
 Data di basis data development dapat dibaca lewat skrip Node di `/tmp` yang
 memakai `mongoose` dan `.env` milik backend; URI Mongo diambil dari nilai
-`.env` yang diawali `mongodb` dan tidak dicetak. Mengubah data development
-hanya dilakukan atas izin pemilik proyek, lewat skrip yang lebih dulu
-dijalankan dalam mode tinjau, dan dicatat di laporan untuk tim backend.
+`.env` yang diawali `mongodb` dan tidak dicetak. Skrip selalu memutus
+koneksi di `finally`. Operasi yang harus melewati aturan backend, misalnya
+membatalkan surat jalan agar stok gudang kembali, dijalankan lewat API
+dengan skrip sekali pakai yang masuk lewat `/api/akun/auth/login` lalu
+`/api/pengguna/pin-login`, bukan dengan menulis langsung ke basis data.
+Login PIN dari skrip mengambil alih sesi web pengguna itu.
+
+Data development adalah data pengujian; belum ada produksi (pemilik
+proyek, 21 September 2026). Yang dijaga adalah kebenaran alur dan aturan,
+bukan isi datanya: spec dan skrip boleh membuat, mengubah, dan membatalkan
+data, dan data cacat yang ditemukan dinilai sebagai sisa pengujian. Skrip
+yang mengubah data tetap punya mode tinjau, dan perubahannya dicatat di
+laporan untuk tim backend bila menyangkut bukti temuan.
 
 Untuk menilai apakah sebuah perilaku backend disengaja, lihat riwayatnya. Pada
 modul produk, `blame` menunjukkan bahwa pemeriksaan resep yang berbeda di
@@ -122,6 +132,16 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   web diterima, pengajuan APPROVED dan PENDING masih bisa diubah, respons
   `approve` berisi dokumen sebelum diperbarui, serta dokumentasi arah dan
   nama endpoint lama; beserta catatan pembalikan 8 pengajuan development
+- Laporan submodul transfer stok: penerimaan dan surat jalan — 8 temuan,
+  disusun 21 September 2026 setelah `dec9d01`: terima mengganti seluruh
+  items tanpa validasi, jumlah diterima 0 menambah stok penuh, dugaan
+  dampak ke aplikasi Flutter, PUT surat jalan menerima field yang
+  seharusnya dikunci, daftar surat jalan mengabaikan query, hapus draf
+  tidak melepas ikatan pengajuan, validator update tetap valid tanpa field
+  sah, dan batal dari DIKIRIM saat barang di perjalanan (perlu keputusan);
+  beserta konfirmasi validator inventory di route (`fc159bd`) dan bukti
+  surat jalan development yang rusak (`kontrak/temuan.md` butir 29 sampai
+  36)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

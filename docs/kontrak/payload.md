@@ -6,14 +6,14 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan.
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan.
 
 #### `PATCH /inventory/:id/minimum-stok`
 
-- Aturan: tanpa validator, dibatasi skema `models/inventoryModel.js`
+- Aturan: `validateMinimumStokPayload` (validators/inventoryValidator.js) di route sejak backend `fc159bd`: allowlist hanya `stokMinimum`, wajib angka tidak negatif; field lain ditolak "Field tidak dikenal", dan `tenantID`, `_id`, `createdAt`, `updatedAt`, serta `__v` ditolak sebagai field yang diisi server
 - Dibaca service dari body: `stokMinimum` (ditolak bila negatif)
-- Wajib dari klien: -
-- Field lain yang dikenali: `bahanBakuID`, `barangInventoryID`, `locationID`, `stok`, `stokMinimum`
+- Wajib dari klien: `stokMinimum`
+- Field lain yang dikenali: - (ditolak allowlist)
 - Diisi server: -
 
 #### `PATCH /pengajuanstok/:id/approve`
@@ -87,6 +87,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PATCH /transferstok/:id/batal`
 
 - Aturan: tanpa validator, dibatasi skema `models/transferStokModel.js`
+- Dari PENDING atau DIKIRIM, lewat gerbang atomik; DITERIMA dan BATAL adalah status akhir (`transferStokService.updateStatus`). Dari DIKIRIM, stok setiap item dikembalikan ke `dariLocationID` dengan jurnal Masuk beralasan "Lainnya" dalam satu transaksi (`temuan.md` butir 36). Pengajuan terkait kembali ke PENDING dan `transferStokID`-nya dilepas
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorTransfer`, `pengajuanStokID`, `dariLocationID`, `keLocationID`, `status`, `items`, `tanggalKirim`, `tanggalTerima`, `penerimaID`
 - Diisi server: `pengirimID`
@@ -94,18 +95,21 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PATCH /transferstok/:id/kirim`
 
 - Aturan: tanpa validator, dibatasi skema `models/transferStokModel.js`
+- Hanya dari PENDING, lewat gerbang atomik (kiriman kedua dijawab 409). Stok setiap item dikurangi di `dariLocationID` dengan syarat stok cukup, dan jurnal Keluar "Transfer Gudang" dicatat, dalam satu transaksi; bila gagal, status dikembalikan ke PENDING
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorTransfer`, `pengajuanStokID`, `dariLocationID`, `keLocationID`, `status`, `items`, `tanggalKirim`, `tanggalTerima`, `penerimaID`
-- Dibaca controller dari body: `-`
+- Dibaca controller dari body: seluruh body diteruskan ke service (`...req.body`); service hanya memakai `tanggalKirim`, dengan bawaan waktu server
 - Diisi server: `pengirimID`
 
 #### `PATCH /transferstok/:id/terima`
 
 - Aturan: tanpa validator, dibatasi skema `models/transferStokModel.js`
+- Hanya dari DIKIRIM, lewat gerbang atomik. `items` dari body menggantikan seluruh items surat jalan tanpa validasi (`temuan.md` butir 29), lalu stok di `keLocationID` ditambah per item sebesar `qtyTerima`, atau `qtyKirim` bila `qtyTerima` 0 atau tidak dikirim (butir 30), dengan jurnal Masuk "Transfer Gudang". Pengajuan terkait menjadi COMPLETED
+- Karena itu klien wajib mengirim seluruh item dengan `bahanBakuID` dan `qtyKirim` dari server; web menyusunnya lewat `susunPayloadTerima` (`features/transfer-stok/payload.ts`)
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorTransfer`, `pengajuanStokID`, `dariLocationID`, `keLocationID`, `status`, `items`, `tanggalKirim`, `tanggalTerima`, `penerimaID`
-- Dibaca controller dari body: `-`
-- Diisi server: `pengirimID`
+- Dibaca controller dari body: seluruh body diteruskan ke service (`...req.body`); service memakai `items` dan `tanggalTerima`, dengan bawaan waktu server
+- Diisi server: `penerimaID`
 
 #### `POST /akun/auth/login`
 
@@ -165,19 +169,19 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /inventory`
 
-- Aturan: tanpa validator, dibatasi skema `models/inventoryModel.js`
+- Aturan: `validateCreatePayload` (validators/inventoryValidator.js) di route sejak backend `fc159bd`: allowlist `bahanBakuID`, `barangInventoryID`, `locationID`, `stok`, dan `stokMinimum`; tepat satu di antara `bahanBakuID` dan `barangInventoryID`; `locationID` wajib ObjectId; `stok` dan `stokMinimum` bila dikirim wajib angka tidak negatif
 - Item yang sudah terdaftar di lokasi yang sama ditolak: satu catatan stok per item per lokasi (`inventoryService` sekitar baris 24)
-- Wajib dari klien: -
+- Wajib dari klien: `locationID`, serta salah satu dari `bahanBakuID` atau `barangInventoryID`
 - Field lain yang dikenali: `bahanBakuID`, `barangInventoryID`, `locationID`, `stok`, `stokMinimum`
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
 #### `POST /inventory/:id/opname`
 
-- Aturan: tanpa validator, dibatasi skema `models/inventoryModel.js`
+- Aturan: `validateOpnamePayload` (validators/inventoryValidator.js) di route sejak backend `fc159bd`: allowlist `fisikAktual` dan `catatan`; `fisikAktual` wajib angka tidak negatif; `catatan` bila dikirim wajib teks
 - Dibaca service dari body: `fisikAktual` (stok menjadi nilai ini; wajib angka tidak negatif, string dan `null` ditolak 400, `inventoryService` baris 162 di backend `f27f093`) dan `catatan` (keterangan pencatatan, bawaan "Koreksi stok fisik")
-- Wajib dari klien: -
-- Field lain yang dikenali: `bahanBakuID`, `barangInventoryID`, `locationID`, `stok`, `stokMinimum`
+- Wajib dari klien: `fisikAktual`
+- Field lain yang dikenali: - (ditolak allowlist)
 - Diisi server: -
 
 #### `POST /jadwalshift`
@@ -372,9 +376,11 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /transferstok`
 
-- Aturan: tanpa validator, dibatasi skema `models/transferStokModel.js`
+- Aturan: `validateTransferPayload` (validators/transferStokValidator.js), dipanggil dari `transferStokService` baris 153, bukan dari route, setelah server mengisi arah lokasi, items, nomor, `tenantID`, dan `pengirimID`
 - Hanya dari pengajuan APPROVED atau PENDING yang belum punya surat jalan. Arah lokasi disalin dari pengajuan (`transferStokService` baris 143 dan 144); membatalkan surat jalan mengembalikan pengajuan ke PENDING
-- Wajib dari klien: -
+- `items` opsional: tanpa items, seluruh item pengajuan dipakai dengan jumlah penuh. Item harus berasal dari pengajuan, dan `qtyKirim` setelah dikonversi ke satuan dasar tidak boleh melebihi jumlah permintaan. Stok setiap item di `dariLocationID` diperiksa sebelum dokumen dibuat; stok kurang ditolak 400 "Pembuatan Draft Gagal: Stok untuk salah satu bahan baku tidak mencukupi di lokasi asal."
+- `nomorTransfer` dibuat otomatis dari nomor pengajuan bila tidak dikirim
+- Wajib dari klien: `pengajuanStokID`
 - Field lain yang dikenali: `nomorTransfer`, `pengajuanStokID`, `dariLocationID`, `keLocationID`, `status`, `items`, `tanggalKirim`, `tanggalTerima`, `penerimaID`
 - Dibaca controller dari body: `-`
 - Diisi server: `pengirimID`, `tenantID`
@@ -524,7 +530,8 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /transferstok/:id`
 
-- Aturan: tanpa validator, dibatasi skema `models/transferStokModel.js`
+- Aturan: `validateTransferPayload` mode update, dipanggil dari `transferStokService` baris 548, bukan dari route. Whitelist-nya memuat `nomorTransfer`, `dariLocationID`, `keLocationID`, `status`, `items`, `tanggalKirim`, `tanggalTerima`, `pengirimID`, dan `penerimaID`; field lain ditolak
+- Hanya untuk status PENDING. `items` hanya diperiksa bentuknya: tidak dikonversi, tidak dibandingkan dengan pengajuan, dan stok tidak diperiksa (`temuan.md` butir 32). Web hanya mengirim `items` berisi `bahanBakuID` dan `qtyKirim` dalam satuan dasar
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorTransfer`, `pengajuanStokID`, `dariLocationID`, `keLocationID`, `status`, `items`, `tanggalKirim`, `tanggalTerima`, `penerimaID`
 - Diisi server: `pengirimID`
