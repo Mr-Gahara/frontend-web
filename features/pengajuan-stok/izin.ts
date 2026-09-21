@@ -23,3 +23,21 @@ export function tabTerlihat(tab: readonly TabPengajuan[], permissions: readonly 
   const terlihat = statusTerlihat(permissions);
   return tab.filter((t) => t === "ALL" || !terlihat || terlihat.includes(t));
 }
+
+/** Revisi draft dan ajukan memakai izin yang sama (route PUT dan PATCH submit). */
+export function bolehUbahPengajuan(permissions: readonly string[]): boolean {
+  return permissions.includes("update-pengajuan-stok");
+}
+
+export function bolehSetujuiPengajuan(permissions: readonly string[]): boolean {
+  return permissions.includes("approve-pengajuan-stok");
+}
+
+export function bolehTolakPengajuan(permissions: readonly string[]): boolean {
+  return permissions.includes("reject-pengajuan-stok");
+}
+
+/** Surat jalan dibuat lewat POST /transferstok, yang mewajibkan create-transfer-stok. */
+export function bolehBuatSuratJalan(permissions: readonly string[]): boolean {
+  return permissions.includes("create-transfer-stok");
+}

@@ -2,7 +2,15 @@ import { describe, expect, it } from "vitest";
 import type { PengajuanStok } from "@/types/pengajuanStok";
 import { saringPengajuan } from "@/features/pengajuan-stok/filter";
 import { arahPengajuanValid } from "@/features/pengajuan-stok/arah";
-import { tabTerlihat } from "@/features/pengajuan-stok/izin";
+import {
+  bolehBuatSuratJalan,
+  bolehSetujuiPengajuan,
+  bolehTolakPengajuan,
+  bolehUbahPengajuan,
+  tabTerlihat,
+} from "@/features/pengajuan-stok/izin";
+import { nilaiAwalPengajuan, susunPayloadPengajuan } from "@/features/pengajuan-stok/payload";
+import { skemaPengajuan } from "@/features/pengajuan-stok/schema";
 
 function pengajuan(nomor: string, status: PengajuanStok["status"], peminta: string, tipeDari: string, tipeKe: string): PengajuanStok {
   return {
@@ -58,6 +66,85 @@ describe("saringPengajuan", () => {
     expect(saringPengajuan(DATA, "gudang", "barat").map((p) => p.nomorPengajuan)).toEqual(["REQ-003"]);
     expect(saringPengajuan(DATA, "gudang", "req-002").map((p) => p.nomorPengajuan)).toEqual(["REQ-002"]);
     expect(saringPengajuan(DATA, "gudang", "timur")).toEqual([]);
+  });
+});
+
+describe("susunPayloadPengajuan", () => {
+  it("mengirim baris valid saja, satuan bawaan pcs, dan tanggal sebagai ISO", () => {
+    const payload = susunPayloadPengajuan({
+      keLocationID: "o1",
+      dariLocationID: "g1",
+      catatan: "",
+      tanggalKebutuhan: new Date("2026-09-25T00:00:00.000Z"),
+      items: [
+        { bahanBakuID: "b1", jumlah: "2", satuan: "kg" },
+        { bahanBakuID: "", jumlah: "5", satuan: "" },
+        { bahanBakuID: "b2", jumlah: "0", satuan: "ml" },
+        { bahanBakuID: "b3", jumlah: "1", satuan: "" },
+      ],
+    });
+    expect(payload).toEqual({
+      dariLocationID: "g1",
+      keLocationID: "o1",
+      catatan: "",
+      tanggalKebutuhan: "2026-09-25T00:00:00.000Z",
+      items: [
+        { bahanBakuID: "b1", jumlah: 2, satuan: "kg" },
+        { bahanBakuID: "b3", jumlah: 1, satuan: "pcs" },
+      ],
+    });
+  });
+});
+
+describe("nilaiAwalPengajuan", () => {
+  it("kosong untuk buat, dengan satu baris kosong", () => {
+    expect(nilaiAwalPengajuan()).toEqual({
+      keLocationID: "",
+      dariLocationID: "",
+      tanggalKebutuhan: undefined,
+      catatan: "",
+      items: [{ bahanBakuID: "", jumlah: "", satuan: "" }],
+    });
+  });
+
+  it("diisi dari dokumen untuk edit, dengan arah lokasi yang sama", () => {
+    const dokumen = {
+      ...DATA[1],
+      catatan: "segera",
+      tanggalKebutuhan: "2026-09-25T00:00:00.000Z",
+      items: [{ bahanBaku: { id: "b1", namaBahan: "Susu", satuan: "ml" }, jumlah: 900, satuan: "ml" }],
+    };
+    expect(nilaiAwalPengajuan(dokumen)).toEqual({
+      keLocationID: "k-REQ-002",
+      dariLocationID: "a-REQ-002",
+      tanggalKebutuhan: new Date("2026-09-25T00:00:00.000Z"),
+      catatan: "segera",
+      items: [{ bahanBakuID: "b1", jumlah: "900", satuan: "ml" }],
+    });
+  });
+});
+
+describe("skemaPengajuan", () => {
+  it("mewajibkan kedua lokasi dan minimal satu baris valid", () => {
+    const kosong = nilaiAwalPengajuan();
+    const barisValid = [{ bahanBakuID: "b1", jumlah: "1", satuan: "kg" }];
+    expect(skemaPengajuan.safeParse({ ...kosong, keLocationID: "o1", dariLocationID: "g1" }).success).toBe(false);
+    expect(skemaPengajuan.safeParse({ ...kosong, items: barisValid }).success).toBe(false);
+    expect(
+      skemaPengajuan.safeParse({ ...kosong, keLocationID: "o1", dariLocationID: "g1", items: barisValid }).success,
+    ).toBe(true);
+  });
+});
+
+describe("izin aksi pengajuan", () => {
+  it("memisahkan izin ubah, setujui, tolak, dan surat jalan", () => {
+    expect(bolehUbahPengajuan(["update-pengajuan-stok"])).toBe(true);
+    expect(bolehUbahPengajuan(["approve-pengajuan-stok"])).toBe(false);
+    expect(bolehSetujuiPengajuan(["approve-pengajuan-stok"])).toBe(true);
+    expect(bolehTolakPengajuan(["reject-pengajuan-stok"])).toBe(true);
+    expect(bolehTolakPengajuan(["approve-pengajuan-stok"])).toBe(false);
+    expect(bolehBuatSuratJalan(["create-transfer-stok"])).toBe(true);
+    expect(bolehBuatSuratJalan([])).toBe(false);
   });
 });
 
