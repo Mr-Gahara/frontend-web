@@ -12,14 +12,14 @@ rujukan. Baseline dan spec rujukan diperbarui setiap modul.
 echo "tsc: $(npx tsc --noEmit > /tmp/t.log 2>&1; echo $?)"; grep 'error TS' /tmp/t.log | cut -c1-110 | head -5
 npx eslint features app components lib 2>&1 | tail -3
 npx vitest run 2>&1 | tail -5
-npx playwright test tests/e2e/<modul> --reporter=line 2>&1 | sed 's/\x1b\[[0-9;]*[A-Za-z]//g' | tail -3
+npx playwright test tests/e2e/<modul> --reporter=json > /tmp/p.json 2>/dev/null; node ~/.cache/frontend-web/alat/ringkas-e2e.js
 ```
 
 Menjalankan satu test saja, dan memeriksa ketahanannya terhadap flakiness:
 
 ```bash
-npx playwright test tests/e2e/<modul> -g "<potongan judul>" --reporter=line 2>&1 | sed 's/\x1b\[[0-9;]*[A-Za-z]//g' | tail -3
-npx playwright test tests/e2e/<modul> -g "<potongan judul>" --repeat-each 3 --reporter=line 2>&1 | sed 's/\x1b\[[0-9;]*[A-Za-z]//g' | tail -3
+npx playwright test tests/e2e/<modul> -g '<potongan judul>' --reporter=json > /tmp/p.json 2>/dev/null; node ~/.cache/frontend-web/alat/ringkas-e2e.js
+npx playwright test tests/e2e/<modul> -g '<potongan judul>' --repeat-each 3 --reporter=line 2>&1 | sed 's/\x1b\[[0-9;]*[A-Za-z]//g' | grep -E '^\s+[0-9]+ (passed|failed|flaky|skipped|did not run)'
 ```
 
 Membandingkan jumlah error ESLint sebuah berkas terhadap `HEAD`, untuk
@@ -30,14 +30,26 @@ memisahkan error baru dari error warisan (memakai
 f=path/ke/berkas.tsx; echo "sekarang:$(npx eslint "$f" -f json 2>/dev/null | node ~/.cache/frontend-web/alat/hitung-eslint.js) HEAD:$(git show "HEAD:$f" | npx eslint --stdin --stdin-filename "$f" -f json 2>/dev/null | node ~/.cache/frontend-web/alat/hitung-eslint.js)"
 ```
 
-Ringkasan e2e dengan daftar kegagalan dan judul test yang dilewati:
+Ringkasan e2e, beserta status dan pesan error setiap test yang tidak lolos
+(helper `ringkas-e2e.js`, bagian Helper penggantian di `cara-kerja.md`):
 
 ```bash
-npx playwright test tests/e2e --reporter=json > /tmp/p.json 2>/dev/null; node -e '
-const r=require("/tmp/p.json");const s=r.stats;
-console.log(`e2e passed:${s.expected} failed:${s.unexpected} flaky:${s.flaky} skipped:${s.skipped}`);
-const jalan=(su)=>su.forEach(x=>{(x.specs||[]).forEach(sp=>sp.tests.forEach(t=>t.results.forEach(res=>{if(res.status==="failed"||res.status==="timedOut")console.log("GAGAL: "+sp.title.slice(0,80));if(res.status==="skipped")console.log("SKIP: "+sp.title.slice(0,80))})));if(x.suites)jalan(x.suites)});
-jalan(r.suites);'
+npx playwright test tests/e2e --reporter=json > /tmp/p.json 2>/dev/null; node ~/.cache/frontend-web/alat/ringkas-e2e.js
+```
+
+Keluaran reporter `line` jangan dipotong dengan `tail` untuk membaca hasil:
+daftar judul test yang gagal atau tidak dijalankan tercetak tanpa baris
+ringkasan di dekatnya, sehingga hasilnya ambigu. Ringkasan vitest dibaca
+dengan `tail -5`, bukan `grep`, karena baris ringkasannya membawa kode warna
+ANSI.
+
+Daftar error ESLint beserta berkas, baris, dan aturannya (helper
+`daftar-eslint.js`). Helper ini selalu mencetak `error: N`, sehingga
+keluaran kosong tidak pernah berarti bersih. Formatter `unix` tidak ada di
+ESLint 9; pakai `json`:
+
+```bash
+npx eslint <berkas atau folder> -f json 2>/dev/null | node ~/.cache/frontend-web/alat/daftar-eslint.js
 ```
 
 Suite e2e penuh memakan 8 sampai 12 menit karena berjalan dengan satu worker
@@ -45,10 +57,14 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per daftar pengajuan stok** (commit `59e10a1`): 118 test unit dan
-integrasi lolos, 203 e2e lolos, 4 skipped: dua `test.fixme` yang menunggu
-backend dan dua `test.skip` bersyarat data (Test yang ditandai fixme dan skip
-bersyarat, di bawah). Angka ini pembanding untuk memastikan tidak ada yang
+**Baseline per penyesuaian backend `f27f093`** (commit `2b3b52d`): 129 test
+unit dan integrasi lolos, 203 e2e lolos, 5 skipped: tiga `test.fixme` yang
+menunggu backend dan dua `test.skip` bersyarat data (Test yang ditandai
+fixme dan skip bersyarat, di bawah). Diukur terhadap backend lokal di branch
+`ridho` yang digabung dengan `yoga`. Sebelum perubahan frontend apa pun,
+suite penuh terhadap backend itu identik dengan baseline `59e10a1` (118,
+203, dan 4), sehingga seluruh selisihnya berasal dari commit `2b3b52d`.
+Angka ini pembanding untuk memastikan tidak ada yang
 hilang diam-diam. Angka skipped dapat berubah bila data uji berubah; periksa
 judul test yang dilewati sebelum menyimpulkan
 ada yang hilang. Setiap run suite penuh menambah tiga dokumen stock opname
@@ -163,6 +179,22 @@ satu putaran.
   (`/\/api\/pengajuanstok/i`). Halaman lama memanggil `/pengajuanStok`,
   sedangkan `features/` memakai konstanta kanonik lowercase; spec yang peka
   huruf gagal setelah migrasi padahal perilakunya sama.
+- Respons mentah yang dipakai sebagai harapan dinormalkan dengan
+  `normalizeId` dari `lib/api/normalize.ts` bila objek bersarangnya dipakai,
+  karena halaman menerima data yang sudah dinormalkan. Pada stock
+  adjustment, `referenceID` mentah membawa `_id`, sehingga href yang
+  diharapkan menjadi `.../undefined` padahal halamannya benar.
+- Bukti bahwa sebuah aksi tidak mengirim permintaan diambil dari penghitung
+  `page.on("request", ...)` yang dilepas dengan `page.off`, bukan hanya dari
+  toast. Contoh: langkah pengosongan di spec draft stock opname.
+- Konfigurasi Playwright tidak menyimpan trace untuk test yang gagal. Untuk
+  menelusuri, jalankan ulang test itu dengan `--trace on`; pada spec tulis,
+  bersihkan dulu dokumen yang tertinggal agar run ulang tidak `skipped`.
+- Blok diagnosis yang menjalankan spec tulis selalu diberi peringatan bahwa
+  ia membuat data baru, dan hasil lolos atau gagalnya dicetak, tidak dibuang
+  ke `/dev/null`. Spec tulis stock opname membuat dokumen baru setiap kali
+  dijalankan, dan dokumen itu tertutup hanya bila test lolos sampai langkah
+  pembatalan.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -172,6 +204,7 @@ Menunggu perbaikan backend:
 |---|---|
 | Edit pola roster | Validator memakai `this.siklusHari` dalam konteks `findOneAndUpdate` |
 | Hapus pengguna | `Promise.all` paralel di dalam transaksi MongoDB |
+| Hitungan tersimpan dapat dikosongkan kembali (`inventaris/stockOpname/draft-stok-opname.spec.ts`) | Validator stock opname menerima `qtyPhysical` null (`kontrak/temuan.md` butir 22). Badannya berupa penanda; skenario ditulis saat `SERVER_TERIMA_HITUNGAN_KOSONG` dibalik |
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
 terhitung di angka skipped pada baseline:
@@ -209,6 +242,10 @@ Urutan debug kegagalan e2e di atas).
   punya cara menghapus entri inventory yang terbentuk.
 - **`tests/helpers/storage.ts`** masih membaca `sessionStorage` dan sudah
   tidak relevan sejak token dipindah ke memori. Berkas itu belum dibersihkan.
+- **Pengosongan hitungan stock opname** baru berupa penanda `test.fixme`
+  tanpa badan, karena backend belum menerima `qtyPhysical` null
+  (`kontrak/temuan.md` butir 22). Yang teruji saat ini hanya perilaku
+  sementara: pengosongan ditahan dengan pesan, tanpa `PATCH`.
 
 ## Spec rujukan
 
@@ -221,12 +258,14 @@ Urutan debug kegagalan e2e di atas).
 - `tests/e2e/inventaris/stockAdjustment/lihat-stock-adjustment.spec.ts`:
   halaman hanya baca, data uji diambil dari respons server lewat
   `page.waitForResponse`, `test.skip` bila data kosong, dan pemeriksaan sel
-  tabel terhadap isi respons.
+  tabel terhadap isi respons yang dinormalkan dengan `normalizeId`; label
+  dan tautan sumber diharapkan dari fungsi tampilan yang sama
+  (`susunSumber`), sedangkan angka dibandingkan langsung dengan field mentah.
 - `tests/e2e/inventaris/jurnalStok/lihat-jurnal-stok.spec.ts`: halaman outlet
   dan gudang yang berbagi komponen, jumlah baris tabel dihitung dari respons
   server, filter Radix Select dibuka lewat teks nilainya, simulasi kegagalan
   GET dengan `page.route`, dan skenario owner (seluruh outlet, pilih satu
-  outlet).
+  outlet, dengan pemeriksaan bahwa permintaan membawa `locationID`).
 - `tests/e2e/inventaris/stok/lihat-stok.spec.ts`: penunggu dipasang setelah
   `goto(..., { waitUntil: "commit" })`, harapan dihitung dari respons
   permintaan itu sendiri, operasi tulis yang mengembalikan nilai semula,
@@ -239,8 +278,11 @@ Urutan debug kegagalan e2e di atas).
   `alur-stok-opname-gudang.spec.ts`: alur tulis lengkap dengan `test.step`,
   dokumen baru per run yang ditutup di akhir, skip bila backend menjawab 409,
   dan baris tabel dipilih menurut urutan respons.
-- `tests/e2e/inventaris/stockOpname/draft-stok-opname.spec.ts`: bukti bug
-  simpan sebagian (isi payload diperiksa) dan dokumen yang tidak ditemukan.
+- `tests/e2e/inventaris/stockOpname/draft-stok-opname.spec.ts`: payload
+  simpan sebagian diperiksa isinya (hanya item yang berubah), pengosongan
+  hitungan ditahan tanpa `PATCH` (dibuktikan dengan penghitung request),
+  penanda `test.fixme` untuk perilaku yang menunggu backend, dan dokumen yang
+  tidak ditemukan.
 - `tests/e2e/inventaris/pengajuanStok/lihat-pengajuan-stok.spec.ts`: path API
   dicocokkan tanpa membedakan huruf besar kecil agar berlaku sebelum dan
   sesudah migrasi, harapan dihitung per ruang dengan aturan yang sama

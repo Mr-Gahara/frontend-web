@@ -30,11 +30,14 @@ Bagian **tetap**: hanya diubah atas perintah pemilik proyek.
 
 - Hanya berisi perintah, tanpa baris komentar atau judul di dalamnya.
 - Efisien, tidak memakai pager, output ringkas dan mudah disalin.
-- Berkas baru diberikan sebagai isi lengkap untuk dibuat manual, tanpa perintah
-  terminal. Perubahan pada berkas yang sudah ada tetap lewat terminal karena
-  harus presisi. Pengecualian: berkas baru yang dibangun dari salinan berkas
-  lama (misalnya komponen form bersama) dibuat dengan `cp` lalu diubah lewat
-  helper, agar isi lamanya tidak diketik ulang.
+- Berkas baru di repo frontend-web diberikan sebagai isi lengkap untuk dibuat
+  manual, tanpa perintah terminal. Perubahan pada berkas yang sudah ada tetap
+  lewat terminal karena harus presisi. Pengecualian: berkas baru yang
+  dibangun dari salinan berkas lama (misalnya komponen form bersama) dibuat
+  dengan `cp` lalu diubah lewat helper, agar isi lamanya tidak diketik ulang.
+- Berkas di luar repo yang bersifat cache atau alat (helper di
+  `~/.cache/frontend-web/alat/`, skrip sekali pakai di `/tmp`) dibuat lewat
+  blok terminal, bukan manual (ditetapkan pemilik proyek, 21 September 2026).
 - Satu blok untuk satu berkas atau satu tujuan. Blok yang panjang tidak dapat
   dijalankan sekaligus dan mudah terpotong saat ditempel.
 
@@ -59,7 +62,7 @@ console.log("OK");
 Untuk penggantian di banyak berkas, kumpulkan pasangan dalam array dan tulis
 berkas hanya bila seluruhnya cocok.
 
-Tiga helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan dengan cache
+Enam helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan dengan cache
 kontrak. Sampai submodul stok, helper disimpan di `/tmp`, dan folder itu dua
 kali dikosongkan sistem dalam sehari: sekali membuat perbaikan dokumen tidak
 masuk sebelum commit (`b0d11d2` menyusulkannya). Skrip sekali pakai tetap di
@@ -108,6 +111,77 @@ process.stdin.on("data", (c) => (d += c)).on("end", () => {
   console.log(r.reduce((s, x) => s + x.errorCount, 0));
 });
 EOF
+cat > ~/.cache/frontend-web/alat/ringkas-e2e.js <<'EOF'
+const r = require(require("path").resolve(process.argv[2] || "/tmp/p.json"));
+const s = r.stats;
+console.log(`e2e passed:${s.expected} failed:${s.unexpected} flaky:${s.flaky} skipped:${s.skipped}`);
+const bersih = (t) => String(t).replace(/\x1b\[[0-9;]*m/g, "");
+const jalan = (su) =>
+  su.forEach((x) => {
+    (x.specs || []).forEach((sp) =>
+      sp.tests.forEach((t) =>
+        t.results.forEach((res) => {
+          if (res.status === "passed") return;
+          const pesan = res.error
+            ? " | " + bersih(res.error.message).split("\n").slice(0, 4).join(" ").slice(0, 300)
+            : "";
+          console.log(res.status.toUpperCase() + ": " + sp.title.slice(0, 80) + pesan);
+        }),
+      ),
+    );
+    if (x.suites) jalan(x.suites);
+  });
+jalan(r.suites);
+EOF
+cat > ~/.cache/frontend-web/alat/daftar-eslint.js <<'EOF'
+let d = "";
+process.stdin.on("data", (c) => (d += c)).on("end", () => {
+  let n = 0;
+  for (const f of JSON.parse(d || "[]"))
+    for (const m of f.messages)
+      if (m.severity === 2) {
+        n++;
+        console.log(f.filePath.replace(process.cwd() + "/", "") + ":" + m.line + ":" + m.column + " " + m.ruleId);
+      }
+  console.log("error: " + n);
+});
+EOF
+cat > ~/.cache/frontend-web/alat/ganti-blok.js <<'EOF'
+const fs = require("fs");
+const pasangan = [];
+let p = null;
+let mode = null;
+let isi = [];
+for (const b of fs.readFileSync(process.argv[2], "utf8").split("\n")) {
+  const m = b.match(/^@@@ (berkas|lama|baru|akhir)(?: (.+))?$/);
+  if (!m) {
+    if (mode) isi.push(b);
+    continue;
+  }
+  if (mode) p[mode] = isi.join("\n");
+  isi = [];
+  if (m[1] === "berkas") p = { berkas: m[2] };
+  if (m[1] === "akhir") pasangan.push(p);
+  mode = m[1] === "lama" || m[1] === "baru" ? m[1] : null;
+}
+const berkas = {};
+const gagal = [];
+for (const { berkas: f, lama, baru } of pasangan) {
+  if (!(f in berkas)) berkas[f] = fs.readFileSync(f, "utf8");
+  const n = berkas[f].split(lama).length - 1;
+  if (n !== 1) {
+    gagal.push("GAGAL " + f + " (" + n + "): " + lama.slice(0, 70).replace(/\n/g, " | "));
+    continue;
+  }
+  berkas[f] = berkas[f].replace(lama, () => baru);
+}
+if (gagal.length) {
+  console.error(gagal.join("\n"));
+  process.exit(1);
+}
+for (const [f, isiBaru] of Object.entries(berkas)) fs.writeFileSync(f, isiBaru);
+console.log("OK " + pasangan.length + " pasangan di " + Object.keys(berkas).length + " berkas");
+EOF
 ```
 
 - `ganti.js`: dipanggil dengan ``node -e 'require(process.env.HOME + "/.cache/frontend-web/alat/ganti.js")("berkas", [[`lama`, `baru`]])'``.
@@ -118,6 +192,19 @@ EOF
   `grep -n` yang mencetak kedua jangkar di blok yang sama (nomor baris dikurangi
   satu).
 - `hitung-eslint.js`: menjumlahkan error dari `eslint -f json`.
+- `ringkas-e2e.js`: meringkas `/tmp/p.json` hasil `--reporter=json` (atau
+  berkas di argumen pertama): jumlah per status, lalu status, judul, dan
+  empat baris pertama pesan error setiap test yang tidak lolos.
+- `daftar-eslint.js`: membaca `eslint -f json` dari stdin, mencetak setiap
+  error beserta berkas, baris, dan aturannya, lalu selalu `error: N`.
+- `ganti-blok.js`: seperti `ganti.js`, tetapi pasangan dibaca dari berkas
+  teks bermarka baris `@@@ berkas <path>`, `@@@ lama`, `@@@ baru`, dan
+  `@@@ akhir`, sehingga teks berisi backtick dan tanda dolar (dokumentasi
+  Markdown) tidak perlu di-escape. Berkas marka ditulis dengan heredoc
+  berdelimiter kutip yang berbeda dari `EOF` bila isinya memuat heredoc.
+  Seluruh pasangan diperiksa lebih dulu dan setiap kegagalan dilaporkan
+  sekaligus; tidak ada berkas yang ditulis bila satu pasangan tidak cocok
+  tepat satu kali.
 - Di dalam template literal skrip, backtick dan tanda dolar yang diikuti kurung
   kurawal ditulis dengan escape, dan tanda miring terbalik ditulis ganda agar
   sampai ke berkas. Hindari kutip bersarang di konten yang disisipkan.
@@ -152,6 +239,13 @@ polanya salah.
   berkas (`No such file or directory` dengan nama berisi banyak baris). Simpan
   daftarnya ke berkas lalu pakai `tr '\n' '\0' < daftar | xargs -0 grep ...`,
   atau baca per baris dengan `while read f; do ...; done`.
+- Pola `grep` selalu ditulis dalam kutip tunggal, tanpa pengecualian. Aturan
+  tanda `!` di atas tetap terlanggar selama pola sesekali ditulis dalam kutip
+  ganda; pada penyesuaian backend `f27f093`, pola `[=!]==` dalam kutip ganda
+  membuat zsh menjawab `event not found`.
+- Nama identifier di pola `grep` memakai batas kata `\b`, agar tidak
+  menangkap nama yang memuatnya (`ItemAdjustment` ikut menangkap
+  `BarisItemAdjustment`).
 
 ## Catatan form (React Hook Form dan Zod)
 
@@ -190,6 +284,10 @@ Untuk kode, informasi diambil bertahap, bukan dengan `cat` seluruh berkas:
    membandingkan dua halaman.
 2. **Potongan** yang dibutuhkan lewat `sed -n 'awal,akhirp'`, dengan nomor
    baris dari peta itu.
+3. **Sekaligus saat memetakan sebuah perubahan**: test yang menguji perilaku
+   yang akan diubah, seluruh pemanggil fungsi atau hook yang diubah (grep),
+   dan jalur backend endpoint-nya utuh. Pada penyesuaian backend `f27f093`,
+   potongan yang diambil sedikit demi sedikit menambah banyak putaran.
 
 Satu blok pengambilan dijaga di bawah sekitar 100 baris keluaran. Pengecualian:
 pemeriksaan dokumentasi yang strukturnya berubah besar memakai isi utuh berkas
@@ -284,6 +382,39 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   daftar selalu membawa objek filter, sehingga `daftar()` (filter
   `undefined`) tidak mengenai daftar mana pun. Terjadi di stock opname dan
   pengajuan stok.
+- **Tipe field referensi dipastikan dari `.populate(` di service dan dari
+  mapper-nya**, bukan dari laporan backend atau komentar model.
+  `referenceID` stock adjustment ditipekan string padahal berisi objek hasil
+  populate, sehingga href menjadi `[object Object]` dan halaman daftar crash.
+- **Jalur backend ditelusuri utuh sebelum menyimpulkan**: route, controller,
+  service, lalu validator. Pemanggil sebuah fungsi dicari di seluruh backend
+  (`backend.md`), bukan hanya di `routes/` dan `controllers/`. Pencarian yang
+  terlalu sempit membuat `validateUpdateItems` sempat disimpulkan kode mati,
+  padahal dipanggil dari service.
+- **Klaim perbaikan di laporan backend adalah petunjuk, bukan bukti.**
+  Perbaikan dibuktikan lewat e2e atau trace terhadap backend yang berjalan
+  sebelum penanganan sementara di frontend dibuang atau payload dirancang
+  ulang. Laporan 20 September menyatakan `qtyPhysical: null` diterima,
+  tetapi validator di depan service masih menolaknya.
+- **Keluaran kosong tidak pernah berarti bersih.** Filter yang tidak mencetak
+  apa pun bisa berarti perintahnya gagal (formatter ESLint yang tidak ada)
+  atau polanya salah (kode warna ANSI di ringkasan vitest). Pakai perintah
+  verifikasi baku dan helper yang selalu mencetak jumlah (`pengujian.md`).
+- **Jangkar penggantian diambil dari berkas nyata**, lewat `grep -n` atau
+  `sed -n`, bukan dari salinan dokumen yang diunggah. Pembungkusan baris di
+  salinan bisa berbeda dari berkasnya; jangkar Catatan shell di berkas ini
+  sempat gagal karena itu.
+- **Jangkar untuk prosa yang dibungkus mencakup baris utuh sampai akhir
+  baris.** Jangkar yang berhenti di tengah baris membuat sisa baris lama
+  tersambung ke teks baru; baseline di `pengujian.md` sempat menjadi satu
+  baris kepanjangan karena itu.
+- **Filter diff dokumentasi tidak boleh membuang butir daftar.** Pola
+  `^[-+][^-+]` di langkah 6 tata cara (`docs/README.md`, bagian Tetap)
+  membuang setiap baris yang diawali `-- ` atau `+- `, sehingga butir daftar
+  yang berubah tidak terlihat saat verifikasi. Sampai perintah itu diganti
+  atas perintah pemilik proyek, pakai
+  `grep -E '^[-+]' | grep -vE '^(\+\+\+|---) '` setelah
+  `git --no-pager diff -U0 docs`.
 
 ## Kapan berhenti dan bertanya
 

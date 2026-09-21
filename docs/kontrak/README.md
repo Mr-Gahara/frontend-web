@@ -22,7 +22,10 @@ data, atau izin harus diturunkan dari sini, bukan dari dugaan.
 | Ketidakselarasan yang sudah tercatat beserta pemiliknya | `temuan.md` (bagian 6) |
 | Seluruh 246 route backend, termasuk yang belum dipakai | `route-backend.md` (Lampiran A) |
 
-Kontrak terikat pada commit backend `4310d1c` (18 September 2026). Bila
+Kontrak terikat pada commit backend `4310d1c` (18 September 2026). Bagian
+inventory dan stock opname di `endpoint.md`, `payload.md`, `izin-halaman.md`,
+dan `temuan.md` dikoreksi manual terhadap backend `f27f093` (origin/yoga,
+20 September 2026) pada 21 September 2026. Bila
 backend berubah cukup jauh, `endpoint.md`, `payload.md`, `izin-halaman.md`,
 dan `route-backend.md` perlu dibangkitkan ulang; bagian 1 di bawah menjelaskan
 cara pembangkitannya. Gejala bahwa kontrak sudah tertinggal: endpoint yang
@@ -48,10 +51,10 @@ Bagian 3 sampai 5 dan Lampiran A (`endpoint.md`, `payload.md`, `izin-halaman.md`
 
 Keterbatasan:
 
-- Validasi yang hanya ada di service tidak tertangkap; operasi seperti itu tercatat memakai skema model.
+- Validasi yang hanya ada di service tidak tertangkap; operasi seperti itu tercatat memakai skema model. Termasuk validator di `validators/` yang dipanggil dari service, bukan route: stock opname memanggil lima validator dari service (`POST /stockopname`, `PATCH /stockopname/:id/items`, `.../approve`, `.../reject`, dan query kedua daftar), dikoreksi manual di `payload.md` pada 21 September 2026. Sebelum menyimpulkan sebuah operasi tidak divalidasi atau sebuah validator tidak terpakai, cari pemanggilnya di seluruh backend, termasuk `services/`.
 - Daftar field pada bagian 4 (`payload.md`) berasal dari validator, sedangkan validator hanya memeriksa dan tidak membuang field lain. Service dapat memakai field di luar daftar itu, seperti `locationID` pada `POST /bahanbaku`. Sebelum sebuah field dihapus dari payload frontend, periksa dulu pemakaiannya di service.
 - Bentuk respons operasi tulis tidak diambil dengan memanggil endpoint, agar data tidak berubah.
-- Analisis statis route hanya membaca argumen pertama `checkPermission`. Route yang menerima salah satu dari beberapa izin perlu dikoreksi manual; `GET /produk` dan `GET /produk/:id` (`read-produk` atau `akses-pos`) sudah dikoreksi pada 20 September 2026.
+- Analisis statis route hanya membaca argumen pertama `checkPermission`. Route yang menerima salah satu dari beberapa izin perlu dikoreksi manual; `GET /produk` dan `GET /produk/:id` (`read-produk` atau `akses-pos`) sudah dikoreksi pada 20 September 2026, dan `GET /inventory` (`read-inventory`, `read-inventory-gudang`, atau `read-inventory-outlet`) pada 21 September 2026. Sapuan seluruh route pada tanggal itu, termasuk pemanggilan yang argumennya dipecah ke beberapa baris, hanya menemukan satu route lain yang berizin ganda, yaitu `PATCH /jurnalstok/wms/*`, yang tidak dipakai frontend. Lampiran A (`route-backend.md`) belum mencerminkan koreksi inventory karena bertanda Tetap.
 - Analisis statis frontend hanya menangkap panggilan `apiClient` dengan path tertulis. Path yang disusun dinamis terlewat, sehingga `GET /stockopname` sempat tercatat tidak dipakai (dikoreksi 20 September 2026). Untuk modul yang sudah dipindah ke `features/`, pemanggilan terpusat di `features/<modul>/api.ts`, sehingga kolom "Dipakai di" di bagian 3.1 (`endpoint.md`) tidak lagi mencerminkan jumlah halaman pemakai. Bagian 5 (`izin-halaman.md`) untuk modul itu diperbarui manual.
 - Kontrak ini berlaku untuk commit acuan di atas. Bila backend berubah, bagian 3 sampai 5 dan Lampiran A perlu dibangkitkan ulang.
 
@@ -97,7 +100,7 @@ Semua respons GET yang sukses memuat `data`. Kunci lain tidak seragam antarmodul
 ### 2.5 Identitas dan field referensi
 
 - Sebagian modul memakai `id`, sebagian `_id`, dan sebagian mencampur keduanya (`id` di tingkat atas, `_id` di objek bertingkat). Beberapa masih membawa `__v`. `lib/api/client.ts` menormalkan `_id` menjadi `id` secara rekursif dan membuang `__v`, sehingga halaman yang memakai lapisan itu hanya mengenal `id`. Halaman yang masih memakai klien lama menerima `_id` apa adanya (2.4).
-- Nama field referensi tidak selalu mencerminkan isinya. Contoh: `bahanBakuID` dan `locationID` di jurnal stok berisi objek hasil populate, dan `dataAset` di aset berisi tipe aset. Tipe frontend mengikuti bentuk nyata di bagian 3.3 (`endpoint.md`), bukan nama field.
+- Nama field referensi tidak selalu mencerminkan isinya. Contoh: `bahanBakuID` dan `locationID` di jurnal stok berisi objek hasil populate, `dataAset` di aset berisi tipe aset, dan `referenceID` di stock adjustment berisi dokumen opname `{ id, nomorOpname, tanggal }`. Tipe frontend mengikuti bentuk nyata di bagian 3.3 (`endpoint.md`), bukan nama field; untuk field referensi, periksa `.populate(` di service sebelum menulis tipenya.
 
 ### 2.6 Field yang diisi server
 

@@ -16,6 +16,8 @@ BE=~/Documents/backend-js
 grep -rn "checkPermission" "$BE/routes/<modul>Route.js" | cut -c1-120
 grep -n "wajib\|allowlist\|enum" "$BE/validators/<modul>Validator.js" | cut -c1-120
 grep -rn "<namaField>" "$BE/services/<modul>Service.js" | cut -c1-140
+grep -rnE '\b<namaFungsi>\b' "$BE" --include='*.js' --exclude-dir=node_modules --exclude-dir=__tests__ | cut -c1-140
+grep -nE 'populate\(' "$BE/services/<modul>Service.js" | cut -c1-140
 ```
 
 Untuk menilai apakah sebuah perilaku backend disengaja, lihat riwayatnya. Pada
@@ -31,7 +33,10 @@ Tiga lapis yang harus dibedakan, karena sering tidak sejalan:
 
 1. **Route** menentukan izin yang diperiksa.
 2. **Validator** menentukan field yang diperiksa, tetapi tidak membuang field lain.
-3. **Service** dapat memakai field yang tidak ada di validator.
+   Validator dapat dipanggil dari route, controller, atau service; stock opname
+   memanggil kelimanya dari service, sehingga tidak terlihat dari route.
+3. **Service** dapat memakai field yang tidak ada di validator, dan aturannya
+   bisa bertentangan dengan validator di depannya (`kontrak/temuan.md` butir 22).
 
 Karena itu, sebelum menghapus sebuah field dari payload frontend, periksa dulu
 pemakaiannya di service. Kekeliruan semacam ini pernah terjadi dua kali:
@@ -98,6 +103,14 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
 - Laporan submodul pengajuan stok (daftar) — 1 temuan, disusun 20 September
   2026: status yang disembunyikan menurut izin dijawab daftar kosong tanpa
   keterangan, sehingga klien harus mencerminkan aturan service
+- Tindak lanjut atas tanggapan tim backend 20 September 2026 (berkas
+  README-Temuan-Frontend di repo backend, menanggapi temuan 2, 9, 18, dan
+  19) — 3 temuan, disusun 21 September 2026: validator stock opname masih
+  menolak `qtyPhysical` null sehingga perbaikan SO-1 tidak sampai ke
+  endpoint (butir 22), `referenceID` adjustment berisi objek populate tanpa
+  dokumentasi, dan `GET /jurnalstok` tidak membaca query lokasi (bersama
+  SO-3), beserta konfirmasi SO-2, koreksi butir 2 dan 9, dan kontrak
+  inventory
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

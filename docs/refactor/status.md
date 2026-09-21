@@ -48,6 +48,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Inventaris: stok dan inventaris gudang | `ad590f9` | Selesai |
 | Inventaris: stock opname | `fc3f220` | Selesai |
 | Cakupan lokasi owner dan staf: jurnal stok dan stok outlet | `6ca6da8` | Selesai |
+| Penyesuaian backend `f27f093`: stock adjustment, gate stok, simpan hitungan opname, dan filter lokasi jurnal stok | `2b3b52d` | Selesai |
 | Inventaris: pengajuan stok, lalu transfer, pengiriman, dan penerimaan | `59e10a1` (daftar pengajuan) | **Berikutnya** (lihat Pekerjaan berikutnya): detail, edit, dan buat pengajuan |
 | Penjualan dan pembayaran | - | Belum |
 | Reservasi | - | Belum |
@@ -61,7 +62,7 @@ Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 
-| Hal | Awal | Setelah submodul stock opname | Catatan |
+| Hal | Awal | Setelah penyesuaian backend `f27f093` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 101 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
 | Kemunculan `_id` | - | 120 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id || _id` |
@@ -140,14 +141,16 @@ find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep 
   `components/calendar.tsx` (240 baris, 2 `any`). Bereskan di submodul yang
   memakainya.
 - `kontrak/temuan.md` butir 10: operasi tulis tanpa validator, sebagian besar di
-  stok (pengajuan dan transfer). Periksa service sebelum menentukan payload.
+  stok (pengajuan dan transfer). Periksa service sebelum menentukan payload,
+  termasuk validator yang dipanggil dari service (butir 22).
 - Halaman pengiriman stok gudang memakai `/transferstok`, yang mewajibkan
   `read-transfer-stok` (`kontrak/izin-halaman.md`).
 - `kontrak/izin-halaman.md` sudah diselaraskan dengan `IZIN_HALAMAN` untuk halaman
   yang disebut di kalimat pembukanya. Baris lain masih mencerminkan keadaan
   sebelum Fase 2; periksa gate yang berlaku di `lib/auth/permissions.ts` dan
   perbarui barisnya saat halamannya dimigrasikan.
-- Belum diverifikasi: `inventoryService` (sekitar baris 70) membangun
+- Belum diverifikasi: `inventoryService` (sekitar baris 106 di backend
+  `f27f093`) membangun
   `new RegExp(search, "i")` langsung dari masukan pengguna. Dugaannya,
   karakter seperti `(` membuat pencarian stok dijawab 500. Buktikan lewat e2e
   atau trace sebelum dilaporkan ke backend atau ditangani di frontend.
@@ -165,13 +168,41 @@ find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep 
     `features/pengajuan-stok/izin.ts`; keduanya diperbarui bersama.
   - `jenisPengajuan` `PENGIRIMAN` tidak dipakai backend maupun frontend:
     semua pengajuan adalah permintaan dari outlet ke gudang.
-  - Halaman buat memilih lokasi asal dari seluruh outlet, bukan lokasi
-    aktif. Perlu keputusan produk saat halaman buat dimigrasikan.
+  - Halaman buat dan edit memilih lokasi asal dari seluruh lokasi bertipe
+    Outlet untuk siapa pun, sehingga staf dapat mengajukan atas nama outlet
+    lain. Keputusan produknya ditahan pemilik proyek sebagai utang
+    (21 September 2026) sampai kondisi backend terbaru jelas. Pilihan yang
+    diajukan: mengikuti cakupan outlet (staf terkunci di lokasi aktif, owner
+    memilih), lokasi aktif untuk semua, atau tetap seperti sekarang. Cakupan
+    outlet satu-satunya pilihan yang tetap benar apa pun keputusan
+    `kontrak/temuan.md` butir 20.
   - `pengajuanStok.detail(id)` masih diisi bentuk mentah oleh detail outlet,
     edit, dan detail gudang. Migrasikan ketiganya bersama agar kunci itu
     tidak berisi dua bentuk data.
   - Usulan tertunda: daftar outlet tidak menampilkan outlet asal, sehingga
     owner di pilihan "Semua Outlet" tidak dapat membedakan outlet pengaju.
+  - Pemetaan 21 September 2026 atas detail outlet, edit, buat, dan detail
+    gudang (1.824 baris): keempatnya belum punya gate halaman maupun spec
+    e2e; tombol aksi hanya mengikuti status, belum izin; dialog ajukan
+    (outlet) dan setujui (gudang) memakai `AlertDialogAction` tanpa
+    `preventDefault`, sehingga tertutup sebelum operasi selesai (pola bug
+    `50e8815`); edit dan buat menyimpan data lokasi dan bahan baku mentah di
+    kunci akar `lokasi.semua` dan `bahanBaku.semua` (keputusan rancangan
+    butir 3); edit mengisi form lewat `useEffect` (butir 8).
+  - Detail gudang membuat transfer (`POST /transferstok` dengan
+    `pengajuanStokID` dan `tanggalKirim`), yang merupakan domain submodul 6.
+    Api-nya ditempatkan di folder fitur transfer stok (butir 12), dibuat saat
+    detail gudang dimigrasikan.
+  - Belum diverifikasi: `pengajuanStokService.getById` (sekitar baris 80) dan
+    `approve` (sekitar baris 261) menghitung stok item di `dariLocationID`,
+    yaitu outlet peminta, bukan gudang tujuan. Bila benar, kolom stok gudang,
+    peringatan stok kurang, dan penolakan approve membaca stok outlet. Baca
+    kedua fungsi itu utuh sebelum menyimpulkan.
+- Backend lokal berjalan di branch `ridho` yang digabung dengan `yoga`
+  (merge 21 September 2026, belum di-push); perubahan yang relevan ada di
+  origin/yoga `f27f093`. `pengajuanStokService` dan `transferStokService`
+  tidak berubah di merge itu, sehingga pemetaan pengajuan di atas tetap
+  berlaku.
 
 ### Setelah modul inventaris: cakupan per gudang
 
@@ -203,3 +234,20 @@ jurnal stok, inventaris, pengajuan, transfer), agar aturannya seragam:
   `app/dashboard/outlet/inventaris/components/`, sehingga `features/`
   bergantung pada `app/`. Pindahkan komponen itu ke `features/bahan-baku`
   atau `components/` saat modul inventaris menyentuhnya.
+
+### Utang kecil dari penyesuaian backend `f27f093`
+
+- Empat error ESLint warisan di `features/stock-opname`:
+  `react-hooks/preserve-manual-memoization` di halaman daftar (sekitar baris
+  129), `react-hooks/set-state-in-effect` di halaman detail (sekitar baris
+  163, efek yang mengisi isian dari data server, bertentangan dengan
+  keputusan rancangan butir 8), dan dua `react/no-unescaped-entities`
+  (sekitar baris 388). Jumlahnya sama dengan sebelum `2b3b52d`. Bereskan
+  saat halaman detail stock opname disentuh lagi.
+- Setelah validator stock opname diperbaiki backend (`kontrak/temuan.md`
+  butir 22): balik `SERVER_TERIMA_HITUNGAN_KOSONG` menjadi true, tulis badan
+  `test.fixme` "hitungan tersimpan dapat dikosongkan kembali", dan pastikan
+  hanya field yang berubah yang terkirim.
+- Kontrak dikoreksi tertarget terhadap `f27f093`. Pembangkitan ulang penuh
+  ditunda sampai backend menyelesaikan modul produk, bahan baku, stok, dan
+  WMS, dan hanya atas perintah pemilik proyek.

@@ -6,7 +6,7 @@ Gate setiap menu sidebar dibandingkan dengan permission endpoint yang dipanggil 
 
 ## 5. Kebutuhan izin per halaman
 
-Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual. Baris pengguna, produk, kategori, bahan baku, stok, stock adjustment, jurnal stok, inventaris gudang, stock opname, dan pengajuan stok (daftar) diperbarui manual dari `IZIN_HALAMAN` setelah migrasi (20 September 2026); baris lain mencerminkan keadaan saat kontrak dibangkitkan.
+Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual. Baris pengguna, produk, kategori, bahan baku, stok, stock adjustment, jurnal stok, inventaris gudang, stock opname, dan pengajuan stok (daftar) diperbarui manual dari `IZIN_HALAMAN` setelah migrasi (20 September 2026), dan baris bahan baku, stok, serta inventaris gudang diperbarui lagi pada 21 September 2026 untuk izin alternatif (`temuan.md` butir 2); baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
 | Menu | Gate saat ini | Endpoint GET di halaman | Permission dibutuhkan | Penilaian |
 |---|---|---|---|---|
@@ -20,9 +20,9 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/outlet/inventaris-data` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/produk` | `read-produk` | `/produk` | `read-produk` atau `akses-pos` | Sejalan |
 | `/dashboard/outlet/inventaris/kategori` | `read-kategori` | `/kategori`, `/produk` | `read-kategori`; `/produk` opsional (`read-produk` atau `akses-pos`) untuk hitungan pemakaian | Sejalan |
-| `/dashboard/outlet/inventaris/bahanBaku` | `read-location`, `read-inventory` | `/location`, `/inventory` | `read-location`, `read-inventory` | Sejalan |
+| `/dashboard/outlet/inventaris/bahanBaku` | `read-location`, `read-inventory` atau `read-inventory-outlet` | `/location`, `/inventory` | `read-location`, salah satu dari `read-inventory`, `read-inventory-gudang`, `read-inventory-outlet` | Sejalan; gate sengaja tidak menerima `read-inventory-gudang` di ruang outlet (keputusan produk) |
 | `/dashboard/outlet/inventaris-pantau` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
-| `/dashboard/outlet/inventaris/stok` | `read-location`, `read-inventory` | `/location`, `/location/current`, `/inventory` | `read-location`, `read-inventory` | Sejalan |
+| `/dashboard/outlet/inventaris/stok` | `read-location`, `read-inventory` atau `read-inventory-outlet` | `/location`, `/location/current`, `/inventory` | `read-location`, salah satu dari `read-inventory`, `read-inventory-gudang`, `read-inventory-outlet` | Sejalan; gate sengaja tidak menerima `read-inventory-gudang` di ruang outlet (keputusan produk) |
 | `/dashboard/outlet/inventaris/stockOpname` | `read-stock-opname`, `read-location` | `/stockopname`, `/location`, `/location/current` | `read-stock-opname`, `read-location` | Sejalan |
 | `/dashboard/outlet/inventaris/stockAdjustment` | `read-stock-adjustment` | `/stockopname/adjustments`, `/stockopname/adjustments/:id` | `read-stock-adjustment` | Sejalan |
 | `/dashboard/outlet/inventaris/jurnalStok` | `read-jurnal-stok`, `read-location` | `/jurnalstok`, `/location`, `/location/current` | `read-jurnal-stok`, `read-location` | Sejalan |
@@ -36,7 +36,7 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/outlet/pengguna` | `read-pengguna`, `read-role` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sejalan |
 | `/dashboard/outlet/pengaturan` | - | - | - | Data dimuat lewat komponen, periksa manual |
 | `/dashboard/gudang` | - | - | - | Data dimuat lewat komponen, periksa manual |
-| `/dashboard/gudang/inventaris` | `read-location`, `read-inventory`, `read-bahan` | `/location`, `/inventory`, `/bahanbaku` | `read-location`, `read-inventory`, `read-bahan` | Sejalan |
+| `/dashboard/gudang/inventaris` | `read-location`, `read-inventory` atau `read-inventory-gudang`, `read-bahan` | `/location`, `/inventory`, `/bahanbaku` | `read-location`, salah satu dari `read-inventory`, `read-inventory-gudang`, `read-inventory-outlet`, `read-bahan` | Sejalan; gate sengaja tidak menerima `read-inventory-outlet` di ruang gudang (keputusan produk) |
 | `/dashboard/gudang/jurnalStok` | `read-jurnal-stok` | `/jurnalstok` | `read-jurnal-stok` | Sejalan |
 | `/dashboard/gudang/stockOpname` | `read-stock-opname` | `/stockopname` | `read-stock-opname` | Sejalan |
 | `/dashboard/gudang/pengajuanStok` | `read-pengajuan-stok` | `/pengajuanstok` | `read-pengajuan-stok` | Sejalan |

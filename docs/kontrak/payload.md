@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan.
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan.
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -40,7 +40,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PATCH /stockopname/:id/approve`
 
-- Aturan: tanpa validator, dibatasi skema `models/stockOpnameModel.js`
+- Aturan: `validateApproveOpname` (validators/stockOpnameValidator.js), dipanggil dari `stockOpnameService` baris 383, bukan dari route: `alasan` opsional, tetapi bila dikirim harus teks
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorOpname`, `locationID`, `tanggal`, `reviewerID`, `status`, `items`, `catatan`, `catatanReview`, `stockAdjustmentID`
 - Dibaca controller dari body: `alasan`
@@ -56,8 +56,10 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PATCH /stockopname/:id/items`
 
-- Aturan: tanpa validator, dibatasi skema `models/stockOpnameModel.js`
-- Hanya untuk status DRAFT atau REJECTED. Setiap item yang dikirim wajib punya `qtyPhysical` angka tidak negatif; `null` ditolak 400 dengan pesan "qtyPhysical tidak boleh kurang dari 0." (`temuan.md` butir 19). Item yang tidak dikirim tidak berubah
+- Aturan: `validateUpdateItems` (validators/stockOpnameValidator.js), dipanggil dari `stockOpnameService` baris 214 sampai 216, bukan dari route
+- Hanya untuk status DRAFT atau REJECTED. `items` wajib array yang tidak kosong, dan setiap `itemId` wajib ObjectId yang valid
+- Validator menolak `qtyPhysical` yang null maupun tidak dikirim ("qtyPhysical wajib diisi."), serta yang bukan angka atau negatif. Loop service sesudahnya sudah menerima `null` sebagai belum dihitung dan membiarkan field yang tidak dikirim, tetapi tidak tercapai (`temuan.md` butir 22). Akibatnya setiap item yang dikirim wajib membawa `qtyPhysical` angka, termasuk bila hanya catatannya yang berubah
+- `catatanItem` opsional; bila dikirim harus teks dan disimpan apa adanya, termasuk string kosong. Item yang tidak dikirim tidak berubah
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorOpname`, `locationID`, `tanggal`, `reviewerID`, `status`, `items`, `catatan`, `catatanReview`, `stockAdjustmentID`
 - Dibaca controller dari body: `items`
@@ -65,7 +67,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PATCH /stockopname/:id/reject`
 
-- Aturan: tanpa validator, dibatasi skema `models/stockOpnameModel.js`
+- Aturan: `validateRejectOpname` (validators/stockOpnameValidator.js), dipanggil dari `stockOpnameService` baris 332, bukan dari route: `catatanReview` wajib teks yang tidak kosong
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorOpname`, `locationID`, `tanggal`, `reviewerID`, `status`, `items`, `catatan`, `catatanReview`, `stockAdjustmentID`
 - Dibaca controller dari body: `catatanReview`
@@ -170,7 +172,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /inventory/:id/opname`
 
 - Aturan: tanpa validator, dibatasi skema `models/inventoryModel.js`
-- Dibaca service dari body: `fisikAktual` (stok menjadi nilai ini) dan `catatan` (keterangan pencatatan, bawaan "Koreksi stok fisik")
+- Dibaca service dari body: `fisikAktual` (stok menjadi nilai ini; wajib angka tidak negatif, string dan `null` ditolak 400, `inventoryService` baris 162 di backend `f27f093`) dan `catatan` (keterangan pencatatan, bawaan "Koreksi stok fisik")
 - Wajib dari klien: -
 - Field lain yang dikenali: `bahanBakuID`, `barangInventoryID`, `locationID`, `stok`, `stokMinimum`
 - Diisi server: -
@@ -340,7 +342,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /stockopname`
 
-- Aturan: tanpa validator, dibatasi skema `models/stockOpnameModel.js`
+- Aturan: `validateCreateOpname` (validators/stockOpnameValidator.js), dipanggil dari `stockOpnameService` baris 100, bukan dari route: `locationID` wajib ObjectId yang valid dan `catatan` bila dikirim harus teks; `tenantID` dan `picID` juga diperiksa, keduanya diisi server
 - Dibaca service: `locationID` dan `catatan`; item diambil otomatis dari seluruh inventory di lokasi itu
 - Opname aktif (DRAFT atau SUBMITTED) di lokasi yang sama ditolak 409 dengan pesan yang menyebut nomor dan statusnya
 - Wajib dari klien: -

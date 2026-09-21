@@ -48,11 +48,20 @@ Tidak boleh dibalik tanpa pembahasan:
 ### Submodul stock adjustment
 
 - **Data yang terbukti salah dari backend tidak ditampilkan sebagai nilai.**
-  Saldo sistem, koreksi, dan alasan adjustment tampil sebagai `-` atau
-  keterangan "belum dikirim server", bukan 0 atau "tidak ada alasan"
-  (`kontrak/temuan.md` butir 18).
-- **Kolom sumber dihapus** dari daftar dan detail, karena respons tidak
-  membawa `referenceType` dan kolom lama hanya mengulang nomor jurnal.
+  Selama mapper backend salah (`kontrak/temuan.md` butir 18), saldo sistem,
+  koreksi, dan alasan tampil sebagai `-` atau keterangan "belum dikirim
+  server", bukan 0 atau "tidak ada alasan". Sejak mapper diperbaiki
+  (`f27f093`), nilainya ditampilkan apa adanya (`2b3b52d`).
+- **Kolom sumber dimunculkan kembali** di daftar dan detail (21 September
+  2026). Sumber diturunkan dari `referenceType`: "Stock Opname" disertai
+  nomor dokumennya dan bertaut ke dokumen itu, "Koreksi Manual" tanpa
+  tautan. Kolom ini sempat dihapus karena respons tidak membawa
+  `referenceType` dan kolom lama hanya mengulang nomor jurnal.
+- **Kolom catatan per item dihapus**, karena backend tidak punya sumber data
+  untuknya dan membuang `catatanItem` dari respons.
+- **Saldo sistem adalah saldo saat disetujui** (`qtyCurrent`). Stok saat
+  draf dibuat (`qtySnapshot`) tampil di bawahnya hanya bila berbeda, sebagai
+  tanda stok bergerak selama opname berlangsung.
 
 ### Submodul jurnal stok
 
@@ -69,6 +78,11 @@ Tidak boleh dibalik tanpa pembahasan:
   menampilkan stok seluruh lokasi bertipe Outlet. Sejak commit cakupan
   lokasi, pilihan itu hanya untuk owner; staf dibatasi ke lokasi aktif tanpa
   pemilih.
+- **Gate halaman stok menerima izin inventory per ruang** (21 September
+  2026). Stok outlet dan bahan baku menerima `read-inventory` atau
+  `read-inventory-outlet`; inventaris gudang menerima `read-inventory` atau
+  `read-inventory-gudang`. Backend menerima ketiganya untuk lokasi mana pun
+  (`kontrak/temuan.md` butir 2), tetapi nama izinnya dimaksudkan per ruang.
 
 ### Submodul stock opname
 
@@ -87,9 +101,20 @@ Tidak boleh dibalik tanpa pembahasan:
   dan membatalkan (keputusan rancangan butir 14).
 - **Pembatalan tersedia untuk DRAFT, SUBMITTED, dan REJECTED** bagi pemegang
   izin tinjau, sejalan dengan backend. Sebelumnya hanya dari SUBMITTED.
-- **Simpan sementara hanya mengirim hitungan yang terisi**, karena backend
-  menolak isian kosong (`kontrak/temuan.md` butir 19). Bila belum ada hitungan,
-  pesan tampil tanpa memanggil backend.
+- **Simpan sementara hanya mengirim item yang berubah** dibanding data server
+  (21 September 2026). Catatan yang dihapus dikirim sebagai string kosong,
+  dan simpan tanpa perubahan menampilkan "Tidak ada perubahan untuk
+  disimpan" tanpa memanggil backend.
+- **Hitungan kosong ditahan selama validator backend menolaknya**
+  (`kontrak/temuan.md` butir 22, opsi B). Setiap item yang dikirim membawa
+  hitungan angka, dan item berubah yang hitungannya kosong tidak dikirim,
+  melainkan dilaporkan dengan pesan "Sebagian perubahan tidak disimpan".
+  Konsekuensi yang diterima pemilik proyek: item yang hanya berubah
+  catatannya ikut mengirim hitungan yang tampil di layar, sehingga hitungan
+  staf lain untuk item yang sama yang tersimpan setelah halaman dimuat dapat
+  tertimpa. Risiko ini sama dengan perilaku sebelumnya, dan hilang begitu
+  `SERVER_TERIMA_HITUNGAN_KOSONG` di `features/stock-opname/payload.ts`
+  dibalik menjadi true.
 - **Dialog aksi hanya tertutup saat berhasil**; saat gagal tetap terbuka
   beserta isiannya (keputusan Fase 0).
 - **Detail membedakan dokumen yang tidak ditemukan dari kegagalan memuat.**
@@ -140,11 +165,14 @@ Tidak boleh dibalik tanpa pembahasan:
     `tampilan.ts`) agar dapat diuji unit dan mudah dibersihkan setelah backend
     diperbaiki.
 11. **Data yang terbukti salah dari backend tidak ditampilkan sebagai nilai.**
-    Tampilkan `-` beserta keterangan singkat, dan kendalikan penanganannya
-    dengan satu konstanta di `tampilan.ts` (misalnya
-    `MAPPER_ADJUSTMENT_SUDAH_BENAR`) agar pembersihannya cukup satu perubahan.
-    Angka palsu seperti koreksi 0 pada audit trail lebih menyesatkan daripada
-    kolom kosong.
+    Tampilkan `-` beserta keterangan singkat, dan kendalikan penanganan
+    sementara apa pun dengan satu konstanta (misalnya
+    `SERVER_TERIMA_HITUNGAN_KOSONG` di `features/stock-opname/payload.ts`)
+    yang komentarnya menyebut penyebab, konsekuensi, dan syarat pembaliknya,
+    agar pembersihannya cukup satu perubahan. Angka palsu seperti koreksi 0
+    pada audit trail lebih menyesatkan daripada kolom kosong. Pola ini
+    terbukti pada `MAPPER_ADJUSTMENT_SUDAH_BENAR`, yang dibersihkan dalam
+    satu putaran begitu mapper backend diperbaiki (`2b3b52d`).
 12. **Hook dan API untuk data lintas modul hanya didefinisikan sekali.** Lokasi
     dan inventory tinggal di `features/inventaris`; modul lain mengimpornya dari
     sana. Sebelum membuat hook baru, grep kunci cache dan endpoint-nya di seluruh
@@ -163,3 +191,16 @@ Tidak boleh dibalik tanpa pembahasan:
     Tombol yang izinnya tidak dimiliki pengguna disembunyikan, dan aturannya
     diletakkan di `features/<modul>/izin.ts` (butir 9). Contoh:
     `bolehHitungOpname` dan `bolehTinjauOpname` di `features/stock-opname`.
+15. **Penyimpanan sebagian hanya mengirim yang berubah dibanding data
+    server.** Pembandingnya nilai tersimpan di cache query, bukan isian awal
+    lokal, dan field yang tidak berubah tidak dikirim bila backend
+    mengizinkannya. Dengan begitu data yang disimpan pengguna lain setelah
+    halaman dimuat tidak tertimpa. Contoh: `susunPayloadHitungan` dan
+    `petakanNilaiServer` di `features/stock-opname/payload.ts`. Rancangan
+    pertama yang mengirim `null` untuk setiap isian kosong akan menimpa
+    hitungan staf lain.
+16. **Izin alternatif sebuah endpoint dinyatakan di `IZIN_HALAMAN`** sebagai
+    array di dalam daftar syarat (`SyaratIzin`), bukan sebagai fungsi izin per
+    halaman. Dengan begitu `bolehBukaHalaman` dan `bolehBukaGrup` tetap satu
+    pintu untuk sidebar dan gate halaman. Aturan izin untuk tombol dan data
+    di dalam halaman tetap di `features/<modul>/izin.ts` (butir 9 dan 14).

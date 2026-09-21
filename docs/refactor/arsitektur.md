@@ -120,7 +120,7 @@ diperbaiki bersama modulnya (Langkah migrasi satu modul, langkah 3).
 - `session.ts` — store token dan payload di memori. `tandaiKeluar()` hanya mengakhiri sesi pengguna; `akhiriSesi()` mengakhiri keduanya (logout).
 - `sessionChannel.ts` — koordinasi refresh antar tab lewat `BroadcastChannel`.
 - `useSession.ts` — hook: `pengguna`, `permissions`, `status`, `sudahMasuk`, `adaTokenAkun`.
-- `permissions.ts` — `IZIN`, `IZIN_HALAMAN`, `bolehBukaHalaman`, `bolehBukaGrup`.
+- `permissions.ts` — `IZIN`, `IZIN_HALAMAN`, `bolehBukaHalaman`, `bolehBukaGrup`. Syarat di `IZIN_HALAMAN` berupa satu izin, atau array izin yang cukup dipenuhi salah satunya (`SyaratIzin`), untuk endpoint yang menerima izin alternatif (`keputusan.md` butir 16).
 
 ### `lib/queryKeys.ts`
 Hierarkis. Setiap domain punya akar `semua`, lalu `daftar(filter)` dan
@@ -153,9 +153,9 @@ Isi tiap `features/` yang sudah ada:
 | `role` | `api.ts`, `hooks.ts`, `constants.ts`, `form-role.tsx` | `form-role.tsx` dipakai halaman edit dan kostum; `useLevelPenggunaAktif` dipakai lintas modul |
 | `produk` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `izin.ts`, `form-produk.tsx` | `form-produk.tsx` dipakai halaman buat dan edit; `useDaftarProduk` dipakai halaman kategori, pajak, dan buat penjualan; `bolehBacaProduk` menerima `read-produk` atau `akses-pos` |
 | `kategori` | `api.ts`, `hooks.ts`, `schema.ts`, `pesan.ts` | `useDaftarKategori` dipakai form produk; `pesan.ts` menentukan field duplikat karena respons backend tidak dapat diandalkan |
-| `stock-adjustment` | `api.ts`, `hooks.ts`, `tampilan.ts` | Hanya baca; `useStockAdjustment` tidak mengulang permintaan saat 404; `tampilan.ts` menampilkan `-` untuk nilai yang salah dari mapper backend, dikendalikan `MAPPER_ADJUSTMENT_SUDAH_BENAR` |
-| `jurnal-stok` | `api.ts`, `hooks.ts`, `filter.ts`, `tampilan.ts`, `halaman-jurnal-stok.tsx` | Hanya baca; komponen halaman dipakai outlet dan gudang, dibedakan lewat `ruang`, `lingkup` (satu lokasi atau tipe lokasi), `penghalang`, dan `pemilihLokasi` (owner di ruang outlet) |
-| `stock-opname` | `api.ts`, `hooks.ts`, `payload.ts`, `izin.ts`, `halaman-daftar-stock-opname.tsx`, `halaman-detail-stock-opname.tsx`, `form-buat-stock-opname.tsx` | Ketiga komponen dipakai outlet dan gudang lewat `ruang` dan `TEKS`. Daftar menerima `lingkup` dan `pemilihLokasi`; form buat menerima `sumberLokasi` (tetap atau pilih). `payload.ts` hanya mengirim hitungan yang terisi; `izin.ts` memuat `bolehHitungOpname` dan `bolehTinjauOpname`; `useStockOpname` tidak mengulang permintaan saat 404 |
+| `stock-adjustment` | `api.ts`, `hooks.ts`, `tampilan.ts`, `tautan-sumber.tsx` | Hanya baca; `useStockAdjustment` tidak mengulang permintaan saat 404. `tampilan.ts` menyusun baris item (`susunBarisItem`: saldo saat disetujui, stok saat draf bila berbeda, dan koreksi) dan sumber (`susunSumber`: label beserta tautan ke dokumen opname di ruang sesuai tipe lokasi); `tautan-sumber.tsx` dipakai daftar dan detail |
+| `jurnal-stok` | `api.ts`, `hooks.ts`, `filter.ts`, `tampilan.ts`, `halaman-jurnal-stok.tsx` | Hanya baca; komponen halaman dipakai outlet dan gudang, dibedakan lewat `ruang`, `lingkup` (satu lokasi atau tipe lokasi), `penghalang`, dan `pemilihLokasi` (owner di ruang outlet). `useDaftarJurnalStok(lingkup)` mengirim `locationID` untuk lingkup satu lokasi lewat `filterServer` (diabaikan backend hari ini) dan tidak meminta data selama lingkup belum siap; penyaringan klien lewat `filter.ts` tetap wajib |
+| `stock-opname` | `api.ts`, `hooks.ts`, `payload.ts`, `izin.ts`, `halaman-daftar-stock-opname.tsx`, `halaman-detail-stock-opname.tsx`, `form-buat-stock-opname.tsx` | Ketiga komponen dipakai outlet dan gudang lewat `ruang` dan `TEKS`. Daftar menerima `lingkup` dan `pemilihLokasi`; form buat menerima `sumberLokasi` (tetap atau pilih). `payload.ts` hanya mengirim item yang berubah dibanding data server (`petakanNilaiServer`), dikendalikan `SERVER_TERIMA_HITUNGAN_KOSONG` selama validator backend menolak hitungan kosong; `izin.ts` memuat `bolehHitungOpname` dan `bolehTinjauOpname`; `useStockOpname` tidak mengulang permintaan saat 404 |
 | `pengajuan-stok` | `api.ts`, `hooks.ts`, `filter.ts`, `izin.ts`, `halaman-daftar-pengajuan-stok.tsx` | Komponen daftar dipakai outlet dan gudang lewat `ruang` dan `TEKS` (tab, label status, kolom lokasi, tombol baris), `lingkup`, `pemilihLokasi`, dan `penghalang`. `filter.ts` menyaring per ruang (tipe lokasi, draf, pencarian); `izin.ts` mencerminkan aturan status per izin di `pengajuanStokService.getAll`. Detail, edit, dan buat belum dimigrasikan |
 
 Cara memeriksa apakah sebuah modul sudah dimigrasikan: halamannya tidak lagi
@@ -183,6 +183,10 @@ terbukti menjaga `tsc` tetap hijau di tiap langkah:
 2. **Periksa kontrak.** Buka `docs/kontrak/endpoint.md` (bagian 3.1 dan 3.3)
    dan `docs/kontrak/payload.md` untuk modul itu. Bila ada field yang
    meragukan, periksa validator dan service backend sebelum memutuskan.
+   Untuk field referensi, grep `.populate("<field>"` di service: isinya bisa
+   objek, bukan id (`referenceID` stock adjustment sempat ditipekan string
+   dan membuat halaman crash). Pemanggil validator dicari di seluruh backend,
+   termasuk `services/` (`backend.md`).
 3. **Perbaiki tipe** di `types/` agar memakai `id` dan sesuai bentuk respons
    nyata. Jalankan `tsc`; error yang muncul adalah peta migrasinya. Bereskan
    seluruh error itu dulu (umumnya penggantian `_id` menjadi `id`) sampai `tsc`
