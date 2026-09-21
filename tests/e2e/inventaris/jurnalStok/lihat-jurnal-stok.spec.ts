@@ -98,7 +98,10 @@ test.describe("Jurnal stok", () => {
     const idTarget = idDari(target!.locationID);
 
     await page.getByText("Semua Outlet", { exact: true }).click();
+    const tTersaring = page.waitForResponse(responsGet(/\/api\/jurnalstok\?(.*&)?locationID=/i));
     await page.getByRole("option", { name: target!.locationID!.nama!, exact: true }).click();
+    const rTersaring = await tTersaring;
+    expect(new URL(rTersaring.url()).searchParams.get("locationID")).toBe(idTarget);
     await periksaJumlahBaris(page, jurnal.filter((j) => idDari(j.locationID) === idTarget).length);
   });
 

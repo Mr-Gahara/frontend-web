@@ -88,7 +88,7 @@ export default function HalamanJurnalStok({
   const [arah, setArah] = useState<FilterArah>("ALL");
   const [alasan, setAlasan] = useState<FilterAlasan>("ALL");
 
-  const { data: semua = [], isLoading, isError } = useDaftarJurnalStok();
+  const { data: semua = [], isLoading, isError } = useDaftarJurnalStok(lingkup);
 
   const daftar = useMemo(
     () =>

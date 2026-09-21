@@ -4,6 +4,7 @@ import {
   formatKoreksi,
   formatTanggalAdjustment,
   susunBarisItem,
+  susunSumber,
 } from "@/features/stock-adjustment/tampilan";
 
 const itemDasar: StockAdjustmentItem = {
@@ -12,50 +13,78 @@ const itemDasar: StockAdjustmentItem = {
   barangInventoryID: null,
   namaSnapshot: "susu full cream",
   satuanSnapshot: "ml",
-  qtySebelum: 0,
+  qtySnapshot: 30000,
+  qtyCurrent: 30000,
   qtyPhysical: 35000,
-  qtyAdjustment: 0,
-  catatanItem: null,
+  qtyDifference: 5000,
 };
 
 describe("susunBarisItem", () => {
-  it("menyembunyikan saldo sistem dan koreksi selama mapper backend belum benar", () => {
-    const baris = susunBarisItem(itemDasar, false);
-    expect(baris.qtySistem).toBeNull();
-    expect(baris.qtyKoreksi).toBeNull();
-    expect(baris.arah).toBeNull();
+  it("memakai saldo saat disetujui dan koreksi dari server", () => {
+    const baris = susunBarisItem(itemDasar);
+    expect(baris.qtySistem).toBe(30000);
     expect(baris.qtyFisik).toBe(35000);
-  });
-
-  it("memakai nilai server setelah mapper benar", () => {
-    const baris = susunBarisItem(
-      { ...itemDasar, qtySebelum: 10, qtyPhysical: 15, qtyAdjustment: 5 },
-      true,
-    );
-    expect(baris.qtySistem).toBe(10);
-    expect(baris.qtyKoreksi).toBe(5);
+    expect(baris.qtyKoreksi).toBe(5000);
     expect(baris.arah).toBe("tambah");
   });
 
-  it("menentukan arah kurang dan tetap", () => {
-    expect(susunBarisItem({ ...itemDasar, qtyAdjustment: -3 }, true).arah).toBe("kurang");
-    expect(susunBarisItem({ ...itemDasar, qtyAdjustment: 0 }, true).arah).toBe("tetap");
+  it("menampilkan stok saat draf hanya bila berbeda dari saldo saat disetujui", () => {
+    expect(susunBarisItem(itemDasar).qtySaatDraf).toBeNull();
+    expect(susunBarisItem({ ...itemDasar, qtySnapshot: 28000 }).qtySaatDraf).toBe(28000);
   });
 
-  it("mengganti nama, satuan, dan catatan kosong dengan tanda strip", () => {
-    const baris = susunBarisItem(
-      { ...itemDasar, namaSnapshot: null, satuanSnapshot: null, catatanItem: null },
-      false,
-    );
+  it("menentukan arah kurang dan tetap", () => {
+    expect(susunBarisItem({ ...itemDasar, qtyDifference: -3 }).arah).toBe("kurang");
+    expect(susunBarisItem({ ...itemDasar, qtyDifference: 0 }).arah).toBe("tetap");
+  });
+
+  it("mengganti nama dan satuan kosong dengan tanda strip", () => {
+    const baris = susunBarisItem({ ...itemDasar, namaSnapshot: null, satuanSnapshot: null });
     expect(baris.nama).toBe("-");
     expect(baris.satuan).toBe("-");
-    expect(baris.catatan).toBe("-");
+  });
+});
+
+describe("susunSumber", () => {
+  const lokasiOutlet = { id: "l1", nama: "Outlet A", tipe: "Outlet" };
+
+  const opname = { id: "op1", nomorOpname: "SO-001", tanggal: null };
+
+  it("menautkan dokumen opname di ruang outlet untuk lokasi outlet", () => {
+    expect(
+      susunSumber({ referenceType: "STOCK_OPNAME", referenceID: opname, lokasi: lokasiOutlet }),
+    ).toEqual({
+      label: "Stock Opname SO-001",
+      href: "/dashboard/outlet/inventaris/stockOpname/op1",
+    });
+  });
+
+  it("menautkan dokumen opname di ruang gudang untuk lokasi gudang", () => {
+    const lokasiGudang = { ...lokasiOutlet, tipe: "Gudang" };
+    expect(
+      susunSumber({ referenceType: "STOCK_OPNAME", referenceID: opname, lokasi: lokasiGudang }).href,
+    ).toBe("/dashboard/gudang/stockOpname/op1");
+  });
+
+  it("tidak menautkan opname yang dokumennya sudah tidak ada", () => {
+    expect(
+      susunSumber({ referenceType: "STOCK_OPNAME", referenceID: null, lokasi: lokasiOutlet }),
+    ).toEqual({ label: "Stock Opname", href: null });
+  });
+
+  it("tidak menautkan koreksi manual dan sumber yang tidak dikirim", () => {
+    expect(
+      susunSumber({ referenceType: "MANUAL_CORRECTION", referenceID: null, lokasi: lokasiOutlet }),
+    ).toEqual({ label: "Koreksi Manual", href: null });
+    expect(susunSumber({ referenceType: null, referenceID: null, lokasi: null })).toEqual({
+      label: "-",
+      href: null,
+    });
   });
 });
 
 describe("formatKoreksi", () => {
-  it("memberi tanda plus untuk koreksi positif dan strip untuk nilai kosong", () => {
-    expect(formatKoreksi(null)).toBe("-");
+  it("memberi tanda plus untuk koreksi positif", () => {
     expect(formatKoreksi(5)).toBe("+5");
     expect(formatKoreksi(-3)).toBe("-3");
     expect(formatKoreksi(0)).toBe("0");

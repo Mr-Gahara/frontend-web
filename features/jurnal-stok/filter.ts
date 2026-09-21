@@ -1,4 +1,5 @@
 import type { AlasanJurnal, JurnalStok, TipeKoreksi } from "@/types/jurnalStok";
+import type { FilterJurnalStok } from "./api";
 
 export type FilterArah = TipeKoreksi | "ALL";
 export type FilterAlasan = AlasanJurnal | "ALL";
@@ -14,6 +15,17 @@ export interface KriteriaJurnal {
  * lokasi bertipe Gudang. Backend mengirim jurnal seluruh tenant.
  */
 export type LingkupJurnal = { lokasiID: string } | { tipeLokasi: string };
+
+/**
+ * Filter yang dikirim ke server untuk sebuah lingkup. Hanya lingkup satu
+ * lokasi yang membawa locationID; lingkup tipe lokasi disaring di klien.
+ * Hari ini backend mengabaikan query ini (jurnalStokController tidak membaca
+ * req.query), sehingga penyaringan klien lewat dalamLingkup tetap wajib.
+ * Dikirim agar data langsung tersaring di server begitu backend membacanya.
+ */
+export function filterServer(lingkup: LingkupJurnal): FilterJurnalStok {
+  return "lokasiID" in lingkup ? { locationID: lingkup.lokasiID } : {};
+}
 
 export function dalamLingkup(jurnal: JurnalStok, lingkup: LingkupJurnal): boolean {
   if ("lokasiID" in lingkup) return jurnal.locationID?.id === lingkup.lokasiID;

@@ -55,7 +55,27 @@ describe("bolehBukaGrup", () => {
     expect(bolehBukaGrup(anakInventaris, [IZIN.penjualan])).toBe(false);
   });
 
-  it("tidak lagi bergantung pada read-inventory-outlet yang tidak diperiksa backend", () => {
-    expect(bolehBukaGrup(anakInventaris, ["read-inventory-outlet"])).toBe(false);
+  it("membuka grup lewat bahan baku bila read-inventory-outlet disertai read-location", () => {
+    expect(bolehBukaGrup(anakInventaris, [IZIN.inventoryOutlet])).toBe(false);
+    expect(bolehBukaGrup(anakInventaris, [IZIN.location, IZIN.inventoryOutlet])).toBe(true);
+  });
+});
+
+describe("gate stok dengan izin alternatif", () => {
+  it("membuka stok outlet dan bahan baku dengan read-inventory-outlet tanpa read-inventory", () => {
+    const dimiliki = [IZIN.location, IZIN.inventoryOutlet];
+    expect(bolehBukaHalaman("/dashboard/outlet/inventaris/stok", dimiliki)).toBe(true);
+    expect(bolehBukaHalaman("/dashboard/outlet/inventaris/bahanBaku", dimiliki)).toBe(true);
+    expect(bolehBukaHalaman("/dashboard/gudang/inventaris", [...dimiliki, IZIN.bahan])).toBe(false);
+  });
+
+  it("membuka inventaris gudang dengan read-inventory-gudang tanpa read-inventory", () => {
+    const dimiliki = [IZIN.location, IZIN.inventoryGudang, IZIN.bahan];
+    expect(bolehBukaHalaman("/dashboard/gudang/inventaris", dimiliki)).toBe(true);
+    expect(bolehBukaHalaman("/dashboard/outlet/inventaris/stok", dimiliki)).toBe(false);
+  });
+
+  it("tetap mensyaratkan izin di luar kelompok alternatif", () => {
+    expect(bolehBukaHalaman("/dashboard/outlet/inventaris/stok", [IZIN.inventoryOutlet])).toBe(false);
   });
 });

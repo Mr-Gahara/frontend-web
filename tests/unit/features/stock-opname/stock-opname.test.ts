@@ -1,35 +1,94 @@
 import { describe, expect, it } from "vitest";
-import { susunPayloadHitungan } from "@/features/stock-opname/payload";
+import { petakanNilaiServer, susunPayloadHitungan } from "@/features/stock-opname/payload";
 import { bolehHitungOpname, bolehTinjauOpname } from "@/features/stock-opname/izin";
 
 describe("susunPayloadHitungan", () => {
-  it("hanya mengirim item yang hitungannya terisi", () => {
-    const payload = susunPayloadHitungan({
-      a: { qtyPhysical: "12", catatanItem: "" },
-      b: { qtyPhysical: "", catatanItem: "belum dihitung" },
-      c: { qtyPhysical: "0", catatanItem: "" },
+  const server = {
+    a: { qtyPhysical: null, catatanItem: null },
+    b: { qtyPhysical: 10, catatanItem: "sudah dihitung" },
+    c: { qtyPhysical: 0, catatanItem: null },
+  };
+
+  describe("selama server belum menerima hitungan kosong", () => {
+    it("hanya mengirim item yang berubah, selalu dengan hitungannya", () => {
+      const hasil = susunPayloadHitungan(
+        {
+          a: { qtyPhysical: "12", catatanItem: "" },
+          b: { qtyPhysical: "10", catatanItem: "  perlu dicek ulang  " },
+          c: { qtyPhysical: "0", catatanItem: "" },
+        },
+        server,
+      );
+      expect(hasil).toEqual({
+        payload: {
+          items: [
+            { itemId: "a", qtyPhysical: 12 },
+            { itemId: "b", qtyPhysical: 10, catatanItem: "perlu dicek ulang" },
+          ],
+        },
+        ditahan: [],
+      });
     });
-    expect(payload).toEqual({
-      items: [
-        { itemId: "a", qtyPhysical: 12 },
-        { itemId: "c", qtyPhysical: 0 },
-      ],
+
+    it("menahan item berubah yang hitungannya kosong", () => {
+      const hasil = susunPayloadHitungan(
+        {
+          a: { qtyPhysical: "", catatanItem: "belum sempat" },
+          b: { qtyPhysical: " ", catatanItem: "sudah dihitung" },
+        },
+        server,
+      );
+      expect(hasil).toEqual({ payload: { items: [] }, ditahan: ["a", "b"] });
+    });
+
+    it("mengirim string kosong untuk catatan yang dihapus", () => {
+      expect(
+        susunPayloadHitungan({ b: { qtyPhysical: "10", catatanItem: "   " } }, server).payload.items,
+      ).toEqual([{ itemId: "b", qtyPhysical: 10, catatanItem: "" }]);
+    });
+
+    it("tidak mengirim dan tidak menahan apa pun bila tidak ada perubahan", () => {
+      expect(
+        susunPayloadHitungan({ a: { qtyPhysical: " ", catatanItem: "" } }, server),
+      ).toEqual({ payload: { items: [] }, ditahan: [] });
     });
   });
 
-  it("merapikan catatan dan tidak mengirim catatan kosong", () => {
-    const payload = susunPayloadHitungan({
-      a: { qtyPhysical: "5", catatanItem: "  kemasan rusak  " },
-      b: { qtyPhysical: "7", catatanItem: "   " },
+  describe("setelah server menerima hitungan kosong", () => {
+    it("mengirim null untuk hitungan yang dikosongkan dan hanya field yang berubah", () => {
+      const hasil = susunPayloadHitungan(
+        {
+          a: { qtyPhysical: "", catatanItem: "belum sempat" },
+          b: { qtyPhysical: " ", catatanItem: "sudah dihitung" },
+          c: { qtyPhysical: "0", catatanItem: "" },
+        },
+        server,
+        true,
+      );
+      expect(hasil).toEqual({
+        payload: {
+          items: [
+            { itemId: "a", catatanItem: "belum sempat" },
+            { itemId: "b", qtyPhysical: null },
+          ],
+        },
+        ditahan: [],
+      });
     });
-    expect(payload.items).toEqual([
-      { itemId: "a", qtyPhysical: 5, catatanItem: "kemasan rusak" },
-      { itemId: "b", qtyPhysical: 7 },
-    ]);
   });
+});
 
-  it("menghasilkan daftar kosong bila belum ada hitungan", () => {
-    expect(susunPayloadHitungan({ a: { qtyPhysical: " ", catatanItem: "" } })).toEqual({ items: [] });
+describe("petakanNilaiServer", () => {
+  it("memetakan item menurut itemId dan menyeragamkan nilai kosong menjadi null", () => {
+    expect(
+      petakanNilaiServer([
+        { itemId: "a", qtyPhysical: 5, catatanItem: "x" },
+        { itemId: "b" },
+      ]),
+    ).toEqual({
+      a: { qtyPhysical: 5, catatanItem: "x" },
+      b: { qtyPhysical: null, catatanItem: null },
+    });
   });
 });
 

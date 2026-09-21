@@ -51,16 +51,32 @@ export interface StockOpname {
   updatedAt: string;
 }
 
+/**
+ * Item adjustment dari mappers/stockOpnameMapper.js. Keempat kuantitas wajib
+ * di models/stockAdjustmentModel.js, sehingga selalu berisi nilai nyata.
+ */
 export interface StockAdjustmentItem {
   itemId: string;
   bahanBakuID: string | null;
   barangInventoryID: string | null;
   namaSnapshot: string | null;
   satuanSnapshot: string | null;
-  qtySebelum: number;
+  /** Stok sistem saat draf opname dibuat. */
+  qtySnapshot: number;
+  /** Stok sistem saat approval, dasar perhitungan koreksi. */
+  qtyCurrent: number;
   qtyPhysical: number;
-  qtyAdjustment: number;
-  catatanItem: string | null;
+  /** qtyPhysical - qtyCurrent; positif menambah, negatif mengurangi. */
+  qtyDifference: number;
+}
+
+export type SumberAdjustment = "STOCK_OPNAME" | "MANUAL_CORRECTION";
+
+/** Dokumen stock opname hasil populate pada respons adjustment. */
+export interface RelasiOpname {
+  id: string;
+  nomorOpname: string;
+  tanggal: string | null;
 }
 
 export interface StockAdjustment {
@@ -70,9 +86,16 @@ export interface StockAdjustment {
   tanggal: string | null;
   lokasi: LokasiRelasi | null;
   pic: RelasiBase | null;
-  stockOpnameID: string | null;
+  referenceType: SumberAdjustment | null;
+  /**
+   * Dokumen stock opname pemicu, berisi objek hasil populate
+   * (stockOpnameService baris 557 untuk daftar dan 581 untuk detail), bukan
+   * string id. Null untuk koreksi manual atau bila dokumen opnamenya sudah
+   * tidak ada.
+   */
+  referenceID: RelasiOpname | null;
   items?: StockAdjustmentItem[];
-  catatan: string | null;
+  alasan: string | null;
   createdAt: string;
   updatedAt: string;
 }

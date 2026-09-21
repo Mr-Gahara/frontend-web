@@ -3,9 +3,12 @@
  *
  * Sebelumnya nama permission ditulis langsung di sidebar, dan beberapa di
  * antaranya tidak memberi akses ke data halamannya:
- *   - read-inventory-outlet dan read-inventory-gudang tidak diperiksa route
- *     mana pun, sehingga menu inventaris tersembunyi walau pengguna berhak
- *     atas produk, kategori, atau stok
+ *   - grup menu inventaris memakai read-inventory-outlet dan
+ *     read-inventory-gudang, sehingga menu tersembunyi walau pengguna berhak
+ *     atas produk atau kategori. Kedua izin itu sah untuk membaca stok:
+ *     GET /inventory menerima salah satu dari read-inventory,
+ *     read-inventory-gudang, dan read-inventory-outlet (inventoryRoute.js),
+ *     sehingga keduanya dipakai sebagai alternatif pada gate halaman stok
  *   - menu Pengiriman Stok memakai read-pengiriman-stok padahal endpointnya
  *     mewajibkan read-transfer-stok
  *   - banyak menu inventaris tanpa gate sama sekali, sehingga pengguna
@@ -25,6 +28,8 @@ export const IZIN = {
   kategori: "read-kategori",
   bahan: "read-bahan",
   inventory: "read-inventory",
+  inventoryOutlet: "read-inventory-outlet",
+  inventoryGudang: "read-inventory-gudang",
   location: "read-location",
   jurnalStok: "read-jurnal-stok",
   stockOpname: "read-stock-opname",
@@ -46,6 +51,12 @@ export const IZIN = {
 export type Izin = (typeof IZIN)[keyof typeof IZIN];
 
 /**
+ * Satu syarat gate: satu izin, atau array izin yang cukup dipenuhi salah
+ * satunya, untuk endpoint yang menerima beberapa izin alternatif.
+ */
+export type SyaratIzin = Izin | readonly Izin[];
+
+/**
  * Izin yang dibutuhkan setiap halaman.
  *
  * Halaman ditampilkan bila pengguna memiliki SELURUH izin dalam daftar,
@@ -60,7 +71,7 @@ export type Izin = (typeof IZIN)[keyof typeof IZIN];
  * siap. Untuk data referensi yang memang dibutuhkan kasir saat transaksi
  * (aset, diskon, metode pembayaran, tarif, tipe aset), gate tidak dipasang.
  */
-export const IZIN_HALAMAN: Record<string, readonly Izin[]> = {
+export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   // Outlet
   "/dashboard/outlet": [],
   "/dashboard/outlet/penjualan": [IZIN.penjualan],
@@ -77,8 +88,8 @@ export const IZIN_HALAMAN: Record<string, readonly Izin[]> = {
   // Inventaris outlet
   "/dashboard/outlet/inventaris/produk": [IZIN.produk],
   "/dashboard/outlet/inventaris/kategori": [IZIN.kategori],
-  "/dashboard/outlet/inventaris/bahanBaku": [IZIN.location, IZIN.inventory],
-  "/dashboard/outlet/inventaris/stok": [IZIN.location, IZIN.inventory],
+  "/dashboard/outlet/inventaris/bahanBaku": [IZIN.location, [IZIN.inventory, IZIN.inventoryOutlet]],
+  "/dashboard/outlet/inventaris/stok": [IZIN.location, [IZIN.inventory, IZIN.inventoryOutlet]],
   "/dashboard/outlet/inventaris/stockOpname": [IZIN.stockOpname, IZIN.location],
   "/dashboard/outlet/inventaris/stockAdjustment": [IZIN.stockAdjustment],
   "/dashboard/outlet/inventaris/jurnalStok": [IZIN.jurnalStok, IZIN.location],
@@ -93,7 +104,7 @@ export const IZIN_HALAMAN: Record<string, readonly Izin[]> = {
 
   // Gudang
   "/dashboard/gudang": [],
-  "/dashboard/gudang/inventaris": [IZIN.location, IZIN.inventory, IZIN.bahan],
+  "/dashboard/gudang/inventaris": [IZIN.location, [IZIN.inventory, IZIN.inventoryGudang], IZIN.bahan],
   "/dashboard/gudang/jurnalStok": [IZIN.jurnalStok],
   "/dashboard/gudang/stockOpname": [IZIN.stockOpname],
   "/dashboard/gudang/pengajuanStok": [IZIN.pengajuanStok],
@@ -107,6 +118,9 @@ export const IZIN_HALAMAN: Record<string, readonly Izin[]> = {
 /**
  * Menentukan apakah sebuah halaman boleh ditampilkan.
  *
+ * Setiap syarat di IZIN_HALAMAN wajib terpenuhi. Syarat berupa array
+ * terpenuhi bila salah satu izin di dalamnya dimiliki.
+ *
  * Owner memegang seluruh permission di backend (role level 100), sehingga
  * pemeriksaan berbasis daftar permission sudah mencakupnya tanpa perlu
  * memeriksa nama role.
@@ -114,7 +128,11 @@ export const IZIN_HALAMAN: Record<string, readonly Izin[]> = {
 export function bolehBukaHalaman(href: string, dimiliki: string[]): boolean {
   const butuh = IZIN_HALAMAN[href];
   if (!butuh) return true;
-  return butuh.every((i) => dimiliki.includes(i));
+  return butuh.every((syarat) =>
+    typeof syarat === "string"
+      ? dimiliki.includes(syarat)
+      : syarat.some((i) => dimiliki.includes(i)),
+  );
 }
 
 /**

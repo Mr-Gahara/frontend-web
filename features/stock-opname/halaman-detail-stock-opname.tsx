@@ -15,7 +15,7 @@ import {
   useStockOpname,
   useTolakOpname,
 } from "./hooks";
-import { susunPayloadHitungan } from "./payload";
+import { petakanNilaiServer, susunPayloadHitungan } from "./payload";
 import { bolehHitungOpname, bolehTinjauOpname } from "./izin";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
@@ -175,11 +175,21 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
   });
 
   const simpanHitungan = () => {
-    const payload = susunPayloadHitungan(editedItems);
-    if (payload.items.length === 0) {
-      toast.error("Belum ada hitungan", {
-        description: "Isi minimal satu stok fisik sebelum menyimpan.",
+    const { payload, ditahan } = susunPayloadHitungan(
+      editedItems,
+      petakanNilaiServer(opname?.items ?? []),
+    );
+    if (ditahan.length > 0) {
+      toast.warning("Sebagian perubahan tidak disimpan", {
+        description: `${ditahan.length} item dengan hitungan kosong tidak dikirim karena server belum menerima hitungan kosong. Isi angkanya untuk menyimpan item itu.`,
       });
+    }
+    if (payload.items.length === 0) {
+      if (ditahan.length === 0) {
+        toast.info("Tidak ada perubahan", {
+          description: "Tidak ada perubahan untuk disimpan.",
+        });
+      }
       return;
     }
     saveItemsMutation.mutate(payload);

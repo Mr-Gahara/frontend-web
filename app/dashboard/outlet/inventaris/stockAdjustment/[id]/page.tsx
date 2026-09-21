@@ -5,11 +5,11 @@ import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { isNotFound } from "@/lib/api/error";
 import { useStockAdjustment } from "@/features/stock-adjustment/hooks";
 import {
-  MAPPER_ADJUSTMENT_SUDAH_BENAR,
   formatKoreksi,
   formatTanggalAdjustment,
   susunBarisItem,
 } from "@/features/stock-adjustment/tampilan";
+import { TautanSumber } from "@/features/stock-adjustment/tautan-sumber";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -141,11 +141,17 @@ export default function StockAdjustmentDetailPage() {
           </div>
           <div className="flex-1 p-4 bg-white/60 rounded-xl border border-[#0A2947]/5 min-h-25">
             <p className="text-sm font-bold text-[#0A2947]/40 italic leading-relaxed">
-              {MAPPER_ADJUSTMENT_SUDAH_BENAR
-                ? `"${adjustment.catatan || "Tidak ada alasan spesifik yang dicantumkan."}"`
-                : "Alasan belum dikirim server."}
+              {adjustment.alasan ? (
+                <>&quot;{adjustment.alasan}&quot;</>
+              ) : (
+                "Tidak ada alasan yang dicantumkan."
+              )}
             </p>
           </div>
+          <p className="text-sm font-medium text-[#0A2947]/70">
+            Sumber Dokumen:{" "}
+            <TautanSumber adjustment={adjustment} className="font-bold text-[#0A2947]" />
+          </p>
         </div>
       </div>
 
@@ -155,11 +161,6 @@ export default function StockAdjustmentDetailPage() {
           <h2 className="font-bold text-[#0A2947]">
             Rekapitulasi Perubahan Saldo Fisik
           </h2>
-          {!MAPPER_ADJUSTMENT_SUDAH_BENAR && (
-            <p className="text-xs font-medium text-[#0A2947]/60">
-              Saldo sistem dan koreksi belum dikirim server.
-            </p>
-          )}
         </div>
 
         <div className="overflow-x-auto">
@@ -168,13 +169,12 @@ export default function StockAdjustmentDetailPage() {
               <tr>
                 <th className="px-5 py-4 font-bold">Nama Item</th>
                 <th className="px-5 py-4 font-bold text-center">
-                  Saldo Sistem (Awal)
+                  Saldo Sistem (Saat Disetujui)
                 </th>
                 <th className="px-5 py-4 font-bold text-center">Fisik Riil</th>
                 <th className="px-5 py-4 font-bold text-center">
                   Koreksi (Delta)
                 </th>
-                <th className="px-5 py-4 font-bold min-w-50">Catatan Ekstra</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#0A2947]/5">
@@ -200,7 +200,12 @@ export default function StockAdjustmentDetailPage() {
                     </td>
 
                     <td className="px-5 py-4 text-center font-bold text-[#0A2947]/60 font-mono">
-                      {baris.qtySistem ?? "-"}
+                      {baris.qtySistem}
+                      {baris.qtySaatDraf !== null && (
+                        <p className="text-[10px] font-medium text-[#0A2947]/50 font-sans">
+                          Saat draf: {baris.qtySaatDraf}
+                        </p>
+                      )}
                     </td>
 
                     <td className="px-5 py-4 text-center font-bold text-[#0A2947] font-mono bg-[#0A2947]/5">
@@ -214,10 +219,6 @@ export default function StockAdjustmentDetailPage() {
                       >
                         {formatKoreksi(baris.qtyKoreksi)}
                       </Badge>
-                    </td>
-
-                    <td className="px-5 py-4 text-sm font-medium text-[#0A2947]/70 italic line-clamp-2">
-                      {baris.catatan}
                     </td>
                   </tr>
                 );

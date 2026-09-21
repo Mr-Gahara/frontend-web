@@ -7,6 +7,7 @@ import type { StockAdjustment } from "@/types/stockOpname";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useDaftarStockAdjustment } from "@/features/stock-adjustment/hooks";
 import { formatTanggalAdjustment } from "@/features/stock-adjustment/tampilan";
+import { TautanSumber } from "@/features/stock-adjustment/tautan-sumber";
 
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,18 @@ export default function StockAdjustmentListPage() {
           <span className="text-sm font-medium text-[#0A2947]/70">
             {formatTanggalAdjustment(row.original.tanggal)}
           </span>
+        ),
+      },
+      {
+        id: "sumber",
+        header: () => (
+          <div className="text-xs font-bold text-[#0A2947]/60">Sumber</div>
+        ),
+        cell: ({ row }) => (
+          <TautanSumber
+            adjustment={row.original}
+            className="text-sm font-bold text-[#0A2947]"
+          />
         ),
       },
       {

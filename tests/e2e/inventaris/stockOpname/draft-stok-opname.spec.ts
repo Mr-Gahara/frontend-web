@@ -1,9 +1,14 @@
-import { test, expect, Page, Response } from "@playwright/test";
+import { test, expect, Page, Request, Response } from "@playwright/test";
 
 const URL_DAFTAR_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/stockOpname";
 const URL_BUAT_OUTLET = `${URL_DAFTAR_OUTLET}/buatStockOpname`;
 
-type ItemMentah = { itemId: string; namaSnapshot: string; qtySystemSnapshot: number };
+type ItemMentah = {
+  itemId: string;
+  namaSnapshot: string;
+  qtySystemSnapshot: number;
+  qtyPhysical: number | null;
+};
 type DetailMentah = { id: string; status: string; items: ItemMentah[] };
 
 async function login(page: Page) {
@@ -31,7 +36,7 @@ test.describe("Draft stock opname outlet", () => {
     await login(page);
   });
 
-  test("simpan sebagian hitungan, lalu batalkan langsung dari DRAFT", async ({ page }) => {
+  test("simpan sebagian hitungan, tahan pengosongan, lalu batalkan langsung dari DRAFT", async ({ page }) => {
     test.setTimeout(120_000);
     let id = "";
     let detail: DetailMentah;
@@ -80,6 +85,35 @@ test.describe("Draft stock opname outlet", () => {
       });
     });
 
+    await test.step("pengosongan hitungan tersimpan ditahan dengan pesan", async () => {
+      const responsDetail = (r: Response) =>
+        r.request().method() === "GET" && r.url().split("?")[0].endsWith("/api/stockopname/" + id);
+      const pertama = detail.items[0];
+      const baris = page.locator("table tbody tr").nth(0);
+      const tombolSimpan = page.getByRole("button", { name: "Simpan Angka Sementara" });
+
+      await page.reload({ waitUntil: "commit" });
+      const tersimpan = await page
+        .waitForResponse(responsDetail)
+        .then(async (r) => ((await r.json()) as { data: DetailMentah }).data.items[0]);
+      expect(tersimpan.qtyPhysical).toBe(pertama.qtySystemSnapshot);
+      await expect(baris.getByPlaceholder("0")).toHaveValue(String(pertama.qtySystemSnapshot));
+
+      let patchTerkirim = 0;
+      const catatPatch = (req: Request) => {
+        if (req.method() === "PATCH" && req.url().includes("/api/stockopname/")) patchTerkirim++;
+      };
+      page.on("request", catatPatch);
+      await baris.getByPlaceholder("0").fill("");
+      await tombolSimpan.click();
+      await expect(page.getByText("Sebagian perubahan tidak disimpan")).toBeVisible();
+      await baris.getByPlaceholder("0").fill(String(pertama.qtySystemSnapshot));
+      await tombolSimpan.click();
+      await expect(page.getByText("Tidak ada perubahan untuk disimpan.")).toBeVisible();
+      page.off("request", catatPatch);
+      expect(patchTerkirim).toBe(0);
+    });
+
     await test.step("batalkan dari DRAFT", async () => {
       await page.getByRole("button", { name: "Batalkan Sesi Opname" }).click();
       const dialog = page.getByRole("alertdialog");
@@ -91,6 +125,14 @@ test.describe("Draft stock opname outlet", () => {
       await expect(page.getByRole("button", { name: "Simpan Angka Sementara" })).toHaveCount(0);
     });
   });
+
+  // Menunggu backend: stockOpnameService.updateItems menjalankan validateUpdateItems
+  // yang menolak qtyPhysical null maupun tidak dikirim (kontrak/temuan.md butir 22).
+  // Setelah diperbaiki: ubah SERVER_TERIMA_HITUNGAN_KOSONG di
+  // features/stock-opname/payload.ts menjadi true, lalu tulis skenario di sini:
+  // simpan satu hitungan, kosongkan, pastikan PATCH mengirim qtyPhysical null dan
+  // dijawab 200, muat ulang dan pastikan isiannya tetap kosong, lalu batalkan draft.
+  test.fixme("hitungan tersimpan dapat dikosongkan kembali", async () => {});
 
   test("dokumen yang tidak ada menampilkan pesan dan kembali ke daftar outlet", async ({ page }) => {
     await page.goto(`${URL_DAFTAR_OUTLET}/000000000000000000000000`);

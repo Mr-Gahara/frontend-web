@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { JurnalStok } from "@/types/jurnalStok";
-import { dalamLingkup, saringJurnal } from "@/features/jurnal-stok/filter";
+import { dalamLingkup, filterServer, saringJurnal } from "@/features/jurnal-stok/filter";
 import { formatWaktuJurnal } from "@/features/jurnal-stok/tampilan";
 import { lokasiTunggal } from "@/features/inventaris/lokasi";
 
@@ -102,5 +102,11 @@ describe("lokasiTunggal", () => {
     expect(lokasiTunggal([])).toBeNull();
     expect(lokasiTunggal(null)).toBeNull();
     expect(lokasiTunggal({ nama: "tanpa id" })).toBeNull();
+  });
+});
+describe("filterServer", () => {
+  it("mengirim locationID hanya untuk lingkup satu lokasi", () => {
+    expect(filterServer({ lokasiID: "l1" })).toEqual({ locationID: "l1" });
+    expect(filterServer({ tipeLokasi: "Gudang" })).toEqual({});
   });
 });
