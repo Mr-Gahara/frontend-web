@@ -138,6 +138,20 @@ Tidak boleh dibalik tanpa pembahasan:
   `features/pengajuan-stok/izin.ts`.
 - **Kegagalan memuat daftar tampil sebagai pesan**, sejalan dengan
   keputusan submodul jurnal stok.
+- **Arah lokasi mengikuti backend** (21 September 2026): gudang asal di
+  `dariLocationID`, outlet peminta di `keLocationID`. Halaman buat dan edit
+  tetap menampilkan outlet di atas dan gudang di bawah; yang berubah hanya
+  field yang diikat dan labelnya ("Outlet Peminta", "Gudang Asal Barang").
+- **Pengajuan yang tersimpan terbalik tidak tampil di daftar mana pun**, dan
+  di detail gudang tombol setujui serta buat surat jalannya dikunci dengan
+  keterangan, agar stok tidak bergerak ke arah salah. Tolak tetap aktif.
+  Penjaga ini dipertahankan sampai backend memvalidasi tipe lokasi
+  (`kontrak/temuan.md` butir 24).
+- **Data development yang terbalik dibalik langsung di basis data**, atas
+  izin pemilik proyek karena belum ada data produksi (8 pengajuan,
+  21 September 2026).
+- **Keputusan cakupan outlet di halaman buat tetap ditahan** sebagai utang
+  sampai kondisi backend terbaru jelas (`status.md`).
 
 ## Keputusan rancangan yang mengikat
 

@@ -49,7 +49,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Inventaris: stock opname | `fc3f220` | Selesai |
 | Cakupan lokasi owner dan staf: jurnal stok dan stok outlet | `6ca6da8` | Selesai |
 | Penyesuaian backend `f27f093`: stock adjustment, gate stok, simpan hitungan opname, dan filter lokasi jurnal stok | `2b3b52d` | Selesai |
-| Inventaris: pengajuan stok, lalu transfer, pengiriman, dan penerimaan | `59e10a1` (daftar pengajuan) | **Berikutnya** (lihat Pekerjaan berikutnya): detail, edit, dan buat pengajuan |
+| Inventaris: pengajuan stok, lalu transfer, pengiriman, dan penerimaan | `59e10a1` (daftar pengajuan), `08d0a73` (arah lokasi) | **Berikutnya** (lihat Pekerjaan berikutnya): detail, edit, dan buat pengajuan |
 | Penjualan dan pembayaran | - | Belum |
 | Reservasi | - | Belum |
 | Keuangan | - | Belum |
@@ -86,7 +86,7 @@ terkecil (`arsitektur.md`, Langkah migrasi satu modul, langkah 7).
 | 2 | Jurnal stok | outlet dan gudang: daftar | 617 | Selesai (`98735d4`) |
 | 3 | Stok dan inventaris | `outlet/inventaris/stok`, `gudang/inventaris` | 1.094 | Selesai (`ad590f9`) |
 | 4 | Stock opname | outlet dan gudang: daftar, detail, buat | 2.544 | Selesai (`fc3f220`) |
-| 5 | Pengajuan stok | outlet: daftar, detail, edit, buat; gudang: daftar, detail | 2.298 | **Berikutnya**: daftar selesai (`59e10a1`); detail, edit, dan buat menyusul |
+| 5 | Pengajuan stok | outlet: daftar, detail, edit, buat; gudang: daftar, detail | 2.298 | **Berikutnya**: daftar selesai (`59e10a1`), arah lokasi dibetulkan (`08d0a73`); detail, edit, dan buat menyusul |
 | 6 | Transfer, pengiriman, penerimaan | gudang: transfer (daftar, detail, edit), pengiriman; outlet: penerimaan (daftar, detail) | 1.950 | Belum |
 
 ### Pemetaan awal (20 September 2026)
@@ -168,7 +168,8 @@ find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep 
     `features/pengajuan-stok/izin.ts`; keduanya diperbarui bersama.
   - `jenisPengajuan` `PENGIRIMAN` tidak dipakai backend maupun frontend:
     semua pengajuan adalah permintaan dari outlet ke gudang.
-  - Halaman buat dan edit memilih lokasi asal dari seluruh lokasi bertipe
+  - Halaman buat dan edit memilih outlet peminta (`keLocationID` sejak
+    `08d0a73`) dari seluruh lokasi bertipe
     Outlet untuk siapa pun, sehingga staf dapat mengajukan atas nama outlet
     lain. Keputusan produknya ditahan pemilik proyek sebagai utang
     (21 September 2026) sampai kondisi backend terbaru jelas. Pilihan yang
@@ -179,7 +180,7 @@ find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep 
   - `pengajuanStok.detail(id)` masih diisi bentuk mentah oleh detail outlet,
     edit, dan detail gudang. Migrasikan ketiganya bersama agar kunci itu
     tidak berisi dua bentuk data.
-  - Usulan tertunda: daftar outlet tidak menampilkan outlet asal, sehingga
+  - Usulan tertunda: daftar outlet tidak menampilkan outlet peminta, sehingga
     owner di pilihan "Semua Outlet" tidak dapat membedakan outlet pengaju.
   - Pemetaan 21 September 2026 atas detail outlet, edit, buat, dan detail
     gudang (1.824 baris): keempatnya belum punya gate halaman maupun spec
@@ -193,11 +194,21 @@ find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep 
     `pengajuanStokID` dan `tanggalKirim`), yang merupakan domain submodul 6.
     Api-nya ditempatkan di folder fitur transfer stok (butir 12), dibuat saat
     detail gudang dimigrasikan.
-  - Belum diverifikasi: `pengajuanStokService.getById` (sekitar baris 80) dan
-    `approve` (sekitar baris 261) menghitung stok item di `dariLocationID`,
-    yaitu outlet peminta, bukan gudang tujuan. Bila benar, kolom stok gudang,
-    peringatan stok kurang, dan penolakan approve membaca stok outlet. Baca
-    kedua fungsi itu utuh sebelum menyimpulkan.
+  - Arah lokasi (diselesaikan di `08d0a73`): backend memaknai
+    `dariLocationID` sebagai gudang asal barang dan `keLocationID` sebagai
+    outlet peminta, sehingga pemeriksaan stok di `getById` dan `approve`
+    sudah benar. Yang terbalik adalah halaman buat dan edit web, dan
+    kedelapan pengajuan development dibalik datanya. Laporan backend
+    21 September 2026 (`kontrak/temuan.md` butir 23 sampai 27).
+  - Aturan status pengajuan (dari service): edit ditolak untuk SUBMITTED,
+    COMPLETED, dan REJECTED (butir 25); ajukan hanya dari DRAFT; setujui dan
+    tolak hanya dari SUBMITTED; REJECTED adalah status akhir; tidak ada hapus
+    maupun batal. Surat jalan hanya dari APPROVED atau PENDING, dan
+    membatalkan surat jalan mengembalikan pengajuan ke PENDING.
+  - Strategi data uji spec alur (keputusan pemilik proyek, pilihan A):
+    buat, edit, ajukan, lalu tolak, dengan dokumen baru per run yang
+    berakhir REJECTED; setujui dan buat surat jalan diuji jalur gagalnya
+    saja dengan `page.route`, karena keduanya meninggalkan dokumen permanen.
 - Backend lokal berjalan di branch `ridho` yang digabung dengan `yoga`
   (merge 21 September 2026, belum di-push); perubahan yang relevan ada di
   origin/yoga `f27f093`. `pengajuanStokService` dan `transferStokService`

@@ -19,6 +19,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PATCH /pengajuanstok/:id/approve`
 
 - Aturan: tanpa validator, dibatasi skema `models/pengajuanStokModel.js`
+- Hanya dari SUBMITTED. Stok setiap item diperiksa di `dariLocationID` (gudang asal); stok kurang ditolak 400. Respons `data` berisi dokumen sebelum diperbarui (`temuan.md` butir 26)
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorPengajuan`, `jenisPengajuan`, `dariLocationID`, `keLocationID`, `disetujuiOleh`, `ditolakOleh`, `transferStokID`, `items`, `status`, `catatan`, `catatanPenolakan`, `tanggalKebutuhan`, `tanggalApprove`, `tanggalReject`
 - Diisi server: `dimintaOleh`
@@ -26,6 +27,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PATCH /pengajuanstok/:id/reject`
 
 - Aturan: tanpa validator, dibatasi skema `models/pengajuanStokModel.js`
+- Hanya dari SUBMITTED, selain itu 409. REJECTED adalah status akhir: tidak dapat diubah maupun diajukan ulang
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorPengajuan`, `jenisPengajuan`, `dariLocationID`, `keLocationID`, `disetujuiOleh`, `ditolakOleh`, `transferStokID`, `items`, `status`, `catatan`, `catatanPenolakan`, `tanggalKebutuhan`, `tanggalApprove`, `tanggalReject`
 - Dibaca controller dari body: `alasan`
@@ -34,6 +36,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PATCH /pengajuanstok/:id/submit`
 
 - Aturan: tanpa validator, dibatasi skema `models/pengajuanStokModel.js`
+- Hanya dari DRAFT, selain itu 409
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorPengajuan`, `jenisPengajuan`, `dariLocationID`, `keLocationID`, `disetujuiOleh`, `ditolakOleh`, `transferStokID`, `items`, `status`, `catatan`, `catatanPenolakan`, `tanggalKebutuhan`, `tanggalApprove`, `tanggalReject`
 - Diisi server: `dimintaOleh`
@@ -247,6 +250,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /pengajuanstok`
 
 - Aturan: tanpa validator, dibatasi skema `models/pengajuanStokModel.js`
+- Arah: `dariLocationID` adalah gudang asal barang dan `keLocationID` outlet peminta. Tipe keduanya tidak diperiksa backend (`temuan.md` butir 23 dan 24). Jumlah item dikonversi ke satuan dasar bahan baku
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorPengajuan`, `jenisPengajuan`, `dariLocationID`, `keLocationID`, `disetujuiOleh`, `ditolakOleh`, `transferStokID`, `items`, `status`, `catatan`, `catatanPenolakan`, `tanggalKebutuhan`, `tanggalApprove`, `tanggalReject`
 - Dibaca controller dari body: `-`
@@ -369,6 +373,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /transferstok`
 
 - Aturan: tanpa validator, dibatasi skema `models/transferStokModel.js`
+- Hanya dari pengajuan APPROVED atau PENDING yang belum punya surat jalan. Arah lokasi disalin dari pengajuan (`transferStokService` baris 143 dan 144); membatalkan surat jalan mengembalikan pengajuan ke PENDING
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorTransfer`, `pengajuanStokID`, `dariLocationID`, `keLocationID`, `status`, `items`, `tanggalKirim`, `tanggalTerima`, `penerimaID`
 - Dibaca controller dari body: `-`
@@ -444,6 +449,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PUT /pengajuanstok/:id`
 
 - Aturan: tanpa validator, dibatasi skema `models/pengajuanStokModel.js`
+- Ditolak 400 bila status SUBMITTED, COMPLETED, atau REJECTED; DRAFT, APPROVED, dan PENDING dapat diubah (`temuan.md` butir 25). Arah lokasi sama dengan `POST /pengajuanstok`
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorPengajuan`, `jenisPengajuan`, `dariLocationID`, `keLocationID`, `disetujuiOleh`, `ditolakOleh`, `transferStokID`, `items`, `status`, `catatan`, `catatanPenolakan`, `tanggalKebutuhan`, `tanggalApprove`, `tanggalReject`
 - Diisi server: `dimintaOleh`

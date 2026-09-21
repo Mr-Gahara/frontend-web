@@ -100,7 +100,7 @@ Semua respons GET yang sukses memuat `data`. Kunci lain tidak seragam antarmodul
 ### 2.5 Identitas dan field referensi
 
 - Sebagian modul memakai `id`, sebagian `_id`, dan sebagian mencampur keduanya (`id` di tingkat atas, `_id` di objek bertingkat). Beberapa masih membawa `__v`. `lib/api/client.ts` menormalkan `_id` menjadi `id` secara rekursif dan membuang `__v`, sehingga halaman yang memakai lapisan itu hanya mengenal `id`. Halaman yang masih memakai klien lama menerima `_id` apa adanya (2.4).
-- Nama field referensi tidak selalu mencerminkan isinya. Contoh: `bahanBakuID` dan `locationID` di jurnal stok berisi objek hasil populate, `dataAset` di aset berisi tipe aset, dan `referenceID` di stock adjustment berisi dokumen opname `{ id, nomorOpname, tanggal }`. Tipe frontend mengikuti bentuk nyata di bagian 3.3 (`endpoint.md`), bukan nama field; untuk field referensi, periksa `.populate(` di service sebelum menulis tipenya.
+- Nama field referensi tidak selalu mencerminkan isinya. Contoh: `bahanBakuID` dan `locationID` di jurnal stok berisi objek hasil populate, `dataAset` di aset berisi tipe aset, dan `referenceID` di stock adjustment berisi dokumen opname `{ id, nomorOpname, tanggal }`. Tipe frontend mengikuti bentuk nyata di bagian 3.3 (`endpoint.md`), bukan nama field; untuk field referensi, periksa `.populate(` di service sebelum menulis tipenya. Nama juga bisa menyesatkan arah: pada pengajuan stok, `dariLocationID` adalah gudang asal barang dan `keLocationID` outlet peminta, walau pengajuannya dibuat oleh outlet (`temuan.md` butir 23).
 
 ### 2.6 Field yang diisi server
 

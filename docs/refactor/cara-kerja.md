@@ -415,6 +415,27 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   perintah pemilik proyek, langkah itu memakai
   `grep -E '^[-+]' | grep -vE '^(\+\+\+|---) '` setelah
   `git --no-pager diff -U0 docs`.
+- **Makna sebuah field dipastikan dari jalur hilirnya dan dari dokumentasi
+  backend** (folder `docs/` di repo backend), sebelum menyimpulkan sisi mana
+  yang salah. Pada pengajuan stok, dugaan pertama menyalahkan backend karena
+  stok diperiksa di `dariLocationID`; penelusuran surat jalan (kirim dan
+  terima) dan skenario e2e backend membuktikan justru frontend yang membalik
+  arah.
+- **Apakah kerusakan data sudah terjadi dinilai dari `git blame` baris
+  penentu, dibandingkan dengan `createdAt` datanya.** Transfer satu-satunya
+  dari pengajuan terbalik ternyata dibuat sebelum baris penyalin arah masuk,
+  sehingga stok belum pernah bergerak ke arah salah.
+- **Data development diukur sebelum ditangani, dan skrip pengubah data
+  selalu punya mode tinjau.** Hitungan per arah dan status menentukan
+  pilihan penanganan; pembalikan dijalankan setelah daftar sasarannya
+  dicetak dan diperiksa.
+- **Teks yang bergantung pada spasi di awal baris disusun lewat skrip**,
+  bukan lewat baris heredoc yang ditempel. Pagar blok kode di dalam butir
+  daftar `docs/README.md` sempat kehilangan indentasinya saat ditempel, dan
+  `4214e13` memperbaikinya.
+- **Pesan commit yang panjang disimpan ke berkas di `/tmp` lebih dulu**, lalu
+  dipakai dengan `git commit -F`, sehingga commit dapat diulang tanpa
+  menempel ulang bila gerbangnya gagal.
 
 ## Kapan berhenti dan bertanya
 

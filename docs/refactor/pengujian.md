@@ -41,7 +41,11 @@ Keluaran reporter `line` jangan dipotong dengan `tail` untuk membaca hasil:
 daftar judul test yang gagal atau tidak dijalankan tercetak tanpa baris
 ringkasan di dekatnya, sehingga hasilnya ambigu. Ringkasan vitest dibaca
 dengan `tail -5`, bukan `grep`, karena baris ringkasannya membawa kode warna
-ANSI.
+ANSI, bahkan saat keluarannya dialihkan ke berkas. Gerbang yang memakai
+`grep` atas keluaran alat membuang kode ANSI lebih dulu
+(`sed 's/\x1b\[[0-9;]*[A-Za-z]//g'`), dan setiap langkah gerbang mencetak
+alasannya saat gagal. `grep -q` yang gagal tanpa pesan sempat menghentikan
+commit `08d0a73` diam-diam.
 
 Daftar error ESLint beserta berkas, baris, dan aturannya (helper
 `daftar-eslint.js`). Helper ini selalu mencetak `error: N`, sehingga
@@ -57,13 +61,12 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per penyesuaian backend `f27f093`** (commit `2b3b52d`): 129 test
-unit dan integrasi lolos, 203 e2e lolos, 5 skipped: tiga `test.fixme` yang
+**Baseline per arah lokasi pengajuan stok** (commit `08d0a73`): 130 test
+unit dan integrasi lolos, 204 e2e lolos, 5 skipped: tiga `test.fixme` yang
 menunggu backend dan dua `test.skip` bersyarat data (Test yang ditandai
 fixme dan skip bersyarat, di bawah). Diukur terhadap backend lokal di branch
-`ridho` yang digabung dengan `yoga`. Sebelum perubahan frontend apa pun,
-suite penuh terhadap backend itu identik dengan baseline `59e10a1` (118,
-203, dan 4), sehingga seluruh selisihnya berasal dari commit `2b3b52d`.
+`ridho` yang digabung dengan `yoga`, dengan data pengajuan development yang
+sudah dibalik ke arah yang benar (`status.md`).
 Angka ini pembanding untuk memastikan tidak ada yang
 hilang diam-diam. Angka skipped dapat berubah bila data uji berubah; periksa
 judul test yang dilewati sebelum menyimpulkan
@@ -195,6 +198,10 @@ satu putaran.
   ke `/dev/null`. Spec tulis stock opname membuat dokumen baru setiap kali
   dijalankan, dan dokumen itu tertutup hanya bila test lolos sampai langkah
   pembatalan.
+- Payload operasi tulis yang tidak boleh meninggalkan data diperiksa dengan
+  `page.route` yang menjawab gagal hanya untuk method dan path itu: isi
+  permintaan dibaca dari `page.waitForRequest`, lalu pesan gagal di UI
+  diperiksa. Contoh: skenario payload buat di spec daftar pengajuan stok.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -286,7 +293,9 @@ Urutan debug kegagalan e2e di atas).
 - `tests/e2e/inventaris/pengajuanStok/lihat-pengajuan-stok.spec.ts`: path API
   dicocokkan tanpa membedakan huruf besar kecil agar berlaku sebelum dan
   sesudah migrasi, harapan dihitung per ruang dengan aturan yang sama
-  dengan tampilan (`dariOutlet`, `diGudang`), dan label tab diambil dari
+  dengan tampilan (`diOutlet` dan `diGudang` lewat `arahBenar`), payload buat
+  diperiksa lewat `page.route` yang menjawab gagal sehingga tidak ada data
+  tersimpan, dan label tab diambil dari
   kode.
 - `tests/e2e/inventaris/bahanBaku/hapus-bahan-baku.spec.ts`: dialog yang harus
   tetap terbuka saat operasi gagal.

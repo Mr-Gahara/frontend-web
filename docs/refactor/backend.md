@@ -20,6 +20,12 @@ grep -rnE '\b<namaFungsi>\b' "$BE" --include='*.js' --exclude-dir=node_modules -
 grep -nE 'populate\(' "$BE/services/<modul>Service.js" | cut -c1-140
 ```
 
+Data di basis data development dapat dibaca lewat skrip Node di `/tmp` yang
+memakai `mongoose` dan `.env` milik backend; URI Mongo diambil dari nilai
+`.env` yang diawali `mongodb` dan tidak dicetak. Mengubah data development
+hanya dilakukan atas izin pemilik proyek, lewat skrip yang lebih dulu
+dijalankan dalam mode tinjau, dan dicatat di laporan untuk tim backend.
+
 Untuk menilai apakah sebuah perilaku backend disengaja, lihat riwayatnya. Pada
 modul produk, `blame` menunjukkan bahwa pemeriksaan resep yang berbeda di
 `create` dan `update` berasal dari satu commit yang sama:
@@ -111,6 +117,11 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   dokumentasi, dan `GET /jurnalstok` tidak membaca query lokasi (bersama
   SO-3), beserta konfirmasi SO-2, koreksi butir 2 dan 9, dan kontrak
   inventory
+- Laporan arah lokasi pengajuan stok — 4 temuan, disusun 21 September 2026:
+  tipe lokasi pengajuan tidak divalidasi sehingga pengajuan terbalik dari
+  web diterima, pengajuan APPROVED dan PENDING masih bisa diubah, respons
+  `approve` berisi dokumen sebelum diperbarui, serta dokumentasi arah dan
+  nama endpoint lama; beserta catatan pembalikan 8 pengajuan development
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi
