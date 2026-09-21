@@ -159,12 +159,12 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | GET | `/pengajuanstok` | authPengguna | `read-pengajuan-stok` | `{ data, success }` | `id` | `features/pengajuan-stok` (query `status`, `locationID`) |
-| POST | `/pengajuanstok` | authPengguna | `create-pengajuan-stok` | - | - | 1 file |
-| GET | `/pengajuanstok/:id` | authPengguna | `read-pengajuan-stok` | `{ data, success }` | `id` | 3 file |
-| PUT | `/pengajuanstok/:id` | authPengguna | `update-pengajuan-stok` | - | - | 1 file |
-| PATCH | `/pengajuanstok/:id/approve` | authPengguna | `approve-pengajuan-stok` | - | - | 1 file |
-| PATCH | `/pengajuanstok/:id/reject` | authPengguna | `reject-pengajuan-stok` | - | - | 1 file |
-| PATCH | `/pengajuanstok/:id/submit` | authPengguna | `update-pengajuan-stok` | - | - | 1 file |
+| POST | `/pengajuanstok` | authPengguna | `create-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` |
+| GET | `/pengajuanstok/:id` | authPengguna | `read-pengajuan-stok` | `{ data, success }` | `id` | `features/pengajuan-stok/api.ts` |
+| PUT | `/pengajuanstok/:id` | authPengguna | `update-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` |
+| PATCH | `/pengajuanstok/:id/approve` | authPengguna | `approve-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` |
+| PATCH | `/pengajuanstok/:id/reject` | authPengguna | `reject-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` |
+| PATCH | `/pengajuanstok/:id/submit` | authPengguna | `update-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` |
 
 #### `/pengguna`
 
@@ -287,7 +287,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | GET | `/transferstok` | authPengguna | `read-transfer-stok` | `{ count, data, success }` | `id` | 3 file |
-| POST | `/transferstok` | authPengguna | `create-transfer-stok` | - | - | 1 file |
+| POST | `/transferstok` | authPengguna | `create-transfer-stok` | - | - | `features/transfer-stok/api.ts` |
 | GET | `/transferstok/:id` | authPengguna | `read-transfer-stok` | `{ data, success }` | `id` | 3 file |
 | PUT | `/transferstok/:id` | authPengguna | `create-transfer-stok` | - | - | 1 file |
 | PATCH | `/transferstok/:id/batal` | authPengguna | `cancel-transfer-stok` | - | - | 1 file |

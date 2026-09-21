@@ -134,7 +134,7 @@ queryKeys.produk.detail(id)     // ["produk", "detail", id]
 
 ### `features/<modul>/`
 Pola yang sudah terbukti di bahan baku, pengguna, role, produk, kategori,
-stock adjustment, jurnal stok, stok, stock opname, dan daftar pengajuan stok:
+stock adjustment, jurnal stok, stok, stock opname, dan pengajuan stok:
 
 - `api.ts` — pemanggilan endpoint memakai `apiData` dan `EP`
 - `hooks.ts` — `useQuery` dan `useMutation`, termasuk aturan invalidasi. Hook mutation menerima `onSuccess` dan `onError` dari halaman untuk toast dan reset dialog (`keputusan.md` butir 13)
@@ -156,7 +156,8 @@ Isi tiap `features/` yang sudah ada:
 | `stock-adjustment` | `api.ts`, `hooks.ts`, `tampilan.ts`, `tautan-sumber.tsx` | Hanya baca; `useStockAdjustment` tidak mengulang permintaan saat 404. `tampilan.ts` menyusun baris item (`susunBarisItem`: saldo saat disetujui, stok saat draf bila berbeda, dan koreksi) dan sumber (`susunSumber`: label beserta tautan ke dokumen opname di ruang sesuai tipe lokasi); `tautan-sumber.tsx` dipakai daftar dan detail |
 | `jurnal-stok` | `api.ts`, `hooks.ts`, `filter.ts`, `tampilan.ts`, `halaman-jurnal-stok.tsx` | Hanya baca; komponen halaman dipakai outlet dan gudang, dibedakan lewat `ruang`, `lingkup` (satu lokasi atau tipe lokasi), `penghalang`, dan `pemilihLokasi` (owner di ruang outlet). `useDaftarJurnalStok(lingkup)` mengirim `locationID` untuk lingkup satu lokasi lewat `filterServer` (diabaikan backend hari ini) dan tidak meminta data selama lingkup belum siap; penyaringan klien lewat `filter.ts` tetap wajib |
 | `stock-opname` | `api.ts`, `hooks.ts`, `payload.ts`, `izin.ts`, `halaman-daftar-stock-opname.tsx`, `halaman-detail-stock-opname.tsx`, `form-buat-stock-opname.tsx` | Ketiga komponen dipakai outlet dan gudang lewat `ruang` dan `TEKS`. Daftar menerima `lingkup` dan `pemilihLokasi`; form buat menerima `sumberLokasi` (tetap atau pilih). `payload.ts` hanya mengirim item yang berubah dibanding data server (`petakanNilaiServer`), dikendalikan `SERVER_TERIMA_HITUNGAN_KOSONG` selama validator backend menolak hitungan kosong; `izin.ts` memuat `bolehHitungOpname` dan `bolehTinjauOpname`; `useStockOpname` tidak mengulang permintaan saat 404 |
-| `pengajuan-stok` | `api.ts`, `hooks.ts`, `filter.ts`, `izin.ts`, `arah.ts`, `halaman-daftar-pengajuan-stok.tsx` | Komponen daftar dipakai outlet dan gudang lewat `ruang` dan `TEKS` (tab, label status, kolom lokasi, tombol baris), `lingkup`, `pemilihLokasi`, dan `penghalang`. `filter.ts` menyaring per ruang (arah lokasi, draf, pencarian); `arah.ts` memuat `arahPengajuanValid` (gudang asal di `dariLokasi`, outlet peminta di `keLokasi`), dipakai juga penjaga setujui dan surat jalan di detail gudang; `izin.ts` mencerminkan aturan status per izin di `pengajuanStokService.getAll`. Detail, edit, dan buat belum dimigrasikan; arah lokasinya sudah dibetulkan di `08d0a73` |
+| `pengajuan-stok` | `api.ts`, `hooks.ts`, `filter.ts`, `izin.ts`, `arah.ts`, `payload.ts`, `schema.ts`, `tampilan.ts`, `halaman-daftar-pengajuan-stok.tsx`, `form-pengajuan-stok.tsx`, `halaman-edit-pengajuan-stok.tsx`, `halaman-detail-pengajuan-outlet.tsx`, `halaman-detail-pengajuan-gudang.tsx` | Komponen daftar dipakai outlet dan gudang lewat `ruang` dan `TEKS` (tab, label status, kolom lokasi, tombol baris), `lingkup`, `pemilihLokasi`, dan `penghalang`. `filter.ts` menyaring per ruang (arah lokasi, draf, pencarian); `arah.ts` memuat `arahPengajuanValid` (gudang asal di `dariLokasi`, outlet peminta di `keLokasi`), dipakai juga penjaga setujui dan surat jalan di detail gudang; `izin.ts` mencerminkan aturan status per izin di `pengajuanStokService.getAll` dan memuat izin aksi per tombol. `form-pengajuan-stok.tsx` dipakai buat dan revisi, dengan skema di `schema.ts` (jumlah sebagai teks) serta `susunPayloadPengajuan` dan `nilaiAwalPengajuan` di `payload.ts`; halaman edit memasang form setelah detail termuat ulang. Detail outlet dan gudang adalah dua komponen terpisah; `usePengajuanStok` tidak mengulang permintaan saat 404 |
+| `transfer-stok` | `api.ts`, `hooks.ts` | Baru berisi pembuatan surat jalan dari pengajuan (`useBuatSuratJalan`), dipakai detail gudang pengajuan; menginvalidasi akar transfer dan pengajuan. Sisa modul menyusul di submodul 6 |
 
 Cara memeriksa apakah sebuah modul sudah dimigrasikan: halamannya tidak lagi
 memanggil `apiClient`, dan lapisan datanya ada di `features/<modul>/` atau di
@@ -172,7 +173,7 @@ memanggil `apiClient`, dan lapisan datanya ada di `features/<modul>/` atau di
 ## Langkah migrasi satu modul
 
 Urutan yang dipakai pada bahan baku, pengguna, role, produk, kategori, stock
-adjustment, jurnal stok, stok, stock opname, dan daftar pengajuan stok, dan
+adjustment, jurnal stok, stok, stock opname, dan pengajuan stok, dan
 terbukti menjaga `tsc` tetap hijau di tiap langkah:
 
 1. **Petakan keadaan.** Hitung baris tiap berkas, cari pemakaian `apiClient`,

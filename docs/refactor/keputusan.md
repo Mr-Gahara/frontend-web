@@ -152,6 +152,22 @@ Tidak boleh dibalik tanpa pembahasan:
   21 September 2026).
 - **Keputusan cakupan outlet di halaman buat tetap ditahan** sebagai utang
   sampai kondisi backend terbaru jelas (`status.md`).
+- **Buat dan revisi memakai satu form** (`form-pengajuan-stok.tsx`). Jumlah
+  disimpan sebagai teks agar isian kosong tetap tampil kosong, dan aturan
+  lama dipertahankan: baris tanpa barang atau berjumlah 0 diabaikan tanpa
+  pesan, tetapi harus ada minimal satu baris valid.
+- **Detail outlet dan detail gudang tetap dua komponen**, karena perannya
+  berbeda (outlet mengajukan, gudang meninjau dan membuat surat jalan);
+  keduanya berbagi lapisan data, izin, dan pemformat.
+- **Tombol aksi mengikuti izin masing-masing**, tidak hanya status:
+  `update-pengajuan-stok` untuk revisi dan ajukan, `approve-pengajuan-stok`
+  untuk setujui, `reject-pengajuan-stok` untuk tolak, dan
+  `create-transfer-stok` untuk surat jalan.
+- **Halaman detail, edit, dan buat tidak punya entri `IZIN_HALAMAN`**,
+  mengikuti pola detail stock opname: `useAuthGuard` menjaga sesi, tombol
+  aksi mengikuti izin, dan backend menolak dengan 403.
+- **Revisi hanya untuk DRAFT** di halaman edit, walau backend masih
+  mengizinkan APPROVED dan PENDING diubah (`kontrak/temuan.md` butir 25).
 
 ## Keputusan rancangan yang mengikat
 

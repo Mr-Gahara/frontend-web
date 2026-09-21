@@ -436,6 +436,14 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Pesan commit yang panjang disimpan ke berkas di `/tmp` lebih dulu**, lalu
   dipakai dengan `git commit -F`, sehingga commit dapat diulang tanpa
   menempel ulang bila gerbangnya gagal.
+- **Tanda tangan sebuah hook dibaca sebelum dipakai**, bukan ditebak dari
+  namanya. `useLokasiBertipe` ternyata mengembalikan satu lokasi pertama
+  (`{ lokasi, lokasiId }`), bukan daftar; form pengajuan membutuhkan
+  `useDaftarLokasi` yang disaring per tipe.
+- **Dugaan penyebab kegagalan diuji terhadap bukti sebelum dijadikan
+  kesimpulan**, termasuk dugaan yang terasa cocok dengan semua pengamatan.
+  Kehilangan sesi pada spec alur pengajuan sempat diduga benturan login
+  paralel, lalu terbantah oleh `workers: 1` di konfigurasi Playwright.
 
 ## Kapan berhenti dan bertanya
 

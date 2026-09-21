@@ -61,8 +61,8 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per arah lokasi pengajuan stok** (commit `08d0a73`): 130 test
-unit dan integrasi lolos, 204 e2e lolos, 5 skipped: tiga `test.fixme` yang
+**Baseline per migrasi pengajuan stok** (commit `90eb935`): 135 test
+unit dan integrasi lolos, 207 e2e lolos, 5 skipped: tiga `test.fixme` yang
 menunggu backend dan dua `test.skip` bersyarat data (Test yang ditandai
 fixme dan skip bersyarat, di bawah). Diukur terhadap backend lokal di branch
 `ridho` yang digabung dengan `yoga`, dengan data pengajuan development yang
@@ -104,7 +104,11 @@ Untuk melihat body yang dikirim, cetak juga `s.request.postData` (isinya di
 membuktikan PUT dikirim tanpa `resep`.
 
 Snapshot DOM saat gagal ada di `error-context.md` di dalam folder test yang
-gagal; cari dengan `find test-results -name error-context.md`.
+gagal. Playwright memendekkan nama folder dan menambahkan hash, jadi berkas
+sebuah test dicari lewat judulnya di isi berkas, bukan lewat pola nama
+folder: `grep -l '<judul test>' $(find test-results -name error-context.md)`.
+Potongan kode sumber spec ikut tercetak di berkas itu; saring baris berpola
+`nomor |` bila hanya isi snapshot yang dibutuhkan.
 
 ## Urutan debug kegagalan e2e
 
@@ -220,6 +224,18 @@ terhitung di angka skipped pada baseline:
 |---|---|
 | `reservasi/aset/crud-aset.spec.ts` | Tidak ada aset berstatus digunakan |
 | `inventaris/stok/lihat-stok.spec.ts`, tab kritis gudang | Tidak ada stok gudang yang kritis (terjadi pada data uji sekarang) |
+
+Kegagalan yang belum terjelaskan:
+
+- **Test setujui gagal di spec alur pengajuan stok mendarat di halaman
+  login** setelah `page.goto` kedua, dua kali pada 21 September 2026, saat
+  spec itu berjalan bersama test lain. Tidak terulang dalam 9 run test itu
+  sendirian maupun dalam urutan berkasnya, dan tidak pada suite penuh
+  `90eb935`. `playwright.config.ts` memakai `workers: 1`, sehingga bukan
+  benturan login paralel; pada run yang lolos, refresh sesi setelah login
+  selalu berstatus 200. Bila terulang, jalankan dengan
+  `--trace retain-on-failure` dan cari `refreshtoken` atau `pin-refresh`
+  berstatus 401 di trace.
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
@@ -245,6 +261,9 @@ Urutan debug kegagalan e2e di atas).
   tanpa izin setujui.
 - **Approve stock opname yang berhasil** tidak diuji e2e, karena mengubah
   stok sungguhan. Yang diuji hanya jalur gagalnya.
+- **Setujui pengajuan dan buat surat jalan yang berhasil** tidak diuji e2e,
+  karena keduanya meninggalkan dokumen permanen (pengajuan dan transfer
+  tidak dapat dihapus). Yang diuji hanya jalur gagalnya.
 - **Tambah barang gudang yang berhasil** tidak diuji e2e, karena UI tidak
   punya cara menghapus entri inventory yang terbentuk.
 - **`tests/helpers/storage.ts`** masih membaca `sessionStorage` dan sudah
@@ -297,5 +316,14 @@ Urutan debug kegagalan e2e di atas).
   diperiksa lewat `page.route` yang menjawab gagal sehingga tidak ada data
   tersimpan, dan label tab diambil dari
   kode.
+- `tests/e2e/inventaris/pengajuanStok/alur-pengajuan-stok.spec.ts`: spec
+  pembanding alur tulis yang ditulis dan dijalankan terhadap kode lama
+  sebelum migrasi (pilihan A di `status.md`). Test pertama membuat satu
+  pengajuan per run dan menutupnya REJECTED; dialog yang harus bertahan
+  saat operasi gagal diperiksa dengan `expect.soft` agar alur tetap
+  selesai walau pemeriksaan itu gagal. Setujui dan surat jalan memakai
+  pengajuan yang sudah ada dan hanya menguji jalur gagalnya; daftar dan
+  detail diambil lewat `page.request` dengan header `Authorization` yang
+  ditangkap dari permintaan halaman.
 - `tests/e2e/inventaris/bahanBaku/hapus-bahan-baku.spec.ts`: dialog yang harus
   tetap terbuka saat operasi gagal.
