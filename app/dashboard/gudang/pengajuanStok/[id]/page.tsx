@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
+import { arahPengajuanValid } from "@/features/pengajuan-stok/arah";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
@@ -227,6 +228,7 @@ export default function DetailPengajuanStokGudangPage({
   const isSubmitted = detail.status === "SUBMITTED";
   const isApproved = detail.status === "APPROVED";
   const hasSuratJalan = !!detail.transferStokID;
+  const arahValid = arahPengajuanValid(detail);
 
   // DETEKSI STOK KURANG
   const isStockInsufficient = detail.items.some(
@@ -372,7 +374,7 @@ export default function DetailPengajuanStokGudangPage({
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-[#0A2947]" />
                 <div className="absolute left-1.5 top-4 -bottom-4 w-0.5 bg-[#0A2947]/10" />
                 <span className="text-xs font-bold text-[#0A2947]/50 uppercase">
-                  Peminta Pasokan
+                  Gudang Asal (Lokasi Kita)
                 </span>
                 <span className="font-bold text-[#0A2947]">
                   {detail.dariLokasi?.nama || "-"}
@@ -381,7 +383,7 @@ export default function DetailPengajuanStokGudangPage({
               <div className="flex flex-col gap-1 relative pl-6">
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-[#D4A373]" />
                 <span className="text-xs font-bold text-[#0A2947]/50 uppercase">
-                  Lokasi Kita (Gudang)
+                  Outlet Peminta
                 </span>
                 <span className="font-bold text-[#0A2947]">
                   {detail.keLokasi?.nama || "-"}
@@ -423,6 +425,18 @@ export default function DetailPengajuanStokGudangPage({
             </div>
           </div>
 
+          {!arahValid && (isSubmitted || (isApproved && !hasSuratJalan)) && (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 flex items-start gap-2">
+              <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+              <p className="text-xs font-medium text-rose-700 leading-snug">
+                Arah lokasi pengajuan ini terbalik: gudang asal dan outlet
+                peminta tertukar. Persetujuan dan surat jalan dikunci agar stok
+                tidak bergerak ke arah yang salah. Perbaiki data pengajuan ini
+                lebih dulu.
+              </p>
+            </div>
+          )}
+
           {/* ACTION BUTTONS (JIKA SUBMITTED) */}
           {isSubmitted && (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm flex flex-col gap-3">
@@ -443,10 +457,10 @@ export default function DetailPengajuanStokGudangPage({
 
               <Button
                 onClick={() => setShowConfirmApprove(true)}
-                disabled={isStockInsufficient || approveMutation.isPending}
+                disabled={!arahValid || isStockInsufficient || approveMutation.isPending}
                 className={cn(
                   "w-full font-bold shadow-md transition-colors",
-                  isStockInsufficient
+                  !arahValid || isStockInsufficient
                     ? "bg-slate-300 text-slate-500 cursor-not-allowed hover:bg-slate-300"
                     : "bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer",
                 )}
@@ -471,7 +485,7 @@ export default function DetailPengajuanStokGudangPage({
               </h3>
               <Button
                 onClick={() => createTransferMutation.mutate()}
-                disabled={createTransferMutation.isPending}
+                disabled={!arahValid || createTransferMutation.isPending}
                 className="w-full bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-md cursor-pointer"
               >
                 <Truck className="w-4 h-4 mr-2" />

@@ -81,7 +81,7 @@ const TEKS: Record<"outlet" | "gudang", TeksRuang> = {
     labelStatus: { DRAFT: "Draft", SUBMITTED: "Menunggu", PENDING: "Menunggu", APPROVED: "Disetujui", COMPLETED: "Selesai", REJECTED: "Ditolak" },
     placeholderCari: "Cari No. Pengajuan...",
     kolomInfo: "Informasi Pengajuan",
-    kolomLokasi: "Tujuan (Gudang)",
+    kolomLokasi: "Gudang Asal",
     kolomItem: "Item",
     kosong: "Tidak ada data pengajuan stok yang ditemukan.",
   },
@@ -96,7 +96,7 @@ const TEKS: Record<"outlet" | "gudang", TeksRuang> = {
     labelStatus: { SUBMITTED: "Perlu Tinjauan", PENDING: "Perlu Tinjauan", APPROVED: "Siap Dikirim", COMPLETED: "Selesai", REJECTED: "Ditolak" },
     placeholderCari: "Cari No. Pengajuan / Outlet...",
     kolomInfo: "Nomor & Tanggal",
-    kolomLokasi: "Asal Peminta",
+    kolomLokasi: "Outlet Peminta",
     kolomItem: "Jumlah Item",
     kosong: "Belum ada permintaan stok di kategori ini.",
   },
@@ -260,12 +260,12 @@ export default function HalamanDaftarPengajuanStok({
                     <td className="px-6 py-4">
                       {ruang === "outlet" ? (
                         <div className="flex items-center gap-2 font-medium text-[#0A2947]/80">
-                          {item.keLokasi?.nama || "Gudang Pusat"}
+                          {item.dariLokasi?.nama || "Gudang Pusat"}
                         </div>
                       ) : (
                         <div className="flex flex-col">
                           <span className="font-bold text-[#0A2947]">
-                            {item.dariLokasi?.nama || "Outlet Tidak Dikenal"}
+                            {item.keLokasi?.nama || "Outlet Tidak Dikenal"}
                           </span>
                           <span className="text-xs font-medium text-[#0A2947]/50 capitalize mt-1">
                             Pembuat: {item.dimintaOleh?.nama || "-"}

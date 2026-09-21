@@ -1,17 +1,18 @@
 import { describe, expect, it } from "vitest";
 import type { PengajuanStok } from "@/types/pengajuanStok";
 import { saringPengajuan } from "@/features/pengajuan-stok/filter";
+import { arahPengajuanValid } from "@/features/pengajuan-stok/arah";
 import { tabTerlihat } from "@/features/pengajuan-stok/izin";
 
-function pengajuan(nomor: string, status: PengajuanStok["status"], asal: string, tipeAsal: string, tipeTujuan: string): PengajuanStok {
+function pengajuan(nomor: string, status: PengajuanStok["status"], peminta: string, tipeDari: string, tipeKe: string): PengajuanStok {
   return {
     id: nomor,
     tenantID: null,
     nomorPengajuan: nomor,
     jenisPengajuan: "PERMINTAAN",
     status,
-    dariLokasi: { id: "a-" + nomor, nama: asal, tipe: tipeAsal },
-    keLokasi: { id: "k-" + nomor, nama: "Gudang Utama", tipe: tipeTujuan },
+    dariLokasi: { id: "a-" + nomor, nama: "Gudang Utama", tipe: tipeDari },
+    keLokasi: { id: "k-" + nomor, nama: peminta, tipe: tipeKe },
     dimintaOleh: null,
     disetujuiOleh: null,
     ditolakOleh: null,
@@ -28,26 +29,35 @@ function pengajuan(nomor: string, status: PengajuanStok["status"], asal: string,
 }
 
 const DATA = [
-  pengajuan("REQ-001", "DRAFT", "Outlet Kota", "Outlet", "Gudang"),
-  pengajuan("REQ-002", "SUBMITTED", "Outlet Kota", "Outlet", "Gudang"),
-  pengajuan("REQ-003", "APPROVED", "Outlet Barat", "Outlet", "Gudang"),
-  pengajuan("REQ-004", "SUBMITTED", "Gudang Cadangan", "Gudang", "Outlet"),
+  pengajuan("REQ-001", "DRAFT", "Outlet Kota", "Gudang", "Outlet"),
+  pengajuan("REQ-002", "SUBMITTED", "Outlet Kota", "Gudang", "Outlet"),
+  pengajuan("REQ-003", "APPROVED", "Outlet Barat", "Gudang", "Outlet"),
+  pengajuan("REQ-004", "SUBMITTED", "Outlet Timur", "Outlet", "Gudang"),
 ];
 
+describe("arahPengajuanValid", () => {
+  it("hanya gudang asal ke outlet peminta yang valid", () => {
+    expect(arahPengajuanValid(DATA[1])).toBe(true);
+    expect(arahPengajuanValid(DATA[3])).toBe(false);
+    expect(arahPengajuanValid({ dariLokasi: null, keLokasi: DATA[1].keLokasi })).toBe(false);
+  });
+});
+
 describe("saringPengajuan", () => {
-  it("outlet: hanya pengajuan dari outlet, pencarian nomor", () => {
+  it("outlet: pengajuan berarah benar, pencarian nomor", () => {
     expect(saringPengajuan(DATA, "outlet", "").map((p) => p.nomorPengajuan)).toEqual(["REQ-001", "REQ-002", "REQ-003"]);
     expect(saringPengajuan(DATA, "outlet", "req-003").map((p) => p.nomorPengajuan)).toEqual(["REQ-003"]);
     expect(saringPengajuan(DATA, "outlet", "Outlet Barat")).toEqual([]);
   });
 
-  it("gudang: hanya pengajuan ke gudang, tanpa draf", () => {
+  it("gudang: pengajuan berarah benar tanpa draf", () => {
     expect(saringPengajuan(DATA, "gudang", "").map((p) => p.nomorPengajuan)).toEqual(["REQ-002", "REQ-003"]);
   });
 
-  it("gudang: pencarian nomor atau nama outlet asal", () => {
+  it("gudang: pencarian nomor atau nama outlet peminta", () => {
     expect(saringPengajuan(DATA, "gudang", "barat").map((p) => p.nomorPengajuan)).toEqual(["REQ-003"]);
     expect(saringPengajuan(DATA, "gudang", "req-002").map((p) => p.nomorPengajuan)).toEqual(["REQ-002"]);
+    expect(saringPengajuan(DATA, "gudang", "timur")).toEqual([]);
   });
 });
 

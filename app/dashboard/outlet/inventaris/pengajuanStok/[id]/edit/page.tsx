@@ -285,10 +285,10 @@ export default function EditPengajuanStokPage({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
           <div className="space-y-2">
             <label className="text-sm font-bold text-[#0A2947]">
-              Diminta Dari (Outlet Anda){" "}
+              Outlet Peminta{" "}
               <span className="text-rose-500">*</span>
             </label>
-            <Select value={dariLocationID} onValueChange={setDariLocationID}>
+            <Select value={keLocationID} onValueChange={setKeLocationID}>
               <SelectTrigger className="w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus:ring-[#0A2947]">
                 <SelectValue placeholder="Pilih Outlet Anda..." />
               </SelectTrigger>
@@ -308,10 +308,10 @@ export default function EditPengajuanStokPage({
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-[#0A2947]">
-              Tujuan Permintaan (Gudang Pusat){" "}
+              Gudang Asal Barang{" "}
               <span className="text-rose-500">*</span>
             </label>
-            <Select value={keLocationID} onValueChange={setKeLocationID}>
+            <Select value={dariLocationID} onValueChange={setDariLocationID}>
               <SelectTrigger className="w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus:ring-[#0A2947]">
                 <SelectValue placeholder="Pilih Gudang..." />
               </SelectTrigger>

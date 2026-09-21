@@ -264,7 +264,7 @@ export default function DetailPengajuanStokPage({
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-[#0A2947]" />
                 <div className="absolute left-1.5 top-4 -bottom-4 w-0.5 bg-[#0A2947]/10" />
                 <span className="text-xs font-bold text-[#0A2947]/50 uppercase">
-                  Dari (Peminta)
+                  Gudang Asal
                 </span>
                 <span className="font-bold text-[#0A2947]">
                   {detail.dariLokasi?.nama || "-"}
@@ -273,7 +273,7 @@ export default function DetailPengajuanStokPage({
               <div className="flex flex-col gap-1 relative pl-6">
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-[#D4A373]" />
                 <span className="text-xs font-bold text-[#0A2947]/50 uppercase">
-                  Tujuan Pengambilan
+                  Outlet Peminta
                 </span>
                 <span className="font-bold text-[#0A2947]">
                   {detail.keLokasi?.nama || "-"}

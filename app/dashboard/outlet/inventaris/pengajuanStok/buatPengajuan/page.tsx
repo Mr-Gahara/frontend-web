@@ -178,8 +178,8 @@ export default function BuatPengajuanStokPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
           <div className="space-y-2">
-            <label className="text-sm font-bold text-[#0A2947]">Diminta Dari (Outlet Anda) <span className="text-rose-500">*</span></label>
-            <Select value={dariLocationID} onValueChange={setDariLocationID} disabled={isLoadingLokasi}>
+            <label className="text-sm font-bold text-[#0A2947]">Outlet Peminta <span className="text-rose-500">*</span></label>
+            <Select value={keLocationID} onValueChange={setKeLocationID} disabled={isLoadingLokasi}>
               <SelectTrigger className="w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus:ring-[#0A2947]">
                 <SelectValue placeholder="Pilih Outlet Anda..." />
               </SelectTrigger>
@@ -194,8 +194,8 @@ export default function BuatPengajuanStokPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-[#0A2947]">Tujuan Permintaan (Gudang Pusat) <span className="text-rose-500">*</span></label>
-            <Select value={keLocationID} onValueChange={setKeLocationID} disabled={isLoadingLokasi}>
+            <label className="text-sm font-bold text-[#0A2947]">Gudang Asal Barang <span className="text-rose-500">*</span></label>
+            <Select value={dariLocationID} onValueChange={setDariLocationID} disabled={isLoadingLokasi}>
               <SelectTrigger className="w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus:ring-[#0A2947]">
                 <SelectValue placeholder="Pilih Gudang..." />
               </SelectTrigger>
