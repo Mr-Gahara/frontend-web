@@ -180,9 +180,9 @@ lewat pencarian dampak dan diff.
    baris yang berubah, termasuk butir daftar. Diff dicocokkan dengan daftar di
    langkah 4 dan dengan bukti: keluaran test, `git log`, dan kode.
 
-```bash
+   ```bash
    git --no-pager diff -U0 docs | grep -E '^[-+]' | grep -vE '^(\+\+\+|---) ' | cut -c1-120
-```
+   ```
 7. **Pemeriksaan utuh** hanya bila struktur berubah besar (berkas baru atau
    bagian dipindah). Seluruh temuan dilaporkan dalam satu putaran.
 8. **Commit** dengan gerbang di awal blok: `grep -q` atas teks perbaikan
