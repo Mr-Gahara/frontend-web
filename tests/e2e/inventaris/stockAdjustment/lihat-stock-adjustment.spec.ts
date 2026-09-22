@@ -2,6 +2,7 @@ import { test, expect, Page, Response } from "@playwright/test";
 import type { StockAdjustment } from "../../../../types/stockOpname";
 import { formatKoreksi, susunSumber } from "../../../../features/stock-adjustment/tampilan";
 import { normalizeId } from "../../../../lib/api/normalize";
+import { ADA_IZIN_LINTAS, JALUR_TERKUNCI, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
 
 const URL_DAFTAR =
   "http://localhost:3000/dashboard/outlet/inventaris/stockAdjustment";
@@ -54,8 +55,9 @@ async function bukaDaftar(page: Page): Promise<RingkasAdjustment[]> {
     page.getByRole("heading", { name: /jurnal penyesuaian stok/i }),
   ).toBeVisible();
   // Dinormalkan seperti lib/api/client.ts: objek bersarang seperti
-  // referenceID masih membawa _id di respons mentah.
-  return normalizeId(body.data) as RingkasAdjustment[];
+  // referenceID masih membawa _id di respons mentah. Ruang outlet hanya
+  // menampilkan adjustment lokasi Outlet, sehingga harapan disaring sama.
+  return (normalizeId(body.data) as RingkasAdjustment[]).filter((a) => a.lokasi?.tipe === "Outlet");
 }
 
 function barisBerisi(page: Page, teks: string) {
@@ -90,6 +92,66 @@ test.describe("Stock adjustment outlet", () => {
 
     await expect(barisBerisi(page, a.nomorAdjustment)).toBeVisible();
     await expect(barisBerisi(page, b.nomorAdjustment)).toHaveCount(0);
+  });
+
+  test("tanpa izin lintas outlet: hanya adjustment outlet tenant", async ({ page }) => {
+    test.skip(ADA_IZIN_LINTAS, JALUR_TERKUNCI);
+    await page.goto(URL_DAFTAR, { waitUntil: "commit" });
+    const tAktif = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/location\/current(\?|$)/.test(r.url()),
+    );
+    const tDaftar = page.waitForResponse(responsDaftar);
+    const aktif = ((await (await tAktif).json()) as { data: { id?: string; _id?: string } | null }).data;
+    const idAktif = aktif?.id ?? aktif?._id;
+    expect(idAktif, "outlet tenant dari /location/current").toBeTruthy();
+    const rDaftar = await tDaftar;
+    expect(new URL(rDaftar.url()).searchParams.get("locationID")).toBe(idAktif);
+    const daftar = normalizeId((await rDaftar.json()).data) as RingkasAdjustment[];
+    expect(daftar.every((a) => a.lokasi?.id === idAktif)).toBe(true);
+    await expect(page.getByText("Semua Outlet", { exact: true })).toHaveCount(0);
+  });
+
+  test("lintas outlet: semua outlet tanpa adjustment gudang", async ({ page }) => {
+    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
+    await page.goto(URL_DAFTAR, { waitUntil: "commit" });
+    const rDaftar = await page.waitForResponse(responsDaftar);
+    expect(new URL(rDaftar.url()).searchParams.has("locationID")).toBe(false);
+    const semua = normalizeId((await rDaftar.json()).data) as RingkasAdjustment[];
+    for (const a of semua.filter((x) => x.lokasi?.tipe !== "Outlet").slice(0, 5)) {
+      await expect(barisBerisi(page, a.nomorAdjustment)).toHaveCount(0);
+    }
+    for (const a of semua.filter((x) => x.lokasi?.tipe === "Outlet").slice(0, 5)) {
+      await expect(barisBerisi(page, a.nomorAdjustment)).toBeVisible();
+    }
+  });
+
+  test("lintas outlet: pilih satu outlet mengirim locationID", async ({ page }) => {
+    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
+    const daftar = await bukaDaftar(page);
+    const target = daftar.find((a) => a.lokasi?.id && a.lokasi?.nama);
+    const namaTarget = target?.lokasi?.nama;
+    test.skip(!target || !namaTarget, "Belum ada stock adjustment outlet");
+    const tTersaring = page.waitForResponse(
+      (r) => responsDaftar(r) && new URL(r.url()).searchParams.get("locationID") === target!.lokasi!.id,
+    );
+    await page.getByText("Semua Outlet", { exact: true }).click();
+    await page.getByRole("option", { name: namaTarget!, exact: true }).click();
+    const hasil = normalizeId((await (await tTersaring).json()).data) as RingkasAdjustment[];
+    expect(hasil.every((a) => a.lokasi?.id === target!.lokasi!.id)).toBe(true);
+    await expect(barisBerisi(page, target!.nomorAdjustment)).toBeVisible();
+  });
+
+  test("daftar: gagal memuat tampil sebagai pesan, bukan daftar kosong", async ({ page }) => {
+    const pola = /\/api\/stockopname\/adjustments(\?|$)/;
+    await page.route(pola, (route) =>
+      route.request().method() === "GET"
+        ? route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ status: "error", message: "uji" }) })
+        : route.continue(),
+    );
+    await page.goto(URL_DAFTAR);
+    await expect(page.getByText(/gagal memuat jurnal penyesuaian stok/i)).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText("Belum ada riwayat penyesuaian stok.")).toHaveCount(0);
+    await page.unroute(pola);
   });
 
   test("detail: dibuka dari daftar, isinya sesuai server, lalu kembali", async ({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import type { StockAdjustment } from "@/types/stockOpname";
@@ -8,6 +8,10 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useDaftarStockAdjustment } from "@/features/stock-adjustment/hooks";
 import { formatTanggalAdjustment } from "@/features/stock-adjustment/tampilan";
 import { TautanSumber } from "@/features/stock-adjustment/tautan-sumber";
+import { useCakupanLokasiOutlet } from "@/features/inventaris/hooks";
+import { lingkupOutlet, SEMUA_OUTLET } from "@/features/inventaris/cakupan";
+import PemilihLokasiOutlet from "@/features/inventaris/pemilih-lokasi-outlet";
+import PesanLokasi from "@/features/inventaris/pesan-lokasi";
 
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
@@ -17,7 +21,41 @@ export default function StockAdjustmentListPage() {
   useAuthGuard();
   const router = useRouter();
 
-  const { data: adjustmentList = [], isLoading } = useDaftarStockAdjustment();
+  // Ruang outlet hanya menampilkan adjustment lokasi Outlet: stok outlet dan
+  // gudang tidak dicampur (keputusan pemilik proyek, 22 September 2026).
+  // Pemegang izin lintas outlet melihat seluruh outlet (dengan pemilih);
+  // pengguna lain hanya outlet tenant. Backend menyaring locationID tetapi
+  // tidak mengenal tipe lokasi, sehingga "Semua Outlet" disaring di klien.
+  const cakupan = useCakupanLokasiOutlet();
+  const [pilihanLokasi, setPilihanLokasi] = useState<string>(SEMUA_OUTLET);
+  const lingkup = lingkupOutlet(cakupan, pilihanLokasi);
+  const tipeSaring = lingkup?.tipeLokasi;
+  const {
+    data: semuaAdjustment = [],
+    isLoading,
+    isError,
+  } = useDaftarStockAdjustment(lingkup ? { locationID: lingkup.locationID } : null);
+  const adjustmentList = useMemo(
+    () => (tipeSaring ? semuaAdjustment.filter((a) => a.lokasi?.tipe === tipeSaring) : semuaAdjustment),
+    [semuaAdjustment, tipeSaring],
+  );
+
+  let penghalang: ReactNode = null;
+  if (cakupan.status === "gagal") {
+    penghalang = (
+      <PesanLokasi
+        judul="Gagal Memuat Lokasi Outlet"
+        isi="Lokasi kerja Anda tidak dapat dimuat. Periksa koneksi, lalu muat ulang halaman."
+      />
+    );
+  } else if (cakupan.status === "terkunci" && !cakupan.lokasiId) {
+    penghalang = (
+      <PesanLokasi
+        judul="Identitas Outlet Tidak Ditemukan"
+        isi="Jurnal penyesuaian stok tidak dapat ditampilkan karena lokasi outlet belum dikonfigurasi."
+      />
+    );
+  }
 
   // --- COLUMNS DEFINITION ---
   const columns = useMemo<ColumnDef<StockAdjustment>[]>(
@@ -115,17 +153,31 @@ export default function StockAdjustmentListPage() {
         </div>
       </div>
 
-      {/* DATA TABLE SECTION */}
-      <div className="w-full overflow-x-auto rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-4 sm:p-6 shadow-sm">
-        <DataTable
-          columns={columns}
-          data={adjustmentList}
-          loading={isLoading}
-          emptyMessage="Belum ada riwayat penyesuaian stok."
-          searchKey="nomorAdjustment"
-          searchPlaceholder="Cari nomor jurnal..."
+      {cakupan.status === "lintas" && (
+        <PemilihLokasiOutlet
+          lokasiOutlet={cakupan.lokasiOutlet}
+          nilai={pilihanLokasi}
+          onUbah={setPilihanLokasi}
         />
-      </div>
+      )}
+
+      {/* DATA TABLE SECTION */}
+      {penghalang ?? (
+        <div className="w-full overflow-x-auto rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-4 sm:p-6 shadow-sm">
+          <DataTable
+            columns={columns}
+            data={adjustmentList}
+            loading={isLoading || cakupan.status === "memuat"}
+            emptyMessage={
+              isError
+                ? "Gagal memuat jurnal penyesuaian stok. Coba muat ulang halaman."
+                : "Belum ada riwayat penyesuaian stok."
+            }
+            searchKey="nomorAdjustment"
+            searchPlaceholder="Cari nomor jurnal..."
+          />
+        </div>
+      )}
     </div>
   );
 }

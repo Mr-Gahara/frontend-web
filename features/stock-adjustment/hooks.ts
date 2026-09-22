@@ -1,12 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { isNotFound } from "@/lib/api/error";
 import { queryKeys } from "@/lib/queryKeys";
-import { stockAdjustmentApi } from "./api";
+import { stockAdjustmentApi, type FilterAdjustment } from "./api";
 
-export function useDaftarStockAdjustment() {
+/**
+ * Daftar stock adjustment. filter null berarti lingkup belum siap, sehingga
+ * tidak ada permintaan; filter tanpa locationID berarti seluruh lokasi, dan
+ * halaman wajib menyaring tipe lokasinya sendiri.
+ */
+export function useDaftarStockAdjustment(filter: FilterAdjustment | null) {
   return useQuery({
-    queryKey: queryKeys.stockAdjustment.daftar(),
-    queryFn: stockAdjustmentApi.daftar,
+    queryKey: queryKeys.stockAdjustment.daftar(filter ?? undefined),
+    queryFn: () => stockAdjustmentApi.daftar(filter ?? {}),
+    enabled: filter !== null,
   });
 }
 
