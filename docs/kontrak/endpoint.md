@@ -6,7 +6,7 @@ Endpoint yang dipanggil frontend beserta auth, permission, envelope, dan bentuk 
 
 ## 3. Endpoint yang dipakai frontend
 
-Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`).
+Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend kini memiliki 247 route (tambahan sejak acuan: `POST /akun/owner/create-tenant`, belum dipakai frontend). Kolom "Dipakai di" diisi dari audit itu: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
 
 Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`; contoh `/diskon` berarti `/api/diskon`. Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom Envelope dan ID hanya terisi untuk GET yang diambil sampelnya.
 
@@ -23,7 +23,8 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | POST | `/akun/auth/login` | public | - | - | - | 1 file |
-| POST | `/akun/auth/logout` | public | - | - | - | 1 file |
+| POST | `/akun/auth/refreshtoken` | public | - | - | - | 2 file (lewat `fetch`: `lib/apiClient.ts` dan `components/providers/session-provider.tsx`) |
+| POST | `/akun/auth/logout` | public | - | - | - | 2 file |
 
 #### `/akunkas`
 
@@ -46,21 +47,21 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/bahan-baku` | tidak ada di backend | - | - | - | 3 file |
-| POST | `/bahan-baku` | tidak ada di backend | - | - | - | 1 file |
-| GET | `/bahan-baku/:param` | tidak ada di backend | - | - | - | 1 file |
-| PUT | `/bahan-baku/:param` | tidak ada di backend | - | - | - | 1 file |
-| DELETE | `/bahan-baku/:param` | tidak ada di backend | - | - | - | 1 file |
+| GET | `/bahan-baku` | tidak ada di backend | - | - | - | tidak dipanggil lagi, dibuang di `aab26f3` (`temuan.md` butir 1) |
+| POST | `/bahan-baku` | tidak ada di backend | - | - | - | tidak dipanggil lagi, dibuang di `aab26f3` (`temuan.md` butir 1) |
+| GET | `/bahan-baku/:param` | tidak ada di backend | - | - | - | tidak dipanggil lagi, dibuang di `aab26f3` (`temuan.md` butir 1) |
+| PUT | `/bahan-baku/:param` | tidak ada di backend | - | - | - | tidak dipanggil lagi, dibuang di `aab26f3` (`temuan.md` butir 1) |
+| DELETE | `/bahan-baku/:param` | tidak ada di backend | - | - | - | tidak dipanggil lagi, dibuang di `aab26f3` (`temuan.md` butir 1) |
 
 #### `/bahanbaku`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/bahanbaku` | authPengguna | `read-bahan` | `{ data, success }` | `id` | 5 file |
-| POST | `/bahanbaku` | authPengguna | `create-bahan` | - | - | 1 file |
-| GET | `/bahanbaku/:id` | authPengguna | `read-bahan` | `{ data, success }` | `id` | 1 file |
-| PUT | `/bahanbaku/:id` | authPengguna | `update-bahan` | - | - | 1 file |
-| DELETE | `/bahanbaku/:id` | authPengguna | `delete-bahan` | - | - | 1 file |
+| GET | `/bahanbaku` | authPengguna | `read-bahan` | `{ data, success }` | `id` | `features/bahan-baku/api.ts` |
+| POST | `/bahanbaku` | authPengguna | `create-bahan` | - | - | `features/bahan-baku/api.ts` |
+| GET | `/bahanbaku/:id` | authPengguna | `read-bahan` | `{ data, success }` | `id` | `features/bahan-baku/api.ts` |
+| PUT | `/bahanbaku/:id` | authPengguna | `update-bahan` | - | - | `features/bahan-baku/api.ts` |
+| DELETE | `/bahanbaku/:id` | authPengguna | `delete-bahan` | - | - | `features/bahan-baku/api.ts` |
 
 #### `/diskon`
 
@@ -75,10 +76,10 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/inventory` | authPengguna | `read-inventory`, `read-inventory-gudang`, atau `read-inventory-outlet` | `{ count, data, success }` | `id` | 3 file |
-| POST | `/inventory` | authPengguna | `create-inventory` | - | - | 1 file |
-| PATCH | `/inventory/:id/minimum-stok` | authPengguna | `update-inventory-minimum` | - | - | 2 file |
-| POST | `/inventory/:id/opname` | authPengguna | `opname-inventory` | - | - | 2 file |
+| GET | `/inventory` | authPengguna | `read-inventory`, `read-inventory-gudang`, atau `read-inventory-outlet` | `{ count, data, success }` | `id` | `features/inventaris/api.ts` |
+| POST | `/inventory` | authPengguna | `create-inventory` | - | - | `features/inventaris/api.ts` |
+| PATCH | `/inventory/:id/minimum-stok` | authPengguna | `update-inventory-minimum` | - | - | `features/inventaris/api.ts` |
+| POST | `/inventory/:id/opname` | authPengguna | `opname-inventory` | - | - | `features/inventaris/api.ts` |
 
 #### `/jadwalshift`
 
@@ -94,16 +95,16 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/jurnalstok` | authPengguna | `read-jurnal-stok` | `{ data }` | `_id`, `_id` bersarang | `features/jurnal-stok` (query `locationID` untuk lingkup satu lokasi; diabaikan backend, `temuan.md` butir 20) |
+| GET | `/jurnalstok` | authPengguna | `read-jurnal-stok` | `{ data }` | `_id`, `_id` bersarang | `features/jurnal-stok/api.ts` (query `locationID` untuk lingkup satu lokasi; diabaikan backend, `temuan.md` butir 20) |
 
 #### `/kategori`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/kategori` | authPengguna | `read-kategori` | `{ data }` | `_id`, `_id` bersarang, `__v` | 3 file |
-| POST | `/kategori` | authPengguna | `create-kategori` | - | - | 1 file |
-| PUT | `/kategori/:id` | authPengguna | `update-kategori` | - | - | 1 file |
-| DELETE | `/kategori/:id` | authPengguna | `delete-kategori` | - | - | 1 file |
+| GET | `/kategori` | authPengguna | `read-kategori` | `{ data }` | `_id`, `_id` bersarang, `__v` | `features/kategori/api.ts` |
+| POST | `/kategori` | authPengguna | `create-kategori` | - | - | `features/kategori/api.ts` |
+| PUT | `/kategori/:id` | authPengguna | `update-kategori` | - | - | `features/kategori/api.ts` |
+| DELETE | `/kategori/:id` | authPengguna | `delete-kategori` | - | - | `features/kategori/api.ts` |
 
 #### `/laporan`
 
@@ -115,9 +116,9 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/location` | authPengguna | `read-location` | `{ data, success }` | `id` | 8 file |
+| GET | `/location` | authPengguna | `read-location` | `{ data, success }` | `id` | `features/inventaris/api.ts`, 1 file halaman lama |
 | POST | `/location` | authPengguna | `create-location` | - | - | 1 file |
-| GET | `/location/current` | authPengguna | `read-location` | `{ data, success }` | `id` | 3 file |
+| GET | `/location/current` | authPengguna | `read-location` | `{ data, success }` | `id` | `features/inventaris/api.ts` |
 
 #### `/metodepembayaran`
 
@@ -158,7 +159,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/pengajuanstok` | authPengguna | `read-pengajuan-stok` | `{ data, success }` | `id` | `features/pengajuan-stok` (query `status`, `locationID`) |
+| GET | `/pengajuanstok` | authPengguna | `read-pengajuan-stok` | `{ data, success }` | `id` | `features/pengajuan-stok/api.ts` (query `status`, `locationID`) |
 | POST | `/pengajuanstok` | authPengguna | `create-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` |
 | GET | `/pengajuanstok/:id` | authPengguna | `read-pengajuan-stok` | `{ data, success }` | `id` | `features/pengajuan-stok/api.ts` |
 | PUT | `/pengajuanstok/:id` | authPengguna | `update-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` |
@@ -170,13 +171,14 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/pengguna` | authPengguna | `read-pengguna` | `{ data, message, total }` | `id` | 5 file |
+| GET | `/pengguna` | authPengguna | `read-pengguna` | `{ data, message, total }` | `id` | `features/pengguna/api.ts`, 3 file halaman lama |
 | GET | `/pengguna/:id` | authPengguna | `read-pengguna` | `{ data, message }` | `id` | 1 file |
-| PUT | `/pengguna/:id` | authPengguna | `update-pengguna` | - | - | 3 file |
-| DELETE | `/pengguna/:id` | authPengguna | `delete-pengguna` | - | - | 2 file |
+| PUT | `/pengguna/:id` | authPengguna | `update-pengguna` | - | - | `features/pengguna/api.ts`, 1 file halaman lama |
+| DELETE | `/pengguna/:id` | authPengguna | `delete-pengguna` | - | - | `features/pengguna/api.ts` |
 | POST | `/pengguna/pin-login` | authAkun | - | - | - | 1 file |
 | POST | `/pengguna/pin-logout` | authPengguna | - | - | - | 1 file |
-| POST | `/pengguna/register-pengguna` | authPengguna | `create-pengguna` | - | - | 2 file |
+| POST | `/pengguna/pin-refresh` | public | - | - | - | 2 file (lewat `fetch`: `lib/apiClient.ts` dan `components/providers/session-provider.tsx`) |
+| POST | `/pengguna/register-pengguna` | authPengguna | `create-pengguna` | - | - | `features/pengguna/api.ts` |
 
 #### `/penjualan`
 
@@ -192,7 +194,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/permission` | authEither | - | `{ data, message }` | `_id`, `__v` | 4 file |
+| GET | `/permission` | authEither | - | `{ data, message }` | `_id`, `__v` | `features/role/api.ts` |
 
 #### `/polaroster`
 
@@ -207,11 +209,11 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/produk` | authPengguna | `read-produk` atau `akses-pos` | `{ data, success }` | `_id` | 3 file |
-| POST | `/produk` | authPengguna | `create-produk` | - | - | 1 file |
-| GET | `/produk/:id` | authPengguna | `read-produk` atau `akses-pos` | `{ data, success }` | `_id` | 1 file |
-| PUT | `/produk/:id` | authPengguna | `update-produk` | - | - | 1 file |
-| DELETE | `/produk/:id` | authPengguna | `delete-produk` | - | - | 1 file |
+| GET | `/produk` | authPengguna | `read-produk` atau `akses-pos` | `{ data, success }` | `_id` | `features/produk/api.ts` |
+| POST | `/produk` | authPengguna | `create-produk` | - | - | `features/produk/api.ts` |
+| GET | `/produk/:id` | authPengguna | `read-produk` atau `akses-pos` | `{ data, success }` | `_id` | `features/produk/api.ts` |
+| PUT | `/produk/:id` | authPengguna | `update-produk` | - | - | `features/produk/api.ts` |
+| DELETE | `/produk/:id` | authPengguna | `delete-produk` | - | - | `features/produk/api.ts` |
 
 #### `/produkpajak`
 
@@ -225,11 +227,11 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/role` | authPengguna | `read-role` | `{ data, message, total }` | `id` | 5 file |
-| POST | `/role` | authPengguna | `create-role` | - | - | 2 file |
-| GET | `/role/:id` | authPengguna | `read-role` | `{ data, message }` | `id` | 1 file |
-| PUT | `/role/:id` | authPengguna | `update-role` | - | - | 1 file |
-| DELETE | `/role/:id` | authPengguna | `delete-role` | - | - | 1 file |
+| GET | `/role` | authPengguna | `read-role` | `{ data, message, total }` | `id` | `features/role/api.ts` |
+| POST | `/role` | authPengguna | `create-role` | - | - | `features/role/api.ts` |
+| GET | `/role/:id` | authPengguna | `read-role` | `{ data, message }` | `id` | `features/role/api.ts` |
+| PUT | `/role/:id` | authPengguna | `update-role` | - | - | `features/role/api.ts` |
+| DELETE | `/role/:id` | authPengguna | `delete-role` | - | - | `features/role/api.ts` |
 
 #### `/sesibooking`
 
@@ -251,16 +253,16 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/stockopname` | authPengguna | `read-stock-opname` | - | - | `features/stock-opname` (query `status` dan `locationID`, divalidasi `validateOpnameQuery` di service; bentuk item di 3.3) |
-| POST | `/stockopname` | authPengguna | `create-stock-opname` | - | - | 2 file |
-| GET | `/stockopname/:id` | authPengguna | `read-stock-opname` | - | - | 2 file |
-| PATCH | `/stockopname/:id/approve` | authPengguna | `review-stock-opname` | - | - | 2 file |
-| PATCH | `/stockopname/:id/cancel` | authPengguna | `review-stock-opname` | - | - | 2 file |
-| PATCH | `/stockopname/:id/items` | authPengguna | `submit-stock-opname` | - | - | 2 file |
-| PATCH | `/stockopname/:id/reject` | authPengguna | `review-stock-opname` | - | - | 2 file |
-| PATCH | `/stockopname/:id/submit` | authPengguna | `submit-stock-opname` | - | - | 2 file |
-| GET | `/stockopname/adjustments` | authPengguna | `read-stock-adjustment` | `{ count, data, success }` | `id` | 1 file |
-| GET | `/stockopname/adjustments/:id` | authPengguna | `read-stock-adjustment` | `{ data, success }` | `id` | 1 file |
+| GET | `/stockopname` | authPengguna | `read-stock-opname` | - | - | `features/stock-opname/api.ts` (query `status` dan `locationID`, divalidasi `validateOpnameQuery` di service; bentuk item di 3.3) |
+| POST | `/stockopname` | authPengguna | `create-stock-opname` | - | - | `features/stock-opname/api.ts` |
+| GET | `/stockopname/:id` | authPengguna | `read-stock-opname` | - | - | `features/stock-opname/api.ts` |
+| PATCH | `/stockopname/:id/approve` | authPengguna | `review-stock-opname` | - | - | `features/stock-opname/api.ts` |
+| PATCH | `/stockopname/:id/cancel` | authPengguna | `review-stock-opname` | - | - | `features/stock-opname/api.ts` |
+| PATCH | `/stockopname/:id/items` | authPengguna | `submit-stock-opname` | - | - | `features/stock-opname/api.ts` |
+| PATCH | `/stockopname/:id/reject` | authPengguna | `review-stock-opname` | - | - | `features/stock-opname/api.ts` |
+| PATCH | `/stockopname/:id/submit` | authPengguna | `submit-stock-opname` | - | - | `features/stock-opname/api.ts` |
+| GET | `/stockopname/adjustments` | authPengguna | `read-stock-adjustment` | `{ count, data, success }` | `id` | `features/stock-adjustment/api.ts` |
+| GET | `/stockopname/adjustments/:id` | authPengguna | `read-stock-adjustment` | `{ data, success }` | `id` | `features/stock-adjustment/api.ts` |
 
 #### `/tarif`
 
@@ -286,17 +288,17 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/transferstok` | authPengguna | `read-transfer-stok` | `{ count, data, success }` | `id` | 3 file (query `status` dikirim web tetapi diabaikan backend, `temuan.md` butir 33) |
+| GET | `/transferstok` | authPengguna | `read-transfer-stok` | `{ count, data, success }` | `id` | `features/transfer-stok/api.ts` (query `status` dan `locationID` dikirim web tetapi diabaikan backend, `temuan.md` butir 33) |
 | POST | `/transferstok` | authPengguna | `create-transfer-stok` | - | - | `features/transfer-stok/api.ts` |
-| GET | `/transferstok/:id` | authPengguna | `read-transfer-stok` | `{ data, success }` | `id` | 3 file |
-| PUT | `/transferstok/:id` | authPengguna | `create-transfer-stok` | - | - | 1 file |
-| PATCH | `/transferstok/:id/batal` | authPengguna | `cancel-transfer-stok` | - | - | 1 file |
-| PATCH | `/transferstok/:id/kirim` | authPengguna | `approve-transfer-stok` | - | - | 1 file |
-| PATCH | `/transferstok/:id/terima` | authPengguna | `receive-transfer-stok` | - | - | 1 file |
+| GET | `/transferstok/:id` | authPengguna | `read-transfer-stok` | `{ data, success }` | `id` | `features/transfer-stok/api.ts` |
+| PUT | `/transferstok/:id` | authPengguna | `create-transfer-stok` | - | - | `features/transfer-stok/api.ts` |
+| PATCH | `/transferstok/:id/batal` | authPengguna | `cancel-transfer-stok` | - | - | `features/transfer-stok/api.ts` |
+| PATCH | `/transferstok/:id/kirim` | authPengguna | `approve-transfer-stok` | - | - | `features/transfer-stok/api.ts` |
+| PATCH | `/transferstok/:id/terima` | authPengguna | `receive-transfer-stok` | - | - | `features/transfer-stok/api.ts` |
 
 ### 3.2 Status sampel GET yang tidak berhasil
 
-- `GET /bahan-baku`: 404 Not Found
+- `GET /bahan-baku`: 404 Not Found (route tidak ada di backend; frontend berhenti memanggilnya di `aab26f3`)
 - `GET /shift`: 500 Cannot access 'data' before initialization
 
 ### 3.3 Bentuk item respons GET

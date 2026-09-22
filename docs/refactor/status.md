@@ -49,12 +49,13 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Inventaris: stock opname | `fc3f220` | Selesai |
 | Cakupan lokasi owner dan staf: jurnal stok dan stok outlet | `6ca6da8` | Selesai |
 | Penyesuaian backend `f27f093`: stock adjustment, gate stok, simpan hitungan opname, dan filter lokasi jurnal stok | `2b3b52d` | Selesai |
-| Inventaris: pengajuan stok, lalu transfer, pengiriman, dan penerimaan | `59e10a1` (daftar pengajuan), `08d0a73` (arah lokasi), `90eb935` (detail, edit, buat), `dec9d01` (perbaikan terima penerimaan) | **Berikutnya** (lihat Pekerjaan berikutnya): transfer, pengiriman, dan penerimaan |
+| Inventaris: pengajuan stok, lalu transfer, pengiriman, dan penerimaan | `59e10a1` (daftar pengajuan), `08d0a73` (arah lokasi), `90eb935` (detail, edit, buat), `dec9d01` (perbaikan terima penerimaan), `ad77a14` (transfer dan pengiriman gudang), `580a1e1` (penerimaan outlet) | Selesai |
+| Gudang: cakupan per gudang | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 | Penjualan dan pembayaran | - | Belum |
 | Reservasi | - | Belum |
 | Keuangan | - | Belum |
 | Jadwal dan shift | - | Belum |
-| Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang dikerjakan di modul inventaris (Pekerjaan berikutnya): jurnal stok, inventaris gudang, dan stock opname sudah, pengajuan, transfer, dan pengiriman belum; pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
+| Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang sudah seluruhnya dimigrasikan di modul inventaris (`580a1e1`); `gudang/layout.tsx` dan `gudang/setup` masih memakai `apiClient`; pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -62,202 +63,126 @@ Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 
-| Hal | Awal | Setelah perbaikan penerimaan `dec9d01` | Catatan |
+| Hal | Awal | Setelah modul inventaris `580a1e1` | Catatan |
 |---|---|---|---|
-| Pemakaian `any` | 302 | 93 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
-| Kemunculan `_id` | - | 107 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id` |
-| `useAuthGuard()` berulang di halaman | 49 | 42 | Dihitung di `app/` saja. Turun karena halaman stock opname menjadi tipis dan pemanggilannya pindah ke komponen di `features/`, bukan karena dipindah ke layout. Rencananya tetap dipindah ke layout |
+| Pemakaian `any` | 302 | 88 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
+| Kemunculan `_id` | - | 99 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id` |
+| `useAuthGuard()` berulang di halaman | 49 | 41 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
 | Berkas di atas 700 baris | 7 | 7 | Sempat 8 karena berkas lain tumbuh; kembali 7 setelah form produk disatukan. Berkurang saat modulnya dimigrasikan |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: modul inventaris (lanjutan)
+## Pekerjaan berikutnya: cakupan per gudang
 
-Modul inventaris terlalu besar untuk satu commit (24 halaman, sekitar 8.900
-baris), sehingga dipecah menjadi enam submodul. Setiap submodul punya spec
-pembanding, suite penuh, dan commit sendiri, dan dikerjakan dari yang
-terkecil (`arsitektur.md`, Langkah migrasi satu modul, langkah 7).
-
-| No | Submodul | Halaman | Baris | Status |
-|---|---|---|---|---|
-| 1 | Stock adjustment | outlet: daftar, detail | 431 | Selesai (`a52afbf`) |
-| 2 | Jurnal stok | outlet dan gudang: daftar | 617 | Selesai (`98735d4`) |
-| 3 | Stok dan inventaris | `outlet/inventaris/stok`, `gudang/inventaris` | 1.094 | Selesai (`ad590f9`) |
-| 4 | Stock opname | outlet dan gudang: daftar, detail, buat | 2.544 | Selesai (`fc3f220`) |
-| 5 | Pengajuan stok | outlet: daftar, detail, edit, buat; gudang: daftar, detail | 2.298 | Selesai (`59e10a1` daftar, `08d0a73` arah lokasi, `90eb935` detail, edit, dan buat) |
-| 6 | Transfer, pengiriman, penerimaan | gudang: transfer (daftar, detail, edit), pengiriman; outlet: penerimaan (daftar, detail) | 1.950 | **Berikutnya** (perbaikan terima: `dec9d01`) |
-
-### Pemetaan awal submodul 6 (21 September 2026)
-
-Halaman submodul 6, sesudah perbaikan penerimaan `dec9d01`. Kolom
-menunjukkan jumlah baris dan jumlah baris yang memuat pola lama.
-
-| Halaman | Baris | apiClient | any | _id | queryKey |
-|---|---|---|---|---|---|
-| `gudang/transferStok` | 267 | 2 | 1 | 0 | 2 |
-| `gudang/transferStok/[id]` | 484 | 4 | 5 | 0 | 9 |
-| `gudang/transferStok/[id]/edit` | 255 | 3 | 3 | 0 | 4 |
-| `gudang/pengirimanStok` | 226 | 2 | 1 | 0 | 2 |
-| `outlet/inventaris/penerimaanBarang` | 218 | 3 | 3 | 1 | 3 |
-| `outlet/inventaris/penerimaanBarang/[id]` | 495 | 3 | 2 | 7 | 6 |
-
-Pasangan halaman yang serupa (baris beda menurut `diff` dibanding total
-baris keduanya):
-
-| Halaman | Beda / total | Penilaian |
-|---|---|---|
-| `gudang/transferStok` dan `gudang/pengirimanStok` | 353 / 493 | Tetap dua halaman: pengiriman memantau surat jalan DIKIRIM berbentuk kartu dengan lama perjalanan dan polling 30 detik, daftar transfer adalah arsip bertab dengan badge status (`keputusan.md`) |
-| `gudang/transferStok/[id]` dan `outlet/inventaris/penerimaanBarang/[id]` | 681 / 979 | Peran berbeda (gudang mengirim, merevisi, dan membatalkan; outlet memeriksa dan menerima); tetap terpisah |
-
-Angka `diff` tidak cukup untuk memutuskan. Jurnal stok (341 dari 617 baris
-berbeda, hampir seluruhnya teks), stock opname (perbedaan kecil tersebar di
-34 hunk), dan daftar pengajuan stok (161 dari 474: teks, tab, dan dua kolom)
-tetap disatukan, sedangkan stok dan inventaris gudang (perbedaan
-perilaku tersebar di seluruh berkas) hanya berbagi lapisan `features/`. Baca
-isi perbedaannya lewat `diff` tanpa baris `className` sebelum memutuskan.
-
-Perintah untuk mengulang pemetaan:
-
-```bash
-find app/dashboard/outlet/inventaris app/dashboard/gudang -name page.tsx | grep -vE "produk|kategori|bahanBaku|pengguna|jadwal|pengaturan|setup|stockAdjustment|jurnalStok|stockOpname|inventaris/stok|gudang/inventaris/page.tsx|gudang/page.tsx|pengajuanStok" | sort | while read f; do printf "%-58s %4s  apiClient:%s any:%s _id:%s qk:%s\n" "${f#app/dashboard/}" "$(wc -l < "$f")" "$(grep -c apiClient "$f")" "$(grep -cE ': any|as any|<any' "$f")" "$(grep -c _id "$f")" "$(grep -cE 'queryKey' "$f")"; done
-```
-
-### Yang sudah diketahui
-
-- `features/inventaris` memuat seluruh hook lokasi, stok, dan cakupan
-  (`arsitektur.md`). Pakai itu; jangan membuat hook lokasi, inventory, atau cakupan
-  baru (`keputusan.md` butir 12). Mutation baru mengikuti pola callback halaman
-  (butir 13), dan tombol aksi mengikuti izin (butir 14).
-- Kunci `queryKeys.lokasi.daftar({ tipe })` masih diisi lewat `apiClient`
-  dengan bentuk mentah oleh `outlet/inventaris/penerimaanBarang` (Outlet).
-  `features/` memakai `lokasi.daftar()` tanpa filter, sehingga tidak
-  tertimpa. Ganti di submodul 6.
-- Di luar `components/ui`, halaman inventaris hanya mengimpor
-  `components/calendar.tsx` (240 baris, 2 `any`). Bereskan di submodul yang
-  memakainya.
-- `kontrak/temuan.md` butir 10: operasi tulis tanpa validator, sebagian besar di
-  stok (pengajuan dan transfer). Periksa service sebelum menentukan payload,
-  termasuk validator yang dipanggil dari service (butir 22). Untuk transfer
-  stok sudah diperiksa pada 21 September 2026 (`kontrak/payload.md`).
-- Halaman pengiriman stok gudang memakai `/transferstok`, yang mewajibkan
-  `read-transfer-stok` (`kontrak/izin-halaman.md`).
-- `kontrak/izin-halaman.md` sudah diselaraskan dengan `IZIN_HALAMAN` untuk halaman
-  yang disebut di kalimat pembukanya. Baris lain masih mencerminkan keadaan
-  sebelum Fase 2; periksa gate yang berlaku di `lib/auth/permissions.ts` dan
-  perbarui barisnya saat halamannya dimigrasikan.
-- Belum diverifikasi: `inventoryService` (sekitar baris 106 di backend
-  `f27f093`) membangun
-  `new RegExp(search, "i")` langsung dari masukan pengguna. Dugaannya,
-  karakter seperti `(` membuat pencarian stok dijawab 500. Buktikan lewat e2e
-  atau trace sebelum dilaporkan ke backend atau ditangani di frontend.
-- Spec e2e yang sudah ada di `tests/e2e/inventaris`: bahan baku, produk,
-  kategori, stock adjustment, jurnal stok, stok, stock opname, pengajuan
-  stok, dan penerimaan barang (detail). Submodul 6 masih butuh spec
-  pembanding untuk daftar transfer, detail gudang, edit, pengiriman, dan
-  daftar penerimaan, dengan pola spec penerimaan (surat jalan baru per run,
-  ditutup di akhir run).
-- `app/dashboard/outlet/inventaris/components/` berisi `bahanBakuCombobox.tsx`
-  (sudah bebas `any` dan `_id` sejak modul produk) dan `inventaris-nav-tabs.tsx`.
-- Transfer, pengiriman, dan penerimaan (submodul 6, dipetakan 21 September
-  2026; keputusannya di `keputusan.md`):
-  - `GET /transferstok` mengabaikan query (`kontrak/temuan.md` butir 33):
-    tab status daftar transfer dan halaman pengiriman sekarang menampilkan
-    seluruh surat jalan. Penyaringan klien lewat `features/transfer-stok`
-    wajib, dengan `status` tetap dikirim, seperti jurnal stok.
-  - Aturan status (dari service): kirim hanya dari PENDING, terima hanya
-    dari DIKIRIM, batal dari PENDING atau DIKIRIM; DITERIMA dan BATAL
-    adalah status akhir. Edit hanya untuk PENDING. Rincian payload dan
-    pergerakan stok ada di `kontrak/payload.md`.
-  - Tombol aksi mengikuti izin endpoint: kirim `approve-transfer-stok`,
-    batal `cancel-transfer-stok`, terima `receive-transfer-stok`, dan edit
-    `create-transfer-stok`. Halaman lama tidak memeriksa izin sama sekali.
-  - Halaman lama melanggar keputusan Fase 0 dan rancangan: dialog kirim dan
-    batal menutup diri saat gagal, invalidasi memakai `daftar()` tanpa
-    filter, dan form edit serta penerimaan diisi lewat `useEffect`
-    (keputusan rancangan butir 8). Halaman edit memakai
-    `crypto.randomUUID` tanpa cadangan, yang tidak tersedia di HTTP biasa.
-  - Daftar penerimaan outlet memakai lokasi bertipe Outlet pertama milik
-    tenant, bukan lokasi aktif; diganti cakupan outlet saat migrasi.
-    Pemanggilan `useAuthGuard` di halaman itu berulang, karena layout
-    dashboard sudah memanggilnya.
-  - Ketiga halaman daftar sudah punya entri `IZIN_HALAMAN` (penerimaan
-    outlet: `read-location` dan `read-transfer-stok`; transfer dan
-    pengiriman gudang: `read-transfer-stok`); barisnya di
-    `kontrak/izin-halaman.md` diperbarui saat migrasi.
-  - Data uji: hanya `PGJ/202608/0001` yang layak dibuatkan surat jalan
-    dengan stok gudang cukup; `PGJ/202608/0003` stoknya kurang dan ditolak
-    backend sebelum dokumen tercipta. Spec penerimaan membuat surat jalan
-    dari pengajuan yang layak dan membatalkannya di akhir, sehingga
-    pengajuannya kembali ke PENDING.
-  - Helper spec (`login`, `bukaDenganAuth`, `api`, `siapkanSuratJalan`)
-    dipindah ke berkas bersama di `tests/helpers/` saat spec transfer
-    ditulis, agar penanganan token dan pembersihan cukup ada di satu
-    tempat.
-- Pengajuan stok (selesai: `59e10a1`, `08d0a73`, `90eb935`):
-  - `pengajuanStokService.getAll` membaca `status`, `jenisPengajuan`, dan
-    `locationID` (dicocokkan dengan lokasi asal atau tujuan).
-  - Aturan status per izin di service baris 30 sampai 47 dicerminkan di
-    `features/pengajuan-stok/izin.ts`; keduanya diperbarui bersama.
-  - `jenisPengajuan` `PENGIRIMAN` tidak dipakai backend maupun frontend:
-    semua pengajuan adalah permintaan dari outlet ke gudang.
-  - Halaman buat dan edit memilih outlet peminta (`keLocationID` sejak
-    `08d0a73`) dari seluruh lokasi bertipe
-    Outlet untuk siapa pun, sehingga staf dapat mengajukan atas nama outlet
-    lain. Keputusan produknya ditahan pemilik proyek sebagai utang
-    (21 September 2026) sampai kondisi backend terbaru jelas. Pilihan yang
-    diajukan: mengikuti cakupan outlet (staf terkunci di lokasi aktif, owner
-    memilih), lokasi aktif untuk semua, atau tetap seperti sekarang. Cakupan
-    outlet satu-satunya pilihan yang tetap benar apa pun keputusan
-    `kontrak/temuan.md` butir 20.
-  - `pengajuanStok.detail(id)` kini hanya diisi lewat `usePengajuanStok`;
-    ketiga pemakainya dimigrasikan bersama di `90eb935`.
-  - Usulan tertunda: daftar outlet tidak menampilkan outlet peminta, sehingga
-    owner di pilihan "Semua Outlet" tidak dapat membedakan outlet pengaju.
-  - Temuan pemetaan 21 September 2026 atas detail outlet, edit, buat, dan
-    detail gudang (1.824 baris) dituntaskan di `90eb935`: tombol aksi
-    mengikuti izin, dialog ajukan dan setujui bertahan saat gagal, lokasi
-    dan bahan baku diambil lewat hook fitur (bukan kunci akar), dan form
-    edit dipasang setelah detail termuat. Keempatnya tetap tanpa entri
-    `IZIN_HALAMAN`, mengikuti pola detail stock opname (`keputusan.md`), dan
-    kini tercakup spec alur (`pengujian.md`).
-  - Pembuatan surat jalan dari detail gudang memakai `features/transfer-stok`
-    (butir 12), yang sejak `dec9d01` juga memuat payload terima; submodul 6
-    melengkapinya.
-  - Arah lokasi (diselesaikan di `08d0a73`): backend memaknai
-    `dariLocationID` sebagai gudang asal barang dan `keLocationID` sebagai
-    outlet peminta, sehingga pemeriksaan stok di `getById` dan `approve`
-    sudah benar. Yang terbalik adalah halaman buat dan edit web, dan
-    kedelapan pengajuan development dibalik datanya. Laporan backend
-    21 September 2026 (`kontrak/temuan.md` butir 23 sampai 27).
-  - Aturan status pengajuan (dari service): edit ditolak untuk SUBMITTED,
-    COMPLETED, dan REJECTED (butir 25); ajukan hanya dari DRAFT; setujui dan
-    tolak hanya dari SUBMITTED; REJECTED adalah status akhir; tidak ada hapus
-    maupun batal. Surat jalan hanya dari APPROVED atau PENDING, dan
-    membatalkan surat jalan mengembalikan pengajuan ke PENDING.
-  - Strategi data uji spec alur (keputusan pemilik proyek, pilihan A):
-    buat, edit, ajukan, lalu tolak, dengan dokumen baru per run yang
-    berakhir REJECTED; setujui dan buat surat jalan diuji jalur gagalnya
-    saja dengan `page.route`, karena keduanya meninggalkan dokumen permanen.
-- Backend lokal berjalan di branch `ridho` `9cd1439`, yang menggabungkan
-  origin/yoga `f0b7157` (21 September 2026, belum di-push). Berkas transfer
-  stok (route, controller, service, validator, model, dan mapper) tidak
-  berubah sejak `f27f093`; `fc159bd` memasang validator allowlist di route
-  inventory (`kontrak/payload.md`), dan spec stok lolos terhadapnya.
-
-### Setelah modul inventaris: cakupan per gudang
-
-Keputusan pengajuan stok (`keputusan.md`): ruang gudang memakai seluruh
-lokasi bertipe Gudang untuk MVP, lalu beralih ke per gudang. Peralihan
-dikerjakan sebagai satu commit untuk seluruh halaman gudang (stock opname,
-jurnal stok, inventaris, pengajuan, transfer), agar aturannya seragam:
+Keputusan pemilik proyek (22 September 2026): ruang gudang beralih dari
+seluruh lokasi bertipe Gudang ke per gudang, sebelum modul penjualan dan
+pembayaran. Dikerjakan sebagai satu commit untuk seluruh halaman gudang agar
+aturannya seragam (`keputusan.md`, submodul pengajuan stok).
 
 - `useCakupanLokasiOutlet` digeneralisasi menjadi cakupan per tipe lokasi:
   owner melihat seluruh gudang dengan pemilih, petugas gudang hanya
-  gudangnya.
+  gudangnya. Owner dikenali lewat `useLevelPenggunaAktif` (keputusan
+  rancangan butir 2).
 - `PemilihLokasiOutlet` menerima tipe lokasi.
-- Setiap halaman gudang disesuaikan, beserta spec-nya.
+- Halaman gudang yang disesuaikan, beserta spec-nya: stock opname (daftar,
+  detail, buat), jurnal stok, inventaris, pengajuan stok (daftar, detail),
+  transfer stok (daftar, detail, revisi), dan pengiriman. Seluruhnya sudah
+  memakai lapisan `features/`, sehingga perubahan cukup di komponen dan hook
+  cakupan.
+- Pembatasan ini hanya di tampilan: backend mengirim data seluruh lokasi
+  tenant (`kontrak/temuan.md` butir 20 dan 33).
+- Pekerjaan ini menyentuh halaman stock opname, sehingga empat error ESLint
+  warisan di `features/stock-opname` (Utang kecil dari penyesuaian backend
+  `f27f093`, di bawah) dibereskan di commit yang sama.
+
+Pemetaan awal belum diambil. Langkah pertama sesi berikutnya, untuk
+menemukan setiap tempat yang menentukan lingkup gudang:
+
+```bash
+grep -rnE 'tipeLokasi|useLokasiBertipe|ruang="gudang"|ruang: "gudang"|"Gudang"' features app/dashboard/gudang --include='*.ts' --include='*.tsx' | cut -c1-130
+```
+
+Jumlah lokasi bertipe Gudang di data development juga belum diperiksa;
+pemilih gudang baru dapat diuji e2e bila ada lebih dari satu gudang.
+
+Sesudah itu: modul penjualan dan pembayaran (tabel Fase 3).
+
+## Catatan dari modul inventaris
+
+Modul inventaris (24 halaman, sekitar 8.900 baris) dikerjakan dalam enam
+submodul, masing-masing dengan spec pembanding, suite penuh, dan commit
+sendiri:
+
+| No | Submodul | Baris | Commit |
+|---|---|---|---|
+| 1 | Stock adjustment | 431 | `a52afbf` |
+| 2 | Jurnal stok | 617 | `98735d4` |
+| 3 | Stok dan inventaris gudang | 1.094 | `ad590f9` |
+| 4 | Stock opname | 2.544 | `fc3f220` |
+| 5 | Pengajuan stok | 2.298 | `59e10a1`, `08d0a73`, `90eb935` |
+| 6 | Transfer, pengiriman, penerimaan | 1.950 | `dec9d01`, `ad77a14`, `580a1e1` |
+
+Angka `diff` antarhalaman tidak cukup untuk memutuskan penyatuan. Jurnal
+stok (341 dari 617 baris berbeda, hampir seluruhnya teks), stock opname, dan
+daftar pengajuan stok (161 dari 474) disatukan, sedangkan stok dan
+inventaris gudang, detail pengajuan, serta seluruh halaman surat jalan hanya
+berbagi lapisan `features/`. Baca isi perbedaannya lewat `diff` tanpa baris
+`className` sebelum memutuskan.
+
+Yang masih berlaku:
+
+- `features/inventaris` memuat seluruh hook lokasi, stok, dan cakupan
+  (`arsitektur.md`); jangan membuat hook serupa (keputusan rancangan butir
+  12).
+- `kontrak/izin-halaman.md` sudah diselaraskan dengan `IZIN_HALAMAN` untuk
+  halaman yang disebut kalimat pembukanya; baris lain masih mencerminkan
+  keadaan sebelum Fase 2 dan diperbarui saat halamannya dimigrasikan.
+- `kontrak/temuan.md` butir 10: operasi tulis tanpa validator di modul lain
+  masih perlu ditelusuri sampai ke service, termasuk validator yang
+  dipanggil dari service (butir 22). Stock opname, pengajuan stok, transfer
+  stok, dan inventory sudah diperiksa.
+- Belum diverifikasi: `inventoryService` (sekitar baris 106 di backend
+  `f27f093`) membangun `new RegExp(search, "i")` langsung dari masukan
+  pengguna. Dugaannya, karakter seperti `(` membuat pencarian stok dijawab
+  500. Buktikan lewat e2e atau trace sebelum dilaporkan ke backend atau
+  ditangani di frontend.
+- `components/calendar.tsx` (240 baris, 2 `any`) belum dibereskan; periksa
+  pemakainya sebelum modul yang memakainya dimigrasikan.
+- `app/dashboard/outlet/inventaris/components/` berisi
+  `bahanBakuCombobox.tsx` (dipakai `features/produk/form-produk.tsx`, lihat
+  utang modul produk) dan `inventaris-nav-tabs.tsx`.
+- Di ruang gudang, `gudang/layout.tsx`, `gudang/setup`, dan `gudang/jadwal`
+  masih memakai `apiClient`; ketiganya bukan halaman stok (modul Gudang dan
+  modul Jadwal dan shift).
+- Backend lokal: branch `ridho` `9cd1439`, yang menggabungkan origin/yoga
+  `f0b7157` (21 September 2026, belum di-push). Berkas transfer stok tidak
+  berubah sejak `f27f093`; `fc159bd` memasang validator allowlist di route
+  inventory, dan spec stok lolos terhadapnya.
+- Pengajuan stok:
+  - Aturan status per izin di `pengajuanStokService.getAll` (baris 30
+    sampai 47) dicerminkan di `features/pengajuan-stok/izin.ts`; keduanya
+    diperbarui bersama.
+  - `jenisPengajuan` `PENGIRIMAN` tidak dipakai backend maupun frontend:
+    semua pengajuan adalah permintaan dari outlet ke gudang.
+  - Strategi data uji spec alur (keputusan pemilik proyek, pilihan A): buat,
+    edit, ajukan, lalu tolak, dengan dokumen baru per run yang berakhir
+    REJECTED; setujui dan buat surat jalan diuji jalur gagalnya saja dengan
+    `page.route`, karena keduanya meninggalkan dokumen permanen.
+  - Utang keputusan produk: halaman buat dan edit memilih outlet peminta
+    dari seluruh lokasi bertipe Outlet untuk siapa pun, sehingga staf dapat
+    mengajukan atas nama outlet lain. Ditahan pemilik proyek (21 September
+    2026) sampai kondisi backend terbaru jelas. Pilihan yang diajukan:
+    mengikuti cakupan outlet (staf terkunci di lokasi aktif, owner memilih),
+    lokasi aktif untuk semua, atau tetap seperti sekarang. Cakupan outlet
+    satu-satunya pilihan yang tetap benar apa pun keputusan
+    `kontrak/temuan.md` butir 20.
+  - Usulan tertunda: daftar outlet tidak menampilkan outlet peminta,
+    sehingga owner di pilihan "Semua Outlet" tidak dapat membedakan outlet
+    pengaju.
+
+## Utang kecil yang tertunda
 
 ### Utang kecil dari modul produk
 
@@ -275,7 +200,8 @@ jurnal stok, inventaris, pengajuan, transfer), agar aturannya seragam:
 - `features/produk/form-produk.tsx` mengimpor `BahanBakuCombobox` dari
   `app/dashboard/outlet/inventaris/components/`, sehingga `features/`
   bergantung pada `app/`. Pindahkan komponen itu ke `features/bahan-baku`
-  atau `components/` saat modul inventaris menyentuhnya.
+  atau `components/` saat modul produk atau bahan baku disentuh lagi; modul
+  inventaris selesai tanpa menyentuhnya.
 
 ### Utang kecil dari penyesuaian backend `f27f093`
 

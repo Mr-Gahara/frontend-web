@@ -93,7 +93,7 @@ Tidak boleh dibalik tanpa pembahasan:
   tampilan, karena backend mengirim data seluruh tenant kepada pemegang izin
   baca (`kontrak/temuan.md` butir 20). Aturan yang sama diterapkan juga ke
   jurnal stok dan stok outlet dalam commit cakupan lokasi, dan ke daftar
-  pengajuan stok (`59e10a1`).
+  pengajuan stok (`59e10a1`), serta daftar penerimaan barang (`580a1e1`).
 - **Membuat opname di outlet tetap memakai lokasi aktif** untuk semua
   pengguna, termasuk owner, karena opname adalah hitungan fisik di tempat.
 - **Tombol aksi disembunyikan sesuai izin**: `submit-stock-opname` untuk
@@ -128,8 +128,9 @@ Tidak boleh dibalik tanpa pembahasan:
 - **Daftar gudang menampilkan pengajuan ke seluruh lokasi bertipe Gudang**
   untuk MVP. Kelak beralih ke per gudang (owner seluruh gudang dengan
   pemilih, petugas gudang hanya gudangnya), dikerjakan sebagai satu commit
-  untuk seluruh halaman gudang agar aturannya seragam (`status.md`, Setelah
-  modul inventaris).
+  untuk seluruh halaman gudang agar aturannya seragam. Waktunya diputuskan
+  pemilik proyek pada 22 September 2026: tepat setelah modul inventaris,
+  sebelum penjualan dan pembayaran (`status.md`, Pekerjaan berikutnya).
 - **Draf tidak pernah tampil di ruang gudang**, karena belum diajukan dan
   belum menjadi urusan gudang.
 - **Tab status yang selalu kosong karena izin disembunyikan.** Backend
@@ -151,7 +152,8 @@ Tidak boleh dibalik tanpa pembahasan:
   izin pemilik proyek karena belum ada data produksi (8 pengajuan,
   21 September 2026).
 - **Keputusan cakupan outlet di halaman buat tetap ditahan** sebagai utang
-  sampai kondisi backend terbaru jelas (`status.md`).
+  sampai kondisi backend terbaru jelas (`status.md`, Catatan dari modul
+  inventaris).
 - **Buat dan revisi memakai satu form** (`form-pengajuan-stok.tsx`). Jumlah
   disimpan sebagai teks agar isian kosong tetap tampil kosong, dan aturan
   lama dipertahankan: baris tanpa barang atau berjumlah 0 diabaikan tanpa
@@ -194,8 +196,7 @@ bug backend dilaporkan dan tidak diakali agar test lolos.
   jalur gagalnya lewat `page.route`; batal dari DIKIRIM lewat API hanya
   dipakai membersihkan data uji.
 - **Daftar penerimaan outlet mengikuti cakupan outlet**: owner seluruh
-  outlet dengan pemilih, staf hanya lokasi aktifnya (dikerjakan saat
-  migrasi).
+  outlet dengan pemilih, staf hanya lokasi aktifnya (`580a1e1`).
 - **Batal surat jalan di web hanya untuk PENDING**, walau backend menerima
   batal dari DIKIRIM, karena stok gudang langsung dikembalikan saat barang
   masih di perjalanan (butir 36).
@@ -205,6 +206,17 @@ bug backend dilaporkan dan tidak diakali agar test lolos.
   hanya berbagi lapisan `features/`: pengiriman memantau surat jalan
   DIKIRIM dengan lama perjalanan dan polling, sedangkan daftar transfer
   adalah arsip bertab (`arsitektur.md`, Kapan halaman disatukan).
+- **Tombol aksi surat jalan mengikuti izin endpoint-nya** (`aksiSuratJalan`,
+  keputusan rancangan butir 14): kirim `approve-transfer-stok`, revisi
+  `create-transfer-stok`, batal `cancel-transfer-stok`, dan terima
+  `receive-transfer-stok`.
+- **Revisi mempertahankan aturan lama**: baris tanpa barang, berjumlah 0,
+  atau bukan angka diabaikan, tetapi harus ada minimal satu baris valid.
+  Karena PUT mengganti items apa adanya (`kontrak/temuan.md` butir 32),
+  baris yang diabaikan hilang dari surat jalan.
+- **Kegagalan memuat daftar penerimaan tampil sebagai pesan**, sejalan
+  dengan keputusan submodul jurnal stok, termasuk lokasi yang gagal dimuat
+  dan staf tanpa lokasi aktif.
 
 ## Keputusan rancangan yang mengikat
 

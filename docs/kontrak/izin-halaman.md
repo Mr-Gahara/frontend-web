@@ -6,7 +6,15 @@ Gate setiap menu sidebar dibandingkan dengan permission endpoint yang dipanggil 
 
 ## 5. Kebutuhan izin per halaman
 
-Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual. Baris pengguna, produk, kategori, bahan baku, stok, stock adjustment, jurnal stok, inventaris gudang, stock opname, dan pengajuan stok (daftar) diperbarui manual dari `IZIN_HALAMAN` setelah migrasi (20 September 2026), dan baris bahan baku, stok, serta inventaris gudang diperbarui lagi pada 21 September 2026 untuk izin alternatif (`temuan.md` butir 2); baris lain mencerminkan keadaan saat kontrak dibangkitkan.
+Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipanggil `page.tsx` halamannya, dan permission yang diwajibkan backend untuk endpoint tersebut. Halaman yang memuat data lewat komponen terpisah ditandai untuk diperiksa manual.
+
+Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`lib/auth/permissions.ts`):
+
+- 20 September 2026: pengguna, produk, kategori, bahan baku, stok, stock adjustment, jurnal stok, inventaris gudang, stock opname, dan pengajuan stok (daftar).
+- 21 September 2026: bahan baku, stok, dan inventaris gudang, untuk izin alternatif (`temuan.md` butir 2).
+- 22 September 2026: penerimaan barang dan pengiriman stok setelah migrasi submodul 6. Gate baris gudang untuk jurnal stok, stock opname, pengajuan stok, transfer stok, dan pengiriman stok dicocokkan ulang dengan `IZIN_HALAMAN` dan sudah sesuai.
+
+Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
 | Menu | Gate saat ini | Endpoint GET di halaman | Permission dibutuhkan | Penilaian |
 |---|---|---|---|---|
@@ -28,7 +36,7 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/outlet/inventaris/jurnalStok` | `read-jurnal-stok`, `read-location` | `/jurnalstok`, `/location`, `/location/current` | `read-jurnal-stok`, `read-location` | Sejalan |
 | `/dashboard/outlet/inventaris-suplai` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/pengajuanStok` | `read-pengajuan-stok`, `read-location` | `/pengajuanstok`, `/location`, `/location/current` | `read-pengajuan-stok`, `read-location` | Sejalan |
-| `/dashboard/outlet/inventaris/penerimaanBarang` | - | `/location`, `/transferstok` | `read-location`, `read-transfer-stok` | Tanpa gate, endpoint berizin |
+| `/dashboard/outlet/inventaris/penerimaanBarang` | `read-location`, `read-transfer-stok` | `/location`, `/location/current`, `/transferstok` | `read-location`, `read-transfer-stok` | Sejalan |
 | `/dashboard/outlet/jadwal` | - | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Tanpa gate, endpoint berizin |
 | `/dashboard/outlet/pola-roster` | - | `/shift`, `/polaroster` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/shift` | - | `/shift` | - | Backend tidak memeriksa izin |
@@ -41,7 +49,7 @@ Untuk setiap menu sidebar: gate yang dipakai saat ini, endpoint GET yang dipangg
 | `/dashboard/gudang/stockOpname` | `read-stock-opname` | `/stockopname` | `read-stock-opname` | Sejalan |
 | `/dashboard/gudang/pengajuanStok` | `read-pengajuan-stok` | `/pengajuanstok` | `read-pengajuan-stok` | Sejalan |
 | `/dashboard/gudang/transferStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
-| `/dashboard/gudang/pengirimanStok` | `read-pengiriman-stok` | `/transferstok` | `read-transfer-stok` | Tidak sejalan |
+| `/dashboard/gudang/pengirimanStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/gudang/jadwal` | - | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Tanpa gate, endpoint berizin |
 | `/dashboard/gudang/pola-roster` | - | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/gudang/shift` | - | - | - | Tidak ada halaman (grup menu atau rute kosong) |

@@ -56,23 +56,35 @@ ESLint 9; pakai `json`:
 npx eslint <berkas atau folder> -f json 2>/dev/null | node ~/.cache/frontend-web/alat/daftar-eslint.js
 ```
 
+Saat menutup modul, kolom "Dipakai di" di `docs/kontrak/endpoint.md` dan
+kecocokan frontend dengan backend diperiksa lewat helper `audit-endpoint.js`
+(`cara-kerja.md`, Helper penggantian). Jalankan
+`node ~/.cache/frontend-web/alat/audit-endpoint.js | head -40` dari akar
+repo, nilai setiap baris laporannya, lalu ulangi dengan `--tulis`. Audit 22
+September 2026 memastikan seluruh panggilan frontend ada di backend dan
+tercatat di kontrak.
+
 Suite e2e penuh memakan 8 sampai 12 menit karena berjalan dengan satu worker
 dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per perbaikan penerimaan** (commit `dec9d01`): 140 test unit
-dan integrasi lolos, 208 e2e lolos, 6 skipped: empat `test.fixme` yang
-menunggu backend dan dua `test.skip` bersyarat data (Test yang ditandai
-fixme dan skip bersyarat, di bawah). Diukur terhadap backend lokal
-`9cd1439` (branch `ridho` yang menggabungkan origin/yoga `f0b7157`).
-Angka ini pembanding untuk memastikan tidak ada yang
-hilang diam-diam. Angka skipped dapat berubah bila data uji berubah; periksa
-judul test yang dilewati sebelum menyimpulkan
-ada yang hilang. Setiap run suite penuh menambah tiga dokumen stock opname
-berstatus CANCELLED, serta satu surat jalan BATAL dan dua entri jurnal
-gudang dari spec penerimaan (Test yang ditandai fixme dan skip bersyarat,
-di bawah).
+**Baseline per migrasi transfer, pengiriman, dan penerimaan** (commit
+`580a1e1`): 149 test unit dan integrasi lolos, 210 e2e lolos, 6 skipped:
+empat `test.fixme` yang menunggu backend dan dua `test.skip` bersyarat data
+(Test yang ditandai fixme dan skip bersyarat, di bawah). Diukur terhadap
+backend lokal `9cd1439` (branch `ridho` yang menggabungkan origin/yoga
+`f0b7157`). Angka ini pembanding untuk memastikan tidak ada yang hilang
+diam-diam. Angka skipped dapat berubah bila data uji berubah; periksa judul
+test yang dilewati sebelum menyimpulkan ada yang hilang.
+
+Setiap run suite penuh menambah tiga dokumen stock opname berstatus
+CANCELLED, serta tiga surat jalan BATAL dan empat entri jurnal gudang. Spec
+penerimaan dan spec pengiriman masing-masing membatalkan satu surat jalan
+DIKIRIM (jurnal kirim dan jurnal batal), dan spec alur transfer membatalkan
+satu surat jalan PENDING tanpa jurnal. Terbukti dengan
+`tinjau-surat-jalan.js BATAL` pada suite penuh `580a1e1`. Aturan data uji
+spec tulis ada di Test yang ditandai fixme dan skip bersyarat, di bawah.
 
 ## Kredensial uji
 
@@ -213,8 +225,8 @@ satu putaran.
   mengambil token dari respons `pin-refresh` pemuatan halaman, lalu
   menggantinya setiap kali halaman melakukan `pin-refresh` lagi. Token dari
   permintaan pertama yang membawa `Authorization` tidak dipakai, karena
-  bisa milik halaman sebelumnya. Contoh: `bukaDenganAuth` di spec
-  penerimaan.
+  bisa milik halaman sebelumnya. Contoh: `bukaDenganAuth` di
+  `tests/helpers/transfer-uji.ts`, dipakai spec penerimaan dan transfer.
 - Persiapan data lewat API memeriksa status setiap langkah dan menyertakan
   pesan backend. `test.skip` hanya dipakai bila memang tidak ada data yang
   layak; kegagalan persiapan sebagian menggagalkan test setelah dokumen
@@ -247,7 +259,7 @@ terhitung di angka skipped pada baseline:
 | `reservasi/aset/crud-aset.spec.ts` | Tidak ada aset berstatus digunakan |
 | `inventaris/stok/lihat-stok.spec.ts`, tab kritis gudang | Tidak ada stok gudang yang kritis (terjadi pada data uji sekarang) |
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
-| `inventaris/penerimaanBarang/terima-penerimaan.spec.ts` | Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup. Kegagalan persiapan lain menggagalkan test, bukan melewatinya |
+| `inventaris/penerimaanBarang/terima-penerimaan.spec.ts`, `inventaris/transferStok/*.spec.ts` | Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup. Kegagalan persiapan lain menggagalkan test, bukan melewatinya |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
 hapus bahan baku juga dilewati bila datanya kosong, tetapi tidak terjadi pada
@@ -259,14 +271,15 @@ Kegagalan yang belum terjelaskan:
   login** setelah `page.goto` kedua, dua kali pada 21 September 2026, saat
   spec itu berjalan bersama test lain. Tidak terulang dalam 9 run test itu
   sendirian maupun dalam urutan berkasnya, dan tidak pada suite penuh
-  `90eb935` maupun `dec9d01`. `playwright.config.ts` memakai `workers: 1`,
-  sehingga bukan
-  benturan login paralel; pada run yang lolos, refresh sesi setelah login
+  `90eb935`, `dec9d01`, `ad77a14`, maupun `580a1e1`. `playwright.config.ts`
+  memakai `workers: 1`, sehingga bukan benturan login paralel; pada run yang
+  lolos, refresh sesi setelah login
   selalu berstatus 200. Bila terulang, jalankan dengan
   `--trace retain-on-failure` dan cari `refreshtoken` atau `pin-refresh`
   berstatus 401 di trace. Kemungkinan terkait: navigasi penuh menjalankan
   `pin-refresh` dan membuat token sebelumnya dijawab 401 (Catatan
-  Playwright); belum dibuktikan untuk kasus ini.
+  Playwright), dan spec ini masih mengambil token dengan pola lama (Spec
+  rujukan); belum dibuktikan untuk kasus ini.
 
 Ketiga spec tulis stock opname membuat dokumen baru di setiap run dan
 menutupnya sebagai CANCELLED, sehingga dokumen CANCELLED bertambah tiga per
@@ -298,6 +311,12 @@ Urutan debug kegagalan e2e di atas).
 - **Item tanpa master bahan baku pada penerimaan** hanya teruji di unit
   test (`tests/unit/features/transfer-stok/payload.test.ts`), karena
   membuat datanya berarti menghapus master bahan baku.
+- **Kirim surat jalan yang berhasil lewat UI** tidak diuji e2e, karena
+  memotong stok gudang. Kirim dijalankan lewat API di persiapan spec dan
+  dibatalkan di akhir; dari UI hanya jalur gagalnya yang diuji.
+- **Tombol aksi surat jalan yang disembunyikan menurut izin** hanya teruji
+  di unit test (`aksiSuratJalan`), dengan alasan yang sama dengan cakupan
+  lokasi: satu-satunya akun uji berperan Owner.
 - **`tests/helpers/storage.ts`** masih membaca `sessionStorage` dan sudah
   tidak relevan sejak token dipindah ke memori. Berkas itu belum dibersihkan.
 - **Pengosongan hitungan stock opname** baru berupa penanda `test.fixme`
@@ -350,13 +369,17 @@ Urutan debug kegagalan e2e di atas).
   kode.
 - `tests/e2e/inventaris/pengajuanStok/alur-pengajuan-stok.spec.ts`: spec
   pembanding alur tulis yang ditulis dan dijalankan terhadap kode lama
-  sebelum migrasi (pilihan A di `status.md`). Test pertama membuat satu
+  sebelum migrasi (pilihan A, `status.md` Catatan dari modul inventaris).
+  Test pertama membuat satu
   pengajuan per run dan menutupnya REJECTED; dialog yang harus bertahan
   saat operasi gagal diperiksa dengan `expect.soft` agar alur tetap
   selesai walau pemeriksaan itu gagal. Setujui dan surat jalan memakai
   pengajuan yang sudah ada dan hanya menguji jalur gagalnya; daftar dan
   detail diambil lewat `page.request` dengan header `Authorization` yang
-  ditangkap dari permintaan halaman.
+  ditangkap dari permintaan halaman. Itu pola lama yang kini dilarang
+  Catatan Playwright, karena tokennya bisa milik halaman sebelumnya; spec
+  baru memakai `bukaDenganAuth` (`tests/helpers/transfer-uji.ts`), dan spec
+  ini dipindah ke pola itu saat disentuh lagi.
 - `tests/e2e/inventaris/bahanBaku/hapus-bahan-baku.spec.ts`: dialog yang harus
   tetap terbuka saat operasi gagal.
 - `tests/e2e/inventaris/penerimaanBarang/terima-penerimaan.spec.ts`: surat
@@ -364,4 +387,16 @@ Urutan debug kegagalan e2e di atas).
   `finally`, token API mengikuti `pin-refresh` halaman, payload terima
   dibaca dari permintaan yang dijawab gagal lewat `page.route`, penahanan
   dibuktikan dengan penghitung request, dan `test.fixme` berbadan lengkap
-  untuk perilaku yang menunggu backend.
+  untuk perilaku yang menunggu backend. Helper-nya (`login`,
+  `bukaDenganAuth`, `api`, `siapkanSuratJalan`, `batalkan`) ada di
+  `tests/helpers/transfer-uji.ts`.
+- `tests/e2e/inventaris/transferStok/alur-transfer-stok.spec.ts`: spec
+  pembanding alur tulis gudang dengan surat jalan PENDING dari API. Tab
+  status diperiksa dengan `toHaveCount(0)` pada baris yang tidak boleh
+  tampil, revisi kuantitas disimpan sungguhan dan dicek lewat API, dan
+  pembatalan dari PENDING lewat UI sekaligus menjadi pembersihnya (tanda
+  `dibatalkan` mencegah pembatalan ganda di `finally`).
+- `tests/e2e/inventaris/transferStok/pengiriman-penerimaan.spec.ts`: harapan
+  jumlah kartu dihitung dari seluruh surat jalan berstatus DIKIRIM, karena
+  backend mengabaikan query status, lalu dibandingkan dengan jumlah tombol
+  per kartu di ruang gudang dan outlet.

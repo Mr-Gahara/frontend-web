@@ -146,7 +146,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /bahan-baku`
 
-- Tidak ada di backend.
+- Tidak ada di backend. Frontend berhenti memanggilnya di `aab26f3` (`temuan.md` butir 1); entri ini dipertahankan sebagai jejak.
 
 #### `POST /bahanbaku`
 
@@ -395,7 +395,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /bahan-baku/:param`
 
-- Tidak ada di backend.
+- Tidak ada di backend. Frontend berhenti memanggilnya di `aab26f3` (`temuan.md` butir 1); entri ini dipertahankan sebagai jejak.
 
 #### `PUT /bahanbaku/:id`
 

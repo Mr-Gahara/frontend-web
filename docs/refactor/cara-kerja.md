@@ -62,11 +62,14 @@ console.log("OK");
 Untuk penggantian di banyak berkas, kumpulkan pasangan dalam array dan tulis
 berkas hanya bila seluruhnya cocok.
 
-Enam helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan dengan cache
+Sembilan helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan dengan cache
 kontrak. Sampai submodul stok, helper disimpan di `/tmp`, dan folder itu dua
 kali dikosongkan sistem dalam sehari: sekali membuat perbaikan dokumen tidak
 masuk sebelum commit (`b0d11d2` menyusulkannya). Skrip sekali pakai tetap di
-`/tmp`. Periksa dengan `ls ~/.cache/frontend-web/alat` sebelum blok pertama
+`/tmp`. Skrip tinjau data yang dipakai berulang lintas sesi
+(`tinjau-surat-jalan.js`, `api-surat-jalan.js`) ikut dipindah ke sana pada
+22 September 2026, setelah `/tmp` kembali dikosongkan di tengah pemakaiannya.
+Periksa dengan `ls ~/.cache/frontend-web/alat` sebelum blok pertama
 sesi, dan buat ulang bila hilang:
 
 ```bash
@@ -186,6 +189,199 @@ if (gagal.length) {
 for (const [f, isiBaru] of Object.entries(berkas)) fs.writeFileSync(f, isiBaru);
 console.log("OK " + pasangan.length + " pasangan di " + Object.keys(berkas).length + " berkas");
 EOF
+cat > ~/.cache/frontend-web/alat/tinjau-surat-jalan.js <<'EOF'
+const BE = process.env.HOME + "/Documents/backend-js";
+const fs = require("fs");
+const mongoose = require(BE + "/node_modules/mongoose");
+const uri = fs.readFileSync(BE + "/.env", "utf8").split("\n").map((l) => l.split("=").slice(1).join("=").trim().replace(/^["']|["']$/g, "")).find((v) => v.startsWith("mongodb"));
+const status = process.argv[2] || "DIKIRIM";
+(async () => {
+  await mongoose.connect(uri);
+  try {
+    const db = mongoose.connection.db;
+    const kol = (f) => db.collection(require(BE + "/models/" + f).collection.name);
+    const jam = (d) => (d ? new Date(d).toISOString().slice(0, 16).replace("T", " ") : "-");
+    const daftar = await kol("transferStokModel").find({ status }).sort({ createdAt: -1 }).limit(10).toArray();
+    if (!daftar.length) {
+      console.log("tidak ada surat jalan " + status);
+      return;
+    }
+    for (const t of daftar) {
+      const n = t.nomorTransfer;
+      const jurnal = await kol("jurnalStokModel").countDocuments({ keterangan: { $in: ["Kirim Transfer: " + n, "Pembatalan Transfer: " + n, "Terima Transfer: " + n] } });
+      const p = await kol("pengajuanStokModel").findOne({ _id: t.pengajuanStokID });
+      console.log(n, "id", String(t._id), "dibuat", jam(t.createdAt), "item", t.items.length, "jurnal", jurnal, "pengajuan", p ? p.nomorPengajuan + " " + p.status : "-");
+    }
+  } finally {
+    await mongoose.disconnect();
+  }
+})().catch((e) => {
+  console.error("GAGAL", e.message);
+  process.exit(1);
+});
+EOF
+cat > ~/.cache/frontend-web/alat/api-surat-jalan.js <<'EOF'
+const BASIS = "http:/" + "/localhost:4000/api";
+const jwt = (o) => {
+  if (typeof o === "string" && /^eyJ[\w-]+\.[\w-]+\.[\w-]+$/.test(o)) return o;
+  if (o && typeof o === "object") for (const v of Object.values(o)) {
+    const t = jwt(v);
+    if (t) return t;
+  }
+  return null;
+};
+const panggil = async (method, path, token, body) => {
+  const res = await fetch(BASIS + path, {
+    method,
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: "Bearer " + token } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const json = await res.json().catch(() => ({}));
+  return { status: res.status, json };
+};
+(async () => {
+  const akun = await panggil("POST", "/akun/auth/login", null, { email: "toko@gmail.com", password: "Toko1234" });
+  const pin = await panggil("POST", "/pengguna/pin-login", jwt(akun.json), { nama: "Ridho", pin: "123456", loginType: "web", installationId: "cli-api-surat-jalan" });
+  const token = jwt(pin.json);
+  console.log("login akun", akun.status, "pin", pin.status, token ? "token ada" : "token tidak ada: " + JSON.stringify(pin.json).slice(0, 120));
+  if (!token) return;
+  const [aksi, id] = process.argv.slice(2);
+  if (!aksi) {
+    const daftar = await panggil("GET", "/transferstok", token);
+    console.log("GET /transferstok", daftar.status);
+    for (const t of daftar.json.data || []) console.log(t.id, t.nomorTransfer, t.status, "item", (t.items || []).length);
+  }
+  if (aksi === "detail" && id) {
+    const r = await panggil("GET", "/transferstok/" + id, token);
+    console.log("GET detail", r.status, "status", (r.json.data || {}).status, "item", ((r.json.data || {}).items || []).length, String(r.json.message || "").slice(0, 120));
+  }
+  if (aksi === "batal" && id) {
+    const r = await panggil("PATCH", "/transferstok/" + id + "/batal", token, {});
+    console.log("PATCH batal", r.status, String(r.json.message || "").slice(0, 150));
+  }
+})().catch((e) => {
+  console.error("GAGAL", e.message);
+  process.exit(1);
+});
+EOF
+cat > ~/.cache/frontend-web/alat/audit-endpoint.js <<'EOF'
+const fs = require("fs");
+const path = require("path");
+const ts = require(path.resolve("node_modules/typescript"));
+const BE = process.env.HOME + "/Documents/backend-js";
+const TULIS = process.argv.includes("--tulis");
+const norm = (p) => ("/" + p.replace(/^\/api(?=\/)/, "").replace(/\?.*$/, "").replace(/%3a\w+/gi, ":p").replace(/\/\$\{[^}]*\}/g, "/:p").replace(/\$\{[^}]*\}/g, "").replace(/:\w+/g, ":p").replace(/^\/+|\/+$/g, "")).toLowerCase();
+const kunci = (m, p) => m.toUpperCase() + " " + norm(p);
+const js = ts.transpileModule(fs.readFileSync("lib/api/endpoints.ts", "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
+const mod = { exports: {} };
+new Function("module", "exports", "require", js)(mod, mod.exports, require);
+const EP = mod.exports.EP || Object.values(mod.exports)[0];
+const ep = {};
+const jalan = (o, pre) => {
+  for (const [k, v] of Object.entries(o)) {
+    const n = pre ? pre + "." + k : k;
+    if (typeof v === "string") ep[n] = v;
+    else if (typeof v === "function") {
+      try { ep[n] = String(v(":p", ":p", ":p")); } catch (e) {}
+    } else if (v && typeof v === "object") jalan(v, n);
+  }
+};
+jalan(EP, "");
+const berkas = [];
+const telusur = (d) => {
+  if (!fs.existsSync(d)) return;
+  for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+    const f = path.join(d, e.name);
+    if (e.isDirectory()) { if (e.name !== "node_modules" && !e.name.startsWith(".")) telusur(f); }
+    else if (/\.(ts|tsx)$/.test(e.name)) berkas.push(f);
+  }
+};
+["app", "components", "lib", "hooks", "features"].forEach(telusur);
+const fe = {};
+const catat = (k, f) => (fe[k] = fe[k] || new Set()).add(f);
+const metode = (sisa) => { const m = sisa.match(/method:\s*["'](\w+)["']/); return m ? m[1] : "GET"; };
+const tidakKenal = [];
+for (const f of berkas) {
+  if (f === path.join("lib", "api", "endpoints.ts")) continue;
+  const s = fs.readFileSync(f, "utf8");
+  for (const m of s.matchAll(/\b(apiData|api|apiClient)\.(get|post|put|patch|delete)\s*(?:<[^(]*?>)?\s*\(\s*EP\.([\w.]+)/g)) {
+    if (ep[m[3]]) catat(kunci(m[2], ep[m[3]]), f); else tidakKenal.push(f + " EP." + m[3]);
+  }
+  for (const m of s.matchAll(/\b(apiData|api|apiClient)\.(get|post|put|patch|delete)\s*(?:<[^(]*?>)?\s*\(\s*`\$\{EP\.([\w.]+)(?:\([^)]*\))?\}([^`]*)`/g)) {
+    if (ep[m[3]]) catat(kunci(m[2], ep[m[3]] + m[4]), f); else tidakKenal.push(f + " EP." + m[3]);
+  }
+  for (const m of s.matchAll(/\b(apiData|api|apiClient)\.(get|post|put|patch|delete)\s*(?:<[^(]*?>)?\s*\(\s*([`'"])(\/[^`'"]*)\3/g)) catat(kunci(m[2], m[4]), f);
+  for (const m of s.matchAll(/fetch\(\s*`\$\{\w+\}(\/[^`]*)`([\s\S]{0,300})/g)) catat(kunci(metode(m[2]), m[1]), f);
+  for (const m of s.matchAll(/fetch\(\s*([`'"])[^`'"]*\/api(\/[^`'"]*)\1([\s\S]{0,300})/g)) catat(kunci(metode(m[3]), m[2]), f);
+}
+const rute = {};
+for (const n of fs.readdirSync(BE + "/routes")) {
+  if (!/Routes?\.js$/.test(n)) continue;
+  const mount = n.replace(/Routes?\.js$/, "").toLowerCase();
+  const s = fs.readFileSync(BE + "/routes/" + n, "utf8");
+  for (const m of s.matchAll(/\.(get|post|put|patch|delete)\(\s*["'`](\/[^"'`]*)["'`]/g)) rute[kunci(m[1], "/" + mount + m[2])] = n;
+  for (const m of s.matchAll(/\.route\(\s*["'`](\/[^"'`]*)["'`]\s*\)([\s\S]*?);/g)) {
+    for (const x of m[2].matchAll(/\.(get|post|put|patch|delete)\(/g)) rute[kunci(x[1], "/" + mount + m[1])] = n;
+  }
+}
+const lampiran = fs.readFileSync("docs/kontrak/route-backend.md", "utf8").split("\n").map((b) => b.match(/^\| (GET|POST|PUT|PATCH|DELETE) \| `([^`]+)` \|/)).filter(Boolean).map((m) => kunci(m[1], m[2]));
+const doc = [];
+for (const b of fs.readFileSync("docs/kontrak/endpoint.md", "utf8").split("\n")) {
+  const m = b.match(/^\| (GET|POST|PUT|PATCH|DELETE) \| `([^`]+)` \|.*\| ([^|]*) \|$/);
+  if (m) doc.push({ k: kunci(m[1], m[2]), sel: m[3].trim() });
+}
+const pendek = (s) => {
+  const a = [...s];
+  const f = a.filter((x) => x.startsWith("features"));
+  const lain = a.length - f.length;
+  return [...f, lain ? lain + " file lain" : ""].filter(Boolean).join(", ");
+};
+console.log("lampiran A: " + lampiran.length + " | rute backend: " + Object.keys(rute).length + " | panggilan frontend unik: " + Object.keys(fe).length + " | baris endpoint.md: " + doc.length + " | EP tak dikenal: " + tidakKenal.length);
+tidakKenal.slice(0, 5).forEach((x) => console.log("  EP? " + x));
+lampiran.filter((k) => !rute[k]).forEach((k) => console.log("  route Lampiran A tidak ditemukan di backend: " + k));
+Object.keys(rute).filter((k) => !lampiran.includes(k)).forEach((k) => console.log("  route backend di luar Lampiran A: " + k + " | " + rute[k]));
+console.log("== baris endpoint.md tanpa pemanggil frontend");
+doc.filter((d) => !fe[d.k]).forEach((d) => console.log("  " + d.k + " | backend " + (rute[d.k] ? "ada" : "TIDAK ADA") + " | kolom: " + d.sel.slice(0, 40)));
+console.log("== panggilan frontend yang tidak ada di endpoint.md");
+Object.keys(fe).filter((k) => !doc.some((d) => d.k === k)).forEach((k) => console.log("  " + k + " | backend " + (rute[k] ? "ada" : "TIDAK ADA") + " | " + pendek(fe[k]).slice(0, 80)));
+console.log("== panggilan frontend yang tidak ada di backend");
+Object.keys(fe).filter((k) => !rute[k]).forEach((k) => console.log("  " + k + " | " + pendek(fe[k]).slice(0, 80)));
+const hasil = doc.map((d) => ({ k: d.k, lama: d.sel, pemanggil: fe[d.k] ? [...fe[d.k]].sort() : [], backend: rute[d.k] || null }));
+fs.writeFileSync("/tmp/audit-endpoint.json", JSON.stringify(hasil, null, 1));
+const campur = hasil.filter((h) => h.pemanggil.some((x) => x.startsWith("features")) && h.pemanggil.some((x) => !x.startsWith("features")));
+console.log("== dipanggil features dan halaman lama sekaligus: " + campur.length);
+campur.forEach((h) => console.log("  " + h.k + " | " + h.pemanggil.filter((x) => !x.startsWith("features")).join(", ").slice(0, 90)));
+if (TULIS) {
+  const peta = Object.fromEntries(hasil.map((h) => [h.k, h]));
+  const f = "docs/kontrak/endpoint.md";
+  const gagal = [];
+  let berubah = 0;
+  const keluar = fs.readFileSync(f, "utf8").split("\n").map((b) => {
+    const m = b.match(/^(\| (GET|POST|PUT|PATCH|DELETE) \| `([^`]+)` \|.*\| )([^|]*)( \|)$/);
+    if (!m) return b;
+    const a = peta[kunci(m[2], m[3])];
+    const lama = m[4].trim();
+    if (!a.pemanggil.length) {
+      if (!/tidak dipanggil lagi/.test(lama)) gagal.push(m[2] + " " + m[3]);
+      return b;
+    }
+    const kurung = lama.match(/ (\(.*\))$/);
+    const fitur = a.pemanggil.filter((x) => x.startsWith("features"));
+    const lain = a.pemanggil.length - fitur.length;
+    let sel = [...fitur.map((x) => "`" + x + "`"), lain ? lain + " file" + (fitur.length ? " halaman lama" : "") : ""].filter(Boolean).join(", ");
+    if (kurung) sel += " " + kurung[1];
+    if (sel === lama) return b;
+    berubah++;
+    return m[1] + sel + m[5];
+  });
+  if (gagal.length) {
+    console.error("GAGAL baris tanpa pemanggil yang belum ditandai tidak dipanggil lagi:\n  " + gagal.join("\n  "));
+    process.exit(1);
+  }
+  fs.writeFileSync(f, keluar.join("\n"));
+  console.log("OK kolom Dipakai di: " + berubah + " berubah");
+}
+EOF
 ```
 
 - `ganti.js`: dipanggil dengan ``node -e 'require(process.env.HOME + "/.cache/frontend-web/alat/ganti.js")("berkas", [[`lama`, `baru`]])'``.
@@ -213,6 +409,30 @@ EOF
   sudah ada di berkas, sehingga blok yang tertempel atau dijalankan dua kali
   tidak menyisipkan ulang. Tanpa pengaman ini, `bentuk.cjs` sempat berisi
   setiap sisipan dua kali (21 September 2026).
+- `tinjau-surat-jalan.js`: membaca basis data development (baca-saja) dan
+  mencetak sampai 10 surat jalan berstatus argumen pertama (bawaan
+  DIKIRIM), beserta jumlah jurnal kirim, batal, dan terima miliknya serta
+  status pengajuannya. Dipakai memastikan tidak ada surat jalan uji yang
+  tertinggal DIKIRIM.
+- `api-surat-jalan.js`: masuk lewat API dengan akun uji. Tanpa argumen
+  mencetak daftar surat jalan, dengan `detail <id>` mencetak satu surat
+  jalan, dan dengan `batal <id>` membatalkannya lewat backend sehingga stok
+  gudang kembali. Login PIN-nya mengambil alih sesi web Ridho.
+- `audit-endpoint.js`: dijalankan dari akar repo frontend-web. Memetakan
+  setiap panggilan frontend (`apiData`, `api`, dan `apiClient` dengan `EP`,
+  path tertulis, atau template, serta `fetch` ke backend) ke method dan
+  path, membaca seluruh route backend dengan aturan mount `routes/index.js`,
+  lalu membandingkan keduanya dengan tabel `docs/kontrak/endpoint.md` dan
+  Lampiran A. Laporannya memuat jumlah per sumber, route backend di luar
+  Lampiran A, baris tanpa pemanggil, panggilan yang tidak tercatat atau
+  tidak ada di backend, dan endpoint yang dipanggil `features/` sekaligus
+  halaman lama; pemetaan lengkapnya disimpan di `/tmp/audit-endpoint.json`.
+  Dengan `--tulis`, kolom "Dipakai di" diisi ulang dengan berkas `features/`
+  pemanggilnya dan jumlah berkas halaman lama. Keterangan dalam kurung
+  dipertahankan, dan baris tanpa pemanggil harus sudah ditandai "tidak
+  dipanggil lagi". Versi pertamanya hanya menemukan 136 dari 246 route,
+  karena rantai `.route()` yang dipecah baris terlewat; pembanding terhadap
+  Lampiran A kini membuat cacat semacam itu langsung terlihat.
 - Di dalam template literal skrip, backtick dan tanda dolar yang diikuti kurung
   kurawal ditulis dengan escape, dan tanda miring terbalik ditulis ganda agar
   sampai ke berkas. Hindari kutip bersarang di konten yang disisipkan.
@@ -256,8 +476,9 @@ polanya salah.
   `BarisItemAdjustment`).
 - Teks berbentuk URL yang ditempel ke terminal diberi garis miring terbalik
   oleh `url-quote-magic` zsh, termasuk di dalam heredoc berdelimiter kutip:
-  titik koma sesudah URL di skrip `/tmp/sj-api.js` tertulis `\;` dan
-  skripnya gagal. Di blok tempel, URL ditulis terpecah
+  titik koma sesudah URL di skrip `/tmp/sj-api.js` (kini helper
+  `api-surat-jalan.js`) tertulis `\;` dan skripnya gagal. Di blok tempel,
+  URL ditulis terpecah
   (`"http:/" + "/localhost"`), lalu baris pertama berkas diperiksa dengan
   `head -1`.
 - `ls` di mesin pemilik proyek adalah alias `lsd`, yang tidak mengenal opsi
@@ -480,6 +701,26 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   masih ada tepat satu kali. `ganti-blok.js` kini menolaknya dengan
   `SUDAH DITERAPKAN`; dengan `ganti.js`, periksa hasilnya dengan grep
   jumlah kemunculan sebelum melangkah.
+- **Halaman dimigrasikan lewat salinan dan penyusunan ulang berjangkar.**
+  `cp` halaman lama ke `features/`, lalu skrip mengganti rentang dari baris
+  jangkar unik sampai sebelum `return (` utama, membungkus tombol dengan
+  mencari `<Button` dan `</Button>` terdekat dari baris `onClick` uniknya,
+  dan memindah blok penjaga utuh ke komponen luar. Urutan jangkar diperiksa
+  sebelum menulis. Cara ini memigrasikan keenam halaman submodul 6 tanpa
+  mengetik ulang tampilannya.
+- **Berkas salinan membawa error ESLint warisan, dan itu dibereskan di
+  commit migrasi**, karena definisi selesai berlaku untuk berkas modul,
+  bukan hanya baris yang diubah. Detail surat jalan membawa empat tanda
+  kutip tanpa escape di teks dialog.
+- **Penggantian global dijalankan terakhir dan jumlahnya dicocokkan dengan
+  hitungan yang diharapkan.** Pada detail penerimaan, penggantian `_id`
+  menjadi `kunci` melaporkan 11, bukan 7, karena empat atribut yang
+  disisipkan skrip yang sama ikut terganti. Selisih semacam ini dijelaskan
+  dari grep hasilnya sebelum melangkah.
+- **Blok tempel yang memuat pagar kode Markdown ditulis lewat skrip yang
+  membaca isinya dari berkas**, bukan ditempel utuh. Pagar kode di dalam
+  heredoc menutup blok perintah saat ditampilkan, sehingga blok tercetak
+  terpotong (sumber skrip tinjau di bagian Helper penggantian).
 
 ## Kapan berhenti dan bertanya
 

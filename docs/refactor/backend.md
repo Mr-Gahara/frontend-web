@@ -20,14 +20,18 @@ grep -rnE '\b<namaFungsi>\b' "$BE" --include='*.js' --exclude-dir=node_modules -
 grep -nE 'populate\(' "$BE/services/<modul>Service.js" | cut -c1-140
 ```
 
-Data di basis data development dapat dibaca lewat skrip Node di `/tmp` yang
-memakai `mongoose` dan `.env` milik backend; URI Mongo diambil dari nilai
-`.env` yang diawali `mongodb` dan tidak dicetak. Skrip selalu memutus
-koneksi di `finally`. Operasi yang harus melewati aturan backend, misalnya
+Data di basis data development dapat dibaca lewat skrip Node yang memakai
+`mongoose` dan `.env` milik backend; URI Mongo diambil dari nilai `.env`
+yang diawali `mongodb` dan tidak dicetak. Skrip selalu memutus koneksi di
+`finally`. Operasi yang harus melewati aturan backend, misalnya
 membatalkan surat jalan agar stok gudang kembali, dijalankan lewat API
-dengan skrip sekali pakai yang masuk lewat `/api/akun/auth/login` lalu
+dengan skrip yang masuk lewat `/api/akun/auth/login` lalu
 `/api/pengguna/pin-login`, bukan dengan menulis langsung ke basis data.
-Login PIN dari skrip mengambil alih sesi web pengguna itu.
+Login PIN dari skrip mengambil alih sesi web pengguna itu. Skrip yang
+dipakai berulang disimpan sebagai helper (`cara-kerja.md`, Helper
+penggantian): `tinjau-surat-jalan.js` untuk membaca surat jalan beserta
+jurnal dan pengajuannya, dan `api-surat-jalan.js` untuk daftar, detail, dan
+batal lewat API. Skrip sekali pakai tetap di `/tmp`.
 
 Data development adalah data pengujian; belum ada produksi (pemilik
 proyek, 21 September 2026). Yang dijaga adalah kebenaran alur dan aturan,
