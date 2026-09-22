@@ -80,3 +80,31 @@ export function susunPayloadTerima(
     },
   };
 }
+
+export interface IsianRevisi {
+  bahanBakuID: string;
+  /** Teks isian, agar isian kosong tetap tampil kosong. */
+  qtyKirim: string;
+}
+
+export type HasilPayloadRevisi =
+  | { ok: true; payload: { items: { bahanBakuID: string; qtyKirim: number }[] } }
+  | { ok: false; pesan: string };
+
+export const PESAN_REVISI_KOSONG = "Minimal harus ada 1 barang dengan jumlah kirim lebih dari 0.";
+
+/**
+ * Menyusun payload PUT /transferstok/:id dari isian revisi. Aturan halaman
+ * lama dipertahankan: baris tanpa barang, berjumlah 0, atau bukan angka
+ * diabaikan, tetapi harus ada minimal satu baris valid. Backend mengganti
+ * items apa adanya tanpa memeriksa jumlah pengajuan maupun stok
+ * (kontrak/temuan.md butir 32), sehingga baris yang diabaikan hilang dari
+ * surat jalan.
+ */
+export function susunPayloadRevisi(isian: IsianRevisi[]): HasilPayloadRevisi {
+  const items = isian
+    .map((i) => ({ bahanBakuID: i.bahanBakuID, qtyKirim: Number(i.qtyKirim) }))
+    .filter((i) => i.bahanBakuID !== "" && Number.isFinite(i.qtyKirim) && i.qtyKirim > 0);
+  if (items.length === 0) return { ok: false, pesan: PESAN_REVISI_KOSONG };
+  return { ok: true, payload: { items } };
+}
