@@ -146,6 +146,12 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   beserta konfirmasi validator inventory di route (`fc159bd`) dan bukti
   surat jalan development yang rusak (`kontrak/temuan.md` butir 29 sampai
   36)
+- Laporan model bisnis MVP dan izin lintas outlet — 3 temuan dan satu
+  jawaban keputusan, disusun 22 September 2026: stok produk dihitung dari
+  master bahan baku tanpa lokasi, stok awal bahan baku jatuh ke lokasi apa
+  pun bila tenant belum punya outlet, dan permintaan permission lintas
+  outlet; beserta jawaban SO-3 bahwa data tidak dibatasi per lokasi
+  pengguna (`kontrak/temuan.md` butir 20 dan 37 sampai 39)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

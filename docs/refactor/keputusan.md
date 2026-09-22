@@ -14,6 +14,45 @@ keputusan rancangan tidak diubah agar rujukan lama tetap berlaku.
 
 ## Keputusan produk
 
+### Model bisnis MVP
+
+Diputuskan pemilik proyek pada 22 September 2026. Mengikat seluruh modul,
+dan membatalkan rencana cakupan per gudang yang dijadwalkan pada hari yang
+sama (submodul pengajuan stok, di bawah).
+
+- **Satu tenant adalah satu brand dengan tepat satu outlet dan satu
+  gudang** pada MVP. Multi-outlet dan multi-gudang direncanakan di patch
+  berikutnya; relasi outlet dan gudang (many-to-many atau many-to-one)
+  belum diputuskan.
+- **Pengguna dan akun hanya terikat ke tenant**, tidak ke lokasi. Tempat
+  dan peran kerja seseorang (petugas gudang, kasir outlet) dibedakan lewat
+  role dan permission. Petugas gudang yang sedang berada di outlet tetap
+  dapat membuka ruang gudang, karena aksesnya ditentukan RBAC.
+- **Lokasi hanya penanda posisi dan acuan absensi** (koordinat dan radius
+  absen). Absensi urusan aplikasi; web hanya memantau.
+- **Lokasi aktif adalah outlet milik tenant**, bukan lokasi pribadi
+  pengguna: `GET /location/current` memanggil `getByTenant`, yang mencari
+  lokasi pertama bertipe Outlet (`kontrak/endpoint.md` bagian 3.3).
+- **Ruang gudang menampilkan seluruh gudang milik tenant**, tanpa cakupan
+  per gudang. Siapa yang boleh masuk ditentukan RBAC.
+- **Bekerja lintas outlet ditentukan satu permission khusus**, bukan nama
+  role maupun lokasi: melihat data seluruh outlet di ruang outlet, dan
+  mengajukan stok atas nama outlet lain. Namanya ditetapkan tim backend;
+  sampai itu `IZIN_LINTAS_OUTLET` di `lib/auth/permissions.ts` bernilai
+  null, dan semua pengguna, owner pun, terkunci ke outlet tenant
+  (`085ec78`, keputusan rancangan butir 18).
+- **Data tidak dibatasi per lokasi pengguna** di backend, cukup per tenant
+  dan per permission. Query `locationID` tetap sah sebagai penyaring
+  pilihan, bukan pembatas akses. Ini jawaban atas SO-3
+  (`kontrak/temuan.md` butir 20).
+- **Master data (produk, bahan baku, barang) milik tenant dan bersumber
+  dari outlet.** Gudang tidak punya master sendiri; gudang baru mulai
+  kosong, lalu menarik barang dari master lewat tambah barang di
+  inventaris gudang.
+- **Stok outlet dan stok gudang tidak boleh tercampur** di tampilan mana
+  pun. Stock adjustment di ruang outlet hanya lokasi Outlet sejak
+  `a5e9cec`.
+
 ### Fase 0
 
 Tidak boleh dibalik tanpa pembahasan:
@@ -62,6 +101,16 @@ Tidak boleh dibalik tanpa pembahasan:
 - **Saldo sistem adalah saldo saat disetujui** (`qtyCurrent`). Stok saat
   draf dibuat (`qtySnapshot`) tampil di bawahnya hanya bila berbeda, sebagai
   tanda stok bergerak selama opname berlangsung.
+- **Ruang outlet hanya menampilkan adjustment lokasi Outlet** (22 September
+  2026, `a5e9cec`), dengan cakupan outlet seperti halaman inventaris outlet
+  lain. Adjustment hasil opname gudang tidak tampil di ruang outlet, dan
+  sampai ruang gudang punya halaman stock adjustment (`status.md`,
+  Pekerjaan berikutnya) tidak tampil di mana pun di web: tombol setelah
+  setujui di detail opname gudang menuju jurnal stok gudang. Gate halaman
+  ditambah `read-location` karena cakupan memanggil `/location/current`
+  (`fe5dd9c`).
+- **Kegagalan memuat daftar stock adjustment tampil sebagai pesan**,
+  sejalan dengan keputusan submodul jurnal stok.
 
 ### Submodul jurnal stok
 
@@ -77,7 +126,8 @@ Tidak boleh dibalik tanpa pembahasan:
   selisih tetap diizinkan, dan pilihan "Semua Lokasi" di outlet tetap
   menampilkan stok seluruh lokasi bertipe Outlet. Sejak commit cakupan
   lokasi, pilihan itu hanya untuk owner; staf dibatasi ke lokasi aktif tanpa
-  pemilih.
+  pemilih. Sejak `085ec78`, pembedanya izin lintas outlet, bukan peran
+  (Model bisnis MVP).
 - **Gate halaman stok menerima izin inventory per ruang** (21 September
   2026). Stok outlet dan bahan baku menerima `read-inventory` atau
   `read-inventory-outlet`; inventaris gudang menerima `read-inventory` atau
@@ -94,6 +144,10 @@ Tidak boleh dibalik tanpa pembahasan:
   baca (`kontrak/temuan.md` butir 20). Aturan yang sama diterapkan juga ke
   jurnal stok dan stok outlet dalam commit cakupan lokasi, dan ke daftar
   pengajuan stok (`59e10a1`), serta daftar penerimaan barang (`580a1e1`).
+  Sejak `085ec78`, pembedanya bukan peran owner melainkan izin lintas
+  outlet, sehingga selama izin itu belum ada di backend semua pengguna
+  terkunci ke outlet tenant (Model bisnis MVP). Daftar stock adjustment
+  ikut aturan ini sejak `a5e9cec`.
 - **Membuat opname di outlet tetap memakai lokasi aktif** untuk semua
   pengguna, termasuk owner, karena opname adalah hitungan fisik di tempat.
 - **Tombol aksi disembunyikan sesuai izin**: `submit-stock-opname` untuk
@@ -119,18 +173,18 @@ Tidak boleh dibalik tanpa pembahasan:
   beserta isiannya (keputusan Fase 0).
 - **Detail membedakan dokumen yang tidak ditemukan dari kegagalan memuat.**
 - **Gate daftar stock opname outlet ditambah `read-location`**, karena
-  cakupan staf memanggil `/location/current`.
+  cakupan outlet memanggil `/location` dan `/location/current`.
 
 ### Submodul pengajuan stok
 
-- **Daftar outlet mengikuti cakupan outlet**: owner melihat seluruh outlet
-  dengan pemilih lokasi, staf hanya pengajuan dari lokasi aktifnya.
-- **Daftar gudang menampilkan pengajuan ke seluruh lokasi bertipe Gudang**
-  untuk MVP. Kelak beralih ke per gudang (owner seluruh gudang dengan
-  pemilih, petugas gudang hanya gudangnya), dikerjakan sebagai satu commit
-  untuk seluruh halaman gudang agar aturannya seragam. Waktunya diputuskan
-  pemilik proyek pada 22 September 2026: tepat setelah modul inventaris,
-  sebelum penjualan dan pembayaran (`status.md`, Pekerjaan berikutnya).
+- **Daftar outlet mengikuti cakupan outlet**: pemegang izin lintas outlet
+  melihat seluruh outlet dengan pemilih lokasi, pengguna lain hanya
+  pengajuan outlet tenant (`085ec78`).
+- **Daftar gudang menampilkan pengajuan ke seluruh lokasi bertipe
+  Gudang.** Rencana beralih ke per gudang (owner seluruh gudang, petugas
+  gudang hanya gudangnya), yang dijadwalkan pemilik proyek pada 22
+  September 2026, dibatalkan pada hari yang sama: pengguna tidak terikat ke
+  lokasi, dan akses ditentukan RBAC (Model bisnis MVP).
 - **Draf tidak pernah tampil di ruang gudang**, karena belum diajukan dan
   belum menjadi urusan gudang.
 - **Tab status yang selalu kosong karena izin disembunyikan.** Backend
@@ -151,9 +205,12 @@ Tidak boleh dibalik tanpa pembahasan:
 - **Data development yang terbalik dibalik langsung di basis data**, atas
   izin pemilik proyek karena belum ada data produksi (8 pengajuan,
   21 September 2026).
-- **Keputusan cakupan outlet di halaman buat tetap ditahan** sebagai utang
-  sampai kondisi backend terbaru jelas (`status.md`, Catatan dari modul
-  inventaris).
+- **Outlet peminta di halaman buat dan edit** (22 September 2026,
+  `085ec78`): staf outlet A hanya mengajukan untuk outlet A. Pengguna tanpa
+  izin lintas outlet melihat outlet peminta terisi lokasi aktif dan
+  terkunci, dan tidak dapat merevisi draf milik outlet lain; pemegang izin
+  lintas outlet memilih dari seluruh outlet. Form menentukan outlet lebih
+  dulu, lalu memasang form (keputusan rancangan butir 8).
 - **Buat dan revisi memakai satu form** (`form-pengajuan-stok.tsx`). Jumlah
   disimpan sebagai teks agar isian kosong tetap tampil kosong, dan aturan
   lama dipertahankan: baris tanpa barang atau berjumlah 0 diabaikan tanpa
@@ -195,8 +252,9 @@ bug backend dilaporkan dan tidak diakali agar test lolos.
   sehingga pengajuannya kembali ke PENDING. Kirim dan terima hanya diuji
   jalur gagalnya lewat `page.route`; batal dari DIKIRIM lewat API hanya
   dipakai membersihkan data uji.
-- **Daftar penerimaan outlet mengikuti cakupan outlet**: owner seluruh
-  outlet dengan pemilih, staf hanya lokasi aktifnya (`580a1e1`).
+- **Daftar penerimaan outlet mengikuti cakupan outlet**: pemegang izin
+  lintas outlet seluruh outlet dengan pemilih, pengguna lain hanya outlet
+  tenant (`580a1e1`, `085ec78`).
 - **Batal surat jalan di web hanya untuk PENDING**, walau backend menerima
   batal dari DIKIRIM, karena stok gudang langsung dikembalikan saat barang
   masih di perjalanan (butir 36).
@@ -216,12 +274,12 @@ bug backend dilaporkan dan tidak diakali agar test lolos.
   baris yang diabaikan hilang dari surat jalan.
 - **Kegagalan memuat daftar penerimaan tampil sebagai pesan**, sejalan
   dengan keputusan submodul jurnal stok, termasuk lokasi yang gagal dimuat
-  dan staf tanpa lokasi aktif.
+  dan tenant tanpa outlet (lokasi aktif kosong).
 
 ## Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.
-2. **Owner tidak diperlakukan khusus** lewat pengecekan nama role. Backend memberi Owner seluruh permission, sehingga pemeriksaan berbasis daftar permission sudah mencakupnya. Pengecualian: `useLevelPenggunaAktif` memakai nama role untuk menentukan level 100, karena token tidak membawa level. Cakupan data lintas lokasi di ruang outlet juga mengikuti level itu (100 berarti owner) lewat `useCakupanLokasiOutlet`; halaman tidak memeriksa nama role sendiri.
+2. **Owner tidak diperlakukan khusus** lewat pengecekan nama role. Backend memberi Owner seluruh permission, sehingga pemeriksaan berbasis daftar permission sudah mencakupnya. Pengecualian: `useLevelPenggunaAktif` memakai nama role untuk menentukan level 100, karena token tidak membawa level; dipakai modul pengguna dan role untuk membandingkan level role. Cakupan data lintas lokasi di ruang outlet sempat mengikuti level itu, dan sejak `085ec78` mengikuti izin lintas outlet (`bolehLintasOutlet`), sehingga tidak lagi bergantung pada nama role. `gudang/layout.tsx` masih memeriksa nama role Owner (baris 32) dan dibereskan bersama modul gudang.
 3. **Invalidasi memakai akar domain** bila perubahan bisa memengaruhi beberapa varian. Kunci akar (`semua`) hanya untuk invalidasi, tidak untuk menyimpan data: halaman gudang lama memakai `queryKeys.bahanBaku.semua` sebagai kunci data master bahan baku.
 4. **Field yang dipakai service tetapi tidak ada di validator** harus diperiksa sebelum dihapus dari payload (lihat `docs/kontrak/README.md` bagian 1, keterbatasan).
 5. **Bug backend tidak diperbaiki dari sini.** Frontend menyesuaikan diri, lalu temuan ditulis untuk tim backend setelah commit bersih.
@@ -293,3 +351,13 @@ bug backend dilaporkan dan tidak diakali agar test lolos.
     ditulis sebagai aturan beserta syarat pencabutannya, bukan konstanta.
     Contoh: `SERVER_TERIMA_JUMLAH_NOL` dan penahanan item tanpa master di
     `features/transfer-stok/payload.ts` (pemilik proyek, 21 September 2026).
+18. **Identitas yang masih menunggu backend ditulis sebagai konstanta
+    null, bukan tebakan.** Aturannya ditulis lengkap sekarang dan berlaku
+    begitu konstanta diisi, tanpa perubahan lain. Nama tebakan yang kelak
+    berbeda dari backend akan diam-diam tidak pernah cocok, sedangkan null
+    terlihat jelas, mudah dicari, dan dipaksa ditangani TypeScript. Test
+    untuk kedua keadaan dikondisikan pada konstanta yang sama: skenario
+    yang menunggu backend memakai `test.fixme` bersyarat, skenario yang
+    hanya berlaku selama konstanta null memakai `test.skip` bersyarat.
+    Contoh: `IZIN_LINTAS_OUTLET` di `lib/auth/permissions.ts` dan
+    `tests/helpers/lintas-outlet.ts` (pemilik proyek, 22 September 2026).

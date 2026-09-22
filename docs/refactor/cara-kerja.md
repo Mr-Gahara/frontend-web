@@ -721,6 +721,36 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   membaca isinya dari berkas**, bukan ditempel utuh. Pagar kode di dalam
   heredoc menutup blok perintah saat ditampilkan, sehingga blok tercetak
   terpotong (sumber skrip tinjau di bagian Helper penggantian).
+- **Makna konsep yang akan digeneralisasi dipastikan dari backend dan dari
+  model bisnis pemilik proyek.** Rencana cakupan per gudang dibangun di
+  atas "lokasi aktif" sebagai lokasi pengguna, padahal pengguna hanya
+  terikat ke tenant dan `/location/current` selalu mengembalikan outlet
+  tenant. Satu fungsi backend dan satu pertanyaan kepada pemilik proyek
+  membatalkan rencana itu sebelum ada kode yang ditulis.
+- **Perilaku komponen bersama dipastikan per nilai pembedanya** (`ruang`,
+  objek `TEKS`), bukan dari fakta bahwa komponennya dipakai bersama. Pada
+  stock adjustment, tautan dari detail opname ke rute outlet sempat
+  disimpulkan berlaku di kedua ruang dan diajukan sebagai keputusan,
+  padahal hanya ada di `TEKS.outlet`.
+- **Sebelum merancang pengiriman query ke backend, pastikan service
+  benar-benar memakainya.** Validator hanya memeriksa format. Daftar
+  adjustment menyaring `locationID`, sedangkan `GET /jurnalstok` dan
+  `GET /transferstok` mengabaikan query.
+- **Gerbang di blok tempel tidak pernah memakai `exit`.** Di shell
+  interaktif, `exit` menutup terminal beserta pesan alasannya; pada commit
+  gate stock adjustment, cabang `{ echo ...; exit 1; }` menutup terminal
+  tanpa jejak. Pakai `if <gerbang>; then <commit>; else echo "GAGAL ...";
+  fi`.
+- **Berkas baru yang dibuat manual diperiksa ukurannya sebelum menjalankan
+  apa pun** (`wc -c`, yang juga gagal bila berkasnya belum ada). Berkas
+  yang belum dibuat atau belum tersimpan (0 byte) membuat vitest menjawab
+  "No test suite found" atau tidak menambah jumlah test, `tsc` gagal
+  menemukan modul, dan Playwright tidak menjalankan satu test pun. Terjadi
+  tiga kali pada putaran izin lintas outlet: dua kali berkas belum dibuat,
+  sekali berukuran 0 byte.
+- **Keluaran panjang disimpan ke berkas lalu dibaca per bagian.** Pencarian
+  dampak menghasilkan ratusan baris; simpan ke `/tmp`, cetak judul bagian
+  dengan `grep -n '^=='`, lalu bagian tertentu dengan `awk`.
 
 ## Kapan berhenti dan bertanya
 

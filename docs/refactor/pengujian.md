@@ -69,14 +69,17 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per migrasi transfer, pengiriman, dan penerimaan** (commit
-`580a1e1`): 149 test unit dan integrasi lolos, 210 e2e lolos, 6 skipped:
-empat `test.fixme` yang menunggu backend dan dua `test.skip` bersyarat data
-(Test yang ditandai fixme dan skip bersyarat, di bawah). Diukur terhadap
-backend lokal `9cd1439` (branch `ridho` yang menggabungkan origin/yoga
-`f0b7157`). Angka ini pembanding untuk memastikan tidak ada yang hilang
-diam-diam. Angka skipped dapat berubah bila data uji berubah; periksa judul
-test yang dilewati sebelum menyimpulkan ada yang hilang.
+**Baseline per izin lintas outlet dan stock adjustment outlet** (commit
+`fe5dd9c`): 153 test unit dan integrasi lolos, 208 e2e lolos, 14 skipped:
+delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
+backend, empat `test.fixme` lain yang menunggu backend, dan dua `test.skip`
+bersyarat data (Test yang ditandai fixme dan skip bersyarat, di bawah).
+Diukur terhadap backend lokal `9cd1439` (branch `ridho` yang menggabungkan
+origin/yoga `f0b7157`). Angka ini pembanding untuk memastikan tidak ada
+yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
+periksa judul test yang dilewati sebelum menyimpulkan ada yang hilang.
+Begitu `IZIN_LINTAS_OUTLET` diisi, delapan skenario lintas outlet berjalan
+dan tiga skenario jalur terkunci dilewati.
 
 Setiap run suite penuh menambah tiga dokumen stock opname berstatus
 CANCELLED, serta tiga surat jalan BATAL dan empat entri jurnal gudang. Spec
@@ -239,6 +242,14 @@ satu putaran.
 - Spec pembanding memakai `expect.soft` untuk setiap perilaku yang akan
   diubah, agar seluruh perbedaan dengan kode lama terlapor dalam satu run.
   Pemeriksaan keras hanya untuk syarat jalannya skenario.
+- Helper pembuka halaman yang menunggu respons tidak mengodekan jalur
+  peran. `bukaOutlet` di spec stok sempat menunggu `GET /inventory` tanpa
+  `locationID` (jalur owner lama), sehingga saat cakupan berubah, enam test
+  yang perilakunya tidak berubah ikut gagal. Penunggu mengikuti lingkup
+  halaman (`ADA_IZIN_LINTAS`).
+- Ringkasan `passed:0 failed:0 skipped:0` berarti tidak ada test yang
+  berjalan, biasanya karena spec gagal dikompilasi (misalnya modul helper
+  belum ada), bukan hasil bersih. Jalankan `tsc` lebih dulu.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -250,6 +261,7 @@ Menunggu perbaikan backend:
 | Hapus pengguna | `Promise.all` paralel di dalam transaksi MongoDB |
 | Hitungan tersimpan dapat dikosongkan kembali (`inventaris/stockOpname/draft-stok-opname.spec.ts`) | Validator stock opname menerima `qtyPhysical` null (`kontrak/temuan.md` butir 22). Badannya berupa penanda; skenario ditulis saat `SERVER_TERIMA_HITUNGAN_KOSONG` dibalik |
 | Jumlah diterima 0 terkirim apa adanya (`inventaris/penerimaanBarang/terima-penerimaan.spec.ts`) | Backend berhenti menghitung stok masuk dengan `qtyTerima \|\| qtyKirim` (`kontrak/temuan.md` butir 30). Badannya lengkap; jalankan setelah `SERVER_TERIMA_JUMLAH_NOL` dibalik |
+| Delapan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, dan stock adjustment | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
 terhitung di angka skipped pada baseline:
@@ -260,6 +272,7 @@ terhitung di angka skipped pada baseline:
 | `inventaris/stok/lihat-stok.spec.ts`, tab kritis gudang | Tidak ada stok gudang yang kritis (terjadi pada data uji sekarang) |
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
 | `inventaris/penerimaanBarang/terima-penerimaan.spec.ts`, `inventaris/transferStok/*.spec.ts` | Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup. Kegagalan persiapan lain menggagalkan test, bukan melewatinya |
+| Skenario jalur terkunci di spec stok, pengajuan stok (daftar), dan stock adjustment | `IZIN_LINTAS_OUTLET` sudah diisi, sehingga Ridho memegangnya; butuh akun uji tanpa izin itu. Tidak terjadi selama konstanta null, sehingga belum terhitung di baseline |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
 hapus bahan baku juga dilewati bila datanya kosong, tetapi tidak terjadi pada
@@ -271,7 +284,12 @@ Kegagalan yang belum terjelaskan:
   login** setelah `page.goto` kedua, dua kali pada 21 September 2026, saat
   spec itu berjalan bersama test lain. Tidak terulang dalam 9 run test itu
   sendirian maupun dalam urutan berkasnya, dan tidak pada suite penuh
-  `90eb935`, `dec9d01`, `ad77a14`, maupun `580a1e1`. `playwright.config.ts`
+  `90eb935`, `dec9d01`, `ad77a14`, maupun `580a1e1`. Terulang sekali pada
+  22 September 2026 saat spec pengajuan berjalan bersama spec stock opname,
+  jurnal stok, stok, dan pengiriman-penerimaan (snapshot DOM: halaman
+  "Login Akun SaaS"), lalu lolos 3 dari 3 dengan `--repeat-each 3` dan
+  pada suite penuh `085ec78`, `a5e9cec`, dan `fe5dd9c`, sehingga trace
+  belum didapat. `playwright.config.ts`
   memakai `workers: 1`, sehingga bukan benturan login paralel; pada run yang
   lolos, refresh sesi setelah login
   selalu berstatus 200. Bila terulang, jalankan dengan
@@ -290,10 +308,13 @@ Urutan debug kegagalan e2e di atas).
 
 ## Utang pengujian
 
-- **Jalur staf pada cakupan lokasi** hanya teruji di unit test
-  (`tests/unit/features/inventaris/cakupan.test.ts`), karena satu-satunya akun
-  uji (Ridho) berperan Owner. Butuh akun staf dengan lokasi aktif untuk
-  menambahkannya ke e2e.
+- **Cakupan lokasi di e2e hanya teruji satu jalur pada satu waktu**,
+  karena satu-satunya akun uji (Ridho) berperan Owner. Selama
+  `IZIN_LINTAS_OUTLET` null, Ridho terkunci ke outlet tenant dan jalur
+  terkunci teruji e2e, sedangkan jalur lintas outlet berupa `test.fixme`
+  bersyarat. Begitu konstanta diisi, keduanya bertukar dan jalur terkunci
+  butuh akun uji tanpa izin itu. Keduanya teruji di unit test
+  (`tests/unit/features/inventaris/cakupan.test.ts`).
 - **Tab pengajuan stok yang disembunyikan menurut izin** hanya teruji di
   unit test (`tests/unit/features/pengajuan-stok/pengajuan-stok.test.ts`),
   dengan alasan yang sama: aturannya hanya berlaku bagi petugas transfer
@@ -317,6 +338,9 @@ Urutan debug kegagalan e2e di atas).
 - **Tombol aksi surat jalan yang disembunyikan menurut izin** hanya teruji
   di unit test (`aksiSuratJalan`), dengan alasan yang sama dengan cakupan
   lokasi: satu-satunya akun uji berperan Owner.
+- **Gate halaman yang menolak pengguna tanpa sebagian izin** hanya teruji
+  di unit test (`tests/unit/lib/auth/gate-stock-adjustment.test.ts`),
+  dengan alasan yang sama.
 - **`tests/helpers/storage.ts`** masih membaca `sessionStorage` dan sudah
   tidak relevan sejak token dipindah ke memori. Berkas itu belum dibersihkan.
 - **Pengosongan hitungan stock opname** baru berupa penanda `test.fixme`
@@ -341,16 +365,17 @@ Urutan debug kegagalan e2e di atas).
 - `tests/e2e/inventaris/jurnalStok/lihat-jurnal-stok.spec.ts`: halaman outlet
   dan gudang yang berbagi komponen, jumlah baris tabel dihitung dari respons
   server, filter Radix Select dibuka lewat teks nilainya, simulasi kegagalan
-  GET dengan `page.route`, dan skenario owner (seluruh outlet, pilih satu
-  outlet, dengan pemeriksaan bahwa permintaan membawa `locationID`).
+  GET dengan `page.route` pada endpoint lokasi yang dipakai jalurnya, dan
+  skenario lintas outlet (pilih satu outlet, dengan pemeriksaan bahwa
+  permintaan membawa `locationID`) sebagai `test.fixme` bersyarat.
 - `tests/e2e/inventaris/stok/lihat-stok.spec.ts`: penunggu dipasang setelah
   `goto(..., { waitUntil: "commit" })`, harapan dihitung dari respons
   permintaan itu sendiri, operasi tulis yang mengembalikan nilai semula,
   aturan tombol nonaktif, dan jalur gagal tambah barang dengan `page.route`
   pada POST saja.
 - `tests/e2e/inventaris/stockOpname/lihat-stok-opname.spec.ts`: tabel
-  berpaginasi diperiksa lewat dokumen pertama dari respons, dan skenario owner
-  (seluruh outlet, pilih satu outlet).
+  berpaginasi diperiksa lewat dokumen pertama dari respons, dan skenario
+  lintas outlet (pilih satu outlet) sebagai `test.fixme` bersyarat.
 - `tests/e2e/inventaris/stockOpname/alur-stok-opname.spec.ts` dan
   `alur-stok-opname-gudang.spec.ts`: alur tulis lengkap dengan `test.step`,
   dokumen baru per run yang ditutup di akhir, skip bila backend menjawab 409,
@@ -400,3 +425,9 @@ Urutan debug kegagalan e2e di atas).
   jumlah kartu dihitung dari seluruh surat jalan berstatus DIKIRIM, karena
   backend mengabaikan query status, lalu dibandingkan dengan jumlah tombol
   per kartu di ruang gudang dan outlet.
+- `tests/helpers/lintas-outlet.ts`: satu sumber keadaan izin lintas outlet
+  untuk seluruh spec, dengan `test.fixme` bersyarat untuk jalur lintas
+  outlet dan `test.skip` bersyarat untuk jalur terkunci (keputusan
+  rancangan butir 18). Contoh pemakaiannya: jalur terkunci di spec stok,
+  pengajuan stok (daftar), dan stock adjustment memeriksa `locationID`
+  permintaan terhadap id dari `/location/current`.

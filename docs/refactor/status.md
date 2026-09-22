@@ -50,12 +50,15 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Cakupan lokasi owner dan staf: jurnal stok dan stok outlet | `6ca6da8` | Selesai |
 | Penyesuaian backend `f27f093`: stock adjustment, gate stok, simpan hitungan opname, dan filter lokasi jurnal stok | `2b3b52d` | Selesai |
 | Inventaris: pengajuan stok, lalu transfer, pengiriman, dan penerimaan | `59e10a1` (daftar pengajuan), `08d0a73` (arah lokasi), `90eb935` (detail, edit, buat), `dec9d01` (perbaikan terima penerimaan), `ad77a14` (transfer dan pengiriman gudang), `580a1e1` (penerimaan outlet) | Selesai |
-| Gudang: cakupan per gudang | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Izin lintas outlet: cakupan outlet dan outlet peminta pengajuan | `085ec78` | Selesai |
+| Stock adjustment outlet hanya lokasi Outlet | `a5e9cec`, `fe5dd9c` (gate `read-location`) | Selesai |
+| Gudang: cakupan per gudang | - | Dibatalkan (`keputusan.md`, Model bisnis MVP) |
+| Gudang: halaman stock adjustment | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 | Penjualan dan pembayaran | - | Belum |
 | Reservasi | - | Belum |
 | Keuangan | - | Belum |
 | Jadwal dan shift | - | Belum |
-| Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang sudah seluruhnya dimigrasikan di modul inventaris (`580a1e1`); `gudang/layout.tsx` dan `gudang/setup` masih memakai `apiClient`; pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
+| Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), kecuali stock adjustment yang belum punya halaman gudang (baris Berikutnya); `gudang/layout.tsx` dan `gudang/setup` masih memakai `apiClient`, dan layout memeriksa nama role Owner (baris 32, keputusan rancangan butir 2); pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -74,40 +77,43 @@ Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: cakupan per gudang
+## Pekerjaan berikutnya: halaman stock adjustment gudang
 
-Keputusan pemilik proyek (22 September 2026): ruang gudang beralih dari
-seluruh lokasi bertipe Gudang ke per gudang, sebelum modul penjualan dan
-pembayaran. Dikerjakan sebagai satu commit untuk seluruh halaman gudang agar
-aturannya seragam (`keputusan.md`, submodul pengajuan stok).
+Sejak `a5e9cec`, daftar stock adjustment di ruang outlet hanya menampilkan
+lokasi Outlet (keputusan pemilik proyek, 22 September 2026), sehingga
+adjustment hasil opname gudang tidak tampil di mana pun di web. Ruang gudang
+juga tidak menautkan ke sana: tombol setelah setujui di detail stock opname
+gudang menuju jurnal stok gudang (`tautanSetelahSetuju` di `TEKS.gudang`,
+`features/stock-opname/halaman-detail-stock-opname.tsx`). Pemilik proyek
+menetapkan halaman ini dikerjakan di putaran berikutnya, sebelum modul
+penjualan dan pembayaran.
 
-- `useCakupanLokasiOutlet` digeneralisasi menjadi cakupan per tipe lokasi:
-  owner melihat seluruh gudang dengan pemilih, petugas gudang hanya
-  gudangnya. Owner dikenali lewat `useLevelPenggunaAktif` (keputusan
-  rancangan butir 2).
-- `PemilihLokasiOutlet` menerima tipe lokasi.
-- Halaman gudang yang disesuaikan, beserta spec-nya: stock opname (daftar,
-  detail, buat), jurnal stok, inventaris, pengajuan stok (daftar, detail),
-  transfer stok (daftar, detail, revisi), dan pengiriman. Seluruhnya sudah
-  memakai lapisan `features/`, sehingga perubahan cukup di komponen dan hook
-  cakupan.
-- Pembatasan ini hanya di tampilan: backend mengirim data seluruh lokasi
-  tenant (`kontrak/temuan.md` butir 20 dan 33).
-- Pekerjaan ini menyentuh halaman stock opname, sehingga empat error ESLint
+- Daftar di ruang gudang menampilkan adjustment seluruh lokasi bertipe
+  Gudang milik tenant, tanpa cakupan per gudang (`keputusan.md`, Model
+  bisnis MVP). Backend menyaring `locationID` tetapi tidak mengenal tipe
+  lokasi, sehingga tipe disaring di klien.
+- Halaman daftar dan detail outlet
+  (`app/dashboard/outlet/inventaris/stockAdjustment/`) dibandingkan dengan
+  `diff` sebelum memutuskan disatukan lewat `ruang` atau hanya berbagi
+  `features/stock-adjustment` (`arsitektur.md`, Kapan halaman disatukan).
+- `susunSumber` di `features/stock-adjustment/tampilan.ts` sudah menautkan
+  sumber ke ruang sesuai tipe lokasi. Tautan dari detail stock opname
+  gudang ke adjustment-nya ditambahkan di `TEKS.gudang`.
+- Entri `IZIN_HALAMAN` dan menu sidebar gudang ditambahkan, dengan gate
+  yang mengikuti endpoint halamannya.
+- Pekerjaan ini menyentuh detail stock opname, sehingga empat error ESLint
   warisan di `features/stock-opname` (Utang kecil dari penyesuaian backend
   `f27f093`, di bawah) dibereskan di commit yang sama.
 
-Pemetaan awal belum diambil. Langkah pertama sesi berikutnya, untuk
-menemukan setiap tempat yang menentukan lingkup gudang:
+Pemetaan awal belum diambil. Langkah pertama sesi berikutnya:
 
 ```bash
-grep -rnE 'tipeLokasi|useLokasiBertipe|ruang="gudang"|ruang: "gudang"|"Gudang"' features app/dashboard/gudang --include='*.ts' --include='*.tsx' | cut -c1-130
+grep -rnE 'stockAdjustment|tautanSetelahSetuju|susunSumber' features app/dashboard components/app-sidebar.tsx lib/auth/permissions.ts --include='*.ts' --include='*.tsx' | cut -c1-130
 ```
 
-Jumlah lokasi bertipe Gudang di data development juga belum diperiksa;
-pemilih gudang baru dapat diuji e2e bila ada lebih dari satu gudang.
-
-Sesudah itu: modul penjualan dan pembayaran (tabel Fase 3).
+Sesudah itu: modul penjualan dan pembayaran (tabel Fase 3). Halaman buat
+penjualan memakai daftar produk, dan stok produk yang dikirim backend tidak
+terhubung ke stok outlet mana pun (`kontrak/temuan.md` butir 37).
 
 ## Catatan dari modul inventaris
 
@@ -148,11 +154,20 @@ Yang masih berlaku:
   pengguna. Dugaannya, karakter seperti `(` membuat pencarian stok dijawab
   500. Buktikan lewat e2e atau trace sebelum dilaporkan ke backend atau
   ditangani di frontend.
+- Belum diverifikasi: `kontrak/payload.md` mencatat `PUT /bahanbaku/:id`
+  memakai `locationID` untuk injeksi stok awal, tetapi
+  `bahanBakuService.update` di backend `9cd1439` (baris 124 sampai 140)
+  hanya menjalankan `$set` atas body. Telusuri route dan controller-nya
+  sebelum kontrak dikoreksi.
 - `components/calendar.tsx` (240 baris, 2 `any`) belum dibereskan; periksa
   pemakainya sebelum modul yang memakainya dimigrasikan.
 - `app/dashboard/outlet/inventaris/components/` berisi
   `bahanBakuCombobox.tsx` (dipakai `features/produk/form-produk.tsx`, lihat
   utang modul produk) dan `inventaris-nav-tabs.tsx`.
+- Tambah barang di inventaris gudang hanya menawarkan master bahan baku.
+  Barang inventory non-bahan (`barangInventoryID`, `/baranginventory`)
+  belum dipakai web sama sekali; master data tetap bersumber dari outlet
+  (`keputusan.md`, Model bisnis MVP). Dirapikan di modul gudang.
 - Di ruang gudang, `gudang/layout.tsx`, `gudang/setup`, dan `gudang/jadwal`
   masih memakai `apiClient`; ketiganya bukan halaman stok (modul Gudang dan
   modul Jadwal dan shift).
@@ -170,17 +185,15 @@ Yang masih berlaku:
     edit, ajukan, lalu tolak, dengan dokumen baru per run yang berakhir
     REJECTED; setujui dan buat surat jalan diuji jalur gagalnya saja dengan
     `page.route`, karena keduanya meninggalkan dokumen permanen.
-  - Utang keputusan produk: halaman buat dan edit memilih outlet peminta
-    dari seluruh lokasi bertipe Outlet untuk siapa pun, sehingga staf dapat
-    mengajukan atas nama outlet lain. Ditahan pemilik proyek (21 September
-    2026) sampai kondisi backend terbaru jelas. Pilihan yang diajukan:
-    mengikuti cakupan outlet (staf terkunci di lokasi aktif, owner memilih),
-    lokasi aktif untuk semua, atau tetap seperti sekarang. Cakupan outlet
-    satu-satunya pilihan yang tetap benar apa pun keputusan
-    `kontrak/temuan.md` butir 20.
+  - Outlet peminta diputuskan pemilik proyek pada 22 September 2026
+    (`085ec78`): pengguna tanpa izin lintas outlet terkunci ke outlet
+    tenant dan tidak dapat merevisi draf outlet lain; pemegang izin lintas
+    outlet memilih dari seluruh outlet (`keputusan.md`, submodul pengajuan
+    stok). Izin itu menunggu backend (`kontrak/temuan.md` butir 39).
   - Usulan tertunda: daftar outlet tidak menampilkan outlet peminta,
-    sehingga owner di pilihan "Semua Outlet" tidak dapat membedakan outlet
-    pengaju.
+    sehingga pemegang izin lintas outlet di pilihan "Semua Outlet" tidak
+    dapat membedakan outlet pengaju. Relevan begitu tenant punya lebih dari
+    satu outlet.
 
 ## Utang kecil yang tertunda
 

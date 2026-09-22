@@ -153,7 +153,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validateBahanBakuPayload (validators/bahanBakuValidator.js)
 - Wajib dari klien: `namaBahan`
 - Field lain yang dikenali: `satuan`, `stok`
-- Tidak diperiksa validator tetapi dipakai service: `locationID` (lokasi tujuan injeksi stok awal; tanpa ini backend memakai lokasi default tenant), `stokMinimum` (batas minimum entri inventory yang dibuat)
+- Tidak diperiksa validator tetapi dipakai service: `locationID` (lokasi tujuan injeksi stok awal; tanpa ini backend memakai outlet pertama tenant, atau lokasi apa pun bila tenant belum punya outlet, `temuan.md` butir 38), `stokMinimum` (batas minimum entri inventory yang dibuat)
 - Nilai sah: `VALID_UNITS`: kg, gram, liter, ml, pcs, pak, unit
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
@@ -254,7 +254,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /pengajuanstok`
 
 - Aturan: tanpa validator, dibatasi skema `models/pengajuanStokModel.js`
-- Arah: `dariLocationID` adalah gudang asal barang dan `keLocationID` outlet peminta. Tipe keduanya tidak diperiksa backend (`temuan.md` butir 23 dan 24). Jumlah item dikonversi ke satuan dasar bahan baku
+- Arah: `dariLocationID` adalah gudang asal barang dan `keLocationID` outlet peminta. Tipe keduanya tidak diperiksa backend (`temuan.md` butir 23 dan 24). Jumlah item dikonversi ke satuan dasar bahan baku. Web mengunci `keLocationID` ke outlet tenant bagi pengguna tanpa izin lintas outlet; backend tidak membatasi outlet peminta (`temuan.md` butir 39)
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorPengajuan`, `jenisPengajuan`, `dariLocationID`, `keLocationID`, `disetujuiOleh`, `ditolakOleh`, `transferStokID`, `items`, `status`, `catatan`, `catatanPenolakan`, `tanggalKebutuhan`, `tanggalApprove`, `tanggalReject`
 - Dibaca controller dari body: `-`
