@@ -114,7 +114,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/inventaris/bahanBaku": [IZIN.location, [IZIN.inventory, IZIN.inventoryOutlet]],
   "/dashboard/outlet/inventaris/stok": [IZIN.location, [IZIN.inventory, IZIN.inventoryOutlet]],
   "/dashboard/outlet/inventaris/stockOpname": [IZIN.stockOpname, IZIN.location],
-  "/dashboard/outlet/inventaris/stockAdjustment": [IZIN.stockAdjustment],
+  "/dashboard/outlet/inventaris/stockAdjustment": [IZIN.stockAdjustment, IZIN.location],
   "/dashboard/outlet/inventaris/jurnalStok": [IZIN.jurnalStok, IZIN.location],
   "/dashboard/outlet/inventaris/pengajuanStok": [IZIN.pengajuanStok, IZIN.location],
   "/dashboard/outlet/inventaris/penerimaanBarang": [IZIN.location, IZIN.transferStok],
