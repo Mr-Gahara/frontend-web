@@ -15,7 +15,7 @@ import { lokasiTunggal } from "./lokasi";
 import type { TambahInventoryPayload } from "@/types/inventory";
 import { useMemo } from "react";
 import { useSession } from "@/lib/auth/useSession";
-import { useLevelPenggunaAktif } from "@/features/role/hooks";
+import { bolehLintasOutlet } from "@/lib/auth/permissions";
 import { tentukanCakupan, type CakupanLokasiOutlet } from "./cakupan";
 import { queryKeys } from "@/lib/queryKeys";
 import type { TipeLokasi } from "@/types/location";
@@ -129,14 +129,17 @@ export function useTambahInventory(opsi: OpsiMutasi<TambahInventoryPayload> = {}
 }
 
 /**
- * Cakupan lokasi halaman di ruang outlet: owner (level 100 dari
- * useLevelPenggunaAktif) melihat seluruh outlet, staf hanya lokasi aktif.
- * Pembatasan ini hanya di tampilan; backend mengirim data seluruh tenant
- * kepada pemegang izin baca.
+ * Cakupan lokasi halaman di ruang outlet: pemegang izin lintas outlet
+ * (bolehLintasOutlet) melihat seluruh outlet dengan pemilih, pengguna lain
+ * terkunci ke lokasi aktif. Lokasi aktif adalah outlet milik tenant
+ * (GET /location/current selalu mencari lokasi bertipe Outlet), karena
+ * pengguna hanya terikat ke tenant. Akses ditentukan permission, bukan nama
+ * role maupun lokasi pengguna. Pembatasan ini hanya di tampilan; backend
+ * mengirim data seluruh tenant kepada pemegang izin baca.
  */
 export function useCakupanLokasiOutlet(): CakupanLokasiOutlet {
-  const { sedangMemuat } = useSession();
-  const owner = useLevelPenggunaAktif() === 100;
+  const { sedangMemuat, permissions } = useSession();
+  const lintasOutlet = bolehLintasOutlet(permissions);
   const daftar = useDaftarLokasi();
   const aktif = useLokasiAktif();
 
@@ -144,13 +147,13 @@ export function useCakupanLokasiOutlet(): CakupanLokasiOutlet {
     () =>
       tentukanCakupan({
         sesiMemuat: sedangMemuat,
-        owner,
+        lintasOutlet,
         daftarLokasi: daftar.data,
         gagalDaftar: daftar.isError,
         lokasiAktif: aktif.lokasi,
         memuatAktif: aktif.isLoading,
         gagalAktif: aktif.isError,
       }),
-    [sedangMemuat, owner, daftar.data, daftar.isError, aktif.lokasi, aktif.isLoading, aktif.isError],
+    [sedangMemuat, lintasOutlet, daftar.data, daftar.isError, aktif.lokasi, aktif.isLoading, aktif.isError],
   );
 }

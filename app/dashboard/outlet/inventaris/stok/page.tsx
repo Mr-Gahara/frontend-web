@@ -67,15 +67,15 @@ export default function StokInventoryPage() {
   }>({ isOpen: false, data: null, fisikAktual: "", catatan: "" });
 
   // --- Queries ---
-  // Cakupan lokasi: owner memilih "Semua Lokasi" atau satu outlet; staf selalu
-  // lokasi aktifnya, tanpa pemilih.
+  // Cakupan lokasi: pemegang izin lintas outlet memilih "Semua Lokasi" atau satu
+  // outlet; pengguna lain selalu lokasi aktif (outlet tenant), tanpa pemilih.
   const cakupan = useCakupanLokasiOutlet();
   const isLoadingLokasi = cakupan.status === "memuat";
-  const lokasiOutlet = cakupan.status === "owner" ? cakupan.lokasiOutlet : [];
+  const lokasiOutlet = cakupan.status === "lintas" ? cakupan.lokasiOutlet : [];
   const filterLokasi =
-    cakupan.status === "owner"
+    cakupan.status === "lintas"
       ? { locationID: selectedLocation !== "all" ? selectedLocation : undefined }
-      : cakupan.status === "staf" && cakupan.lokasiId
+      : cakupan.status === "terkunci" && cakupan.lokasiId
         ? { locationID: cakupan.lokasiId }
         : null;
 
@@ -174,7 +174,7 @@ export default function StokInventoryPage() {
             />
           </div>
 
-          {cakupan.status === "owner" && (
+          {cakupan.status === "lintas" && (
           <Select value={selectedLocation} onValueChange={setSelectedLocation}>
             <SelectTrigger className="w-full sm:w-48 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-semibold focus:ring-[#0A2947]">
               <MapPin className="w-4 h-4 mr-2 text-[#D4A373]" />
@@ -208,7 +208,7 @@ export default function StokInventoryPage() {
           isi="Lokasi kerja Anda tidak dapat dimuat. Periksa koneksi, lalu muat ulang halaman."
         />
       )}
-      {cakupan.status === "staf" && !cakupan.lokasiId && (
+      {cakupan.status === "terkunci" && !cakupan.lokasiId && (
         <PesanLokasi
           judul="Identitas Outlet Tidak Ditemukan"
           isi="Lokasi kerja Anda saat ini belum dikonfigurasi, sehingga stok tidak dapat ditampilkan. Harap periksa pengaturan profil lokasi Anda."

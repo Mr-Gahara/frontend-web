@@ -16,7 +16,7 @@ interface Props {
   onUbah: (nilai: string) => void;
 }
 
-/** Pemilih lokasi untuk owner: seluruh outlet atau satu outlet. */
+/** Pemilih lokasi bagi pemegang izin lintas outlet: seluruh outlet atau satu outlet. */
 export default function PemilihLokasiOutlet({ lokasiOutlet, nilai, onUbah }: Props) {
   return (
     <div className="space-y-1.5 w-full sm:w-64">

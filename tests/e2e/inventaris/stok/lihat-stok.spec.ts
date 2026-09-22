@@ -1,4 +1,5 @@
 import { test, expect, Locator, Page, Response } from "@playwright/test";
+import { ADA_IZIN_LINTAS, JALUR_TERKUNCI, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
 
 const URL_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/stok";
 const URL_GUDANG = "http://localhost:3000/dashboard/gudang/inventaris";
@@ -47,6 +48,10 @@ function getLokasi(r: Response) {
   return r.request().method() === "GET" && /\/api\/location(\?|$)/.test(r.url());
 }
 
+function getLokasiAktif(r: Response) {
+  return r.request().method() === "GET" && /\/api\/location\/current(\?|$)/.test(r.url());
+}
+
 /**
  * Menunggu respons dan langsung membaca isinya. Isi respons dibuang browser
  * bila halaman memuat ulang data sebelum isinya sempat dibaca.
@@ -83,11 +88,13 @@ async function periksaBaris(page: Page, jumlah: number, teksKosong?: string) {
 async function bukaOutlet(page: Page) {
   // Penunggu dipasang setelah dokumen baru ter-commit, agar respons dari
   // halaman sebelumnya (dashboard setelah login) tidak ikut tertangkap.
+  // Pemegang izin lintas outlet memuat stok seluruh lokasi (tanpa
+  // locationID); pengguna lain memuat stok lokasi aktif, yaitu outlet tenant.
   await page.goto(URL_OUTLET, { waitUntil: "commit" });
   const pLokasi = tunggu<LokasiMentah[]>(page, getLokasi);
   const pInventory = tunggu<InventoryMentah[]>(
     page,
-    getInventory((u) => !u.searchParams.has("locationID")),
+    getInventory((u) => u.searchParams.has("locationID") !== ADA_IZIN_LINTAS),
   );
   const [lokasi, inventory] = await Promise.all([pLokasi, pInventory]);
   await expect(page.getByRole("columnheader", { name: "Nama Barang" })).toBeVisible();
@@ -167,9 +174,25 @@ test.describe("Stok outlet", () => {
     await login(page);
   });
 
-  test("semua lokasi: hanya stok di lokasi bertipe outlet", async ({ page }) => {
+  test("lintas outlet: semua lokasi hanya stok di lokasi bertipe outlet", async ({ page }) => {
+    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     const { inventory } = await bukaOutlet(page);
     await periksaBaris(page, inventory.length, KOSONG_OUTLET);
+  });
+
+  test("tanpa izin lintas outlet: stok outlet tenant tanpa pemilih lokasi", async ({ page }) => {
+    test.skip(ADA_IZIN_LINTAS, JALUR_TERKUNCI);
+    await page.goto(URL_OUTLET, { waitUntil: "commit" });
+    const pAktif = tunggu<LokasiMentah | null>(page, getLokasiAktif);
+    const tInventory = page.waitForRequest(
+      (r) => r.method() === "GET" && /\/api\/inventory(\?|$)/.test(r.url()),
+    );
+    const aktif = await pAktif;
+    const idAktif = aktif?.id ?? aktif?._id;
+    expect(idAktif, "outlet tenant dari /location/current").toBeTruthy();
+    expect(new URL((await tInventory).url()).searchParams.get("locationID")).toBe(idAktif);
+    await expect(page.getByRole("columnheader", { name: "Nama Barang" })).toBeVisible();
+    await expect(page.getByText("Semua Lokasi", { exact: true })).toHaveCount(0);
   });
 
   test("tab stok kritis menyaring stok di bawah batas minimum", async ({ page }) => {
@@ -193,7 +216,8 @@ test.describe("Stok outlet", () => {
     await periksaBaris(page, hasil.length, KOSONG_OUTLET);
   });
 
-  test("pilih lokasi mengirim locationID dan menampilkan stok lokasi itu", async ({ page }) => {
+  test("lintas outlet: pilih lokasi mengirim locationID dan menampilkan stok lokasi itu", async ({ page }) => {
+    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     const { lokasi } = await bukaOutlet(page);
     const outlet = lokasi.find((l) => l.tipe === "Outlet");
     test.skip(!outlet, "Belum ada lokasi bertipe outlet");

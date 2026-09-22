@@ -1,4 +1,5 @@
 import { test, expect, Page, Response } from "@playwright/test";
+import { ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
 
 const URL_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/jurnalStok";
 const URL_GUDANG = "http://localhost:3000/dashboard/gudang/jurnalStok";
@@ -86,12 +87,13 @@ test.describe("Jurnal stok", () => {
     await login(page);
   });
 
-  test("owner: seluruh outlet tanpa jurnal gudang", async ({ page }) => {
+  test("outlet: hanya jurnal lokasi outlet, tanpa jurnal gudang", async ({ page }) => {
     const { jurnal } = await bukaJurnal(page, URL_OUTLET);
     await periksaJumlahBaris(page, jurnal.filter((j) => j.locationID?.tipe === "Outlet").length);
   });
 
-  test("owner: pilih satu outlet menyaring jurnal outlet itu", async ({ page }) => {
+  test("lintas outlet: pilih satu outlet menyaring jurnal outlet itu", async ({ page }) => {
+    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     const { jurnal } = await bukaJurnal(page, URL_OUTLET);
     const target = jurnal.find((j) => j.locationID?.tipe === "Outlet" && j.locationID?.nama);
     test.skip(!target, "Belum ada jurnal outlet");
@@ -156,9 +158,9 @@ test.describe("Jurnal stok", () => {
     await page.unroute(pola);
   });
 
-  test("outlet: gagal memuat daftar lokasi dibedakan dari lokasi yang belum dikonfigurasi", async ({ page }) => {
-    // Owner memakai daftar lokasi; jalur staf (/location/current) diuji di unit test cakupan.
-    const pola = "**/api/location";
+  test("outlet: gagal memuat lokasi dibedakan dari lokasi yang belum dikonfigurasi", async ({ page }) => {
+    // Jalur terkunci memakai /location/current, pemegang izin lintas outlet memakai daftar lokasi.
+    const pola = ADA_IZIN_LINTAS ? "**/api/location" : "**/api/location/current";
     await page.route(pola, (route) =>
       route.request().method() === "GET"
         ? route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ status: "error", message: "uji" }) })

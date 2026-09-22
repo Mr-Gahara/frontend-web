@@ -46,13 +46,16 @@ test.describe("Daftar surat jalan DIKIRIM", () => {
           .toHaveCount(dikirim.length);
       });
 
-      await test.step("penerimaan outlet untuk owner", async () => {
+      await test.step("penerimaan outlet: surat jalan DIKIRIM ke outlet tenant", async () => {
         await page.goto(URL_PENERIMAAN);
         await expect
-          .soft(page.getByText(transfer.nomorTransfer).first(), "surat jalan DIKIRIM ke outlet mana pun tampil untuk owner")
+          .soft(page.getByText(transfer.nomorTransfer).first(), "surat jalan DIKIRIM ke outlet tenant tampil")
           .toBeVisible();
         await expect
-          .soft(page.getByRole("button", { name: /proses terima/i }), "seluruh surat jalan DIKIRIM tampil untuk owner")
+          .soft(
+            page.getByRole("button", { name: /proses terima/i }),
+            "seluruh surat jalan DIKIRIM tampil, karena di MVP semuanya menuju satu-satunya outlet tenant",
+          )
           .toHaveCount(dikirim.length);
       });
     } finally {

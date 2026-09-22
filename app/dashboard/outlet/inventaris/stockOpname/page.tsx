@@ -23,7 +23,7 @@ export default function StockOpnamePage() {
         isi="Lokasi kerja Anda tidak dapat dimuat. Periksa koneksi, lalu muat ulang halaman."
       />
     );
-  } else if (cakupan.status === "staf" && !cakupan.lokasiId) {
+  } else if (cakupan.status === "terkunci" && !cakupan.lokasiId) {
     penghalang = (
       <PesanLokasi
         judul="Identitas Outlet Tidak Ditemukan"
@@ -39,7 +39,7 @@ export default function StockOpnamePage() {
       memuatLingkup={cakupan.status === "memuat"}
       penghalang={penghalang}
       pemilihLokasi={
-        cakupan.status === "owner" ? (
+        cakupan.status === "lintas" ? (
           <PemilihLokasiOutlet
             lokasiOutlet={cakupan.lokasiOutlet}
             nilai={pilihanLokasi}

@@ -1,4 +1,5 @@
 import { test, expect, Page, Response } from "@playwright/test";
+import { ADA_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
 
 /*
  * Spec pembanding alur tulis pengajuan stok (keputusan pemilik proyek,
@@ -90,8 +91,12 @@ test.describe("Alur tulis pengajuan stok", () => {
 
     await test.step("buat draft dari outlet", async () => {
       await page.goto(URL_OUTLET + "/buatPengajuan");
-      await page.getByText("Pilih Outlet Anda...", { exact: true }).click();
-      await page.getByRole("option").first().click();
+      if (ADA_IZIN_LINTAS) {
+        await page.getByText("Pilih Outlet Anda...", { exact: true }).click();
+        await page.getByRole("option").first().click();
+      } else {
+        await expect(page.locator("#pengajuan-outlet"), "outlet peminta terkunci ke outlet tenant").toBeDisabled();
+      }
       await page.getByText("Pilih Gudang...", { exact: true }).click();
       await page.getByRole("option").first().click();
       if ((await page.getByText("Pilih...", { exact: true }).count()) === 0) {

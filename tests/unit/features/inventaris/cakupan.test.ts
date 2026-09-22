@@ -12,7 +12,7 @@ const gudang = { id: "g1", nama: "Gudang Pusat", tipe: "Gudang" } as Lokasi;
 
 const dasar: MasukanCakupan = {
   sesiMemuat: false,
-  owner: false,
+  lintasOutlet: false,
   daftarLokasi: undefined,
   gagalDaftar: false,
   lokasiAktif: null,
@@ -21,46 +21,46 @@ const dasar: MasukanCakupan = {
 };
 
 describe("tentukanCakupan", () => {
-  it("menunggu selama sesi dipulihkan, termasuk untuk owner", () => {
-    expect(tentukanCakupan({ ...dasar, sesiMemuat: true, owner: true })).toEqual({
+  it("menunggu selama sesi dipulihkan, termasuk untuk pemegang izin lintas outlet", () => {
+    expect(tentukanCakupan({ ...dasar, sesiMemuat: true, lintasOutlet: true })).toEqual({
       status: "memuat",
     });
   });
 
-  it("owner mendapat seluruh lokasi bertipe Outlet setelah daftar termuat", () => {
-    expect(tentukanCakupan({ ...dasar, owner: true })).toEqual({ status: "memuat" });
-    expect(tentukanCakupan({ ...dasar, owner: true, gagalDaftar: true })).toEqual({
+  it("pemegang izin lintas outlet mendapat seluruh lokasi bertipe Outlet setelah daftar termuat", () => {
+    expect(tentukanCakupan({ ...dasar, lintasOutlet: true })).toEqual({ status: "memuat" });
+    expect(tentukanCakupan({ ...dasar, lintasOutlet: true, gagalDaftar: true })).toEqual({
       status: "gagal",
     });
     expect(
-      tentukanCakupan({ ...dasar, owner: true, daftarLokasi: [outletA, gudang] }),
-    ).toEqual({ status: "owner", lokasiOutlet: [outletA] });
+      tentukanCakupan({ ...dasar, lintasOutlet: true, daftarLokasi: [outletA, gudang] }),
+    ).toEqual({ status: "lintas", lokasiOutlet: [outletA] });
   });
 
-  it("staf mendapat lokasi aktif, termasuk keadaan tanpa lokasi", () => {
+  it("tanpa izin lintas outlet terkunci ke lokasi aktif, termasuk keadaan tanpa lokasi", () => {
     expect(tentukanCakupan({ ...dasar, memuatAktif: true })).toEqual({ status: "memuat" });
     expect(tentukanCakupan({ ...dasar, gagalAktif: true })).toEqual({ status: "gagal" });
     expect(tentukanCakupan({ ...dasar, lokasiAktif: outletA })).toEqual({
-      status: "staf",
+      status: "terkunci",
       lokasi: outletA,
       lokasiId: "o1",
     });
-    expect(tentukanCakupan(dasar)).toEqual({ status: "staf", lokasi: null, lokasiId: "" });
+    expect(tentukanCakupan(dasar)).toEqual({ status: "terkunci", lokasi: null, lokasiId: "" });
   });
 });
 
 describe("lingkupOutlet", () => {
-  it("owner: semua outlet disaring di klien, satu outlet dikirim ke server", () => {
-    const owner = { status: "owner" as const, lokasiOutlet: [outletA] };
-    expect(lingkupOutlet(owner, SEMUA_OUTLET)).toEqual({ tipeLokasi: "Outlet" });
-    expect(lingkupOutlet(owner, "o1")).toEqual({ locationID: "o1" });
+  it("lintas outlet: semua outlet disaring di klien, satu outlet dikirim ke server", () => {
+    const lintas = { status: "lintas" as const, lokasiOutlet: [outletA] };
+    expect(lingkupOutlet(lintas, SEMUA_OUTLET)).toEqual({ tipeLokasi: "Outlet" });
+    expect(lingkupOutlet(lintas, "o1")).toEqual({ locationID: "o1" });
   });
 
-  it("staf selalu dibatasi lokasi aktif, dan tidak memuat apa pun tanpa lokasi", () => {
+  it("terkunci: selalu dibatasi lokasi aktif, dan tidak memuat apa pun tanpa lokasi", () => {
     expect(
-      lingkupOutlet({ status: "staf", lokasi: outletA, lokasiId: "o1" }, SEMUA_OUTLET),
+      lingkupOutlet({ status: "terkunci", lokasi: outletA, lokasiId: "o1" }, SEMUA_OUTLET),
     ).toEqual({ locationID: "o1" });
-    expect(lingkupOutlet({ status: "staf", lokasi: null, lokasiId: "" }, SEMUA_OUTLET)).toBeNull();
+    expect(lingkupOutlet({ status: "terkunci", lokasi: null, lokasiId: "" }, SEMUA_OUTLET)).toBeNull();
     expect(lingkupOutlet({ status: "memuat" }, SEMUA_OUTLET)).toBeNull();
     expect(lingkupOutlet({ status: "gagal" }, SEMUA_OUTLET)).toBeNull();
   });

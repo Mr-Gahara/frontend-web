@@ -10,7 +10,10 @@ import { id as localeID } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { pesanError } from "@/lib/api/error";
 import type { PengajuanStok } from "@/types/pengajuanStok";
-import { useDaftarLokasi } from "@/features/inventaris/hooks";
+import { useDaftarLokasi, useLokasiAktif } from "@/features/inventaris/hooks";
+import { useSession } from "@/lib/auth/useSession";
+import { bolehLintasOutlet } from "@/lib/auth/permissions";
+import type { Lokasi } from "@/types/location";
 import { useDaftarBahanBaku } from "@/features/bahan-baku/hooks";
 import { useBuatPengajuan, usePerbaruiPengajuan } from "./hooks";
 import { BARIS_KOSONG, nilaiAwalPengajuan, susunPayloadPengajuan } from "./payload";
@@ -85,24 +88,76 @@ interface Props {
 }
 
 /**
- * Form bersama buat dan revisi pengajuan stok. Nilai awal dibaca sekali dari
- * defaultValues, sehingga halaman edit memasang form setelah detail termuat
- * (keputusan rancangan butir 8). Pilihan outlet mengisi keLocationID dan
- * pilihan gudang mengisi dariLocationID (arah.ts). Cakupan outlet yang boleh
- * dipilih masih seluruh outlet; keputusannya ditahan sebagai utang.
+ * Form bersama buat dan revisi pengajuan stok. Outlet peminta ditentukan
+ * lebih dulu, lalu form dipasang, karena nilai awal dibaca sekali dari
+ * defaultValues (keputusan rancangan butir 8). Pilihan outlet mengisi
+ * keLocationID dan pilihan gudang mengisi dariLocationID (arah.ts).
+ *
+ * Staf outlet A hanya mengajukan untuk outlet A (keputusan pemilik proyek,
+ * 22 September 2026): pengguna tanpa izin lintas outlet terkunci ke lokasi
+ * aktif, yaitu outlet milik tenant, dan tidak dapat merevisi draf outlet
+ * lain. Pemegang izin lintas outlet memilih dari seluruh outlet. Izin itu
+ * belum ada di backend (IZIN_LINTAS_OUTLET di lib/auth/permissions.ts masih
+ * null), sehingga sementara semua pengguna terkunci; di MVP outlet tenant
+ * hanya satu, sehingga pilihannya sama.
  */
 export function FormPengajuanStok({ pengajuan }: Props) {
+  const router = useRouter();
+  const { sedangMemuat, permissions } = useSession();
+  const lintasOutlet = bolehLintasOutlet(permissions);
+  const aktif = useLokasiAktif();
+
+  if (sedangMemuat || (!lintasOutlet && aktif.isLoading)) {
+    return (
+      <div className="py-20 text-center text-sm font-medium text-[#0A2947]/60">
+        Memuat lokasi outlet...
+      </div>
+    );
+  }
+
+  if (!lintasOutlet) {
+    const pesan = aktif.isError
+      ? "Gagal memuat lokasi outlet. Coba muat ulang halaman."
+      : !aktif.lokasi
+        ? "Lokasi outlet belum dikonfigurasi."
+        : pengajuan && pengajuan.keLokasi?.id !== aktif.lokasi.id
+          ? "Pengajuan ini milik outlet lain dan hanya dapat direvisi oleh outlet itu."
+          : null;
+    if (pesan) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <p className="text-sm font-bold text-[#0A2947]">{pesan}</p>
+          <Button variant="outline" onClick={() => router.push(URL_DAFTAR)}>
+            Kembali
+          </Button>
+        </div>
+      );
+    }
+  }
+
+  return <IsiFormPengajuanStok pengajuan={pengajuan} outletTerkunci={lintasOutlet ? null : aktif.lokasi} />;
+}
+
+interface PropsIsi extends Props {
+  /** Outlet peminta yang dikunci; null berarti pengguna memilih dari seluruh outlet. */
+  outletTerkunci: Lokasi | null;
+}
+
+function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
   const router = useRouter();
   const teks = pengajuan ? TEKS.edit : TEKS.buat;
 
   const { data: lokasiList = [], isLoading: memuatLokasi } = useDaftarLokasi();
-  const outletList = lokasiList.filter((l) => l.tipe === "Outlet");
+  const outletList = outletTerkunci ? [outletTerkunci] : lokasiList.filter((l) => l.tipe === "Outlet");
   const gudangList = lokasiList.filter((l) => l.tipe === "Gudang");
   const { data: bahanBakuList = [], isLoading: memuatBahan } = useDaftarBahanBaku();
 
   const { control, register, handleSubmit, setValue } = useForm<NilaiFormPengajuan>({
     resolver: zodResolver(skemaPengajuan),
-    defaultValues: nilaiAwalPengajuan(pengajuan),
+    defaultValues: {
+      ...nilaiAwalPengajuan(pengajuan),
+      ...(outletTerkunci ? { keLocationID: outletTerkunci.id } : {}),
+    },
   });
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
   const items = useWatch({ control, name: "items" });
@@ -178,7 +233,7 @@ export function FormPengajuanStok({ pengajuan }: Props) {
               control={control}
               name="keLocationID"
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange} disabled={memuatLokasi}>
+                <Select value={field.value} onValueChange={field.onChange} disabled={outletTerkunci !== null || memuatLokasi}>
                   <SelectTrigger
                     id="pengajuan-outlet"
                     className="w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus:ring-[#0A2947]"

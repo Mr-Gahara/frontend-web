@@ -40,8 +40,9 @@ const getLamaPerjalanan = (tanggalKirim: string | null) => {
 
 /**
  * Daftar penerimaan barang di ruang outlet: surat jalan DIKIRIM menuju cakupan
- * outlet pengguna. Owner melihat seluruh outlet dengan pemilih, staf hanya
- * lokasi aktifnya (keputusan pemilik proyek, 21 September 2026). Backend
+ * outlet pengguna. Pemegang izin lintas outlet melihat seluruh outlet dengan
+ * pemilih, pengguna lain hanya lokasi aktif, yaitu outlet milik tenant
+ * (useCakupanLokasiOutlet; keputusan pemilik proyek 21 dan 22 September 2026). Backend
  * mengabaikan query daftar (kontrak/temuan.md butir 33), sehingga status dan
  * lokasi tujuan disaring di klien.
  */
@@ -78,7 +79,7 @@ export default function HalamanDaftarPenerimaan() {
         isi="Lokasi kerja Anda tidak dapat dimuat. Periksa koneksi, lalu muat ulang halaman."
       />
     );
-  } else if (cakupan.status === "staf" && !cakupan.lokasiId) {
+  } else if (cakupan.status === "terkunci" && !cakupan.lokasiId) {
     penghalang = (
       <PesanLokasi
         judul="Identitas Outlet Tidak Ditemukan"
@@ -112,7 +113,7 @@ export default function HalamanDaftarPenerimaan() {
           </div>
         </div>
 
-        {cakupan.status === "owner" && (
+        {cakupan.status === "lintas" && (
           <PemilihLokasiOutlet lokasiOutlet={cakupan.lokasiOutlet} nilai={pilihanLokasi} onUbah={setPilihanLokasi} />
         )}
         <div className="relative w-full sm:w-80">

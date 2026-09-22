@@ -51,6 +51,29 @@ export const IZIN = {
 export type Izin = (typeof IZIN)[keyof typeof IZIN];
 
 /**
+ * Permission yang mengizinkan pengguna bekerja lintas outlet: melihat data
+ * seluruh outlet tenant di ruang outlet (useCakupanLokasiOutlet) dan
+ * mengajukan stok atas nama outlet lain (form pengajuan stok). Keputusan
+ * pemilik proyek 22 September 2026: akses ditentukan role dan permission,
+ * bukan nama role maupun lokasi pengguna.
+ *
+ * Belum ada di backend; namanya ditetapkan tim backend. Selama null, tidak
+ * ada pengguna yang memegangnya, owner pun tidak, sehingga semua pengguna
+ * terkunci ke outlet tenant. Di MVP (satu outlet per tenant) datanya sama.
+ * Isi dengan nama dari seeder permission backend begitu tersedia; tidak ada
+ * perubahan lain yang dibutuhkan.
+ */
+export const IZIN_LINTAS_OUTLET: string | null = null;
+
+/** True bila pengguna memegang izin lintas outlet; selalu false selama izinnya belum ditetapkan. */
+export function bolehLintasOutlet(
+  permissions: readonly string[],
+  izin: string | null = IZIN_LINTAS_OUTLET,
+): boolean {
+  return izin !== null && permissions.includes(izin);
+}
+
+/**
  * Satu syarat gate: satu izin, atau array izin yang cukup dipenuhi salah
  * satunya, untuk endpoint yang menerima beberapa izin alternatif.
  */

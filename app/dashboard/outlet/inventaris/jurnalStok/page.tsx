@@ -9,7 +9,7 @@ import PemilihLokasiOutlet from "@/features/inventaris/pemilih-lokasi-outlet";
 import PesanLokasi from "@/features/inventaris/pesan-lokasi";
 
 export default function JurnalStokOutletPage() {
-  // Owner melihat seluruh outlet (dengan pemilih); staf hanya lokasi aktifnya.
+  // Pemegang izin lintas outlet melihat seluruh outlet (dengan pemilih); pengguna lain hanya outlet tenant.
   const cakupan = useCakupanLokasiOutlet();
   const [pilihanLokasi, setPilihanLokasi] = useState<string>(SEMUA_OUTLET);
 
@@ -30,7 +30,7 @@ export default function JurnalStokOutletPage() {
         isi="Lokasi kerja Anda tidak dapat dimuat. Periksa koneksi, lalu muat ulang halaman."
       />
     );
-  } else if (cakupan.status === "staf" && !cakupan.lokasiId) {
+  } else if (cakupan.status === "terkunci" && !cakupan.lokasiId) {
     penghalang = (
       <PesanLokasi
         judul="Identitas Outlet Tidak Ditemukan"
@@ -40,12 +40,12 @@ export default function JurnalStokOutletPage() {
   }
 
   let namaCakupan = "Outlet Saat Ini";
-  if (cakupan.status === "owner") {
+  if (cakupan.status === "lintas") {
     namaCakupan =
       pilihanLokasi === SEMUA_OUTLET
         ? "seluruh outlet"
         : (cakupan.lokasiOutlet.find((l) => l.id === pilihanLokasi)?.nama ?? "outlet terpilih");
-  } else if (cakupan.status === "staf" && cakupan.lokasi) {
+  } else if (cakupan.status === "terkunci" && cakupan.lokasi) {
     namaCakupan = cakupan.lokasi.nama;
   }
 
@@ -56,7 +56,7 @@ export default function JurnalStokOutletPage() {
       memuatLingkup={cakupan.status === "memuat"}
       penghalang={penghalang}
       pemilihLokasi={
-        cakupan.status === "owner" ? (
+        cakupan.status === "lintas" ? (
           <PemilihLokasiOutlet
             lokasiOutlet={cakupan.lokasiOutlet}
             nilai={pilihanLokasi}

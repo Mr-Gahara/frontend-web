@@ -1,21 +1,22 @@
 import type { Lokasi } from "@/types/location";
 
-/** Nilai pemilih lokasi owner untuk seluruh outlet. */
+/** Nilai pemilih lokasi untuk seluruh outlet. */
 export const SEMUA_OUTLET = "SEMUA";
 
 /**
- * Cakupan lokasi halaman di ruang outlet.
- * Owner melihat seluruh outlet; staf hanya lokasi aktifnya.
+ * Cakupan lokasi halaman di ruang outlet. Pemegang izin lintas outlet
+ * (IZIN_LINTAS_OUTLET) melihat seluruh outlet; pengguna lain terkunci ke
+ * lokasi aktif, yaitu outlet milik tenant, bukan lokasi pribadi pengguna.
  */
 export type CakupanLokasiOutlet =
   | { status: "memuat" }
   | { status: "gagal" }
-  | { status: "owner"; lokasiOutlet: Lokasi[] }
-  | { status: "staf"; lokasi: Lokasi | null; lokasiId: string };
+  | { status: "lintas"; lokasiOutlet: Lokasi[] }
+  | { status: "terkunci"; lokasi: Lokasi | null; lokasiId: string };
 
 export interface MasukanCakupan {
   sesiMemuat: boolean;
-  owner: boolean;
+  lintasOutlet: boolean;
   daftarLokasi: Lokasi[] | undefined;
   gagalDaftar: boolean;
   lokasiAktif: Lokasi | null;
@@ -24,22 +25,22 @@ export interface MasukanCakupan {
 }
 
 export function tentukanCakupan(m: MasukanCakupan): CakupanLokasiOutlet {
-  // Selama sesi dipulihkan, peran belum diketahui: owner jangan sampai
-  // sempat diperlakukan sebagai staf.
+  // Selama sesi dipulihkan, permission belum diketahui: pemegang izin lintas
+  // outlet jangan sampai sempat terkunci.
   if (m.sesiMemuat) return { status: "memuat" };
 
-  if (m.owner) {
+  if (m.lintasOutlet) {
     if (m.gagalDaftar) return { status: "gagal" };
     if (!m.daftarLokasi) return { status: "memuat" };
     return {
-      status: "owner",
+      status: "lintas",
       lokasiOutlet: m.daftarLokasi.filter((l) => l.tipe === "Outlet"),
     };
   }
 
   if (m.gagalAktif) return { status: "gagal" };
   if (m.memuatAktif) return { status: "memuat" };
-  return { status: "staf", lokasi: m.lokasiAktif, lokasiId: m.lokasiAktif?.id ?? "" };
+  return { status: "terkunci", lokasi: m.lokasiAktif, lokasiId: m.lokasiAktif?.id ?? "" };
 }
 
 /**
@@ -56,10 +57,10 @@ export function lingkupOutlet(
   cakupan: CakupanLokasiOutlet,
   pilihan: string,
 ): LingkupLokasi | null {
-  if (cakupan.status === "owner") {
+  if (cakupan.status === "lintas") {
     return pilihan === SEMUA_OUTLET ? { tipeLokasi: "Outlet" } : { locationID: pilihan };
   }
-  if (cakupan.status === "staf") {
+  if (cakupan.status === "terkunci") {
     return cakupan.lokasiId ? { locationID: cakupan.lokasiId } : null;
   }
   return null;

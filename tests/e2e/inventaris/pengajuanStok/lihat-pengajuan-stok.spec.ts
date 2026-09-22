@@ -1,4 +1,7 @@
 import { test, expect, Page, Response } from "@playwright/test";
+import { ADA_IZIN_LINTAS, JALUR_TERKUNCI, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
+
+type LokasiMentah = { id?: string; _id?: string; nama: string; tipe: string };
 
 const URL_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/pengajuanStok";
 const URL_GUDANG = "http://localhost:3000/dashboard/gudang/pengajuanStok";
@@ -103,7 +106,8 @@ test.describe("Daftar pengajuan stok outlet", () => {
     await expect(page.locator("table tbody tr").first()).toContainText(kata);
   });
 
-  test("owner: pilih satu outlet mengirim locationID outlet itu", async ({ page }) => {
+  test("lintas outlet: pilih satu outlet mengirim locationID outlet itu", async ({ page }) => {
+    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     const data = (await buka(page, URL_OUTLET, null)).filter(diOutlet);
     const contoh = data.find((p) => p.keLokasi?.id && p.keLokasi?.nama);
     test.skip(!contoh, "Belum ada pengajuan outlet");
@@ -126,7 +130,53 @@ test.describe("Daftar pengajuan stok outlet", () => {
     await page.waitForURL(/\/pengajuanStok\/buatPengajuan$/);
   });
 
-  test("buat: gudang asal dikirim di dariLocationID dan outlet peminta di keLocationID", async ({ page }) => {
+  test("buat tanpa izin lintas outlet: outlet peminta terkunci ke outlet tenant dan gudang asal di dariLocationID", async ({ page }) => {
+    test.skip(ADA_IZIN_LINTAS, JALUR_TERKUNCI);
+    // POST dijawab gagal lewat page.route agar tidak ada pengajuan yang
+    // tersimpan; yang diperiksa adalah isi payload.
+    const polaPost = /\/api\/pengajuanstok(\?|$)/i;
+    await page.route(polaPost, (route) =>
+      route.request().method() === "POST"
+        ? route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ status: "error", message: "uji" }) })
+        : route.continue(),
+    );
+    await page.goto(URL_OUTLET + "/buatPengajuan", { waitUntil: "commit" });
+    const tAktif = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/location\/current(\?|$)/i.test(r.url()),
+    );
+    const tLokasi = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/location(\?|$)/i.test(r.url()),
+    );
+    const aktif = ((await (await tAktif).json()) as { data: LokasiMentah | null }).data;
+    const lokasi = ((await (await tLokasi).json()) as { data: LokasiMentah[] }).data;
+    expect(aktif, "outlet tenant dari /location/current").not.toBeNull();
+    const idAktif = aktif!.id ?? aktif!._id;
+    const tipe = (id: string) => lokasi.find((l) => (l.id ?? l._id) === id)?.tipe;
+
+    const pemilihOutlet = page.locator("#pengajuan-outlet");
+    await expect(pemilihOutlet).toBeDisabled();
+    await expect(pemilihOutlet).toContainText(aktif!.nama);
+    await page.getByText("Pilih Gudang...", { exact: true }).click();
+    await page.getByRole("option").first().click();
+    if ((await page.getByText("Pilih...", { exact: true }).count()) === 0) {
+      await page.getByRole("button", { name: /tambah baris/i }).click();
+    }
+    await page.getByText("Pilih...", { exact: true }).first().click();
+    await page.getByRole("option").first().click();
+    await page.getByPlaceholder("0").first().fill("1");
+
+    const tPost = page.waitForRequest((r) => r.method() === "POST" && polaPost.test(r.url()));
+    await page.getByRole("button", { name: "Simpan sebagai Draft" }).click();
+    const payload = (await tPost).postDataJSON() as { dariLocationID: string; keLocationID: string };
+    expect(payload.keLocationID).toBe(idAktif);
+    expect(tipe(payload.dariLocationID)).toBe("Gudang");
+    expect(tipe(payload.keLocationID)).toBe("Outlet");
+    await expect(page.getByText("Gagal Menyimpan")).toBeVisible();
+    await page.unroute(polaPost);
+  });
+
+  test("buat dengan izin lintas outlet: outlet peminta dipilih dan dikirim di keLocationID", async ({ page }) => {
+    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     // POST dijawab gagal lewat page.route agar tidak ada pengajuan yang
     // tersimpan; yang diperiksa adalah isi payload.
     const polaPost = /\/api\/pengajuanstok(\?|$)/i;
@@ -139,7 +189,7 @@ test.describe("Daftar pengajuan stok outlet", () => {
     const rLokasi = await page.waitForResponse(
       (r) => r.request().method() === "GET" && /\/api\/location(\?|$)/i.test(r.url()),
     );
-    const lokasi = ((await rLokasi.json()) as { data: { id?: string; _id?: string; tipe: string }[] }).data;
+    const lokasi = ((await rLokasi.json()) as { data: LokasiMentah[] }).data;
     const tipe = (id: string) => lokasi.find((l) => (l.id ?? l._id) === id)?.tipe;
 
     await page.getByText("Pilih Outlet Anda...", { exact: true }).click();
