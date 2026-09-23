@@ -54,8 +54,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Stock adjustment outlet hanya lokasi Outlet | `a5e9cec`, `fe5dd9c` (gate `read-location`) | Selesai |
 | Gudang: cakupan per gudang | - | Dibatalkan (`keputusan.md`, Model bisnis MVP) |
 | Gudang: halaman stock adjustment | `247cf2d` | Selesai |
-| Perbaikan spec alur pengajuan stok | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
-| Penjualan dan pembayaran | - | Belum |
+| Perbaikan spec alur pengajuan stok | `8d62c56` | Selesai |
+| Penjualan dan pembayaran | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 | Reservasi | - | Belum |
 | Keuangan | - | Belum |
 | Jadwal dan shift | - | Belum |
@@ -78,44 +78,34 @@ Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: perbaikan spec alur pengajuan stok
+## Pekerjaan berikutnya: modul penjualan dan pembayaran
 
-Suite penuh pada `247cf2d` meninggalkan satu kegagalan: "setujui gagal:
-dialog bertahan dan pesan tampil" di
-`tests/e2e/inventaris/pengajuanStok/alur-pengajuan-stok.spec.ts`. Commit itu
-disetujui pemilik proyek berjalan lebih dulu, dengan perbaikan ini sebagai
-prioritas putaran berikutnya (23 September 2026): didebug sampai jelas
-asalnya dari spec atau dari frontend, lalu diperbaiki sampai seluruh suite
-lolos.
+Empat halaman, 2.935 baris, seluruhnya masih memakai `apiClient`:
+`penjualan/page.tsx` (701), `penjualan/[id]/page.tsx` (589),
+`penjualan/[id]/pembayaran/page.tsx` (498), dan
+`penjualan/buatPenjualan/page.tsx` (1.147). Dua di antaranya ada di daftar
+berkas di atas 700 baris (Metrik sisa pekerjaan).
 
-Yang sudah diketahui (`pengujian.md`, Kegagalan yang belum terjelaskan):
+- Spec pembanding sudah ada: `tests/e2e/penjualan/buat-penjualan.spec.ts`.
+  Jalankan terhadap kode lama sebelum mengubah apa pun, dan lengkapi
+  skenarionya untuk halaman daftar, detail, dan pembayaran yang belum
+  terwakili.
+- Stok produk yang dikirim backend tidak terhubung ke stok outlet mana pun
+  (`kontrak/temuan.md` butir 37). Halaman buat penjualan memakai daftar
+  produk, jadi perilaku stoknya diputuskan bersama pemilik proyek sebelum
+  tampilan dirancang.
+- Tipe `Produk` dibaca halaman pajak dan buat penjualan; memindahkannya ke
+  `id` menuntut seluruh pembacanya ikut pindah dalam commit yang sama
+  (`arsitektur.md`, Fondasi yang sudah tersedia).
+- `app/dashboard/outlet/pengeluaran/page.tsx` hanya 8 baris; datanya dimuat
+  lewat komponen terpisah yang perlu dipetakan lebih dulu
+  (`kontrak/izin-halaman.md` menandainya "periksa manual").
 
-- Kegagalannya kini berulang, tiga run berturut-turut, termasuk dua run
-  modul pengajuan sendirian. Sebelumnya selalu sesekali dan tidak pernah
-  terulang saat dijalankan sendirian, sehingga trace tidak pernah didapat.
-  Karena itu langkah pertama adalah mengambil trace.
-- Sudah disingkirkan sebagai penyebab: data uji (`PGJ/202608/0006`
-  SUBMITTED, arah gudang ke outlet, stok gudang 35.000 untuk kebutuhan 900,
-  belum punya surat jalan), nama tombol (`Setujui Permintaan`,
-  `features/pengajuan-stok/halaman-detail-pengajuan-gudang.tsx` baris 383),
-  dan skrip API di luar run.
-- Snapshot DOM menunjukkan halaman "Login Akun SaaS", jadi sesi web dicabut
-  di tengah run.
-- Dugaan yang harus diuji lebih dulu: navigasi penuh menjalankan
-  `pin-refresh` sehingga token sebelumnya dijawab 401, dan spec ini masih
-  mengambil token dengan pola lama, bukan `bukaDenganAuth`
-  (`tests/helpers/transfer-uji.ts`) seperti spec penerimaan dan transfer.
-
-Langkah pertama sesi berikutnya:
+Pemetaan awal belum diambil. Langkah pertama sesi berikutnya:
 
 ```bash
-npx playwright test tests/e2e/inventaris/pengajuanStok/alur-pengajuan-stok.spec.ts --trace retain-on-failure --reporter=json > /tmp/p.json; node ~/.cache/frontend-web/alat/ringkas-e2e.js
-find test-results -name trace.zip | head -1
+grep -rnE 'apiClient|: any|_id|queryKey' app/dashboard/outlet/penjualan app/dashboard/outlet/pengeluaran --include='*.tsx' | cut -c1-130
 ```
-
-Sesudah itu: modul penjualan dan pembayaran (tabel Fase 3). Halaman buat
-penjualan memakai daftar produk, dan stok produk yang dikirim backend tidak
-terhubung ke stok outlet mana pun (`kontrak/temuan.md` butir 37).
 
 ## Catatan dari modul inventaris
 

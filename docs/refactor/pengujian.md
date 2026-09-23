@@ -69,16 +69,14 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per stock adjustment gudang** (commit `247cf2d`): 156 test unit
-dan integrasi lolos di 22 berkas, 212 e2e lolos, 1 gagal, 14 skipped:
+**Baseline per perbaikan token spec pengajuan** (commit `8d62c56`): 156 test
+unit dan integrasi lolos di 22 berkas, 213 e2e lolos, 14 skipped:
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
 backend, empat `test.fixme` lain yang menunggu backend, dan dua `test.skip`
 bersyarat data (Test yang ditandai fixme dan skip bersyarat, di bawah).
-Kegagalannya "setujui gagal: dialog bertahan dan pesan tampil" di spec alur
-pengajuan stok (Kegagalan yang belum terjelaskan, di bawah), yang menjadi
-prioritas putaran berikutnya (`status.md`, Pekerjaan berikutnya). Angka ini
-dicatat apa adanya, bukan angka yang seharusnya, karena baseline dipakai
-membandingkan run nyata.
+Suite kembali lolos seluruhnya setelah token spec alur pengajuan mengikuti
+`pin-refresh` (`8d62c56`, Catatan Playwright); baseline `247cf2d` mencatat
+212 lolos dengan 1 gagal.
 Diukur terhadap backend lokal `9cd1439` (branch `ridho` yang menggabungkan
 origin/yoga `f0b7157`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -234,7 +232,17 @@ satu putaran.
   menggantinya setiap kali halaman melakukan `pin-refresh` lagi. Token dari
   permintaan pertama yang membawa `Authorization` tidak dipakai, karena
   bisa milik halaman sebelumnya. Contoh: `bukaDenganAuth` di
-  `tests/helpers/transfer-uji.ts`, dipakai spec penerimaan dan transfer.
+  `tests/helpers/transfer-uji.ts`, dipakai spec penerimaan, transfer, dan
+  alur pengajuan stok. Spec alur pengajuan sempat punya `bukaDenganAuth`
+  lokal bernama sama yang membekukan token dari permintaan API pertama,
+  dan itulah penyebab kegagalan sesekali "setujui gagal: dialog bertahan
+  dan pesan tampil": halaman mendarat di login karena token spec sudah
+  dijawab 401. Gejalanya muncul dua kali pada 21 September 2026, sekali
+  pada 22 September, dan tiga kali berturut-turut pada `247cf2d`, selalu
+  bergantung pada waktu `pin-refresh`. Diperbaiki di `8d62c56` dengan
+  memakai helper bersama; 260 dari 260 lolos dengan `--repeat-each 20`.
+  Bila gejala serupa muncul di spec lain, periksa lebih dulu apakah spec
+  itu memakai helper bersama atau versi lokalnya sendiri.
 - Persiapan data lewat API memeriksa status setiap langkah dan menyertakan
   pesan backend. `test.skip` hanya dipakai bila memang tidak ada data yang
   layak; kegagalan persiapan sebagian menggagalkan test setelah dokumen
@@ -282,33 +290,6 @@ terhitung di angka skipped pada baseline:
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
 hapus bahan baku juga dilewati bila datanya kosong, tetapi tidak terjadi pada
 data uji sekarang.
-
-Kegagalan yang belum terjelaskan:
-
-- **Test setujui gagal di spec alur pengajuan stok mendarat di halaman
-  login** setelah `page.goto` kedua, dua kali pada 21 September 2026, saat
-  spec itu berjalan bersama test lain. Tidak terulang dalam 9 run test itu
-  sendirian maupun dalam urutan berkasnya, dan tidak pada suite penuh
-  `90eb935`, `dec9d01`, `ad77a14`, maupun `580a1e1`. Terulang sekali pada
-  22 September 2026 saat spec pengajuan berjalan bersama spec stock opname,
-  jurnal stok, stok, dan pengiriman-penerimaan (snapshot DOM: halaman
-  "Login Akun SaaS"), lalu lolos 3 dari 3 dengan `--repeat-each 3` dan
-  pada suite penuh `085ec78`, `a5e9cec`, dan `fe5dd9c`, sehingga trace
-  belum didapat. `playwright.config.ts`
-  memakai `workers: 1`, sehingga bukan benturan login paralel; pada run yang
-  lolos, refresh sesi setelah login
-  selalu berstatus 200. Bila terulang, jalankan dengan
-  `--trace retain-on-failure` dan cari `refreshtoken` atau `pin-refresh`
-  berstatus 401 di trace. Kemungkinan terkait: navigasi penuh menjalankan
-  `pin-refresh` dan membuat token sebelumnya dijawab 401 (Catatan
-  Playwright), dan spec ini masih mengambil token dengan pola lama (Spec
-  rujukan); belum dibuktikan untuk kasus ini. Sejak 23 September 2026
-  kegagalannya berulang: tiga run berturut-turut pada `247cf2d`, termasuk
-  dua run modul pengajuan sendirian, sehingga trace akhirnya dapat diambil.
-  Data uji sudah disingkirkan sebagai penyebab (`PGJ/202608/0006`
-  SUBMITTED, arah gudang ke outlet, stok gudang 35.000 untuk kebutuhan 900,
-  belum punya surat jalan), begitu pula nama tombol dan skrip API di luar
-  run.
 
 Ketiga spec tulis stock opname membuat dokumen baru di setiap run dan
 menutupnya sebagai CANCELLED, sehingga dokumen CANCELLED bertambah tiga per

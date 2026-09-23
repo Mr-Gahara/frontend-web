@@ -774,6 +774,17 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   kosong sebagai jangkar akhir cocok dengan baris kosong pertama sesudah
   jangkar awal, bukan yang dimaksud; `ganti-baris.js` menolaknya lewat
   indeks pengaman. Pakai baris berisi teks khas, misalnya rujukan temuan.
+- **Helper lokal bernama sama dengan helper bersama adalah jebakan.**
+  Sebelum memakai helper yang didefinisikan di dalam spec, cari nama itu di
+  `tests/helpers/`: bila ada, versi bersama biasanya sudah menangani hal
+  yang belum diketahui saat versi lokal ditulis. `bukaDenganAuth` ada dua,
+  dan yang lokal membekukan token sehingga spec pengajuan gagal sesekali
+  selama tiga hari (`pengujian.md`, Catatan Playwright).
+- **Aturan yang sudah tertulis tetap perlu diperiksa penerapannya di
+  setiap berkas.** Catatan token mengikuti `pin-refresh` sudah ada sejak
+  submodul transfer, tetapi satu spec tertinggal memakai pola lama. Saat
+  sebuah aturan ditulis, grep pemakaian pola lamanya di seluruh spec dan
+  perbaiki sekaligus, jangan hanya di berkas yang sedang dikerjakan.
 
 ## Kapan berhenti dan bertanya
 
