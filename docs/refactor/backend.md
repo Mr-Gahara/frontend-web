@@ -152,6 +152,11 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   pun bila tenant belum punya outlet, dan permintaan permission lintas
   outlet; beserta jawaban SO-3 bahwa data tidak dibatasi per lokasi
   pengguna (`kontrak/temuan.md` butir 20 dan 37 sampai 39)
+- Laporan pembatasan stock adjustment per ruang — 1 temuan, disusun 23
+  September 2026: daftar dan detail adjustment tidak membedakan ruang
+  outlet dan gudang, baik lewat izin maupun lewat penyaring, sehingga
+  pemisahan stok outlet dan gudang hanya ditegakkan di tampilan frontend
+  (`kontrak/temuan.md` butir 40)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

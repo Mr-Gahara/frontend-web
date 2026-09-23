@@ -53,12 +53,13 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Izin lintas outlet: cakupan outlet dan outlet peminta pengajuan | `085ec78` | Selesai |
 | Stock adjustment outlet hanya lokasi Outlet | `a5e9cec`, `fe5dd9c` (gate `read-location`) | Selesai |
 | Gudang: cakupan per gudang | - | Dibatalkan (`keputusan.md`, Model bisnis MVP) |
-| Gudang: halaman stock adjustment | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Gudang: halaman stock adjustment | `247cf2d` | Selesai |
+| Perbaikan spec alur pengajuan stok | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 | Penjualan dan pembayaran | - | Belum |
 | Reservasi | - | Belum |
 | Keuangan | - | Belum |
 | Jadwal dan shift | - | Belum |
-| Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), kecuali stock adjustment yang belum punya halaman gudang (baris Berikutnya); `gudang/layout.tsx` dan `gudang/setup` masih memakai `apiClient`, dan layout memeriksa nama role Owner (baris 32, keputusan rancangan butir 2); pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
+| Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), termasuk stock adjustment (`247cf2d`); `gudang/layout.tsx` dan `gudang/setup` masih memakai `apiClient`, dan layout memeriksa nama role Owner (baris 32, keputusan rancangan butir 2); pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -70,45 +71,46 @@ Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 |---|---|---|---|
 | Pemakaian `any` | 302 | 88 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
 | Kemunculan `_id` | - | 99 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id` |
-| `useAuthGuard()` berulang di halaman | 49 | 41 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang) |
+| `useAuthGuard()` berulang di halaman | 49 | 39 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
-| Berkas di atas 700 baris | 7 | 7 | Sempat 8 karena berkas lain tumbuh; kembali 7 setelah form produk disatukan. Berkurang saat modulnya dimigrasikan |
+| Berkas di atas 700 baris | 7 | 8 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Berkurang saat modulnya dimigrasikan |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: halaman stock adjustment gudang
+## Pekerjaan berikutnya: perbaikan spec alur pengajuan stok
 
-Sejak `a5e9cec`, daftar stock adjustment di ruang outlet hanya menampilkan
-lokasi Outlet (keputusan pemilik proyek, 22 September 2026), sehingga
-adjustment hasil opname gudang tidak tampil di mana pun di web. Ruang gudang
-juga tidak menautkan ke sana: tombol setelah setujui di detail stock opname
-gudang menuju jurnal stok gudang (`tautanSetelahSetuju` di `TEKS.gudang`,
-`features/stock-opname/halaman-detail-stock-opname.tsx`). Pemilik proyek
-menetapkan halaman ini dikerjakan di putaran berikutnya, sebelum modul
-penjualan dan pembayaran.
+Suite penuh pada `247cf2d` meninggalkan satu kegagalan: "setujui gagal:
+dialog bertahan dan pesan tampil" di
+`tests/e2e/inventaris/pengajuanStok/alur-pengajuan-stok.spec.ts`. Commit itu
+disetujui pemilik proyek berjalan lebih dulu, dengan perbaikan ini sebagai
+prioritas putaran berikutnya (23 September 2026): didebug sampai jelas
+asalnya dari spec atau dari frontend, lalu diperbaiki sampai seluruh suite
+lolos.
 
-- Daftar di ruang gudang menampilkan adjustment seluruh lokasi bertipe
-  Gudang milik tenant, tanpa cakupan per gudang (`keputusan.md`, Model
-  bisnis MVP). Backend menyaring `locationID` tetapi tidak mengenal tipe
-  lokasi, sehingga tipe disaring di klien.
-- Halaman daftar dan detail outlet
-  (`app/dashboard/outlet/inventaris/stockAdjustment/`) dibandingkan dengan
-  `diff` sebelum memutuskan disatukan lewat `ruang` atau hanya berbagi
-  `features/stock-adjustment` (`arsitektur.md`, Kapan halaman disatukan).
-- `susunSumber` di `features/stock-adjustment/tampilan.ts` sudah menautkan
-  sumber ke ruang sesuai tipe lokasi. Tautan dari detail stock opname
-  gudang ke adjustment-nya ditambahkan di `TEKS.gudang`.
-- Entri `IZIN_HALAMAN` dan menu sidebar gudang ditambahkan, dengan gate
-  yang mengikuti endpoint halamannya.
-- Pekerjaan ini menyentuh detail stock opname, sehingga empat error ESLint
-  warisan di `features/stock-opname` (Utang kecil dari penyesuaian backend
-  `f27f093`, di bawah) dibereskan di commit yang sama.
+Yang sudah diketahui (`pengujian.md`, Kegagalan yang belum terjelaskan):
 
-Pemetaan awal belum diambil. Langkah pertama sesi berikutnya:
+- Kegagalannya kini berulang, tiga run berturut-turut, termasuk dua run
+  modul pengajuan sendirian. Sebelumnya selalu sesekali dan tidak pernah
+  terulang saat dijalankan sendirian, sehingga trace tidak pernah didapat.
+  Karena itu langkah pertama adalah mengambil trace.
+- Sudah disingkirkan sebagai penyebab: data uji (`PGJ/202608/0006`
+  SUBMITTED, arah gudang ke outlet, stok gudang 35.000 untuk kebutuhan 900,
+  belum punya surat jalan), nama tombol (`Setujui Permintaan`,
+  `features/pengajuan-stok/halaman-detail-pengajuan-gudang.tsx` baris 383),
+  dan skrip API di luar run.
+- Snapshot DOM menunjukkan halaman "Login Akun SaaS", jadi sesi web dicabut
+  di tengah run.
+- Dugaan yang harus diuji lebih dulu: navigasi penuh menjalankan
+  `pin-refresh` sehingga token sebelumnya dijawab 401, dan spec ini masih
+  mengambil token dengan pola lama, bukan `bukaDenganAuth`
+  (`tests/helpers/transfer-uji.ts`) seperti spec penerimaan dan transfer.
+
+Langkah pertama sesi berikutnya:
 
 ```bash
-grep -rnE 'stockAdjustment|tautanSetelahSetuju|susunSumber' features app/dashboard components/app-sidebar.tsx lib/auth/permissions.ts --include='*.ts' --include='*.tsx' | cut -c1-130
+npx playwright test tests/e2e/inventaris/pengajuanStok/alur-pengajuan-stok.spec.ts --trace retain-on-failure --reporter=json > /tmp/p.json; node ~/.cache/frontend-web/alat/ringkas-e2e.js
+find test-results -name trace.zip | head -1
 ```
 
 Sesudah itu: modul penjualan dan pembayaran (tabel Fase 3). Halaman buat
@@ -216,15 +218,22 @@ Yang masih berlaku:
   atau `components/` saat modul produk atau bahan baku disentuh lagi; modul
   inventaris selesai tanpa menyentuhnya.
 
+### Utang kecil dari modul stock adjustment gudang
+
+- 21 error ESLint `@typescript-eslint/no-explicit-any` warisan di luar
+  berkas modul: spec reservasi (aset, tarif, tipe aset), login, integration
+  jadwal, pengguna, dan pola roster, `tests/helpers/storage.ts`,
+  `tests/unit/lib/decodeToken.test.ts`, dan `components/app-sidebar.tsx`
+  baris 368. Bereskan saat berkasnya dimigrasikan; `storage.ts` sendiri
+  sudah tidak relevan (`pengujian.md`). Mengganti `any` di sidebar dicoba
+  dan dikembalikan, karena tipe hilirnya ikut berubah (`cara-kerja.md`).
+- Detail stock opname tidak memeriksa tipe lokasi terhadap ruang, sehingga
+  dokumen gudang yang dibuka lewat URL ruang outlet tetap tampil. Pola
+  penjaganya sudah ada di `features/stock-adjustment/ruang.ts`
+  (`TIPE_LOKASI_RUANG`). Bereskan saat halaman stock opname disentuh lagi.
+
 ### Utang kecil dari penyesuaian backend `f27f093`
 
-- Empat error ESLint warisan di `features/stock-opname`:
-  `react-hooks/preserve-manual-memoization` di halaman daftar (sekitar baris
-  129), `react-hooks/set-state-in-effect` di halaman detail (sekitar baris
-  163, efek yang mengisi isian dari data server, bertentangan dengan
-  keputusan rancangan butir 8), dan dua `react/no-unescaped-entities`
-  (sekitar baris 388). Jumlahnya sama dengan sebelum `2b3b52d`. Bereskan
-  saat halaman detail stock opname disentuh lagi.
 - Setelah validator stock opname diperbaiki backend (`kontrak/temuan.md`
   butir 22): balik `SERVER_TERIMA_HITUNGAN_KOSONG` menjadi true, tulis badan
   `test.fixme` "hitungan tersimpan dapat dikosongkan kembali", dan pastikan

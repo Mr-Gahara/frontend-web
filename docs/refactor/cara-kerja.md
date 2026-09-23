@@ -752,6 +752,29 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   dampak menghasilkan ratusan baris; simpan ke `/tmp`, cetak judul bagian
   dengan `grep -n '^=='`, lalu bagian tertentu dengan `awk`.
 
+- **Kegagalan e2e diperiksa dari snapshot DOM lebih dulu**, untuk
+  memastikan halaman yang tampil memang halaman yang diuji. Pesan
+  `element(s) not found` pada tombol yang seharusnya ada sering berarti
+  sesi hilang, bukan status dokumen atau nama tombol yang salah. Snapshot
+  di `test-results/*/error-context.md` menjawabnya dalam satu perintah;
+  pastikan berkasnya dari run terakhir dengan `find -newermt`.
+- **`awk` dengan rentang baris lintas berkas memakai `FNR`, bukan `NR`.**
+  `NR` menghitung terus antarberkas, sehingga berkas kedua dan seterusnya
+  tidak pernah tercetak. Terjadi saat memetakan dua berkas halaman stock
+  opname sekaligus.
+- **Blok perintah tidak diletakkan di dalam butir daftar.** Indentasinya
+  ikut tersalin, sehingga delimiter heredoc tidak dikenali dan terminal
+  menggantung di `heredoc>`, dan marka `@@@` tidak dikenali
+  `ganti-blok.js`.
+- **Membuang `any` dari parameter generik mengubah tipe di hilirnya.**
+  Pemakai hasilnya dibaca lebih dulu: pada sidebar, `res.data.nama ||
+  pengguna.nama` menjadi `string | undefined` dan ditolak `setNamaUser`,
+  sehingga perubahan itu dikembalikan.
+- **Jangkar akhir untuk penggantian berbasis baris harus unik.** Baris
+  kosong sebagai jangkar akhir cocok dengan baris kosong pertama sesudah
+  jangkar awal, bukan yang dimaksud; `ganti-baris.js` menolaknya lewat
+  indeks pengaman. Pakai baris berisi teks khas, misalnya rujukan temuan.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:

@@ -14,6 +14,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 21 September 2026: bahan baku, stok, dan inventaris gudang, untuk izin alternatif (`temuan.md` butir 2).
 - 22 September 2026: penerimaan barang dan pengiriman stok setelah migrasi submodul 6. Gate baris gudang untuk jurnal stok, stock opname, pengajuan stok, transfer stok, dan pengiriman stok dicocokkan ulang dengan `IZIN_HALAMAN` dan sudah sesuai.
 - 22 September 2026: stock adjustment, setelah daftarnya memakai cakupan outlet (`a5e9cec`, gate `fe5dd9c`).
+- 23 September 2026: stock adjustment gudang, halaman baru (`247cf2d`).
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -48,6 +49,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/gudang/inventaris` | `read-location`, `read-inventory` atau `read-inventory-gudang`, `read-bahan` | `/location`, `/inventory`, `/bahanbaku` | `read-location`, salah satu dari `read-inventory`, `read-inventory-gudang`, `read-inventory-outlet`, `read-bahan` | Sejalan; gate sengaja tidak menerima `read-inventory-outlet` di ruang gudang (keputusan produk) |
 | `/dashboard/gudang/jurnalStok` | `read-jurnal-stok` | `/jurnalstok` | `read-jurnal-stok` | Sejalan |
 | `/dashboard/gudang/stockOpname` | `read-stock-opname` | `/stockopname` | `read-stock-opname` | Sejalan |
+| `/dashboard/gudang/stockAdjustment` | `read-stock-adjustment` | `/stockopname/adjustments` | `read-stock-adjustment` | Sejalan |
 | `/dashboard/gudang/pengajuanStok` | `read-pengajuan-stok` | `/pengajuanstok` | `read-pengajuan-stok` | Sejalan |
 | `/dashboard/gudang/transferStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/gudang/pengirimanStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |

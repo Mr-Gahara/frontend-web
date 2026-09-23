@@ -51,7 +51,7 @@ sama (submodul pengajuan stok, di bawah).
   inventaris gudang.
 - **Stok outlet dan stok gudang tidak boleh tercampur** di tampilan mana
   pun. Stock adjustment di ruang outlet hanya lokasi Outlet sejak
-  `a5e9cec`.
+  `a5e9cec`, dan ruang gudang hanya lokasi Gudang sejak `247cf2d`.
 
 ### Fase 0
 
@@ -104,11 +104,24 @@ Tidak boleh dibalik tanpa pembahasan:
 - **Ruang outlet hanya menampilkan adjustment lokasi Outlet** (22 September
   2026, `a5e9cec`), dengan cakupan outlet seperti halaman inventaris outlet
   lain. Adjustment hasil opname gudang tidak tampil di ruang outlet, dan
-  sampai ruang gudang punya halaman stock adjustment (`status.md`,
-  Pekerjaan berikutnya) tidak tampil di mana pun di web: tombol setelah
-  setujui di detail opname gudang menuju jurnal stok gudang. Gate halaman
+  sampai ruang gudang punya halaman stock adjustment tidak tampil di mana
+  pun di web; sejak `247cf2d` halaman itu ada. Gate halaman
   ditambah `read-location` karena cakupan memanggil `/location/current`
   (`fe5dd9c`).
+- **Ruang gudang menampilkan adjustment seluruh lokasi bertipe Gudang**
+  (23 September 2026, `247cf2d`), tanpa cakupan per gudang (Model bisnis
+  MVP). Daftar dan detail memakai komponen bersama dengan ruang outlet,
+  dibedakan lewat `ruang`. Gate halamannya cukup `read-stock-adjustment`,
+  karena ruang gudang tidak memanggil `/location`.
+- **Detail menolak adjustment dari ruang yang salah** (23 September 2026).
+  Id milik ruang lain yang dibuka lewat URL menampilkan pesan beserta
+  tombol kembali, bukan isi dokumen. Ini penjaga tampilan demi aturan stok
+  outlet dan gudang tidak tercampur, bukan pengaman akses: backend tidak
+  membatasi stock adjustment per ruang (`kontrak/temuan.md` butir 40).
+  Adjustment yang lokasinya sudah terhapus tetap ditampilkan.
+- **Tombol setelah setujui di detail opname gudang menuju jurnal
+  penyesuaian gudang**, sejalan dengan ruang outlet, menggantikan tautan
+  lama ke jurnal stok gudang.
 - **Kegagalan memuat daftar stock adjustment tampil sebagai pesan**,
   sejalan dengan keputusan submodul jurnal stok.
 

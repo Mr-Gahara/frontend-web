@@ -69,11 +69,16 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per izin lintas outlet dan stock adjustment outlet** (commit
-`fe5dd9c`): 153 test unit dan integrasi lolos, 208 e2e lolos, 14 skipped:
+**Baseline per stock adjustment gudang** (commit `247cf2d`): 156 test unit
+dan integrasi lolos di 22 berkas, 212 e2e lolos, 1 gagal, 14 skipped:
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
 backend, empat `test.fixme` lain yang menunggu backend, dan dua `test.skip`
 bersyarat data (Test yang ditandai fixme dan skip bersyarat, di bawah).
+Kegagalannya "setujui gagal: dialog bertahan dan pesan tampil" di spec alur
+pengajuan stok (Kegagalan yang belum terjelaskan, di bawah), yang menjadi
+prioritas putaran berikutnya (`status.md`, Pekerjaan berikutnya). Angka ini
+dicatat apa adanya, bukan angka yang seharusnya, karena baseline dipakai
+membandingkan run nyata.
 Diukur terhadap backend lokal `9cd1439` (branch `ridho` yang menggabungkan
 origin/yoga `f0b7157`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -297,7 +302,13 @@ Kegagalan yang belum terjelaskan:
   berstatus 401 di trace. Kemungkinan terkait: navigasi penuh menjalankan
   `pin-refresh` dan membuat token sebelumnya dijawab 401 (Catatan
   Playwright), dan spec ini masih mengambil token dengan pola lama (Spec
-  rujukan); belum dibuktikan untuk kasus ini.
+  rujukan); belum dibuktikan untuk kasus ini. Sejak 23 September 2026
+  kegagalannya berulang: tiga run berturut-turut pada `247cf2d`, termasuk
+  dua run modul pengajuan sendirian, sehingga trace akhirnya dapat diambil.
+  Data uji sudah disingkirkan sebagai penyebab (`PGJ/202608/0006`
+  SUBMITTED, arah gudang ke outlet, stok gudang 35.000 untuk kebutuhan 900,
+  belum punya surat jalan), begitu pula nama tombol dan skrip API di luar
+  run.
 
 Ketiga spec tulis stock opname membuat dokumen baru di setiap run dan
 menutupnya sebagai CANCELLED, sehingga dokumen CANCELLED bertambah tiga per
@@ -339,7 +350,8 @@ Urutan debug kegagalan e2e di atas).
   di unit test (`aksiSuratJalan`), dengan alasan yang sama dengan cakupan
   lokasi: satu-satunya akun uji berperan Owner.
 - **Gate halaman yang menolak pengguna tanpa sebagian izin** hanya teruji
-  di unit test (`tests/unit/lib/auth/gate-stock-adjustment.test.ts`),
+  di unit test (`tests/unit/lib/auth/gate-stock-adjustment.test.ts`, kedua
+  ruang),
   dengan alasan yang sama.
 - **`tests/helpers/storage.ts`** masih membaca `sessionStorage` dan sudah
   tidak relevan sejak token dipindah ke memori. Berkas itu belum dibersihkan.
@@ -362,6 +374,10 @@ Urutan debug kegagalan e2e di atas).
   tabel terhadap isi respons yang dinormalkan dengan `normalizeId`; label
   dan tautan sumber diharapkan dari fungsi tampilan yang sama
   (`susunSumber`), sedangkan angka dibandingkan langsung dengan field mentah.
+  Sejak `247cf2d`, satu berkas memuat dua `describe` per ruang: helper
+  `bukaDaftar` menerima url dan tipe lokasi, dan skenario gudang memeriksa
+  daftar tidak memuat adjustment outlet, penolakan id ruang lain, serta
+  tautan setelah setujui dari detail opname gudang.
 - `tests/e2e/inventaris/jurnalStok/lihat-jurnal-stok.spec.ts`: halaman outlet
   dan gudang yang berbagi komponen, jumlah baris tabel dihitung dari respons
   server, filter Radix Select dibuka lewat teks nilainya, simulasi kegagalan
