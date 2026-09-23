@@ -1,5 +1,6 @@
 import { test, expect, Page, Response } from "@playwright/test";
 import { ADA_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
+import { bukaDenganAuth, type Auth } from "../../../helpers/transfer-uji";
 
 /*
  * Spec pembanding alur tulis pengajuan stok (keputusan pemilik proyek,
@@ -64,16 +65,17 @@ function getDetail(id: string) {
     r.url().split("?")[0].toLowerCase().endsWith("/api/pengajuanstok/" + id.toLowerCase());
 }
 
-/** Membuka halaman dan mengambil header Authorization dari permintaan API-nya sendiri. */
-async function bukaDenganAuth(page: Page, url: string): Promise<string> {
-  const tAuth = page.waitForRequest((r) => r.url().includes("/api/") && !!r.headers()["authorization"]);
-  await page.goto(url);
-  return (await tAuth).headers()["authorization"];
-}
+/*
+ * Token API memakai `bukaDenganAuth` bersama (`tests/helpers/transfer-uji.ts`),
+ * yang mengikuti setiap `pin-refresh` dan mengembalikan fungsi, bukan string
+ * beku. Versi lokal sebelumnya mengambil header dari permintaan API pertama,
+ * sehingga tokennya bisa milik halaman sebelumnya dan dijawab 401 setelah
+ * navigasi penuh berikutnya (`docs/refactor/pengujian.md`, Catatan Playwright).
+ */
 
-async function daftarPengajuan(page: Page, auth: string, status: string): Promise<PengajuanMentah[]> {
+async function daftarPengajuan(page: Page, auth: Auth, status: string): Promise<PengajuanMentah[]> {
   const res = await page.request.get("http://localhost:3000/api/pengajuanstok?status=" + status, {
-    headers: { Authorization: auth },
+    headers: { Authorization: auth() },
   });
   expect(res.status()).toBe(200);
   return ((await res.json()) as { data: PengajuanMentah[] }).data;
@@ -194,7 +196,7 @@ test.describe("Alur tulis pengajuan stok", () => {
     for (const p of await daftarPengajuan(page, auth, "SUBMITTED")) {
       if (p.dariLokasi?.tipe !== "Gudang" || p.keLokasi?.tipe !== "Outlet") continue;
       const res = await page.request.get("http://localhost:3000/api/pengajuanstok/" + p.id, {
-        headers: { Authorization: auth },
+        headers: { Authorization: auth() },
       });
       const detail = ((await res.json()) as { data: PengajuanMentah }).data;
       if ((detail.items ?? []).every((i) => (i.stokGudangSaatIni ?? 0) >= i.jumlah)) {
