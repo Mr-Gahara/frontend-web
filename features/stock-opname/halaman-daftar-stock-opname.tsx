@@ -211,7 +211,7 @@ export default function HalamanDaftarStockOpname({
         },
       },
     ],
-    [router],
+    [router, teks.urlDaftar],
   );
 
   return (

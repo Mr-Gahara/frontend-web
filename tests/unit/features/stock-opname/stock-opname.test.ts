@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { petakanNilaiServer, susunPayloadHitungan } from "@/features/stock-opname/payload";
+import { isiAwalHitungan, petakanNilaiServer, susunPayloadHitungan } from "@/features/stock-opname/payload";
 import { bolehHitungOpname, bolehTinjauOpname } from "@/features/stock-opname/izin";
 
 describe("susunPayloadHitungan", () => {
@@ -75,6 +75,26 @@ describe("susunPayloadHitungan", () => {
         ditahan: [],
       });
     });
+  });
+});
+
+describe("isiAwalHitungan", () => {
+  it("mengubah hitungan dan catatan server menjadi isian teks", () => {
+    expect(
+      isiAwalHitungan([
+        { itemId: "a", qtyPhysical: 5, catatanItem: "rusak" },
+        { itemId: "b", qtyPhysical: 0, catatanItem: null },
+        { itemId: "c", qtyPhysical: null, catatanItem: null },
+      ]),
+    ).toEqual({
+      a: { qtyPhysical: "5", catatanItem: "rusak" },
+      b: { qtyPhysical: "0", catatanItem: "" },
+      c: { qtyPhysical: "", catatanItem: "" },
+    });
+  });
+
+  it("menghasilkan isian kosong untuk dokumen tanpa item", () => {
+    expect(isiAwalHitungan([])).toEqual({});
   });
 });
 

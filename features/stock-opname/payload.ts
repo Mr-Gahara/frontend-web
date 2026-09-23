@@ -39,6 +39,23 @@ export interface HasilHitungan {
  */
 export const SERVER_TERIMA_HITUNGAN_KOSONG = false;
 
+/**
+ * Isian awal tabel hitungan dari item dokumen opname: hitungan yang belum
+ * diisi dan catatan kosong menjadi string kosong.
+ */
+export function isiAwalHitungan(
+  items: { itemId: string; qtyPhysical: number | null; catatanItem: string | null }[],
+): Record<string, IsianItem> {
+  const isian: Record<string, IsianItem> = {};
+  for (const item of items) {
+    isian[item.itemId] = {
+      qtyPhysical: item.qtyPhysical !== null && item.qtyPhysical !== undefined ? String(item.qtyPhysical) : "",
+      catatanItem: item.catatanItem || "",
+    };
+  }
+  return isian;
+}
+
 /** Nilai tersimpan per itemId dari item dokumen opname. */
 export function petakanNilaiServer(
   items: readonly { itemId: string; qtyPhysical?: number | null; catatanItem?: string | null }[],

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { StockOpname, StatusOpname } from "@/types/stockOpname";
@@ -15,7 +15,7 @@ import {
   useStockOpname,
   useTolakOpname,
 } from "./hooks";
-import { petakanNilaiServer, susunPayloadHitungan } from "./payload";
+import { isiAwalHitungan, petakanNilaiServer, susunPayloadHitungan } from "./payload";
 import { bolehHitungOpname, bolehTinjauOpname } from "./izin";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
@@ -112,8 +112,11 @@ const TEKS: Record<"outlet" | "gudang", TeksRuang> = {
     deskripsiAjukan: "Sesi opname telah dikunci dan diajukan ke Kepala Gudang.",
     deskripsiBatal: "Sesi opname gudang ini telah dibatalkan permanen.",
     alasanSetujuiBawaan: "Disetujui oleh manajemen gudang",
-    tombolSetelahSetuju: "Lihat Jurnal Stok",
-    tautanSetelahSetuju: () => "/dashboard/gudang/jurnalStok",
+    tombolSetelahSetuju: "Lihat Jurnal Penyesuaian",
+    tautanSetelahSetuju: (opname) =>
+      opname.stockAdjustment?.id
+        ? `/dashboard/gudang/stockAdjustment/${opname.stockAdjustment.id}`
+        : null,
   },
 };
 
@@ -149,20 +152,19 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
   // --- FETCH DATA OPNAME ---
   const { data: opname, isLoading, error } = useStockOpname(opnameID);
 
-  // Sinkronisasi data ke Local State saat data opname di-load (Untuk status DRAFT/REJECTED)
-  useEffect(() => {
+  // Isian hitungan diisi ulang dari server setiap kali data opname berganti
+  // (dimuat, disimpan sementara, atau ditolak) selagi DRAFT atau REJECTED.
+  // Disesuaikan saat render, bukan di effect (react-hooks/set-state-in-effect).
+  // Nilai awal undefined agar data yang sudah ada di cache saat halaman dibuka
+  // tetap mengisi. TanStack mempertahankan referensi data yang tidak berubah,
+  // sehingga pengisian ulang hanya terjadi saat data server benar-benar berubah.
+  const [opnameTerisi, setOpnameTerisi] = useState<StockOpname | undefined>(undefined);
+  if (opname !== opnameTerisi) {
+    setOpnameTerisi(opname);
     if (opname && (opname.status === "DRAFT" || opname.status === "REJECTED")) {
-      const initialMap: Record<string, { qtyPhysical: string; catatanItem: string }> = {};
-      // FIX: Gunakan opname.items?.forEach dan ambil itemId
-      opname.items?.forEach((item) => {
-        initialMap[item.itemId] = {
-          qtyPhysical: item.qtyPhysical !== null && item.qtyPhysical !== undefined ? String(item.qtyPhysical) : "",
-          catatanItem: item.catatanItem || "",
-        };
-      });
-      setEditedItems(initialMap);
+      setEditedItems(isiAwalHitungan(opname.items ?? []));
     }
-  }, [opname]);
+  }
 
   // --- MUTATIONS ---
   // Dialog ditutup hanya saat berhasil; saat gagal tetap terbuka beserta
@@ -385,7 +387,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
               <div className="p-3 bg-white/50 rounded-xl border border-[#0A2947]/10">
                 <span className="text-xs font-bold text-[#0A2947]/60 block mb-1">Pesan dari Manajer/Reviewer:</span>
                 <p className="text-sm font-bold text-[#0A2947]">
-                  "{opname.catatanReview}"
+                  &ldquo;{opname.catatanReview}&rdquo;
                 </p>
               </div>
             )}
