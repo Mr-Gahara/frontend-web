@@ -13,16 +13,6 @@ export interface DataPengguna {
 }
 
 /**
- * Bentuk populate mentah untuk halaman yang belum dimigrasikan dan masih
- * membaca respons lewat lib/apiClient.ts. Tipe berakhiran Lama di berkas ini
- * dihapus saat halaman pembayaran dimigrasikan (submodul 4, keputusan K8).
- */
-export interface DataPenggunaLama {
-  _id: string;
-  nama: string;
-}
-
-/**
  * Pelanggan penjualan, hasil populate pelangganID. Daftar mem-populate
  * nomorHp, detail mem-populate alamat dan email.
  */
@@ -33,11 +23,6 @@ export interface DataPelanggan {
   nomorHp?: string;
   alamat?: string;
   email?: string;
-}
-
-export interface DataPelangganLama {
-  _id: string;
-  namaPelanggan: string;
 }
 
 /**
@@ -52,23 +37,6 @@ export interface RincianPajak {
   jumlah: number;
 }
 
-/** Bentuk lama yang tidak sesuai mapper (pajakID, tipe, nilai, jumlahPajak). */
-export interface RincianPajakLama {
-  pajakID: string;
-  namaPajak: string;
-  tipe: string;
-  nilai: number;
-  jumlahPajak: number;
-}
-
-export interface RincianDiskon {
-  diskonID: string;
-  namaDiskon: string;
-  tipe: "persen" | "nominal";
-  nilai: number;
-  jumlahDiskon: number;
-}
-
 // ITEM PENJUALAN
 /** Item penjualan dari mapPenjualanResponse. diskonItem (hasil populate diskon) tidak dibaca web. */
 export interface ItemPenjualan {
@@ -81,21 +49,6 @@ export interface ItemPenjualan {
   jumlahDiskon: number;
   total: number;
   rincianPajak: RincianPajak[];
-  jumlahPajak: number;
-  totalharga: number;
-}
-
-export interface ItemPenjualanLama {
-  sesiBookingID: string | null;
-  produkID: string;
-  namaProduk: string;
-  jumlah: number;
-  hargaJual: number;
-  subTotal: number;
-  diskonItem: RincianDiskon[];
-  jumlahDiskon: number;
-  total: number;
-  rincianPajak: RincianPajakLama[];
   jumlahPajak: number;
   totalharga: number;
 }
@@ -129,35 +82,6 @@ export interface Penjualan {
   statusBayar: StatusBayar;
   statusPenjualan: StatusPenjualan;
   keterangan: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-/** Bentuk lama untuk halaman pembayaran yang belum dimigrasikan (keputusan K8). */
-export interface PenjualanLama {
-  _id: string;
-  tenantID: string;
-  locationID: string | null;
-  noReferensi: string;
-  dataPengguna: DataPenggunaLama;
-  dataPelanggan: DataPelangganLama;
-  jenisTransaksi: JenisTransaksi;
-  jenisPenjualan: JenisPenjualan;
-  tanggalTransaksi: string;
-  itemPenjualan: ItemPenjualanLama[];
-  totalHargaProduk: number;
-  diskonGlobal: RincianDiskon[];
-  jumlahDiskonTransaksi: number;
-  pajakTransaksi: RincianPajakLama[];
-  jumlahPajakTransaksi: number;
-  totalTagihan: number;
-  totalDibayar: number;
-  sisaTagihan: number;
-  statusBayar: StatusBayar;
-  statusPenjualan: StatusPenjualan;
-  keterangan: string;
-  jatuhTempo?: string;
-  simpanDraft?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -213,39 +137,6 @@ export interface PenjualanFilterParams {
   noReferensi?: string;
 }
 
-// API RESPONSE SHAPES
-export interface GetPenjualanResponse {
-  data: PenjualanLama[];
-}
-
-export interface PenjualanResponse {
-  data: PenjualanLama;
-}
-
-// ENTITAS PENDUKUNG (untuk form)
 // Dipakai di combobox pelanggan pada form create/edit
-export interface PelangganOption {
-  _id: string;
-  namaPelanggan: string;
-  tipePelanggan: "umum" | "korporat" | "member";
-  nomorHp?: string;
-}
-
-export interface GetPelangganResponse {
-  data: PelangganOption[];
-}
 
 // Dipakai di combobox/multiselect diskon pada form create/edit
-export interface DiskonOption {
-  _id: string;
-  namaDiskon: string;
-  cakupan: "Global" | "Item";
-  tipe: "persen" | "nominal";
-  nilai: number;
-  bisaDigabung: boolean;
-  status: "Aktif" | "Non-Aktif";
-}
-
-export interface GetDiskonResponse {
-  data: DiskonOption[];
-}

@@ -22,12 +22,15 @@ export interface Pembayaran {
   updatedAt: string;
 }
 
+/**
+ * Payload POST /pembayaran. status tidak dikirim (keputusan K2a): backend
+ * menentukannya sendiri. tanggalBayar wajib karena status akhirnya PAID.
+ */
 export interface PembayaranRequest {
   penjualanID: string;
   akunKasID: string;
   metodePembayaranID: string;
   jumlahBayar: number;
-  tanggalBayar?: string; // ISO String
+  tanggalBayar: string;
   catatan?: string;
-  status?: StatusPembayaran;
 }

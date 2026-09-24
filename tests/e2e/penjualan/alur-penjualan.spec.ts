@@ -87,6 +87,10 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       await page.getByRole("button", { name: /ya, catat/i }).click();
       const res = await tunggu;
       expect(res.status(), `POST /pembayaran: ${(await res.text()).slice(0, 200)}`).toBeLessThan(300);
+      // K2a: status ditentukan backend; tanggalBayar wajib untuk PAID.
+      const kiriman = res.request().postDataJSON();
+      expect(kiriman).not.toHaveProperty("status");
+      expect(typeof kiriman.tanggalBayar).toBe("string");
 
       const lunas = await detailPenjualan(page, auth, penjualan.id);
       expect(lunas.statusBayar).toBe("PAID");
@@ -257,6 +261,35 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       }
     },
   );
+
+  test("dialog konfirmasi pembayaran bertahan saat pembayaran gagal (keputusan Fase 0)", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, DAFTAR);
+    await siapkanFixture(page, auth, 20);
+    const penjualan = await buatDraftLewatUi(page, 1);
+    const pola = /\/api\/pembayaran(\?|$)/i;
+    try {
+      await page.goto(`${DAFTAR}/${penjualan.id}/pembayaran`);
+      await expect(page.getByRole("heading", { name: /terima pembayaran/i })).toBeVisible();
+      await page.getByRole("combobox").filter({ hasText: /pilih akun kas/i }).click();
+      await page.getByRole("option").first().click();
+      await page.getByRole("combobox").filter({ hasText: /pilih metode/i }).click();
+      await page.getByRole("option").first().click();
+      await page.getByRole("button", { name: /bayar uang pas/i }).click();
+      const catatan = page.getByLabel(/catatan pembayaran/i);
+      await catatan.fill("Uji pembayaran gagal");
+      await catatan.press("Enter");
+      await expect(page.getByRole("alertdialog")).toBeVisible();
+      await page.route(pola, (route) =>
+        route.request().method() === "POST" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
+      );
+      await page.getByRole("button", { name: /ya, catat/i }).click();
+      await expect(page.getByText(/^gagal$/i).first()).toBeVisible();
+      await expect(page.getByRole("alertdialog")).toBeVisible();
+    } finally {
+      await page.unroute(pola);
+      await hapusDraft(page, auth, penjualan.id);
+    }
+  });
 
   test("detail penjualan yang tidak ada menampilkan pesan tidak ditemukan tanpa mengalihkan", async ({ page }) => {
     await bukaDenganAuth(page, `${DAFTAR}/000000000000000000000000`);
