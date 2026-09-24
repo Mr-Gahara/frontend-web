@@ -12,6 +12,7 @@ export type PerubahanPenjualan = {
 export const penjualanApi = {
   daftar: (params: Record<string, string>) =>
     apiData.get<Penjualan[]>(EP.penjualan.list, params),
+  detail: (id: string) => apiData.get<Penjualan>(EP.penjualan.detail(id)),
   perbarui: (id: string, payload: PerubahanPenjualan) =>
     apiData.put<Penjualan>(EP.penjualan.detail(id), payload),
   hapus: (id: string) => apiData.delete<unknown>(EP.penjualan.detail(id)),

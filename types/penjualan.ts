@@ -15,20 +15,24 @@ export interface DataPengguna {
 /**
  * Bentuk populate mentah untuk halaman yang belum dimigrasikan dan masih
  * membaca respons lewat lib/apiClient.ts. Tipe berakhiran Lama di berkas ini
- * dihapus saat detail dan pembayaran dimigrasikan (submodul 3 dan 4,
- * keputusan K8).
+ * dihapus saat halaman pembayaran dimigrasikan (submodul 4, keputusan K8).
  */
 export interface DataPenggunaLama {
   _id: string;
   nama: string;
 }
 
-/** Pelanggan penjualan, hasil populate pelangganID. */
+/**
+ * Pelanggan penjualan, hasil populate pelangganID. Daftar mem-populate
+ * nomorHp, detail mem-populate alamat dan email.
+ */
 export interface DataPelanggan {
   id: string;
   namaPelanggan: string;
   tipePelanggan?: string;
   nomorHp?: string;
+  alamat?: string;
+  email?: string;
 }
 
 export interface DataPelangganLama {
@@ -37,9 +41,9 @@ export interface DataPelangganLama {
 }
 
 /**
- * Rincian pajak per item dan per transaksi dari mapPenjualanResponse. Hanya
- * field yang sudah dipastikan dari mapper; bentuk lengkapnya dipastikan saat
- * detail penjualan dimigrasikan (submodul 3).
+ * Rincian pajak per item dan per transaksi dari mapPenjualanResponse. Field
+ * model tidak ditipekan: backend menyimpannya dalam array tanpa skema, dan
+ * web tidak membacanya.
  */
 export interface RincianPajak {
   id: string | null;
@@ -66,7 +70,7 @@ export interface RincianDiskon {
 }
 
 // ITEM PENJUALAN
-/** Item penjualan dari mapPenjualanResponse; field diskon item dipastikan di submodul 3. */
+/** Item penjualan dari mapPenjualanResponse. diskonItem (hasil populate diskon) tidak dibaca web. */
 export interface ItemPenjualan {
   sesiBookingID: string | null;
   produkID: string;
@@ -99,8 +103,8 @@ export interface ItemPenjualanLama {
 // ENTITAS PENJUALAN (response dari backend)
 /**
  * Bentuk respons GET /penjualan dan /penjualan/:id setelah dinormalkan,
- * mengikuti mapPenjualanResponse backend. diskonGlobal belum ditipekan rinci;
- * bentuknya dipastikan saat detail penjualan dimigrasikan (submodul 3).
+ * mengikuti mapPenjualanResponse backend. diskonGlobal (hasil populate
+ * diskon) tidak dibaca web, sehingga tidak ditipekan rinci.
  */
 export interface Penjualan {
   id: string;
@@ -129,7 +133,7 @@ export interface Penjualan {
   updatedAt: string;
 }
 
-/** Bentuk lama untuk detail dan pembayaran yang belum dimigrasikan (keputusan K8). */
+/** Bentuk lama untuk halaman pembayaran yang belum dimigrasikan (keputusan K8). */
 export interface PenjualanLama {
   _id: string;
   tenantID: string;

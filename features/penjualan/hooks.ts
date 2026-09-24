@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { penjualanApi } from "./api";
 import { filterServerPenjualan } from "./filter";
 import { queryKeys } from "@/lib/queryKeys";
+import { isNotFound } from "@/lib/api/error";
+import { susunPayloadFinalisasi } from "./payload";
 import type { PenjualanFilterParams } from "@/types/penjualan";
 
 type Callback = { onSuccess?: () => void; onError?: (err: unknown) => void };
@@ -15,6 +17,16 @@ export function useDaftarPenjualan(filter: PenjualanFilterParams, siap: boolean)
     queryKey: queryKeys.penjualan.daftar(params),
     queryFn: () => penjualanApi.daftar(params),
     enabled: siap,
+  });
+}
+
+/** Detail penjualan; tidak mengulang permintaan saat 404 karena dokumennya memang tidak ada. */
+export function usePenjualan(id: string) {
+  return useQuery({
+    queryKey: queryKeys.penjualan.detail(id),
+    queryFn: () => penjualanApi.detail(id),
+    enabled: Boolean(id),
+    retry: (jumlah, err) => !isNotFound(err) && jumlah < 3,
   });
 }
 
@@ -34,6 +46,29 @@ export function useVoidPenjualan({ onSuccess, onError }: Callback = {}) {
     mutationFn: (id: string) => penjualanApi.perbarui(id, { statusPenjualan: "VOID" }),
     onSuccess: async () => {
       await invalidasi();
+      onSuccess?.();
+    },
+    onError,
+  });
+}
+
+/**
+ * Finalisasi memotong stok bahan di outlet dan produk.stok, lalu menulis
+ * jurnal stok, sehingga inventory, produk, dan jurnal stok ikut diinvalidasi.
+ */
+export function useFinalisasiPenjualan(id: string, { onSuccess, onError }: Callback = {}) {
+  const queryClient = useQueryClient();
+  const invalidasi = useInvalidasiPenjualan();
+  return useMutation({
+    mutationFn: (locationID: string | undefined) =>
+      penjualanApi.perbarui(id, susunPayloadFinalisasi(locationID)),
+    onSuccess: async () => {
+      await Promise.all([
+        invalidasi(),
+        queryClient.invalidateQueries({ queryKey: queryKeys.inventory.semua }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.produk.semua }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.jurnalStok.semua }),
+      ]);
       onSuccess?.();
     },
     onError,

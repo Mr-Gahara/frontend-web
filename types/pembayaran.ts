@@ -1,18 +1,23 @@
 export type StatusPembayaran = "PAID" | "PENDING" | "EXPIRED" | "FAILED" | "VOID";
 
+/**
+ * Bentuk respons GET /pembayaran setelah dinormalkan, mengikuti
+ * mappers/pembayaranMapper.js backend: ketiga referensi dikirim sebagai id
+ * string (_extractId), bukan objek hasil populate.
+ */
 export interface Pembayaran {
-  _id: string;
+  id: string;
   tenantID: string;
-  akunKasID: any; 
-  penjualanID: any;
-  metodePembayaranID: any;
+  akunKasID: string | null;
+  penjualanID: string | null;
+  metodePembayaranID: string | null;
   noReferensi: string;
   tanggalBayar: string | null;
-  gatewayPaymentID?: string;
-  qrString?: string;
+  gatewayPaymentID: string | null;
+  qrString: string | null;
   jumlahBayar: number;
   status: StatusPembayaran;
-  catatan?: string;
+  catatan: string | null;
   createdAt: string;
   updatedAt: string;
 }

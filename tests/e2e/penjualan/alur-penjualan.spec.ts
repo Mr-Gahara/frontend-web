@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
-import { BASIS, JAWAB_GAGAL, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { normalizeId } from "@/lib/api/normalize";
+import { BASIS, JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import {
   TAKARAN,
   buatDraftLewatUi,
@@ -25,7 +26,7 @@ import {
  * (penjualan maupun opname). Asersinya ditulis lengkap di dua test.fixme.
  *
  * Dialog yang harus bertahan saat operasi gagal (keputusan Fase 0) diuji di
- * test tersendiri; dialog finalisasi masih test.fixme sampai submodul 3.
+ * test tersendiri.
  */
 const DAFTAR = BASIS + "/dashboard/outlet/penjualan";
 const polaPenjualan = (id: string) => new RegExp(`/api/penjualan/${id}(\\?|$)`, "i");
@@ -91,6 +92,19 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       expect(lunas.statusBayar).toBe("PAID");
       expect(lunas.sisaTagihan).toBe(0);
       expect(lunas.totalDibayar).toBe(lunas.totalTagihan);
+    });
+
+    await test.step("riwayat pembayaran di detail menampilkan metode yang sebenarnya", async () => {
+      type Bayar = { id: string; penjualanID: string | null; metodePembayaranID: string | null };
+      type Metode = { id: string; namaPembayaran: string };
+      const semua = normalizeId((await api<Bayar[]>(page, auth, "GET", "/pembayaran")).data ?? []);
+      const bayar = semua.find((p) => p.penjualanID === penjualan.id);
+      expect(bayar, "pembayaran penjualan uji").toBeTruthy();
+      const metode = normalizeId((await api<Metode[]>(page, auth, "GET", "/metodepembayaran")).data ?? []);
+      const nama = metode.find((m) => m.id === bayar!.metodePembayaranID)?.namaPembayaran;
+      expect(nama, "nama metode pembayaran").toBeTruthy();
+      await page.goto(`${DAFTAR}/${penjualan.id}`);
+      await expect(page.getByRole("row").filter({ hasText: /lunas e2e alur penjualan/i })).toContainText(nama!);
     });
   });
 
@@ -175,8 +189,8 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     },
   );
 
-  test.fixme(
-    "dialog finalisasi bertahan saat finalisasi gagal (keputusan Fase 0; dibuka di submodul 3, detail penjualan)",
+  test(
+    "dialog finalisasi bertahan saat finalisasi gagal (keputusan Fase 0)",
     async ({ page }) => {
       const auth = await bukaDenganAuth(page, DAFTAR);
       await siapkanFixture(page, auth, 20);
@@ -243,6 +257,13 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       }
     },
   );
+
+  test("detail penjualan yang tidak ada menampilkan pesan tidak ditemukan tanpa mengalihkan", async ({ page }) => {
+    await bukaDenganAuth(page, `${DAFTAR}/000000000000000000000000`);
+    await expect(page.getByText("Penjualan tidak ditemukan.")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("button", { name: /kembali ke daftar/i })).toBeVisible();
+    await expect(page).toHaveURL(/\/penjualan\/0{24}$/);
+  });
 
   test("void DRAFT dari daftar: gagal menampilkan pesan, status VOID saat berhasil", async ({ page }) => {
     const auth = await bukaDenganAuth(page, DAFTAR);
