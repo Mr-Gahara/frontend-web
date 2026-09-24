@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AkunKas } from "@/types/akunKas";
+import { AkunKasLama as AkunKas } from "@/types/akunKas";
 import {
   KategoriMetode,
   MetodePembayaranRequest,

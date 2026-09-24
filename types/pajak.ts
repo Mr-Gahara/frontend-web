@@ -1,6 +1,31 @@
 export type ModelPerhitungan = 1 | 2 | 3;
  
+/**
+ * Bentuk respons GET /pajak setelah dinormalkan lib/api/client.ts. Backend
+ * mengirim _id mentah tanpa mapper; normalisasi mengubahnya menjadi id.
+ */
 export interface Pajak {
+  id: string;
+  namaPajak: string;
+  tarifPajak: number;
+  /** true = per produk, false = per transaksi */
+  tipePajak: boolean;
+  /** 1 = inclusive, 2 = exclusive, 3 = compound */
+  modelPerhitungan: ModelPerhitungan;
+  prioritas: number;
+  statusPajak: boolean;
+  tenantID: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Bentuk mentah untuk halaman yang belum dimigrasikan dan masih membaca
+ * respons lewat lib/apiClient.ts. Dihapus bersama tipe Lama lain di berkas
+ * ini saat modul pengaturan pajak dimigrasikan (keputusan K8, modul
+ * penjualan).
+ */
+export interface PajakLama {
   _id: string;
   namaPajak: string;
   tarifPajak: number;
@@ -24,16 +49,16 @@ export interface PajakRequest {
  
 export interface GetPajakResponse {
   success: boolean;
-  data: Pajak[];
+  data: PajakLama[];
 }
  
 export interface PajakResponse {
   success: boolean;
   message?: string;
-  data: Pajak;
+  data: PajakLama;
 }
 
-export interface ProdukPajakRelasi {
+export interface ProdukPajakRelasiLama {
   _id: string;
   produkID: string;
   pajakID: string;
@@ -46,17 +71,17 @@ export interface ProdukPajakRequest {
   pajakID: string;
 }
  
-export interface PajakDariProduk {
+export interface PajakDariProdukLama {
   _id: string;
-  pajak: Omit<Pajak, "tenantID" | "createdAt" | "updatedAt">;
+  pajak: Omit<PajakLama, "tenantID" | "createdAt" | "updatedAt">;
 }
  
 export interface GetPajakByProdukResponse {
   success: boolean;
-  data: PajakDariProduk[];
+  data: PajakDariProdukLama[];
 }
  
 export interface ProdukPajakResponse {
   success: boolean;
-  data: ProdukPajakRelasi;
+  data: ProdukPajakRelasiLama;
 }

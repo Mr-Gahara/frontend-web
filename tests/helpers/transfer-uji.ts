@@ -93,7 +93,7 @@ export async function bukaDenganAuth(page: Page, url: string): Promise<Auth> {
 export async function api<T>(
   page: Page,
   auth: Auth,
-  method: "GET" | "POST" | "PATCH",
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   path: string,
   data?: object,
 ): Promise<{ status: number; data: T; pesan: string }> {
@@ -103,7 +103,10 @@ export async function api<T>(
     data,
   });
   const body = await res.json().catch(() => ({}));
-  return { status: res.status(), data: body.data as T, pesan: String(body.message ?? "") };
+  // Validator penjualan dan pembayaran membalas { errors } tanpa message,
+  // karena dibalas langsung di route dan tidak lewat errorHandler.
+  const pesan = body.message ?? (Array.isArray(body.errors) ? body.errors.join(", ") : "");
+  return { status: res.status(), data: body.data as T, pesan: String(pesan) };
 }
 
 /**

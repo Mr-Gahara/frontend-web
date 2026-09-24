@@ -6,7 +6,7 @@ import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
 
 import {
-  Pajak,
+  PajakLama as Pajak,
   PajakRequest,
   GetPajakResponse,
   PajakResponse,

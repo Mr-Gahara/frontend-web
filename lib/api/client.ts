@@ -18,6 +18,9 @@ import { unwrap, type HasilApi } from "./normalize";
 
 type TokenType = "akun" | "pengguna";
 
+/** Opsi tambahan per permintaan; saat ini hanya header (misalnya x-idempotency-key). */
+export type OpsiPermintaan = { headers?: Record<string, string> };
+
 /** apiClient sudah melempar ApiError; sisanya kegagalan jaringan. */
 function keApiError(e: unknown): ApiError {
   if (e instanceof ApiError) return e;
@@ -42,8 +45,12 @@ export const api = {
     tokenType: TokenType = "pengguna",
   ) => jalankan<T>(() => apiClient.get(endpoint, params, tokenType)),
 
-  post: <T>(endpoint: string, body: unknown, tokenType: TokenType = "pengguna") =>
-    jalankan<T>(() => apiClient.post(endpoint, body, undefined, tokenType)),
+  post: <T>(
+    endpoint: string,
+    body: unknown,
+    tokenType: TokenType = "pengguna",
+    opsi?: OpsiPermintaan,
+  ) => jalankan<T>(() => apiClient.post(endpoint, body, opsi, tokenType)),
 
   put: <T>(endpoint: string, body: unknown, tokenType: TokenType = "pengguna") =>
     jalankan<T>(() => apiClient.put(endpoint, body, undefined, tokenType)),
@@ -59,8 +66,8 @@ export const api = {
 export const apiData = {
   get: async <T>(endpoint: string, params?: Record<string, unknown>, tokenType?: TokenType) =>
     (await api.get<T>(endpoint, params, tokenType)).data,
-  post: async <T>(endpoint: string, body: unknown, tokenType?: TokenType) =>
-    (await api.post<T>(endpoint, body, tokenType)).data,
+  post: async <T>(endpoint: string, body: unknown, tokenType?: TokenType, opsi?: OpsiPermintaan) =>
+    (await api.post<T>(endpoint, body, tokenType, opsi)).data,
   put: async <T>(endpoint: string, body: unknown, tokenType?: TokenType) =>
     (await api.put<T>(endpoint, body, tokenType)).data,
   patch: async <T>(endpoint: string, body: unknown, tokenType?: TokenType) =>

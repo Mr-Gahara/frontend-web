@@ -11,7 +11,7 @@ import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AkunKas } from "@/types/akunKas";
+import { AkunKasLama as AkunKas } from "@/types/akunKas";
 
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {

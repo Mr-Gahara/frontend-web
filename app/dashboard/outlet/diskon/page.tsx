@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
 import {
-  Diskon,
+  DiskonLama as Diskon,
   DiskonRequest,
   DiskonResponse,
   GetDiskonResponse,

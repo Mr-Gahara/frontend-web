@@ -39,7 +39,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { AkunKas } from "@/types/akunKas"; // Pastikan tipe ini di-import
+import { AkunKasLama as AkunKas } from "@/types/akunKas"; // Pastikan tipe ini di-import
 
 type MetodePembayaran = {
   _id: string;
