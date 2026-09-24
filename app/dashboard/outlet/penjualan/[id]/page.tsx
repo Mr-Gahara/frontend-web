@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { apiClient } from "@/lib/apiClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { Penjualan, StatusBayar, StatusPenjualan } from "@/types/penjualan";
+import { PenjualanLama as Penjualan, StatusBayar, StatusPenjualan } from "@/types/penjualan";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { format } from "date-fns";

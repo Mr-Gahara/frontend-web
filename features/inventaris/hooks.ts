@@ -20,11 +20,18 @@ import { tentukanCakupan, type CakupanLokasiOutlet } from "./cakupan";
 import { queryKeys } from "@/lib/queryKeys";
 import type { TipeLokasi } from "@/types/location";
 
-export function useDaftarLokasi() {
+/**
+ * aktif: false mematikan permintaan, misalnya bagi pengguna tanpa
+ * read-location di daftar penjualan (keputusan K11b). Bawaan true.
+ */
+type OpsiKueri = { aktif?: boolean };
+
+export function useDaftarLokasi({ aktif = true }: OpsiKueri = {}) {
   return useQuery({
     queryKey: queryKeys.lokasi.daftar(),
     queryFn: lokasiApi.daftar,
     staleTime: 5 * 60 * 1000,
+    enabled: aktif,
   });
 }
 
@@ -64,11 +71,12 @@ export function useDaftarInventory(filter: FilterInventory | null) {
  * Lokasi kerja pengguna saat ini (/location/current), diseragamkan lewat
  * lokasiTunggal karena kunci cache ini dapat terbagi dengan halaman lama.
  */
-export function useLokasiAktif() {
+export function useLokasiAktif({ aktif = true }: OpsiKueri = {}) {
   const { data, ...sisa } = useQuery({
     queryKey: queryKeys.lokasi.aktif(),
     queryFn: lokasiApi.aktif,
     staleTime: 5 * 60 * 1000,
+    enabled: aktif,
   });
   const lokasi = lokasiTunggal(data);
   return { ...sisa, lokasi, lokasiId: lokasi?.id ?? "" };
@@ -137,11 +145,11 @@ export function useTambahInventory(opsi: OpsiMutasi<TambahInventoryPayload> = {}
  * role maupun lokasi pengguna. Pembatasan ini hanya di tampilan; backend
  * mengirim data seluruh tenant kepada pemegang izin baca.
  */
-export function useCakupanLokasiOutlet(): CakupanLokasiOutlet {
+export function useCakupanLokasiOutlet(opsi: OpsiKueri = {}): CakupanLokasiOutlet {
   const { sedangMemuat, permissions } = useSession();
   const lintasOutlet = bolehLintasOutlet(permissions);
-  const daftar = useDaftarLokasi();
-  const aktif = useLokasiAktif();
+  const daftar = useDaftarLokasi(opsi);
+  const aktif = useLokasiAktif(opsi);
 
   return useMemo(
     () =>

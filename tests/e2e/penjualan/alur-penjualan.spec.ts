@@ -25,7 +25,7 @@ import {
  * (penjualan maupun opname). Asersinya ditulis lengkap di dua test.fixme.
  *
  * Dialog yang harus bertahan saat operasi gagal (keputusan Fase 0) diuji di
- * tiga test.fixme, masing-masing dibuka oleh submodul yang memperbaikinya.
+ * test tersendiri; dialog finalisasi masih test.fixme sampai submodul 3.
  */
 const DAFTAR = BASIS + "/dashboard/outlet/penjualan";
 const polaPenjualan = (id: string) => new RegExp(`/api/penjualan/${id}(\\?|$)`, "i");
@@ -198,8 +198,8 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     },
   );
 
-  test.fixme(
-    "dialog void bertahan saat void gagal (keputusan Fase 0; dibuka di submodul 2, daftar penjualan)",
+  test(
+    "dialog void bertahan saat void gagal (keputusan Fase 0)",
     async ({ page }) => {
       const auth = await bukaDenganAuth(page, DAFTAR);
       await siapkanFixture(page, auth, 20);
@@ -221,8 +221,8 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     },
   );
 
-  test.fixme(
-    "dialog hapus bertahan saat hapus gagal (keputusan Fase 0; dibuka di submodul 2, daftar penjualan)",
+  test(
+    "dialog hapus bertahan saat hapus gagal (keputusan Fase 0)",
     async ({ page }) => {
       const auth = await bukaDenganAuth(page, DAFTAR);
       await siapkanFixture(page, auth, 20);
