@@ -98,7 +98,7 @@ module.exports = (f, awal, akhir, iAwal, iAkhir, baru) => {
   const baris = fs.readFileSync(f, "utf8").split("\n");
   const a = baris.indexOf(awal);
   const z = baris.indexOf(akhir, a);
-  if (a !== iAwal || z !== iAkhir) {
+  if (a < 0 || z < 0 || a !== iAwal || z !== iAkhir) {
     console.error("GAGAL jangkar " + f + " " + a + " " + z);
     process.exit(1);
   }
@@ -390,7 +390,9 @@ EOF
 - `ganti-baris.js`: mengganti rentang baris dari jangkar awal sampai jangkar
   akhir, dengan indeks yang diharapkan sebagai pengaman. Indeks diambil dari
   `grep -n` yang mencetak kedua jangkar di blok yang sama (nomor baris dikurangi
-  satu).
+  satu). `grep` yang kosong menghasilkan indeks `-1`; helper menolaknya sejak
+  26 September 2026, sedangkan sebelumnya menerimanya karena `indexOf` juga
+  `-1`.
 - `hitung-eslint.js`: menjumlahkan error dari `eslint -f json`.
 - `ringkas-e2e.js`: meringkas `/tmp/p.json` hasil `--reporter=json` (atau
   berkas di argumen pertama): jumlah per status, lalu status, judul, dan
@@ -800,11 +802,12 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   blok yang menulis halaman tipis, sehingga yang tersalin adalah halaman
   tipis itu. Sumber dari HEAD tidak bergantung pada urutan eksekusi blok.
 - **Jangkar diperiksa ada tepat sekali oleh skrip yang menulis, sebelum
-  menulis apa pun.** `ganti-baris.js` membandingkan `indexOf(jangkar)`
-  dengan indeks yang diberikan; saat jangkar tidak ada, keduanya `-1`
-  sehingga dianggap cocok, dan wilayah baru tertempel di akhir berkas.
-  Skrip wilayah di modul penjualan menghitung kemunculan setiap jangkar
-  dan berhenti bila tidak tepat satu. Helper itu belum ditambal.
+  menulis apa pun.** `ganti-baris.js` sempat membandingkan
+  `indexOf(jangkar)` dengan indeks yang diberikan; saat jangkar tidak ada,
+  keduanya `-1` sehingga dianggap cocok, dan wilayah baru tertempel di
+  akhir berkas. Sejak 26 September 2026 helper itu menolak indeks negatif
+  dan keluar dengan kode 1. Skrip wilayah di modul penjualan tetap
+  menghitung kemunculan setiap jangkar dan berhenti bila tidak tepat satu.
 - **Berkas marka hanya memuat pasangan yang wajib.** `ganti-blok.js`
   menulis semua atau tidak sama sekali, sehingga satu pasangan yang tidak
   cocok menahan seluruhnya. Di halaman buat penjualan, pasangan pengganti
