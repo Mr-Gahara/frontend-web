@@ -96,9 +96,10 @@ export interface ItemPenjualanRequest {
 }
 
 export interface PenjualanRequest {
-  /** Opsional: backend menentukan lokasi dari sesi bila tidak dikirim. */
+  /** Outlet tenant bagi pemegang read-location (keputusan K13a); tanpanya tidak dikirim. */
   locationID?: string;
   pelangganID: string;
+  /** Diwajibkan validator backend; controller menggantinya dengan pengguna dari token. */
   penggunaID: string;
   jenisTransaksi: JenisTransaksi;
   jenisPenjualan: JenisPenjualan;

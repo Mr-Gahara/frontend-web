@@ -167,8 +167,8 @@ export async function hapusDraft(page: Page, auth: Auth, id: string) {
   expect.soft(hapus.status, `hapus draf uji: ${hapus.pesan}`).toBe(200);
 }
 
-/** Membuat penjualan DRAFT lewat halaman buat; id dan nomor diambil dari respons POST. */
-export async function buatDraftLewatUi(page: Page, jumlah: number): Promise<PenjualanUji> {
+/** Mengisi halaman buat penjualan dengan produk uji sampai dialog konfirmasi terbuka. */
+export async function isiFormPenjualan(page: Page, jumlah: number) {
   await page.goto(BASIS + "/dashboard/outlet/penjualan/buatPenjualan");
   await expect(page.getByRole("heading", { name: /buat penjualan/i })).toBeVisible();
 
@@ -189,7 +189,11 @@ export async function buatDraftLewatUi(page: Page, jumlah: number): Promise<Penj
   await keterangan.fill(`E2E alur penjualan ${Date.now()}`);
   await keterangan.press("Enter");
   await expect(page.getByRole("alertdialog")).toBeVisible();
+}
 
+/** Membuat penjualan DRAFT lewat halaman buat; id dan nomor diambil dari respons POST. */
+export async function buatDraftLewatUi(page: Page, jumlah: number): Promise<PenjualanUji> {
+  await isiFormPenjualan(page, jumlah);
   const tunggu = page.waitForResponse(
     (r) => r.request().method() === "POST" && /\/api\/penjualan(\?|$)/i.test(r.url()),
   );

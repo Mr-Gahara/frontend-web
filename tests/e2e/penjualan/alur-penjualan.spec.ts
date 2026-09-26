@@ -5,6 +5,7 @@ import {
   TAKARAN,
   buatDraftLewatUi,
   detailPenjualan,
+  isiFormPenjualan,
   hapusDraft,
   jurnalPenjualan,
   setelStokOutlet,
@@ -288,6 +289,56 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     } finally {
       await page.unroute(pola);
       await hapusDraft(page, auth, penjualan.id);
+    }
+  });
+
+  test("buat penjualan mengirim kunci idempotensi, penggunaID, dan lokasi outlet tenant", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, DAFTAR);
+    const fx = await siapkanFixture(page, auth, 20);
+    const tunggu = page.waitForRequest(
+      (r) => r.method() === "POST" && /\/api\/penjualan(\?|$)/i.test(r.url()),
+    );
+    const penjualan = await buatDraftLewatUi(page, 1);
+    try {
+      const permintaan = await tunggu;
+      expect(permintaan.headers()["x-idempotency-key"], "kunci idempotensi (K3a)").toBeTruthy();
+      const kiriman = permintaan.postDataJSON();
+      expect(kiriman.penggunaID, "penggunaID diwajibkan validator backend").toBeTruthy();
+      expect(kiriman.locationID, "outlet tenant (K13a)").toBe(fx.outletId);
+      expect(kiriman).not.toHaveProperty("status");
+      expect((await detailPenjualan(page, auth, penjualan.id)).statusPenjualan).toBe("DRAFT");
+    } finally {
+      await hapusDraft(page, auth, penjualan.id);
+    }
+  });
+
+  test("dialog buat penjualan bertahan saat gagal, dan kunci idempotensi dipakai ulang saat diulang", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, DAFTAR);
+    await siapkanFixture(page, auth, 20);
+    await isiFormPenjualan(page, 1);
+    const pola = /\/api\/penjualan(\?|$)/i;
+    let kunciGagal = "";
+    await page.route(pola, (route) => {
+      if (route.request().method() !== "POST") return route.continue();
+      kunciGagal = route.request().headers()["x-idempotency-key"] ?? "";
+      return route.fulfill(JAWAB_GAGAL);
+    });
+    await page.getByRole("button", { name: /ya, lanjutkan/i }).click();
+    await expect(page.getByText(/gagal memproses/i).first()).toBeVisible();
+    await expect(page.getByRole("alertdialog")).toBeVisible();
+    await page.unroute(pola);
+    expect(kunciGagal, "kunci idempotensi terkirim pada percobaan pertama").toBeTruthy();
+
+    const tunggu = page.waitForResponse((r) => r.request().method() === "POST" && pola.test(r.url()));
+    await page.getByRole("button", { name: /ya, lanjutkan/i }).click();
+    const res = await tunggu;
+    const body = await res.json().catch(() => ({}));
+    const id = normalizeId((body.data ?? {}) as { id?: string }).id ?? "";
+    try {
+      expect(res.status(), `POST /penjualan: ${JSON.stringify(body).slice(0, 200)}`).toBe(201);
+      expect(res.request().headers()["x-idempotency-key"], "kunci sama saat diulang (K3a)").toBe(kunciGagal);
+    } finally {
+      if (id) await hapusDraft(page, auth, id);
     }
   });
 

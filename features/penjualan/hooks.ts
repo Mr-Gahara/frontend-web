@@ -6,7 +6,7 @@ import { filterServerPenjualan } from "./filter";
 import { queryKeys } from "@/lib/queryKeys";
 import { isNotFound } from "@/lib/api/error";
 import { susunPayloadFinalisasi } from "./payload";
-import type { PenjualanFilterParams } from "@/types/penjualan";
+import type { PenjualanFilterParams, PenjualanRequest } from "@/types/penjualan";
 
 type Callback = { onSuccess?: () => void; onError?: (err: unknown) => void };
 
@@ -69,6 +69,24 @@ export function useFinalisasiPenjualan(id: string, { onSuccess, onError }: Callb
         queryClient.invalidateQueries({ queryKey: queryKeys.produk.semua }),
         queryClient.invalidateQueries({ queryKey: queryKeys.jurnalStok.semua }),
       ]);
+      onSuccess?.();
+    },
+    onError,
+  });
+}
+
+/**
+ * Membuat penjualan dengan kunci idempotensi (keputusan K3a): backend menahan
+ * permintaan dengan kunci yang sama selama 24 jam, sehingga klik ganda atau
+ * percobaan ulang tidak membuat dua penjualan.
+ */
+export function useBuatPenjualan({ onSuccess, onError }: Callback = {}) {
+  const invalidasi = useInvalidasiPenjualan();
+  return useMutation({
+    mutationFn: ({ payload, kunci }: { payload: PenjualanRequest; kunci: string }) =>
+      penjualanApi.buat(payload, kunci),
+    onSuccess: async () => {
+      await invalidasi();
       onSuccess?.();
     },
     onError,
