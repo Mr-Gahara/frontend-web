@@ -23,7 +23,7 @@ dan urutan migrasi satu modul.
 | `components/` | Komponen UI yang dipakai lintas modul, termasuk shadcn di `components/ui/` |
 | `lib/` | Fondasi: `api/`, `auth/`, `queryKeys.ts`, `apiClient.ts`, `decodeToken.ts` |
 | `types/` | Tipe respons dan payload, diturunkan dari kontrak |
-| `tests/e2e/` | Playwright, memakai backend sungguhan |
+| `tests/e2e/` | Playwright, memakai backend sungguhan; `page.route` hanya untuk jalur gagal (`pengujian.md`, Catatan Playwright) |
 | `tests/unit/` | Vitest untuk fondasi, hook, dan fungsi murni di `features/` |
 | `docs/` | `README.md` (titik masuk), `refactor/`, dan `kontrak/` |
 | `scripts/` | Alat pengembangan; `scripts/dokumen/` memeriksa dokumentasi (`npm run docs:periksa`, `npm run docs:dampak`) |

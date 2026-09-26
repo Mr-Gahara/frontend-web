@@ -56,6 +56,17 @@ ESLint 9; pakai `json`:
 npx eslint <berkas atau folder> -f json 2>/dev/null | node ~/.cache/frontend-web/alat/daftar-eslint.js
 ```
 
+Memastikan tidak ada spec yang memalsukan respons sukses (helper
+`audit-fulfill.js`, keputusan rancangan butir 21). Helper keluar dengan
+kode gagal bila ada `route.fulfill` berstatus sukses tanpa tanda
+`// simulasi:`, sehingga dipakai sebagai gerbang di blok commit spec.
+Selama spec reservasi belum dibangun ulang, audit seluruh suite gagal;
+jalankan untuk folder spec yang diubah:
+
+```bash
+node ~/.cache/frontend-web/alat/audit-fulfill.js tests/e2e
+```
+
 Saat menutup modul, kolom "Dipakai di" di `docs/kontrak/endpoint.md` dan
 kecocokan frontend dengan backend diperiksa lewat helper `audit-endpoint.js`
 (`cara-kerja.md`, Helper penggantian). Jalankan
@@ -69,12 +80,20 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per modul penjualan dan pembayaran** (commit `f33ffa6`): 186 test
-unit dan integrasi lolos di 27 berkas, 224 e2e lolos, 17 skipped:
+Satu pengecualian atas backend sungguhan: ketiga spec master data
+reservasi masih memalsukan respons sukses sampai dibangun ulang di modul
+reservasi (Utang pengujian, di bawah). Spec lain memakai `page.route`
+hanya untuk jalur gagal, terbukti dengan `audit-fulfill.js` pada 26
+September 2026.
+
+**Baseline per perbaikan spec login** (commit `5a3deea`): 186 test
+unit dan integrasi lolos di 27 berkas, 225 e2e lolos, 17 skipped:
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
 backend, tujuh `test.fixme` lain yang menunggu backend (tiga di antaranya
 di spec alur penjualan), dan dua `test.skip` bersyarat data (Test yang
-ditandai fixme dan skip bersyarat, di bawah).
+ditandai fixme dan skip bersyarat, di bawah). Satu e2e lebih banyak dari
+baseline modul penjualan (`f33ffa6`, 224), karena skenario kredensial
+salah di spec login dipecah dua.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -174,6 +193,20 @@ satu putaran.
   dibuat backend secara deterministik, dan hanya untuk method serta path yang
   diperlukan. Request lain tetap ke backend sungguhan, dan intersepsi dilepas
   dengan `page.unroute` setelah dipakai.
+- `route.fulfill` berstatus sukses dilarang (keputusan rancangan butir 21).
+  Keadaan memuat diuji dengan menahan permintaan lalu `route.continue()`,
+  sehingga responsnya tetap dari backend. Simulasi berstatus 200 yang tidak
+  terhindarkan dibentuk dari respons nyata bila bisa (`route.fetch()` lalu
+  mengubah satu field) dan ditandai `// simulasi: <alasan>` di baris
+  `fulfill` atau tepat di atasnya. Periksa dengan `audit-fulfill.js`.
+- Pesan gagal dibandingkan dengan `message` respons nyata yang ditunggu
+  lewat `page.waitForResponse`, bukan dengan teks yang ditulis di spec.
+  Spec login lama menulis sendiri 401 "Email atau password salah.",
+  padahal backend menjawab 404 dan 400 dengan pesan lain.
+- Uji login gagal memakai email atau nama pengguna unik per run, karena
+  pembatas login dihitung per IP dan email serta per tenant dan nama.
+  Percobaan gagal dengan akun uji menambah hitungan yang, bila habis,
+  mengunci login seluruh suite selama 15 menit.
 - Nama data uji dibuat unik per run (misalnya akhiran dari `Date.now()`), agar
   data sisa dari run yang gagal tidak memicu penolakan duplikat.
 - Nilai input berformat rupiah diperiksa dengan pola, misalnya
@@ -291,7 +324,7 @@ terhitung di angka skipped pada baseline:
 
 | Spec | Dilewati bila |
 |---|---|
-| `reservasi/aset/crud-aset.spec.ts` | Tidak ada aset berstatus digunakan |
+| `reservasi/aset/crud-aset.spec.ts` | Tidak ada aset berstatus digunakan. Spec ini memalsukan respons sukses; skenarionya pindah ke spec alur reservasi yang membuat booking sungguhan (keputusan R1a dan R2b) |
 | `inventaris/stok/lihat-stok.spec.ts`, tab kritis gudang | Tidak ada stok gudang yang kritis (terjadi pada data uji sekarang) |
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
 | `inventaris/penerimaanBarang/terima-penerimaan.spec.ts`, `inventaris/transferStok/*.spec.ts` | Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup. Kegagalan persiapan lain menggagalkan test, bukan melewatinya |
@@ -361,6 +394,15 @@ Urutan debug kegagalan e2e di atas).
 - **Idempotensi hanya teruji dari sisi klien**: kunci terkirim dan sama saat
   permintaan diulang. Penahanan permintaan kembar di backend tidak diuji
   dari web.
+- **Tiga spec master data reservasi memalsukan respons sukses**: 70
+  `route.fulfill` sukses di spec tipe aset, tarif, dan aset menurut audit
+  26 September 2026, sehingga skenario buat, edit, dan hapusnya tidak
+  pernah menyentuh backend. Dibangun ulang terhadap backend sungguhan
+  sebagai langkah pertama modul reservasi (keputusan R1a).
+- **Password salah pada akun uji menambah hitungan pembatas login**, dan
+  login sukses tidak menguranginya. Spec login gagal lebih awal bila sisa
+  kuota di header `RateLimit` di bawah 3; menjalankan spec auth berulang
+  (`--repeat-each`) dalam 15 menit dapat mengunci login seluruh suite.
 
 ## Spec rujukan
 
@@ -458,3 +500,9 @@ Urutan debug kegagalan e2e di atas).
   (`postDataJSON`, header `x-idempotency-key`), dialog yang harus bertahan
   diuji lewat `page.route`, dan kunci idempotensi dibandingkan antara
   percobaan yang gagal dan ulangannya.
+- `tests/e2e/auth/login.spec.ts`: spec tanpa respons sukses palsu. Login
+  sungguhan dengan status dan token diperiksa dari respons, pesan gagal
+  dibandingkan dengan `message` respons nyata, email dan nama unik per run
+  agar tidak terhitung pembatas, tombol memuat lewat `tahanLaluTeruskan`,
+  simulasi `requireSetup` dari respons login nyata lewat `route.fetch()`,
+  dan pemeriksaan sisa kuota dari header `RateLimit`.

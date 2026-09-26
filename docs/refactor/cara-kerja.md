@@ -62,7 +62,7 @@ console.log("OK");
 Untuk penggantian di banyak berkas, kumpulkan pasangan dalam array dan tulis
 berkas hanya bila seluruhnya cocok.
 
-Sembilan helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan dengan cache
+Sepuluh helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan dengan cache
 kontrak. Sampai submodul stok, helper disimpan di `/tmp`, dan folder itu dua
 kali dikosongkan sistem dalam sehari: sekali membuat perbaikan dokumen tidak
 masuk sebelum commit (`b0d11d2` menyusulkannya). Skrip sekali pakai tetap di
@@ -382,6 +382,52 @@ if (TULIS) {
   console.log("OK kolom Dipakai di: " + berubah + " berubah");
 }
 EOF
+cat > ~/.cache/frontend-web/alat/audit-fulfill.js <<'EOF'
+const fs = require("fs");
+const path = require("path");
+const akar = process.argv[2] || "tests/e2e";
+const berkas = [];
+(function jalan(d) {
+  for (const n of fs.readdirSync(d)) {
+    const p = path.join(d, n);
+    if (fs.statSync(p).isDirectory()) jalan(p);
+    else if (p.endsWith(".spec.ts")) berkas.push(p);
+  }
+})(akar);
+let total = 0;
+const simulasi = [];
+for (const f of berkas.sort()) {
+  const baris = fs.readFileSync(f, "utf8").split("\n");
+  let rute = 0, sukses = 0, gagal = 0, sim = 0;
+  const contoh = [];
+  baris.forEach((b, i) => {
+    if (/\.route\(/.test(b)) rute++;
+    if (!/\.fulfill\(/.test(b)) return;
+    const jendela = [b];
+    for (let j = i + 1; j < Math.min(i + 10, baris.length); j++) {
+      if (/\.fulfill\(/.test(baris[j])) break;
+      jendela.push(baris[j]);
+    }
+    const teks = jendela.join(" ");
+    const m = teks.match(/status:\s*(\d{3})/);
+    const tanda = (b + " " + (baris[i - 1] || "")).match(/\/\/ simulasi: (.*)$/);
+    if (/JAWAB_GAGAL/.test(teks) || (m && Number(m[1]) >= 400)) gagal++;
+    else if (tanda) {
+      sim++;
+      simulasi.push(f.replace(akar + "/", "") + ":" + (i + 1) + " " + tanda[1].trim().slice(0, 80));
+    } else {
+      sukses++;
+      if (contoh.length < 4) contoh.push(i + 1);
+    }
+  });
+  total += sukses;
+  if (rute || sukses || gagal || sim)
+    console.log(f.replace(akar + "/", "") + " route:" + rute + " sukses:" + sukses + " gagal:" + gagal + " simulasi:" + sim + (contoh.length ? " baris " + contoh.join(",") : ""));
+}
+simulasi.forEach((s) => console.log("SIMULASI " + s));
+console.log("total fulfill sukses: " + total + " di " + berkas.length + " spec");
+process.exit(total ? 1 : 0);
+EOF
 ```
 
 - `ganti.js`: dipanggil dengan ``node -e 'require(process.env.HOME + "/.cache/frontend-web/alat/ganti.js")("berkas", [[`lama`, `baru`]])'``.
@@ -435,12 +481,29 @@ EOF
   dipanggil lagi". Versi pertamanya hanya menemukan 136 dari 246 route,
   karena rantai `.route()` yang dipecah baris terlewat; pembanding terhadap
   Lampiran A kini membuat cacat semacam itu langsung terlihat.
+- `audit-fulfill.js`: menghitung `route.fulfill` per spec di folder
+  argumen pertama (bawaan `tests/e2e`). Setiap pemanggilan dibaca sampai
+  pemanggilan berikutnya, sehingga `status` di baris lain ikut terbaca:
+  status 4xx atau 5xx dan `JAWAB_GAGAL` dihitung gagal, tanda
+  `// simulasi:` di baris itu atau tepat di atasnya dihitung simulasi dan
+  dicetak beserta alasannya, dan sisanya, termasuk status dari variabel,
+  dihitung sukses. Keluar dengan kode 1 bila ada yang sukses, sehingga
+  dapat menjadi gerbang (`pengujian.md`, Perintah verifikasi).
 - Di dalam template literal skrip, backtick dan tanda dolar yang diikuti kurung
   kurawal ditulis dengan escape, dan tanda miring terbalik ditulis ganda agar
   sampai ke berkas. Hindari kutip bersarang di konten yang disisipkan.
 - Untuk menyisipkan kutip tunggal ke dalam argumen `node -e '...'`, tulis
   `'"'"'` (tutup kutip, kutip tunggal di dalam kutip ganda, buka kutip lagi),
   atau pakai skrip heredoc berisi string JavaScript.
+- Skrip heredoc yang memuat banyak pasangan kode TypeScript menulis setiap
+  teks dengan `String.raw`, agar garis miring terbalik di regex sampai
+  utuh, dan teks barunya tidak memakai backtick maupun `${`, sehingga
+  tidak ada yang perlu di-escape (`/tmp/ganti-login.js` untuk `5a3deea`).
+- Berkas marka yang teksnya memuat pagar kode Markdown ditulis dengan
+  penanda `PAGAR` di baris itu, lalu penanda diganti tiga backtick lewat
+  `\x60` sebelum `ganti-blok.js` dijalankan. Pagar kode di dalam blok
+  tempel memotong blok itu saat pesan ditampilkan, dan blok marka
+  `cara-kerja.md` untuk `5a3deea` harus dikirim ulang karenanya.
 
 **Catatan penting**: blok panjang kadang tertempel dua kali di terminal. Bila
 sebuah penggantian melaporkan 0 kecocokan padahal seharusnya ada, periksa dulu
@@ -821,6 +884,21 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Istilah `docs:dampak` harus khas.** Istilah umum seperti "lama" atau
   "buat" menjaring ratusan baris derau (237 baris untuk "Lama" di modul
   penjualan). Pakai nama fungsi, nama berkas, atau frasa khas.
+- **Gerbang atas kode ditulis sebagai helper yang membaca per pemanggilan,
+  bukan grep per baris.** Gerbang grep pertama untuk `route.fulfill`
+  salah menghitung, karena `status` hampir selalu ditulis di baris sesudah
+  `route.fulfill({`; `audit-fulfill.js` membaca setiap pemanggilan sampai
+  pemanggilan berikutnya.
+- **Pernyataan dokumentasi tentang seluruh suite diaudit, bukan
+  diasumsikan.** Kalimat bahwa seluruh spec e2e memakai backend sungguhan
+  bertahan sejak Fase 0, padahal empat spec memalsukan respons sukses:
+  aturan `page.route` di Catatan Playwright tidak pernah diperiksa
+  terhadap spec yang ditulis sebelum aturan itu ada. Spec lama yang
+  dijadikan pembanding migrasi diaudit dulu dengan `audit-fulfill.js`.
+- **Variabel daftar berkas di zsh tetap terlupa walau sudah dicatat.**
+  Blok pemetaan reservasi memakai `$S` berisi daftar service dan gagal.
+  Daftar berkas diteruskan langsung lewat `$(...)` di argumen, bukan
+  disimpan ke variabel lebih dulu.
 
 ## Kapan berhenti dan bertanya
 

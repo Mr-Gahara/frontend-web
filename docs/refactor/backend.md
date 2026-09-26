@@ -167,6 +167,10 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   `read-location` yang tidak dapat mengetahui outletnya, dan daftar
   penjualan tanpa filter lokasi; beserta catatan 408 test merah di branch
   `ridho` (`kontrak/temuan.md` butir 41 sampai 49)
+- Laporan spec login — 1 temuan, disusun 26 September 2026: login akun
+  membedakan email tidak terdaftar (404) dari password salah (400),
+  sehingga keberadaan sebuah email dapat diketahui tanpa password
+  (`kontrak/temuan.md` butir 50)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

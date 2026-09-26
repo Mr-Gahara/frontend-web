@@ -56,6 +56,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Gudang: halaman stock adjustment | `247cf2d` | Selesai |
 | Perbaikan spec alur pengajuan stok | `8d62c56` | Selesai |
 | Penjualan dan pembayaran | `e8c81b1` (fondasi), `c9640ce` (daftar), `69a5d5e` (detail), `8738752` (pembayaran), `f33ffa6` (buat) | Selesai |
+| Spec login tanpa respons sukses palsu | `5a3deea` | Selesai |
 | Reservasi | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 | Keuangan | - | Belum |
 | Jadwal dan shift | - | Belum |
@@ -91,27 +92,59 @@ buat, dan edit untuk aset, tarif, dan tipe aset, beserta
 - Void penjualan membatalkan sesi booking-nya (`penjualanService.update`),
   dan pembuatan booking membuat penjualan berjenis `booking`. Spec alurnya
   harus membuktikan kedua arah itu, bukan hanya CRUD master data.
-- Spec pembanding yang sudah ada hanya untuk master data:
-  `tests/e2e/reservasi/aset/crud-aset.spec.ts`,
-  `tests/e2e/reservasi/tarif/crud-tarif.spec.ts`, dan
-  `tests/e2e/reservasi/tipeAset/crud-tipeAset.spec.ts`. Ketiganya membawa
-  error ESLint `any` warisan (Utang kecil dari modul stock adjustment
-  gudang). Daftar dan buat reservasi belum punya spec.
+- Pemetaan dan penelusuran backend sudah diambil (26 September 2026,
+  backend `00b9957`): 13 berkas, 5.749 baris, seluruhnya masih memakai
+  `apiClient`. Buat reservasi 1.165 baris, buat dan edit tarif 774 dan
+  807. Form buat tarif memakai `<select>` bawaan untuk basis perhitungan,
+  sedangkan form edit memakai Radix Select.
+- Ketiga spec master data yang ada memalsukan respons sukses (Utang
+  pengujian di `pengujian.md`) dan dibangun ulang terhadap backend
+  sungguhan sebagai langkah pertama, lalu dijalankan terhadap kode lama
+  sebelum skenario baru ditambahkan (keputusan R1a). Daftar dan buat
+  reservasi belum punya spec.
+- Urutan submodul: master data (tipe aset, aset, tarif), daftar
+  reservasi, lalu buat reservasi, masing-masing dengan suite penuh dan
+  commit sendiri.
 - Buat reservasi mengisi kunci `pelanggan.semua` dan
   `diskon.daftar({ status: "Aktif" })` dengan data mentah. Migrasinya
   memakai `features/pelanggan` dan `features/diskon` (keputusan rancangan
   butir 12), bukan membuat hook baru.
-- Kontrak sesi booking, aset, tipe aset, dan tarif belum pernah
-  diverifikasi terhadap kode. Telusuri route, validator, service, dan
-  mapper seperti modul penjualan; sebagian endpointnya tanpa
-  `checkPermission` (`kontrak/temuan.md` butir 5).
+- Kontrak yang terbukti tertinggal: `POST /sesibooking` di `payload.md`
+  mencatat validator dan field wajib yang keliru (validatornya
+  `validateSesiBookingPayload`, dengan jalur tunggal dan jalur batch
+  `items` yang saling meniadakan); `GET`, `PUT`, dan `DELETE` sesi booking
+  per id belum tercatat di `endpoint.md`; bentuk respons sesi booking
+  belum ada di bagian 3.3 (cache kontrak tanpa contoh, ambil dari mapper
+  backend); respons tarif membawa `dataAset` berisi tipe aset, bukan
+  `tipeAsetID`. Tipe `Tarif`, `TipeAset`, dan `SesiBookingResponse` di
+  `types/` disesuaikan.
+- Perilaku backend yang menentukan rancangan: booking dari web dibuat
+  lewat jalur batch dengan penjualan `booking` berstatus FINAL, dan
+  `simpanDraft` diabaikan, sehingga ubah dan hapus sesi booking selalu
+  ditolak; satu-satunya jalan batal adalah void penjualannya. Tarif
+  dipilih otomatis menurut tipe aset, hari, jam, dan prioritas. Status
+  aset "digunakan" dihitung dinamis dari booking Aktif yang sedang
+  berjalan.
+- Calon temuan backend, dibuktikan di spec lalu dilaporkan setelah
+  commit: void penjualan hanya menghapus cache `booking:tenant:<t>`,
+  bukan kunci per tanggal dan detail yang dibaca halaman reservasi
+  (`penjualanService` baris 628 dan 758); hapus tarif memakai `payload`
+  yang tidak terdefinisi sehingga diduga dijawab 500 setelah data
+  terhapus, dan ubah tarif tidak membersihkan cache tipe aset
+  (`tarifService` baris 152 dan 166); hapus aset dan tipe aset tanpa
+  pemeriksaan pemakaian; `voidPenjualan` tidak terpakai; sekitar 930
+  baris kode lama dikomentari di `sesiBookingService.js`; daftar sesi
+  booking mengubah status menjadi Selesai saat dibaca dan hanya
+  meng-cache daftar yang tidak kosong.
+- Keputusan pemilik proyek untuk modul ini ada di `keputusan.md` (Modul
+  reservasi, R1a sampai R4a).
 
-Pemetaan awal belum diambil. Langkah pertama sesi berikutnya:
-
-```bash
-find app/dashboard/outlet/reservasi -name '*.tsx' | xargs wc -l | sort -rn
-grep -rnE 'apiClient|: any|_id|queryKey' app/dashboard/outlet/reservasi --include='*.tsx' | cut -c1-130
-```
+Langkah pertama sesi berikutnya: menulis ulang ketiga spec master data
+(`tests/e2e/reservasi/tipeAset/crud-tipeAset.spec.ts`,
+`tests/e2e/reservasi/aset/crud-aset.spec.ts`, dan
+`tests/e2e/reservasi/tarif/crud-tarif.spec.ts`) menurut Catatan
+Playwright di `pengujian.md`, sampai `audit-fulfill.js` lolos untuk
+`tests/e2e/reservasi` dan spec itu lolos terhadap kode lama.
 
 ## Catatan dari modul inventaris
 
@@ -216,8 +249,8 @@ Yang masih berlaku:
 
 ### Utang kecil dari modul stock adjustment gudang
 
-- 21 error ESLint `@typescript-eslint/no-explicit-any` warisan di luar
-  berkas modul: spec reservasi (aset, tarif, tipe aset), login, integration
+- 20 error ESLint `@typescript-eslint/no-explicit-any` warisan di luar
+  berkas modul: spec reservasi (aset, tarif, tipe aset), integration
   jadwal, pengguna, dan pola roster, `tests/helpers/storage.ts`,
   `tests/unit/lib/decodeToken.test.ts`, dan `components/app-sidebar.tsx`
   baris 368. Bereskan saat berkasnya dimigrasikan; `storage.ts` sendiri

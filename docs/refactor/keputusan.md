@@ -336,6 +336,27 @@ keputusan rancangan butir 17.
 - **Dialog void, hapus, finalisasi, konfirmasi pembayaran, dan buat
   penjualan hanya tertutup saat berhasil** (keputusan Fase 0).
 
+### Modul reservasi
+
+Diputuskan pemilik proyek pada 26 September 2026, dengan prinsip
+keputusan rancangan butir 17 dan 21.
+
+- **R1a: spec master data dibangun ulang sebelum migrasi.** Spec tipe
+  aset, aset, dan tarif yang memalsukan respons sukses diganti seluruhnya
+  dengan spec terhadap backend sungguhan, dijalankan terhadap kode lama
+  sampai lolos, baru skenario baru ditambahkan dan dijalankan ulang.
+- **R2b: data uji booking memakai fixture tetap.** Tipe aset, tarif tanpa
+  batas hari dan jam, serta aset uji dibuat sekali bila belum ada; booking
+  dibuat per run di slot waktu unik lalu di-void, karena hapus aset tidak
+  memeriksa booking dan akan meninggalkan sesi yatim.
+- **R3a: daftar reservasi yang basi setelah void ditulis sebagai
+  `test.fixme` berbadan lengkap.** Data backend dibuktikan lewat detail
+  sesi booking yang belum pernah dibaca, sedangkan pemeriksaan daftar di
+  UI menunggu backend membersihkan cache daftar per tanggal.
+- **R4a: blok booking di daftar reservasi menautkan ke detail
+  penjualannya**, satu-satunya jalur membatalkan booking, tanpa menambah
+  aksi ubah atau hapus sesi booking.
+
 ## Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.
@@ -433,3 +454,13 @@ keputusan rancangan butir 17.
     validasi, dipakai ulang bila permintaan diulang, dan diganti setelah
     berhasil, lewat opsi header `api.post` dan `apiData.post`. Contoh:
     `x-idempotency-key` di `useBuatPenjualan` (keputusan K3a).
+21. **Spec e2e tidak memalsukan respons sukses.** `route.fulfill` hanya
+    menjawab status gagal untuk jalur yang tidak dapat dibuat backend
+    secara deterministik. Keadaan antara diuji dengan menahan permintaan
+    lalu meneruskannya (`route.continue`), dan keberhasilan dibuktikan
+    dari respons nyata atau data yang dibaca ulang lewat API. Simulasi
+    berstatus 200 yang tidak terhindarkan ditandai `// simulasi:` beserta
+    alasannya, dan gerbangnya `audit-fulfill.js`. Tujuan pengujian adalah
+    membuktikan logika dan alur berjalan benar di frontend dan backend
+    (pemilik proyek, 26 September 2026). Contoh:
+    `tests/e2e/auth/login.spec.ts` (`5a3deea`).

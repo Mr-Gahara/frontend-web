@@ -98,6 +98,15 @@ Semua error berbentuk `{ status: "error", message, errors? }`; `errors` hanya ad
 
 Login PIN untuk aplikasi dapat menjawab 200 dengan `success: false` (perangkat menunggu persetujuan). Web tidak terdampak, tetapi lapisan API tetap memeriksa `success` bila ada.
 
+Login yang gagal tidak mengikuti tabel di atas. Email tidak terdaftar
+dijawab 404 dengan `Email tidak ditemukan.`, password salah 400 dengan
+`Password salah.`, dan nama atau PIN salah 401 dengan
+`Nama atau PIN salah.` (backend `00b9957`: `akunService` baris 103 dan
+106, `penggunaDeviceService` baris 269 dan 271). Halaman login
+menampilkan `message` itu apa adanya tanpa refresh, terbukti di
+`tests/e2e/auth/login.spec.ts` (`5a3deea`). Pembedaan 404 dan 400
+tercatat di `temuan.md` butir 50.
+
 ### 2.4 Envelope respons
 
 Semua respons GET yang sukses memuat `data`. Kunci lain tidak seragam antarmodul (`success`, `message`, `count`, `total`). Lapisan API frontend mengambil `data` sebagai isi dan menyeragamkan `count` atau `total` menjadi satu nama. Kolom Envelope di bagian 3 (`endpoint.md`) menunjukkan kunci yang benar-benar dikirim. Pembukaan envelope ini, dan normalisasi identitas di 2.5, hanya dilakukan `lib/api/client.ts`. Halaman yang masih memakai klien lama `lib/apiClient.ts` menerima respons mentah, termasuk `_id`.
