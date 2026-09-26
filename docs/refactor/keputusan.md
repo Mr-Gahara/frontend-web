@@ -289,6 +289,53 @@ bug backend dilaporkan dan tidak diakali agar test lolos.
   dengan keputusan submodul jurnal stok, termasuk lokasi yang gagal dimuat
   dan tenant tanpa outlet (lokasi aktif kosong).
 
+### Modul penjualan dan pembayaran
+
+Diputuskan pemilik proyek pada 24 sampai 26 September 2026, dengan prinsip
+keputusan rancangan butir 17.
+
+- **K1a: data referensi lintas modul ada di `features/<domain>/`**
+  (pelanggan, diskon, pajak, akun kas, metode pembayaran). Masing-masing
+  dibuat di submodul pemakai pertamanya, dengan kunci `daftar()` yang
+  berbeda dari kunci yang diisi halaman lama (butir 12).
+- **K2a: pembayaran dari web tidak mengirim `status`.** Backend
+  menentukannya dari metode, dan karena `isAutomated` tidak ada di model,
+  hasilnya selalu PAID (`kontrak/temuan.md` butir 45).
+- **K3a: buat penjualan mengirim `x-idempotency-key`**, satu kunci per
+  pengisian form (butir 20).
+- **K4a: halaman buat penjualan tidak menampilkan stok produk**, karena
+  `produk.stok` tidak terhubung ke lokasi mana pun (`kontrak/temuan.md`
+  butir 37).
+- **K5b dan K11b: daftar penjualan memakai cakupan outlet hanya bagi
+  pemegang `read-location`.** Template Guest, Staff, dan Kasir memegang
+  `read-penjualan` tanpa `read-location`, sehingga gate tidak ditambah, dan
+  pengguna tanpa izin itu melihat penjualan seluruh tenant (pada MVP satu
+  outlet sama dengan outlet tenant). Penjualan tanpa `locationID` dianggap
+  milik outlet tenant, sama dengan cadangan backend saat finalisasi. Wajib
+  ditutup sebelum multi-outlet (`kontrak/temuan.md` butir 48 dan 49).
+- **K6b: spec alur membuktikan alur bisnis sampai stok dan pembayaran**,
+  dengan stok disiapkan sesuai kebutuhan setiap test, walau meninggalkan
+  penjualan FINAL dan pembayaran di data uji.
+- **K8a: tipe ber-`_id` yang masih dibaca halaman lama menjadi tipe
+  `Lama`** (butir 19), dengan syarat pemilik proyek: frontend akhirnya
+  harus bersih dari `_id`.
+- **K9a: asersi jurnal stok menjadi `test.fixme`** selama cache daftar
+  jurnal tidak dibersihkan saat jurnal ditulis (`kontrak/temuan.md` butir
+  46).
+- **K10a: pemeriksaan dialog yang bertahan saat gagal dipisah ke
+  `test.fixme` per submodul pemiliknya**, agar suite hijau di setiap
+  commit. Ketiganya sudah dibuka di submodul 2 dan 3.
+- **K12a: kolom Metode di riwayat pembayaran menampilkan nama metode
+  sebenarnya** dari daftar metode pembayaran, dan `-` bila tidak dapat
+  ditentukan, menggantikan "Kasir" yang selalu tampil.
+- **K13a: buat penjualan mengirim outlet tenant sebagai `locationID`** bagi
+  pemegang `read-location`. Pemilih outlet bagi pemegang izin lintas outlet
+  ditunda sampai multi-outlet.
+- **Detail dan pembayaran yang tidak ditemukan menampilkan pesan** tanpa
+  pengalihan otomatis, sejalan dengan detail stock opname.
+- **Dialog void, hapus, finalisasi, konfirmasi pembayaran, dan buat
+  penjualan hanya tertutup saat berhasil** (keputusan Fase 0).
+
 ## Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.
@@ -374,3 +421,15 @@ bug backend dilaporkan dan tidak diakali agar test lolos.
     hanya berlaku selama konstanta null memakai `test.skip` bersyarat.
     Contoh: `IZIN_LINTAS_OUTLET` di `lib/auth/permissions.ts` dan
     `tests/helpers/lintas-outlet.ts` (pemilik proyek, 22 September 2026).
+19. **Tipe ber-`_id` yang masih dibaca halaman lama menjadi jembatan
+    berakhiran `Lama`.** Nama kanonik menjadi tipe ber-`id` dari bentuk
+    respons nyata, sedangkan halaman lama memakai tipe lamanya lewat alias
+    impor (`PelangganLama as Pelanggan`), sehingga badan halaman tidak
+    berubah. Tipe `Lama` dihapus di commit migrasi modul pemiliknya, dan
+    sisanya dicatat di `status.md` sampai habis (pemilik proyek, 24
+    September 2026: frontend akhirnya harus bersih dari `_id`).
+20. **Endpoint buat yang mendukung idempotensi dipanggil dengan satu kunci
+    per pengisian form.** Kunci dibuat saat form pertama kali lolos
+    validasi, dipakai ulang bila permintaan diulang, dan diganti setelah
+    berhasil, lewat opsi header `api.post` dan `apiData.post`. Contoh:
+    `x-idempotency-key` di `useBuatPenjualan` (keputusan K3a).

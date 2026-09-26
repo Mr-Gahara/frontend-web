@@ -69,16 +69,14 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-**Baseline per perbaikan token spec pengajuan** (commit `8d62c56`): 156 test
-unit dan integrasi lolos di 22 berkas, 213 e2e lolos, 14 skipped:
+**Baseline per modul penjualan dan pembayaran** (commit `f33ffa6`): 186 test
+unit dan integrasi lolos di 27 berkas, 224 e2e lolos, 17 skipped:
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
-backend, empat `test.fixme` lain yang menunggu backend, dan dua `test.skip`
-bersyarat data (Test yang ditandai fixme dan skip bersyarat, di bawah).
-Suite kembali lolos seluruhnya setelah token spec alur pengajuan mengikuti
-`pin-refresh` (`8d62c56`, Catatan Playwright); baseline `247cf2d` mencatat
-212 lolos dengan 1 gagal.
-Diukur terhadap backend lokal `9cd1439` (branch `ridho` yang menggabungkan
-origin/yoga `f0b7157`). Angka ini pembanding untuk memastikan tidak ada
+backend, tujuh `test.fixme` lain yang menunggu backend (tiga di antaranya
+di spec alur penjualan), dan dua `test.skip` bersyarat data (Test yang
+ditandai fixme dan skip bersyarat, di bawah).
+Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
+menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
 periksa judul test yang dilewati sebelum menyimpulkan ada yang hilang.
 Begitu `IZIN_LINTAS_OUTLET` diisi, delapan skenario lintas outlet berjalan
@@ -263,6 +261,16 @@ satu putaran.
 - Ringkasan `passed:0 failed:0 skipped:0` berarti tidak ada test yang
   berjalan, biasanya karena spec gagal dikompilasi (misalnya modul helper
   belum ada), bukan hasil bersih. Jalankan `tsc` lebih dulu.
+- Asersi "tidak berubah" hanya bermakna bila bacaannya terbukti segar. Di
+  spec alur penjualan, asersi "tidak ada jurnal baru" lolos padahal daftar
+  jurnal di-cache 300 detik, sehingga bacaan sesudah selalu sama dengan
+  sebelumnya. Pastikan lebih dulu bahwa perubahan yang diharapkan memang
+  terbaca lewat sumber yang sama (asersi positif), baru percayai asersi
+  negatifnya.
+- Data uji harus dapat membedakan hasil yang benar dari yang salah. Bila
+  data hanya punya satu nilai (satu outlet), skenario penyaringan lolos
+  tanpa menguji apa pun; uji aturannya di unit test dan catat
+  keterbatasannya di Utang pengujian.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -274,6 +282,8 @@ Menunggu perbaikan backend:
 | Hapus pengguna | `Promise.all` paralel di dalam transaksi MongoDB |
 | Hitungan tersimpan dapat dikosongkan kembali (`inventaris/stockOpname/draft-stok-opname.spec.ts`) | Validator stock opname menerima `qtyPhysical` null (`kontrak/temuan.md` butir 22). Badannya berupa penanda; skenario ditulis saat `SERVER_TERIMA_HITUNGAN_KOSONG` dibalik |
 | Jumlah diterima 0 terkirim apa adanya (`inventaris/penerimaanBarang/terima-penerimaan.spec.ts`) | Backend berhenti menghitung stok masuk dengan `qtyTerima \|\| qtyKirim` (`kontrak/temuan.md` butir 30). Badannya lengkap; jalankan setelah `SERVER_TERIMA_JUMLAH_NOL` dibalik |
+| Jurnal Keluar penjualan langsung terbaca setelah finalisasi, dan finalisasi yang ditolak tidak menambah jurnal (`penjualan/alur-penjualan.spec.ts`, dua test) | Backend membersihkan cache daftar jurnal setiap kali `inventoryService` menulis jurnal (`kontrak/temuan.md` butir 46). Keduanya dibuka bersamaan: test kedua baru bermakna bila bacaan jurnal terbukti segar |
+| Finalisasi berhasil bila stok bahan outlet cukup walau stok produk tidak (`penjualan/alur-penjualan.spec.ts`) | Backend menghubungkan stok produk ke stok lokasi (`kontrak/temuan.md` butir 37) |
 | Delapan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, dan stock adjustment | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
@@ -340,6 +350,17 @@ Urutan debug kegagalan e2e di atas).
   tanpa badan, karena backend belum menerima `qtyPhysical` null
   (`kontrak/temuan.md` butir 22). Yang teruji saat ini hanya perilaku
   sementara: pengosongan ditahan dengan pesan, tanpa `PATCH`.
+
+- **Cakupan per lokasi di daftar penjualan tidak punya skenario e2e.** Data
+  uji hanya punya satu outlet, sehingga penyaringan per lokasi tidak dapat
+  dibedakan dari tanpa penyaringan. Aturannya, termasuk K11b dan penjualan
+  tanpa lokasi, diuji di `tests/unit/features/penjualan/filter.test.ts`.
+- **Jalur tanpa `read-location` di halaman penjualan** (tanpa cakupan, dan
+  tanpa `locationID` saat membuat) hanya teruji di unit test, dengan alasan
+  yang sama: satu-satunya akun uji berperan Owner.
+- **Idempotensi hanya teruji dari sisi klien**: kunci terkirim dan sama saat
+  permintaan diulang. Penahanan permintaan kembar di backend tidak diuji
+  dari web.
 
 ## Spec rujukan
 
@@ -428,3 +449,12 @@ Urutan debug kegagalan e2e di atas).
   rancangan butir 18). Contoh pemakaiannya: jalur terkunci di spec stok,
   pengajuan stok (daftar), dan stock adjustment memeriksa `locationID`
   permintaan terhadap id dari `/location/current`.
+- `tests/e2e/penjualan/alur-penjualan.spec.ts`: spec pembanding alur bisnis
+  dengan fixture tetap (`tests/helpers/penjualan-uji.ts`). Bahan baku dan
+  produk uji dibuat sekali, lalu stok master, `produk.stok`, dan stok outlet
+  disetel ulang di awal setiap test, sehingga pemotongan stok dibuktikan
+  dengan angka pasti. Kedua gerbang stok finalisasi diuji terpisah dengan
+  menyetel satu angka saja. Payload diperiksa dari permintaan nyata
+  (`postDataJSON`, header `x-idempotency-key`), dialog yang harus bertahan
+  diuji lewat `page.route`, dan kunci idempotensi dibandingkan antara
+  percobaan yang gagal dan ulangannya.

@@ -28,7 +28,9 @@ dan `temuan.md` dikoreksi manual terhadap backend `f27f093` (origin/yoga,
 20 September 2026) pada 21 September 2026. Pada hari yang sama, bagian
 transfer stok dan validator inventory di `endpoint.md`, `payload.md`, dan
 `temuan.md` dikoreksi terhadap backend `9cd1439` (branch `ridho` yang
-menggabungkan origin/yoga `f0b7157`). Bila
+menggabungkan origin/yoga `f0b7157`). Bagian penjualan dan pembayaran di
+`endpoint.md`, `payload.md`, `izin-halaman.md`, dan `temuan.md` dikoreksi
+terhadap backend `00b9957` (branch `ridho`) pada 26 September 2026. Bila
 backend berubah cukup jauh, `endpoint.md`, `payload.md`, `izin-halaman.md`,
 dan `route-backend.md` perlu dibangkitkan ulang; bagian 1 di bawah menjelaskan
 cara pembangkitannya. Gejala bahwa kontrak sudah tertinggal: endpoint yang

@@ -15,6 +15,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 22 September 2026: penerimaan barang dan pengiriman stok setelah migrasi submodul 6. Gate baris gudang untuk jurnal stok, stock opname, pengajuan stok, transfer stok, dan pengiriman stok dicocokkan ulang dengan `IZIN_HALAMAN` dan sudah sesuai.
 - 22 September 2026: stock adjustment, setelah daftarnya memakai cakupan outlet (`a5e9cec`, gate `fe5dd9c`).
 - 23 September 2026: stock adjustment gudang, halaman baru (`247cf2d`).
+- 26 September 2026: penjualan setelah migrasi modul penjualan dan pembayaran (`f33ffa6`), dan pengeluaran yang ternyata halaman placeholder.
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -24,8 +25,8 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/reservasi` | `read-booking` | `/aset`, `/sesibooking` | `read-booking` | Sejalan |
 | `/dashboard/outlet/diskon` | - | `/diskon` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/keuangan` | `read-akunkas` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
-| `/dashboard/outlet/penjualan` | `read-penjualan` | `/penjualan` | `read-penjualan` | Sejalan |
-| `/dashboard/outlet/pengeluaran` | `read-pembayaran` | - | - | Data dimuat lewat komponen, periksa manual |
+| `/dashboard/outlet/penjualan` | `read-penjualan` | `/penjualan`; `/location` dan `/location/current` hanya bagi pemegang `read-location` | `read-penjualan`; `read-location` opsional untuk cakupan outlet | Sejalan; gate sengaja tidak menambah `read-location` agar Guest, Staff, dan Kasir tetap dapat membuka daftar (keputusan K11b) |
+| `/dashboard/outlet/pengeluaran` | `read-pembayaran` | - | - | Halaman placeholder tanpa data |
 | `/dashboard/outlet/keuangan/ringkasanLabaRugi` | `read-laporan` | `/laporan/laba-rugi` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/inventaris-data` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/produk` | `read-produk` | `/produk` | `read-produk` atau `akses-pos` | Sejalan |

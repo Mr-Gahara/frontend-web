@@ -55,8 +55,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Gudang: cakupan per gudang | - | Dibatalkan (`keputusan.md`, Model bisnis MVP) |
 | Gudang: halaman stock adjustment | `247cf2d` | Selesai |
 | Perbaikan spec alur pengajuan stok | `8d62c56` | Selesai |
-| Penjualan dan pembayaran | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
-| Reservasi | - | Belum |
+| Penjualan dan pembayaran | `e8c81b1` (fondasi), `c9640ce` (daftar), `69a5d5e` (detail), `8738752` (pembayaran), `f33ffa6` (buat) | Selesai |
+| Reservasi | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 | Keuangan | - | Belum |
 | Jadwal dan shift | - | Belum |
 | Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), termasuk stock adjustment (`247cf2d`); `gudang/layout.tsx` dan `gudang/setup` masih memakai `apiClient`, dan layout memeriksa nama role Owner (baris 32, keputusan rancangan butir 2); pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
@@ -67,44 +67,50 @@ Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 
-| Hal | Awal | Setelah modul inventaris `580a1e1` | Catatan |
+| Hal | Awal | Setelah modul penjualan `f33ffa6` | Catatan |
 |---|---|---|---|
-| Pemakaian `any` | 302 | 88 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
-| Kemunculan `_id` | - | 99 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id` |
-| `useAuthGuard()` berulang di halaman | 49 | 39 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment) |
+| Pemakaian `any` | 302 | 71 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
+| Kemunculan `_id` | - | 78 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id` |
+| `useAuthGuard()` berulang di halaman | 49 | 35 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, dan keempat halaman penjualan) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
-| Berkas di atas 700 baris | 7 | 8 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Berkurang saat modulnya dimigrasikan |
+| Berkas di atas 700 baris | 7 | 7 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris (Utang kecil dari modul penjualan dan pembayaran). Berkurang saat modulnya dimigrasikan atau dipecah |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: modul penjualan dan pembayaran
+## Pekerjaan berikutnya: modul reservasi
 
-Empat halaman, 2.935 baris, seluruhnya masih memakai `apiClient`:
-`penjualan/page.tsx` (701), `penjualan/[id]/page.tsx` (589),
-`penjualan/[id]/pembayaran/page.tsx` (498), dan
-`penjualan/buatPenjualan/page.tsx` (1.147). Dua di antaranya ada di daftar
-berkas di atas 700 baris (Metrik sisa pekerjaan).
+Cakupan (pemilik proyek, 26 September 2026): seluruh halaman reservasi dan
+sesi booking beserta master datanya, yaitu aset, tipe aset, dan tarif,
+termasuk hubungannya dengan penjualan. Halamannya ada di
+`app/dashboard/outlet/reservasi/`: daftar dan buat reservasi, serta daftar,
+buat, dan edit untuk aset, tarif, dan tipe aset, beserta
+`app/dashboard/outlet/reservasi/layout.tsx` dan
+`app/dashboard/outlet/reservasi/components/reservasi-nav-tabs.tsx`.
 
-- Spec pembanding sudah ada: `tests/e2e/penjualan/buat-penjualan.spec.ts`.
-  Jalankan terhadap kode lama sebelum mengubah apa pun, dan lengkapi
-  skenarionya untuk halaman daftar, detail, dan pembayaran yang belum
-  terwakili.
-- Stok produk yang dikirim backend tidak terhubung ke stok outlet mana pun
-  (`kontrak/temuan.md` butir 37). Halaman buat penjualan memakai daftar
-  produk, jadi perilaku stoknya diputuskan bersama pemilik proyek sebelum
-  tampilan dirancang.
-- Tipe `Produk` dibaca halaman pajak dan buat penjualan; memindahkannya ke
-  `id` menuntut seluruh pembacanya ikut pindah dalam commit yang sama
-  (`arsitektur.md`, Fondasi yang sudah tersedia).
-- `app/dashboard/outlet/pengeluaran/page.tsx` hanya 8 baris; datanya dimuat
-  lewat komponen terpisah yang perlu dipetakan lebih dulu
-  (`kontrak/izin-halaman.md` menandainya "periksa manual").
+- Void penjualan membatalkan sesi booking-nya (`penjualanService.update`),
+  dan pembuatan booking membuat penjualan berjenis `booking`. Spec alurnya
+  harus membuktikan kedua arah itu, bukan hanya CRUD master data.
+- Spec pembanding yang sudah ada hanya untuk master data:
+  `tests/e2e/reservasi/aset/crud-aset.spec.ts`,
+  `tests/e2e/reservasi/tarif/crud-tarif.spec.ts`, dan
+  `tests/e2e/reservasi/tipeAset/crud-tipeAset.spec.ts`. Ketiganya membawa
+  error ESLint `any` warisan (Utang kecil dari modul stock adjustment
+  gudang). Daftar dan buat reservasi belum punya spec.
+- Buat reservasi mengisi kunci `pelanggan.semua` dan
+  `diskon.daftar({ status: "Aktif" })` dengan data mentah. Migrasinya
+  memakai `features/pelanggan` dan `features/diskon` (keputusan rancangan
+  butir 12), bukan membuat hook baru.
+- Kontrak sesi booking, aset, tipe aset, dan tarif belum pernah
+  diverifikasi terhadap kode. Telusuri route, validator, service, dan
+  mapper seperti modul penjualan; sebagian endpointnya tanpa
+  `checkPermission` (`kontrak/temuan.md` butir 5).
 
 Pemetaan awal belum diambil. Langkah pertama sesi berikutnya:
 
 ```bash
-grep -rnE 'apiClient|: any|_id|queryKey' app/dashboard/outlet/penjualan app/dashboard/outlet/pengeluaran --include='*.tsx' | cut -c1-130
+find app/dashboard/outlet/reservasi -name '*.tsx' | xargs wc -l | sort -rn
+grep -rnE 'apiClient|: any|_id|queryKey' app/dashboard/outlet/reservasi --include='*.tsx' | cut -c1-130
 ```
 
 ## Catatan dari modul inventaris
@@ -221,6 +227,30 @@ Yang masih berlaku:
   dokumen gudang yang dibuka lewat URL ruang outlet tetap tampil. Pola
   penjaganya sudah ada di `features/stock-adjustment/ruang.ts`
   (`TIPE_LOKASI_RUANG`). Bereskan saat halaman stock opname disentuh lagi.
+
+### Utang kecil dari modul penjualan dan pembayaran
+
+- Delapan tipe berakhiran `Lama` masih dipakai halaman yang belum
+  dimigrasikan lewat alias impor (`keputusan.md` butir 19): `PelangganLama`
+  (halaman pelanggan), `DiskonLama` (halaman diskon), `PajakLama`,
+  `ProdukPajakRelasiLama`, dan `PajakDariProdukLama` (pengaturan pajak),
+  `AkunKasLama` dan `AkunKasRefLama` (keuangan dan metode pembayaran), serta
+  `MetodePembayaranLama` (pengaturan metode pembayaran). Masing-masing
+  dihapus di commit migrasi modul pemiliknya. Sisanya dihitung dengan
+  `grep -rhoE 'export interface [A-Za-z]+Lama\b' types | wc -l` (8 per
+  `f33ffa6`).
+- `features/penjualan/halaman-buat-penjualan.tsx` masih 1.127 baris:
+  migrasi memindahkan lapisan data dan membuang `any`, tetapi tidak memecah
+  komponennya. Pisahkan pemilih pelanggan, pemilih diskon, dan pratinjau
+  total saat halaman itu disentuh lagi.
+- Cakupan outlet daftar penjualan (K11b) dan `locationID` buat penjualan
+  (K13a) hanya berlaku bagi pemegang `read-location`; pengguna lain melihat
+  seluruh penjualan tenant dan tidak mengirim lokasi. Halaman buat belum
+  punya pemilih outlet bagi pemegang izin lintas outlet. Keduanya wajib
+  ditutup sebelum multi-outlet (`kontrak/temuan.md` butir 48 dan 49).
+- Tiga `test.fixme` di spec alur penjualan menunggu backend: dua untuk
+  cache daftar jurnal (`kontrak/temuan.md` butir 46) dan satu untuk stok
+  produk (butir 37).
 
 ### Utang kecil dari penyesuaian backend `f27f093`
 

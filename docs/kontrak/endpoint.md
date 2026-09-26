@@ -30,7 +30,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/akunkas` | authPengguna | `read-akunkas` | `{ data }` | `id` | 6 file |
+| GET | `/akunkas` | authPengguna | `read-akunkas` | `{ data }` | `id` | `features/akun-kas/api.ts`, 5 file halaman lama |
 | POST | `/akunkas` | authPengguna | `create-akunkas` | - | - | 1 file |
 
 #### `/aset`
@@ -67,7 +67,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/diskon` | authPengguna | - | `{ data }` | `id` | 3 file |
+| GET | `/diskon` | authPengguna | - | `{ data }` | `id` | `features/diskon/api.ts`, 2 file halaman lama |
 | POST | `/diskon` | authPengguna | `create-diskon` | - | - | 1 file |
 | PUT | `/diskon/:id` | authPengguna | `update-diskon` | - | - | 1 file |
 | DELETE | `/diskon/:id` | authPengguna | `delete-diskon` | - | - | 1 file |
@@ -124,7 +124,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/metodepembayaran` | authPengguna | - | `{ data }` | `id` | 2 file |
+| GET | `/metodepembayaran` | authPengguna | - | `{ data }` | `id` | `features/metode-pembayaran/api.ts`, 1 file halaman lama |
 | POST | `/metodepembayaran` | authPengguna | `create-metode-pembayaran` | - | - | 1 file |
 | GET | `/metodepembayaran/:id` | authPengguna | - | `{ data }` | `id` | 1 file |
 | PUT | `/metodepembayaran/:id` | authPengguna | `update-metode-pembayaran` | - | - | 1 file |
@@ -134,7 +134,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/pajak` | authPengguna | - | `{ data, success }` | `_id` | 2 file |
+| GET | `/pajak` | authPengguna | - | `{ data, success }` | `_id` | `features/pajak/api.ts`, 1 file halaman lama |
 | POST | `/pajak` | authPengguna | - | - | - | 1 file |
 | PUT | `/pajak/:id` | authPengguna | - | - | - | 1 file |
 | DELETE | `/pajak/:id` | authPengguna | - | - | - | 1 file |
@@ -143,7 +143,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/pelanggan` | authPengguna | - | `{ data }` | `id` | 3 file |
+| GET | `/pelanggan` | authPengguna | - | `{ data }` | `id` | `features/pelanggan/api.ts`, 2 file halaman lama |
 | POST | `/pelanggan` | authPengguna | `create-pelanggan` | - | - | 1 file |
 | PUT | `/pelanggan/:id` | authPengguna | `update-pelanggan` | - | - | 1 file |
 | DELETE | `/pelanggan/:id` | authPengguna | `delete-pelanggan` | - | - | 1 file |
@@ -152,8 +152,8 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/pembayaran` | authPengguna | `read-pembayaran` | `{ data }` | `id` | 1 file |
-| POST | `/pembayaran` | authPengguna | `create-pembayaran` | - | - | 1 file |
+| GET | `/pembayaran` | authPengguna | `read-pembayaran` | `{ data }` | `id` | `features/pembayaran/api.ts` |
+| POST | `/pembayaran` | authPengguna | `create-pembayaran` | - | - | `features/pembayaran/api.ts` |
 
 #### `/pengajuanstok`
 
@@ -184,11 +184,11 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/penjualan` | authPengguna | `read-penjualan` | `{ data }` | `id`, `_id` bersarang | 1 file |
-| POST | `/penjualan` | authPengguna | `create-penjualan` | - | - | 1 file |
-| GET | `/penjualan/:id` | authPengguna | `read-penjualan` | `{ data }` | `id`, `_id` bersarang | 2 file |
-| PUT | `/penjualan/:id` | authPengguna | `update-penjualan` | - | - | 2 file |
-| DELETE | `/penjualan/:id` | authPengguna | `delete-penjualan` | - | - | 1 file |
+| GET | `/penjualan` | authPengguna | `read-penjualan` | `{ data }` | `id`, `_id` bersarang | `features/penjualan/api.ts` |
+| POST | `/penjualan` | authPengguna | `create-penjualan` | - | - | `features/penjualan/api.ts` |
+| GET | `/penjualan/:id` | authPengguna | `read-penjualan` | `{ data }` | `id`, `_id` bersarang | `features/penjualan/api.ts` |
+| PUT | `/penjualan/:id` | authPengguna | `update-penjualan` | - | - | `features/penjualan/api.ts` |
+| DELETE | `/penjualan/:id` | authPengguna | `delete-penjualan` | - | - | `features/penjualan/api.ts` |
 
 #### `/permission`
 
@@ -323,13 +323,13 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /metodepembayaran/:param`: akunKas{id, namaAkun, nomorAkun}, createdAt, id, isActive, kategori, namaPembayaran, tenantID, updatedAt
 - `GET /pajak`: _id, createdAt, modelPerhitungan, namaPajak, prioritas, statusPajak, tarifPajak, tenantID, tipePajak, updatedAt
 - `GET /pelanggan`: alamat, createdAt, email, id, namaPelanggan, nomorHp, poinLoyalitas, tenantID, tipePelanggan, updatedAt
-- `GET /pembayaran`: akunKasID, catatan, createdAt, gatewayPaymentID, id, jumlahBayar, metodePembayaranID, noReferensi, penjualanID, qrString, status, tanggalBayar, tenantID, updatedAt
+- `GET /pembayaran`: akunKasID, catatan, createdAt, gatewayPaymentID, id, jumlahBayar, metodePembayaranID, noReferensi, penjualanID, qrString, status, tanggalBayar, tenantID, updatedAt (dari `mappers/pembayaranMapper.js` backend `00b9957`: `akunKasID`, `penjualanID`, dan `metodePembayaranID` berupa id string lewat `_extractId`, tanpa nama metode; service hanya membaca `tenantID`, sehingga daftar selalu berisi seluruh pembayaran tenant, `temuan.md` butir 43)
 - `GET /pengajuanstok`: catatan, catatanPenolakan, createdAt, dariLokasi{id, nama, tipe}, dimintaOleh{id, nama}, disetujuiOleh, ditolakOleh, id, items[], jenisPengajuan, keLokasi{id, nama, tipe}, nomorPengajuan, status, tanggalApprove, tanggalKebutuhan, tanggalReject, tenantID, transferStokID, updatedAt (query yang dibaca service: `status`, `jenisPengajuan`, dan `locationID` untuk lokasi asal atau tujuan; status dibatasi menurut izin, `temuan.md` butir 21). Arah: `dariLokasi` adalah gudang asal barang dan `keLokasi` outlet peminta (`temuan.md` butir 23); `GET /pengajuanstok/:param` menambahkan `items[].stokGudangSaatIni`, yaitu stok item di `dariLocationID`
 - `GET /pengajuanstok/:param`: catatan, catatanPenolakan, createdAt, dariLokasi{id, nama, tipe}, dimintaOleh{id, nama}, disetujuiOleh, ditolakOleh, id, items[], jenisPengajuan, keLokasi{id, nama, tipe}, nomorPengajuan, status, tanggalApprove, tanggalKebutuhan, tanggalReject, tenantID, transferStokID, updatedAt
 - `GET /pengguna`: aksesType[], fotoKaryawan, id, nama, nomorHp, role, roleID, status
 - `GET /pengguna/:param`: aksesType[], fotoKaryawan, id, nama, nomorHp, role, roleID, status
-- `GET /penjualan`: createdAt, dataPelanggan{_id, namaPelanggan, nomorHp, tipePelanggan}, dataPengguna{_id, nama}, diskonGlobal[], id, itemPenjualan[], jatuhTempo, jenisPenjualan, jenisTransaksi, jumlahDiskonTransaksi, jumlahPajakTransaksi, keterangan, locationID, noReferensi, pajakTransaksi[], sisaTagihan, statusBayar, statusPenjualan, tanggalTransaksi, tenantID, totalDibayar, totalHargaProduk, totalTagihan, updatedAt
-- `GET /penjualan/:param`: createdAt, dataPelanggan{_id, namaPelanggan, tipePelanggan}, dataPengguna{_id, nama}, diskonGlobal[], id, itemPenjualan[], jatuhTempo, jenisPenjualan, jenisTransaksi, jumlahDiskonTransaksi, jumlahPajakTransaksi, keterangan, locationID, noReferensi, pajakTransaksi[], sisaTagihan, statusBayar, statusPenjualan, tanggalTransaksi, tenantID, totalDibayar, totalHargaProduk, totalTagihan, updatedAt
+- `GET /penjualan`: createdAt, dataPelanggan{_id, namaPelanggan, nomorHp, tipePelanggan}, dataPengguna{_id, nama}, diskonGlobal[], id, itemPenjualan[], jatuhTempo, jenisPenjualan, jenisTransaksi, jumlahDiskonTransaksi, jumlahPajakTransaksi, keterangan, locationID, noReferensi, pajakTransaksi[], sisaTagihan, statusBayar, statusPenjualan, tanggalTransaksi, tenantID, totalDibayar, totalHargaProduk, totalTagihan, updatedAt (dari `mappers/penjualanMapper.js` backend `00b9957`: `pajakTransaksi[]` dan `itemPenjualan[].rincianPajak[]` berbentuk `{_id, namaPajak, tarifPajak, jumlah, model}`, sedangkan `diskonGlobal[]` dan `itemPenjualan[].diskonItem[]` berisi hasil populate diskon. Daftar disaring di memori menurut delapan query, yaitu `statusBayar`, `statusPenjualan`, `jenisTransaksi`, `jenisPenjualan`, `pelangganID`, `startDate`, `endDate`, dan `noReferensi`, dari cache 60 detik per tenant, tanpa `locationID`, `temuan.md` butir 49)
+- `GET /penjualan/:param`: createdAt, dataPelanggan{_id, namaPelanggan, tipePelanggan}, dataPengguna{_id, nama}, diskonGlobal[], id, itemPenjualan[], jatuhTempo, jenisPenjualan, jenisTransaksi, jumlahDiskonTransaksi, jumlahPajakTransaksi, keterangan, locationID, noReferensi, pajakTransaksi[], sisaTagihan, statusBayar, statusPenjualan, tanggalTransaksi, tenantID, totalDibayar, totalHargaProduk, totalTagihan, updatedAt (bentuk seperti daftar; `dataPelanggan` detail mem-populate `alamat` dan `email`, bukan `nomorHp`)
 - `GET /permission`: __v, _id, deskripsi, grup, nama
 - `GET /polaroster`: detailSiklus[], dibuatPada, id, keterangan, namaPola, siklusHari
 - `GET /produk`: _id, createdAt, gambarProduk, hargaDasar, hargaJual, isUnlimitedStok, kategori, kategoriID, keterangan, namaProduk, pajakList[], resep[], stok, updatedAt (`stok` adalah angka per tenant yang tidak terhubung ke stok lokasi mana pun, `temuan.md` butir 37)

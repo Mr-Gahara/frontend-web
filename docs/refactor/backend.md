@@ -157,6 +157,16 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   outlet dan gudang, baik lewat izin maupun lewat penyaring, sehingga
   pemisahan stok outlet dan gudang hanya ditegakkan di tampilan frontend
   (`kontrak/temuan.md` butir 40)
+- Laporan modul penjualan dan pembayaran — 9 temuan, disusun 26 September
+  2026: validator buat penjualan mewajibkan `penggunaID` yang dibuang
+  controller, galat validasi penjualan dan pembayaran tanpa `status` dan
+  `message`, daftar pembayaran tanpa filter per penjualan dan tanpa nama
+  metode, pembayaran tanpa idempotensi, `isAutomated` yang tidak ada di
+  model, cache daftar jurnal yang tidak dibersihkan saat jurnal ditulis,
+  hapus bahan baku yang meninggalkan data yatim, pengguna tanpa
+  `read-location` yang tidak dapat mengetahui outletnya, dan daftar
+  penjualan tanpa filter lokasi; beserta catatan 408 test merah di branch
+  `ridho` (`kontrak/temuan.md` butir 41 sampai 49)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

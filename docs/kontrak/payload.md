@@ -245,9 +245,10 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /pembayaran`
 
 - Aturan: validatePembayaranPayload (validators/pembayaranValidator.js)
-- Wajib dari klien: `penjualanID`, `metodePembayaranID`, `akunKasID`, `jumlahBayar`
-- Field lain yang dikenali: `status`, `tanggalBayar`
+- Wajib dari klien: `penjualanID`, `metodePembayaranID`, `akunKasID`, `jumlahBayar`; `tanggalBayar` wajib bila status akhirnya PAID dan tidak boleh mendahului tanggal transaksi penjualan (`pembayaranService`, dikoreksi 26 September 2026)
+- Field lain yang dikenali: `status`, `tanggalBayar`, `catatan`. `status` dari klien hanya dipakai untuk metode otomatis (`metodeValid.isAutomated`), tetapi field itu tidak ada di skema metode pembayaran, sehingga status selalu PAID (`temuan.md` butir 45); web tidak mengirimnya (keputusan K2a)
 - Nilai sah: `VALID_STATUS`: PAID, PENDING, EXPIRED, FAILED, VOID
+- Aturan service: penjualan VOID, penjualan yang sudah lunas, dan `jumlahBayar` di atas `sisaTagihan` ditolak 400; `sisaTagihan` dikurangi secara atomik sebelum dokumen dibuat. Tanpa idempotensi (`temuan.md` butir 44). Galat validator dibalas mentah `{ errors }` dari route (butir 42)
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -288,9 +289,10 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /penjualan`
 
-- Aturan: validateIdOrArray (validators/penjualanValidator.js)
-- Wajib dari klien: `penggunaID`, `pelangganID`, `jenisTransaksi`, `tanggalTransaksi`, `jenisPenjualan`, `itemPenjualan`
-- Field lain yang dikenali: `simpanDraft`, `finalize`, `statusPenjualan`, `locationID`, `jatuhTempo`, `pajakTransaksiIDs`, `diskonGlobalIDs`, `jumlahDiskonTransaksi`
+- Aturan: `validatePenjualanPayload` (validators/penjualanValidator.js), dipasang di route setelah `tenantID` disuntik dari sesi; controller lalu menyaring body dengan allowlist 14 field (`_sanitizePayload`). Analisis statis sempat mencatat `validateIdOrArray`, fungsi pembantu di berkas yang sama (dikoreksi 26 September 2026)
+- Wajib dari klien: `penggunaID` (hanya karena validator mewajibkannya; controller membuangnya dan memakai pengguna dari token, `temuan.md` butir 41), `pelangganID`, `jenisTransaksi`, `tanggalTransaksi` (tidak boleh di masa depan), `jenisPenjualan`, `itemPenjualan` (minimal satu, dengan `produkID` sah dan `jumlah` minimal 1)
+- Field lain yang dikenali (allowlist controller): `jatuhTempo`, `diskonGlobalIDs`, `jumlahDiskonTransaksi`, `pajakTransaksiIDs`, `keterangan`, `locationID`, `simpanDraft`, `statusPenjualan`, `finalize`
+- Header: `x-idempotency-key` (opsional). Kunci yang sama dalam 24 jam per tenant mengembalikan hasil pertama, dan dijawab 409 selama permintaan pertama masih diproses
 - Nilai sah: `VALID_STATUS_PENJUALAN`: DRAFT, FINAL, VOID; `VALID_JENIS_TRANSAKSI`: POS, INVOICE; `VALID_JENIS_PENJUALAN`: dine-in, takeaway, booking
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
@@ -471,9 +473,10 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /penjualan/:id`
 
-- Aturan: validateIdOrArray (validators/penjualanValidator.js)
-- Wajib dari klien: `penggunaID`, `pelangganID`, `jenisTransaksi`, `tanggalTransaksi`, `jenisPenjualan`, `itemPenjualan`
-- Field lain yang dikenali: `simpanDraft`, `finalize`, `statusPenjualan`, `locationID`, `jatuhTempo`, `pajakTransaksiIDs`, `diskonGlobalIDs`, `jumlahDiskonTransaksi`
+- Aturan: `validatePenjualanPayload` dengan `isUpdate` (validators/penjualanValidator.js) di route, lalu allowlist controller yang sama dengan buat. Analisis statis sempat mencatat `validateIdOrArray` (dikoreksi 26 September 2026)
+- Wajib dari klien: - (seluruh field opsional saat update)
+- Field lain yang dikenali: sama dengan buat. `finalize: true` memfinalisasi DRAFT, memotong stok lewat `inventoryService.processSaleStock` di `locationID` penjualan atau lokasi Outlet pertama tenant; `statusPenjualan: "VOID"` membatalkan DRAFT beserta sesi booking-nya
+- Aturan service: penjualan VOID tidak dapat diubah; penjualan FINAL tidak dapat diubah maupun di-VOID langsung (pembayarannya harus di-void lebih dulu)
 - Nilai sah: `VALID_STATUS_PENJUALAN`: DRAFT, FINAL, VOID; `VALID_JENIS_TRANSAKSI`: POS, INVOICE; `VALID_JENIS_PENJUALAN`: dine-in, takeaway, booking
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`

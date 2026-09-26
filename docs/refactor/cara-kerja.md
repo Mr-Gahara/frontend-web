@@ -485,6 +485,15 @@ polanya salah.
   GNU seperti `--time-style`. Pakai `command ls` bila opsi `ls` asli
   dibutuhkan.
 
+- **Kata yang diawali `=` diperluas zsh.** `echo ====` gagal dengan
+  `=== not found`, karena zsh membaca `=perintah` sebagai path perintah
+  itu, dan sisa baris tidak berjalan. Pemisah ditulis berkutip, misalnya
+  `echo '== judul'`.
+- **Kolom keluaran Jest tidak tetap.** Baris `FAIL` memuat nama project
+  (`unit`, `integration`) dan kadang durasi (`(811.617 s)`), sehingga
+  `awk '{print $2}'` maupun `$NF` salah mengambil path. Ambil path dengan
+  pola `grep -oE '__tests__/[^ ]+\.test\.js'`.
+
 ## Catatan form (React Hook Form dan Zod)
 
 - **Hindari `z.coerce`.** Ia membuat tipe input dan output skema berbeda,
@@ -785,6 +794,30 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   submodul transfer, tetapi satu spec tertinggal memakai pola lama. Saat
   sebuah aturan ditulis, grep pemakaian pola lamanya di seluruh spec dan
   perbaiki sekaligus, jangan hanya di berkas yang sedang dikerjakan.
+
+- **Salinan untuk migrasi diambil dari `git show HEAD:`, bukan dari berkas
+  kerja.** Pada halaman buat penjualan, blok salinan dijalankan setelah
+  blok yang menulis halaman tipis, sehingga yang tersalin adalah halaman
+  tipis itu. Sumber dari HEAD tidak bergantung pada urutan eksekusi blok.
+- **Jangkar diperiksa ada tepat sekali oleh skrip yang menulis, sebelum
+  menulis apa pun.** `ganti-baris.js` membandingkan `indexOf(jangkar)`
+  dengan indeks yang diberikan; saat jangkar tidak ada, keduanya `-1`
+  sehingga dianggap cocok, dan wilayah baru tertempel di akhir berkas.
+  Skrip wilayah di modul penjualan menghitung kemunculan setiap jangkar
+  dan berhenti bila tidak tepat satu. Helper itu belum ditambal.
+- **Berkas marka hanya memuat pasangan yang wajib.** `ganti-blok.js`
+  menulis semua atau tidak sama sekali, sehingga satu pasangan yang tidak
+  cocok menahan seluruhnya. Di halaman buat penjualan, pasangan pengganti
+  deklarasi tipe union yang setara dengan `JenisPenjualan` gagal cocok
+  tanpa sebab yang terjelaskan dan menahan 15 pasangan lain; pasangan itu
+  tidak diperlukan dan dibuang.
+- **Teks yang muncul berulang diganti dengan jumlah kemunculan yang
+  ditetapkan**, bukan lewat pasangan unik: skrip memeriksa setiap pola
+  muncul tepat N kali sebelum mengganti semuanya (`d._id || d.id` delapan
+  kali di halaman buat penjualan).
+- **Istilah `docs:dampak` harus khas.** Istilah umum seperti "lama" atau
+  "buat" menjaring ratusan baris derau (237 baris untuk "Lama" di modul
+  penjualan). Pakai nama fungsi, nama berkas, atau frasa khas.
 
 ## Kapan berhenti dan bertanya
 
