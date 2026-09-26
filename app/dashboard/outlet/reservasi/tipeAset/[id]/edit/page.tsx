@@ -121,7 +121,9 @@ export default function EditTipeAsetPage() {
 
     const payload: TipeAsetPayload = {
       namaTipeAset: data.namaTipeAset.trim(),
-      deskripsi: data.deskripsi?.trim() || undefined,
+      // Deskripsi yang dikosongkan dikirim sebagai "" agar terhapus di backend;
+      // tanpa field ini backend mempertahankan deskripsi lama.
+      deskripsi: data.deskripsi?.trim() ?? "",
     };
 
     updateMutation.mutate(payload);

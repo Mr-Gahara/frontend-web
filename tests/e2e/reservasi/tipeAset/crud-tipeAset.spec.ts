@@ -1,1208 +1,588 @@
-import { test, expect, type Page, type Route } from "@playwright/test";
+import { test, expect, type Page, type Request, type Response } from "@playwright/test";
+import { login, bukaDenganAuth, api, BASIS, JAWAB_GAGAL, type Auth } from "../../../helpers/transfer-uji";
 
-// =============================================================================
-// HELPERS & AUTH SETUP
-// =============================================================================
+/*
+ * Spec tipe aset terhadap backend sungguhan (keputusan rancangan butir 21,
+ * keputusan R1a). Data uji dibuat lewat API dengan nama unik per run dan
+ * dihapus lewat API di finally. page.route hanya dipakai untuk menahan
+ * permintaan lalu meneruskannya, atau menjawab gagal untuk satu method dan
+ * path. Satu-satunya simulasi (daftar kosong) ditandai "// simulasi:".
+ */
 
-async function login(page: Page) {
-  await page.goto("http://localhost:3000/login");
-  await page.getByLabel(/email/i).fill("toko@gmail.com");
-  await page.getByLabel(/password/i).fill("Toko1234");
-  await page.getByRole("button", { name: /login/i }).click();
+type TipeAsetMentah = {
+  id: string;
+  namaTipeAset: string;
+  deskripsi: string | null;
+  dataTarif: { id: string }[];
+};
 
-  await page.waitForURL("**/login/pengguna");
-  await page.getByLabel(/nama/i).fill("Ridho");
-  await page.getByLabel(/pin/i).fill("123456");
-  await page.getByRole("button", { name: /login/i }).click();
+const URL_DAFTAR = BASIS + "/dashboard/outlet/reservasi/tipeAset";
+const URL_BUAT = URL_DAFTAR + "/buatTipeAset";
+const urlEdit = (id: string) => URL_DAFTAR + "/" + id + "/edit";
+const POLA_DAFTAR = /\/api\/tipeaset(\?|$)/i;
+const POLA_SATU = /\/api\/tipeaset\/[^/?]+(\?|$)/i;
+const ID_TIDAK_ADA = "000000000000000000000000";
 
-  await page.waitForURL("**/dashboard");
+let urut = 0;
+const unik = () => Date.now().toString(36) + (urut++).toString(36);
+const namaUji = (label: string) => "E2E Tipe " + label + " " + unik();
+const tunda = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+function cocok(method: string, pola: RegExp) {
+  return (r: Response) => r.request().method() === method && pola.test(r.url());
 }
 
-// -----------------------------------------------------------------------------
-// BUTLER UTILITY: API GUARD
-// Mencegah Playwright mencegat request dokumen HTML agar halaman bisa di-render
-// -----------------------------------------------------------------------------
-function withApiGuard(handler: (route: Route) => any) {
-  return (route: Route) => {
-    const type = route.request().resourceType();
-    if (type === "fetch" || type === "xhr") {
-      return handler(route);
-    }
-    return route.continue();
+async function buatTipe(page: Page, auth: Auth, nama: string, deskripsi?: string) {
+  const r = await api<TipeAsetMentah>(
+    page,
+    auth,
+    "POST",
+    "/tipeaset",
+    deskripsi ? { namaTipeAset: nama, deskripsi } : { namaTipeAset: nama },
+  );
+  expect(r.status, "buat tipe aset uji: " + r.pesan).toBeLessThan(300);
+  expect(r.data?.id, "respons buat tipe aset harus membawa id").toBeTruthy();
+  return r.data;
+}
+
+async function hapusTipe(page: Page, auth: Auth, id: string | undefined) {
+  if (id) await api(page, auth, "DELETE", "/tipeaset/" + id);
+}
+
+const bacaTipe = (page: Page, auth: Auth, id: string) =>
+  api<TipeAsetMentah>(page, auth, "GET", "/tipeaset/" + id);
+
+/** Membuka daftar dan mengembalikan isi respons GET daftar halaman itu sendiri. */
+async function bukaDaftar(page: Page): Promise<TipeAsetMentah[]> {
+  await page.goto(URL_DAFTAR, { waitUntil: "commit" });
+  const res = await page.waitForResponse(cocok("GET", POLA_DAFTAR));
+  expect(res.status()).toBe(200);
+  return (await res.json()).data as TipeAsetMentah[];
+}
+
+const baris = (page: Page, nama: string) => page.getByRole("row").filter({ hasText: nama });
+
+function pantauPermintaan(page: Page, method: string, pola: RegExp) {
+  const tercatat: Request[] = [];
+  const catat = (r: Request) => {
+    if (r.method() === method && pola.test(r.url())) tercatat.push(r);
   };
+  page.on("request", catat);
+  return { jumlah: () => tercatat.length, lepas: () => page.off("request", catat) };
 }
 
-// =============================================================================
-// MOCK DATA FIXTURES
-// =============================================================================
-
-const MOCK_LIST = [
-  {
-    id: "tipe-001",
-    _id: "tipe-001",
-    namaTipeAset: "Meja Billiard",
-    deskripsi: "Meja billiard standar internasional",
-    dataTarif: [{ id: "t1" }, { id: "t2" }],
-  },
-  {
-    id: "tipe-002",
-    _id: "tipe-002",
-    namaTipeAset: "Lapangan Futsal",
-    deskripsi: "Lapangan futsal indoor berukuran standar",
-    dataTarif: [],
-  },
-  {
-    id: "tipe-003",
-    _id: "tipe-003",
-    namaTipeAset: "Kolam Renang",
-    deskripsi: null,
-    dataTarif: [{ id: "t3" }],
-  },
-];
-
-const MOCK_SINGLE = MOCK_LIST[0];
-
-// =============================================================================
-// URL CONSTANTS
-// =============================================================================
-
-const BASE = "http://localhost:3000";
-const LIST_PATH = "/dashboard/outlet/reservasi/tipeAset";
-const BUAT_PATH = "/dashboard/outlet/reservasi/tipeAset/buatTipeAset";
-const EDIT_PATH = "/dashboard/outlet/reservasi/tipeAset/tipe-001/edit";
-
-// =============================================================================
-// SUITE 1 — Halaman Daftar Tipe Aset
-// =============================================================================
+/** Menahan permintaan method itu sebentar lalu meneruskannya ke backend sungguhan. */
+async function tahanLaluTeruskan(page: Page, method: string, pola: RegExp, ms = 1_500) {
+  await page.route(pola, async (route) => {
+    if (route.request().method() === method) await tunda(ms);
+    await route.continue();
+  });
+}
 
 test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
   });
 
-  // ---------------------------------------------------------------------------
-  // 1.1 UI & Render State
-  // ---------------------------------------------------------------------------
-
-  test("harus merender header, search bar, counter total, dan tombol tambah", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    await expect(
-      page.getByRole("heading", { name: /kategori aset/i }),
-    ).toBeVisible();
+  test("merender judul, pencarian, total sesuai respons, dan tombol tambah", async ({ page }) => {
+    const data = await bukaDaftar(page);
+    await expect(page.getByRole("heading", { name: "Kategori Aset", exact: true })).toBeVisible();
     await expect(page.getByPlaceholder(/cari kategori/i)).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /tambah kategori/i }),
-    ).toBeVisible();
-    await expect(page.getByText(/total: 3 tipe/i)).toBeVisible();
+    await expect(page.getByText("Total: " + data.length + " Tipe")).toBeVisible();
+    await expect(page.getByRole("button", { name: /tambah kategori/i })).toBeVisible();
   });
 
-  test("harus merender loading spinner saat data sedang diambil dari API", async ({
+  test("menampilkan spinner selama daftar dimuat, lalu data dari backend", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaUji("Muat");
+    let t: TipeAsetMentah | undefined;
+    try {
+      t = await buatTipe(page, auth, nama);
+      await tahanLaluTeruskan(page, "GET", POLA_DAFTAR);
+      await page.goto(URL_DAFTAR);
+      await expect(page.getByText("Memuat data...")).toBeVisible();
+      await expect(baris(page, nama)).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText("Memuat data...")).toHaveCount(0);
+      await page.unroute(POLA_DAFTAR);
+    } finally {
+      await hapusTipe(page, auth, t?.id);
+    }
+  });
+
+  test("menampilkan pesan galat saat daftar gagal dimuat", async ({ page }) => {
+    await page.route(POLA_DAFTAR, (route) =>
+      route.request().method() === "GET" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
+    );
+    await page.goto(URL_DAFTAR);
+    await expect(page.getByText("Gagal memuat data tipe aset.")).toBeVisible({ timeout: 20_000 });
+    await page.unroute(POLA_DAFTAR);
+  });
+
+  test("menampilkan total 0 tanpa baris saat tenant belum punya tipe aset", async ({ page }) => {
+    await page.route(POLA_DAFTAR, async (route) => {
+      if (route.request().method() !== "GET") return route.continue();
+      const asli = await route.fetch();
+      const body = await asli.json();
+      // simulasi: tenant tanpa tipe aset hanya ada bila seluruh tipe aset tenant uji dihapus
+      await route.fulfill({ status: asli.status(), json: { ...body, data: [] } });
+    });
+    const tDaftar = page.waitForResponse(cocok("GET", POLA_DAFTAR));
+    await page.goto(URL_DAFTAR);
+    await tDaftar;
+    await expect(page.getByText("Memuat data...")).toHaveCount(0);
+    await expect(page.getByText("Total: 0 Tipe")).toBeVisible();
+    await expect(page.getByRole("button", { name: /^edit$/i })).toHaveCount(0);
+    await expect(page.getByText("Tidak ada tipe aset yang cocok dengan pencarian.")).toHaveCount(0);
+    await page.unroute(POLA_DAFTAR);
+  });
+
+  test("menampilkan nama, deskripsi atau penggantinya, dan jumlah tarif dari backend", async ({
     page,
   }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard(async (route) => {
-        await new Promise((r) => setTimeout(r, 2_000));
-        return route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        });
-      }),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-    await expect(page.getByText(/memuat data/i)).toBeVisible();
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const namaA = namaUji("Deskripsi");
+    const namaB = namaUji("Kosong");
+    const deskripsi = "Deskripsi uji " + unik();
+    let a: TipeAsetMentah | undefined;
+    let b: TipeAsetMentah | undefined;
+    try {
+      a = await buatTipe(page, auth, namaA, deskripsi);
+      b = await buatTipe(page, auth, namaB);
+      const data = await bukaDaftar(page);
+      const mentahA = data.find((x) => x.id === a?.id);
+      expect(mentahA, "tipe aset uji harus ada di respons daftar").toBeTruthy();
+      await expect(page.getByText("Total: " + data.length + " Tipe")).toBeVisible();
+      await expect(baris(page, namaA)).toContainText(deskripsi);
+      await expect(baris(page, namaA)).toContainText(
+        (mentahA?.dataTarif.length ?? -1) + " Tarif Terhubung",
+      );
+      await expect(baris(page, namaB)).toContainText("Tidak ada deskripsi");
+    } finally {
+      await hapusTipe(page, auth, a?.id);
+      await hapusTipe(page, auth, b?.id);
+    }
   });
 
-  test("harus merender error state saat API gagal (500)", async ({ page }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({ status: 500, body: "Internal Server Error" }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-    await expect(page.getByText(/gagal memuat data tipe aset/i)).toBeVisible();
-  });
-
-  test("harus merender empty state 'belum ada data' saat list kosong tanpa pencarian", async ({
+  test("pencarian menyaring di klien tanpa peka huruf dan menampilkan keadaan tanpa hasil", async ({
     page,
   }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: [] }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-    await expect(
-      page.getByText(/belum ada master data tipe aset/i),
-    ).toBeVisible();
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaUji("Cari");
+    let t: TipeAsetMentah | undefined;
+    try {
+      t = await buatTipe(page, auth, nama);
+      await bukaDaftar(page);
+      const cari = page.getByPlaceholder(/cari kategori/i);
+      const permintaan = pantauPermintaan(page, "GET", POLA_DAFTAR);
+      await test.step("nama persis", async () => {
+        await cari.fill(nama);
+        await expect(baris(page, nama)).toBeVisible();
+        await expect(page.getByText("Total: 1 Tipe")).toBeVisible();
+      });
+      await test.step("huruf besar", async () => {
+        await cari.fill(nama.toUpperCase());
+        await expect(baris(page, nama)).toBeVisible();
+        await expect(page.getByText("Total: 1 Tipe")).toBeVisible();
+      });
+      await test.step("tanpa hasil", async () => {
+        await cari.fill("tidak-ada-" + unik());
+        await expect(page.getByText("Tidak ada tipe aset yang cocok dengan pencarian.")).toBeVisible();
+        await expect(page.getByText("Total: 0 Tipe")).toBeVisible();
+      });
+      expect(permintaan.jumlah(), "pencarian tidak memanggil backend").toBe(0);
+      permintaan.lepas();
+    } finally {
+      await hapusTipe(page, auth, t?.id);
+    }
   });
 
-  test("harus merender data dengan benar — nama, deskripsi, dan badge jumlah tarif", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    await expect(
-      page.getByText("Meja Billiard", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      page.getByText("Meja billiard standar internasional"),
-    ).toBeVisible();
-    await expect(page.getByText("2 Tarif Terhubung")).toBeVisible();
-
-    await expect(
-      page.getByText("Lapangan Futsal", { exact: true }),
-    ).toBeVisible();
-    await expect(page.getByText("0 Tarif Terhubung")).toBeVisible();
-
-    await expect(page.getByText("Kolam Renang")).toBeVisible();
-    await expect(page.getByText("1 Tarif Terhubung")).toBeVisible();
-  });
-
-  test("item tanpa deskripsi harus menampilkan teks fallback 'Tidak ada deskripsi'", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-    await expect(page.getByText(/tidak ada deskripsi/i)).toBeVisible();
-  });
-
-  // ---------------------------------------------------------------------------
-  // 1.2 Search Filter
-  // ---------------------------------------------------------------------------
-
-  test("search harus menyaring list secara client-side dan memperbarui counter", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    await page.getByPlaceholder(/cari kategori/i).fill("billiard");
-
-    await expect(
-      page.getByText("Meja Billiard", { exact: true }),
-    ).toBeVisible();
-    await expect(page.getByText("Lapangan Futsal")).not.toBeVisible();
-    await expect(page.getByText("Kolam Renang")).not.toBeVisible();
-    await expect(page.getByText(/total: 1 tipe/i)).toBeVisible();
-  });
-
-  test("search yang tidak menemukan hasil harus tampilkan empty state dengan teks pencarian", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    await page.getByPlaceholder(/cari kategori/i).fill("aset tidak pernah ada");
-
-    await expect(
-      page.getByText(/tidak ada tipe aset yang cocok dengan pencarian/i),
-    ).toBeVisible();
-    await expect(page.getByText(/total: 0 tipe/i)).toBeVisible();
-  });
-
-  test("search harus case-insensitive — 'BILLIARD' harus match 'Meja Billiard'", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-    await page.getByPlaceholder(/cari kategori/i).fill("BILLIARD");
-    await expect(
-      page.getByText("Meja Billiard", { exact: true }),
-    ).toBeVisible();
-  });
-
-  // ---------------------------------------------------------------------------
-  // 1.3 Navigasi
-  // ---------------------------------------------------------------------------
-
-  test("tombol 'Tambah Kategori' harus navigate ke halaman buatTipeAset", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
+  test("tombol Tambah Kategori membuka halaman buat", async ({ page }) => {
+    await bukaDaftar(page);
     await page.getByRole("button", { name: /tambah kategori/i }).click();
-
-    await page.waitForURL(`**${BUAT_PATH}`);
-    await expect(page).toHaveURL(new RegExp(BUAT_PATH));
+    await page.waitForURL("**/tipeAset/buatTipeAset");
   });
 
-  test("tombol Edit harus navigate ke halaman edit dengan ID item yang benar", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    const firstRow = page.getByRole("row").filter({ hasText: "Meja Billiard" });
-    await firstRow.getByRole("button", { name: /edit/i }).click();
-
-    await page.waitForURL("**/tipe-001/edit");
-    await expect(page).toHaveURL(/tipe-001\/edit/);
+  test("tombol Edit membuka halaman edit dengan id dari backend", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaUji("Navigasi");
+    let t: TipeAsetMentah | undefined;
+    try {
+      t = await buatTipe(page, auth, nama);
+      await bukaDaftar(page);
+      await baris(page, nama).getByRole("button", { name: /edit/i }).click();
+      await page.waitForURL(urlEdit(t.id));
+    } finally {
+      await hapusTipe(page, auth, t?.id);
+    }
   });
 
-  // ---------------------------------------------------------------------------
-  // 1.4 Delete Flow
-  // ---------------------------------------------------------------------------
-
-  test("klik tombol hapus (ikon trash) harus membuka modal konfirmasi dengan nama item", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    const targetRow = page
-      .getByRole("row")
-      .filter({ hasText: "Meja Billiard" });
-    await targetRow.getByRole("button").last().click();
-
-    await expect(page.getByRole("alertdialog")).toBeVisible();
-    await expect(
-      page.getByRole("alertdialog").getByText(/meja billiard/i),
-    ).toBeVisible();
-    await expect(page.getByText(/akan dihapus secara permanen/i)).toBeVisible();
+  test("hapus: dialog menyebut nama, dan Batal menutupnya tanpa menghapus", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaUji("Batal Hapus");
+    let t: TipeAsetMentah | undefined;
+    try {
+      t = await buatTipe(page, auth, nama);
+      await bukaDaftar(page);
+      const permintaan = pantauPermintaan(page, "DELETE", POLA_SATU);
+      await baris(page, nama).getByRole("button").last().click();
+      const dialog = page.getByRole("alertdialog");
+      await expect(dialog).toContainText("Hapus Tipe Aset?");
+      await expect(dialog).toContainText(nama);
+      await dialog.getByRole("button", { name: "Batal", exact: true }).click();
+      await expect(dialog).toBeHidden();
+      expect(permintaan.jumlah(), "Batal tidak mengirim DELETE").toBe(0);
+      permintaan.lepas();
+      expect((await bacaTipe(page, auth, t.id)).status).toBe(200);
+      await expect(baris(page, nama)).toBeVisible();
+    } finally {
+      await hapusTipe(page, auth, t?.id);
+    }
   });
 
-  test("klik Batal di modal hapus harus menutup modal dan data tetap ada di tabel", async ({
+  test("hapus: tombol menunggu selama permintaan berjalan, lalu data terhapus di backend", async ({
     page,
   }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    const targetRow = page
-      .getByRole("row")
-      .filter({ hasText: "Meja Billiard" });
-    await targetRow.getByRole("button").last().click();
-
-    await expect(page.getByRole("alertdialog")).toBeVisible();
-    await page.getByRole("button", { name: /batal/i }).click();
-
-    await expect(page.getByRole("alertdialog")).not.toBeVisible();
-    await expect(
-      page.getByText("Meja Billiard", { exact: true }),
-    ).toBeVisible();
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaUji("Hapus");
+    let t: TipeAsetMentah | undefined;
+    let terhapus = false;
+    try {
+      t = await buatTipe(page, auth, nama);
+      await bukaDaftar(page);
+      await tahanLaluTeruskan(page, "DELETE", POLA_SATU);
+      await baris(page, nama).getByRole("button").last().click();
+      const dialog = page.getByRole("alertdialog");
+      const tHapus = page.waitForResponse(cocok("DELETE", POLA_SATU));
+      await dialog.getByRole("button", { name: /ya, hapus tipe/i }).click();
+      const menunggu = dialog.getByRole("button", { name: /menghapus/i });
+      await expect(menunggu).toBeVisible();
+      await expect(menunggu).toBeDisabled();
+      expect((await tHapus).status()).toBeLessThan(300);
+      terhapus = true;
+      await expect(dialog).toBeHidden();
+      await expect(baris(page, nama)).toHaveCount(0);
+      expect((await bacaTipe(page, auth, t.id)).status).toBe(404);
+      await page.unroute(POLA_SATU);
+    } finally {
+      if (!terhapus) await hapusTipe(page, auth, t?.id);
+    }
   });
 
-  test("konfirmasi hapus loading state: tombol harus disabled dan teks berubah", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard(async (route) => {
-        await new Promise((r) => setTimeout(r, 2_000));
-        return route.fulfill({ status: 200, body: "{}" });
-      }),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    const targetRow = page
-      .getByRole("row")
-      .filter({ hasText: "Meja Billiard" });
-    await targetRow.getByRole("button").last().click();
-    await page.getByRole("button", { name: /ya, hapus/i }).click();
-
-    await expect(
-      page.getByRole("button", { name: /menghapus/i }),
-    ).toBeDisabled();
-    await expect(page.getByRole("button", { name: /batal/i })).toBeDisabled();
-  });
-
-  test("konfirmasi hapus happy path: item hilang dari tabel setelah dihapus", async ({
-    page,
-  }) => {
-    let getCallCount = 0;
-
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) => {
-        if (route.request().method() === "GET") {
-          getCallCount++;
-          const data =
-            getCallCount === 1
-              ? MOCK_LIST
-              : MOCK_LIST.filter((i) => i.id !== "tipe-001");
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ data }),
-          });
-        }
-        return route.continue();
-      }),
-    );
-
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ success: true }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    const targetRow = page
-      .getByRole("row")
-      .filter({ hasText: "Meja Billiard" });
-    await targetRow.getByRole("button").last().click();
-    await page.getByRole("button", { name: /ya, hapus/i }).click();
-
-    await expect(
-      page.getByText(/data tipe aset berhasil dihapus/i),
-    ).toBeVisible({ timeout: 5_000 });
-    await expect(page.getByText("Meja Billiard")).not.toBeVisible();
-    await expect(page.getByRole("alertdialog")).not.toBeVisible();
-  });
-
-  test("konfirmasi hapus error: toast error muncul dan modal tidak ikut tertutup", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 422,
-          contentType: "application/json",
-          body: JSON.stringify({
-            message: "Tipe aset masih digunakan oleh aset aktif",
-          }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    const targetRow = page
-      .getByRole("row")
-      .filter({ hasText: "Meja Billiard" });
-    await targetRow.getByRole("button").last().click();
-    await page.getByRole("button", { name: /ya, hapus/i }).click();
-
-    await expect(
-      page.getByText(/tipe aset masih digunakan/i).first(),
-    ).toBeVisible({ timeout: 5_000 });
+  test("hapus gagal: dialog tetap terbuka, pesan tampil, dan data tetap ada", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaUji("Hapus Gagal");
+    let t: TipeAsetMentah | undefined;
+    try {
+      t = await buatTipe(page, auth, nama);
+      await bukaDaftar(page);
+      await page.route(POLA_SATU, (route) =>
+        route.request().method() === "DELETE" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
+      );
+      await baris(page, nama).getByRole("button").last().click();
+      const dialog = page.getByRole("alertdialog");
+      await dialog.getByRole("button", { name: /ya, hapus tipe/i }).click();
+      await expect(page.getByText("Gagal", { exact: true })).toBeVisible();
+      await expect(dialog).toBeVisible();
+      await page.unroute(POLA_SATU);
+      expect((await bacaTipe(page, auth, t.id)).status).toBe(200);
+    } finally {
+      await hapusTipe(page, auth, t?.id);
+    }
   });
 });
-
-// =============================================================================
-// SUITE 2 — Halaman Buat Tipe Aset
-// =============================================================================
 
 test.describe("E2E — Tipe Aset › Halaman Buat", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
   });
 
-  // ---------------------------------------------------------------------------
-  // 2.1 UI & Navigasi
-  // ---------------------------------------------------------------------------
-
-  test("harus merender form dengan semua elemen yang diperlukan", async ({
-    page,
-  }) => {
-    await page.goto(`${BASE}${BUAT_PATH}`);
-
-    await expect(
-      page.getByRole("heading", { name: /tambah kategori aset baru/i }),
-    ).toBeVisible();
+  test("merender form beserta tombolnya", async ({ page }) => {
+    await page.goto(URL_BUAT);
+    await expect(page.getByRole("heading", { name: /tambah kategori aset baru/i })).toBeVisible();
     await expect(page.getByPlaceholder(/meja billiard vip/i)).toBeVisible();
-    await expect(
-      page.getByPlaceholder(/catatan atau keterangan/i),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /simpan kategori aset/i }),
-    ).toBeVisible();
-    await expect(page.getByRole("button", { name: /batal/i })).toBeVisible();
+    await expect(page.getByPlaceholder(/catatan atau keterangan/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /simpan kategori aset/i })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Batal", exact: true })).toBeVisible();
   });
 
-  test("tombol 'Kembali ke Daftar' harus navigate ke halaman daftar", async ({
+  test("tombol kembali dan Batal kembali ke daftar tanpa menyimpan", async ({ page }) => {
+    const permintaan = pantauPermintaan(page, "POST", POLA_DAFTAR);
+    await page.goto(URL_BUAT);
+    await page.getByRole("button", { name: /kembali ke daftar kategori aset/i }).click();
+    await page.waitForURL("**/reservasi/tipeAset");
+    await page.goto(URL_BUAT);
+    await page.getByRole("button", { name: "Batal", exact: true }).click();
+    await page.waitForURL("**/reservasi/tipeAset");
+    expect(permintaan.jumlah(), "kembali dan Batal tidak mengirim POST").toBe(0);
+    permintaan.lepas();
+  });
+
+  test("validasi: nama kosong dan satu karakter ditolak tanpa mengirim permintaan", async ({
     page,
   }) => {
-    await page.goto(`${BASE}${BUAT_PATH}`);
-
-    await page
-      .getByRole("button", { name: /kembali ke daftar kategori aset/i })
-      .click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-    await expect(page).toHaveURL(new RegExp(LIST_PATH));
-  });
-
-  test("tombol 'Batal' harus navigate ke halaman daftar", async ({ page }) => {
-    await page.goto(`${BASE}${BUAT_PATH}`);
-
-    await page.getByRole("button", { name: /batal/i }).click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-    await expect(page).toHaveURL(new RegExp(LIST_PATH));
-  });
-
-  // ---------------------------------------------------------------------------
-  // 2.2 Validasi Form (Zod)
-  // ---------------------------------------------------------------------------
-
-  test("unhappy: submit tanpa nama harus menampilkan pesan validasi wajib diisi", async ({
-    page,
-  }) => {
-    await page.goto(`${BASE}${BUAT_PATH}`);
-
-    await page.getByRole("button", { name: /simpan kategori aset/i }).click();
-
-    await expect(
-      page.getByText(/nama kategori aset wajib diisi/i),
-    ).toBeVisible();
-  });
-
-  test("unhappy: submit dengan nama 1 karakter harus menampilkan error minimal 2 karakter", async ({
-    page,
-  }) => {
-    await page.goto(`${BASE}${BUAT_PATH}`);
-
+    const permintaan = pantauPermintaan(page, "POST", POLA_DAFTAR);
+    await page.goto(URL_BUAT);
+    const simpan = page.getByRole("button", { name: /simpan kategori aset/i });
+    await simpan.click();
+    await expect(page.getByText("Nama Kategori Aset wajib diisi")).toBeVisible();
     await page.getByPlaceholder(/meja billiard vip/i).fill("A");
-    await page.getByRole("button", { name: /simpan kategori aset/i }).click();
-
-    await expect(page.getByText(/minimal 2 karakter/i)).toBeVisible();
+    await simpan.click();
+    await expect(page.getByText("Nama Kategori Aset minimal 2 karakter")).toBeVisible();
+    expect(permintaan.jumlah(), "validasi gagal tidak mengirim POST").toBe(0);
+    permintaan.lepas();
   });
 
-  test("deskripsi bersifat opsional — tidak ada error validasi saat deskripsi dikosongkan", async ({
+  test("berhasil tanpa deskripsi: nama dipangkas, deskripsi tidak dikirim, dan data tersimpan", async ({
     page,
   }) => {
-    await page.goto(`${BASE}${BUAT_PATH}`);
-
-    await page.getByPlaceholder(/meja billiard vip/i).fill("Tipe Valid");
-    await expect(page.getByText(/deskripsi.*wajib/i)).not.toBeVisible();
+    const auth = await bukaDenganAuth(page, URL_BUAT);
+    const nama = namaUji("Buat");
+    let id: string | undefined;
+    try {
+      await page.getByPlaceholder(/meja billiard vip/i).fill("  " + nama + "  ");
+      const tKirim = page.waitForResponse(cocok("POST", POLA_DAFTAR));
+      await page.getByRole("button", { name: /simpan kategori aset/i }).click();
+      const res = await tKirim;
+      const payload = res.request().postDataJSON();
+      expect(payload.namaTipeAset).toBe(nama);
+      expect(payload).not.toHaveProperty("deskripsi");
+      expect(res.status()).toBeLessThan(300);
+      id = (await res.json()).data?.id;
+      expect(id, "respons buat harus membawa id").toBeTruthy();
+      await page.waitForURL("**/reservasi/tipeAset");
+      await expect(baris(page, nama)).toBeVisible();
+      const tersimpan = await bacaTipe(page, auth, id ?? "");
+      expect(tersimpan.status).toBe(200);
+      expect(tersimpan.data.namaTipeAset).toBe(nama);
+      expect(tersimpan.data.deskripsi).toBeNull();
+    } finally {
+      await hapusTipe(page, auth, id);
+    }
   });
 
-  // ---------------------------------------------------------------------------
-  // 2.3 Loading State
-  // ---------------------------------------------------------------------------
-
-  test("loading state: tombol harus disabled dan teks berubah saat submit in-flight", async ({
+  test("berhasil dengan deskripsi: tombol menunggu selama menyimpan, lalu deskripsi tersimpan", async ({
     page,
   }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard(async (route) => {
-        if (route.request().method() === "POST") {
-          await new Promise((r) => setTimeout(r, 2_000));
-          return route.fulfill({ status: 201, body: "{}" });
-        }
-        return route.continue();
-      }),
-    );
-
-    await page.goto(`${BASE}${BUAT_PATH}`);
-    await page.getByPlaceholder(/meja billiard vip/i).fill("Arena Badminton");
-    await page.getByRole("button", { name: /simpan kategori aset/i }).click();
-
-    await expect(
-      page.getByRole("button", { name: /menyimpan data/i }),
-    ).toBeDisabled();
-    await expect(page.getByRole("button", { name: /batal/i })).toBeDisabled();
+    const auth = await bukaDenganAuth(page, URL_BUAT);
+    const nama = namaUji("Buat Deskripsi");
+    const deskripsi = "Deskripsi uji " + unik();
+    let id: string | undefined;
+    try {
+      await tahanLaluTeruskan(page, "POST", POLA_DAFTAR);
+      await page.getByPlaceholder(/meja billiard vip/i).fill(nama);
+      await page.getByPlaceholder(/catatan atau keterangan/i).fill(deskripsi);
+      const tKirim = page.waitForResponse(cocok("POST", POLA_DAFTAR));
+      await page.getByRole("button", { name: /simpan kategori aset/i }).click();
+      const menunggu = page.getByRole("button", { name: /menyimpan data/i });
+      await expect(menunggu).toBeVisible();
+      await expect(menunggu).toBeDisabled();
+      const res = await tKirim;
+      expect(res.status()).toBeLessThan(300);
+      id = (await res.json()).data?.id;
+      await page.waitForURL("**/reservasi/tipeAset");
+      const tersimpan = await bacaTipe(page, auth, id ?? "");
+      expect(tersimpan.status).toBe(200);
+      expect(tersimpan.data.deskripsi).toBe(deskripsi);
+      await page.unroute(POLA_DAFTAR);
+    } finally {
+      await hapusTipe(page, auth, id);
+    }
   });
 
-  // ---------------------------------------------------------------------------
-  // 2.4 Happy Path
-  // ---------------------------------------------------------------------------
-
-  test("happy path: submit nama valid tanpa deskripsi harus redirect ke daftar + toast sukses", async ({
+  test("gagal dari backend: pesan backend tampil, tetap di halaman buat, dan tidak ada data ganda", async ({
     page,
   }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) => {
-        if (route.request().method() === "POST") {
-          return route.fulfill({
-            status: 201,
-            contentType: "application/json",
-            body: JSON.stringify({
-              data: { id: "tipe-004", namaTipeAset: "Arena Badminton" },
-            }),
-          });
-        }
-        return route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        });
-      }),
-    );
-
-    await page.goto(`${BASE}${BUAT_PATH}`);
-    await page.getByPlaceholder(/meja billiard vip/i).fill("Arena Badminton");
-    await page.getByRole("button", { name: /simpan kategori aset/i }).click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-    await expect(page).toHaveURL(new RegExp(LIST_PATH));
-    await expect(
-      page.getByText(/kategori aset baru berhasil ditambahkan/i),
-    ).toBeVisible();
-  });
-
-  test("happy path: payload yang dikirim harus sesuai — nama trimmed, deskripsi ada jika diisi", async ({
-    page,
-  }) => {
-    let capturedBody: any = null;
-
-    await page.route(
-      "**/tipeAset",
-      withApiGuard(async (route) => {
-        if (route.request().method() === "POST") {
-          capturedBody = route.request().postDataJSON();
-          return route.fulfill({
-            status: 201,
-            contentType: "application/json",
-            body: JSON.stringify({ data: { id: "tipe-005" } }),
-          });
-        }
-        return route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        });
-      }),
-    );
-
-    await page.goto(`${BASE}${BUAT_PATH}`);
-    await page.getByPlaceholder(/meja billiard vip/i).fill("  Kamar VIP  ");
-    await page
-      .getByPlaceholder(/catatan atau keterangan/i)
-      .fill("Kamar eksklusif dengan AC");
-    await page.getByRole("button", { name: /simpan kategori aset/i }).click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-
-    expect(capturedBody.namaTipeAset).toBe("Kamar VIP");
-    expect(capturedBody.deskripsi).toBe("Kamar eksklusif dengan AC");
-  });
-
-  test("happy path: submit tanpa deskripsi harus mengirim payload tanpa field deskripsi", async ({
-    page,
-  }) => {
-    let capturedBody: any = null;
-
-    await page.route(
-      "**/tipeAset",
-      withApiGuard(async (route) => {
-        if (route.request().method() === "POST") {
-          capturedBody = route.request().postDataJSON();
-          return route.fulfill({
-            status: 201,
-            contentType: "application/json",
-            body: JSON.stringify({ data: { id: "tipe-006" } }),
-          });
-        }
-        return route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        });
-      }),
-    );
-
-    await page.goto(`${BASE}${BUAT_PATH}`);
-    await page
-      .getByPlaceholder(/meja billiard vip/i)
-      .fill("Tipe Tanpa Deskripsi");
-    await page.getByRole("button", { name: /simpan kategori aset/i }).click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-
-    expect(capturedBody.deskripsi).toBeUndefined();
-  });
-
-  test("unhappy: error dari backend harus menampilkan toast error dan tidak redirect", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) => {
-        if (route.request().method() === "POST") {
-          return route.fulfill({
-            status: 409,
-            contentType: "application/json",
-            body: JSON.stringify({ message: "Nama tipe aset sudah terdaftar" }),
-          });
-        }
-        return route.continue();
-      }),
-    );
-
-    await page.goto(`${BASE}${BUAT_PATH}`);
-    await page.getByPlaceholder(/meja billiard vip/i).fill("Meja Billiard");
-    await page.getByRole("button", { name: /simpan kategori aset/i }).click();
-
-    await expect(page.getByText(/nama tipe aset sudah terdaftar/i)).toBeVisible(
-      { timeout: 5_000 },
-    );
-    await expect(page).toHaveURL(new RegExp(BUAT_PATH));
+    const auth = await bukaDenganAuth(page, URL_BUAT);
+    const nama = namaUji("Duplikat");
+    let t: TipeAsetMentah | undefined;
+    try {
+      t = await buatTipe(page, auth, nama);
+      await page.getByPlaceholder(/meja billiard vip/i).fill(nama);
+      const tKirim = page.waitForResponse(cocok("POST", POLA_DAFTAR));
+      await page.getByRole("button", { name: /simpan kategori aset/i }).click();
+      const res = await tKirim;
+      const body = await res.json();
+      expect(res.status()).toBe(400);
+      expect(body.message, "respons gagal harus membawa message").toBeTruthy();
+      await expect(page.getByText("Gagal Menyimpan")).toBeVisible();
+      await expect(page.getByText(body.message).first()).toBeVisible();
+      await expect(page).toHaveURL(/\/buatTipeAset$/);
+      const daftar = await api<TipeAsetMentah[]>(page, auth, "GET", "/tipeaset");
+      expect(daftar.data.filter((x) => x.namaTipeAset === nama)).toHaveLength(1);
+    } finally {
+      await hapusTipe(page, auth, t?.id);
+    }
   });
 });
-
-// =============================================================================
-// SUITE 3 — Halaman Edit Tipe Aset
-// =============================================================================
 
 test.describe("E2E — Tipe Aset › Halaman Edit", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
   });
 
-  // ---------------------------------------------------------------------------
-  // 3.1 Guard — ID Tidak Valid
-  // ---------------------------------------------------------------------------
-
-  test("guard: navigasi ke ID 'undefined' harus merender halaman error ID tidak valid", async ({
+  test("id 'undefined' menampilkan halaman ID tidak valid, dan tombol kembali ke daftar", async ({
     page,
   }) => {
-    await page.goto(
-      `${BASE}/dashboard/outlet/reservasi/tipeAset/undefined/edit`,
-    );
-
-    await expect(page.getByText(/id tipe aset tidak valid/i)).toBeVisible();
-    await expect(page.getByText(/id pada url ini rusak/i)).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /kembali ke daftar tipe aset/i }),
-    ).toBeVisible();
-  });
-
-  test("guard: tombol kembali di halaman error ID harus navigate ke daftar", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(
-      `${BASE}/dashboard/outlet/reservasi/tipeAset/undefined/edit`,
-    );
-
-    await page
-      .getByRole("button", { name: /kembali ke daftar tipe aset/i })
-      .click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-    await expect(page).toHaveURL(new RegExp(LIST_PATH));
-  });
-
-  // ---------------------------------------------------------------------------
-  // 3.2 Loading & Error State Fetch
-  // ---------------------------------------------------------------------------
-
-  test("harus merender loading spinner saat data tipe aset sedang di-fetch", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard(async (route) => {
-        await new Promise((r) => setTimeout(r, 2_000));
-        return route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_SINGLE }),
-        });
-      }),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
-    await expect(page.getByText(/memuat data tipe aset/i)).toBeVisible();
-  });
-
-  test("harus merender error state saat fetch data gagal (404)", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard((route) =>
-        route.fulfill({ status: 404, body: "Not Found" }),
-      ),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
-
-    await expect(page.getByText(/data tidak ditemukan/i)).toBeVisible();
-    await expect(
-      page.getByText(/gagal mengambil data tipe aset/i),
-    ).toBeVisible();
-    await expect(page.getByRole("button", { name: /kembali/i })).toBeVisible();
-  });
-
-  test("tombol kembali di error state fetch harus navigate ke daftar", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard((route) =>
-        route.fulfill({ status: 404, body: "Not Found" }),
-      ),
-    );
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
+    await page.goto(URL_DAFTAR + "/undefined/edit");
+    await expect(page.getByText("ID Tipe Aset Tidak Valid")).toBeVisible();
     await page.getByRole("button", { name: /kembali/i }).click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-    await expect(page).toHaveURL(new RegExp(LIST_PATH));
+    await page.waitForURL("**/reservasi/tipeAset");
   });
 
-  // ---------------------------------------------------------------------------
-  // 3.3 Pre-fill & Navigasi
-  // ---------------------------------------------------------------------------
+  test("menampilkan spinner selama data dimuat, lalu form terisi data backend", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaUji("Isi Form");
+    const deskripsi = "Deskripsi uji " + unik();
+    let t: TipeAsetMentah | undefined;
+    try {
+      t = await buatTipe(page, auth, nama, deskripsi);
+      await tahanLaluTeruskan(page, "GET", POLA_SATU);
+      await page.goto(urlEdit(t.id));
+      await expect(page.getByText("Memuat data tipe aset...")).toBeVisible();
+      await expect(page.getByPlaceholder(/meja billiard vip/i)).toHaveValue(nama, { timeout: 10_000 });
+      await expect(page.getByPlaceholder(/catatan atau keterangan/i)).toHaveValue(deskripsi);
+      await page.unroute(POLA_SATU);
+    } finally {
+      await hapusTipe(page, auth, t?.id);
+    }
+  });
 
-  test("harus pre-fill form dengan data existing yang diambil dari API", async ({
+  test("id yang tidak ada menampilkan Data Tidak Ditemukan, dan tombol kembali ke daftar", async ({
     page,
   }) => {
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard((route) => {
-        if (route.request().method() === "GET") {
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ data: MOCK_SINGLE }),
-          });
-        }
-        return route.continue();
-      }),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
-
-    const namaInput = page.getByPlaceholder(/meja billiard vip/i);
-    const deskripsiInput = page.getByPlaceholder(/catatan atau keterangan/i);
-
-    await expect(namaInput).toHaveValue("Meja Billiard");
-    await expect(deskripsiInput).toHaveValue(
-      "Meja billiard standar internasional",
-    );
+    const tBaca = page.waitForResponse(cocok("GET", POLA_SATU));
+    await page.goto(urlEdit(ID_TIDAK_ADA));
+    expect((await tBaca).status()).toBe(404);
+    await expect(page.getByText("Data Tidak Ditemukan")).toBeVisible({ timeout: 20_000 });
+    await page.getByRole("button", { name: /kembali/i }).click();
+    await page.waitForURL("**/reservasi/tipeAset");
   });
 
-  test("tombol 'Kembali ke Daftar Tipe Aset' harus navigate ke halaman daftar", async ({
+  test("tombol Kembali ke Daftar Tipe Aset dan Batal kembali ke daftar tanpa menyimpan", async ({
     page,
   }) => {
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard((route) => {
-        if (route.request().method() === "GET") {
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ data: MOCK_SINGLE }),
-          });
-        }
-        return route.continue();
-      }),
-    );
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
-    await page
-      .getByRole("button", { name: /kembali ke daftar tipe aset/i })
-      .click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-    await expect(page).toHaveURL(new RegExp(LIST_PATH));
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaUji("Kembali");
+    let t: TipeAsetMentah | undefined;
+    try {
+      t = await buatTipe(page, auth, nama);
+      const permintaan = pantauPermintaan(page, "PUT", POLA_SATU);
+      await page.goto(urlEdit(t.id));
+      await expect(page.getByPlaceholder(/meja billiard vip/i)).toHaveValue(nama);
+      await page.getByRole("button", { name: /kembali ke daftar tipe aset/i }).click();
+      await page.waitForURL("**/reservasi/tipeAset");
+      await page.goto(urlEdit(t.id));
+      await expect(page.getByPlaceholder(/meja billiard vip/i)).toHaveValue(nama);
+      await page.getByRole("button", { name: "Batal", exact: true }).click();
+      await page.waitForURL("**/reservasi/tipeAset");
+      expect(permintaan.jumlah(), "kembali dan Batal tidak mengirim PUT").toBe(0);
+      permintaan.lepas();
+    } finally {
+      await hapusTipe(page, auth, t?.id);
+    }
   });
 
-  test("tombol 'Batal' harus navigate ke halaman daftar", async ({ page }) => {
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard((route) => {
-        if (route.request().method() === "GET") {
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ data: MOCK_SINGLE }),
-          });
-        }
-        return route.continue();
-      }),
-    );
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
-    await page.getByRole("button", { name: /batal/i }).click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-    await expect(page).toHaveURL(new RegExp(LIST_PATH));
+  test("validasi: nama kosong ditolak tanpa mengirim permintaan", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaUji("Validasi");
+    let t: TipeAsetMentah | undefined;
+    try {
+      t = await buatTipe(page, auth, nama);
+      const permintaan = pantauPermintaan(page, "PUT", POLA_SATU);
+      await page.goto(urlEdit(t.id));
+      const input = page.getByPlaceholder(/meja billiard vip/i);
+      await expect(input).toHaveValue(nama);
+      await input.fill("");
+      await page.getByRole("button", { name: /simpan perubahan/i }).click();
+      await expect(page.getByText("Nama Tipe Aset wajib diisi")).toBeVisible();
+      expect(permintaan.jumlah(), "validasi gagal tidak mengirim PUT").toBe(0);
+      permintaan.lepas();
+    } finally {
+      await hapusTipe(page, auth, t?.id);
+    }
   });
 
-  // ---------------------------------------------------------------------------
-  // 3.4 Validasi Form
-  // ---------------------------------------------------------------------------
-
-  test("unhappy: kosongkan nama dan submit harus menampilkan error validasi Zod", async ({
+  test("berhasil: tombol menunggu selama menyimpan, lalu nama baru tersimpan dan kembali ke daftar", async ({
     page,
   }) => {
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard((route) => {
-        if (route.request().method() === "GET") {
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ data: MOCK_SINGLE }),
-          });
-        }
-        return route.continue();
-      }),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
-
-    await page.getByPlaceholder(/meja billiard vip/i).clear();
-    await page.getByRole("button", { name: /simpan perubahan/i }).click();
-
-    await expect(page.getByText(/nama tipe aset wajib diisi/i)).toBeVisible();
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaUji("Ubah");
+    const namaBaru = namaUji("Diubah");
+    let t: TipeAsetMentah | undefined;
+    try {
+      t = await buatTipe(page, auth, nama);
+      await tahanLaluTeruskan(page, "PUT", POLA_SATU);
+      await page.goto(urlEdit(t.id));
+      const input = page.getByPlaceholder(/meja billiard vip/i);
+      await expect(input).toHaveValue(nama);
+      await input.fill(namaBaru);
+      const tKirim = page.waitForResponse(cocok("PUT", POLA_SATU));
+      await page.getByRole("button", { name: /simpan perubahan/i }).click();
+      const menunggu = page.getByRole("button", { name: /menyimpan perubahan/i });
+      await expect(menunggu).toBeVisible();
+      await expect(menunggu).toBeDisabled();
+      const res = await tKirim;
+      expect(res.status()).toBeLessThan(300);
+      expect(res.request().postDataJSON().namaTipeAset).toBe(namaBaru);
+      await page.waitForURL("**/reservasi/tipeAset");
+      await expect(baris(page, namaBaru)).toBeVisible();
+      const tersimpan = await bacaTipe(page, auth, t.id);
+      expect(tersimpan.data.namaTipeAset).toBe(namaBaru);
+      await page.unroute(POLA_SATU);
+    } finally {
+      await hapusTipe(page, auth, t?.id);
+    }
   });
 
-  // ---------------------------------------------------------------------------
-  // 3.5 Loading State Submit
-  // ---------------------------------------------------------------------------
-
-  test("loading state: tombol harus disabled dan teks berubah saat update in-flight", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard(async (route) => {
-        if (route.request().method() === "GET") {
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ data: MOCK_SINGLE }),
-          });
-        }
-        if (route.request().method() === "PUT") {
-          await new Promise((r) => setTimeout(r, 2_000));
-          return route.fulfill({ status: 200, body: "{}" });
-        }
-        return route.continue();
-      }),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
-    await page.getByRole("button", { name: /simpan perubahan/i }).click();
-
-    await expect(
-      page.getByRole("button", { name: /menyimpan perubahan/i }),
-    ).toBeDisabled();
-    await expect(page.getByRole("button", { name: /batal/i })).toBeDisabled();
+  test("mengosongkan deskripsi menghapus deskripsi di backend", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaUji("Kosongkan");
+    let t: TipeAsetMentah | undefined;
+    try {
+      t = await buatTipe(page, auth, nama, "Deskripsi uji " + unik());
+      await page.goto(urlEdit(t.id));
+      const deskripsi = page.getByPlaceholder(/catatan atau keterangan/i);
+      await expect(deskripsi).not.toHaveValue("");
+      await deskripsi.fill("");
+      const tKirim = page.waitForResponse(cocok("PUT", POLA_SATU));
+      await page.getByRole("button", { name: /simpan perubahan/i }).click();
+      expect((await tKirim).status()).toBeLessThan(300);
+      await page.waitForURL("**/reservasi/tipeAset");
+      const tersimpan = await bacaTipe(page, auth, t.id);
+      expect(tersimpan.data.deskripsi, "deskripsi yang dikosongkan harus terhapus").toBeNull();
+    } finally {
+      await hapusTipe(page, auth, t?.id);
+    }
   });
 
-  // ---------------------------------------------------------------------------
-  // 3.6 Happy Path
-  // ---------------------------------------------------------------------------
-
-  test("happy path: edit nama harus redirect ke daftar + toast sukses + payload benar", async ({
+  test("gagal dari backend: pesan backend tampil, tetap di halaman edit, dan data tidak berubah", async ({
     page,
   }) => {
-    let capturedBody: any = null;
-
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard((route) => {
-        if (route.request().method() === "GET") {
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ data: MOCK_SINGLE }),
-          });
-        }
-        if (route.request().method() === "PUT") {
-          capturedBody = route.request().postDataJSON();
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({
-              data: { ...MOCK_SINGLE, namaTipeAset: "Meja Billiard Premium" },
-            }),
-          });
-        }
-        return route.continue();
-      }),
-    );
-
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
-
-    const namaInput = page.getByPlaceholder(/meja billiard vip/i);
-    await namaInput.clear();
-    await namaInput.fill("Meja Billiard Premium");
-    await page.getByRole("button", { name: /simpan perubahan/i }).click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-    await expect(page).toHaveURL(new RegExp(LIST_PATH));
-    await expect(
-      page.getByText(/perubahan tipe aset telah tersimpan/i),
-    ).toBeVisible();
-
-    expect(capturedBody.namaTipeAset).toBe("Meja Billiard Premium");
-  });
-
-  test("happy path: hapus deskripsi (clear textarea) → payload deskripsi harus undefined", async ({
-    page,
-  }) => {
-    let capturedBody: any = null;
-
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard((route) => {
-        if (route.request().method() === "GET") {
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ data: MOCK_SINGLE }),
-          });
-        }
-        if (route.request().method() === "PUT") {
-          capturedBody = route.request().postDataJSON();
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ data: MOCK_SINGLE }),
-          });
-        }
-        return route.continue();
-      }),
-    );
-
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
-
-    await page.getByPlaceholder(/catatan atau keterangan/i).clear();
-    await page.getByRole("button", { name: /simpan perubahan/i }).click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-
-    expect(capturedBody.deskripsi).toBeUndefined();
-  });
-
-  test("unhappy: error dari backend saat update harus menampilkan toast error dan tidak redirect", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tipeAset/tipe-001",
-      withApiGuard((route) => {
-        if (route.request().method() === "GET") {
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ data: MOCK_SINGLE }),
-          });
-        }
-        if (route.request().method() === "PUT") {
-          return route.fulfill({
-            status: 500,
-            contentType: "application/json",
-            body: JSON.stringify({ message: "Terjadi kesalahan pada server" }),
-          });
-        }
-        return route.continue();
-      }),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
-    await page.getByRole("button", { name: /simpan perubahan/i }).click();
-
-    await expect(page.getByText(/terjadi kesalahan/i)).toBeVisible({
-      timeout: 5_000,
-    });
-
-    await expect(page).toHaveURL(new RegExp(EDIT_PATH));
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const namaA = namaUji("Asal");
+    const namaB = namaUji("Pemilik");
+    let a: TipeAsetMentah | undefined;
+    let b: TipeAsetMentah | undefined;
+    try {
+      a = await buatTipe(page, auth, namaA);
+      b = await buatTipe(page, auth, namaB);
+      await page.goto(urlEdit(a.id));
+      const input = page.getByPlaceholder(/meja billiard vip/i);
+      await expect(input).toHaveValue(namaA);
+      await input.fill(namaB);
+      const tKirim = page.waitForResponse(cocok("PUT", POLA_SATU));
+      await page.getByRole("button", { name: /simpan perubahan/i }).click();
+      const res = await tKirim;
+      const body = await res.json();
+      expect(res.status()).toBe(400);
+      expect(body.message, "respons gagal harus membawa message").toBeTruthy();
+      await expect(page.getByText("Gagal Memperbarui")).toBeVisible();
+      await expect(page.getByText(body.message).first()).toBeVisible();
+      await expect(page).toHaveURL(/\/edit$/);
+      expect((await bacaTipe(page, auth, a.id)).data.namaTipeAset).toBe(namaA);
+    } finally {
+      await hapusTipe(page, auth, a?.id);
+      await hapusTipe(page, auth, b?.id);
+    }
   });
 });
