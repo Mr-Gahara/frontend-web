@@ -1,51 +1,36 @@
 import { test, expect, type Page } from "@playwright/test";
 
 // =============================================================================
-// HELPER — Membuat fake JWT yang bisa di-decode oleh decodeJWT() di frontend
-// Standard base64url encoding (compatible dengan atob() di browser)
+// Spec login memakai backend sungguhan. page.route hanya untuk jalur gagal
+// yang tidak dapat dibuat backend secara deterministik, atau untuk menahan
+// permintaan lalu meneruskannya (route.continue) agar keadaan memuat terlihat.
+// Respons sukses tidak dipalsukan; simulasi yang tidak terhindarkan ditandai
+// "// simulasi:" beserta alasannya (docs/refactor/pengujian.md).
 // =============================================================================
-function makeFakeJWT(payload: Record<string, any>): string {
-  const encode = (data: string) =>
-    Buffer.from(data)
-      .toString("base64")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=/g, "");
+const EMAIL_UJI = "toko@gmail.com";
+const PASSWORD_UJI = "Toko1234";
+const NAMA_UJI = "Ridho";
+const PIN_UJI = "123456";
+const POLA_LOGIN_AKUN = /\/api\/akun\/auth\/login(\?|$)/i;
+const POLA_LOGIN_PIN = /\/api\/pengguna\/pin-login(\?|$)/i;
+const POLA_JWT = /eyJ[\w-]+\.[\w-]+\.[\w-]+/;
 
-  const header = encode(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-  const body = encode(JSON.stringify(payload));
-  return `${header}.${body}.fakesignature`;
+/** Akhiran unik per run, agar pembatas login tidak menghitung akun dan pengguna uji. */
+const unik = () => Date.now().toString(36);
+
+/** Menahan permintaan sebentar lalu meneruskannya ke backend sungguhan. */
+async function tahanLaluTeruskan(page: Page, pola: RegExp, ms = 1_500) {
+  await page.route(pola, async (route) => {
+    await new Promise((r) => setTimeout(r, ms));
+    await route.continue();
+  });
 }
 
-// =============================================================================
-// TOKEN FIXTURES
-// =============================================================================
-const TOKEN_VALID = makeFakeJWT({ id: "acc-001", tenantID: "tenant-001" });
-const TOKEN_NO_ID = makeFakeJWT({ tenantID: "tenant-001" }); // id tidak ada — JWT invalid
-// [SKENARIO BARU] Token kedaluwarsa (1 jam yang lalu)
-const TOKEN_EXPIRED = makeFakeJWT({
-  id: "acc-001",
-  tenantID: "tenant-001",
-  exp: Math.floor(Date.now() / 1000) - 3600,
-});
-
-// =============================================================================
-// MOCK API RESPONSE FIXTURES
-// =============================================================================
-const MOCK_LOGIN_SUCCESS = {
-  accessToken: TOKEN_VALID,
-  data: { id: "acc-001", email: "toko@gmail.com", nama: "Toko Demo" },
-  requireSetup: false,
-};
-
-const MOCK_LOGIN_REQUIRE_SETUP = {
-  ...MOCK_LOGIN_SUCCESS,
-  requireSetup: true,
-};
-
-const MOCK_PENGGUNA_SUCCESS = {
-  accessToken: "pengguna-token-xyz-valid",
-};
+/** Sisa kuota pembatas dari header RateLimit (draft-7), atau null bila tidak ada. */
+function sisaKuota(header: string | undefined): number | null {
+  const m = header?.match(/remaining=(\d+)/);
+  return m ? Number(m[1]) : null;
+}
 
 /**
  * Menyiapkan sesi akun untuk halaman login PIN.
@@ -61,14 +46,6 @@ async function siapkanSesiAkun(page: Page) {
   await page.getByRole("button", { name: /masuk|login/i }).click();
   await page.waitForURL("**/login/pengguna");
 }
-
-const MOCK_ERROR_CREDENTIALS = {
-  message: "Email atau password salah.",
-};
-
-const MOCK_ERROR_PIN = {
-  message: "Nama atau PIN tidak valid.",
-};
 
 // =============================================================================
 // SUITE 1 — /login (SaaS Account Login)
@@ -104,23 +81,17 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
     test("harus bisa navigasi dan submit form menggunakan tombol Keyboard (Tab & Enter)", async ({
       page,
     }) => {
-      await page.route("**/akun/auth/login", (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify(MOCK_LOGIN_SUCCESS),
-        }),
-      );
-
       await page.goto("http://localhost:3000/login");
+      const tLogin = page.waitForResponse(POLA_LOGIN_AKUN);
 
       // Simulasikan flow user murni pakai keyboard
       await page.getByLabel(/email/i).focus();
-      await page.keyboard.insertText("toko@gmail.com");
+      await page.keyboard.insertText(EMAIL_UJI);
       await page.keyboard.press("Tab"); // Pindah ke field password
-      await page.keyboard.insertText("Toko1234");
+      await page.keyboard.insertText(PASSWORD_UJI);
       await page.keyboard.press("Enter"); // Submit form
 
+      expect((await tLogin).status()).toBe(200);
       await page.waitForURL("**/login/pengguna");
       await expect(page).toHaveURL(/.*\/login\/pengguna/);
     });
@@ -130,26 +101,45 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
   // 1.2 Unhappy Path
   // ---------------------------------------------------------------------------
   test.describe("Unhappy Path", () => {
-    test("harus menampilkan pesan error saat kredensial salah (401 dari backend)", async ({
-      page,
-    }) => {
-      await page.route("**/akun/auth/login", (route) =>
-        route.fulfill({
-          status: 401,
-          contentType: "application/json",
-          body: JSON.stringify(MOCK_ERROR_CREDENTIALS),
-        }),
-      );
-
+    test("harus menampilkan pesan backend saat email tidak terdaftar", async ({ page }) => {
       await page.goto("http://localhost:3000/login");
-      await page.getByLabel(/email/i).fill("salah@gmail.com");
+      // Email unik per run: pembatas login dihitung per IP dan email.
+      await page.getByLabel(/email/i).fill("e2e-" + unik() + "@contoh.test");
       await page.getByLabel(/password/i).fill("PasswordNgarang");
+      const tLogin = page.waitForResponse(POLA_LOGIN_AKUN);
       await page.getByRole("button", { name: /masuk|login/i }).click();
 
-      // Gunakan teks error langsung — lebih robust dari class selector
-      await expect(page.getByText(/email atau password salah/i)).toBeVisible({
-        timeout: 10_000,
-      });
+      const res = await tLogin;
+      const body = await res.json();
+      expect(res.status()).toBe(404);
+      expect(body.message, "respons gagal harus membawa message").toBeTruthy();
+      await expect(page.getByText(body.message).first()).toBeVisible({ timeout: 10_000 });
+      await expect(page).toHaveURL(/.*\/login$/);
+    });
+
+    test("harus menampilkan pesan backend saat password salah", async ({ page }) => {
+      await page.goto("http://localhost:3000/login");
+      await page.getByLabel(/email/i).fill(EMAIL_UJI);
+      await page.getByLabel(/password/i).fill("Salah-" + unik());
+      const tLogin = page.waitForResponse(POLA_LOGIN_AKUN);
+      await page.getByRole("button", { name: /masuk|login/i }).click();
+
+      const res = await tLogin;
+      const body = await res.json();
+      expect(res.status()).toBe(400);
+      expect(body.message, "respons gagal harus membawa message").toBeTruthy();
+      await expect(page.getByText(body.message).first()).toBeVisible({ timeout: 10_000 });
+      await expect(page).toHaveURL(/.*\/login$/);
+
+      // Percobaan ini menambah hitungan pembatas akun uji (per IP dan email;
+      // login sukses tidak menguranginya), dan seluruh spec login dengan akun
+      // itu. Gagal lebih awal bila kuota menipis, agar penyebabnya terlihat di sini.
+      const sisa = sisaKuota(res.headers()["ratelimit"]);
+      expect(sisa, "header RateLimit harus ada pada respons login akun").not.toBeNull();
+      expect(
+        sisa ?? -1,
+        "sisa kuota login " + EMAIL_UJI + " menipis; tunggu jendela pembatas berakhir",
+      ).toBeGreaterThanOrEqual(3);
     });
 
     test("harus menampilkan pesan error saat terjadi network failure (abort)", async ({
@@ -204,14 +194,7 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
     test("tombol harus disabled dan teks berubah menjadi loading saat request in-flight", async ({
       page,
     }) => {
-      await page.route("**/akun/auth/login", async (route) => {
-        await new Promise((r) => setTimeout(r, 2_000));
-        await route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify(MOCK_LOGIN_SUCCESS),
-        });
-      });
+      await tahanLaluTeruskan(page, POLA_LOGIN_AKUN);
 
       await page.goto("http://localhost:3000/login");
       await page.getByLabel(/email/i).fill("toko@gmail.com");
@@ -226,6 +209,7 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
       });
       await expect(loadingBtn).toBeVisible();
       await expect(loadingBtn).toBeDisabled();
+      await page.waitForURL("**/login/pengguna");
     });
   });
 
@@ -236,19 +220,17 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
     test("harus redirect ke /login/pengguna saat login berhasil dan requireSetup=false", async ({
       page,
     }) => {
-      await page.route("**/akun/auth/login", (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify(MOCK_LOGIN_SUCCESS),
-        }),
-      );
-
       await page.goto("http://localhost:3000/login");
-      await page.getByLabel(/email/i).fill("toko@gmail.com");
-      await page.getByLabel(/password/i).fill("Toko1234");
+      await page.getByLabel(/email/i).fill(EMAIL_UJI);
+      await page.getByLabel(/password/i).fill(PASSWORD_UJI);
+      const tLogin = page.waitForResponse(POLA_LOGIN_AKUN);
       await page.getByRole("button", { name: /masuk|login/i }).click();
 
+      const res = await tLogin;
+      expect(res.status()).toBe(200);
+      const body = await res.json();
+      expect(body.requireSetup).toBe(false);
+      expect(JSON.stringify(body)).toMatch(POLA_JWT);
       await page.waitForURL("**/login/pengguna");
       await expect(page).toHaveURL(/.*\/login\/pengguna/);
     });
@@ -256,13 +238,12 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
     test("harus tetap di /login dan mengarahkan ke aplikasi saat requireSetup=true, tanpa menyimpan sesi", async ({
       page,
     }) => {
-      await page.route("**/akun/auth/login", (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify(MOCK_LOGIN_REQUIRE_SETUP),
-        }),
-      );
+      await page.route(POLA_LOGIN_AKUN, async (route) => {
+        const asli = await route.fetch();
+        const body = await asli.json();
+        // simulasi: akun uji selalu punya toko (needsSetup false); akun baru tanpa toko akan permanen
+        await route.fulfill({ status: asli.status(), json: { ...body, requireSetup: true } });
+      });
 
       await page.goto("http://localhost:3000/login");
       await page.getByLabel(/email/i).fill("toko@gmail.com");
@@ -322,7 +303,6 @@ test.describe("E2E — Penanganan 403 akun dibekukan", () => {
     await expect(page).toHaveURL(/.*\/login$/, { timeout: 20_000 });
   });
 });
-
 
 test.describe("E2E — Sesi lintas muat halaman", () => {
   test("sesi bertahan setelah halaman di-reload", async ({ page }) => {
@@ -454,30 +434,22 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
         await siapkanSesiAkun(page);
       });
 
-      test("harus menampilkan error saat nama atau PIN salah (401 dari backend)", async ({
+      test("harus menampilkan pesan backend saat nama atau PIN salah (401)", async ({
         page,
       }) => {
-        // FIX ROOT CAUSE: suntikkan accessToken dulu agar halaman /login/pengguna
-        // tidak langsung redirect ke /login sebelum form sempat dirender
-        await siapkanSesiAkun(page);
-
-        await page.route("**/pengguna/pin-login", (route) =>
-          route.fulfill({
-            status: 401,
-            contentType: "application/json",
-            body: JSON.stringify(MOCK_ERROR_PIN),
-          }),
-        );
-
         await page.goto("http://localhost:3000/login/pengguna");
-        await page.getByLabel(/nama/i).fill("NamaSalah");
+        // Nama unik per run: pembatas PIN dihitung per tenant dan nama.
+        await page.getByLabel(/nama/i).fill("E2E Salah " + unik());
         await page.getByLabel(/pin/i).fill("000000");
+        const tLogin = page.waitForResponse(POLA_LOGIN_PIN);
         await page.getByRole("button", { name: /masuk|login/i }).click();
 
-        // Gunakan teks error langsung — lebih robust dari class selector
-        await expect(page.getByText(/nama atau pin tidak valid/i)).toBeVisible({
-          timeout: 10_000,
-        });
+        const res = await tLogin;
+        const body = await res.json();
+        expect(res.status()).toBe(401);
+        expect(body.message, "respons gagal harus membawa message").toBeTruthy();
+        await expect(page.getByText(body.message).first()).toBeVisible({ timeout: 10_000 });
+        await expect(page).toHaveURL(/.*\/login\/pengguna$/);
       });
 
       test("harus menampilkan error saat terjadi network failure di endpoint PIN", async ({
@@ -499,6 +471,7 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
         page,
       }) => {
         await page.route("**/pengguna/pin-login", (route) =>
+          // simulasi: backend yang menjawab 200 tanpa token tidak dapat dibuat deterministik
           route.fulfill({
             status: 200,
             contentType: "application/json",
@@ -524,14 +497,7 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
       }) => {
         await siapkanSesiAkun(page);
 
-        await page.route("**/pengguna/pin-login", async (route) => {
-          await new Promise((r) => setTimeout(r, 2_000));
-          await route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify(MOCK_PENGGUNA_SUCCESS),
-          });
-        });
+        await tahanLaluTeruskan(page, POLA_LOGIN_PIN);
 
         await page.goto("http://localhost:3000/login/pengguna");
         await page.getByLabel(/nama/i).fill("Ridho");
@@ -546,6 +512,7 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
         });
         await expect(loadingBtn).toBeVisible();
         await expect(loadingBtn).toBeDisabled();
+        await page.waitForURL("**/dashboard");
       });
     });
 
@@ -560,19 +527,15 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
       test("harus redirect ke /dashboard setelah PIN login berhasil", async ({
         page,
       }) => {
-        await page.route("**/pengguna/pin-login", (route) =>
-          route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify(MOCK_PENGGUNA_SUCCESS),
-          }),
-        );
-
         await page.goto("http://localhost:3000/login/pengguna");
-        await page.getByLabel(/nama/i).fill("Ridho");
-        await page.getByLabel(/pin/i).fill("123456");
+        await page.getByLabel(/nama/i).fill(NAMA_UJI);
+        await page.getByLabel(/pin/i).fill(PIN_UJI);
+        const tLogin = page.waitForResponse(POLA_LOGIN_PIN);
         await page.getByRole("button", { name: /masuk|login/i }).click();
 
+        const res = await tLogin;
+        expect(res.status()).toBe(200);
+        expect(JSON.stringify(await res.json())).toMatch(POLA_JWT);
         await page.waitForURL("**/dashboard");
         await expect(page).toHaveURL(/.*\/dashboard/);
       });
@@ -604,35 +567,25 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
     test("harus berhasil tembus dari /login → /login/pengguna → /dashboard", async ({
       page,
     }) => {
-      await page.route("**/akun/auth/login", (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify(MOCK_LOGIN_SUCCESS),
-        }),
-      );
-
-      await page.route("**/pengguna/pin-login", (route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify(MOCK_PENGGUNA_SUCCESS),
-        }),
-      );
-
       // FASE 1: Login Akun SaaS
       await page.goto("http://localhost:3000/login");
-      await page.getByLabel(/email/i).fill("toko@gmail.com");
-      await page.getByLabel(/password/i).fill("Toko1234");
+      await page.getByLabel(/email/i).fill(EMAIL_UJI);
+      await page.getByLabel(/password/i).fill(PASSWORD_UJI);
+      const tAkun = page.waitForResponse(POLA_LOGIN_AKUN);
       await page.getByRole("button", { name: /masuk|login/i }).click();
+      expect((await tAkun).status()).toBe(200);
 
       await page.waitForURL("**/login/pengguna");
       await expect(page).toHaveURL(/.*\/login\/pengguna/);
 
       // FASE 2: Login PIN Karyawan
-      await page.getByLabel(/nama/i).fill("Ridho");
-      await page.getByLabel(/pin/i).fill("123456");
+      await page.getByLabel(/nama/i).fill(NAMA_UJI);
+      await page.getByLabel(/pin/i).fill(PIN_UJI);
+      const tPin = page.waitForResponse(POLA_LOGIN_PIN);
       await page.getByRole("button", { name: /masuk|login/i }).click();
+      const resPin = await tPin;
+      expect(resPin.status()).toBe(200);
+      expect(JSON.stringify(await resPin.json())).toMatch(POLA_JWT);
 
       // FASE 3: Verifikasi masuk ke Dashboard
       await page.waitForURL("**/dashboard");
