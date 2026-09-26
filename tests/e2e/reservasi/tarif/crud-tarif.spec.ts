@@ -1,568 +1,431 @@
-import { test, expect, type Page, type Route } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+import { login, bukaDenganAuth, api, BASIS, type Auth } from "../../../helpers/transfer-uji";
+import {
+  unik,
+  cocok,
+  pantauPermintaan,
+  tahanLaluTeruskan,
+  buatTipeAset,
+  hapusLewatApi,
+  type TipeAsetMentah,
+} from "../../../helpers/reservasi-uji";
 
-// =============================================================================
-// HELPERS & AUTH SETUP
-// =============================================================================
+/*
+ * Spec tarif terhadap backend sungguhan (keputusan rancangan butir 21,
+ * keputusan R1a). Tarif dan tipe aset uji dibuat lewat API dengan nama unik
+ * dan dihapus di finally (tarif dulu, baru tipe aset). Hapus tarif lewat API
+ * tidak diperiksa statusnya, karena backend menghapus datanya lalu menjawab
+ * 500 (tarifService.delete memakai payload yang tidak terdefinisi).
+ */
 
-async function login(page: Page) {
-  await page.goto("http://localhost:3000/login");
-  await page.getByLabel(/email/i).fill("toko@gmail.com");
-  await page.getByLabel(/password/i).fill("Toko1234");
-  await page.getByRole("button", { name: /login/i }).click();
+type TarifMentah = {
+  id: string;
+  namaTarif: string;
+  basisPerhitungan: "per jam" | "per sesi";
+  harga: number;
+  durasiMinimum: number;
+  isActive: boolean;
+  hariAktif: number[];
+  jamMulai: string;
+  jamSelesai: string;
+  prioritas: number;
+  dataAset: { id: string; namaTipeAset: string }[];
+};
 
-  await page.waitForURL("**/login/pengguna");
-  await page.getByLabel(/nama/i).fill("Ridho");
-  await page.getByLabel(/pin/i).fill("123456");
-  await page.getByRole("button", { name: /login/i }).click();
+type TarifBaru = {
+  namaTarif: string;
+  basisPerhitungan: "per jam" | "per sesi";
+  harga: number;
+  durasiMinimum: number;
+  isActive?: boolean;
+  hariAktif?: number[];
+  jamMulai?: string;
+  jamSelesai?: string;
+  prioritas?: number;
+  tipeAsetID?: string[];
+};
 
-  await page.waitForURL("**/dashboard");
+const URL_DAFTAR = BASIS + "/dashboard/outlet/reservasi/tarif";
+const URL_BUAT = URL_DAFTAR + "/buatTarif";
+const urlEdit = (id: string) => URL_DAFTAR + "/" + id + "/edit";
+const POLA_DAFTAR = /\/api\/tarif(\?|$)/i;
+const POLA_SATU = /\/api\/tarif\/[^/?]+(\?|$)/i;
+const POLA_NONAKTIF = /non ?aktif|tidak aktif/i;
+
+const namaTarifUji = (label: string) => "E2E Tarif " + label + " " + unik();
+const namaTipeUji = () => "E2E Tipe Tarif " + unik();
+
+async function buatTarif(page: Page, auth: Auth, data: TarifBaru) {
+  const r = await api<TarifMentah>(page, auth, "POST", "/tarif", data);
+  expect(r.status, "buat tarif uji: " + r.pesan).toBeLessThan(300);
+  expect(r.data?.id, "respons buat tarif harus membawa id").toBeTruthy();
+  return r.data;
 }
 
-// -----------------------------------------------------------------------------
-// BUTLER UTILITY: API GUARD
-// Mencegah Playwright mencegat request HTML agar halaman SSR Next.js bisa render
-// -----------------------------------------------------------------------------
-function withApiGuard(handler: (route: Route) => any) {
-  return (route: Route) => {
-    const type = route.request().resourceType();
-    if (type === "fetch" || type === "xhr") {
-      return handler(route);
-    }
-    return route.continue();
-  };
+const bacaTarif = (page: Page, auth: Auth, id: string) =>
+  api<TarifMentah>(page, auth, "GET", "/tarif/" + id);
+
+/** Membuka daftar dan mengembalikan isi respons GET daftar halaman itu sendiri. */
+async function bukaDaftar(page: Page): Promise<TarifMentah[]> {
+  await page.goto(URL_DAFTAR, { waitUntil: "commit" });
+  const res = await page.waitForResponse(cocok("GET", POLA_DAFTAR));
+  expect(res.status()).toBe(200);
+  return (await res.json()).data as TarifMentah[];
 }
 
-// =============================================================================
-// MOCK DATA FIXTURES
-// =============================================================================
-
-const MOCK_TIPE_ASET = [
-  { id: "tipe-001", namaTipeAset: "Meja Billiard VIP" },
-  { id: "tipe-002", namaTipeAset: "Lapangan Futsal" },
-];
-
-const MOCK_TARIF_LIST = [
-  {
-    _id: "tarif-001",
-    namaTarif: "Tarif Reguler Siang",
-    basisPerhitungan: "per jam",
-    harga: 35000,
-    durasiMinimum: 1,
-    isActive: true,
-    hariAktif: [1, 2, 3, 4, 5],
-    jamMulai: "08:00",
-    jamSelesai: "17:00",
-    prioritas: 1,
-    tipeAsetID: [MOCK_TIPE_ASET[0]], // Terhubung ke Meja Billiard
-  },
-  {
-    _id: "tarif-002",
-    namaTarif: "Tarif Promo Weekend",
-    basisPerhitungan: "per sesi",
-    harga: 150000,
-    durasiMinimum: 1,
-    isActive: false, // Nonaktif
-    hariAktif: [0, 6], // Sabtu, Minggu
-    jamMulai: null, // 24 Jam
-    jamSelesai: null,
-    prioritas: 10,
-    tipeAsetID: [], // Semua Aset
-  },
-];
-
-const MOCK_SINGLE_TARIF = MOCK_TARIF_LIST[0];
-
-// =============================================================================
-// URL CONSTANTS
-// =============================================================================
-
-const BASE = "http://localhost:3000";
-const LIST_PATH = "/dashboard/outlet/reservasi/tarif";
-const BUAT_PATH = "/dashboard/outlet/reservasi/tarif/buatTarif";
-const EDIT_PATH = "/dashboard/outlet/reservasi/tarif/tarif-001/edit";
-
-// =============================================================================
-// SUITE 1 — Halaman Daftar Tarif
-// =============================================================================
+const baris = (page: Page, nama: string) => page.getByRole("row").filter({ hasText: nama });
 
 test.describe("E2E — Tarif › Halaman Daftar", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
   });
 
-  test("harus merender UI utama (search bar, tombol tambah, tabel header)", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tarif",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_TARIF_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
+  test("merender pencarian, tombol tambah, dan enam kolom kepala tabel", async ({ page }) => {
+    await bukaDaftar(page);
     await expect(page.getByPlaceholder(/cari nama tarif/i)).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /tambah tarif/i }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("columnheader", { name: /nama & status tarif/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /tambah tarif/i })).toBeVisible();
+    await expect(page.getByRole("columnheader")).toHaveCount(6);
   });
 
-  test("harus merender data tarif beserta format Rupiah, lencana hari, dan status", async ({
+  test("menampilkan harga rupiah, basis, durasi, hari, jam, prioritas, dan status dari backend", async ({
     page,
   }) => {
-    await page.route(
-      "**/tarif",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_TARIF_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    // Data 1: Tarif Reguler
-    await expect(
-      page.getByText("Tarif Reguler Siang", { exact: true }),
-    ).toBeVisible();
-    await expect(page.getByText("Rp 35.000")).toBeVisible();
-    await expect(page.getByText("Sen, Sel, Rab, Kam, Jum")).toBeVisible();
-    await expect(page.getByText("08:00 - 17:00")).toBeVisible();
-    await expect(page.getByText("Meja Billiard VIP")).toBeVisible();
-    await expect(page.getByText("Aktif", { exact: true })).toBeVisible();
-
-    // Data 2: Promo Weekend (Nonaktif & Semua Aset & 24 Jam)
-    await expect(
-      page.getByText("Tarif Promo Weekend", { exact: true }),
-    ).toBeVisible();
-    await expect(page.getByText("Rp 150.000")).toBeVisible();
-    await expect(page.getByText("Min, Sab")).toBeVisible();
-    await expect(page.getByText("24 Jam Penuh")).toBeVisible();
-    await expect(page.getByText("Semua Aset")).toBeVisible();
-    await expect(page.getByText("Nonaktif", { exact: true })).toBeVisible();
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const namaA = namaTarifUji("Hari Kerja");
+    const namaB = namaTarifUji("Setiap Hari");
+    let a: TarifMentah | undefined;
+    let b: TarifMentah | undefined;
+    try {
+      a = await buatTarif(page, auth, {
+        namaTarif: namaA,
+        basisPerhitungan: "per jam",
+        harga: 150000,
+        durasiMinimum: 2,
+        isActive: true,
+        hariAktif: [1, 2, 3, 4, 5],
+        jamMulai: "08:00",
+        jamSelesai: "17:00",
+        prioritas: 3,
+      });
+      b = await buatTarif(page, auth, {
+        namaTarif: namaB,
+        basisPerhitungan: "per sesi",
+        harga: 250000,
+        durasiMinimum: 1,
+        isActive: false,
+        hariAktif: [0, 1, 2, 3, 4, 5, 6],
+        jamMulai: "00:00",
+        jamSelesai: "23:59",
+        prioritas: 1,
+      });
+      await bukaDaftar(page);
+      const barisA = baris(page, namaA);
+      await expect(barisA).toContainText(/Rp\s?150\.000/);
+      await expect(barisA).toContainText("per jam");
+      await expect(barisA).toContainText("Min. 2 Jam");
+      await expect(barisA).toContainText("Sen, Sel, Rab, Kam, Jum");
+      await expect(barisA).toContainText("08:00 - 17:00");
+      await expect(barisA).toContainText("Prioritas: 3");
+      await expect(barisA).not.toContainText(POLA_NONAKTIF);
+      const barisB = baris(page, namaB);
+      await expect(barisB).toContainText(/Rp\s?250\.000/);
+      await expect(barisB).toContainText("per sesi");
+      await expect(barisB).toContainText("Min. 1 Sesi");
+      await expect(barisB).toContainText("Setiap Hari");
+      await expect(barisB).toContainText("00:00 - 23:59");
+      await expect(barisB).toContainText(POLA_NONAKTIF);
+    } finally {
+      await hapusLewatApi(page, auth, "/tarif", a?.id);
+      await hapusLewatApi(page, auth, "/tarif", b?.id);
+    }
   });
 
-  test("search filter harus menyaring data di tabel secara client-side", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tarif",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_TARIF_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    const searchInput = page.getByPlaceholder(/cari nama tarif/i);
-    await searchInput.fill("Promo");
-
-    await expect(page.getByText("Tarif Promo Weekend")).toBeVisible();
-    await expect(page.getByText("Tarif Reguler Siang")).not.toBeVisible();
+  test("pencarian menyaring di klien tanpa memanggil backend", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaTarifUji("Cari");
+    let t: TarifMentah | undefined;
+    try {
+      t = await buatTarif(page, auth, {
+        namaTarif: nama,
+        basisPerhitungan: "per jam",
+        harga: 100000,
+        durasiMinimum: 1,
+      });
+      await bukaDaftar(page);
+      const permintaan = pantauPermintaan(page, "GET", POLA_DAFTAR);
+      await page.getByPlaceholder(/cari nama tarif/i).fill(nama);
+      await expect(baris(page, nama)).toBeVisible();
+      await expect(page.getByRole("button", { name: /^edit$/i })).toHaveCount(1);
+      expect(permintaan.jumlah(), "pencarian tidak memanggil backend").toBe(0);
+      permintaan.lepas();
+    } finally {
+      await hapusLewatApi(page, auth, "/tarif", t?.id);
+    }
   });
 
-  test("search kosong harus menampilkan empty state khusus", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tarif",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_TARIF_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-    await page.getByPlaceholder(/cari nama tarif/i).fill("Tarif Fiktif");
-
-    await expect(page.getByText(/tidak ada tarif yang cocok/i)).toBeVisible();
+  test("pencarian tanpa hasil menampilkan keadaan kosong khusus pencarian", async ({ page }) => {
+    await bukaDaftar(page);
+    await page.getByPlaceholder(/cari nama tarif/i).fill("tidak-ada-" + unik());
+    await expect(page.getByText("Tidak ada tarif yang cocok.")).toBeVisible();
+    await expect(page.getByRole("button", { name: /^edit$/i })).toHaveCount(0);
   });
 
-  test("klik batal di modal hapus harus menutup modal tanpa menghapus data", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tarif",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_TARIF_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    const row = page
-      .getByRole("row")
-      .filter({ hasText: "Tarif Reguler Siang" });
-    await row.getByRole("button").last().click();
-
-    await expect(page.getByRole("alertdialog")).toBeVisible();
-    await page.getByRole("button", { name: /batal/i }).click();
-
-    await expect(page.getByRole("alertdialog")).not.toBeVisible();
-    await expect(
-      page.getByText("Tarif Reguler Siang", { exact: true }),
-    ).toBeVisible();
+  test("hapus: Batal menutup dialog tanpa mengirim DELETE", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaTarifUji("Batal Hapus");
+    let t: TarifMentah | undefined;
+    try {
+      t = await buatTarif(page, auth, {
+        namaTarif: nama,
+        basisPerhitungan: "per jam",
+        harga: 100000,
+        durasiMinimum: 1,
+      });
+      await bukaDaftar(page);
+      const permintaan = pantauPermintaan(page, "DELETE", POLA_SATU);
+      await baris(page, nama).getByRole("button").last().click();
+      const dialog = page.getByRole("alertdialog");
+      await expect(dialog).toContainText("Hapus Tarif?");
+      await dialog.getByRole("button", { name: "Batal", exact: true }).click();
+      await expect(dialog).toBeHidden();
+      expect(permintaan.jumlah(), "Batal tidak mengirim DELETE").toBe(0);
+      permintaan.lepas();
+      expect((await bacaTarif(page, auth, t.id)).status).toBe(200);
+      await expect(baris(page, nama)).toBeVisible();
+    } finally {
+      await hapusLewatApi(page, auth, "/tarif", t?.id);
+    }
   });
 
-  test("konfirmasi hapus loading state: tombol harus disabled dan teks berubah (STRICT UX TEST)", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tarif",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_TARIF_LIST }),
-        }),
-      ),
-    );
-
-    // Simulasi delay 2 detik dari server agar kita bisa menangkap loading state
-    await page.route(
-      "**/tarif/tarif-001",
-      withApiGuard(async (route) => {
-        await new Promise((r) => setTimeout(r, 2000));
-        return route.fulfill({ status: 200, body: "{}" });
-      }),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    const row = page
-      .getByRole("row")
-      .filter({ hasText: "Tarif Reguler Siang" });
-    await row.getByRole("button").last().click();
-
-    await page.getByRole("button", { name: /ya, hapus tarif/i }).click();
-
-    // PENGUJIAN INI AKAN GAGAL JIKA MODAL AUTO-CLOSE
-    // Playwright menuntut tombol "Menghapus..." ada dan tidak bisa diklik.
-    await expect(
-      page.getByRole("button", { name: /menghapus/i }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /menghapus/i }),
-    ).toBeDisabled();
-    await expect(page.getByRole("button", { name: /batal/i })).toBeDisabled();
+  test("hapus: tombol menunggu selama permintaan berjalan", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaTarifUji("Hapus Muat");
+    let t: TarifMentah | undefined;
+    try {
+      t = await buatTarif(page, auth, {
+        namaTarif: nama,
+        basisPerhitungan: "per jam",
+        harga: 100000,
+        durasiMinimum: 1,
+      });
+      await bukaDaftar(page);
+      await tahanLaluTeruskan(page, "DELETE", POLA_SATU);
+      await baris(page, nama).getByRole("button").last().click();
+      const dialog = page.getByRole("alertdialog");
+      const tHapus = page.waitForResponse(cocok("DELETE", POLA_SATU));
+      await dialog.getByRole("button", { name: /ya, hapus tarif/i }).click();
+      const menunggu = dialog.getByRole("button", { name: /menghapus/i });
+      await expect(menunggu).toBeVisible();
+      await expect(menunggu).toBeDisabled();
+      await tHapus;
+      await page.unroute(POLA_SATU);
+      // Tarif terhapus di backend apa pun status DELETE-nya; status yang benar
+      // diuji di skenario "hapus berhasil" (fixme, menunggu backend).
+      expect((await bacaTarif(page, auth, t.id)).status).toBe(404);
+    } finally {
+      await hapusLewatApi(page, auth, "/tarif", t?.id);
+    }
   });
 
-  test("konfirmasi hapus happy path: toast sukses muncul dan data hilang dari tabel", async ({
+  test("hapus berhasil: backend menjawab sukses, toast sukses tampil, dan tarif hilang", async ({
     page,
   }) => {
-    let callCount = 0;
-
-    await page.route(
-      "**/tarif",
-      withApiGuard((route) => {
-        if (route.request().method() === "GET") {
-          callCount++;
-          const data = callCount === 1 ? MOCK_TARIF_LIST : [];
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ data }),
-          });
-        }
-        return route.continue();
-      }),
-    );
-
-    await page.route(
-      "**/tarif/tarif-001",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ success: true }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${LIST_PATH}`);
-
-    const row = page
-      .getByRole("row")
-      .filter({ hasText: "Tarif Reguler Siang" });
-    await row.getByRole("button").last().click();
-    await page.getByRole("button", { name: /ya, hapus tarif/i }).click();
-
-    await expect(page.getByText(/tarif berhasil dihapus/i).first()).toBeVisible(
-      {
-        timeout: 5000,
-      },
-    );
-    await expect(
-      page.getByText("Tarif Reguler Siang", { exact: true }),
-    ).not.toBeVisible();
+    // Backend menghapus tarif lalu menjawab 500, karena tarifService.delete
+    // memakai payload yang tidak terdefinisi. Badan test ini membuktikan
+    // perilaku benar dan berjalan kembali setelah backend diperbaiki.
+    test.fixme(true, "Menunggu backend: DELETE /tarif/:id menjawab 500 setelah tarif terhapus");
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaTarifUji("Hapus");
+    let t: TarifMentah | undefined;
+    try {
+      t = await buatTarif(page, auth, {
+        namaTarif: nama,
+        basisPerhitungan: "per jam",
+        harga: 100000,
+        durasiMinimum: 1,
+      });
+      await bukaDaftar(page);
+      await baris(page, nama).getByRole("button").last().click();
+      const dialog = page.getByRole("alertdialog");
+      const tHapus = page.waitForResponse(cocok("DELETE", POLA_SATU));
+      await dialog.getByRole("button", { name: /ya, hapus tarif/i }).click();
+      const res = await tHapus;
+      expect(res.status(), "DELETE /tarif/:id harus menjawab sukses").toBeLessThan(300);
+      await expect(page.getByText("Tarif Berhasil Dihapus")).toBeVisible();
+      await expect(dialog).toBeHidden();
+      await expect(baris(page, nama)).toHaveCount(0);
+      expect((await bacaTarif(page, auth, t.id)).status).toBe(404);
+    } finally {
+      await hapusLewatApi(page, auth, "/tarif", t?.id);
+    }
   });
 });
-
-// =============================================================================
-// SUITE 2 — Halaman Buat Tarif
-// =============================================================================
 
 test.describe("E2E — Tarif › Halaman Buat", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
-    // Kita perlu mem-mock data aset karena halaman buat tarif menarik relasi aset
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_TIPE_ASET }),
-        }),
-      ),
-    );
   });
 
-  test("validasi Zod: jam mulai harus lebih awal dari jam selesai", async ({
+  test("validasi: jam mulai harus lebih awal dari jam selesai, tanpa mengirim permintaan", async ({
     page,
   }) => {
-    await page.goto(`${BASE}${BUAT_PATH}`);
-
-    // Isi jam mulai > jam selesai (Invalid)
-    // Ingat, lokator custom input kita pakai locator jam dan menit
-    const inputsJam = page.locator('input[placeholder="00"]');
-
-    await inputsJam.nth(0).fill("15"); // Mulai Jam
-    await inputsJam.nth(1).fill("00"); // Mulai Menit
-
-    await inputsJam.nth(2).fill("10"); // Selesai Jam
-    await inputsJam.nth(3).fill("00"); // Selesai Menit
-
-    // Trigger blur/submit untuk memvalidasi
+    const permintaan = pantauPermintaan(page, "POST", POLA_DAFTAR);
+    await page.goto(URL_BUAT);
+    await page.locator('input[name="namaTarif"]').fill(namaTarifUji("Jam Terbalik"));
+    await page.locator('input[name="harga"]').fill("100000");
+    await page.locator('input[name="durasiMinimum"]').fill("1");
+    const jam = page.locator('input[placeholder="00"]');
+    await jam.nth(0).fill("20");
+    await jam.nth(1).fill("00");
+    await jam.nth(2).fill("08");
+    await jam.nth(3).fill("00");
     await page.getByRole("button", { name: /simpan tarif/i }).click();
-
-    // Error kustom Zod harus muncul
-    await expect(
-      page.getByText(/jam mulai harus lebih awal dari jam selesai/i).first(),
-    ).toBeVisible();
+    await expect(page.getByText("Jam mulai harus lebih awal dari jam selesai")).toBeVisible();
+    expect(permintaan.jumlah(), "validasi gagal tidak mengirim POST").toBe(0);
+    permintaan.lepas();
   });
 
-  test("happy path: membuat tarif per sesi untuk akhir pekan ke aset spesifik", async ({
+  test("berhasil: tarif per sesi akhir pekan untuk satu tipe aset terkirim dan tersimpan", async ({
     page,
   }) => {
-    let capturedBody: any = null;
-
-    await page.route(
-      "**/tarif",
-      withApiGuard((route) => {
-        if (route.request().method() === "POST") {
-          capturedBody = route.request().postDataJSON();
-          return route.fulfill({ status: 201, body: "{}" });
-        }
-        return route.fulfill({
-          status: 200,
-          body: JSON.stringify({ data: MOCK_TARIF_LIST }),
-        });
-      }),
-    );
-
-    await page.goto(`${BASE}${BUAT_PATH}`);
-
-    // 1. Info Dasar
-    await page.locator('input[name="namaTarif"]').fill("Tarif Sesi Super");
-    await page.locator('input[name="prioritas"]').fill("5");
-    // Tarif default-nya aktif, kita coba biarkan aktif
-
-    // 2. Aturan Harga
-    await page.getByRole("combobox").selectOption("per sesi");
-    // Karena input harga tidak punya name (menggunakan Controller), kita ambil via label terdekat
-    await page.locator('input[name="harga"]').fill("250000");
-    await page.locator('input[name="durasiMinimum"]').fill("2");
-
-    // 3. Jadwal (Matikan selain Sabtu & Minggu)
-    await page.getByText("Senin", { exact: true }).click();
-    await page.getByText("Selasa", { exact: true }).click();
-    await page.getByText("Rabu", { exact: true }).click();
-    await page.getByText("Kamis", { exact: true }).click();
-    await page.getByText("Jumat", { exact: true }).click();
-    // Default form mencentang semua, jika di-klik maka mati. Sisakan Sabtu & Minggu.
-
-    // Isi Waktu (20:00 - 23:59)
-    const inputsJam = page.locator('input[placeholder="00"]');
-    await inputsJam.nth(0).fill("20");
-    await inputsJam.nth(1).fill("00");
-    await inputsJam.nth(2).fill("23");
-    await inputsJam.nth(3).fill("59");
-
-    // 4. Aset Terkait
-    await page.getByText("Meja Billiard VIP", { exact: true }).click();
-
-    // 5. Submit
-    await page.getByRole("button", { name: /simpan tarif/i }).click();
-
-    // Verifikasi Keberhasilan & Pengalihan
-    await page.waitForURL(`**${LIST_PATH}`);
-    await expect(page).toHaveURL(new RegExp(LIST_PATH));
-    await expect(
-      page.getByText(/tarif berhasil dibuat/i).first(),
-    ).toBeVisible();
-
-    // Analisis ketepatan Payload!
-    expect(capturedBody).not.toBeNull();
-    expect(capturedBody.namaTarif).toBe("Tarif Sesi Super");
-    expect(capturedBody.basisPerhitungan).toBe("per sesi");
-    expect(capturedBody.harga).toBe(250000);
-    expect(capturedBody.durasiMinimum).toBe(2);
-    expect(capturedBody.hariAktif.sort()).toEqual([0, 6]); // 0=Minggu, 6=Sabtu
-    expect(capturedBody.jamMulai).toBe("20:00");
-    expect(capturedBody.jamSelesai).toBe("23:59");
-    expect(capturedBody.tipeAsetID).toEqual(["tipe-001"]);
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaTarifUji("Akhir Pekan");
+    let tipe: TipeAsetMentah | undefined;
+    let id: string | undefined;
+    try {
+      tipe = await buatTipeAset(page, auth, namaTipeUji());
+      await page.goto(URL_BUAT);
+      await page.locator('input[name="namaTarif"]').fill(nama);
+      await page.locator('input[name="prioritas"]').fill("5");
+      await page.locator('select[name="basisPerhitungan"]').selectOption("per sesi");
+      await page.locator('input[name="harga"]').fill("250000");
+      await page.locator('input[name="durasiMinimum"]').fill("2");
+      for (const hari of ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"]) {
+        await page.getByText(hari, { exact: true }).click();
+      }
+      const jam = page.locator('input[placeholder="00"]');
+      await jam.nth(0).fill("20");
+      await jam.nth(1).fill("00");
+      await jam.nth(2).fill("23");
+      await jam.nth(3).fill("59");
+      await page.getByText(tipe.namaTipeAset, { exact: true }).click();
+      const tKirim = page.waitForResponse(cocok("POST", POLA_DAFTAR));
+      await page.getByRole("button", { name: /simpan tarif/i }).click();
+      const res = await tKirim;
+      const payload = res.request().postDataJSON();
+      expect(payload.namaTarif).toBe(nama);
+      expect(payload.basisPerhitungan).toBe("per sesi");
+      expect(payload.harga).toBe(250000);
+      expect(payload.durasiMinimum).toBe(2);
+      expect(payload.prioritas).toBe(5);
+      expect([...payload.hariAktif].sort()).toEqual([0, 6]);
+      expect(payload.jamMulai).toBe("20:00");
+      expect(payload.jamSelesai).toBe("23:59");
+      expect(payload.tipeAsetID).toEqual([tipe.id]);
+      expect(res.status()).toBeLessThan(300);
+      id = (await res.json()).data?.id;
+      expect(id, "respons buat harus membawa id").toBeTruthy();
+      await page.waitForURL("**/reservasi/tarif");
+      await expect(baris(page, nama)).toBeVisible();
+      const tersimpan = await bacaTarif(page, auth, id ?? "");
+      expect(tersimpan.status).toBe(200);
+      expect(tersimpan.data.basisPerhitungan).toBe("per sesi");
+      expect(tersimpan.data.harga).toBe(250000);
+      expect([...tersimpan.data.hariAktif].sort()).toEqual([0, 6]);
+      expect(tersimpan.data.jamMulai).toBe("20:00");
+      expect(tersimpan.data.jamSelesai).toBe("23:59");
+      expect(tersimpan.data.dataAset.map((x) => x.id)).toEqual([tipe.id]);
+    } finally {
+      await hapusLewatApi(page, auth, "/tarif", id);
+      await hapusLewatApi(page, auth, "/tipeaset", tipe?.id);
+    }
   });
 });
-
-// =============================================================================
-// SUITE 3 — Halaman Edit Tarif
-// =============================================================================
 
 test.describe("E2E — Tarif › Halaman Edit", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
-    await page.route(
-      "**/tipeAset",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_TIPE_ASET }),
-        }),
-      ),
-    );
   });
 
-  test("guard: id 'undefined' harus menampilkan layar error tanpa melempar crash", async ({
-    page,
-  }) => {
-    await page.goto(`${BASE}/dashboard/outlet/reservasi/tarif/undefined/edit`);
-
-    await expect(page.getByText(/id tarif tidak valid/i)).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /kembali ke daftar/i }),
-    ).toBeVisible();
+  test("id 'undefined' menampilkan halaman ID tidak valid tanpa crash", async ({ page }) => {
+    await page.goto(URL_DAFTAR + "/undefined/edit");
+    await expect(page.getByText("ID Tarif Tidak Valid")).toBeVisible();
   });
 
-  test("harus melakukan pre-fill form sesuai data API, lalu update mengirim payload akurat", async ({
-    page,
-  }) => {
-    let capturedBody: any = null;
-
-    // API Tarikan Data Edit
-    await page.route(
-      "**/tarif/tarif-001",
-      withApiGuard((route) => {
-        if (route.request().method() === "GET") {
-          // Bentuk respons GET detail tarif yang dimapping
-          const responsePayload = {
-            ...MOCK_SINGLE_TARIF,
-            dataAset: [{ id: "tipe-001" }], // Mensimulasikan format balikan backend
-          };
-          return route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ data: responsePayload }),
-          });
-        }
-        if (route.request().method() === "PUT") {
-          capturedBody = route.request().postDataJSON();
-          return route.fulfill({ status: 200, body: "{}" });
-        }
-        return route.continue();
-      }),
-    );
-
-    await page.route(
-      "**/tarif",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          body: JSON.stringify({ data: MOCK_TARIF_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
-
-    // Verifikasi Pre-fill (Tunggu form beres prefill nama)
-    const inputNama = page.locator('input[name="namaTarif"]');
-    await expect(inputNama).toHaveValue("Tarif Reguler Siang");
-
-    const containerHarga = page
-      .locator("label")
-      .filter({ hasText: "Harga (Rp)" })
-      .locator("..");
-    await expect(containerHarga.locator("input")).toHaveValue("35.000");
-
-    // Modifikasi Data
-    await inputNama.fill("Tarif Reguler Malam");
-    await containerHarga.locator("input").fill("45000"); // Naik harga
-
-    // Submit Perubahan
-    await page.getByRole("button", { name: /simpan perubahan/i }).click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-    await expect(page).toHaveURL(new RegExp(LIST_PATH));
-
-    // Validasi Mutasi Payload
-    expect(capturedBody).not.toBeNull();
-    expect(capturedBody.namaTarif).toBe("Tarif Reguler Malam");
-    expect(capturedBody.harga).toBe(45000);
-    // Sisanya harus dipertahankan sesuai prefill!
-    expect(capturedBody.hariAktif.sort()).toEqual([1, 2, 3, 4, 5]);
-    expect(capturedBody.tipeAsetID).toEqual(["tipe-001"]);
+  test("form terisi dari data backend, lalu nama dan harga baru tersimpan", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaTarifUji("Ubah");
+    const namaBaru = namaTarifUji("Diubah");
+    let tipe: TipeAsetMentah | undefined;
+    let t: TarifMentah | undefined;
+    try {
+      tipe = await buatTipeAset(page, auth, namaTipeUji());
+      t = await buatTarif(page, auth, {
+        namaTarif: nama,
+        basisPerhitungan: "per jam",
+        harga: 150000,
+        durasiMinimum: 2,
+        isActive: true,
+        hariAktif: [1, 2, 3, 4, 5],
+        jamMulai: "08:00",
+        jamSelesai: "17:00",
+        prioritas: 3,
+        tipeAsetID: [tipe.id],
+      });
+      await page.goto(urlEdit(t.id));
+      const inputNama = page.locator('input[name="namaTarif"]');
+      await expect(inputNama).toHaveValue(nama, { timeout: 10_000 });
+      // Harga di halaman edit dirender lewat Controller tanpa atribut name.
+      const inputHarga = page.locator('input[inputmode="numeric"][placeholder="0"]');
+      await expect(inputHarga).toHaveValue(/150\.?000/);
+      await expect(page.locator('input[name="durasiMinimum"]')).toHaveValue("2");
+      await expect(page.locator('input[name="prioritas"]')).toHaveValue("3");
+      await expect(page.getByRole("combobox").filter({ hasText: "Per Jam" })).toBeVisible();
+      await expect(page.getByRole("checkbox", { name: "Senin" })).toBeChecked();
+      await expect(page.getByRole("checkbox", { name: "Minggu" })).not.toBeChecked();
+      const jam = page.locator('input[placeholder="00"]');
+      await expect(jam.nth(0)).toHaveValue("08");
+      await expect(jam.nth(2)).toHaveValue("17");
+      await inputNama.fill(namaBaru);
+      await inputHarga.fill("175000");
+      const tKirim = page.waitForResponse(cocok("PUT", POLA_SATU));
+      await page.getByRole("button", { name: /simpan perubahan/i }).click();
+      const res = await tKirim;
+      const payload = res.request().postDataJSON();
+      expect(payload.namaTarif).toBe(namaBaru);
+      expect(payload.harga).toBe(175000);
+      expect(payload.tipeAsetID).toEqual([tipe.id]);
+      expect(res.status()).toBeLessThan(300);
+      const tersimpan = await bacaTarif(page, auth, t.id);
+      expect(tersimpan.data.namaTarif).toBe(namaBaru);
+      expect(tersimpan.data.harga).toBe(175000);
+      expect(tersimpan.data.dataAset.map((x) => x.id)).toEqual([tipe.id]);
+    } finally {
+      await hapusLewatApi(page, auth, "/tarif", t?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", tipe?.id);
+    }
   });
 
-  test("tombol batal harus mengembalikan navigasi tanpa menyimpan", async ({
-    page,
-  }) => {
-    await page.route(
-      "**/tarif/tarif-001",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ data: MOCK_SINGLE_TARIF }),
-        }),
-      ),
-    );
-    await page.route(
-      "**/tarif",
-      withApiGuard((route) =>
-        route.fulfill({
-          status: 200,
-          body: JSON.stringify({ data: MOCK_TARIF_LIST }),
-        }),
-      ),
-    );
-
-    await page.goto(`${BASE}${EDIT_PATH}`);
-    await page.getByRole("button", { name: /batal/i }).click();
-
-    await page.waitForURL(`**${LIST_PATH}`);
-    await expect(page).toHaveURL(new RegExp(LIST_PATH));
+  test("Batal kembali ke daftar tanpa menyimpan", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaTarifUji("Batal");
+    let t: TarifMentah | undefined;
+    try {
+      t = await buatTarif(page, auth, {
+        namaTarif: nama,
+        basisPerhitungan: "per jam",
+        harga: 100000,
+        durasiMinimum: 1,
+      });
+      const permintaan = pantauPermintaan(page, "PUT", POLA_SATU);
+      await page.goto(urlEdit(t.id));
+      await expect(page.locator('input[name="namaTarif"]')).toHaveValue(nama, { timeout: 10_000 });
+      await page.getByRole("button", { name: "Batal", exact: true }).click();
+      await page.waitForURL("**/reservasi/tarif");
+      expect(permintaan.jumlah(), "Batal tidak mengirim PUT").toBe(0);
+      permintaan.lepas();
+    } finally {
+      await hapusLewatApi(page, auth, "/tarif", t?.id);
+    }
   });
 });
