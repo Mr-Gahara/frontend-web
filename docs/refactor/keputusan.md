@@ -432,6 +432,11 @@ keputusan rancangan butir 17 dan 21.
     ditulis sebagai aturan beserta syarat pencabutannya, bukan konstanta.
     Contoh: `SERVER_TERIMA_JUMLAH_NOL` dan penahanan item tanpa master di
     `features/transfer-stok/payload.ts` (pemilik proyek, 21 September 2026).
+    Bug milik frontend yang terbukti oleh spec tidak ditandai `test.fixme`,
+    melainkan diperbaiki di commit spec itu, karena perbaikannya ada di
+    tangan frontend: deskripsi tipe aset (`a2adc70`), serta kolom tipe
+    aset dan dialog hapus tarif (`04830b7`) (pemilik proyek, 26 September
+    2026).
 18. **Identitas yang masih menunggu backend ditulis sebagai konstanta
     null, bukan tebakan.** Aturannya ditulis lengkap sekarang dan berlaku
     begitu konstanta diisi, tanpa perubahan lain. Nama tebakan yang kelak

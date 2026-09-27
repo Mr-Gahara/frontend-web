@@ -60,8 +60,8 @@ Memastikan tidak ada spec yang memalsukan respons sukses (helper
 `audit-fulfill.js`, keputusan rancangan butir 21). Helper keluar dengan
 kode gagal bila ada `route.fulfill` berstatus sukses tanpa tanda
 `// simulasi:`, sehingga dipakai sebagai gerbang di blok commit spec.
-Selama spec reservasi belum dibangun ulang, audit seluruh suite gagal;
-jalankan untuk folder spec yang diubah:
+Audit seluruh suite bersih sejak `04830b7`; jalankan untuk seluruh suite
+sebelum commit spec, atau untuk folder spec yang diubah saat iterasi:
 
 ```bash
 node ~/.cache/frontend-web/alat/audit-fulfill.js tests/e2e
@@ -80,20 +80,20 @@ dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
 sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
 wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
 
-Satu pengecualian atas backend sungguhan: ketiga spec master data
-reservasi masih memalsukan respons sukses sampai dibangun ulang di modul
-reservasi (Utang pengujian, di bawah). Spec lain memakai `page.route`
-hanya untuk jalur gagal, terbukti dengan `audit-fulfill.js` pada 26
-September 2026.
+Seluruh spec memakai `page.route` hanya untuk jalur gagal atau untuk
+menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
+seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
+di spec login, satu di spec tipe aset).
 
-**Baseline per perbaikan spec login** (commit `5a3deea`): 186 test
-unit dan integrasi lolos di 27 berkas, 225 e2e lolos, 17 skipped:
+**Baseline per spec master data reservasi** (commit `04830b7`): 186 test
+unit dan integrasi lolos di 27 berkas, 240 e2e lolos, 19 skipped:
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
-backend, tujuh `test.fixme` lain yang menunggu backend (tiga di antaranya
-di spec alur penjualan), dan dua `test.skip` bersyarat data (Test yang
-ditandai fixme dan skip bersyarat, di bawah). Satu e2e lebih banyak dari
-baseline modul penjualan (`f33ffa6`, 224), karena skenario kredensial
-salah di spec login dipecah dua.
+backend, sepuluh `test.fixme` lain yang menunggu backend (tiga di spec
+alur penjualan dan tiga di spec master data reservasi), dan satu
+`test.skip` bersyarat data (Test yang ditandai fixme dan skip bersyarat,
+di bawah). Dari baseline `5a3deea` (225 lolos), spec tipe aset berubah
+dari 40 menjadi 25 test, aset dari 11 menjadi 27, dan tarif dari 12
+menjadi 28.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -170,6 +170,7 @@ Pola kegagalan yang berulang:
 | Klik habis waktu padahal tombol terlihat | Tombol `disabled` oleh validasi form, misalnya catatan wajib; baca kondisi `disabled` di kode sebelum mengubah spec |
 | `response.json` gagal dengan `No resource with given identifier found` | Penunggu menangkap respons milik halaman sebelumnya yang sudah dibuang; pasang penunggu setelah `goto(..., { waitUntil: "commit" })` atau `reload(...)` yang sama |
 | Skenario tulis `skipped` padahal kode tidak berubah | Dokumen aktif sisa run yang gagal menghalangi pembuatan (409). Baca pesan `POST` di trace (backend menyebut nomornya), lalu batalkan dokumen itu dari halaman detail |
+| `net::ERR_NETWORK_IO_SUSPENDED` saat `page.goto` | Mesin menangguhkan jaringan (tidur atau hemat daya) di tengah suite; jalankan ulang test itu sendirian, lalu suite penuh diawali `systemd-inhibit --what=idle:sleep` |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena
 tombol hapus sempat disabled sampai daftar role selesai dimuat (level
@@ -207,6 +208,20 @@ satu putaran.
   pembatas login dihitung per IP dan email serta per tenant dan nama.
   Percobaan gagal dengan akun uji menambah hitungan yang, bila habis,
   mengunci login seluruh suite selama 15 menit.
+- Input yang dirender lewat `Controller` tidak punya atribut `name`
+  (misalnya harga berformat ribuan di edit tarif); pilih lewat atribut
+  yang benar-benar ada di kode, seperti `inputmode` dan `placeholder`.
+  Selector diturunkan dari kode halaman, bukan dari spec lama: selector
+  `menuitem` di spec aset lama tidak pernah cocok dengan UI, karena
+  skenarionya selalu di-skip.
+- Checkbox Radix yang dibungkus `<label>` bernama sesuai teks labelnya,
+  sehingga `getByRole("checkbox", { name })` dan `toBeChecked()` dapat
+  dipakai (hari aktif dan tipe aset di form tarif).
+- Tombol simpan yang teks menunggunya tidak diketahui diperiksa lewat
+  `button[type="submit"]` yang nonaktif selama permintaan ditahan.
+- Pesan galat utuh test yang gagal dicetak helper `galat-e2e.js`
+  (`cara-kerja.md`, Helper penggantian), karena `ringkas-e2e.js` memotong
+  nilai yang diterima.
 - Nama data uji dibuat unik per run (misalnya akhiran dari `Date.now()`), agar
   data sisa dari run yang gagal tidak memicu penolakan duplikat.
 - Nilai input berformat rupiah diperiksa dengan pola, misalnya
@@ -318,13 +333,15 @@ Menunggu perbaikan backend:
 | Jurnal Keluar penjualan langsung terbaca setelah finalisasi, dan finalisasi yang ditolak tidak menambah jurnal (`penjualan/alur-penjualan.spec.ts`, dua test) | Backend membersihkan cache daftar jurnal setiap kali `inventoryService` menulis jurnal (`kontrak/temuan.md` butir 46). Keduanya dibuka bersamaan: test kedua baru bermakna bila bacaan jurnal terbukti segar |
 | Finalisasi berhasil bila stok bahan outlet cukup walau stok produk tidak (`penjualan/alur-penjualan.spec.ts`) | Backend menghubungkan stok produk ke stok lokasi (`kontrak/temuan.md` butir 37) |
 | Delapan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, dan stock adjustment | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
+| Daftar aset yang dimuat ulang setelah tipe asetnya dihapus (`reservasi/aset/crud-aset.spec.ts`) | Backend membersihkan cache daftar aset saat tipe aset dihapus (`kontrak/temuan.md` butir 51) |
+| Hapus tarif berhasil (`reservasi/tarif/crud-tarif.spec.ts`) | `DELETE /tarif/:id` menjawab sukses (`kontrak/temuan.md` butir 53). Selama menunggu, skenario tombol menunggu membuktikan tarif memang terhapus (404 saat dibaca ulang) |
+| Tarif dilepas dari tipe aset (`reservasi/tarif/crud-tarif.spec.ts`) | Ubah tarif mengganti `tipeAsetID` alih-alih `$addToSet`, dan membersihkan cache tipe aset dengan `tenantID` yang benar (`kontrak/temuan.md` butir 54 dan 55) |
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
 terhitung di angka skipped pada baseline:
 
 | Spec | Dilewati bila |
 |---|---|
-| `reservasi/aset/crud-aset.spec.ts` | Tidak ada aset berstatus digunakan. Spec ini memalsukan respons sukses; skenarionya pindah ke spec alur reservasi yang membuat booking sungguhan (keputusan R1a dan R2b) |
 | `inventaris/stok/lihat-stok.spec.ts`, tab kritis gudang | Tidak ada stok gudang yang kritis (terjadi pada data uji sekarang) |
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
 | `inventaris/penerimaanBarang/terima-penerimaan.spec.ts`, `inventaris/transferStok/*.spec.ts` | Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup. Kegagalan persiapan lain menggagalkan test, bukan melewatinya |
@@ -394,11 +411,12 @@ Urutan debug kegagalan e2e di atas).
 - **Idempotensi hanya teruji dari sisi klien**: kunci terkirim dan sama saat
   permintaan diulang. Penahanan permintaan kembar di backend tidak diuji
   dari web.
-- **Tiga spec master data reservasi memalsukan respons sukses**: 70
-  `route.fulfill` sukses di spec tipe aset, tarif, dan aset menurut audit
-  26 September 2026, sehingga skenario buat, edit, dan hapusnya tidak
-  pernah menyentuh backend. Dibangun ulang terhadap backend sungguhan
-  sebagai langkah pertama modul reservasi (keputusan R1a).
+- **Spec tipe aset belum memakai `tests/helpers/reservasi-uji.ts`**:
+  helper-nya masih didefinisikan di dalam spec, karena `a2adc70`
+  mendahului helper bersama itu. Dipindah saat spec itu disentuh lagi.
+- **Status aset "Digunakan" dan penghapusan aset yang punya booking**
+  belum teruji; keduanya menunggu spec alur reservasi yang membuat booking
+  sungguhan (keputusan R2b).
 - **Password salah pada akun uji menambah hitungan pembatas login**, dan
   login sukses tidak menguranginya. Spec login gagal lebih awal bila sisa
   kuota di header `RateLimit` di bawah 3; menjalankan spec auth berulang
@@ -506,3 +524,16 @@ Urutan debug kegagalan e2e di atas).
   agar tidak terhitung pembatas, tombol memuat lewat `tahanLaluTeruskan`,
   simulasi `requireSetup` dari respons login nyata lewat `route.fetch()`,
   dan pemeriksaan sisa kuota dari header `RateLimit`.
+- `tests/e2e/reservasi/tipeAset/crud-tipeAset.spec.ts`: data uji dibuat
+  lewat API dengan nama unik dan dihapus di `finally`, keberhasilan
+  dibuktikan dengan membaca ulang lewat API (404 setelah hapus), galat
+  backend sungguhan dari nama duplikat, dan simulasi daftar kosong yang
+  dibentuk dari respons nyata.
+- `tests/e2e/reservasi/aset/crud-aset.spec.ts`: helper bersama
+  `tests/helpers/reservasi-uji.ts`, data yatim yang dibuat nyata dengan
+  menghapus tipe aset uji, dan `test.fixme` berbadan lengkap untuk cache
+  backend yang basi.
+- `tests/e2e/reservasi/tarif/crud-tarif.spec.ts`: skenario pendamping yang
+  tetap membuktikan efek sebenarnya selama skenario utama menunggu backend
+  (tarif terhapus walau `DELETE` menjawab 500), serta selector untuk input
+  `Controller` tanpa `name` dan checkbox Radix berlabel.

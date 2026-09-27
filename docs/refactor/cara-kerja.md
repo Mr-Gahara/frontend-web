@@ -62,7 +62,7 @@ console.log("OK");
 Untuk penggantian di banyak berkas, kumpulkan pasangan dalam array dan tulis
 berkas hanya bila seluruhnya cocok.
 
-Sepuluh helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan dengan cache
+Sebelas helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan dengan cache
 kontrak. Sampai submodul stok, helper disimpan di `/tmp`, dan folder itu dua
 kali dikosongkan sistem dalam sehari: sekali membuat perbaikan dokumen tidak
 masuk sebelum commit (`b0d11d2` menyusulkannya). Skrip sekali pakai tetap di
@@ -428,6 +428,27 @@ simulasi.forEach((s) => console.log("SIMULASI " + s));
 console.log("total fulfill sukses: " + total + " di " + berkas.length + " spec");
 process.exit(total ? 1 : 0);
 EOF
+cat > ~/.cache/frontend-web/alat/galat-e2e.js <<'EOF'
+const path = require("path");
+const r = require(path.resolve(process.argv[2] || "/tmp/p.json"));
+let n = 0;
+const jalan = (daftar) =>
+  daftar.forEach((s) => {
+    (s.specs || []).forEach((sp) =>
+      sp.tests.forEach((t) =>
+        t.results.forEach((res) => {
+          if (res.status !== "failed" && res.status !== "timedOut") return;
+          n++;
+          console.log("== " + sp.title.slice(0, 90) + " (" + sp.file + ":" + sp.line + ")");
+          console.log(String(res.error && res.error.message).replace(/\x1b\[[0-9;]*m/g, "").slice(0, 800));
+        }),
+      ),
+    );
+    if (s.suites) jalan(s.suites);
+  });
+jalan(r.suites);
+console.log("gagal: " + n);
+EOF
 ```
 
 - `ganti.js`: dipanggil dengan ``node -e 'require(process.env.HOME + "/.cache/frontend-web/alat/ganti.js")("berkas", [[`lama`, `baru`]])'``.
@@ -489,6 +510,12 @@ EOF
   dicetak beserta alasannya, dan sisanya, termasuk status dari variabel,
   dihitung sukses. Keluar dengan kode 1 bila ada yang sukses, sehingga
   dapat menjadi gerbang (`pengujian.md`, Perintah verifikasi).
+- `galat-e2e.js`: membaca `/tmp/p.json` (atau berkas di argumen pertama)
+  dan mencetak judul, berkas, baris, serta 800 karakter pertama pesan
+  galat setiap test yang gagal atau habis waktu, lalu `gagal: N`. Dipakai
+  setelah `ringkas-e2e.js` bila nilai yang diterima terpotong; di spec
+  master data reservasi, nilai itulah yang membedakan status 500, elemen
+  yang tidak ditemukan, dan data yang tidak berubah.
 - Di dalam template literal skrip, backtick dan tanda dolar yang diikuti kurung
   kurawal ditulis dengan escape, dan tanda miring terbalik ditulis ganda agar
   sampai ke berkas. Hindari kutip bersarang di konten yang disisipkan.
@@ -899,6 +926,13 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   Blok pemetaan reservasi memakai `$S` berisi daftar service dan gagal.
   Daftar berkas diteruskan langsung lewat `$(...)` di argumen, bukan
   disimpan ke variabel lebih dulu.
+- **Kegagalan spec pengganti dipilah menurut pemilik bugnya sebelum ada
+  yang diubah.** Spec master data reservasi ditulis untuk perilaku benar
+  dan gagal tujuh kali: tiga bug frontend (deskripsi tipe aset, kolom tipe
+  aset tarif, dialog hapus tarif) diperbaiki, tiga bug backend (cache
+  aset, hapus tarif 500, `$addToSet` tarif) menjadi `test.fixme` dengan
+  persetujuan, dan satu kesalahan selector spec (harga di edit tarif)
+  dibetulkan. Tidak satu pun diselesaikan dengan melonggarkan harapan.
 
 ## Kapan berhenti dan bertanya
 

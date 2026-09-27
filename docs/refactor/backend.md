@@ -171,6 +171,12 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   membedakan email tidak terdaftar (404) dari password salah (400),
   sehingga keberadaan sebuah email dapat diketahui tanpa password
   (`kontrak/temuan.md` butir 50)
+- Laporan master data reservasi — 5 temuan, disusun 27 September 2026:
+  cache daftar aset tidak dibersihkan saat tipe aset dihapus, hapus aset
+  dan tipe aset tanpa pemeriksaan pemakaian, hapus tarif menjawab 500
+  setelah datanya terhapus, ubah tarif tidak dapat melepas tipe aset, dan
+  cache tipe aset dibersihkan dengan `tenantID` undefined
+  (`kontrak/temuan.md` butir 51 sampai 55)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

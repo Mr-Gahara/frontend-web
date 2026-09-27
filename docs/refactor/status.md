@@ -57,6 +57,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Perbaikan spec alur pengajuan stok | `8d62c56` | Selesai |
 | Penjualan dan pembayaran | `e8c81b1` (fondasi), `c9640ce` (daftar), `69a5d5e` (detail), `8738752` (pembayaran), `f33ffa6` (buat) | Selesai |
 | Spec login tanpa respons sukses palsu | `5a3deea` | Selesai |
+| Spec master data reservasi | `a2adc70` (tipe aset), `4d3467f` (aset), `adbee4c` dan `04830b7` (tarif) | Selesai |
 | Reservasi | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 | Keuangan | - | Belum |
 | Jadwal dan shift | - | Belum |
@@ -97,11 +98,11 @@ buat, dan edit untuk aset, tarif, dan tipe aset, beserta
   `apiClient`. Buat reservasi 1.165 baris, buat dan edit tarif 774 dan
   807. Form buat tarif memakai `<select>` bawaan untuk basis perhitungan,
   sedangkan form edit memakai Radix Select.
-- Ketiga spec master data yang ada memalsukan respons sukses (Utang
-  pengujian di `pengujian.md`) dan dibangun ulang terhadap backend
-  sungguhan sebagai langkah pertama, lalu dijalankan terhadap kode lama
-  sebelum skenario baru ditambahkan (keputusan R1a). Daftar dan buat
-  reservasi belum punya spec.
+- Spec master data sudah dibangun ulang terhadap backend sungguhan
+  (keputusan R1a): tipe aset `a2adc70`, aset `4d3467f`, serta tarif
+  `adbee4c` dan `04830b7`, dengan helper bersama
+  `tests/helpers/reservasi-uji.ts`. Ketiganya menjadi pembanding migrasi
+  halaman master data. Daftar dan buat reservasi belum punya spec.
 - Urutan submodul: master data (tipe aset, aset, tarif), daftar
   reservasi, lalu buat reservasi, masing-masing dengan suite penuh dan
   commit sendiri.
@@ -115,9 +116,9 @@ buat, dan edit untuk aset, tarif, dan tipe aset, beserta
   `items` yang saling meniadakan); `GET`, `PUT`, dan `DELETE` sesi booking
   per id belum tercatat di `endpoint.md`; bentuk respons sesi booking
   belum ada di bagian 3.3 (cache kontrak tanpa contoh, ambil dari mapper
-  backend); respons tarif membawa `dataAset` berisi tipe aset, bukan
-  `tipeAsetID`. Tipe `Tarif`, `TipeAset`, dan `SesiBookingResponse` di
-  `types/` disesuaikan.
+  backend). Tipe `Tarif` membaca `dataAset` sejak `04830b7`; `_id` wajib
+  di `Tarif`, `_id` di `TipeAset`, dan `SesiBookingResponse` disesuaikan
+  saat migrasi.
 - Perilaku backend yang menentukan rancangan: booking dari web dibuat
   lewat jalur batch dengan penjualan `booking` berstatus FINAL, dan
   `simpanDraft` diabaikan, sehingga ubah dan hapus sesi booking selalu
@@ -125,26 +126,23 @@ buat, dan edit untuk aset, tarif, dan tipe aset, beserta
   dipilih otomatis menurut tipe aset, hari, jam, dan prioritas. Status
   aset "digunakan" dihitung dinamis dari booking Aktif yang sedang
   berjalan.
-- Calon temuan backend, dibuktikan di spec lalu dilaporkan setelah
-  commit: void penjualan hanya menghapus cache `booking:tenant:<t>`,
+- Temuan backend master data yang sudah terbukti ada di
+  `kontrak/temuan.md` butir 51 sampai 55. Calon temuan yang belum
+  dibuktikan: void penjualan hanya menghapus cache `booking:tenant:<t>`,
   bukan kunci per tanggal dan detail yang dibaca halaman reservasi
-  (`penjualanService` baris 628 dan 758); hapus tarif memakai `payload`
-  yang tidak terdefinisi sehingga diduga dijawab 500 setelah data
-  terhapus, dan ubah tarif tidak membersihkan cache tipe aset
-  (`tarifService` baris 152 dan 166); hapus aset dan tipe aset tanpa
-  pemeriksaan pemakaian; `voidPenjualan` tidak terpakai; sekitar 930
+  (`penjualanService` baris 628 dan 758); keberadaan tipe aset tidak
+  diperiksa saat aset dibuat; `voidPenjualan` tidak terpakai; sekitar 930
   baris kode lama dikomentari di `sesiBookingService.js`; daftar sesi
   booking mengubah status menjadi Selesai saat dibaca dan hanya
   meng-cache daftar yang tidak kosong.
 - Keputusan pemilik proyek untuk modul ini ada di `keputusan.md` (Modul
   reservasi, R1a sampai R4a).
 
-Langkah pertama sesi berikutnya: menulis ulang ketiga spec master data
-(`tests/e2e/reservasi/tipeAset/crud-tipeAset.spec.ts`,
-`tests/e2e/reservasi/aset/crud-aset.spec.ts`, dan
-`tests/e2e/reservasi/tarif/crud-tarif.spec.ts`) menurut Catatan
-Playwright di `pengujian.md`, sampai `audit-fulfill.js` lolos untuk
-`tests/e2e/reservasi` dan spec itu lolos terhadap kode lama.
+Langkah berikutnya: migrasi halaman master data ke `features/` dengan
+ketiga spec di atas sebagai pembanding, dimulai dari tipe aset, lalu aset
+dan tarif. Langkah pertama sesi berikutnya adalah pemetaan halaman tipe
+aset: `grep -rnE 'apiClient|: any|_id|queryKey'
+app/dashboard/outlet/reservasi/tipeAset --include='*.tsx'`.
 
 ## Catatan dari modul inventaris
 
@@ -249,8 +247,8 @@ Yang masih berlaku:
 
 ### Utang kecil dari modul stock adjustment gudang
 
-- 20 error ESLint `@typescript-eslint/no-explicit-any` warisan di luar
-  berkas modul: spec reservasi (aset, tarif, tipe aset), integration
+- 10 error ESLint `@typescript-eslint/no-explicit-any` warisan di luar
+  berkas modul: integration
   jadwal, pengguna, dan pola roster, `tests/helpers/storage.ts`,
   `tests/unit/lib/decodeToken.test.ts`, dan `components/app-sidebar.tsx`
   baris 368. Bereskan saat berkasnya dimigrasikan; `storage.ts` sendiri

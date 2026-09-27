@@ -143,6 +143,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Nilai sah: `VALID_STATUS`: tersedia, digunakan, perbaikan
 - Dibaca controller dari body: `-`
 - Diisi server: -
+- Service mengganti `status` kosong atau `digunakan` menjadi `tersedia`. Status yang dibaca kembali dihitung ulang dari sesi booking Aktif yang sedang berjalan (`asetService._applyDynamicStatus`), kecuali `perbaikan`. `tipeAsetID` hanya diperiksa formatnya
 
 #### `POST /bahan-baku`
 
@@ -364,7 +365,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 - Aturan: validateTarifPayload (validators/tarifValidator.js)
 - Wajib dari klien: `namaTarif`, `basisPerhitungan`, `harga`, `durasiMinimum`
-- Field lain yang dikenali: `hariAktif`, `jamMulai`, `jamSelesai`, `tipeAsetID`
+- Field lain yang dikenali: `hariAktif`, `jamMulai`, `jamSelesai`, `tipeAsetID`; `isActive` dan `prioritas` diteruskan service tanpa aturan, dan model berbawaan `isActive: false`
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -372,7 +373,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 - Aturan: validateTipeAsetPayload (validators/tipeAsetValidator.js)
 - Wajib dari klien: `namaTipeAset`
-- Field lain yang dikenali: -
+- Field lain yang dikenali: `deskripsi`, tanpa aturan di validator dan diteruskan service
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -390,10 +391,11 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PUT /aset/:id`
 
 - Aturan: validateAsetPayload (validators/asetValidator.js)
-- Wajib dari klien: `namaAset`, `tipeAsetID`
-- Field lain yang dikenali: `status`
+- Wajib dari klien: - (validator memeriksa field wajib hanya saat create; `tipeAsetID` yang dikirim diperiksa formatnya)
+- Field lain yang dikenali: `namaAset`, `tipeAsetID`, `status`
 - Nilai sah: `VALID_STATUS`: tersedia, digunakan, perbaikan
 - Diisi server: -
+- Service mengganti `status` `digunakan` menjadi `tersedia`, sehingga status itu tidak dapat dipaksa dari klien
 
 #### `PUT /bahan-baku/:param`
 
@@ -520,16 +522,17 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PUT /tarif/:id`
 
 - Aturan: validateTarifPayload (validators/tarifValidator.js)
-- Wajib dari klien: `namaTarif`, `basisPerhitungan`, `harga`, `durasiMinimum`
-- Field lain yang dikenali: `hariAktif`, `jamMulai`, `jamSelesai`, `tipeAsetID`
-- Diisi server: `tenantID`
+- Wajib dari klien: - (validator memeriksa field wajib hanya saat create)
+- Field lain yang dikenali: `namaTarif`, `basisPerhitungan`, `harga`, `durasiMinimum`, `hariAktif`, `jamMulai`, `jamSelesai`, `tipeAsetID`; `isActive` dan `prioritas` diteruskan service tanpa aturan
+- `tipeAsetID` digabung ke tipe aset lama lewat `$addToSet`, sehingga tipe aset tidak dapat dilepas maupun diganti (`temuan.md` butir 54)
+- Diisi server: - (`tenantID` hanya disuntikkan saat create, sehingga cache tipe aset dibersihkan dengan `tenantID` undefined, `temuan.md` butir 55)
 
 #### `PUT /tipeaset/:id`
 
 - Aturan: validateTipeAsetPayload (validators/tipeAsetValidator.js)
-- Wajib dari klien: `namaTipeAset`
-- Field lain yang dikenali: -
-- Diisi server: `tenantID`
+- Wajib dari klien: - (`namaTipeAset` yang dikirim tidak boleh kosong dan minimal 2 karakter)
+- Field lain yang dikenali: `deskripsi`, tanpa aturan; payload diteruskan utuh ke `findOneAndUpdate`, sehingga string kosong menghapus deskripsi (dikirim frontend sejak `a2adc70`)
+- Diisi server: - (`tenantID` hanya disuntikkan saat create, dan dibuang service saat update)
 
 #### `PUT /transferstok/:id`
 
