@@ -15,7 +15,8 @@ export interface Tarif {
   jamMulai: string;
   jamSelesai: string;
   prioritas: number;
-  tipeAsetID: TipeAsetRef[];
+  // Tipe aset terhubung, dikirim backend sebagai dataAset (tarifMapper).
+  dataAset: TipeAsetRef[];
   tenantID: string;
   createdAt?: string;
   updatedAt?: string;

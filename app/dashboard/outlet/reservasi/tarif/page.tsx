@@ -87,8 +87,7 @@ export default function DaftarTarifPage() {
         description:
           error.message || "Terjadi kesalahan saat menghapus data tarif.",
       });
-      setDeleteModalOpen(false);
-      setSelectedTarifId(null);
+      // Dialog bertahan saat gagal agar hapus dapat diulang (keputusan Fase 0).
     },
   });
 
@@ -370,8 +369,8 @@ export default function DaftarTarifPage() {
                     {/* TIPE ASET TERKAIT */}
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1 max-w-45">
-                        {item.tipeAsetID && item.tipeAsetID.length > 0 ? (
-                          item.tipeAsetID.map((aset, i) => (
+                        {item.dataAset && item.dataAset.length > 0 ? (
+                          item.dataAset.map((aset, i) => (
                             <span
                               key={aset.id || i}
                               className="text-[10px] font-semibold px-2 py-0.5 rounded-full border"
