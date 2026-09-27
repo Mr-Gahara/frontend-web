@@ -37,7 +37,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/aset` | authPengguna | - | `{ data }` | `id` | `features/aset/api.ts`, 2 file halaman lama |
+| GET | `/aset` | authPengguna | - | `{ data }` | `id` | `features/aset/api.ts`, 1 file halaman lama |
 | POST | `/aset` | authPengguna | `create-aset` | - | - | `features/aset/api.ts` |
 | GET | `/aset/:id` | authPengguna | - | `{ data }` | `id` | `features/aset/api.ts` |
 | PUT | `/aset/:id` | authPengguna | `update-aset` | - | - | `features/aset/api.ts` |
@@ -237,7 +237,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/sesibooking` | authPengguna | `read-booking` | `{ data }` | - | 2 file |
+| GET | `/sesibooking` | authPengguna | `read-booking` | `{ data }` | `id`, `_id` bersarang | `features/sesi-booking/api.ts`, 1 file halaman lama (query `tanggal`, cache per tanggal, `temuan.md` butir 57) |
 | POST | `/sesibooking` | authPengguna | `create-booking` | - | - | 1 file |
 
 #### `/shift`
@@ -336,6 +336,7 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /produk/:param`: _id, createdAt, gambarProduk, hargaDasar, hargaJual, isUnlimitedStok, kategori, kategoriID, keterangan, namaProduk, pajakList[], resep[], stok, updatedAt
 - `GET /role`: deskripsi, id, level, namaRole, permissions[]
 - `GET /role/:param`: deskripsi, id, level, namaRole, permissions[]
+- `GET /sesibooking`: dataAset{id, namaAset, status}, dataPelanggan{id, namaPelanggan, tipePelanggan}, dataPengguna{id, nama}, dataPenjualan{_id, noReferensi, statusPenjualan, statusBayar, totalTagihan, totalDibayar, sisaTagihan, itemPenjualan[], dan lainnya}, dataTarif{id, harga, namaTarif}, durasiMenit, id, status, tenantID, totalBiaya, waktuMulai, waktuSelesai (dari `mappers/sesiBookingMapper.js` backend `00b9957`, bukan dari sampel cache kontrak: referensi dibentuk `_formatRef`, sehingga selalu `{ id, ...field }` atau null, dan `dataPenjualan` dari `_formatPenjualanOutput` membawa `_id`. Service hanya membaca query `tanggal` (YYYY-MM-DD lokal) dan menyaring `waktuMulai` pada tanggal itu tanpa menyaring status, sehingga booking Batal ikut terkirim; booking Aktif yang sudah lewat diubah menjadi Selesai saat dibaca (`temuan.md` butir 58), dan daftar yang tidak kosong di-cache 300 detik per tanggal (butir 57))
 - `GET /stockopname` dan `GET /stockopname/:param` (dari `mappers/stockOpnameMapper.js`, bukan dari sampel cache kontrak; sekurang-kurangnya): catatan, catatanReview, id, items[] (itemId, namaSnapshot, satuanSnapshot, qtySystemSnapshot, qtyPhysical, varianceSnapshot, adaSelisih, catatanItem), lokasi{id, nama, tipe}, nomorOpname, pic{id, nama}, reviewer, status, stockAdjustment, tanggal (`qtyPhysical` dan `varianceSnapshot` null selama item belum dihitung, dan `adaSelisih` false untuk item itu; mapper backend `f27f093` baris 90 dan 93)
 - `GET /stockopname/adjustments` (dari `mappers/stockOpnameMapper.js` backend `f27f093`, bukan dari sampel cache kontrak): alasan, createdAt, id, items[], lokasi{id, nama, tipe}, nomorAdjustment, pic{id, nama}, referenceID{id, nomorOpname, tanggal}, referenceType, tanggal, tenantID, updatedAt. `referenceID` berisi objek hasil populate (`stockOpnameService` baris 557), null untuk koreksi manual atau dokumen opname yang sudah tidak ada; `referenceType` bernilai `STOCK_OPNAME` atau `MANUAL_CORRECTION`. Query `referenceType` dan `locationID` divalidasi `validateAdjustmentQuery` di service, lalu dipakai sebagai filter (`getAllAdjustments` baris 538 sampai 552 di backend `9cd1439`)
 - `GET /stockopname/adjustments/:param`: seperti daftar, dengan lokasi{alamat, id, nama, tipe} dan referenceID{id, nomorOpname, tanggal, picID} (`picID` tidak dipopulate, `stockOpnameService` baris 581). Setiap item: itemId, bahanBakuID, barangInventoryID, namaSnapshot, satuanSnapshot, qtySnapshot (stok saat draf dibuat), qtyCurrent (stok saat approval), qtyPhysical, dan qtyDifference (qtyPhysical dikurangi qtyCurrent); keempat kuantitas wajib di model

@@ -966,6 +966,14 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   grep yang terpotong. Pada tarif, `useState` dan `useWatch` ternyata
   tidak terpakai di buat, begitu pula `useState`, `useEffect`, dan
   `useWatch` di edit (`/tmp/tarif-umum.js`).
+- **Klaim dokumentasi tentang perilaku backend dibuktikan dari kode
+  sebelum menjadi dasar rancangan.** R2b dan R4a disusun di atas kalimat
+  "satu-satunya jalan batal adalah void penjualannya", padahal penjualan
+  booking selalu FINAL dan FINAL tidak dapat di-void langsung; rancangan
+  fixture harus diajukan ulang (R2c, R4b).
+- **Deteksi hidrasi memakai `useSyncExternalStore`**, dengan snapshot
+  server false dan klien true, bukan `setState` di effect yang ditolak
+  `react-hooks/set-state-in-effect` (daftar reservasi, `eef371a`).
 
 ## Kapan berhenti dan bertanya
 

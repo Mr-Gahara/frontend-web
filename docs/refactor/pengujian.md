@@ -85,18 +85,21 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
 di spec login, satu di spec tipe aset).
 
-**Baseline per submodul tarif** (commit `365553f`): 203 test unit dan
-integrasi lolos di 30 berkas, 244 e2e lolos, 19 skipped:
+**Baseline per daftar reservasi** (commit `eef371a`): 210 test unit dan
+integrasi lolos di 31 berkas, 251 e2e lolos, 20 skipped:
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
-backend, sepuluh `test.fixme` lain yang menunggu backend (tiga di spec
-alur penjualan dan tiga di spec master data reservasi), dan satu
+backend, sebelas `test.fixme` lain yang menunggu backend (tiga di spec
+alur penjualan, tiga di spec master data reservasi, dan satu di spec
+daftar reservasi), dan satu
 `test.skip` bersyarat data (Test yang ditandai fixme dan skip bersyarat,
 di bawah). Dari baseline `5a3deea` (225 lolos), spec tipe aset berubah
 dari 40 menjadi 25 test, aset dari 11 menjadi 27, dan tarif dari 12
 menjadi 28. Migrasi tipe aset (`074e98c`) dan aset (`d3ae182`)
 menambah 4 dan 3 test unit dari 186 di 27 berkas, tanpa mengubah
 angka e2e. Migrasi tarif (`365553f`) menambah 10 test unit dan 4
-skenario e2e di spec tarif.
+skenario e2e di spec tarif. Spec daftar reservasi (`27749fe`) menambah 6
+skenario lolos dan satu fixme, dan migrasinya (`eef371a`) menambah 7 test
+unit dan satu skenario.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -324,6 +327,19 @@ satu putaran.
   data hanya punya satu nilai (satu outlet), skenario penyaringan lolos
   tanpa menguji apa pun; uji aturannya di unit test dan catat
   keterbatasannya di Utang pengujian.
+- Laporan JSON untuk run berulang atau diagnosis ditulis ke berkas
+  tersendiri, misalnya `/tmp/p-daftar.json`. Pada daftar reservasi,
+  `/tmp/p.json` tertimpa run penuh yang terhenti, lalu `galat-e2e.js`
+  menjawab `gagal: 0` karena statusnya `interrupted`.
+- Elemen yang dikenali lewat teks yang dapat berulang dari data run
+  sebelumnya dihitung dari respons, bukan ditebak 1. Booking Batal dari
+  run sebelumnya dalam menit yang sama berteks jam sama, dan
+  `--repeat-each 3` pertama gagal dengan `Received: 2`.
+- Helper persiapan tidak membaca kunci cache backend yang juga dibaca
+  halaman yang diuji. Helper booking membaca `GET /sesibooking` tanpa
+  tanggal, karena daftar per tanggal yang terbaca helper tidak dibersihkan
+  saat void (`kontrak/temuan.md` butir 57) dan membuat halaman menerima
+  data basi.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -341,6 +357,7 @@ Menunggu perbaikan backend:
 | Daftar aset yang dimuat ulang setelah tipe asetnya dihapus (`reservasi/aset/crud-aset.spec.ts`) | Backend membersihkan cache daftar aset saat tipe aset dihapus (`kontrak/temuan.md` butir 51) |
 | Hapus tarif berhasil (`reservasi/tarif/crud-tarif.spec.ts`) | `DELETE /tarif/:id` menjawab sukses (`kontrak/temuan.md` butir 53). Selama menunggu, skenario tombol menunggu membuktikan tarif memang terhapus (404 saat dibaca ulang) |
 | Tarif dilepas dari tipe aset (`reservasi/tarif/crud-tarif.spec.ts`) | Ubah tarif mengganti `tipeAsetID` alih-alih `$addToSet`, dan membersihkan cache tipe aset dengan `tenantID` yang benar (`kontrak/temuan.md` butir 54 dan 55) |
+| Timeline yang dimuat ulang tidak lagi menampilkan booking yang di-void (`reservasi/daftar/lihat-reservasi.spec.ts`) | Void penjualan membersihkan cache daftar booking per tanggal (`kontrak/temuan.md` butir 57, keputusan R3a). Badannya lengkap |
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
 terhitung di angka skipped pada baseline:
@@ -424,8 +441,17 @@ Urutan debug kegagalan e2e di atas).
   dari 78 dalam tiga putaran terhadap kode lama; penyebab kegagalan
   sekali itu belum diketahui.
 - **Status aset "Digunakan" dan penghapusan aset yang punya booking**
-  belum teruji; keduanya menunggu spec alur reservasi yang membuat booking
-  sungguhan (keputusan R2b).
+  belum teruji. Spec daftar reservasi kini membuat booking sungguhan yang
+  mencakup waktu sekarang, tetapi label status aset uji hanya dibandingkan
+  dengan respons `GET /aset`, karena daftar aset di-cache backend 60 detik
+  dan belum terbukti dibersihkan saat booking dibuat.
+- **Booking uji hanya dapat dibersihkan lewat API** (bayar Rp1, hapus
+  pembayaran, void penjualan), karena web tidak punya jalur batal
+  (`kontrak/temuan.md` butir 56). Setiap run spec daftar reservasi
+  meninggalkan penjualan booking VOID dan booking Batal.
+- **Blok booking tanpa penjualan** (tanpa tautan R4b) hanya teruji di unit
+  test (`tests/unit/features/sesi-booking/tampilan.test.ts`), karena jalur
+  buat booking selalu membuat penjualan.
 - **Password salah pada akun uji menambah hitungan pembatas login**, dan
   login sukses tidak menguranginya. Spec login gagal lebih awal bila sisa
   kuota di header `RateLimit` di bawah 3; menjalankan spec auth berulang
@@ -546,3 +572,8 @@ Urutan debug kegagalan e2e di atas).
   tetap membuktikan efek sebenarnya selama skenario utama menunggu backend
   (tarif terhapus walau `DELETE` menjawab 500), serta selector untuk input
   `Controller` tanpa `name` dan checkbox Radix berlabel.
+- `tests/e2e/reservasi/daftar/lihat-reservasi.spec.ts`: fixture booking
+  tetap dengan pembersihan lewat penjualan (`batalkanBooking`, keputusan
+  R2c), booking yang dibaca helper dari daftar tanpa tanggal agar kunci
+  cache yang dibaca halaman tidak terisi, harapan dari respons yang dibaca
+  halaman itu sendiri, dan tautan yang diperiksa lewat `href` lalu dibuka.

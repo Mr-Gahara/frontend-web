@@ -177,6 +177,13 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   setelah datanya terhapus, ubah tarif tidak dapat melepas tipe aset, dan
   cache tipe aset dibersihkan dengan `tenantID` undefined
   (`kontrak/temuan.md` butir 51 sampai 55)
+- Laporan modul reservasi: sesi booking — 4 temuan, disusun 27 September
+  2026 setelah `eef371a`: booking tanpa pembayaran tidak dapat dibatalkan
+  karena penjualannya selalu FINAL (perlu keputusan alur), void penjualan
+  tidak membersihkan cache daftar per tanggal dan detail booking, status
+  Selesai ditulis saat daftar dibaca, dan kode lama yang dikomentari di
+  `services/sesiBooking/sesiBookingService.js` (`kontrak/temuan.md` butir
+  56 sampai 59)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

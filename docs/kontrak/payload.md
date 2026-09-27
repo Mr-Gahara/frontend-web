@@ -336,8 +336,9 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /sesibooking`
 
-- Aturan: validateWaktuRange (validators/sesiBookingValidator.js)
-- Wajib dari klien: `dataPelanggan`, `dataAset`, `waktuMulai`, `waktuSelesai`, `items`
+- Aturan: `validateSesiBookingPayload` (validators/sesiBookingValidator.js) di route. Analisis statis sempat mencatat `validateWaktuRange`, fungsi pembantu di berkas yang sama (dikoreksi 27 September 2026)
+- Wajib dari klien: `dataPelanggan`, lalu salah satu dari dua jalur yang saling meniadakan: jalur tunggal (`dataAset`, `waktuMulai`, `waktuSelesai`) atau jalur batch (`items` tidak kosong, setiap item dengan `dataAset`, `waktuMulai`, dan `waktuSelesai`). Controller memanggil `createBatch` untuk jalur batch dan `create` untuk jalur tunggal
+- Aturan service: kedua jalur membuat penjualan `booking` berstatus FINAL dengan `sisaTagihan` sama dengan `totalTagihan`, sehingga booking yang belum dibayar tidak dapat dibatalkan (`temuan.md` butir 56); `simpanDraft` tidak dibaca. Bentrok dengan booking Aktif aset yang sama ditolak 409 (`checkConflict`), dan tarif dipilih otomatis lewat `findBestTarif` menurut tipe aset, hari, dan jam, lalu prioritas, tanpa memeriksa `isActive`
 - Field lain yang dikenali: `dataTarif`, `diskonItem`, `diskonGlobal`, `status`, `simpanDraft`, `noReferensi`, `dataPenjualan`
 - Nilai sah: `VALID_STATUS`: Aktif, Selesai, Batal
 - Dibaca controller dari body: `-`

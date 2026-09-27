@@ -354,8 +354,9 @@ keputusan rancangan butir 17 dan 21.
   sesi booking yang belum pernah dibaca, sedangkan pemeriksaan daftar di
   UI menunggu backend membersihkan cache daftar per tanggal.
 - **R4a: blok booking di daftar reservasi menautkan ke detail
-  penjualannya**, satu-satunya jalur membatalkan booking, tanpa menambah
-  aksi ubah atau hapus sesi booking.
+  penjualannya**, tanpa menambah aksi ubah atau hapus sesi booking.
+  Anggapan bahwa detail penjualan adalah jalur batal booking terbukti
+  keliru (`kontrak/temuan.md` butir 56) dan dijelaskan ulang oleh R4b.
 - **Nama berisi spasi saja ditolak di form tipe aset dan aset** (27
   September 2026, `074e98c` dan `d3ae182`). Skema buat dan edit
   disatukan dengan trim; sebelumnya nama itu lolos form tipe aset lalu
@@ -374,6 +375,17 @@ keputusan rancangan butir 17 dan 21.
   saat booking.
 - **T4a: nama tarif berisi spasi saja ditolak** di buat dan edit,
   sejalan dengan tipe aset dan aset.
+- **R2c: booking uji dibersihkan lewat penjualannya** (27 September
+  2026, `27749fe`), melengkapi R2b: bayar Rp1, hapus pembayaran itu
+  (penjualan kembali DRAFT dan saldo akun kas kembali), lalu void
+  penjualan (booking Batal). Penjualan booking selalu FINAL dan tidak dapat
+  di-void langsung (`kontrak/temuan.md` butir 56).
+- **R4b: tautan blok booking ke detail penjualan adalah jalur lihat dan
+  bayar, bukan jalur batal** (`eef371a`). Web belum punya jalur
+  membatalkan booking.
+- **R5a: booking Batal tidak ditampilkan di timeline daftar reservasi**
+  (`eef371a`), karena slotnya sudah dilepas; backend tetap mengirimnya,
+  karena daftar tidak disaring menurut status.
 
 ## Keputusan rancangan yang mengikat
 

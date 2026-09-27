@@ -61,7 +61,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Reservasi: tipe aset | `074e98c` | Selesai |
 | Reservasi: aset | `d3ae182` | Selesai |
 | Reservasi: tarif | `365553f` | Selesai |
-| Reservasi: daftar dan buat reservasi | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Reservasi: daftar reservasi | `27749fe` (spec), `eef371a` | Selesai |
+| Reservasi: buat reservasi | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 | Keuangan | - | Belum |
 | Jadwal dan shift | - | Belum |
 | Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), termasuk stock adjustment (`247cf2d`); `gudang/layout.tsx` dan `gudang/setup` masih memakai `apiClient`, dan layout memeriksa nama role Owner (baris 32, keputusan rancangan butir 2); pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
@@ -72,10 +73,10 @@ Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 
-| Hal | Awal | Setelah submodul tarif `365553f` | Catatan |
+| Hal | Awal | Setelah daftar reservasi `eef371a` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 58 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
-| Kemunculan `_id` | - | 70 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id` |
+| Kemunculan `_id` | - | 71 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts` |
 | `useAuthGuard()` berulang di halaman | 49 | 35 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, dan keempat halaman penjualan) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
 | Berkas di atas 700 baris | 7 | 5 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah |
@@ -102,61 +103,59 @@ buat, dan edit untuk aset, tarif, dan tipe aset, beserta
   774 dan 807 (angka pemetaan itu). Form buat tarif memakai `<select>`
   bawaan untuk basis perhitungan, sedangkan form edit memakai Radix
   Select.
-- Tipe aset (`074e98c`), aset (`d3ae182`), dan tarif (`365553f`) sudah
-  dimigrasikan ke `features/tipe-aset`, `features/aset`, dan
-  `features/tarif`. Yang masih memakai `apiClient` tinggal daftar
-  reservasi dan buat reservasi (27 September 2026).
+- Tipe aset (`074e98c`), aset (`d3ae182`), tarif (`365553f`), dan daftar
+  reservasi (`eef371a`) sudah dimigrasikan ke `features/tipe-aset`,
+  `features/aset`, `features/tarif`, dan `features/sesi-booking`. Yang
+  masih memakai `apiClient` tinggal buat reservasi (27 September 2026).
 - Spec master data sudah dibangun ulang terhadap backend sungguhan
   (keputusan R1a): tipe aset `a2adc70`, aset `4d3467f`, serta tarif
   `adbee4c` dan `04830b7`, dengan helper bersama
   `tests/helpers/reservasi-uji.ts`. Ketiganya menjadi pembanding migrasi
-  halaman master data: `074e98c`, `d3ae182`, dan `365553f`. Daftar dan
-  buat reservasi belum punya spec.
+  halaman master data: `074e98c`, `d3ae182`, dan `365553f`. Daftar
+  reservasi punya spec `27749fe` dengan fixture booking tetap (keputusan
+  R2b dan R2c); buat reservasi belum punya spec.
 - Urutan submodul: master data (tipe aset, aset, tarif), daftar
   reservasi, lalu buat reservasi, masing-masing dengan suite penuh dan
-  commit sendiri. Master data selesai; berikutnya daftar reservasi.
+  commit sendiri. Master data dan daftar reservasi selesai; berikutnya
+  buat reservasi.
 - Buat reservasi mengisi kunci `pelanggan.semua` dan
   `diskon.daftar({ status: "Aktif" })` dengan data mentah. Migrasinya
   memakai `features/pelanggan` dan `features/diskon` (keputusan rancangan
   butir 12), bukan membuat hook baru.
-- Daftar reservasi dan buat reservasi masih memanggil `GET /aset` lewat
-  `apiClient` (audit endpoint 27 September 2026). Migrasinya memakai
-  `useDaftarAset` dari `features/aset`, bukan hook baru, dan tidak
-  menyimpan data di kunci akar (keputusan rancangan butir 3 dan 12).
-- Kontrak yang terbukti tertinggal: `POST /sesibooking` di `payload.md`
-  mencatat validator dan field wajib yang keliru (validatornya
-  `validateSesiBookingPayload`, dengan jalur tunggal dan jalur batch
-  `items` yang saling meniadakan); `GET`, `PUT`, dan `DELETE` sesi booking
-  per id belum tercatat di `endpoint.md`; bentuk respons sesi booking
-  belum ada di bagian 3.3 (cache kontrak tanpa contoh, ambil dari mapper
-  backend). Tipe `Tarif` membaca `dataAset` sejak `04830b7`, `_id` di
-  `TipeAset` dibuang di `074e98c`, dan `_id` di `Tarif` di `365553f`;
-  `SesiBookingResponse` disesuaikan saat migrasi.
+- Buat reservasi masih memanggil `GET /aset` dan `GET /sesibooking` lewat
+  `apiClient` (audit endpoint 27 September 2026), dengan kunci
+  `sesiBooking.banyakTanggal`. Migrasinya memakai `useDaftarAset` dan
+  `features/sesi-booking`, bukan hook baru, dan tidak menyimpan data di
+  kunci akar (keputusan rancangan butir 3 dan 12).
+- Kontrak sesi booking dikoreksi pada 27 September 2026: validator dan
+  dua jalur `POST /sesibooking` di `payload.md`, serta bentuk respons
+  daftar di `endpoint.md` bagian 3.3. Route sesi booking per id tidak
+  dipakai web, sehingga tetap hanya di Lampiran A. Tipe `Tarif` membaca
+  `dataAset` sejak `04830b7`, `_id` di `TipeAset` dibuang di `074e98c`
+  dan di `Tarif` di `365553f`, dan `SesiBookingResponse` membawa
+  `dataPenjualan` bertipe sejak `eef371a`.
 - Perilaku backend yang menentukan rancangan: booking dari web dibuat
   lewat jalur batch dengan penjualan `booking` berstatus FINAL, dan
   `simpanDraft` diabaikan, sehingga ubah dan hapus sesi booking selalu
-  ditolak; satu-satunya jalan batal adalah void penjualannya. Tarif
+  ditolak. Penjualan FINAL tidak dapat di-void langsung, sehingga booking
+  yang belum dibayar tidak dapat dibatalkan sama sekali dan web belum
+  punya jalur batal (`kontrak/temuan.md` butir 56, keputusan R4b). Tarif
   dipilih otomatis menurut tipe aset, hari, jam, dan prioritas. Status
   aset "digunakan" dihitung dinamis dari booking Aktif yang sedang
   berjalan.
-- Temuan backend master data yang sudah terbukti ada di
-  `kontrak/temuan.md` butir 51 sampai 55. Calon temuan yang belum
-  dibuktikan: void penjualan hanya menghapus cache `booking:tenant:<t>`,
-  bukan kunci per tanggal dan detail yang dibaca halaman reservasi
-  (`penjualanService` baris 628 dan 758); keberadaan tipe aset tidak
-  diperiksa saat aset dibuat; `voidPenjualan` tidak terpakai; sekitar 930
-  baris kode lama dikomentari di `sesiBookingService.js`; daftar sesi
-  booking mengubah status menjadi Selesai saat dibaca dan hanya
-  meng-cache daftar yang tidak kosong.
+- Temuan backend modul ini yang sudah terbukti ada di `kontrak/temuan.md`
+  butir 51 sampai 59: master data (51 sampai 55) dan sesi booking (56
+  sampai 59). Calon temuan yang belum dibuktikan: keberadaan tipe aset
+  tidak diperiksa saat aset dibuat, dan `voidPenjualan` tidak terpakai.
 - Keputusan pemilik proyek untuk modul ini ada di `keputusan.md` (Modul
-  reservasi, R1a sampai R4a, serta T1a sampai T4a untuk tarif).
+  reservasi, R1a sampai R5a, serta T1a sampai T4a untuk tarif).
 
-Langkah berikutnya: spec pembanding daftar reservasi terhadap kode lama
-dengan fixture tetap (keputusan R2b dan R3a), lalu migrasinya, kemudian
-buat reservasi dengan cara yang sama. Langkah pertama sesi berikutnya
-adalah pemetaan halaman daftar reservasi:
+Langkah berikutnya: spec pembanding buat reservasi terhadap kode lama
+dengan fixture booking yang sudah ada (`tests/helpers/reservasi-uji.ts`),
+lalu migrasinya ke `features/`. Langkah pertama sesi berikutnya adalah
+pemetaan halaman buat reservasi:
 `grep -nE 'apiClient|: any|_id|queryKey'
-app/dashboard/outlet/reservasi/page.tsx`.
+app/dashboard/outlet/reservasi/buatReservasi/page.tsx`.
 
 ## Catatan dari modul inventaris
 

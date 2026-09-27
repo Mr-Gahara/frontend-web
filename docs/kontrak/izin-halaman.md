@@ -16,6 +16,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 22 September 2026: stock adjustment, setelah daftarnya memakai cakupan outlet (`a5e9cec`, gate `fe5dd9c`).
 - 23 September 2026: stock adjustment gudang, halaman baru (`247cf2d`).
 - 26 September 2026: penjualan setelah migrasi modul penjualan dan pembayaran (`f33ffa6`), dan pengeluaran yang ternyata halaman placeholder.
+- 27 September 2026: reservasi setelah migrasi daftar reservasi (`eef371a`), tanpa perubahan gate maupun endpoint.
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
