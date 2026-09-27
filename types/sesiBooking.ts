@@ -44,6 +44,20 @@ export interface SesiBookingTarifRef extends SesiBookingRef {
   harga: number | null;
 }
 
+/**
+ * Penjualan booking yang di-populate daftar dan detail sesi booking
+ * (mappers/sesiBookingMapper.js, _formatPenjualanOutput). Hanya field yang
+ * dipakai web; _id dinormalkan menjadi id.
+ */
+export interface SesiBookingPenjualanRef {
+  id: string;
+  noReferensi: string | null;
+  statusPenjualan: "DRAFT" | "FINAL" | "VOID";
+  statusBayar: string;
+  totalTagihan: number;
+  sisaTagihan: number;
+}
+
 export interface SesiBookingResponse {
   id: string;
   tenantID: string | null;
@@ -56,7 +70,7 @@ export interface SesiBookingResponse {
   durasiMenit: number | null;
   totalBiaya: number | null;
   status: "Aktif" | "Selesai" | "Batal";
-  dataPenjualan: unknown | null;
+  dataPenjualan: SesiBookingPenjualanRef | null;
 }
 
 export interface SesiBookingListApiResponse {

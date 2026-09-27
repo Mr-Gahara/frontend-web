@@ -1,4 +1,4 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { format } from "date-fns";
 import { normalizeId } from "@/lib/api/normalize";
 import { JAWAB_GAGAL, bukaDenganAuth, login } from "../../../helpers/transfer-uji";
@@ -41,25 +41,6 @@ const blokBooking = (page: Page, mulai: Date, selesai: Date) =>
   barisAsetUji(page)
     .locator("div.absolute")
     .filter({ hasText: `${format(mulai, "HH:mm")} – ${format(selesai, "HH:mm")}` });
-
-/**
- * Jumlah booking aset uji di respons daftar yang teks jamnya sama. Booking
- * dari run sebelumnya dalam menit yang sama berteks jam sama, dan timeline
- * lama menampilkan booking Batal, sehingga jumlah blok tidak selalu 1.
- */
-function jumlahJamSama(sesi: SesiBookingMentah[], asetId: string, mulai: Date, selesai: Date) {
-  const jam = (d: Date | string) => format(new Date(d), "HH:mm");
-  return sesi.filter(
-    (x) =>
-      x.dataAset?.id === asetId &&
-      jam(x.waktuMulai) === jam(mulai) &&
-      !!x.waktuSelesai &&
-      jam(x.waktuSelesai) === jam(selesai),
-  ).length;
-}
-
-const opasitas = (blok: Locator) =>
-  blok.evaluateAll((el) => el.map((e) => getComputedStyle(e).opacity));
 
 /** Rentang booking yang mencakup waktu sekarang dan dimulai pada tanggal hari ini. */
 function rentangSekarang(menit: number) {
@@ -113,14 +94,14 @@ test.describe("E2E — Reservasi › Daftar (timeline aset)", () => {
       penjualanId = b.dataPenjualan?.id;
       const { sesi } = await buka(page);
       expect(sesi.some((x) => x.id === b.id), "daftar tanggal ini memuat booking uji").toBe(true);
+      // Booking Batal berjam sama dari run sebelumnya tidak ditampilkan
+      // (keputusan R5a), dan checkConflict tidak mengizinkan dua booking Aktif
+      // bertumpuk, sehingga tepat satu blok tampil.
       const blok = blokBooking(page, mulai, selesai);
-      await expect(blok).toHaveCount(jumlahJamSama(sesi, fx.asetId, mulai, selesai));
-      await expect(blok.first()).toContainText(NAMA_PELANGGAN_BOOKING);
-      expect(
-        (await opasitas(blok)).filter((o) => o === "1"),
-        "tepat satu blok penuh, yaitu booking Aktif uji",
-      ).toHaveLength(1);
-      await expect(blok.filter({ hasText: "Selesai" })).toHaveCount(0);
+      await expect(blok).toHaveCount(1);
+      await expect(blok).toContainText(NAMA_PELANGGAN_BOOKING);
+      await expect(blok).toHaveCSS("opacity", "1");
+      await expect(blok).not.toContainText("Selesai");
     } finally {
       await batalkanBooking(page, auth, penjualanId);
     }
@@ -162,7 +143,7 @@ test.describe("E2E — Reservasi › Daftar (timeline aset)", () => {
     await page.unroute(POLA_SESI);
   });
 
-  test("booking yang dibatalkan: detail Batal, dan timeline lama menampilkannya redup tanpa label", async ({
+  test("booking yang dibatalkan: detail Batal, dan timeline tidak menampilkannya (keputusan R5a)", async ({
     page,
   }) => {
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
@@ -180,17 +161,28 @@ test.describe("E2E — Reservasi › Daftar (timeline aset)", () => {
       expect(sesi.find((x) => x.id === b.id)?.status, "daftar yang belum di-cache membawa status Batal").toBe(
         "Batal",
       );
-      // Perilaku lama: booking Batal tetap tampil redup tanpa label. Keputusan R5a
-      // menyembunyikannya; harapan ini diganti saat migrasi.
-      const blok = blokBooking(page, mulai, selesai);
-      const jumlah = jumlahJamSama(sesi, fx.asetId, mulai, selesai);
-      expect(jumlah, "respons memuat booking uji yang dibatalkan").toBeGreaterThan(0);
-      await expect(blok).toHaveCount(jumlah);
-      expect(
-        (await opasitas(blok)).every((o) => o === "0.55"),
-        "seluruh blok berjam sama redup, karena seluruhnya Batal",
-      ).toBe(true);
-      await expect(blok.filter({ hasText: "Batal" })).toHaveCount(0);
+      // Keputusan R5a: booking Batal tidak ditampilkan, termasuk booking Batal
+      // berjam sama dari run sebelumnya.
+      await expect(blokBooking(page, mulai, selesai)).toHaveCount(0);
+    } finally {
+      await batalkanBooking(page, auth, penjualanId);
+    }
+  });
+
+  test("blok booking membuka detail penjualan booking itu (keputusan R4b)", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const fx = await siapkanFixtureBooking(page, auth);
+    await bersihkanSisaBooking(page, auth, fx);
+    const { mulai, selesai } = rentangSekarang(50);
+    let penjualanId: string | undefined;
+    try {
+      const b = await buatBooking(page, auth, fx, mulai, selesai);
+      penjualanId = b.dataPenjualan?.id;
+      await buka(page);
+      const tautan = blokBooking(page, mulai, selesai).getByRole("link");
+      await expect(tautan).toHaveAttribute("href", `/dashboard/outlet/penjualan/${penjualanId}`);
+      await tautan.click();
+      await page.waitForURL(`**/dashboard/outlet/penjualan/${penjualanId}`);
     } finally {
       await batalkanBooking(page, auth, penjualanId);
     }

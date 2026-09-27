@@ -1,6 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo, useEffect, useSyncExternalStore } from "react";
 import { format, addHours, setMinutes, setSeconds, isSameDay } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import {
@@ -11,30 +10,11 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import { apiClient } from "@/lib/apiClient";
-import { queryKeys } from "@/lib/queryKeys";
-import type {
-  SesiBookingListApiResponse,
-  SesiBookingResponse,
-} from "@/types/sesiBooking";
+import { useDaftarAset } from "@/features/aset/hooks";
+import { useDaftarSesiBooking } from "@/features/sesi-booking/hooks";
+import { bookingPerAset, tautanPenjualanBooking } from "@/features/sesi-booking/tampilan";
+import { TautanPenjualanBooking } from "@/features/sesi-booking/tautan-penjualan";
 
-// ─── Types lokal ────────────────────────────────────────────────────────────
-
-interface AsetResponse {
-  id: string;
-  namaAset: string;
-  status: string;
-  dataAset: {
-    id: string;
-    namaTipeAset: string | null;
-    deskripsi: string | null;
-  } | null;
-  tenantID: string | null;
-}
-
-interface AsetListApiResponse {
-  data: AsetResponse[];
-}
 
 // ─── Design Tokens ──────────────────────────────────────────────────────────
 
@@ -120,62 +100,34 @@ function ErrorState({ message }: { message: string }) {
 export default function DasborTimelinePage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [now, setNow] = useState(new Date());
-  const [isMounted, setIsMounted] = useState(false);
+  // Garis waktu sekarang hanya dirender setelah hidrasi, karena nilai `now`
+  // di server berbeda dengan di browser. Snapshot server false dan snapshot
+  // klien true menggantikan setIsMounted di effect.
+  const isMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   useEffect(() => {
-    setIsMounted(true);
     const interval = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(interval);
   }, []);
 
   const tanggalParam = useMemo(() => toDateParam(selectedDate), [selectedDate]);
 
-  // ── Fetch aset (stale: jarang berubah, cache 5 menit) ──
+  // ── Aset dan booking per tanggal ──
   const {
-    data: asetData,
+    data: asetList = [],
     isLoading: asetLoading,
     isError: asetError,
-  } = useQuery<AsetListApiResponse>({
-    queryKey: queryKeys.aset.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<any>("/aset", undefined, "pengguna");
-      if (!res) return { data: [] };
+  } = useDaftarAset();
 
-      // Menangani variasi struktur response backend (res.data.data atau res.data)
-      const raw = res.data?.data || res.data || [];
-      return { data: Array.isArray(raw) ? raw : [] };
-    },
-    staleTime: 5 * 60 * 1000,
-    refetchOnMount: "always", // MEMAKSA ambil data terbaru saat halaman dibuka
-    refetchOnWindowFocus: true,
-  });
-
-  // ── Fetch booking per tanggal (refetch tiap ganti tanggal) ──
   const {
-    data: bookingData,
+    data: bookingList = [],
     isLoading: bookingLoading,
     isError: bookingError,
-  } = useQuery<SesiBookingListApiResponse>({
-    queryKey: queryKeys.sesiBooking.daftar(tanggalParam),
-    queryFn: async () => {
-      const res = await apiClient.get<any>(
-        `/sesiBooking?tanggal=${tanggalParam}`,
-        undefined,
-        "pengguna",
-      );
-      if (!res) return { data: [] };
-
-      // Validasi array yang ketat
-      const raw = res.data?.data || res.data || [];
-      return { data: Array.isArray(raw) ? raw : [] };
-    },
-    staleTime: 60 * 1000, // 1 menit — booking lebih dinamis
-    refetchOnMount: "always", // Mencegah bug data gaib/kosong di klien
-    refetchOnWindowFocus: true,
-  });
-
-  const asetList = asetData?.data ?? [];
-  const bookingList = bookingData?.data ?? [];
+  } = useDaftarSesiBooking(tanggalParam);
 
   // ── Timeline ──
 
@@ -210,25 +162,11 @@ export default function DasborTimelinePage() {
     return (diffMinutes / totalTimelineMinutes) * 100;
   }, [selectedDate, now, timelineStart, totalTimelineMinutes]);
 
-  // ── Derived: booking per aset ──
-  // Map asetID → booking[] yang overlap dengan window timeline
-  const bookingsByAset = useMemo(() => {
-    const map = new Map<string, SesiBookingResponse[]>();
-    for (const booking of bookingList) {
-      const asetId = booking.dataAset?.id;
-      if (!asetId) continue;
-      const mulai = new Date(booking.waktuMulai);
-      const selesai = booking.waktuSelesai
-        ? new Date(booking.waktuSelesai)
-        : null;
-      // Booking aktif tanpa waktuSelesai: tetap tampilkan dari waktuMulai
-      const selesaiEfektif = selesai ?? timelineEnd;
-      if (selesaiEfektif <= timelineStart || mulai >= timelineEnd) continue;
-      if (!map.has(asetId)) map.set(asetId, []);
-      map.get(asetId)!.push(booking);
-    }
-    return map;
-  }, [bookingList, timelineStart, timelineEnd]);
+  // ── Derived: booking per aset, tanpa booking Batal (keputusan R5a) ──
+  const bookingsByAset = useMemo(
+    () => bookingPerAset(bookingList, timelineStart, timelineEnd),
+    [bookingList, timelineStart, timelineEnd],
+  );
 
   const isLoading = asetLoading || bookingLoading;
   const isError = asetError || bookingError;
@@ -406,10 +344,10 @@ export default function DasborTimelinePage() {
                       ? new Date(booking.waktuSelesai)
                       : timelineEnd;
 
-                    let startDiffMs = mulai.getTime() - timelineStart.getTime();
+                    const startDiffMs = mulai.getTime() - timelineStart.getTime();
                     let startMinutes = Math.floor(startDiffMs / 60000);
 
-                    let durationMs = selesai.getTime() - mulai.getTime();
+                    const durationMs = selesai.getTime() - mulai.getTime();
                     let durationMinutes = Math.floor(durationMs / 60000);
 
                     if (startMinutes < 0) {
@@ -562,6 +500,7 @@ export default function DasborTimelinePage() {
                                 height: "72px",
                               }}
                             >
+                              <TautanPenjualanBooking href={tautanPenjualanBooking(booking)}>
                               <div
                                 className="w-full h-full rounded-xl p-2.5 flex flex-col justify-center cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 overflow-hidden"
                                 style={
@@ -599,6 +538,7 @@ export default function DasborTimelinePage() {
                                   {isSelesai && " · Selesai"}
                                 </span>
                               </div>
+                              </TautanPenjualanBooking>
                             </div>
                           );
                         })}

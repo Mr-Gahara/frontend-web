@@ -84,7 +84,10 @@ export const EP = {
     list: "/tarif",
     detail: (id: string) => `/tarif/${id}`,
   },
-  sesiBooking: "/sesibooking",
+  sesiBooking: {
+    list: "/sesibooking",
+    detail: (id: string) => `/sesibooking/${id}`,
+  },
 
   location: {
     list: "/location",
