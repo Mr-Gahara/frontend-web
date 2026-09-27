@@ -6,7 +6,7 @@ Endpoint yang dipanggil frontend beserta auth, permission, envelope, dan bentuk 
 
 ## 3. Endpoint yang dipakai frontend
 
-Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend kini memiliki 247 route (tambahan sejak acuan: `POST /akun/owner/create-tenant`, belum dipakai frontend). Audit 27 September 2026 (frontend `d3ae182`, backend `00b9957`) menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
+Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend kini memiliki 247 route (tambahan sejak acuan: `POST /akun/owner/create-tenant`, belum dipakai frontend). Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
 
 Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`; contoh `/diskon` berarti `/api/diskon`. Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom Envelope dan ID hanya terisi untuk GET yang diambil sampelnya.
 
@@ -268,17 +268,17 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/tarif` | authPengguna | - | `{ data }` | `id` | 1 file |
-| POST | `/tarif` | authPengguna | `create-tarif` | - | - | 1 file |
-| GET | `/tarif/:id` | authPengguna | - | `{ data }` | `id` | 1 file |
-| PUT | `/tarif/:id` | authPengguna | `update-tarif` | - | - | 1 file |
-| DELETE | `/tarif/:id` | authPengguna | `delete-tarif` | - | - | 1 file |
+| GET | `/tarif` | authPengguna | - | `{ data }` | `id` | `features/tarif/api.ts` |
+| POST | `/tarif` | authPengguna | `create-tarif` | - | - | `features/tarif/api.ts` |
+| GET | `/tarif/:id` | authPengguna | - | `{ data }` | `id` | `features/tarif/api.ts` |
+| PUT | `/tarif/:id` | authPengguna | `update-tarif` | - | - | `features/tarif/api.ts` |
+| DELETE | `/tarif/:id` | authPengguna | `delete-tarif` | - | - | `features/tarif/api.ts` |
 
 #### `/tipeaset`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/tipeaset` | authPengguna | - | `{ data }` | `id` | `features/tipe-aset/api.ts`, 2 file halaman lama |
+| GET | `/tipeaset` | authPengguna | - | `{ data }` | `id` | `features/tipe-aset/api.ts` |
 | POST | `/tipeaset` | authPengguna | `create-tipe-aset` | - | - | `features/tipe-aset/api.ts` |
 | GET | `/tipeaset/:id` | authPengguna | - | `{ data }` | `id` | `features/tipe-aset/api.ts` |
 | PUT | `/tipeaset/:id` | authPengguna | `update-tipe-aset` | - | - | `features/tipe-aset/api.ts` |

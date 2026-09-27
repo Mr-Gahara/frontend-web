@@ -363,6 +363,17 @@ keputusan rancangan butir 17 dan 21.
 - **Dialog hapus aset hanya tertutup saat berhasil** (`d3ae182`,
   keputusan Fase 0), setelah hapus beralih dari `mutateAsync` tanpa
   penangkap ke `mutate`.
+- **T1a: halaman buat dan edit tarif tetap terpisah** (27 September
+  2026, `365553f`). Logikanya pindah ke `features/tarif`, sedangkan
+  tampilan kedua halaman tidak berubah; penyatuan ke satu form ditunda.
+- **T2a: skema tarif mempertahankan `z.coerce`**, dengan alasan dan
+  batasnya di `cara-kerja.md` (Catatan form).
+- **T3b: harga tarif yang tidak diisi ditolak form** dengan "Harga wajib
+  diisi", sedangkan 0 yang diketik tetap sah. Sebelumnya harga kosong
+  tersimpan 0 tanpa pemberitahuan, dan tarif 0 akan dipilih otomatis
+  saat booking.
+- **T4a: nama tarif berisi spasi saja ditolak** di buat dan edit,
+  sejalan dengan tipe aset dan aset.
 
 ## Keputusan rancangan yang mengikat
 

@@ -139,7 +139,7 @@ queryKeys.produk.detail(id)     // ["produk", "detail", id]
 ### `features/<modul>/`
 Pola yang sudah terbukti di bahan baku, pengguna, role, produk, kategori,
 stock adjustment, jurnal stok, stok, stock opname, pengajuan stok, transfer
-stok, penjualan, tipe aset, dan aset:
+stok, penjualan, tipe aset, aset, dan tarif:
 
 - `api.ts` — pemanggilan endpoint memakai `apiData` dan `EP`
 - `hooks.ts` — `useQuery` dan `useMutation`, termasuk aturan invalidasi. Hook mutation menerima `onSuccess` dan `onError` dari halaman untuk toast dan reset dialog (`keputusan.md` butir 13)
@@ -170,8 +170,9 @@ Isi tiap `features/` yang sudah ada:
 | `pelanggan` | `api.ts`, `hooks.ts` | Dibuat untuk modul penjualan (K1a); hanya `useDaftarPelanggan`. Halaman pelanggan dan buat reservasi belum dimigrasikan |
 | `diskon` | `api.ts`, `hooks.ts`, `filter.ts` | Dibuat untuk modul penjualan (K1a); hanya daftar, dengan kunci `diskon.daftar()` tanpa filter yang berbeda dari kunci yang diisi buat reservasi lama, dan `diskonAktif` per cakupan. Halaman diskon belum dimigrasikan |
 | `pajak` | `api.ts`, `hooks.ts`, `filter.ts` | Dibuat untuk modul penjualan (K1a); hanya daftar dan `pajakTransaksiAktif` (urut prioritas). Halaman pengaturan pajak belum dimigrasikan |
-| `tipe-aset` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts` | Submodul reservasi (`074e98c`). `useDaftarTipeAset` memakai kunci `daftar()`, berbeda dari akar `semua` yang masih diisi halaman tarif lama dengan data mentah (keputusan rancangan butir 12), dan dipakai juga form aset; `useTipeAset` tidak mengulang saat 404. Mutation menginvalidasi akar tipe aset, tarif, dan aset, karena daftar tarif dan aset menampilkan nama tipe aset. Satu skema buat dan edit dengan trim; `payloadBuatTipeAset` tidak mengirim deskripsi kosong, sedangkan `payloadUbahTipeAset` mengirim `""` agar deskripsi yang dikosongkan terhapus |
+| `tipe-aset` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts` | Submodul reservasi (`074e98c`). `useDaftarTipeAset` memakai kunci `daftar()` (keputusan rancangan butir 12), dan dipakai juga form aset serta form buat dan edit tarif; `useTipeAset` tidak mengulang saat 404. Mutation menginvalidasi akar tipe aset, tarif, dan aset, karena daftar tarif dan aset menampilkan nama tipe aset. Satu skema buat dan edit dengan trim; `payloadBuatTipeAset` tidak mengirim deskripsi kosong, sedangkan `payloadUbahTipeAset` mengirim `""` agar deskripsi yang dikosongkan terhapus |
 | `aset` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts` | Submodul reservasi (`d3ae182`). `useDaftarAset` memakai kunci `daftar()` dan dimuat ulang setiap halaman dibuka, karena status aset dihitung backend dari sesi booking yang sedang berjalan; `useAset` tidak mengulang saat 404. Mutation menginvalidasi akar aset dan sesi booking. Satu skema buat dan edit dengan trim; `payloadAset` tidak mengirim status "digunakan", karena status itu dihitung, bukan disimpan |
+| `tarif` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts` | Submodul reservasi (`365553f`). `useDaftarTarif` memakai kunci `daftar()`; `useTarif` tidak mengulang saat 404 dan dimuat ulang setiap halaman edit dibuka, dan halaman edit memasang `FormEditTarif` setelah `isFetchedAfterMount` (keputusan rancangan butir 8). Mutation menginvalidasi akar tarif dan tipe aset, karena daftar tipe aset menampilkan tarif terkait. `skemaTarif` dipakai buat dan edit: `z.coerce` dengan tipe masukan dan keluaran eksplisit (keputusan T2a), harga kosong ditolak lewat `z.preprocess` (T3b), dan nama dipangkas (T4a); `NILAI_AWAL_TARIF` untuk buat. `payloadTarif` menyebut sepuluh field form satu per satu, dan `nilaiAwalTarif` menyusun nilai awal edit, termasuk id tipe aset dari `dataAset` |
 
 Cara memeriksa apakah sebuah modul sudah dimigrasikan: halamannya tidak lagi
 memanggil `apiClient`, dan lapisan datanya ada di `features/<modul>/` atau di

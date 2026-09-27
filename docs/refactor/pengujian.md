@@ -85,8 +85,8 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
 di spec login, satu di spec tipe aset).
 
-**Baseline per submodul aset** (commit `d3ae182`): 193 test unit dan
-integrasi lolos di 29 berkas, 240 e2e lolos, 19 skipped:
+**Baseline per submodul tarif** (commit `365553f`): 203 test unit dan
+integrasi lolos di 30 berkas, 244 e2e lolos, 19 skipped:
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
 backend, sepuluh `test.fixme` lain yang menunggu backend (tiga di spec
 alur penjualan dan tiga di spec master data reservasi), dan satu
@@ -95,7 +95,8 @@ di bawah). Dari baseline `5a3deea` (225 lolos), spec tipe aset berubah
 dari 40 menjadi 25 test, aset dari 11 menjadi 27, dan tarif dari 12
 menjadi 28. Migrasi tipe aset (`074e98c`) dan aset (`d3ae182`)
 menambah 4 dan 3 test unit dari 186 di 27 berkas, tanpa mengubah
-angka e2e.
+angka e2e. Migrasi tarif (`365553f`) menambah 10 test unit dan 4
+skenario e2e di spec tarif.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -419,9 +420,9 @@ Urutan debug kegagalan e2e di atas).
   helper-nya masih didefinisikan di dalam spec, karena `a2adc70`
   mendahului helper bersama itu. Dipindah saat spec itu disentuh lagi.
 - **Spec tarif sempat gagal sekali di suite penuh `074e98c`** (spinner,
-  lolos 3 dari 3 saat diulang). Penyebabnya belum diketahui; jalankan
-  spec tarif dengan `--repeat-each` sebelum dipakai sebagai pembanding
-  migrasi tarif.
+  lolos 3 dari 3 saat diulang). Sebelum migrasi tarif, spec itu lolos 78
+  dari 78 dalam tiga putaran terhadap kode lama; penyebab kegagalan
+  sekali itu belum diketahui.
 - **Status aset "Digunakan" dan penghapusan aset yang punya booking**
   belum teruji; keduanya menunggu spec alur reservasi yang membuat booking
   sungguhan (keputusan R2b).

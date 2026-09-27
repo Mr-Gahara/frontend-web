@@ -585,11 +585,22 @@ polanya salah.
   (`unit`, `integration`) dan kadang durasi (`(811.617 s)`), sehingga
   `awk '{print $2}'` maupun `$NF` salah mengambil path. Ambil path dengan
   pola `grep -oE '__tests__/[^ ]+\.test\.js'`.
+- **Substitusi `$(grep -n ...)` untuk nomor baris dipastikan tunggal.**
+  Bila polanya cocok di dua baris, variabelnya berisi dua angka dan
+  aritmetika zsh gagal dengan `bad math expression`; judul skenario
+  validasi di spec tarif muncul di dua `describe`. Pakai `grep -m1 -n`,
+  atau cetak dulu seluruh kecocokan.
 
 ## Catatan form (React Hook Form dan Zod)
 
 - **Hindari `z.coerce`.** Ia membuat tipe input dan output skema berbeda,
   sehingga `useForm<T>` dengan satu parameter tipe bentrok dengan resolver.
+  Pengecualian (keputusan T2a, tarif `365553f`): bila halaman lama
+  mengikat angka lewat `register` biasa dan migrasinya hanya memindah
+  logika, `z.coerce` boleh dipertahankan dengan
+  `useForm<z.input, unknown, z.output>`. Isian kosong yang harus ditolak
+  dipetakan ke `undefined` lewat `z.preprocess`, karena `z.coerce`
+  membaca teks kosong sebagai 0.
 - Untuk input angka, pakai `z.number()` di skema dan
   `register("field", { valueAsNumber: true })` di komponen. Tanpa itu, nilai
   terkirim sebagai string dan validasi menahan submit tanpa pesan yang terlihat.
@@ -939,6 +950,22 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   lebih dulu. Pada 27 September 2026, `074e98c` dan `d3ae182` baru
   ketahuan dari pohon berkas (`features/aset` tanpa baris di
   `arsitektur.md`), karena sesi dibuka dengan `tree` tanpa log.
+- **Pemeriksaan akhir skrip penerap mencari bentuk pemakaian kode, bukan
+  kata.** Skrip edit tarif menolak hasilnya sendiri karena komentar
+  sisipannya memuat "reset()" dan pola `\breset\b` ikut cocok; polanya
+  dipersempit menjadi `reset\(\{` dan `useEffect\(`. Saat gagal, skrip
+  sebaiknya mencetak pola mana yang tersisa, agar penyebabnya tidak perlu
+  dicari dengan perintah terpisah.
+- **Error `tsc` yang muncul di beberapa berkas sekaligus setelah satu
+  tahap dicocokkan dulu dengan blok yang mungkin terlewat.** Pada tarif,
+  blok `types/tarif.ts` tidak dijalankan; dua error di halaman daftar
+  dan test unit adalah gejalanya, dan `git status` menunjukkan berkas
+  tipe itu belum berubah.
+- **Specifier import yang tidak lagi dipakai dibuang oleh skrip penerap
+  dengan menghitung kemunculan namanya**, bukan ditebak dari keluaran
+  grep yang terpotong. Pada tarif, `useState` dan `useWatch` ternyata
+  tidak terpakai di buat, begitu pula `useState`, `useEffect`, dan
+  `useWatch` di edit (`/tmp/tarif-umum.js`).
 
 ## Kapan berhenti dan bertanya
 
