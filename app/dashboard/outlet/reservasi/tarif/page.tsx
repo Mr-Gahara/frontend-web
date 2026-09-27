@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useDaftarTarif, useHapusTarif } from "@/features/tarif/hooks";
+import { pesanError } from "@/lib/api/error";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,8 +29,6 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
-import { queryKeys } from "@/lib/queryKeys";
-import { Tarif } from "@/types/tarif";
 
 // --- COLORS (Design Tokens) ---
 const COLORS = {
@@ -47,7 +45,6 @@ const HARI_MAP = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 export default function DaftarTarifPage() {
   useAuthGuard();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   // --- STATE ---
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,62 +52,32 @@ export default function DaftarTarifPage() {
   const [selectedTarifId, setSelectedTarifId] = useState<string | null>(null);
 
   // --- FETCH DATA ---
-  const {
-    data: tarifList = [],
-    isLoading,
-    isError,
-  } = useQuery<Tarif[]>({
-    queryKey: queryKeys.tarif.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<{ data: Tarif[] }>(
-        "/tarif",
-        undefined,
-        "pengguna",
-      );
-      return res.data || [];
-    },
-  });
+  const { data: tarifList = [], isLoading, isError } = useDaftarTarif();
 
   // --- MUTATION HAPUS ---
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return await apiClient.delete(`/tarif/${id}`, undefined, "pengguna");
-    },
-    onSuccess: () => {
-      toast.success("Tarif Berhasil Dihapus");
-      queryClient.invalidateQueries({ queryKey: queryKeys.tarif.semua });
-      setDeleteModalOpen(false);
-      setSelectedTarifId(null);
-    },
-    onError: (error: any) => {
-      toast.error("Gagal Menghapus", {
-        description:
-          error.message || "Terjadi kesalahan saat menghapus data tarif.",
-      });
-      // Dialog bertahan saat gagal agar hapus dapat diulang (keputusan Fase 0).
-    },
-  });
+  const deleteMutation = useHapusTarif();
 
-  // FIX: gunakan fallback _id || id, konsisten dengan tombol Edit.
-  // Sebelumnya hanya menerima `id: string` dari item._id saja,
-  // sehingga jika API mengembalikan field `id` (bukan `_id`),
-  // selectedTarifId menjadi undefined dan confirmDelete() gagal jalan.
-  const handleDeleteClick = (id: string | undefined) => {
-    if (!id) {
-      toast.error("Gagal Menghapus", {
-        description: "ID tarif tidak ditemukan pada data ini.",
-      });
-      return;
-    }
+  const handleDeleteClick = (id: string) => {
     setSelectedTarifId(id);
     setDeleteModalOpen(true);
   };
 
   const confirmDelete = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (selectedTarifId) {
-      deleteMutation.mutate(selectedTarifId);
-    }
+    if (!selectedTarifId) return;
+    deleteMutation.mutate(selectedTarifId, {
+      onSuccess: () => {
+        toast.success("Tarif Berhasil Dihapus");
+        setDeleteModalOpen(false);
+        setSelectedTarifId(null);
+      },
+      onError: (galat) => {
+        toast.error("Gagal Menghapus", {
+          description: pesanError(galat, "Terjadi kesalahan saat menghapus data tarif."),
+        });
+        // Dialog bertahan saat gagal agar hapus dapat diulang (keputusan Fase 0).
+      },
+    });
   };
 
   // --- FILTERING ---
@@ -256,9 +223,9 @@ export default function DaftarTarifPage() {
                   </td>
                 </tr>
               ) : (
-                filteredList.map((item, index) => (
+                filteredList.map((item) => (
                   <tr
-                    key={item._id || item.id || index}
+                    key={item.id}
                     className="transition-colors hover:bg-[#F2EAE1]"
                   >
                     {/* NAMA TARIF & STATUS */}
@@ -401,7 +368,7 @@ export default function DaftarTarifPage() {
                           size="sm"
                           onClick={() =>
                             router.push(
-                              `/dashboard/outlet/reservasi/tarif/${item._id || item.id}/edit`,
+                              `/dashboard/outlet/reservasi/tarif/${item.id}/edit`,
                             )
                           }
                           className="h-8 px-3 transition-colors hover:bg-[#F2EAE1] hover:text-[#0A2947] font-bold"
@@ -412,8 +379,7 @@ export default function DaftarTarifPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          // FIX: sebelumnya item._id saja, sekarang fallback item._id || item.id
-                          onClick={() => handleDeleteClick(item._id || item.id)}
+                          onClick={() => handleDeleteClick(item.id)}
                           className="h-8 px-2 transition-colors hover:bg-rose-50 hover:text-rose-600"
                           style={{ color: COLORS.rose }}
                         >

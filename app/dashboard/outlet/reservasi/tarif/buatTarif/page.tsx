@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/queryKeys";
-import { Tarif, TarifPayload, TipeAsetRef } from "@/types/tarif";
-import { useForm, Controller, useWatch } from "react-hook-form";
+import { useDaftarTipeAset } from "@/features/tipe-aset/hooks";
+import { useSimpanTarif } from "@/features/tarif/hooks";
+import { payloadTarif } from "@/features/tarif/payload";
+import { NILAI_AWAL_TARIF, skemaTarif, type NilaiFormTarif, type NilaiMasukTarif } from "@/features/tarif/schema";
+import { pesanError } from "@/lib/api/error";
+import type { TipeAsetRef } from "@/types/tarif";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -44,124 +44,41 @@ const HARI_MAP = [
   { id: 6, label: "Sabtu" },
 ];
 
-const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
-
-// --- ZOD SCHEMA ---
-const tarifSchema = z
-  .object({
-    namaTarif: z.string().min(1, "Nama tarif wajib diisi"),
-    basisPerhitungan: z.enum(["per jam", "per sesi"]),
-    harga: z.coerce.number().min(0, "Harga tidak boleh negatif"),
-    durasiMinimum: z.coerce.number().min(1, "Durasi minimum minimal 1"),
-    isActive: z.boolean().default(true),
-    hariAktif: z.array(z.number()).default([]),
-    jamMulai: z.string().optional(),
-    jamSelesai: z.string().optional(),
-    prioritas: z.coerce.number().min(1, "Prioritas minimal 1").default(1),
-    tipeAsetID: z.array(z.string()).default([]),
-  })
-  .superRefine((data, ctx) => {
-    if (data.jamMulai && !TIME_REGEX.test(data.jamMulai)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Format harus HH:mm",
-        path: ["jamMulai"],
-      });
-    }
-    if (data.jamSelesai && !TIME_REGEX.test(data.jamSelesai)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Format harus HH:mm",
-        path: ["jamSelesai"],
-      });
-    }
-    if (
-      data.jamMulai &&
-      data.jamSelesai &&
-      TIME_REGEX.test(data.jamMulai) &&
-      TIME_REGEX.test(data.jamSelesai)
-    ) {
-      if (data.jamMulai >= data.jamSelesai) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Jam mulai harus lebih awal dari jam selesai",
-          path: ["jamMulai"],
-        });
-      }
-    }
-  });
-
-type TarifFormInput = z.input<typeof tarifSchema>;
-type TarifFormOutput = z.output<typeof tarifSchema>;
-
 export default function BuatTarifPage() {
   useAuthGuard();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<TarifFormInput, any, TarifFormOutput>({
-    resolver: zodResolver(tarifSchema),
-    defaultValues: {
-      namaTarif: "",
-      basisPerhitungan: "per jam",
-      harga: "",
-      durasiMinimum: 1,
-      isActive: true,
-      hariAktif: [0, 1, 2, 3, 4, 5, 6],
-      jamMulai: "00:00",
-      jamSelesai: "23:59",
-      prioritas: 1,
-      tipeAsetID: [],
-    },
+  } = useForm<NilaiMasukTarif, unknown, NilaiFormTarif>({
+    resolver: zodResolver(skemaTarif),
+    defaultValues: NILAI_AWAL_TARIF,
   });
 
-  const basisPerhitungan = useWatch({ control, name: "basisPerhitungan" });
+  const { data: tipeAsetList = [], isLoading: isLoadingAset } = useDaftarTipeAset();
 
-  const {
-    data: tipeAsetList = [],
-    isLoading: isLoadingAset,
-    isError: isErrorAset,
-  } = useQuery<TipeAsetRef[]>({
-    queryKey: queryKeys.tipeAset.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<{ data: TipeAsetRef[] }>(
-        "/tipeAset",
-        undefined,
-        "pengguna",
-      );
-      return Array.isArray(res.data) ? res.data : [];
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+  const createMutation = useSimpanTarif();
 
-  const createMutation = useMutation<Tarif, Error, TarifPayload>({
-    mutationFn: async (payload: TarifPayload) => {
-      return await apiClient.post("/tarif", payload, undefined, "pengguna");
-    },
-    onSuccess: () => {
-      toast.success("Tarif Berhasil Dibuat", {
-        description: "Data tarif baru telah tersimpan di sistem.",
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tarif.semua });
-      router.push("/dashboard/outlet/reservasi/tarif");
-    },
-    onError: (error: any) => {
-      toast.error("Gagal Menyimpan", {
-        description: error.message || "Terjadi kesalahan saat menyimpan data.",
-      });
-    },
-  });
-
-  const onSubmit = (data: TarifFormOutput) => {
-    const payload: TarifPayload = {
-      ...data,
-    };
-    createMutation.mutate(payload);
+  const onSubmit = (data: NilaiFormTarif) => {
+    createMutation.mutate(
+      { data: payloadTarif(data) },
+      {
+        onSuccess: () => {
+          toast.success("Tarif Berhasil Dibuat", {
+            description: "Data tarif baru telah tersimpan di sistem.",
+          });
+          router.push("/dashboard/outlet/reservasi/tarif");
+        },
+        onError: (galat) => {
+          toast.error("Gagal Menyimpan", {
+            description: pesanError(galat, "Terjadi kesalahan saat menyimpan data."),
+          });
+        },
+      },
+    );
   };
 
   return (

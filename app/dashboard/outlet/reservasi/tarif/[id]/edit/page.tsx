@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { queryKeys } from "@/lib/queryKeys";
-import { Tarif, TarifPayload, TipeAsetRef } from "@/types/tarif";
-import { useForm, Controller, useWatch } from "react-hook-form";
+import { useDaftarTipeAset } from "@/features/tipe-aset/hooks";
+import { useSimpanTarif, useTarif } from "@/features/tarif/hooks";
+import { nilaiAwalTarif, payloadTarif } from "@/features/tarif/payload";
+import { skemaTarif, type NilaiFormTarif, type NilaiMasukTarif } from "@/features/tarif/schema";
+import { pesanError } from "@/lib/api/error";
+import type { Tarif, TipeAsetRef } from "@/types/tarif";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -46,228 +46,42 @@ const HARI_MAP = [
   { id: 6, label: "Sabtu" },
 ];
 
-const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
-
-// --- ZOD SCHEMA ---
-const tarifSchema = z
-  .object({
-    namaTarif: z.string().min(1, "Nama tarif wajib diisi"),
-    basisPerhitungan: z.enum(["per jam", "per sesi"]),
-    harga: z.coerce.number().min(0, "Harga tidak boleh negatif"),
-    durasiMinimum: z.coerce.number().min(1, "Durasi minimum minimal 1"),
-    isActive: z.boolean().default(true),
-    hariAktif: z.array(z.number()).default([]),
-    jamMulai: z.string().optional(),
-    jamSelesai: z.string().optional(),
-    prioritas: z.coerce.number().min(1, "Prioritas minimal 1").default(1),
-    tipeAsetID: z.array(z.string()).default([]),
-  })
-  .superRefine((data, ctx) => {
-    if (data.jamMulai && !TIME_REGEX.test(data.jamMulai)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Format harus HH:mm",
-        path: ["jamMulai"],
-      });
-    }
-    if (data.jamSelesai && !TIME_REGEX.test(data.jamSelesai)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Format harus HH:mm",
-        path: ["jamSelesai"],
-      });
-    }
-    if (
-      data.jamMulai &&
-      data.jamSelesai &&
-      TIME_REGEX.test(data.jamMulai) &&
-      TIME_REGEX.test(data.jamSelesai)
-    ) {
-      if (data.jamMulai >= data.jamSelesai) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Jam mulai harus lebih awal dari jam selesai",
-          path: ["jamMulai"],
-        });
-      }
-    }
-  });
-
-type TarifFormInput = z.input<typeof tarifSchema>;
-type TarifFormOutput = z.output<typeof tarifSchema>;
-
-export default function EditTarifPage() {
-  useAuthGuard();
+function FormEditTarif({ tarif }: { tarif: Tarif }) {
   const router = useRouter();
-  const params = useParams();
-  const rawId = params?.id as string;
-
-  // Proteksi ID tidak valid
-  const tarifId = rawId === "undefined" || !rawId ? null : rawId;
-  const queryClient = useQueryClient();
 
   const {
     register,
     handleSubmit,
     control,
-    reset,
     setValue,
     formState: { errors },
-  } = useForm<TarifFormInput, any, TarifFormOutput>({
-    resolver: zodResolver(tarifSchema),
-    defaultValues: {
-      namaTarif: "",
-      basisPerhitungan: "per jam",
-      harga: 0,
-      durasiMinimum: 1,
-      isActive: true,
-      hariAktif: [0, 1, 2, 3, 4, 5, 6],
-      jamMulai: "00:00",
-      jamSelesai: "23:59",
-      prioritas: 1,
-      tipeAsetID: [],
-    },
+  } = useForm<NilaiMasukTarif, unknown, NilaiFormTarif>({
+    resolver: zodResolver(skemaTarif),
+    defaultValues: nilaiAwalTarif(tarif),
   });
 
-  // --- 1. FETCH DATA TARIF LAMA ---
-  const {
-    data: tarifData,
-    isLoading: isLoadingTarif,
-    isError: isErrorTarif,
-  } = useQuery({
-    queryKey: queryKeys.tarif.detail(tarifId!),
-    queryFn: async () => {
-      const res = await apiClient.get<any>(
-        `/tarif/${tarifId}`,
-        undefined,
-        "pengguna",
-      );
-      return res?.data || res;
-    },
-    enabled: !!tarifId,
-  });
+  const { data: tipeAsetList = [], isLoading: isLoadingAset } = useDaftarTipeAset();
 
-  // --- 2. PRE-FILL FORM KETIKA DATA DIDAPATKAN ---
-  useEffect(() => {
-    if (tarifData) {
-      const mappedTipeAset: string[] =
-        tarifData.dataAset
-          ?.map((aset: any) => String(aset.id || ""))
-          .filter(Boolean) || [];
+  const updateMutation = useSimpanTarif();
 
-      reset({
-        namaTarif: tarifData.namaTarif || "",
-        basisPerhitungan: tarifData.basisPerhitungan || "per jam",
-        harga: tarifData.harga ?? 0,
-        durasiMinimum: tarifData.durasiMinimum ?? 1,
-        isActive: tarifData.isActive ?? true,
-        hariAktif: tarifData.hariAktif || [],
-        jamMulai: tarifData.jamMulai || "00:00",
-        jamSelesai: tarifData.jamSelesai || "23:59",
-        prioritas: tarifData.prioritas ?? 1,
-        tipeAsetID: mappedTipeAset,
-      });
-    }
-  }, [tarifData, reset]);
-
-  // --- 3. FETCH TIPE ASET LIST ---
-  const { data: tipeAsetList = [], isLoading: isLoadingAset } = useQuery<
-    TipeAsetRef[]
-  >({
-    queryKey: queryKeys.tipeAset.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<{ data: TipeAsetRef[] }>(
-        "/tipeAset",
-        undefined,
-        "pengguna",
-      );
-      return Array.isArray(res.data) ? res.data : [];
-    },
-    staleTime: 5 * 60 * 1000,
-  });
-
-  // --- 4. MUTATION UNTUK UPDATE DATA ---
-  const updateMutation = useMutation<Tarif, Error, TarifPayload>({
-    mutationFn: async (payload: TarifPayload) => {
-      return await apiClient.put(
-        `/tarif/${tarifId}`,
-        payload,
-        undefined,
-        "pengguna",
-      );
-    },
-    onSuccess: () => {
-      toast.success("Berhasil Diperbarui", {
-        description: "Perubahan data tarif telah tersimpan di sistem.",
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tarif.semua });
-      router.push("/dashboard/outlet/reservasi/tarif");
-    },
-    onError: (error: any) => {
-      toast.error("Gagal Memperbarui", {
-        description: error.message || "Terjadi kesalahan saat menyimpan data.",
-      });
-    },
-  });
-
-  const onSubmit = (data: TarifFormOutput) => {
-    if (!tarifId) return;
-    const payload: TarifPayload = { ...data };
-    updateMutation.mutate(payload);
+  const onSubmit = (data: NilaiFormTarif) => {
+    updateMutation.mutate(
+      { id: tarif.id, data: payloadTarif(data) },
+      {
+        onSuccess: () => {
+          toast.success("Berhasil Diperbarui", {
+            description: "Perubahan data tarif telah tersimpan di sistem.",
+          });
+          router.push("/dashboard/outlet/reservasi/tarif");
+        },
+        onError: (galat) => {
+          toast.error("Gagal Memperbarui", {
+            description: pesanError(galat, "Terjadi kesalahan saat menyimpan data."),
+          });
+        },
+      },
+    );
   };
-
-  // --- ERROR / LOADING STATES ---
-  if (!tarifId) {
-    return (
-      <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4 text-center px-4">
-        <AlertTriangle className="h-12 w-12 text-rose-500" />
-        <h2 className="text-xl font-bold text-[#0A2947]">
-          ID Tarif Tidak Valid
-        </h2>
-        <p className="text-sm font-medium text-[#0A2947]/80">
-          Sistem mendeteksi bahwa ID tarif pada URL ini rusak atau "undefined".
-        </p>
-        <Button
-          onClick={() => router.push("/dashboard/outlet/reservasi/tarif")}
-          className="mt-4 bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Daftar Tarif
-        </Button>
-      </div>
-    );
-  }
-
-  if (isLoadingTarif) {
-    return (
-      <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-[#0A2947]" />
-        <p className="text-sm font-bold text-[#0A2947]/80">
-          Memuat data tarif...
-        </p>
-      </div>
-    );
-  }
-
-  if (isErrorTarif) {
-    return (
-      <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4 text-center px-4">
-        <AlertTriangle className="h-12 w-12 text-rose-500" />
-        <h2 className="text-xl font-bold text-[#0A2947]">
-          Data Tidak Ditemukan
-        </h2>
-        <p className="text-sm font-medium text-[#0A2947]/80">
-          Gagal mengambil data tarif. Data mungkin sudah dihapus atau server
-          sedang bermasalah.
-        </p>
-        <Button
-          onClick={() => router.push("/dashboard/outlet/reservasi/tarif")}
-          className="mt-4 bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Kembali
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
@@ -804,4 +618,74 @@ export default function EditTarifPage() {
       </form>
     </div>
   );
+}
+
+/**
+ * Detail dimuat ulang setiap halaman dibuka, dan form baru dipasang setelah
+ * pemuatan itu selesai, sehingga defaultValues selalu berasal dari data
+ * terbaru (keputusan rancangan butir 8). Sebelumnya form diisi lewat reset()
+ * di effect, yang menimpa isian pengguna setiap kali detail dimuat ulang.
+ */
+export default function EditTarifPage() {
+  useAuthGuard();
+  const router = useRouter();
+  const params = useParams();
+  const rawId = params?.id as string;
+  // Proteksi ID tidak valid
+  const tarifId = rawId === "undefined" || !rawId ? null : rawId;
+  const { data: tarif, isLoading, isError, isFetchedAfterMount } = useTarif(tarifId);
+
+  if (!tarifId) {
+    return (
+      <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4 text-center px-4">
+        <AlertTriangle className="h-12 w-12 text-rose-500" />
+        <h2 className="text-xl font-bold text-[#0A2947]">
+          ID Tarif Tidak Valid
+        </h2>
+        <p className="text-sm font-medium text-[#0A2947]/80">
+          Sistem mendeteksi bahwa ID tarif pada URL ini rusak atau &quot;undefined&quot;.
+        </p>
+        <Button
+          onClick={() => router.push("/dashboard/outlet/reservasi/tarif")}
+          className="mt-4 bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Daftar Tarif
+        </Button>
+      </div>
+    );
+  }
+
+  if (isLoading || !isFetchedAfterMount) {
+    return (
+      <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-[#0A2947]" />
+        <p className="text-sm font-bold text-[#0A2947]/80">
+          Memuat data tarif...
+        </p>
+      </div>
+    );
+  }
+
+  if (isError || !tarif) {
+    return (
+      <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4 text-center px-4">
+        <AlertTriangle className="h-12 w-12 text-rose-500" />
+        <h2 className="text-xl font-bold text-[#0A2947]">
+          Data Tidak Ditemukan
+        </h2>
+        <p className="text-sm font-medium text-[#0A2947]/80">
+          Gagal mengambil data tarif. Data mungkin sudah dihapus atau server
+          sedang bermasalah.
+        </p>
+        <Button
+          onClick={() => router.push("/dashboard/outlet/reservasi/tarif")}
+          className="mt-4 bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" /> Kembali
+        </Button>
+      </div>
+    );
+  }
+
+  return <FormEditTarif tarif={tarif} />;
 }

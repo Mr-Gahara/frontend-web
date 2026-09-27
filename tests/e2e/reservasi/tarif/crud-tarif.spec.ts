@@ -678,6 +678,57 @@ test.describe("E2E — Tarif › Buat: batal, memuat, gagal, dan validasi", () =
     expect(permintaan.jumlah(), "validasi gagal tidak mengirim POST").toBe(0);
     permintaan.lepas();
   });
+
+  test("validasi: harga kosong ditolak tanpa mengirim permintaan", async ({ page }) => {
+    const permintaan = pantauPermintaan(page, "POST", POLA_DAFTAR);
+    await page.goto(URL_BUAT);
+    await page.locator('input[name="namaTarif"]').fill(namaTarifUji("Harga Kosong"));
+    await page.locator('input[name="durasiMinimum"]').fill("1");
+    await expect(page.locator('input[name="harga"]')).toHaveValue("");
+    await page.getByRole("button", { name: /simpan tarif/i }).click();
+    await expect(page.getByText("Harga wajib diisi")).toBeVisible();
+    expect(permintaan.jumlah(), "harga kosong tidak mengirim POST").toBe(0);
+    permintaan.lepas();
+  });
+
+  test("validasi: nama berisi spasi saja ditolak tanpa mengirim permintaan", async ({ page }) => {
+    const permintaan = pantauPermintaan(page, "POST", POLA_DAFTAR);
+    await page.goto(URL_BUAT);
+    await page.locator('input[name="namaTarif"]').fill("   ");
+    await page.locator('input[name="harga"]').fill("100000");
+    await page.locator('input[name="durasiMinimum"]').fill("1");
+    await page.getByRole("button", { name: /simpan tarif/i }).click();
+    await expect(page.getByText("Nama tarif wajib diisi")).toBeVisible();
+    expect(permintaan.jumlah(), "nama berisi spasi saja tidak mengirim POST").toBe(0);
+    permintaan.lepas();
+  });
+
+  test("harga 0 yang diketik terkirim sebagai 0 dengan nama terpangkas, lalu tersimpan", async ({
+    page,
+  }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaTarifUji("Harga Nol");
+    let id: string | undefined;
+    try {
+      await page.goto(URL_BUAT);
+      await page.locator('input[name="namaTarif"]').fill("  " + nama + "  ");
+      await page.locator('input[name="harga"]').fill("0");
+      await page.locator('input[name="durasiMinimum"]').fill("1");
+      const tKirim = page.waitForResponse(cocok("POST", POLA_DAFTAR));
+      await page.getByRole("button", { name: /simpan tarif/i }).click();
+      const res = await tKirim;
+      expect(res.status()).toBeLessThan(300);
+      const kiriman = res.request().postDataJSON();
+      expect(kiriman.harga, "harga 0 terkirim sebagai angka 0").toBe(0);
+      expect(kiriman.namaTarif, "nama terkirim tanpa spasi di tepi").toBe(nama);
+      id = (await res.json()).data?.id;
+      await page.waitForURL("**/reservasi/tarif");
+      const daftar = await api<TarifMentah[]>(page, auth, "GET", "/tarif");
+      expect(daftar.data.find((x) => x.namaTarif === nama)?.harga).toBe(0);
+    } finally {
+      await hapusLewatApi(page, auth, "/tarif", id);
+    }
+  });
 });
 
 test.describe("E2E — Tarif › Edit: guard, navigasi, validasi, basis, dan gagal", () => {
@@ -720,6 +771,31 @@ test.describe("E2E — Tarif › Edit: guard, navigasi, validasi, basis, dan gag
       await page.getByRole("button", { name: /kembali ke daftar tarif/i }).click();
       await page.waitForURL("**/reservasi/tarif");
       expect(permintaan.jumlah(), "kembali tidak mengirim PUT").toBe(0);
+      permintaan.lepas();
+    } finally {
+      await hapusLewatApi(page, auth, "/tarif", t?.id);
+    }
+  });
+
+  test("validasi: nama berisi spasi saja ditolak tanpa mengirim permintaan", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const nama = namaTarifUji("Validasi Spasi");
+    let t: TarifMentah | undefined;
+    try {
+      t = await buatTarif(page, auth, {
+        namaTarif: nama,
+        basisPerhitungan: "per jam",
+        harga: 100000,
+        durasiMinimum: 1,
+      });
+      const permintaan = pantauPermintaan(page, "PUT", POLA_SATU);
+      await page.goto(urlEdit(t.id));
+      const input = page.locator('input[name="namaTarif"]');
+      await expect(input).toHaveValue(nama, { timeout: 10_000 });
+      await input.fill("   ");
+      await page.getByRole("button", { name: /simpan perubahan/i }).click();
+      await expect(page.getByText("Nama tarif wajib diisi")).toBeVisible();
+      expect(permintaan.jumlah(), "nama berisi spasi saja tidak mengirim PUT").toBe(0);
       permintaan.lepas();
     } finally {
       await hapusLewatApi(page, auth, "/tarif", t?.id);

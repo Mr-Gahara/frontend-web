@@ -4,8 +4,7 @@ export interface TipeAsetRef {
 }
 
 export interface Tarif {
-  _id: string;
-  id?: string;
+  id: string;
   namaTarif: string;
   basisPerhitungan: "per jam" | "per sesi";
   harga: number;
