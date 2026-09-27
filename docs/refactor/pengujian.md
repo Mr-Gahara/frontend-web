@@ -85,15 +85,17 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
 di spec login, satu di spec tipe aset).
 
-**Baseline per spec master data reservasi** (commit `04830b7`): 186 test
-unit dan integrasi lolos di 27 berkas, 240 e2e lolos, 19 skipped:
+**Baseline per submodul aset** (commit `d3ae182`): 193 test unit dan
+integrasi lolos di 29 berkas, 240 e2e lolos, 19 skipped:
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
 backend, sepuluh `test.fixme` lain yang menunggu backend (tiga di spec
 alur penjualan dan tiga di spec master data reservasi), dan satu
 `test.skip` bersyarat data (Test yang ditandai fixme dan skip bersyarat,
 di bawah). Dari baseline `5a3deea` (225 lolos), spec tipe aset berubah
 dari 40 menjadi 25 test, aset dari 11 menjadi 27, dan tarif dari 12
-menjadi 28.
+menjadi 28. Migrasi tipe aset (`074e98c`) dan aset (`d3ae182`)
+menambah 4 dan 3 test unit dari 186 di 27 berkas, tanpa mengubah
+angka e2e.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -171,6 +173,8 @@ Pola kegagalan yang berulang:
 | `response.json` gagal dengan `No resource with given identifier found` | Penunggu menangkap respons milik halaman sebelumnya yang sudah dibuang; pasang penunggu setelah `goto(..., { waitUntil: "commit" })` atau `reload(...)` yang sama |
 | Skenario tulis `skipped` padahal kode tidak berubah | Dokumen aktif sisa run yang gagal menghalangi pembuatan (409). Baca pesan `POST` di trace (backend menyebut nomornya), lalu batalkan dokumen itu dari halaman detail |
 | `net::ERR_NETWORK_IO_SUSPENDED` saat `page.goto` | Mesin menangguhkan jaringan (tidur atau hemat daya) di tengah suite; jalankan ulang test itu sendirian, lalu suite penuh diawali `systemd-inhibit --what=idle:sleep` |
+| Surat jalan uji ditolak karena nomornya bentrok, sekali lalu hilang | Backend membentuk akhiran nomor dari empat digit terakhir `Date.now()`, sehingga dua surat jalan uji dapat bernomor sama (suite penuh `074e98c`). Jalankan ulang; calon temuan backend yang belum dibuktikan dari kode dan belum dilaporkan |
+| `page.request` di `finally` habis waktu, sekali lalu hilang | Backend sesaat tidak menjawab; permintaan ini tidak melewati `page.route`, sehingga bukan akibat simulasi spec (suite penuh `074e98c`). Jalankan ulang suite penuh sebelum mengubah spec |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena
 tombol hapus sempat disabled sampai daftar role selesai dimuat (level
@@ -414,6 +418,10 @@ Urutan debug kegagalan e2e di atas).
 - **Spec tipe aset belum memakai `tests/helpers/reservasi-uji.ts`**:
   helper-nya masih didefinisikan di dalam spec, karena `a2adc70`
   mendahului helper bersama itu. Dipindah saat spec itu disentuh lagi.
+- **Spec tarif sempat gagal sekali di suite penuh `074e98c`** (spinner,
+  lolos 3 dari 3 saat diulang). Penyebabnya belum diketahui; jalankan
+  spec tarif dengan `--repeat-each` sebelum dipakai sebagai pembanding
+  migrasi tarif.
 - **Status aset "Digunakan" dan penghapusan aset yang punya booking**
   belum teruji; keduanya menunggu spec alur reservasi yang membuat booking
   sungguhan (keputusan R2b).

@@ -356,6 +356,13 @@ keputusan rancangan butir 17 dan 21.
 - **R4a: blok booking di daftar reservasi menautkan ke detail
   penjualannya**, satu-satunya jalur membatalkan booking, tanpa menambah
   aksi ubah atau hapus sesi booking.
+- **Nama berisi spasi saja ditolak di form tipe aset dan aset** (27
+  September 2026, `074e98c` dan `d3ae182`). Skema buat dan edit
+  disatukan dengan trim; sebelumnya nama itu lolos form tipe aset lalu
+  ditolak backend.
+- **Dialog hapus aset hanya tertutup saat berhasil** (`d3ae182`,
+  keputusan Fase 0), setelah hapus beralih dari `mutateAsync` tanpa
+  penangkap ke `mutate`.
 
 ## Keputusan rancangan yang mengikat
 

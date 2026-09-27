@@ -933,6 +933,12 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   aset, hapus tarif 500, `$addToSet` tarif) menjadi `test.fixme` dengan
   persetujuan, dan satu kesalahan selector spec (harga di edit tarif)
   dibetulkan. Tidak satu pun diselesaikan dengan melonggarkan harapan.
+- **Sesi dibuka dengan perintah pembuka `docs/README.md` utuh**,
+  termasuk `git log`. Commit modul tanpa commit dokumen penutup terlihat
+  dari log: bila commit terakhir bukan `docs:`, dokumentasinya ditutup
+  lebih dulu. Pada 27 September 2026, `074e98c` dan `d3ae182` baru
+  ketahuan dari pohon berkas (`features/aset` tanpa baris di
+  `arsitektur.md`), karena sesi dibuka dengan `tree` tanpa log.
 
 ## Kapan berhenti dan bertanya
 
