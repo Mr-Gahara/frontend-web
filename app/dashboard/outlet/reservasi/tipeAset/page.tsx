@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { TipeAset } from "@/types/tipeAset";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { TipeAset } from "@/types/tipeAset";
+import { useDaftarTipeAset, useHapusTipeAset } from "@/features/tipe-aset/hooks";
+import { pesanError } from "@/lib/api/error";
 import { toast } from "sonner";
 
 // --- Components ---
@@ -32,12 +32,10 @@ import {
   Layers,
   Tags,
 } from "lucide-react";
-import { queryKeys } from "@/lib/queryKeys";
 
 export default function TipeAsetPage() {
   useAuthGuard();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   // --- STATE ---
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,37 +45,10 @@ export default function TipeAsetPage() {
   );
 
   // --- FETCH DATA TIPE ASET ---
-  const {
-    data: tipeAsetList = [],
-    isLoading,
-    isError,
-  } = useQuery<TipeAset[]>({
-    queryKey: queryKeys.tipeAset.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<{ data: TipeAset[] }>(
-        "/tipeAset",
-        undefined,
-        "pengguna",
-      );
-      return Array.isArray(res.data) ? res.data : [];
-    },
-  });
+  const { data: tipeAsetList = [], isLoading, isError } = useDaftarTipeAset();
 
   // --- MUTATION DELETE ---
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return await apiClient.delete(`/tipeAset/${id}`, undefined, "pengguna");
-    },
-    onSuccess: () => {
-      toast.success("Dihapus", {
-        description: "Data Tipe Aset berhasil dihapus.",
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tipeAset.semua });
-      setIsDeleteModalOpen(false);
-      setSelectedTipeAset(null);
-    },
-    onError: (err: any) => toast.error("Gagal", { description: err.message }),
-  });
+  const deleteMutation = useHapusTipeAset();
 
   // --- HANDLERS ---
   const handleDeleteClick = (tipeAset: TipeAset) => {
@@ -85,16 +56,21 @@ export default function TipeAsetPage() {
     setIsDeleteModalOpen(true);
   };
 
-  // Tambahkan parameter event dan cegah penutupan otomatis
-  const confirmDelete = async (e: React.MouseEvent) => {
+  // preventDefault menahan dialog tetap terbuka sampai hapus berhasil,
+  // sehingga dialog bertahan saat gagal (keputusan Fase 0).
+  const confirmDelete = (e: React.MouseEvent) => {
     e.preventDefault();
-
-    if (selectedTipeAset) {
-      const idToDelete = selectedTipeAset.id || selectedTipeAset._id;
-      if (idToDelete) {
-        await deleteMutation.mutateAsync(idToDelete);
-      }
-    }
+    if (!selectedTipeAset) return;
+    deleteMutation.mutate(selectedTipeAset.id, {
+      onSuccess: () => {
+        toast.success("Dihapus", {
+          description: "Data Tipe Aset berhasil dihapus.",
+        });
+        setIsDeleteModalOpen(false);
+        setSelectedTipeAset(null);
+      },
+      onError: (galat) => toast.error("Gagal", { description: pesanError(galat) }),
+    });
   };
 
   const filteredList = tipeAsetList.filter((item) =>
@@ -200,7 +176,7 @@ export default function TipeAsetPage() {
               ) : (
                 filteredList.map((item) => (
                   <tr
-                    key={item.id || item._id}
+                    key={item.id}
                     className="hover:bg-[#0A2947]/5 transition-colors"
                   >
                     <td className="px-6 py-4">
@@ -233,7 +209,7 @@ export default function TipeAsetPage() {
                           size="sm"
                           onClick={() =>
                             router.push(
-                              `/dashboard/outlet/reservasi/tipeAset/${item.id || item._id}/edit`,
+                              `/dashboard/outlet/reservasi/tipeAset/${item.id}/edit`,
                             )
                           }
                           className="h-8 px-3 cursor-pointer text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-[#0A2947]/10 font-bold"

@@ -7,7 +7,6 @@ export interface TarifAsetTerkait {
 
 export interface TipeAset {
   id: string;
-  _id?: string; // Fallback jika ID asli masih terbawa
   tenantID: string;
   namaTipeAset: string;
   deskripsi: string | null;

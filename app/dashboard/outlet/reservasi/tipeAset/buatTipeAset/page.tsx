@@ -2,17 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { queryKeys } from "@/lib/queryKeys";
-import { TipeAsetPayload } from "@/types/tipeAset";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSimpanTipeAset } from "@/features/tipe-aset/hooks";
+import { payloadBuatTipeAset } from "@/features/tipe-aset/payload";
+import { skemaBuatTipeAset, type NilaiFormTipeAset } from "@/features/tipe-aset/schema";
+import { pesanError } from "@/lib/api/error";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 // --- Form & Validation ---
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 
 // --- Components ---
 import { Button } from "@/components/ui/button";
@@ -24,29 +23,18 @@ import {
   FileText,
 } from "lucide-react";
 
-// --- ZOD SCHEMA ---
-const tipeAsetSchema = z.object({
-  namaTipeAset: z
-    .string()
-    .min(1, "Nama Kategori Aset wajib diisi")
-    .min(2, "Nama Kategori Aset minimal 2 karakter"), // Menyesuaikan validasi backend
-  deskripsi: z.string().optional(),
-});
-
-type TipeAsetFormInput = z.input<typeof tipeAsetSchema>;
 
 export default function BuatTipeAsetPage() {
   useAuthGuard();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   // --- REACT HOOK FORM ---
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<TipeAsetFormInput>({
-    resolver: zodResolver(tipeAsetSchema),
+  } = useForm<NilaiFormTipeAset>({
+    resolver: zodResolver(skemaBuatTipeAset),
     defaultValues: {
       namaTipeAset: "",
       deskripsi: "",
@@ -54,34 +42,26 @@ export default function BuatTipeAsetPage() {
   });
 
   // --- MUTATION CREATE TIPE ASET ---
-  const createMutation = useMutation<any, Error, TipeAsetPayload>({
-    mutationFn: async (payload: TipeAsetPayload) => {
-      // Menggunakan endpoint /tipe-aset sesuai standar REST backend Anda
-      return await apiClient.post("/tipeAset", payload, undefined, "pengguna");
-    },
-    onSuccess: () => {
-      toast.success("Berhasil", {
-        description: "Kategori Aset baru berhasil ditambahkan.",
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tipeAset.semua });
-      router.push("/dashboard/outlet/reservasi/tipeAset");
-    },
-    onError: (err: any) => {
-      toast.error("Gagal Menyimpan", {
-        description: err.message || "Gagal menambahkan Kategori Aset baru.",
-      });
-    },
-  });
+  const createMutation = useSimpanTipeAset();
 
   // --- HANDLER SUBMIT ---
-  const onSubmit = (data: TipeAsetFormInput) => {
-    // Sanitasi data opsional
-    const payload: TipeAsetPayload = {
-      namaTipeAset: data.namaTipeAset.trim(),
-      deskripsi: data.deskripsi?.trim() || undefined,
-    };
-
-    createMutation.mutate(payload);
+  const onSubmit = (data: NilaiFormTipeAset) => {
+    createMutation.mutate(
+      { data: payloadBuatTipeAset(data) },
+      {
+        onSuccess: () => {
+          toast.success("Berhasil", {
+            description: "Kategori Aset baru berhasil ditambahkan.",
+          });
+          router.push("/dashboard/outlet/reservasi/tipeAset");
+        },
+        onError: (galat) => {
+          toast.error("Gagal Menyimpan", {
+            description: pesanError(galat, "Gagal menambahkan Kategori Aset baru."),
+          });
+        },
+      },
+    );
   };
 
   return (

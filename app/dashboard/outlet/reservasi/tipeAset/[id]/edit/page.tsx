@@ -3,16 +3,16 @@
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { TipeAsetPayload } from "@/types/tipeAset";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSimpanTipeAset, useTipeAset } from "@/features/tipe-aset/hooks";
+import { payloadUbahTipeAset } from "@/features/tipe-aset/payload";
+import { skemaUbahTipeAset, type NilaiFormTipeAset } from "@/features/tipe-aset/schema";
+import { pesanError } from "@/lib/api/error";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 // --- Form & Validation ---
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 
 // --- Components ---
 import { Button } from "@/components/ui/button";
@@ -25,24 +25,11 @@ import {
   AlertTriangle,
   Edit3,
 } from "lucide-react";
-import { queryKeys } from "@/lib/queryKeys";
-
-// --- ZOD SCHEMA ---
-const tipeAsetSchema = z.object({
-  namaTipeAset: z
-    .string()
-    .min(1, "Nama Tipe Aset wajib diisi")
-    .min(2, "Nama Tipe Aset minimal 2 karakter"),
-  deskripsi: z.string().optional(),
-});
-
-type TipeAsetFormInput = z.input<typeof tipeAsetSchema>;
 
 export default function EditTipeAsetPage() {
   useAuthGuard();
   const router = useRouter();
   const params = useParams();
-  const queryClient = useQueryClient();
 
   const rawId = params?.id as string;
   // Proteksi ID tidak valid
@@ -54,8 +41,8 @@ export default function EditTipeAsetPage() {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<TipeAsetFormInput>({
-    resolver: zodResolver(tipeAsetSchema),
+  } = useForm<NilaiFormTipeAset>({
+    resolver: zodResolver(skemaUbahTipeAset),
     defaultValues: {
       namaTipeAset: "",
       deskripsi: "",
@@ -67,18 +54,7 @@ export default function EditTipeAsetPage() {
     data: tipeAsetData,
     isLoading: isLoadingTipeAset,
     isError: isErrorTipeAset,
-  } = useQuery({
-    queryKey: [...queryKeys.tipeAset.semua, tipeAsetId],
-    queryFn: async () => {
-      const res = await apiClient.get<any>(
-        `/tipeAset/${tipeAsetId}`,
-        undefined,
-        "pengguna",
-      );
-      return res?.data || res;
-    },
-    enabled: !!tipeAsetId,
-  });
+  } = useTipeAset(tipeAsetId);
 
   // --- 2. EFFECT: PRE-FILL FORM KETIKA DATA DIDAPATKAN ---
   useEffect(() => {
@@ -91,42 +67,27 @@ export default function EditTipeAsetPage() {
   }, [tipeAsetData, reset]);
 
   // --- 3. MUTATION UNTUK UPDATE DATA ---
-  const updateMutation = useMutation<any, Error, TipeAsetPayload>({
-    mutationFn: async (payload: TipeAsetPayload) => {
-      return await apiClient.put(
-        `/tipeAset/${tipeAsetId}`,
-        payload,
-        undefined,
-        "pengguna",
-      );
-    },
-    onSuccess: () => {
-      toast.success("Berhasil Diperbarui", {
-        description: "Perubahan Tipe Aset telah tersimpan di sistem.",
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.tipeAset.semua });
-      router.push("/dashboard/outlet/reservasi/tipeAset");
-    },
-    onError: (err: any) => {
-      toast.error("Gagal Memperbarui", {
-        description:
-          err.message || "Terjadi kesalahan saat menyimpan perubahan.",
-      });
-    },
-  });
+  const updateMutation = useSimpanTipeAset();
 
   // --- HANDLER SUBMIT ---
-  const onSubmit = (data: TipeAsetFormInput) => {
+  const onSubmit = (data: NilaiFormTipeAset) => {
     if (!tipeAsetId) return;
-
-    const payload: TipeAsetPayload = {
-      namaTipeAset: data.namaTipeAset.trim(),
-      // Deskripsi yang dikosongkan dikirim sebagai "" agar terhapus di backend;
-      // tanpa field ini backend mempertahankan deskripsi lama.
-      deskripsi: data.deskripsi?.trim() ?? "",
-    };
-
-    updateMutation.mutate(payload);
+    updateMutation.mutate(
+      { id: tipeAsetId, data: payloadUbahTipeAset(data) },
+      {
+        onSuccess: () => {
+          toast.success("Berhasil Diperbarui", {
+            description: "Perubahan Tipe Aset telah tersimpan di sistem.",
+          });
+          router.push("/dashboard/outlet/reservasi/tipeAset");
+        },
+        onError: (galat) => {
+          toast.error("Gagal Memperbarui", {
+            description: pesanError(galat, "Terjadi kesalahan saat menyimpan perubahan."),
+          });
+        },
+      },
+    );
   };
 
   // --- ERROR / LOADING STATES ---
