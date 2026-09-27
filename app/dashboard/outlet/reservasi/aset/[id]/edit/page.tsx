@@ -1,16 +1,17 @@
 "use client";
 import { useRouter, useParams } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { AsetPayload } from "@/types/aset";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAset, useSimpanAset } from "@/features/aset/hooks";
+import { payloadAset } from "@/features/aset/payload";
+import { skemaAset, type NilaiFormAset } from "@/features/aset/schema";
+import { useDaftarTipeAset } from "@/features/tipe-aset/hooks";
+import { pesanError } from "@/lib/api/error";
+import type { Aset } from "@/types/aset";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { TipeAset } from "@/types/tipeAset";
-import { queryKeys } from "@/lib/queryKeys";
+import type { TipeAset } from "@/types/tipeAset";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,12 +33,6 @@ import {
   PlayCircle,
 } from "lucide-react";
 
-const asetSchema = z.object({
-  namaAset: z.string().min(1, "Nama aset wajib diisi"),
-  tipeAsetID: z.string().min(1, "Kategori / Tipe aset wajib dipilih"),
-  status: z.enum(["tersedia", "perbaikan", "digunakan"]).default("tersedia"),
-});
-type AsetFormInput = z.input<typeof asetSchema>;
 
 // ============================================================
 // INNER COMPONENT: hanya dirender setelah data tersedia
@@ -49,57 +44,45 @@ function EditAsetForm({
   tipeAsetList,
   asetId,
 }: {
-  asetData: any;
+  asetData: Aset;
   tipeAsetList: TipeAset[];
   asetId: string;
 }) {
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const {
     register,
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<AsetFormInput>({
-    resolver: zodResolver(asetSchema),
+  } = useForm<NilaiFormAset>({
+    resolver: zodResolver(skemaAset),
     defaultValues: {
       namaAset: asetData.namaAset || "",
       tipeAsetID: asetData.dataAset?.id || "",
-      status: (asetData.status as AsetFormInput["status"]) || "tersedia",
+      status: asetData.status || "tersedia",
     },
   });
 
-  const updateMutation = useMutation<any, Error, AsetPayload>({
-    mutationFn: async (payload: AsetPayload) => {
-      return await apiClient.put(
-        `/aset/${asetId}`,
-        payload,
-        undefined,
-        "pengguna",
-      );
-    },
-    onSuccess: () => {
-      toast.success("Berhasil Diperbarui", {
-        description: "Perubahan data aset telah tersimpan di sistem.",
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.aset.semua });
-      router.push("/dashboard/outlet/reservasi/aset");
-    },
-    onError: (err: any) => {
-      toast.error("Gagal Memperbarui", {
-        description: err.message || "Terjadi kesalahan saat menyimpan aset.",
-      });
-    },
-  });
+  const updateMutation = useSimpanAset();
 
-  const onSubmit = (data: AsetFormInput) => {
-    const payload: AsetPayload = {
-      namaAset: data.namaAset.trim(),
-      tipeAsetID: data.tipeAsetID,
-      status: data.status as "tersedia" | "perbaikan",
-    };
-    updateMutation.mutate(payload);
+  const onSubmit = (data: NilaiFormAset) => {
+    updateMutation.mutate(
+      { id: asetId, data: payloadAset(data) },
+      {
+        onSuccess: () => {
+          toast.success("Berhasil Diperbarui", {
+            description: "Perubahan data aset telah tersimpan di sistem.",
+          });
+          router.push("/dashboard/outlet/reservasi/aset");
+        },
+        onError: (galat) => {
+          toast.error("Gagal Memperbarui", {
+            description: pesanError(galat, "Terjadi kesalahan saat menyimpan aset."),
+          });
+        },
+      },
+    );
   };
 
   return (
@@ -268,14 +251,14 @@ function EditAsetForm({
                   <Info className="w-4 h-4 mr-1.5" /> Perhatian
                 </p>
                 <p className="text-xs text-blue-700/80 font-medium mt-1 leading-relaxed">
-                  Aset ini saat ini berstatus <b>"digunakan"</b> di sistem
-                  penyewaan aktif. Jika Anda memaksanya menjadi "tersedia", hal
+                  Aset ini saat ini berstatus <b>&quot;digunakan&quot;</b> di sistem
+                  penyewaan aktif. Jika Anda memaksanya menjadi &quot;tersedia&quot;, hal
                   ini dapat menyebabkan konflik sesi.
                 </p>
               </div>
             ) : (
               <p className="text-[10px] font-medium text-[#0A2947]/50 pt-1">
-                Catatan: Status "Digunakan" akan diatur secara otomatis oleh
+                Catatan: Status &quot;Digunakan&quot; akan diatur secara otomatis oleh
                 sistem saat transaksi berjalan.
               </p>
             )}
@@ -322,33 +305,9 @@ export default function EditAsetPage() {
     data: asetData,
     isLoading: isLoadingAset,
     isError: isErrorAset,
-  } = useQuery({
-    queryKey: [...queryKeys.aset.semua, asetId],
-    queryFn: async () => {
-      const res = await apiClient.get<any>(
-        `/aset/${asetId}`,
-        undefined,
-        "pengguna",
-      );
-      return res.data;
-    },
-    enabled: !!asetId,
-  });
+  } = useAset(asetId);
 
-  const { data: tipeAsetList = [], isLoading: isLoadingTipeAset } = useQuery<
-    TipeAset[]
-  >({
-    queryKey: queryKeys.tipeAset.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<{ data: any[] }>(
-        "/tipeAset",
-        undefined,
-        "pengguna",
-      );
-      return Array.isArray(res.data) ? res.data : [];
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data: tipeAsetList = [], isLoading: isLoadingTipeAset } = useDaftarTipeAset();
 
   if (!asetId) {
     return (

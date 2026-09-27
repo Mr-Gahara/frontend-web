@@ -2,17 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { AsetPayload } from "@/types/aset";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSimpanAset } from "@/features/aset/hooks";
+import { payloadAset } from "@/features/aset/payload";
+import { skemaAset, type NilaiFormAset } from "@/features/aset/schema";
+import { useDaftarTipeAset } from "@/features/tipe-aset/hooks";
+import { pesanError } from "@/lib/api/error";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { TipeAsetRef } from "@/types/tarif";
 
 // --- Form & Validation ---
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 
 // --- Components ---
 import { Button } from "@/components/ui/button";
@@ -25,22 +25,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, Box, CheckCircle2, Wrench, Layers } from "lucide-react";
-import { queryKeys } from "@/lib/queryKeys";
 
-// --- ZOD SCHEMA ---
-const asetSchema = z.object({
-  namaAset: z.string().min(1, "Nama aset wajib diisi"),
-  tipeAsetID: z.string().min(1, "Kategori / Tipe aset wajib dipilih"),
-  // Status "digunakan" sengaja tidak dimasukkan karena aset baru pasti belum disewa
-  status: z.enum(["tersedia", "perbaikan"]).default("tersedia"),
-});
-
-type AsetFormInput = z.input<typeof asetSchema>;
 
 export default function BuatAsetPage() {
   useAuthGuard();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   // --- REACT HOOK FORM ---
   const {
@@ -48,8 +37,8 @@ export default function BuatAsetPage() {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<AsetFormInput>({
-    resolver: zodResolver(asetSchema),
+  } = useForm<NilaiFormAset>({
+    resolver: zodResolver(skemaAset),
     defaultValues: {
       namaAset: "",
       tipeAsetID: "",
@@ -57,50 +46,30 @@ export default function BuatAsetPage() {
     },
   });
 
-  // --- FETCH DATA TIPE ASET (Untuk Dropdown) ---
-  const { data: tipeAsetList = [], isLoading: isLoadingTipeAset } = useQuery<
-    TipeAsetRef[]
-  >({
-    queryKey: queryKeys.tipeAset.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<{ data: any[] }>(
-        "/tipeAset",
-        undefined,
-        "pengguna",
-      );
-      return Array.isArray(res.data) ? res.data : [];
-    },
-    staleTime: 5 * 60 * 1000, // Cache 5 menit
-  });
+  // --- DATA TIPE ASET (Untuk Dropdown) ---
+  const { data: tipeAsetList = [], isLoading: isLoadingTipeAset } = useDaftarTipeAset();
 
   // --- MUTATION CREATE ASET ---
-  const createMutation = useMutation<any, Error, AsetPayload>({
-    mutationFn: async (payload: AsetPayload) => {
-      return await apiClient.post("/aset", payload, undefined, "pengguna");
-    },
-    onSuccess: () => {
-      toast.success("Berhasil", {
-        description: "Data aset baru telah ditambahkan.",
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.aset.semua });
-      router.push("/dashboard/outlet/reservasi/aset");
-    },
-    onError: (err: any) => {
-      toast.error("Gagal Menyimpan", {
-        description: err.message || "Terjadi kesalahan saat menyimpan aset.",
-      });
-    },
-  });
+  const createMutation = useSimpanAset();
 
   // --- HANDLER SUBMIT ---
-  const onSubmit = (data: AsetFormInput) => {
-    const payload: AsetPayload = {
-      namaAset: data.namaAset.trim(),
-      tipeAsetID: data.tipeAsetID,
-      status: data.status as "tersedia" | "perbaikan",
-    };
-
-    createMutation.mutate(payload);
+  const onSubmit = (data: NilaiFormAset) => {
+    createMutation.mutate(
+      { data: payloadAset(data) },
+      {
+        onSuccess: () => {
+          toast.success("Berhasil", {
+            description: "Data aset baru telah ditambahkan.",
+          });
+          router.push("/dashboard/outlet/reservasi/aset");
+        },
+        onError: (galat) => {
+          toast.error("Gagal Menyimpan", {
+            description: pesanError(galat, "Terjadi kesalahan saat menyimpan aset."),
+          });
+        },
+      },
+    );
   };
 
   return (
@@ -268,7 +237,7 @@ export default function BuatAsetPage() {
               )}
             />
             <p className="text-[10px] font-medium text-[#0A2947]/50 pt-1">
-              Catatan: Status "Digunakan" akan diatur secara otomatis oleh
+              Catatan: Status &quot;Digunakan&quot; akan diatur secara otomatis oleh
               sistem saat transaksi berjalan.
             </p>
           </div>

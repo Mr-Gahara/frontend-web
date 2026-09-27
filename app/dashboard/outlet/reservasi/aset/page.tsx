@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { queryKeys } from "@/lib/queryKeys";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
-import { apiClient } from "@/lib/apiClient";
-import { Aset, StatusAset } from "@/types/aset";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { Aset, StatusAset } from "@/types/aset";
+import { useDaftarAset, useHapusAset } from "@/features/aset/hooks";
+import { pesanError } from "@/lib/api/error";
 import { toast } from "sonner";
 
 // --- Components ---
@@ -39,7 +38,6 @@ import {
 export default function AsetPage() {
   useAuthGuard();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   // --- STATE ---
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,42 +45,10 @@ export default function AsetPage() {
   const [selectedAset, setSelectedAset] = useState<Aset | null>(null);
 
   // --- FETCH DATA ASET ---
-  const {
-    data: asetList = [],
-    isLoading,
-    isError,
-  } = useQuery<Aset[]>({
-    queryKey: queryKeys.aset.semua,
-    queryFn: async () => {
-      const res = await apiClient.get<any>("/aset", undefined, "pengguna");
-
-      // Validasi ekstra: Cegah caching dari response yang gagal/kosong
-      if (!res) return [];
-
-      const raw = res.data?.data || res.data || [];
-      return Array.isArray(raw) ? raw : [];
-    },
-    // KOREKSI UTAMA:
-    // Memaksa query untuk mengabaikan cache lama dan selalu mengambil data
-    // terbaru dari server setiap kali Anda menavigasi ke halaman ini.
-    refetchOnMount: "always",
-    // Opsional namun disarankan: Refetch saat Anda kembali membuka tab browser
-    refetchOnWindowFocus: true,
-  });
+  const { data: asetList = [], isLoading, isError } = useDaftarAset();
 
   // --- MUTATION DELETE ---
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return await apiClient.delete(`/aset/${id}`, undefined, "pengguna");
-    },
-    onSuccess: () => {
-      toast.success("Dihapus", { description: "Data aset berhasil dihapus." });
-      queryClient.invalidateQueries({ queryKey: queryKeys.aset.semua });
-      setIsDeleteModalOpen(false);
-      setSelectedAset(null);
-    },
-    onError: (err: any) => toast.error("Gagal", { description: err.message }),
-  });
+  const deleteMutation = useHapusAset();
 
   // --- HANDLERS ---
   const handleDeleteClick = (aset: Aset) => {
@@ -90,11 +56,19 @@ export default function AsetPage() {
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = async (e: React.MouseEvent) => {
+  // preventDefault menahan dialog tetap terbuka sampai hapus berhasil,
+  // sehingga dialog bertahan saat gagal (keputusan Fase 0).
+  const confirmDelete = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (selectedAset) {
-      await deleteMutation.mutateAsync(selectedAset.id);
-    }
+    if (!selectedAset) return;
+    deleteMutation.mutate(selectedAset.id, {
+      onSuccess: () => {
+        toast.success("Dihapus", { description: "Data aset berhasil dihapus." });
+        setIsDeleteModalOpen(false);
+        setSelectedAset(null);
+      },
+      onError: (galat) => toast.error("Gagal", { description: pesanError(galat) }),
+    });
   };
 
   // --- RENDER HELPERS ---
