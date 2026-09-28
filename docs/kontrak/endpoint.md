@@ -6,7 +6,7 @@ Endpoint yang dipanggil frontend beserta auth, permission, envelope, dan bentuk 
 
 ## 3. Endpoint yang dipakai frontend
 
-Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend kini memiliki 247 route (tambahan sejak acuan: `POST /akun/owner/create-tenant`, belum dipakai frontend). Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
+Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend kini memiliki 247 route (tambahan sejak acuan: `POST /akun/owner/create-tenant`, belum dipakai frontend). Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258`) menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
 
 Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`; contoh `/diskon` berarti `/api/diskon`. Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom Envelope dan ID hanya terisi untuk GET yang diambil sampelnya.
 
@@ -37,7 +37,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/aset` | authPengguna | - | `{ data }` | `id` | `features/aset/api.ts`, 1 file halaman lama |
+| GET | `/aset` | authPengguna | - | `{ data }` | `id` | `features/aset/api.ts` |
 | POST | `/aset` | authPengguna | `create-aset` | - | - | `features/aset/api.ts` |
 | GET | `/aset/:id` | authPengguna | - | `{ data }` | `id` | `features/aset/api.ts` |
 | PUT | `/aset/:id` | authPengguna | `update-aset` | - | - | `features/aset/api.ts` |
@@ -67,7 +67,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/diskon` | authPengguna | - | `{ data }` | `id` | `features/diskon/api.ts`, 2 file halaman lama |
+| GET | `/diskon` | authPengguna | - | `{ data }` | `id` | `features/diskon/api.ts`, 1 file halaman lama |
 | POST | `/diskon` | authPengguna | `create-diskon` | - | - | 1 file |
 | PUT | `/diskon/:id` | authPengguna | `update-diskon` | - | - | 1 file |
 | DELETE | `/diskon/:id` | authPengguna | `delete-diskon` | - | - | 1 file |
@@ -143,7 +143,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/pelanggan` | authPengguna | - | `{ data }` | `id` | `features/pelanggan/api.ts`, 2 file halaman lama |
+| GET | `/pelanggan` | authPengguna | - | `{ data }` | `id` | `features/pelanggan/api.ts`, 1 file halaman lama |
 | POST | `/pelanggan` | authPengguna | `create-pelanggan` | - | - | 1 file |
 | PUT | `/pelanggan/:id` | authPengguna | `update-pelanggan` | - | - | 1 file |
 | DELETE | `/pelanggan/:id` | authPengguna | `delete-pelanggan` | - | - | 1 file |
@@ -237,8 +237,8 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/sesibooking` | authPengguna | `read-booking` | `{ data }` | `id`, `_id` bersarang | `features/sesi-booking/api.ts`, 1 file halaman lama (query `tanggal`, cache per tanggal, `temuan.md` butir 57) |
-| POST | `/sesibooking` | authPengguna | `create-booking` | - | - | 1 file |
+| GET | `/sesibooking` | authPengguna | `read-booking` | `{ data }` | `id`, `_id` bersarang | `features/sesi-booking/api.ts` (query `tanggal`, cache per tanggal, `temuan.md` butir 57) |
+| POST | `/sesibooking` | authPengguna | `create-booking` | - | - | `features/sesi-booking/api.ts` |
 
 #### `/shift`
 

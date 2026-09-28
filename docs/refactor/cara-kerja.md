@@ -41,6 +41,15 @@ Bagian **tetap**: hanya diubah atas perintah pemilik proyek.
 - Satu blok untuk satu berkas atau satu tujuan. Blok yang panjang tidak dapat
   dijalankan sekaligus dan mudah terpotong saat ditempel.
 
+## Pengecualian alur
+
+Ditetapkan pemilik proyek, di luar teks bagian Tetap agar pemeriksa
+dokumen tetap menjaganya:
+
+- Commit yang hanya mengubah dokumentasi tidak menjalankan vitest penuh
+  maupun suite e2e penuh (langkah 5 Alur setiap perubahan); gerbangnya
+  `npm run docs:periksa` (28 September 2026).
+
 ## Helper penggantian
 
 Penggantian teks memakai skrip Node inline yang menolak bila jumlah kecocokan
@@ -997,6 +1006,29 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   `susunPayloadPenjualan` dijalankan lewat `node -e` dan membuktikan jam
   "99" menggeser transaksi empat hari serta jam "ab" melempar
   `RangeError`.
+- **Nama fixture uji tidak boleh menjadi awalan nama fixture lain**, dan
+  elemen yang dikenali lewat nama dicocokkan persis tanpa `.first()`.
+  Fixture "E2E Reservasi Aset Perbaikan" membuat pencari baris "E2E
+  Reservasi Aset" di spec daftar reservasi membaca baris yang salah, dan
+  tiga skenario gagal di suite penuh walaupun spec buat reservasi lolos
+  sendirian (`652d669`).
+- **Marka tidak menunjuk berkas yang baru dibuat oleh blok yang belum
+  dijalankan.** Pesan commit di `/tmp` baru ada setelah blok commit
+  dijalankan; marka yang menyisipkan butir ke berkas itu gagal dengan
+  ENOENT sebelum menulis apa pun (terjadi dua kali). Pesan commit ditulis
+  utuh di blok commit itu sendiri.
+- **Halaman besar yang dipindah sekaligus diubah ditulis utuh, bukan
+  dipindah lewat skrip.** Di buat reservasi hampir setiap rentang yang
+  dipindah juga berubah isinya, sehingga skrip berjangkar justru rawan
+  salah. Halaman lama dibaca penuh lebih dulu, `className` disalin persis,
+  dan spec pembanding menjadi penjaganya (`477f258`, keputusan R9b).
+- **Gerbang commit hanya sah bila laporannya dibuat setelah perubahan
+  terakhir.** Gerbang membaca `/tmp/v.log` dan `/tmp/p.json` apa adanya,
+  sehingga pada `bcd44a1` (perubahan komentar saja) gerbang lolos dengan
+  laporan suite `477f258` karena suite tidak dijalankan ulang. Gerbang
+  commit kode memeriksa juga bahwa kedua laporan lebih baru daripada
+  berkas yang di-stage, misalnya
+  `[ -z "$(find <berkas> -newer /tmp/p.json)" ]`.
 
 ## Kapan berhenti dan bertanya
 

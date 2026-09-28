@@ -75,22 +75,25 @@ repo, nilai setiap baris laporannya, lalu ulangi dengan `--tulis`. Audit 22
 September 2026 memastikan seluruh panggilan frontend ada di backend dan
 tercatat di kontrak.
 
-Suite e2e penuh memakan 8 sampai 12 menit karena berjalan dengan satu worker
-dan memakai backend sungguhan. Saat iterasi cukup jalankan spec modul yang
-sedang dikerjakan. **Sebelum setiap commit, vitest penuh dan suite e2e penuh
-wajib dijalankan dan seluruhnya lolos**, dengan baseline sebagai pembanding.
+Suite e2e penuh memakan 13 sampai 15 menit (diukur 28 September 2026)
+karena berjalan dengan satu worker dan memakai backend sungguhan. Saat
+iterasi cukup jalankan spec modul yang sedang dikerjakan. **Sebelum setiap
+commit, vitest penuh dan suite e2e penuh wajib dijalankan dan seluruhnya
+lolos**, dengan baseline sebagai pembanding. Commit yang hanya mengubah
+dokumentasi dikecualikan; gerbangnya `npm run docs:periksa` (pemilik
+proyek, 28 September 2026).
 
 Seluruh spec memakai `page.route` hanya untuk jalur gagal atau untuk
 menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
 di spec login, satu di spec tipe aset).
 
-**Baseline per komponen tanggal dan waktu** (commit `e43e000`): 237 test
-unit dan integrasi lolos di 34 berkas, 253 e2e lolos, 20 skipped:
+**Baseline per buat reservasi** (commit `477f258`): 255 test unit dan
+integrasi lolos di 36 berkas, 260 e2e lolos, 20 skipped:
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
-backend, sebelas `test.fixme` lain yang menunggu backend (tiga di spec
-alur penjualan, tiga di spec master data reservasi, dan satu di spec
-daftar reservasi), dan satu
+backend, sebelas `test.fixme` lain yang menunggu backend (pola roster,
+pengguna, stock opname, penerimaan, tiga di spec alur penjualan, tiga di
+spec master data reservasi, dan satu di spec daftar reservasi), dan satu
 `test.skip` bersyarat data (Test yang ditandai fixme dan skip bersyarat,
 di bawah). Dari baseline `5a3deea` (225 lolos), spec tipe aset berubah
 dari 40 menjadi 25 test, aset dari 11 menjadi 27, dan tarif dari 12
@@ -100,7 +103,9 @@ angka e2e. Migrasi tarif (`365553f`) menambah 10 test unit dan 4
 skenario e2e di spec tarif. Spec daftar reservasi (`27749fe`) menambah 6
 skenario lolos dan satu fixme, dan migrasinya (`eef371a`) menambah 7 test
 unit dan satu skenario. Komponen tanggal dan waktu (`e43e000`) menambah
-27 test unit dan integrasi serta dua skenario e2e penjualan.
+27 test unit dan integrasi serta dua skenario e2e penjualan. Spec buat
+reservasi (`652d669`) menambah enam skenario, dan migrasinya (`477f258`)
+menambah 18 test unit dan satu skenario.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -453,6 +458,9 @@ Urutan debug kegagalan e2e di atas).
 - **Blok booking tanpa penjualan** (tanpa tautan R4b) hanya teruji di unit
   test (`tests/unit/features/sesi-booking/tampilan.test.ts`), karena jalur
   buat booking selalu membuat penjualan.
+- **Bentrok yang tidak menghitung booking Selesai** (keputusan R6a) hanya
+  teruji di unit test `bookingBentrok`, karena membuat booking Selesai di
+  e2e berarti membuat booking di masa lalu.
 - **Password salah pada akun uji menambah hitungan pembatas login**, dan
   login sukses tidak menguranginya. Spec login gagal lebih awal bila sisa
   kuota di header `RateLimit` di bawah 3; menjalankan spec auth berulang
@@ -586,3 +594,9 @@ Urutan debug kegagalan e2e di atas).
 - `tests/integration/components/waktu/`: perilaku mengetik `InputWaktu`
   lewat `user-event`, dan `PilihTanggal` di jsdom dengan stub
   `ResizeObserver`, yang dibutuhkan popover Radix.
+- `tests/e2e/reservasi/buat/buat-reservasi.spec.ts`: payload nyata
+  dibandingkan utuh, termasuk id diskon item dan diskon global dari
+  fixture tetap (keputusan R7b); tanggal dipilih lewat kalender kostum
+  (R8b); slot booking uji digeser menurut menit berjalan dan urutan
+  pemanggilan, agar tidak tertahan daftar booking per tanggal yang basi
+  (`kontrak/temuan.md` butir 57).

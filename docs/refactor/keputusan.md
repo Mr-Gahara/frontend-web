@@ -69,7 +69,8 @@ Tidak boleh dibalik tanpa pembahasan:
   mengembalikan `Promise<void>`, dan `confirmDelete` memanggil `preventDefault`
   agar dialog bertahan selama mutation berjalan.
 - **ESLint memblokir import dari `__tests__`, `__fixtures__`, dan `__mocks__`**
-  di `app`, `components`, `hooks`, `lib`, dan `types`.
+  di `app`, `components`, `hooks`, `lib`, dan `types`, serta di `features`
+  sejak `e43e000`.
 
 ### Modul produk dan kategori
 
@@ -388,13 +389,20 @@ keputusan rancangan butir 17 dan 21.
   karena daftar tidak disaring menurut status.
 - **R6a: pemeriksaan bentrok di form buat reservasi hanya menghitung
   booking Aktif** (28 September 2026), sejalan dengan `checkConflict`
-  backend; sebelumnya booking Selesai ikut dihitung. Diterapkan saat buat
-  reservasi dimigrasikan.
+  backend; sebelumnya booking Selesai ikut dihitung. Diterapkan di
+  `477f258` lewat `bookingBentrok`, dan diuji di test unit.
 - **R7b: diskon di buat reservasi memakai `features/diskon`**, dengan
   aturan `bisaDigabung` sebagai fungsi murni, serta fixture diskon item dan
-  diskon global uji di spec e2e.
+  diskon global uji di spec e2e (28 September 2026; fixture di `652d669`,
+  `pilihDiskon` di `477f258`).
 - **R8b: spec buat reservasi memilih tanggal lewat kalender kostum**,
-  sekaligus menguji fungsinya.
+  sekaligus menguji fungsinya (28 September 2026, `652d669`).
+- **R9b: buat reservasi dipindah ke `features/sesi-booking` dan dipecah
+  menjadi komponen** (28 September 2026, `477f258`): halaman,
+  `KartuFasilitas`, dan `PanelRingkasan`, masing-masing di bawah 700
+  baris. Karena hampir setiap rentang yang dipindah juga berubah isinya,
+  keempat berkas ditulis utuh dari halaman lama yang dibaca penuh, dengan
+  `className` disalin, dan spec pembanding `652d669` menjadi penjaganya.
 
 ### Komponen tanggal dan waktu
 
@@ -413,8 +421,8 @@ Diputuskan pemilik proyek pada 28 September 2026 (`e43e000`).
   ESLint**, begitu pula input `type` date, time, datetime-local, month, dan
   week di JSX.
 - **K-TW3a: diterapkan lebih dulu di buat penjualan, filter daftar
-  penjualan, dan tarif**; buat reservasi saat dimigrasikan, serta form
-  shift dan jadwal bersama modul jadwal.
+  penjualan, dan tarif** (`e43e000`), lalu di buat reservasi (`477f258`);
+  form shift dan jadwal bersama modul jadwal.
 - **Filter tanggal daftar penjualan dikosongkan lewat reset filter**,
   karena `PilihTanggal` tidak punya tombol kosongkan.
 
@@ -537,6 +545,6 @@ Diputuskan pemilik proyek pada 28 September 2026 (`e43e000`).
     (`components/input-waktu.tsx`), dengan aturan di `lib/waktu.ts`.
     Kalender shadcn murni sudah dihapus, dan ESLint menolak impornya serta
     input tanggal atau waktu bawaan browser di JSX. Halaman lama yang
-    masih menulis input jam sendiri (buat reservasi dan form shift)
-    diganti saat modulnya dimigrasikan (pemilik proyek, 28 September 2026,
-    `e43e000`).
+    masih menulis input jam sendiri (form shift dan jadwal) diganti saat
+    modulnya dimigrasikan; buat reservasi sudah memakai kedua komponen
+    sejak `477f258` (pemilik proyek, 28 September 2026, `e43e000`).

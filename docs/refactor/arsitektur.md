@@ -147,6 +147,7 @@ stok, penjualan, tipe aset, aset, tarif, dan sesi booking:
 - `halaman-*.tsx` — komponen halaman bersama bila outlet dan gudang memakai halaman yang sama
 - `form-*.tsx` — komponen form bersama untuk mode buat dan edit
 - `payload.ts`, `pesan.ts`, `izin.ts`, `tampilan.ts`, `filter.ts` — fungsi murni untuk penyusunan payload, penerjemahan pesan error, aturan izin endpoint, penyiapan data tampilan, dan penyaringan daftar di klien (`keputusan.md` butir 9 sampai 11)
+- Komponen pecahan halaman besar, misalnya `kartu-fasilitas.tsx` dan `panel-ringkasan.tsx` di `sesi-booking` (keputusan R9b)
 
 Isi tiap `features/` yang sudah ada:
 
@@ -167,13 +168,13 @@ Isi tiap `features/` yang sudah ada:
 | `pembayaran` | `api.ts`, `hooks.ts`, `filter.ts`, `payload.ts` | `useDaftarPembayaran` memuat seluruh pembayaran tenant karena backend tidak menyaring per penjualan (`kontrak/temuan.md` butir 43); `pembayaranPenjualan` menyaringnya di klien. `useBuatPembayaran` menginvalidasi penjualan, pembayaran, dan akun kas. `payload.ts` memuat `nominalDariTeks`, `validasiPembayaran`, dan `susunPayloadPembayaran` (tanpa `status`, K2a) |
 | `metode-pembayaran` | `api.ts`, `hooks.ts`, `filter.ts` | Dibuat untuk modul penjualan (K1a); hanya daftar. `metodeAktif`, dan `namaMetode` untuk riwayat pembayaran (K12). Halaman pengaturan metode pembayaran belum dimigrasikan |
 | `akun-kas` | `api.ts`, `hooks.ts`, `filter.ts` | Dibuat untuk modul penjualan (K1a); hanya daftar dan `akunKasAktif`. Halaman keuangan belum dimigrasikan |
-| `pelanggan` | `api.ts`, `hooks.ts` | Dibuat untuk modul penjualan (K1a); hanya `useDaftarPelanggan`. Halaman pelanggan dan buat reservasi belum dimigrasikan |
-| `diskon` | `api.ts`, `hooks.ts`, `filter.ts` | Dibuat untuk modul penjualan (K1a); hanya daftar, dengan kunci `diskon.daftar()` tanpa filter yang berbeda dari kunci yang diisi buat reservasi lama, dan `diskonAktif` per cakupan. Halaman diskon belum dimigrasikan |
+| `pelanggan` | `api.ts`, `hooks.ts` | Dibuat untuk modul penjualan (K1a); hanya `useDaftarPelanggan`, dipakai buat penjualan dan buat reservasi (`477f258`). Halaman pelanggan belum dimigrasikan |
+| `diskon` | `api.ts`, `hooks.ts`, `filter.ts` | Dibuat untuk modul penjualan (K1a); hanya daftar, dengan kunci `diskon.daftar()` tanpa filter, `diskonAktif` per cakupan, dan `pilihDiskon` (aturan `bisaDigabung`, keputusan R7b, dipakai buat reservasi sejak `477f258`). Halaman diskon belum dimigrasikan |
 | `pajak` | `api.ts`, `hooks.ts`, `filter.ts` | Dibuat untuk modul penjualan (K1a); hanya daftar dan `pajakTransaksiAktif` (urut prioritas). Halaman pengaturan pajak belum dimigrasikan |
 | `tipe-aset` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts` | Submodul reservasi (`074e98c`). `useDaftarTipeAset` memakai kunci `daftar()` (keputusan rancangan butir 12), dan dipakai juga form aset serta form buat dan edit tarif; `useTipeAset` tidak mengulang saat 404. Mutation menginvalidasi akar tipe aset, tarif, dan aset, karena daftar tarif dan aset menampilkan nama tipe aset. Satu skema buat dan edit dengan trim; `payloadBuatTipeAset` tidak mengirim deskripsi kosong, sedangkan `payloadUbahTipeAset` mengirim `""` agar deskripsi yang dikosongkan terhapus |
 | `aset` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts` | Submodul reservasi (`d3ae182`). `useDaftarAset` memakai kunci `daftar()` dan dimuat ulang setiap halaman dibuka, karena status aset dihitung backend dari sesi booking yang sedang berjalan; `useAset` tidak mengulang saat 404. Mutation menginvalidasi akar aset dan sesi booking. Satu skema buat dan edit dengan trim; `payloadAset` tidak mengirim status "digunakan", karena status itu dihitung, bukan disimpan |
 | `tarif` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts` | Submodul reservasi (`365553f`). `useDaftarTarif` memakai kunci `daftar()`; `useTarif` tidak mengulang saat 404 dan dimuat ulang setiap halaman edit dibuka, dan halaman edit memasang `FormEditTarif` setelah `isFetchedAfterMount` (keputusan rancangan butir 8). Mutation menginvalidasi akar tarif dan tipe aset, karena daftar tipe aset menampilkan tarif terkait. `skemaTarif` dipakai buat dan edit: `z.coerce` dengan tipe masukan dan keluaran eksplisit (keputusan T2a), harga kosong ditolak lewat `z.preprocess` (T3b), dan nama dipangkas (T4a); `NILAI_AWAL_TARIF` untuk buat. `payloadTarif` menyebut sepuluh field form satu per satu, dan `nilaiAwalTarif` menyusun nilai awal edit, termasuk id tipe aset dari `dataAset`. Jam mulai dan selesai memakai `InputWaktu` dengan `pisahTeksWaktu` dan `gabungTeksWaktu`, sehingga isian yang belum lengkap tetap tersimpan dan divalidasi skema (`e43e000`) |
-| `sesi-booking` | `api.ts`, `hooks.ts`, `tampilan.ts`, `tautan-penjualan.tsx` | Submodul reservasi (`eef371a`); hanya daftar per tanggal. `useDaftarSesiBooking(tanggal)` memakai kunci `sesiBooking.daftar(tanggal)`, segar 1 menit, dan dimuat ulang saat halaman dibuka dan saat jendela difokus; buat reservasi lama memakai kunci `banyakTanggal` (keputusan rancangan butir 12). `tampilan.ts` memuat `bookingPerAset` (pengelompokan per aset untuk timeline, tanpa booking Batal, keputusan R5a) dan `tautanPenjualanBooking` (R4b); `TautanPenjualanBooking` membungkus blok booking dengan tautan ke detail penjualan bila ada |
+| `sesi-booking` | `api.ts`, `hooks.ts`, `tampilan.ts`, `tautan-penjualan.tsx`, `schema.ts`, `waktu-booking.ts`, `payload.ts`, `halaman-buat-reservasi.tsx`, `kartu-fasilitas.tsx`, `panel-ringkasan.tsx` | Submodul reservasi (`eef371a`, `477f258`). `useDaftarSesiBooking(tanggal)` memakai kunci `sesiBooking.daftar(tanggal)`, segar 1 menit, dan dimuat ulang saat halaman dibuka dan saat jendela difokus. `useBookingBanyakTanggal` memakai kunci `banyakTanggal` untuk deteksi bentrok di buat reservasi, dimuat ulang tiap menit (keputusan rancangan butir 12). `useBuatBooking` menginvalidasi penjualan dan aset saat berhasil, dan daftar booking saat selesai termasuk gagal, agar penolakan bentrok 409 langsung terlihat. `tampilan.ts` memuat `bookingPerAset` (timeline tanpa booking Batal, R5a), `tautanPenjualanBooking` (R4b), dan `bookingBentrok` (hanya booking Aktif, R6a). Buat reservasi dipecah menjadi halaman, `KartuFasilitas`, dan `PanelRingkasan` (R9b); waktu per fasilitas disimpan sebagai `WaktuItem` di luar form lalu diisikan ke `waktuMulai` dan `waktuSelesai` lewat `gabungTanggalWaktu`, sehingga jam yang belum lengkap menjadi isian kosong yang ditolak skema (K-TW5a) |
 
 Cara memeriksa apakah sebuah modul sudah dimigrasikan: halamannya tidak lagi
 memanggil `apiClient`, dan lapisan datanya ada di `features/<modul>/` atau di
@@ -259,6 +260,16 @@ Jangan satukan hanya karena tampilannya mirip. Bila perbedaannya bermakna
 ada di salah satunya), komponen bersama akan penuh percabangan dan justru lebih
 sulit dibaca daripada dua berkas terpisah. Dalam hal itu, cukup bagikan lapisan
 `features/` dan biarkan halamannya terpisah.
+
+### Kapan halaman besar dipecah
+
+Pola dari buat reservasi (keputusan R9b): bagian halaman yang berdiri
+sendiri dan dapat menerima datanya lewat prop, seperti kartu per item dan
+panel ringkasan, dipindah ke komponen tersendiri di `features/<modul>/`.
+State yang hanya dipakai satu bagian, misalnya popover pemilih diskon,
+ikut pindah ke komponennya. Apakah sebuah halaman dipecah diputuskan
+pemilik proyek per halaman: buat penjualan (`f33ffa6`) dipindah tanpa
+dipecah, dan pemecahannya tercatat sebagai utang di `status.md`.
 
 ### Definisi selesai untuk satu modul
 
