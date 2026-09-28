@@ -64,8 +64,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Reservasi: daftar reservasi | `27749fe` (spec), `eef371a` | Selesai |
 | Komponen tanggal dan waktu (lintas modul) | `e43e000` | Selesai |
 | Reservasi: buat reservasi | `652d669` (spec), `477f258` | Selesai |
-| Keuangan | `0cfb3bd` (spec) | **Berikutnya** (lihat Pekerjaan berikutnya) |
-| Jadwal dan shift | - | Belum |
+| Keuangan | `0cfb3bd` (spec), `45187b6` | Selesai |
+| Jadwal dan shift | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 | Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), termasuk stock adjustment (`247cf2d`); `gudang/layout.tsx` dan `gudang/setup` masih memakai `apiClient`, dan layout memeriksa nama role Owner (baris 32, keputusan rancangan butir 2); pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
@@ -74,10 +74,10 @@ Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 
-| Hal | Awal | Setelah buat reservasi `477f258` | Catatan |
+| Hal | Awal | Setelah keuangan `45187b6` | Catatan |
 |---|---|---|---|
-| Pemakaian `any` | 302 | 56 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
-| Kemunculan `_id` | - | 59 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts` |
+| Pemakaian `any` | 302 | 54 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
+| Kemunculan `_id` | - | 46 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas |
 | `useAuthGuard()` berulang di halaman | 49 | 34 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, dan buat reservasi) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
 | Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). |
@@ -85,58 +85,87 @@ Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: modul keuangan
+## Pekerjaan berikutnya: modul jadwal dan shift
 
-Cakupan: `app/dashboard/outlet/keuangan/`, tujuh berkas dengan total 1.377
-baris: akun kas (daftar dan buat), mutasi arus kas, ringkasan laba rugi,
-dua komponen bersama, dan layout. Tidak ada berkas di atas 700 baris.
+Cakupan: jadwal outlet (`jadwal/` dan `jadwal/generate/`), jadwal gudang,
+shift, dan pola roster, beserta komponennya di `components/jadwal/`,
+`components/shift/`, dan `components/pola-roster/`: 18 berkas dengan total
+4.138 baris. Tidak ada berkas di atas 700 baris.
 
 Pemetaan awal (28 September 2026):
 
 | Berkas | Baris | `apiClient` | `any` | `_id` | `queryKey` |
 |---|---|---|---|---|---|
-| `app/dashboard/outlet/keuangan/akunkas/buatAkunKas/page.tsx` | 391 | 2 | 1 | 0 | 2 |
-| `app/dashboard/outlet/keuangan/akunkas/page.tsx` | 188 | 2 | 0 | 1 | 2 |
-| `app/dashboard/outlet/keuangan/components/keuangan-nav-tabs.tsx` | 56 | 0 | 0 | 0 | 0 |
-| `app/dashboard/outlet/keuangan/components/keuangan-summary-cards.tsx` | 124 | 3 | 2 | 0 | 4 |
-| `app/dashboard/outlet/keuangan/layout.tsx` | 26 | 0 | 0 | 0 | 0 |
-| `app/dashboard/outlet/keuangan/mutasiArusKas/page.tsx` | 298 | 0 | 0 | 12 | 0 |
-| `app/dashboard/outlet/keuangan/ringkasanLabaRugi/page.tsx` | 294 | 2 | 2 | 0 | 3 |
+| `app/dashboard/gudang/jadwal/page.tsx` | 235 | 5 | 4 | 1 | 5 |
+| `app/dashboard/outlet/jadwal/generate/page.tsx` | 222 | 5 | 5 | 1 | 5 |
+| `app/dashboard/outlet/jadwal/page.tsx` | 310 | 8 | 5 | 5 | 8 |
+| `app/dashboard/outlet/pola-roster/page.tsx` | 216 | 6 | 7 | 3 | 5 |
+| `app/dashboard/outlet/shift/page.tsx` | 131 | 5 | 4 | 1 | 4 |
+| `components/jadwal/form-jadwal-dialog.tsx` | 435 | 0 | 0 | 0 | 0 |
+| `components/jadwal/generate/step-dua-preview.tsx` | 285 | 0 | 1 | 0 | 0 |
+| `components/jadwal/generate/step-satu-form.tsx` | 398 | 0 | 0 | 0 | 0 |
+| `components/jadwal/jadwal-grid.tsx` | 170 | 0 | 0 | 0 | 0 |
+| `components/jadwal/jadwal-toolbar.tsx` | 84 | 0 | 0 | 0 | 0 |
+| `components/jadwal/jadwal-utama.tsx` | 149 | 0 | 0 | 0 | 0 |
+| `components/jadwal/shift-cell.tsx` | 53 | 0 | 0 | 0 | 0 |
+| `components/pola-roster/pola-delete-dialog.tsx` | 77 | 0 | 0 | 0 | 0 |
+| `components/pola-roster/pola-form-dialog.tsx` | 274 | 0 | 0 | 1 | 0 |
+| `components/pola-roster/pola-utama.tsx` | 280 | 0 | 0 | 3 | 0 |
+| `components/shift/shift-delete-dialog.tsx` | 76 | 0 | 0 | 0 | 0 |
+| `components/shift/shift-form-dialog.tsx` | 393 | 0 | 0 | 0 | 0 |
+| `components/shift/shift-utama.tsx` | 350 | 0 | 1 | 3 | 0 |
 
-- Sumber data (dipetakan 28 September 2026): daftar akun kas dan kartu
-  Saldo Kas Total memanggil `GET /akunkas`, buat akun kas `POST /akunkas`,
-  dan ringkasan laba rugi serta tiga kartu laba memanggil
-  `GET /laporan/laba-rugi` dengan query `periode` (harian, mingguan, atau
-  bulanan), `startDate`, dan `endDate`. Kartu ringkasan dipasang di
-  `layout.tsx`, sehingga tampil di setiap halaman keuangan. Daftar akun
-  kas dan kartu ringkasan menyimpan data di bawah kunci akar
-  `akunKas.semua` (keputusan rancangan butir 3), dan kunci laba rugi
-  menambahkan `startDate` dan `endDate` di luar objek filter.
-- Mutasi arus kas tidak punya sumber data: seluruh isinya data tiruan di
-  dalam kode, dan backend tidak punya model maupun route mutasi kas
-  (keputusan KU1a, `kontrak/temuan.md` butir 61). Persentase "vs periode
-  sebelumnya" di ringkasan laba
-  rugi dihitung dengan `Math.random()` (KU5a), dan kartu ringkasan
-  menelan galat menjadi Rp0 (KU2a).
-- `features/akun-kas` sudah ada dari modul penjualan (keputusan K1a).
-  `AkunKasLama` masih dipakai tiga halaman metode pembayaran, dan
-  `AkunKasRefLama` dipakai `types/metodePembayaran.ts`, sehingga keduanya
-  tetap ada sampai modul metode pembayaran dimigrasikan.
+- Lapisan data hanya ada di kelima halaman `app/`; komponen di
+  `components/` tidak memanggil `apiClient` maupun `useQuery`, dan
+  menerima data dari halamannya.
+- Endpoint yang terlibat: `/jadwalshift` (termasuk `bulk`), `/shift`,
+  `/polaroster`, dan `/pengguna`. Route jadwal, shift, dan pola roster
+  tanpa `checkPermission` (`kontrak/temuan.md` butir 5), halaman jadwal
+  tanpa gate walau `/pengguna` mewajibkan `read-pengguna`
+  (`kontrak/izin-halaman.md`), dan enam permission jadwal belum ada di
+  seed (butir 4). `GET /shift` tanpa query string dijawab 500 (butir 8).
+- `GET /pengguna` masih dipanggil halaman jadwal lama bersama
+  `features/pengguna` (audit endpoint 28 September 2026).
+- Edit pola roster menunggu backend (`test.fixme`, `pengujian.md`), dan
+  pola roster memakai hapus permanen (keputusan Fase 0).
+- Form shift dan form jadwal beralih ke `InputWaktu` dan `PilihTanggal`
+  (keputusan K-TW3a dan rancangan butir 22). Error ESLint warisan di test
+  integrasi jadwal dan pola roster dibereskan bersama modul ini (Utang
+  kecil dari modul stock adjustment gudang).
+- Spec yang ada: `tests/e2e/jadwal/pola-roster/crud-pola-roster.spec.ts`
+  dan `tests/e2e/jadwal/shift/crud-shift.spec.ts`. Jadwal dan generate
+  jadwal belum punya spec e2e.
+
+Langkah berikutnya: spec pembanding jadwal dan generate jadwal terhadap
+kode lama (pola keputusan R1a), lalu pemetaan sumber data kelima halaman
+dan jalur backend `jadwalshift`, `shift`, dan `polaroster`. Keputusan
+produk yang muncul, misalnya gate halaman jadwal, diajukan sekaligus
+setelah pemetaan.
+
+## Catatan dari modul keuangan
+
+Modul keuangan selesai pada 28 September 2026: spec pembanding (`0cfb3bd`)
+dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
+`apiClient`, dan tidak ada data tiruan.
+
+- Lapisan data ada di `features/akun-kas` (daftar, buat, dan skema) dan
+  `features/laporan` (laba rugi dan aturan periode di `periode.ts`);
+  halamannya tetap di `app/` dengan tampilan lama.
+- Ringkasan laba rugi meminta dua rentang per periode, berjalan dan
+  pembanding (KU5a). Kartu ringkasan dipasang di `layout.tsx` dan meminta
+  bulan kalender penuh serta `GET /akunkas`, sehingga pengguna tanpa
+  `read-akunkas` melihat `-` di kartu saldo (KU2a,
+  `kontrak/izin-halaman.md`).
+- Mutasi arus kas menunggu endpoint mutasi kas dari backend
+  (`kontrak/temuan.md` butir 61, keputusan KU1a).
 - Setup tenant membuat akun kas bawaan "Kas Kecil (Laci)" `CASH-001` dan
   metode pembayaran "Tunai" yang bergantung padanya
   (`tenantService.createWithOwner`). Spec keuangan hanya menghapus akun
   uji yang dibuatnya sendiri.
-- Spec pembanding `tests/e2e/keuangan/keuangan.spec.ts` (`0cfb3bd`) lolos
-  terhadap kode lama: daftar dan buat akun kas, laba rugi harian dan
-  mingguan, serta kartu ringkasan.
-
-Langkah berikutnya: migrasi modul keuangan. `features/akun-kas` mendapat
-`buat` dan hook mutation; folder `laporan` baru di `features/` untuk laba rugi,
-dengan kunci berisi seluruh filter dan permintaan periode sebelumnya
-(KU5a); skema buat akun kas mempertahankan `z.coerce` tanpa `.default()`
-(KU3a); kartu ringkasan menampilkan `-` saat gagal (KU2a); dan mutasi arus
-kas tanpa data tiruan (KU1a). Skenario untuk ketiga perubahan perilaku itu
-ditambahkan ke spec keuangan.
+- `AkunKasLama` dan `AkunKasRefLama` tinggal dipakai modul metode
+  pembayaran.
+- Keputusan pemilik proyek untuk modul ini ada di `keputusan.md` (Modul
+  keuangan, KU1a sampai KU7a).
 
 ## Catatan dari modul reservasi
 
@@ -299,7 +328,7 @@ Yang masih berlaku:
   dimigrasikan lewat alias impor (`keputusan.md` butir 19): `PelangganLama`
   (halaman pelanggan), `DiskonLama` (halaman diskon), `PajakLama`,
   `ProdukPajakRelasiLama`, dan `PajakDariProdukLama` (pengaturan pajak),
-  `AkunKasLama` dan `AkunKasRefLama` (keuangan dan metode pembayaran), serta
+  `AkunKasLama` dan `AkunKasRefLama` (metode pembayaran), serta
   `MetodePembayaranLama` (pengaturan metode pembayaran). Masing-masing
   dihapus di commit migrasi modul pemiliknya. Sisanya dihitung dengan
   `grep -rhoE 'export interface [A-Za-z]+Lama\b' types | wc -l` (8 per
@@ -332,6 +361,15 @@ Yang masih berlaku:
 - Form shift (`components/shift/shift-form-dialog.tsx`) dan form jadwal
   masih menulis input jam dan tanggal sendiri; diganti `InputWaktu` dan
   `PilihTanggal` bersama modul jadwal (keputusan K-TW3a).
+
+### Utang kecil dari modul keuangan
+
+- Daftar akun kas belum punya ubah maupun hapus, walau backend punya
+  `PUT` dan `DELETE /akunkas/:id` (Lampiran A), dan tombol "Pindah Dana"
+  nonaktif karena transfer antar akun belum ada.
+- Ketiga halaman keuangan yang memuat data masih memanggil
+  `useAuthGuard()`, karena halamannya tetap di `app/` dengan tampilan
+  lama; pemanggilan itu dibuang bila halamannya dijadikan tipis.
 
 ### Utang kecil dari penyesuaian backend `f27f093`
 

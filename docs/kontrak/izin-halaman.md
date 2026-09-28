@@ -17,6 +17,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 23 September 2026: stock adjustment gudang, halaman baru (`247cf2d`).
 - 26 September 2026: penjualan setelah migrasi modul penjualan dan pembayaran (`f33ffa6`), dan pengeluaran yang ternyata halaman placeholder.
 - 27 September 2026: reservasi setelah migrasi daftar reservasi (`eef371a`), tanpa perubahan gate maupun endpoint.
+- 28 September 2026: ringkasan laba rugi setelah migrasi modul keuangan (`45187b6`), tanpa perubahan gate. Halaman akun kas dan mutasi arus kas bukan menu sidebar (dibuka lewat tab keuangan) dan bergate `read-akunkas` di `IZIN_HALAMAN`.
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -28,7 +29,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/keuangan` | `read-akunkas` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/penjualan` | `read-penjualan` | `/penjualan`; `/location` dan `/location/current` hanya bagi pemegang `read-location` | `read-penjualan`; `read-location` opsional untuk cakupan outlet | Sejalan; gate sengaja tidak menambah `read-location` agar Guest, Staff, dan Kasir tetap dapat membuka daftar (keputusan K11b) |
 | `/dashboard/outlet/pengeluaran` | `read-pembayaran` | - | - | Halaman placeholder tanpa data |
-| `/dashboard/outlet/keuangan/ringkasanLabaRugi` | `read-laporan` | `/laporan/laba-rugi` | - | Backend tidak memeriksa izin |
+| `/dashboard/outlet/keuangan/ringkasanLabaRugi` | `read-laporan` | `/laporan/laba-rugi` (periode berjalan dan pembanding); kartu ringkasan di layout juga `/akunkas` | -; `/akunkas` butuh `read-akunkas` | Backend tidak memeriksa izin laporan; tanpa `read-akunkas` kartu saldo menampilkan `-` (KU2a) |
 | `/dashboard/outlet/inventaris-data` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/produk` | `read-produk` | `/produk` | `read-produk` atau `akses-pos` | Sejalan |
 | `/dashboard/outlet/inventaris/kategori` | `read-kategori` | `/kategori`, `/produk` | `read-kategori`; `/produk` opsional (`read-produk` atau `akses-pos`) untuk hitungan pemakaian | Sejalan |

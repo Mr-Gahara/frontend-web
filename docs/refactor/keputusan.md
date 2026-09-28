@@ -456,7 +456,20 @@ Diputuskan pemilik proyek pada 28 September 2026.
 - **KU5a: persentase pertumbuhan laba dihitung dari laba periode
   sebelumnya** lewat endpoint yang sama dengan rentang mundur satu
   periode, dan `-` bila laba periode sebelumnya 0. Sebelumnya persentase
-  itu dihitung dengan `Math.random()`.
+  itu dihitung dengan `Math.random()`. Diterapkan di `45187b6`:
+  pembanding adalah periode yang sama mundur satu periode sepanjang yang
+  sudah berjalan (kemarin; Senin sampai hari yang sama minggu lalu; atau
+  tanggal 1 sampai tanggal yang sama bulan lalu, dipangkas ke akhir
+  bulan), agar periode berjalan yang parsial tidak dibandingkan dengan
+  periode penuh. Penyebutnya nilai mutlak, sehingga rugi yang membaik
+  bertanda positif, dan warna badge mengikuti arah pertumbuhan: hijau
+  naik, merah turun, netral untuk `0%` dan `-`.
+- **KU6a: daftar akun kas yang gagal dimuat menampilkan pesan**, bukan
+  "Belum ada Akun Kas", sejalan dengan keputusan submodul jurnal stok
+  (`45187b6`).
+- **KU7a: nama dan nomor akun berisi spasi saja ditolak form** lewat
+  `trim` dengan pesan wajib yang sudah ada, sejalan dengan T4a
+  (`45187b6`); sebelumnya isian itu lolos form lalu ditolak backend.
 
 ## Keputusan rancangan yang mengikat
 

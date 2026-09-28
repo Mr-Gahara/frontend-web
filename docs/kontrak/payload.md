@@ -128,12 +128,14 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /akunkas`
 
-- Aturan: validateAkunKasPayload (validators/akunKasValidator.js)
-- Wajib dari klien: `namaAkun`, `nomorAkun`
-- Field lain yang dikenali: `tipeAkun`, `status`, `saldo`
-- Nilai sah: `VALID_STATUS`: aktif, non-aktif
+- Aturan: validateAkunKasPayload (validators/akunKasValidator.js). Dikoreksi 28 September 2026 terhadap validator: `tipeAkun` wajib saat create, dan `saldo` bila dikirim wajib bertipe number dan tidak negatif
+- Wajib dari klien: `namaAkun` dan `nomorAkun` (diperiksa setelah `trim`), `tipeAkun`
+- Field lain yang dikenali: `status`, `saldo`
+- Tidak diperiksa validator tetapi dipakai: `keterangan` (controller meneruskan `...req.body` ke `AkunKas.create`)
+- Nilai sah: `VALID_TIPE_AKUN`: Kas Fisik, Rekening Bank; `VALID_STATUS`: aktif, non-aktif
+- Nomor akun duplikat dalam tenant dijawab 400 "Nomor Akun sudah digunakan di tenant ini" (`akunKasService` baris 69), bukan 409
 - Dibaca controller dari body: `-`
-- Diisi server: -
+- Diisi server: `tenantID`
 
 #### `POST /aset`
 

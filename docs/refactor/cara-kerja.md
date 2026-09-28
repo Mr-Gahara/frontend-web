@@ -1037,6 +1037,16 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   commit kode memeriksa juga bahwa kedua laporan lebih baru daripada
   berkas yang di-stage, misalnya
   `[ -z "$(find <berkas> -newer /tmp/p.json)" ]`.
+- **Baris yang terpotong di keluaran (`cut -c`) tidak dijadikan jangkar
+  maupun teks lama.** Pada kartu ringkasan keuangan, pembungkus kartu
+  yang `className`-nya terpotong dibiarkan, dan penggantian memakai
+  jangkar di sekitarnya. Berkas yang hampir seluruhnya berubah (mutasi
+  arus kas, 298 menjadi 31 baris) ditulis ulang lewat heredoc di balik
+  gerbang `git diff --quiet HEAD -- <berkas>` (`45187b6`).
+- **Sebelum menamai tipe atau pola baru di `features/`, grep bentuk yang
+  sudah ada.** Callback mutation punya dua bentuk (`OpsiMutasi` dan
+  `Callback`); `useBuatAkunKas` sempat memakai nama ketiga sebelum
+  diselaraskan dengan `Callback` milik penjualan dan pembayaran.
 
 ## Kapan berhenti dan bertanya
 

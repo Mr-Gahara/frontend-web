@@ -88,8 +88,8 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
 di spec login, satu di spec tipe aset).
 
-**Baseline per spec keuangan** (commit `0cfb3bd`): 255 test unit dan
-integrasi lolos di 36 berkas, 266 e2e lolos, 20 skipped:
+**Baseline per modul keuangan** (commit `45187b6`): 277 test unit dan
+integrasi lolos di 38 berkas, 271 e2e lolos, 20 skipped:
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
 backend, sebelas `test.fixme` lain yang menunggu backend (pola roster,
 pengguna, stock opname, penerimaan, tiga di spec alur penjualan, tiga di
@@ -106,7 +106,8 @@ unit dan satu skenario. Komponen tanggal dan waktu (`e43e000`) menambah
 27 test unit dan integrasi serta dua skenario e2e penjualan. Spec buat
 reservasi (`652d669`) menambah enam skenario, dan migrasinya (`477f258`)
 menambah 18 test unit dan satu skenario. Spec keuangan (`0cfb3bd`)
-menambah enam skenario.
+menambah enam skenario, dan migrasinya (`45187b6`) menambah 22 test unit
+dan lima skenario.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -347,6 +348,12 @@ satu putaran.
   tanggal, karena daftar per tanggal yang terbaca helper tidak dibersihkan
   saat void (`kontrak/temuan.md` butir 57) dan membuat halaman menerima
   data basi.
+- Satu aksi yang memicu dua permintaan ke endpoint dan query yang sama
+  membuat `waitForResponse` menangkap salah satunya tanpa urutan yang
+  pasti. Sejak KU5a, tombol periode laba rugi meminta periode berjalan dan
+  pembandingnya, dan penunggu yang hanya mencocokkan `periode` lolos
+  karena kebetulan urutan. Penunggu dipersempit dengan parameter pembeda,
+  di sini `endDate` (`responsLabaRugi`, `45187b6`).
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -467,6 +474,12 @@ Urutan debug kegagalan e2e di atas).
   sama pada saat yang sama, sehingga respons milik halaman tidak dapat
   dibedakan. Periode Harian dan Mingguan dicocokkan penuh, dan kartu laba
   bulanan dicocokkan di halaman akun kas (`0cfb3bd`).
+- **Arah badge pertumbuhan laba hanya pasti teruji di unit test.**
+  Skenario KU5a membandingkan badge dengan `teksPertumbuhan` dari dua
+  respons nyata, sehingga jalur yang teruji e2e bergantung pada data laba
+  dua hari terakhir. Panah naik dan turun teruji di
+  `tests/unit/features/laporan/periode.test.ts`, sedangkan warna badge
+  belum teruji.
 - **Password salah pada akun uji menambah hitungan pembatas login**, dan
   login sukses tidak menguranginya. Spec login gagal lebih awal bila sisa
   kuota di header `RateLimit` di bawah 3; menjalankan spec auth berulang
@@ -611,4 +624,8 @@ Urutan debug kegagalan e2e di atas).
   rugi), rupiah dibandingkan setelah spasi tak-putus dari `Intl` diganti
   spasi biasa, dan permintaan yang dibuat dua komponen sekaligus (periode
   bulanan di halaman ringkasan dan di kartu layout) dihindari dengan
-  menguji periode yang hanya diminta satu komponen.
+  menguji periode yang hanya diminta satu komponen. Sejak `45187b6`, dua
+  rentang periode yang sama (berjalan dan pembanding) dibedakan lewat
+  `endDate` (`responsLabaRugi`), harapan badge dihitung dengan fungsi
+  murni yang sama dengan tampilan, dan kegagalan per sumber data
+  disimulasikan dengan `JAWAB_GAGAL` hanya untuk GET endpoint itu.
