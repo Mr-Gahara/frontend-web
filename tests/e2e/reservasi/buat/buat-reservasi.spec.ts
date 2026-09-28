@@ -69,16 +69,17 @@ async function pilihAsetUji(page: Page) {
 /** Tanggal lewat kalender kostum (R8b), lalu jam dan menit, lalu durasi. */
 async function aturWaktu(page: Page, mulai: Date, durasiJam: number) {
   const hariIni = new Date();
-  await page.getByRole("button", { name: teksTanggal(hariIni) }).click();
+  await page.getByRole("button", { name: `Tanggal Fasilitas #1, ${teksTanggal(hariIni)}` }).click();
   const selisihBulan = (mulai.getFullYear() - hariIni.getFullYear()) * 12 + mulai.getMonth() - hariIni.getMonth();
   for (let i = 0; i < selisihBulan; i++) await page.getByRole("button", { name: /next month/i }).click();
   await page.getByRole("grid").getByText(String(mulai.getDate()), { exact: true }).click();
-  await expect(page.getByRole("button", { name: teksTanggal(mulai) })).toBeVisible();
-  const isian = page.locator('input[placeholder="00"]');
-  await isian.nth(0).fill(String(mulai.getHours()).padStart(2, "0"));
-  await isian.nth(0).press("Tab");
-  await isian.nth(1).fill(String(mulai.getMinutes()).padStart(2, "0"));
-  await isian.nth(1).press("Tab");
+  await expect(page.getByRole("button", { name: `Tanggal Fasilitas #1, ${teksTanggal(mulai)}` })).toBeVisible();
+  await page
+    .getByRole("textbox", { name: "Jam Mulai Fasilitas #1 (jam)" })
+    .fill(String(mulai.getHours()).padStart(2, "0"));
+  await page
+    .getByRole("textbox", { name: "Jam Mulai Fasilitas #1 (menit)" })
+    .fill(String(mulai.getMinutes()).padStart(2, "0"));
   await page.getByRole("button", { name: `${durasiJam} jam`, exact: true }).click();
 }
 
@@ -171,6 +172,24 @@ test.describe("E2E — Reservasi › Buat reservasi", () => {
     } finally {
       await batalkanBooking(page, auth, penjualanId);
     }
+  });
+
+  test("jam mulai yang dikosongkan menahan simpan dengan pesan, tanpa mengirim permintaan (K-TW5a)", async ({
+    page,
+  }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    await siapkanFixtureBuatReservasi(page, auth);
+    await bukaBuat(page);
+    await pilihPelanggan(page);
+    await pilihAsetUji(page);
+    const kirim = pantauPermintaan(page, "POST", POLA_POST);
+    const jam = page.getByRole("textbox", { name: "Jam Mulai Fasilitas #1 (jam)" });
+    await jam.fill("");
+    await page.getByRole("button", { name: "Proses & Buat Tagihan" }).click();
+    await expect(page.getByText("Waktu mulai wajib diisi")).toBeVisible();
+    await expect(jam).toHaveAttribute("aria-invalid", "true");
+    expect(kirim.jumlah(), "jam kosong tidak mengirim POST").toBe(0);
+    kirim.lepas();
   });
 
   test("gagal: pesan tampil dan halaman tetap di buat reservasi", async ({ page }) => {

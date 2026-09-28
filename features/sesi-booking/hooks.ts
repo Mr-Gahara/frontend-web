@@ -13,7 +13,7 @@
  * walau frontend memuat ulang.
  */
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { sesiBookingApi } from "./api";
 import { queryKeys } from "@/lib/queryKeys";
 
@@ -24,5 +24,38 @@ export function useDaftarSesiBooking(tanggal: string) {
     staleTime: 60 * 1000,
     refetchOnMount: "always",
     refetchOnWindowFocus: true,
+  });
+}
+
+/**
+ * Booking beberapa tanggal sekaligus, untuk mendeteksi bentrok di form buat
+ * reservasi. Kunci banyakTanggal berbeda dari daftar(tanggal) milik timeline,
+ * dan dimuat ulang tiap menit, sama dengan halaman lama.
+ */
+export function useBookingBanyakTanggal(tanggal: string[]) {
+  return useQuery({
+    queryKey: queryKeys.sesiBooking.banyakTanggal(tanggal),
+    queryFn: async () => (await Promise.all(tanggal.map((t) => sesiBookingApi.daftar(t)))).flat(),
+    enabled: tanggal.length > 0,
+    refetchInterval: 60_000,
+  });
+}
+
+/**
+ * Buat booking. Penjualan dan aset diinvalidasi saat berhasil, karena booking
+ * membuat penjualan dan status aset dihitung dari booking. Daftar booking
+ * dimuat ulang juga saat gagal, agar penolakan bentrok 409 langsung terlihat
+ * di form, sama dengan halaman lama.
+ */
+export function useBuatBooking() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: sesiBookingApi.buat,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.penjualan.semua }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.aset.semua }),
+      ]),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.sesiBooking.semua }),
   });
 }

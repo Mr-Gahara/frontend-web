@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bookingPerAset, tautanPenjualanBooking } from "@/features/sesi-booking/tampilan";
+import { bookingBentrok, bookingPerAset, tautanPenjualanBooking } from "@/features/sesi-booking/tampilan";
 import type { SesiBookingResponse } from "@/types/sesiBooking";
 
 const awal = new Date("2026-09-27T08:00:00");
@@ -86,5 +86,41 @@ describe("tautanPenjualanBooking", () => {
 
   it("mengembalikan null bila booking tidak membawa penjualan", () => {
     expect(tautanPenjualanBooking(booking({ dataPenjualan: null }))).toBeNull();
+  });
+});
+
+describe("bookingBentrok", () => {
+  const mulai = new Date("2026-09-27T09:30:00");
+  const selesai = new Date("2026-09-27T10:30:00");
+
+  it("mengembalikan booking Aktif di aset yang sama yang bertumpuk", () => {
+    const b = booking({ id: "aktif" });
+    expect(bookingBentrok([b], "a1", mulai, selesai)).toBe(b);
+  });
+
+  it("tidak menghitung booking Selesai maupun Batal (keputusan R6a)", () => {
+    const daftar = [booking({ status: "Selesai" }), booking({ status: "Batal" })];
+    expect(bookingBentrok(daftar, "a1", mulai, selesai)).toBeNull();
+  });
+
+  it("tidak menghitung aset lain maupun rentang yang hanya bersentuhan di tepi", () => {
+    expect(bookingBentrok([booking()], "a2", mulai, selesai)).toBeNull();
+    expect(
+      bookingBentrok([booking()], "a1", new Date("2026-09-27T10:00:00"), new Date("2026-09-27T11:00:00")),
+    ).toBeNull();
+  });
+
+  it("menganggap booking tanpa waktuSelesai berlangsung satu jam", () => {
+    const tanpaSelesai = booking({ waktuSelesai: null });
+    expect(
+      bookingBentrok([tanpaSelesai], "a1", new Date("2026-09-27T09:59:00"), new Date("2026-09-27T10:30:00")),
+    ).toBe(tanpaSelesai);
+    expect(
+      bookingBentrok([tanpaSelesai], "a1", new Date("2026-09-27T10:00:00"), new Date("2026-09-27T10:30:00")),
+    ).toBeNull();
+  });
+
+  it("mengembalikan null bila aset belum dipilih", () => {
+    expect(bookingBentrok([booking()], "", mulai, selesai)).toBeNull();
   });
 });

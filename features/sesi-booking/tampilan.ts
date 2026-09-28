@@ -38,3 +38,26 @@ export function tautanPenjualanBooking(booking: SesiBookingResponse): string | n
   const id = booking.dataPenjualan?.id;
   return id ? `/dashboard/outlet/penjualan/${id}` : null;
 }
+
+/**
+ * Booking Aktif di aset itu yang bertumpuk dengan rentang [mulai, selesai),
+ * atau null. Hanya booking Aktif yang dihitung (keputusan R6a), sejalan
+ * dengan checkConflict backend; sebelumnya booking Selesai ikut dihitung.
+ * Booking tanpa waktuSelesai dianggap berlangsung satu jam, sama dengan
+ * halaman lama.
+ */
+export function bookingBentrok(
+  daftar: SesiBookingResponse[],
+  asetId: string,
+  mulai: Date,
+  selesai: Date,
+): SesiBookingResponse | null {
+  if (!asetId) return null;
+  for (const booking of daftar) {
+    if (booking.dataAset?.id !== asetId || booking.status !== "Aktif") continue;
+    const awal = new Date(booking.waktuMulai);
+    const akhir = booking.waktuSelesai ? new Date(booking.waktuSelesai) : new Date(awal.getTime() + 3_600_000);
+    if (mulai < akhir && selesai > awal) return booking;
+  }
+  return null;
+}
