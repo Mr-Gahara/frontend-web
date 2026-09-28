@@ -263,3 +263,44 @@ export async function statusBooking(page: Page, auth: Auth, id: string) {
   expect(r.status, "baca detail booking: " + r.pesan).toBe(200);
   return r.data?.status;
 }
+
+export const NAMA_ASET_PERBAIKAN = "E2E Reservasi Aset Perbaikan";
+export const NAMA_DISKON_ITEM = "E2E Reservasi Diskon Item";
+export const NAMA_DISKON_GLOBAL = "E2E Reservasi Diskon Global";
+
+export type FixtureBuatReservasi = FixtureBooking & { diskonItemId: string; diskonGlobalId: string };
+
+/**
+ * Fixture buat reservasi (keputusan R7b): fixture booking, ditambah aset uji
+ * berstatus perbaikan dan satu diskon item serta satu diskon global Aktif
+ * yang dapat digabung. Semuanya bernama tetap dan dibuat sekali bila belum
+ * ada.
+ */
+export async function siapkanFixtureBuatReservasi(page: Page, auth: Auth): Promise<FixtureBuatReservasi> {
+  const fx = await siapkanFixtureBooking(page, auth);
+  await cariAtauBuat<Berid & { namaAset: string }>(
+    page,
+    auth,
+    "/aset",
+    (x) => x.namaAset === NAMA_ASET_PERBAIKAN,
+    { namaAset: NAMA_ASET_PERBAIKAN, tipeAsetID: fx.tipeAsetId, status: "perbaikan" },
+    "aset perbaikan",
+  );
+  const diskonItem = await cariAtauBuat<Berid & { namaDiskon: string }>(
+    page,
+    auth,
+    "/diskon",
+    (x) => x.namaDiskon === NAMA_DISKON_ITEM,
+    { namaDiskon: NAMA_DISKON_ITEM, cakupan: "Item", tipe: "persen", nilai: 10, bisaDigabung: true, status: "Aktif" },
+    "diskon item",
+  );
+  const diskonGlobal = await cariAtauBuat<Berid & { namaDiskon: string }>(
+    page,
+    auth,
+    "/diskon",
+    (x) => x.namaDiskon === NAMA_DISKON_GLOBAL,
+    { namaDiskon: NAMA_DISKON_GLOBAL, cakupan: "Global", tipe: "nominal", nilai: 1000, bisaDigabung: true, status: "Aktif" },
+    "diskon global",
+  );
+  return { ...fx, diskonItemId: diskonItem.id, diskonGlobalId: diskonGlobal.id };
+}

@@ -34,8 +34,10 @@ const LABEL_STATUS: Record<string, string> = {
   perbaikan: "Perbaikan",
 };
 
+// Baris dikenali dari elemen nama yang teksnya persis nama aset uji, karena
+// nama aset lain dapat diawali nama itu ("E2E Reservasi Aset Perbaikan").
 const barisAsetUji = (page: Page) =>
-  page.locator("div.group").filter({ hasText: NAMA_ASET_BOOKING }).first();
+  page.locator("div.group").filter({ has: page.getByText(NAMA_ASET_BOOKING, { exact: true }) });
 
 const blokBooking = (page: Page, mulai: Date, selesai: Date) =>
   barisAsetUji(page)
