@@ -62,6 +62,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Reservasi: aset | `d3ae182` | Selesai |
 | Reservasi: tarif | `365553f` | Selesai |
 | Reservasi: daftar reservasi | `27749fe` (spec), `eef371a` | Selesai |
+| Komponen tanggal dan waktu (lintas modul) | `e43e000` | Selesai |
 | Reservasi: buat reservasi | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 | Keuangan | - | Belum |
 | Jadwal dan shift | - | Belum |
@@ -73,7 +74,7 @@ Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 
-| Hal | Awal | Setelah daftar reservasi `eef371a` | Catatan |
+| Hal | Awal | Setelah komponen tanggal dan waktu `e43e000` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 58 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
 | Kemunculan `_id` | - | 71 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts` |
@@ -127,6 +128,10 @@ buat, dan edit untuk aset, tarif, dan tipe aset, beserta
   `sesiBooking.banyakTanggal`. Migrasinya memakai `useDaftarAset` dan
   `features/sesi-booking`, bukan hook baru, dan tidak menyimpan data di
   kunci akar (keputusan rancangan butir 3 dan 12).
+- Buat reservasi memakai `PilihTanggal` dan `InputWaktu` saat dimigrasikan
+  (keputusan rancangan butir 22); input jam dan menitnya masih ditulis
+  sendiri (`jamStr`, `menitStr`, `placeholder="00"`). Bentrok di form
+  dihitung dari booking Aktif saja (keputusan R6a).
 - Kontrak sesi booking dikoreksi pada 27 September 2026: validator dan
   dua jalur `POST /sesibooking` di `payload.md`, serta bentuk respons
   daftar di `endpoint.md` bagian 3.3. Route sesi booking per id tidak
@@ -148,14 +153,19 @@ buat, dan edit untuk aset, tarif, dan tipe aset, beserta
   sampai 59). Calon temuan yang belum dibuktikan: keberadaan tipe aset
   tidak diperiksa saat aset dibuat, dan `voidPenjualan` tidak terpakai.
 - Keputusan pemilik proyek untuk modul ini ada di `keputusan.md` (Modul
-  reservasi, R1a sampai R5a, serta T1a sampai T4a untuk tarif).
+  reservasi, R1a sampai R8b, serta T1a sampai T4a untuk tarif).
 
 Langkah berikutnya: spec pembanding buat reservasi terhadap kode lama
 dengan fixture booking yang sudah ada (`tests/helpers/reservasi-uji.ts`),
-lalu migrasinya ke `features/`. Langkah pertama sesi berikutnya adalah
-pemetaan halaman buat reservasi:
-`grep -nE 'apiClient|: any|_id|queryKey'
-app/dashboard/outlet/reservasi/buatReservasi/page.tsx`.
+ditambah fixture aset uji berstatus perbaikan serta diskon item dan diskon
+global uji (keputusan R7b), lalu migrasinya ke `features/` dengan
+`PilihTanggal` dan `InputWaktu`. Pemetaan halaman sudah diambil (28
+September 2026): pelanggan lewat combobox "Ketik untuk mencari
+pelanggan...", aset lewat Select "Pilih aset yang tersedia", tanggal lewat
+kalender kostum (R8b), jam dan menit lewat dua isian `placeholder="00"`,
+durasi "1 jam" sampai "8 jam", pesan bentrok "Aset ini sedang dipesan
+dari", dan tombol "Proses & Buat Tagihan" yang menjadi "Waktu Terpakai"
+saat bentrok.
 
 ## Catatan dari modul inventaris
 
@@ -201,8 +211,9 @@ Yang masih berlaku:
   `bahanBakuService.update` di backend `9cd1439` (baris 124 sampai 140)
   hanya menjalankan `$set` atas body. Telusuri route dan controller-nya
   sebelum kontrak dikoreksi.
-- `components/calendar.tsx` (240 baris, 2 `any`) belum dibereskan; periksa
-  pemakainya sebelum modul yang memakainya dimigrasikan.
+- `components/calendar.tsx` (240 baris) adalah kalender kostum standar
+  sejak `e43e000` (keputusan rancangan butir 22) dan dipakai lewat
+  `PilihTanggal`; kedua `any`-nya belum dibereskan.
 - `app/dashboard/outlet/inventaris/components/` berisi
   `bahanBakuCombobox.tsx` (dipakai `features/produk/form-produk.tsx`, lihat
   utang modul produk) dan `inventaris-nav-tabs.tsx`.
@@ -283,7 +294,7 @@ Yang masih berlaku:
   dihapus di commit migrasi modul pemiliknya. Sisanya dihitung dengan
   `grep -rhoE 'export interface [A-Za-z]+Lama\b' types | wc -l` (8 per
   `f33ffa6`).
-- `features/penjualan/halaman-buat-penjualan.tsx` masih 1.127 baris:
+- `features/penjualan/halaman-buat-penjualan.tsx` masih 1.088 baris:
   migrasi memindahkan lapisan data dan membuang `any`, tetapi tidak memecah
   komponennya. Pisahkan pemilih pelanggan, pemilih diskon, dan pratinjau
   total saat halaman itu disentuh lagi.
@@ -295,6 +306,9 @@ Yang masih berlaku:
 - Tiga `test.fixme` di spec alur penjualan menunggu backend: dua untuk
   cache daftar jurnal (`kontrak/temuan.md` butir 46) dan satu untuk stok
   produk (butir 37).
+- Filter tanggal daftar penjualan tidak dapat dikosongkan langsung,
+  karena `PilihTanggal` tidak punya tombol kosongkan; filter dikosongkan
+  lewat reset filter.
 
 ### Utang kecil dari modul reservasi
 
@@ -305,6 +319,9 @@ Yang masih berlaku:
 - Halaman buat dan edit tarif masih berbeda tampilan: `<select>` bawaan
   dan harga polos di buat, Radix Select dan harga berformat ribuan di
   edit. Penyatuan ke satu form ditunda (keputusan T1a).
+- Form shift (`components/shift/shift-form-dialog.tsx`) dan form jadwal
+  masih menulis input jam dan tanggal sendiri; diganti `InputWaktu` dan
+  `PilihTanggal` bersama modul jadwal (keputusan K-TW3a).
 
 ### Utang kecil dari penyesuaian backend `f27f093`
 

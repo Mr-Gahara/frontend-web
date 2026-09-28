@@ -974,6 +974,29 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Deteksi hidrasi memakai `useSyncExternalStore`**, dengan snapshot
   server false dan klien true, bukan `setState` di effect yang ditolak
   `react-hooks/set-state-in-effect` (daftar reservasi, `eef371a`).
+- **`awk` tidak mengenal `\b` sebagai batas kata**; di `awk`, `\b` adalah
+  karakter backspace. Pola `<(Button|...)\b` saat memetakan buat reservasi
+  tidak menangkap satu tag pun. Pakai `grep -E` untuk pola berbatas kata,
+  atau `awk` dengan pola tanpa `\b`.
+- **Aturan ESLint yang sama di flat config ditimpa blok berikutnya** untuk
+  berkas yang sama, bukan digabung. Larangan impor kalender shadcn
+  digabung ke `no-restricted-imports` yang sudah memuat larangan
+  `__tests__` (`e43e000`).
+- **Berkas yang sudah dihapus dengan `git rm` tidak disebut lagi di
+  `git add`.** Satu path yang tidak ada menggagalkan seluruh perintah,
+  sehingga tidak ada yang ter-stage dan commit berikutnya di rangkaian
+  `&&` tidak berjalan (commit `e43e000` sempat tertahan).
+- **Komponen yang membungkus nilai form mempertahankan bentuk nilai mentah
+  form itu.** Tarif menyimpan jam sebagai teks "HH:mm" yang divalidasi
+  skema; membungkus `InputWaktu` dengan `keTeksWaktu`, yang mengembalikan
+  string kosong untuk waktu belum lengkap, akan menghapus angka yang baru
+  diketik. `pisahTeksWaktu` dan `gabungTeksWaktu` menyimpan isian apa
+  adanya.
+- **Akibat bug dibuktikan dengan menjalankan baris yang dicurigai**
+  sebelum diperbaiki. Dua baris `setHours` dan `toISOString` dari
+  `susunPayloadPenjualan` dijalankan lewat `node -e` dan membuktikan jam
+  "99" menggeser transaksi empat hari serta jam "ab" melempar
+  `RangeError`.
 
 ## Kapan berhenti dan bertanya
 

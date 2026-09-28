@@ -85,8 +85,8 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
 di spec login, satu di spec tipe aset).
 
-**Baseline per daftar reservasi** (commit `eef371a`): 210 test unit dan
-integrasi lolos di 31 berkas, 251 e2e lolos, 20 skipped:
+**Baseline per komponen tanggal dan waktu** (commit `e43e000`): 237 test
+unit dan integrasi lolos di 34 berkas, 253 e2e lolos, 20 skipped:
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
 backend, sebelas `test.fixme` lain yang menunggu backend (tiga di spec
 alur penjualan, tiga di spec master data reservasi, dan satu di spec
@@ -99,7 +99,8 @@ menambah 4 dan 3 test unit dari 186 di 27 berkas, tanpa mengubah
 angka e2e. Migrasi tarif (`365553f`) menambah 10 test unit dan 4
 skenario e2e di spec tarif. Spec daftar reservasi (`27749fe`) menambah 6
 skenario lolos dan satu fixme, dan migrasinya (`eef371a`) menambah 7 test
-unit dan satu skenario.
+unit dan satu skenario. Komponen tanggal dan waktu (`e43e000`) menambah
+27 test unit dan integrasi serta dua skenario e2e penjualan.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -577,3 +578,11 @@ Urutan debug kegagalan e2e di atas).
   R2c), booking yang dibaca helper dari daftar tanpa tanggal agar kunci
   cache yang dibaca halaman tidak terisi, harapan dari respons yang dibaca
   halaman itu sendiri, dan tautan yang diperiksa lewat `href` lalu dibuka.
+- `tests/e2e/penjualan/waktu-penjualan.spec.ts`: input dipilih lewat nama
+  aksesibel komponen (`Jam Transaksi (jam)`, tombol `Tanggal Transaksi,
+  <tanggal>`), kalender kostum diuji di browser sungguhan (navigasi bulan,
+  memilih tanggal, dan popover tertutup), dan harapan tanggal dibandingkan
+  dengan payload nyata.
+- `tests/integration/components/waktu/`: perilaku mengetik `InputWaktu`
+  lewat `user-event`, dan `PilihTanggal` di jsdom dengan stub
+  `ResizeObserver`, yang dibutuhkan popover Radix.

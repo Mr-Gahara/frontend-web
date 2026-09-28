@@ -386,6 +386,37 @@ keputusan rancangan butir 17 dan 21.
 - **R5a: booking Batal tidak ditampilkan di timeline daftar reservasi**
   (`eef371a`), karena slotnya sudah dilepas; backend tetap mengirimnya,
   karena daftar tidak disaring menurut status.
+- **R6a: pemeriksaan bentrok di form buat reservasi hanya menghitung
+  booking Aktif** (28 September 2026), sejalan dengan `checkConflict`
+  backend; sebelumnya booking Selesai ikut dihitung. Diterapkan saat buat
+  reservasi dimigrasikan.
+- **R7b: diskon di buat reservasi memakai `features/diskon`**, dengan
+  aturan `bisaDigabung` sebagai fungsi murni, serta fixture diskon item dan
+  diskon global uji di spec e2e.
+- **R8b: spec buat reservasi memilih tanggal lewat kalender kostum**,
+  sekaligus menguji fungsinya.
+
+### Komponen tanggal dan waktu
+
+Diputuskan pemilik proyek pada 28 September 2026 (`e43e000`).
+
+- **K-TW1a: `PilihTanggal` dan `InputWaktu` menjadi komponen bersama**,
+  dengan aturan murni di `lib/waktu.ts` (keputusan rancangan butir 22).
+- **K-TW4a: hanya angka yang diterima, dan ketikan yang membuat jam
+  melebihi 23 atau menit melebihi 59 ditolak**; isian tetap berisi nilai
+  sah terakhir.
+- **K-TW5a: isian jam kosong dibiarkan kosong dan ditolak halaman saat
+  simpan.** Di buat penjualan, jam yang dikosongkan tidak lagi menjadi
+  00.00; di tarif, kedua isian kosong tetap ditolak skema seperti
+  sebelumnya.
+- **K-TW2a: kalender shadcn murni dihapus, dan pemakaiannya ditolak
+  ESLint**, begitu pula input `type` date, time, datetime-local, month, dan
+  week di JSX.
+- **K-TW3a: diterapkan lebih dulu di buat penjualan, filter daftar
+  penjualan, dan tarif**; buat reservasi saat dimigrasikan, serta form
+  shift dan jadwal bersama modul jadwal.
+- **Filter tanggal daftar penjualan dikosongkan lewat reset filter**,
+  karena `PilihTanggal` tidak punya tombol kosongkan.
 
 ## Keputusan rancangan yang mengikat
 
@@ -499,3 +530,13 @@ keputusan rancangan butir 17 dan 21.
     membuktikan logika dan alur berjalan benar di frontend dan backend
     (pemilik proyek, 26 September 2026). Contoh:
     `tests/e2e/auth/login.spec.ts` (`5a3deea`).
+22. **Seluruh input tanggal dan waktu memakai komponen kostum.** Tanggal
+    memakai `PilihTanggal` (`components/pilih-tanggal.tsx`) dengan kalender
+    kostum `components/calendar.tsx`, turunan kalender shadcn dengan
+    tampilan proyek; jam dan menit memakai `InputWaktu`
+    (`components/input-waktu.tsx`), dengan aturan di `lib/waktu.ts`.
+    Kalender shadcn murni sudah dihapus, dan ESLint menolak impornya serta
+    input tanggal atau waktu bawaan browser di JSX. Halaman lama yang
+    masih menulis input jam sendiri (buat reservasi dan form shift)
+    diganti saat modulnya dimigrasikan (pemilik proyek, 28 September 2026,
+    `e43e000`).
