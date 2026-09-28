@@ -1,18 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Landmark, Wallet, Banknote } from "lucide-react";
 
 // Form & Validation
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 
-import { apiClient } from "@/lib/apiClient";
-import { queryKeys } from "@/lib/queryKeys";
+import { pesanError } from "@/lib/api/error";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
+import { useBuatAkunKas } from "@/features/akun-kas/hooks";
+import { skemaAkunKas, type KeluaranAkunKas, type MasukanAkunKas } from "@/features/akun-kas/schema";
 import { AkunKasRequest } from "@/types/akunKas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,27 +24,10 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-// --- ZOD SCHEMA ---
-const akunKasSchema = z.object({
-  tipeAkun: z.enum(["Kas Fisik", "Rekening Bank"], {
-    message: "Tipe akun wajib dipilih.", // <-- PERBAIKAN 1: Menggunakan 'message'
-  }),
-  namaAkun: z.string().min(1, "Nama Akun wajib diisi."),
-  nomorAkun: z.string().min(1, "Nomor Akun wajib diisi."),
-  keterangan: z.string().optional(),
-  saldo: z.coerce.number().min(0, "Saldo tidak boleh negatif.").default(0),
-  status: z.enum(["aktif", "non-aktif"]).default("aktif"),
-});
-
-// Memisahkan tipe Input (sebelum validasi) dan Output (sesudah validasi)
-type AkunKasFormInput = z.input<typeof akunKasSchema>;
-type AkunKasFormOutput = z.output<typeof akunKasSchema>;
-
 // Page
 export default function BuatAkunKasPage() {
   useAuthGuard();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   // --- REACT HOOK FORM ---
   const {
@@ -53,9 +35,8 @@ export default function BuatAkunKasPage() {
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<AkunKasFormInput, any, AkunKasFormOutput>({
-    // <-- PERBAIKAN 2: Menginjeksikan tipe Input dan Output secara eksplisit
-    resolver: zodResolver(akunKasSchema),
+  } = useForm<MasukanAkunKas, unknown, KeluaranAkunKas>({
+    resolver: zodResolver(skemaAkunKas),
     defaultValues: {
       tipeAkun: "Kas Fisik",
       namaAkun: "",
@@ -71,26 +52,22 @@ export default function BuatAkunKasPage() {
   const TipeIcon = watchedTipeAkun === "Rekening Bank" ? Landmark : Wallet;
 
   // --- MUTATION ---
-  const createMutation = useMutation<any, Error, AkunKasRequest>({
-    mutationFn: async (data: AkunKasRequest) => {
-      return await apiClient.post("/akunkas", data, undefined, "pengguna");
-    },
+  const createMutation = useBuatAkunKas({
     onSuccess: () => {
       toast.success("Berhasil", {
         description: "Akun Kas baru telah ditambahkan.",
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.akunKas.semua });
       router.push("/dashboard/outlet/keuangan/akunkas");
     },
-    onError: (err: any) => {
+    onError: (err) => {
       toast.error("Gagal Menyimpan", {
-        description: err.message || "Gagal menyimpan akun kas.",
+        description: pesanError(err, "Gagal menyimpan akun kas."),
       });
     },
   });
 
   // --- HANDLER SUBMIT ---
-  const onSubmit = (data: AkunKasFormOutput) => {
+  const onSubmit = (data: KeluaranAkunKas) => {
     const payload: AkunKasRequest = {
       ...data,
       // Hapus keterangan jika hanya string kosong

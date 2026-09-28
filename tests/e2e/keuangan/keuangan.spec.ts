@@ -1,20 +1,21 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, type Response } from "@playwright/test";
 import { JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { cocok, hapusLewatApi, pantauPermintaan, unik } from "../../helpers/reservasi-uji";
+import { persentasePertumbuhan, teksPertumbuhan } from "../../../features/laporan/periode";
 
 /*
- * Spec pembanding modul keuangan, ditulis dan dijalankan terhadap kode lama
- * sebelum migrasi (pola keputusan R1a). Akun kas uji dibuat lewat UI dengan
- * nama unik, dibaca ulang lewat API, lalu dihapus lewat API di finally
- * (keputusan KU4a). Respons sukses tidak dipalsukan (keputusan rancangan
- * butir 21). Mutasi arus kas (KU1a), kegagalan kartu ringkasan (KU2a), dan
- * persentase pertumbuhan laba tidak diuji di sini, karena perilakunya
- * berubah saat migrasi.
+ * Spec modul keuangan. Bagian pembandingnya ditulis dan dijalankan terhadap
+ * kode lama sebelum migrasi (pola keputusan R1a). Akun kas uji dibuat lewat
+ * UI dengan nama unik, dibaca ulang lewat API, lalu dihapus lewat API di
+ * finally (keputusan KU4a). Respons sukses tidak dipalsukan (keputusan
+ * rancangan butir 21). Skenario KU1a, KU2a, KU5a, KU6a, dan KU7a ditambahkan
+ * saat migrasi.
  */
 
 const URL_AKUN = "/dashboard/outlet/keuangan/akunkas";
 const URL_BUAT_AKUN = "/dashboard/outlet/keuangan/akunkas/buatAkunKas";
 const URL_LABA_RUGI = "/dashboard/outlet/keuangan/ringkasanLabaRugi";
+const URL_MUTASI = "/dashboard/outlet/keuangan/mutasiArusKas";
 const POLA_AKUN = /\/api\/akunkas(\?|$)/i;
 const POLA_LABA_RUGI = /\/api\/laporan\/laba-rugi(\?|$)/i;
 
@@ -53,6 +54,20 @@ const nilaiKartuRingkasan = (page: Page, judul: string) =>
     .filter({ has: page.locator("h3") })
     .last()
     .locator("h3");
+
+/**
+ * Respons laba rugi untuk satu periode. Sejak KU5a halaman meminta periode
+ * berjalan dan periode sebelumnya sekaligus; keduanya dibedakan lewat
+ * endDate: periode berjalan berakhir di akhir hari ini, pembandingnya
+ * sebelum sekarang.
+ */
+const responsLabaRugi = (periode: string, kini: boolean) => (r: Response) => {
+  if (r.request().method() !== "GET" || !POLA_LABA_RUGI.test(r.url())) return false;
+  const url = new URL(r.url());
+  if (url.searchParams.get("periode") !== periode) return false;
+  const akhir = new Date(url.searchParams.get("endDate") ?? "").getTime();
+  return akhir >= Date.now() === kini;
+};
 
 async function isiFormAkunValid(page: Page, nama: string) {
   await page.getByRole("combobox").filter({ hasText: "Kas Fisik" }).click();
@@ -150,9 +165,7 @@ test.describe("E2E — Keuangan", () => {
       ["Harian", "harian", "Laba Hari Ini"],
       ["Mingguan", "mingguan", "Laba Minggu Ini"],
     ] as const) {
-      const tRes = page.waitForResponse(
-        (r) => r.request().method() === "GET" && POLA_LABA_RUGI.test(r.url()) && r.url().includes("periode=" + periode),
-      );
+      const tRes = page.waitForResponse(responsLabaRugi(periode, true));
       await page.getByRole("button", { name: tombol, exact: true }).click();
       const res = await tRes;
       const url = new URL(res.url());
@@ -188,5 +201,83 @@ test.describe("E2E — Keuangan", () => {
     for (const [judul, nilai] of harapan) {
       await expect(nilaiKartuRingkasan(page, judul), judul).toHaveText(rupiah(nilai));
     }
+  });
+
+  test("daftar akun kas gagal dimuat: pesan tampil, bukan keadaan kosong, dan saldo kas total '-' (KU6a, KU2a)", async ({
+    page,
+  }) => {
+    await page.route(POLA_AKUN, (route) =>
+      route.request().method() === "GET" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
+    );
+    await page.goto(URL_AKUN);
+    await expect(page.getByText("Gagal memuat daftar akun kas")).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText("Belum ada Akun Kas")).toHaveCount(0);
+    await expect(nilaiKartuRingkasan(page, "Saldo Kas Total")).toHaveText("-");
+    await page.unroute(POLA_AKUN);
+  });
+
+  test("kartu ringkasan laba rugi gagal dimuat: '-' dan keterangan, bukan Rp0 (KU2a)", async ({ page }) => {
+    await page.route(POLA_LABA_RUGI, (route) =>
+      route.request().method() === "GET" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
+    );
+    const tAkun = page.waitForResponse(cocok("GET", POLA_AKUN));
+    await page.goto(URL_AKUN, { waitUntil: "commit" });
+    const akun = daftarDari<AkunKasUji>(await (await tAkun).json());
+    for (const judul of ["Total Omzet Bulan Ini", "Total Pengeluaran", "Laba Bersih"]) {
+      await expect(nilaiKartuRingkasan(page, judul), judul).toHaveText("-", { timeout: 20000 });
+    }
+    await expect(page.getByText("Gagal memuat data", { exact: true })).toHaveCount(3);
+    await expect(nilaiKartuRingkasan(page, "Saldo Kas Total")).toHaveText(rupiah(jumlah(akun, (x) => x.saldo)));
+    await page.unroute(POLA_LABA_RUGI);
+  });
+
+  test("buat akun kas: nama dan nomor berisi spasi saja ditolak tanpa mengirim permintaan (KU7a)", async ({ page }) => {
+    await page.goto(URL_BUAT_AKUN);
+    const kirim = pantauPermintaan(page, "POST", POLA_AKUN);
+    await page.locator('input[name="namaAkun"]').fill("   ");
+    await page.locator('input[name="nomorAkun"]').fill("  ");
+    await page.getByRole("button", { name: "Simpan Akun Kas" }).click();
+    await expect(page.getByText("Nama Akun wajib diisi.")).toBeVisible();
+    await expect(page.getByText("Nomor Akun wajib diisi.")).toBeVisible();
+    expect(kirim.jumlah(), "isian spasi saja tidak mengirim POST").toBe(0);
+    kirim.lepas();
+  });
+
+  test("laba rugi: pertumbuhan dihitung dari periode sebelumnya yang diminta bersamaan (KU5a)", async ({ page }) => {
+    await page.goto(URL_LABA_RUGI);
+    await expect(page.getByText("Laba Bulan Ini")).toBeVisible();
+    const tKini = page.waitForResponse(responsLabaRugi("harian", true));
+    const tLalu = page.waitForResponse(responsLabaRugi("harian", false));
+    await page.getByRole("button", { name: "Harian", exact: true }).click();
+    const [resKini, resLalu] = await Promise.all([tKini, tLalu]);
+    const lalu = new URL(resLalu.url());
+    const kemarin = new Date();
+    kemarin.setDate(kemarin.getDate() - 1);
+    const mulaiLalu = new Date(lalu.searchParams.get("startDate") ?? "");
+    const akhirLalu = new Date(lalu.searchParams.get("endDate") ?? "");
+    expect([mulaiLalu.getDate(), mulaiLalu.getHours(), mulaiLalu.getMinutes()], "awal pembanding").toEqual([
+      kemarin.getDate(),
+      0,
+      0,
+    ]);
+    expect([akhirLalu.getDate(), akhirLalu.getHours(), akhirLalu.getMinutes()], "akhir pembanding").toEqual([
+      kemarin.getDate(),
+      23,
+      59,
+    ]);
+    const totalKini = jumlah(daftarDari<BarisLabaRugi>(await resKini.json()), (x) => x.totalLabaBersih);
+    const totalLalu = jumlah(daftarDari<BarisLabaRugi>(await resLalu.json()), (x) => x.totalLabaBersih);
+    const harapan = teksPertumbuhan(persentasePertumbuhan(totalKini, totalLalu));
+    await expect(
+      page.getByText("vs periode sebelumnya").locator("xpath=preceding-sibling::span[1]"),
+      "badge pertumbuhan",
+    ).toHaveText(harapan);
+  });
+
+  test("mutasi arus kas menampilkan keterangan belum tersedia tanpa data tiruan (KU1a)", async ({ page }) => {
+    await page.goto(URL_MUTASI);
+    await expect(page.getByText("Mutasi arus kas belum tersedia")).toBeVisible();
+    await expect(page.getByText("Setoran harian Outlet A")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Download CSV" })).toHaveCount(0);
   });
 });

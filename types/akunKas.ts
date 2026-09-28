@@ -24,8 +24,8 @@ export interface AkunKas {
 /**
  * Bentuk mentah untuk halaman yang belum dimigrasikan dan masih membaca
  * respons lewat lib/apiClient.ts. Dihapus bersama AkunKasRefLama saat modul
- * keuangan dan metode pembayaran dimigrasikan (keputusan K8, modul
- * penjualan).
+ * metode pembayaran dimigrasikan; modul keuangan tidak lagi memakainya
+ * (keputusan K8a, modul penjualan).
  */
 export interface AkunKasLama {
   _id: string;

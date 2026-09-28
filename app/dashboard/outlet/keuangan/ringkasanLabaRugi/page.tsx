@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { LineChart as LineChartIcon, AlertTriangle } from "lucide-react";
 import {
   LineChart,
@@ -13,14 +12,20 @@ import {
   CartesianGrid,
 } from "recharts";
 
-import { apiClient } from "@/lib/apiClient";
-import { queryKeys } from "@/lib/queryKeys";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LaporanLabaRugiData } from "@/types/laporan";
+import { useLabaRugi } from "@/features/laporan/hooks";
+import {
+  jumlahkan,
+  persentasePertumbuhan,
+  rentangPeriode,
+  rentangPeriodeSebelumnya,
+  teksPertumbuhan,
+  type PeriodeLaporan,
+} from "@/features/laporan/periode";
 
 // Types
-type FilterPeriode = "harian" | "mingguan" | "bulanan";
+type FilterPeriode = PeriodeLaporan;
 
 type DataPoint = {
   label: string;
@@ -37,13 +42,23 @@ function formatRupiah(value: number): string {
 }
 
 // Custom Tooltip
-function CustomTooltip({ active, payload, label }: any) {
+/**
+ * Props yang dibaca dari recharts. value diketik unknown karena recharts
+ * mengizinkan angka, teks, atau array; yang ditampilkan selalu angka laba.
+ */
+type PropsTooltip = {
+  active?: boolean;
+  payload?: { value?: unknown }[];
+  label?: string | number;
+};
+
+function CustomTooltip({ active, payload, label }: PropsTooltip) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg px-3 py-2 text-[#0A2947] text-xs shadow-lg">
       <p className="text-[#0A2947]/70 font-medium mb-1">{label}</p>
       <p className="font-bold text-[#718355]">
-        {formatRupiah(payload[0].value)}
+        {formatRupiah(Number(payload[0].value) || 0)}
       </p>
     </div>
   );
@@ -80,77 +95,33 @@ export default function RingkasanLabaRugiPage() {
   useAuthGuard();
   const [periode, setPeriode] = useState<FilterPeriode>("bulanan");
 
-  // --- KALKULATOR TANGGAL ABSOLUT ---
-  const { start, end } = useMemo(() => {
-    const now = new Date();
-    let startDate = new Date();
-    let endDate = new Date();
+  // Rentang periode berjalan dan pembandingnya (keputusan KU5a).
+  const rentang = useMemo(() => rentangPeriode(periode), [periode]);
+  const rentangSebelumnya = useMemo(() => rentangPeriodeSebelumnya(periode), [periode]);
 
-    if (periode === "harian") {
-      // Hanya hari ini dari jam 00:00 - 23:59
-      startDate.setHours(0, 0, 0, 0);
-    } else if (periode === "mingguan") {
-      // Hari Senin minggu ini
-      const dayOfWeek = now.getDay() === 0 ? 7 : now.getDay();
-      startDate.setDate(now.getDate() - dayOfWeek + 1);
-      startDate.setHours(0, 0, 0, 0);
-    } else if (periode === "bulanan") {
-      // Tanggal 1 bulan ini
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    }
+  const { data: laporanList = [], isLoading, isError } = useLabaRugi(rentang);
+  const { data: laporanSebelumnya } = useLabaRugi(rentangSebelumnya);
 
-    endDate.setHours(23, 59, 59, 999);
-
-    return { start: startDate.toISOString(), end: endDate.toISOString() };
-  }, [periode]);
-
-  // --- FETCH DATA REAL DARI BACKEND ---
-  const {
-    data: laporanList = [],
-    isLoading,
-    isError,
-  } = useQuery({
-    // Tambahkan start & end ke queryKey agar cache browser tidak tertukar
-    queryKey: [...queryKeys.laporan.labaRugi({ periode }), start, end],
-    queryFn: async (): Promise<LaporanLabaRugiData[]> => {
-      // Suntikkan tanggal ke URL Backend
-      const res = await apiClient.get<any>(
-        `/laporan/laba-rugi?periode=${periode}&startDate=${start}&endDate=${end}`,
-        undefined,
-        "pengguna",
-      );
-      const fetched = res.data?.data || res.data || [];
-      return Array.isArray(fetched) ? fetched : [];
-    },
-  });
-
-  // --- DATA PROCESSING (Murni dari Backend) ---
-  const { chartData, totalNilai, persentaseNaikTurun } = useMemo(() => {
-    // BENTENG PERTAHANAN: Paksa data menjadi Array apa pun isi cache dari React Query
-    const safeLaporanList = Array.isArray(laporanList) ? laporanList : [];
-
-    // 1. Mapping langsung dari backend ke format grafik Recharts
-    const processedData: DataPoint[] = safeLaporanList.map((item) => ({
-      label: item?.tanggal || "-", // Fallback aman jika item kosong
-      nilai: item?.totalLabaBersih || 0,
+  const { chartData, totalNilai, pertumbuhan, persentaseNaikTurun } = useMemo(() => {
+    const processedData: DataPoint[] = laporanList.map((item) => ({
+      label: item.tanggal || "-",
+      nilai: item.totalLabaBersih || 0,
     }));
 
-    // 2. Hitung grand total Laba Bersih
-    const currentTotal = safeLaporanList.reduce(
-      (sum, item) => sum + (item?.totalLabaBersih || 0),
-      0,
-    );
+    const currentTotal = jumlahkan(laporanList, "totalLabaBersih");
 
-    // Simulasi statis perhitungan persentase (biarkan untuk UI sementara)
-    const randPertumbuhan = (Math.random() * 15 + 5).toFixed(2);
-    const persentase = currentTotal > 0 ? `↑ ${randPertumbuhan}%` : "0%";
+    // Tanpa data pembanding (memuat, gagal, atau laba sebelumnya 0) badge menampilkan "-".
+    const pertumbuhan = laporanSebelumnya
+      ? persentasePertumbuhan(currentTotal, jumlahkan(laporanSebelumnya, "totalLabaBersih"))
+      : null;
 
     return {
       chartData: processedData,
       totalNilai: currentTotal,
-      persentaseNaikTurun: persentase,
+      pertumbuhan,
+      persentaseNaikTurun: teksPertumbuhan(pertumbuhan),
     };
-  }, [laporanList]);
+  }, [laporanList, laporanSebelumnya]);
 
   const labelPeriode = {
     harian: "Laba Hari Ini",
@@ -220,9 +191,11 @@ export default function RingkasanLabaRugiPage() {
               <div className="flex items-center gap-1 mt-1">
                 <span
                   className={
-                    totalNilai > 0
-                      ? "text-xs text-[#718355] font-bold"
-                      : "text-xs text-rose-500 font-bold"
+                    pertumbuhan === null || pertumbuhan === 0
+                      ? "text-xs text-[#0A2947]/60 font-bold"
+                      : pertumbuhan > 0
+                        ? "text-xs text-[#718355] font-bold"
+                        : "text-xs text-rose-500 font-bold"
                   }
                 >
                   {persentaseNaikTurun}

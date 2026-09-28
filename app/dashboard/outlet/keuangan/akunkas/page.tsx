@@ -2,16 +2,13 @@
 
 import React from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftRight, Download, Landmark, Plus, Wallet } from "lucide-react";
+import { ArrowLeftRight, Landmark, Plus, Wallet } from "lucide-react";
 
-import { apiClient } from "@/lib/apiClient";
-import { queryKeys } from "@/lib/queryKeys";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AkunKasLama as AkunKas } from "@/types/akunKas";
+import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
 
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
@@ -44,21 +41,7 @@ function AkunKasCardSkeleton() {
 export default function AkunKasPage() {
   useAuthGuard();
 
-  const { data: akunKasList = [], isLoading } = useQuery({
-    queryKey: queryKeys.akunKas.semua,
-    queryFn: async (): Promise<AkunKas[]> => {
-      const res = await apiClient.get<{ data: AkunKas[] } | AkunKas[]>(
-        "/akunkas",
-        undefined,
-        "pengguna"
-      );
-
-      if (Array.isArray(res)) return res;
-      if (res && "data" in res && Array.isArray(res.data)) return res.data;
-
-      return [];
-    },
-  });
+  const { data: akunKasList = [], isLoading, isError } = useDaftarAkunKas();
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8 w-full">
@@ -115,6 +98,15 @@ export default function AkunKasPage() {
             <AkunKasCardSkeleton />
             <AkunKasCardSkeleton />
           </>
+        ) : isError ? (
+          <div className="col-span-full rounded-2xl border border-dashed border-rose-300 bg-[#F2EAE1] p-12 sm:p-16 text-center">
+            <p className="text-base font-bold text-rose-600 mb-1">
+              Gagal memuat daftar akun kas
+            </p>
+            <p className="text-sm font-medium text-[#0A2947]/60 max-w-md mx-auto">
+              Periksa koneksi lalu muat ulang halaman.
+            </p>
+          </div>
         ) : akunKasList.length === 0 ? (
           <div className="col-span-full rounded-2xl border border-dashed border-[#0A2947]/20 bg-[#F2EAE1] p-12 sm:p-16 text-center shadow-sm">
             <Wallet className="w-10 h-10 text-[#D4A373] mx-auto mb-4" />
@@ -127,13 +119,13 @@ export default function AkunKasPage() {
             </p>
           </div>
         ) : (
-          akunKasList.map((akun, index) => {
+          akunKasList.map((akun) => {
             const Icon = akun.tipeAkun === "Rekening Bank" ? Landmark : Wallet;
             const isAktif = akun.status === "aktif";
 
             return (
               <div
-                key={akun._id || `akunkas-fallback-${index}`}
+                key={akun.id}
                 className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-5 sm:p-6 flex flex-col justify-between min-h-45 shadow-sm hover:border-[#0A2947]/30 transition-colors"
               >
                 <div>
