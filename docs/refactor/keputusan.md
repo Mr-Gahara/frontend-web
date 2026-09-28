@@ -52,6 +52,17 @@ sama (submodul pengajuan stok, di bawah).
 - **Stok outlet dan stok gudang tidak boleh tercampur** di tampilan mana
   pun. Stock adjustment di ruang outlet hanya lokasi Outlet sejak
   `a5e9cec`, dan ruang gudang hanya lokasi Gudang sejak `247cf2d`.
+- **Onboarding dilakukan klien sendiri** (28 September 2026). Klien
+  mendaftar lewat `POST /akun/auth/register` (publik; menghasilkan akun
+  `client` tanpa tenant dengan masa percobaan), lalu men-setup tenant,
+  owner pengguna, dan lokasi sendiri lewat aplikasi. Petugas lapangan
+  bersifat opsional: bila klien kesulitan, petugas datang ke toko dan
+  membantu dengan login ke akun klien itu. Admin platform hanya membuat
+  akun klien dan mengelola langganan (`/akun/admin/*`), tidak men-setup
+  tenant. Setup tenant (`POST /tenant`, `tenantService.createWithOwner`)
+  selalu untuk akun pemanggilnya, dan membuat role Owner berizin penuh,
+  akun kas "Kas Kecil (Laci)" `CASH-001`, serta metode pembayaran
+  "Tunai".
 
 ### Fase 0
 
@@ -425,6 +436,27 @@ Diputuskan pemilik proyek pada 28 September 2026 (`e43e000`).
   form shift dan jadwal bersama modul jadwal.
 - **Filter tanggal daftar penjualan dikosongkan lewat reset filter**,
   karena `PilihTanggal` tidak punya tombol kosongkan.
+
+### Modul keuangan
+
+Diputuskan pemilik proyek pada 28 September 2026.
+
+- **KU1a: halaman mutasi arus kas tidak lagi menampilkan data tiruan.**
+  Tab dan rutenya tetap, dengan keterangan bahwa fitur belum tersedia,
+  karena backend belum punya model maupun route mutasi kas. Kebutuhan
+  endpoint-nya disampaikan ke tim backend (`kontrak/temuan.md` butir 61).
+- **KU2a: kartu ringkasan yang gagal memuat menampilkan `-`** beserta
+  keterangan singkat, bukan Rp0 (keputusan rancangan butir 11).
+- **KU3a: skema buat akun kas mempertahankan `z.coerce`** dengan tipe
+  masukan dan keluaran eksplisit, seperti T2a; `.default()` dibuang
+  karena nilai awal sudah ada di `defaultValues`.
+- **KU4a: spec buat akun kas membuat akun uji sungguhan** bernama unik
+  per run, lalu menghapusnya lewat `DELETE /akunkas/:id` di `finally`
+  (`0cfb3bd`).
+- **KU5a: persentase pertumbuhan laba dihitung dari laba periode
+  sebelumnya** lewat endpoint yang sama dengan rentang mundur satu
+  periode, dan `-` bila laba periode sebelumnya 0. Sebelumnya persentase
+  itu dihitung dengan `Math.random()`.
 
 ## Keputusan rancangan yang mengikat
 

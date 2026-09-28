@@ -64,7 +64,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Reservasi: daftar reservasi | `27749fe` (spec), `eef371a` | Selesai |
 | Komponen tanggal dan waktu (lintas modul) | `e43e000` | Selesai |
 | Reservasi: buat reservasi | `652d669` (spec), `477f258` | Selesai |
-| Keuangan | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Keuangan | `0cfb3bd` (spec) | **Berikutnya** (lihat Pekerjaan berikutnya) |
 | Jadwal dan shift | - | Belum |
 | Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), termasuk stock adjustment (`247cf2d`); `gudang/layout.tsx` dan `gudang/setup` masih memakai `apiClient`, dan layout memeriksa nama role Owner (baris 32, keputusan rancangan butir 2); pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
 
@@ -103,26 +103,40 @@ Pemetaan awal (28 September 2026):
 | `app/dashboard/outlet/keuangan/mutasiArusKas/page.tsx` | 298 | 0 | 0 | 12 | 0 |
 | `app/dashboard/outlet/keuangan/ringkasanLabaRugi/page.tsx` | 294 | 2 | 2 | 0 | 3 |
 
-- Endpoint dan sumber data setiap halaman belum dipetakan. Pencarian
-  pertama tidak menangkap pemanggilan apa pun, karena polanya hanya
-  mengenali `apiClient` bergenerik dengan path dalam kutip. Menurut kolom
-  "Dipakai di" `kontrak/endpoint.md`, `GET /akunkas` dipanggil lima
-  berkas halaman lama, `POST /akunkas` satu, dan `GET /laporan/laba-rugi`
-  dua. Mutasi arus kas tidak memanggil `apiClient`, tetapi memuat 12
-  kemunculan `_id`.
+- Sumber data (dipetakan 28 September 2026): daftar akun kas dan kartu
+  Saldo Kas Total memanggil `GET /akunkas`, buat akun kas `POST /akunkas`,
+  dan ringkasan laba rugi serta tiga kartu laba memanggil
+  `GET /laporan/laba-rugi` dengan query `periode` (harian, mingguan, atau
+  bulanan), `startDate`, dan `endDate`. Kartu ringkasan dipasang di
+  `layout.tsx`, sehingga tampil di setiap halaman keuangan. Daftar akun
+  kas dan kartu ringkasan menyimpan data di bawah kunci akar
+  `akunKas.semua` (keputusan rancangan butir 3), dan kunci laba rugi
+  menambahkan `startDate` dan `endDate` di luar objek filter.
+- Mutasi arus kas tidak punya sumber data: seluruh isinya data tiruan di
+  dalam kode, dan backend tidak punya model maupun route mutasi kas
+  (keputusan KU1a, `kontrak/temuan.md` butir 61). Persentase "vs periode
+  sebelumnya" di ringkasan laba
+  rugi dihitung dengan `Math.random()` (KU5a), dan kartu ringkasan
+  menelan galat menjadi Rp0 (KU2a).
 - `features/akun-kas` sudah ada dari modul penjualan (keputusan K1a).
-  Tipe `AkunKasLama` dan `AkunKasRefLama` (Utang kecil dari modul
-  penjualan dan pembayaran) dihapus di commit migrasi modul ini bila
-  pemakainya tinggal halaman keuangan.
-- `tests/e2e/keuangan/` ada tetapi kosong. Modul ini belum punya spec,
-  sehingga spec pembanding dibangun lebih dulu dan dijalankan terhadap
-  kode lama (pola keputusan R1a).
+  `AkunKasLama` masih dipakai tiga halaman metode pembayaran, dan
+  `AkunKasRefLama` dipakai `types/metodePembayaran.ts`, sehingga keduanya
+  tetap ada sampai modul metode pembayaran dimigrasikan.
+- Setup tenant membuat akun kas bawaan "Kas Kecil (Laci)" `CASH-001` dan
+  metode pembayaran "Tunai" yang bergantung padanya
+  (`tenantService.createWithOwner`). Spec keuangan hanya menghapus akun
+  uji yang dibuatnya sendiri.
+- Spec pembanding `tests/e2e/keuangan/keuangan.spec.ts` (`0cfb3bd`) lolos
+  terhadap kode lama: daftar dan buat akun kas, laba rugi harian dan
+  mingguan, serta kartu ringkasan.
 
-Langkah berikutnya: pemetaan endpoint dan sumber data setiap halaman
-keuangan, pemeriksaan kontrak endpoint akun kas dan laporan di
-`kontrak/`, lalu spec pembanding. Langkah pertama sesi berikutnya:
-`grep -rnE 'apiClient|queryKey|useQuery|useMutation|_id|/api|fetch'
-app/dashboard/outlet/keuangan`.
+Langkah berikutnya: migrasi modul keuangan. `features/akun-kas` mendapat
+`buat` dan hook mutation; folder `laporan` baru di `features/` untuk laba rugi,
+dengan kunci berisi seluruh filter dan permintaan periode sebelumnya
+(KU5a); skema buat akun kas mempertahankan `z.coerce` tanpa `.default()`
+(KU3a); kartu ringkasan menampilkan `-` saat gagal (KU2a); dan mutasi arus
+kas tanpa data tiruan (KU1a). Skenario untuk ketiga perubahan perilaku itu
+ditambahkan ke spec keuangan.
 
 ## Catatan dari modul reservasi
 

@@ -184,6 +184,11 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   Selesai ditulis saat daftar dibaca, dan kode lama yang dikomentari di
   `services/sesiBooking/sesiBookingService.js` (`kontrak/temuan.md` butir
   56 sampai 59)
+- Laporan setelah spec keuangan — 2 temuan, disusun 28 September 2026
+  setelah `0cfb3bd`: nomor surat jalan yang dapat bentrok karena dibentuk
+  dari nomor pengajuan dan empat digit terakhir `Date.now()`, dan
+  kebutuhan endpoint mutasi kas untuk halaman mutasi arus kas (perlu
+  keputusan) (`kontrak/temuan.md` butir 60 dan 61)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

@@ -327,7 +327,12 @@ const rute = {};
 for (const n of fs.readdirSync(BE + "/routes")) {
   if (!/Routes?\.js$/.test(n)) continue;
   const mount = n.replace(/Routes?\.js$/, "").toLowerCase();
-  const s = fs.readFileSync(BE + "/routes/" + n, "utf8");
+  const s = fs
+    .readFileSync(BE + "/routes/" + n, "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .split("\n")
+    .filter((b) => !/^\s*\/\//.test(b))
+    .join("\n");
   for (const m of s.matchAll(/\.(get|post|put|patch|delete)\(\s*["'`](\/[^"'`]*)["'`]/g)) rute[kunci(m[1], "/" + mount + m[2])] = n;
   for (const m of s.matchAll(/\.route\(\s*["'`](\/[^"'`]*)["'`]\s*\)([\s\S]*?);/g)) {
     for (const x of m[2].matchAll(/\.(get|post|put|patch|delete)\(/g)) rute[kunci(x[1], "/" + mount + m[1])] = n;
@@ -510,7 +515,10 @@ EOF
   dipertahankan, dan baris tanpa pemanggil harus sudah ditandai "tidak
   dipanggil lagi". Versi pertamanya hanya menemukan 136 dari 246 route,
   karena rantai `.route()` yang dipecah baris terlewat; pembanding terhadap
-  Lampiran A kini membuat cacat semacam itu langsung terlihat.
+  Lampiran A kini membuat cacat semacam itu langsung terlihat. Komentar
+  blok dan baris yang diawali `//` di berkas route dibuang sebelum
+  dibaca; sampai 28 September 2026 route yang dikomentari
+  (`create-tenant` di `akunRoute.js`) ikut terhitung sebagai route ke-247.
 - `audit-fulfill.js`: menghitung `route.fulfill` per spec di folder
   argumen pertama (bawaan `tests/e2e`). Setiap pemanggilan dibaca sampai
   pemanggilan berikutnya, sehingga `status` di baris lain ikut terbaca:
