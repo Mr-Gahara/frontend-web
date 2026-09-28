@@ -9,6 +9,8 @@ import { skemaTarif, type NilaiFormTarif, type NilaiMasukTarif } from "@/feature
 import { pesanError } from "@/lib/api/error";
 import type { Tarif, TipeAsetRef } from "@/types/tarif";
 import { useForm, Controller } from "react-hook-form";
+import { InputWaktu } from "@/components/input-waktu";
+import { gabungTeksWaktu, pisahTeksWaktu } from "@/lib/waktu";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -373,57 +375,14 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                   <Controller
                     name="jamMulai"
                     control={control}
-                    render={({ field }) => {
-                      const hourVal = field.value
-                        ? field.value.split(":")[0]
-                        : "00";
-                      const minuteVal = field.value
-                        ? field.value.split(":")[1]
-                        : "00";
-                      return (
-                        <div
-                          className={cn(
-                            "flex h-11 w-full flex-1 items-center justify-center gap-1.5 rounded-md border border-[#0A2947]/20 bg-white px-3 focus-within:ring-1 focus-within:ring-[#0A2947] transition-shadow shadow-sm",
-                            errors.jamMulai && "border-rose-500",
-                          )}
-                        >
-                          <Clock className="h-4 w-4 mr-1 text-[#D4A373]" />
-                          <input
-                            type="text"
-                            maxLength={2}
-                            placeholder="00"
-                            className="w-7 bg-transparent text-center font-bold text-[#0A2947] outline-none"
-                            value={hourVal}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, "");
-                              field.onChange(`${val}:${minuteVal}`);
-                            }}
-                            onBlur={(e) => {
-                              let val = e.target.value.padStart(2, "0");
-                              if (parseInt(val) > 23) val = "23";
-                              field.onChange(`${val}:${minuteVal}`);
-                            }}
-                          />
-                          <span className="font-bold text-[#0A2947]">:</span>
-                          <input
-                            type="text"
-                            maxLength={2}
-                            placeholder="00"
-                            className="w-7 bg-transparent text-center font-bold text-[#0A2947] outline-none"
-                            value={minuteVal}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, "");
-                              field.onChange(`${hourVal}:${val}`);
-                            }}
-                            onBlur={(e) => {
-                              let val = e.target.value.padStart(2, "0");
-                              if (parseInt(val) > 59) val = "59";
-                              field.onChange(`${hourVal}:${val}`);
-                            }}
-                          />
-                        </div>
-                      );
-                    }}
+                    render={({ field }) => (
+                      <InputWaktu
+                        label="Jam Mulai"
+                        value={pisahTeksWaktu(field.value)}
+                        onChange={(waktu) => field.onChange(gabungTeksWaktu(waktu))}
+                        invalid={!!errors.jamMulai}
+                      />
+                    )}
                   />
                   <span className="text-sm font-bold hidden sm:block shrink-0 text-[#0A2947]/50">
                     s/d
@@ -431,57 +390,14 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                   <Controller
                     name="jamSelesai"
                     control={control}
-                    render={({ field }) => {
-                      const hourVal = field.value
-                        ? field.value.split(":")[0]
-                        : "00";
-                      const minuteVal = field.value
-                        ? field.value.split(":")[1]
-                        : "00";
-                      return (
-                        <div
-                          className={cn(
-                            "flex h-11 w-full flex-1 items-center justify-center gap-1.5 rounded-md border border-[#0A2947]/20 bg-white px-3 focus-within:ring-1 focus-within:ring-[#0A2947] transition-shadow shadow-sm",
-                            errors.jamSelesai && "border-rose-500",
-                          )}
-                        >
-                          <Clock className="h-4 w-4 mr-1 text-[#D4A373]" />
-                          <input
-                            type="text"
-                            maxLength={2}
-                            placeholder="00"
-                            className="w-7 bg-transparent text-center font-bold text-[#0A2947] outline-none"
-                            value={hourVal}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, "");
-                              field.onChange(`${val}:${minuteVal}`);
-                            }}
-                            onBlur={(e) => {
-                              let val = e.target.value.padStart(2, "0");
-                              if (parseInt(val) > 23) val = "23";
-                              field.onChange(`${val}:${minuteVal}`);
-                            }}
-                          />
-                          <span className="font-bold text-[#0A2947]">:</span>
-                          <input
-                            type="text"
-                            maxLength={2}
-                            placeholder="00"
-                            className="w-7 bg-transparent text-center font-bold text-[#0A2947] outline-none"
-                            value={minuteVal}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, "");
-                              field.onChange(`${hourVal}:${val}`);
-                            }}
-                            onBlur={(e) => {
-                              let val = e.target.value.padStart(2, "0");
-                              if (parseInt(val) > 59) val = "59";
-                              field.onChange(`${hourVal}:${val}`);
-                            }}
-                          />
-                        </div>
-                      );
-                    }}
+                    render={({ field }) => (
+                      <InputWaktu
+                        label="Jam Selesai"
+                        value={pisahTeksWaktu(field.value)}
+                        onChange={(waktu) => field.onChange(gabungTeksWaktu(waktu))}
+                        invalid={!!errors.jamSelesai}
+                      />
+                    )}
                   />
                 </div>
                 {(errors.jamMulai || errors.jamSelesai) && (

@@ -1,5 +1,8 @@
 "use client";
 
+import { PilihTanggal } from "@/components/pilih-tanggal";
+import { dariTanggalLokal, keTanggalLokal } from "@/lib/waktu";
+
 import { useState, useMemo, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { pesanError } from "@/lib/api/error";
@@ -525,29 +528,29 @@ export default function HalamanDaftarPenjualan({
             {/* Baris 4: 2 kolom tanggal */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#0A2947]">
+                <label htmlFor="filter-dari-tanggal" className="text-xs font-bold text-[#0A2947]">
                   Dari Tanggal
                 </label>
-                <Input
-                  type="date"
-                  value={filters.startDate ?? ""}
-                  onChange={(e) =>
-                    setFilters({ ...filters, startDate: e.target.value })
-                  }
-                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]"
+                <PilihTanggal
+                  id="filter-dari-tanggal"
+                  label="Dari Tanggal"
+                  placeholder="Semua tanggal"
+                  value={dariTanggalLokal(filters.startDate)}
+                  onChange={(tanggal) => setFilters({ ...filters, startDate: keTanggalLokal(tanggal) })}
+                  className="h-10"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#0A2947]">
+                <label htmlFor="filter-sampai-tanggal" className="text-xs font-bold text-[#0A2947]">
                   Sampai Tanggal
                 </label>
-                <Input
-                  type="date"
-                  value={filters.endDate ?? ""}
-                  onChange={(e) =>
-                    setFilters({ ...filters, endDate: e.target.value })
-                  }
-                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]"
+                <PilihTanggal
+                  id="filter-sampai-tanggal"
+                  label="Sampai Tanggal"
+                  placeholder="Semua tanggal"
+                  value={dariTanggalLokal(filters.endDate)}
+                  onChange={(tanggal) => setFilters({ ...filters, endDate: keTanggalLokal(tanggal) })}
+                  className="h-10"
                 />
               </div>
             </div>

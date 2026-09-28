@@ -1,13 +1,13 @@
 import type { PerubahanPenjualan } from "./api";
 import type { JenisPenjualan, PenjualanRequest } from "@/types/penjualan";
+import { gabungTanggalWaktu, waktuLengkap, type NilaiWaktu } from "@/lib/waktu";
 
 export interface IsianPenjualan {
   penggunaID: string;
   pelangganID: string;
   jenisPenjualan: JenisPenjualan;
   tanggal: Date;
-  jam: string;
-  menit: string;
+  waktu: NilaiWaktu;
   items: { produkID: string; jumlah: number; diskonItemIDs: string[] }[];
   diskonGlobalIDs: string[];
   keterangan: string;
@@ -16,11 +16,14 @@ export interface IsianPenjualan {
 
 /** Pesan validasi form buat penjualan, atau null bila sah; teks pesan lama dipertahankan. */
 export function validasiPenjualan(
-  isian: Pick<IsianPenjualan, "penggunaID" | "pelangganID" | "items">,
+  isian: Pick<IsianPenjualan, "penggunaID" | "pelangganID" | "items" | "waktu">,
 ): string | null {
   if (!isian.penggunaID) return "Sesi kasir tidak terdeteksi.";
   if (!isian.pelangganID) return "Silakan pilih pelanggan terlebih dahulu.";
   if (isian.items.some((item) => !item.produkID)) return "Semua baris item harus memiliki produk.";
+  // Jam kosong atau di luar batas ditolak (keputusan K-TW5a); sebelumnya jam
+  // "99" menggeser transaksi beberapa hari dan jam berhuruf melempar RangeError.
+  if (!waktuLengkap(isian.waktu)) return "Jam transaksi wajib diisi lengkap.";
   return null;
 }
 
@@ -35,8 +38,10 @@ export function validasiPenjualan(
  *   sendiri, sama dengan pratinjau di halaman.
  */
 export function susunPayloadPenjualan(isian: IsianPenjualan): PenjualanRequest {
-  const tanggal = new Date(isian.tanggal);
-  tanggal.setHours(Number(isian.jam), Number(isian.menit), 0);
+  // validasiPenjualan menjamin waktu lengkap. Bila tetap tidak lengkap, payload
+  // tidak disusun, alih-alih membentuk tanggal yang bergeser atau tidak valid.
+  const tanggal = gabungTanggalWaktu(isian.tanggal, isian.waktu);
+  if (!tanggal) throw new Error("Jam transaksi tidak lengkap.");
   return {
     penggunaID: isian.penggunaID,
     pelangganID: isian.pelangganID,

@@ -10,8 +10,7 @@ const isianDasar: IsianPenjualan = {
   pelangganID: "c1",
   jenisPenjualan: "dine-in",
   tanggal: new Date(2026, 8, 24, 0, 0, 0, 0),
-  jam: "14",
-  menit: "05",
+  waktu: { jam: "14", menit: "05" },
   items: [{ produkID: "p1", jumlah: 2, diskonItemIDs: [] }],
   diskonGlobalIDs: [],
   keterangan: "",
@@ -59,9 +58,23 @@ describe("validasiPenjualan", () => {
     ).toBe("Semua baris item harus memiliki produk.");
     expect(validasiPenjualan(isianDasar)).toBeNull();
   });
+
+  it("menolak jam transaksi yang kosong atau di luar batas (keputusan K-TW5a)", () => {
+    const pesan = "Jam transaksi wajib diisi lengkap.";
+    expect(validasiPenjualan({ ...isianDasar, waktu: { jam: "", menit: "05" } })).toBe(pesan);
+    expect(validasiPenjualan({ ...isianDasar, waktu: { jam: "14", menit: "" } })).toBe(pesan);
+    expect(validasiPenjualan({ ...isianDasar, waktu: { jam: "99", menit: "05" } })).toBe(pesan);
+    expect(validasiPenjualan({ ...isianDasar, waktu: { jam: "ab", menit: "05" } })).toBe(pesan);
+  });
 });
 
 describe("susunPayloadPenjualan", () => {
+  it("tidak menyusun payload dari jam yang tidak sah, alih-alih menggeser tanggal", () => {
+    expect(() => susunPayloadPenjualan({ ...isianDasar, waktu: { jam: "99", menit: "05" } })).toThrow(
+      "Jam transaksi tidak lengkap.",
+    );
+  });
+
   it("payload minimal: invoice DRAFT tanpa field kosong, tanpa locationID bila tidak ada", () => {
     expect(susunPayloadPenjualan(isianDasar)).toEqual({
       penggunaID: "u1",

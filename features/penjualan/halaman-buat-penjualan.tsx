@@ -12,6 +12,9 @@ import { useDaftarPajak } from "@/features/pajak/hooks";
 import { pajakTransaksiAktif } from "@/features/pajak/filter";
 import { useBuatPenjualan } from "./hooks";
 import { susunPayloadPenjualan, validasiPenjualan } from "./payload";
+import { InputWaktu } from "@/components/input-waktu";
+import { PilihTanggal } from "@/components/pilih-tanggal";
+import { waktuDari, waktuLengkap, type NilaiWaktu } from "@/lib/waktu";
 import { bolehCakupanPenjualan } from "./izin";
 import { JenisPenjualan, PenjualanRequest, ItemPenjualanRequest } from "@/types/penjualan";
 import type { Diskon } from "@/types/diskon";
@@ -61,17 +64,13 @@ import {
   ChevronsUpDown,
   Plus,
   Trash2,
-  CalendarIcon,
-  Clock3,
   Tag,
   Receipt,
   Users,
   ShoppingCart,
   Calculator,
 } from "lucide-react";
-import { Calendar } from "@/components/calendar";
 import { format } from "date-fns";
-import { id as localeID } from "date-fns/locale";
 
 interface ItemState extends ItemPenjualanRequest {
   jumlahStr: string;
@@ -104,11 +103,7 @@ export default function HalamanBuatPenjualan() {
     "dine-in" | "takeaway" | "booking"
   >("dine-in");
   const [tanggalInput, setTanggalInput] = useState<Date>(new Date());
-  const now = new Date();
-  const [hour, setHour] = useState(String(now.getHours()).padStart(2, "0"));
-  const [minute, setMinute] = useState(
-    String(now.getMinutes()).padStart(2, "0"),
-  );
+  const [waktu, setWaktu] = useState<NilaiWaktu>(() => waktuDari(new Date()));
   const [keterangan, setKeterangan] = useState("");
   const [items, setItems] = useState<ItemState[]>([emptyItem()]);
   const [diskonGlobalIDs, setDiskonGlobalIDs] = useState<string[]>([]); // State Diskon Global
@@ -364,7 +359,7 @@ export default function HalamanBuatPenjualan() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const pesan = validasiPenjualan({ penggunaID: currentUserId, pelangganID, items });
+    const pesan = validasiPenjualan({ penggunaID: currentUserId, pelangganID, items, waktu });
     setFormError(pesan ?? "");
     if (pesan) return;
     setPendingPayload(
@@ -373,8 +368,7 @@ export default function HalamanBuatPenjualan() {
         pelangganID,
         jenisPenjualan,
         tanggal: tanggalInput,
-        jam: hour,
-        menit: minute,
+        waktu,
         items,
         diskonGlobalIDs,
         keterangan,
@@ -464,60 +458,27 @@ export default function HalamanBuatPenjualan() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947]">
+                <label htmlFor="tanggal-transaksi" className="text-sm font-bold text-[#0A2947]">
                   Tanggal Transaksi
                 </label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full h-12 justify-start text-left font-bold cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4 text-[#D4A373]" />
-                      {format(tanggalInput, "dd MMMM yyyy", {
-                        locale: localeID,
-                      })}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-auto p-0 border-[#0A2947]/10 bg-[#FFFAF3]"
-                    align="start"
-                  >
-                    <Calendar
-                      mode="single"
-                      selected={tanggalInput}
-                      onSelect={(date) => {
-                        if (date) setTanggalInput(date);
-                      }}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <PilihTanggal
+                  id="tanggal-transaksi"
+                  label="Tanggal Transaksi"
+                  value={tanggalInput}
+                  onChange={setTanggalInput}
+                />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947]">
+                <label htmlFor="jam-transaksi" className="text-sm font-bold text-[#0A2947]">
                   Jam Transaksi
                 </label>
-                <div className="flex h-12 w-full items-center gap-2 rounded-md border border-[#0A2947]/20 bg-[#FFFAF3] px-3 focus-within:ring-1 focus-within:ring-[#0A2947]">
-                  <Clock3 className="h-4 w-4 text-[#D4A373]" />
-                  <input
-                    type="text"
-                    maxLength={2}
-                    className="w-10 bg-transparent text-center font-bold text-[#0A2947] outline-none"
-                    value={hour}
-                    onChange={(e) => setHour(e.target.value)}
-                    onBlur={() => setHour((p) => p.padStart(2, "0"))}
-                  />
-                  <span className="font-bold text-[#0A2947]">:</span>
-                  <input
-                    type="text"
-                    maxLength={2}
-                    className="w-10 bg-transparent text-center font-bold text-[#0A2947] outline-none"
-                    value={minute}
-                    onChange={(e) => setMinute(e.target.value)}
-                    onBlur={() => setMinute((p) => p.padStart(2, "0"))}
-                  />
-                </div>
+                <InputWaktu
+                  id="jam-transaksi"
+                  label="Jam Transaksi"
+                  value={waktu}
+                  onChange={setWaktu}
+                  invalid={formError !== "" && !waktuLengkap(waktu)}
+                />
               </div>
             </div>
           </div>

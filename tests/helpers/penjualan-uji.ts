@@ -167,8 +167,8 @@ export async function hapusDraft(page: Page, auth: Auth, id: string) {
   expect.soft(hapus.status, `hapus draf uji: ${hapus.pesan}`).toBe(200);
 }
 
-/** Mengisi halaman buat penjualan dengan produk uji sampai dialog konfirmasi terbuka. */
-export async function isiFormPenjualan(page: Page, jumlah: number) {
+/** Mengisi pelanggan, produk uji, jumlah, dan keterangan di halaman buat penjualan, tanpa mengirim. */
+export async function isiIsianPenjualan(page: Page, jumlah: number) {
   await page.goto(BASIS + "/dashboard/outlet/penjualan/buatPenjualan");
   await expect(page.getByRole("heading", { name: /buat penjualan/i })).toBeVisible();
 
@@ -185,9 +185,13 @@ export async function isiFormPenjualan(page: Page, jumlah: number) {
   await inputJumlah.fill(String(jumlah));
   await inputJumlah.blur();
 
-  const keterangan = page.getByLabel(/keterangan/i);
-  await keterangan.fill(`E2E alur penjualan ${Date.now()}`);
-  await keterangan.press("Enter");
+  await page.getByLabel(/keterangan/i).fill(`E2E alur penjualan ${Date.now()}`);
+}
+
+/** Mengisi halaman buat penjualan dengan produk uji sampai dialog konfirmasi terbuka. */
+export async function isiFormPenjualan(page: Page, jumlah: number) {
+  await isiIsianPenjualan(page, jumlah);
+  await page.getByLabel(/keterangan/i).press("Enter");
   await expect(page.getByRole("alertdialog")).toBeVisible();
 }
 

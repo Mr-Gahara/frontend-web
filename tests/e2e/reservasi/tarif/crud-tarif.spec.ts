@@ -275,11 +275,10 @@ test.describe("E2E — Tarif › Halaman Buat", () => {
     await page.locator('input[name="namaTarif"]').fill(namaTarifUji("Jam Terbalik"));
     await page.locator('input[name="harga"]').fill("100000");
     await page.locator('input[name="durasiMinimum"]').fill("1");
-    const jam = page.locator('input[placeholder="00"]');
-    await jam.nth(0).fill("20");
-    await jam.nth(1).fill("00");
-    await jam.nth(2).fill("08");
-    await jam.nth(3).fill("00");
+    await page.getByRole("textbox", { name: "Jam Mulai (jam)" }).fill("20");
+    await page.getByRole("textbox", { name: "Jam Mulai (menit)" }).fill("00");
+    await page.getByRole("textbox", { name: "Jam Selesai (jam)" }).fill("08");
+    await page.getByRole("textbox", { name: "Jam Selesai (menit)" }).fill("00");
     await page.getByRole("button", { name: /simpan tarif/i }).click();
     await expect(page.getByText("Jam mulai harus lebih awal dari jam selesai")).toBeVisible();
     expect(permintaan.jumlah(), "validasi gagal tidak mengirim POST").toBe(0);
@@ -304,11 +303,10 @@ test.describe("E2E — Tarif › Halaman Buat", () => {
       for (const hari of ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"]) {
         await page.getByText(hari, { exact: true }).click();
       }
-      const jam = page.locator('input[placeholder="00"]');
-      await jam.nth(0).fill("20");
-      await jam.nth(1).fill("00");
-      await jam.nth(2).fill("23");
-      await jam.nth(3).fill("59");
+      await page.getByRole("textbox", { name: "Jam Mulai (jam)" }).fill("20");
+      await page.getByRole("textbox", { name: "Jam Mulai (menit)" }).fill("00");
+      await page.getByRole("textbox", { name: "Jam Selesai (jam)" }).fill("23");
+      await page.getByRole("textbox", { name: "Jam Selesai (menit)" }).fill("59");
       await page.getByText(tipe.namaTipeAset, { exact: true }).click();
       const tKirim = page.waitForResponse(cocok("POST", POLA_DAFTAR));
       await page.getByRole("button", { name: /simpan tarif/i }).click();
@@ -384,9 +382,8 @@ test.describe("E2E — Tarif › Halaman Edit", () => {
       await expect(page.getByRole("combobox").filter({ hasText: "Per Jam" })).toBeVisible();
       await expect(page.getByRole("checkbox", { name: "Senin" })).toBeChecked();
       await expect(page.getByRole("checkbox", { name: "Minggu" })).not.toBeChecked();
-      const jam = page.locator('input[placeholder="00"]');
-      await expect(jam.nth(0)).toHaveValue("08");
-      await expect(jam.nth(2)).toHaveValue("17");
+      await expect(page.getByRole("textbox", { name: "Jam Mulai (jam)" })).toHaveValue("08");
+      await expect(page.getByRole("textbox", { name: "Jam Selesai (jam)" })).toHaveValue("17");
       await inputNama.fill(namaBaru);
       await inputHarga.fill("175000");
       const tKirim = page.waitForResponse(cocok("PUT", POLA_SATU));
