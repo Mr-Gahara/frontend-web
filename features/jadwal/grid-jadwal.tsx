@@ -4,11 +4,12 @@ import React from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
 import { KaryawanJadwal, ShiftItem } from "@/types/jadwal";
-import { ShiftCell } from "./shift-cell";
+import { ShiftCell } from "./sel-shift";
 
 interface JadwalGridProps {
   dataKaryawan: KaryawanJadwal[];
   isLoading: boolean;
+  isError?: boolean;
   year: number;
   month: number;
   daysArray: number[];
@@ -21,12 +22,14 @@ const ShiftCellMemo = React.memo(function ShiftCellMemo({
   isSunday,
   shifts,
   empId,
+  namaKaryawan,
   onCellClick,
 }: {
   day: number;
   isSunday: boolean;
   shifts: ShiftItem[];
   empId: string;
+  namaKaryawan: string;
   onCellClick: (id: string, day: number, shifts: ShiftItem[]) => void;
 }) {
   const handleClick = React.useCallback(() => {
@@ -35,6 +38,7 @@ const ShiftCellMemo = React.memo(function ShiftCellMemo({
 
   return (
     <ShiftCell
+      namaKaryawan={namaKaryawan}
       day={day}
       isSunday={isSunday}
       shifts={shifts}
@@ -46,6 +50,7 @@ const ShiftCellMemo = React.memo(function ShiftCellMemo({
 export function JadwalGrid({
   dataKaryawan,
   isLoading,
+  isError = false,
   year,
   month,
   daysArray,
@@ -107,6 +112,19 @@ export function JadwalGrid({
                   </div>
                 </td>
               </tr>
+            ) : isError ? (
+              <tr>
+                <td
+                  colSpan={daysInMonth + 1}
+                  role="alert"
+                  className="h-32 text-center align-middle text-red-600 text-sm font-bold"
+                >
+                  <span className="block">Gagal Memuat Data</span>
+                  <span className="block font-medium">
+                    Data karyawan, jadwal, atau master shift tidak dapat dimuat. Muat ulang halaman untuk mencoba lagi.
+                  </span>
+                </td>
+              </tr>
             ) : dataKaryawan.length === 0 ? (
               <tr>
                 <td
@@ -155,6 +173,7 @@ export function JadwalGrid({
                         isSunday={isSunday}
                         shifts={shifts}
                         empId={emp.id}
+                        namaKaryawan={emp.nama}
                         onCellClick={onCellClick}
                       />
                     );

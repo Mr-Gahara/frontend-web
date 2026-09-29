@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { bukaDenganAuth, JAWAB_GAGAL, login } from "../../../helpers/transfer-uji";
+import { api, bukaDenganAuth, JAWAB_GAGAL, login } from "../../../helpers/transfer-uji";
 import { cocok } from "../../../helpers/reservasi-uji";
 import {
   bersihkanHari,
@@ -12,6 +12,7 @@ import {
   siapkanFixtureJadwal,
   tanggalUji,
   URL_GENERATE_OUTLET,
+  URL_GENERATE_GUDANG,
   type BulanUji,
 } from "../../../helpers/jadwal-uji";
 
@@ -39,10 +40,10 @@ async function pilihTanggalBerlabel(page: Page, label: string, b: BulanUji, hari
   await expect(page.getByRole("grid")).toHaveCount(0);
 }
 
-async function isiLangkahSatu(page: Page, b: BulanUji) {
+async function isiLangkahSatu(page: Page, b: BulanUji, namaPola = NAMA_POLA) {
   await page.getByRole("combobox").filter({ hasText: "Pilih pola yang sudah dibuat..." }).click();
-  await page.getByPlaceholder("Cari pola roster...").fill(NAMA_POLA);
-  await page.getByRole("option", { name: new RegExp(NAMA_POLA) }).click();
+  await page.getByPlaceholder("Cari pola roster...").fill(namaPola);
+  await page.getByRole("option", { name: new RegExp(namaPola) }).click();
   await pilihTanggalBerlabel(page, "Mulai Tanggal", b, DARI);
   await pilihTanggalBerlabel(page, "Sampai Tanggal", b, SAMPAI);
   await page.getByText(NAMA_PENGGUNA, { exact: true }).click();
@@ -109,6 +110,85 @@ test("generate gagal: tetap di langkah 2 dengan pesan galat", async ({ page }) =
     expect(await jadwalRentang(page, auth, fx, dari, sampai)).toEqual([]);
   } finally {
     await page.unroute(POLA_BULK_JADWAL);
+    await bersihkanHari(page, auth, fx, dari, sampai);
+  }
+});
+
+// ============================================================
+// MIGRASI features/jadwal (keputusan GN2a dan J5b)
+// ============================================================
+test("pola dengan shift nonaktif ditandai dan simpan ditahan (keputusan GN2a)", async ({ page }) => {
+  const auth = await bukaDenganAuth(page, URL_GENERATE_OUTLET);
+  await siapkanFixtureJadwal(page, auth);
+  const b = bulanUji();
+  const akhiran = Date.now();
+  const namaShift = `Shift Arsip Generate ${akhiran}`;
+  const namaPola = `Pola Arsip Generate ${akhiran}`;
+  const shift = await api<{ id: string }>(page, auth, "POST", "/shift", {
+    namaShift,
+    jamMasuk: "07:00",
+    jamPulang: "15:00",
+    isLintasHari: false,
+    toleransiTerlambat: 0,
+    status: "Aktif",
+  });
+  expect(shift.status, `POST /shift: ${shift.pesan}`).toBe(201);
+  const pola = await api<{ id: string }>(page, auth, "POST", "/polaroster", {
+    namaPola,
+    siklusHari: 1,
+    detailSiklus: [{ hariKe: 1, isLibur: false, shiftID: shift.data.id }],
+  });
+  expect(pola.status, `POST /polaroster: ${pola.pesan}`).toBe(201);
+  try {
+    const nonaktif = await api<unknown>(page, auth, "DELETE", `/shift/${shift.data.id}`);
+    expect(nonaktif.status, `DELETE /shift: ${nonaktif.pesan}`).toBe(200);
+    await page.reload();
+    let bulk = 0;
+    page.on("request", (r) => {
+      if (r.method() === "POST" && POLA_BULK_JADWAL.test(r.url())) bulk++;
+    });
+    await isiLangkahSatu(page, b, namaPola);
+    await expect(page.getByText("(nonaktif)").first()).toBeVisible();
+    await expect(page.getByRole("alert").filter({ hasText: namaShift })).toContainText("sudah nonaktif");
+    const simpan = page.getByRole("button", { name: /Simpan & Terapkan Jadwal/ });
+    await expect(simpan).toBeDisabled();
+    await simpan.click({ force: true });
+    expect(bulk, "tidak ada POST bulk selama ada shift bermasalah").toBe(0);
+  } finally {
+    const hapus = await api<unknown>(page, auth, "DELETE", `/polaroster/${pola.data.id}`);
+    expect.soft(hapus.status, `DELETE /polaroster: ${hapus.pesan}`).toBe(200);
+  }
+});
+
+test("generate jadwal gudang tersimpan dan kembali ke kalender gudang (keputusan J5b)", async ({ page }) => {
+  const auth = await bukaDenganAuth(page, URL_GENERATE_GUDANG);
+  const fx = await siapkanFixtureJadwal(page, auth);
+  const b = bulanUji();
+  const dari = tanggalUji(b, DARI);
+  const sampai = tanggalUji(b, SAMPAI);
+  const harapan = [
+    [tanggalUji(b, 20), false, fx.shiftPagi],
+    [tanggalUji(b, 21), true, null],
+    [tanggalUji(b, 22), false, fx.shiftPagi],
+    [tanggalUji(b, 23), true, null],
+  ];
+  await bersihkanHari(page, auth, fx, dari, sampai);
+  try {
+    await isiLangkahSatu(page, b);
+    const tunggu = page.waitForResponse(cocok("POST", POLA_BULK_JADWAL));
+    await page.getByRole("button", { name: /Simpan & Terapkan Jadwal/ }).click();
+    const res = await tunggu;
+    const body = await res.json().catch(() => ({}));
+    expect(res.status(), `POST /jadwalshift/bulk: ${JSON.stringify(body).slice(0, 200)}`).toBe(200);
+    expect(body.data).toMatchObject({ ditolak: 0 });
+    await page.waitForURL(/\/dashboard\/gudang\/jadwal$/);
+    const tersimpan = await jadwalRentang(page, auth, fx, dari, sampai);
+    expect(
+      tersimpan
+        .map((j) => [j.tanggalKerja, j.isLibur, j.shift?.id ?? null])
+        .sort((x, y) => String(x[0]).localeCompare(String(y[0]))),
+    ).toEqual(harapan);
+  } finally {
     await bersihkanHari(page, auth, fx, dari, sampai);
   }
 });

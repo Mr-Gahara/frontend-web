@@ -64,18 +64,19 @@ export function JadwalToolbar({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Cari nama karyawan..."
+            aria-label="Cari nama karyawan"
             className="pl-9 h-11 bg-[#FFFAF3] border-[#041E3F]/15 text-[#041E3F] focus-visible:ring-[#041E3F]/50 rounded-xl font-medium"
           />
         </div>
 
         <div className="flex items-center gap-2 bg-[#FFFAF3] border border-[#041E3F]/15 rounded-xl p-1 shadow-sm">
-          <Button variant="ghost" size="icon" onClick={onPrevMonth} className="h-9 w-9 rounded-lg text-[#041E3F] hover:bg-[#041E3F]/10">
+          <Button variant="ghost" size="icon" onClick={onPrevMonth} aria-label="Bulan sebelumnya" className="h-9 w-9 rounded-lg text-[#041E3F] hover:bg-[#041E3F]/10">
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center font-bold text-[#041E3F] px-4 min-w-35 justify-center">
             {currentDate.toLocaleString("id-ID", { month: "long", year: "numeric" })}
           </div>
-          <Button variant="ghost" size="icon" onClick={onNextMonth} className="h-9 w-9 rounded-lg text-[#041E3F] hover:bg-[#041E3F]/10">
+          <Button variant="ghost" size="icon" onClick={onNextMonth} aria-label="Bulan berikutnya" className="h-9 w-9 rounded-lg text-[#041E3F] hover:bg-[#041E3F]/10">
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>

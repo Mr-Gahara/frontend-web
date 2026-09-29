@@ -2,53 +2,43 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { JadwalToolbar } from "./jadwal-toolbar";
-import { JadwalGrid } from "./jadwal-grid";
-import { FormJadwalDialog } from "./form-jadwal-dialog";
-import {
-  KaryawanJadwal,
-  ShiftItem,
-  MasterShiftItem,
-  PolaRosterItem,
-  JadwalManualPayload,
-  JadwalUpdatePayload,
-} from "@/types/jadwal";
+import { JadwalToolbar } from "./toolbar-jadwal";
+import { JadwalGrid } from "./grid-jadwal";
+import { FormJadwalDialog } from "./form-jadwal";
+import type { PayloadJadwalManual, RuangJadwal } from "./tipe";
+import type { KaryawanJadwal, ShiftItem } from "@/types/jadwal";
+import type { ShiftItem as MasterShift } from "@/types/shift";
 
 interface JadwalUtamaProps {
-  tipeRuang: "outlet" | "gudang";
+  tipeRuang: RuangJadwal;
   dataKaryawan: KaryawanJadwal[];
-  masterShiftList: MasterShiftItem[];
-  polaRosterList: PolaRosterItem[]; // Tetap dipertahankan agar tidak memecah page.tsx parent
+  shiftList: MasterShift[];
   isLoading: boolean;
+  isError: boolean;
   currentDate: Date;
   onPrevMonth: () => void;
   onNextMonth: () => void;
   searchQuery: string;
   onSearchChange: (value: string) => void;
-  onSubmitManual?: (data: JadwalManualPayload) => void;
-  onUpdateManual?: (params: {
-    id: string;
-    payload: JadwalUpdatePayload;
-  }) => Promise<void>;
-  onDeleteManual?: (id: string) => Promise<void>;
-  isSavingManual?: boolean;
+  onSimpan: (payload: PayloadJadwalManual, ada: ShiftItem[]) => Promise<void>;
+  onHapus: (id: string) => Promise<void>;
+  isSaving: boolean;
 }
 
 export default function JadwalUtama({
   tipeRuang,
   dataKaryawan,
-  masterShiftList,
-  polaRosterList,
+  shiftList,
   isLoading,
+  isError,
   currentDate,
   onPrevMonth,
   onNextMonth,
   searchQuery,
   onSearchChange,
-  onSubmitManual,
-  onUpdateManual,
-  onDeleteManual,
-  isSavingManual = false,
+  onSimpan,
+  onHapus,
+  isSaving,
 }: JadwalUtamaProps) {
   // ✅ Injeksi Next.js Router
   const router = useRouter();
@@ -117,6 +107,7 @@ export default function JadwalUtama({
       <JadwalGrid
         dataKaryawan={dataKaryawan}
         isLoading={isLoading}
+        isError={isError}
         year={year}
         month={month}
         daysArray={daysArray}
@@ -133,16 +124,11 @@ export default function JadwalUtama({
         namaKaryawan={selectedKaryawan?.nama || "Pilih Karyawan"}
         tanggal={selectedDate}
         existingShifts={selectedExistingShifts}
-        masterShiftList={masterShiftList}
-        karyawanList={dataKaryawan} // ← tambah ini
-        isPending={isSavingManual}
-        onSubmit={onSubmitManual}
-        onUpdate={
-          onUpdateManual
-            ? async (id, data) => await onUpdateManual({ id, payload: data })
-            : undefined
-        }
-        onDelete={onDeleteManual}
+        shiftList={shiftList}
+        karyawanList={dataKaryawan}
+        isPending={isSaving}
+        onSimpan={(payload) => onSimpan(payload, selectedExistingShifts)}
+        onHapus={onHapus}
       />
     </div>
   );

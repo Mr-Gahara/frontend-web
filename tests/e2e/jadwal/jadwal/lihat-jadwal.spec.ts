@@ -1,8 +1,9 @@
 import { test, expect, type Page } from "@playwright/test";
-import { bukaDenganAuth, JAWAB_GAGAL, login } from "../../../helpers/transfer-uji";
-import { cocok } from "../../../helpers/reservasi-uji";
+import { api, bukaDenganAuth, JAWAB_GAGAL, login } from "../../../helpers/transfer-uji";
+import { cocok, tanggalLokal } from "../../../helpers/reservasi-uji";
 import {
   barisKaryawan,
+  CATATAN_UJI,
   bersihkanHari,
   bulanUji,
   buatJadwalApi,
@@ -82,3 +83,42 @@ for (const ruang of ["outlet", "gudang"] as const) {
     });
   });
 }
+
+// ============================================================
+// MIGRASI features/jadwal (keputusan J1a dan JD5a)
+// ============================================================
+test("rentang bulan memakai tanggal lokal (keputusan J1a)", async ({ page }) => {
+  const tunggu = page.waitForResponse(cocok("GET", POLA_DAFTAR_JADWAL));
+  await bukaDenganAuth(page, URL_JADWAL_OUTLET);
+  const url = new URL((await tunggu).url());
+  const kini = new Date();
+  expect([url.searchParams.get("startDate"), url.searchParams.get("endDate")]).toEqual([
+    tanggalLokal(new Date(kini.getFullYear(), kini.getMonth(), 1)),
+    tanggalLokal(new Date(kini.getFullYear(), kini.getMonth() + 1, 0)),
+  ]);
+});
+
+test("jadwal libur tampil LIBUR, berbeda dari hari tanpa jadwal (keputusan JD5a)", async ({ page }) => {
+  const auth = await bukaDenganAuth(page, URL_JADWAL_OUTLET);
+  const fx = await siapkanFixtureJadwal(page, auth);
+  const b = bulanUji();
+  const hari = 16;
+  const tgl = tanggalUji(b, hari);
+  await bersihkanHari(page, auth, fx, tgl, tgl);
+  try {
+    const res = await api<{ ditolak: number }>(page, auth, "POST", "/jadwalshift", {
+      penggunaId: fx.penggunaId,
+      tanggal: tgl,
+      isLibur: true,
+      shiftIds: [],
+      catatan: CATATAN_UJI,
+    });
+    expect(res.status, `POST /jadwalshift libur: ${res.pesan}`).toBe(201);
+    expect(res.data.ditolak).toBe(0);
+    await keBulanUji(page, b);
+    await expect(selHari(page, hari)).toContainText("LIBUR");
+    await expect(selHari(page, hari + 1)).not.toContainText("LIBUR");
+  } finally {
+    await bersihkanHari(page, auth, fx, tgl, tgl);
+  }
+});

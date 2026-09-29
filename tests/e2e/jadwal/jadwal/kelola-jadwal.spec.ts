@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { bukaDenganAuth, JAWAB_GAGAL, login } from "../../../helpers/transfer-uji";
+import { api, bukaDenganAuth, JAWAB_GAGAL, login } from "../../../helpers/transfer-uji";
 import { cocok } from "../../../helpers/reservasi-uji";
 import {
   bersihkanHari,
@@ -17,6 +17,9 @@ import {
   selHari,
   siapkanFixtureJadwal,
   tanggalUji,
+  NAMA_SHIFT_SIANG,
+  pastikanShiftSiang,
+  URL_JADWAL_GUDANG,
   URL_JADWAL_OUTLET,
 } from "../../../helpers/jadwal-uji";
 
@@ -179,6 +182,98 @@ test("simpan gagal: dialog tetap terbuka dan toast Gagal Menyimpan tampil", asyn
     expect(await jadwalRentang(page, auth, fx, tgl, tgl)).toEqual([]);
   } finally {
     await page.unroute(POLA_BUAT_JADWAL);
+    await bersihkanHari(page, auth, fx, tgl, tgl);
+  }
+});
+
+// ============================================================
+// MIGRASI features/jadwal (keputusan J2a, JD4, JD6a, dan J5b)
+// ============================================================
+test("jadwal yang ditolak backend ditampilkan dan dialog bertahan (keputusan J2a dan JD6a)", async ({ page }) => {
+  const auth = await bukaDenganAuth(page, URL_JADWAL_OUTLET);
+  const fx = await siapkanFixtureJadwal(page, auth);
+  await pastikanShiftSiang(page, auth);
+  const b = bulanUji();
+  const hari = 24;
+  const tgl = tanggalUji(b, hari);
+  await bersihkanHari(page, auth, fx, tgl, tgl);
+  try {
+    await buatJadwalApi(page, auth, fx, tgl, fx.shiftPagi);
+    await page.reload();
+    await keBulanUji(page, b);
+    await itemSel(page, hari).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Ubah Jadwal");
+    await dialog.getByRole("button", { name: "Tambah Split Shift" }).click();
+    await pilihShift(page, NAMA_SHIFT_SIANG);
+    const tunggu = page.waitForResponse(cocok("POST", POLA_BUAT_JADWAL));
+    await dialog.getByRole("button", { name: "Simpan Perubahan" }).click();
+    const res = await tunggu;
+    const body = await res.json().catch(() => ({}));
+    expect(res.status(), `POST /jadwalshift: ${JSON.stringify(body).slice(0, 200)}`).toBe(201);
+    expect(body.data?.ditolak, "shift siang bertumpuk jam dengan shift pagi").toBe(1);
+    await expect(page.getByText("Gagal Menyimpan")).toBeVisible();
+    await expect(page.getByText(/1 jadwal ditolak/)).toBeVisible();
+    await expect(dialog, "dialog bertahan saat jadwal ditolak").toBeVisible();
+    const tersimpan = await jadwalRentang(page, auth, fx, tgl, tgl);
+    expect(tersimpan.map((j) => j.shift?.id)).toEqual([fx.shiftPagi]);
+  } finally {
+    await bersihkanHari(page, auth, fx, tgl, tgl);
+  }
+});
+
+test("form ubah memuat catatan tersimpan dan mengirimnya kembali (keputusan JD4)", async ({ page }) => {
+  const auth = await bukaDenganAuth(page, URL_JADWAL_OUTLET);
+  const fx = await siapkanFixtureJadwal(page, auth);
+  const b = bulanUji();
+  const hari = 25;
+  const tgl = tanggalUji(b, hari);
+  await bersihkanHari(page, auth, fx, tgl, tgl);
+  try {
+    const id = await buatJadwalApi(page, auth, fx, tgl, fx.shiftPagi);
+    await page.reload();
+    await keBulanUji(page, b);
+    await itemSel(page, hari).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Ubah Jadwal");
+    await expect(dialog.getByPlaceholder("Contoh: Menggantikan shift Andi...")).toHaveValue(CATATAN_UJI);
+    const tunggu = page.waitForResponse(cocok("PUT", new RegExp(`/api/jadwalshift/${id}$`, "i")));
+    await dialog.getByRole("button", { name: "Simpan Perubahan" }).click();
+    const res = await tunggu;
+    expect(res.request().postDataJSON()).toMatchObject({ isLibur: false, shiftID: fx.shiftPagi, catatan: CATATAN_UJI });
+    expect(res.status()).toBe(200);
+    const tersimpan = await jadwalRentang(page, auth, fx, tgl, tgl);
+    expect(tersimpan.map((j) => j.catatan)).toEqual([CATATAN_UJI]);
+  } finally {
+    await bersihkanHari(page, auth, fx, tgl, tgl);
+  }
+});
+
+test("jadwal gudang dapat dibuat lewat klik sel (keputusan J5b)", async ({ page }) => {
+  const auth = await bukaDenganAuth(page, URL_JADWAL_GUDANG);
+  const fx = await siapkanFixtureJadwal(page, auth);
+  const b = bulanUji();
+  const hari = 26;
+  const tgl = tanggalUji(b, hari);
+  await bersihkanHari(page, auth, fx, tgl, tgl);
+  try {
+    await keBulanUji(page, b);
+    await itemSel(page, hari).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Kelola Jadwal");
+    await pilihShift(page, NAMA_SHIFT_PAGI);
+    const tunggu = page.waitForResponse(cocok("POST", POLA_BUAT_JADWAL));
+    await dialog.getByRole("button", { name: "Simpan Jadwal" }).click();
+    const res = await tunggu;
+    expect(res.request().postDataJSON()).toMatchObject({ penggunaId: fx.penggunaId, tanggal: tgl, shiftIds: [fx.shiftPagi] });
+    const body = await res.json().catch(() => ({}));
+    expect(res.status(), `POST /jadwalshift: ${JSON.stringify(body).slice(0, 200)}`).toBe(201);
+    expect(body.data?.ditolak).toBe(0);
+    await expect(page.getByText("Jadwal Berhasil Dibuat")).toBeVisible();
+    const tersimpan = await jadwalRentang(page, auth, fx, tgl, tgl);
+    expect(tersimpan.map((j) => j.shift?.id)).toEqual([fx.shiftPagi]);
+    await expect(selHari(page, hari)).toContainText(NAMA_SHIFT_PAGI);
+  } finally {
     await bersihkanHari(page, auth, fx, tgl, tgl);
   }
 });

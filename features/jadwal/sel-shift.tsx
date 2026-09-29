@@ -4,13 +4,23 @@ import React from "react";
 import { ShiftItem } from "@/types/jadwal";
 
 interface ShiftCellProps {
+  namaKaryawan: string;
   day: number;
   isSunday: boolean;
   shifts: ShiftItem[];
   onClick: () => void;
 }
 
-export function ShiftCell({ day, isSunday, shifts, onClick }: ShiftCellProps) {
+export function ShiftCell({ namaKaryawan, day, isSunday, shifts, onClick }: ShiftCellProps) {
+  const labelSel = (shift: ShiftItem) => {
+    const isi =
+      shift.id === "off"
+        ? "belum ada jadwal"
+        : shift.type === "off"
+          ? shift.name
+          : `${shift.name}, ${shift.label}`;
+    return `${namaKaryawan}, tanggal ${day}: ${isi}`;
+  };
   return (
     <td
       className={`border-b border-r border-[#041E3F]/5 p-1.5 md:p-2 align-top ${
@@ -19,9 +29,11 @@ export function ShiftCell({ day, isSunday, shifts, onClick }: ShiftCellProps) {
     >
       <div className="flex flex-col gap-1.5 min-w-22.5 md:min-w-27.5">
         {shifts.map((shift, idx) => (
-          <div
+          <button
+            type="button"
             key={shift.id || idx}
             onClick={onClick}
+            aria-label={labelSel(shift)}
             className={`flex flex-col justify-center p-1.5 md:p-2 rounded-lg cursor-pointer transition-all hover:ring-2 hover:ring-offset-1 hover:ring-[#041E3F]/30 min-h-11 md:min-h-13
               ${shift.type === "pagi" ? "bg-[#041E3F]/10 text-[#041E3F]" : ""}
               ${shift.type === "sore" ? "bg-sky-100 text-sky-700" : ""}
@@ -33,7 +45,7 @@ export function ShiftCell({ day, isSunday, shifts, onClick }: ShiftCellProps) {
             {shift.type !== "off" ? (
               <>
                 <span className="text-[10px] md:text-xs font-bold truncate text-center">
-                  {shift.name}
+                  {shift.shiftNonaktif ? `${shift.name} (nonaktif)` : shift.name}
                 </span>
                 <span
                   className={`text-[8px] md:text-[9px] font-semibold text-center truncate ${
@@ -44,9 +56,11 @@ export function ShiftCell({ day, isSunday, shifts, onClick }: ShiftCellProps) {
                 </span>
               </>
             ) : (
-              <span className="text-[10px] md:text-xs font-bold text-center">—</span>
+              <span className="text-[10px] md:text-xs font-bold text-center">
+                {shift.id === "off" ? "—" : shift.name}
+              </span>
             )}
-          </div>
+          </button>
         ))}
       </div>
     </td>

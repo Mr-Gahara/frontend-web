@@ -4,106 +4,51 @@ import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Check, CalendarDays, AlertTriangle } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { GenerateParams } from "./step-satu-form";
-import { KaryawanJadwal, MasterShiftItem } from "@/types/jadwal";
-import { PolaRosterItem } from "@/types/pola-roster";
+import type { GenerateParams } from "./langkah-satu";
+import { entriBulkJadwal, pesanMasalahSimulasi, simulasiGenerate } from "./generate";
+import { daftarTanggal, uraiTanggalLokal } from "./rentang";
+import type { EntriBulkJadwal, KaryawanRuang } from "./tipe";
+import type { PolaRosterItem } from "@/types/pola-roster";
+import type { ShiftItem } from "@/types/shift";
 import { cn } from "@/lib/utils";
 
 interface StepDuaPreviewProps {
   params: GenerateParams;
   polaRosterList: PolaRosterItem[];
-  masterShiftList: MasterShiftItem[];
-  karyawanList: KaryawanJadwal[];
+  shiftList: ShiftItem[];
+  karyawanList: KaryawanRuang[];
   onBack: () => void;
-  onSubmit: (finalPayload: any) => void;
+  onSubmit: (entri: EntriBulkJadwal[]) => void;
   isPending?: boolean;
 }
 
 export function StepDuaPreview({
   params,
   polaRosterList,
-  masterShiftList,
+  shiftList,
   karyawanList,
   onBack,
   onSubmit,
   isPending = false,
 }: StepDuaPreviewProps) {
-  // --- 1. ENGINE SIMULASI JADWAL (FRONTEND CALCULATOR) ---
-  const { simulatedData, dateHeaders, selectedPola } = useMemo(() => {
+  // Simulasi jadwal dari features/jadwal/generate.ts. Hari yang shift-nya
+  // nonaktif atau tidak ditemukan ditandai dan menahan simpan (GN2a).
+  const { simulatedData, dateHeaders, selectedPola, pesanMasalah } = useMemo(() => {
     const pola = polaRosterList.find((p) => p.id === params.polaId);
-
-    const start = new Date(params.startDate);
-    const end = new Date(params.endDate);
-    const dates: Date[] = [];
-    let current = new Date(start);
-    while (current <= end) {
-      dates.push(new Date(current));
-      current.setDate(current.getDate() + 1);
-    }
-
-    const targetKaryawans = karyawanList.filter((k) =>
-      params.karyawanIds.includes(k.id),
-    );
-
-    const simulation = targetKaryawans.map((emp) => {
-      const scheduleRow = dates.map((date, index) => {
-        const siklusHari = pola?.siklusHari || 7;
-        const cycleIndex = index % siklusHari;
-
-        const detailHari = pola?.detailSiklus?.find(
-          (d) => d.hariKe === cycleIndex + 1,
-        );
-
-        let isLibur = true;
-        let shiftID = undefined;
-        let shiftLabel = "OFF";
-        let jam = "";
-
-        if (detailHari && !detailHari.isLibur && detailHari.shiftID) {
-          const shiftMaster = masterShiftList.find(
-            (s) => s.id === detailHari.shiftID,
-          );
-          if (shiftMaster) {
-            isLibur = false;
-            shiftID = shiftMaster.id;
-            shiftLabel = shiftMaster.nama.substring(0, 4).toUpperCase();
-            jam = shiftMaster.jam;
-          }
-        }
-
-        return {
-          date: date.toISOString().split("T")[0],
-          isLibur,
-          shiftID,
-          shiftLabel,
-          jam,
-        };
-      });
-
-      return {
-        karyawan: emp,
-        jadwal: scheduleRow,
-      };
-    });
-
+    const tanggal = daftarTanggal(params.startDate, params.endDate);
+    const target = karyawanList.filter((k) => params.karyawanIds.includes(k.id));
+    const baris = simulasiGenerate(tanggal, pola, shiftList, target);
     return {
-      simulatedData: simulation,
-      dateHeaders: dates,
+      simulatedData: baris,
+      dateHeaders: tanggal.map(uraiTanggalLokal),
       selectedPola: pola,
+      pesanMasalah: pesanMasalahSimulasi(baris),
     };
-  }, [params, polaRosterList, masterShiftList, karyawanList]);
+  }, [params, polaRosterList, shiftList, karyawanList]);
 
-  // --- 2. HANDLER SUBMIT KE BACKEND ---
   const handleFinalSubmit = () => {
-    const bulkPayload = simulatedData.flatMap((empRow) =>
-      empRow.jadwal.map((j) => ({
-        penggunaID: empRow.karyawan.id,
-        tanggalKerja: j.date,
-        isLibur: j.isLibur,
-        shiftID: j.shiftID,
-      })),
-    );
-    onSubmit(bulkPayload);
+    if (pesanMasalah) return;
+    onSubmit(entriBulkJadwal(simulatedData));
   };
 
   return (
@@ -136,12 +81,12 @@ export function StepDuaPreview({
             Rentang Tanggal
           </span>
           <span className="text-sm font-bold text-[#041E3F]">
-            {new Date(params.startDate).toLocaleDateString("id-ID", {
+            {uraiTanggalLokal(params.startDate).toLocaleDateString("id-ID", {
               day: "2-digit",
               month: "short",
             })}{" "}
             -{" "}
-            {new Date(params.endDate).toLocaleDateString("id-ID", {
+            {uraiTanggalLokal(params.endDate).toLocaleDateString("id-ID", {
               day: "2-digit",
               month: "short",
               year: "numeric",
@@ -157,6 +102,16 @@ export function StepDuaPreview({
           </span>
         </div>
       </div>
+
+      {pesanMasalah && (
+        <div
+          role="alert"
+          className="flex items-center gap-2 bg-red-50 text-red-600 p-3 rounded-xl border border-red-200 mb-6 text-sm font-bold"
+        >
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <p>{pesanMasalah}</p>
+        </div>
+      )}
 
       {/* WARNING LONG RANGE */}
       {dateHeaders.length > 31 && (
@@ -243,10 +198,19 @@ export function StepDuaPreview({
                           <div className="mx-auto flex min-h-[48px] w-full max-w-[85px] items-center justify-center rounded-xl bg-red-50/80 text-[11px] font-bold text-red-600 border border-red-100 shadow-sm">
                             OFF
                           </div>
+                        ) : cell.masalah ? (
+                          <div
+                            title={cell.masalah === "nonaktif" ? "Shift sudah nonaktif" : "Shift tidak ditemukan"}
+                            className="mx-auto flex flex-col min-h-[48px] w-full max-w-[90px] items-center justify-center rounded-xl bg-amber-50 text-amber-800 border border-amber-300 shadow-sm px-1 py-1.5"
+                          >
+                            <span className="text-[11px] font-bold leading-tight">{cell.label}</span>
+                            <span className="text-[10px] font-semibold tracking-tight mt-0.5">
+                              {cell.masalah === "nonaktif" ? "(nonaktif)" : "(tidak ditemukan)"}
+                            </span>
+                          </div>
                         ) : (
-                          // ✅ FIX 4: Desain SHIFT cell dengan min-h dan max-w yang dinaikkan, padding longgar, dan font disesuaikan
                           <div className="mx-auto flex flex-col min-h-[48px] w-full max-w-[90px] items-center justify-center rounded-xl bg-[#FFFAF3] text-[#041E3F] border border-[#041E3F]/20 shadow-sm transition-all hover:border-[#041E3F]/40 hover:bg-[#041E3F]/5 px-1 py-1.5">
-                            <span className="text-[11px] font-bold leading-tight">{cell.shiftLabel}</span>
+                            <span className="text-[11px] font-bold leading-tight">{cell.label}</span>
                             <span className="text-[10px] font-semibold opacity-60 font-mono tracking-tight mt-0.5">{cell.jam || "Shift"}</span>
                           </div>
                         )}
@@ -274,7 +238,7 @@ export function StepDuaPreview({
         </Button>
         <Button
           onClick={handleFinalSubmit}
-          disabled={isPending}
+          disabled={isPending || pesanMasalah !== null}
           className="h-12 px-8 bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer"
         >
           {isPending ? "Menyimpan ke Server..." : "Simpan & Terapkan Jadwal"}

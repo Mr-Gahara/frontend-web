@@ -122,6 +122,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   // Jadwal outlet: izin shift, pola roster, dan jadwal belum ada di backend,
   // sehingga gate memakai izin data yang benar-benar diperiksa (daftar karyawan).
   "/dashboard/outlet/jadwal": [IZIN.pengguna],
+  "/dashboard/outlet/jadwal/generate": [IZIN.pengguna],
   "/dashboard/outlet/pola-roster": [],
   "/dashboard/outlet/shift": [],
 
@@ -135,6 +136,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/gudang/transferStok": [IZIN.transferStok],
   "/dashboard/gudang/pengirimanStok": [IZIN.transferStok],
   "/dashboard/gudang/jadwal": [IZIN.pengguna],
+  "/dashboard/gudang/jadwal/generate": [IZIN.pengguna],
   "/dashboard/gudang/shift": [],
   "/dashboard/gudang/pola-roster": [],
   "/dashboard/gudang/pengguna": [IZIN.pengguna, IZIN.role],

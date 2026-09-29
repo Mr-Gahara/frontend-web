@@ -16,6 +16,7 @@ import { cocok, tanggalLokal } from "./reservasi-uji";
 export const URL_JADWAL_OUTLET = BASIS + "/dashboard/outlet/jadwal";
 export const URL_JADWAL_GUDANG = BASIS + "/dashboard/gudang/jadwal";
 export const URL_GENERATE_OUTLET = BASIS + "/dashboard/outlet/jadwal/generate";
+export const URL_GENERATE_GUDANG = BASIS + "/dashboard/gudang/jadwal/generate";
 
 export const NAMA_PENGGUNA = "Ridho";
 export const NAMA_SHIFT_PAGI = "E2E Jadwal Pagi";
@@ -190,7 +191,7 @@ export function barisKaryawan(page: Page): Locator {
 /** Sel pertama baris adalah nama karyawan, sehingga sel hari ke-n berada di indeks n. */
 export const selHari = (page: Page, hari: number) => barisKaryawan(page).locator(":scope > td").nth(hari);
 
-export const itemSel = (page: Page, hari: number) => selHari(page, hari).locator(":scope > div > div").first();
+export const itemSel = (page: Page, hari: number) => selHari(page, hari).getByRole("button").first();
 
 export async function pilihTanggalKalender(page: Page, selisihBulan: number, hari: number) {
   for (let i = 0; i < selisihBulan; i++) await page.getByRole("button", { name: /next month/i }).click();
@@ -200,4 +201,25 @@ export async function pilihTanggalKalender(page: Page, selisihBulan: number, har
 export async function pilihShift(page: Page, nama: string) {
   await page.getByRole("dialog").getByText("Pilih shift...").click();
   await page.getByRole("option", { name: new RegExp("^" + nama) }).click();
+}
+
+export const NAMA_SHIFT_SIANG = "E2E Jadwal Siang";
+export const JAM_SIANG = { masuk: "12:00", pulang: "20:00" };
+
+/** Shift uji kedua yang jamnya bertumpuk dengan shift pagi uji, untuk jadwal yang ditolak backend (J2a). */
+export async function pastikanShiftSiang(page: Page, auth: Auth): Promise<string> {
+  const res = await api<unknown>(page, auth, "GET", "/shift?status=Aktif");
+  expect(res.status, `GET /shift: ${res.pesan}`).toBe(200);
+  const ada = daftar(res.data).find((s) => s.namaShift === NAMA_SHIFT_SIANG);
+  if (ada) return ada.id;
+  const buat = await api<unknown>(page, auth, "POST", "/shift", {
+    namaShift: NAMA_SHIFT_SIANG,
+    jamMasuk: JAM_SIANG.masuk,
+    jamPulang: JAM_SIANG.pulang,
+    isLintasHari: false,
+    toleransiTerlambat: 0,
+    status: "Aktif",
+  });
+  expect([200, 201], `POST /shift: ${buat.pesan}`).toContain(buat.status);
+  return String(idDari(normalizeId(buat.data) as unknown));
 }
