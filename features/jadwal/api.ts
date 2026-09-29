@@ -1,5 +1,6 @@
 /**
- * Pemanggilan API jadwal shift dan karyawan per ruang.
+ * Pemanggilan API jadwal shift. Daftar karyawan per ruang memakai
+ * useDaftarPengguna dari features/pengguna (keputusan rancangan butir 12).
  *
  * Respons sudah ternormalisasi oleh lib/api/normalize.ts, dan kegagalan
  * dilempar sebagai ApiError. POST /jadwalshift dan bulk menjawab sukses
@@ -10,21 +11,13 @@ import type {
   EntriBulkJadwal,
   HasilJadwal,
   JadwalItem,
-  KaryawanRuang,
   PayloadJadwalManual,
   PayloadUbahJadwal,
-  RuangJadwal,
 } from "./tipe";
 import { apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
 
-type PenggunaMentah = { id: string; nama?: string; role?: string };
-
 export const jadwalApi = {
-  karyawan: async (ruang: RuangJadwal): Promise<KaryawanRuang[]> => {
-    const data = await apiData.get<PenggunaMentah[]>(`${EP.pengguna.list}?workspace=${ruang}`);
-    return data.map((p) => ({ id: p.id, nama: p.nama ?? "-", role: p.role ?? "-" }));
-  },
   daftar: (rentang: { startDate: string; endDate: string }) =>
     apiData.get<JadwalItem[]>(`${EP.jadwalShift.list}?${new URLSearchParams(rentang)}`),
   buat: (payload: PayloadJadwalManual) => apiData.post<HasilJadwal>(EP.jadwalShift.list, payload),

@@ -11,11 +11,12 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import JadwalUtama from "./halaman-jadwal";
 import { pesanDitolak } from "./hasil";
-import { useDaftarJadwal, useHapusJadwal, useKaryawanRuang, useSimpanJadwalHari } from "./hooks";
-import { petakanJadwalKaryawan } from "./pemetaan";
+import { useDaftarJadwal, useHapusJadwal, useSimpanJadwalHari } from "./hooks";
+import { keKaryawanRuang, petakanJadwalKaryawan } from "./pemetaan";
 import { rencanaSimpanJadwal } from "./rencana";
 import { rentangBulan } from "./rentang";
 import type { HasilJadwal, RuangJadwal } from "./tipe";
+import { useDaftarPengguna } from "@/features/pengguna/hooks";
 import { useDaftarShift } from "@/features/shift/hooks";
 import { pesanError } from "@/lib/api/error";
 
@@ -23,7 +24,7 @@ export function HalamanJadwalRuang({ ruang }: { ruang: RuangJadwal }) {
   const [bulan, setBulan] = useState(() => new Date());
   const [cari, setCari] = useState("");
   const rentang = useMemo(() => rentangBulan(bulan), [bulan]);
-  const karyawan = useKaryawanRuang(ruang);
+  const karyawan = useDaftarPengguna(ruang);
   const jadwal = useDaftarJadwal(rentang);
   const shift = useDaftarShift(ruang);
   const simpan = useSimpanJadwalHari();
@@ -31,7 +32,7 @@ export function HalamanJadwalRuang({ ruang }: { ruang: RuangJadwal }) {
 
   const baris = useMemo(() => {
     const kata = cari.toLowerCase();
-    return petakanJadwalKaryawan(karyawan.data ?? [], jadwal.data ?? []).filter((k) =>
+    return petakanJadwalKaryawan(keKaryawanRuang(karyawan.data ?? []), jadwal.data ?? []).filter((k) =>
       k.nama.toLowerCase().includes(kata),
     );
   }, [karyawan.data, jadwal.data, cari]);

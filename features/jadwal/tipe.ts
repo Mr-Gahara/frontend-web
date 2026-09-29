@@ -20,7 +20,7 @@ export interface JadwalItem {
   } | null;
 }
 
-/** Karyawan satu ruang dari GET /pengguna?workspace=. */
+/** Karyawan satu ruang, dipetakan dari useDaftarPengguna (features/pengguna). */
 export interface KaryawanRuang {
   id: string;
   nama: string;

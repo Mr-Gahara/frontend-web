@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * Hook data jadwal. Karyawan per ruang memakai kunci di bawah akar pengguna
- * dengan penanda ruang, agar tidak bertabrakan dengan data halaman pengguna
- * (keputusan rancangan butir 3). Mutation menunggu invalidasi jadwal,
+ * Hook data jadwal. Daftar karyawan per ruang tidak didefinisikan di sini,
+ * melainkan memakai useDaftarPengguna dari features/pengguna (keputusan
+ * rancangan butir 12). Mutation menunggu invalidasi jadwal,
  * juga saat gagal, agar kalender menampilkan keadaan sebenarnya setelah
  * perubahan sebagian (keputusan JD6a).
  */
@@ -11,16 +11,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { jadwalApi } from "./api";
 import { gabungHasil } from "./hasil";
 import type { LangkahJadwal } from "./rencana";
-import type { EntriBulkJadwal, HasilJadwal, RuangJadwal } from "./tipe";
+import type { EntriBulkJadwal, HasilJadwal } from "./tipe";
 import { pesanError } from "@/lib/api/error";
 import { queryKeys } from "@/lib/queryKeys";
 
-export function useKaryawanRuang(ruang: RuangJadwal) {
-  return useQuery({
-    queryKey: [...queryKeys.pengguna.semua, "ruang", ruang] as const,
-    queryFn: () => jadwalApi.karyawan(ruang),
-  });
-}
 
 export function useDaftarJadwal(rentang: { startDate: string; endDate: string }) {
   return useQuery({

@@ -13,8 +13,10 @@ import { ChevronLeft, Loader2, AlertCircle } from "lucide-react";
 import { StepSatuForm, type GenerateParams } from "./langkah-satu";
 import { StepDuaPreview } from "./langkah-dua";
 import { pesanDitolak } from "./hasil";
-import { useGenerateJadwal, useKaryawanRuang } from "./hooks";
+import { useGenerateJadwal } from "./hooks";
+import { keKaryawanRuang } from "./pemetaan";
 import type { EntriBulkJadwal, RuangJadwal } from "./tipe";
+import { useDaftarPengguna } from "@/features/pengguna/hooks";
 import { useDaftarPolaRoster } from "@/features/pola-roster/hooks";
 import { useDaftarShift } from "@/features/shift/hooks";
 import { pesanError } from "@/lib/api/error";
@@ -25,10 +27,11 @@ export function HalamanGenerateRuang({ ruang }: { ruang: RuangJadwal }) {
   const [langkah, setLangkah] = useState<1 | 2>(1);
   const [params, setParams] = useState<GenerateParams | undefined>();
   const [pesanSimpan, setPesanSimpan] = useState("");
-  const karyawan = useKaryawanRuang(ruang);
+  const karyawan = useDaftarPengguna(ruang);
   const pola = useDaftarPolaRoster(ruang);
   const shift = useDaftarShift(ruang);
   const generate = useGenerateJadwal();
+  const karyawanList = keKaryawanRuang(karyawan.data ?? []);
 
   if (karyawan.isLoading || pola.memuat || shift.memuat) {
     return (
@@ -100,7 +103,7 @@ export function HalamanGenerateRuang({ ruang }: { ruang: RuangJadwal }) {
       {langkah === 1 || !params ? (
         <StepSatuForm
           polaRosterList={pola.data}
-          karyawanList={karyawan.data ?? []}
+          karyawanList={karyawanList}
           initialData={params}
           onNext={(nilai) => {
             setParams(nilai);
@@ -114,7 +117,7 @@ export function HalamanGenerateRuang({ ruang }: { ruang: RuangJadwal }) {
           params={params}
           polaRosterList={pola.data}
           shiftList={shift.data}
-          karyawanList={karyawan.data ?? []}
+          karyawanList={karyawanList}
           onBack={() => {
             setLangkah(1);
             setPesanSimpan("");

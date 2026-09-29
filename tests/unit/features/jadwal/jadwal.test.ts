@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { entriBulkJadwal, pesanMasalahSimulasi, simulasiGenerate } from "@/features/jadwal/generate";
 import { gabungHasil, pesanDitolak } from "@/features/jadwal/hasil";
-import { itemJadwal, petakanJadwalKaryawan } from "@/features/jadwal/pemetaan";
+import { itemJadwal, keKaryawanRuang, petakanJadwalKaryawan } from "@/features/jadwal/pemetaan";
 import { rencanaSimpanJadwal } from "@/features/jadwal/rencana";
 import { daftarTanggal, rentangBulan } from "@/features/jadwal/rentang";
 import { buatSkemaJadwalManual, skemaGenerate } from "@/features/jadwal/schema";
@@ -74,6 +74,22 @@ describe("pemetaan jadwal ke sel", () => {
     expect(hasil).toHaveLength(1);
     expect(hasil[0].jadwalMap[10].map((s) => s.id)).toEqual(["j1", "j2"]);
     expect(hasil[0].jadwalMap[11]).toBeUndefined();
+  });
+});
+
+describe("keKaryawanRuang (keputusan rancangan butir 12)", () => {
+  it("memetakan pengguna: peran dari role lalu roleID.namaRole, dan tanda hubung untuk yang kosong (JD14a)", () => {
+    // Data uji hanya memuat field yang dibaca keKaryawanRuang.
+    const pengguna = [
+      { id: "p1", nama: "Ridho", role: "Owner", roleID: "r0" },
+      { id: "p2", nama: "", role: "", roleID: "r9" },
+      { id: "p3", nama: "Sari", roleID: { id: "r1", namaRole: "Kasir" } },
+    ] as unknown as Parameters<typeof keKaryawanRuang>[0];
+    expect(keKaryawanRuang(pengguna)).toEqual([
+      { id: "p1", nama: "Ridho", role: "Owner" },
+      { id: "p2", nama: "-", role: "-" },
+      { id: "p3", nama: "Sari", role: "Kasir" },
+    ]);
   });
 });
 

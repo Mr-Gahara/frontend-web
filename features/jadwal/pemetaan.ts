@@ -1,5 +1,24 @@
 import type { JadwalItem, KaryawanRuang } from "./tipe";
+import type { penggunaApi } from "@/features/pengguna/api";
 import type { KaryawanJadwal, ShiftItem } from "@/types/jadwal";
+
+type PenggunaDaftar = Awaited<ReturnType<typeof penggunaApi.daftar>>[number];
+
+/**
+ * Karyawan satu ruang dari daftar pengguna features/pengguna (keputusan
+ * rancangan butir 12). Peran dibaca dari role, lalu roleID.namaRole
+ * (keputusan JD14a); nama atau peran yang kosong tampil "-" (butir 11).
+ */
+export function keKaryawanRuang(pengguna: PenggunaDaftar[]): KaryawanRuang[] {
+  return pengguna.map((p) => ({
+    id: p.id,
+    nama: p.nama || "-",
+    role:
+      p.role ||
+      (typeof p.roleID === "object" && p.roleID !== null ? p.roleID.namaRole : "") ||
+      "-",
+  }));
+}
 
 /** Warna sel menurut jam masuk, sama dengan halaman lama. */
 export function jenisShift(shift: NonNullable<JadwalItem["shift"]>): ShiftItem["type"] {

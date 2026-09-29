@@ -19,6 +19,8 @@ export interface PenggunaItem extends Entitas, Timestamps {
   tenantID: string;
   /** Backend mengirim string atau objek hasil populate, tergantung endpoint. */
   roleID: string | Role;
+  /** Nama peran dalam teks, dikirim GET /pengguna di samping roleID (kontrak/endpoint.md). */
+  role?: string;
   tokenVersion: number;
 }
 
