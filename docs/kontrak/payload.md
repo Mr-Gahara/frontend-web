@@ -309,7 +309,10 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 - Aturan: validatePolaRosterPayload (validators/polaRosterValidator.js)
 - Wajib dari klien: `namaPola`, `siklusHari`, `detailSiklus`
-- Field lain yang dikenali: -
+- Field lain yang dikenali: `keterangan`, disimpan model tanpa aturan validator
+- Aturan validator: `siklusHari` angka minimal 1; `detailSiklus` array yang panjangnya sama dengan `siklusHari`, dengan `hariKe` unik dari 1 sampai `siklusHari`; hari kerja wajib `shiftID` ObjectId yang sah, dan hari libur boleh tanpa `shiftID`. Controller menolak `detailSiklus` lebih dari 365 hari; web membatasi 31 (keputusan PL4a). Service menolak 400 bila ada shift yang tidak ditemukan atau sudah nonaktif. Nama ganda dalam tenant (indeks `{ tenantID, namaPola }`) dijawab 4xx tanpa pesan galat MongoDB (spec `dcc22e0`). Dikoreksi 29 September 2026
+- Web mengirim hasil `payloadPolaRoster` (`features/pola-roster/payload.ts`): nama dipangkas, dan `shiftID` hanya untuk hari kerja
+- Respons 201 dengan `data` berbentuk item `GET /polaroster`
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -497,11 +500,12 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /polaroster/:id`
 
-- Aturan: validatePolaRosterPayload (validators/polaRosterValidator.js)
-- Wajib dari klien: `namaPola`, `siklusHari`, `detailSiklus`
-- Field lain yang dikenali: -
+- Aturan: validatePolaRosterPayload mode update (validators/polaRosterValidator.js): seluruh field opsional, tetapi `siklusHari` dan `detailSiklus` wajib dikirim bersamaan
+- Wajib dari klien: -
+- Field lain yang dikenali: `namaPola`, `siklusHari`, `detailSiklus`, `keterangan`
+- Selalu gagal selama `detailSiklus` ikut dikirim: validator model memakai `this.siklusHari` di dalam `findOneAndUpdate`, dan di sana `this` adalah query (`test.fixme` di `refactor/pengujian.md`); web selalu mengirimnya. Service menjalankan `$set` atas seluruh body, sehingga `tenantID` yang dikirim ikut disimpan bila berupa ObjectId yang sah (`temuan.md` butir 72); web tidak mengirimnya. Dikoreksi 29 September 2026
 - Dibaca controller dari body: `-`
-- Diisi server: `tenantID`
+- Diisi server: - (`tenantID` hanya diisi saat create)
 
 #### `PUT /produk/:id`
 

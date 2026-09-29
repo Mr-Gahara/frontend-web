@@ -1067,6 +1067,12 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   melintasi baris kosong tidak pernah cocok. Di spec shift, dua pasangan
   gagal karena itu. Pakai pasangan satu baris, atau ambil teks lamanya
   dengan `sed -n` tanpa saringan (`cat -A` menampilkan baris kosong).
+- **Spec lama dibaca utuh sebelum migrasi, bukan hanya judul dan
+  selectornya.** Di submodul pola roster, badan dua test lama baru
+  terbaca setelah keduanya gagal: satu mengharapkan perilaku yang sudah
+  diubah keputusan (PL3a), dan satu mencegat path dengan glob yang peka
+  huruf besar kecil, sehingga run pertama menyimpan data sungguhan yang
+  harus dihapus lewat API.
 
 ## Kapan berhenti dan bertanya
 

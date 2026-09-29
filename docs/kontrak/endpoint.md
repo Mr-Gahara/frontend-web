@@ -6,7 +6,7 @@ Endpoint yang dipanggil frontend beserta auth, permission, envelope, dan bentuk 
 
 ## 3. Endpoint yang dipakai frontend
 
-Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend tetap memiliki 246 route. Audit itu sempat mencatat 247 dengan `POST /akun/owner/create-tenant`, padahal route itu dikomentari di `akunRoute.js` baris 74; `audit-endpoint.js` membaca baris komentar sampai diperbaiki pada 28 September 2026. Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258` dan `45187b6`), serta 29 September 2026 (frontend `f99b7cf`), menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
+Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend tetap memiliki 246 route. Audit itu sempat mencatat 247 dengan `POST /akun/owner/create-tenant`, padahal route itu dikomentari di `akunRoute.js` baris 74; `audit-endpoint.js` membaca baris komentar sampai diperbaiki pada 28 September 2026. Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258` dan `45187b6`), serta 29 September 2026 (frontend `f99b7cf` dan `dcc22e0`), menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
 
 Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`; contoh `/diskon` berarti `/api/diskon`. Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom Envelope dan ID hanya terisi untuk GET yang diambil sampelnya.
 
@@ -200,10 +200,10 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/polaroster` | authPengguna | - | `{ data, message, success }` | `id` | 4 file |
-| POST | `/polaroster` | authPengguna | - | - | - | 1 file |
-| PUT | `/polaroster/:id` | authPengguna | - | - | - | 1 file |
-| DELETE | `/polaroster/:id` | authPengguna | - | - | - | 1 file |
+| GET | `/polaroster` | authPengguna | - | `{ data, message, success }` | `id` | `features/pola-roster/api.ts`, 3 file halaman lama |
+| POST | `/polaroster` | authPengguna | - | - | - | `features/pola-roster/api.ts` |
+| PUT | `/polaroster/:id` | authPengguna | - | - | - | `features/pola-roster/api.ts` |
+| DELETE | `/polaroster/:id` | authPengguna | - | - | - | `features/pola-roster/api.ts` |
 
 #### `/produk`
 
@@ -244,7 +244,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/shift` | authPengguna | - | `{ data, message, success }` | `id` | `features/shift/api.ts`, 4 file halaman lama (query `workspace` hanya penghindar 500, `temuan.md` butir 8) |
+| GET | `/shift` | authPengguna | - | `{ data, message, success }` | `id` | `features/shift/api.ts`, 3 file halaman lama (query `workspace` hanya penghindar 500, `temuan.md` butir 8) |
 | POST | `/shift` | authPengguna | - | - | - | `features/shift/api.ts` |
 | PUT | `/shift/:id` | authPengguna | - | - | - | `features/shift/api.ts` |
 | DELETE | `/shift/:id` | authPengguna | - | - | - | `features/shift/api.ts` |
@@ -331,7 +331,7 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /penjualan`: createdAt, dataPelanggan{_id, namaPelanggan, nomorHp, tipePelanggan}, dataPengguna{_id, nama}, diskonGlobal[], id, itemPenjualan[], jatuhTempo, jenisPenjualan, jenisTransaksi, jumlahDiskonTransaksi, jumlahPajakTransaksi, keterangan, locationID, noReferensi, pajakTransaksi[], sisaTagihan, statusBayar, statusPenjualan, tanggalTransaksi, tenantID, totalDibayar, totalHargaProduk, totalTagihan, updatedAt (dari `mappers/penjualanMapper.js` backend `00b9957`: `pajakTransaksi[]` dan `itemPenjualan[].rincianPajak[]` berbentuk `{_id, namaPajak, tarifPajak, jumlah, model}`, sedangkan `diskonGlobal[]` dan `itemPenjualan[].diskonItem[]` berisi hasil populate diskon. Daftar disaring di memori menurut delapan query, yaitu `statusBayar`, `statusPenjualan`, `jenisTransaksi`, `jenisPenjualan`, `pelangganID`, `startDate`, `endDate`, dan `noReferensi`, dari cache 60 detik per tenant, tanpa `locationID`, `temuan.md` butir 49)
 - `GET /penjualan/:param`: createdAt, dataPelanggan{_id, namaPelanggan, tipePelanggan}, dataPengguna{_id, nama}, diskonGlobal[], id, itemPenjualan[], jatuhTempo, jenisPenjualan, jenisTransaksi, jumlahDiskonTransaksi, jumlahPajakTransaksi, keterangan, locationID, noReferensi, pajakTransaksi[], sisaTagihan, statusBayar, statusPenjualan, tanggalTransaksi, tenantID, totalDibayar, totalHargaProduk, totalTagihan, updatedAt (bentuk seperti daftar; `dataPelanggan` detail mem-populate `alamat` dan `email`, bukan `nomorHp`)
 - `GET /permission`: __v, _id, deskripsi, grup, nama
-- `GET /polaroster`: detailSiklus[], dibuatPada, id, keterangan, namaPola, siklusHari
+- `GET /polaroster`: detailSiklus[], dibuatPada, id, keterangan, namaPola, siklusHari (dari `mappers/polaRosterMapper.js` backend `00b9957`: setiap `detailSiklus[]` berisi hariKe, isLibur, shiftID yang null untuk libur, dan shift{id, namaShift, jamMasuk, jamPulang, status} hasil populate. Service tidak membaca query apa pun, dan daftarnya di-cache 3.600 detik tanpa dibersihkan saat shift berubah, `temuan.md` butir 73)
 - `GET /produk`: _id, createdAt, gambarProduk, hargaDasar, hargaJual, isUnlimitedStok, kategori, kategoriID, keterangan, namaProduk, pajakList[], resep[], stok, updatedAt (`stok` adalah angka per tenant yang tidak terhubung ke stok lokasi mana pun, `temuan.md` butir 37)
 - `GET /produk/:param`: _id, createdAt, gambarProduk, hargaDasar, hargaJual, isUnlimitedStok, kategori, kategoriID, keterangan, namaProduk, pajakList[], resep[], stok, updatedAt
 - `GET /role`: deskripsi, id, level, namaRole, permissions[]

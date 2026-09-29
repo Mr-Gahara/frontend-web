@@ -32,8 +32,9 @@ menggabungkan origin/yoga `f0b7157`). Bagian penjualan dan pembayaran di
 `endpoint.md`, `payload.md`, `izin-halaman.md`, dan `temuan.md` dikoreksi
 terhadap backend `00b9957` (branch `ridho`) pada 26 September 2026, dan
 bagian sesi booking di `endpoint.md`, `payload.md`, dan `temuan.md` pada
-27 September 2026, serta bagian jadwal shift dan shift di `endpoint.md`,
-`payload.md`, dan `temuan.md` terhadap backend `00b9957` pada
+27 September 2026, serta bagian jadwal shift, shift, dan pola roster
+di `endpoint.md`, `payload.md`, dan `temuan.md` terhadap backend
+`00b9957` pada
 29 September 2026. Bila
 backend berubah cukup jauh, `endpoint.md`, `payload.md`, `izin-halaman.md`,
 dan `route-backend.md` perlu dibangkitkan ulang; bagian 1 di bawah menjelaskan

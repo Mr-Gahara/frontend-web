@@ -538,6 +538,26 @@ keputusan rancangan butir 17 dan 21.
 - **SH5a: tim backend diminta menambah `locationID`** untuk shift, pola
   roster, dan monitoring absensi, dengan indeks unik nama shift per
   tenant dan lokasi (`kontrak/temuan.md` butir 70).
+- **PL1a: shift nonaktif di pola roster ditampilkan dengan penanda
+  "(nonaktif)"** (`dcc22e0`). Pratinjau memakai nama dan status dari
+  daftar shift, atau dari shift hasil populate di respons pola bila tidak
+  ada di daftar. Form ubah menampilkannya sebagai pilihan nonaktif, dan
+  skema meminta pengguna menggantinya, karena backend menolak pola dengan
+  shift nonaktif.
+- **PL2a: form pola roster memakai React Hook Form dan Zod**, dengan
+  pesan galat dan tampilan yang sama.
+- **PL3a: ketikan siklus di atas batas ditolak**, dan isian tetap berisi
+  nilai sah terakhir. Mengosongkan isian tidak menghapus rincian hari;
+  rincian baru disesuaikan saat siklus berisi angka sah, dan baris yang
+  ada dipertahankan beserta pilihan shift-nya.
+- **PL4a: batas siklus tetap 31 hari**, walau backend menerima sampai
+  365.
+- **PL5: halaman pola roster gudang memakai komponen yang sama dengan
+  outlet** (`dcc22e0`), mengikuti prinsip bahwa outlet dan gudang punya
+  data masing-masing. Pemisahan per ruang ditulis lengkap dengan
+  `KUNCI_LOKASI_POLA_ROSTER` bernilai null, terpisah dari
+  `KUNCI_LOKASI_SHIFT`, karena backend dapat menambahkannya di waktu yang
+  berbeda.
 
 ## Keputusan rancangan yang mengikat
 

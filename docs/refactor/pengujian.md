@@ -88,9 +88,10 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
 di spec login, satu di spec tipe aset).
 
-**Baseline per submodul shift** (commit `f99b7cf`): 291 test unit dan
-integrasi lolos di 39 berkas, 288 e2e lolos, 21 skipped: satu
-`test.fixme` bersyarat yang menunggu backend memisahkan shift per lokasi,
+**Baseline per submodul pola roster** (commit `dcc22e0`): 307 test unit
+dan integrasi lolos di 40 berkas, 293 e2e lolos, 22 skipped: dua
+`test.fixme` bersyarat yang menunggu backend memisahkan shift dan pola
+roster per lokasi,
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
 backend, sebelas `test.fixme` lain yang menunggu backend (pola roster,
 pengguna, stock opname, penerimaan, tiga di spec alur penjualan, tiga di
@@ -110,7 +111,9 @@ menambah 18 test unit dan satu skenario. Spec keuangan (`0cfb3bd`)
 menambah enam skenario, dan migrasinya (`45187b6`) menambah 22 test unit
 dan lima skenario. Spec pembanding jadwal (`d9af531`) menambah 13
 skenario. Submodul shift (`f99b7cf`) menambah 14 test unit, empat
-skenario lolos, dan satu `test.fixme` bersyarat.
+skenario lolos, dan satu `test.fixme` bersyarat. Submodul pola roster
+(`dcc22e0`) menambah 15 test unit, satu test integrasi, lima skenario
+lolos, dan satu `test.fixme` bersyarat.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -378,6 +381,14 @@ satu putaran.
   dihitung sebagai lolos kali N ditambah skipped kali N. Pesan commit
   `f99b7cf` menyebut spec shift 48 lolos, padahal hasilnya 45 lolos dan
   3 skipped.
+- Pola path `page.route` ditulis sebagai regex tanpa membedakan huruf
+  besar kecil (`/\/api\/polaroster$/i`), bukan glob string. Glob peka
+  huruf besar kecil, dan pencegat yang tidak kena gagal diam-diam: di
+  spec pola roster, `"**/api/polaRoster"` tidak mengenai path kanonik
+  `/polaroster` setelah migrasi, sehingga simulasi simpan gagal justru
+  menyimpan pola sungguhan, yang lalu dihapus lewat API (`dcc22e0`). Per
+  29 September 2026, enam `page.route` lain masih memakai glob string,
+  dan seluruhnya ber-path lowercase yang cocok dengan path kanonik.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -397,6 +408,7 @@ Menunggu perbaikan backend:
 | Tarif dilepas dari tipe aset (`reservasi/tarif/crud-tarif.spec.ts`) | Ubah tarif mengganti `tipeAsetID` alih-alih `$addToSet`, dan membersihkan cache tipe aset dengan `tenantID` yang benar (`kontrak/temuan.md` butir 54 dan 55) |
 | Timeline yang dimuat ulang tidak lagi menampilkan booking yang di-void (`reservasi/daftar/lihat-reservasi.spec.ts`) | Void penjualan membersihkan cache daftar booking per tanggal (`kontrak/temuan.md` butir 57, keputusan R3a). Badannya lengkap |
 | Shift yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/shift/crud-shift.spec.ts`) | Backend memisahkan shift per lokasi dan `KUNCI_LOKASI_SHIFT` di `features/shift/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
+| Pola yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | Backend memisahkan pola roster per lokasi dan `KUNCI_LOKASI_POLA_ROSTER` di `features/pola-roster/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
 terhitung di angka skipped pada baseline:
@@ -408,6 +420,7 @@ terhitung di angka skipped pada baseline:
 | `inventaris/penerimaanBarang/terima-penerimaan.spec.ts`, `inventaris/transferStok/*.spec.ts` | Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup. Kegagalan persiapan lain menggagalkan test, bukan melewatinya |
 | Skenario jalur terkunci di spec stok, pengajuan stok (daftar), dan stock adjustment | `IZIN_LINTAS_OUTLET` sudah diisi, sehingga Ridho memegangnya; butuh akun uji tanpa izin itu. Tidak terjadi selama konstanta null, sehingga belum terhitung di baseline |
 | Halaman shift gudang dengan keterangan pemakaian bersama (`jadwal/shift/crud-shift.spec.ts`) | `KUNCI_LOKASI_SHIFT` sudah diisi, sehingga keterangan tidak tampil lagi. Tidak terjadi selama konstanta null |
+| Halaman pola roster gudang dengan keterangan pemakaian bersama (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | `KUNCI_LOKASI_POLA_ROSTER` sudah diisi, sehingga keterangan tidak tampil lagi. Tidak terjadi selama konstanta null |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
 hapus bahan baku juga dilewati bila datanya kosong, tetapi tidak terjadi pada
@@ -485,6 +498,11 @@ Urutan debug kegagalan e2e di atas).
   (`crud-tipeAset.spec.ts` baris 267), lalu lolos 75 dari 75 dengan
   `--repeat-each 3`, dan suite penuh berikutnya bersih. Sejalan dengan
   kejadian spec tarif di atas; penyebabnya belum diketahui.
+- **Spec shift dan pola roster meninggalkan shift uji**: shift hanya
+  dapat dinonaktifkan, tidak dihapus, sehingga setiap run menambah shift
+  "Shift Ganda ..." (spec shift) dan "Shift Arsip ..." nonaktif (spec pola
+  roster), di samping shift uji lama spec shift. Pola roster uji dihapus
+  di akhir setiap skenario baru.
 - **Status aset "Digunakan" dan penghapusan aset yang punya booking**
   belum teruji. Spec daftar reservasi kini membuat booking sungguhan yang
   mencakup waktu sekarang, tetapi label status aset uji hanya dibandingkan
@@ -673,3 +691,8 @@ Urutan debug kegagalan e2e di atas).
   selama konstanta null memakai `test.skip` bersyarat, dan penolakan
   validasi browser dibuktikan lewat `validity.valid` beserta penghitung
   permintaan.
+- `tests/e2e/jadwal/pola-roster/crud-pola-roster.spec.ts` (sejak
+  `dcc22e0`): skenario migrasi berada di `describe` tersendiri yang
+  memakai helper bersama `tests/helpers`, dan data uji yang tidak dapat
+  dibuat lewat UI (pola dengan shift yang kemudian dinonaktifkan)
+  disiapkan lewat API lalu dihapus di `finally`.

@@ -202,6 +202,10 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   `tenantID` yang dapat diubah lewat `PUT /shift/:id`; beserta permintaan
   `locationID` untuk shift, pola roster, dan monitoring absensi
   (`kontrak/temuan.md` butir 8 dan 67 sampai 71)
+- Laporan submodul pola roster — 2 temuan, disusun 29 September 2026
+  setelah `dcc22e0`: `tenantID` yang dapat diubah lewat
+  `PUT /polaroster/:id`, dan cache daftar pola roster yang basi saat
+  shift diubah (`kontrak/temuan.md` butir 72 dan 73)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi
