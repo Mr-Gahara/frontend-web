@@ -1073,6 +1073,19 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   diubah keputusan (PL3a), dan satu mencegat path dengan glob yang peka
   huruf besar kecil, sehingga run pertama menyimpan data sungguhan yang
   harus dihapus lewat API.
+- **`features/` diperiksa sebelum menulis api atau hook lintas modul.**
+  Di submodul jadwal, daftar karyawan per ruang ditulis ulang di
+  `features/jadwal`, padahal `features/pengguna` sudah menyediakan
+  `useDaftarPengguna(workspace)`. Duplikasinya baru terlihat saat
+  pencarian dampak dokumen penutup, dan diperbaiki di `e2a0cfd`. Cari
+  dengan `grep -rn 'EP\.<modul>' features` sebelum menulis api baru.
+- **Blok penerap dan blok verifikasinya digabung dalam satu blok.** Di
+  Tahap B submodul jadwal, blok penerap dan blok verifikasi terpisah, dan
+  verifikasi dua kali melaporkan galat yang sama karena blok penerapnya
+  belum dijalankan. Setelah digabung, satu kali salin cukup.
+- **`awk` tidak mengenal `\b`** (di awk, `\b` adalah backspace), sehingga
+  pola seperti `/type Nama\b/` tidak pernah cocok. Pakai `[^A-Za-z]` atau
+  `grep -n` untuk menemukan barisnya.
 
 ## Kapan berhenti dan bertanya
 

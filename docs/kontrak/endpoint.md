@@ -6,7 +6,7 @@ Endpoint yang dipanggil frontend beserta auth, permission, envelope, dan bentuk 
 
 ## 3. Endpoint yang dipakai frontend
 
-Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend tetap memiliki 246 route. Audit itu sempat mencatat 247 dengan `POST /akun/owner/create-tenant`, padahal route itu dikomentari di `akunRoute.js` baris 74; `audit-endpoint.js` membaca baris komentar sampai diperbaiki pada 28 September 2026. Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258` dan `45187b6`), serta 29 September 2026 (frontend `f99b7cf` dan `dcc22e0`), menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
+Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend tetap memiliki 246 route. Audit itu sempat mencatat 247 dengan `POST /akun/owner/create-tenant`, padahal route itu dikomentari di `akunRoute.js` baris 74; `audit-endpoint.js` membaca baris komentar sampai diperbaiki pada 28 September 2026. Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258` dan `45187b6`), serta 29 September 2026 (frontend `f99b7cf`, `dcc22e0`, dan `e2a0cfd`), menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
 
 Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`; contoh `/diskon` berarti `/api/diskon`. Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom Envelope dan ID hanya terisi untuk GET yang diambil sampelnya.
 
@@ -85,11 +85,11 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/jadwalshift` | authPengguna | - | `{ data, message, success }` | `id` | 2 file |
-| POST | `/jadwalshift` | authPengguna | - | - | - | 1 file |
-| PUT | `/jadwalshift/:id` | authPengguna | - | - | - | 1 file |
-| DELETE | `/jadwalshift/:id` | authPengguna | - | - | - | 1 file |
-| POST | `/jadwalshift/bulk` | authPengguna | - | - | - | 1 file |
+| GET | `/jadwalshift` | authPengguna | - | `{ data, message, success }` | `id` | `features/jadwal/api.ts` |
+| POST | `/jadwalshift` | authPengguna | - | - | - | `features/jadwal/api.ts` |
+| PUT | `/jadwalshift/:id` | authPengguna | - | - | - | `features/jadwal/api.ts` |
+| DELETE | `/jadwalshift/:id` | authPengguna | - | - | - | `features/jadwal/api.ts` |
+| POST | `/jadwalshift/bulk` | authPengguna | - | - | - | `features/jadwal/api.ts` |
 
 #### `/jurnalstok`
 
@@ -171,7 +171,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/pengguna` | authPengguna | `read-pengguna` | `{ data, message, total }` | `id` | `features/pengguna/api.ts`, 3 file halaman lama |
+| GET | `/pengguna` | authPengguna | `read-pengguna` | `{ data, message, total }` | `id` | `features/pengguna/api.ts` |
 | GET | `/pengguna/:id` | authPengguna | `read-pengguna` | `{ data, message }` | `id` | 1 file |
 | PUT | `/pengguna/:id` | authPengguna | `update-pengguna` | - | - | `features/pengguna/api.ts`, 1 file halaman lama |
 | DELETE | `/pengguna/:id` | authPengguna | `delete-pengguna` | - | - | `features/pengguna/api.ts` |
@@ -200,7 +200,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/polaroster` | authPengguna | - | `{ data, message, success }` | `id` | `features/pola-roster/api.ts`, 3 file halaman lama |
+| GET | `/polaroster` | authPengguna | - | `{ data, message, success }` | `id` | `features/pola-roster/api.ts` |
 | POST | `/polaroster` | authPengguna | - | - | - | `features/pola-roster/api.ts` |
 | PUT | `/polaroster/:id` | authPengguna | - | - | - | `features/pola-roster/api.ts` |
 | DELETE | `/polaroster/:id` | authPengguna | - | - | - | `features/pola-roster/api.ts` |
@@ -244,7 +244,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/shift` | authPengguna | - | `{ data, message, success }` | `id` | `features/shift/api.ts`, 3 file halaman lama (query `workspace` hanya penghindar 500, `temuan.md` butir 8) |
+| GET | `/shift` | authPengguna | - | `{ data, message, success }` | `id` | `features/shift/api.ts` (query `workspace` hanya penghindar 500, `temuan.md` butir 8) |
 | POST | `/shift` | authPengguna | - | - | - | `features/shift/api.ts` |
 | PUT | `/shift/:id` | authPengguna | - | - | - | `features/shift/api.ts` |
 | DELETE | `/shift/:id` | authPengguna | - | - | - | `features/shift/api.ts` |

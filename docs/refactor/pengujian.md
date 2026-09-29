@@ -88,8 +88,8 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
 di spec login, satu di spec tipe aset).
 
-**Baseline per submodul pola roster** (commit `dcc22e0`): 307 test unit
-dan integrasi lolos di 40 berkas, 293 e2e lolos, 22 skipped: dua
+**Baseline per submodul jadwal** (commit `e2a0cfd`): 323 test unit dan
+integrasi lolos di 41 berkas, 300 e2e lolos, 22 skipped: dua
 `test.fixme` bersyarat yang menunggu backend memisahkan shift dan pola
 roster per lokasi,
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
@@ -113,7 +113,9 @@ dan lima skenario. Spec pembanding jadwal (`d9af531`) menambah 13
 skenario. Submodul shift (`f99b7cf`) menambah 14 test unit, empat
 skenario lolos, dan satu `test.fixme` bersyarat. Submodul pola roster
 (`dcc22e0`) menambah 15 test unit, satu test integrasi, lima skenario
-lolos, dan satu `test.fixme` bersyarat.
+lolos, dan satu `test.fixme` bersyarat. Submodul jadwal (`19227f8` dan
+`e2a0cfd`) menambah 15 test unit, satu test integrasi, dan tujuh
+skenario lolos.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -500,9 +502,11 @@ Urutan debug kegagalan e2e di atas).
   kejadian spec tarif di atas; penyebabnya belum diketahui.
 - **Spec shift dan pola roster meninggalkan shift uji**: shift hanya
   dapat dinonaktifkan, tidak dihapus, sehingga setiap run menambah shift
-  "Shift Ganda ..." (spec shift) dan "Shift Arsip ..." nonaktif (spec pola
-  roster), di samping shift uji lama spec shift. Pola roster uji dihapus
-  di akhir setiap skenario baru.
+  "Shift Ganda ..." (spec shift), serta "Shift Arsip ..." dan "Shift
+  Arsip Generate ..." nonaktif (spec pola roster dan generate jadwal), di
+  samping shift uji lama spec shift. Fixture "E2E Jadwal Siang" dibuat
+  sekali lalu dipakai ulang. Pola roster uji dihapus di akhir setiap
+  skenario baru.
 - **Status aset "Digunakan" dan penghapusan aset yang punya booking**
   belum teruji. Spec daftar reservasi kini membuat booking sungguhan yang
   mencakup waktu sekarang, tetapi label status aset uji hanya dibandingkan
@@ -696,3 +700,8 @@ Urutan debug kegagalan e2e di atas).
   memakai helper bersama `tests/helpers`, dan data uji yang tidak dapat
   dibuat lewat UI (pola dengan shift yang kemudian dinonaktifkan)
   disiapkan lewat API lalu dihapus di `finally`.
+- `tests/e2e/jadwal/jadwal/` (sejak `19227f8`): penolakan backend (J2a)
+  dibuktikan dengan fixture shift kedua yang jamnya bertumpuk
+  (`pastikanShiftSiang`), bukan dengan respons tiruan, dan penahanan
+  simpan (GN2a) dibuktikan dengan penghitung permintaan bulk yang tetap
+  nol.

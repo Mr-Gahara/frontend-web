@@ -20,6 +20,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 28 September 2026: ringkasan laba rugi setelah migrasi modul keuangan (`45187b6`), tanpa perubahan gate. Halaman akun kas dan mutasi arus kas bukan menu sidebar (dibuka lewat tab keuangan) dan bergate `read-akunkas` di `IZIN_HALAMAN`.
 - 29 September 2026: jadwal outlet dan jadwal gudang, yang ternyata sudah bergate `read-pengguna` di `IZIN_HALAMAN` sejak Fase 2, serta shift outlet dan shift gudang setelah migrasi submodul shift (`f99b7cf`).
 - 29 September 2026: pola roster outlet dan pola roster gudang setelah migrasi submodul pola roster (`dcc22e0`).
+- 29 September 2026: jadwal dan generate jadwal outlet dan gudang setelah migrasi submodul kalender dan generate (`19227f8`); generate outlet mendapat entri `IZIN_HALAMAN`, dan generate gudang dibuat.
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -45,6 +46,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/inventaris/pengajuanStok` | `read-pengajuan-stok`, `read-location` | `/pengajuanstok`, `/location`, `/location/current` | `read-pengajuan-stok`, `read-location` | Sejalan |
 | `/dashboard/outlet/inventaris/penerimaanBarang` | `read-location`, `read-transfer-stok` | `/location`, `/location/current`, `/transferstok` | `read-location`, `read-transfer-stok` | Sejalan |
 | `/dashboard/outlet/jadwal` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Sejalan; baris ini sempat tertinggal dari `IZIN_HALAMAN` (dikoreksi 29 September 2026) |
+| `/dashboard/outlet/jadwal/generate` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift/bulk` | `read-pengguna` | Sejalan; entri `IZIN_HALAMAN` ditambahkan di `19227f8` |
 | `/dashboard/outlet/pola-roster` | - | `/shift`, `/polaroster` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/shift` | - | `/shift` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/pelanggan` | `read-pelanggan` | `/pelanggan` | - | Backend tidak memeriksa izin |
@@ -59,6 +61,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/gudang/transferStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/gudang/pengirimanStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/gudang/jadwal` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Sejalan; baris ini sempat tertinggal dari `IZIN_HALAMAN` (dikoreksi 29 September 2026) |
+| `/dashboard/gudang/jadwal/generate` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift/bulk` | `read-pengguna` | Sejalan; halaman dibuat di `19227f8` (keputusan J5b dan JD13c) |
 | `/dashboard/gudang/pola-roster` | - | `/shift`, `/polaroster` | - | Backend tidak memeriksa izin; halaman dibuat di `dcc22e0` (keputusan PL5) |
 | `/dashboard/gudang/shift` | - | `/shift` | - | Backend tidak memeriksa izin; halaman dibuat di `f99b7cf` (keputusan SH1b) |
 | `/dashboard/gudang/pengguna` | `read-pengguna`, `read-role` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sejalan |

@@ -558,6 +558,29 @@ keputusan rancangan butir 17 dan 21.
   `KUNCI_LOKASI_POLA_ROSTER` bernilai null, terpisah dari
   `KUNCI_LOKASI_SHIFT`, karena backend dapat menambahkannya di waktu yang
   berbeda.
+- **JD5a: jadwal libur tampil LIBUR** di sel kalender (`19227f8`), berbeda
+  dari sel tanpa jadwal yang tetap tanda hubung.
+- **JD6a: simpan jadwal beruntun dengan satu ringkasan.** Ubah jadwal satu
+  hari dijalankan sebagai langkah berurutan (`rencanaSimpanJadwal`); bila
+  satu langkah gagal, dialog bertahan, pesan menyebut langkahnya, dan
+  kalender dimuat ulang.
+- **JD8a: form jadwal memakai React Hook Form dan Zod** dengan
+  `PilihTanggal`, dan tampilannya dipertahankan.
+- **JD13c: submodul kalender dan generate digabung** dalam satu commit,
+  agar Auto-Generate gudang tidak pernah menuju halaman yang belum ada.
+- **JD14a: `PenggunaItem` dilengkapi `role` opsional** sesuai kontrak
+  `GET /pengguna` (`e2a0cfd`); kalender dan generate membaca `role`, lalu
+  `roleID.namaRole`, lalu tanda hubung. Perilaku halaman pengguna tidak
+  berubah.
+- **GN2a: hari pola dengan shift nonaktif atau hilang ditandai di pratinjau
+  generate, dan simpan ditahan**, karena backend melewati entri itu tanpa
+  mencatatnya (`kontrak/temuan.md` butir 62).
+- **GN4a: langkah 1 generate memakai React Hook Form dan Zod** dengan
+  `PilihTanggal` dan kotak centang berlabel.
+- Diterapkan dari keputusan sebelumnya tanpa ditanyakan ulang (`19227f8`):
+  J1a, J2a, J5b, penanda shift nonaktif di form jadwal seperti PL1a,
+  catatan yang dimuat ke form ubah, galat keempat sumber data, dan
+  aksesibilitas sel serta pilihan status.
 
 ## Keputusan rancangan yang mengikat
 
