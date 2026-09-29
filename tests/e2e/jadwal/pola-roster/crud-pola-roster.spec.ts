@@ -1,4 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
+import { api, BASIS, bukaDenganAuth, JAWAB_GAGAL, login as loginUji } from "../../../helpers/transfer-uji";
+import { cocok } from "../../../helpers/reservasi-uji";
+import { polaTerpisahPerRuang } from "@/features/pola-roster/ruang";
 
 // ============================================================
 // CONFIG & CONSTANTS
@@ -180,7 +183,7 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
   test("simpan gagal: dialog tetap terbuka dan toast Gagal Menyimpan tampil", async ({
     page,
   }) => {
-    await page.route("**/api/polaRoster", (route) => {
+    await page.route(/\/api\/polaroster$/i, (route) => {
       if (route.request().method() !== "POST") return route.continue();
       return route.fulfill({
         status: 400,
@@ -260,8 +263,12 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
     const dialog = page.getByRole("dialog");
     const inputSiklus = dialog.locator('input[type="text"]').last();
 
-    await test.step("Maksimal siklus adalah 31 hari", async () => {
+    // Keputusan PL3a: ketikan yang membuat siklus melebihi 31 ditolak, dan
+    // isian tetap berisi nilai sah terakhir. Form lama memaksanya menjadi 31.
+    await test.step("Siklus di atas 31 ditolak, 31 diterima", async () => {
       await inputSiklus.fill("99");
+      await expect(inputSiklus).toHaveValue("7");
+      await inputSiklus.fill("31");
       await expect(inputSiklus).toHaveValue("31");
       // UI harus memunculkan 31 baris rincian
       await expect(dialog.getByText(/31 Hari Terdeteksi/i)).toBeVisible();
@@ -302,5 +309,150 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
 
     await expect(alertDialog).toBeHidden();
     await expect(row).toBeVisible();
+  });
+});
+
+// ============================================================
+// MIGRASI features/pola-roster (keputusan PL1a sampai PL5)
+// ============================================================
+test.describe("E2E - Pola Roster setelah migrasi features/pola-roster", () => {
+  const URL_POLA = `${BASIS}/dashboard/outlet/pola-roster`;
+  const URL_POLA_GUDANG = `${BASIS}/dashboard/gudang/pola-roster`;
+  const POLA_DAFTAR_POLA = /\/api\/polaroster(\?|$)/i;
+  const POLA_BUAT_POLA = /\/api\/polaroster$/i;
+
+  test.beforeEach(async ({ page }) => {
+    await loginUji(page);
+  });
+
+  test("gagal memuat: tabel menampilkan pesan galat", async ({ page }) => {
+    await page.goto(URL_POLA);
+    await page.route(POLA_DAFTAR_POLA, (route) =>
+      route.request().method() === "GET" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
+    );
+    try {
+      await page.reload();
+      await expect(page.getByText(/gagal memuat data pola roster/i)).toBeVisible({ timeout: 20_000 });
+    } finally {
+      await page.unroute(POLA_DAFTAR_POLA);
+    }
+  });
+
+  test("siklus di atas 31 ditolak, dan mengosongkan siklus tidak menghapus rincian (keputusan PL3a)", async ({
+    page,
+  }) => {
+    await page.goto(URL_POLA);
+    await page.getByRole("button", { name: /buat pola roster/i }).click();
+    const dialog = page.getByRole("dialog");
+    const siklus = dialog.getByLabel("Siklus (Hari)");
+    await expect(siklus).toHaveValue("7");
+    await siklus.fill("32");
+    await expect(siklus).toHaveValue("7");
+    await expect(dialog.getByText("7 Hari Terdeteksi")).toBeVisible();
+    await siklus.fill("");
+    await expect(siklus).toHaveValue("");
+    await expect(dialog.getByText("7 Hari Terdeteksi")).toBeVisible();
+    await siklus.fill("3");
+    await expect(dialog.getByText("3 Hari Terdeteksi")).toBeVisible();
+  });
+
+  test("pola yang memakai shift nonaktif menampilkan nama shift dengan penanda (keputusan PL1a)", async ({
+    page,
+  }) => {
+    const auth = await bukaDenganAuth(page, URL_POLA);
+    const akhiran = Date.now();
+    const namaShift = `Shift Arsip ${akhiran}`;
+    const namaPola = `Pola Arsip ${akhiran}`;
+    const shift = await api<{ id: string }>(page, auth, "POST", "/shift", {
+      namaShift,
+      jamMasuk: "07:00",
+      jamPulang: "15:00",
+      isLintasHari: false,
+      toleransiTerlambat: 0,
+      status: "Aktif",
+    });
+    expect(shift.status, `POST /shift: ${shift.pesan}`).toBe(201);
+    const pola = await api<{ id: string }>(page, auth, "POST", "/polaroster", {
+      namaPola,
+      siklusHari: 1,
+      detailSiklus: [{ hariKe: 1, isLibur: false, shiftID: shift.data.id }],
+    });
+    expect(pola.status, `POST /polaroster: ${pola.pesan}`).toBe(201);
+    try {
+      const nonaktif = await api<unknown>(page, auth, "DELETE", `/shift/${shift.data.id}`);
+      expect(nonaktif.status, `DELETE /shift: ${nonaktif.pesan}`).toBe(200);
+      await page.reload();
+      const baris = page.locator("tbody tr").filter({ hasText: namaPola });
+      await expect(baris).toContainText(`${namaShift} (nonaktif)`, { timeout: 15_000 });
+    } finally {
+      const hapus = await api<unknown>(page, auth, "DELETE", `/polaroster/${pola.data.id}`);
+      expect.soft(hapus.status, `DELETE /polaroster: ${hapus.pesan}`).toBe(200);
+    }
+  });
+
+  test("nama pola ganda ditolak dengan pesan, dan dialog tetap terbuka", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_POLA);
+    const namaPola = `Pola Ganda ${Date.now()}`;
+    const pola = await api<{ id: string }>(page, auth, "POST", "/polaroster", {
+      namaPola,
+      siklusHari: 1,
+      detailSiklus: [{ hariKe: 1, isLibur: true }],
+    });
+    expect(pola.status, `POST /polaroster: ${pola.pesan}`).toBe(201);
+    try {
+      await page.reload();
+      await page.getByRole("button", { name: /buat pola roster/i }).click();
+      const dialog = page.getByRole("dialog");
+      await dialog.getByLabel("Nama Pola Roster").fill(namaPola);
+      const tunggu = page.waitForResponse(cocok("POST", POLA_BUAT_POLA));
+      await dialog.getByRole("button", { name: /simpan pola roster/i }).click();
+      const res = await tunggu;
+      const body = await res.json().catch(() => ({}));
+      expect(
+        [400, 409],
+        `POST /polaroster nama ganda: ${res.status()} ${JSON.stringify(body).slice(0, 200)}`,
+      ).toContain(res.status());
+      expect(String(body.message ?? ""), "pesan tidak membocorkan galat MongoDB").not.toMatch(/E11000/);
+      await expect(page.getByText("Gagal Menyimpan")).toBeVisible();
+      await expect(dialog).toBeVisible();
+    } finally {
+      const hapus = await api<unknown>(page, auth, "DELETE", `/polaroster/${pola.data.id}`);
+      expect.soft(hapus.status, `DELETE /polaroster: ${hapus.pesan}`).toBe(200);
+    }
+  });
+
+  test("halaman pola roster gudang memuat daftar dengan keterangan pemakaian bersama (keputusan PL5)", async ({
+    page,
+  }) => {
+    test.skip(polaTerpisahPerRuang(), "Keterangan hanya tampil selama pola roster belum terpisah per ruang");
+    const tunggu = page.waitForResponse(cocok("GET", POLA_DAFTAR_POLA));
+    await page.goto(URL_POLA_GUDANG);
+    const data = ((await (await tunggu).json()).data ?? []) as unknown[];
+    await expect(page.getByRole("heading", { name: /pola roster gudang/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/masih dipakai bersama ruang outlet dan gudang/i)).toBeVisible();
+    await expect(page.locator("tbody tr")).toHaveCount(Math.max(data.length, 1));
+  });
+
+  test("pola yang dibuat di ruang outlet tidak tampil di ruang gudang (keputusan PL5)", async ({ page }) => {
+    test.fixme(
+      !polaTerpisahPerRuang(),
+      "Menunggu backend memisahkan pola roster per lokasi (KUNCI_LOKASI_POLA_ROSTER di features/pola-roster/ruang.ts)",
+    );
+    const auth = await bukaDenganAuth(page, URL_POLA);
+    const namaPola = `Pola Ruang ${Date.now()}`;
+    await page.getByRole("button", { name: /buat pola roster/i }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Nama Pola Roster").fill(namaPola);
+    await dialog.getByRole("button", { name: /simpan pola roster/i }).click();
+    await expect(dialog).toBeHidden({ timeout: 10_000 });
+    const daftar = await api<{ id: string; namaPola: string }[]>(page, auth, "GET", "/polaroster");
+    const dibuat = daftar.data.find((p) => p.namaPola === namaPola);
+    try {
+      await page.goto(URL_POLA_GUDANG);
+      await expect(page.getByRole("heading", { name: /pola roster gudang/i })).toBeVisible({ timeout: 15_000 });
+      await expect(page.locator("tbody tr").filter({ hasText: namaPola })).toHaveCount(0);
+    } finally {
+      if (dibuat) await api<unknown>(page, auth, "DELETE", `/polaroster/${dibuat.id}`);
+    }
   });
 });

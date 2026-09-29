@@ -14,10 +14,8 @@ import { shiftApi } from "./api";
 import { payloadShift } from "./payload";
 import { filterDaftarShift, shiftTerpisahPerRuang, type RuangShift } from "./ruang";
 import type { NilaiFormShift } from "./schema";
-import { useDaftarLokasi, useLokasiAktif } from "@/features/inventaris/hooks";
+import { useLokasiRuang, type LokasiRuang } from "@/features/inventaris/hooks";
 import { queryKeys } from "@/lib/queryKeys";
-
-type LokasiRuang = { lokasiId: string | null; memuat: boolean; gagal: boolean };
 
 /**
  * Lokasi ruang untuk memisahkan shift: outlet tenant untuk ruang outlet, dan
@@ -26,18 +24,7 @@ type LokasiRuang = { lokasiId: string | null; memuat: boolean; gagal: boolean };
  * daftar kosong seolah-olah belum ada shift.
  */
 function useLokasiRuangShift(ruang: RuangShift): LokasiRuang {
-  const terpisah = shiftTerpisahPerRuang();
-  const outlet = useLokasiAktif({ aktif: terpisah && ruang === "outlet" });
-  const daftar = useDaftarLokasi({ aktif: terpisah && ruang === "gudang" });
-  if (!terpisah) return { lokasiId: null, memuat: false, gagal: false };
-  const kueri = ruang === "outlet" ? outlet : daftar;
-  // useLokasiAktif mengembalikan lokasiId "" bila tenant belum punya outlet.
-  const lokasiId =
-    ruang === "outlet"
-      ? outlet.lokasiId || null
-      : (daftar.data?.find((l) => l.tipe === "Gudang")?.id ?? null);
-  const memuat = kueri.isLoading;
-  return { lokasiId, memuat, gagal: kueri.isError || (!memuat && lokasiId === null) };
+  return useLokasiRuang(ruang, { aktif: shiftTerpisahPerRuang() });
 }
 
 export function useDaftarShift(ruang: RuangShift) {

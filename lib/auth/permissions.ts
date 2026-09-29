@@ -136,6 +136,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/gudang/pengirimanStok": [IZIN.transferStok],
   "/dashboard/gudang/jadwal": [IZIN.pengguna],
   "/dashboard/gudang/shift": [],
+  "/dashboard/gudang/pola-roster": [],
   "/dashboard/gudang/pengguna": [IZIN.pengguna, IZIN.role],
   "/dashboard/gudang/pengaturan": [],
 };

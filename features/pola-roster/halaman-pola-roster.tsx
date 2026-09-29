@@ -21,16 +21,19 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import { PolaRosterItem, PolaRosterRequest } from "@/types/pola-roster";
-import { MasterShiftItem } from "@/types/jadwal";
-import { PolaFormDialog } from "./pola-form-dialog";
-import { PolaDeleteDialog } from "./pola-delete-dialog";
+import type { PolaRosterItem, PolaRosterRequest } from "@/types/pola-roster";
+import type { ShiftItem } from "@/types/shift";
+import { PolaFormDialog } from "./form-pola-roster";
+import { PolaDeleteDialog } from "./dialog-hapus-pola-roster";
+import { labelShiftPola, teksLabelShift } from "./payload";
+import { polaTerpisahPerRuang, type RuangPolaRoster } from "./ruang";
 
 interface PolaUtamaProps {
-  tipeRuang: "outlet" | "gudang";
+  tipeRuang: RuangPolaRoster;
   dataPola: PolaRosterItem[];
-  masterShiftList: MasterShiftItem[];
+  shiftList: ShiftItem[];
   isLoading: boolean;
+  isError: boolean;
   onSave: (data: PolaRosterRequest, id?: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   isSaving?: boolean;
@@ -40,8 +43,9 @@ interface PolaUtamaProps {
 export default function PolaUtama({
   tipeRuang,
   dataPola,
-  masterShiftList,
+  shiftList,
   isLoading,
+  isError,
   onSave,
   onDelete,
   isSaving = false,
@@ -61,12 +65,6 @@ export default function PolaUtama({
     );
   }, [dataPola, searchQuery]);
 
-  // --- HELPER: GET NAMA SHIFT ---
-  const getShiftLabel = (shiftID: string) => {
-    const shift = masterShiftList.find((s) => s.id === shiftID);
-    return shift ? shift.nama : "Tidak Diketahui";
-  };
-
   return (
     <div className="flex flex-col gap-6 w-full max-w-[95vw] mx-auto">
       {/* 1. HEADER & TOOLBAR */}
@@ -78,6 +76,12 @@ export default function PolaUtama({
           <p className="text-sm text-[#041E3F]/60 font-medium">
             Kelola template siklus kerja untuk auto-generate jadwal.
           </p>
+          {!polaTerpisahPerRuang() && (
+            <p className="text-xs text-[#041E3F]/50 font-semibold">
+              Daftar pola roster masih dipakai bersama ruang outlet dan gudang
+              sampai backend mendukung pola roster per lokasi.
+            </p>
+          )}
         </div>
 
         <Button
@@ -99,6 +103,7 @@ export default function PolaUtama({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari nama pola..."
+            aria-label="Cari nama pola"
             className="pl-9 h-11 bg-[#FFFAF3] border-[#041E3F]/15 text-[#041E3F] focus-visible:ring-[#041E3F]/50 rounded-xl font-medium"
           />
         </div>
@@ -138,19 +143,31 @@ export default function PolaUtama({
                     </div>
                   </td>
                 </tr>
+              ) : isError ? (
+                <tr>
+                  <td
+                    colSpan={4}
+                    role="alert"
+                    className="h-32 text-center align-middle text-red-600 text-sm font-bold"
+                  >
+                    Gagal memuat data pola roster atau master shift. Muat ulang halaman untuk mencoba lagi.
+                  </td>
+                </tr>
               ) : filteredData.length === 0 ? (
                 <tr>
                   <td
                     colSpan={4}
                     className="h-32 text-center align-middle text-[#041E3F]/50 text-sm font-bold"
                   >
-                    Tidak ada pola roster yang ditemukan.
+                    {dataPola.length === 0
+                      ? "Belum ada pola roster."
+                      : "Tidak ada pola roster yang cocok dengan pencarian."}
                   </td>
                 </tr>
               ) : (
                 filteredData.map((pola) => (
                   <tr
-                    key={pola.id || pola._id}
+                    key={pola.id}
                     className="hover:bg-[#041E3F]/2 transition-colors group"
                   >
                     <td className="p-4">
@@ -190,7 +207,7 @@ export default function PolaUtama({
                           >
                             {detail.isLibur
                               ? "OFF"
-                              : getShiftLabel(detail.shiftID || "")}
+                              : teksLabelShift(labelShiftPola(detail, shiftList))}
                           </div>
                         ))}
                       </div>
@@ -202,6 +219,7 @@ export default function PolaUtama({
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label="Buka menu"
                             className="h-8 w-8 text-[#041E3F]/50 hover:text-[#041E3F] hover:bg-[#041E3F]/10 cursor-pointer"
                           >
                             <MoreHorizontal className="h-5 w-5" />
@@ -247,11 +265,11 @@ export default function PolaUtama({
         open={formOpen}
         onOpenChange={setFormOpen}
         editTarget={selectedPola}
-        masterShiftList={masterShiftList}
+        shiftList={shiftList}
         onSubmit={async (data) => {
           try {
             // [PERBAIKAN] Gunakan await agar dialog menunggu API selesai
-            await onSave(data, selectedPola?.id || selectedPola?._id);
+            await onSave(data, selectedPola?.id);
             setFormOpen(false); // Hanya tertutup jika API sukses
           } catch {
             // Jika API gagal (misal 500 error), dialog tetap terbuka
@@ -267,7 +285,7 @@ export default function PolaUtama({
         onConfirm={async () => {
           try {
             // [PERBAIKAN] Gunakan await
-            await onDelete(selectedPola?.id || selectedPola?._id || "");
+            await onDelete(selectedPola?.id ?? "");
             setDeleteOpen(false); // Hanya tertutup jika API sukses
           } catch {
             // Jika API gagal, dialog tetap terbuka

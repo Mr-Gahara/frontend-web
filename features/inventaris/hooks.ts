@@ -165,3 +165,31 @@ export function useCakupanLokasiOutlet(opsi: OpsiKueri = {}): CakupanLokasiOutle
     [sedangMemuat, lintasOutlet, daftar.data, daftar.isError, aktif.lokasi, aktif.isLoading, aktif.isError],
   );
 }
+
+/** Keadaan lokasi satu ruang kerja; lokasiId null berarti belum ada atau tidak dipakai. */
+export type LokasiRuang = { lokasiId: string | null; memuat: boolean; gagal: boolean };
+
+/**
+ * Lokasi satu ruang kerja: outlet tenant untuk ruang outlet, dan lokasi
+ * Gudang pertama untuk ruang gudang (model MVP). Dipakai untuk memisahkan
+ * data per ruang (shift, pola roster) begitu backend mendukungnya. aktif
+ * false berarti pemisahan belum didukung, sehingga tidak ada permintaan
+ * lokasi. Lokasi yang sudah termuat tetapi tidak ada dianggap gagal, agar
+ * halaman tidak menampilkan daftar kosong seolah-olah belum ada data.
+ */
+export function useLokasiRuang(
+  ruang: "outlet" | "gudang",
+  { aktif = true }: OpsiKueri = {},
+): LokasiRuang {
+  const outlet = useLokasiAktif({ aktif: aktif && ruang === "outlet" });
+  const daftar = useDaftarLokasi({ aktif: aktif && ruang === "gudang" });
+  if (!aktif) return { lokasiId: null, memuat: false, gagal: false };
+  const kueri = ruang === "outlet" ? outlet : daftar;
+  // useLokasiAktif mengembalikan lokasiId "" bila tenant belum punya outlet.
+  const lokasiId =
+    ruang === "outlet"
+      ? outlet.lokasiId || null
+      : (daftar.data?.find((l) => l.tipe === "Gudang")?.id ?? null);
+  const memuat = kueri.isLoading;
+  return { lokasiId, memuat, gagal: kueri.isError || (!memuat && lokasiId === null) };
+}
