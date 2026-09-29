@@ -29,15 +29,18 @@ import {
 } from "lucide-react";
 
 // Import tipe data dan komponen anak
-import { ShiftItem, ShiftRequest } from "@/types/shift";
-import { ShiftFormDialog } from "./shift-form-dialog";
-import { ShiftDeleteDialog } from "./shift-delete-dialog";
+import type { ShiftItem } from "@/types/shift";
+import { ShiftFormDialog } from "./form-shift";
+import { ShiftDeleteDialog } from "./dialog-nonaktif-shift";
+import { shiftTerpisahPerRuang, type RuangShift } from "./ruang";
+import type { NilaiFormShift } from "./schema";
 
 interface ShiftUtamaProps {
-  tipeRuang: "outlet" | "gudang";
+  tipeRuang: RuangShift;
   dataShift: ShiftItem[];
   isLoading: boolean;
-  onSave: (data: ShiftRequest, id?: string) => Promise<void>;
+  isError: boolean;
+  onSave: (nilai: NilaiFormShift, id?: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   isSaving?: boolean;
   isDeleting?: boolean;
@@ -47,6 +50,7 @@ export default function ShiftUtama({
   tipeRuang,
   dataShift,
   isLoading,
+  isError,
   onSave,
   onDelete,
   isSaving = false,
@@ -93,10 +97,10 @@ export default function ShiftUtama({
     setDeleteOpen(true);
   };
 
-  const handleFormSubmit = async (data: ShiftRequest) => {
+  const handleFormSubmit = async (nilai: NilaiFormShift) => {
     // Jika ada selectedShift, berarti Edit (kirim ID). Jika tidak, berarti Create Baru.
     try {
-      await onSave(data, selectedShift?.id || selectedShift?._id);
+      await onSave(nilai, selectedShift?.id);
       // Dialog hanya ditutup bila simpan sukses. Saat gagal, toast error
       // ditampilkan oleh onError di halaman induk dan isian form tetap ada.
       setFormOpen(false);
@@ -108,7 +112,7 @@ export default function ShiftUtama({
   const handleDeleteConfirm = async () => {
     if (!selectedShift) return;
     try {
-      await onDelete(selectedShift.id || selectedShift._id!);
+      await onDelete(selectedShift.id);
       setDeleteOpen(false);
     } catch {
       // Error sudah ditangani onError mutation di halaman induk.
@@ -126,6 +130,12 @@ export default function ShiftUtama({
           <p className="text-sm text-[#041E3F]/60 font-medium">
             Kelola jam operasional, toleransi keterlambatan, dan status shift.
           </p>
+          {!shiftTerpisahPerRuang() && (
+            <p className="text-xs text-[#041E3F]/50 font-semibold">
+              Daftar shift masih dipakai bersama ruang outlet dan gudang sampai
+              backend mendukung shift per lokasi.
+            </p>
+          )}
         </div>
 
         <Button
@@ -145,6 +155,7 @@ export default function ShiftUtama({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari nama shift..."
+            aria-label="Cari nama shift"
             className="pl-9 h-11 bg-[#FFFAF3] border-[#041E3F]/15 text-[#041E3F] focus-visible:ring-[#041E3F]/50 rounded-xl font-medium"
           />
         </div>
@@ -153,9 +164,12 @@ export default function ShiftUtama({
         <div className="w-full sm:w-48">
           <Select
             value={filterStatus}
-            onValueChange={(val: any) => setFilterStatus(val)}
+            onValueChange={(val) => setFilterStatus(val as "Semua" | "Aktif" | "Non-Aktif")}
           >
-            <SelectTrigger className="w-full bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus:ring-[#041E3F]/50 font-bold h-11 rounded-xl px-4">
+            <SelectTrigger
+              aria-label="Filter status shift"
+              className="w-full bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus:ring-[#041E3F]/50 font-bold h-11 rounded-xl px-4"
+            >
               <SelectValue placeholder="Semua Status" />
             </SelectTrigger>
             <SelectContent className="bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F] font-medium rounded-xl">
@@ -214,19 +228,31 @@ export default function ShiftUtama({
                     </div>
                   </td>
                 </tr>
+              ) : isError ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    role="alert"
+                    className="h-32 text-center align-middle text-red-600 text-sm font-bold"
+                  >
+                    Gagal memuat data shift. Muat ulang halaman untuk mencoba lagi.
+                  </td>
+                </tr>
               ) : filteredData.length === 0 ? (
                 <tr>
                   <td
                     colSpan={5}
                     className="h-32 text-center align-middle text-[#041E3F]/50 text-sm font-bold"
                   >
-                    Tidak ada data shift yang ditemukan.
+                    {dataShift.length === 0
+                      ? "Belum ada master shift."
+                      : "Tidak ada shift yang cocok dengan pencarian atau filter."}
                   </td>
                 </tr>
               ) : (
                 filteredData.map((shift) => (
                   <tr
-                    key={shift.id || shift._id}
+                    key={shift.id}
                     className="hover:bg-[#041E3F]/2 transition-colors group"
                   >
                     {/* Kolom Nama */}

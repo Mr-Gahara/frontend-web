@@ -1,4 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
+import { JAWAB_GAGAL } from "../../../helpers/transfer-uji";
+import { cocok, pantauPermintaan } from "../../../helpers/reservasi-uji";
+import { shiftTerpisahPerRuang } from "@/features/shift/ruang";
 
 // ============================================================
 // CONFIG & CONSTANTS
@@ -297,13 +300,20 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     const dialog = page.getByRole("dialog");
     const timeInputs = dialog.locator('input[type="text"]');
 
-    await test.step("Maksimal nilai jam adalah 23", async () => {
+    // Keputusan K-TW4a (InputWaktu): ketikan yang melebihi batas ditolak,
+    // dan isian tetap berisi nilai sah terakhir. Form lama memaksanya
+    // menjadi batas (99 menjadi 23).
+    await test.step("Jam di atas 23 ditolak, nilai sah diterima", async () => {
       await timeInputs.nth(0).fill("99");
+      await expect(timeInputs.nth(0)).toHaveValue("");
+      await timeInputs.nth(0).fill("23");
       await expect(timeInputs.nth(0)).toHaveValue("23");
     });
 
-    await test.step("Maksimal nilai menit adalah 59", async () => {
+    await test.step("Menit di atas 59 ditolak, nilai sah diterima", async () => {
       await timeInputs.nth(1).fill("99");
+      await expect(timeInputs.nth(1)).toHaveValue("");
+      await timeInputs.nth(1).fill("59");
       await expect(timeInputs.nth(1)).toHaveValue("59");
     });
 
@@ -533,6 +543,9 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
       .click();
     await dialog.getByRole("button", { name: /simpan master shift/i }).click();
 
+    // Dialog baru tertutup setelah daftar dimuat ulang (features/shift), dan
+    // klik di luar dialog modal yang masih terbuka hanya menutupnya.
+    await expect(dialog).toBeHidden({ timeout: 10_000 });
     // 3. Verifikasi pindah ke tab non-aktif
     await page.getByRole("combobox").first().click(); // Dropdown filter di luar
     await page.getByRole("option", { name: /^non-aktif$/i }).click();
@@ -540,5 +553,102 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     const inactiveRow = getShiftRow(page, namaShift);
     await expect(inactiveRow).toBeVisible({ timeout: 10_000 });
     await expect(inactiveRow).toContainText("Non-Aktif");
+  });
+
+  // ----------------------------------------------------------
+  // [11] MIGRASI features/shift (keputusan SH1b sampai SH4a)
+  // ----------------------------------------------------------
+  const POLA_DAFTAR_SHIFT = /\/api\/shift\?/i;
+  const POLA_BUAT_SHIFT = /\/api\/shift$/i;
+
+  async function buatShiftLewatUi(page: Page, namaShift: string) {
+    await bukaTambahShift(page);
+    const dialog = page.getByRole("dialog");
+    await dialog.getByPlaceholder(/contoh: shift pagi/i).fill(namaShift);
+    await isiWaktuShift(dialog, { inJam: "08", inMnt: "00", outJam: "16", outMnt: "00" });
+    await dialog.getByRole("button", { name: /simpan master shift/i }).click();
+    await expect(dialog).toBeHidden({ timeout: 10_000 });
+  }
+
+  test("gagal memuat: tabel menampilkan pesan galat, bukan daftar kosong", async ({ page }) => {
+    await page.route(POLA_DAFTAR_SHIFT, (route) =>
+      route.request().method() === "GET" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
+    );
+    try {
+      await page.reload();
+      await expect(page.getByText(/gagal memuat data shift/i)).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByText("Belum ada master shift.")).toHaveCount(0);
+    } finally {
+      await page.unroute(POLA_DAFTAR_SHIFT);
+    }
+  });
+
+  test("toleransi desimal ditolak tanpa mengirim permintaan (keputusan SH4a)", async ({ page }) => {
+    await bukaTambahShift(page);
+    const dialog = page.getByRole("dialog");
+    await dialog.getByPlaceholder(/contoh: shift pagi/i).fill(`Shift Desimal ${Date.now()}`);
+    await isiWaktuShift(dialog, { inJam: "08", inMnt: "00", outJam: "16", outMnt: "00" });
+    const toleransi = dialog.locator('input[type="number"]');
+    await toleransi.fill("1.5");
+    const pantau = pantauPermintaan(page, "POST", POLA_BUAT_SHIFT);
+    try {
+      await dialog.getByRole("button", { name: /simpan master shift/i }).click();
+      expect(await toleransi.evaluate((el: HTMLInputElement) => el.validity.valid)).toBe(false);
+      await expect(dialog).toBeVisible();
+      expect(pantau.jumlah(), "tidak ada POST /shift").toBe(0);
+    } finally {
+      pantau.lepas();
+    }
+  });
+
+  test("nama shift ganda ditolak dengan pesan, dan dialog tetap terbuka", async ({ page }) => {
+    const namaShift = `Shift Ganda ${Date.now()}`;
+    await buatShiftLewatUi(page, namaShift);
+    await bukaTambahShift(page);
+    const dialog = page.getByRole("dialog");
+    await dialog.getByPlaceholder(/contoh: shift pagi/i).fill(namaShift);
+    await isiWaktuShift(dialog, { inJam: "09", inMnt: "00", outJam: "17", outMnt: "00" });
+    const tunggu = page.waitForResponse(cocok("POST", POLA_BUAT_SHIFT));
+    await dialog.getByRole("button", { name: /simpan master shift/i }).click();
+    const res = await tunggu;
+    const body = await res.json().catch(() => ({}));
+    expect(
+      [400, 409],
+      `POST /shift nama ganda: ${res.status()} ${JSON.stringify(body).slice(0, 200)}`,
+    ).toContain(res.status());
+    expect(String(body.message ?? ""), "pesan tidak membocorkan galat MongoDB").not.toMatch(/E11000/);
+    await expect(page.getByText("Gagal Menyimpan")).toBeVisible();
+    await expect(dialog).toBeVisible();
+  });
+
+  test("halaman shift gudang memuat daftar dengan keterangan pemakaian bersama (keputusan SH1b)", async ({
+    page,
+  }) => {
+    test.skip(shiftTerpisahPerRuang(), "Keterangan hanya tampil selama shift belum terpisah per ruang");
+    const tunggu = page.waitForResponse(cocok("GET", /\/api\/shift\?workspace=gudang/i));
+    await page.goto(`${BASE}/dashboard/gudang/shift`);
+    const data = ((await (await tunggu).json()).data ?? []) as unknown[];
+    await expect(page.getByRole("heading", { name: /master shift gudang/i })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.getByText(/masih dipakai bersama ruang outlet dan gudang/i)).toBeVisible();
+    await expect(page.locator("tbody tr")).toHaveCount(Math.max(data.length, 1));
+  });
+
+  test("shift yang dibuat di ruang outlet tidak tampil di ruang gudang (keputusan SH1b)", async ({
+    page,
+  }) => {
+    test.fixme(
+      !shiftTerpisahPerRuang(),
+      "Menunggu backend memisahkan shift per lokasi (KUNCI_LOKASI_SHIFT di features/shift/ruang.ts)",
+    );
+    const namaShift = `Shift Ruang ${Date.now()}`;
+    await buatShiftLewatUi(page, namaShift);
+    await expect(getShiftRow(page, namaShift)).toBeVisible();
+    await page.goto(`${BASE}/dashboard/gudang/shift`);
+    await expect(page.getByRole("heading", { name: /master shift gudang/i })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(getShiftRow(page, namaShift)).toHaveCount(0);
   });
 });
