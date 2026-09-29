@@ -65,8 +65,11 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Komponen tanggal dan waktu (lintas modul) | `e43e000` | Selesai |
 | Reservasi: buat reservasi | `652d669` (spec), `477f258` | Selesai |
 | Keuangan | `0cfb3bd` (spec), `45187b6` | Selesai |
-| Jadwal dan shift, termasuk pola roster dan monitoring absensi | `d9af531` (spec), `f99b7cf` (shift), `dcc22e0` (pola roster), `19227f8` dan `e2a0cfd` (jadwal) | **Berikutnya**: submodul monitoring absensi (lihat Pekerjaan berikutnya) |
-| Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), termasuk stock adjustment (`247cf2d`); `gudang/layout.tsx` dan `gudang/setup` masih memakai `apiClient`, dan layout memeriksa nama role Owner (baris 32, keputusan rancangan butir 2); pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
+| Jadwal dan shift, termasuk pola roster dan monitoring absensi | `d9af531` (spec), `f99b7cf` (shift), `dcc22e0` (pola roster), `19227f8` dan `e2a0cfd` (jadwal), `845c2cf` (monitoring absensi) | Selesai |
+| Gudang: dashboard, pengaturan, setup | - | **Berikutnya** (lihat Pekerjaan berikutnya). Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), termasuk stock adjustment (`247cf2d`); `gudang/layout.tsx` dan `gudang/setup` masih memakai `apiClient`, dan layout memeriksa nama role Owner (baris 32, keputusan rancangan butir 2); pengguna gudang ikut modul Pengguna (`7275d14`), dan jadwal, shift, serta pola roster gudang ikut modul Jadwal dan shift |
+| Pengaturan outlet: pajak dan metode pembayaran | - | Belum. Keempat halaman di `app/dashboard/outlet/pengaturan/pajak/` dan `app/dashboard/outlet/pengaturan/metodePembayaran/` masih memakai `apiClient`, `any`, dan `_id` |
+| Pelanggan dan diskon | - | Belum. `app/dashboard/outlet/pelanggan/page.tsx` dan `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`, dan `_id` |
+| Profil, login, dan sidebar | - | Belum. `app/dashboard/profil/page.tsx`, `app/login/page.tsx`, `app/login/pengguna/page.tsx`, dan `components/app-sidebar.tsx` masih memakai `apiClient` |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -74,9 +77,9 @@ Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 
-| Hal | Awal | Setelah jadwal `e2a0cfd` | Catatan |
+| Hal | Awal | Setelah absensi `845c2cf` | Catatan |
 |---|---|---|---|
-| Pemakaian `any` | 302 | 27 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
+| Pemakaian `any` | 302 | 25 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
 | Kemunculan `_id` | - | 29 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate |
 | `useAuthGuard()` berulang di halaman | 49 | 32 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, dan pola roster outlet) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
@@ -85,63 +88,62 @@ Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: modul jadwal dan shift
+## Pekerjaan berikutnya: modul Gudang
 
-Cakupan: jadwal outlet dan gudang (termasuk generate), shift, pola roster,
-dan monitoring absensi. Saat pemetaan awal (28 September 2026) cakupan ini
-18 berkas dengan total 4.138 baris, tanpa berkas di atas 700 baris. Shift
-(`f99b7cf`), pola roster (`dcc22e0`), serta kalender, kelola manual, dan
-generate jadwal (`19227f8` dan `e2a0cfd`) sudah dimigrasikan ke
-`features/shift/`, `features/pola-roster/`, dan `features/jadwal/`. Tidak
-ada lagi halaman jadwal, shift, maupun pola roster yang memakai
-`apiClient`, dan folder komponen lama keduanya (jadwal dan pola roster)
-di `components/` sudah dihapus.
+Cakupan: halaman ruang gudang yang belum dimigrasikan, yaitu layout,
+setup, dashboard, dan pengaturan. Pemetaan awal (29 September 2026):
+
+| Berkas | Baris | `apiClient` | `any` | `_id` | `queryKey` |
+|---|---|---|---|---|---|
+| `app/dashboard/gudang/layout.tsx` | 102 | 2 | 0 | 0 | 0 |
+| `app/dashboard/gudang/setup/page.tsx` | 222 | 2 | 2 | 0 | 2 |
+| `app/dashboard/gudang/page.tsx` | 9 | 0 | 0 | 0 | 0 |
+| `app/dashboard/gudang/pengaturan/page.tsx` | 8 | 0 | 0 | 0 | 0 |
+
+- Dashboard dan pengaturan gudang sudah tipis dan tidak mengimpor
+  komponen dari `components/` selain `ui`; yang dirender keduanya ikut
+  diinventaris utuh di langkah pertama.
+- Layout memuat lokasi lewat `apiClient` dan memeriksa nama role Owner
+  (keputusan rancangan butir 2); setup membuat lokasi gudang lewat
+  `POST /location`.
+- Halaman stok, pengguna, jadwal, shift, dan pola roster gudang sudah
+  dimigrasikan di modulnya masing-masing, dan tidak termasuk cakupan ini.
+
+Langkah pertama: inventaris keempat berkas di atas beserta yang
+direndernya lewat blok terminal, dengan setiap berkas dibaca penuh,
+termasuk badan spec yang menyentuhnya. `features/` diperiksa lebih dulu
+untuk api dan hook lokasi yang sudah ada (`features/inventaris`,
+`cara-kerja.md` Disiplin). Seluruh keputusan yang dibutuhkan diajukan
+sekaligus.
+
+## Catatan dari modul jadwal dan shift
+
+Modul jadwal dan shift selesai pada 29 September 2026 dalam empat
+submodul: shift (`f99b7cf`), pola roster (`dcc22e0`), kalender, kelola
+manual, dan generate jadwal (`19227f8` dan `e2a0cfd`), serta monitoring
+absensi (`845c2cf`). Spec pembandingnya di `d9af531`. Seluruh lapisan
+data kini di `features/shift/`, `features/pola-roster/`,
+`features/jadwal/`, dan `features/absensi/`, dan tidak ada lagi halaman
+modul ini yang memakai `apiClient`.
 
 - Endpoint yang terlibat: `/jadwalshift` (termasuk `bulk`), `/shift`,
   `/polaroster`, `/pengguna`, dan `/absensi/monitoring`. Route jadwal,
   shift, dan pola roster tanpa `checkPermission` (`kontrak/temuan.md`
-  butir 5); halaman jadwal dan generate jadwal outlet maupun gudang
-  bergate `read-pengguna` di `IZIN_HALAMAN`, dan enam permission jadwal
-  belum ada di seed (butir 4). `GET /shift` tanpa query string dijawab
-  500 (butir 8).
-- Edit pola roster menunggu backend (`test.fixme`, `pengujian.md`), dan
-  pola roster memakai hapus permanen (keputusan Fase 0).
-- Error ESLint warisan di test integrasi jadwal dan pola roster sudah
-  bersih sejak `19227f8` dan `dcc22e0`.
-- Spec: `tests/e2e/jadwal/jadwal/` (lihat, kelola, dan generate),
-  `tests/e2e/jadwal/pola-roster/`, dan `tests/e2e/jadwal/shift/`, dengan
-  fixture di `tests/helpers/jadwal-uji.ts`. Jalur backend `jadwalshift`
-  dipetakan di `kontrak/payload.md` dan `kontrak/temuan.md` butir 62
-  sampai 66; keputusan modul tercatat di `keputusan.md` (Modul jadwal dan
-  shift).
-
-Cakupan diperluas atas permintaan pemilik proyek (29 September 2026):
-seluruh bug, galat, dan cacat UI/UX di fitur jadwal, shift, pola roster,
-dan monitoring absensi dibereskan di modul ini. Monitoring absensi di web
-hanya `hooks/use-monitoring-absensi.ts` (`GET /absensi/monitoring` lewat
-`apiClient` lama), yang dipakai
-`components/pengguna/bento-pengguna-widget.tsx`.
-
-Modul dipecah menurut ketergantungan data (`keputusan.md`, Modul jadwal
-dan shift), masing-masing dengan inventaris, keputusan, perbaikan, commit,
-dan dokumen penutup sendiri. Submodul kalender dan generate digabung
-(keputusan JD13c), sehingga kini ada empat submodul:
-
-| No | Submodul | Commit |
-|---|---|---|
-| 1 | Shift outlet dan gudang | `f99b7cf` |
-| 2 | Pola roster outlet dan gudang | `dcc22e0` |
-| 3 | Kalender, kelola manual, dan generate jadwal, outlet dan gudang | `19227f8`, `e2a0cfd` |
-| 4 | Monitoring absensi | **Berikutnya** |
-
-Langkah berikutnya, submodul monitoring absensi: inventaris
-`hooks/use-monitoring-absensi.ts`, `components/pengguna/bento-pengguna-widget.tsx`,
-dan jalur backend `GET /absensi/monitoring` lewat blok terminal, dengan
-setiap berkas dibaca penuh, termasuk badan spec yang menyentuhnya bila
-ada. Sebelum menulis api atau hook, `features/` diperiksa lebih dulu
-untuk hook lintas modul yang sudah ada (`cara-kerja.md`, Disiplin).
-Pemisahan absensi per ruang menunggu backend (keputusan SH5a,
-`kontrak/temuan.md` butir 70).
+  butir 5); monitoring absensi memeriksa `read-absensi` di controller.
+  Halaman jadwal dan generate jadwal bergate `read-pengguna`, dan enam
+  permission jadwal belum ada di seed (butir 4). `GET /shift` tanpa
+  query string dijawab 500 (butir 8).
+- Shift, pola roster, dan absensi belum dapat dipisahkan per lokasi di
+  backend (keputusan SH5a, `kontrak/temuan.md` butir 70). Shift dan pola
+  roster menunggu lewat konstanta null; widget absensi menyaring dengan
+  karyawan ruang (AB4a).
+- Edit pola roster menunggu backend (`test.fixme`), dan pola roster
+  memakai hapus permanen (keputusan Fase 0).
+- Spec: `tests/e2e/jadwal/` (jadwal, pola roster, dan shift) dengan
+  fixture di `tests/helpers/jadwal-uji.ts`, serta
+  `tests/e2e/pengguna/absensi-widget.spec.ts`. Keputusan modul tercatat
+  di `keputusan.md` (Modul jadwal dan shift), dan laporan backend di
+  `kontrak/temuan.md` butir 62 sampai 73.
 
 ## Catatan dari modul keuangan
 

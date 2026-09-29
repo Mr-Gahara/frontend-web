@@ -88,8 +88,8 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
 di spec login, satu di spec tipe aset).
 
-**Baseline per submodul jadwal** (commit `e2a0cfd`): 323 test unit dan
-integrasi lolos di 41 berkas, 300 e2e lolos, 22 skipped: dua
+**Baseline per modul jadwal dan shift** (commit `845c2cf`): 327 test unit
+dan integrasi lolos di 43 berkas, 303 e2e lolos, 22 skipped: dua
 `test.fixme` bersyarat yang menunggu backend memisahkan shift dan pola
 roster per lokasi,
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
@@ -115,7 +115,8 @@ skenario lolos, dan satu `test.fixme` bersyarat. Submodul pola roster
 (`dcc22e0`) menambah 15 test unit, satu test integrasi, lima skenario
 lolos, dan satu `test.fixme` bersyarat. Submodul jadwal (`19227f8` dan
 `e2a0cfd`) menambah 15 test unit, satu test integrasi, dan tujuh
-skenario lolos.
+skenario lolos. Submodul monitoring absensi (`845c2cf`) menambah empat
+test unit dan tiga skenario lolos.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -705,3 +706,7 @@ Urutan debug kegagalan e2e di atas).
   (`pastikanShiftSiang`), bukan dengan respons tiruan, dan penahanan
   simpan (GN2a) dibuktikan dengan penghitung permintaan bulk yang tetap
   nol.
+- `tests/e2e/pengguna/absensi-widget.spec.ts` (sejak `845c2cf`): angka
+  widget dibandingkan dengan respons nyata monitoring yang disaring
+  karyawan ruang, dan jawaban 403 disimulasikan dengan `route.fulfill`
+  berstatus 403 untuk membuktikan pesan izin.

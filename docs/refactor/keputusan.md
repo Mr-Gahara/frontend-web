@@ -581,6 +581,22 @@ keputusan rancangan butir 17 dan 21.
   J1a, J2a, J5b, penanda shift nonaktif di form jadwal seperti PL1a,
   catatan yang dimuat ke form ubah, galat keempat sumber data, dan
   aksesibilitas sel serta pilihan status.
+- **AB3a: widget absensi menampilkan pesan izin dan galat** (`845c2cf`).
+  Jawaban 403 menampilkan pesan bahwa pengguna tidak memiliki izin melihat
+  absensi, galat lain tampil sebagai gagal memuat, dan "belum ada yang
+  absen" hanya muncul bila permintaan berhasil tanpa data. Permintaan yang
+  dijawab 403 tidak diulang.
+- **AB4a: monitoring absensi disaring dengan karyawan ruang** yang sudah
+  dimuat halaman pengguna. Staf yang terdaftar di kedua ruang tampil di
+  keduanya. Backend belum memisahkan absensi per lokasi (SH5a).
+- **AB5a: widget menampilkan yang sedang bekerja dan yang sudah absen.**
+  Angka besar adalah staf yang sedang bekerja, dengan baris jumlah staf
+  yang sudah absen hari ini; teks kosong dibedakan antara belum ada yang
+  absen dan tidak ada yang sedang bekerja.
+- Diterapkan tanpa ditanyakan (`845c2cf`): nama peran dari satu fungsi
+  `namaPeran` di `features/pengguna`, dipakai tabel pengguna, kalender
+  jadwal, dan widget (keputusan rancangan butir 12); jam masuk dalam zona
+  `Asia/Jakarta` agar label WIB selalu benar; log debug dibuang.
 
 ## Keputusan rancangan yang mengikat
 

@@ -6,7 +6,7 @@ Endpoint yang dipanggil frontend beserta auth, permission, envelope, dan bentuk 
 
 ## 3. Endpoint yang dipakai frontend
 
-Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend tetap memiliki 246 route. Audit itu sempat mencatat 247 dengan `POST /akun/owner/create-tenant`, padahal route itu dikomentari di `akunRoute.js` baris 74; `audit-endpoint.js` membaca baris komentar sampai diperbaiki pada 28 September 2026. Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258` dan `45187b6`), serta 29 September 2026 (frontend `f99b7cf`, `dcc22e0`, dan `e2a0cfd`), menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
+Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend tetap memiliki 246 route. Audit itu sempat mencatat 247 dengan `POST /akun/owner/create-tenant`, padahal route itu dikomentari di `akunRoute.js` baris 74; `audit-endpoint.js` membaca baris komentar sampai diperbaiki pada 28 September 2026. Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258` dan `45187b6`), serta 29 September 2026 (frontend `f99b7cf`, `dcc22e0`, `e2a0cfd`, dan `845c2cf`), menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
 
 Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`; contoh `/diskon` berarti `/api/diskon`. Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom Envelope dan ID hanya terisi untuk GET yang diambil sampelnya.
 
@@ -16,7 +16,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/absensi/monitoring` | authPengguna | - | `{ data }` | - | 1 file |
+| GET | `/absensi/monitoring` | authPengguna | - | `{ data }` | - | `features/absensi/api.ts` |
 
 #### `/akun`
 
@@ -305,7 +305,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat ditulis `nama{kunci}`, array ditulis `nama[]`.
 
-- `GET /absensi/monitoring`: daftar[], ringkasan{belumAbsen, sudahAbsen, totalStaf}, tanggal
+- `GET /absensi/monitoring`: daftar[], ringkasan{belumAbsen, sudahAbsen, totalStaf}, tanggal (controller memeriksa `read-absensi` sendiri dan menjawab 403 tanpa izin; service memuat seluruh staf aktif tenant tanpa pemisah ruang, `temuan.md` butir 70, menentukan hari ini dalam WIB, dan menyimpan hasilnya 30 detik di produksi)
 - `GET /akunkas`: createdAt, id, keterangan, namaAkun, nomorAkun, saldo, status, tenantID, tipeAkun, updatedAt
 - `GET /aset`: createdAt, dataAset{deskripsi, id, namaTipeAset}, id, namaAset, status, tenantID, updatedAt
 - `GET /aset/:param`: createdAt, dataAset{deskripsi, id, namaTipeAset}, id, namaAset, status, tenantID, updatedAt
