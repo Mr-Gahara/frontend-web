@@ -92,6 +92,7 @@ export const EP = {
   location: {
     list: "/location",
     current: "/location/current",
+    detail: (id: string) => `/location/${id}`,
   },
   inventory: {
     list: "/inventory",

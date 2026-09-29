@@ -1,5 +1,10 @@
 import * as z from "zod";
-import type { BuatLokasiPayload, TipeLokasi } from "@/types/location";
+import type {
+  BuatLokasiPayload,
+  Lokasi,
+  PerbaruiLokasiPayload,
+  TipeLokasi,
+} from "@/types/location";
 
 /**
  * Skema form lokasi: setup gudang (keputusan GD3a), dan kelak profil
@@ -55,14 +60,33 @@ export const NILAI_AWAL_LOKASI: NilaiFormLokasi = {
   radiusAbsen: "",
 };
 
-/** Payload POST /location dari nilai form yang sudah lolos skema. */
-export function payloadBuatLokasi(nilai: NilaiFormLokasi, tipe: TipeLokasi): BuatLokasiPayload {
+/**
+ * Nilai awal form dari lokasi tersimpan (pengaturan gudang, GD2a).
+ * koordinat.coordinates berurutan longitude, latitude (GeoJSON).
+ */
+export function nilaiAwalLokasi(lokasi: Lokasi): NilaiFormLokasi {
+  const [longitude, latitude] = lokasi.koordinat.coordinates;
+  return {
+    nama: lokasi.nama,
+    alamat: lokasi.alamat,
+    latitude: String(latitude),
+    longitude: String(longitude),
+    radiusAbsen: String(lokasi.radiusAbsen),
+  };
+}
+
+/** Payload PUT /location/:id dari nilai form yang sudah lolos skema, tanpa tipe. */
+export function payloadPerbaruiLokasi(nilai: NilaiFormLokasi): PerbaruiLokasiPayload {
   return {
     nama: nilai.nama,
-    tipe,
     alamat: nilai.alamat,
     radiusAbsen: Number(nilai.radiusAbsen),
     latitude: Number(nilai.latitude),
     longitude: Number(nilai.longitude),
   };
+}
+
+/** Payload POST /location dari nilai form yang sudah lolos skema. */
+export function payloadBuatLokasi(nilai: NilaiFormLokasi, tipe: TipeLokasi): BuatLokasiPayload {
+  return { ...payloadPerbaruiLokasi(nilai), tipe };
 }

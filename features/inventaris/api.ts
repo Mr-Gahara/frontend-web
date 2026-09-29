@@ -13,7 +13,7 @@ import type {
   TambahInventoryPayload,
   UpdateMinStockPayload,
 } from "@/types/inventory";
-import type { BuatLokasiPayload, Lokasi } from "@/types/location";
+import type { BuatLokasiPayload, Lokasi, PerbaruiLokasiPayload } from "@/types/location";
 
 /** Tanpa locationID, backend mengirim stok seluruh lokasi tenant. */
 export interface FilterInventory {
@@ -39,4 +39,6 @@ export const lokasiApi = {
   daftar: () => apiData.get<Lokasi[]>(EP.location.list),
   aktif: () => apiData.get<Lokasi>(EP.location.current),
   buat: (payload: BuatLokasiPayload) => apiData.post<Lokasi>(EP.location.list, payload),
+  perbarui: (id: string, payload: PerbaruiLokasiPayload) =>
+    apiData.put<Lokasi>(EP.location.detail(id), payload),
 };

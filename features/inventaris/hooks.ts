@@ -18,7 +18,7 @@ import { useSession } from "@/lib/auth/useSession";
 import { bolehLintasOutlet } from "@/lib/auth/permissions";
 import { tentukanCakupan, type CakupanLokasiOutlet } from "./cakupan";
 import { queryKeys } from "@/lib/queryKeys";
-import type { BuatLokasiPayload, TipeLokasi } from "@/types/location";
+import type { BuatLokasiPayload, PerbaruiLokasiPayload, TipeLokasi } from "@/types/location";
 
 /**
  * aktif: false mematikan permintaan, misalnya bagi pengguna tanpa
@@ -146,6 +146,28 @@ export function useBuatLokasi(opsi: OpsiMutasi<BuatLokasiPayload> = {}) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: BuatLokasiPayload) => lokasiApi.buat(payload),
+    onSuccess: async (...args) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.lokasi.semua });
+      opsi.onSuccess?.(...args);
+    },
+    onError: opsi.onError,
+  });
+}
+
+export interface PerbaruiLokasiVars {
+  id: string;
+  payload: PerbaruiLokasiPayload;
+}
+
+/**
+ * Mengubah profil lokasi (pengaturan gudang, keputusan GD2a). Seperti
+ * useBuatLokasi, invalidasi ditunggu sebelum callback halaman, agar form
+ * yang dipasang ulang dan layout gudang membaca nilai yang tersimpan.
+ */
+export function usePerbaruiLokasi(opsi: OpsiMutasi<PerbaruiLokasiVars> = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: PerbaruiLokasiVars) => lokasiApi.perbarui(id, payload),
     onSuccess: async (...args) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.lokasi.semua });
       opsi.onSuccess?.(...args);

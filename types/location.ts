@@ -36,3 +36,10 @@ export interface BuatLokasiPayload {
   longitude: number;
   radiusAbsen?: number;
 }
+
+/**
+ * Payload PUT /location/:id: field buat tanpa tipe, karena validator update
+ * backend hanya menerima nama, alamat, latitude, longitude, dan radiusAbsen,
+ * dan menolak tipe maupun tenantID.
+ */
+export type PerbaruiLokasiPayload = Omit<BuatLokasiPayload, "tipe">;

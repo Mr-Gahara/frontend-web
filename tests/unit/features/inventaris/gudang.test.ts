@@ -6,7 +6,9 @@ import {
 } from "@/features/inventaris/akses-gudang";
 import {
   NILAI_AWAL_LOKASI,
+  nilaiAwalLokasi,
   payloadBuatLokasi,
+  payloadPerbaruiLokasi,
   skemaLokasi,
 } from "@/features/inventaris/schema-lokasi";
 import type { Lokasi } from "@/types/location";
@@ -165,5 +167,35 @@ describe("skemaLokasi dan payloadBuatLokasi", () => {
   it("memulai form dengan koordinat kosong", () => {
     expect(NILAI_AWAL_LOKASI.latitude).toBe("");
     expect(NILAI_AWAL_LOKASI.longitude).toBe("");
+  });
+
+  it("menyusun nilai awal dari lokasi tersimpan dengan urutan koordinat GeoJSON", () => {
+    const lokasi = {
+      id: "g1",
+      tipe: "Gudang",
+      nama: "Gudang A",
+      alamat: "Jl. Uji",
+      radiusAbsen: 10,
+      koordinat: { type: "Point", coordinates: [109.2747264, -0.0393216] },
+    } as Lokasi;
+    expect(nilaiAwalLokasi(lokasi)).toEqual({
+      nama: "Gudang A",
+      alamat: "Jl. Uji",
+      latitude: "-0.0393216",
+      longitude: "109.2747264",
+      radiusAbsen: "10",
+    });
+  });
+
+  it("menyusun payload ubah tanpa tipe, sesuai validator update backend", () => {
+    const payload = payloadPerbaruiLokasi(skemaLokasi.parse(SAH));
+    expect(payload).toEqual({
+      nama: "Gudang Uji",
+      alamat: "Jl. Uji No. 1",
+      radiusAbsen: 20,
+      latitude: -0.0393,
+      longitude: 109.2747,
+    });
+    expect(payload).not.toHaveProperty("tipe");
   });
 });
