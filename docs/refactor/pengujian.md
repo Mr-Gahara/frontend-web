@@ -88,8 +88,8 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
 di spec login, satu di spec tipe aset).
 
-**Baseline per modul keuangan** (commit `45187b6`): 277 test unit dan
-integrasi lolos di 38 berkas, 271 e2e lolos, 20 skipped:
+**Baseline per spec jadwal** (commit `d9af531`): 277 test unit dan
+integrasi lolos di 38 berkas, 284 e2e lolos, 20 skipped:
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
 backend, sebelas `test.fixme` lain yang menunggu backend (pola roster,
 pengguna, stock opname, penerimaan, tiga di spec alur penjualan, tiga di
@@ -107,7 +107,8 @@ unit dan satu skenario. Komponen tanggal dan waktu (`e43e000`) menambah
 reservasi (`652d669`) menambah enam skenario, dan migrasinya (`477f258`)
 menambah 18 test unit dan satu skenario. Spec keuangan (`0cfb3bd`)
 menambah enam skenario, dan migrasinya (`45187b6`) menambah 22 test unit
-dan lima skenario.
+dan lima skenario. Spec pembanding jadwal (`d9af531`) menambah 13
+skenario.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -354,6 +355,16 @@ satu putaran.
   pembandingnya, dan penunggu yang hanya mencocokkan `periode` lolos
   karena kebetulan urutan. Penunggu dipersempit dengan parameter pembeda,
   di sini `endDate` (`responsLabaRugi`, `45187b6`).
+- Pemicu bertipe `combobox` tidak mendapat nama aksesibel dari teks di
+  dalamnya, sehingga `getByRole("combobox", { name })` tidak pernah cocok
+  bila pemicu itu tidak berlabel; pilih lewat `.filter({ hasText })`.
+  Tanpa `actionTimeout` di konfigurasi, aksi yang tidak menemukan
+  elemennya menunggu sampai batas waktu test habis, dan galatnya hanya
+  menunjuk langkah pembersihan sesudahnya. Snapshot DOM diperiksa lebih
+  dulu (pemicu pola di generate jadwal, `d9af531`).
+- Status respons yang belum pernah dibaca dari kode atau respons nyata
+  tidak ditebak dari endpoint serupa: `POST /jadwalshift` menjawab 201,
+  sedangkan `POST /jadwalshift/bulk` menjawab 200.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -454,6 +465,11 @@ Urutan debug kegagalan e2e di atas).
   lolos 3 dari 3 saat diulang). Sebelum migrasi tarif, spec itu lolos 78
   dari 78 dalam tiga putaran terhadap kode lama; penyebab kegagalan
   sekali itu belum diketahui.
+- **Spec tipe aset sempat habis waktu sekali di suite penuh `d9af531`**:
+  `hapusTipe` lewat `page.request` tidak dijawab dalam batas waktu test
+  (`crud-tipeAset.spec.ts` baris 267), lalu lolos 75 dari 75 dengan
+  `--repeat-each 3`, dan suite penuh berikutnya bersih. Sejalan dengan
+  kejadian spec tarif di atas; penyebabnya belum diketahui.
 - **Status aset "Digunakan" dan penghapusan aset yang punya booking**
   belum teruji. Spec daftar reservasi kini membuat booking sungguhan yang
   mencakup waktu sekarang, tetapi label status aset uji hanya dibandingkan
@@ -629,3 +645,10 @@ Urutan debug kegagalan e2e di atas).
   `endDate` (`responsLabaRugi`), harapan badge dihitung dengan fungsi
   murni yang sama dengan tampilan, dan kegagalan per sumber data
   disimulasikan dengan `JAWAB_GAGAL` hanya untuk GET endpoint itu.
+- `tests/e2e/jadwal/jadwal/`: `test.use({ timezoneId: "Asia/Pontianak" })`
+  agar perilaku zona waktu sama di mesin mana pun; sel grid dipilih lewat
+  indeks hari (sel pertama baris adalah nama karyawan), dan item selnya
+  lewat struktur `:scope > div > div`; bulan dinavigasi lewat tombol di
+  sebelah label bulan toolbar sambil menunggu `GET /jadwalshift` bulan
+  itu; dan hari uji setiap test dibersihkan lewat API di awal dan di
+  `finally` (`tests/helpers/jadwal-uji.ts`).

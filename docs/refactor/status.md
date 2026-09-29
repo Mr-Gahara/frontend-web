@@ -65,7 +65,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Komponen tanggal dan waktu (lintas modul) | `e43e000` | Selesai |
 | Reservasi: buat reservasi | `652d669` (spec), `477f258` | Selesai |
 | Keuangan | `0cfb3bd` (spec), `45187b6` | Selesai |
-| Jadwal dan shift | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Jadwal dan shift, termasuk pola roster dan monitoring absensi | `d9af531` (spec) | **Berikutnya** (lihat Pekerjaan berikutnya) |
 | Gudang: dashboard, pengaturan, setup | - | Belum. Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), termasuk stock adjustment (`247cf2d`); `gudang/layout.tsx` dan `gudang/setup` masih memakai `apiClient`, dan layout memeriksa nama role Owner (baris 32, keputusan rancangan butir 2); pengguna gudang sudah ikut modul Pengguna (`7275d14`); jadwal gudang dijadwalkan di modul Jadwal dan shift |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
@@ -136,11 +136,25 @@ Pemetaan awal (28 September 2026):
   dan `tests/e2e/jadwal/shift/crud-shift.spec.ts`. Jadwal dan generate
   jadwal belum punya spec e2e.
 
-Langkah berikutnya: spec pembanding jadwal dan generate jadwal terhadap
-kode lama (pola keputusan R1a), lalu pemetaan sumber data kelima halaman
-dan jalur backend `jadwalshift`, `shift`, dan `polaroster`. Keputusan
-produk yang muncul, misalnya gate halaman jadwal, diajukan sekaligus
-setelah pemetaan.
+Spec pembanding jadwal outlet, jadwal gudang, kelola manual, dan generate
+jadwal selesai di `d9af531` (`tests/e2e/jadwal/jadwal/`), dengan fixture
+di `tests/helpers/jadwal-uji.ts`. Jalur backend `jadwalshift` sudah
+dipetakan (`kontrak/payload.md`, `kontrak/temuan.md` butir 62 sampai
+66), dan keputusan J1a sampai J5b tercatat di `keputusan.md` (Modul
+jadwal dan shift).
+
+Cakupan diperluas atas permintaan pemilik proyek (29 September 2026):
+seluruh bug, galat, dan cacat UI/UX di fitur jadwal, shift, pola roster,
+dan monitoring absensi dibereskan di modul ini. Monitoring absensi di web
+hanya `hooks/use-monitoring-absensi.ts` (`GET /absensi/monitoring` lewat
+`apiClient` lama), yang dipakai
+`components/pengguna/bento-pengguna-widget.tsx`.
+
+Langkah berikutnya: inventaris utuh seluruh berkas jadwal, shift, pola
+roster, dan monitoring absensi. Setiap berkas dibaca penuh, dan seluruh
+temuan dilaporkan sekaligus beserta buktinya. Keputusan yang dibutuhkan
+diajukan sekaligus, baru kemudian migrasi. Skenario J1a, J2a, dan J5b
+ditambahkan ke spec di commit migrasi.
 
 ## Catatan dari modul keuangan
 
@@ -370,6 +384,15 @@ Yang masih berlaku:
 - Ketiga halaman keuangan yang memuat data masih memanggil
   `useAuthGuard()`, karena halamannya tetap di `app/` dengan tampilan
   lama; pemanggilan itu dibuang bila halamannya dijadikan tipis.
+
+### Utang kecil dari modul jadwal dan shift
+
+- Halaman jadwal outlet, generate jadwal, dan jadwal gudang tetap tanpa
+  gate, walau `GET /pengguna` mewajibkan `read-pengguna` (keputusan J3b).
+  Pengguna tanpa izin itu hanya melihat "Gagal Memuat Data", karena
+  galat pengguna ikut menentukan galat halaman. Disampaikan bersama
+  laporan akhir modul, bersama permission jadwal yang belum ada di seed
+  (`kontrak/temuan.md` butir 4).
 
 ### Utang kecil dari penyesuaian backend `f27f093`
 

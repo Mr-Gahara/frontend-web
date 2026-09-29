@@ -471,6 +471,43 @@ Diputuskan pemilik proyek pada 28 September 2026.
   `trim` dengan pesan wajib yang sudah ada, sejalan dengan T4a
   (`45187b6`); sebelumnya isian itu lolos form lalu ditolak backend.
 
+### Modul jadwal dan shift
+
+Diputuskan pemilik proyek pada 29 September 2026, dengan prinsip
+keputusan rancangan butir 17 dan 21.
+
+- **Cakupan modul diperluas**: seluruh bug, galat, dan cacat UI/UX di
+  fitur jadwal, shift, pola roster, dan monitoring absensi dibereskan di
+  modul ini, bukan hanya migrasi lapisan data.
+- **J1a: rentang bulan kalender jadwal diperbaiki di commit migrasi.**
+  Halaman outlet dan gudang menyusun `startDate` dan `endDate` dari
+  `toISOString` tengah malam lokal, sehingga di WIB rentangnya bergeser
+  sehari: jadwal di tanggal terakhir bulan tidak termuat, dan jadwal dari
+  tanggal terakhir bulan lalu tampil di tanggal yang sama bulan ini.
+  Dampaknya hanya tampilan. Generate terbukti mengirim tanggal yang
+  benar, karena `startDate`-nya teks YYYY-MM-DD yang dibaca sebagai
+  tengah malam UTC.
+- **J2a: jadwal yang ditolak backend ditampilkan.** Buat dan generate
+  menjawab sukses walau `ditolak` lebih dari 0 (`kontrak/temuan.md`
+  butir 66). Buat manual yang seluruhnya ditolak diperlakukan gagal
+  (dialog bertahan dengan alasan dari `detailDitolak`), penolakan sebagian
+  ditampilkan sebagai peringatan, dan generate tetap di langkah 2 dengan
+  daftar jadwal yang ditolak.
+- **J3b: halaman jadwal tetap tanpa gate**, walau `/pengguna` mewajibkan
+  `read-pengguna`. Dicatat sebagai utang di `status.md` dan disampaikan
+  bersama laporan akhir modul.
+- **J4: data uji jadwal memakai fixture tetap** (shift dan pola roster
+  uji) dan jadwal uji Ridho di bulan 30 hari pertama mulai dua bulan ke
+  depan, yang dihapus per id di awal dan di `finally` (`d9af531`).
+- **J5b: jadwal gudang dikelola penuh seperti outlet**: buat, ubah,
+  hapus, dan generate. Hari ini toolbar gudang sudah menampilkan Tambah
+  Manual dan Auto-Generate, tetapi halamannya tidak mengirim
+  `onSubmitManual`, dan Auto-Generate menuju
+  `/dashboard/gudang/jadwal/generate`, rute yang tidak ada.
+- **Spec pembanding hanya memuat perilaku yang tidak berubah** dan lolos
+  terhadap kode lama (`d9af531`); skenario J1a, J2a, dan J5b
+  ditambahkan di commit migrasi.
+
 ## Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.

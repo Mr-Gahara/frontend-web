@@ -189,6 +189,12 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   dari nomor pengajuan dan empat digit terakhir `Date.now()`, dan
   kebutuhan endpoint mutasi kas untuk halaman mutasi arus kas (perlu
   keputusan) (`kontrak/temuan.md` butir 60 dan 61)
+- Laporan spec jadwal shift — 5 temuan, disusun 29 September 2026
+  setelah `d9af531`: jadwal dengan shift tidak aktif dilewati diam-diam
+  oleh generate, galat `bulkWrite` ditelan, satu hari dapat libur
+  sekaligus punya shift (perlu keputusan), nama dan role karyawan di
+  respons jadwal selalu "Tidak Diketahui", dan respons sukses walau
+  jadwal ditolak (`kontrak/temuan.md` butir 62 sampai 66)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

@@ -189,17 +189,22 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /jadwalshift`
 
-- Aturan: tanpa validator, dibatasi skema `models/jadwalShiftModel.js`
-- Wajib dari klien: -
-- Field lain yang dikenali: `penggunaID`, `shiftID`, `tanggalKerja`, `isLibur`, `catatan`
-- Diisi server: -
+- Aturan: tanpa validator di route. Service `createManual` mewajibkan `penggunaId` dan `tanggal`, serta minimal satu shift bila bukan libur (400), lalu menyusun satu entri per shift dan meneruskannya ke `generateBulk`, sehingga seluruh aturan `POST /jadwalshift/bulk` berlaku. Dikoreksi 29 September 2026; sebelumnya tercatat memakai field model
+- Body yang dibaca service: `penggunaId`, `tanggal` (YYYY-MM-DD), `isLibur`, `shiftIds[]`, dan `catatan`. Ejaannya berbeda dari field model (`penggunaID`, `tanggalKerja`, `shiftID`)
+- Wajib dari klien: `penggunaId`, `tanggal`, dan `shiftIds` yang tidak kosong bila `isLibur` false
+- Upsert per `tenantID`, `penggunaID`, `tanggalKerja`, dan `shiftID`: membuat jadwal yang sama dua kali tidak ditolak, hanya diperbarui. Libur disimpan sebagai dokumen ber-`shiftID` null, sehingga tidak menimpa shift di hari yang sama (`temuan.md` butir 64)
+- Respons 201 dengan `data` berisi `message`, `berhasilDiproses`, `ditolak`, dan `detailDitolak`, juga saat seluruh jadwal ditolak (`temuan.md` butir 66)
+- Diisi server: `tenantID`
 
 #### `POST /jadwalshift/bulk`
 
-- Aturan: tanpa validator, dibatasi skema `models/jadwalShiftModel.js`
-- Wajib dari klien: -
-- Field lain yang dikenali: `penggunaID`, `shiftID`, `tanggalKerja`, `isLibur`, `catatan`
-- Diisi server: -
+- Aturan: `validateJadwalShiftPayload` (validators/jadwalShiftValidator.js), dipanggil dari `jadwalShiftService.generateBulk`, bukan dari route. Dikoreksi 29 September 2026
+- Body: array (satu objek diterima sebagai array berisi satu), maksimal 2000 entri. Setiap entri: `penggunaID` dan `tanggalKerja` wajib, `isLibur` wajib boolean, `shiftID` wajib ObjectId bila bukan libur, dan `catatan` opsional
+- Aturan service: setiap `penggunaID` harus milik tenant (400 bila tidak); shift diambil hanya yang Aktif, dan entri dengan shift tidak aktif dilewati tanpa masuk `detailDitolak` (`temuan.md` butir 62); cuti yang disetujui memaksa hari itu libur dengan catatan otomatis; entri yang bentrok jam dengan entri lain di batch yang sama masuk `detailDitolak`, dan bentrok dengan jadwal lama pengguna itu dari sehari sebelum sampai sehari sesudah juga diperiksa
+- Ditulis lewat `bulkWrite` upsert per 500 entri, dengan filter yang sama dengan `POST /jadwalshift`; galat penulisan ditelan (`temuan.md` butir 63)
+- Respons 200 dengan `data` berisi `message`, `berhasilDiproses`, `ditolak`, dan `detailDitolak`. `berhasilDiproses` hanya menghitung dokumen yang dibuat atau berubah (`temuan.md` butir 66)
+- Web mengirim `penggunaID`, `tanggalKerja` (YYYY-MM-DD), `isLibur`, dan `shiftID` untuk hari kerja
+- Diisi server: `tenantID`
 
 #### `POST /kategori`
 
@@ -424,9 +429,11 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /jadwalshift/:id`
 
-- Aturan: tanpa validator, dibatasi skema `models/jadwalShiftModel.js`
+- Aturan: tanpa validator. Service `update` hanya membaca `isLibur`, `shiftID`, dan `catatan`; field yang tidak dikirim memakai nilai lama, dan pengguna maupun tanggal tidak dapat diubah. Dikoreksi 29 September 2026
+- Bukan libur: `shiftID` wajib (400) dan harus shift Aktif milik tenant (400 "Master Shift yang dipilih tidak ditemukan atau sudah tidak aktif."), lalu diperiksa bentrok jam dengan jadwal lain pengguna itu dari sehari sebelum sampai sehari sesudah (400)
+- Libur: `shiftID` dikosongkan
 - Wajib dari klien: -
-- Field lain yang dikenali: `penggunaID`, `shiftID`, `tanggalKerja`, `isLibur`, `catatan`
+- Respons 200 dengan detail jadwal, berbentuk seperti item `GET /jadwalshift`
 - Diisi server: -
 
 #### `PUT /kategori/:id`

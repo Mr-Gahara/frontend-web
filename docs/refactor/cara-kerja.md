@@ -1047,6 +1047,14 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   sudah ada.** Callback mutation punya dua bentuk (`OpsiMutasi` dan
   `Callback`); `useBuatAkunKas` sempat memakai nama ketiga sebelum
   diselaraskan dengan `Callback` milik penjualan dan pembayaran.
+- **Selector untuk spec diambil dari rentang JSX utuh komponennya, dalam
+  satu putaran.** Grep pola teks membuang teks tombol dan label yang
+  ditulis di baris sendiri atau sebaris dengan ikon, dan pemetaan spec
+  jadwal butuh lima putaran karenanya. Yang berhasil: `sed -n` pada
+  rentang JSX setiap komponen yang disentuh spec (toolbar, sel, form,
+  langkah), dengan saringan yang hanya membuang baris kosong, baris
+  `className=` saja, baris penutup kurung, dan komentar JSX, ditambah
+  helper uji dan komponen bersama yang dipakainya (kalender).
 
 ## Kapan berhenti dan bertanya
 
@@ -1071,6 +1079,10 @@ dikumpulkan (pemilik proyek, 21 September 2026). Kumpulkan bukti sampai
 cukup, lalu ajukan seluruh temuan yang memerlukan keputusan sekaligus:
 masalahnya sekarang, opsi solusi, dan rekomendasi beserta alasannya.
 Sebelum keputusan diambil, tidak ada perbaikan yang diterapkan.
+
+Keputusan diajukan lewat dialog pilihan, bukan ditulis sebagai teks,
+agar jawabannya diberikan sebelum respons berlanjut (pemilik proyek,
+29 September 2026).
 
 ## Keputusan berdasar bukti
 
