@@ -10,6 +10,8 @@ import { cocok, pantauPermintaan, tunda } from "../../helpers/reservasi-uji";
  * Tenant uji sudah punya gudang, sehingga setup dibuka dengan daftar lokasi
  * tanpa gudang yang dibentuk dari respons nyata ("// simulasi:"), dan POST
  * dijawab gagal agar tidak ada lokasi yang tersimpan (keputusan GD6a).
+ * Skenario koordinat kosong, label, koordinat bukan angka, dan galat
+ * layout ditambahkan saat migrasi (keputusan GD3a dan GD4a).
  */
 
 const URL_GUDANG = BASIS + "/dashboard/gudang";
@@ -125,6 +127,50 @@ test.describe("Ruang gudang", () => {
     await expect(page).toHaveURL(URL_SETUP);
     await expect(page.getByPlaceholder("Contoh: Gudang Utama A")).toHaveValue(NAMA);
     await page.unroute(POLA_LOKASI);
+  });
+
+  test("setup memulai koordinat kosong dengan label yang terhubung ke isiannya", async ({ page }) => {
+    await simulasikanTanpaGudang(page);
+    await bukaSetup(page);
+    await expect(page.getByLabel("Nama Gudang / Warehouse")).toBeVisible();
+    await expect(page.getByLabel("Alamat Lengkap")).toBeVisible();
+    await expect(page.getByLabel("Radius Toleransi Absen (Meter)")).toBeVisible();
+    await expect(page.getByLabel("Latitude", { exact: true })).toHaveValue("");
+    await expect(page.getByLabel("Longitude", { exact: true })).toHaveValue("");
+    await page.unroute(POLA_LOKASI);
+  });
+
+  test("setup tidak mengirim koordinat bukan angka dan menampilkan pesannya", async ({ page }) => {
+    await simulasikanTanpaGudang(page);
+    await bukaSetup(page);
+    await isiSetup(page, "20");
+    await isianKoordinat(page, "Latitude").fill("abc");
+    const pantau = pantauPermintaan(page, "POST", POLA_LOKASI);
+    await tombolSimpan(page).click();
+    await expect(page.getByText("Latitude harus berupa angka desimal.")).toBeVisible();
+    await tunda(1_000);
+    pantau.lepas();
+    expect(pantau.jumlah()).toBe(0);
+    await expect(page).toHaveURL(URL_SETUP);
+    await page.unroute(POLA_LOKASI);
+  });
+
+  test("layout menampilkan pesan dan tombol coba lagi saat lokasi gagal dimuat", async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.route(POLA_LOKASI, async (route) => {
+      if (route.request().method() === "GET") await route.fulfill(JAWAB_GAGAL);
+      else await route.continue();
+    });
+    await page.goto(URL_GUDANG);
+    await expect(page.getByText("Gagal Memuat Data Gudang")).toBeVisible({ timeout: 25_000 });
+    await expect(page).toHaveURL(URL_GUDANG);
+    await page.unroute(POLA_LOKASI);
+    const tMuatUlang = page.waitForResponse(cocok("GET", POLA_LOKASI));
+    await page.getByRole("button", { name: "Coba Lagi" }).click();
+    expect((await tMuatUlang).status()).toBe(200);
+    await expect(page.getByText("Gagal Memuat Data Gudang")).toHaveCount(0);
+    await expect(page.getByText("Memverifikasi data Gudang...")).toHaveCount(0);
+    await expect(page).toHaveURL(URL_GUDANG);
   });
 
   for (const radius of ["5", "60"]) {

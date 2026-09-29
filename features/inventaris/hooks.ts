@@ -18,7 +18,7 @@ import { useSession } from "@/lib/auth/useSession";
 import { bolehLintasOutlet } from "@/lib/auth/permissions";
 import { tentukanCakupan, type CakupanLokasiOutlet } from "./cakupan";
 import { queryKeys } from "@/lib/queryKeys";
-import type { TipeLokasi } from "@/types/location";
+import type { BuatLokasiPayload, TipeLokasi } from "@/types/location";
 
 /**
  * aktif: false mematikan permintaan, misalnya bagi pengguna tanpa
@@ -130,6 +130,24 @@ export function useTambahInventory(opsi: OpsiMutasi<TambahInventoryPayload> = {}
     mutationFn: (payload: TambahInventoryPayload) => inventoryApi.buat(payload),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.inventory.semua });
+      opsi.onSuccess?.(...args);
+    },
+    onError: opsi.onError,
+  });
+}
+
+/**
+ * Membuat lokasi baru (setup gudang). Invalidasi ditunggu sebelum callback
+ * halaman, agar layout gudang membaca daftar lokasi yang sudah memuat gudang
+ * baru saat halaman berpindah, alih-alih mengalihkan kembali ke setup, dan
+ * menu Ruang Gudang di sidebar muncul tanpa muat ulang (keputusan GD5a).
+ */
+export function useBuatLokasi(opsi: OpsiMutasi<BuatLokasiPayload> = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: BuatLokasiPayload) => lokasiApi.buat(payload),
+    onSuccess: async (...args) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.lokasi.semua });
       opsi.onSuccess?.(...args);
     },
     onError: opsi.onError,

@@ -7,7 +7,7 @@ import { akhiriSesi } from "@/lib/auth/session";
 import { useSession } from "@/lib/auth/useSession";
 import { bolehBukaGrup, bolehBukaHalaman } from "@/lib/auth/permissions";
 import { apiClient } from "@/lib/apiClient";
-import { LokasiListResponse } from "@/types/location";
+import { useDaftarLokasi } from "@/features/inventaris/hooks";
 
 // Impor Ikon (Tambahan ikon Archive untuk Data Barang)
 import {
@@ -349,9 +349,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [role, setRole] = useState<string>("");
 
   // State Evaluasi Lokasi
-  const [hasGudang, setHasGudang] = useState<boolean>(false);
-  const [isLoadingLokasi, setIsLoadingLokasi] = useState<boolean>(true);
   const { pengguna } = useSession();
+  // Lokasi dimuat lewat features/inventaris dan berbagi cache dengan layout
+  // gudang, sehingga menu Ruang Gudang muncul setelah setup tanpa muat
+  // ulang (keputusan GD5a). Tanpa read-location permintaan dimatikan.
+  const bacaLokasi = pengguna?.permissions.includes("read-location") ?? false;
+  const daftarLokasi = useDaftarLokasi({ aktif: bacaLokasi });
+  const hasGudang = daftarLokasi.data?.some((l) => l.tipe === "Gudang") ?? false;
+  const isLoadingLokasi = bacaLokasi && daftarLokasi.isLoading;
 
   useEffect(() => {
     const fetchSidebarData = async () => {
@@ -370,20 +375,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             if (res && res.data) setNamaUser(res.data.nama || pengguna.nama);
           })
           .catch(() => {});
-
-        apiClient
-          .get<LokasiListResponse>("/location", undefined, "pengguna")
-          .then((res) => {
-            const gudangExists = res.data?.some((loc) => loc.tipe === "Gudang");
-            setHasGudang(!!gudangExists);
-          })
-          .catch(() => {})
-          .finally(() => {
-            setIsLoadingLokasi(false);
-          });
       } catch (err) {
         console.error("Gagal memuat data di sidebar:", err);
-        setIsLoadingLokasi(false);
       }
     };
 
@@ -436,6 +429,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     permissions.includes("read-dashboard-gudang");
   const canCreateLocation =
     permissions.includes("create-location");
+  // Ruang Gudang tetap ditawarkan saat lokasi tidak dapat dibaca (tanpa
+  // read-location) atau gagal dimuat; layout gudang yang menampilkan
+  // pesannya (keputusan GD4a dan GD5a). Setup hanya ditawarkan bila daftar
+  // lokasi terbukti tidak memuat gudang.
+  const tawarkanRuangGudang =
+    canAccessGudang &&
+    !isLoadingLokasi &&
+    (hasGudang || !bacaLokasi || daftarLokasi.isError);
+  const tawarkanSetupGudang =
+    canCreateLocation && daftarLokasi.isSuccess && !hasGudang;
 
   return (
     <Sidebar
@@ -490,7 +493,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </DropdownMenuItem>
                 )}
 
-                {canAccessGudang && hasGudang && !isLoadingLokasi && (
+                {tawarkanRuangGudang && (
                   <DropdownMenuItem
                     onClick={() => handleNavigation("/dashboard/gudang")}
                     className={`cursor-pointer ${isGudangWorkspace ? "bg-accent" : ""}`}
@@ -505,7 +508,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </DropdownMenuItem>
                 )}
 
-                {!hasGudang && canCreateLocation && !isLoadingLokasi && (
+                {tawarkanSetupGudang && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem

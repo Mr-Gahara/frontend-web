@@ -1,103 +1,91 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth/useSession";
-import { apiClient } from "@/lib/apiClient";
-import { LokasiListResponse } from "@/types/location";
+import { IZIN } from "@/lib/auth/permissions";
+import { Button } from "@/components/ui/button";
+import { useDaftarLokasi } from "@/features/inventaris/hooks";
+import { tentukanAksesGudang, tujuanAksesGudang } from "@/features/inventaris/akses-gudang";
+import PesanLokasi from "@/features/inventaris/pesan-lokasi";
 
-export default function GudangLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+/**
+ * Penjaga ruang gudang (keputusan GD4a). Keputusannya ada di
+ * tentukanAksesGudang: pengalihan hanya ke tujuan yang tidak mengirim
+ * balik ke ruang gudang, sedangkan galat memuat lokasi, gudang yang belum
+ * ada bagi pengguna tanpa create-location, dan setup tanpa read-location
+ * tampil sebagai pesan di tempat. Lokasi dimuat lewat useDaftarLokasi,
+ * sehingga tidak diminta ulang di setiap perpindahan halaman dan berbagi
+ * cache dengan sidebar (keputusan GD5a). Nama role tidak diperiksa:
+ * Owner memegang seluruh permission (keputusan rancangan butir 2).
+ */
+export default function GudangLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const { status, permissions, pengguna, sudahMasuk } = useSession();
-  const [isLoading, setIsLoading] = useState(true);
+  const { status, permissions, sudahMasuk } = useSession();
+  const lokasi = useDaftarLokasi({
+    aktif: sudahMasuk && permissions.includes(IZIN.location),
+  });
+  const akses = tentukanAksesGudang({
+    sesiMemuat: status === "memuat",
+    sudahMasuk,
+    permissions,
+    diSetup: pathname.includes("/gudang/setup"),
+    lokasi: { memuat: lokasi.isLoading, gagal: lokasi.isError, daftar: lokasi.data },
+  });
+  const tujuan = tujuanAksesGudang(akses);
 
   useEffect(() => {
-    const checkGudangAccess = async () => {
-      // Tunggu pemulihan sesi selesai sebelum memutuskan.
-      if (status === "memuat") return;
+    if (tujuan) router.replace(tujuan);
+  }, [tujuan, router]);
 
-      if (!sudahMasuk) {
-        router.push("/login");
-        return;
-      }
+  if (akses === "izinkan") return <>{children}</>;
 
-      // Owner memegang seluruh permission di backend, sehingga pemeriksaan
-      // berbasis permission sudah mencakupnya.
-      const isOwner = pengguna?.role === "Owner";
-      const hasGudangAccess = permissions.includes("read-dashboard-gudang");
-
-      // BLOKIR JIKA TIDAK ADA IZIN DASBOR GUDANG
-      if (!hasGudangAccess) {
-        router.replace("/dashboard");
-        return;
-      }
-
-      // cek gudang udah ada atau belum
-      try {
-        const res = await apiClient.get<LokasiListResponse>(
-          "/location", 
-          undefined, 
-          "pengguna"
-        );
-        
-        // Asumsi data berada di res.data sesuai interface LokasiListResponse
-        const gudangList = res.data?.filter((loc) => loc.tipe === "Gudang") || [];
-        const isSetupPage = pathname.includes("/gudang/setup");
-
-        if (gudangList.length === 0) {
-          // kalau gudang belum ada: Lempar ke halaman setup (jika belum di sana)
-          if (!isSetupPage) {
-            const canCreateLocation = isOwner || permissions.includes("create-location");
-            
-            if (canCreateLocation) {
-              router.replace("/dashboard/gudang/setup");
-            } else {
-              // Kasus langka: Staf gudang login, tapi owner belum bikin entitas Gudang-nya.
-              // Tendang ke profil karena staf tidak punya izin membuat lokasi.
-              router.replace("/dashboard/profil");
-            }
-            return;
-          }
-        } else {
-          // kalau gudang sudah ada: Jika user iseng mau akses /setup lagi, kembalikan ke dasbor utama Gudang
-          if (isSetupPage) {
-            router.replace("/dashboard/gudang");
-            return;
-          }
-        }
-
-        // Jika lolos semua testing, izinkan rendering
-        setIsAuthorized(true);
-      } catch (error) {
-        console.error("Gagal memverifikasi lokasi gudang:", error);
-        // Jika API error (misal koneksi putus), lebih aman kembalikan ke root
-        router.replace("/dashboard");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkGudangAccess();
-  }, [router, pathname, status, sudahMasuk, permissions, pengguna]);
-
-  // Layar loading khusus saat melakukan fetch API ke /lokasi
-  if (isLoading || !isAuthorized) {
+  if (akses === "gagal") {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <span className="animate-pulse text-sm font-medium text-slate-500">
-            Memverifikasi data Gudang...
-          </span>
+      <div className="p-6">
+        <PesanLokasi
+          judul="Gagal Memuat Data Gudang"
+          isi="Data lokasi tidak dapat dimuat. Periksa koneksi Anda, lalu coba lagi."
+        />
+        <div className="mt-4 flex justify-center">
+          <Button onClick={() => lokasi.refetch()} disabled={lokasi.isFetching}>
+            Coba Lagi
+          </Button>
         </div>
       </div>
     );
   }
 
-  return <>{children}</>;
+  if (akses === "belum-ada") {
+    return (
+      <div className="p-6">
+        <PesanLokasi
+          judul="Gudang Belum Didaftarkan"
+          isi="Tenant ini belum memiliki Gudang. Hubungi pemilik toko untuk mendaftarkan Gudang sebelum memakai ruang gudang."
+        />
+      </div>
+    );
+  }
+
+  if (akses === "tanpa-izin-lokasi") {
+    return (
+      <div className="p-6">
+        <PesanLokasi
+          judul="Izin Lokasi Dibutuhkan"
+          isi="Setup Gudang membutuhkan izin melihat lokasi, agar Gudang tidak terdaftar ganda. Hubungi pemilik toko."
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen w-full items-center justify-center">
+      <div className="flex flex-col items-center gap-2">
+        <span className="animate-pulse text-sm font-medium text-slate-500">
+          Memverifikasi data Gudang...
+        </span>
+      </div>
+    </div>
+  );
 }

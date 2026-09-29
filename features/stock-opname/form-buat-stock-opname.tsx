@@ -82,7 +82,7 @@ const TEKS = {
     judulKosong: "Gudang Belum Didaftarkan",
     isiKosong:
       "Sistem tidak dapat menemukan data Gudang di akun Anda. Anda harus membuat profil Gudang terlebih dahulu sebelum melakukan Stok Opname.",
-    urlSetup: "/dashboard/gudang/pengaturan",
+    urlSetup: "/dashboard/gudang/setup",
     pesanLokasi: "Lokasi tidak valid. Silakan pilih gudang terlebih dahulu.",
     placeholderCatatan: "Misal: Audit rutin bulanan Gudang Utama...",
     deskripsiBerhasil: "Sistem telah mengambil snapshot stok gudang saat ini.",

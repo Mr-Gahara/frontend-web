@@ -10,7 +10,7 @@ export interface KoordinatLokasi {
 }
 
 /**
- * Respons GET /location, sesuai docs/kontrak-api.md bagian 3.3.
+ * Respons GET /location, sesuai docs/kontrak/endpoint.md bagian 3.3.
  * Identitas sudah dinormalkan menjadi id oleh lib/api/normalize.ts.
  */
 export interface Lokasi extends Entitas, Timestamps {
@@ -22,8 +22,17 @@ export interface Lokasi extends Entitas, Timestamps {
   tenantID: string;
 }
 
-// Response dari endpoint GET /lokasi biasanya dibungkus array di dalam 'data'
-export interface LokasiListResponse {
-  success: boolean;
-  data: Lokasi[];
+/**
+ * Payload POST /location. Sesuai DIIZINKAN_BUAT di
+ * validators/locationValidator.js backend: tipe wajib, koordinat wajib
+ * angka sungguhan, dan radiusAbsen opsional 10 sampai 50 (bawaan model 50).
+ * tenantID diisi server dari sesi.
+ */
+export interface BuatLokasiPayload {
+  nama: string;
+  tipe: TipeLokasi;
+  alamat: string;
+  latitude: number;
+  longitude: number;
+  radiusAbsen?: number;
 }

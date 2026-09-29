@@ -2,28 +2,62 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/apiClient";
-import { queryKeys } from "@/lib/queryKeys";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { MapPin, Building2, Save, Loader2, Navigation } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { pesanError } from "@/lib/api/error";
+import { useBuatLokasi } from "@/features/inventaris/hooks";
+import {
+  NILAI_AWAL_LOKASI,
+  payloadBuatLokasi,
+  skemaLokasi,
+  type NilaiFormLokasi,
+} from "@/features/inventaris/schema-lokasi";
 
+/** Pesan galat satu isian dari skema. */
+function PesanIsian({ pesan }: { pesan?: string }) {
+  if (!pesan) return null;
+  return <p className="text-xs font-medium text-rose-600">{pesan}</p>;
+}
+
+/**
+ * Setup gudang pertama tenant. Layout gudang hanya membuka halaman ini bagi
+ * pemegang create-location di tenant yang belum punya lokasi Gudang
+ * (keputusan GD4a). Form memakai React Hook Form dan Zod dengan tampilan
+ * lama (keputusan GD3a): label terhubung ke isiannya, koordinat kosong di
+ * awal dan diisi lewat Deteksi Otomatis atau manual, serta atribut required,
+ * min, dan max dipertahankan. useBuatLokasi menunggu daftar lokasi dimuat
+ * ulang sebelum halaman berpindah, agar layout tidak mengalihkan kembali ke
+ * setup.
+ */
 export default function GudangSetupPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
-
-  // State Formulir
-  const [nama, setNama] = useState("");
-  const [alamat, setAlamat] = useState("");
-  
-  // UX PERBAIKAN: Default kosong agar mudah diisi, bukan angka statis.
-  const [radiusAbsen, setRadiusAbsen] = useState<string>("");
-  
-  // State Koordinat (Default: Titik Tengah Pontianak sebagai cadangan)
-  const [latitude, setLatitude] = useState<string>("-0.0227");
-  const [longitude, setLongitude] = useState<string>("109.3425");
   const [isLocating, setIsLocating] = useState(false);
+  const {
+    register,
+    setValue,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<NilaiFormLokasi>({
+    resolver: zodResolver(skemaLokasi),
+    defaultValues: NILAI_AWAL_LOKASI,
+  });
+
+  const createGudangMutation = useBuatLokasi({
+    onSuccess: () => {
+      toast.success("Gudang Berhasil Dibuat", {
+        description: "Sistem WMS Anda kini siap digunakan.",
+      });
+      router.replace("/dashboard/gudang");
+    },
+    onError: (err) => {
+      toast.error("Gagal Membuat Gudang", {
+        description: pesanError(err, "Periksa kembali data Anda."),
+      });
+    },
+  });
 
   // --- FUNGSI AMBIL LOKASI DARI BROWSER ---
   const handleGetLocation = () => {
@@ -31,20 +65,19 @@ export default function GudangSetupPage() {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setLatitude(position.coords.latitude.toString());
-          setLongitude(position.coords.longitude.toString());
+          setValue("latitude", position.coords.latitude.toString(), { shouldValidate: true });
+          setValue("longitude", position.coords.longitude.toString(), { shouldValidate: true });
           toast.success("Lokasi Ditemukan", {
             description: "Koordinat gudang berhasil diperbarui dari browser Anda.",
           });
           setIsLocating(false);
         },
-        (error) => {
-          console.error("Error Geolocation: ", error);
+        () => {
           toast.error("Akses Lokasi Ditolak", {
-            description: "Silakan masukkan koordinat secara manual atau gunakan nilai default.",
+            description: "Silakan masukkan koordinat secara manual.",
           });
           setIsLocating(false);
-        }
+        },
       );
     } else {
       toast.error("Tidak Didukung", { description: "Browser Anda tidak mendukung fitur lokasi." });
@@ -52,60 +85,14 @@ export default function GudangSetupPage() {
     }
   };
 
-  // --- MUTASI POST DATA ---
-  const createGudangMutation = useMutation({
-    mutationFn: async (payload: any) => {
-      // PERBAIKAN: Menggunakan endpoint /location sesuai nama file route backend Anda
-      return await apiClient.post("/location", payload, undefined, "pengguna");
-    },
-    onSuccess: () => {
-      toast.success("Gudang Berhasil Dibuat", {
-        description: "Sistem WMS Anda kini siap digunakan.",
-      });
-      // INVALIDASI CACHE LOKASI
-      queryClient.invalidateQueries({ queryKey: queryKeys.lokasi.semua });
-      
-      // Tendang ke halaman utama gudang
-      router.replace("/dashboard/gudang");
-    },
-    onError: (err: any) => {
-      toast.error("Gagal Membuat Gudang", {
-        description: err.message || "Periksa kembali data Anda.",
-      });
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nama || !alamat || !latitude || !longitude || !radiusAbsen) {
-      toast.error("Formulir Tidak Lengkap", { description: "Semua field wajib diisi." });
-      return;
-    }
-
-    // PERBAIKAN: Validasi Batas Radius sesuai locationValidator.js (10 - 50)
-    const radiusNumber = Number(radiusAbsen);
-    if (radiusNumber < 10 || radiusNumber > 50) {
-      toast.error("Radius Tidak Valid", { description: "Radius absensi harus berada di antara 10 hingga 50 meter." });
-      return;
-    }
-
-    // PERBAIKAN PAYLOAD: Format datar (flat) sesuai ekspektasi Validator Express backend
-    const payload = {
-      nama,
-      tipe: "Gudang",
-      alamat,
-      radiusAbsen: radiusNumber,
-      latitude: Number(latitude),
-      longitude: Number(longitude),
-    };
-
-    createGudangMutation.mutate(payload);
+  const kirim = (nilai: NilaiFormLokasi) => {
+    createGudangMutation.mutate(payloadBuatLokasi(nilai, "Gudang"));
   };
 
   return (
     <div className="flex min-h-[80vh] w-full items-center justify-center p-4">
       <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-xl sm:p-8">
-        
+
         {/* HEADER FORM */}
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
@@ -118,27 +105,29 @@ export default function GudangSetupPage() {
         </div>
 
         {/* BODY FORM */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit(kirim)} className="space-y-5">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Nama Gudang / Warehouse</label>
+            <label htmlFor="setup-gudang-nama" className="text-sm font-medium text-foreground">Nama Gudang / Warehouse</label>
             <Input
-              value={nama}
-              onChange={(e) => setNama(e.target.value)}
+              id="setup-gudang-nama"
+              {...register("nama")}
               placeholder="Contoh: Gudang Utama A"
               required
               className="bg-background"
             />
+            <PesanIsian pesan={errors.nama?.message} />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Alamat Lengkap</label>
+            <label htmlFor="setup-gudang-alamat" className="text-sm font-medium text-foreground">Alamat Lengkap</label>
             <Input
-              value={alamat}
-              onChange={(e) => setAlamat(e.target.value)}
+              id="setup-gudang-alamat"
+              {...register("alamat")}
               placeholder="Contoh: Jl. Khatulistiwa No. 123"
               required
               className="bg-background"
             />
+            <PesanIsian pesan={errors.alamat?.message} />
           </div>
 
           <hr className="my-4 border-border" />
@@ -146,9 +135,9 @@ export default function GudangSetupPage() {
           {/* SECTION GEOLOKASI */}
           <div className="space-y-4 rounded-xl border border-border bg-muted/30 p-4">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-foreground flex items-center gap-2">
+              <span className="text-sm font-medium text-foreground flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-emerald-600" /> Koordinat Lokasi
-              </label>
+              </span>
               <button
                 type="button"
                 onClick={handleGetLocation}
@@ -159,35 +148,41 @@ export default function GudangSetupPage() {
                 Deteksi Otomatis
               </button>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Latitude</span>
+                <label htmlFor="setup-gudang-latitude" className="text-[10px] text-muted-foreground uppercase tracking-wider">Latitude</label>
                 <Input
-                  value={latitude}
-                  onChange={(e) => setLatitude(e.target.value)}
+                  id="setup-gudang-latitude"
+                  {...register("latitude")}
+                  inputMode="decimal"
+                  placeholder="-0.0227"
                   required
                   className="font-mono text-xs bg-background"
                 />
+                <PesanIsian pesan={errors.latitude?.message} />
               </div>
               <div className="space-y-1">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Longitude</span>
+                <label htmlFor="setup-gudang-longitude" className="text-[10px] text-muted-foreground uppercase tracking-wider">Longitude</label>
                 <Input
-                  value={longitude}
-                  onChange={(e) => setLongitude(e.target.value)}
+                  id="setup-gudang-longitude"
+                  {...register("longitude")}
+                  inputMode="decimal"
+                  placeholder="109.3425"
                   required
                   className="font-mono text-xs bg-background"
                 />
+                <PesanIsian pesan={errors.longitude?.message} />
               </div>
             </div>
 
-            {/* PERBAIKAN UI: Input Radius Absen */}
+            {/* Radius wajib 10 sampai 50 meter, sesuai validator backend */}
             <div className="space-y-1 pt-2">
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Radius Toleransi Absen (Meter)</span>
+              <label htmlFor="setup-gudang-radius" className="text-[10px] text-muted-foreground uppercase tracking-wider">Radius Toleransi Absen (Meter)</label>
               <Input
+                id="setup-gudang-radius"
                 type="number"
-                value={radiusAbsen}
-                onChange={(e) => setRadiusAbsen(e.target.value)}
+                {...register("radiusAbsen")}
                 placeholder="Contoh: 20"
                 min={10}
                 max={50}
@@ -197,6 +192,7 @@ export default function GudangSetupPage() {
               <p className="text-[10px] text-amber-600/80 mt-1 font-medium">
                 *Batas minimum radius adalah 10 meter dan maksimum 50 meter.
               </p>
+              <PesanIsian pesan={errors.radiusAbsen?.message} />
             </div>
           </div>
 
