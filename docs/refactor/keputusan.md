@@ -598,6 +598,54 @@ keputusan rancangan butir 17 dan 21.
   jadwal, dan widget (keputusan rancangan butir 12); jam masuk dalam zona
   `Asia/Jakarta` agar label WIB selalu benar; log debug dibuang.
 
+### Modul gudang
+
+Diputuskan pemilik proyek pada 29 September 2026, dengan prinsip
+keputusan rancangan butir 17 dan 21.
+
+- **GD1a: dashboard gudang memakai sumber data gabungan.** Hitungan
+  pengajuan (menunggu persetujuan; siap dibuat surat jalan) dan surat
+  jalan (PENDING; sedang dikirim) diambil dari `GET /dashboard/gudang`,
+  sedangkan stok kritis dan jurnal terbaru dari hook `features/` yang
+  hanya menghitung lokasi Gudang, karena endpoint itu menghitung seluruh
+  lokasi tenant termasuk outlet (Model bisnis MVP: stok outlet dan gudang
+  tidak boleh tercampur). **Eksekusinya ditunda**: layout dan UI/UX
+  dashboard ditentukan pemilik proyek sendiri, dan halamannya tetap
+  placeholder sampai itu (`status.md`, Utang kecil dari modul Gudang).
+- **GD2a: pengaturan gudang berisi profil gudang yang dapat diubah**
+  (nama, alamat, koordinat, dan radius absen) lewat `PUT /location/:id`
+  bagi pemegang `update-location`, dan baca-saja bagi pengguna lain,
+  dengan form yang sama dengan setup.
+- **GD3a: form setup memakai React Hook Form dan Zod** dengan tampilan
+  yang dipertahankan: label ber-`htmlFor`, koordinat wajib angka dalam
+  rentang backend dan kosong di awal (diisi lewat Deteksi Otomatis atau
+  manual) menggantikan koordinat bawaan titik tengah Pontianak, dan
+  radius tetap wajib 10 sampai 50 meter.
+- **GD4a: layout gudang menampilkan pesan di tempat, tanpa pengalihan.**
+  Pengguna tanpa `read-location` membuka ruang gudang tanpa pemeriksaan
+  gudang, karena setiap halaman punya gate sendiri. Galat memuat tampil
+  sebagai pesan dengan tombol coba lagi, dan gudang yang belum ada bagi
+  pengguna tanpa `create-location` tampil sebagai pesan agar menghubungi
+  pemilik. Pengalihan berputar antara `/dashboard` dan `/dashboard/gudang`
+  hilang. Gerbang ruang tetap `read-dashboard-gudang`, sejalan dengan
+  backend, sidebar, dan layout outlet.
+- **GD5a: hanya pemuatan lokasi di sidebar yang ikut dimigrasikan**, ke
+  `useDaftarLokasi` yang berbagi cache dengan layout (keputusan rancangan
+  butir 12), sehingga menu Ruang Gudang muncul setelah setup tanpa muat
+  ulang. Tanpa `read-location` permintaannya dimatikan, dan menu Ruang
+  Gudang tetap tampil bagi pemegang `read-dashboard-gudang`. Sisa sidebar
+  tetap untuk modul Profil, login, dan sidebar.
+- **GD6a: setup diuji dengan daftar lokasi tanpa gudang yang dibentuk dari
+  respons nyata** (`// simulasi:`), karena tenant uji sudah punya gudang
+  yang menyimpan stok, dan `POST /location` dijawab gagal agar tidak ada
+  lokasi yang tersimpan (`2d7225b`). Setup yang berhasil tidak diuji e2e
+  (`pengujian.md`, Utang pengujian).
+- Diputuskan tanpa ditanyakan, diterapkan di commit migrasi: pemeriksaan
+  nama role Owner di layout dibuang (keputusan rancangan butir 2), dan
+  `urlSetup` form buat stock opname gudang diarahkan ke
+  `/dashboard/gudang/setup`, karena gudang yang belum didaftarkan adalah
+  urusan setup, bukan pengaturan.
+
 ## Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.

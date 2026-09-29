@@ -85,11 +85,12 @@ proyek, 28 September 2026).
 
 Seluruh spec memakai `page.route` hanya untuk jalur gagal atau untuk
 menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
-seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
-di spec login, satu di spec tipe aset).
+seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
+di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
+`2d7225b`).
 
-**Baseline per modul jadwal dan shift** (commit `845c2cf`): 327 test unit
-dan integrasi lolos di 43 berkas, 303 e2e lolos, 22 skipped: dua
+**Baseline per spec ruang gudang** (commit `2d7225b`): 327 test unit
+dan integrasi lolos di 43 berkas, 309 e2e lolos, 22 skipped: dua
 `test.fixme` bersyarat yang menunggu backend memisahkan shift dan pola
 roster per lokasi,
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
@@ -116,7 +117,8 @@ skenario lolos, dan satu `test.fixme` bersyarat. Submodul pola roster
 lolos, dan satu `test.fixme` bersyarat. Submodul jadwal (`19227f8` dan
 `e2a0cfd`) menambah 15 test unit, satu test integrasi, dan tujuh
 skenario lolos. Submodul monitoring absensi (`845c2cf`) menambah empat
-test unit dan tiga skenario lolos.
+test unit dan tiga skenario lolos. Spec ruang gudang (`2d7225b`) menambah
+enam skenario lolos.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -538,6 +540,12 @@ Urutan debug kegagalan e2e di atas).
   login sukses tidak menguranginya. Spec login gagal lebih awal bila sisa
   kuota di header `RateLimit` di bawah 3; menjalankan spec auth berulang
   (`--repeat-each`) dalam 15 menit dapat mengunci login seluruh suite.
+- **Setup gudang yang berhasil tidak diuji e2e** (keputusan GD6a). Tenant
+  uji sudah punya gudang yang menyimpan stok, sehingga setup hanya dapat
+  dibuka dengan daftar lokasi tanpa gudang yang disimulasikan, dan
+  `POST /location` dijawab gagal agar tidak ada gudang kedua yang
+  tersimpan. Payload dan penolakan radius teruji; pengalihan setelah
+  setup berhasil dan pembaruan menu sidebar sesudahnya belum.
 
 ## Spec rujukan
 
@@ -710,3 +718,9 @@ Urutan debug kegagalan e2e di atas).
   widget dibandingkan dengan respons nyata monitoring yang disaring
   karyawan ruang, dan jawaban 403 disimulasikan dengan `route.fulfill`
   berstatus 403 untuk membuktikan pesan izin.
+- `tests/e2e/gudang/ruang-gudang.spec.ts` (sejak `2d7225b`): keadaan
+  tanpa gudang dibentuk dari respons `GET /location` nyata yang disaring,
+  dengan `POST` pada pencegat yang sama dijawab gagal; penunggu respons
+  dipasang setelah `goto` dengan `waitUntil: "commit"`; dan isian tanpa
+  label dipilih lewat placeholder, atau lewat teks saudaranya beserta
+  induknya.
