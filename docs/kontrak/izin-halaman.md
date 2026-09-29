@@ -21,6 +21,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 29 September 2026: jadwal outlet dan jadwal gudang, yang ternyata sudah bergate `read-pengguna` di `IZIN_HALAMAN` sejak Fase 2, serta shift outlet dan shift gudang setelah migrasi submodul shift (`f99b7cf`).
 - 29 September 2026: pola roster outlet dan pola roster gudang setelah migrasi submodul pola roster (`dcc22e0`).
 - 29 September 2026: jadwal dan generate jadwal outlet dan gudang setelah migrasi submodul kalender dan generate (`19227f8`); generate outlet mendapat entri `IZIN_HALAMAN`, dan generate gudang dibuat.
+- 29 September 2026: ruang gudang setelah migrasi layout dan setup gudang (`9ce288b`). Layout bergerbang `read-dashboard-gudang` dan memuat `/location` bagi pemegang `read-location`; setup membuat lokasi lewat `POST /location` (`create-location`), bukan menu sidebar, dan tidak punya entri `IZIN_HALAMAN`.
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -52,7 +53,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/pelanggan` | `read-pelanggan` | `/pelanggan` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/pengguna` | `read-pengguna`, `read-role` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sejalan |
 | `/dashboard/outlet/pengaturan` | - | - | - | Data dimuat lewat komponen, periksa manual |
-| `/dashboard/gudang` | - | - | - | Data dimuat lewat komponen, periksa manual |
+| `/dashboard/gudang` | - | - | - | Halaman placeholder tanpa data (keputusan GD1a); layout ruang gudang bergerbang `read-dashboard-gudang` dan memuat `/location` bagi pemegang `read-location` (`9ce288b`) |
 | `/dashboard/gudang/inventaris` | `read-location`, `read-inventory` atau `read-inventory-gudang`, `read-bahan` | `/location`, `/inventory`, `/bahanbaku` | `read-location`, salah satu dari `read-inventory`, `read-inventory-gudang`, `read-inventory-outlet`, `read-bahan` | Sejalan; gate sengaja tidak menerima `read-inventory-outlet` di ruang gudang (keputusan produk) |
 | `/dashboard/gudang/jurnalStok` | `read-jurnal-stok` | `/jurnalstok` | `read-jurnal-stok` | Sejalan |
 | `/dashboard/gudang/stockOpname` | `read-stock-opname` | `/stockopname` | `read-stock-opname` | Sejalan |

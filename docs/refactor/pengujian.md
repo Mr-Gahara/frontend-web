@@ -89,8 +89,8 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
-**Baseline per spec ruang gudang** (commit `2d7225b`): 327 test unit
-dan integrasi lolos di 43 berkas, 309 e2e lolos, 22 skipped: dua
+**Baseline per langkah 1 modul Gudang** (commit `9ce288b`): 343 test unit
+dan integrasi lolos di 44 berkas, 312 e2e lolos, 22 skipped: dua
 `test.fixme` bersyarat yang menunggu backend memisahkan shift dan pola
 roster per lokasi,
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
@@ -118,7 +118,8 @@ lolos, dan satu `test.fixme` bersyarat. Submodul jadwal (`19227f8` dan
 `e2a0cfd`) menambah 15 test unit, satu test integrasi, dan tujuh
 skenario lolos. Submodul monitoring absensi (`845c2cf`) menambah empat
 test unit dan tiga skenario lolos. Spec ruang gudang (`2d7225b`) menambah
-enam skenario lolos.
+enam skenario lolos, dan langkah 1 modul Gudang (`9ce288b`) menambah 16
+test unit dan tiga skenario lolos.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -546,6 +547,11 @@ Urutan debug kegagalan e2e di atas).
   `POST /location` dijawab gagal agar tidak ada gudang kedua yang
   tersimpan. Payload dan penolakan radius teruji; pengalihan setelah
   setup berhasil dan pembaruan menu sidebar sesudahnya belum.
+- **Jalur layout gudang selain Owner hanya teruji di unit test**
+  (`tests/unit/features/inventaris/gudang.test.ts`): pengguna tanpa
+  `read-location`, tanpa `create-location`, dan tenant tanpa gudang,
+  karena satu-satunya akun uji berperan Owner dan tenant uji sudah punya
+  gudang.
 
 ## Spec rujukan
 
@@ -723,4 +729,6 @@ Urutan debug kegagalan e2e di atas).
   dengan `POST` pada pencegat yang sama dijawab gagal; penunggu respons
   dipasang setelah `goto` dengan `waitUntil: "commit"`; dan isian tanpa
   label dipilih lewat placeholder, atau lewat teks saudaranya beserta
-  induknya.
+  induknya. Sejak `9ce288b`, galat layout disimulasikan dengan
+  `JAWAB_GAGAL` untuk GET saja, lalu pencegatnya dilepas sebelum tombol
+  coba lagi ditekan dan respons muat ulangnya ditunggu.

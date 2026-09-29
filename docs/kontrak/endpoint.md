@@ -6,7 +6,7 @@ Endpoint yang dipanggil frontend beserta auth, permission, envelope, dan bentuk 
 
 ## 3. Endpoint yang dipakai frontend
 
-Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend tetap memiliki 246 route. Audit itu sempat mencatat 247 dengan `POST /akun/owner/create-tenant`, padahal route itu dikomentari di `akunRoute.js` baris 74; `audit-endpoint.js` membaca baris komentar sampai diperbaiki pada 28 September 2026. Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258` dan `45187b6`), serta 29 September 2026 (frontend `f99b7cf`, `dcc22e0`, `e2a0cfd`, dan `845c2cf`), menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
+Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend tetap memiliki 246 route. Audit itu sempat mencatat 247 dengan `POST /akun/owner/create-tenant`, padahal route itu dikomentari di `akunRoute.js` baris 74; `audit-endpoint.js` membaca baris komentar sampai diperbaiki pada 28 September 2026. Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258` dan `45187b6`), serta 29 September 2026 (frontend `f99b7cf`, `dcc22e0`, `e2a0cfd`, `845c2cf`, dan `9ce288b`), menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
 
 Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`; contoh `/diskon` berarti `/api/diskon`. Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom Envelope dan ID hanya terisi untuk GET yang diambil sampelnya.
 
@@ -116,8 +116,8 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/location` | authPengguna | `read-location` | `{ data, success }` | `id` | `features/inventaris/api.ts`, 1 file halaman lama |
-| POST | `/location` | authPengguna | `create-location` | - | - | 1 file |
+| GET | `/location` | authPengguna | `read-location` | `{ data, success }` | `id` | `features/inventaris/api.ts` |
+| POST | `/location` | authPengguna | `create-location` | - | - | `features/inventaris/api.ts` |
 | GET | `/location/current` | authPengguna | `read-location` | `{ data, success }` | `id` | `features/inventaris/api.ts` |
 
 #### `/metodepembayaran`
@@ -317,7 +317,7 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /jurnalstok`: _id, alasan, bahanBakuID{_id, namaBahan, satuan}, createdAt, dicatatOleh{_id, nama}, jumlah, keterangan, locationID{_id, nama, tipe}, tanggal, tenantID, tipeKoreksi, updatedAt
 - `GET /kategori`: __v, _id, createdAt, keterangan, kodeKategori, namaKategori, tenantID{_id, namaToko}, updatedAt
 - `GET /laporan/laba-rugi`: tanggal, totalBebanOperasional, totalDiskon, totalHPP, totalLabaBersih, totalLabaKotor, totalOmzet, totalPenjualanKotor (dari `laporanController` dan `laporanService`: array per kelompok waktu, per jam untuk `harian` dan per tanggal untuk `mingguan` dan `bulanan`. Query `periode` bawaan `bulanan` bila tidak dikenal, `endDate` bawaan sekarang, dan `startDate` bawaan 30 hari sebelumnya; web selalu mengirim ketiganya lewat `features/laporan`)
-- `GET /location`: alamat, createdAt, id, koordinat{coordinates, type}, nama, radiusAbsen, tenantID, tipe, updatedAt
+- `GET /location`: alamat, createdAt, id, koordinat{coordinates, type}, nama, radiusAbsen, tenantID, tipe, updatedAt (diurutkan dari yang terbaru, `locationService` baris 90 di backend `00b9957`, sehingga lokasi pertama bertipe Gudang adalah gudang terbaru; `koordinat.coordinates` berurutan longitude, latitude)
 - `GET /location/current`: alamat, createdAt, id, koordinat{coordinates, type}, nama, radiusAbsen, tenantID, tipe, updatedAt (dari `locationService.getByTenant` backend `9cd1439` baris 108: lokasi pertama tenant bertipe Outlet, sama untuk setiap pengguna; null bila tenant belum punya outlet)
 - `GET /metodepembayaran`: akunKas{id, namaAkun, nomorAkun}, createdAt, id, isActive, kategori, namaPembayaran, tenantID, updatedAt
 - `GET /metodepembayaran/:param`: akunKas{id, namaAkun, nomorAkun}, createdAt, id, isActive, kategori, namaPembayaran, tenantID, updatedAt

@@ -608,6 +608,12 @@ polanya salah.
   validasi di spec tarif muncul di dua `describe`. Pakai `grep -m1 -n`,
   atau cetak dulu seluruh kecocokan.
 
+- **Daftar berkas di variabel diteruskan dengan `$=VAR`.** Di zsh,
+  `$=F` memecah isi variabel per spasi, sehingga daftar berkas yang
+  dipakai dua kali (gerbang yang memeriksa waktu ubah dan `git add`)
+  cukup ditulis sekali: `F="a.ts b.ts"`, lalu `git add $=F`. Terbukti
+  pada commit `9ce288b`.
+
 ## Catatan form (React Hook Form dan Zod)
 
 - **Hindari `z.coerce`.** Ia membuat tipe input dan output skema berbeda,
@@ -939,6 +945,10 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Istilah `docs:dampak` harus khas.** Istilah umum seperti "lama" atau
   "buat" menjaring ratusan baris derau (237 baris untuk "Lama" di modul
   penjualan). Pakai nama fungsi, nama berkas, atau frasa khas.
+  Istilah turunan nama berkas yang diubah commit juga dapat umum
+  ("gudang", "inventaris", "location"): pada `9ce288b`, dari 528 baris
+  hanya puluhan yang relevan. Baca bagian istilah khas lebih dulu, lalu
+  saring bagian umum dengan `grep -E` atas kata kunci perubahan.
 - **Gerbang atas kode ditulis sebagai helper yang membaca per pemanggilan,
   bukan grep per baris.** Gerbang grep pertama untuk `route.fulfill`
   salah menghitung, karena `status` hampir selalu ditulis di baris sesudah

@@ -35,7 +35,8 @@ bagian sesi booking di `endpoint.md`, `payload.md`, dan `temuan.md` pada
 27 September 2026, serta bagian jadwal shift, shift, dan pola roster
 di `endpoint.md`, `payload.md`, dan `temuan.md` terhadap backend
 `00b9957` pada
-29 September 2026. Bila
+29 September 2026, begitu pula bagian lokasi di `payload.md` dan
+`endpoint.md` pada hari yang sama. Bila
 backend berubah cukup jauh, `endpoint.md`, `payload.md`, `izin-halaman.md`,
 dan `route-backend.md` perlu dibangkitkan ulang; bagian 1 di bawah menjelaskan
 cara pembangkitannya. Gejala bahwa kontrak sudah tertinggal: endpoint yang

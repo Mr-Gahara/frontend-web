@@ -640,7 +640,7 @@ keputusan rancangan butir 17 dan 21.
   yang menyimpan stok, dan `POST /location` dijawab gagal agar tidak ada
   lokasi yang tersimpan (`2d7225b`). Setup yang berhasil tidak diuji e2e
   (`pengujian.md`, Utang pengujian).
-- Diputuskan tanpa ditanyakan, diterapkan di commit migrasi: pemeriksaan
+- Diputuskan tanpa ditanyakan, diterapkan di `9ce288b`: pemeriksaan
   nama role Owner di layout dibuang (keputusan rancangan butir 2), dan
   `urlSetup` form buat stock opname gudang diarahkan ke
   `/dashboard/gudang/setup`, karena gudang yang belum didaftarkan adalah
@@ -649,7 +649,7 @@ keputusan rancangan butir 17 dan 21.
 ## Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.
-2. **Owner tidak diperlakukan khusus** lewat pengecekan nama role. Backend memberi Owner seluruh permission, sehingga pemeriksaan berbasis daftar permission sudah mencakupnya. Pengecualian: `useLevelPenggunaAktif` memakai nama role untuk menentukan level 100, karena token tidak membawa level; dipakai modul pengguna dan role untuk membandingkan level role. Cakupan data lintas lokasi di ruang outlet sempat mengikuti level itu, dan sejak `085ec78` mengikuti izin lintas outlet (`bolehLintasOutlet`), sehingga tidak lagi bergantung pada nama role. `gudang/layout.tsx` masih memeriksa nama role Owner (baris 32) dan dibereskan bersama modul gudang.
+2. **Owner tidak diperlakukan khusus** lewat pengecekan nama role. Backend memberi Owner seluruh permission, sehingga pemeriksaan berbasis daftar permission sudah mencakupnya. Pengecualian: `useLevelPenggunaAktif` memakai nama role untuk menentukan level 100, karena token tidak membawa level; dipakai modul pengguna dan role untuk membandingkan level role. Cakupan data lintas lokasi di ruang outlet sempat mengikuti level itu, dan sejak `085ec78` mengikuti izin lintas outlet (`bolehLintasOutlet`), sehingga tidak lagi bergantung pada nama role. Pemeriksaan nama role Owner di `gudang/layout.tsx` dibuang bersama modul gudang (`9ce288b`).
 3. **Invalidasi memakai akar domain** bila perubahan bisa memengaruhi beberapa varian. Kunci akar (`semua`) hanya untuk invalidasi, tidak untuk menyimpan data: halaman gudang lama memakai `queryKeys.bahanBaku.semua` sebagai kunci data master bahan baku.
 4. **Field yang dipakai service tetapi tidak ada di validator** harus diperiksa sebelum dihapus dari payload (lihat `docs/kontrak/README.md` bagian 1, keterbatasan).
 5. **Bug backend tidak diperbaiki dari sini.** Frontend menyesuaikan diri, lalu temuan ditulis untuk tim backend setelah commit bersih.

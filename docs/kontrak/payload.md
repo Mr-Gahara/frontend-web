@@ -217,12 +217,15 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /location`
 
-- Aturan: validateLocationPayload (validators/locationValidator.js)
-- Wajib dari klien: `alamat`
-- Field lain yang dikenali: `nama`, `tipe`, `latitude`, `longitude`, `radiusAbsen`
+- Aturan: validateLocationPayload (validators/locationValidator.js) di route, setelah `tenantID` disuntik dari sesi. Dikoreksi 29 September 2026 terhadap backend `00b9957`; sebelumnya allowlist update tercatat sebagai allowlist buat, dan hanya `alamat` yang tercatat wajib
+- Allowlist buat (`DIIZINKAN_BUAT`): `tenantID`, `nama`, `alamat`, `tipe`, `latitude`, `longitude`, `radiusAbsen`. Field lain ditolak "Field tidak dikenal", sedangkan `_id`, `koordinat`, `createdAt`, `updatedAt`, dan `__v` ditolak sebagai field yang diisi server
+- Wajib dari klien: `nama` dan `alamat` (teks yang tidak kosong setelah `trim`), `tipe`, `latitude`, dan `longitude`
+- Koordinat wajib angka sungguhan (bertipe number dan terhingga; teks angka dan `null` ditolak), dengan latitude -90 sampai 90 dan longitude -180 sampai 180. `radiusAbsen` opsional; bila dikirim wajib angka 10 sampai 50, dan bawaan model 50
 - Nilai sah: `VALID_TIPE`: Gudang, Outlet
-- Allowlist field: `nama`, `alamat`, `latitude`, `longitude`, `radiusAbsen`
-- Dibaca controller dari body: `-`
+- Aturan service: satu tenant hanya boleh punya satu lokasi bertipe Outlet (`locationService.create` baris 39 sampai 49, dan indeks unik parsial yang bentroknya dijawab 409 di baris 68); Gudang boleh lebih dari satu. Koordinat disimpan sebagai GeoJSON `koordinat` berurutan longitude, latitude
+- Galat validator dijawab 400 lewat errorHandler pusat dengan `message` "Payload lokasi tidak valid." dan `errors`
+- Web mengirim hasil `payloadBuatLokasi` (`features/inventaris/schema-lokasi.ts`) dari setup gudang
+- Dibaca controller dari body: seluruh body, dengan `tenantID` ditimpa dari sesi
 - Diisi server: `tenantID`
 
 #### `POST /metodepembayaran`

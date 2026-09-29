@@ -66,7 +66,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Reservasi: buat reservasi | `652d669` (spec), `477f258` | Selesai |
 | Keuangan | `0cfb3bd` (spec), `45187b6` | Selesai |
 | Jadwal dan shift, termasuk pola roster dan monitoring absensi | `d9af531` (spec), `f99b7cf` (shift), `dcc22e0` (pola roster), `19227f8` dan `e2a0cfd` (jadwal), `845c2cf` (monitoring absensi) | Selesai |
-| Gudang: layout, setup, pengaturan, dan dashboard | `2d7225b` (spec) | **Berikutnya** (lihat Pekerjaan berikutnya). Spec pembanding selesai; layout, setup, dan lokasi sidebar, lalu pengaturan gudang, menyusul (keputusan GD1a sampai GD6a). Eksekusi dashboard gudang ditunda sampai pemilik proyek menentukan layout dan UI/UX-nya (Utang kecil dari modul Gudang). Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), termasuk stock adjustment (`247cf2d`); pengguna gudang ikut modul Pengguna (`7275d14`), dan jadwal, shift, serta pola roster gudang ikut modul Jadwal dan shift |
+| Gudang: layout, setup, pengaturan, dan dashboard | `2d7225b` (spec), `9ce288b` (layout, setup, dan lokasi sidebar) | **Berikutnya** (lihat Pekerjaan berikutnya). Layout, setup, dan lokasi sidebar selesai; pengaturan gudang menyusul (keputusan GD1a sampai GD6a). Eksekusi dashboard gudang ditunda sampai pemilik proyek menentukan layout dan UI/UX-nya (Utang kecil dari modul Gudang). Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), termasuk stock adjustment (`247cf2d`); pengguna gudang ikut modul Pengguna (`7275d14`), dan jadwal, shift, serta pola roster gudang ikut modul Jadwal dan shift |
 | Pengaturan outlet: pajak dan metode pembayaran | - | Belum. Keempat halaman di `app/dashboard/outlet/pengaturan/pajak/` dan `app/dashboard/outlet/pengaturan/metodePembayaran/` masih memakai `apiClient`, `any`, dan `_id` |
 | Pelanggan dan diskon | - | Belum. `app/dashboard/outlet/pelanggan/page.tsx` dan `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`, dan `_id` |
 | Profil, login, dan sidebar | - | Belum. `app/dashboard/profil/page.tsx`, `app/login/page.tsx`, `app/login/pengguna/page.tsx`, dan `components/app-sidebar.tsx` masih memakai `apiClient` |
@@ -100,64 +100,32 @@ setup, dashboard, dan pengaturan. Pemetaan awal (29 September 2026):
 | `app/dashboard/gudang/page.tsx` | 9 | 0 | 0 | 0 | 0 |
 | `app/dashboard/gudang/pengaturan/page.tsx` | 8 | 0 | 0 | 0 | 0 |
 
-- Dashboard dan pengaturan gudang adalah placeholder yang hanya berisi
-  satu judul, bukan halaman tipis, dan tidak merender komponen lain.
-  Form buat stock opname gudang menautkan `urlSetup` ke pengaturan yang
-  kosong itu, dan form outlet ke `/dashboard/outlet/pengaturan/lokasi`,
-  rute yang tidak ada.
-- Layout menggerbangi seluruh ruang gudang dengan `read-dashboard-gudang`,
-  sejalan dengan backend (`penggunaCrudService` baris 80 sampai 84),
-  sidebar, dan layout outlet. Ia memuat `GET /location` lewat `apiClient`
-  di setiap perpindahan halaman, memeriksa nama role Owner (baris 32 dan
-  56, keputusan rancangan butir 2), dan mengalihkan setiap galat ke
-  `/dashboard`. Bagi pengguna yang hanya punya ruang gudang, `/dashboard`
-  mengalihkan kembali ke `/dashboard/gudang`, sehingga role kostum tanpa
-  `read-location` atau backend yang mati membuat pengalihan berputar.
-  Template role di `lib/roleTemplates.ts` tidak memicunya.
-- Setup membuat lokasi Gudang lewat `POST /location` dengan `useState`,
-  label tanpa `htmlFor`, koordinat bawaan titik tengah Pontianak, dan
-  teks koordinat yang tidak divalidasi sebagai angka (`NaN` terkirim
-  sebagai `null`).
-- Sidebar memuat `GET /location` sekali lewat `apiClient` untuk menu
-  Ruang Gudang dan Setup Gudang Baru. Setelah setup berhasil, menu itu
-  baru benar setelah halaman dimuat ulang, dan galatnya ditelan.
-- Halaman stok, pengguna, jadwal, shift, dan pola roster gudang sudah
-  dimigrasikan di modulnya masing-masing, dan tidak termasuk cakupan ini.
-
 Keputusan modul tercatat di `keputusan.md` (Modul gudang, GD1a sampai
-GD6a), dan spec pembandingnya di `2d7225b`. Pekerjaan yang tersisa, tiap
-langkah dengan commit dan dokumen penutupnya sendiri:
+GD6a). Spec pembandingnya di `2d7225b`, dan langkah 1 (layout, setup,
+lokasi sidebar, dan `urlSetup` gudang) selesai di `9ce288b`; rinciannya
+di pesan commit itu. Koreksi kontrak lokasi dan temuan 74 sudah masuk
+`docs/kontrak/`.
 
-1. Layout, setup, lokasi sidebar, dan `urlSetup` gudang (GD3a sampai
-   GD6a). Lapisan data lokasi tetap di `features/inventaris` (keputusan
-   rancangan butir 12): api dan hook buat serta perbarui lokasi, dan
-   skema form yang dipakai setup dan pengaturan. `LokasiListResponse`
-   dihapus setelah layout dan sidebar tidak memakainya.
-2. Pengaturan gudang sebagai profil gudang lewat `PUT /location/:id`
-   (GD2a).
+Yang tersisa: langkah 2, pengaturan gudang sebagai profil gudang lewat
+`PUT /location/:id` bagi pemegang `update-location`, dan baca-saja bagi
+pengguna lain (GD2a).
 
-Dokumen penutup langkah 1 juga membawa koreksi kontrak yang sudah
-dibuktikan dari kode backend:
+- Halamannya masih placeholder
+  (`app/dashboard/gudang/pengaturan/page.tsx`, 8 baris) dengan syarat
+  kosong di `IZIN_HALAMAN`.
+- Form memakai `skemaLokasi` dari `features/inventaris/schema-lokasi.ts`.
+  Validator update backend hanya menerima `nama`, `alamat`, `latitude`,
+  `longitude`, dan `radiusAbsen`, dan menolak `tipe` serta `tenantID`
+  (`validators/locationValidator.js` baris 113 sampai 158).
+- Yang perlu ditambahkan di `features/inventaris`: endpoint detail
+  lokasi di `EP.location`, `lokasiApi.perbarui`, dan hook perbaruinya.
+  Gudang yang diubah adalah lokasi Gudang pertama dari `GET /location`,
+  yaitu gudang terbaru (`kontrak/endpoint.md` bagian 3.3).
+- Laporan backend modul Gudang (`kontrak/temuan.md` butir 74) disusun
+  setelah langkah 2 di-commit.
 
-- `kontrak/payload.md`, `POST /location`: allowlist buat adalah
-  `DIIZINKAN_BUAT` yang memuat `tipe`; wajib dari klien `nama`,
-  `alamat`, `tipe`, `latitude`, dan `longitude`; koordinat wajib angka
-  sungguhan; `radiusAbsen` opsional 10 sampai 50 dengan bawaan model 50
-  (`validators/locationValidator.js` baris 21 sampai 107). Yang tercatat
-  hari ini adalah allowlist update.
-- `kontrak/endpoint.md` bagian 3.3: `GET /location` diurutkan dari yang
-  terbaru (`locationService` baris 90), sehingga gudang pertama di
-  `useLokasiRuang` adalah gudang terbaru.
-- `kontrak/temuan.md`: `GET /dashboard/gudang` menghitung `stokKritis` dan
-  `jurnalTerbaru` dari seluruh lokasi tenant termasuk outlet, dan tidak
-  memeriksa izin baca modul pengajuan maupun transfer
-  (`dashboardGudangService.getSummary`). `GET /dashboard/outlet` juga
-  memuat jurnal seluruh lokasi.
-- `kontrak/izin-halaman.md`: baris `/dashboard/gudang` dan
-  `/dashboard/gudang/pengaturan`.
-
-Langkah pertama sesi berikutnya: komparasi langkah 1, dimulai dari api,
-hook, dan skema lokasi di `features/inventaris`.
+Langkah pertama sesi berikutnya: baca utuh jalur `PUT /location/:id` di
+controller dan service backend, lalu komparasi langkah 2.
 
 ## Catatan dari modul jadwal dan shift
 
@@ -306,8 +274,8 @@ Yang masih berlaku:
   Barang inventory non-bahan (`barangInventoryID`, `/baranginventory`)
   belum dipakai web sama sekali; master data tetap bersumber dari outlet
   (`keputusan.md`, Model bisnis MVP). Dirapikan di modul gudang.
-- Di ruang gudang, `gudang/layout.tsx` dan `gudang/setup` masih memakai
-  `apiClient`; keduanya bukan halaman stok (modul Gudang). Jadwal gudang
+- Di ruang gudang, `gudang/layout.tsx` dan `gudang/setup` memakai
+  `features/inventaris` sejak `9ce288b` (modul Gudang). Jadwal gudang
   sudah beralih ke `features/jadwal` di `19227f8`.
 - Backend lokal: branch `ridho` `9cd1439`, yang menggabungkan origin/yoga
   `f0b7157` (21 September 2026, belum di-push). Berkas transfer stok tidak
@@ -360,7 +328,7 @@ Yang masih berlaku:
   berkas modul (test integrasi pola roster bersih sejak `dcc22e0`):
   integration jadwal dan pengguna, `tests/helpers/storage.ts`,
   `tests/unit/lib/decodeToken.test.ts`, dan `components/app-sidebar.tsx`
-  baris 368. Bereskan saat berkasnya dimigrasikan; `storage.ts` sendiri
+  baris 373. Bereskan saat berkasnya dimigrasikan; `storage.ts` sendiri
   sudah tidak relevan (`pengujian.md`). Mengganti `any` di sidebar dicoba
   dan dikembalikan, karena tipe hilirnya ikut berubah (`cara-kerja.md`).
 - Detail stock opname tidak memeriksa tipe lokasi terhadap ruang, sehingga
@@ -446,6 +414,11 @@ Yang masih berlaku:
 - Tautan `urlSetup` form buat stock opname outlet menuju
   `/dashboard/outlet/pengaturan/lokasi`, rute yang tidak ada. Dibereskan
   bersama modul pengaturan outlet.
+- Dua error ESLint `react/no-unescaped-entities` di
+  `app/dashboard/gudang/inventaris/page.tsx` baris 273 (tanda kutip di
+  teks keadaan kosong) warisan sejak migrasi stok `ad590f9`, yang ditutup
+  walau definisi selesai meminta ESLint tanpa error di berkas modulnya.
+  Bereskan saat halaman inventaris gudang disentuh lagi.
 
 ### Utang kecil dari penyesuaian backend `f27f093`
 
