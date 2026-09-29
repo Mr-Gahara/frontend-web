@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useMemo } from "react";
 import { PenggunaItem } from "@/types/pengguna";
 import { Role } from "@/types/role";
 import {
@@ -10,12 +10,18 @@ import {
   Clock,
   Loader2,
 } from "lucide-react";
-import { format } from "date-fns";
+import { namaPeran } from "./peran";
+import { useMonitoringAbsensi } from "@/features/absensi/hooks";
+import { hitungAbsensi, jamWIB, stafRuang } from "@/features/absensi/ringkasan";
+import { isForbidden } from "@/lib/api/error";
 
-// IMPORT HOOK ABSENSI ASLI
-import { useMonitoringAbsensi } from "@/hooks/use-monitoring-absensi";
-
-// --- WIDGET 1: KARYAWAN AKTIF (TERHUBUNG KE BACKEND) ---
+/**
+ * Widget staf yang sedang bekerja hari ini, dari GET /absensi/monitoring.
+ * Daftar disaring dengan karyawan ruang halaman ini (keputusan AB4a); angka
+ * besar adalah yang sedang bekerja, dan baris kecil yang sudah absen (AB5a).
+ * 403 dan galat lain ditampilkan sebagai pesan, bukan daftar kosong (AB3a),
+ * dan jam masuk diformat dalam WIB (AB7).
+ */
 export function WidgetActiveUsers({
   penggunaList,
   roleList,
@@ -23,22 +29,16 @@ export function WidgetActiveUsers({
   penggunaList: PenggunaItem[];
   roleList: Role[];
 }) {
-  const { data: absensiRes, isLoading } = useMonitoringAbsensi(new Date());
-
-  React.useEffect(() => {
-    if (absensiRes) console.log("🔥 Data API Absensi:", absensiRes);
-  }, [absensiRes]);
-
-  const rawData = absensiRes as any;
-  const daftarStaf =
-    rawData?.data?.data?.daftar ||
-    rawData?.data?.daftar ||
-    rawData?.daftar ||
-    [];
-
-  const activeUsersAPI = daftarStaf.filter(
-    (staf: any) => staf.status === "sedang_bekerja",
-  );
+  const monitoring = useMonitoringAbsensi(new Date());
+  const { sedangBekerja, sudahAbsen } = useMemo(() => {
+    const idRuang = new Set(penggunaList.map((p) => p.id));
+    return hitungAbsensi(stafRuang(monitoring.data?.daftar ?? [], idRuang));
+  }, [monitoring.data, penggunaList]);
+  const pesanGalat = monitoring.isError
+    ? isForbidden(monitoring.error)
+      ? "Anda tidak memiliki izin melihat absensi staf."
+      : "Gagal memuat data absensi. Muat ulang halaman untuk mencoba lagi."
+    : null;
 
   return (
     <div className="rounded-xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col w-full h-full relative overflow-hidden">
@@ -53,59 +53,46 @@ export function WidgetActiveUsers({
           </span>
         </div>
         <div className="flex items-end gap-2 mt-2">
-          {isLoading ? (
+          {monitoring.isLoading ? (
             <Loader2 className="h-10 w-10 text-[#0A2947] animate-spin mb-1" />
           ) : (
             <span className="text-6xl font-black text-[#0A2947] leading-none">
-              {activeUsersAPI.length}
+              {pesanGalat ? "-" : sedangBekerja.length}
             </span>
           )}
           <span className="text-sm text-[#0A2947]/60 font-medium mb-1.5">
-            online hari ini
+            sedang bekerja
           </span>
         </div>
+        {!monitoring.isLoading && !pesanGalat && (
+          <p className="text-xs font-semibold text-[#0A2947]/50 mt-2">
+            {sudahAbsen} staf sudah absen hari ini
+          </p>
+        )}
       </div>
 
       {/* Daftar Karyawan dari Backend */}
       <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-3 scrollbar-thin scrollbar-thumb-[#0A2947]/20">
-        {isLoading ? (
+        {monitoring.isLoading ? (
           <div className="text-sm font-medium text-[#0A2947]/50 text-center mt-4">
             Memuat data absensi...
           </div>
-        ) : activeUsersAPI.length === 0 ? (
+        ) : pesanGalat ? (
+          <div role="alert" className="text-sm font-medium text-red-600 text-center mt-4">
+            {pesanGalat}
+          </div>
+        ) : sedangBekerja.length === 0 ? (
           <div className="text-sm font-medium text-[#0A2947]/50 text-center mt-4">
-            Belum ada karyawan yang absen hari ini.
+            {sudahAbsen === 0
+              ? "Belum ada karyawan yang absen hari ini."
+              : "Tidak ada karyawan yang sedang bekerja saat ini."}
           </div>
         ) : (
-          activeUsersAPI.map((staf: any, idx: number) => {
-            const matchedUser = penggunaList.find(
-              (p) => p.id === staf.penggunaID,
-            );
-            let roleName = "Staff";
-
-            if (matchedUser) {
-              if (
-                typeof matchedUser.roleID === "object" &&
-                matchedUser.roleID !== null
-              ) {
-                roleName = (matchedUser.roleID as any).namaRole;
-              } else if (typeof matchedUser.roleID === "string") {
-                const foundRole = roleList.find(
-                  (r) =>
-                    (r as any).id === matchedUser.roleID ||
-                    r.id === matchedUser.roleID,
-                );
-                if (foundRole) roleName = foundRole.namaRole;
-              }
-            }
-
-            const jamMasuk = staf.sesiTerakhir?.waktuMasuk
-              ? format(new Date(staf.sesiTerakhir.waktuMasuk), "HH:mm") + " WIB"
-              : "-";
-
+          sedangBekerja.map((staf) => {
+            const pengguna = penggunaList.find((p) => p.id === String(staf.penggunaID));
             return (
               <div
-                key={staf.penggunaID || idx}
+                key={staf.penggunaID}
                 className="flex flex-col gap-1.5 rounded-lg border border-[#0A2947]/10 bg-[#FFFAF3] p-3 hover:border-[#0A2947]/30 transition-colors shadow-sm"
               >
                 <div className="flex justify-between items-start">
@@ -114,11 +101,11 @@ export function WidgetActiveUsers({
                   </p>
                   <div className="flex items-center gap-1 text-[10px] font-bold text-white bg-[#718355] px-2 py-0.5 rounded-full shrink-0">
                     <Clock className="h-3 w-3" />
-                    {jamMasuk}
+                    {jamWIB(staf.sesiTerakhir?.waktuMasuk)}
                   </div>
                 </div>
                 <p className="text-xs font-semibold capitalize text-[#0A2947]/60">
-                  {roleName}
+                  {pengguna ? namaPeran(pengguna, roleList) : "-"}
                 </p>
               </div>
             );

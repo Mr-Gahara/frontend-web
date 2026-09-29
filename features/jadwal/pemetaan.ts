@@ -1,22 +1,20 @@
 import type { JadwalItem, KaryawanRuang } from "./tipe";
 import type { penggunaApi } from "@/features/pengguna/api";
+import { namaPeran } from "@/features/pengguna/peran";
 import type { KaryawanJadwal, ShiftItem } from "@/types/jadwal";
 
 type PenggunaDaftar = Awaited<ReturnType<typeof penggunaApi.daftar>>[number];
 
 /**
  * Karyawan satu ruang dari daftar pengguna features/pengguna (keputusan
- * rancangan butir 12). Peran dibaca dari role, lalu roleID.namaRole
- * (keputusan JD14a); nama atau peran yang kosong tampil "-" (butir 11).
+ * rancangan butir 12). Peran dari namaPeran (features/pengguna, keputusan
+ * JD14a); nama yang kosong tampil "-" (butir 11).
  */
 export function keKaryawanRuang(pengguna: PenggunaDaftar[]): KaryawanRuang[] {
   return pengguna.map((p) => ({
     id: p.id,
     nama: p.nama || "-",
-    role:
-      p.role ||
-      (typeof p.roleID === "object" && p.roleID !== null ? p.roleID.namaRole : "") ||
-      "-",
+    role: namaPeran(p),
   }));
 }
 

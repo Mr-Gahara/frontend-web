@@ -10,6 +10,7 @@ import {
   useSimpanPengguna,
 } from "./hooks";
 import { useDaftarRole, useLevelPenggunaAktif } from "@/features/role/hooks";
+import { namaPeran } from "./peran";
 import { pesanError } from "@/lib/api/error";
 import type { Workspace } from "./api";
 import { ColumnDef } from "@tanstack/react-table";
@@ -42,7 +43,7 @@ import {
   WidgetTotalUsers,
   WidgetActiveUsers,
   WidgetAccess,
-} from "@/components/pengguna/bento-pengguna-widget";
+} from "./widget-pengguna";
 
 const emptyForm: PenggunaRequest = {
   nama: "",
@@ -247,15 +248,7 @@ export default function HalamanPengguna({
       header: () => (
         <span className="text-xs font-bold text-[#0A2947]/60">Role</span>
       ),
-      accessorFn: (row) => {
-        if (typeof row.roleID === "object" && row.roleID !== null)
-          return row.roleID.namaRole || "-";
-        if (typeof row.roleID === "string") {
-          const foundRole = roleList.find((r) => r.id === row.roleID);
-          return foundRole ? foundRole.namaRole : "-";
-        }
-        return "-";
-      },
+      accessorFn: (row) => namaPeran(row, roleList),
       cell: ({ row }) => (
         <span className="text-sm font-semibold capitalize text-[#0A2947]">
           {row.getValue("role") as string}
