@@ -88,8 +88,9 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan tiga simulasi beralasan (dua
 di spec login, satu di spec tipe aset).
 
-**Baseline per spec jadwal** (commit `d9af531`): 277 test unit dan
-integrasi lolos di 38 berkas, 284 e2e lolos, 20 skipped:
+**Baseline per submodul shift** (commit `f99b7cf`): 291 test unit dan
+integrasi lolos di 39 berkas, 288 e2e lolos, 21 skipped: satu
+`test.fixme` bersyarat yang menunggu backend memisahkan shift per lokasi,
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
 backend, sebelas `test.fixme` lain yang menunggu backend (pola roster,
 pengguna, stock opname, penerimaan, tiga di spec alur penjualan, tiga di
@@ -108,7 +109,8 @@ reservasi (`652d669`) menambah enam skenario, dan migrasinya (`477f258`)
 menambah 18 test unit dan satu skenario. Spec keuangan (`0cfb3bd`)
 menambah enam skenario, dan migrasinya (`45187b6`) menambah 22 test unit
 dan lima skenario. Spec pembanding jadwal (`d9af531`) menambah 13
-skenario.
+skenario. Submodul shift (`f99b7cf`) menambah 14 test unit, empat
+skenario lolos, dan satu `test.fixme` bersyarat.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -365,6 +367,17 @@ satu putaran.
 - Status respons yang belum pernah dibaca dari kode atau respons nyata
   tidak ditebak dari endpoint serupa: `POST /jadwalshift` menjawab 201,
   sedangkan `POST /jadwalshift/bulk` menjawab 200.
+- Setelah menekan simpan di dialog modal, tunggu dialog tertutup
+  (`toBeHidden`) sebelum berinteraksi dengan halaman. Hook di `features/`
+  menunggu invalidasi sebelum mutation selesai, sehingga dialog baru
+  tertutup setelah daftar dimuat ulang, dan klik di luar dialog yang
+  masih terbuka hanya menutupnya. Terbukti lewat trace di spec shift
+  (`f99b7cf`); spec itu lolos di kode lama hanya karena dialog lama
+  tertutup lebih cepat.
+- Hasil `--repeat-each N` untuk spec yang memuat `test.fixme` bersyarat
+  dihitung sebagai lolos kali N ditambah skipped kali N. Pesan commit
+  `f99b7cf` menyebut spec shift 48 lolos, padahal hasilnya 45 lolos dan
+  3 skipped.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -383,6 +396,7 @@ Menunggu perbaikan backend:
 | Hapus tarif berhasil (`reservasi/tarif/crud-tarif.spec.ts`) | `DELETE /tarif/:id` menjawab sukses (`kontrak/temuan.md` butir 53). Selama menunggu, skenario tombol menunggu membuktikan tarif memang terhapus (404 saat dibaca ulang) |
 | Tarif dilepas dari tipe aset (`reservasi/tarif/crud-tarif.spec.ts`) | Ubah tarif mengganti `tipeAsetID` alih-alih `$addToSet`, dan membersihkan cache tipe aset dengan `tenantID` yang benar (`kontrak/temuan.md` butir 54 dan 55) |
 | Timeline yang dimuat ulang tidak lagi menampilkan booking yang di-void (`reservasi/daftar/lihat-reservasi.spec.ts`) | Void penjualan membersihkan cache daftar booking per tanggal (`kontrak/temuan.md` butir 57, keputusan R3a). Badannya lengkap |
+| Shift yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/shift/crud-shift.spec.ts`) | Backend memisahkan shift per lokasi dan `KUNCI_LOKASI_SHIFT` di `features/shift/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
 terhitung di angka skipped pada baseline:
@@ -393,6 +407,7 @@ terhitung di angka skipped pada baseline:
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
 | `inventaris/penerimaanBarang/terima-penerimaan.spec.ts`, `inventaris/transferStok/*.spec.ts` | Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup. Kegagalan persiapan lain menggagalkan test, bukan melewatinya |
 | Skenario jalur terkunci di spec stok, pengajuan stok (daftar), dan stock adjustment | `IZIN_LINTAS_OUTLET` sudah diisi, sehingga Ridho memegangnya; butuh akun uji tanpa izin itu. Tidak terjadi selama konstanta null, sehingga belum terhitung di baseline |
+| Halaman shift gudang dengan keterangan pemakaian bersama (`jadwal/shift/crud-shift.spec.ts`) | `KUNCI_LOKASI_SHIFT` sudah diisi, sehingga keterangan tidak tampil lagi. Tidak terjadi selama konstanta null |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
 hapus bahan baku juga dilewati bila datanya kosong, tetapi tidak terjadi pada
@@ -652,3 +667,9 @@ Urutan debug kegagalan e2e di atas).
   sebelah label bulan toolbar sambil menunggu `GET /jadwalshift` bulan
   itu; dan hari uji setiap test dibersihkan lewat API di awal dan di
   `finally` (`tests/helpers/jadwal-uji.ts`).
+- `tests/e2e/jadwal/shift/crud-shift.spec.ts` (sejak `f99b7cf`): skenario
+  yang menunggu pemisahan per ruang ditulis lengkap sebagai `test.fixme`
+  bersyarat pada `shiftTerpisahPerRuang()`, keterangan yang hanya berlaku
+  selama konstanta null memakai `test.skip` bersyarat, dan penolakan
+  validasi browser dibuktikan lewat `validity.valid` beserta penghitung
+  permintaan.

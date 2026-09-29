@@ -195,6 +195,13 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   sekaligus punya shift (perlu keputusan), nama dan role karyawan di
   respons jadwal selalu "Tidak Diketahui", dan respons sukses walau
   jadwal ditolak (`kontrak/temuan.md` butir 62 sampai 66)
+- Laporan submodul shift — 5 temuan dan 1 permintaan, disusun 29
+  September 2026 setelah `f99b7cf`: penyebab `GET /shift` tanpa query
+  menjawab 500, cache daftar shift yang tidak pernah dibaca, jam tanpa
+  titik dua diterima, lintas hari tidak dicocokkan dengan jam, dan
+  `tenantID` yang dapat diubah lewat `PUT /shift/:id`; beserta permintaan
+  `locationID` untuk shift, pola roster, dan monitoring absensi
+  (`kontrak/temuan.md` butir 8 dan 67 sampai 71)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

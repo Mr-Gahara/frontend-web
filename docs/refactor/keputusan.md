@@ -493,9 +493,12 @@ keputusan rancangan butir 17 dan 21.
   (dialog bertahan dengan alasan dari `detailDitolak`), penolakan sebagian
   ditampilkan sebagai peringatan, dan generate tetap di langkah 2 dengan
   daftar jadwal yang ditolak.
-- **J3b: halaman jadwal tetap tanpa gate**, walau `/pengguna` mewajibkan
-  `read-pengguna`. Dicatat sebagai utang di `status.md` dan disampaikan
-  bersama laporan akhir modul.
+- **J3b: dicabut** (29 September 2026, setelah `f99b7cf`). Keputusan ini
+  diambil di atas baris `kontrak/izin-halaman.md` yang tertinggal, padahal
+  `IZIN_HALAMAN` sudah memasang `read-pengguna` untuk jadwal outlet dan
+  jadwal gudang sejak Fase 2. Tidak ada gate yang diubah, dan utangnya
+  diganti di `status.md`. Generate jadwal belum punya entri, dan
+  ditangani di submodul generate.
 - **J4: data uji jadwal memakai fixture tetap** (shift dan pola roster
   uji) dan jadwal uji Ridho di bulan 30 hari pertama mulai dua bulan ke
   depan, yang dihapus per id di awal dan di `finally` (`d9af531`).
@@ -507,6 +510,34 @@ keputusan rancangan butir 17 dan 21.
 - **Spec pembanding hanya memuat perilaku yang tidak berubah** dan lolos
   terhadap kode lama (`d9af531`); skenario J1a, J2a, dan J5b
   ditambahkan di commit migrasi.
+- **Modul dipecah menjadi lima submodul** menurut ketergantungan data,
+  masing-masing dengan inventaris, keputusan, perbaikan, commit, dan
+  dokumen penutup sendiri: shift, pola roster, kalender jadwal dan
+  kelola manual, generate, lalu monitoring absensi. Informasi diambil
+  lewat blok terminal; berkas diunggah hanya bila memang perlu.
+- **Outlet dan gudang punya karyawan, jadwal, shift, pola roster, dan
+  absensi masing-masing.** Tampilannya boleh sama, tetapi datanya tidak
+  dicampur.
+- **SH1b: halaman shift gudang memakai komponen yang sama dengan outlet**
+  (`f99b7cf`), dan pemisahan shift per ruang ditulis lengkap di
+  `features/shift/ruang.ts` dengan `KUNCI_LOKASI_SHIFT` bernilai null
+  (keputusan rancangan butir 18). Selama null, kedua ruang menampilkan
+  daftar tenant yang sama beserta keterangan, karena `shiftModel` belum
+  punya field lokasi. Menggantikan SH1a (data shift milik tenant
+  bersama), yang diputuskan sebelum kebutuhan pemisahan per ruang
+  disampaikan.
+- **SH2a: lintas hari dihitung dari jam** (jam pulang tidak lebih besar
+  dari jam masuk, termasuk jam yang sama), dan kotak centangnya nonaktif
+  beserta keterangan. Sebelumnya effect menimpa centang manual setiap
+  kali jam lengkap.
+- **SH3a: form shift memakai React Hook Form dan Zod** dengan
+  `InputWaktu`, dan tampilannya dipertahankan.
+- **SH4a: toleransi harus bilangan bulat menit yang tidak negatif**;
+  desimal ditolak, sedangkan sebelumnya dibulatkan ke bawah tanpa
+  pemberitahuan.
+- **SH5a: tim backend diminta menambah `locationID`** untuk shift, pola
+  roster, dan monitoring absensi, dengan indeks unik nama shift per
+  tenant dan lokasi (`kontrak/temuan.md` butir 70).
 
 ## Keputusan rancangan yang mengikat
 

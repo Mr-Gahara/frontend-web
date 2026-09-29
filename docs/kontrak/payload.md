@@ -356,6 +356,8 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validateShiftPayload (validators/shiftValidator.js)
 - Wajib dari klien: `namaShift`, `jamMasuk`, `jamPulang`
 - Field lain yang dikenali: `isLintasHari`, `toleransiTerlambat`, `status`
+- Jam divalidasi dengan pola yang titik duanya opsional, sehingga "0800" diterima (`temuan.md` butir 68); `isLintasHari` tidak dicocokkan dengan jam (butir 69), dan jam masuk yang sama dengan jam pulang hanya sah bila lintas hari. Nama ganda dalam tenant (indeks `{ tenantID, namaShift }`) dijawab 4xx tanpa pesan galat MongoDB; spec `f99b7cf` menerima 400 maupun 409. Controller meneruskan `...req.body` ke `Shift.create`, dan field di luar skema dibuang Mongoose, termasuk `workspace` yang dahulu dikirim web. Web mengirim keenam field dari `payloadShift` (`features/shift/payload.ts`). Dikoreksi 29 September 2026
+- Respons 201 dengan `data` berbentuk item `GET /shift`
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -523,11 +525,12 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /shift/:id`
 
-- Aturan: validateShiftPayload (validators/shiftValidator.js)
-- Wajib dari klien: `namaShift`, `jamMasuk`, `jamPulang`
-- Field lain yang dikenali: `isLintasHari`, `toleransiTerlambat`, `status`
+- Aturan: validateShiftPayload mode update (validators/shiftValidator.js): seluruh field opsional, tetapi yang dikirim diperiksa formatnya
+- Wajib dari klien: -
+- Field lain yang dikenali: `namaShift`, `jamMasuk`, `jamPulang`, `isLintasHari`, `toleransiTerlambat`, `status`
+- Service menjalankan `findOneAndUpdate` dengan `$set` atas seluruh body. `tenantID` yang dikirim ikut disimpan bila berupa ObjectId yang sah, sehingga shift dapat dipindah ke tenant lain (`temuan.md` butir 71); web tidak mengirimnya. Dikoreksi 29 September 2026
 - Dibaca controller dari body: `-`
-- Diisi server: `tenantID`
+- Diisi server: - (`tenantID` hanya diisi saat create)
 
 #### `PUT /tarif/:id`
 

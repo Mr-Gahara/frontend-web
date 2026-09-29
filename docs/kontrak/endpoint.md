@@ -6,7 +6,7 @@ Endpoint yang dipanggil frontend beserta auth, permission, envelope, dan bentuk 
 
 ## 3. Endpoint yang dipakai frontend
 
-Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend tetap memiliki 246 route. Audit itu sempat mencatat 247 dengan `POST /akun/owner/create-tenant`, padahal route itu dikomentari di `akunRoute.js` baris 74; `audit-endpoint.js` membaca baris komentar sampai diperbaiki pada 28 September 2026. Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258` dan `45187b6`) menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
+Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend tetap memiliki 246 route. Audit itu sempat mencatat 247 dengan `POST /akun/owner/create-tenant`, padahal route itu dikomentari di `akunRoute.js` baris 74; `audit-endpoint.js` membaca baris komentar sampai diperbaiki pada 28 September 2026. Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258` dan `45187b6`), serta 29 September 2026 (frontend `f99b7cf`), menghasilkan angka yang sama. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
 
 Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`; contoh `/diskon` berarti `/api/diskon`. Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom Envelope dan ID hanya terisi untuk GET yang diambil sampelnya.
 
@@ -244,10 +244,10 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/shift` | authPengguna | - | 500 | - | 5 file |
-| POST | `/shift` | authPengguna | - | - | - | 1 file |
-| PUT | `/shift/:id` | authPengguna | - | - | - | 1 file |
-| DELETE | `/shift/:id` | authPengguna | - | - | - | 1 file |
+| GET | `/shift` | authPengguna | - | `{ data, message, success }` | `id` | `features/shift/api.ts`, 4 file halaman lama (query `workspace` hanya penghindar 500, `temuan.md` butir 8) |
+| POST | `/shift` | authPengguna | - | - | - | `features/shift/api.ts` |
+| PUT | `/shift/:id` | authPengguna | - | - | - | `features/shift/api.ts` |
+| DELETE | `/shift/:id` | authPengguna | - | - | - | `features/shift/api.ts` |
 
 #### `/stockopname`
 
@@ -299,7 +299,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 ### 3.2 Status sampel GET yang tidak berhasil
 
 - `GET /bahan-baku`: 404 Not Found (route tidak ada di backend; frontend berhenti memanggilnya di `aab26f3`)
-- `GET /shift`: 500 Cannot access 'data' before initialization
+- `GET /shift`: 500 Cannot access 'data' before initialization, hanya bila tanpa query apa pun (`shiftService.getAll` baris 21 sampai 28, `temuan.md` butir 8)
 
 ### 3.3 Bentuk item respons GET
 
@@ -337,6 +337,7 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /role`: deskripsi, id, level, namaRole, permissions[]
 - `GET /role/:param`: deskripsi, id, level, namaRole, permissions[]
 - `GET /sesibooking`: dataAset{id, namaAset, status}, dataPelanggan{id, namaPelanggan, tipePelanggan}, dataPengguna{id, nama}, dataPenjualan{_id, noReferensi, statusPenjualan, statusBayar, totalTagihan, totalDibayar, sisaTagihan, itemPenjualan[], dan lainnya}, dataTarif{id, harga, namaTarif}, durasiMenit, id, status, tenantID, totalBiaya, waktuMulai, waktuSelesai (dari `mappers/sesiBookingMapper.js` backend `00b9957`, bukan dari sampel cache kontrak: referensi dibentuk `_formatRef`, sehingga selalu `{ id, ...field }` atau null, dan `dataPenjualan` dari `_formatPenjualanOutput` membawa `_id`. Service hanya membaca query `tanggal` (YYYY-MM-DD lokal) dan menyaring `waktuMulai` pada tanggal itu tanpa menyaring status, sehingga booking Batal ikut terkirim; booking Aktif yang sudah lewat diubah menjadi Selesai saat dibaca (`temuan.md` butir 58), dan daftar yang tidak kosong di-cache 300 detik per tanggal (butir 57))
+- `GET /shift`: dibuatPada, id, isLintasHari, jamMasuk, jamPulang, namaShift, status, toleransiTerlambat (dari `mappers/shiftMapper.js` backend `00b9957`, bukan dari sampel cache kontrak: tanpa `tenantID`, dan waktu dibuat bernama `dibuatPada`. Service hanya membaca query `status` dan mengurutkan menurut `jamMasuk`; tanpa query apa pun dijawab 500, `temuan.md` butir 8)
 - `GET /stockopname` dan `GET /stockopname/:param` (dari `mappers/stockOpnameMapper.js`, bukan dari sampel cache kontrak; sekurang-kurangnya): catatan, catatanReview, id, items[] (itemId, namaSnapshot, satuanSnapshot, qtySystemSnapshot, qtyPhysical, varianceSnapshot, adaSelisih, catatanItem), lokasi{id, nama, tipe}, nomorOpname, pic{id, nama}, reviewer, status, stockAdjustment, tanggal (`qtyPhysical` dan `varianceSnapshot` null selama item belum dihitung, dan `adaSelisih` false untuk item itu; mapper backend `f27f093` baris 90 dan 93)
 - `GET /stockopname/adjustments` (dari `mappers/stockOpnameMapper.js` backend `f27f093`, bukan dari sampel cache kontrak): alasan, createdAt, id, items[], lokasi{id, nama, tipe}, nomorAdjustment, pic{id, nama}, referenceID{id, nomorOpname, tanggal}, referenceType, tanggal, tenantID, updatedAt. `referenceID` berisi objek hasil populate (`stockOpnameService` baris 557), null untuk koreksi manual atau dokumen opname yang sudah tidak ada; `referenceType` bernilai `STOCK_OPNAME` atau `MANUAL_CORRECTION`. Query `referenceType` dan `locationID` divalidasi `validateAdjustmentQuery` di service, lalu dipakai sebagai filter (`getAllAdjustments` baris 538 sampai 552 di backend `9cd1439`)
 - `GET /stockopname/adjustments/:param`: seperti daftar, dengan lokasi{alamat, id, nama, tipe} dan referenceID{id, nomorOpname, tanggal, picID} (`picID` tidak dipopulate, `stockOpnameService` baris 581). Setiap item: itemId, bahanBakuID, barangInventoryID, namaSnapshot, satuanSnapshot, qtySnapshot (stok saat draf dibuat), qtyCurrent (stok saat approval), qtyPhysical, dan qtyDifference (qtyPhysical dikurangi qtyCurrent); keempat kuantitas wajib di model

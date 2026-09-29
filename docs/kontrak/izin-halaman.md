@@ -18,6 +18,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 26 September 2026: penjualan setelah migrasi modul penjualan dan pembayaran (`f33ffa6`), dan pengeluaran yang ternyata halaman placeholder.
 - 27 September 2026: reservasi setelah migrasi daftar reservasi (`eef371a`), tanpa perubahan gate maupun endpoint.
 - 28 September 2026: ringkasan laba rugi setelah migrasi modul keuangan (`45187b6`), tanpa perubahan gate. Halaman akun kas dan mutasi arus kas bukan menu sidebar (dibuka lewat tab keuangan) dan bergate `read-akunkas` di `IZIN_HALAMAN`.
+- 29 September 2026: jadwal outlet dan jadwal gudang, yang ternyata sudah bergate `read-pengguna` di `IZIN_HALAMAN` sejak Fase 2, serta shift outlet dan shift gudang setelah migrasi submodul shift (`f99b7cf`).
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -42,7 +43,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/inventaris-suplai` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/pengajuanStok` | `read-pengajuan-stok`, `read-location` | `/pengajuanstok`, `/location`, `/location/current` | `read-pengajuan-stok`, `read-location` | Sejalan |
 | `/dashboard/outlet/inventaris/penerimaanBarang` | `read-location`, `read-transfer-stok` | `/location`, `/location/current`, `/transferstok` | `read-location`, `read-transfer-stok` | Sejalan |
-| `/dashboard/outlet/jadwal` | - | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Tanpa gate, endpoint berizin |
+| `/dashboard/outlet/jadwal` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Sejalan; baris ini sempat tertinggal dari `IZIN_HALAMAN` (dikoreksi 29 September 2026) |
 | `/dashboard/outlet/pola-roster` | - | `/shift`, `/polaroster` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/shift` | - | `/shift` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/pelanggan` | `read-pelanggan` | `/pelanggan` | - | Backend tidak memeriksa izin |
@@ -56,8 +57,8 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/gudang/pengajuanStok` | `read-pengajuan-stok` | `/pengajuanstok` | `read-pengajuan-stok` | Sejalan |
 | `/dashboard/gudang/transferStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/gudang/pengirimanStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
-| `/dashboard/gudang/jadwal` | - | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Tanpa gate, endpoint berizin |
+| `/dashboard/gudang/jadwal` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Sejalan; baris ini sempat tertinggal dari `IZIN_HALAMAN` (dikoreksi 29 September 2026) |
 | `/dashboard/gudang/pola-roster` | - | - | - | Tidak ada halaman (grup menu atau rute kosong) |
-| `/dashboard/gudang/shift` | - | - | - | Tidak ada halaman (grup menu atau rute kosong) |
+| `/dashboard/gudang/shift` | - | `/shift` | - | Backend tidak memeriksa izin; halaman dibuat di `f99b7cf` (keputusan SH1b) |
 | `/dashboard/gudang/pengguna` | `read-pengguna`, `read-role` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sejalan |
 | `/dashboard/gudang/pengaturan` | - | - | - | Data dimuat lewat komponen, periksa manual |

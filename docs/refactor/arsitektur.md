@@ -46,7 +46,7 @@ dan urutan migrasi satu modul.
 ### Komponen per modul
 
 Selain `components/ui/` (shadcn), ada komponen khusus modul yang dipakai
-halaman: `components/pengguna/`, `components/shift/`, `components/pola-roster/`,
+halaman: `components/pengguna/`, `components/pola-roster/`,
 dan lainnya. Ada juga komponen di dalam folder rute, misalnya
 `app/dashboard/outlet/inventaris/components/`, `keuangan/components/`, dan
 `reservasi/components/`. Saat memigrasikan sebuah modul, periksa juga
@@ -139,7 +139,7 @@ queryKeys.produk.detail(id)     // ["produk", "detail", id]
 ### `features/<modul>/`
 Pola yang sudah terbukti di bahan baku, pengguna, role, produk, kategori,
 stock adjustment, jurnal stok, stok, stock opname, pengajuan stok, transfer
-stok, penjualan, tipe aset, aset, tarif, sesi booking, akun kas, dan laporan:
+stok, penjualan, tipe aset, aset, tarif, sesi booking, akun kas, laporan, dan shift:
 
 - `api.ts` — pemanggilan endpoint memakai `apiData` dan `EP`
 - `hooks.ts` — `useQuery` dan `useMutation`, termasuk aturan invalidasi. Hook mutation menerima `onSuccess` dan `onError` dari halaman untuk toast dan reset dialog (`keputusan.md` butir 13)
@@ -176,6 +176,7 @@ Isi tiap `features/` yang sudah ada:
 | `aset` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts` | Submodul reservasi (`d3ae182`). `useDaftarAset` memakai kunci `daftar()` dan dimuat ulang setiap halaman dibuka, karena status aset dihitung backend dari sesi booking yang sedang berjalan; `useAset` tidak mengulang saat 404. Mutation menginvalidasi akar aset dan sesi booking. Satu skema buat dan edit dengan trim; `payloadAset` tidak mengirim status "digunakan", karena status itu dihitung, bukan disimpan |
 | `tarif` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts` | Submodul reservasi (`365553f`). `useDaftarTarif` memakai kunci `daftar()`; `useTarif` tidak mengulang saat 404 dan dimuat ulang setiap halaman edit dibuka, dan halaman edit memasang `FormEditTarif` setelah `isFetchedAfterMount` (keputusan rancangan butir 8). Mutation menginvalidasi akar tarif dan tipe aset, karena daftar tipe aset menampilkan tarif terkait. `skemaTarif` dipakai buat dan edit: `z.coerce` dengan tipe masukan dan keluaran eksplisit (keputusan T2a), harga kosong ditolak lewat `z.preprocess` (T3b), dan nama dipangkas (T4a); `NILAI_AWAL_TARIF` untuk buat. `payloadTarif` menyebut sepuluh field form satu per satu, dan `nilaiAwalTarif` menyusun nilai awal edit, termasuk id tipe aset dari `dataAset`. Jam mulai dan selesai memakai `InputWaktu` dengan `pisahTeksWaktu` dan `gabungTeksWaktu`, sehingga isian yang belum lengkap tetap tersimpan dan divalidasi skema (`e43e000`) |
 | `sesi-booking` | `api.ts`, `hooks.ts`, `tampilan.ts`, `tautan-penjualan.tsx`, `schema.ts`, `waktu-booking.ts`, `payload.ts`, `halaman-buat-reservasi.tsx`, `kartu-fasilitas.tsx`, `panel-ringkasan.tsx` | Submodul reservasi (`eef371a`, `477f258`). `useDaftarSesiBooking(tanggal)` memakai kunci `sesiBooking.daftar(tanggal)`, segar 1 menit, dan dimuat ulang saat halaman dibuka dan saat jendela difokus. `useBookingBanyakTanggal` memakai kunci `banyakTanggal` untuk deteksi bentrok di buat reservasi, dimuat ulang tiap menit (keputusan rancangan butir 12). `useBuatBooking` menginvalidasi penjualan dan aset saat berhasil, dan daftar booking saat selesai termasuk gagal, agar penolakan bentrok 409 langsung terlihat. `tampilan.ts` memuat `bookingPerAset` (timeline tanpa booking Batal, R5a), `tautanPenjualanBooking` (R4b), dan `bookingBentrok` (hanya booking Aktif, R6a). Buat reservasi dipecah menjadi halaman, `KartuFasilitas`, dan `PanelRingkasan` (R9b); waktu per fasilitas disimpan sebagai `WaktuItem` di luar form lalu diisikan ke `waktuMulai` dan `waktuSelesai` lewat `gabungTanggalWaktu`, sehingga jam yang belum lengkap menjadi isian kosong yang ditolak skema (K-TW5a) |
+| `shift` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `ruang.ts`, `halaman-shift-ruang.tsx`, `halaman-shift.tsx`, `form-shift.tsx`, `dialog-nonaktif-shift.tsx` | Submodul shift modul jadwal (`f99b7cf`). `HalamanShiftRuang` dipakai halaman outlet dan gudang (keputusan SH1b); ia memuat, menyimpan, dan menonaktifkan lewat `useDaftarShift(ruang)`, `useSimpanShift(ruang)`, dan `useNonaktifkanShift`, menampilkan toast, dan melempar ulang galat agar dialog bertahan. Mutation menunggu invalidasi shift, pola roster, dan jadwal shift, sehingga dialog tertutup setelah daftar termuat ulang. `ruang.ts` memuat `KUNCI_LOKASI_SHIFT` (null sampai backend memisahkan shift per lokasi, keputusan rancangan butir 18) dan `filterDaftarShift`, yang selama null mengirim `?workspace=` karena `GET /shift` tanpa query dijawab 500. `form-shift.tsx` memasang `IsiFormShift` setiap kali dialog dibuka (butir 8), dengan `skemaShift` dan `InputWaktu`; `hitungLintasHari`, `nilaiAwalShift`, dan `payloadShift` ada di `payload.ts` (SH2a, SH4a). `useDaftarShift` disiapkan untuk pola roster dan jadwal (butir 12) |
 
 Cara memeriksa apakah sebuah modul sudah dimigrasikan: halamannya tidak lagi
 memanggil `apiClient`, dan lapisan datanya ada di `features/<modul>/` atau di

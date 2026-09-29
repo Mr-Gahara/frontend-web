@@ -1055,6 +1055,18 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   langkah), dengan saringan yang hanya membuang baris kosong, baris
   `className=` saja, baris penutup kurung, dan komentar JSX, ditambah
   helper uji dan komponen bersama yang dipakainya (kalender).
+- **Tanda tangan hook dibaca utuh, termasuk nilai kembaliannya.** Aturan
+  bahwa tanda tangan sebuah hook dibaca sebelum dipakai sudah ada, tetapi
+  di submodul shift yang terbaca baru parameternya lewat `grep '^export'`,
+  sehingga `useLokasiAktif` ditulis seolah mengembalikan hasil `useQuery`
+  (`outlet.data?.id`), padahal mengembalikan `{ lokasi, lokasiId }`.
+  `tsc` menangkapnya. Baca badan hook sampai `return`-nya.
+- **Keluaran yang disaring tidak dijadikan teks lama penggantian.**
+  Seperti baris yang terpotong `cut -c`, keluaran `grep -vE '^\s*$'`
+  membuang baris kosong yang ada di berkas, sehingga pasangan yang
+  melintasi baris kosong tidak pernah cocok. Di spec shift, dua pasangan
+  gagal karena itu. Pakai pasangan satu baris, atau ambil teks lamanya
+  dengan `sed -n` tanpa saringan (`cat -A` menampilkan baris kosong).
 
 ## Kapan berhenti dan bertanya
 
