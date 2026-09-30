@@ -125,6 +125,12 @@ halaman indeks pengaturan dan halaman toko. Pemetaan awal (30 September
   butir 82). Kontrak metode pembayaran, pajak, dan produk pajak belum
   dikoreksi terhadap `465b438` (`kontrak/payload.md`), dan `assignPajak`
   punya cacat yang dilaporkan (butir 80).
+- Buat metode pembayaran dari web selalu gagal terhadap `465b438`:
+  halaman lama mengirim `isAutomated`, yang ditolak allowlist validator
+  (`kontrak/temuan.md` butir 84). Diperbaiki di modul ini setelah spec
+  pembanding ditulis. Halaman ubah metode diperiksa untuk hal yang sama,
+  begitu pula pilihan akun kas di form, karena akun kas nonaktif ditolak
+  400.
 - Jalur payment gateway tidak dipakai (`kontrak/temuan.md` butir 78 dan
   79); sisa field gateway di tipe web diperiksa, dan cakupan
   pembersihannya diputuskan di modul ini.

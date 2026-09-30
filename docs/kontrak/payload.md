@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon, pajak, pelanggan, dan metode pembayaran belum, dan diperiksa saat modul pemiliknya dimigrasikan.
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon, pajak, pelanggan, dan ubah metode pembayaran belum, dan diperiksa saat modul pemiliknya dimigrasikan; buat metode pembayaran dikoreksi bersama `temuan.md` butir 84.
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -231,9 +231,11 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /metodepembayaran`
 
-- Aturan: validateMetodePembayaranPayload (validators/metodePembayaranValidator.js)
-- Wajib dari klien: -
-- Field lain yang dikenali: -
+- Aturan: validateMetodePembayaranPayload (validators/metodePembayaranValidator.js). Dikoreksi 30 September 2026 terhadap backend `465b438`: allowlist `FIELD_DIIZINKAN` berisi `namaPembayaran`, `akunKasID`, `kategori`, dan `isActive`; field lain ditolak 400, dan `tenantID` ditolak sebagai field terlarang (`FIELD_DILARANG`)
+- Wajib dari klien: `namaPembayaran` dan `akunKasID` (ObjectId yang sah)
+- Field lain yang dikenali: `kategori`, `isActive`
+- Aturan service: akun kas tujuan harus aktif, selain itu 400 (`_tulisDenganAkunKas`); satu akun kas boleh dipakai banyak metode; nama kembar dalam tenant ditolak 409 (indeks unik `{ tenantID, namaPembayaran }` tanpa membedakan huruf besar kecil); paling banyak 10 metode aktif per tenant, dan metode ke-11 ditolak 409 (`BATAS_METODE_AKTIF`)
+- Halaman lama web selalu mengirim `isAutomated`, sehingga seluruh permintaan buatnya ditolak 400 (`temuan.md` butir 84)
 - Dibaca controller dari body: `-`
 - Diisi server: -
 
