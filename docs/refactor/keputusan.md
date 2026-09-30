@@ -268,21 +268,27 @@ bug backend dilaporkan dan tidak diakali agar test lolos.
   `SERVER_TERIMA_JUMLAH_NOL` di `features/transfer-stok/payload.ts`, dan
   payload sudah membawa 0 apa adanya. Konsekuensi yang diterima: surat jalan
   yang salah satu barangnya tidak diterima sama sekali tertahan DIKIRIM.
+  Dicabut 30 September 2026 (PB12a): backend `465b438` mencatat 0
+  sebagai barang tidak sampai.
 - **Item yang master bahan bakunya terhapus menahan penerimaan** (butir 29).
   Aturan ini tidak dikendalikan konstanta, karena payload yang benar untuk
-  item itu baru ada bila kontrak terima berubah.
+  item itu baru ada bila kontrak terima berubah. Sejak `6e314ae` penahanan
+  hanya berlaku bila `itemId` juga tidak ada (PB12a).
 - **Spec memakai data sungguhan yang dibuat dan ditutup sendiri.** Surat
   jalan dibuat dari pengajuan APPROVED atau PENDING tanpa surat jalan,
   dikirim lewat API bila skenarionya butuh DIKIRIM, dan dibatalkan di akhir,
   sehingga pengajuannya kembali ke PENDING. Kirim dan terima hanya diuji
   jalur gagalnya lewat `page.route`; batal dari DIKIRIM lewat API hanya
-  dipakai membersihkan data uji.
+  dipakai membersihkan data uji. Sejak backend `465b438` surat jalan
+  DIKIRIM ditutup lewat terima (PB10a), dan terima sungguhan diuji lewat
+  UI sejak `6e314ae` (PB12a).
 - **Daftar penerimaan outlet mengikuti cakupan outlet**: pemegang izin
   lintas outlet seluruh outlet dengan pemilih, pengguna lain hanya outlet
   tenant (`580a1e1`, `085ec78`).
 - **Batal surat jalan di web hanya untuk PENDING**, walau backend menerima
   batal dari DIKIRIM, karena stok gudang langsung dikembalikan saat barang
-  masih di perjalanan (butir 36).
+  masih di perjalanan (butir 36). Backend `465b438` kini menerapkan aturan
+  yang sama (P12).
 - **Surat jalan development yang rusak dibiarkan** sebagai bukti untuk tim
   backend (butir 29).
 - **Halaman pengiriman dan daftar transfer gudang tetap dua halaman** dan
@@ -327,7 +333,8 @@ keputusan rancangan butir 17.
   ditutup sebelum multi-outlet (`kontrak/temuan.md` butir 48 dan 49).
 - **K6b: spec alur membuktikan alur bisnis sampai stok dan pembayaran**,
   dengan stok disiapkan sesuai kebutuhan setiap test, walau meninggalkan
-  penjualan FINAL dan pembayaran di data uji.
+  penjualan FINAL (sejak backend `465b438` berstatus PAID) dan pembayaran
+  di data uji.
 - **K8a: tipe ber-`_id` yang masih dibaca halaman lama menjadi tipe
   `Lama`** (butir 19), dengan syarat pemilik proyek: frontend akhirnya
   harus bersih dari `_id`.
@@ -339,7 +346,8 @@ keputusan rancangan butir 17.
   commit. Ketiganya sudah dibuka di submodul 2 dan 3.
 - **K12a: kolom Metode di riwayat pembayaran menampilkan nama metode
   sebenarnya** dari daftar metode pembayaran, dan `-` bila tidak dapat
-  ditentukan, menggantikan "Kasir" yang selalu tampil.
+  ditentukan, menggantikan "Kasir" yang selalu tampil. Sejak `b85c2bd` nama metode
+  dibaca dari respons detail (PB4a).
 - **K13a: buat penjualan mengirim outlet tenant sebagai `locationID`** bagi
   pemegang `read-location`. Pemilih outlet bagi pemegang izin lintas outlet
   ditunda sampai multi-outlet.
@@ -391,17 +399,21 @@ keputusan rancangan butir 17 dan 21.
   2026, `27749fe`), melengkapi R2b: bayar Rp1, hapus pembayaran itu
   (penjualan kembali DRAFT dan saldo akun kas kembali), lalu void
   penjualan (booking Batal). Penjualan booking selalu FINAL dan tidak dapat
-  di-void langsung (`kontrak/temuan.md` butir 56).
+  di-void langsung (`kontrak/temuan.md` butir 56). Diganti PB8a sejak
+  backend `465b438`.
 - **R4b: tautan blok booking ke detail penjualan adalah jalur lihat dan
   bayar, bukan jalur batal** (`eef371a`). Web belum punya jalur
-  membatalkan booking.
+  membatalkan booking. Sejak `b85c2bd` booking dibatalkan lewat void
+  penjualannya (PB2a).
 - **R5a: booking Batal tidak ditampilkan di timeline daftar reservasi**
   (`eef371a`), karena slotnya sudah dilepas; backend tetap mengirimnya,
-  karena daftar tidak disaring menurut status.
+  karena daftar tidak disaring menurut status. Sejak backend `465b438`
+  statusnya VOID (PB8a).
 - **R6a: pemeriksaan bentrok di form buat reservasi hanya menghitung
   booking Aktif** (28 September 2026), sejalan dengan `checkConflict`
   backend; sebelumnya booking Selesai ikut dihitung. Diterapkan di
-  `477f258` lewat `bookingBentrok`, dan diuji di test unit.
+  `477f258` lewat `bookingBentrok`, dan diuji di test unit. Sejak backend `465b438`
+  hanya booking Aktif yang sudah dibayar yang dihitung (PB8a).
 - **R7b: diskon di buat reservasi memakai `features/diskon`**, dengan
   aturan `bisaDigabung` sebagai fungsi murni, serta fixture diskon item dan
   diskon global uji di spec e2e (28 September 2026; fixture di `652d669`,
@@ -445,6 +457,9 @@ Diputuskan pemilik proyek pada 28 September 2026.
   Tab dan rutenya tetap, dengan keterangan bahwa fitur belum tersedia,
   karena backend belum punya model maupun route mutasi kas. Kebutuhan
   endpoint-nya disampaikan ke tim backend (`kontrak/temuan.md` butir 61).
+  Backend `465b438` kini punya endpoint mutasi kas; penerapan halamannya
+  menunggu keputusan pemilik proyek (`status.md`, Utang kecil dari modul
+  keuangan).
 - **KU2a: kartu ringkasan yang gagal memuat menampilkan `-`** beserta
   keterangan singkat, bukan Rp0 (keputusan rancangan butir 11).
 - **KU3a: skema buat akun kas mempertahankan `z.coerce`** dengan tipe
@@ -452,7 +467,8 @@ Diputuskan pemilik proyek pada 28 September 2026.
   karena nilai awal sudah ada di `defaultValues`.
 - **KU4a: spec buat akun kas membuat akun uji sungguhan** bernama unik
   per run, lalu menghapusnya lewat `DELETE /akunkas/:id` di `finally`
-  (`0cfb3bd`).
+  (`0cfb3bd`); sejak `b5a55c4` akun uji bersaldo 0 lalu dinonaktifkan,
+  karena hapus tidak ada lagi (PB13a).
 - **KU5a: persentase pertumbuhan laba dihitung dari laba periode
   sebelumnya** lewat endpoint yang sama dengan rentang mundur satu
   periode, dan `-` bila laba periode sebelumnya 0. Sebelumnya persentase
@@ -652,6 +668,91 @@ keputusan rancangan butir 17 dan 21.
   `updatedAt` (keputusan rancangan butir 8); dan gate halaman
   `read-location`, diturunkan dari endpoint yang dipanggilnya.
 
+### Penyesuaian backend `465b438`
+
+Diputuskan pemilik proyek pada 30 September 2026, saat backend
+di-fast-forward ke branch `nizar` `465b438`, dengan prinsip keputusan
+rancangan butir 17 dan 21. Diterapkan di `b85c2bd`, kecuali yang disebut
+lain.
+
+- **PB1a: status penjualan mengikuti backend**: DRAFT, UNPAID, PARTIAL,
+  PAID, dan VOID; FINAL dihapus. Aksi di daftar dan detail ditentukan
+  status dan izin endpoint-nya (`aksiPenjualan`, keputusan rancangan
+  butir 14): finalisasi untuk DRAFT, bayar untuk UNPAID dan PARTIAL, void
+  untuk DRAFT dan UNPAID yang belum punya pembayaran, dan hapus untuk
+  DRAFT. Label dan urutan status tinggal di
+  `features/penjualan/tampilan.ts`.
+- **PB2a: void penjualan ditawarkan di detail** untuk DRAFT dan UNPAID
+  tanpa pembayaran, lewat tombol Void Penjualan dengan dialog yang hanya
+  tertutup saat berhasil. Penjualan yang punya pembayaran aktif di-void
+  setelah pembayarannya dibatalkan.
+- **PB3a: pembayaran tidak mengirim `akunKasID`**; form menampilkan akun
+  tujuan dari metode yang dipilih. Halaman bayar menolak penjualan DRAFT
+  dan VOID dengan pesan beserta tautan ke detail.
+- **PB4a: riwayat pembayaran dibaca dari `pembayaran[]` detail
+  penjualan** beserta `namaMetodePembayaran`, menggantikan penyaringan
+  `GET /pembayaran` di klien dan pencocokan nama metode (K12a).
+  Pembayaran VOID tetap tampil dengan statusnya.
+- **PB5a: pembayaran PAID dapat dibatalkan per baris** oleh pemegang
+  `update-pembayaran`, lewat `PUT /pembayaran/:id { status: "VOID" }`
+  dengan alasan opsional yang dikirim sebagai `catatan`. Alasan itu
+  menimpa catatan asli pembayaran (`kontrak/temuan.md` butir 75).
+- **PB6a: daftar penjualan per halaman**, 10 baris per halaman (pilihan
+  jumlah baris sejak PB14a), dengan
+  data halaman sebelumnya dipertahankan selama halaman berikutnya
+  dimuat, karena backend selalu menjawab per halaman.
+- **PB7a: payload buat penjualan memakai `diskonItem` dan
+  `diskonGlobal`**, tanpa `penggunaID`. Keberhasilan diskon dibuktikan
+  lewat e2e dari UI, bukan hanya unit test, karena nama lama dibuang
+  backend tanpa galat.
+- **PB8a: reservasi mengikuti status booking baru**: Aktif, Selesai,
+  VOID, dan Tidak Datang. Timeline menyembunyikan booking VOID
+  (melengkapi R5a), pemeriksaan bentrok hanya menghitung booking Aktif
+  yang sudah dibayar (melengkapi R6a), dan booking bertumpuk yang belum
+  dibayar tampil sebagai peringatan tanpa menahan simpan. Booking uji
+  dibatalkan dengan membatalkan pembayaran PAID-nya lalu mem-void
+  penjualan (menggantikan R2c).
+- **PB9a: skenario "Tipe Tidak Diketahui" dan `test.fixme` butir 51
+  dibuang**, karena backend kini menolak hapus tipe aset yang masih
+  dipakai (409); tampilan tipe yang hilang diuji unit lewat
+  `namaTipeAset`.
+- **PB10a: surat jalan uji DIKIRIM ditutup lewat terima penuh**, karena
+  batal dari DIKIRIM ditolak backend (P12). `siapkanSuratJalan` memakai
+  pengajuan uji milik spec, yang dipakai ulang bila ada dan dibuat bila
+  tidak, lalu disetujui pengguna uji "E2E Penyetuju" di konteks
+  permintaan terpisah.
+- **PB11a: persetujuan pengajuan sendiri**: Owner boleh menyetujui
+  pengajuannya sendiri dengan penanda self-approval, peran lain tidak.
+  Backend belum menerapkannya (`kontrak/temuan.md` butir 76); sampai itu
+  spec memakai pengguna penyetuju uji (PB10a).
+- **PB12a: terima penerimaan diuji sungguhan lewat UI tanpa
+  `page.route`** (`6e314ae`). Jumlah diterima 0 dikirim apa adanya dan
+  tidak lagi ditahan, mencabut penahanan `SERVER_TERIMA_JUMLAH_NOL` dari
+  submodul transfer; item dikenali lewat `itemId`.
+- **PB13a: pembersihan data uji memeriksa jawabannya** (`b5a55c4`):
+  `hapusLewatApi` dan `hapusTipe` menerima sukses atau 404 lewat
+  `expect.soft`. Akun kas uji dibuat bersaldo 0 lalu dinonaktifkan,
+  karena akun kas tidak dapat dihapus dan akun bersaldo tidak dapat
+  ditutup (melengkapi KU4a, `kontrak/temuan.md` butir 81); payload
+  bersaldo diperiksa lewat `POST` yang dijawab gagal. Lima akun uji
+  bersaldo yang tertinggal dihapus langsung dari basis data development
+  beserta mutasi saldo awalnya.
+- **PB14a: footer tabel memakai paginasi server** (`b63cf08`),
+  menggantikan bar navigasi terpisah yang membuat daftar penjualan
+  menampilkan dua kontrol halaman. `DataTable` mendapat `paginasiServer`,
+  dan footer yang sudah ada memakai angka serta aksi server. Pilihan
+  jumlah baris 10, 20, 50, dan 100 ada di footer, berbawaan 10 dan tidak
+  diingat; mengganti jumlah baris kembali ke halaman 1. Tombol urutkan No.
+  Referensi, Tanggal, dan Total dibuang, karena `GET /penjualan` tidak
+  menerima parameter urutan; kebutuhannya dilaporkan
+  (`kontrak/temuan.md` butir 83).
+- Diterapkan tanpa ditanyakan (`b85c2bd`): laporan laba rugi mengirim
+  tanggal lokal `YYYY-MM-DD` (`keTanggalLokal`), karena backend menolak
+  format ISO; `filter.ts` di `features/pembayaran`, `useDaftarPembayaran`, dan
+  `namaMetode` dibuang; dan `test.fixme` yang terbukti diperbaiki backend
+  dilepas satu per satu dengan commit masing-masing (`a10af75`,
+  `e4bfc86`, `8134842`, `31ebd92`).
+
 ## Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.
@@ -726,7 +827,8 @@ keputusan rancangan butir 17 dan 21.
     payload yang benar selama kontrak backend belum berubah, penahanannya
     ditulis sebagai aturan beserta syarat pencabutannya, bukan konstanta.
     Contoh: `SERVER_TERIMA_JUMLAH_NOL` dan penahanan item tanpa master di
-    `features/transfer-stok/payload.ts` (pemilik proyek, 21 September 2026).
+    `features/transfer-stok/payload.ts` (pemilik proyek, 21 September 2026);
+    saklar itu dibuang di `6e314ae` begitu backend memperbaikinya (PB12a).
     Bug milik frontend yang terbukti oleh spec tidak ditandai `test.fixme`,
     melainkan diperbaiki di commit spec itu, karena perbaikannya ada di
     tangan frontend: deskripsi tipe aset (`a2adc70`), serta kolom tipe

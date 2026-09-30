@@ -23,6 +23,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 29 September 2026: jadwal dan generate jadwal outlet dan gudang setelah migrasi submodul kalender dan generate (`19227f8`); generate outlet mendapat entri `IZIN_HALAMAN`, dan generate gudang dibuat.
 - 29 September 2026: ruang gudang setelah migrasi layout dan setup gudang (`9ce288b`). Layout bergerbang `read-dashboard-gudang` dan memuat `/location` bagi pemegang `read-location`; setup membuat lokasi lewat `POST /location` (`create-location`), bukan menu sidebar, dan tidak punya entri `IZIN_HALAMAN`.
 - 30 September 2026: pengaturan gudang setelah migrasi profil gudang (`319bd99`), dengan gate `read-location` di `IZIN_HALAMAN`.
+- 30 September 2026: penjualan setelah penyesuaian backend `465b438` (`b85c2bd`), tanpa perubahan gate. Aksi di daftar dan detail mengikuti izin endpoint-nya (`aksiPenjualan`): `update-penjualan` untuk finalisasi dan void, `delete-penjualan` untuk hapus, `create-pembayaran` untuk bayar, dan `update-pembayaran` untuk membatalkan pembayaran (`bolehBatalkanPembayaran`).
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -32,9 +33,9 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/reservasi` | `read-booking` | `/aset`, `/sesibooking` | `read-booking` | Sejalan |
 | `/dashboard/outlet/diskon` | - | `/diskon` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/keuangan` | `read-akunkas` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
-| `/dashboard/outlet/penjualan` | `read-penjualan` | `/penjualan`; `/location` dan `/location/current` hanya bagi pemegang `read-location` | `read-penjualan`; `read-location` opsional untuk cakupan outlet | Sejalan; gate sengaja tidak menambah `read-location` agar Guest, Staff, dan Kasir tetap dapat membuka daftar (keputusan K11b) |
+| `/dashboard/outlet/penjualan` | `read-penjualan` | `/penjualan` (per halaman, `page` dan `limit`); `/location` dan `/location/current` hanya bagi pemegang `read-location` | `read-penjualan`; `read-location` opsional untuk cakupan outlet | Sejalan; gate sengaja tidak menambah `read-location` agar Guest, Staff, dan Kasir tetap dapat membuka daftar (keputusan K11b) |
 | `/dashboard/outlet/pengeluaran` | `read-pembayaran` | - | - | Halaman placeholder tanpa data |
-| `/dashboard/outlet/keuangan/ringkasanLabaRugi` | `read-laporan` | `/laporan/laba-rugi` (periode berjalan dan pembanding); kartu ringkasan di layout juga `/akunkas` | -; `/akunkas` butuh `read-akunkas` | Backend tidak memeriksa izin laporan; tanpa `read-akunkas` kartu saldo menampilkan `-` (KU2a) |
+| `/dashboard/outlet/keuangan/ringkasanLabaRugi` | `read-laporan` | `/laporan/laba-rugi` (periode berjalan dan pembanding); kartu ringkasan di layout juga `/akunkas` | `read-laporan`; `/akunkas` butuh `read-akunkas` | Sejalan sejak backend `465b438` memeriksa `read-laporan`; tanpa `read-akunkas` kartu saldo menampilkan `-` (KU2a) |
 | `/dashboard/outlet/inventaris-data` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/produk` | `read-produk` | `/produk` | `read-produk` atau `akses-pos` | Sejalan |
 | `/dashboard/outlet/inventaris/kategori` | `read-kategori` | `/kategori`, `/produk` | `read-kategori`; `/produk` opsional (`read-produk` atau `akses-pos`) untuk hitungan pemakaian | Sejalan |

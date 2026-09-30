@@ -36,13 +36,24 @@ bagian sesi booking di `endpoint.md`, `payload.md`, dan `temuan.md` pada
 di `endpoint.md`, `payload.md`, dan `temuan.md` terhadap backend
 `00b9957` pada
 29 September 2026, begitu pula bagian lokasi di `payload.md` dan
-`endpoint.md` pada hari yang sama. Bila
+`endpoint.md` pada hari yang sama. Pada 30 September 2026, bagian
+penjualan, pembayaran, laporan, sesi booking, tipe aset, dan transfer
+stok di `endpoint.md`, `payload.md`, `izin-halaman.md`, dan `temuan.md`
+dikoreksi terhadap backend `465b438` (branch `nizar`, di-fast-forward
+dari `ridho` `00b9957`). Bila
 backend berubah cukup jauh, `endpoint.md`, `payload.md`, `izin-halaman.md`,
 dan `route-backend.md` perlu dibangkitkan ulang; bagian 1 di bawah menjelaskan
 cara pembangkitannya. Gejala bahwa kontrak sudah tertinggal: endpoint yang
 dipanggil menjawab 404, permission yang tercatat tidak lagi diperiksa, atau
 bentuk respons berbeda dari tipe. Pembangkitan ulang hanya dilakukan atas
-permintaan pemilik proyek.
+permintaan pemilik proyek. Lampiran A (`route-backend.md`) sudah
+menunjukkan gejala itu terhadap backend `465b438` (audit 30 September
+2026): tujuh route tidak ada lagi, yaitu `DELETE` akun kas, diskon, jurnal
+transfer, metode pembayaran, pembayaran, dan sesi booking, serta
+`PATCH /metodepembayaran/:id/toggle-active`; dan empat route belum
+tercatat, yaitu `GET /akunkas/mutasi`, `GET /akunkas/:id/mutasi`,
+`GET /akunkas/:id/ringkasan`, dan `POST /sesibooking/:id/checkin`.
+Lampiran A tidak diubah sampai pembangkitan ulang.
 
 ## 1. Acuan dan metodologi
 
@@ -66,7 +77,7 @@ Keterbatasan:
 - Daftar field pada bagian 4 (`payload.md`) berasal dari validator, sedangkan validator hanya memeriksa dan tidak membuang field lain. Service dapat memakai field di luar daftar itu, seperti `locationID` pada `POST /bahanbaku`. Sebelum sebuah field dihapus dari payload frontend, periksa dulu pemakaiannya di service.
 - Bentuk respons operasi tulis tidak diambil dengan memanggil endpoint, agar data tidak berubah.
 - Analisis statis route hanya membaca argumen pertama `checkPermission`. Route yang menerima salah satu dari beberapa izin perlu dikoreksi manual; `GET /produk` dan `GET /produk/:id` (`read-produk` atau `akses-pos`) sudah dikoreksi pada 20 September 2026, dan `GET /inventory` (`read-inventory`, `read-inventory-gudang`, atau `read-inventory-outlet`) pada 21 September 2026. Sapuan seluruh route pada tanggal itu, termasuk pemanggilan yang argumennya dipecah ke beberapa baris, hanya menemukan satu route lain yang berizin ganda, yaitu `PATCH /jurnalstok/wms/*`, yang tidak dipakai frontend. Lampiran A (`route-backend.md`) belum mencerminkan koreksi inventory karena bertanda Tetap.
-- Analisis statis frontend hanya menangkap panggilan `apiClient` dengan path tertulis. Path yang disusun dinamis terlewat, sehingga `GET /stockopname` sempat tercatat tidak dipakai (dikoreksi 20 September 2026). Untuk modul yang sudah dipindah ke `features/`, pemanggilan terpusat di `features/<modul>/api.ts`, dan kolom "Dipakai di" di bagian 3.1 (`endpoint.md`) diaudit ulang pada 22 September 2026, lalu 27 September 2026, lewat helper `audit-endpoint.js` (`refactor/cara-kerja.md`), sehingga menyebut berkas itu serta jumlah halaman lama yang masih memanggil langsung. Bagian 5 (`izin-halaman.md`) untuk modul itu diperbarui manual. Panggilan yang tidak lewat `apiClient.<method>` juga terlewat: `POST /pengguna/pin-refresh` dan `POST /akun/auth/refreshtoken` dipanggil lewat `fetch` langsung oleh `components/providers/session-provider.tsx` (pemulihan sesi saat aplikasi dimuat) dan `lib/apiClient.ts` (penyegaran token). Keduanya kini tercatat di `endpoint.md`, tetapi Lampiran A (`route-backend.md`) mencatatnya tidak dipakai.
+- Analisis statis frontend hanya menangkap panggilan `apiClient` dengan path tertulis. Path yang disusun dinamis terlewat, sehingga `GET /stockopname` sempat tercatat tidak dipakai (dikoreksi 20 September 2026). Untuk modul yang sudah dipindah ke `features/`, pemanggilan terpusat di `features/<modul>/api.ts`, dan kolom "Dipakai di" di bagian 3.1 (`endpoint.md`) diaudit ulang pada 22 September 2026, lalu setiap penutupan modul, terakhir 30 September 2026 terhadap backend `465b438`, lewat helper `audit-endpoint.js` (`refactor/cara-kerja.md`), sehingga menyebut berkas itu serta jumlah halaman lama yang masih memanggil langsung. Bagian 5 (`izin-halaman.md`) untuk modul itu diperbarui manual. Panggilan yang tidak lewat `apiClient.<method>` juga terlewat: `POST /pengguna/pin-refresh` dan `POST /akun/auth/refreshtoken` dipanggil lewat `fetch` langsung oleh `components/providers/session-provider.tsx` (pemulihan sesi saat aplikasi dimuat) dan `lib/apiClient.ts` (penyegaran token). Keduanya kini tercatat di `endpoint.md`, tetapi Lampiran A (`route-backend.md`) mencatatnya tidak dipakai.
 - Kontrak ini berlaku untuk commit acuan di atas. Bila backend berubah, bagian 3 sampai 5 dan Lampiran A perlu dibangkitkan ulang.
 
 ## 2. Aturan umum
@@ -99,7 +110,7 @@ Semua error berbentuk `{ status: "error", message, errors? }`; `errors` hanya ad
 | 401 | Token kedaluwarsa atau sesi diambil alih | Refresh sekali; bila gagal, kembali ke login |
 | 403 | Izin ditolak, pengguna nonaktif, atau tenant/akun dibekukan | Jangan refresh; tampilkan pesan akses ditolak |
 | 404 | Data tidak ada atau id tidak valid | Tampilkan keadaan tidak ditemukan |
-| 409 | Duplikat atau data masih dipakai | Tampilkan pesan konflik. Tidak semua modul memakainya: duplikat kategori dijawab 400 (`temuan.md` butir 14), sedangkan opname aktif ganda di satu lokasi dijawab 409 (`payload.md`, `POST /stockopname`) |
+| 409 | Duplikat atau data masih dipakai | Tampilkan pesan konflik. Tidak semua modul memakainya: duplikat kategori dijawab 400 (`temuan.md` butir 14), sedangkan opname aktif ganda di satu lokasi dijawab 409 (`payload.md`, `POST /stockopname`), begitu pula nama tipe aset ganda dan tipe aset yang masih dipakai sejak backend `465b438` |
 | 429 | Terlalu banyak percobaan login | Tampilkan waktu tunggu |
 
 Login PIN untuk aplikasi dapat menjawab 200 dengan `success: false` (perangkat menunggu persetujuan). Web tidak terdampak, tetapi lapisan API tetap memeriksa `success` bila ada.
@@ -115,7 +126,7 @@ tercatat di `temuan.md` butir 50.
 
 ### 2.4 Envelope respons
 
-Semua respons GET yang sukses memuat `data`. Kunci lain tidak seragam antarmodul (`success`, `message`, `count`, `total`). Lapisan API frontend mengambil `data` sebagai isi dan menyeragamkan `count` atau `total` menjadi satu nama. Kolom Envelope di bagian 3 (`endpoint.md`) menunjukkan kunci yang benar-benar dikirim. Pembukaan envelope ini, dan normalisasi identitas di 2.5, hanya dilakukan `lib/api/client.ts`. Halaman yang masih memakai klien lama `lib/apiClient.ts` menerima respons mentah, termasuk `_id`.
+Semua respons GET yang sukses memuat `data`. Kunci lain tidak seragam antarmodul (`success`, `message`, `count`, `total`). Lapisan API frontend mengambil `data` sebagai isi dan menyeragamkan `count` atau `total` menjadi satu nama. Kolom Envelope di bagian 3 (`endpoint.md`) menunjukkan kunci yang benar-benar dikirim. Pembukaan envelope ini, dan normalisasi identitas di 2.5, hanya dilakukan `lib/api/client.ts`. Halaman yang masih memakai klien lama `lib/apiClient.ts` menerima respons mentah, termasuk `_id`. Daftar penjualan sejak backend `465b438` selalu per halaman dan membawa `pagination` (`page`, `limit`, `total`, `totalPages`); `lib/api/client.ts` meneruskannya lewat `HasilApi.pagination`, dan nilai yang bukan angka dibaca 0.
 
 ### 2.5 Identitas dan field referensi
 
@@ -128,5 +139,6 @@ Backend mengisi sendiri field berikut dari token pengguna; frontend tidak mengir
 
 - `tenantID` pada hampir semua operasi create.
 - `dataPengguna` (sesi booking), `dimintaOleh` (pengajuan stok), `picID` (stock opname), `pengirimID` (buat dan kirim transfer stok), `penerimaID` (terima transfer stok), dan `dicatatOleh` (pembelian stok).
+- Sejak backend `465b438`: `akunKasID` pembayaran (akun kas diambil dari metode; `akunKasID` termasuk `FIELD_SERVER` dan ditolak 400 bila dikirim), `kembalian` pembayaran, serta kasir penjualan (`penggunaID` tidak lagi dikirim). `status` pembayaran tidak dikirim web (keputusan K2a).
 
 Daftar "Wajib dari klien" di bagian 4 (`payload.md`) sudah mengecualikan field ini.

@@ -73,7 +73,9 @@ kecocokan frontend dengan backend diperiksa lewat helper `audit-endpoint.js`
 `node ~/.cache/frontend-web/alat/audit-endpoint.js | head -40` dari akar
 repo, nilai setiap baris laporannya, lalu ulangi dengan `--tulis`. Audit 22
 September 2026 memastikan seluruh panggilan frontend ada di backend dan
-tercatat di kontrak.
+tercatat di kontrak. Audit juga dijalankan setiap kali backend berpindah
+versi: audit 30 September 2026 terhadap `465b438` menemukan tujuh route
+yang hilang, termasuk route hapus yang dipakai pembersihan spec.
 
 Suite e2e penuh memakan 13 sampai 15 menit (diukur 28 September 2026)
 karena berjalan dengan satu worker dan memakai backend sungguhan. Saat
@@ -88,6 +90,21 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
+
+**Baseline per penyesuaian backend `465b438`** (commit `b63cf08`): 365
+test unit dan integrasi lolos di 47 berkas, 322 e2e lolos, 16 skipped:
+dua `test.fixme` bersyarat yang menunggu backend memisahkan shift dan pola
+roster per lokasi, delapan `test.fixme` bersyarat yang menunggu izin
+lintas outlet, lima `test.fixme` lain yang menunggu backend (ubah pola
+roster, hitungan opname yang dikosongkan, dua jurnal di spec alur
+penjualan, dan stok produk), dan satu `test.skip` bersyarat data (tab
+stok kritis). Diukur terhadap backend lokal `465b438` (branch `nizar`).
+Dari baseline modul Gudang di bawah (345 unit, 316 e2e, 22 skipped):
+penyesuaian `b85c2bd` sampai `6e314ae` menjadikannya 368 unit dan 319
+e2e, karena enam `test.fixme` dilepas atau dibuang dan skenario baru
+ditambahkan; `b5a55c4` menambah satu skenario akun kas (320); dan
+`b63cf08` menambah dua skenario daftar penjualan (322) serta satu test
+unit, sambil membuang empat test unit `navigasiHalaman` (365).
 
 **Baseline per modul Gudang** (commit `319bd99`): 345 test unit
 dan integrasi lolos di 44 berkas, 316 e2e lolos, 22 skipped: dua
@@ -133,7 +150,12 @@ CANCELLED, serta tiga surat jalan BATAL dan empat entri jurnal gudang. Spec
 penerimaan dan spec pengiriman masing-masing membatalkan satu surat jalan
 DIKIRIM (jurnal kirim dan jurnal batal), dan spec alur transfer membatalkan
 satu surat jalan PENDING tanpa jurnal. Terbukti dengan
-`tinjau-surat-jalan.js BATAL` pada suite penuh `580a1e1`. Aturan data uji
+`tinjau-surat-jalan.js BATAL` pada suite penuh `580a1e1`. Sejak `b85c2bd`
+(PB10a), surat jalan DIKIRIM spec penerimaan dan pengiriman ditutup lewat
+terima penuh, bukan dibatalkan, sehingga setiap run menambah surat jalan
+DITERIMA beserta jurnal kirim dan terima, dan stok outlet uji bertambah;
+jumlah per run belum diukur ulang. Spec keuangan menambah satu akun kas
+non-aktif bersaldo 0 per run (PB13a). Aturan data uji
 spec tulis ada di Test yang ditandai fixme dan skip bersyarat, di bawah.
 
 ## Kredensial uji
@@ -200,6 +222,8 @@ Pola kegagalan yang berulang:
 | `net::ERR_NETWORK_IO_SUSPENDED` saat `page.goto` | Mesin menangguhkan jaringan (tidur atau hemat daya) di tengah suite; jalankan ulang test itu sendirian, lalu suite penuh diawali `systemd-inhibit --what=idle:sleep` |
 | Surat jalan uji ditolak karena nomornya bentrok, sekali lalu hilang | Backend membentuk akhiran nomor dari empat digit terakhir `Date.now()` (`transferStokService.js` baris 148 sampai 150), dan setiap run spec transfer membuat surat jalan baru dari pengajuan uji yang sama (124 surat jalan untuk `PGJ/202608/0001` per 28 September 2026), sehingga peluang bentrok naik setiap run (`kontrak/temuan.md` butir 60; terjadi di suite penuh `074e98c` dan `0cfb3bd`). Jalankan ulang test itu sendirian, lalu suite penuh |
 | `page.request` di `finally` habis waktu, sekali lalu hilang | Backend sesaat tidak menjawab; permintaan ini tidak melewati `page.route`, sehingga bukan akibat simulasi spec (suite penuh `074e98c`). Jalankan ulang suite penuh sebelum mengubah spec |
+| `waitForResponse` habis waktu setelah kembali ke halaman atau filter yang sudah pernah dimuat | Kunci query masih segar (`staleTime` 5 menit di `components/providers/query-provider.tsx`), sehingga tidak ada permintaan. Buktikan dari tampilan; penunggu jaringan hanya untuk kunci yang belum pernah dimuat (`b63cf08`) |
+| Pembersihan tampak lolos, tetapi data uji menumpuk di basis data | Helper pembersihan membuang jawaban permintaannya. Periksa statusnya dengan `expect.soft`, dan jalankan audit endpoint: route yang dihapus backend juga menjawab 404 (`b5a55c4`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena
 tombol hapus sempat disabled sampai daftar role selesai dimuat (level
@@ -397,6 +421,40 @@ satu putaran.
   29 September 2026, enam `page.route` lain masih memakai glob string,
   dan seluruhnya ber-path lowercase yang cocok dengan path kanonik.
 
+- Keberhasilan dibuktikan dari respons atau data yang dibaca ulang dari
+  backend, bukan dari teks toast umum. Surat jalan DITERIMA dan
+  `qtyTerima: 0` di spec terima dibuktikan lewat detail dari API
+  (`6e314ae`).
+- Jalur gagal yang diuji lewat `page.route` perlu pasangan jalur sukses
+  sungguhan. Terima penerimaan sempat hanya diuji jalur gagalnya, sehingga
+  kontrak `itemId` backend `465b438` tidak terlihat sampai terima
+  sungguhan ditulis.
+- Elemen yang diubah oleh aksi yang diuji tidak dicari lewat nilai yang
+  ikut berubah. Baris riwayat pembayaran yang dicari lewat catatannya
+  hilang setelah dibatalkan, karena backend menimpa catatan itu dengan
+  alasan pembatalan (`kontrak/temuan.md` butir 75); cari lewat id atau
+  nilai yang tetap.
+- Field payload dibandingkan dengan validator dan allowlist backend
+  setiap kali backend berpindah versi, lalu efeknya dibuktikan lewat e2e.
+  `diskonGlobalIDs` dibuang allowlist `465b438` tanpa galat, sehingga
+  diskon hilang diam-diam walau test unit payload lolos.
+- Pengguna kedua di e2e (misalnya penyetuju pengajuan) masuk lewat
+  `request.newContext()` terpisah, agar sesi web pengguna uji tidak
+  diambil alih (PB10a).
+- Helper pembersihan memeriksa jawaban setiap permintaannya dengan
+  `expect.soft`, yang menerima sukses atau 404. `hapusLewatApi` sempat
+  membuang jawabannya, sehingga lima akun kas uji tertinggal tanpa
+  terlihat (`b5a55c4`).
+- Kegagalan sesekali ditelusuri dari durasi di laporan JSON, yang
+  membedakan permintaan tertahan dari test yang lambat; tangkapan layar
+  dan trace diambil sebelum run lain menimpanya, dan run ulang dilakukan
+  terbuka, bukan dianggap selesai (`kontrak/temuan.md` butir 77).
+- Spec baru untuk sebuah halaman menyalin cara pembukaan halaman dari
+  spec yang sudah lolos untuk halaman itu. Spec daftar penjualan sempat
+  menyalin pola spec keuangan: tanpa `login`, dan penunggu dipasang
+  sebelum `reload`, sehingga respons halaman sebelumnya ikut tertangkap
+  (`b63cf08`).
+
 ## Test yang ditandai fixme dan skip bersyarat
 
 Menunggu perbaikan backend:
@@ -404,18 +462,24 @@ Menunggu perbaikan backend:
 | Test | Menunggu |
 |---|---|
 | Edit pola roster | Validator memakai `this.siklusHari` dalam konteks `findOneAndUpdate` |
-| Hapus pengguna | `Promise.all` paralel di dalam transaksi MongoDB |
 | Hitungan tersimpan dapat dikosongkan kembali (`inventaris/stockOpname/draft-stok-opname.spec.ts`) | Validator stock opname menerima `qtyPhysical` null (`kontrak/temuan.md` butir 22). Badannya berupa penanda; skenario ditulis saat `SERVER_TERIMA_HITUNGAN_KOSONG` dibalik |
-| Jumlah diterima 0 terkirim apa adanya (`inventaris/penerimaanBarang/terima-penerimaan.spec.ts`) | Backend berhenti menghitung stok masuk dengan `qtyTerima \|\| qtyKirim` (`kontrak/temuan.md` butir 30). Badannya lengkap; jalankan setelah `SERVER_TERIMA_JUMLAH_NOL` dibalik |
 | Jurnal Keluar penjualan langsung terbaca setelah finalisasi, dan finalisasi yang ditolak tidak menambah jurnal (`penjualan/alur-penjualan.spec.ts`, dua test) | Backend membersihkan cache daftar jurnal setiap kali `inventoryService` menulis jurnal (`kontrak/temuan.md` butir 46). Keduanya dibuka bersamaan: test kedua baru bermakna bila bacaan jurnal terbukti segar |
 | Finalisasi berhasil bila stok bahan outlet cukup walau stok produk tidak (`penjualan/alur-penjualan.spec.ts`) | Backend menghubungkan stok produk ke stok lokasi (`kontrak/temuan.md` butir 37) |
 | Delapan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, dan stock adjustment | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
-| Daftar aset yang dimuat ulang setelah tipe asetnya dihapus (`reservasi/aset/crud-aset.spec.ts`) | Backend membersihkan cache daftar aset saat tipe aset dihapus (`kontrak/temuan.md` butir 51) |
-| Hapus tarif berhasil (`reservasi/tarif/crud-tarif.spec.ts`) | `DELETE /tarif/:id` menjawab sukses (`kontrak/temuan.md` butir 53). Selama menunggu, skenario tombol menunggu membuktikan tarif memang terhapus (404 saat dibaca ulang) |
-| Tarif dilepas dari tipe aset (`reservasi/tarif/crud-tarif.spec.ts`) | Ubah tarif mengganti `tipeAsetID` alih-alih `$addToSet`, dan membersihkan cache tipe aset dengan `tenantID` yang benar (`kontrak/temuan.md` butir 54 dan 55) |
-| Timeline yang dimuat ulang tidak lagi menampilkan booking yang di-void (`reservasi/daftar/lihat-reservasi.spec.ts`) | Void penjualan membersihkan cache daftar booking per tanggal (`kontrak/temuan.md` butir 57, keputusan R3a). Badannya lengkap |
 | Shift yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/shift/crud-shift.spec.ts`) | Backend memisahkan shift per lokasi dan `KUNCI_LOKASI_SHIFT` di `features/shift/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
 | Pola yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | Backend memisahkan pola roster per lokasi dan `KUNCI_LOKASI_POLA_ROSTER` di `features/pola-roster/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
+
+Pada 30 September 2026, setelah backend `465b438`, lima `test.fixme`
+dilepas karena terbukti diperbaiki: hapus pengguna (`a10af75`), timeline
+setelah void booking (`e4bfc86`), hapus tarif (`8134842`), dan pelepasan
+tarif dari tipe aset (`31ebd92`), masing-masing dengan commit sendiri;
+jumlah diterima 0 diganti terima sungguhan lewat UI (`6e314ae`). Skenario
+daftar aset setelah tipe asetnya dihapus dibuang, karena hapus tipe aset
+yang masih dipakai kini ditolak 409 (keputusan PB9a). Cara membuktikan
+sebuah fixme: lepas sementara, jalankan dua kali, kembalikan berkasnya
+dengan `git checkout`, lalu lepas dan commit per test yang lolos. Fixme
+berbadan kosong, fixme yang bersyarat konstanta frontend, dan fixme yang
+hanya bermakna bila fixme lain lolos lebih dulu bukan kandidat.
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
 terhitung di angka skipped pada baseline:
@@ -424,7 +488,6 @@ terhitung di angka skipped pada baseline:
 |---|---|
 | `inventaris/stok/lihat-stok.spec.ts`, tab kritis gudang | Tidak ada stok gudang yang kritis (terjadi pada data uji sekarang) |
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
-| `inventaris/penerimaanBarang/terima-penerimaan.spec.ts`, `inventaris/transferStok/*.spec.ts` | Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup. Kegagalan persiapan lain menggagalkan test, bukan melewatinya |
 | Skenario jalur terkunci di spec stok, pengajuan stok (daftar), dan stock adjustment | `IZIN_LINTAS_OUTLET` sudah diisi, sehingga Ridho memegangnya; butuh akun uji tanpa izin itu. Tidak terjadi selama konstanta null, sehingga belum terhitung di baseline |
 | Halaman shift gudang dengan keterangan pemakaian bersama (`jadwal/shift/crud-shift.spec.ts`) | `KUNCI_LOKASI_SHIFT` sudah diisi, sehingga keterangan tidak tampil lagi. Tidak terjadi selama konstanta null |
 | Halaman pola roster gudang dengan keterangan pemakaian bersama (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | `KUNCI_LOKASI_POLA_ROSTER` sudah diisi, sehingga keterangan tidak tampil lagi. Tidak terjadi selama konstanta null |
@@ -460,15 +523,16 @@ Urutan debug kegagalan e2e di atas).
   tidak dapat dihapus). Yang diuji hanya jalur gagalnya.
 - **Tambah barang gudang yang berhasil** tidak diuji e2e, karena UI tidak
   punya cara menghapus entri inventory yang terbentuk.
-- **Terima penerimaan yang berhasil** tidak diuji e2e, karena menambah stok
-  outlet secara permanen dan surat jalan DITERIMA tidak dapat dibatalkan.
-  Yang diuji hanya jalur gagalnya beserta isi payload.
+- **Terima penerimaan yang berhasil** diuji sungguhan lewat UI sejak
+  `6e314ae` (keputusan PB12a), termasuk jumlah 0. Setiap run menambah stok
+  outlet secara permanen, dan surat jalan DITERIMA tidak dapat dibatalkan.
 - **Item tanpa master bahan baku pada penerimaan** hanya teruji di unit
   test (`tests/unit/features/transfer-stok/payload.test.ts`), karena
   membuat datanya berarti menghapus master bahan baku.
 - **Kirim surat jalan yang berhasil lewat UI** tidak diuji e2e, karena
   memotong stok gudang. Kirim dijalankan lewat API di persiapan spec dan
-  dibatalkan di akhir; dari UI hanya jalur gagalnya yang diuji.
+  ditutup lewat terima penuh di akhir, karena batal dari DIKIRIM ditolak
+  backend `465b438` (PB10a); dari UI hanya jalur gagalnya yang diuji.
 - **Tombol aksi surat jalan yang disembunyikan menurut izin** hanya teruji
   di unit test (`aksiSuratJalan`), dengan alasan yang sama dengan cakupan
   lokasi: satu-satunya akun uji berperan Owner.
@@ -504,7 +568,10 @@ Urutan debug kegagalan e2e di atas).
   `hapusTipe` lewat `page.request` tidak dijawab dalam batas waktu test
   (`crud-tipeAset.spec.ts` baris 267), lalu lolos 75 dari 75 dengan
   `--repeat-each 3`, dan suite penuh berikutnya bersih. Sejalan dengan
-  kejadian spec tarif di atas; penyebabnya belum diketahui.
+  kejadian spec tarif di atas; penyebabnya belum diketahui. Terulang dua
+  kali pada 30 September 2026 di `DELETE /tipeaset` dan `/tarif`, dengan
+  permintaan tertahan sekitar 25 detik, lalu 220 eksekusi sesudahnya
+  bersih; dicatat untuk tim backend (`kontrak/temuan.md` butir 77).
 - **Spec shift dan pola roster meninggalkan shift uji**: shift hanya
   dapat dinonaktifkan, tidak dihapus, sehingga setiap run menambah shift
   "Shift Ganda ..." (spec shift), serta "Shift Arsip ..." dan "Shift
@@ -517,10 +584,10 @@ Urutan debug kegagalan e2e di atas).
   mencakup waktu sekarang, tetapi label status aset uji hanya dibandingkan
   dengan respons `GET /aset`, karena daftar aset di-cache backend 60 detik
   dan belum terbukti dibersihkan saat booking dibuat.
-- **Booking uji hanya dapat dibersihkan lewat API** (bayar Rp1, hapus
-  pembayaran, void penjualan), karena web tidak punya jalur batal
-  (`kontrak/temuan.md` butir 56). Setiap run spec daftar reservasi
-  meninggalkan penjualan booking VOID dan booking Batal.
+- **Booking uji dibersihkan lewat API**: pembayaran PAID-nya dibatalkan,
+  lalu penjualannya di-void (PB8a), walau web kini punya jalur void untuk
+  penjualan booking yang belum dibayar (PB2a). Setiap run spec daftar
+  reservasi meninggalkan penjualan booking VOID dan booking VOID.
 - **Blok booking tanpa penjualan** (tanpa tautan R4b) hanya teruji di unit
   test (`tests/unit/features/sesi-booking/tampilan.test.ts`), karena jalur
   buat booking selalu membuat penjualan.
@@ -556,6 +623,22 @@ Urutan debug kegagalan e2e di atas).
 - **Mode baca-saja pengaturan gudang belum teruji**, karena satu-satunya
   akun uji memegang `update-location`. Yang teruji e2e hanya jalur ubah,
   dan `bacaSaja` di `IsianLokasi` belum punya test.
+- **Akun kas uji menumpuk sebagai non-aktif**, satu per run spec
+  keuangan, karena akun kas tidak dapat dihapus sejak backend `465b438`
+  (PB13a, `kontrak/temuan.md` butir 81). Payload bersaldo hanya diperiksa
+  lewat `POST` yang dijawab gagal.
+- **`hapusLewatApi` menerima 404 sebagai sudah terhapus**, padahal route
+  yang dihapus backend juga menjawab 404. Route hapus yang hilang tidak
+  terdeteksi helper ini; yang menangkapnya adalah audit endpoint
+  (`cara-kerja.md`, Helper penggantian).
+- **Persetujuan pengajuan uji memakai pengguna penyetuju uji** "E2E
+  Penyetuju", karena backend melarang pengaju menyetujui pengajuannya
+  sendiri (`kontrak/temuan.md` butir 76, PB11a). Jalur Owner menyetujui
+  pengajuannya sendiri belum teruji.
+- **`DataTable` mode server hanya dipakai dan teruji di daftar
+  penjualan** (`tests/e2e/penjualan/daftar-penjualan.spec.ts`). Mode
+  klien kesembilan tabel lain tidak berubah di `b63cf08`, dan tidak diuji
+  ulang khusus.
 
 ## Spec rujukan
 
@@ -624,10 +707,11 @@ Urutan debug kegagalan e2e di atas).
   jalan disiapkan lewat API dari pengajuan yang layak dan ditutup di
   `finally`, token API mengikuti `pin-refresh` halaman, payload terima
   dibaca dari permintaan yang dijawab gagal lewat `page.route`, penahanan
-  dibuktikan dengan penghitung request, dan `test.fixme` berbadan lengkap
-  untuk perilaku yang menunggu backend. Helper-nya (`login`,
-  `bukaDenganAuth`, `api`, `siapkanSuratJalan`, `batalkan`) ada di
-  `tests/helpers/transfer-uji.ts`.
+  dibuktikan dengan penghitung request, dan sejak `6e314ae` terima
+  sungguhan lewat UI tanpa `page.route`, dengan surat jalan DITERIMA dan
+  `qtyTerima: 0` dibuktikan dari backend. Helper-nya ada di
+  `tests/helpers/transfer-uji.ts`, termasuk `siapkanSuratJalan` dan
+  `tutupSuratJalanUji` (PB10a).
 - `tests/e2e/inventaris/transferStok/alur-transfer-stok.spec.ts`: spec
   pembanding alur tulis gudang dengan surat jalan PENDING dari API. Tab
   status diperiksa dengan `toHaveCount(0)` pada baris yang tidak boleh
@@ -660,21 +744,25 @@ Urutan debug kegagalan e2e di atas).
   simulasi `requireSetup` dari respons login nyata lewat `route.fetch()`,
   dan pemeriksaan sisa kuota dari header `RateLimit`.
 - `tests/e2e/reservasi/tipeAset/crud-tipeAset.spec.ts`: data uji dibuat
-  lewat API dengan nama unik dan dihapus di `finally`, keberhasilan
+  lewat API dengan nama unik dan dihapus di `finally` (jawabannya
+  diperiksa lunak sejak `b5a55c4`), keberhasilan
   dibuktikan dengan membaca ulang lewat API (404 setelah hapus), galat
   backend sungguhan dari nama duplikat, dan simulasi daftar kosong yang
   dibentuk dari respons nyata.
 - `tests/e2e/reservasi/aset/crud-aset.spec.ts`: helper bersama
-  `tests/helpers/reservasi-uji.ts`, data yatim yang dibuat nyata dengan
-  menghapus tipe aset uji, dan `test.fixme` berbadan lengkap untuk cache
-  backend yang basi.
+  `tests/helpers/reservasi-uji.ts`. Skenario data yatim (tipe aset uji
+  dihapus) beserta `test.fixme` cache backend yang basi dibuang di
+  `b85c2bd`, karena hapus tipe aset yang masih dipakai kini ditolak 409
+  (PB9a).
 - `tests/e2e/reservasi/tarif/crud-tarif.spec.ts`: skenario pendamping yang
   tetap membuktikan efek sebenarnya selama skenario utama menunggu backend
-  (tarif terhapus walau `DELETE` menjawab 500), serta selector untuk input
+  (tarif terhapus walau `DELETE` menjawab 500; skenario utama dilepas di
+  `8134842`), serta selector untuk input
   `Controller` tanpa `name` dan checkbox Radix berlabel.
 - `tests/e2e/reservasi/daftar/lihat-reservasi.spec.ts`: fixture booking
   tetap dengan pembersihan lewat penjualan (`batalkanBooking`, keputusan
-  R2c), booking yang dibaca helper dari daftar tanpa tanggal agar kunci
+  R2c, sejak `b85c2bd` PB8a), booking yang dibaca helper dari daftar
+  tanpa tanggal agar kunci
   cache yang dibaca halaman tidak terisi, harapan dari respons yang dibaca
   halaman itu sendiri, dan tautan yang diperiksa lewat `href` lalu dibuka.
 - `tests/e2e/penjualan/waktu-penjualan.spec.ts`: input dipilih lewat nama
@@ -700,7 +788,9 @@ Urutan debug kegagalan e2e di atas).
   rentang periode yang sama (berjalan dan pembanding) dibedakan lewat
   `endDate` (`responsLabaRugi`), harapan badge dihitung dengan fungsi
   murni yang sama dengan tampilan, dan kegagalan per sumber data
-  disimulasikan dengan `JAWAB_GAGAL` hanya untuk GET endpoint itu.
+  disimulasikan dengan `JAWAB_GAGAL` hanya untuk GET endpoint itu. Sejak
+  `b5a55c4`, akun uji dibuat bersaldo 0 dan dinonaktifkan di `finally`,
+  dan payload bersaldo diperiksa lewat `POST` yang dijawab gagal (PB13a).
 - `tests/e2e/jadwal/jadwal/`: `test.use({ timezoneId: "Asia/Pontianak" })`
   agar perilaku zona waktu sama di mesin mana pun; sel grid dipilih lewat
   indeks hari (sel pertama baris adalah nama karyawan), dan item selnya
@@ -741,3 +831,8 @@ Urutan debug kegagalan e2e di atas).
   `finally`; keberhasilan dibuktikan dari payload, respons `PUT`, dan
   pembacaan ulang API; harapan tampilan dihitung dari `GET /location` yang
   dibaca lewat API.
+- `tests/e2e/penjualan/daftar-penjualan.spec.ts` (sejak `b63cf08`):
+  halaman dibuka dengan `goto` ber-`waitUntil: "commit"` sebelum penunggu
+  dipasang, harapan footer dihitung dari respons halaman itu sendiri,
+  perpindahan ke kunci yang masih segar di cache dibuktikan dari
+  tampilan, dan tidak ada data yang ditulis.

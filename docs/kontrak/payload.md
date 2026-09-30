@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan.
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon, pajak, pelanggan, dan metode pembayaran belum, dan diperiksa saat modul pemiliknya dimigrasikan.
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -87,7 +87,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PATCH /transferstok/:id/batal`
 
 - Aturan: tanpa validator, dibatasi skema `models/transferStokModel.js`
-- Dari PENDING atau DIKIRIM, lewat gerbang atomik; DITERIMA dan BATAL adalah status akhir (`transferStokService.updateStatus`). Dari DIKIRIM, stok setiap item dikembalikan ke `dariLocationID` dengan jurnal Masuk beralasan "Lainnya" dalam satu transaksi (`temuan.md` butir 36). Pengajuan terkait kembali ke PENDING dan `transferStokID`-nya dilepas
+- Hanya dari PENDING sejak backend `465b438` (P12); DIKIRIM ditolak 400, sehingga barang yang sudah dikirim diselesaikan lewat terima (`temuan.md` butir 36). DITERIMA dan BATAL adalah status akhir. Pengajuan terkait kembali ke PENDING dan `transferStokID`-nya dilepas
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorTransfer`, `pengajuanStokID`, `dariLocationID`, `keLocationID`, `status`, `items`, `tanggalKirim`, `tanggalTerima`, `penerimaID`
 - Diisi server: `pengirimID`
@@ -104,8 +104,8 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `PATCH /transferstok/:id/terima`
 
 - Aturan: tanpa validator, dibatasi skema `models/transferStokModel.js`
-- Hanya dari DIKIRIM, lewat gerbang atomik. `items` dari body menggantikan seluruh items surat jalan tanpa validasi (`temuan.md` butir 29), lalu stok di `keLocationID` ditambah per item sebesar `qtyTerima`, atau `qtyKirim` bila `qtyTerima` 0 atau tidak dikirim (butir 30), dengan jurnal Masuk "Transfer Gudang". Pengajuan terkait menjadi COMPLETED
-- Karena itu klien wajib mengirim seluruh item dengan `bahanBakuID` dan `qtyKirim` dari server; web menyusunnya lewat `susunPayloadTerima` (`features/transfer-stok/payload.ts`)
+- Hanya dari DIKIRIM, lewat gerbang atomik. Sejak backend `465b438`, `items` dari body hanya memuat barang yang berbeda dari kiriman, dikenali lewat `itemId` (id item surat jalan) atau `bahanBakuID`; barang di luar surat jalan dan `qtyKirim` yang berbeda ditolak, dan body tanpa `items` berarti seluruh barang diterima penuh (`temuan.md` butir 29). Stok di `keLocationID` ditambah per item sebesar `qtyTerima`, dengan jurnal Masuk "Transfer Gudang"; `qtyTerima` 0 berarti barang tidak sampai, tanpa stok maupun jurnal masuk (butir 30, `transferStokService` baris 544 sampai 547). Pengajuan terkait menjadi COMPLETED
+- Web mengirim seluruh item dengan `itemId` bila ada, `bahanBakuID` sebagai cadangan, dan `qtyTerima` apa adanya termasuk 0, lewat `susunPayloadTerima` (`features/transfer-stok/payload.ts`, `6e314ae`)
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorTransfer`, `pengajuanStokID`, `dariLocationID`, `keLocationID`, `status`, `items`, `tanggalKirim`, `tanggalTerima`, `penerimaID`
 - Dibaca controller dari body: seluruh body diteruskan ke service (`...req.body`); service memakai `items` dan `tanggalTerima`, dengan bawaan waktu server
@@ -134,6 +134,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Tidak diperiksa validator tetapi dipakai: `keterangan` (controller meneruskan `...req.body` ke `AkunKas.create`)
 - Nilai sah: `VALID_TIPE_AKUN`: Kas Fisik, Rekening Bank; `VALID_STATUS`: aktif, non-aktif
 - Nomor akun duplikat dalam tenant dijawab 400 "Nomor Akun sudah digunakan di tenant ini" (`akunKasService` baris 69), bukan 409
+- Sejak backend `465b438`, setiap tenant dibatasi 10 akun kas aktif, dan buat ditolak 409 bila sudah penuh (`akunKasService` baris 141 sampai 144); saldo awal lebih dari 0 dicatat sebagai mutasi `SALDO_AWAL`. Akun bersaldo tidak dapat ditutup, dan `DELETE /akunkas/:id` tidak ada lagi (`temuan.md` butir 81), sehingga spec web tidak membuat akun uji bersaldo (`refactor/pengujian.md`)
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -256,10 +257,11 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /pembayaran`
 
 - Aturan: validatePembayaranPayload (validators/pembayaranValidator.js)
-- Wajib dari klien: `penjualanID`, `metodePembayaranID`, `akunKasID`, `jumlahBayar`; `tanggalBayar` wajib bila status akhirnya PAID dan tidak boleh mendahului tanggal transaksi penjualan (`pembayaranService`, dikoreksi 26 September 2026)
-- Field lain yang dikenali: `status`, `tanggalBayar`, `catatan`. `status` dari klien hanya dipakai untuk metode otomatis (`metodeValid.isAutomated`), tetapi field itu tidak ada di skema metode pembayaran, sehingga status selalu PAID (`temuan.md` butir 45); web tidak mengirimnya (keputusan K2a)
+- Wajib dari klien: `penjualanID`, `metodePembayaranID`, dan `jumlahBayar` (angka lebih dari 0); `tanggalBayar` wajib bila status akhirnya PAID dan tidak boleh mendahului tanggal transaksi penjualan (`pembayaranService`, dikoreksi 26 September 2026)
+- Field lain yang dikenali: `tanggalBayar`, `catatan`, dan `uangDiterima` (opsional; bila dikirim wajib angka). Sejak backend `465b438`, field yang diatur server (`FIELD_SERVER`), antara lain `akunKasID`, ditolak 400 "Field diatur server dan tidak boleh dikirim": akun kas tujuan diambil dari metode pembayaran, dan `kembalian` dihitung server. Web tidak mengirim `status` (keputusan K2a); cabang gateway `metode.isAutomated` masih ada di service tetapi tidak pernah berjalan (`temuan.md` butir 45 dan 78)
+- Web menolak membayar penjualan DRAFT dan VOID sejak `b85c2bd`: pembayaran baru dibuka setelah finalisasi, untuk penjualan UNPAID atau PARTIAL
 - Nilai sah: `VALID_STATUS`: PAID, PENDING, EXPIRED, FAILED, VOID
-- Aturan service: penjualan VOID, penjualan yang sudah lunas, dan `jumlahBayar` di atas `sisaTagihan` ditolak 400; `sisaTagihan` dikurangi secara atomik sebelum dokumen dibuat. Tanpa idempotensi (`temuan.md` butir 44). Galat validator dibalas mentah `{ errors }` dari route (butir 42)
+- Aturan service: penjualan VOID, penjualan yang sudah lunas, dan `jumlahBayar` di atas `sisaTagihan` ditolak 400 (belum diperiksa ulang terhadap backend `465b438`); `sisaTagihan` dikurangi secara atomik sebelum dokumen dibuat. Tanpa idempotensi (`temuan.md` butir 44). Galat validator dibalas mentah `{ errors }` dari route (butir 42)
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -300,11 +302,12 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /penjualan`
 
-- Aturan: `validatePenjualanPayload` (validators/penjualanValidator.js), dipasang di route setelah `tenantID` disuntik dari sesi; controller lalu menyaring body dengan allowlist 14 field (`_sanitizePayload`). Analisis statis sempat mencatat `validateIdOrArray`, fungsi pembantu di berkas yang sama (dikoreksi 26 September 2026)
-- Wajib dari klien: `penggunaID` (hanya karena validator mewajibkannya; controller membuangnya dan memakai pengguna dari token, `temuan.md` butir 41), `pelangganID`, `jenisTransaksi`, `tanggalTransaksi` (tidak boleh di masa depan), `jenisPenjualan`, `itemPenjualan` (minimal satu, dengan `produkID` sah dan `jumlah` minimal 1)
-- Field lain yang dikenali (allowlist controller): `jatuhTempo`, `diskonGlobalIDs`, `jumlahDiskonTransaksi`, `pajakTransaksiIDs`, `keterangan`, `locationID`, `simpanDraft`, `statusPenjualan`, `finalize`
+- Aturan: `validatePenjualanPayload` (validators/penjualanValidator.js), dipasang di route setelah `tenantID` disuntik dari sesi; controller lalu menyaring body dengan allowlist 13 field (`_sanitizePayload`, dikoreksi 30 September 2026 terhadap backend `465b438`). Analisis statis sempat mencatat `validateIdOrArray`, fungsi pembantu di berkas yang sama (dikoreksi 26 September 2026)
+- Wajib dari klien: `pelangganID`, `jenisTransaksi`, `tanggalTransaksi` (tidak boleh di masa depan), `jenisPenjualan`, `itemPenjualan` (minimal satu, dengan `produkID` sah dan `jumlah` minimal 1)
+- Field lain yang dikenali (allowlist controller): `jatuhTempo`, `diskonGlobal`, `pajakTransaksiIDs`, `keterangan`, `locationID`, `simpanDraft`, `statusPenjualan`, `finalize`; diskon per item lewat `itemPenjualan[].diskonItem`
+- Sejak backend `465b438`, `penggunaID` tidak lagi wajib dan kasir diambil dari token (`temuan.md` butir 41). Harga dan diskon tidak dapat diatur kasir: `jumlahDiskon` per item dan `jumlahDiskonTransaksi` ditolak validator ("gunakan diskonItem" dan "gunakan diskonGlobal"), sedangkan nama lama `diskonGlobalIDs` dibuang allowlist tanpa galat, sehingga diskon global hilang diam-diam. Web mengirim `diskonGlobal` dan `diskonItem` sejak `b85c2bd`, dibuktikan lewat e2e
 - Header: `x-idempotency-key` (opsional). Kunci yang sama dalam 24 jam per tenant mengembalikan hasil pertama, dan dijawab 409 selama permintaan pertama masih diproses
-- Nilai sah: `VALID_STATUS_PENJUALAN`: DRAFT, FINAL, VOID; `VALID_JENIS_TRANSAKSI`: POS, INVOICE; `VALID_JENIS_PENJUALAN`: dine-in, takeaway, booking
+- Nilai status penjualan: DRAFT, UNPAID, PARTIAL, PAID, dan VOID sejak backend `465b438`; FINAL dihapus, dan UNPAID, PARTIAL, serta PAID dihitung dari pembayaran; `VALID_JENIS_TRANSAKSI`: POS, INVOICE; `VALID_JENIS_PENJUALAN`: dine-in, takeaway, booking
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -351,9 +354,9 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 - Aturan: `validateSesiBookingPayload` (validators/sesiBookingValidator.js) di route. Analisis statis sempat mencatat `validateWaktuRange`, fungsi pembantu di berkas yang sama (dikoreksi 27 September 2026)
 - Wajib dari klien: `dataPelanggan`, lalu salah satu dari dua jalur yang saling meniadakan: jalur tunggal (`dataAset`, `waktuMulai`, `waktuSelesai`) atau jalur batch (`items` tidak kosong, setiap item dengan `dataAset`, `waktuMulai`, dan `waktuSelesai`). Controller memanggil `createBatch` untuk jalur batch dan `create` untuk jalur tunggal
-- Aturan service: kedua jalur membuat penjualan `booking` berstatus FINAL dengan `sisaTagihan` sama dengan `totalTagihan`, sehingga booking yang belum dibayar tidak dapat dibatalkan (`temuan.md` butir 56); `simpanDraft` tidak dibaca. Bentrok dengan booking Aktif aset yang sama ditolak 409 (`checkConflict`), dan tarif dipilih otomatis lewat `findBestTarif` menurut tipe aset, hari, dan jam, lalu prioritas, tanpa memeriksa `isActive`
+- Aturan service: kedua jalur membuat penjualan `booking` berstatus UNPAID sejak backend `465b438`, dengan `sisaTagihan` sama dengan `totalTagihan`; penjualan tanpa pembayaran dapat di-void beserta booking-nya (`temuan.md` butir 56); `simpanDraft` tidak dibaca. Bentrok hanya dihitung terhadap booking Aktif yang sudah dibayar, sehingga jadwal baru terkunci setelah pembayaran pertama, dan bentrok ditolak 409 (`checkConflict`). Tarif dipilih otomatis lewat `findBestTarif` menurut tipe aset, hari, dan jam, lalu prioritas, tanpa memeriksa `isActive`
 - Field lain yang dikenali: `dataTarif`, `diskonItem`, `diskonGlobal`, `status`, `simpanDraft`, `noReferensi`, `dataPenjualan`
-- Nilai sah: `VALID_STATUS`: Aktif, Selesai, Batal
+- Nilai sah: `VALID_STATUS`: Aktif, Selesai, VOID (sebelumnya Batal; validator baris 3 dan model baris 53 di backend `465b438`). Tidak Datang tidak disimpan, melainkan dihitung saat dibaca
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`, `dataPengguna`
 
@@ -390,6 +393,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validateTipeAsetPayload (validators/tipeAsetValidator.js)
 - Wajib dari klien: `namaTipeAset`
 - Field lain yang dikenali: `deskripsi`, tanpa aturan di validator dan diteruskan service
+- Nama tipe aset kembar dalam toko ditolak 409 "Nama tipe aset sudah digunakan di toko ini" (`tipeAsetService` baris 149 dan 186, juga saat `PUT`), dan hapus tipe aset yang masih dipakai aset ditolak 409 (baris 206), sejak backend `465b438`
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -485,6 +489,14 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Nilai sah: `VALID_TYPES`: umum, member, korporat
 - Diisi server: -
 
+#### `PUT /pembayaran/:id`
+
+- Aturan: `FIELD_UPDATE` di `services/pembayaranService.js` baris 27: hanya `catatan` dan `status` yang dibaca. Ditambahkan 30 September 2026 terhadap backend `465b438`
+- Dipakai web untuk membatalkan pembayaran PAID dengan `{ status: "VOID", catatan? }`, beralasan opsional; tombolnya hanya untuk pembayaran PAID dan pemegang `update-pembayaran` (`bolehBatalkanPembayaran`)
+- Aturan service: membatalkan pembayaran PAID mengurangi saldo akun kas tujuannya dan mencatat mutasi `VOID_PEMBAYARAN` beserta alasannya (baris 506 sampai 518), lalu status bayar dan sisa tagihan penjualan disinkronkan. `catatan` asli pembayaran ditimpa alasan pembatalan (`temuan.md` butir 75)
+- Wajib dari klien: -
+- Diisi server: -
+
 #### `PUT /pengajuanstok/:id`
 
 - Aturan: tanpa validator, dibatasi skema `models/pengajuanStokModel.js`
@@ -506,9 +518,9 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 - Aturan: `validatePenjualanPayload` dengan `isUpdate` (validators/penjualanValidator.js) di route, lalu allowlist controller yang sama dengan buat. Analisis statis sempat mencatat `validateIdOrArray` (dikoreksi 26 September 2026)
 - Wajib dari klien: - (seluruh field opsional saat update)
-- Field lain yang dikenali: sama dengan buat. `finalize: true` memfinalisasi DRAFT, memotong stok lewat `inventoryService.processSaleStock` di `locationID` penjualan atau lokasi Outlet pertama tenant; `statusPenjualan: "VOID"` membatalkan DRAFT beserta sesi booking-nya
-- Aturan service: penjualan VOID tidak dapat diubah; penjualan FINAL tidak dapat diubah maupun di-VOID langsung (pembayarannya harus di-void lebih dulu)
-- Nilai sah: `VALID_STATUS_PENJUALAN`: DRAFT, FINAL, VOID; `VALID_JENIS_TRANSAKSI`: POS, INVOICE; `VALID_JENIS_PENJUALAN`: dine-in, takeaway, booking
+- Field lain yang dikenali: sama dengan buat. `finalize: true` memfinalisasi DRAFT menjadi UNPAID, memotong stok lewat `inventoryService.processSaleStock` di `locationID` penjualan atau lokasi Outlet pertama tenant; `statusPenjualan: "VOID"` membatalkan DRAFT, atau UNPAID yang belum punya pembayaran aktif, beserta sesi booking-nya
+- Aturan service: penjualan VOID tidak dapat diubah; sejak backend `465b438`, penjualan yang punya pembayaran aktif tidak dapat di-VOID sampai pembayarannya dibatalkan lewat `PUT /pembayaran/:id`, menggantikan aturan FINAL
+- Nilai status penjualan: DRAFT, UNPAID, PARTIAL, PAID, dan VOID; `VALID_JENIS_TRANSAKSI`: POS, INVOICE; `VALID_JENIS_PENJUALAN`: dine-in, takeaway, booking
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 

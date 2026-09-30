@@ -119,7 +119,7 @@ Dibangkitkan dari `routes/*.js` backend pada commit acuan di `README.md`. Tidak 
 | GET | `/location` | authPengguna | `read-location` | ya | `locationRoute.js` |
 | POST | `/location` | authPengguna | `create-location` | ya | `locationRoute.js` |
 | GET | `/location/:id` | authPengguna | `read-location` | - | `locationRoute.js` |
-| PUT | `/location/:id` | authPengguna | `update-location` | - | `locationRoute.js` |
+| PUT | `/location/:id` | authPengguna | `update-location` | ya | `locationRoute.js` |
 | DELETE | `/location/:id` | authPengguna | `delete-location` | - | `locationRoute.js` |
 | GET | `/location/current` | authPengguna | `read-location` | ya | `locationRoute.js` |
 | GET | `/membership` | authPengguna | `read-membership` | - | `membershipRoute.js` |
@@ -150,10 +150,10 @@ Dibangkitkan dari `routes/*.js` backend pada commit acuan di `README.md`. Tidak 
 | GET | `/pelanggan/:id` | authPengguna | - | - | `pelangganRoute.js` |
 | PUT | `/pelanggan/:id` | authPengguna | `update-pelanggan` | ya | `pelangganRoute.js` |
 | DELETE | `/pelanggan/:id` | authPengguna | `delete-pelanggan` | ya | `pelangganRoute.js` |
-| GET | `/pembayaran` | authPengguna | `read-pembayaran` | ya | `pembayaranRoute.js` |
+| GET | `/pembayaran` | authPengguna | `read-pembayaran` | - | `pembayaranRoute.js` |
 | POST | `/pembayaran` | authPengguna | `create-pembayaran` | ya | `pembayaranRoute.js` |
 | GET | `/pembayaran/:id` | authPengguna | `read-pembayaran` | - | `pembayaranRoute.js` |
-| PUT | `/pembayaran/:id` | authPengguna | `update-pembayaran` | - | `pembayaranRoute.js` |
+| PUT | `/pembayaran/:id` | authPengguna | `update-pembayaran` | ya | `pembayaranRoute.js` |
 | DELETE | `/pembayaran/:id` | authPengguna | `delete-pembayaran` | - | `pembayaranRoute.js` |
 | GET | `/pembelianstok` | authPengguna | - | - | `pembelianStokRoute.js` |
 | POST | `/pembelianstok` | authPengguna | - | - | `pembelianStokRoute.js` |

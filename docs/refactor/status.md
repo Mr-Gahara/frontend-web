@@ -67,15 +67,17 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Keuangan | `0cfb3bd` (spec), `45187b6` | Selesai |
 | Jadwal dan shift, termasuk pola roster dan monitoring absensi | `d9af531` (spec), `f99b7cf` (shift), `dcc22e0` (pola roster), `19227f8` dan `e2a0cfd` (jadwal), `845c2cf` (monitoring absensi) | Selesai |
 | Gudang: layout, setup, pengaturan, dan dashboard | `2d7225b` (spec), `9ce288b` (layout, setup, dan lokasi sidebar), `319bd99` (pengaturan) | Selesai (keputusan GD1a sampai GD6a). Eksekusi dashboard gudang ditunda sampai pemilik proyek menentukan layout dan UI/UX-nya (Utang kecil dari modul Gudang). Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), termasuk stock adjustment (`247cf2d`); pengguna gudang ikut modul Pengguna (`7275d14`), dan jadwal, shift, serta pola roster gudang ikut modul Jadwal dan shift |
+| Penyesuaian backend `465b438`: keuangan, penjualan, pembayaran, reservasi, transfer stok, pembersihan data uji, dan paginasi daftar penjualan | `b85c2bd` (penyesuaian), `a10af75`, `e4bfc86`, `8134842`, `31ebd92` (fixme dilepas), `6e314ae` (terima), `b5a55c4` (data uji), `b63cf08` (paginasi) | Selesai (Catatan dari penyesuaian backend `465b438`) |
 | Pengaturan outlet: pajak dan metode pembayaran | - | **Berikutnya** (lihat Pekerjaan berikutnya). Keempat halaman di `app/dashboard/outlet/pengaturan/pajak/` dan `app/dashboard/outlet/pengaturan/metodePembayaran/` masih memakai `apiClient`, `any`, dan `_id` |
-| Pelanggan dan diskon | - | Belum. `app/dashboard/outlet/pelanggan/page.tsx` dan `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`, dan `_id` |
+| Pelanggan dan diskon | - | Belum. `app/dashboard/outlet/pelanggan/page.tsx` dan `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`, dan `_id`; hapus diskon memanggil `DELETE /diskon/:id`, yang tidak ada lagi di backend `465b438` (`kontrak/temuan.md` butir 82) |
 | Profil, login, dan sidebar | - | Belum. `app/dashboard/profil/page.tsx`, `app/login/page.tsx`, `app/login/pengguna/page.tsx`, dan `components/app-sidebar.tsx` masih memakai `apiClient` |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 ## Metrik sisa pekerjaan
 
-Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul:
+Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
+Angka belum diukur ulang setelah penyesuaian backend `465b438`:
 
 | Hal | Awal | Setelah absensi `845c2cf` | Catatan |
 |---|---|---|---|
@@ -117,6 +119,15 @@ halaman indeks pengaturan dan halaman toko. Pemetaan awal (30 September
   `features/inventaris`, bila pemilik proyek memasukkannya ke cakupan.
 - Endpoint pajak dan produk pajak tanpa `checkPermission`
   (`kontrak/temuan.md` butir 5).
+- Backend `465b438` tidak lagi punya `DELETE /metodepembayaran/:id`:
+  metode dihentikan lewat `PUT` dengan `isActive: false`, dan halaman
+  lama yang masih memanggil hapus selalu gagal (`kontrak/temuan.md`
+  butir 82). Kontrak metode pembayaran, pajak, dan produk pajak belum
+  dikoreksi terhadap `465b438` (`kontrak/payload.md`), dan `assignPajak`
+  punya cacat yang dilaporkan (butir 80).
+- Jalur payment gateway tidak dipakai (`kontrak/temuan.md` butir 78 dan
+  79); sisa field gateway di tipe web diperiksa, dan cakupan
+  pembersihannya diputuskan di modul ini.
 
 Langkah pertama: inventaris keenam berkas di atas beserta yang
 direndernya lewat blok terminal, dengan setiap berkas dibaca penuh, dan
@@ -124,6 +135,45 @@ periksa `features/` lebih dulu untuk api dan hook pajak, metode
 pembayaran, dan akun kas yang sudah ada (`cara-kerja.md`, Disiplin).
 Seluruh keputusan yang dibutuhkan diajukan sekaligus lewat dialog
 pilihan.
+
+## Catatan dari penyesuaian backend `465b438`
+
+Backend di-fast-forward ke branch `nizar` `465b438` pada 30 September
+2026, sebelumnya `ridho` `00b9957`. Suite pertama terhadap backend itu
+menghasilkan 306 lolos, 8 gagal, dan 24 skipped; penyesuaiannya selesai
+dalam delapan commit, dengan keputusan PB1a sampai PB14a (`keputusan.md`).
+
+| Commit | Isi |
+|---|---|
+| `b85c2bd` | Penyesuaian keuangan, penjualan, pembayaran, reservasi, dan transfer stok (52 berkas) |
+| `a10af75`, `e4bfc86`, `8134842`, `31ebd92` | `test.fixme` yang terbukti diperbaiki backend dilepas: hapus pengguna, timeline setelah void booking (R3a), hapus tarif, dan pelepasan tarif dari tipe aset |
+| `6e314ae` | Terima surat jalan dengan `itemId` dan jumlah 0 sebagai barang tidak sampai, diuji sungguhan lewat UI |
+| `b5a55c4` | Pembersihan data uji diperiksa; akun kas uji bersaldo 0 lalu dinonaktifkan |
+| `b63cf08` | Footer `DataTable` memakai paginasi server, dengan pilihan jumlah baris |
+
+- Kontrak dikoreksi terhadap `465b438` untuk penjualan, pembayaran,
+  laporan, sesi booking, tipe aset, transfer stok, dan buat akun kas
+  (`kontrak/payload.md`, `kontrak/endpoint.md`). Metode pembayaran,
+  pajak, pelanggan, dan diskon belum, dan diperiksa saat modul pemiliknya
+  dimigrasikan.
+- Audit endpoint mencatat backend kini memiliki 243 route: tujuh route
+  Lampiran A hilang, termasuk `DELETE /akunkas/:id`, `DELETE /diskon/:id`,
+  dan `DELETE /metodepembayaran/:id`, dan empat route baru belum dipakai
+  web, yaitu mutasi dan ringkasan akun kas serta check-in sesi booking.
+  Lampiran A tidak diubah sampai pembangkitan ulang (`kontrak/README.md`).
+- Status penjualan kini DRAFT, UNPAID, PARTIAL, PAID, dan VOID. Booking
+  tersimpan UNPAID dan dapat di-void selama belum dibayar, sehingga web
+  punya jalur batal booking lewat void penjualan (PB2a).
+- Temuan untuk tim backend: `kontrak/temuan.md` butir 75 sampai 83.
+  Butir 29, 30, 41, 43, dan 53 sampai 57 terbukti diperbaiki, butir 52
+  sebagian, dan butir 33 serta 58 dilaporkan diperbaiki tetapi belum
+  dibuktikan dari web.
+- `test.fixme` yang masih gagal terhadap `465b438`: jurnal Keluar yang
+  langsung terbaca (butir 46), stok produk tingkat tenant (butir 37), dan
+  ubah pola roster (validator model).
+- Lima akun kas uji bersaldo yang tertinggal dihapus langsung dari basis
+  data development beserta mutasi saldo awalnya (PB13a); setiap run kini
+  meninggalkan satu akun kas uji non-aktif bersaldo 0.
 
 ## Catatan dari modul Gudang
 
@@ -198,8 +248,10 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   (`kontrak/temuan.md` butir 61, keputusan KU1a).
 - Setup tenant membuat akun kas bawaan "Kas Kecil (Laci)" `CASH-001` dan
   metode pembayaran "Tunai" yang bergantung padanya
-  (`tenantService.createWithOwner`). Spec keuangan hanya menghapus akun
-  uji yang dibuatnya sendiri.
+  (`tenantService.createWithOwner`). Spec keuangan hanya menutup akun
+  uji yang dibuatnya sendiri: sejak `b5a55c4` akun uji dibuat bersaldo 0
+  lalu dinonaktifkan, karena `DELETE /akunkas/:id` tidak ada lagi dan akun
+  bersaldo tidak dapat ditutup (`kontrak/temuan.md` butir 81).
 - `AkunKasLama` dan `AkunKasRefLama` tinggal dipakai modul metode
   pembayaran.
 - Keputusan pemilik proyek untuk modul ini ada di `keputusan.md` (Modul
@@ -220,6 +272,9 @@ aset (`d3ae182`), tarif (`365553f`), daftar reservasi (`27749fe`,
   (`kontrak/temuan.md` butir 56); booking uji dibatalkan lewat bayar,
   hapus pembayaran, lalu void penjualannya (keputusan R2c dan R4b). Void
   penjualan membatalkan sesi booking-nya (`penjualanService.update`).
+  Sejak backend `465b438` penjualan booking tersimpan UNPAID, dan booking
+  dibatalkan lewat void penjualannya (Catatan dari penyesuaian backend
+  `465b438`).
 - Tarif dipilih otomatis oleh backend menurut tipe aset, hari, jam, dan
   prioritas, dan status aset "digunakan" dihitung dari booking Aktif yang
   sedang berjalan.
@@ -228,11 +283,13 @@ aset (`d3ae182`), tarif (`365553f`), daftar reservasi (`27749fe`,
   di `endpoint.md` bagian 3.3. Route sesi booking per id tidak dipakai
   web, sehingga hanya tercatat di Lampiran A.
 - Void penjualan tidak membersihkan cache daftar booking per tanggal
-  (butir 57). Satu skenario daftar reservasi menunggu backend (`test.fixme`,
-  keputusan R3a), dan slot booking uji di spec buat reservasi digeser
+  (butir 57); diperbaiki backend `465b438`, dan `test.fixme` R3a dilepas
+  di `e4bfc86`. Sebelumnya satu skenario daftar reservasi menunggu backend
+  (keputusan R3a), dan slot booking uji di spec buat reservasi digeser
   menurut menit dan urutan pemanggilan agar tidak tertahan daftar yang
   basi.
-- Daftar sesi booking menulis status Selesai saat dibaca (butir 58), dan
+- Daftar sesi booking menulis status Selesai saat dibaca (butir 58,
+  dilaporkan diperbaiki di `465b438`), dan
   sekitar 930 baris kode lama dikomentari di service sesi booking (butir
   59). Temuan master data reservasi tercatat di butir 51 sampai 55.
   Calon temuan yang belum dibuktikan dari kode: keberadaan tipe aset tidak
@@ -240,7 +297,7 @@ aset (`d3ae182`), tarif (`365553f`), daftar reservasi (`27749fe`,
 - Data uji reservasi bernama tetap dan dibuat sekali: tipe aset, aset,
   aset berstatus perbaikan, tarif, pelanggan, serta diskon item dan diskon
   global uji. Setiap run spec daftar dan buat reservasi meninggalkan
-  booking Batal dan penjualan booking VOID.
+  booking VOID (sebelumnya Batal) dan penjualan booking VOID.
 - Keputusan pemilik proyek untuk modul ini ada di `keputusan.md` (Modul
   reservasi, R1a sampai R9b, serta T1a sampai T4a untuk tarif).
 
@@ -304,7 +361,9 @@ Yang masih berlaku:
 - Backend lokal: branch `ridho` `9cd1439`, yang menggabungkan origin/yoga
   `f0b7157` (21 September 2026, belum di-push). Berkas transfer stok tidak
   berubah sejak `f27f093`; `fc159bd` memasang validator allowlist di route
-  inventory, dan spec stok lolos terhadapnya.
+  inventory, dan spec stok lolos terhadapnya. Sejak 30 September 2026
+  backend lokal adalah `nizar` `465b438` (Catatan dari penyesuaian backend
+  `465b438`).
 - Pengajuan stok:
   - Aturan status per izin di `pengajuanStokService.getAll` (baris 30
     sampai 47) dicerminkan di `features/pengajuan-stok/izin.ts`; keduanya
@@ -386,6 +445,8 @@ Yang masih berlaku:
 - Filter tanggal daftar penjualan tidak dapat dikosongkan langsung,
   karena `PilihTanggal` tidak punya tombol kosongkan; filter dikosongkan
   lewat reset filter.
+- Tombol urutkan daftar penjualan menunggu dukungan urutan di
+  `GET /penjualan` (`kontrak/temuan.md` butir 83, keputusan PB14a).
 
 ### Utang kecil dari modul reservasi
 
@@ -399,9 +460,15 @@ Yang masih berlaku:
 
 ### Utang kecil dari modul keuangan
 
-- Daftar akun kas belum punya ubah maupun hapus, walau backend punya
-  `PUT` dan `DELETE /akunkas/:id` (Lampiran A), dan tombol "Pindah Dana"
-  nonaktif karena transfer antar akun belum ada.
+- Daftar akun kas belum punya ubah maupun nonaktifkan, walau backend
+  punya `PUT /akunkas/:id`. `DELETE /akunkas/:id` tidak ada lagi sejak
+  backend `465b438`, dan akun bersaldo tidak dapat ditutup
+  (`kontrak/temuan.md` butir 81). Tombol "Pindah Dana" nonaktif karena
+  transfer antar akun belum ada.
+- Backend `465b438` menambah `GET /akunkas/mutasi`,
+  `GET /akunkas/:id/mutasi`, dan `GET /akunkas/:id/ringkasan`
+  (`kontrak/temuan.md` butir 61), sehingga halaman mutasi arus kas (KU1a)
+  dapat diwujudkan; cakupannya menunggu keputusan pemilik proyek.
 - Ketiga halaman keuangan yang memuat data masih memanggil
   `useAuthGuard()`, karena halamannya tetap di `app/` dengan tampilan
   lama; pemanggilan itu dibuang bila halamannya dijadikan tipis.

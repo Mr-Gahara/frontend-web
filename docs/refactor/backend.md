@@ -211,6 +211,19 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   kritis dan jurnal terbaru dari seluruh lokasi tenant), tidak memeriksa
   izin baca modul, dan mengirim jurnal tanpa mapper
   (`kontrak/temuan.md` butir 74)
+- Laporan penyesuaian backend `465b438` — 8 temuan untuk backend dan satu
+  catatan milik frontend (butir 82), beserta penilaian ulang, disusun
+  30 September 2026 setelah `b63cf08`: catatan pembayaran
+  tertimpa alasan pembatalan, larangan pengaju menyetujui pengajuannya
+  sendiri tanpa pengecualian Owner (perlu keputusan), `DELETE /tipeaset`
+  dan `/tarif` yang sesekali tertahan (pengamatan), sisa jalur payment
+  gateway, dokumen metode pembayaran yang masih menyebut gateway,
+  `assignPajak` tanpa pemeriksaan tenant, akun kas bersaldo yang tidak
+  dapat ditutup (perlu keputusan), route hapus yang hilang sementara
+  halaman web lama masih memanggilnya, dan urutan per kolom di
+  `GET /penjualan`; beserta konfirmasi butir yang sudah diperbaiki
+  (`kontrak/temuan.md` butir 29, 30, 33, 36, 41, 43, 51 sampai 58, dan 75
+  sampai 83)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

@@ -71,7 +71,7 @@ console.log("OK");
 Untuk penggantian di banyak berkas, kumpulkan pasangan dalam array dan tulis
 berkas hanya bila seluruhnya cocok.
 
-Sebelas helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan dengan cache
+Dua belas helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan dengan cache
 kontrak. Sampai submodul stok, helper disimpan di `/tmp`, dan folder itu dua
 kali dikosongkan sistem dalam sehari: sekali membuat perbaikan dokumen tidak
 masuk sebelum commit (`b0d11d2` menyusulkannya). Skrip sekali pakai tetap di
@@ -197,6 +197,56 @@ if (gagal.length) {
 }
 for (const [f, isiBaru] of Object.entries(berkas)) fs.writeFileSync(f, isiBaru);
 console.log("OK " + pasangan.length + " pasangan di " + Object.keys(berkas).length + " berkas");
+EOF
+cat > ~/.cache/frontend-web/alat/ganti-rentang.js <<'EOF'
+const fs = require("fs");
+const blok = [];
+let p = null;
+let mode = null;
+let isi = [];
+for (const b of fs.readFileSync(process.argv[2], "utf8").split("\n")) {
+  const m = b.match(/^@@@ (berkas|dari|sampai|baru|akhir)(?: (.+))?$/);
+  if (!m) {
+    if (mode === "baru") isi.push(b);
+    continue;
+  }
+  if (m[1] === "berkas") p = { berkas: m[2] };
+  if (m[1] === "dari") p.dari = m[2].trim();
+  if (m[1] === "sampai") p.sampai = m[2].trim();
+  if (m[1] === "baru") {
+    mode = "baru";
+    isi = [];
+  }
+  if (m[1] === "akhir") {
+    p.baru = isi;
+    blok.push(p);
+    mode = null;
+  }
+}
+const berkas = {};
+const gagal = [];
+for (const { berkas: f, dari, sampai, baru } of blok) {
+  if (!(f in berkas)) berkas[f] = fs.readFileSync(f, "utf8").split("\n");
+  const baris = berkas[f];
+  const akhirDicari = sampai ?? dari;
+  const awal = baris.map((b, i) => (b.trim() === dari ? i : -1)).filter((i) => i >= 0);
+  if (awal.length !== 1) {
+    gagal.push("GAGAL dari " + f + " (" + awal.length + "): " + dari.slice(0, 70));
+    continue;
+  }
+  const akhir = baris.findIndex((b, i) => i >= awal[0] && b.trim() === akhirDicari);
+  if (akhir < 0) {
+    gagal.push("GAGAL sampai " + f + ": " + akhirDicari.slice(0, 70));
+    continue;
+  }
+  baris.splice(awal[0], akhir - awal[0] + 1, ...baru);
+}
+if (gagal.length) {
+  console.error(gagal.join("\n"));
+  process.exit(1);
+}
+for (const [f, baris] of Object.entries(berkas)) fs.writeFileSync(f, baris.join("\n"));
+console.log("OK " + blok.length + " rentang di " + Object.keys(berkas).length + " berkas");
 EOF
 cat > ~/.cache/frontend-web/alat/tinjau-surat-jalan.js <<'EOF'
 const BE = process.env.HOME + "/Documents/backend-js";
@@ -492,6 +542,18 @@ EOF
   sudah ada di berkas, sehingga blok yang tertempel atau dijalankan dua kali
   tidak menyisipkan ulang. Tanpa pengaman ini, `bentuk.cjs` sempat berisi
   setiap sisipan dua kali (21 September 2026).
+- `ganti-rentang.js`: mengganti rentang baris per pasangan dari berkas
+  marka bertanda `@@@ berkas <path>`, `@@@ dari <baris>`, `@@@ sampai
+  <baris>` (opsional; tanpa itu hanya baris `dari` yang diganti),
+  `@@@ baru`, dan `@@@ akhir`. Jangkar dicocokkan setelah spasi awal dan
+  akhirnya dipangkas: `dari` harus muncul tepat sekali di seluruh berkas,
+  dan `sampai` adalah kecocokan pertama sejak `dari`. Teks baru ditulis
+  apa adanya, termasuk indentasinya. Seluruh pasangan diperiksa lebih
+  dulu, dan tidak ada berkas yang ditulis bila satu pasangan gagal.
+  Dipakai untuk rentang kode yang teks lamanya panjang, karena cukup dua
+  baris jangkar yang terlihat di keluaran. Karena dipangkas, `sampai`
+  berupa penutup seperti `}` atau `});` dapat mengenai penutup blok
+  dalam; pakai baris yang khas.
 - `tinjau-surat-jalan.js`: membaca basis data development (baca-saja) dan
   mencetak sampai 10 surat jalan berstatus argumen pertama (bawaan
   DIKIRIM), beserta jumlah jurnal kirim, batal, dan terima miliknya serta
@@ -614,6 +676,22 @@ polanya salah.
   cukup ditulis sekali: `F="a.ts b.ts"`, lalu `git add $=F`. Terbukti
   pada commit `9ce288b`.
 
+- **`grep` tanpa berkas menunggu masukan keyboard.** Pola
+  `grep ... $(find ...)` yang hasil `find`-nya kosong membuat terminal
+  diam tanpa pesan; tambahkan `/dev/null` sebagai berkas terakhir.
+- **Tanda `✘` di prompt berarti perintah terakhir keluar dengan kode
+  bukan 0.** `grep -c` yang menjawab 0 juga keluar dengan kode 1, sehingga
+  hitungan ditulis `echo "label: $(grep -c ...)"`, agar `✘` hanya muncul
+  bila ada yang benar-benar gagal.
+- **Pola glob beberapa ekstensi sekaligus gagal seluruhnya bila salah
+  satunya tidak cocok.** `grep ... dir/*.ts dir/*.tsx` di folder tanpa
+  `.tsx` membatalkan seluruh perintah, termasuk bagian `.ts` yang cocok;
+  pakai `find dir -name '*.ts*'` (30 September 2026, ekspor `features/`).
+- **Rangkaian `&&` berhenti di langkah pertama yang gagal**, termasuk
+  pemeriksaan pendahulu seperti `wc -c` atas berkas yang belum dibuat,
+  sehingga `tsc` sesudahnya tidak berjalan tanpa tanda. Pemeriksaan yang
+  boleh gagal ditulis `echo "x: $(wc -c < f 2>/dev/null || echo TIDAK ADA)"`.
+
 ## Catatan form (React Hook Form dan Zod)
 
 - **Hindari `z.coerce`.** Ia membuat tipe input dan output skema berbeda,
@@ -646,9 +724,16 @@ polanya salah.
 
 Konteks proyek dibagikan dengan menjalankan perintah terminal dan menempel
 outputnya. Berkas diunggah hanya untuk pemeriksaan dokumentasi yang terlalu
-panjang untuk ditempel. Karena itu setiap perintah harus
-ringkas outputnya: batasi jumlah baris, potong lebar dengan `cut -c1-110`,
-dan hindari pager.
+panjang untuk ditempel. Karena itu setiap perintah harus ringkas
+outputnya: batasi jumlah baris, potong lebar dengan `cut -c1-110`, dan
+hindari pager.
+
+Panjang setiap dokumen diperiksa lebih dulu dengan `wc -l` dan `wc -c`.
+Dokumen pendek dibaca lewat `cat`, `grep`, atau `sed`, dan hanya yang
+benar-benar panjang dikirim sebagai berkas (pemilik proyek, 30 September
+2026). Jumlah karakter ikut menentukan: `kontrak/temuan.md` hanya sekitar
+100 baris, tetapi baris tabelnya ratusan karakter, sehingga tetap dikirim
+sebagai berkas.
 
 Untuk kode, informasi diambil bertahap, bukan dengan `cat` seluruh berkas:
 
@@ -1096,6 +1181,50 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **`awk` tidak mengenal `\b`** (di awk, `\b` adalah backspace), sehingga
   pola seperti `/type Nama\b/` tidak pernah cocok. Pakai `[^A-Za-z]` atau
   `grep -n` untuk menemukan barisnya.
+
+- **Jangkar `ganti-rentang.js` wajib unik di seluruh berkas dan diambil
+  dari keluaran yang sudah terlihat.** Bila ragu, gerbang
+  `grep -cF '<jangkar>'` menuntut hitungan tepat 1 sebelum skrip
+  dijalankan.
+- **Blok tempel dijaga paling banyak sekitar 50 baris.** Berkas panjang
+  ditulis bertahap dengan `cat >>` yang bergerbang, bukan satu heredoc
+  panjang.
+- **Angka harapan untuk gerbang dihitung dari keluaran runner, dalam
+  satuan yang sama.** Gerbang commit `b63cf08` sempat menuntut 364 test
+  unit karena test `navigasiHalaman` dihitung dari baris `expect` (lima),
+  bukan blok `it` (empat); hitungan spec penjualan 32 menjadi 28 sudah
+  memberi angka yang benar.
+- **Suite penuh dijalankan sebelum setiap commit yang mengubah kode
+  produk atau test, termasuk rangkaian commit kecil** seperti pelepasan
+  `test.fixme` satu per satu.
+- **Skrip yang mencari penutup blok mencocokkan baris utuh berindentasi
+  yang diharapkan**, bukan baris yang sudah dipangkas. Pencari penutup
+  `describe("navigasiHalaman")` sempat mengenai `  });` milik blok `it`
+  pertama, karena keduanya sama setelah dipangkas.
+- **Skrip yang membuang rentang dari jangkar awal sampai jangkar akhir
+  memeriksa isi di antaranya.** Pembuangan tipe dan fungsi
+  `navigasiHalaman` ikut membuang tiga konstanta yang disisipkan di
+  antaranya satu langkah sebelumnya; skrip semacam itu berhenti bila
+  rentangnya memuat `export` lain yang tidak disebut.
+- **Pasangan `ganti-blok.js` yang membuang baris memakai teks lama
+  berupa baris itu beserta akhir barisnya, dengan satu baris kosong
+  sesudah `@@@ baru`.** Helper membaca isian itu sebagai teks kosong,
+  sehingga barisnya hilang tanpa sisa (tabel fixme `pengujian.md`,
+  30 September 2026).
+- **Label keputusan baru diperiksa unik lintas dokumen.** R5 sampai R13
+  untuk perubahan backend `465b438` bertabrakan dengan keputusan
+  reservasi R1a sampai R9b dan sempat tertulis di `kontrak/temuan.md`;
+  keputusannya dicatat ulang sebagai PB1a sampai PB14a.
+- **Nama fungsi dan perilaku backend yang ditulis di dokumen atau
+  komentar kode diperiksa dari kode lebih dulu.** `_filterDatabase`
+  sempat ditulis di komentar `features/penjualan/filter.ts` tanpa dibaca;
+  kebetulan benar, dan klaim 409 nama tipe aset kembar di
+  `kontrak/README.md` baru dibuktikan setelah tertulis.
+- **Audit endpoint dijalankan setiap kali backend berpindah versi,
+  sebelum penyesuaiannya dianggap selesai.** Tujuh route yang hilang di
+  `465b438`, termasuk `DELETE /akunkas/:id` yang dipakai pembersihan spec
+  keuangan, baru ketahuan saat dokumen penutup disusun, setelah lima akun
+  uji tertinggal.
 
 ## Kapan berhenti dan bertanya
 
