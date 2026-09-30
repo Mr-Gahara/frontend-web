@@ -90,29 +90,6 @@ test.describe("E2E — Aset › Halaman Daftar", () => {
     }
   });
 
-  test("aset yang tipe asetnya sudah dihapus tampil sebagai Tipe Tidak Diketahui", async ({
-    page,
-  }) => {
-    const auth = await bukaDenganAuth(page, URL_DAFTAR);
-    const nama = namaAsetUji("Yatim");
-    let tipe: TipeAsetMentah | undefined;
-    let aset: AsetMentah | undefined;
-    try {
-      tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
-      // Backend tidak memeriksa pemakaian saat tipe aset dihapus, sehingga
-      // aset uji tetap ada dan menunjuk ke tipe yang sudah tidak ada.
-      const hapusTipe = await api(page, auth, "DELETE", "/tipeaset/" + tipe.id);
-      expect(hapusTipe.status, "hapus tipe aset uji: " + hapusTipe.pesan).toBeLessThan(300);
-      tipe = undefined;
-      const data = await bukaDaftar(page);
-      expect(data.find((x) => x.id === aset?.id)?.dataAset ?? null).toBeNull();
-      await expect(baris(page, nama)).toContainText("Tipe Tidak Diketahui");
-    } finally {
-      await hapusLewatApi(page, auth, "/aset", aset?.id);
-      await hapusLewatApi(page, auth, "/tipeaset", tipe?.id);
-    }
-  });
 
   test("pencarian menyaring di klien tanpa memanggil backend", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
@@ -424,36 +401,6 @@ test.describe("E2E — Aset › Daftar: keadaan, navigasi, dan hapus", () => {
     }
   });
 
-  test("setelah tipe asetnya dihapus, daftar yang dimuat ulang menampilkan Tipe Tidak Diketahui", async ({
-    page,
-  }) => {
-    // Daftar aset di-cache 60 detik dan hapus tipe aset tidak membersihkannya,
-    // sehingga aset tetap menampilkan tipe yang sudah terhapus. Badan test ini
-    // membuktikan perilaku benar dan berjalan kembali setelah backend diperbaiki.
-    test.fixme(true, "Menunggu backend membersihkan cache daftar aset saat tipe aset dihapus");
-    const auth = await bukaDenganAuth(page, URL_DAFTAR);
-    const nama = namaAsetUji("Cache");
-    let tipe: TipeAsetMentah | undefined;
-    let aset: AsetMentah | undefined;
-    try {
-      tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
-      await bukaDaftar(page);
-      await expect(baris(page, nama)).toContainText(tipe.namaTipeAset);
-      const hapusTipe = await api(page, auth, "DELETE", "/tipeaset/" + tipe.id);
-      expect(hapusTipe.status, "hapus tipe aset uji: " + hapusTipe.pesan).toBeLessThan(300);
-      tipe = undefined;
-      const data = await bukaDaftar(page);
-      expect(
-        data.find((x) => x.id === aset?.id)?.dataAset ?? null,
-        "daftar aset harus dibaca ulang setelah tipe asetnya dihapus",
-      ).toBeNull();
-      await expect(baris(page, nama)).toContainText("Tipe Tidak Diketahui");
-    } finally {
-      await hapusLewatApi(page, auth, "/aset", aset?.id);
-      await hapusLewatApi(page, auth, "/tipeaset", tipe?.id);
-    }
-  });
 });
 
 test.describe("E2E — Aset › Buat: navigasi, memuat, dan gagal", () => {

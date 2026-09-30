@@ -13,6 +13,7 @@ import {
 import { useDaftarAset } from "@/features/aset/hooks";
 import { useDaftarSesiBooking } from "@/features/sesi-booking/hooks";
 import { bookingPerAset, tautanPenjualanBooking } from "@/features/sesi-booking/tampilan";
+import { labelStatusBooking } from "@/features/sesi-booking/status";
 import { TautanPenjualanBooking } from "@/features/sesi-booking/tautan-penjualan";
 
 
@@ -482,7 +483,7 @@ export default function DasborTimelinePage() {
                           const tipePelanggan = booking.dataPelanggan?.tipePelanggan ?? "";
                           const isMember = tipePelanggan.toLowerCase() === "member";
                           const isAktif = booking.status === "Aktif";
-                          const isSelesai = booking.status === "Selesai";
+                          const labelStatus = labelStatusBooking(booking.status);
 
                           const blockOpacity = isAktif ? 1 : 0.55;
 
@@ -535,7 +536,7 @@ export default function DasborTimelinePage() {
                                   {booking.waktuSelesai
                                     ? format(selesai, "HH:mm")
                                     : "aktif"}
-                                  {isSelesai && " · Selesai"}
+                                  {labelStatus}
                                 </span>
                               </div>
                               </TautanPenjualanBooking>

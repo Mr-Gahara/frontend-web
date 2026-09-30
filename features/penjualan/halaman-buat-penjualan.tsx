@@ -16,7 +16,7 @@ import { InputWaktu } from "@/components/input-waktu";
 import { PilihTanggal } from "@/components/pilih-tanggal";
 import { waktuDari, waktuLengkap, type NilaiWaktu } from "@/lib/waktu";
 import { bolehCakupanPenjualan } from "./izin";
-import { JenisPenjualan, PenjualanRequest, ItemPenjualanRequest } from "@/types/penjualan";
+import { JenisPenjualan, PenjualanRequest } from "@/types/penjualan";
 import type { Diskon } from "@/types/diskon";
 import { useDaftarProduk } from "@/features/produk/hooks";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -72,7 +72,9 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 
-interface ItemState extends ItemPenjualanRequest {
+interface ItemState {
+  produkID: string;
+  jumlah: number;
   jumlahStr: string;
   diskonItemIDs: string[]; // State array ID Diskon Item
 }
@@ -87,9 +89,9 @@ const emptyItem = (): ItemState => ({
 export default function HalamanBuatPenjualan() {
   const router = useRouter();
 
-  // EKSTRAKSI ID PENGGUNA (KASIR)
-  const { pengguna, permissions } = useSession();
-  const currentUserId = pengguna?.id ?? "";
+  // Kasir dicatat backend dari token (backend 465b438), sehingga id pengguna
+  // tidak dikirim; sesi hanya dibutuhkan untuk izin lokasi.
+  const { permissions } = useSession();
   // Outlet tenant hanya dapat dibaca pemegang read-location (keputusan K11b
   // dan K13a); tanpa izin itu locationID tidak dikirim.
   const outletTenant = useLokasiAktif({ aktif: bolehCakupanPenjualan(permissions) });
@@ -359,12 +361,11 @@ export default function HalamanBuatPenjualan() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const pesan = validasiPenjualan({ penggunaID: currentUserId, pelangganID, items, waktu });
+    const pesan = validasiPenjualan({ pelangganID, items, waktu });
     setFormError(pesan ?? "");
     if (pesan) return;
     setPendingPayload(
       susunPayloadPenjualan({
-        penggunaID: currentUserId,
         pelangganID,
         jenisPenjualan,
         tanggal: tanggalInput,

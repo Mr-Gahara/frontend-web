@@ -1,21 +1,22 @@
 import { test, expect, Request } from "@playwright/test";
-import { BASIS, JAWAB_GAGAL, batalkan, bukaDenganAuth, login, siapkanSuratJalan } from "../../../helpers/transfer-uji";
+import { BASIS, JAWAB_GAGAL, bukaDenganAuth, login, siapkanSuratJalan, tutupSuratJalanUji } from "../../../helpers/transfer-uji";
 
 /*
  * Spec penerimaan barang outlet (keputusan pemilik proyek K3 pilihan B,
- * 21 September 2026). Setiap test menyiapkan surat jalan sendiri lewat API:
- * dibuat dari pengajuan APPROVED atau PENDING berarah benar tanpa surat
- * jalan, lalu dikirim. Stok gudang terpotong saat kirim dan dikembalikan
- * backend saat surat jalan dibatalkan dari DIKIRIM di akhir test, sehingga
- * setiap run menambah satu surat jalan BATAL dan dua entri jurnal gudang,
- * sedangkan pengajuannya kembali ke PENDING dan dapat dipakai lagi.
+ * 21 September 2026). Setiap test menyiapkan surat jalan sendiri lewat API
+ * dari pengajuan uji milik spec (keputusan R8 dan R13, disetujui pengguna
+ * penyetuju uji), lalu dikirim. Stok gudang terpotong saat kirim. Sejak
+ * backend 465b438 surat jalan DIKIRIM tidak dapat dibatalkan (kontrak P12),
+ * sehingga blok finally menutupnya lewat terima penuh: setiap run
+ * memindahkan satu unit bahan uji dari gudang ke outlet secara permanen.
  *
- * Terima hanya diuji jalur gagalnya: PATCH terima selalu dijawab gagal lewat
- * page.route, karena terima yang berhasil menambah stok outlet secara
- * permanen. Isi payload dibaca dari permintaan yang tertahan itu.
+ * Terima lewat UI hanya diuji jalur gagalnya: PATCH terima dari halaman
+ * selalu dijawab gagal lewat page.route, dan isi payload dibaca dari
+ * permintaan yang tertahan itu. Penutupan di finally memakai API langsung,
+ * yang tidak tertahan page.route.
  *
  * Bila test berhenti sebelum blok finally, surat jalan tertinggal DIKIRIM;
- * batalkan lewat PATCH /api/transferstok/:id/batal.
+ * tutup lewat PATCH /api/transferstok/:id/terima dengan body kosong.
  */
 
 const URL_DAFTAR = BASIS + "/dashboard/outlet/inventaris/penerimaanBarang";
@@ -36,9 +37,7 @@ test.describe("Penerimaan barang outlet", () => {
 
   test("detail menampilkan barang, terima gagal mengirim seluruh item, dan jumlah 0 ditahan", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
-    const sj = await siapkanSuratJalan(page, auth);
-    test.skip(!sj, "Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup");
-    const transfer = sj!;
+    const transfer = await siapkanSuratJalan(page, auth);
 
     const terkirim: ItemTerima[][] = [];
     const catat = (r: Request) => {
@@ -93,15 +92,13 @@ test.describe("Penerimaan barang outlet", () => {
     } finally {
       page.off("request", catat);
       await page.unroute(POLA_TERIMA);
-      await batalkan(page, auth, transfer.id);
+      await tutupSuratJalanUji(page, auth, transfer.id);
     }
   });
 
   test.fixme("jumlah diterima 0 terkirim apa adanya setelah backend berhenti memakai qtyTerima || qtyKirim", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
-    const sj = await siapkanSuratJalan(page, auth);
-    test.skip(!sj, "Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup");
-    const transfer = sj!;
+    const transfer = await siapkanSuratJalan(page, auth);
 
     await page.route(POLA_TERIMA, (route) => route.fulfill(JAWAB_GAGAL));
     try {
@@ -122,7 +119,7 @@ test.describe("Penerimaan barang outlet", () => {
       );
     } finally {
       await page.unroute(POLA_TERIMA);
-      await batalkan(page, auth, transfer.id);
+      await tutupSuratJalanUji(page, auth, transfer.id);
     }
   });
 });

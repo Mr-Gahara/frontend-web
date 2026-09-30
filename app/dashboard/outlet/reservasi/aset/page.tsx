@@ -1,5 +1,7 @@
 "use client";
 
+import { namaTipeAset } from "@/features/aset/tampilan";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
@@ -216,7 +218,7 @@ export default function AsetPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="font-bold text-[#0A2947]/80 bg-[#0A2947]/5 px-2.5 py-1 rounded-md text-xs">
-                        {item.dataAset?.namaTipeAset || "Tipe Tidak Diketahui"}
+                        {namaTipeAset(item)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">

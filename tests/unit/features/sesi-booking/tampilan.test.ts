@@ -18,10 +18,11 @@ function booking(ubah: Partial<SesiBookingResponse> = {}): SesiBookingResponse {
     durasiMenit: 60,
     totalBiaya: 10000,
     status: "Aktif",
+    sudahDibayar: true,
     dataPenjualan: {
       id: "j1",
       noReferensi: "INV-1",
-      statusPenjualan: "FINAL",
+      statusPenjualan: "UNPAID",
       statusBayar: "UNPAID",
       totalTagihan: 10000,
       sisaTagihan: 10000,
@@ -45,8 +46,8 @@ describe("bookingPerAset", () => {
     expect(peta.get("a2")?.map((b) => b.id)).toEqual(["b3"]);
   });
 
-  it("membuang booking Batal (keputusan R5a)", () => {
-    expect(bookingPerAset([booking({ status: "Batal" })], awal, akhir).size).toBe(0);
+  it("membuang booking VOID (keputusan R5a)", () => {
+    expect(bookingPerAset([booking({ status: "VOID" })], awal, akhir).size).toBe(0);
   });
 
   it("membuang booking di luar jendela dan mempertahankan yang bertumpuk di tepinya", () => {
@@ -98,9 +99,13 @@ describe("bookingBentrok", () => {
     expect(bookingBentrok([b], "a1", mulai, selesai)).toBe(b);
   });
 
-  it("tidak menghitung booking Selesai maupun Batal (keputusan R6a)", () => {
-    const daftar = [booking({ status: "Selesai" }), booking({ status: "Batal" })];
+  it("tidak menghitung booking Selesai, VOID, maupun Tidak Datang", () => {
+    const daftar = [booking({ status: "Selesai" }), booking({ status: "VOID" }), booking({ status: "Tidak Datang" })];
     expect(bookingBentrok(daftar, "a1", mulai, selesai)).toBeNull();
+  });
+
+  it("tidak menghitung booking Aktif yang belum dibayar (backend 465b438)", () => {
+    expect(bookingBentrok([booking({ sudahDibayar: false })], "a1", mulai, selesai)).toBeNull();
   });
 
   it("tidak menghitung aset lain maupun rentang yang hanya bersentuhan di tepi", () => {

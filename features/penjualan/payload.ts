@@ -3,7 +3,6 @@ import type { JenisPenjualan, PenjualanRequest } from "@/types/penjualan";
 import { gabungTanggalWaktu, waktuLengkap, type NilaiWaktu } from "@/lib/waktu";
 
 export interface IsianPenjualan {
-  penggunaID: string;
   pelangganID: string;
   jenisPenjualan: JenisPenjualan;
   tanggal: Date;
@@ -16,9 +15,8 @@ export interface IsianPenjualan {
 
 /** Pesan validasi form buat penjualan, atau null bila sah; teks pesan lama dipertahankan. */
 export function validasiPenjualan(
-  isian: Pick<IsianPenjualan, "penggunaID" | "pelangganID" | "items" | "waktu">,
+  isian: Pick<IsianPenjualan, "pelangganID" | "items" | "waktu">,
 ): string | null {
-  if (!isian.penggunaID) return "Sesi kasir tidak terdeteksi.";
   if (!isian.pelangganID) return "Silakan pilih pelanggan terlebih dahulu.";
   if (isian.items.some((item) => !item.produkID)) return "Semua baris item harus memiliki produk.";
   // Jam kosong atau di luar batas ditolak (keputusan K-TW5a); sebelumnya jam
@@ -30,8 +28,9 @@ export function validasiPenjualan(
 /**
  * Payload POST /penjualan. Web selalu membuat invoice DRAFT; finalisasi
  * dilakukan di detail.
- * - penggunaID dikirim hanya karena validator backend mewajibkannya;
- *   controller menggantinya dengan pengguna dari token.
+ * - Diskon dikirim sebagai diskonItem per item dan diskonGlobal, nama field
+ *   backend 465b438; nama lama dibuang backend tanpa galat. Kasir dicatat
+ *   backend dari token, sehingga penggunaID tidak dikirim.
  * - locationID: outlet tenant bagi pemegang read-location (keputusan K13a);
  *   tanpa izin itu tidak dikirim, dan penjualan dianggap milik outlet tenant.
  * - pajakTransaksiIDs tidak dikirim: backend menerapkan pajak transaksi aktif
@@ -43,7 +42,6 @@ export function susunPayloadPenjualan(isian: IsianPenjualan): PenjualanRequest {
   const tanggal = gabungTanggalWaktu(isian.tanggal, isian.waktu);
   if (!tanggal) throw new Error("Jam transaksi tidak lengkap.");
   return {
-    penggunaID: isian.penggunaID,
     pelangganID: isian.pelangganID,
     jenisTransaksi: "INVOICE",
     jenisPenjualan: isian.jenisPenjualan,
@@ -51,9 +49,9 @@ export function susunPayloadPenjualan(isian: IsianPenjualan): PenjualanRequest {
     itemPenjualan: isian.items.map(({ produkID, jumlah, diskonItemIDs }) => ({
       produkID,
       jumlah,
-      ...(diskonItemIDs.length > 0 ? { diskonItemIDs } : {}),
+      ...(diskonItemIDs.length > 0 ? { diskonItem: diskonItemIDs } : {}),
     })),
-    ...(isian.diskonGlobalIDs.length > 0 ? { diskonGlobalIDs: isian.diskonGlobalIDs } : {}),
+    ...(isian.diskonGlobalIDs.length > 0 ? { diskonGlobal: isian.diskonGlobalIDs } : {}),
     ...(isian.keterangan ? { keterangan: isian.keterangan } : {}),
     ...(isian.locationID ? { locationID: isian.locationID } : {}),
     simpanDraft: true,

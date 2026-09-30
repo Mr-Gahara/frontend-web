@@ -9,17 +9,13 @@ import {
 } from "@/features/laporan/periode";
 import type { LaporanLabaRugiData } from "@/types/laporan";
 
-/** Tahun, bulan (1-12), tanggal, jam, dan menit lokal dari teks ISO. */
-function bagian(iso: string) {
-  const d = new Date(iso);
-  return [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes()];
-}
-
 function baris(tanggal: string, totalLabaBersih: number, totalOmzet: number): LaporanLabaRugiData {
   return {
     tanggal,
     totalPenjualanKotor: 0,
+    totalPenjualanSewa: 0,
     totalDiskon: 0,
+    totalPajak: 0,
     totalOmzet,
     totalHPP: 0,
     totalLabaKotor: 0,
@@ -32,64 +28,77 @@ const RABU = new Date(2026, 8, 30, 15, 20);
 const MINGGU = new Date(2026, 9, 4, 9, 0);
 
 describe("rentangPeriode", () => {
-  it("harian: awal sampai akhir hari ini", () => {
-    const r = rentangPeriode("harian", RABU);
-    expect(r.periode).toBe("harian");
-    expect(bagian(r.startDate)).toEqual([2026, 9, 30, 0, 0]);
-    expect(bagian(r.endDate)).toEqual([2026, 9, 30, 23, 59]);
+  it("harian: hari ini sebagai startDate dan endDate", () => {
+    expect(rentangPeriode("harian", RABU)).toEqual({
+      periode: "harian",
+      startDate: "2026-09-30",
+      endDate: "2026-09-30",
+    });
   });
 
   it("mingguan: sejak Senin minggu ini, termasuk saat hari Minggu", () => {
-    expect(bagian(rentangPeriode("mingguan", RABU).startDate)).toEqual([2026, 9, 28, 0, 0]);
-    const minggu = rentangPeriode("mingguan", MINGGU);
-    expect(bagian(minggu.startDate)).toEqual([2026, 9, 28, 0, 0]);
-    expect(bagian(minggu.endDate)).toEqual([2026, 10, 4, 23, 59]);
+    expect(rentangPeriode("mingguan", RABU).startDate).toBe("2026-09-28");
+    expect(rentangPeriode("mingguan", MINGGU)).toEqual({
+      periode: "mingguan",
+      startDate: "2026-09-28",
+      endDate: "2026-10-04",
+    });
   });
 
-  it("bulanan: sejak tanggal 1 sampai akhir hari ini", () => {
-    const r = rentangPeriode("bulanan", RABU);
-    expect(bagian(r.startDate)).toEqual([2026, 9, 1, 0, 0]);
-    expect(bagian(r.endDate)).toEqual([2026, 9, 30, 23, 59]);
+  it("bulanan: sejak tanggal 1 sampai hari ini", () => {
+    expect(rentangPeriode("bulanan", RABU)).toEqual({
+      periode: "bulanan",
+      startDate: "2026-09-01",
+      endDate: "2026-09-30",
+    });
+  });
+
+  it("tanggal dibentuk dari hari lokal, bukan dari UTC", () => {
+    const r = rentangPeriode("harian", new Date(2026, 8, 30, 0, 30));
+    expect(r.startDate).toBe("2026-09-30");
+    expect(r.endDate).toBe("2026-09-30");
   });
 });
 
 describe("rentangPeriodeSebelumnya", () => {
-  it("harian: kemarin penuh, termasuk melewati pergantian tahun", () => {
-    const r = rentangPeriodeSebelumnya("harian", new Date(2026, 0, 1, 10, 0));
-    expect(r.periode).toBe("harian");
-    expect(bagian(r.startDate)).toEqual([2025, 12, 31, 0, 0]);
-    expect(bagian(r.endDate)).toEqual([2025, 12, 31, 23, 59]);
+  it("harian: kemarin sebagai satu hari, termasuk melewati pergantian tahun", () => {
+    expect(rentangPeriodeSebelumnya("harian", new Date(2026, 0, 1, 10, 0))).toEqual({
+      periode: "harian",
+      startDate: "2025-12-31",
+      endDate: "2025-12-31",
+    });
   });
 
   it("mingguan: Senin minggu lalu sampai hari yang sama minggu lalu", () => {
     const r = rentangPeriodeSebelumnya("mingguan", RABU);
-    expect(bagian(r.startDate)).toEqual([2026, 9, 21, 0, 0]);
-    expect(bagian(r.endDate)).toEqual([2026, 9, 23, 23, 59]);
+    expect(r.startDate).toBe("2026-09-21");
+    expect(r.endDate).toBe("2026-09-23");
   });
 
   it("bulanan: tanggal 1 bulan lalu sampai tanggal yang sama bulan lalu", () => {
     const r = rentangPeriodeSebelumnya("bulanan", RABU);
-    expect(bagian(r.startDate)).toEqual([2026, 8, 1, 0, 0]);
-    expect(bagian(r.endDate)).toEqual([2026, 8, 30, 23, 59]);
+    expect(r.startDate).toBe("2026-08-01");
+    expect(r.endDate).toBe("2026-08-30");
   });
 
   it("bulanan: tanggal dipangkas ke akhir bulan lalu yang lebih pendek", () => {
     const r = rentangPeriodeSebelumnya("bulanan", new Date(2026, 2, 31, 8, 0));
-    expect(bagian(r.startDate)).toEqual([2026, 2, 1, 0, 0]);
-    expect(bagian(r.endDate)).toEqual([2026, 2, 28, 23, 59]);
+    expect(r.startDate).toBe("2026-02-01");
+    expect(r.endDate).toBe("2026-02-28");
   });
 });
 
 describe("rentangBulanIni", () => {
   it("bulan kalender penuh berperiode bulanan", () => {
-    const r = rentangBulanIni(RABU);
-    expect(r.periode).toBe("bulanan");
-    expect(bagian(r.startDate)).toEqual([2026, 9, 1, 0, 0]);
-    expect(bagian(r.endDate)).toEqual([2026, 9, 30, 23, 59]);
+    expect(rentangBulanIni(RABU)).toEqual({
+      periode: "bulanan",
+      startDate: "2026-09-01",
+      endDate: "2026-09-30",
+    });
   });
 
   it("akhir Februari mengikuti jumlah hari bulan itu", () => {
-    expect(bagian(rentangBulanIni(new Date(2026, 1, 10, 12, 0)).endDate)).toEqual([2026, 2, 28, 23, 59]);
+    expect(rentangBulanIni(new Date(2026, 1, 10, 12, 0)).endDate).toBe("2026-02-28");
   });
 });
 

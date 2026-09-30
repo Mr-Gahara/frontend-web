@@ -1,10 +1,11 @@
 import { lingkupOutlet, type CakupanLokasiOutlet } from "@/features/inventaris/cakupan";
+import type { Paginasi } from "@/lib/api/normalize";
 import type { Penjualan, PenjualanFilterParams } from "@/types/penjualan";
 
 /**
- * Filter daftar yang dikirim sebagai query. Backend menerapkan kedelapan
- * filter ini (penjualanService._applyFilters), jadi tidak disaring ulang di
- * klien. Nilai kosong tidak dikirim.
+ * Filter daftar yang dikirim sebagai query. Sejak backend 465b438 filter ini
+ * diterapkan di basis data bersama pagination (penjualanService._filterDatabase),
+ * jadi tidak disaring ulang di klien. Nilai kosong tidak dikirim.
  */
 export function filterServerPenjualan(filter: PenjualanFilterParams): Record<string, string> {
   const hasil: Record<string, string> = {};
@@ -57,4 +58,25 @@ export function dalamLingkupPenjualan(p: Penjualan, lingkup: LingkupPenjualan): 
 
 export function saringPenjualan(daftar: Penjualan[], lingkup: LingkupPenjualan): Penjualan[] {
   return daftar.filter((p) => dalamLingkupPenjualan(p, lingkup));
+}
+
+export interface NavigasiHalaman {
+  teks: string;
+  sebelumnya: boolean;
+  berikutnya: boolean;
+}
+
+/**
+ * Keterangan dan tombol navigasi halaman daftar. Tanpa pagination (belum
+ * dimuat) kedua tombol nonaktif. Halaman di luar jumlah halaman, misalnya
+ * setelah baris terakhir halaman terakhir dihapus, tetap dapat mundur.
+ */
+export function navigasiHalaman(pagination: Paginasi | null, halaman: number): NavigasiHalaman {
+  if (!pagination) return { teks: "", sebelumnya: false, berikutnya: false };
+  const jumlahHalaman = Math.max(1, pagination.totalPages);
+  return {
+    teks: `Halaman ${halaman} dari ${jumlahHalaman} (${pagination.total} penjualan)`,
+    sebelumnya: halaman > 1,
+    berikutnya: halaman < pagination.totalPages,
+  };
 }

@@ -55,6 +55,25 @@ describe("unwrap", () => {
     expect(unwrap({ data: [] }).jumlah).toBeUndefined();
   });
 
+  it("membawa pagination bila dikirim backend, dengan nilai bukan angka menjadi 0", () => {
+    expect(unwrap({ data: [], pagination: { page: 2, limit: 10, total: 25, totalPages: 3 } }).pagination).toEqual({
+      page: 2,
+      limit: 10,
+      total: 25,
+      totalPages: 3,
+    });
+    expect(unwrap({ data: [], pagination: { page: "2" } }).pagination).toEqual({
+      page: 0,
+      limit: 0,
+      total: 0,
+      totalPages: 0,
+    });
+  });
+
+  it("tanpa pagination bila backend tidak mengirimnya", () => {
+    expect(unwrap({ data: [] })).not.toHaveProperty("pagination");
+  });
+
   it("melempar ApiError saat success false walau status 200", () => {
     expect(() =>
       unwrap({ success: false, code: "DEVICE_PENDING_APPROVAL", message: "Menunggu persetujuan." }),

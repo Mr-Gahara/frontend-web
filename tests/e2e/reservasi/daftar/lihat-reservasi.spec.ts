@@ -96,7 +96,7 @@ test.describe("E2E — Reservasi › Daftar (timeline aset)", () => {
       penjualanId = b.dataPenjualan?.id;
       const { sesi } = await buka(page);
       expect(sesi.some((x) => x.id === b.id), "daftar tanggal ini memuat booking uji").toBe(true);
-      // Booking Batal berjam sama dari run sebelumnya tidak ditampilkan
+      // Booking VOID berjam sama dari run sebelumnya tidak ditampilkan
       // (keputusan R5a), dan checkConflict tidak mengizinkan dua booking Aktif
       // bertumpuk, sehingga tepat satu blok tampil.
       const blok = blokBooking(page, mulai, selesai);
@@ -145,7 +145,7 @@ test.describe("E2E — Reservasi › Daftar (timeline aset)", () => {
     await page.unroute(POLA_SESI);
   });
 
-  test("booking yang dibatalkan: detail Batal, dan timeline tidak menampilkannya (keputusan R5a)", async ({
+  test("booking yang dibatalkan: detail VOID, dan timeline tidak menampilkannya (keputusan R5a)", async ({
     page,
   }) => {
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
@@ -158,12 +158,12 @@ test.describe("E2E — Reservasi › Daftar (timeline aset)", () => {
       penjualanId = b.dataPenjualan?.id;
       await batalkanBooking(page, auth, penjualanId);
       penjualanId = undefined;
-      expect(await statusBooking(page, auth, b.id), "detail booking setelah void").toBe("Batal");
+      expect(await statusBooking(page, auth, b.id), "detail booking setelah void (backend 465b438)").toBe("VOID");
       const { sesi } = await buka(page);
-      expect(sesi.find((x) => x.id === b.id)?.status, "daftar yang belum di-cache membawa status Batal").toBe(
-        "Batal",
+      expect(sesi.find((x) => x.id === b.id)?.status, "daftar yang belum di-cache membawa status VOID").toBe(
+        "VOID",
       );
-      // Keputusan R5a: booking Batal tidak ditampilkan, termasuk booking Batal
+      // Keputusan R5a: booking VOID tidak ditampilkan, termasuk booking VOID
       // berjam sama dari run sebelumnya.
       await expect(blokBooking(page, mulai, selesai)).toHaveCount(0);
     } finally {
@@ -207,12 +207,12 @@ test.describe("E2E — Reservasi › Daftar (timeline aset)", () => {
       await expect(blokBooking(page, mulai, selesai)).toHaveCount(1);
       await batalkanBooking(page, auth, penjualanId);
       penjualanId = undefined;
-      expect(await statusBooking(page, auth, b.id), "detail booking setelah void").toBe("Batal");
+      expect(await statusBooking(page, auth, b.id), "detail booking setelah void").toBe("VOID");
       await page.reload({ waitUntil: "commit" });
       const res = await page.waitForResponse(cocok("GET", POLA_SESI));
       const sesi = normalizeId((await res.json()).data ?? []) as unknown as SesiBookingMentah[];
-      expect(sesi.find((x) => x.id === b.id)?.status, "daftar yang dimuat ulang membawa status Batal").toBe(
-        "Batal",
+      expect(sesi.find((x) => x.id === b.id)?.status, "daftar yang dimuat ulang membawa status VOID").toBe(
+        "VOID",
       );
       await expect(blokBooking(page, mulai, selesai)).toHaveCount(0);
     } finally {

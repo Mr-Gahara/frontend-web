@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { penjualanApi } from "./api";
 import { filterServerPenjualan } from "./filter";
 import { queryKeys } from "@/lib/queryKeys";
@@ -10,13 +10,23 @@ import type { PenjualanFilterParams, PenjualanRequest } from "@/types/penjualan"
 
 type Callback = { onSuccess?: () => void; onError?: (err: unknown) => void };
 
-/** Daftar penjualan tenant; siap false berarti lingkup belum siap dan belum ada permintaan. */
-export function useDaftarPenjualan(filter: PenjualanFilterParams, siap: boolean) {
-  const params = filterServerPenjualan(filter);
+/** Jumlah baris per halaman daftar, sama dengan ukuran halaman DataTable. */
+export const BARIS_PER_HALAMAN = 10;
+
+/**
+ * Satu halaman daftar penjualan tenant. Backend 465b438 selalu mengirim
+ * daftar per halaman (20 terbaru tanpa page), sehingga halaman dan limit
+ * dikirim dan ikut menjadi kunci. Data halaman sebelumnya dipertahankan
+ * selama halaman berikutnya dimuat. siap false berarti lingkup belum siap
+ * dan belum ada permintaan.
+ */
+export function useDaftarPenjualan(filter: PenjualanFilterParams, halaman: number, siap: boolean) {
+  const params = { ...filterServerPenjualan(filter), page: String(halaman), limit: String(BARIS_PER_HALAMAN) };
   return useQuery({
     queryKey: queryKeys.penjualan.daftar(params),
     queryFn: () => penjualanApi.daftar(params),
     enabled: siap,
+    placeholderData: keepPreviousData,
   });
 }
 

@@ -402,7 +402,7 @@ test.describe("E2E — Tipe Aset › Halaman Buat", () => {
       await page.getByRole("button", { name: /simpan kategori aset/i }).click();
       const res = await tKirim;
       const body = await res.json();
-      expect(res.status()).toBe(400);
+      expect(res.status(), "duplikat dijawab 409 sejak backend 465b438").toBe(409);
       expect(body.message, "respons gagal harus membawa message").toBeTruthy();
       await expect(page.getByText("Gagal Menyimpan")).toBeVisible();
       await expect(page.getByText(body.message).first()).toBeVisible();
@@ -574,7 +574,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
       await page.getByRole("button", { name: /simpan perubahan/i }).click();
       const res = await tKirim;
       const body = await res.json();
-      expect(res.status()).toBe(400);
+      expect(res.status(), "duplikat dijawab 409 sejak backend 465b438").toBe(409);
       expect(body.message, "respons gagal harus membawa message").toBeTruthy();
       await expect(page.getByText("Gagal Memperbarui")).toBeVisible();
       await expect(page.getByText(body.message).first()).toBeVisible();

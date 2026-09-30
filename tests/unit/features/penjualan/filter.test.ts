@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   filterServerPenjualan,
+  navigasiHalaman,
   saringPenjualan,
   tentukanLingkupPenjualan,
   type LingkupPenjualan,
@@ -55,13 +56,13 @@ describe("filterServerPenjualan", () => {
   it("hanya mengirim filter yang terisi", () => {
     expect(
       filterServerPenjualan({
-        statusBayar: "PAID",
+        statusPenjualan: "PAID",
         noReferensi: "",
         pelangganID: "",
         startDate: "2026-09-01",
         jenisTransaksi: undefined,
       }),
-    ).toEqual({ statusBayar: "PAID", startDate: "2026-09-01" });
+    ).toEqual({ statusPenjualan: "PAID", startDate: "2026-09-01" });
   });
 });
 
@@ -119,6 +120,36 @@ describe("saringPenjualan", () => {
     expect(saringPenjualan(daftar, lokasiA).map((p) => p.id)).toEqual(["1", "2"]);
     expect(saringPenjualan(daftar, lokasiB).map((p) => p.id)).toEqual(["3"]);
     expect(saringPenjualan(daftar, { jenis: "semua" }).map((p) => p.id)).toEqual(["1", "2", "3"]);
+  });
+});
+
+describe("navigasiHalaman", () => {
+  const pag = (page: number, total: number, totalPages: number) => ({ page, limit: 10, total, totalPages });
+
+  it("tanpa pagination: tanpa keterangan dan kedua tombol nonaktif", () => {
+    expect(navigasiHalaman(null, 1)).toEqual({ teks: "", sebelumnya: false, berikutnya: false });
+  });
+
+  it("halaman tengah: kedua arah aktif", () => {
+    expect(navigasiHalaman(pag(2, 25, 3), 2)).toEqual({
+      teks: "Halaman 2 dari 3 (25 penjualan)",
+      sebelumnya: true,
+      berikutnya: true,
+    });
+  });
+
+  it("halaman pertama, halaman terakhir, dan daftar kosong", () => {
+    expect(navigasiHalaman(pag(1, 25, 3), 1)).toMatchObject({ sebelumnya: false, berikutnya: true });
+    expect(navigasiHalaman(pag(3, 25, 3), 3)).toMatchObject({ sebelumnya: true, berikutnya: false });
+    expect(navigasiHalaman(pag(1, 0, 0), 1)).toEqual({
+      teks: "Halaman 1 dari 1 (0 penjualan)",
+      sebelumnya: false,
+      berikutnya: false,
+    });
+  });
+
+  it("halaman di luar jumlah halaman tetap dapat mundur", () => {
+    expect(navigasiHalaman(pag(4, 30, 3), 4)).toMatchObject({ sebelumnya: true, berikutnya: false });
   });
 });
 

@@ -1,3 +1,5 @@
+import type { StatusPenjualan } from "./penjualan";
+
 export interface SesiBookingItemPayload {
   dataAset: string;
   waktuMulai: string;
@@ -52,11 +54,17 @@ export interface SesiBookingTarifRef extends SesiBookingRef {
 export interface SesiBookingPenjualanRef {
   id: string;
   noReferensi: string | null;
-  statusPenjualan: "DRAFT" | "FINAL" | "VOID";
+  statusPenjualan: StatusPenjualan;
   statusBayar: string;
   totalTagihan: number;
   sisaTagihan: number;
 }
+
+/**
+ * Status booking sejak backend 465b438: Batal diganti VOID, dan Tidak Datang
+ * dihitung saat dibaca bila booking belum check-in sampai batas terlambat.
+ */
+export type StatusBooking = "Aktif" | "Selesai" | "VOID" | "Tidak Datang";
 
 export interface SesiBookingResponse {
   id: string;
@@ -69,7 +77,11 @@ export interface SesiBookingResponse {
   waktuSelesai: string | null;
   durasiMenit: number | null;
   totalBiaya: number | null;
-  status: "Aktif" | "Selesai" | "Batal";
+  status: StatusBooking;
+  /** Jadwal baru terkunci setelah penjualannya menerima uang (backend 465b438). */
+  sudahDibayar: boolean;
+  waktuCheckIn?: string | null;
+  batasCheckIn?: string | null;
   dataPenjualan: SesiBookingPenjualanRef | null;
 }
 

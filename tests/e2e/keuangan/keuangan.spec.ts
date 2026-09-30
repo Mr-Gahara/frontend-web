@@ -2,6 +2,7 @@ import { expect, test, type Page, type Response } from "@playwright/test";
 import { JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { cocok, hapusLewatApi, pantauPermintaan, unik } from "../../helpers/reservasi-uji";
 import { persentasePertumbuhan, teksPertumbuhan } from "../../../features/laporan/periode";
+import { keTanggalLokal } from "../../../lib/waktu";
 
 /*
  * Spec modul keuangan. Bagian pembandingnya ditulis dan dijalankan terhadap
@@ -58,15 +59,14 @@ const nilaiKartuRingkasan = (page: Page, judul: string) =>
 /**
  * Respons laba rugi untuk satu periode. Sejak KU5a halaman meminta periode
  * berjalan dan periode sebelumnya sekaligus; keduanya dibedakan lewat
- * endDate: periode berjalan berakhir di akhir hari ini, pembandingnya
- * sebelum sekarang.
+ * endDate: periode berjalan berakhir hari ini (YYYY-MM-DD lokal, kontrak
+ * backend 465b438), pembandingnya sebelum hari ini.
  */
 const responsLabaRugi = (periode: string, kini: boolean) => (r: Response) => {
   if (r.request().method() !== "GET" || !POLA_LABA_RUGI.test(r.url())) return false;
   const url = new URL(r.url());
   if (url.searchParams.get("periode") !== periode) return false;
-  const akhir = new Date(url.searchParams.get("endDate") ?? "").getTime();
-  return akhir >= Date.now() === kini;
+  return (url.searchParams.get("endDate") === keTanggalLokal(new Date())) === kini;
 };
 
 async function isiFormAkunValid(page: Page, nama: string) {
@@ -169,10 +169,13 @@ test.describe("E2E — Keuangan", () => {
       await page.getByRole("button", { name: tombol, exact: true }).click();
       const res = await tRes;
       const url = new URL(res.url());
-      const mulai = url.searchParams.get("startDate");
-      const akhir = url.searchParams.get("endDate");
-      expect(mulai && akhir, "startDate dan endDate terkirim").toBeTruthy();
-      expect(new Date(akhir!).getTime()).toBeGreaterThan(new Date(mulai!).getTime());
+      expect(res.status(), `GET laba rugi ${periode}`).toBe(200);
+      const mulai = url.searchParams.get("startDate") ?? "";
+      const akhir = url.searchParams.get("endDate") ?? "";
+      expect(mulai, "startDate berbentuk YYYY-MM-DD").toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(akhir, "endDate hari ini").toBe(keTanggalLokal(new Date()));
+      if (periode === "harian") expect(mulai, "harian: startDate sama dengan endDate").toBe(akhir);
+      else expect(mulai <= akhir, "mingguan: startDate tidak sesudah endDate").toBe(true);
       const daftar = daftarDari<BarisLabaRugi>(await res.json());
       const total = jumlah(daftar, (x) => x.totalLabaBersih);
       await expect(page.getByText(label)).toBeVisible();
@@ -253,18 +256,10 @@ test.describe("E2E — Keuangan", () => {
     const lalu = new URL(resLalu.url());
     const kemarin = new Date();
     kemarin.setDate(kemarin.getDate() - 1);
-    const mulaiLalu = new Date(lalu.searchParams.get("startDate") ?? "");
-    const akhirLalu = new Date(lalu.searchParams.get("endDate") ?? "");
-    expect([mulaiLalu.getDate(), mulaiLalu.getHours(), mulaiLalu.getMinutes()], "awal pembanding").toEqual([
-      kemarin.getDate(),
-      0,
-      0,
-    ]);
-    expect([akhirLalu.getDate(), akhirLalu.getHours(), akhirLalu.getMinutes()], "akhir pembanding").toEqual([
-      kemarin.getDate(),
-      23,
-      59,
-    ]);
+    expect(lalu.searchParams.get("startDate"), "awal pembanding").toBe(keTanggalLokal(kemarin));
+    expect(lalu.searchParams.get("endDate"), "akhir pembanding").toBe(keTanggalLokal(kemarin));
+    expect(resKini.status(), "GET laba rugi berjalan").toBe(200);
+    expect(resLalu.status(), "GET laba rugi pembanding").toBe(200);
     const totalKini = jumlah(daftarDari<BarisLabaRugi>(await resKini.json()), (x) => x.totalLabaBersih);
     const totalLalu = jumlah(daftarDari<BarisLabaRugi>(await resLalu.json()), (x) => x.totalLabaBersih);
     const harapan = teksPertumbuhan(persentasePertumbuhan(totalKini, totalLalu));

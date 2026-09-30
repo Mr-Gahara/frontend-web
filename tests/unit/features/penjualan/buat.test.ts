@@ -6,7 +6,6 @@ import type { Diskon } from "@/types/diskon";
 import type { Pajak } from "@/types/pajak";
 
 const isianDasar: IsianPenjualan = {
-  penggunaID: "u1",
   pelangganID: "c1",
   jenisPenjualan: "dine-in",
   tanggal: new Date(2026, 8, 24, 0, 0, 0, 0),
@@ -48,8 +47,7 @@ function pajak(id: string, statusPajak: boolean, tipePajak: boolean, prioritas: 
 }
 
 describe("validasiPenjualan", () => {
-  it("memeriksa sesi, pelanggan, lalu produk tiap baris, dengan pesan halaman lama", () => {
-    expect(validasiPenjualan({ ...isianDasar, penggunaID: "" })).toBe("Sesi kasir tidak terdeteksi.");
+  it("memeriksa pelanggan lalu produk tiap baris, dengan pesan halaman lama", () => {
     expect(validasiPenjualan({ ...isianDasar, pelangganID: "" })).toBe(
       "Silakan pilih pelanggan terlebih dahulu.",
     );
@@ -77,7 +75,6 @@ describe("susunPayloadPenjualan", () => {
 
   it("payload minimal: invoice DRAFT tanpa field kosong, tanpa locationID bila tidak ada", () => {
     expect(susunPayloadPenjualan(isianDasar)).toEqual({
-      penggunaID: "u1",
       pelangganID: "c1",
       jenisTransaksi: "INVOICE",
       jenisPenjualan: "dine-in",
@@ -87,7 +84,7 @@ describe("susunPayloadPenjualan", () => {
     });
   });
 
-  it("membawa diskon, keterangan, dan locationID outlet tenant (K13a) bila ada", () => {
+  it("membawa diskon dengan nama field backend (diskonItem, diskonGlobal), keterangan, dan locationID (K13a)", () => {
     const payload = susunPayloadPenjualan({
       ...isianDasar,
       items: [{ produkID: "p1", jumlah: 2, diskonItemIDs: ["d1"] }],
@@ -95,8 +92,9 @@ describe("susunPayloadPenjualan", () => {
       keterangan: "Meja 4",
       locationID: "outlet-a",
     });
-    expect(payload.itemPenjualan).toEqual([{ produkID: "p1", jumlah: 2, diskonItemIDs: ["d1"] }]);
-    expect(payload.diskonGlobalIDs).toEqual(["d2"]);
+    expect(payload.itemPenjualan).toEqual([{ produkID: "p1", jumlah: 2, diskonItem: ["d1"] }]);
+    expect(payload.diskonGlobal).toEqual(["d2"]);
+    expect(payload).not.toHaveProperty("diskonGlobalIDs");
     expect(payload.keterangan).toBe("Meja 4");
     expect(payload.locationID).toBe("outlet-a");
     expect(payload).not.toHaveProperty("status");

@@ -1,7 +1,13 @@
 
+import type { StatusPembayaran } from "./pembayaran";
+
 // ENUMS / KONSTANTA
 export type StatusBayar = "UNPAID" | "PAID" | "PARTIAL";
-export type StatusPenjualan = "DRAFT" | "FINAL" | "VOID";
+/**
+ * Sejak backend 465b438: UNPAID, PARTIAL, dan PAID dihitung dari uang yang
+ * masuk dan selalu sama dengan statusBayar; FINAL tidak ada lagi.
+ */
+export type StatusPenjualan = "DRAFT" | "UNPAID" | "PARTIAL" | "PAID" | "VOID";
 export type JenisTransaksi = "POS" | "INVOICE";
 export type JenisPenjualan = "dine-in" | "takeaway" | "booking";
 
@@ -53,6 +59,22 @@ export interface ItemPenjualan {
   totalharga: number;
 }
 
+/**
+ * Pembayaran di detail penjualan (pembayaran[] sejak backend 465b438).
+ * namaMetodePembayaran adalah salinan saat pembayaran dicatat, sehingga
+ * metode yang kemudian dinonaktifkan tetap bernama (keputusan K12a).
+ */
+export interface PembayaranPenjualan {
+  id: string;
+  namaMetodePembayaran: string | null;
+  jumlahBayar: number;
+  uangDiterima: number | null;
+  kembalian: number | null;
+  status: StatusPembayaran;
+  tanggalBayar: string | null;
+  catatan: string | null;
+}
+
 // ENTITAS PENJUALAN (response dari backend)
 /**
  * Bentuk respons GET /penjualan dan /penjualan/:id setelah dinormalkan,
@@ -81,54 +103,43 @@ export interface Penjualan {
   sisaTagihan: number;
   statusBayar: StatusBayar;
   statusPenjualan: StatusPenjualan;
+  /** Hanya di detail: seluruh pembayaran penjualan ini, termasuk VOID, urut dari yang pertama (backend 465b438). */
+  pembayaran?: PembayaranPenjualan[];
   keterangan: string;
   createdAt: string;
   updatedAt: string;
 }
 
 // REQUEST PAYLOAD
+/**
+ * Item payload penjualan (backend 465b438). Harga dan diskon manual
+ * (hargaJual, jumlahDiskon) ditolak 400: harga selalu dari produk dan
+ * diskon hanya dari master diskon.
+ */
 export interface ItemPenjualanRequest {
   produkID: string;
   jumlah: number;
-  hargaJual?: number;
-  diskonItemIDs?: string[];
-  jumlahDiskon?: number;
+  diskonItem?: string[];
 }
 
 export interface PenjualanRequest {
   /** Outlet tenant bagi pemegang read-location (keputusan K13a); tanpanya tidak dikirim. */
   locationID?: string;
   pelangganID: string;
-  /** Diwajibkan validator backend; controller menggantinya dengan pengguna dari token. */
-  penggunaID: string;
   jenisTransaksi: JenisTransaksi;
   jenisPenjualan: JenisPenjualan;
   tanggalTransaksi: string;
   itemPenjualan: ItemPenjualanRequest[];
-  diskonGlobalIDs?: string[];
-  pajakTransaksiIDs?: string[];
-  jumlahDiskonTransaksi?: number;
+  /** Diskon transaksi dari master diskon bercakupan Global. */
+  diskonGlobal?: string[];
   keterangan?: string;
   jatuhTempo?: string;
   simpanDraft?: boolean;
 }
 
-export interface PenjualanUpdateRequest {
-  locationID?: string;
-  pelangganID?: string;
-  tanggalTransaksi?: string;
-  itemPenjualan?: ItemPenjualanRequest[];
-  diskonGlobalIDs?: string[];
-  pajakTransaksiIDs?: string[];
-  jumlahDiskonTransaksi?: number;
-  keterangan?: string;
-  jatuhTempo?: string;
-  finalize?: boolean;
-}
 
 // FILTER PARAMS (untuk GET /penjualan)
 export interface PenjualanFilterParams {
-  statusBayar?: StatusBayar;
   statusPenjualan?: StatusPenjualan;
   jenisTransaksi?: JenisTransaksi;
   jenisPenjualan?: JenisPenjualan;

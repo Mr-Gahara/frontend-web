@@ -32,6 +32,8 @@ interface PropsKartuFasilitas {
   diskonTerpilih: string[];
   onPilihDiskon: (id: string) => void;
   bentrok: SesiBookingResponse | null;
+  /** Booking belum dibayar yang bertumpuk: hanya peringatan (backend 465b438). */
+  belumDibayar: SesiBookingResponse | null;
 }
 
 const teksRentang = (tanggal: Date, jam: Date | null) =>
@@ -52,6 +54,7 @@ export function KartuFasilitas({
   diskonTerpilih,
   onPilihDiskon,
   bentrok,
+  belumDibayar,
 }: PropsKartuFasilitas) {
   const [bukaDiskon, setBukaDiskon] = useState(false);
   const nomor = index + 1;
@@ -260,6 +263,29 @@ export function KartuFasilitas({
                 : "Selesai"}
             </span>
             . Silakan atur ulang waktu atau pilih aset lain.
+          </div>
+        </div>
+      )}
+
+      {/* PERINGATAN BOOKING BELUM DIBAYAR (backend 465b438) */}
+      {!bentrok && belumDibayar && (
+        <div
+          role="status"
+          className="bg-amber-50 border border-amber-200 p-3 rounded-lg flex gap-2.5 items-start mt-2 shadow-sm"
+        >
+          <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+          <div className="text-xs text-amber-800 font-medium leading-relaxed">
+            Ada booking belum dibayar di aset ini dari{" "}
+            <span className="font-bold">
+              {format(new Date(belumDibayar.waktuMulai), "HH:mm", { locale: localeID })}
+            </span>{" "}
+            sampai{" "}
+            <span className="font-bold">
+              {belumDibayar.waktuSelesai
+                ? format(new Date(belumDibayar.waktuSelesai), "HH:mm", { locale: localeID })
+                : "Selesai"}
+            </span>
+            . Booking belum dibayar tidak mengunci jadwal; booking yang lebih dulu dibayar yang mendapat jadwal.
           </div>
         </div>
       )}

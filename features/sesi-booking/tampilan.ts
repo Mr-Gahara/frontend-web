@@ -2,7 +2,7 @@ import type { SesiBookingResponse } from "@/types/sesiBooking";
 
 /**
  * Mengelompokkan booking per aset untuk timeline, hanya booking yang
- * bertumpuk dengan jendela [awal, akhir). Booking Batal tidak ditampilkan
+ * bertumpuk dengan jendela [awal, akhir). Booking VOID tidak ditampilkan
  * (keputusan R5a): slotnya sudah dilepas, dan menampilkannya membuat aset
  * tampak terpakai. Backend tetap mengirimnya karena daftar tidak disaring
  * menurut status. Booking tanpa waktuSelesai dianggap berlangsung sampai
@@ -15,7 +15,7 @@ export function bookingPerAset(
 ): Map<string, SesiBookingResponse[]> {
   const peta = new Map<string, SesiBookingResponse[]>();
   for (const booking of daftar) {
-    if (booking.status === "Batal") continue;
+    if (booking.status === "VOID") continue;
     const asetId = booking.dataAset?.id;
     if (!asetId) continue;
     const mulai = new Date(booking.waktuMulai);
@@ -30,9 +30,10 @@ export function bookingPerAset(
 
 /**
  * Tautan detail penjualan sebuah booking (keputusan R4b), sebagai jalur untuk
- * melihat dan membayar tagihannya. Web belum punya jalur membatalkan booking:
- * penjualan booking selalu FINAL, dan detail penjualan hanya menawarkan void
- * untuk DRAFT. Null bila booking tidak membawa penjualan.
+ * melihat, membayar, dan membatalkan tagihannya: sejak backend 465b438
+ * penjualan booking tersimpan UNPAID, dan void penjualan tanpa pembayaran
+ * membatalkan seluruh booking di dalamnya. Null bila booking tidak membawa
+ * penjualan.
  */
 export function tautanPenjualanBooking(booking: SesiBookingResponse): string | null {
   const id = booking.dataPenjualan?.id;
@@ -40,9 +41,10 @@ export function tautanPenjualanBooking(booking: SesiBookingResponse): string | n
 }
 
 /**
- * Booking Aktif di aset itu yang bertumpuk dengan rentang [mulai, selesai),
- * atau null. Hanya booking Aktif yang dihitung (keputusan R6a), sejalan
- * dengan checkConflict backend; sebelumnya booking Selesai ikut dihitung.
+ * Booking yang menempati aset itu dan bertumpuk dengan rentang [mulai,
+ * selesai), atau null. Hanya booking Aktif yang sudah dibayar yang dihitung,
+ * sejalan dengan checkConflict backend 465b438: booking yang belum dibayar
+ * tidak mengunci jadwal, dan Selesai, VOID, serta Tidak Datang tidak menempati.
  * Booking tanpa waktuSelesai dianggap berlangsung satu jam, sama dengan
  * halaman lama.
  */
@@ -54,7 +56,7 @@ export function bookingBentrok(
 ): SesiBookingResponse | null {
   if (!asetId) return null;
   for (const booking of daftar) {
-    if (booking.dataAset?.id !== asetId || booking.status !== "Aktif") continue;
+    if (booking.dataAset?.id !== asetId || booking.status !== "Aktif" || !booking.sudahDibayar) continue;
     const awal = new Date(booking.waktuMulai);
     const akhir = booking.waktuSelesai ? new Date(booking.waktuSelesai) : new Date(awal.getTime() + 3_600_000);
     if (mulai < akhir && selesai > awal) return booking;

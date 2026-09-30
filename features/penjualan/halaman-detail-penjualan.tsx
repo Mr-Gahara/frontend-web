@@ -1,24 +1,22 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useSession } from "@/lib/auth/useSession";
 import { useRouter } from "next/navigation";
 import { isNotFound, pesanError } from "@/lib/api/error";
-import { StatusBayar, StatusPenjualan } from "@/types/penjualan";
-import type { Pembayaran } from "@/types/pembayaran";
+import type { PembayaranPenjualan, StatusPenjualan } from "@/types/penjualan";
 import { useLokasiAktif } from "@/features/inventaris/hooks";
-import { useDaftarPembayaran } from "@/features/pembayaran/hooks";
-import { pembayaranPenjualan } from "@/features/pembayaran/filter";
-import { useDaftarMetodePembayaran } from "@/features/metode-pembayaran/hooks";
-import { namaMetode } from "@/features/metode-pembayaran/filter";
-import { useFinalisasiPenjualan, usePenjualan } from "./hooks";
+import { useBatalkanPembayaran } from "@/features/pembayaran/hooks";
+import { useFinalisasiPenjualan, usePenjualan, useVoidPenjualan } from "./hooks";
 import { lokasiFinalisasi } from "./payload";
-import { bolehCakupanPenjualan } from "./izin";
+import { aksiPenjualan, bolehBatalkanPembayaran, bolehCakupanPenjualan } from "./izin";
+import { PESAN_BATAL_PEMBAYARAN, PESAN_VOID_PENJUALAN, TAMPILAN_STATUS_PENJUALAN } from "./tampilan";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -42,6 +40,7 @@ import {
   History,
   ShoppingCart,
   CheckCircle2,
+  Ban,
 } from "lucide-react";
 
 // --- HELPERS ---
@@ -57,58 +56,15 @@ const formatTanggal = (iso: string) => {
   return format(new Date(iso), "dd MMM yyyy, HH:mm", { locale: localeID });
 };
 
-// --- BADGE MAPPING ---
-const badgeStatusBayar = (status: StatusBayar) => {
-  const map: Record<StatusBayar, { label: string; className: string }> = {
-    PAID: {
-      label: "Lunas",
-      className: "bg-[#718355] text-[#FFFAF3] border-none shadow-sm",
-    },
-    UNPAID: {
-      label: "Belum Bayar",
-      className: "bg-[#D4A373] text-[#0A2947] border-none shadow-sm",
-    },
-    PARTIAL: {
-      label: "Sebagian",
-      className: "bg-[#0A2947]/10 text-[#0A2947] border-none shadow-sm",
-    },
-  };
-  const config = map[status] ?? {
-    label: status,
-    className: "bg-[#0A2947]/5 text-[#0A2947]/60",
-  };
+// --- BADGE STATUS (satu status sejak backend 465b438) ---
+const badgeStatus = (status: StatusPenjualan) => {
+  const tampilan = TAMPILAN_STATUS_PENJUALAN[status];
   return (
     <Badge
       variant="outline"
-      className={`${config.className} px-2.5 py-0.5 font-bold`}
+      className={`${tampilan?.kelas ?? "bg-[#0A2947]/5 text-[#0A2947]/60"} px-2.5 py-0.5 font-bold shadow-sm`}
     >
-      {config.label}
-    </Badge>
-  );
-};
-
-const badgeStatusPenjualan = (status: StatusPenjualan) => {
-  const map: Record<StatusPenjualan, { label: string; className: string }> = {
-    FINAL: {
-      label: "Final",
-      className: "bg-[#718355] text-[#FFFAF3] border-none shadow-sm",
-    },
-    DRAFT: {
-      label: "Draft",
-      className: "bg-[#D4A373] text-[#0A2947] border-none shadow-sm",
-    },
-    VOID: {
-      label: "Void",
-      className: "bg-[#0A2947]/10 text-[#0A2947]/60 border-none shadow-sm",
-    },
-  };
-  const config = map[status] ?? { label: status, className: "" };
-  return (
-    <Badge
-      variant="outline"
-      className={`${config.className} px-2.5 py-0.5 font-bold`}
-    >
-      {config.label}
+      {tampilan?.label ?? status}
     </Badge>
   );
 };
@@ -121,6 +77,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
   const router = useRouter();
 
   const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
+  const [showVoidConfirm, setShowVoidConfirm] = useState(false);
 
   const { permissions } = useSession();
   // Outlet tenant hanya dapat dibaca pemegang read-location (keputusan K11b);
@@ -134,30 +91,50 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
     error: errorPenjualan,
   } = usePenjualan(idPenjualan);
 
-  // Backend mengirim seluruh pembayaran tenant (GET /pembayaran tanpa
-  // filter); disaring per penjualan di klien.
-  const daftarPembayaran = useDaftarPembayaran(Boolean(penjualan));
-  const loadingPembayaran = daftarPembayaran.isLoading;
-  const pembayaranTerkait = useMemo(
-    () => pembayaranPenjualan(daftarPembayaran.data ?? [], idPenjualan),
-    [daftarPembayaran.data, idPenjualan],
-  );
-  // Respons pembayaran hanya membawa id metode; namanya diambil dari daftar
-  // metode pembayaran (keputusan K12).
-  const daftarMetode = useDaftarMetodePembayaran();
+  // Riwayat pembayaran dibaca dari pembayaran[] respons detail (backend
+  // 465b438), beserta nama metode saat pembayaran dicatat (keputusan K12a).
+  const [batalTarget, setBatalTarget] = useState<PembayaranPenjualan | null>(null);
+  const [alasanBatal, setAlasanBatal] = useState("");
 
   // Dialog finalisasi hanya tertutup saat berhasil; saat gagal tetap terbuka
   // beserta pesannya (keputusan Fase 0).
   const finalizeMutation = useFinalisasiPenjualan(idPenjualan, {
     onSuccess: () => {
       toast.success("Berhasil Difinalisasi", {
-        description: "Status penjualan menjadi FINAL dan stok telah dipotong.",
+        description: "Penjualan disimpan sebagai Belum Bayar dan stok telah dipotong.",
       });
       setShowFinalizeConfirm(false);
     },
     onError: (err) => {
       toast.error("Gagal Finalisasi", {
         description: pesanError(err, "Terjadi kesalahan saat memfinalisasi penjualan."),
+      });
+    },
+  });
+
+  // Dialog batalkan pembayaran hanya tertutup saat berhasil (keputusan Fase 0).
+  const batalMutation = useBatalkanPembayaran({
+    onSuccess: () => {
+      toast.success("Berhasil", { description: "Pembayaran berhasil dibatalkan." });
+      setBatalTarget(null);
+      setAlasanBatal("");
+    },
+    onError: (err) => {
+      toast.error("Gagal Membatalkan", {
+        description: pesanError(err, "Gagal membatalkan pembayaran."),
+      });
+    },
+  });
+
+  // Dialog void hanya tertutup saat berhasil (keputusan Fase 0).
+  const voidMutation = useVoidPenjualan({
+    onSuccess: () => {
+      toast.success("Berhasil", { description: "Penjualan berhasil di-void." });
+      setShowVoidConfirm(false);
+    },
+    onError: (err) => {
+      toast.error("Gagal Memproses", {
+        description: pesanError(err, "Gagal melakukan void penjualan."),
       });
     },
   });
@@ -190,10 +167,8 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
     );
   }
 
-  const isDraft = penjualan.statusPenjualan === "DRAFT";
-  const canPay =
-    penjualan.statusPenjualan !== "VOID" && penjualan.sisaTagihan > 0;
-  const isInvoiceDraft = penjualan.jenisTransaksi === "INVOICE" && isDraft;
+  const aksi = aksiPenjualan(penjualan, permissions);
+  const riwayatPembayaran = penjualan.pembayaran ?? [];
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
@@ -223,13 +198,12 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="flex gap-2">
-            {badgeStatusPenjualan(penjualan.statusPenjualan)}
-            {badgeStatusBayar(penjualan.statusBayar)}
+            {badgeStatus(penjualan.statusPenjualan)}
           </div>
 
           <div className="flex gap-2 w-full sm:w-auto">
             {/* Tombol Finalisasi Khusus Invoice Draft */}
-            {isInvoiceDraft && (
+            {aksi.finalisasi && (
               <Button
                 variant="outline"
                 className="border-[#718355] text-[#718355] hover:bg-[#718355]/10 cursor-pointer shadow-sm font-bold w-full sm:w-auto"
@@ -239,7 +213,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
               </Button>
             )}
 
-            {canPay && (
+            {aksi.bayar && (
               <Button
                 className="bg-[#718355] text-[#FFFAF3] hover:bg-[#718355]/90 cursor-pointer shadow-sm font-bold w-full sm:w-auto"
                 onClick={() =>
@@ -249,6 +223,16 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
                 }
               >
                 <CreditCard className="mr-2 h-4 w-4" /> Terima Pembayaran
+              </Button>
+            )}
+
+            {aksi.void && (
+              <Button
+                variant="outline"
+                className="border-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/10 cursor-pointer shadow-sm font-bold w-full sm:w-auto"
+                onClick={() => setShowVoidConfirm(true)}
+              >
+                <Ban className="mr-2 h-4 w-4" /> Void Penjualan
               </Button>
             )}
           </div>
@@ -450,7 +434,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
       </div>
 
       {/* RIWAYAT PEMBAYARAN */}
-      {!loadingPembayaran && pembayaranTerkait.length > 0 && (
+      {riwayatPembayaran.length > 0 && (
         <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] shadow-sm overflow-hidden mt-2">
           <div className="p-6 border-b border-[#0A2947]/5 flex items-center gap-2">
             <History className="h-5 w-5 text-[#D4A373]" />
@@ -465,10 +449,11 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
                   <th className="px-6 py-4 font-bold">Catatan</th>
                   <th className="px-6 py-4 font-bold text-right">Jumlah</th>
                   <th className="px-6 py-4 font-bold text-center">Status</th>
+                  <th className="px-6 py-4 font-bold text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#0A2947]/5 bg-[#FFFAF3]">
-                {pembayaranTerkait.map((pay: Pembayaran) => {
+                {riwayatPembayaran.map((pay) => {
                   const validId = pay.id;
                   return (
                     <tr
@@ -484,7 +469,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
                           : "-"}
                       </td>
                       <td className="px-6 py-4 font-bold text-[#0A2947]">
-                        {namaMetode(daftarMetode.data, pay.metodePembayaranID)}
+                        {pay.namaMetodePembayaran || "-"}
                       </td>
                       <td className="px-6 py-4 font-medium text-[#0A2947]/60 text-xs line-clamp-1">
                         {pay.catatan || "-"}
@@ -497,8 +482,20 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
                           variant="outline"
                           className={`font-bold border-none shadow-sm px-2.5 py-0.5 ${pay.status === "PAID" ? "bg-[#718355] text-[#FFFAF3]" : pay.status === "VOID" ? "bg-[#0A2947]/10 text-[#0A2947]/60" : "bg-[#D4A373] text-[#0A2947]"}`}
                         >
-                          {pay.status === "PAID" ? "Sukses" : pay.status}
+                          {pay.status === "PAID" ? "Sukses" : pay.status === "VOID" ? "Batal" : pay.status}
                         </Badge>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {bolehBatalkanPembayaran(pay, permissions) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setBatalTarget(pay)}
+                            className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-500/10 font-bold"
+                          >
+                            Batalkan
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   );
@@ -508,6 +505,90 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
           </div>
         </div>
       )}
+
+      {/* DIALOG BATALKAN PEMBAYARAN */}
+      <AlertDialog
+        open={!!batalTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setBatalTarget(null);
+            setAlasanBatal("");
+          }
+        }}
+      >
+        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[#0A2947]">
+              Batalkan pembayaran {formatRupiah(batalTarget?.jumlahBayar ?? 0)}?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+              {PESAN_BATAL_PEMBAYARAN}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <label htmlFor="alasanBatal" className="text-sm font-bold text-[#0A2947]">
+              Alasan <span className="text-[#0A2947]/50 font-medium">(Opsional)</span>
+            </label>
+            <Input
+              id="alasanBatal"
+              value={alasanBatal}
+              onChange={(e) => setAlasanBatal(e.target.value)}
+              placeholder="Misal: salah pilih metode"
+              className="bg-white border-[#0A2947]/20 text-[#0A2947]"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={batalMutation.isPending}
+              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+            >
+              Kembali
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (batalTarget) batalMutation.mutate({ id: batalTarget.id, alasan: alasanBatal });
+              }}
+              disabled={batalMutation.isPending}
+              className="cursor-pointer bg-red-600 text-white hover:bg-red-700 font-bold"
+            >
+              {batalMutation.isPending ? "Membatalkan..." : "Ya, Batalkan Pembayaran"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* DIALOG KONFIRMASI VOID */}
+      <AlertDialog open={showVoidConfirm} onOpenChange={setShowVoidConfirm}>
+        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[#0A2947]">
+              Void Penjualan {penjualan.noReferensi}?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+              {PESAN_VOID_PENJUALAN}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={voidMutation.isPending}
+              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+            >
+              Batal
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                voidMutation.mutate(idPenjualan);
+              }}
+              disabled={voidMutation.isPending}
+              className="cursor-pointer bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/90 font-bold"
+            >
+              {voidMutation.isPending ? "Memproses..." : "Ya, Void Penjualan"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* DIALOG KONFIRMASI FINALISASI */}
       <AlertDialog
@@ -520,10 +601,10 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
               Finalisasi Invoice?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
-              Tindakan ini akan mengunci transaksi menjadi{" "}
-              <strong className="text-[#0A2947]">FINAL</strong> dan memotong
-              persediaan stok barang secara permanen. Apakah Anda yakin ingin
-              melanjutkan?
+              Tindakan ini akan menyimpan transaksi sebagai{" "}
+              <strong className="text-[#0A2947]">Belum Bayar</strong> dan memotong
+              persediaan stok barang secara permanen. Setelah disimpan, isi
+              transaksi tidak dapat diubah. Apakah Anda yakin ingin melanjutkan?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

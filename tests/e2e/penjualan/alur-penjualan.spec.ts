@@ -1,16 +1,24 @@
 import { test, expect, type Page } from "@playwright/test";
 import { normalizeId } from "@/lib/api/normalize";
-import { BASIS, JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { BASIS, JAWAB_GAGAL, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { NAMA_DISKON_GLOBAL, NAMA_DISKON_ITEM, siapkanDiskonUji } from "../../helpers/reservasi-uji";
 import {
   TAKARAN,
+  batalkanPenjualanUji,
+  bayarLewatApi,
+  bukaAksiBaris,
   buatDraftLewatUi,
   detailPenjualan,
   isiFormPenjualan,
+  isiIsianPenjualan,
   hapusDraft,
   jurnalPenjualan,
+  metodeUji,
+  pilihDiskon,
   setelStokOutlet,
   setelStokProduk,
   siapkanFixture,
+  simpanLewatApi,
   stokOutlet,
   stokProduk,
 } from "../../helpers/penjualan-uji";
@@ -19,8 +27,10 @@ import {
  * Spec pembanding alur penjualan (keputusan K6b, 24 September 2026): stok
  * bahan di outlet benar-benar berkurang sesuai resep saat finalisasi, dan
  * ditolak utuh bila tidak cukup. Menulis data sungguhan: fixture tetap,
- * penjualan FINAL beserta pembayarannya, penjualan VOID, jurnal stok, dan
- * opname persiapan. Penjualan DRAFT yang tersisa dihapus.
+ * penjualan tersimpan (UNPAID sampai PAID) beserta pembayarannya, penjualan
+ * VOID, jurnal stok, dan opname persiapan. Penjualan DRAFT yang tersisa
+ * dihapus, dan penjualan tersimpan yang dibuat skenario lain dibatalkan
+ * pembayarannya lalu di-void (backend 465b438).
  *
  * Jurnal stok belum dapat diperiksa lewat API: daftar jurnal di-cache 300
  * detik dan tidak dibersihkan saat inventoryService menulis jurnal
@@ -40,12 +50,6 @@ async function finalisasiLewatDetail(page: Page, id: string) {
   return tunggu;
 }
 
-async function bukaAksiBaris(page: Page, noReferensi: string, menu: RegExp) {
-  const baris = page.getByRole("row").filter({ hasText: noReferensi });
-  await expect(baris).toHaveCount(1);
-  await baris.getByRole("cell").last().getByRole("button").click();
-  await page.getByRole("menuitem", { name: menu }).click();
-}
 
 test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", () => {
   test.setTimeout(150_000);
@@ -66,17 +70,18 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     await test.step("finalisasi memotong stok bahan di outlet sesuai resep", async () => {
       const res = await finalisasiLewatDetail(page, penjualan.id);
       expect(res.status(), `PUT finalisasi: ${(await res.text()).slice(0, 200)}`).toBe(200);
-      expect((await detailPenjualan(page, auth, penjualan.id)).statusPenjualan).toBe("FINAL");
+      expect((await detailPenjualan(page, auth, penjualan.id)).statusPenjualan, "tersimpan belum dibayar (backend 465b438)").toBe("UNPAID");
       expect(await stokOutlet(page, auth, fx)).toBe(STOK_AWAL - JUMLAH * TAKARAN);
     });
 
     await test.step("bayar lunas dengan uang pas", async () => {
       await page.getByRole("button", { name: /terima pembayaran/i }).click();
       await expect(page.getByRole("heading", { name: /terima pembayaran/i })).toBeVisible();
-      await page.getByRole("combobox").filter({ hasText: /pilih akun kas/i }).click();
-      await page.getByRole("option").first().click();
       await page.getByRole("combobox").filter({ hasText: /pilih metode/i }).click();
       await page.getByRole("option").first().click();
+      await expect(page.getByLabel("Akun Kas Tujuan"), "akun tujuan dari metode").not.toHaveText(
+        "Pilih metode pembayaran lebih dulu.",
+      );
       await page.getByRole("button", { name: /bayar uang pas/i }).click();
       const catatan = page.getByLabel(/catatan pembayaran/i);
       await catatan.fill("Lunas e2e alur penjualan");
@@ -92,24 +97,23 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       const kiriman = res.request().postDataJSON();
       expect(kiriman).not.toHaveProperty("status");
       expect(typeof kiriman.tanggalBayar).toBe("string");
+      expect(kiriman, "akun kas diambil dari metode (backend 465b438)").not.toHaveProperty("akunKasID");
 
       const lunas = await detailPenjualan(page, auth, penjualan.id);
       expect(lunas.statusBayar).toBe("PAID");
+      expect(lunas.statusPenjualan).toBe("PAID");
       expect(lunas.sisaTagihan).toBe(0);
       expect(lunas.totalDibayar).toBe(lunas.totalTagihan);
     });
 
     await test.step("riwayat pembayaran di detail menampilkan metode yang sebenarnya", async () => {
-      type Bayar = { id: string; penjualanID: string | null; metodePembayaranID: string | null };
-      type Metode = { id: string; namaPembayaran: string };
-      const semua = normalizeId((await api<Bayar[]>(page, auth, "GET", "/pembayaran")).data ?? []);
-      const bayar = semua.find((p) => p.penjualanID === penjualan.id);
-      expect(bayar, "pembayaran penjualan uji").toBeTruthy();
-      const metode = normalizeId((await api<Metode[]>(page, auth, "GET", "/metodepembayaran")).data ?? []);
-      const nama = metode.find((m) => m.id === bayar!.metodePembayaranID)?.namaPembayaran;
-      expect(nama, "nama metode pembayaran").toBeTruthy();
+      const detail = await detailPenjualan(page, auth, penjualan.id);
+      const bayar = (detail.pembayaran ?? []).find((p) => p.catatan === "Lunas e2e alur penjualan");
+      expect(bayar?.namaMetodePembayaran, "nama metode dari pembayaran[] detail (K12a)").toBeTruthy();
       await page.goto(`${DAFTAR}/${penjualan.id}`);
-      await expect(page.getByRole("row").filter({ hasText: /lunas e2e alur penjualan/i })).toContainText(nama!);
+      await expect(page.getByRole("row").filter({ hasText: /lunas e2e alur penjualan/i })).toContainText(
+        bayar!.namaMetodePembayaran!,
+      );
     });
   });
 
@@ -265,14 +269,14 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
 
   test("dialog konfirmasi pembayaran bertahan saat pembayaran gagal (keputusan Fase 0)", async ({ page }) => {
     const auth = await bukaDenganAuth(page, DAFTAR);
-    await siapkanFixture(page, auth, 20);
+    const fx = await siapkanFixture(page, auth, 20);
     const penjualan = await buatDraftLewatUi(page, 1);
     const pola = /\/api\/pembayaran(\?|$)/i;
     try {
+      // DRAFT tidak dapat dibayar sejak backend 465b438.
+      await simpanLewatApi(page, auth, penjualan.id, fx);
       await page.goto(`${DAFTAR}/${penjualan.id}/pembayaran`);
       await expect(page.getByRole("heading", { name: /terima pembayaran/i })).toBeVisible();
-      await page.getByRole("combobox").filter({ hasText: /pilih akun kas/i }).click();
-      await page.getByRole("option").first().click();
       await page.getByRole("combobox").filter({ hasText: /pilih metode/i }).click();
       await page.getByRole("option").first().click();
       await page.getByRole("button", { name: /bayar uang pas/i }).click();
@@ -288,11 +292,11 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       await expect(page.getByRole("alertdialog")).toBeVisible();
     } finally {
       await page.unroute(pola);
-      await hapusDraft(page, auth, penjualan.id);
+      await batalkanPenjualanUji(page, auth, penjualan.id);
     }
   });
 
-  test("buat penjualan mengirim kunci idempotensi, penggunaID, dan lokasi outlet tenant", async ({ page }) => {
+  test("buat penjualan mengirim kunci idempotensi dan lokasi outlet tenant, tanpa penggunaID", async ({ page }) => {
     const auth = await bukaDenganAuth(page, DAFTAR);
     const fx = await siapkanFixture(page, auth, 20);
     const tunggu = page.waitForRequest(
@@ -303,7 +307,7 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       const permintaan = await tunggu;
       expect(permintaan.headers()["x-idempotency-key"], "kunci idempotensi (K3a)").toBeTruthy();
       const kiriman = permintaan.postDataJSON();
-      expect(kiriman.penggunaID, "penggunaID diwajibkan validator backend").toBeTruthy();
+      expect(kiriman, "kasir dicatat backend dari token (backend 465b438)").not.toHaveProperty("penggunaID");
       expect(kiriman.locationID, "outlet tenant (K13a)").toBe(fx.outletId);
       expect(kiriman).not.toHaveProperty("status");
       expect((await detailPenjualan(page, auth, penjualan.id)).statusPenjualan).toBe("DRAFT");
@@ -405,5 +409,106 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       await page.unroute(pola);
       await hapusDraft(page, auth, penjualan.id);
     }
+  });
+
+  test("diskon item dan diskon global dari form terpasang di backend (backend 465b438)", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, DAFTAR);
+    await siapkanFixture(page, auth, 20);
+    const diskon = await siapkanDiskonUji(page, auth);
+    await isiIsianPenjualan(page, 1);
+    await pilihDiskon(page, "Diskon Produk", NAMA_DISKON_ITEM);
+    await pilihDiskon(page, "Diskon Global", NAMA_DISKON_GLOBAL);
+    await page.getByLabel(/keterangan/i).press("Enter");
+    await expect(page.getByRole("alertdialog")).toBeVisible();
+    const tunggu = page.waitForResponse(
+      (r) => r.request().method() === "POST" && /\/api\/penjualan(\?|$)/i.test(r.url()),
+    );
+    await page.getByRole("button", { name: /ya, lanjutkan/i }).click();
+    const res = await tunggu;
+    const body = await res.json().catch(() => ({}));
+    expect(res.status(), `POST /penjualan: ${JSON.stringify(body).slice(0, 200)}`).toBe(201);
+    const id = normalizeId((body.data ?? {}) as { id?: string }).id ?? "";
+    try {
+      const kiriman = res.request().postDataJSON();
+      expect(kiriman.itemPenjualan[0].diskonItem, "diskon item dengan nama field backend").toEqual([diskon.diskonItemId]);
+      expect(kiriman.diskonGlobal, "diskon global dengan nama field backend").toEqual([diskon.diskonGlobalId]);
+      const detail = await detailPenjualan(page, auth, id);
+      expect(detail.itemPenjualan?.[0]?.jumlahDiskon, "potongan diskon item dari backend").toBeGreaterThan(0);
+      expect(detail.jumlahDiskonTransaksi, "potongan diskon transaksi dari backend").toBeGreaterThan(0);
+    } finally {
+      if (id) await hapusDraft(page, auth, id);
+    }
+  });
+
+  test("bayar sebagian dan lunas, batalkan kedua pembayaran dari riwayat, lalu void penjualan", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, DAFTAR);
+    const fx = await siapkanFixture(page, auth, 20);
+    const penjualan = await buatDraftLewatUi(page, 1);
+    try {
+      await simpanLewatApi(page, auth, penjualan.id, fx);
+      const tersimpan = await detailPenjualan(page, auth, penjualan.id);
+      expect(tersimpan.statusPenjualan).toBe("UNPAID");
+      const metode = await metodeUji(page, auth);
+      const sebagian = Math.floor(tersimpan.totalTagihan / 2);
+      await bayarLewatApi(page, auth, penjualan.id, metode.id, sebagian, "Siklus sebagian");
+      expect((await detailPenjualan(page, auth, penjualan.id)).statusPenjualan).toBe("PARTIAL");
+      await bayarLewatApi(page, auth, penjualan.id, metode.id, tersimpan.totalTagihan - sebagian, "Siklus pelunasan");
+      expect((await detailPenjualan(page, auth, penjualan.id)).statusPenjualan).toBe("PAID");
+      await page.goto(`${DAFTAR}/${penjualan.id}`);
+      await expect(page.getByRole("button", { name: /void penjualan/i }), "void menunggu pembayaran dibatalkan").toHaveCount(0);
+      // Baris dicari lewat tombol Batalkan, bukan catatan: catatan pembayaran
+      // ikut diganti alasan pembatalan (PUT { status, catatan }).
+      for (const sisa of [1, 0]) {
+        const baris = page.getByRole("row").filter({ has: page.getByRole("button", { name: "Batalkan" }) }).first();
+        await baris.getByRole("button", { name: "Batalkan" }).click();
+        const dialog = page.getByRole("alertdialog");
+        await dialog.getByLabel(/alasan/i).fill("E2E siklus batal");
+        const tunggu = page.waitForResponse(
+          (r) => r.request().method() === "PUT" && /\/api\/pembayaran\/[a-f0-9]{24}$/i.test(r.url()),
+        );
+        await dialog.getByRole("button", { name: /ya, batalkan pembayaran/i }).click();
+        const res = await tunggu;
+        expect(res.status(), `PUT pembayaran: ${(await res.text()).slice(0, 200)}`).toBe(200);
+        expect(res.request().postDataJSON()).toEqual({ status: "VOID", catatan: "E2E siklus batal" });
+        await expect(dialog).toBeHidden();
+        await expect(page.getByRole("button", { name: "Batalkan" }), "tombol Batalkan yang tersisa").toHaveCount(sisa);
+      }
+      const setelahBatal = await detailPenjualan(page, auth, penjualan.id);
+      expect(setelahBatal.statusPenjualan).toBe("UNPAID");
+      expect((setelahBatal.pembayaran ?? []).map((p) => p.status), "kedua pembayaran tercatat VOID").toEqual([
+        "VOID",
+        "VOID",
+      ]);
+      await page.getByRole("button", { name: /void penjualan/i }).click();
+      const tungguVoid = page.waitForResponse(
+        (r) => r.request().method() === "PUT" && polaPenjualan(penjualan.id).test(r.url()),
+      );
+      await page.getByRole("alertdialog").getByRole("button", { name: /ya, void penjualan/i }).click();
+      expect((await tungguVoid).status()).toBe(200);
+      expect((await detailPenjualan(page, auth, penjualan.id)).statusPenjualan).toBe("VOID");
+    } finally {
+      await batalkanPenjualanUji(page, auth, penjualan.id);
+    }
+  });
+
+  test("daftar per halaman: permintaan membawa page dan limit, dan Berikutnya membuka halaman kedua", async ({ page }) => {
+    const pola = /\/api\/penjualan(\?|$)/i;
+    const tAwal = page.waitForResponse((r) => r.request().method() === "GET" && pola.test(r.url()));
+    await page.goto(DAFTAR, { waitUntil: "commit" });
+    const res = await tAwal;
+    const url = new URL(res.url());
+    expect(url.searchParams.get("page")).toBe("1");
+    expect(url.searchParams.get("limit")).toBe("10");
+    const pag = (await res.json()).pagination as { total: number; totalPages: number };
+    await expect(page.getByText(`Halaman 1 dari ${Math.max(1, pag.totalPages)} (${pag.total} penjualan)`)).toBeVisible();
+    test.skip(pag.totalPages < 2, "Data uji penjualan kurang dari dua halaman");
+    const tDua = page.waitForResponse(
+      (r) => r.request().method() === "GET" && pola.test(r.url()) && new URL(r.url()).searchParams.get("page") === "2",
+    );
+    await page.getByRole("button", { name: /berikutnya/i }).click();
+    const kedua = normalizeId(((await (await tDua).json()).data ?? []) as { noReferensi: string }[]);
+    await expect(page.getByText(/^Halaman 2 dari/)).toBeVisible();
+    expect(kedua.length, "halaman kedua berisi penjualan").toBeGreaterThan(0);
+    await expect(page.getByRole("row").filter({ hasText: kedua[0].noReferensi })).toHaveCount(1);
   });
 });

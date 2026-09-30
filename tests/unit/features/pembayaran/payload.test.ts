@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   nominalDariTeks,
+  susunPayloadBatalPembayaran,
   susunPayloadPembayaran,
+  teksAkunTujuan,
   validasiPembayaran,
 } from "@/features/pembayaran/payload";
 import { akunKasAktif } from "@/features/akun-kas/filter";
@@ -10,7 +12,7 @@ import type { AkunKas } from "@/types/akunKas";
 import type { MetodePembayaran } from "@/types/metodePembayaran";
 
 const rupiah = (n: number) => `Rp${n}`;
-const isianSah = { akunKasID: "k1", metodePembayaranID: "m1", jumlahBayarStr: "Rp 50.000" };
+const isianSah = { metodePembayaranID: "m1", jumlahBayarStr: "Rp 50.000" };
 
 function akun(id: string, status: AkunKas["status"]): AkunKas {
   return {
@@ -48,10 +50,7 @@ describe("nominalDariTeks", () => {
 });
 
 describe("validasiPembayaran", () => {
-  it("memeriksa akun kas, metode, lalu nominal, dengan pesan halaman lama", () => {
-    expect(validasiPembayaran({ ...isianSah, akunKasID: "" }, 100000, rupiah)).toBe(
-      "Silakan pilih Akun Kas tujuan penerimaan pembayaran.",
-    );
+  it("memeriksa metode lalu nominal, dengan pesan halaman lama", () => {
     expect(validasiPembayaran({ ...isianSah, metodePembayaranID: "" }, 100000, rupiah)).toBe(
       "Silakan pilih Metode Pembayaran.",
     );
@@ -85,7 +84,6 @@ describe("susunPayloadPembayaran", () => {
     );
     expect(payload).toEqual({
       penjualanID: "p1",
-      akunKasID: "k1",
       metodePembayaranID: "m1",
       jumlahBayar: 50000,
       tanggalBayar: "2026-09-24T04:00:00.000Z",
@@ -99,6 +97,30 @@ describe("susunPayloadPembayaran", () => {
       sekarang,
     );
     expect(payload.catatan).toBe("DP 50%");
+  });
+});
+
+describe("teksAkunTujuan", () => {
+  it("akun kas tujuan dari metode terpilih", () => {
+    expect(teksAkunTujuan({ akunKas: { id: "k1", namaAkun: "Bank BCA", nomorAkun: "11001" } })).toBe(
+      "Bank BCA (11001)",
+    );
+    expect(teksAkunTujuan({ akunKas: { id: "k1", namaAkun: "Laci", nomorAkun: null } })).toBe("Laci");
+  });
+
+  it("petunjuk bila metode belum dipilih, dan tanda hubung bila metode tanpa akun kas", () => {
+    expect(teksAkunTujuan(undefined)).toBe("Pilih metode pembayaran lebih dulu.");
+    expect(teksAkunTujuan({ akunKas: null })).toBe("-");
+  });
+});
+
+describe("susunPayloadBatalPembayaran", () => {
+  it("status VOID, dengan alasan dipangkas bila diisi", () => {
+    expect(susunPayloadBatalPembayaran("  salah metode  ")).toEqual({ status: "VOID", catatan: "salah metode" });
+  });
+
+  it("alasan kosong tidak dikirim", () => {
+    expect(susunPayloadBatalPembayaran("   ")).toEqual({ status: "VOID" });
   });
 });
 

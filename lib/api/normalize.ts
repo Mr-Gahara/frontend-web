@@ -41,11 +41,27 @@ export function normalizeId<T>(input: T): T {
   return hasil as T;
 }
 
+/** Pagination daftar dari utils/paginasi.js backend (sejak 465b438). */
+export interface Paginasi {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface HasilApi<T> {
   data: T;
   /** Dari count atau total bila dikirim backend. */
   jumlah?: number;
   message?: string;
+  /** Hanya bila backend mengirim pagination, misalnya daftar penjualan. */
+  pagination?: Paginasi;
+}
+
+/** Nilai pagination yang bukan angka dibaca 0, agar tampilan tidak menampilkan NaN. */
+function bacaPaginasi(p: Rekaman): Paginasi {
+  const angka = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+  return { page: angka(p.page), limit: angka(p.limit), total: angka(p.total), totalPages: angka(p.totalPages) };
 }
 
 /**
@@ -81,6 +97,7 @@ export function unwrap<T>(respons: unknown): HasilApi<T> {
     data: normalizeId(isi) as T,
     jumlah,
     message: typeof respons.message === "string" ? respons.message : undefined,
+    ...(objekBiasa(respons.pagination) ? { pagination: bacaPaginasi(respons.pagination) } : {}),
   };
 }
 

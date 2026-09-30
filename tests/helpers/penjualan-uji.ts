@@ -30,6 +30,17 @@ export type PenjualanUji = {
   totalTagihan: number;
   totalDibayar: number;
   sisaTagihan: number;
+  jumlahDiskonTransaksi?: number;
+  itemPenjualan?: { jumlahDiskon: number }[];
+  /** Hanya di detail (backend 465b438). */
+  pembayaran?: { id: string; status: string; catatan: string | null; namaMetodePembayaran: string | null }[];
+};
+
+export type MetodeUji = {
+  id: string;
+  namaPembayaran: string;
+  isActive: boolean;
+  akunKas: { id: string; namaAkun: string | null; nomorAkun: string | null } | null;
 };
 
 type Hasil<T> = { status: number; data: T; pesan: string };
@@ -159,7 +170,7 @@ export async function detailPenjualan(page: Page, auth: Auth, id: string): Promi
   return wajib(await api<PenjualanUji>(page, auth, "GET", `/penjualan/${id}`), "GET detail penjualan");
 }
 
-/** Menghapus penjualan uji yang masih DRAFT; FINAL dan VOID memang tidak dapat dihapus. */
+/** Menghapus penjualan uji yang masih DRAFT; penjualan tersimpan dan VOID memang tidak dapat dihapus (batalkanPenjualanUji). */
 export async function hapusDraft(page: Page, auth: Auth, id: string) {
   const r = await api<PenjualanUji>(page, auth, "GET", `/penjualan/${id}`);
   if (r.status !== 200 || r.data?.statusPenjualan !== "DRAFT") return;
@@ -206,4 +217,83 @@ export async function buatDraftLewatUi(page: Page, jumlah: number): Promise<Penj
   const body = await res.json().catch(() => ({}));
   expect(res.status(), `POST /penjualan: ${JSON.stringify(body).slice(0, 200)}`).toBe(201);
   return normalizeId(body.data as PenjualanUji);
+}
+
+/** Menyimpan (finalisasi) penjualan uji lewat API: DRAFT menjadi UNPAID dan stok dipotong. */
+export async function simpanLewatApi(page: Page, auth: Auth, id: string, fx: Fixture) {
+  wajib(
+    await api(page, auth, "PUT", `/penjualan/${id}`, { finalize: true, locationID: fx.outletId }),
+    "simpan penjualan uji",
+  );
+}
+
+/** Metode pembayaran aktif pertama yang punya akun kas tujuan. */
+export async function metodeUji(page: Page, auth: Auth): Promise<MetodeUji> {
+  const daftar = wajib(await api<MetodeUji[]>(page, auth, "GET", "/metodepembayaran"), "GET /metodepembayaran");
+  const metode = daftar.find((m) => m.isActive && m.akunKas);
+  expect(metode, "metode pembayaran aktif berakun kas").toBeTruthy();
+  return metode!;
+}
+
+/** Mencatat pembayaran uji lewat API, tanpa akunKasID dan status (backend 465b438). */
+export async function bayarLewatApi(
+  page: Page,
+  auth: Auth,
+  penjualanId: string,
+  metodeId: string,
+  jumlah: number,
+  catatan: string,
+) {
+  wajib(
+    await api(page, auth, "POST", "/pembayaran", {
+      penjualanID: penjualanId,
+      metodePembayaranID: metodeId,
+      jumlahBayar: jumlah,
+      tanggalBayar: new Date().toISOString(),
+      catatan,
+    }),
+    "bayar penjualan uji",
+  );
+}
+
+/**
+ * Membersihkan penjualan uji dari blok finally: DRAFT dihapus, penjualan
+ * tersimpan dibatalkan pembayaran PAID-nya lalu di-void (backend 465b438).
+ * Pemeriksaannya lunak agar tidak menutupi kegagalan asli test.
+ */
+export async function batalkanPenjualanUji(page: Page, auth: Auth, id: string | undefined) {
+  if (!id) return;
+  const r = await api<PenjualanUji>(page, auth, "GET", `/penjualan/${id}`);
+  if (r.status !== 200) return;
+  const penjualan = normalizeId(r.data);
+  if (penjualan.statusPenjualan === "VOID") return;
+  if (penjualan.statusPenjualan === "DRAFT") return hapusDraft(page, auth, id);
+  for (const bayar of penjualan.pembayaran ?? []) {
+    if (bayar.status !== "PAID") continue;
+    const v = await api(page, auth, "PUT", `/pembayaran/${bayar.id}`, { status: "VOID", catatan: "Pembersihan e2e" });
+    expect.soft(v.status, `batalkan pembayaran uji: ${v.pesan}`).toBe(200);
+  }
+  const v = await api(page, auth, "PUT", `/penjualan/${id}`, { statusPenjualan: "VOID" });
+  expect.soft(v.status, `void penjualan uji: ${v.pesan}`).toBe(200);
+}
+
+/** Membuka menu aksi baris daftar penjualan untuk nomor itu, lalu memilih menunya. */
+export async function bukaAksiBaris(page: Page, noReferensi: string, menu: RegExp) {
+  const baris = page.getByRole("row").filter({ hasText: noReferensi });
+  await expect(baris).toHaveCount(1);
+  await baris.getByRole("cell").last().getByRole("button").click();
+  await page.getByRole("menuitem", { name: menu }).click();
+}
+
+/**
+ * Memilih satu diskon di pemilih Diskon Produk (baris item) atau Diskon Global
+ * halaman buat, lalu menutup pemilihnya. Kedua pemicu bernama "Pilih Diskon",
+ * sehingga dicari dari pembungkus terdalam yang memuat judulnya.
+ */
+export async function pilihDiskon(page: Page, judul: "Diskon Produk" | "Diskon Global", nama: string) {
+  const bagian = page.locator("div").filter({ has: page.getByText(judul, { exact: true }) }).last();
+  await bagian.getByRole("button", { name: "Pilih Diskon" }).click();
+  await page.getByRole("option", { name: new RegExp(nama) }).click();
+  await page.keyboard.press("Escape");
+  await expect(page.getByText(new RegExp(`${nama} \\(`)).first(), `badge ${nama}`).toBeVisible();
 }

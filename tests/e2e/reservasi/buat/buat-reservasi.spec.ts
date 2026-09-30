@@ -15,6 +15,7 @@ import {
   pantauPermintaan,
   siapkanFixtureBuatReservasi,
 } from "../../../helpers/reservasi-uji";
+import { bayarLewatApi, metodeUji } from "../../../helpers/penjualan-uji";
 
 /*
  * Spec pembanding buat reservasi, ditulis dan dijalankan terhadap kode lama
@@ -33,9 +34,10 @@ let urut = 0;
 /**
  * Tanggal 10 bulan depan, pada jam yang bergeser menurut menit berjalan dan
  * urutan pemanggilan. Daftar booking per tanggal yang dibaca form untuk
- * mendeteksi bentrok tidak dibersihkan saat void (kontrak/temuan.md butir
- * 57), sehingga booking Batal dari run sebelumnya di slot yang sama masih
- * terbaca Aktif sampai 5 menit.
+ * mendeteksi bentrok dahulu tidak dibersihkan saat void (kontrak/temuan.md
+ * butir 57, dilaporkan diperbaiki backend 465b438 dan dibuktikan lewat fixme
+ * R3a); pergeseran jam dipertahankan agar booking uji run sebelumnya tidak
+ * berada di slot yang sama.
  */
 function slotBulanDepan(durasiJam: number) {
   const sekarang = new Date();
@@ -114,7 +116,34 @@ test.describe("E2E — Reservasi › Buat reservasi", () => {
     await expect(page.getByRole("option", { name: new RegExp(NAMA_ASET_PERBAIKAN) })).toHaveCount(0);
   });
 
-  test("bentrok: jadwal yang sudah dipesan menampilkan peringatan dan menonaktifkan simpan", async ({ page }) => {
+  test("bentrok: jadwal yang sudah dibayar menampilkan peringatan dan menonaktifkan simpan (backend 465b438)", async ({
+    page,
+  }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const fx = await siapkanFixtureBuatReservasi(page, auth);
+    await bersihkanSisaBooking(page, auth, fx);
+    const { mulai, selesai } = slotBulanDepan(1);
+    let penjualanId: string | undefined;
+    try {
+      const b = await buatBooking(page, auth, fx, mulai, selesai);
+      penjualanId = b.dataPenjualan?.id;
+      // Jadwal baru terkunci setelah pembayaran pertama masuk.
+      const metode = await metodeUji(page, auth);
+      await bayarLewatApi(page, auth, penjualanId!, metode.id, 1, "DP e2e bentrok");
+      await bukaBuat(page);
+      await pilihPelanggan(page);
+      await pilihAsetUji(page);
+      await aturWaktu(page, mulai, 1);
+      await expect(page.getByText(/Aset ini sedang dipesan dari/)).toBeVisible();
+      await expect(page.getByRole("button", { name: "Waktu Terpakai" })).toBeDisabled();
+    } finally {
+      await batalkanBooking(page, auth, penjualanId);
+    }
+  });
+
+  test("booking belum dibayar di jam yang sama: peringatan tampil, simpan tetap aktif (backend 465b438)", async ({
+    page,
+  }) => {
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
     const fx = await siapkanFixtureBuatReservasi(page, auth);
     await bersihkanSisaBooking(page, auth, fx);
@@ -127,8 +156,9 @@ test.describe("E2E — Reservasi › Buat reservasi", () => {
       await pilihPelanggan(page);
       await pilihAsetUji(page);
       await aturWaktu(page, mulai, 1);
-      await expect(page.getByText(/Aset ini sedang dipesan dari/)).toBeVisible();
-      await expect(page.getByRole("button", { name: "Waktu Terpakai" })).toBeDisabled();
+      await expect(page.getByRole("status").filter({ hasText: /booking belum dibayar/i })).toBeVisible();
+      await expect(page.getByText(/Aset ini sedang dipesan dari/)).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "Proses & Buat Tagihan" })).toBeEnabled();
     } finally {
       await batalkanBooking(page, auth, penjualanId);
     }

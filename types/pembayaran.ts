@@ -11,6 +11,7 @@ export interface Pembayaran {
   akunKasID: string | null;
   penjualanID: string | null;
   metodePembayaranID: string | null;
+  namaMetodePembayaran: string | null;
   noReferensi: string;
   tanggalBayar: string | null;
   gatewayPaymentID: string | null;
@@ -23,14 +24,21 @@ export interface Pembayaran {
 }
 
 /**
- * Payload POST /pembayaran. status tidak dikirim (keputusan K2a): backend
- * menentukannya sendiri. tanggalBayar wajib karena status akhirnya PAID.
+ * Payload POST /pembayaran. status tidak dikirim (keputusan K2a), dan
+ * akunKasID juga tidak: sejak backend 465b438 keduanya diatur server, akun
+ * kas diambil dari metode, dan mengirimnya ditolak 400. tanggalBayar wajib
+ * karena status akhirnya PAID.
  */
 export interface PembayaranRequest {
   penjualanID: string;
-  akunKasID: string;
   metodePembayaranID: string;
   jumlahBayar: number;
   tanggalBayar: string;
+  catatan?: string;
+}
+
+/** Payload PUT /pembayaran/:id untuk membatalkan; catatan menjadi alasan di buku mutasi kas. */
+export interface PembatalanPembayaranRequest {
+  status: "VOID";
   catatan?: string;
 }

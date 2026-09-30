@@ -7,11 +7,13 @@ import { useState, useMemo, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { pesanError } from "@/lib/api/error";
 import { useDaftarPenjualan, useHapusPenjualan, useVoidPenjualan } from "./hooks";
-import { saringPenjualan, type LingkupPenjualan } from "./filter";
+import { navigasiHalaman, saringPenjualan, type LingkupPenjualan } from "./filter";
+import { aksiPenjualan } from "./izin";
+import { PESAN_VOID_PENJUALAN, TAMPILAN_STATUS_PENJUALAN, URUTAN_STATUS_PENJUALAN } from "./tampilan";
+import { useSession } from "@/lib/auth/useSession";
 import {
   Penjualan,
   PenjualanFilterParams,
-  StatusBayar,
   StatusPenjualan,
   JenisTransaksi,
   JenisPenjualan,
@@ -54,6 +56,8 @@ import {
   RotateCcw,
   SlidersHorizontal,
   ReceiptText,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 const formatRupiah = (angka: number) =>
@@ -72,47 +76,17 @@ const formatTanggal = (iso: string) =>
     minute: "2-digit",
   }).format(new Date(iso));
 
-// --- BADGE MAPPING DENGAN PALET TETRADIC ---
-const badgeStatusBayar = (status: StatusBayar) => {
-  const styles: Record<StatusBayar, string> = {
-    PAID: "bg-[#718355] text-[#FFFAF3] border-none",      // Sage Green
-    UNPAID: "bg-[#D4A373] text-[#0A2947] border-none",    // Mustard
-    PARTIAL: "bg-[#0A2947]/10 text-[#0A2947] border-none",// Navy Muted
-  };
-  const labels: Record<StatusBayar, string> = { 
-    PAID: "Lunas", 
-    UNPAID: "Belum Bayar", 
-    PARTIAL: "Sebagian" 
-  };
-  
+// --- BADGE STATUS (satu status sejak backend 465b438) ---
+const badgeStatus = (status: StatusPenjualan) => {
+  const tampilan = TAMPILAN_STATUS_PENJUALAN[status];
   return (
-    <Badge className={`${styles[status] || "bg-muted"} px-2.5 py-0.5 font-bold shadow-sm`}>
-      {labels[status] || status}
-    </Badge>
-  );
-};
-
-const badgeStatusPenjualan = (status: StatusPenjualan) => {
-  const styles: Record<StatusPenjualan, string> = {
-    FINAL: "bg-[#718355] text-[#FFFAF3] border-none", // Sage Green
-    DRAFT: "bg-[#D4A373] text-[#0A2947] border-none", // Mustard
-    VOID: "bg-[#0A2947]/10 text-[#0A2947]/60 border-none", // Navy Muted
-  };
-  const labels: Record<StatusPenjualan, string> = { 
-    FINAL: "Final", 
-    DRAFT: "Draft", 
-    VOID: "Void" 
-  };
-
-  return (
-    <Badge className={`${styles[status] || "bg-muted"} px-2.5 py-0.5 font-bold shadow-sm`}>
-      {labels[status] || status}
+    <Badge className={`${tampilan?.kelas ?? "bg-muted"} px-2.5 py-0.5 font-bold shadow-sm`}>
+      {tampilan?.label ?? status}
     </Badge>
   );
 };
 
 const emptyFilter: PenjualanFilterParams = {
-  statusBayar: undefined,
   statusPenjualan: undefined,
   jenisTransaksi: undefined,
   jenisPenjualan: undefined,
@@ -137,21 +111,25 @@ export default function HalamanDaftarPenjualan({
   pemilihLokasi,
 }: PropsHalamanDaftarPenjualan) {
   const router = useRouter();
+  const { permissions } = useSession();
 
   const [filters, setFilters] = useState<PenjualanFilterParams>(emptyFilter);
   const [appliedFilters, setAppliedFilters] = useState<PenjualanFilterParams>(emptyFilter);
+  const [halaman, setHalaman] = useState(1);
   const [showFilter, setShowFilter] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<Penjualan | null>(null);
   const [voidTarget, setVoidTarget] = useState<Penjualan | null>(null);
 
-  const daftar = useDaftarPenjualan(appliedFilters, lingkup !== null && !penghalang);
+  const daftar = useDaftarPenjualan(appliedFilters, halaman, lingkup !== null && !penghalang);
   // Backend tidak dapat menyaring lokasi; lingkup outlet diterapkan di klien
-  // (features/penjualan/filter.ts).
+  // per halaman (features/penjualan/filter.ts). Pada MVP satu outlet hasilnya
+  // sama dengan tanpa penyaringan; wajib ditinjau sebelum multi-outlet.
   const penjualanList = useMemo(
-    () => (lingkup ? saringPenjualan(daftar.data ?? [], lingkup) : []),
+    () => (lingkup ? saringPenjualan(daftar.data?.data ?? [], lingkup) : []),
     [daftar.data, lingkup],
   );
+  const navigasi = navigasiHalaman(daftar.data?.pagination ?? null, halaman);
 
   // Dialog hapus dan void hanya tertutup saat berhasil; saat gagal tetap
   // terbuka beserta pesannya (keputusan Fase 0).
@@ -189,12 +167,14 @@ export default function HalamanDaftarPenjualan({
 
   const handleApplyFilter = () => {
     setAppliedFilters({ ...filters });
+    setHalaman(1);
     setShowFilter(false);
   };
 
   const handleResetFilter = () => {
     setFilters(emptyFilter);
     setAppliedFilters(emptyFilter);
+    setHalaman(1);
   };
 
   const columns = useMemo<ColumnDef<Penjualan>[]>(
@@ -270,41 +250,19 @@ export default function HalamanDaftarPenjualan({
         ),
       },
       {
-        accessorKey: "statusBayar",
-        header: () => (
-          <span className="text-xs font-bold text-[#0A2947]/60">
-            Bayar
-          </span>
-        ),
-        cell: ({ row }) => {
-          if (row.original.statusPenjualan === "VOID") {
-            return (
-              <Badge className="bg-[#0A2947]/10 text-[#0A2947]/60 border-none font-bold shadow-sm px-2.5 py-0.5">
-                Batal
-              </Badge>
-            );
-          }
-          return badgeStatusBayar(row.original.statusBayar);
-        },
-      },
-      {
         accessorKey: "statusPenjualan",
         header: () => (
-          <span className="text-xs font-bold text-[#0A2947]/60 hidden sm:inline">
+          <span className="text-xs font-bold text-[#0A2947]/60">
             Status
           </span>
         ),
-        cell: ({ row }) => (
-          <span className="hidden sm:inline">
-            {badgeStatusPenjualan(row.original.statusPenjualan)}
-          </span>
-        ),
+        cell: ({ row }) => badgeStatus(row.original.statusPenjualan),
       },
       {
         id: "aksi",
         header: () => <div className="text-right text-xs font-bold text-[#0A2947]/60">Aksi</div>,
         cell: ({ row }) => {
-          const isDraft = row.original.statusPenjualan === "DRAFT";
+          const aksi = aksiPenjualan(row.original, permissions);
           const targetId = row.original.id;
 
           return (
@@ -329,7 +287,7 @@ export default function HalamanDaftarPenjualan({
                     Lihat Detail
                   </DropdownMenuItem>
 
-                  {isDraft && (
+                  {aksi.bayar && (
                     <>
                       <DropdownMenuSeparator className="bg-[#0A2947]/10" />
                       <DropdownMenuItem
@@ -340,14 +298,23 @@ export default function HalamanDaftarPenjualan({
                           )
                         }
                       >
-                        Terima Penjualan
+                        Terima Pembayaran
                       </DropdownMenuItem>
+                    </>
+                  )}
+                  {aksi.void && (
+                    <>
+                      <DropdownMenuSeparator className="bg-[#0A2947]/10" />
                       <DropdownMenuItem
                         className="cursor-pointer text-[#D4A373] focus:text-[#D4A373] focus:bg-[#D4A373]/10 font-bold"
                         onClick={() => setVoidTarget(row.original)}
                       >
                         Void Penjualan
                       </DropdownMenuItem>
+                    </>
+                  )}
+                  {aksi.hapus && (
+                    <>
                       <DropdownMenuSeparator className="bg-[#0A2947]/10" />
                       <DropdownMenuItem
                         className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10 font-bold"
@@ -364,7 +331,7 @@ export default function HalamanDaftarPenjualan({
         },
       },
     ],
-    [router],
+    [router, permissions],
   );
 
   return (
@@ -424,55 +391,30 @@ export default function HalamanDaftarPenjualan({
               />
             </div>
 
-            {/* Baris 2: 2 kolom Status */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#0A2947]">Status Bayar</label>
-                <Select
-                  value={filters.statusBayar ?? "ALL"}
-                  onValueChange={(val) =>
-                    setFilters({
-                      ...filters,
-                      statusBayar:
-                        val === "ALL" ? undefined : (val as StatusBayar),
-                    })
-                  }
-                >
-                  <SelectTrigger className="cursor-pointer w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]">
-                    <SelectValue placeholder="Status bayar" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
-                    <SelectItem value="ALL" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Semua Status Bayar</SelectItem>
-                    <SelectItem value="UNPAID" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Belum Bayar</SelectItem>
-                    <SelectItem value="PAID" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Lunas</SelectItem>
-                    <SelectItem value="PARTIAL" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Sebagian</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#0A2947]">Status Transaksi</label>
-                <Select
-                  value={filters.statusPenjualan ?? "ALL"}
-                  onValueChange={(val) =>
-                    setFilters({
-                      ...filters,
-                      statusPenjualan:
-                        val === "ALL" ? undefined : (val as StatusPenjualan),
-                    })
-                  }
-                >
-                  <SelectTrigger className="cursor-pointer w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]">
-                    <SelectValue placeholder="Status penjualan" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
-                    <SelectItem value="ALL" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Semua Status</SelectItem>
-                    <SelectItem value="DRAFT" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Draft</SelectItem>
-                    <SelectItem value="FINAL" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Final</SelectItem>
-                    <SelectItem value="VOID" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Void</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Baris 2: Status */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#0A2947]">Status</label>
+              <Select
+                value={filters.statusPenjualan ?? "ALL"}
+                onValueChange={(val) =>
+                  setFilters({
+                    ...filters,
+                    statusPenjualan: val === "ALL" ? undefined : (val as StatusPenjualan),
+                  })
+                }
+              >
+                <SelectTrigger className="cursor-pointer w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                  <SelectItem value="ALL" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Semua Status</SelectItem>
+                  {URUTAN_STATUS_PENJUALAN.map((status) => (
+                    <SelectItem key={status} value={status} className="cursor-pointer font-medium hover:bg-[#0A2947]/5">
+                      {TAMPILAN_STATUS_PENJUALAN[status].label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Baris 3: 2 kolom Jenis */}
@@ -586,14 +528,42 @@ export default function HalamanDaftarPenjualan({
             {pesanError(daftar.error, "Gagal memuat data penjualan.")}
           </p>
         ) : (
-          <DataTable
-            columns={columns}
-            data={penjualanList}
-            loading={lingkup === null || daftar.isLoading}
-            emptyMessage="Belum ada data penjualan."
-            searchKey="noReferensi"
-            searchPlaceholder="Cari no. referensi..."
-          />
+          <>
+            <DataTable
+              columns={columns}
+              data={penjualanList}
+              loading={lingkup === null || daftar.isLoading}
+              emptyMessage="Belum ada data penjualan."
+            />
+            {navigasi.teks && (
+              <nav
+                aria-label="Halaman daftar penjualan"
+                className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3"
+              >
+                <p className="text-xs font-medium text-[#0A2947]/60">{navigasi.teks}</p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!navigasi.sebelumnya || daftar.isFetching}
+                    onClick={() => setHalaman((h) => h - 1)}
+                    className="cursor-pointer gap-1 border-[#0A2947]/20 font-bold text-[#0A2947] hover:bg-[#0A2947]/5"
+                  >
+                    <ChevronLeft className="h-4 w-4" /> Sebelumnya
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!navigasi.berikutnya || daftar.isFetching}
+                    onClick={() => setHalaman((h) => h + 1)}
+                    className="cursor-pointer gap-1 border-[#0A2947]/20 font-bold text-[#0A2947] hover:bg-[#0A2947]/5"
+                  >
+                    Berikutnya <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </nav>
+            )}
+          </>
         )}
       </div>
 
@@ -610,10 +580,7 @@ export default function HalamanDaftarPenjualan({
               Void Penjualan {voidTarget?.noReferensi}?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
-              Tindakan ini akan membatalkan transaksi secara permanen (menjadi
-              VOID) dan membatalkan sesi <i>booking</i> (jika ada). Jika
-              transaksi ini sudah ada pembayarannya, Anda harus melakukan void
-              pada data pembayarannya terlebih dahulu.
+              {PESAN_VOID_PENJUALAN}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">

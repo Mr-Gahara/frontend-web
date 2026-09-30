@@ -17,7 +17,7 @@ export const sesiBookingApi = {
   /** Booking yang dimulai pada tanggal lokal YYYY-MM-DD; backend hanya membaca query tanggal. */
   daftar: (tanggal: string) =>
     apiData.get<SesiBookingResponse[]>(EP.sesiBooking.list, { tanggal }),
-  /** Buat booking lewat jalur batch; backend membuat penjualan booking FINAL (kontrak/temuan.md butir 56). */
+  /** Buat booking lewat jalur batch; backend membuat penjualan booking tersimpan UNPAID (backend 465b438). */
   buat: (payload: SesiBookingBatchPayload) =>
     apiData.post<SesiBookingBatchResponse>(EP.sesiBooking.list, payload),
 };

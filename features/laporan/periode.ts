@@ -1,10 +1,13 @@
 import type { LaporanLabaRugiData } from "@/types/laporan";
+import { keTanggalLokal } from "@/lib/waktu";
 
 /** Periode yang diterima GET /laporan/laba-rugi (laporanController). */
 export type PeriodeLaporan = "harian" | "mingguan" | "bulanan";
 
 /**
- * Filter laba rugi. Rentang dikirim sebagai ISO dan ikut menjadi kunci cache,
+ * Filter laba rugi. Tanggal dikirim sebagai hari lokal YYYY-MM-DD, satu-satunya
+ * bentuk yang diterima backend sejak 465b438 (hari WIB, keduanya ikut
+ * dihitung); ISO dengan jam dijawab 400. Rentang ikut menjadi kunci cache,
  * sehingga periode berjalan dan periode pembandingnya tersimpan terpisah.
  */
 export interface RentangLaporan {
@@ -22,15 +25,10 @@ function awalHari(d: Date): Date {
   return hasil;
 }
 
-function akhirHari(d: Date): Date {
-  const hasil = new Date(d);
-  hasil.setHours(23, 59, 59, 999);
-  return hasil;
-}
-
 /**
- * Rentang periode berjalan sampai akhir hari ini, sama dengan halaman lama:
- * harian hari ini, mingguan sejak Senin, bulanan sejak tanggal 1.
+ * Rentang periode berjalan sampai hari ini, sama dengan halaman lama: harian
+ * hari ini (startDate sama dengan endDate, syarat backend untuk periode
+ * harian), mingguan sejak Senin, bulanan sejak tanggal 1.
  */
 export function rentangPeriode(periode: PeriodeLaporan, sekarang: Date = new Date()): RentangLaporan {
   let awal = awalHari(sekarang);
@@ -40,7 +38,7 @@ export function rentangPeriode(periode: PeriodeLaporan, sekarang: Date = new Dat
   } else if (periode === "bulanan") {
     awal = new Date(sekarang.getFullYear(), sekarang.getMonth(), 1);
   }
-  return { periode, startDate: awal.toISOString(), endDate: akhirHari(sekarang).toISOString() };
+  return { periode, startDate: keTanggalLokal(awal), endDate: keTanggalLokal(sekarang) };
 }
 
 /**
@@ -79,8 +77,8 @@ export function rentangPeriodeSebelumnya(
 /** Bulan kalender penuh, dipakai kartu ringkasan di layout keuangan. */
 export function rentangBulanIni(sekarang: Date = new Date()): RentangLaporan {
   const awal = new Date(sekarang.getFullYear(), sekarang.getMonth(), 1);
-  const akhir = new Date(sekarang.getFullYear(), sekarang.getMonth() + 1, 0, 23, 59, 59, 999);
-  return { periode: "bulanan", startDate: awal.toISOString(), endDate: akhir.toISOString() };
+  const akhir = new Date(sekarang.getFullYear(), sekarang.getMonth() + 1, 0);
+  return { periode: "bulanan", startDate: keTanggalLokal(awal), endDate: keTanggalLokal(akhir) };
 }
 
 /** Jumlah satu kolom di seluruh baris; nilai yang bukan angka dihitung 0, seperti halaman lama. */

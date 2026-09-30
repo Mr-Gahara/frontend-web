@@ -1,4 +1,5 @@
-import type { PembayaranRequest } from "@/types/pembayaran";
+import type { PembatalanPembayaranRequest, PembayaranRequest } from "@/types/pembayaran";
+import type { MetodePembayaran } from "@/types/metodePembayaran";
 
 /** Nominal dari isian berformat rupiah; null bila tidak ada angka. */
 export function nominalDariTeks(teks: string): number | null {
@@ -6,9 +7,30 @@ export function nominalDariTeks(teks: string): number | null {
   return Number.isNaN(n) ? null : n;
 }
 
+/**
+ * Keterangan akun kas tujuan untuk metode terpilih. Sejak backend 465b438
+ * pembayaran selalu masuk ke akun kas milik metodenya, sehingga form hanya
+ * menampilkannya.
+ */
+export function teksAkunTujuan(metode: Pick<MetodePembayaran, "akunKas"> | undefined): string {
+  if (!metode) return "Pilih metode pembayaran lebih dulu.";
+  const akun = metode.akunKas;
+  if (!akun?.namaAkun) return "-";
+  return akun.nomorAkun ? `${akun.namaAkun} (${akun.nomorAkun})` : akun.namaAkun;
+}
+
+/**
+ * Payload PUT /pembayaran/:id untuk membatalkan pembayaran. Alasan opsional
+ * (keputusan penyesuaian 465b438); bila diisi, backend menyalinnya sebagai
+ * alasan di buku mutasi kas.
+ */
+export function susunPayloadBatalPembayaran(alasan: string): PembatalanPembayaranRequest {
+  const catatan = alasan.trim();
+  return catatan ? { status: "VOID", catatan } : { status: "VOID" };
+}
+
 export interface IsianPembayaran {
   penjualanID: string;
-  akunKasID: string;
   metodePembayaranID: string;
   jumlahBayarStr: string;
   catatan: string;
@@ -20,11 +42,10 @@ export interface IsianPembayaran {
  * null berarti penjualan belum termuat, sehingga batas atas tidak diperiksa.
  */
 export function validasiPembayaran(
-  isian: Pick<IsianPembayaran, "akunKasID" | "metodePembayaranID" | "jumlahBayarStr">,
+  isian: Pick<IsianPembayaran, "metodePembayaranID" | "jumlahBayarStr">,
   sisaTagihan: number | null,
   formatRupiah: (angka: number) => string,
 ): string | null {
-  if (!isian.akunKasID) return "Silakan pilih Akun Kas tujuan penerimaan pembayaran.";
   if (!isian.metodePembayaranID) return "Silakan pilih Metode Pembayaran.";
   const nominal = nominalDariTeks(isian.jumlahBayarStr);
   if (nominal === null || nominal <= 0) return "Jumlah pembayaran tidak valid.";
@@ -35,16 +56,15 @@ export function validasiPembayaran(
 }
 
 /**
- * Payload POST /pembayaran. status tidak dikirim (keputusan K2a): backend
- * menentukannya dari metode, dan field isAutomated yang dibacanya tidak ada di
- * model, sehingga hasilnya selalu PAID. tanggalBayar wajib untuk PAID dan tidak
- * boleh mendahului tanggal transaksi.
+ * Payload POST /pembayaran. status dan akunKasID tidak dikirim: sejak backend
+ * 465b438 keduanya diatur server (akun kas diambil dari metode) dan
+ * mengirimnya ditolak 400. tanggalBayar wajib untuk PAID dan tidak boleh
+ * mendahului tanggal transaksi.
  */
 export function susunPayloadPembayaran(isian: IsianPembayaran, sekarang: Date): PembayaranRequest {
   const catatan = isian.catatan.trim();
   return {
     penjualanID: isian.penjualanID,
-    akunKasID: isian.akunKasID,
     metodePembayaranID: isian.metodePembayaranID,
     jumlahBayar: nominalDariTeks(isian.jumlahBayarStr) ?? 0,
     tanggalBayar: sekarang.toISOString(),

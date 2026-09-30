@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import {
   BASIS,
   api,
-  batalkan,
+  tutupSuratJalanUji,
   bukaDenganAuth,
   login,
   siapkanSuratJalan,
@@ -12,11 +12,14 @@ import {
 /*
  * Spec pembanding daftar surat jalan DIKIRIM: pengiriman di ruang gudang dan
  * penerimaan di ruang outlet (keputusan pemilik proyek K3 pilihan B dan K4).
- * Surat jalan dibuat dan dikirim lewat API, lalu dibatalkan dari DIKIRIM di
- * akhir sehingga stok gudang kembali; setiap run menambah satu surat jalan
- * BATAL dan dua entri jurnal gudang. Harapan jumlah kartu dihitung dari
- * seluruh surat jalan yang berstatus DIKIRIM, karena backend mengabaikan
- * query status (kontrak/temuan.md butir 33).
+ * Surat jalan dibuat dari pengajuan uji milik spec (keputusan R8 dan R13) dan
+ * dikirim lewat API, lalu ditutup lewat terima penuh di akhir, karena sejak
+ * backend 465b438 surat jalan DIKIRIM tidak dapat dibatalkan (kontrak P12).
+ * Setiap run memindahkan satu unit bahan uji dari gudang ke outlet secara
+ * permanen. Harapan jumlah kartu dihitung dari seluruh surat jalan yang
+ * berstatus DIKIRIM, karena backend dahulu mengabaikan query status
+ * (kontrak/temuan.md butir 33); cara hitung ini tetap benar sesudah
+ * perbaikannya.
  */
 
 const URL_PENGIRIMAN = BASIS + "/dashboard/gudang/pengirimanStok";
@@ -29,9 +32,7 @@ test.describe("Daftar surat jalan DIKIRIM", () => {
 
   test("pengiriman gudang dan penerimaan outlet hanya menampilkan surat jalan DIKIRIM", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_PENGIRIMAN);
-    const sj = await siapkanSuratJalan(page, auth);
-    test.skip(!sj, "Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup");
-    const transfer: TransferMentah = sj!;
+    const transfer: TransferMentah = await siapkanSuratJalan(page, auth);
 
     try {
       const semua = await api<TransferMentah[]>(page, auth, "GET", "/transferstok");
@@ -59,7 +60,7 @@ test.describe("Daftar surat jalan DIKIRIM", () => {
           .toHaveCount(dikirim.length);
       });
     } finally {
-      await batalkan(page, auth, transfer.id);
+      await tutupSuratJalanUji(page, auth, transfer.id);
     }
   });
 });

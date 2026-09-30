@@ -3,7 +3,7 @@ import {
   BASIS,
   JAWAB_GAGAL,
   api,
-  batalkan,
+  tutupSuratJalanUji,
   bukaDenganAuth,
   login,
   siapkanSuratJalan,
@@ -13,11 +13,12 @@ import {
 /*
  * Spec pembanding alur surat jalan di ruang gudang (keputusan pemilik proyek
  * K3 pilihan B, docs/refactor/keputusan.md). Surat jalan dibuat lewat API dari
- * pengajuan yang layak dan dibiarkan PENDING. Daftar, detail, revisi
- * kuantitas, dan pembatalan dari PENDING diuji dengan data sungguhan;
- * pembatalan di akhir mengembalikan pengajuan ke PENDING, sehingga setiap run
- * menambah satu surat jalan BATAL. Kirim hanya diuji jalur gagalnya lewat
- * page.route, karena kirim yang berhasil memotong stok gudang.
+ * pengajuan uji milik spec (keputusan R8 dan R13) dan dibiarkan PENDING.
+ * Daftar, detail, revisi kuantitas, dan pembatalan dari PENDING diuji dengan
+ * data sungguhan; pembatalan di akhir mengembalikan pengajuan uji ke PENDING,
+ * sehingga dipakai ulang run berikutnya dan setiap run hanya menambah satu
+ * surat jalan BATAL. Kirim hanya diuji jalur gagalnya lewat page.route,
+ * karena kirim yang berhasil memotong stok gudang.
  */
 
 const URL_DAFTAR = BASIS + "/dashboard/gudang/transferStok";
@@ -32,9 +33,7 @@ test.describe("Alur surat jalan gudang", () => {
 
   test("daftar, detail, kirim gagal, revisi kuantitas, dan batal dari PENDING", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
-    const sj = await siapkanSuratJalan(page, auth, { kirim: false });
-    test.skip(!sj, "Tidak ada pengajuan APPROVED atau PENDING berarah benar tanpa surat jalan dengan stok gudang cukup");
-    const transfer: TransferMentah = sj!;
+    const transfer: TransferMentah = await siapkanSuratJalan(page, auth, { kirim: false });
     const polaDetail = new RegExp(`/api/transferstok/${transfer.id}(\\?|$)`, "i");
     let dibatalkan = false;
 
@@ -122,7 +121,7 @@ test.describe("Alur surat jalan gudang", () => {
         await expect.soft(page.getByRole("button", { name: /kirim barang sekarang/i }), "tombol aksi hilang setelah batal").toHaveCount(0);
       });
     } finally {
-      if (!dibatalkan) await batalkan(page, auth, transfer.id);
+      if (!dibatalkan) await tutupSuratJalanUji(page, auth, transfer.id);
     }
   });
 });

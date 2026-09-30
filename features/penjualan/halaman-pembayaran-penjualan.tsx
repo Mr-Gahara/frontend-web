@@ -3,13 +3,12 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isNotFound, pesanError } from "@/lib/api/error";
-import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
-import { akunKasAktif } from "@/features/akun-kas/filter";
 import { useDaftarMetodePembayaran } from "@/features/metode-pembayaran/hooks";
 import { metodeAktif } from "@/features/metode-pembayaran/filter";
 import { useBuatPembayaran } from "@/features/pembayaran/hooks";
 import {
   nominalDariTeks,
+  teksAkunTujuan,
   susunPayloadPembayaran,
   validasiPembayaran,
 } from "@/features/pembayaran/payload";
@@ -60,7 +59,6 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
 
   // --- STATE FORM ---
   const [jumlahBayarStr, setJumlahBayarStr] = useState("");
-  const [akunKasID, setAkunKasID] = useState("");
   const [metodePembayaranID, setMetodePembayaranID] = useState("");
   const [catatan, setCatatan] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
@@ -72,10 +70,9 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
     error: errorPenjualan,
   } = usePenjualan(penjualanID);
 
-  const daftarAkunKas = useDaftarAkunKas();
-  const akunKasList = useMemo(() => akunKasAktif(daftarAkunKas.data ?? []), [daftarAkunKas.data]);
   const daftarMetode = useDaftarMetodePembayaran();
   const metodeList = useMemo(() => metodeAktif(daftarMetode.data ?? []), [daftarMetode.data]);
+  const metodeTerpilih = metodeList.find((m) => m.id === metodePembayaranID);
 
   // Dialog konfirmasi hanya tertutup saat berhasil; saat gagal tetap terbuka
   // beserta pesannya (keputusan Fase 0). Kedua tombolnya nonaktif selama
@@ -96,7 +93,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
   const handleValidation = (e: React.FormEvent) => {
     e.preventDefault();
     const pesan = validasiPembayaran(
-      { akunKasID, metodePembayaranID, jumlahBayarStr },
+      { metodePembayaranID, jumlahBayarStr },
       penjualan ? penjualan.sisaTagihan : null,
       formatRupiah,
     );
@@ -107,7 +104,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
   const executePayment = () => {
     createPembayaranMutation.mutate(
       susunPayloadPembayaran(
-        { penjualanID, akunKasID, metodePembayaranID, jumlahBayarStr, catatan },
+        { penjualanID, metodePembayaranID, jumlahBayarStr, catatan },
         new Date(),
       ),
     );
@@ -139,6 +136,22 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
         </p>
         <Button variant="outline" onClick={() => router.push("/dashboard/outlet/penjualan")}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Daftar
+        </Button>
+      </div>
+    );
+  }
+
+  if (penjualan.statusPenjualan === "DRAFT" || penjualan.statusPenjualan === "VOID") {
+    // DRAFT belum dapat dibayar dan VOID tidak dapat dibayar lagi (backend 465b438).
+    return (
+      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-16 text-center">
+        <p role="alert" className="text-sm font-bold text-[#0A2947]/70">
+          {penjualan.statusPenjualan === "DRAFT"
+            ? "Penjualan masih Draft. Simpan penjualan lewat Finalisasi Invoice di halaman detail sebelum menerima pembayaran."
+            : "Penjualan sudah dibatalkan dan tidak dapat dibayar."}
+        </p>
+        <Button variant="outline" onClick={() => router.push(`/dashboard/outlet/penjualan/${penjualanID}`)}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Ke Detail Penjualan
         </Button>
       </div>
     );
@@ -195,32 +208,6 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Pilihan Akun Kas */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947]">
-                  Akun Kas Tujuan <span className="text-red-500">*</span>
-                </label>
-                <Select value={akunKasID} onValueChange={setAkunKasID}>
-                  <SelectTrigger className="w-full cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-medium">
-                    <SelectValue placeholder="Pilih akun kas..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
-                    {akunKasList.map((kas) => {
-                      const validId = kas.id;
-                      return (
-                        <SelectItem
-                          key={validId}
-                          value={validId}
-                          className="cursor-pointer hover:bg-[#0A2947]/5 font-medium"
-                        >
-                          {kas.namaAkun}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Pilihan Metode Pembayaran */}
               <div className="space-y-2">
                 <label className="text-sm font-bold text-[#0A2947]">
@@ -248,6 +235,20 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
                     })}
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Akun kas tujuan ditentukan backend dari metode (backend 465b438) */}
+              <div className="space-y-2">
+                <p className="text-sm font-bold text-[#0A2947]">Akun Kas Tujuan</p>
+                <p
+                  aria-label="Akun Kas Tujuan"
+                  className="flex h-9 items-center rounded-md border border-[#0A2947]/10 bg-[#FFFAF3]/60 px-3 text-sm font-medium text-[#0A2947]"
+                >
+                  {teksAkunTujuan(metodeTerpilih)}
+                </p>
+                <p className="text-xs font-medium text-[#0A2947]/50">
+                  Mengikuti akun kas metode pembayaran yang dipilih.
+                </p>
               </div>
             </div>
 

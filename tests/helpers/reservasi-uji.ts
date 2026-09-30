@@ -84,10 +84,8 @@ export async function hapusLewatApi(page: Page, auth: Auth, path: string, id: st
 /*
  * Fixture booking (keputusan R2b dan R2c). Tipe aset, tarif, aset, dan
  * pelanggan uji bernama tetap dan dibuat sekali bila belum ada. Booking dibuat
- * per test lewat jalur batch, yang selalu membuat penjualan FINAL, lalu
- * dibatalkan lewat satu-satunya jalur di backend: bayar Rp1, hapus pembayaran
- * itu (penjualan kembali DRAFT dan saldo akun kas kembali), lalu void
- * penjualan (booking menjadi Batal).
+ * per test lewat jalur batch, yang membuat penjualan tersimpan UNPAID, lalu
+ * dibatalkan dengan mem-void penjualannya (booking menjadi VOID).
  *
  * Booking dibaca dari GET /sesibooking tanpa tanggal. Kunci cache tanpa
  * tanggal dibersihkan saat booking dibuat maupun saat penjualannya di-void,
@@ -217,35 +215,22 @@ export async function buatBooking(
   return b as SesiBookingMentah;
 }
 
-/** Membatalkan booking lewat penjualannya (keputusan R2c); dipakai di finally, sehingga memakai expect.soft. */
+/**
+ * Membatalkan booking lewat penjualannya (keputusan R2c, disederhanakan untuk
+ * backend 465b438): penjualan booking kini tersimpan UNPAID, sehingga cukup
+ * pembayaran PAID-nya dibatalkan bila ada, lalu penjualannya di-void; seluruh
+ * booking di dalamnya ikut VOID. Dipakai di finally, sehingga memakai expect.soft.
+ */
 export async function batalkanBooking(page: Page, auth: Auth, penjualanId: string | undefined) {
   if (!penjualanId) return;
-  const p = await api<{ statusPenjualan: string }>(page, auth, "GET", "/penjualan/" + penjualanId);
+  const p = await api<{ statusPenjualan: string; pembayaran?: unknown[] }>(page, auth, "GET", "/penjualan/" + penjualanId);
   expect.soft(p.status, "baca penjualan booking: " + p.pesan).toBe(200);
-  const status = p.data?.statusPenjualan;
-  if (status === "VOID") return;
-  if (status === "FINAL") {
-    const metode = (await bacaDaftar<Berid & { isActive: boolean }>(page, auth, "/metodepembayaran", true)).find(
-      (m) => m.isActive,
-    );
-    const akun = (await bacaDaftar<Berid & { status: string }>(page, auth, "/akunkas", true)).find(
-      (a) => a.status === "aktif",
-    );
-    expect.soft(metode, "metode pembayaran aktif untuk membatalkan booking").toBeTruthy();
-    expect.soft(akun, "akun kas aktif untuk membatalkan booking").toBeTruthy();
-    if (!metode || !akun) return;
-    const bayar = await api<unknown>(page, auth, "POST", "/pembayaran", {
-      penjualanID: penjualanId,
-      metodePembayaranID: metode.id,
-      akunKasID: akun.id,
-      jumlahBayar: 1,
-      tanggalBayar: new Date().toISOString(),
-    });
-    expect.soft(bayar.status, "bayar Rp1 untuk membatalkan booking: " + bayar.pesan).toBeLessThan(300);
-    const idBayar = (normalizeId(bayar.data) as unknown as Berid | undefined)?.id;
-    if (!idBayar) return;
-    const hapus = await api(page, auth, "DELETE", "/pembayaran/" + idBayar);
-    expect.soft(hapus.status, "hapus pembayaran Rp1: " + hapus.pesan).toBeLessThan(300);
+  if (p.status !== 200 || p.data?.statusPenjualan === "VOID") return;
+  const pembayaran = normalizeId(p.data?.pembayaran ?? []) as unknown as (Berid & { status: string })[];
+  for (const bayar of pembayaran) {
+    if (bayar.status !== "PAID") continue;
+    const b = await api(page, auth, "PUT", "/pembayaran/" + bayar.id, { status: "VOID", catatan: "Pembersihan e2e" });
+    expect.soft(b.status, "batalkan pembayaran booking: " + b.pesan).toBe(200);
   }
   const v = await api(page, auth, "PUT", "/penjualan/" + penjualanId, { statusPenjualan: "VOID" });
   expect.soft(v.status, "void penjualan booking: " + v.pesan).toBeLessThan(300);
@@ -286,6 +271,19 @@ export async function siapkanFixtureBuatReservasi(page: Page, auth: Auth): Promi
     { namaAset: NAMA_ASET_PERBAIKAN, tipeAsetID: fx.tipeAsetId, status: "perbaikan" },
     "aset perbaikan",
   );
+  return { ...fx, ...(await siapkanDiskonUji(page, auth)) };
+}
+
+/**
+ * Diskon item dan diskon global uji (keputusan R7b): cakupan Item tanpa daftar
+ * produk dan cakupan Global, keduanya Aktif dan dapat digabung. Bernama tetap
+ * dan dibuat sekali bila belum ada; dipakai spec buat reservasi dan spec alur
+ * penjualan.
+ */
+export async function siapkanDiskonUji(
+  page: Page,
+  auth: Auth,
+): Promise<{ diskonItemId: string; diskonGlobalId: string }> {
   const diskonItem = await cariAtauBuat<Berid & { namaDiskon: string }>(
     page,
     auth,
@@ -302,5 +300,5 @@ export async function siapkanFixtureBuatReservasi(page: Page, auth: Auth): Promi
     { namaDiskon: NAMA_DISKON_GLOBAL, cakupan: "Global", tipe: "nominal", nilai: 1000, bisaDigabung: true, status: "Aktif" },
     "diskon global",
   );
-  return { ...fx, diskonItemId: diskonItem.id, diskonGlobalId: diskonGlobal.id };
+  return { diskonItemId: diskonItem.id, diskonGlobalId: diskonGlobal.id };
 }

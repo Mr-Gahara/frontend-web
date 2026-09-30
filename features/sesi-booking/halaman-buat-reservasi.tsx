@@ -22,6 +22,7 @@ import { PanelRingkasan } from "./panel-ringkasan";
 import { susunPayloadBooking } from "./payload";
 import { skemaBooking, type NilaiFormBooking } from "./schema";
 import { bookingBentrok } from "./tampilan";
+import { bookingBertumpukBelumDibayar } from "./status";
 import { isianWaktuItem, rentangWaktuItem, waktuItemDari, type WaktuItem } from "./waktu-booking";
 
 /** Pesan gagal simpan: isi errors dari galat validasi digabung bila ada, sama dengan halaman lama. */
@@ -86,6 +87,14 @@ export default function HalamanBuatReservasi() {
     return rentang && item?.dataAset ? bookingBentrok(bookingData, item.dataAset, rentang.mulai, rentang.selesai) : null;
   });
   const adaBentrok = bentrokPerItem.some((b) => b !== null);
+  // Booking belum dibayar tidak mengunci jadwal (backend 465b438): hanya peringatan.
+  const belumDibayarPerItem = watchedItems.map((item, index) => {
+    const waktu = waktuItems[index];
+    const rentang = waktu ? rentangWaktuItem(waktu) : null;
+    return rentang && item?.dataAset
+      ? bookingBertumpukBelumDibayar(bookingData, item.dataAset, rentang.mulai, rentang.selesai)
+      : null;
+  });
 
   const namaPelanggan = pelangganList.find((p) => p.id === watchedPelangganId)?.namaPelanggan ?? "Belum dipilih";
 
@@ -268,6 +277,7 @@ export default function HalamanBuatReservasi() {
                     diskonTerpilih={watchedItems[index]?.diskonItem ?? []}
                     onPilihDiskon={(id) => pilihDiskonItem(index, id)}
                     bentrok={bentrokPerItem[index] ?? null}
+                    belumDibayar={belumDibayarPerItem[index] ?? null}
                   />
                 );
               })}
