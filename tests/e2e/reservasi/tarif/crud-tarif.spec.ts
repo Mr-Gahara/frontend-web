@@ -473,10 +473,10 @@ test.describe("E2E — Tarif › Daftar: tipe aset, keadaan, navigasi, dan hapus
   test("setelah tarif dilepas dari tipe aset, daftar tipe aset menampilkan jumlah tarif terbaru", async ({
     page,
   }) => {
-    // tarifService.update memakai $addToSet untuk tipeAsetID, sehingga tipe aset
-    // tidak dapat dilepas maupun diganti, dan membersihkan cache tipe aset dengan
-    // payload.tenantID yang undefined. Badan test ini membuktikan perilaku benar.
-    test.fixme(true, "Menunggu backend: ubah tarif tidak dapat melepas tipe aset");
+    // tarifService.update dahulu memakai $addToSet untuk tipeAsetID, sehingga
+    // tipe aset tidak dapat dilepas maupun diganti, dan membersihkan cache tipe
+    // aset dengan tenantID yang undefined. Diperbaiki backend 465b438; test ini
+    // kembali dijalankan setelah terbukti lolos.
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
     const nama = namaTarifUji("Lepas Tipe");
     let tipe: TipeAsetMentah | undefined;
