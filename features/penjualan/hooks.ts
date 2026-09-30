@@ -11,8 +11,6 @@ import type { PenjualanFilterParams, PenjualanRequest } from "@/types/penjualan"
 type Callback = { onSuccess?: () => void; onError?: (err: unknown) => void };
 
 /** Jumlah baris per halaman daftar, sama dengan ukuran halaman DataTable. */
-export const BARIS_PER_HALAMAN = 10;
-
 /**
  * Satu halaman daftar penjualan tenant. Backend 465b438 selalu mengirim
  * daftar per halaman (20 terbaru tanpa page), sehingga halaman dan limit
@@ -20,8 +18,8 @@ export const BARIS_PER_HALAMAN = 10;
  * selama halaman berikutnya dimuat. siap false berarti lingkup belum siap
  * dan belum ada permintaan.
  */
-export function useDaftarPenjualan(filter: PenjualanFilterParams, halaman: number, siap: boolean) {
-  const params = { ...filterServerPenjualan(filter), page: String(halaman), limit: String(BARIS_PER_HALAMAN) };
+export function useDaftarPenjualan(filter: PenjualanFilterParams, halaman: number, ukuran: number, siap: boolean) {
+  const params = { ...filterServerPenjualan(filter), page: String(halaman), limit: String(ukuran) };
   return useQuery({
     queryKey: queryKeys.penjualan.daftar(params),
     queryFn: () => penjualanApi.daftar(params),

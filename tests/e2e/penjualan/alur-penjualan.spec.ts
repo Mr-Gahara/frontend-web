@@ -491,7 +491,7 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     }
   });
 
-  test("daftar per halaman: permintaan membawa page dan limit, dan Berikutnya membuka halaman kedua", async ({ page }) => {
+  test("daftar per halaman: permintaan membawa page dan limit, dan Next membuka halaman kedua", async ({ page }) => {
     const pola = /\/api\/penjualan(\?|$)/i;
     const tAwal = page.waitForResponse((r) => r.request().method() === "GET" && pola.test(r.url()));
     await page.goto(DAFTAR, { waitUntil: "commit" });
@@ -500,12 +500,13 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     expect(url.searchParams.get("page")).toBe("1");
     expect(url.searchParams.get("limit")).toBe("10");
     const pag = (await res.json()).pagination as { total: number; totalPages: number };
-    await expect(page.getByText(`Halaman 1 dari ${Math.max(1, pag.totalPages)} (${pag.total} penjualan)`)).toBeVisible();
+    await expect(page.getByText(`${pag.total} total data`, { exact: true })).toBeVisible();
+    await expect(page.getByText(`Halaman 1 dari ${Math.max(1, pag.totalPages)}`, { exact: true })).toBeVisible();
     test.skip(pag.totalPages < 2, "Data uji penjualan kurang dari dua halaman");
     const tDua = page.waitForResponse(
       (r) => r.request().method() === "GET" && pola.test(r.url()) && new URL(r.url()).searchParams.get("page") === "2",
     );
-    await page.getByRole("button", { name: /berikutnya/i }).click();
+    await page.getByRole("button", { name: "Next", exact: true }).click();
     const kedua = normalizeId(((await (await tDua).json()).data ?? []) as { noReferensi: string }[]);
     await expect(page.getByText(/^Halaman 2 dari/)).toBeVisible();
     expect(kedua.length, "halaman kedua berisi penjualan").toBeGreaterThan(0);

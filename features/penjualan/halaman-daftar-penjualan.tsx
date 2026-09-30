@@ -7,7 +7,13 @@ import { useState, useMemo, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { pesanError } from "@/lib/api/error";
 import { useDaftarPenjualan, useHapusPenjualan, useVoidPenjualan } from "./hooks";
-import { navigasiHalaman, saringPenjualan, type LingkupPenjualan } from "./filter";
+import {
+  PILIHAN_UKURAN_HALAMAN,
+  saringPenjualan,
+  UKURAN_HALAMAN_BAWAAN,
+  type LingkupPenjualan,
+  type UkuranHalaman,
+} from "./filter";
 import { aksiPenjualan } from "./izin";
 import { PESAN_VOID_PENJUALAN, TAMPILAN_STATUS_PENJUALAN, URUTAN_STATUS_PENJUALAN } from "./tampilan";
 import { useSession } from "@/lib/auth/useSession";
@@ -50,14 +56,11 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
-  ArrowUpDown,
   MoreHorizontal,
   Plus,
   RotateCcw,
   SlidersHorizontal,
   ReceiptText,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 
 const formatRupiah = (angka: number) =>
@@ -116,12 +119,13 @@ export default function HalamanDaftarPenjualan({
   const [filters, setFilters] = useState<PenjualanFilterParams>(emptyFilter);
   const [appliedFilters, setAppliedFilters] = useState<PenjualanFilterParams>(emptyFilter);
   const [halaman, setHalaman] = useState(1);
+  const [ukuranHalaman, setUkuranHalaman] = useState<UkuranHalaman>(UKURAN_HALAMAN_BAWAAN);
   const [showFilter, setShowFilter] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<Penjualan | null>(null);
   const [voidTarget, setVoidTarget] = useState<Penjualan | null>(null);
 
-  const daftar = useDaftarPenjualan(appliedFilters, halaman, lingkup !== null && !penghalang);
+  const daftar = useDaftarPenjualan(appliedFilters, halaman, ukuranHalaman, lingkup !== null && !penghalang);
   // Backend tidak dapat menyaring lokasi; lingkup outlet diterapkan di klien
   // per halaman (features/penjualan/filter.ts). Pada MVP satu outlet hasilnya
   // sama dengan tanpa penyaringan; wajib ditinjau sebelum multi-outlet.
@@ -129,7 +133,6 @@ export default function HalamanDaftarPenjualan({
     () => (lingkup ? saringPenjualan(daftar.data?.data ?? [], lingkup) : []),
     [daftar.data, lingkup],
   );
-  const navigasi = navigasiHalaman(daftar.data?.pagination ?? null, halaman);
 
   // Dialog hapus dan void hanya tertutup saat berhasil; saat gagal tetap
   // terbuka beserta pesannya (keputusan Fase 0).
@@ -181,17 +184,7 @@ export default function HalamanDaftarPenjualan({
     () => [
       {
         accessorKey: "noReferensi",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] cursor-pointer"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            No. Referensi
-            <ArrowUpDown className="ml-1 h-3 w-3" />
-          </Button>
-        ),
+        header: () => <span className="text-xs font-bold text-[#0A2947]/60">No. Referensi</span>,
         cell: ({ row }) => (
           <span className="font-bold font-mono text-[#0A2947] text-xs sm:text-sm">
             {row.original.noReferensi}
@@ -200,17 +193,7 @@ export default function HalamanDaftarPenjualan({
       },
       {
         accessorKey: "tanggalTransaksi",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] cursor-pointer hidden sm:flex"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Tanggal
-            <ArrowUpDown className="ml-1 h-3 w-3" />
-          </Button>
-        ),
+        header: () => <span className="text-xs font-bold text-[#0A2947]/60 hidden sm:inline">Tanggal</span>,
         cell: ({ row }) => (
           <span className="text-xs sm:text-sm font-medium text-[#0A2947]/70 hidden sm:inline">
             {formatTanggal(row.original.tanggalTransaksi)}
@@ -232,17 +215,7 @@ export default function HalamanDaftarPenjualan({
       },
       {
         accessorKey: "totalTagihan",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] cursor-pointer"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Total
-            <ArrowUpDown className="ml-1 h-3 w-3" />
-          </Button>
-        ),
+        header: () => <span className="text-xs font-bold text-[#0A2947]/60">Total</span>,
         cell: ({ row }) => (
           <span className="font-bold text-[#0A2947] text-xs sm:text-sm font-mono">
             {formatRupiah(row.original.totalTagihan)}
@@ -534,35 +507,20 @@ export default function HalamanDaftarPenjualan({
               data={penjualanList}
               loading={lingkup === null || daftar.isLoading}
               emptyMessage="Belum ada data penjualan."
+              paginasiServer={{
+                halaman,
+                jumlahHalaman: daftar.data?.pagination?.totalPages ?? 1,
+                total: daftar.data?.pagination?.total ?? 0,
+                ukuran: ukuranHalaman,
+                pilihanUkuran: PILIHAN_UKURAN_HALAMAN,
+                sibuk: daftar.isFetching,
+                onGantiHalaman: setHalaman,
+                onGantiUkuran: (ukuran) => {
+                  setUkuranHalaman(ukuran as UkuranHalaman);
+                  setHalaman(1);
+                },
+              }}
             />
-            {navigasi.teks && (
-              <nav
-                aria-label="Halaman daftar penjualan"
-                className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3"
-              >
-                <p className="text-xs font-medium text-[#0A2947]/60">{navigasi.teks}</p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!navigasi.sebelumnya || daftar.isFetching}
-                    onClick={() => setHalaman((h) => h - 1)}
-                    className="cursor-pointer gap-1 border-[#0A2947]/20 font-bold text-[#0A2947] hover:bg-[#0A2947]/5"
-                  >
-                    <ChevronLeft className="h-4 w-4" /> Sebelumnya
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!navigasi.berikutnya || daftar.isFetching}
-                    onClick={() => setHalaman((h) => h + 1)}
-                    className="cursor-pointer gap-1 border-[#0A2947]/20 font-bold text-[#0A2947] hover:bg-[#0A2947]/5"
-                  >
-                    Berikutnya <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </nav>
-            )}
           </>
         )}
       </div>

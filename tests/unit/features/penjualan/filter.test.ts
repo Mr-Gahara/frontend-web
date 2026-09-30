@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   filterServerPenjualan,
-  navigasiHalaman,
+  PILIHAN_UKURAN_HALAMAN,
+  UKURAN_HALAMAN_BAWAAN,
   saringPenjualan,
   tentukanLingkupPenjualan,
   type LingkupPenjualan,
@@ -123,39 +124,16 @@ describe("saringPenjualan", () => {
   });
 });
 
-describe("navigasiHalaman", () => {
-  const pag = (page: number, total: number, totalPages: number) => ({ page, limit: 10, total, totalPages });
-
-  it("tanpa pagination: tanpa keterangan dan kedua tombol nonaktif", () => {
-    expect(navigasiHalaman(null, 1)).toEqual({ teks: "", sebelumnya: false, berikutnya: false });
-  });
-
-  it("halaman tengah: kedua arah aktif", () => {
-    expect(navigasiHalaman(pag(2, 25, 3), 2)).toEqual({
-      teks: "Halaman 2 dari 3 (25 penjualan)",
-      sebelumnya: true,
-      berikutnya: true,
-    });
-  });
-
-  it("halaman pertama, halaman terakhir, dan daftar kosong", () => {
-    expect(navigasiHalaman(pag(1, 25, 3), 1)).toMatchObject({ sebelumnya: false, berikutnya: true });
-    expect(navigasiHalaman(pag(3, 25, 3), 3)).toMatchObject({ sebelumnya: true, berikutnya: false });
-    expect(navigasiHalaman(pag(1, 0, 0), 1)).toEqual({
-      teks: "Halaman 1 dari 1 (0 penjualan)",
-      sebelumnya: false,
-      berikutnya: false,
-    });
-  });
-
-  it("halaman di luar jumlah halaman tetap dapat mundur", () => {
-    expect(navigasiHalaman(pag(4, 30, 3), 4)).toMatchObject({ sebelumnya: true, berikutnya: false });
-  });
-});
-
 describe("bolehCakupanPenjualan", () => {
   it("hanya pemegang read-location", () => {
     expect(bolehCakupanPenjualan(["read-penjualan", "read-location"])).toBe(true);
     expect(bolehCakupanPenjualan(["read-penjualan"])).toBe(false);
+  });
+});
+describe("pilihan ukuran halaman", () => {
+  it("berada dalam batas limit backend 1 sampai 100 dan memuat bawaannya", () => {
+    expect(PILIHAN_UKURAN_HALAMAN).toEqual([10, 20, 50, 100]);
+    expect(PILIHAN_UKURAN_HALAMAN.every((n) => n >= 1 && n <= 100)).toBe(true);
+    expect(PILIHAN_UKURAN_HALAMAN).toContain(UKURAN_HALAMAN_BAWAAN);
   });
 });

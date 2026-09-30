@@ -1,5 +1,4 @@
 import { lingkupOutlet, type CakupanLokasiOutlet } from "@/features/inventaris/cakupan";
-import type { Paginasi } from "@/lib/api/normalize";
 import type { Penjualan, PenjualanFilterParams } from "@/types/penjualan";
 
 /**
@@ -60,23 +59,8 @@ export function saringPenjualan(daftar: Penjualan[], lingkup: LingkupPenjualan):
   return daftar.filter((p) => dalamLingkupPenjualan(p, lingkup));
 }
 
-export interface NavigasiHalaman {
-  teks: string;
-  sebelumnya: boolean;
-  berikutnya: boolean;
-}
-
-/**
- * Keterangan dan tombol navigasi halaman daftar. Tanpa pagination (belum
- * dimuat) kedua tombol nonaktif. Halaman di luar jumlah halaman, misalnya
- * setelah baris terakhir halaman terakhir dihapus, tetap dapat mundur.
- */
-export function navigasiHalaman(pagination: Paginasi | null, halaman: number): NavigasiHalaman {
-  if (!pagination) return { teks: "", sebelumnya: false, berikutnya: false };
-  const jumlahHalaman = Math.max(1, pagination.totalPages);
-  return {
-    teks: `Halaman ${halaman} dari ${jumlahHalaman} (${pagination.total} penjualan)`,
-    sebelumnya: halaman > 1,
-    berikutnya: halaman < pagination.totalPages,
-  };
-}
+/** Pilihan jumlah baris daftar penjualan; backend menerima limit 1 sampai 100 (LIMIT_MAKS). */
+export const PILIHAN_UKURAN_HALAMAN = [10, 20, 50, 100] as const;
+export type UkuranHalaman = (typeof PILIHAN_UKURAN_HALAMAN)[number];
+/** Bawaan setiap kali halaman dibuka; pilihan lain tidak diingat. */
+export const UKURAN_HALAMAN_BAWAAN: UkuranHalaman = 10;
