@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon, pajak, pelanggan, dan ubah metode pembayaran belum, dan diperiksa saat modul pemiliknya dimigrasikan; buat metode pembayaran dikoreksi bersama `temuan.md` butir 84.
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon, pajak, dan pelanggan belum, dan diperiksa saat modul pemiliknya dimigrasikan; buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, dan ubah metode pembayaran pada 1 Oktober 2026.
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -235,7 +235,8 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Wajib dari klien: `namaPembayaran` dan `akunKasID` (ObjectId yang sah)
 - Field lain yang dikenali: `kategori`, `isActive`
 - Aturan service: akun kas tujuan harus aktif, selain itu 400 (`_tulisDenganAkunKas`); satu akun kas boleh dipakai banyak metode; nama kembar dalam tenant ditolak 409 (indeks unik `{ tenantID, namaPembayaran }` tanpa membedakan huruf besar kecil); paling banyak 10 metode aktif per tenant, dan metode ke-11 ditolak 409 (`BATAS_METODE_AKTIF`)
-- Halaman lama web selalu mengirim `isAutomated`, sehingga seluruh permintaan buatnya ditolak 400 (`temuan.md` butir 84)
+- Web mengirim tepat keempat field allowlist lewat `payloadBuatMetode` (`features/metode-pembayaran/payload.ts`) sejak `3359497`. Halaman lama selalu ikut mengirim `isAutomated` dan `xenditChannelCode`, sehingga seluruh permintaan buatnya ditolak 400 (`temuan.md` butir 84)
+- Batas 10 metode aktif ikut diperiksa saat membuat metode nonaktif (`temuan.md` butir 85), dan nama kembar diperiksa sebelum nama dipangkas (butir 86)
 - Dibaca controller dari body: `-`
 - Diisi server: -
 
@@ -471,9 +472,13 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /metodepembayaran/:id`
 
-- Aturan: validateMetodePembayaranPayload (validators/metodePembayaranValidator.js)
-- Wajib dari klien: -
-- Field lain yang dikenali: -
+- Aturan: validateMetodePembayaranPayload mode update (validators/metodePembayaranValidator.js) di route. Dikoreksi 1 Oktober 2026 terhadap backend `465b438`: allowlist dan field terlarang sama dengan `POST`; seluruh field opsional, tetapi minimal satu harus dikirim ("Tidak ada data yang diperbarui"); `isActive` wajib boolean asli, dan `akunKasID` atau `kategori` berupa string kosong atau `null` ditolak 400
+- Wajib dari klien: - (minimal satu field)
+- Field lain yang dikenali: `namaPembayaran`, `akunKasID`, `kategori`, `isActive`
+- Aturan service (`metodePembayaranService.update`): metode yang tidak ada atau milik tenant lain dijawab 404 lebih dulu; `akunKasID` yang dikirim harus akun kas aktif milik tenant (400); mengaktifkan kembali tanpa pindah akun memeriksa ulang akun lamanya (400 bila nonaktif) dan batas 10 metode aktif (409); nama kembar 409, dengan pesan khusus bila bentrok dengan metode nonaktif. Menonaktifkan ditulis tanpa pemeriksaan, termasuk metode aktif terakhir (`temuan.md` butir 87). Tidak ada `DELETE`: metode dihentikan lewat `isActive: false` (butir 82)
+- Web mengirim hanya field yang berbeda dari data server lewat `payloadUbahMetode` (`features/metode-pembayaran/payload.ts`, `3359497`), sehingga akun yang tidak berubah tidak dikirim; aktifkan dan nonaktifkan dari daftar mengirim `{ isActive }` saja
+- `POST` dan `PUT` dibatasi 30 permintaan per menit per pengguna (429, `routes/metodePembayaranRoute.js`)
+- Respons 200 dengan `data` berbentuk item `GET /metodepembayaran` dan `message` "Metode Pembayaran berhasil diperbarui"
 - Diisi server: -
 
 #### `PUT /pajak/:id`

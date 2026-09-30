@@ -40,7 +40,8 @@ di `endpoint.md`, `payload.md`, dan `temuan.md` terhadap backend
 penjualan, pembayaran, laporan, sesi booking, tipe aset, dan transfer
 stok di `endpoint.md`, `payload.md`, `izin-halaman.md`, dan `temuan.md`
 dikoreksi terhadap backend `465b438` (branch `nizar`, di-fast-forward
-dari `ridho` `00b9957`). Bila
+dari `ridho` `00b9957`). Pada 1 Oktober 2026, bagian metode pembayaran
+di `endpoint.md` dan `payload.md` dikoreksi terhadap backend yang sama. Bila
 backend berubah cukup jauh, `endpoint.md`, `payload.md`, `izin-halaman.md`,
 dan `route-backend.md` perlu dibangkitkan ulang; bagian 1 di bawah menjelaskan
 cara pembangkitannya. Gejala bahwa kontrak sudah tertinggal: endpoint yang

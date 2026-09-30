@@ -753,6 +753,65 @@ lain.
   dilepas satu per satu dengan commit masing-masing (`a10af75`,
   `e4bfc86`, `8134842`, `31ebd92`).
 
+### Modul Pengaturan outlet
+
+Diputuskan pemilik proyek pada 30 September 2026, dengan prinsip
+keputusan rancangan butir 17 dan 21. PO1a sampai PO5a diterapkan di
+`3359497` (submodul metode pembayaran).
+
+- **PO1a: tiga submodul berurutan**, masing-masing dengan spec pembanding,
+  migrasi, commit, dan dokumen penutup sendiri: metode pembayaran, pajak,
+  lalu profil outlet. Profil outlet memakai `IsianLokasi` dan
+  `usePerbaruiLokasi` dari `features/inventaris`, dan `urlSetup` form buat
+  stock opname outlet diarahkan ke halamannya.
+- **PO2a: hapus metode pembayaran diganti aktifkan dan nonaktifkan** dari
+  menu daftar, lewat dialog yang hanya tertutup saat berhasil, karena
+  backend tidak punya `DELETE` (`kontrak/temuan.md` butir 82). Status
+  tetap dapat diubah di form ubah. Halaman kelola memakai `showAll=true`.
+- **PO3a: batas 10 metode aktif ditahan di klien**, dihitung dari daftar
+  kelola: tombol Tambah dan menu Aktifkan nonaktif beserta keterangan, dan
+  pilihan Aktif di form nonaktif. Jawaban 409 backend tetap ditampilkan.
+- **PO4a: badge Default, kolom Sistem, kotak centang gateway Xendit, dan
+  field gateway di tipe web dibuang.** Badge ditebak dari nama tanpa
+  konsep backend, dan gateway tidak dipakai (`kontrak/temuan.md` butir 78).
+- **PO5a: menonaktifkan metode aktif terakhir diberi peringatan** di
+  dialog tanpa ditahan, karena backend tidak menahannya
+  (`kontrak/temuan.md` butir 87).
+- **PO6a: satu pajak per produk.** Tab pajak per produk menampilkan satu
+  pajak terpasang, memasang pajak lain menggantinya lewat konfirmasi yang
+  menyebut pajak lama, dan hanya pajak per produk yang aktif yang
+  ditawarkan, karena backend menyimpan relasi lewat upsert per produk.
+- **PO7a: menyimpan pajak per transaksi yang aktif diberi peringatan**
+  yang menyebut pajak per transaksi aktif yang akan dinonaktifkan backend.
+- **PO8a: prioritas pajak berupa pilihan 1 atau 2**, sesuai validator;
+  tarif kosong ditolak form (sejalan T3b), 0 yang diketik tetap sah,
+  batasnya 0 sampai 100, dan nama dipangkas.
+- **PO9a: hapus pajak tetap ada**, dengan peringatan bahwa relasi produk
+  ikut dilepas dan pajak hilang dari penjualan berikutnya; dialog hanya
+  tertutup saat berhasil.
+- **PO10a: data uji.** Metode uji "E2E Metode Uji" dibuat sekali di akun
+  kas yang sudah dipakai metode tunai bawaan, disimpan nonaktif, lalu
+  diubah dan dikembalikan tiap test; buat sungguhan bernama unik lalu
+  dinonaktifkan. Akun kas uji spec keuangan tidak dipakai, karena metode
+  yang menunjuk sebuah akun mengunci akun itu dari penonaktifan. Pajak uji
+  per produk dibuat lalu dihapus; pajak per transaksi yang aktif hanya
+  diuji lewat `POST` atau `PUT` yang dijawab gagal, agar `PPN` tenant uji
+  tidak dinonaktifkan.
+- **PO11a: lima permission template role yang tidak ada di seed dibuang**
+  (`delete-pembayaran`, `delete-diskon`, `delete-akunkas`,
+  `delete-metode-pembayaran`, dan `delete-booking`) dalam commit
+  tersendiri, setelah perlakuan `POST /role` atas nama izin yang tidak
+  dikenal dipastikan.
+- Diterapkan tanpa ditanyakan (`3359497`): ubah hanya mengirim field yang
+  berubah (butir 15), sehingga akun lama yang sudah nonaktif tidak
+  menggagalkan penggantian nama; akun nonaktif milik metode tampil
+  bertanda "(nonaktif)" seperti PL1a; tombol mengikuti izin create dan
+  update (butir 14); detail yang gagal dimuat atau tidak ditemukan
+  menampilkan pesan; form memakai React Hook Form dan Zod dengan nama
+  dipangkas dan paling banyak 100 karakter; menu Edit memakai `onSelect`
+  dan `router.push`; dan mutation memakai `mutate` beserta callback,
+  sehingga penolakan backend tidak menjadi unhandled rejection.
+
 ## Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.

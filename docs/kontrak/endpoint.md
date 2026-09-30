@@ -6,7 +6,7 @@ Endpoint yang dipanggil frontend beserta auth, permission, envelope, dan bentuk 
 
 ## 3. Endpoint yang dipakai frontend
 
-Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend tetap memiliki 246 route. Audit itu sempat mencatat 247 dengan `POST /akun/owner/create-tenant`, padahal route itu dikomentari di `akunRoute.js` baris 74; `audit-endpoint.js` membaca baris komentar sampai diperbaiki pada 28 September 2026. Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258` dan `45187b6`), serta 29 September 2026 (frontend `f99b7cf`, `dcc22e0`, `e2a0cfd`, `845c2cf`, dan `9ce288b`), menghasilkan angka yang sama. Audit 30 September 2026 (frontend `319bd99`) mencatat 125 panggilan unik, bertambah `PUT /location/:id` dari pengaturan gudang, seluruhnya ada di backend dan tercatat di tabel ini. Audit 30 September 2026 (frontend `b5a55c4`, backend `465b438`) tetap mencatat 125 panggilan unik: `GET /pembayaran` tidak dipanggil lagi, dan `PUT /pembayaran/:id` bertambah. Backend kini memiliki 243 route, dan dua panggilan halaman lama, `DELETE /diskon/:id` dan `DELETE /metodepembayaran/:id`, tidak ada lagi di backend (`temuan.md` butir 82). Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
+Saat kontrak dibangkitkan, frontend memanggil 126 endpoint unik; 121 di antaranya didefinisikan backend. Backend memiliki 246 route secara keseluruhan (Lampiran A, `route-backend.md`). Audit ulang 22 September 2026 (frontend `580a1e1`, backend `9cd1439`): frontend memanggil 124 endpoint unik, 122 lewat `apiData`, `api`, dan `apiClient` dan 2 lewat `fetch` langsung untuk penyegaran sesi, seluruhnya ada di backend dan tercatat di tabel ini; lima baris `/bahan-baku` tinggal sebagai jejak, dan backend tetap memiliki 246 route. Audit itu sempat mencatat 247 dengan `POST /akun/owner/create-tenant`, padahal route itu dikomentari di `akunRoute.js` baris 74; `audit-endpoint.js` membaca baris komentar sampai diperbaiki pada 28 September 2026. Audit 27 September 2026 (frontend `365553f`, backend `00b9957`) dan 28 September 2026 (frontend `477f258` dan `45187b6`), serta 29 September 2026 (frontend `f99b7cf`, `dcc22e0`, `e2a0cfd`, `845c2cf`, dan `9ce288b`), menghasilkan angka yang sama. Audit 30 September 2026 (frontend `319bd99`) mencatat 125 panggilan unik, bertambah `PUT /location/:id` dari pengaturan gudang, seluruhnya ada di backend dan tercatat di tabel ini. Audit 30 September 2026 (frontend `b5a55c4`, backend `465b438`) tetap mencatat 125 panggilan unik: `GET /pembayaran` tidak dipanggil lagi, dan `PUT /pembayaran/:id` bertambah. Backend kini memiliki 243 route, dan dua panggilan halaman lama, `DELETE /diskon/:id` dan `DELETE /metodepembayaran/:id`, tidak ada lagi di backend (`temuan.md` butir 82). Audit 1 Oktober 2026 (frontend `3359497`) mencatat 124 panggilan unik: `DELETE /metodepembayaran/:id` tidak dipanggil lagi, dan keempat panggilan metode pembayaran kini lewat `features/metode-pembayaran/api.ts`. Kolom "Dipakai di" diisi dari audit terakhir: berkas `features/` pemanggilnya, jumlah berkas halaman lama yang masih memanggil lewat `apiClient`, atau keterangan bila tidak dipanggil lagi.
 
 Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`; contoh `/diskon` berarti `/api/diskon`. Kolom Permission berisi `-` bila route tidak memakai `checkPermission`. Kolom Envelope dan ID hanya terisi untuk GET yang diambil sampelnya.
 
@@ -30,7 +30,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/akunkas` | authPengguna | `read-akunkas` | `{ data }` | `id` | `features/akun-kas/api.ts`, 3 file halaman lama |
+| GET | `/akunkas` | authPengguna | `read-akunkas` | `{ data }` | `id` | `features/akun-kas/api.ts` |
 | POST | `/akunkas` | authPengguna | `create-akunkas` | - | - | `features/akun-kas/api.ts` |
 
 #### `/aset`
@@ -125,11 +125,11 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/metodepembayaran` | authPengguna | - | `{ data }` | `id` | `features/metode-pembayaran/api.ts`, 1 file halaman lama |
-| POST | `/metodepembayaran` | authPengguna | `create-metode-pembayaran` | - | - | 1 file |
-| GET | `/metodepembayaran/:id` | authPengguna | - | `{ data }` | `id` | 1 file |
-| PUT | `/metodepembayaran/:id` | authPengguna | `update-metode-pembayaran` | - | - | 1 file |
-| DELETE | `/metodepembayaran/:id` | authPengguna | `delete-metode-pembayaran` | - | - | 1 file (route tidak ada lagi di backend `465b438`; metode dihentikan lewat `PUT` dengan `isActive: false`, modul Pengaturan outlet, `temuan.md` butir 82) |
+| GET | `/metodepembayaran` | authPengguna | - | `{ data }` | `id` | `features/metode-pembayaran/api.ts` (query `showAll=true` untuk halaman kelola, tanpa query untuk pilihan kasir) |
+| POST | `/metodepembayaran` | authPengguna | `create-metode-pembayaran` | - | - | `features/metode-pembayaran/api.ts` |
+| GET | `/metodepembayaran/:id` | authPengguna | - | `{ data }` | `id` | `features/metode-pembayaran/api.ts` |
+| PUT | `/metodepembayaran/:id` | authPengguna | `update-metode-pembayaran` | - | - | `features/metode-pembayaran/api.ts` |
+| DELETE | `/metodepembayaran/:id` | authPengguna | `delete-metode-pembayaran` | - | - | tidak dipanggil lagi sejak `3359497` (route tidak ada lagi di backend `465b438`; metode dihentikan lewat `PUT` dengan `isActive`, `temuan.md` butir 82) |
 
 #### `/pajak`
 

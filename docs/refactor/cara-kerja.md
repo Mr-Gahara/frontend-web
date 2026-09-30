@@ -1225,6 +1225,18 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   `465b438`, termasuk `DELETE /akunkas/:id` yang dipakai pembersihan spec
   keuangan, baru ketahuan saat dokumen penutup disusun, setelah lima akun
   uji tertinggal.
+- **Verifikasi berkas baru memeriksa ekspor yang diharapkan, bukan hanya
+  ukurannya.** Dua berkas baru submodul metode pembayaran berukuran sama
+  persis karena isi satu berkas tertempel ke berkas lainnya; `tsc` dan
+  lima test e2e gagal lebih dulu sebelum `cmp` membuktikannya. Pemeriksaan
+  `grep -c "^export function <Nama>\b"` per berkas menangkapnya dalam satu
+  putaran.
+- **Umur data uji dibaca dari `createdAt` di basis data, bukan ditebak
+  dari akhiran `unik()`.** Perkiraan dari awalan basis 36 sempat keliru
+  menyimpulkan satu tipe aset uji berasal dari run yang sedang ditelusuri.
+- **Jumlah di pesan commit dihitung dengan perintah, bukan diperkirakan.**
+  Pesan `3359497` menyebut enam tipe `Lama` tersisa, padahal `grep`
+  menunjukkan lima.
 
 ## Kapan berhenti dan bertanya
 

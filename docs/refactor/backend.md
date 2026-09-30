@@ -224,6 +224,14 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   `GET /penjualan`; beserta konfirmasi butir yang sudah diperbaiki
   (`kontrak/temuan.md` butir 29, 30, 33, 36, 41, 43, 51 sampai 58, dan 75
   sampai 83)
+- Laporan submodul metode pembayaran — 3 temuan dan satu perluasan,
+  disusun 1 Oktober 2026 setelah `3359497`: membuat metode nonaktif tetap
+  dihitung ke batas 10 metode aktif, nama kembar diperiksa sebelum
+  dipangkas, dan metode aktif terakhir dapat dinonaktifkan (perlu
+  keputusan); beserta perluasan butir 77, yaitu `POST /tipeaset` yang
+  juga tertahan setelah data tersimpan dan enam tipe aset uji yang
+  tertinggal sebagai jejaknya, serta konfirmasi butir 84 yang diperbaiki
+  di frontend (`kontrak/temuan.md` butir 77 dan 85 sampai 87)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

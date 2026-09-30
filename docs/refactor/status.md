@@ -68,7 +68,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Jadwal dan shift, termasuk pola roster dan monitoring absensi | `d9af531` (spec), `f99b7cf` (shift), `dcc22e0` (pola roster), `19227f8` dan `e2a0cfd` (jadwal), `845c2cf` (monitoring absensi) | Selesai |
 | Gudang: layout, setup, pengaturan, dan dashboard | `2d7225b` (spec), `9ce288b` (layout, setup, dan lokasi sidebar), `319bd99` (pengaturan) | Selesai (keputusan GD1a sampai GD6a). Eksekusi dashboard gudang ditunda sampai pemilik proyek menentukan layout dan UI/UX-nya (Utang kecil dari modul Gudang). Halaman stok gudang sudah dimigrasikan di modul inventaris (`580a1e1`), termasuk stock adjustment (`247cf2d`); pengguna gudang ikut modul Pengguna (`7275d14`), dan jadwal, shift, serta pola roster gudang ikut modul Jadwal dan shift |
 | Penyesuaian backend `465b438`: keuangan, penjualan, pembayaran, reservasi, transfer stok, pembersihan data uji, dan paginasi daftar penjualan | `b85c2bd` (penyesuaian), `a10af75`, `e4bfc86`, `8134842`, `31ebd92` (fixme dilepas), `6e314ae` (terima), `b5a55c4` (data uji), `b63cf08` (paginasi) | Selesai (Catatan dari penyesuaian backend `465b438`) |
-| Pengaturan outlet: pajak dan metode pembayaran | - | **Berikutnya** (lihat Pekerjaan berikutnya). Keempat halaman di `app/dashboard/outlet/pengaturan/pajak/` dan `app/dashboard/outlet/pengaturan/metodePembayaran/` masih memakai `apiClient`, `any`, dan `_id` |
+| Pengaturan outlet: metode pembayaran | `9ca273a` (spec), `3359497` | Selesai (keputusan PO1a sampai PO5a dan PO10a; Catatan dari submodul metode pembayaran) |
+| Pengaturan outlet: pajak, lalu profil outlet | - | **Berikutnya** (lihat Pekerjaan berikutnya). `app/dashboard/outlet/pengaturan/pajak/page.tsx` masih memakai `apiClient`, `any`, dan `_id`, dan halaman toko masih placeholder |
 | Pelanggan dan diskon | - | Belum. `app/dashboard/outlet/pelanggan/page.tsx` dan `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`, dan `_id`; hapus diskon memanggil `DELETE /diskon/:id`, yang tidak ada lagi di backend `465b438` (`kontrak/temuan.md` butir 82) |
 | Profil, login, dan sidebar | - | Belum. `app/dashboard/profil/page.tsx`, `app/login/page.tsx`, `app/login/pengguna/page.tsx`, dan `components/app-sidebar.tsx` masih memakai `apiClient` |
 
@@ -77,70 +78,90 @@ Keputusan produk tiap modul tercatat di `keputusan.md`.
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Angka belum diukur ulang setelah penyesuaian backend `465b438`:
+Diukur ulang per submodul metode pembayaran (`3359497`), termasuk
+perubahan penyesuaian backend `465b438`:
 
-| Hal | Awal | Setelah absensi `845c2cf` | Catatan |
+| Hal | Awal | Setelah metode pembayaran `3359497` | Catatan |
 |---|---|---|---|
-| Pemakaian `any` | 302 | 25 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan |
-| Kemunculan `_id` | - | 29 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate |
-| `useAuthGuard()` berulang di halaman | 49 | 32 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, dan pola roster outlet) |
+| Pemakaian `any` | 302 | 16 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran |
+| Kemunculan `_id` | - | 20 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran |
+| `useAuthGuard()` berulang di halaman | 49 | 29 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, dan ketiga halaman metode pembayaran) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
-| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). |
+| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: modul Pengaturan outlet
+## Pekerjaan berikutnya: submodul pajak (modul Pengaturan outlet)
 
-Cakupan: pengaturan pajak dan metode pembayaran di ruang outlet, beserta
-halaman indeks pengaturan dan halaman toko. Pemetaan awal (30 September
-2026):
+Submodul 2 dari tiga (keputusan PO1a): pengaturan pajak dan pajak per
+produk. Submodul 1 (metode pembayaran) selesai di `3359497`, dan submodul
+3 (profil outlet) menyusul. Pemetaan awal (30 September 2026):
 
 | Berkas | Baris | `apiClient` | `any` | `_id` | `queryKey` |
 |---|---|---|---|---|---|
-| `app/dashboard/outlet/pengaturan/page.tsx` | 99 | 0 | 0 | 0 | 0 |
-| `app/dashboard/outlet/pengaturan/toko/page.tsx` | 8 | 0 | 0 | 0 | 0 |
 | `app/dashboard/outlet/pengaturan/pajak/page.tsx` | 553 | 8 | 4 | 7 | 7 |
-| `app/dashboard/outlet/pengaturan/metodePembayaran/page.tsx` | 253 | 4 | 3 | 5 | 4 |
-| `app/dashboard/outlet/pengaturan/metodePembayaran/[id]/page.tsx` | 391 | 4 | 2 | 3 | 4 |
-| `app/dashboard/outlet/pengaturan/metodePembayaran/buatMetodePembayaran/page.tsx` | 212 | 3 | 2 | 1 | 3 |
 
-- Belum ada spec e2e yang menyentuh halaman pengaturan pajak, metode
-  pembayaran, maupun toko; spec pembanding ditulis lebih dulu.
-- `features/pajak` dan `features/metode-pembayaran` sudah ada untuk
-  daftar (modul penjualan, K1a). Tipe `PajakLama`,
-  `ProdukPajakRelasiLama`, `PajakDariProdukLama`, `AkunKasLama`,
-  `AkunKasRefLama`, dan `MetodePembayaranLama` masih dipakai halaman ini
-  (Utang kecil dari modul penjualan dan pembayaran).
-- Halaman toko adalah placeholder 8 baris, dan form buat stock opname
-  outlet menautkan `urlSetup` ke `/dashboard/outlet/pengaturan/lokasi`,
-  rute yang tidak ada (Utang kecil dari modul Gudang). Profil outlet
-  dapat memakai `IsianLokasi` dan `usePerbaruiLokasi` dari
-  `features/inventaris`, bila pemilik proyek memasukkannya ke cakupan.
-- Endpoint pajak dan produk pajak tanpa `checkPermission`
-  (`kontrak/temuan.md` butir 5).
-- Backend `465b438` tidak lagi punya `DELETE /metodepembayaran/:id`:
-  metode dihentikan lewat `PUT` dengan `isActive: false`, dan halaman
-  lama yang masih memanggil hapus selalu gagal (`kontrak/temuan.md`
-  butir 82). Kontrak metode pembayaran, pajak, dan produk pajak belum
-  dikoreksi terhadap `465b438` (`kontrak/payload.md`), dan `assignPajak`
-  punya cacat yang dilaporkan (butir 80).
-- Buat metode pembayaran dari web selalu gagal terhadap `465b438`:
-  halaman lama mengirim `isAutomated`, yang ditolak allowlist validator
-  (`kontrak/temuan.md` butir 84). Diperbaiki di modul ini setelah spec
-  pembanding ditulis. Halaman ubah metode diperiksa untuk hal yang sama,
-  begitu pula pilihan akun kas di form, karena akun kas nonaktif ditolak
-  400.
-- Jalur payment gateway tidak dipakai (`kontrak/temuan.md` butir 78 dan
-  79); sisa field gateway di tipe web diperiksa, dan cakupan
-  pembersihannya diputuskan di modul ini.
+- Halaman memuat `GET /pajak`, `GET /produkpajak/:targetID`, dan daftar
+  produk lewat `useDaftarProduk`, lalu menulis lewat `POST`, `PUT`, dan
+  `DELETE /pajak` serta `POST` dan `DELETE /produkpajak`. Belum ada spec
+  e2e; spec pembanding ditulis lebih dulu.
+- `features/pajak` baru menyediakan `useDaftarPajak` (kunci `daftar()`)
+  dan `pajakTransaksiAktif` untuk buat penjualan. `PajakLama`,
+  `ProdukPajakRelasiLama`, dan `PajakDariProdukLama` masih dipakai halaman
+  ini.
+- Cacat halaman yang terbukti dari kode: tabel relasi membaca
+  `namaPajak`, `tarifPajak`, `modelPerhitungan`, dan `statusPajak`, padahal
+  `GET /produkpajak/:targetID` mengirim `pajak` berisi `_id`, `nama`,
+  `tarif`, `tipe`, `prioritas`, dan `model` berupa teks, sehingga tipe
+  `PajakDariProdukLama` keliru; pajak per produk yang nonaktif tetap
+  ditawarkan; prioritas berupa angka bebas padahal backend hanya menerima
+  1 atau 2; tarif kosong tersimpan 0; dialog hapus tertutup walau gagal;
+  dan galat memuat hanya tampil sebagai toast.
+- Aturan backend `465b438` yang terbukti dari kode: satu pajak per produk
+  (upsert per `{ produkID, tenantID }`); relasi ke pajak nonaktif tidak
+  dikirim `getByTarget`; membuat atau mengaktifkan pajak per transaksi
+  menonaktifkan pajak per transaksi lain; setiap pajak per transaksi yang
+  aktif dikenakan `penjualanService` pada setiap penjualan; hapus pajak
+  permanen dan ikut menghapus relasinya; tidak ada `checkPermission`
+  (`kontrak/temuan.md` butir 5); `assignPajak` membungkus setiap galat
+  menjadi 500 (butir 80). Kontrak pajak dan produk pajak di `payload.md`
+  belum dikoreksi terhadap `465b438`.
+- Calon temuan backend yang terbukti dari kode dan belum dilaporkan:
+  penonaktifan otomatis pajak per transaksi berjalan sebelum penulisan
+  dan tidak atomik, sehingga membuat pajak transaksi aktif bernama kembar
+  tetap mematikan pajak lain; `hitungPajakTransaksi` memakai `limit(1)`,
+  sedangkan `penjualanService` mengenakan seluruh pajak transaksi aktif;
+  dan cache produk tidak selalu dibersihkan saat pajak diubah atau
+  dihapus.
+- Keputusan yang berlaku (`keputusan.md`, Modul Pengaturan outlet): PO6a
+  sampai PO9a untuk halaman, dan PO10a untuk data uji. Tenant uji punya
+  pajak `PPN` per transaksi yang aktif, sehingga spec tidak membuat maupun
+  mengaktifkan pajak per transaksi; jalur itu hanya diuji lewat `POST`
+  atau `PUT` yang dijawab gagal.
 
-Langkah pertama: inventaris keenam berkas di atas beserta yang
-direndernya lewat blok terminal, dengan setiap berkas dibaca penuh, dan
-periksa `features/` lebih dulu untuk api dan hook pajak, metode
-pembayaran, dan akun kas yang sudah ada (`cara-kerja.md`, Disiplin).
-Seluruh keputusan yang dibutuhkan diajukan sekaligus lewat dialog
-pilihan.
+Langkah pertama: spec pembanding untuk perilaku yang tidak berubah, lalu
+blok terminal untuk `features/produk/hooks.ts` (kunci `produk.pajak`) dan
+tipe produk (`pajakList`), karena `features/pajak` akan menambah api dan
+hook relasi. Keputusan submodul ini sudah diambil; dialog pilihan hanya
+dipakai bila bukti baru menuntut keputusan lain.
+
+## Catatan dari submodul metode pembayaran
+
+Submodul 1 modul Pengaturan outlet selesai pada 1 Oktober 2026: spec
+pembanding (`9ca273a`) dan migrasi (`3359497`). Tidak ada lagi halaman
+metode pembayaran yang memakai `apiClient`, dan hapus diganti aktifkan dan
+nonaktifkan (keputusan PO2a).
+
+- Lapisan data di `features/metode-pembayaran` (`arsitektur.md`). Pilihan
+  kasir di pembayaran penjualan tetap memakai metode aktif saja, sedangkan
+  halaman kelola memakai `useDaftarMetodePembayaran({ semua: true })`.
+- Butir 84 dan bagian metode pembayaran butir 82 selesai. Temuan backend
+  baru: butir 85 sampai 87, serta perluasan butir 77 (`kontrak/temuan.md`).
+- Kontrak `PUT /metodepembayaran/:id` dikoreksi terhadap `465b438`
+  (`kontrak/payload.md`).
+- Keputusan pemilik proyek: `keputusan.md` (Modul Pengaturan outlet, PO1a
+  sampai PO5a dan PO10a).
 
 ## Catatan dari penyesuaian backend `465b438`
 
@@ -159,9 +180,9 @@ dalam delapan commit, dengan keputusan PB1a sampai PB14a (`keputusan.md`).
 
 - Kontrak dikoreksi terhadap `465b438` untuk penjualan, pembayaran,
   laporan, sesi booking, tipe aset, transfer stok, dan buat akun kas
-  (`kontrak/payload.md`, `kontrak/endpoint.md`). Metode pembayaran,
-  pajak, pelanggan, dan diskon belum, dan diperiksa saat modul pemiliknya
-  dimigrasikan.
+  (`kontrak/payload.md`, `kontrak/endpoint.md`). Metode pembayaran
+  dikoreksi 1 Oktober 2026 (`3359497`); pajak, pelanggan, dan diskon
+  belum, dan diperiksa saat modul pemiliknya dimigrasikan.
 - Audit endpoint mencatat backend kini memiliki 243 route: tujuh route
   Lampiran A hilang, termasuk `DELETE /akunkas/:id`, `DELETE /diskon/:id`,
   dan `DELETE /metodepembayaran/:id`, dan empat route baru belum dipakai
@@ -258,8 +279,8 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   uji yang dibuatnya sendiri: sejak `b5a55c4` akun uji dibuat bersaldo 0
   lalu dinonaktifkan, karena `DELETE /akunkas/:id` tidak ada lagi dan akun
   bersaldo tidak dapat ditutup (`kontrak/temuan.md` butir 81).
-- `AkunKasLama` dan `AkunKasRefLama` tinggal dipakai modul metode
-  pembayaran.
+- `AkunKasLama` dan `AkunKasRefLama` dihapus bersama migrasi metode
+  pembayaran (`3359497`).
 - Keputusan pemilik proyek untuk modul ini ada di `keputusan.md` (Modul
   keuangan, KU1a sampai KU7a).
 
@@ -427,15 +448,14 @@ Yang masih berlaku:
 
 ### Utang kecil dari modul penjualan dan pembayaran
 
-- Delapan tipe berakhiran `Lama` masih dipakai halaman yang belum
+- Lima tipe berakhiran `Lama` masih dipakai halaman yang belum
   dimigrasikan lewat alias impor (`keputusan.md` butir 19): `PelangganLama`
-  (halaman pelanggan), `DiskonLama` (halaman diskon), `PajakLama`,
-  `ProdukPajakRelasiLama`, dan `PajakDariProdukLama` (pengaturan pajak),
-  `AkunKasLama` dan `AkunKasRefLama` (metode pembayaran), serta
-  `MetodePembayaranLama` (pengaturan metode pembayaran). Masing-masing
-  dihapus di commit migrasi modul pemiliknya. Sisanya dihitung dengan
-  `grep -rhoE 'export interface [A-Za-z]+Lama\b' types | wc -l` (8 per
-  `f33ffa6`).
+  (halaman pelanggan), `DiskonLama` (halaman diskon), serta `PajakLama`,
+  `ProdukPajakRelasiLama`, dan `PajakDariProdukLama` (pengaturan pajak).
+  Masing-masing dihapus di commit migrasi modul pemiliknya. Sisanya
+  dihitung dengan `grep -rhoE 'export interface [A-Za-z]+Lama\b' types |
+  wc -l` (5 per `3359497`, yang menghapus `AkunKasLama`, `AkunKasRefLama`,
+  dan `MetodePembayaranLama`; pesan commit itu keliru menyebut enam).
 - `features/penjualan/halaman-buat-penjualan.tsx` masih 1.088 baris:
   migrasi memindahkan lapisan data dan membuang `any`, tetapi tidak memecah
   komponennya. Pisahkan pemilih pelanggan, pemilih diskon, dan pratinjau
@@ -516,6 +536,17 @@ Yang masih berlaku:
   teks keadaan kosong) warisan sejak migrasi stok `ad590f9`, yang ditutup
   walau definisi selesai meminta ESLint tanpa error di berkas modulnya.
   Bereskan saat halaman inventaris gudang disentuh lagi.
+
+### Utang kecil dari modul Pengaturan outlet
+
+- Form buat dan ubah metode pembayaran bergantung pada `read-akunkas`
+  untuk pilihan akun tujuan, walau backend hanya mewajibkan izin create
+  atau update metode; tanpa izin itu form menampilkan pesan gagal memuat.
+  Diputuskan bila ada role yang membutuhkannya
+  (`kontrak/izin-halaman.md`).
+- Enam tipe aset uji tertinggal sebagai bukti butir 77
+  (`kontrak/temuan.md`), dan dihapus lewat API setelah laporan backend
+  diterima.
 
 ### Utang kecil dari penyesuaian backend `f27f093`
 

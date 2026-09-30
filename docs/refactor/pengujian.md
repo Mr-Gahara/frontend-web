@@ -91,6 +91,13 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per submodul metode pembayaran** (commit `3359497`): 378 test
+unit dan integrasi lolos di 48 berkas, 336 e2e lolos, 16 skipped (sama
+dengan baseline `465b438` di bawah). Dari baseline itu, spec pembanding
+metode pembayaran (`9ca273a`) menambah enam skenario (328), dan migrasinya
+(`3359497`) menambah 13 test unit dan delapan skenario (336). Diukur
+terhadap backend lokal `465b438`.
+
 **Baseline per penyesuaian backend `465b438`** (commit `b63cf08`): 365
 test unit dan integrasi lolos di 47 berkas, 322 e2e lolos, 16 skipped:
 dua `test.fixme` bersyarat yang menunggu backend memisahkan shift dan pola
@@ -155,7 +162,8 @@ satu surat jalan PENDING tanpa jurnal. Terbukti dengan
 terima penuh, bukan dibatalkan, sehingga setiap run menambah surat jalan
 DITERIMA beserta jurnal kirim dan terima, dan stok outlet uji bertambah;
 jumlah per run belum diukur ulang. Spec keuangan menambah satu akun kas
-non-aktif bersaldo 0 per run (PB13a). Aturan data uji
+non-aktif bersaldo 0 per run (PB13a), dan spec kelola metode pembayaran
+satu metode uji nonaktif per run (PO10a). Aturan data uji
 spec tulis ada di Test yang ditandai fixme dan skip bersyarat, di bawah.
 
 ## Kredensial uji
@@ -454,6 +462,17 @@ satu putaran.
   menyalin pola spec keuangan: tanpa `login`, dan penunggu dipasang
   sebelum `reload`, sehingga respons halaman sebelumnya ikut tertangkap
   (`b63cf08`).
+- Pesan galat yang juga tampil di overlay galat Next.js (dev) dicari di
+  dalam `main`, dan tidak adanya galat runtime dibuktikan lewat
+  `page.on("pageerror")`. Di halaman buat metode lama, penolakan backend
+  menjadi unhandled rejection, sehingga teks pesannya tampil dua kali
+  (`9ca273a`).
+- Daftar yang tumbuh karena data uji menumpuk dicari lewat kotak
+  pencarian halaman, bukan diasumsikan ada di halaman pertama tabel (spec
+  kelola metode pembayaran, `3359497`).
+- Trace dibaca per entri: berkas `.trace` juga memuat entri `snapshot`
+  milik snapshot DOM tanpa `request`, sehingga skrip yang membaca
+  `snapshot.request` memeriksa keberadaannya lebih dulu.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -572,6 +591,9 @@ Urutan debug kegagalan e2e di atas).
   kali pada 30 September 2026 di `DELETE /tipeaset` dan `/tarif`, dengan
   permintaan tertahan sekitar 25 detik, lalu 220 eksekusi sesudahnya
   bersih; dicatat untuk tim backend (`kontrak/temuan.md` butir 77).
+  Kejadian ketiga pukul 22.28 di `POST /tipeaset`: dokumennya tersimpan
+  tetapi jawabannya tidak sampai, dan enam tipe aset uji tertinggal
+  sebagai jejak kejadian sejak 27 September.
 - **Spec shift dan pola roster meninggalkan shift uji**: shift hanya
   dapat dinonaktifkan, tidak dihapus, sehingga setiap run menambah shift
   "Shift Ganda ..." (spec shift), serta "Shift Arsip ..." dan "Shift
@@ -639,6 +661,17 @@ Urutan debug kegagalan e2e di atas).
   penjualan** (`tests/e2e/penjualan/daftar-penjualan.spec.ts`). Mode
   klien kesembilan tabel lain tidak berubah di `b63cf08`, dan tidak diuji
   ulang khusus.
+- **Batas 10 metode aktif hanya teruji lewat simulasi** respons daftar
+  yang ditandai `// simulasi:`, karena sepuluh metode aktif tidak dapat
+  dibuat di data uji tanpa menumpuk metode permanen. Peringatan metode
+  aktif terakhir, akun nonaktif bertanda di form ubah, dan penolakan akun
+  nonaktif saat mengaktifkan kembali hanya teruji di unit test
+  (`tests/unit/features/metode-pembayaran/`).
+- **Metode uji menumpuk sebagai nonaktif**, satu per run spec kelola
+  metode pembayaran, karena metode tidak dapat dihapus (PO10a).
+- **Tombol metode pembayaran yang disembunyikan menurut izin hanya teruji
+  di unit test** (`aksiMetodePembayaran`), dan form tanpa `read-akunkas`
+  belum teruji, karena satu-satunya akun uji berperan Owner.
 
 ## Spec rujukan
 
@@ -836,3 +869,11 @@ Urutan debug kegagalan e2e di atas).
   dipasang, harapan footer dihitung dari respons halaman itu sendiri,
   perpindahan ke kunci yang masih segar di cache dibuktikan dari
   tampilan, dan tidak ada data yang ditulis.
+- `tests/e2e/pengaturan/metode-pembayaran.spec.ts` (`9ca273a`) dan
+  `kelola-metode-pembayaran.spec.ts` (`3359497`): spec pembanding dan
+  spec migrasi dipisah, sehingga berkas pembanding tetap utuh; fixture
+  tetap diubah lalu dikembalikan lewat API di `finally`; baris dicari
+  lewat kotak pencarian; payload dibandingkan utuh dengan `toEqual`,
+  termasuk ketiadaan field gateway; batas 10 lewat simulasi dari respons
+  nyata (`route.fetch()`); dan `pageerror` membuktikan tidak ada galat
+  runtime.

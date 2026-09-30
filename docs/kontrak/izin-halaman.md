@@ -24,6 +24,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 29 September 2026: ruang gudang setelah migrasi layout dan setup gudang (`9ce288b`). Layout bergerbang `read-dashboard-gudang` dan memuat `/location` bagi pemegang `read-location`; setup membuat lokasi lewat `POST /location` (`create-location`), bukan menu sidebar, dan tidak punya entri `IZIN_HALAMAN`.
 - 30 September 2026: pengaturan gudang setelah migrasi profil gudang (`319bd99`), dengan gate `read-location` di `IZIN_HALAMAN`.
 - 30 September 2026: penjualan setelah penyesuaian backend `465b438` (`b85c2bd`), tanpa perubahan gate. Aksi di daftar dan detail mengikuti izin endpoint-nya (`aksiPenjualan`): `update-penjualan` untuk finalisasi dan void, `delete-penjualan` untuk hapus, `create-pembayaran` untuk bayar, dan `update-pembayaran` untuk membatalkan pembayaran (`bolehBatalkanPembayaran`).
+- 1 Oktober 2026: metode pembayaran setelah migrasi submodul 1 modul Pengaturan outlet (`3359497`). Halaman kelola bukan menu sidebar (dibuka dari halaman indeks pengaturan) dan tanpa entri `IZIN_HALAMAN`, karena `GET /metodepembayaran` tidak memeriksa izin. Tombol tambah mengikuti `create-metode-pembayaran`, dan menu ubah, aktifkan, serta nonaktifkan mengikuti `update-metode-pembayaran`. Form buat dan ubah juga memuat `GET /akunkas` untuk pilihan akun tujuan, sehingga tanpa `read-akunkas` form menampilkan pesan gagal memuat.
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -54,7 +55,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/shift` | - | `/shift` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/pelanggan` | `read-pelanggan` | `/pelanggan` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/pengguna` | `read-pengguna`, `read-role` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sejalan |
-| `/dashboard/outlet/pengaturan` | - | - | - | Data dimuat lewat komponen, periksa manual |
+| `/dashboard/outlet/pengaturan` | - | - | - | Halaman indeks tanpa data (`IZIN_HALAMAN` berisi syarat kosong). Sub-halaman metode pembayaran memanggil `/metodepembayaran` (tanpa izin baca) dan `/akunkas` (`read-akunkas`), tanpa entri `IZIN_HALAMAN` (`3359497`) |
 | `/dashboard/gudang` | - | - | - | Halaman placeholder tanpa data (keputusan GD1a); layout ruang gudang bergerbang `read-dashboard-gudang` dan memuat `/location` bagi pemegang `read-location` (`9ce288b`) |
 | `/dashboard/gudang/inventaris` | `read-location`, `read-inventory` atau `read-inventory-gudang`, `read-bahan` | `/location`, `/inventory`, `/bahanbaku` | `read-location`, salah satu dari `read-inventory`, `read-inventory-gudang`, `read-inventory-outlet`, `read-bahan` | Sejalan; gate sengaja tidak menerima `read-inventory-outlet` di ruang gudang (keputusan produk) |
 | `/dashboard/gudang/jurnalStok` | `read-jurnal-stok` | `/jurnalstok` | `read-jurnal-stok` | Sejalan |
