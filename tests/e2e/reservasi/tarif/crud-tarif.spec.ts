@@ -231,10 +231,9 @@ test.describe("E2E — Tarif › Halaman Daftar", () => {
   test("hapus berhasil: backend menjawab sukses, toast sukses tampil, dan tarif hilang", async ({
     page,
   }) => {
-    // Backend menghapus tarif lalu menjawab 500, karena tarifService.delete
-    // memakai payload yang tidak terdefinisi. Badan test ini membuktikan
-    // perilaku benar dan berjalan kembali setelah backend diperbaiki.
-    test.fixme(true, "Menunggu backend: DELETE /tarif/:id menjawab 500 setelah tarif terhapus");
+    // DELETE /tarif/:id dahulu menjawab 500 setelah tarif terhapus, karena
+    // tarifService.delete memakai payload yang tidak terdefinisi. Diperbaiki
+    // backend 465b438; test ini kembali dijalankan setelah terbukti lolos.
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
     const nama = namaTarifUji("Hapus");
     let t: TarifMentah | undefined;
