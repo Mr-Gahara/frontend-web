@@ -1,5 +1,14 @@
 import { test, expect, Request } from "@playwright/test";
-import { BASIS, JAWAB_GAGAL, bukaDenganAuth, login, siapkanSuratJalan, tutupSuratJalanUji } from "../../../helpers/transfer-uji";
+import {
+  BASIS,
+  JAWAB_GAGAL,
+  api,
+  bukaDenganAuth,
+  login,
+  siapkanSuratJalan,
+  tutupSuratJalanUji,
+  type TransferMentah,
+} from "../../../helpers/transfer-uji";
 
 /*
  * Spec penerimaan barang outlet (keputusan pemilik proyek K3 pilihan B,
@@ -24,7 +33,8 @@ const POLA_TERIMA = /\/api\/transferstok\/[^/]+\/terima(\?|$)/i;
 const ALASAN = "Uji e2e penerimaan";
 
 type ItemTerima = {
-  bahanBakuID: string;
+  itemId?: string;
+  bahanBakuID?: string;
   qtyKirim: number;
   qtyTerima: number;
   catatanItem?: string | null;
@@ -35,7 +45,7 @@ test.describe("Penerimaan barang outlet", () => {
     await login(page);
   });
 
-  test("detail menampilkan barang, terima gagal mengirim seluruh item, dan jumlah 0 ditahan", async ({ page }) => {
+  test("detail menampilkan barang, dan terima gagal mengirim seluruh item", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
     const transfer = await siapkanSuratJalan(page, auth);
 
@@ -68,7 +78,7 @@ test.describe("Penerimaan barang outlet", () => {
         expect.soft(terkirim.at(-1) ?? [], "payload terima harus membawa seluruh item surat jalan").toEqual(
           transfer.items.map((item) =>
             expect.objectContaining({
-              bahanBakuID: item.bahanBaku?.id,
+              itemId: item.id,
               qtyKirim: item.qtyKirim,
               qtyTerima: item.qtyKirim,
             }),
@@ -77,18 +87,6 @@ test.describe("Penerimaan barang outlet", () => {
         await expect.soft(dialog, "dialog harus tetap terbuka saat gagal (keputusan Fase 0)").toBeVisible();
       });
 
-      await test.step("jumlah diterima 0 ditahan tanpa PATCH", async () => {
-        await page.reload();
-        const jumlah = page.getByRole("spinbutton");
-        await expect(jumlah).toHaveCount(transfer.items.length);
-        const sebelum = terkirim.length;
-        await jumlah.first().fill("0");
-        await page.getByPlaceholder(/bungkus pecah/i).first().fill(ALASAN);
-        await page.getByRole("button", { name: /konfirmasi terima barang/i }).click();
-        await page.getByRole("alertdialog").getByRole("button", { name: /ya, selesaikan inbound/i }).click();
-        await expect.soft(page.getByText(/belum dapat diproses/i).first(), "pesan penahanan jumlah 0").toBeVisible();
-        expect.soft(terkirim.length - sebelum, "jumlah 0 tidak boleh mengirim PATCH terima selama backend memakai ||").toBe(0);
-      });
     } finally {
       page.off("request", catat);
       await page.unroute(POLA_TERIMA);
@@ -96,29 +94,33 @@ test.describe("Penerimaan barang outlet", () => {
     }
   });
 
-  test.fixme("jumlah diterima 0 terkirim apa adanya setelah backend berhenti memakai qtyTerima || qtyKirim", async ({ page }) => {
+  test("jumlah diterima 0 dicatat backend sebagai tidak sampai: terima sungguhan lewat UI (backend 465b438)", async ({
+    page,
+  }) => {
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
     const transfer = await siapkanSuratJalan(page, auth);
-
-    await page.route(POLA_TERIMA, (route) => route.fulfill(JAWAB_GAGAL));
     try {
       await page.goto(`${URL_DAFTAR}/${transfer.id}`);
       await page.getByRole("spinbutton").first().fill("0");
       await page.getByPlaceholder(/bungkus pecah/i).first().fill(ALASAN);
       await page.getByRole("button", { name: /konfirmasi terima barang/i }).click();
-      const tKirim = page.waitForRequest((r) => r.method() === "PATCH" && POLA_TERIMA.test(r.url()));
+      const tTerima = page.waitForResponse((r) => r.request().method() === "PATCH" && POLA_TERIMA.test(r.url()));
       await page.getByRole("alertdialog").getByRole("button", { name: /ya, selesaikan inbound/i }).click();
-      const items: ItemTerima[] = (await tKirim).postDataJSON()?.items ?? [];
+      const res = await tTerima;
+      expect(res.status(), `PATCH terima: ${(await res.text()).slice(0, 200)}`).toBe(200);
+      const items: ItemTerima[] = res.request().postDataJSON()?.items ?? [];
       expect(items[0]).toEqual(
         expect.objectContaining({
-          bahanBakuID: transfer.items[0].bahanBaku?.id,
+          itemId: transfer.items[0].id,
           qtyKirim: transfer.items[0].qtyKirim,
           qtyTerima: 0,
           catatanItem: ALASAN,
         }),
       );
+      const sesudah = await api<TransferMentah>(page, auth, "GET", `/transferstok/${transfer.id}`);
+      expect(sesudah.data.status, "surat jalan diterima").toBe("DITERIMA");
+      expect(sesudah.data.items[0].qtyTerima, "barang pertama tercatat tidak sampai").toBe(0);
     } finally {
-      await page.unroute(POLA_TERIMA);
       await tutupSuratJalanUji(page, auth, transfer.id);
     }
   });

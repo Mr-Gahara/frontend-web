@@ -12,6 +12,8 @@ export interface TransferRelasiPengguna {
 }
 
 export interface TransferItem {
+  /** Id item surat jalan (items[].id), dipakai sebagai itemId saat terima (backend 465b438). */
+  id?: string;
   bahanBaku: {
     id: string;
     namaBahan: string | null;

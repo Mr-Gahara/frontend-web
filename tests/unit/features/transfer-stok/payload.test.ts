@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  PESAN_JUMLAH_NOL,
   PESAN_TANPA_MASTER,
-  SERVER_TERIMA_JUMLAH_NOL,
   susunPayloadTerima,
 } from "@/features/transfer-stok/payload";
 import type { TransferItem } from "@/types/transferStok";
@@ -51,14 +49,24 @@ describe("susunPayloadTerima", () => {
     expect(hasil).toEqual({ ok: false, pesan: PESAN_TANPA_MASTER });
   });
 
-  it("menahan jumlah diterima 0 selama server menghitungnya sebagai diterima penuh", () => {
-    expect(SERVER_TERIMA_JUMLAH_NOL).toBe(false);
-    const hasil = susunPayloadTerima([item("a", 10)], [{ qtyTerima: 0, catatanItem: "hilang" }]);
-    expect(hasil).toEqual({ ok: false, pesan: PESAN_JUMLAH_NOL });
+  it("memakai itemId dari surat jalan bila ada, tanpa bahanBakuID (backend 465b438)", () => {
+    const hasil = susunPayloadTerima([{ ...item("a", 10), id: "i1" }], [{ qtyTerima: 8, catatanItem: "2 sobek" }]);
+    expect(hasil).toEqual({
+      ok: true,
+      payload: { items: [{ itemId: "i1", qtyKirim: 10, qtyTerima: 8, catatanItem: "2 sobek" }] },
+    });
   });
 
-  it("mengirim jumlah 0 apa adanya setelah server diperbaiki", () => {
-    const hasil = susunPayloadTerima([item("a", 10)], [{ qtyTerima: 0, catatanItem: "hilang" }], true);
+  it("barang tanpa master bahan baku tetap dapat dikonfirmasi lewat itemId", () => {
+    const hasil = susunPayloadTerima([{ ...item(null, 5), id: "i2" }], [{ qtyTerima: 5, catatanItem: "" }]);
+    expect(hasil).toEqual({
+      ok: true,
+      payload: { items: [{ itemId: "i2", qtyKirim: 5, qtyTerima: 5, catatanItem: null }] },
+    });
+  });
+
+  it("mengirim jumlah 0 apa adanya: barang tidak sampai (backend 465b438)", () => {
+    const hasil = susunPayloadTerima([item("a", 10)], [{ qtyTerima: 0, catatanItem: "hilang" }]);
     expect(hasil).toEqual({
       ok: true,
       payload: { items: [{ bahanBakuID: "a", qtyKirim: 10, qtyTerima: 0, catatanItem: "hilang" }] },

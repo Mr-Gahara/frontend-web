@@ -19,8 +19,10 @@ export const JAWAB_GAGAL = {
 export type LokasiMentah = { id: string; nama: string | null; tipe: string | null } | null;
 
 export type ItemTransferMentah = {
+  id: string;
   bahanBaku: { id: string; namaBahan: string | null; satuan: string | null } | null;
   qtyKirim: number;
+  qtyTerima?: number;
 };
 
 export type TransferMentah = {

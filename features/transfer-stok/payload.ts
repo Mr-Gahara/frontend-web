@@ -1,34 +1,25 @@
 import type { TransferItem } from "@/types/transferStok";
 
 /*
- * Penyusunan payload PATCH /transferstok/:id/terima.
+ * Penyusunan payload PATCH /transferstok/:id/terima (backend 465b438).
  *
- * Backend mengganti seluruh items surat jalan dengan items dari body
- * (transferStokService.updateStatus, `items: updates.items || transfer.items`),
- * lalu menambah stok outlet per item. Karena itu setiap item surat jalan wajib
- * dikirim dengan bahanBakuID dan qtyKirim dari server: item yang tertinggal
- * hilang dari surat jalan dan tidak menambah stok.
+ * Setiap item surat jalan dikirim dengan itemId (items[].id dari respons) bila
+ * ada, atau bahanBakuID sebagai cadangan; bahanBakuID hanya sah bila bahan itu
+ * muncul sekali di surat jalan. qtyKirim dikirim dari catatan gudang (backend
+ * menolak nilai yang berbeda), dan qtyTerima 0 sampai qtyKirim. qtyTerima 0
+ * berarti barang tidak sampai: tidak ada stok maupun jurnal masuk untuk barang
+ * itu. Stok tujuan bertambah pada bahan yang tercatat di surat jalan, bukan
+ * dari body.
  */
 
 /**
- * Backend menghitung stok masuk sebagai `item.qtyTerima || item.qtyKirim`,
- * sehingga qtyTerima 0 menambah stok outlet sebesar qtyKirim, sementara surat
- * jalan mencatat 0. Selama itu jumlah 0 ditahan di frontend. Konsekuensinya,
- * surat jalan yang salah satu barangnya tidak diterima sama sekali tertahan
- * DIKIRIM sampai backend diperbaiki.
- *
- * Balik menjadi true setelah backend memakai `item.qtyTerima ?? item.qtyKirim`.
- * Payload sudah membawa 0 apa adanya, sehingga tidak ada perubahan lain; lalu
- * jalankan test.fixme "jumlah diterima 0 terkirim apa adanya" di
- * tests/e2e/inventaris/penerimaanBarang/terima-penerimaan.spec.ts.
+ * Pesan bila ada barang yang tidak dapat dikenali server: tanpa itemId dan
+ * tanpa master bahan baku.
  */
-export const SERVER_TERIMA_JUMLAH_NOL = false;
 
 export const PESAN_TANPA_MASTER =
   "Penerimaan belum dapat diproses: ada barang yang master bahan bakunya sudah dihapus, sehingga server tidak mengirim identitasnya. Hubungi admin.";
 
-export const PESAN_JUMLAH_NOL =
-  "Penerimaan belum dapat diproses: jumlah diterima 0 masih dicatat server sebagai diterima penuh. Hubungi gudang.";
 
 export interface IsianTerima {
   qtyTerima: number;
@@ -36,7 +27,8 @@ export interface IsianTerima {
 }
 
 export interface ItemPayloadTerima {
-  bahanBakuID: string;
+  itemId?: string;
+  bahanBakuID?: string;
   qtyKirim: number;
   qtyTerima: number;
   catatanItem: string | null;
@@ -48,30 +40,26 @@ export type HasilPayloadTerima =
 
 /**
  * Menyusun payload dari item surat jalan (urutan dari server) dan isian per
- * item pada urutan yang sama. Argumen `terimaNol` hanya dibuka agar kedua
- * cabang dapat diuji; halaman memakai nilai bawaan.
+ * item pada urutan yang sama. Seluruh item dikirim, termasuk yang diterima
+ * penuh, agar jumlah dan catatan setiap barang tercatat eksplisit.
  *
- * Item tanpa bahanBaku (master bahan bakunya dihapus) selalu menahan
- * penerimaan. Backend tidak mengirim id-nya, dan mengirim items tanpa item itu
- * menghapusnya dari surat jalan. Penahanan ini baru dapat dicabut bila kontrak
- * terima berubah, misalnya backend tidak lagi mengganti seluruh items atau
- * tetap mengirim id bahan baku yang tidak ter-populate, dan bentuk payload ikut
- * disesuaikan saat itu.
+ * Barang dikenali lewat itemId; bahanBakuID hanya cadangan untuk respons yang
+ * belum membawa items[].id. Barang tanpa keduanya (master bahan baku terhapus
+ * dan respons tanpa id item) tetap menahan penerimaan, karena server tidak
+ * dapat mencocokkannya.
  */
 export function susunPayloadTerima(
   items: TransferItem[],
   isian: IsianTerima[],
-  terimaNol: boolean = SERVER_TERIMA_JUMLAH_NOL,
 ): HasilPayloadTerima {
-  if (items.some((item) => !item.bahanBaku?.id)) return { ok: false, pesan: PESAN_TANPA_MASTER };
-  if (!terimaNol && isian.some((i) => i.qtyTerima === 0)) return { ok: false, pesan: PESAN_JUMLAH_NOL };
+  if (items.some((item) => !item.id && !item.bahanBaku?.id)) return { ok: false, pesan: PESAN_TANPA_MASTER };
   return {
     ok: true,
     payload: {
       items: items.map((item, indeks) => {
         const catatan = isian[indeks]?.catatanItem.trim() ?? "";
         return {
-          bahanBakuID: item.bahanBaku!.id,
+          ...(item.id ? { itemId: item.id } : { bahanBakuID: item.bahanBaku!.id }),
           qtyKirim: item.qtyKirim,
           qtyTerima: isian[indeks]?.qtyTerima ?? item.qtyKirim,
           catatanItem: catatan === "" ? null : catatan,
