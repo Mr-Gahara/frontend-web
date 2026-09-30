@@ -1,10 +1,9 @@
 // types/metodePembayaran.ts
 
-import { AkunKasRef, AkunKasRefLama } from "./akunKas";
+import { AkunKasRef } from "./akunKas";
 
 export type KategoriMetode = "tunai" | "non-tunai";
 
-// Tipe untuk respons dari server (Data Utuh)
 /**
  * Bentuk respons GET /metodepembayaran setelah dinormalkan, mengikuti
  * mappers/metodePembayaranMapper.js backend. Model backend tidak punya
@@ -23,31 +22,16 @@ export interface MetodePembayaran {
 }
 
 /**
- * Bentuk lama yang dipakai halaman pengaturan metode pembayaran. Isinya
- * tidak sesuai respons (isAutomated, xenditChannelCode, akunKasID), dan
- * dihapus saat modulnya dimigrasikan (keputusan K8, modul penjualan).
+ * Payload POST /metodepembayaran: tepat allowlist validator backend 465b438
+ * (FIELD_DIIZINKAN), tanpa field gateway (kontrak/temuan.md butir 84,
+ * keputusan PO4a).
  */
-export interface MetodePembayaranLama {
-  _id: string;
+export interface MetodePembayaranBaru {
   namaPembayaran: string;
+  akunKasID: string;
   kategori: KategoriMetode;
-  isAutomated: boolean;
-  xenditChannelCode?: string | null;
   isActive: boolean;
-  akunKasID: AkunKasRefLama; // Hasil populate dari backend
-  createdAt?: string;
-  updatedAt?: string;
 }
 
-// Tipe payload untuk form Create & Update Metode Pembayaran
-export interface MetodePembayaranRequest {
-  namaPembayaran: string;
-  kategori: KategoriMetode;
-  akunKasID: string; 
-  isAutomated?: boolean;
-  xenditChannelCode?: string | null;
-  isActive?: boolean;
-}
-
-// Opsional: Tipe untuk menampung respons array dari GET /metode-pembayaran
-export type GetMetodePembayaranResponse = MetodePembayaranLama[];
+/** Payload PUT /metodepembayaran/:id: hanya field yang berubah (keputusan rancangan butir 15). */
+export type PerubahanMetodePembayaran = Partial<MetodePembayaranBaru>;

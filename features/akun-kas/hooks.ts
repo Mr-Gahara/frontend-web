@@ -5,10 +5,8 @@ import { akunKasApi } from "./api";
 import { queryKeys } from "@/lib/queryKeys";
 
 /**
- * Daftar akun kas tenant, dipakai halaman keuangan, kartu ringkasan, dan
- * pembayaran penjualan. Kunci daftar() berbeda dari akar akunKas.semua yang
- * masih diisi halaman metode pembayaran lama dengan data mentah (keputusan
- * rancangan butir 12).
+ * Daftar akun kas tenant, dipakai halaman keuangan, kartu ringkasan,
+ * pembayaran penjualan, dan form metode pembayaran (pilihan akun tujuan).
  */
 export function useDaftarAkunKas() {
   return useQuery({
@@ -21,9 +19,9 @@ export function useDaftarAkunKas() {
 type Callback = { onSuccess?: () => void; onError?: (err: unknown) => void };
 
 /**
- * Buat akun kas. Invalidasi memakai akar akunKas.semua, karena halaman metode
- * pembayaran lama masih mengisi akar itu dengan data mentah (keputusan
- * rancangan butir 3). Toast dan navigasi dari halaman (butir 13).
+ * Buat akun kas. Invalidasi memakai akar akunKas.semua, sehingga seluruh
+ * varian di bawahnya ikut dimuat ulang (keputusan rancangan butir 3). Toast
+ * dan navigasi dari halaman (butir 13).
  */
 export function useBuatAkunKas(opsi: Callback = {}) {
   const queryClient = useQueryClient();

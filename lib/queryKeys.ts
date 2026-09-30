@@ -90,7 +90,7 @@ export const queryKeys = {
   },
   metodePembayaran: {
     semua: kunci(["metodePembayaran"] as const),
-    daftar: () => ["metodePembayaran", "daftar"] as const,
+    daftar: (filter?: Filter) => ["metodePembayaran", "daftar", filter] as const,
     detail: (id: string) => ["metodePembayaran", "detail", id] as const,
   },
   akunKas: {
