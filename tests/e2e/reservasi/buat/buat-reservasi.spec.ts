@@ -35,9 +35,9 @@ let urut = 0;
  * Tanggal 10 bulan depan, pada jam yang bergeser menurut menit berjalan dan
  * urutan pemanggilan. Daftar booking per tanggal yang dibaca form untuk
  * mendeteksi bentrok dahulu tidak dibersihkan saat void (kontrak/temuan.md
- * butir 57, dilaporkan diperbaiki backend 465b438 dan dibuktikan lewat fixme
- * R3a); pergeseran jam dipertahankan agar booking uji run sebelumnya tidak
- * berada di slot yang sama.
+ * butir 57, diperbaiki backend 465b438 dan terbukti lewat test R3a di spec
+ * daftar reservasi); pergeseran jam dipertahankan agar booking uji run
+ * sebelumnya tidak berada di slot yang sama.
  */
 function slotBulanDepan(durasiJam: number) {
   const sekarang = new Date();

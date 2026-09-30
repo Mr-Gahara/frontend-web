@@ -191,10 +191,6 @@ test.describe("E2E — Reservasi › Daftar (timeline aset)", () => {
   });
 
   test("setelah booking di-void, timeline yang dimuat ulang tidak lagi menampilkan booking itu", async ({ page }) => {
-    test.fixme(
-      true,
-      "Menunggu backend: void penjualan tidak membersihkan cache daftar booking per tanggal (keputusan R3a)",
-    );
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
     const fx = await siapkanFixtureBooking(page, auth);
     await bersihkanSisaBooking(page, auth, fx);
