@@ -46,7 +46,9 @@ async function buatTipe(page: Page, auth: Auth, nama: string, deskripsi?: string
 }
 
 async function hapusTipe(page: Page, auth: Auth, id: string | undefined) {
-  if (id) await api(page, auth, "DELETE", "/tipeaset/" + id);
+  if (!id) return;
+  const res = await api(page, auth, "DELETE", "/tipeaset/" + id);
+  expect.soft([200, 204, 404], `hapus tipe aset uji ${id}: ${res.status} ${res.pesan}`).toContain(res.status);
 }
 
 const bacaTipe = (page: Page, auth: Auth, id: string) =>

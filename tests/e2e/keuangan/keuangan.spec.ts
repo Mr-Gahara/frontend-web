@@ -1,6 +1,6 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
 import { JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
-import { cocok, hapusLewatApi, pantauPermintaan, unik } from "../../helpers/reservasi-uji";
+import { cocok, pantauPermintaan, unik } from "../../helpers/reservasi-uji";
 import { persentasePertumbuhan, teksPertumbuhan } from "../../../features/laporan/periode";
 import { keTanggalLokal } from "../../../lib/waktu";
 
@@ -69,15 +69,21 @@ const responsLabaRugi = (periode: string, kini: boolean) => (r: Response) => {
   return (url.searchParams.get("endDate") === keTanggalLokal(new Date())) === kini;
 };
 
-async function isiFormAkunValid(page: Page, nama: string) {
+async function isiFormAkunValid(
+  page: Page,
+  nama: string,
+  saldo: { ketik: string; tampil: string } | null = { ketik: "125000", tampil: "125.000" },
+) {
   await page.getByRole("combobox").filter({ hasText: "Kas Fisik" }).click();
   await page.getByRole("option", { name: "Rekening Bank" }).click();
   await page.locator('input[name="namaAkun"]').fill(nama);
   await page.locator('input[name="nomorAkun"]').fill("E2E-" + unik());
   await page.getByPlaceholder("Catatan tambahan untuk akun ini...").fill("E2E keuangan");
-  const saldo = page.getByPlaceholder("0", { exact: true });
-  await saldo.fill("125000");
-  await expect(saldo).toHaveValue("125.000");
+  if (saldo) {
+    const isian = page.getByPlaceholder("0", { exact: true });
+    await isian.fill(saldo.ketik);
+    await expect(isian).toHaveValue(saldo.tampil);
+  }
 }
 
 test.describe("E2E — Keuangan", () => {
@@ -106,20 +112,21 @@ test.describe("E2E — Keuangan", () => {
     kirim.lepas();
   });
 
-  test("buat akun kas berhasil: payload utuh, kembali ke daftar, dan akun tersimpan (KU4a)", async ({ page }) => {
-    const auth = await bukaDenganAuth(page, URL_AKUN);
+  test("payload buat akun kas membawa saldo awal berformat, tanpa menyimpan (KU4a)", async ({ page }) => {
+    await bukaDenganAuth(page, URL_AKUN);
     const nama = "E2E Keuangan Akun " + unik();
-    let id: string | undefined;
+    await page.goto(URL_BUAT_AKUN);
+    await isiFormAkunValid(page, nama);
+    // Akun bersaldo tidak dapat ditutup sejak backend 465b438 (hapus tidak ada,
+    // nonaktif mensyaratkan saldo 0), sehingga payload bersaldo hanya diperiksa
+    // lewat POST yang dijawab gagal.
+    await page.route(POLA_AKUN, (route) =>
+      route.request().method() === "POST" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
+    );
     try {
-      await page.goto(URL_BUAT_AKUN);
-      await isiFormAkunValid(page, nama);
-      const tKirim = page.waitForResponse(cocok("POST", POLA_AKUN));
+      const tKirim = page.waitForRequest((r) => r.method() === "POST" && POLA_AKUN.test(r.url()));
       await page.getByRole("button", { name: "Simpan Akun Kas" }).click();
-      const res = await tKirim;
-      const body = await res.json().catch(() => ({}));
-      expect(res.status(), `POST /akunkas: ${JSON.stringify(body).slice(0, 200)}`).toBeLessThan(300);
-      const payload = res.request().postDataJSON();
-      expect(payload).toEqual({
+      expect((await tKirim).postDataJSON()).toEqual({
         tipeAkun: "Rekening Bank",
         namaAkun: nama,
         nomorAkun: expect.stringMatching(/^E2E-/),
@@ -127,20 +134,50 @@ test.describe("E2E — Keuangan", () => {
         saldo: 125000,
         status: "aktif",
       });
+    } finally {
+      await page.unroute(POLA_AKUN);
+    }
+  });
+
+  test("buat akun kas berhasil: tersimpan bersaldo 0, kembali ke daftar, lalu dinonaktifkan (KU4a)", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_AKUN);
+    const nama = "E2E Keuangan Akun " + unik();
+    let id: string | undefined;
+    try {
+      await page.goto(URL_BUAT_AKUN);
+      await isiFormAkunValid(page, nama, null);
+      const tKirim = page.waitForResponse(cocok("POST", POLA_AKUN));
+      await page.getByRole("button", { name: "Simpan Akun Kas" }).click();
+      const res = await tKirim;
+      const body = await res.json().catch(() => ({}));
+      expect(res.status(), `POST /akunkas: ${JSON.stringify(body).slice(0, 200)}`).toBeLessThan(300);
+      expect(res.request().postDataJSON()).toEqual({
+        tipeAkun: "Rekening Bank",
+        namaAkun: nama,
+        nomorAkun: expect.stringMatching(/^E2E-/),
+        keterangan: "E2E keuangan",
+        saldo: 0,
+        status: "aktif",
+      });
       await page.waitForURL(/\/keuangan\/akunkas$/);
-      await expect(kartuAkun(page, nama)).toContainText(rupiah(125000));
+      await expect(kartuAkun(page, nama)).toContainText(rupiah(0));
       const baca = await api<AkunKasUji[]>(page, auth, "GET", "/akunkas");
       expect(baca.status, "baca ulang akun kas: " + baca.pesan).toBe(200);
       const tersimpan = (baca.data ?? []).find((a) => a.namaAkun === nama);
       expect(tersimpan, "akun uji tersimpan di backend").toBeTruthy();
       id = tersimpan?.id;
-      expect(Number(tersimpan?.saldo)).toBe(125000);
+      expect(Number(tersimpan?.saldo)).toBe(0);
     } finally {
       if (!id) {
         const baca = await api<AkunKasUji[]>(page, auth, "GET", "/akunkas");
         id = (baca.data ?? []).find((a) => a.namaAkun === nama)?.id;
       }
-      await hapusLewatApi(page, auth, "/akunkas", id);
+      // Akun kas tidak dapat dihapus sejak backend 465b438; akun uji bersaldo 0
+      // ditutup lewat status non-aktif agar tidak menghabiskan kuota 10 akun aktif.
+      if (id) {
+        const tutup = await api(page, auth, "PUT", "/akunkas/" + id, { status: "non-aktif" });
+        expect.soft(tutup.status, `nonaktifkan akun kas uji: ${tutup.pesan}`).toBe(200);
+      }
     }
   });
 

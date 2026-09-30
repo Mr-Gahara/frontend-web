@@ -77,8 +77,16 @@ export async function buatAset(
 }
 
 /** Menghapus data uji lewat API; status tidak diperiksa karena dipakai di finally. */
+/**
+ * Menghapus data uji dari blok finally. Jawaban diperiksa lunak: sukses atau
+ * 404 (sudah terhapus) diterima, selain itu terlapor tanpa menutupi kegagalan
+ * asli test. Sebelumnya jawaban dibuang, sehingga pembersihan yang gagal tidak
+ * pernah terlihat (akun kas uji tertinggal sejak backend 465b438).
+ */
 export async function hapusLewatApi(page: Page, auth: Auth, path: string, id: string | undefined) {
-  if (id) await api(page, auth, "DELETE", path + "/" + id);
+  if (!id) return;
+  const res = await api(page, auth, "DELETE", path + "/" + id);
+  expect.soft([200, 204, 404], `hapus data uji ${path}/${id}: ${res.status} ${res.pesan}`).toContain(res.status);
 }
 
 /*
