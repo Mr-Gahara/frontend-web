@@ -22,6 +22,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 29 September 2026: pola roster outlet dan pola roster gudang setelah migrasi submodul pola roster (`dcc22e0`).
 - 29 September 2026: jadwal dan generate jadwal outlet dan gudang setelah migrasi submodul kalender dan generate (`19227f8`); generate outlet mendapat entri `IZIN_HALAMAN`, dan generate gudang dibuat.
 - 29 September 2026: ruang gudang setelah migrasi layout dan setup gudang (`9ce288b`). Layout bergerbang `read-dashboard-gudang` dan memuat `/location` bagi pemegang `read-location`; setup membuat lokasi lewat `POST /location` (`create-location`), bukan menu sidebar, dan tidak punya entri `IZIN_HALAMAN`.
+- 30 September 2026: pengaturan gudang setelah migrasi profil gudang (`319bd99`), dengan gate `read-location` di `IZIN_HALAMAN`.
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -66,4 +67,4 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/gudang/pola-roster` | - | `/shift`, `/polaroster` | - | Backend tidak memeriksa izin; halaman dibuat di `dcc22e0` (keputusan PL5) |
 | `/dashboard/gudang/shift` | - | `/shift` | - | Backend tidak memeriksa izin; halaman dibuat di `f99b7cf` (keputusan SH1b) |
 | `/dashboard/gudang/pengguna` | `read-pengguna`, `read-role` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sejalan |
-| `/dashboard/gudang/pengaturan` | - | - | - | Data dimuat lewat komponen, periksa manual |
+| `/dashboard/gudang/pengaturan` | `read-location` | `/location` | `read-location`; `PUT /location/:id` butuh `update-location` | Sejalan; tanpa `update-location` profil gudang tampil baca-saja (`319bd99`, keputusan GD2a) |

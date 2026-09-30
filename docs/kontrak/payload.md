@@ -452,6 +452,17 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Duplikat nama atau kode: 400 `{ errors: ["tenantID sudah digunakan di tenant ini"] }` tanpa `message`, sama seperti `POST /kategori` (`temuan.md` butir 14)
 - Diisi server: -
 
+#### `PUT /location/:id`
+
+- Aturan: validateLocationPayload mode update (validators/locationValidator.js) di route: seluruh field opsional, tetapi yang dikirim diperiksa, lalu body diganti hasil whitelist (`validation.updates`). Ditambahkan 30 September 2026 terhadap backend `00b9957`
+- Allowlist update: `nama`, `alamat`, `latitude`, `longitude`, `radiusAbsen`. `tenantID`, `_id`, `createdAt`, `updatedAt`, dan `tipe` ditolak "tidak diizinkan untuk diubah"; field lain ditolak "Field tidak dikenal"; body tanpa field sah ditolak "Tidak ada data valid untuk diperbarui."
+- Aturan nilai sama dengan `POST /location`: nama dan alamat teks yang tidak kosong, koordinat angka sungguhan dalam rentangnya, dan radius 10 sampai 50
+- Aturan service: bila salah satu koordinat dikirim, `koordinat` disusun ulang dari nilai baru dan nilai lama, lalu `$set` dijalankan dengan `runValidators`; lokasi milik tenant lain dijawab 404; cache daftar, detail, dan lokasi tenant dibersihkan
+- Respons 200 dengan `data` berbentuk item `GET /location` dan `message` "Lokasi berhasil diperbarui"
+- Web mengirim kelima field hasil `payloadPerbaruiLokasi` (`features/inventaris/schema-lokasi.ts`) dari pengaturan gudang
+- Wajib dari klien: -
+- Diisi server: -
+
 #### `PUT /metodepembayaran/:id`
 
 - Aturan: validateMetodePembayaranPayload (validators/metodePembayaranValidator.js)

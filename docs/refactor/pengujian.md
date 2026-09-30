@@ -89,8 +89,8 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
-**Baseline per langkah 1 modul Gudang** (commit `9ce288b`): 343 test unit
-dan integrasi lolos di 44 berkas, 312 e2e lolos, 22 skipped: dua
+**Baseline per modul Gudang** (commit `319bd99`): 345 test unit
+dan integrasi lolos di 44 berkas, 316 e2e lolos, 22 skipped: dua
 `test.fixme` bersyarat yang menunggu backend memisahkan shift dan pola
 roster per lokasi,
 delapan `test.fixme` bersyarat yang menunggu izin lintas outlet dari
@@ -119,7 +119,8 @@ lolos, dan satu `test.fixme` bersyarat. Submodul jadwal (`19227f8` dan
 skenario lolos. Submodul monitoring absensi (`845c2cf`) menambah empat
 test unit dan tiga skenario lolos. Spec ruang gudang (`2d7225b`) menambah
 enam skenario lolos, dan langkah 1 modul Gudang (`9ce288b`) menambah 16
-test unit dan tiga skenario lolos.
+test unit dan tiga skenario lolos. Pengaturan gudang (`319bd99`) menambah
+dua test unit dan empat skenario lolos.
 Diukur terhadap backend lokal `00b9957` (branch `ridho` setelah
 menggabungkan origin/yoga `77f4767`). Angka ini pembanding untuk memastikan tidak ada
 yang hilang diam-diam. Angka skipped dapat berubah bila data uji berubah;
@@ -552,6 +553,9 @@ Urutan debug kegagalan e2e di atas).
   `read-location`, tanpa `create-location`, dan tenant tanpa gudang,
   karena satu-satunya akun uji berperan Owner dan tenant uji sudah punya
   gudang.
+- **Mode baca-saja pengaturan gudang belum teruji**, karena satu-satunya
+  akun uji memegang `update-location`. Yang teruji e2e hanya jalur ubah,
+  dan `bacaSaja` di `IsianLokasi` belum punya test.
 
 ## Spec rujukan
 
@@ -732,3 +736,8 @@ Urutan debug kegagalan e2e di atas).
   induknya. Sejak `9ce288b`, galat layout disimulasikan dengan
   `JAWAB_GAGAL` untuk GET saja, lalu pencegatnya dilepas sebelum tombol
   coba lagi ditekan dan respons muat ulangnya ditunggu.
+- `tests/e2e/gudang/pengaturan-gudang.spec.ts` (sejak `319bd99`): data
+  uji tetap ("Gudang A") diubah lewat UI lalu dikembalikan lewat API di
+  `finally`; keberhasilan dibuktikan dari payload, respons `PUT`, dan
+  pembacaan ulang API; harapan tampilan dihitung dari `GET /location` yang
+  dibaca lewat API.

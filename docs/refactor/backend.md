@@ -206,6 +206,11 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   setelah `dcc22e0`: `tenantID` yang dapat diubah lewat
   `PUT /polaroster/:id`, dan cache daftar pola roster yang basi saat
   shift diubah (`kontrak/temuan.md` butir 72 dan 73)
+- Laporan modul Gudang — 1 temuan, disusun 30 September 2026 setelah
+  `319bd99`: dashboard gudang dan outlet mencampur data lokasi (stok
+  kritis dan jurnal terbaru dari seluruh lokasi tenant), tidak memeriksa
+  izin baca modul, dan mengirim jurnal tanpa mapper
+  (`kontrak/temuan.md` butir 74)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

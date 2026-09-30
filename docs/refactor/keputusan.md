@@ -645,6 +645,12 @@ keputusan rancangan butir 17 dan 21.
   `urlSetup` form buat stock opname gudang diarahkan ke
   `/dashboard/gudang/setup`, karena gudang yang belum didaftarkan adalah
   urusan setup, bukan pengaturan.
+- Diterapkan tanpa ditanyakan di `319bd99`: pengaturan mengubah lokasi
+  Gudang pertama dari `GET /location` (MVP satu gudang); isian form
+  dipakai bersama setup lewat `IsianLokasi`; tombol simpan nonaktif selama
+  form belum berubah; form dipasang ulang lewat `key` berisi id dan
+  `updatedAt` (keputusan rancangan butir 8); dan gate halaman
+  `read-location`, diturunkan dari endpoint yang dipanggilnya.
 
 ## Keputusan rancangan yang mengikat
 
