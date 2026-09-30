@@ -237,14 +237,13 @@ test.describe("E2E - Siklus Hidup Pengguna (CRUD)", () => {
   });
 
   // ==========================================================
-  // [1b] HAPUS PENGGUNA (fixme: bug backend)
-  // penggunaCrudService menjalankan Device.deleteMany dan
-  // Absensi.deleteMany secara paralel (Promise.all) dalam satu sesi
-  // transaksi. Driver MongoDB tidak mendukung operasi paralel dalam satu
-  // transaksi, sehingga DELETE /api/pengguna/:id gagal 500 secara acak.
-  // Ganti test.fixme menjadi test setelah backend diperbaiki.
+  // [1b] HAPUS PENGGUNA
+  // DELETE /api/pengguna/:id dahulu gagal 500 secara acak karena
+  // Device.deleteMany dan Absensi.deleteMany berjalan paralel dalam satu
+  // transaksi. Diperbaiki backend 465b438; test ini kembali dijalankan
+  // setelah terbukti lolos (30 September 2026).
   // ==========================================================
-  test.fixme("hapus: pengguna terhapus dan hilang dari tabel", async ({
+  test("hapus: pengguna terhapus dan hilang dari tabel", async ({
     page,
   }) => {
     const nama = `Karyawan Hapus ${Date.now()}`;
