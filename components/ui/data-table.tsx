@@ -42,6 +42,16 @@ export interface PaginasiServerTabel {
   onGantiUkuran?: (ukuran: number) => void;
 }
 
+/**
+ * Urutan dari server: tabel tidak mengurutkan baris sendiri, dan pergantian
+ * urutan kolom diteruskan ke pemakai tabel (daftar penjualan, GET /penjualan
+ * sort dan order sejak backend yoga 8fad4c0).
+ */
+export interface UrutanServerTabel {
+  urutan: SortingState;
+  onGantiUrutan: (urutan: SortingState) => void;
+}
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -55,6 +65,8 @@ interface DataTableProps<TData, TValue> {
    * server (daftar penjualan).
    */
   paginasiServer?: PaginasiServerTabel;
+  /** Urutan dari server: pengurutan klien dimatikan dan urutan datang dari pemakai tabel. */
+  urutanServer?: UrutanServerTabel;
 }
 
 export function DataTable<TData, TValue>({
@@ -65,6 +77,7 @@ export function DataTable<TData, TValue>({
   searchKey,
   searchPlaceholder = "Cari...",
   paginasiServer,
+  urutanServer,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -76,12 +89,16 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: paginasiServer ? undefined : getPaginationRowModel(),
     manualPagination: !!paginasiServer,
-    getSortedRowModel: getSortedRowModel(),
+    getSortedRowModel: urutanServer ? undefined : getSortedRowModel(),
+    manualSorting: !!urutanServer,
     getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
+    onSortingChange: (pembaru) => {
+      if (!urutanServer) return setSorting(pembaru);
+      urutanServer.onGantiUrutan(typeof pembaru === "function" ? pembaru(urutanServer.urutan) : pembaru);
+    },
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    state: { sorting, columnFilters, columnVisibility },
+    state: { sorting: urutanServer ? urutanServer.urutan : sorting, columnFilters, columnVisibility },
     initialState: { pagination: { pageSize: 10 } },
   });
 

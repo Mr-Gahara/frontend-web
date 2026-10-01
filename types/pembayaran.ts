@@ -19,6 +19,8 @@ export interface Pembayaran {
   jumlahBayar: number;
   status: StatusPembayaran;
   catatan: string | null;
+  /** Alasan pembatalan, terpisah dari catatan (backend yoga 8fad4c0). */
+  alasanVoid?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,8 +39,12 @@ export interface PembayaranRequest {
   catatan?: string;
 }
 
-/** Payload PUT /pembayaran/:id untuk membatalkan; catatan menjadi alasan di buku mutasi kas. */
+/**
+ * Payload PUT /pembayaran/:id untuk membatalkan. Alasan dikirim sebagai
+ * alasanVoid (backend yoga 8fad4c0), sehingga catatan asli pembayaran tidak
+ * tertimpa; backend juga menyalinnya ke keterangan mutasi kas.
+ */
 export interface PembatalanPembayaranRequest {
   status: "VOID";
-  catatan?: string;
+  alasanVoid?: string;
 }

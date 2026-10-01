@@ -4,8 +4,9 @@ import { login } from "../../helpers/transfer-uji";
 /*
  * Daftar penjualan per halaman (keputusan PB6a). Backend 465b438 menjawab
  * GET /penjualan per halaman, sehingga footer tabel memakai angka dan aksi
- * server, kolom tidak diurutkan per halaman, dan pilihan jumlah baris
- * terkirim sebagai limit. Harapan dihitung dari respons yang dibaca halaman
+ * server, urutan kolom terkirim sebagai sort dan order (backend yoga), dan
+ * pilihan jumlah baris terkirim sebagai limit. Harapan dihitung dari
+ * respons yang dibaca halaman
  * itu sendiri; tidak ada data yang ditulis.
  */
 
@@ -40,7 +41,7 @@ test.describe("E2E — Daftar penjualan per halaman", () => {
     await login(page);
   });
 
-  test("satu footer halaman berangka server, tanpa tombol urutkan kolom (PB6a)", async ({ page }) => {
+  test("satu footer halaman berangka server, dengan tombol urutkan tiga kolom (PB6a, PB14a)", async ({ page }) => {
     const awal = await bukaDaftar(page);
     expect(awal.pagination.limit).toBe(10);
     await expect(page.getByText(`${awal.pagination.total} total data`, { exact: true })).toBeVisible();
@@ -48,8 +49,42 @@ test.describe("E2E — Daftar penjualan per halaman", () => {
     await expect(page.getByRole("button", { name: "Previous", exact: true })).toHaveCount(1);
     await expect(page.getByRole("button", { name: "Next", exact: true })).toHaveCount(1);
     await expect(page.getByRole("button", { name: "Previous", exact: true })).toBeDisabled();
-    await expect(page.getByRole("button", { name: /^(No\. Referensi|Tanggal|Total)$/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^(No\. Referensi|Tanggal|Total)$/ })).toHaveCount(3);
     await expect(page.locator("tbody tr")).toHaveCount(awal.data.length);
+  });
+
+  test("urutkan Total: sort dan order terkirim, kembali ke halaman 1, dan baris berurutan dari server (PB14a)", async ({
+    page,
+  }) => {
+    type BarisUrut = { noReferensi: string; totalTagihan: number };
+    type ResponsUrut = { data: BarisUrut[]; pagination: ResponsDaftar["pagination"] };
+    const tungguUrut = (order: string) =>
+      page.waitForResponse((r) => {
+        if (r.request().method() !== "GET" || !POLA_DAFTAR.test(r.url())) return false;
+        const q = new URL(r.url()).searchParams;
+        return q.get("sort") === "totalTagihan" && q.get("order") === order && q.get("page") === "1";
+      });
+
+    const awal = await bukaDaftar(page);
+    expect(awal.pagination.total, "data uji perlu lebih dari 10 penjualan").toBeGreaterThan(10);
+    const tHalaman2 = tungguDaftar(page, 2, 10);
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await tHalaman2;
+
+    const tNaik = tungguUrut("asc");
+    await page.getByRole("button", { name: "Total", exact: true }).click();
+    const naik = (await (await tNaik).json()) as ResponsUrut;
+    const angkaNaik = naik.data.map((p) => p.totalTagihan);
+    expect(angkaNaik, "urutan naik dari server").toEqual([...angkaNaik].sort((a, b) => a - b));
+    await expect(page.getByText(teksHalaman(naik, 1), { exact: true })).toBeVisible();
+    await expect(page.locator("tbody tr").first()).toContainText(naik.data[0].noReferensi);
+
+    const tTurun = tungguUrut("desc");
+    await page.getByRole("button", { name: "Total", exact: true }).click();
+    const turun = (await (await tTurun).json()) as ResponsUrut;
+    const angkaTurun = turun.data.map((p) => p.totalTagihan);
+    expect(angkaTurun, "urutan turun dari server").toEqual([...angkaTurun].sort((a, b) => b - a));
+    await expect(page.locator("tbody tr").first()).toContainText(turun.data[0].noReferensi);
   });
 
   test("Previous kembali ke halaman 1, dan jumlah baris terkirim sebagai limit", async ({ page }) => {

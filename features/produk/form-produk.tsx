@@ -8,6 +8,9 @@ import { pesanError } from "@/lib/api/error";
 import { BahanBakuCombobox } from "@/app/dashboard/outlet/inventaris/components/bahanBakuCombobox";
 import { useDaftarBahanBaku } from "@/features/bahan-baku/hooks";
 import { useDaftarKategori } from "@/features/kategori/hooks";
+import { useLokasiAktif } from "@/features/inventaris/hooks";
+import { useSession } from "@/lib/auth/useSession";
+import { IZIN } from "@/lib/auth/permissions";
 import { useSimpanProduk } from "./hooks";
 import { susunPayloadProduk } from "./payload";
 import {
@@ -145,6 +148,11 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
   const router = useRouter();
   const teks = TEKS[mode];
   const resepAwalAda = (produk?.resep.length ?? 0) > 0;
+  // Outlet aktif menentukan stok bahan yang dipakai menghitung stok produk
+  // beresep (backend yoga). Hanya dimuat bagi pemegang read-location; tanpa
+  // itu backend memakai outlet tenant.
+  const { permissions } = useSession();
+  const { lokasiId } = useLokasiAktif({ aktif: permissions.includes(IZIN.location) });
 
   const [openCombobox, setOpenCombobox] = useState(false);
 
@@ -167,8 +175,9 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
 
   const isUnlimitedStok = useWatch({ control, name: "isUnlimitedStok" });
   const hasResep = fields.length > 0;
-  // Resep lama dihapus seluruhnya: backend akan menjadikan stok 0 (lihat
-  // susunPayloadProduk), sehingga pengguna perlu diberi tahu.
+  // Resep lama dihapus seluruhnya: isian stok, yang selama ada resep dipaksa
+  // 0, kini aktif kembali dan nilainya tersimpan apa adanya (backend yoga
+  // a66980c), sehingga pengguna diminta mengisinya sebelum menyimpan.
   const resepAkanDihapus = resepAwalAda && !hasResep;
 
   // Efek samping: Manajemen Paksa Stok
@@ -222,7 +231,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
     try {
       await simpanMutation.mutateAsync({
         id: produk?.id,
-        data: susunPayloadProduk(nilai, { resepAwalAda }),
+        data: susunPayloadProduk(nilai, { resepAwalAda, locationID: lokasiId || undefined }),
       });
       toast.success("Berhasil", { description: teks.berhasil });
       router.push(URL_DAFTAR_PRODUK);
@@ -592,7 +601,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                           : isUnlimitedStok
                             ? "Stok dinonaktifkan karena produk ini berstatus Unlimited (Tanpa batas)."
                             : resepAkanDihapus
-                              ? "Stok akan menjadi 0 setelah resep dihapus. Atur stok kembali setelah menyimpan."
+                              ? "Resep dihapus: isi stok produk ini sebelum menyimpan, karena nilai inilah yang tersimpan."
                               : teks.petunjukStok}
                       </p>
                     )}

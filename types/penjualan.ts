@@ -73,6 +73,8 @@ export interface PembayaranPenjualan {
   status: StatusPembayaran;
   tanggalBayar: string | null;
   catatan: string | null;
+  /** Alasan pembatalan pembayaran (backend yoga 8fad4c0). */
+  alasanVoid?: string | null;
 }
 
 // ENTITAS PENJUALAN (response dari backend)
@@ -103,6 +105,8 @@ export interface Penjualan {
   sisaTagihan: number;
   statusBayar: StatusBayar;
   statusPenjualan: StatusPenjualan;
+  /** Alasan void, diisi saat penjualan di-VOID (backend yoga 8fad4c0). */
+  alasanVoid?: string | null;
   /** Hanya di detail: seluruh pembayaran penjualan ini, termasuk VOID, urut dari yang pertama (backend 465b438). */
   pembayaran?: PembayaranPenjualan[];
   keterangan: string;

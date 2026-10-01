@@ -64,3 +64,17 @@ export const PILIHAN_UKURAN_HALAMAN = [10, 20, 50, 100] as const;
 export type UkuranHalaman = (typeof PILIHAN_UKURAN_HALAMAN)[number];
 /** Bawaan setiap kali halaman dibuka; pilihan lain tidak diingat. */
 export const UKURAN_HALAMAN_BAWAAN: UkuranHalaman = 10;
+
+/** Kolom daftar penjualan yang diurutkan server (GET /penjualan sort, backend yoga 8fad4c0). */
+export const KOLOM_URUT_PENJUALAN = ["noReferensi", "tanggalTransaksi", "totalTagihan"] as const;
+
+/**
+ * Parameter sort dan order dari urutan tabel. Kosong berarti urutan bawaan
+ * backend (terbaru dulu); kolom di luar KOLOM_URUT_PENJUALAN tidak dikirim,
+ * karena backend menolaknya 400.
+ */
+export function paramUrutanPenjualan(urutan: readonly { id: string; desc: boolean }[]): Record<string, string> {
+  const pertama = urutan[0];
+  if (!pertama || !(KOLOM_URUT_PENJUALAN as readonly string[]).includes(pertama.id)) return {};
+  return { sort: pertama.id, order: pertama.desc ? "desc" : "asc" };
+}

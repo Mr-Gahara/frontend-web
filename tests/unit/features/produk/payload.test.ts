@@ -57,6 +57,18 @@ describe("susunPayloadProduk", () => {
   });
 });
 
+describe("susunPayloadProduk: locationID (backend yoga)", () => {
+  it("produk beresep membawa locationID outlet aktif", () => {
+    const payload = susunPayloadProduk({ ...dasar, resep }, { resepAwalAda: false, locationID: "l1" });
+    expect(payload.locationID).toBe("l1");
+  });
+
+  it("produk tanpa resep, atau lokasi belum termuat, tanpa locationID", () => {
+    expect(susunPayloadProduk(dasar, { resepAwalAda: false, locationID: "l1" }).locationID).toBeUndefined();
+    expect(susunPayloadProduk({ ...dasar, resep }, { resepAwalAda: false }).locationID).toBeUndefined();
+  });
+});
+
 describe("skemaProduk", () => {
   it("menolak satuan resep yang tidak diterima backend", () => {
     const hasil = skemaProduk.safeParse({

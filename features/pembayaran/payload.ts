@@ -21,12 +21,13 @@ export function teksAkunTujuan(metode: Pick<MetodePembayaran, "akunKas"> | undef
 
 /**
  * Payload PUT /pembayaran/:id untuk membatalkan pembayaran. Alasan opsional
- * (keputusan penyesuaian 465b438); bila diisi, backend menyalinnya sebagai
- * alasan di buku mutasi kas.
+ * (keputusan PB5a) dikirim sebagai alasanVoid sejak backend yoga 8fad4c0,
+ * sehingga catatan asli pembayaran tetap terbaca di riwayat; backend juga
+ * menyalinnya ke keterangan mutasi kas.
  */
 export function susunPayloadBatalPembayaran(alasan: string): PembatalanPembayaranRequest {
-  const catatan = alasan.trim();
-  return catatan ? { status: "VOID", catatan } : { status: "VOID" };
+  const alasanVoid = alasan.trim();
+  return alasanVoid ? { status: "VOID", alasanVoid } : { status: "VOID" };
 }
 
 export interface IsianPembayaran {

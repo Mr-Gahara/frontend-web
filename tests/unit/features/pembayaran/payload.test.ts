@@ -116,7 +116,7 @@ describe("teksAkunTujuan", () => {
 
 describe("susunPayloadBatalPembayaran", () => {
   it("status VOID, dengan alasan dipangkas bila diisi", () => {
-    expect(susunPayloadBatalPembayaran("  salah metode  ")).toEqual({ status: "VOID", catatan: "salah metode" });
+    expect(susunPayloadBatalPembayaran("  salah metode  ")).toEqual({ status: "VOID", alasanVoid: "salah metode" });
   });
 
   it("alasan kosong tidak dikirim", () => {

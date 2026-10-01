@@ -40,4 +40,6 @@ export interface ProdukRequest {
   keterangan?: string;
   gambarProduk?: string;
   resep?: ResepItem[];
+  /** Outlet yang stok bahannya dipakai menghitung stok produk beresep (backend yoga 5eb72e5). */
+  locationID?: string;
 }

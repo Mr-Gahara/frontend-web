@@ -71,3 +71,14 @@ export function lokasiFinalisasi(lokasiPenjualan: string | null, outletTenantId:
 export function susunPayloadFinalisasi(locationID: string | undefined): PerubahanPenjualan {
   return locationID ? { finalize: true, locationID } : { finalize: true };
 }
+/**
+ * Payload PUT /penjualan/:id untuk void (keputusan PB2a). Alasan opsional
+ * dikirim sebagai alasanVoid sejak backend yoga 8fad4c0, dan backend
+ * menyalinnya ke sesi booking milik penjualan itu. Alasan kosong tidak dikirim.
+ */
+export function susunPayloadVoidPenjualan(alasan: string) {
+  const alasanVoid = alasan.trim();
+  return alasanVoid
+    ? { statusPenjualan: "VOID" as const, alasanVoid }
+    : { statusPenjualan: "VOID" as const };
+}

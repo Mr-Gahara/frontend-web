@@ -11,6 +11,7 @@ export type PerubahanPenjualan = {
   statusPenjualan?: StatusPenjualan;
   finalize?: boolean;
   locationID?: string;
+  alasanVoid?: string;
 };
 
 export const penjualanApi = {

@@ -15,7 +15,8 @@ import {
   type UkuranHalaman,
 } from "./filter";
 import { aksiPenjualan } from "./izin";
-import { PESAN_VOID_PENJUALAN, TAMPILAN_STATUS_PENJUALAN, URUTAN_STATUS_PENJUALAN } from "./tampilan";
+import { DialogVoidPenjualan } from "./dialog-void-penjualan";
+import { TAMPILAN_STATUS_PENJUALAN, URUTAN_STATUS_PENJUALAN } from "./tampilan";
 import { useSession } from "@/lib/auth/useSession";
 import {
   Penjualan,
@@ -24,7 +25,8 @@ import {
   JenisTransaksi,
   JenisPenjualan,
 } from "@/types/penjualan";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, type SortingState } from "@tanstack/react-table";
+import { KepalaUrut } from "@/components/ui/kepala-urut";
 import { toast } from "sonner";
 
 import { DataTable } from "@/components/ui/data-table";
@@ -120,12 +122,14 @@ export default function HalamanDaftarPenjualan({
   const [appliedFilters, setAppliedFilters] = useState<PenjualanFilterParams>(emptyFilter);
   const [halaman, setHalaman] = useState(1);
   const [ukuranHalaman, setUkuranHalaman] = useState<UkuranHalaman>(UKURAN_HALAMAN_BAWAAN);
+  // Urutan per kolom diterapkan server (keputusan PB14a, backend yoga).
+  const [urutan, setUrutan] = useState<SortingState>([]);
   const [showFilter, setShowFilter] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<Penjualan | null>(null);
   const [voidTarget, setVoidTarget] = useState<Penjualan | null>(null);
 
-  const daftar = useDaftarPenjualan(appliedFilters, halaman, ukuranHalaman, lingkup !== null && !penghalang);
+  const daftar = useDaftarPenjualan(appliedFilters, halaman, ukuranHalaman, lingkup !== null && !penghalang, urutan);
   // Backend tidak dapat menyaring lokasi; lingkup outlet diterapkan di klien
   // per halaman (features/penjualan/filter.ts). Pada MVP satu outlet hasilnya
   // sama dengan tanpa penyaringan; wajib ditinjau sebelum multi-outlet.
@@ -164,10 +168,6 @@ export default function HalamanDaftarPenjualan({
     },
   });
 
-  const handleVoid = () => {
-    if (voidTarget) updateStatusMutation.mutate(voidTarget.id);
-  };
-
   const handleApplyFilter = () => {
     setAppliedFilters({ ...filters });
     setHalaman(1);
@@ -184,7 +184,7 @@ export default function HalamanDaftarPenjualan({
     () => [
       {
         accessorKey: "noReferensi",
-        header: () => <span className="text-xs font-bold text-[#0A2947]/60">No. Referensi</span>,
+        header: ({ column }) => <KepalaUrut column={column} judul="No. Referensi" />,
         cell: ({ row }) => (
           <span className="font-bold font-mono text-[#0A2947] text-xs sm:text-sm">
             {row.original.noReferensi}
@@ -193,7 +193,7 @@ export default function HalamanDaftarPenjualan({
       },
       {
         accessorKey: "tanggalTransaksi",
-        header: () => <span className="text-xs font-bold text-[#0A2947]/60 hidden sm:inline">Tanggal</span>,
+        header: ({ column }) => <KepalaUrut column={column} judul="Tanggal" className="hidden sm:inline-flex" />,
         cell: ({ row }) => (
           <span className="text-xs sm:text-sm font-medium text-[#0A2947]/70 hidden sm:inline">
             {formatTanggal(row.original.tanggalTransaksi)}
@@ -215,7 +215,7 @@ export default function HalamanDaftarPenjualan({
       },
       {
         accessorKey: "totalTagihan",
-        header: () => <span className="text-xs font-bold text-[#0A2947]/60">Total</span>,
+        header: ({ column }) => <KepalaUrut column={column} judul="Total" />,
         cell: ({ row }) => (
           <span className="font-bold text-[#0A2947] text-xs sm:text-sm font-mono">
             {formatRupiah(row.original.totalTagihan)}
@@ -520,49 +520,28 @@ export default function HalamanDaftarPenjualan({
                   setHalaman(1);
                 },
               }}
+              urutanServer={{
+                urutan,
+                onGantiUrutan: (berikut) => {
+                  setUrutan(berikut);
+                  setHalaman(1);
+                },
+              }}
             />
           </>
         )}
       </div>
 
       {/* DIALOG VOID */}
-      <AlertDialog
-        open={!!voidTarget}
-        onOpenChange={(open) => {
-          if (!open) setVoidTarget(null);
+      <DialogVoidPenjualan
+        noReferensi={voidTarget?.noReferensi}
+        terbuka={!!voidTarget}
+        memproses={updateStatusMutation.isPending}
+        onTutup={() => setVoidTarget(null)}
+        onKonfirmasi={(alasan) => {
+          if (voidTarget) updateStatusMutation.mutate({ id: voidTarget.id, alasan });
         }}
-      >
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10 max-w-[90vw] sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">
-              Void Penjualan {voidTarget?.noReferensi}?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
-              {PESAN_VOID_PENJUALAN}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel
-              disabled={updateStatusMutation.isPending}
-              className="cursor-pointer w-full sm:w-auto border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
-            >
-              Batal
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                handleVoid();
-              }}
-              disabled={updateStatusMutation.isPending}
-              className="cursor-pointer bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/90 font-bold w-full sm:w-auto"
-            >
-              {updateStatusMutation.isPending
-                ? "Memproses..."
-                : "Ya, Void Penjualan"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      />
 
       {/* DIALOG HAPUS */}
       <AlertDialog

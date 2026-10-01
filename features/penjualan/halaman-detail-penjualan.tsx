@@ -10,7 +10,8 @@ import { useBatalkanPembayaran } from "@/features/pembayaran/hooks";
 import { useFinalisasiPenjualan, usePenjualan, useVoidPenjualan } from "./hooks";
 import { lokasiFinalisasi } from "./payload";
 import { aksiPenjualan, bolehBatalkanPembayaran, bolehCakupanPenjualan } from "./izin";
-import { PESAN_BATAL_PEMBAYARAN, PESAN_VOID_PENJUALAN, TAMPILAN_STATUS_PENJUALAN } from "./tampilan";
+import { DialogVoidPenjualan } from "./dialog-void-penjualan";
+import { PESAN_BATAL_PEMBAYARAN, TAMPILAN_STATUS_PENJUALAN } from "./tampilan";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
@@ -197,8 +198,13 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="flex gap-2">
-            {badgeStatus(penjualan.statusPenjualan)}
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-2">
+              {badgeStatus(penjualan.statusPenjualan)}
+            </div>
+            {penjualan.statusPenjualan === "VOID" && penjualan.alasanVoid && (
+              <p className="text-xs font-medium text-[#0A2947]/60">Alasan void: {penjualan.alasanVoid}</p>
+            )}
           </div>
 
           <div className="flex gap-2 w-full sm:w-auto">
@@ -471,8 +477,11 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
                       <td className="px-6 py-4 font-bold text-[#0A2947]">
                         {pay.namaMetodePembayaran || "-"}
                       </td>
-                      <td className="px-6 py-4 font-medium text-[#0A2947]/60 text-xs line-clamp-1">
-                        {pay.catatan || "-"}
+                      <td className="px-6 py-4 font-medium text-[#0A2947]/60 text-xs">
+                        <span className="line-clamp-1">{pay.catatan || "-"}</span>
+                        {pay.status === "VOID" && pay.alasanVoid && (
+                          <span className="block line-clamp-1 text-red-700">Alasan batal: {pay.alasanVoid}</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-right font-bold text-[#0A2947] font-mono">
                         {formatRupiah(pay.jumlahBayar)}
@@ -559,36 +568,13 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
       </AlertDialog>
 
       {/* DIALOG KONFIRMASI VOID */}
-      <AlertDialog open={showVoidConfirm} onOpenChange={setShowVoidConfirm}>
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">
-              Void Penjualan {penjualan.noReferensi}?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
-              {PESAN_VOID_PENJUALAN}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              disabled={voidMutation.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
-            >
-              Batal
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                voidMutation.mutate(idPenjualan);
-              }}
-              disabled={voidMutation.isPending}
-              className="cursor-pointer bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/90 font-bold"
-            >
-              {voidMutation.isPending ? "Memproses..." : "Ya, Void Penjualan"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DialogVoidPenjualan
+        noReferensi={penjualan.noReferensi}
+        terbuka={showVoidConfirm}
+        memproses={voidMutation.isPending}
+        onTutup={() => setShowVoidConfirm(false)}
+        onKonfirmasi={(alasan) => voidMutation.mutate({ id: idPenjualan, alasan })}
+      />
 
       {/* DIALOG KONFIRMASI FINALISASI */}
       <AlertDialog

@@ -456,8 +456,8 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       expect((await detailPenjualan(page, auth, penjualan.id)).statusPenjualan).toBe("PAID");
       await page.goto(`${DAFTAR}/${penjualan.id}`);
       await expect(page.getByRole("button", { name: /void penjualan/i }), "void menunggu pembayaran dibatalkan").toHaveCount(0);
-      // Baris dicari lewat tombol Batalkan, bukan catatan: catatan pembayaran
-      // ikut diganti alasan pembatalan (PUT { status, catatan }).
+      // Baris dicari lewat tombol Batalkan. Alasan dikirim sebagai alasanVoid,
+      // sehingga catatan asli pembayaran tetap terbaca (backend yoga 8fad4c0).
       for (const sisa of [1, 0]) {
         const baris = page.getByRole("row").filter({ has: page.getByRole("button", { name: "Batalkan" }) }).first();
         await baris.getByRole("button", { name: "Batalkan" }).click();
@@ -469,9 +469,10 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
         await dialog.getByRole("button", { name: /ya, batalkan pembayaran/i }).click();
         const res = await tunggu;
         expect(res.status(), `PUT pembayaran: ${(await res.text()).slice(0, 200)}`).toBe(200);
-        expect(res.request().postDataJSON()).toEqual({ status: "VOID", catatan: "E2E siklus batal" });
+        expect(res.request().postDataJSON()).toEqual({ status: "VOID", alasanVoid: "E2E siklus batal" });
         await expect(dialog).toBeHidden();
         await expect(page.getByRole("button", { name: "Batalkan" }), "tombol Batalkan yang tersisa").toHaveCount(sisa);
+        await expect(page.getByText("Alasan batal: E2E siklus batal"), "alasan tampil di riwayat").toHaveCount(2 - sisa);
       }
       const setelahBatal = await detailPenjualan(page, auth, penjualan.id);
       expect(setelahBatal.statusPenjualan).toBe("UNPAID");
@@ -479,13 +480,25 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
         "VOID",
         "VOID",
       ]);
+      const riwayat = (setelahBatal.pembayaran ?? []) as unknown as { catatan: string | null; alasanVoid?: string | null }[];
+      expect(
+        riwayat.map((p) => [p.catatan, p.alasanVoid]),
+        "catatan asli tetap, alasan tersimpan di alasanVoid",
+      ).toEqual([
+        ["Siklus sebagian", "E2E siklus batal"],
+        ["Siklus pelunasan", "E2E siklus batal"],
+      ]);
       await page.getByRole("button", { name: /void penjualan/i }).click();
       const tungguVoid = page.waitForResponse(
         (r) => r.request().method() === "PUT" && polaPenjualan(penjualan.id).test(r.url()),
       );
+      await page.getByRole("alertdialog").getByLabel(/alasan/i).fill("E2E void siklus");
       await page.getByRole("alertdialog").getByRole("button", { name: /ya, void penjualan/i }).click();
-      expect((await tungguVoid).status()).toBe(200);
+      const resVoid = await tungguVoid;
+      expect(resVoid.status()).toBe(200);
+      expect(resVoid.request().postDataJSON()).toEqual({ statusPenjualan: "VOID", alasanVoid: "E2E void siklus" });
       expect((await detailPenjualan(page, auth, penjualan.id)).statusPenjualan).toBe("VOID");
+      await expect(page.getByText("Alasan void: E2E void siklus")).toBeVisible();
     } finally {
       await batalkanPenjualanUji(page, auth, penjualan.id);
     }

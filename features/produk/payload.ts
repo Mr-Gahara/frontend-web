@@ -1,14 +1,16 @@
 /**
  * Menyusun payload POST dan PUT /produk dari nilai form.
  *
- * Penanganan sementara bug backend: PUT /produk/:id memeriksa
- * if (payload.resep), sehingga resep kosong (array kosong bernilai truthy)
- * membuat produkService menghitung ulang stok menjadi 0. Produk tanpa resep
- * yang bukan unlimited lalu tidak dapat dijual, karena inventoryService
- * mensyaratkan stok mencukupi. Karena itu resep hanya dikirim bila produk
- * sekarang memiliki resep, atau sebelumnya memiliki resep sehingga resep lama
- * perlu dihapus. Sederhanakan setelah backend memeriksa panjang resep seperti
- * pada create.
+ * Resep hanya dikirim bila produk sekarang memiliki resep, atau sebelumnya
+ * memiliki resep sehingga resep lama perlu dihapus. Sejak backend yoga
+ * a66980c, resep kosong tidak lagi membuat stok dihitung ulang menjadi 0
+ * (kontrak/temuan.md butir 11), sehingga stok yang dikirim tersimpan apa
+ * adanya; aturan ini dipertahankan agar payload tidak membawa field yang
+ * tidak berubah.
+ *
+ * locationID (outlet aktif) dikirim untuk produk beresep, agar backend
+ * menghitung stok produk dari inventory outlet itu (5eb72e5). Tanpa itu
+ * backend memakai outlet tenant.
  */
 
 import type { ProdukRequest } from "@/types/produk";
@@ -16,7 +18,7 @@ import type { NilaiFormProduk } from "./schema";
 
 export function susunPayloadProduk(
   nilai: NilaiFormProduk,
-  opsi: { resepAwalAda: boolean },
+  opsi: { resepAwalAda: boolean; locationID?: string },
 ): ProdukRequest {
   const adaResep = nilai.resep.length > 0;
   const isUnlimitedStok = adaResep ? false : nilai.isUnlimitedStok;
@@ -33,5 +35,6 @@ export function susunPayloadProduk(
   };
 
   if (adaResep || opsi.resepAwalAda) payload.resep = nilai.resep;
+  if (adaResep && opsi.locationID) payload.locationID = opsi.locationID;
   return payload;
 }

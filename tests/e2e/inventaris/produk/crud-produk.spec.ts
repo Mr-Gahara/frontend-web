@@ -446,7 +446,7 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
   // ----------------------------------------------------------
   // [4d] EDIT: Resep dihapus seluruhnya, petunjuk stok muncul
   // ----------------------------------------------------------
-  test("edit produk: resep dihapus seluruhnya → petunjuk stok muncul", async ({
+  test("edit produk: resep dihapus seluruhnya → petunjuk stok muncul, dan stok yang diisi tersimpan", async ({
     page,
   }) => {
     const namaProduk = "Produk E2E Resep Dihapus";
@@ -487,8 +487,27 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
       await tombolHapus.click();
       await expect(tombolHapus).not.toBeVisible();
       await expect(
-        page.getByText(/stok akan menjadi 0 setelah resep dihapus/i),
+        page.getByText(/resep dihapus: isi stok produk ini sebelum menyimpan/i),
       ).toBeVisible();
+    });
+
+    await test.step("Isi stok lalu simpan: stok tersimpan apa adanya (backend yoga a66980c)", async () => {
+      await page.locator("#stok").fill("7");
+      const tunggu = page.waitForResponse(
+        (r) => r.request().method() === "PUT" && /\/api\/produk\/[a-f0-9]{24}$/i.test(r.url()),
+      );
+      await page.getByRole("button", { name: /simpan/i }).click();
+      const res = await tunggu;
+      expect(res.status(), `PUT produk: ${(await res.text()).slice(0, 200)}`).toBe(200);
+      expect(res.request().postDataJSON()).toMatchObject({ resep: [], stok: 7 });
+      await page.waitForURL("**/inventaris/produk");
+
+      await page.getByPlaceholder(/cari nama produk/i).fill(namaProduk);
+      const row = page.getByRole("row", { name: new RegExp(namaProduk, "i") }).first();
+      await klikTombolAksiProduk(row);
+      await page.getByRole("menuitem", { name: /edit produk/i }).click();
+      await page.waitForURL("**/edit");
+      await expect(page.locator("#stok"), "stok tersimpan dari isian").toHaveValue("7");
     });
 
     await test.step("Cleanup", async () => {

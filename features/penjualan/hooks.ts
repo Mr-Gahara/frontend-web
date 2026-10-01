@@ -2,10 +2,10 @@
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { penjualanApi } from "./api";
-import { filterServerPenjualan } from "./filter";
+import { filterServerPenjualan, paramUrutanPenjualan } from "./filter";
 import { queryKeys } from "@/lib/queryKeys";
 import { isNotFound } from "@/lib/api/error";
-import { susunPayloadFinalisasi } from "./payload";
+import { susunPayloadFinalisasi, susunPayloadVoidPenjualan } from "./payload";
 import type { PenjualanFilterParams, PenjualanRequest } from "@/types/penjualan";
 
 type Callback = { onSuccess?: () => void; onError?: (err: unknown) => void };
@@ -18,8 +18,19 @@ type Callback = { onSuccess?: () => void; onError?: (err: unknown) => void };
  * selama halaman berikutnya dimuat. siap false berarti lingkup belum siap
  * dan belum ada permintaan.
  */
-export function useDaftarPenjualan(filter: PenjualanFilterParams, halaman: number, ukuran: number, siap: boolean) {
-  const params = { ...filterServerPenjualan(filter), page: String(halaman), limit: String(ukuran) };
+export function useDaftarPenjualan(
+  filter: PenjualanFilterParams,
+  halaman: number,
+  ukuran: number,
+  siap: boolean,
+  urutan: readonly { id: string; desc: boolean }[] = [],
+) {
+  const params = {
+    ...filterServerPenjualan(filter),
+    ...paramUrutanPenjualan(urutan),
+    page: String(halaman),
+    limit: String(ukuran),
+  };
   return useQuery({
     queryKey: queryKeys.penjualan.daftar(params),
     queryFn: () => penjualanApi.daftar(params),
@@ -51,7 +62,8 @@ function useInvalidasiPenjualan() {
 export function useVoidPenjualan({ onSuccess, onError }: Callback = {}) {
   const invalidasi = useInvalidasiPenjualan();
   return useMutation({
-    mutationFn: (id: string) => penjualanApi.perbarui(id, { statusPenjualan: "VOID" }),
+    mutationFn: ({ id, alasan }: { id: string; alasan: string }) =>
+      penjualanApi.perbarui(id, susunPayloadVoidPenjualan(alasan)),
     onSuccess: async () => {
       await invalidasi();
       onSuccess?.();
