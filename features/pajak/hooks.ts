@@ -83,7 +83,13 @@ export function useHapusPajak(opsi: Callback = {}) {
   });
 }
 
-/** Pasang dan lepas mengubah relasi dan pajakList produk; cukup akar produk. */
+/**
+ * Pasang dan lepas mengubah relasi (queryKeys.produk.pajak, di bawah akar
+ * produk). pajakList produk tidak ikut berubah, karena backend 465b438
+ * membentuknya dari field pajak di dokumen produk, bukan dari relasi
+ * (kontrak/temuan.md butir 88); invalidasi akar produk dipertahankan agar
+ * pajakList ikut termuat ulang begitu backend menyatukan keduanya.
+ */
 export function usePasangPajak(opsi: Callback = {}) {
   const queryClient = useQueryClient();
   return useMutation({
