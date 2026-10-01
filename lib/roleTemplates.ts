@@ -170,7 +170,6 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "read-pembayaran",
       "create-pembayaran",
       "update-pembayaran",
-      "delete-pembayaran",
       // Pengaturan Toko
       "read-akunkas",
       "create-akunkas",
@@ -179,7 +178,6 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "update-metode-pembayaran",
       "create-diskon",
       "update-diskon",
-      "delete-diskon",
       // Inventory & Stok
       "read-inventory",
       "read-inventory-outlet",
@@ -271,18 +269,14 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "read-pembayaran",
       "create-pembayaran",
       "update-pembayaran",
-      "delete-pembayaran",
       // Pengaturan Toko
       "read-akunkas",
       "create-akunkas",
       "update-akunkas",
-      "delete-akunkas",
       "create-metode-pembayaran",
       "update-metode-pembayaran",
-      "delete-metode-pembayaran",
       "create-diskon",
       "update-diskon",
-      "delete-diskon",
       // Inventory & Stok
       "read-inventory",
       "read-inventory-outlet",
@@ -327,7 +321,6 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "read-booking",
       "create-booking",
       "update-booking",
-      "delete-booking",
       // Pengguna & Role (full CRUD)
       "read-pengguna",
       "create-pengguna",

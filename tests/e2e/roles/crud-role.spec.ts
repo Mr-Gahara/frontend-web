@@ -1,4 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
+import { JAWAB_GAGAL } from "../../helpers/transfer-uji";
+import { ROLE_TEMPLATES } from "../../../lib/roleTemplates";
 
 const BASE = "http://localhost:3000";
 const DAFTAR = "/dashboard/outlet/pengaturan/roles";
@@ -129,5 +131,46 @@ test.describe("E2E - Role (CRUD)", () => {
       await bersihkanRole(page, namaEdit);
       await expect(page.getByText(namaEdit)).toHaveCount(0, { timeout: 15_000 });
     });
+  });
+
+  test("template: setiap izin terpetakan ke id, dan badge sesuai payload", async ({
+    page,
+  }) => {
+    await page.goto(`${BASE}${DAFTAR}/buatRole`);
+    await page.route(/\/api\/role$/i, (route) =>
+      route.request().method() === "POST"
+        ? route.fulfill(JAWAB_GAGAL)
+        : route.continue(),
+    );
+
+    for (const template of ROLE_TEMPLATES) {
+      const kartu = page
+        .locator("div")
+        .filter({ has: page.getByText(template.namaRole, { exact: true }) })
+        .filter({ has: page.getByRole("button", { name: /gunakan|membuat/i }) })
+        .last();
+      const tombol = kartu.getByRole("button", { name: /gunakan/i });
+      await expect(tombol, template.namaRole).toBeEnabled({ timeout: 15_000 });
+
+      const permintaan = page.waitForRequest(
+        (r) => /\/api\/role$/i.test(r.url()) && r.method() === "POST",
+      );
+      await tombol.click();
+      const body = (await permintaan).postDataJSON() as {
+        namaRole: string;
+        permissions: string[];
+      };
+
+      expect(body.namaRole).toBe(template.namaRole);
+      expect
+        .soft(body.permissions, `${template.namaRole}: izin tanpa padanan id`)
+        .toHaveLength(template.permissions.length);
+      await expect
+        .soft(kartu.getByText(`${body.permissions.length} Wewenang`), template.namaRole)
+        .toBeVisible();
+      await expect(tombol).toBeEnabled({ timeout: 15_000 });
+    }
+
+    await page.unroute(/\/api\/role$/i);
   });
 });
