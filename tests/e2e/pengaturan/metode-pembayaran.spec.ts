@@ -38,6 +38,13 @@ async function bukaDaftar(page: Page) {
 const barisMetode = (page: Page, nama: string) =>
   page.getByRole("row").filter({ has: page.getByText(nama, { exact: true }) });
 
+/**
+ * Daftar dapat melebihi 10 baris (paginasi klien DataTable), karena spec
+ * kelola meninggalkan satu metode uji nonaktif per run (PO10a); baris dicari
+ * lewat kotak pencarian, seperti spec kelola.
+ */
+const cari = (page: Page, nama: string) => page.getByPlaceholder("Cari nama pembayaran...").fill(nama);
+
 const pemicu = (page: Page, teks: string | RegExp) => page.getByRole("combobox").filter({ hasText: teks });
 
 function metodeTunaiAktif(daftar: MetodeMentah[]) {
@@ -54,7 +61,8 @@ test.describe("E2E — Pengaturan metode pembayaran (pembanding)", () => {
   test("daftar menampilkan nama, kategori, akun tujuan, dan status setiap metode dari backend", async ({ page }) => {
     const daftar = await bukaDaftar(page);
     expect(daftar.length, "tenant uji punya metode pembayaran").toBeGreaterThan(0);
-    for (const m of daftar.slice(0, 10)) {
+    for (const m of daftar) {
+      await cari(page, m.namaPembayaran);
       const baris = barisMetode(page, m.namaPembayaran);
       await expect(baris).toHaveCount(1);
       const kategori = m.kategori === "tunai" ? "Tunai" : "Non Tunai";
@@ -70,6 +78,7 @@ test.describe("E2E — Pengaturan metode pembayaran (pembanding)", () => {
     await page.getByText("Tambah Metode", { exact: true }).click();
     await expect(page).toHaveURL(new RegExp(URL_BUAT + "$"));
     await page.goBack();
+    await cari(page, m.namaPembayaran);
     const baris = barisMetode(page, m.namaPembayaran);
     await expect(baris).toHaveCount(1);
     await baris.getByRole("button").last().click();
