@@ -1,7 +1,27 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
-import { JAWAB_GAGAL, api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
+import { expect, test } from "@playwright/test";
+import { JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { cocok, unik } from "../../helpers/reservasi-uji";
 import { normalizeId } from "../../../lib/api/normalize";
+import {
+  NAMA_PRODUK_UJI,
+  POLA_BUAT,
+  POLA_DAFTAR,
+  POLA_DETAIL,
+  POLA_PASANG,
+  POLA_RELASI,
+  URL_PAJAK,
+  barisPajak,
+  buatLewatUi,
+  cari,
+  hapusPajakUji,
+  isian,
+  lepasSemuaRelasi,
+  pastikanProdukUji,
+  pemicu,
+  relasiProduk,
+  wajib,
+  type PajakItem,
+} from "../../helpers/pajak-uji";
 
 /**
  * Spec pembanding pengaturan pajak, ditulis dan dijalankan terhadap halaman
@@ -22,125 +42,10 @@ import { normalizeId } from "../../../lib/api/normalize";
  * relasinya. Produk uji dibuat sekali lalu dipakai ulang, karena memasang
  * pajak menimpa relasi produk itu (upsert per produk di
  * produkPajakService.assignPajak), sehingga produk lain tidak boleh dipakai.
- * Form buat lama menahan submit sampai prioritas diketik, sehingga spec
- * mengisinya; langkah itu menjadi pilihan saat migrasi (PO8a).
+ * Form buat lama menahan submit sampai prioritas diketik; sejak migrasi
+ * prioritas berupa pilihan 1 atau 2 (PO8a), dan spec memilihnya. Helper
+ * bersama ada di tests/helpers/pajak-uji.ts.
  */
-
-const URL_PAJAK = "/dashboard/outlet/pengaturan/pajak";
-const POLA_DAFTAR = /\/api\/pajak(\?|$)/i;
-const POLA_BUAT = /\/api\/pajak$/i;
-const POLA_DETAIL = /\/api\/pajak\/[a-f0-9]{24}$/i;
-const POLA_PASANG = /\/api\/produkpajak$/i;
-const POLA_RELASI = /\/api\/produkpajak\/[a-f0-9]{24}$/i;
-const NAMA_PRODUK_UJI = "E2E Pajak Produk";
-const NAMA_KATEGORI_UJI = "E2E Pajak Kategori";
-
-type Hasil<T> = { status: number; data: T; pesan: string };
-
-type PajakItem = {
-  id: string;
-  namaPajak: string;
-  tarifPajak: number;
-  tipePajak: boolean;
-  modelPerhitungan: number;
-  prioritas: number;
-  statusPajak: boolean;
-};
-
-type RelasiItem = {
-  id: string;
-  produkID?: string;
-  pajak: { id: string; nama: string; tarif: number };
-};
-
-type ProdukUji = { id: string; namaProduk: string };
-type KategoriUji = { id: string; namaKategori: string };
-
-const barisPajak = (page: Page, nama: string) =>
-  page.getByRole("row").filter({ has: page.getByText(nama, { exact: true }) });
-
-const pemicu = (page: Page, teks: string | RegExp) => page.getByRole("combobox").filter({ hasText: teks });
-
-const cari = (page: Page, nama: string) => page.getByPlaceholder("Cari nama pajak...").fill(nama);
-
-/** Isian tanpa label terhubung: div terdalam yang memuat teks label beserta input-nya. */
-function isian(lingkup: Locator, label: string) {
-  return lingkup
-    .locator("div")
-    .filter({ has: lingkup.page().getByText(label, { exact: true }) })
-    .filter({ has: lingkup.page().locator("input") })
-    .last()
-    .locator("input");
-}
-
-function wajib<T>(r: Hasil<T>, label: string): T {
-  expect(r.status, `${label}: ${r.status} ${r.pesan}`).toBeLessThan(300);
-  return normalizeId(r.data) as T;
-}
-
-async function pastikanProdukUji(page: Page, auth: Auth): Promise<ProdukUji> {
-  const daftar = wajib(await api<ProdukUji[]>(page, auth, "GET", "/produk"), "GET /produk");
-  const ada = daftar.find((p) => p.namaProduk === NAMA_PRODUK_UJI);
-  if (ada) return ada;
-  const semuaKategori = wajib(await api<KategoriUji[]>(page, auth, "GET", "/kategori"), "GET /kategori");
-  let kategori = semuaKategori.find((k) => k.namaKategori === NAMA_KATEGORI_UJI);
-  if (!kategori) {
-    kategori = wajib(
-      await api<KategoriUji>(page, auth, "POST", "/kategori", {
-        namaKategori: NAMA_KATEGORI_UJI,
-        kodeKategori: "E2E-PJK",
-        keterangan: "Kategori produk uji spec pajak",
-      }),
-      "POST kategori uji",
-    );
-  }
-  return wajib(
-    await api<ProdukUji>(page, auth, "POST", "/produk", {
-      namaProduk: NAMA_PRODUK_UJI,
-      hargaJual: 10000,
-      hargaDasar: 5000,
-      kategoriID: kategori.id,
-      isUnlimitedStok: true,
-    }),
-    "POST produk uji",
-  );
-}
-
-async function relasiProduk(page: Page, auth: Auth, produkId: string): Promise<RelasiItem[]> {
-  return wajib(await api<RelasiItem[]>(page, auth, "GET", "/produkpajak/" + produkId), "GET /produkpajak");
-}
-
-async function lepasSemuaRelasi(page: Page, auth: Auth, produkId: string) {
-  for (const r of await relasiProduk(page, auth, produkId)) {
-    const d = await api(page, auth, "DELETE", "/produkpajak/" + r.id);
-    expect(d.status, `lepas relasi sisa ${r.id}: ${d.pesan}`).toBe(200);
-  }
-}
-
-/**
- * Membuat pajak per produk lewat dialog Tambah Pajak dengan nilai awal form.
- * Id dicatat lewat callback begitu respons diterima, agar pembersihan tetap
- * berjalan bila pemeriksaan sesudahnya gagal.
- */
-async function buatLewatUi(page: Page, nama: string, tarif: string, catat: (id: string) => void) {
-  await page.getByRole("button", { name: "Tambah Pajak" }).click();
-  const dialog = page.getByRole("dialog", { name: "Tambah Pajak" });
-  await isian(dialog, "Nama Pajak").fill(nama);
-  await isian(dialog, "Tarif (%)").fill(tarif);
-  await isian(dialog, "Prioritas").fill("1");
-  const tJawab = page.waitForResponse(cocok("POST", POLA_BUAT));
-  await dialog.getByRole("button", { name: "Simpan" }).click();
-  const jawab = await tJawab;
-  expect(jawab.status(), "POST /pajak").toBe(201);
-  catat((normalizeId(((await jawab.json()) as { data: PajakItem }).data) as PajakItem).id);
-  await expect(dialog).toBeHidden();
-}
-
-async function hapusPajakUji(page: Page, auth: Auth, id: string | undefined) {
-  if (!id) return;
-  const d = await api(page, auth, "DELETE", "/pajak/" + id);
-  expect.soft([200, 404], `hapus pajak uji ${id}: ${d.status} ${d.pesan}`).toContain(d.status);
-}
 
 test.describe("E2E — Pengaturan pajak (pembanding)", () => {
   test.beforeEach(async ({ page }) => {
@@ -238,7 +143,8 @@ test.describe("E2E — Pengaturan pajak (pembanding)", () => {
       const dialog = page.getByRole("dialog", { name: "Tambah Pajak" });
       await isian(dialog, "Nama Pajak").fill(nama);
       await isian(dialog, "Tarif (%)").fill("5");
-      await isian(dialog, "Prioritas").fill("1");
+      await dialog.getByRole("combobox", { name: "Prioritas" }).click();
+      await page.getByRole("option", { name: "1", exact: true }).click();
       const tJawab = page.waitForResponse(cocok("POST", POLA_BUAT));
       await dialog.getByRole("button", { name: "Simpan" }).click();
       expect((await tJawab).status()).toBe(500);

@@ -1,5 +1,5 @@
 export type ModelPerhitungan = 1 | 2 | 3;
- 
+
 /**
  * Bentuk respons GET /pajak setelah dinormalkan lib/api/client.ts. Backend
  * mengirim _id mentah tanpa mapper; normalisasi mengubahnya menjadi id.
@@ -19,69 +19,47 @@ export interface Pajak {
   updatedAt: string;
 }
 
-/**
- * Bentuk mentah untuk halaman yang belum dimigrasikan dan masih membaca
- * respons lewat lib/apiClient.ts. Dihapus bersama tipe Lama lain di berkas
- * ini saat modul pengaturan pajak dimigrasikan (keputusan K8, modul
- * penjualan).
- */
-export interface PajakLama {
-  _id: string;
-  namaPajak: string;
-  tarifPajak: number;
-  tipePajak: boolean; // true = Per Produk, false = Per Transaksi
-  modelPerhitungan: ModelPerhitungan; // 1=Inclusive, 2=Exclusive, 3=Compound
-  prioritas: number;
-  statusPajak: boolean;
-  tenantID: string;
-  createdAt: string;
-  updatedAt: string;
-}
- 
-export interface PajakRequest {
+/** Prioritas yang diterima validator backend (VALID_PRIORITAS, pajakValidator.js). */
+export type PrioritasPajak = 1 | 2;
+
+/** Payload POST /pajak dari form pengaturan pajak. */
+export interface PajakBaru {
   namaPajak: string;
   tarifPajak: number;
   tipePajak: boolean;
   modelPerhitungan: ModelPerhitungan;
-  prioritas: number;
-  statusPajak?: boolean;
-}
- 
-export interface GetPajakResponse {
-  success: boolean;
-  data: PajakLama[];
-}
- 
-export interface PajakResponse {
-  success: boolean;
-  message?: string;
-  data: PajakLama;
+  prioritas: PrioritasPajak;
+  statusPajak: boolean;
 }
 
-export interface ProdukPajakRelasiLama {
-  _id: string;
-  produkID: string;
-  pajakID: string;
-  tenantID: string;
-  createdAt: string;
-}
- 
+/**
+ * Payload PUT /pajak/:id: field yang berubah saja (keputusan rancangan butir
+ * 15), ditambah tipePajak yang selalu dikirim, karena validatePajakPayload
+ * menolak "tipePajak wajib diisi" juga pada mode update (backend 465b438).
+ */
+export type PerubahanPajak = Partial<Omit<PajakBaru, "tipePajak">> & { tipePajak: boolean };
+
 export interface ProdukPajakRequest {
   produkID: string;
   pajakID: string;
 }
- 
-export interface PajakDariProdukLama {
-  _id: string;
-  pajak: Omit<PajakLama, "tenantID" | "createdAt" | "updatedAt">;
-}
- 
-export interface GetPajakByProdukResponse {
-  success: boolean;
-  data: PajakDariProdukLama[];
-}
- 
-export interface ProdukPajakResponse {
-  success: boolean;
-  data: ProdukPajakRelasiLama;
+
+/**
+ * Bentuk respons GET /produkpajak/:targetID setelah dinormalkan
+ * (produkPajakService.getPajakByTarget, backend 465b438). Nama field pajak
+ * berbeda dari GET /pajak, model berupa teks, dan statusPajak tidak dikirim
+ * karena relasi ke pajak nonaktif sudah disaring backend.
+ */
+export interface RelasiPajakProduk {
+  id: string;
+  produkID?: string;
+  assetID?: string;
+  pajak: {
+    id: string;
+    nama: string;
+    tarif: number;
+    tipe: boolean;
+    prioritas: number;
+    model: "Inclusive" | "Exclusive" | "Compound";
+  };
 }
