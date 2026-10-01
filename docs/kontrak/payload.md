@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon dan pelanggan belum, dan diperiksa saat modul pemiliknya dimigrasikan; buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`).
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon dan pelanggan belum, dan diperiksa saat modul pemiliknya dimigrasikan; buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`.
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -333,6 +333,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Wajib dari klien: `namaProduk`, `hargaJual`, `hargaDasar`, `kategoriID`
 - Field lain yang dikenali: `resep`, `isUnlimitedStok`
 - Tidak diperiksa validator tetapi dipakai service: `stok`, `gambarProduk`, `keterangan` (payload diteruskan utuh ke `Produk.create`)
+- `locationID` opsional sejak backend `yoga` `5eb72e5`: validator menerimanya sebagai 24 heksadesimal, dan service memakainya untuk menghitung stok produk beresep dari inventory lokasi itu (harus milik tenant, 400 bila tidak), lalu membuangnya dari dokumen; tanpa itu dipakai outlet tenant, lalu lokasi apa pun. Bahan resep yang belum terdaftar di lokasi itu membuat stok 0. Web mengirim lokasi aktif untuk produk beresep (`susunPayloadProduk`, `a4304ce`)
 - Nilai sah satuan resep: gram, ml, pcs, kg, liter (lebih sempit dari satuan bahan baku)
 - `kategoriID` hanya diperiksa formatnya, bukan keberadaannya (`temuan.md` butir 13)
 - Dibaca controller dari body: `-`
@@ -506,9 +507,9 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /pembayaran/:id`
 
-- Aturan: `FIELD_UPDATE` di `services/pembayaranService.js` baris 27: hanya `catatan` dan `status` yang dibaca. Ditambahkan 30 September 2026 terhadap backend `465b438`
-- Dipakai web untuk membatalkan pembayaran PAID dengan `{ status: "VOID", catatan? }`, beralasan opsional; tombolnya hanya untuk pembayaran PAID dan pemegang `update-pembayaran` (`bolehBatalkanPembayaran`)
-- Aturan service: membatalkan pembayaran PAID mengurangi saldo akun kas tujuannya dan mencatat mutasi `VOID_PEMBAYARAN` beserta alasannya (baris 506 sampai 518), lalu status bayar dan sisa tagihan penjualan disinkronkan. `catatan` asli pembayaran ditimpa alasan pembatalan (`temuan.md` butir 75)
+- Aturan: `FIELD_UPDATE` di `services/pembayaranService.js` baris 27: `catatan`, `status`, dan sejak backend `yoga` `8fad4c0` `alasanVoid` yang dibaca. Ditambahkan 30 September 2026 terhadap backend `465b438`, dikoreksi 2 Oktober 2026 terhadap `yoga`. Validator menolak `alasanVoid` tanpa `status: "VOID"` (400), begitu pula alasan yang bukan teks atau melebihi batas panjang catatan
+- Dipakai web untuk membatalkan pembayaran PAID dengan `{ status: "VOID", alasanVoid? }` sejak `a4304ce`, beralasan opsional; tombolnya hanya untuk pembayaran PAID dan pemegang `update-pembayaran` (`bolehBatalkanPembayaran`)
+- Aturan service: membatalkan pembayaran PAID mengurangi saldo akun kas tujuannya dan mencatat mutasi `VOID_PEMBAYARAN` beserta alasannya (baris 506 sampai 518), lalu status bayar dan sisa tagihan penjualan disinkronkan. Sejak backend `yoga` alasan mutasi diambil dari `alasanVoid`, dan `catatan` asli tidak lagi ditimpa: `catatan` yang dikirim bersama VOID dipindah ke `alasanVoid` bila `alasanVoid` tidak dikirim. Sampai `465b438` catatan asli ditimpa alasan pembatalan (`temuan.md` butir 75)
 - Wajib dari klien: -
 - Diisi server: -
 
@@ -533,7 +534,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 - Aturan: `validatePenjualanPayload` dengan `isUpdate` (validators/penjualanValidator.js) di route, lalu allowlist controller yang sama dengan buat. Analisis statis sempat mencatat `validateIdOrArray` (dikoreksi 26 September 2026)
 - Wajib dari klien: - (seluruh field opsional saat update)
-- Field lain yang dikenali: sama dengan buat. `finalize: true` memfinalisasi DRAFT menjadi UNPAID, memotong stok lewat `inventoryService.processSaleStock` di `locationID` penjualan atau lokasi Outlet pertama tenant; `statusPenjualan: "VOID"` membatalkan DRAFT, atau UNPAID yang belum punya pembayaran aktif, beserta sesi booking-nya
+- Field lain yang dikenali: sama dengan buat. `finalize: true` memfinalisasi DRAFT menjadi UNPAID, memotong stok lewat `inventoryService.processSaleStock` di `locationID` penjualan atau lokasi Outlet pertama tenant; `statusPenjualan: "VOID"` membatalkan DRAFT, atau UNPAID yang belum punya pembayaran aktif, beserta sesi booking-nya. Sejak backend `yoga` `8fad4c0`, `alasanVoid` opsional (teks, paling panjang 500) hanya diterima bersama `statusPenjualan: "VOID"` dan disalin ke sesi booking-nya; selain itu ditolak 400. Web mengirimnya lewat `susunPayloadVoidPenjualan` (`a4304ce`)
 - Aturan service: penjualan VOID tidak dapat diubah; sejak backend `465b438`, penjualan yang punya pembayaran aktif tidak dapat di-VOID sampai pembayarannya dibatalkan lewat `PUT /pembayaran/:id`, menggantikan aturan FINAL
 - Nilai status penjualan: DRAFT, UNPAID, PARTIAL, PAID, dan VOID; `VALID_JENIS_TRANSAKSI`: POS, INVOICE; `VALID_JENIS_PENJUALAN`: dine-in, takeaway, booking
 - Dibaca controller dari body: `-`
@@ -554,7 +555,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Wajib dari klien: `namaProduk`, `hargaJual`, `hargaDasar`, `kategoriID`
 - Field lain yang dikenali: `resep`, `isUnlimitedStok`
 - Tidak diperiksa validator tetapi dipakai service: `stok`, `gambarProduk`, `keterangan`
-- `resep` yang dikirim, termasuk array kosong, membuat stok dihitung ulang dari resep; resep kosong menjadikan stok 0. Kirim `resep` hanya bila perlu (`temuan.md` butir 11)
+- `resep` yang berisi membuat stok dihitung ulang dari inventory lokasi (`locationID`, sama dengan `POST`). Sampai backend `465b438`, array kosong juga memicunya dan menjadikan stok 0 (`temuan.md` butir 11); sejak `yoga` `a66980c` resep kosong tidak menghitung ulang, sehingga `stok` yang dikirim tersimpan. Web tetap mengirim `resep` hanya bila perlu
 - Nilai sah satuan resep: gram, ml, pcs, kg, liter
 - `kategoriID` hanya diperiksa formatnya, bukan keberadaannya (`temuan.md` butir 13)
 - Dibaca controller dari body: `-`

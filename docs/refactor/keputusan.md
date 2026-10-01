@@ -323,7 +323,9 @@ keputusan rancangan butir 17.
   pengisian form (butir 20).
 - **K4a: halaman buat penjualan tidak menampilkan stok produk**, karena
   `produk.stok` tidak terhubung ke lokasi mana pun (`kontrak/temuan.md`
-  butir 37).
+  butir 37). Dipertahankan sejak backend `yoga` (keputusan PY4a):
+  `produk.stok` kini potret stok outlet saat produk disimpan, belum stok
+  yang hidup.
 - **K5b dan K11b: daftar penjualan memakai cakupan outlet hanya bagi
   pemegang `read-location`.** Template Guest, Staff, dan Kasir memegang
   `read-penjualan` tanpa `read-location`, sehingga gate tidak ditambah, dan
@@ -696,7 +698,9 @@ lain.
 - **PB5a: pembayaran PAID dapat dibatalkan per baris** oleh pemegang
   `update-pembayaran`, lewat `PUT /pembayaran/:id { status: "VOID" }`
   dengan alasan opsional yang dikirim sebagai `catatan`. Alasan itu
-  menimpa catatan asli pembayaran (`kontrak/temuan.md` butir 75).
+  menimpa catatan asli pembayaran (`kontrak/temuan.md` butir 75). Sejak
+  `a4304ce` alasan dikirim sebagai `alasanVoid`, dan catatan asli tetap
+  (PY5a).
 - **PB6a: daftar penjualan per halaman**, 10 baris per halaman (pilihan
   jumlah baris sejak PB14a), dengan
   data halaman sebelumnya dipertahankan selama halaman berikutnya
@@ -745,7 +749,8 @@ lain.
   diingat; mengganti jumlah baris kembali ke halaman 1. Tombol urutkan No.
   Referensi, Tanggal, dan Total dibuang, karena `GET /penjualan` tidak
   menerima parameter urutan; kebutuhannya dilaporkan
-  (`kontrak/temuan.md` butir 83).
+  (`kontrak/temuan.md` butir 83). Dipasang kembali sebagai urutan server
+  di `a4304ce` (PY6a).
 - Diterapkan tanpa ditanyakan (`b85c2bd`): laporan laba rugi mengirim
   tanggal lokal `YYYY-MM-DD` (`keTanggalLokal`), karena backend menolak
   format ISO; `filter.ts` di `features/pembayaran`, `useDaftarPembayaran`, dan
@@ -857,6 +862,25 @@ Diputuskan pemilik proyek pada 1 Oktober 2026.
   diisi ulang (`refactor/backend.md`). Temuannya tetap dilaporkan, karena
   setiap basis data yang sudah berjalan akan mengalami hal yang sama
   (`kontrak/temuan.md` butir 97).
+- **PY4a: fixture stok penjualan mengikuti kontrak `yoga`** (`65edf8c`).
+  `produk.stok` disetel lewat stok bahan uji di outlet, karena backend
+  menghitungnya dari inventory outlet saat produk disimpan; stok master
+  tidak dipakai lagi. Kedua gerbang stok finalisasi tetap diuji terpisah
+  dengan mengubah stok outlet sesudah produk disimpan. `test.fixme` butir
+  37 dibuktikan masih gagal dan dipertahankan.
+- **PY5a: `alasanVoid` untuk pembayaran dan penjualan** (`a4304ce`).
+  Batal pembayaran mengirim `alasanVoid`, riwayat menampilkan catatan asli
+  dan alasan batal, dan void penjualan menerima alasan opsional lewat
+  `DialogVoidPenjualan`, yang dipakai detail dan daftar; detail penjualan
+  VOID menampilkan alasannya.
+- **PY6a: urutan daftar penjualan dari server** (`a4304ce`), mencabut
+  penundaan di PB14a. No. Referensi, Tanggal, dan Total dapat diurutkan
+  lewat `sort` dan `order`, urutan ikut kunci query, dan mengganti urutan
+  kembali ke halaman 1.
+- **PY7a: form produk mengirim `locationID` lokasi aktif** untuk produk
+  beresep (`a4304ce`), bagi pemegang `read-location`. Petunjuk resep yang
+  dihapus diganti: stok yang diisi tersimpan apa adanya sejak butir 11
+  diperbaiki.
 
 ## Keputusan rancangan yang mengikat
 

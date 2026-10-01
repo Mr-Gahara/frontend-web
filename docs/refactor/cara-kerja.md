@@ -1274,6 +1274,17 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   membuat pemetaan dan spec disusun di atas kontrak yang akan diganti:
   pada 1 Oktober 2026, `yoga` sudah sembilan commit di depan `465b438`
   saat submodul profil outlet dipetakan.
+- **Fixture yang menulis perilaku keliru backend ikut menegaskannya.**
+  `setelStokProduk` menegaskan `produk.stok` dihitung dari stok master,
+  sehingga perbaikan backend `yoga` (`5eb72e5`) tampil sebagai empat belas
+  kegagalan di persiapan test. Asersi persiapan diberi label yang
+  menyebut kontrak yang dianggapnya, agar kegagalannya langsung terbaca
+  sebagai perubahan kontrak, bukan regresi.
+- **Dampak perpindahan backend dibaca dari diff kode per modul, bukan dari
+  judul commit.** Judul `5eb72e5` ("hitung stok resep dari inventory
+  outlet") mengesankan butir 37 tertutup, tetapi diff menunjukkan
+  perhitungannya tetap hanya saat produk disimpan, dan `test.fixme`-nya
+  terbukti masih gagal.
 
 ## Kapan berhenti dan bertanya
 

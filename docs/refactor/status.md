@@ -71,8 +71,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Pengaturan outlet: metode pembayaran | `9ca273a` (spec), `3359497` | Selesai (keputusan PO1a sampai PO5a dan PO10a; Catatan dari submodul metode pembayaran) |
 | Pengaturan outlet: pajak | `9586e3c` (spec), `e0aaeca`, `b84de56` (komentar) | Selesai (keputusan PO6a sampai PO9a; Catatan dari submodul pajak). Spec pembanding metode pembayaran diperbaiki di `cc65d93` |
 | Role: template tanpa permission di luar seed (PO11a) | `366e9b7` | Selesai (Catatan dari PO11a) |
-| Penyesuaian backend `yoga` `50eede7` | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
-| Pengaturan outlet: profil outlet | - | Belum. Sesudah penyesuaian `yoga` (keputusan PY2a); pemetaan dan keputusan cakupan di Pekerjaan berikutnya. `app/dashboard/outlet/pengaturan/toko/page.tsx` masih placeholder 8 baris |
+| Penyesuaian backend `yoga` `50eede7`: fixture stok penjualan, `alasanVoid`, urutan server daftar penjualan, dan lokasi stok produk | `65edf8c` (fixture), `a4304ce` (penyesuaian) | Selesai (keputusan PY4a sampai PY7a; Catatan dari penyesuaian backend `yoga`) |
+| Pengaturan outlet: profil outlet | - | **Berikutnya** (lihat Pekerjaan berikutnya). `app/dashboard/outlet/pengaturan/toko/page.tsx` masih placeholder 8 baris |
 | Pelanggan dan diskon | - | Belum. `app/dashboard/outlet/pelanggan/page.tsx` dan `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`, dan `_id`; hapus diskon memanggil `DELETE /diskon/:id`, yang tidak ada lagi di backend `465b438` (`kontrak/temuan.md` butir 82) |
 | Profil, login, dan sidebar | - | Belum. `app/dashboard/profil/page.tsx`, `app/login/page.tsx`, `app/login/pengguna/page.tsx`, dan `components/app-sidebar.tsx` masih memakai `apiClient` |
 
@@ -89,49 +89,20 @@ Diukur ulang per submodul pajak (`e0aaeca`):
 | Kemunculan `_id` | - | 13 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak |
 | `useAuthGuard()` berulang di halaman | 49 | 29 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, dan ketiga halaman metode pembayaran) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
-| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). |
+| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: penyesuaian backend `yoga` `50eede7`
-
-Diputuskan pemilik proyek pada 1 Oktober 2026 (keputusan PY1a dan PY2a):
-backend acuan berpindah dari `465b438` ke `origin/yoga` `50eede7`, yang
-sudah menggabungkan `origin/nizar` `3edbdea`, dan penyesuaiannya
-dikerjakan sebelum submodul profil outlet. Pemetaan awal (1 Oktober 2026,
-lewat `git fetch` baca-saja; backend lokal belum di-checkout):
-
-- Sembilan commit di depan `465b438`. Di luar dokumen dan test, 18 berkas
-  berubah: controller penjualan dan sesi booking; mapper dan model
-  pembayaran, penjualan, dan sesi booking; validator pembayaran,
-  penjualan, produk, dan sesi booking; dan service akun kas, pembayaran,
-  penjualan, produk, serta query dan update sesi booking. Route dan seed
-  tidak berubah.
-- Dugaan dampak dari judul commit, belum dibuktikan dari diff:
-  - `a66980c` dan `5eb72e5` (produk): stok tidak lagi direset saat resep
-    kosong, dan stok resep dihitung dari inventory outlet. Keduanya dapat
-    menutup `kontrak/temuan.md` butir 11 dan 37, sehingga penanganan
-    resep di `features/produk/payload.ts`, keputusan K4a, dan
-    `test.fixme` stok produk di spec alur penjualan ditinjau ulang.
-  - `8fad4c0` (pembayaran, penjualan, dan sesi booking): `alasanVoid`
-    opsional dan urutan daftar, yang dapat menutup butir 75 (PB5a) dan
-    butir 83 (PB14a).
-  - `4194965` (sesi booking): simpan tanpa perubahan di aset perbaikan,
-    dan cache booking.
-
-Langkah pertama: checkout backend lokal ke `origin/yoga`, tinjau ulang
-permission basis data (`refactor/backend.md`, Menyelaraskan permission
-basis data development), jalankan audit endpoint dan suite penuh, lalu
-baca diff per modul dan ajukan keputusan penyesuaian sekaligus lewat
-dialog pilihan.
-
-### Sesudahnya: submodul profil outlet (modul Pengaturan outlet)
+## Pekerjaan berikutnya: submodul profil outlet (modul Pengaturan outlet)
 
 Submodul 3 dari tiga (keputusan PO1a). Submodul 1 (metode pembayaran)
-selesai di `3359497`, dan submodul 2 (pajak) di `e0aaeca`.
+selesai di `3359497`, dan submodul 2 (pajak) di `e0aaeca`; PO11a
+(`366e9b7`) dan penyesuaian backend `yoga` (`65edf8c`, `a4304ce`)
+dikerjakan lebih dulu (keputusan PY2a).
 `app/dashboard/outlet/pengaturan/toko/page.tsx` masih placeholder 8 baris
-tanpa spec e2e. Pemetaan backend (1 Oktober 2026, terhadap `465b438`):
+tanpa spec e2e. Pemetaan backend (1 Oktober 2026, terhadap `465b438`;
+berkas tenant dan lokasi tidak berubah di `yoga`):
 
 - `GET /tenant/:id` tanpa `checkPermission`; controller menolak 403 bila
   id bukan tenant sesi, dan service men-cache detail 60 detik.
@@ -157,9 +128,33 @@ tanpa spec e2e. Pemetaan backend (1 Oktober 2026, terhadap `465b438`):
   frasa "jam operasional" dibuang dari kartu indeks pengaturan; dan tipe
   `Tenant` dipindah ke `id` (keputusan rancangan butir 1).
 
-Keputusan cakupan sudah diambil (PO12a sampai PO14a). Langkah pertama
-sesudah penyesuaian `yoga`: periksa ulang pemetaan ini terhadap backend
-baru, lalu tulis spec pembanding.
+Keputusan cakupan sudah diambil (PO12a sampai PO14a). Langkah pertama:
+buktikan apakah `pin-refresh` mengisi ulang `tenantName`, lalu tulis spec
+pembanding.
+
+## Catatan dari penyesuaian backend `yoga`
+
+Backend lokal berpindah ke `origin/yoga` `50eede7` pada 1 Oktober 2026
+(keputusan PY1a), sembilan commit di depan `465b438`. Route dan seed tidak
+berubah: audit endpoint sama dengan sebelumnya, dan permission basis data
+tetap sama dengan seed. Suite pertama terhadap `yoga` menghasilkan 332
+lolos dan 15 gagal: empat belas test penjualan berhenti di fixture stok,
+dan satu kejadian butir 77.
+
+| Commit | Isi |
+|---|---|
+| `65edf8c` | Fixture stok penjualan mengikuti `produk.stok` dari inventory outlet (PY4a) |
+| `a4304ce` | `alasanVoid` untuk pembayaran dan penjualan (PY5a), urutan server daftar penjualan (PY6a), dan `locationID` produk (PY7a) |
+
+- Butir 11, 75, dan 83 terbukti diperbaiki backend lewat e2e. Butir 37
+  tertutup sebagian: `produk.stok` bersumber dari outlet, tetapi tetap
+  potret dan tetap memblokir finalisasi, sehingga `test.fixme`-nya
+  dipertahankan.
+- Dampak dibaca dari diff kode `465b438..yoga` per modul, bukan dari judul
+  commit (`cara-kerja.md`).
+- Kontrak produk, penjualan, pembayaran, dan sesi booking dikoreksi
+  terhadap `yoga` (`kontrak/README.md`). Laporan untuk tim backend ada di
+  `backend.md` (laporan penyesuaian `yoga`).
 
 ## Catatan dari PO11a
 
@@ -449,7 +444,8 @@ Yang masih berlaku:
   berubah sejak `f27f093`; `fc159bd` memasang validator allowlist di route
   inventory, dan spec stok lolos terhadapnya. Sejak 30 September 2026
   backend lokal adalah `nizar` `465b438` (Catatan dari penyesuaian backend
-  `465b438`).
+  `465b438`), dan sejak 1 Oktober 2026 `yoga` `50eede7` (Catatan dari
+  penyesuaian backend `yoga`).
 - Pengajuan stok:
   - Aturan status per izin di `pengajuanStokService.getAll` (baris 30
     sampai 47) dicerminkan di `features/pengajuan-stok/izin.ts`; keduanya
@@ -527,12 +523,10 @@ Yang masih berlaku:
   ditutup sebelum multi-outlet (`kontrak/temuan.md` butir 48 dan 49).
 - Tiga `test.fixme` di spec alur penjualan menunggu backend: dua untuk
   cache daftar jurnal (`kontrak/temuan.md` butir 46) dan satu untuk stok
-  produk (butir 37).
+  produk (butir 37, tertutup sebagian di backend `yoga`).
 - Filter tanggal daftar penjualan tidak dapat dikosongkan langsung,
   karena `PilihTanggal` tidak punya tombol kosongkan; filter dikosongkan
   lewat reset filter.
-- Tombol urutkan daftar penjualan menunggu dukungan urutan di
-  `GET /penjualan` (`kontrak/temuan.md` butir 83, keputusan PB14a).
 
 ### Utang kecil dari modul reservasi
 

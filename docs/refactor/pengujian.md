@@ -91,6 +91,14 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per penyesuaian backend `yoga`** (commit `a4304ce`): 399 test
+unit dan integrasi lolos di 51 berkas, 348 e2e lolos, 16 skipped (sama
+dengan baseline `465b438` di bawah). Fixture stok penjualan (`65edf8c`)
+tidak mengubah jumlah; penyesuaian `a4304ce` menambah 8 test unit dan
+satu skenario urutan di spec daftar penjualan. Diukur terhadap backend
+lokal `yoga` `50eede7`, setelah permission basis data ditinjau sama
+dengan seed.
+
 **Baseline per PO11a** (commit `366e9b7`): 391 test unit dan integrasi
 lolos di 49 berkas, 347 e2e lolos, 16 skipped (sama dengan baseline
 `465b438` di bawah). Skenario template di spec role menambah satu
@@ -456,8 +464,8 @@ satu putaran.
 - Elemen yang diubah oleh aksi yang diuji tidak dicari lewat nilai yang
   ikut berubah. Baris riwayat pembayaran yang dicari lewat catatannya
   hilang setelah dibatalkan, karena backend menimpa catatan itu dengan
-  alasan pembatalan (`kontrak/temuan.md` butir 75); cari lewat id atau
-  nilai yang tetap.
+  alasan pembatalan (`kontrak/temuan.md` butir 75, diperbaiki backend
+  `yoga`); cari lewat id atau nilai yang tetap.
 - Field payload dibandingkan dengan validator dan allowlist backend
   setiap kali backend berpindah versi, lalu efeknya dibuktikan lewat e2e.
   `diskonGlobalIDs` dibuang allowlist `465b438` tanpa galat, sehingga
@@ -514,7 +522,7 @@ Menunggu perbaikan backend:
 | Edit pola roster | Validator memakai `this.siklusHari` dalam konteks `findOneAndUpdate` |
 | Hitungan tersimpan dapat dikosongkan kembali (`inventaris/stockOpname/draft-stok-opname.spec.ts`) | Validator stock opname menerima `qtyPhysical` null (`kontrak/temuan.md` butir 22). Badannya berupa penanda; skenario ditulis saat `SERVER_TERIMA_HITUNGAN_KOSONG` dibalik |
 | Jurnal Keluar penjualan langsung terbaca setelah finalisasi, dan finalisasi yang ditolak tidak menambah jurnal (`penjualan/alur-penjualan.spec.ts`, dua test) | Backend membersihkan cache daftar jurnal setiap kali `inventoryService` menulis jurnal (`kontrak/temuan.md` butir 46). Keduanya dibuka bersamaan: test kedua baru bermakna bila bacaan jurnal terbukti segar |
-| Finalisasi berhasil bila stok bahan outlet cukup walau stok produk tidak (`penjualan/alur-penjualan.spec.ts`) | Backend menghubungkan stok produk ke stok lokasi (`kontrak/temuan.md` butir 37) |
+| Finalisasi berhasil bila stok bahan outlet cukup walau `produk.stok`, potret stok outlet saat produk disimpan, tidak (`penjualan/alur-penjualan.spec.ts`) | Backend berhenti memakai `produk.stok` sebagai gerbang finalisasi, atau menghitungnya dari stok lokasi saat dibaca (`kontrak/temuan.md` butir 37). Sejak `yoga` sumbernya stok outlet, tetapi tetap potret; dibuktikan masih gagal pada 1 Oktober 2026 |
 | Delapan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, dan stock adjustment | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
 | Shift yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/shift/crud-shift.spec.ts`) | Backend memisahkan shift per lokasi dan `KUNCI_LOKASI_SHIFT` di `features/shift/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
 | Pola yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | Backend memisahkan pola roster per lokasi dan `KUNCI_LOKASI_POLA_ROSTER` di `features/pola-roster/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
@@ -624,7 +632,9 @@ Urutan debug kegagalan e2e di atas).
   bersih; dicatat untuk tim backend (`kontrak/temuan.md` butir 77).
   Kejadian ketiga pukul 22.28 di `POST /tipeaset`: dokumennya tersimpan
   tetapi jawabannya tidak sampai, dan enam tipe aset uji tertinggal
-  sebagai jejak kejadian sejak 27 September.
+  sebagai jejak kejadian sejak 27 September. Kejadian keempat 1 Oktober
+  22.49 WIB, suite penuh terhadap `yoga` (`crud-tipeAset.spec.ts:221`),
+  meninggalkan jejak ketujuh; tiga run ulang spec itu lolos 75 dari 75.
 - **Spec shift dan pola roster meninggalkan shift uji**: shift hanya
   dapat dinonaktifkan, tidak dihapus, sehingga setiap run menambah shift
   "Shift Ganda ..." (spec shift), serta "Shift Arsip ..." dan "Shift
@@ -691,7 +701,8 @@ Urutan debug kegagalan e2e di atas).
 - **`DataTable` mode server hanya dipakai dan teruji di daftar
   penjualan** (`tests/e2e/penjualan/daftar-penjualan.spec.ts`). Mode
   klien kesembilan tabel lain tidak berubah di `b63cf08`, dan tidak diuji
-  ulang khusus.
+  ulang khusus. Urutan server (`urutanServer`, `a4304ce`) juga hanya
+  dipakai dan teruji di daftar penjualan.
 - **Batas 10 metode aktif hanya teruji lewat simulasi** respons daftar
   yang ditandai `// simulasi:`, karena sepuluh metode aktif tidak dapat
   dibuat di data uji tanpa menumpuk metode permanen. Peringatan metode
@@ -811,8 +822,9 @@ Urutan debug kegagalan e2e di atas).
   permintaan terhadap id dari `/location/current`.
 - `tests/e2e/penjualan/alur-penjualan.spec.ts`: spec pembanding alur bisnis
   dengan fixture tetap (`tests/helpers/penjualan-uji.ts`). Bahan baku dan
-  produk uji dibuat sekali, lalu stok master, `produk.stok`, dan stok outlet
-  disetel ulang di awal setiap test, sehingga pemotongan stok dibuktikan
+  produk uji dibuat sekali, lalu stok outlet dan `produk.stok` disetel
+  ulang di awal setiap test (sejak `65edf8c`, `produk.stok` lewat stok
+  outlet dan simpan ulang resep), sehingga pemotongan stok dibuktikan
   dengan angka pasti. Kedua gerbang stok finalisasi diuji terpisah dengan
   menyetel satu angka saja. Payload diperiksa dari permintaan nyata
   (`postDataJSON`, header `x-idempotency-key`), dialog yang harus bertahan
@@ -916,7 +928,9 @@ Urutan debug kegagalan e2e di atas).
   halaman dibuka dengan `goto` ber-`waitUntil: "commit"` sebelum penunggu
   dipasang, harapan footer dihitung dari respons halaman itu sendiri,
   perpindahan ke kunci yang masih segar di cache dibuktikan dari
-  tampilan, dan tidak ada data yang ditulis.
+  tampilan, dan tidak ada data yang ditulis. Sejak `a4304ce`, urutan
+  server dibuktikan dari parameter permintaan dan urutan baris respons,
+  mulai dari halaman 2 agar kembalinya ke halaman 1 ikut teruji.
 - `tests/e2e/pengaturan/metode-pembayaran.spec.ts` (`9ca273a`) dan
   `kelola-metode-pembayaran.spec.ts` (`3359497`): spec pembanding dan
   spec migrasi dipisah, dan berkas pembanding hanya berubah bila asumsinya

@@ -275,6 +275,11 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   beserta bukti basis data development (lima nama lama dipegang lima role,
   tiga izin jurnal transfer belum ada) dan cara penyelarasannya
   (`kontrak/temuan.md` butir 97)
+- Laporan penyesuaian backend `yoga` — 1 temuan dan satu pengamatan,
+  disusun 2 Oktober 2026 setelah `a4304ce`: stok produk yang masih potret
+  padahal menjadi gerbang finalisasi (butir 37, sebagian), dan kejadian
+  keempat permintaan tertahan (butir 77); beserta konfirmasi butir 11,
+  75, dan 83 yang terbukti diperbaiki lewat e2e (`kontrak/temuan.md`)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi
