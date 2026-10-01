@@ -757,7 +757,8 @@ lain.
 
 Diputuskan pemilik proyek pada 30 September 2026, dengan prinsip
 keputusan rancangan butir 17 dan 21. PO1a sampai PO5a diterapkan di
-`3359497` (submodul metode pembayaran).
+`3359497` (submodul metode pembayaran), dan PO6a sampai PO9a di
+`e0aaeca` (submodul pajak).
 
 - **PO1a: tiga submodul berurutan**, masing-masing dengan spec pembanding,
   migrasi, commit, dan dokumen penutup sendiri: metode pembayaran, pajak,
@@ -794,8 +795,10 @@ keputusan rancangan butir 17 dan 21. PO1a sampai PO5a diterapkan di
   diubah dan dikembalikan tiap test; buat sungguhan bernama unik lalu
   dinonaktifkan. Akun kas uji spec keuangan tidak dipakai, karena metode
   yang menunjuk sebuah akun mengunci akun itu dari penonaktifan. Pajak uji
-  per produk dibuat lalu dihapus; pajak per transaksi yang aktif hanya
-  diuji lewat `POST` atau `PUT` yang dijawab gagal, agar `PPN` tenant uji
+  per produk dibuat lalu dihapus lewat UI (`9586e3c`, `e0aaeca`), dan
+  dipasang pada produk uji khusus "E2E Pajak Produk" yang dibuat sekali,
+  karena memasang pajak menimpa relasi produk itu; pajak per transaksi yang
+  aktif hanya diuji lewat `POST` yang dijawab gagal, agar `PPN` tenant uji
   tidak dinonaktifkan.
 - **PO11a: lima permission template role yang tidak ada di seed dibuang**
   (`delete-pembayaran`, `delete-diskon`, `delete-akunkas`,
@@ -811,6 +814,16 @@ keputusan rancangan butir 17 dan 21. PO1a sampai PO5a diterapkan di
   dipangkas dan paling banyak 100 karakter; menu Edit memakai `onSelect`
   dan `router.push`; dan mutation memakai `mutate` beserta callback,
   sehingga penolakan backend tidak menjadi unhandled rejection.
+- Diterapkan tanpa ditanyakan (`e0aaeca`): ubah pajak hanya mengirim field
+  yang berubah ditambah `tipePajak`, karena validator backend mewajibkannya
+  juga pada update (`kontrak/temuan.md` butir 91); simpan ubah nonaktif
+  selama tidak ada perubahan; kolom Status tab pajak per produk dibuang,
+  karena backend tidak mengirimnya dan relasi ke pajak nonaktif sudah
+  disaring; galat memuat tampil di tempat dengan tombol coba lagi; tombol
+  aksi baris ber-`aria-label`; teks tombol, label, dan tab lama
+  dipertahankan agar spec pembanding tetap berlaku; dan tidak ada tombol
+  yang disembunyikan menurut izin, karena route pajak tanpa
+  `checkPermission` (butir 5).
 
 ## Keputusan rancangan yang mengikat
 
@@ -935,3 +948,13 @@ keputusan rancangan butir 17 dan 21. PO1a sampai PO5a diterapkan di
     masih menulis input jam sendiri (form shift dan jadwal) diganti saat
     modulnya dimigrasikan; buat reservasi sudah memakai kedua komponen
     sejak `477f258` (pemilik proyek, 28 September 2026, `e43e000`).
+23. **Spec e2e menjalankan setiap operasi yang diuji lewat UI.** Data yang
+    menjadi bahan uji dibuat, diubah, dan dihapus lewat halaman yang diuji,
+    agar tombol dan fungsi yang rusak ikut terlihat; tidak ada data yang
+    disuntikkan diam-diam lewat API. API hanya membaca bukti, menyiapkan
+    data milik modul lain (misalnya produk uji untuk pajak per produk), dan
+    membersihkan sisa run yang gagal. Aturan ini menemukan form buat pajak
+    lama yang menahan submit sampai prioritas diketik (pemilik proyek,
+    1 Oktober 2026, `9586e3c`). Spec yang ditulis sebelumnya dan masih
+    menyiapkan data uji lewat API disesuaikan saat spec itu disentuh
+    (`pengujian.md`, Utang pengujian).

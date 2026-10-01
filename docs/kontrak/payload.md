@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon, pajak, dan pelanggan belum, dan diperiksa saat modul pemiliknya dimigrasikan; buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, dan ubah metode pembayaran pada 1 Oktober 2026.
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon dan pelanggan belum, dan diperiksa saat modul pemiliknya dimigrasikan; buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`).
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -242,10 +242,12 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /pajak`
 
-- Aturan: validatePajakPayload (validators/pajakValidator.js)
-- Wajib dari klien: `namaPajak`, `tarifPajak`, `modelPerhitungan`, `prioritas`, `tipePajak`
-- Field lain yang dikenali: -
-- Dibaca controller dari body: `-`
+- Aturan: validatePajakPayload (validators/pajakValidator.js) di route. Dikoreksi 1 Oktober 2026 terhadap backend `465b438`
+- Wajib dari klien: `namaPajak` (tidak kosong setelah `trim`), `tarifPajak` (angka 0 sampai 100), `modelPerhitungan` (1, 2, atau 3), `prioritas` (1 atau 2), dan `tipePajak` (boolean: true per produk, false per transaksi)
+- Field lain yang dikenali: `statusPajak`, tanpa aturan validator. Tidak ada allowlist; field di luar skema dibuang Mongoose. `VALID_TIPE` di validator tidak dipakai (`temuan.md` butir 96)
+- Aturan service: membuat pajak per transaksi yang aktif menonaktifkan seluruh pajak per transaksi lain lewat `updateMany` sebelum dokumen dibuat dan tanpa transaksi, sehingga penonaktifan tetap terjadi walau pembuatan gagal (butir 90). Nama kembar dalam tenant ditolak indeks unik `{ tenantID, namaPajak }`
+- Web mengirim keenam field lewat `payloadBuatPajak` (`features/pajak/payload.ts`, `e0aaeca`): nama dipangkas, serta tarif dan prioritas sebagai angka
+- Dibaca controller dari body: seluruh body, dengan `tenantID` ditimpa dari sesi
 - Diisi server: `tenantID`
 
 #### `POST /pelanggan`
@@ -338,10 +340,12 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /produkpajak`
 
-- Aturan: validateProdukPajakPayload (validators/produkPajakValidator.js)
-- Wajib dari klien: `pajakID`
-- Field lain yang dikenali: `produkID`, `assetID`
-- Dibaca controller dari body: `-`
+- Aturan: validateProdukPajakPayload (validators/produkPajakValidator.js) di route dan controller: tepat satu di antara `produkID` dan `assetID` berupa ObjectId yang sah, dan `pajakID` wajib ObjectId. Dikoreksi 1 Oktober 2026 terhadap backend `465b438`
+- Wajib dari klien: `pajakID`, serta salah satu dari `produkID` atau `assetID`
+- Aturan service (`produkPajakService.assignPajak`): relasi di-upsert per `{ produkID, tenantID }`, sehingga memasang pajak lain menggantikan relasi lama, termasuk relasi ke pajak nonaktif yang tidak terlihat di `GET` (butir 93); nama pajak disalin ke relasi. Pajak dicari tanpa `tenantID`, tipe dan statusnya tidak diperiksa, dan setiap galat dijawab 500 "Gagal mengatur pajak produk." (butir 80). Relasi tidak memperbarui `pajakList` produk (butir 88)
+- Web mengirim `{ produkID, pajakID }` untuk pajak per produk yang aktif saja (keputusan PO6a, `e0aaeca`)
+- Respons 201 dengan `data` dokumen relasi
+- Dibaca controller dari body: seluruh body, dengan `tenantID` dari sesi
 - Diisi server: `tenantID`
 
 #### `POST /role`
@@ -483,9 +487,13 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /pajak/:id`
 
-- Aturan: validatePajakPayload (validators/pajakValidator.js)
-- Wajib dari klien: `namaPajak`, `tarifPajak`, `modelPerhitungan`, `prioritas`, `tipePajak`
-- Field lain yang dikenali: -
+- Aturan: validatePajakPayload mode update (validators/pajakValidator.js) di route: field yang dikirim diperiksa dengan aturan `POST`, tetapi `tipePajak` tetap wajib di setiap permintaan (`temuan.md` butir 91). Dikoreksi 1 Oktober 2026 terhadap backend `465b438`; sebelumnya kelima field tercatat wajib
+- Wajib dari klien: `tipePajak`
+- Field lain yang dikenali: `namaPajak`, `tarifPajak`, `modelPerhitungan`, `prioritas`, `statusPajak`
+- Controller meneruskan `req.body` apa adanya, dan service menjalankan `$set` atas seluruhnya, sehingga `tenantID` yang dikirim ikut tersimpan (butir 89); web tidak mengirimnya
+- Aturan service: pajak milik tenant lain dijawab 404; bila keadaan akhirnya per transaksi dan aktif, pajak per transaksi lain dinonaktifkan sebelum pembaruan (butir 90); cache produk tidak dibersihkan (butir 94)
+- Web mengirim field yang berubah ditambah `tipePajak` lewat `payloadUbahPajak` (`features/pajak/payload.ts`, `e0aaeca`)
+- Respons 200 dengan `data` dokumen hasil pembaruan dan `message` "Pajak diperbarui"
 - Diisi server: -
 
 #### `PUT /pelanggan/:id`

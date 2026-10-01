@@ -232,6 +232,15 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   juga tertahan setelah data tersimpan dan enam tipe aset uji yang
   tertinggal sebagai jejaknya, serta konfirmasi butir 84 yang diperbaiki
   di frontend (`kontrak/temuan.md` butir 77 dan 85 sampai 87)
+- Laporan submodul pajak — 9 temuan, disusun 1 Oktober 2026 setelah
+  `b84de56`: `pajakList` produk dibentuk dari field yang tidak pernah
+  ditulis, `PUT /pajak/:id` menyimpan `tenantID` dari body, penonaktifan
+  otomatis pajak per transaksi yang tidak atomik, `tipePajak` wajib di
+  setiap update, relasi pajak yatim saat produk dihapus, relasi ke pajak
+  nonaktif yang tersembunyi tetapi tertimpa, cache produk yang tidak
+  dibersihkan saat pajak diubah, simulasi pajak transaksi yang berbeda
+  dari penjualan, dan konstanta validator yang tidak dipakai
+  (`kontrak/temuan.md` butir 88 sampai 96)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

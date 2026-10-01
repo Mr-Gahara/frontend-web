@@ -91,6 +91,14 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per submodul pajak** (commit `b84de56`): 391 test unit dan
+integrasi lolos di 49 berkas, 346 e2e lolos, 16 skipped (sama dengan
+baseline `465b438` di bawah). Dari baseline metode pembayaran, spec
+pembanding pajak (`9586e3c`) menambah lima skenario (341), perbaikan spec
+pembanding metode pembayaran (`cc65d93`) tidak mengubah jumlah, dan
+migrasi pajak (`e0aaeca`) menambah 13 test unit dan lima skenario (346).
+Diukur terhadap backend lokal `465b438`.
+
 **Baseline per submodul metode pembayaran** (commit `3359497`): 378 test
 unit dan integrasi lolos di 48 berkas, 336 e2e lolos, 16 skipped (sama
 dengan baseline `465b438` di bawah). Dari baseline itu, spec pembanding
@@ -163,7 +171,9 @@ terima penuh, bukan dibatalkan, sehingga setiap run menambah surat jalan
 DITERIMA beserta jurnal kirim dan terima, dan stok outlet uji bertambah;
 jumlah per run belum diukur ulang. Spec keuangan menambah satu akun kas
 non-aktif bersaldo 0 per run (PB13a), dan spec kelola metode pembayaran
-satu metode uji nonaktif per run (PO10a). Aturan data uji
+satu metode uji nonaktif per run (PO10a). Spec pajak menghapus pajak
+ujinya lewat UI di setiap run; kategori dan produk uji pajak dibuat
+sekali. Aturan data uji
 spec tulis ada di Test yang ditandai fixme dan skip bersyarat, di bawah.
 
 ## Kredensial uji
@@ -473,6 +483,21 @@ satu putaran.
 - Trace dibaca per entri: berkas `.trace` juga memuat entri `snapshot`
   milik snapshot DOM tanpa `request`, sehingga skrip yang membaca
   `snapshot.request` memeriksa keberadaannya lebih dulu.
+- Pemicu Radix Select yang diberi label `htmlFor` bernama aksesibel sesuai
+  labelnya, sehingga dipilih lewat `getByRole("combobox", { name })`
+  (helper `pilihOpsi` di `tests/helpers/pajak-uji.ts`); pemicu tanpa label
+  tetap dipilih lewat teks yang tampil.
+- Spec yang meninggalkan data uji permanen di sebuah daftar membuat spec
+  lain di halaman yang sama ikut gagal begitu daftarnya melewati satu
+  halaman tabel. Saat menulis spec semacam itu, periksa juga spec lain di
+  halaman itu, dan cari baris lewat kotak pencarian. Spec pembanding
+  metode pembayaran gagal karena metode uji spec kelola mendorong `CASH`
+  ke halaman kedua (`cc65d93`).
+- Spec form memeriksa bahwa permintaannya terkirim, bukan hanya hasil
+  akhirnya: validasi browser (`required`, `min`) menahan submit tanpa
+  pesan yang dapat dibaca test. Form buat pajak lama menahan submit sampai
+  prioritas diketik, dan hanya terungkap lewat `waitForResponse` yang habis
+  waktu serta snapshot dengan isian prioritas aktif (`9586e3c`).
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -672,6 +697,23 @@ Urutan debug kegagalan e2e di atas).
 - **Tombol metode pembayaran yang disembunyikan menurut izin hanya teruji
   di unit test** (`aksiMetodePembayaran`), dan form tanpa `read-akunkas`
   belum teruji, karena satu-satunya akun uji berperan Owner.
+- **Spec pola roster sesekali kehilangan sesi setelah `reload`**: pada run
+  suite penuh pertama untuk `b84de56`, skenario "gagal memuat: tabel
+  menampilkan pesan galat" habis waktu (21,7 detik), karena snapshot
+  menampilkan halaman login setelah `page.reload()`. Test itu lolos 3 dari
+  3 sendirian, dan run ulang suite bersih; jawaban `pin-refresh`-nya tidak
+  terbaca karena trace tidak disimpan. Bila terulang, jalankan dengan
+  `--trace on`.
+- **Pajak per transaksi hanya diuji jalur gagalnya** (PO10a): membuat atau
+  mengaktifkannya menonaktifkan `PPN` tenant uji. Penonaktifan otomatis
+  yang tidak atomik (`kontrak/temuan.md` butir 90) terbukti dari kode
+  saja.
+- **Relasi ke pajak nonaktif tidak dapat diuji dari web**, karena backend
+  tidak mengirimnya (butir 93).
+- **Spec yang ditulis sebelum keputusan rancangan butir 23 masih
+  menyiapkan sebagian data uji lewat API**, misalnya fixture metode
+  pembayaran di spec kelola dan booking uji di spec reservasi;
+  disesuaikan saat spec itu disentuh.
 
 ## Spec rujukan
 
@@ -871,9 +913,18 @@ Urutan debug kegagalan e2e di atas).
   tampilan, dan tidak ada data yang ditulis.
 - `tests/e2e/pengaturan/metode-pembayaran.spec.ts` (`9ca273a`) dan
   `kelola-metode-pembayaran.spec.ts` (`3359497`): spec pembanding dan
-  spec migrasi dipisah, sehingga berkas pembanding tetap utuh; fixture
+  spec migrasi dipisah, dan berkas pembanding hanya berubah bila asumsinya
+  terbukti keliru (pencarian baris sejak `cc65d93`); fixture
   tetap diubah lalu dikembalikan lewat API di `finally`; baris dicari
   lewat kotak pencarian; payload dibandingkan utuh dengan `toEqual`,
   termasuk ketiadaan field gateway; batas 10 lewat simulasi dari respons
   nyata (`route.fetch()`); dan `pageerror` membuktikan tidak ada galat
   runtime.
+- `tests/e2e/pengaturan/pajak.spec.ts` (`9586e3c`) dan
+  `kelola-pajak.spec.ts` (`e0aaeca`): seluruh operasi pajak lewat UI
+  (keputusan rancangan butir 23), helper bersama di
+  `tests/helpers/pajak-uji.ts` (isian tanpa label lewat div terdalam yang
+  memuat label dan input, pemicu Select berlabel lewat `pilihOpsi`), id
+  dicatat lewat callback begitu respons diterima agar pembersihan tetap
+  berjalan, payload dibandingkan utuh, dan pajak per transaksi hanya lewat
+  `POST` yang dijawab gagal.

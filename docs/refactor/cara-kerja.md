@@ -719,6 +719,15 @@ polanya salah.
   Bila dialog harus bertahan sampai operasi berhasil (keputusan Fase 0),
   panggil `e.preventDefault()` di `onClick`. Bug hapus bahan baku (`50e8815`)
   berasal dari sini.
+- **Callback `refine` diberi anotasi `: boolean`** bila isian harus tetap
+  bertipe lebar. TypeScript 5.5 ke atas menyimpulkan
+  `(v) => v === "1" || v === "2"` sebagai predikat tipe, dan zod 4
+  mempersempit tipe keluaran menjadi `"1" | "2"`, sehingga nilai awal `""`
+  ditolak `tsc` (`features/pajak/schema.ts`).
+- **Form memakai `noValidate` dan skema**, bukan validasi browser. Atribut
+  `required` dan `min` menahan submit tanpa pesan yang terlihat bagi
+  pengguna maupun test; form buat pajak lama menahan submit selama isian
+  prioritas kosong, walau state form berisi 1.
 
 ## Cara berbagi konteks
 
@@ -1237,6 +1246,21 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Jumlah di pesan commit dihitung dengan perintah, bukan diperkirakan.**
   Pesan `3359497` menyebut enam tipe `Lama` tersisa, padahal `grep`
   menunjukkan lima.
+- **Angka harapan di blok verifikasi juga dihitung dari isi berkas.** Pada
+  submodul pajak, jumlah pasangan marka dan jumlah ekspor helper
+  diperkirakan dan dua kali meleset, sehingga keluaran yang benar sempat
+  tampak salah.
+- **Rentang aggregate dibaca dari tahap `$lookup`-nya**, lewat
+  `grep -nE '\$lookup' -A6`, bukan dari nomor baris field hasilnya.
+  Rentang `sed` yang diambil dari baris `pajakList` hanya memuat
+  `$project`, dan asal datanya baru terlihat di putaran berikutnya.
+- **Temuan lama dibaca sebelum laporan backend disusun.** Dua calon temuan
+  submodul pajak (galat 500 dan pencarian tanpa `tenantID` di
+  `assignPajak`) ternyata sudah tercakup butir 80.
+- **Dugaan sumber data dibuktikan dari model dan data development**, bukan
+  dari nama field. `pajakList` diduga dibentuk dari relasi pajak produk;
+  model produk, pencarian penulis field, dan tinjauan basis data
+  membuktikan sumbernya field yang tidak pernah ditulis.
 
 ## Kapan berhenti dan bertanya
 
