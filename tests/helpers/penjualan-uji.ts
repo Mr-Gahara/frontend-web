@@ -95,32 +95,41 @@ export async function setelStokOutlet(page: Page, auth: Auth, fx: Fixture, stok:
   expect(await stokOutlet(page, auth, fx), "stok outlet setelah opname").toBe(stok);
 }
 
-async function simpanProduk(page: Page, auth: Auth, bahanId: string, kategoriId: string, produkId?: string) {
+async function simpanProduk(
+  page: Page,
+  auth: Auth,
+  bahanId: string,
+  kategoriId: string,
+  outletId: string,
+  produkId?: string,
+) {
   const body = {
     namaProduk: NAMA_PRODUK,
     hargaJual: 10000,
     hargaDasar: 4000,
     kategoriID: kategoriId,
     resep: [{ bahanBakuID: bahanId, jumlah: TAKARAN, satuan: "pcs" }],
+    locationID: outletId,
   };
   if (produkId) return wajib(await api<ProdukUji>(page, auth, "PUT", `/produk/${produkId}`, body), "PUT produk uji");
   return wajib(await api<ProdukUji>(page, auth, "POST", "/produk", body), "POST produk uji");
 }
 
 /**
- * Menyetel stok master bahan uji, lalu menyimpan ulang resep produk agar
- * backend menghitung ulang produk.stok dari stok master itu. produk.stok
- * adalah angka tingkat tenant yang tidak terhubung ke lokasi mana pun
- * (kontrak/temuan.md butir 37), tetapi ikut diperiksa saat finalisasi.
+ * Menyetel produk.stok lewat stok bahan uji di outlet tenant: stok outlet
+ * diopname ke nilai itu, lalu resep produk disimpan ulang dengan locationID
+ * outlet, sehingga backend menghitung produk.stok dari inventory outlet
+ * (backend yoga 5eb72e5). produk.stok tetap potret saat produk disimpan:
+ * opname, transfer, dan penerimaan sesudahnya tidak mengubahnya
+ * (kontrak/temuan.md butir 37), tetapi ia ikut diperiksa saat finalisasi.
+ * Stok outlet berakhir di nilai yang sama; ubah lewat setelStokOutlet
+ * sesudahnya bila skenario butuh kedua angka berbeda.
  */
-export async function setelStokProduk(page: Page, auth: Auth, fx: Fixture, stokMaster: number) {
-  wajib(
-    await api(page, auth, "PUT", `/bahanbaku/${fx.bahanId}`, { namaBahan: NAMA_BAHAN, satuan: "pcs", stok: stokMaster }),
-    "PUT bahan uji",
-  );
-  await simpanProduk(page, auth, fx.bahanId, fx.kategoriId, fx.produkId);
-  expect(await stokProduk(page, auth, fx), "produk.stok dihitung ulang dari stok master").toBe(
-    Math.floor(stokMaster / TAKARAN),
+export async function setelStokProduk(page: Page, auth: Auth, fx: Fixture, stok: number) {
+  await setelStokOutlet(page, auth, fx, stok);
+  await simpanProduk(page, auth, fx.bahanId, fx.kategoriId, fx.outletId, fx.produkId);
+  expect(await stokProduk(page, auth, fx), "produk.stok dihitung dari stok outlet saat produk disimpan").toBe(
+    Math.floor(stok / TAKARAN),
   );
 }
 
@@ -151,11 +160,10 @@ export async function siapkanFixture(page: Page, auth: Auth, stokAwal: number): 
 
   const semuaProduk = wajib(await api<ProdukUji[]>(page, auth, "GET", "/produk"), "GET /produk");
   const ada = semuaProduk.find((p) => p.namaProduk === NAMA_PRODUK);
-  const produkId = ada?.id ?? (await simpanProduk(page, auth, bahan.id, kategori[0].id)).id;
+  const produkId = ada?.id ?? (await simpanProduk(page, auth, bahan.id, kategori[0].id, outletId)).id;
 
   const fx: Fixture = { outletId, bahanId: bahan.id, produkId, kategoriId: kategori[0].id, inventoryId: inv!.id };
   await setelStokProduk(page, auth, fx, stokAwal);
-  await setelStokOutlet(page, auth, fx, stokAwal);
   return fx;
 }
 

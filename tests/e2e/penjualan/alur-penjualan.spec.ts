@@ -180,7 +180,7 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
   );
 
   test.fixme(
-    "finalisasi berhasil bila stok bahan outlet cukup walau stok produk tingkat tenant tidak (kontrak/temuan.md butir 37)",
+    "finalisasi berhasil bila stok bahan outlet cukup walau produk.stok, potret stok outlet saat produk disimpan, tidak (kontrak/temuan.md butir 37)",
     async ({ page }) => {
       const auth = await bukaDenganAuth(page, DAFTAR);
       const JUMLAH = 3;
