@@ -758,7 +758,8 @@ lain.
 Diputuskan pemilik proyek pada 30 September 2026, dengan prinsip
 keputusan rancangan butir 17 dan 21. PO1a sampai PO5a diterapkan di
 `3359497` (submodul metode pembayaran), dan PO6a sampai PO9a di
-`e0aaeca` (submodul pajak).
+`e0aaeca` (submodul pajak). PO11a diterapkan di `366e9b7`, dan PO12a
+sampai PO14a diputuskan pada 1 Oktober 2026 untuk submodul profil outlet.
 
 - **PO1a: tiga submodul berurutan**, masing-masing dengan spec pembanding,
   migrasi, commit, dan dokumen penutup sendiri: metode pembayaran, pajak,
@@ -804,7 +805,23 @@ keputusan rancangan butir 17 dan 21. PO1a sampai PO5a diterapkan di
   (`delete-pembayaran`, `delete-diskon`, `delete-akunkas`,
   `delete-metode-pembayaran`, dan `delete-booking`) dalam commit
   tersendiri, setelah perlakuan `POST /role` atas nama izin yang tidak
-  dikenal dipastikan.
+  dikenal dipastikan. Diterapkan di `366e9b7`: backend menolak nama yang
+  tidak dikenal dengan 400, sedangkan halaman template dan form role
+  membuangnya diam-diam sebelum mengirim, sehingga yang terdampak hanya
+  badge jumlah wewenang.
+- **PO12a: Profil Toko memuat profil tenant dan lokasi Outlet** (1 Oktober
+  2026), dalam dua kartu dengan simpan masing-masing: profil toko lewat
+  `PUT /tenant/:id`, dan lokasi Outlet lewat `IsianLokasi` dan
+  `usePerbaruiLokasi`, melengkapi PO1a.
+- **PO13a: `persenPajak`, `tipePajak`, `logoUrl`, dan `isSetupComplete`
+  tidak ditampilkan.** Pajak tenant tidak dipakai backend di luar model
+  dan mapper (pajak penjualan lewat modul pajak), logo hanya teks tanpa
+  unggah, dan flag setup dapat diubah klien. Ketiganya dilaporkan bersama
+  submodul profil outlet.
+- **PO14a: halaman tanpa entri `IZIN_HALAMAN`, dengan izin per bagian.**
+  Profil tenant dibaca semua pengguna dan diubah pemegang `update-tenant`;
+  lokasi dimuat bagi pemegang `read-location` dan diubah bagi pemegang
+  `update-location`, baca-saja selain itu (sejalan GD2a).
 - Diterapkan tanpa ditanyakan (`3359497`): ubah hanya mengirim field yang
   berubah (butir 15), sehingga akun lama yang sudah nonaktif tidak
   menggagalkan penggantian nama; akun nonaktif milik metode tampil
@@ -824,6 +841,22 @@ keputusan rancangan butir 17 dan 21. PO1a sampai PO5a diterapkan di
   dipertahankan agar spec pembanding tetap berlaku; dan tidak ada tombol
   yang disembunyikan menurut izin, karena route pajak tanpa
   `checkPermission` (butir 5).
+
+### Penyesuaian backend `yoga`
+
+Diputuskan pemilik proyek pada 1 Oktober 2026.
+
+- **PY1a: acuan backend berikutnya `origin/yoga`** (`50eede7`), yang sudah
+  menggabungkan `origin/nizar` `3edbdea`.
+- **PY2a: urutan pekerjaan.** PO11a di-commit terhadap `465b438`, lalu
+  penyesuaian ke `yoga`, lalu submodul profil outlet, agar profil outlet
+  tidak diuji terhadap backend yang akan diganti.
+- **PY3a: permission basis data development diselaraskan sendiri** dengan
+  seed backend, karena basis datanya lokal: nama yang dikeluarkan dari
+  seed dilepas dari role lalu dihapus, seed disinkronkan, dan role Owner
+  diisi ulang (`refactor/backend.md`). Temuannya tetap dilaporkan, karena
+  setiap basis data yang sudah berjalan akan mengalami hal yang sama
+  (`kontrak/temuan.md` butir 97).
 
 ## Keputusan rancangan yang mengikat
 

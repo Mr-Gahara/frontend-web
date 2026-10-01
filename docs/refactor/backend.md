@@ -72,6 +72,33 @@ bentuk respons sebuah endpoint tanpa memanggilnya:
 node -e 'const r=require(process.env.HOME+"/.cache/frontend-web/kontrak/kontrak-respons.json");console.log(JSON.stringify(r["/<endpoint>"].contoh.data[0],null,1).slice(0,400))'
 ```
 
+## Menyelaraskan permission basis data development
+
+Seed permission backend tidak menghapus nama yang dikeluarkan dari daftar.
+`seeds/permissionSeed.js` mode bawaan hanya meng-upsert per nama, dan
+`--reset` membuat ulang seluruh permission dengan `_id` baru, sehingga
+setiap role selain Owner kehilangan izinnya (`kontrak/temuan.md` butir
+97). Karena itu, setiap kali backend berpindah versi, permission basis
+data disilang dengan seed lebih dulu, lalu diselaraskan dengan urutan ini
+(1 Oktober 2026, keputusan PY3a; basis datanya lokal, `localhost:27017`):
+
+1. Tinjau dengan skrip baca-saja: jumlah permission basis data dan seed,
+   nama di luar seed, nama seed yang belum ada, dan role pemegangnya.
+2. Nama yang dikeluarkan dari seed dilepas dari role (`$pull`) lalu
+   dihapus, hanya bila daftar di luar seed sama dengan nama yang
+   diharapkan, agar permission kustom tidak ikut terhapus.
+3. `node seeds/permissionSeed.js` mode sinkron, tanpa `--reset`, dengan
+   `MONGO_URI` dari `.env`.
+4. `node seeds/seedOwnerPermission.js`, yang menimpa izin setiap role
+   Owner dengan seluruh permission basis data kecuali permission
+   platform. Langkah 2 harus lebih dulu, agar Owner tidak kembali
+   memegang nama lama.
+5. Cache Redis `permissions:all`, `role:list:*`, dan `auth:pengguna:*`
+   dihapus, lalu tinjauan diulang.
+
+Skrip tinjau dan penghapusnya sekali pakai di `/tmp`
+(`rekonsiliasi-permission.js`), dengan mode tinjau sebagai bawaan.
+
 ## Bila menemukan bug backend
 
 Urutannya:
@@ -241,6 +268,13 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   dibersihkan saat pajak diubah, simulasi pajak transaksi yang berbeda
   dari penjualan, dan konstanta validator yang tidak dipakai
   (`kontrak/temuan.md` butir 88 sampai 96)
+- Laporan permission seed — 1 temuan, disusun 1 Oktober 2026 setelah
+  `366e9b7`: sinkron seed permission tidak membuang nama yang dikeluarkan
+  dari daftar, `--reset` memutus referensi setiap role selain Owner, dan
+  izin baru hanya sampai ke role Owner lewat `seedOwnerPermission.js`;
+  beserta bukti basis data development (lima nama lama dipegang lima role,
+  tiga izin jurnal transfer belum ada) dan cara penyelarasannya
+  (`kontrak/temuan.md` butir 97)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

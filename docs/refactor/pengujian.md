@@ -91,6 +91,12 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per PO11a** (commit `366e9b7`): 391 test unit dan integrasi
+lolos di 49 berkas, 347 e2e lolos, 16 skipped (sama dengan baseline
+`465b438` di bawah). Skenario template di spec role menambah satu
+skenario. Diukur terhadap backend lokal `465b438`, setelah permission
+basis data diselaraskan dengan seed (`refactor/backend.md`).
+
 **Baseline per submodul pajak** (commit `b84de56`): 391 test unit dan
 integrasi lolos di 49 berkas, 346 e2e lolos, 16 skipped (sama dengan
 baseline `465b438` di bawah). Dari baseline metode pembayaran, spec
@@ -928,3 +934,8 @@ Urutan debug kegagalan e2e di atas).
   dicatat lewat callback begitu respons diterima agar pembersihan tetap
   berjalan, payload dibandingkan utuh, dan pajak per transaksi hanya lewat
   `POST` yang dijawab gagal.
+- `tests/e2e/roles/crud-role.spec.ts` (sejak `366e9b7`): setiap template
+  dipakai dengan `POST /role` dijawab gagal lewat `JAWAB_GAGAL`, sehingga
+  tidak ada role yang tersimpan; harapan diturunkan dari `ROLE_TEMPLATES`
+  yang diimpor; dan pembuktian terhadap kode lama baru sah setelah
+  permission basis data disilang dengan seed.

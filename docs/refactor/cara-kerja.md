@@ -1261,6 +1261,19 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   dari nama field. `pajakList` diduga dibentuk dari relasi pajak produk;
   model produk, pencarian penulis field, dan tinjauan basis data
   membuktikan sumbernya field yang tidak pernah ditulis.
+- **Pembuktian terhadap kode lama hanya sah bila data uji dapat
+  membedakannya.** Skenario template lolos terhadap kode lama karena basis
+  data development masih memuat permission yang sudah dibuang dari seed.
+  Setelah keduanya disilang dan diselaraskan, skenario gagal di Manajer
+  dan General Manajer (`366e9b7`).
+- **`gagal: 0` dari `galat-e2e.js` dibaca bersama `ringkas-e2e.js`.**
+  Helper itu hanya menghitung test yang gagal, sehingga run yang tidak
+  menjalankan apa pun juga menjawab 0.
+- **Backend di-`fetch` dan dibandingkan dengan acuan di awal setiap
+  submodul**, sebelum pemetaan. Perubahan backend yang terlambat diketahui
+  membuat pemetaan dan spec disusun di atas kontrak yang akan diganti:
+  pada 1 Oktober 2026, `yoga` sudah sembilan commit di depan `465b438`
+  saat submodul profil outlet dipetakan.
 
 ## Kapan berhenti dan bertanya
 

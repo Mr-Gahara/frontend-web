@@ -70,7 +70,9 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Penyesuaian backend `465b438`: keuangan, penjualan, pembayaran, reservasi, transfer stok, pembersihan data uji, dan paginasi daftar penjualan | `b85c2bd` (penyesuaian), `a10af75`, `e4bfc86`, `8134842`, `31ebd92` (fixme dilepas), `6e314ae` (terima), `b5a55c4` (data uji), `b63cf08` (paginasi) | Selesai (Catatan dari penyesuaian backend `465b438`) |
 | Pengaturan outlet: metode pembayaran | `9ca273a` (spec), `3359497` | Selesai (keputusan PO1a sampai PO5a dan PO10a; Catatan dari submodul metode pembayaran) |
 | Pengaturan outlet: pajak | `9586e3c` (spec), `e0aaeca`, `b84de56` (komentar) | Selesai (keputusan PO6a sampai PO9a; Catatan dari submodul pajak). Spec pembanding metode pembayaran diperbaiki di `cc65d93` |
-| Pengaturan outlet: profil outlet | - | **Berikutnya** (lihat Pekerjaan berikutnya). `app/dashboard/outlet/pengaturan/toko/page.tsx` masih placeholder 8 baris |
+| Role: template tanpa permission di luar seed (PO11a) | `366e9b7` | Selesai (Catatan dari PO11a) |
+| Penyesuaian backend `yoga` `50eede7` | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Pengaturan outlet: profil outlet | - | Belum. Sesudah penyesuaian `yoga` (keputusan PY2a); pemetaan dan keputusan cakupan di Pekerjaan berikutnya. `app/dashboard/outlet/pengaturan/toko/page.tsx` masih placeholder 8 baris |
 | Pelanggan dan diskon | - | Belum. `app/dashboard/outlet/pelanggan/page.tsx` dan `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`, dan `_id`; hapus diskon memanggil `DELETE /diskon/:id`, yang tidak ada lagi di backend `465b438` (`kontrak/temuan.md` butir 82) |
 | Profil, login, dan sidebar | - | Belum. `app/dashboard/profil/page.tsx`, `app/login/page.tsx`, `app/login/pengguna/page.tsx`, dan `components/app-sidebar.tsx` masih memakai `apiClient` |
 
@@ -92,33 +94,90 @@ Diukur ulang per submodul pajak (`e0aaeca`):
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: submodul profil outlet (modul Pengaturan outlet)
+## Pekerjaan berikutnya: penyesuaian backend `yoga` `50eede7`
+
+Diputuskan pemilik proyek pada 1 Oktober 2026 (keputusan PY1a dan PY2a):
+backend acuan berpindah dari `465b438` ke `origin/yoga` `50eede7`, yang
+sudah menggabungkan `origin/nizar` `3edbdea`, dan penyesuaiannya
+dikerjakan sebelum submodul profil outlet. Pemetaan awal (1 Oktober 2026,
+lewat `git fetch` baca-saja; backend lokal belum di-checkout):
+
+- Sembilan commit di depan `465b438`. Di luar dokumen dan test, 18 berkas
+  berubah: controller penjualan dan sesi booking; mapper dan model
+  pembayaran, penjualan, dan sesi booking; validator pembayaran,
+  penjualan, produk, dan sesi booking; dan service akun kas, pembayaran,
+  penjualan, produk, serta query dan update sesi booking. Route dan seed
+  tidak berubah.
+- Dugaan dampak dari judul commit, belum dibuktikan dari diff:
+  - `a66980c` dan `5eb72e5` (produk): stok tidak lagi direset saat resep
+    kosong, dan stok resep dihitung dari inventory outlet. Keduanya dapat
+    menutup `kontrak/temuan.md` butir 11 dan 37, sehingga penanganan
+    resep di `features/produk/payload.ts`, keputusan K4a, dan
+    `test.fixme` stok produk di spec alur penjualan ditinjau ulang.
+  - `8fad4c0` (pembayaran, penjualan, dan sesi booking): `alasanVoid`
+    opsional dan urutan daftar, yang dapat menutup butir 75 (PB5a) dan
+    butir 83 (PB14a).
+  - `4194965` (sesi booking): simpan tanpa perubahan di aset perbaikan,
+    dan cache booking.
+
+Langkah pertama: checkout backend lokal ke `origin/yoga`, tinjau ulang
+permission basis data (`refactor/backend.md`, Menyelaraskan permission
+basis data development), jalankan audit endpoint dan suite penuh, lalu
+baca diff per modul dan ajukan keputusan penyesuaian sekaligus lewat
+dialog pilihan.
+
+### Sesudahnya: submodul profil outlet (modul Pengaturan outlet)
 
 Submodul 3 dari tiga (keputusan PO1a). Submodul 1 (metode pembayaran)
-selesai di `3359497`, dan submodul 2 (pajak) di `e0aaeca`. Pemetaan awal
-(1 Oktober 2026):
+selesai di `3359497`, dan submodul 2 (pajak) di `e0aaeca`.
+`app/dashboard/outlet/pengaturan/toko/page.tsx` masih placeholder 8 baris
+tanpa spec e2e. Pemetaan backend (1 Oktober 2026, terhadap `465b438`):
 
-| Berkas | Baris | `apiClient` | `any` | `_id` | `queryKey` |
-|---|---|---|---|---|---|
-| `app/dashboard/outlet/pengaturan/toko/page.tsx` | 8 | 0 | 0 | 0 | 0 |
+- `GET /tenant/:id` tanpa `checkPermission`; controller menolak 403 bila
+  id bukan tenant sesi, dan service men-cache detail 60 detik.
+  `PUT /tenant/:id` memeriksa `update-tenant`, menolak tenant lain 403,
+  dan menyaring body lewat allowlist validator (`TENANT_FIELDS`, 12
+  field) sebelum `$set` dengan `runValidators`.
+- `persenPajak` dan `tipePajak` tidak dipakai backend di luar model dan
+  mapper; `isSetupComplete` dapat diubah klien; `logoUrl` hanya teks tanpa
+  endpoint unggah; dan "jam operasional" di kartu indeks tidak punya
+  field.
+- Nama toko di sidebar dan halaman profil dibaca dari `tenantName` token
+  (`penggunaDeviceService` baris 56). Apakah `pin-refresh` mengisinya
+  ulang belum dibuktikan.
+- Tipe `Tenant` di `types/tenant.ts` masih ber-`_id`, dan `EP` belum punya
+  endpoint tenant.
+- PO1a: `urlSetup` form buat stock opname outlet
+  (`features/stock-opname/form-buat-stock-opname.tsx` baris 72) kini
+  menuju rute yang tidak ada (`/dashboard/outlet/pengaturan/lokasi`), dan
+  diarahkan ke halaman profil toko.
+- Diputuskan tanpa ditanyakan (1 Oktober 2026): tenant tanpa outlet
+  (`/location/current` menjawab null) menampilkan pesan di kartu lokasi,
+  sejalan GD4a, karena setup outlet urusan onboarding lewat aplikasi;
+  frasa "jam operasional" dibuang dari kartu indeks pengaturan; dan tipe
+  `Tenant` dipindah ke `id` (keputusan rancangan butir 1).
 
-- Kartu "Profil Toko" di halaman indeks pengaturan menuju
-  `/dashboard/outlet/pengaturan/toko`, yang masih placeholder. Belum ada
-  spec e2e.
-- PO1a: profil outlet memakai `IsianLokasi` dan `usePerbaruiLokasi` dari
-  `features/inventaris`, seperti pengaturan gudang (`319bd99`), dan
-  `urlSetup` form buat stock opname outlet
-  (`features/stock-opname/form-buat-stock-opname.tsx` baris 72), yang kini
-  menuju rute yang tidak ada (`/dashboard/outlet/pengaturan/lokasi`),
-  diarahkan ke halamannya.
-- Belum diputuskan: apakah "Profil Toko" juga memuat profil tenant (nama
-  toko, lewat `GET /tenant/:id` dan `PUT /tenant/:id` dengan
-  `update-tenant`) di samping lokasi Outlet, dan bagaimana tenant tanpa
-  outlet ditangani (`/location/current` menjawab null).
+Keputusan cakupan sudah diambil (PO12a sampai PO14a). Langkah pertama
+sesudah penyesuaian `yoga`: periksa ulang pemetaan ini terhadap backend
+baru, lalu tulis spec pembanding.
 
-Langkah pertama: petakan backend `/tenant` (route, validator, dan service)
-serta `PUT /location/:id` untuk lokasi Outlet, lalu ajukan cakupan halaman
-lewat dialog pilihan sebelum menulis spec.
+## Catatan dari PO11a
+
+Diterapkan pada 1 Oktober 2026 (`366e9b7`), sebelum penyesuaian `yoga`
+dan submodul profil outlet (keputusan PY2a).
+
+- Lima permission yang tidak ada di seed backend dibuang dari template
+  Manajer dan General Manajer di `lib/roleTemplates.ts`. Silang seluruh
+  nama izin template terhadap `seeds/permissionSeed.js` backend: tidak
+  ada lagi nama di luar seed.
+- `POST /role` menolak nama izin yang tidak dikenal (400), tetapi halaman
+  buat posisi dari template dan form role selalu mengirim id dan membuang
+  nama tanpa padanan diam-diam. Dampak yang terlihat hanya badge
+  "N Wewenang" yang lebih besar daripada izin tersimpan.
+- Basis data development masih memuat kelima permission lama dan belum
+  memuat tiga izin jurnal transfer, karena seed `465b438` belum dijalankan
+  ulang. Diselaraskan langsung (keputusan PY3a, `refactor/backend.md`),
+  dan temuannya dicatat di `kontrak/temuan.md` butir 97.
 
 ## Catatan dari submodul pajak
 
