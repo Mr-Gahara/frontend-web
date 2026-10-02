@@ -280,6 +280,13 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   padahal menjadi gerbang finalisasi (butir 37, sebagian), dan kejadian
   keempat permintaan tertahan (butir 77); beserta konfirmasi butir 11,
   75, dan 83 yang terbukti diperbaiki lewat e2e (`kontrak/temuan.md`)
+- Laporan submodul profil outlet — 5 temuan, disusun 2 Oktober 2026
+  setelah `fcf2dd2`: token hasil `pin-refresh` web membawa `tenantName`
+  "Toko Tidak Diketahui", `isSetupComplete` yang dapat diubah klien,
+  panjang `namaToko` dihitung sebelum dipangkas, validasi yang berjalan
+  sebelum pemeriksaan izin di `PUT /tenant/:id`, serta `persenPajak`,
+  `tipePajak`, dan `logoUrl` tenant tanpa pemakai (perlu keputusan)
+  (`kontrak/temuan.md` butir 98 sampai 103)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

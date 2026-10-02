@@ -1285,6 +1285,21 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   outlet") mengesankan butir 37 tertutup, tetapi diff menunjukkan
   perhitungannya tetap hanya saat produk disimpan, dan `test.fixme`-nya
   terbukti masih gagal.
+- **Gejala yang dilaporkan dibuktikan penyebabnya sebelum dicatat.**
+  Menu sidebar yang hilang setelah muat ulang sempat diduga akibat token
+  `pin-refresh`; isi token dari respons nyata menunjukkan izinnya utuh,
+  dan penyebabnya ternyata effect sidebar ber-`[]` (`ca6eb3d`). Bandingkan
+  payload token sebelum dan sesudah refresh lebih dulu, baru baca
+  komponennya.
+- **Harapan di blok verifikasi dihitung dengan cakupan yang sama dengan
+  perintahnya.** Pada submodul profil outlet tiga harapan meleset karena
+  cakupannya: `grep` nama field ikut menghitung komentar yang baru
+  ditulis, `grep 'test('` ikut menghitung `test.describe(`, dan ESLint
+  atas satu folder ikut memeriksa halaman modul lain.
+- **Pekerjaan yang belum di-commit disimpan dengan `git stash push -u`
+  sebelum mengerjakan commit perbaikan terpisah**, lalu dikembalikan
+  dengan `git stash pop` setelah commit itu masuk, agar suite penuh
+  mengukur perbaikan itu saja (`ca6eb3d` di tengah profil toko).
 
 ## Kapan berhenti dan bertanya
 

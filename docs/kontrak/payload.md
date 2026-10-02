@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon dan pelanggan belum, dan diperiksa saat modul pemiliknya dimigrasikan; buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`.
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon dan pelanggan belum, dan diperiksa saat modul pemiliknya dimigrasikan; buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`).
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -585,6 +585,17 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Field lain yang dikenali: `namaTarif`, `basisPerhitungan`, `harga`, `durasiMinimum`, `hariAktif`, `jamMulai`, `jamSelesai`, `tipeAsetID`; `isActive` dan `prioritas` diteruskan service tanpa aturan
 - `tipeAsetID` digabung ke tipe aset lama lewat `$addToSet`, sehingga tipe aset tidak dapat dilepas maupun diganti (`temuan.md` butir 54)
 - Diisi server: - (`tenantID` hanya disuntikkan saat create, sehingga cache tipe aset dibersihkan dengan `tenantID` undefined, `temuan.md` butir 55)
+
+#### `PUT /tenant/:id`
+
+- Aturan: validateTenantPayload mode update (validators/tenantValidator.js) di route, sebelum `checkPermission("update-tenant")` (`temuan.md` butir 103), lalu dijalankan lagi di `tenantService.update`. Ditambahkan 2 Oktober 2026 terhadap backend `yoga` `50eede7`
+- Allowlist (`TENANT_FIELDS`): `namaToko`, `alamat`, `kota`, `kodePos`, `nomorTelepon`, `emailBisnis`, `logoUrl`, `footerStruk`, `idNPWP`, `persenPajak`, `tipePajak`, dan `isSetupComplete`. Field lain ditolak 400, dan `absensiLokasiAktif` ditolak karena diatur server
+- Aturan nilai: `namaToko` tidak boleh dikosongkan dan minimal 3 karakter, dihitung sebelum dipangkas (butir 99); field teks wajib bertipe teks atau null; `emailBisnis` berformat email bila tidak kosong; `persenPajak` angka 0 sampai 100; `isSetupComplete` boolean (butir 101). Teks kosong diterima untuk field opsional
+- Aturan service: hanya field allowlist yang diteruskan ke `$set` dengan `runValidators`; body tanpa field allowlist ditolak 400 "Tidak ada data tenant yang dapat diperbarui."; controller menolak tenant lain dengan 403; cache daftar dan detail tenant dibersihkan
+- Web mengirim hanya field yang berubah dari delapan field profil lewat `payloadPerbaruiTenant` (`features/tenant/payload.ts`, `fcf2dd2`), tanpa `persenPajak`, `tipePajak`, `logoUrl`, dan `isSetupComplete` (keputusan PO13a)
+- Respons 200 dengan `data` berbentuk `GET /tenant/:id` dan `message` "Data toko berhasil diperbarui."
+- Wajib dari klien: - (minimal satu field)
+- Diisi server: -
 
 #### `PUT /tipeaset/:id`
 

@@ -91,6 +91,13 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per submodul profil outlet** (commit `fcf2dd2`): 407 test unit
+dan integrasi lolos di 52 berkas, 356 e2e lolos, 16 skipped (sama dengan
+baseline `465b438` di bawah). Dari baseline `yoga`, perbaikan sidebar
+(`ca6eb3d`) menambah satu skenario (349), dan profil toko (`fcf2dd2`)
+menambah 8 test unit dan tujuh skenario (356). Diukur terhadap backend
+lokal `yoga` `50eede7`.
+
 **Baseline per penyesuaian backend `yoga`** (commit `a4304ce`): 399 test
 unit dan integrasi lolos di 51 berkas, 348 e2e lolos, 16 skipped (sama
 dengan baseline `465b438` di bawah). Fixture stok penjualan (`65edf8c`)
@@ -512,6 +519,16 @@ satu putaran.
   pesan yang dapat dibaca test. Form buat pajak lama menahan submit sampai
   prioritas diketik, dan hanya terungkap lewat `waitForResponse` yang habis
   waktu serta snapshot dengan isian prioritas aktif (`9586e3c`).
+- Teks yang juga dapat tampil di sidebar atau topbar dicari di dalam
+  `main`, bukan di seluruh halaman. Spec generate jadwal mencari nama
+  pengguna uji dengan `page.getByText`, dan lolos hanya karena kaki
+  sidebar kosong setelah navigasi penuh; begitu sidebar diperbaiki,
+  pencariannya mengenai dua elemen (`ca6eb3d`).
+- Perilaku setelah halaman dimuat ulang diuji dengan `reload` sungguhan.
+  Test yang memeriksa sidebar tepat setelah `login` tidak melewati
+  pemulihan sesi, karena navigasi dari halaman login terjadi saat sesi
+  sudah ada; menu yang hilang setelah muat ulang tidak terlihat sampai
+  spec muat ulang ditulis (`ca6eb3d`).
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -731,6 +748,21 @@ Urutan debug kegagalan e2e di atas).
   menyiapkan sebagian data uji lewat API**, misalnya fixture metode
   pembayaran di spec kelola dan booking uji di spec reservasi;
   disesuaikan saat spec itu disentuh.
+- **Mode baca-saja Profil Toko belum teruji**: kartu profil tanpa
+  `update-tenant`, kartu lokasi tanpa `update-location`, dan kartu lokasi
+  tanpa `read-location`, karena satu-satunya akun uji berperan Owner.
+  Tenant tanpa outlet juga belum teruji, karena tenant uji punya outlet.
+- **Spec profil toko mengubah nama toko tenant uji untuk sementara**,
+  lalu mengembalikannya lewat UI dan, bila test berhenti di tengah, lewat
+  API di `finally`. Kode pos tenant uji menjadi teks kosong, bukan null,
+  setelah run pertama.
+- **Spec login sempat habis waktu sekali di suite penuh 2 Oktober 2026**
+  (sekitar 13.34 WIB, test "PIN login in-flight"): halaman login PIN
+  menampilkan "Akses ditolak. Token akun tidak ditemukan.", yang berarti
+  `akun/auth/refreshtoken` pada pemuatan itu tidak memulihkan token akun.
+  Test itu lolos sendirian dan di dua suite penuh sesudahnya; penyebabnya
+  belum diketahui, karena trace tidak disimpan. Bila terulang, jalankan
+  dengan `--trace on`.
 
 ## Spec rujukan
 
@@ -953,3 +985,13 @@ Urutan debug kegagalan e2e di atas).
   tidak ada role yang tersimpan; harapan diturunkan dari `ROLE_TEMPLATES`
   yang diimpor; dan pembuktian terhadap kode lama baru sah setelah
   permission basis data disilang dengan seed.
+- `tests/e2e/auth/sidebar-muat-ulang.spec.ts` (`ca6eb3d`): sidebar
+  diperiksa sebelum dan sesudah `reload`, dengan respons `pin-refresh`
+  ditunggu setelah `reload` ber-`waitUntil: "commit"`; spec ini dibuktikan
+  gagal terhadap kode lama sebelum perbaikannya diterapkan.
+- `tests/e2e/pengaturan/profil-toko.spec.ts` (`fcf2dd2`): setiap perubahan
+  dijalankan dan dikembalikan lewat UI, dengan payload dibandingkan utuh
+  (hanya field yang berubah) dan hasilnya dibaca ulang lewat API; nama
+  toko dibuktikan tampil di sidebar dan bertahan setelah muat ulang; dan
+  `finally` mengembalikan data lewat API hanya bila nilainya masih
+  berbeda.

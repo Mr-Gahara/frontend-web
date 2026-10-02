@@ -764,7 +764,8 @@ Diputuskan pemilik proyek pada 30 September 2026, dengan prinsip
 keputusan rancangan butir 17 dan 21. PO1a sampai PO5a diterapkan di
 `3359497` (submodul metode pembayaran), dan PO6a sampai PO9a di
 `e0aaeca` (submodul pajak). PO11a diterapkan di `366e9b7`, dan PO12a
-sampai PO14a diputuskan pada 1 Oktober 2026 untuk submodul profil outlet.
+sampai PO14a diputuskan pada 1 Oktober 2026 untuk submodul profil outlet
+dan diterapkan di `fcf2dd2` bersama PO15a; PO16a diterapkan di `ca6eb3d`.
 
 - **PO1a: tiga submodul berurutan**, masing-masing dengan spec pembanding,
   migrasi, commit, dan dokumen penutup sendiri: metode pembayaran, pajak,
@@ -827,6 +828,19 @@ sampai PO14a diputuskan pada 1 Oktober 2026 untuk submodul profil outlet.
   Profil tenant dibaca semua pengguna dan diubah pemegang `update-tenant`;
   lokasi dimuat bagi pemegang `read-location` dan diubah bagi pemegang
   `update-location`, baca-saja selain itu (sejalan GD2a).
+- **PO15a: nama toko di sidebar dan halaman profil dibaca dari
+  `GET /tenant/:id`** (2 Oktober 2026, `fcf2dd2`), lewat `useTenant` yang
+  berbagi cache dengan halaman Profil Toko, sehingga nama ikut berubah
+  setelah profil disimpan. `tenantName` di token tidak dipakai lagi,
+  karena menjadi "Toko Tidak Diketahui" setelah `pin-refresh`
+  (`kontrak/temuan.md` butir 98). Hanya pembacaan nama toko yang
+  disentuh di sidebar dan halaman profil, seperti GD5a.
+- **PO16a: effect sidebar mengikuti sesi, sebagai commit tersendiri**
+  (2 Oktober 2026, `ca6eb3d`) sebelum profil toko. Effect yang menyalin
+  nama, role, dan izin berdependensi `[]` dan keluar selama sesi belum
+  pulih, sehingga setelah muat ulang menu berizin hilang sampai login
+  ulang. Spec muat ulang ditulis lebih dulu dan dibuktikan gagal terhadap
+  kode lama. Sisa sidebar tetap untuk modul Profil, login, dan sidebar.
 - Diterapkan tanpa ditanyakan (`3359497`): ubah hanya mengirim field yang
   berubah (butir 15), sehingga akun lama yang sudah nonaktif tidak
   menggagalkan penggantian nama; akun nonaktif milik metode tampil
@@ -846,6 +860,21 @@ sampai PO14a diputuskan pada 1 Oktober 2026 untuk submodul profil outlet.
   dipertahankan agar spec pembanding tetap berlaku; dan tidak ada tombol
   yang disembunyikan menurut izin, karena route pajak tanpa
   `checkPermission` (butir 5).
+- Diterapkan tanpa ditanyakan (`fcf2dd2`): ubah profil toko hanya mengirim
+  field yang berubah (butir 15), dan field yang dikosongkan dikirim
+  sebagai teks kosong; setiap isian dipangkas, nama toko minimal 3
+  karakter, dan email diperiksa bentuknya bila diisi, sesuai validator
+  backend; simpan nonaktif selama form belum berubah; kedua form dipasang
+  ulang lewat `key` berisi id dan `updatedAt` (butir 8); `IsianLokasi`
+  menerima teks per tipe lokasi, dengan bawaan gudang; `BuatTokoRequest`
+  dan `BuatTokoResponse` dibuang karena tidak punya pemakai; dan spec
+  pembanding tidak ditulis karena halaman lama hanya placeholder.
+  Diputuskan saat pemetaan (1 Oktober 2026) dan diterapkan di commit yang
+  sama: tenant tanpa outlet (`/location/current` menjawab null)
+  menampilkan pesan di kartu lokasi, sejalan GD4a, karena setup outlet
+  urusan onboarding lewat aplikasi; frasa "jam operasional" dibuang dari
+  kartu indeks pengaturan, karena tidak punya field; dan tipe `Tenant`
+  dipindah ke `id` (keputusan rancangan butir 1).
 
 ### Penyesuaian backend `yoga`
 

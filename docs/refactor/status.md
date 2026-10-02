@@ -72,9 +72,9 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Pengaturan outlet: pajak | `9586e3c` (spec), `e0aaeca`, `b84de56` (komentar) | Selesai (keputusan PO6a sampai PO9a; Catatan dari submodul pajak). Spec pembanding metode pembayaran diperbaiki di `cc65d93` |
 | Role: template tanpa permission di luar seed (PO11a) | `366e9b7` | Selesai (Catatan dari PO11a) |
 | Penyesuaian backend `yoga` `50eede7`: fixture stok penjualan, `alasanVoid`, urutan server daftar penjualan, dan lokasi stok produk | `65edf8c` (fixture), `a4304ce` (penyesuaian) | Selesai (keputusan PY4a sampai PY7a; Catatan dari penyesuaian backend `yoga`) |
-| Pengaturan outlet: profil outlet | - | **Berikutnya** (lihat Pekerjaan berikutnya). `app/dashboard/outlet/pengaturan/toko/page.tsx` masih placeholder 8 baris |
-| Pelanggan dan diskon | - | Belum. `app/dashboard/outlet/pelanggan/page.tsx` dan `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`, dan `_id`; hapus diskon memanggil `DELETE /diskon/:id`, yang tidak ada lagi di backend `465b438` (`kontrak/temuan.md` butir 82) |
-| Profil, login, dan sidebar | - | Belum. `app/dashboard/profil/page.tsx`, `app/login/page.tsx`, `app/login/pengguna/page.tsx`, dan `components/app-sidebar.tsx` masih memakai `apiClient` |
+| Pengaturan outlet: profil outlet | `ca6eb3d` (menu sidebar setelah muat ulang), `fcf2dd2` | Selesai (keputusan PO12a sampai PO16a; Catatan dari submodul profil outlet) |
+| Pelanggan dan diskon | - | **Berikutnya** (lihat Pekerjaan berikutnya). `app/dashboard/outlet/pelanggan/page.tsx` dan `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`, dan `_id`; hapus diskon memanggil `DELETE /diskon/:id`, yang tidak ada lagi di backend `465b438` (`kontrak/temuan.md` butir 82) |
+| Profil, login, dan sidebar | - | Belum. `app/dashboard/profil/page.tsx`, `app/login/page.tsx`, `app/login/pengguna/page.tsx`, dan `components/app-sidebar.tsx` masih memakai `apiClient`. Nama toko di sidebar dan halaman profil sudah dibaca lewat `useTenant` (`fcf2dd2`), dan effect sidebar mengikuti sesi (`ca6eb3d`) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -89,48 +89,70 @@ Diukur ulang per submodul pajak (`e0aaeca`):
 | Kemunculan `_id` | - | 13 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak |
 | `useAuthGuard()` berulang di halaman | 49 | 29 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, dan ketiga halaman metode pembayaran) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
-| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. |
+| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: submodul profil outlet (modul Pengaturan outlet)
+## Pekerjaan berikutnya: modul Pelanggan dan diskon
 
-Submodul 3 dari tiga (keputusan PO1a). Submodul 1 (metode pembayaran)
-selesai di `3359497`, dan submodul 2 (pajak) di `e0aaeca`; PO11a
-(`366e9b7`) dan penyesuaian backend `yoga` (`65edf8c`, `a4304ce`)
-dikerjakan lebih dulu (keputusan PY2a).
-`app/dashboard/outlet/pengaturan/toko/page.tsx` masih placeholder 8 baris
-tanpa spec e2e. Pemetaan backend (1 Oktober 2026, terhadap `465b438`;
-berkas tenant dan lokasi tidak berubah di `yoga`):
+Modul Pengaturan outlet selesai dengan submodul profil outlet (`fcf2dd2`).
+Yang tersisa di Fase 3 adalah modul ini, lalu Profil, login, dan sidebar.
+Pemetaannya belum diambil; yang sudah diketahui dari modul lain:
 
-- `GET /tenant/:id` tanpa `checkPermission`; controller menolak 403 bila
-  id bukan tenant sesi, dan service men-cache detail 60 detik.
-  `PUT /tenant/:id` memeriksa `update-tenant`, menolak tenant lain 403,
-  dan menyaring body lewat allowlist validator (`TENANT_FIELDS`, 12
-  field) sebelum `$set` dengan `runValidators`.
-- `persenPajak` dan `tipePajak` tidak dipakai backend di luar model dan
-  mapper; `isSetupComplete` dapat diubah klien; `logoUrl` hanya teks tanpa
-  endpoint unggah; dan "jam operasional" di kartu indeks tidak punya
-  field.
-- Nama toko di sidebar dan halaman profil dibaca dari `tenantName` token
-  (`penggunaDeviceService` baris 56). Apakah `pin-refresh` mengisinya
-  ulang belum dibuktikan.
-- Tipe `Tenant` di `types/tenant.ts` masih ber-`_id`, dan `EP` belum punya
-  endpoint tenant.
-- PO1a: `urlSetup` form buat stock opname outlet
-  (`features/stock-opname/form-buat-stock-opname.tsx` baris 72) kini
-  menuju rute yang tidak ada (`/dashboard/outlet/pengaturan/lokasi`), dan
-  diarahkan ke halaman profil toko.
-- Diputuskan tanpa ditanyakan (1 Oktober 2026): tenant tanpa outlet
-  (`/location/current` menjawab null) menampilkan pesan di kartu lokasi,
-  sejalan GD4a, karena setup outlet urusan onboarding lewat aplikasi;
-  frasa "jam operasional" dibuang dari kartu indeks pengaturan; dan tipe
-  `Tenant` dipindah ke `id` (keputusan rancangan butir 1).
+- `app/dashboard/outlet/pelanggan/page.tsx` dan
+  `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`,
+  dan `_id`. Tipe `PelangganLama` dan `DiskonLama` (keputusan rancangan
+  butir 19) dihapus di commit migrasinya.
+- `features/pelanggan` dan `features/diskon` baru memuat daftar, yang
+  dipakai buat penjualan dan buat reservasi (`arsitektur.md`).
+- Hapus diskon memanggil `DELETE /diskon/:id`, yang tidak ada lagi di
+  backend sejak `465b438` (`kontrak/temuan.md` butir 82); penggantinya
+  perlu keputusan pemilik proyek.
+- Payload buat dan ubah diskon serta pelanggan di `kontrak/payload.md`
+  belum dikoreksi terhadap backend `yoga`.
+- `GET /pelanggan` dan `GET /diskon` tanpa `checkPermission`
+  (`kontrak/temuan.md` butir 5), sedangkan menu pelanggan bergate
+  `read-pelanggan` (`kontrak/izin-halaman.md`).
 
-Keputusan cakupan sudah diambil (PO12a sampai PO14a). Langkah pertama:
-buktikan apakah `pin-refresh` mengisi ulang `tenantName`, lalu tulis spec
-pembanding.
+Langkah pertama sesi berikutnya, setelah backend di-`fetch` dan
+dibandingkan dengan acuan (`cara-kerja.md`):
+
+```bash
+cd ~/Documents/frontend-web
+wc -l app/dashboard/outlet/pelanggan/page.tsx app/dashboard/outlet/diskon/page.tsx
+grep -nE 'apiClient|: any|_id|queryKey' app/dashboard/outlet/pelanggan/page.tsx app/dashboard/outlet/diskon/page.tsx | cut -c1-120
+```
+
+## Catatan dari submodul profil outlet
+
+Submodul 3 modul Pengaturan outlet selesai pada 2 Oktober 2026 dalam dua
+commit: perbaikan menu sidebar setelah muat ulang (`ca6eb3d`) dan halaman
+Profil Toko (`fcf2dd2`). Dengan itu modul Pengaturan outlet selesai.
+
+- Lapisan data di `features/tenant` (`arsitektur.md`). Halaman memuat dua
+  kartu dengan simpan masing-masing: profil tenant, dan lokasi Outlet
+  lewat `IsianLokasi` (keputusan PO12a sampai PO14a).
+- Token hasil `pin-refresh` membawa `tenantName` "Toko Tidak Diketahui"
+  (`kontrak/temuan.md` butir 98), sehingga nama toko di sidebar dan
+  halaman profil dibaca dari `GET /tenant/:id` (PO15a). Token tetap
+  membawa role dan seluruh izin.
+- Menu berizin dan nama pengguna di sidebar hilang setelah halaman dimuat
+  ulang, karena effect sidebar hanya berjalan sekali sebelum sesi pulih.
+  Itu bug frontend, diperbaiki di `ca6eb3d` (PO16a). Spec generate jadwal
+  ikut dikoreksi, karena selama ini lolos berkat kaki sidebar yang kosong
+  (`pengujian.md`, Catatan Playwright).
+- Spec pembanding tidak ditulis, karena halaman lama hanya placeholder;
+  ketujuh skenario ditulis bersama migrasi, seluruhnya lewat UI
+  (keputusan rancangan butir 23).
+- `urlSetup` form buat stock opname outlet kini menuju halaman Profil
+  Toko, dan frasa "jam operasional" dibuang dari kartu indeks pengaturan.
+- Payload token pengguna tidak membawa `nama`, sehingga nama pengguna di
+  sidebar bergantung pada `GET /pengguna/:id`, yang mewajibkan
+  `read-pengguna`. Ditinjau bersama modul Profil, login, dan sidebar.
+- Temuan backend baru: butir 98 sampai 103, dilaporkan 2 Oktober 2026
+  (`backend.md`). Kontrak tenant ditambahkan ke `kontrak/endpoint.md`,
+  `kontrak/payload.md`, dan `kontrak/izin-halaman.md`.
 
 ## Catatan dari penyesuaian backend `yoga`
 
@@ -582,9 +604,6 @@ Yang masih berlaku:
 - Dashboard outlet (`app/dashboard/outlet/page.tsx`) juga placeholder,
   dan `GET /dashboard/outlet` belum dipakai web; di luar cakupan modul
   Gudang.
-- Tautan `urlSetup` form buat stock opname outlet menuju
-  `/dashboard/outlet/pengaturan/lokasi`, rute yang tidak ada. Dibereskan
-  bersama modul pengaturan outlet.
 - Dua error ESLint `react/no-unescaped-entities` di
   `app/dashboard/gudang/inventaris/page.tsx` baris 273 (tanda kutip di
   teks keadaan kosong) warisan sejak migrasi stok `ad590f9`, yang ditutup
@@ -608,6 +627,13 @@ Yang masih berlaku:
   ditinjau bersama modul reservasi bila dibutuhkan.
 - `pajakList` di tipe `Produk` tetap ada tetapi tidak dipakai tampilan,
   karena tidak mencerminkan relasi pajak (`kontrak/temuan.md` butir 88).
+- Dua error ESLint `react-hooks/set-state-in-effect` warisan modul Role di
+  `app/dashboard/outlet/pengaturan/roles/page.tsx` baris 39 dan
+  `app/dashboard/outlet/pengaturan/roles/buatRole/page.tsx` baris 43.
+  Bereskan saat halaman role disentuh lagi.
+- `tenantName` masih ada di `PenggunaSesi` (`lib/auth/session.ts`) tanpa
+  pembaca, karena token masih membawanya; dibuang bersama modul Profil,
+  login, dan sidebar.
 
 ### Utang kecil dari penyesuaian backend `f27f093`
 

@@ -46,7 +46,9 @@ begitu pula bagian pajak dan produk pajak di `endpoint.md`, `payload.md`,
 `izin-halaman.md`, dan `temuan.md`. Pada 2 Oktober 2026, bagian produk,
 penjualan, pembayaran, dan sesi booking di `endpoint.md`, `payload.md`,
 dan `temuan.md` dikoreksi terhadap backend `yoga` `50eede7`
-(`origin/yoga`, yang menggabungkan `origin/nizar` `3edbdea`). Bila
+(`origin/yoga`, yang menggabungkan `origin/nizar` `3edbdea`), dan
+bagian tenant ditambahkan ke `endpoint.md`, `payload.md`,
+`izin-halaman.md`, dan `temuan.md` terhadap backend yang sama. Bila
 backend berubah cukup jauh, `endpoint.md`, `payload.md`, `izin-halaman.md`,
 dan `route-backend.md` perlu dibangkitkan ulang; bagian 1 di bawah menjelaskan
 cara pembangkitannya. Gejala bahwa kontrak sudah tertinggal: endpoint yang
@@ -104,6 +106,7 @@ Keterbatasan:
 - Keduanya dikirim sebagai header `Authorization: Bearer <token>`.
 - Refresh akun lewat `POST /api/akun/auth/refreshtoken`, refresh pengguna web lewat `POST /api/pengguna/pin-refresh`. Keduanya membaca refresh token dari cookie httpOnly, sehingga request wajib menyertakan cookie.
 - Hanya satu sesi web aktif per pengguna. Login di tempat lain membuat sesi lama dijawab 401.
+- Payload token pengguna web memuat id, tenantID, tenantName, roleID, role, permissions, aksesType, loginType, dan version, tanpa nama pengguna. `tenantName` tidak dapat diandalkan: token hasil `pin-refresh` membawa "Toko Tidak Diketahui" (`temuan.md` butir 98), sehingga nama toko dibaca dari `GET /tenant/:id`.
 - Kolom Auth di bagian 3 (`endpoint.md`) menunjukkan middleware yang diperiksa backend: `authAkun`, `authPengguna`, `authEither`, dan `adminOnly`.
 
 ### 2.3 Format error dan kode status
