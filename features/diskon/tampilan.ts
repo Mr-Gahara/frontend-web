@@ -98,3 +98,20 @@ export function ringkasAturan(diskon: Diskon): string[] {
 export function aktifTetapiTidakBerlaku(diskon: Diskon): boolean {
   return diskon.status === "Aktif" && !diskon.sedangBerlaku;
 }
+/**
+ * Syarat pemakaian yang bergantung pada transaksi, untuk ditampilkan di
+ * pilihan diskon kasir (keputusan PD4a). Backend yang menegakkannya saat
+ * penjualan atau booking disimpan.
+ */
+export function syaratPemakaian(diskon: Diskon): string[] {
+  const syarat: string[] = [];
+  if (diskon.minimalBelanja > 0) {
+    syarat.push(`Minimal belanja Rp ${diskon.minimalBelanja.toLocaleString("id-ID")}`);
+  }
+  if (diskon.produkIDs.length > 0) syarat.push(`${diskon.produkIDs.length} produk tertentu`);
+  if (diskon.kuotaPerPelanggan !== null) {
+    syarat.push(`Maksimal ${diskon.kuotaPerPelanggan} kali per pelanggan`);
+  }
+  if (diskon.khususMember) syarat.push("Khusus member");
+  return syarat;
+}

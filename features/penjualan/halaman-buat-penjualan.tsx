@@ -1,5 +1,6 @@
 "use client";
 
+import { SyaratDiskon } from "@/features/diskon/syarat-diskon";
 import { useState, useCallback, useMemo, useRef } from "react";
 import { useSession } from "@/lib/auth/useSession";
 import { useRouter } from "next/navigation";
@@ -701,7 +702,7 @@ export default function HalamanBuatPenjualan() {
                                                 <Check className="h-3 w-3 text-[#FFFAF3]" />
                                               )}
                                             </div>
-                                            <span>{d.namaDiskon}</span>
+                                            <span className="flex flex-col"><span>{d.namaDiskon}</span><SyaratDiskon diskon={d} /></span>
                                           </div>
                                           <Badge className="text-[10px] bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373] border-none font-bold">
                                             {d.tipe === "persen"
@@ -911,7 +912,7 @@ export default function HalamanBuatPenjualan() {
                                       <Check className="h-3 w-3 text-[#FFFAF3]" />
                                     )}
                                   </div>
-                                  <span>{d.namaDiskon}</span>
+                                  <span className="flex flex-col"><span>{d.namaDiskon}</span><SyaratDiskon diskon={d} /></span>
                                 </div>
                                 <Badge className="text-[10px] bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373] border-none font-bold">
                                   {d.tipe === "persen" ? `${d.nilai}%` : "Rp"}

@@ -1,5 +1,6 @@
 "use client";
 
+import { SyaratDiskon } from "@/features/diskon/syarat-diskon";
 import { useState } from "react";
 import { Check, Receipt, Sparkles, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -94,7 +95,7 @@ export function PanelRingkasan({
                                 >
                                   {terpilih && <Check className="h-3 w-3 text-[#FFFAF3]" />}
                                 </div>
-                                <span>{d.namaDiskon}</span>
+                                <span className="flex flex-col"><span>{d.namaDiskon}</span><SyaratDiskon diskon={d} /></span>
                               </div>
                             </CommandItem>
                           );

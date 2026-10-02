@@ -1,5 +1,6 @@
 "use client";
 
+import { SyaratDiskon } from "@/features/diskon/syarat-diskon";
 import { useState } from "react";
 import { Controller, type Control, type FieldErrors } from "react-hook-form";
 import { format } from "date-fns";
@@ -217,7 +218,7 @@ export function KartuFasilitas({
                             >
                               {terpilih && <Check className="h-3 w-3 text-[#FFFAF3]" />}
                             </div>
-                            <span>{d.namaDiskon}</span>
+                            <span className="flex flex-col"><span>{d.namaDiskon}</span><SyaratDiskon diskon={d} /></span>
                           </div>
                         </CommandItem>
                       );

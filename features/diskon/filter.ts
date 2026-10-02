@@ -1,8 +1,16 @@
 import type { Diskon, DiskonCakupan } from "@/types/diskon";
 
-/** Diskon aktif untuk satu cakupan; aturan halaman buat penjualan lama dipertahankan. */
+/**
+ * Diskon yang dapat ditawarkan kasir untuk satu cakupan (keputusan PD4a):
+ * berstatus Aktif dan sedang berlaku menurut backend, yaitu di dalam masa,
+ * jam, hari, dan kuotanya. sedangBerlaku dihitung backend saat respons
+ * dibuat, sehingga dapat tertinggal selama daftar masih segar di cache;
+ * backend tetap menolak diskon yang tidak berlaku saat disimpan.
+ */
 export function diskonAktif(daftar: Diskon[], cakupan: DiskonCakupan): Diskon[] {
-  return daftar.filter((d) => d.status === "Aktif" && d.cakupan === cakupan);
+  return daftar.filter(
+    (d) => d.status === "Aktif" && d.sedangBerlaku && d.cakupan === cakupan,
+  );
 }
 
 /**
