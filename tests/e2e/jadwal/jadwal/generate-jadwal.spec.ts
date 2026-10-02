@@ -46,7 +46,7 @@ async function isiLangkahSatu(page: Page, b: BulanUji, namaPola = NAMA_POLA) {
   await page.getByRole("option", { name: new RegExp(namaPola) }).click();
   await pilihTanggalBerlabel(page, "Mulai Tanggal", b, DARI);
   await pilihTanggalBerlabel(page, "Sampai Tanggal", b, SAMPAI);
-  await page.getByText(NAMA_PENGGUNA, { exact: true }).click();
+  await page.getByRole("main").getByText(NAMA_PENGGUNA, { exact: true }).click();
   await expect(page.getByText("1 Dipilih", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Lanjut Pratinjau" }).click();
   await expect(page.getByText("Langkah 2: Pratinjau Jadwal")).toBeVisible();

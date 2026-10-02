@@ -381,7 +381,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     fetchSidebarData();
-  }, []);
+    // Dijalankan ulang saat sesi pulih: ketika halaman dimuat ulang, sidebar
+    // terpasang sebelum pin-refresh selesai, sehingga pengguna masih kosong
+    // pada pemasangan pertama dan menu berizin tidak pernah muncul
+    // (keputusan PO16a).
+  }, [pengguna]);
 
   const handleLogout = async () => {
     try {
