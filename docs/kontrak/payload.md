@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon belum, dan diperiksa saat submodulnya dimigrasikan, sedangkan operasi pelanggan dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`).
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi pelanggan dan diskon dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`, `1e05df6`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`).
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -164,12 +164,16 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /diskon`
 
-- Aturan: validateDiskonPayload (validators/diskonValidator.js)
-- Wajib dari klien: `namaDiskon`
-- Field lain yang dikenali: `cakupan`, `tipe`, `nilai`, `bisaDigabung`, `status`
+- Aturan: validateDiskonPayload (validators/diskonValidator.js) di route, setelah pembatas laju tulis dan `checkPermission("create-diskon")`. Dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7`
+- Allowlist (`FIELD_DIKENAL`, 17 field): `namaDiskon`, `cakupan`, `tipe`, `nilai`, `bisaDigabung`, `status`, `produkIDs`, `tanggalMulai`, `tanggalBerakhir`, `hitungPerBarang`, `minimalBelanja`, `kuota`, `khususMember`, `kuotaPerPelanggan`, `jamMulai`, `jamSelesai`, dan `hariAktif`. Field lain ditolak 400 "Field tidak dikenal"
+- Wajib dari klien: `namaDiskon` (paling banyak 100 karakter), `cakupan`, `tipe`, dan `nilai` (angka lebih dari 0; persen paling banyak 100)
+- Aturan nilai lain: `bisaDigabung`, `hitungPerBarang`, dan `khususMember` boolean; `produkIDs` array ObjectId paling banyak 500 dan hanya untuk cakupan Item; `tanggalMulai` dan `tanggalBerakhir` teks ISO atau null, dengan berakhir sesudah mulai; `hitungPerBarang` hanya untuk Item bertipe nominal; `minimalBelanja` angka 0 atau lebih; `kuota` dan `kuotaPerPelanggan` bilangan bulat minimal 1 atau null; `jamMulai` dan `jamSelesai` dikirim berpasangan, `HH:mm` atau keduanya null, dan tidak boleh sama; `hariAktif` array 0 (Minggu) sampai 6 (Sabtu)
 - Nilai sah: `VALID_TIPE`: persen, nominal; `VALID_STATUS`: Aktif, Non-Aktif; `VALID_CAKUPAN`: Global, Item
-- Dibaca controller dari body: `-`
-- Diisi server: -
+- Aturan service: nama kembar dalam tenant ditolak 409 tanpa membedakan huruf besar kecil; produk harus milik tenant (400); paling banyak 50 diskon aktif per tenant, dan pemeriksaan itu berjalan juga saat membuat diskon Non-Aktif (`temuan.md` butir 107)
+- Web mengirim hasil `payloadBuatDiskon` (`features/diskon/payload.ts`, `1e05df6` dan `54f2938`): enam field dasar, ditambah hanya aturan yang diisi; `khususMember` tidak dikirim (keputusan PD8a)
+- Respons 201 dengan `data` berbentuk item `GET /diskon` dan `message` "Data diskon berhasil ditambahkan"
+- Dibaca controller dari body: seluruh body, dengan `tenantID` dari sesi
+- Diisi server: `tenantID`, `terpakai`
 
 #### `POST /inventory`
 
@@ -444,10 +448,12 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /diskon/:id`
 
-- Aturan: validateDiskonPayload (validators/diskonValidator.js)
-- Wajib dari klien: `namaDiskon`
-- Field lain yang dikenali: `cakupan`, `tipe`, `nilai`, `bisaDigabung`, `status`
-- Nilai sah: `VALID_TIPE`: persen, nominal; `VALID_STATUS`: Aktif, Non-Aktif; `VALID_CAKUPAN`: Global, Item
+- Aturan: validateDiskonPayload mode update (validators/diskonValidator.js) di route, setelah pembatas laju tulis dan `checkPermission("update-diskon")`: seluruh field opsional, minimal satu, dengan allowlist dan aturan nilai yang sama dengan `POST`. Dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7`; sebelumnya `namaDiskon` tercatat wajib
+- Wajib dari klien: - (minimal satu field)
+- Field lain yang dikenali: ketujuh belas field `FIELD_DIKENAL`
+- Aturan service (`diskonService.update`): hanya field yang dikenal yang ditulis, lewat `$set` milik service; gabungan nilai baru dan nilai tersimpan diperiksa (persen di atas 100, produk pada cakupan Global, hitung per barang di luar Item nominal, dan urutan tanggal); nama kembar 409; mengaktifkan kembali dihitung ke batas 50 diskon aktif (409); `kuota` tidak boleh di bawah pemakaian tercatat (400); diskon milik tenant lain dijawab 404. Tidak ada `DELETE`: diskon dihentikan lewat `status: "Non-Aktif"` (`temuan.md` butir 82)
+- Web mengirim hasil `payloadPerbaruiDiskon` (`features/diskon/payload.ts`): hanya field yang berubah; aturan yang dikosongkan sebagai null (tanggal, kuota, jam), 0 (minimal belanja), atau array kosong (hari, produk); jam selalu berpasangan; dan berpindah ke cakupan Global ikut mengirim `produkIDs: []` serta `hitungPerBarang: false`. Aktifkan dan nonaktifkan dari daftar mengirim `{ status }` saja (keputusan PD2a)
+- Respons 200 dengan `data` berbentuk item `GET /diskon` dan `message` "Data diskon berhasil diperbarui"
 - Diisi server: -
 
 #### `PUT /jadwalshift/:id`

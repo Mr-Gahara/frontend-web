@@ -1310,6 +1310,19 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Jawaban sukses backend dibandingkan dengan data yang dibaca ulang.**
   `PUT` pelanggan menjawab 200 "berhasil" untuk pengosongan yang tidak
   terjadi; bila hanya status yang diperiksa, temuan itu tidak terlihat.
+- **Berkas baru dibuat dan diperiksa sebelum blok yang mengimpornya
+  dijalankan.** Pada pilihan diskon kasir, blok penerap menambahkan impor
+  ke tiga berkas sebelum `syarat-diskon.tsx` dibuat; `next dev` gagal
+  mengompilasi seluruh halaman, dan setiap test e2e habis waktu di login.
+  Isi berkas baru ditulis paling atas dalam respons, dan blok penerap
+  diawali pemeriksaan bahwa berkas itu ada.
+- **Blok yang mengubah berkas di daftar gerbang commit yang belum masuk
+  ditunda sampai commit itu masuk.** Gerbang menuntut laporan suite lebih
+  baru daripada setiap berkas di daftarnya; perubahan untuk commit
+  berikutnya yang diterapkan lebih dulu membuat gerbang menolak.
+- **Suite penuh diawali pemeriksaan bahwa frontend dan backend hidup**
+  (`curl` ke `/login` dan ke sebuah endpoint API), agar run 18 menit tidak
+  terbuang.
 
 ## Kapan berhenti dan bertanya
 

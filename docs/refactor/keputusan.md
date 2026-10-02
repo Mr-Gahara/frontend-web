@@ -915,7 +915,9 @@ Diputuskan pemilik proyek pada 1 Oktober 2026.
 
 Diputuskan pemilik proyek pada 2 Oktober 2026, dengan prinsip keputusan
 rancangan butir 17, 21, dan 23. PD1a dan PD5a diterapkan di `d9365d3`
-(submodul pelanggan); PD2a sampai PD4a untuk submodul diskon.
+(submodul pelanggan). PD2a dan PD3a diterapkan di `1e05df6` dan
+`54f2938`, PD4a di `52c550e`, dan PD6a sampai PD9a di `54f2938`
+(submodul diskon).
 
 - **PD1a: dua submodul berurutan**, pelanggan lalu diskon, masing-masing
   dengan spec pembanding, migrasi, commit, dan dokumen penutup sendiri.
@@ -941,6 +943,19 @@ rancangan butir 17, 21, dan 23. PD1a dan PD5a diterapkan di `d9365d3`
   memperingatkan bila nilainya masih ada. Tanpa konstanta, karena
   peringatan hilang sendiri begitu backend diperbaiki; skenario
   pengosongannya ditulis lengkap sebagai `test.fixme`.
+- **PD6a: masa berlaku diskon diisi sebagai tanggal saja.** Tanggal mulai
+  dikirim sebagai awal hari dan tanggal berakhir sebagai akhir hari, waktu
+  lokal; jam harian diatur lewat jam berlaku.
+- **PD7a: produk tertentu dipilih lewat daftar centang berpencarian** di
+  dalam form, hanya untuk cakupan Item dan bagi pemegang izin baca produk.
+  Tanpa pilihan, diskon berlaku untuk seluruh produk.
+- **PD8a: khusus member tidak ditawarkan di form.** Backend mensyaratkan
+  `Membership` aktif, sedangkan permission membership tidak ada di seed,
+  sehingga membership tidak dapat dibuat siapa pun (`kontrak/temuan.md`
+  butir 108). Diskon yang sudah ditandai diberi keterangan.
+- **PD9a: aturan berada di bagian Aturan tambahan yang dapat dibuka dan
+  ditutup**, terbuka sendiri bila diskon sudah punya aturan atau ada
+  isian aturan yang ditolak. Enam isian dasar tetap seperti semula.
 - Diterapkan tanpa ditanyakan (`d9365d3`): form memakai React Hook Form
   dan Zod dengan isian dipangkas dan email diperiksa bentuknya bila diisi;
   ubah hanya mengirim field yang berubah (butir 15), dan simpan tanpa
@@ -950,6 +965,18 @@ rancangan butir 17, 21, dan 23. PD1a dan PD5a diterapkan di `d9365d3`
   daftar yang gagal dimuat tampil sebagai pesan dengan tombol coba lagi,
   sejalan dengan keputusan submodul jurnal stok; dan tampilan serta teks
   lain dipertahankan agar spec pembanding tetap berlaku.
+- Diterapkan tanpa ditanyakan (`1e05df6`, `54f2938`, `52c550e`): form
+  diskon memakai React Hook Form dan Zod; ubah hanya mengirim field yang
+  berubah (butir 15), aturan yang dikosongkan dikirim sebagai null, 0,
+  atau array kosong, dan jam selalu berpasangan; saat membuat, hanya
+  aturan yang diisi yang dikirim; berpindah ke cakupan Global ikut
+  mengosongkan produk dan hitung per barang; filter daftar menyaring di
+  klien dari satu cache (butir 12); tombol tambah ditahan seluruhnya saat
+  batas 50 tercapai, karena backend menghitung batas juga untuk diskon
+  Non-Aktif (`kontrak/temuan.md` butir 107); tombol mengikuti izin create
+  dan update (butir 14); isian jam diberi keterangan WIB (butir 109);
+  syarat yang bergantung pada transaksi tampil di bawah nama diskon pada
+  pilihan kasir; dan tampilan serta teks lama dipertahankan.
 
 ## Keputusan rancangan yang mengikat
 
@@ -1045,7 +1072,7 @@ rancangan butir 17, 21, dan 23. PD1a dan PD5a diterapkan di `d9365d3`
 19. **Tipe ber-`_id` yang masih dibaca halaman lama menjadi jembatan
     berakhiran `Lama`.** Nama kanonik menjadi tipe ber-`id` dari bentuk
     respons nyata, sedangkan halaman lama memakai tipe lamanya lewat alias
-    impor (`DiskonLama as Diskon`), sehingga badan halaman tidak
+    impor (`DiskonLama as Diskon`, sampai `1e05df6`), sehingga badan halaman tidak
     berubah. Tipe `Lama` dihapus di commit migrasi modul pemiliknya, dan
     sisanya dicatat di `status.md` sampai habis (pemilik proyek, 24
     September 2026: frontend akhirnya harus bersih dari `_id`).

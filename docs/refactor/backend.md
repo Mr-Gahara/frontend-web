@@ -293,6 +293,13 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   lewat permintaan nyata), nomor HP, email, dan alamat yang tidak dapat
   dikosongkan padahal dijawab berhasil, dan duplikat yang dijawab 400
   (`kontrak/temuan.md` butir 104 sampai 106)
+- Laporan submodul diskon — 3 temuan dan satu catatan milik frontend,
+  disusun 2 Oktober 2026 setelah `52c550e`: diskon khusus member yang
+  tidak dapat dipakai karena permission membership tidak ada di seed,
+  diskon Non-Aktif yang ikut dihitung ke batas 50 diskon aktif saat
+  dibuat, dan jam berlaku yang dibaca dalam WIB tetap (perlu keputusan);
+  beserta catatan bahwa halaman diskon lama mengirim `POST` saat mengubah
+  (`kontrak/temuan.md` butir 107 sampai 110)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

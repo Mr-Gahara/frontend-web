@@ -91,6 +91,15 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per submodul diskon** (commit `52c550e`): 448 test unit dan
+integrasi lolos di 56 berkas, 378 e2e lolos, 17 skipped (sama dengan
+baseline pelanggan di bawah). Dari baseline pelanggan, spec pembanding
+diskon (`8cb6f31`) menambah empat skenario (370); migrasi halaman
+(`1e05df6`) menambah 14 test unit dan lima skenario (375); form aturan
+(`54f2938`) menambah 12 test unit dan dua skenario (377); dan pilihan
+kasir (`52c550e`) menambah tiga test unit dan satu skenario (378). Diukur
+terhadap backend lokal `yoga` `50eede7`.
+
 **Baseline per submodul pelanggan** (commit `d9365d3`): 419 test unit dan
 integrasi lolos di 53 berkas, 366 e2e lolos, 17 skipped: 16 seperti
 baseline `465b438` di bawah, ditambah satu `test.fixme` pengosongan nomor
@@ -550,6 +559,23 @@ satu putaran.
   tersendiri. Langkah pengosongan nomor HP memeriksa peringatan bila
   respons masih membawa nilainya dan pesan berhasil bila tidak, sehingga
   benar di kedua keadaan backend (`d9365d3`).
+- Bila seluruh test gagal di `login` (koneksi ditolak, atau habis waktu
+  menunggu isian email), periksa server lebih dulu, bukan test-nya:
+  `curl` ke `/login` dan `tsc`. Pada submodul diskon itu terjadi dua kali:
+  sekali server dev tidak berjalan (388 gagal dengan
+  `ERR_CONNECTION_REFUSED`), dan sekali sebuah berkas yang sudah diimpor
+  belum dibuat, sehingga tidak ada halaman yang terkompilasi.
+- Dugaan bug halaman lama dibuktikan dengan test yang menegaskan perilaku
+  benar dan dijalankan terhadap kode lama, lalu dibuang dari spec
+  pembanding sebelum commit dan kembali di spec migrasi. Test "ubah
+  mengirim PUT ke id diskon" gagal terhadap kode lama dengan
+  `POST /diskon` berstatus 409, dan lolos setelah migrasi (`8cb6f31`,
+  `1e05df6`).
+- Pemeriksaan "tidak ditawarkan" didampingi pemeriksaan positif pada
+  daftar yang sama. Spec pilihan kasir memastikan diskon uji yang berlaku
+  tampil di popover sebelum menegaskan diskon yang belum berlaku tidak
+  ada, sehingga popover yang salah atau daftar yang belum termuat tidak
+  lolos diam-diam (`52c550e`).
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -792,6 +818,25 @@ Urutan debug kegagalan e2e di atas).
   indeks unik backend mengabaikannya.
 - **Peringatan pengosongan email dan alamat hanya teruji di unit test**
   (`isianTidakTerkosongkan`); e2e hanya menguji nomor HP.
+- **Diskon uji menumpuk sebagai Non-Aktif**, lima per run suite penuh
+  (satu dari spec pembanding, dua dari kelola, satu dari aturan, dan satu
+  dari pilihan kasir), karena backend tidak punya `DELETE /diskon`. Diskon
+  Non-Aktif tidak dihitung batas 50 diskon aktif.
+- **Batas 50 diskon aktif hanya teruji lewat simulasi** respons daftar
+  yang ditandai `// simulasi:`, dan hanya untuk tombol tambah; menu
+  aktifkan dan pilihan Aktif di form yang terkunci saat batas tercapai
+  belum teruji.
+- **Keterangan khusus member dan pemilih produk tanpa izin baca produk
+  belum teruji**: web tidak dapat menandai khusus member (PD8a), dan
+  satu-satunya akun uji berperan Owner. `aksiDiskon` hanya teruji di unit
+  test, dengan alasan yang sama.
+- **Pilihan diskon kasir hanya teruji e2e di buat reservasi**; buat
+  penjualan memakai `diskonAktif` yang sama dan teruji di unit test.
+  `sedangBerlaku` dapat tertinggal sampai lima menit di cache, dan itu
+  tidak diuji.
+- **Satu surat jalan uji tertinggal DIKIRIM sejak 30 September 2026**
+  (`SJ-PGJ/202609/0096-8045`), sisa run sebelum PB10a; suite tetap lolos
+  dengannya. Ditutup lewat terima penuh dari halaman penerimaan.
 
 ## Spec rujukan
 
@@ -1031,3 +1076,12 @@ Urutan debug kegagalan e2e di atas).
   dibuktikan dengan menjawab gagal lalu melepas pencegat dan mengulang
   aksi yang sama sampai berhasil; dan `test.fixme` berbadan lengkap
   berdampingan dengan langkah yang membaca respons nyata.
+- `tests/e2e/diskon/`: `diskon.spec.ts` (`8cb6f31`, pembanding),
+  `kelola-diskon.spec.ts` (`1e05df6`), `aturan-diskon.spec.ts`
+  (`54f2938`), dan `pilihan-kasir.spec.ts` (`52c550e`). Diskon uji dibuat
+  lewat UI berstatus Non-Aktif karena tidak dapat dihapus; tanggal dari
+  kalender kostum di dalam dialog diperiksa lewat komponen waktu lokal
+  payload, bukan teks ISO; pengosongan aturan ditegaskan dengan payload
+  persis; batas 50 lewat simulasi dari respons nyata (`route.fetch()`);
+  dan diskon yang sempat diaktifkan dinonaktifkan lewat UI, dengan API di
+  `finally` sebagai cadangan.
