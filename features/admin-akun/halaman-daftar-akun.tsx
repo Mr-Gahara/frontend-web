@@ -21,6 +21,7 @@ import { useDaftarAkun } from "./hooks";
 import {
   LABEL_ROLE,
   URL_BUAT_AKUN,
+  urlDetailAkun,
   saringAkun,
   teksMasaAkses,
   teksStatus,
@@ -34,7 +35,12 @@ const KOLOM: ColumnDef<AkunAdmin>[] = [
     header: "Akun",
     cell: ({ row }) => (
       <div>
-        <p className="font-medium">{row.original.email}</p>
+        <Link
+          href={urlDetailAkun(row.original.id)}
+          className="font-medium underline-offset-4 hover:underline"
+        >
+          {row.original.email}
+        </Link>
         <p className="text-xs text-muted-foreground">{row.original.username ?? "Tanpa username"}</p>
       </div>
     ),

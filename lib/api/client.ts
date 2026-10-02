@@ -82,6 +82,18 @@ export const apiData = {
  * dijadikan ApiError.
  */
 export const apiMentah = {
+  /** GET tanpa pembukaan envelope, untuk respons berkursor (riwayat langganan: cursorBerikutnya). */
+  get: async <T>(
+    endpoint: string,
+    params?: Record<string, unknown>,
+    tokenType: TokenType = "pengguna",
+  ): Promise<T> => {
+    try {
+      return await apiClient.get<T>(endpoint, params, tokenType);
+    } catch (e) {
+      throw keApiError(e);
+    }
+  },
   post: async <T>(
     endpoint: string,
     body: unknown,

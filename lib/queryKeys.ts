@@ -45,6 +45,7 @@ export const queryKeys = {
   adminAkun: {
     semua: kunci(["adminAkun"] as const),
     daftar: () => ["adminAkun", "daftar"] as const,
+    riwayat: (id: string) => ["adminAkun", "riwayat", id] as const,
   },
 
   // --- Tenant ---

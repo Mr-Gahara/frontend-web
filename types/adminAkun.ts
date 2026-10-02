@@ -35,3 +35,38 @@ export interface BuatAkunKlienPayload {
   username?: string;
   durasiBulan?: DurasiLangganan;
 }
+export type AksiLangganan = "buat" | "perpanjang" | "freeze" | "unfreeze" | "kedaluwarsa";
+
+/** Catatan GET /akun/admin/users/:id/langganan, setelah _id dinormalkan menjadi id. */
+export interface RiwayatLangganan {
+  id: string;
+  akunID: string;
+  aksi: AksiLangganan;
+  durasiBulan: number | null;
+  berakhirSebelum: string | null;
+  berakhirSesudah: string | null;
+  /** null berarti dilakukan sistem (job pembeku), bukan admin. */
+  olehAkunID: string | null;
+  alasan: string | null;
+  createdAt: string;
+}
+
+/** Satu halaman riwayat; cursorBerikutnya null berarti tidak ada lagi. */
+export interface HalamanRiwayat {
+  data: RiwayatLangganan[];
+  cursorBerikutnya: string | null;
+}
+
+export interface BekukanPayload {
+  alasan?: string;
+}
+
+export interface AktifkanPayload {
+  durasiBulan?: DurasiLangganan;
+  alasan?: string;
+}
+
+export interface PerpanjangPayload {
+  durasiBulan: DurasiLangganan;
+  alasan?: string;
+}

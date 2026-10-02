@@ -76,7 +76,7 @@ export async function hapusAkunKlienUji(id: string, admin: KredensialAdmin) {
       headers: kepala,
       data: { alasan: "Pembersihan akun uji e2e" },
     });
-    expect.soft(beku.status(), "bekukan akun uji").toBe(200);
+    expect.soft([200, 409], "bekukan akun uji (409: sudah non-aktif)").toContain(beku.status());
     const hapus = await ctx.delete("/api/akun/admin/users/" + id, {
       headers: kepala,
       data: { password: admin.password },
