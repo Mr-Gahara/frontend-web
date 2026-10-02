@@ -77,19 +77,31 @@ tercatat di kontrak. Audit juga dijalankan setiap kali backend berpindah
 versi: audit 30 September 2026 terhadap `465b438` menemukan tujuh route
 yang hilang, termasuk route hapus yang dipakai pembersihan spec.
 
-Suite e2e penuh memakan 13 sampai 15 menit (diukur 28 September 2026)
+Suite e2e penuh memakan sekitar 26 menit (diukur 2 Oktober 2026 dengan
+393 test; 13 sampai 15 menit pada 28 September 2026)
 karena berjalan dengan satu worker dan memakai backend sungguhan. Saat
 iterasi cukup jalankan spec modul yang sedang dikerjakan. **Sebelum setiap
-commit, vitest penuh dan suite e2e penuh wajib dijalankan dan seluruhnya
-lolos**, dengan baseline sebagai pembanding. Commit yang hanya mengubah
-dokumentasi dikecualikan; gerbangnya `npm run docs:periksa` (pemilik
-proyek, 28 September 2026).
+commit, `tsc`, ESLint, vitest penuh, dan spec e2e yang terdampak wajib
+lolos; suite e2e penuh dijalankan sekali saat modul selesai**, sebelum
+pembaruan dokumentasi, dengan baseline sebagai pembanding (pemilik proyek,
+2 Oktober 2026, keputusan PF6a). Commit yang hanya mengubah dokumentasi
+dikecualikan; gerbangnya `npm run docs:periksa` (pemilik proyek, 28
+September 2026).
 
 Seluruh spec memakai `page.route` hanya untuk jalur gagal atau untuk
 menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
+
+**Baseline per modul Profil, login, dan sidebar** (commit `57a7084`): 473
+test unit dan integrasi lolos di 59 berkas, 393 e2e lolos, 17 skipped (sama
+dengan baseline pelanggan di bawah). Dari baseline diskon, spec pembanding
+profil (`0ed0e9a`) menambah lima skenario (383); migrasi profil (`091be4e`)
+menambah 16 test unit dan lima skenario (388); login (`1c13ee6`) menambah
+9 test unit dan dua skenario (390); dan sidebar (`57a7084`) menambah tiga
+skenario (393). Suite penuh dijalankan sekali di akhir modul (PF6a).
+Diukur terhadap backend lokal `yoga` `50eede7`.
 
 **Baseline per submodul diskon** (commit `52c550e`): 448 test unit dan
 integrasi lolos di 56 berkas, 378 e2e lolos, 17 skipped (sama dengan
@@ -577,6 +589,27 @@ satu putaran.
   ada, sehingga popover yang salah atau daftar yang belum termuat tidak
   lolos diam-diam (`52c550e`).
 
+- Bila beberapa test gagal serentak menunggu satu rute yang sama
+  (`waitForURL`), baca status permintaan `_rsc` rute itu di trace lebih
+  dulu. Status -1 berarti server dev tidak menjawab, biasanya karena
+  masih mengompilasi; pastikan dengan `curl` ke rute itu sebelum kode
+  dicurigai. Enam test gagal begitu setelah sidebar dipecah, juga dengan
+  sidebar lama, lalu lolos tanpa perubahan (`57a7084`).
+- `Toaster` berada di dalam `main` layout dashboard, sehingga toast tidak
+  ikut berpindah ke halaman di luar layout itu. Pesan yang harus tampil
+  setelah berpindah ke area login dititipkan lewat
+  `lib/auth/pesan-login.ts` dan ditampilkan `app/login/layout.tsx`.
+- Pemeriksaan "tidak ada" disempitkan ke bagian yang diuji. Locator
+  gambar selebar halaman di spec profil mengenai avatar di sidebar, bukan
+  halaman profil (`091be4e`).
+- Isian yang masih dapat diedit selama simpan berjalan kehilangan
+  ketikannya saat form dipasang ulang. Isian dibuat baca-saja selama
+  simpan; `fill` menunggu isian dapat diedit, sehingga test menjadi pasti
+  tanpa penunggu tambahan (`091be4e`).
+- Pengguna kedua yang harus masuk lewat UI memakai `browser.newContext()`
+  dan `loginSebagai` (`tests/helpers/profil-uji.ts`), agar cookie sesi
+  pengguna pertama tidak tertimpa.
+
 ## Test yang ditandai fixme dan skip bersyarat
 
 Menunggu perbaikan backend:
@@ -838,6 +871,17 @@ Urutan debug kegagalan e2e di atas).
   (`SJ-PGJ/202609/0096-8045`), sisa run sebelum PB10a; suite tetap lolos
   dengannya. Ditutup lewat terima penuh dari halaman penerimaan.
 
+- **Pengguna uji "E2E Profil" permanen** di basis data development,
+  dibuat sekali dengan peran tanpa izin pengguna. Nama, PIN, dan nomor
+  HP-nya dipulihkan Ridho di awal setiap test (PF5a).
+- **Profil Owner hanya teruji dibuka**, tidak diubah, karena nama dan PIN
+  Ridho dipakai login seluruh suite.
+- **Profil yang gagal dimuat dan logout yang gagal belum teruji e2e**:
+  pesan beserta tombol coba lagi, dan logout akun yang tetap berjalan
+  walau logout pengguna gagal, hanya terbukti dari kode.
+- **Pesan titipan setelah PIN berubah hilang bila halaman dimuat ulang**,
+  karena hanya hidup di memori; itu tidak diuji.
+
 ## Spec rujukan
 
 - `tests/e2e/inventaris/kategori/crud-kategori.spec.ts`: spec pembanding yang
@@ -1085,3 +1129,17 @@ Urutan debug kegagalan e2e di atas).
   persis; batas 50 lewat simulasi dari respons nyata (`route.fetch()`);
   dan diskon yang sempat diaktifkan dinonaktifkan lewat UI, dengan API di
   `finally` sebagai cadangan.
+- `tests/e2e/profil/profil.spec.ts` (`0ed0e9a`) dan `kelola-profil.spec.ts`
+  (`091be4e`): pengguna uji khusus dipulihkan oleh Ridho di awal setiap
+  test (`tests/helpers/profil-uji.ts`) dan masuk lewat UI di konteks
+  browser terpisah; nama dan PIN diubah sungguhan, PIN baru dibuktikan
+  dengan login lewat UI, dan bukti dibaca lewat API oleh Ridho. Payload
+  dibandingkan utuh, dan penolakan form dibuktikan dengan penghitung
+  permintaan.
+- `tests/e2e/auth/validasi-login.spec.ts` (`1c13ee6`): pesan skema dan
+  penghitung permintaan yang tetap nol, tanpa satu pun percobaan login
+  gagal di backend, sehingga pembatas login tidak terhitung.
+- `tests/e2e/auth/sidebar-pengguna.spec.ts` (`57a7084`): logout
+  dibuktikan dari kedua respons dan dari sesi yang tidak dapat dipulihkan
+  saat dashboard dibuka lagi; cache bersama dibuktikan dari nama di
+  sidebar yang berubah setelah profil disimpan.

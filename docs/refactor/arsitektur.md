@@ -68,11 +68,11 @@ per pengguna**: login PIN baru mencabut sesi sebelumnya.
 Seluruh modul baru wajib memakai lapisan ini. Jangan memanggil `apiClient`
 langsung dari halaman.
 
-**Status transisi**: mayoritas halaman yang belum dimigrasikan masih memanggil
-`apiClient` secara langsung, dan itu memang keadaan yang diharapkan.
-`lib/api/client.ts` dibangun sebagai pembungkus di atasnya, bukan pengganti,
-agar migrasi dapat berjalan per modul tanpa memecahkan halaman lain. Jangan
-menyapu seluruh pemakaian `apiClient` sekaligus; ganti bersama modulnya.
+**Status transisi**: selesai di `57a7084`. Tidak ada lagi halaman, komponen,
+maupun berkas `features/` yang mengimpor `apiClient`; satu-satunya pemakainya
+`lib/api/client.ts`, yang dibangun sebagai pembungkus di atasnya, bukan
+pengganti. Penanganan sesi (penyegaran token dan pengalihan saat 401) masih
+berada di `lib/apiClient.ts`.
 
 **`apiClient` lama tidak menormalkan `_id`.** Mengganti tipe sebuah entitas ke
 `id` mengharuskan seluruh pembacanya, termasuk di modul lain, pindah ke hook
@@ -88,10 +88,10 @@ halaman lama lewat alias impor, sedangkan nama kanonik menjadi tipe ber-`id`
 Dua nama yang mirip dan mudah tertukar:
 
 - **`lib/apiClient.ts`** adalah klien lama: menangani header, penyegaran token,
-  dan pengalihan ke login saat sesi berakhir. Masih dipakai halaman yang belum
-  dimigrasikan, dan tetap menjadi lapisan terbawah.
-- **`lib/api/client.ts`** adalah pembungkus baru di atasnya, mengekspor `api`
-  dan `apiData`. Inilah yang dipakai `features/`.
+  dan pengalihan ke login saat sesi berakhir. Tidak lagi dipanggil halaman
+  mana pun sejak `57a7084`, dan tetap menjadi lapisan terbawah.
+- **`lib/api/client.ts`** adalah pembungkus baru di atasnya, mengekspor `api`,
+  `apiData`, dan `apiMentah`. Inilah yang dipakai `features/`.
 
 Halaman yang sudah dimigrasikan tidak memanggil keduanya secara langsung,
 melainkan lewat hook di `features/`.
@@ -102,7 +102,9 @@ berparameter berupa fungsi: `EP.produk.detail(id)`.
 
 ### `lib/api/client.ts`
 `apiData` dan `api`. Mengembalikan data yang sudah dinormalkan dan melempar
-`ApiError`. Token pengguna menjadi default.
+`ApiError`. Token pengguna menjadi default. `apiMentah.post` mengembalikan
+respons tanpa pembukaan envelope dan tanpa normalisasi, untuk login yang
+membawa `accessToken` di tingkat atas (`1c13ee6`).
 
 ```ts
 apiData.get<Produk[]>(EP.produk.list)
@@ -127,6 +129,7 @@ nilai yang bukan angka dibaca 0 (daftar penjualan sejak backend `465b438`).
 - `session.ts` — store token dan payload di memori. `tandaiKeluar()` hanya mengakhiri sesi pengguna; `akhiriSesi()` mengakhiri keduanya (logout).
 - `sessionChannel.ts` — koordinasi refresh antar tab lewat `BroadcastChannel`.
 - `useSession.ts` — hook: `pengguna`, `permissions`, `status`, `sudahMasuk`, `adaTokenAkun`.
+- `pesan-login.ts` — pesan sekali pakai untuk area login (`titipPesanLogin`, `ambilPesanLogin`), ditampilkan `app/login/layout.tsx` setelah sesi diakhiri (keputusan PF7a).
 - `permissions.ts` — `IZIN`, `IZIN_HALAMAN`, `bolehBukaHalaman`, `bolehBukaGrup`, serta `IZIN_LINTAS_OUTLET` dan `bolehLintasOutlet` (izin lintas outlet; null sampai backend menetapkan namanya, keputusan rancangan butir 18). Syarat di `IZIN_HALAMAN` berupa satu izin, atau array izin yang cukup dipenuhi salah satunya (`SyaratIzin`), untuk endpoint yang menerima izin alternatif (`keputusan.md` butir 16).
 
 ### `lib/queryKeys.ts`
@@ -144,7 +147,7 @@ Pola yang sudah terbukti di bahan baku, pengguna, role, produk, kategori,
 stock adjustment, jurnal stok, stok, stock opname, pengajuan stok, transfer
 stok, penjualan, tipe aset, aset, tarif, sesi booking, akun kas, laporan,
 shift, pola roster, jadwal, absensi, metode pembayaran, pajak, tenant,
-pelanggan, dan diskon:
+pelanggan, diskon, dan auth:
 
 - `api.ts` — pemanggilan endpoint memakai `apiData` dan `EP`
 - `hooks.ts` — `useQuery` dan `useMutation`, termasuk aturan invalidasi. Hook mutation menerima `onSuccess` dan `onError` dari halaman untuk toast dan reset dialog (`keputusan.md` butir 13)
@@ -160,7 +163,7 @@ Isi tiap `features/` yang sudah ada:
 |---|---|---|
 | `bahan-baku` | `api.ts`, `hooks.ts`, `schema.ts` | Modul percontohan Fase 2. Lokasi dan stok diambil dari `features/inventaris`; `useDaftarBahanBaku` juga dipakai inventaris gudang untuk master bahan baku |
 | `inventaris` | `api.ts`, `hooks.ts`, `lokasi.ts`, `cakupan.ts`, `pemilih-lokasi-outlet.tsx`, `pesan-lokasi.tsx`, `akses-gudang.ts`, `schema-lokasi.ts`, `isian-lokasi.tsx` | Lintas halaman inventaris; dipakai bahan baku, jurnal stok, stok outlet, inventaris gudang, stock opname, stock adjustment, pengajuan stok, penerimaan barang, dan penjualan. Lokasi: `useDaftarLokasi` dan `useLokasiBertipe` berbagi kunci `lokasi.daftar()`, sedangkan `useLokasiAktif` menyeragamkan cache lewat `lokasiTunggal`. Stok: `useDaftarInventory` (argumen `null` berarti belum siap; tanpa `locationID` berarti semua lokasi), `useUbahStokMinimum`, `useOpnameInventory`, dan `useTambahInventory`. Cakupan: `useCakupanLokasiOutlet` (status `lintas`: pemegang izin lintas outlet, seluruh outlet dengan pemilih; status `terkunci`: pengguna lain, lokasi aktif yaitu outlet tenant) dengan fungsi murni `tentukanCakupan` dan `lingkupOutlet`, serta komponen `PemilihLokasiOutlet` dan `PesanLokasi`. `useDaftarLokasi`, `useLokasiAktif`, dan `useCakupanLokasiOutlet` menerima opsi `aktif` (bawaan true) untuk mematikan permintaan bagi pengguna tanpa `read-location` (penjualan, keputusan K11b). Satu-satunya tempat hook lokasi, inventory, dan cakupan. `useLokasiRuang(ruang, { aktif })` (sejak `dcc22e0`) memberi lokasi satu ruang untuk pemisahan data per ruang di shift dan pola roster, dan tidak meminta apa pun selama `aktif` false. Sejak `9ce288b`: `useBuatLokasi` membuat lokasi dan menunggu invalidasi `lokasi.semua` sebelum callback halaman (setup gudang); `akses-gudang.ts` memuat `tentukanAksesGudang` dan `tujuanAksesGudang` untuk layout gudang (GD4a); `schema-lokasi.ts` memuat `skemaLokasi`, `NILAI_AWAL_LOKASI`, dan `payloadBuatLokasi` untuk form lokasi (GD3a); sidebar dan layout gudang berbagi `useDaftarLokasi` (GD5a). Sejak `319bd99`: `usePerbaruiLokasi` dengan pola yang sama dengan `useBuatLokasi`; `nilaiAwalLokasi` dan `payloadPerbaruiLokasi` di `schema-lokasi.ts`; serta `IsianLokasi` (`isian-lokasi.tsx`), isian form lokasi yang dipakai setup dan pengaturan gudang, dengan mode `bacaSaja` (GD2a). Sejak `fcf2dd2`: `IsianLokasi` menerima `teks` per tipe lokasi (`TEKS_ISIAN_LOKASI`, bawaan gudang), dan Profil Toko memakainya untuk lokasi Outlet lewat `useLokasiAktif` dan `usePerbaruiLokasi` (PO12a) |
-| `pengguna` | `api.ts`, `hooks.ts`, `peran.ts`, `halaman-pengguna.tsx`, `widget-pengguna.tsx` | Komponen halaman dipakai outlet dan gudang |
+| `pengguna` | `api.ts`, `hooks.ts`, `peran.ts`, `halaman-pengguna.tsx`, `widget-pengguna.tsx`, `hooks-profil.ts`, `schema-profil.ts`, `halaman-profil.tsx` | Komponen halaman dipakai outlet dan gudang. Profil sendiri (`091be4e`): `usePenggunaSaya` membaca pengguna milik sesi lewat `GET /pengguna/:id` (kunci `pengguna.detail(id)`, dimuat ulang saat dibuka), dan dipakai halaman profil serta kaki sidebar, sehingga keduanya berbagi cache; `usePerbaruiProfil` menunggu invalidasi akar, kecuali bila PIN ikut berubah (PF7a). `schema-profil.ts` memuat `skemaProfil` (nama 3 sampai 50 karakter, PIN baru tepat 6 digit, pasangan `pinLama` dan `pinBaru`), `nilaiAwalProfil`, `payloadPerbaruiProfil` (hanya field yang berubah, butir 15; nomor HP dikosongkan sebagai null), `hanyaAngka`, `saringNomorHp`, `inisialNama`, dan `kunciFormProfil` (respons pengguna tanpa `updatedAt`). `HalamanProfil` memasang form lewat kunci itu (butir 8) |
 | `role` | `api.ts`, `hooks.ts`, `constants.ts`, `form-role.tsx` | `form-role.tsx` dipakai halaman edit dan kostum; `useLevelPenggunaAktif` dipakai lintas modul |
 | `produk` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `izin.ts`, `form-produk.tsx` | `form-produk.tsx` dipakai halaman buat dan edit; `useDaftarProduk` dipakai halaman kategori, pajak, dan buat penjualan; `bolehBacaProduk` menerima `read-produk` atau `akses-pos`. `susunPayloadProduk` mengirim `locationID` lokasi aktif untuk produk beresep, yang dimuat form lewat `useLokasiAktif` hanya bagi pemegang `read-location` (backend `yoga`, keputusan PY7a) |
 | `kategori` | `api.ts`, `hooks.ts`, `schema.ts`, `pesan.ts` | `useDaftarKategori` dipakai form produk; `pesan.ts` menentukan field duplikat karena respons backend tidak dapat diandalkan |
@@ -185,6 +188,7 @@ Isi tiap `features/` yang sudah ada:
 | `pola-roster` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `ruang.ts`, `halaman-pola-roster-ruang.tsx`, `halaman-pola-roster.tsx`, `form-pola-roster.tsx`, `dialog-hapus-pola-roster.tsx` | Submodul pola roster modul jadwal (`dcc22e0`). `HalamanPolaRosterRuang` dipakai halaman outlet dan gudang (keputusan PL5); ia memuat pola lewat `useDaftarPolaRoster(ruang)` dan shift lewat `useDaftarShift(ruang)`, lalu menyimpan dan menghapus lewat `useSimpanPolaRoster(ruang)` dan `useHapusPolaRoster`, dengan toast dan galat yang dilempar ulang agar dialog bertahan. `ruang.ts` memuat `KUNCI_LOKASI_POLA_ROSTER` (null, butir 18) dan `filterDaftarPola`, tanpa query selama null. `form-pola-roster.tsx` memasang `IsiFormPolaRoster` setiap kali dialog dibuka (butir 8), dengan `buatSkemaPolaRoster(idShiftAktif)` yang menolak hari kerja tanpa shift dan shift nonaktif (PL1a). `payload.ts` memuat `terimaKetikanSiklus` dan `sesuaikanRincian` (PL3a), `payloadPolaRoster`, `tambahLokasiPolaRoster`, serta `labelShiftPola` dan `teksLabelShift` untuk penanda nonaktif |
 | `jadwal` | `tipe.ts`, `rentang.ts`, `pemetaan.ts`, `rencana.ts`, `hasil.ts`, `generate.ts`, `api.ts`, `hooks.ts`, `schema.ts`, `halaman-jadwal-ruang.tsx`, `halaman-jadwal.tsx`, `grid-jadwal.tsx`, `sel-shift.tsx`, `toolbar-jadwal.tsx`, `form-jadwal.tsx`, `halaman-generate-ruang.tsx`, `langkah-satu.tsx`, `langkah-dua.tsx` | Submodul kalender, kelola manual, dan generate modul jadwal (`19227f8`, `e2a0cfd`). `HalamanJadwalRuang` dan `HalamanGenerateRuang` dipakai rute outlet dan gudang. Karyawan dari `useDaftarPengguna` (`features/pengguna`) lewat `keKaryawanRuang`, shift dari `useDaftarShift`, dan pola dari `useDaftarPolaRoster` (butir 12). `rentangBulan` memakai tanggal lokal (J1a); `itemJadwal` memetakan libur, catatan, dan shift nonaktif; `rencanaSimpanJadwal` dijalankan `useSimpanJadwalHari` dengan satu ringkasan (JD6a); `pesanDitolak` menampilkan jadwal yang ditolak (J2a); `simulasiGenerate` menandai shift bermasalah dan menahan simpan (GN2a) |
 | `absensi` | `api.ts`, `hooks.ts`, `ringkasan.ts` | Submodul monitoring absensi modul jadwal (`845c2cf`). `useMonitoringAbsensi(tanggal)` memuat ulang setiap 30 detik untuk hari ini dan tidak mengulang jawaban 403 (AB3a). `ringkasan.ts` memuat `stafRuang` (AB4a), `hitungAbsensi` (AB5a), dan `jamWIB`. Dipakai `WidgetActiveUsers` di `features/pengguna/widget-pengguna.tsx`, yang membaca nama peran lewat `namaPeran` (`features/pengguna/peran.ts`) |
+| `auth` | `api.ts`, `hooks.ts`, `schema.ts`, `hasil.ts`, `halaman-login-akun.tsx`, `halaman-login-pengguna.tsx` | Login dan logout (`1c13ee6`, `57a7084`). `authApi` memakai `apiMentah` untuk login akun dan login pengguna (token akun), serta `apiData` untuk `logoutAkun` dan `logoutPengguna`. `useLoginAkun`, `useLoginPengguna`, dan `useLogoutAkun` hanya memanggil API; penyimpanan token dan pengalihan diurus halaman lewat callback `mutate`. `useKeluar` menjalankan logout pengguna lalu logout akun, dan logout akun tetap berjalan walau yang pertama gagal. `schema.ts` memuat `skemaLoginAkun` dan `skemaLoginPengguna` (PF3a); `hasil.ts` memuat `hasilLoginPengguna`, yang membaca `accessToken` tingkat atas dan menolak respons tanpa token |
 | `tenant` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `halaman-profil-toko.tsx` | Submodul profil outlet modul Pengaturan outlet (`fcf2dd2`). `useTenant()` membaca tenant sesi lewat `GET /tenant/:id` (kunci `tenant.detail(id)`, id dari token) dan tidak meminta apa pun selama sesi belum pulih; dipakai halaman Profil Toko, sidebar, dan halaman profil untuk nama toko (PO15a). `usePerbaruiTenant` menunggu invalidasi akar `tenant.semua` sebelum callback. `schema.ts` memuat `skemaTenant` (isian dipangkas, nama minimal 3 karakter, email berformat bila diisi); `payload.ts` memuat `FIELD_PROFIL_TOKO` (delapan field, PO13a), `nilaiAwalTenant`, dan `payloadPerbaruiTenant` (hanya field yang berubah, butir 15; field yang dikosongkan dikirim sebagai teks kosong). `HalamanProfilToko` memuat dua kartu dengan simpan masing-masing (PO12a): profil tenant, dan lokasi Outlet lewat `IsianLokasi`, `useLokasiAktif`, dan `usePerbaruiLokasi` dari `features/inventaris`; kedua form dipasang ulang lewat `key` berisi id dan `updatedAt` (butir 8), dan baca-saja tanpa izin ubahnya (PO14a) |
 
 Cara memeriksa apakah sebuah modul sudah dimigrasikan: halamannya tidak lagi
@@ -199,6 +203,19 @@ memanggil `apiClient`, dan lapisan datanya ada di `features/<modul>/` atau di
 - `session-provider.tsx` — memulihkan sesi saat aplikasi dimuat, dengan
   memanggil refresh akun lalu refresh pengguna. Keduanya dipasang di
   `app/layout.tsx`.
+
+### Sidebar
+
+Dipecah di `57a7084` (keputusan PF4a):
+
+- `components/app-sidebar.tsx` — kepala (pilihan ruang kerja) dan daftar
+  menu. Izin dibaca langsung dari sesi saat render, bukan disalin ke state
+  lewat effect, sehingga menu berizin mengikuti sesi begitu pulih.
+- `components/sidebar-menu.ts` — tipe menu serta `outletMenus` dan
+  `gudangMenus`. Kelayakan tiap menu tetap ditentukan `IZIN_HALAMAN`.
+- `components/sidebar-pengguna.tsx` — kaki sidebar: nama dari
+  `usePenggunaSaya`, peran dari sesi, avatar inisial, tautan profil, dan
+  logout lewat `useKeluar`.
 
 ### Komponen tanggal dan waktu
 
@@ -307,7 +324,7 @@ dipecah, dan pemecahannya tercatat sebagai utang di `status.md`.
 - ESLint tanpa error pada berkas modul itu (peringatan warisan boleh tersisa)
 - Tidak ada lagi `apiClient`, `any`, maupun `_id` di halaman modul itu
 - Spec e2e modul lolos, termasuk skenario baru untuk perilaku yang berubah
-- Vitest penuh dan suite e2e penuh lolos sebelum commit, dibandingkan dengan baseline
+- `tsc`, ESLint, vitest penuh, dan spec e2e yang terdampak lolos sebelum commit; suite e2e penuh lolos sekali saat modul selesai, dibandingkan dengan baseline (keputusan PF6a)
 - Pelajaran dari debug dan perbaikan selama modul ini sudah dicatat di `cara-kerja.md` atau `pengujian.md`
 - Sudah di-commit dan di-push
 - Dokumentasi di `docs/refactor/` dan `docs/kontrak/` diperbarui lalu diperiksa

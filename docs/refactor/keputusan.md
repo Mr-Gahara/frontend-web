@@ -652,7 +652,7 @@ keputusan rancangan butir 17 dan 21.
   butir 12), sehingga menu Ruang Gudang muncul setelah setup tanpa muat
   ulang. Tanpa `read-location` permintaannya dimatikan, dan menu Ruang
   Gudang tetap tampil bagi pemegang `read-dashboard-gudang`. Sisa sidebar
-  tetap untuk modul Profil, login, dan sidebar.
+  tetap untuk modul Profil, login, dan sidebar (selesai di `57a7084`).
 - **GD6a: setup diuji dengan daftar lokasi tanpa gudang yang dibentuk dari
   respons nyata** (`// simulasi:`), karena tenant uji sudah punya gudang
   yang menyimpan stok, dan `POST /location` dijawab gagal agar tidak ada
@@ -840,7 +840,8 @@ dan diterapkan di `fcf2dd2` bersama PO15a; PO16a diterapkan di `ca6eb3d`.
   nama, role, dan izin berdependensi `[]` dan keluar selama sesi belum
   pulih, sehingga setelah muat ulang menu berizin hilang sampai login
   ulang. Spec muat ulang ditulis lebih dulu dan dibuktikan gagal terhadap
-  kode lama. Sisa sidebar tetap untuk modul Profil, login, dan sidebar.
+  kode lama. Sisa sidebar tetap untuk modul Profil, login, dan sidebar
+  (selesai di `57a7084`, keputusan PF4a).
 - Diterapkan tanpa ditanyakan (`3359497`): ubah hanya mengirim field yang
   berubah (butir 15), sehingga akun lama yang sudah nonaktif tidak
   menggagalkan penggantian nama; akun nonaktif milik metode tampil
@@ -977,6 +978,64 @@ rancangan butir 17, 21, dan 23. PD1a dan PD5a diterapkan di `d9365d3`
   dan update (butir 14); isian jam diberi keterangan WIB (butir 109);
   syarat yang bergantung pada transaksi tampil di bawah nama diskon pada
   pilihan kasir; dan tampilan serta teks lama dipertahankan.
+
+### Modul Profil, login, dan sidebar
+
+Diputuskan pemilik proyek pada 2 Oktober 2026, dengan prinsip keputusan
+rancangan butir 17, 21, dan 23.
+
+- **PF1a: tiga submodul berurutan**: profil (`0ed0e9a`, `091be4e`), login
+  akun dan login pengguna (`1c13ee6`), lalu sidebar beserta logout
+  (`57a7084`).
+- **PF2a: tombol hapus akun tampil nonaktif dengan keterangan**, tanpa
+  `alert`. Backend diminta menyediakan jalur hapus akun sendiri: hanya
+  Owner, mencakup akun beserta tokonya, dengan konfirmasi password atau
+  autentikasi dua kali, dan admin platform tetap berkuasa penuh atas
+  semua akun (`kontrak/temuan.md` butir 112).
+- **PF3a: form login akun dan login pengguna memakai React Hook Form,
+  Zod, dan `noValidate`**, menggantikan validasi HTML5 browser. Login
+  pengguna hanya menuntut PIN terisi dan berupa angka; panjang tepat 6
+  digit ditegakkan saat PIN dibuat atau diubah.
+- **PF4a: sidebar dipecah**, tampilan dipertahankan: data menu, kaki
+  sidebar, dan komponen utama (`arsitektur.md`).
+- **PF5a: nama dan PIN diuji sungguhan pada pengguna uji khusus "E2E
+  Profil"**, yang tidak memegang `read-pengguna` maupun
+  `update-pengguna`, di konteks browser terpisah. Nama dan PIN Ridho
+  tidak diubah, karena login seluruh suite bergantung padanya; Ridho
+  memulihkan pengguna uji di awal setiap test.
+- **PF6a: suite e2e penuh dijalankan sekali saat modul selesai**,
+  sebelum pembaruan dokumentasi, bukan sebelum setiap commit. Setiap
+  commit kode melewati `tsc`, ESLint, vitest penuh, dan spec yang
+  terdampak. Langkah 5 Alur setiap perubahan di `cara-kerja.md` diubah
+  atas perintah ini.
+- **PF7a: setelah PIN berubah, pengguna diberi pesan lalu login ulang.**
+  Backend memutus sesi setiap PIN berubah; halaman menitipkan pesan,
+  mengakhiri sesi pengguna, dan menuju login pengguna, tanpa permintaan
+  yang pasti dijawab 401.
+- **PF8a: nomor HP isian teks** yang hanya menerima angka dan tanda + di
+  depan. Nomor yang dikosongkan dikirim sebagai null, dan format akhirnya
+  diputuskan backend.
+- **PF9a: avatar memakai inisial nama**, di halaman profil dan kaki
+  sidebar; gambar contoh dari luar dibuang. Unggah foto profil bukan
+  kebutuhan MVP dan ditinjau setelah rilis.
+- **Login tahap kedua dinamai "pengguna", bukan "pin"**, di nama berkas,
+  komponen, skema, hook, dan tipe. Kata PIN hanya dipakai untuk isian PIN
+  itu sendiri.
+- **Pekerjaan setelah modul ini adalah panel admin** bagi akun admin
+  setelah login akun (`status.md`, Pekerjaan berikutnya).
+- Diterapkan tanpa ditanyakan (`091be4e`): PIN baru tepat 6 digit
+  (keputusan Fase 0); form dipasang setelah data termuat (butir 8); ubah
+  hanya mengirim field yang berubah (butir 15); PIN lama yang diisi
+  tanpa PIN baru ditolak form; isian nama dan nomor HP baca-saja selama
+  simpan berjalan, agar ketikan tidak hilang saat form dipasang ulang;
+  profil yang gagal dimuat tampil sebagai pesan dengan tombol coba lagi;
+  dan `useAuthGuard` menuju login pengguna bila token akun masih ada.
+- Diterapkan tanpa ditanyakan (`1c13ee6`, `57a7084`): "Ganti Akun
+  Bisnis" menjadi tombol; logout akun tetap dijalankan walau logout
+  pengguna gagal; izin sidebar dibaca dari sesi saat render, bukan
+  disalin ke state; nama di sidebar dari satu hook yang berbagi cache
+  dengan halaman profil (butir 12); dan `tenantName` dibuang dari
+  `PenggunaSesi`.
 
 ## Keputusan rancangan yang mengikat
 

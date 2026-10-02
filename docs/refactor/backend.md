@@ -300,6 +300,14 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   dibuat, dan jam berlaku yang dibaca dalam WIB tetap (perlu keputusan);
   beserta catatan bahwa halaman diskon lama mengirim `POST` saat mengubah
   (`kontrak/temuan.md` butir 107 sampai 110)
+- Laporan modul Profil, login, dan sidebar — 1 temuan, 1 permintaan, dan
+  3 konfirmasi kontrak, disusun 2 Oktober 2026 setelah `57a7084`: PIN
+  lama yang salah dijawab 401 sehingga klien menyegarkan token dan
+  mengirim ulang permintaan, dan permintaan jalur hapus akun sendiri bagi
+  Owner (perlu keputusan); beserta konfirmasi bahwa web kini mengandalkan
+  izin diri sendiri di `GET` dan `PUT /pengguna/:id`, field `PUT` yang
+  seluruhnya opsional, dan kontrak login pengguna
+  (`kontrak/temuan.md` butir 111 dan 112)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

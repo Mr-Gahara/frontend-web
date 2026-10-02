@@ -75,55 +75,91 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Pengaturan outlet: profil outlet | `ca6eb3d` (menu sidebar setelah muat ulang), `fcf2dd2` | Selesai (keputusan PO12a sampai PO16a; Catatan dari submodul profil outlet) |
 | Pelanggan | `b6de75c` (spec), `d9365d3` | Selesai (keputusan PD1a dan PD5a; Catatan dari submodul pelanggan) |
 | Diskon | `8cb6f31` (spec), `1e05df6` (halaman), `54f2938` (aturan), `52c550e` (pilihan kasir) | Selesai (keputusan PD2a sampai PD4a dan PD6a sampai PD9a; Catatan dari submodul diskon) |
-| Profil, login, dan sidebar | - | **Berikutnya** (lihat Pekerjaan berikutnya). `app/dashboard/profil/page.tsx`, `app/login/page.tsx`, `app/login/pengguna/page.tsx`, dan `components/app-sidebar.tsx` masih memakai `apiClient`. Nama toko di sidebar dan halaman profil sudah dibaca lewat `useTenant` (`fcf2dd2`), dan effect sidebar mengikuti sesi (`ca6eb3d`) |
+| Profil, login, dan sidebar | `0ed0e9a` (spec profil), `091be4e` (profil), `1c13ee6` (login), `57a7084` (sidebar) | Selesai (keputusan PF1a sampai PF9a; Catatan dari modul Profil, login, dan sidebar). Modul terakhir migrasi halaman lama |
+| Panel admin | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per submodul diskon (`52c550e`):
+Diukur ulang per modul Profil, login, dan sidebar (`57a7084`):
 
-| Hal | Awal | Setelah diskon `52c550e` | Catatan |
+| Hal | Awal | Setelah sidebar `57a7084` | Catatan |
 |---|---|---|---|
-| Pemakaian `any` | 302 | 7 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), dan 7 setelah halaman diskon (`1e05df6`) |
-| Kemunculan `_id` | - | 9 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon |
-| `useAuthGuard()` berulang di halaman | 49 | 27 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, dan halaman diskon) |
+| Pemakaian `any` | 302 | 4 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), dan 4 setelah halaman profil, login, dan sidebar (`57a7084`) |
+| Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil |
+| `useAuthGuard()` berulang di halaman | 49 | 26 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, halaman diskon, dan halaman profil) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
-| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. |
+| Berkas di atas 700 baris | 7 | 3 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702) |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: modul Profil, login, dan sidebar
+## Pekerjaan berikutnya: panel admin
 
-Modul terakhir Fase 3; modul Pelanggan dan diskon selesai di `52c550e`.
-`app/dashboard/profil/page.tsx`, `app/login/page.tsx`,
-`app/login/pengguna/page.tsx`, dan `components/app-sidebar.tsx` masih
-memakai `apiClient`. Pemetaannya belum diambil; yang sudah diketahui dari
-modul lain:
+Migrasi halaman lama selesai di `57a7084`. Pekerjaan berikutnya, atas
+keputusan pemilik proyek (2 Oktober 2026), adalah panel admin: ruang kerja
+bagi akun admin setelah login akun. Pemetaannya belum diambil; yang sudah
+diketahui:
 
-- Sidebar: effect yang menyalin nama, role, dan izin dari sesi sudah
-  mengikuti sesi (`ca6eb3d`), dan nama toko dibaca lewat `useTenant`
-  (`fcf2dd2`). Sisanya masih state lokal yang disalin di effect, satu
-  `any` di pemanggilan `GET /pengguna/:id`, dan pemuatan lokasi lewat
-  `useDaftarLokasi` (GD5a).
-- Payload token pengguna tidak membawa `nama`, sehingga nama pengguna di
-  sidebar bergantung pada `GET /pengguna/:id`, yang mewajibkan
-  `read-pengguna` (`kontrak/README.md` bagian 2.2).
-- `tenantName` masih ada di `PenggunaSesi` tanpa pembaca
-  (`kontrak/temuan.md` butir 98).
-- Halaman profil memanggil `PUT /pengguna/:id` langsung; itu satu-satunya
-  endpoint yang masih dipanggil `features/` sekaligus halaman lama (audit
-  `52c550e`).
-- Spec login sempat habis waktu sekali di halaman login PIN dengan pesan
-  "Token akun tidak ditemukan" (`pengujian.md`, Utang pengujian);
-  penyebabnya belum diketahui.
+- Backend punya route khusus admin yang belum dipakai web: daftar, buat,
+  ubah, hapus, bekukan, dan aktifkan akun, serta langganan, di bawah
+  `/akun/admin`, ditambah `GET /tenant` dan operasi tulis `/permission`
+  (`kontrak/route-backend.md`).
+- Login akun admin dijawab tanpa `requireSetup` (`kontrak/payload.md`).
+  Web selalu menuju login pengguna setelah login akun
+  (`features/auth/halaman-login-akun.tsx`), yang buntu bagi admin karena
+  admin tidak punya tenant maupun pengguna. Pemisahan tujuan setelah
+  login akun adalah keputusan pertama modul itu.
+- Hapus akun oleh admin mewajibkan password admin dan akun target yang
+  sudah non-aktif (`kontrak/temuan.md` butir 112).
 
 Langkah pertama sesi berikutnya, setelah backend di-`fetch` dan
-dibandingkan dengan acuan (`cara-kerja.md`): petakan keempat berkas itu
-(jumlah baris, `apiClient`, `any`, `_id`, dan `queryKey`), lalu ajukan
-pembagian submodulnya.
+dibandingkan dengan acuan (`cara-kerja.md`): petakan isi token akun admin
+dan payload setiap route admin dari validator dan service-nya, lalu ajukan
+rancangan halaman beserta pembagian submodulnya.
+
+## Catatan dari modul Profil, login, dan sidebar
+
+Modul terakhir migrasi halaman lama selesai pada 2 Oktober 2026 dalam
+empat commit, dengan suite e2e penuh dijalankan sekali di akhir modul
+(keputusan PF6a): 393 lolos dan 17 skipped.
+
+| Commit | Isi |
+|---|---|
+| `0ed0e9a` | Spec pembanding halaman profil terhadap kode lama |
+| `091be4e` | Halaman profil ke `features/pengguna`: form berskema, PIN 6 digit, dan login ulang setelah PIN berubah |
+| `1c13ee6` | Login akun dan login pengguna ke `features/auth`, dengan form berskema dan respons bertipe |
+| `57a7084` | Sidebar dipecah, izin dari sesi saat render, dan logout lewat `features/auth` |
+
+- Tidak ada lagi halaman, komponen, maupun berkas `features/` yang
+  mengimpor `apiClient`; ia tinggal lapisan terbawah di `lib/`
+  (`arsitektur.md`). Login memakai `apiMentah`, karena `accessToken`
+  berada di tingkat atas respons.
+- Backend meloloskan `GET` dan `PUT /pengguna/:id` atas diri sendiri
+  tanpa `read-pengguna` dan `update-pengguna`, dan seluruh field `PUT`
+  opsional; keduanya berbeda dari kontrak lama dan dibuktikan dari web
+  oleh pengguna uji "E2E Profil" (PF5a). Kontrak dikoreksi
+  (`kontrak/endpoint.md`, `kontrak/payload.md`).
+- Setelah PIN berubah backend memutus sesi. Halaman profil menitipkan
+  pesan, mengakhiri sesi pengguna, dan menuju login pengguna (PF7a);
+  `useAuthGuard` kini menuju `/login/pengguna` bila token akun masih
+  ada, dan area login punya layout ber-Toaster sendiri.
+- Sidebar dipecah menjadi `components/app-sidebar.tsx` (325 baris),
+  `components/sidebar-menu.ts`, dan `components/sidebar-pengguna.tsx`.
+  Nama pengguna dibaca lewat `usePenggunaSaya`, yang berbagi cache dengan
+  halaman profil, dan avatar memakai inisial (PF9a).
+- Login tahap kedua dinamai "pengguna", bukan "pin", di seluruh kode
+  (`HalamanLoginPengguna`, `skemaLoginPengguna`), atas permintaan pemilik
+  proyek.
+- Temuan backend baru: butir 111 dan 112, dilaporkan 2 Oktober 2026
+  (`backend.md`).
+- Enam kegagalan pada run pertama submodul sidebar berasal dari server
+  dev yang belum selesai mengompilasi satu rute, bukan dari kode
+  (`pengujian.md`, Catatan Playwright).
+- Keputusan pemilik proyek: `keputusan.md` (Modul Profil, login, dan
+  sidebar).
 
 ## Catatan dari submodul diskon
 
@@ -206,8 +242,9 @@ Profil Toko (`fcf2dd2`). Dengan itu modul Pengaturan outlet selesai.
 - `urlSetup` form buat stock opname outlet kini menuju halaman Profil
   Toko, dan frasa "jam operasional" dibuang dari kartu indeks pengaturan.
 - Payload token pengguna tidak membawa `nama`, sehingga nama pengguna di
-  sidebar bergantung pada `GET /pengguna/:id`, yang mewajibkan
-  `read-pengguna`. Ditinjau bersama modul Profil, login, dan sidebar.
+  sidebar bergantung pada `GET /pengguna/:id`. Endpoint itu sempat dicatat
+  mewajibkan `read-pengguna`; ternyata backend meloloskan diri sendiri
+  tanpa izin itu (dibuktikan di `091be4e`).
 - Temuan backend baru: butir 98 sampai 103, dilaporkan 2 Oktober 2026
   (`backend.md`). Kontrak tenant ditambahkan ke `kontrak/endpoint.md`,
   `kontrak/payload.md`, dan `kontrak/izin-halaman.md`.
@@ -569,13 +606,23 @@ Yang masih berlaku:
 
 ### Utang kecil dari modul stock adjustment gudang
 
-- 9 error ESLint `@typescript-eslint/no-explicit-any` warisan di luar
-  berkas modul (test integrasi pola roster bersih sejak `dcc22e0`):
-  integration jadwal dan pengguna, `tests/helpers/storage.ts`,
-  `tests/unit/lib/decodeToken.test.ts`, dan `components/app-sidebar.tsx`
-  baris 373. Bereskan saat berkasnya dimigrasikan; `storage.ts` sendiri
-  sudah tidak relevan (`pengujian.md`). Mengganti `any` di sidebar dicoba
-  dan dikembalikan, karena tipe hilirnya ikut berubah (`cara-kerja.md`).
+- 20 error ESLint warisan per `57a7084`, dihitung dengan
+  `daftar-eslint.js` atas `app`, `components`, `features`, `lib`, dan
+  `tests`. Empat belas `@typescript-eslint/no-explicit-any`:
+  `lib/apiClient.ts` (3), `lib/decodeToken.ts` (1),
+  `components/calendar.tsx` (2),
+  `components/pengguna/pengguna-form-dialog.tsx` (2),
+  `tests/integration/components/pengguna/pengguna-form-dialog.test.tsx`
+  (2), `tests/helpers/storage.ts` (1), dan
+  `tests/unit/lib/decodeToken.test.ts` (3). Empat
+  `react-hooks/set-state-in-effect`: kedua halaman role (Utang kecil dari
+  modul Pengaturan outlet), `components/topbar.tsx`, dan
+  `features/role/form-role.tsx`. Dua `react/no-unescaped-entities` di
+  inventaris gudang (Utang kecil dari modul Gudang). Hitungan 9 yang
+  tercatat sebelumnya hanya mencakup `any` di luar berkas modul; `any` di
+  sidebar hilang saat sidebar dipecah (`57a7084`). Bereskan saat
+  berkasnya disentuh; `storage.ts` sendiri sudah tidak relevan
+  (`pengujian.md`).
 - Detail stock opname tidak memeriksa tipe lokasi terhadap ruang, sehingga
   dokumen gudang yang dibuka lewat URL ruang outlet tetap tampil. Pola
   penjaganya sudah ada di `features/stock-adjustment/ruang.ts`
@@ -689,9 +736,26 @@ Yang masih berlaku:
   `app/dashboard/outlet/pengaturan/roles/page.tsx` baris 39 dan
   `app/dashboard/outlet/pengaturan/roles/buatRole/page.tsx` baris 43.
   Bereskan saat halaman role disentuh lagi.
-- `tenantName` masih ada di `PenggunaSesi` (`lib/auth/session.ts`) tanpa
-  pembaca, karena token masih membawanya; dibuang bersama modul Profil,
-  login, dan sidebar.
+
+### Utang kecil dari modul Profil, login, dan sidebar
+
+- `features/stock-opname/form-buat-stock-opname.tsx` membaca `nama` dari
+  sesi, padahal token tidak membawanya, sehingga nama PIC selalu memakai
+  teks cadangan. Pindahkan ke `usePenggunaSaya` saat form itu disentuh,
+  lalu buang `nama` dari `PenggunaSesi` (`lib/auth/session.ts`).
+- Tombol hapus akun di halaman profil tampil nonaktif (PF2a) sampai
+  backend punya jalur hapus akun sendiri bagi Owner (`kontrak/temuan.md`
+  butir 112).
+- Unggah foto profil belum ada; avatar memakai inisial (PF9a). Bukan
+  kebutuhan MVP, dan ditinjau setelah rilis.
+- Teks tombol saat memuat di login pengguna masih "Menerbitkan Token
+  C...", istilah internal; penggantiannya menunggu keputusan pemilik
+  proyek.
+- Halaman ringkasan laba rugi memicu peringatan ukuran grafik di konsol
+  (lebar dan tinggi -1 saat render pertama). Penyebabnya belum ditelusuri
+  dari kode, dan grafiknya tetap tampil.
+- `types/auth.ts` masih memuat `RegisterRequest`, `RegisterResponse`, dan
+  `LoginRequest` tanpa pemakai; dipakai atau dibuang bersama panel admin.
 
 ### Utang kecil dari penyesuaian backend `f27f093`
 

@@ -15,8 +15,10 @@ Bagian **tetap**: hanya diubah atas perintah pemilik proyek.
 2. Blok perintah siap tempel yang menerapkannya (menjalankannya adalah persetujuan).
 3. Perintah verifikasi: `tsc`, ESLint, dan pemeriksaan hasil.
 4. Menjalankan test yang ada, menambah skenario untuk perubahan itu, menjalankan ulang.
-5. Sebelum commit: vitest penuh dan suite e2e penuh, dibandingkan dengan
-   baseline. Seluruhnya harus lolos, bukan hanya spec modul.
+5. Sebelum commit: `tsc`, ESLint, vitest penuh, dan spec e2e yang terdampak
+   perubahan itu, seluruhnya lolos. Suite e2e penuh dijalankan sekali saat
+   modul selesai, sebelum pembaruan dokumentasi, dan dibandingkan dengan
+   baseline (pemilik proyek, 2 Oktober 2026).
 6. Setelah lolos: `git add`, commit dengan pesan lengkap (masalah, keputusan rancangan beserta alasan, dampak, pengujian), lalu push.
 
 Tidak ada perubahan yang diterapkan tanpa persetujuan. Komparasi dan blok
@@ -47,7 +49,7 @@ Ditetapkan pemilik proyek, di luar teks bagian Tetap agar pemeriksa
 dokumen tetap menjaganya:
 
 - Commit yang hanya mengubah dokumentasi tidak menjalankan vitest penuh
-  maupun suite e2e penuh (langkah 5 Alur setiap perubahan); gerbangnya
+  maupun spec e2e (langkah 5 Alur setiap perubahan); gerbangnya
   `npm run docs:periksa` (28 September 2026).
 
 ## Helper penggantian
@@ -363,13 +365,13 @@ const tidakKenal = [];
 for (const f of berkas) {
   if (f === path.join("lib", "api", "endpoints.ts")) continue;
   const s = fs.readFileSync(f, "utf8");
-  for (const m of s.matchAll(/\b(apiData|api|apiClient)\.(get|post|put|patch|delete)\s*(?:<[^(]*?>)?\s*\(\s*EP\.([\w.]+)/g)) {
+  for (const m of s.matchAll(/\b(apiData|apiMentah|api|apiClient)\.(get|post|put|patch|delete)\s*(?:<[^(]*?>)?\s*\(\s*EP\.([\w.]+)/g)) {
     if (ep[m[3]]) catat(kunci(m[2], ep[m[3]]), f); else tidakKenal.push(f + " EP." + m[3]);
   }
-  for (const m of s.matchAll(/\b(apiData|api|apiClient)\.(get|post|put|patch|delete)\s*(?:<[^(]*?>)?\s*\(\s*`\$\{EP\.([\w.]+)(?:\([^)]*\))?\}([^`]*)`/g)) {
+  for (const m of s.matchAll(/\b(apiData|apiMentah|api|apiClient)\.(get|post|put|patch|delete)\s*(?:<[^(]*?>)?\s*\(\s*`\$\{EP\.([\w.]+)(?:\([^)]*\))?\}([^`]*)`/g)) {
     if (ep[m[3]]) catat(kunci(m[2], ep[m[3]] + m[4]), f); else tidakKenal.push(f + " EP." + m[3]);
   }
-  for (const m of s.matchAll(/\b(apiData|api|apiClient)\.(get|post|put|patch|delete)\s*(?:<[^(]*?>)?\s*\(\s*([`'"])(\/[^`'"]*)\3/g)) catat(kunci(m[2], m[4]), f);
+  for (const m of s.matchAll(/\b(apiData|apiMentah|api|apiClient)\.(get|post|put|patch|delete)\s*(?:<[^(]*?>)?\s*\(\s*([`'"])(\/[^`'"]*)\3/g)) catat(kunci(m[2], m[4]), f);
   for (const m of s.matchAll(/fetch\(\s*`\$\{\w+\}(\/[^`]*)`([\s\S]{0,300})/g)) catat(kunci(metode(m[2]), m[1]), f);
   for (const m of s.matchAll(/fetch\(\s*([`'"])[^`'"]*\/api(\/[^`'"]*)\1([\s\S]{0,300})/g)) catat(kunci(metode(m[3]), m[2]), f);
 }
@@ -564,7 +566,8 @@ EOF
   jalan, dan dengan `batal <id>` membatalkannya lewat backend sehingga stok
   gudang kembali. Login PIN-nya mengambil alih sesi web Ridho.
 - `audit-endpoint.js`: dijalankan dari akar repo frontend-web. Memetakan
-  setiap panggilan frontend (`apiData`, `api`, dan `apiClient` dengan `EP`,
+  setiap panggilan frontend (`apiData`, `apiMentah`, `api`, dan `apiClient`
+  dengan `EP`,
   path tertulis, atau template, serta `fetch` ke backend) ke method dan
   path, membaca seluruh route backend dengan aturan mount `routes/index.js`,
   lalu membandingkan keduanya dengan tabel `docs/kontrak/endpoint.md` dan
@@ -1203,9 +1206,11 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   unit karena test `navigasiHalaman` dihitung dari baris `expect` (lima),
   bukan blok `it` (empat); hitungan spec penjualan 32 menjadi 28 sudah
   memberi angka yang benar.
-- **Suite penuh dijalankan sebelum setiap commit yang mengubah kode
-  produk atau test, termasuk rangkaian commit kecil** seperti pelepasan
-  `test.fixme` satu per satu.
+- **Suite e2e penuh dijalankan sekali saat modul selesai, bukan sebelum
+  setiap commit** (pemilik proyek, 2 Oktober 2026, keputusan PF6a). Setiap
+  commit kode tetap melewati `tsc`, ESLint, vitest penuh, dan spec yang
+  terdampak, dan gerbangnya menuntut laporan spec itu lebih baru daripada
+  berkas yang di-commit.
 - **Skrip yang mencari penutup blok mencocokkan baris utuh berindentasi
   yang diharapkan**, bukan baris yang sudah dipangkas. Pencari penutup
   `describe("navigasiHalaman")` sempat mengenai `  });` milik blok `it`
@@ -1323,6 +1328,29 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Suite penuh diawali pemeriksaan bahwa frontend dan backend hidup**
   (`curl` ke `/login` dan ke sebuah endpoint API), agar run 18 menit tidak
   terbuang.
+
+- **Keluaran bersaring tidak dipakai untuk menyalin tampilan.** JSX yang
+  akan ditulis ulang diambil utuh dengan `sed -n` tanpa saringan dan tanpa
+  `cut`. Di halaman profil, saringan yang membuang baris `className`
+  membuat migrasi harus dipecah dua tahap.
+- **Helper audit dicocokkan setiap kali lapisan API bertambah.**
+  `audit-endpoint.js` hanya mengenali `apiData`, `api`, dan `apiClient`,
+  sehingga kedua login lewat `apiMentah` dilaporkan tanpa pemanggil
+  (`1c13ee6`); polanya ditambah pada 2 Oktober 2026.
+- **Respons yang membawa field di tingkat atas tidak dilewatkan
+  `apiData`.** `unwrap` hanya mengembalikan `data`, sehingga `accessToken`
+  login akan hilang; pakai `apiMentah` (`lib/api/client.ts`).
+- **Dugaan regresi diuji dengan mengembalikan berkas tersangka ke `HEAD`
+  sebelum disimpulkan.** Enam kegagalan setelah sidebar dipecah sempat
+  disebut regresi; test yang sama tetap gagal dengan sidebar lama, dan
+  penyebabnya server dev yang belum selesai mengompilasi rute itu
+  (`pengujian.md`, Catatan Playwright).
+- **Snapshot sebuah test dicari lewat nama folder test-nya.** Berkas
+  `error-context.md` memuat potongan sumber spec, sehingga `grep -l` atas
+  judul test lain ikut cocok dan mengenai snapshot yang salah.
+- **Data test unit ditulis sesuai maksud yang disebut judulnya.** Test
+  nomor HP "berspasi di tengah" memakai teks berspasi di ujung, yang sah
+  setelah `trim`, dan gagal karenanya.
 
 ## Kapan berhenti dan bertanya
 

@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi pelanggan dan diskon dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`, `1e05df6`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`).
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi pelanggan dan diskon dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`, `1e05df6`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`). Pada hari yang sama, login akun, login pengguna, dan ubah pengguna dikoreksi terhadap backend yang sama (`091be4e`, `1c13ee6`).
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -114,8 +114,8 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /akun/auth/login`
 
 - Aturan: validateLogin (validators/akunValidator.js)
-- Wajib dari klien: `password`
-- Field lain yang dikenali: `email`
+- Wajib dari klien: `email` (berformat email) dan `password`. Dikoreksi 2 Oktober 2026 terhadap validator: `email` sempat tercatat opsional
+- Respons membawa `accessToken` dan `requireSetup` di tingkat atas, di samping `data`; akun admin dijawab tanpa `requireSetup`. Web membacanya lewat `apiMentah` (`features/auth/api.ts`, `1c13ee6`), karena pembukaan envelope hanya mengembalikan `data`
 - Dibaca controller dari body: `-`
 - Diisi server: -
 
@@ -288,9 +288,10 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /pengguna/pin-login`
 
-- Aturan: validatePenggunaLogin (validators/penggunaValidator.js)
-- Wajib dari klien: `loginType`, `installationId`
-- Field lain yang dikenali: `nama`, `pin`
+- Aturan: validatePenggunaLogin (validators/penggunaValidator.js) di route, setelah `authAkun` dan pembatas login. Dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7`; sebelumnya `installationId` tercatat wajib, dan `nama` serta `pin` tercatat opsional
+- Wajib dari klien: `nama`, `pin`, dan `loginType`; `installationId` hanya wajib untuk `loginType` app
+- Respons sukses membawa `accessToken` di tingkat atas; login aplikasi dapat dijawab 200 dengan `success: false` dan `code` `DEVICE_PENDING_APPROVAL` (perangkat menunggu persetujuan)
+- Web mengirim `nama`, `pin`, dan `loginType` web lewat `authApi.loginPengguna` (`features/auth/api.ts`, `1c13ee6`) dengan token akun, dan membaca token lewat `hasilLoginPengguna`
 - Nilai sah: `validLoginTypes`: web, app
 - Dibaca controller dari body: `nama`, `pin`, `loginType`, `installationId`, `deviceName`, `appVersion`, `osVersion`
 - Diisi server: -
@@ -535,11 +536,14 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /pengguna/:id`
 
-- Aturan: validatePenggunaPayload (validators/penggunaValidator.js)
-- Wajib dari klien: `nama`, `pin`, `roleID`, `aksesType`
-- Field lain yang dikenali: `pinBaru`, `nomorHp`, `status`
+- Aturan: validatePenggunaPayload mode update (validators/penggunaValidator.js) di route, setelah `checkPermissionOrSelf("update-pengguna")`: seluruh field opsional, tetapi yang dikirim diperiksa. Dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7`; sebelumnya `nama`, `pin`, `roleID`, dan `aksesType` tercatat wajib
+- Wajib dari klien: - (body tidak boleh kosong)
+- Field lain yang dikenali: `nama` (3 sampai 50 karakter), `pin` dan `pinBaru` (tepat 6 digit angka), `pinLama`, `nomorHp` (format Indonesia; null dilewati validator, teks kosong ditolak), `roleID`, `status`, `aksesType`, `fotoKaryawan`
 - Nilai sah: `validTypes`: web, app
-- Dibaca controller dari body: `-`
+- Mengubah diri sendiri diloloskan tanpa `update-pengguna`. Controller lalu membuang `roleID`, `status`, dan `aksesType`, serta `pin` bagi selain Owner
+- Aturan service (`penggunaCrudService.update`): PIN sendiri hanya berubah lewat `pinLama` dan `pinBaru`; PIN lama yang tidak cocok dijawab 401 (`temuan.md` butir 111), dan `pin` langsung untuk diri sendiri ditolak 400. Perubahan PIN, status, atau `aksesType` menaikkan `tokenVersion` dan memutus sesi web serta aplikasi
+- Web mengubah profil sendiri lewat `payloadPerbaruiProfil` (`features/pengguna/schema-profil.ts`, `091be4e`): hanya field yang berubah, `nomorHp` null untuk nomor yang dikosongkan, dan pasangan `pinLama` serta `pinBaru`
+- Respons 200 dengan `data` berbentuk `GET /pengguna/:id` dan `message` "Data pengguna berhasil diperbarui."
 - Diisi server: -
 
 #### `PUT /penjualan/:id`
