@@ -15,11 +15,14 @@ import { useSession } from "@/lib/auth/useSession";
 
 export function useAuthGuard() {
   const router = useRouter();
-  const { status } = useSession();
+  const { status, adaTokenAkun } = useSession();
 
   useEffect(() => {
-    if (status === "keluar") router.replace("/login");
-  }, [status, router]);
+    // Sesi pengguna berakhir tetapi token akun masih ada (misalnya setelah
+    // PIN diubah, keputusan PF7a): cukup login PIN ulang, sejalan dengan
+    // lib/apiClient.ts saat pin-refresh gagal.
+    if (status === "keluar") router.replace(adaTokenAkun ? "/login/pengguna" : "/login");
+  }, [status, adaTokenAkun, router]);
 
   return { status, siap: status === "masuk" };
 }

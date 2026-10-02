@@ -44,3 +44,29 @@ export interface PenggunaResponse {
   message: string;
   data: PenggunaItem;
 }
+/**
+ * Respons GET dan PUT /pengguna/:id, sesuai mappers/penggunaMapper.js
+ * backend: tanpa timestamps, tenantID, maupun tokenVersion, dengan roleID
+ * berupa id dan role berupa nama peran.
+ */
+export interface PenggunaDetail extends Entitas {
+  nama: string;
+  nomorHp: string | null;
+  status: "aktif" | "non-aktif";
+  fotoKaryawan: string | null;
+  aksesType: ("app" | "web")[];
+  roleID: string | null;
+  role: string | null;
+}
+
+/**
+ * Payload ubah profil sendiri lewat PUT /pengguna/:id. Seluruh field
+ * opsional di validator mode update; nomorHp null mengosongkan nomor, dan
+ * PIN diubah lewat pasangan pinLama dan pinBaru.
+ */
+export interface PerbaruiProfilPayload {
+  nama?: string;
+  nomorHp?: string | null;
+  pinLama?: string;
+  pinBaru?: string;
+}

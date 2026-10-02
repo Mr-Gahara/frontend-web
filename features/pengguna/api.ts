@@ -7,7 +7,7 @@
 
 import { apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
-import type { PenggunaItem, PenggunaRequest } from "@/types/pengguna";
+import type { PenggunaItem, PenggunaRequest, PenggunaDetail, PerbaruiProfilPayload } from "@/types/pengguna";
 
 export type Workspace = "outlet" | "gudang";
 
@@ -19,4 +19,7 @@ export const penggunaApi = {
   perbarui: (id: string, payload: PenggunaRequest) =>
     apiData.put<PenggunaItem>(EP.pengguna.detail(id), payload),
   hapus: (id: string) => apiData.delete<unknown>(EP.pengguna.detail(id)),
+  detail: (id: string) => apiData.get<PenggunaDetail>(EP.pengguna.detail(id)),
+  perbaruiProfil: (id: string, payload: PerbaruiProfilPayload) =>
+    apiData.put<PenggunaDetail>(EP.pengguna.detail(id), payload),
 };
