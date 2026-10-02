@@ -308,6 +308,18 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   izin diri sendiri di `GET` dan `PUT /pengguna/:id`, field `PUT` yang
   seluruhnya opsional, dan kontrak login pengguna
   (`kontrak/temuan.md` butir 111 dan 112)
+- Laporan modul panel admin — 10 butir, disusun dan diserahkan 3 Oktober
+  2026 setelah `c824f18`: `PUT /akun/admin/users/:id` tanpa validator dan
+  allowlist sehingga `role` dan `tenantID` dapat diubah (alasan
+  keamanan), password admin yang salah saat hapus dijawab 401, akun tanpa
+  masa akses yang tidak dapat diaktifkan tanpa durasi (perlu keputusan),
+  hapus akun yang menjawab berhasil sebelum data toko terhapus, riwayat
+  langganan yang gagal dicatat ditelan, respons aksi admin yang tidak
+  sebentuk dengan daftar, permintaan endpoint detail akun dan daftar yang
+  dapat dipotong, riwayat tanpa jumlah total dan tanpa mapper, respons
+  login admin yang berbeda bentuk, dan `username` ber-`sparse` tanpa
+  indeks; beserta konfirmasi kontrak akun admin yang terbukti lewat e2e
+  (`kontrak/temuan.md` butir 113 sampai 122)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

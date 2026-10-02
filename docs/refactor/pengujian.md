@@ -77,7 +77,8 @@ tercatat di kontrak. Audit juga dijalankan setiap kali backend berpindah
 versi: audit 30 September 2026 terhadap `465b438` menemukan tujuh route
 yang hilang, termasuk route hapus yang dipakai pembersihan spec.
 
-Suite e2e penuh memakan sekitar 26 menit (diukur 2 Oktober 2026 dengan
+Suite e2e penuh memakan sekitar 35 menit (diukur 3 Oktober 2026 dengan
+427 test; 26 menit pada 2 Oktober 2026 dengan
 393 test; 13 sampai 15 menit pada 28 September 2026)
 karena berjalan dengan satu worker dan memakai backend sungguhan. Saat
 iterasi cukup jalankan spec modul yang sedang dikerjakan. **Sebelum setiap
@@ -93,6 +94,19 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
+
+**Baseline per modul panel admin** (commit `c824f18`): 530 test unit dan
+integrasi lolos di 63 berkas, 410 e2e lolos, 17 skipped (sama dengan
+baseline pelanggan di bawah). Dari baseline profil, fondasi (`0f54b3c`)
+menambah 15 test unit dan lima skenario (398); daftar dan buat akun
+(`4e2a254`) menambah 18 test unit dan lima skenario (403); langganan
+(`10c7efb`) menambah 12 test unit dan empat skenario (407); dan ubah serta
+hapus (`c824f18`) menambah 12 test unit dan tiga skenario (410). Suite
+penuh dijalankan sekali di akhir modul (PF6a), terhadap backend lokal
+`yoga` `50eede7`. Angka ini berlaku bila `.env.e2e` berisi kredensial
+admin uji. Tanpa berkas itu 16 skenario admin dilewati (spec admin: 1
+lolos dan 16 skipped, terukur), sehingga suite penuh menjadi 394 lolos dan
+33 skipped (dihitung, belum dijalankan penuh).
 
 **Baseline per modul Profil, login, dan sidebar** (commit `57a7084`): 473
 test unit dan integrasi lolos di 59 berkas, 393 e2e lolos, 17 skipped (sama
@@ -231,6 +245,10 @@ spec tulis ada di Test yang ditandai fixme dan skip bersyarat, di bawah.
 - Akun: `toko@gmail.com` / `Toko1234`
 - Pengguna: nama `Ridho`, PIN `123456` (berperan Owner)
 - Frontend `localhost:3000`, backend `localhost:4000`
+- Akun admin platform: tidak ditulis di sini (keputusan PA6a). Spec
+  membacanya dari `E2E_ADMIN_EMAIL` dan `E2E_ADMIN_PASSWORD` di `.env.e2e`
+  (akar repo, diabaikan git) atau dari variabel lingkungan, lewat
+  `tests/helpers/admin-uji.ts`
 
 ## Menelusuri kegagalan e2e
 
@@ -610,6 +628,31 @@ satu putaran.
   dan `loginSebagai` (`tests/helpers/profil-uji.ts`), agar cookie sesi
   pengguna pertama tidak tertimpa.
 
+- `getByRole("alert")` selebar halaman juga mengenai route announcer
+  Next.js (`__next-route-announcer__`, ber-`role="alert"` di luar `main`),
+  sehingga locator-nya ganda. Pesan galat dicari di dalam `main` atau di
+  dalam dialog (`c824f18`).
+- Klaim "tidak ada permintaan setelah X" dihitung sejak respons X
+  diterima, bukan sejak halaman dibuka. Pemulihan sesi di halaman login,
+  sebelum ada akun, memang memanggil `pin-refresh`, dan penghitung yang
+  mulai dari `goto` ikut mencatatnya (`catatPermintaanPin` dengan
+  `sejakRespons`, `0f54b3c`).
+- Kredensial yang tidak boleh masuk repo dibaca helper dari berkas yang
+  diabaikan git, dan spec-nya dilewati dengan alasan bila berkas itu tidak
+  ada. Log panggilan Playwright memuat nilai yang diisikan, sehingga
+  keluaran galat disaring dengan `grep -vE 'fill\('` sebelum ditempel.
+- Berkas halaman rute baru dibuat sebelum spec dijalankan. Rute yang
+  pertama kali dikompilasi `next dev` di tengah run dapat membuat
+  `.next/dev/types/validator.ts` tertulis rusak, dan `tsc` lalu gagal di
+  berkas bangkitan itu walau kodenya benar (`4e2a254`).
+- Pembersihan lewat UI didampingi cadangan API di `finally` yang hanya
+  berjalan bila penanda `terhapus` belum diset, sehingga data uji tidak
+  tertinggal saat test berhenti di tengah (`hapusAkunDariDetail` dan
+  `hapusAkunKlienUji`, `c824f18`).
+- Login akun di konteks `request` terpisah memutar `tokenVersion` akun
+  itu dan memutus sesi halaman yang sedang diuji; helper semacam itu
+  dipanggil setelah halaman tidak dipakai lagi.
+
 ## Test yang ditandai fixme dan skip bersyarat
 
 Menunggu perbaikan backend:
@@ -647,6 +690,7 @@ terhitung di angka skipped pada baseline:
 | Skenario jalur terkunci di spec stok, pengajuan stok (daftar), dan stock adjustment | `IZIN_LINTAS_OUTLET` sudah diisi, sehingga Ridho memegangnya; butuh akun uji tanpa izin itu. Tidak terjadi selama konstanta null, sehingga belum terhitung di baseline |
 | Halaman shift gudang dengan keterangan pemakaian bersama (`jadwal/shift/crud-shift.spec.ts`) | `KUNCI_LOKASI_SHIFT` sudah diisi, sehingga keterangan tidak tampil lagi. Tidak terjadi selama konstanta null |
 | Halaman pola roster gudang dengan keterangan pemakaian bersama (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | `KUNCI_LOKASI_POLA_ROSTER` sudah diisi, sehingga keterangan tidak tampil lagi. Tidak terjadi selama konstanta null |
+| Enam belas skenario di `tests/e2e/admin/` (sesi, akun klien, langganan, dan kelola akun) | `.env.e2e` tidak berisi kredensial admin uji (PA5a). Tidak terjadi di mesin pemilik proyek, sehingga tidak terhitung di baseline |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
 hapus bahan baku juga dilewati bila datanya kosong, tetapi tidak terjadi pada
@@ -881,6 +925,26 @@ Urutan debug kegagalan e2e di atas).
   walau logout pengguna gagal, hanya terbukti dari kode.
 - **Pesan titipan setelah PIN berubah hilang bila halaman dimuat ulang**,
   karena hanya hidup di memori; itu tidak diuji.
+
+- **Spec panel admin bergantung pada `.env.e2e`**: tanpa kredensial admin
+  uji, 16 dari 17 skenarionya dilewati (PA5a), sehingga mesin tanpa berkas
+  itu tidak menguji panel admin sama sekali.
+- **Pengulangan `DELETE` setelah password admin salah tidak diukur.**
+  Respons 401 dan pesannya teruji; penyegaran token dan permintaan kedua
+  hanya dibaca dari `lib/apiClient.ts` (`kontrak/temuan.md` butir 114).
+- **Aktifkan dengan durasi wajib dan perpanjangan yang membuka akun
+  kedaluwarsa hanya teruji di unit test**
+  (`tests/unit/features/admin-akun/langganan.test.ts`), karena akun
+  bermasa akses lewat atau beku karena kedaluwarsa tidak dapat dibuat
+  lewat UI.
+- **Tombol muat berikutnya riwayat langganan belum teruji e2e**, karena
+  butuh lebih dari 20 catatan pada satu akun.
+- **Bekukan dan hapus sungguhan hanya diuji pada akun uji tanpa toko.**
+  Pemutusan sesi pengguna toko saat akun dibekukan dan penghapusan data
+  toko saat akun dihapus tidak diuji.
+- **Daftar akun yang gagal dimuat, domain email disposable, dan akun
+  klien tanpa sesi pengguna yang membuka `/admin`** belum teruji e2e;
+  yang terakhir teruji di `tests/unit/lib/auth/tujuan.test.ts`.
 
 ## Spec rujukan
 
@@ -1143,3 +1207,17 @@ Urutan debug kegagalan e2e di atas).
   dibuktikan dari kedua respons dan dari sesi yang tidak dapat dipulihkan
   saat dashboard dibuka lagi; cache bersama dibuktikan dari nama di
   sidebar yang berubah setelah profil disimpan.
+- `tests/e2e/admin/sesi-admin.spec.ts` (`0f54b3c`): `test.skip` bersyarat
+  kredensial di tingkat `describe`, penghitung permintaan berjendela
+  sejak respons login, sesi yang dibuktikan pulih lewat refresh akun saja
+  setelah `reload`, dan logout yang dibuktikan dari respons serta dari
+  sesi yang tidak dapat dipulihkan.
+- `tests/e2e/admin/akun-klien.spec.ts` (`4e2a254`),
+  `langganan-akun.spec.ts` (`10c7efb`), dan `kelola-akun.spec.ts`
+  (`c824f18`), dengan helper di `tests/helpers/admin-uji.ts`: akun uji
+  beremail unik dibuat, dibekukan, diubah, dan dihapus lewat UI; payload
+  dibandingkan utuh, termasuk body kosong dan `username: null`; status
+  penolakan backend (409, 401) dan pesannya dibaca dari respons nyata;
+  password baru dibuktikan dengan login di konteks terpisah; dan satu
+  jalur gagal (bekukan dijawab 500) memakai akun yang sudah ada agar
+  tidak ada akun sungguhan yang ikut beku.

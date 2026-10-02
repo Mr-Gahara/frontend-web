@@ -1022,7 +1022,7 @@ rancangan butir 17, 21, dan 23.
   komponen, skema, hook, dan tipe. Kata PIN hanya dipakai untuk isian PIN
   itu sendiri.
 - **Pekerjaan setelah modul ini adalah panel admin** bagi akun admin
-  setelah login akun (`status.md`, Pekerjaan berikutnya).
+  setelah login akun (selesai di `c824f18`, Modul panel admin).
 - Diterapkan tanpa ditanyakan (`091be4e`): PIN baru tepat 6 digit
   (keputusan Fase 0); form dipasang setelah data termuat (butir 8); ubah
   hanya mengirim field yang berubah (butir 15); PIN lama yang diisi
@@ -1036,6 +1036,76 @@ rancangan butir 17, 21, dan 23.
   disalin ke state; nama di sidebar dari satu hook yang berbagi cache
   dengan halaman profil (butir 12); dan `tenantName` dibuang dari
   `PenggunaSesi`.
+
+### Modul panel admin
+
+Diputuskan pemilik proyek pada 2 dan 3 Oktober 2026, dengan prinsip
+keputusan rancangan butir 17, 21, dan 23. PA1a, PA5a, dan PA6a diterapkan
+di `0f54b3c`; PA7a sampai PA9a di `4e2a254`; PA10b dan PA11a di `10c7efb`;
+dan PA3a serta PA12a sampai PA14a di `c824f18`.
+
+- **PA1a: panel admin berada di `/admin`, terpisah dari `/dashboard`**,
+  dengan layout dan guard sendiri. Akun admin dikenali dari `role` di
+  payload token akun dan masuk tanpa login pengguna; login akun admin
+  menuju `/admin`, dan halaman toko maupun login pengguna mengembalikannya
+  ke sana.
+- **PA2a: cakupan putaran ini akun dan langganan**: daftar, buat, ubah,
+  hapus, bekukan, aktifkan, perpanjang, dan riwayat. Daftar toko dan
+  kelola permission platform tidak ikut.
+- **PA3a: form ubah hanya username, email, dan password.** `role` dan
+  `tenantID` tidak ditawarkan, walau backend menerimanya
+  (`kontrak/temuan.md` butir 113).
+- **PA4a: spec e2e memakai akun admin dari seed backend.**
+- **PA5a: kredensial admin uji tidak masuk git.** Spec dan helper tetap di
+  repo; email dan password dibaca dari variabel lingkungan atau `.env.e2e`
+  yang diabaikan git, dan tanpa itu spec admin dilewati lewat `test.skip`
+  bersyarat dengan alasan yang terlihat.
+- **PA6a: dokumentasi dan pesan commit tidak memuat email maupun password
+  akun admin.**
+- **PA7a: akun admin tampil di daftar dengan penanda peran**; aksi hanya
+  untuk akun klien, karena backend menolak membekukan dan melanggankan
+  akun admin.
+- **PA8b: form buat akun klien di halaman tersendiri**,
+  `/admin/akun/buat`.
+- **PA9a: akun klien uji dibuat lewat UI dengan email unik per run.**
+  Pembersihannya sempat lewat API selama bekukan dan hapus belum ada di
+  UI; sejak `c824f18` akun uji dibekukan dan dihapus lewat UI, dan API
+  tinggal cadangan di `finally`.
+- **PA10b: aksi langganan dan riwayat di halaman detail akun**,
+  `/admin/akun/[id]`. Backend tidak punya endpoint detail satu akun,
+  sehingga akun dibaca dari cache daftar, dan kekurangan itu dilaporkan
+  (`kontrak/temuan.md` butir 119).
+- **PA11a: riwayat langganan bertahap dengan tombol muat berikutnya.**
+  Backend memberi kursor tanpa jumlah total; kebutuhan total dilaporkan
+  (butir 120).
+- **PA12a: form ubah akun di halaman tersendiri**,
+  `/admin/akun/[id]/ubah`.
+- **PA13a: ubah dan hapus hanya untuk akun klien.** Akun admin baca-saja,
+  sehingga admin tidak dapat mengunci dirinya sendiri atau admin lain dari
+  web.
+- **PA14a: tombol Hapus Akun selalu tampil untuk akun klien**, nonaktif
+  dengan keterangan selama akunnya aktif, karena backend hanya menghapus
+  akun non-aktif.
+- **Pekerjaan setelah modul ini adalah mutasi arus kas** (3 Oktober 2026;
+  `status.md`, Pekerjaan berikutnya).
+- Diterapkan tanpa ditanyakan (`0f54b3c`): makna `status` sesi tidak
+  diubah, sehingga admin yang sudah masuk berstatus "keluar" dan dikenali
+  dari role akunnya; role di luar `admin` diperlakukan sebagai klien;
+  aturan pengalihan ditulis sebagai fungsi murni (butir 10); pemulihan
+  sesi melewati `pin-refresh` untuk akun admin; dan logout admin tetap
+  mengakhiri sesi lokal walau permintaannya gagal.
+- Diterapkan tanpa ditanyakan (`4e2a254`, `10c7efb`, `c824f18`):
+  pencarian dan filter status daftar di klien dari satu cache (butir 12);
+  skema buat mengikuti validator backend, dan skema ubah diturunkan
+  darinya karena `PUT` tidak punya validator; lama masa percobaan tidak
+  ditulis di web karena berasal dari konfigurasi backend; akun tanpa masa
+  akses tampil "Tidak dibatasi"; durasi saat mengaktifkan wajib bila masa
+  akses kosong atau sudah lewat, mengikuti backend; dialog aksi dipasang
+  setiap kali dibuka dan hanya tertutup saat berhasil (keputusan Fase 0);
+  ubah hanya mengirim field yang berubah (butir 15), dengan username yang
+  dikosongkan sebagai null; password admin yang salah ditampilkan apa
+  adanya tanpa penanganan sementara (butir 17); dan halaman admin memakai
+  token tema, bukan warna heksadesimal.
 
 ## Keputusan rancangan yang mengikat
 

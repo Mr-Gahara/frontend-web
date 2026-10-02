@@ -63,6 +63,10 @@ Keduanya hanya hidup di memori (`lib/auth/session.ts`), dipulihkan lewat cookie
 refresh httpOnly saat aplikasi dimuat. Backend hanya mengizinkan **satu sesi web
 per pengguna**: login PIN baru mencabut sesi sebelumnya.
 
+Akun admin platform (role `admin` di payload token akun) tidak punya toko
+maupun pengguna. Setelah login akun ia menuju `/admin` tanpa Token C, dan
+sesinya dipulihkan lewat refresh akun saja (keputusan PA1a).
+
 ## Fondasi yang sudah tersedia
 
 Seluruh modul baru wajib memakai lapisan ini. Jangan memanggil `apiClient`
@@ -104,7 +108,10 @@ berparameter berupa fungsi: `EP.produk.detail(id)`.
 `apiData` dan `api`. Mengembalikan data yang sudah dinormalkan dan melempar
 `ApiError`. Token pengguna menjadi default. `apiMentah.post` mengembalikan
 respons tanpa pembukaan envelope dan tanpa normalisasi, untuk login yang
-membawa `accessToken` di tingkat atas (`1c13ee6`).
+membawa `accessToken` di tingkat atas (`1c13ee6`). `apiMentah.get`
+melakukan hal yang sama untuk GET berkursor (riwayat langganan, `10c7efb`),
+dan `api.delete` serta `apiData.delete` menerima body opsional untuk hapus
+akun oleh admin (`c824f18`).
 
 ```ts
 apiData.get<Produk[]>(EP.produk.list)
@@ -128,7 +135,8 @@ nilai yang bukan angka dibaca 0 (daftar penjualan sejak backend `465b438`).
 ### `lib/auth/`
 - `session.ts` — store token dan payload di memori. `tandaiKeluar()` hanya mengakhiri sesi pengguna; `akhiriSesi()` mengakhiri keduanya (logout).
 - `sessionChannel.ts` — koordinasi refresh antar tab lewat `BroadcastChannel`.
-- `useSession.ts` — hook: `pengguna`, `permissions`, `status`, `sudahMasuk`, `adaTokenAkun`.
+- `useSession.ts` — hook: `pengguna`, `permissions`, `status`, `sudahMasuk`, `adaTokenAkun`, `akun`, dan `adalahAdmin`.
+- `tujuan.ts` — aturan pengalihan guard sebagai fungsi murni: `tujuanGuardDashboard` dan `tujuanGuardAdmin` (`0f54b3c`).
 - `pesan-login.ts` — pesan sekali pakai untuk area login (`titipPesanLogin`, `ambilPesanLogin`), ditampilkan `app/login/layout.tsx` setelah sesi diakhiri (keputusan PF7a).
 - `permissions.ts` — `IZIN`, `IZIN_HALAMAN`, `bolehBukaHalaman`, `bolehBukaGrup`, serta `IZIN_LINTAS_OUTLET` dan `bolehLintasOutlet` (izin lintas outlet; null sampai backend menetapkan namanya, keputusan rancangan butir 18). Syarat di `IZIN_HALAMAN` berupa satu izin, atau array izin yang cukup dipenuhi salah satunya (`SyaratIzin`), untuk endpoint yang menerima izin alternatif (`keputusan.md` butir 16).
 
@@ -147,7 +155,7 @@ Pola yang sudah terbukti di bahan baku, pengguna, role, produk, kategori,
 stock adjustment, jurnal stok, stok, stock opname, pengajuan stok, transfer
 stok, penjualan, tipe aset, aset, tarif, sesi booking, akun kas, laporan,
 shift, pola roster, jadwal, absensi, metode pembayaran, pajak, tenant,
-pelanggan, diskon, dan auth:
+pelanggan, diskon, auth, dan admin-akun:
 
 - `api.ts` — pemanggilan endpoint memakai `apiData` dan `EP`
 - `hooks.ts` — `useQuery` dan `useMutation`, termasuk aturan invalidasi. Hook mutation menerima `onSuccess` dan `onError` dari halaman untuk toast dan reset dialog (`keputusan.md` butir 13)
@@ -188,7 +196,8 @@ Isi tiap `features/` yang sudah ada:
 | `pola-roster` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `ruang.ts`, `halaman-pola-roster-ruang.tsx`, `halaman-pola-roster.tsx`, `form-pola-roster.tsx`, `dialog-hapus-pola-roster.tsx` | Submodul pola roster modul jadwal (`dcc22e0`). `HalamanPolaRosterRuang` dipakai halaman outlet dan gudang (keputusan PL5); ia memuat pola lewat `useDaftarPolaRoster(ruang)` dan shift lewat `useDaftarShift(ruang)`, lalu menyimpan dan menghapus lewat `useSimpanPolaRoster(ruang)` dan `useHapusPolaRoster`, dengan toast dan galat yang dilempar ulang agar dialog bertahan. `ruang.ts` memuat `KUNCI_LOKASI_POLA_ROSTER` (null, butir 18) dan `filterDaftarPola`, tanpa query selama null. `form-pola-roster.tsx` memasang `IsiFormPolaRoster` setiap kali dialog dibuka (butir 8), dengan `buatSkemaPolaRoster(idShiftAktif)` yang menolak hari kerja tanpa shift dan shift nonaktif (PL1a). `payload.ts` memuat `terimaKetikanSiklus` dan `sesuaikanRincian` (PL3a), `payloadPolaRoster`, `tambahLokasiPolaRoster`, serta `labelShiftPola` dan `teksLabelShift` untuk penanda nonaktif |
 | `jadwal` | `tipe.ts`, `rentang.ts`, `pemetaan.ts`, `rencana.ts`, `hasil.ts`, `generate.ts`, `api.ts`, `hooks.ts`, `schema.ts`, `halaman-jadwal-ruang.tsx`, `halaman-jadwal.tsx`, `grid-jadwal.tsx`, `sel-shift.tsx`, `toolbar-jadwal.tsx`, `form-jadwal.tsx`, `halaman-generate-ruang.tsx`, `langkah-satu.tsx`, `langkah-dua.tsx` | Submodul kalender, kelola manual, dan generate modul jadwal (`19227f8`, `e2a0cfd`). `HalamanJadwalRuang` dan `HalamanGenerateRuang` dipakai rute outlet dan gudang. Karyawan dari `useDaftarPengguna` (`features/pengguna`) lewat `keKaryawanRuang`, shift dari `useDaftarShift`, dan pola dari `useDaftarPolaRoster` (butir 12). `rentangBulan` memakai tanggal lokal (J1a); `itemJadwal` memetakan libur, catatan, dan shift nonaktif; `rencanaSimpanJadwal` dijalankan `useSimpanJadwalHari` dengan satu ringkasan (JD6a); `pesanDitolak` menampilkan jadwal yang ditolak (J2a); `simulasiGenerate` menandai shift bermasalah dan menahan simpan (GN2a) |
 | `absensi` | `api.ts`, `hooks.ts`, `ringkasan.ts` | Submodul monitoring absensi modul jadwal (`845c2cf`). `useMonitoringAbsensi(tanggal)` memuat ulang setiap 30 detik untuk hari ini dan tidak mengulang jawaban 403 (AB3a). `ringkasan.ts` memuat `stafRuang` (AB4a), `hitungAbsensi` (AB5a), dan `jamWIB`. Dipakai `WidgetActiveUsers` di `features/pengguna/widget-pengguna.tsx`, yang membaca nama peran lewat `namaPeran` (`features/pengguna/peran.ts`) |
-| `auth` | `api.ts`, `hooks.ts`, `schema.ts`, `hasil.ts`, `halaman-login-akun.tsx`, `halaman-login-pengguna.tsx` | Login dan logout (`1c13ee6`, `57a7084`). `authApi` memakai `apiMentah` untuk login akun dan login pengguna (token akun), serta `apiData` untuk `logoutAkun` dan `logoutPengguna`. `useLoginAkun`, `useLoginPengguna`, dan `useLogoutAkun` hanya memanggil API; penyimpanan token dan pengalihan diurus halaman lewat callback `mutate`. `useKeluar` menjalankan logout pengguna lalu logout akun, dan logout akun tetap berjalan walau yang pertama gagal. `schema.ts` memuat `skemaLoginAkun` dan `skemaLoginPengguna` (PF3a); `hasil.ts` memuat `hasilLoginPengguna`, yang membaca `accessToken` tingkat atas dan menolak respons tanpa token |
+| `auth` | `api.ts`, `hooks.ts`, `schema.ts`, `hasil.ts`, `halaman-login-akun.tsx`, `halaman-login-pengguna.tsx` | Login dan logout (`1c13ee6`, `57a7084`). `authApi` memakai `apiMentah` untuk login akun dan login pengguna (token akun), serta `apiData` untuk `logoutAkun` dan `logoutPengguna`. `useLoginAkun`, `useLoginPengguna`, dan `useLogoutAkun` hanya memanggil API; penyimpanan token dan pengalihan diurus halaman lewat callback `mutate`. `useKeluar` menjalankan logout pengguna lalu logout akun, dan logout akun tetap berjalan walau yang pertama gagal. `schema.ts` memuat `skemaLoginAkun` dan `skemaLoginPengguna` (PF3a); `hasil.ts` memuat `hasilLoginPengguna`, yang membaca `accessToken` tingkat atas dan menolak respons tanpa token. Sejak `0f54b3c`, login akun ber-role admin menuju `/admin`, dan login pengguna mengalihkan akun admin ke sana (PA1a) |
+| `admin-akun` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `tampilan.ts`, `langganan.ts`, `ubah.ts`, `halaman-daftar-akun.tsx`, `halaman-buat-akun.tsx`, `halaman-detail-akun.tsx`, `halaman-ubah-akun.tsx`, `dialog-langganan.tsx`, `dialog-hapus-akun.tsx`, `riwayat-langganan.tsx` | Panel admin (`4e2a254`, `10c7efb`, `c824f18`), seluruhnya dengan token akun. `useDaftarAkun` (kunci `adminAkun.daftar()`) memuat seluruh akun sekali, dan dipakai daftar, detail, serta ubah, karena backend tidak punya endpoint detail (PA10b); `useBuatAkunKlien`, `useBekukanAkun`, `useAktifkanAkun`, `usePerpanjangLangganan`, dan `usePerbaruiAkun` menunggu invalidasi akar sebelum callback, sedangkan `useHapusAkun` menjalankan callback lebih dulu agar detail akun yang baru dihapus tidak sempat tampil sebagai tidak ditemukan. `useRiwayatLangganan` memakai `useInfiniteQuery` dengan kursor backend (PA11a), dan `adminAkunApi.riwayat` membaca `cursorBerikutnya` lewat `apiMentah.get` lalu menormalkan `_id`. `schema.ts` memuat `skemaBuatAkunKlien`, `PILIHAN_DURASI`, dan `LABEL_DURASI`; `payload.ts` memuat `payloadBuatAkunKlien` (username kosong dan masa percobaan tidak dikirim); `tampilan.ts` memuat `saringAkun`, `namaToko`, `teksToko`, `teksStatus`, `teksMasaAkses`, dan URL halaman; `langganan.ts` memuat `aksiLangganan`, `durasiWajibSaatAktifkan`, `akibatPerpanjang`, payload ketiga aksi, serta label dan teks riwayat; `ubah.ts` memuat `skemaUbahAkun` (diturunkan dari skema buat), `payloadPerbaruiAkun` (hanya yang berubah, butir 15), dan `aksiKelolaAkun` (PA13a, PA14a). `DialogLangganan` dan `DialogHapusAkun` dipasang setiap kali dibuka dan hanya tertutup saat berhasil |
 | `tenant` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `halaman-profil-toko.tsx` | Submodul profil outlet modul Pengaturan outlet (`fcf2dd2`). `useTenant()` membaca tenant sesi lewat `GET /tenant/:id` (kunci `tenant.detail(id)`, id dari token) dan tidak meminta apa pun selama sesi belum pulih; dipakai halaman Profil Toko, sidebar, dan halaman profil untuk nama toko (PO15a). `usePerbaruiTenant` menunggu invalidasi akar `tenant.semua` sebelum callback. `schema.ts` memuat `skemaTenant` (isian dipangkas, nama minimal 3 karakter, email berformat bila diisi); `payload.ts` memuat `FIELD_PROFIL_TOKO` (delapan field, PO13a), `nilaiAwalTenant`, dan `payloadPerbaruiTenant` (hanya field yang berubah, butir 15; field yang dikosongkan dikirim sebagai teks kosong). `HalamanProfilToko` memuat dua kartu dengan simpan masing-masing (PO12a): profil tenant, dan lokasi Outlet lewat `IsianLokasi`, `useLokasiAktif`, dan `usePerbaruiLokasi` dari `features/inventaris`; kedua form dipasang ulang lewat `key` berisi id dan `updatedAt` (butir 8), dan baca-saja tanpa izin ubahnya (PO14a) |
 
 Cara memeriksa apakah sebuah modul sudah dimigrasikan: halamannya tidak lagi
@@ -201,7 +210,8 @@ memanggil `apiClient`, dan lapisan datanya ada di `features/<modul>/` atau di
   5 menit: kembali ke kunci yang masih segar tidak memicu permintaan
   (`pengujian.md`, Urutan debug kegagalan e2e).
 - `session-provider.tsx` — memulihkan sesi saat aplikasi dimuat, dengan
-  memanggil refresh akun lalu refresh pengguna. Keduanya dipasang di
+  memanggil refresh akun lalu refresh pengguna; untuk akun admin refresh
+  pengguna dilewati (PA1a). Keduanya dipasang di
   `app/layout.tsx`.
 
 ### Sidebar
@@ -216,6 +226,20 @@ Dipecah di `57a7084` (keputusan PF4a):
 - `components/sidebar-pengguna.tsx` — kaki sidebar: nama dari
   `usePenggunaSaya`, peran dari sesi, avatar inisial, tautan profil, dan
   logout lewat `useKeluar`.
+
+### Panel admin
+
+Ruang kerja akun admin platform, di luar `/dashboard` (keputusan PA1a):
+
+- `app/admin/layout.tsx` — kepala, tombol logout akun, dan `Toaster`
+  sendiri. Dijaga `app/hooks/useAdminGuard.ts`, yang menunggu pemulihan
+  sesi lalu mengalihkan selain akun admin (`tujuanGuardAdmin`).
+- `app/admin/page.tsx` (daftar akun), `app/admin/akun/buat`,
+  `app/admin/akun/[id]`, dan `app/admin/akun/[id]/ubah` — halaman tipis
+  di atas `features/admin-akun`.
+- Halaman admin tidak punya entri `IZIN_HALAMAN`: gerbangnya role akun,
+  bukan permission pengguna, dan backend menegakkannya lewat `authAkun`
+  dan `adminOnly`.
 
 ### Komponen tanggal dan waktu
 

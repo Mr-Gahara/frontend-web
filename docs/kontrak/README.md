@@ -51,7 +51,10 @@ bagian tenant ditambahkan ke `endpoint.md`, `payload.md`,
 `izin-halaman.md`, dan `temuan.md` terhadap backend yang sama, begitu
 pula bagian pelanggan dan diskon, serta bagian akun dan pengguna (login
 akun, login pengguna, detail, dan ubah pengguna) di `endpoint.md`,
-`payload.md`, dan `temuan.md`. Bila
+`payload.md`, dan `temuan.md`. Pada 3 Oktober 2026, bagian akun admin
+(daftar, buat, ubah, hapus, bekukan, aktifkan, perpanjang, dan riwayat
+langganan) ditambahkan ke `endpoint.md`, `payload.md`, dan `temuan.md`
+terhadap backend yang sama. Bila
 backend berubah cukup jauh, `endpoint.md`, `payload.md`, `izin-halaman.md`,
 dan `route-backend.md` perlu dibangkitkan ulang; bagian 1 di bawah menjelaskan
 cara pembangkitannya. Gejala bahwa kontrak sudah tertinggal: endpoint yang
@@ -64,7 +67,9 @@ transfer, metode pembayaran, pembayaran, dan sesi booking, serta
 `PATCH /metodepembayaran/:id/toggle-active`; dan empat route belum
 tercatat, yaitu `GET /akunkas/mutasi`, `GET /akunkas/:id/mutasi`,
 `GET /akunkas/:id/ringkasan`, dan `POST /sesibooking/:id/checkin`.
-Lampiran A tidak diubah sampai pembangkitan ulang.
+Lampiran A tidak diubah sampai pembangkitan ulang. Delapan route
+`/akun/admin/...` yang tercatat tidak dipakai di Lampiran A kini dipakai
+web lewat `features/admin-akun/api.ts` (audit 3 Oktober 2026).
 
 ## 1. Acuan dan metodologi
 
@@ -88,7 +93,7 @@ Keterbatasan:
 - Daftar field pada bagian 4 (`payload.md`) berasal dari validator, sedangkan validator hanya memeriksa dan tidak membuang field lain. Service dapat memakai field di luar daftar itu, seperti `locationID` pada `POST /bahanbaku`. Sebelum sebuah field dihapus dari payload frontend, periksa dulu pemakaiannya di service.
 - Bentuk respons operasi tulis tidak diambil dengan memanggil endpoint, agar data tidak berubah.
 - Analisis statis route hanya membaca argumen pertama `checkPermission`. Route yang menerima salah satu dari beberapa izin perlu dikoreksi manual; `GET /produk` dan `GET /produk/:id` (`read-produk` atau `akses-pos`) sudah dikoreksi pada 20 September 2026, dan `GET /inventory` (`read-inventory`, `read-inventory-gudang`, atau `read-inventory-outlet`) pada 21 September 2026. Sapuan seluruh route pada tanggal itu, termasuk pemanggilan yang argumennya dipecah ke beberapa baris, hanya menemukan satu route lain yang berizin ganda, yaitu `PATCH /jurnalstok/wms/*`, yang tidak dipakai frontend. Lampiran A (`route-backend.md`) belum mencerminkan koreksi inventory karena bertanda Tetap.
-- Analisis statis frontend hanya menangkap panggilan `apiClient` dengan path tertulis. Path yang disusun dinamis terlewat, sehingga `GET /stockopname` sempat tercatat tidak dipakai (dikoreksi 20 September 2026). Untuk modul yang sudah dipindah ke `features/`, pemanggilan terpusat di `features/<modul>/api.ts`, dan kolom "Dipakai di" di bagian 3.1 (`endpoint.md`) diaudit ulang pada 22 September 2026, lalu setiap penutupan modul, terakhir 30 September 2026 terhadap backend `465b438`, lewat helper `audit-endpoint.js` (`refactor/cara-kerja.md`), sehingga menyebut berkas itu serta jumlah halaman lama yang masih memanggil langsung. Bagian 5 (`izin-halaman.md`) untuk modul itu diperbarui manual. Panggilan yang tidak lewat `apiClient.<method>` juga terlewat: `POST /pengguna/pin-refresh` dan `POST /akun/auth/refreshtoken` dipanggil lewat `fetch` langsung oleh `components/providers/session-provider.tsx` (pemulihan sesi saat aplikasi dimuat) dan `lib/apiClient.ts` (penyegaran token). Keduanya kini tercatat di `endpoint.md`, tetapi Lampiran A (`route-backend.md`) mencatatnya tidak dipakai. Sejak `1c13ee6` login memanggil lewat `apiMentah`, yang sempat tidak dikenali `audit-endpoint.js` sampai polanya ditambahkan pada 2 Oktober 2026.
+- Analisis statis frontend hanya menangkap panggilan `apiClient` dengan path tertulis. Path yang disusun dinamis terlewat, sehingga `GET /stockopname` sempat tercatat tidak dipakai (dikoreksi 20 September 2026). Untuk modul yang sudah dipindah ke `features/`, pemanggilan terpusat di `features/<modul>/api.ts`, dan kolom "Dipakai di" di bagian 3.1 (`endpoint.md`) diaudit ulang pada 22 September 2026, lalu setiap penutupan modul, terakhir 30 September 2026 terhadap backend `465b438`, lewat helper `audit-endpoint.js` (`refactor/cara-kerja.md`), sehingga menyebut berkas itu serta jumlah halaman lama yang masih memanggil langsung. Bagian 5 (`izin-halaman.md`) untuk modul itu diperbarui manual. Panggilan yang tidak lewat `apiClient.<method>` juga terlewat: `POST /pengguna/pin-refresh` dan `POST /akun/auth/refreshtoken` dipanggil lewat `fetch` langsung oleh `components/providers/session-provider.tsx` (pemulihan sesi saat aplikasi dimuat) dan `lib/apiClient.ts` (penyegaran token). Keduanya kini tercatat di `endpoint.md`, tetapi Lampiran A (`route-backend.md`) mencatatnya tidak dipakai. Sejak `1c13ee6` login memanggil lewat `apiMentah`, yang sempat tidak dikenali `audit-endpoint.js` sampai polanya ditambahkan pada 2 Oktober 2026. Riwayat langganan akun dibaca lewat `apiMentah.get` sejak `10c7efb`.
 - Kontrak ini berlaku untuk commit acuan di atas. Bila backend berubah, bagian 3 sampai 5 dan Lampiran A perlu dibangkitkan ulang.
 
 ## 2. Aturan umum
@@ -110,6 +115,7 @@ Keterbatasan:
 - Refresh akun lewat `POST /api/akun/auth/refreshtoken`, refresh pengguna web lewat `POST /api/pengguna/pin-refresh`. Keduanya membaca refresh token dari cookie httpOnly, sehingga request wajib menyertakan cookie.
 - Hanya satu sesi web aktif per pengguna. Login di tempat lain membuat sesi lama dijawab 401.
 - Payload token pengguna web memuat id, tenantID, tenantName, roleID, role, permissions, aksesType, loginType, dan version, tanpa nama pengguna. `tenantName` tidak dapat diandalkan: token hasil `pin-refresh` membawa "Toko Tidak Diketahui" (`temuan.md` butir 98), sehingga nama toko dibaca dari `GET /tenant/:id`.
+- Payload token akun memuat id, role, dan version, ditambah tenantID bila akun terikat toko (respons nyata, 2 Oktober 2026). Web mengenali admin platform dari `role` itu; akun admin tidak punya token pengguna.
 - Kolom Auth di bagian 3 (`endpoint.md`) menunjukkan middleware yang diperiksa backend: `authAkun`, `authPengguna`, `authEither`, dan `adminOnly`.
 
 ### 2.3 Format error dan kode status

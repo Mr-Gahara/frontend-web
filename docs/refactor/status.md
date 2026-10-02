@@ -76,19 +76,20 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Pelanggan | `b6de75c` (spec), `d9365d3` | Selesai (keputusan PD1a dan PD5a; Catatan dari submodul pelanggan) |
 | Diskon | `8cb6f31` (spec), `1e05df6` (halaman), `54f2938` (aturan), `52c550e` (pilihan kasir) | Selesai (keputusan PD2a sampai PD4a dan PD6a sampai PD9a; Catatan dari submodul diskon) |
 | Profil, login, dan sidebar | `0ed0e9a` (spec profil), `091be4e` (profil), `1c13ee6` (login), `57a7084` (sidebar) | Selesai (keputusan PF1a sampai PF9a; Catatan dari modul Profil, login, dan sidebar). Modul terakhir migrasi halaman lama |
-| Panel admin | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Panel admin | `0f54b3c` (fondasi), `4e2a254` (daftar dan buat akun), `10c7efb` (langganan), `c824f18` (ubah dan hapus) | Selesai (keputusan PA1a sampai PA14a; Catatan dari modul panel admin) |
+| Keuangan: mutasi arus kas | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per modul Profil, login, dan sidebar (`57a7084`):
+Diukur ulang per modul panel admin (`c824f18`):
 
-| Hal | Awal | Setelah sidebar `57a7084` | Catatan |
+| Hal | Awal | Setelah panel admin `c824f18` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 4 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), dan 4 setelah halaman profil, login, dan sidebar (`57a7084`) |
-| Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil |
+| Kemunculan `_id` | - | 9 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts` |
 | `useAuthGuard()` berulang di halaman | 49 | 26 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, halaman diskon, dan halaman profil) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
 | Berkas di atas 700 baris | 7 | 3 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702) |
@@ -96,29 +97,72 @@ Diukur ulang per modul Profil, login, dan sidebar (`57a7084`):
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: panel admin
+## Pekerjaan berikutnya: mutasi arus kas
 
-Migrasi halaman lama selesai di `57a7084`. Pekerjaan berikutnya, atas
-keputusan pemilik proyek (2 Oktober 2026), adalah panel admin: ruang kerja
-bagi akun admin setelah login akun. Pemetaannya belum diambil; yang sudah
-diketahui:
+Panel admin selesai di `c824f18`. Pekerjaan berikutnya, atas keputusan
+pemilik proyek (3 Oktober 2026), adalah halaman mutasi arus kas di modul
+keuangan. Pemetaannya belum diambil; yang sudah diketahui:
 
-- Backend punya route khusus admin yang belum dipakai web: daftar, buat,
-  ubah, hapus, bekukan, dan aktifkan akun, serta langganan, di bawah
-  `/akun/admin`, ditambah `GET /tenant` dan operasi tulis `/permission`
-  (`kontrak/route-backend.md`).
-- Login akun admin dijawab tanpa `requireSetup` (`kontrak/payload.md`).
-  Web selalu menuju login pengguna setelah login akun
-  (`features/auth/halaman-login-akun.tsx`), yang buntu bagi admin karena
-  admin tidak punya tenant maupun pengguna. Pemisahan tujuan setelah
-  login akun adalah keputusan pertama modul itu.
-- Hapus akun oleh admin mewajibkan password admin dan akun target yang
-  sudah non-aktif (`kontrak/temuan.md` butir 112).
+- Halaman `app/dashboard/outlet/keuangan/mutasiArusKas/page.tsx` hanya
+  menampilkan keterangan belum tersedia sejak `45187b6` (keputusan KU1a).
+- Backend `465b438` menambah `GET /akunkas/mutasi`,
+  `GET /akunkas/:id/mutasi`, dan `GET /akunkas/:id/ringkasan`
+  (`kontrak/temuan.md` butir 61). Ketiganya di luar Lampiran A dan belum
+  tercatat di `kontrak/endpoint.md` maupun `kontrak/payload.md`.
+- Mutasi ditulis backend saat saldo awal akun kas dibuat (`SALDO_AWAL`)
+  dan saat pembayaran dibatalkan (`VOID_PEMBAYARAN`); jenis lain belum
+  dibaca dari kode.
+- Lapisan data akun kas sudah ada di `features/akun-kas`, dan halaman
+  itu bergate `read-akunkas` (`kontrak/izin-halaman.md`).
 
 Langkah pertama sesi berikutnya, setelah backend di-`fetch` dan
-dibandingkan dengan acuan (`cara-kerja.md`): petakan isi token akun admin
-dan payload setiap route admin dari validator dan service-nya, lalu ajukan
-rancangan halaman beserta pembagian submodulnya.
+dibandingkan dengan acuan (`cara-kerja.md`): petakan ketiga route itu
+beserta query, izin, dan bentuk responsnya, lalu ajukan rancangan halaman.
+
+```bash
+BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline 50eede7..origin/yoga | head -20
+grep -nE 'mutasi|ringkasan' "$BE/routes/akunKasRoute.js" | cut -c1-140
+grep -rnE 'mutasi|Mutasi' "$BE/controllers/akunKasController.js" "$BE/services/akunKasService.js" | cut -c1-140 | head -40
+```
+
+## Catatan dari modul panel admin
+
+Modul panel admin selesai pada 2 dan 3 Oktober 2026 dalam empat submodul,
+dengan suite e2e penuh dijalankan sekali di akhir modul (keputusan PF6a):
+410 lolos dan 17 skipped.
+
+| Commit | Isi |
+|---|---|
+| `0f54b3c` | Fondasi: login admin menuju `/admin`, sesi akun dari token, guard, dan logout |
+| `4e2a254` | Daftar akun dan buat akun klien |
+| `10c7efb` | Langganan di halaman detail: bekukan, aktifkan, perpanjang, dan riwayat |
+| `c824f18` | Ubah dan hapus akun klien, dan pembersihan akun uji lewat UI |
+
+- Panel admin adalah ruang kerja di `/admin`, terpisah dari `/dashboard`
+  (PA1a). Akun admin tidak punya toko maupun pengguna: ia dikenali dari
+  `role` di payload token akun, masuk tanpa login pengguna, dan sesinya
+  dipulihkan lewat refresh akun saja. Respons login admin terbukti tanpa
+  `requireSetup` dan tanpa `daftarTenant`.
+- Lapisan data di `features/admin-akun`, seluruhnya dengan token akun
+  (`arsitektur.md`). Cakupannya akun dan langganan (PA2a); daftar toko dan
+  kelola permission tidak ikut.
+- Backend tidak punya endpoint detail satu akun, sehingga halaman detail
+  dan halaman ubah membaca akun dari cache daftar (PA10b). Riwayat
+  langganan berkursor tanpa jumlah total, sehingga dibaca lewat
+  `apiMentah.get` dan ditampilkan bertahap (PA11a).
+- Ubah hanya untuk username, email, dan password akun klien (PA3a, PA13a);
+  hapus membawa password admin di body `DELETE` dan hanya untuk akun yang
+  sudah dibekukan (PA14a).
+- Kredensial admin uji tidak ada di repo: spec membacanya dari `.env.e2e`
+  yang diabaikan git, dan tanpa berkas itu 16 skenario admin dilewati
+  (PA5a, PA6a, `pengujian.md`).
+- Password akun admin di basis data development diganti lewat model
+  backend pada 2 Oktober 2026, karena password lamanya tidak diketahui dan
+  tidak ada jalur API untuk itu tanpa login admin.
+- Temuan backend baru: butir 113 sampai 122, dilaporkan 3 Oktober 2026
+  (`backend.md`). Kontrak akun admin ditambahkan ke `kontrak/endpoint.md`
+  dan `kontrak/payload.md`.
+- Keputusan pemilik proyek: `keputusan.md` (Modul panel admin).
 
 ## Catatan dari modul Profil, login, dan sidebar
 
@@ -755,7 +799,28 @@ Yang masih berlaku:
   (lebar dan tinggi -1 saat render pertama). Penyebabnya belum ditelusuri
   dari kode, dan grafiknya tetap tampil.
 - `types/auth.ts` masih memuat `RegisterRequest`, `RegisterResponse`, dan
-  `LoginRequest` tanpa pemakai; dipakai atau dibuang bersama panel admin.
+  `LoginRequest` tanpa pemakai; modul panel admin tidak memakainya, dan
+  ketiganya dibuang saat berkas itu disentuh lagi.
+
+### Utang kecil dari modul panel admin
+
+- Daftar akun dimuat seluruhnya tanpa paginasi, dan halaman detail serta
+  halaman ubah membaca akun dari cache daftar, karena backend tidak punya
+  endpoint detail maupun daftar yang dapat dipotong (`kontrak/temuan.md`
+  butir 119). Diganti begitu endpoint-nya ada.
+- Akun admin baca-saja di panel (PA13a): tidak ada jalur web untuk
+  mengubah atau mengganti password akun admin, termasuk miliknya sendiri.
+- Daftar toko (`GET /tenant`) dan kelola permission platform di luar
+  cakupan putaran ini (PA2a).
+- Dialog aktifkan mewajibkan durasi untuk akun tanpa masa akses, mengikuti
+  backend (`durasiWajibSaatAktifkan`, `kontrak/temuan.md` butir 115);
+  disesuaikan begitu makna masa akses kosong diputuskan.
+- Password admin yang salah saat hapus dijawab 401, sehingga klien
+  menyegarkan token lalu mengulang `DELETE` (butir 114); web menampilkan
+  pesannya tanpa penanganan sementara.
+- Kepala panel admin tidak menampilkan identitas admin yang sedang masuk,
+  karena token akun tidak membawa email, dan tampilannya masih sederhana
+  dengan token tema; layout dan UI/UX-nya menunggu keputusan pemilik proyek.
 
 ### Utang kecil dari penyesuaian backend `f27f093`
 

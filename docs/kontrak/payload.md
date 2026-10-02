@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi pelanggan dan diskon dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`, `1e05df6`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`). Pada hari yang sama, login akun, login pengguna, dan ubah pengguna dikoreksi terhadap backend yang sama (`091be4e`, `1c13ee6`).
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan, kecuali `DELETE /akun/admin/users/:id`, yang membawa password admin. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi pelanggan dan diskon dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`, `1e05df6`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`). Pada hari yang sama, login akun, login pengguna, dan ubah pengguna dikoreksi terhadap backend yang sama (`091be4e`, `1c13ee6`). Pada 3 Oktober 2026, operasi akun admin ditambahkan terhadap backend yang sama (`4e2a254`, `10c7efb`, `c824f18`).
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -111,11 +111,46 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Dibaca controller dari body: seluruh body diteruskan ke service (`...req.body`); service memakai `items` dan `tanggalTerima`, dengan bawaan waktu server
 - Diisi server: `penerimaID`
 
+#### `POST /akun/admin/users`
+
+- Aturan: validateBuatAkunKlien (validators/akunValidator.js) di route, setelah `authAkun` dan `adminOnly`. Ditambahkan 3 Oktober 2026 terhadap backend `yoga` `50eede7`
+- Allowlist: `email`, `password`, `username`, dan `durasiBulan`; field lain ditolak 400 "Field tidak diizinkan"
+- Wajib dari klien: `email` (berformat email, bukan domain disposable) dan `password` (minimal 8 karakter, dengan huruf kapital dan angka)
+- Field lain yang dikenali: `username` (3 sampai 25 karakter) dan `durasiBulan` (1, 3, 6, atau 12)
+- Aturan service (`langgananService.buatAkunKlien`): email terdaftar ditolak 409 "Email sudah terdaftar." (terbukti lewat e2e, `4e2a254`); akun dibuat ber-role client, aktif, tanpa toko; tanpa `durasiBulan` masa akses diisi masa percobaan dari konfigurasi backend (`TRIAL_DAYS`), dengan durasi dihitung dari sekarang; riwayat `buat` dicatat
+- Web mengirim hasil `payloadBuatAkunKlien` (`features/admin-akun/payload.ts`): email dan password, serta username dan `durasiBulan` hanya bila diisi
+- Respons 201 dengan `data` berbentuk item `GET /akun/admin/all`, dengan `daftarTenant` kosong
+- Diisi server: role, status, `tenantID`, dan `aksesBerakhirPada`
+
+#### `POST /akun/admin/users/:id/freeze`
+
+- Aturan: validateFreeze di route: body boleh kosong; hanya `alasan` yang dikenali (teks, paling panjang 200), field lain ditolak 400
+- Aturan service (`langgananService.freeze`): hanya akun klien yang aktif; akun non-aktif ditolak 409, dan akun admin 400. Status menjadi non-aktif dengan `alasanNonAktif` manual, `tokenVersion` akun diganti, dan cache sesi seluruh pengguna tokonya dihapus; riwayat `freeze` dicatat
+- Web mengirim hasil `payloadBekukan` (`features/admin-akun/langganan.ts`): `{ alasan }` yang dipangkas, atau body kosong
+- Respons 200 dengan `data` akun, dengan `daftarTenant` kosong walau akunnya punya toko (`temuan.md` butir 118)
+- Wajib dari klien: -
+
+#### `POST /akun/admin/users/:id/langganan`
+
+- Aturan: validatePerpanjang di route: `durasiBulan` wajib (1, 3, 6, atau 12), `alasan` opsional paling panjang 200; field lain ditolak 400
+- Aturan service (`langgananService.perpanjang`): masa akses dihitung dari masa akses yang masih berjalan, atau dari sekarang bila kosong atau sudah lewat; akun yang non-aktif karena kedaluwarsa aktif kembali, sedangkan yang dibekukan manual tetap non-aktif; riwayat `perpanjang` dicatat
+- Web mengirim hasil `payloadPerpanjang`: `durasiBulan`, serta `alasan` bila diisi
+- Respons 200 dengan `data` akun; `message` menyebut bila akun ikut diaktifkan
+- Wajib dari klien: `durasiBulan`
+
+#### `POST /akun/admin/users/:id/unfreeze`
+
+- Aturan: validateUnfreeze di route: body boleh kosong; `durasiBulan` dan `alasan` opsional, field lain ditolak 400
+- Aturan service (`langgananService.unfreeze`): hanya akun klien non-aktif (akun aktif 409). Dengan `durasiBulan`, masa akses diperpanjang; tanpa itu, akun yang masa aksesnya kosong atau sudah lewat ditolak 400 (`temuan.md` butir 115). Status menjadi aktif, `tokenVersion` diganti, dan riwayat `unfreeze` dicatat
+- Web mengirim hasil `payloadAktifkan`: body kosong, atau `durasiBulan` dan `alasan` yang diisi; dialognya mewajibkan durasi bila masa akses kosong atau sudah lewat (`durasiWajibSaatAktifkan`)
+- Respons 200 dengan `data` akun; body kosong terbukti diterima lewat e2e (`10c7efb`)
+- Wajib dari klien: -
+
 #### `POST /akun/auth/login`
 
 - Aturan: validateLogin (validators/akunValidator.js)
 - Wajib dari klien: `email` (berformat email) dan `password`. Dikoreksi 2 Oktober 2026 terhadap validator: `email` sempat tercatat opsional
-- Respons membawa `accessToken` dan `requireSetup` di tingkat atas, di samping `data`; akun admin dijawab tanpa `requireSetup`. Web membacanya lewat `apiMentah` (`features/auth/api.ts`, `1c13ee6`), karena pembukaan envelope hanya mengembalikan `data`
+- Respons membawa `accessToken` dan `requireSetup` di tingkat atas, di samping `data`; akun admin dijawab tanpa `requireSetup` dan tanpa `daftarTenant` di `data` (respons nyata 2 Oktober 2026, `temuan.md` butir 121). Web membacanya lewat `apiMentah` (`features/auth/api.ts`, `1c13ee6`), karena pembukaan envelope hanya mengembalikan `data`
 - Dibaca controller dari body: `-`
 - Diisi server: -
 
@@ -423,6 +458,23 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Field lain yang dikenali: `nomorTransfer`, `pengajuanStokID`, `dariLocationID`, `keLocationID`, `status`, `items`, `tanggalKirim`, `tanggalTerima`, `penerimaID`
 - Dibaca controller dari body: `-`
 - Diisi server: `pengirimID`, `tenantID`
+
+#### `PUT /akun/admin/users/:id`
+
+- Aturan: tanpa validator di route (`temuan.md` butir 113). Controller menolak body kosong dan field `status` (400: status hanya lewat freeze dan unfreeze). Ditambahkan 3 Oktober 2026 terhadap backend `yoga` `50eede7`
+- Dibaca service dari body (`akunService.updateByAdmin`): `username`, `email`, `role`, `password`, dan `tenantID`, ditulis apa adanya tanpa pemeriksaan bentuk; `tenantID` kosong atau null melepas toko, dan tenant yang sudah dimiliki akun lain ditolak 409
+- Perubahan role, tenant, atau password mengganti `tokenVersion` akun itu, sehingga sesinya berakhir
+- Web mengirim hasil `payloadPerbaruiAkun` (`features/admin-akun/ubah.ts`, keputusan PA3a): hanya `email`, `username`, dan `password` yang berubah; username yang dikosongkan dikirim sebagai null, dan password hanya bila diisi. Aturan bentuknya ditegakkan `skemaUbahAkun`, sama dengan aturan buat akun
+- Email milik akun lain ditolak sebagai galat klien dengan pesan (400 atau 409, terbukti lewat e2e `c824f18`; pemetaannya di `middleware/errorHandler.js` untuk galat indeks unik)
+- Respons 200 dengan `data` akun tanpa `langganan` dan dengan `daftarTenant` kosong (butir 118); web tidak memakainya
+- Wajib dari klien: - (body tidak boleh kosong)
+
+#### `DELETE /akun/admin/users/:id`
+
+- Body: `password`, yaitu password akun admin yang sedang masuk; tanpa itu 400 dari controller
+- Aturan service (`akunService.deleteUserByAdmin`): menghapus diri sendiri ditolak 400; password admin yang salah dijawab 401 (`temuan.md` butir 114, terbukti lewat e2e); akun target yang masih aktif ditolak 400, sehingga akun harus dibekukan lebih dulu; untuk akun klien bertoko, penghapusan data toko dipicu di latar tanpa ditunggu (butir 116)
+- Web mengirim `{ password }` lewat `apiData.delete` berbody (`features/admin-akun/api.ts`), dan hanya menawarkan hapus untuk akun klien non-aktif (keputusan PA13a dan PA14a)
+- Respons 200 dengan `message` "Akun berhasil dihapus oleh admin."
 
 #### `PUT /aset/:id`
 

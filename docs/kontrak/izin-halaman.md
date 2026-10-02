@@ -30,6 +30,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 2 Oktober 2026: pelanggan setelah migrasi submodul pelanggan (`d9365d3`), tanpa perubahan gate maupun endpoint baca. Tombol tambah mengikuti `create-pelanggan`, menu ubah `update-pelanggan`, dan menu hapus `delete-pelanggan` (`aksiPelanggan`).
 - 2 Oktober 2026: diskon setelah migrasi submodul diskon (`1e05df6`), tanpa perubahan gate maupun endpoint baca. Tombol tambah mengikuti `create-diskon`, dan menu ubah, aktifkan, serta nonaktifkan mengikuti `update-diskon` (`aksiDiskon`). Bagian produk tertentu di form juga memuat `GET /produk` (`read-produk` atau `akses-pos`); tanpa izin itu pilihan produk yang tersimpan tidak berubah.
 - 2 Oktober 2026: profil pengguna (`/dashboard/profil`) setelah migrasi modul Profil, login, dan sidebar (`091be4e`). Halaman bukan menu sidebar (dibuka dari kaki sidebar). `GET` dan `PUT /pengguna/:id` meloloskan permintaan atas diri sendiri tanpa `read-pengguna` maupun `update-pengguna` (`checkPermissionOrSelf`), dibuktikan pengguna uji tanpa kedua izin itu, sehingga setiap pengguna dapat membuka dan mengubah profilnya.
+- 3 Oktober 2026: panel admin (`/admin`, `/admin/akun/buat`, `/admin/akun/[id]`, dan `/admin/akun/[id]/ubah`) setelah modul panel admin (`c824f18`). Bukan menu sidebar dan tanpa entri `IZIN_HALAMAN`: gerbangnya role akun `admin` di token akun (`useAdminGuard`), dan seluruh endpoint-nya dijaga `authAkun` serta `adminOnly`, bukan permission pengguna.
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 

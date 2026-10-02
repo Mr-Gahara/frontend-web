@@ -1371,6 +1371,39 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   nomor HP "berspasi di tengah" memakai teks berspasi di ujung, yang sah
   setelah `trim`, dan gagal karenanya.
 
+- **Skrip yang memuat model backend dijalankan dari direktori backend.**
+  Model memuat `config`, dan `config` membaca `.env` dari direktori
+  kerja; dijalankan dari `frontend-web`, pemeriksaan variabel rahasia
+  backend menghentikan proses sebelum tersambung. Pakai subshell:
+  `(cd ~/Documents/backend-js && node /tmp/skrip.js)`.
+- **Skrip yang berhenti tanpa bekerja keluar dengan kode gagal.** Skrip
+  ganti password admin mencetak "BERHENTI" tetapi keluar dengan kode 0,
+  sehingga rangkaian `&&` melanjutkan ke login dan menambah percobaan
+  gagal di pembatas login. Set `process.exitCode = 1`, dan bila
+  keluarannya dipipa, teruskan kodenya dengan `exit ${pipestatus[1]}` di
+  dalam subshell.
+- **Rahasia tidak lewat percakapan maupun riwayat shell.** Kredensial
+  ditulis pemilik proyek ke berkas yang diabaikan git, skrip membacanya
+  dari sana, dan keluaran hanya mencetak bentuk (panjang, jenis karakter,
+  kunci respons), bukan nilainya.
+- **Password yang terlupa tidak dapat dibaca dari basis data**, karena
+  yang tersimpan hanya hash. Penggantiannya lewat model backend agar hook
+  hash tetap berjalan, dengan mode tinjau sebagai bawaan dan syarat yang
+  diperiksa sebelum menulis.
+- **Galat `tsc` yang menunjuk `.next/dev/types/` diperiksa barisnya
+  sebelum kode dicurigai.** Itu berkas bangkitan `next dev`; satu baris
+  impornya sempat tertulis rusak (`page.jsge.js`) saat rute baru pertama
+  dikompilasi di tengah run spec.
+- **Berkas rute baru dibuat paling akhir, setelah seluruh berkas yang
+  diimpornya ada**, dan blok yang mengubah berkas pengimpor diberi gerbang
+  keberadaan berkas itu. Satu halaman rute yang belum dibuat lolos dari
+  `tsc`, karena belum ada yang mengimpornya, dan baru terlihat sebagai
+  tautan menuju 404.
+- **Batas pembatas login dibaca dari nilainya, bukan dari nama
+  konstantanya**, sebelum percobaan login diulang; saringan yang hanya
+  menampilkan `limit: MAX_ATTEMPTS` belum menjawab berapa percobaan yang
+  tersisa.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:
