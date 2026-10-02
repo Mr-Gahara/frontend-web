@@ -1,3 +1,4 @@
+import { ATURAN_DISKON_KOSONG } from "@/features/diskon/tampilan";
 import { describe, expect, it } from "vitest";
 import { susunPayloadPenjualan, validasiPenjualan, type IsianPenjualan } from "@/features/penjualan/payload";
 import { diskonAktif } from "@/features/diskon/filter";
@@ -25,6 +26,7 @@ function diskon(id: string, status: Diskon["status"], cakupan: Diskon["cakupan"]
     nilai: 10,
     bisaDigabung: false,
     status,
+    ...ATURAN_DISKON_KOSONG,
     tenantID: "t",
     createdAt: "",
     updatedAt: "",

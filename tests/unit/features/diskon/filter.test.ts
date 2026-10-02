@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { pilihDiskon } from "@/features/diskon/filter";
+import { ATURAN_DISKON_KOSONG } from "@/features/diskon/tampilan";
 import type { Diskon } from "@/types/diskon";
 
 function diskon(id: string, bisaDigabung: boolean): Diskon {
@@ -11,6 +12,7 @@ function diskon(id: string, bisaDigabung: boolean): Diskon {
     nilai: 10,
     bisaDigabung,
     status: "Aktif",
+    ...ATURAN_DISKON_KOSONG,
     tenantID: "t",
     createdAt: "2026-09-28T00:00:00.000Z",
     updatedAt: "2026-09-28T00:00:00.000Z",
