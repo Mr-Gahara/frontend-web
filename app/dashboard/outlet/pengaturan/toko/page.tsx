@@ -1,9 +1,5 @@
-const TokoPage = () => {
-    return (
-        <div>
-            <h1>Toko Page</h1>
-        </div>
-    );
+import { HalamanProfilToko } from "@/features/tenant/halaman-profil-toko";
+
+export default function TokoPage() {
+  return <HalamanProfilToko />;
 }
- 
-export default TokoPage;

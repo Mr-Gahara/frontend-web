@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useSession } from "@/lib/auth/useSession";
+import { useTenant } from "@/features/tenant/hooks";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
@@ -38,8 +39,10 @@ export default function ProfilPage() {
   const userId = pengguna?.id ?? "";
   const namaFromToken = pengguna?.nama ?? "";
   const roleFromToken = pengguna?.role || "Staf";
-  // Nama toko diambil dari payload token pengguna.
-  const namaTokoFromToken = pengguna?.tenantName || "Toko";
+  // Nama toko dibaca dari GET /tenant/:id, bukan dari tenantName token, yang
+  // menjadi "Toko Tidak Diketahui" setelah pin-refresh (keputusan PO15a).
+  const tenant = useTenant();
+  const namaToko = tenant.data?.namaToko ?? (tenant.isError ? "Toko" : "");
 
   // 2. PRE-POPULATE
   const [nama, setNama] = useState(namaFromToken);
@@ -200,7 +203,7 @@ export default function ProfilPage() {
             </h2>
             <p className="text-xs text-muted-foreground flex items-center justify-center sm:justify-start gap-1">
               <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              Sesi Aktif: {roleFromToken} @ {namaTokoFromToken}
+              Sesi Aktif: {roleFromToken} @ {namaToko}
             </p>
           </div>
         </div>
@@ -254,7 +257,7 @@ export default function ProfilPage() {
               </label>
               <Input
                 type="text"
-                value={namaTokoFromToken}
+                value={namaToko}
                 disabled
                 className="flex h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed select-none"
               />

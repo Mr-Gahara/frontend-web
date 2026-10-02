@@ -3,8 +3,9 @@ export type TipePajak =
   | "Sudah Termasuk (Inclusive)"
   | "Belum Termasuk (Exclusive)";
 
+/** Bentuk GET /tenant/:id (mappers/tenantMapper.js backend). */
 export interface Tenant {
-  _id: string;
+  id: string;
   namaToko: string;
   status: TenantStatus;
   alamat: string | null;
@@ -18,17 +19,24 @@ export interface Tenant {
   persenPajak: number;
   tipePajak: TipePajak;
   isSetupComplete: boolean;
+  absensiLokasiAktif: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface BuatTokoRequest {
-  namaToko: string;
-}
-
-export interface BuatTokoResponse {
-  message: string;
-  accessToken: string;
-  refreshToken: string;
-  data: Tenant;
+/**
+ * Field profil toko yang diubah web lewat PUT /tenant/:id (keputusan
+ * PO13a: persenPajak, tipePajak, logoUrl, dan isSetupComplete tidak
+ * dikirim). Seluruhnya opsional, karena hanya field yang berubah yang
+ * dikirim.
+ */
+export interface PerbaruiTenantPayload {
+  namaToko?: string;
+  alamat?: string;
+  kota?: string;
+  kodePos?: string;
+  nomorTelepon?: string;
+  emailBisnis?: string;
+  footerStruk?: string;
+  idNPWP?: string;
 }

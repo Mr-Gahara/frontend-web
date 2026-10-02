@@ -8,6 +8,7 @@ import { useSession } from "@/lib/auth/useSession";
 import { bolehBukaGrup, bolehBukaHalaman } from "@/lib/auth/permissions";
 import { apiClient } from "@/lib/apiClient";
 import { useDaftarLokasi } from "@/features/inventaris/hooks";
+import { useTenant } from "@/features/tenant/hooks";
 
 // Impor Ikon (Tambahan ikon Archive untuk Data Barang)
 import {
@@ -344,7 +345,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // State Pengguna & Hak Akses
   const [namaUser, setNamaUser] = useState("");
   const [posisiUser, setPosisiUser] = useState("");
-  const [namaToko, setNamaToko] = useState("");
   const [permissions, setPermissions] = useState<string[]>([]);
   const [role, setRole] = useState<string>("");
 
@@ -357,6 +357,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const daftarLokasi = useDaftarLokasi({ aktif: bacaLokasi });
   const hasGudang = daftarLokasi.data?.some((l) => l.tipe === "Gudang") ?? false;
   const isLoadingLokasi = bacaLokasi && daftarLokasi.isLoading;
+  // Nama toko dibaca dari GET /tenant/:id, bukan dari tenantName token, yang
+  // menjadi "Toko Tidak Diketahui" setelah pin-refresh (keputusan PO15a,
+  // kontrak/temuan.md butir 98). Berbagi cache dengan halaman Profil Toko,
+  // sehingga nama ikut berubah setelah profil disimpan.
+  const tenant = useTenant();
+  const namaToko = tenant.data?.namaToko ?? (tenant.isError ? "Nama Toko" : "");
 
   useEffect(() => {
     const fetchSidebarData = async () => {
@@ -366,7 +372,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         setNamaUser(pengguna.nama || "Pengguna");
         setPosisiUser(pengguna.role || "");
         setRole(pengguna.role || "");
-        setNamaToko(pengguna.tenantName || "Nama Toko");
         setPermissions(pengguna.permissions);
 
         apiClient

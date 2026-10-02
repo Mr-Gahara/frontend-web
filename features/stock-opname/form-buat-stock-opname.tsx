@@ -69,7 +69,7 @@ const TEKS = {
     judulKosong: "Lokasi / Gudang Belum Diatur",
     isiKosong:
       "Sistem tidak dapat menemukan data lokasi untuk outlet/gudang yang sedang Anda akses saat ini. Anda harus mengatur profil lokasi terlebih dahulu sebelum melakukan Stok Opname.",
-    urlSetup: "/dashboard/outlet/pengaturan/lokasi",
+    urlSetup: "/dashboard/outlet/pengaturan/toko",
     pesanLokasi: "Lokasi tidak valid. Silakan setup lokasi terlebih dahulu.",
     placeholderCatatan: "Misal: Audit rutin akhir bulan...",
     deskripsiBerhasil: "Sistem telah mengambil snapshot stok saat ini.",

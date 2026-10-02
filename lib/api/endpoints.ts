@@ -89,6 +89,9 @@ export const EP = {
     detail: (id: string) => `/sesibooking/${id}`,
   },
 
+  tenant: {
+    detail: (id: string) => `/tenant/${id}`,
+  },
   location: {
     list: "/location",
     current: "/location/current",

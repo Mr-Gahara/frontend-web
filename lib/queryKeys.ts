@@ -41,6 +41,12 @@ export const queryKeys = {
     detail: (id: string) => ["bahanBaku", "detail", id] as const,
   },
 
+  // --- Tenant ---
+  tenant: {
+    semua: kunci(["tenant"] as const),
+    detail: (id: string) => ["tenant", "detail", id] as const,
+  },
+
   // --- Inventaris dan gudang ---
   lokasi: {
     semua: kunci(["lokasi"] as const),

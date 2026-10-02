@@ -29,7 +29,7 @@ const settingsModules = [
   },
   {
     title: "Profil Toko",
-    description: "Konfigurasi informasi dasar, alamat, jam operasional, dan detail toko lainnya.",
+    description: "Konfigurasi informasi dasar, alamat, dan lokasi outlet toko Anda.",
     icon: Store,
     href: "/dashboard/outlet/pengaturan/toko",
     iconColor: "text-[#D4A373]", // Mustard

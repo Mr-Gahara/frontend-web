@@ -13,6 +13,26 @@ function PesanIsian({ pesan }: { pesan?: string }) {
   return <p className="text-xs font-medium text-rose-600">{pesan}</p>;
 }
 
+/** Teks isian yang berbeda per tipe lokasi. */
+export interface TeksIsianLokasi {
+  labelNama: string;
+  contohNama: string;
+  pesanKoordinat: string;
+}
+
+export const TEKS_ISIAN_LOKASI: Record<"gudang" | "outlet", TeksIsianLokasi> = {
+  gudang: {
+    labelNama: "Nama Gudang / Warehouse",
+    contohNama: "Contoh: Gudang Utama A",
+    pesanKoordinat: "Koordinat gudang berhasil diperbarui dari browser Anda.",
+  },
+  outlet: {
+    labelNama: "Nama Outlet",
+    contohNama: "Contoh: Outlet Pusat",
+    pesanKoordinat: "Koordinat outlet berhasil diperbarui dari browser Anda.",
+  },
+};
+
 interface Props {
   register: UseFormRegister<NilaiFormLokasi>;
   setValue: UseFormSetValue<NilaiFormLokasi>;
@@ -21,6 +41,8 @@ interface Props {
   idAwalan: string;
   /** Bagi pengguna tanpa update-location: isian hanya dibaca, tanpa Deteksi Otomatis. */
   bacaSaja?: boolean;
+  /** Teks per tipe lokasi; bawaan gudang, profil toko memakai outlet (PO12a). */
+  teks?: TeksIsianLokasi;
 }
 
 /**
@@ -36,6 +58,7 @@ export default function IsianLokasi({
   errors,
   idAwalan,
   bacaSaja = false,
+  teks = TEKS_ISIAN_LOKASI.gudang,
 }: Props) {
   const [isLocating, setIsLocating] = useState(false);
   const id = (nama: string) => `${idAwalan}-${nama}`;
@@ -49,7 +72,7 @@ export default function IsianLokasi({
           setValue("latitude", position.coords.latitude.toString(), opsi);
           setValue("longitude", position.coords.longitude.toString(), opsi);
           toast.success("Lokasi Ditemukan", {
-            description: "Koordinat gudang berhasil diperbarui dari browser Anda.",
+            description: teks.pesanKoordinat,
           });
           setIsLocating(false);
         },
@@ -69,11 +92,11 @@ export default function IsianLokasi({
   return (
     <>
       <div className="space-y-2">
-        <label htmlFor={id("nama")} className="text-sm font-medium text-foreground">Nama Gudang / Warehouse</label>
+        <label htmlFor={id("nama")} className="text-sm font-medium text-foreground">{teks.labelNama}</label>
         <Input
           id={id("nama")}
           {...register("nama")}
-          placeholder="Contoh: Gudang Utama A"
+          placeholder={teks.contohNama}
           required
           readOnly={bacaSaja}
           className="bg-background"
