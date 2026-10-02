@@ -73,7 +73,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Role: template tanpa permission di luar seed (PO11a) | `366e9b7` | Selesai (Catatan dari PO11a) |
 | Penyesuaian backend `yoga` `50eede7`: fixture stok penjualan, `alasanVoid`, urutan server daftar penjualan, dan lokasi stok produk | `65edf8c` (fixture), `a4304ce` (penyesuaian) | Selesai (keputusan PY4a sampai PY7a; Catatan dari penyesuaian backend `yoga`) |
 | Pengaturan outlet: profil outlet | `ca6eb3d` (menu sidebar setelah muat ulang), `fcf2dd2` | Selesai (keputusan PO12a sampai PO16a; Catatan dari submodul profil outlet) |
-| Pelanggan dan diskon | - | **Berikutnya** (lihat Pekerjaan berikutnya). `app/dashboard/outlet/pelanggan/page.tsx` dan `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`, dan `_id`; hapus diskon memanggil `DELETE /diskon/:id`, yang tidak ada lagi di backend `465b438` (`kontrak/temuan.md` butir 82) |
+| Pelanggan | `b6de75c` (spec), `d9365d3` | Selesai (keputusan PD1a dan PD5a; Catatan dari submodul pelanggan) |
+| Diskon | - | **Berikutnya** (lihat Pekerjaan berikutnya). `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`, dan `_id`; hapus diskon memanggil `DELETE /diskon/:id`, yang tidak ada lagi di backend `465b438` (`kontrak/temuan.md` butir 82) |
 | Profil, login, dan sidebar | - | Belum. `app/dashboard/profil/page.tsx`, `app/login/page.tsx`, `app/login/pengguna/page.tsx`, dan `components/app-sidebar.tsx` masih memakai `apiClient`. Nama toko di sidebar dan halaman profil sudah dibaca lewat `useTenant` (`fcf2dd2`), dan effect sidebar mengikuti sesi (`ca6eb3d`) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
@@ -81,48 +82,77 @@ Keputusan produk tiap modul tercatat di `keputusan.md`.
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per submodul pajak (`e0aaeca`):
+Diukur ulang per submodul pelanggan (`d9365d3`):
 
-| Hal | Awal | Setelah pajak `e0aaeca` | Catatan |
+| Hal | Awal | Setelah pelanggan `d9365d3` | Catatan |
 |---|---|---|---|
-| Pemakaian `any` | 302 | 12 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`) |
-| Kemunculan `_id` | - | 13 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak |
-| `useAuthGuard()` berulang di halaman | 49 | 29 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, dan ketiga halaman metode pembayaran) |
+| Pemakaian `any` | 302 | 9 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), dan 9 setelah halaman pelanggan (`d9365d3`) |
+| Kemunculan `_id` | - | 11 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan |
+| `useAuthGuard()` berulang di halaman | 49 | 28 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, dan halaman pelanggan) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
 | Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: modul Pelanggan dan diskon
+## Pekerjaan berikutnya: submodul diskon (modul Pelanggan dan diskon)
 
-Modul Pengaturan outlet selesai dengan submodul profil outlet (`fcf2dd2`).
-Yang tersisa di Fase 3 adalah modul ini, lalu Profil, login, dan sidebar.
-Pemetaannya belum diambil; yang sudah diketahui dari modul lain:
+Submodul 2 dari dua (keputusan PD1a); submodul pelanggan selesai di
+`d9365d3`. `app/dashboard/outlet/diskon/page.tsx` (648 baris) masih
+memakai `apiClient`, `any`, dan `_id`, tanpa spec e2e. Pemetaan backend
+(2 Oktober 2026, terhadap `yoga` `50eede7`):
 
-- `app/dashboard/outlet/pelanggan/page.tsx` dan
-  `app/dashboard/outlet/diskon/page.tsx` masih memakai `apiClient`, `any`,
-  dan `_id`. Tipe `PelangganLama` dan `DiskonLama` (keputusan rancangan
-  butir 19) dihapus di commit migrasinya.
-- `features/pelanggan` dan `features/diskon` baru memuat daftar, yang
-  dipakai buat penjualan dan buat reservasi (`arsitektur.md`).
-- Hapus diskon memanggil `DELETE /diskon/:id`, yang tidak ada lagi di
-  backend sejak `465b438` (`kontrak/temuan.md` butir 82); penggantinya
-  perlu keputusan pemilik proyek.
-- Payload buat dan ubah diskon serta pelanggan di `kontrak/payload.md`
-  belum dikoreksi terhadap backend `yoga`.
-- `GET /pelanggan` dan `GET /diskon` tanpa `checkPermission`
-  (`kontrak/temuan.md` butir 5), sedangkan menu pelanggan bergate
-  `read-pelanggan` (`kontrak/izin-halaman.md`).
+- Route hanya `GET`, `POST`, dan `PUT`; tidak ada `DELETE`, karena diskon
+  dirujuk riwayat penjualan. `POST` dan `PUT` memeriksa `create-diskon`
+  dan `update-diskon` serta dibatasi pembatas laju; `GET` tanpa
+  `checkPermission`.
+- Validator memakai allowlist 17 field (`FIELD_DIKENAL`): enam yang
+  dikenal web, ditambah `produkIDs`, `tanggalMulai`, `tanggalBerakhir`,
+  `hitungPerBarang`, `minimalBelanja`, `kuota`, `khususMember`,
+  `kuotaPerPelanggan`, `jamMulai`, `jamSelesai`, dan `hariAktif`.
+- Service: nama kembar 409 tanpa membedakan huruf besar kecil, paling
+  banyak 50 diskon aktif per toko (409), dan daftar menerima query
+  `status`, `cakupan`, dan `tipe` dengan cache 300 detik.
+- Respons membawa seluruh field aturan beserta `terpakai`, `sisaKuota`,
+  dan `sedangBerlaku`, yang dihitung saat respons dibuat.
+- Aturan itu ditegakkan saat dipakai: `penjualanService` dan
+  `sesiBookingHelperService` memeriksa minimal belanja, kuota, jam dan
+  hari berlaku, khusus member, dan kuota per pelanggan, sedangkan
+  `diskonAktif` di web hanya melihat status.
+- Halaman lama membaca `editTarget?._id` dan `deleteTarget._id`, padahal
+  mapper mengirim `id`; diduga ubah mengirim `POST` dan hapus memanggil
+  route yang tidak ada. Belum dibuktikan; spec pembanding yang
+  membuktikannya.
 
-Langkah pertama sesi berikutnya, setelah backend di-`fetch` dan
-dibandingkan dengan acuan (`cara-kerja.md`):
+Keputusan sudah diambil (PD2a sampai PD4a). Langkah pertama: tulis spec
+pembanding terhadap kode lama, lalu migrasi enam field lama (commit
+pertama PD3a).
 
-```bash
-cd ~/Documents/frontend-web
-wc -l app/dashboard/outlet/pelanggan/page.tsx app/dashboard/outlet/diskon/page.tsx
-grep -nE 'apiClient|: any|_id|queryKey' app/dashboard/outlet/pelanggan/page.tsx app/dashboard/outlet/diskon/page.tsx | cut -c1-120
-```
+## Catatan dari submodul pelanggan
+
+Submodul 1 modul Pelanggan dan diskon selesai pada 2 Oktober 2026: spec
+pembanding (`b6de75c`) dan migrasi (`d9365d3`). Halaman pelanggan tidak
+lagi memakai `apiClient`, dan `PelangganLama` dihapus.
+
+- Lapisan data dan komponen di `features/pelanggan` (`arsitektur.md`).
+  Halaman, buat penjualan, dan buat reservasi berbagi satu cache
+  `pelanggan.daftar()`.
+- Dialog konfirmasi buat dan hapus kini hanya tertutup saat berhasil
+  (keputusan Fase 0), label terhubung ke isiannya, dan daftar yang gagal
+  dimuat tampil sebagai pesan.
+- Backend menjawab 200 saat nomor HP, email, atau alamat dikosongkan
+  tanpa mengubah nilainya (`kontrak/temuan.md` butir 104); web mengirim
+  teks kosong lalu memperingatkan dari hasil simpan (PD5a), dan skenario
+  pengosongannya menunggu sebagai `test.fixme`.
+- `PUT /pelanggan/:id` menerima operator MongoDB dari body, dibuktikan
+  lewat permintaan nyata (butir 105, alasan keamanan). Temuan backend
+  baru: butir 104 sampai 106, dilaporkan 2 Oktober 2026 (`backend.md`).
+- Satu selector spec pembanding berubah di commit migrasi, karena dialog
+  yang kini bertahan menyembunyikan `main` dari pohon aksesibilitas
+  (`pengujian.md`, Catatan Playwright).
+- Kontrak pelanggan dikoreksi terhadap `yoga` (`kontrak/payload.md`,
+  `kontrak/endpoint.md`).
+- Keputusan pemilik proyek: `keputusan.md` (Modul Pelanggan dan diskon).
 
 ## Catatan dari submodul profil outlet
 
@@ -257,8 +287,8 @@ dalam delapan commit, dengan keputusan PB1a sampai PB14a (`keputusan.md`).
   laporan, sesi booking, tipe aset, transfer stok, dan buat akun kas
   (`kontrak/payload.md`, `kontrak/endpoint.md`). Metode pembayaran
   dikoreksi 1 Oktober 2026 (`3359497`), begitu pula pajak (`e0aaeca`);
-  pelanggan dan diskon belum, dan diperiksa saat modul pemiliknya
-  dimigrasikan.
+  pelanggan dikoreksi 2 Oktober 2026 (`d9365d3`); diskon belum, dan
+  diperiksa saat submodulnya dimigrasikan.
 - Audit endpoint mencatat backend kini memiliki 243 route: tujuh route
   Lampiran A hilang, termasuk `DELETE /akunkas/:id`, `DELETE /diskon/:id`,
   dan `DELETE /metodepembayaran/:id`, dan empat route baru belum dipakai
@@ -525,15 +555,15 @@ Yang masih berlaku:
 
 ### Utang kecil dari modul penjualan dan pembayaran
 
-- Dua tipe berakhiran `Lama` masih dipakai halaman yang belum
-  dimigrasikan lewat alias impor (`keputusan.md` butir 19): `PelangganLama`
-  (halaman pelanggan) dan `DiskonLama` (halaman diskon). Masing-masing
+- Satu tipe berakhiran `Lama` masih dipakai halaman yang belum
+  dimigrasikan lewat alias impor (`keputusan.md` butir 19): `DiskonLama`
+  (halaman diskon); `PelangganLama` dihapus di `d9365d3`. Masing-masing
   dihapus di commit migrasi modul pemiliknya. Sisanya dihitung dengan
   `grep -rhoE 'export interface [A-Za-z]+Lama\b' types | wc -l` (2 per
   `e0aaeca`, yang menghapus `PajakLama`, `ProdukPajakRelasiLama`, dan
   `PajakDariProdukLama`; 5 per `3359497`, yang menghapus `AkunKasLama`,
   `AkunKasRefLama`, dan `MetodePembayaranLama`, dan pesan commit itu
-  keliru menyebut enam).
+  keliru menyebut enam). Per `d9365d3` tersisa 1.
 - `features/penjualan/halaman-buat-penjualan.tsx` masih 1.088 baris:
   migrasi memindahkan lapisan data dan membuang `any`, tetapi tidak memecah
   komponennya. Pisahkan pemilih pelanggan, pemilih diskon, dan pratinjau

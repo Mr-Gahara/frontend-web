@@ -48,7 +48,8 @@ penjualan, pembayaran, dan sesi booking di `endpoint.md`, `payload.md`,
 dan `temuan.md` dikoreksi terhadap backend `yoga` `50eede7`
 (`origin/yoga`, yang menggabungkan `origin/nizar` `3edbdea`), dan
 bagian tenant ditambahkan ke `endpoint.md`, `payload.md`,
-`izin-halaman.md`, dan `temuan.md` terhadap backend yang sama. Bila
+`izin-halaman.md`, dan `temuan.md` terhadap backend yang sama, begitu
+pula bagian pelanggan. Bila
 backend berubah cukup jauh, `endpoint.md`, `payload.md`, `izin-halaman.md`,
 dan `route-backend.md` perlu dibangkitkan ulang; bagian 1 di bawah menjelaskan
 cara pembangkitannya. Gejala bahwa kontrak sudah tertinggal: endpoint yang

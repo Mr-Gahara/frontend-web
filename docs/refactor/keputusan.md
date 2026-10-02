@@ -911,6 +911,46 @@ Diputuskan pemilik proyek pada 1 Oktober 2026.
   dihapus diganti: stok yang diisi tersimpan apa adanya sejak butir 11
   diperbaiki.
 
+### Modul Pelanggan dan diskon
+
+Diputuskan pemilik proyek pada 2 Oktober 2026, dengan prinsip keputusan
+rancangan butir 17, 21, dan 23. PD1a dan PD5a diterapkan di `d9365d3`
+(submodul pelanggan); PD2a sampai PD4a untuk submodul diskon.
+
+- **PD1a: dua submodul berurutan**, pelanggan lalu diskon, masing-masing
+  dengan spec pembanding, migrasi, commit, dan dokumen penutup sendiri.
+- **PD2a: hapus diskon diganti aktifkan dan nonaktifkan** dari menu
+  daftar, lewat dialog yang hanya tertutup saat berhasil, karena backend
+  tidak punya `DELETE` (diskon dirujuk riwayat penjualan). Batas 50 diskon
+  aktif ditahan di klien dengan keterangan, dan jawaban 409 backend tetap
+  ditampilkan, seperti PO2a dan PO3a.
+- **PD3a: form diskon mengelola seluruh field backend, dalam dua commit.**
+  Commit pertama memigrasikan enam field lama dan menampilkan aturan lain
+  baca-saja di daftar; commit kedua menambah masa berlaku, jam dan hari,
+  minimal belanja, kuota, kuota per pelanggan, khusus member, produk
+  tertentu, dan hitung per barang.
+- **PD4a: pilihan diskon di buat penjualan dan buat reservasi mengikuti
+  `sedangBerlaku`** dari backend, sehingga diskon di luar masa, jam, hari,
+  atau kuotanya tidak ditawarkan. Syarat yang bergantung pada transaksi
+  (minimal belanja, khusus member, produk) tampil sebagai keterangan, dan
+  penolakan backend ditampilkan apa adanya.
+- **PD5a: isian pelanggan yang dikosongkan dikirim, lalu hasilnya
+  diperingatkan.** Backend menjawab 200 tanpa mengubah nilainya
+  (`kontrak/temuan.md` butir 104). Form ubah mengirim teks kosong, lalu
+  membandingkan hasil simpan lewat `isianTidakTerkosongkan` dan
+  memperingatkan bila nilainya masih ada. Tanpa konstanta, karena
+  peringatan hilang sendiri begitu backend diperbaiki; skenario
+  pengosongannya ditulis lengkap sebagai `test.fixme`.
+- Diterapkan tanpa ditanyakan (`d9365d3`): form memakai React Hook Form
+  dan Zod dengan isian dipangkas dan email diperiksa bentuknya bila diisi;
+  ubah hanya mengirim field yang berubah (butir 15), dan simpan tanpa
+  perubahan tidak mengirim permintaan; dialog konfirmasi buat dan hapus
+  hanya tertutup saat berhasil (keputusan Fase 0); label ber-`htmlFor`;
+  tombol tambah, ubah, dan hapus mengikuti izin endpoint-nya (butir 14);
+  daftar yang gagal dimuat tampil sebagai pesan dengan tombol coba lagi,
+  sejalan dengan keputusan submodul jurnal stok; dan tampilan serta teks
+  lain dipertahankan agar spec pembanding tetap berlaku.
+
 ## Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.
@@ -1005,7 +1045,7 @@ Diputuskan pemilik proyek pada 1 Oktober 2026.
 19. **Tipe ber-`_id` yang masih dibaca halaman lama menjadi jembatan
     berakhiran `Lama`.** Nama kanonik menjadi tipe ber-`id` dari bentuk
     respons nyata, sedangkan halaman lama memakai tipe lamanya lewat alias
-    impor (`PelangganLama as Pelanggan`), sehingga badan halaman tidak
+    impor (`DiskonLama as Diskon`), sehingga badan halaman tidak
     berubah. Tipe `Lama` dihapus di commit migrasi modul pemiliknya, dan
     sisanya dicatat di `status.md` sampai habis (pemilik proyek, 24
     September 2026: frontend akhirnya harus bersih dari `_id`).

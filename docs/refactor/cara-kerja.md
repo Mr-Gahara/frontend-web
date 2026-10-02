@@ -1300,6 +1300,16 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   sebelum mengerjakan commit perbaikan terpisah**, lalu dikembalikan
   dengan `git stash pop` setelah commit itu masuk, agar suite penuh
   mengukur perbaikan itu saja (`ca6eb3d` di tengah profil toko).
+- **Celah backend dibuktikan lewat field yang tidak merusak, pada data
+  uji yang dibuat dan dihapus skrip itu sendiri.** Operator `$set` di
+  `PUT /pelanggan/:id` dibuktikan dengan `poinLoyalitas` pelanggan uji,
+  bukan `tenantID`, dan dibandingkan dengan permintaan tanpa operator
+  agar terlihat perlindungan mana yang terlewati. Service yang meneruskan
+  body ke `findOneAndUpdate` tanpa `$set` dan validator tanpa allowlist
+  adalah tandanya.
+- **Jawaban sukses backend dibandingkan dengan data yang dibaca ulang.**
+  `PUT` pelanggan menjawab 200 "berhasil" untuk pengosongan yang tidak
+  terjadi; bila hanya status yang diperiksa, temuan itu tidak terlihat.
 
 ## Kapan berhenti dan bertanya
 

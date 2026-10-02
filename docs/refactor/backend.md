@@ -287,6 +287,12 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   sebelum pemeriksaan izin di `PUT /tenant/:id`, serta `persenPajak`,
   `tipePajak`, dan `logoUrl` tenant tanpa pemakai (perlu keputusan)
   (`kontrak/temuan.md` butir 98 sampai 103)
+- Laporan submodul pelanggan — 3 temuan, disusun 2 Oktober 2026 setelah
+  `d9365d3`: `PUT /pelanggan/:id` menerima operator MongoDB dari body
+  sehingga field yang dilindungi dapat diubah (alasan keamanan, dibuktikan
+  lewat permintaan nyata), nomor HP, email, dan alamat yang tidak dapat
+  dikosongkan padahal dijawab berhasil, dan duplikat yang dijawab 400
+  (`kontrak/temuan.md` butir 104 sampai 106)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

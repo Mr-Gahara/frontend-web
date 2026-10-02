@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon dan pelanggan belum, dan diperiksa saat modul pemiliknya dimigrasikan; buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`).
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi diskon belum, dan diperiksa saat submodulnya dimigrasikan, sedangkan operasi pelanggan dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`).
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -252,12 +252,15 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `POST /pelanggan`
 
-- Aturan: validatePelangganPayload (validators/pelangganValidator.js)
+- Aturan: validatePelangganPayload (validators/pelangganValidator.js) di route, setelah `checkPermission("create-pelanggan")`. Dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7`
 - Wajib dari klien: `namaPelanggan`, `tipePelanggan`
-- Field lain yang dikenali: `nomorHp`, `email`, `alamat`
+- Field lain yang dikenali: `nomorHp`, `email`, `alamat`. Ketiganya dibuang validator dari body bila berupa teks kosong atau null; `email` yang diisi diperiksa bentuknya. Tidak ada allowlist
 - Nilai sah: `VALID_TYPES`: umum, member, korporat
-- Dibaca controller dari body: `-`
-- Diisi server: -
+- Aturan service: nama, nomor HP, dan email unik per tenant di antara pelanggan yang belum dihapus (indeks unik parsial); duplikat dijawab 400 dengan pesan yang menyebut field dan nilainya, bukan 409 (`temuan.md` butir 106)
+- Web mengirim hasil `payloadBuatPelanggan` (`features/pelanggan/payload.ts`, `d9365d3`): nama dan tipe, serta isian opsional yang diisi saja
+- Respons 201 dengan `data` berbentuk item `GET /pelanggan` dan `message` "Pelanggan berhasil ditambahkan"
+- Dibaca controller dari body: seluruh body, dengan `tenantID` ditimpa dari sesi
+- Diisi server: `tenantID`
 
 #### `POST /pembayaran`
 
@@ -499,10 +502,13 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /pelanggan/:id`
 
-- Aturan: validatePelangganPayload (validators/pelangganValidator.js)
-- Wajib dari klien: `namaPelanggan`, `tipePelanggan`
-- Field lain yang dikenali: `nomorHp`, `email`, `alamat`
-- Nilai sah: `VALID_TYPES`: umum, member, korporat
+- Aturan: validatePelangganPayload mode update (validators/pelangganValidator.js) di route, setelah `checkPermission("update-pelanggan")`: seluruh field opsional. Dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7`; sebelumnya `namaPelanggan` dan `tipePelanggan` tercatat wajib
+- Wajib dari klien: -
+- Field lain yang dikenali: `namaPelanggan`, `tipePelanggan`, `nomorHp`, `email`, `alamat`
+- `nomorHp`, `email`, dan `alamat` yang berupa teks kosong atau null dibuang validator, sehingga isian yang sudah terisi tidak dapat dikosongkan, dan permintaannya tetap dijawab 200 (`temuan.md` butir 104)
+- Aturan service: `tenantID`, `_id`, `poinLoyalitas`, dan `isDeleted` dibuang dari tingkat atas body, lalu body diteruskan ke `findOneAndUpdate` tanpa `$set` dan tanpa allowlist, sehingga operator seperti `$set` di body dijalankan (butir 105). Pelanggan milik tenant lain atau yang sudah dihapus dijawab 404; duplikat 400 seperti `POST`
+- Web mengirim hanya field yang berubah lewat `payloadPerbaruiPelanggan` (`features/pelanggan/payload.ts`, `d9365d3`), dengan teks kosong untuk isian yang dikosongkan, lalu membandingkan hasilnya (keputusan PD5a)
+- Respons 200 dengan `data` berbentuk item `GET /pelanggan` dan `message` "Pelanggan berhasil diperbarui"
 - Diisi server: -
 
 #### `PUT /pembayaran/:id`

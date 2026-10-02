@@ -91,6 +91,14 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per submodul pelanggan** (commit `d9365d3`): 419 test unit dan
+integrasi lolos di 53 berkas, 366 e2e lolos, 17 skipped: 16 seperti
+baseline `465b438` di bawah, ditambah satu `test.fixme` pengosongan nomor
+HP pelanggan. Dari baseline profil outlet, spec pembanding pelanggan
+(`b6de75c`) menambah empat skenario (360), dan migrasinya (`d9365d3`)
+menambah 12 test unit, enam skenario lolos, dan satu `test.fixme` (366).
+Diukur terhadap backend lokal `yoga` `50eede7`.
+
 **Baseline per submodul profil outlet** (commit `fcf2dd2`): 407 test unit
 dan integrasi lolos di 52 berkas, 356 e2e lolos, 16 skipped (sama dengan
 baseline `465b438` di bawah). Dari baseline `yoga`, perbaikan sidebar
@@ -529,6 +537,19 @@ satu putaran.
   pemulihan sesi, karena navigasi dari halaman login terjadi saat sesi
   sudah ada; menu yang hilang setelah muat ulang tidak terlihat sampai
   spec muat ulang ditulis (`ca6eb3d`).
+- Selagi dialog modal terbuka, isi halaman tersembunyi dari pohon
+  aksesibilitas, sehingga `getByRole("main")` tidak menemukan apa pun dan
+  toast di dalamnya hanya dapat dicari lewat `page.getByText`. Spec
+  pembanding pelanggan mencari pesan gagal di dalam `main`, yang hanya
+  berhasil karena dialog lama tertutup saat diklik; selector itu berubah
+  di commit migrasi begitu dialog bertahan (`d9365d3`). Selector spec
+  pembanding tidak boleh bergantung pada perilaku yang akan diubah.
+- Tampilan yang bergantung pada perilaku backend yang menunggu perbaikan
+  diuji dengan membaca respons nyata lalu memeriksa tampilan yang sesuai
+  dengannya, sedangkan perilaku yang benar ditegaskan `test.fixme`
+  tersendiri. Langkah pengosongan nomor HP memeriksa peringatan bila
+  respons masih membawa nilainya dan pesan berhasil bila tidak, sehingga
+  benar di kedua keadaan backend (`d9365d3`).
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -542,6 +563,7 @@ Menunggu perbaikan backend:
 | Finalisasi berhasil bila stok bahan outlet cukup walau `produk.stok`, potret stok outlet saat produk disimpan, tidak (`penjualan/alur-penjualan.spec.ts`) | Backend berhenti memakai `produk.stok` sebagai gerbang finalisasi, atau menghitungnya dari stok lokasi saat dibaca (`kontrak/temuan.md` butir 37). Sejak `yoga` sumbernya stok outlet, tetapi tetap potret; dibuktikan masih gagal pada 1 Oktober 2026 |
 | Delapan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, dan stock adjustment | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
 | Shift yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/shift/crud-shift.spec.ts`) | Backend memisahkan shift per lokasi dan `KUNCI_LOKASI_SHIFT` di `features/shift/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
+| Nomor HP pelanggan yang dikosongkan tersimpan kosong (`pelanggan/kelola-pelanggan.spec.ts`) | Backend menerapkan pengosongan `nomorHp`, `email`, dan `alamat` di `PUT /pelanggan/:id`, yang kini dibuang validator lalu dijawab 200 (`kontrak/temuan.md` butir 104, keputusan PD5a). Badannya lengkap |
 | Pola yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | Backend memisahkan pola roster per lokasi dan `KUNCI_LOKASI_POLA_ROSTER` di `features/pola-roster/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
 
 Pada 30 September 2026, setelah backend `465b438`, lima `test.fixme`
@@ -763,6 +785,13 @@ Urutan debug kegagalan e2e di atas).
   Test itu lolos sendirian dan di dua suite penuh sesudahnya; penyebabnya
   belum diketahui, karena trace tidak disimpan. Bila terulang, jalankan
   dengan `--trace on`.
+- **Tombol pelanggan yang disembunyikan menurut izin hanya teruji di unit
+  test** (`aksiPelanggan`), karena satu-satunya akun uji berperan Owner.
+- **Pelanggan uji dihapus lunak**, sehingga setiap run spec pelanggan
+  menambah dokumen ber-`isDeleted` di basis data development; daftar dan
+  indeks unik backend mengabaikannya.
+- **Peringatan pengosongan email dan alamat hanya teruji di unit test**
+  (`isianTidakTerkosongkan`); e2e hanya menguji nomor HP.
 
 ## Spec rujukan
 
@@ -995,3 +1024,10 @@ Urutan debug kegagalan e2e di atas).
   toko dibuktikan tampil di sidebar dan bertahan setelah muat ulang; dan
   `finally` mengembalikan data lewat API hanya bila nilainya masih
   berbeda.
+- `tests/e2e/pelanggan/pelanggan.spec.ts` (`b6de75c`) dan
+  `kelola-pelanggan.spec.ts` (`d9365d3`): spec pembanding dan spec
+  migrasi dipisah; pelanggan uji dibuat, diubah, dan dihapus lewat UI
+  dengan nama, nomor HP, dan email unik per run; dialog yang bertahan
+  dibuktikan dengan menjawab gagal lalu melepas pencegat dan mengulang
+  aksi yang sama sampai berhasil; dan `test.fixme` berbadan lengkap
+  berdampingan dengan langkah yang membaca respons nyata.
