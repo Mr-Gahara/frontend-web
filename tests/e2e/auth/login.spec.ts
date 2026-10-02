@@ -157,7 +157,7 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
       });
     });
 
-    test("harus menolak submit saat format email tidak valid (HTML5 validation)", async ({
+    test("harus menolak submit saat format email tidak valid", async ({
       page,
     }) => {
       await page.goto("http://localhost:3000/login");
@@ -169,7 +169,7 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
     });
 
     // [SKENARIO BARU] Bypass HTML5
-    test("harus tetap gagal submit jika atribut HTML5 di-bypass dan input dikosongkan", async ({
+    test("harus tetap gagal submit saat input dikosongkan", async ({
       page,
     }) => {
       await page.goto("http://localhost:3000/login");

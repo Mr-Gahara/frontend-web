@@ -68,3 +68,22 @@ export interface LoginPenggunaResponse {
   accessToken: string;
   data: PenggunaSession;
 }
+
+/** Payload POST /pengguna/pin-login dari web; installationId hanya wajib untuk aplikasi. */
+export interface PayloadLoginPengguna {
+  nama: string;
+  pin: string;
+  loginType: "web";
+}
+
+/**
+ * Respons POST /pengguna/pin-login. accessToken berada di tingkat atas.
+ * success false dengan status 200 berarti perangkat menunggu persetujuan
+ * (hanya login aplikasi).
+ */
+export interface ResponsLoginPengguna {
+  success?: boolean;
+  code?: string;
+  message?: string;
+  accessToken?: string;
+}

@@ -75,3 +75,23 @@ export const apiData = {
   delete: async <T>(endpoint: string, tokenType?: TokenType) =>
     (await api.delete<T>(endpoint, tokenType)).data,
 };
+/**
+ * Varian tanpa pembukaan envelope, untuk respons yang membawa field di
+ * tingkat atas di samping data (login: accessToken dan requireSetup), yang
+ * akan hilang bila dilewatkan unwrap. Isinya tidak dinormalkan; galat tetap
+ * dijadikan ApiError.
+ */
+export const apiMentah = {
+  post: async <T>(
+    endpoint: string,
+    body: unknown,
+    tokenType: TokenType = "pengguna",
+    opsi?: OpsiPermintaan,
+  ): Promise<T> => {
+    try {
+      return await apiClient.post<T>(endpoint, body, opsi, tokenType);
+    } catch (e) {
+      throw keApiError(e);
+    }
+  },
+};
