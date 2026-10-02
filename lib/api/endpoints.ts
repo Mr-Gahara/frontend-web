@@ -14,6 +14,8 @@ export const EP = {
     login: "/akun/auth/login",
     logout: "/akun/auth/logout",
     refresh: "/akun/auth/refreshtoken",
+    adminDaftar: "/akun/admin/all",
+    adminAkun: "/akun/admin/users",
   },
   pengguna: {
     list: "/pengguna",

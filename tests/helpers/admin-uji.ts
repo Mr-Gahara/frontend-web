@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Page, Response } from "@playwright/test";
+import { expect, request, type Page, type Response } from "@playwright/test";
 
 /*
  * Akun admin uji untuk spec panel admin (keputusan PA4a dan PA5a).
@@ -50,4 +50,39 @@ export async function loginAdmin(page: Page, admin: KredensialAdmin): Promise<Re
   const respons = await tunggu;
   await page.waitForURL("**/admin");
   return respons;
+}
+/** Kredensial admin uji; melempar bila tidak tersedia (spec-nya sudah dilewati test.skip). */
+export function wajibAdmin(): KredensialAdmin {
+  const admin = kredensialAdmin();
+  if (!admin) throw new Error(ALASAN_TANPA_ADMIN);
+  return admin;
+}
+
+/**
+ * Membersihkan akun klien uji lewat API (keputusan PA9a): dibekukan lalu
+ * dihapus, karena backend hanya menghapus akun non-aktif. Login di konteks
+ * terpisah memutar tokenVersion admin, jadi dipanggil setelah halaman tidak
+ * dipakai lagi. Jawabannya diperiksa lunak agar kegagalan asli test tetap
+ * terlihat.
+ */
+export async function hapusAkunKlienUji(id: string, admin: KredensialAdmin) {
+  const ctx = await request.newContext({ baseURL: "http://localhost:3000" });
+  try {
+    const masuk = await ctx.post("/api/akun/auth/login", {
+      data: { email: admin.email, password: admin.password },
+    });
+    const kepala = { Authorization: "Bearer " + (await masuk.json()).accessToken };
+    const beku = await ctx.post("/api/akun/admin/users/" + id + "/freeze", {
+      headers: kepala,
+      data: { alasan: "Pembersihan akun uji e2e" },
+    });
+    expect.soft(beku.status(), "bekukan akun uji").toBe(200);
+    const hapus = await ctx.delete("/api/akun/admin/users/" + id, {
+      headers: kepala,
+      data: { password: admin.password },
+    });
+    expect.soft(hapus.status(), "hapus akun uji").toBe(200);
+  } finally {
+    await ctx.dispose();
+  }
 }

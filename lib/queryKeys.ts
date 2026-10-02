@@ -41,6 +41,12 @@ export const queryKeys = {
     detail: (id: string) => ["bahanBaku", "detail", id] as const,
   },
 
+  // --- Panel admin ---
+  adminAkun: {
+    semua: kunci(["adminAkun"] as const),
+    daftar: () => ["adminAkun", "daftar"] as const,
+  },
+
   // --- Tenant ---
   tenant: {
     semua: kunci(["tenant"] as const),
