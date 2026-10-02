@@ -29,6 +29,7 @@ import {
   payloadBuatDiskon,
   payloadPerbaruiDiskon,
 } from "./payload";
+import { IsianAturanDiskon } from "./aturan-diskon";
 import { skemaDiskon, type NilaiFormDiskon } from "./schema";
 
 const KELAS_LABEL = "text-sm font-bold text-[#041E3F]";
@@ -50,7 +51,8 @@ interface IsiProps {
 }
 
 /**
- * Isi form diskon untuk enam field dasar, dipakai tambah dan ubah. Dipasang
+ * Isi form diskon: enam field dasar dan bagian Aturan tambahan
+ * (IsianAturanDiskon, keputusan PD3a), dipakai tambah dan ubah. Dipasang
  * setiap kali dialog dibuka, dengan nilai awal lewat defaultValues
  * (keputusan rancangan butir 8). Ubah hanya mengirim field yang berubah
  * (butir 15). Dialog hanya tertutup saat simpan berhasil; saat gagal, pesan
@@ -220,6 +222,8 @@ function IsiFormDiskon({ diskon, batasTercapai, onTutup }: IsiProps) {
         </div>
       </div>
 
+      <IsianAturanDiskon register={register} control={control} errors={errors} diskon={diskon} />
+
       {galat && (
         <p className="text-sm text-red-600 font-bold bg-red-500/10 px-4 py-3 rounded-xl border border-red-500/20 mt-1">
           {galat}
@@ -250,7 +254,7 @@ export function DialogFormDiskon({
         if (!buka) onTutup();
       }}
     >
-      <DialogContent className="sm:max-w-135 border-[#041E3F]/10 bg-[#F2EAE1] p-6 sm:p-8 [&>button]:hidden rounded-[1.5rem] shadow-xl">
+      <DialogContent className="sm:max-w-135 max-h-[90vh] overflow-y-auto border-[#041E3F]/10 bg-[#F2EAE1] p-6 sm:p-8 [&>button]:hidden rounded-[1.5rem] shadow-xl">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#041E3F]/15 bg-[#FFFAF3] text-[#041E3F]">

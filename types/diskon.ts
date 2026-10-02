@@ -38,8 +38,26 @@ export interface Diskon {
   updatedAt: string;
 }
 
-/** Payload POST /diskon dari form web (enam field dasar). */
-export interface BuatDiskonPayload {
+/**
+ * Field aturan diskon yang dikelola form web (keputusan PD3a). khususMember
+ * tidak termasuk (PD8a). Saat membuat, hanya aturan yang diisi yang dikirim.
+ * null menghapus batasnya di backend.
+ */
+export interface AturanDiskonPayload {
+  produkIDs?: string[];
+  tanggalMulai?: string | null;
+  tanggalBerakhir?: string | null;
+  hitungPerBarang?: boolean;
+  minimalBelanja?: number;
+  kuota?: number | null;
+  kuotaPerPelanggan?: number | null;
+  jamMulai?: string | null;
+  jamSelesai?: string | null;
+  hariAktif?: number[];
+}
+
+/** Payload POST /diskon dari form web: enam field dasar dan aturan yang diisi. */
+export interface BuatDiskonPayload extends AturanDiskonPayload {
   namaDiskon: string;
   cakupan: DiskonCakupan;
   tipe: DiskonTipe;
