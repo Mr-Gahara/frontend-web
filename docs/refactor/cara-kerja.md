@@ -317,6 +317,10 @@ const panggil = async (method, path, token, body) => {
     const r = await panggil("GET", "/transferstok/" + id, token);
     console.log("GET detail", r.status, "status", (r.json.data || {}).status, "item", ((r.json.data || {}).items || []).length, String(r.json.message || "").slice(0, 120));
   }
+  if (aksi === "terima" && id) {
+    const r = await panggil("PATCH", "/transferstok/" + id + "/terima", token, {});
+    console.log("PATCH terima", r.status, String(r.json.message || "").slice(0, 150));
+  }
   if (aksi === "batal" && id) {
     const r = await panggil("PATCH", "/transferstok/" + id + "/batal", token, {});
     console.log("PATCH batal", r.status, String(r.json.message || "").slice(0, 150));
@@ -573,8 +577,12 @@ EOF
   tertinggal DIKIRIM.
 - `api-surat-jalan.js`: masuk lewat API dengan akun uji. Tanpa argumen
   mencetak daftar surat jalan, dengan `detail <id>` mencetak satu surat
-  jalan, dan dengan `batal <id>` membatalkannya lewat backend sehingga stok
-  gudang kembali. Login PIN-nya mengambil alih sesi web Ridho.
+  jalan, dengan `batal <id>` membatalkannya lewat backend sehingga stok
+  gudang kembali, dan dengan `terima <id>` menerimanya penuh (body kosong
+  berarti seluruh barang diterima, sejak backend `465b438`). Terima dipakai
+  menutup surat jalan uji yang tertinggal DIKIRIM, karena batal dari
+  DIKIRIM ditolak backend (keputusan PB10a). Login PIN-nya mengambil alih
+  sesi web Ridho.
 - `audit-endpoint.js`: dijalankan dari akar repo frontend-web. Memetakan
   setiap panggilan frontend (`apiData`, `apiMentah`, `api`, dan `apiClient`
   dengan `EP`,

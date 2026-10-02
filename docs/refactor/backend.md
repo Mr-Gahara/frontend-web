@@ -30,8 +30,8 @@ dengan skrip yang masuk lewat `/api/akun/auth/login` lalu
 Login PIN dari skrip mengambil alih sesi web pengguna itu. Skrip yang
 dipakai berulang disimpan sebagai helper (`cara-kerja.md`, Helper
 penggantian): `tinjau-surat-jalan.js` untuk membaca surat jalan beserta
-jurnal dan pengajuannya, dan `api-surat-jalan.js` untuk daftar, detail, dan
-batal lewat API. Skrip sekali pakai tetap di `/tmp`.
+jurnal dan pengajuannya, dan `api-surat-jalan.js` untuk daftar, detail,
+batal, dan terima lewat API. Skrip sekali pakai tetap di `/tmp`.
 
 Data development adalah data pengujian; belum ada produksi (pemilik
 proyek, 21 September 2026). Yang dijaga adalah kebenaran alur dan aturan,
