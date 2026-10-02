@@ -24,7 +24,6 @@ export interface PenggunaSesi {
   roleID?: string;
   permissions: string[];
   tenantID: string;
-  tenantName?: string;
   aksesType?: string[];
   loginType?: string;
 }
@@ -79,7 +78,6 @@ function keSesiPengguna(token: string): PenggunaSesi | null {
     roleID: p.roleID ? String(p.roleID) : undefined,
     permissions: Array.isArray(p.permissions) ? p.permissions.map(String) : [],
     tenantID: String(p.tenantID),
-    tenantName: p.tenantName ? String(p.tenantName) : undefined,
     aksesType: Array.isArray(p.aksesType) ? p.aksesType.map(String) : undefined,
     loginType: p.loginType ? String(p.loginType) : undefined,
   };

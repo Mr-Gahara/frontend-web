@@ -26,3 +26,20 @@ export function useLoginPengguna() {
 export function useLogoutAkun() {
   return useMutation({ mutationFn: () => authApi.logoutAkun() });
 }
+
+/**
+ * Logout penuh: sesi pengguna, lalu akun. Logout akun tetap dijalankan
+ * walau logout pengguna gagal, agar cookie refresh akun tidak tertinggal
+ * berlaku. Pengakhiran sesi lokal dan pengalihan diurus pemanggilnya.
+ */
+export function useKeluar() {
+  return useMutation({
+    mutationFn: async () => {
+      try {
+        await authApi.logoutPengguna();
+      } finally {
+        await authApi.logoutAkun();
+      }
+    },
+  });
+}

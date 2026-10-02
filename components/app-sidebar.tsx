@@ -1,43 +1,22 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { akhiriSesi } from "@/lib/auth/session";
 import { useSession } from "@/lib/auth/useSession";
 import { bolehBukaGrup, bolehBukaHalaman } from "@/lib/auth/permissions";
-import { apiClient } from "@/lib/apiClient";
 import { useDaftarLokasi } from "@/features/inventaris/hooks";
 import { useTenant } from "@/features/tenant/hooks";
+import { SidebarPengguna } from "@/components/sidebar-pengguna";
+import { gudangMenus, outletMenus, type MenuItem } from "@/components/sidebar-menu";
 
 // Impor Ikon (Tambahan ikon Archive untuk Data Barang)
 import {
-  LayoutDashboard,
-  User,
-  CircleDollarSign,
-  Package,
-  Users,
-  UserCircle,
-  FileText,
-  Settings,
-  LogOut,
   ChevronRight,
   ChevronsUpDown,
   GalleryVerticalEnd,
-  Ticket,
   Building2,
   Warehouse,
   PlusCircle,
-  ArrowRightLeft,
-  Truck,
-  BookOpen,
-  ClipboardList,
-  Scale,
-  Archive,
-  CalendarDays,
-  CalendarRange,
-  Clock,
-  CalendarClock,
 } from "lucide-react";
 
 import {
@@ -72,288 +51,21 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-// --- TIPE DATA ---
-type SubMenuItem = {
-  label: string;
-  href: string;
-};
-
-type MenuItem = {
-  label: string;
-  href: string;
-  icon: React.ElementType;
-  subItems?: SubMenuItem[];
-};
-
-type MenuGroup = {
-  grup: string | null;
-  items: MenuItem[];
-};
-
-// --- 1. DEFINISI MENU OUTLET (TELAH DIRESTUKTURISASI) ---
-const outletMenus: MenuGroup[] = [
-  {
-    grup: null,
-    items: [
-      {
-        label: "Dashboard",
-        href: "/dashboard/outlet",
-        icon: LayoutDashboard,
-      },
-    ],
-  },
-  {
-    grup: "Operasional",
-    items: [
-      {
-        label: "Sesi Booking & Reservasi",
-        href: "/dashboard/outlet/reservasi",
-        icon: UserCircle,
-      },
-      {
-        label: "Promo & Diskon",
-        href: "/dashboard/outlet/diskon",
-        icon: Ticket,
-      },
-    ],
-  },
-  {
-    grup: "Keuangan & Laporan",
-    items: [
-      {
-        label: "Keuangan",
-        href: "/dashboard/outlet/keuangan",
-        icon: CircleDollarSign,
-        subItems: [
-          {
-            label: "Penjualan",
-            href: "/dashboard/outlet/penjualan",
-          },
-          {
-            label: "Pengeluaran",
-            href: "/dashboard/outlet/pengeluaran",
-          },
-        ],
-      },
-      {
-        label: "Laporan",
-        href: "/dashboard/outlet/keuangan/ringkasanLabaRugi",
-        icon: FileText,
-      },
-    ],
-  },
-  // KELOMPOK BARU: INVENTARIS YANG DIPECAH 3
-  {
-    grup: "Manajemen Inventaris",
-    items: [
-      {
-        label: "Data Barang",
-        href: "/dashboard/outlet/inventaris-data", // Href semu untuk parent
-        icon: Archive,
-        subItems: [
-          {
-            label: "Produk Jualan",
-            href: "/dashboard/outlet/inventaris/produk",
-          },
-          { label: "Kategori", href: "/dashboard/outlet/inventaris/kategori" },
-          {
-            label: "Bahan Baku / Resep",
-            href: "/dashboard/outlet/inventaris/bahanBaku",
-          },
-        ],
-      },
-      {
-        label: "Pantau Stok",
-        href: "/dashboard/outlet/inventaris-pantau", // Href semu untuk parent
-        icon: ClipboardList,
-        subItems: [
-          { label: "Stok Saat Ini", href: "/dashboard/outlet/inventaris/stok" },
-          {
-            label: "Hitung Fisik",
-            href: "/dashboard/outlet/inventaris/stockOpname",
-          },
-          {
-            label: "Koreksi Selisih",
-            href: "/dashboard/outlet/inventaris/stockAdjustment",
-          },
-          {
-            label: "Riwayat Pergerakan",
-            href: "/dashboard/outlet/inventaris/jurnalStok",
-          },
-        ],
-      },
-      {
-        label: "Suplai Gudang",
-        href: "/dashboard/outlet/inventaris-suplai", // Href semu untuk parent
-        icon: Truck,
-        subItems: [
-          {
-            label: "Minta Barang",
-            href: "/dashboard/outlet/inventaris/pengajuanStok",
-          },
-          {
-            label: "Terima Barang",
-            href: "/dashboard/outlet/inventaris/penerimaanBarang",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    grup: "Manajemen Shift",
-    items: [
-      {
-        label: "Kalender Jadwal",
-        href: "/dashboard/outlet/jadwal",
-        icon: CalendarDays,
-      },
-      {
-        label: "Pola Roster",
-        href: "/dashboard/outlet/pola-roster",
-        icon: CalendarRange,
-      },
-      {
-        label: "Master Shift",
-        href: "/dashboard/outlet/shift",
-        icon: Clock,
-      },
-    ],
-  },
-  {
-    grup: "Manajemen & Relasi",
-    items: [
-      {
-        label: "Pelanggan",
-        href: "/dashboard/outlet/pelanggan",
-        icon: UserCircle,
-      },
-      {
-        label: "Karyawan & Staff",
-        href: "/dashboard/outlet/pengguna",
-        icon: Users,
-      },
-      {
-        label: "Pengaturan Outlet",
-        href: "/dashboard/outlet/pengaturan",
-        icon: Settings,
-      },
-    ],
-  },
-];
-
-// --- 2. DEFINISI MENU GUDANG (WMS) ---
-const gudangMenus: MenuGroup[] = [
-  {
-    grup: null,
-    items: [
-      {
-        label: "Dashboard WMS",
-        href: "/dashboard/gudang",
-        icon: LayoutDashboard,
-      },
-    ],
-  },
-  {
-    grup: "Manajemen Inventaris",
-    items: [
-      {
-        label: "Barang Gudang",
-        href: "/dashboard/gudang/inventaris",
-        icon: Package,
-      },
-      {
-        label: "Jurnal Stok",
-        href: "/dashboard/gudang/jurnalStok",
-        icon: BookOpen,
-      },
-      {
-        label: "Stock Opname",
-        href: "/dashboard/gudang/stockOpname",
-        icon: ClipboardList,
-      },
-      {
-        label: "Stock Adjustment",
-        href: "/dashboard/gudang/stockAdjustment",
-        icon: Scale,
-      },
-    ],
-  },
-  {
-    grup: "Distribusi & WMS",
-    items: [
-      {
-        label: "Pengajuan Stok",
-        href: "/dashboard/gudang/pengajuanStok",
-        icon: FileText,
-      },
-      {
-        label: "Transfer Stok",
-        href: "/dashboard/gudang/transferStok",
-        icon: ArrowRightLeft,
-      },
-      {
-        label: "Pengiriman Stok",
-        href: "/dashboard/gudang/pengirimanStok",
-        icon: Truck,
-      },
-    ],
-  },
-  {
-    grup: "Manajemen Shift",
-    items: [
-      {
-        label: "Kalender Jadwal",
-        href: "/dashboard/gudang/jadwal",
-        icon: CalendarDays,
-      },
-      {
-        label: "Pola Roster",
-        href: "/dashboard/gudang/pola-roster",
-        icon: CalendarRange,
-      },
-      {
-        label: "Master Shift",
-        href: "/dashboard/gudang/shift",
-        icon: Clock,
-      },
-    ],
-  },
-  {
-    grup: "Manajemen",
-    items: [
-      {
-        label: "Petugas Gudang",
-        href: "/dashboard/gudang/pengguna",
-        icon: Users,
-      },
-      {
-        label: "Pengaturan Gudang",
-        href: "/dashboard/gudang/pengaturan",
-        icon: Settings,
-      },
-    ],
-  },
-];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
   const pathname = usePathname();
   const { setOpenMobile, isMobile } = useSidebar();
 
-  // State Pengguna & Hak Akses
-  const [namaUser, setNamaUser] = useState("");
-  const [posisiUser, setPosisiUser] = useState("");
-  const [permissions, setPermissions] = useState<string[]>([]);
-  const [role, setRole] = useState<string>("");
-
-  // State Evaluasi Lokasi
+  // Izin dibaca langsung dari sesi saat render, bukan disalin ke state
+  // lewat effect, sehingga menu berizin mengikuti sesi begitu pulih setelah
+  // halaman dimuat ulang (keputusan PO16a).
   const { pengguna } = useSession();
+  const permissions = pengguna?.permissions ?? [];
   // Lokasi dimuat lewat features/inventaris dan berbagi cache dengan layout
   // gudang, sehingga menu Ruang Gudang muncul setelah setup tanpa muat
   // ulang (keputusan GD5a). Tanpa read-location permintaan dimatikan.
-  const bacaLokasi = pengguna?.permissions.includes("read-location") ?? false;
+  const bacaLokasi = permissions.includes("read-location");
   const daftarLokasi = useDaftarLokasi({ aktif: bacaLokasi });
   const hasGudang = daftarLokasi.data?.some((l) => l.tipe === "Gudang") ?? false;
   const isLoadingLokasi = bacaLokasi && daftarLokasi.isLoading;
@@ -363,45 +75,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // sehingga nama ikut berubah setelah profil disimpan.
   const tenant = useTenant();
   const namaToko = tenant.data?.namaToko ?? (tenant.isError ? "Nama Toko" : "");
-
-  useEffect(() => {
-    const fetchSidebarData = async () => {
-      try {
-        if (!pengguna) return;
-
-        setNamaUser(pengguna.nama || "Pengguna");
-        setPosisiUser(pengguna.role || "");
-        setRole(pengguna.role || "");
-        setPermissions(pengguna.permissions);
-
-        apiClient
-          .get<{ data: any }>(`/pengguna/${pengguna.id}`, undefined, "pengguna")
-          .then((res) => {
-            if (res && res.data) setNamaUser(res.data.nama || pengguna.nama);
-          })
-          .catch(() => {});
-      } catch (err) {
-        console.error("Gagal memuat data di sidebar:", err);
-      }
-    };
-
-    fetchSidebarData();
-    // Dijalankan ulang saat sesi pulih: ketika halaman dimuat ulang, sidebar
-    // terpasang sebelum pin-refresh selesai, sehingga pengguna masih kosong
-    // pada pemasangan pertama dan menu berizin tidak pernah muncul
-    // (keputusan PO16a).
-  }, [pengguna]);
-
-  const handleLogout = async () => {
-    try {
-      await apiClient.post("/pengguna/pin-logout", {}, undefined, "pengguna");
-      await apiClient.post("/akun/auth/logout", {});
-    } catch {
-    } finally {
-      akhiriSesi();
-      router.push("/login");
-    }
-  };
 
   const handleNavigation = (href: string) => {
     router.push(href);
@@ -643,68 +316,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! text-slate-50! hover:text-slate-900! data-[state=open]:text-slate-900! cursor-pointer transition-colors"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage
-                      src="https://github.com/shadcn.png"
-                      alt={namaUser || "Avatar Pengguna"}
-                    />
-                    <AvatarFallback className="bg-neutral-600 text-xs font-bold text-white">
-                      {namaUser ? namaUser.substring(0, 2).toUpperCase() : "US"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold group-data-[state=open]:text-slate-900">
-                      {namaUser || "Nama Pengguna"}
-                    </span>
-                    <span className="truncate text-xs text-slate-50/70 group-data-[state=open]:text-slate-500">
-                      {posisiUser || "Position"}
-                    </span>
-                  </div>
-                  <ChevronsUpDown className="ml-auto size-4 text-slate-50/70 group-data-[state=open]:text-slate-500" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="bottom"
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {namaUser}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {role}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => handleNavigation("/dashboard/profil")}
-                  className="cursor-pointer"
-                >
-                  <User className="mr-2 size-4" /> Profil
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="text-red-500 focus:text-white focus:bg-red-500 cursor-pointer"
-                >
-                  <LogOut className="mr-2 size-4" /> Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <SidebarPengguna onNavigasi={handleNavigation} />
       </SidebarFooter>
 
       <SidebarRail />

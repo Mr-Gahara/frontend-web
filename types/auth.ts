@@ -51,24 +51,6 @@ export interface LoginResponse {
   data: AkunSession;
 }
 
-export interface PenggunaSession {
-  _id: string;
-  nama: string;
-  tenantID: string;
-  role: {
-    _id: string;
-    nama: string;
-    level: number;
-  };
-}
-
-// Opsional: Jika backend punya endpoint login khusus untuk pengguna (Staff/Owner)
-export interface LoginPenggunaResponse {
-  message: string;
-  accessToken: string;
-  data: PenggunaSession;
-}
-
 /** Payload POST /pengguna/pin-login dari web; installationId hanya wajib untuk aplikasi. */
 export interface PayloadLoginPengguna {
   nama: string;

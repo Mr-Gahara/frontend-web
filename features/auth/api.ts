@@ -15,4 +15,5 @@ export const authApi = {
   loginPengguna: (payload: PayloadLoginPengguna) =>
     apiMentah.post<ResponsLoginPengguna>(EP.pengguna.pinLogin, payload, "akun"),
   logoutAkun: () => apiData.post<unknown>(EP.akun.logout, {}, "akun"),
+  logoutPengguna: () => apiData.post<unknown>(EP.pengguna.pinLogout, {}, "pengguna"),
 };
