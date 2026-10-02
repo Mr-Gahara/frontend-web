@@ -130,16 +130,17 @@ const r = require(require("path").resolve(process.argv[2] || "/tmp/p.json"));
 const s = r.stats;
 console.log(`e2e passed:${s.expected} failed:${s.unexpected} flaky:${s.flaky} skipped:${s.skipped}`);
 const bersih = (t) => String(t).replace(/\x1b\[[0-9;]*m/g, "");
+const ringkas = (e) => bersih(e.message).split("\n").slice(0, 4).join(" ").slice(0, 300);
 const jalan = (su) =>
   su.forEach((x) => {
     (x.specs || []).forEach((sp) =>
       sp.tests.forEach((t) =>
         t.results.forEach((res) => {
           if (res.status === "passed") return;
-          const pesan = res.error
-            ? " | " + bersih(res.error.message).split("\n").slice(0, 4).join(" ").slice(0, 300)
-            : "";
-          console.log(res.status.toUpperCase() + ": " + sp.title.slice(0, 80) + pesan);
+          const galat = res.errors && res.errors.length ? res.errors : res.error ? [res.error] : [];
+          console.log(res.status.toUpperCase() + ": " + sp.title.slice(0, 80) + (galat.length ? " (" + galat.length + " galat)" : ""));
+          galat.forEach((e, i) => console.log("  " + (i + 1) + ". " + ringkas(e)));
+          (t.annotations || []).forEach((a) => console.log("  ANOTASI " + a.type + (a.description ? ": " + a.description : "")));
         }),
       ),
     );
@@ -498,6 +499,8 @@ cat > ~/.cache/frontend-web/alat/galat-e2e.js <<'EOF'
 const path = require("path");
 const r = require(path.resolve(process.argv[2] || "/tmp/p.json"));
 let n = 0;
+const lokasi = (e) =>
+  e && e.location ? " @ " + e.location.file.split("/").slice(-2).join("/") + ":" + e.location.line : "";
 const jalan = (daftar) =>
   daftar.forEach((s) => {
     (s.specs || []).forEach((sp) =>
@@ -505,8 +508,12 @@ const jalan = (daftar) =>
         t.results.forEach((res) => {
           if (res.status !== "failed" && res.status !== "timedOut") return;
           n++;
-          console.log("== " + sp.title.slice(0, 90) + " (" + sp.file + ":" + sp.line + ")");
-          console.log(String(res.error && res.error.message).replace(/\x1b\[[0-9;]*m/g, "").slice(0, 800));
+          console.log("== " + sp.title.slice(0, 90) + " (" + sp.file + ":" + sp.line + ", " + res.status + ")");
+          const galat = res.errors && res.errors.length ? res.errors : [res.error];
+          galat.forEach((e, i) =>
+            console.log("-- galat " + (i + 1) + lokasi(e) + "\n" +
+              String(e && e.message).replace(/\x1b\[[0-9;]*m/g, "").slice(0, 700)),
+          );
         }),
       ),
     );
@@ -528,8 +535,11 @@ EOF
   `-1`.
 - `hitung-eslint.js`: menjumlahkan error dari `eslint -f json`.
 - `ringkas-e2e.js`: meringkas `/tmp/p.json` hasil `--reporter=json` (atau
-  berkas di argumen pertama): jumlah per status, lalu status, judul, dan
-  empat baris pertama pesan error setiap test yang tidak lolos.
+  berkas di argumen pertama): jumlah per status, lalu untuk setiap test
+  yang tidak lolos status, judul, jumlah galatnya, empat baris pertama
+  setiap galat (paling banyak 300 karakter), dan anotasinya (`ANOTASI
+  fixme` atau `skip` beserta alasannya), sehingga test yang dilewati
+  terbaca alasannya tanpa membuka spec.
 - `daftar-eslint.js`: membaca `eslint -f json` dari stdin, mencetak setiap
   error beserta berkas, baris, dan aturannya, lalu selalu `error: N`.
 - `ganti-blok.js`: seperti `ganti.js`, tetapi pasangan dibaca dari berkas
@@ -593,8 +603,9 @@ EOF
   dihitung sukses. Keluar dengan kode 1 bila ada yang sukses, sehingga
   dapat menjadi gerbang (`pengujian.md`, Perintah verifikasi).
 - `galat-e2e.js`: membaca `/tmp/p.json` (atau berkas di argumen pertama)
-  dan mencetak judul, berkas, baris, serta 800 karakter pertama pesan
-  galat setiap test yang gagal atau habis waktu, lalu `gagal: N`. Dipakai
+  dan mencetak judul, berkas, baris, dan status setiap test yang gagal
+  atau habis waktu, lalu setiap galatnya beserta lokasinya di spec dan
+  700 karakter pertama pesannya, diakhiri `gagal: N`. Dipakai
   setelah `ringkas-e2e.js` bila nilai yang diterima terpotong; di spec
   master data reservasi, nilai itulah yang membedakan status 500, elemen
   yang tidak ditemukan, dan data yang tidak berubah.
