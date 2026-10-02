@@ -37,6 +37,13 @@ export function HalamanLoginAkun() {
     setTokenPengguna(null);
     masuk.mutate(nilai, {
       onSuccess: (res) => {
+        // Akun admin platform tidak punya toko maupun pengguna: ruang
+        // kerjanya panel admin, tanpa login pengguna (keputusan PA1a).
+        if (res.data.role === "admin") {
+          setTokenAkun(res.accessToken);
+          router.push("/admin");
+          return;
+        }
         // Onboarding toko hanya tersedia di aplikasi mobile. Sesi tidak disimpan
         // agar pengguna tanpa toko tidak tertahan di alur web.
         if (res.requireSetup) {

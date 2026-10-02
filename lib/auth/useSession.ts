@@ -12,6 +12,7 @@ import { bacaSesi, langgananSesi, punyaIzin, punyaSalahSatuIzin } from "./sessio
 
 const snapshotServer = {
   tokenAkun: null,
+  akun: null,
   tokenPengguna: null,
   pengguna: null,
   status: "memuat" as const,
@@ -23,6 +24,9 @@ export function useSession() {
   return {
     /** Token akun diperlukan halaman login PIN untuk memanggil pin-login. */
     adaTokenAkun: !!sesi.tokenAkun,
+    /** Akun admin platform tidak punya pengguna; ruang kerjanya /admin (keputusan PA1a). */
+    akun: sesi.akun,
+    adalahAdmin: sesi.akun?.role === "admin",
     pengguna: sesi.pengguna,
     permissions: sesi.pengguna?.permissions ?? [],
     role: sesi.pengguna?.role ?? "",

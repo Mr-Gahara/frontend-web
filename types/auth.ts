@@ -39,7 +39,8 @@ export interface AkunSession {
   email: string;
   role: AkunRole;
   status: "aktif" | "non-aktif";
-  daftarTenant: TenantEntry[];
+  /** Tidak dikirim untuk akun admin (respons nyata, 2 Oktober 2026). */
+  daftarTenant?: TenantEntry[];
   createdAt: string;
   updatedAt: string;
 }
@@ -47,7 +48,8 @@ export interface AkunSession {
 export interface LoginResponse {
   message: string;
   accessToken: string;
-  requireSetup: boolean;
+  /** Tidak dikirim untuk akun admin (respons nyata, 2 Oktober 2026). */
+  requireSetup?: boolean;
   data: AkunSession;
 }
 

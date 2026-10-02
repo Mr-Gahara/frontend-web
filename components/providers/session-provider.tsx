@@ -14,7 +14,7 @@
  */
 
 import { useEffect } from "react";
-import { setTokenAkun, setTokenPengguna, tandaiKeluar } from "@/lib/auth/session";
+import { bacaSesi, setTokenAkun, setTokenPengguna, tandaiKeluar } from "@/lib/auth/session";
 import { refreshTerkoordinasi } from "@/lib/auth/sessionChannel";
 
 const BASE_URL = "/api";
@@ -64,6 +64,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       const akun = await refreshTerkoordinasi("akun", pulihkanAkun);
       if (dibatalkan) return;
       if (akun) setTokenAkun(akun);
+
+      // Akun admin tidak punya pengguna (keputusan PA1a): pin-refresh pasti
+      // gagal, sehingga dilewati dan pemulihan selesai di sini.
+      if (akun && bacaSesi().akun?.role === "admin") {
+        tandaiKeluar();
+        return;
+      }
 
       const pengguna = await refreshTerkoordinasi("pengguna", pulihkanPengguna);
       if (dibatalkan) return;

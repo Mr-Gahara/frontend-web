@@ -24,7 +24,7 @@ function PesanIsian({ pesan }: { pesan?: string }) {
 export function HalamanLoginPengguna() {
   const router = useRouter();
   const [galat, setGalat] = useState("");
-  const { status, sudahMasuk, adaTokenAkun } = useSession();
+  const { status, sudahMasuk, adaTokenAkun, adalahAdmin } = useSession();
   const {
     register,
     handleSubmit,
@@ -48,10 +48,16 @@ export function HalamanLoginPengguna() {
       return;
     }
 
+    // Akun admin tidak punya pengguna (keputusan PA1a).
+    if (adalahAdmin) {
+      router.replace("/admin");
+      return;
+    }
+
     // Tanpa token akun, login pengguna tidak dapat dikirim (endpoint-nya
     // memerlukan token akun), sehingga pengguna dikembalikan ke login akun.
     if (!adaTokenAkun) router.replace("/login");
-  }, [status, sudahMasuk, adaTokenAkun, router]);
+  }, [status, sudahMasuk, adaTokenAkun, adalahAdmin, router]);
 
   const kirim = (nilai: NilaiLoginPengguna) => {
     setGalat("");

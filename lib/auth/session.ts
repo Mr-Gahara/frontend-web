@@ -30,8 +30,16 @@ export interface PenggunaSesi {
 
 export type StatusSesi = "memuat" | "masuk" | "keluar";
 
+/** Isi payload token akun: id, role, dan tenantID bila akun terikat toko. */
+export interface AkunSesi {
+  id: string;
+  role: "client" | "admin";
+  tenantID?: string;
+}
+
 interface IsiSesi {
   tokenAkun: string | null;
+  akun: AkunSesi | null;
   tokenPengguna: string | null;
   pengguna: PenggunaSesi | null;
   status: StatusSesi;
@@ -39,6 +47,7 @@ interface IsiSesi {
 
 let sesi: IsiSesi = {
   tokenAkun: null,
+  akun: null,
   tokenPengguna: null,
   pengguna: null,
   status: "memuat",
@@ -83,8 +92,23 @@ function keSesiPengguna(token: string): PenggunaSesi | null {
   };
 }
 
+/**
+ * Mengubah payload token akun menjadi bentuk yang dipakai aplikasi.
+ * Role di luar "admin" diperlakukan sebagai client, agar nilai yang tidak
+ * dikenal tidak pernah membuka panel admin.
+ */
+function keSesiAkun(token: string): AkunSesi | null {
+  const p = decodeJWT(token);
+  if (!p || !p.id) return null;
+  return {
+    id: String(p.id),
+    role: p.role === "admin" ? "admin" : "client",
+    tenantID: p.tenantID ? String(p.tenantID) : undefined,
+  };
+}
+
 export function setTokenAkun(token: string | null) {
-  sesi = { ...sesi, tokenAkun: token };
+  sesi = { ...sesi, tokenAkun: token, akun: token ? keSesiAkun(token) : null };
   beriTahu();
 }
 
@@ -114,7 +138,7 @@ export function tandaiKeluar() {
 
 /** Mengakhiri sesi sepenuhnya: logout dan pergantian akun bisnis. */
 export function akhiriSesi() {
-  sesi = { tokenAkun: null, tokenPengguna: null, pengguna: null, status: "keluar" };
+  sesi = { tokenAkun: null, akun: null, tokenPengguna: null, pengguna: null, status: "keluar" };
   beriTahu();
 }
 
