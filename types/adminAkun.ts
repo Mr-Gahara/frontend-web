@@ -70,3 +70,13 @@ export interface PerpanjangPayload {
   durasiBulan: DurasiLangganan;
   alasan?: string;
 }
+
+/**
+ * Field PUT /akun/admin/users/:id yang ditawarkan web (keputusan PA3a).
+ * username null mengosongkan username; role dan tenantID tidak dikirim.
+ */
+export interface PerbaruiAkunPayload {
+  username?: string | null;
+  email?: string;
+  password?: string;
+}

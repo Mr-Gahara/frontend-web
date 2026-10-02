@@ -58,8 +58,15 @@ export const api = {
   patch: <T>(endpoint: string, body: unknown, tokenType: TokenType = "pengguna") =>
     jalankan<T>(() => apiClient.patch(endpoint, body, undefined, tokenType)),
 
-  delete: <T>(endpoint: string, tokenType: TokenType = "pengguna") =>
-    jalankan<T>(() => apiClient.delete(endpoint, undefined, tokenType)),
+  /** body opsional: hapus akun oleh admin membawa password admin di body DELETE. */
+  delete: <T>(endpoint: string, tokenType: TokenType = "pengguna", body?: unknown) =>
+    jalankan<T>(() =>
+      apiClient.delete(
+        endpoint,
+        body === undefined ? undefined : { body: JSON.stringify(body) },
+        tokenType,
+      ),
+    ),
 };
 
 /** Varian yang langsung mengembalikan isi, untuk pemakaian paling umum. */
@@ -72,8 +79,8 @@ export const apiData = {
     (await api.put<T>(endpoint, body, tokenType)).data,
   patch: async <T>(endpoint: string, body: unknown, tokenType?: TokenType) =>
     (await api.patch<T>(endpoint, body, tokenType)).data,
-  delete: async <T>(endpoint: string, tokenType?: TokenType) =>
-    (await api.delete<T>(endpoint, tokenType)).data,
+  delete: async <T>(endpoint: string, tokenType?: TokenType, body?: unknown) =>
+    (await api.delete<T>(endpoint, tokenType, body)).data,
 };
 /**
  * Varian tanpa pembukaan envelope, untuk respons yang membawa field di

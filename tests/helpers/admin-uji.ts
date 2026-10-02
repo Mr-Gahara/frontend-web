@@ -86,3 +86,91 @@ export async function hapusAkunKlienUji(id: string, admin: KredensialAdmin) {
     await ctx.dispose();
   }
 }
+
+export interface AkunUji {
+  id: string;
+  email: string;
+  role: "client" | "admin";
+  status: string;
+}
+
+export const PASSWORD_AKUN_UJI = "UjiKlien123";
+
+const POLA_DAFTAR_AKUN = /\/api\/akun\/admin\/all(\?|$)/i;
+const POLA_BUAT_AKUN = /\/api\/akun\/admin\/users(\?|$)/i;
+const POLA_BEKUKAN_AKUN = /\/api\/akun\/admin\/users\/[^/]+\/freeze(\?|$)/i;
+const POLA_SATU_AKUN = /\/api\/akun\/admin\/users\/[0-9a-f]{24}(\?|$)/i;
+
+/** Login admin, lalu muat ulang agar respons daftar milik halaman ini tertangkap. */
+export async function bukaDaftarAkun(page: Page): Promise<AkunUji[]> {
+  await loginAdmin(page, wajibAdmin());
+  await page.reload({ waitUntil: "commit" });
+  const respons = await page.waitForResponse(
+    (r) => POLA_DAFTAR_AKUN.test(r.url()) && r.request().method() === "GET",
+  );
+  expect(respons.status()).toBe(200);
+  const isi = (await respons.json()) as { data: AkunUji[] };
+  await expect(page.getByText(`${isi.data.length} dari ${isi.data.length} akun`)).toBeVisible({
+    timeout: 15_000,
+  });
+  return isi.data;
+}
+
+/** Dari halaman daftar: cari lewat email, lalu buka detailnya. */
+export async function bukaDetailAkun(page: Page, akun: Pick<AkunUji, "id" | "email">) {
+  await page.getByLabel("Cari akun").fill(akun.email);
+  await page.getByRole("link", { name: akun.email }).click();
+  await page.waitForURL("**/admin/akun/" + akun.id);
+  await expect(page.getByRole("heading", { name: "Detail Akun" })).toBeVisible();
+}
+
+/** Dari halaman daftar: buat akun klien uji bermasa percobaan lewat form, sampai kembali ke daftar. */
+export async function buatAkunKlienLewatUi(page: Page, email: string): Promise<AkunUji> {
+  await page.getByRole("button", { name: "Buat Akun Klien" }).click();
+  await page.waitForURL("**/admin/akun/buat");
+  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Password awal").fill(PASSWORD_AKUN_UJI);
+  const tunggu = page.waitForResponse(
+    (r) => POLA_BUAT_AKUN.test(r.url()) && r.request().method() === "POST",
+  );
+  await page.getByRole("button", { name: "Simpan Akun" }).click();
+  const respons = await tunggu;
+  expect(respons.status(), "buat akun uji").toBe(201);
+  const akun = ((await respons.json()) as { data: AkunUji }).data;
+  await page.waitForURL("**/admin");
+  return akun;
+}
+
+/**
+ * Dari halaman detail: bekukan bila masih aktif, lalu hapus dengan password
+ * admin, seluruhnya lewat UI (keputusan rancangan butir 23), dan pastikan
+ * akun hilang dari daftar.
+ */
+export async function hapusAkunDariDetail(page: Page, email: string, admin: KredensialAdmin) {
+  const kotak = page.getByRole("dialog");
+  const hapus = page.getByRole("button", { name: "Hapus Akun" });
+  const bekukan = page.getByRole("button", { name: "Bekukan Akun" });
+  await expect(hapus).toBeVisible({ timeout: 15_000 });
+
+  if (await bekukan.isVisible()) {
+    await bekukan.click();
+    const tungguBeku = page.waitForResponse(
+      (r) => POLA_BEKUKAN_AKUN.test(r.url()) && r.request().method() === "POST",
+    );
+    await kotak.getByRole("button", { name: "Bekukan", exact: true }).click();
+    expect((await tungguBeku).status(), "bekukan sebelum hapus").toBe(200);
+    await expect(kotak).toBeHidden({ timeout: 15_000 });
+  }
+
+  await expect(hapus).toBeEnabled();
+  await hapus.click();
+  await kotak.getByLabel("Password admin").fill(admin.password);
+  const tungguHapus = page.waitForResponse(
+    (r) => POLA_SATU_AKUN.test(r.url()) && r.request().method() === "DELETE",
+  );
+  await kotak.getByRole("button", { name: "Hapus Permanen" }).click();
+  expect((await tungguHapus).status(), "hapus akun uji lewat UI").toBe(200);
+  await page.waitForURL("**/admin");
+  await page.getByLabel("Cari akun").fill(email);
+  await expect(page.getByRole("link", { name: email })).toHaveCount(0);
+}

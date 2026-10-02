@@ -5,6 +5,7 @@ import type { AkunAdmin } from "@/types/adminAkun";
 export const URL_DAFTAR_AKUN = "/admin";
 export const URL_BUAT_AKUN = "/admin/akun/buat";
 export const urlDetailAkun = (id: string) => `/admin/akun/${id}`;
+export const urlUbahAkun = (id: string) => `/admin/akun/${id}/ubah`;
 
 export type FilterStatusAkun = "semua" | "aktif" | "non-aktif";
 

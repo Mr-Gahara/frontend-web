@@ -16,6 +16,7 @@ export const EP = {
     refresh: "/akun/auth/refreshtoken",
     adminDaftar: "/akun/admin/all",
     adminAkun: "/akun/admin/users",
+    adminAkunDetail: (id: string) => `/akun/admin/users/${id}`,
     adminBekukan: (id: string) => `/akun/admin/users/${id}/freeze`,
     adminAktifkan: (id: string) => `/akun/admin/users/${id}/unfreeze`,
     adminLangganan: (id: string) => `/akun/admin/users/${id}/langganan`,

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { pesanError } from "@/lib/api/error";
 import { formatTanggal, formatTanggalPendek } from "@/lib/format";
 import type { AkunAdmin } from "@/types/adminAkun";
+import { DialogHapusAkun } from "./dialog-hapus-akun";
 import { DialogLangganan, type JenisAksi } from "./dialog-langganan";
 import { useDaftarAkun } from "./hooks";
 import { aksiLangganan } from "./langganan";
@@ -18,7 +19,9 @@ import {
   teksMasaAkses,
   teksStatus,
   teksToko,
+  urlUbahAkun,
 } from "./tampilan";
+import { aksiKelolaAkun } from "./ubah";
 
 function Butir({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -59,6 +62,7 @@ export function HalamanDetailAkun() {
   const id = params?.id;
   const daftar = useDaftarAkun();
   const [jenis, setJenis] = useState<JenisAksi | null>(null);
+  const [menghapus, setMenghapus] = useState(false);
   const akun = daftar.data?.find((a) => a.id === id);
 
   let isi: ReactNode;
@@ -83,6 +87,7 @@ export function HalamanDetailAkun() {
     );
   } else {
     const aksi = aksiLangganan(akun);
+    const kelola = aksiKelolaAkun(akun);
     isi = (
       <>
         <RingkasanAkun akun={akun} />
@@ -108,9 +113,32 @@ export function HalamanDetailAkun() {
                   Bekukan Akun
                 </Button>
               )}
+              {kelola.ubah && (
+                <Link href={urlUbahAkun(akun.id)}>
+                  <Button type="button" variant="outline">
+                    Ubah Akun
+                  </Button>
+                </Link>
+              )}
+              {kelola.hapusTampil && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => setMenghapus(true)}
+                  disabled={!kelola.hapusAktif}
+                >
+                  Hapus Akun
+                </Button>
+              )}
             </div>
+            {kelola.hapusTampil && !kelola.hapusAktif && (
+              <p className="text-xs text-muted-foreground">
+                Akun aktif tidak dapat dihapus. Bekukan akun lebih dulu.
+              </p>
+            )}
             <DaftarRiwayatLangganan akunId={akun.id} />
             <DialogLangganan akun={akun} jenis={jenis} onTutup={() => setJenis(null)} />
+            <DialogHapusAkun akun={akun} buka={menghapus} onTutup={() => setMenghapus(false)} />
           </>
         )}
       </>

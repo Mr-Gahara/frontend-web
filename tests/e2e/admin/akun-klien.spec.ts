@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import {
   ALASAN_TANPA_ADMIN,
+  hapusAkunDariDetail,
   hapusAkunKlienUji,
   kredensialAdmin,
   loginAdmin,
@@ -134,6 +135,8 @@ test.describe("Akun klien di panel admin", () => {
     const email = `e2e.klien.${unik}@tachyon-uji.com`;
     const username = `e2e-${unik}`.slice(0, 25);
     let idAkun: string | null = null;
+    let terhapus = false;
+    test.setTimeout(90_000);
 
     try {
       await bukaDaftar(page);
@@ -171,8 +174,13 @@ test.describe("Akun klien di panel admin", () => {
       await expect(baris).toContainText("Belum punya toko");
       await expect(baris).toContainText("Aktif");
       await expect(baris).not.toContainText("Tidak dibatasi");
+
+      await page.getByRole("link", { name: email }).click();
+      await page.waitForURL("**/admin/akun/" + idAkun);
+      await hapusAkunDariDetail(page, email, admin);
+      terhapus = true;
     } finally {
-      if (idAkun) await hapusAkunKlienUji(idAkun, admin);
+      if (idAkun && !terhapus) await hapusAkunKlienUji(idAkun, admin);
     }
   });
 });

@@ -7,6 +7,7 @@ import type {
   BekukanPayload,
   BuatAkunKlienPayload,
   HalamanRiwayat,
+  PerbaruiAkunPayload,
   PerpanjangPayload,
   RiwayatLangganan,
 } from "@/types/adminAkun";
@@ -42,4 +43,10 @@ export const adminAkunApi = {
       cursorBerikutnya: mentah.cursorBerikutnya ?? null,
     };
   },
+  /** Respons PUT tanpa langganan dan tanpa toko, sehingga tidak dipakai; daftar dimuat ulang. */
+  perbarui: (id: string, payload: PerbaruiAkunPayload) =>
+    apiData.put<unknown>(EP.akun.adminAkunDetail(id), payload, "akun"),
+  /** Backend memverifikasi password admin dari body, dan hanya menghapus akun non-aktif. */
+  hapus: (id: string, password: string) =>
+    apiData.delete<unknown>(EP.akun.adminAkunDetail(id), "akun", { password }),
 };

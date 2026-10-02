@@ -1,6 +1,7 @@
 import { test, expect, type Page, type Response } from "@playwright/test";
 import {
   ALASAN_TANPA_ADMIN,
+  hapusAkunDariDetail,
   hapusAkunKlienUji,
   kredensialAdmin,
   loginAdmin,
@@ -65,6 +66,7 @@ test.describe("Langganan akun klien", () => {
     const unik = Date.now().toString(36);
     const email = `e2e.langganan.${unik}@tachyon-uji.com`;
     let akun: AkunRespons | null = null;
+    let terhapus = false;
 
     try {
       await test.step("buat akun uji dengan masa percobaan lewat UI", async () => {
@@ -152,9 +154,14 @@ test.describe("Langganan akun klien", () => {
         await expect(riwayat(page).getByRole("listitem")).toHaveCount(4);
         await expect(riwayat(page).getByRole("listitem").first()).toContainText("Diperpanjang 6 bulan");
       });
+
+      await test.step("hapus akun uji lewat UI: bekukan, lalu hapus dengan password admin", async () => {
+        await hapusAkunDariDetail(page, email, admin);
+        terhapus = true;
+      });
     } finally {
       const tersisa = akun as AkunRespons | null;
-      if (tersisa) await hapusAkunKlienUji(tersisa.id, admin);
+      if (tersisa && !terhapus) await hapusAkunKlienUji(tersisa.id, admin);
     }
   });
 

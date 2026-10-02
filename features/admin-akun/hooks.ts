@@ -13,6 +13,7 @@ import type {
   AktifkanPayload,
   BekukanPayload,
   BuatAkunKlienPayload,
+  PerbaruiAkunPayload,
   PerpanjangPayload,
 } from "@/types/adminAkun";
 import { adminAkunApi } from "./api";
@@ -92,5 +93,41 @@ export function useRiwayatLangganan(akunId: string) {
     queryFn: ({ pageParam }) => adminAkunApi.riwayat(akunId, pageParam ?? undefined),
     initialPageParam: null as string | null,
     getNextPageParam: (terakhir) => terakhir.cursorBerikutnya,
+  });
+}
+
+export function usePerbaruiAkun(opsi: OpsiMutasi<unknown, AksiAkunVars<PerbaruiAkunPayload>> = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: AksiAkunVars<PerbaruiAkunPayload>) =>
+      adminAkunApi.perbarui(id, payload),
+    onSuccess: async (...args) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.adminAkun.semua });
+      opsi.onSuccess?.(...args);
+    },
+    onError: opsi.onError,
+  });
+}
+
+export interface HapusAkunVars {
+  id: string;
+  password: string;
+}
+
+/**
+ * Callback halaman dijalankan sebelum invalidasi: halaman detail membaca akun
+ * dari cache daftar, sehingga bila daftar dimuat ulang lebih dulu, detail
+ * akun yang baru dihapus sempat tampil sebagai tidak ditemukan sebelum
+ * berpindah ke daftar.
+ */
+export function useHapusAkun(opsi: OpsiMutasi<unknown, HapusAkunVars> = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, password }: HapusAkunVars) => adminAkunApi.hapus(id, password),
+    onSuccess: async (...args) => {
+      opsi.onSuccess?.(...args);
+      await queryClient.invalidateQueries({ queryKey: queryKeys.adminAkun.semua });
+    },
+    onError: opsi.onError,
   });
 }
