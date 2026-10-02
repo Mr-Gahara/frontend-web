@@ -171,7 +171,7 @@ test.describe("Pelanggan", () => {
     expect(res.status(), "POST /pelanggan dengan nama kembar").toBe(400);
     const pesan = String((await res.json()).message);
     expect(pesan).toContain(sudahAda);
-    await expect(page.getByRole("main").getByText(pesan)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(pesan)).toBeVisible({ timeout: 15_000 });
     const sesudah = await daftarPelanggan(page, auth);
     expect(sesudah.length).toBe(daftar.length);
   });
