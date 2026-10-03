@@ -19,7 +19,7 @@ const URL_LABA_RUGI = "/dashboard/outlet/keuangan/ringkasanLabaRugi";
 const POLA_AKUN = /\/api\/akunkas(\?|$)/i;
 const POLA_LABA_RUGI = /\/api\/laporan\/laba-rugi(\?|$)/i;
 
-type AkunKasUji = { id: string; namaAkun: string; saldo: number };
+type AkunKasUji = { id: string; namaAkun: string; saldo: number; status: string };
 type BarisLabaRugi = {
   totalOmzet: number;
   totalBebanOperasional: number;
@@ -90,15 +90,30 @@ test.describe("E2E — Keuangan", () => {
     await login(page);
   });
 
-  test("daftar akun kas menampilkan setiap akun dari backend", async ({ page }) => {
+  test("daftar akun kas: kartu hanya untuk akun aktif, akun non-aktif di bagian lipat (AK1a)", async ({ page }) => {
     await page.goto(URL_AKUN, { waitUntil: "commit" });
     const res = await page.waitForResponse(cocok("GET", POLA_AKUN));
     const daftar = daftarDari<AkunKasUji>(await res.json());
     expect(daftar.length, "data uji punya akun kas").toBeGreaterThan(0);
-    await expect(page.getByText("Saldo Saat Ini", { exact: true })).toHaveCount(daftar.length);
-    for (const akun of daftar) {
+    const aktif = daftar.filter((a) => a.status === "aktif");
+    const nonAktif = daftar.filter((a) => a.status !== "aktif");
+
+    await expect(page.getByText("Saldo Saat Ini", { exact: true })).toHaveCount(aktif.length);
+    for (const akun of aktif) {
       await expect(page.getByRole("heading", { name: akun.namaAkun, exact: true }).first()).toBeVisible();
     }
+
+    const lipat = page.getByRole("button", { name: `Akun non-aktif (${nonAktif.length})` });
+    const barisLipat = page.locator("#daftar-akun-non-aktif").getByRole("listitem");
+    test.skip(nonAktif.length === 0, "Tidak ada akun kas non-aktif di data uji");
+    await expect(lipat).toHaveAttribute("aria-expanded", "false");
+    await expect(barisLipat).toHaveCount(0);
+
+    await lipat.click();
+    await expect(lipat).toHaveAttribute("aria-expanded", "true");
+    await expect(barisLipat).toHaveCount(nonAktif.length);
+    await expect(barisLipat.filter({ hasText: nonAktif[0].namaAkun }).first()).toBeVisible();
+    await expect(page.getByText("Saldo Saat Ini", { exact: true })).toHaveCount(aktif.length);
   });
 
   test("buat akun kas: nama dan nomor kosong menampilkan pesan tanpa mengirim permintaan", async ({ page }) => {

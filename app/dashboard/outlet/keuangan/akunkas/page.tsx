@@ -1,13 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, Landmark, Plus, Wallet } from "lucide-react";
+import { ArrowLeftRight, ChevronDown, Landmark, Plus, Wallet } from "lucide-react";
 
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { akunKasAktif, akunKasNonAktif } from "@/features/akun-kas/filter";
 import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
 
 function formatRupiah(value: number): string {
@@ -42,6 +43,11 @@ export default function AkunKasPage() {
   useAuthGuard();
 
   const { data: akunKasList = [], isLoading, isError } = useDaftarAkunKas();
+  // Kartu hanya untuk akun aktif; akun non-aktif di bagian lipat di bawahnya
+  // (keputusan AK1a), karena akun kas tidak dapat dihapus dan terus bertambah.
+  const [bukaNonAktif, setBukaNonAktif] = useState(false);
+  const akunAktif = akunKasAktif(akunKasList);
+  const akunNonAktif = akunKasNonAktif(akunKasList);
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8 w-full">
@@ -118,10 +124,20 @@ export default function AkunKasPage() {
               mencatat arus keuangan.
             </p>
           </div>
+        ) : akunAktif.length === 0 ? (
+          <div className="col-span-full rounded-2xl border border-dashed border-[#0A2947]/20 bg-[#F2EAE1] p-12 sm:p-16 text-center shadow-sm">
+            <Wallet className="w-10 h-10 text-[#D4A373] mx-auto mb-4" />
+            <p className="text-base font-bold text-[#0A2947] mb-1">
+              Belum ada akun kas aktif
+            </p>
+            <p className="text-sm font-medium text-[#0A2947]/60 max-w-md mx-auto">
+              Seluruh akun kas berstatus non-aktif. Tambahkan akun baru untuk
+              mulai mencatat arus keuangan.
+            </p>
+          </div>
         ) : (
-          akunKasList.map((akun) => {
+          akunAktif.map((akun) => {
             const Icon = akun.tipeAkun === "Rekening Bank" ? Landmark : Wallet;
-            const isAktif = akun.status === "aktif";
 
             return (
               <div
@@ -140,14 +156,6 @@ export default function AkunKasPage() {
                       >
                         {akun.tipeAkun}
                       </Badge>
-                      {!isAktif && (
-                        <Badge
-                          variant="secondary"
-                          className="bg-red-900/10 text-red-600 hover:bg-red-900/10 border-none shadow-sm"
-                        >
-                          Non-Aktif
-                        </Badge>
-                      )}
                     </div>
                   </div>
                   <h3 className="text-lg sm:text-xl font-bold tracking-tight text-[#0A2947]">
@@ -176,6 +184,46 @@ export default function AkunKasPage() {
           })
         )}
       </div>
+
+      {akunNonAktif.length > 0 && (
+        <section className="w-full">
+          <button
+            type="button"
+            onClick={() => setBukaNonAktif((buka) => !buka)}
+            aria-expanded={bukaNonAktif}
+            aria-controls="daftar-akun-non-aktif"
+            className="flex w-full items-center justify-between rounded-xl border border-[#0A2947]/10 bg-[#F2EAE1] px-4 py-3 text-sm font-bold text-[#0A2947] cursor-pointer hover:border-[#0A2947]/30 transition-colors"
+          >
+            <span>Akun non-aktif ({akunNonAktif.length})</span>
+            <ChevronDown
+              className={`w-4 h-4 transition-transform ${bukaNonAktif ? "rotate-180" : ""}`}
+            />
+          </button>
+          {bukaNonAktif && (
+            <ul
+              id="daftar-akun-non-aktif"
+              className="mt-2 divide-y divide-[#0A2947]/10 rounded-xl border border-[#0A2947]/10 bg-[#FFFAF3]"
+            >
+              {akunNonAktif.map((akun) => (
+                <li
+                  key={akun.id}
+                  className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3 text-sm"
+                >
+                  <div className="min-w-0">
+                    <p className="font-bold text-[#0A2947]/80 truncate">{akun.namaAkun}</p>
+                    <p className="text-xs font-medium text-[#0A2947]/50">
+                      {akun.tipeAkun}, {akun.nomorAkun || "-"}
+                    </p>
+                  </div>
+                  <p className="font-mono font-bold text-[#0A2947]/70">
+                    {formatRupiah(akun.saldo ?? 0)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </div>
   );
 }
