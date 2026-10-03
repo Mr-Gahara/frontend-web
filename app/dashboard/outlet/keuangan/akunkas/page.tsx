@@ -2,14 +2,19 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeftRight, ChevronDown, Landmark, Plus, Wallet } from "lucide-react";
+import { ArrowLeftRight, ChevronDown, Landmark, Pencil, Plus, Wallet } from "lucide-react";
 
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { akunKasAktif, akunKasNonAktif } from "@/features/akun-kas/filter";
+import { DialogStatusAkun } from "@/features/akun-kas/dialog-status-akun";
 import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
+import { aksiAkunKas } from "@/features/akun-kas/izin";
+import { urlUbahAkunKas } from "@/features/akun-kas/ubah";
+import { useSession } from "@/lib/auth/useSession";
+import type { AkunKas } from "@/types/akunKas";
 
 function formatRupiah(value: number): string {
   return new Intl.NumberFormat("id-ID", {
@@ -48,6 +53,11 @@ export default function AkunKasPage() {
   const [bukaNonAktif, setBukaNonAktif] = useState(false);
   const akunAktif = akunKasAktif(akunKasList);
   const akunNonAktif = akunKasNonAktif(akunKasList);
+  // Ubah dan aktifkan kembali hanya bagi pemegang update-akunkas (keputusan
+  // UA1a dan UA2a); pengguna lain melihat daftar tanpa tombol aksi.
+  const { permissions } = useSession();
+  const aksi = aksiAkunKas(permissions);
+  const [akunDiaktifkan, setAkunDiaktifkan] = useState<AkunKas | null>(null);
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8 w-full">
@@ -156,6 +166,16 @@ export default function AkunKasPage() {
                       >
                         {akun.tipeAkun}
                       </Badge>
+                      {aksi.ubah && (
+                        <Link
+                          href={urlUbahAkunKas(akun.id)}
+                          aria-label={`Ubah ${akun.namaAkun}`}
+                          className="inline-flex items-center gap-1 rounded-md border border-[#0A2947]/20 bg-[#FFFAF3] px-2 py-1 text-xs font-bold text-[#0A2947] hover:bg-[#0A2947]/5"
+                        >
+                          <Pencil className="w-3 h-3" />
+                          Ubah
+                        </Link>
+                      )}
                     </div>
                   </div>
                   <h3 className="text-lg sm:text-xl font-bold tracking-tight text-[#0A2947]">
@@ -215,14 +235,45 @@ export default function AkunKasPage() {
                       {akun.tipeAkun}, {akun.nomorAkun || "-"}
                     </p>
                   </div>
-                  <p className="font-mono font-bold text-[#0A2947]/70">
-                    {formatRupiah(akun.saldo ?? 0)}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p className="font-mono font-bold text-[#0A2947]/70">
+                      {formatRupiah(akun.saldo ?? 0)}
+                    </p>
+                    {aksi.ubah && (
+                      <>
+                        <Link
+                          href={urlUbahAkunKas(akun.id)}
+                          aria-label={`Ubah ${akun.namaAkun}`}
+                          className="inline-flex items-center gap-1 rounded-md border border-[#0A2947]/20 bg-[#F2EAE1] px-2 py-1 text-xs font-bold text-[#0A2947] hover:bg-[#0A2947]/5"
+                        >
+                          <Pencil className="w-3 h-3" />
+                          Ubah
+                        </Link>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          aria-label={`Aktifkan kembali ${akun.namaAkun}`}
+                          onClick={() => setAkunDiaktifkan(akun)}
+                          className="border-[#0A2947]/20 text-[#0A2947] text-xs font-bold"
+                        >
+                          Aktifkan kembali
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
           )}
         </section>
+      )}
+      {akunDiaktifkan && (
+        <DialogStatusAkun
+          akun={akunDiaktifkan}
+          tujuan="aktif"
+          onTutup={() => setAkunDiaktifkan(null)}
+        />
       )}
     </div>
   );

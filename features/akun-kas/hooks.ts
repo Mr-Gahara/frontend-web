@@ -1,7 +1,7 @@
 "use client";
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { akunKasApi } from "./api";
+import { akunKasApi, type PayloadUbahAkunKas } from "./api";
 import { filterServerMutasi, paramPeriodeMutasi, type FilterMutasi } from "./mutasi";
 import { queryKeys } from "@/lib/queryKeys";
 
@@ -30,6 +30,26 @@ export function useBuatAkunKas(opsi: Callback = {}) {
     mutationFn: akunKasApi.buat,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.akunKas.semua });
+      opsi.onSuccess?.();
+    },
+    onError: (err) => opsi.onError?.(err),
+  });
+}
+
+/**
+ * Ubah akun kas lewat PUT /akunkas/:id: sunting isian, nonaktifkan, dan
+ * aktifkan kembali (keputusan UA1a sampai UA4a). Metode pembayaran ikut
+ * diinvalidasi karena responsnya memuat nama dan nomor akun kas tujuan,
+ * dan backend membuang cache metode pada perubahan yang sama.
+ */
+export function useUbahAkunKas(opsi: Callback = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: PayloadUbahAkunKas }) =>
+      akunKasApi.ubah(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.akunKas.semua });
+      queryClient.invalidateQueries({ queryKey: queryKeys.metodePembayaran.semua });
       opsi.onSuccess?.();
     },
     onError: (err) => opsi.onError?.(err),

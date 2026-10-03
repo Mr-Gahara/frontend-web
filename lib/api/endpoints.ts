@@ -73,6 +73,7 @@ export const EP = {
     detail: (id: string) => `/metodepembayaran/${id}`,
   },
   akunKas: "/akunkas",
+  akunKasById: (id: string) => `/akunkas/${id}`,
   akunKasMutasi: "/akunkas/mutasi",
   akunKasRingkasan: (id: string) => `/akunkas/${id}/ringkasan`,
   pelanggan: {
