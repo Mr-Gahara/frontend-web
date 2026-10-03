@@ -165,13 +165,25 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 - Aturan: validateAkunKasPayload (validators/akunKasValidator.js). Dikoreksi 28 September 2026 terhadap validator: `tipeAkun` wajib saat create, dan `saldo` bila dikirim wajib bertipe number dan tidak negatif
 - Wajib dari klien: `namaAkun` dan `nomorAkun` (diperiksa setelah `trim`), `tipeAkun`
-- Field lain yang dikenali: `status`, `saldo`
-- Tidak diperiksa validator tetapi dipakai: `keterangan` (controller meneruskan `...req.body` ke `AkunKas.create`)
+- Field lain yang dikenali: `status`, `saldo`, `keterangan` (string paling panjang 255 setelah `trim`, atau `null`). Sejak validator `50eede7` (dibaca 3 Oktober 2026) body diperiksa terhadap daftar putih `FIELD_CREATE`, dan field di luar daftar ditolak 400 "Field tidak dikenal"
 - Nilai sah: `VALID_TIPE_AKUN`: Kas Fisik, Rekening Bank; `VALID_STATUS`: aktif, non-aktif
-- Nomor akun duplikat dalam tenant dijawab 400 "Nomor Akun sudah digunakan di tenant ini" (`akunKasService` baris 69), bukan 409
+- Nomor atau nama akun duplikat dalam tenant, tanpa membedakan huruf besar-kecil, dijawab 409 "Nomor Akun sudah digunakan di tenant ini" atau "Nama Akun sudah digunakan di tenant ini" (`errorDuplikat` di `akunKasService`, dari indeks unik; dibaca dari kode `50eede7` pada 3 Oktober 2026, menggantikan catatan lama 400)
 - Sejak backend `465b438`, setiap tenant dibatasi 10 akun kas aktif, dan buat ditolak 409 bila sudah penuh (`akunKasService` baris 141 sampai 144); saldo awal lebih dari 0 dicatat sebagai mutasi `SALDO_AWAL`. Akun bersaldo tidak dapat ditutup, dan `DELETE /akunkas/:id` tidak ada lagi (`temuan.md` butir 81), sehingga spec web tidak membuat akun uji bersaldo (`refactor/pengujian.md`)
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
+
+#### `PUT /akunkas/:id`
+
+- Aturan: validateAkunKasPayload dengan `isUpdate` (validators/akunKasValidator.js), dibaca 3 Oktober 2026 terhadap backend `yoga` `50eede7`. Body diperiksa terhadap daftar putih `FIELD_UPDATE`: field di luar daftar ditolak 400 "Field tidak dikenal", `saldo` ditolak 400 "saldo tidak bisa diubah langsung. Saldo hanya berubah lewat transaksi", dan `tenantID` ditolak 400. Galat validator dibalas `{ errors }` tanpa `message`
+- Wajib dari klien: sedikitnya satu field `FIELD_UPDATE`; tanpa itu 400 "Tidak ada data yang diperbarui"
+- Field lain yang dikenali: `namaAkun` (paling panjang 100 setelah `trim`), `nomorAkun` (50), `tipeAkun`, `status`, `keterangan` (255, atau `null` untuk mengosongkan). `namaAkun` dan `nomorAkun` bila dikirim tidak boleh kosong
+- Nilai sah: `VALID_TIPE_AKUN`: Kas Fisik, Rekening Bank; `VALID_STATUS`: aktif, non-aktif
+- Aturan service (`akunKasService.update`): `status` non-aktif hanya diterima bila saldo akun 0 dan akun tidak dipakai metode pembayaran mana pun, termasuk metode yang sedang nonaktif; keduanya dijawab 409 dengan pesan yang memuat jumlah saldo atau nama metode, dan penjaga metode diperiksa lebih dulu. `status` aktif dihitung ke batas 10 akun kas aktif per tenant, dengan akun itu sendiri dikecualikan, dan dijawab 409 bila penuh. Nama atau nomor akun yang kembar dalam tenant, tanpa membedakan huruf besar-kecil, dijawab 409 (nama kembar terbukti lewat e2e 3 Oktober 2026; nomor kembar dari kode)
+- Respons: 200 `{ data, message: "Akun Kas diperbarui" }` dengan `data` sebentuk `GET /akunkas`; akun yang tidak ada atau milik tenant lain dijawab 404 "Akun Kas tidak ditemukan"
+- Tulisan ke `/akunkas` dibatasi 30 permintaan per menit per pengguna dan dijawab 429 bila terlampaui; pembatas dilewati hanya bila backend berjalan dengan `NODE_ENV=test`
+- Web (`1bc76f4`): form ubah mengirim hanya field yang berubah di antara `namaAkun`, `nomorAkun`, `tipeAkun`, dan `keterangan`; ganti status mengirim hanya `{ status }`
+- Dibaca controller dari body: `-`
+- Diisi server: -
 
 #### `POST /aset`
 

@@ -321,7 +321,8 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   indeks; beserta konfirmasi kontrak akun admin yang terbukti lewat e2e
   (`kontrak/temuan.md` butir 113 sampai 122)
 - Laporan halaman mutasi arus kas — 1 catatan dan 2 permintaan, disusun
-  3 Oktober 2026 setelah `6a57d12`: batas periode bertanggal saja dibaca
+  dan diserahkan 3 Oktober 2026 setelah `6a57d12`: batas periode
+  bertanggal saja dibaca
   sebagai tengah malam UTC (dokumentasi atau keputusan zona waktu), baris
   mutasi tanpa nama akun, nama pencatat, dan id penjualan, serta
   ringkasan periode gabungan seluruh akun kas; beserta konfirmasi bahwa

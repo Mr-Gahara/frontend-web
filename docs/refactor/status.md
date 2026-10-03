@@ -78,7 +78,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Profil, login, dan sidebar | `0ed0e9a` (spec profil), `091be4e` (profil), `1c13ee6` (login), `57a7084` (sidebar) | Selesai (keputusan PF1a sampai PF9a; Catatan dari modul Profil, login, dan sidebar). Modul terakhir migrasi halaman lama |
 | Panel admin | `0f54b3c` (fondasi), `4e2a254` (daftar dan buat akun), `10c7efb` (langganan), `c824f18` (ubah dan hapus) | Selesai (keputusan PA1a sampai PA14a; Catatan dari modul panel admin) |
 | Keuangan: mutasi arus kas dan akun kas non-aktif | `e129f9d` (mutasi arus kas), `6a57d12` (akun kas non-aktif dipisah) | Selesai (keputusan MK1a sampai MK3a dan AK1a; Catatan dari pekerjaan mutasi arus kas dan akun kas) |
-| Keuangan: ubah dan aktifkan kembali akun kas | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Keuangan: ubah dan aktifkan kembali akun kas | `1bc76f4` | Selesai (keputusan UA1a sampai UA4a; Catatan dari pekerjaan ubah akun kas) |
+| Keuangan: Pindah Dana antar akun kas | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -98,38 +99,79 @@ Diukur ulang per modul panel admin (`c824f18`):
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: ubah dan aktifkan kembali akun kas
+## Pekerjaan berikutnya: Pindah Dana antar akun kas
 
-Mutasi arus kas selesai di `e129f9d`. Pekerjaan berikutnya, atas keputusan
-pemilik proyek (3 Oktober 2026), adalah mengubah akun kas dan mengaktifkan
-kembali akun non-aktif dari web. Pemetaannya belum diambil; yang sudah
-diketahui:
+Ubah akun kas selesai di `1bc76f4`. Pekerjaan berikutnya, atas keputusan
+pemilik proyek (3 Oktober 2026), adalah Pindah Dana: memindahkan saldo
+antar akun kas dari web. Pemetaannya belum diambil; yang sudah diketahui:
 
-- Backend punya `PUT /akunkas/:id` (`update-akunkas` di Lampiran A) dan
-  `GET /akunkas/:id`; keduanya belum dipakai web dan belum tercatat di
-  `kontrak/endpoint.md` maupun `kontrak/payload.md`.
-- `akunKasService.update` menolak body kosong, dan service memuat penjaga
-  yang belum dibaca isinya: batas 10 akun kas aktif
-  (`_pastikanDalamBatas`), akun yang masih dipakai metode pembayaran
-  (`_pastikanTidakDipakaiMetodePembayaran`), dan akun yang masih bersaldo
-  (`_tolakBilaMasihBersaldo`, `kontrak/temuan.md` butir 81).
-- Halaman akun kas memisahkan akun non-aktif ke bagian lipat sejak
-  `6a57d12` (keputusan AK1a); aksi aktifkan kembali paling wajar berada di
-  baris bagian itu, tetapi tempatnya diputuskan pemilik proyek.
-- Spec keuangan menonaktifkan akun ujinya lewat API
-  (`PUT /akunkas/:id { status: "non-aktif" }`), sehingga jalur itu sudah
-  terbukti menjawab 200 untuk akun bersaldo 0.
+- Tombol "Pindah Dana" di halaman akun kas masih nonaktif dengan
+  keterangan "Fitur transfer antar akun belum tersedia".
+- Backend `yoga` `50eede7` punya `routes/jurnalTransferRoute.js`: `GET`
+  dan `POST /jurnaltransfer` (`read-jurnal-transfer` dan
+  `create-jurnal-transfer`), serta `GET` dan `PUT /jurnaltransfer/:id`
+  (`read-jurnal-transfer` dan `update-jurnal-transfer`). Tulisannya
+  dibatasi 30 permintaan per menit; kunci pembatasnya belum dibaca.
+  Belum ada yang dipakai web.
+- Lampiran A (`kontrak/route-backend.md`) mencatat lima route
+  `/jurnaltransfer` tanpa izin dan masih memuat `DELETE`, yang tidak ada
+  lagi sejak backend `465b438`; izin di atas dibaca dari kode route.
+- Buku mutasi sudah mengenal jenis `TRANSFER_KELUAR`, `TRANSFER_MASUK`,
+  `VOID_TRANSFER_KELUAR`, dan `VOID_TRANSFER_MASUK`
+  (`models/akunKasModel.js`), dan labelnya sudah ada di
+  `features/akun-kas/mutasi.ts`.
+- Validator, service, bentuk respons, dan kegunaan
+  `PUT /jurnaltransfer/:id` belum dibaca.
 
 Langkah pertama sesi berikutnya, setelah backend di-`fetch` dan
-dibandingkan dengan acuan (`cara-kerja.md`): petakan validator, penjaga
-service, dan bentuk respons `PUT /akunkas/:id`, lalu ajukan rancangan
+dibandingkan dengan acuan (`cara-kerja.md`): petakan route, validator,
+service, dan bentuk respons `/jurnaltransfer`, lalu ajukan rancangan
 beserta keputusannya.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline 50eede7..origin/yoga | head -20
-grep -nE 'router|checkPermission|validasi' "$BE/routes/akunKasRoute.js" | cut -c1-140
-sed -n '90,200p;489,560p' "$BE/services/akunKasService.js" | grep -vE '^\s*$' | cut -c1-125
+grep -vE '^\s*$' "$BE/routes/jurnalTransferRoute.js" | cut -c1-140
+ls "$BE/validators" "$BE/services" "$BE/controllers" | grep -i transfer
 ```
+
+## Catatan dari pekerjaan ubah akun kas
+
+Selesai pada 3 Oktober 2026 dalam satu commit, `1bc76f4`. Suite e2e penuh
+dijalankan sebelum commit: 420 lolos dan 17 skipped, tanpa kegagalan.
+
+- Halaman akun kas kini memakai `PUT /akunkas/:id` untuk tiga hal: ubah
+  isian di halaman tersendiri,
+  `/dashboard/outlet/keuangan/akunkas/[id]/ubah` (UA1a); nonaktifkan
+  lewat tombol terpisah di halaman ubah (UA3a); dan aktifkan kembali
+  lewat tombol di baris bagian lipat (UA2a).
+- Form ubah mengirim hanya field yang berubah (UA4a): teks dibandingkan
+  setelah dipangkas, keterangan yang dikosongkan dikirim `null`, dan
+  tombol simpan mati bila tidak ada perubahan, karena backend menolak
+  `PUT` tanpa perubahan dengan 400. Saldo hanya ditampilkan: validator
+  backend menolak `saldo` saat update.
+- Ganti status mengirim hanya `{ status }`. Penolakan 409 backend
+  ditampilkan apa adanya di dalam dialog, karena pesannya memuat jumlah
+  saldo atau nama metode: saldo belum 0, akun masih dipakai metode
+  pembayaran (metode non-aktif ikut dihitung), dan batas 10 akun kas
+  aktif saat mengaktifkan.
+- Tombol Ubah dan Aktifkan kembali hanya tampil bagi pemegang
+  `update-akunkas` (`features/akun-kas/izin.ts`); pengguna lain mendapat
+  keterangan di halaman ubah. Rute ubah tanpa entri `IZIN_HALAMAN`.
+- Halaman ubah membaca akun dari cache daftar; `GET /akunkas/:id` tidak
+  dipakai. `useUbahAkunKas` menginvalidasi akar `akunKas` dan
+  `metodePembayaran`, karena respons metode memuat nama dan nomor akun
+  kas tujuan.
+- `routes/akunKasRoute.js` membatasi tambah dan ubah akun kas 30
+  permintaan per menit per pengguna, dan hanya dilewati bila backend
+  berjalan dengan `NODE_ENV=test`. Satu putaran spec ubah mengirim 15
+  tulisan, sehingga pengulangan beruntun dijawab 429 (`pengujian.md`).
+- Commit pertama pekerjaan ini (`5420f89`) dicabut dari `main` dan
+  diganti `1bc76f4` dengan isi yang sama: pesan commit tidak memuat baris
+  atribusi asisten, atas keputusan pemilik proyek (3 Oktober 2026).
+- Tidak ada catatan backend baru. Kontrak `PUT /akunkas/:id` ditambahkan
+  ke `kontrak/endpoint.md` dan `kontrak/payload.md`.
+- Keputusan pemilik proyek: `keputusan.md` (Modul keuangan, UA1a sampai
+  UA4a).
 
 ## Catatan dari pekerjaan mutasi arus kas dan akun kas
 
@@ -749,18 +791,18 @@ Yang masih berlaku:
 
 ### Utang kecil dari modul keuangan
 
-- Daftar akun kas belum punya ubah maupun nonaktifkan, walau backend
-  punya `PUT /akunkas/:id`. `DELETE /akunkas/:id` tidak ada lagi sejak
-  backend `465b438`, dan akun bersaldo tidak dapat ditutup
-  (`kontrak/temuan.md` butir 81). Tombol "Pindah Dana" nonaktif karena
-  transfer antar akun belum ada.
+- `DELETE /akunkas/:id` tidak ada lagi sejak backend `465b438`, dan akun
+  bersaldo tidak dapat ditutup (`kontrak/temuan.md` butir 81). Ubah,
+  nonaktifkan, dan aktifkan kembali tersedia sejak `1bc76f4`. Tombol
+  "Pindah Dana" masih nonaktif; itu pekerjaan berikutnya.
 - Halaman mutasi arus kas (`e129f9d`) tidak menampilkan nama pencatat dan
   tidak menautkan baris ke penjualannya, karena baris mutasi hanya
   membawa id (`kontrak/temuan.md` butir 124); ringkasan gabungan seluruh
   akun juga belum ada (butir 125). `GET /akunkas/:id/mutasi` tidak dipakai
   web, karena buku gabungan menerima `akunKasID`.
-- Akun non-aktif belum dapat diaktifkan kembali dari bagian lipat halaman
-  akun kas (`6a57d12`); itu pekerjaan berikutnya.
+- Tampilan halaman akun kas dan halaman ubah bagi pengguna tanpa
+  `update-akunkas` belum teruji e2e (`pengujian.md`), dan halaman ubah
+  membaca akun dari cache daftar tanpa `GET /akunkas/:id`.
 - Label jenis mutasi selain pembayaran dan pembatalannya belum pernah
   tampil dengan data nyata, karena data development belum memuat saldo
   awal maupun transfer.

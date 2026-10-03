@@ -504,7 +504,19 @@ Diputuskan pemilik proyek pada 3 Oktober 2026, untuk mutasi arus kas
   tertutup saat halaman dibuka, berisi daftar ringkas satu baris per
   akun. Alasannya: akun kas tidak dapat dihapus, sehingga akun yang
   ditutup terus bertambah dan menenggelamkan akun aktif.
-- **Pekerjaan setelah ini adalah ubah dan aktifkan kembali akun kas**
+- **UA1a: form ubah akun kas di halaman tersendiri**,
+  `/dashboard/outlet/keuangan/akunkas/[id]/ubah`, sejalan dengan halaman
+  buat; tautan Ubah ada di kartu akun aktif dan di baris akun non-aktif.
+- **UA2a: akun non-aktif diaktifkan kembali lewat tombol di baris bagian
+  lipat**, dengan dialog konfirmasi.
+- **UA3a: nonaktifkan adalah tombol terpisah di halaman ubah**, bukan
+  isian status di form, sehingga penolakan backend (saldo belum 0 atau
+  akun masih dipakai metode pembayaran) tidak menggagalkan simpan isian
+  lain.
+- **UA4a: form ubah mengirim hanya field yang berubah.** Tombol simpan
+  mati bila tidak ada perubahan, keterangan yang dikosongkan dikirim
+  `null`, dan saldo hanya ditampilkan.
+- **Pekerjaan setelah ini adalah Pindah Dana antar akun kas**
   (`status.md`, Pekerjaan berikutnya).
 - Diterapkan tanpa ditanyakan (`e129f9d`): batas periode dikirim sebagai
   ISO utuh dari awal dan akhir hari lokal, karena tanggal tanpa jam
@@ -520,6 +532,15 @@ Diputuskan pemilik proyek pada 3 Oktober 2026, untuk mutasi arus kas
   menampilkan keterangan "Belum ada akun kas aktif", berbeda dari keadaan
   belum ada akun sama sekali; lencana Non-Aktif di kartu dibuang; dan
   halamannya tetap di `app/` dengan tampilan lama.
+- Diterapkan tanpa ditanyakan (`1bc76f4`): halaman ubah akun non-aktif
+  juga memuat tombol Aktifkan Kembali, agar halaman itu tidak buntu;
+  akun dibaca dari cache daftar tanpa permintaan detail; skema ubah
+  memakai batas panjang backend (nama 100, nomor 50, keterangan 255);
+  teks dibandingkan setelah dipangkas, sehingga spasi di tepi bukan
+  perubahan; dialog ganti status tetap terbuka dan menampilkan pesan
+  backend saat ditolak; metode pembayaran ikut diinvalidasi; dan
+  pengguna tanpa `update-akunkas` tidak melihat tombol aksi serta
+  mendapat keterangan di halaman ubah.
 
 ### Modul jadwal dan shift
 

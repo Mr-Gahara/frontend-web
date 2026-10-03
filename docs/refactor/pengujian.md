@@ -95,6 +95,18 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per pekerjaan ubah akun kas** (commit `1bc76f4`): 556 test
+unit dan integrasi lolos di 66 berkas, bertambah 11 test dari
+`tests/unit/features/akun-kas/ubah.test.ts`. Suite penuh 3 Oktober 2026
+terhadap backend lokal `yoga` `50eede7` menghasilkan 420 lolos dan 17
+skipped tanpa kegagalan, bertambah enam skenario
+`tests/e2e/keuangan/ubah-akun-kas.spec.ts`. Spec yang menulis ke
+`/akunkas` tidak boleh diulang beruntun: route itu membatasi tambah dan
+ubah 30 permintaan per menit per pengguna (dilewati hanya bila backend
+berjalan dengan `NODE_ENV=test`), dan satu putaran spec ubah mengirim 15
+tulisan. `--repeat-each 3` tanpa jeda menghasilkan 13 lolos dan 5 gagal
+karena 429; tiga putaran berjeda 65 detik lolos 6 dari 6.
+
 **Baseline per pekerjaan mutasi arus kas dan akun kas** (commit
 `6a57d12`): 545 test unit dan integrasi lolos di 65 berkas. Mutasi
 (`e129f9d`) menambah 13 test unit dan lima skenario serta membuang
@@ -853,7 +865,8 @@ Urutan debug kegagalan e2e di atas).
   akun uji memegang `update-location`. Yang teruji e2e hanya jalur ubah,
   dan `bacaSaja` di `IsianLokasi` belum punya test.
 - **Akun kas uji menumpuk sebagai non-aktif**, satu per run spec
-  keuangan, karena akun kas tidak dapat dihapus sejak backend `465b438`
+  keuangan dan lima per run spec ubah akun kas (`1bc76f4`), karena akun
+  kas tidak dapat dihapus sejak backend `465b438`
   (PB13a, `kontrak/temuan.md` butir 81). Payload bersaldo hanya diperiksa
   lewat `POST` yang dijawab gagal.
 - **`hapusLewatApi` menerima 404 sebagai sudah terhapus**, padahal route
@@ -981,6 +994,15 @@ Urutan debug kegagalan e2e di atas).
   teruji e2e**; query periode awal dan fungsi pembentuknya teruji.
 - **Keadaan seluruh akun kas non-aktif belum teruji e2e**, karena tenant
   uji selalu punya akun aktif.
+- **Tampilan tanpa `update-akunkas` belum teruji e2e** (tombol Ubah dan
+  Aktifkan kembali tidak tampil, halaman ubah menampilkan keterangan),
+  karena data uji tidak punya pengguna tanpa izin itu; `aksiAkunKas`
+  teruji di unit test.
+- **Penolakan 409 karena batas 10 akun kas aktif belum teruji e2e.**
+  Skenario nonaktifkan yang ditolak memakai akun aktif bersaldo yang
+  sudah ada dan dilewati bila tidak ada; penolakannya dapat berasal dari
+  penjaga metode pembayaran, yang diperiksa backend lebih dulu, dan spec
+  hanya memeriksa status 409 beserta pesan yang tampil.
 
 ## Spec rujukan
 
@@ -1263,3 +1285,10 @@ Urutan debug kegagalan e2e di atas).
   yang sama, filter dibuktikan dari query permintaan dan dari isi
   respons, ringkasan dari respons `ringkasan`, dan jalur gagal dipulihkan
   lewat tombol coba lagi setelah `unroute`.
+- `tests/e2e/keuangan/ubah-akun-kas.spec.ts` (`1bc76f4`): spec tulis
+  terhadap `PUT /akunkas/:id` tanpa respons palsu. Akun uji dibuat lewat
+  API bersaldo 0 dan ditutup di `finally`. Payload dibandingkan persis
+  (hanya field yang berubah, atau hanya `status`), hasil dibaca ulang
+  lewat API, dan pesan penolakan 409 diambil dari respons lalu
+  dicocokkan dengan yang tampil di toast atau dialog. Satu putaran
+  mengirim 15 tulisan dari kuota 30 per menit.

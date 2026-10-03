@@ -73,6 +73,8 @@ Lampiran A tidak diubah sampai pembangkitan ulang. Delapan route
 web lewat `features/admin-akun/api.ts` (audit 3 Oktober 2026). Dari empat
 route yang belum tercatat di Lampiran A, `GET /akunkas/mutasi` dan
 `GET /akunkas/:id/ringkasan` dipakai web sejak `e129f9d`.
+`PUT /akunkas/:id`, yang tercatat tidak dipakai di Lampiran A, dipakai
+web sejak `1bc76f4`.
 
 ## 1. Acuan dan metodologi
 
