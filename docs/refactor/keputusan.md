@@ -459,9 +459,8 @@ Diputuskan pemilik proyek pada 28 September 2026.
   Tab dan rutenya tetap, dengan keterangan bahwa fitur belum tersedia,
   karena backend belum punya model maupun route mutasi kas. Kebutuhan
   endpoint-nya disampaikan ke tim backend (`kontrak/temuan.md` butir 61).
-  Backend `465b438` kini punya endpoint mutasi kas; penerapan halamannya
-  menunggu keputusan pemilik proyek (`status.md`, Utang kecil dari modul
-  keuangan).
+  Backend `465b438` kini punya endpoint mutasi kas, dan halamannya
+  diwujudkan di `e129f9d` (MK1a sampai MK3a di bawah).
 - **KU2a: kartu ringkasan yang gagal memuat menampilkan `-`** beserta
   keterangan singkat, bukan Rp0 (keputusan rancangan butir 11).
 - **KU3a: skema buat akun kas mempertahankan `z.coerce`** dengan tipe
@@ -488,6 +487,39 @@ Diputuskan pemilik proyek pada 28 September 2026.
 - **KU7a: nama dan nomor akun berisi spasi saja ditolak form** lewat
   `trim` dengan pesan wajib yang sudah ada, sejalan dengan T4a
   (`45187b6`); sebelumnya isian itu lolos form lalu ditolak backend.
+
+Diputuskan pemilik proyek pada 3 Oktober 2026, untuk mutasi arus kas
+(`e129f9d`) dan halaman akun kas (`6a57d12`):
+
+- **MK1a: mutasi arus kas adalah satu halaman buku gabungan** seluruh
+  akun kas dari `GET /akunkas/mutasi`, dengan filter akun, periode, arah,
+  dan jenis, berpaginasi server. Halaman mutasi per akun tidak dibuat.
+- **MK2a: ringkasan periode tampil hanya saat satu akun dipilih** di
+  filter (saldo awal, total masuk, total keluar, dan saldo akhir), karena
+  backend hanya punya ringkasan per akun (`kontrak/temuan.md` butir 125).
+- **MK3a: halaman dibuka dengan periode bulan berjalan**, dari tanggal 1
+  sampai hari ini, dan dapat diubah lewat dua `PilihTanggal`.
+- **AK1a: halaman akun kas menampilkan kartu hanya untuk akun aktif.**
+  Akun non-aktif masuk bagian lipat "Akun non-aktif (N)" di bawah kartu,
+  tertutup saat halaman dibuka, berisi daftar ringkas satu baris per
+  akun. Alasannya: akun kas tidak dapat dihapus, sehingga akun yang
+  ditutup terus bertambah dan menenggelamkan akun aktif.
+- **Pekerjaan setelah ini adalah ubah dan aktifkan kembali akun kas**
+  (`status.md`, Pekerjaan berikutnya).
+- Diterapkan tanpa ditanyakan (`e129f9d`): batas periode dikirim sebagai
+  ISO utuh dari awal dan akhir hari lokal, karena tanggal tanpa jam
+  dibaca backend sebagai tengah malam UTC (butir 123); periode menyaring
+  waktu dicatat mengikuti backend, dan tanggal transaksi ditampilkan
+  hanya bila harinya berbeda; nama akun dicocokkan dari daftar akun kas;
+  pilihan jenis mengikuti arah, dan mengganti arah mengosongkan jenis
+  yang tidak searah; filter akun memuat akun non-aktif juga, agar mutasi
+  lamanya tetap dapat disaring; tabel tanpa tombol urutkan, karena
+  backend tidak menerima urutan; dan kedua hook mutasi selalu dimuat
+  ulang saat dibuka.
+- Diterapkan tanpa ditanyakan (`6a57d12`): seluruh akun non-aktif
+  menampilkan keterangan "Belum ada akun kas aktif", berbeda dari keadaan
+  belum ada akun sama sekali; lencana Non-Aktif di kartu dibuang; dan
+  halamannya tetap di `app/` dengan tampilan lama.
 
 ### Modul jadwal dan shift
 
@@ -1087,7 +1119,7 @@ dan PA3a serta PA12a sampai PA14a di `c824f18`.
   dengan keterangan selama akunnya aktif, karena backend hanya menghapus
   akun non-aktif.
 - **Pekerjaan setelah modul ini adalah mutasi arus kas** (3 Oktober 2026;
-  `status.md`, Pekerjaan berikutnya).
+  selesai di `e129f9d`, Modul keuangan).
 - Diterapkan tanpa ditanyakan (`0f54b3c`): makna `status` sesi tidak
   diubah, sehingga admin yang sudah masuk berstatus "keluar" dan dikenali
   dari role akunnya; role di luar `admin` diperlakukan sebagai klien;

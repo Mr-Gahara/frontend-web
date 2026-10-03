@@ -54,7 +54,8 @@ akun, login pengguna, detail, dan ubah pengguna) di `endpoint.md`,
 `payload.md`, dan `temuan.md`. Pada 3 Oktober 2026, bagian akun admin
 (daftar, buat, ubah, hapus, bekukan, aktifkan, perpanjang, dan riwayat
 langganan) ditambahkan ke `endpoint.md`, `payload.md`, dan `temuan.md`
-terhadap backend yang sama. Bila
+terhadap backend yang sama, begitu pula bagian mutasi dan ringkasan akun
+kas di `endpoint.md` dan `temuan.md`. Bila
 backend berubah cukup jauh, `endpoint.md`, `payload.md`, `izin-halaman.md`,
 dan `route-backend.md` perlu dibangkitkan ulang; bagian 1 di bawah menjelaskan
 cara pembangkitannya. Gejala bahwa kontrak sudah tertinggal: endpoint yang
@@ -69,7 +70,9 @@ tercatat, yaitu `GET /akunkas/mutasi`, `GET /akunkas/:id/mutasi`,
 `GET /akunkas/:id/ringkasan`, dan `POST /sesibooking/:id/checkin`.
 Lampiran A tidak diubah sampai pembangkitan ulang. Delapan route
 `/akun/admin/...` yang tercatat tidak dipakai di Lampiran A kini dipakai
-web lewat `features/admin-akun/api.ts` (audit 3 Oktober 2026).
+web lewat `features/admin-akun/api.ts` (audit 3 Oktober 2026). Dari empat
+route yang belum tercatat di Lampiran A, `GET /akunkas/mutasi` dan
+`GET /akunkas/:id/ringkasan` dipakai web sejak `e129f9d`.
 
 ## 1. Acuan dan metodologi
 

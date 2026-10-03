@@ -95,6 +95,18 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per pekerjaan mutasi arus kas dan akun kas** (commit
+`6a57d12`): 545 test unit dan integrasi lolos di 65 berkas. Mutasi
+(`e129f9d`) menambah 13 test unit dan lima skenario serta membuang
+skenario KU1a; akun kas (`6a57d12`) menambah 2 test unit dan mengganti
+satu skenario. Harapan suite penuh karena itu 414 lolos dan 17 skipped.
+Run suite penuh 3 Oktober 2026 terhadap backend lokal `yoga` `50eede7`
+menghasilkan 413 lolos, 1 gagal, dan 17 skipped: `POST /aset` saat
+menyiapkan data spec aset dijawab backend 500 "Connection operation
+buffering timed out after 10000ms". Spec aset lalu lolos 50 dari 50
+dengan `--repeat-each 2`, sehingga kegagalan itu dicatat sebagai gangguan
+sesaat koneksi basis data backend, bukan sebagai 414 lolos.
+
 **Baseline per modul panel admin** (commit `c824f18`): 530 test unit dan
 integrasi lolos di 63 berkas, 410 e2e lolos, 17 skipped (sama dengan
 baseline pelanggan di bawah). Dari baseline profil, fondasi (`0f54b3c`)
@@ -652,6 +664,18 @@ satu putaran.
 - Login akun di konteks `request` terpisah memutar `tokenVersion` akun
   itu dan memutus sesi halaman yang sedang diuji; helper semacam itu
   dipanggil setelah halaman tidak dipakai lagi.
+- Nama pada `getByRole` dicocokkan sebagian. Tombol "Next" milik footer
+  `DataTable` bertabrakan dengan tombol lain yang namanya memuat kata itu
+  di mode pengembangan, sehingga dipakai `exact: true` (`e129f9d`).
+- Kegagalan suite penuh yang pesannya berasal dari backend, misalnya 500
+  "Connection operation buffering timed out", dinilai dari pesannya, lalu
+  spec itu dijalankan ulang sendiri dengan `--repeat-each 2`. Hasilnya
+  dicatat apa adanya di baseline: jumlah lolos suite penuh tidak
+  dinaikkan menjadi angka harapan.
+- Harapan spec baca-saja dihitung dari respons yang dibaca halaman itu
+  sendiri, dan skenarionya dilewati dengan alasan bila datanya tidak
+  cukup (misalnya mutasi bulan berjalan belum sampai dua halaman),
+  sehingga spec tetap benar di awal bulan.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -946,6 +970,18 @@ Urutan debug kegagalan e2e di atas).
   klien tanpa sesi pengguna yang membuka `/admin`** belum teruji e2e;
   yang terakhir teruji di `tests/unit/lib/auth/tujuan.test.ts`.
 
+- **Spec mutasi arus kas bergantung pada data bulan berjalan**: empat
+  skenarionya dilewati bersyarat bila belum ada mutasi, belum sampai dua
+  halaman, atau belum ada pembatalan pembayaran pada bulan itu, sehingga
+  di awal bulan jumlah skipped dapat naik.
+- **Jenis mutasi saldo awal dan transfer belum teruji e2e**, karena data
+  development hanya memuat pembayaran dan pembatalannya; label dan arah
+  kesembilan jenis teruji di `tests/unit/features/akun-kas/mutasi.test.ts`.
+- **Filter periode mutasi lewat `PilihTanggal` dan tombol reset belum
+  teruji e2e**; query periode awal dan fungsi pembentuknya teruji.
+- **Keadaan seluruh akun kas non-aktif belum teruji e2e**, karena tenant
+  uji selalu punya akun aktif.
+
 ## Spec rujukan
 
 - `tests/e2e/inventaris/kategori/crud-kategori.spec.ts`: spec pembanding yang
@@ -1221,3 +1257,9 @@ Urutan debug kegagalan e2e di atas).
   password baru dibuktikan dengan login di konteks terpisah; dan satu
   jalur gagal (bekukan dijawab 500) memakai akun yang sudah ada agar
   tidak ada akun sungguhan yang ikut beku.
+- `tests/e2e/keuangan/mutasi-kas.spec.ts` (`e129f9d`): spec baca-saja
+  untuk daftar berpaginasi dan berfilter server. Query awal dibandingkan
+  dengan batas hari lokal yang dihitung spec, baris tabel dengan respons
+  yang sama, filter dibuktikan dari query permintaan dan dari isi
+  respons, ringkasan dari respons `ringkasan`, dan jalur gagal dipulihkan
+  lewat tombol coba lagi setelah `unroute`.

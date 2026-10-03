@@ -77,7 +77,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Diskon | `8cb6f31` (spec), `1e05df6` (halaman), `54f2938` (aturan), `52c550e` (pilihan kasir) | Selesai (keputusan PD2a sampai PD4a dan PD6a sampai PD9a; Catatan dari submodul diskon) |
 | Profil, login, dan sidebar | `0ed0e9a` (spec profil), `091be4e` (profil), `1c13ee6` (login), `57a7084` (sidebar) | Selesai (keputusan PF1a sampai PF9a; Catatan dari modul Profil, login, dan sidebar). Modul terakhir migrasi halaman lama |
 | Panel admin | `0f54b3c` (fondasi), `4e2a254` (daftar dan buat akun), `10c7efb` (langganan), `c824f18` (ubah dan hapus) | Selesai (keputusan PA1a sampai PA14a; Catatan dari modul panel admin) |
-| Keuangan: mutasi arus kas | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Keuangan: mutasi arus kas dan akun kas non-aktif | `e129f9d` (mutasi arus kas), `6a57d12` (akun kas non-aktif dipisah) | Selesai (keputusan MK1a sampai MK3a dan AK1a; Catatan dari pekerjaan mutasi arus kas dan akun kas) |
+| Keuangan: ubah dan aktifkan kembali akun kas | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -97,33 +98,69 @@ Diukur ulang per modul panel admin (`c824f18`):
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: mutasi arus kas
+## Pekerjaan berikutnya: ubah dan aktifkan kembali akun kas
 
-Panel admin selesai di `c824f18`. Pekerjaan berikutnya, atas keputusan
-pemilik proyek (3 Oktober 2026), adalah halaman mutasi arus kas di modul
-keuangan. Pemetaannya belum diambil; yang sudah diketahui:
+Mutasi arus kas selesai di `e129f9d`. Pekerjaan berikutnya, atas keputusan
+pemilik proyek (3 Oktober 2026), adalah mengubah akun kas dan mengaktifkan
+kembali akun non-aktif dari web. Pemetaannya belum diambil; yang sudah
+diketahui:
 
-- Halaman `app/dashboard/outlet/keuangan/mutasiArusKas/page.tsx` hanya
-  menampilkan keterangan belum tersedia sejak `45187b6` (keputusan KU1a).
-- Backend `465b438` menambah `GET /akunkas/mutasi`,
-  `GET /akunkas/:id/mutasi`, dan `GET /akunkas/:id/ringkasan`
-  (`kontrak/temuan.md` butir 61). Ketiganya di luar Lampiran A dan belum
-  tercatat di `kontrak/endpoint.md` maupun `kontrak/payload.md`.
-- Mutasi ditulis backend saat saldo awal akun kas dibuat (`SALDO_AWAL`)
-  dan saat pembayaran dibatalkan (`VOID_PEMBAYARAN`); jenis lain belum
-  dibaca dari kode.
-- Lapisan data akun kas sudah ada di `features/akun-kas`, dan halaman
-  itu bergate `read-akunkas` (`kontrak/izin-halaman.md`).
+- Backend punya `PUT /akunkas/:id` (`update-akunkas` di Lampiran A) dan
+  `GET /akunkas/:id`; keduanya belum dipakai web dan belum tercatat di
+  `kontrak/endpoint.md` maupun `kontrak/payload.md`.
+- `akunKasService.update` menolak body kosong, dan service memuat penjaga
+  yang belum dibaca isinya: batas 10 akun kas aktif
+  (`_pastikanDalamBatas`), akun yang masih dipakai metode pembayaran
+  (`_pastikanTidakDipakaiMetodePembayaran`), dan akun yang masih bersaldo
+  (`_tolakBilaMasihBersaldo`, `kontrak/temuan.md` butir 81).
+- Halaman akun kas memisahkan akun non-aktif ke bagian lipat sejak
+  `6a57d12` (keputusan AK1a); aksi aktifkan kembali paling wajar berada di
+  baris bagian itu, tetapi tempatnya diputuskan pemilik proyek.
+- Spec keuangan menonaktifkan akun ujinya lewat API
+  (`PUT /akunkas/:id { status: "non-aktif" }`), sehingga jalur itu sudah
+  terbukti menjawab 200 untuk akun bersaldo 0.
 
 Langkah pertama sesi berikutnya, setelah backend di-`fetch` dan
-dibandingkan dengan acuan (`cara-kerja.md`): petakan ketiga route itu
-beserta query, izin, dan bentuk responsnya, lalu ajukan rancangan halaman.
+dibandingkan dengan acuan (`cara-kerja.md`): petakan validator, penjaga
+service, dan bentuk respons `PUT /akunkas/:id`, lalu ajukan rancangan
+beserta keputusannya.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline 50eede7..origin/yoga | head -20
-grep -nE 'mutasi|ringkasan' "$BE/routes/akunKasRoute.js" | cut -c1-140
-grep -rnE 'mutasi|Mutasi' "$BE/controllers/akunKasController.js" "$BE/services/akunKasService.js" | cut -c1-140 | head -40
+grep -nE 'router|checkPermission|validasi' "$BE/routes/akunKasRoute.js" | cut -c1-140
+sed -n '90,200p;489,560p' "$BE/services/akunKasService.js" | grep -vE '^\s*$' | cut -c1-125
 ```
+
+## Catatan dari pekerjaan mutasi arus kas dan akun kas
+
+Selesai pada 3 Oktober 2026 dalam dua commit. Suite e2e penuh dijalankan
+sekali di akhir (keputusan PF6a): 413 lolos, 1 gagal, dan 17 skipped.
+
+| Commit | Isi |
+|---|---|
+| `e129f9d` | Halaman mutasi arus kas dari `GET /akunkas/mutasi`, dengan filter, ringkasan per akun, dan paginasi server |
+| `6a57d12` | Halaman akun kas: kartu hanya untuk akun aktif, akun non-aktif di bagian lipat ringkas |
+
+- Halaman mutasi adalah buku gabungan seluruh akun kas (MK1a): filter
+  akun, periode, arah, dan jenis diterapkan backend bersama paginasi.
+  Ringkasan periode tampil hanya saat satu akun dipilih (MK2a), dan
+  halaman dibuka dengan bulan berjalan (MK3a).
+- Lapisan datanya ditambahkan ke `features/akun-kas` (`arsitektur.md`).
+  Kedua hook mutasi selalu dimuat ulang saat dibuka, karena pembayaran
+  mengubah buku tanpa menginvalidasi akar `akunKas`.
+- Batas periode dikirim sebagai ISO utuh dari awal dan akhir hari lokal:
+  tanggal tanpa jam dibaca backend sebagai tengah malam UTC, terbukti
+  dari respons nyata (`kontrak/temuan.md` butir 123).
+- Butir 61 terpenuhi. Catatan backend baru: butir 123 sampai 125,
+  dilaporkan 3 Oktober 2026 (`backend.md`). Kontrak mutasi dan ringkasan
+  ditambahkan ke `kontrak/endpoint.md`.
+- Satu kegagalan suite penuh berasal dari backend, bukan dari kode:
+  `POST /aset` saat menyiapkan data spec aset dijawab 500 "Connection
+  operation buffering timed out after 10000ms" (koneksi Mongoose ke basis
+  data). Spec itu lolos 50 dari 50 saat diulang dua putaran
+  (`pengujian.md`).
+- Keputusan pemilik proyek: `keputusan.md` (Modul keuangan, MK1a sampai
+  MK3a dan AK1a).
 
 ## Catatan dari modul panel admin
 
@@ -486,8 +523,9 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   bulan kalender penuh serta `GET /akunkas`, sehingga pengguna tanpa
   `read-akunkas` melihat `-` di kartu saldo (KU2a,
   `kontrak/izin-halaman.md`).
-- Mutasi arus kas menunggu endpoint mutasi kas dari backend
-  (`kontrak/temuan.md` butir 61, keputusan KU1a).
+- Mutasi arus kas sempat menunggu endpoint mutasi kas dari backend
+  (`kontrak/temuan.md` butir 61, keputusan KU1a); halamannya diwujudkan
+  di `e129f9d` (Catatan dari pekerjaan mutasi arus kas dan akun kas).
 - Setup tenant membuat akun kas bawaan "Kas Kecil (Laci)" `CASH-001` dan
   metode pembayaran "Tunai" yang bergantung padanya
   (`tenantService.createWithOwner`). Spec keuangan hanya menutup akun
@@ -716,10 +754,16 @@ Yang masih berlaku:
   backend `465b438`, dan akun bersaldo tidak dapat ditutup
   (`kontrak/temuan.md` butir 81). Tombol "Pindah Dana" nonaktif karena
   transfer antar akun belum ada.
-- Backend `465b438` menambah `GET /akunkas/mutasi`,
-  `GET /akunkas/:id/mutasi`, dan `GET /akunkas/:id/ringkasan`
-  (`kontrak/temuan.md` butir 61), sehingga halaman mutasi arus kas (KU1a)
-  dapat diwujudkan; cakupannya menunggu keputusan pemilik proyek.
+- Halaman mutasi arus kas (`e129f9d`) tidak menampilkan nama pencatat dan
+  tidak menautkan baris ke penjualannya, karena baris mutasi hanya
+  membawa id (`kontrak/temuan.md` butir 124); ringkasan gabungan seluruh
+  akun juga belum ada (butir 125). `GET /akunkas/:id/mutasi` tidak dipakai
+  web, karena buku gabungan menerima `akunKasID`.
+- Akun non-aktif belum dapat diaktifkan kembali dari bagian lipat halaman
+  akun kas (`6a57d12`); itu pekerjaan berikutnya.
+- Label jenis mutasi selain pembayaran dan pembatalannya belum pernah
+  tampil dengan data nyata, karena data development belum memuat saldo
+  awal maupun transfer.
 - Ketiga halaman keuangan yang memuat data masih memanggil
   `useAuthGuard()`, karena halamannya tetap di `app/` dengan tampilan
   lama; pemanggilan itu dibuang bila halamannya dijadikan tipis.
