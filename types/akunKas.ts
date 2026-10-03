@@ -36,3 +36,49 @@ export interface AkunKasRequest {
   status?: AkunKasStatus;
   keterangan?: string;
 }
+
+export type ArahMutasi = "MASUK" | "KELUAR";
+
+/** Kunci JENIS_MUTASI backend (models/akunKasModel.js); arah mengikuti jenisnya. */
+export type JenisMutasi =
+  | "SALDO_AWAL"
+  | "PEMBAYARAN"
+  | "VOID_PEMBAYARAN"
+  | "BEBAN"
+  | "PEMBALIK_BEBAN"
+  | "TRANSFER_KELUAR"
+  | "TRANSFER_MASUK"
+  | "VOID_TRANSFER_KELUAR"
+  | "VOID_TRANSFER_MASUK";
+
+/**
+ * Satu baris buku mutasi kas (GET /akunkas/mutasi). tanggal adalah tanggal
+ * transaksi untuk ditampilkan; urutan buku dan filter periode memakai
+ * createdAt, waktu saldo benar-benar berubah.
+ */
+export interface MutasiKas {
+  id: string;
+  akunKasID: string;
+  jenis: JenisMutasi;
+  arah: ArahMutasi;
+  jumlah: number;
+  saldoSebelum: number;
+  saldoSesudah: number;
+  referensi: { tipe: string | null; id: string | null };
+  mutasiAsalID: string | null;
+  keterangan: string;
+  tanggal: string;
+  penggunaID: string | null;
+  createdAt: string;
+}
+
+/** Respons GET /akunkas/:id/ringkasan untuk satu periode. */
+export interface RingkasanMutasi {
+  saldoAwalPeriode: number;
+  totalMasuk: number;
+  totalKeluar: number;
+  totalLunas: number;
+  totalVoid: number;
+  totalKeluarLain: number;
+  saldoAkhirPeriode: number;
+}

@@ -1,7 +1,8 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { akunKasApi } from "./api";
+import { filterServerMutasi, paramPeriodeMutasi, type FilterMutasi } from "./mutasi";
 import { queryKeys } from "@/lib/queryKeys";
 
 /**
@@ -32,5 +33,35 @@ export function useBuatAkunKas(opsi: Callback = {}) {
       opsi.onSuccess?.();
     },
     onError: (err) => opsi.onError?.(err),
+  });
+}
+
+/**
+ * Satu halaman buku mutasi gabungan (keputusan MK1a). Data halaman sebelumnya
+ * dipertahankan selama halaman berikutnya dimuat. Selalu dimuat ulang saat
+ * dibuka (staleTime 0), karena pembayaran dan pembatalannya mengubah buku
+ * tanpa menginvalidasi akar akunKas.
+ */
+export function useDaftarMutasi(filter: FilterMutasi, halaman: number, ukuran: number) {
+  const params = { ...filterServerMutasi(filter), page: String(halaman), limit: String(ukuran) };
+  return useQuery({
+    queryKey: queryKeys.akunKas.mutasi(params),
+    queryFn: () => akunKasApi.mutasi(params),
+    placeholderData: keepPreviousData,
+    staleTime: 0,
+  });
+}
+
+/**
+ * Ringkasan periode satu akun kas. Backend hanya punya ringkasan per akun,
+ * sehingga hook ini diam selama tidak ada akun yang dipilih (keputusan MK2a).
+ */
+export function useRingkasanMutasi(filter: FilterMutasi) {
+  const periode = paramPeriodeMutasi(filter);
+  return useQuery({
+    queryKey: queryKeys.akunKas.ringkasan(filter.akunKasID, periode),
+    queryFn: () => akunKasApi.ringkasan(filter.akunKasID, periode),
+    enabled: filter.akunKasID !== "",
+    staleTime: 0,
   });
 }

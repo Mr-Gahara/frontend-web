@@ -16,7 +16,6 @@ import { keTanggalLokal } from "../../../lib/waktu";
 const URL_AKUN = "/dashboard/outlet/keuangan/akunkas";
 const URL_BUAT_AKUN = "/dashboard/outlet/keuangan/akunkas/buatAkunKas";
 const URL_LABA_RUGI = "/dashboard/outlet/keuangan/ringkasanLabaRugi";
-const URL_MUTASI = "/dashboard/outlet/keuangan/mutasiArusKas";
 const POLA_AKUN = /\/api\/akunkas(\?|$)/i;
 const POLA_LABA_RUGI = /\/api\/laporan\/laba-rugi(\?|$)/i;
 
@@ -306,10 +305,5 @@ test.describe("E2E — Keuangan", () => {
     ).toHaveText(harapan);
   });
 
-  test("mutasi arus kas menampilkan keterangan belum tersedia tanpa data tiruan (KU1a)", async ({ page }) => {
-    await page.goto(URL_MUTASI);
-    await expect(page.getByText("Mutasi arus kas belum tersedia")).toBeVisible();
-    await expect(page.getByText("Setoran harian Outlet A")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Download CSV" })).toHaveCount(0);
-  });
+  // Mutasi arus kas diuji di tests/e2e/keuangan/mutasi-kas.spec.ts (keputusan MK1a).
 });
