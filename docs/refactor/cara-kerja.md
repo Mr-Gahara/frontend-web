@@ -1467,6 +1467,18 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   berkas di folder yang sama; gerbang penghapusan memakai pola yang
   mencakup keduanya.
 
+- **Variabel yang dihitung tetapi tidak dipakai diperiksa sebagai calon
+  bug sebelum dibuang.** `isLoadingLokasi` di stok outlet tampak seperti
+  sisa migrasi, padahal menandai keadaan memuat yang tidak pernah
+  ditampilkan: query ber-`enabled: false` tidak melaporkan `isLoading`,
+  sehingga tabel menampilkan daftar kosong selama lokasi dimuat
+  (`eb0181f`). Baca pemakaian yang semestinya ada sebelum memutuskan.
+- **Blok perintah tidak memuat placeholder yang harus diganti tangan.**
+  Blok pencarian dampak memuat `C=HASH_C` dan dijalankan apa adanya,
+  sehingga pencarian untuk commit itu gagal tanpa terlihat. Nilai yang
+  baru ada setelah blok lain dijalankan diambil lewat perintah, misalnya
+  `git rev-parse --short HEAD`.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:

@@ -174,6 +174,12 @@ produk (`152088b`). Labelnya PR:
   `read-inventory-gudang`. Backend menerima ketiganya untuk lokasi mana pun
   (`kontrak/temuan.md` butir 2), tetapi nama izinnya dimaksudkan per ruang.
 
+- **Tabel stok outlet menampilkan kerangka memuat selama lokasi aktif
+  dimuat** (4 Oktober 2026, `eb0181f`), bukan "Tidak ada data stok yang
+  ditemukan.": selama itu query stok belum berjalan, sehingga daftar
+  kosong belum dapat disimpulkan. Diterapkan tanpa ditanyakan, sejalan
+  dengan keputusan submodul jurnal stok.
+
 ### Submodul stock opname
 
 - **Cakupan lokasi di ruang outlet mengikuti peran.** Owner melihat seluruh
@@ -214,6 +220,17 @@ produk (`152088b`). Labelnya PR:
 - **Detail membedakan dokumen yang tidak ditemukan dari kegagalan memuat.**
 - **Gate daftar stock opname outlet ditambah `read-location`**, karena
   cakupan outlet memanggil `/location` dan `/location/current`.
+
+- **Detail menolak dokumen dari ruang yang salah** (4 Oktober 2026,
+  `eb0181f`), sejalan dengan detail stock adjustment. Id milik ruang lain
+  yang dibuka lewat URL menampilkan pesan beserta tombol kembali, bukan
+  isi dokumen. Ini penjaga tampilan demi aturan stok outlet dan gudang
+  tidak tercampur, bukan pengaman akses, dan dokumen yang tipe lokasinya
+  tidak diketahui tetap ditampilkan.
+- **PIC di form buat menampilkan nama pengguna dari server** (`eb0181f`),
+  lewat `usePenggunaSaya`. `picID` tetap dari sesi; selama nama dimuat
+  tampil "Memuat data Anda...", dan bila gagal dimuat kembali ke teks
+  cadangan, sehingga form tidak tertahan permintaan nama.
 
 ### Submodul pengajuan stok
 
@@ -1284,7 +1301,8 @@ Diputuskan pemilik proyek pada 4 Oktober 2026. Labelnya EL:
   `useSyncExternalStore` yang sudah ada di reservasi, agar pola itu hanya
   didefinisikan sekali (keputusan rancangan butir 12).
 - **Pekerjaan setelah ini adalah utang kecil yang tidak menunggu
-  backend** (`status.md`, Pekerjaan berikutnya).
+  backend** (selesai di `9195472`), lalu `useAuthGuard()` yang berulang
+  (`status.md`, Pekerjaan berikutnya).
 - Diterapkan tanpa ditanyakan (`4f19e77`): `decodeJWT` mengembalikan
   `Record<string, unknown>`, dan `exp` yang bukan angka dianggap
   kedaluwarsa; tipe `Dropdown` kalender diambil dari `react-day-picker`;

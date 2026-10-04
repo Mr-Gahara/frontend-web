@@ -87,63 +87,86 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | `formatRupiah` deterministik untuk nilai pecahan | `4c9c4ed` | Selesai (keputusan FR1a dan FR2a, dan keputusan rancangan butir 24) |
 | Pemformat rupiah: sembilan berkas ke `formatRupiah` | `006d7f8` | Selesai (keputusan rancangan butir 24; Catatan dari utang kecil modul produk dan pemformat rupiah) |
 | Error ESLint warisan | `4f19e77` (tipe, kutip, dan `storage.ts`), `039ead4` (hidrasi), `f5fe574` (form role) | Selesai (keputusan EL1a sampai EL4a; Catatan dari error ESLint warisan) |
-| Utang kecil yang tidak menunggu backend | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Utang kecil yang tidak menunggu backend | `6b5e1cc` (kode mati), `eb0181f` (penjaga ruang opname, nama PIC, dan kerangka memuat stok), `9195472` (spec tipe aset) | Selesai (Catatan dari utang kecil yang tidak menunggu backend) |
+| `useAuthGuard()` berulang | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per error ESLint warisan (`f5fe574`):
+Diukur ulang per utang kecil yang tidak menunggu backend (`9195472`):
 
-| Hal | Awal | Setelah ESLint warisan `f5fe574` | Catatan |
+| Hal | Awal | Setelah utang kecil `9195472` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 0 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), 4 setelah halaman profil, login, dan sidebar (`57a7084`), dan 0 setelah error ESLint warisan (`4f19e77`) |
 | Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna |
 | `useAuthGuard()` berulang di halaman | 49 | 26 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, halaman diskon, dan halaman profil) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
-| Berkas di atas 700 baris | 7 | 3 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702) |
+| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.087 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702). Per `9195472` menjadi 4: `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700 (714 baris) karena penjaga ruang (`eb0181f`), dan buat penjualan menjadi 1.087 baris setelah kode mati dibuang (`6b5e1cc`) |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: utang kecil yang tidak menunggu backend
+## Pekerjaan berikutnya: useAuthGuard berulang
 
-Error ESLint warisan selesai di `f5fe574`. Pekerjaan berikutnya, atas
-keputusan pemilik proyek (4 Oktober 2026), adalah utang kecil yang dapat
-dikerjakan tanpa perubahan backend:
+Kelima utang kecil yang tidak menunggu backend selesai di `9195472`.
+Pekerjaan berikutnya, atas keputusan pemilik proyek (4 Oktober 2026),
+adalah pemanggilan `useAuthGuard()` yang berulang.
+`app/dashboard/layout.tsx` sudah memanggilnya untuk seluruh dashboard,
+sehingga pemanggilan di halaman dan komponen di bawah layout itu
+berulang.
 
-- Detail stock opname memeriksa tipe lokasi terhadap ruang (Utang kecil
-  dari modul stock adjustment gudang).
-- Nama PIC di form buat stock opname dibaca lewat `usePenggunaSaya`, lalu
-  `nama` dibuang dari `PenggunaSesi` (Utang kecil dari modul Profil,
-  login, dan sidebar).
-- `RegisterRequest`, `RegisterResponse`, dan `LoginRequest` di
-  `types/auth.ts` dibuang (utang yang sama).
-- Spec tipe aset memakai `tests/helpers/reservasi-uji.ts`
-  (`pengujian.md`, Utang pengujian).
-- Delapan belas warning ESLint (diukur 4 Oktober 2026 setelah `f5fe574`):
-  empat belas impor tidak terpakai, tiga variabel tidak terpakai
-  (`isLoadingLokasi` di stok outlet, `simpanDraft` di buat penjualan, dan
-  `props` di `components/calendar.tsx`), dan satu ternary yang dipakai
-  sebagai pernyataan di `toggleExpand` halaman daftar role. Pemakaian
-  ketiga variabel dibaca lebih dulu, karena variabel yang tidak terpakai
-  dapat menandai perilaku yang tertinggal. Dua warning
-  `react-hooks/incompatible-library` (`components/ui/data-table.tsx` dan
-  `features/stock-opname/form-buat-stock-opname.tsx`) dibiarkan: itu
-  keterangan React Compiler tentang pustaka, bukan cacat kode.
+Pemetaan awal (4 Oktober 2026, setelah `9195472`): 24 berkas di `app/`
+di luar layout dashboard dan berkas hook-nya sendiri, seluruhnya di bawah
+`app/dashboard/`, dan 13 berkas di `features/`, yang belum pernah masuk
+metrik. Yang belum dibuktikan: apakah ada pemanggil yang memakai nilai
+kembalian hook itu, apa yang dilakukan hook saat dipanggil dua kali dalam
+satu pohon, dan test mana yang bergantung pada pemanggilan di halaman.
 
-Pemetaannya belum diambil. Langkah pertama sesi berikutnya, setelah
-backend di-`fetch` dan dibandingkan dengan acuan (`cara-kerja.md`):
-petakan kelimanya, lalu ajukan rancangan beserta keputusannya sekaligus.
+Langkah pertama sesi berikutnya, setelah backend di-`fetch` dan
+dibandingkan dengan acuan (`cara-kerja.md`): baca hook-nya utuh, petakan
+pemanggilnya, lalu ajukan rancangan beserta keputusannya sekaligus.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline 50eede7..origin/yoga | head -20
-grep -nE 'lokasi|TIPE_LOKASI|ruang' features/stock-opname/halaman-detail-stock-opname.tsx | cut -c1-140 | head -30
-grep -nE '\bnama\b' lib/auth/session.ts features/stock-opname/form-buat-stock-opname.tsx | cut -c1-140
-grep -rnE '\b(RegisterRequest|RegisterResponse|LoginRequest)\b' app components features lib types tests | cut -c1-140
-npx eslint app components features hooks lib tests 2>&1 | grep -E 'warning' | cut -c1-140
+cat app/hooks/useAuthGuard.ts | cut -c1-140
+grep -rnE 'useAuthGuard\(\)' app features | grep -vE ':[[:space:]]*useAuthGuard\(\);$' | cut -c1-140
+grep -rlE 'useAuthGuard\(\)' features | sort
 ```
+
+## Catatan dari utang kecil yang tidak menunggu backend
+
+Dikerjakan pada 4 Oktober 2026 dalam tiga commit, terhadap backend `yoga`
+`50eede7`. Suite e2e penuh dijalankan sekali di akhir (keputusan PF6a):
+430 lolos dan 17 skipped, tanpa kegagalan.
+
+| Commit | Isi |
+|---|---|
+| `6b5e1cc` | Tiga belas impor dan dua variabel tidak terpakai, ternary di `toggleExpand`, dan tiga tipe tanpa pemakai di `types/auth.ts` |
+| `eb0181f` | Penjaga ruang di detail stock opname, nama PIC lewat `usePenggunaSaya`, `nama` dibuang dari `PenggunaSesi`, dan kerangka memuat tabel stok outlet |
+| `9195472` | Spec tipe aset memakai helper bersama `tests/helpers/reservasi-uji.ts` |
+
+- Warning ESLint turun dari 20 menjadi 2. Yang tersisa dua
+  `react-hooks/incompatible-library` (`components/ui/data-table.tsx` dan
+  `features/stock-opname/form-buat-stock-opname.tsx`), yang dibiarkan: itu
+  keterangan React Compiler tentang pustaka, bukan cacat kode.
+- Variabel `isLoadingLokasi` yang tidak terpakai ternyata menandai bug:
+  selama lokasi aktif dimuat, query stok belum berjalan dan tidak
+  melaporkan memuat, sehingga tabel stok outlet sempat menampilkan "Tidak
+  ada data stok yang ditemukan." Kerangka memuat kini mengikuti keduanya.
+- Detail stock opname menolak dokumen yang tipe lokasinya bukan milik
+  ruang itu, dengan pola yang sama dengan detail stock adjustment. Ini
+  penjaga tampilan, bukan pengaman akses.
+- PIC di form buat stock opname menampilkan nama pengguna dari server.
+  Sebelumnya selalu teks cadangan, karena token tidak membawa nama.
+- Keempat skenario e2e baru dijalankan lebih dulu terhadap kode lama dan
+  gagal keempatnya, lalu lolos setelah perbaikan.
+- Helper lokal spec tipe aset dibandingkan baris demi baris dengan helper
+  bersama sebelum diganti; jumlah test spec tetap 25.
+- Tidak ada temuan backend baru, dan kontrak tidak berubah.
+- Keputusan: `keputusan.md` (Submodul stok dan inventaris gudang, dan
+  Submodul stock opname).
 
 ## Catatan dari error ESLint warisan
 
@@ -871,13 +894,6 @@ Yang masih berlaku:
 
 ## Utang kecil yang tertunda
 
-### Utang kecil dari modul stock adjustment gudang
-
-- Detail stock opname tidak memeriksa tipe lokasi terhadap ruang, sehingga
-  dokumen gudang yang dibuka lewat URL ruang outlet tetap tampil. Pola
-  penjaganya sudah ada di `features/stock-adjustment/ruang.ts`
-  (`TIPE_LOKASI_RUANG`). Bereskan saat halaman stock opname disentuh lagi.
-
 ### Utang kecil dari modul penjualan dan pembayaran
 
 - Tipe berakhiran `Lama` (`keputusan.md` butir 19) habis sejak `1e05df6`:
@@ -889,7 +905,7 @@ Yang masih berlaku:
   `PajakDariProdukLama`; 5 per `3359497`, yang menghapus `AkunKasLama`,
   `AkunKasRefLama`, dan `MetodePembayaranLama`, dan pesan commit itu
   keliru menyebut enam). Per `d9365d3` tersisa 1, dan per `1e05df6` 0.
-- `features/penjualan/halaman-buat-penjualan.tsx` masih 1.088 baris:
+- `features/penjualan/halaman-buat-penjualan.tsx` masih 1.087 baris:
   migrasi memindahkan lapisan data dan membuang `any`, tetapi tidak memecah
   komponennya. Pisahkan pemilih pelanggan, pemilih diskon, dan pratinjau
   total saat halaman itu disentuh lagi.
@@ -1000,10 +1016,6 @@ Yang masih berlaku:
 
 ### Utang kecil dari modul Profil, login, dan sidebar
 
-- `features/stock-opname/form-buat-stock-opname.tsx` membaca `nama` dari
-  sesi, padahal token tidak membawanya, sehingga nama PIC selalu memakai
-  teks cadangan. Pindahkan ke `usePenggunaSaya` saat form itu disentuh,
-  lalu buang `nama` dari `PenggunaSesi` (`lib/auth/session.ts`).
 - Tombol hapus akun di halaman profil tampil nonaktif (PF2a) sampai
   backend punya jalur hapus akun sendiri bagi Owner (`kontrak/temuan.md`
   butir 112).
@@ -1015,9 +1027,6 @@ Yang masih berlaku:
 - Halaman ringkasan laba rugi memicu peringatan ukuran grafik di konsol
   (lebar dan tinggi -1 saat render pertama). Penyebabnya belum ditelusuri
   dari kode, dan grafiknya tetap tampil.
-- `types/auth.ts` masih memuat `RegisterRequest`, `RegisterResponse`, dan
-  `LoginRequest` tanpa pemakai; modul panel admin tidak memakainya, dan
-  ketiganya dibuang saat berkas itu disentuh lagi.
 
 ### Utang kecil dari modul panel admin
 
@@ -1049,3 +1058,6 @@ Yang masih berlaku:
   untuk transfer stok dan validator inventory. Pembangkitan ulang penuh
   ditunda sampai backend menyelesaikan modul produk, bahan baku, stok, dan
   WMS, dan hanya atas perintah pemilik proyek.
+- `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700
+  baris (714) sejak penjaga ruang ditambahkan di `eb0181f`. Pisahkan
+  dialog aksi dan tabel hitungan saat halaman itu disentuh lagi.

@@ -95,6 +95,14 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per utang kecil yang tidak menunggu backend** (commit
+`9195472`): 579 test unit dan integrasi lolos di 69 berkas, tidak
+berubah. Suite penuh 4 Oktober 2026 terhadap backend lokal `yoga`
+`50eede7` menghasilkan 430 lolos dan 17 skipped tanpa kegagalan,
+bertambah empat skenario dari `eb0181f` (tiga di
+`tests/e2e/inventaris/stockOpname/ruang-dan-pic.spec.ts` dan satu di
+`tests/e2e/inventaris/stok/memuat-stok.spec.ts`), dalam sekitar 21 menit.
+
 **Baseline per error ESLint warisan** (commit `f5fe574`): 579 test unit
 dan integrasi lolos di 69 berkas: `039ead4` menambah dua test
 `useSudahHidrasi`, dan `f5fe574` empat test `nilaiAwalRole`; `4f19e77`
@@ -864,9 +872,6 @@ Urutan debug kegagalan e2e di atas).
 - **Idempotensi hanya teruji dari sisi klien**: kunci terkirim dan sama saat
   permintaan diulang. Penahanan permintaan kembar di backend tidak diuji
   dari web.
-- **Spec tipe aset belum memakai `tests/helpers/reservasi-uji.ts`**:
-  helper-nya masih didefinisikan di dalam spec, karena `a2adc70`
-  mendahului helper bersama itu. Dipindah saat spec itu disentuh lagi.
 - **Spec tarif sempat gagal sekali di suite penuh `074e98c`** (spinner,
   lolos 3 dari 3 saat diulang). Sebelum migrasi tarif, spec itu lolos 78
   dari 78 dalam tiga putaran terhadap kode lama; penyebab kegagalan
@@ -1113,6 +1118,11 @@ Urutan debug kegagalan e2e di atas).
   ulang belum teruji e2e. `nilaiAwalRole` teruji di
   `tests/unit/features/role/nilai-awal.test.ts`.
 
+- **Penjaga ruang detail stock opname hanya teruji untuk dokumen yang
+  tipe lokasinya diketahui**, dan kedua skenarionya dilewati bila ruang
+  itu belum punya dokumen. Nama PIC yang gagal dimuat (teks cadangan)
+  belum teruji e2e.
+
 ## Spec rujukan
 
 - `tests/e2e/inventaris/kategori/crud-kategori.spec.ts`: spec pembanding yang
@@ -1228,7 +1238,8 @@ Urutan debug kegagalan e2e di atas).
   diperiksa lunak sejak `b5a55c4`), keberhasilan
   dibuktikan dengan membaca ulang lewat API (404 setelah hapus), galat
   backend sungguhan dari nama duplikat, dan simulasi daftar kosong yang
-  dibentuk dari respons nyata.
+  dibentuk dari respons nyata. Sejak `9195472` helper-nya diimpor dari
+  `tests/helpers/reservasi-uji.ts`, tanpa salinan lokal.
 - `tests/e2e/reservasi/aset/crud-aset.spec.ts`: helper bersama
   `tests/helpers/reservasi-uji.ts`. Skenario data yatim (tipe aset uji
   dihapus) beserta `test.fixme` cache backend yang basi dibuang di
@@ -1430,3 +1441,13 @@ Urutan debug kegagalan e2e di atas).
   (`LABEL_JENIS`, `teksJumlahMutasi`), dan `finally` memulihkan saldo
   lewat API hanya bila alur berhenti di tengah. Helper akun kas uji
   bersama ada di `tests/helpers/akun-kas-uji.ts`.
+- `tests/e2e/inventaris/stockOpname/ruang-dan-pic.spec.ts` (`eb0181f`):
+  spec baca-saja yang dibuktikan gagal terhadap kode lama sebelum
+  perbaikannya diterapkan. Id dokumen ruang lain diambil dari respons
+  daftar ruang itu, lalu dibuka lewat URL ruang yang salah; nama PIC
+  dibandingkan dengan respons `GET /pengguna/:id` yang dibaca halaman.
+- `tests/e2e/inventaris/stok/memuat-stok.spec.ts` (`eb0181f`): keadaan
+  antara diuji dengan menahan satu permintaan lalu meneruskannya
+  (`tahanLaluTeruskan`). Pemeriksaan positif (kepala tabel sudah tampil)
+  mendahului pemeriksaan bahwa teks daftar kosong tidak ada, dan batas
+  waktu pemeriksaan negatif lebih pendek daripada lama penahanan.
