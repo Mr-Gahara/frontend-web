@@ -71,7 +71,6 @@ import {
   ShoppingCart,
   Calculator,
 } from "lucide-react";
-import { format } from "date-fns";
 
 interface ItemState {
   produkID: string;
@@ -111,8 +110,6 @@ export default function HalamanBuatPenjualan() {
   const [items, setItems] = useState<ItemState[]>([emptyItem()]);
   const [diskonGlobalIDs, setDiskonGlobalIDs] = useState<string[]>([]); // State Diskon Global
   const [formError, setFormError] = useState("");
-
-  const simpanDraft = true;
 
   // ALERT DIALOG STATE
   const [showConfirm, setShowConfirm] = useState(false);

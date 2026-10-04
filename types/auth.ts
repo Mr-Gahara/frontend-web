@@ -12,22 +12,6 @@ export interface Akun {
 
 // --- Request / Response ---
 
-export interface RegisterRequest {
-  username?: string;
-  email: string;
-  password: string;
-}
-
-export interface RegisterResponse {
-  message: string;
-  data: Pick<Akun, "_id" | "email" | "role">;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
 export interface TenantEntry {
   tenantID: string;
   namaToko: string;

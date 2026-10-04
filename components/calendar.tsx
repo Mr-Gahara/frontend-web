@@ -157,7 +157,7 @@ function Calendar({
           <CalendarDayButton locale={locale} {...props} />
         ),
         // 4. INJEKSI CUSTOM DROPDOWN SHADCN
-        Dropdown: ({ value, onChange, options, ...props }: DropdownProps) => {
+        Dropdown: ({ value, onChange, options }: DropdownProps) => {
           const handleChange = (val: string) => {
             const changeEvent = {
               target: { value: val },

@@ -14,7 +14,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Search,
   Truck,
-  MapPin,
   Clock,
   ArrowRight,
   PackageCheck,

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Box, CalendarClock, History, Layers, Tags } from "lucide-react";
+import { Box, CalendarClock, Layers, Tags } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [

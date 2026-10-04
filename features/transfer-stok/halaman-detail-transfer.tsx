@@ -31,7 +31,6 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  FileText,
   Send,
   Truck,
   Ban,

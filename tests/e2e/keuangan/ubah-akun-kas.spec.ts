@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { ID_TIDAK_ADA, cocok, pantauPermintaan, unik } from "../../helpers/reservasi-uji";
 import { daftarAkun, buatAkunUji, tutupAkunUji, type AkunKasUji } from "../../helpers/akun-kas-uji";
 

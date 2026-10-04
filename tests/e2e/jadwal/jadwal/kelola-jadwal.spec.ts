@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { api, bukaDenganAuth, JAWAB_GAGAL, login } from "../../../helpers/transfer-uji";
+import { bukaDenganAuth, JAWAB_GAGAL, login } from "../../../helpers/transfer-uji";
 import { cocok } from "../../../helpers/reservasi-uji";
 import {
   bersihkanHari,

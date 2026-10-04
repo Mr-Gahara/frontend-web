@@ -2,7 +2,7 @@
 
 import { namaTipeAset } from "@/features/aset/tampilan";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import type { Aset, StatusAset } from "@/types/aset";

@@ -23,7 +23,6 @@ import {
   CheckCircle2,
   XCircle,
   FileEdit,
-  ArrowRight,
   Eye,
   Inbox
 } from "lucide-react";
