@@ -1403,6 +1403,16 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   konstantanya**, sebelum percobaan login diulang; saringan yang hanya
   menampilkan `limit: MAX_ATTEMPTS` belum menjawab berapa percobaan yang
   tersisa.
+- **Laporan gerbang di `/tmp` dapat hilang bila commit ditunda.** Suite
+  penuh `e53c016` dijalankan sehari setelah vitest, dan `/tmp/v.log`
+  sudah dikosongkan sistem, sehingga gerbang menolak. Bila suite penuh
+  dan commit tidak dikerjakan dalam satu sesi, vitest dijalankan ulang
+  di blok commit yang sama.
+- **Calon temuan backend dari kode dibuktikan lewat permintaan nyata
+  sebelum dilaporkan**, pada data uji yang dibuat dan ditutup skrip itu
+  sendiri. Dari lima calon temuan jurnal transfer, satu terbantah: id
+  tidak sah di `PUT` diduga berujung galat server, padahal errorHandler
+  pusat menjawab 404.
 
 ## Kapan berhenti dan bertanya
 

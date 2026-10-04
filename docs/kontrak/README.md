@@ -74,7 +74,12 @@ web lewat `features/admin-akun/api.ts` (audit 3 Oktober 2026). Dari empat
 route yang belum tercatat di Lampiran A, `GET /akunkas/mutasi` dan
 `GET /akunkas/:id/ringkasan` dipakai web sejak `e129f9d`.
 `PUT /akunkas/:id`, yang tercatat tidak dipakai di Lampiran A, dipakai
-web sejak `1bc76f4`.
+web sejak `1bc76f4`. Pada 4 Oktober 2026, bagian jurnal transfer
+ditambahkan ke `endpoint.md`, `payload.md`, `izin-halaman.md`, dan
+`temuan.md` terhadap backend yang sama. `GET` dan `POST /jurnaltransfer`
+serta `PUT /jurnaltransfer/:id`, yang tercatat tanpa izin dan tidak
+dipakai di Lampiran A, dipakai web sejak `e53c016`; `DELETE` jurnal
+transfer termasuk tujuh route yang tidak ada lagi.
 
 ## 1. Acuan dan metodologi
 

@@ -95,6 +95,17 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per pekerjaan Pindah Dana** (commit `e53c016`): 572 test unit
+dan integrasi lolos di 67 berkas, bertambah 16 test dari
+`tests/unit/features/jurnal-transfer/jurnal-transfer.test.ts`. Suite
+penuh 4 Oktober 2026 terhadap backend lokal `yoga` `50eede7` menghasilkan
+422 lolos dan 17 skipped tanpa kegagalan, bertambah dua skenario
+`tests/e2e/keuangan/pindah-dana.spec.ts`, dalam sekitar 20 menit.
+Template role (`e053a67`) tidak mengubah jumlah test. Pembatas tulis
+`/jurnaltransfer` (30 per menit per pengguna) berkunci sendiri, terpisah
+dari `/akunkas`; satu putaran spec Pindah Dana mengirim dua tulisan ke
+`/jurnaltransfer` dan empat ke `/akunkas`.
+
 **Baseline per pekerjaan ubah akun kas** (commit `1bc76f4`): 556 test
 unit dan integrasi lolos di 66 berkas, bertambah 11 test dari
 `tests/unit/features/akun-kas/ubah.test.ts`. Suite penuh 3 Oktober 2026
@@ -865,7 +876,8 @@ Urutan debug kegagalan e2e di atas).
   akun uji memegang `update-location`. Yang teruji e2e hanya jalur ubah,
   dan `bacaSaja` di `IsianLokasi` belum punya test.
 - **Akun kas uji menumpuk sebagai non-aktif**, satu per run spec
-  keuangan dan lima per run spec ubah akun kas (`1bc76f4`), karena akun
+  keuangan, lima per run spec ubah akun kas (`1bc76f4`), dan dua per run
+  spec Pindah Dana (`e53c016`), karena akun
   kas tidak dapat dihapus sejak backend `465b438`
   (PB13a, `kontrak/temuan.md` butir 81). Payload bersaldo hanya diperiksa
   lewat `POST` yang dijawab gagal.
@@ -987,9 +999,10 @@ Urutan debug kegagalan e2e di atas).
   skenarionya dilewati bersyarat bila belum ada mutasi, belum sampai dua
   halaman, atau belum ada pembatalan pembayaran pada bulan itu, sehingga
   di awal bulan jumlah skipped dapat naik.
-- **Jenis mutasi saldo awal dan transfer belum teruji e2e**, karena data
-  development hanya memuat pembayaran dan pembatalannya; label dan arah
-  kesembilan jenis teruji di `tests/unit/features/akun-kas/mutasi.test.ts`.
+- **Jenis mutasi saldo awal dan transfer belum teruji e2e** di halaman
+  mutasi: spec Pindah Dana membuktikan saldo, bukan baris mutasinya.
+  Label dan arah kesembilan jenis teruji di
+  `tests/unit/features/akun-kas/mutasi.test.ts`.
 - **Filter periode mutasi lewat `PilihTanggal` dan tombol reset belum
   teruji e2e**; query periode awal dan fungsi pembentuknya teruji.
 - **Keadaan seluruh akun kas non-aktif belum teruji e2e**, karena tenant
@@ -1003,6 +1016,19 @@ Urutan debug kegagalan e2e di atas).
   sudah ada dan dilewati bila tidak ada; penolakannya dapat berasal dari
   penjaga metode pembayaran, yang diperiksa backend lebih dulu, dan spec
   hanya memeriksa status 409 beserta pesan yang tampil.
+- **Transfer uji menumpuk berstatus VOID**, satu per run spec Pindah
+  Dana, karena transfer tidak dapat dihapus. Skenario utamanya dilewati
+  bila tidak ada akun kas aktif bersaldo di luar akun uji.
+- **Penolakan backend atas Pindah Dana belum teruji e2e**: saldo sumber
+  tidak cukup (ditahan form lebih dulu), akun nonaktif, dan pembatalan
+  yang ditolak karena saldo akun tujuan tidak cukup. Statusnya (400)
+  dibuktikan lewat skrip sekali pakai pada 4 Oktober 2026
+  (`kontrak/temuan.md` butir 128).
+- **Tampilan Pindah Dana menurut izin hanya teruji di unit test**
+  (`aksiTransfer`): form tanpa izin buat, riwayat tanpa izin baca, dan
+  tombol Batalkan tanpa izin ubah, karena satu-satunya akun uji berperan
+  Owner. Filter riwayat dan keadaan kurang dari dua akun aktif juga
+  belum teruji e2e.
 
 ## Spec rujukan
 
@@ -1292,3 +1318,11 @@ Urutan debug kegagalan e2e di atas).
   lewat API, dan pesan penolakan 409 diambil dari respons lalu
   dicocokkan dengan yang tampil di toast atau dialog. Satu putaran
   mengirim 15 tulisan dari kuota 30 per menit.
+- `tests/e2e/keuangan/pindah-dana.spec.ts` (`e53c016`): operasi yang
+  mengubah saldo diuji sungguhan lalu dipulihkan lewat UI. Rp1 dipindah
+  dari akun aktif ke akun uji bersaldo 0, payload dibandingkan persis,
+  saldo kedua akun dibaca ulang lewat API, lalu transfer dibatalkan dari
+  riwayat dan saldo dibuktikan pulih; `finally` membatalkan lewat API
+  hanya bila penanda `dibatalkan` belum diset. Penahanan form dibuktikan
+  dengan penghitung permintaan yang tetap nol, dan pemicu Select dipilih
+  lewat nama label.

@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan, kecuali `DELETE /akun/admin/users/:id`, yang membawa password admin. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi pelanggan dan diskon dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`, `1e05df6`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`). Pada hari yang sama, login akun, login pengguna, dan ubah pengguna dikoreksi terhadap backend yang sama (`091be4e`, `1c13ee6`). Pada 3 Oktober 2026, operasi akun admin ditambahkan terhadap backend yang sama (`4e2a254`, `10c7efb`, `c824f18`).
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan, kecuali `DELETE /akun/admin/users/:id`, yang membawa password admin. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi pelanggan dan diskon dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`, `1e05df6`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`). Pada hari yang sama, login akun, login pengguna, dan ubah pengguna dikoreksi terhadap backend yang sama (`091be4e`, `1c13ee6`). Pada 3 Oktober 2026, operasi akun admin ditambahkan terhadap backend yang sama (`4e2a254`, `10c7efb`, `c824f18`). Pada 4 Oktober 2026, buat dan batal jurnal transfer ditambahkan terhadap backend yang sama (`e53c016`).
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -257,6 +257,20 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Respons 200 dengan `data` berisi `message`, `berhasilDiproses`, `ditolak`, dan `detailDitolak`. `berhasilDiproses` hanya menghitung dokumen yang dibuat atau berubah (`temuan.md` butir 66)
 - Web mengirim `penggunaID`, `tanggalKerja` (YYYY-MM-DD), `isLibur`, dan `shiftID` untuk hari kerja
 - Diisi server: `tenantID`
+
+#### `POST /jurnaltransfer`
+
+- Aturan: validateJurnalTransferPayload (validators/jurnalTransferValidator.js) di route, setelah pembatas laju tulis dan `checkPermission("create-jurnal-transfer")`. Ditambahkan 4 Oktober 2026 terhadap backend `yoga` `50eede7`
+- Allowlist (`FIELD_CREATE`): `kasSumberID`, `kasTujuanID`, `jumlah`, `keterangan`, dan `tanggal`. Field lain ditolak 400 "Field tidak dikenal"
+- Wajib dari klien: `kasSumberID` dan `kasTujuanID` (ObjectId yang sah dan tidak boleh sama), `jumlah` (angka lebih dari 0), dan `keterangan` (tidak kosong, paling panjang 500 setelah `trim`)
+- Field lain yang dikenali: `tanggal` (teks tanggal yang sah, tidak boleh lebih dari 60 detik di masa depan); tanpa itu waktu server
+- Validator tidak menuntut `jumlah` bilangan bulat, sedangkan model menuntut minimal 1: 1,5 diterima dan tersimpan, dan 0,5 ditolak 400 "Data yang dikirim tidak valid." tanpa menyebut field (`temuan.md` butir 126, terbukti lewat permintaan nyata)
+- Aturan service (`jurnalTransferService.create`), dalam satu transaksi: kas sumber harus aktif dan saldonya cukup, selain itu 400 dengan pesan yang menyebut sebabnya (saldo tidak cukup memuat angka saldo); kas tujuan harus aktif milik tenant (400). Saldo sumber dikurangi dan saldo tujuan ditambah, nama kedua akun disalin ke transfer, dan dua baris mutasi ditulis (`TRANSFER_KELUAR` dan `TRANSFER_MASUK`) dengan `referensi` bertipe `JurnalTransfer`. Penolakan aturan dijawab 400, bukan 409 (butir 128)
+- Galat validator dibalas `{ errors }` tanpa `message` dari route (butir 128)
+- Tulisan dibatasi 30 permintaan per menit per pengguna (429), dengan kunci `jurnal-transfer:<pengguna>` yang terpisah dari `/akunkas`; pembatas dilewati hanya bila backend berjalan dengan `NODE_ENV=test`
+- Web mengirim hasil `payloadBuatTransfer` (`features/jurnal-transfer/payload.ts`, `e53c016`): tepat empat field tanpa `tanggal` (keputusan DN3a), dengan jumlah bilangan bulat minimal 1 dari `skemaPindahDana`
+- Respons 201 dengan `data` berbentuk item `GET /jurnaltransfer` dan `message` "Transfer saldo berhasil dicatat"
+- Diisi server: `tenantID`, `dicatatOleh`, `namaKasSumber`, `namaKasTujuan`, `status`
 
 #### `POST /kategori`
 
@@ -528,6 +542,19 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Libur: `shiftID` dikosongkan
 - Wajib dari klien: -
 - Respons 200 dengan detail jadwal, berbentuk seperti item `GET /jadwalshift`
+- Diisi server: -
+
+#### `PUT /jurnaltransfer/:id`
+
+- Aturan: validateJurnalTransferPayload mode update (validators/jurnalTransferValidator.js) di route, setelah pembatas laju tulis dan `checkPermission("update-jurnal-transfer")`. Ditambahkan 4 Oktober 2026 terhadap backend `yoga` `50eede7`
+- Allowlist (`FIELD_UPDATE`): `keterangan`, `catatan`, dan `status`. Field lain ditolak 400; jumlah, akun, dan tanggal tidak dapat diubah setelah tercatat
+- Wajib dari klien: - (minimal satu field)
+- Aturan nilai: `status` hanya boleh `VOID`; `keterangan` bila dikirim tidak boleh kosong; `catatan` teks atau null; keduanya paling panjang 500 setelah `trim`
+- Aturan service (`jurnalTransferService.update`) untuk VOID, dalam satu transaksi: hanya dari AKTIF, dan transfer yang sudah VOID ditolak 400 "Transfer ini sudah VOID."; kas tujuan harus aktif dan masih bersaldo sebesar transfer, dan kas sumber harus aktif, selain itu 400. Saldo dibalik, dan dua baris mutasi pembalik ditulis (`VOID_TRANSFER_MASUK` dan `VOID_TRANSFER_KELUAR`) dengan `mutasiAsalID` ke baris asalnya; `catatan` yang dikirim bersama VOID ikut ke keterangan mutasi pembalik. Tidak ada `DELETE`
+- Tanpa `status`, `keterangan` dan `catatan` ditulis tanpa memeriksa status, sehingga transfer yang sudah VOID masih dapat diubah (`temuan.md` butir 127, terbukti lewat permintaan nyata)
+- Transfer yang tidak ada, milik tenant lain, atau ber-id tidak sah dijawab 404
+- Web hanya memakainya untuk membatalkan, lewat `payloadBatalTransfer` (`features/jurnal-transfer/payload.ts`, `e53c016`): `{ status: "VOID" }`, ditambah `catatan` hanya bila alasan diisi; tombolnya hanya untuk transfer AKTIF dan pemegang `update-jurnal-transfer`
+- Respons 200 dengan `data` berbentuk item `GET /jurnaltransfer` dan `message` "Transfer saldo diperbarui"
 - Diisi server: -
 
 #### `PUT /kategori/:id`

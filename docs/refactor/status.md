@@ -79,7 +79,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Panel admin | `0f54b3c` (fondasi), `4e2a254` (daftar dan buat akun), `10c7efb` (langganan), `c824f18` (ubah dan hapus) | Selesai (keputusan PA1a sampai PA14a; Catatan dari modul panel admin) |
 | Keuangan: mutasi arus kas dan akun kas non-aktif | `e129f9d` (mutasi arus kas), `6a57d12` (akun kas non-aktif dipisah) | Selesai (keputusan MK1a sampai MK3a dan AK1a; Catatan dari pekerjaan mutasi arus kas dan akun kas) |
 | Keuangan: ubah dan aktifkan kembali akun kas | `1bc76f4` | Selesai (keputusan UA1a sampai UA4a; Catatan dari pekerjaan ubah akun kas) |
-| Keuangan: Pindah Dana antar akun kas | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Keuangan: Pindah Dana antar akun kas | `e053a67` (izin di template role), `e53c016` | Selesai (keputusan DN1a sampai DN4a; Catatan dari pekerjaan Pindah Dana) |
+| Keuangan: pengeluaran (beban operasional) | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -99,40 +100,69 @@ Diukur ulang per modul panel admin (`c824f18`):
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: Pindah Dana antar akun kas
+## Pekerjaan berikutnya: pengeluaran (beban operasional)
 
-Ubah akun kas selesai di `1bc76f4`. Pekerjaan berikutnya, atas keputusan
-pemilik proyek (3 Oktober 2026), adalah Pindah Dana: memindahkan saldo
-antar akun kas dari web. Pemetaannya belum diambil; yang sudah diketahui:
+Pindah Dana selesai di `e53c016`. Pekerjaan berikutnya, atas keputusan
+pemilik proyek (4 Oktober 2026), adalah halaman pengeluaran. Pemetaannya
+belum diambil; yang sudah diketahui:
 
-- Tombol "Pindah Dana" di halaman akun kas masih nonaktif dengan
-  keterangan "Fitur transfer antar akun belum tersedia".
-- Backend `yoga` `50eede7` punya `routes/jurnalTransferRoute.js`: `GET`
-  dan `POST /jurnaltransfer` (`read-jurnal-transfer` dan
-  `create-jurnal-transfer`), serta `GET` dan `PUT /jurnaltransfer/:id`
-  (`read-jurnal-transfer` dan `update-jurnal-transfer`). Tulisannya
-  dibatasi 30 permintaan per menit; kunci pembatasnya belum dibaca.
-  Belum ada yang dipakai web.
+- `/dashboard/outlet/pengeluaran` masih halaman placeholder tanpa data,
+  bergate `read-pembayaran` (`kontrak/izin-halaman.md`).
 - Lampiran A (`kontrak/route-backend.md`) mencatat lima route
-  `/jurnaltransfer` tanpa izin dan masih memuat `DELETE`, yang tidak ada
-  lagi sejak backend `465b438`; izin di atas dibaca dari kode route.
-- Buku mutasi sudah mengenal jenis `TRANSFER_KELUAR`, `TRANSFER_MASUK`,
-  `VOID_TRANSFER_KELUAR`, dan `VOID_TRANSFER_MASUK`
-  (`models/akunKasModel.js`), dan labelnya sudah ada di
-  `features/akun-kas/mutasi.ts`.
-- Validator, service, bentuk respons, dan kegunaan
-  `PUT /jurnaltransfer/:id` belum dibaca.
+  `/bebanoperasional` dan lima route `/kategoribeban`, seluruhnya tanpa
+  izin dan belum dipakai web. Lampiran itu terikat backend `4310d1c`;
+  keadaan kedua route di `yoga` `50eede7` belum dibaca.
+- Buku mutasi mengenal jenis `BEBAN` dan `PEMBALIK_BEBAN`
+  (`types/akunKas.ts`), sehingga beban diduga mengubah saldo akun kas;
+  itu belum dibuktikan dari service.
+- Validator, service, bentuk respons, dan izin kedua route belum dibaca.
 
 Langkah pertama sesi berikutnya, setelah backend di-`fetch` dan
 dibandingkan dengan acuan (`cara-kerja.md`): petakan route, validator,
-service, dan bentuk respons `/jurnaltransfer`, lalu ajukan rancangan
-beserta keputusannya.
+service, dan bentuk respons `/bebanoperasional` dan `/kategoribeban`,
+lalu ajukan rancangan beserta keputusannya.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline 50eede7..origin/yoga | head -20
-grep -vE '^\s*$' "$BE/routes/jurnalTransferRoute.js" | cut -c1-140
-ls "$BE/validators" "$BE/services" "$BE/controllers" | grep -i transfer
+grep -vE '^\s*$' "$BE/routes/bebanOperasionalRoute.js" "$BE/routes/kategoriBebanRoute.js" | cut -c1-140
+ls "$BE/validators" "$BE/services" "$BE/controllers" "$BE/models" | grep -i beban
 ```
+
+## Catatan dari pekerjaan Pindah Dana
+
+Selesai pada 3 dan 4 Oktober 2026 dalam dua commit. Suite e2e penuh
+dijalankan sebelum commit fitur: 422 lolos dan 17 skipped, tanpa
+kegagalan.
+
+| Commit | Isi |
+|---|---|
+| `e053a67` | Ketiga izin jurnal transfer di template Manajer dan General Manajer (DN4a) |
+| `e53c016` | Halaman Pindah Dana: form, riwayat berpaginasi server, dan pembatalan lewat VOID |
+
+- Halaman `/dashboard/outlet/keuangan/akunkas/pindahDana` (DN1a) memuat
+  form di atas dan riwayat transfer di bawahnya (DN2a), di atas
+  `features/jurnal-transfer` (`arsitektur.md`). Waktu transfer adalah
+  waktu server; `tanggal` tidak dikirim (DN3a).
+- Backend tidak punya `DELETE`: transfer dibatalkan lewat
+  `PUT /jurnaltransfer/:id` berstatus VOID, yang membalik saldo kedua
+  akun. Jumlah, akun, dan tanggal tidak dapat diubah setelah tercatat.
+- Halaman tanpa entri `IZIN_HALAMAN`, dengan izin per bagian: form bagi
+  `create-jurnal-transfer`, riwayat bagi `read-jurnal-transfer`, dan
+  Batalkan bagi `update-jurnal-transfer`. Tombol Pindah Dana di halaman
+  akun kas menjadi tautan bagi pemegang izin buat atau baca.
+- Kedua mutation menginvalidasi akar `jurnalTransfer` dan `akunKas`,
+  karena transfer mengubah saldo dua akun dan menulis dua baris buku
+  mutasi.
+- Pembatas tulis `/jurnaltransfer` 30 permintaan per menit per pengguna,
+  dengan kunci sendiri yang terpisah dari `/akunkas`.
+- Calon temuan backend dibuktikan lewat permintaan nyata pada akun uji
+  sebelum dilaporkan: empat terbukti, dan satu dugaan (id tidak sah di
+  `PUT` berujung galat server) terbantah, karena dijawab 404.
+- Catatan backend baru: butir 126 sampai 129, dilaporkan 4 Oktober 2026
+  (`backend.md`). Kontrak jurnal transfer ditambahkan ke
+  `kontrak/endpoint.md` dan `kontrak/payload.md`.
+- Keputusan pemilik proyek: `keputusan.md` (Modul keuangan, DN1a sampai
+  DN4a).
 
 ## Catatan dari pekerjaan ubah akun kas
 
@@ -793,8 +823,12 @@ Yang masih berlaku:
 
 - `DELETE /akunkas/:id` tidak ada lagi sejak backend `465b438`, dan akun
   bersaldo tidak dapat ditutup (`kontrak/temuan.md` butir 81). Ubah,
-  nonaktifkan, dan aktifkan kembali tersedia sejak `1bc76f4`. Tombol
-  "Pindah Dana" masih nonaktif; itu pekerjaan berikutnya.
+  nonaktifkan, dan aktifkan kembali tersedia sejak `1bc76f4`, dan Pindah
+  Dana sejak `e53c016`. Menutup akun bersaldo dengan memindah saldonya
+  lebih dulu belum diuji sebagai satu alur.
+- Riwayat transfer hanya dapat disaring per akun dan status, karena
+  backend tidak punya filter periode (`kontrak/temuan.md` butir 129), dan
+  ubah keterangan transfer tanpa VOID tidak dibuat.
 - Halaman mutasi arus kas (`e129f9d`) tidak menampilkan nama pencatat dan
   tidak menautkan baris ke penjualannya, karena baris mutasi hanya
   membawa id (`kontrak/temuan.md` butir 124); ringkasan gabungan seluruh
@@ -803,9 +837,10 @@ Yang masih berlaku:
 - Tampilan halaman akun kas dan halaman ubah bagi pengguna tanpa
   `update-akunkas` belum teruji e2e (`pengujian.md`), dan halaman ubah
   membaca akun dari cache daftar tanpa `GET /akunkas/:id`.
-- Label jenis mutasi selain pembayaran dan pembatalannya belum pernah
-  tampil dengan data nyata, karena data development belum memuat saldo
-  awal maupun transfer.
+- Label jenis mutasi saldo awal dan beban belum pernah tampil dengan data
+  nyata. Mutasi transfer dan pembatalannya ada di data development sejak
+  spec Pindah Dana (`e53c016`), tetapi tampilannya di halaman mutasi
+  belum diperiksa.
 - Ketiga halaman keuangan yang memuat data masih memanggil
   `useAuthGuard()`, karena halamannya tetap di `app/` dengan tampilan
   lama; pemanggilan itu dibuang bila halamannya dijadikan tipis.

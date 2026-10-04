@@ -328,6 +328,14 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   ringkasan periode gabungan seluruh akun kas; beserta konfirmasi bahwa
   butir 61 terpenuhi dan kontrak mutasi yang terbukti lewat e2e
   (`kontrak/temuan.md` butir 61 dan 123 sampai 125)
+- Laporan Pindah Dana (jurnal transfer) — 3 temuan dan 1 permintaan,
+  disusun dan diserahkan 4 Oktober 2026 setelah `e53c016`: jumlah
+  transfer pecahan diterima validator, keterangan dan catatan transfer
+  yang sudah VOID masih dapat diubah, penolakan aturan dijawab 400 dan
+  galat validator tanpa `message`, serta permintaan filter periode di
+  daftar transfer; beserta konfirmasi kontrak jurnal transfer yang
+  terbukti lewat e2e dan permintaan nyata
+  (`kontrak/temuan.md` butir 126 sampai 129)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

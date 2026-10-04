@@ -516,8 +516,8 @@ Diputuskan pemilik proyek pada 3 Oktober 2026, untuk mutasi arus kas
 - **UA4a: form ubah mengirim hanya field yang berubah.** Tombol simpan
   mati bila tidak ada perubahan, keterangan yang dikosongkan dikirim
   `null`, dan saldo hanya ditampilkan.
-- **Pekerjaan setelah ini adalah Pindah Dana antar akun kas**
-  (`status.md`, Pekerjaan berikutnya).
+- **Pekerjaan setelah ini adalah Pindah Dana antar akun kas** (selesai di
+  `e53c016`, DN1a sampai DN4a di bawah).
 - Diterapkan tanpa ditanyakan (`e129f9d`): batas periode dikirim sebagai
   ISO utuh dari awal dan akhir hari lokal, karena tanggal tanpa jam
   dibaca backend sebagai tengah malam UTC (butir 123); periode menyaring
@@ -541,6 +541,36 @@ Diputuskan pemilik proyek pada 3 Oktober 2026, untuk mutasi arus kas
   backend saat ditolak; metode pembayaran ikut diinvalidasi; dan
   pengguna tanpa `update-akunkas` tidak melihat tombol aksi serta
   mendapat keterangan di halaman ubah.
+
+Diputuskan pemilik proyek pada 3 dan 4 Oktober 2026, untuk Pindah Dana
+(`e053a67`, `e53c016`). Labelnya DN, karena PD sudah dipakai modul
+Pelanggan dan diskon:
+
+- **DN1a: form Pindah Dana di halaman tersendiri**,
+  `/dashboard/outlet/keuangan/akunkas/pindahDana`, sejalan dengan halaman
+  buat dan ubah akun kas.
+- **DN2a: riwayat transfer di halaman yang sama**, berpaginasi server,
+  dengan filter akun dan status, serta Batalkan per baris lewat dialog
+  beralasan opsional.
+- **DN3a: tanggal transfer tidak diisi.** `tanggal` tidak dikirim dan
+  backend memakai waktu server, karena filter periode buku mutasi memakai
+  waktu dicatat.
+- **DN4a: ketiga izin jurnal transfer masuk template Manajer dan General
+  Manajer**, sebagai commit tersendiri (`e053a67`), seperti PO11a.
+- **Pekerjaan setelah ini adalah pengeluaran (beban operasional)**
+  (4 Oktober 2026; `status.md`, Pekerjaan berikutnya).
+- Diterapkan tanpa ditanyakan (`e53c016`): halaman tanpa entri
+  `IZIN_HALAMAN`, dengan izin per bagian seperti PO14a (form bagi izin
+  buat, riwayat bagi izin baca, Batalkan bagi izin ubah); jumlah
+  bilangan bulat minimal 1 dan disimpan sebagai teks; keterangan wajib,
+  dipangkas, paling panjang 500; pilihan akun hanya yang aktif, dan akun
+  tujuan tidak menawarkan akun sumber; jumlah di atas saldo sumber
+  ditahan form, sedangkan penolakan backend ditampilkan apa adanya;
+  form dikosongkan setelah berhasil tanpa berpindah halaman; dialog batal
+  hanya tertutup saat berhasil (keputusan Fase 0); filter akun riwayat
+  memuat akun non-aktif juga; ubah keterangan tanpa VOID tidak dibuat;
+  dan transfer uji e2e dibuat lalu dibatalkan lewat UI, sehingga saldo
+  akun sumber pulih.
 
 ### Modul jadwal dan shift
 
