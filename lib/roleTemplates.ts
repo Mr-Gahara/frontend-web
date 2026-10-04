@@ -181,6 +181,10 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "update-metode-pembayaran",
       "create-diskon",
       "update-diskon",
+      "read-pajak",
+      "create-pajak",
+      "update-pajak",
+      "delete-pajak",
       // Inventory & Stok
       "read-inventory",
       "read-inventory-outlet",
@@ -283,6 +287,10 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "update-metode-pembayaran",
       "create-diskon",
       "update-diskon",
+      "read-pajak",
+      "create-pajak",
+      "update-pajak",
+      "delete-pajak",
       // Inventory & Stok
       "read-inventory",
       "read-inventory-outlet",
