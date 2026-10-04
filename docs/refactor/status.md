@@ -85,7 +85,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Keuangan: utang kecil (menutup akun bersaldo lewat Pindah Dana, dan tampilan mutasi transfer) | `f7805ca` | Selesai (keputusan UK1a sampai UK3a; Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang) |
 | Produk: utang kecil (dialog hapus, spec produk, dan `BahanBakuCombobox`) | `152088b` | Selesai (keputusan PR1a sampai PR3a; Catatan dari utang kecil modul produk dan pemformat rupiah) |
 | `formatRupiah` deterministik untuk nilai pecahan | `4c9c4ed` | Selesai (keputusan FR1a dan FR2a, dan keputusan rancangan butir 24) |
-| Pemformat rupiah: sembilan berkas ke `formatRupiah` | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Pemformat rupiah: sembilan berkas ke `formatRupiah` | `006d7f8` | Selesai (keputusan rancangan butir 24; Catatan dari utang kecil modul produk dan pemformat rupiah) |
+| Error ESLint warisan | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -105,48 +106,37 @@ Diukur ulang per modul panel admin (`c824f18`):
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: satukan pemformat rupiah
+## Pekerjaan berikutnya: error ESLint warisan
 
-Utang kecil modul produk selesai di `152088b`, dan `formatRupiah` dibuat
-deterministik di `4c9c4ed`. Pekerjaan berikutnya, atas keputusan pemilik
-proyek (4 Oktober 2026): sembilan berkas aplikasi yang punya pemformat
-IDR sendiri dipindah ke `formatRupiah` (`lib/format.ts`), agar tampilan
-rupiah sama di setiap runtime (keputusan rancangan butir 24):
+Kesembilan pemformat rupiah disatukan di `006d7f8`. Pekerjaan
+berikutnya, atas keputusan pemilik proyek (4 Oktober 2026), adalah error
+ESLint warisan (Utang kecil dari modul stock adjustment gudang): 20
+error per `57a7084`, yaitu empat belas `no-explicit-any`, empat
+`react-hooks/set-state-in-effect`, dan dua `react/no-unescaped-entities`.
 
-- `app/dashboard/outlet/inventaris/produk/page.tsx`
-- `app/dashboard/outlet/keuangan/ringkasanLabaRugi/page.tsx`
-- `app/dashboard/outlet/keuangan/akunkas/page.tsx`
-- `app/dashboard/outlet/keuangan/components/keuangan-summary-cards.tsx`
-- `app/dashboard/outlet/reservasi/tarif/page.tsx`
-- `features/penjualan/halaman-detail-penjualan.tsx`
-- `features/penjualan/halaman-pembayaran-penjualan.tsx`
-- `features/penjualan/halaman-daftar-penjualan.tsx`
-- `features/akun-kas/halaman-ubah.tsx`
-
-Pemetaannya belum diambil: opsi tiap pemformat belum dibandingkan, dan
-ada yang mungkin sengaja berbeda. Langkah pertama sesi berikutnya,
-setelah backend di-`fetch` dan dibandingkan dengan acuan
-(`cara-kerja.md`): bandingkan opsi kesembilan pemformat itu dengan
-`formatRupiah`, lalu ajukan rancangan beserta keputusannya. Suite e2e
-penuh dijalankan di akhir pekerjaan itu; harapannya 425 lolos dan 17
-skipped (`pengujian.md`).
+Pemetaannya belum diambil, dan hitungan itu belum diukur ulang sejak
+`57a7084`. Langkah pertama sesi berikutnya, setelah backend di-`fetch`
+dan dibandingkan dengan acuan (`cara-kerja.md`): daftar error terkini
+per berkas dan aturan, lalu ajukan rancangan beserta keputusannya,
+dikelompokkan menurut aturan.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline 50eede7..origin/yoga | head -20
-grep -rnE 'currency: "IDR"' -B4 -A4 app features components lib --include='*.ts' --include='*.tsx' | cut -c1-140
+npx eslint app components features lib tests -f json 2>/dev/null | node ~/.cache/frontend-web/alat/daftar-eslint.js
 ```
 
 ## Catatan dari utang kecil modul produk dan pemformat rupiah
 
-Dikerjakan pada 4 Oktober 2026 dalam dua commit, terhadap backend `yoga`
-`50eede7`. Suite e2e penuh dijalankan sekali setelah `152088b`: 424
-lolos, 1 gagal, dan 17 skipped. Kegagalan itu diperbaiki di `4c9c4ed`,
-dan suite penuh tidak dijalankan ulang sesudahnya.
+Dikerjakan pada 4 Oktober 2026 dalam tiga commit, terhadap backend `yoga`
+`50eede7`. Suite e2e penuh dijalankan dua kali: setelah `152088b` (424
+lolos, 1 gagal, dan 17 skipped; kegagalannya diperbaiki di `4c9c4ed`),
+dan setelah `006d7f8` (425 lolos dan 17 skipped, tanpa kegagalan).
 
 | Commit | Isi |
 |---|---|
 | `152088b` | Dialog hapus produk bertahan saat gagal, `BahanBakuCombobox` ke `features/bahan-baku`, dan spec produk bernama unik (PR1a sampai PR3a) |
 | `4c9c4ed` | `formatRupiah` memakai `maximumFractionDigits` 2 secara eksplisit, dan helper `rupiah` ketiga spec keuangan memanggilnya (FR1a) |
+| `006d7f8` | Sembilan pemformat IDR lokal dibuang; seluruh tampilan rupiah lewat `formatRupiah` (keputusan rancangan butir 24) |
 
 - Keempat utang kecil modul produk selesai. Dialog hapus produk dahulu
   tertutup juga saat gagal, karena `setDeleteTarget(null)` berada di
@@ -160,8 +150,10 @@ dan suite penuh tidak dijalankan ulang sesudahnya.
   nilai pecahan dan Chromium tidak. Pecahannya berasal dari transfer
   berjumlah pecahan di data development (`kontrak/temuan.md` butir 126),
   yang dibiarkan sebagai bukti (FR2a).
-- Sembilan berkas aplikasi masih punya pemformat IDR sendiri; itu
-  pekerjaan berikutnya.
+- Sembilan berkas aplikasi yang punya pemformat IDR sendiri dipindah ke
+  `formatRupiah` di `006d7f8`. Opsinya sama semua, sehingga tampilan
+  tidak berubah; tiga di antaranya memformat `angka || 0`, dan tidak ada
+  pemanggilnya yang dapat mengirim `NaN`.
 - Keputusan pemilik proyek: `keputusan.md` (Modul produk dan kategori,
   PR1a sampai PR3a; Modul keuangan, FR1a dan FR2a; keputusan rancangan
   butir 24).

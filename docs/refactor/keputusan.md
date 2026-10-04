@@ -644,8 +644,9 @@ Diputuskan pemilik proyek pada 4 Oktober 2026, untuk pemformat rupiah
   sebagai bukti `kontrak/temuan.md` butir 126.
 - **Baseline suite penuh dicatat apa adanya** (424 lolos, 1 gagal, dan
   17 skipped), tanpa menjalankan ulang suite penuh setelah perbaikan.
-- **Pekerjaan setelah ini adalah menyatukan pemformat rupiah**
-  (`status.md`, Pekerjaan berikutnya).
+- **Pekerjaan setelah ini adalah menyatukan pemformat rupiah** (selesai
+  di `006d7f8`), lalu error ESLint warisan (`status.md`, Pekerjaan
+  berikutnya).
 
 ### Modul jadwal dan shift
 
@@ -1405,5 +1406,5 @@ dan PA3a serta PA12a sampai PA14a di `c824f18`.
     `maximumFractionDigits` memberi teks berbeda di server, di test, dan
     di browser untuk nilai pecahan. Halaman dan spec memakai
     `formatRupiah`, bukan `Intl.NumberFormat` sendiri; sembilan berkas
-    yang masih memformat sendiri dipindah di pekerjaan berikutnya
+    yang masih memformat sendiri dipindah di `006d7f8`
     (pemilik proyek, 4 Oktober 2026, `4c9c4ed`).

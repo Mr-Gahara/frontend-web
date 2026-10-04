@@ -95,6 +95,13 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per penyatuan pemformat rupiah** (commit `006d7f8`): 573
+test unit dan integrasi lolos di 67 berkas, tidak berubah. Suite penuh
+4 Oktober 2026 terhadap backend lokal `yoga` `50eede7` menghasilkan 425
+lolos dan 17 skipped tanpa kegagalan, dalam sekitar 27 menit. Itu run
+penuh pertama yang bersih sejak `e53c016`, dan mencakup seluruh commit
+kode hari itu (`7fce871` sampai `006d7f8`).
+
 **Baseline per utang kecil modul produk dan pemformat rupiah** (commit
 `4c9c4ed`): 573 test unit dan integrasi lolos di 67 berkas, bertambah
 satu test pecahan di `tests/unit/lib/format.test.ts`. Suite penuh
