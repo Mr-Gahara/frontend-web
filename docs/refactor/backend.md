@@ -336,6 +336,18 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   daftar transfer; beserta konfirmasi kontrak jurnal transfer yang
   terbukti lewat e2e dan permintaan nyata
   (`kontrak/temuan.md` butir 126 sampai 129)
+- Laporan modul beban operasional dan kategori beban — 9 butir, disusun
+  4 Oktober 2026 setelah `7fce871`: setiap permintaan ke kedua endpoint
+  dijawab 403 karena izinnya tidak ada di seed dan pembandingnya nama
+  terhadap `_id` (penghalang), beban mengubah saldo tanpa buku mutasi,
+  laporan laba rugi menyaring status VOID yang tidak ada di model (perlu
+  keputusan VOID atau hapus), buat beban tanpa pemeriksaan saldo, akun,
+  dan kategori serta tidak atomik, ubah beban tanpa `$set` dan allowlist
+  yang dapat merusak saldo, kategori yang dapat dihapus selagi dipakai,
+  permintaan daftar berpaginasi, berfilter, dan bermapper, bentuk galat
+  dan aturan nilai, serta dokumen API yang masih kerangka; hanya butir
+  pertama yang terbukti lewat permintaan nyata
+  (`kontrak/temuan.md` butir 130 sampai 138)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

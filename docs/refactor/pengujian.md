@@ -95,6 +95,16 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per penundaan pengeluaran dan butir 33** (commit `03c4eb3`):
+572 test unit dan integrasi lolos di 67 berkas, tidak berubah: test unit
+`saringTransfer` dan `filterServerTransfer` ditulis ulang tanpa menambah
+jumlah. `7fce871` menambah satu skenario,
+`tests/e2e/keuangan/pengeluaran.spec.ts`, sehingga harapan suite penuh
+423 lolos dan 17 skipped. Suite penuh tidak dijalankan untuk kedua commit
+(PF6a); yang dijalankan spec pengeluaran (1 lolos) serta folder
+`transferStok` dan `penerimaanBarang` (4 lolos), terhadap backend lokal
+`yoga` `50eede7`.
+
 **Baseline per pekerjaan Pindah Dana** (commit `e53c016`): 572 test unit
 dan integrasi lolos di 67 berkas, bertambah 16 test dari
 `tests/unit/features/jurnal-transfer/jurnal-transfer.test.ts`. Suite
@@ -1029,6 +1039,11 @@ Urutan debug kegagalan e2e di atas).
   tombol Batalkan tanpa izin ubah, karena satu-satunya akun uji berperan
   Owner. Filter riwayat dan keadaan kurang dari dua akun aktif juga
   belum teruji e2e.
+- **Beda `keLocationID` dan `locationID` di daftar surat jalan tidak
+  teruji dari data**: seluruh surat jalan uji menuju outlet tenant,
+  sehingga keduanya memberi hasil yang sama; bedanya terbukti dari kode
+  (`kontrak/temuan.md` butir 33). Lingkup satu lokasi tujuan hanya teruji
+  di unit test (`filterServerTransfer`).
 
 ## Spec rujukan
 
@@ -1109,9 +1124,11 @@ Urutan debug kegagalan e2e di atas).
   pembatalan dari PENDING lewat UI sekaligus menjadi pembersihnya (tanda
   `dibatalkan` mencegah pembatalan ganda di `finally`).
 - `tests/e2e/inventaris/transferStok/pengiriman-penerimaan.spec.ts`: harapan
-  jumlah kartu dihitung dari seluruh surat jalan berstatus DIKIRIM, karena
-  backend mengabaikan query status, lalu dibandingkan dengan jumlah tombol
-  per kartu di ruang gudang dan outlet.
+  jumlah kartu dihitung dari seluruh surat jalan berstatus DIKIRIM yang
+  dibaca tanpa query, lalu dibandingkan dengan jumlah tombol per kartu di
+  ruang gudang dan outlet. Sejak `03c4eb3` halaman tidak lagi menyaring
+  status di klien, sehingga skenario ini hanya lolos bila server
+  menyaring (`kontrak/temuan.md` butir 33).
 - `tests/helpers/lintas-outlet.ts`: satu sumber keadaan izin lintas outlet
   untuk seluruh spec, dengan `test.fixme` bersyarat untuk jalur lintas
   outlet dan `test.skip` bersyarat untuk jalur terkunci (keputusan
@@ -1326,3 +1343,6 @@ Urutan debug kegagalan e2e di atas).
   hanya bila penanda `dibatalkan` belum diset. Penahanan form dibuktikan
   dengan penghitung permintaan yang tetap nol, dan pemicu Select dipilih
   lewat nama label.
+- `tests/e2e/keuangan/pengeluaran.spec.ts` (`7fce871`): halaman yang
+  menunggu backend diuji lewat keterangannya dan lewat penghitung
+  permintaan ke endpoint yang belum dapat dipakai, yang harus tetap nol.

@@ -986,7 +986,8 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Sebelum merancang pengiriman query ke backend, pastikan service
   benar-benar memakainya.** Validator hanya memeriksa format. Daftar
   adjustment menyaring `locationID`, sedangkan `GET /jurnalstok` dan
-  `GET /transferstok` mengabaikan query.
+  `GET /transferstok` mengabaikan query (surat jalan hanya sampai backend
+  `465b438`, `kontrak/temuan.md` butir 33).
 - **Gerbang di blok tempel tidak pernah memakai `exit`.** Di shell
   interaktif, `exit` menutup terminal beserta pesan alasannya; pada commit
   gate stock adjustment, cabang `{ echo ...; exit 1; }` menutup terminal
@@ -1413,6 +1414,20 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   sendiri. Dari lima calon temuan jurnal transfer, satu terbantah: id
   tidak sah di `PUT` diduga berujung galat server, padahal errorHandler
   pusat menjawab 404.
+- **Izin endpoint modul baru dibuktikan lewat `GET` nyata sebelum
+  pemetaannya dilanjutkan.** Pengeluaran dijadwalkan dari Lampiran A,
+  yang mencatat route beban tanpa izin; satu `GET` sebagai Owner dijawab
+  403, karena izinnya diperiksa di controller dengan nama yang tidak ada
+  di seed. Silang juga nama izin di controller dan route dengan
+  `GET /permission`.
+- **Perbaikan backend yang dilaporkan tetapi belum dibuktikan diperiksa
+  ulang setiap kali pekerjaan berikutnya tertahan.** Butir 33 menunggu
+  sejak 30 September 2026 dan terbukti dalam satu skrip baca-saja yang
+  membandingkan jumlah per status dengan dan tanpa query.
+- **Membuang penyaringan klien didahului pemeriksaan bahwa hook tidak
+  mempertahankan data filter sebelumnya.** Tanpa `placeholderData`,
+  berganti filter mengosongkan daftar sampai respons baru tiba; dengan
+  itu, baris filter lama akan tampil tanpa penyaring klien.
 
 ## Kapan berhenti dan bertanya
 

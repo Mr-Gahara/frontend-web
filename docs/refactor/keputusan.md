@@ -306,6 +306,13 @@ bug backend dilaporkan dan tidak diakali agar test lolos.
 - **Kegagalan memuat daftar penerimaan tampil sebagai pesan**, sejalan
   dengan keputusan submodul jurnal stok, termasuk lokasi yang gagal dimuat
   dan tenant tanpa outlet (lokasi aktif kosong).
+- **TS1a: daftar surat jalan memakai penyaringan server** (4 Oktober
+  2026, `03c4eb3`), setelah butir 33 terbukti diperbaiki lewat permintaan
+  nyata terhadap backend `50eede7`. Lingkup satu lokasi tujuan dikirim
+  sebagai `keLocationID`, karena `locationID` di server berarti asal atau
+  tujuan, dan status tidak lagi disaring di klien. Lingkup per tipe
+  lokasi dan pencarian tetap disaring di klien, karena tidak punya
+  padanan di server.
 
 ### Modul penjualan dan pembayaran
 
@@ -558,7 +565,7 @@ Pelanggan dan diskon:
 - **DN4a: ketiga izin jurnal transfer masuk template Manajer dan General
   Manajer**, sebagai commit tersendiri (`e053a67`), seperti PO11a.
 - **Pekerjaan setelah ini adalah pengeluaran (beban operasional)**
-  (4 Oktober 2026; `status.md`, Pekerjaan berikutnya).
+  (4 Oktober 2026); ditunda pada hari yang sama (BO1a di bawah).
 - Diterapkan tanpa ditanyakan (`e53c016`): halaman tanpa entri
   `IZIN_HALAMAN`, dengan izin per bagian seperti PO14a (form bagi izin
   buat, riwayat bagi izin baca, Batalkan bagi izin ubah); jumlah
@@ -571,6 +578,23 @@ Pelanggan dan diskon:
   memuat akun non-aktif juga; ubah keterangan tanpa VOID tidak dibuat;
   dan transfer uji e2e dibuat lalu dibatalkan lewat UI, sehingga saldo
   akun sumber pulih.
+
+Diputuskan pemilik proyek pada 4 Oktober 2026, untuk pengeluaran
+(`7fce871`). Labelnya BO (beban operasional):
+
+- **BO1a: pekerjaan pengeluaran ditunda** sampai backend memperbaiki izin
+  beban dan menetapkan kontraknya. Kedua endpoint beban menjawab 403 bagi
+  setiap pengguna di backend `50eede7`, dan kontraknya diperkirakan
+  berubah (`kontrak/temuan.md` butir 130 sampai 132), sehingga halaman
+  yang dibangun sekarang tidak dapat diuji e2e dan berisiko ditulis
+  ulang. Temuannya dilaporkan (`backend.md`).
+- **BO2a: halaman pengeluaran menampilkan keterangan belum tersedia**,
+  seperti mutasi arus kas dahulu (KU1a), dengan rute dan menu tetap.
+  Gate `read-pembayaran` tidak diubah sampai izin backend ditetapkan.
+- **Pekerjaan setelah ini**: memeriksa ulang utang yang menunggu backend
+  terhadap cabang backend terbaru (hasilnya TS1a, Submodul transfer,
+  pengiriman, dan penerimaan), lalu utang kecil keuangan (`status.md`,
+  Pekerjaan berikutnya).
 
 ### Modul jadwal dan shift
 

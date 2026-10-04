@@ -79,7 +79,13 @@ ditambahkan ke `endpoint.md`, `payload.md`, `izin-halaman.md`, dan
 `temuan.md` terhadap backend yang sama. `GET` dan `POST /jurnaltransfer`
 serta `PUT /jurnaltransfer/:id`, yang tercatat tanpa izin dan tidak
 dipakai di Lampiran A, dipakai web sejak `e53c016`; `DELETE` jurnal
-transfer termasuk tujuh route yang tidak ada lagi.
+transfer termasuk tujuh route yang tidak ada lagi. Pada hari yang sama,
+bagian transfer stok di `endpoint.md` dan `temuan.md` dikoreksi terhadap
+backend yang sama (query daftar surat jalan, butir 33), dan temuan modul
+beban ditambahkan ke `temuan.md` dan `izin-halaman.md` (butir 130 sampai
+138). Sepuluh route `/bebanoperasional` dan `/kategoribeban` tercatat
+tanpa izin di Lampiran A, karena izinnya diperiksa di controller, bukan
+lewat `checkPermission` di route; keduanya belum dipakai web.
 
 ## 1. Acuan dan metodologi
 

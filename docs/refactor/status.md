@@ -80,7 +80,9 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Keuangan: mutasi arus kas dan akun kas non-aktif | `e129f9d` (mutasi arus kas), `6a57d12` (akun kas non-aktif dipisah) | Selesai (keputusan MK1a sampai MK3a dan AK1a; Catatan dari pekerjaan mutasi arus kas dan akun kas) |
 | Keuangan: ubah dan aktifkan kembali akun kas | `1bc76f4` | Selesai (keputusan UA1a sampai UA4a; Catatan dari pekerjaan ubah akun kas) |
 | Keuangan: Pindah Dana antar akun kas | `e053a67` (izin di template role), `e53c016` | Selesai (keputusan DN1a sampai DN4a; Catatan dari pekerjaan Pindah Dana) |
-| Keuangan: pengeluaran (beban operasional) | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Keuangan: pengeluaran (beban operasional) | `7fce871` (keterangan belum tersedia) | Ditunda (keputusan BO1a dan BO2a; Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang): endpoint beban menjawab 403 bagi setiap pengguna di backend `50eede7` |
+| Transfer stok: daftar surat jalan memakai penyaringan server (butir 33) | `03c4eb3` | Selesai (keputusan TS1a; Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang) |
+| Keuangan: utang kecil (menutup akun bersaldo lewat Pindah Dana, dan tampilan mutasi transfer) | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -100,33 +102,63 @@ Diukur ulang per modul panel admin (`c824f18`):
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: pengeluaran (beban operasional)
+## Pekerjaan berikutnya: utang kecil keuangan
 
-Pindah Dana selesai di `e53c016`. Pekerjaan berikutnya, atas keputusan
-pemilik proyek (4 Oktober 2026), adalah halaman pengeluaran. Pemetaannya
-belum diambil; yang sudah diketahui:
+Pengeluaran ditunda (`7fce871`) dan butir 33 selesai (`03c4eb3`).
+Pekerjaan berikutnya, atas keputusan pemilik proyek (4 Oktober 2026),
+adalah dua utang kecil modul keuangan (Utang kecil dari modul keuangan):
 
-- `/dashboard/outlet/pengeluaran` masih halaman placeholder tanpa data,
-  bergate `read-pembayaran` (`kontrak/izin-halaman.md`).
-- Lampiran A (`kontrak/route-backend.md`) mencatat lima route
-  `/bebanoperasional` dan lima route `/kategoribeban`, seluruhnya tanpa
-  izin dan belum dipakai web. Lampiran itu terikat backend `4310d1c`;
-  keadaan kedua route di `yoga` `50eede7` belum dibaca.
-- Buku mutasi mengenal jenis `BEBAN` dan `PEMBALIK_BEBAN`
-  (`types/akunKas.ts`), sehingga beban diduga mengubah saldo akun kas;
-  itu belum dibuktikan dari service.
-- Validator, service, bentuk respons, dan izin kedua route belum dibaca.
+- Menutup akun kas bersaldo sebagai satu alur teruji e2e: saldo dipindah
+  lewat Pindah Dana ke akun lain, lalu akun dinonaktifkan dari halaman
+  ubah (`kontrak/temuan.md` butir 81).
+- Tampilan mutasi transfer dan pembatalannya di halaman mutasi arus kas,
+  yang datanya ada sejak spec Pindah Dana (`e53c016`) tetapi belum
+  diperiksa.
 
-Langkah pertama sesi berikutnya, setelah backend di-`fetch` dan
-dibandingkan dengan acuan (`cara-kerja.md`): petakan route, validator,
-service, dan bentuk respons `/bebanoperasional` dan `/kategoribeban`,
-lalu ajukan rancangan beserta keputusannya.
+Pemetaannya belum diambil. Langkah pertama sesi berikutnya, setelah
+backend di-`fetch` dan dibandingkan dengan acuan (`cara-kerja.md`):
+petakan spec ubah akun kas dan Pindah Dana serta label jenis mutasi
+transfer, lalu ajukan rancangan skenarionya.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline 50eede7..origin/yoga | head -20
-grep -vE '^\s*$' "$BE/routes/bebanOperasionalRoute.js" "$BE/routes/kategoriBebanRoute.js" | cut -c1-140
-ls "$BE/validators" "$BE/services" "$BE/controllers" "$BE/models" | grep -i beban
+grep -nE 'test\(|test\.step\(|async function' tests/e2e/keuangan/ubah-akun-kas.spec.ts tests/e2e/keuangan/pindah-dana.spec.ts | cut -c1-140
+grep -nE 'TRANSFER' features/akun-kas/mutasi.ts | cut -c1-140
 ```
+
+## Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang
+
+Dikerjakan pada 4 Oktober 2026 dalam dua commit, terhadap backend `yoga`
+`50eede7`. Suite e2e penuh tidak dijalankan (keputusan PF6a): setiap
+commit melewati `tsc`, ESLint, vitest penuh, dan spec yang terdampak.
+
+| Commit | Isi |
+|---|---|
+| `7fce871` | Halaman pengeluaran menampilkan keterangan belum tersedia (BO2a) |
+| `03c4eb3` | Daftar surat jalan memakai penyaringan server: `keLocationID`, dan status tidak lagi disaring klien (TS1a) |
+
+- Halaman pengeluaran tidak dapat dibangun terhadap `50eede7`:
+  `GET /bebanoperasional` dan `GET /kategoribeban` menjawab 403 bagi
+  Owner, karena izin `kelola-beban-operasional` dan
+  `kelola-kategori-beban` tidak ada di seed, dan controller membandingkan
+  nama izin dari sesi dengan `_id` dokumen permission
+  (`kontrak/temuan.md` butir 130). Pekerjaannya ditunda (BO1a).
+- Kontrak beban diperkirakan berubah: beban belum menulis buku mutasi
+  (butir 131), dan laporan laba rugi sudah menyaring status VOID yang
+  belum ada di model beban (butir 132). Temuan backend baru: butir 130
+  sampai 138, disusun 4 Oktober 2026 (`backend.md`).
+- Tidak ada cabang backend yang lebih depan dari `50eede7`: `origin/yoga`,
+  `origin/nizar`, `origin/ridho`, dan `origin/main` diperiksa. Utang yang
+  menunggu backend dibaca ulang dari kode commit itu: butir 8, 22, 39,
+  46, 70, dan 76 serta validator ubah pola roster masih tertahan.
+- Butir 33 terbukti diperbaiki lewat permintaan nyata, sehingga
+  `filterServerTransfer` mengirim `keLocationID` dan `saringTransfer`
+  tidak lagi menyaring status (`arsitektur.md`). Butir 58 terbukti dari
+  kode: service daftar sesi booking tidak lagi menulis saat dibaca.
+- Pemeriksaan booking saat aset dihapus (butir 52) tetap belum
+  dibuktikan.
+- Keputusan pemilik proyek: `keputusan.md` (Modul keuangan, BO1a dan
+  BO2a; Submodul transfer, pengiriman, dan penerimaan, TS1a).
 
 ## Catatan dari pekerjaan Pindah Dana
 
@@ -518,7 +550,8 @@ dalam delapan commit, dengan keputusan PB1a sampai PB14a (`keputusan.md`).
 - Temuan untuk tim backend: `kontrak/temuan.md` butir 75 sampai 83.
   Butir 29, 30, 41, 43, dan 53 sampai 57 terbukti diperbaiki, butir 52
   sebagian, dan butir 33 serta 58 dilaporkan diperbaiki tetapi belum
-  dibuktikan dari web.
+  dibuktikan dari web saat itu; butir 33 terbukti lewat permintaan nyata
+  dan butir 58 dari kode pada 4 Oktober 2026 (`03c4eb3`).
 - `test.fixme` yang masih gagal terhadap `465b438`: jurnal Keluar yang
   langsung terbaca (butir 46), stok produk tingkat tenant (butir 37), dan
   ubah pola roster (validator model).
@@ -641,7 +674,7 @@ aset (`d3ae182`), tarif (`365553f`), daftar reservasi (`27749fe`,
   menurut menit dan urutan pemanggilan agar tidak tertahan daftar yang
   basi.
 - Daftar sesi booking menulis status Selesai saat dibaca (butir 58,
-  dilaporkan diperbaiki di `465b438`), dan
+  diperbaiki di `465b438`, terbukti dari kode `50eede7`), dan
   sekitar 930 baris kode lama dikomentari di service sesi booking (butir
   59). Temuan master data reservasi tercatat di butir 51 sampai 55.
   Calon temuan yang belum dibuktikan dari kode: keberadaan tipe aset tidak
@@ -821,6 +854,10 @@ Yang masih berlaku:
 
 ### Utang kecil dari modul keuangan
 
+- Halaman pengeluaran menampilkan keterangan belum tersedia sejak
+  `7fce871`, dan gate-nya masih `read-pembayaran`. Halamannya dibangun
+  begitu backend memperbaiki izin beban dan menetapkan kontraknya
+  (`kontrak/temuan.md` butir 130 sampai 132).
 - `DELETE /akunkas/:id` tidak ada lagi sejak backend `465b438`, dan akun
   bersaldo tidak dapat ditutup (`kontrak/temuan.md` butir 81). Ubah,
   nonaktifkan, dan aktifkan kembali tersedia sejak `1bc76f4`, dan Pindah
