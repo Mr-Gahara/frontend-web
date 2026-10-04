@@ -6,11 +6,11 @@ import type { ItemPayloadTerima } from "./payload";
 export interface FilterTransferStok {
   status?: StatusTransfer;
   /**
-   * Diusulkan dicocokkan dengan lokasi asal atau tujuan, seperti pengajuan
-   * stok. Hari ini diabaikan backend bersama seluruh query (kontrak/temuan.md
-   * butir 33); penyaringan klien ada di filter.ts.
+   * Lokasi tujuan surat jalan. Server juga menerima locationID (asal atau
+   * tujuan) dan dariLocationID; web hanya memakai tujuan (kontrak/temuan.md
+   * butir 33).
    */
-  locationID?: string;
+  keLocationID?: string;
 }
 
 /** PUT hanya mengirim items; backend tidak memeriksa jumlah maupun stok (kontrak/temuan.md butir 32). */
@@ -38,7 +38,7 @@ export const transferStokApi = {
   daftar: (filter: FilterTransferStok) => {
     const params: Record<string, string> = {};
     if (filter.status) params.status = filter.status;
-    if (filter.locationID) params.locationID = filter.locationID;
+    if (filter.keLocationID) params.keLocationID = filter.keLocationID;
     return apiData.get<TransferStok[]>(EP.transferStok.list, params);
   },
   detail: (id: string) => apiData.get<TransferStok>(EP.transferStok.detail(id)),

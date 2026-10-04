@@ -46,8 +46,8 @@ export default function HalamanPengiriman() {
   const debouncedSearch = useDebounce(searchTerm, 500);
 
   // --- Queries ---
-  // Hanya surat jalan DIKIRIM. Backend mengabaikan query status
-  // (kontrak/temuan.md butir 33), sehingga status disaring di klien. Polling
+  // Hanya surat jalan DIKIRIM, disaring server lewat query status
+  // (kontrak/temuan.md butir 33); pencarian disaring di klien. Polling
   // 30 detik memantau penerimaan oleh outlet.
   const kriteria = { status: "DIKIRIM" as const, cari: debouncedSearch };
   const { data: daftarPengiriman = [], isLoading } = useDaftarTransferStok(filterServerTransfer(kriteria), {

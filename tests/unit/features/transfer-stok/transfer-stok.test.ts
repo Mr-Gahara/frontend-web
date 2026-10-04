@@ -33,13 +33,14 @@ const daftar = [
 const nomor = (hasil: TransferStok[]) => hasil.map((t) => t.nomorTransfer);
 
 describe("saringTransfer", () => {
-  it("menyaring status di klien karena backend mengabaikan query", () => {
-    expect(nomor(saringTransfer(daftar, { status: "DIKIRIM" }))).toEqual(["SJ-2", "SJ-3"]);
+  it("tidak menyaring status, karena status disaring server (butir 33)", () => {
+    expect(nomor(saringTransfer(daftar, { status: "DIKIRIM" }))).toEqual(["SJ-1", "SJ-2", "SJ-3", "SJ-4"]);
     expect(nomor(saringTransfer(daftar, { status: "ALL" }))).toEqual(["SJ-1", "SJ-2", "SJ-3", "SJ-4"]);
   });
 
   it("menyaring lokasi tujuan per lokasi atau per tipe", () => {
-    expect(nomor(saringTransfer(daftar, { status: "DIKIRIM", tujuan: { lokasiID: "o2" } }))).toEqual(["SJ-3"]);
+    expect(nomor(saringTransfer(daftar, { tujuan: { lokasiID: "o2" } }))).toEqual(["SJ-3", "SJ-4"]);
+    expect(nomor(saringTransfer(daftar, { tujuan: { tipeLokasi: "Outlet" } }))).toEqual(["SJ-1", "SJ-2", "SJ-3", "SJ-4"]);
     expect(nomor(saringTransfer(daftar, { tujuan: { tipeLokasi: "Gudang" } }))).toEqual([]);
   });
 
@@ -55,7 +56,7 @@ describe("filterServerTransfer", () => {
     expect(filterServerTransfer({ status: "ALL" })).toEqual({});
     expect(filterServerTransfer({ status: "DIKIRIM", tujuan: { lokasiID: "o1" } })).toEqual({
       status: "DIKIRIM",
-      locationID: "o1",
+      keLocationID: "o1",
     });
     expect(filterServerTransfer({ tujuan: { tipeLokasi: "Outlet" } })).toEqual({});
   });

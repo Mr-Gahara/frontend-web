@@ -43,8 +43,8 @@ const getLamaPerjalanan = (tanggalKirim: string | null) => {
  * outlet pengguna. Pemegang izin lintas outlet melihat seluruh outlet dengan
  * pemilih, pengguna lain hanya lokasi aktif, yaitu outlet milik tenant
  * (useCakupanLokasiOutlet; keputusan pemilik proyek 21 dan 22 September 2026). Backend
- * mengabaikan query daftar (kontrak/temuan.md butir 33), sehingga status dan
- * lokasi tujuan disaring di klien.
+ * menyaring status dan lokasi tujuan tunggal (kontrak/temuan.md butir 33);
+ * lingkup per tipe lokasi dan pencarian disaring di klien.
  */
 export default function HalamanDaftarPenerimaan() {
   const router = useRouter();

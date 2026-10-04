@@ -63,8 +63,8 @@ const getStatusBadge = (status: StatusTransfer) => {
 };
 
 /**
- * Daftar surat jalan di ruang gudang. Backend mengabaikan query status
- * (kontrak/temuan.md butir 33), sehingga tab disaring di klien.
+ * Daftar surat jalan di ruang gudang. Tab disaring server lewat query status
+ * (kontrak/temuan.md butir 33).
  */
 export default function HalamanDaftarTransfer() {
   const router = useRouter();
@@ -75,8 +75,8 @@ export default function HalamanDaftarTransfer() {
   const [activeTab, setActiveTab] = useState<TabTransfer>("ALL");
 
   // --- Queries ---
-  // Filter tetap dikirim ke server, tetapi status dan pencarian disaring di
-  // klien lewat saringTransfer (pencarian: nomor atau nama outlet tujuan).
+  // Status disaring server; pencarian disaring di klien lewat saringTransfer
+  // (nomor atau nama outlet tujuan).
   const kriteria = { status: activeTab, cari: debouncedSearch };
   const { data: daftarTransfer = [], isLoading } = useDaftarTransferStok(filterServerTransfer(kriteria));
   const filteredData = saringTransfer(daftarTransfer, kriteria);

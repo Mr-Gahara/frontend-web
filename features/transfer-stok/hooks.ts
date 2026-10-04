@@ -28,8 +28,10 @@ export function useBuatSuratJalan(opsi: OpsiMutasi<TransferDibuat, TransferDariP
 
 /**
  * Daftar surat jalan. Argumen null berarti belum siap (misalnya cakupan
- * lokasi masih dimuat). Filter dikirim walau backend mengabaikannya hari ini;
- * halaman tetap menyaring lewat saringTransfer (filter.ts).
+ * lokasi masih dimuat). Status dan lokasi tujuan disaring server; lingkup per
+ * tipe lokasi dan pencarian disaring halaman lewat saringTransfer (filter.ts).
+ * Data filter sebelumnya tidak dipertahankan, sehingga berganti filter tidak
+ * menampilkan baris milik filter lama.
  */
 export function useDaftarTransferStok(filter: FilterTransferStok | null, opsi: { refetchInterval?: number } = {}) {
   return useQuery({
