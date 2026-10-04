@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSession } from "@/lib/auth/useSession";
+import { usePenggunaSaya } from "@/features/pengguna/hooks-profil";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { CreateOpnameRequest } from "@/types/stockOpname";
@@ -34,13 +35,6 @@ import {
   AlertTriangle,
   Settings,
 } from "lucide-react";
-
-// Interface untuk struktur response standard dari backend
-interface ApiResponse<T> {
-  success: boolean;
-  message?: string;
-  data: T;
-}
 
 // --- ZOD SCHEMA ---
 const opnameSchema = z.object({
@@ -109,8 +103,12 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
   const router = useRouter();
   const teks = TEKS[ruang];
 
-  // State untuk label (hanya untuk keperluan visual)
-  const [currentUserName, setCurrentUserName] = useState("Memuat data Anda...");
+  // Nama PIC dibaca dari GET /pengguna/:id milik sesi, karena token tidak
+  // membawa nama; berbagi cache dengan halaman profil dan kaki sidebar.
+  const penggunaSaya = usePenggunaSaya();
+  const currentUserName =
+    penggunaSaya.data?.nama ||
+    (penggunaSaya.isLoading ? "Memuat data Anda..." : "Anda (Pengguna Saat Ini)");
 
   // --- REACT HOOK FORM ---
   const {
@@ -131,13 +129,12 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
   const watchLocationID = watch("locationID");
   const watchPicID = watch("picID");
 
-  // --- MENGAMBIL USER ID & NAMA DENGAN AMAN DARI TOKEN ---
+  // --- MENGAMBIL ID PENGGUNA DARI SESI ---
   const { pengguna } = useSession();
 
   useEffect(() => {
     if (!pengguna) return;
     setValue("picID", pengguna.id);
-    setCurrentUserName(pengguna.nama || "Anda (Pengguna Saat Ini)");
   }, [pengguna, setValue]);
 
   // --- LOKASI ---

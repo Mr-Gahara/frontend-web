@@ -17,6 +17,7 @@ import {
 } from "./hooks";
 import { isiAwalHitungan, petakanNilaiServer, susunPayloadHitungan } from "./payload";
 import { bolehHitungOpname, bolehTinjauOpname } from "./izin";
+import { TIPE_LOKASI_RUANG } from "@/features/stock-adjustment/ruang";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 
@@ -270,6 +271,24 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
           {!error || isNotFound(error)
             ? "Dokumen stok opname tidak ditemukan."
             : "Gagal memuat dokumen stok opname. Coba muat ulang halaman."}
+        </p>
+        <Button onClick={() => router.push(teks.urlDaftar)} variant="outline">
+          Kembali ke Daftar
+        </Button>
+      </div>
+    );
+  }
+
+  // Dokumen milik ruang lain tidak ditampilkan: stok outlet dan gudang tidak
+  // dicampur (keputusan Model bisnis MVP). Ini penjaga tampilan, bukan
+  // pengaman akses; dokumen yang tipe lokasinya tidak diketahui tetap tampil.
+  const tipeLokasi = opname.lokasi?.tipe;
+  if (tipeLokasi && tipeLokasi !== TIPE_LOKASI_RUANG[ruang]) {
+    return (
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-[#0A2947]">
+        <Ban className="h-10 w-10 text-rose-500" />
+        <p className="font-bold">
+          Dokumen stok opname ini milik lokasi {tipeLokasi} dan tidak ditampilkan di ruang ini.
         </p>
         <Button onClick={() => router.push(teks.urlDaftar)} variant="outline">
           Kembali ke Daftar

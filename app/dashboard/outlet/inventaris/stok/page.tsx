@@ -258,7 +258,7 @@ export default function StokInventoryPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#0A2947]/5">
-              {isLoadingInventory ? (
+              {isLoadingLokasi || isLoadingInventory ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
                     <td className="px-6 py-4">

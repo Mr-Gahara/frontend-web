@@ -19,7 +19,6 @@ import { decodeJWT, isTokenExpired } from "@/lib/decodeToken";
 
 export interface PenggunaSesi {
   id: string;
-  nama?: string;
   role: string;
   roleID?: string;
   permissions: string[];
@@ -82,7 +81,6 @@ function keSesiPengguna(token: string): PenggunaSesi | null {
   if (!p || !p.id || !p.tenantID) return null;
   return {
     id: String(p.id),
-    nama: p.nama ? String(p.nama) : undefined,
     role: String(p.role ?? ""),
     roleID: p.roleID ? String(p.roleID) : undefined,
     permissions: Array.isArray(p.permissions) ? p.permissions.map(String) : [],
