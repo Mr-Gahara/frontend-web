@@ -76,6 +76,8 @@ export const EP = {
   akunKasById: (id: string) => `/akunkas/${id}`,
   akunKasMutasi: "/akunkas/mutasi",
   akunKasRingkasan: (id: string) => `/akunkas/${id}/ringkasan`,
+  jurnalTransfer: "/jurnaltransfer",
+  jurnalTransferById: (id: string) => `/jurnaltransfer/${id}`,
   pelanggan: {
     list: "/pelanggan",
     detail: (id: string) => `/pelanggan/${id}`,

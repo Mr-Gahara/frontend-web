@@ -13,6 +13,8 @@ import { DialogStatusAkun } from "@/features/akun-kas/dialog-status-akun";
 import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
 import { aksiAkunKas } from "@/features/akun-kas/izin";
 import { urlUbahAkunKas } from "@/features/akun-kas/ubah";
+import { aksiTransfer } from "@/features/jurnal-transfer/izin";
+import { URL_PINDAH_DANA } from "@/features/jurnal-transfer/payload";
 import { useSession } from "@/lib/auth/useSession";
 import type { AkunKas } from "@/types/akunKas";
 
@@ -78,17 +80,31 @@ export default function AkunKasPage() {
           Di layar sm (tablet/desktop), kembali ke `flex` agar ukurannya menyesuaikan konten (auto).
         */}
         <div className="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <Button
-            variant="outline"
-            disabled
-            title="Fitur transfer antar akun belum tersedia"
-            className="w-full sm:w-auto border-[#0A2947]/20 text-[#0A2947] px-2 sm:px-4"
-          >
-            <ArrowLeftRight className="w-4 h-4 mr-1.5 shrink-0" />
-            <span className="truncate text-xs min-[375px]:text-sm">
-              Pindah Dana
-            </span>
-          </Button>
+          {aksiTransfer(permissions).buat || aksiTransfer(permissions).baca ? (
+            <Link href={URL_PINDAH_DANA} className="block w-full sm:w-auto">
+              <Button
+                variant="outline"
+                className="w-full border-[#0A2947]/20 text-[#0A2947] px-2 sm:px-4 cursor-pointer"
+              >
+                <ArrowLeftRight className="w-4 h-4 mr-1.5 shrink-0" />
+                <span className="truncate text-xs min-[375px]:text-sm">
+                  Pindah Dana
+                </span>
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              variant="outline"
+              disabled
+              title="Anda tidak memiliki izin Pindah Dana"
+              className="w-full sm:w-auto border-[#0A2947]/20 text-[#0A2947] px-2 sm:px-4"
+            >
+              <ArrowLeftRight className="w-4 h-4 mr-1.5 shrink-0" />
+              <span className="truncate text-xs min-[375px]:text-sm">
+                Pindah Dana
+              </span>
+            </Button>
+          )}
 
           {/* Menambahkan class `block w-full` pada Link agar mengisi penuh sel Grid-nya */}
           <Link
