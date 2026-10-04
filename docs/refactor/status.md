@@ -122,16 +122,27 @@ dikerjakan tanpa perubahan backend:
   `types/auth.ts` dibuang (utang yang sama).
 - Spec tipe aset memakai `tests/helpers/reservasi-uji.ts`
   (`pengujian.md`, Utang pengujian).
+- Delapan belas warning ESLint (diukur 4 Oktober 2026 setelah `f5fe574`):
+  empat belas impor tidak terpakai, tiga variabel tidak terpakai
+  (`isLoadingLokasi` di stok outlet, `simpanDraft` di buat penjualan, dan
+  `props` di `components/calendar.tsx`), dan satu ternary yang dipakai
+  sebagai pernyataan di `toggleExpand` halaman daftar role. Pemakaian
+  ketiga variabel dibaca lebih dulu, karena variabel yang tidak terpakai
+  dapat menandai perilaku yang tertinggal. Dua warning
+  `react-hooks/incompatible-library` (`components/ui/data-table.tsx` dan
+  `features/stock-opname/form-buat-stock-opname.tsx`) dibiarkan: itu
+  keterangan React Compiler tentang pustaka, bukan cacat kode.
 
 Pemetaannya belum diambil. Langkah pertama sesi berikutnya, setelah
 backend di-`fetch` dan dibandingkan dengan acuan (`cara-kerja.md`):
-petakan keempatnya, lalu ajukan rancangan beserta keputusannya sekaligus.
+petakan kelimanya, lalu ajukan rancangan beserta keputusannya sekaligus.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline 50eede7..origin/yoga | head -20
 grep -nE 'lokasi|TIPE_LOKASI|ruang' features/stock-opname/halaman-detail-stock-opname.tsx | cut -c1-140 | head -30
 grep -nE '\bnama\b' lib/auth/session.ts features/stock-opname/form-buat-stock-opname.tsx | cut -c1-140
 grep -rnE '\b(RegisterRequest|RegisterResponse|LoginRequest)\b' app components features lib types tests | cut -c1-140
+npx eslint app components features hooks lib tests 2>&1 | grep -E 'warning' | cut -c1-140
 ```
 
 ## Catatan dari error ESLint warisan
