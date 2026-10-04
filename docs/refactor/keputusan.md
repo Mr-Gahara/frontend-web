@@ -593,8 +593,31 @@ Diputuskan pemilik proyek pada 4 Oktober 2026, untuk pengeluaran
   Gate `read-pembayaran` tidak diubah sampai izin backend ditetapkan.
 - **Pekerjaan setelah ini**: memeriksa ulang utang yang menunggu backend
   terhadap cabang backend terbaru (hasilnya TS1a, Submodul transfer,
-  pengiriman, dan penerimaan), lalu utang kecil keuangan (`status.md`,
+  pengiriman, dan penerimaan), lalu utang kecil keuangan (selesai di
+  `f7805ca`, UK1a sampai UK3a di bawah).
+
+Diputuskan pemilik proyek pada 4 Oktober 2026, untuk utang kecil keuangan
+(`f7805ca`). Labelnya UK:
+
+- **UK1a: helper akun kas uji menjadi helper bersama**,
+  `tests/helpers/akun-kas-uji.ts`, dan spec ubah akun kas serta Pindah
+  Dana dipindah ke helper itu di commit yang sama.
+- **UK2a: alur menutup akun bersaldo menyertakan satu pembatalan
+  transfer**, agar label pembatalan ikut diperiksa di halaman mutasi;
+  satu transfer VOID tambahan tertinggal per run.
+- **UK3a: skenario 409 lama di spec ubah akun kas dipertahankan**, walau
+  penyebab penolakannya tidak pasti; alur baru menambah bukti penolakan
+  yang pasti karena saldo.
+- **Suite e2e penuh tidak dijalankan sebelum dokumentasi ditutup**;
+  baseline dicatat sebagai hitungan, dan suite penuh dijalankan di akhir
+  pekerjaan berikutnya.
+- **Pekerjaan setelah ini adalah utang kecil modul produk** (`status.md`,
   Pekerjaan berikutnya).
+- Diterapkan tanpa ditanyakan (`f7805ca`): spec baru tersendiri,
+  `tutup-akun-bersaldo.spec.ts`; akun uji dibuat lewat API seperti kedua
+  spec lama; `finally` memulihkan saldo dan menutup akun lewat API bila
+  alur berhenti di tengah; dan harapan buku mutasi dihitung dari respons
+  yang dibaca halaman itu sendiri.
 
 ### Modul jadwal dan shift
 

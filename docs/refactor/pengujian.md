@@ -95,6 +95,17 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per utang kecil keuangan** (commit `f7805ca`): 572 test unit
+dan integrasi lolos di 67 berkas, tidak berubah. `f7805ca` menambah satu
+skenario, `tests/e2e/keuangan/tutup-akun-bersaldo.spec.ts`, sehingga
+harapan suite penuh 424 lolos dan 17 skipped. Angka itu hitungan: suite
+penuh belum dijalankan sejak `e53c016`, atas keputusan pemilik proyek
+(4 Oktober 2026), dan dijalankan di akhir pekerjaan berikutnya. Yang
+dijalankan: spec ubah akun kas, Pindah Dana, dan alur baru, 9 lolos dua
+kali berturut-turut, terhadap backend lokal `yoga` `50eede7`. Ketiganya
+mengirim 22 tulisan ke `/akunkas` dan enam ke `/jurnaltransfer` per
+putaran, sehingga tidak diulang beruntun dalam satu menit.
+
 **Baseline per penundaan pengeluaran dan butir 33** (commit `03c4eb3`):
 572 test unit dan integrasi lolos di 67 berkas, tidak berubah: test unit
 `saringTransfer` dan `filterServerTransfer` ditulis ulang tanpa menambah
@@ -886,8 +897,9 @@ Urutan debug kegagalan e2e di atas).
   akun uji memegang `update-location`. Yang teruji e2e hanya jalur ubah,
   dan `bacaSaja` di `IsianLokasi` belum punya test.
 - **Akun kas uji menumpuk sebagai non-aktif**, satu per run spec
-  keuangan, lima per run spec ubah akun kas (`1bc76f4`), dan dua per run
-  spec Pindah Dana (`e53c016`), karena akun
+  keuangan, lima per run spec ubah akun kas (`1bc76f4`), dua per run
+  spec Pindah Dana (`e53c016`), dan satu per run spec tutup akun
+  bersaldo (`f7805ca`), karena akun
   kas tidak dapat dihapus sejak backend `465b438`
   (PB13a, `kontrak/temuan.md` butir 81). Payload bersaldo hanya diperiksa
   lewat `POST` yang dijawab gagal.
@@ -1009,9 +1021,11 @@ Urutan debug kegagalan e2e di atas).
   skenarionya dilewati bersyarat bila belum ada mutasi, belum sampai dua
   halaman, atau belum ada pembatalan pembayaran pada bulan itu, sehingga
   di awal bulan jumlah skipped dapat naik.
-- **Jenis mutasi saldo awal dan transfer belum teruji e2e** di halaman
-  mutasi: spec Pindah Dana membuktikan saldo, bukan baris mutasinya.
-  Label dan arah kesembilan jenis teruji di
+- **Jenis mutasi saldo awal, beban, dan pembatalan transfer keluar belum
+  teruji e2e** di halaman mutasi. Transfer masuk, transfer keluar, dan
+  pembatalan transfer masuk teruji sejak `f7805ca`
+  (`tutup-akun-bersaldo.spec.ts`). Label dan arah kesembilan jenis
+  teruji di
   `tests/unit/features/akun-kas/mutasi.test.ts`.
 - **Filter periode mutasi lewat `PilihTanggal` dan tombol reset belum
   teruji e2e**; query periode awal dan fungsi pembentuknya teruji.
@@ -1025,10 +1039,14 @@ Urutan debug kegagalan e2e di atas).
   Skenario nonaktifkan yang ditolak memakai akun aktif bersaldo yang
   sudah ada dan dilewati bila tidak ada; penolakannya dapat berasal dari
   penjaga metode pembayaran, yang diperiksa backend lebih dulu, dan spec
-  hanya memeriksa status 409 beserta pesan yang tampil.
-- **Transfer uji menumpuk berstatus VOID**, satu per run spec Pindah
-  Dana, karena transfer tidak dapat dihapus. Skenario utamanya dilewati
-  bila tidak ada akun kas aktif bersaldo di luar akun uji.
+  hanya memeriksa status 409 beserta pesan yang tampil. Penolakan yang
+  pasti karena saldo teruji di alur tutup akun bersaldo (`f7805ca`), yang
+  memakai akun uji tanpa metode pembayaran.
+- **Transfer uji menumpuk**, karena transfer tidak dapat dihapus: satu
+  VOID per run spec Pindah Dana, serta dua AKTIF dan satu VOID per run
+  spec tutup akun bersaldo (`f7805ca`), masing-masing Rp1. Skenario
+  utama kedua spec dilewati bila tidak ada akun kas aktif bersaldo di
+  luar akun uji.
 - **Penolakan backend atas Pindah Dana belum teruji e2e**: saldo sumber
   tidak cukup (ditahan form lebih dulu), akun nonaktif, dan pembatalan
   yang ditolak karena saldo akun tujuan tidak cukup. Statusnya (400)
@@ -1346,3 +1364,12 @@ Urutan debug kegagalan e2e di atas).
 - `tests/e2e/keuangan/pengeluaran.spec.ts` (`7fce871`): halaman yang
   menunggu backend diuji lewat keterangannya dan lewat penghitung
   permintaan ke endpoint yang belum dapat dipakai, yang harus tetap nol.
+- `tests/e2e/keuangan/tutup-akun-bersaldo.spec.ts` (`f7805ca`): alur
+  lintas halaman ber-`test.step` yang membuat datanya sendiri lewat UI,
+  sehingga halaman baca-saja (mutasi) diperiksa dengan jumlah dan urutan
+  baris yang pasti. Token API diambil ulang lewat `bukaDenganAuth` di
+  setiap navigasi penuh, penolakan 409 dibaca dari respons nyata, label
+  dan jumlah per baris diharapkan dari fungsi tampilan yang sama
+  (`LABEL_JENIS`, `teksJumlahMutasi`), dan `finally` memulihkan saldo
+  lewat API hanya bila alur berhenti di tengah. Helper akun kas uji
+  bersama ada di `tests/helpers/akun-kas-uji.ts`.

@@ -82,7 +82,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Keuangan: Pindah Dana antar akun kas | `e053a67` (izin di template role), `e53c016` | Selesai (keputusan DN1a sampai DN4a; Catatan dari pekerjaan Pindah Dana) |
 | Keuangan: pengeluaran (beban operasional) | `7fce871` (keterangan belum tersedia) | Ditunda (keputusan BO1a dan BO2a; Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang): endpoint beban menjawab 403 bagi setiap pengguna di backend `50eede7` |
 | Transfer stok: daftar surat jalan memakai penyaringan server (butir 33) | `03c4eb3` | Selesai (keputusan TS1a; Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang) |
-| Keuangan: utang kecil (menutup akun bersaldo lewat Pindah Dana, dan tampilan mutasi transfer) | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Keuangan: utang kecil (menutup akun bersaldo lewat Pindah Dana, dan tampilan mutasi transfer) | `f7805ca` | Selesai (keputusan UK1a sampai UK3a; Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang) |
+| Produk: utang kecil (dialog hapus, spec produk, dan `BahanBakuCombobox`) | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -102,33 +103,37 @@ Diukur ulang per modul panel admin (`c824f18`):
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: utang kecil keuangan
+## Pekerjaan berikutnya: utang kecil modul produk
 
-Pengeluaran ditunda (`7fce871`) dan butir 33 selesai (`03c4eb3`).
-Pekerjaan berikutnya, atas keputusan pemilik proyek (4 Oktober 2026),
-adalah dua utang kecil modul keuangan (Utang kecil dari modul keuangan):
+Utang kecil keuangan selesai di `f7805ca`. Pekerjaan berikutnya, atas
+keputusan pemilik proyek (4 Oktober 2026), adalah keempat utang kecil
+modul produk (Utang kecil dari modul produk):
 
-- Menutup akun kas bersaldo sebagai satu alur teruji e2e: saldo dipindah
-  lewat Pindah Dana ke akun lain, lalu akun dinonaktifkan dari halaman
-  ubah (`kontrak/temuan.md` butir 81).
-- Tampilan mutasi transfer dan pembatalannya di halaman mutasi arus kas,
-  yang datanya ada sejak spec Pindah Dana (`e53c016`) tetapi belum
-  diperiksa.
+- Dialog hapus di daftar produk hanya tertutup saat berhasil (keputusan
+  Fase 0), seperti halaman kategori.
+- Skenario 4d spec produk memilih bahan baku lewat teks tombolnya, bukan
+  lewat urutan `combobox`.
+- Spec produk memakai nama produk unik per run.
+- `BahanBakuCombobox` dipindah dari `app/`, agar `features/` tidak
+  bergantung pada `app/`.
 
 Pemetaannya belum diambil. Langkah pertama sesi berikutnya, setelah
 backend di-`fetch` dan dibandingkan dengan acuan (`cara-kerja.md`):
-petakan spec ubah akun kas dan Pindah Dana serta label jenis mutasi
-transfer, lalu ajukan rancangan skenarionya.
+petakan dialog hapus di halaman daftar produk dan pembandingnya di
+halaman kategori, pemakai `BahanBakuCombobox`, serta nama produk dan
+selector di spec produk, lalu ajukan rancangan beserta keputusannya.
+Suite e2e penuh dijalankan di akhir pekerjaan itu (`pengujian.md`).
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline 50eede7..origin/yoga | head -20
-grep -nE 'test\(|test\.step\(|async function' tests/e2e/keuangan/ubah-akun-kas.spec.ts tests/e2e/keuangan/pindah-dana.spec.ts | cut -c1-140
-grep -nE 'TRANSFER' features/akun-kas/mutasi.ts | cut -c1-140
+grep -nE 'AlertDialog|preventDefault|useHapus|onClick' app/dashboard/outlet/inventaris/produk/page.tsx app/dashboard/outlet/inventaris/kategori/page.tsx | cut -c1-140
+grep -rnE 'BahanBakuCombobox|bahanBakuCombobox' app features components --include='*.ts' --include='*.tsx' | cut -c1-140
+grep -nE 'nth\(|namaProduk|fill\(' tests/e2e/inventaris/produk/crud-produk.spec.ts | cut -c1-140 | head -30
 ```
 
 ## Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang
 
-Dikerjakan pada 4 Oktober 2026 dalam dua commit, terhadap backend `yoga`
+Dikerjakan pada 4 Oktober 2026 dalam tiga commit, terhadap backend `yoga`
 `50eede7`. Suite e2e penuh tidak dijalankan (keputusan PF6a): setiap
 commit melewati `tsc`, ESLint, vitest penuh, dan spec yang terdampak.
 
@@ -136,6 +141,7 @@ commit melewati `tsc`, ESLint, vitest penuh, dan spec yang terdampak.
 |---|---|
 | `7fce871` | Halaman pengeluaran menampilkan keterangan belum tersedia (BO2a) |
 | `03c4eb3` | Daftar surat jalan memakai penyaringan server: `keLocationID`, dan status tidak lagi disaring klien (TS1a) |
+| `f7805ca` | Alur e2e menutup akun kas bersaldo beserta buku mutasi transfernya, dan helper akun kas uji bersama (UK1a sampai UK3a) |
 
 - Halaman pengeluaran tidak dapat dibangun terhadap `50eede7`:
   `GET /bebanoperasional` dan `GET /kategoribeban` menjawab 403 bagi
@@ -157,8 +163,19 @@ commit melewati `tsc`, ESLint, vitest penuh, dan spec yang terdampak.
   kode: service daftar sesi booking tidak lagi menulis saat dibaca.
 - Pemeriksaan booking saat aset dihapus (butir 52) tetap belum
   dibuktikan.
-- Keputusan pemilik proyek: `keputusan.md` (Modul keuangan, BO1a dan
-  BO2a; Submodul transfer, pengiriman, dan penerimaan, TS1a).
+- Kedua utang kecil keuangan ditutup tanpa mengubah kode halaman
+  (`f7805ca`): akun uji diisi Rp1 lewat Pindah Dana, penonaktifannya
+  ditolak 409 karena saldo, saldonya dipindah keluar, lalu akun
+  dinonaktifkan; buku mutasinya menampilkan transfer masuk, pembatalan
+  transfer masuk, dan transfer keluar dengan label dan jumlah yang sesuai
+  respons (`pengujian.md`, Spec rujukan).
+- Helper akun kas uji yang kembar di dua spec dipindah ke
+  `tests/helpers/akun-kas-uji.ts` (UK1a).
+- Suite e2e penuh belum dijalankan untuk ketiga commit, atas keputusan
+  pemilik proyek; harapannya 424 lolos dan 17 skipped (`pengujian.md`).
+- Keputusan pemilik proyek: `keputusan.md` (Modul keuangan, BO1a, BO2a,
+  dan UK1a sampai UK3a; Submodul transfer, pengiriman, dan penerimaan,
+  TS1a).
 
 ## Catatan dari pekerjaan Pindah Dana
 
@@ -862,7 +879,8 @@ Yang masih berlaku:
   bersaldo tidak dapat ditutup (`kontrak/temuan.md` butir 81). Ubah,
   nonaktifkan, dan aktifkan kembali tersedia sejak `1bc76f4`, dan Pindah
   Dana sejak `e53c016`. Menutup akun bersaldo dengan memindah saldonya
-  lebih dulu belum diuji sebagai satu alur.
+  lebih dulu teruji sebagai satu alur sejak `f7805ca`; backend tetap
+  tidak punya jalur koreksi saldo.
 - Riwayat transfer hanya dapat disaring per akun dan status, karena
   backend tidak punya filter periode (`kontrak/temuan.md` butir 129), dan
   ubah keterangan transfer tanpa VOID tidak dibuat.
@@ -875,9 +893,9 @@ Yang masih berlaku:
   `update-akunkas` belum teruji e2e (`pengujian.md`), dan halaman ubah
   membaca akun dari cache daftar tanpa `GET /akunkas/:id`.
 - Label jenis mutasi saldo awal dan beban belum pernah tampil dengan data
-  nyata. Mutasi transfer dan pembatalannya ada di data development sejak
-  spec Pindah Dana (`e53c016`), tetapi tampilannya di halaman mutasi
-  belum diperiksa.
+  nyata. Tampilan mutasi transfer dan pembatalan transfer masuk teruji
+  e2e sejak `f7805ca`; pembatalan transfer keluar hanya teruji di unit
+  test.
 - Ketiga halaman keuangan yang memuat data masih memanggil
   `useAuthGuard()`, karena halamannya tetap di `app/` dengan tampilan
   lama; pemanggilan itu dibuang bila halamannya dijadikan tipis.

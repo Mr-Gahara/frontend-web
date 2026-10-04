@@ -1428,6 +1428,14 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   mempertahankan data filter sebelumnya.** Tanpa `placeholderData`,
   berganti filter mengosongkan daftar sampai respons baru tiba; dengan
   itu, baris filter lama akan tampil tanpa penyaring klien.
+- **Skrip yang menyusun ulang blok impor mempertahankan baris kosong
+  sesudahnya.** Skrip pemindah helper akun kas menyambung impor dan badan
+  berkas tanpa baris kosong; `tsc` dan ESLint tidak menangkapnya, dan
+  baru terlihat dari `sed -n '1,8p'` atas hasilnya (`f7805ca`).
+- **Harapan spec yang belum dilihat langsung disebut sebelum run.**
+  Dengan begitu kegagalannya dibaca sebagai harapan yang perlu diluruskan
+  dari bukti, bukan dilonggarkan; di alur tutup akun bersaldo, teks pesan
+  409 dan jumlah baris buku mutasi disebut lebih dulu, lalu terbukti.
 
 ## Kapan berhenti dan bertanya
 
