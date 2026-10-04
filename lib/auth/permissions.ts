@@ -43,6 +43,8 @@ export const IZIN = {
   laporan: "read-laporan",
   pelanggan: "read-pelanggan",
   booking: "read-booking",
+  pajak: "read-pajak",
+  aksesPos: "akses-pos",
 
   pengguna: "read-pengguna",
   role: "read-role",
@@ -86,7 +88,7 @@ export type SyaratIzin = Izin | readonly Izin[];
  * karena halaman memanggil semua endpoint itu saat dimuat. Daftar kosong
  * berarti halaman tidak memuat data berizin.
  *
- * Catatan: shift, pola roster, jadwal shift, pajak, produk pajak, laporan,
+ * Catatan: shift, pola roster, jadwal shift, laporan,
  * absensi, dan sebagian data referensi transaksi belum diperiksa backend
  * (catatan tim backend nomor 2 dan 12). Untuk data sensitif seperti laporan
  * dan pelanggan, gate tetap dipasang memakai permission yang sudah ada di
@@ -106,6 +108,9 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/reservasi": [IZIN.booking],
   "/dashboard/outlet/diskon": [],
   "/dashboard/outlet/pengaturan": [],
+  // Bukan menu sidebar: dibaca halaman pajak dan kartu indeks pengaturan.
+  // GET /pajak menerima read-pajak atau akses-pos sejak backend fc29433.
+  "/dashboard/outlet/pengaturan/pajak": [[IZIN.pajak, IZIN.aksesPos]],
   "/dashboard/outlet/pengguna": [IZIN.pengguna, IZIN.role],
 
   // Inventaris outlet

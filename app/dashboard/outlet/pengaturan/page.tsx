@@ -2,6 +2,8 @@
 
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import Link from "next/link"
+import { useSession } from "@/lib/auth/useSession";
+import { bolehBukaHalaman } from "@/lib/auth/permissions";
 import { 
   Receipt, 
   Users, 
@@ -45,6 +47,10 @@ const settingsModules = [
 
 export default function PengaturanPage() {
   useAuthGuard();
+  // Kartu mengikuti gerbang halamannya (IZIN_HALAMAN): kartu Pajak hanya
+  // tampil bagi pemegang read-pajak atau akses-pos (keputusan FC3a).
+  const { permissions } = useSession();
+  const modulTampil = settingsModules.filter((modul) => bolehBukaHalaman(modul.href, permissions));
   return (
     <div className="p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full overflow-x-hidden">
       
@@ -65,7 +71,7 @@ export default function PengaturanPage() {
 
       {/* Grid Navigasi Pengaturan */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full items-stretch">
-        {settingsModules.map((modul, idx) => {
+        {modulTampil.map((modul, idx) => {
           const Icon = modul.icon
           return (
             <Link 

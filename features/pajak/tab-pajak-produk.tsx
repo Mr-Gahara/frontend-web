@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { useSession } from "@/lib/auth/useSession";
+import { aksiPajak } from "./izin";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -39,6 +41,9 @@ const kelasSelKosong = "text-center text-[#0A2947]/60 font-medium py-6";
  * field yang tidak dikirim, sehingga isinya selalu kosong.
  */
 export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] }) {
+  const { permissions } = useSession();
+  // Memasang dan melepas pajak produk memakai update-produk di backend.
+  const bolehPasang = aksiPajak(permissions).pasang;
   const produk = useDaftarProduk();
   const [produkId, setProdukId] = useState("");
   const [pilihan, setPilihan] = useState("");
@@ -116,7 +121,7 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
         )}
       </div>
 
-      {produkId && (
+      {produkId && bolehPasang && (
         <div className="space-y-2 pt-2">
           <label htmlFor="pajak-pasang" className={kelasLabel}>
             Assign Pajak
@@ -189,6 +194,7 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
                   <TableCell className="font-semibold text-[#0A2947]">{terpasang.pajak.tarif}%</TableCell>
                   <TableCell className="font-medium text-[#0A2947]/80">{labelModelRelasi(terpasang.pajak.model)}</TableCell>
                   <TableCell className="text-right">
+                    {bolehPasang && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -198,6 +204,7 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
                     >
                       Lepas
                     </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               )}

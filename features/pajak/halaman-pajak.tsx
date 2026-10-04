@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/auth/useSession";
+import { bolehBukaHalaman } from "@/lib/auth/permissions";
+import { aksiPajak, URL_PAJAK } from "./izin";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowUpDown, MoreHorizontal, Plus } from "lucide-react";
@@ -54,7 +57,29 @@ const kelasTab =
  * disembunyikan menurut izin.
  */
 export function HalamanPajak() {
+  const { permissions } = useSession();
+
+  // Tanpa izin baca, isi halaman tidak dipasang, sehingga tidak ada
+  // permintaan yang pasti dijawab 403 (keputusan FC3a).
+  if (!bolehBukaHalaman(URL_PAJAK, permissions)) {
+    return (
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-2 text-center text-[#0A2947]">
+        <p className="font-bold">Anda tidak memiliki izin melihat pajak.</p>
+        <p className="text-sm font-medium text-[#0A2947]/60">
+          Hubungi pemilik toko bila Anda memerlukannya.
+        </p>
+      </div>
+    );
+  }
+
+  return <IsiHalamanPajak />;
+}
+
+function IsiHalamanPajak() {
   const router = useRouter();
+  const { permissions } = useSession();
+  const aksi = aksiPajak(permissions);
+  const adaAksiBaris = aksi.ubah || aksi.hapus;
   const [tab, setTab] = useState<Tab>("pajak");
   const daftar = useDaftarPajak();
   const data = useMemo(() => daftar.data ?? [], [daftar.data]);
@@ -145,8 +170,10 @@ export function HalamanPajak() {
       },
       {
         id: "aksi",
-        header: () => <div className="text-right text-xs font-bold text-[#0A2947]/60">Aksi</div>,
-        cell: ({ row }) => (
+        header: () =>
+          adaAksiBaris ? <div className="text-right text-xs font-bold text-[#0A2947]/60">Aksi</div> : null,
+        cell: ({ row }) =>
+          !adaAksiBaris ? null : (
           <div className="flex justify-end">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -160,6 +187,7 @@ export function HalamanPajak() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-[#FFFAF3] border-[#0A2947]/10">
+                {aksi.ubah && (
                 <DropdownMenuItem
                   className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5"
                   onSelect={() => {
@@ -169,7 +197,9 @@ export function HalamanPajak() {
                 >
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#0A2947]/10" />
+                )}
+                {aksi.ubah && aksi.hapus && <DropdownMenuSeparator className="bg-[#0A2947]/10" />}
+                {aksi.hapus && (
                 <DropdownMenuItem
                   className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10"
                   onSelect={() => {
@@ -179,13 +209,14 @@ export function HalamanPajak() {
                 >
                   Hapus
                 </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         ),
       },
     ],
-    [],
+    [aksi.ubah, aksi.hapus, adaAksiBaris],
   );
 
   return (
@@ -207,7 +238,7 @@ export function HalamanPajak() {
             <p className="text-sm font-medium text-[#0A2947]/60">Kelola pajak dan relasi produk.</p>
           </div>
 
-          {tab === "pajak" && (
+          {tab === "pajak" && aksi.buat && (
             <Button
               onClick={() => bukaDialog({ mode: "buat" })}
               className="cursor-pointer font-bold bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm"
