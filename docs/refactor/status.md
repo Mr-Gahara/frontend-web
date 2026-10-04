@@ -86,19 +86,20 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Produk: utang kecil (dialog hapus, spec produk, dan `BahanBakuCombobox`) | `152088b` | Selesai (keputusan PR1a sampai PR3a; Catatan dari utang kecil modul produk dan pemformat rupiah) |
 | `formatRupiah` deterministik untuk nilai pecahan | `4c9c4ed` | Selesai (keputusan FR1a dan FR2a, dan keputusan rancangan butir 24) |
 | Pemformat rupiah: sembilan berkas ke `formatRupiah` | `006d7f8` | Selesai (keputusan rancangan butir 24; Catatan dari utang kecil modul produk dan pemformat rupiah) |
-| Error ESLint warisan | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Error ESLint warisan | `4f19e77` (tipe, kutip, dan `storage.ts`), `039ead4` (hidrasi), `f5fe574` (form role) | Selesai (keputusan EL1a sampai EL4a; Catatan dari error ESLint warisan) |
+| Utang kecil yang tidak menunggu backend | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per modul panel admin (`c824f18`):
+Diukur ulang per error ESLint warisan (`f5fe574`):
 
-| Hal | Awal | Setelah panel admin `c824f18` | Catatan |
+| Hal | Awal | Setelah ESLint warisan `f5fe574` | Catatan |
 |---|---|---|---|
-| Pemakaian `any` | 302 | 4 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), dan 4 setelah halaman profil, login, dan sidebar (`57a7084`) |
-| Kemunculan `_id` | - | 9 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts` |
+| Pemakaian `any` | 302 | 0 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), 4 setelah halaman profil, login, dan sidebar (`57a7084`), dan 0 setelah error ESLint warisan (`4f19e77`) |
+| Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna |
 | `useAuthGuard()` berulang di halaman | 49 | 26 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, halaman diskon, dan halaman profil) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
 | Berkas di atas 700 baris | 7 | 3 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.088 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702) |
@@ -106,24 +107,67 @@ Diukur ulang per modul panel admin (`c824f18`):
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: error ESLint warisan
+## Pekerjaan berikutnya: utang kecil yang tidak menunggu backend
 
-Kesembilan pemformat rupiah disatukan di `006d7f8`. Pekerjaan
-berikutnya, atas keputusan pemilik proyek (4 Oktober 2026), adalah error
-ESLint warisan (Utang kecil dari modul stock adjustment gudang): 20
-error per `57a7084`, yaitu empat belas `no-explicit-any`, empat
-`react-hooks/set-state-in-effect`, dan dua `react/no-unescaped-entities`.
+Error ESLint warisan selesai di `f5fe574`. Pekerjaan berikutnya, atas
+keputusan pemilik proyek (4 Oktober 2026), adalah utang kecil yang dapat
+dikerjakan tanpa perubahan backend:
 
-Pemetaannya belum diambil, dan hitungan itu belum diukur ulang sejak
-`57a7084`. Langkah pertama sesi berikutnya, setelah backend di-`fetch`
-dan dibandingkan dengan acuan (`cara-kerja.md`): daftar error terkini
-per berkas dan aturan, lalu ajukan rancangan beserta keputusannya,
-dikelompokkan menurut aturan.
+- Detail stock opname memeriksa tipe lokasi terhadap ruang (Utang kecil
+  dari modul stock adjustment gudang).
+- Nama PIC di form buat stock opname dibaca lewat `usePenggunaSaya`, lalu
+  `nama` dibuang dari `PenggunaSesi` (Utang kecil dari modul Profil,
+  login, dan sidebar).
+- `RegisterRequest`, `RegisterResponse`, dan `LoginRequest` di
+  `types/auth.ts` dibuang (utang yang sama).
+- Spec tipe aset memakai `tests/helpers/reservasi-uji.ts`
+  (`pengujian.md`, Utang pengujian).
+
+Pemetaannya belum diambil. Langkah pertama sesi berikutnya, setelah
+backend di-`fetch` dan dibandingkan dengan acuan (`cara-kerja.md`):
+petakan keempatnya, lalu ajukan rancangan beserta keputusannya sekaligus.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline 50eede7..origin/yoga | head -20
-npx eslint app components features lib tests -f json 2>/dev/null | node ~/.cache/frontend-web/alat/daftar-eslint.js
+grep -nE 'lokasi|TIPE_LOKASI|ruang' features/stock-opname/halaman-detail-stock-opname.tsx | cut -c1-140 | head -30
+grep -nE '\bnama\b' lib/auth/session.ts features/stock-opname/form-buat-stock-opname.tsx | cut -c1-140
+grep -rnE '\b(RegisterRequest|RegisterResponse|LoginRequest)\b' app components features lib types tests | cut -c1-140
 ```
+
+## Catatan dari error ESLint warisan
+
+Dikerjakan pada 4 Oktober 2026 dalam tiga commit, terhadap backend `yoga`
+`50eede7`. Suite e2e penuh dijalankan sekali di akhir (keputusan PF6a):
+426 lolos dan 17 skipped, tanpa kegagalan.
+
+| Commit | Isi |
+|---|---|
+| `4f19e77` | Enam belas error tanpa perubahan perilaku: empat belas `no-explicit-any` dan dua `react/no-unescaped-entities`; `storage.ts` di helper uji dihapus (EL1a) |
+| `039ead4` | `useSudahHidrasi` menggantikan `setState` di effect di kedua halaman role dan topbar, serta dua salinan lama di reservasi (EL4a) |
+| `f5fe574` | Form role dipasang setelah detail termuat, dan effect pengisinya dibuang (EL2a) |
+
+- ESLint atas `app`, `components`, `features`, `hooks`, `lib`, dan
+  `tests` kini tanpa error. Hitungan 20 per `57a7084` terbukti masih sama
+  saat diukur ulang sebelum pekerjaan dimulai, dan pemakaian `any` di
+  metrik menjadi 0.
+- `decodeJWT` mengembalikan `Record<string, unknown>`, dan
+  `lib/auth/session.ts` tidak berubah, karena setiap field payload sudah
+  dibaca lewat `String`, `Array.isArray`, atau perbandingan. Satu beda
+  perilaku: `exp` token yang bukan angka kini dianggap kedaluwarsa.
+- Deteksi hidrasi kini satu hook, `hooks/use-sudah-hidrasi.ts`, dengan
+  lima pemakai. Halaman role yang dibuka lewat navigasi di dalam aplikasi
+  langsung tampil tanpa satu render kosong lebih dulu, dan tanggal di
+  topbar dihitung di setiap render.
+- Form role dipecah menjadi `FormRole` (memuat detail) dan `IsiFormRole`
+  (form), dengan nilai awal dari `nilaiAwalRole` (`arsitektur.md`). Detail
+  yang gagal dimuat tampil sebagai pesan di tempat beserta tautan
+  kembali, menggantikan toast dan form kosong; jalurnya teruji e2e lewat
+  id yang tidak ada, tanpa respons tiruan.
+- Isian form role tetap memakai `useState` (Utang kecil dari modul
+  Pengaturan outlet).
+- Tidak ada temuan backend baru, dan kontrak tidak berubah.
+- Keputusan pemilik proyek: `keputusan.md` (Error ESLint warisan, EL1a
+  sampai EL4a).
 
 ## Catatan dari utang kecil modul produk dan pemformat rupiah
 
@@ -776,7 +820,7 @@ Yang masih berlaku:
   sebelum kontrak dikoreksi.
 - `components/calendar.tsx` (240 baris) adalah kalender kostum standar
   sejak `e43e000` (keputusan rancangan butir 22) dan dipakai lewat
-  `PilihTanggal`; kedua `any`-nya belum dibereskan.
+  `PilihTanggal`; kedua `any`-nya dibereskan di `4f19e77`.
 - `app/dashboard/outlet/inventaris/components/` berisi
   `inventaris-nav-tabs.tsx`; `BahanBakuCombobox` pindah ke
   `features/bahan-baku/bahan-baku-combobox.tsx` di `152088b`.
@@ -818,23 +862,6 @@ Yang masih berlaku:
 
 ### Utang kecil dari modul stock adjustment gudang
 
-- 20 error ESLint warisan per `57a7084`, dihitung dengan
-  `daftar-eslint.js` atas `app`, `components`, `features`, `lib`, dan
-  `tests`. Empat belas `@typescript-eslint/no-explicit-any`:
-  `lib/apiClient.ts` (3), `lib/decodeToken.ts` (1),
-  `components/calendar.tsx` (2),
-  `components/pengguna/pengguna-form-dialog.tsx` (2),
-  `tests/integration/components/pengguna/pengguna-form-dialog.test.tsx`
-  (2), `tests/helpers/storage.ts` (1), dan
-  `tests/unit/lib/decodeToken.test.ts` (3). Empat
-  `react-hooks/set-state-in-effect`: kedua halaman role (Utang kecil dari
-  modul Pengaturan outlet), `components/topbar.tsx`, dan
-  `features/role/form-role.tsx`. Dua `react/no-unescaped-entities` di
-  inventaris gudang (Utang kecil dari modul Gudang). Hitungan 9 yang
-  tercatat sebelumnya hanya mencakup `any` di luar berkas modul; `any` di
-  sidebar hilang saat sidebar dipecah (`57a7084`). Bereskan saat
-  berkasnya disentuh; `storage.ts` sendiri sudah tidak relevan
-  (`pengujian.md`).
 - Detail stock opname tidak memeriksa tipe lokasi terhadap ruang, sehingga
   dokumen gudang yang dibuka lewat URL ruang outlet tetap tampil. Pola
   penjaganya sudah ada di `features/stock-adjustment/ruang.ts`
@@ -937,11 +964,6 @@ Yang masih berlaku:
 - Dashboard outlet (`app/dashboard/outlet/page.tsx`) juga placeholder,
   dan `GET /dashboard/outlet` belum dipakai web; di luar cakupan modul
   Gudang.
-- Dua error ESLint `react/no-unescaped-entities` di
-  `app/dashboard/gudang/inventaris/page.tsx` baris 273 (tanda kutip di
-  teks keadaan kosong) warisan sejak migrasi stok `ad590f9`, yang ditutup
-  walau definisi selesai meminta ESLint tanpa error di berkas modulnya.
-  Bereskan saat halaman inventaris gudang disentuh lagi.
 
 ### Utang kecil dari modul Pengaturan outlet
 
@@ -960,10 +982,10 @@ Yang masih berlaku:
   ditinjau bersama modul reservasi bila dibutuhkan.
 - `pajakList` di tipe `Produk` tetap ada tetapi tidak dipakai tampilan,
   karena tidak mencerminkan relasi pajak (`kontrak/temuan.md` butir 88).
-- Dua error ESLint `react-hooks/set-state-in-effect` warisan modul Role di
-  `app/dashboard/outlet/pengaturan/roles/page.tsx` baris 39 dan
-  `app/dashboard/outlet/pengaturan/roles/buatRole/page.tsx` baris 43.
-  Bereskan saat halaman role disentuh lagi.
+- Form role (`features/role/form-role.tsx`) masih memakai `useState` per
+  isian dan memvalidasi di `handleSubmit`. `f5fe574` hanya memindah
+  pengisian nilai awal; perpindahan ke React Hook Form dan Zod dikerjakan
+  saat form itu disentuh lagi.
 
 ### Utang kecil dari modul Profil, login, dan sidebar
 

@@ -645,8 +645,8 @@ Diputuskan pemilik proyek pada 4 Oktober 2026, untuk pemformat rupiah
 - **Baseline suite penuh dicatat apa adanya** (424 lolos, 1 gagal, dan
   17 skipped), tanpa menjalankan ulang suite penuh setelah perbaikan.
 - **Pekerjaan setelah ini adalah menyatukan pemformat rupiah** (selesai
-  di `006d7f8`), lalu error ESLint warisan (`status.md`, Pekerjaan
-  berikutnya).
+  di `006d7f8`), lalu error ESLint warisan (selesai di `f5fe574`, Error
+  ESLint warisan).
 
 ### Modul jadwal dan shift
 
@@ -1265,6 +1265,37 @@ dan PA3a serta PA12a sampai PA14a di `c824f18`.
   dikosongkan sebagai null; password admin yang salah ditampilkan apa
   adanya tanpa penanganan sementara (butir 17); dan halaman admin memakai
   token tema, bukan warna heksadesimal.
+
+### Error ESLint warisan
+
+Diputuskan pemilik proyek pada 4 Oktober 2026. Labelnya EL:
+
+- **EL1a: `storage.ts` di helper uji dihapus** (`4f19e77`), bukan hanya
+  diperbaiki tipenya, karena tidak punya pengimpor dan membaca
+  `sessionStorage` yang tidak dipakai sejak token pindah ke memori.
+- **EL2a: form role dipecah sesuai keputusan rancangan butir 8**
+  (`f5fe574`), bukan ditunda: `FormRole` memuat detail lalu memasang
+  `IsiFormRole` dengan nilai awal, dan effect pengisinya dibuang.
+- **EL3a: tiga commit per kelompok**, masing-masing dengan gerbang dan
+  spec terdampaknya sendiri: tipe, kutip, dan `storage.ts` tanpa
+  perubahan perilaku; hidrasi; lalu form role.
+- **EL4a: deteksi hidrasi lewat satu hook bersama dengan lima pemakai**
+  (`039ead4`): kedua halaman role, topbar, dan dua salinan
+  `useSyncExternalStore` yang sudah ada di reservasi, agar pola itu hanya
+  didefinisikan sekali (keputusan rancangan butir 12).
+- **Pekerjaan setelah ini adalah utang kecil yang tidak menunggu
+  backend** (`status.md`, Pekerjaan berikutnya).
+- Diterapkan tanpa ditanyakan (`4f19e77`): `decodeJWT` mengembalikan
+  `Record<string, unknown>`, dan `exp` yang bukan angka dianggap
+  kedaluwarsa; tipe `Dropdown` kalender diambil dari `react-day-picker`;
+  pilihan role di dialog pengguna membaca `role.id` tanpa cadangan `_id`
+  (butir 1); dan fixture test dialog pengguna ditulis sesuai tipenya.
+- Diterapkan tanpa ditanyakan (`f5fe574`): detail yang gagal dimuat
+  tampil sebagai pesan di tempat beserta tautan kembali, menggantikan
+  toast dan form kosong, sejalan dengan keputusan detail yang gagal
+  dimuat di modul lain; `useRole` dimuat ulang saat halaman dibuka; nilai
+  awal disusun fungsi murni `nilaiAwalRole` (butir 10); dan isian form
+  tetap memakai `useState`.
 
 ## Keputusan rancangan yang mengikat
 

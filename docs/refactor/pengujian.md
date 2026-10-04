@@ -10,7 +10,7 @@ rujukan. Baseline dan spec rujukan diperbarui setiap modul.
 
 ```bash
 echo "tsc: $(npx tsc --noEmit > /tmp/t.log 2>&1; echo $?)"; grep 'error TS' /tmp/t.log | cut -c1-110 | head -5
-npx eslint features app components lib 2>&1 | tail -3
+npx eslint app components features hooks lib tests 2>&1 | tail -3
 npx vitest run 2>&1 | tail -5
 npx playwright test tests/e2e/<modul> --reporter=json > /tmp/p.json 2>/dev/null; node ~/.cache/frontend-web/alat/ringkas-e2e.js
 ```
@@ -94,6 +94,13 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
+
+**Baseline per error ESLint warisan** (commit `f5fe574`): 579 test unit
+dan integrasi lolos di 69 berkas: `039ead4` menambah dua test
+`useSudahHidrasi`, dan `f5fe574` empat test `nilaiAwalRole`; `4f19e77`
+tidak mengubah jumlah. Suite penuh 4 Oktober 2026 terhadap backend lokal
+`yoga` `50eede7` menghasilkan 426 lolos dan 17 skipped tanpa kegagalan,
+bertambah satu skenario di spec role (`f5fe574`), dalam sekitar 23 menit.
 
 **Baseline per penyatuan pemformat rupiah** (commit `006d7f8`): 573
 test unit dan integrasi lolos di 67 berkas, tidak berubah. Suite penuh
@@ -748,6 +755,13 @@ satu putaran.
   24); skenario ringkasan mutasi gagal karenanya begitu data memuat
   pecahan (`4c9c4ed`).
 
+- Jalur gagal memuat sebuah detail dapat diuji tanpa `page.route`: buka
+  halamannya dengan id berformat sah yang tidak ada, tunggu respons
+  gagal dari backend, lalu bandingkan pesan yang tampil dengan `message`
+  respons itu. Spec menegaskan responsnya gagal, bukan status
+  tertentu, selama status itu belum dibaca dari respons nyata (form role,
+  `f5fe574`).
+
 ## Test yang ditandai fixme dan skip bersyarat
 
 Menunggu perbaikan backend:
@@ -835,8 +849,6 @@ Urutan debug kegagalan e2e di atas).
   di unit test (`tests/unit/lib/auth/gate-stock-adjustment.test.ts`, kedua
   ruang),
   dengan alasan yang sama.
-- **`tests/helpers/storage.ts`** masih membaca `sessionStorage` dan sudah
-  tidak relevan sejak token dipindah ke memori. Berkas itu belum dibersihkan.
 - **Pengosongan hitungan stock opname** baru berupa penanda `test.fixme`
   tanpa badan, karena backend belum menerima `qtyPhysical` null
   (`kontrak/temuan.md` butir 22). Yang teruji saat ini hanya perilaku
@@ -1096,6 +1108,11 @@ Urutan debug kegagalan e2e di atas).
 - **Jalur gagal dialog hapus produk hanya diuji dengan jawaban 500
   tiruan**; penolakan hapus dari backend sungguhan belum teruji.
 
+- **Form role yang gagal dimuat hanya teruji untuk id yang tidak ada.**
+  Galat server saat memuat detail dan penanda memuat selama detail dimuat
+  ulang belum teruji e2e. `nilaiAwalRole` teruji di
+  `tests/unit/features/role/nilai-awal.test.ts`.
+
 ## Spec rujukan
 
 - `tests/e2e/inventaris/kategori/crud-kategori.spec.ts`: spec pembanding yang
@@ -1322,7 +1339,10 @@ Urutan debug kegagalan e2e di atas).
   dipakai dengan `POST /role` dijawab gagal lewat `JAWAB_GAGAL`, sehingga
   tidak ada role yang tersimpan; harapan diturunkan dari `ROLE_TEMPLATES`
   yang diimpor; dan pembuktian terhadap kode lama baru sah setelah
-  permission basis data disilang dengan seed.
+  permission basis data disilang dengan seed. Sejak `f5fe574`: halaman
+  ubah dibuka untuk id berformat sah yang tidak ada, sehingga jalur gagal
+  memuat teruji lewat respons backend sungguhan, dan ketiadaan form
+  ditegaskan lewat `toHaveCount(0)` pada isian dan tombol simpan.
 - `tests/e2e/auth/sidebar-muat-ulang.spec.ts` (`ca6eb3d`): sidebar
   diperiksa sebelum dan sesudah `reload`, dengan respons `pin-refresh`
   ditunggu setelah `reload` ber-`waitUntil: "commit"`; spec ini dibuktikan

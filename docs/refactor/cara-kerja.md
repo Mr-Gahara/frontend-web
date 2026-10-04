@@ -1115,9 +1115,12 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   "satu-satunya jalan batal adalah void penjualannya", padahal penjualan
   booking selalu FINAL dan FINAL tidak dapat di-void langsung; rancangan
   fixture harus diajukan ulang (R2c, R4b).
-- **Deteksi hidrasi memakai `useSyncExternalStore`**, dengan snapshot
-  server false dan klien true, bukan `setState` di effect yang ditolak
-  `react-hooks/set-state-in-effect` (daftar reservasi, `eef371a`).
+- **Deteksi hidrasi memakai `useSudahHidrasi`**
+  (`hooks/use-sudah-hidrasi.ts`, `039ead4`), pembungkus
+  `useSyncExternalStore` dengan snapshot server false dan klien true,
+  bukan `setState` di effect yang ditolak
+  `react-hooks/set-state-in-effect`. Pola itu sempat ditulis sendiri di
+  dua berkas reservasi sejak `eef371a` sebelum disatukan.
 - **`awk` tidak mengenal `\b` sebagai batas kata**; di `awk`, `\b` adalah
   karakter backspace. Pola `<(Button|...)\b` saat memetakan buat reservasi
   tidak menangkap satu tag pun. Pakai `grep -E` untuk pola berbatas kata,
@@ -1274,7 +1277,9 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Angka harapan di blok verifikasi juga dihitung dari isi berkas.** Pada
   submodul pajak, jumlah pasangan marka dan jumlah ekspor helper
   diperkirakan dan dua kali meleset, sehingga keluaran yang benar sempat
-  tampak salah.
+  tampak salah. Terulang pada error ESLint warisan (`4f19e77`): 15
+  alih-alih 16 error dan 10 alih-alih 8 berkas, karena disebut dari
+  ingatan, bukan dijumlah dari daftar yang sudah tercetak.
 - **Rentang aggregate dibaca dari tahap `$lookup`-nya**, lewat
   `grep -nE '\$lookup' -A6`, bukan dari nomor baris field hasilnya.
   Rentang `sed` yang diambil dari baris `pajakList` hanya memuat
@@ -1449,6 +1454,18 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   nama tag.** `/<AlertDialog[ >]/` tidak menangkap tag yang berdiri di
   baris sendiri; ambil rentangnya dengan `sed -n` dari nomor baris hasil
   `grep -n`.
+
+- **Tipe pengganti `any` dibuktikan lewat `tsc` per lokasi.**
+  `Object.values` atas nilai yang dipersempit `typeof === "object"`
+  bertipe `unknown[]`, sehingga callback berparameter sempit ditolak;
+  parameternya `unknown`, dan field dibaca lewat cast (`lib/apiClient.ts`,
+  `4f19e77`). Sebelum mengganti kembalian sebuah fungsi ke `unknown`,
+  baca setiap pemakainya: `lib/auth/session.ts` tidak perlu diubah karena
+  seluruh field sudah dibaca lewat `String` dan `Array.isArray`.
+- **Pemakai sebuah berkas dicari juga lewat impor relatif.** Grep atas
+  path beralias (`helpers/storage`) tidak menangkap `./storage` dari
+  berkas di folder yang sama; gerbang penghapusan memakai pola yang
+  mencakup keduanya.
 
 ## Kapan berhenti dan bertanya
 
