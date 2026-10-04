@@ -22,6 +22,7 @@ export function useRole(id: string) {
     queryKey: queryKeys.roles.detail(id),
     queryFn: () => roleApi.detail(id),
     enabled: !!id,
+    refetchOnMount: "always",
   });
 }
 

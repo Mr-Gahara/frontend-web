@@ -133,6 +133,39 @@ test.describe("E2E - Role (CRUD)", () => {
     });
   });
 
+  test("edit: posisi yang tidak ada menampilkan pesan, bukan form kosong", async ({
+    page,
+  }) => {
+    const idTidakAda = "000000000000000000000000";
+
+    await page.goto(`${BASE}${DAFTAR}/${idTidakAda}/edit`, {
+      waitUntil: "commit",
+    });
+    const respons = await page.waitForResponse(
+      (r) =>
+        new RegExp(`/api/role/${idTidakAda}$`, "i").test(r.url()) &&
+        r.request().method() === "GET",
+      { timeout: 15_000 },
+    );
+    expect(respons.ok()).toBe(false);
+    const isi = (await respons.json().catch(() => ({}))) as {
+      message?: string;
+    };
+
+    const main = page.getByRole("main");
+    await expect(main.getByText("Posisi tidak dapat dimuat.")).toBeVisible({
+      timeout: 20_000,
+    });
+    if (isi.message) await expect(main).toContainText(isi.message);
+
+    // Form tidak dipasang, sehingga tidak ada isian kosong yang dapat disimpan.
+    await expect(page.getByLabel(/nama posisi|nama role/i)).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /simpan/i })).toHaveCount(0);
+
+    await main.getByRole("link", { name: "Kembali ke Daftar Posisi" }).click();
+    await expect(page).toHaveURL(new RegExp(`${DAFTAR}$`), { timeout: 15_000 });
+  });
+
   test("template: setiap izin terpetakan ke id, dan badge sesuai payload", async ({
     page,
   }) => {

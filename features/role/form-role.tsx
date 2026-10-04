@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { IZIN_DASAR, IZIN_TERLARANG } from "./constants";
+import { nilaiAwalRole } from "./nilai-awal";
 import {
   useDaftarPermission,
   useDaftarRole,
@@ -49,26 +51,82 @@ export interface PropsFormRole {
   urlSelesai?: string;
 }
 
-export default function FormRole({
+type DetailRole = NonNullable<ReturnType<typeof useRole>["data"]>;
+
+export default function FormRole(props: PropsFormRole) {
+  useAuthGuard();
+  const { roleId, urlKembali, labelKembali } = props;
+  const modeEdit = !!roleId;
+
+  // Detail hanya dimuat saat mengubah posisi yang sudah ada, dan selalu
+  // dimuat ulang saat halaman dibuka, agar form dipasang dengan data
+  // terbaru (keputusan rancangan butir 8).
+  const {
+    data: roleDetail,
+    error: detailError,
+    isFetchedAfterMount,
+  } = useRole(roleId ?? "");
+
+  if (modeEdit && detailError) {
+    return (
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-3 text-center">
+        <AlertTriangle className="h-8 w-8 text-red-600" />
+        <p className="text-sm font-bold text-[#0A2947]">
+          Posisi tidak dapat dimuat.
+        </p>
+        <p className="text-sm font-medium text-[#0A2947]/60">
+          {pesanError(detailError, "Data posisi tidak ditemukan.")}
+        </p>
+        <Link
+          href={urlKembali}
+          className="text-sm font-bold text-[#0A2947] underline"
+        >
+          {labelKembali}
+        </Link>
+      </div>
+    );
+  }
+
+  if (modeEdit && (!roleDetail || !isFetchedAfterMount)) {
+    return (
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-[#0A2947]/60" />
+        <p className="text-sm font-bold text-[#0A2947]/60">
+          Memuat rincian posisi...
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <IsiFormRole
+      key={roleDetail?.id ?? "baru"}
+      {...props}
+      awal={roleDetail}
+    />
+  );
+}
+
+function IsiFormRole({
   roleId,
   judul,
   deskripsiHalaman,
   urlKembali,
   labelKembali,
   urlSelesai = "/dashboard/outlet/pengaturan/roles",
-}: PropsFormRole) {
+  awal,
+}: PropsFormRole & { awal?: DetailRole }) {
   const modeEdit = !!roleId;
-  useAuthGuard();
-
   const router = useRouter();
 
-  const [namaRole, setNamaRole] = useState("");
-  const [deskripsi, setDeskripsi] = useState("");
-  const [level, setLevel] = useState("");
-  // Saat membuat posisi baru, wewenang dasar sudah terpilih sejak awal;
-  // saat mengubah, nilainya diisi dari detail role setelah dimuat.
+  // Nilai awal dihitung sekali saat form dipasang: wewenang dasar untuk
+  // posisi baru, atau isi posisi yang diubah.
+  const [awalForm] = useState(() => nilaiAwalRole(awal));
+  const [namaRole, setNamaRole] = useState(awalForm.namaRole);
+  const [deskripsi, setDeskripsi] = useState(awalForm.deskripsi);
+  const [level, setLevel] = useState(awalForm.level);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>(
-    modeEdit ? [] : IZIN_DASAR,
+    awalForm.izinTerpilih,
   );
   const [formError, setFormError] = useState("");
 
@@ -80,13 +138,6 @@ export default function FormRole({
 
   const { data: allPermissions = [], isLoading: permissionsLoading } =
     useDaftarPermission();
-
-  // Detail hanya dimuat saat mengubah posisi yang sudah ada.
-  const {
-    data: roleDetail,
-    isLoading: isLoadingDetail,
-    error: detailError,
-  } = useRole(roleId ?? "");
 
   // Daftar role dipakai untuk menentukan level pengguna aktif, karena
   // token hanya membawa nama role tanpa level.
@@ -109,40 +160,9 @@ export default function FormRole({
     );
   }, [allowedPermissions]);
 
-  // DEFENSIVE: Menangkap wewenang terlarang jika ada (fallback ke array kosong jika undef)
-  // DEFENSIVE: Ekstrak string 'nama' jika backend mengirim object
-  const hiddenExistingPerms = useMemo(() => {
-    if (!roleDetail?.permissions) return [];
-    return roleDetail.permissions
-      .map((p: string | Permission) => (typeof p === "object" ? p.nama : p))
-      .filter((p: string) => IZIN_TERLARANG.includes(p));
-  }, [roleDetail]);
-
-  // EFFECT: PRE-POPULATE FORM
-  useEffect(() => {
-    if (roleDetail) {
-      setNamaRole(roleDetail.namaRole || "");
-      setDeskripsi(roleDetail.deskripsi || "");
-      setLevel(roleDetail.level !== undefined ? String(roleDetail.level) : "");
-
-      const safePerms = (roleDetail.permissions || [])
-        .map((p: string | Permission) => (typeof p === "object" ? p.nama : p))
-        .filter((p: string) => !IZIN_TERLARANG.includes(p));
-
-      setSelectedPermissions(safePerms);
-    }
-  }, [roleDetail]);
-
-  useEffect(() => {
-    if (detailError) {
-      toast.error("Gagal Memuat Posisi", {
-        description:
-          detailError instanceof Error
-            ? detailError.message
-            : "Data posisi tidak ditemukan.",
-      });
-    }
-  }, [detailError]);
+  // Wewenang terlarang yang sudah dimiliki posisi ini tidak ditampilkan,
+  // tetapi tetap dikirim saat simpan agar tidak hilang.
+  const hiddenExistingPerms = awalForm.izinTersembunyi;
 
   // MUTATION: UPDATE ROLE
   const simpanRoleMutation = useSimpanRole();
@@ -291,17 +311,6 @@ export default function FormRole({
     simpanRole(payload);
   };
 
-  if (modeEdit && isLoadingDetail) {
-    return (
-      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-[#0A2947]/60" />
-        <p className="text-sm font-bold text-[#0A2947]/60">
-          Memuat rincian posisi...
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
       {/* Header */}
@@ -394,7 +403,7 @@ export default function FormRole({
                 size="sm"
                 onClick={handleSelectAllGlobal}
                 className="h-8 text-xs font-bold cursor-pointer transition-colors border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 shadow-sm"
-                disabled={permissionsLoading || isLoadingDetail}
+                disabled={permissionsLoading}
               >
                 {selectedPermissions.length === allowedPermissions.length &&
                 allowedPermissions.length > 0
@@ -504,8 +513,7 @@ export default function FormRole({
               type="submit"
               disabled={
                 simpanRoleMutation.isPending ||
-                permissionsLoading ||
-                isLoadingDetail
+                permissionsLoading
               }
               className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm px-6"
             >
