@@ -1,5 +1,15 @@
-import { test, expect, type Page, type Request, type Response } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { login, bukaDenganAuth, api, BASIS, JAWAB_GAGAL, type Auth } from "../../../helpers/transfer-uji";
+import {
+  ID_TIDAK_ADA,
+  buatTipeAset,
+  cocok,
+  hapusLewatApi,
+  pantauPermintaan,
+  tahanLaluTeruskan,
+  unik,
+  type TipeAsetMentah,
+} from "../../../helpers/reservasi-uji";
 
 /*
  * Spec tipe aset terhadap backend sungguhan (keputusan rancangan butir 21,
@@ -9,47 +19,13 @@ import { login, bukaDenganAuth, api, BASIS, JAWAB_GAGAL, type Auth } from "../..
  * path. Satu-satunya simulasi (daftar kosong) ditandai "// simulasi:".
  */
 
-type TipeAsetMentah = {
-  id: string;
-  namaTipeAset: string;
-  deskripsi: string | null;
-  dataTarif: { id: string }[];
-};
-
 const URL_DAFTAR = BASIS + "/dashboard/outlet/reservasi/tipeAset";
 const URL_BUAT = URL_DAFTAR + "/buatTipeAset";
 const urlEdit = (id: string) => URL_DAFTAR + "/" + id + "/edit";
 const POLA_DAFTAR = /\/api\/tipeaset(\?|$)/i;
 const POLA_SATU = /\/api\/tipeaset\/[^/?]+(\?|$)/i;
-const ID_TIDAK_ADA = "000000000000000000000000";
 
-let urut = 0;
-const unik = () => Date.now().toString(36) + (urut++).toString(36);
 const namaUji = (label: string) => "E2E Tipe " + label + " " + unik();
-const tunda = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-function cocok(method: string, pola: RegExp) {
-  return (r: Response) => r.request().method() === method && pola.test(r.url());
-}
-
-async function buatTipe(page: Page, auth: Auth, nama: string, deskripsi?: string) {
-  const r = await api<TipeAsetMentah>(
-    page,
-    auth,
-    "POST",
-    "/tipeaset",
-    deskripsi ? { namaTipeAset: nama, deskripsi } : { namaTipeAset: nama },
-  );
-  expect(r.status, "buat tipe aset uji: " + r.pesan).toBeLessThan(300);
-  expect(r.data?.id, "respons buat tipe aset harus membawa id").toBeTruthy();
-  return r.data;
-}
-
-async function hapusTipe(page: Page, auth: Auth, id: string | undefined) {
-  if (!id) return;
-  const res = await api(page, auth, "DELETE", "/tipeaset/" + id);
-  expect.soft([200, 204, 404], `hapus tipe aset uji ${id}: ${res.status} ${res.pesan}`).toContain(res.status);
-}
 
 const bacaTipe = (page: Page, auth: Auth, id: string) =>
   api<TipeAsetMentah>(page, auth, "GET", "/tipeaset/" + id);
@@ -63,23 +39,6 @@ async function bukaDaftar(page: Page): Promise<TipeAsetMentah[]> {
 }
 
 const baris = (page: Page, nama: string) => page.getByRole("row").filter({ hasText: nama });
-
-function pantauPermintaan(page: Page, method: string, pola: RegExp) {
-  const tercatat: Request[] = [];
-  const catat = (r: Request) => {
-    if (r.method() === method && pola.test(r.url())) tercatat.push(r);
-  };
-  page.on("request", catat);
-  return { jumlah: () => tercatat.length, lepas: () => page.off("request", catat) };
-}
-
-/** Menahan permintaan method itu sebentar lalu meneruskannya ke backend sungguhan. */
-async function tahanLaluTeruskan(page: Page, method: string, pola: RegExp, ms = 1_500) {
-  await page.route(pola, async (route) => {
-    if (route.request().method() === method) await tunda(ms);
-    await route.continue();
-  });
-}
 
 test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
   test.beforeEach(async ({ page }) => {
@@ -99,7 +58,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
     const nama = namaUji("Muat");
     let t: TipeAsetMentah | undefined;
     try {
-      t = await buatTipe(page, auth, nama);
+      t = await buatTipeAset(page, auth, nama);
       await tahanLaluTeruskan(page, "GET", POLA_DAFTAR);
       await page.goto(URL_DAFTAR);
       await expect(page.getByText("Memuat data...")).toBeVisible();
@@ -107,7 +66,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
       await expect(page.getByText("Memuat data...")).toHaveCount(0);
       await page.unroute(POLA_DAFTAR);
     } finally {
-      await hapusTipe(page, auth, t?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", t?.id);
     }
   });
 
@@ -148,8 +107,8 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
     let a: TipeAsetMentah | undefined;
     let b: TipeAsetMentah | undefined;
     try {
-      a = await buatTipe(page, auth, namaA, deskripsi);
-      b = await buatTipe(page, auth, namaB);
+      a = await buatTipeAset(page, auth, namaA, deskripsi);
+      b = await buatTipeAset(page, auth, namaB);
       const data = await bukaDaftar(page);
       const mentahA = data.find((x) => x.id === a?.id);
       expect(mentahA, "tipe aset uji harus ada di respons daftar").toBeTruthy();
@@ -160,8 +119,8 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
       );
       await expect(baris(page, namaB)).toContainText("Tidak ada deskripsi");
     } finally {
-      await hapusTipe(page, auth, a?.id);
-      await hapusTipe(page, auth, b?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", a?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", b?.id);
     }
   });
 
@@ -172,7 +131,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
     const nama = namaUji("Cari");
     let t: TipeAsetMentah | undefined;
     try {
-      t = await buatTipe(page, auth, nama);
+      t = await buatTipeAset(page, auth, nama);
       await bukaDaftar(page);
       const cari = page.getByPlaceholder(/cari kategori/i);
       const permintaan = pantauPermintaan(page, "GET", POLA_DAFTAR);
@@ -194,7 +153,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
       expect(permintaan.jumlah(), "pencarian tidak memanggil backend").toBe(0);
       permintaan.lepas();
     } finally {
-      await hapusTipe(page, auth, t?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", t?.id);
     }
   });
 
@@ -209,12 +168,12 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
     const nama = namaUji("Navigasi");
     let t: TipeAsetMentah | undefined;
     try {
-      t = await buatTipe(page, auth, nama);
+      t = await buatTipeAset(page, auth, nama);
       await bukaDaftar(page);
       await baris(page, nama).getByRole("button", { name: /edit/i }).click();
       await page.waitForURL(urlEdit(t.id));
     } finally {
-      await hapusTipe(page, auth, t?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", t?.id);
     }
   });
 
@@ -223,7 +182,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
     const nama = namaUji("Batal Hapus");
     let t: TipeAsetMentah | undefined;
     try {
-      t = await buatTipe(page, auth, nama);
+      t = await buatTipeAset(page, auth, nama);
       await bukaDaftar(page);
       const permintaan = pantauPermintaan(page, "DELETE", POLA_SATU);
       await baris(page, nama).getByRole("button").last().click();
@@ -237,7 +196,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
       expect((await bacaTipe(page, auth, t.id)).status).toBe(200);
       await expect(baris(page, nama)).toBeVisible();
     } finally {
-      await hapusTipe(page, auth, t?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", t?.id);
     }
   });
 
@@ -249,7 +208,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
     let t: TipeAsetMentah | undefined;
     let terhapus = false;
     try {
-      t = await buatTipe(page, auth, nama);
+      t = await buatTipeAset(page, auth, nama);
       await bukaDaftar(page);
       await tahanLaluTeruskan(page, "DELETE", POLA_SATU);
       await baris(page, nama).getByRole("button").last().click();
@@ -266,7 +225,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
       expect((await bacaTipe(page, auth, t.id)).status).toBe(404);
       await page.unroute(POLA_SATU);
     } finally {
-      if (!terhapus) await hapusTipe(page, auth, t?.id);
+      if (!terhapus) await hapusLewatApi(page, auth, "/tipeaset", t?.id);
     }
   });
 
@@ -275,7 +234,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
     const nama = namaUji("Hapus Gagal");
     let t: TipeAsetMentah | undefined;
     try {
-      t = await buatTipe(page, auth, nama);
+      t = await buatTipeAset(page, auth, nama);
       await bukaDaftar(page);
       await page.route(POLA_SATU, (route) =>
         route.request().method() === "DELETE" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
@@ -288,7 +247,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
       await page.unroute(POLA_SATU);
       expect((await bacaTipe(page, auth, t.id)).status).toBe(200);
     } finally {
-      await hapusTipe(page, auth, t?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", t?.id);
     }
   });
 });
@@ -358,7 +317,7 @@ test.describe("E2E — Tipe Aset › Halaman Buat", () => {
       expect(tersimpan.data.namaTipeAset).toBe(nama);
       expect(tersimpan.data.deskripsi).toBeNull();
     } finally {
-      await hapusTipe(page, auth, id);
+      await hapusLewatApi(page, auth, "/tipeaset", id);
     }
   });
 
@@ -387,7 +346,7 @@ test.describe("E2E — Tipe Aset › Halaman Buat", () => {
       expect(tersimpan.data.deskripsi).toBe(deskripsi);
       await page.unroute(POLA_DAFTAR);
     } finally {
-      await hapusTipe(page, auth, id);
+      await hapusLewatApi(page, auth, "/tipeaset", id);
     }
   });
 
@@ -398,7 +357,7 @@ test.describe("E2E — Tipe Aset › Halaman Buat", () => {
     const nama = namaUji("Duplikat");
     let t: TipeAsetMentah | undefined;
     try {
-      t = await buatTipe(page, auth, nama);
+      t = await buatTipeAset(page, auth, nama);
       await page.getByPlaceholder(/meja billiard vip/i).fill(nama);
       const tKirim = page.waitForResponse(cocok("POST", POLA_DAFTAR));
       await page.getByRole("button", { name: /simpan kategori aset/i }).click();
@@ -412,7 +371,7 @@ test.describe("E2E — Tipe Aset › Halaman Buat", () => {
       const daftar = await api<TipeAsetMentah[]>(page, auth, "GET", "/tipeaset");
       expect(daftar.data.filter((x) => x.namaTipeAset === nama)).toHaveLength(1);
     } finally {
-      await hapusTipe(page, auth, t?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", t?.id);
     }
   });
 });
@@ -437,7 +396,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
     const deskripsi = "Deskripsi uji " + unik();
     let t: TipeAsetMentah | undefined;
     try {
-      t = await buatTipe(page, auth, nama, deskripsi);
+      t = await buatTipeAset(page, auth, nama, deskripsi);
       await tahanLaluTeruskan(page, "GET", POLA_SATU);
       await page.goto(urlEdit(t.id));
       await expect(page.getByText("Memuat data tipe aset...")).toBeVisible();
@@ -445,7 +404,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
       await expect(page.getByPlaceholder(/catatan atau keterangan/i)).toHaveValue(deskripsi);
       await page.unroute(POLA_SATU);
     } finally {
-      await hapusTipe(page, auth, t?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", t?.id);
     }
   });
 
@@ -467,7 +426,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
     const nama = namaUji("Kembali");
     let t: TipeAsetMentah | undefined;
     try {
-      t = await buatTipe(page, auth, nama);
+      t = await buatTipeAset(page, auth, nama);
       const permintaan = pantauPermintaan(page, "PUT", POLA_SATU);
       await page.goto(urlEdit(t.id));
       await expect(page.getByPlaceholder(/meja billiard vip/i)).toHaveValue(nama);
@@ -480,7 +439,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
       expect(permintaan.jumlah(), "kembali dan Batal tidak mengirim PUT").toBe(0);
       permintaan.lepas();
     } finally {
-      await hapusTipe(page, auth, t?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", t?.id);
     }
   });
 
@@ -489,7 +448,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
     const nama = namaUji("Validasi");
     let t: TipeAsetMentah | undefined;
     try {
-      t = await buatTipe(page, auth, nama);
+      t = await buatTipeAset(page, auth, nama);
       const permintaan = pantauPermintaan(page, "PUT", POLA_SATU);
       await page.goto(urlEdit(t.id));
       const input = page.getByPlaceholder(/meja billiard vip/i);
@@ -500,7 +459,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
       expect(permintaan.jumlah(), "validasi gagal tidak mengirim PUT").toBe(0);
       permintaan.lepas();
     } finally {
-      await hapusTipe(page, auth, t?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", t?.id);
     }
   });
 
@@ -512,7 +471,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
     const namaBaru = namaUji("Diubah");
     let t: TipeAsetMentah | undefined;
     try {
-      t = await buatTipe(page, auth, nama);
+      t = await buatTipeAset(page, auth, nama);
       await tahanLaluTeruskan(page, "PUT", POLA_SATU);
       await page.goto(urlEdit(t.id));
       const input = page.getByPlaceholder(/meja billiard vip/i);
@@ -532,7 +491,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
       expect(tersimpan.data.namaTipeAset).toBe(namaBaru);
       await page.unroute(POLA_SATU);
     } finally {
-      await hapusTipe(page, auth, t?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", t?.id);
     }
   });
 
@@ -541,7 +500,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
     const nama = namaUji("Kosongkan");
     let t: TipeAsetMentah | undefined;
     try {
-      t = await buatTipe(page, auth, nama, "Deskripsi uji " + unik());
+      t = await buatTipeAset(page, auth, nama, "Deskripsi uji " + unik());
       await page.goto(urlEdit(t.id));
       const deskripsi = page.getByPlaceholder(/catatan atau keterangan/i);
       await expect(deskripsi).not.toHaveValue("");
@@ -553,7 +512,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
       const tersimpan = await bacaTipe(page, auth, t.id);
       expect(tersimpan.data.deskripsi, "deskripsi yang dikosongkan harus terhapus").toBeNull();
     } finally {
-      await hapusTipe(page, auth, t?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", t?.id);
     }
   });
 
@@ -566,8 +525,8 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
     let a: TipeAsetMentah | undefined;
     let b: TipeAsetMentah | undefined;
     try {
-      a = await buatTipe(page, auth, namaA);
-      b = await buatTipe(page, auth, namaB);
+      a = await buatTipeAset(page, auth, namaA);
+      b = await buatTipeAset(page, auth, namaB);
       await page.goto(urlEdit(a.id));
       const input = page.getByPlaceholder(/meja billiard vip/i);
       await expect(input).toHaveValue(namaA);
@@ -583,8 +542,8 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
       await expect(page).toHaveURL(/\/edit$/);
       expect((await bacaTipe(page, auth, a.id)).data.namaTipeAset).toBe(namaA);
     } finally {
-      await hapusTipe(page, auth, a?.id);
-      await hapusTipe(page, auth, b?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", a?.id);
+      await hapusLewatApi(page, auth, "/tipeaset", b?.id);
     }
   });
 });
