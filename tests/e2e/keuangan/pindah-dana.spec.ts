@@ -1,6 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
-import { api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
+import { expect, test } from "@playwright/test";
+import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { unik } from "../../helpers/reservasi-uji";
+import { daftarAkun, saldoAkun, buatAkunUji, tutupAkunUji, pilihAkun, type AkunKasUji } from "../../helpers/akun-kas-uji";
 
 /*
  * Spec Pindah Dana antar akun kas (keputusan DN1a sampai DN3a), tanpa respons
@@ -16,51 +17,6 @@ const URL_AKUN = "/dashboard/outlet/keuangan/akunkas";
 const URL_PINDAH = URL_AKUN + "/pindahDana";
 const POLA_TRANSFER = /\/api\/jurnaltransfer(\?|$)/i;
 const POLA_TRANSFER_ID = /\/api\/jurnaltransfer\/[a-f0-9]{24}(\?|$)/i;
-
-type AkunKasUji = {
-  id: string;
-  namaAkun: string;
-  saldo: number;
-  status: string;
-};
-
-async function daftarAkun(page: Page, auth: Auth) {
-  const baca = await api<AkunKasUji[]>(page, auth, "GET", "/akunkas");
-  expect(baca.status, "baca akun kas: " + baca.pesan).toBe(200);
-  return baca.data ?? [];
-}
-
-async function saldoAkun(page: Page, auth: Auth, id: string) {
-  const akun = (await daftarAkun(page, auth)).find((a) => a.id === id);
-  expect(akun, "akun kas " + id + " terbaca").toBeTruthy();
-  return (akun as AkunKasUji).saldo;
-}
-
-async function buatAkunUji(page: Page, auth: Auth, nama: string) {
-  const buat = await api<AkunKasUji>(page, auth, "POST", "/akunkas", {
-    namaAkun: nama,
-    nomorAkun: "E2E-" + unik(),
-    tipeAkun: "Kas Fisik",
-    keterangan: "E2E pindah dana",
-    saldo: 0,
-    status: "aktif",
-  });
-  expect(buat.status, "buat akun kas uji: " + buat.pesan).toBe(201);
-  const akun = (await daftarAkun(page, auth)).find((a) => a.namaAkun === nama);
-  expect(akun, "akun uji tersimpan di backend").toBeTruthy();
-  return akun as AkunKasUji;
-}
-
-async function tutupAkunUji(page: Page, auth: Auth, id: string | undefined) {
-  if (!id) return;
-  const tutup = await api(page, auth, "PUT", "/akunkas/" + id, { status: "non-aktif" });
-  expect.soft(tutup.status, `nonaktifkan akun kas uji: ${tutup.pesan}`).toBe(200);
-}
-
-async function pilihAkun(page: Page, label: string, nama: string) {
-  await page.getByRole("combobox", { name: label }).click();
-  await page.getByRole("option", { name: nama, exact: true }).click();
-}
 
 test.describe("pindah dana", () => {
   test.beforeEach(async ({ page }) => {

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
-import { api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
+import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { ID_TIDAK_ADA, cocok, pantauPermintaan, unik } from "../../helpers/reservasi-uji";
+import { daftarAkun, buatAkunUji, tutupAkunUji, type AkunKasUji } from "../../helpers/akun-kas-uji";
 
 /*
  * Spec ubah, nonaktifkan, dan aktifkan kembali akun kas lewat PUT
@@ -15,48 +16,12 @@ const URL_AKUN = "/dashboard/outlet/keuangan/akunkas";
 const urlUbah = (id: string) => `${URL_AKUN}/${id}/ubah`;
 const POLA_AKUN_ID = /\/api\/akunkas\/[a-f0-9]{24}(\?|$)/i;
 
-type AkunKasUji = {
-  id: string;
-  namaAkun: string;
-  nomorAkun: string;
-  saldo: number;
-  status: string;
-  keterangan: string | null;
-};
-
 const kartuAkun = (page: Page, nama: string) =>
   page
     .locator("div")
     .filter({ has: page.getByRole("heading", { name: nama, exact: true }) })
     .filter({ hasText: "Saldo Saat Ini" })
     .last();
-
-async function daftarAkun(page: Page, auth: Auth) {
-  const baca = await api<AkunKasUji[]>(page, auth, "GET", "/akunkas");
-  expect(baca.status, "baca akun kas: " + baca.pesan).toBe(200);
-  return baca.data ?? [];
-}
-
-async function buatAkunUji(page: Page, auth: Auth, nama: string) {
-  const buat = await api<AkunKasUji>(page, auth, "POST", "/akunkas", {
-    namaAkun: nama,
-    nomorAkun: "E2E-" + unik(),
-    tipeAkun: "Kas Fisik",
-    keterangan: "E2E ubah akun",
-    saldo: 0,
-    status: "aktif",
-  });
-  expect(buat.status, "buat akun kas uji: " + buat.pesan).toBe(201);
-  const akun = (await daftarAkun(page, auth)).find((a) => a.namaAkun === nama);
-  expect(akun, "akun uji tersimpan di backend").toBeTruthy();
-  return akun as AkunKasUji;
-}
-
-async function tutupAkunUji(page: Page, auth: Auth, id: string | undefined) {
-  if (!id) return;
-  const tutup = await api(page, auth, "PUT", "/akunkas/" + id, { status: "non-aktif" });
-  expect.soft(tutup.status, `nonaktifkan akun kas uji: ${tutup.pesan}`).toBe(200);
-}
 
 test.describe("ubah akun kas", () => {
   test.beforeEach(async ({ page }) => {
