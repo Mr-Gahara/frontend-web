@@ -1436,6 +1436,19 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   Dengan begitu kegagalannya dibaca sebagai harapan yang perlu diluruskan
   dari bukti, bukan dilonggarkan; di alur tutup akun bersaldo, teks pesan
   409 dan jumlah baris buku mutasi disebut lebih dulu, lalu terbukti.
+- **Opsi `Intl` yang bergantung pada runtime ditulis eksplisit.** Dua
+  pemformat yang teksnya sama persis memberi hasil berbeda di Node dan
+  Chromium, karena batas pecahan IDR diambil dari data ICU. Bandingkan
+  `resolvedOptions()` sebelum menyimpulkan bahwa fungsinya yang berbeda
+  (`4c9c4ed`).
+- **Premis sebuah pilihan dibuktikan sebelum diajukan sebagai
+  keputusan.** Pilihan agar spec memakai pemformat halaman diajukan dan
+  dipilih, padahal kedua pemformat sudah sama; keputusannya harus
+  diajukan ulang setelah `lib/format.ts` dibaca.
+- **Pola rentang `awk` untuk blok JSX tidak menuntut karakter sesudah
+  nama tag.** `/<AlertDialog[ >]/` tidak menangkap tag yang berdiri di
+  baris sendiri; ambil rentangnya dengan `sed -n` dari nomor baris hasil
+  `grep -n`.
 
 ## Kapan berhenti dan bertanya
 

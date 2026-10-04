@@ -95,6 +95,20 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per utang kecil modul produk dan pemformat rupiah** (commit
+`4c9c4ed`): 573 test unit dan integrasi lolos di 67 berkas, bertambah
+satu test pecahan di `tests/unit/lib/format.test.ts`. Suite penuh
+4 Oktober 2026 setelah `152088b`, terhadap backend lokal `yoga`
+`50eede7`, menghasilkan 424 lolos, 1 gagal, dan 17 skipped dalam sekitar
+22 menit; `152088b` menambah satu skenario hapus gagal di spec produk.
+Yang gagal adalah skenario ringkasan periode di
+`tests/e2e/keuangan/mutasi-kas.spec.ts` (MK2a): kartu menampilkan
+pecahan, sedangkan harapan spec, yang dihitung di Node, dibulatkan
+(keputusan rancangan butir 24). Setelah `4c9c4ed` skenario itu lolos
+bersama spec keuangan dan tutup akun bersaldo (17 lolos), tetapi suite
+penuh tidak dijalankan ulang, atas keputusan pemilik proyek. Harapan run
+berikutnya 425 lolos dan 17 skipped.
+
 **Baseline per utang kecil keuangan** (commit `f7805ca`): 572 test unit
 dan integrasi lolos di 67 berkas, tidak berubah. `f7805ca` menambah satu
 skenario, `tests/e2e/keuangan/tutup-akun-bersaldo.spec.ts`, sehingga
@@ -720,6 +734,12 @@ satu putaran.
   sendiri, dan skenarionya dilewati dengan alasan bila datanya tidak
   cukup (misalnya mutasi bulan berjalan belum sampai dua halaman),
   sehingga spec tetap benar di awal bulan.
+- Teks hasil `Intl` yang dihitung spec berasal dari Node, bukan dari
+  browser, dan keduanya dapat berbeda: batas pecahan bawaan IDR 0 di
+  Node 22 dan lebih dari 0 di Chromium. Harapan rupiah dihitung lewat
+  `formatRupiah`, yang batasnya eksplisit (keputusan rancangan butir
+  24); skenario ringkasan mutasi gagal karenanya begitu data memuat
+  pecahan (`4c9c4ed`).
 
 ## Test yang ditandai fixme dan skip bersyarat
 
@@ -1062,6 +1082,12 @@ Urutan debug kegagalan e2e di atas).
   sehingga keduanya memberi hasil yang sama; bedanya terbukti dari kode
   (`kontrak/temuan.md` butir 33). Lingkup satu lokasi tujuan hanya teruji
   di unit test (`filterServerTransfer`).
+- **Data development memuat transfer berjumlah pecahan** di akun "kasir
+  outlet" (bukti `kontrak/temuan.md` butir 126, FR2a), sehingga total
+  masuk dan total keluar akun itu berpecahan sepanjang Oktober 2026.
+  Spec yang membandingkan rupiah memakai `formatRupiah`.
+- **Jalur gagal dialog hapus produk hanya diuji dengan jawaban 500
+  tiruan**; penolakan hapus dari backend sungguhan belum teruji.
 
 ## Spec rujukan
 
@@ -1070,7 +1096,11 @@ Urutan debug kegagalan e2e di atas).
   dengan `page.route` hanya untuk satu method dan path.
 - `tests/e2e/inventaris/produk/crud-produk.spec.ts`: form bersama dua mode,
   input tanpa label dipilih lewat nama aksesibel (`aria-labelledby`), dan
-  pemeriksaan data setelah halaman edit dibuka ulang.
+  pemeriksaan data setelah halaman edit dibuka ulang. Sejak `152088b`:
+  nama produk unik per run, pemilih bahan baku dibuka lewat teks
+  pemicunya (`pemilihBahan`), dan jalur gagal dialog hapus diuji dengan
+  menjawab gagal `DELETE` saja, lalu melepas pencegat dan mengulang hapus
+  yang sama sampai berhasil.
 - `tests/e2e/inventaris/stockAdjustment/lihat-stock-adjustment.spec.ts`:
   halaman hanya baca, data uji diambil dari respons server lewat
   `page.waitForResponse`, `test.skip` bila data kosong, dan pemeriksaan sel

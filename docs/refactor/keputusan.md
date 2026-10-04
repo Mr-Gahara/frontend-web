@@ -96,6 +96,21 @@ Tidak boleh dibalik tanpa pembahasan:
   perlu. Bila resep dihapus seluruhnya, backend tetap menjadikan stok 0, dan
   form memberi petunjuk agar stok diatur ulang.
 
+Diputuskan pemilik proyek pada 4 Oktober 2026, untuk utang kecil modul
+produk (`152088b`). Labelnya PR:
+
+- **PR1a: `BahanBakuCombobox` pindah ke `features/bahan-baku`**
+  (`bahan-baku-combobox.tsx`), karena komponennya khusus domain bahan
+  baku, bukan UI lintas modul.
+- **PR2a: ketiga pemilih bahan baku di spec produk memakai satu helper**
+  yang memilih pemicu lewat teks tombolnya.
+- **PR3a: nama produk uji berakhiran `Date.now()`**, mengikuti pola yang
+  sudah ada di spec itu.
+- Diterapkan tanpa ditanyakan (`152088b`): dialog hapus produk hanya
+  tertutup saat berhasil (keputusan Fase 0), dengan `preventDefault` di
+  `onClick`; dan jalur gagalnya diuji lewat `page.route` pada `DELETE`
+  saja, setelah dibuktikan gagal terhadap halaman lama.
+
 ### Submodul stock adjustment
 
 - **Data yang terbukti salah dari backend tidak ditampilkan sebagai nilai.**
@@ -611,13 +626,26 @@ Diputuskan pemilik proyek pada 4 Oktober 2026, untuk utang kecil keuangan
 - **Suite e2e penuh tidak dijalankan sebelum dokumentasi ditutup**;
   baseline dicatat sebagai hitungan, dan suite penuh dijalankan di akhir
   pekerjaan berikutnya.
-- **Pekerjaan setelah ini adalah utang kecil modul produk** (`status.md`,
-  Pekerjaan berikutnya).
+- **Pekerjaan setelah ini adalah utang kecil modul produk** (selesai di
+  `152088b`, Modul produk dan kategori).
 - Diterapkan tanpa ditanyakan (`f7805ca`): spec baru tersendiri,
   `tutup-akun-bersaldo.spec.ts`; akun uji dibuat lewat API seperti kedua
   spec lama; `finally` memulihkan saldo dan menutup akun lewat API bila
   alur berhenti di tengah; dan harapan buku mutasi dihitung dari respons
   yang dibaca halaman itu sendiri.
+
+Diputuskan pemilik proyek pada 4 Oktober 2026, untuk pemformat rupiah
+(`4c9c4ed`). Labelnya FR:
+
+- **FR1a: `formatRupiah` menampilkan pecahan sampai dua digit**, lewat
+  `maximumFractionDigits` 2 yang eksplisit. Pembulatan ke rupiah utuh
+  tidak dipilih, agar pecahan yang ada di data tetap terlihat.
+- **FR2a: transfer berjumlah pecahan di data development dibiarkan**
+  sebagai bukti `kontrak/temuan.md` butir 126.
+- **Baseline suite penuh dicatat apa adanya** (424 lolos, 1 gagal, dan
+  17 skipped), tanpa menjalankan ulang suite penuh setelah perbaikan.
+- **Pekerjaan setelah ini adalah menyatukan pemformat rupiah**
+  (`status.md`, Pekerjaan berikutnya).
 
 ### Modul jadwal dan shift
 
@@ -1370,3 +1398,12 @@ dan PA3a serta PA12a sampai PA14a di `c824f18`.
     1 Oktober 2026, `9586e3c`). Spec yang ditulis sebelumnya dan masih
     menyiapkan data uji lewat API disesuaikan saat spec itu disentuh
     (`pengujian.md`, Utang pengujian).
+24. **Rupiah ditampilkan lewat satu pemformat, `formatRupiah`
+    (`lib/format.ts`), dengan batas pecahan yang eksplisit.** Batas
+    pecahan bawaan `Intl` untuk IDR bergantung pada versi ICU runtime (0
+    di Node 22, lebih dari 0 di Chromium), sehingga pemformat tanpa
+    `maximumFractionDigits` memberi teks berbeda di server, di test, dan
+    di browser untuk nilai pecahan. Halaman dan spec memakai
+    `formatRupiah`, bukan `Intl.NumberFormat` sendiri; sembilan berkas
+    yang masih memformat sendiri dipindah di pekerjaan berikutnya
+    (pemilik proyek, 4 Oktober 2026, `4c9c4ed`).

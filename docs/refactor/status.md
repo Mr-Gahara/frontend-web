@@ -83,7 +83,9 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Keuangan: pengeluaran (beban operasional) | `7fce871` (keterangan belum tersedia) | Ditunda (keputusan BO1a dan BO2a; Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang): endpoint beban menjawab 403 bagi setiap pengguna di backend `50eede7` |
 | Transfer stok: daftar surat jalan memakai penyaringan server (butir 33) | `03c4eb3` | Selesai (keputusan TS1a; Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang) |
 | Keuangan: utang kecil (menutup akun bersaldo lewat Pindah Dana, dan tampilan mutasi transfer) | `f7805ca` | Selesai (keputusan UK1a sampai UK3a; Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang) |
-| Produk: utang kecil (dialog hapus, spec produk, dan `BahanBakuCombobox`) | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Produk: utang kecil (dialog hapus, spec produk, dan `BahanBakuCombobox`) | `152088b` | Selesai (keputusan PR1a sampai PR3a; Catatan dari utang kecil modul produk dan pemformat rupiah) |
+| `formatRupiah` deterministik untuk nilai pecahan | `4c9c4ed` | Selesai (keputusan FR1a dan FR2a, dan keputusan rancangan butir 24) |
+| Pemformat rupiah: sembilan berkas ke `formatRupiah` | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -103,33 +105,66 @@ Diukur ulang per modul panel admin (`c824f18`):
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: utang kecil modul produk
+## Pekerjaan berikutnya: satukan pemformat rupiah
 
-Utang kecil keuangan selesai di `f7805ca`. Pekerjaan berikutnya, atas
-keputusan pemilik proyek (4 Oktober 2026), adalah keempat utang kecil
-modul produk (Utang kecil dari modul produk):
+Utang kecil modul produk selesai di `152088b`, dan `formatRupiah` dibuat
+deterministik di `4c9c4ed`. Pekerjaan berikutnya, atas keputusan pemilik
+proyek (4 Oktober 2026): sembilan berkas aplikasi yang punya pemformat
+IDR sendiri dipindah ke `formatRupiah` (`lib/format.ts`), agar tampilan
+rupiah sama di setiap runtime (keputusan rancangan butir 24):
 
-- Dialog hapus di daftar produk hanya tertutup saat berhasil (keputusan
-  Fase 0), seperti halaman kategori.
-- Skenario 4d spec produk memilih bahan baku lewat teks tombolnya, bukan
-  lewat urutan `combobox`.
-- Spec produk memakai nama produk unik per run.
-- `BahanBakuCombobox` dipindah dari `app/`, agar `features/` tidak
-  bergantung pada `app/`.
+- `app/dashboard/outlet/inventaris/produk/page.tsx`
+- `app/dashboard/outlet/keuangan/ringkasanLabaRugi/page.tsx`
+- `app/dashboard/outlet/keuangan/akunkas/page.tsx`
+- `app/dashboard/outlet/keuangan/components/keuangan-summary-cards.tsx`
+- `app/dashboard/outlet/reservasi/tarif/page.tsx`
+- `features/penjualan/halaman-detail-penjualan.tsx`
+- `features/penjualan/halaman-pembayaran-penjualan.tsx`
+- `features/penjualan/halaman-daftar-penjualan.tsx`
+- `features/akun-kas/halaman-ubah.tsx`
 
-Pemetaannya belum diambil. Langkah pertama sesi berikutnya, setelah
-backend di-`fetch` dan dibandingkan dengan acuan (`cara-kerja.md`):
-petakan dialog hapus di halaman daftar produk dan pembandingnya di
-halaman kategori, pemakai `BahanBakuCombobox`, serta nama produk dan
-selector di spec produk, lalu ajukan rancangan beserta keputusannya.
-Suite e2e penuh dijalankan di akhir pekerjaan itu (`pengujian.md`).
+Pemetaannya belum diambil: opsi tiap pemformat belum dibandingkan, dan
+ada yang mungkin sengaja berbeda. Langkah pertama sesi berikutnya,
+setelah backend di-`fetch` dan dibandingkan dengan acuan
+(`cara-kerja.md`): bandingkan opsi kesembilan pemformat itu dengan
+`formatRupiah`, lalu ajukan rancangan beserta keputusannya. Suite e2e
+penuh dijalankan di akhir pekerjaan itu; harapannya 425 lolos dan 17
+skipped (`pengujian.md`).
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline 50eede7..origin/yoga | head -20
-grep -nE 'AlertDialog|preventDefault|useHapus|onClick' app/dashboard/outlet/inventaris/produk/page.tsx app/dashboard/outlet/inventaris/kategori/page.tsx | cut -c1-140
-grep -rnE 'BahanBakuCombobox|bahanBakuCombobox' app features components --include='*.ts' --include='*.tsx' | cut -c1-140
-grep -nE 'nth\(|namaProduk|fill\(' tests/e2e/inventaris/produk/crud-produk.spec.ts | cut -c1-140 | head -30
+grep -rnE 'currency: "IDR"' -B4 -A4 app features components lib --include='*.ts' --include='*.tsx' | cut -c1-140
 ```
+
+## Catatan dari utang kecil modul produk dan pemformat rupiah
+
+Dikerjakan pada 4 Oktober 2026 dalam dua commit, terhadap backend `yoga`
+`50eede7`. Suite e2e penuh dijalankan sekali setelah `152088b`: 424
+lolos, 1 gagal, dan 17 skipped. Kegagalan itu diperbaiki di `4c9c4ed`,
+dan suite penuh tidak dijalankan ulang sesudahnya.
+
+| Commit | Isi |
+|---|---|
+| `152088b` | Dialog hapus produk bertahan saat gagal, `BahanBakuCombobox` ke `features/bahan-baku`, dan spec produk bernama unik (PR1a sampai PR3a) |
+| `4c9c4ed` | `formatRupiah` memakai `maximumFractionDigits` 2 secara eksplisit, dan helper `rupiah` ketiga spec keuangan memanggilnya (FR1a) |
+
+- Keempat utang kecil modul produk selesai. Dialog hapus produk dahulu
+  tertutup juga saat gagal, karena `setDeleteTarget(null)` berada di
+  blok `finally`; skenario jalur gagalnya ditulis lebih dulu dan
+  terbukti gagal terhadap halaman lama, lalu lolos setelah perbaikan.
+- `features/` tidak lagi bergantung pada `app/`: `BahanBakuCombobox`
+  kini di `features/bahan-baku/bahan-baku-combobox.tsx`.
+- Satu kegagalan suite penuh, skenario ringkasan periode di spec mutasi
+  (MK2a), bukan dari kode yang diubah hari itu: batas pecahan bawaan
+  `Intl` untuk IDR bergantung pada versi ICU, sehingga Node membulatkan
+  nilai pecahan dan Chromium tidak. Pecahannya berasal dari transfer
+  berjumlah pecahan di data development (`kontrak/temuan.md` butir 126),
+  yang dibiarkan sebagai bukti (FR2a).
+- Sembilan berkas aplikasi masih punya pemformat IDR sendiri; itu
+  pekerjaan berikutnya.
+- Keputusan pemilik proyek: `keputusan.md` (Modul produk dan kategori,
+  PR1a sampai PR3a; Modul keuangan, FR1a dan FR2a; keputusan rancangan
+  butir 24).
 
 ## Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang
 
@@ -751,8 +786,8 @@ Yang masih berlaku:
   sejak `e43e000` (keputusan rancangan butir 22) dan dipakai lewat
   `PilihTanggal`; kedua `any`-nya belum dibereskan.
 - `app/dashboard/outlet/inventaris/components/` berisi
-  `bahanBakuCombobox.tsx` (dipakai `features/produk/form-produk.tsx`, lihat
-  utang modul produk) dan `inventaris-nav-tabs.tsx`.
+  `inventaris-nav-tabs.tsx`; `BahanBakuCombobox` pindah ke
+  `features/bahan-baku/bahan-baku-combobox.tsx` di `152088b`.
 - Tambah barang di inventaris gudang hanya menawarkan master bahan baku.
   Barang inventory non-bahan (`barangInventoryID`, `/baranginventory`)
   belum dipakai web sama sekali; master data tetap bersumber dari outlet
@@ -788,25 +823,6 @@ Yang masih berlaku:
     satu outlet.
 
 ## Utang kecil yang tertunda
-
-### Utang kecil dari modul produk
-
-- Dialog hapus di halaman daftar produk masih tertutup saat hapus gagal
-  (perilaku lama dipertahankan di `53414dd`), bertentangan dengan keputusan
-  Fase 0. Samakan dengan halaman kategori: `preventDefault`, tertutup hanya
-  saat berhasil, tetap terbuka saat gagal.
-- Skenario 4d di spec produk membuka pemilih bahan baku dengan
-  `getByRole("combobox").nth(1)`, bertentangan dengan catatan Playwright di
-  `pengujian.md`. Ganti dengan tombol berteks "Pilih bahan..." saat spec produk
-  disentuh lagi.
-- Spec produk memakai nama produk tetap. Satu kegagalan sebelum cleanup
-  membuat run berikutnya gagal karena nama duplikat, dan hal itu terjadi pada
-  modul ini. Pakai akhiran unik per run seperti spec kategori.
-- `features/produk/form-produk.tsx` mengimpor `BahanBakuCombobox` dari
-  `app/dashboard/outlet/inventaris/components/`, sehingga `features/`
-  bergantung pada `app/`. Pindahkan komponen itu ke `features/bahan-baku`
-  atau `components/` saat modul produk atau bahan baku disentuh lagi; modul
-  inventaris selesai tanpa menyentuhnya.
 
 ### Utang kecil dari modul stock adjustment gudang
 
