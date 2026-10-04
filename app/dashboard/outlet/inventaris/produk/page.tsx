@@ -72,6 +72,8 @@ export default function ProdukPage() {
   // =========================
   const deleteMutation = useHapusProduk();
 
+  // Dialog hapus bertahan selama mutation berjalan dan hanya tertutup bila
+  // berhasil (keputusan Fase 0); saat gagal, dialog tetap terbuka.
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
@@ -79,12 +81,11 @@ export default function ProdukPage() {
       toast.success("Berhasil", {
         description: "Produk berhasil dihapus.",
       });
+      setDeleteTarget(null);
     } catch (err) {
       toast.error("Gagal", {
         description: pesanError(err, "Gagal menghapus produk."),
       });
-    } finally {
-      setDeleteTarget(null);
     }
   };
 
@@ -276,7 +277,10 @@ export default function ProdukPage() {
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
+              onClick={(e) => {
+                e.preventDefault();
+                void handleDelete();
+              }}
               disabled={deleteMutation.isPending}
               className="cursor-pointer bg-red-600 text-white hover:bg-red-700 font-bold"
             >

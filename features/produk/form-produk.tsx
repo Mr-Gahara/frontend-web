@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { pesanError } from "@/lib/api/error";
-import { BahanBakuCombobox } from "@/app/dashboard/outlet/inventaris/components/bahanBakuCombobox";
+import { BahanBakuCombobox } from "@/features/bahan-baku/bahan-baku-combobox";
 import { useDaftarBahanBaku } from "@/features/bahan-baku/hooks";
 import { useDaftarKategori } from "@/features/kategori/hooks";
 import { useLokasiAktif } from "@/features/inventaris/hooks";

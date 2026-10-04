@@ -102,6 +102,14 @@ async function klikTombolAksiProduk(row: ReturnType<Page["getByRole"]>) {
 }
 
 // ============================================================
+// HELPER: Pemicu pemilih bahan baku di baris resep yang belum terisi.
+// Dipilih lewat teks yang tampil, bukan urutan combobox
+// (pengujian.md, Catatan Playwright).
+// ============================================================
+const pemilihBahan = (page: Page) =>
+  page.getByRole("combobox").filter({ hasText: /pilih bahan/i });
+
+// ============================================================
 // HELPER: Hapus produk via tabel (untuk cleanup)
 // ============================================================
 async function hapusProduk(page: Page, nama: string) {
@@ -131,7 +139,7 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
   test("happy path: tambah produk baru tanpa resep → muncul di tabel", async ({
     page,
   }) => {
-    const namaProduk = "Produk E2E Test Polos";
+    const namaProduk = `Produk E2E Test Polos ${Date.now()}`;
 
     await test.step("Login dan navigasi", async () => {
       await login(page);
@@ -230,9 +238,7 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
       await page.getByRole("button", { name: /tambah bahan/i }).click();
 
       // Pilih bahan baku pertama di combobox resep
-      const bahanCombobox = page
-        .getByRole("combobox")
-        .filter({ hasText: /pilih bahan/i });
+      const bahanCombobox = pemilihBahan(page);
       await bahanCombobox.click();
       await page.getByRole("option").first().click();
 
@@ -263,8 +269,8 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
   test("happy path: edit nama dan harga produk → perubahan tersimpan", async ({
     page,
   }) => {
-    const namaAwal = "Produk E2E Pre-Edit";
-    const namaUpdate = "Produk E2E Post-Edit";
+    const namaAwal = `Produk E2E Pre-Edit ${Date.now()}`;
+    const namaUpdate = `Produk E2E Post-Edit ${Date.now()}`;
 
     await test.step("Login, navigasi, dan buat produk", async () => {
       await login(page);
@@ -319,7 +325,7 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
   test("edit: halaman edit terisi data produk dari server", async ({
     page,
   }) => {
-    const namaProduk = "Produk E2E Prefill";
+    const namaProduk = `Produk E2E Prefill ${Date.now()}`;
 
     await test.step("Login, navigasi, dan buat produk", async () => {
       await login(page);
@@ -355,7 +361,7 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
   test("hapus: konfirmasi hapus → produk hilang dari tabel", async ({
     page,
   }) => {
-    const namaProduk = "Produk E2E Hapus Tuntas";
+    const namaProduk = `Produk E2E Hapus Tuntas ${Date.now()}`;
 
     await test.step("Login, navigasi, dan buat produk", async () => {
       await login(page);
@@ -381,8 +387,8 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
   // [4c] EDIT: Produk tanpa resep, stok tidak kembali ke 0
   // ----------------------------------------------------------
   test("edit produk tanpa resep: stok tidak kembali ke 0", async ({ page }) => {
-    const namaAwal = "Produk E2E Stok Tetap";
-    const namaUpdate = "Produk E2E Stok Tetap Diubah";
+    const namaAwal = `Produk E2E Stok Tetap ${Date.now()}`;
+    const namaUpdate = `Produk E2E Stok Tetap Diubah ${Date.now()}`;
 
     await test.step("Login dan buat produk dengan stok 25", async () => {
       await login(page);
@@ -449,7 +455,7 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
   test("edit produk: resep dihapus seluruhnya → petunjuk stok muncul, dan stok yang diisi tersimpan", async ({
     page,
   }) => {
-    const namaProduk = "Produk E2E Resep Dihapus";
+    const namaProduk = `Produk E2E Resep Dihapus ${Date.now()}`;
 
     await test.step("Login dan buat produk dengan resep", async () => {
       await login(page);
@@ -461,7 +467,7 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
         hargaJual: "15000",
       });
       await page.getByRole("button", { name: /tambah bahan/i }).click();
-      await page.getByRole("combobox").nth(1).click();
+      await pemilihBahan(page).click();
       await page
         .getByRole("option", { name: /\((gram|ml|pcs|kg|liter)\)/i })
         .first()
@@ -589,9 +595,7 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
       await page.getByRole("button", { name: /tambah bahan/i }).click();
 
       // Pilih bahan baku
-      const bahanCombobox = page
-        .getByRole("combobox")
-        .filter({ hasText: /pilih bahan/i });
+      const bahanCombobox = pemilihBahan(page);
       await bahanCombobox.click();
       await page.getByRole("option").first().click();
 
@@ -684,7 +688,7 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
   test("dialog hapus: klik batal → dialog tutup, produk tidak terhapus", async ({
     page,
   }) => {
-    const namaProduk = "Produk E2E Batal Hapus";
+    const namaProduk = `Produk E2E Batal Hapus ${Date.now()}`;
 
     await test.step("Login, navigasi, dan buat produk", async () => {
       await login(page);
@@ -728,6 +732,83 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
     await test.step("Cleanup", async () => {
       await hapusProduk(page, namaProduk);
     });
+  });
+
+  // ----------------------------------------------------------
+  // DIALOG HAPUS: hapus gagal, dialog bertahan (keputusan Fase 0)
+  // ----------------------------------------------------------
+  test("dialog hapus: hapus gagal → dialog bertahan dan pesan tampil, lalu berhasil setelah diulang", async ({
+    page,
+  }) => {
+    const namaProduk = `Produk E2E Hapus Gagal ${Date.now()}`;
+    const polaHapus = /\/api\/produk\/[a-f0-9]{24}$/i;
+    let terhapus = false;
+
+    await test.step("Login, navigasi, dan buat produk", async () => {
+      await login(page);
+      await bukaHalamanProduk(page);
+      await tambahProdukBaru(page, namaProduk);
+    });
+
+    try {
+      await test.step("Hapus dijawab gagal: dialog bertahan dan pesan tampil", async () => {
+        await expect(
+          page.getByText(/produk baru berhasil ditambahkan/i),
+        ).not.toBeVisible({ timeout: 10000 });
+        await page.route(polaHapus, async (route) => {
+          if (route.request().method() !== "DELETE") return route.continue();
+          await route.fulfill({
+            status: 500,
+            contentType: "application/json",
+            body: JSON.stringify({ status: "error", message: "Simulasi gagal hapus produk" }),
+          });
+        });
+
+        await page.getByPlaceholder(/cari nama produk/i).fill(namaProduk);
+        const row = page
+          .getByRole("row", { name: new RegExp(namaProduk, "i") })
+          .first();
+        await klikTombolAksiProduk(row);
+        await page.getByRole("menuitem", { name: /hapus produk/i }).click();
+        const dialog = page.getByRole("alertdialog");
+        await expect(dialog).toBeVisible();
+
+        const tungguGagal = page.waitForResponse(
+          (r) => r.request().method() === "DELETE" && polaHapus.test(r.url()),
+        );
+        await dialog.getByRole("button", { name: /^hapus$/i }).click();
+        expect((await tungguGagal).status()).toBe(500);
+
+        await expect(
+          page.getByText(/Simulasi gagal hapus produk|Gagal menghapus produk/),
+        ).toBeVisible();
+        await expect(dialog, "dialog bertahan saat hapus gagal").toBeVisible();
+      });
+
+      await test.step("Pencegat dilepas: hapus yang sama berhasil dan dialog tertutup", async () => {
+        await page.unroute(polaHapus);
+        const dialog = page.getByRole("alertdialog");
+        const tungguHapus = page.waitForResponse(
+          (r) => r.request().method() === "DELETE" && polaHapus.test(r.url()),
+        );
+        await dialog.getByRole("button", { name: /^hapus$/i }).click();
+        expect((await tungguHapus).ok(), "DELETE /produk/:id berhasil").toBeTruthy();
+        terhapus = true;
+        await expect(dialog).not.toBeVisible();
+        await expect(
+          page.getByRole("row", { name: new RegExp(namaProduk, "i") }),
+        ).toHaveCount(0);
+      });
+    } finally {
+      if (!terhapus) {
+        await page.unroute(polaHapus).catch(() => {});
+        await page
+          .getByRole("button", { name: /batal/i })
+          .click({ timeout: 2000 })
+          .catch(() => {});
+        await hapusProduk(page, namaProduk).catch(() => {});
+      }
+    }
   });
 
   // ----------------------------------------------------------
