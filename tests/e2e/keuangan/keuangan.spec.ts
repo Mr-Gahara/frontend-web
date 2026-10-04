@@ -3,6 +3,7 @@ import { JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-
 import { cocok, pantauPermintaan, unik } from "../../helpers/reservasi-uji";
 import { persentasePertumbuhan, teksPertumbuhan } from "../../../features/laporan/periode";
 import { keTanggalLokal } from "../../../lib/waktu";
+import { formatRupiah } from "../../../lib/format";
 
 /*
  * Spec modul keuangan. Bagian pembandingnya ditulis dan dijalankan terhadap
@@ -26,10 +27,8 @@ type BarisLabaRugi = {
   totalLabaBersih: number;
 };
 
-const rupiah = (nilai: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 })
-    .format(nilai)
-    .replace(/\u00a0/g, " ");
+/** Rupiah seperti yang ditampilkan halaman (formatRupiah); spasi tak-putus diganti spasi biasa. */
+const rupiah = (nilai: number) => formatRupiah(nilai).replace(/\u00a0/g, " ");
 
 const daftarDari = <T>(body: unknown): T[] => {
   const b = body as { data?: unknown };

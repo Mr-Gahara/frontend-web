@@ -3,6 +3,7 @@ import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { cocok, unik } from "../../helpers/reservasi-uji";
 import { buatAkunUji, daftarAkun, pilihAkun, saldoAkun, tutupAkunUji, type AkunKasUji } from "../../helpers/akun-kas-uji";
 import { LABEL_JENIS, teksJumlahMutasi } from "../../../features/akun-kas/mutasi";
+import { formatRupiah } from "../../../lib/format";
 
 /*
  * Menutup akun kas bersaldo sebagai satu alur (kontrak/temuan.md butir 81):
@@ -30,10 +31,8 @@ type BarisMutasi = Parameters<typeof teksJumlahMutasi>[0] & {
   saldoSesudah: number;
 };
 
-const rupiah = (nilai: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 })
-    .format(nilai)
-    .replace(/\u00a0/g, " ");
+/** Rupiah seperti yang ditampilkan halaman (formatRupiah); spasi tak-putus diganti spasi biasa. */
+const rupiah = (nilai: number) => formatRupiah(nilai).replace(/\u00a0/g, " ");
 
 /** Memindahkan Rp1 lewat form Pindah Dana yang sedang terbuka, dan mengembalikan id transfernya. */
 async function pindahkanSatuRupiah(page: Page, sumber: string, tujuan: string, keterangan: string) {

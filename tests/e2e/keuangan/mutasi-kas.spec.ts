@@ -1,5 +1,6 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
 import { login } from "../../helpers/transfer-uji";
+import { formatRupiah } from "../../../lib/format";
 
 /*
  * Halaman mutasi arus kas (keputusan MK1a sampai MK3a): buku gabungan dari
@@ -35,10 +36,8 @@ const POLA_MUTASI = /\/api\/akunkas\/mutasi(\?|$)/i;
 const POLA_AKUN = /\/api\/akunkas(\?|$)/i;
 const POLA_RINGKASAN = /\/api\/akunkas\/[0-9a-f]{24}\/ringkasan(\?|$)/i;
 
-const rupiah = (nilai: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 })
-    .format(nilai)
-    .replace(/\u00a0/g, " ");
+/** Rupiah seperti yang ditampilkan halaman (formatRupiah); spasi tak-putus diganti spasi biasa. */
+const rupiah = (nilai: number) => formatRupiah(nilai).replace(/\u00a0/g, " ");
 
 const barisTabel = (page: Page) => page.locator("tbody tr");
 const pemilih = (page: Page, nama: string) => page.getByRole("combobox", { name: nama, exact: true });

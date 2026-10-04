@@ -6,6 +6,9 @@ export const formatRupiah = (angka: number): string => {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
+    // Eksplisit agar hasilnya sama di setiap runtime: batas bawaan untuk IDR
+    // bergantung pada versi ICU (0 di Node 22, lebih dari 0 di Chromium).
+    maximumFractionDigits: 2,
   }).format(angka);
 };
 

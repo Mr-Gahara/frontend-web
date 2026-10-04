@@ -15,6 +15,12 @@ describe("Format - formatRupiah", () => {
     const result = formatRupiah(-50000);
     expect(result).toMatch(/-Rp\s*50\.000|Rp\s*-50\.000/);
   });
+
+  it("menampilkan pecahan sampai dua digit, sama di setiap runtime", () => {
+    expect(formatRupiah(1295843.5)).toMatch(/Rp\s*1\.295\.843,5$/);
+    expect(formatRupiah(10.126)).toMatch(/Rp\s*10,13$/);
+    expect(formatRupiah(1295844)).toMatch(/Rp\s*1\.295\.844$/);
+  });
 });
 
 describe("Format - Tanggal", () => {
