@@ -15,8 +15,8 @@ import { useSimpanProduk } from "./hooks";
 import { susunPayloadProduk } from "./payload";
 import {
   keAngka,
-  skemaProduk,
-  SATUAN_RESEP,
+  buatSkemaProduk,
+  satuanResepUntukBahan,
   type NilaiFormProduk,
   type SatuanResep,
 } from "./schema";
@@ -164,7 +164,10 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
     setError,
     formState: { errors },
   } = useForm<NilaiFormProduk>({
-    resolver: zodResolver(skemaProduk),
+    // Skema dibentuk saat validasi, agar memakai daftar bahan yang terakhir
+    // termuat: satuan resep diperiksa terhadap satuan bahannya (FC4a).
+    resolver: (nilai, konteks, opsi) =>
+      zodResolver(buatSkemaProduk(bahanBakuList))(nilai, konteks, opsi),
     defaultValues: nilaiAwalDari(produk),
   });
 
@@ -174,6 +177,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
   });
 
   const isUnlimitedStok = useWatch({ control, name: "isUnlimitedStok" });
+  const resepTerisi = useWatch({ control, name: "resep" });
   const hasResep = fields.length > 0;
   // Resep lama dihapus seluruhnya: isian stok, yang selama ada resep dipaksa
   // 0, kini aktif kembali dan nilainya tersimpan apa adanya (backend yoga
@@ -739,7 +743,9 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                               <SelectValue placeholder="Satuan" />
                             </SelectTrigger>
                             <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
-                              {SATUAN_RESEP.map((sat) => (
+                              {satuanResepUntukBahan(
+                                bahanBakuList.find((b) => b.id === resepTerisi?.[index]?.bahanBakuID),
+                              ).map((sat) => (
                                 <SelectItem
                                   key={sat}
                                   value={sat}

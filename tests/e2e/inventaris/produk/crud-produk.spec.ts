@@ -264,6 +264,48 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
   });
 
   // ----------------------------------------------------------
+  // [3b] RESEP: pilihan satuan mengikuti satuan bahan terpilih (FC4a)
+  // ----------------------------------------------------------
+  test("resep: pilihan satuan hanya menawarkan satuan yang sah untuk bahan terpilih", async ({
+    page,
+  }) => {
+    await login(page);
+    await bukaHalamanProduk(page);
+    await bukaBuatProduk(page);
+
+    await page.getByRole("button", { name: /tambah bahan/i }).click();
+    await pemilihBahan(page).click();
+    const opsiBahan = page.getByRole("option").first();
+    const teksBahan = (await opsiBahan.textContent()) ?? "";
+    const satuanBahan = teksBahan.match(/\(([a-z]+)\)\s*$/i)?.[1]?.toLowerCase() ?? "";
+    expect(satuanBahan, `satuan terbaca dari pilihan bahan: "${teksBahan}"`).not.toBe("");
+    test.skip(
+      satuanBahan === "pak" || satuanBahan === "unit",
+      "Bahan pertama bersatuan pak atau unit, yang belum punya satuan resep",
+    );
+    await opsiBahan.click();
+
+    // Memilih bahan mengisi satuan resep dengan satuan bahan itu.
+    const pemicuSatuan = page
+      .getByRole("combobox")
+      .filter({ hasText: new RegExp(`^${satuanBahan}$`, "i") });
+    await expect(pemicuSatuan).toBeVisible();
+    await pemicuSatuan.click();
+
+    // Positif lebih dulu: daftar memang terbuka dan memuat satuan bahan.
+    await expect(page.getByRole("option", { name: satuanBahan, exact: true })).toBeVisible();
+
+    // Satuan dari kelompok lain tidak ditawarkan: backend fc29433 menolaknya
+    // saat penjualan difinalisasi.
+    const kelompokLain = ["ml", "liter"].includes(satuanBahan) ? "gram" : "ml";
+    await expect(page.getByRole("option", { name: kelompokLain, exact: true })).toHaveCount(0);
+    if (satuanBahan !== "pcs") {
+      await expect(page.getByRole("option", { name: "pcs", exact: true })).toHaveCount(0);
+    }
+    await page.keyboard.press("Escape");
+  });
+
+  // ----------------------------------------------------------
   // [4] HAPPY PATH: Edit produk — ubah nama dan harga
   // ----------------------------------------------------------
   test("happy path: edit nama dan harga produk → perubahan tersimpan", async ({

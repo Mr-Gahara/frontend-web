@@ -1,4 +1,5 @@
 import * as z from "zod";
+import type { BahanBaku } from "@/types/bahanBaku";
 
 /**
  * Satuan resep yang diterima validator produk di backend (produkValidator.js).
@@ -38,3 +39,45 @@ export const skemaProduk = z.object({
 });
 
 export type NilaiFormProduk = z.infer<typeof skemaProduk>;
+
+type BahanResep = Pick<BahanBaku, "id" | "namaBahan" | "satuan" | "availableUnits">;
+
+/**
+ * Satuan resep yang sah untuk sebuah bahan: availableUnits dari backend
+ * (getAvailableUnits, aturan "hanya ke bawah"), diiris dengan satuan yang
+ * diterima validator resep. Tanpa availableUnits, hanya satuan bahan itu
+ * sendiri. Sejak backend fc29433 finalisasi menolak satuan resep yang tidak
+ * dapat dikonversi ke satuan bahan, sehingga pilihan di luar daftar ini
+ * baru gagal saat penjualan (keputusan FC4a). Hasil kosong berarti bahan
+ * itu belum dapat dipakai di resep (pak dan unit, kontrak/temuan.md butir 15).
+ */
+export function satuanResepUntukBahan(bahan?: BahanResep | null): SatuanResep[] {
+  if (!bahan) return [...SATUAN_RESEP];
+  const ditawarkan: readonly string[] = bahan.availableUnits?.length
+    ? bahan.availableUnits
+    : [bahan.satuan];
+  return SATUAN_RESEP.filter((satuan) => ditawarkan.includes(satuan));
+}
+
+/**
+ * Skema produk ditambah pemeriksaan satuan setiap baris resep terhadap
+ * bahannya. Baris yang bahannya belum termuat di daftar dilewati.
+ */
+export function buatSkemaProduk(daftarBahan: readonly BahanResep[]) {
+  return skemaProduk.superRefine((nilai, ctx) => {
+    nilai.resep.forEach((baris, indeks) => {
+      const bahan = daftarBahan.find((b) => b.id === baris.bahanBakuID);
+      if (!bahan) return;
+      const sah = satuanResepUntukBahan(bahan);
+      if (sah.includes(baris.satuan)) return;
+      ctx.addIssue({
+        code: "custom",
+        path: ["resep", indeks, "satuan"],
+        message:
+          sah.length === 0
+            ? `Bahan bersatuan ${bahan.satuan} belum dapat dipakai di resep.`
+            : `Untuk bahan bersatuan ${bahan.satuan}, pilih ${sah.join(" atau ")}.`,
+      });
+    });
+  });
+}
