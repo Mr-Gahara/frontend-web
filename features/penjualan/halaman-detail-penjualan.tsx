@@ -43,15 +43,9 @@ import {
   CheckCircle2,
   Ban,
 } from "lucide-react";
+import { formatRupiah } from "@/lib/format";
 
 // --- HELPERS ---
-const formatRupiah = (angka: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(angka || 0);
-
 const formatTanggal = (iso: string) => {
   if (!iso) return "-";
   return format(new Date(iso), "dd MMM yyyy, HH:mm", { locale: localeID });

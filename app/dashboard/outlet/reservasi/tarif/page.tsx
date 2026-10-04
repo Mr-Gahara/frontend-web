@@ -29,6 +29,7 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
+import { formatRupiah } from "@/lib/format";
 
 // --- COLORS (Design Tokens) ---
 const COLORS = {
@@ -84,15 +85,6 @@ export default function DaftarTarifPage() {
   const filteredList = tarifList.filter((item) =>
     item.namaTarif.toLowerCase().includes(searchQuery.toLowerCase()),
   );
-
-  // Helper Format Rupiah
-  const formatRupiah = (angka: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(angka);
-  };
 
   // Helper Format Hari Aktif
   const formatHariAktif = (hariArray?: number[]) => {

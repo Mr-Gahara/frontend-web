@@ -64,13 +64,7 @@ import {
   SlidersHorizontal,
   ReceiptText,
 } from "lucide-react";
-
-const formatRupiah = (angka: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(angka);
+import { formatRupiah } from "@/lib/format";
 
 const formatTanggal = (iso: string) =>
   new Intl.DateTimeFormat("id-ID", {

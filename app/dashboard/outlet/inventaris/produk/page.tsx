@@ -28,16 +28,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { formatRupiah } from "@/lib/format";
 import { ArrowUpDown, MoreHorizontal, Plus, Package, Infinity } from "lucide-react"; // <-- Import Infinity Icon
-
-// Helper untuk format Rupiah
-const formatRupiah = (angka: number) => {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(angka || 0);
-};
 
 export default function ProdukPage() {
   // 1. PROTEKSI HALAMAN

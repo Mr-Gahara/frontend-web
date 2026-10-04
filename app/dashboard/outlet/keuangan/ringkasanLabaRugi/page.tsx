@@ -23,6 +23,7 @@ import {
   teksPertumbuhan,
   type PeriodeLaporan,
 } from "@/features/laporan/periode";
+import { formatRupiah } from "@/lib/format";
 
 // Types
 type FilterPeriode = PeriodeLaporan;
@@ -31,15 +32,6 @@ type DataPoint = {
   label: string;
   nilai: number;
 };
-
-// Helper Format Rupiah
-function formatRupiah(value: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(value);
-}
 
 // Custom Tooltip
 /**

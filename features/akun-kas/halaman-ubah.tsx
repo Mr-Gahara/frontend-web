@@ -34,17 +34,10 @@ import {
   skemaUbahAkunKas,
   type IsianUbahAkunKas,
 } from "./ubah";
+import { formatRupiah } from "@/lib/format";
 
 const KELAS_ISIAN =
   "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]";
-
-function formatRupiah(value: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(value);
-}
 
 function Keadaan({ judul, isi }: { judul: string; isi: string }) {
   return (

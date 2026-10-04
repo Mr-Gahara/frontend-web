@@ -5,14 +5,7 @@ import { TrendingUp } from "lucide-react";
 import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
 import { useLabaRugi } from "@/features/laporan/hooks";
 import { jumlahkan, rentangBulanIni, type KolomNilaiLaporan } from "@/features/laporan/periode";
-
-function formatRupiah(value: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(value);
-}
+import { formatRupiah } from "@/lib/format";
 
 type SummaryCard = {
   title: string;

@@ -17,14 +17,7 @@ import { aksiTransfer } from "@/features/jurnal-transfer/izin";
 import { URL_PINDAH_DANA } from "@/features/jurnal-transfer/payload";
 import { useSession } from "@/lib/auth/useSession";
 import type { AkunKas } from "@/types/akunKas";
-
-function formatRupiah(value: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(value);
-}
+import { formatRupiah } from "@/lib/format";
 
 function AkunKasCardSkeleton() {
   return (
