@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useSudahHidrasi } from "@/hooks/use-sudah-hidrasi";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import {
@@ -28,7 +29,7 @@ export default function BuatRolePage() {
 
   const router = useRouter();
 
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSudahHidrasi();
   const [loadingTemplateId, setLoadingTemplateId] = useState<string | null>(
     null,
   );
@@ -38,10 +39,6 @@ export default function BuatRolePage() {
   // sehingga seluruh template terkunci bagi pengguna lain.
   const { data: roles = [] } = useDaftarRole();
   const currentUserLevel = useLevelPenggunaAktif(roles);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // QUERY: MASTER PERMISSION
   const { data: allPermissions = [], isLoading: permissionsLoading } =

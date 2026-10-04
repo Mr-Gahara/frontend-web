@@ -1,21 +1,22 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useSudahHidrasi } from "@/hooks/use-sudah-hidrasi";
 import { Bell } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-export default function Topbar() {
-  const [currentDate, setCurrentDate] = useState<string>("");
+const OPSI_TANGGAL: Intl.DateTimeFormatOptions = {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+};
 
-  useEffect(() => {
-    const dateOptions: Intl.DateTimeFormatOptions = {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    };
-    const today = new Date().toLocaleDateString("id-ID", dateOptions);
-    setCurrentDate(today);
-  }, []);
+export default function Topbar() {
+  // Tanggal dihitung setelah hidrasi, karena jam server dapat berbeda dari
+  // jam browser; sebelum itu teksnya kosong, sama dengan render server.
+  const sudahHidrasi = useSudahHidrasi();
+  const currentDate = sudahHidrasi
+    ? new Date().toLocaleDateString("id-ID", OPSI_TANGGAL)
+    : "";
 
   return (
     <header className="flex justify-between items-center px-8 py-5 bg-transparent z-10">

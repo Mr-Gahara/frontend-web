@@ -25,19 +25,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useSudahHidrasi } from "@/hooks/use-sudah-hidrasi";
 
 export default function RolesPage() {
   useAuthGuard();
 
   const router = useRouter();
 
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSudahHidrasi();
   const [deleteTarget, setDeleteTarget] = useState<Role | null>(null);
   const [expandedRoles, setExpandedRoles] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const toggleExpand = (id: string) => {
     setExpandedRoles((prev) => {

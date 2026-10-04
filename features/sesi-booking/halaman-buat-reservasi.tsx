@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState } from "react";
+import { useSudahHidrasi } from "@/hooks/use-sudah-hidrasi";
 import { useRouter } from "next/navigation";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,12 +42,8 @@ function pesanGagalSimpan(galat: unknown): string {
 export default function HalamanBuatReservasi() {
   const router = useRouter();
   // Form baru dirender setelah hidrasi, karena waktu awalnya diambil dari
-  // jam browser; snapshot server false menggantikan setIsMounted di effect.
-  const sudahTerpasang = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
+  // jam browser.
+  const sudahTerpasang = useSudahHidrasi();
   const [waktuItems, setWaktuItems] = useState<WaktuItem[]>(() => [waktuItemDari(new Date())]);
   const [bukaPelanggan, setBukaPelanggan] = useState(false);
   const [diskonGlobalIDs, setDiskonGlobalIDs] = useState<string[]>([]);

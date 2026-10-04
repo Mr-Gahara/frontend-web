@@ -1,5 +1,6 @@
 "use client";
-import { useState, useMemo, useEffect, useSyncExternalStore } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSudahHidrasi } from "@/hooks/use-sudah-hidrasi";
 import { format, addHours, setMinutes, setSeconds, isSameDay } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import {
@@ -102,13 +103,8 @@ export default function DasborTimelinePage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [now, setNow] = useState(new Date());
   // Garis waktu sekarang hanya dirender setelah hidrasi, karena nilai `now`
-  // di server berbeda dengan di browser. Snapshot server false dan snapshot
-  // klien true menggantikan setIsMounted di effect.
-  const isMounted = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
+  // di server berbeda dengan di browser.
+  const isMounted = useSudahHidrasi();
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60000);
