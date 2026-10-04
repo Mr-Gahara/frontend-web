@@ -1,4 +1,4 @@
-export function decodeJWT(token: string): Record<string, any> {
+export function decodeJWT(token: string): Record<string, unknown> {
   try {
     if (!token || typeof token !== "string") return {};
 
@@ -36,12 +36,13 @@ export function decodeJWT(token: string): Record<string, any> {
 export function isTokenExpired(token: string): boolean {
   try {
     const payload = decodeJWT(token);
-    if (!payload.exp) return true;
+    const exp = payload.exp;
+    if (typeof exp !== "number" || !exp) return true;
 
     // Tambahkan Grace Period (Waktu Toleransi) sebesar 10 detik.
     // Jika sisa umur token kurang dari 10 detik, anggap saja sudah kedaluwarsa
     // agar sistem punya waktu memanggil fungsi refreshToken sebelum benar-benar mati.
-    const expirationTimeInMs = payload.exp * 1000;
+    const expirationTimeInMs = exp * 1000;
     const currentTimeInMs = Date.now();
     const GRACE_PERIOD_MS = 10000; 
 

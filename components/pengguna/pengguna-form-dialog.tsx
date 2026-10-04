@@ -215,8 +215,8 @@ export default function PenggunaFormDialog({
                 <SelectContent className="bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F] font-medium">
                   {roleList
                     .filter((role: Role) => role.level < currentUserLevel)
-                    .map((role: Role, index: number) => {
-                      const roleIdValue = (role as any).id || (role as any)._id || `role-fallback-${index}`;
+                    .map((role: Role) => {
+                      const roleIdValue = role.id;
                       return (
                         <SelectItem key={roleIdValue} value={String(roleIdValue)} className="cursor-pointer text-sm">
                           {role.namaRole}

@@ -222,12 +222,12 @@ async function request<T>(
       const error = await res.json();
 
       if (error.errors && Array.isArray(error.errors)) {
-        daftarError = error.errors.map((e: any) =>
+        daftarError = error.errors.map((e: string | { msg?: string; message?: string }) =>
           typeof e === "string" ? e : e.msg || e.message || JSON.stringify(e),
         );
       } else if (error.errors && typeof error.errors === "object") {
-        daftarError = Object.values(error.errors).map((e: any) =>
-          typeof e === "string" ? e : e.message || String(e),
+        daftarError = Object.values(error.errors).map((e: unknown) =>
+          typeof e === "string" ? e : (e as { message?: string }).message || String(e),
         );
       }
 
@@ -255,7 +255,7 @@ export const apiClient = {
   // UPGRADE: Fungsi GET kini otomatis mengubah parameter object menjadi Query String URL
   get: <T>(
     endpoint: string,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
     tokenType?: TokenType,
     options?: RequestInit
   ) => {

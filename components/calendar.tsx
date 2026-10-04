@@ -5,6 +5,7 @@ import {
   DayPicker,
   getDefaultClassNames,
   type DayButton,
+  type DropdownProps,
   type Locale,
 } from "react-day-picker";
 
@@ -156,7 +157,7 @@ function Calendar({
           <CalendarDayButton locale={locale} {...props} />
         ),
         // 4. INJEKSI CUSTOM DROPDOWN SHADCN
-        Dropdown: ({ value, onChange, options, ...props }: any) => {
+        Dropdown: ({ value, onChange, options, ...props }: DropdownProps) => {
           const handleChange = (val: string) => {
             const changeEvent = {
               target: { value: val },
@@ -173,7 +174,7 @@ function Calendar({
                 position="popper"
                 className="max-h-55 bg-[#F2EAE1] border-[#041E3F]/10 shadow-xl rounded-xl"
               >
-                {options?.map((option: any, id: number) => (
+                {options?.map((option, id) => (
                   <SelectItem
                     key={`${option.value}-${id}`}
                     value={option.value?.toString()}

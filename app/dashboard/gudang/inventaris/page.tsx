@@ -270,7 +270,7 @@ export default function GudangInventoryPage() {
                       </div>
                       <div className="space-y-1">
                         <h3 className="font-bold text-[#0A2947]">Gudang Masih Kosong</h3>
-                        <p className="text-sm font-medium">Klik tombol "Masukkan Master Data" di atas untuk mendaftarkan barang.</p>
+                        <p className="text-sm font-medium">Klik tombol &quot;Masukkan Master Data&quot; di atas untuk mendaftarkan barang.</p>
                       </div>
                     </div>
                   </td>

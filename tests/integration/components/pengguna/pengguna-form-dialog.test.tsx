@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import "@testing-library/jest-dom";
 import PenggunaFormDialog from "@/components/pengguna/pengguna-form-dialog";
+import type { PenggunaRequest } from "@/types/pengguna";
+import type { Role } from "@/types/role";
 
 describe("Integration - PenggunaFormDialog", () => {
   const mockSetShowDialog = vi.fn();
@@ -14,14 +16,14 @@ describe("Integration - PenggunaFormDialog", () => {
     showDialog: true,
     setShowDialog: mockSetShowDialog,
     editTarget: null,
-    form: { username: "", nama: "", password: "" } as any,
+    form: { nama: "", roleID: "", status: "aktif", aksesType: ["web"] } as PenggunaRequest,
     setForm: mockSetForm,
     formError: "",
     handleSubmit: mockHandleSubmit,
     isPending: false,
     isSelf: false,
     isOwner: true,
-    roleList: [{ id: "1", name: "Admin", level: 1 }] as any,
+    roleList: [{ id: "1", namaRole: "Admin", deskripsi: null, level: 1, permissions: [] }] as Role[],
     currentUserLevel: 0,
   };
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { decodeJWT, isTokenExpired } from '@/lib/decodeToken';
 
-const createMockJWT = (payload: any) => {
+const createMockJWT = (payload: unknown) => {
   const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
   const body = btoa(JSON.stringify(payload));
   const signature = 'dummy-signature';
@@ -17,8 +17,8 @@ describe('DecodeToken - decodeJWT', () => {
 
   it('harus mengembalikan object kosong jika input kosong/bukan string (Unhappy Path)', () => {
     expect(decodeJWT('')).toEqual({});
-    expect(decodeJWT(null as any)).toEqual({});
-    expect(decodeJWT(123 as any)).toEqual({});
+    expect(decodeJWT(null as unknown as string)).toEqual({});
+    expect(decodeJWT(123 as unknown as string)).toEqual({});
   });
 
   it('harus mengembalikan object kosong jika format JWT salah (Edge Case)', () => {
