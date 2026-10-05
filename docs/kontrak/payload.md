@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan, kecuali `DELETE /akun/admin/users/:id`, yang membawa password admin. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi pelanggan dan diskon dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`, `1e05df6`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`). Pada hari yang sama, login akun, login pengguna, dan ubah pengguna dikoreksi terhadap backend yang sama (`091be4e`, `1c13ee6`). Pada 3 Oktober 2026, operasi akun admin ditambahkan terhadap backend yang sama (`4e2a254`, `10c7efb`, `c824f18`). Pada 4 Oktober 2026, buat dan batal jurnal transfer ditambahkan terhadap backend yang sama (`e53c016`).
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan, kecuali `DELETE /akun/admin/users/:id`, yang membawa password admin. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi pelanggan dan diskon dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`, `1e05df6`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`). Pada hari yang sama, login akun, login pengguna, dan ubah pengguna dikoreksi terhadap backend yang sama (`091be4e`, `1c13ee6`). Pada 3 Oktober 2026, operasi akun admin ditambahkan terhadap backend yang sama (`4e2a254`, `10c7efb`, `c824f18`). Pada 4 Oktober 2026, buat dan batal jurnal transfer ditambahkan terhadap backend yang sama (`e53c016`). Pada 6 Oktober 2026, ubah role dikoreksi terhadap backend `yoga` `fc29433` (`597a163`).
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -670,10 +670,12 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 #### `PUT /role/:id`
 
-- Aturan: validateRolePayload (validators/roleValidator.js)
-- Wajib dari klien: `namaRole`, `permissions`
-- Field lain yang dikenali: `deskripsi`
-- Allowlist field: `tenantID`, `namaRole`, `deskripsi`, `permissions`, `level`
+- Aturan: validateRolePayload mode update (validators/roleValidator.js) di route: seluruh field opsional, tetapi yang dikirim diperiksa. Dikoreksi 6 Oktober 2026 terhadap backend `yoga` `fc29433`; sebelumnya `namaRole` dan `permissions` tercatat wajib
+- Wajib dari klien: -
+- Field lain yang dikenali: `namaRole` (3 sampai 50 karakter setelah `trim`), `deskripsi` (teks paling panjang 255; teks kosong diterima), `level`, dan `permissions` (array id, paling banyak 120)
+- Allowlist field: `tenantID`, `namaRole`, `deskripsi`, `permissions`, `level`; field lain ditolak 400
+- Aturan service (`roleService.update`): hanya field yang dikirim yang ditulis; `level` divalidasi hanya bila dikirim (bilangan bulat minimal 1, di bawah level Owner dan di bawah level pemanggil), begitu pula `permissions`; nama, level, dan wewenang role Owner tidak dapat diubah (403); role yang tidak ada atau milik tenant lain dijawab 404
+- Web mengirim hasil `payloadPerbaruiRole` (`features/role/payload.ts`, `597a163`): hanya field yang berubah, dengan deskripsi yang dikosongkan sebagai teks kosong, terbukti lewat e2e
 - Diisi server: -
 
 #### `PUT /shift/:id`

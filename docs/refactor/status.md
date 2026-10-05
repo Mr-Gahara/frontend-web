@@ -92,17 +92,17 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | `useAuthGuard()` berulang | `628f52e` | Selesai (Catatan dari useAuthGuard berulang) |
 | Gerbang rute dari `IZIN_HALAMAN` | `bc388c6` | Selesai (keputusan GR1a sampai GR7a; Catatan dari gerbang rute) |
 | Utang kecil gerbang rute | `dc0af1c` | Selesai (Catatan dari utang kecil gerbang rute) |
-| Form role ke React Hook Form dan Zod | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Form role ke React Hook Form dan Zod | `597a163` | Selesai (keputusan RL1a sampai RL3a; Catatan dari form role) |
+| Rancangan dan perbaikan UI/UX, layout, dan palet warna | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per utang kecil gerbang rute (`dc0af1c`), tidak berubah
-dari `628f52e`:
+Diukur ulang per form role (`597a163`), tidak berubah dari `628f52e`:
 
-| Hal | Awal | Per `dc0af1c` | Catatan |
+| Hal | Awal | Per `597a163` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 0 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), 4 setelah halaman profil, login, dan sidebar (`57a7084`), dan 0 setelah error ESLint warisan (`4f19e77`) |
 | Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna |
@@ -113,30 +113,58 @@ dari `628f52e`:
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: form role ke React Hook Form dan Zod
+## Pekerjaan berikutnya: rancangan dan perbaikan UI/UX, layout, dan palet warna
 
-Utang kecil gerbang rute selesai di `dc0af1c`. Pekerjaan berikutnya, atas
-keputusan pemilik proyek (6 Oktober 2026), adalah memindah
-`features/role/form-role.tsx` dari `useState` per isian dan validasi di
-`handleSubmit` ke React Hook Form dan Zod, seperti form lain (Utang kecil
-dari modul Pengaturan outlet). `f5fe574` sudah memisahkan pemuatan detail
-(`FormRole`) dari form (`IsiFormRole`) dan menyusun nilai awal lewat
-`nilaiAwalRole`.
+Form role selesai di `597a163`. Pekerjaan berikutnya, atas keputusan
+pemilik proyek (6 Oktober 2026), adalah fase rancangan dan perbaikan
+UI/UX, layout, dan palet warna. Seluruh rancangannya ditentukan pemilik
+proyek sendiri: tidak ada usulan desain yang diterapkan tanpa arahannya
+(`keputusan.md`, Form role).
 
-Pemetaannya belum diambil. Yang sudah diketahui: form dipakai halaman
-ubah dan kostum; wewenang terlarang tidak ditampilkan tetapi tetap
-dikirim saat simpan; dan form masih membandingkan `read-akun` serta
-`read-tenant` sebagai teks. Langkah pertama sesi berikutnya: backend
-di-`fetch` dan dibandingkan dengan acuan (`cara-kerja.md`), lalu pemetaan
-lewat perintah di bawah. Suite e2e penuh tidak dijalankan di awal sesi;
-harapan hitungannya 438 lolos dan 16 skipped (`pengujian.md`).
+Pemetaannya belum diambil, dan cakupan serta urutannya menunggu arahan
+pemilik proyek. Yang sudah tercatat menunggu fase ini: tahap 2.7 desain
+token (warna, tipografi, spasi) dan metrik warna heksadesimal hardcoded;
+dashboard gudang dan outlet yang masih placeholder (keputusan GD1a); dan
+layout serta tampilan panel admin (Utang kecil dari modul panel admin).
+Langkah pertama sesi berikutnya: backend di-`fetch` dan dibandingkan
+dengan acuan (`cara-kerja.md`), lalu arahan pemilik proyek. Perintah di
+bawah memetakan warna yang dipakai sekarang, bila dibutuhkan. Suite e2e
+penuh tidak dijalankan di awal sesi; harapan hitungannya 440 lolos dan
+16 skipped (`pengujian.md`).
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline fc29433..origin/yoga | head -20
-wc -l features/role/*.ts*; grep -nE 'useState|handleSubmit|toast\.|useSimpanRole|read-akun|read-tenant' features/role/form-role.tsx | cut -c1-140
-grep -nE 'wajib|Allowlist|allowlist|length|level' "$BE/validators/roleValidator.js" | cut -c1-140
-grep -nE '^\s*test(\.describe)?\(' tests/e2e/roles/crud-role.spec.ts | cut -c1-120
+grep -rhoE '#[0-9A-Fa-f]{6}\b' app components features | tr 'a-f' 'A-F' | sort | uniq -c | sort -rn | head -30
+grep -nE '^\s*--[a-z-]+:' app/globals.css | cut -c1-100 | head -60
 ```
+
+## Catatan dari form role
+
+Dikerjakan pada 6 Oktober 2026 dalam satu commit, `597a163`, terhadap
+backend `yoga` `fc29433`; `origin/yoga` tidak maju sejak itu.
+
+- Isian form role beralih dari `useState` dan validasi di `handleSubmit`
+  ke React Hook Form dan Zod, dengan `noValidate`. Tampilan, teks, label,
+  dan id isian tidak berubah, dan ketiga handler wewenang tidak disentuh.
+- Empat cacat form lama terbukti dari kode dan diperbaiki: nama hanya
+  dijaga atribut `required` browser dan dikirim tanpa `trim`; deskripsi
+  yang dikosongkan tidak dikirim; level desimal dipotong `parseInt`; dan
+  setiap simpan ditolak bila level pengguna aktif tidak dapat ditentukan.
+- Galat validasi tampil di bawah tiap isian (RL1a). Ubah hanya mengirim
+  field yang berubah, dan simpan nonaktif selama tidak ada perubahan
+  (RL2a). Batas atas level hanya diperiksa form bila level pengguna
+  diketahui (RL3a).
+- Lapisan murninya di `features/role/schema.ts` dan
+  `features/role/payload.ts` (`arsitektur.md`).
+- Dasar RL2a dibaca dari backend lebih dulu: `roleService.update` menulis
+  hanya field yang dikirim, dan validator mode update menjadikan seluruh
+  field opsional. Kontrak `PUT /role/:id` dikoreksi (`kontrak/payload.md`).
+- Kedua skenario e2e baru dijalankan terhadap form lama lebih dulu dan
+  gagal keduanya, lalu lolos setelah peralihan. Vitest 620 lolos di 73
+  berkas, dan `tests/e2e/roles` 7 lolos (`pengujian.md`). Suite e2e penuh
+  tidak dijalankan.
+- Tidak ada temuan backend baru.
+- Keputusan: `keputusan.md` (Form role, RL1a sampai RL3a).
 
 ## Catatan dari utang kecil gerbang rute
 
@@ -1037,8 +1065,6 @@ Yang masih berlaku:
 
 ### Utang kecil dari gerbang rute
 
-- `features/role/form-role.tsx` masih membandingkan `read-akun` dan
-  `read-tenant` sebagai teks; ditinjau bersama pekerjaan form role.
 - Pesan gerbang bersifat umum dan tidak menyebut halaman maupun izin yang
   kurang.
 - Syarat 44 entri baru diturunkan dari nama hook dan kontrak, bukan dari
@@ -1165,10 +1191,10 @@ Yang masih berlaku:
   ditinjau bersama modul reservasi bila dibutuhkan.
 - `pajakList` di tipe `Produk` tetap ada tetapi tidak dipakai tampilan,
   karena tidak mencerminkan relasi pajak (`kontrak/temuan.md` butir 88).
-- Form role (`features/role/form-role.tsx`) masih memakai `useState` per
-  isian dan memvalidasi di `handleSubmit`. `f5fe574` hanya memindah
-  pengisian nilai awal; perpindahan ke React Hook Form dan Zod dikerjakan
-  saat form itu disentuh lagi.
+- Wewenang yang namanya tidak punya padanan id di daftar permission
+  dibuang diam-diam saat form role menyusun payload (`payloadBuatRole`),
+  dan teks tombol simpan form role tetap "Simpan Perubahan" saat membuat
+  posisi baru; keduanya dipertahankan dari form lama (`597a163`).
 
 ### Utang kecil dari modul Profil, login, dan sidebar
 

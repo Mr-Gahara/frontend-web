@@ -1526,6 +1526,18 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   tidak ditemukan di `seeds/permissionSeed.js` (`dc0af1c`: 71 nama, tidak
   ada yang hilang).
 
+- **Saat state form dipindah ke React Hook Form, nama pembaca dan
+  penulisnya dipertahankan sebagai pembungkus nilai form.** Di form role,
+  `selectedPermissions` (`useWatch`) dan `setSelectedPermissions`
+  (`setValue`) membuat ketiga handler wewenang tidak perlu diubah, dan
+  diff-nya tinggal sumber nilai serta validasi (`597a163`).
+- **Rentang kode yang memuat baris kosong diganti lewat
+  `ganti-rentang.js`, dengan penutup blok lama dibiarkan menjadi penutup
+  blok baru.** Baris kosong di teks lama tidak terlihat isinya di
+  keluaran, sehingga pasangan `ganti-blok.js` yang melintasinya rawan
+  tidak cocok; `handleSubmit` form role diganti dari baris pembukanya
+  sampai pernyataan terakhirnya saja.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:

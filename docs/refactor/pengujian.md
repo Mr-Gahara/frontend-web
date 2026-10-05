@@ -96,6 +96,14 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per form role** (commit `597a163`): 620 test unit dan
+integrasi lolos di 73 berkas, bertambah 16 test di
+`tests/unit/features/role/form-role.test.ts`. `597a163` menambah dua
+skenario di `tests/e2e/roles/crud-role.spec.ts`, sehingga harapan suite
+penuh 440 lolos dan 16 skipped; angka itu hitungan, karena suite penuh
+tidak dijalankan. Yang dijalankan terhadap backend lokal `yoga`
+`fc29433`: `tests/e2e/roles`, 7 lolos.
+
 **Baseline per utang kecil gerbang rute** (commit `dc0af1c`): 604 test
 unit dan integrasi lolos di 72 berkas, bertambah satu test nama izin
 unik di `tests/unit/lib/auth/permissions.test.ts`. Jumlah skenario e2e
@@ -1162,6 +1170,11 @@ Urutan debug kegagalan e2e di atas).
 - **Jalur gagal dialog hapus produk hanya diuji dengan jawaban 500
   tiruan**; penolakan hapus dari backend sungguhan belum teruji.
 
+- **Batas atas level, level pengguna yang tidak diketahui (RL3a), dan
+  perubahan level atau wewenang di payload ubah hanya teruji di unit
+  test** (`tests/unit/features/role/form-role.test.ts`), karena akun uji
+  berperan Owner. Penolakan backend saat simpan, yang tampil di atas
+  tombol simpan, belum teruji e2e.
 - **Form role yang gagal dimuat hanya teruji untuk id yang tidak ada.**
   Galat server saat memuat detail dan penanda memuat selama detail dimuat
   ulang belum teruji e2e. `nilaiAwalRole` teruji di
@@ -1427,7 +1440,12 @@ Urutan debug kegagalan e2e di atas).
   permission basis data disilang dengan seed. Sejak `f5fe574`: halaman
   ubah dibuka untuk id berformat sah yang tidak ada, sehingga jalur gagal
   memuat teruji lewat respons backend sungguhan, dan ketiadaan form
-  ditegaskan lewat `toHaveCount(0)` pada isian dan tombol simpan.
+  ditegaskan lewat `toHaveCount(0)` pada isian dan tombol simpan. Sejak
+  `597a163`: penolakan form dibuktikan dengan `POST` yang dijawab gagal
+  dan penghitung yang tetap nol; payload ubah dibandingkan persis, hanya
+  `namaRole` lalu hanya `deskripsi` kosong; dan pengosongan dibuktikan
+  dengan membuka ulang halaman ubah. Kedua skenario dibuktikan gagal
+  terhadap form lama lebih dulu.
 - `tests/e2e/auth/sidebar-muat-ulang.spec.ts` (`ca6eb3d`): sidebar
   diperiksa sebelum dan sesudah `reload`, dengan respons `pin-refresh`
   ditunggu setelah `reload` ber-`waitUntil: "commit"`; spec ini dibuktikan

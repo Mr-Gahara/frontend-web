@@ -1382,7 +1382,7 @@ GR:
   di `features/<modul>/izin.ts` (keputusan rancangan butir 9), dan data
   template role tetap teks.
 - **Pekerjaan setelah itu adalah form role ke React Hook Form dan Zod**
-  (`status.md`, Pekerjaan berikutnya).
+  (selesai di `597a163`, Form role).
 - Diterapkan tanpa ditanyakan (`dc0af1c`): objek izin lokal seperti
   `IZIN_PENJUALAN` dipertahankan sebagai alias, sehingga pemakai dan
   test-nya tidak berubah; `revisiTransferStok` diganti nama menjadi
@@ -1399,6 +1399,33 @@ GR:
   sebagai entri kosong; rute tanpa entri tetap diloloskan, dan test unit
   kelengkapan yang menolak halaman tanpa entri; serta spec e2e membaca
   izin peran pengguna uji dari backend, bukan mengandaikannya.
+
+### Form role
+
+Diputuskan pemilik proyek pada 6 Oktober 2026 (`597a163`). Labelnya RL:
+
+- **RL1a: galat validasi form role tampil di bawah tiap isian**, seperti
+  form lain; penolakan backend tetap satu paragraf di atas tombol simpan.
+- **RL2a: ubah posisi hanya mengirim field yang berubah** (keputusan
+  rancangan butir 15). Deskripsi yang dikosongkan dikirim sebagai teks
+  kosong, daftar wewenang dikirim utuh hanya bila susunannya berubah,
+  dan simpan nonaktif selama tidak ada perubahan.
+- **RL3a: batas atas level hanya diperiksa form bila level pengguna
+  aktif diketahui.** Bila tidak, form hanya menuntut bilangan bulat
+  minimal 1, dan backend yang menolak level setara atau melebihi level
+  pengguna, dengan pesannya ditampilkan.
+- **Pekerjaan setelah ini adalah fase rancangan dan perbaikan UI/UX,
+  layout, dan palet warna.** Seluruh rancangannya ditentukan pemilik
+  proyek sendiri; tidak ada usulan desain yang diterapkan tanpa
+  arahannya (`status.md`, Pekerjaan berikutnya).
+- Diterapkan tanpa ditanyakan (`597a163`): nama dipangkas dan dibatasi 3
+  sampai 50 karakter serta deskripsi 255, sesuai validator backend
+  (sejalan T4a); level desimal ditolak, bukan dipotong (sejalan SH4a);
+  penjelasan wewenang dasar pindah ke `constants.ts` sebagai data;
+  `selectedPermissions` dan penulisnya dipertahankan namanya agar handler
+  wewenang tidak berubah; teks tombol simpan tetap "Simpan Perubahan" di
+  kedua mode; dan kedua skenario e2e dibuktikan gagal terhadap form lama
+  sebelum form diubah.
 
 ## Keputusan rancangan yang mengikat
 
