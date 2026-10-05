@@ -1144,5 +1144,6 @@ Yang masih berlaku:
   ditunda sampai backend menyelesaikan modul produk, bahan baku, stok, dan
   WMS, dan hanya atas perintah pemilik proyek.
 - `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700
-  baris (714) sejak penjaga ruang ditambahkan di `eb0181f`. Pisahkan
-  dialog aksi dan tabel hitungan saat halaman itu disentuh lagi.
+  baris (714) sejak penjaga ruang ditambahkan di `eb0181f`, dan kini 712
+  baris setelah pemanggilan guard dibuang (`628f52e`). Pisahkan dialog
+  aksi dan tabel hitungan saat halaman itu disentuh lagi.
