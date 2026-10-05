@@ -2,7 +2,6 @@
 
 import { useState, useMemo, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { StockOpname, StatusOpname } from "@/types/stockOpname";
 import type { LingkupLokasi } from "@/features/inventaris/cakupan";
 import { useDaftarStockOpname } from "./hooks";
@@ -93,7 +92,6 @@ export default function HalamanDaftarStockOpname({
   pemilihLokasi,
   penghalang,
 }: Props) {
-  useAuthGuard();
   const router = useRouter();
   const teks = TEKS[ruang];
 

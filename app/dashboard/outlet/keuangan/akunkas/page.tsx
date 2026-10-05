@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowLeftRight, ChevronDown, Landmark, Pencil, Plus, Wallet } from "lucide-react";
 
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,8 +39,6 @@ function AkunKasCardSkeleton() {
 }
 
 export default function AkunKasPage() {
-  useAuthGuard();
-
   const { data: akunKasList = [], isLoading, isError } = useDaftarAkunKas();
   // Kartu hanya untuk akun aktif; akun non-aktif di bagian lipat di bawahnya
   // (keputusan AK1a), karena akun kas tidak dapat dihapus dan terus bertambah.

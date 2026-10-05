@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { isNotFound } from "@/lib/api/error";
 import { usePengajuanStok } from "./hooks";
 import { FormPengajuanStok } from "./form-pengajuan-stok";
@@ -19,7 +18,6 @@ const URL_DAFTAR = "/dashboard/outlet/inventaris/pengajuanStok";
  * PENDING diubah (kontrak/temuan.md butir 25).
  */
 export default function HalamanEditPengajuanStok() {
-  useAuthGuard();
   const router = useRouter();
   const id = useParams().id as string;
   const { data: pengajuan, error, isFetchedAfterMount } = usePengajuanStok(id);

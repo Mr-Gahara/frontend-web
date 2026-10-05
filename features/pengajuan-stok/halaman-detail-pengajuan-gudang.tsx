@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { isNotFound, pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
 import type { StatusPengajuan } from "@/types/pengajuanStok";
@@ -87,7 +86,6 @@ function badgeStatus(status: StatusPengajuan) {
 }
 
 export default function HalamanDetailPengajuanGudang() {
-  useAuthGuard();
   const router = useRouter();
   const id = useParams().id as string;
   const { permissions } = useSession();

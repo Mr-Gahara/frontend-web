@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useSudahHidrasi } from "@/hooks/use-sudah-hidrasi";
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import {
   useDaftarPermission,
   useDaftarRole,
@@ -25,8 +24,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export default function BuatRolePage() {
-  useAuthGuard();
-
   const router = useRouter();
 
   const mounted = useSudahHidrasi();

@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { toast } from "sonner";
 import { SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
 import { useBahanBaku, usePerbaruiBahanBaku } from "@/features/bahan-baku/hooks";
@@ -24,7 +23,6 @@ import {
 import { ArrowLeft, PackageCheck, Save, Loader2, Ban } from "lucide-react";
 
 export default function EditBahanBakuPage() {
-  useAuthGuard();
   const router = useRouter();
   const params = useParams();
   const bahanId = params.id as string;

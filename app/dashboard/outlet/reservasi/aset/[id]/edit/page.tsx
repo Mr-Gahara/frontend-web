@@ -1,6 +1,5 @@
 "use client";
 import { useRouter, useParams } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useAset, useSimpanAset } from "@/features/aset/hooks";
 import { payloadAset } from "@/features/aset/payload";
 import { skemaAset, type NilaiFormAset } from "@/features/aset/schema";
@@ -295,7 +294,6 @@ function EditAsetForm({
 // baru merender EditAsetForm setelah semua data siap
 // ============================================================
 export default function EditAsetPage() {
-  useAuthGuard();
   const router = useRouter();
   const params = useParams();
   const rawId = params?.id as string;

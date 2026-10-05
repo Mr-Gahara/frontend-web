@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useSession } from "@/lib/auth/useSession";
 import { useEffect, useState } from "react";
 import { PenggunaItem, PenggunaRequest } from "@/types/pengguna";
@@ -66,7 +65,6 @@ export default function HalamanPengguna({
 }: {
   workspace: Workspace;
 }) {
-  useAuthGuard();
   const { pengguna } = useSession();
   const currentUserId = pengguna?.id ?? "";
 

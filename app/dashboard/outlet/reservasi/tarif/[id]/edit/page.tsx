@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useDaftarTipeAset } from "@/features/tipe-aset/hooks";
 import { useSimpanTarif, useTarif } from "@/features/tarif/hooks";
 import { nilaiAwalTarif, payloadTarif } from "@/features/tarif/payload";
@@ -543,7 +542,6 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
  * di effect, yang menimpa isian pengguna setiap kali detail dimuat ulang.
  */
 export default function EditTarifPage() {
-  useAuthGuard();
   const router = useRouter();
   const params = useParams();
   const rawId = params?.id as string;

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Controller, useFieldArray, useForm, useWatch, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -78,7 +77,6 @@ function pesanPertama(errors: FieldErrors<NilaiFormPengajuan>): string {
  * page.tsx, seperti halaman detail dan edit (pola detail stock opname).
  */
 export function HalamanBuatPengajuanStok() {
-  useAuthGuard();
   return <FormPengajuanStok />;
 }
 

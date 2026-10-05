@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useSimpanTipeAset } from "@/features/tipe-aset/hooks";
 import { payloadBuatTipeAset } from "@/features/tipe-aset/payload";
 import { skemaBuatTipeAset, type NilaiFormTipeAset } from "@/features/tipe-aset/schema";
@@ -25,7 +24,6 @@ import {
 
 
 export default function BuatTipeAsetPage() {
-  useAuthGuard();
   const router = useRouter();
 
   // --- REACT HOOK FORM ---

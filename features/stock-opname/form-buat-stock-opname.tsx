@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useSession } from "@/lib/auth/useSession";
 import { usePenggunaSaya } from "@/features/pengguna/hooks-profil";
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { CreateOpnameRequest } from "@/types/stockOpname";
 import type { Lokasi } from "@/types/location";
 import { pesanError } from "@/lib/api/error";
@@ -99,7 +98,6 @@ function keteranganLokasi(sumber: SumberLokasi): string {
 }
 
 export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
-  useAuthGuard();
   const router = useRouter();
   const teks = TEKS[ruang];
 

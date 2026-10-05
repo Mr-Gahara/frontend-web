@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import type { TipeAset } from "@/types/tipeAset";
 import { useDaftarTipeAset, useHapusTipeAset } from "@/features/tipe-aset/hooks";
 import { pesanError } from "@/lib/api/error";
@@ -34,7 +33,6 @@ import {
 } from "lucide-react";
 
 export default function TipeAsetPage() {
-  useAuthGuard();
   const router = useRouter();
 
   // --- STATE ---

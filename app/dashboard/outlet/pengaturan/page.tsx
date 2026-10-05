@@ -1,6 +1,5 @@
 "use client"
 
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import Link from "next/link"
 import { useSession } from "@/lib/auth/useSession";
 import { bolehBukaHalaman } from "@/lib/auth/permissions";
@@ -46,7 +45,6 @@ const settingsModules = [
 ]
 
 export default function PengaturanPage() {
-  useAuthGuard();
   // Kartu mengikuti gerbang halamannya (IZIN_HALAMAN): kartu Pajak hanya
   // tampil bagi pemegang read-pajak atau akses-pos (keputusan FC3a).
   const { permissions } = useSession();

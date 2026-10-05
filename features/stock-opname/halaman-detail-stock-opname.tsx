@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { StockOpname, StatusOpname } from "@/types/stockOpname";
 import { toast } from "sonner";
 import { isNotFound, pesanError } from "@/lib/api/error";
@@ -126,7 +125,6 @@ interface Props {
 }
 
 export default function HalamanDetailStockOpname({ ruang }: Props) {
-  useAuthGuard();
   const router = useRouter();
   const params = useParams();
   const opnameID = params.id as string;

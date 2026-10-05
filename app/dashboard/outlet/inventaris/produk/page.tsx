@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useDaftarProduk, useHapusProduk } from "@/features/produk/hooks";
 import { pesanError } from "@/lib/api/error";
 import type { Produk } from "@/types/produk";
@@ -33,7 +32,6 @@ import { ArrowUpDown, MoreHorizontal, Plus, Package, Infinity } from "lucide-rea
 
 export default function ProdukPage() {
   // 1. PROTEKSI HALAMAN
-  useAuthGuard();
 
   const router = useRouter();
 

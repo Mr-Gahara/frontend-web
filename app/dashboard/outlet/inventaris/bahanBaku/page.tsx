@@ -5,7 +5,6 @@ import { useHapusBahanBaku } from "@/features/bahan-baku/hooks";
 import { useDaftarInventory, useLokasiBertipe } from "@/features/inventaris/hooks";
 import { pesanError } from "@/lib/api/error";
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useDebounce } from "@/hooks/use-debounce";
 import { toast } from "sonner";
 
@@ -35,7 +34,6 @@ import {
 } from "lucide-react";
 
 export default function DaftarBahanBakuPage() {
-  useAuthGuard();
   const router = useRouter();
   // --- STATE ---
   const [searchQuery, setSearchQuery] = useState("");

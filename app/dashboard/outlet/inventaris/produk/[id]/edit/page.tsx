@@ -2,13 +2,11 @@
 
 import { useParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { FormProduk } from "@/features/produk/form-produk";
 import { useProduk } from "@/features/produk/hooks";
 import { pesanError } from "@/lib/api/error";
 
 export default function EditProdukPage() {
-  useAuthGuard();
   const params = useParams();
   const produkId = params.id as string;
 

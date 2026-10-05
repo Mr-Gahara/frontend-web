@@ -1,12 +1,10 @@
 "use client";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Button } from "@/components/ui/button";
 import { Filter, Plus } from "lucide-react";
 import { ReservasiNavTabs } from "./components/reservasi-nav-tabs";
 import { useRouter } from "next/navigation"; // ✅ bukan "next/router"
 
 export default function ReservasiLayout({ children }: { children: React.ReactNode }) {
-  useAuthGuard();
   const router = useRouter(); // ✅ dipanggil sebagai hook, bukan di-import langsung
 
   return (

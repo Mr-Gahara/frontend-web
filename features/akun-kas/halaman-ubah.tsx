@@ -8,7 +8,6 @@ import { ArrowLeft, Save } from "lucide-react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -55,7 +54,6 @@ function Keadaan({ judul, isi }: { judul: string; isi: string }) {
  * di tempat, karena backend menolak PUT-nya dengan 403.
  */
 export function HalamanUbahAkunKas() {
-  useAuthGuard();
   const { id } = useParams<{ id: string }>();
   const { permissions } = useSession();
   const { data: daftar, isLoading, isError } = useDaftarAkunKas();

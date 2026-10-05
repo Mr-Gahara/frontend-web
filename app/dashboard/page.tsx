@@ -1,13 +1,11 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useSession } from "@/lib/auth/useSession";
 
 const DashboardPage = () => {
   const router = useRouter();
   
-  useAuthGuard();
   const { permissions, sudahMasuk } = useSession();
 
   useEffect(() => {

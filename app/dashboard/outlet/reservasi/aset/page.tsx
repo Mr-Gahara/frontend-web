@@ -4,7 +4,6 @@ import { namaTipeAset } from "@/features/aset/tampilan";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import type { Aset, StatusAset } from "@/types/aset";
 import { useDaftarAset, useHapusAset } from "@/features/aset/hooks";
 import { pesanError } from "@/lib/api/error";
@@ -38,7 +37,6 @@ import {
 } from "lucide-react";
 
 export default function AsetPage() {
-  useAuthGuard();
   const router = useRouter();
 
   // --- STATE ---

@@ -12,7 +12,6 @@ import {
   CartesianGrid,
 } from "recharts";
 
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLabaRugi } from "@/features/laporan/hooks";
 import {
@@ -84,7 +83,6 @@ function PeriodeToggle({
 }
 
 export default function RingkasanLabaRugiPage() {
-  useAuthGuard();
   const [periode, setPeriode] = useState<FilterPeriode>("bulanan");
 
   // Rentang periode berjalan dan pembandingnya (keputusan KU5a).

@@ -2,7 +2,6 @@
 
 import { useMemo, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import type { StockAdjustment } from "@/types/stockOpname";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { LingkupLokasi } from "@/features/inventaris/cakupan";
@@ -48,7 +47,6 @@ export default function HalamanDaftarStockAdjustment({
   penghalang,
   pemilihLokasi,
 }: Props) {
-  useAuthGuard();
   const router = useRouter();
   const teks = TEKS[ruang];
   const urlDaftar = URL_DAFTAR_ADJUSTMENT[ruang];

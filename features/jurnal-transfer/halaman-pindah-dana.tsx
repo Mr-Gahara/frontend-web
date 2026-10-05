@@ -8,7 +8,6 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ColumnDef } from "@tanstack/react-table";
 
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
@@ -69,7 +68,6 @@ function Keadaan({ judul, isi }: { judul: string; isi: string }) {
  * read-jurnal-transfer, dan Batalkan bagi update-jurnal-transfer.
  */
 export function HalamanPindahDana() {
-  useAuthGuard();
   const { permissions } = useSession();
   const aksi = aksiTransfer(permissions);
   const akunKas = useDaftarAkunKas();

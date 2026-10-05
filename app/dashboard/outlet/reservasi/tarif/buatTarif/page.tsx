@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useDaftarTipeAset } from "@/features/tipe-aset/hooks";
 import { useSimpanTarif } from "@/features/tarif/hooks";
 import { payloadTarif } from "@/features/tarif/payload";
@@ -47,7 +46,6 @@ const HARI_MAP = [
 ];
 
 export default function BuatTarifPage() {
-  useAuthGuard();
   const router = useRouter();
 
   const {

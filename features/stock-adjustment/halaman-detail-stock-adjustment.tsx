@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { isNotFound } from "@/lib/api/error";
 import { TIPE_LOKASI_RUANG, URL_DAFTAR_ADJUSTMENT, type RuangAdjustment } from "./ruang";
 import { useStockAdjustment } from "@/features/stock-adjustment/hooks";
@@ -29,7 +28,6 @@ interface Props {
 }
 
 export default function HalamanDetailStockAdjustment({ ruang }: Props) {
-  useAuthGuard();
   const router = useRouter();
   const params = useParams();
   const adjustmentID = params.id as string;

@@ -9,7 +9,6 @@ import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { pesanError } from "@/lib/api/error";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useBuatAkunKas } from "@/features/akun-kas/hooks";
 import { skemaAkunKas, type KeluaranAkunKas, type MasukanAkunKas } from "@/features/akun-kas/schema";
 import { AkunKasRequest } from "@/types/akunKas";
@@ -26,7 +25,6 @@ import { cn } from "@/lib/utils";
 
 // Page
 export default function BuatAkunKasPage() {
-  useAuthGuard();
   const router = useRouter();
 
   // --- REACT HOOK FORM ---

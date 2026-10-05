@@ -3,7 +3,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useSession } from "@/lib/auth/useSession";
 import { pesanError } from "@/lib/api/error";
 import { pesanErrorKategori } from "@/features/kategori/pesan";
@@ -55,8 +54,6 @@ const nilaiKosong: NilaiFormKategori = {
 };
 
 export default function KategoriPage() {
-  useAuthGuard();
-
   const [showDialog, setShowDialog] = useState(false);
   const [editTarget, setEditTarget] = useState<Kategori | null>(null);
   const [formError, setFormError] = useState("");

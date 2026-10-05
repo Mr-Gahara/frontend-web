@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useSimpanTipeAset, useTipeAset } from "@/features/tipe-aset/hooks";
 import { payloadUbahTipeAset } from "@/features/tipe-aset/payload";
 import { skemaUbahTipeAset, type NilaiFormTipeAset } from "@/features/tipe-aset/schema";
@@ -27,7 +26,6 @@ import {
 } from "lucide-react";
 
 export default function EditTipeAsetPage() {
-  useAuthGuard();
   const router = useRouter();
   const params = useParams();
 

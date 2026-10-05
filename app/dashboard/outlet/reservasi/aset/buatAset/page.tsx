@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useSimpanAset } from "@/features/aset/hooks";
 import { payloadAset } from "@/features/aset/payload";
 import { skemaAset, type NilaiFormAset } from "@/features/aset/schema";
@@ -28,7 +27,6 @@ import { ArrowLeft, Box, CheckCircle2, Wrench, Layers } from "lucide-react";
 
 
 export default function BuatAsetPage() {
-  useAuthGuard();
   const router = useRouter();
 
   // --- REACT HOOK FORM ---

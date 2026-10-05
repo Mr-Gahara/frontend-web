@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { toast } from "sonner";
 import { BahanBakuRequest, SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
 import { useBuatBahanBaku } from "@/features/bahan-baku/hooks";
@@ -24,7 +23,6 @@ import {
 import { ArrowLeft, PackagePlus, Info, Save, MapPin } from "lucide-react";
 
 export default function BuatBahanBakuPage() {
-  useAuthGuard();
   const router = useRouter();
   // Lokasi aktif menentukan tujuan injeksi stok awal di backend.
   // Respons sudah ternormalisasi (id, bukan _id) oleh lapisan API.

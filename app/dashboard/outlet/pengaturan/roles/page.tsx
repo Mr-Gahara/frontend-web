@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -28,8 +27,6 @@ import { Button } from "@/components/ui/button";
 import { useSudahHidrasi } from "@/hooks/use-sudah-hidrasi";
 
 export default function RolesPage() {
-  useAuthGuard();
-
   const router = useRouter();
 
   const mounted = useSudahHidrasi();

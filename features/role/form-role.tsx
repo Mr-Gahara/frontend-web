@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { IZIN_DASAR, IZIN_TERLARANG } from "./constants";
 import { nilaiAwalRole } from "./nilai-awal";
 import {
@@ -54,7 +53,6 @@ export interface PropsFormRole {
 type DetailRole = NonNullable<ReturnType<typeof useRole>["data"]>;
 
 export default function FormRole(props: PropsFormRole) {
-  useAuthGuard();
   const { roleId, urlKembali, labelKembali } = props;
   const modeEdit = !!roleId;
 

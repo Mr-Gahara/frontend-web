@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useDaftarTarif, useHapusTarif } from "@/features/tarif/hooks";
 import { pesanError } from "@/lib/api/error";
 import { toast } from "sonner";
@@ -44,7 +43,6 @@ const COLORS = {
 const HARI_MAP = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 export default function DaftarTarifPage() {
-  useAuthGuard();
   const router = useRouter();
 
   // --- STATE ---
