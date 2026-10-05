@@ -1479,6 +1479,25 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   baru ada setelah blok lain dijalankan diambil lewat perintah, misalnya
   `git rev-parse --short HEAD`.
 
+- **Laporan run yang masih akan dibaca tidak disimpan di `/tmp`.**
+  Laporan suite penuh `fc29433` hilang sebelum durasi kegagalannya
+  dibaca, sehingga sebab kegagalan itu tidak dapat dibuktikan. Laporan
+  suite penuh ditulis ke `~/.cache/frontend-web/`.
+- **Baris tabel kontrak dicari lewat isinya, bukan nomor dari ingatan.**
+  Nomor `EP` baris pajak ditulis dari ingatan dan tidak ada; bagian
+  riwayat yang diandaikan ada ternyata tidak. Cari lewat method dan path,
+  dan lihat strukturnya sebelum menulis penerap.
+- **Sebelum menjanjikan sebuah gerbang, periksa siapa yang membacanya.**
+  Entri `IZIN_HALAMAN` diandaikan menolak rute, padahal hanya dibaca
+  sidebar. `grep` pemanggilnya lebih dulu.
+- **Field yang dihitung backend dipakai sebelum aturannya disalin.**
+  Satuan resep hampir ditulis sebagai salinan tabel kelompok satuan
+  backend, padahal `availableUnits` sudah dikirim per bahan.
+- **Dugaan tentang test mana yang akan gagal dibaca dari isi spec.**
+  Skenario gerbang `produk.stok` diperkirakan gagal terhadap backend
+  baru, padahal skenario itu `test.fixme`; yang aktif menguji gerbang
+  lain dan tetap benar.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:

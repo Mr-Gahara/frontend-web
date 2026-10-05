@@ -85,7 +85,12 @@ backend yang sama (query daftar surat jalan, butir 33), dan temuan modul
 beban ditambahkan ke `temuan.md` dan `izin-halaman.md` (butir 130 sampai
 138). Sepuluh route `/bebanoperasional` dan `/kategoribeban` tercatat
 tanpa izin di Lampiran A, karena izinnya diperiksa di controller, bukan
-lewat `checkPermission` di route; keduanya belum dipakai web.
+lewat `checkPermission` di route; keduanya belum dipakai web. Pada
+5 Oktober 2026, bagian pajak di `endpoint.md`, `payload.md`,
+`izin-halaman.md`, dan `temuan.md` diperbarui terhadap backend `yoga`
+`fc29433`, yang memasang izin di route pajak, produk pajak, dan beban
+operasional. Lampiran A belum dibentuk ulang, sehingga route itu masih
+tercatat tanpa izin di sana.
 
 ## 1. Acuan dan metodologi
 

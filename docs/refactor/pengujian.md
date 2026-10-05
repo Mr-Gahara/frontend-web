@@ -95,6 +95,16 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per penyesuaian backend `fc29433`** (commit `b887278`): 593
+test unit dan integrasi lolos di 71 berkas, bertambah empat belas (enam
+test izin pajak dan delapan test satuan resep). Suite penuh 4 Oktober
+2026 terhadap backend lokal `yoga` `fc29433` menghasilkan 431 lolos, 1
+gagal, dan 16 skipped. Hitungannya sesuai harapan 432 dan 16:
+`test.fixme` butir 37 dilepas dan lolos, dan satu skenario satuan resep
+ditambahkan. Yang gagal login di `beforeEach` spec tipe aset, tidak
+terkait perubahan (Utang pengujian); spec itu lolos 25 saat dijalankan
+terpisah pada 5 Oktober 2026.
+
 **Baseline per utang kecil yang tidak menunggu backend** (commit
 `9195472`): 579 test unit dan integrasi lolos di 69 berkas, tidak
 berubah. Suite penuh 4 Oktober 2026 terhadap backend lokal `yoga`
@@ -779,7 +789,6 @@ Menunggu perbaikan backend:
 | Edit pola roster | Validator memakai `this.siklusHari` dalam konteks `findOneAndUpdate` |
 | Hitungan tersimpan dapat dikosongkan kembali (`inventaris/stockOpname/draft-stok-opname.spec.ts`) | Validator stock opname menerima `qtyPhysical` null (`kontrak/temuan.md` butir 22). Badannya berupa penanda; skenario ditulis saat `SERVER_TERIMA_HITUNGAN_KOSONG` dibalik |
 | Jurnal Keluar penjualan langsung terbaca setelah finalisasi, dan finalisasi yang ditolak tidak menambah jurnal (`penjualan/alur-penjualan.spec.ts`, dua test) | Backend membersihkan cache daftar jurnal setiap kali `inventoryService` menulis jurnal (`kontrak/temuan.md` butir 46). Keduanya dibuka bersamaan: test kedua baru bermakna bila bacaan jurnal terbukti segar |
-| Finalisasi berhasil bila stok bahan outlet cukup walau `produk.stok`, potret stok outlet saat produk disimpan, tidak (`penjualan/alur-penjualan.spec.ts`) | Backend berhenti memakai `produk.stok` sebagai gerbang finalisasi, atau menghitungnya dari stok lokasi saat dibaca (`kontrak/temuan.md` butir 37). Sejak `yoga` sumbernya stok outlet, tetapi tetap potret; dibuktikan masih gagal pada 1 Oktober 2026 |
 | Delapan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, dan stock adjustment | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
 | Shift yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/shift/crud-shift.spec.ts`) | Backend memisahkan shift per lokasi dan `KUNCI_LOKASI_SHIFT` di `features/shift/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
 | Nomor HP pelanggan yang dikosongkan tersimpan kosong (`pelanggan/kelola-pelanggan.spec.ts`) | Backend menerapkan pengosongan `nomorHp`, `email`, dan `alamat` di `PUT /pelanggan/:id`, yang kini dibuang validator lalu dijawab 200 (`kontrak/temuan.md` butir 104, keputusan PD5a). Badannya lengkap |
@@ -1123,6 +1132,19 @@ Urutan debug kegagalan e2e di atas).
   itu belum punya dokumen. Nama PIC yang gagal dimuat (teks cadangan)
   belum teruji e2e.
 
+- **Dua kejadian sesekali pada spec tipe aset, 4 dan 5 Oktober 2026**,
+  terhadap backend `fc29433`. Di suite penuh, login akun di `beforeEach`
+  tidak berpindah dari `/login` ke `/login/pengguna` dalam 30 detik
+  (sekali). Pada run pertama keesokan harinya, baris tipe aset yang baru
+  dibuat lewat API tidak tampil dalam 5 detik di skenario pencarian
+  (sekali); run berikutnya lolos 25 dengan test terlama 6,9 detik.
+  Sebabnya tidak terbukti: laporan suite ada di `/tmp` dan hilang sebelum
+  durasinya dibaca. Tidak ada kode maupun asersi yang diubah.
+- **Sisi tanpa izin di halaman pajak hanya teruji di unit test**
+  (`tests/unit/features/pajak/izin.test.ts`): tombol, kartu indeks
+  pengaturan, dan pesan tanpa izin baca tidak teruji e2e, karena akun uji
+  berperan Owner.
+
 ## Spec rujukan
 
 - `tests/e2e/inventaris/kategori/crud-kategori.spec.ts`: spec pembanding yang
@@ -1451,3 +1473,8 @@ Urutan debug kegagalan e2e di atas).
   (`tahanLaluTeruskan`). Pemeriksaan positif (kepala tabel sudah tampil)
   mendahului pemeriksaan bahwa teks daftar kosong tidak ada, dan batas
   waktu pemeriksaan negatif lebih pendek daripada lama penahanan.
+- Skenario "pilihan satuan hanya menawarkan satuan yang sah" di
+  `tests/e2e/inventaris/produk/crud-produk.spec.ts` (`b887278`): harapan
+  dibaca dari teks pilihan yang ditekan, dan skenario tidak menyimpan
+  data. Bukti terhadap kode lama diambil dengan `git stash push` atas
+  berkas perubahannya saja, lalu `git stash pop`, tanpa mengubah spec.

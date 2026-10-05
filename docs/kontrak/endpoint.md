@@ -154,10 +154,10 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/pajak` | authPengguna | - | `{ data, success }` | `_id` | `features/pajak/api.ts` |
-| POST | `/pajak` | authPengguna | - | - | - | `features/pajak/api.ts` |
-| PUT | `/pajak/:id` | authPengguna | - | - | - | `features/pajak/api.ts` |
-| DELETE | `/pajak/:id` | authPengguna | - | - | - | `features/pajak/api.ts` |
+| GET | `/pajak` | authPengguna | `read-pajak` atau `akses-pos` | `{ data, success }` | `_id` | `features/pajak/api.ts` |
+| POST | `/pajak` | authPengguna | `create-pajak` | - | - | `features/pajak/api.ts` |
+| PUT | `/pajak/:id` | authPengguna | `update-pajak` | - | - | `features/pajak/api.ts` |
+| DELETE | `/pajak/:id` | authPengguna | `delete-pajak` | - | - | `features/pajak/api.ts` |
 
 #### `/pelanggan`
 
@@ -240,9 +240,9 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| POST | `/produkpajak` | authPengguna | - | - | - | `features/pajak/api.ts` |
-| GET | `/produkpajak/:targetid` | authPengguna | - | - | - | `features/pajak/api.ts` |
-| DELETE | `/produkpajak/:id` | authPengguna | - | - | - | `features/pajak/api.ts` |
+| POST | `/produkpajak` | authPengguna | `update-produk` | - | - | `features/pajak/api.ts` |
+| GET | `/produkpajak/:targetid` | authPengguna | `read-pajak`, `read-produk`, atau `akses-pos` | - | - | `features/pajak/api.ts` |
+| DELETE | `/produkpajak/:id` | authPengguna | `update-produk` | - | - | `features/pajak/api.ts` |
 
 #### `/role`
 

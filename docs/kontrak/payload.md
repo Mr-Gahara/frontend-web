@@ -592,7 +592,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validatePajakPayload mode update (validators/pajakValidator.js) di route: field yang dikirim diperiksa dengan aturan `POST`, tetapi `tipePajak` tetap wajib di setiap permintaan (`temuan.md` butir 91). Dikoreksi 1 Oktober 2026 terhadap backend `465b438`; sebelumnya kelima field tercatat wajib
 - Wajib dari klien: `tipePajak`
 - Field lain yang dikenali: `namaPajak`, `tarifPajak`, `modelPerhitungan`, `prioritas`, `statusPajak`
-- Controller meneruskan `req.body` apa adanya, dan service menjalankan `$set` atas seluruhnya, sehingga `tenantID` yang dikirim ikut tersimpan (butir 89); web tidak mengirimnya
+- Sejak backend `fc29433`: hanya `namaPajak`, `tarifPajak`, `tipePajak`, `modelPerhitungan`, `prioritas`, dan `statusPajak` yang diterima. `tenantID` dan field lain ditolak 400 oleh validator, dan service menyaring ulang sebelum `$set` (butir 89 tertutup). `statusPajak` harus boolean. Penulisan dan penonaktifan pajak per transaksi lain berjalan dalam satu transaksi database (butir 90 tertutup). Dikoreksi 5 Oktober 2026 dari kode; `tipePajak` yang tetap wajib dibuktikan lewat permintaan nyata
 - Aturan service: pajak milik tenant lain dijawab 404; bila keadaan akhirnya per transaksi dan aktif, pajak per transaksi lain dinonaktifkan sebelum pembaruan (butir 90); cache produk tidak dibersihkan (butir 94)
 - Web mengirim field yang berubah ditambah `tipePajak` lewat `payloadUbahPajak` (`features/pajak/payload.ts`, `e0aaeca`)
 - Respons 200 dengan `data` dokumen hasil pembaruan dan `message` "Pajak diperbarui"

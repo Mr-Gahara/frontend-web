@@ -364,7 +364,9 @@ keputusan rancangan butir 17.
   `produk.stok` tidak terhubung ke lokasi mana pun (`kontrak/temuan.md`
   butir 37). Dipertahankan sejak backend `yoga` (keputusan PY4a):
   `produk.stok` kini potret stok outlet saat produk disimpan, belum stok
-  yang hidup.
+  yang hidup. Tetap dipertahankan setelah backend `fc29433` (keputusan
+  backend P15): finalisasi tidak lagi memakainya, tetapi angkanya di
+  respons produk masih potret.
 - **K5b dan K11b: daftar penjualan memakai cakupan outlet hanya bagi
   pemegang `read-location`.** Template Guest, Staff, dan Kasir memegang
   `read-penjualan` tanpa `read-location`, sehingga gate tidak ditambah, dan
@@ -1036,7 +1038,9 @@ dan diterapkan di `fcf2dd2` bersama PO15a; PO16a diterapkan di `ca6eb3d`.
   aksi baris ber-`aria-label`; teks tombol, label, dan tab lama
   dipertahankan agar spec pembanding tetap berlaku; dan tidak ada tombol
   yang disembunyikan menurut izin, karena route pajak tanpa
-  `checkPermission` (butir 5).
+  `checkPermission` (butir 5). Butir terakhir berubah di `d3443e2`: sejak
+  backend `fc29433` route pajak memeriksa izin, dan tombolnya mengikuti
+  (keputusan FC3a).
 - Diterapkan tanpa ditanyakan (`fcf2dd2`): ubah profil toko hanya mengirim
   field yang berubah (butir 15), dan field yang dikosongkan dikirim
   sebagai teks kosong; setiap isian dipangkas, nama toko minimal 3
@@ -1457,3 +1461,36 @@ Diputuskan pemilik proyek pada 4 Oktober 2026. Labelnya EL:
     `formatRupiah`, bukan `Intl.NumberFormat` sendiri; sembilan berkas
     yang masih memformat sendiri dipindah di `006d7f8`
     (pemilik proyek, 4 Oktober 2026, `4c9c4ed`).
+
+### Penyesuaian backend `fc29433`
+
+Diputuskan pemilik proyek pada 4 Oktober 2026, setelah `origin/yoga` maju
+dari `50eede7` ke `fc29433`.
+
+- **Urutan kerja**: penyesuaian backend didahulukan dari `useAuthGuard()`
+  berulang, sejalan dengan PY2a.
+- **FC1a: keempat izin pajak masuk template Manajer dan General
+  Manajer** (`1ec905d`), sejalan dengan izin metode pembayaran dan diskon
+  yang sudah mereka pegang (pola DN4a). Kasir dan staf membaca pajak
+  lewat `akses-pos`.
+- **FC2a: izin beban operasional masuk template bersama halaman
+  pengeluaran**, bukan sekarang, karena kategori beban masih dijawab 403
+  dan kontrak beban belum final.
+- **FC3a: halaman pajak mendapat entri `IZIN_HALAMAN`** (`read-pajak`
+  atau `akses-pos`, `d3443e2`), diturunkan dari endpoint yang dipanggil
+  halaman. Karena `IZIN_HALAMAN` hanya dibaca sidebar dan halaman pajak
+  bukan menu sidebar, entrinya dibaca halaman pajak sendiri dan kartu di
+  halaman indeks pengaturan.
+- **FC4a: satuan resep yang tidak sah untuk bahannya ditahan di form
+  produk** (`b887278`), bukan dibiarkan sampai backend menolaknya saat
+  finalisasi.
+- Diterapkan tanpa ditanyakan (`d3443e2`): tanpa izin baca, isi halaman
+  pajak tidak dipasang, sehingga tidak ada permintaan yang pasti dijawab
+  403; kolom Aksi kosong bila `update-pajak` dan `delete-pajak` sama-sama
+  tidak dipegang; bagian Assign Pajak disembunyikan utuh bagi pengguna
+  tanpa `update-produk`, sedangkan relasi yang terpasang tetap terbaca.
+- Diterapkan tanpa ditanyakan (`b887278`): sumber aturan satuan adalah
+  `availableUnits` yang dihitung backend, bukan salinan tabel kelompok
+  satuan di web (keputusan rancangan butir 12); bahan tanpa satuan resep
+  yang sah (pak dan unit) ditolak dengan pesan tersendiri; `skemaProduk`
+  tetap diekspor dan pemeriksaannya ditambahkan lewat `buatSkemaProduk`.

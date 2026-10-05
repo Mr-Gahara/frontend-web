@@ -88,6 +88,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Pemformat rupiah: sembilan berkas ke `formatRupiah` | `006d7f8` | Selesai (keputusan rancangan butir 24; Catatan dari utang kecil modul produk dan pemformat rupiah) |
 | Error ESLint warisan | `4f19e77` (tipe, kutip, dan `storage.ts`), `039ead4` (hidrasi), `f5fe574` (form role) | Selesai (keputusan EL1a sampai EL4a; Catatan dari error ESLint warisan) |
 | Utang kecil yang tidak menunggu backend | `6b5e1cc` (kode mati), `eb0181f` (penjaga ruang opname, nama PIC, dan kerangka memuat stok), `9195472` (spec tipe aset) | Selesai (Catatan dari utang kecil yang tidak menunggu backend) |
+| Penyesuaian backend `fc29433` | `a17d584` (fixme butir 37), `d3443e2` (izin pajak), `1ec905d` (template role), `b887278` (satuan resep) | Selesai (keputusan FC1a sampai FC4a; Catatan dari penyesuaian backend `fc29433`) |
 | `useAuthGuard()` berulang | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
@@ -95,15 +96,15 @@ Keputusan produk tiap modul tercatat di `keputusan.md`.
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per utang kecil yang tidak menunggu backend (`9195472`):
+Diukur ulang per penyesuaian backend `fc29433` (`b887278`):
 
-| Hal | Awal | Setelah utang kecil `9195472` | Catatan |
+| Hal | Awal | Setelah penyesuaian `b887278` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 0 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), 4 setelah halaman profil, login, dan sidebar (`57a7084`), dan 0 setelah error ESLint warisan (`4f19e77`) |
 | Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna |
 | `useAuthGuard()` berulang di halaman | 49 | 26 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, halaman diskon, dan halaman profil) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
-| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.087 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702). Per `9195472` menjadi 4: `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700 (714 baris) karena penjaga ruang (`eb0181f`), dan buat penjualan menjadi 1.087 baris setelah kode mati dibuang (`6b5e1cc`) |
+| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.087 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702). Per `9195472` menjadi 4: `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700 (714 baris) karena penjaga ruang (`eb0181f`), dan buat penjualan menjadi 1.087 baris setelah kode mati dibuang (`6b5e1cc`). Per `b887278` form produk menjadi 809 baris (pemeriksaan satuan resep) |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
@@ -117,23 +118,67 @@ adalah pemanggilan `useAuthGuard()` yang berulang.
 sehingga pemanggilan di halaman dan komponen di bawah layout itu
 berulang.
 
-Pemetaan awal (4 Oktober 2026, setelah `9195472`): 24 berkas di `app/`
-di luar layout dashboard dan berkas hook-nya sendiri, seluruhnya di bawah
-`app/dashboard/`, dan 13 berkas di `features/`, yang belum pernah masuk
-metrik. Yang belum dibuktikan: apakah ada pemanggil yang memakai nilai
-kembalian hook itu, apa yang dilakukan hook saat dipanggil dua kali dalam
-satu pohon, dan test mana yang bergantung pada pemanggilan di halaman.
+Pekerjaan ini tertunda oleh penyesuaian backend `fc29433`, yang selesai
+di `b887278`. Pemetaannya (4 Oktober 2026, terhadap `9195472`) sudah
+terbukti: 37 pemanggilan berulang, yaitu 24 berkas di `app/` di luar
+layout dashboard dan berkas hook-nya sendiri, dan 13 berkas di
+`features/`, yang seluruhnya hanya dipasang di bawah `/dashboard`. Tidak
+ada pemanggil yang memakai nilai kembalian hook, layout dashboard
+memanggilnya tanpa menahan render, dan test unit hook tidak bergantung
+pada pemanggilan di halaman. Rancangannya: ke-37 pemanggilan beserta
+impornya dibuang dalam satu commit tanpa perubahan perilaku.
 
 Langkah pertama sesi berikutnya, setelah backend di-`fetch` dan
-dibandingkan dengan acuan (`cara-kerja.md`): baca hook-nya utuh, petakan
-pemanggilnya, lalu ajukan rancangan beserta keputusannya sekaligus.
+dibandingkan dengan acuan (`cara-kerja.md`): pastikan daftar pemanggil
+belum berubah lewat perintah di bawah, lalu terapkan.
 
 ```bash
-BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline 50eede7..origin/yoga | head -20
+BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline fc29433..origin/yoga | head -20
 cat app/hooks/useAuthGuard.ts | cut -c1-140
 grep -rnE 'useAuthGuard\(\)' app features | grep -vE ':[[:space:]]*useAuthGuard\(\);$' | cut -c1-140
 grep -rlE 'useAuthGuard\(\)' features | sort
 ```
+
+## Catatan dari penyesuaian backend `fc29433`
+
+Dikerjakan pada 4 dan 5 Oktober 2026. `origin/yoga` maju lima commit dari
+`50eede7` ke `fc29433` (keputusan backend R16 dan P15), dan atas
+keputusan pemilik proyek penyesuaian ini didahulukan dari
+`useAuthGuard()` berulang.
+
+| Commit | Isi |
+|---|---|
+| `a17d584` | `test.fixme` butir 37 dilepas: finalisasi produk beresep tidak lagi memakai `produk.stok` |
+| `d3443e2` | Halaman pajak mengikuti izin: `features/pajak/izin.ts`, gerbang halaman, tombol, tab pajak produk, dan kartu indeks pengaturan |
+| `1ec905d` | Keempat izin pajak di template Manajer dan General Manajer |
+| `b887278` | Satuan resep mengikuti `availableUnits` bahan terpilih |
+
+- Backend lokal dipindah ke `fc29433` dengan fast-forward. Permission
+  diselaraskan menurut `backend.md`: seed sinkron menambah delapan izin
+  (119 di basis data dan 119 di seed), seed Owner memberi 116 izin ke
+  tiga role Owner, dan cache izin dibersihkan.
+- Audit endpoint tidak berubah: 243 route backend dan 139 panggilan
+  frontend unik, tanpa panggilan ke route yang tidak ada.
+- Dibuktikan lewat permintaan nyata sebagai Owner: `GET /pajak` 200,
+  `GET /bebanoperasional` 200, `GET /kategoribeban` masih 403, dan
+  `PUT /pajak/:id` tanpa `tipePajak` masih 400.
+- Yang tertutup di backend: butir 37, 89, dan 90, serta butir 5 untuk
+  pajak dan butir 130 untuk beban operasional. Yang masih terbuka: butir
+  91, butir 130 untuk kategori beban, dan butir 15, yang kini berakibat
+  nyata (bahan bersatuan pak atau unit tidak dapat dipakai di resep).
+- Pekerjaan pengeluaran tetap ditunda (keputusan BO1a): beban tidak dapat
+  dicatat tanpa kategori, dan kategori beban masih 403.
+- Dugaan yang keliru: skenario gerbang `produk.stok` diperkirakan gagal
+  terhadap backend baru, padahal skenario penolakan yang aktif menguji
+  gerbang stok bahan dan tetap benar; skenario `produk.stok` adalah
+  `test.fixme` itu sendiri.
+- Suite penuh 4 Oktober 2026: 431 lolos, 1 gagal, dan 16 skipped, sesuai
+  hitungan harapan. Yang gagal login di `beforeEach` spec tipe aset,
+  tidak terkait perubahan; spec itu lolos 25 saat dijalankan terpisah
+  (`pengujian.md`, Utang pengujian).
+- Laporan untuk tim backend disusun 5 Oktober 2026: kategori beban,
+  `tipePajak`, dan satuan pak serta unit.
+- Keputusan: `keputusan.md` (Penyesuaian backend `fc29433`).
 
 ## Catatan dari utang kecil yang tidak menunggu backend
 
@@ -894,6 +939,23 @@ Yang masih berlaku:
 
 ## Utang kecil yang tertunda
 
+### Utang kecil dari penyesuaian backend `fc29433`
+
+- `IZIN_HALAMAN` hanya dibaca sidebar (`components/app-sidebar.tsx`).
+  Tidak ada layout yang menolak rute berdasarkan peta itu, sehingga
+  halaman yang dibuka lewat URL oleh pengguna tanpa izinnya tetap
+  dirender dan baru ditolak backend. Halaman pajak membaca entrinya
+  sendiri sejak `d3443e2`; halaman lain belum. Gerbang rute di layout
+  perlu keputusan pemilik proyek.
+- Izin beban operasional belum masuk template role (keputusan FC2a);
+  ditambahkan bersama halaman pengeluaran.
+- `features/produk/izin.ts` masih menulis `akses-pos` sebagai teks,
+  padahal `IZIN.aksesPos` ada sejak `d3443e2`.
+- Pilihan satuan resep hanya terbukti dari respons nyata untuk bahan
+  bersatuan pcs, gram, dan ml. Untuk kg, liter, pak, dan unit, isi
+  `availableUnits` dibaca dari kode backend, karena data development
+  tidak punya bahan bersatuan itu.
+
 ### Utang kecil dari modul penjualan dan pembayaran
 
 - Tipe berakhiran `Lama` (`keputusan.md` butir 19) habis sejak `1e05df6`:
@@ -914,9 +976,9 @@ Yang masih berlaku:
   seluruh penjualan tenant dan tidak mengirim lokasi. Halaman buat belum
   punya pemilih outlet bagi pemegang izin lintas outlet. Keduanya wajib
   ditutup sebelum multi-outlet (`kontrak/temuan.md` butir 48 dan 49).
-- Tiga `test.fixme` di spec alur penjualan menunggu backend: dua untuk
-  cache daftar jurnal (`kontrak/temuan.md` butir 46) dan satu untuk stok
-  produk (butir 37, tertutup sebagian di backend `yoga`).
+- Dua `test.fixme` di spec alur penjualan menunggu backend, keduanya
+  untuk cache daftar jurnal (`kontrak/temuan.md` butir 46). Yang ketiga
+  (butir 37) dilepas di `a17d584` setelah backend `fc29433`.
 - Filter tanggal daftar penjualan tidak dapat dikosongkan langsung,
   karena `PilihTanggal` tidak punya tombol kosongkan; filter dikosongkan
   lewat reset filter.

@@ -348,6 +348,10 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   dan aturan nilai, serta dokumen API yang masih kerangka; hanya butir
   pertama yang terbukti lewat permintaan nyata
   (`kontrak/temuan.md` butir 130 sampai 138)
+- Laporan penyesuaian `fc29433` (disusun 5 Oktober 2026): kategori beban
+  masih dijawab 403 (butir 130), `tipePajak` masih wajib di
+  `PUT /pajak/:id` (butir 91), dan bahan bersatuan pak atau unit tidak
+  dapat dipakai di resep (butir 15)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi
