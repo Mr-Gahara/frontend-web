@@ -36,6 +36,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 4 Oktober 2026: Pindah Dana setelah `e53c016`. Rute `/dashboard/outlet/keuangan/akunkas/pindahDana` bukan menu sidebar (dibuka dari halaman akun kas) dan tanpa entri `IZIN_HALAMAN`, dengan izin per bagian. Form memanggil `GET /akunkas` (`read-akunkas`) dan `POST /jurnaltransfer`, dan hanya tampil bagi pemegang `create-jurnal-transfer`; riwayat memanggil `GET /jurnaltransfer` dan hanya tampil bagi pemegang `read-jurnal-transfer`; tombol Batalkan memanggil `PUT /jurnaltransfer/:id` dan hanya tampil bagi pemegang `update-jurnal-transfer`. Tanpa izin buat maupun baca, halaman menampilkan keterangan. Ketiga izin ada di template Manajer dan General Manajer sejak `e053a67`.
 - 4 Oktober 2026: pengeluaran setelah `7fce871`, tanpa perubahan gate (`read-pembayaran`). Halaman menampilkan keterangan belum tersedia dan tidak memanggil endpoint apa pun, karena `/bebanoperasional` dan `/kategoribeban` menjawab 403 bagi setiap pengguna (`temuan.md` butir 130).
 - 5 Oktober 2026: pajak setelah `d3443e2`, terhadap backend `fc29433`. Route pajak dan produk pajak kini memeriksa izin, sehingga halaman pajak mendapat entri `IZIN_HALAMAN` (`read-pajak` atau `akses-pos`, keputusan FC3a). `IZIN_HALAMAN` hanya dibaca sidebar, dan halaman pajak bukan menu sidebar, sehingga entrinya dibaca halaman pajak sendiri dan kartu di halaman indeks pengaturan.
+- 6 Oktober 2026: gerbang rute setelah `bc388c6` (keputusan GR1a sampai GR7a). `IZIN_HALAMAN` kini memuat seluruh 83 rute di bawah `/dashboard` dan ditegakkan `GerbangRute` di layout dashboard: rute yang syaratnya tidak dipenuhi menampilkan pesan tanpa izin, dan isinya tidak dipasang. Rute detail, form, dan sub-halaman dicatat di 5.1. Halaman form menuntut izin baca dan izin tulisnya (GR5a). Rute yang pada catatan di atas disebut tanpa entri `IZIN_HALAMAN` (metode pembayaran, profil toko, profil pengguna, ubah akun kas, Pindah Dana, serta detail, buat, dan ubah pengajuan stok) kini punya entri: kosong untuk yang berizin per bagian, bersyarat untuk yang lain. Panel admin tetap di luar `IZIN_HALAMAN`.
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -66,7 +67,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/shift` | - | `/shift` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/pelanggan` | `read-pelanggan` | `/pelanggan` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/pengguna` | `read-pengguna`, `read-role` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sejalan |
-| `/dashboard/outlet/pengaturan` | - | - | - | Halaman indeks tanpa data (`IZIN_HALAMAN` berisi syarat kosong). Sub-halaman metode pembayaran memanggil `/metodepembayaran` (tanpa izin baca) dan `/akunkas` (`read-akunkas`), tanpa entri `IZIN_HALAMAN` (`3359497`); sub-halaman pajak punya baris sendiri di bawah sejak `d3443e2`, karena backend `fc29433` memasang izin di route pajak; sub-halaman profil toko memanggil `/tenant/:id` (tanpa izin baca) dan `/location/current` (`read-location`), tanpa entri (`fcf2dd2`) |
+| `/dashboard/outlet/pengaturan` | - | - | - | Halaman indeks tanpa data (`IZIN_HALAMAN` berisi syarat kosong). Sub-halaman metode pembayaran memanggil `/metodepembayaran` (tanpa izin baca) dan `/akunkas` (`read-akunkas`), tanpa entri `IZIN_HALAMAN` (`3359497`); sub-halaman pajak punya baris sendiri di bawah sejak `d3443e2`, karena backend `fc29433` memasang izin di route pajak; sub-halaman profil toko memanggil `/tenant/:id` (tanpa izin baca) dan `/location/current` (`read-location`), tanpa entri (`fcf2dd2`). Sejak `bc388c6` ketiga sub-halaman punya entri (5.1) |
 | `/dashboard/outlet/pengaturan/pajak` | `read-pajak` atau `akses-pos` | `/pajak`, `/produk`, `/produkpajak/:targetid` | `read-pajak` atau `akses-pos`; `/produk` butuh `read-produk` atau `akses-pos` | Sejalan sejak `d3443e2` (keputusan FC3a). Bukan menu sidebar. Tombol tambah, ubah, dan hapus mengikuti `create-`, `update-`, dan `delete-pajak`; pasang dan lepas pajak produk mengikuti `update-produk` |
 | `/dashboard/gudang` | - | - | - | Halaman placeholder tanpa data (keputusan GD1a); layout ruang gudang bergerbang `read-dashboard-gudang` dan memuat `/location` bagi pemegang `read-location` (`9ce288b`) |
 | `/dashboard/gudang/inventaris` | `read-location`, `read-inventory` atau `read-inventory-gudang`, `read-bahan` | `/location`, `/inventory`, `/bahanbaku` | `read-location`, salah satu dari `read-inventory`, `read-inventory-gudang`, `read-inventory-outlet`, `read-bahan` | Sejalan; gate sengaja tidak menerima `read-inventory-outlet` di ruang gudang (keputusan produk) |
@@ -82,3 +83,54 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/gudang/shift` | - | `/shift` | - | Backend tidak memeriksa izin; halaman dibuat di `f99b7cf` (keputusan SH1b) |
 | `/dashboard/gudang/pengguna` | `read-pengguna`, `read-role` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sejalan |
 | `/dashboard/gudang/pengaturan` | `read-location` | `/location` | `read-location`; `PUT /location/:id` butuh `update-location` | Sejalan; tanpa `update-location` profil gudang tampil baca-saja (`319bd99`, keputusan GD2a) |
+
+### 5.1 Rute turunan dan sub-halaman
+
+Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipanggil halaman saat dibuka dan dari izin endpoint di `endpoint.md`, bukan dari path induknya. Halaman form menuntut izin baca dan izin tulis operasi utamanya (GR5a); data pendukung yang opsional tidak menjadi syarat (GR7a). Tanda `-` berarti tanpa syarat.
+
+| Rute | Gate | Dipanggil saat dibuka | Catatan |
+|---|---|---|---|
+| `/dashboard` | - | - | Tanpa data berizin |
+| `/dashboard/profil` | - | `/pengguna/:id`, `/tenant/:id` | Diri sendiri diloloskan backend tanpa izin |
+| `/dashboard/gudang/setup` | - | - | Layout gudang yang memutuskan (GD4a); simpan lewat `POST /location` |
+| `/dashboard/gudang/pengajuanStok/[id]` | `read-pengajuan-stok` | `/pengajuanstok/:id` | Detail; aksi mengikuti izin tombolnya |
+| `/dashboard/gudang/stockAdjustment/[id]` | `read-stock-adjustment` | `/stockopname/adjustments/:id` | Detail |
+| `/dashboard/gudang/stockOpname/[id]` | `read-stock-opname` | `/stockopname/:id` | Detail; aksi mengikuti izin tombolnya |
+| `/dashboard/gudang/stockOpname/buatStockOpname` | `read-location`, `create-stock-opname` | `/location`, `/pengguna/:id` | Form |
+| `/dashboard/gudang/transferStok/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; aksi mengikuti izin tombolnya |
+| `/dashboard/gudang/transferStok/[id]/edit` | `read-transfer-stok`, `create-transfer-stok` | `/transferstok/:id` | Form; `PUT /transferstok/:id` menuntut `create-transfer-stok` |
+| `/dashboard/outlet/inventaris/bahanBaku/buatBahanBaku` | `create-bahan` | `/location/current` (opsional) | Form; `locationID` opsional di payload |
+| `/dashboard/outlet/inventaris/bahanBaku/[id]/edit` | `read-bahan`, `update-bahan` | `/bahanbaku/:id` | Form |
+| `/dashboard/outlet/inventaris/penerimaanBarang/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; terima mengikuti `receive-transfer-stok` |
+| `/dashboard/outlet/inventaris/pengajuanStok/buatPengajuan` | `read-bahan`, `read-location`, `create-pengajuan-stok` | `/bahanbaku`, `/location`, `/location/current` | Form |
+| `/dashboard/outlet/inventaris/pengajuanStok/[id]` | `read-pengajuan-stok` | `/pengajuanstok/:id` | Detail; tanpa `read-location`, berbeda dari daftarnya |
+| `/dashboard/outlet/inventaris/pengajuanStok/[id]/edit` | `read-pengajuan-stok`, `read-bahan`, `read-location`, `update-pengajuan-stok` | `/pengajuanstok/:id`, `/bahanbaku`, `/location`, `/location/current` | Form |
+| `/dashboard/outlet/inventaris/produk/buatProduk` | `read-kategori`, `create-produk` | `/kategori`; `/bahanbaku` dan `/location/current` opsional | Form; bahan baku hanya untuk resep |
+| `/dashboard/outlet/inventaris/produk/[id]/edit` | `read-produk`, `read-kategori`, `update-produk` | `/produk/:id`, `/kategori`; `/bahanbaku` dan `/location/current` opsional | Form |
+| `/dashboard/outlet/inventaris/stockAdjustment/[id]` | `read-stock-adjustment` | `/stockopname/adjustments/:id` | Detail |
+| `/dashboard/outlet/inventaris/stockOpname/[id]` | `read-stock-opname` | `/stockopname/:id` | Detail; aksi mengikuti izin tombolnya |
+| `/dashboard/outlet/inventaris/stockOpname/buatStockOpname` | `read-location`, `create-stock-opname` | `/location/current`, `/pengguna/:id` | Form |
+| `/dashboard/outlet/keuangan/akunkas/buatAkunKas` | `create-akunkas` | - | Form |
+| `/dashboard/outlet/keuangan/akunkas/[id]/ubah` | `read-akunkas`, `update-akunkas` | `/akunkas` | Form; keterangan tanpa `update-akunkas` di halaman tidak lagi tercapai |
+| `/dashboard/outlet/keuangan/akunkas/pindahDana` | - | `/akunkas`, `/jurnaltransfer` | Izin per bagian di dalam halaman (DN1a) |
+| `/dashboard/outlet/pengaturan/metodePembayaran` | - | `/metodepembayaran` | `GET` tanpa izin di backend |
+| `/dashboard/outlet/pengaturan/metodePembayaran/buatMetodePembayaran` | `read-akunkas`, `create-metode-pembayaran` | `/akunkas` | Form; akun tujuan wajib |
+| `/dashboard/outlet/pengaturan/metodePembayaran/[id]` | `update-metode-pembayaran` | `/metodepembayaran/:id`; `/akunkas` opsional | Form; `read-akunkas` hanya untuk pindah akun |
+| `/dashboard/outlet/pengaturan/roles` | `read-role` | `/role`, `/permission` | Daftar; sebelum `bc388c6` tanpa gate |
+| `/dashboard/outlet/pengaturan/roles/buatRole` | `read-role`, `create-role` | `/role`, `/permission` | Form dari template |
+| `/dashboard/outlet/pengaturan/roles/buatRole/kostum` | `read-role`, `create-role` | `/role`, `/permission` | Form |
+| `/dashboard/outlet/pengaturan/roles/[id]/edit` | `read-role`, `update-role` | `/role/:id`, `/role`, `/permission` | Form |
+| `/dashboard/outlet/pengaturan/toko` | - | `/tenant/:id`, `/location/current` | Izin per bagian di dalam halaman (PO14a) |
+| `/dashboard/outlet/penjualan/buatPenjualan` | `read-produk` atau `akses-pos`, `create-penjualan` | `/produk`, `/pelanggan`, `/diskon`; `/pajak` dan `/location/current` opsional | Form |
+| `/dashboard/outlet/penjualan/[id]` | `read-penjualan` | `/penjualan/:id` | Detail; aksi mengikuti `aksiPenjualan` |
+| `/dashboard/outlet/penjualan/[id]/pembayaran` | `read-penjualan`, `create-pembayaran` | `/penjualan/:id`, `/metodepembayaran` | Form |
+| `/dashboard/outlet/reservasi/buatReservasi` | `read-booking`, `create-booking` | `/sesibooking`, `/aset`, `/pelanggan`, `/diskon` | Form |
+| `/dashboard/outlet/reservasi/aset` | - | `/aset` | `GET` tanpa izin di backend (GR6a) |
+| `/dashboard/outlet/reservasi/aset/buatAset` | `create-aset` | `/tipeaset` | Form |
+| `/dashboard/outlet/reservasi/aset/[id]/edit` | `update-aset` | `/aset/:id`, `/tipeaset` | Form |
+| `/dashboard/outlet/reservasi/tarif` | - | `/tarif` | `GET` tanpa izin di backend (GR6a) |
+| `/dashboard/outlet/reservasi/tarif/buatTarif` | `create-tarif` | `/tipeaset` | Form |
+| `/dashboard/outlet/reservasi/tarif/[id]/edit` | `update-tarif` | `/tarif/:id`, `/tipeaset` | Form |
+| `/dashboard/outlet/reservasi/tipeAset` | - | `/tipeaset` | `GET` tanpa izin di backend (GR6a) |
+| `/dashboard/outlet/reservasi/tipeAset/buatTipeAset` | `create-tipe-aset` | - | Form |
+| `/dashboard/outlet/reservasi/tipeAset/[id]/edit` | `update-tipe-aset` | `/tipeaset/:id` | Form |

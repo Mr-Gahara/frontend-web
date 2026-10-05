@@ -283,6 +283,7 @@ produk (`152088b`). Labelnya PR:
   mengikuti pola detail stock opname: `useAuthGuard` menjaga sesi, tombol
   aksi mengikuti izin, dan backend menolak dengan 403. Sejak `628f52e`
   sesi dijaga guard layout dashboard, tanpa pemanggilan di halaman.
+  Diganti di `bc388c6`: ketiganya punya entri sendiri (GR3a dan GR5a).
 - **Revisi hanya untuk DRAFT** di halaman edit, walau backend masih
   mengizinkan APPROVED dan PENDING diubah (`kontrak/temuan.md` butir 25).
 
@@ -1006,7 +1007,8 @@ dan diterapkan di `fcf2dd2` bersama PO15a; PO16a diterapkan di `ca6eb3d`.
 - **PO14a: halaman tanpa entri `IZIN_HALAMAN`, dengan izin per bagian.**
   Profil tenant dibaca semua pengguna dan diubah pemegang `update-tenant`;
   lokasi dimuat bagi pemegang `read-location` dan diubah bagi pemegang
-  `update-location`, baca-saja selain itu (sejalan GD2a).
+  `update-location`, baca-saja selain itu (sejalan GD2a). Sejak `bc388c6`
+  entrinya ditulis eksplisit kosong, agar gerbang rute tidak menolaknya.
 - **PO15a: nama toko di sidebar dan halaman profil dibaca dari
   `GET /tenant/:id`** (2 Oktober 2026, `fcf2dd2`), lewat `useTenant` yang
   berbagi cache dengan halaman Profil Toko, sehingga nama ikut berubah
@@ -1188,7 +1190,8 @@ rancangan butir 17, 21, dan 23.
   sebelum pembaruan dokumentasi, bukan sebelum setiap commit. Setiap
   commit kode melewati `tsc`, ESLint, vitest penuh, dan spec yang
   terdampak. Langkah 5 Alur setiap perubahan di `cara-kerja.md` diubah
-  atas perintah ini.
+  atas perintah ini. Diganti pada 6 Oktober 2026: suite penuh hanya
+  dijalankan saat penting (Gerbang rute).
 - **PF7a: setelah PIN berubah, pengguna diberi pesan lalu login ulang.**
   Backend memutus sesi setiap PIN berubah; halaman menitipkan pesan,
   mengakhiri sesi pengguna, dan menuju login pengguna, tanpa permintaan
@@ -1331,12 +1334,57 @@ Diputuskan pemilik proyek pada 4 dan 5 Oktober 2026 (`628f52e`).
   ditutup** (5 Oktober 2026); baseline dicatat sebagai hitungan, dan
   suite penuh menjadi langkah pertama pekerjaan berikutnya.
 - **Pekerjaan setelah ini adalah gerbang rute dari `IZIN_HALAMAN`**
-  (`status.md`, Pekerjaan berikutnya).
+  (selesai di `bc388c6`, Gerbang rute).
 - Diterapkan tanpa ditanyakan (`628f52e`): spec baru
   `tests/e2e/auth/guard-dashboard.spec.ts` untuk empat rute tanpa sesi;
   spec e2e terdampak dijalankan sebagai perwakilan tiap jenis berkas
   yang berubah; dan guard halaman login serta panel admin tidak
   disentuh.
+
+### Gerbang rute
+
+Diputuskan pemilik proyek pada 5 dan 6 Oktober 2026 (`bc388c6`). Labelnya
+GR:
+
+- **GR1a: gerbang rute dipasang sekali di `app/dashboard/layout.tsx`**,
+  di samping guard sesi, sehingga outlet, gudang, dan profil lewat satu
+  pintu.
+- **GR2a: rute yang ditolak menampilkan pesan di tempat**, tanpa
+  pengalihan, dan isi halamannya tidak dipasang, sehingga tidak ada
+  permintaan yang pasti dijawab 403 (sejalan GD4a).
+- **GR3a: seluruh rute dipetakan sekaligus.** Setiap halaman di bawah
+  `/dashboard` punya entri `IZIN_HALAMAN` sendiri, diturunkan dari
+  endpoint yang dipanggilnya. Syarat tidak diwariskan dari induk: warisan
+  akan menuntut `read-akunkas` di Pindah Dana dan `read-location` di
+  detail pengajuan outlet.
+- **GR4a: pemeriksaan izin baca di halaman pajak dibuang**; gerbang
+  pusat menggantikannya dengan pesan umum.
+- **GR5a: halaman form menuntut izin baca dan izin tulisnya**, karena
+  tanpa izin tulis form pasti berakhir 403. Halaman detail hanya
+  menuntut izin baca, dan tombol aksinya tetap mengikuti izin
+  masing-masing (keputusan rancangan butir 14).
+- **GR6a: daftar aset, tarif, dan tipe aset tanpa syarat**, mengikuti
+  `GET` backend yang tanpa izin; halaman buat dan ubahnya mengikuti GR5a.
+- **GR7a: data pendukung form menjadi syarat hanya bila wajib untuk
+  menyimpan**, misalnya kategori di form produk dan akun tujuan di buat
+  metode pembayaran. Data opsional tetap menampilkan pesan gagal memuat
+  di tempat.
+- **Suite e2e penuh hanya dijalankan saat penting** (6 Oktober 2026),
+  menggantikan PF6a: penyesuaian backend, penelusuran bug atau galat
+  yang butuh uji menyeluruh, atau atas permintaan pemilik proyek. Setiap
+  commit kode tetap melewati `tsc`, ESLint, vitest penuh, dan spec e2e
+  modul yang terdampak.
+- **Pekerjaan setelah ini adalah utang kecil gerbang rute** (`status.md`,
+  Pekerjaan berikutnya).
+- Diterapkan tanpa ditanyakan (`bc388c6`): selama sesi belum masuk, isi
+  halaman diteruskan seperti sebelumnya, agar pesan tanpa izin tidak
+  tampil sebelum daftar izin diketahui; `bolehBukaHalaman` tetap
+  mencocokkan persis untuk sidebar dan kartu, dan gerbang memakai
+  `bolehBukaRute`; rute statis didahulukan dari pola `[id]`; halaman
+  berizin per bagian (profil toko, Pindah Dana) dan setup gudang ditulis
+  sebagai entri kosong; rute tanpa entri tetap diloloskan, dan test unit
+  kelengkapan yang menolak halaman tanpa entri; serta spec e2e membaca
+  izin peran pengguna uji dari backend, bukan mengandaikannya.
 
 ## Keputusan rancangan yang mengikat
 
@@ -1499,7 +1547,8 @@ dari `50eede7` ke `fc29433`.
   atau `akses-pos`, `d3443e2`), diturunkan dari endpoint yang dipanggil
   halaman. Karena `IZIN_HALAMAN` hanya dibaca sidebar dan halaman pajak
   bukan menu sidebar, entrinya dibaca halaman pajak sendiri dan kartu di
-  halaman indeks pengaturan.
+  halaman indeks pengaturan. Sejak `bc388c6` entrinya ditegakkan gerbang
+  rute, dan pemeriksaan di halaman pajak dibuang (GR4a).
 - **FC4a: satuan resep yang tidak sah untuk bahannya ditahan di form
   produk** (`b887278`), bukan dibiarkan sampai backend menolaknya saat
   finalisasi.

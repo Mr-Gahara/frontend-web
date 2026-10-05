@@ -83,9 +83,10 @@ Suite e2e penuh memakan sekitar 35 menit (diukur 3 Oktober 2026 dengan
 karena berjalan dengan satu worker dan memakai backend sungguhan. Saat
 iterasi cukup jalankan spec modul yang sedang dikerjakan. **Sebelum setiap
 commit, `tsc`, ESLint, vitest penuh, dan spec e2e yang terdampak wajib
-lolos; suite e2e penuh dijalankan sekali saat modul selesai**, sebelum
-pembaruan dokumentasi, dengan baseline sebagai pembanding (pemilik proyek,
-2 Oktober 2026, keputusan PF6a). Commit yang hanya mengubah dokumentasi
+lolos; suite e2e penuh hanya dijalankan saat penting**: penyesuaian
+backend, penelusuran bug atau galat yang butuh uji menyeluruh, atau atas
+permintaan pemilik proyek (pemilik proyek, 6 Oktober 2026, menggantikan
+PF6a). Commit yang hanya mengubah dokumentasi
 dikecualikan; gerbangnya `npm run docs:periksa` (pemilik proyek, 28
 September 2026).
 
@@ -94,6 +95,21 @@ menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
+
+**Baseline per gerbang rute** (commit `bc388c6`): 603 test unit dan
+integrasi lolos di 72 berkas, bertambah sepuluh test di
+`tests/unit/lib/auth/gerbang-rute.test.ts`. Suite penuh yang tertunda
+sejak `628f52e` dijalankan 5 Oktober 2026 terhadap backend lokal `yoga`
+`fc29433`, sebelum perubahan: 436 lolos dan 16 skipped, sesuai hitungan
+di bawah. `bc388c6` menambah dua skenario,
+`tests/e2e/auth/gerbang-rute.spec.ts`, sehingga harapan suite penuh 438
+lolos dan 16 skipped. Angka itu hitungan: suite penuh tidak dijalankan
+ulang, atas keputusan pemilik proyek (6 Oktober 2026). Yang dijalankan
+setelah perubahan: `tests/e2e/auth`, `tests/e2e/pengaturan`,
+`tests/e2e/roles`, dan `tests/e2e/profil`, 83 lolos; spec gerbang rute,
+2 lolos; serta spec buat penjualan, `tests/e2e/inventaris/stockOpname`,
+`tests/e2e/reservasi/tarif`, dan `tests/e2e/gudang`, 60 lolos dan 2
+skipped (dua `test.fixme` lama).
 
 **Baseline per `useAuthGuard()` berulang** (commit `628f52e`): 593 test
 unit dan integrasi lolos di 71 berkas, tidak berubah. `628f52e` menambah
@@ -1153,9 +1169,21 @@ Urutan debug kegagalan e2e di atas).
   Sebabnya tidak terbukti: laporan suite ada di `/tmp` dan hilang sebelum
   durasinya dibaca. Tidak ada kode maupun asersi yang diubah.
 - **Sisi tanpa izin di halaman pajak hanya teruji di unit test**
-  (`tests/unit/features/pajak/izin.test.ts`): tombol, kartu indeks
-  pengaturan, dan pesan tanpa izin baca tidak teruji e2e, karena akun uji
-  berperan Owner.
+  (`tests/unit/features/pajak/izin.test.ts`): tombol dan kartu indeks
+  pengaturan tidak teruji e2e, karena akun uji berperan Owner. Pesan
+  tanpa izin baca kini milik gerbang rute (`bc388c6`).
+- **Sisi tertolak gerbang rute hanya teruji e2e untuk rute yang ditolak
+  peran pengguna uji profil**: daftar pengguna, serta ubah posisi dan
+  ubah produk bila peran itu tidak memegang izinnya. Rute lain teruji di
+  `tests/unit/lib/auth/gerbang-rute.test.ts`. Skenarionya dilewati bila
+  peran itu tidak memegang `read-dashboard-outlet`.
+- **Syarat 44 entri baru `IZIN_HALAMAN` diturunkan dari nama hook dan
+  kontrak, bukan dari trace per halaman.** Yang terbukti: pemilik seluruh
+  izin membuka setiap rute terpetakan (unit), dan spec terdampak lolos.
+- **Suite e2e penuh tidak lagi dijalankan di akhir setiap pekerjaan**
+  (6 Oktober 2026), sehingga baseline suite penuh dapat berupa hitungan
+  selama beberapa pekerjaan. Angka terukur terakhir 436 lolos dan 16
+  skipped, terhadap `628f52e`.
 
 ## Spec rujukan
 
@@ -1495,3 +1523,11 @@ Urutan debug kegagalan e2e di atas).
   tanpa sesi membuka rute di `app/`, rute berparameter, dan halaman dari
   `features/`, lalu menunggu URL berakhir di `/login`. Spec penjaga
   untuk refactor tanpa perubahan perilaku: lolos sebelum dan sesudahnya.
+- `tests/e2e/auth/gerbang-rute.spec.ts` (`bc388c6`): sisi tertolak diuji
+  dengan pengguna uji profil di konteks browser terpisah. Izin perannya
+  dibaca dari backend, rute yang semestinya tertolak dihitung dengan
+  `bolehBukaRute` yang sama dengan gerbang, dan ketiadaan permintaan data
+  dibuktikan dengan penghitung permintaan. Pemeriksaan positif
+  mendampinginya: profil tetap terbuka, dan Owner memicu `GET /role` dari
+  halaman form. Skenario tertolak dibuktikan gagal tanpa gerbang lewat
+  `git stash push` atas layout saja.

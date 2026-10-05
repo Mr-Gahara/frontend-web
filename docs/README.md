@@ -159,7 +159,8 @@ lewat pencarian dampak dan diff.
 ## Tata cara pembaruan per modul
 
 1. **Kode selesai dan di-commit** (`refactor/cara-kerja.md`, Alur setiap
-   perubahan). Angka dari suite penuh dicatat: vitest, e2e lolos, dan skipped.
+   perubahan). Angka yang dijalankan dicatat: vitest, serta e2e lolos dan
+   skipped dari spec terdampak, atau dari suite penuh bila dijalankan.
 2. **Laporan backend**, bila ada temuan, disusun setelah commit bersih
    (`refactor/backend.md`).
 3. **Pencarian dampak**:

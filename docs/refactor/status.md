@@ -90,16 +90,17 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Utang kecil yang tidak menunggu backend | `6b5e1cc` (kode mati), `eb0181f` (penjaga ruang opname, nama PIC, dan kerangka memuat stok), `9195472` (spec tipe aset) | Selesai (Catatan dari utang kecil yang tidak menunggu backend) |
 | Penyesuaian backend `fc29433` | `a17d584` (fixme butir 37), `d3443e2` (izin pajak), `1ec905d` (template role), `b887278` (satuan resep) | Selesai (keputusan FC1a sampai FC4a; Catatan dari penyesuaian backend `fc29433`) |
 | `useAuthGuard()` berulang | `628f52e` | Selesai (Catatan dari useAuthGuard berulang) |
-| Gerbang rute dari `IZIN_HALAMAN` | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Gerbang rute dari `IZIN_HALAMAN` | `bc388c6` | Selesai (keputusan GR1a sampai GR7a; Catatan dari gerbang rute) |
+| Utang kecil gerbang rute | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per `useAuthGuard()` berulang (`628f52e`):
+Diukur ulang per gerbang rute (`bc388c6`), tidak berubah dari `628f52e`:
 
-| Hal | Awal | Per `628f52e` | Catatan |
+| Hal | Awal | Per `bc388c6` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 0 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), 4 setelah halaman profil, login, dan sidebar (`57a7084`), dan 0 setelah error ESLint warisan (`4f19e77`) |
 | Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna |
@@ -110,34 +111,63 @@ Diukur ulang per `useAuthGuard()` berulang (`628f52e`):
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: gerbang rute dari IZIN_HALAMAN
+## Pekerjaan berikutnya: utang kecil gerbang rute
 
-Pemanggilan `useAuthGuard()` yang berulang selesai di `628f52e`.
-Pekerjaan berikutnya, atas keputusan pemilik proyek (5 Oktober 2026),
-adalah gerbang rute dari `IZIN_HALAMAN`. Hari ini peta itu hanya dibaca
-sidebar, sehingga halaman yang dibuka lewat URL oleh pengguna tanpa
-izinnya tetap dirender dan baru ditolak backend (Utang kecil dari
-penyesuaian backend `fc29433`).
+Gerbang rute dari `IZIN_HALAMAN` selesai di `bc388c6`. Pekerjaan
+berikutnya, atas keputusan pemilik proyek (6 Oktober 2026), adalah utang
+kecil yang ditinggalkannya (Utang kecil dari gerbang rute):
 
-Pemetaannya belum diambil. Yang sudah diketahui: guard sesi dashboard
-hanya dipasang di `app/dashboard/layout.tsx`; halaman pajak membaca
-entrinya sendiri sejak `d3443e2`; dan sejumlah halaman sengaja tanpa
-entri `IZIN_HALAMAN`, dengan izin per bagian (misalnya keputusan PO14a
-dan DN1a), sehingga rute tanpa entri tidak boleh ikut ditolak. Tempat
-gerbang, perilaku saat ditolak, dan perlakuan rute turunan (detail,
-buat, dan ubah) diajukan sebagai keputusan setelah pemetaan.
+- Cabang keterangan tanpa `update-akunkas` di halaman ubah akun kas
+  dibuang, karena gerbang rute menolak rute itu lebih dulu.
+- `features/produk/izin.ts` memakai `IZIN.aksesPos`.
+- Izin tulis di `features/*/izin.ts` memakai konstanta `IZIN` yang ada
+  sejak `bc388c6`.
 
-Langkah pertama sesi berikutnya: suite e2e penuh yang tertunda sejak
-`628f52e` (harapan 436 lolos dan 16 skipped, `pengujian.md`), lalu
-backend di-`fetch` dan dibandingkan dengan acuan (`cara-kerja.md`), lalu
-pemetaan lewat perintah di bawah.
+Pemetaannya belum diambil. Langkah pertama sesi berikutnya: backend
+di-`fetch` dan dibandingkan dengan acuan (`cara-kerja.md`), lalu pemetaan
+lewat perintah di bawah. Suite e2e penuh tidak dijalankan di awal sesi;
+harapan hitungannya 438 lolos dan 16 skipped (`pengujian.md`).
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline fc29433..origin/yoga | head -20
-grep -rnE 'IZIN_HALAMAN|bolehBukaHalaman|bolehBukaGrup' app components features lib | cut -c1-140
-grep -nE '"/dashboard' lib/auth/permissions.ts | cut -c1-140
-find app/dashboard -name 'page.tsx' | sed 's|^app||; s|/page.tsx$||' | sort
+grep -rnE '"(create|update|delete|approve|reject|cancel|receive|review|submit)-[a-z-]+"|"akses-pos"' features lib --include='*.ts*' | cut -c1-140
+grep -nE 'update-akunkas|aksiAkunKas|boleh' features/akun-kas/halaman-ubah.tsx features/akun-kas/izin.ts | cut -c1-140
 ```
+
+## Catatan dari gerbang rute
+
+Dikerjakan pada 5 dan 6 Oktober 2026 dalam satu commit, `bc388c6`,
+terhadap backend `yoga` `fc29433`; `origin/yoga` tidak maju sejak itu.
+
+- Suite e2e penuh yang tertunda sejak `628f52e` dijalankan di awal sesi,
+  sebelum perubahan: 436 lolos dan 16 skipped, sesuai hitungan.
+- `GerbangRute` (`components/gerbang-rute.tsx`) dipasang di
+  `app/dashboard/layout.tsx`. Rute yang syaratnya tidak dipenuhi tidak
+  dipasang isinya dan menampilkan pesan di tempat, tanpa pengalihan.
+- `IZIN_HALAMAN` kini memuat seluruh 83 halaman di bawah `/dashboard`: 44
+  entri baru, dengan rute berparameter sebagai pola `[id]`. `syaratRute`
+  mencocokkan persis lebih dulu, lalu pola bersegmen sama
+  (`arsitektur.md`).
+- `IZIN` bertambah 23 izin tulis: halaman form menuntut izin baca dan
+  izin tulisnya, sedangkan halaman detail hanya izin baca (GR5a).
+- Syarat setiap rute diturunkan dari hook yang dipanggil halamannya,
+  lewat skrip sekali pakai yang menelusuri impor setiap `page.tsx`, dan
+  dari izin endpoint di kontrak; tidak ada yang diwariskan dari induk.
+- Lokasi di buat bahan baku, bahan baku di form produk, dan pajak di buat
+  penjualan terbukti opsional dari kode, sehingga tidak menjadi syarat
+  (GR7a).
+- Pemeriksaan izin baca di halaman pajak dibuang (GR4a); kartu indeks
+  pengaturan tetap membaca `bolehBukaHalaman`.
+- Vitest 603 lolos di 72 berkas. Spec baru
+  `tests/e2e/auth/gerbang-rute.spec.ts` lolos 2, dan skenario tertolaknya
+  terbukti gagal tanpa gerbang. Spec terdampak: 83 lolos, lalu 60 lolos
+  dan 2 skipped (`pengujian.md`).
+- Suite e2e penuh tidak dijalankan ulang setelah perubahan. Sejak
+  6 Oktober 2026 suite penuh hanya dijalankan saat penting (`keputusan.md`,
+  Gerbang rute).
+- Tidak ada temuan backend baru. `kontrak/izin-halaman.md` mendapat
+  tabel rute turunan; kontrak lain tidak berubah.
+- Keputusan: `keputusan.md` (Gerbang rute, GR1a sampai GR7a).
 
 ## Catatan dari useAuthGuard berulang
 
@@ -371,7 +401,8 @@ kegagalan.
 - Backend tidak punya `DELETE`: transfer dibatalkan lewat
   `PUT /jurnaltransfer/:id` berstatus VOID, yang membalik saldo kedua
   akun. Jumlah, akun, dan tanggal tidak dapat diubah setelah tercatat.
-- Halaman tanpa entri `IZIN_HALAMAN`, dengan izin per bagian: form bagi
+- Halaman tanpa syarat di `IZIN_HALAMAN` (entri kosong sejak `bc388c6`),
+  dengan izin per bagian: form bagi
   `create-jurnal-transfer`, riwayat bagi `read-jurnal-transfer`, dan
   Batalkan bagi `update-jurnal-transfer`. Tombol Pindah Dana di halaman
   akun kas menjadi tautan bagi pemegang izin buat atau baca.
@@ -411,7 +442,9 @@ dijalankan sebelum commit: 420 lolos dan 17 skipped, tanpa kegagalan.
   aktif saat mengaktifkan.
 - Tombol Ubah dan Aktifkan kembali hanya tampil bagi pemegang
   `update-akunkas` (`features/akun-kas/izin.ts`); pengguna lain mendapat
-  keterangan di halaman ubah. Rute ubah tanpa entri `IZIN_HALAMAN`.
+  keterangan di halaman ubah. Rute ubah tanpa entri `IZIN_HALAMAN` saat
+  itu; sejak `bc388c6` bersyarat `read-akunkas` dan `update-akunkas`,
+  sehingga keterangan itu tidak lagi tercapai.
 - Halaman ubah membaca akun dari cache daftar; `GET /akunkas/:id` tidak
   dipakai. `useUbahAkunKas` menginvalidasi akar `akunKas` dan
   `metodePembayaran`, karena respons metode memuat nama dan nomor akun
@@ -965,14 +998,22 @@ Yang masih berlaku:
 
 ## Utang kecil yang tertunda
 
+### Utang kecil dari gerbang rute
+
+- Cabang keterangan tanpa `update-akunkas` di
+  `features/akun-kas/halaman-ubah.tsx` tidak lagi tercapai, karena
+  gerbang rute menolak rute itu lebih dulu (GR5a). Dibuang di pekerjaan
+  berikutnya.
+- Izin tulis di `features/*/izin.ts` masih ditulis sebagai teks, padahal
+  konstantanya ada di `IZIN` sejak `bc388c6`; begitu pula `akses-pos` di
+  `features/produk/izin.ts` (utang `fc29433` di bawah).
+- Pesan gerbang bersifat umum dan tidak menyebut halaman maupun izin yang
+  kurang.
+- Syarat 44 entri baru diturunkan dari nama hook dan kontrak, bukan dari
+  trace per halaman (`pengujian.md`, Utang pengujian).
+
 ### Utang kecil dari penyesuaian backend `fc29433`
 
-- `IZIN_HALAMAN` hanya dibaca sidebar (`components/app-sidebar.tsx`).
-  Tidak ada layout yang menolak rute berdasarkan peta itu, sehingga
-  halaman yang dibuka lewat URL oleh pengguna tanpa izinnya tetap
-  dirender dan baru ditolak backend. Halaman pajak membaca entrinya
-  sendiri sejak `d3443e2`; halaman lain belum. Gerbang rute dijadwalkan
-  sebagai pekerjaan berikutnya (pemilik proyek, 5 Oktober 2026).
 - Izin beban operasional belum masuk template role (keputusan FC2a);
   ditambahkan bersama halaman pengeluaran.
 - `features/produk/izin.ts` masih menulis `akses-pos` sebagai teks,

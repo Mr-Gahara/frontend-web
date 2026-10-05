@@ -16,9 +16,10 @@ Bagian **tetap**: hanya diubah atas perintah pemilik proyek.
 3. Perintah verifikasi: `tsc`, ESLint, dan pemeriksaan hasil.
 4. Menjalankan test yang ada, menambah skenario untuk perubahan itu, menjalankan ulang.
 5. Sebelum commit: `tsc`, ESLint, vitest penuh, dan spec e2e yang terdampak
-   perubahan itu, seluruhnya lolos. Suite e2e penuh dijalankan sekali saat
-   modul selesai, sebelum pembaruan dokumentasi, dan dibandingkan dengan
-   baseline (pemilik proyek, 2 Oktober 2026).
+   perubahan itu, seluruhnya lolos. Suite e2e penuh hanya dijalankan saat
+   penting: penyesuaian backend, penelusuran bug atau galat yang butuh uji
+   menyeluruh, atau atas permintaan pemilik proyek (pemilik proyek,
+   6 Oktober 2026).
 6. Setelah lolos: `git add`, commit dengan pesan lengkap (masalah, keputusan rancangan beserta alasan, dampak, pengujian), lalu push.
 
 Tidak ada perubahan yang diterapkan tanpa persetujuan. Komparasi dan blok
@@ -1229,8 +1230,9 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   unit karena test `navigasiHalaman` dihitung dari baris `expect` (lima),
   bukan blok `it` (empat); hitungan spec penjualan 32 menjadi 28 sudah
   memberi angka yang benar.
-- **Suite e2e penuh dijalankan sekali saat modul selesai, bukan sebelum
-  setiap commit** (pemilik proyek, 2 Oktober 2026, keputusan PF6a). Setiap
+- **Suite e2e penuh hanya dijalankan saat penting** (pemilik proyek,
+  6 Oktober 2026, menggantikan PF6a): penyesuaian backend, penelusuran
+  bug atau galat yang butuh uji menyeluruh, atau atas permintaan. Setiap
   commit kode tetap melewati `tsc`, ESLint, vitest penuh, dan spec yang
   terdampak, dan gerbangnya menuntut laporan spec itu lebih baru daripada
   berkas yang di-commit.
@@ -1279,7 +1281,8 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   diperkirakan dan dua kali meleset, sehingga keluaran yang benar sempat
   tampak salah. Terulang pada error ESLint warisan (`4f19e77`): 15
   alih-alih 16 error dan 10 alih-alih 8 berkas, karena disebut dari
-  ingatan, bukan dijumlah dari daftar yang sudah tercetak.
+  ingatan, bukan dijumlah dari daftar yang sudah tercetak. Terulang lagi
+  di `bc388c6`: 48 alih-alih 47 izin di `IZIN`.
 - **Rentang aggregate dibaca dari tahap `$lookup`-nya**, lewat
   `grep -nE '\$lookup' -A6`, bukan dari nomor baris field hasilnya.
   Rentang `sed` yang diambil dari baris `pajakList` hanya memuat
@@ -1503,6 +1506,20 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   itu 37 baris impor, 37 baris pemanggilan, dan empat baris kosong,
   tanpa baris tambahan. Skrip penerapnya memeriksa bentuk setiap berkas
   dan jumlah berkas sebelum menulis apa pun.
+
+- **Syarat sebuah rute diturunkan dari hook yang dipanggil halamannya,
+  bukan diwariskan dari path induknya.** Warisan akan menuntut
+  `read-akunkas` di Pindah Dana dan `read-location` di detail pengajuan
+  outlet, dan meloloskan `pengaturan/roles` lewat entri kosong induknya.
+  Skrip sekali pakai yang menelusuri impor `.tsx` setiap `page.tsx` dan
+  mencetak hook datanya memetakan 44 rute dalam satu putaran (`bc388c6`).
+- **Data pendukung form dinilai wajib atau opsional dari kodenya sebelum
+  dijadikan syarat.** Lokasi di buat bahan baku, bahan baku di form
+  produk, dan pajak di buat penjualan tampak wajib dari nama hook-nya,
+  tetapi ketiganya berbawaan kosong atau dimatikan tanpa izinnya.
+- **Aturan kelengkapan dijaga test yang membaca disk.** Test unit gerbang
+  rute membaca `app/dashboard` dan gagal bila ada `page.tsx` tanpa entri
+  `IZIN_HALAMAN`, sehingga halaman baru tidak lolos diam-diam.
 
 ## Kapan berhenti dan bertanya
 
