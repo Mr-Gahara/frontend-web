@@ -1374,8 +1374,22 @@ GR:
   yang butuh uji menyeluruh, atau atas permintaan pemilik proyek. Setiap
   commit kode tetap melewati `tsc`, ESLint, vitest penuh, dan spec e2e
   modul yang terdampak.
-- **Pekerjaan setelah ini adalah utang kecil gerbang rute** (`status.md`,
-  Pekerjaan berikutnya).
+- **Pekerjaan setelah ini adalah utang kecil gerbang rute** (selesai di
+  `dc0af1c`).
+- **Seluruh nama izin di `features/` merujuk `IZIN`** (6 Oktober 2026,
+  `dc0af1c`), bukan hanya yang kembar dengan izin gerbang, agar nama izin
+  punya satu sumber dan salah ketik tertangkap `tsc`. Aturan aksi tetap
+  di `features/<modul>/izin.ts` (keputusan rancangan butir 9), dan data
+  template role tetap teks.
+- **Pekerjaan setelah itu adalah form role ke React Hook Form dan Zod**
+  (`status.md`, Pekerjaan berikutnya).
+- Diterapkan tanpa ditanyakan (`dc0af1c`): objek izin lokal seperti
+  `IZIN_PENJUALAN` dipertahankan sebagai alias, sehingga pemakai dan
+  test-nya tidak berubah; `revisiTransferStok` diganti nama menjadi
+  `buatTransferStok`; izin ruang dan lokasi di layout outlet, halaman
+  `/dashboard`, pengaturan gudang, dan sidebar ikut merujuk `IZIN`; dan
+  cabang keterangan tanpa `update-akunkas` dibuang setelah terbukti tidak
+  tercapai dari kode layout outlet dan gerbang.
 - Diterapkan tanpa ditanyakan (`bc388c6`): selama sesi belum masuk, isi
   halaman diteruskan seperti sebelumnya, agar pesan tanpa izin tidak
   tampil sebelum daftar izin diketahui; `bolehBukaHalaman` tetap

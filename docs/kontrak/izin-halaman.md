@@ -111,7 +111,7 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/outlet/inventaris/stockOpname/[id]` | `read-stock-opname` | `/stockopname/:id` | Detail; aksi mengikuti izin tombolnya |
 | `/dashboard/outlet/inventaris/stockOpname/buatStockOpname` | `read-location`, `create-stock-opname` | `/location/current`, `/pengguna/:id` | Form |
 | `/dashboard/outlet/keuangan/akunkas/buatAkunKas` | `create-akunkas` | - | Form |
-| `/dashboard/outlet/keuangan/akunkas/[id]/ubah` | `read-akunkas`, `update-akunkas` | `/akunkas` | Form; keterangan tanpa `update-akunkas` di halaman tidak lagi tercapai |
+| `/dashboard/outlet/keuangan/akunkas/[id]/ubah` | `read-akunkas`, `update-akunkas` | `/akunkas` | Form; cabang keterangan tanpa `update-akunkas` di halaman dibuang di `dc0af1c` |
 | `/dashboard/outlet/keuangan/akunkas/pindahDana` | - | `/akunkas`, `/jurnaltransfer` | Izin per bagian di dalam halaman (DN1a) |
 | `/dashboard/outlet/pengaturan/metodePembayaran` | - | `/metodepembayaran` | `GET` tanpa izin di backend |
 | `/dashboard/outlet/pengaturan/metodePembayaran/buatMetodePembayaran` | `read-akunkas`, `create-metode-pembayaran` | `/akunkas` | Form; akun tujuan wajib |

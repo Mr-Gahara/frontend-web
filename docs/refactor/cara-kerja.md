@@ -1521,6 +1521,11 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   rute membaca `app/dashboard` dan gagal bila ada `page.tsx` tanpa entri
   `IZIN_HALAMAN`, sehingga halaman baru tidak lolos diam-diam.
 
+- **Nama izin di kode disilang dengan seed backend lewat skrip**, bukan
+  dibaca dengan mata: satu perintah mencetak setiap nama di `IZIN` yang
+  tidak ditemukan di `seeds/permissionSeed.js` (`dc0af1c`: 71 nama, tidak
+  ada yang hilang).
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:

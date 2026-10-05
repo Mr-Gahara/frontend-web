@@ -96,6 +96,17 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per utang kecil gerbang rute** (commit `dc0af1c`): 604 test
+unit dan integrasi lolos di 72 berkas, bertambah satu test nama izin
+unik di `tests/unit/lib/auth/permissions.test.ts`. Jumlah skenario e2e
+tidak berubah, sehingga harapan suite penuh tetap 438 lolos dan 16
+skipped; angka itu hitungan, karena suite penuh tidak dijalankan. Yang
+dijalankan terhadap backend lokal `yoga` `fc29433`: spec ubah akun kas,
+Pindah Dana, `tests/e2e/pelanggan`, kelola diskon,
+`tests/e2e/pengaturan`, `tests/e2e/inventaris/transferStok`,
+`tests/e2e/inventaris/pengajuanStok`, `tests/e2e/gudang`, dan
+`tests/e2e/auth`, 121 lolos dan 3 skipped (tiga `test.fixme` lama).
+
 **Baseline per gerbang rute** (commit `bc388c6`): 603 test unit dan
 integrasi lolos di 72 berkas, bertambah sepuluh test di
 `tests/unit/lib/auth/gerbang-rute.test.ts`. Suite penuh yang tertunda
@@ -1113,7 +1124,8 @@ Urutan debug kegagalan e2e di atas).
 - **Keadaan seluruh akun kas non-aktif belum teruji e2e**, karena tenant
   uji selalu punya akun aktif.
 - **Tampilan tanpa `update-akunkas` belum teruji e2e** (tombol Ubah dan
-  Aktifkan kembali tidak tampil, halaman ubah menampilkan keterangan),
+  Aktifkan kembali tidak tampil, dan rute ubah ditolak gerbang rute sejak
+  `bc388c6`),
   karena data uji tidak punya pengguna tanpa izin itu; `aksiAkunKas`
   teruji di unit test.
 - **Penolakan 409 karena batas 10 akun kas aktif belum teruji e2e.**

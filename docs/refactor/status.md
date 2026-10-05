@@ -91,16 +91,18 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Penyesuaian backend `fc29433` | `a17d584` (fixme butir 37), `d3443e2` (izin pajak), `1ec905d` (template role), `b887278` (satuan resep) | Selesai (keputusan FC1a sampai FC4a; Catatan dari penyesuaian backend `fc29433`) |
 | `useAuthGuard()` berulang | `628f52e` | Selesai (Catatan dari useAuthGuard berulang) |
 | Gerbang rute dari `IZIN_HALAMAN` | `bc388c6` | Selesai (keputusan GR1a sampai GR7a; Catatan dari gerbang rute) |
-| Utang kecil gerbang rute | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Utang kecil gerbang rute | `dc0af1c` | Selesai (Catatan dari utang kecil gerbang rute) |
+| Form role ke React Hook Form dan Zod | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per gerbang rute (`bc388c6`), tidak berubah dari `628f52e`:
+Diukur ulang per utang kecil gerbang rute (`dc0af1c`), tidak berubah
+dari `628f52e`:
 
-| Hal | Awal | Per `bc388c6` | Catatan |
+| Hal | Awal | Per `dc0af1c` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 0 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), 4 setelah halaman profil, login, dan sidebar (`57a7084`), dan 0 setelah error ESLint warisan (`4f19e77`) |
 | Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna |
@@ -111,28 +113,62 @@ Diukur ulang per gerbang rute (`bc388c6`), tidak berubah dari `628f52e`:
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: utang kecil gerbang rute
+## Pekerjaan berikutnya: form role ke React Hook Form dan Zod
 
-Gerbang rute dari `IZIN_HALAMAN` selesai di `bc388c6`. Pekerjaan
-berikutnya, atas keputusan pemilik proyek (6 Oktober 2026), adalah utang
-kecil yang ditinggalkannya (Utang kecil dari gerbang rute):
+Utang kecil gerbang rute selesai di `dc0af1c`. Pekerjaan berikutnya, atas
+keputusan pemilik proyek (6 Oktober 2026), adalah memindah
+`features/role/form-role.tsx` dari `useState` per isian dan validasi di
+`handleSubmit` ke React Hook Form dan Zod, seperti form lain (Utang kecil
+dari modul Pengaturan outlet). `f5fe574` sudah memisahkan pemuatan detail
+(`FormRole`) dari form (`IsiFormRole`) dan menyusun nilai awal lewat
+`nilaiAwalRole`.
 
-- Cabang keterangan tanpa `update-akunkas` di halaman ubah akun kas
-  dibuang, karena gerbang rute menolak rute itu lebih dulu.
-- `features/produk/izin.ts` memakai `IZIN.aksesPos`.
-- Izin tulis di `features/*/izin.ts` memakai konstanta `IZIN` yang ada
-  sejak `bc388c6`.
-
-Pemetaannya belum diambil. Langkah pertama sesi berikutnya: backend
+Pemetaannya belum diambil. Yang sudah diketahui: form dipakai halaman
+ubah dan kostum; wewenang terlarang tidak ditampilkan tetapi tetap
+dikirim saat simpan; dan form masih membandingkan `read-akun` serta
+`read-tenant` sebagai teks. Langkah pertama sesi berikutnya: backend
 di-`fetch` dan dibandingkan dengan acuan (`cara-kerja.md`), lalu pemetaan
 lewat perintah di bawah. Suite e2e penuh tidak dijalankan di awal sesi;
 harapan hitungannya 438 lolos dan 16 skipped (`pengujian.md`).
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline fc29433..origin/yoga | head -20
-grep -rnE '"(create|update|delete|approve|reject|cancel|receive|review|submit)-[a-z-]+"|"akses-pos"' features lib --include='*.ts*' | cut -c1-140
-grep -nE 'update-akunkas|aksiAkunKas|boleh' features/akun-kas/halaman-ubah.tsx features/akun-kas/izin.ts | cut -c1-140
+wc -l features/role/*.ts*; grep -nE 'useState|handleSubmit|toast\.|useSimpanRole|read-akun|read-tenant' features/role/form-role.tsx | cut -c1-140
+grep -nE 'wajib|Allowlist|allowlist|length|level' "$BE/validators/roleValidator.js" | cut -c1-140
+grep -nE '^\s*test(\.describe)?\(' tests/e2e/roles/crud-role.spec.ts | cut -c1-120
 ```
+
+## Catatan dari utang kecil gerbang rute
+
+Dikerjakan pada 6 Oktober 2026 dalam satu commit, `dc0af1c`, terhadap
+backend `yoga` `fc29433`; `origin/yoga` tidak maju sejak itu.
+
+- `IZIN` menjadi satu sumber nama izin: 24 izin aksi ditambahkan,
+  sehingga memuat 71 nama dalam tiga kelompok (ruang dan baca, tulis
+  halaman form, dan aksi di dalam halaman). Atas keputusan pemilik
+  proyek, seluruh izin tulis dipindah, bukan hanya yang kembar.
+- Sebelas `features/<modul>/izin.ts` merujuk `IZIN`. Objek lokal seperti
+  `IZIN_PENJUALAN` dan fungsi aksi dipertahankan, sehingga pemakai dan
+  test unitnya tidak berubah.
+- Izin ruang, lokasi, dan tenant di layout outlet, halaman `/dashboard`,
+  pengaturan gudang, sidebar, `akses-gudang.ts`, dan halaman profil toko
+  ikut merujuk `IZIN`.
+- `revisiTransferStok` diganti nama menjadi `buatTransferStok`, karena
+  `create-transfer-stok` dipakai untuk membuat dan merevisi surat jalan.
+- Cabang keterangan tanpa `update-akunkas` di halaman ubah akun kas
+  dibuang. Cabang itu terbukti mati dari kode: layout outlet tidak
+  memasang isi sampai sesi masuk, dan sesudahnya gerbang rute menuntut
+  `update-akunkas` untuk rute itu (GR5a).
+- Yang sengaja tetap teks: `lib/roleTemplates.ts` dan
+  `features/role/constants.ts` (data), serta dua pembanding nama di
+  `features/role/form-role.tsx`.
+- Seluruh 71 nama di `IZIN` disilang dengan `seeds/permissionSeed.js`
+  backend lewat skrip: tidak ada yang hilang.
+- Vitest 604 lolos di 72 berkas, dan spec e2e terdampak 121 lolos dan 3
+  skipped (`pengujian.md`). Suite e2e penuh tidak dijalankan.
+- Tidak ada perubahan perilaku selain cabang mati itu, tidak ada temuan
+  backend baru, dan kontrak tidak berubah.
+- Keputusan: `keputusan.md` (Gerbang rute).
 
 ## Catatan dari gerbang rute
 
@@ -444,7 +480,8 @@ dijalankan sebelum commit: 420 lolos dan 17 skipped, tanpa kegagalan.
   `update-akunkas` (`features/akun-kas/izin.ts`); pengguna lain mendapat
   keterangan di halaman ubah. Rute ubah tanpa entri `IZIN_HALAMAN` saat
   itu; sejak `bc388c6` bersyarat `read-akunkas` dan `update-akunkas`,
-  sehingga keterangan itu tidak lagi tercapai.
+  sehingga keterangan itu tidak lagi tercapai. Cabangnya dibuang di
+  `dc0af1c`.
 - Halaman ubah membaca akun dari cache daftar; `GET /akunkas/:id` tidak
   dipakai. `useUbahAkunKas` menginvalidasi akar `akunKas` dan
   `metodePembayaran`, karena respons metode memuat nama dan nomor akun
@@ -1000,13 +1037,8 @@ Yang masih berlaku:
 
 ### Utang kecil dari gerbang rute
 
-- Cabang keterangan tanpa `update-akunkas` di
-  `features/akun-kas/halaman-ubah.tsx` tidak lagi tercapai, karena
-  gerbang rute menolak rute itu lebih dulu (GR5a). Dibuang di pekerjaan
-  berikutnya.
-- Izin tulis di `features/*/izin.ts` masih ditulis sebagai teks, padahal
-  konstantanya ada di `IZIN` sejak `bc388c6`; begitu pula `akses-pos` di
-  `features/produk/izin.ts` (utang `fc29433` di bawah).
+- `features/role/form-role.tsx` masih membandingkan `read-akun` dan
+  `read-tenant` sebagai teks; ditinjau bersama pekerjaan form role.
 - Pesan gerbang bersifat umum dan tidak menyebut halaman maupun izin yang
   kurang.
 - Syarat 44 entri baru diturunkan dari nama hook dan kontrak, bukan dari
@@ -1016,8 +1048,6 @@ Yang masih berlaku:
 
 - Izin beban operasional belum masuk template role (keputusan FC2a);
   ditambahkan bersama halaman pengeluaran.
-- `features/produk/izin.ts` masih menulis `akses-pos` sebagai teks,
-  padahal `IZIN.aksesPos` ada sejak `d3443e2`.
 - Pilihan satuan resep hanya terbukti dari respons nyata untuk bahan
   bersatuan pcs, gram, dan ml. Untuk kg, liter, pak, dan unit, isi
   `availableUnits` dibaca dari kode backend, karena data development
