@@ -68,6 +68,10 @@ Akun admin platform (role `admin` di payload token akun) tidak punya toko
 maupun pengguna. Setelah login akun ia menuju `/admin` tanpa Token C, dan
 sesinya dipulihkan lewat refresh akun saja (keputusan PA1a).
 
+Guard sesi dashboard hanya dipasang di `app/dashboard/layout.tsx`
+(`useAuthGuard`, `628f52e`). Halaman dan komponen di bawah `/dashboard`
+tidak memanggilnya sendiri, dan `features/` tidak mengimpornya.
+
 ## Fondasi yang sudah tersedia
 
 Seluruh modul baru wajib memakai lapisan ini. Jangan memanggil `apiClient`

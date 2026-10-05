@@ -89,55 +89,81 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Error ESLint warisan | `4f19e77` (tipe, kutip, dan `storage.ts`), `039ead4` (hidrasi), `f5fe574` (form role) | Selesai (keputusan EL1a sampai EL4a; Catatan dari error ESLint warisan) |
 | Utang kecil yang tidak menunggu backend | `6b5e1cc` (kode mati), `eb0181f` (penjaga ruang opname, nama PIC, dan kerangka memuat stok), `9195472` (spec tipe aset) | Selesai (Catatan dari utang kecil yang tidak menunggu backend) |
 | Penyesuaian backend `fc29433` | `a17d584` (fixme butir 37), `d3443e2` (izin pajak), `1ec905d` (template role), `b887278` (satuan resep) | Selesai (keputusan FC1a sampai FC4a; Catatan dari penyesuaian backend `fc29433`) |
-| `useAuthGuard()` berulang | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| `useAuthGuard()` berulang | `628f52e` | Selesai (Catatan dari useAuthGuard berulang) |
+| Gerbang rute dari `IZIN_HALAMAN` | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per penyesuaian backend `fc29433` (`b887278`):
+Diukur ulang per `useAuthGuard()` berulang (`628f52e`):
 
-| Hal | Awal | Setelah penyesuaian `b887278` | Catatan |
+| Hal | Awal | Per `628f52e` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 0 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), 4 setelah halaman profil, login, dan sidebar (`57a7084`), dan 0 setelah error ESLint warisan (`4f19e77`) |
 | Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna |
-| `useAuthGuard()` berulang di halaman | 49 | 26 | Dihitung di `app/` saja, termasuk `app/dashboard/layout.tsx`, yang sudah memanggilnya untuk seluruh dashboard; pemanggilan di halaman karena itu berulang. Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, halaman diskon, dan halaman profil) |
+| `useAuthGuard()` berulang di halaman | 49 | 2 | Dihitung di `app/` saja. Yang tersisa `app/dashboard/layout.tsx`, satu-satunya pemanggil, dan berkas hook-nya sendiri; ke-24 pemanggilan berulang di `app/` dan ke-13 di `features/` dibuang di `628f52e` (26 sebelum itu). Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, halaman diskon, dan halaman profil) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
-| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.087 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702). Per `9195472` menjadi 4: `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700 (714 baris) karena penjaga ruang (`eb0181f`), dan buat penjualan menjadi 1.087 baris setelah kode mati dibuang (`6b5e1cc`). Per `b887278` form produk menjadi 809 baris (pemeriksaan satuan resep) |
+| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.087 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702). Per `9195472` menjadi 4: `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700 (714 baris) karena penjaga ruang (`eb0181f`), dan buat penjualan menjadi 1.087 baris setelah kode mati dibuang (`6b5e1cc`). Per `b887278` form produk menjadi 809 baris (pemeriksaan satuan resep). Per `628f52e` tetap 4; detail stock opname menjadi 712 baris setelah pemanggilan guard dibuang |
 
 Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
 dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
 
-## Pekerjaan berikutnya: useAuthGuard berulang
+## Pekerjaan berikutnya: gerbang rute dari IZIN_HALAMAN
 
-Kelima utang kecil yang tidak menunggu backend selesai di `9195472`.
-Pekerjaan berikutnya, atas keputusan pemilik proyek (4 Oktober 2026),
-adalah pemanggilan `useAuthGuard()` yang berulang.
-`app/dashboard/layout.tsx` sudah memanggilnya untuk seluruh dashboard,
-sehingga pemanggilan di halaman dan komponen di bawah layout itu
-berulang.
+Pemanggilan `useAuthGuard()` yang berulang selesai di `628f52e`.
+Pekerjaan berikutnya, atas keputusan pemilik proyek (5 Oktober 2026),
+adalah gerbang rute dari `IZIN_HALAMAN`. Hari ini peta itu hanya dibaca
+sidebar, sehingga halaman yang dibuka lewat URL oleh pengguna tanpa
+izinnya tetap dirender dan baru ditolak backend (Utang kecil dari
+penyesuaian backend `fc29433`).
 
-Pekerjaan ini tertunda oleh penyesuaian backend `fc29433`, yang selesai
-di `b887278`. Pemetaannya (4 Oktober 2026, terhadap `9195472`) sudah
-terbukti: 37 pemanggilan berulang, yaitu 24 berkas di `app/` di luar
-layout dashboard dan berkas hook-nya sendiri, dan 13 berkas di
-`features/`, yang seluruhnya hanya dipasang di bawah `/dashboard`. Tidak
-ada pemanggil yang memakai nilai kembalian hook, layout dashboard
-memanggilnya tanpa menahan render, dan test unit hook tidak bergantung
-pada pemanggilan di halaman. Rancangannya: ke-37 pemanggilan beserta
-impornya dibuang dalam satu commit tanpa perubahan perilaku.
+Pemetaannya belum diambil. Yang sudah diketahui: guard sesi dashboard
+hanya dipasang di `app/dashboard/layout.tsx`; halaman pajak membaca
+entrinya sendiri sejak `d3443e2`; dan sejumlah halaman sengaja tanpa
+entri `IZIN_HALAMAN`, dengan izin per bagian (misalnya keputusan PO14a
+dan DN1a), sehingga rute tanpa entri tidak boleh ikut ditolak. Tempat
+gerbang, perilaku saat ditolak, dan perlakuan rute turunan (detail,
+buat, dan ubah) diajukan sebagai keputusan setelah pemetaan.
 
-Langkah pertama sesi berikutnya, setelah backend di-`fetch` dan
-dibandingkan dengan acuan (`cara-kerja.md`): pastikan daftar pemanggil
-belum berubah lewat perintah di bawah, lalu terapkan.
+Langkah pertama sesi berikutnya: suite e2e penuh yang tertunda sejak
+`628f52e` (harapan 436 lolos dan 16 skipped, `pengujian.md`), lalu
+backend di-`fetch` dan dibandingkan dengan acuan (`cara-kerja.md`), lalu
+pemetaan lewat perintah di bawah.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline fc29433..origin/yoga | head -20
-cat app/hooks/useAuthGuard.ts | cut -c1-140
-grep -rnE 'useAuthGuard\(\)' app features | grep -vE ':[[:space:]]*useAuthGuard\(\);$' | cut -c1-140
-grep -rlE 'useAuthGuard\(\)' features | sort
+grep -rnE 'IZIN_HALAMAN|bolehBukaHalaman|bolehBukaGrup' app components features lib | cut -c1-140
+grep -nE '"/dashboard' lib/auth/permissions.ts | cut -c1-140
+find app/dashboard -name 'page.tsx' | sed 's|^app||; s|/page.tsx$||' | sort
 ```
+
+## Catatan dari useAuthGuard berulang
+
+Dikerjakan pada 5 Oktober 2026 dalam satu commit, `628f52e`, terhadap
+backend `yoga` `fc29433`; `origin/yoga` tidak maju sejak itu.
+
+- Baris impor dan baris pemanggilan `useAuthGuard()` dibuang dari 37
+  berkas: 24 di `app/` dan 13 di `features/`, beserta empat baris kosong
+  yang menjadi berlebih. Tidak ada baris yang ditambahkan, dan perilaku
+  tidak berubah.
+- Pemetaan terhadap `9195472` dibuktikan ulang sebelum diterapkan:
+  jumlah pemanggil sama, tidak ada yang memakai nilai kembalian hook,
+  dan bentuk kedua baris seragam di setiap berkas.
+- Guard sesi dashboard kini hanya dipasang di `app/dashboard/layout.tsx`
+  (`arsitektur.md`), dan `features/` tidak lagi mengimpor
+  `useAuthGuard`.
+- Spec baru `tests/e2e/auth/guard-dashboard.spec.ts`: tanpa sesi, empat
+  rute di bawah `/dashboard` berakhir di `/login`. Skenarionya lolos
+  juga terhadap kode lama; gunanya menjaga guard layout sebagai
+  satu-satunya penjaga.
+- Vitest penuh 593 lolos, dan spec e2e terdampak 98 lolos dan 2
+  skipped. Suite e2e penuh tidak dijalankan, atas keputusan pemilik
+  proyek, dan menjadi langkah pertama pekerjaan berikutnya
+  (`pengujian.md`).
+- Tidak ada temuan backend baru, dan kontrak tidak berubah.
+- Keputusan: `keputusan.md` (useAuthGuard berulang).
 
 ## Catatan dari penyesuaian backend `fc29433`
 
@@ -945,8 +971,8 @@ Yang masih berlaku:
   Tidak ada layout yang menolak rute berdasarkan peta itu, sehingga
   halaman yang dibuka lewat URL oleh pengguna tanpa izinnya tetap
   dirender dan baru ditolak backend. Halaman pajak membaca entrinya
-  sendiri sejak `d3443e2`; halaman lain belum. Gerbang rute di layout
-  perlu keputusan pemilik proyek.
+  sendiri sejak `d3443e2`; halaman lain belum. Gerbang rute dijadwalkan
+  sebagai pekerjaan berikutnya (pemilik proyek, 5 Oktober 2026).
 - Izin beban operasional belum masuk template role (keputusan FC2a);
   ditambahkan bersama halaman pengeluaran.
 - `features/produk/izin.ts` masih menulis `akses-pos` sebagai teks,
@@ -1020,9 +1046,6 @@ Yang masih berlaku:
   nyata. Tampilan mutasi transfer dan pembatalan transfer masuk teruji
   e2e sejak `f7805ca`; pembatalan transfer keluar hanya teruji di unit
   test.
-- Ketiga halaman keuangan yang memuat data masih memanggil
-  `useAuthGuard()`, karena halamannya tetap di `app/` dengan tampilan
-  lama; pemanggilan itu dibuang bila halamannya dijadikan tipis.
 
 ### Utang kecil dari modul jadwal dan shift
 

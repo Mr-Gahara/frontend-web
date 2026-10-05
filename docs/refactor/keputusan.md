@@ -281,7 +281,8 @@ produk (`152088b`). Labelnya PR:
   `create-transfer-stok` untuk surat jalan.
 - **Halaman detail, edit, dan buat tidak punya entri `IZIN_HALAMAN`**,
   mengikuti pola detail stock opname: `useAuthGuard` menjaga sesi, tombol
-  aksi mengikuti izin, dan backend menolak dengan 403.
+  aksi mengikuti izin, dan backend menolak dengan 403. Sejak `628f52e`
+  sesi dijaga guard layout dashboard, tanpa pemanggilan di halaman.
 - **Revisi hanya untuk DRAFT** di halaman edit, walau backend masih
   mengizinkan APPROVED dan PENDING diubah (`kontrak/temuan.md` butir 25).
 
@@ -1306,7 +1307,7 @@ Diputuskan pemilik proyek pada 4 Oktober 2026. Labelnya EL:
   didefinisikan sekali (keputusan rancangan butir 12).
 - **Pekerjaan setelah ini adalah utang kecil yang tidak menunggu
   backend** (selesai di `9195472`), lalu `useAuthGuard()` yang berulang
-  (`status.md`, Pekerjaan berikutnya).
+  (selesai di `628f52e`, useAuthGuard berulang).
 - Diterapkan tanpa ditanyakan (`4f19e77`): `decodeJWT` mengembalikan
   `Record<string, unknown>`, dan `exp` yang bukan angka dianggap
   kedaluwarsa; tipe `Dropdown` kalender diambil dari `react-day-picker`;
@@ -1318,6 +1319,24 @@ Diputuskan pemilik proyek pada 4 Oktober 2026. Labelnya EL:
   dimuat di modul lain; `useRole` dimuat ulang saat halaman dibuka; nilai
   awal disusun fungsi murni `nilaiAwalRole` (butir 10); dan isian form
   tetap memakai `useState`.
+
+### useAuthGuard berulang
+
+Diputuskan pemilik proyek pada 4 dan 5 Oktober 2026 (`628f52e`).
+
+- **Guard sesi dashboard hanya dipasang di `app/dashboard/layout.tsx`.**
+  Ke-37 pemanggilan `useAuthGuard()` di bawah layout itu dibuang dalam
+  satu commit tanpa perubahan perilaku.
+- **Suite e2e penuh tidak dijalankan sebelum commit dan dokumentasi
+  ditutup** (5 Oktober 2026); baseline dicatat sebagai hitungan, dan
+  suite penuh menjadi langkah pertama pekerjaan berikutnya.
+- **Pekerjaan setelah ini adalah gerbang rute dari `IZIN_HALAMAN`**
+  (`status.md`, Pekerjaan berikutnya).
+- Diterapkan tanpa ditanyakan (`628f52e`): spec baru
+  `tests/e2e/auth/guard-dashboard.spec.ts` untuk empat rute tanpa sesi;
+  spec e2e terdampak dijalankan sebagai perwakilan tiap jenis berkas
+  yang berubah; dan guard halaman login serta panel admin tidak
+  disentuh.
 
 ## Keputusan rancangan yang mengikat
 

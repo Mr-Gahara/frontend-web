@@ -95,6 +95,18 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per `useAuthGuard()` berulang** (commit `628f52e`): 593 test
+unit dan integrasi lolos di 71 berkas, tidak berubah. `628f52e` menambah
+empat skenario, `tests/e2e/auth/guard-dashboard.spec.ts`, sehingga
+harapan suite penuh 436 lolos dan 16 skipped. Angka itu hitungan, yaitu
+harapan 432 dan 16 di bawah ditambah empat: suite penuh tidak
+dijalankan, atas keputusan pemilik proyek (5 Oktober 2026), dan menjadi
+langkah pertama pekerjaan berikutnya. Yang dijalankan terhadap backend
+lokal `yoga` `fc29433`: `tests/e2e/auth`, `tests/e2e/roles`,
+`tests/e2e/inventaris/kategori`, `tests/e2e/inventaris/stockAdjustment`,
+`tests/e2e/reservasi/tarif`, dan spec Pindah Dana, 98 lolos dan 2
+skipped (dua `test.fixme` lintas outlet).
+
 **Baseline per penyesuaian backend `fc29433`** (commit `b887278`): 593
 test unit dan integrasi lolos di 71 berkas, bertambah empat belas (enam
 test izin pajak dan delapan test satuan resep). Suite penuh 4 Oktober
@@ -1478,3 +1490,8 @@ Urutan debug kegagalan e2e di atas).
   dibaca dari teks pilihan yang ditekan, dan skenario tidak menyimpan
   data. Bukti terhadap kode lama diambil dengan `git stash push` atas
   berkas perubahannya saja, lalu `git stash pop`, tanpa mengubah spec.
+- `tests/e2e/auth/guard-dashboard.spec.ts` (`628f52e`): skenario
+  dibangkitkan dari daftar rute, tanpa login dan tanpa data. Konteks
+  tanpa sesi membuka rute di `app/`, rute berparameter, dan halaman dari
+  `features/`, lalu menunggu URL berakhir di `/login`. Spec penjaga
+  untuk refactor tanpa perubahan perilaku: lolos sebelum dan sesudahnya.

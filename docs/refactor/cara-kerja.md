@@ -1497,6 +1497,12 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   Skenario gerbang `produk.stok` diperkirakan gagal terhadap backend
   baru, padahal skenario itu `test.fixme`; yang aktif menguji gerbang
   lain dan tetap benar.
+- **Perubahan seragam di banyak berkas dibuktikan lewat ringkasan
+  diff.** `git diff -U0` yang disaring lalu `sort | uniq -c` harus hanya
+  memuat jenis baris yang direncanakan beserta jumlahnya; di `628f52e`
+  itu 37 baris impor, 37 baris pemanggilan, dan empat baris kosong,
+  tanpa baris tambahan. Skrip penerapnya memeriksa bentuk setiap berkas
+  dan jumlah berkas sebelum menulis apa pun.
 
 ## Kapan berhenti dan bertanya
 
