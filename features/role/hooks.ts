@@ -8,7 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { permissionApi, roleApi } from "./api";
 import { queryKeys } from "@/lib/queryKeys";
 import { useSession } from "@/lib/auth/useSession";
-import type { BuatRoleRequest, Role } from "@/types/role";
+import type { BuatRoleRequest, PerbaruiRoleRequest, Role } from "@/types/role";
 
 export function useDaftarRole() {
   return useQuery({
@@ -39,11 +39,16 @@ function useInvalidasiRole() {
   return () => queryClient.invalidateQueries({ queryKey: queryKeys.roles.semua });
 }
 
+/** Tanpa id berarti membuat posisi baru; dengan id berarti mengubah sebagian. */
+export type SimpanRole =
+  | { id: string; data: PerbaruiRoleRequest }
+  | { id?: undefined; data: BuatRoleRequest };
+
 export function useSimpanRole() {
   const invalidasi = useInvalidasiRole();
   return useMutation({
-    mutationFn: ({ id, data }: { id?: string; data: BuatRoleRequest }) =>
-      id ? roleApi.perbarui(id, data) : roleApi.buat(data),
+    mutationFn: (v: SimpanRole) =>
+      v.id === undefined ? roleApi.buat(v.data) : roleApi.perbarui(v.id, v.data),
     onSuccess: invalidasi,
   });
 }

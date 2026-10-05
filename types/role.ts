@@ -22,6 +22,9 @@ export interface BuatRoleRequest {
   permissions: string[];
 }
 
+/** Payload PUT /role/:id: seluruh field opsional, hanya yang berubah yang dikirim. */
+export type PerbaruiRoleRequest = Partial<BuatRoleRequest>;
+
 export interface BuatRoleResponse {
   message: string;
   data: {

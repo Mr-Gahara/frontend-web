@@ -1,10 +1,19 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { IZIN_DASAR, IZIN_TERLARANG } from "./constants";
+import {
+  IZIN_DASAR,
+  IZIN_TERLARANG,
+  PENJELASAN_IZIN_DASAR,
+  PENJELASAN_IZIN_DASAR_UMUM,
+} from "./constants";
 import { nilaiAwalRole } from "./nilai-awal";
+import { adaPerubahanRole, payloadBuatRole, payloadPerbaruiRole } from "./payload";
+import { buatSkemaRole, type NilaiFormRole } from "./schema";
 import {
   useDaftarPermission,
   useDaftarRole,
@@ -13,7 +22,7 @@ import {
   useSimpanRole,
 } from "./hooks";
 import { pesanError } from "@/lib/api/error";
-import { BuatRoleRequest, Permission } from "@/types/role";
+import type { Permission } from "@/types/role";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
 
@@ -120,12 +129,8 @@ function IsiFormRole({
   // Nilai awal dihitung sekali saat form dipasang: wewenang dasar untuk
   // posisi baru, atau isi posisi yang diubah.
   const [awalForm] = useState(() => nilaiAwalRole(awal));
-  const [namaRole, setNamaRole] = useState(awalForm.namaRole);
-  const [deskripsi, setDeskripsi] = useState(awalForm.deskripsi);
-  const [level, setLevel] = useState(awalForm.level);
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(
-    awalForm.izinTerpilih,
-  );
+  // Penolakan backend saat simpan; galat validasi tampil di bawah tiap
+  // isian (keputusan RL1a).
   const [formError, setFormError] = useState("");
 
   const [warningDialog, setWarningDialog] = useState<{
@@ -141,6 +146,38 @@ function IsiFormRole({
   // token hanya membawa nama role tanpa level.
   const { data: roles = [] } = useDaftarRole();
   const currentUserLevel = useLevelPenggunaAktif(roles);
+
+  // Skema dibentuk ulang setiap render, sehingga batas atas level mengikuti
+  // level pengguna begitu daftar role termuat (keputusan RL3a).
+  const {
+    register,
+    handleSubmit: tanganiSubmit,
+    control,
+    setValue,
+    getValues,
+    formState: { errors },
+  } = useForm<NilaiFormRole>({
+    resolver: zodResolver(buatSkemaRole(currentUserLevel)),
+    defaultValues: {
+      namaRole: awalForm.namaRole,
+      deskripsi: awalForm.deskripsi,
+      level: awalForm.level,
+      izin: awalForm.izinTerpilih,
+    },
+  });
+  const selectedPermissions = useWatch({ control, name: "izin" });
+  const [namaTampil, deskripsiTampil, levelTampil] = useWatch({
+    control,
+    name: ["namaRole", "deskripsi", "level"],
+  });
+  const setSelectedPermissions = (
+    pembaru: string[] | ((sebelumnya: string[]) => string[]),
+  ) =>
+    setValue(
+      "izin",
+      typeof pembaru === "function" ? pembaru(getValues("izin")) : pembaru,
+      { shouldDirty: true, shouldValidate: true },
+    );
 
   // LOGIKA RBAC KLIEN
   const allowedPermissions = useMemo(() => {
@@ -158,35 +195,46 @@ function IsiFormRole({
     );
   }, [allowedPermissions]);
 
-  // Wewenang terlarang yang sudah dimiliki posisi ini tidak ditampilkan,
-  // tetapi tetap dikirim saat simpan agar tidak hilang.
-  const hiddenExistingPerms = awalForm.izinTersembunyi;
+  // Mode ubah: payload dihitung dari isian saat ini, sehingga simpan
+  // nonaktif selama tidak ada perubahan (keputusan RL2a). Wewenang
+  // terlarang yang sudah dimiliki posisi ini tidak ditampilkan, tetapi
+  // tetap ikut dikirim lewat payload agar tidak hilang.
+  const tanpaPerubahan =
+    modeEdit &&
+    !adaPerubahanRole(
+      payloadPerbaruiRole(
+        awalForm,
+        {
+          namaRole: namaTampil,
+          deskripsi: deskripsiTampil,
+          level: levelTampil,
+          izin: selectedPermissions,
+        },
+        allPermissions,
+      ),
+    );
 
   // MUTATION: UPDATE ROLE
   const simpanRoleMutation = useSimpanRole();
 
-  const simpanRole = (payload: BuatRoleRequest) =>
-    simpanRoleMutation.mutate(
-      { id: roleId, data: payload },
-      {
-        onSuccess: () => {
-          toast.success("Berhasil", {
-            description: modeEdit
-              ? "Perubahan posisi berhasil disimpan."
-              : "Posisi karyawan baru telah berhasil dibuat.",
-          });
-          router.push(urlSelesai);
-        },
-        onError: (err) => {
-          setFormError(
-            pesanError(
-              err,
-              modeEdit ? "Gagal memperbarui posisi." : "Gagal membuat posisi baru.",
-            ),
-          );
-        },
-      },
-    );
+  const hasilSimpan = {
+    onSuccess: () => {
+      toast.success("Berhasil", {
+        description: modeEdit
+          ? "Perubahan posisi berhasil disimpan."
+          : "Posisi karyawan baru telah berhasil dibuat.",
+      });
+      router.push(urlSelesai);
+    },
+    onError: (err: unknown) => {
+      setFormError(
+        pesanError(
+          err,
+          modeEdit ? "Gagal memperbarui posisi." : "Gagal membuat posisi baru.",
+        ),
+      );
+    },
+  };
 
   // HANDLERS SELEKSI PERMISSION
   const handleCheckbox = (nama: string) => {
@@ -194,16 +242,8 @@ function IsiFormRole({
     const isUnchecking = selectedPermissions.includes(nama);
 
     if (isBasic && isUnchecking) {
-      let penjelasan =
-        "Fungsi dasar aplikasi akan terganggu tanpa wewenang ini.";
-
-      if (nama === "read-akun") {
-        penjelasan =
-          "Tanpa wewenang ini, staf tidak dapat melihat informasi identitas bisnis klien di dalam sistem.";
-      } else if (nama === "read-tenant") {
-        penjelasan =
-          "Tanpa wewenang ini, aplikasi tidak bisa mengidentifikasi data profil toko atau cabang saat staf tersebut bekerja.";
-      }
+      const penjelasan =
+        PENJELASAN_IZIN_DASAR[nama] ?? PENJELASAN_IZIN_DASAR_UMUM;
 
       setWarningDialog({ isOpen: true, nama, penjelasan });
       return;
@@ -264,49 +304,19 @@ function IsiFormRole({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Dipanggil setelah skema lolos; nama dan deskripsi sudah dipangkas.
+  const kirim = (data: NilaiFormRole) => {
     setFormError("");
-
-    if (selectedPermissions.length === 0) {
-      setFormError("Silakan pilih minimal 1 hak akses untuk posisi ini.");
+    if (modeEdit && roleId) {
+      const perubahan = payloadPerbaruiRole(awalForm, data, allPermissions);
+      if (!adaPerubahanRole(perubahan)) return;
+      simpanRoleMutation.mutate({ id: roleId, data: perubahan }, hasilSimpan);
       return;
     }
-
-    const parsedLevel = parseInt(level, 10);
-
-    if (isNaN(parsedLevel) || parsedLevel <= 0) {
-      setFormError("Level harus berupa angka lebih besar dari 0.");
-      return;
-    }
-
-    if (parsedLevel >= currentUserLevel) {
-      setFormError(
-        `Level harus lebih rendah dari level Anda saat ini (${currentUserLevel}).`,
-      );
-      return;
-    }
-
-    const finalPermissionsNames = [
-      ...selectedPermissions,
-      ...hiddenExistingPerms,
-    ];
-
-    const finalPermissionIds = finalPermissionsNames
-      .map((nama) => {
-        const matched = allPermissions.find((p) => p.nama === nama);
-        return matched ? matched.id : null;
-      })
-      .filter(Boolean) as string[];
-
-    const payload: BuatRoleRequest = {
-      namaRole,
-      ...(deskripsi && { deskripsi }),
-      level: parsedLevel,
-      permissions: finalPermissionIds,
-    };
-
-    simpanRole(payload);
+    simpanRoleMutation.mutate(
+      { data: payloadBuatRole(data, awalForm.izinTersembunyi, allPermissions) },
+      hasilSimpan,
+    );
   };
 
   return (
@@ -335,17 +345,19 @@ function IsiFormRole({
 
       {/* Main Container Card */}
       <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-7">
+        <form onSubmit={tanganiSubmit(kirim)} noValidate className="flex flex-col gap-7">
           <div className="space-y-2">
             <label htmlFor="namaRole" className="text-sm font-bold text-[#0A2947]">Nama Posisi / Jabatan</label>
             <Input
               className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
               id="namaRole"
-              value={namaRole}
-              onChange={(e) => setNamaRole(e.target.value)}
+              {...register("namaRole")}
+              aria-invalid={!!errors.namaRole}
               placeholder="Contoh: Manajer Toko, Kasir Depan, Barista"
-              required
             />
+            {errors.namaRole && (
+              <p className="text-xs font-bold text-red-600">{errors.namaRole.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -358,10 +370,13 @@ function IsiFormRole({
             <Input
               className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
               id="deskripsiRole"
-              value={deskripsi}
-              onChange={(e) => setDeskripsi(e.target.value)}
+              {...register("deskripsi")}
+              aria-invalid={!!errors.deskripsi}
               placeholder="Contoh: Bertanggung jawab atas transaksi penjualan dan laporan kas harian"
             />
+            {errors.deskripsi && (
+              <p className="text-xs font-bold text-red-600">{errors.deskripsi.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -370,11 +385,13 @@ function IsiFormRole({
               type="number"
               className="no-spinner bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
               id="levelRole"
-              value={level}
-              onChange={(e) => setLevel(e.target.value)}
+              {...register("level")}
+              aria-invalid={!!errors.level}
               placeholder="Contoh: 100"
-              required
             />
+            {errors.level && (
+              <p className="text-xs font-bold text-red-600">{errors.level.message}</p>
+            )}
             {currentUserLevel > 0 && (
               <p className="text-xs font-medium text-[#0A2947]/60 mt-1">
                 Level harus antara 1 hingga {currentUserLevel - 1}. Semakin
@@ -492,6 +509,10 @@ function IsiFormRole({
             )}
           </div>
 
+          {errors.izin && (
+            <p className="text-sm font-bold text-red-600 px-2">{errors.izin.message}</p>
+          )}
+
           {formError && (
             <p className="text-sm font-bold text-red-600 px-2">{formError}</p>
           )}
@@ -511,7 +532,8 @@ function IsiFormRole({
               type="submit"
               disabled={
                 simpanRoleMutation.isPending ||
-                permissionsLoading
+                permissionsLoading ||
+                tanpaPerubahan
               }
               className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm px-6"
             >

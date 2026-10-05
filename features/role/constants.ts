@@ -13,6 +13,18 @@
  */
 export const IZIN_DASAR = ["read-akun", "read-tenant"];
 
+/** Akibat melepas sebuah wewenang dasar, ditampilkan di dialog peringatan. */
+export const PENJELASAN_IZIN_DASAR: Record<string, string> = {
+  "read-akun":
+    "Tanpa wewenang ini, staf tidak dapat melihat informasi identitas bisnis klien di dalam sistem.",
+  "read-tenant":
+    "Tanpa wewenang ini, aplikasi tidak bisa mengidentifikasi data profil toko atau cabang saat staf tersebut bekerja.",
+};
+
+/** Penjelasan untuk wewenang dasar yang belum punya penjelasan sendiri. */
+export const PENJELASAN_IZIN_DASAR_UMUM =
+  "Fungsi dasar aplikasi akan terganggu tanpa wewenang ini.";
+
 /**
  * Wewenang yang tidak boleh diberikan lewat form ini karena menyangkut
  * pengelolaan permission itu sendiri. Disembunyikan dari daftar pilihan,

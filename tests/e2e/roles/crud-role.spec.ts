@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, type Request } from "@playwright/test";
 import { JAWAB_GAGAL } from "../../helpers/transfer-uji";
 import { ROLE_TEMPLATES } from "../../../lib/roleTemplates";
 
@@ -164,6 +164,102 @@ test.describe("E2E - Role (CRUD)", () => {
 
     await main.getByRole("link", { name: "Kembali ke Daftar Posisi" }).click();
     await expect(page).toHaveURL(new RegExp(`${DAFTAR}$`), { timeout: 15_000 });
+  });
+
+  test("validasi form: nama terlalu pendek dan level desimal ditolak tanpa permintaan", async ({
+    page,
+  }) => {
+    // POST dijawab gagal agar tidak ada posisi yang tersimpan, juga bila
+    // form ternyata mengirimnya.
+    let terkirim = 0;
+    await page.route(/\/api\/role$/i, async (route) => {
+      if (route.request().method() !== "POST") return route.continue();
+      terkirim += 1;
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ status: "error", message: "Simulasi gagal simpan" }),
+      });
+    });
+
+    await page.goto(`${BASE}${DAFTAR}/buatRole/kostum`);
+    const nama = page.getByLabel(/nama posisi|nama role/i);
+    const level = page.getByLabel(/level/i);
+    const simpan = page.getByRole("button", { name: /simpan/i });
+    await expect(page.getByRole("checkbox").first()).toBeVisible({ timeout: 15_000 });
+
+    await nama.fill("ab");
+    await level.fill("1");
+    await simpan.click();
+    await expect(page.getByText("Nama posisi minimal 3 karakter.")).toBeVisible({
+      timeout: 10_000,
+    });
+
+    await nama.fill(`Posisi E2E Validasi ${Date.now()}`);
+    await level.fill("1.5");
+    await simpan.click();
+    await expect(
+      page.getByText("Level harus berupa bilangan bulat lebih besar dari 0."),
+    ).toBeVisible({ timeout: 10_000 });
+
+    expect(terkirim, "POST /role selama isian ditolak form").toBe(0);
+    await page.unroute(/\/api\/role$/i);
+  });
+
+  test("ubah: simpan nonaktif tanpa perubahan, hanya field berubah yang dikirim, dan deskripsi dapat dikosongkan", async ({
+    page,
+  }) => {
+    const nama = `Posisi E2E Ubah ${Date.now()}`;
+    const namaBaru = `${nama} B`;
+    const putRole = (r: Request) =>
+      r.method() === "PUT" && /\/api\/role\/[0-9a-f]{24}$/i.test(r.url());
+    const simpan = page.getByRole("button", { name: /simpan/i });
+    const deskripsi = page.locator("#deskripsiRole");
+
+    await page.goto(`${BASE}${DAFTAR}/buatRole/kostum`);
+    await page.getByLabel(/nama posisi|nama role/i).fill(nama);
+    await deskripsi.fill("Deskripsi uji");
+    await page.getByLabel(/level/i).fill("1");
+    await simpan.click();
+    await expect(page).toHaveURL(new RegExp(`${DAFTAR}$`), { timeout: 15_000 });
+
+    try {
+      await test.step("Ubah nama saja: payload hanya berisi namaRole", async () => {
+        await kartuRole(page, nama).getByRole("button", { name: /edit/i }).first().click();
+        await page.waitForURL("**/edit", { timeout: 15_000 });
+        const inputNama = page.getByLabel(/nama posisi|nama role/i);
+        await expect(inputNama).toHaveValue(nama, { timeout: 15_000 });
+        await expect(page.getByRole("checkbox").first()).toBeVisible({ timeout: 15_000 });
+        await expect.soft(simpan, "simpan nonaktif tanpa perubahan").toBeDisabled();
+
+        await inputNama.fill(namaBaru);
+        const [permintaan] = await Promise.all([page.waitForRequest(putRole), simpan.click()]);
+        expect(permintaan.postDataJSON()).toEqual({ namaRole: namaBaru });
+        await expect(page).toHaveURL(new RegExp(`${DAFTAR}$`), { timeout: 15_000 });
+      });
+
+      await test.step("Deskripsi dikosongkan: dikirim sebagai teks kosong dan tersimpan kosong", async () => {
+        await kartuRole(page, namaBaru).getByRole("button", { name: /edit/i }).first().click();
+        await page.waitForURL("**/edit", { timeout: 15_000 });
+        await expect(deskripsi).toHaveValue("Deskripsi uji", { timeout: 15_000 });
+        await expect(page.getByRole("checkbox").first()).toBeVisible({ timeout: 15_000 });
+
+        await deskripsi.fill("");
+        const [permintaan] = await Promise.all([page.waitForRequest(putRole), simpan.click()]);
+        expect(permintaan.postDataJSON()).toEqual({ deskripsi: "" });
+        await expect(page).toHaveURL(new RegExp(`${DAFTAR}$`), { timeout: 15_000 });
+
+        await kartuRole(page, namaBaru).getByRole("button", { name: /edit/i }).first().click();
+        await page.waitForURL("**/edit", { timeout: 15_000 });
+        await expect(page.getByLabel(/nama posisi|nama role/i)).toHaveValue(namaBaru, {
+          timeout: 15_000,
+        });
+        await expect(deskripsi).toHaveValue("");
+      });
+    } finally {
+      // Nama baru memuat nama lama, sehingga kartunya ditemukan di kedua keadaan.
+      await bersihkanRole(page, nama);
+    }
   });
 
   test("template: setiap izin terpetakan ke id, dan badge sesuai payload", async ({

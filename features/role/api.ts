@@ -7,13 +7,13 @@
 
 import { apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
-import type { BuatRoleRequest, Permission, Role } from "@/types/role";
+import type { BuatRoleRequest, PerbaruiRoleRequest, Permission, Role } from "@/types/role";
 
 export const roleApi = {
   daftar: () => apiData.get<Role[]>(EP.role.list),
   detail: (id: string) => apiData.get<Role>(EP.role.detail(id)),
   buat: (payload: BuatRoleRequest) => apiData.post<Role>(EP.role.list, payload),
-  perbarui: (id: string, payload: BuatRoleRequest) =>
+  perbarui: (id: string, payload: PerbaruiRoleRequest) =>
     apiData.put<Role>(EP.role.detail(id), payload),
   hapus: (id: string) => apiData.delete<unknown>(EP.role.detail(id)),
 };
