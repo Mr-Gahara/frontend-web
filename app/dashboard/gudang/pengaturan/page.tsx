@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Building2, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/auth/useSession";
+import { IZIN } from "@/lib/auth/permissions";
 import { pesanError } from "@/lib/api/error";
 import { useDaftarLokasi, usePerbaruiLokasi } from "@/features/inventaris/hooks";
 import IsianLokasi from "@/features/inventaris/isian-lokasi";
@@ -101,7 +102,7 @@ function FormProfilGudang({ gudang, bolehUbah }: FormProfilGudangProps) {
  */
 export default function PengaturanGudangPage() {
   const { permissions } = useSession();
-  const bolehUbah = permissions.includes("update-location");
+  const bolehUbah = permissions.includes(IZIN.ubahLocation);
   const lokasi = useDaftarLokasi();
   const gudang = lokasi.data?.find((l) => l.tipe === "Gudang") ?? null;
 

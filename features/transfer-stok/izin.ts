@@ -1,23 +1,24 @@
+import { IZIN } from "@/lib/auth/permissions";
 import type { StatusTransfer } from "@/types/transferStok";
 
 /** PATCH /transferstok/:id/kirim mewajibkan approve-transfer-stok. */
 export function bolehKirimSuratJalan(permissions: readonly string[]): boolean {
-  return permissions.includes("approve-transfer-stok");
+  return permissions.includes(IZIN.kirimTransferStok);
 }
 
 /** PUT /transferstok/:id memakai izin buat, create-transfer-stok. */
 export function bolehRevisiSuratJalan(permissions: readonly string[]): boolean {
-  return permissions.includes("create-transfer-stok");
+  return permissions.includes(IZIN.buatTransferStok);
 }
 
 /** PATCH /transferstok/:id/batal mewajibkan cancel-transfer-stok. */
 export function bolehBatalSuratJalan(permissions: readonly string[]): boolean {
-  return permissions.includes("cancel-transfer-stok");
+  return permissions.includes(IZIN.batalTransferStok);
 }
 
 /** PATCH /transferstok/:id/terima mewajibkan receive-transfer-stok. */
 export function bolehTerimaSuratJalan(permissions: readonly string[]): boolean {
-  return permissions.includes("receive-transfer-stok");
+  return permissions.includes(IZIN.terimaTransferStok);
 }
 
 export interface AksiSuratJalan {

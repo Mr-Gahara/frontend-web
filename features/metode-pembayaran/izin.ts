@@ -1,3 +1,5 @@
+import { IZIN } from "@/lib/auth/permissions";
+
 /**
  * Izin tulis metode pembayaran, sesuai route backend 465b438 (keputusan
  * rancangan butir 14). Membaca daftar dan detail cukup login, sehingga
@@ -5,8 +7,8 @@
  * ubah, karena keduanya lewat PUT.
  */
 export const IZIN_METODE_PEMBAYARAN = {
-  buat: "create-metode-pembayaran",
-  ubah: "update-metode-pembayaran",
+  buat: IZIN.buatMetodePembayaran,
+  ubah: IZIN.ubahMetodePembayaran,
 } as const;
 
 export function aksiMetodePembayaran(permissions: readonly string[]) {

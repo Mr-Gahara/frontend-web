@@ -1,3 +1,5 @@
+import { IZIN } from "@/lib/auth/permissions";
+
 /**
  * Izin aksi halaman diskon, mengikuti checkPermission di
  * routes/diskonRoute.js backend (keputusan rancangan butir 9 dan 14).
@@ -5,8 +7,8 @@
  * lewat PUT status, sehingga aktifkan dan nonaktifkan mengikuti izin ubah.
  */
 export const IZIN_DISKON = {
-  buat: "create-diskon",
-  ubah: "update-diskon",
+  buat: IZIN.buatDiskon,
+  ubah: IZIN.ubahDiskon,
 } as const;
 
 export function aksiDiskon(permissions: string[]) {

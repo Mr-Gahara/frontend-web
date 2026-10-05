@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/lib/auth/useSession";
+import { IZIN } from "@/lib/auth/permissions";
 import { pesanError } from "@/lib/api/error";
 import { useLokasiAktif, usePerbaruiLokasi } from "@/features/inventaris/hooks";
 import IsianLokasi, { TEKS_ISIAN_LOKASI } from "@/features/inventaris/isian-lokasi";
@@ -247,15 +248,15 @@ function Kartu({
  * Profil Toko (keputusan PO12a sampai PO14a): dua kartu dengan simpan
  * masing-masing. Profil tenant dibaca setiap pengguna lewat GET /tenant/:id
  * dan diubah pemegang update-tenant; lokasi Outlet dimuat bagi pemegang
- * read-location dan diubah pemegang update-location. Halaman tanpa entri
- * IZIN_HALAMAN. persenPajak, tipePajak, logoUrl, dan isSetupComplete tidak
+ * read-location dan diubah pemegang update-location. Entri IZIN_HALAMAN-nya
+ * kosong (PO14a). persenPajak, tipePajak, logoUrl, dan isSetupComplete tidak
  * ditampilkan (PO13a).
  */
 export function HalamanProfilToko() {
   const { permissions } = useSession();
-  const bolehUbahToko = permissions.includes("update-tenant");
-  const bacaLokasi = permissions.includes("read-location");
-  const bolehUbahLokasi = permissions.includes("update-location");
+  const bolehUbahToko = permissions.includes(IZIN.ubahTenant);
+  const bacaLokasi = permissions.includes(IZIN.location);
+  const bolehUbahLokasi = permissions.includes(IZIN.ubahLocation);
 
   const tenant = useTenant();
   const outlet = useLokasiAktif({ aktif: bacaLokasi });

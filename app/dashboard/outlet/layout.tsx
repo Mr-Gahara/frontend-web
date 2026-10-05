@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth/useSession";
+import { IZIN } from "@/lib/auth/permissions";
 
 export default function OutletLayout({
   children,
@@ -13,7 +14,7 @@ export default function OutletLayout({
   const { status, permissions, sudahMasuk } = useSession();
   // Owner memegang seluruh permission di backend, sehingga tidak perlu
   // pemeriksaan nama role terpisah.
-  const berwenang = sudahMasuk && permissions.includes("read-dashboard-outlet");
+  const berwenang = sudahMasuk && permissions.includes(IZIN.dashboardOutlet);
 
   useEffect(() => {
     if (status === "memuat") return;

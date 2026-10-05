@@ -15,10 +15,10 @@ export function bolehCakupanPenjualan(permissions: readonly string[]): boolean {
 
 /** Izin aksi penjualan dan pembayarannya, sesuai route backend 465b438 (keputusan rancangan butir 14). */
 export const IZIN_PENJUALAN = {
-  ubah: "update-penjualan",
-  hapus: "delete-penjualan",
-  bayar: "create-pembayaran",
-  batalBayar: "update-pembayaran",
+  ubah: IZIN.ubahPenjualan,
+  hapus: IZIN.hapusPenjualan,
+  bayar: IZIN.buatPembayaran,
+  batalBayar: IZIN.ubahPembayaran,
 } as const;
 
 export interface AksiPenjualan {

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth/useSession";
-import { bolehBukaGrup, bolehBukaHalaman } from "@/lib/auth/permissions";
+import { IZIN, bolehBukaGrup, bolehBukaHalaman } from "@/lib/auth/permissions";
 import { useDaftarLokasi } from "@/features/inventaris/hooks";
 import { useTenant } from "@/features/tenant/hooks";
 import { SidebarPengguna } from "@/components/sidebar-pengguna";
@@ -65,7 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Lokasi dimuat lewat features/inventaris dan berbagi cache dengan layout
   // gudang, sehingga menu Ruang Gudang muncul setelah setup tanpa muat
   // ulang (keputusan GD5a). Tanpa read-location permintaan dimatikan.
-  const bacaLokasi = permissions.includes("read-location");
+  const bacaLokasi = permissions.includes(IZIN.location);
   const daftarLokasi = useDaftarLokasi({ aktif: bacaLokasi });
   const hasGudang = daftarLokasi.data?.some((l) => l.tipe === "Gudang") ?? false;
   const isLoadingLokasi = bacaLokasi && daftarLokasi.isLoading;
@@ -106,11 +106,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     : "Outlet Ops.";
 
   const canAccessOutlet =
-    permissions.includes("read-dashboard-outlet");
+    permissions.includes(IZIN.dashboardOutlet);
   const canAccessGudang =
-    permissions.includes("read-dashboard-gudang");
+    permissions.includes(IZIN.dashboardGudang);
   const canCreateLocation =
-    permissions.includes("create-location");
+    permissions.includes(IZIN.buatLocation);
   // Ruang Gudang tetap ditawarkan saat lokasi tidak dapat dibaca (tanpa
   // read-location) atau gagal dimuat; layout gudang yang menampilkan
   // pesannya (keputusan GD4a dan GD5a). Setup hanya ditawarkan bila daftar

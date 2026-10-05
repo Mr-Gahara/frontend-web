@@ -1,11 +1,13 @@
+import { IZIN } from "@/lib/auth/permissions";
+
 /**
  * Izin jurnal transfer, sesuai routes/jurnalTransferRoute.js backend yoga
  * 50eede7: GET memakai read-, POST create-, dan PUT (termasuk VOID) update-.
  */
 export const IZIN_TRANSFER = {
-  baca: "read-jurnal-transfer",
-  buat: "create-jurnal-transfer",
-  batal: "update-jurnal-transfer",
+  baca: IZIN.bacaJurnalTransfer,
+  buat: IZIN.buatJurnalTransfer,
+  batal: IZIN.ubahJurnalTransfer,
 } as const;
 
 export function aksiTransfer(permissions: readonly string[]) {

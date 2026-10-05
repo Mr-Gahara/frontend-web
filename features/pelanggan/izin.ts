@@ -1,12 +1,14 @@
+import { IZIN } from "@/lib/auth/permissions";
+
 /**
  * Izin aksi halaman pelanggan, mengikuti checkPermission di
  * routes/pelangganRoute.js backend (keputusan rancangan butir 9 dan 14).
  * GET /pelanggan tidak memeriksa izin.
  */
 export const IZIN_PELANGGAN = {
-  buat: "create-pelanggan",
-  ubah: "update-pelanggan",
-  hapus: "delete-pelanggan",
+  buat: IZIN.buatPelanggan,
+  ubah: IZIN.ubahPelanggan,
+  hapus: IZIN.hapusPelanggan,
 } as const;
 
 export function aksiPelanggan(permissions: string[]) {

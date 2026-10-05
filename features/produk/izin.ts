@@ -9,5 +9,5 @@ import { IZIN } from "@/lib/auth/permissions";
  * produk, sehingga pengguna dengan akses-pos saja tetap dapat membacanya.
  */
 export function bolehBacaProduk(dimiliki: string[]): boolean {
-  return dimiliki.includes(IZIN.produk) || dimiliki.includes("akses-pos");
+  return dimiliki.includes(IZIN.produk) || dimiliki.includes(IZIN.aksesPos);
 }

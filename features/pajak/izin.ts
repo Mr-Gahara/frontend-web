@@ -1,3 +1,5 @@
+import { IZIN } from "@/lib/auth/permissions";
+
 /**
  * Izin halaman pajak, mengikuti checkPermission di routes/pajakRoute.js dan
  * routes/produkPajakRoute.js backend fc29433 (keputusan rancangan butir 9
@@ -8,10 +10,10 @@
 export const URL_PAJAK = "/dashboard/outlet/pengaturan/pajak";
 
 export const IZIN_PAJAK = {
-  buat: "create-pajak",
-  ubah: "update-pajak",
-  hapus: "delete-pajak",
-  pasang: "update-produk",
+  buat: IZIN.buatPajak,
+  ubah: IZIN.ubahPajak,
+  hapus: IZIN.hapusPajak,
+  pasang: IZIN.ubahProduk,
 } as const;
 
 export function aksiPajak(permissions: string[]) {

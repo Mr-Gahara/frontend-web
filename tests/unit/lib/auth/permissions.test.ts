@@ -41,6 +41,13 @@ describe("bolehBukaHalaman", () => {
   });
 });
 
+describe("IZIN", () => {
+  it("setiap nama izin hanya terdaftar sekali", () => {
+    const nama = Object.values(IZIN);
+    expect(new Set(nama).size).toBe(nama.length);
+  });
+});
+
 describe("bolehBukaGrup", () => {
   const anakInventaris = [
     "/dashboard/outlet/inventaris/produk",

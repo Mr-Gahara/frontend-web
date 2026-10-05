@@ -19,12 +19,10 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { pesanError } from "@/lib/api/error";
-import { useSession } from "@/lib/auth/useSession";
 import { cn } from "@/lib/utils";
 import type { AkunKas } from "@/types/akunKas";
 import { DialogStatusAkun } from "./dialog-status-akun";
 import { useDaftarAkunKas, useUbahAkunKas } from "./hooks";
-import { aksiAkunKas } from "./izin";
 import {
   URL_DAFTAR_AKUN_KAS,
   adaPerubahanAkunKas,
@@ -50,12 +48,11 @@ function Keadaan({ judul, isi }: { judul: string; isi: string }) {
 /**
  * Halaman ubah akun kas (keputusan UA1a). Akun diambil dari daftar yang sudah
  * dimuat halaman keuangan, sehingga tidak ada permintaan detail tersendiri.
- * Form hanya untuk pemegang update-akunkas; pengguna lain mendapat keterangan
- * di tempat, karena backend menolak PUT-nya dengan 403.
+ * Rute ini hanya dipasang bagi pemegang read-akunkas dan update-akunkas
+ * (gerbang rute, keputusan GR5a).
  */
 export function HalamanUbahAkunKas() {
   const { id } = useParams<{ id: string }>();
-  const { permissions } = useSession();
   const { data: daftar, isLoading, isError } = useDaftarAkunKas();
   const akun = daftar?.find((a) => a.id === id);
 
@@ -79,11 +76,6 @@ export function HalamanUbahAkunKas() {
         <Keadaan
           judul="Akun kas tidak ditemukan"
           isi="Akun ini tidak ada di toko Anda. Kembali ke daftar untuk memilih akun lain."
-        />
-      ) : !aksiAkunKas(permissions).ubah ? (
-        <Keadaan
-          judul="Tidak ada izin mengubah akun kas"
-          isi="Hubungi pemilik toko bila Anda perlu mengubah akun kas."
         />
       ) : (
         <FormUbah key={akun.id} akun={akun} />

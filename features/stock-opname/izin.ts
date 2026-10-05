@@ -1,7 +1,9 @@
+import { IZIN } from "@/lib/auth/permissions";
+
 /** Menghitung: simpan hitungan dan ajukan (route PATCH items dan submit). */
-export const IZIN_HITUNG_OPNAME = "submit-stock-opname";
+export const IZIN_HITUNG_OPNAME = IZIN.hitungStockOpname;
 /** Meninjau: setujui, tolak, dan batalkan (route PATCH approve, reject, dan cancel). */
-export const IZIN_TINJAU_OPNAME = "review-stock-opname";
+export const IZIN_TINJAU_OPNAME = IZIN.tinjauStockOpname;
 
 export function bolehHitungOpname(permissions: readonly string[]): boolean {
   return permissions.includes(IZIN_HITUNG_OPNAME);

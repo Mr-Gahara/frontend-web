@@ -63,7 +63,7 @@ function Keadaan({ judul, isi }: { judul: string; isi: string }) {
 
 /**
  * Pindah Dana antar akun kas (keputusan DN1a sampai DN3a): form di atas dan
- * riwayat transfer di bawahnya. Halaman tanpa entri IZIN_HALAMAN; tiap bagian
+ * riwayat transfer di bawahnya. Entri IZIN_HALAMAN-nya kosong; tiap bagian
  * mengikuti izin endpoint-nya: form bagi create-jurnal-transfer, riwayat bagi
  * read-jurnal-transfer, dan Batalkan bagi update-jurnal-transfer.
  */

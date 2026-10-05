@@ -1,3 +1,4 @@
+import { IZIN } from "@/lib/auth/permissions";
 import type { StatusPengajuan } from "@/types/pengajuanStok";
 
 export type TabPengajuan = StatusPengajuan | "ALL";
@@ -13,8 +14,8 @@ export const STATUS_PETUGAS_TRANSFER: readonly StatusPengajuan[] = ["SUBMITTED",
 
 /** Status yang boleh dilihat, atau null bila tidak dibatasi. */
 export function statusTerlihat(permissions: readonly string[]): readonly StatusPengajuan[] | null {
-  const bolehSetujui = permissions.includes("approve-pengajuan-stok");
-  const bolehTransfer = permissions.includes("create-transfer-stok");
+  const bolehSetujui = permissions.includes(IZIN.setujuiPengajuanStok);
+  const bolehTransfer = permissions.includes(IZIN.buatTransferStok);
   return !bolehSetujui && bolehTransfer ? STATUS_PETUGAS_TRANSFER : null;
 }
 
@@ -26,18 +27,18 @@ export function tabTerlihat(tab: readonly TabPengajuan[], permissions: readonly 
 
 /** Revisi draft dan ajukan memakai izin yang sama (route PUT dan PATCH submit). */
 export function bolehUbahPengajuan(permissions: readonly string[]): boolean {
-  return permissions.includes("update-pengajuan-stok");
+  return permissions.includes(IZIN.ubahPengajuanStok);
 }
 
 export function bolehSetujuiPengajuan(permissions: readonly string[]): boolean {
-  return permissions.includes("approve-pengajuan-stok");
+  return permissions.includes(IZIN.setujuiPengajuanStok);
 }
 
 export function bolehTolakPengajuan(permissions: readonly string[]): boolean {
-  return permissions.includes("reject-pengajuan-stok");
+  return permissions.includes(IZIN.tolakPengajuanStok);
 }
 
 /** Surat jalan dibuat lewat POST /transferstok, yang mewajibkan create-transfer-stok. */
 export function bolehBuatSuratJalan(permissions: readonly string[]): boolean {
-  return permissions.includes("create-transfer-stok");
+  return permissions.includes(IZIN.buatTransferStok);
 }

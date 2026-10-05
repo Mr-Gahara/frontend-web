@@ -43,7 +43,7 @@ export function tentukanAksesGudang(m: MasukanAksesGudang): AksesGudang {
   if (m.lokasi.daftar.some((l) => l.tipe === "Gudang")) {
     return m.diSetup ? "ke-dashboard" : "izinkan";
   }
-  if (!m.permissions.includes("create-location")) return "belum-ada";
+  if (!m.permissions.includes(IZIN.buatLocation)) return "belum-ada";
   return m.diSetup ? "izinkan" : "setup";
 }
 

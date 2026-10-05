@@ -19,8 +19,14 @@
  * dipanggil halaman itu.
  */
 
-/** Permission yang terdaftar di seeds/permissionSeed.js backend. */
+/**
+ * Nama permission yang dikenal web, sesuai route dan seed backend. Satu
+ * sumber nama izin: gerbang rute, sidebar, dan aturan aksi di
+ * features/<modul>/izin.ts merujuk ke sini. Yang tetap ditulis sebagai
+ * teks hanya data template role (lib/roleTemplates.ts).
+ */
 export const IZIN = {
+  // Izin ruang dan izin baca.
   dashboardOutlet: "read-dashboard-outlet",
   dashboardGudang: "read-dashboard-gudang",
 
@@ -73,7 +79,35 @@ export const IZIN = {
   buatStockOpname: "create-stock-opname",
   buatPengajuanStok: "create-pengajuan-stok",
   ubahPengajuanStok: "update-pengajuan-stok",
-  revisiTransferStok: "create-transfer-stok",
+  buatTransferStok: "create-transfer-stok",
+
+  // Izin aksi di dalam halaman: tombol dan bagian mengikuti izin
+  // endpoint-nya lewat features/<modul>/izin.ts (keputusan rancangan
+  // butir 9 dan 14).
+  ubahPenjualan: "update-penjualan",
+  hapusPenjualan: "delete-penjualan",
+  ubahPembayaran: "update-pembayaran",
+  buatDiskon: "create-diskon",
+  ubahDiskon: "update-diskon",
+  bacaJurnalTransfer: "read-jurnal-transfer",
+  buatJurnalTransfer: "create-jurnal-transfer",
+  ubahJurnalTransfer: "update-jurnal-transfer",
+  buatPajak: "create-pajak",
+  ubahPajak: "update-pajak",
+  hapusPajak: "delete-pajak",
+  buatPelanggan: "create-pelanggan",
+  ubahPelanggan: "update-pelanggan",
+  hapusPelanggan: "delete-pelanggan",
+  hitungStockOpname: "submit-stock-opname",
+  tinjauStockOpname: "review-stock-opname",
+  kirimTransferStok: "approve-transfer-stok",
+  batalTransferStok: "cancel-transfer-stok",
+  terimaTransferStok: "receive-transfer-stok",
+  setujuiPengajuanStok: "approve-pengajuan-stok",
+  tolakPengajuanStok: "reject-pengajuan-stok",
+  buatLocation: "create-location",
+  ubahLocation: "update-location",
+  ubahTenant: "update-tenant",
 } as const;
 
 export type Izin = (typeof IZIN)[keyof typeof IZIN];
@@ -215,7 +249,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/gudang/pengajuanStok/[id]": [IZIN.pengajuanStok],
   "/dashboard/gudang/transferStok": [IZIN.transferStok],
   "/dashboard/gudang/transferStok/[id]": [IZIN.transferStok],
-  "/dashboard/gudang/transferStok/[id]/edit": [IZIN.transferStok, IZIN.revisiTransferStok],
+  "/dashboard/gudang/transferStok/[id]/edit": [IZIN.transferStok, IZIN.buatTransferStok],
   "/dashboard/gudang/pengirimanStok": [IZIN.transferStok],
   "/dashboard/gudang/jadwal": [IZIN.pengguna],
   "/dashboard/gudang/jadwal/generate": [IZIN.pengguna],

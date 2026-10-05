@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth/useSession";
+import { IZIN } from "@/lib/auth/permissions";
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -14,9 +15,9 @@ const DashboardPage = () => {
 
     // Owner memegang seluruh permission di backend, sehingga pemeriksaan
     // berbasis permission sudah mencakupnya tanpa perlu cek nama role.
-    if (permissions.includes("read-dashboard-outlet")) {
+    if (permissions.includes(IZIN.dashboardOutlet)) {
       router.replace("/dashboard/outlet");
-    } else if (permissions.includes("read-dashboard-gudang")) {
+    } else if (permissions.includes(IZIN.dashboardGudang)) {
       router.replace("/dashboard/gudang");
     } else {
       router.replace("/dashboard/profil");
