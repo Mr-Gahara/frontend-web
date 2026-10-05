@@ -48,6 +48,32 @@ export const IZIN = {
 
   pengguna: "read-pengguna",
   role: "read-role",
+
+  // Izin tulis halaman form: syarat gerbang rute di samping izin bacanya
+  // (keputusan GR5a).
+  buatPenjualan: "create-penjualan",
+  buatPembayaran: "create-pembayaran",
+  buatAkunKas: "create-akunkas",
+  ubahAkunKas: "update-akunkas",
+  buatBooking: "create-booking",
+  buatAset: "create-aset",
+  ubahAset: "update-aset",
+  buatTarif: "create-tarif",
+  ubahTarif: "update-tarif",
+  buatTipeAset: "create-tipe-aset",
+  ubahTipeAset: "update-tipe-aset",
+  buatMetodePembayaran: "create-metode-pembayaran",
+  ubahMetodePembayaran: "update-metode-pembayaran",
+  buatRole: "create-role",
+  ubahRole: "update-role",
+  buatProduk: "create-produk",
+  ubahProduk: "update-produk",
+  buatBahan: "create-bahan",
+  ubahBahan: "update-bahan",
+  buatStockOpname: "create-stock-opname",
+  buatPengajuanStok: "create-pengajuan-stok",
+  ubahPengajuanStok: "update-pengajuan-stok",
+  revisiTransferStok: "create-transfer-stok",
 } as const;
 
 export type Izin = (typeof IZIN)[keyof typeof IZIN];
@@ -97,32 +123,75 @@ export type SyaratIzin = Izin | readonly Izin[];
  * (aset, diskon, metode pembayaran, tarif, tipe aset), gate tidak dipasang.
  */
 export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
+  // Akar dan profil: tanpa data berizin.
+  "/dashboard": [],
+  "/dashboard/profil": [],
+
   // Outlet
   "/dashboard/outlet": [],
   "/dashboard/outlet/penjualan": [IZIN.penjualan],
+  "/dashboard/outlet/penjualan/buatPenjualan": [[IZIN.produk, IZIN.aksesPos], IZIN.buatPenjualan],
+  "/dashboard/outlet/penjualan/[id]": [IZIN.penjualan],
+  "/dashboard/outlet/penjualan/[id]/pembayaran": [IZIN.penjualan, IZIN.buatPembayaran],
   "/dashboard/outlet/pengeluaran": [IZIN.pembayaran],
   "/dashboard/outlet/keuangan/akunkas": [IZIN.akunKas],
+  "/dashboard/outlet/keuangan/akunkas/buatAkunKas": [IZIN.buatAkunKas],
+  "/dashboard/outlet/keuangan/akunkas/[id]/ubah": [IZIN.akunKas, IZIN.ubahAkunKas],
+  // Izin per bagian di dalam halaman (keputusan DN1a).
+  "/dashboard/outlet/keuangan/akunkas/pindahDana": [],
   "/dashboard/outlet/keuangan/mutasiArusKas": [IZIN.akunKas],
   "/dashboard/outlet/keuangan/ringkasanLabaRugi": [IZIN.laporan],
   "/dashboard/outlet/pelanggan": [IZIN.pelanggan],
   "/dashboard/outlet/reservasi": [IZIN.booking],
+  "/dashboard/outlet/reservasi/buatReservasi": [IZIN.booking, IZIN.buatBooking],
+  // Master reservasi: GET tanpa izin di backend (keputusan GR6a).
+  "/dashboard/outlet/reservasi/aset": [],
+  "/dashboard/outlet/reservasi/aset/buatAset": [IZIN.buatAset],
+  "/dashboard/outlet/reservasi/aset/[id]/edit": [IZIN.ubahAset],
+  "/dashboard/outlet/reservasi/tarif": [],
+  "/dashboard/outlet/reservasi/tarif/buatTarif": [IZIN.buatTarif],
+  "/dashboard/outlet/reservasi/tarif/[id]/edit": [IZIN.ubahTarif],
+  "/dashboard/outlet/reservasi/tipeAset": [],
+  "/dashboard/outlet/reservasi/tipeAset/buatTipeAset": [IZIN.buatTipeAset],
+  "/dashboard/outlet/reservasi/tipeAset/[id]/edit": [IZIN.ubahTipeAset],
   "/dashboard/outlet/diskon": [],
   "/dashboard/outlet/pengaturan": [],
   // Bukan menu sidebar: dibaca halaman pajak dan kartu indeks pengaturan.
   // GET /pajak menerima read-pajak atau akses-pos sejak backend fc29433.
   "/dashboard/outlet/pengaturan/pajak": [[IZIN.pajak, IZIN.aksesPos]],
+  "/dashboard/outlet/pengaturan/metodePembayaran": [],
+  // Akun tujuan wajib saat membuat metode, sehingga read-akunkas ikut (GR7a).
+  "/dashboard/outlet/pengaturan/metodePembayaran/buatMetodePembayaran": [IZIN.akunKas, IZIN.buatMetodePembayaran],
+  "/dashboard/outlet/pengaturan/metodePembayaran/[id]": [IZIN.ubahMetodePembayaran],
+  "/dashboard/outlet/pengaturan/roles": [IZIN.role],
+  "/dashboard/outlet/pengaturan/roles/buatRole": [IZIN.role, IZIN.buatRole],
+  "/dashboard/outlet/pengaturan/roles/buatRole/kostum": [IZIN.role, IZIN.buatRole],
+  "/dashboard/outlet/pengaturan/roles/[id]/edit": [IZIN.role, IZIN.ubahRole],
+  // Izin per bagian di dalam halaman (keputusan PO14a).
+  "/dashboard/outlet/pengaturan/toko": [],
   "/dashboard/outlet/pengguna": [IZIN.pengguna, IZIN.role],
 
   // Inventaris outlet
   "/dashboard/outlet/inventaris/produk": [IZIN.produk],
+  "/dashboard/outlet/inventaris/produk/buatProduk": [IZIN.kategori, IZIN.buatProduk],
+  "/dashboard/outlet/inventaris/produk/[id]/edit": [IZIN.produk, IZIN.kategori, IZIN.ubahProduk],
   "/dashboard/outlet/inventaris/kategori": [IZIN.kategori],
   "/dashboard/outlet/inventaris/bahanBaku": [IZIN.location, [IZIN.inventory, IZIN.inventoryOutlet]],
+  "/dashboard/outlet/inventaris/bahanBaku/buatBahanBaku": [IZIN.buatBahan],
+  "/dashboard/outlet/inventaris/bahanBaku/[id]/edit": [IZIN.bahan, IZIN.ubahBahan],
   "/dashboard/outlet/inventaris/stok": [IZIN.location, [IZIN.inventory, IZIN.inventoryOutlet]],
   "/dashboard/outlet/inventaris/stockOpname": [IZIN.stockOpname, IZIN.location],
+  "/dashboard/outlet/inventaris/stockOpname/buatStockOpname": [IZIN.location, IZIN.buatStockOpname],
+  "/dashboard/outlet/inventaris/stockOpname/[id]": [IZIN.stockOpname],
   "/dashboard/outlet/inventaris/stockAdjustment": [IZIN.stockAdjustment, IZIN.location],
+  "/dashboard/outlet/inventaris/stockAdjustment/[id]": [IZIN.stockAdjustment],
   "/dashboard/outlet/inventaris/jurnalStok": [IZIN.jurnalStok, IZIN.location],
   "/dashboard/outlet/inventaris/pengajuanStok": [IZIN.pengajuanStok, IZIN.location],
+  "/dashboard/outlet/inventaris/pengajuanStok/buatPengajuan": [IZIN.bahan, IZIN.location, IZIN.buatPengajuanStok],
+  "/dashboard/outlet/inventaris/pengajuanStok/[id]": [IZIN.pengajuanStok],
+  "/dashboard/outlet/inventaris/pengajuanStok/[id]/edit": [IZIN.pengajuanStok, IZIN.bahan, IZIN.location, IZIN.ubahPengajuanStok],
   "/dashboard/outlet/inventaris/penerimaanBarang": [IZIN.location, IZIN.transferStok],
+  "/dashboard/outlet/inventaris/penerimaanBarang/[id]": [IZIN.transferStok],
 
   // Jadwal outlet: izin shift, pola roster, dan jadwal belum ada di backend,
   // sehingga gate memakai izin data yang benar-benar diperiksa (daftar karyawan).
@@ -133,12 +202,20 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
 
   // Gudang
   "/dashboard/gudang": [],
+  // Layout gudang sudah memutuskan siapa yang boleh setup (keputusan GD4a).
+  "/dashboard/gudang/setup": [],
   "/dashboard/gudang/inventaris": [IZIN.location, [IZIN.inventory, IZIN.inventoryGudang], IZIN.bahan],
   "/dashboard/gudang/jurnalStok": [IZIN.jurnalStok],
   "/dashboard/gudang/stockOpname": [IZIN.stockOpname],
+  "/dashboard/gudang/stockOpname/buatStockOpname": [IZIN.location, IZIN.buatStockOpname],
+  "/dashboard/gudang/stockOpname/[id]": [IZIN.stockOpname],
   "/dashboard/gudang/stockAdjustment": [IZIN.stockAdjustment],
+  "/dashboard/gudang/stockAdjustment/[id]": [IZIN.stockAdjustment],
   "/dashboard/gudang/pengajuanStok": [IZIN.pengajuanStok],
+  "/dashboard/gudang/pengajuanStok/[id]": [IZIN.pengajuanStok],
   "/dashboard/gudang/transferStok": [IZIN.transferStok],
+  "/dashboard/gudang/transferStok/[id]": [IZIN.transferStok],
+  "/dashboard/gudang/transferStok/[id]/edit": [IZIN.transferStok, IZIN.revisiTransferStok],
   "/dashboard/gudang/pengirimanStok": [IZIN.transferStok],
   "/dashboard/gudang/jadwal": [IZIN.pengguna],
   "/dashboard/gudang/jadwal/generate": [IZIN.pengguna],
@@ -161,11 +238,51 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
 export function bolehBukaHalaman(href: string, dimiliki: string[]): boolean {
   const butuh = IZIN_HALAMAN[href];
   if (!butuh) return true;
+  return penuhiSyarat(butuh, dimiliki);
+}
+
+function penuhiSyarat(butuh: readonly SyaratIzin[], dimiliki: string[]): boolean {
   return butuh.every((syarat) =>
     typeof syarat === "string"
       ? dimiliki.includes(syarat)
       : syarat.some((i) => dimiliki.includes(i)),
   );
+}
+
+/** Kunci IZIN_HALAMAN yang memuat segmen berparameter, misalnya [id]. */
+const POLA_HALAMAN = Object.keys(IZIN_HALAMAN)
+  .filter((kunci) => kunci.includes("["))
+  .map((kunci) => ({ kunci, bagian: kunci.split("/") }));
+
+/**
+ * Syarat izin sebuah rute nyata (hasil usePathname).
+ *
+ * Kunci yang cocok persis didahulukan, sehingga rute statis seperti
+ * penjualan/buatPenjualan tidak pernah jatuh ke pola penjualan/[id]. Pola
+ * hanya cocok bila jumlah segmennya sama. Rute yang tidak dikenal
+ * mengembalikan undefined.
+ */
+export function syaratRute(pathname: string): readonly SyaratIzin[] | undefined {
+  const persis = IZIN_HALAMAN[pathname];
+  if (persis) return persis;
+  const bagian = pathname.split("/");
+  const cocok = POLA_HALAMAN.find(
+    (pola) =>
+      pola.bagian.length === bagian.length &&
+      pola.bagian.every((b, i) => (b.startsWith("[") ? bagian[i] !== "" : b === bagian[i])),
+  );
+  return cocok ? IZIN_HALAMAN[cocok.kunci] : undefined;
+}
+
+/**
+ * Menentukan apakah isi sebuah rute boleh dipasang; dipakai gerbang rute
+ * di layout dashboard (keputusan GR1a). Halaman detail menuntut izin baca,
+ * dan halaman form menuntut izin baca beserta izin tulisnya (GR5a).
+ */
+export function bolehBukaRute(pathname: string, dimiliki: string[]): boolean {
+  const butuh = syaratRute(pathname);
+  if (!butuh) return true;
+  return penuhiSyarat(butuh, dimiliki);
 }
 
 /**

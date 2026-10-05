@@ -10,7 +10,8 @@ describe("bolehBukaHalaman", () => {
   });
 
   it("mengizinkan href yang tidak terdaftar di peta", () => {
-    // Halaman detail dan form tidak dipetakan; pembatasannya ada di backend.
+    // bolehBukaHalaman hanya mencocokkan persis (sidebar dan kartu); rute
+    // berparameter dinilai bolehBukaRute.
     expect(bolehBukaHalaman("/dashboard/outlet/penjualan/123", [])).toBe(true);
   });
 

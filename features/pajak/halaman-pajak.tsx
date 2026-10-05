@@ -3,8 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth/useSession";
-import { bolehBukaHalaman } from "@/lib/auth/permissions";
-import { aksiPajak, URL_PAJAK } from "./izin";
+import { aksiPajak } from "./izin";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowUpDown, MoreHorizontal, Plus } from "lucide-react";
@@ -57,21 +56,7 @@ const kelasTab =
  * disembunyikan menurut izin.
  */
 export function HalamanPajak() {
-  const { permissions } = useSession();
-
-  // Tanpa izin baca, isi halaman tidak dipasang, sehingga tidak ada
-  // permintaan yang pasti dijawab 403 (keputusan FC3a).
-  if (!bolehBukaHalaman(URL_PAJAK, permissions)) {
-    return (
-      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-2 text-center text-[#0A2947]">
-        <p className="font-bold">Anda tidak memiliki izin melihat pajak.</p>
-        <p className="text-sm font-medium text-[#0A2947]/60">
-          Hubungi pemilik toko bila Anda memerlukannya.
-        </p>
-      </div>
-    );
-  }
-
+  // Izin baca ditegakkan gerbang rute di layout dashboard (keputusan GR4a).
   return <IsiHalamanPajak />;
 }
 
