@@ -62,6 +62,7 @@ export const IZIN = {
   buatAkunKas: "create-akunkas",
   ubahAkunKas: "update-akunkas",
   buatBooking: "create-booking",
+  ubahBooking: "update-booking",
   buatAset: "create-aset",
   ubahAset: "update-aset",
   buatTarif: "create-tarif",

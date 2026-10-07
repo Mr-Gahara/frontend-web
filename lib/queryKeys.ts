@@ -153,6 +153,7 @@ export const queryKeys = {
     semua: kunci(["sesiBooking"] as const),
     daftar: (tanggal?: string) => ["sesiBooking", "daftar", tanggal] as const,
     banyakTanggal: (tanggal: string[]) => ["sesiBooking", "banyakTanggal", tanggal] as const,
+    detail: (id: string) => ["sesiBooking", "detail", id] as const,
   },
 
   // --- SDM ---

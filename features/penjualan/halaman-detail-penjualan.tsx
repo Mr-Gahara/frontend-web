@@ -11,6 +11,7 @@ import { useFinalisasiPenjualan, usePenjualan, useVoidPenjualan } from "./hooks"
 import { lokasiFinalisasi } from "./payload";
 import { aksiPenjualan, bolehBatalkanPembayaran, bolehCakupanPenjualan } from "./izin";
 import { DialogVoidPenjualan } from "./dialog-void-penjualan";
+import { BookingPenjualan } from "@/features/sesi-booking/booking-penjualan";
 import { PESAN_BATAL_PEMBAYARAN, TAMPILAN_STATUS_PENJUALAN } from "./tampilan";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -238,6 +239,12 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
           </div>
         </div>
       </div>
+
+      {penjualan.jenisPenjualan === "booking" && (
+        <BookingPenjualan
+          idBooking={(penjualan.itemPenjualan ?? []).flatMap((i) => (i.sesiBookingID ? [i.sesiBookingID] : []))}
+        />
+      )}
 
       {/* INFORMASI UMUM (GRID) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

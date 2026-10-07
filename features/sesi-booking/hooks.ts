@@ -59,3 +59,30 @@ export function useBuatBooking() {
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.sesiBooking.semua }),
   });
 }
+
+/** Detail satu booking (NZ7a). Selalu dimuat ulang saat dibuka, karena statusnya berubah lewat pembayaran dan jam. */
+export function useSesiBooking(id: string) {
+  return useQuery({
+    queryKey: queryKeys.sesiBooking.detail(id),
+    queryFn: () => sesiBookingApi.detail(id),
+    enabled: id !== "",
+    staleTime: 0,
+  });
+}
+
+/**
+ * Menandai booking Selesai lebih awal (keputusan NZ7a). Akar sesiBooking dan
+ * aset diinvalidasi dan ditunggu: jadwalnya terbuka untuk booking lain, dan
+ * status aset dihitung dari booking Aktif.
+ */
+export function useTandaiSelesaiBooking() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: sesiBookingApi.tandaiSelesai,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.sesiBooking.semua }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.aset.semua }),
+      ]),
+  });
+}
