@@ -102,6 +102,23 @@ export function namaAkunMutasi(akunKasID: string, daftar: AkunKas[] | undefined)
   return daftar?.find((akun) => akun.id === akunKasID)?.namaAkun ?? "Akun tidak dikenal";
 }
 
+/** Nama akun sebuah baris: dari baris itu sendiri (backend nizar c29310c), dengan daftar akun sebagai cadangan. */
+export function namaAkunBaris(mutasi: Pick<MutasiKas, "akunKasID" | "akunKas">, daftar: AkunKas[] | undefined): string {
+  return mutasi.akunKas?.namaAkun || namaAkunMutasi(mutasi.akunKasID, daftar);
+}
+
+/** Nama pencatat baris mutasi, atau tanda hubung bila backend tidak mengirimnya. */
+export function namaPencatat(mutasi: Pick<MutasiKas, "pengguna">): string {
+  return mutasi.pengguna?.nama || "-";
+}
+
+/** Tautan ke detail penjualan untuk mutasi pembayaran dan pembatalannya; null untuk jenis lain (NZ2a). */
+export function tautanPenjualanMutasi(mutasi: Pick<MutasiKas, "referensi">): { url: string; teks: string } | null {
+  const id = mutasi.referensi.penjualanID;
+  if (!id) return null;
+  return { url: `/dashboard/outlet/penjualan/${id}`, teks: mutasi.referensi.noReferensi || "Lihat penjualan" };
+}
+
 export function teksJumlahMutasi(mutasi: Pick<MutasiKas, "arah" | "jumlah">): string {
   return `${mutasi.arah === "MASUK" ? "+" : "-"} ${formatRupiah(mutasi.jumlah)}`;
 }

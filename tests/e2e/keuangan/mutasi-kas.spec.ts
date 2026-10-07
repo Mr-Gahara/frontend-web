@@ -35,6 +35,12 @@ const URL_MUTASI = "/dashboard/outlet/keuangan/mutasiArusKas";
 const POLA_MUTASI = /\/api\/akunkas\/mutasi(\?|$)/i;
 const POLA_AKUN = /\/api\/akunkas(\?|$)/i;
 const POLA_RINGKASAN = /\/api\/akunkas\/[0-9a-f]{24}\/ringkasan(\?|$)/i;
+const POLA_RINGKASAN_GABUNGAN = /\/api\/akunkas\/ringkasan(\?|$)/i;
+/** Field baris yang ikut dikirim sejak backend nizar c29310c (butir 124). */
+type BarisNz = {
+  pengguna?: { nama: string } | null;
+  referensi?: { penjualanID?: string | null; noReferensi?: string | null } | null;
+};
 
 /** Rupiah seperti yang ditampilkan halaman (formatRupiah); spasi tak-putus diganti spasi biasa. */
 const rupiah = (nilai: number) => formatRupiah(nilai).replace(/\u00a0/g, " ");
@@ -120,16 +126,27 @@ test.describe("Mutasi arus kas", () => {
     await expect(barisTabel(page).filter({ hasText: "Pembatalan pembayaran" })).toHaveCount(isi.data.length);
   });
 
-  test("ringkasan periode tampil hanya saat satu akun dipilih (MK2a)", async ({ page }) => {
+  test("ringkasan gabungan tanpa akun terpilih, lalu ringkasan akun saat satu akun dipilih (NZ1a)", async ({ page }) => {
+    const tGabungan = page.waitForResponse(
+      (r) => r.request().method() === "GET" && POLA_RINGKASAN_GABUNGAN.test(r.url()),
+    );
     const { mutasi, akun } = await bukaMutasi(page);
+    const resGabungan = await tGabungan;
+    expect(resGabungan.status()).toBe(200);
+    const gabungan = ((await resGabungan.json()) as { data: RingkasanUji }).data;
+    const kartuGabungan = page.getByRole("region", { name: "Ringkasan seluruh akun kas" });
+    await expect(kartuGabungan).toBeVisible({ timeout: 15_000 });
+    await expect(kartuGabungan).toContainText(rupiah(gabungan.saldoAwalPeriode));
+    await expect(kartuGabungan).toContainText(rupiah(gabungan.totalMasuk));
+    await expect(kartuGabungan).toContainText(rupiah(gabungan.totalKeluar));
+    await expect(kartuGabungan).toContainText(rupiah(gabungan.saldoAkhirPeriode));
+
     test.skip(mutasi.data.length === 0, "Belum ada mutasi pada bulan berjalan di data uji");
     const dipilih = akun.find((a) => a.id === mutasi.data[0].akunKasID);
     test.skip(!dipilih, "Akun kas pemilik mutasi tidak ada di daftar akun");
     if (!dipilih) return;
 
     const ringkasan = page.getByRole("region", { name: `Ringkasan ${dipilih.namaAkun}` });
-    await expect(ringkasan).toHaveCount(0);
-
     const tMutasi = page.waitForResponse(responsMutasi((q) => q.get("akunKasID") === dipilih.id));
     const tRingkasan = page.waitForResponse(
       (r) => r.request().method() === "GET" && POLA_RINGKASAN.test(r.url()),
@@ -142,11 +159,29 @@ test.describe("Mutasi arus kas", () => {
     expect(respons.url()).toContain(dipilih.id);
     const angka = ((await respons.json()) as { data: RingkasanUji }).data;
 
+    await expect(kartuGabungan).toHaveCount(0);
     await expect(ringkasan).toBeVisible({ timeout: 15_000 });
     await expect(ringkasan).toContainText(rupiah(angka.saldoAwalPeriode));
     await expect(ringkasan).toContainText(rupiah(angka.totalMasuk));
     await expect(ringkasan).toContainText(rupiah(angka.totalKeluar));
     await expect(ringkasan).toContainText(rupiah(angka.saldoAkhirPeriode));
+  });
+
+  test("baris pembayaran menampilkan pencatat dan tautan ke detail penjualannya (NZ2a)", async ({ page }) => {
+    const { mutasi } = await bukaMutasi(page);
+    const data = mutasi.data as unknown as BarisNz[];
+    const i = data.findIndex((m) => m.referensi?.penjualanID && m.pengguna?.nama);
+    test.skip(i < 0, "Belum ada mutasi pembayaran di halaman pertama bulan berjalan");
+    const m = data[i];
+    const idPenjualan = m.referensi?.penjualanID ?? "";
+    await expect(barisTabel(page)).toHaveCount(data.length, { timeout: 15_000 });
+    const baris = barisTabel(page).nth(i);
+    await expect(baris).toContainText(m.pengguna?.nama ?? "");
+    const tautan = baris.getByRole("link");
+    await expect(tautan).toHaveText(m.referensi?.noReferensi || "Lihat penjualan");
+    await expect(tautan).toHaveAttribute("href", `/dashboard/outlet/penjualan/${idPenjualan}`);
+    await tautan.click();
+    await expect(page).toHaveURL(new RegExp(`/dashboard/outlet/penjualan/${idPenjualan}$`));
   });
 
   test("mutasi gagal dimuat: pesan backend tampil, lalu Coba Lagi memuat datanya", async ({ page }) => {

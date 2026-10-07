@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
 import { PilihTanggal } from "@/components/pilih-tanggal";
 import { Button } from "@/components/ui/button";
@@ -23,9 +24,12 @@ import {
   UKURAN_MUTASI_BAWAAN,
   filterAwalMutasi,
   gantiArah,
+  namaAkunBaris,
   namaAkunMutasi,
+  namaPencatat,
   pilihanJenis,
   tanggalTransaksiBerbeda,
+  tautanPenjualanMutasi,
   teksJumlahMutasi,
   type FilterMutasi,
 } from "./mutasi";
@@ -43,7 +47,7 @@ function KartuRingkasan({ judul, nilai }: { judul: string; nilai: number }) {
   );
 }
 
-/** Ringkasan periode satu akun kas; hanya dipasang saat satu akun dipilih (keputusan MK2a). */
+/** Ringkasan periode: satu akun kas bila dipilih, gabungan seluruh akun kas bila tidak (keputusan NZ1a). */
 function RingkasanAkun({ filter, namaAkun }: { filter: FilterMutasi; namaAkun: string }) {
   const ringkasan = useRingkasanMutasi(filter);
   return (
@@ -102,14 +106,27 @@ export function HalamanMutasi() {
       {
         id: "akun",
         header: "Akun Kas",
-        cell: ({ row }) => namaAkunMutasi(row.original.akunKasID, akunKas.data),
+        cell: ({ row }) => namaAkunBaris(row.original, akunKas.data),
       },
       { id: "jenis", header: "Jenis", cell: ({ row }) => LABEL_JENIS[row.original.jenis] },
       {
         accessorKey: "keterangan",
         header: "Keterangan",
-        cell: ({ row }) => row.original.keterangan || "-",
+        cell: ({ row }) => {
+          const tautan = tautanPenjualanMutasi(row.original);
+          return (
+            <div>
+              <p>{row.original.keterangan || "-"}</p>
+              {tautan && (
+                <Link href={tautan.url} className="text-xs font-bold text-[#0A2947] underline underline-offset-2">
+                  {tautan.teks}
+                </Link>
+              )}
+            </div>
+          );
+        },
       },
+      { id: "pencatat", header: "Pencatat", cell: ({ row }) => namaPencatat(row.original) },
       {
         id: "jumlah",
         header: () => <div className="text-right">Jumlah</div>,
@@ -237,9 +254,10 @@ export function HalamanMutasi() {
           </Button>
         </div>
 
-        {filter.akunKasID && (
-          <RingkasanAkun filter={filter} namaAkun={namaAkunMutasi(filter.akunKasID, akunKas.data)} />
-        )}
+        <RingkasanAkun
+          filter={filter}
+          namaAkun={filter.akunKasID ? namaAkunMutasi(filter.akunKasID, akunKas.data) : "seluruh akun kas"}
+        />
 
         {daftar.isError ? (
           <div

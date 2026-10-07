@@ -23,7 +23,10 @@ export const akunKasApi = {
     const hasil = await api.get<MutasiKas[]>(EP.akunKasMutasi, params);
     return { data: hasil.data, pagination: hasil.pagination ?? null };
   },
-  /** Ringkasan satu periode; backend hanya menyediakannya per akun kas. */
+  /** Ringkasan satu periode untuk satu akun kas. */
   ringkasan: (id: string, periode: Record<string, string>) =>
     apiData.get<RingkasanMutasi>(EP.akunKasRingkasan(id), periode),
+  /** Ringkasan satu periode gabungan seluruh akun kas (backend nizar c29310c, butir 125). */
+  ringkasanGabungan: (periode: Record<string, string>) =>
+    apiData.get<RingkasanMutasi>(EP.akunKasRingkasanGabungan, periode),
 };

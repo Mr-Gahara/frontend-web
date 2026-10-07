@@ -73,15 +73,15 @@ export function useDaftarMutasi(filter: FilterMutasi, halaman: number, ukuran: n
 }
 
 /**
- * Ringkasan periode satu akun kas. Backend hanya punya ringkasan per akun,
- * sehingga hook ini diam selama tidak ada akun yang dipilih (keputusan MK2a).
+ * Ringkasan periode: satu akun kas bila dipilih, atau gabungan seluruh akun
+ * kas bila tidak (keputusan NZ1a, menggantikan MK2a; backend nizar c29310c).
  */
 export function useRingkasanMutasi(filter: FilterMutasi) {
   const periode = paramPeriodeMutasi(filter);
+  const id = filter.akunKasID;
   return useQuery({
-    queryKey: queryKeys.akunKas.ringkasan(filter.akunKasID, periode),
-    queryFn: () => akunKasApi.ringkasan(filter.akunKasID, periode),
-    enabled: filter.akunKasID !== "",
+    queryKey: queryKeys.akunKas.ringkasan(id || "semua", periode),
+    queryFn: () => (id ? akunKasApi.ringkasan(id, periode) : akunKasApi.ringkasanGabungan(periode)),
     staleTime: 0,
   });
 }

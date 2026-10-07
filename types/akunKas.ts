@@ -64,15 +64,24 @@ export interface MutasiKas {
   jumlah: number;
   saldoSebelum: number;
   saldoSesudah: number;
-  referensi: { tipe: string | null; id: string | null };
+  referensi: {
+    tipe: string | null;
+    id: string | null;
+    /** Hanya pada mutasi pembayaran dan pembatalannya (backend nizar c29310c, butir 124). */
+    penjualanID?: string | null;
+    noReferensi?: string | null;
+  };
   mutasiAsalID: string | null;
   keterangan: string;
   tanggal: string;
   penggunaID: string | null;
+  /** Nama akun dan pencatat ikut dikirim per baris sejak backend nizar c29310c (butir 124). */
+  akunKas?: { id: string; namaAkun: string } | null;
+  pengguna?: { id: string; nama: string } | null;
   createdAt: string;
 }
 
-/** Respons GET /akunkas/:id/ringkasan untuk satu periode. */
+/** Respons GET /akunkas/:id/ringkasan dan GET /akunkas/ringkasan (gabungan) untuk satu periode. */
 export interface RingkasanMutasi {
   saldoAwalPeriode: number;
   totalMasuk: number;
@@ -81,4 +90,6 @@ export interface RingkasanMutasi {
   totalVoid: number;
   totalKeluarLain: number;
   saldoAkhirPeriode: number;
+  /** Hanya pada ringkasan gabungan: jumlah akun kas tenant, termasuk yang non-aktif. */
+  jumlahAkun?: number;
 }
