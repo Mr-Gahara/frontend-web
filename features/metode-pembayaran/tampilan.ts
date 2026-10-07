@@ -15,7 +15,8 @@ export const masihDalamBatas = (daftar: readonly MetodePembayaran[]) =>
 
 /**
  * Menonaktifkan metode aktif terakhir membuat kasir tanpa metode
- * pembayaran; backend tidak menahannya, dan web hanya memperingatkan (PO5a).
+ * pembayaran. Backend menolaknya 409 sejak nizar c29310c (butir 87), dan web
+ * menahannya di menu daftar serta di form ubah (NZ4a, menggantikan PO5a).
  */
 export const metodeAktifTerakhir = (daftar: readonly MetodePembayaran[], m: MetodePembayaran) =>
   m.isActive && jumlahMetodeAktif(daftar) === 1;

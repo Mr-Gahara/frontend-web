@@ -186,7 +186,7 @@ test.describe("E2E — Kelola metode pembayaran", () => {
     }
   });
 
-  test("tambah dan aktifkan ditahan saat toko sudah punya 10 metode aktif (PO3a)", async ({ page }) => {
+  test("batas 10 metode aktif: aktifkan ditahan, tambah hanya dapat menyimpan nonaktif (PO3a, NZ5a)", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
     await pastikanFixture(page, auth);
     await page.route(POLA_DAFTAR, async (route) => {
@@ -204,10 +204,40 @@ test.describe("E2E — Kelola metode pembayaran", () => {
     });
     await page.goto(URL_DAFTAR);
     await expect(page.getByText(/batas maksimal/)).toBeVisible();
-    await expect(page.getByRole("button", { name: /tambah metode/i })).toBeDisabled();
     await cari(page, NAMA_FIXTURE);
     await page.getByRole("button", { name: `Aksi ${NAMA_FIXTURE}` }).click();
     await expect(page.getByRole("menuitem", { name: "Aktifkan" })).toBeDisabled();
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: /tambah metode/i }).click();
+    await expect(page).toHaveURL(new RegExp(URL_BUAT + "$"));
+    await expect(page.getByText(/hanya dapat disimpan nonaktif/)).toBeVisible();
+    await pemicu(page, "Non-Aktif").click();
+    await expect(page.getByRole("option", { name: "Aktif", exact: true })).toBeDisabled();
+  });
+
+  test("metode aktif terakhir tidak dapat dinonaktifkan dari daftar maupun form ubah (NZ4a)", async ({ page }) => {
+    await bukaDenganAuth(page, URL_DAFTAR);
+    let terakhir: MetodeMentah | undefined;
+    await page.route(POLA_DAFTAR, async (route) => {
+      if (route.request().method() !== "GET") return route.continue();
+      const res = await route.fetch();
+      const body = (await res.json()) as { data: MetodeMentah[] };
+      terakhir = body.data.find((m) => m.isActive);
+      const data = body.data.map((m) => ({ ...m, isActive: m.id === terakhir?.id }));
+      // simulasi: menyisakan satu metode aktif sungguhan mengosongkan pilihan kasir spec lain
+      await route.fulfill({ response: res, json: { ...body, data } });
+    });
+    await page.goto(URL_DAFTAR);
+    await expect(page.getByText(/Hanya satu metode yang aktif/)).toBeVisible();
+    const nama = terakhir?.namaPembayaran ?? "";
+    expect(nama).not.toBe("");
+    await cari(page, nama);
+    await page.getByRole("button", { name: `Aksi ${nama}`, exact: true }).click();
+    await expect(page.getByRole("menuitem", { name: "Nonaktifkan" })).toBeDisabled();
+    await page.getByRole("menuitem", { name: "Edit" }).click();
+    await expect(page.getByText(/Ini satu-satunya metode aktif/)).toBeVisible();
+    await pemicu(page, "Aktif").click();
+    await expect(page.getByRole("option", { name: "Non-Aktif", exact: true })).toBeDisabled();
   });
 
   test("detail yang tidak ditemukan menampilkan pesan, bukan memuat tanpa akhir", async ({ page }) => {

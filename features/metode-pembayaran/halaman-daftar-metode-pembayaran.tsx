@@ -31,7 +31,7 @@ import { useSession } from "@/lib/auth/useSession";
 import type { MetodePembayaran } from "@/types/metodePembayaran";
 import { useDaftarMetodePembayaran, usePerbaruiMetodePembayaran } from "./hooks";
 import { aksiMetodePembayaran } from "./izin";
-import { BATAS_METODE_AKTIF, labelKategori, masihDalamBatas, metodeAktifTerakhir } from "./tampilan";
+import { BATAS_METODE_AKTIF, jumlahMetodeAktif, labelKategori, masihDalamBatas, metodeAktifTerakhir } from "./tampilan";
 import { PesanMetode, URL_DAFTAR_METODE } from "./form-metode-pembayaran";
 
 const URL_BUAT = URL_DAFTAR_METODE + "/buatMetodePembayaran";
@@ -41,10 +41,11 @@ const kelasKepalaKolom = "text-xs font-bold text-[#0A2947]/60";
  * Daftar kelola metode pembayaran: seluruh metode termasuk yang nonaktif
  * (showAll, keputusan PO2a). Hapus diganti aktifkan dan nonaktifkan lewat
  * PUT { isActive }, karena backend 465b438 tidak punya DELETE
- * (kontrak/temuan.md butir 82). Tambah dan aktifkan ditahan saat toko sudah
- * punya 10 metode aktif (PO3a), menonaktifkan metode aktif terakhir diberi
- * peringatan (PO5a), dan tombol mengikuti izin create dan update
- * (keputusan rancangan butir 14).
+ * (kontrak/temuan.md butir 82). Saat toko sudah punya 10 metode aktif,
+ * aktifkan ditahan dan metode baru hanya dapat disimpan nonaktif (PO3a,
+ * NZ5a); menonaktifkan metode aktif terakhir ditahan, karena backend
+ * menolaknya 409 (NZ4a, butir 87); dan tombol mengikuti izin create dan
+ * update (keputusan rancangan butir 14).
  */
 export function HalamanDaftarMetodePembayaran() {
   const router = useRouter();
@@ -146,6 +147,7 @@ export function HalamanDaftarMetodePembayaran() {
                   <DropdownMenuSeparator className="bg-[#0A2947]/10" />
                   {m.isActive ? (
                     <DropdownMenuItem
+                      disabled={metodeAktifTerakhir(data, m)}
                       className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10 font-bold"
                       onSelect={() => setTarget(m)}
                     >
@@ -167,7 +169,7 @@ export function HalamanDaftarMetodePembayaran() {
         },
       },
     ],
-    [aksi.ubah, dalamBatas, router],
+    [aksi.ubah, dalamBatas, data, router],
   );
 
   const menonaktifkan = target?.isActive === true;
@@ -194,23 +196,23 @@ export function HalamanDaftarMetodePembayaran() {
               <p className="text-sm font-medium text-[#0A2947]/60">Kelola saluran pembayaran yang terhubung ke Akun Kas Anda.</p>
             </div>
           </div>
-          {aksi.buat &&
-            (dalamBatas ? (
-              <Link href={URL_BUAT} className="w-full sm:w-auto">
-                <Button className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm w-full font-bold">
-                  <Plus className="mr-2 h-4 w-4" /> Tambah Metode
-                </Button>
-              </Link>
-            ) : (
-              <Button disabled className="bg-[#0A2947] text-[#FFFAF3] shadow-sm w-full sm:w-auto font-bold">
+          {aksi.buat && (
+            <Link href={URL_BUAT} className="w-full sm:w-auto">
+              <Button className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm w-full font-bold">
                 <Plus className="mr-2 h-4 w-4" /> Tambah Metode
               </Button>
-            ))}
+            </Link>
+          )}
         </div>
         {!dalamBatas && (
           <p className="text-sm font-medium text-[#0A2947]/70">
-            Toko sudah punya {BATAS_METODE_AKTIF} metode aktif (batas maksimal). Nonaktifkan metode yang tidak dipakai untuk
-            menambah atau mengaktifkan metode lain.
+            Toko sudah punya {BATAS_METODE_AKTIF} metode aktif (batas maksimal). Metode baru hanya dapat disimpan nonaktif;
+            nonaktifkan metode yang tidak dipakai untuk mengaktifkan metode lain.
+          </p>
+        )}
+        {daftar.data && jumlahMetodeAktif(data) === 1 && (
+          <p className="text-sm font-medium text-[#0A2947]/70">
+            Hanya satu metode yang aktif, sehingga metode itu tidak dapat dinonaktifkan. Aktifkan atau buat metode lain lebih dulu.
           </p>
         )}
       </div>
@@ -252,11 +254,6 @@ export function HalamanDaftarMetodePembayaran() {
                 : "Metode ini akan kembali dapat dipilih di kasir."}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {target && metodeAktifTerakhir(data, target) && (
-            <p className="rounded-md border border-red-500/20 bg-red-500/10 p-3 text-sm font-bold text-red-600">
-              Ini metode aktif terakhir. Setelah dinonaktifkan, kasir tidak punya metode pembayaran sama sekali.
-            </p>
-          )}
           <AlertDialogFooter className="pt-2">
             <AlertDialogCancel
               disabled={ubahStatus.isPending}

@@ -14,7 +14,7 @@ import {
 } from "./hooks";
 import { FormMetodePembayaran, KepalaFormMetode, MemuatMetode, PesanMetode, URL_DAFTAR_METODE } from "./form-metode-pembayaran";
 import { NILAI_AWAL_METODE, nilaiAwalMetode, payloadBuatMetode, payloadUbahMetode } from "./payload";
-import { masihDalamBatas } from "./tampilan";
+import { masihDalamBatas, metodeAktifTerakhir } from "./tampilan";
 
 const KELAS_HALAMAN = "mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8";
 
@@ -125,6 +125,7 @@ export function HalamanUbahMetodePembayaran() {
         asal={m}
         akunKas={akun.data}
         bolehAktif={m.isActive || masihDalamBatas(daftar.data)}
+        bolehNonaktif={!metodeAktifTerakhir(daftar.data, m)}
         sedangMenyimpan={perbarui.isPending}
         galat={galat}
         onSimpan={(n) => {

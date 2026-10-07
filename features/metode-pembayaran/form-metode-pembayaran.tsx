@@ -99,6 +99,8 @@ type PropsForm = {
   akunKas: AkunKas[];
   /** false bila toko sudah punya 10 metode aktif dan metode ini belum aktif (PO3a). */
   bolehAktif: boolean;
+  /** False untuk metode aktif terakhir: backend menolak penonaktifannya (NZ4a). */
+  bolehNonaktif?: boolean;
   sedangMenyimpan: boolean;
   galat: string;
   onSimpan: (nilai: NilaiMetodePembayaran) => void;
@@ -116,6 +118,7 @@ export function FormMetodePembayaran({
   asal,
   akunKas,
   bolehAktif,
+  bolehNonaktif = true,
   sedangMenyimpan,
   galat,
   onSimpan,
@@ -240,7 +243,7 @@ export function FormMetodePembayaran({
                 </SelectTrigger>
                 <SelectContent className={kelasIsiPilihan}>
                   <SelectItem value="true" disabled={!bolehAktif} className={kelasPilihan}>Aktif</SelectItem>
-                  <SelectItem value="false" className={kelasPilihan}>Non-Aktif</SelectItem>
+                  <SelectItem value="false" disabled={!bolehNonaktif} className={kelasPilihan}>Non-Aktif</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -248,6 +251,11 @@ export function FormMetodePembayaran({
           {!bolehAktif && (
             <p className="text-xs font-medium text-[#0A2947]/60">
               Toko sudah punya {BATAS_METODE_AKTIF} metode aktif, sehingga metode ini hanya dapat disimpan nonaktif.
+            </p>
+          )}
+          {!bolehNonaktif && (
+            <p className="text-xs font-medium text-[#0A2947]/60">
+              Ini satu-satunya metode aktif di toko, sehingga tidak dapat dinonaktifkan. Aktifkan atau buat metode lain lebih dulu.
             </p>
           )}
           {errors.isActive && <p className={kelasGalat}>{errors.isActive.message}</p>}
