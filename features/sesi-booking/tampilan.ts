@@ -44,7 +44,7 @@ export function tautanPenjualanBooking(booking: SesiBookingResponse): string | n
  * Booking yang menempati aset itu dan bertumpuk dengan rentang [mulai,
  * selesai), atau null. Hanya booking Aktif yang sudah dibayar yang dihitung,
  * sejalan dengan checkConflict backend 465b438: booking yang belum dibayar
- * tidak mengunci jadwal, dan Selesai, VOID, serta Tidak Datang tidak menempati.
+ * tidak mengunci jadwal, dan Selesai serta VOID tidak menempati.
  * Booking tanpa waktuSelesai dianggap berlangsung satu jam, sama dengan
  * halaman lama.
  */

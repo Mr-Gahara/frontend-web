@@ -33,7 +33,7 @@ describe("bookingBertumpukBelumDibayar", () => {
   it("tidak menghitung booking sudah dibayar, status selain Aktif, aset lain, atau yang hanya bersentuhan", () => {
     expect(bookingBertumpukBelumDibayar([booking({ sudahDibayar: true })], "a1", mulai, selesai)).toBeNull();
     expect(
-      bookingBertumpukBelumDibayar([booking({ status: "VOID" }), booking({ status: "Tidak Datang" })], "a1", mulai, selesai),
+      bookingBertumpukBelumDibayar([booking({ status: "VOID" }), booking({ status: "Selesai" })], "a1", mulai, selesai),
     ).toBeNull();
     expect(bookingBertumpukBelumDibayar([booking()], "a2", mulai, selesai)).toBeNull();
     expect(
@@ -43,9 +43,9 @@ describe("bookingBertumpukBelumDibayar", () => {
 });
 
 describe("labelStatusBooking", () => {
-  it("label untuk Selesai dan Tidak Datang, kosong untuk Aktif", () => {
+  it("label untuk Selesai, kosong untuk Aktif dan VOID", () => {
     expect(labelStatusBooking("Selesai")).toBe(" · Selesai");
-    expect(labelStatusBooking("Tidak Datang")).toBe(" · Tidak Datang");
+    expect(labelStatusBooking("VOID")).toBe("");
     expect(labelStatusBooking("Aktif")).toBe("");
   });
 });

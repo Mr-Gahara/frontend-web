@@ -99,8 +99,8 @@ describe("bookingBentrok", () => {
     expect(bookingBentrok([b], "a1", mulai, selesai)).toBe(b);
   });
 
-  it("tidak menghitung booking Selesai, VOID, maupun Tidak Datang", () => {
-    const daftar = [booking({ status: "Selesai" }), booking({ status: "VOID" }), booking({ status: "Tidak Datang" })];
+  it("tidak menghitung booking Selesai maupun VOID", () => {
+    const daftar = [booking({ status: "Selesai" }), booking({ status: "VOID" })];
     expect(bookingBentrok(daftar, "a1", mulai, selesai)).toBeNull();
   });
 

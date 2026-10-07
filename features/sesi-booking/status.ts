@@ -24,9 +24,8 @@ export function bookingBertumpukBelumDibayar(
   return kena ? (belumDibayar.find((b) => b.id === kena.id) ?? null) : null;
 }
 
-/** Label status di blok timeline: Selesai dan Tidak Datang diberi keterangan, Aktif tanpa label (keputusan R9). */
+/** Label status di blok timeline: Selesai diberi keterangan, Aktif tanpa label (keputusan R9). */
 export function labelStatusBooking(status: StatusBooking): string {
   if (status === "Selesai") return " · Selesai";
-  if (status === "Tidak Datang") return " · Tidak Datang";
   return "";
 }

@@ -61,10 +61,11 @@ export interface SesiBookingPenjualanRef {
 }
 
 /**
- * Status booking sejak backend 465b438: Batal diganti VOID, dan Tidak Datang
- * dihitung saat dibaca bila booking belum check-in sampai batas terlambat.
+ * Status booking sejak backend 465b438: Batal diganti VOID. Tidak Datang dan
+ * check-in dibuang backend nizar 60575b5: booking yang sudah dibayar menempati
+ * jadwal sampai waktuSelesai.
  */
-export type StatusBooking = "Aktif" | "Selesai" | "VOID" | "Tidak Datang";
+export type StatusBooking = "Aktif" | "Selesai" | "VOID";
 
 export interface SesiBookingResponse {
   id: string;
@@ -80,8 +81,6 @@ export interface SesiBookingResponse {
   status: StatusBooking;
   /** Jadwal baru terkunci setelah penjualannya menerima uang (backend 465b438). */
   sudahDibayar: boolean;
-  waktuCheckIn?: string | null;
-  batasCheckIn?: string | null;
   dataPenjualan: SesiBookingPenjualanRef | null;
 }
 
