@@ -8,6 +8,7 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ColumnDef } from "@tanstack/react-table";
 
+import { PilihTanggal } from "@/components/pilih-tanggal";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ import { useBuatTransfer, useDaftarTransfer } from "./hooks";
 import { aksiTransfer } from "./izin";
 import {
   FILTER_AWAL_TRANSFER,
+  adaFilterTransfer,
   ISIAN_AWAL_PINDAH_DANA,
   LABEL_STATUS_TRANSFER,
   namaAkunTransfer,
@@ -426,6 +428,32 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
             </SelectContent>
           </Select>
         </div>
+        <div className="flex flex-col gap-1">
+          <span className={KELAS_LABEL_FILTER}>Transfer dari</span>
+          <PilihTanggal
+            label="Transfer dari"
+            value={filter.dari}
+            onChange={(dari) => ubahFilter({ ...filter, dari })}
+            tanggalNonaktif={filter.sampai ? { after: filter.sampai } : undefined}
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className={KELAS_LABEL_FILTER}>Transfer sampai</span>
+          <PilihTanggal
+            label="Transfer sampai"
+            value={filter.sampai}
+            onChange={(sampai) => ubahFilter({ ...filter, sampai })}
+            tanggalNonaktif={filter.dari ? { before: filter.dari } : undefined}
+          />
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={!adaFilterTransfer(filter)}
+          onClick={() => ubahFilter(FILTER_AWAL_TRANSFER)}
+        >
+          Reset Filter
+        </Button>
       </div>
 
       {daftar.isError ? (

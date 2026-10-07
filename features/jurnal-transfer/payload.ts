@@ -1,3 +1,4 @@
+import { keTanggalLokal } from "@/lib/waktu";
 import type { AkunKas } from "@/types/akunKas";
 import type {
   AkunTransfer,
@@ -47,16 +48,34 @@ export function pilihanTujuan(akunAktif: AkunKas[], kasSumberID: string): AkunKa
   return akunAktif.filter((akun) => akun.id !== kasSumberID);
 }
 
-export type FilterTransfer = { akunKasID: string; status: "" | StatusTransfer };
+export type FilterTransfer = {
+  akunKasID: string;
+  status: "" | StatusTransfer;
+  /** Periode tanggal transfer; kosong berarti tanpa batas (keputusan NZ3a). */
+  dari?: Date;
+  sampai?: Date;
+};
 
 export const FILTER_AWAL_TRANSFER: FilterTransfer = { akunKasID: "", status: "" };
 
-/** Query GET /jurnaltransfer: hanya filter yang diisi (akunKasID dan status). */
+/**
+ * Query GET /jurnaltransfer: hanya filter yang diisi. Periode dikirim sebagai
+ * YYYY-MM-DD, yang dibaca backend sebagai hari WIB atas tanggal transfer
+ * (nizar c29310c, kontrak/temuan.md butir 129). Backend menolak query di luar
+ * status, akunKasID, dari, sampai, page, dan limit dengan 400.
+ */
 export function filterServerTransfer(filter: FilterTransfer): Record<string, string> {
   const params: Record<string, string> = {};
   if (filter.akunKasID) params.akunKasID = filter.akunKasID;
   if (filter.status) params.status = filter.status;
+  if (filter.dari) params.dari = keTanggalLokal(filter.dari);
+  if (filter.sampai) params.sampai = keTanggalLokal(filter.sampai);
   return params;
+}
+
+/** Ada filter riwayat yang diisi; menentukan hidupnya tombol Reset Filter (NZ3a). */
+export function adaFilterTransfer(filter: FilterTransfer): boolean {
+  return Object.keys(filterServerTransfer(filter)).length > 0;
 }
 
 export const LABEL_STATUS_TRANSFER: Record<StatusTransfer, string> = {

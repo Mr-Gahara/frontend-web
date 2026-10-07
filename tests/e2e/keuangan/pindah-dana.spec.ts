@@ -107,6 +107,49 @@ test.describe("pindah dana", () => {
     }
   });
 
+  test("riwayat: periode dikirim sebagai tanggal YYYY-MM-DD, dan Reset Filter mengosongkannya (NZ3a)", async ({ page }) => {
+    const daftarTransfer = (syarat: (q: URLSearchParams) => boolean) =>
+      page.waitForResponse(
+        (r) => r.request().method() === "GET" && POLA_TRANSFER.test(r.url()) && syarat(new URL(r.url()).searchParams),
+      );
+    const total = async (r: Awaited<ReturnType<typeof daftarTransfer>>) =>
+      ((await r.json()) as { pagination: { total: number } }).pagination.total;
+    const tampilTotal = async (n: number) => {
+      if (n === 0) await expect(page.getByText("Belum ada transfer pada filter ini.")).toBeVisible();
+      else await expect(page.getByText(`${n} total data`)).toBeVisible();
+    };
+
+    await page.goto(URL_PINDAH, { waitUntil: "commit" });
+    const awal = await daftarTransfer((q) => !q.has("dari") && !q.has("sampai"));
+    expect(awal.status()).toBe(200);
+    const totalAwal = await total(awal);
+    const reset = page.getByRole("button", { name: "Reset Filter" });
+    await expect(reset).toBeDisabled();
+
+    const kini = new Date();
+    const awalan = `${kini.getFullYear()}-${String(kini.getMonth() + 1).padStart(2, "0")}-`;
+    const tDari = daftarTransfer((q) => q.get("dari") === awalan + "15" && !q.has("sampai"));
+    await page.getByRole("button", { name: /^Transfer dari, / }).click();
+    await page.getByRole("grid").getByText("15", { exact: true }).click();
+    await expect(page.getByRole("grid")).toHaveCount(0);
+    expect((await tDari).status()).toBe(200);
+
+    const tSampai = daftarTransfer((q) => q.get("dari") === awalan + "15" && q.get("sampai") === awalan + "20");
+    await page.getByRole("button", { name: /^Transfer sampai, / }).click();
+    await page.getByRole("grid").getByText("20", { exact: true }).click();
+    await expect(page.getByRole("grid")).toHaveCount(0);
+    const resSampai = await tSampai;
+    expect(resSampai.status()).toBe(200);
+    const totalPeriode = await total(resSampai);
+    expect(totalPeriode).toBeLessThanOrEqual(totalAwal);
+    await tampilTotal(totalPeriode);
+    await expect(reset).toBeEnabled();
+
+    await reset.click();
+    await expect(reset).toBeDisabled();
+    await tampilTotal(totalAwal);
+  });
+
   test("form menahan isian kosong dan jumlah di atas saldo, tanpa permintaan", async ({ page }) => {
     let auth = await bukaDenganAuth(page, URL_AKUN);
     const tujuan = (await daftarAkun(page, auth)).find(
