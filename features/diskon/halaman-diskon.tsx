@@ -219,7 +219,6 @@ export function HalamanDiskon() {
         {aksi.buat && (
           <Button
             onClick={() => setForm({ diskon: null })}
-            disabled={!dalamBatas}
             className="cursor-pointer bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90 font-semibold rounded-xl"
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -230,8 +229,8 @@ export function HalamanDiskon() {
 
       {!dalamBatas && (
         <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-800">
-          Toko ini sudah punya {BATAS_DISKON_AKTIF} diskon aktif (batas maksimal). Nonaktifkan
-          diskon yang tidak dipakai sebelum menambah atau mengaktifkan diskon lain.
+          Toko ini sudah punya {BATAS_DISKON_AKTIF} diskon aktif (batas maksimal). Diskon baru hanya
+          dapat disimpan Non-Aktif; nonaktifkan diskon yang tidak dipakai untuk mengaktifkan diskon lain.
         </p>
       )}
 

@@ -45,7 +45,10 @@ function PesanIsian({ pesan }: { pesan?: string }) {
 interface IsiProps {
   /** null berarti menambah diskon baru. */
   diskon: Diskon | null;
-  /** Batas diskon aktif tercapai: diskon Non-Aktif tidak dapat diaktifkan. */
+  /**
+   * Batas diskon aktif tercapai: diskon Non-Aktif tidak dapat diaktifkan, dan
+   * diskon baru hanya dapat disimpan Non-Aktif (NZ5a).
+   */
   batasTercapai: boolean;
   onTutup: () => void;
 }
@@ -66,7 +69,11 @@ function IsiFormDiskon({ diskon, batasTercapai, onTutup }: IsiProps) {
     formState: { errors },
   } = useForm<NilaiFormDiskon>({
     resolver: zodResolver(skemaDiskon),
-    defaultValues: diskon ? nilaiAwalDiskon(diskon) : NILAI_AWAL_DISKON,
+    defaultValues: diskon
+      ? nilaiAwalDiskon(diskon)
+      : batasTercapai
+        ? { ...NILAI_AWAL_DISKON, status: "Non-Aktif" }
+        : NILAI_AWAL_DISKON,
   });
   const tipe = useWatch({ control, name: "tipe" });
   const [galat, setGalat] = useState("");
@@ -194,7 +201,7 @@ function IsiFormDiskon({ diskon, batasTercapai, onTutup }: IsiProps) {
           />
           {aktifTerkunci && (
             <p className="text-xs font-medium text-[#041E3F]/60">
-              Batas diskon aktif tercapai; diskon ini belum dapat diaktifkan.
+              Batas diskon aktif tercapai; diskon ini hanya dapat disimpan Non-Aktif.
             </p>
           )}
         </div>

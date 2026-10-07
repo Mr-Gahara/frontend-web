@@ -178,7 +178,7 @@ test.describe("Kelola diskon", () => {
     await expect(dialog).toBeHidden();
   });
 
-  test("batas diskon aktif: tombol tambah nonaktif beserta keterangannya", async ({ page }) => {
+  test("batas diskon aktif: tambah membuka form yang terkunci Non-Aktif (PD2a, NZ5a)", async ({ page }) => {
     await page.route(POLA_DISKON, async (route) => {
       if (route.request().method() !== "GET") {
         await route.continue();
@@ -201,7 +201,12 @@ test.describe("Kelola diskon", () => {
     await bukaDiskon(page);
     await expect(page.getByText("50 total data")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/sudah punya 50 diskon aktif/)).toBeVisible();
-    await expect(page.getByRole("button", { name: "Tambah Diskon" })).toBeDisabled();
+    await page.getByRole("button", { name: "Tambah Diskon" }).click();
+    const dialog = dialogForm(page);
+    await expect(dialog.getByText(/hanya dapat disimpan Non-Aktif/)).toBeVisible();
+    await expect(dialog.getByRole("combobox", { name: "Status" })).toHaveText("Non-Aktif");
+    await dialog.getByRole("combobox", { name: "Status" }).click();
+    await expect(page.getByRole("option", { name: "Aktif", exact: true })).toBeDisabled();
   });
 
   test("daftar yang gagal dimuat menampilkan pesan, dan coba lagi memuatnya", async ({ page }) => {

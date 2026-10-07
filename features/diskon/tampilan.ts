@@ -24,7 +24,7 @@ export const ATURAN_DISKON_KOSONG = {
 /** Batas diskon berstatus Aktif per toko di backend (BATAS_DISKON_AKTIF). */
 export const BATAS_DISKON_AKTIF = 50;
 
-/** Masih boleh menambah atau mengaktifkan diskon (keputusan PD2a). */
+/** Masih boleh mengaktifkan diskon; di luar batas, diskon baru hanya dapat disimpan Non-Aktif (PD2a, NZ5a). */
 export function masihDalamBatas(daftar: Diskon[]): boolean {
   return daftar.filter((d) => d.status === "Aktif").length < BATAS_DISKON_AKTIF;
 }
