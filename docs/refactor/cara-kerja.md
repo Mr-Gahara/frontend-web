@@ -1564,6 +1564,27 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Method api untuk endpoint yang berbeda ditulis terpisah**, bukan
   ternary di argumen pemanggilan: `audit-endpoint.js` mengenali panggilan
   lewat `apiData.get(EP...`, dan ternary membuatnya terlewat.
+- **Pemilik modul backend dibaca dari berkas pemilik backend, bukan dari
+  riwayat commit.** `git log --format='%an'` menunjuk Nizar untuk
+  kategori beban, sedangkan pemiliknya Ridho lalu Yoga. Laporan 7 Oktober
+  2026 semula melampirkan temuan nomor pengajuan (milik Yoga) pada
+  laporan penyesuaian `nizar`.
+- **Dokumen status backend dibaca di ketiga cabang sebelum laporan
+  disusun.** `docs/pengembangan/klien.md` backend berisi 127, 325, dan
+  241 baris di `ridho`,
+  `nizar`, dan `yoga`; label B dan status `Menunggu verifikasi` di
+  dalamnya menentukan bentuk laporan (`backend.md`).
+- **Ujung cabang remote diperiksa ulang sesudah `fetch` sebelum sebuah
+  hash ditulis sebagai keadaan cabang.** Dokumen `9df34f6` menyebut
+  `origin/yoga` `fc29433`, padahal cabang itu sudah di `55328f1` saat
+  dokumen di-commit.
+- **Blok perintah ditulis untuk zsh.** `set -- $p` tidak memecah kata di
+  zsh; pasangan nilai dipisah dengan `${p% *}` dan `${p#* }`.
+- **Setiap pasangan di berkas marka `ganti-blok.js` didahului baris
+  `@@@ berkas` sendiri**, juga bila berkasnya sama. Beberapa pasangan di
+  bawah satu `@@@ berkas` memakai satu objek, sehingga semuanya berisi
+  teks pasangan terakhir dan ditolak dengan hitungan 0, tanpa ada berkas
+  yang ditulis.
 
 ## Kapan berhenti dan bertanya
 

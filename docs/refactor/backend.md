@@ -128,6 +128,49 @@ Bentuk tiap temuan dalam laporan:
 Temuan diurutkan berdasarkan tingkat kepentingan, dan ditutup tabel ringkasan
 prioritas.
 
+## Pemilik modul backend
+
+Backend dikerjakan tiga orang di tiga cabang remote: `ridho`, `nizar`, dan
+`yoga`. Setiap cabang memuat pekerjaan pemiliknya dan tidak selalu memuat
+pekerjaan yang lain, sehingga satu cabang saja tidak menggambarkan backend
+seutuhnya. Sumber kepemilikan adalah
+`~/Documents/backend-js/docs/pemilik.md`, bukan
+riwayat commit: `kategoriBebanService.js` ditulis Nizar, tercatat milik
+Ridho, lalu dipindahkan ke Yoga di `149f17f`.
+
+Keadaan per 7 Oktober 2026 (berkas pemilik di `yoga` `55328f1`):
+
+| Pemilik | Nama git | Cakupan |
+|---|---|---|
+| Ridho | `Mr-Gahara` | Auth, sesi, RBAC, tenant, keamanan, deploy, SDM (absensi, shift, jadwal shift, pola roster, izin cuti, kontrak kompensasi), paket membership, serta `middleware/` dan `config/` |
+| Yoga | `Yoga Pradana` | Inventaris, gudang, WMS (pengajuan stok, transfer stok, stock opname, jurnal stok), produk, pajak, beban operasional, kategori beban, dashboard |
+| Nizar | `Nizar Khawarizmi` | Kasir dan uang toko (penjualan, pembayaran, metode pembayaran, diskon, akun kas, transfer saldo), pelanggan, membership, posisi, booking (sesi booking, aset, tipe aset, tarif), laporan |
+
+`seeds/permissionSeed.js` tercatat belum ditentukan pemiliknya dan diubah
+lebih dari satu orang, sehingga temuan tentang isi seed dialamatkan ke
+pemilik modul yang memakai izinnya.
+
+Yang dibaca di awal setiap penyesuaian, di setiap cabang, sebelum kontrak
+dicocokkan atau laporan disusun:
+
+- Berkas pemilik di atas: siapa memegang modul apa.
+- `docs/pengembangan/status/<nama>.md`, diambil dari cabang pemiliknya:
+  pekerjaan selesai dan utang yang sudah mereka ketahui.
+- `docs/pengembangan/status.md` bagian Temuan untuk pemilik modul lain.
+- `docs/pengembangan/klien.md`: status tiap butir laporan web
+  (`Perlu diperbaiki`, `Perlu diputuskan`, `Menunggu verifikasi`,
+  `Selesai`, `Bukan backend`, `Dicatat`) dan label B untuk perubahan yang
+  perlu diteruskan ke klien.
+
+```bash
+BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for b in ridho nizar yoga; do echo "== $b $(git -C "$BE" rev-parse --short origin/$b)"; git -C "$BE" show origin/$b:docs/pengembangan/status/$b.md | cut -c1-200; done; git -C "$BE" show origin/yoga:docs/pemilik.md
+```
+
+Laporan disusun per pemilik, memakai nomor butir `kontrak/temuan.md`,
+label B mereka bila ada, dan kosakata status di atas. Butir yang sudah
+mereka catat cukup dirujuk. Laporan 7 Oktober 2026 adalah yang pertama
+disusun dengan cara ini.
+
 ## Catatan untuk tim backend
 
 Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
@@ -352,7 +395,8 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   masih dijawab 403 (butir 130), `tipePajak` masih wajib di
   `PUT /pajak/:id` (butir 91), dan bahan bersatuan pak atau unit tidak
   dapat dipakai di resep (butir 15)
-- Laporan penyesuaian `nizar` — 3 temuan dan konfirmasi, disusun
+- Laporan 7 Oktober 2026, disusun per pemilik (Yoga, Nizar, Ridho) dan
+  semula disebut laporan penyesuaian `nizar` — 3 temuan dan konfirmasi, disusun
   7 Oktober 2026 setelah `729c16a`: nomor pengajuan dibentuk dari urutan
   `createdAt` sehingga dapat mengunci pembuatan pengajuan sebulan
   (beserta catatan penggeseran tiga dokumen development), permintaan

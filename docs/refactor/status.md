@@ -132,8 +132,11 @@ dengan acuan (`cara-kerja.md`), lalu arahan pemilik proyek. Perintah di
 bawah memetakan warna yang dipakai sekarang, bila dibutuhkan. Suite e2e
 penuh tidak dijalankan di awal sesi; harapan hitungannya 444 lolos dan
 16 skipped (`pengujian.md`). Backend lokal berada di cabang uji
-`uji-yoga-nizar` `54f787b`; acuan berikutnya ditetapkan begitu `nizar`
-dan `yoga` digabung tim backend.
+`uji-yoga-nizar` `54f787b`. `origin/yoga` sudah maju ke `55328f1` dan
+belum disesuaikan web (B36, B37, dan B38 di
+`docs/pengembangan/klien.md` backend); cabang
+uji dibangun ulang dari ujung cabang lebih dulu (`backend.md` bagian
+Pemilik modul backend).
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline --remotes --not HEAD | head -20
@@ -143,11 +146,15 @@ grep -nE '^\s*--[a-z-]+:' app/globals.css | cut -c1-100 | head -60
 
 ## Catatan dari penyesuaian backend `nizar`
 
-Dikerjakan pada 7 Oktober 2026 dalam enam commit. `origin/yoga` tidak
-maju dari `fc29433`, tetapi `origin/nizar` maju tiga commit ke `9d45efc`
-dari titik cabang `3edbdea`, sehingga tidak memuat `fc29433`. Acuan
-ujinya gabungan lokal keduanya, cabang `uji-yoga-nizar` `54f787b`, yang
-tidak di-push.
+Dikerjakan pada 7 Oktober 2026 dalam enam commit. Saat dimulai,
+`origin/yoga` berada di `fc29433`, dan `origin/nizar` maju tiga commit ke
+`9d45efc` dari titik cabang `3edbdea`, sehingga tidak memuat `fc29433`.
+Acuan ujinya gabungan lokal keduanya, cabang `uji-yoga-nizar` `54f787b`,
+yang tidak di-push. Pada malam yang sama `origin/yoga` maju tujuh commit
+ke `55328f1` (izin kategori beban, `tipePajak` hanya wajib saat membuat,
+dan satuan resep mengikuti bahan); ketujuhnya belum diuji web. Ketiga
+cabang backend memegang pekerjaan pemilik yang berbeda (`backend.md`
+bagian Pemilik modul backend).
 
 | Commit | Isi |
 |---|---|
@@ -1122,9 +1129,13 @@ Yang masih berlaku:
 
 ### Utang kecil dari penyesuaian backend `nizar`
 
-- Backend lokal berada di cabang uji `uji-yoga-nizar`. Begitu tim backend
-  menggabungkan `nizar` dan `yoga`, backend dipindah ke cabang itu dan
-  kontrak dicocokkan ulang.
+- Backend lokal berada di cabang uji `uji-yoga-nizar` `54f787b`, yang
+  tertinggal tujuh commit dari `origin/yoga` `55328f1`. Cabang uji
+  dibangun ulang setiap kali salah satu cabang pemilik maju, lalu kontrak
+  dicocokkan ulang.
+- Penyesuaian terhadap `yoga` `55328f1` belum dikerjakan: izin kategori
+  beban (`kontrak/temuan.md` butir 130), `tipePajak` di `PUT /pajak/:id`
+  (butir 91), dan satuan resep (butir 15).
 - Bagian Sesi Booking di detail penjualan memakai tata letak sederhana di
   atas grid informasi; penempatannya menunggu fase UI/UX.
 - Timeline reservasi tidak punya aksi Tandai Selesai (NZ7a), dan booking
