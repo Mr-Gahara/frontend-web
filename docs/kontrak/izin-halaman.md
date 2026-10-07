@@ -37,6 +37,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 4 Oktober 2026: pengeluaran setelah `7fce871`, tanpa perubahan gate (`read-pembayaran`). Halaman menampilkan keterangan belum tersedia dan tidak memanggil endpoint apa pun, karena `/bebanoperasional` dan `/kategoribeban` menjawab 403 bagi setiap pengguna (`temuan.md` butir 130).
 - 5 Oktober 2026: pajak setelah `d3443e2`, terhadap backend `fc29433`. Route pajak dan produk pajak kini memeriksa izin, sehingga halaman pajak mendapat entri `IZIN_HALAMAN` (`read-pajak` atau `akses-pos`, keputusan FC3a). `IZIN_HALAMAN` hanya dibaca sidebar, dan halaman pajak bukan menu sidebar, sehingga entrinya dibaca halaman pajak sendiri dan kartu di halaman indeks pengaturan.
 - 6 Oktober 2026: gerbang rute setelah `bc388c6` (keputusan GR1a sampai GR7a). `IZIN_HALAMAN` kini memuat seluruh 83 rute di bawah `/dashboard` dan ditegakkan `GerbangRute` di layout dashboard: rute yang syaratnya tidak dipenuhi menampilkan pesan tanpa izin, dan isinya tidak dipasang. Rute detail, form, dan sub-halaman dicatat di 5.1. Halaman form menuntut izin baca dan izin tulisnya (GR5a). Rute yang pada catatan di atas disebut tanpa entri `IZIN_HALAMAN` (metode pembayaran, profil toko, profil pengguna, ubah akun kas, Pindah Dana, serta detail, buat, dan ubah pengajuan stok) kini punya entri: kosong untuk yang berizin per bagian, bersyarat untuk yang lain. Panel admin tetap di luar `IZIN_HALAMAN`.
+- 7 Oktober 2026: detail penjualan setelah `729c16a`, tanpa perubahan gate (`read-penjualan`). Untuk penjualan berjenis booking, halaman juga memanggil `GET /sesibooking/:id` per booking, hanya bagi pemegang `read-booking`; tanpa izin itu bagian Sesi Booking tidak dipasang. Tombol Tandai Selesai memanggil `PUT /sesibooking/:id` dan hanya tampil bagi pemegang `update-booking` (keputusan NZ7a). Mutasi arus kas juga memanggil `GET /akunkas/ringkasan` (`read-akunkas`, sejalan dengan gate) sejak `d23844a`.
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -122,7 +123,7 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/outlet/pengaturan/roles/[id]/edit` | `read-role`, `update-role` | `/role/:id`, `/role`, `/permission` | Form |
 | `/dashboard/outlet/pengaturan/toko` | - | `/tenant/:id`, `/location/current` | Izin per bagian di dalam halaman (PO14a) |
 | `/dashboard/outlet/penjualan/buatPenjualan` | `read-produk` atau `akses-pos`, `create-penjualan` | `/produk`, `/pelanggan`, `/diskon`; `/pajak` dan `/location/current` opsional | Form |
-| `/dashboard/outlet/penjualan/[id]` | `read-penjualan` | `/penjualan/:id` | Detail; aksi mengikuti `aksiPenjualan` |
+| `/dashboard/outlet/penjualan/[id]` | `read-penjualan` | `/penjualan/:id` | Detail; aksi mengikuti `aksiPenjualan`. Booking dimuat lewat `/sesibooking/:id` bagi pemegang `read-booking` (`729c16a`) |
 | `/dashboard/outlet/penjualan/[id]/pembayaran` | `read-penjualan`, `create-pembayaran` | `/penjualan/:id`, `/metodepembayaran` | Form |
 | `/dashboard/outlet/reservasi/buatReservasi` | `read-booking`, `create-booking` | `/sesibooking`, `/aset`, `/pelanggan`, `/diskon` | Form |
 | `/dashboard/outlet/reservasi/aset` | - | `/aset` | `GET` tanpa izin di backend (GR6a) |

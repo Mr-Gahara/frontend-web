@@ -96,6 +96,21 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per penyesuaian backend `nizar`** (commit `729c16a`): 627
+test unit dan integrasi lolos di 76 berkas, bertambah tujuh (tiga test
+baris mutasi, dua test filter periode transfer, dan dua test izin sesi
+booking). Suite penuh 7 Oktober 2026 terhadap cabang uji lokal
+`uji-yoga-nizar` `54f787b` menghasilkan 440 lolos, 4 gagal, dan 16
+skipped. Hitungannya sesuai harapan 444 dan 16: empat skenario baru
+(metode aktif terakhir, baris pembayaran di mutasi, filter periode
+Pindah Dana, dan tandai selesai). Keempat yang gagal berhenti di
+`POST /pengajuanstok` yang dijawab 409 nomor kembar
+(`kontrak/temuan.md` butir 139), bukan dari kode yang diubah. Setelah
+`createdAt` tiga pengajuan development digeser, folder
+`penerimaanBarang`, `transferStok`, dan `pengajuanStok` lolos 17 dan 2
+skipped; suite penuh tidak dijalankan ulang, sehingga angka terukurnya
+tetap 440 lolos.
+
 **Baseline per form role** (commit `597a163`): 620 test unit dan
 integrasi lolos di 73 berkas, bertambah 16 test di
 `tests/unit/features/role/form-role.test.ts`. `597a163` menambah dua
@@ -459,6 +474,7 @@ Pola kegagalan yang berulang:
 | `page.request` di `finally` habis waktu, sekali lalu hilang | Backend sesaat tidak menjawab; permintaan ini tidak melewati `page.route`, sehingga bukan akibat simulasi spec (suite penuh `074e98c`). Jalankan ulang suite penuh sebelum mengubah spec |
 | `waitForResponse` habis waktu setelah kembali ke halaman atau filter yang sudah pernah dimuat | Kunci query masih segar (`staleTime` 5 menit di `components/providers/query-provider.tsx`), sehingga tidak ada permintaan. Buktikan dari tampilan; penunggu jaringan hanya untuk kunci yang belum pernah dimuat (`b63cf08`) |
 | Pembersihan tampak lolos, tetapi data uji menumpuk di basis data | Helper pembersihan membuang jawaban permintaannya. Periksa statusnya dengan `expect.soft`, dan jalankan audit endpoint: route yang dihapus backend juga menjawab 404 (`b5a55c4`) |
+| `POST /pengajuanstok` ditolak 409 nomor kembar, menetap saat diulang | Backend membentuk nomor dari dokumen terakhir menurut `createdAt` (`kontrak/temuan.md` butir 139). Bandingkan `createdAt` dan waktu `_id` dokumen bernomor terbesar dengan jam sistem lewat skrip baca-saja; dokumen ber-`createdAt` di depan mengunci pembuatan sampai bulan berganti |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena
 tombol hapus sempat disabled sampai daftar role selesai dimuat (level
@@ -1022,6 +1038,7 @@ Urutan debug kegagalan e2e di atas).
   aktif terakhir, akun nonaktif bertanda di form ubah, dan penolakan akun
   nonaktif saat mengaktifkan kembali hanya teruji di unit test
   (`tests/unit/features/metode-pembayaran/`).
+  Peringatan itu diganti penahanan di `3b4f35b` (NZ4a), yang teruji e2e.
 - **Metode uji menumpuk sebagai nonaktif**, satu per run spec kelola
   metode pembayaran, karena metode tidak dapat dihapus (PO10a).
 - **Tombol metode pembayaran yang disembunyikan menurut izin hanya teruji
@@ -1072,8 +1089,8 @@ Urutan debug kegagalan e2e di atas).
   Non-Aktif tidak dihitung batas 50 diskon aktif.
 - **Batas 50 diskon aktif hanya teruji lewat simulasi** respons daftar
   yang ditandai `// simulasi:`, dan hanya untuk tombol tambah; menu
-  aktifkan dan pilihan Aktif di form yang terkunci saat batas tercapai
-  belum teruji.
+  aktifkan yang terkunci saat batas tercapai belum teruji. Pilihan Aktif
+  di form buat teruji e2e sejak `a80d2fa` (NZ5a).
 - **Keterangan khusus member dan pemilih produk tanpa izin baca produk
   belum teruji**: web tidak dapat menandai khusus member (PD8a), dan
   satu-satunya akun uji berperan Owner. `aksiDiskon` hanya teruji di unit
@@ -1209,6 +1226,30 @@ Urutan debug kegagalan e2e di atas).
   (6 Oktober 2026), sehingga baseline suite penuh dapat berupa hitungan
   selama beberapa pekerjaan. Angka terukur terakhir 436 lolos dan 16
   skipped, terhadap `628f52e`.
+
+- **Jumlah skenario lolos suite penuh 7 Oktober 2026 adalah 440, bukan
+  444**: empat skenario gagal karena nomor pengajuan kembar di backend
+  (`kontrak/temuan.md` butir 139), lalu lolos saat foldernya diulang
+  setelah data development digeser.
+- **Batas 10 metode aktif dan metode aktif terakhir hanya teruji lewat
+  simulasi** bertanda `// simulasi:`. Penolakan 409 backend atas metode
+  aktif terakhir dibuktikan lewat skrip sekali pakai (7 Oktober 2026),
+  bukan lewat e2e, karena web kini menahannya.
+- **Tandai Selesai hanya teruji untuk satu booking yang dibayar Rp1.**
+  Tombol yang tidak tampil (belum dibayar, jam sudah lewat, tanpa
+  `update-booking`) hanya teruji di unit test
+  (`tests/unit/features/sesi-booking/izin.test.ts`), dan bagian Sesi
+  Booking tanpa `read-booking` belum teruji. Setiap run meninggalkan
+  satu penjualan booking VOID.
+- **Tautan penjualan di buku mutasi bergantung pada data**: skenarionya
+  dilewati bila halaman pertama bulan berjalan tidak memuat mutasi
+  pembayaran. Baris tanpa pencatat hanya teruji di unit test.
+- **Filter periode riwayat Pindah Dana diuji dengan tanggal 15 sampai 20
+  bulan berjalan**, yang hampir selalu memberi daftar kosong; isi daftar
+  dalam periode tidak dibandingkan per baris.
+- **Booking lama berstatus Batal** masih ada di data development dan
+  tampil di timeline (`kontrak/temuan.md` butir 141); tidak ada test
+  untuknya.
 
 ## Spec rujukan
 
@@ -1561,3 +1602,22 @@ Urutan debug kegagalan e2e di atas).
   mendampinginya: profil tetap terbuka, dan Owner memicu `GET /role` dari
   halaman form. Skenario tertolak dibuktikan gagal tanpa gerbang lewat
   `git stash push` atas layout saja.
+- `tests/e2e/reservasi/daftar/tandai-selesai.spec.ts` (`729c16a`): data
+  milik alur lain (booking dan pembayaran Rp1) disiapkan lewat API,
+  sedangkan aksi yang diuji dijalankan lewat UI. Payload dibandingkan
+  persis, hasil dibaca ulang lewat detail booking, dan `finally`
+  membersihkan lewat void penjualan, yang berlaku juga untuk booking
+  yang sudah Selesai.
+- Skenario ringkasan dan baris pembayaran di
+  `tests/e2e/keuangan/mutasi-kas.spec.ts` (`d23844a`): penunggu respons
+  dipasang sebelum helper pembuka, karena permintaannya terkirim saat
+  halaman dimuat; baris dipilih lewat indeksnya di respons; dan tautan
+  dibuktikan dari `href` lalu dibuka.
+- Skenario riwayat di `tests/e2e/keuangan/pindah-dana.spec.ts`
+  (`8072214`): query filter dibuktikan dari permintaan nyata, sedangkan
+  kembali ke kunci yang masih segar (Reset Filter) dibuktikan dari
+  tampilan, tanpa penunggu jaringan.
+- Skenario batas dan aktif terakhir di
+  `tests/e2e/pengaturan/kelola-metode-pembayaran.spec.ts` (`3b4f35b`):
+  keadaan yang tidak dapat dibuat di data uji dibentuk dari respons
+  nyata (`route.fetch()`), lalu terbawa ke halaman berikutnya.

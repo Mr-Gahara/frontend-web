@@ -450,6 +450,7 @@ keputusan rancangan butir 17 dan 21.
   bayar, bukan jalur batal** (`eef371a`). Web belum punya jalur
   membatalkan booking. Sejak `b85c2bd` booking dibatalkan lewat void
   penjualannya (PB2a).
+  Tandai Selesai ada di detail penjualan sejak `729c16a` (NZ7a).
 - **R5a: booking Batal tidak ditampilkan di timeline daftar reservasi**
   (`eef371a`), karena slotnya sudah dilepas; backend tetap mengirimnya,
   karena daftar tidak disaring menurut status. Sejak backend `465b438`
@@ -540,6 +541,7 @@ Diputuskan pemilik proyek pada 3 Oktober 2026, untuk mutasi arus kas
 - **MK2a: ringkasan periode tampil hanya saat satu akun dipilih** di
   filter (saldo awal, total masuk, total keluar, dan saldo akhir), karena
   backend hanya punya ringkasan per akun (`kontrak/temuan.md` butir 125).
+  Diubah NZ1a (`d23844a`): tanpa akun terpilih tampil ringkasan gabungan.
 - **MK3a: halaman dibuka dengan periode bulan berjalan**, dari tanggal 1
   sampai hari ini, dan dapat diubah lewat dua `PilihTanggal`.
 - **AK1a: halaman akun kas menampilkan kartu hanya untuk akun aktif.**
@@ -595,6 +597,7 @@ Pelanggan dan diskon:
 - **DN2a: riwayat transfer di halaman yang sama**, berpaginasi server,
   dengan filter akun dan status, serta Batalkan per baris lewat dialog
   beralasan opsional.
+  Filter periode ditambahkan di `8072214` (NZ3a).
 - **DN3a: tanggal transfer tidak diisi.** `tanggal` tidak dikirim dan
   backend memakai waktu server, karena filter periode buku mutasi memakai
   waktu dicatat.
@@ -896,6 +899,7 @@ lain.
   dibayar tampil sebagai peringatan tanpa menahan simpan. Booking uji
   dibatalkan dengan membatalkan pembayaran PAID-nya lalu mem-void
   penjualan (menggantikan R2c).
+  Tidak Datang dibuang backend `nizar` `60575b5` (`9b25433`).
 - **PB9a: skenario "Tipe Tidak Diketahui" dan `test.fixme` butir 51
   dibuang**, karena backend kini menolak hapus tipe aset yang masih
   dipakai (409); tampilan tipe yang hilang diuji unit lewat
@@ -959,12 +963,14 @@ dan diterapkan di `fcf2dd2` bersama PO15a; PO16a diterapkan di `ca6eb3d`.
 - **PO3a: batas 10 metode aktif ditahan di klien**, dihitung dari daftar
   kelola: tombol Tambah dan menu Aktifkan nonaktif beserta keterangan, dan
   pilihan Aktif di form nonaktif. Jawaban 409 backend tetap ditampilkan.
+  Sejak `3b4f35b` tombol Tambah tetap hidup saat batas tercapai (NZ5a).
 - **PO4a: badge Default, kolom Sistem, kotak centang gateway Xendit, dan
   field gateway di tipe web dibuang.** Badge ditebak dari nama tanpa
   konsep backend, dan gateway tidak dipakai (`kontrak/temuan.md` butir 78).
 - **PO5a: menonaktifkan metode aktif terakhir diberi peringatan** di
   dialog tanpa ditahan, karena backend tidak menahannya
   (`kontrak/temuan.md` butir 87).
+  Diganti NZ4a (`3b4f35b`): backend kini menolaknya, dan web menahannya.
 - **PO6a: satu pajak per produk.** Tab pajak per produk menampilkan satu
   pajak terpasang, memasang pajak lain menggantinya lewat konfirmasi yang
   menyebut pajak lama, dan hanya pajak per produk yang aktif yang
@@ -1110,6 +1116,7 @@ rancangan butir 17, 21, dan 23. PD1a dan PD5a diterapkan di `d9365d3`
   tidak punya `DELETE` (diskon dirujuk riwayat penjualan). Batas 50 diskon
   aktif ditahan di klien dengan keterangan, dan jawaban 409 backend tetap
   ditampilkan, seperti PO2a dan PO3a.
+  Sejak `a80d2fa` tombol tambah tetap hidup saat batas tercapai (NZ5a).
 - **PD3a: form diskon mengelola seluruh field backend, dalam dua commit.**
   Commit pertama memigrasikan enam field lama dan menampilkan aturan lain
   baca-saja di daftar; commit kedua menambah masa berlaku, jam dan hari,
@@ -1137,6 +1144,7 @@ rancangan butir 17, 21, dan 23. PD1a dan PD5a diterapkan di `d9365d3`
   `Membership` aktif, sedangkan permission membership tidak ada di seed,
   sehingga membership tidak dapat dibuat siapa pun (`kontrak/temuan.md`
   butir 108). Diskon yang sudah ditandai diberi keterangan.
+  Dipertahankan setelah izin membership masuk seed (NZ6a).
 - **PD9a: aturan berada di bagian Aturan tambahan yang dapat dibuka dan
   ditutup**, terbuka sendiri bila diskon sudah punya aturan atau ada
   isian aturan yang ditolak. Enam isian dasar tetap seperti semula.
@@ -1426,6 +1434,61 @@ Diputuskan pemilik proyek pada 6 Oktober 2026 (`597a163`). Labelnya RL:
   wewenang tidak berubah; teks tombol simpan tetap "Simpan Perubahan" di
   kedua mode; dan kedua skenario e2e dibuktikan gagal terhadap form lama
   sebelum form diubah.
+
+### Penyesuaian backend `nizar`
+
+Diputuskan pemilik proyek pada 7 Oktober 2026, setelah `origin/nizar` maju
+ke `9d45efc` (tiga commit, bercabang dari `yoga` di `3edbdea`). Labelnya
+NZ.
+
+- **Acuan uji adalah gabungan lokal `yoga` dan `nizar`**: cabang
+  `uji-yoga-nizar` `54f787b` di backend lokal, tidak di-push, karena
+  `nizar` tidak memuat `fc29433`. Satu-satunya konflik ada di dokumen
+  backend dan diselesaikan dengan versi `nizar`.
+- **Seluruh perbaikan backend dimanfaatkan dalam putaran ini**, satu
+  commit per kelompok.
+- **NZ1a: ringkasan mutasi gabungan tampil saat tidak ada akun dipilih**
+  (`d23844a`), dari `GET /akunkas/ringkasan`; dengan satu akun tetap
+  ringkasan akun itu. Mengubah MK2a.
+- **NZ2a: buku mutasi menampilkan pencatat dan tautan penjualan**
+  (`d23844a`): kolom Pencatat, dan nomor referensi mutasi pembayaran
+  bertaut ke detail penjualannya. Nama akun dibaca dari baris, dengan
+  daftar akun kas sebagai cadangan.
+- **NZ3a: riwayat Pindah Dana berfilter periode** (`8072214`), lewat dua
+  `PilihTanggal` atas tanggal transfer, dengan tombol Reset Filter yang
+  mati selama tidak ada filter yang diisi. Melengkapi DN2a.
+- **NZ4a: metode pembayaran aktif terakhir ditahan di klien**
+  (`3b4f35b`): menu Nonaktifkan dan pilihan Non-Aktif di form ubah mati
+  beserta keterangan, dan jawaban 409 backend tetap ditampilkan.
+  Menggantikan PO5a.
+- **NZ5a: saat batas aktif tercapai, tambah tetap terbuka dan hanya dapat
+  menyimpan nonaktif** (`3b4f35b` untuk metode pembayaran, `a80d2fa`
+  untuk diskon). Mengaktifkan tetap ditahan. Mengubah PO3a dan PD2a.
+- **NZ6a: khusus member tetap tidak ditawarkan** sampai web punya modul
+  membership, walau izinnya kini ada di seed. PD8a dipertahankan.
+- **NZ7a: booking yang sudah dibayar dapat ditandai Selesai lebih awal
+  dari detail penjualan** (`729c16a`), bukan dari blok timeline, yang
+  tetap menjadi tautan (R4b).
+- **Booking lama berstatus Batal dibiarkan** dan dicatat
+  (`kontrak/temuan.md` butir 141): hanya data development, dan backend
+  tidak lagi menulis status itu.
+- **`createdAt` tiga pengajuan development digeser** ke sebelum
+  `PGJ/202610/0137`, lewat skrip bermode tinjau, karena pembentuk nomor
+  backend terkunci olehnya (`kontrak/temuan.md` butir 139).
+- Diterapkan tanpa ditanyakan (`9b25433`): status Tidak Datang serta
+  `waktuCheckIn` dan `batasCheckIn` dibuang dari tipe, label timeline,
+  dan test, mengikuti backend.
+- Diterapkan tanpa ditanyakan (`d23844a`): periode tetap dikirim sebagai
+  ISO hari lokal, karena hasilnya terbukti sama dengan tanggal saja;
+  ringkasan gabungan lewat method api tersendiri, agar audit endpoint
+  mengenalinya; dan field baru di tipe mutasi opsional.
+- Diterapkan tanpa ditanyakan (`8072214`): periode riwayat kosong di
+  awal, dan dikirim sebagai `YYYY-MM-DD`; labelnya "Transfer dari" dan
+  "Transfer sampai", karena backend menyaring tanggal transfer.
+- Diterapkan tanpa ditanyakan (`729c16a`): booking dimuat per id dari
+  `itemPenjualan[].sesiBookingID`, hanya bagi pemegang `read-booking`;
+  tombol hanya untuk booking Aktif yang jamnya belum lewat; dan dialog
+  hanya tertutup saat berhasil (keputusan Fase 0).
 
 ## Keputusan rancangan yang mengikat
 

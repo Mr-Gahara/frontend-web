@@ -91,6 +91,16 @@ lewat `checkPermission` di route; keduanya belum dipakai web. Pada
 `fc29433`, yang memasang izin di route pajak, produk pajak, dan beban
 operasional. Lampiran A belum dibentuk ulang, sehingga route itu masih
 tercatat tanpa izin di sana.
+Pada 7 Oktober 2026, bagian metode pembayaran, diskon, akun kas, jurnal
+transfer, sesi booking, dan tipe aset di `endpoint.md`, `payload.md`,
+`izin-halaman.md`, dan `temuan.md` dikoreksi terhadap cabang uji lokal
+`uji-yoga-nizar` `54f787b`, yaitu `origin/yoga` `fc29433` digabung
+`origin/nizar` `9d45efc`; cabang itu tidak di-push, dan acuan berikutnya
+ditetapkan begitu tim backend menggabungkan keduanya. Terhadap Lampiran
+A: `POST /sesibooking/:id/checkin` tidak ada lagi, `GET /akunkas/ringkasan`
+belum tercatat dan dipakai web sejak `d23844a`, dan `GET` serta
+`PUT /sesibooking/:id`, yang tercatat tidak dipakai, dipakai web sejak
+`729c16a`.
 
 ## 1. Acuan dan metodologi
 

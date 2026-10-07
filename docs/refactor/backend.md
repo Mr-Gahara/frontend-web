@@ -352,6 +352,14 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   masih dijawab 403 (butir 130), `tipePajak` masih wajib di
   `PUT /pajak/:id` (butir 91), dan bahan bersatuan pak atau unit tidak
   dapat dipakai di resep (butir 15)
+- Laporan penyesuaian `nizar` — 3 temuan dan konfirmasi, disusun
+  7 Oktober 2026 setelah `729c16a`: nomor pengajuan dibentuk dari urutan
+  `createdAt` sehingga dapat mengunci pembuatan pengajuan sebulan
+  (beserta catatan penggeseran tiga dokumen development), permintaan
+  filter per penjualan di daftar sesi booking, dan booking lama
+  berstatus Batal yang tidak dimigrasikan; beserta konfirmasi butir yang
+  terbukti diperbaiki `nizar` `c29310c` dan `60575b5`, dan butir yang
+  masih terbuka (`kontrak/temuan.md` butir 139 sampai 141)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

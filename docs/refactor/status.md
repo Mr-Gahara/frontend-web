@@ -93,6 +93,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Gerbang rute dari `IZIN_HALAMAN` | `bc388c6` | Selesai (keputusan GR1a sampai GR7a; Catatan dari gerbang rute) |
 | Utang kecil gerbang rute | `dc0af1c` | Selesai (Catatan dari utang kecil gerbang rute) |
 | Form role ke React Hook Form dan Zod | `597a163` | Selesai (keputusan RL1a sampai RL3a; Catatan dari form role) |
+| Penyesuaian backend `nizar` | `9b25433` (sesi booking), `3b4f35b` (metode pembayaran), `a80d2fa` (diskon), `d23844a` (mutasi), `8072214` (riwayat Pindah Dana), `729c16a` (tandai selesai) | Selesai (keputusan NZ1a sampai NZ7a; Catatan dari penyesuaian backend `nizar`) |
 | Rancangan dan perbaikan UI/UX, layout, dan palet warna | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
@@ -100,9 +101,9 @@ Keputusan produk tiap modul tercatat di `keputusan.md`.
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per form role (`597a163`), tidak berubah dari `628f52e`:
+Diukur ulang per penyesuaian `nizar` (`729c16a`), tidak berubah dari `597a163`:
 
-| Hal | Awal | Per `597a163` | Catatan |
+| Hal | Awal | Per `729c16a` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 0 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), 4 setelah halaman profil, login, dan sidebar (`57a7084`), dan 0 setelah error ESLint warisan (`4f19e77`) |
 | Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna |
@@ -129,14 +130,68 @@ layout serta tampilan panel admin (Utang kecil dari modul panel admin).
 Langkah pertama sesi berikutnya: backend di-`fetch` dan dibandingkan
 dengan acuan (`cara-kerja.md`), lalu arahan pemilik proyek. Perintah di
 bawah memetakan warna yang dipakai sekarang, bila dibutuhkan. Suite e2e
-penuh tidak dijalankan di awal sesi; harapan hitungannya 440 lolos dan
-16 skipped (`pengujian.md`).
+penuh tidak dijalankan di awal sesi; harapan hitungannya 444 lolos dan
+16 skipped (`pengujian.md`). Backend lokal berada di cabang uji
+`uji-yoga-nizar` `54f787b`; acuan berikutnya ditetapkan begitu `nizar`
+dan `yoga` digabung tim backend.
 
 ```bash
-BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline fc29433..origin/yoga | head -20
+BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline --remotes --not HEAD | head -20
 grep -rhoE '#[0-9A-Fa-f]{6}\b' app components features | tr 'a-f' 'A-F' | sort | uniq -c | sort -rn | head -30
 grep -nE '^\s*--[a-z-]+:' app/globals.css | cut -c1-100 | head -60
 ```
+
+## Catatan dari penyesuaian backend `nizar`
+
+Dikerjakan pada 7 Oktober 2026 dalam enam commit. `origin/yoga` tidak
+maju dari `fc29433`, tetapi `origin/nizar` maju tiga commit ke `9d45efc`
+dari titik cabang `3edbdea`, sehingga tidak memuat `fc29433`. Acuan
+ujinya gabungan lokal keduanya, cabang `uji-yoga-nizar` `54f787b`, yang
+tidak di-push.
+
+| Commit | Isi |
+|---|---|
+| `9b25433` | Status Tidak Datang dan field check-in dibuang dari tipe, label timeline, dan test |
+| `3b4f35b` | Metode aktif terakhir ditahan (NZ4a), dan Tambah tetap hidup saat batas 10 tercapai (NZ5a) |
+| `a80d2fa` | Tambah diskon tetap hidup saat batas 50 tercapai, dengan form terkunci Non-Aktif (NZ5a) |
+| `d23844a` | Ringkasan mutasi gabungan (NZ1a), kolom Pencatat, dan tautan penjualan (NZ2a) |
+| `8072214` | Filter periode dan Reset Filter di riwayat Pindah Dana (NZ3a) |
+| `729c16a` | Tandai Selesai untuk booking lunas di detail penjualan (NZ7a) |
+
+- Permission diselaraskan menurut `backend.md`: seed sinkron menambah
+  delapan izin membership (127 di seed), dan seed Owner memberi 124 izin
+  ke tiga role Owner. Tidak ada nama yang dikeluarkan dari seed.
+- Audit endpoint: 243 route dan 142 panggilan frontend unik, tanpa
+  panggilan ke route yang tidak ada. `POST /sesibooking/:id/checkin`
+  hilang, dan `GET /akunkas/ringkasan` bertambah.
+- Tidak ada `test.fixme` yang dapat dilepas: berkas penentu butir 8, 22,
+  46, 70, dan 104 serta validator ubah pola roster tidak diubah `nizar`,
+  dan seed tidak memuat izin lintas outlet (butir 39).
+- Terbukti lewat permintaan nyata: butir 86, 87, 123, 124, 125, 126, dan
+  129, bentuk galat validator (butir 42 dan 128), dan bentuk sesi
+  booking. Butir 85, 107, dan 127 dibaca dari diff. Butir 77 dan 109
+  hanya menurut pesan commit (`kontrak/temuan.md`).
+- `POST /metodepembayaran` tanpa `kategori` dijawab 400, sehingga
+  kontraknya dikoreksi; `jamBuka` dan `jamTutup` tipe aset, yang ada
+  sejak `465b438`, baru tercatat (`kontrak/payload.md`,
+  `kontrak/endpoint.md`).
+- Booking milik sebuah penjualan dikenali dari
+  `itemPenjualan[].sesiBookingID` dan dimuat per id, karena daftar
+  booking tidak dapat disaring per penjualan (butir 140).
+- Vitest 627 lolos di 76 berkas. Suite e2e penuh: 440 lolos, 4 gagal,
+  dan 16 skipped; jumlah skenarionya sesuai hitungan harapan (444 dan
+  16).
+- Keempat kegagalan bukan dari kode hari itu: `POST /pengajuanstok`
+  dijawab 409 nomor kembar, karena pembentuk nomor backend mengurutkan
+  menurut `createdAt` dan tiga pengajuan development ber-`createdAt` di
+  depan jam sistem (butir 139). Setelah `createdAt` ketiganya digeser,
+  ketiga folder spec terkait lolos 17 dan 2 skipped (`pengujian.md`).
+  Pemicu waktu di depan itu tidak terbukti.
+- Push commit `8072214` dua kali ditolak GitHub dengan galat server, dan
+  masuk bersama `729c16a`.
+- Temuan backend baru: butir 139 sampai 141 (`backend.md`).
+- Keputusan: `keputusan.md` (Penyesuaian backend `nizar`, NZ1a sampai
+  NZ7a).
 
 ## Catatan dari form role
 
@@ -540,6 +595,7 @@ sekali di akhir (keputusan PF6a): 413 lolos, 1 gagal, dan 17 skipped.
   akun, periode, arah, dan jenis diterapkan backend bersama paginasi.
   Ringkasan periode tampil hanya saat satu akun dipilih (MK2a), dan
   halaman dibuka dengan bulan berjalan (MK3a).
+  Sejak `d23844a` tanpa akun terpilih tampil ringkasan gabungan (NZ1a).
 - Lapisan datanya ditambahkan ke `features/akun-kas` (`arsitektur.md`).
   Kedua hook mutasi selalu dimuat ulang saat dibuka, karena pembayaran
   mengubah buku tanpa menginvalidasi akar `akunKas`.
@@ -835,6 +891,7 @@ dalam delapan commit, dengan keputusan PB1a sampai PB14a (`keputusan.md`).
   dan `DELETE /metodepembayaran/:id`, dan empat route baru belum dipakai
   web, yaitu mutasi dan ringkasan akun kas serta check-in sesi booking.
   Lampiran A tidak diubah sampai pembangkitan ulang (`kontrak/README.md`).
+  Check-in dibuang backend `nizar` `60575b5` tanpa pernah dipakai web.
 - Status penjualan kini DRAFT, UNPAID, PARTIAL, PAID, dan VOID. Booking
   tersimpan UNPAID dan dapat di-void selama belum dibayar, sehingga web
   punya jalur batal booking lewat void penjualan (PB2a).
@@ -1063,6 +1120,21 @@ Yang masih berlaku:
 
 ## Utang kecil yang tertunda
 
+### Utang kecil dari penyesuaian backend `nizar`
+
+- Backend lokal berada di cabang uji `uji-yoga-nizar`. Begitu tim backend
+  menggabungkan `nizar` dan `yoga`, backend dipindah ke cabang itu dan
+  kontrak dicocokkan ulang.
+- Bagian Sesi Booking di detail penjualan memakai tata letak sederhana di
+  atas grid informasi; penempatannya menunggu fase UI/UX.
+- Timeline reservasi tidak punya aksi Tandai Selesai (NZ7a), dan booking
+  lama berstatus Batal tampil sebagai blok redup (`kontrak/temuan.md`
+  butir 141).
+- Khusus member belum ditawarkan di form diskon (NZ6a); ditinjau bersama
+  modul membership.
+- Mutasi transfer di buku mutasi tidak bertaut ke riwayat Pindah Dana,
+  karena riwayat itu tidak punya halaman per transfer.
+
 ### Utang kecil dari gerbang rute
 
 - Pesan gerbang bersifat umum dan tidak menyebut halaman maupun izin yang
@@ -1128,14 +1200,12 @@ Yang masih berlaku:
   Dana sejak `e53c016`. Menutup akun bersaldo dengan memindah saldonya
   lebih dulu teruji sebagai satu alur sejak `f7805ca`; backend tetap
   tidak punya jalur koreksi saldo.
-- Riwayat transfer hanya dapat disaring per akun dan status, karena
-  backend tidak punya filter periode (`kontrak/temuan.md` butir 129), dan
-  ubah keterangan transfer tanpa VOID tidak dibuat.
-- Halaman mutasi arus kas (`e129f9d`) tidak menampilkan nama pencatat dan
-  tidak menautkan baris ke penjualannya, karena baris mutasi hanya
-  membawa id (`kontrak/temuan.md` butir 124); ringkasan gabungan seluruh
-  akun juga belum ada (butir 125). `GET /akunkas/:id/mutasi` tidak dipakai
-  web, karena buku gabungan menerima `akunKasID`.
+- Riwayat transfer berfilter periode sejak `8072214` (NZ3a). Ubah
+  keterangan transfer tanpa VOID tidak dibuat.
+- Halaman mutasi arus kas menampilkan pencatat, tautan penjualan, dan
+  ringkasan gabungan sejak `d23844a` (NZ1a dan NZ2a).
+  `GET /akunkas/:id/mutasi` tidak dipakai web, karena buku gabungan
+  menerima `akunKasID`.
 - Tampilan halaman akun kas dan halaman ubah bagi pengguna tanpa
   `update-akunkas` belum teruji e2e (`pengujian.md`), dan halaman ubah
   membaca akun dari cache daftar tanpa `GET /akunkas/:id`.

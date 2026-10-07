@@ -1538,6 +1538,33 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   tidak cocok; `handleSubmit` form role diganti dari baris pembukanya
   sampai pernyataan terakhirnya saja.
 
+- **Riwayat seluruh cabang backend diperiksa, bukan hanya cabang
+  acuan.** `origin/yoga` tidak maju, tetapi `origin/nizar` maju tiga
+  commit dari titik cabang yang lebih lama. Hitung commit di depan dan
+  di belakang acuan untuk setiap cabang remote, dan uji gabungannya
+  lewat `git merge-tree --write-tree` sebelum memutuskan cara mengujinya.
+- **Pathspec pengecualian ditulis `:(exclude)<path>`.** Bentuk pendek
+  `:!__tests__` gagal, karena garis bawah sesudah `!` dibaca git sebagai
+  magic pathspec.
+- **Rantai `a || b || c` atas ekspor modul dibaca dari bentuk ekspornya
+  lebih dulu.** `m.client` pada klien ioredis adalah method perintah
+  `CLIENT`, sehingga rantai itu memilih fungsi tersebut, bukan kliennya.
+- **Komparasi dan marka dihitung dari satuan yang sama.** Satu bagian
+  komparasi yang dipecah menjadi dua pasangan marka membuat harapan
+  jumlah pasangan meleset (`9b25433`), dan harapan sisa nol meleset
+  karena komentar baru memuat kata yang dicari.
+- **Push dipisah dari rangkaian gerbang commit.** Push `8072214` ditolak
+  galat server GitHub setelah commit masuk, lalu blok yang tertempel
+  ulang ditolak gerbang karena tidak ada lagi yang berubah. Tanda `↑1`
+  di prompt menunjukkan commit yang belum ter-push.
+- **Nomor kembar yang menetap diperiksa dari data, bukan diulang.**
+  Empat spec gagal di `POST /pengajuanstok`; `createdAt` dan waktu `_id`
+  dokumen terakhir, dibandingkan dengan jam sistem, menunjukkan sebabnya
+  dalam satu skrip baca-saja (`kontrak/temuan.md` butir 139).
+- **Method api untuk endpoint yang berbeda ditulis terpisah**, bukan
+  ternary di argumen pemanggilan: `audit-endpoint.js` mengenali panggilan
+  lewat `apiData.get(EP...`, dan ternary membuatnya terlewat.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:
