@@ -108,8 +108,10 @@ Pindah Dana, dan tandai selesai). Keempat yang gagal berhenti di
 (`kontrak/temuan.md` butir 139), bukan dari kode yang diubah. Setelah
 `createdAt` tiga pengajuan development digeser, folder
 `penerimaanBarang`, `transferStok`, dan `pengajuanStok` lolos 17 dan 2
-skipped; suite penuh tidak dijalankan ulang, sehingga angka terukurnya
-tetap 440 lolos.
+skipped; suite penuh tidak dijalankan ulang terhadap cabang uji itu.
+Suite penuh berikutnya, 8 Oktober 2026 terhadap backend `ridho`
+`92d4f27` (gabungan `yoga` `55328f1` dan `nizar` `9d45efc`),
+menghasilkan 444 lolos, 0 gagal, dan 16 skipped.
 
 **Baseline per form role** (commit `597a163`): 620 test unit dan
 integrasi lolos di 73 berkas, bertambah 16 test di

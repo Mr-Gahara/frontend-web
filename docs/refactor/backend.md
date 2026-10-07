@@ -138,6 +138,29 @@ seutuhnya. Sumber kepemilikan adalah
 riwayat commit: `kategoriBebanService.js` ditulis Nizar, tercatat milik
 Ridho, lalu dipindahkan ke Yoga di `149f17f`.
 
+Cabang `ridho` adalah tempat ketiganya disatukan, dan menjadi acuan web
+sejak `92d4f27` (7 Oktober 2026: `yoga` `55328f1` digabung `nizar`
+`9d45efc`). Setiap kali `yoga` atau `nizar` maju, `ridho` digabung ulang
+sebelum web disesuaikan.
+
+Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
+otomatis membuang lima bagian milik Nizar dari
+`docs/pengembangan/klien.md` backend tanpa tanda konflik, karena bagian
+itu sudah tertimpa di cabang `yoga`. Karena itu hasil gabungan
+dibandingkan dengan kedua ujung cabang dan titik cabangnya sebelum
+di-commit:
+
+- tidak ada berkas dari salah satu sisi yang absen;
+- tidak ada baris yang ditambahkan salah satu sisi sejak titik cabang
+  yang hilang;
+- baris lama yang diganti sisi lain berada di modul milik pengubahnya,
+  dan yang berada di dokumen bersama dibaca satu per satu.
+
+Sesudah itu suite test backend yang disentuh kedua sisi dijalankan,
+permission basis data diselaraskan, dan suite e2e web penuh dijalankan.
+Nomor B27 sampai B38 di `docs/pengembangan/klien.md` backend dipakai dua
+kali dan dirujuk dengan pemiliknya, misalnya B36 (Yoga).
+
 Keadaan per 7 Oktober 2026 (berkas pemilik di `yoga` `55328f1`):
 
 | Pemilik | Nama git | Cakupan |

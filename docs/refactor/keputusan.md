@@ -1446,8 +1446,9 @@ NZ.
   `nizar` tidak memuat `fc29433`. Satu-satunya konflik ada di dokumen
   backend dan diselesaikan dengan versi `nizar`. Ketiga cabang backend
   (`ridho`, `nizar`, `yoga`) memegang pekerjaan pemilik yang berbeda dan
-  tidak saling memuat; selama itu berlaku, acuan uji adalah gabungan
-  lokal ujung cabang (`backend.md` bagian Pemilik modul backend).
+  tidak saling memuat. Sejak `92d4f27` acuan uji adalah cabang `ridho`,
+  tempat pemilik proyek menyatukan `yoga` dan `nizar`; cabang uji lokal
+  tidak dipakai lagi (`backend.md` bagian Pemilik modul backend).
 - **Seluruh perbaikan backend dimanfaatkan dalam putaran ini**, satu
   commit per kelompok.
 - **NZ1a: ringkasan mutasi gabungan tampil saat tidak ada akun dipilih**

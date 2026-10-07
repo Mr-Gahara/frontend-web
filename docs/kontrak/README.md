@@ -97,7 +97,8 @@ transfer, sesi booking, dan tipe aset di `endpoint.md`, `payload.md`,
 `uji-yoga-nizar` `54f787b`, yaitu `origin/yoga` `fc29433` digabung
 `origin/nizar` `9d45efc`; cabang itu tidak di-push. `origin/yoga` maju ke
 `55328f1` pada malam yang sama, dan tujuh commit itu belum dicocokkan
-dengan kontrak ini. Terhadap Lampiran
+dengan kontrak ini. Sejak itu acuan backend adalah `ridho` `92d4f27`,
+gabungan ketiga cabang. Terhadap Lampiran
 A: `POST /sesibooking/:id/checkin` tidak ada lagi, `GET /akunkas/ringkasan`
 belum tercatat dan dipakai web sejak `d23844a`, dan `GET` serta
 `PUT /sesibooking/:id`, yang tercatat tidak dipakai, dipakai web sejak

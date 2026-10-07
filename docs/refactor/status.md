@@ -131,12 +131,11 @@ Langkah pertama sesi berikutnya: backend di-`fetch` dan dibandingkan
 dengan acuan (`cara-kerja.md`), lalu arahan pemilik proyek. Perintah di
 bawah memetakan warna yang dipakai sekarang, bila dibutuhkan. Suite e2e
 penuh tidak dijalankan di awal sesi; harapan hitungannya 444 lolos dan
-16 skipped (`pengujian.md`). Backend lokal berada di cabang uji
-`uji-yoga-nizar` `54f787b`. `origin/yoga` sudah maju ke `55328f1` dan
-belum disesuaikan web (B36, B37, dan B38 di
-`docs/pengembangan/klien.md` backend); cabang
-uji dibangun ulang dari ujung cabang lebih dulu (`backend.md` bagian
-Pemilik modul backend).
+16 skipped (`pengujian.md`). Backend lokal berada di cabang `ridho`
+`92d4f27`, yang memuat `yoga` `55328f1` dan `nizar` `9d45efc` dan menjadi
+acuan web (`backend.md` bagian Pemilik modul backend). Tiga perubahan
+`yoga` belum dimanfaatkan web: B36 (Yoga), B37 (Yoga), dan B38 (Yoga) di
+`docs/pengembangan/klien.md` backend.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline --remotes --not HEAD | head -20
@@ -152,9 +151,11 @@ Dikerjakan pada 7 Oktober 2026 dalam enam commit. Saat dimulai,
 Acuan ujinya gabungan lokal keduanya, cabang `uji-yoga-nizar` `54f787b`,
 yang tidak di-push. Pada malam yang sama `origin/yoga` maju tujuh commit
 ke `55328f1` (izin kategori beban, `tipePajak` hanya wajib saat membuat,
-dan satuan resep mengikuti bahan); ketujuhnya belum diuji web. Ketiga
-cabang backend memegang pekerjaan pemilik yang berbeda (`backend.md`
-bagian Pemilik modul backend).
+dan satuan resep mengikuti bahan). Malam itu juga ketiga cabang
+disatukan di `ridho` `92d4f27` dan di-push; suite penuh terhadapnya, 8
+Oktober 2026, menghasilkan 444 lolos dan 16 skipped, sehingga ketujuh
+commit itu tidak menggeser spec mana pun (`backend.md` bagian Pemilik
+modul backend).
 
 | Commit | Isi |
 |---|---|
@@ -1129,10 +1130,10 @@ Yang masih berlaku:
 
 ### Utang kecil dari penyesuaian backend `nizar`
 
-- Backend lokal berada di cabang uji `uji-yoga-nizar` `54f787b`, yang
-  tertinggal tujuh commit dari `origin/yoga` `55328f1`. Cabang uji
-  dibangun ulang setiap kali salah satu cabang pemilik maju, lalu kontrak
-  dicocokkan ulang.
+- Backend lokal berada di cabang `ridho` `92d4f27`. Setiap kali `yoga`
+  atau `nizar` maju, cabang itu digabung ulang dengan pemeriksaan
+  kelengkapan (`backend.md`), lalu kontrak dicocokkan ulang. Cabang uji
+  lokal `uji-yoga-nizar` tidak dipakai lagi.
 - Penyesuaian terhadap `yoga` `55328f1` belum dikerjakan: izin kategori
   beban (`kontrak/temuan.md` butir 130), `tipePajak` di `PUT /pajak/:id`
   (butir 91), dan satuan resep (butir 15).

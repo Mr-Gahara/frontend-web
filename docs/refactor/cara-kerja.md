@@ -1585,6 +1585,12 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   bawah satu `@@@ berkas` memakai satu objek, sehingga semuanya berisi
   teks pasangan terakhir dan ditolak dengan hitungan 0, tanpa ada berkas
   yang ditulis.
+- **Gabungan cabang tanpa konflik diperiksa kelengkapannya sebelum
+  di-commit.** Hasilnya dibandingkan dengan kedua ujung dan titik
+  cabangnya: berkas yang absen, baris baru yang hilang, dan baris lama
+  yang diganti sisi lain (`backend.md`). Pada backend `92d4f27` hanya
+  satu berkas berkonflik, tetapi lima bagian dokumen hilang di luar
+  potongan konflik itu.
 
 ## Kapan berhenti dan bertanya
 
