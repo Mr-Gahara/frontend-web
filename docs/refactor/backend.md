@@ -198,6 +198,15 @@ label B mereka bila ada, dan kosakata status di atas. Butir yang sudah
 mereka catat cukup dirujuk. Laporan 7 Oktober 2026 adalah yang pertama
 disusun dengan cara ini.
 
+Laporan tidak mengulang temuan yang sudah diserahkan dan dicatat (pemilik
+proyek, 8 Oktober 2026). Isinya hanya temuan baru, dan hasil pembuktian
+atas perbaikan mereka, satu baris per butir. Butir lama yang masih
+terbuka tidak ditulis ulang, juga tidak sebagai pengingat; bila perlu
+disebut, cukup nomornya. Sebelum laporan disusun, setiap calon butir
+dicocokkan dengan daftar laporan di bawah dan dengan
+`docs/pengembangan/klien.md` backend. Bila tidak ada temuan baru maupun
+pembuktian baru, tidak ada laporan yang dibuat.
+
 ## Catatan untuk tim backend
 
 Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
@@ -445,8 +454,8 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   butir 142)
 - Konfirmasi untuk Yoga atas `yoga` `55328f1`, disusun 8 Oktober 2026
   setelah `f64b518`, tanpa temuan baru: B36, B37, dan B38 (Yoga) terbukti
-  dari web (`kontrak/temuan.md` butir 130, 91, dan 15 tertutup), beserta
-  pengingat bahwa butir 131 sampai 134 masih menahan halaman pengeluaran
+  dari web (`kontrak/temuan.md` butir 130, 91, dan 15 tertutup). Butir
+  lama yang masih terbuka tidak diulang
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi
