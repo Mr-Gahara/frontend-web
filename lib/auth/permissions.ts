@@ -149,13 +149,14 @@ export type SyaratIzin = Izin | readonly Izin[];
  * karena halaman memanggil semua endpoint itu saat dimuat. Daftar kosong
  * berarti halaman tidak memuat data berizin.
  *
- * Catatan: shift, pola roster, jadwal shift, laporan,
- * absensi, dan sebagian data referensi transaksi belum diperiksa backend
- * (catatan tim backend nomor 2 dan 12). Untuk data sensitif seperti laporan
- * dan pelanggan, gate tetap dipasang memakai permission yang sudah ada di
- * seed, sehingga begitu backend memasang checkPermission frontend sudah
- * siap. Untuk data referensi yang memang dibutuhkan kasir saat transaksi
- * (aset, diskon, metode pembayaran, tarif, tipe aset), gate tidak dipasang.
+ * Catatan: route shift, pola roster, dan jadwal shift belum memakai
+ * checkPermission di backend (catatan tim backend nomor 2 dan 12), dan
+ * monitoring absensi memeriksa read-absensi di controller. Laporan memeriksa
+ * read-laporan sejak backend 465b438, dan pelanggan memeriksa read-pelanggan
+ * sejak backend nizar 8dc6211; gate keduanya sudah dipasang lebih dulu
+ * memakai permission yang ada di seed. Untuk data referensi yang memang
+ * dibutuhkan kasir saat transaksi (aset, diskon, metode pembayaran, tarif,
+ * tipe aset), gate tidak dipasang.
  */
 export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   // Akar dan profil: tanpa data berizin.
@@ -165,7 +166,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   // Outlet
   "/dashboard/outlet": [],
   "/dashboard/outlet/penjualan": [IZIN.penjualan],
-  "/dashboard/outlet/penjualan/buatPenjualan": [[IZIN.produk, IZIN.aksesPos], IZIN.buatPenjualan],
+  "/dashboard/outlet/penjualan/buatPenjualan": [[IZIN.produk, IZIN.aksesPos], IZIN.pelanggan, IZIN.buatPenjualan],
   "/dashboard/outlet/penjualan/[id]": [IZIN.penjualan],
   "/dashboard/outlet/penjualan/[id]/pembayaran": [IZIN.penjualan, IZIN.buatPembayaran],
   "/dashboard/outlet/pengeluaran": [IZIN.pembayaran],
@@ -178,7 +179,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/keuangan/ringkasanLabaRugi": [IZIN.laporan],
   "/dashboard/outlet/pelanggan": [IZIN.pelanggan],
   "/dashboard/outlet/reservasi": [IZIN.booking],
-  "/dashboard/outlet/reservasi/buatReservasi": [IZIN.booking, IZIN.buatBooking],
+  "/dashboard/outlet/reservasi/buatReservasi": [IZIN.booking, IZIN.pelanggan, IZIN.buatBooking],
   // Master reservasi: GET tanpa izin di backend (keputusan GR6a).
   "/dashboard/outlet/reservasi/aset": [],
   "/dashboard/outlet/reservasi/aset/buatAset": [IZIN.buatAset],

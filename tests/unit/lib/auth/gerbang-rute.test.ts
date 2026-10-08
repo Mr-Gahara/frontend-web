@@ -56,9 +56,13 @@ describe("bolehBukaRute", () => {
 
   it("buat penjualan menerima read-produk atau akses-pos, ditambah izin buat", () => {
     const rute = `${OUTLET}/penjualan/buatPenjualan`;
-    expect(bolehBukaRute(rute, [IZIN.aksesPos, IZIN.buatPenjualan])).toBe(true);
-    expect(bolehBukaRute(rute, [IZIN.produk, IZIN.buatPenjualan])).toBe(true);
-    expect(bolehBukaRute(rute, [IZIN.buatPenjualan])).toBe(false);
+    expect(bolehBukaRute(rute, [IZIN.aksesPos, IZIN.pelanggan, IZIN.buatPenjualan])).toBe(true);
+    expect(bolehBukaRute(rute, [IZIN.produk, IZIN.pelanggan, IZIN.buatPenjualan])).toBe(true);
+    expect(bolehBukaRute(rute, [IZIN.pelanggan, IZIN.buatPenjualan])).toBe(false);
+    expect(bolehBukaRute(rute, [IZIN.aksesPos, IZIN.buatPenjualan])).toBe(false);
+    const reservasi = `${OUTLET}/reservasi/buatReservasi`;
+    expect(bolehBukaRute(reservasi, [IZIN.booking, IZIN.pelanggan, IZIN.buatBooking])).toBe(true);
+    expect(bolehBukaRute(reservasi, [IZIN.booking, IZIN.buatBooking])).toBe(false);
     expect(bolehBukaRute(rute, [IZIN.aksesPos])).toBe(false);
   });
 
