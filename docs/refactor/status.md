@@ -95,6 +95,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Form role ke React Hook Form dan Zod | `597a163` | Selesai (keputusan RL1a sampai RL3a; Catatan dari form role) |
 | Penyesuaian backend `nizar` | `9b25433` (sesi booking), `3b4f35b` (metode pembayaran), `a80d2fa` (diskon), `d23844a` (mutasi), `8072214` (riwayat Pindah Dana), `729c16a` (tandai selesai) | Selesai (keputusan NZ1a sampai NZ7a; Catatan dari penyesuaian backend `nizar`) |
 | Penyesuaian backend `nizar` `8dc6211` | `4539c85` (gerbang rute), `fe9631f` (pemilih pelanggan), `1bb26c0` (pengosongan kontak), `5b92d14` (spec kembar) | Selesai (keputusan NZ8a sampai NZ10a; Catatan dari penyesuaian backend `nizar` `8dc6211`) |
+| Penyesuaian backend `yoga` `55328f1` | `50e6485` (ubah pajak), `f64b518` (satuan resep) | Selesai (keputusan NZ11a sampai NZ13a; Catatan dari penyesuaian backend `yoga` `55328f1`) |
 | Rancangan dan perbaikan UI/UX, layout, dan palet warna | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
@@ -131,19 +132,50 @@ layout serta tampilan panel admin (Utang kecil dari modul panel admin).
 Langkah pertama sesi berikutnya: backend di-`fetch` dan dibandingkan
 dengan acuan (`cara-kerja.md`), lalu arahan pemilik proyek. Perintah di
 bawah memetakan warna yang dipakai sekarang, bila dibutuhkan. Suite e2e
-penuh tidak dijalankan di awal sesi; harapan hitungannya 447 lolos dan
+penuh tidak dijalankan di awal sesi; harapan hitungannya 448 lolos dan
 15 skipped (`pengujian.md`). Backend lokal berada di cabang `ridho`
 `8dc6211`, hasil fast-forward ke `origin/nizar` pada 8 Oktober 2026 dan
-belum di-push; `origin/ridho` masih `92d4f27` (`backend.md` bagian
-Pemilik modul backend). Tiga perubahan `yoga` belum dimanfaatkan web:
-B36 (Yoga), B37 (Yoga), dan B38 (Yoga) di `docs/pengembangan/klien.md`
-backend.
+sudah di-push (`backend.md` bagian Pemilik modul backend). Ketiga
+perubahan `yoga` yang sempat tertunda, B36 sampai B38 (Yoga), sudah
+dinilai dan dimanfaatkan (Catatan dari penyesuaian backend `yoga`
+`55328f1`).
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline --remotes --not HEAD | head -20
 grep -rhoE '#[0-9A-Fa-f]{6}\b' app components features | tr 'a-f' 'A-F' | sort | uniq -c | sort -rn | head -30
 grep -nE '^\s*--[a-z-]+:' app/globals.css | cut -c1-100 | head -60
 ```
+
+## Catatan dari penyesuaian backend `yoga` `55328f1`
+
+Dikerjakan pada 8 Oktober 2026 dalam dua commit, setelah penyesuaian
+`nizar` `8dc6211`. Kode Yoga sudah termuat di `ridho` sejak `92d4f27`;
+yang dikerjakan adalah tiga perubahannya yang belum dimanfaatkan web.
+
+| Commit | Isi |
+|---|---|
+| `50e6485` | Ubah pajak hanya mengirim field yang berubah, tanpa `tipePajak` wajib (NZ12a) |
+| `f64b518` | Pak dan unit sebagai satuan resep (NZ13a) |
+
+- B36 (Yoga): `GET /kategoribeban` dan `GET /bebanoperasional` dijawab
+  200 bagi Owner, dan kedelapan izin beban ada di daftar permission
+  (`kontrak/temuan.md` butir 130 tertutup). Service beban belum berubah:
+  saldo masih diubah tanpa buku mutasi, tanpa transaksi, dan tanpa
+  status VOID (butir 131 sampai 134, dari kode), sehingga pengeluaran
+  tetap ditunda (NZ11a).
+- B37 (Yoga): terbukti lewat e2e. Langkah ubah nama di spec kelola pajak
+  mengirim tepat `{ namaPajak }` dan dijawab 200 (butir 91 tertutup).
+- B38 (Yoga): terbukti lewat e2e. Produk beresep bahan bersatuan pak
+  tersimpan 201 (butir 15 tertutup).
+- Satu test unit di berkas lain, test payload produk, menegaskan pak
+  ditolak skema dan gagal setelah perubahan; contohnya diganti satuan
+  yang memang tidak dikenal.
+- `ridho` `8dc6211` sudah di-push pemilik proyek.
+- Vitest 631 lolos di 77 berkas. Suite e2e penuh: 448 lolos dan 15
+  skipped, tanpa kegagalan (`pengujian.md`).
+- Tidak ada temuan backend baru.
+- Keputusan: `keputusan.md` (Penyesuaian backend `yoga` `55328f1`, NZ11a
+  sampai NZ13a).
 
 ## Catatan dari penyesuaian backend `nizar` `8dc6211`
 
@@ -1178,7 +1210,7 @@ Yang masih berlaku:
 ### Utang kecil dari penyesuaian backend `nizar`
 
 - Backend lokal berada di cabang `ridho` `8dc6211` (fast-forward ke
-  `origin/nizar`, belum di-push). Setiap kali `yoga` atau `nizar` maju,
+  `origin/nizar`, sudah di-push). Setiap kali `yoga` atau `nizar` maju,
   cabang itu digabung ulang dengan pemeriksaan kelengkapan
   (`backend.md`), lalu kontrak dicocokkan ulang. Cabang uji lokal
   `uji-yoga-nizar` sudah dihapus (8 Oktober 2026).
@@ -1187,9 +1219,9 @@ Yang masih berlaku:
   menyediakan migrasi indeks.
 - Booking milik sebuah penjualan belum disertakan di respons detail
   penjualan; permintaannya ditunda (NZ9a).
-- Penyesuaian terhadap `yoga` `55328f1` belum dikerjakan: izin kategori
-  beban (`kontrak/temuan.md` butir 130), `tipePajak` di `PUT /pajak/:id`
-  (butir 91), dan satuan resep (butir 15).
+- Penyesuaian terhadap `yoga` `55328f1` selesai di `50e6485` dan
+  `f64b518`. Yang tersisa: pengeluaran tetap ditunda sampai
+  `kontrak/temuan.md` butir 131 sampai 134 diperbaiki backend (NZ11a).
 - Bagian Sesi Booking di detail penjualan memakai tata letak sederhana di
   atas grid informasi; penempatannya menunggu fase UI/UX.
 - Timeline reservasi tidak punya aksi Tandai Selesai (NZ7a). Booking lama
@@ -1215,7 +1247,8 @@ Yang masih berlaku:
 - Pilihan satuan resep hanya terbukti dari respons nyata untuk bahan
   bersatuan pcs, gram, dan ml. Untuk kg, liter, pak, dan unit, isi
   `availableUnits` dibaca dari kode backend, karena data development
-  tidak punya bahan bersatuan itu.
+  tidak punya bahan bersatuan itu. Sejak `f64b518` bahan bersatuan pak
+  terbukti lewat e2e.
 
 ### Utang kecil dari modul penjualan dan pembayaran
 
@@ -1259,7 +1292,8 @@ Yang masih berlaku:
 - Halaman pengeluaran menampilkan keterangan belum tersedia sejak
   `7fce871`, dan gate-nya masih `read-pembayaran`. Halamannya dibangun
   begitu backend memperbaiki izin beban dan menetapkan kontraknya
-  (`kontrak/temuan.md` butir 130 sampai 132).
+  (`kontrak/temuan.md` butir 130 sampai 132). Izinnya sudah diperbaiki
+  (`yoga` `55328f1`); yang ditunggu tinggal butir 131 sampai 134 (NZ11a).
 - `DELETE /akunkas/:id` tidak ada lagi sejak backend `465b438`, dan akun
   bersaldo tidak dapat ditutup (`kontrak/temuan.md` butir 81). Ubah,
   nonaktifkan, dan aktifkan kembali tersedia sejak `1bc76f4`, dan Pindah

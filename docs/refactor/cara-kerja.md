@@ -1287,7 +1287,9 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   tampak salah. Terulang pada error ESLint warisan (`4f19e77`): 15
   alih-alih 16 error dan 10 alih-alih 8 berkas, karena disebut dari
   ingatan, bukan dijumlah dari daftar yang sudah tercetak. Terulang lagi
-  di `bc388c6`: 48 alih-alih 47 izin di `IZIN`.
+  di `bc388c6`: 48 alih-alih 47 izin di `IZIN`. Terulang di `f64b518`: 20
+  alih-alih 19 skenario spec produk, dihitung dari daftar judul; gerbang
+  commit menolaknya. Angka gerbang diambil dari keluaran runner.
 - **Rentang aggregate dibaca dari tahap `$lookup`-nya**, lewat
   `grep -nE '\$lookup' -A6`, bukan dari nomor baris field hasilnya.
   Rentang `sed` yang diambil dari baris `pajakList` hanya memuat
@@ -1624,6 +1626,16 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   tunggal.** zsh tetap menyisipkan garis miring terbalik saat ditempel;
   setiap `curl` ditulis di baris sendiri (pemeriksaan server sebelum
   suite penuh, 8 Oktober 2026).
+- **URL yang diikuti titik koma juga rusak di dalam kode sumber yang
+  ditempel lewat heredoc.** Baris konstanta berisi URL di berkas marka
+  tertulis dengan garis miring terbalik sebelum titik koma, dan `tsc`
+  menolaknya dengan "Invalid character" (`f64b518`). Di kode yang
+  ditempel, URL disusun dari potongan atau diambil dari konstanta yang
+  sudah ada, lalu barisnya diperiksa dengan `cat -A`.
+- **Sebelum mengubah konstanta atau enum bersama, grep seluruh test yang
+  menegaskan nilai lamanya.** `SATUAN_RESEP` ditambah pak, dan satu test
+  di berkas test lain yang menegaskan pak ditolak baru ketahuan dari
+  vitest (`f64b518`).
 - **Gabungan cabang tanpa konflik diperiksa kelengkapannya sebelum
   di-commit.** Hasilnya dibandingkan dengan kedua ujung dan titik
   cabangnya: berkas yang absen, baris baru yang hilang, dan baris lama

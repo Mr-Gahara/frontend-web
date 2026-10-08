@@ -105,7 +105,10 @@ belum tercatat dan dipakai web sejak `d23844a`, dan `GET` serta
 `729c16a`. Pada 8 Oktober 2026, bagian pelanggan dan sesi booking di
 `endpoint.md`, `payload.md`, `izin-halaman.md`, dan `temuan.md`
 dikoreksi terhadap backend `nizar` `8dc6211`, delapan commit di atas
-`ridho` `92d4f27`; `ridho` lokal di-fast-forward ke sana.
+`ridho` `92d4f27`; `ridho` lokal di-fast-forward ke sana dan sudah
+di-push. Pada hari yang sama, bagian pajak dan produk di `payload.md`,
+`izin-halaman.md`, dan `temuan.md` dikoreksi terhadap `yoga` `55328f1`,
+yang termuat di `ridho` sejak `92d4f27`.
 
 ## 1. Acuan dan metodologi
 

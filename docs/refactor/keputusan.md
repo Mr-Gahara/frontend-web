@@ -91,7 +91,7 @@ Tidak boleh dibalik tanpa pembahasan:
 - **Produk yang kategorinya sudah dihapus** tampil "Tanpa kategori" dan harus
   dipilihkan kategori baru sebelum disimpan.
 - **Satuan resep dibatasi** ke gram, ml, pcs, kg, dan liter, sesuai validator
-  backend.
+  backend. Sejak `f64b518` juga pak dan unit (NZ13a).
 - **Bug stok saat edit produk ditangani di frontend**: resep hanya dikirim bila
   perlu. Bila resep dihapus seluruhnya, backend tetap menjadikan stok 0, dan
   form memberi petunjuk agar stok diatur ulang.
@@ -1040,7 +1040,8 @@ dan diterapkan di `fcf2dd2` bersama PO15a; PO16a diterapkan di `ca6eb3d`.
   sehingga penolakan backend tidak menjadi unhandled rejection.
 - Diterapkan tanpa ditanyakan (`e0aaeca`): ubah pajak hanya mengirim field
   yang berubah ditambah `tipePajak`, karena validator backend mewajibkannya
-  juga pada update (`kontrak/temuan.md` butir 91); simpan ubah nonaktif
+  juga pada update (`kontrak/temuan.md` butir 91; dicabut NZ12a di
+  `50e6485`); simpan ubah nonaktif
   selama tidak ada perubahan; kolom Status tab pajak per produk dibuang,
   karena backend tidak mengirimnya dan relasi ke pajak nonaktif sudah
   disaring; galat memuat tampil di tempat dengan tombol coba lagi; tombol
@@ -1531,6 +1532,32 @@ delapan commit di atas `ridho` `92d4f27`. Labelnya melanjutkan NZ.
   dan di pemicu, dengan gaya elemen di sebelahnya; dan `value` item
   pilihan di buat reservasi memuat id agar unik.
 
+### Penyesuaian backend `yoga` `55328f1`
+
+Diputuskan pemilik proyek pada 8 Oktober 2026, untuk tiga perubahan Yoga
+yang termuat di `ridho` sejak `92d4f27` dan belum dimanfaatkan web (B36,
+B37, dan B38 milik Yoga). Labelnya melanjutkan NZ.
+
+- **NZ11a: pengeluaran tetap ditunda** (BO1a dipertahankan). Kategori
+  beban kini dapat diakses, tetapi beban masih mengubah saldo akun kas
+  tanpa buku mutasi, tanpa transaksi, dan tanpa status VOID
+  (`kontrak/temuan.md` butir 131 sampai 134), sehingga halaman yang
+  dibangun sekarang akan meniru kekeliruan itu. Izin beban masuk template
+  role bersama halamannya (FC2a).
+- **NZ12a: ubah pajak hanya mengirim field yang berubah** (`50e6485`),
+  setelah backend tidak lagi mewajibkan `tipePajak` saat mengubah.
+  Mencabut penanganan sementara dari submodul pajak.
+- **NZ13a: bahan bersatuan pak dan unit dapat dipakai di resep**
+  (`f64b518`), dengan satuannya sendiri. Pemeriksaan terhadap
+  `availableUnits` tetap (FC4a).
+- Diterapkan tanpa ditanyakan (`50e6485`): aturan "ada perubahan" di form
+  pajak mengikuti payload yang tidak kosong, dan `PerubahanPajak` tidak
+  lagi mewajibkan `tipePajak`.
+- Diterapkan tanpa ditanyakan (`f64b518`): bahan uji tetap "E2E Bahan
+  Pak" dibuat sekali lewat API dan tidak dihapus; dan pesan "belum dapat
+  dipakai di resep" dipertahankan untuk satuan bahan yang tidak dikenal
+  web.
+
 ## Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.
@@ -1696,7 +1723,8 @@ dari `50eede7` ke `fc29433`.
   rute, dan pemeriksaan di halaman pajak dibuang (GR4a).
 - **FC4a: satuan resep yang tidak sah untuk bahannya ditahan di form
   produk** (`b887278`), bukan dibiarkan sampai backend menolaknya saat
-  finalisasi.
+  finalisasi. Sejak `yoga` `05c1149` backend menolaknya saat produk
+  disimpan, dan pak serta unit sah (NZ13a).
 - Diterapkan tanpa ditanyakan (`d3443e2`): tanpa izin baca, isi halaman
   pajak tidak dipasang, sehingga tidak ada permintaan yang pasti dijawab
   403; kolom Aksi kosong bila `update-pajak` dan `delete-pajak` sama-sama

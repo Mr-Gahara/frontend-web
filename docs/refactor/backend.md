@@ -144,7 +144,8 @@ sejak `92d4f27` (7 Oktober 2026: `yoga` `55328f1` digabung `nizar`
 sebelum web disesuaikan. Pada 8 Oktober 2026 `nizar` maju ke `8dc6211`
 tepat di atas `92d4f27`, sehingga `ridho` lokal cukup di-fast-forward;
 bila satu sisi tidak punya commit di luar sisi lain, pemeriksaan
-kelengkapan di bawah tidak diperlukan.
+kelengkapan di bawah tidak diperlukan. `ridho` `8dc6211` di-push pada
+hari yang sama.
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari
@@ -442,6 +443,10 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   `?penjualanID=` berasal dari permintaan web dan tidak dipakai; beserta
   konfirmasi butir 104, 105, 106, 140, dan 141 (`kontrak/temuan.md`
   butir 142)
+- Konfirmasi untuk Yoga atas `yoga` `55328f1`, disusun 8 Oktober 2026
+  setelah `f64b518`, tanpa temuan baru: B36, B37, dan B38 (Yoga) terbukti
+  dari web (`kontrak/temuan.md` butir 130, 91, dan 15 tertutup), beserta
+  pengingat bahwa butir 131 sampai 134 masih menahan halaman pengeluaran
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

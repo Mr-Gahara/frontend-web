@@ -96,6 +96,13 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per penyesuaian backend `yoga` `55328f1`** (commit `f64b518`):
+631 test unit dan integrasi lolos di 77 berkas, bertambah dua test satuan
+resep; `50e6485` tidak mengubah jumlah. Suite penuh 8 Oktober 2026
+terhadap backend `ridho` `8dc6211` menghasilkan 448 lolos, 0 gagal, dan
+15 skipped, sesuai hitungan: bertambah satu skenario resep bersatuan pak
+(`f64b518`). Suite itu dijalankan atas isi `f64b518` sebelum di-commit.
+
 **Baseline per penyesuaian backend `nizar` `8dc6211`** (commit
 `5b92d14`): 629 test unit dan integrasi lolos di 77 berkas: `fe9631f`
 menambah empat test tampilan pelanggan, dan `1bb26c0` membuang dua test
@@ -1107,6 +1114,11 @@ Urutan debug kegagalan e2e di atas).
   sama. E2E menguji pencarian lewat nomor HP dan tampilannya.
 - **Spec pemilih pelanggan menambah dua pelanggan terhapus lunak per
   run**, dan skenario nomor HP kembar satu.
+- **Bahan uji "E2E Bahan Pak" permanen** di basis data development,
+  dibuat sekali oleh spec produk (`f64b518`). Bahan bersatuan unit hanya
+  teruji di unit test, dan penolakan backend atas satuan di luar
+  `availableUnits` tidak diuji dari web, karena form menahannya lebih
+  dulu.
 - **Diskon uji menumpuk sebagai Non-Aktif**, lima per run suite penuh
   (satu dari spec pembanding, dua dari kelola, satu dari aturan, dan satu
   dari pilihan kasir), karena backend tidak punya `DELETE /diskon`. Diskon
@@ -1652,3 +1664,8 @@ Urutan debug kegagalan e2e di atas).
   `bukaDenganAuth`, lalu halaman dimuat ulang penuh agar daftar di cache
   memuatnya. Bukti terhadap kode lama diambil dengan `git stash push`
   atas kedua halaman saja, tanpa mengubah spec.
+- Skenario "bahan bersatuan pak" di
+  `tests/e2e/inventaris/produk/crud-produk.spec.ts` (`f64b518`): bahan uji
+  tetap dibuat lewat API hanya bila belum ada dan tidak dihapus, payload
+  dibaca dari permintaan `POST /produk` milik respons yang ditunggu, dan
+  produknya dihapus lewat UI.
