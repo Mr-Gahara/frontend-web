@@ -1,7 +1,7 @@
 export interface ResepItem {
   bahanBakuID: string;
   jumlah: number;
-  satuan: "gram" | "ml" | "pcs" | "kg" | "liter";
+  satuan: "gram" | "ml" | "pcs" | "kg" | "liter" | "pak" | "unit";
 }
 
 /** Pajak yang melekat pada produk, hasil lookup di produkService. */

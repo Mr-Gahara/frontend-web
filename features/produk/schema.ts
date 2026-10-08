@@ -3,9 +3,10 @@ import type { BahanBaku } from "@/types/bahanBaku";
 
 /**
  * Satuan resep yang diterima validator produk di backend (produkValidator.js).
- * Lebih sempit dari satuan bahan baku: pak dan unit ditolak dengan 400.
+ * Sama dengan satuan bahan baku sejak backend yoga 05c1149: pak dan unit
+ * diterima, dan setiap satuan diperiksa terhadap availableUnits bahannya.
  */
-export const SATUAN_RESEP = ["gram", "ml", "pcs", "kg", "liter"] as const;
+export const SATUAN_RESEP = ["gram", "ml", "pcs", "kg", "liter", "pak", "unit"] as const;
 export type SatuanResep = (typeof SATUAN_RESEP)[number];
 
 /**
@@ -22,7 +23,7 @@ const skemaResep = z.object({
   jumlah: z.number().min(0.01, "Jumlah harus lebih dari 0"),
   satuan: z.enum(SATUAN_RESEP, {
     error:
-      "Satuan tidak didukung untuk resep. Gunakan gram, ml, pcs, kg, atau liter.",
+      "Satuan tidak didukung untuk resep. Gunakan gram, ml, pcs, kg, liter, pak, atau unit.",
   }),
 });
 
@@ -48,8 +49,10 @@ type BahanResep = Pick<BahanBaku, "id" | "namaBahan" | "satuan" | "availableUnit
  * diterima validator resep. Tanpa availableUnits, hanya satuan bahan itu
  * sendiri. Sejak backend fc29433 finalisasi menolak satuan resep yang tidak
  * dapat dikonversi ke satuan bahan, sehingga pilihan di luar daftar ini
- * baru gagal saat penjualan (keputusan FC4a). Hasil kosong berarti bahan
- * itu belum dapat dipakai di resep (pak dan unit, kontrak/temuan.md butir 15).
+ * baru gagal saat penjualan (keputusan FC4a). Sejak backend yoga 05c1149
+ * pak dan unit sah untuk bahan bersatuan itu (kontrak/temuan.md butir 15),
+ * dan backend menolak satuan di luar availableUnits saat produk disimpan.
+ * Hasil kosong hanya terjadi bila satuan bahan tidak dikenal web.
  */
 export function satuanResepUntukBahan(bahan?: BahanResep | null): SatuanResep[] {
   if (!bahan) return [...SATUAN_RESEP];

@@ -1,4 +1,5 @@
 import { test, expect, Page } from "@playwright/test";
+import { bukaDenganAuth } from "../../../helpers/transfer-uji";
 
 // ============================================================
 // HELPER: Login
@@ -279,10 +280,6 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
     const teksBahan = (await opsiBahan.textContent()) ?? "";
     const satuanBahan = teksBahan.match(/\(([a-z]+)\)\s*$/i)?.[1]?.toLowerCase() ?? "";
     expect(satuanBahan, `satuan terbaca dari pilihan bahan: "${teksBahan}"`).not.toBe("");
-    test.skip(
-      satuanBahan === "pak" || satuanBahan === "unit",
-      "Bahan pertama bersatuan pak atau unit, yang belum punya satuan resep",
-    );
     await opsiBahan.click();
 
     // Memilih bahan mengisi satuan resep dengan satuan bahan itu.
@@ -303,6 +300,72 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
       await expect(page.getByRole("option", { name: "pcs", exact: true })).toHaveCount(0);
     }
     await page.keyboard.press("Escape");
+  });
+
+  // ----------------------------------------------------------
+  // [3c] RESEP: bahan bersatuan pak dipakai dengan satuan pak (B38 Yoga)
+  // ----------------------------------------------------------
+  test("resep: bahan bersatuan pak memakai satuan pak, dan produknya tersimpan", async ({
+    page,
+  }) => {
+    // Bahan uji tetap: dibuat sekali lewat API dan tidak dihapus, karena
+    // menghapus bahan baku meninggalkan inventory dan resep yatim
+    // (kontrak/temuan.md butir 47).
+    const NAMA_BAHAN_PAK = "E2E Bahan Pak";
+    const API_BAHAN = "http://localhost:3000/api/bahanbaku";
+    const namaProduk = `Produk E2E Resep Pak ${Date.now()}`;
+
+    await login(page);
+    const auth = await bukaDenganAuth(
+      page,
+      "http://localhost:3000/dashboard/outlet/inventaris/produk",
+    );
+    const daftar = await page.request.get(API_BAHAN, {
+      headers: { Authorization: auth() },
+    });
+    expect(daftar.status(), "GET /bahanbaku").toBe(200);
+    const sudahAda = ((await daftar.json()).data as { namaBahan: string }[]).some(
+      (b) => b.namaBahan === NAMA_BAHAN_PAK,
+    );
+    if (!sudahAda) {
+      const buat = await page.request.post(API_BAHAN, {
+        headers: { Authorization: auth() },
+        data: { namaBahan: NAMA_BAHAN_PAK, satuan: "pak" },
+      });
+      const isi = await buat.json().catch(() => ({}));
+      expect(buat.ok(), "POST /bahanbaku: " + String(isi.message)).toBeTruthy();
+    }
+
+    // Dimuat ulang penuh agar daftar bahan di form memuat bahan uji.
+    await bukaHalamanProduk(page);
+    await bukaBuatProduk(page);
+    await isiFormDasarProduk(page, { nama: namaProduk, hargaJual: "25000" });
+
+    await page.getByRole("button", { name: /tambah bahan/i }).click();
+    await pemilihBahan(page).click();
+    await page.getByRole("option", { name: new RegExp(NAMA_BAHAN_PAK) }).click();
+
+    // Memilih bahan mengisi satuan resep dengan pak, dan hanya pak yang ditawarkan.
+    const pemicuSatuan = page.getByRole("combobox").filter({ hasText: /^pak$/i });
+    await expect(pemicuSatuan).toBeVisible();
+    await pemicuSatuan.click();
+    await expect(page.getByRole("option", { name: "pak", exact: true })).toBeVisible();
+    await expect(page.getByRole("option", { name: "pcs", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("option", { name: "gram", exact: true })).toHaveCount(0);
+    await page.keyboard.press("Escape");
+
+    await page.getByPlaceholder("0").last().fill("1");
+    const tSimpan = page.waitForResponse(
+      (r) => r.request().method() === "POST" && /\/api\/produk$/i.test(r.url()),
+    );
+    await page.getByRole("button", { name: /simpan produk baru/i }).click();
+    const res = await tSimpan;
+    const resep = (res.request().postDataJSON() as { resep: { satuan: string }[] }).resep;
+    expect(resep.map((r) => r.satuan)).toEqual(["pak"]);
+    expect(res.status(), "POST /produk dengan resep bersatuan pak").toBe(201);
+    await page.waitForURL("**/inventaris/produk");
+
+    await hapusProduk(page, namaProduk);
   });
 
   // ----------------------------------------------------------

@@ -73,7 +73,7 @@ describe("skemaProduk", () => {
   it("menolak satuan resep yang tidak diterima backend", () => {
     const hasil = skemaProduk.safeParse({
       ...dasar,
-      resep: [{ bahanBakuID: "b1", jumlah: 1, satuan: "pak" }],
+      resep: [{ bahanBakuID: "b1", jumlah: 1, satuan: "lusin" }],
     });
     expect(hasil.success).toBe(false);
     expect(hasil.error?.issues[0]?.message).toMatch(/satuan tidak didukung/i);
@@ -81,5 +81,12 @@ describe("skemaProduk", () => {
 
   it("menerima satuan resep yang didukung", () => {
     expect(skemaProduk.safeParse({ ...dasar, resep }).success).toBe(true);
+    for (const satuan of ["pak", "unit"]) {
+      const hasil = skemaProduk.safeParse({
+        ...dasar,
+        resep: [{ bahanBakuID: "b1", jumlah: 1, satuan }],
+      });
+      expect(hasil.success, `satuan ${satuan}`).toBe(true);
+    }
   });
 });

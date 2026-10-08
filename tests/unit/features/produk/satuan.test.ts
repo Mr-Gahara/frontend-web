@@ -38,9 +38,13 @@ describe("satuanResepUntukBahan", () => {
     expect(satuanResepUntukBahan(bahan("d", "gram", []))).toEqual(["gram"]);
   });
 
-  it("bahan bersatuan pak atau unit tidak punya satuan resep yang sah", () => {
-    expect(satuanResepUntukBahan(bahan("e", "pak", ["pak"]))).toEqual([]);
-    expect(satuanResepUntukBahan(bahan("f", "unit"))).toEqual([]);
+  it("bahan bersatuan pak atau unit memakai satuannya sendiri", () => {
+    expect(satuanResepUntukBahan(bahan("e", "pak", ["pak"]))).toEqual(["pak"]);
+    expect(satuanResepUntukBahan(bahan("f", "unit"))).toEqual(["unit"]);
+  });
+
+  it("satuan yang tidak dikenal web menghasilkan daftar kosong", () => {
+    expect(satuanResepUntukBahan(bahan("g", "lusin", ["lusin"]))).toEqual([]);
   });
 });
 
@@ -67,9 +71,22 @@ describe("buatSkemaProduk", () => {
     expect(hasil.error.issues[0].message).toMatch(/gram/);
   });
 
-  it("menolak bahan yang tidak punya satuan resep, dengan pesan tersendiri", () => {
+  it("bahan bersatuan pak: menerima pak, dan menolak satuan lain dengan menyebut pilihannya", () => {
+    const sah = buatSkemaProduk(daftar).safeParse(
+      nilai([{ bahanBakuID: "dus", jumlah: 1, satuan: "pak" }]),
+    );
+    expect(sah.success).toBe(true);
     const hasil = buatSkemaProduk(daftar).safeParse(
       nilai([{ bahanBakuID: "dus", jumlah: 1, satuan: "pcs" }]),
+    );
+    expect(hasil.success).toBe(false);
+    if (hasil.success) return;
+    expect(hasil.error.issues[0].message).toMatch(/pilih pak/);
+  });
+
+  it("menolak bahan yang satuannya tidak dikenal web, dengan pesan tersendiri", () => {
+    const hasil = buatSkemaProduk([bahan("lsn", "lusin", ["lusin"])]).safeParse(
+      nilai([{ bahanBakuID: "lsn", jumlah: 1, satuan: "pcs" }]),
     );
     expect(hasil.success).toBe(false);
     if (hasil.success) return;
