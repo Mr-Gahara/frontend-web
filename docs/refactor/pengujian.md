@@ -96,6 +96,15 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per penyesuaian backend `nizar` `8dc6211`** (commit
+`5b92d14`): 629 test unit dan integrasi lolos di 77 berkas: `fe9631f`
+menambah empat test tampilan pelanggan, dan `1bb26c0` membuang dua test
+`isianTidakTerkosongkan`. Suite penuh 8 Oktober 2026 terhadap backend
+lokal `ridho` `8dc6211` (fast-forward ke `origin/nizar`) menghasilkan 447
+lolos, 0 gagal, dan 15 skipped, sesuai hitungan: dua skenario pemilih
+pelanggan (`fe9631f`), satu `test.fixme` yang dilepas (`1bb26c0`), dan
+skenario kembar yang diganti satu banding satu (`5b92d14`).
+
 **Baseline per penyesuaian backend `nizar`** (commit `729c16a`): 627
 test unit dan integrasi lolos di 76 berkas, bertambah tujuh (tiga test
 baris mutasi, dua test filter periode transfer, dan dua test izin sesi
@@ -856,7 +865,6 @@ Menunggu perbaikan backend:
 | Jurnal Keluar penjualan langsung terbaca setelah finalisasi, dan finalisasi yang ditolak tidak menambah jurnal (`penjualan/alur-penjualan.spec.ts`, dua test) | Backend membersihkan cache daftar jurnal setiap kali `inventoryService` menulis jurnal (`kontrak/temuan.md` butir 46). Keduanya dibuka bersamaan: test kedua baru bermakna bila bacaan jurnal terbukti segar |
 | Delapan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, dan stock adjustment | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
 | Shift yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/shift/crud-shift.spec.ts`) | Backend memisahkan shift per lokasi dan `KUNCI_LOKASI_SHIFT` di `features/shift/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
-| Nomor HP pelanggan yang dikosongkan tersimpan kosong (`pelanggan/kelola-pelanggan.spec.ts`) | Backend menerapkan pengosongan `nomorHp`, `email`, dan `alamat` di `PUT /pelanggan/:id`, yang kini dibuang validator lalu dijawab 200 (`kontrak/temuan.md` butir 104, keputusan PD5a). Badannya lengkap |
 | Pola yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | Backend memisahkan pola roster per lokasi dan `KUNCI_LOKASI_POLA_ROSTER` di `features/pola-roster/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
 
 Pada 30 September 2026, setelah backend `465b438`, lima `test.fixme`
@@ -870,6 +878,10 @@ sebuah fixme: lepas sementara, jalankan dua kali, kembalikan berkasnya
 dengan `git checkout`, lalu lepas dan commit per test yang lolos. Fixme
 berbadan kosong, fixme yang bersyarat konstanta frontend, dan fixme yang
 hanya bermakna bila fixme lain lolos lebih dulu bukan kandidat.
+
+Pada 8 Oktober 2026, setelah backend `nizar` `8dc6211`, `test.fixme`
+pengosongan nomor HP pelanggan dilepas (`1bb26c0`), setelah lolos dua
+putaran berturut-turut.
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
 terhitung di angka skipped pada baseline:
@@ -1083,8 +1095,18 @@ Urutan debug kegagalan e2e di atas).
 - **Pelanggan uji dihapus lunak**, sehingga setiap run spec pelanggan
   menambah dokumen ber-`isDeleted` di basis data development; daftar dan
   indeks unik backend mengabaikannya.
-- **Peringatan pengosongan email dan alamat hanya teruji di unit test**
-  (`isianTidakTerkosongkan`); e2e hanya menguji nomor HP.
+- **Pengosongan email dan alamat pelanggan tidak teruji e2e**; yang
+  teruji hanya nomor HP. Peringatan `isianTidakTerkosongkan` dibuang di
+  `1bb26c0`.
+- **Nama pelanggan kembar yang diterima tidak teruji**, karena basis
+  data development masih menolaknya lewat indeks lama
+  (`kontrak/temuan.md` butir 142). Email kembar yang dijawab 409 hanya
+  dibaca dari kode; e2e menguji nomor HP kembar.
+- **Dua pelanggan bernama sama di pemilih hanya teruji di unit test**
+  (`tests/unit/features/pelanggan/tampilan.test.ts`), dengan alasan yang
+  sama. E2E menguji pencarian lewat nomor HP dan tampilannya.
+- **Spec pemilih pelanggan menambah dua pelanggan terhapus lunak per
+  run**, dan skenario nomor HP kembar satu.
 - **Diskon uji menumpuk sebagai Non-Aktif**, lima per run suite penuh
   (satu dari spec pembanding, dua dari kelola, satu dari aturan, dan satu
   dari pilihan kasir), karena backend tidak punya `DELETE /diskon`. Diskon
@@ -1505,7 +1527,9 @@ Urutan debug kegagalan e2e di atas).
   dengan nama, nomor HP, dan email unik per run; dialog yang bertahan
   dibuktikan dengan menjawab gagal lalu melepas pencegat dan mengulang
   aksi yang sama sampai berhasil; dan `test.fixme` berbadan lengkap
-  berdampingan dengan langkah yang membaca respons nyata.
+  berdampingan dengan langkah yang membaca respons nyata. Sejak `1bb26c0`
+  dan `5b92d14`: `test.fixme` itu dilepas, dan penolakan kembar diuji
+  lewat nomor HP (409) pada pelanggan uji yang dibuat lewat UI.
 - `tests/e2e/diskon/`: `diskon.spec.ts` (`8cb6f31`, pembanding),
   `kelola-diskon.spec.ts` (`1e05df6`), `aturan-diskon.spec.ts`
   (`54f2938`), dan `pilihan-kasir.spec.ts` (`52c550e`). Diskon uji dibuat
@@ -1623,3 +1647,8 @@ Urutan debug kegagalan e2e di atas).
   `tests/e2e/pengaturan/kelola-metode-pembayaran.spec.ts` (`3b4f35b`):
   keadaan yang tidak dapat dibuat di data uji dibentuk dari respons
   nyata (`route.fetch()`), lalu terbawa ke halaman berikutnya.
+- `tests/e2e/pelanggan/pemilih-pelanggan.spec.ts` (`fe9631f`): data milik
+  modul lain dibuat lewat `page.request` dengan header dari
+  `bukaDenganAuth`, lalu halaman dimuat ulang penuh agar daftar di cache
+  memuatnya. Bukti terhadap kode lama diambil dengan `git stash push`
+  atas kedua halaman saja, tanpa mengubah spec.

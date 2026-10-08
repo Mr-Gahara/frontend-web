@@ -141,7 +141,10 @@ Ridho, lalu dipindahkan ke Yoga di `149f17f`.
 Cabang `ridho` adalah tempat ketiganya disatukan, dan menjadi acuan web
 sejak `92d4f27` (7 Oktober 2026: `yoga` `55328f1` digabung `nizar`
 `9d45efc`). Setiap kali `yoga` atau `nizar` maju, `ridho` digabung ulang
-sebelum web disesuaikan.
+sebelum web disesuaikan. Pada 8 Oktober 2026 `nizar` maju ke `8dc6211`
+tepat di atas `92d4f27`, sehingga `ridho` lokal cukup di-fast-forward;
+bila satu sisi tidak punya commit di luar sisi lain, pemeriksaan
+kelengkapan di bawah tidak diperlukan.
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari
@@ -421,13 +424,23 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
 - Laporan 7 Oktober 2026, disusun per pemilik (Yoga, Nizar, Ridho) dan
   semula disebut laporan penyesuaian `nizar` — 3 temuan dan konfirmasi,
   disusun 7 Oktober 2026 setelah `729c16a` dan sudah diserahkan ke tim
-  backend: nomor pengajuan dibentuk dari urutan
+  backend (tercatat di `docs/pengembangan/klien.md` backend sebagai
+  Laporan Frontend Web 8 Oktober 2026): nomor pengajuan dibentuk dari
+  urutan
   `createdAt` sehingga dapat mengunci pembuatan pengajuan sebulan
   (beserta catatan penggeseran tiga dokumen development), permintaan
   filter per penjualan di daftar sesi booking, dan booking lama
   berstatus Batal yang tidak dimigrasikan; beserta konfirmasi butir yang
   terbukti diperbaiki `nizar` `c29310c` dan `60575b5`, dan butir yang
   masih terbuka (`kontrak/temuan.md` butir 139 sampai 141)
+- Laporan penyesuaian `nizar` `8dc6211`, untuk Nizar — 1 temuan, 1
+  pelurusan, dan konfirmasi, disusun 8 Oktober 2026 setelah `5b92d14`:
+  perubahan indeks skema pelanggan tidak sampai ke basis data yang sudah
+  berjalan, sehingga nama kembar tetap ditolak dan kontak pelanggan
+  terhapus tetap terkunci (perlu migrasi indeks); pelurusan bahwa filter
+  `?penjualanID=` berasal dari permintaan web dan tidak dipakai; beserta
+  konfirmasi butir 104, 105, 106, 140, dan 141 (`kontrak/temuan.md`
+  butir 142)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

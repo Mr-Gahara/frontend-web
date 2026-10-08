@@ -94,6 +94,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Utang kecil gerbang rute | `dc0af1c` | Selesai (Catatan dari utang kecil gerbang rute) |
 | Form role ke React Hook Form dan Zod | `597a163` | Selesai (keputusan RL1a sampai RL3a; Catatan dari form role) |
 | Penyesuaian backend `nizar` | `9b25433` (sesi booking), `3b4f35b` (metode pembayaran), `a80d2fa` (diskon), `d23844a` (mutasi), `8072214` (riwayat Pindah Dana), `729c16a` (tandai selesai) | Selesai (keputusan NZ1a sampai NZ7a; Catatan dari penyesuaian backend `nizar`) |
+| Penyesuaian backend `nizar` `8dc6211` | `4539c85` (gerbang rute), `fe9631f` (pemilih pelanggan), `1bb26c0` (pengosongan kontak), `5b92d14` (spec kembar) | Selesai (keputusan NZ8a sampai NZ10a; Catatan dari penyesuaian backend `nizar` `8dc6211`) |
 | Rancangan dan perbaikan UI/UX, layout, dan palet warna | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
@@ -130,18 +131,64 @@ layout serta tampilan panel admin (Utang kecil dari modul panel admin).
 Langkah pertama sesi berikutnya: backend di-`fetch` dan dibandingkan
 dengan acuan (`cara-kerja.md`), lalu arahan pemilik proyek. Perintah di
 bawah memetakan warna yang dipakai sekarang, bila dibutuhkan. Suite e2e
-penuh tidak dijalankan di awal sesi; harapan hitungannya 444 lolos dan
-16 skipped (`pengujian.md`). Backend lokal berada di cabang `ridho`
-`92d4f27`, yang memuat `yoga` `55328f1` dan `nizar` `9d45efc` dan menjadi
-acuan web (`backend.md` bagian Pemilik modul backend). Tiga perubahan
-`yoga` belum dimanfaatkan web: B36 (Yoga), B37 (Yoga), dan B38 (Yoga) di
-`docs/pengembangan/klien.md` backend.
+penuh tidak dijalankan di awal sesi; harapan hitungannya 447 lolos dan
+15 skipped (`pengujian.md`). Backend lokal berada di cabang `ridho`
+`8dc6211`, hasil fast-forward ke `origin/nizar` pada 8 Oktober 2026 dan
+belum di-push; `origin/ridho` masih `92d4f27` (`backend.md` bagian
+Pemilik modul backend). Tiga perubahan `yoga` belum dimanfaatkan web:
+B36 (Yoga), B37 (Yoga), dan B38 (Yoga) di `docs/pengembangan/klien.md`
+backend.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline --remotes --not HEAD | head -20
 grep -rhoE '#[0-9A-Fa-f]{6}\b' app components features | tr 'a-f' 'A-F' | sort | uniq -c | sort -rn | head -30
 grep -nE '^\s*--[a-z-]+:' app/globals.css | cut -c1-100 | head -60
 ```
+
+## Catatan dari penyesuaian backend `nizar` `8dc6211`
+
+Dikerjakan pada 8 Oktober 2026 dalam empat commit. `origin/nizar` maju
+delapan commit di atas `ridho` `92d4f27` (pelanggan, membership, posisi,
+dan sesi booking), sehingga `ridho` lokal cukup di-fast-forward: tidak
+ada sisi kedua yang perlu diperiksa kelengkapannya. `origin/yoga` tidak
+maju.
+
+| Commit | Isi |
+|---|---|
+| `4539c85` | Buat penjualan dan buat reservasi menuntut `read-pelanggan` (GR7a) |
+| `fe9631f` | Pemilih pelanggan menampilkan dan mencari nomor HP (NZ8a) |
+| `1bb26c0` | `test.fixme` pengosongan nomor HP dilepas, dan peringatan sementara dibuang (NZ10a) |
+| `5b92d14` | Skenario penolakan kembar berpindah dari nama (400) ke nomor HP (409) |
+
+- Permission diselaraskan menurut `backend.md`: seed sinkron menambah
+  empat izin posisi (135 di seed), dan seed Owner memberi 132 izin ke dua
+  role Owner. Tidak ada nama yang dikeluarkan dari seed.
+- Audit endpoint tidak berubah: 243 route dan 142 panggilan frontend
+  unik, tanpa panggilan ke route yang tidak ada.
+- `GET /pelanggan` kini memeriksa `read-pelanggan`. Halaman pelanggan
+  sudah bergate izin itu sejak Fase 2; gerbang buat penjualan dan buat
+  reservasi disusulkan (`kontrak/izin-halaman.md`).
+- Terbukti lewat permintaan nyata: butir 104 dan 105 tertutup, nomor HP
+  kembar dijawab 409 (butir 106), `?penjualanID=` diterima (butir 140),
+  dan query tidak dikenal ditolak 400 di daftar pelanggan dan booking.
+  Status Batal yang dibaca VOID (butir 141) dan email kembar 409 dibaca
+  dari kode.
+- Nama kembar masih ditolak 409 di basis data development, karena indeks
+  unik lama tidak ikut terhapus saat dibuang dari skema; indeks nomor HP
+  dan email di basis data juga belum memuat filter `isDeleted`
+  (`kontrak/temuan.md` butir 142). Basis datanya dibiarkan sebagai
+  bukti.
+- Filter `?penjualanID=` berasal dari permintaan web sendiri (butir 140)
+  dan tidak dipakai: detail penjualan tetap memuat booking per id (NZ9a).
+- Helper `ganti-blok.js` diperbaiki: beberapa pasangan di bawah satu
+  baris berkas kini diterapkan (`f573eeb`, `cara-kerja.md`).
+- Cabang uji lokal `uji-yoga-nizar` di backend dihapus; kedua induknya
+  termuat di `ridho`.
+- Vitest 629 lolos di 77 berkas. Suite e2e penuh: 447 lolos dan 15
+  skipped, tanpa kegagalan (`pengujian.md`).
+- Temuan backend baru: butir 142 (`backend.md`).
+- Keputusan: `keputusan.md` (Penyesuaian backend `nizar` `8dc6211`, NZ8a
+  sampai NZ10a).
 
 ## Catatan dari penyesuaian backend `nizar`
 
@@ -1130,18 +1177,25 @@ Yang masih berlaku:
 
 ### Utang kecil dari penyesuaian backend `nizar`
 
-- Backend lokal berada di cabang `ridho` `92d4f27`. Setiap kali `yoga`
-  atau `nizar` maju, cabang itu digabung ulang dengan pemeriksaan
-  kelengkapan (`backend.md`), lalu kontrak dicocokkan ulang. Cabang uji
-  lokal `uji-yoga-nizar` tidak dipakai lagi.
+- Backend lokal berada di cabang `ridho` `8dc6211` (fast-forward ke
+  `origin/nizar`, belum di-push). Setiap kali `yoga` atau `nizar` maju,
+  cabang itu digabung ulang dengan pemeriksaan kelengkapan
+  (`backend.md`), lalu kontrak dicocokkan ulang. Cabang uji lokal
+  `uji-yoga-nizar` sudah dihapus (8 Oktober 2026).
+- Indeks pelanggan di basis data development belum sesuai skema
+  (`kontrak/temuan.md` butir 142); dibiarkan sebagai bukti sampai backend
+  menyediakan migrasi indeks.
+- Booking milik sebuah penjualan belum disertakan di respons detail
+  penjualan; permintaannya ditunda (NZ9a).
 - Penyesuaian terhadap `yoga` `55328f1` belum dikerjakan: izin kategori
   beban (`kontrak/temuan.md` butir 130), `tipePajak` di `PUT /pajak/:id`
   (butir 91), dan satuan resep (butir 15).
 - Bagian Sesi Booking di detail penjualan memakai tata letak sederhana di
   atas grid informasi; penempatannya menunggu fase UI/UX.
-- Timeline reservasi tidak punya aksi Tandai Selesai (NZ7a), dan booking
-  lama berstatus Batal tampil sebagai blok redup (`kontrak/temuan.md`
-  butir 141).
+- Timeline reservasi tidak punya aksi Tandai Selesai (NZ7a). Booking lama
+  berstatus Batal dibaca VOID sejak backend `nizar` `8dc6211`, sehingga
+  menurut kode tidak tampil lagi (`kontrak/temuan.md` butir 141); belum
+  dilihat langsung di timeline.
 - Khusus member belum ditawarkan di form diskon (NZ6a); ditinjau bersama
   modul membership.
 - Mutasi transfer di buku mutasi tidak bertaut ke riwayat Pindah Dana,

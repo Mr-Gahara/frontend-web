@@ -102,7 +102,10 @@ gabungan ketiga cabang. Terhadap Lampiran
 A: `POST /sesibooking/:id/checkin` tidak ada lagi, `GET /akunkas/ringkasan`
 belum tercatat dan dipakai web sejak `d23844a`, dan `GET` serta
 `PUT /sesibooking/:id`, yang tercatat tidak dipakai, dipakai web sejak
-`729c16a`.
+`729c16a`. Pada 8 Oktober 2026, bagian pelanggan dan sesi booking di
+`endpoint.md`, `payload.md`, `izin-halaman.md`, dan `temuan.md`
+dikoreksi terhadap backend `nizar` `8dc6211`, delapan commit di atas
+`ridho` `92d4f27`; `ridho` lokal di-fast-forward ke sana.
 
 ## 1. Acuan dan metodologi
 

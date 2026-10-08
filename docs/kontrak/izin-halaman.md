@@ -38,6 +38,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 5 Oktober 2026: pajak setelah `d3443e2`, terhadap backend `fc29433`. Route pajak dan produk pajak kini memeriksa izin, sehingga halaman pajak mendapat entri `IZIN_HALAMAN` (`read-pajak` atau `akses-pos`, keputusan FC3a). `IZIN_HALAMAN` hanya dibaca sidebar, dan halaman pajak bukan menu sidebar, sehingga entrinya dibaca halaman pajak sendiri dan kartu di halaman indeks pengaturan.
 - 6 Oktober 2026: gerbang rute setelah `bc388c6` (keputusan GR1a sampai GR7a). `IZIN_HALAMAN` kini memuat seluruh 83 rute di bawah `/dashboard` dan ditegakkan `GerbangRute` di layout dashboard: rute yang syaratnya tidak dipenuhi menampilkan pesan tanpa izin, dan isinya tidak dipasang. Rute detail, form, dan sub-halaman dicatat di 5.1. Halaman form menuntut izin baca dan izin tulisnya (GR5a). Rute yang pada catatan di atas disebut tanpa entri `IZIN_HALAMAN` (metode pembayaran, profil toko, profil pengguna, ubah akun kas, Pindah Dana, serta detail, buat, dan ubah pengajuan stok) kini punya entri: kosong untuk yang berizin per bagian, bersyarat untuk yang lain. Panel admin tetap di luar `IZIN_HALAMAN`.
 - 7 Oktober 2026: detail penjualan setelah `729c16a`, tanpa perubahan gate (`read-penjualan`). Untuk penjualan berjenis booking, halaman juga memanggil `GET /sesibooking/:id` per booking, hanya bagi pemegang `read-booking`; tanpa izin itu bagian Sesi Booking tidak dipasang. Tombol Tandai Selesai memanggil `PUT /sesibooking/:id` dan hanya tampil bagi pemegang `update-booking` (keputusan NZ7a). Mutasi arus kas juga memanggil `GET /akunkas/ringkasan` (`read-akunkas`, sejalan dengan gate) sejak `d23844a`.
+- 8 Oktober 2026: pelanggan, buat penjualan, dan buat reservasi setelah `4539c85`, terhadap backend `nizar` `8dc6211`. `GET /pelanggan` kini memeriksa `read-pelanggan`, sejalan dengan gate halaman pelanggan. Buat penjualan dan buat reservasi memuat `/pelanggan` dan mewajibkan pelanggan di payload, sehingga gerbang keduanya ikut menuntut izin itu (GR7a).
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -66,7 +67,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/jadwal/generate` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift/bulk` | `read-pengguna` | Sejalan; entri `IZIN_HALAMAN` ditambahkan di `19227f8` |
 | `/dashboard/outlet/pola-roster` | - | `/shift`, `/polaroster` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/shift` | - | `/shift` | - | Backend tidak memeriksa izin |
-| `/dashboard/outlet/pelanggan` | `read-pelanggan` | `/pelanggan` | - | Backend tidak memeriksa izin |
+| `/dashboard/outlet/pelanggan` | `read-pelanggan` | `/pelanggan` | `read-pelanggan` | Sejalan sejak backend `nizar` `8dc6211` |
 | `/dashboard/outlet/pengguna` | `read-pengguna`, `read-role` | `/pengguna`, `/role` | `read-pengguna`, `read-role` | Sejalan |
 | `/dashboard/outlet/pengaturan` | - | - | - | Halaman indeks tanpa data (`IZIN_HALAMAN` berisi syarat kosong). Sub-halaman metode pembayaran memanggil `/metodepembayaran` (tanpa izin baca) dan `/akunkas` (`read-akunkas`), tanpa entri `IZIN_HALAMAN` (`3359497`); sub-halaman pajak punya baris sendiri di bawah sejak `d3443e2`, karena backend `fc29433` memasang izin di route pajak; sub-halaman profil toko memanggil `/tenant/:id` (tanpa izin baca) dan `/location/current` (`read-location`), tanpa entri (`fcf2dd2`). Sejak `bc388c6` ketiga sub-halaman punya entri (5.1) |
 | `/dashboard/outlet/pengaturan/pajak` | `read-pajak` atau `akses-pos` | `/pajak`, `/produk`, `/produkpajak/:targetid` | `read-pajak` atau `akses-pos`; `/produk` butuh `read-produk` atau `akses-pos` | Sejalan sejak `d3443e2` (keputusan FC3a). Bukan menu sidebar. Tombol tambah, ubah, dan hapus mengikuti `create-`, `update-`, dan `delete-pajak`; pasang dan lepas pajak produk mengikuti `update-produk` |
@@ -122,10 +123,10 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/outlet/pengaturan/roles/buatRole/kostum` | `read-role`, `create-role` | `/role`, `/permission` | Form |
 | `/dashboard/outlet/pengaturan/roles/[id]/edit` | `read-role`, `update-role` | `/role/:id`, `/role`, `/permission` | Form |
 | `/dashboard/outlet/pengaturan/toko` | - | `/tenant/:id`, `/location/current` | Izin per bagian di dalam halaman (PO14a) |
-| `/dashboard/outlet/penjualan/buatPenjualan` | `read-produk` atau `akses-pos`, `create-penjualan` | `/produk`, `/pelanggan`, `/diskon`; `/pajak` dan `/location/current` opsional | Form |
+| `/dashboard/outlet/penjualan/buatPenjualan` | `read-produk` atau `akses-pos`, `read-pelanggan`, `create-penjualan` | `/produk`, `/pelanggan`, `/diskon`; `/pajak` dan `/location/current` opsional | Form |
 | `/dashboard/outlet/penjualan/[id]` | `read-penjualan` | `/penjualan/:id` | Detail; aksi mengikuti `aksiPenjualan`. Booking dimuat lewat `/sesibooking/:id` bagi pemegang `read-booking` (`729c16a`) |
 | `/dashboard/outlet/penjualan/[id]/pembayaran` | `read-penjualan`, `create-pembayaran` | `/penjualan/:id`, `/metodepembayaran` | Form |
-| `/dashboard/outlet/reservasi/buatReservasi` | `read-booking`, `create-booking` | `/sesibooking`, `/aset`, `/pelanggan`, `/diskon` | Form |
+| `/dashboard/outlet/reservasi/buatReservasi` | `read-booking`, `read-pelanggan`, `create-booking` | `/sesibooking`, `/aset`, `/pelanggan`, `/diskon` | Form |
 | `/dashboard/outlet/reservasi/aset` | - | `/aset` | `GET` tanpa izin di backend (GR6a) |
 | `/dashboard/outlet/reservasi/aset/buatAset` | `create-aset` | `/tipeaset` | Form |
 | `/dashboard/outlet/reservasi/aset/[id]/edit` | `update-aset` | `/aset/:id`, `/tipeaset` | Form |

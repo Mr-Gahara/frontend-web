@@ -1602,6 +1602,28 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   `seeds/permissionSeed.js`, tidak diperiksa dan cukup disertai kata
   backend. Nama yang kebetulan sama dengan berkas di `docs/` repo ini
   lolos tanpa tanda, sehingga kata backend tetap ditulis.
+- **Hitungan `rev-list A..B` bukan ukuran aman menghapus cabang
+  gabungan.** Cabang yang ujungnya commit gabungan miliknya sendiri
+  selalu punya satu commit di luar; yang dibuktikan adalah kedua
+  induknya, lewat `git merge-base --is-ancestor`. Syarat "aman hanya
+  bila 0" sempat keliru untuk `uji-yoga-nizar`.
+- **Bila `rev-list --left-right --count` menjawab 0 di satu sisi,
+  gabungannya fast-forward**, dan pemeriksaan kelengkapan gabungan tidak
+  diperlukan (`ridho` ke `nizar` `8dc6211`).
+- **Perubahan indeks di skema backend dibuktikan dari daftar indeks di
+  basis data**, bukan dari skemanya. Indeks yang dibuang dari skema
+  tetap ada di basis data yang sudah berjalan: nama pelanggan kembar
+  ditolak 409 walau skema `8dc6211` mengizinkannya, dan satu skrip
+  baca-saja atas `collection.indexes()` menjelaskannya
+  (`kontrak/temuan.md` butir 142).
+- **Permintaan ke backend ditimbang terhadap preseden di proyek sebelum
+  diajukan.** Butir 140 meminta filter koleksi `?penjualanID=`, padahal
+  detail penjualan sudah membawa `pembayaran[]` dengan pola disertakan;
+  permintaannya dipenuhi lalu tidak dipakai (NZ9a).
+- **URL di blok tempel tidak diikuti titik koma, juga di dalam kutip
+  tunggal.** zsh tetap menyisipkan garis miring terbalik saat ditempel;
+  setiap `curl` ditulis di baris sendiri (pemeriksaan server sebelum
+  suite penuh, 8 Oktober 2026).
 - **Gabungan cabang tanpa konflik diperiksa kelengkapannya sebelum
   di-commit.** Hasilnya dibandingkan dengan kedua ujung dan titik
   cabangnya: berkas yang absen, baris baru yang hilang, dan baris lama

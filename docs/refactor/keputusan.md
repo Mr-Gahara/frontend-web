@@ -1134,6 +1134,8 @@ rancangan butir 17, 21, dan 23. PD1a dan PD5a diterapkan di `d9365d3`
   memperingatkan bila nilainya masih ada. Tanpa konstanta, karena
   peringatan hilang sendiri begitu backend diperbaiki; skenario
   pengosongannya ditulis lengkap sebagai `test.fixme`.
+  Dicabut NZ10a (`1bb26c0`): backend `nizar` `8dc6211` menerapkan
+  pengosongan, dan peringatannya dibuang.
 - **PD6a: masa berlaku diskon diisi sebagai tanggal saja.** Tanggal mulai
   dikirim sebagai awal hari dan tanggal berakhir sebagai akhir hari, waktu
   lokal; jam harian diatur lewat jam berlaku.
@@ -1493,6 +1495,41 @@ NZ.
   `itemPenjualan[].sesiBookingID`, hanya bagi pemegang `read-booking`;
   tombol hanya untuk booking Aktif yang jamnya belum lewat; dan dialog
   hanya tertutup saat berhasil (keputusan Fase 0).
+
+### Penyesuaian backend `nizar` `8dc6211`
+
+Diputuskan pemilik proyek pada 8 Oktober 2026, setelah `origin/nizar` maju
+delapan commit di atas `ridho` `92d4f27`. Labelnya melanjutkan NZ.
+
+- **Prinsip penilaian**: acuannya praktik baku. Setiap perubahan backend
+  dinilai lebih dulu; yang benar diikuti, dan yang keliru dilaporkan
+  tanpa ditiru di web.
+- **NZ8a: nama pelanggan boleh kembar, mengikuti backend.** Yang unik
+  adalah pengenal (nomor HP dan email), bukan nama. Sebagai gantinya,
+  pemilih pelanggan di buat penjualan dan buat reservasi menampilkan dan
+  mencari nomor HP (`fe9631f`), dan skenario penolakan kembar di e2e
+  berpindah dari nama (400) ke nomor HP (409) (`5b92d14`).
+- **NZ9a: booking di detail penjualan tetap dimuat per id.** Filter
+  `?penjualanID=`, yang diminta web di `kontrak/temuan.md` butir 140,
+  tidak dipakai, dan tidak ada permintaan baru ke backend. Menyertakan
+  booking di respons detail penjualan, seperti `pembayaran[]`, baru
+  diajukan bila penjualan dengan banyak booking terbukti nyata, bersama
+  keputusan izinnya. Melengkapi NZ7a.
+- **NZ10a: `test.fixme` pengosongan nomor HP dilepas, dan
+  `isianTidakTerkosongkan` beserta peringatannya dibuang** (`1bb26c0`),
+  setelah pengosongan terbukti di backend. Mencabut PD5a.
+- **Basis data development tidak diselaraskan untuk indeks pelanggan**
+  (`kontrak/temuan.md` butir 142): dibiarkan sebagai bukti, karena
+  perubahan web tidak bergantung padanya.
+- Diterapkan tanpa ditanyakan (`4539c85`): buat penjualan dan buat
+  reservasi menuntut `read-pelanggan`, karena pelanggan wajib di kedua
+  payload (GR7a); template role tidak diubah, karena setiap template
+  yang memuat `create-penjualan` sudah memuat izin itu.
+- Diterapkan tanpa ditanyakan (`fe9631f`): aturan tampilan pemilih
+  ditulis sebagai fungsi murni di `features/pelanggan/tampilan.ts`
+  (keputusan rancangan butir 10 dan 12); nomor HP tampil di baris pilihan
+  dan di pemicu, dengan gaya elemen di sebelahnya; dan `value` item
+  pilihan di buat reservasi memuat id agar unik.
 
 ## Keputusan rancangan yang mengikat
 
