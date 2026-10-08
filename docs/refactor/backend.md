@@ -434,7 +434,8 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   terbukti diperbaiki `nizar` `c29310c` dan `60575b5`, dan butir yang
   masih terbuka (`kontrak/temuan.md` butir 139 sampai 141)
 - Laporan penyesuaian `nizar` `8dc6211`, untuk Nizar — 1 temuan, 1
-  pelurusan, dan konfirmasi, disusun 8 Oktober 2026 setelah `5b92d14`:
+  pelurusan, dan konfirmasi, disusun dan diserahkan 8 Oktober 2026
+  setelah `5b92d14`:
   perubahan indeks skema pelanggan tidak sampai ke basis data yang sudah
   berjalan, sehingga nama kembar tetap ditolak dan kontak pelanggan
   terhapus tetap terkunci (perlu migrasi indeks); pelurusan bahwa filter
