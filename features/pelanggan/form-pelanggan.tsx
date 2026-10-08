@@ -41,7 +41,6 @@ import type { Pelanggan } from "@/types/pelanggan";
 import { useBuatPelanggan, usePerbaruiPelanggan } from "./hooks";
 import {
   NILAI_AWAL_PELANGGAN,
-  isianTidakTerkosongkan,
   nilaiAwalPelanggan,
   payloadBuatPelanggan,
   payloadPerbaruiPelanggan,
@@ -282,15 +281,8 @@ function IsiFormUbah({ pelanggan, onTutup }: { pelanggan: Pelanggan; onTutup: ()
   const [galat, setGalat] = useState("");
 
   const perbarui = usePerbaruiPelanggan({
-    onSuccess: (hasil, variabel) => {
-      const tersisa = isianTidakTerkosongkan(variabel.payload, hasil);
-      if (tersisa.length > 0) {
-        toast.warning("Sebagian perubahan belum tersimpan", {
-          description: `${tersisa.join(", ")} belum dapat dikosongkan oleh server, sehingga nilai lamanya tetap.`,
-        });
-      } else {
-        toast.success("Berhasil", { description: "Data pelanggan berhasil diperbarui." });
-      }
+    onSuccess: () => {
+      toast.success("Berhasil", { description: "Data pelanggan berhasil diperbarui." });
       onTutup();
     },
     onError: (err) => {

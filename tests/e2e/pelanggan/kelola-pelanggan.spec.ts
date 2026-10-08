@@ -221,12 +221,8 @@ test.describe("Kelola pelanggan", () => {
         expect(res.status(), "PUT /pelanggan/:id").toBe(200);
         expect(res.request().postDataJSON()).toEqual({ nomorHp: "" });
         const hasil = (await res.json()).data as PelangganMentah;
-        if (hasil.nomorHp) {
-          await expect(page.getByText("Sebagian perubahan belum tersimpan")).toBeVisible();
-          await expect(page.getByText(/Nomor HP belum dapat dikosongkan/)).toBeVisible();
-        } else {
-          await expect(page.getByText("Data pelanggan berhasil diperbarui.")).toBeVisible();
-        }
+        expect(hasil.nomorHp ?? "", "nomor HP di respons PUT").toBe("");
+        await expect(page.getByText("Data pelanggan berhasil diperbarui.")).toBeVisible();
         await expect(dialog).toBeHidden({ timeout: 15_000 });
       });
     } finally {
@@ -234,10 +230,9 @@ test.describe("Kelola pelanggan", () => {
     }
   });
 
-  test.fixme("nomor HP yang dikosongkan tersimpan kosong", async ({ page }) => {
-    // Menunggu backend: validator pelanggan membuang isian kosong dari body,
-    // sehingga PUT menjawab 200 tanpa mengubah nilainya (kontrak/temuan.md
-    // butir 104, keputusan PD5a).
+  test("nomor HP yang dikosongkan tersimpan kosong", async ({ page }) => {
+    // Terbukti sejak backend nizar 8dc6211: kontak yang dikirim kosong
+    // dihapus dari dokumen (kontrak/temuan.md butir 104).
     const auth = await bukaPelanggan(page);
     const data = dataUji();
     let id: string | undefined;

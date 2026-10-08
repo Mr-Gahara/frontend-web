@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { skemaPelanggan } from "@/features/pelanggan/schema";
 import {
   NILAI_AWAL_PELANGGAN,
-  isianTidakTerkosongkan,
   nilaiAwalPelanggan,
   payloadBuatPelanggan,
   payloadPerbaruiPelanggan,
@@ -93,19 +92,6 @@ describe("payloadPerbaruiPelanggan", () => {
   });
 });
 
-describe("isianTidakTerkosongkan", () => {
-  it("menyebut isian yang dikosongkan tetapi masih terisi di hasil simpan", () => {
-    expect(isianTidakTerkosongkan({ nomorHp: "", alamat: "" }, pelanggan)).toEqual([
-      "Nomor HP",
-      "Alamat",
-    ]);
-  });
-
-  it("kosong bila hasil simpan sudah mengosongkannya, atau bila tidak ada yang dikosongkan", () => {
-    expect(isianTidakTerkosongkan({ nomorHp: "" }, { ...pelanggan, nomorHp: null })).toEqual([]);
-    expect(isianTidakTerkosongkan({ namaPelanggan: "Budi S." }, pelanggan)).toEqual([]);
-  });
-});
 
 describe("aksiPelanggan", () => {
   it("mengikuti izin endpoint masing-masing", () => {

@@ -61,19 +61,3 @@ export function payloadPerbaruiPelanggan(
   }
   return payload;
 }
-
-/**
- * Isian yang dikosongkan lewat payload tetapi masih terisi di hasil
- * simpan (keputusan PD5a). Backend menjawab 200 untuk pengosongan nomor HP,
- * email, dan alamat tanpa mengubah nilainya (kontrak/temuan.md butir 104),
- * sehingga halaman memperingatkan dari hasil nyata, tanpa konstanta: daftar
- * ini kosong dengan sendirinya begitu backend diperbaiki.
- */
-export function isianTidakTerkosongkan(
-  payload: PerbaruiPelangganPayload,
-  hasil: Pelanggan,
-): string[] {
-  return ISIAN_OPSIONAL.filter(
-    ([field]) => payload[field] === "" && (hasil[field] ?? "") !== "",
-  ).map(([, sebutan]) => sebutan);
-}
