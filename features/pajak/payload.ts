@@ -43,14 +43,15 @@ function keFieldBackend(n: NilaiPajak): PajakBaru {
 export const payloadBuatPajak = (n: NilaiPajak): PajakBaru => keFieldBackend(n);
 
 /**
- * Payload ubah: field yang berbeda dari data server (keputusan rancangan
- * butir 15), ditambah tipePajak yang selalu dikirim, karena
- * validatePajakPayload menolak "tipePajak wajib diisi" juga pada mode update
- * (backend 465b438). Nama yang hanya berbeda spasi di ujung tidak dikirim.
+ * Payload ubah: hanya field yang berbeda dari data server (keputusan
+ * rancangan butir 15). Sejak backend yoga 241802e tipePajak hanya wajib saat
+ * membuat (kontrak/temuan.md butir 91), sehingga dikirim hanya bila berubah.
+ * Nama yang hanya berbeda spasi di ujung tidak dikirim.
  */
 export function payloadUbahPajak(n: NilaiPajak, asal: Pajak): PerubahanPajak {
   const baru = keFieldBackend(n);
-  const payload: PerubahanPajak = { tipePajak: baru.tipePajak };
+  const payload: PerubahanPajak = {};
+  if (baru.tipePajak !== asal.tipePajak) payload.tipePajak = baru.tipePajak;
   if (baru.namaPajak !== asal.namaPajak) payload.namaPajak = baru.namaPajak;
   if (baru.tarifPajak !== asal.tarifPajak) payload.tarifPajak = baru.tarifPajak;
   if (baru.modelPerhitungan !== asal.modelPerhitungan) payload.modelPerhitungan = baru.modelPerhitungan;

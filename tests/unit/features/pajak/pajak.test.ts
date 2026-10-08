@@ -105,12 +105,11 @@ describe("payload pajak", () => {
     expect(nilaiAwalPajak(pajak("a", { prioritas: 5 })).prioritas).toBe("");
   });
 
-  it("payload ubah hanya mengirim field yang berubah, dengan tipePajak selalu ikut", () => {
+  it("payload ubah hanya mengirim field yang berubah, termasuk tipePajak", () => {
     const asal = pajak("a", { namaPajak: "PPN", tipePajak: false });
-    expect(payloadUbahPajak(nilaiAwalPajak(asal), asal)).toEqual({ tipePajak: false });
-    expect(payloadUbahPajak({ ...nilaiAwalPajak(asal), namaPajak: " PPN " }, asal)).toEqual({ tipePajak: false });
+    expect(payloadUbahPajak(nilaiAwalPajak(asal), asal)).toEqual({});
+    expect(payloadUbahPajak({ ...nilaiAwalPajak(asal), namaPajak: " PPN " }, asal)).toEqual({});
     expect(payloadUbahPajak({ ...nilaiAwalPajak(asal), tarifPajak: "11", statusPajak: false }, asal)).toEqual({
-      tipePajak: false,
       tarifPajak: 11,
       statusPajak: false,
     });

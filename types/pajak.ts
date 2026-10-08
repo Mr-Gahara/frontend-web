@@ -37,7 +37,7 @@ export interface PajakBaru {
  * 15), ditambah tipePajak yang selalu dikirim, karena validatePajakPayload
  * menolak "tipePajak wajib diisi" juga pada mode update (backend 465b438).
  */
-export type PerubahanPajak = Partial<Omit<PajakBaru, "tipePajak">> & { tipePajak: boolean };
+export type PerubahanPajak = Partial<PajakBaru>;
 
 export interface ProdukPajakRequest {
   produkID: string;

@@ -107,7 +107,7 @@ test.describe("E2E — Kelola pajak", () => {
         await expect(baris.getByRole("cell", { name: "2", exact: true })).toBeVisible();
       });
 
-      await test.step("ubah nama saja: simpan nonaktif sebelum ada perubahan, payload nama dan tipePajak", async () => {
+      await test.step("ubah nama saja: simpan nonaktif sebelum ada perubahan, payload hanya nama", async () => {
         await page.getByRole("button", { name: `Aksi ${nama}` }).click();
         await page.getByRole("menuitem", { name: "Edit" }).click();
         const dialog = page.getByRole("dialog", { name: "Edit Pajak" });
@@ -119,7 +119,7 @@ test.describe("E2E — Kelola pajak", () => {
         const tKirim = page.waitForRequest((r) => r.method() === "PUT" && POLA_DETAIL.test(r.url()));
         const tJawab = page.waitForResponse(cocok("PUT", POLA_DETAIL));
         await simpan.click();
-        expect((await tKirim).postDataJSON()).toEqual({ tipePajak: true, namaPajak: namaBaru });
+        expect((await tKirim).postDataJSON()).toEqual({ namaPajak: namaBaru });
         expect((await tJawab).status()).toBe(200);
         await expect(dialog).toBeHidden();
         await cari(page, namaBaru);

@@ -45,7 +45,7 @@ export function FormPajak({ nilaiAwal, asal, daftar, sedangMenyimpan, galat, onS
   const nilai = useWatch({ control }) as NilaiPajak;
   const terdampak = pajakTransaksiTerdampak(daftar, nilai, asal?.id);
   const perubahan = asal ? payloadUbahPajak(nilai, asal) : null;
-  const adaPerubahan = !asal || !perubahan || Object.keys(perubahan).length > 1 || perubahan.tipePajak !== asal.tipePajak;
+  const adaPerubahan = !asal || !perubahan || Object.keys(perubahan).length > 0;
 
   return (
     <form onSubmit={handleSubmit(onSimpan)} noValidate className="mt-4 flex flex-col gap-4">
