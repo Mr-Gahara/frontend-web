@@ -6,7 +6,9 @@ import { hapusLewatApi, unik } from "../../helpers/reservasi-uji";
  * Spec pembanding halaman pelanggan, ditulis terhadap kode sebelum migrasi
  * (keputusan PD1a). Hanya memuat perilaku yang tidak berubah: daftar dari
  * data nyata, alur buat, ubah, dan hapus lewat UI (keputusan rancangan
- * butir 23), validasi nama kosong, dan penolakan nama kembar oleh backend.
+ * butir 23), dan validasi nama kosong. Penolakan kembar diuji di
+ * kelola-pelanggan.spec.ts sejak backend nizar 8dc6211: yang ditolak nomor
+ * HP dan email kembar (409), sedangkan nama boleh kembar.
  * Pelanggan uji bernama unik per run dan dihapus lewat UI; API hanya
  * membaca bukti dan, di finally, menghapus sisa bila test berhenti di
  * tengah. Hapus di backend adalah hapus lunak.
@@ -161,18 +163,4 @@ test.describe("Pelanggan", () => {
     expect(jumlahPost).toBe(0);
   });
 
-  test("nama yang sudah terdaftar ditolak backend dan pesannya tampil", async ({ page }) => {
-    const auth = await bukaPelanggan(page);
-    const daftar = await daftarPelanggan(page, auth);
-    test.skip(daftar.length === 0, "Tidak ada pelanggan untuk diuji nama kembarnya");
-    const sudahAda = daftar[0].namaPelanggan;
-    await isianNama(page).fill(sudahAda);
-    const res = await kirimFormTambah(page);
-    expect(res.status(), "POST /pelanggan dengan nama kembar").toBe(400);
-    const pesan = String((await res.json()).message);
-    expect(pesan).toContain(sudahAda);
-    await expect(page.getByText(pesan)).toBeVisible({ timeout: 15_000 });
-    const sesudah = await daftarPelanggan(page, auth);
-    expect(sesudah.length).toBe(daftar.length);
-  });
 });

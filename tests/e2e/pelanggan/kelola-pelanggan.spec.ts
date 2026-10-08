@@ -252,6 +252,30 @@ test.describe("Kelola pelanggan", () => {
     }
   });
 
+  test("nomor HP yang sudah terdaftar ditolak 409, dan pesan backend tampil", async ({ page }) => {
+    const auth = await bukaPelanggan(page);
+    const data = dataUji();
+    let id: string | undefined;
+    try {
+      id = await buatLewatUi(page, auth, data);
+      const kembar = dataUji();
+      await page.getByLabel(/^Nama Pelanggan/).fill(kembar.nama);
+      await page.getByLabel(/^Nomor WhatsApp/).fill(data.nomorHp);
+      await page.getByRole("button", { name: "Simpan Pelanggan" }).click();
+      const tPost = tunggu(page, "POST", POLA_DAFTAR);
+      await dialogKonfirmasi(page).getByRole("button", { name: "Ya, Simpan" }).click();
+      const res = await tPost;
+      expect(res.status(), "POST /pelanggan dengan nomor HP kembar").toBe(409);
+      const pesan = String((await res.json()).message);
+      expect(pesan).toContain(data.nomorHp);
+      await expect(page.getByText(pesan)).toBeVisible({ timeout: 15_000 });
+      const sesudah = await daftarPelanggan(page, auth);
+      expect(sesudah.filter((p) => p.nomorHp === data.nomorHp)).toHaveLength(1);
+    } finally {
+      await hapusLewatApi(page, auth, "/pelanggan", id);
+    }
+  });
+
   test("daftar yang gagal dimuat menampilkan pesan, dan coba lagi memuatnya", async ({ page }) => {
     await page.route(POLA_DAFTAR, async (route) => {
       if (route.request().method() === "GET") await route.fulfill(JAWAB_GAGAL);
