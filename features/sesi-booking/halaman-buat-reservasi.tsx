@@ -14,6 +14,7 @@ import { useDaftarAset } from "@/features/aset/hooks";
 import { diskonAktif, pilihDiskon } from "@/features/diskon/filter";
 import { useDaftarDiskon } from "@/features/diskon/hooks";
 import { useDaftarPelanggan } from "@/features/pelanggan/hooks";
+import { labelPelangganTerpilih, nilaiPilihanPelanggan } from "@/features/pelanggan/tampilan";
 import { isApiError, pesanError } from "@/lib/api/error";
 import { cn } from "@/lib/utils";
 import { keTanggalLokal } from "@/lib/waktu";
@@ -196,7 +197,7 @@ export default function HalamanBuatReservasi() {
                         )}
                       >
                         {field.value
-                          ? (pelangganList.find((p) => p.id === field.value)?.namaPelanggan ?? "—")
+                          ? (labelPelangganTerpilih(pelangganList, field.value) ?? "—")
                           : memuatPelanggan
                             ? "Memuat..."
                             : "Ketik untuk mencari pelanggan..."}
@@ -214,7 +215,7 @@ export default function HalamanBuatReservasi() {
                             {pelangganList.map((pel) => (
                               <CommandItem
                                 key={pel.id}
-                                value={pel.namaPelanggan}
+                                value={nilaiPilihanPelanggan(pel)}
                                 onSelect={() => {
                                   field.onChange(pel.id);
                                   setBukaPelanggan(false);
@@ -228,6 +229,11 @@ export default function HalamanBuatReservasi() {
                                   )}
                                 />
                                 {pel.namaPelanggan}
+                                {pel.nomorHp ? (
+                                  <span className="ml-2 text-xs font-medium text-[#0A2947]/60">
+                                    {pel.nomorHp}
+                                  </span>
+                                ) : null}
                               </CommandItem>
                             ))}
                           </CommandGroup>

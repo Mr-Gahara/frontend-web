@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { pesanError } from "@/lib/api/error";
 import { useLokasiAktif } from "@/features/inventaris/hooks";
 import { useDaftarPelanggan } from "@/features/pelanggan/hooks";
+import { cocokCariPelanggan, labelPelangganTerpilih } from "@/features/pelanggan/tampilan";
 import { useDaftarDiskon } from "@/features/diskon/hooks";
 import { diskonAktif } from "@/features/diskon/filter";
 import { useDaftarPajak } from "@/features/pajak/hooks";
@@ -151,9 +152,8 @@ export default function HalamanBuatPenjualan() {
   const debouncedPelangganSearch = useDebounce(pelangganSearch, 300);
   const filteredPelanggan = useMemo(() => {
     if (!debouncedPelangganSearch) return pelangganList;
-    const q = debouncedPelangganSearch.toLowerCase();
     return pelangganList.filter((p) =>
-      p.namaPelanggan.toLowerCase().includes(q),
+      cocokCariPelanggan(p, debouncedPelangganSearch),
     );
   }, [pelangganList, debouncedPelangganSearch]);
 
@@ -782,9 +782,8 @@ export default function HalamanBuatPenjualan() {
                       }
                     >
                       {pelangganID
-                        ? (pelangganList.find(
-                            (p) => (p.id) === pelangganID,
-                          )?.namaPelanggan ?? "Pelanggan tidak ditemukan")
+                        ? (labelPelangganTerpilih(pelangganList, pelangganID) ??
+                          "Pelanggan tidak ditemukan")
                         : "Pilih pelanggan..."}
                     </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
@@ -827,6 +826,11 @@ export default function HalamanBuatPenjualan() {
                                 )}
                               />
                               <span>{p.namaPelanggan}</span>
+                              {p.nomorHp ? (
+                                <span className="ml-2 text-xs font-medium text-[#0A2947]/60">
+                                  {p.nomorHp}
+                                </span>
+                              ) : null}
                               <span className="ml-auto text-xs font-bold text-[#0A2947]/50 capitalize">
                                 {p.tipePelanggan}
                               </span>
