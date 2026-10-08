@@ -177,7 +177,10 @@ for (const b of fs.readFileSync(process.argv[2], "utf8").split("\n")) {
   if (mode) p[mode] = isi.join("\n");
   isi = [];
   if (m[1] === "berkas") p = { berkas: m[2] };
-  if (m[1] === "akhir") pasangan.push(p);
+  if (m[1] === "akhir") {
+    pasangan.push(p);
+    p = { berkas: p.berkas };
+  }
   mode = m[1] === "lama" || m[1] === "baru" ? m[1] : null;
 }
 const berkas = {};
@@ -550,7 +553,9 @@ EOF
 - `ganti-blok.js`: seperti `ganti.js`, tetapi pasangan dibaca dari berkas
   teks bermarka baris `@@@ berkas <path>`, `@@@ lama`, `@@@ baru`, dan
   `@@@ akhir`, sehingga teks berisi backtick dan tanda dolar (dokumentasi
-  Markdown) tidak perlu di-escape. Berkas marka ditulis dengan heredoc
+  Markdown) tidak perlu di-escape. Pasangan tanpa `@@@ berkas` sendiri
+  memakai berkas pasangan sebelumnya (sejak 8 Oktober 2026). Berkas marka
+  ditulis dengan heredoc
   berdelimiter kutip yang berbeda dari `EOF` bila isinya memuat heredoc.
   Seluruh pasangan diperiksa lebih dulu dan setiap kegagalan dilaporkan
   sekaligus; tidak ada berkas yang ditulis bila satu pasangan tidak cocok
@@ -1580,11 +1585,23 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   dokumen di-commit.
 - **Blok perintah ditulis untuk zsh.** `set -- $p` tidak memecah kata di
   zsh; pasangan nilai dipisah dengan `${p% *}` dan `${p#* }`.
-- **Setiap pasangan di berkas marka `ganti-blok.js` didahului baris
-  `@@@ berkas` sendiri**, juga bila berkasnya sama. Beberapa pasangan di
-  bawah satu `@@@ berkas` memakai satu objek, sehingga semuanya berisi
-  teks pasangan terakhir dan ditolak dengan hitungan 0, tanpa ada berkas
-  yang ditulis.
+- **Beberapa pasangan `ganti-blok.js` untuk satu berkas cukup di bawah
+  satu `@@@ berkas`** sejak 8 Oktober 2026. Sebelumnya pasangan di bawah
+  satu `@@@ berkas` memakai satu objek, sehingga semuanya berisi teks
+  pasangan terakhir dan ditolak dengan hitungan 0, tanpa ada berkas yang
+  ditulis; kini `@@@ akhir` memulai objek baru yang mewarisi berkasnya.
+- **Berkas backend ditulis agar tidak terbaca pemeriksa sebagai berkas
+  repo ini.** `bentuk.cjs` menuntut setiap nama `.md` berhuruf kecil
+  dalam backtick, polos atau berawalan `docs/`, `refactor/`, atau
+  `kontrak/`, ada di `docs/` repo ini, dan `fakta.cjs` menuntut setiap
+  path dalam backtick yang berawalan `app/`, `components/`, `features/`,
+  `hooks/`, `lib/`, `scripts/`, `tests/`, atau `types/` ada di repo ini.
+  Berkas backend berbentuk begitu ditulis dengan awalan
+  `~/Documents/backend-js/`, seperti berkas pemilik di `backend.md`.
+  Path backend lain, misalnya `docs/pengembangan/klien.md` atau
+  `seeds/permissionSeed.js`, tidak diperiksa dan cukup disertai kata
+  backend. Nama yang kebetulan sama dengan berkas di `docs/` repo ini
+  lolos tanpa tanda, sehingga kata backend tetap ditulis.
 - **Gabungan cabang tanpa konflik diperiksa kelengkapannya sebelum
   di-commit.** Hasilnya dibandingkan dengan kedua ujung dan titik
   cabangnya: berkas yang absen, baris baru yang hilang, dan baris lama
