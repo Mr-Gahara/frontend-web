@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { isNotFound, pesanError } from "@/lib/api/error";
 import { useDaftarMetodePembayaran } from "@/features/metode-pembayaran/hooks";
@@ -70,8 +70,11 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
 
   // Dialog konfirmasi hanya tertutup saat berhasil; saat gagal tetap terbuka
   // beserta pesannya (keputusan Fase 0). Kedua tombolnya nonaktif selama
-  // permintaan berjalan: satu-satunya penjaga pembayaran ganda di web, karena
-  // POST /pembayaran tidak mendukung idempotensi di backend.
+  // permintaan berjalan, dan permintaan membawa kunci idempotensi (keputusan
+  // RH1a): satu kunci per pengisian form, dibuat saat form pertama kali lolos
+  // validasi dan dipakai ulang bila permintaan diulang, sehingga kiriman ulang
+  // tidak mencatat pembayaran kedua (backend nizar 3c9c19f).
+  const kunciIdempotensi = useRef<string | null>(null);
   const createPembayaranMutation = useBuatPembayaran({
     onSuccess: () => {
       toast.success("Berhasil", { description: "Pembayaran sukses dicatat." });
@@ -92,16 +95,19 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
       formatRupiah,
     );
     setFormError(pesan ?? "");
-    if (!pesan) setShowConfirm(true);
+    if (pesan) return;
+    kunciIdempotensi.current ??= crypto.randomUUID();
+    setShowConfirm(true);
   };
 
   const executePayment = () => {
-    createPembayaranMutation.mutate(
-      susunPayloadPembayaran(
+    createPembayaranMutation.mutate({
+      payload: susunPayloadPembayaran(
         { penjualanID, metodePembayaranID, jumlahBayarStr, catatan },
         new Date(),
       ),
-    );
+      kunci: kunciIdempotensi.current ?? crypto.randomUUID(),
+    });
   };
 
   // Kalkulasi Otomatis (Kembalian, dll)

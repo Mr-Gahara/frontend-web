@@ -38,7 +38,8 @@ export function useBatalkanPembayaran({ onSuccess, onError }: Callback = {}) {
 export function useBuatPembayaran({ onSuccess, onError }: Callback = {}) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: PembayaranRequest) => pembayaranApi.buat(payload),
+    mutationFn: ({ payload, kunci }: { payload: PembayaranRequest; kunci: string }) =>
+      pembayaranApi.buat(payload, kunci),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.penjualan.semua }),

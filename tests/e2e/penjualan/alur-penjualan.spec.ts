@@ -267,7 +267,7 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     },
   );
 
-  test("dialog konfirmasi pembayaran bertahan saat pembayaran gagal (keputusan Fase 0)", async ({ page }) => {
+  test("dialog konfirmasi pembayaran bertahan saat pembayaran gagal, dan kunci idempotensi dipakai ulang saat diulang", async ({ page }) => {
     const auth = await bukaDenganAuth(page, DAFTAR);
     const fx = await siapkanFixture(page, auth, 20);
     const penjualan = await buatDraftLewatUi(page, 1);
@@ -284,12 +284,23 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       await catatan.fill("Uji pembayaran gagal");
       await catatan.press("Enter");
       await expect(page.getByRole("alertdialog")).toBeVisible();
-      await page.route(pola, (route) =>
-        route.request().method() === "POST" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
-      );
+      let kunciGagal = "";
+      await page.route(pola, (route) => {
+        if (route.request().method() !== "POST") return route.continue();
+        kunciGagal = route.request().headers()["x-idempotency-key"] ?? "";
+        return route.fulfill(JAWAB_GAGAL);
+      });
       await page.getByRole("button", { name: /ya, catat/i }).click();
       await expect(page.getByText(/^gagal$/i).first()).toBeVisible();
       await expect(page.getByRole("alertdialog")).toBeVisible();
+      await page.unroute(pola);
+      expect(kunciGagal, "kunci idempotensi terkirim pada percobaan pertama (RH1a)").toBeTruthy();
+
+      const tunggu = page.waitForResponse((r) => r.request().method() === "POST" && pola.test(r.url()));
+      await page.getByRole("button", { name: /ya, catat/i }).click();
+      const res = await tunggu;
+      expect(res.status(), "POST /pembayaran saat diulang").toBe(201);
+      expect(res.request().headers()["x-idempotency-key"], "kunci sama saat diulang (RH1a)").toBe(kunciGagal);
     } finally {
       await page.unroute(pola);
       await batalkanPenjualanUji(page, auth, penjualan.id);
