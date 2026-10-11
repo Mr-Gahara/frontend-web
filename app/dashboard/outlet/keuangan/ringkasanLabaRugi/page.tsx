@@ -3,14 +3,9 @@
 import React, { useState, useMemo } from "react";
 import { LineChart as LineChartIcon, AlertTriangle } from "lucide-react";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
+  GrafikLaporan,
+  type TitikGrafik,
+} from "@/features/laporan/grafik-laporan";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLabaRugi } from "@/features/laporan/hooks";
@@ -27,33 +22,7 @@ import { formatRupiah } from "@/lib/format";
 // Types
 type FilterPeriode = PeriodeLaporan;
 
-type DataPoint = {
-  label: string;
-  nilai: number;
-};
-
-// Custom Tooltip
-/**
- * Props yang dibaca dari recharts. value diketik unknown karena recharts
- * mengizinkan angka, teks, atau array; yang ditampilkan selalu angka laba.
- */
-type PropsTooltip = {
-  active?: boolean;
-  payload?: { value?: unknown }[];
-  label?: string | number;
-};
-
-function CustomTooltip({ active, payload, label }: PropsTooltip) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg px-3 py-2 text-[#0A2947] text-xs shadow-lg">
-      <p className="text-[#0A2947]/70 font-medium mb-1">{label}</p>
-      <p className="font-bold text-[#718355]">
-        {formatRupiah(Number(payload[0].value) || 0)}
-      </p>
-    </div>
-  );
-}
+type DataPoint = TitikGrafik;
 
 // Filter toggle
 function PeriodeToggle({
@@ -198,56 +167,12 @@ export default function RingkasanLabaRugiPage() {
 
             {/* Chart */}
             <div className="w-full h-62.5 sm:h-87.5 md:h-100 mt-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
-                >
-                  <defs>
-                    <linearGradient
-                      id="gradienSage"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop offset="5%" stopColor="#718355" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#718355" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="#0A2947"
-                    strokeOpacity={0.15}
-                    vertical={false}
-                  />
-                  <XAxis
-                    dataKey="label"
-                    tick={{
-                      fill: "#0A2947",
-                      opacity: 0.6,
-                      fontSize: 10,
-                      fontWeight: 600,
-                    }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickMargin={12}
-                    interval={
-                      periode === "harian" ? 4 : periode === "bulanan" ? 4 : 0
-                    }
-                  />
-                  <YAxis hide />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line
-                    type="monotone"
-                    dataKey="nilai"
-                    stroke="#718355"
-                    strokeWidth={3}
-                    dot={false}
-                    activeDot={{ r: 5, fill: "#718355", strokeWidth: 0 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <GrafikLaporan
+                data={chartData}
+                interval={
+                  periode === "harian" ? 4 : periode === "bulanan" ? 4 : 0
+                }
+              />
             </div>
           </>
         )}
