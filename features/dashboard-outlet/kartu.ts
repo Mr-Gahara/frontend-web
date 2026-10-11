@@ -29,10 +29,19 @@ export function paramTransaksiLunas(hari: Date): Record<string, string> {
   };
 }
 
+const BULAN_PENDEK = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+/** "2026-10-06" menjadi "6 Okt"; teks lain dikembalikan apa adanya, dan kosong menjadi "-". */
+export function labelTanggalPendek(tanggal: string | null | undefined): string {
+  const cocok = /^\d{4}-(\d{2})-(\d{2})/.exec(tanggal ?? "");
+  const bulan = cocok ? BULAN_PENDEK[Number(cocok[1]) - 1] : undefined;
+  return cocok && bulan ? `${Number(cocok[2])} ${bulan}` : tanggal || "-";
+}
+
 /** Titik grafik pendapatan: omzet per baris laporan (DB5a). */
 export function titikOmzet(laporan: LaporanLabaRugiData[]): TitikGrafik[] {
   return laporan.map((baris) => ({
-    label: baris.tanggal || "-",
+    label: labelTanggalPendek(baris.tanggal),
     nilai: Number(baris.totalOmzet) || 0,
   }));
 }

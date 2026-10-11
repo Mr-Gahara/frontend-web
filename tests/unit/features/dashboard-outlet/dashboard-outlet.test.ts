@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { hariMundur, paramTransaksiLunas, titikOmzet } from "@/features/dashboard-outlet/kartu";
+import {
+  hariMundur,
+  labelTanggalPendek,
+  paramTransaksiLunas,
+  titikOmzet,
+} from "@/features/dashboard-outlet/kartu";
 import { gabungStatusStaf, izinBerlaku } from "@/features/dashboard-outlet/staf";
 import { bookingBerjalan, petakVenue } from "@/features/dashboard-outlet/venue";
 import type { MonitoringStaf } from "@/types/absensi";
@@ -140,11 +145,19 @@ describe("kartu dashboard", () => {
     });
   });
 
+  it("labelTanggalPendek memendekkan tanggal dan membiarkan teks lain", () => {
+    expect(labelTanggalPendek("2026-10-06")).toBe("6 Okt");
+    expect(labelTanggalPendek("2026-01-31T00:00:00.000Z")).toBe("31 Jan");
+    expect(labelTanggalPendek("08:00")).toBe("08:00");
+    expect(labelTanggalPendek("")).toBe("-");
+    expect(labelTanggalPendek(null)).toBe("-");
+  });
+
   it("titikOmzet memetakan tanggal dan omzet, dengan nilai bukan angka sebagai 0", () => {
     const baris = { tanggal: "2026-10-11", totalOmzet: 150000 } as LaporanLabaRugiData;
     const rusak = { tanggal: "", totalOmzet: Number.NaN } as LaporanLabaRugiData;
     expect(titikOmzet([baris, rusak])).toEqual([
-      { label: "2026-10-11", nilai: 150000 },
+      { label: "11 Okt", nilai: 150000 },
       { label: "-", nilai: 0 },
     ]);
   });

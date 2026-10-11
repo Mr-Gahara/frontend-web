@@ -56,6 +56,8 @@ export const IZIN = {
 
   pengguna: "read-pengguna",
   role: "read-role",
+  absensi: "read-absensi",
+  izinCuti: "read-izin-cuti",
 
   // Izin tulis halaman form: syarat gerbang rute di samping izin bacanya
   // (keputusan GR5a).

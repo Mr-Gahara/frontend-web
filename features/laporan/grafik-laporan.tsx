@@ -2,8 +2,8 @@
 
 import {
   CartesianGrid,
-  Line,
-  LineChart,
+  Area,
+  AreaChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -54,7 +54,7 @@ export function GrafikLaporan({
 }) {
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <LineChart
+      <AreaChart
         data={data}
         margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
       >
@@ -85,15 +85,16 @@ export function GrafikLaporan({
         />
         <YAxis hide />
         <Tooltip content={<TooltipGrafik />} />
-        <Line
+        <Area
           type="monotone"
           dataKey="nilai"
           stroke="#718355"
           strokeWidth={3}
+          fill="url(#gradienSage)"
           dot={false}
           activeDot={{ r: 5, fill: "#718355", strokeWidth: 0 }}
         />
-      </LineChart>
+      </AreaChart>
     </ResponsiveContainer>
   );
 }

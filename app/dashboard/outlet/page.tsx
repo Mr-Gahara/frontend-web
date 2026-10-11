@@ -1,9 +1,5 @@
-const DashboardOutletPage = () => {
-    return (
-        <div>
-            <h1>Dashboard Outlet</h1>
-        </div>
-    );
+import { HalamanDashboardOutlet } from "@/features/dashboard-outlet/halaman-dashboard-outlet";
+
+export default function DashboardOutletPage() {
+  return <HalamanDashboardOutlet />;
 }
- 
-export default DashboardOutletPage;

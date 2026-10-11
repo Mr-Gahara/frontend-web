@@ -58,3 +58,26 @@ export function petakVenue(
     })
     .sort((x, y) => x.nama.localeCompare(y.nama, "id", { numeric: true }));
 }
+export const BATAS_PETAK_BESAR = 6;
+export const BATAS_PETAK_TAMPIL = 10;
+
+const URUTAN_STATUS: Record<StatusAset, number> = { digunakan: 0, tersedia: 1, perbaikan: 2 };
+
+/**
+ * Susunan petak untuk ditampilkan: sampai BATAS_PETAK_BESAR petaknya besar,
+ * lebih dari itu ringkas. Di atas BATAS_PETAK_TAMPIL daftar dipotong, dengan
+ * aset yang dipakai lebih dulu agar tidak tersembunyi; urutan nama di dalam
+ * tiap status tetap.
+ */
+export function susunPetak(petak: PetakVenue[]): {
+  tampil: PetakVenue[];
+  total: number;
+  ringkas: boolean;
+} {
+  const total = petak.length;
+  if (total <= BATAS_PETAK_TAMPIL) {
+    return { tampil: petak, total, ringkas: total > BATAS_PETAK_BESAR };
+  }
+  const urut = [...petak].sort((x, y) => URUTAN_STATUS[x.status] - URUTAN_STATUS[y.status]);
+  return { tampil: urut.slice(0, BATAS_PETAK_TAMPIL), total, ringkas: true };
+}

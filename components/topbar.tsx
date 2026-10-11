@@ -33,7 +33,11 @@ export default function Topbar() {
 
       <div>
         <button
-          className="flex items-center justify-center p-2.5 bg-[#0A2947] hover:bg-[#0A2947]/80 text-white rounded-lg transition-colors cursor-pointer border-none shadow-sm"
+          type="button"
+          disabled
+          aria-label="Notifikasi belum tersedia"
+          title="Notifikasi belum tersedia"
+          className="flex items-center justify-center p-2.5 bg-[#0A2947] text-white rounded-lg border-none shadow-sm opacity-50 cursor-not-allowed"
         >
           <Bell size={20} />
         </button>
