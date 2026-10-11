@@ -22,6 +22,13 @@ export const labelModelRelasi = (m: ModelTeks): string => LABEL_MODEL[MODEL_DARI
 /** Satu pajak per produk (PO6a): backend menyimpan relasi lewat upsert per produk. */
 export const pajakTerpasang = (relasi: readonly RelasiPajakProduk[]): RelasiPajakProduk | null => relasi[0] ?? null;
 
+/**
+ * Relasi ke pajak nonaktif (keputusan RH4a). Backend mengirimnya dengan status
+ * false: pajak itu tidak dikenakan saat penjualan, tetapi relasinya tetap ada
+ * dan tertimpa bila pajak lain dipasang. Status yang tidak dikirim dianggap aktif.
+ */
+export const relasiNonaktif = (relasi: RelasiPajakProduk | null): boolean => relasi?.pajak.status === false;
+
 /** Pajak yang ditawarkan untuk dipasang (PO6a): per produk dan aktif, selain yang sudah terpasang. */
 export const pilihanPajakProduk = (daftar: readonly Pajak[], idTerpasang?: string): Pajak[] =>
   daftar.filter((p) => p.tipePajak && p.statusPajak && p.id !== idTerpasang);

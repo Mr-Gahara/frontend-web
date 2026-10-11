@@ -46,9 +46,10 @@ export interface ProdukPajakRequest {
 
 /**
  * Bentuk respons GET /produkpajak/:targetID setelah dinormalkan
- * (produkPajakService.getPajakByTarget, backend 465b438). Nama field pajak
- * berbeda dari GET /pajak, model berupa teks, dan statusPajak tidak dikirim
- * karena relasi ke pajak nonaktif sudah disaring backend.
+ * (produkPajakService.getPajakByTarget). Nama field pajak berbeda dari
+ * GET /pajak, dan model berupa teks. Sejak backend yoga ac33df2 relasi ke
+ * pajak nonaktif ikut dikirim dengan status false (kontrak/temuan.md butir
+ * 93); sebelumnya relasi itu disaring dan status tidak dikirim.
  */
 export interface RelasiPajakProduk {
   id: string;
@@ -60,6 +61,7 @@ export interface RelasiPajakProduk {
     tarif: number;
     tipe: boolean;
     prioritas: number;
+    status?: boolean;
     model: "Inclusive" | "Exclusive" | "Compound";
   };
 }

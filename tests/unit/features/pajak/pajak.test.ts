@@ -6,6 +6,7 @@ import {
   pajakTerpasang,
   pajakTransaksiTerdampak,
   pilihanPajakProduk,
+  relasiNonaktif,
 } from "@/features/pajak/tampilan";
 import type { Pajak, RelasiPajakProduk } from "@/types/pajak";
 
@@ -131,6 +132,14 @@ describe("tampilan pajak", () => {
   it("pajak terpasang adalah relasi pertama, atau null bila belum ada", () => {
     expect(pajakTerpasang([])).toBeNull();
     expect(pajakTerpasang([relasi("r1")])?.id).toBe("r1");
+  });
+
+  it("relasi nonaktif hanya bila status false; status yang tidak dikirim dianggap aktif (RH4a)", () => {
+    const aktif = relasi("r1");
+    expect(relasiNonaktif(null)).toBe(false);
+    expect(relasiNonaktif(aktif)).toBe(false);
+    expect(relasiNonaktif({ ...aktif, pajak: { ...aktif.pajak, status: true } })).toBe(false);
+    expect(relasiNonaktif({ ...aktif, pajak: { ...aktif.pajak, status: false } })).toBe(true);
   });
 
   it("pilihan pasang hanya pajak per produk yang aktif, selain yang terpasang (PO6a)", () => {

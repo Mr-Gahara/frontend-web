@@ -22,7 +22,7 @@ import { pesanError } from "@/lib/api/error";
 import type { Pajak } from "@/types/pajak";
 import { useLepasPajak, usePasangPajak, useRelasiPajakProduk } from "./hooks";
 import { PesanPajak } from "./pesan-pajak";
-import { labelModelRelasi, pajakTerpasang, pilihanPajakProduk } from "./tampilan";
+import { labelModelRelasi, pajakTerpasang, pilihanPajakProduk, relasiNonaktif } from "./tampilan";
 
 const kelasLabel = "text-sm font-bold text-[#0A2947]";
 const kelasPemicu = "border-[#0A2947]/20 bg-[#FFFAF3] text-[#0A2947]";
@@ -190,7 +190,17 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
                 </TableRow>
               ) : (
                 <TableRow className="border-b border-[#0A2947]/5 hover:bg-[#0A2947]/5 transition-colors">
-                  <TableCell className="font-bold text-[#0A2947]">{terpasang.pajak.nama}</TableCell>
+                  <TableCell className="font-bold text-[#0A2947]">
+                    {terpasang.pajak.nama}
+                    {relasiNonaktif(terpasang) && (
+                      <>
+                        <span className="ml-1 font-medium text-[#0A2947]/60">(nonaktif)</span>
+                        <p className="text-xs font-medium text-[#0A2947]/60">
+                          Pajak ini nonaktif dan tidak dikenakan saat penjualan.
+                        </p>
+                      </>
+                    )}
+                  </TableCell>
                   <TableCell className="font-semibold text-[#0A2947]">{terpasang.pajak.tarif}%</TableCell>
                   <TableCell className="font-medium text-[#0A2947]/80">{labelModelRelasi(terpasang.pajak.model)}</TableCell>
                   <TableCell className="text-right">

@@ -267,6 +267,89 @@ test.describe("E2E — Kelola pajak", () => {
     }
   });
 
+  test("pajak per produk: relasi ke pajak nonaktif tampil bertanda, dan ganti tetap lewat konfirmasi (RH4a)", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const auth = await bukaDenganAuth(page, URL_PAJAK);
+    const produk = await pastikanProdukUji(page, auth);
+    await lepasSemuaRelasi(page, auth, produk.id);
+    const akhiran = unik();
+    const namaA = "E2E PJK N " + akhiran;
+    const namaB = "E2E PJK M " + akhiran;
+    const id: { a?: string; b?: string } = {};
+    const opsi = (nama: string, tarif: number) => page.getByRole("option", { name: `${nama} (${tarif}%)`, exact: true });
+    const baris = page.getByRole("row").filter({ has: page.getByRole("button", { name: "Lepas" }) });
+    const bukaProdukUji = async () => {
+      await page.getByRole("tab", { name: "Pajak per Produk" }).click();
+      await pemicu(page, "Pilih produk").click();
+      const tRelasi = page.waitForResponse(cocok("GET", POLA_RELASI));
+      await page.getByRole("option", { name: NAMA_PRODUK_UJI, exact: true }).click();
+      return tRelasi;
+    };
+    try {
+      await page.reload();
+      await buatLewatUi(page, namaA, "5", (x) => {
+        id.a = x;
+      });
+      await buatLewatUi(page, namaB, "7", (x) => {
+        id.b = x;
+      });
+
+      expect((await bukaProdukUji()).status()).toBe(200);
+      await pemicu(page, "Pilih pajak").click();
+      await opsi(namaA, 5).click();
+      const tPasang = page.waitForResponse(cocok("POST", POLA_PASANG));
+      await page.getByRole("button", { name: "Assign" }).click();
+      expect((await tPasang).status()).toBe(201);
+      await expect(baris).toContainText(namaA);
+      await expect(baris).not.toContainText("(nonaktif)");
+
+      // Muat ulang mengembalikan halaman ke tab daftar; pajak A dinonaktifkan lewat dialog Edit.
+      await page.reload();
+      await cari(page, namaA);
+      await page.getByRole("button", { name: `Aksi ${namaA}` }).click();
+      await page.getByRole("menuitem", { name: "Edit" }).click();
+      const dialog = page.getByRole("dialog", { name: "Edit Pajak" });
+      await pilihOpsi(dialog, "Status", "Non-Aktif");
+      const tKirim = page.waitForRequest((r) => r.method() === "PUT" && POLA_DETAIL.test(r.url()));
+      const tJawab = page.waitForResponse(cocok("PUT", POLA_DETAIL));
+      await dialog.getByRole("button", { name: "Simpan" }).click();
+      expect((await tKirim).postDataJSON()).toEqual({ statusPajak: false });
+      expect((await tJawab).status()).toBe(200);
+      await expect(dialog).toBeHidden();
+
+      const jawabRelasi = await bukaProdukUji();
+      const isiRelasi = (await jawabRelasi.json()) as { data: { pajak: { status?: boolean } }[] };
+      expect(isiRelasi.data[0]?.pajak.status, "backend mengirim relasi ke pajak nonaktif dengan status false").toBe(false);
+      await expect(baris).toContainText(namaA);
+      await expect(baris).toContainText("(nonaktif)");
+      await expect(baris).toContainText("tidak dikenakan saat penjualan");
+
+      await pemicu(page, "Pilih pajak").click();
+      await expect(opsi(namaA, 5)).toHaveCount(0);
+      await opsi(namaB, 7).click();
+      await page.getByRole("button", { name: "Assign" }).click();
+      const konfirmasi = page.getByRole("alertdialog");
+      await expect(konfirmasi).toContainText(namaA);
+      await expect(konfirmasi).toContainText(namaB);
+      const tGanti = page.waitForResponse(cocok("POST", POLA_PASANG));
+      await konfirmasi.getByRole("button", { name: "Ganti" }).click();
+      expect((await tGanti).status()).toBe(201);
+      await expect(konfirmasi).toBeHidden();
+      await expect(baris).toContainText(namaB);
+      await expect(baris).not.toContainText("(nonaktif)");
+      expect((await relasiProduk(page, auth, produk.id)).map((r) => r.pajak.id)).toEqual([id.b]);
+
+      const tLepas = page.waitForResponse(cocok("DELETE", POLA_RELASI));
+      await page.getByRole("button", { name: "Lepas" }).click();
+      expect((await tLepas).status()).toBe(200);
+      await expect(page.getByText("Belum ada pajak untuk produk ini.")).toBeVisible();
+    } finally {
+      for (const x of [id.a, id.b]) await hapusPajakUji(page, auth, x);
+    }
+  });
+
   test("daftar pajak yang gagal dimuat menampilkan pesan dan dapat dicoba lagi", async ({ page }) => {
     await page.route(POLA_DAFTAR, (route) =>
       route.request().method() === "GET" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
