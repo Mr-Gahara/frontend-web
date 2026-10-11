@@ -48,6 +48,15 @@ const rupiah = (nilai: number) => formatRupiah(nilai).replace(/\u00a0/g, " ");
 const barisTabel = (page: Page) => page.locator("tbody tr");
 const pemilih = (page: Page, nama: string) => page.getByRole("combobox", { name: nama, exact: true });
 
+/** Membuka dialog rincian baris ke-i lewat menu titik tiga, dan mengembalikan dialognya. */
+async function bukaRincian(page: Page, i: number) {
+  await barisTabel(page).nth(i).getByRole("button", { name: "Buka menu" }).click();
+  await page.getByRole("menuitem", { name: "Lihat detail" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  return dialog;
+}
+
 /** Respons mutasi yang query-nya memenuhi syarat. */
 const responsMutasi = (syarat: (q: URLSearchParams) => boolean) => (r: Response) =>
   r.request().method() === "GET" && POLA_MUTASI.test(r.url()) && syarat(new URL(r.url()).searchParams);
@@ -84,7 +93,9 @@ test.describe("Mutasi arus kas", () => {
     const namaAkun = akun.find((a) => a.id === pertama.akunKasID)?.namaAkun ?? "Akun tidak dikenal";
     await expect(barisTabel(page).first()).toContainText(namaAkun);
     await expect(barisTabel(page).first()).toContainText(pertama.keterangan);
-    await expect(barisTabel(page).first()).toContainText(rupiah(pertama.saldoSesudah));
+    const rincian = await bukaRincian(page, 0);
+    await expect(rincian).toContainText(pertama.keterangan);
+    await expect(rincian).toContainText(rupiah(pertama.saldoSesudah));
   });
 
   test("pindah halaman meminta page berikutnya dan menampilkan barisnya", async ({ page }) => {
@@ -167,7 +178,7 @@ test.describe("Mutasi arus kas", () => {
     await expect(ringkasan).toContainText(rupiah(angka.saldoAkhirPeriode));
   });
 
-  test("baris pembayaran menampilkan pencatat dan tautan ke detail penjualannya (NZ2a)", async ({ page }) => {
+  test("rincian baris pembayaran menampilkan pencatat dan tautan ke detail penjualannya (NZ2a)", async ({ page }) => {
     const { mutasi } = await bukaMutasi(page);
     const data = mutasi.data as unknown as BarisNz[];
     const i = data.findIndex((m) => m.referensi?.penjualanID && m.pengguna?.nama);
@@ -175,9 +186,9 @@ test.describe("Mutasi arus kas", () => {
     const m = data[i];
     const idPenjualan = m.referensi?.penjualanID ?? "";
     await expect(barisTabel(page)).toHaveCount(data.length, { timeout: 15_000 });
-    const baris = barisTabel(page).nth(i);
-    await expect(baris).toContainText(m.pengguna?.nama ?? "");
-    const tautan = baris.getByRole("link");
+    const rincian = await bukaRincian(page, i);
+    await expect(rincian).toContainText(m.pengguna?.nama ?? "");
+    const tautan = rincian.getByRole("link");
     await expect(tautan).toHaveText(m.referensi?.noReferensi || "Lihat penjualan");
     await expect(tautan).toHaveAttribute("href", `/dashboard/outlet/penjualan/${idPenjualan}`);
     await tautan.click();

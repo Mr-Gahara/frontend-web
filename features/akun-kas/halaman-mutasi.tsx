@@ -1,11 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
+import { MoreHorizontal } from "lucide-react";
 import { PilihTanggal } from "@/components/pilih-tanggal";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -16,6 +22,7 @@ import {
 import { pesanError } from "@/lib/api/error";
 import { formatRupiah, formatTanggal, formatTanggalPendek } from "@/lib/format";
 import type { ArahMutasi, JenisMutasi, MutasiKas } from "@/types/akunKas";
+import { DialogRincianMutasi } from "./dialog-rincian-mutasi";
 import { useDaftarAkunKas, useDaftarMutasi, useRingkasanMutasi } from "./hooks";
 import {
   LABEL_ARAH,
@@ -26,21 +33,19 @@ import {
   gantiArah,
   namaAkunBaris,
   namaAkunMutasi,
-  namaPencatat,
   pilihanJenis,
   tanggalTransaksiBerbeda,
-  tautanPenjualanMutasi,
   teksJumlahMutasi,
   type FilterMutasi,
 } from "./mutasi";
 
 const SEMUA = "semua";
 const KELAS_LABEL = "text-xs font-bold text-navy/70";
-const KELAS_PEMICU = "w-52 bg-gading border-navy/20 text-navy";
+const KELAS_PEMICU = "w-52 bg-permukaan border-navy/20 text-navy";
 
 function KartuRingkasan({ judul, nilai }: { judul: string; nilai: number }) {
   return (
-    <div className="rounded-xl border border-navy/10 bg-gading p-4">
+    <div className="rounded-2xl border border-navy/10 bg-permukaan p-4">
       <p className="text-xs font-bold text-navy/60">{judul}</p>
       <p className="mt-1 text-lg font-black tracking-tight text-navy">{formatRupiah(nilai)}</p>
     </div>
@@ -81,6 +86,7 @@ export function HalamanMutasi() {
   const [ukuran, setUkuran] = useState<number>(UKURAN_MUTASI_BAWAAN);
   const akunKas = useDaftarAkunKas();
   const daftar = useDaftarMutasi(filter, halaman, ukuran);
+  const [dirinci, setDirinci] = useState<MutasiKas | null>(null);
 
   const ubahFilter = (baru: FilterMutasi) => {
     setFilter(baru);
@@ -108,25 +114,18 @@ export function HalamanMutasi() {
         header: "Akun Kas",
         cell: ({ row }) => namaAkunBaris(row.original, akunKas.data),
       },
-      { id: "jenis", header: "Jenis", cell: ({ row }) => LABEL_JENIS[row.original.jenis] },
       {
         accessorKey: "keterangan",
         header: "Keterangan",
-        cell: ({ row }) => {
-          const tautan = tautanPenjualanMutasi(row.original);
-          return (
-            <div>
-              <p>{row.original.keterangan || "-"}</p>
-              {tautan && (
-                <Link href={tautan.url} className="text-xs font-bold text-navy underline underline-offset-2">
-                  {tautan.teks}
-                </Link>
-              )}
-            </div>
-          );
-        },
+        cell: ({ row }) => (
+          <div className="max-w-[16rem] lg:max-w-md xl:max-w-xl">
+            <p className="font-bold text-navy">{LABEL_JENIS[row.original.jenis]}</p>
+            <p className="truncate text-xs text-navy/70" title={row.original.keterangan || undefined}>
+              {row.original.keterangan || "-"}
+            </p>
+          </div>
+        ),
       },
-      { id: "pencatat", header: "Pencatat", cell: ({ row }) => namaPencatat(row.original) },
       {
         id: "jumlah",
         header: () => <div className="text-right">Jumlah</div>,
@@ -141,11 +140,30 @@ export function HalamanMutasi() {
         ),
       },
       {
-        id: "saldoSesudah",
-        header: () => <div className="text-right">Saldo Sesudah</div>,
+        id: "aksi",
+        header: () => <div className="text-right">Aksi</div>,
         cell: ({ row }) => (
-          <div className="text-right font-mono text-navy">
-            {formatRupiah(row.original.saldoSesudah)}
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 cursor-pointer text-navy/70 hover:text-navy hover:bg-navy/5"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Buka menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-gading border-navy/10">
+                <DropdownMenuItem
+                  className="cursor-pointer font-bold text-navy/80"
+                  onClick={() => setDirinci(row.original)}
+                >
+                  Lihat detail
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         ),
       },
@@ -155,7 +173,12 @@ export function HalamanMutasi() {
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
-      <div className="bg-krem border border-navy/10 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col gap-6 w-full overflow-hidden">
+      <DialogRincianMutasi
+        mutasi={dirinci}
+        namaAkun={dirinci ? namaAkunBaris(dirinci, akunKas.data) : ""}
+        onTutup={() => setDirinci(null)}
+      />
+      <div className="flex flex-col gap-6 w-full">
         <div>
           <h2 className="text-base sm:text-lg font-bold tracking-wide text-navy">
             Laporan Mutasi Arus Kas
