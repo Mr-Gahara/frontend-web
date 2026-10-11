@@ -1,4 +1,4 @@
-import { expect, Page, request } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 
 /*
  * Helper spec transfer stok: login, token API yang mengikuti pin-refresh,
@@ -74,7 +74,11 @@ async function buatPengajuanUji(page: Page, auth: Auth): Promise<string> {
   const id = idDari(buat.data);
   const ajukan = await api(page, auth, "PATCH", `/pengajuanstok/${id}/submit`, {});
   expect(ajukan.status, `submit pengajuan uji: ${ajukan.pesan}`).toBeLessThan(300);
-  await setujuiSebagaiPenyetuju(page, auth, id);
+  // Owner boleh menyetujui pengajuannya sendiri sejak backend yoga 2e25bb6
+  // (P20, keputusan RH5a), dan persetujuannya ditandai disetujuiSendiri.
+  const setuju = await api<{ disetujuiSendiri?: boolean }>(page, auth, "PATCH", `/pengajuanstok/${id}/approve`, {});
+  expect(setuju.status, `approve pengajuan uji oleh pengajunya sendiri: ${setuju.pesan}`).toBe(200);
+  expect(setuju.data?.disetujuiSendiri, "persetujuan ditandai disetujuiSendiri").toBe(true);
   return id;
 }
 
@@ -97,64 +101,6 @@ const idDari = (x: Berid | null | undefined) => String(x?.id ?? x?._id ?? "");
 
 /** Pengajuan uji milik spec transfer (keputusan R8), dikenali lewat catatannya. */
 const CATATAN_PENGAJUAN_UJI = "E2E pengajuan uji transfer";
-
-/**
- * Pengguna penyetuju uji (keputusan R13). Backend melarang pengaju menyetujui
- * pengajuannya sendiri tanpa pengecualian, sehingga pengajuan uji yang dibuat
- * Ridho disetujui pengguna ini. Dibuat sekali dengan peran pertama selain
- * Owner yang memegang approve-pengajuan-stok.
- */
-export const NAMA_PENYETUJU = "E2E Penyetuju";
-const PIN_PENYETUJU = "135790";
-
-async function pastikanPenyetuju(page: Page, auth: Auth) {
-  const pengguna = await api<(Berid & { nama?: string })[]>(page, auth, "GET", "/pengguna");
-  expect(pengguna.status, `GET /pengguna: ${pengguna.pesan}`).toBe(200);
-  if ((pengguna.data ?? []).some((p) => p.nama === NAMA_PENYETUJU)) return;
-  const peran = await api<(Berid & { namaRole?: string; permissions?: unknown[] })[]>(page, auth, "GET", "/role");
-  expect(peran.status, `GET /role: ${peran.pesan}`).toBe(200);
-  const namaIzin = (x: unknown) => (typeof x === "string" ? x : (x as { nama?: string } | null)?.nama);
-  const cocok = (peran.data ?? []).find(
-    (r) => !/owner/i.test(r.namaRole ?? "") && (r.permissions ?? []).some((x) => namaIzin(x) === "approve-pengajuan-stok"),
-  );
-  expect(cocok, "perlu peran selain Owner yang memegang approve-pengajuan-stok untuk pengguna penyetuju uji").toBeTruthy();
-  const buat = await api(page, auth, "POST", "/pengguna/register-pengguna", {
-    nama: NAMA_PENYETUJU,
-    pin: PIN_PENYETUJU,
-    roleID: idDari(cocok),
-    aksesType: ["web"],
-  });
-  expect(buat.status, `buat pengguna penyetuju uji: ${buat.pesan}`).toBeLessThan(300);
-}
-
-/**
- * Menyetujui pengajuan sebagai pengguna penyetuju uji. Login akun dan login
- * PIN berjalan di konteks permintaan terpisah, karena keduanya memasang
- * cookie refreshToken yang akan menimpa sesi Ridho di browser test.
- */
-async function setujuiSebagaiPenyetuju(page: Page, auth: Auth, pengajuanId: string) {
-  await pastikanPenyetuju(page, auth);
-  const ctx = await request.newContext({ baseURL: BASIS });
-  try {
-    const akun = await ctx.post("/api/akun/auth/login", { data: { email: "toko@gmail.com", password: "Toko1234" } });
-    const isiAkun = await akun.json().catch(() => ({}));
-    expect(akun.status(), `login akun untuk penyetuju: ${isiAkun.message ?? ""}`).toBe(200);
-    const pin = await ctx.post("/api/pengguna/pin-login", {
-      data: { nama: NAMA_PENYETUJU, pin: PIN_PENYETUJU, loginType: "web" },
-      headers: { Authorization: "Bearer " + isiAkun.accessToken },
-    });
-    const isiPin = await pin.json().catch(() => ({}));
-    expect(pin.status(), `login PIN penyetuju: ${isiPin.message ?? ""}`).toBe(200);
-    const token = cariToken(isiPin);
-    expect(token, "respons login PIN penyetuju membawa access token").toBeTruthy();
-    const setuju = await ctx.patch(`/api/pengajuanstok/${pengajuanId}/approve`, {
-      headers: { Authorization: "Bearer " + token },
-    });
-    expect(setuju.status(), `approve pengajuan uji: ${(await setuju.text()).slice(0, 200)}`).toBe(200);
-  } finally {
-    await ctx.dispose();
-  }
-}
 
 export async function login(page: Page) {
   await page.goto(BASIS + "/login");
