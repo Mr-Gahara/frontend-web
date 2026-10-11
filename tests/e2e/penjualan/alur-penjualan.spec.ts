@@ -32,9 +32,9 @@ import {
  * dihapus, dan penjualan tersimpan yang dibuat skenario lain dibatalkan
  * pembayarannya lalu di-void (backend 465b438).
  *
- * Jurnal stok belum dapat diperiksa lewat API: daftar jurnal di-cache 300
- * detik dan tidak dibersihkan saat inventoryService menulis jurnal
- * (penjualan maupun opname). Asersinya ditulis lengkap di dua test.fixme.
+ * Jurnal stok diperiksa lewat API: sejak backend yoga b63811d cache daftar
+ * jurnal dibuang saat inventoryService menulis jurnal (penjualan maupun
+ * opname), sehingga jurnal baru langsung terbaca (kontrak/temuan.md butir 46).
  *
  * Dialog yang harus bertahan saat operasi gagal (keputusan Fase 0) diuji di
  * test tersendiri.
@@ -140,8 +140,8 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     }
   });
 
-  test.fixme(
-    "jurnal Keluar penjualan langsung terbaca setelah finalisasi (cache daftar jurnal tidak dibersihkan saat inventory menulis jurnal)",
+  test(
+    "jurnal Keluar penjualan langsung terbaca setelah finalisasi",
     async ({ page }) => {
       const auth = await bukaDenganAuth(page, DAFTAR);
       const JUMLAH = 3;
@@ -160,8 +160,8 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     },
   );
 
-  test.fixme(
-    "finalisasi yang ditolak tidak menambah jurnal, terbaca langsung dari daftar jurnal (bermakna hanya bila fixme jurnal di atas lolos)",
+  test(
+    "finalisasi yang ditolak tidak menambah jurnal, terbaca langsung dari daftar jurnal",
     async ({ page }) => {
       const auth = await bukaDenganAuth(page, DAFTAR);
       const JUMLAH = 3;
