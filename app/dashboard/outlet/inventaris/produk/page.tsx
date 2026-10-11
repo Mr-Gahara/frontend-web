@@ -231,7 +231,7 @@ export default function ProdukPage() {
       </div>
 
       {/* Tabel Wrapper (Card Cream Gelap) */}
-      <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-4 w-full">
+      <div className="flex flex-col gap-4 w-full">
         <DataTable
           columns={columns}
           data={produkList}

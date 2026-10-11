@@ -375,7 +375,7 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
   return (
     <section
       aria-label="Riwayat transfer"
-      className="bg-krem border border-navy/10 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col gap-6 w-full overflow-hidden"
+      className="flex flex-col gap-6 w-full"
     >
       <div>
         <h2 className="text-base sm:text-lg font-bold tracking-wide text-navy">

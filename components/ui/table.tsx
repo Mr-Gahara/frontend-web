@@ -8,11 +8,11 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className="relative w-full overflow-x-auto pb-1"
     >
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom border-separate border-spacing-x-0 border-spacing-y-1.5 text-sm", className)}
+        className={cn("w-full caption-bottom border-separate border-spacing-x-0 border-spacing-y-2 text-sm", className)}
         {...props}
       />
     </div>
@@ -57,7 +57,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "[&:hover>td]:border-navy/30 [&[data-state=selected]>td]:bg-navy/5",
+        "[&:has(>td)]:[filter:drop-shadow(0_1px_1px_color-mix(in_srgb,var(--navy)_14%,transparent))] sm:[&:hover>td]:bg-krem [&[data-state=selected]>td]:bg-krem",
         className
       )}
       {...props}
@@ -83,7 +83,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        "px-4 py-3 align-middle whitespace-nowrap text-navy font-medium bg-[var(--warna-baris,var(--krem))] border-y border-navy/10 first:border-l first:rounded-l-xl last:border-r last:rounded-r-xl transition-colors [&:has([role=checkbox])]:pr-0",
+        "px-4 py-3 align-middle whitespace-nowrap text-navy font-medium bg-[var(--warna-baris,var(--permukaan))] border-y border-navy/10 first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl transition-colors [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}

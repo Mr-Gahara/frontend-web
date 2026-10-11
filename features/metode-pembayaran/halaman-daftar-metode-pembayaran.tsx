@@ -217,7 +217,7 @@ export function HalamanDaftarMetodePembayaran() {
         )}
       </div>
 
-      <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         {daftar.isError ? (
           <PesanMetode
             judul="Gagal memuat metode pembayaran"

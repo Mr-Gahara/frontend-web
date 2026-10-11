@@ -220,7 +220,7 @@ export function HalamanPelanggan() {
         </div>
 
         <div
-          className={`rounded-xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-4 ${
+          className={`flex flex-col gap-4 ${
             aksi.buat ? "lg:col-span-8" : "lg:col-span-12"
           }`}
         >

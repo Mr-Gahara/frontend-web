@@ -139,7 +139,7 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
             />
             <AngkaRingkas label="Belum absen" labelPendek="Belum" jumlah={jumlah("belum_absen")} titik="bg-navy/30" />
           </div>
-          <div className="sm:max-h-96 sm:overflow-y-auto [--warna-baris:#FFFAF3]">
+          <div className="sm:max-h-96 sm:overflow-y-auto">
             <Table>
               <TableHeader className="hidden sm:table-header-group sticky top-0 bg-krem">
                 <TableRow>

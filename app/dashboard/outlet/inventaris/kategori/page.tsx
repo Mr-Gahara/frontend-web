@@ -282,7 +282,7 @@ export default function KategoriPage() {
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm">
+      <div className="w-full">
         <DataTable
           columns={columns}
           data={data}

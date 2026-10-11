@@ -487,7 +487,7 @@ export default function HalamanDaftarPenjualan({
       )}
 
       {/* Tabel */}
-      <div className="w-full overflow-x-auto rounded-2xl border border-navy/10 bg-krem p-4 sm:p-6 shadow-sm">
+      <div className="w-full">
         {penghalang ? (
           penghalang
         ) : daftar.isError ? (

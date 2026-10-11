@@ -380,7 +380,7 @@ export default function HalamanPengguna({
 
         {/* TABEL DATA */}
         <div className="col-span-1 md:col-span-12 xl:col-span-9 flex flex-col h-full min-h-112.5">
-          <div className="rounded-xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-4 grow h-full">
+          <div className="flex flex-col gap-4 grow h-full">
             <h2 className="text-lg font-bold text-navy mb-1">
               Daftar Pengguna Sistem
             </h2>

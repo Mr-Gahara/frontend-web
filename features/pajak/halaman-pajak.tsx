@@ -246,7 +246,7 @@ function IsiHalamanPajak() {
         </TabsList>
 
         <TabsContent value="pajak">
-          <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
             {daftar.isError ? (
               <PesanPajak
                 judul="Gagal memuat pajak"

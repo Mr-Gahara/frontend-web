@@ -38,7 +38,7 @@ import { cn } from "@/lib/utils";
  * per sel milik TableCell, yang hanya berlaku di lebar meja.
  */
 const KELAS_BARIS_HP =
-  "max-sm:relative max-sm:mb-2 max-sm:flex max-sm:flex-col max-sm:gap-1.5 max-sm:rounded-xl max-sm:border max-sm:border-navy/10 max-sm:bg-[var(--warna-baris,var(--krem))] max-sm:p-3";
+  "max-sm:relative max-sm:mb-2 max-sm:flex max-sm:flex-col max-sm:gap-1.5 max-sm:rounded-2xl max-sm:border max-sm:border-navy/10 max-sm:bg-[var(--warna-baris,var(--permukaan))] max-sm:p-3";
 const KELAS_SEL_HP =
   "max-sm:block max-sm:border-0 max-sm:bg-transparent max-sm:p-0 max-sm:whitespace-normal max-sm:first:border-l-0 max-sm:first:rounded-none max-sm:first:pr-10 max-sm:first:text-base max-sm:first:font-bold max-sm:last:border-r-0 max-sm:last:rounded-none";
 const KELAS_AKSI_HP = "max-sm:absolute max-sm:right-2 max-sm:top-2";
@@ -142,7 +142,7 @@ export function DataTable<TData, TValue>({
             suppressHydrationWarning
             value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
             onChange={(e) => table.getColumn(searchKey)?.setFilterValue(e.target.value)}
-            className="max-w-sm text-sm bg-gading text-navy border-navy/15 focus-visible:ring-navy/50 h-11 rounded-xl px-4 font-medium"
+            className="max-w-sm text-sm bg-permukaan text-navy border-navy/15 focus-visible:ring-navy/50 h-11 rounded-xl px-4 font-medium"
           />
         </div>
       )}

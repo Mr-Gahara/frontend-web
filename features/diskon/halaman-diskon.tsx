@@ -288,7 +288,7 @@ export function HalamanDiskon() {
         )}
       </div>
 
-      <div className="rounded-xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-4 mt-2">
+      <div className="flex flex-col gap-4 mt-2">
         {daftar.isError ? (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-8 text-center">
             <p className="text-sm font-medium text-red-600">
