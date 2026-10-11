@@ -208,8 +208,8 @@ sebelum diterapkan (`cara-kerja.md`, Pelajaran dari fase UI/UX).
 - Dokumentasi kesembilan commit ditulis sekaligus di commit penutup, atas
   keputusan pemilik proyek menundanya sampai pekerjaan tabel hari itu
   selesai.
-- Dua temuan backend dicatat dan belum diserahkan (`kontrak/temuan.md`
-  butir 146 dan 147).
+- Dua temuan backend dilaporkan pada hari yang sama, setelah commit
+  dokumentasi `5706d4c` (`kontrak/temuan.md` butir 146 dan 147).
 
 ## Catatan dari penyesuaian backend `ridho` `2dd57aa`
 
@@ -1351,8 +1351,6 @@ Yang masih berlaku:
 - Suite e2e penuh belum dijalankan ulang sejak `93490bb`; harapannya tetap
   455 lolos dan 14 skipped, karena perubahan spec sesudahnya tidak
   menambah atau mengurangi skenario.
-- Laporan untuk tim backend atas butir 146 dan 147 `kontrak/temuan.md`
-  belum diserahkan.
 
 ### Utang kecil dari penyesuaian backend `ridho` `2dd57aa`
 

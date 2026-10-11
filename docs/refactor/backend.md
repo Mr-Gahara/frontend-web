@@ -475,8 +475,9 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   44, 46, 76, 93, dan 142 (`kontrak/temuan.md` butir 143 sampai 145).
   Versi ringkas butir 143 dan 145 juga dikirim ke Yoga, begitu pula
   usulan VOID beralasan untuk beban operasional
-- Catatan 11 Oktober 2026 dari fase UI/UX, belum diserahkan: `GET
-  /izincuti` tanpa filter tanggal, dan `startDate` bertanggal saja di
+- Laporan 11 Oktober 2026 dari fase UI/UX, 2 temuan, disusun dan
+  diserahkan 11 Oktober 2026 setelah `5706d4c`: `GET /izincuti` tanpa
+  filter tanggal, dan `startDate` bertanggal saja di
   `GET /penjualan` yang dibaca sebagai tengah malam UTC
   (`kontrak/temuan.md` butir 146 dan 147)
 
