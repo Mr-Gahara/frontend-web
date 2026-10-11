@@ -6,7 +6,7 @@ Aturan payload setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. Fiel
 
 ## 4. Payload operasi tulis
 
-Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan, kecuali `DELETE /akun/admin/users/:id`, yang membawa password admin. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi pelanggan dan diskon dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`, `1e05df6`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`). Pada hari yang sama, login akun, login pengguna, dan ubah pengguna dikoreksi terhadap backend yang sama (`091be4e`, `1c13ee6`). Pada 3 Oktober 2026, operasi akun admin ditambahkan terhadap backend yang sama (`4e2a254`, `10c7efb`, `c824f18`). Pada 4 Oktober 2026, buat dan batal jurnal transfer ditambahkan terhadap backend yang sama (`e53c016`). Pada 6 Oktober 2026, ubah role dikoreksi terhadap backend `yoga` `fc29433` (`597a163`). Pada 7 Oktober 2026, buat dan ubah metode pembayaran, buat diskon, buat akun kas, serta buat dan ubah jurnal transfer dikoreksi, dan ubah sesi booking ditambahkan, terhadap cabang uji lokal `uji-yoga-nizar` `54f787b` (`3b4f35b`, `a80d2fa`, `8072214`, `729c16a`). Pada 8 Oktober 2026, buat dan ubah pelanggan dikoreksi terhadap backend `nizar` `8dc6211` (`1bb26c0`, `5b92d14`). Pada hari yang sama, ubah pajak serta buat dan ubah produk dikoreksi terhadap `yoga` `55328f1` (`50e6485`, `f64b518`).
+Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukkan fungsi validator terakhir di rantai validasi, atau skema model bila tidak ada validator. Validator yang dipanggil dari service tidak tertangkap analisis route; operasi stock opname dan transfer stok sudah dikoreksi manual (21 September 2026, `README.md` bagian 1). Tiga operasi inventory divalidasi di route sejak backend `fc159bd` dan juga dikoreksi manual pada tanggal yang sama. Field yang diisi server sudah dikecualikan dari "Wajib dari klien". DELETE tidak membawa body dan tidak dicantumkan, kecuali `DELETE /akun/admin/users/:id`, yang membawa password admin. Pada 30 September 2026, operasi buat akun kas, penjualan, pembayaran, sesi booking, tipe aset, serta terima dan batal transfer stok dikoreksi terhadap backend `465b438`; operasi pelanggan dan diskon dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7` (`d9365d3`, `1e05df6`); buat metode pembayaran dikoreksi bersama `temuan.md` butir 84, ubah metode pembayaran pada 1 Oktober 2026, dan operasi pajak serta produk pajak pada hari yang sama (`e0aaeca`). Pada 2 Oktober 2026, buat dan ubah produk, ubah penjualan, dan ubah pembayaran dikoreksi terhadap backend `yoga` `50eede7`, dan ubah tenant ditambahkan terhadap backend yang sama (`fcf2dd2`). Pada hari yang sama, login akun, login pengguna, dan ubah pengguna dikoreksi terhadap backend yang sama (`091be4e`, `1c13ee6`). Pada 3 Oktober 2026, operasi akun admin ditambahkan terhadap backend yang sama (`4e2a254`, `10c7efb`, `c824f18`). Pada 4 Oktober 2026, buat dan batal jurnal transfer ditambahkan terhadap backend yang sama (`e53c016`). Pada 6 Oktober 2026, ubah role dikoreksi terhadap backend `yoga` `fc29433` (`597a163`). Pada 7 Oktober 2026, buat dan ubah metode pembayaran, buat diskon, buat akun kas, serta buat dan ubah jurnal transfer dikoreksi, dan ubah sesi booking ditambahkan, terhadap cabang uji lokal `uji-yoga-nizar` `54f787b` (`3b4f35b`, `a80d2fa`, `8072214`, `729c16a`). Pada 8 Oktober 2026, buat dan ubah pelanggan dikoreksi terhadap backend `nizar` `8dc6211` (`1bb26c0`, `5b92d14`). Pada hari yang sama, ubah pajak serta buat dan ubah produk dikoreksi terhadap `yoga` `55328f1` (`50e6485`, `f64b518`). Pada 11 Oktober 2026, buat pembayaran, buat produk pajak, buat dan ubah pengajuan stok, setujui pengajuan stok, buat bahan baku, ubah kategori, dan buat transfer stok dikoreksi terhadap backend `ridho` `2dd57aa` (`26093b0`, `a8aec53`, `ed4bfd3`).
 
 #### `PATCH /inventory/:id/minimum-stok`
 
@@ -23,6 +23,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorPengajuan`, `jenisPengajuan`, `dariLocationID`, `keLocationID`, `disetujuiOleh`, `ditolakOleh`, `transferStokID`, `items`, `status`, `catatan`, `catatanPenolakan`, `tanggalKebutuhan`, `tanggalApprove`, `tanggalReject`
 - Diisi server: `dimintaOleh`
+- Sejak `yoga` `816c2a6` dan `2e25bb6` (dikoreksi 11 Oktober 2026): respons `data` berisi dokumen yang sudah disetujui, dan Owner, dikenali dari level role, boleh menyetujui pengajuannya sendiri, ditandai `disetujuiSendiri: true`; peran lain ditolak 403 (butir 26 dan 76 tertutup, terbukti lewat e2e `a8aec53`)
 
 #### `PATCH /pengajuanstok/:id/reject`
 
@@ -208,6 +209,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Nilai sah: `VALID_UNITS`: kg, gram, liter, ml, pcs, pak, unit
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
+- Sejak `yoga` `968749a` (dari kode `2dd57aa`): `locationID` diperiksa format dan tenant-nya sebelum master disimpan (400); tanpa `locationID` dipakai Outlet tenant, dan gudang tidak pernah dipilih otomatis; tenant tanpa outlet ditolak 400 bila stok awal di atas 0 (butir 38 tertutup). Entri inventory dibuat setiap kali lokasi ada, berapa pun stok awalnya, dan entri itu menghalangi `DELETE /bahanbaku/:id` (409, `temuan.md` butir 143)
 
 #### `POST /diskon`
 
@@ -338,6 +340,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan service: penjualan VOID, penjualan yang sudah lunas, dan `jumlahBayar` di atas `sisaTagihan` ditolak 400 (belum diperiksa ulang terhadap backend `465b438`); `sisaTagihan` dikurangi secara atomik sebelum dokumen dibuat. Tanpa idempotensi (`temuan.md` butir 44). Galat validator dibalas mentah `{ errors }` dari route (butir 42)
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
+- Header: `x-idempotency-key` (opsional, paling panjang 100 karakter; lebih dari itu 400) sejak `nizar` `3c9c19f`. Kunci disimpan di dokumen pembayaran, unik per toko; kiriman ulang berkunci sama dijawab 201 dengan pembayaran pertama tanpa menambah saldo lagi (dari kode `2dd57aa`, `temuan.md` butir 44). Web mengirim satu kunci per pengisian form sejak `26093b0` (keputusan RH1a), terbukti lewat e2e: percobaan ulang setelah gagal memakai kunci yang sama
 
 #### `POST /pengajuanstok`
 
@@ -347,6 +350,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Field lain yang dikenali: `nomorPengajuan`, `jenisPengajuan`, `dariLocationID`, `keLocationID`, `disetujuiOleh`, `ditolakOleh`, `transferStokID`, `items`, `status`, `catatan`, `catatanPenolakan`, `tanggalKebutuhan`, `tanggalApprove`, `tanggalReject`
 - Dibaca controller dari body: `-`
 - Diisi server: `dimintaOleh`, `tenantID`
+- Sejak `yoga` `816c2a6` (dari skema `2dd57aa`): pengajuan wajib memuat minimal satu barang, dan `jumlah` setiap barang harus di atas 0; selain itu 400
 
 #### `POST /pengguna/pin-login`
 
@@ -418,6 +422,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Respons 201 dengan `data` dokumen relasi
 - Dibaca controller dari body: seluruh body, dengan `tenantID` dari sesi
 - Diisi server: `tenantID`
+- Sejak `yoga` `88be128` dan `3bfd84e` (dikoreksi 11 Oktober 2026 dari kode `2dd57aa`): pajak dicari dengan `tenantID` (404 bila tidak ada), pajak per transaksi dan pajak nonaktif ditolak 400, produk atau aset harus milik tenant (404), relasi aset dicari menurut `assetID`, dan galat tidak lagi dibungkus 500 (butir 80 tertutup)
 
 #### `POST /role`
 
@@ -485,6 +490,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Field lain yang dikenali: `nomorTransfer`, `pengajuanStokID`, `dariLocationID`, `keLocationID`, `status`, `items`, `tanggalKirim`, `tanggalTerima`, `penerimaID`
 - Dibaca controller dari body: `-`
 - Diisi server: `pengirimID`, `tenantID`
+- Sejak `yoga` `314d5bc` (dari kode `2dd57aa`): nomor otomatis berbentuk `SJ-<nomorPengajuan>-01` dan seterusnya, dari penghitung `urutanSuratJalan` di pengajuan yang dinaikkan atomik (butir 60 tertutup)
 
 #### `PUT /akun/admin/users/:id`
 
@@ -565,6 +571,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Field lain yang dikenali: `namaKategori`, `kodeKategori`, `keterangan`
 - Duplikat nama atau kode: 400 `{ errors: ["tenantID sudah digunakan di tenant ini"] }` tanpa `message`, sama seperti `POST /kategori` (`temuan.md` butir 14)
 - Diisi server: -
+- Sejak `yoga` `ee8ca7f` (dari kode `2dd57aa`): hanya field kategori yang ditulis lewat `$set`, dan field lain ditolak "Field tidak dikenal". `DELETE /kategori/:id` menolak 409 kategori yang masih dipakai produk (`666b918`, butir 12)
 
 #### `PUT /location/:id`
 
@@ -626,6 +633,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Wajib dari klien: -
 - Field lain yang dikenali: `nomorPengajuan`, `jenisPengajuan`, `dariLocationID`, `keLocationID`, `disetujuiOleh`, `ditolakOleh`, `transferStokID`, `items`, `status`, `catatan`, `catatanPenolakan`, `tanggalKebutuhan`, `tanggalApprove`, `tanggalReject`
 - Diisi server: `dimintaOleh`
+- Sejak `yoga` `bda9da8` (dikoreksi 11 Oktober 2026 dari kode `2dd57aa`): hanya `jenisPengajuan`, `dariLocationID`, `keLocationID`, `items`, `catatan`, dan `tanggalKebutuhan` yang diterima; field lain ditolak 400 "tidak dapat diubah lewat edit pengajuan". Bahan baku di `items` harus milik tenant (400, `ba69c66`). APPROVED dan PENDING masih dapat diubah isinya (`temuan.md` butir 25). Payload web sudah di dalam daftar itu
 
 #### `PUT /pengguna/:id`
 

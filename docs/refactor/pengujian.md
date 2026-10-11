@@ -96,6 +96,22 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per penyesuaian backend `ridho` `2dd57aa`** (commit
+`43f09af`): 634 test unit dan integrasi lolos di 77 berkas, bertambah
+tiga (dua test gate stock adjustment di `f61e146`, dan satu test
+`relasiNonaktif` di `ed4bfd3`). Suite penuh 11 Oktober 2026 pukul 14.55,
+sebelum perubahan web, menghasilkan 448 lolos, 0 gagal, dan 15 skipped,
+tetapi skenario hapus bahan baku di dalamnya lolos tanpa bahannya
+terhapus (Utang pengujian). Suite penuh kedua pada hari yang sama, atas
+isi `ed4bfd3`, menghasilkan 450 lolos, 1 gagal, dan 13 skipped; jumlah
+skenarionya sesuai hitungan 451 dan 13: dua `test.fixme` jurnal dilepas
+(`936f073`), dan satu skenario pajak nonaktif ditambahkan (`ed4bfd3`).
+Yang gagal skenario hapus bahan baku, karena backend menolak hapus bahan
+yang punya entri stok (`kontrak/temuan.md` butir 143). Setelah `43f09af`
+harapan suite penuh 451 lolos dan 14 skipped; angka itu hitungan, karena
+suite penuh tidak dijalankan ulang, dan folder `bahanBaku` lolos 4
+dengan 1 skipped.
+
 **Baseline per penyesuaian backend `yoga` `55328f1`** (commit `f64b518`):
 631 test unit dan integrasi lolos di 77 berkas, bertambah dua test satuan
 resep; `50e6485` tidak mengubah jumlah. Suite penuh 8 Oktober 2026
@@ -869,7 +885,7 @@ Menunggu perbaikan backend:
 |---|---|
 | Edit pola roster | Validator memakai `this.siklusHari` dalam konteks `findOneAndUpdate` |
 | Hitungan tersimpan dapat dikosongkan kembali (`inventaris/stockOpname/draft-stok-opname.spec.ts`) | Validator stock opname menerima `qtyPhysical` null (`kontrak/temuan.md` butir 22). Badannya berupa penanda; skenario ditulis saat `SERVER_TERIMA_HITUNGAN_KOSONG` dibalik |
-| Jurnal Keluar penjualan langsung terbaca setelah finalisasi, dan finalisasi yang ditolak tidak menambah jurnal (`penjualan/alur-penjualan.spec.ts`, dua test) | Backend membersihkan cache daftar jurnal setiap kali `inventoryService` menulis jurnal (`kontrak/temuan.md` butir 46). Keduanya dibuka bersamaan: test kedua baru bermakna bila bacaan jurnal terbukti segar |
+| Bahan yang baru dibuat dapat dihapus walau diisi stok awal dan batas minimum (`inventaris/bahanBaku/crud-bahan-baku.spec.ts`) | Backend tidak lagi menghitung entri stok otomatis sebagai keterkaitan, dan menghapusnya bersama master (`kontrak/temuan.md` butir 143). Badannya lengkap tetapi belum pernah berjalan: status sukses `DELETE` dan parameter pencarian inventory diluruskan saat dilepas |
 | Delapan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, dan stock adjustment | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
 | Shift yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/shift/crud-shift.spec.ts`) | Backend memisahkan shift per lokasi dan `KUNCI_LOKASI_SHIFT` di `features/shift/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
 | Pola yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | Backend memisahkan pola roster per lokasi dan `KUNCI_LOKASI_POLA_ROSTER` di `features/pola-roster/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
@@ -889,6 +905,10 @@ hanya bermakna bila fixme lain lolos lebih dulu bukan kandidat.
 Pada 8 Oktober 2026, setelah backend `nizar` `8dc6211`, `test.fixme`
 pengosongan nomor HP pelanggan dilepas (`1bb26c0`), setelah lolos dua
 putaran berturut-turut.
+
+Pada 11 Oktober 2026, setelah backend `ridho` `2dd57aa`, kedua
+`test.fixme` jurnal stok di spec alur penjualan dilepas (`936f073`),
+setelah lolos dua putaran berturut-turut.
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
 terhitung di angka skipped pada baseline:
@@ -950,6 +970,7 @@ Urutan debug kegagalan e2e di atas).
   di unit test (`tests/unit/lib/auth/gate-stock-adjustment.test.ts`, kedua
   ruang),
   dengan alasan yang sama.
+  Izin per ruang (RH3a) juga hanya teruji di unit test.
 - **Pengosongan hitungan stock opname** baru berupa penanda `test.fixme`
   tanpa badan, karena backend belum menerima `qtyPhysical` null
   (`kontrak/temuan.md` butir 22). Yang teruji saat ini hanya perilaku
@@ -965,6 +986,7 @@ Urutan debug kegagalan e2e di atas).
 - **Idempotensi hanya teruji dari sisi klien**: kunci terkirim dan sama saat
   permintaan diulang. Penahanan permintaan kembar di backend tidak diuji
   dari web.
+  Berlaku juga untuk buat pembayaran sejak `26093b0` (RH1a).
 - **Spec tarif sempat gagal sekali di suite penuh `074e98c`** (spinner,
   lolos 3 dari 3 saat diulang). Sebelum migrasi tarif, spec itu lolos 78
   dari 78 dalam tiga putaran terhadap kode lama; penyebab kegagalan
@@ -1048,6 +1070,8 @@ Urutan debug kegagalan e2e di atas).
   Penyetuju", karena backend melarang pengaju menyetujui pengajuannya
   sendiri (`kontrak/temuan.md` butir 76, PB11a). Jalur Owner menyetujui
   pengajuannya sendiri belum teruji.
+  Sejak `a8aec53` pengajuan uji disetujui Ridho sendiri (RH5a), sehingga
+  jalur Owner teruji; penolakan bagi peran lain belum teruji dari web.
 - **`DataTable` mode server hanya dipakai dan teruji di daftar
   penjualan** (`tests/e2e/penjualan/daftar-penjualan.spec.ts`). Mode
   klien kesembilan tabel lain tidak berubah di `b63cf08`, dan tidak diuji
@@ -1078,6 +1102,7 @@ Urutan debug kegagalan e2e di atas).
   saja.
 - **Relasi ke pajak nonaktif tidak dapat diuji dari web**, karena backend
   tidak mengirimnya (butir 93).
+  Teruji e2e sejak `ed4bfd3`, setelah backend mengirimnya (RH4a).
 - **Spec yang ditulis sebelum keputusan rancangan butir 23 masih
   menyiapkan sebagian data uji lewat API**, misalnya fixture metode
   pembayaran di spec kelola dan booking uji di spec reservasi;
@@ -1287,6 +1312,20 @@ Urutan debug kegagalan e2e di atas).
   tampil di timeline (`kontrak/temuan.md` butir 141); tidak ada test
   untuknya.
 
+- **Hapus bahan baku yang berhasil tidak teruji e2e** sejak `43f09af`:
+  skenarionya `test.fixme` menunggu backend (`kontrak/temuan.md` butir
+  143), dan skenario tambah, cari, dan edit meninggalkan satu bahan uji
+  berstok 50 per run. Skenario hapus lama sempat lolos di suite penuh 11
+  Oktober 2026 walau bahannya tidak terhapus, karena buktinya hanya baris
+  yang tidak ada di tabel; dua bahan uji dari run itu dibiarkan sebagai
+  bukti.
+- **Penolakan hapus bahan yang punya riwayat tidak teruji e2e**; yang
+  teruji hanya dialog yang bertahan saat hapus dijawab gagal.
+- **Penyaringan stock adjustment per ruang di server tidak teruji dari
+  web**, karena akun uji berperan Owner.
+- **Penahanan pembayaran kembar di backend tidak diuji dari web**; yang
+  teruji kunci yang sama saat permintaan diulang.
+
 ## Spec rujukan
 
 - `tests/e2e/inventaris/kategori/crud-kategori.spec.ts`: spec pembanding yang
@@ -1363,6 +1402,8 @@ Urutan debug kegagalan e2e di atas).
   `qtyTerima: 0` dibuktikan dari backend. Helper-nya ada di
   `tests/helpers/transfer-uji.ts`, termasuk `siapkanSuratJalan` dan
   `tutupSuratJalanUji` (PB10a).
+  Sejak `a8aec53` pengajuan uji disetujui Ridho sendiri, tanpa pengguna
+  kedua.
 - `tests/e2e/inventaris/transferStok/alur-transfer-stok.spec.ts`: spec
   pembanding alur tulis gudang dengan surat jalan PENDING dari API. Tab
   status diperiksa dengan `toHaveCount(0)` pada baris yang tidak boleh
@@ -1391,6 +1432,8 @@ Urutan debug kegagalan e2e di atas).
   (`postDataJSON`, header `x-idempotency-key`), dialog yang harus bertahan
   diuji lewat `page.route`, dan kunci idempotensi dibandingkan antara
   percobaan yang gagal dan ulangannya.
+  Sejak `936f073` kedua skenario jurnal berjalan, dan sejak `26093b0`
+  kunci idempotensi pembayaran dibandingkan dengan cara yang sama.
 - `tests/e2e/auth/login.spec.ts`: spec tanpa respons sukses palsu. Login
   sungguhan dengan status dan token diperiksa dari respons, pesan gagal
   dibandingkan dengan `message` respons nyata, email dan nama unik per run
@@ -1510,6 +1553,8 @@ Urutan debug kegagalan e2e di atas).
   dicatat lewat callback begitu respons diterima agar pembersihan tetap
   berjalan, payload dibandingkan utuh, dan pajak per transaksi hanya lewat
   `POST` yang dijawab gagal.
+  Sejak `ed4bfd3`: skenario relasi ke pajak nonaktif, dengan pajak
+  dinonaktifkan lewat dialog Edit dan status relasi dibaca dari respons.
 - `tests/e2e/roles/crud-role.spec.ts` (sejak `366e9b7`): setiap template
   dipakai dengan `POST /role` dijawab gagal lewat `JAWAB_GAGAL`, sehingga
   tidak ada role yang tersimpan; harapan diturunkan dari `ROLE_TEMPLATES`

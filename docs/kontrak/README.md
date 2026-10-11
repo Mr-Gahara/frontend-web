@@ -109,6 +109,19 @@ dikoreksi terhadap backend `nizar` `8dc6211`, delapan commit di atas
 di-push. Pada hari yang sama, bagian pajak dan produk di `payload.md`,
 `izin-halaman.md`, dan `temuan.md` dikoreksi terhadap `yoga` `55328f1`,
 yang termuat di `ridho` sejak `92d4f27`.
+Pada 11 Oktober 2026 acuan backend menjadi `ridho` `2dd57aa`, yaitu
+`origin/yoga` yang memuat `origin/nizar` `b0a77d4`, hasil fast-forward
+dari `8dc6211` (42 commit). Bagian pembayaran, produk pajak, pengajuan
+stok, bahan baku, kategori, transfer stok, penjualan, dan stock
+adjustment di `endpoint.md`, `payload.md`, `izin-halaman.md`, dan
+`temuan.md` dikoreksi terhadapnya, hanya untuk yang terbukti dari kode
+atau dari web. Yang belum dicocokkan dari 42 commit itu: modul
+pembelian stok, dan cache produk saat pajak berubah. Terhadap
+Lampiran A: route `/pembelianstok` kini memeriksa izin `read-`,
+`create-`, `update-`, dan `delete-pembelian-stok`, dan kedua route
+`GET /stockopname/adjustments` menerima juga
+`read-stock-adjustment-outlet` dan `read-stock-adjustment-gudang`;
+Lampiran A masih mencatat keadaan lama.
 
 ## 1. Acuan dan metodologi
 

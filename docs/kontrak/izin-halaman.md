@@ -40,6 +40,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 7 Oktober 2026: detail penjualan setelah `729c16a`, tanpa perubahan gate (`read-penjualan`). Untuk penjualan berjenis booking, halaman juga memanggil `GET /sesibooking/:id` per booking, hanya bagi pemegang `read-booking`; tanpa izin itu bagian Sesi Booking tidak dipasang. Tombol Tandai Selesai memanggil `PUT /sesibooking/:id` dan hanya tampil bagi pemegang `update-booking` (keputusan NZ7a). Mutasi arus kas juga memanggil `GET /akunkas/ringkasan` (`read-akunkas`, sejalan dengan gate) sejak `d23844a`.
 - 8 Oktober 2026: pelanggan, buat penjualan, dan buat reservasi setelah `4539c85`, terhadap backend `nizar` `8dc6211`. `GET /pelanggan` kini memeriksa `read-pelanggan`, sejalan dengan gate halaman pelanggan. Buat penjualan dan buat reservasi memuat `/pelanggan` dan mewajibkan pelanggan di payload, sehingga gerbang keduanya ikut menuntut izin itu (GR7a).
 - 8 Oktober 2026: pengeluaran, terhadap `yoga` `55328f1`. Route `/kategoribeban` kini memeriksa izin per operasi (`read-`, `create-`, `update-`, dan `delete-kategori-beban`), seperti `/bebanoperasional` sejak `fc29433`, dan keduanya menjawab 200 bagi Owner. Halaman tetap menampilkan keterangan belum tersedia (keputusan NZ11a), sehingga gate `read-pembayaran` belum diselaraskan.
+- 11 Oktober 2026: stock adjustment outlet dan gudang setelah `f61e146`, terhadap backend `ridho` `2dd57aa`. `GET /stockopname/adjustments` dan detailnya kini menerima `read-stock-adjustment`, `read-stock-adjustment-outlet`, atau `read-stock-adjustment-gudang`, dan menyaring menurut ruang. Gate daftar dan detail di tiap ruang menerima izin umum atau izin ruangnya; izin ruang lain tidak diterima (keputusan RH3a).
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -59,7 +60,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/inventaris-pantau` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/stok` | `read-location`, `read-inventory` atau `read-inventory-outlet` | `/location`, `/location/current`, `/inventory` | `read-location`, salah satu dari `read-inventory`, `read-inventory-gudang`, `read-inventory-outlet` | Sejalan; gate sengaja tidak menerima `read-inventory-gudang` di ruang outlet (keputusan produk) |
 | `/dashboard/outlet/inventaris/stockOpname` | `read-stock-opname`, `read-location` | `/stockopname`, `/location`, `/location/current` | `read-stock-opname`, `read-location` | Sejalan |
-| `/dashboard/outlet/inventaris/stockAdjustment` | `read-stock-adjustment`, `read-location` | `/stockopname/adjustments`, `/location`, `/location/current` | `read-stock-adjustment`, `read-location` | Sejalan |
+| `/dashboard/outlet/inventaris/stockAdjustment` | `read-stock-adjustment` atau `read-stock-adjustment-outlet`, `read-location` | `/stockopname/adjustments`, `/location`, `/location/current` | salah satu dari `read-stock-adjustment`, `read-stock-adjustment-outlet`, `read-stock-adjustment-gudang`, `read-location` | Sejalan; gate sengaja tidak menerima izin ruang lain (keputusan RH3a) |
 | `/dashboard/outlet/inventaris/jurnalStok` | `read-jurnal-stok`, `read-location` | `/jurnalstok`, `/location`, `/location/current` | `read-jurnal-stok`, `read-location` | Sejalan |
 | `/dashboard/outlet/inventaris-suplai` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/pengajuanStok` | `read-pengajuan-stok`, `read-location` | `/pengajuanstok`, `/location`, `/location/current` | `read-pengajuan-stok`, `read-location` | Sejalan |
@@ -76,7 +77,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/gudang/inventaris` | `read-location`, `read-inventory` atau `read-inventory-gudang`, `read-bahan` | `/location`, `/inventory`, `/bahanbaku` | `read-location`, salah satu dari `read-inventory`, `read-inventory-gudang`, `read-inventory-outlet`, `read-bahan` | Sejalan; gate sengaja tidak menerima `read-inventory-outlet` di ruang gudang (keputusan produk) |
 | `/dashboard/gudang/jurnalStok` | `read-jurnal-stok` | `/jurnalstok` | `read-jurnal-stok` | Sejalan |
 | `/dashboard/gudang/stockOpname` | `read-stock-opname` | `/stockopname` | `read-stock-opname` | Sejalan |
-| `/dashboard/gudang/stockAdjustment` | `read-stock-adjustment` | `/stockopname/adjustments` | `read-stock-adjustment` | Sejalan |
+| `/dashboard/gudang/stockAdjustment` | `read-stock-adjustment` atau `read-stock-adjustment-gudang` | `/stockopname/adjustments` | salah satu dari `read-stock-adjustment`, `read-stock-adjustment-outlet`, `read-stock-adjustment-gudang` | Sejalan; gate sengaja tidak menerima izin ruang lain (keputusan RH3a) |
 | `/dashboard/gudang/pengajuanStok` | `read-pengajuan-stok` | `/pengajuanstok` | `read-pengajuan-stok` | Sejalan |
 | `/dashboard/gudang/transferStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/gudang/pengirimanStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
@@ -97,7 +98,7 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/profil` | - | `/pengguna/:id`, `/tenant/:id` | Diri sendiri diloloskan backend tanpa izin |
 | `/dashboard/gudang/setup` | - | - | Layout gudang yang memutuskan (GD4a); simpan lewat `POST /location` |
 | `/dashboard/gudang/pengajuanStok/[id]` | `read-pengajuan-stok` | `/pengajuanstok/:id` | Detail; aksi mengikuti izin tombolnya |
-| `/dashboard/gudang/stockAdjustment/[id]` | `read-stock-adjustment` | `/stockopname/adjustments/:id` | Detail |
+| `/dashboard/gudang/stockAdjustment/[id]` | `read-stock-adjustment` atau `read-stock-adjustment-gudang` | `/stockopname/adjustments/:id` | Detail |
 | `/dashboard/gudang/stockOpname/[id]` | `read-stock-opname` | `/stockopname/:id` | Detail; aksi mengikuti izin tombolnya |
 | `/dashboard/gudang/stockOpname/buatStockOpname` | `read-location`, `create-stock-opname` | `/location`, `/pengguna/:id` | Form |
 | `/dashboard/gudang/transferStok/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; aksi mengikuti izin tombolnya |
@@ -110,7 +111,7 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/outlet/inventaris/pengajuanStok/[id]/edit` | `read-pengajuan-stok`, `read-bahan`, `read-location`, `update-pengajuan-stok` | `/pengajuanstok/:id`, `/bahanbaku`, `/location`, `/location/current` | Form |
 | `/dashboard/outlet/inventaris/produk/buatProduk` | `read-kategori`, `create-produk` | `/kategori`; `/bahanbaku` dan `/location/current` opsional | Form; bahan baku hanya untuk resep |
 | `/dashboard/outlet/inventaris/produk/[id]/edit` | `read-produk`, `read-kategori`, `update-produk` | `/produk/:id`, `/kategori`; `/bahanbaku` dan `/location/current` opsional | Form |
-| `/dashboard/outlet/inventaris/stockAdjustment/[id]` | `read-stock-adjustment` | `/stockopname/adjustments/:id` | Detail |
+| `/dashboard/outlet/inventaris/stockAdjustment/[id]` | `read-stock-adjustment` atau `read-stock-adjustment-outlet` | `/stockopname/adjustments/:id` | Detail |
 | `/dashboard/outlet/inventaris/stockOpname/[id]` | `read-stock-opname` | `/stockopname/:id` | Detail; aksi mengikuti izin tombolnya |
 | `/dashboard/outlet/inventaris/stockOpname/buatStockOpname` | `read-location`, `create-stock-opname` | `/location/current`, `/pengguna/:id` | Form |
 | `/dashboard/outlet/keuangan/akunkas/buatAkunKas` | `create-akunkas` | - | Form |

@@ -96,6 +96,11 @@ data disilang dengan seed lebih dulu, lalu diselaraskan dengan urutan ini
 5. Cache Redis `permissions:all`, `role:list:*`, dan `auth:pengguna:*`
    dihapus, lalu tinjauan diulang.
 
+Sejak backend `nizar` `3c9c19f`, indeks pelanggan dan posisi juga
+diselaraskan setiap berpindah versi lewat `npm run db:indeks` di repo
+backend; skripnya berhenti tanpa mengubah apa pun bila ada data yang
+bentrok.
+
 Skrip tinjau dan penghapusnya sekali pakai di `/tmp`
 (`rekonsiliasi-permission.js`), dengan mode tinjau sebagai bawaan.
 
@@ -146,6 +151,10 @@ tepat di atas `92d4f27`, sehingga `ridho` lokal cukup di-fast-forward;
 bila satu sisi tidak punya commit di luar sisi lain, pemeriksaan
 kelengkapan di bawah tidak diperlukan. `ridho` `8dc6211` di-push pada
 hari yang sama.
+Pada 11 Oktober 2026 `yoga` maju ke `2dd57aa`, 42 commit di atas
+`8dc6211`, dan sudah memuat `nizar` `b0a77d4`, sehingga `ridho` kembali
+cukup di-fast-forward. Gabungan Yoga sendiri (`1d3f2d7`) tetap diperiksa
+kelengkapannya untuk berkas yang diubah kedua induknya.
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari
@@ -456,6 +465,16 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   setelah `f64b518`, tanpa temuan baru: B36, B37, dan B38 (Yoga) terbukti
   dari web (`kontrak/temuan.md` butir 130, 91, dan 15 tertutup). Butir
   lama yang masih terbuka tidak diulang
+- Laporan 11 Oktober 2026, per pemilik (Yoga dan Nizar), terhadap `ridho`
+  `2dd57aa` — 3 temuan dan hasil pembuktian, disusun dan diserahkan 11
+  Oktober 2026 setelah `43f09af`: bahan baku yang baru dibuat tidak dapat
+  dihapus karena entri stok otomatisnya dihitung sebagai keterkaitan
+  (Yoga), filter lokasi daftar penjualan yang belum dapat dipakai karena
+  sebagian besar penjualan tanpa `locationID` (Nizar), dan nama penyetuju
+  yang kosong di daftar pengajuan stok (Yoga); beserta pembuktian butir
+  44, 46, 76, 93, dan 142 (`kontrak/temuan.md` butir 143 sampai 145).
+  Versi ringkas butir 143 dan 145 juga dikirim ke Yoga, begitu pula
+  usulan VOID beralasan untuk beban operasional
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

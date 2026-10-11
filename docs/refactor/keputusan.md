@@ -146,6 +146,8 @@ produk (`152088b`). Labelnya PR:
   outlet dan gudang tidak tercampur, bukan pengaman akses: backend tidak
   membatasi stock adjustment per ruang (`kontrak/temuan.md` butir 40).
   Adjustment yang lokasinya sudah terhapus tetap ditampilkan.
+  Sejak backend `yoga` `12c143f` backend membatasinya lewat izin per ruang
+  (RH3a).
 - **Tombol setelah setujui di detail opname gudang menuju jurnal
   penyesuaian gudang**, sejalan dengan ruang outlet, menggantikan tautan
   lama ke jurnal stok gudang.
@@ -362,6 +364,7 @@ keputusan rancangan butir 17.
   hasilnya selalu PAID (`kontrak/temuan.md` butir 45).
 - **K3a: buat penjualan mengirim `x-idempotency-key`**, satu kunci per
   pengisian form (butir 20).
+  Buat pembayaran memakai pola yang sama sejak `26093b0` (RH1a).
 - **K4a: halaman buat penjualan tidak menampilkan stok produk**, karena
   `produk.stok` tidak terhubung ke lokasi mana pun (`kontrak/temuan.md`
   butir 37). Dipertahankan sejak backend `yoga` (keputusan PY4a):
@@ -376,6 +379,7 @@ keputusan rancangan butir 17.
   outlet sama dengan outlet tenant). Penjualan tanpa `locationID` dianggap
   milik outlet tenant, sama dengan cadangan backend saat finalisasi. Wajib
   ditutup sebelum multi-outlet (`kontrak/temuan.md` butir 48 dan 49).
+  Tetap di klien setelah backend punya filter `locationID` (RH2b).
 - **K6b: spec alur membuktikan alur bisnis sampai stok dan pembayaran**,
   dengan stok disiapkan sesuai kebutuhan setiap test, walau meninggalkan
   penjualan FINAL (sejak backend `465b438` berstatus PAID) dan pembayaran
@@ -386,6 +390,7 @@ keputusan rancangan butir 17.
 - **K9a: asersi jurnal stok menjadi `test.fixme`** selama cache daftar
   jurnal tidak dibersihkan saat jurnal ditulis (`kontrak/temuan.md` butir
   46).
+  Dilepas di `936f073`, setelah backend `yoga` `b63811d` membuang cache itu.
 - **K10a: pemeriksaan dialog yang bertahan saat gagal dipisah ke
   `test.fixme` per submodul pemiliknya**, agar suite hijau di setiap
   commit. Ketiganya sudah dibuka di submodul 2 dan 3.
@@ -909,10 +914,13 @@ lain.
   pengajuan uji milik spec, yang dipakai ulang bila ada dan dibuat bila
   tidak, lalu disetujui pengguna uji "E2E Penyetuju" di konteks
   permintaan terpisah.
+  Sejak `a8aec53` pengajuan uji disetujui Ridho sendiri (RH5a).
 - **PB11a: persetujuan pengajuan sendiri**: Owner boleh menyetujui
   pengajuannya sendiri dengan penanda self-approval, peran lain tidak.
   Backend belum menerapkannya (`kontrak/temuan.md` butir 76); sampai itu
   spec memakai pengguna penyetuju uji (PB10a).
+  Diterapkan backend `yoga` `2e25bb6`; penyetuju uji dicabut di `a8aec53`
+  (RH5a).
 - **PB12a: terima penerimaan diuji sungguhan lewat UI tanpa
   `page.route`** (`6e314ae`). Jumlah diterima 0 dikirim apa adanya dan
   tidak lagi ditahan, mencabut penahanan `SERVER_TERIMA_JUMLAH_NOL` dari
@@ -975,6 +983,7 @@ dan diterapkan di `fcf2dd2` bersama PO15a; PO16a diterapkan di `ca6eb3d`.
   pajak terpasang, memasang pajak lain menggantinya lewat konfirmasi yang
   menyebut pajak lama, dan hanya pajak per produk yang aktif yang
   ditawarkan, karena backend menyimpan relasi lewat upsert per produk.
+  Relasi ke pajak nonaktif tampil bertanda sejak `ed4bfd3` (RH4a).
 - **PO7a: menyimpan pajak per transaksi yang aktif diberi peringatan**
   yang menyebut pajak per transaksi aktif yang akan dinonaktifkan backend.
 - **PO8a: prioritas pajak berupa pilihan 1 atau 2**, sesuai validator;
@@ -1557,6 +1566,56 @@ B37, dan B38 milik Yoga). Labelnya melanjutkan NZ.
   Pak" dibuat sekali lewat API dan tidak dihapus; dan pesan "belum dapat
   dipakai di resep" dipertahankan untuk satuan bahan yang tidak dikenal
   web.
+
+### Penyesuaian backend `ridho` `2dd57aa`
+
+Diputuskan pemilik proyek pada 11 Oktober 2026, setelah `origin/yoga` maju
+42 commit di atas `ridho` `8dc6211` dan memuat `origin/nizar` `b0a77d4`,
+sehingga `ridho` cukup di-fast-forward. Labelnya RH.
+
+- **RH1a: buat pembayaran mengirim `x-idempotency-key`** (`26093b0`),
+  satu kunci per pengisian form, dengan pola K3a (keputusan rancangan
+  butir 20). Menutup `kontrak/temuan.md` butir 44 dari sisi web.
+- **RH2b: cakupan daftar penjualan lewat `locationID` server ditunda.**
+  Sekitar 980 dari 1.620 penjualan development tidak punya `locationID`,
+  termasuk seluruh penjualan booking, dan filter backend mencocokkan
+  persis, sehingga memakainya akan menyembunyikan penjualan itu
+  (`kontrak/temuan.md` butir 144). K5b tetap di klien sampai backend
+  mengisi lokasi setiap penjualan. Menggantikan RH2a, yang semula
+  memilih memindahkannya ke server.
+- **RH3a: gate stock adjustment menerima izin per ruang** (`f61e146`)
+  sebagai alternatif izin umum: `read-stock-adjustment-outlet` di ruang
+  outlet dan `read-stock-adjustment-gudang` di ruang gudang (keputusan
+  rancangan butir 16). Izin ruang lain tidak diterima, dan template role
+  tidak diubah.
+- **RH4a: relasi ke pajak nonaktif tampil bertanda "(nonaktif)"** di tab
+  pajak per produk (`ed4bfd3`), beserta keterangan bahwa pajak itu tidak
+  dikenakan saat penjualan. Tab tetap membaca `GET /produkpajak`, bukan
+  `pajakList` produk, karena relasi membawa id untuk melepas pajak.
+- **RH5a: pengguna penyetuju uji dicabut dari helper spec** (`a8aec53`).
+  Pengajuan uji disetujui Ridho sendiri, sehingga jalur Owner menyetujui
+  pengajuannya sendiri teruji. Pengguna "E2E Penyetuju" dibiarkan di
+  basis data development. Menggantikan bagian penyetuju di PB10a.
+- **RH6a: izin pembelian stok masuk template role bersama halamannya**,
+  seperti FC2a.
+- **Bahan baku yang belum punya riwayat dapat dihapus**, walau saat
+  dibuat diisi stok awal dan batas minimum: setelah dihapus, bahan itu
+  dianggap tidak pernah ada. Yang tidak dapat dihapus adalah bahan yang
+  sudah dipakai resep produk, diopname, ditransfer, diajukan, dibeli,
+  atau tercatat di jurnal stok, agar riwayat lama tidak kehilangan
+  rujukannya, seperti metode pembayaran. Backend `2dd57aa` masih menolak
+  bahan yang baru dibuat (`kontrak/temuan.md` butir 143); kode halaman
+  web tidak diubah, dan skenario hapusnya menjadi `test.fixme`
+  (`43f09af`).
+- Diterapkan tanpa ditanyakan (`936f073`): kedua `test.fixme` jurnal
+  stok dilepas setelah lolos dua putaran, dan judulnya diluruskan
+  (mencabut K9a).
+- Diterapkan tanpa ditanyakan (`ed4bfd3`): `pajak.status` di tipe relasi
+  opsional, dan status yang tidak dikirim dianggap aktif; aturannya
+  fungsi murni `relasiNonaktif` (butir 10).
+- Diterapkan tanpa ditanyakan (`43f09af`): bukti hapus di badan
+  `test.fixme` diambil dari respons `DELETE` dan dari daftar yang dibaca
+  ulang, bukan dari baris yang tidak ada di tabel.
 
 ## Keputusan rancangan yang mengikat
 

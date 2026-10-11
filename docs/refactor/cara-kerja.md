@@ -1642,6 +1642,39 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   yang diganti sisi lain (`backend.md`). Pada backend `92d4f27` hanya
   satu berkas berkonflik, tetapi lima bagian dokumen hilang di luar
   potongan konflik itu.
+- **Tanda tangan fungsi lapisan API dibaca utuh sebelum dipanggil.**
+  Opsi header `apiData.post` adalah argumen keempat, sesudah `tokenType`;
+  pemanggilan pembayaran ditulis dari potongan grep pemanggilan penjualan
+  dan ditolak `tsc` (`26093b0`).
+- **Maksud sebuah aturan dipastikan kepada pemilik proyek sebelum
+  perilaku backend dinilai.** Penolakan hapus bahan baku dinilai keliru,
+  lalu benar, lalu keliru sebagian, dalam tiga putaran, sampai aturannya
+  dirumuskan pemilik proyek: yang menghalangi hapus adalah riwayat, bukan
+  entri stok awal (`kontrak/temuan.md` butir 143).
+- **Test yang menegaskan perilaku backend ditulis setelah perilaku itu
+  dipastikan benar.** Skenario yang menegaskan 409 untuk bahan baru
+  sempat diterapkan lalu dibuang sebelum di-commit, karena mengunci
+  perilaku yang ternyata keliru (`43f09af`).
+- **Bukti hapus diambil dari respons dan dari data yang dibaca ulang.**
+  Skenario hapus bahan baku lolos di satu suite penuh walau bahannya
+  tidak terhapus, karena hanya menunggu baris tidak ada di tabel.
+- **Filter server dipakai setelah datanya diukur.** `?locationID=` daftar
+  penjualan menyaring dengan benar, tetapi sekitar 980 dari 1.620
+  penjualan tidak punya `locationID`; tiga permintaan baca-saja (total,
+  total terfilter, dan contoh baris tanpa nilai) menunjukkannya sebelum
+  ada kode yang diubah.
+- **Gabungan yang dibuat orang lain tetap diperiksa kelengkapannya.**
+  Bila cabang yang ditarik sudah memuat cabang lain lewat commit
+  gabungannya sendiri, berkas yang diubah kedua induknya dibandingkan
+  terhadap titik cabang: baris tambahan tiap sisi dicari di hasil
+  gabungan (`1d3f2d7` di backend).
+- **Keluaran yang akan diunggah disimpan di luar `/tmp`**, misalnya di
+  `~/Documents`, karena dialog unggah tidak membuka `/tmp` dengan mudah.
+- **Dokumen bertabel panjang diperbarui lewat skrip berawalan baris**,
+  bukan pasangan teks. Baris dikenali dari awalannya (nomor butir, method
+  dan path, atau judul bagian), kalimat ditambahkan di akhirnya, dan
+  skrip berhenti bila sasaran tidak tepat satu atau sudah diterapkan
+  (dokumen penutup `2dd57aa`).
 
 ## Kapan berhenti dan bertanya
 

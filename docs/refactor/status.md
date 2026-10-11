@@ -96,6 +96,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Penyesuaian backend `nizar` | `9b25433` (sesi booking), `3b4f35b` (metode pembayaran), `a80d2fa` (diskon), `d23844a` (mutasi), `8072214` (riwayat Pindah Dana), `729c16a` (tandai selesai) | Selesai (keputusan NZ1a sampai NZ7a; Catatan dari penyesuaian backend `nizar`) |
 | Penyesuaian backend `nizar` `8dc6211` | `4539c85` (gerbang rute), `fe9631f` (pemilih pelanggan), `1bb26c0` (pengosongan kontak), `5b92d14` (spec kembar) | Selesai (keputusan NZ8a sampai NZ10a; Catatan dari penyesuaian backend `nizar` `8dc6211`) |
 | Penyesuaian backend `yoga` `55328f1` | `50e6485` (ubah pajak), `f64b518` (satuan resep) | Selesai (keputusan NZ11a sampai NZ13a; Catatan dari penyesuaian backend `yoga` `55328f1`) |
+| Penyesuaian backend `ridho` `2dd57aa` | `936f073` (fixme jurnal), `26093b0` (idempotensi pembayaran), `a8aec53` (penyetuju uji), `f61e146` (izin stock adjustment), `ed4bfd3` (pajak nonaktif), `43f09af` (fixme hapus bahan baku) | Selesai (keputusan RH1a sampai RH6a; Catatan dari penyesuaian backend `ridho` `2dd57aa`) |
 | Rancangan dan perbaikan UI/UX, layout, dan palet warna | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
@@ -132,19 +133,71 @@ layout serta tampilan panel admin (Utang kecil dari modul panel admin).
 Langkah pertama sesi berikutnya: backend di-`fetch` dan dibandingkan
 dengan acuan (`cara-kerja.md`), lalu arahan pemilik proyek. Perintah di
 bawah memetakan warna yang dipakai sekarang, bila dibutuhkan. Suite e2e
-penuh tidak dijalankan di awal sesi; harapan hitungannya 448 lolos dan
-15 skipped (`pengujian.md`). Backend lokal berada di cabang `ridho`
-`8dc6211`, hasil fast-forward ke `origin/nizar` pada 8 Oktober 2026 dan
+penuh tidak dijalankan di awal sesi; harapan hitungannya 451 lolos dan
+14 skipped (`pengujian.md`). Backend lokal berada di cabang `ridho`
+`2dd57aa`, hasil fast-forward ke `origin/yoga` pada 11 Oktober 2026 dan
 sudah di-push (`backend.md` bagian Pemilik modul backend). Ketiga
 perubahan `yoga` yang sempat tertunda, B36 sampai B38 (Yoga), sudah
 dinilai dan dimanfaatkan (Catatan dari penyesuaian backend `yoga`
 `55328f1`).
+Perubahan `yoga` dan `nizar` sampai `2dd57aa` sudah dinilai (Catatan dari
+penyesuaian backend `ridho` `2dd57aa`).
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline --remotes --not HEAD | head -20
 grep -rhoE '#[0-9A-Fa-f]{6}\b' app components features | tr 'a-f' 'A-F' | sort | uniq -c | sort -rn | head -30
 grep -nE '^\s*--[a-z-]+:' app/globals.css | cut -c1-100 | head -60
 ```
+
+## Catatan dari penyesuaian backend `ridho` `2dd57aa`
+
+Dikerjakan pada 11 Oktober 2026 dalam enam commit. `origin/yoga` maju 42
+commit di atas `ridho` `8dc6211` dan sudah memuat `origin/nizar` `b0a77d4`
+(dua commit), sehingga `ridho` di-fast-forward ke `2dd57aa` dan di-push
+pada hari yang sama.
+
+| Commit | Isi |
+|---|---|
+| `936f073` | Dua `test.fixme` jurnal stok dilepas (butir 46) |
+| `26093b0` | Buat pembayaran mengirim kunci idempotensi (RH1a) |
+| `a8aec53` | Pengajuan uji disetujui Owner sendiri; penyetuju uji dicabut (RH5a) |
+| `f61e146` | Gate stock adjustment menerima izin per ruang (RH3a) |
+| `ed4bfd3` | Relasi ke pajak nonaktif tampil bertanda (RH4a) |
+| `43f09af` | Hapus bahan yang baru dibuat menjadi `test.fixme` (butir 143) |
+
+- Gabungan Yoga `1d3f2d7` (`nizar` ke `yoga`) diperiksa kelengkapannya:
+  satu-satunya berkas yang diubah kedua sisi adalah
+  `docs/pengembangan/klien.md` backend, dan seluruh baris tambahan kedua
+  sisi ada di hasilnya.
+- Permission diselaraskan menurut `backend.md`: seed sinkron menambah
+  enam izin (141 di seed: empat izin pembelian stok dan dua izin stock
+  adjustment per ruang), dan seed Owner memberi 138 izin ke dua role
+  Owner. Indeks pelanggan dan posisi diselaraskan lewat
+  `npm run db:indeks`.
+- Cache izin tidak dapat dipastikan bersih: Redis lokal tanpa sandi
+  kosong, sedangkan `.env` backend memuat `REDIS_URL`.
+- Audit endpoint tidak berubah: 243 route dan 142 panggilan frontend
+  unik, tanpa panggilan ke route yang tidak ada.
+- Terbukti dari web: butir 46, 76, dan 93 lewat e2e, dan butir 142 lewat
+  permintaan nyata. Dicocokkan dari kode: butir 12, 16, 38, 40, 44, 59,
+  60, 80, dan 95 (`kontrak/temuan.md`).
+- Filter `?locationID=` daftar penjualan tidak dipakai: sekitar 980 dari
+  1.620 penjualan development tanpa `locationID` (butir 144, RH2b).
+- Suite penuh kedua gagal di hapus bahan baku: bahan yang baru dibuat
+  ditolak 409 karena entri stok otomatisnya (butir 143). Aturan pemilik
+  proyek berbeda dari perilaku itu, sehingga skenarionya menjadi
+  `test.fixme`, dan kode halaman tidak diubah.
+- Skenario hapus itu lolos di suite pagi walau bahannya tidak terhapus;
+  sebabnya tidak terbukti (`pengujian.md`, Utang pengujian).
+- Usulan untuk pengeluaran, diteruskan ke Yoga dan belum diputuskan:
+  beban yang salah dicatat dibatalkan lewat VOID beralasan dengan baris
+  mutasi pembalik, bukan dihapus atau diubah jumlahnya.
+- Vitest 634 lolos di 77 berkas. Suite e2e penuh: 450 lolos, 1 gagal,
+  dan 13 skipped; harapan setelah `43f09af` 451 lolos dan 14 skipped
+  (`pengujian.md`).
+- Temuan backend baru: butir 143 sampai 145 (`backend.md`).
+- Keputusan: `keputusan.md` (Penyesuaian backend `ridho` `2dd57aa`, RH1a
+  sampai RH6a).
 
 ## Catatan dari penyesuaian backend `yoga` `55328f1`
 
@@ -1207,6 +1260,24 @@ Yang masih berlaku:
 
 ## Utang kecil yang tertunda
 
+### Utang kecil dari penyesuaian backend `ridho` `2dd57aa`
+
+- Hapus bahan baku selalu ditolak 409 sampai backend tidak menghitung
+  entri stok otomatis sebagai keterkaitan (`kontrak/temuan.md` butir
+  143); skenarionya `test.fixme`, dan setiap run meninggalkan satu bahan
+  uji.
+- Cakupan daftar penjualan pindah ke filter server begitu setiap
+  penjualan punya `locationID` (butir 144, RH2b).
+- Izin pembelian stok belum masuk template role, dan modul pembelian
+  stok belum punya halaman di web (RH6a). Izin stock adjustment per
+  ruang juga belum masuk template role (RH3a).
+- Belum dicocokkan dari 42 commit backend: modul pembelian stok, dan
+  cache produk saat pajak berubah (`kontrak/README.md`).
+- Hapus aset yang punya booking (butir 52) dan hapus kategori yang
+  dipakai produk (butir 12) belum diuji dari web.
+- Nama penyetuju di daftar pengajuan stok kosong (butir 145); belum
+  dipakai web.
+
 ### Utang kecil dari penyesuaian backend `nizar`
 
 - Backend lokal berada di cabang `ridho` `8dc6211` (fast-forward ke
@@ -1214,9 +1285,12 @@ Yang masih berlaku:
   cabang itu digabung ulang dengan pemeriksaan kelengkapan
   (`backend.md`), lalu kontrak dicocokkan ulang. Cabang uji lokal
   `uji-yoga-nizar` sudah dihapus (8 Oktober 2026).
+  Sejak 11 Oktober 2026 `ridho` berada di `2dd57aa`.
 - Indeks pelanggan di basis data development belum sesuai skema
   (`kontrak/temuan.md` butir 142); dibiarkan sebagai bukti sampai backend
   menyediakan migrasi indeks.
+  Diselaraskan lewat `npm run db:indeks` pada 11 Oktober 2026 (butir 142
+  tertutup).
 - Booking milik sebuah penjualan belum disertakan di respons detail
   penjualan; permintaannya ditunda (NZ9a).
 - Penyesuaian terhadap `yoga` `55328f1` selesai di `50e6485` dan
@@ -1270,9 +1344,11 @@ Yang masih berlaku:
   seluruh penjualan tenant dan tidak mengirim lokasi. Halaman buat belum
   punya pemilih outlet bagi pemegang izin lintas outlet. Keduanya wajib
   ditutup sebelum multi-outlet (`kontrak/temuan.md` butir 48 dan 49).
+  Filter `?locationID=` backend belum dapat dipakai (butir 144, RH2b).
 - Dua `test.fixme` di spec alur penjualan menunggu backend, keduanya
   untuk cache daftar jurnal (`kontrak/temuan.md` butir 46). Yang ketiga
   (butir 37) dilepas di `a17d584` setelah backend `fc29433`.
+  Keduanya dilepas di `936f073`.
 - Filter tanggal daftar penjualan tidak dapat dikosongkan langsung,
   karena `PilihTanggal` tidak punya tombol kosongkan; filter dikosongkan
   lewat reset filter.
@@ -1357,10 +1433,13 @@ Yang masih berlaku:
 - Tab pajak per produk tidak dapat menampilkan relasi ke pajak nonaktif,
   karena backend tidak mengirimnya (`kontrak/temuan.md` butir 93), sehingga
   produk itu tampak tanpa pajak dan konfirmasi ganti tidak muncul.
+  Tertutup di `ed4bfd3`: relasi itu tampil bertanda (RH4a).
 - Pajak per aset (`assetID` di `POST /produkpajak`) belum dipakai web;
   ditinjau bersama modul reservasi bila dibutuhkan.
 - `pajakList` di tipe `Produk` tetap ada tetapi tidak dipakai tampilan,
   karena tidak mencerminkan relasi pajak (`kontrak/temuan.md` butir 88).
+  Sejak backend `yoga` `e9bd1ae` dibaca dari relasi; tab tetap memakai
+  `GET /produkpajak` (RH4a).
 - Wewenang yang namanya tidak punya padanan id di daftar permission
   dibuang diam-diam saat form role menyusun payload (`payloadBuatRole`),
   dan teks tombol simpan form role tetap "Simpan Perubahan" saat membuat
