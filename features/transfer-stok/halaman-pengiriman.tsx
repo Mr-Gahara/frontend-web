@@ -59,20 +59,20 @@ export default function HalamanPengiriman() {
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947] flex items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight text-navy flex items-center gap-2">
             <Truck className="w-6 h-6 text-amber-500" /> Radar Pengiriman
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <p className="text-sm font-medium text-navy/60">
             Pantau armada logistik yang sedang dalam perjalanan menuju Outlet.
           </p>
         </div>
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0A2947]/40" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
           <Input
             placeholder="Cari SJ / Outlet Tujuan..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 bg-white border-[#0A2947]/20 text-[#0A2947] focus-visible:ring-[#0A2947]"
+            className="pl-9 bg-white border-navy/20 text-navy focus-visible:ring-navy"
           />
         </div>
       </div>
@@ -92,15 +92,15 @@ export default function HalamanPengiriman() {
             </h3>
           </div>
         </div>
-        <div className="bg-[#0A2947]/5 border border-[#0A2947]/10 rounded-2xl p-4 flex items-center gap-4 sm:col-span-2">
-          <div className="bg-[#0A2947]/10 p-3 rounded-xl text-[#0A2947]">
+        <div className="bg-navy/5 border border-navy/10 rounded-2xl p-4 flex items-center gap-4 sm:col-span-2">
+          <div className="bg-navy/10 p-3 rounded-xl text-navy">
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-bold text-[#0A2947]/70 uppercase tracking-wider">
+            <p className="text-xs font-bold text-navy/70 uppercase tracking-wider">
               Informasi Radar
             </p>
-            <p className="text-sm font-medium text-[#0A2947]">
+            <p className="text-sm font-medium text-navy">
               Layar ini akan otomatis memperbarui data ketika Outlet
               mengonfirmasi penerimaan barang. Dokumen yang telah selesai akan
               otomatis berpindah ke arsip Transfer Stok.
@@ -115,16 +115,16 @@ export default function HalamanPengiriman() {
           Array.from({ length: 3 }).map((_, i) => (
             <Skeleton
               key={i}
-              className="h-48 w-full rounded-2xl bg-[#0A2947]/10"
+              className="h-48 w-full rounded-2xl bg-navy/10"
             />
           ))
         ) : filteredData.length === 0 ? (
-          <div className="col-span-full py-16 text-center bg-white border border-[#0A2947]/10 rounded-2xl">
-            <PackageCheck className="w-16 h-16 mx-auto mb-4 text-[#0A2947]/20" />
-            <h3 className="text-lg font-bold text-[#0A2947]">
+          <div className="col-span-full py-16 text-center bg-white border border-navy/10 rounded-2xl">
+            <PackageCheck className="w-16 h-16 mx-auto mb-4 text-navy/20" />
+            <h3 className="text-lg font-bold text-navy">
               Semua Pengiriman Tuntas
             </h3>
-            <p className="text-sm font-medium text-[#0A2947]/50 mt-1">
+            <p className="text-sm font-medium text-navy/50 mt-1">
               Tidak ada armada truk yang sedang berada di jalan saat ini.
             </p>
           </div>
@@ -132,10 +132,10 @@ export default function HalamanPengiriman() {
           filteredData.map((item) => (
             <div
               key={item.id}
-              className="bg-white border border-[#0A2947]/10 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col"
+              className="bg-white border border-navy/10 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col"
             >
-              <div className="bg-[#F2EAE1] px-5 py-3 border-b border-[#0A2947]/5 flex justify-between items-center">
-                <span className="font-mono font-bold text-[#0A2947] text-sm">
+              <div className="bg-krem px-5 py-3 border-b border-navy/5 flex justify-between items-center">
+                <span className="font-mono font-bold text-navy text-sm">
                   {item.nomorTransfer}
                 </span>
                 <Badge className="bg-amber-100 text-amber-700 border-none text-[10px] font-bold px-2 py-0.5 animate-pulse">
@@ -147,13 +147,13 @@ export default function HalamanPengiriman() {
                 {/* Rute Visual */}
                 <div className="flex items-center gap-3">
                   <div className="flex flex-col items-center">
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#0A2947]" />
-                    <div className="w-0.5 h-6 bg-[#0A2947]/20" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-navy" />
+                    <div className="w-0.5 h-6 bg-navy/20" />
                     <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                   </div>
                   <div className="flex flex-col justify-between h-11.5 flex-1">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-bold text-[#0A2947] truncate">
+                      <span className="text-sm font-bold text-navy truncate">
                         {item.dariLokasi?.nama || "Gudang"}
                       </span>
                     </div>
@@ -165,17 +165,17 @@ export default function HalamanPengiriman() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 bg-[#FFFAF3] p-3 rounded-xl border border-[#0A2947]/5 mt-2">
+                <div className="grid grid-cols-2 gap-4 bg-gading p-3 rounded-xl border border-navy/5 mt-2">
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-[#0A2947]/50 uppercase">
+                    <span className="text-[10px] font-bold text-navy/50 uppercase">
                       Berangkat
                     </span>
-                    <span className="text-xs font-bold text-[#0A2947]">
+                    <span className="text-xs font-bold text-navy">
                       {formatTanggal(item.tanggalKirim)}
                     </span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-[#0A2947]/50 uppercase">
+                    <span className="text-[10px] font-bold text-navy/50 uppercase">
                       Lama Perjalanan
                     </span>
                     <span className="text-xs font-bold text-amber-600">
@@ -184,17 +184,17 @@ export default function HalamanPengiriman() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-sm font-bold text-[#0A2947]/70">
-                  <Package className="w-4 h-4 text-[#D4A373]" />
+                <div className="flex items-center gap-2 text-sm font-bold text-navy/70">
+                  <Package className="w-4 h-4 text-karamel" />
                   Membawa {item.items?.length || 0} Macam Barang
                 </div>
               </div>
 
-              <div className="px-5 py-3 bg-[#0A2947]/5 border-t border-[#0A2947]/5 mt-auto">
+              <div className="px-5 py-3 bg-navy/5 border-t border-navy/5 mt-auto">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-between font-bold text-[#0A2947] hover:bg-white hover:shadow-sm"
+                  className="w-full justify-between font-bold text-navy hover:bg-white hover:shadow-sm"
                   onClick={() =>
                     router.push(`/dashboard/gudang/transferStok/${item.id}`)
                   }

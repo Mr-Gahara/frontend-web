@@ -22,7 +22,7 @@ interface PropsInputWaktu {
 }
 
 const KELAS_ISIAN =
-  "w-10 bg-transparent text-center font-bold text-[#0A2947] outline-none placeholder:text-[#0A2947]/30 disabled:cursor-not-allowed disabled:opacity-50";
+  "w-10 bg-transparent text-center font-bold text-navy outline-none placeholder:text-navy/30 disabled:cursor-not-allowed disabled:opacity-50";
 
 /**
  * Input jam dan menit standar seluruh frontend (keputusan K-TW1). Aturan
@@ -35,12 +35,12 @@ export function InputWaktu({ label, value, onChange, id, disabled, invalid, clas
       role="group"
       aria-label={label}
       className={cn(
-        "flex h-12 w-full items-center gap-2 rounded-md border border-[#0A2947]/20 bg-[#FFFAF3] px-3 focus-within:ring-1 focus-within:ring-[#0A2947]",
+        "flex h-12 w-full items-center gap-2 rounded-md border border-navy/20 bg-gading px-3 focus-within:ring-1 focus-within:ring-navy",
         invalid && "border-rose-500",
         className,
       )}
     >
-      <Clock3 aria-hidden="true" className="h-4 w-4 text-[#D4A373]" />
+      <Clock3 aria-hidden="true" className="h-4 w-4 text-karamel" />
       <input
         id={id}
         type="text"
@@ -56,7 +56,7 @@ export function InputWaktu({ label, value, onChange, id, disabled, invalid, clas
         onChange={(e) => onChange({ ...value, jam: terimaKetikan(value.jam, e.target.value, BATAS_JAM) })}
         onBlur={() => onChange({ ...value, jam: rapikanBagian(value.jam) })}
       />
-      <span aria-hidden="true" className="font-bold text-[#0A2947]">
+      <span aria-hidden="true" className="font-bold text-navy">
         :
       </span>
       <input

@@ -37,7 +37,7 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
       </li>
     );
   }
-  if (!booking.data) return <li className="text-sm font-medium text-[#0A2947]/60">Memuat sesi booking...</li>;
+  if (!booking.data) return <li className="text-sm font-medium text-navy/60">Memuat sesi booking...</li>;
 
   const b = booking.data;
   const nama = b.dataAset?.namaAset ?? "Aset tidak dikenal";
@@ -46,8 +46,8 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
   return (
     <li className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p className="font-bold text-[#0A2947]">{nama}</p>
-        <p className="text-xs font-medium text-[#0A2947]/60">
+        <p className="font-bold text-navy">{nama}</p>
+        <p className="text-xs font-medium text-navy/60">
           {formatTanggal(b.waktuMulai)}
           {sampai} · {LABEL_STATUS[b.status] ?? b.status}
         </p>
@@ -60,7 +60,7 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
             setGalat("");
             setKonfirmasi(true);
           }}
-          className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] font-bold"
+          className="cursor-pointer border-navy/20 text-navy font-bold"
         >
           Tandai Selesai
         </Button>
@@ -71,10 +71,10 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
           if (!buka && !tandai.isPending) setKonfirmasi(false);
         }}
       >
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">Tandai booking {nama} selesai?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogTitle className="text-navy">Tandai booking {nama} selesai?</AlertDialogTitle>
+            <AlertDialogDescription className="text-navy/70 font-medium">
               Pembayaran tetap tercatat, dan sisa jam aset ini terbuka untuk booking lain. Booking yang sudah
               selesai tidak dapat diubah lagi.
             </AlertDialogDescription>
@@ -87,7 +87,7 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
           <AlertDialogFooter className="pt-2">
             <AlertDialogCancel
               disabled={tandai.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Batal
             </AlertDialogCancel>
@@ -103,7 +103,7 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
                   onError: (err) => setGalat(pesanError(err, "Booking gagal ditandai selesai.")),
                 });
               }}
-              className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold"
+              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold"
             >
               {tandai.isPending ? "Menyimpan..." : "Tandai Selesai"}
             </AlertDialogAction>
@@ -126,11 +126,11 @@ export function BookingPenjualan({ idBooking }: { idBooking: string[] }) {
   return (
     <section
       aria-label="Sesi booking"
-      className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm space-y-4"
+      className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm space-y-4"
     >
-      <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-        <CalendarClock className="h-5 w-5 text-[#D4A373]" />
-        <h2 className="font-bold text-[#0A2947]">Sesi Booking</h2>
+      <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
+        <CalendarClock className="h-5 w-5 text-karamel" />
+        <h2 className="font-bold text-navy">Sesi Booking</h2>
       </div>
       <ul className="flex flex-col gap-4">
         {idBooking.map((id) => (

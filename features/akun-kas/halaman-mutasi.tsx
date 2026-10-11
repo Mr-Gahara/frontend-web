@@ -35,14 +35,14 @@ import {
 } from "./mutasi";
 
 const SEMUA = "semua";
-const KELAS_LABEL = "text-xs font-bold text-[#0A2947]/70";
-const KELAS_PEMICU = "w-52 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]";
+const KELAS_LABEL = "text-xs font-bold text-navy/70";
+const KELAS_PEMICU = "w-52 bg-gading border-navy/20 text-navy";
 
 function KartuRingkasan({ judul, nilai }: { judul: string; nilai: number }) {
   return (
-    <div className="rounded-xl border border-[#0A2947]/10 bg-[#FFFAF3] p-4">
-      <p className="text-xs font-bold text-[#0A2947]/60">{judul}</p>
-      <p className="mt-1 text-lg font-black tracking-tight text-[#0A2947]">{formatRupiah(nilai)}</p>
+    <div className="rounded-xl border border-navy/10 bg-gading p-4">
+      <p className="text-xs font-bold text-navy/60">{judul}</p>
+      <p className="mt-1 text-lg font-black tracking-tight text-navy">{formatRupiah(nilai)}</p>
     </div>
   );
 }
@@ -57,7 +57,7 @@ function RingkasanAkun({ filter, namaAkun }: { filter: FilterMutasi; namaAkun: s
           {pesanError(ringkasan.error, "Gagal memuat ringkasan akun kas.")}
         </p>
       ) : !ringkasan.data ? (
-        <p className="text-sm font-medium text-[#0A2947]/60">Memuat ringkasan...</p>
+        <p className="text-sm font-medium text-navy/60">Memuat ringkasan...</p>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <KartuRingkasan judul="Saldo awal periode" nilai={ringkasan.data.saldoAwalPeriode} />
@@ -94,9 +94,9 @@ export function HalamanMutasi() {
         header: "Dicatat",
         cell: ({ row }) => (
           <div>
-            <p className="font-medium text-[#0A2947]">{formatTanggal(row.original.createdAt)}</p>
+            <p className="font-medium text-navy">{formatTanggal(row.original.createdAt)}</p>
             {tanggalTransaksiBerbeda(row.original) && (
-              <p className="text-xs text-[#0A2947]/60">
+              <p className="text-xs text-navy/60">
                 Tanggal transaksi {formatTanggalPendek(row.original.tanggal)}
               </p>
             )}
@@ -118,7 +118,7 @@ export function HalamanMutasi() {
             <div>
               <p>{row.original.keterangan || "-"}</p>
               {tautan && (
-                <Link href={tautan.url} className="text-xs font-bold text-[#0A2947] underline underline-offset-2">
+                <Link href={tautan.url} className="text-xs font-bold text-navy underline underline-offset-2">
                   {tautan.teks}
                 </Link>
               )}
@@ -144,7 +144,7 @@ export function HalamanMutasi() {
         id: "saldoSesudah",
         header: () => <div className="text-right">Saldo Sesudah</div>,
         cell: ({ row }) => (
-          <div className="text-right font-mono text-[#0A2947]">
+          <div className="text-right font-mono text-navy">
             {formatRupiah(row.original.saldoSesudah)}
           </div>
         ),
@@ -155,12 +155,12 @@ export function HalamanMutasi() {
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
-      <div className="bg-[#F2EAE1] border border-[#0A2947]/10 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col gap-6 w-full overflow-hidden">
+      <div className="bg-krem border border-navy/10 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col gap-6 w-full overflow-hidden">
         <div>
-          <h2 className="text-base sm:text-lg font-bold tracking-wide text-[#0A2947]">
+          <h2 className="text-base sm:text-lg font-bold tracking-wide text-navy">
             Laporan Mutasi Arus Kas
           </h2>
-          <p className="text-sm font-medium text-[#0A2947]/60 mt-1">
+          <p className="text-sm font-medium text-navy/60 mt-1">
             Setiap perubahan saldo akun kas, terbaru dicatat lebih dulu.
           </p>
         </div>

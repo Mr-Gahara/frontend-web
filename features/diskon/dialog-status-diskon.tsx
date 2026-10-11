@@ -48,12 +48,12 @@ export function DialogStatusDiskon({
         if (!buka && !perbarui.isPending) onTutup();
       }}
     >
-      <AlertDialogContent className="border-[#041E3F]/10 bg-[#F2EAE1]">
+      <AlertDialogContent className="border-navy/10 bg-krem">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-[#041E3F]">
+          <AlertDialogTitle className="text-navy">
             {mengaktifkan ? "Aktifkan" : "Nonaktifkan"} diskon {diskon?.namaDiskon}?
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-[#041E3F]/70">
+          <AlertDialogDescription className="text-navy/70">
             {mengaktifkan
               ? "Diskon akan kembali dapat dipilih kasir, sesuai aturan berlakunya."
               : "Diskon tidak lagi dapat dipilih kasir. Riwayat penjualan yang memakainya tetap tersimpan, dan diskon dapat diaktifkan kembali."}
@@ -62,7 +62,7 @@ export function DialogStatusDiskon({
         <AlertDialogFooter>
           <AlertDialogCancel
             disabled={perbarui.isPending}
-            className="cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent"
+            className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 bg-transparent"
           >
             Batal
           </AlertDialogCancel>
@@ -79,7 +79,7 @@ export function DialogStatusDiskon({
             disabled={perbarui.isPending}
             className={
               mengaktifkan
-                ? "cursor-pointer bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90"
+                ? "cursor-pointer bg-navy text-gading hover:bg-navy/90"
                 : "cursor-pointer bg-red-600 text-white hover:bg-red-700 focus:ring-red-600"
             }
           >

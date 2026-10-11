@@ -36,8 +36,8 @@ export function HalamanGenerateRuang({ ruang }: { ruang: RuangJadwal }) {
   if (karyawan.isLoading || pola.memuat || shift.memuat) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#041E3F] mb-4" />
-        <p className="text-[#041E3F]/70 font-bold">
+        <Loader2 className="h-8 w-8 animate-spin text-navy mb-4" />
+        <p className="text-navy/70 font-bold">
           Mempersiapkan mesin generator...
         </p>
       </div>
@@ -56,7 +56,7 @@ export function HalamanGenerateRuang({ ruang }: { ruang: RuangJadwal }) {
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="mt-4 px-6 py-2 bg-[#041E3F] text-[#FFFAF3] rounded-xl font-bold"
+          className="mt-4 px-6 py-2 bg-navy text-gading rounded-xl font-bold"
         >
           Coba Lagi
         </button>
@@ -84,7 +84,7 @@ export function HalamanGenerateRuang({ ruang }: { ruang: RuangJadwal }) {
       <button
         type="button"
         onClick={() => router.push(urlKalender)}
-        className="flex items-center gap-2 text-[#041E3F]/60 hover:text-[#041E3F] font-bold text-sm mb-6 transition-colors"
+        className="flex items-center gap-2 text-navy/60 hover:text-navy font-bold text-sm mb-6 transition-colors"
       >
         <ChevronLeft className="h-4 w-4" />
         Kembali ke Kalender Jadwal

@@ -48,12 +48,12 @@ import {
 import { skemaPelanggan, type NilaiFormPelanggan } from "./schema";
 
 const KELAS_INPUT =
-  "bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50";
+  "bg-gading text-navy border-navy/15 focus-visible:ring-navy/50";
 
 /** Tampilan isian yang berbeda antara panel tambah dan dialog ubah. */
 const RAGAM = {
-  tambah: { bungkus: "space-y-1.5", label: "text-xs font-medium text-[#041E3F]" },
-  ubah: { bungkus: "space-y-2", label: "text-sm font-medium text-[#041E3F]" },
+  tambah: { bungkus: "space-y-1.5", label: "text-xs font-medium text-navy" },
+  ubah: { bungkus: "space-y-2", label: "text-sm font-medium text-navy" },
 } as const;
 
 type Ragam = keyof typeof RAGAM;
@@ -64,7 +64,7 @@ function PesanIsian({ pesan }: { pesan?: string }) {
 }
 
 function Opsional() {
-  return <span className="text-[#041E3F]/50 font-normal">(opsional)</span>;
+  return <span className="text-navy/50 font-normal">(opsional)</span>;
 }
 
 interface IsianProps {
@@ -106,14 +106,14 @@ function IsianPelanggan({ register, control, errors, idAwalan, ragam }: IsianPro
             <Select value={field.value} onValueChange={field.onChange}>
               <SelectTrigger
                 id={id("tipe")}
-                className="w-full cursor-pointer bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus:ring-[#041E3F]/50"
+                className="w-full cursor-pointer bg-gading text-navy border-navy/15 focus:ring-navy/50"
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F]">
-                <SelectItem value="umum" className="cursor-pointer hover:bg-[#041E3F]/5">Umum</SelectItem>
-                <SelectItem value="member" className="cursor-pointer hover:bg-[#041E3F]/5">Member</SelectItem>
-                <SelectItem value="korporat" className="cursor-pointer hover:bg-[#041E3F]/5">Korporat</SelectItem>
+              <SelectContent className="bg-krem border-navy/10 text-navy">
+                <SelectItem value="umum" className="cursor-pointer hover:bg-navy/5">Umum</SelectItem>
+                <SelectItem value="member" className="cursor-pointer hover:bg-navy/5">Member</SelectItem>
+                <SelectItem value="korporat" className="cursor-pointer hover:bg-navy/5">Korporat</SelectItem>
               </SelectContent>
             </Select>
           )}
@@ -217,7 +217,7 @@ export function FormTambahPelanggan() {
         />
         <Button
           type="submit"
-          className="w-full cursor-pointer mt-2 bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90"
+          className="w-full cursor-pointer mt-2 bg-navy text-gading hover:bg-navy/90"
           disabled={buat.isPending}
         >
           Simpan Pelanggan
@@ -230,17 +230,17 @@ export function FormTambahPelanggan() {
           if (!buka && !buat.isPending) setMenunggu(null);
         }}
       >
-        <AlertDialogContent className="border-[#041E3F]/10 bg-[#F2EAE1]">
+        <AlertDialogContent className="border-navy/10 bg-krem">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#041E3F]">Simpan Pelanggan Baru?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#041E3F]/70">
+            <AlertDialogTitle className="text-navy">Simpan Pelanggan Baru?</AlertDialogTitle>
+            <AlertDialogDescription className="text-navy/70">
               Apakah Anda yakin ingin menambahkan <strong>{menunggu?.namaPelanggan}</strong> ke dalam daftar pelanggan?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={buat.isPending}
-              className="cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 bg-transparent"
             >
               Batal
             </AlertDialogCancel>
@@ -250,7 +250,7 @@ export function FormTambahPelanggan() {
                 if (menunggu) buat.mutate(payloadBuatPelanggan(menunggu));
               }}
               disabled={buat.isPending}
-              className="cursor-pointer bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90"
+              className="cursor-pointer bg-navy text-gading hover:bg-navy/90"
             >
               {buat.isPending ? "Menyimpan..." : "Ya, Simpan"}
             </AlertDialogAction>
@@ -322,14 +322,14 @@ function IsiFormUbah({ pelanggan, onTutup }: { pelanggan: Pelanggan; onTutup: ()
           variant="outline"
           onClick={onTutup}
           disabled={perbarui.isPending}
-          className="cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent"
+          className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 bg-transparent"
         >
           Batal
         </Button>
         <Button
           type="submit"
           disabled={perbarui.isPending}
-          className="cursor-pointer bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90"
+          className="cursor-pointer bg-navy text-gading hover:bg-navy/90"
         >
           {perbarui.isPending ? "Menyimpan..." : "Simpan Perubahan"}
         </Button>
@@ -352,10 +352,10 @@ export function DialogUbahPelanggan({
         if (!buka) onTutup();
       }}
     >
-      <DialogContent className="sm:max-w-md border-[#041E3F]/10 bg-[#F2EAE1]">
+      <DialogContent className="sm:max-w-md border-navy/10 bg-krem">
         <DialogHeader>
-          <DialogTitle className="text-[#041E3F]">Edit Pelanggan</DialogTitle>
-          <DialogDescription className="text-[#041E3F]/70">
+          <DialogTitle className="text-navy">Edit Pelanggan</DialogTitle>
+          <DialogDescription className="text-navy/70">
             Perbarui informasi data pelanggan di bawah ini.
           </DialogDescription>
         </DialogHeader>

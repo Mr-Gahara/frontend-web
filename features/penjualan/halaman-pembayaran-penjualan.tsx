@@ -118,8 +118,8 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
   if (loadingPenjualan)
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0A2947] border-t-transparent"></div>
-        <p className="text-sm font-bold text-[#0A2947]/60">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-navy border-t-transparent"></div>
+        <p className="text-sm font-bold text-navy/60">
           Memuat data tagihan...
         </p>
       </div>
@@ -129,7 +129,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
     // (sejalan dengan detail penjualan).
     return (
       <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-16 text-center">
-        <p role="alert" className="text-sm font-bold text-[#0A2947]/70">
+        <p role="alert" className="text-sm font-bold text-navy/70">
           {!errorPenjualan || isNotFound(errorPenjualan)
             ? "Penjualan tidak ditemukan."
             : pesanError(errorPenjualan, "Gagal memuat data tagihan.")}
@@ -145,7 +145,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
     // DRAFT belum dapat dibayar dan VOID tidak dapat dibayar lagi (backend 465b438).
     return (
       <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-16 text-center">
-        <p role="alert" className="text-sm font-bold text-[#0A2947]/70">
+        <p role="alert" className="text-sm font-bold text-navy/70">
           {penjualan.statusPenjualan === "DRAFT"
             ? "Penjualan masih Draft. Simpan penjualan lewat Finalisasi Invoice di halaman detail sebelum menerima pembayaran."
             : "Penjualan sudah dibatalkan dan tidak dapat dibayar."}
@@ -164,7 +164,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
           onClick={() => router.back()}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -172,19 +172,19 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
         </Button>
         <div className="flex justify-between items-end">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+            <h1 className="text-2xl font-bold tracking-tight text-navy">
               Terima Pembayaran
             </h1>
-            <p className="text-sm font-medium text-[#0A2947]/60">
+            <p className="text-sm font-medium text-navy/60">
               Catat penerimaan pembayaran untuk No. Referensi:{" "}
-              <span className="font-bold font-mono text-[#0A2947]">
+              <span className="font-bold font-mono text-navy">
                 {penjualan.noReferensi}
               </span>
             </p>
           </div>
           <div className="text-right hidden sm:block">
-            <p className="text-xs font-bold text-[#0A2947]/60">Tanggal Transaksi</p>
-            <p className="font-bold text-sm text-[#0A2947]">
+            <p className="text-xs font-bold text-navy/60">Tanggal Transaksi</p>
+            <p className="font-bold text-sm text-navy">
               {format(new Date(penjualan.tanggalTransaksi), "dd MMM yyyy", {
                 locale: localeID,
               })}
@@ -198,11 +198,11 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
         <div className="lg:col-span-7 flex flex-col gap-6">
           <form
             onSubmit={handleValidation}
-            className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm space-y-6"
+            className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm space-y-6"
           >
-            <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3 mb-2">
-              <Wallet className="h-5 w-5 text-[#D4A373]" />
-              <h2 className="font-bold text-[#0A2947]">
+            <div className="flex items-center gap-2 border-b border-navy/10 pb-3 mb-2">
+              <Wallet className="h-5 w-5 text-karamel" />
+              <h2 className="font-bold text-navy">
                 Detail Penerimaan Pembayaran
               </h2>
             </div>
@@ -210,24 +210,24 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Pilihan Metode Pembayaran */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947]">
+                <label className="text-sm font-bold text-navy">
                   Metode Pembayaran <span className="text-red-500">*</span>
                 </label>
                 <Select
                   value={metodePembayaranID}
                   onValueChange={setMetodePembayaranID}
                 >
-                  <SelectTrigger className="w-full cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-medium">
+                  <SelectTrigger className="w-full cursor-pointer bg-gading border-navy/20 text-navy font-medium">
                     <SelectValue placeholder="Pilih metode..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                  <SelectContent className="bg-gading border-navy/10 text-navy">
                     {metodeList.map((metode) => {
                       const validId = metode.id;
                       return (
                         <SelectItem
                           key={validId}
                           value={validId}
-                          className="cursor-pointer hover:bg-[#0A2947]/5 font-medium"
+                          className="cursor-pointer hover:bg-navy/5 font-medium"
                         >
                           {metode.namaPembayaran}
                         </SelectItem>
@@ -239,24 +239,24 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
 
               {/* Akun kas tujuan ditentukan backend dari metode (backend 465b438) */}
               <div className="space-y-2">
-                <p className="text-sm font-bold text-[#0A2947]">Akun Kas Tujuan</p>
+                <p className="text-sm font-bold text-navy">Akun Kas Tujuan</p>
                 <p
                   aria-label="Akun Kas Tujuan"
-                  className="flex h-9 items-center rounded-md border border-[#0A2947]/10 bg-[#FFFAF3]/60 px-3 text-sm font-medium text-[#0A2947]"
+                  className="flex h-9 items-center rounded-md border border-navy/10 bg-gading/60 px-3 text-sm font-medium text-navy"
                 >
                   {teksAkunTujuan(metodeTerpilih)}
                 </p>
-                <p className="text-xs font-medium text-[#0A2947]/50">
+                <p className="text-xs font-medium text-navy/50">
                   Mengikuti akun kas metode pembayaran yang dipilih.
                 </p>
               </div>
             </div>
 
-            <div className="h-px w-full bg-[#0A2947]/10" />
+            <div className="h-px w-full bg-navy/10" />
 
             {/* Input Nominal */}
             <div className="space-y-2 pt-2">
-              <label className="text-sm font-bold text-[#0A2947]" htmlFor="jumlahBayar">
+              <label className="text-sm font-bold text-navy" htmlFor="jumlahBayar">
                 Jumlah Diterima (Rp) <span className="text-red-500">*</span>
               </label>
               <div className="flex flex-col sm:flex-row gap-3">
@@ -264,7 +264,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
                   id="jumlahBayar"
                   type="text"
                   inputMode="numeric"
-                  className="text-lg font-bold h-12 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]"
+                  className="text-lg font-bold h-12 bg-gading border-navy/20 text-navy"
                   placeholder="0"
                   value={jumlahBayarStr}
                   onChange={(e) => {
@@ -276,7 +276,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
                 />
                 <Button
                   type="button"
-                  className="h-12 px-6 cursor-pointer bg-[#718355]/10 text-[#718355] hover:bg-[#718355]/20 font-bold border-none shadow-none shrink-0"
+                  className="h-12 px-6 cursor-pointer bg-sage/10 text-sage hover:bg-sage/20 font-bold border-none shadow-none shrink-0"
                   onClick={() =>
                     setJumlahBayarStr(
                       new Intl.NumberFormat("id-ID").format(sisaTagihan),
@@ -286,23 +286,23 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
                   Bayar Uang Pas
                 </Button>
               </div>
-              <p className="text-xs font-medium text-[#0A2947]/50 mt-1">
+              <p className="text-xs font-medium text-navy/50 mt-1">
                 Masukkan nominal angka. Maksimal setara dengan total sisa
                 tagihan.
               </p>
             </div>
 
             {/* Catatan */}
-            <div className="space-y-2 pt-2 border-t border-[#0A2947]/10 mt-2">
-              <label className="text-sm font-bold text-[#0A2947]" htmlFor="catatanBayar">
-                Catatan Pembayaran <span className="text-[#0A2947]/50 font-medium">(Opsional)</span>
+            <div className="space-y-2 pt-2 border-t border-navy/10 mt-2">
+              <label className="text-sm font-bold text-navy" htmlFor="catatanBayar">
+                Catatan Pembayaran <span className="text-navy/50 font-medium">(Opsional)</span>
               </label>
               <Input
                 id="catatanBayar"
                 value={catatan}
                 onChange={(e) => setCatatan(e.target.value)}
                 placeholder="Misal: Pembayaran DP 50% via Transfer"
-                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-medium"
+                className="bg-gading border-navy/20 text-navy placeholder:text-navy/30 font-medium"
               />
             </div>
 
@@ -312,10 +312,10 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
               </p>
             )}
 
-            <div className="pt-6 border-t border-[#0A2947]/10">
+            <div className="pt-6 border-t border-navy/10">
               <Button
                 type="submit"
-                className="w-full h-14 text-base cursor-pointer bg-[#718355] text-[#FFFAF3] hover:bg-[#718355]/90 font-bold shadow-sm"
+                className="w-full h-14 text-base cursor-pointer bg-sage text-gading hover:bg-sage/90 font-bold shadow-sm"
                 disabled={penjualan.sisaTagihan <= 0}
               >
                 {penjualan.sisaTagihan <= 0
@@ -328,8 +328,8 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
 
         {/* PANEL KANAN: RINGKASAN TAGIHAN (Sticky) */}
         <div className="lg:col-span-5 flex flex-col gap-6 lg:sticky lg:top-6">
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#0A2947] text-[#FFFAF3] p-6 sm:p-8 shadow-md space-y-5">
-            <div className="flex items-center gap-2 border-b border-[#FFFAF3]/20 pb-3 uppercase tracking-widest text-[#D4A373]">
+          <div className="rounded-2xl border border-navy/10 bg-navy text-gading p-6 sm:p-8 shadow-md space-y-5">
+            <div className="flex items-center gap-2 border-b border-gading/20 pb-3 uppercase tracking-widest text-karamel">
               <ReceiptText className="h-4 w-4" />
               <h2 className="font-bold text-sm">
                 Ringkasan Tagihan
@@ -337,18 +337,18 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
             </div>
 
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between text-[#FFFAF3]/80 font-medium">
+              <div className="flex justify-between text-gading/80 font-medium">
                 <span>Total Tagihan Awal</span>
-                <span className="font-mono text-[#FFFAF3]">
+                <span className="font-mono text-gading">
                   {formatRupiah(penjualan.totalTagihan)}
                 </span>
               </div>
-              <div className="flex justify-between text-[#718355] font-bold">
+              <div className="flex justify-between text-sage font-bold">
                 <span>Telah Dibayar</span>
                 <span className="font-mono">{formatRupiah(penjualan.totalDibayar)}</span>
               </div>
 
-              <div className="border-t border-[#FFFAF3]/20 pt-4 flex justify-between items-center">
+              <div className="border-t border-gading/20 pt-4 flex justify-between items-center">
                 <span className="text-base font-bold text-rose-300">
                   Sisa Tagihan
                 </span>
@@ -360,22 +360,22 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
 
             {/* Simulasi Setelah Pembayaran Ini */}
             {nominalInput > 0 && (
-              <div className="bg-[#FFFAF3]/10 p-5 rounded-xl space-y-3 mt-6 border border-[#FFFAF3]/5">
-                <p className="text-[10px] font-bold text-[#FFFAF3]/50 uppercase tracking-widest mb-2">
+              <div className="bg-gading/10 p-5 rounded-xl space-y-3 mt-6 border border-gading/5">
+                <p className="text-[10px] font-bold text-gading/50 uppercase tracking-widest mb-2">
                   Simulasi Setelah Pembayaran
                 </p>
-                <div className="flex justify-between text-sm font-medium text-[#FFFAF3]/80">
+                <div className="flex justify-between text-sm font-medium text-gading/80">
                   <span>Akan Dibayar</span>
-                  <span className="font-mono text-[#FFFAF3]">
+                  <span className="font-mono text-gading">
                     {formatRupiah(nominalInput)}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm font-bold border-t border-[#FFFAF3]/20 pt-3">
+                <div className="flex justify-between text-sm font-bold border-t border-gading/20 pt-3">
                   <span>Sisa Hutang Baru</span>
                   <span
                     className={`font-mono text-lg ${
                       sisaSetelahBayar === 0
-                        ? "text-[#718355]" // Sage Green
+                        ? "text-sage" // Sage Green
                         : "text-rose-300"
                     }`}
                   >
@@ -386,12 +386,12 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
             )}
           </div>
 
-          <div className="rounded-2xl border border-[#D4A373]/30 bg-[#FFFAF3] p-5 shadow-sm flex items-start gap-4">
-            <div className="p-2 bg-[#D4A373]/10 rounded-lg shrink-0">
-              <Banknote className="h-5 w-5 text-[#D4A373]" />
+          <div className="rounded-2xl border border-karamel/30 bg-gading p-5 shadow-sm flex items-start gap-4">
+            <div className="p-2 bg-karamel/10 rounded-lg shrink-0">
+              <Banknote className="h-5 w-5 text-karamel" />
             </div>
-            <div className="text-sm text-[#0A2947]/70">
-              <p className="font-bold text-[#0A2947] mb-1">Peringatan Audit Kasir</p>
+            <div className="text-sm text-navy/70">
+              <p className="font-bold text-navy mb-1">Peringatan Audit Kasir</p>
               <p className="font-medium leading-relaxed">
                 Pastikan nominal yang diketik sesuai dengan uang fisik atau
                 saldo mutasi bank yang Anda terima. Aksi ini akan mempengaruhi
@@ -404,12 +404,12 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
 
       {/* DIALOG KONFIRMASI */}
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">Konfirmasi Pembayaran</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogTitle className="text-navy">Konfirmasi Pembayaran</AlertDialogTitle>
+            <AlertDialogDescription className="text-navy/70 font-medium">
               Anda akan mencatat pembayaran sebesar{" "}
-              <strong className="text-[#0A2947] font-mono text-base">
+              <strong className="text-navy font-mono text-base">
                 {formatRupiah(nominalInput)}
               </strong>{" "}
               ke dalam sistem. Lanjutkan?
@@ -418,7 +418,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={createPembayaranMutation.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Batal
             </AlertDialogCancel>
@@ -428,7 +428,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
                 executePayment();
               }}
               disabled={createPembayaranMutation.isPending}
-              className="cursor-pointer bg-[#718355] hover:bg-[#718355]/90 text-[#FFFAF3] font-bold"
+              className="cursor-pointer bg-sage hover:bg-sage/90 text-gading font-bold"
             >
               {createPembayaranMutation.isPending
                 ? "Memproses..."

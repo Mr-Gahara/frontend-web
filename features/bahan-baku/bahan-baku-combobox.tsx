@@ -39,12 +39,12 @@ export function BahanBakuCombobox({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between bg-white border-[#0A2947]/20 text-[#0A2947] h-10 focus:ring-1 focus:ring-[#0A2947]",
+            "w-full justify-between bg-white border-navy/20 text-navy h-10 focus:ring-1 focus:ring-navy",
             hasError && "border-rose-500",
             selected ? "font-bold" : "font-normal",
           )}
         >
-          <span className={cn("truncate", !selected && "text-[#0A2947]/50")}>
+          <span className={cn("truncate", !selected && "text-navy/50")}>
             {isLoading
               ? "Memuat bahan..."
               : selected
@@ -55,16 +55,16 @@ export function BahanBakuCombobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[--radix-popover-trigger-width] p-0 border-[#0A2947]/10"
+        className="w-[--radix-popover-trigger-width] p-0 border-navy/10"
         align="start"
       >
         <Command className="bg-white">
           <CommandInput
             placeholder="Cari bahan baku..."
-            className="text-[#0A2947]"
+            className="text-navy"
           />
           <CommandList>
-            <CommandEmpty className="py-4 text-center text-sm text-[#0A2947]/60 font-medium">
+            <CommandEmpty className="py-4 text-center text-sm text-navy/60 font-medium">
               Bahan tidak ditemukan.
             </CommandEmpty>
             <CommandGroup>
@@ -80,16 +80,16 @@ export function BahanBakuCombobox({
                       onSatuanChange(bb.satuan);
                       setOpen(false);
                     }}
-                    className="cursor-pointer text-[#0A2947] aria-selected:bg-[#0A2947]/5 font-medium"
+                    className="cursor-pointer text-navy aria-selected:bg-navy/5 font-medium"
                   >
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4 text-[#718355]",
+                        "mr-2 h-4 w-4 text-sage",
                         String(value) === itemId ? "opacity-100" : "opacity-0",
                       )}
                     />
                     {bb.namaBahan}
-                    <span className="ml-1 text-xs text-[#0A2947]/50 font-normal">
+                    <span className="ml-1 text-xs text-navy/50 font-normal">
                       ({bb.satuan})
                     </span>
                   </CommandItem>

@@ -7,11 +7,11 @@ import type { StatusPenjualan } from "@/types/penjualan";
  * status (keputusan penyesuaian 465b438).
  */
 export const TAMPILAN_STATUS_PENJUALAN: Record<StatusPenjualan, { label: string; kelas: string }> = {
-  DRAFT: { label: "Draft", kelas: "bg-[#FFFAF3] text-[#0A2947] border border-[#0A2947]/20" },
-  UNPAID: { label: "Belum Bayar", kelas: "bg-[#D4A373] text-[#0A2947] border-none" },
-  PARTIAL: { label: "Sebagian", kelas: "bg-[#0A2947]/10 text-[#0A2947] border-none" },
-  PAID: { label: "Lunas", kelas: "bg-[#718355] text-[#FFFAF3] border-none" },
-  VOID: { label: "Batal", kelas: "bg-[#0A2947]/10 text-[#0A2947]/60 border-none" },
+  DRAFT: { label: "Draft", kelas: "bg-gading text-navy border border-navy/20" },
+  UNPAID: { label: "Belum Bayar", kelas: "bg-karamel text-navy border-none" },
+  PARTIAL: { label: "Sebagian", kelas: "bg-navy/10 text-navy border-none" },
+  PAID: { label: "Lunas", kelas: "bg-sage text-gading border-none" },
+  VOID: { label: "Batal", kelas: "bg-navy/10 text-navy/60 border-none" },
 };
 
 /** Urutan pilihan filter status di daftar penjualan. */

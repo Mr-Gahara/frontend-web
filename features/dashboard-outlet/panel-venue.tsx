@@ -30,9 +30,9 @@ function Petak({ petak, ringkas }: { petak: PetakVenue; ringkas: boolean }) {
     : "rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 text-xs sm:text-sm";
   if (petak.status === "digunakan") {
     return (
-      <li className={`bg-[#0A2947] text-[#FFFAF3] flex flex-col gap-1 min-w-0 shadow-sm ${ukuran}`}>
+      <li className={`bg-navy text-gading flex flex-col gap-1 min-w-0 shadow-sm ${ukuran}`}>
         <span className="font-black line-clamp-2 break-words">{petak.nama}</span>
-        <span className="text-[#F2EAE2]/80 truncate">
+        <span className="text-krem/80 truncate">
           {petak.pelanggan
             ? petak.tipePelanggan
               ? `${petak.pelanggan} · ${petak.tipePelanggan}`
@@ -40,7 +40,7 @@ function Petak({ petak, ringkas }: { petak: PetakVenue; ringkas: boolean }) {
             : "Dipakai"}
         </span>
         {petak.sisaMenit !== null && petak.sisaMenit > 0 && (
-          <span className="text-[#D4A373] font-bold">Sisa {petak.sisaMenit} menit</span>
+          <span className="text-karamel font-bold">Sisa {petak.sisaMenit} menit</span>
         )}
       </li>
     );
@@ -48,17 +48,17 @@ function Petak({ petak, ringkas }: { petak: PetakVenue; ringkas: boolean }) {
   const perbaikan = petak.status === "perbaikan";
   return (
     <li
-      className={`bg-[#FFFAF3] flex flex-col gap-1 min-w-0 border ${
-        perbaikan ? "border-dashed border-orange-400" : "border-[#718355]/40"
+      className={`bg-gading flex flex-col gap-1 min-w-0 border ${
+        perbaikan ? "border-dashed border-orange-400" : "border-sage/40"
       } ${ukuran}`}
     >
-      <span className="font-black text-[#0A2947] line-clamp-2 break-words">{petak.nama}</span>
+      <span className="font-black text-navy line-clamp-2 break-words">{petak.nama}</span>
       <span
         className={`flex items-center gap-1.5 font-medium ${
           perbaikan ? "text-orange-700" : "text-[#4F5E3A]"
         }`}
       >
-        <Titik warna={perbaikan ? "bg-orange-500" : "bg-[#718355]"} />
+        <Titik warna={perbaikan ? "bg-orange-500" : "bg-sage"} />
         {perbaikan ? "Perbaikan" : "Kosong"}
       </span>
     </li>
@@ -82,35 +82,35 @@ export function PanelVenue({ booking }: { booking: SesiBookingResponse[] }) {
   return (
     <section
       aria-label="Status Venue"
-      className="bg-[#F2EAE2] border border-[#0A2947]/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-[#0A2947] shadow-sm flex flex-col gap-3 sm:gap-4 h-full"
+      className="bg-krem border border-navy/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-navy shadow-sm flex flex-col gap-3 sm:gap-4 h-full"
     >
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-sm sm:text-lg font-bold tracking-wide">Status Venue</h2>
         {!aset.isLoading && !aset.isError && total > 0 && (
-          <span className="text-xs font-medium text-[#0A2947]/70">
+          <span className="text-xs font-medium text-navy/70">
             {dipakai} dari {total} dipakai
           </span>
         )}
       </div>
       {aset.isLoading ? (
-        <Skeleton className="h-40 w-full bg-[#0A2947]/5 rounded-xl" />
+        <Skeleton className="h-40 w-full bg-navy/5 rounded-xl" />
       ) : aset.isError ? (
         <p className="text-sm font-medium text-rose-600">Gagal memuat status venue.</p>
       ) : total === 0 ? (
-        <p className="text-sm text-[#0A2947]/60">Belum ada aset.</p>
+        <p className="text-sm text-navy/60">Belum ada aset.</p>
       ) : (
         <>
           <div className="flex flex-col gap-2">
-            <div className="h-2 rounded-full bg-[#0A2947]/10 overflow-hidden">
-              <div className="h-full bg-[#0A2947] rounded-full" style={{ width: `${persenDipakai}%` }} />
+            <div className="h-2 rounded-full bg-navy/10 overflow-hidden">
+              <div className="h-full bg-navy rounded-full" style={{ width: `${persenDipakai}%` }} />
             </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium text-[#0A2947]/80">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium text-navy/80">
               <span className="flex items-center gap-1.5">
-                <Titik warna="bg-[#0A2947]" />
+                <Titik warna="bg-navy" />
                 Dipakai {dipakai}
               </span>
               <span className="flex items-center gap-1.5">
-                <Titik warna="bg-[#718355]" />
+                <Titik warna="bg-sage" />
                 Kosong {kosong}
               </span>
               <span className="flex items-center gap-1.5">
@@ -131,7 +131,7 @@ export function PanelVenue({ booking }: { booking: SesiBookingResponse[] }) {
             ))}
           </ul>
           {tampil.length < total && (
-            <p className="text-xs text-[#0A2947]/70">
+            <p className="text-xs text-navy/70">
               Menampilkan {tampil.length} dari {total} aset.{" "}
               <Link href="/dashboard/outlet/reservasi" className="font-bold underline">
                 Lihat semua

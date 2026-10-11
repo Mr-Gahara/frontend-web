@@ -141,8 +141,8 @@ export default function HalamanDetailPengajuanGudang() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-5xl mx-auto">
-        <Skeleton className="h-8 w-64 bg-[#0A2947]/10" />
-        <Skeleton className="h-64 w-full bg-[#0A2947]/10 rounded-2xl" />
+        <Skeleton className="h-8 w-64 bg-navy/10" />
+        <Skeleton className="h-64 w-full bg-navy/10 rounded-2xl" />
       </div>
     );
   }
@@ -150,7 +150,7 @@ export default function HalamanDetailPengajuanGudang() {
   if (error || !detail) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <h2 className="text-xl font-bold text-[#0A2947]">
+        <h2 className="text-xl font-bold text-navy">
           {!error || isNotFound(error)
             ? "Data tidak ditemukan"
             : "Gagal memuat pengajuan. Coba muat ulang halaman."}
@@ -176,22 +176,22 @@ export default function HalamanDetailPengajuanGudang() {
   return (
     <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-5xl mx-auto">
       {/* HEADER & STATUS */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#0A2947]/10 pb-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-navy/10 pb-6">
         <div className="flex flex-col gap-4">
           <Button
             variant="ghost"
             size="sm"
-            className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+            className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
             onClick={() => router.push(URL_DAFTAR)}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Kembali ke Inbox Permintaan
           </Button>
           <div className="space-y-1.5">
-            <h1 className="text-3xl font-black font-mono tracking-tight text-[#0A2947]">
+            <h1 className="text-3xl font-black font-mono tracking-tight text-navy">
               {detail.nomorPengajuan}
             </h1>
-            <div className="flex items-center gap-3 text-sm font-medium text-[#0A2947]/60">
+            <div className="flex items-center gap-3 text-sm font-medium text-navy/60">
               <span className="flex items-center gap-1">
                 <FileText className="w-4 h-4" /> {detail.jenisPengajuan}
               </span>
@@ -218,34 +218,34 @@ export default function HalamanDetailPengajuanGudang() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* KOLOM KIRI: DETAIL ITEM */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-white shadow-sm overflow-hidden">
-            <div className="bg-[#F2EAE1] px-6 py-4 border-b border-[#0A2947]/10 flex items-center gap-2">
-              <Package className="w-5 h-5 text-[#D4A373]" />
-              <h2 className="font-bold text-[#0A2947]">Rincian Kebutuhan Outlet</h2>
+          <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
+            <div className="bg-krem px-6 py-4 border-b border-navy/10 flex items-center gap-2">
+              <Package className="w-5 h-5 text-karamel" />
+              <h2 className="font-bold text-navy">Rincian Kebutuhan Outlet</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="bg-[#FFFAF3] text-xs uppercase font-bold text-[#0A2947]/50 border-b border-[#0A2947]/5">
+                <thead className="bg-gading text-xs uppercase font-bold text-navy/50 border-b border-navy/5">
                   <tr>
                     <th className="px-6 py-4">Nama Barang</th>
                     <th className="px-6 py-4 text-center">Permintaan</th>
                     <th className="px-6 py-4 text-center">Stok Gudang</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#0A2947]/5">
+                <tbody className="divide-y divide-navy/5">
                   {detail.items.map((item, index) => {
                     const stokTersedia = item.stokGudangSaatIni || 0;
                     const isKurang = item.jumlah > stokTersedia;
 
                     return (
-                      <tr key={index} className="hover:bg-[#FFFAF3]/50">
-                        <td className="px-6 py-4 font-bold text-[#0A2947]">
+                      <tr key={index} className="hover:bg-gading/50">
+                        <td className="px-6 py-4 font-bold text-navy">
                           {item.bahanBaku?.namaBahan || "Item Tidak Dikenal"}
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className="font-mono font-bold text-[#0A2947] bg-[#0A2947]/5 px-3 py-1 rounded-md">
+                          <span className="font-mono font-bold text-navy bg-navy/5 px-3 py-1 rounded-md">
                             {item.jumlah}{" "}
-                            <span className="text-xs font-sans font-medium text-[#0A2947]/60">
+                            <span className="text-xs font-sans font-medium text-navy/60">
                               {item.satuan}
                             </span>
                           </span>
@@ -279,9 +279,9 @@ export default function HalamanDetailPengajuanGudang() {
 
           {/* Catatan Tambahan */}
           {detail.catatan && (
-            <div className="rounded-2xl border border-[#0A2947]/10 bg-white p-6 shadow-sm space-y-2">
-              <h3 className="font-bold text-[#0A2947] text-sm">Pesan Khusus dari Outlet:</h3>
-              <p className="text-sm font-medium text-[#0A2947]/70 italic bg-[#FFFAF3] p-4 rounded-xl border border-[#0A2947]/5">
+            <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-2">
+              <h3 className="font-bold text-navy text-sm">Pesan Khusus dari Outlet:</h3>
+              <p className="text-sm font-medium text-navy/70 italic bg-gading p-4 rounded-xl border border-navy/5">
                 &quot;{detail.catatan}&quot;
               </p>
             </div>
@@ -290,48 +290,48 @@ export default function HalamanDetailPengajuanGudang() {
 
         {/* KOLOM KANAN: INFO RUTE & TIMELINE */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-white p-6 shadow-sm space-y-5">
-            <h2 className="font-bold text-[#0A2947] flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-              <MapPin className="w-4 h-4 text-[#D4A373]" /> Informasi Logistik
+          <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-5">
+            <h2 className="font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
+              <MapPin className="w-4 h-4 text-karamel" /> Informasi Logistik
             </h2>
 
             <div className="space-y-4">
               <div className="flex flex-col gap-1 relative pl-6">
-                <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-[#0A2947]" />
-                <div className="absolute left-1.5 top-4 -bottom-4 w-0.5 bg-[#0A2947]/10" />
-                <span className="text-xs font-bold text-[#0A2947]/50 uppercase">
+                <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-navy" />
+                <div className="absolute left-1.5 top-4 -bottom-4 w-0.5 bg-navy/10" />
+                <span className="text-xs font-bold text-navy/50 uppercase">
                   Gudang Asal (Lokasi Kita)
                 </span>
-                <span className="font-bold text-[#0A2947]">{detail.dariLokasi?.nama || "-"}</span>
+                <span className="font-bold text-navy">{detail.dariLokasi?.nama || "-"}</span>
               </div>
               <div className="flex flex-col gap-1 relative pl-6">
-                <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-[#D4A373]" />
-                <span className="text-xs font-bold text-[#0A2947]/50 uppercase">Outlet Peminta</span>
-                <span className="font-bold text-[#0A2947]">{detail.keLokasi?.nama || "-"}</span>
+                <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-karamel" />
+                <span className="text-xs font-bold text-navy/50 uppercase">Outlet Peminta</span>
+                <span className="font-bold text-navy">{detail.keLokasi?.nama || "-"}</span>
               </div>
             </div>
 
-            <div className="border-t border-[#0A2947]/10 pt-4 mt-2 space-y-3">
+            <div className="border-t border-navy/10 pt-4 mt-2 space-y-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="font-bold text-[#0A2947]/60 flex items-center gap-1.5">
+                <span className="font-bold text-navy/60 flex items-center gap-1.5">
                   <CalendarClock className="w-4 h-4" /> Batas Waktu Tiba
                 </span>
-                <span className="font-bold text-[#0A2947] text-right">
+                <span className="font-bold text-navy text-right">
                   {detail.tanggalKebutuhan ? formatTanggalPengajuan(detail.tanggalKebutuhan) : "Fleksibel"}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="font-bold text-[#0A2947]/60">PIC Outlet</span>
-                <span className="font-bold text-[#0A2947] capitalize text-right">
+                <span className="font-bold text-navy/60">PIC Outlet</span>
+                <span className="font-bold text-navy capitalize text-right">
                   {detail.dimintaOleh?.nama || "-"}
                 </span>
               </div>
 
               {/* Tampilkan PIC Gudang jika sudah diproses */}
               {!isSubmitted && (detail.disetujuiOleh || detail.ditolakOleh) && (
-                <div className="flex justify-between items-center text-sm border-t border-[#0A2947]/5 pt-2">
-                  <span className="font-bold text-[#0A2947]/60">Diproses Oleh</span>
-                  <span className="font-bold text-[#0A2947] capitalize text-right">
+                <div className="flex justify-between items-center text-sm border-t border-navy/5 pt-2">
+                  <span className="font-bold text-navy/60">Diproses Oleh</span>
+                  <span className="font-bold text-navy capitalize text-right">
                     {detail.disetujuiOleh?.nama || detail.ditolakOleh?.nama || "-"}
                   </span>
                 </div>
@@ -420,12 +420,12 @@ export default function HalamanDetailPengajuanGudang() {
 
           {/* ACTION BUTTONS (JIKA SUDAH ADA SJ) */}
           {hasSuratJalan && (
-            <div className="rounded-2xl border border-[#0A2947]/10 bg-white p-6 shadow-sm flex flex-col gap-3">
-              <h3 className="text-sm font-bold text-[#0A2947] text-center mb-1">Dokumen Terkait</h3>
+            <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm flex flex-col gap-3">
+              <h3 className="text-sm font-bold text-navy text-center mb-1">Dokumen Terkait</h3>
               <Button
                 variant="outline"
                 onClick={() => router.push(`${URL_TRANSFER}/${detail.transferStokID}`)}
-                className="w-full border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold cursor-pointer"
+                className="w-full border-navy/20 text-navy hover:bg-navy/5 font-bold cursor-pointer"
               >
                 <FileText className="w-4 h-4 mr-2" /> Lihat Surat Jalan
               </Button>
@@ -436,10 +436,10 @@ export default function HalamanDetailPengajuanGudang() {
 
       {/* MODAL KONFIRMASI APPROVE */}
       <AlertDialog open={showConfirmApprove} onOpenChange={setShowConfirmApprove}>
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">Setujui Permintaan Outlet?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogTitle className="text-navy">Setujui Permintaan Outlet?</AlertDialogTitle>
+            <AlertDialogDescription className="text-navy/70 font-medium">
               Pastikan stok di gudang Anda mencukupi. Setelah disetujui, Anda harus membuat Surat
               Jalan (Transfer Stok) untuk mengirimkan barang ini secara fisik.
             </AlertDialogDescription>
@@ -447,7 +447,7 @@ export default function HalamanDetailPengajuanGudang() {
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={approveMutation.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Batal
             </AlertDialogCancel>
@@ -457,7 +457,7 @@ export default function HalamanDetailPengajuanGudang() {
                 approveMutation.mutate();
               }}
               disabled={approveMutation.isPending}
-              className="cursor-pointer bg-emerald-600 text-[#FFFAF3] hover:bg-emerald-700 font-bold border-none"
+              className="cursor-pointer bg-emerald-600 text-gading hover:bg-emerald-700 font-bold border-none"
             >
               {approveMutation.isPending ? "Memproses..." : "Ya, Setujui Sekarang"}
             </AlertDialogAction>
@@ -467,12 +467,12 @@ export default function HalamanDetailPengajuanGudang() {
 
       {/* MODAL REJECT (BUTUH ALASAN) */}
       <Dialog open={showRejectModal} onOpenChange={setShowRejectModal}>
-        <DialogContent className="bg-[#FFFAF3] border-[#0A2947]/10 sm:max-w-md">
+        <DialogContent className="bg-gading border-navy/10 sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-rose-600 flex items-center gap-2">
               <XCircle className="w-5 h-5" /> Tolak Permintaan
             </DialogTitle>
-            <DialogDescription className="text-[#0A2947]/70 font-medium pt-2">
+            <DialogDescription className="text-navy/70 font-medium pt-2">
               Berikan alasan penolakan agar staf Outlet mengetahui kendalanya (misal: stok gudang
               kosong, permintaan terlalu banyak).
             </DialogDescription>
@@ -483,7 +483,7 @@ export default function HalamanDetailPengajuanGudang() {
               placeholder="Ketik alasan penolakan di sini..."
               value={alasanTolak}
               onChange={(e) => setAlasanTolak(e.target.value)}
-              className="bg-white border-[#0A2947]/20 text-[#0A2947] focus-visible:ring-rose-500 resize-none font-medium"
+              className="bg-white border-navy/20 text-navy focus-visible:ring-rose-500 resize-none font-medium"
               rows={4}
             />
           </div>
@@ -491,7 +491,7 @@ export default function HalamanDetailPengajuanGudang() {
             <Button
               variant="ghost"
               onClick={() => setShowRejectModal(false)}
-              className="font-bold text-[#0A2947]/60 hover:text-[#0A2947] cursor-pointer"
+              className="font-bold text-navy/60 hover:text-navy cursor-pointer"
             >
               Batal
             </Button>

@@ -154,15 +154,15 @@ export default function HalamanBuatReservasi() {
           type="button"
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold"
           onClick={() => router.back()}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali
         </Button>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">Buat Sesi Booking (Reservasi)</h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">Buat Sesi Booking (Reservasi)</h1>
+          <p className="text-sm font-medium text-navy/60">
             Sistem akan mencatat jadwal dan secara otomatis membuat Invoice tagihan untuk pelanggan.
           </p>
         </div>
@@ -172,13 +172,13 @@ export default function HalamanBuatReservasi() {
         {/* PANEL KIRI */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           {/* BENTO 1: PELANGGAN */}
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm">
-            <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3 mb-5">
-              <User className="h-5 w-5 text-[#D4A373]" />
-              <h3 className="text-base font-bold text-[#0A2947]">Data Pelanggan</h3>
+          <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm">
+            <div className="flex items-center gap-2 border-b border-navy/10 pb-3 mb-5">
+              <User className="h-5 w-5 text-karamel" />
+              <h3 className="text-base font-bold text-navy">Data Pelanggan</h3>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-navy">
                 Pilih Pelanggan Penyewa <span className="text-rose-500">*</span>
               </label>
               <Controller
@@ -192,7 +192,7 @@ export default function HalamanBuatReservasi() {
                         role="combobox"
                         disabled={memuatPelanggan}
                         className={cn(
-                          "w-full justify-between cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-bold h-12",
+                          "w-full justify-between cursor-pointer bg-gading border-navy/20 text-navy font-bold h-12",
                           errors.dataPelanggan && "border-rose-500",
                         )}
                       >
@@ -204,11 +204,11 @@ export default function HalamanBuatReservasi() {
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-[#0A2947]/10" align="start">
-                      <Command className="bg-[#FFFAF3]">
-                        <CommandInput placeholder="Cari nama pelanggan..." className="text-[#0A2947]" />
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-navy/10" align="start">
+                      <Command className="bg-gading">
+                        <CommandInput placeholder="Cari nama pelanggan..." className="text-navy" />
                         <CommandList>
-                          <CommandEmpty className="py-6 text-center text-sm text-[#0A2947]/60 font-medium">
+                          <CommandEmpty className="py-6 text-center text-sm text-navy/60 font-medium">
                             Pelanggan tidak ditemukan.
                           </CommandEmpty>
                           <CommandGroup>
@@ -220,17 +220,17 @@ export default function HalamanBuatReservasi() {
                                   field.onChange(pel.id);
                                   setBukaPelanggan(false);
                                 }}
-                                className="cursor-pointer text-[#0A2947] aria-selected:bg-[#0A2947]/5 font-bold"
+                                className="cursor-pointer text-navy aria-selected:bg-navy/5 font-bold"
                               >
                                 <Check
                                   className={cn(
-                                    "mr-2 h-4 w-4 text-[#718355]",
+                                    "mr-2 h-4 w-4 text-sage",
                                     field.value === pel.id ? "opacity-100" : "opacity-0",
                                   )}
                                 />
                                 {pel.namaPelanggan}
                                 {pel.nomorHp ? (
-                                  <span className="ml-2 text-xs font-medium text-[#0A2947]/60">
+                                  <span className="ml-2 text-xs font-medium text-navy/60">
                                     {pel.nomorHp}
                                   </span>
                                 ) : null}
@@ -250,13 +250,13 @@ export default function HalamanBuatReservasi() {
           </div>
 
           {/* BENTO 2: DAFTAR FASILITAS */}
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#FFFAF3] shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-[#0A2947]/10 bg-[#F2EAE1]">
+          <div className="rounded-2xl border border-navy/10 bg-gading shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-navy/10 bg-krem">
               <div className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-[#718355]" />
-                <h3 className="text-base font-bold text-[#0A2947]">Daftar Fasilitas & Jadwal Sewa</h3>
+                <CalendarDays className="h-5 w-5 text-sage" />
+                <h3 className="text-base font-bold text-navy">Daftar Fasilitas & Jadwal Sewa</h3>
               </div>
-              <p className="text-xs font-medium text-[#0A2947]/60 mt-1">
+              <p className="text-xs font-medium text-navy/60 mt-1">
                 Atur aset/ruangan mana saja yang akan dibooking. Anda dapat menyewa banyak fasilitas sekaligus.
               </p>
             </div>
@@ -289,7 +289,7 @@ export default function HalamanBuatReservasi() {
                 type="button"
                 onClick={tambahFasilitas}
                 variant="outline"
-                className="w-full border-dashed border-2 border-[#0A2947]/20 text-[#0A2947]/70 hover:text-[#0A2947] hover:bg-[#0A2947]/5 hover:border-[#0A2947]/40 h-12 font-bold cursor-pointer transition-all"
+                className="w-full border-dashed border-2 border-navy/20 text-navy/70 hover:text-navy hover:bg-navy/5 hover:border-navy/40 h-12 font-bold cursor-pointer transition-all"
               >
                 <Plus className="w-4 h-4 mr-2" /> Tambah Fasilitas Lain
               </Button>

@@ -393,17 +393,17 @@ export default function HalamanBuatPenjualan() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
           onClick={() => router.push("/dashboard/outlet/penjualan")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali ke Daftar Penjualan
         </Button>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">
             Buat Penjualan
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <p className="text-sm font-medium text-navy/60">
             Isi detail transaksi untuk membuat struk/invoice penjualan baru.
           </p>
         </div>
@@ -416,38 +416,38 @@ export default function HalamanBuatPenjualan() {
         {/* ================= KOLOM KIRI (UTAMA) ================= */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           {/* INFO TRANSAKSI */}
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm space-y-5">
-            <h2 className="text-base font-bold text-[#0A2947] flex items-center gap-2">
-              <Receipt className="w-5 h-5 text-[#D4A373]" />
+          <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm space-y-5">
+            <h2 className="text-base font-bold text-navy flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-karamel" />
               Informasi Transaksi
             </h2>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-navy">
                 Jenis Penjualan
               </label>
               <Select
                 value={jenisPenjualan}
                 onValueChange={(val) => setJenisPenjualan(val as JenisPenjualan)}
               >
-                <SelectTrigger className="w-full h-12 cursor-pointer font-bold bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]">
+                <SelectTrigger className="w-full h-12 cursor-pointer font-bold bg-gading border-navy/20 text-navy">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                <SelectContent className="bg-gading border-navy/10 text-navy">
                   <SelectItem
                     value="dine-in"
-                    className="cursor-pointer py-3 font-bold hover:bg-[#0A2947]/5"
+                    className="cursor-pointer py-3 font-bold hover:bg-navy/5"
                   >
                     Dine-in
                   </SelectItem>
                   <SelectItem
                     value="takeaway"
-                    className="cursor-pointer py-3 font-bold hover:bg-[#0A2947]/5"
+                    className="cursor-pointer py-3 font-bold hover:bg-navy/5"
                   >
                     Takeaway
                   </SelectItem>
                   <SelectItem
                     value="booking"
-                    className="cursor-pointer py-3 font-bold hover:bg-[#0A2947]/5"
+                    className="cursor-pointer py-3 font-bold hover:bg-navy/5"
                   >
                     Booking
                   </SelectItem>
@@ -457,7 +457,7 @@ export default function HalamanBuatPenjualan() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label htmlFor="tanggal-transaksi" className="text-sm font-bold text-[#0A2947]">
+                <label htmlFor="tanggal-transaksi" className="text-sm font-bold text-navy">
                   Tanggal Transaksi
                 </label>
                 <PilihTanggal
@@ -468,7 +468,7 @@ export default function HalamanBuatPenjualan() {
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="jam-transaksi" className="text-sm font-bold text-[#0A2947]">
+                <label htmlFor="jam-transaksi" className="text-sm font-bold text-navy">
                   Jam Transaksi
                 </label>
                 <InputWaktu
@@ -483,10 +483,10 @@ export default function HalamanBuatPenjualan() {
           </div>
 
           {/* ITEM PENJUALAN */}
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm space-y-4">
+          <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-[#0A2947] flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5 text-[#D4A373]" />
+              <h2 className="text-base font-bold text-navy flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5 text-karamel" />
                 Item Penjualan
               </h2>
               <Button
@@ -494,7 +494,7 @@ export default function HalamanBuatPenjualan() {
                 variant="outline"
                 size="sm"
                 onClick={addItem}
-                className="cursor-pointer border-[#0A2947]/20 bg-[#FFFAF3] text-[#0A2947] font-bold hover:bg-[#0A2947]/5 shadow-sm"
+                className="cursor-pointer border-navy/20 bg-gading text-navy font-bold hover:bg-navy/5 shadow-sm"
               >
                 <Plus className="mr-1 h-3.5 w-3.5" /> Tambah Item
               </Button>
@@ -510,10 +510,10 @@ export default function HalamanBuatPenjualan() {
                 return (
                   <div
                     key={index}
-                    className="rounded-xl border border-[#0A2947]/10 p-5 space-y-4 bg-[#FFFAF3] shadow-inner"
+                    className="rounded-xl border border-navy/10 p-5 space-y-4 bg-gading shadow-inner"
                   >
-                    <div className="flex items-center justify-between border-b border-[#0A2947]/5 pb-3">
-                      <span className="text-xs font-bold text-[#0A2947]/50 uppercase tracking-widest">
+                    <div className="flex items-center justify-between border-b border-navy/5 pb-3">
+                      <span className="text-xs font-bold text-navy/50 uppercase tracking-widest">
                         Item #{index + 1}
                       </span>
                       {items.length > 1 && (
@@ -530,7 +530,7 @@ export default function HalamanBuatPenjualan() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-[#0A2947]">
+                      <label className="text-sm font-bold text-navy">
                         Produk
                       </label>
                       <Popover
@@ -543,13 +543,13 @@ export default function HalamanBuatPenjualan() {
                           <Button
                             variant="outline"
                             role="combobox"
-                            className="w-full justify-between font-bold cursor-pointer bg-white border-[#0A2947]/20 text-[#0A2947]"
+                            className="w-full justify-between font-bold cursor-pointer bg-white border-navy/20 text-navy"
                           >
                             <span
                               className={
                                 item.produkID
                                   ? ""
-                                  : "text-[#0A2947]/40 font-medium"
+                                  : "text-navy/40 font-medium"
                               }
                             >
                               {item.produkID
@@ -560,16 +560,16 @@ export default function HalamanBuatPenjualan() {
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent
-                          className="w-[--radix-popover-trigger-width] p-0 border-[#0A2947]/10"
+                          className="w-[--radix-popover-trigger-width] p-0 border-navy/10"
                           align="start"
                         >
-                          <Command className="bg-[#FFFAF3]">
+                          <Command className="bg-gading">
                             <CommandInput
                               placeholder="Cari produk..."
-                              className="text-[#0A2947]"
+                              className="text-navy"
                             />
                             <CommandList>
-                              <CommandEmpty className="py-6 text-center text-sm font-medium text-[#0A2947]/60">
+                              <CommandEmpty className="py-6 text-center text-sm font-medium text-navy/60">
                                 Produk tidak ditemukan.
                               </CommandEmpty>
                               <CommandGroup>
@@ -579,11 +579,11 @@ export default function HalamanBuatPenjualan() {
                                     onSelect={() =>
                                       handlePilihProduk(index, p.id)
                                     }
-                                    className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-medium"
+                                    className="cursor-pointer text-navy hover:bg-navy/5 font-medium"
                                   >
                                     <Check
                                       className={cn(
-                                        "mr-2 h-4 w-4 text-[#718355]",
+                                        "mr-2 h-4 w-4 text-sage",
                                         item.produkID === p.id
                                           ? "opacity-100"
                                           : "opacity-0",
@@ -592,7 +592,7 @@ export default function HalamanBuatPenjualan() {
                                     <span className="flex-1">
                                       {p.namaProduk}
                                     </span>
-                                    <span className="ml-2 text-xs font-bold text-[#0A2947]/50">
+                                    <span className="ml-2 text-xs font-bold text-navy/50">
                                       {formatRupiah(p.hargaJual)}
                                     </span>
                                   </CommandItem>
@@ -606,7 +606,7 @@ export default function HalamanBuatPenjualan() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-bold text-[#0A2947]" htmlFor={`jumlah-${index}`}>
+                        <label className="text-sm font-bold text-navy" htmlFor={`jumlah-${index}`}>
                           Jumlah
                         </label>
                         <Input
@@ -618,14 +618,14 @@ export default function HalamanBuatPenjualan() {
                             handleJumlahChange(index, e.target.value)
                           }
                           onBlur={() => handleJumlahBlur(index)}
-                          className="bg-white border-[#0A2947]/20 text-[#0A2947] font-bold no-spinner"
+                          className="bg-white border-navy/20 text-navy font-bold no-spinner"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-bold text-[#0A2947]">
+                        <label className="text-sm font-bold text-navy">
                           Harga Satuan
                         </label>
-                        <div className="flex h-10 items-center rounded-md border border-[#0A2947]/10 bg-[#0A2947]/5 px-3 text-sm font-bold text-[#0A2947]/70 font-mono">
+                        <div className="flex h-10 items-center rounded-md border border-navy/10 bg-navy/5 px-3 text-sm font-bold text-navy/70 font-mono">
                           {selectedProduk
                             ? formatRupiah(selectedProduk.hargaJual)
                             : "-"}
@@ -637,8 +637,8 @@ export default function HalamanBuatPenjualan() {
                     {selectedProduk && (
                       <div className="space-y-2 pt-2">
                         <div className="flex justify-between items-center">
-                          <label className="text-xs font-bold flex items-center gap-1.5 text-[#0A2947]">
-                            <Tag className="h-3.5 w-3.5 text-[#D4A373]" />{" "}
+                          <label className="text-xs font-bold flex items-center gap-1.5 text-navy">
+                            <Tag className="h-3.5 w-3.5 text-karamel" />{" "}
                             Diskon Produk
                           </label>
                           <Popover
@@ -651,22 +651,22 @@ export default function HalamanBuatPenjualan() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-7 text-xs cursor-pointer font-bold border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5"
+                                className="h-7 text-xs cursor-pointer font-bold border-navy/20 text-navy hover:bg-navy/5"
                               >
                                 Pilih Diskon
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent
                               align="end"
-                              className="w-64 p-0 border-[#0A2947]/10"
+                              className="w-64 p-0 border-navy/10"
                             >
-                              <Command className="bg-[#FFFAF3]">
+                              <Command className="bg-gading">
                                 <CommandInput
                                   placeholder="Cari diskon item..."
-                                  className="text-[#0A2947]"
+                                  className="text-navy"
                                 />
                                 <CommandList>
-                                  <CommandEmpty className="py-4 text-center text-xs font-medium text-[#0A2947]/60">
+                                  <CommandEmpty className="py-4 text-center text-xs font-medium text-navy/60">
                                     Belum ada diskon aktif.
                                   </CommandEmpty>
                                   <CommandGroup>
@@ -683,7 +683,7 @@ export default function HalamanBuatPenjualan() {
                                           onSelect={() =>
                                             toggleItemDiskon(index, targetId)
                                           }
-                                          className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-medium"
+                                          className="cursor-pointer text-navy hover:bg-navy/5 font-medium"
                                         >
                                           <div className="flex flex-1 items-center gap-2">
                                             {/* Checkbox Custom untuk CommandItem */}
@@ -691,17 +691,17 @@ export default function HalamanBuatPenjualan() {
                                               className={cn(
                                                 "flex h-4 w-4 items-center justify-center rounded-sm border",
                                                 isSelected
-                                                  ? "bg-[#0A2947] border-[#0A2947]"
-                                                  : "border-[#0A2947]/30",
+                                                  ? "bg-navy border-navy"
+                                                  : "border-navy/30",
                                               )}
                                             >
                                               {isSelected && (
-                                                <Check className="h-3 w-3 text-[#FFFAF3]" />
+                                                <Check className="h-3 w-3 text-gading" />
                                               )}
                                             </div>
                                             <span className="flex flex-col"><span>{d.namaDiskon}</span><SyaratDiskon diskon={d} /></span>
                                           </div>
-                                          <Badge className="text-[10px] bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373] border-none font-bold">
+                                          <Badge className="text-[10px] bg-karamel text-navy hover:bg-karamel border-none font-bold">
                                             {d.tipe === "persen"
                                               ? `${d.nilai}%`
                                               : "Rp"}
@@ -726,7 +726,7 @@ export default function HalamanBuatPenjualan() {
                               return (
                                 <Badge
                                   key={d.id || `badge-item-${idx}`}
-                                  className="bg-[#D4A373] text-[#0A2947] border-none hover:bg-[#D4A373] text-[10px] font-bold shadow-sm"
+                                  className="bg-karamel text-navy border-none hover:bg-karamel text-[10px] font-bold shadow-sm"
                                 >
                                   {d.namaDiskon} (
                                   {d.tipe === "persen"
@@ -742,13 +742,13 @@ export default function HalamanBuatPenjualan() {
                     )}
 
                     {selectedProduk && (
-                      <div className="flex flex-col items-end gap-1 pt-3 border-t border-[#0A2947]/5 mt-2">
+                      <div className="flex flex-col items-end gap-1 pt-3 border-t border-navy/5 mt-2">
                         {itemCalc.totalDiskonItem > 0 && (
                           <span className="text-xs text-rose-500 line-through font-mono">
                             {formatRupiah(itemCalc.subTotal)}
                           </span>
                         )}
-                        <span className="text-sm font-bold text-[#0A2947] font-mono">
+                        <span className="text-sm font-bold text-navy font-mono">
                           {formatRupiah(itemCalc.totalHarga)}
                         </span>
                       </div>
@@ -763,9 +763,9 @@ export default function HalamanBuatPenjualan() {
         {/* ================= KOLOM KANAN (SIDEBAR) ================= */}
         <div className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-6">
           {/* PELANGGAN */}
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm space-y-4">
-            <h2 className="text-base font-bold text-[#0A2947] flex items-center gap-2">
-              <Users className="w-5 h-5 text-[#D4A373]" /> Pelanggan
+          <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-4">
+            <h2 className="text-base font-bold text-navy flex items-center gap-2">
+              <Users className="w-5 h-5 text-karamel" /> Pelanggan
             </h2>
             <div className="space-y-2">
               <Popover open={openPelanggan} onOpenChange={setOpenPelanggan}>
@@ -774,11 +774,11 @@ export default function HalamanBuatPenjualan() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={openPelanggan}
-                    className="w-full justify-between font-bold cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]"
+                    className="w-full justify-between font-bold cursor-pointer bg-gading border-navy/20 text-navy"
                   >
                     <span
                       className={
-                        pelangganID ? "" : "text-[#0A2947]/50 font-medium"
+                        pelangganID ? "" : "text-navy/50 font-medium"
                       }
                     >
                       {pelangganID
@@ -790,18 +790,18 @@ export default function HalamanBuatPenjualan() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
-                  className="w-[--radix-popover-trigger-width] p-0 border-[#0A2947]/10"
+                  className="w-[--radix-popover-trigger-width] p-0 border-navy/10"
                   align="start"
                 >
-                  <Command shouldFilter={false} className="bg-[#FFFAF3]">
+                  <Command shouldFilter={false} className="bg-gading">
                     <CommandInput
                       placeholder="Cari pelanggan..."
                       value={pelangganSearch}
                       onValueChange={setPelangganSearch}
-                      className="text-[#0A2947]"
+                      className="text-navy"
                     />
                     <CommandList>
-                      <CommandEmpty className="py-4 text-center text-xs font-medium text-[#0A2947]/60">
+                      <CommandEmpty className="py-4 text-center text-xs font-medium text-navy/60">
                         Pelanggan tidak ditemukan.
                       </CommandEmpty>
                       <CommandGroup>
@@ -815,11 +815,11 @@ export default function HalamanBuatPenjualan() {
                                 setOpenPelanggan(false);
                                 setPelangganSearch("");
                               }}
-                              className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-medium"
+                              className="cursor-pointer text-navy hover:bg-navy/5 font-medium"
                             >
                               <Check
                                 className={cn(
-                                  "mr-2 h-4 w-4 text-[#718355]",
+                                  "mr-2 h-4 w-4 text-sage",
                                   pelangganID === idPelanggan
                                     ? "opacity-100"
                                     : "opacity-0",
@@ -827,11 +827,11 @@ export default function HalamanBuatPenjualan() {
                               />
                               <span>{p.namaPelanggan}</span>
                               {p.nomorHp ? (
-                                <span className="ml-2 text-xs font-medium text-[#0A2947]/60">
+                                <span className="ml-2 text-xs font-medium text-navy/60">
                                   {p.nomorHp}
                                 </span>
                               ) : null}
-                              <span className="ml-auto text-xs font-bold text-[#0A2947]/50 capitalize">
+                              <span className="ml-auto text-xs font-bold text-navy/50 capitalize">
                                 {p.tipePelanggan}
                               </span>
                             </CommandItem>
@@ -846,11 +846,11 @@ export default function HalamanBuatPenjualan() {
           </div>
 
           {/* DISKON GLOBAL & KETERANGAN */}
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm space-y-5">
+          <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-5">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-[#0A2947] flex items-center gap-2">
-                  <Tag className="h-4 w-4 text-[#D4A373]" /> Diskon Global
+                <h2 className="text-base font-bold text-navy flex items-center gap-2">
+                  <Tag className="h-4 w-4 text-karamel" /> Diskon Global
                 </h2>
                 <Popover
                   open={openDiskonGlobal}
@@ -860,22 +860,22 @@ export default function HalamanBuatPenjualan() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-7 text-xs cursor-pointer font-bold border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5"
+                      className="h-7 text-xs cursor-pointer font-bold border-navy/20 text-navy hover:bg-navy/5"
                     >
                       Pilih Diskon
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
                     align="end"
-                    className="w-64 p-0 border-[#0A2947]/10"
+                    className="w-64 p-0 border-navy/10"
                   >
-                    <Command className="bg-[#FFFAF3]">
+                    <Command className="bg-gading">
                       <CommandInput
                         placeholder="Cari diskon transaksi..."
-                        className="text-[#0A2947]"
+                        className="text-navy"
                       />
                       <CommandList>
-                        <CommandEmpty className="py-4 text-center text-xs font-medium text-[#0A2947]/60">
+                        <CommandEmpty className="py-4 text-center text-xs font-medium text-navy/60">
                           Belum ada diskon aktif.
                         </CommandEmpty>
                         <CommandGroup>
@@ -897,7 +897,7 @@ export default function HalamanBuatPenjualan() {
                                     ),
                                   )
                                 }
-                                className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-medium"
+                                className="cursor-pointer text-navy hover:bg-navy/5 font-medium"
                               >
                                 <div className="flex flex-1 items-center gap-2">
                                   {/* Checkbox Custom */}
@@ -905,17 +905,17 @@ export default function HalamanBuatPenjualan() {
                                     className={cn(
                                       "flex h-4 w-4 items-center justify-center rounded-sm border",
                                       isSelected
-                                        ? "bg-[#0A2947] border-[#0A2947]"
-                                        : "border-[#0A2947]/30",
+                                        ? "bg-navy border-navy"
+                                        : "border-navy/30",
                                     )}
                                   >
                                     {isSelected && (
-                                      <Check className="h-3 w-3 text-[#FFFAF3]" />
+                                      <Check className="h-3 w-3 text-gading" />
                                     )}
                                   </div>
                                   <span className="flex flex-col"><span>{d.namaDiskon}</span><SyaratDiskon diskon={d} /></span>
                                 </div>
-                                <Badge className="text-[10px] bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373] border-none font-bold">
+                                <Badge className="text-[10px] bg-karamel text-navy hover:bg-karamel border-none font-bold">
                                   {d.tipe === "persen" ? `${d.nilai}%` : "Rp"}
                                 </Badge>
                               </CommandItem>
@@ -938,7 +938,7 @@ export default function HalamanBuatPenjualan() {
                     return (
                       <Badge
                         key={d.id || `badge-global-${idx}`}
-                        className="bg-[#D4A373] text-[#0A2947] border-none hover:bg-[#D4A373] text-[11px] px-2.5 py-1 font-bold shadow-sm"
+                        className="bg-karamel text-navy border-none hover:bg-karamel text-[11px] px-2.5 py-1 font-bold shadow-sm"
                       >
                         {d.namaDiskon} (
                         {d.tipe === "persen"
@@ -952,10 +952,10 @@ export default function HalamanBuatPenjualan() {
               )}
             </div>
 
-            <div className="space-y-2 border-t border-[#0A2947]/10 pt-4">
-              <label className="text-sm font-bold text-[#0A2947]" htmlFor="keterangan">
+            <div className="space-y-2 border-t border-navy/10 pt-4">
+              <label className="text-sm font-bold text-navy" htmlFor="keterangan">
                 Keterangan{" "}
-                <span className="font-medium text-[#0A2947]/50">
+                <span className="font-medium text-navy/50">
                   (Opsional)
                 </span>
               </label>
@@ -964,20 +964,20 @@ export default function HalamanBuatPenjualan() {
                 value={keterangan}
                 onChange={(e) => setKeterangan(e.target.value)}
                 placeholder="Catatan transaksi..."
-                className="text-sm bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
+                className="text-sm bg-gading border-navy/20 text-navy placeholder:text-navy/30"
               />
             </div>
           </div>
 
           {/* RINGKASAN TAGIHAN */}
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#0A2947] text-[#FFFAF3] p-6 shadow-md space-y-4">
-            <h2 className="text-sm font-bold border-b border-[#FFFAF3]/20 pb-3 flex items-center gap-2 uppercase tracking-widest text-[#D4A373]">
+          <div className="rounded-2xl border border-navy/10 bg-navy text-gading p-6 shadow-md space-y-4">
+            <h2 className="text-sm font-bold border-b border-gading/20 pb-3 flex items-center gap-2 uppercase tracking-widest text-karamel">
               <Calculator className="w-4 h-4" /> Ringkasan
             </h2>
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between text-[#FFFAF3]/80 font-medium">
+              <div className="flex justify-between text-gading/80 font-medium">
                 <span>Subtotal Produk</span>
-                <span className="font-mono text-[#FFFAF3]">
+                <span className="font-mono text-gading">
                   {formatRupiah(calc.grandTotalItem)}
                 </span>
               </div>
@@ -996,7 +996,7 @@ export default function HalamanBuatPenjualan() {
                   {calc.rincianPajak.map((p, idx) => (
                     <div
                       key={idx}
-                      className="flex justify-between text-[#FFFAF3]/60 text-xs font-medium"
+                      className="flex justify-between text-gading/60 text-xs font-medium"
                     >
                       <span>Pajak: {p.namaPajak}</span>
                       <span className="font-mono">
@@ -1005,7 +1005,7 @@ export default function HalamanBuatPenjualan() {
                       </span>
                     </div>
                   ))}
-                  <div className="flex justify-between text-[#FFFAF3]/80 font-bold border-t border-[#FFFAF3]/20 border-dashed pt-2 mt-2">
+                  <div className="flex justify-between text-gading/80 font-bold border-t border-gading/20 border-dashed pt-2 mt-2">
                     <span>Total Pajak</span>
                     <span className="font-mono">
                       {formatRupiah(calc.totalPajak)}
@@ -1014,11 +1014,11 @@ export default function HalamanBuatPenjualan() {
                 </div>
               )}
 
-              <div className="border-t border-[#FFFAF3]/20 pt-4 mt-2 flex justify-between items-end">
-                <span className="text-sm font-bold text-[#FFFAF3]">
+              <div className="border-t border-gading/20 pt-4 mt-2 flex justify-between items-end">
+                <span className="text-sm font-bold text-gading">
                   Total Estimasi
                 </span>
-                <span className="text-2xl font-black text-[#718355] leading-none font-mono">
+                <span className="text-2xl font-black text-sage leading-none font-mono">
                   {formatRupiah(calc.grandTotal)}
                 </span>
               </div>
@@ -1033,20 +1033,20 @@ export default function HalamanBuatPenjualan() {
               {formError}
             </p>
           )}
-          <div className="flex items-center justify-between gap-3 rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-navy/10 bg-krem p-4 shadow-sm">
             <Button
               type="button"
               variant="outline"
               onClick={() => router.push("/dashboard/outlet/penjualan")}
               disabled={createMutation.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Batal
             </Button>
             <Button
               type="submit"
               disabled={createMutation.isPending}
-              className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold px-8 shadow-sm"
+              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold px-8 shadow-sm"
             >
               {createMutation.isPending ? "Memproses..." : "Buat Penjualan"}
             </Button>
@@ -1056,12 +1056,12 @@ export default function HalamanBuatPenjualan() {
 
       {/* DIALOG KONFIRMASI */}
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">
+            <AlertDialogTitle className="text-navy">
               Buat Transaksi Penjualan?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogDescription className="text-navy/70 font-medium">
               Apakah Anda yakin detail transaksi sudah benar? Data akan disimpan
               sebagai transaksi baru yang belum dibayar.
             </AlertDialogDescription>
@@ -1069,7 +1069,7 @@ export default function HalamanBuatPenjualan() {
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={createMutation.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Batal
             </AlertDialogCancel>
@@ -1079,7 +1079,7 @@ export default function HalamanBuatPenjualan() {
                 executeCreate();
               }}
               disabled={createMutation.isPending}
-              className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold"
+              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold"
             >
               {createMutation.isPending ? "Memproses..." : "Ya, Lanjutkan"}
             </AlertDialogAction>

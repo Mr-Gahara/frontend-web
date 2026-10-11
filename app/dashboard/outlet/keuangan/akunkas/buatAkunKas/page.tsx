@@ -84,21 +84,21 @@ export default function BuatAkunKasPage() {
           type="button"
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
           onClick={() => router.push("/dashboard/outlet/keuangan/akunkas")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali ke Daftar Akun Kas
         </Button>
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg shrink-0 shadow-sm">
-            <TipeIcon className="w-6 h-6 text-[#D4A373]" />
+          <div className="p-2 bg-gading border border-navy/10 rounded-lg shrink-0 shadow-sm">
+            <TipeIcon className="w-6 h-6 text-karamel" />
           </div>
           <div className="space-y-0.5">
-            <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+            <h1 className="text-2xl font-bold tracking-tight text-navy">
               Tambah Akun Kas
             </h1>
-            <p className="text-sm font-medium text-[#0A2947]/60">
+            <p className="text-sm font-medium text-navy/60">
               Daftarkan rekening bank atau kas fisik baru ke sistem.
             </p>
           </div>
@@ -106,7 +106,7 @@ export default function BuatAkunKasPage() {
       </div>
 
       {/* Form (Dibungkus Dark Cream) */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] shadow-sm">
+      <div className="rounded-2xl border border-navy/10 bg-krem shadow-sm">
         <form
           onSubmit={handleSubmit(onSubmit)}
           // Padding dalam disesuaikan menjadi p-5 untuk seluler
@@ -114,12 +114,12 @@ export default function BuatAkunKasPage() {
         >
           {/* Informasi Akun */}
           <div className="space-y-4">
-            <h2 className="text-base font-bold text-[#0A2947] flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-              <Banknote className="h-4 w-4 text-[#D4A373]" /> Informasi Akun
+            <h2 className="text-base font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
+              <Banknote className="h-4 w-4 text-karamel" /> Informasi Akun
             </h2>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-navy">
                 Tipe Akun <span className="text-red-500">*</span>
               </label>
               <Controller
@@ -129,28 +129,28 @@ export default function BuatAkunKasPage() {
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger
                       className={cn(
-                        "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] w-full font-bold focus:ring-1 focus:ring-[#0A2947]",
+                        "bg-gading border-navy/20 text-navy w-full font-bold focus:ring-1 focus:ring-navy",
                         errors.tipeAkun && "border-rose-500",
                       )}
                     >
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                    <SelectContent className="bg-gading border-navy/10 text-navy">
                       <SelectItem
                         value="Kas Fisik"
-                        className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+                        className="cursor-pointer font-bold hover:bg-navy/5"
                       >
                         <div className="flex items-center gap-2">
-                          <Wallet className="w-4 h-4 text-[#D4A373]" />
+                          <Wallet className="w-4 h-4 text-karamel" />
                           Kas Fisik
                         </div>
                       </SelectItem>
                       <SelectItem
                         value="Rekening Bank"
-                        className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+                        className="cursor-pointer font-bold hover:bg-navy/5"
                       >
                         <div className="flex items-center gap-2">
-                          <Landmark className="w-4 h-4 text-[#D4A373]" />
+                          <Landmark className="w-4 h-4 text-karamel" />
                           Rekening Bank
                         </div>
                       </SelectItem>
@@ -169,7 +169,7 @@ export default function BuatAkunKasPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947]">
+                <label className="text-sm font-bold text-navy">
                   Nama Akun <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -180,7 +180,7 @@ export default function BuatAkunKasPage() {
                       : "Misal: Kas Laci Kasir"
                   }
                   className={cn(
-                    "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]",
+                    "bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy",
                     errors.namaAkun && "border-rose-500",
                   )}
                 />
@@ -194,7 +194,7 @@ export default function BuatAkunKasPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947]">
+                <label className="text-sm font-bold text-navy">
                   Nomor Akun <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -205,7 +205,7 @@ export default function BuatAkunKasPage() {
                       : "Misal: KAS-001"
                   }
                   className={cn(
-                    "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]",
+                    "bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy",
                     errors.nomorAkun && "border-rose-500",
                   )}
                 />
@@ -220,38 +220,38 @@ export default function BuatAkunKasPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-navy">
                 Keterangan{" "}
-                <span className="text-[#0A2947]/50 font-medium">
+                <span className="text-navy/50 font-medium">
                   (Opsional)
                 </span>
               </label>
               <Input
                 {...register("keterangan")}
                 placeholder="Catatan tambahan untuk akun ini..."
-                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
+                className="bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy"
               />
             </div>
           </div>
 
-          <div className="h-px w-full bg-[#0A2947]/10 my-2" />
+          <div className="h-px w-full bg-navy/10 my-2" />
 
           {/* Saldo & Status */}
           <div className="space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-[#0A2947]/50">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-navy/50">
               Saldo & Status Operasional
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947]">
+                <label className="text-sm font-bold text-navy">
                   Saldo Awal{" "}
-                  <span className="text-[#0A2947]/50 text-xs font-medium">
+                  <span className="text-navy/50 text-xs font-medium">
                     (Opsional, Default 0)
                   </span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-[#0A2947]/50">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-navy/50">
                     Rp
                   </span>
                   <Controller
@@ -277,7 +277,7 @@ export default function BuatAkunKasPage() {
                             field.onChange(raw ? Number(raw) : 0);
                           }}
                           className={cn(
-                            "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] pl-9 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947]",
+                            "bg-gading border-navy/20 text-navy pl-9 font-mono font-bold focus-visible:ring-1 focus-visible:ring-navy",
                             errors.saldo && "border-rose-500",
                           )}
                           inputMode="numeric"
@@ -292,7 +292,7 @@ export default function BuatAkunKasPage() {
                       {errors.saldo.message}
                     </span>
                   ) : (
-                    <p className="text-xs font-medium text-[#0A2947]/50">
+                    <p className="text-xs font-medium text-navy/50">
                       Saldo awal saat akun ini pertama kali didaftarkan.
                     </p>
                   )}
@@ -300,7 +300,7 @@ export default function BuatAkunKasPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947]">
+                <label className="text-sm font-bold text-navy">
                   Status Operasional
                 </label>
                 <Controller
@@ -308,19 +308,19 @@ export default function BuatAkunKasPage() {
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] w-full font-bold focus:ring-1 focus:ring-[#0A2947]">
+                      <SelectTrigger className="bg-gading border-navy/20 text-navy w-full font-bold focus:ring-1 focus:ring-navy">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                      <SelectContent className="bg-gading border-navy/10 text-navy">
                         <SelectItem
                           value="aktif"
-                          className="cursor-pointer font-medium hover:bg-[#0A2947]/5"
+                          className="cursor-pointer font-medium hover:bg-navy/5"
                         >
                           Aktif
                         </SelectItem>
                         <SelectItem
                           value="non-aktif"
-                          className="cursor-pointer font-medium hover:bg-[#0A2947]/5"
+                          className="cursor-pointer font-medium hover:bg-navy/5"
                         >
                           Non-Aktif
                         </SelectItem>
@@ -334,20 +334,20 @@ export default function BuatAkunKasPage() {
 
           {/* Aksi Bawah */}
           {/* Mengubah layout tombol agar responsif: ditumpuk di HP (Batal di bawah), sejajar di Desktop */}
-          <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-6 border-t border-[#0A2947]/10 mt-4">
+          <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-6 border-t border-navy/10 mt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => router.push("/dashboard/outlet/keuangan/akunkas")}
               disabled={createMutation.isPending}
-              className="w-full sm:w-auto cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold px-6"
+              className="w-full sm:w-auto cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold px-6"
             >
               Batal
             </Button>
             <Button
               type="submit"
               disabled={createMutation.isPending}
-              className="w-full sm:w-auto cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold px-6 shadow-sm"
+              className="w-full sm:w-auto cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold px-6 shadow-sm"
             >
               {createMutation.isPending ? (
                 "Menyimpan..."

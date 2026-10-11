@@ -169,14 +169,14 @@ export default function KategoriPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] cursor-pointer"
+            className="h-auto p-0 text-xs font-bold text-navy/60 hover:bg-transparent hover:text-navy cursor-pointer"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Nama Kategori <ArrowUpDown className="ml-1 h-3 w-3" />
           </Button>
         ),
         cell: ({ row }) => (
-          <span className="font-bold text-[#0A2947]">
+          <span className="font-bold text-navy">
             {row.original.namaKategori}
           </span>
         ),
@@ -184,10 +184,10 @@ export default function KategoriPage() {
       {
         accessorKey: "kodeKategori",
         header: () => (
-          <span className="text-xs font-bold text-[#0A2947]/60">Kode</span>
+          <span className="text-xs font-bold text-navy/60">Kode</span>
         ),
         cell: ({ row }) => (
-          <span className="font-mono text-xs font-bold text-[#0A2947]/70">
+          <span className="font-mono text-xs font-bold text-navy/70">
             {row.original.kodeKategori}
           </span>
         ),
@@ -195,12 +195,12 @@ export default function KategoriPage() {
       {
         accessorKey: "keterangan",
         header: () => (
-          <span className="text-xs font-bold text-[#0A2947]/60">
+          <span className="text-xs font-bold text-navy/60">
             Keterangan
           </span>
         ),
         cell: ({ row }) => (
-          <span className="text-sm font-medium text-[#0A2947]/70">
+          <span className="text-sm font-medium text-navy/70">
             {row.original.keterangan || "-"}
           </span>
         ),
@@ -208,7 +208,7 @@ export default function KategoriPage() {
       {
         id: "aksi",
         header: () => (
-          <div className="text-right text-xs font-bold text-[#0A2947]/60">
+          <div className="text-right text-xs font-bold text-navy/60">
             Aksi
           </div>
         ),
@@ -219,17 +219,17 @@ export default function KategoriPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 cursor-pointer text-[#0A2947]/70 hover:text-[#0A2947] hover:bg-[#0A2947]/5"
+                  className="h-8 w-8 cursor-pointer text-navy/70 hover:text-navy hover:bg-navy/5"
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="bg-[#FFFAF3] border-[#0A2947]/10"
+                className="bg-gading border-navy/10"
               >
                 <DropdownMenuItem
-                  className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+                  className="cursor-pointer text-navy hover:bg-navy/5 font-bold"
                   onClick={() => {
                     setEditTarget(row.original);
                     setFormError("");
@@ -238,7 +238,7 @@ export default function KategoriPage() {
                 >
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#0A2947]/10" />
+                <DropdownMenuSeparator className="bg-navy/10" />
                 <DropdownMenuItem
                   className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10 font-bold"
                   onClick={() => setDeleteTarget(row.original)}
@@ -258,14 +258,14 @@ export default function KategoriPage() {
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg shadow-sm">
-            <Tag className="w-6 h-6 text-[#0A2947]" />
+          <div className="p-2 bg-gading border border-navy/10 rounded-lg shadow-sm">
+            <Tag className="w-6 h-6 text-navy" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+            <h1 className="text-2xl font-bold tracking-tight text-navy">
               Kelola Kategori
             </h1>
-            <p className="text-sm font-medium text-[#0A2947]/60">
+            <p className="text-sm font-medium text-navy/60">
               Kelola seluruh data kategori produk.
             </p>
           </div>
@@ -276,13 +276,13 @@ export default function KategoriPage() {
             setFormError("");
             setShowDialog(true);
           }}
-          className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold"
+          className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm font-bold"
         >
           <Plus className="mr-2 h-4 w-4" /> Tambah Kategori
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm">
+      <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm">
         <DataTable
           columns={columns}
           data={data}
@@ -294,12 +294,12 @@ export default function KategoriPage() {
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-md bg-[#FFFAF3] border-[#0A2947]/10">
+        <DialogContent className="sm:max-w-md bg-gading border-navy/10">
           <DialogHeader>
-            <DialogTitle className="text-[#0A2947]">
+            <DialogTitle className="text-navy">
               {editTarget ? "Edit Kategori" : "Tambah Kategori"}
             </DialogTitle>
-            <DialogDescription className="text-[#0A2947]/60 font-medium">
+            <DialogDescription className="text-navy/60 font-medium">
               {editTarget
                 ? "Perbarui data kategori yang sudah ada."
                 : "Isi form berikut untuk menambahkan kategori baru."}
@@ -307,7 +307,7 @@ export default function KategoriPage() {
           </DialogHeader>
           <form onSubmit={handleSubmit(simpan)} className="mt-4 flex flex-col gap-4">
             <div className="space-y-2">
-              <label htmlFor="namaKategori" className="text-sm font-bold text-[#0A2947]">
+              <label htmlFor="namaKategori" className="text-sm font-bold text-navy">
                 Nama Kategori
               </label>
               <Input
@@ -315,14 +315,14 @@ export default function KategoriPage() {
                 {...register("namaKategori")}
                 placeholder="Masukkan nama kategori"
                 aria-invalid={Boolean(errors.namaKategori)}
-                className="bg-white border-[#0A2947]/20"
+                className="bg-white border-navy/20"
               />
               {errors.namaKategori && (
                 <p className="text-sm font-bold text-red-600">{errors.namaKategori.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <label htmlFor="kodeKategori" className="text-sm font-bold text-[#0A2947]">
+              <label htmlFor="kodeKategori" className="text-sm font-bold text-navy">
                 Kode Kategori
               </label>
               <Input
@@ -330,21 +330,21 @@ export default function KategoriPage() {
                 {...register("kodeKategori")}
                 placeholder="Masukkan kode kategori"
                 aria-invalid={Boolean(errors.kodeKategori)}
-                className="bg-white border-[#0A2947]/20"
+                className="bg-white border-navy/20"
               />
               {errors.kodeKategori && (
                 <p className="text-sm font-bold text-red-600">{errors.kodeKategori.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <label htmlFor="keteranganKategori" className="text-sm font-bold text-[#0A2947]">
+              <label htmlFor="keteranganKategori" className="text-sm font-bold text-navy">
                 Keterangan
               </label>
               <Input
                 id="keteranganKategori"
                 {...register("keterangan")}
                 placeholder="Keterangan tambahan (opsional)"
-                className="bg-white border-[#0A2947]/20"
+                className="bg-white border-navy/20"
               />
             </div>
             {formError && (
@@ -356,14 +356,14 @@ export default function KategoriPage() {
                 variant="outline"
                 onClick={() => setShowDialog(false)}
                 disabled={saveKategoriMutation.isPending}
-                className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+                className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 disabled={saveKategoriMutation.isPending}
-                className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold"
+                className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm font-bold"
               >
                 {saveKategoriMutation.isPending ? "Menyimpan..." : "Simpan"}
               </Button>
@@ -378,17 +378,17 @@ export default function KategoriPage() {
           if (!open) setDeleteTarget(null);
         }}
       >
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">
+            <AlertDialogTitle className="text-navy">
               Hapus kategori {deleteTarget?.namaKategori}?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogDescription className="text-navy/70 font-medium">
               {pesanHapus}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold">
+            <AlertDialogCancel className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold">
               Batal
             </AlertDialogCancel>
             <AlertDialogAction

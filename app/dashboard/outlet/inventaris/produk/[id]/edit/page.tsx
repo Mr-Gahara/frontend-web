@@ -27,9 +27,9 @@ export default function EditProdukPage() {
   return (
     <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
       {gagal ? null : (
-        <Loader2 className="h-8 w-8 animate-spin text-[#0A2947]/60" />
+        <Loader2 className="h-8 w-8 animate-spin text-navy/60" />
       )}
-      <p className="text-sm font-bold text-[#0A2947]/60">
+      <p className="text-sm font-bold text-navy/60">
         {gagal
           ? pesanError(error, "Produk tidak ditemukan.")
           : "Memuat detail produk..."}

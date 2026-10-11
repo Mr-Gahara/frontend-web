@@ -37,10 +37,10 @@ import {
   type FilterDiskon,
 } from "./tampilan";
 
-const KELAS_KEPALA = "text-xs font-semibold text-[#041E3F]/60";
+const KELAS_KEPALA = "text-xs font-semibold text-navy/60";
 const KELAS_PEMICU_FILTER =
-  "w-40 h-11 bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus:ring-[#041E3F]/50 font-medium rounded-xl";
-const KELAS_ISI_FILTER = "bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F] font-medium rounded-xl";
+  "w-40 h-11 bg-gading text-navy border-navy/15 focus:ring-navy/50 font-medium rounded-xl";
+const KELAS_ISI_FILTER = "bg-krem border-navy/10 text-navy font-medium rounded-xl";
 
 /**
  * Halaman diskon (keputusan PD2a dan PD3a). Daftar disaring di klien dari
@@ -70,7 +70,7 @@ export function HalamanDiskon() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-0 text-xs font-semibold text-[#041E3F]/60 hover:text-[#041E3F] hover:bg-transparent"
+          className="h-auto p-0 text-xs font-semibold text-navy/60 hover:text-navy hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Nama Diskon
@@ -78,7 +78,7 @@ export function HalamanDiskon() {
         </Button>
       ),
       cell: ({ row }) => (
-        <span className="font-bold text-[#041E3F]">{row.original.namaDiskon}</span>
+        <span className="font-bold text-navy">{row.original.namaDiskon}</span>
       ),
     },
     {
@@ -100,7 +100,7 @@ export function HalamanDiskon() {
       accessorKey: "tipe",
       header: () => <span className={KELAS_KEPALA}>Tipe</span>,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-[#041E3F]/70">
+        <span className="text-sm font-medium text-navy/70">
           {row.original.tipe === "persen" ? "Persen" : "Nominal"}
         </span>
       ),
@@ -109,14 +109,14 @@ export function HalamanDiskon() {
       accessorKey: "nilai",
       header: () => <span className={KELAS_KEPALA}>Nilai</span>,
       cell: ({ row }) => (
-        <span className="font-bold text-[#041E3F]">{teksNilai(row.original)}</span>
+        <span className="font-bold text-navy">{teksNilai(row.original)}</span>
       ),
     },
     {
       accessorKey: "bisaDigabung",
       header: () => <span className={KELAS_KEPALA}>Digabung</span>,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-[#041E3F]/70">
+        <span className="text-sm font-medium text-navy/70">
           {row.original.bisaDigabung ? "Ya" : "Tidak"}
         </span>
       ),
@@ -127,12 +127,12 @@ export function HalamanDiskon() {
       cell: ({ row }) => {
         const aturan = ringkasAturan(row.original);
         if (aturan.length === 0) {
-          return <span className="text-sm font-medium text-[#041E3F]/40">-</span>;
+          return <span className="text-sm font-medium text-navy/40">-</span>;
         }
         return (
           <ul className="space-y-0.5">
             {aturan.map((teks) => (
-              <li key={teks} className="text-xs font-medium text-[#041E3F]/70">
+              <li key={teks} className="text-xs font-medium text-navy/70">
                 {teks}
               </li>
             ))}
@@ -149,7 +149,7 @@ export function HalamanDiskon() {
             className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
               row.original.status === "Aktif"
                 ? "bg-green-100 text-green-700"
-                : "bg-[#041E3F]/10 text-[#041E3F]/60"
+                : "bg-navy/10 text-navy/60"
             }`}
           >
             {row.original.status}
@@ -162,7 +162,7 @@ export function HalamanDiskon() {
     },
     {
       id: "aksi",
-      header: () => <div className="text-right text-xs text-[#041E3F]/60">Aksi</div>,
+      header: () => <div className="text-right text-xs text-navy/60">Aksi</div>,
       cell: ({ row }) => {
         if (!aksi.ubah) return null;
         const item = row.original;
@@ -174,25 +174,25 @@ export function HalamanDiskon() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 cursor-pointer text-[#041E3F]/70 hover:text-[#041E3F] hover:bg-[#041E3F]/5"
+                  className="h-8 w-8 cursor-pointer text-navy/70 hover:text-navy hover:bg-navy/5"
                 >
                   <MoreHorizontal className="h-4 w-4" />
                   <span className="sr-only">Buka menu</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#F2EAE1] border-[#041E3F]/10">
+              <DropdownMenuContent align="end" className="bg-krem border-navy/10">
                 <DropdownMenuItem
-                  className="cursor-pointer text-[#041E3F] hover:bg-[#041E3F]/5 font-medium"
+                  className="cursor-pointer text-navy hover:bg-navy/5 font-medium"
                   onClick={() => setForm({ diskon: item })}
                 >
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#041E3F]/10" />
+                <DropdownMenuSeparator className="bg-navy/10" />
                 <DropdownMenuItem
                   disabled={mengaktifkan && !dalamBatas}
                   className={
                     mengaktifkan
-                      ? "cursor-pointer text-[#041E3F] hover:bg-[#041E3F]/5 font-medium"
+                      ? "cursor-pointer text-navy hover:bg-navy/5 font-medium"
                       : "cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10 font-medium"
                   }
                   onClick={() => setStatusDiubah(item)}
@@ -211,15 +211,15 @@ export function HalamanDiskon() {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#041E3F]">Kelola Diskon</h1>
-          <p className="text-sm text-[#041E3F]/60">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">Kelola Diskon</h1>
+          <p className="text-sm text-navy/60">
             Kelola seluruh data diskon dan promosi toko.
           </p>
         </div>
         {aksi.buat && (
           <Button
             onClick={() => setForm({ diskon: null })}
-            className="cursor-pointer bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90 font-semibold rounded-xl"
+            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-semibold rounded-xl"
           >
             <Plus className="mr-2 h-4 w-4" />
             Tambah Diskon
@@ -281,14 +281,14 @@ export function HalamanDiskon() {
           <Button
             variant="outline"
             onClick={() => setFilter(FILTER_DISKON_AWAL)}
-            className="cursor-pointer h-11 border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent font-semibold rounded-xl"
+            className="cursor-pointer h-11 border-navy/20 text-navy hover:bg-navy/5 bg-transparent font-semibold rounded-xl"
           >
             Reset Filter
           </Button>
         )}
       </div>
 
-      <div className="rounded-xl border border-[#041E3F]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col gap-4 mt-2">
+      <div className="rounded-xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-4 mt-2">
         {daftar.isError ? (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-8 text-center">
             <p className="text-sm font-medium text-red-600">

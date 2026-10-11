@@ -105,12 +105,12 @@ export function StepSatuForm({
     karyawanIds.length === karyawanList.length && karyawanList.length > 0;
 
   return (
-    <div className="bg-[#FFFAF3] border border-[#041E3F]/10 rounded-2xl shadow-sm p-6 sm:p-8 w-full max-w-5xl mx-auto">
-      <div className="mb-8 border-b border-[#041E3F]/10 pb-6">
-        <h2 className="text-xl font-bold text-[#041E3F]">
+    <div className="bg-gading border border-navy/10 rounded-2xl shadow-sm p-6 sm:p-8 w-full max-w-5xl mx-auto">
+      <div className="mb-8 border-b border-navy/10 pb-6">
+        <h2 className="text-xl font-bold text-navy">
           Langkah 1: Parameter Jadwal
         </h2>
-        <p className="text-sm font-semibold text-[#041E3F]/60 mt-1">
+        <p className="text-sm font-semibold text-navy/60 mt-1">
           Pilih template pola kerja, rentang waktu, dan karyawan yang akan
           diterapkan.
         </p>
@@ -132,12 +132,12 @@ export function StepSatuForm({
       >
         {/* KOLOM KIRI: Pengaturan Pola & Waktu */}
         <div className="lg:col-span-7 flex flex-col gap-6">
-          <div className="space-y-3 bg-[#F2EAE1] p-5 rounded-xl border border-[#041E3F]/10">
+          <div className="space-y-3 bg-krem p-5 rounded-xl border border-navy/10">
             <span
               id="label-pola-generate"
-              className="flex items-center gap-2 text-sm font-bold text-[#041E3F]"
+              className="flex items-center gap-2 text-sm font-bold text-navy"
             >
-              <CalendarRange className="h-5 w-5 text-[#041E3F]/70" />
+              <CalendarRange className="h-5 w-5 text-navy/70" />
               Template Pola Roster
             </span>
             <Popover open={openPola} onOpenChange={setOpenPola}>
@@ -149,8 +149,8 @@ export function StepSatuForm({
                   aria-expanded={openPola}
                   aria-labelledby="label-pola-generate"
                   className={cn(
-                    "w-full justify-between font-bold cursor-pointer bg-[#FFFAF3] border-[#041E3F]/15 h-12 rounded-xl px-4 hover:bg-[#041E3F]/5 text-[#041E3F]",
-                    !polaId && "text-[#041E3F]/50 font-medium",
+                    "w-full justify-between font-bold cursor-pointer bg-gading border-navy/15 h-12 rounded-xl px-4 hover:bg-navy/5 text-navy",
+                    !polaId && "text-navy/50 font-medium",
                   )}
                 >
                   {polaId
@@ -160,16 +160,16 @@ export function StepSatuForm({
                 </Button>
               </PopoverTrigger>
               <PopoverContent
-                className="w-[--radix-popover-trigger-width] p-0 border-[#041E3F]/10 bg-[#FFFAF3] shadow-lg rounded-xl"
+                className="w-[--radix-popover-trigger-width] p-0 border-navy/10 bg-gading shadow-lg rounded-xl"
                 align="start"
               >
-                <Command className="bg-[#FFFAF3]">
+                <Command className="bg-gading">
                   <CommandInput
                     placeholder="Cari pola roster..."
-                    className="text-[#041E3F]"
+                    className="text-navy"
                   />
                   <CommandList>
-                    <CommandEmpty className="py-4 text-center text-sm font-medium text-[#041E3F]/60">
+                    <CommandEmpty className="py-4 text-center text-sm font-medium text-navy/60">
                       Pola roster tidak ditemukan.
                     </CommandEmpty>
                     <CommandGroup>
@@ -181,16 +181,16 @@ export function StepSatuForm({
                             setValue("polaId", pola.id);
                             setOpenPola(false);
                           }}
-                          className="cursor-pointer text-[#041E3F] hover:bg-[#041E3F]/5 font-medium"
+                          className="cursor-pointer text-navy hover:bg-navy/5 font-medium"
                         >
                           <Check
                             className={cn(
-                              "mr-2 h-4 w-4 text-[#718355]",
+                              "mr-2 h-4 w-4 text-sage",
                               polaId === pola.id ? "opacity-100" : "opacity-0",
                             )}
                           />
                           <span className="flex-1">{pola.namaPola}</span>
-                          <span className="text-xs font-bold text-[#041E3F]/50">
+                          <span className="text-xs font-bold text-navy/50">
                             ({pola.siklusHari} Hari)
                           </span>
                         </CommandItem>
@@ -202,9 +202,9 @@ export function StepSatuForm({
             </Popover>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#F2EAE1] p-5 rounded-xl border border-[#041E3F]/10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-krem p-5 rounded-xl border border-navy/10">
             <div className="space-y-3">
-              <label htmlFor="mulai-generate" className="text-sm font-bold text-[#041E3F]">
+              <label htmlFor="mulai-generate" className="text-sm font-bold text-navy">
                 Mulai Tanggal
               </label>
               <Controller
@@ -222,7 +222,7 @@ export function StepSatuForm({
             </div>
 
             <div className="space-y-3">
-              <label htmlFor="sampai-generate" className="text-sm font-bold text-[#041E3F]">
+              <label htmlFor="sampai-generate" className="text-sm font-bold text-navy">
                 Sampai Tanggal
               </label>
               <Controller
@@ -255,27 +255,27 @@ export function StepSatuForm({
 
         {/* KOLOM KANAN: Multi-Select Karyawan */}
         <div className="lg:col-span-5 flex flex-col h-full min-h-100">
-          <div className="flex flex-col flex-1 border border-[#041E3F]/15 bg-[#F2EAE1] rounded-xl overflow-hidden shadow-sm">
-            <div className="flex items-center justify-between p-4 border-b border-[#041E3F]/10 bg-[#FFFAF3]">
-              <span className="flex items-center gap-2 text-sm font-bold text-[#041E3F]">
-                <Users className="h-5 w-5 text-[#041E3F]/70" />
+          <div className="flex flex-col flex-1 border border-navy/15 bg-krem rounded-xl overflow-hidden shadow-sm">
+            <div className="flex items-center justify-between p-4 border-b border-navy/10 bg-gading">
+              <span className="flex items-center gap-2 text-sm font-bold text-navy">
+                <Users className="h-5 w-5 text-navy/70" />
                 Target Karyawan
               </span>
-              <span className="text-xs font-black text-[#FFFAF3] bg-[#041E3F] px-2.5 py-1 rounded-md shadow-sm">
+              <span className="text-xs font-black text-gading bg-navy px-2.5 py-1 rounded-md shadow-sm">
                 {karyawanIds.length} Dipilih
               </span>
             </div>
 
-            <div className="flex items-center space-x-3 p-3.5 border-b border-[#041E3F]/10 bg-[#041E3F]/5 transition-colors hover:bg-[#041E3F]/10">
+            <div className="flex items-center space-x-3 p-3.5 border-b border-navy/10 bg-navy/5 transition-colors hover:bg-navy/10">
               <Checkbox
                 id="pilih-semua-karyawan"
                 checked={isAllSelected}
                 onCheckedChange={(c) => toggleAllKaryawan(c === true)}
-                className="rounded-full border-[#041E3F]/30 data-[state=checked]:bg-[#041E3F] data-[state=checked]:border-[#041E3F] data-[state=checked]:text-[#FFFAF3]"
+                className="rounded-full border-navy/30 data-[state=checked]:bg-navy data-[state=checked]:border-navy data-[state=checked]:text-gading"
               />
               <label
                 htmlFor="pilih-semua-karyawan"
-                className="text-sm font-bold text-[#041E3F] cursor-pointer select-none"
+                className="text-sm font-bold text-navy cursor-pointer select-none"
               >
                 Pilih Semua Karyawan
               </label>
@@ -283,7 +283,7 @@ export function StepSatuForm({
 
             <div className="flex flex-col flex-1 overflow-y-auto custom-scrollbar p-2 gap-1 max-h-87.5">
               {karyawanList.length === 0 && (
-                <div className="p-4 text-center text-sm font-bold text-[#041E3F]/50">
+                <div className="p-4 text-center text-sm font-bold text-navy/50">
                   Tidak ada karyawan tersedia.
                 </div>
               )}
@@ -292,19 +292,19 @@ export function StepSatuForm({
                 return (
                   <div
                     key={emp.id}
-                    className="flex items-center space-x-3 p-3 hover:bg-[#FFFAF3] rounded-lg transition-colors border border-transparent hover:border-[#041E3F]/10"
+                    className="flex items-center space-x-3 p-3 hover:bg-gading rounded-lg transition-colors border border-transparent hover:border-navy/10"
                   >
                     <Checkbox
                       id={idKotak}
                       checked={karyawanIds.includes(emp.id)}
                       onCheckedChange={() => toggleKaryawan(emp.id)}
-                      className="rounded-md border-[#041E3F]/30 data-[state=checked]:bg-[#041E3F] data-[state=checked]:border-[#041E3F] data-[state=checked]:text-[#FFFAF3]"
+                      className="rounded-md border-navy/30 data-[state=checked]:bg-navy data-[state=checked]:border-navy data-[state=checked]:text-gading"
                     />
                     <label htmlFor={idKotak} className="flex flex-col cursor-pointer">
-                      <span className="text-sm font-bold text-[#041E3F] leading-none">
+                      <span className="text-sm font-bold text-navy leading-none">
                         {emp.nama}
                       </span>
-                      <span className="text-xs font-semibold text-[#041E3F]/60 mt-1.5">
+                      <span className="text-xs font-semibold text-navy/60 mt-1.5">
                         {emp.role}
                       </span>
                     </label>
@@ -316,18 +316,18 @@ export function StepSatuForm({
         </div>
 
         {/* FOOTER ACTIONS */}
-        <div className="lg:col-span-12 flex items-center justify-end gap-3 mt-4 pt-6 border-t border-[#041E3F]/10">
+        <div className="lg:col-span-12 flex items-center justify-end gap-3 mt-4 pt-6 border-t border-navy/10">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
-            className="h-12 px-6 border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 font-bold rounded-xl cursor-pointer"
+            className="h-12 px-6 border-navy/20 text-navy hover:bg-navy/5 font-bold rounded-xl cursor-pointer"
           >
             Batal
           </Button>
           <Button
             type="submit"
-            className="h-12 px-8 bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer group"
+            className="h-12 px-8 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer group"
           >
             Lanjut Pratinjau
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

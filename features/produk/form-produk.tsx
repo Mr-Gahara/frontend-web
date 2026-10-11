@@ -254,7 +254,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
           type="button"
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
           onClick={() => router.push("/dashboard/outlet/inventaris/produk")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -262,10 +262,10 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">
             {teks.judul}
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <p className="text-sm font-medium text-navy/60">
             {produk ? (
               <>Perbarui informasi produk &quot;{produk.namaProduk}&quot;.</>
             ) : (
@@ -279,17 +279,17 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
         {/* GRID UTAMA: Info Produk & Harga */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* KOLOM KIRI: Info Dasar */}
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm flex flex-col gap-5">
-            <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-              <PackagePlus className="h-5 w-5 text-[#D4A373]" />
-              <h3 className="text-base font-bold text-[#0A2947]">
+          <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm flex flex-col gap-5">
+            <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
+              <PackagePlus className="h-5 w-5 text-karamel" />
+              <h3 className="text-base font-bold text-navy">
                 Informasi Utama
               </h3>
             </div>
 
             <div className="space-y-2">
               <label
-                className="text-sm font-bold text-[#0A2947]"
+                className="text-sm font-bold text-navy"
                 htmlFor="namaProduk"
               >
                 Nama Produk <span className="text-red-500">*</span>
@@ -298,7 +298,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                 id="namaProduk"
                 {...register("namaProduk")}
                 placeholder="Contoh: Kopi Susu Gula Aren"
-                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
+                className="bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy"
               />
               <div className="min-h-4">
                 {errors.namaProduk && (
@@ -310,7 +310,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
             </div>
 
             <div className="space-y-2 flex flex-col">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-navy">
                 Kategori <span className="text-red-500">*</span>
               </label>
               <Controller
@@ -323,13 +323,13 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                         variant="outline"
                         role="combobox"
                         aria-expanded={openCombobox}
-                        className="w-full justify-between cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 focus:ring-1 focus:ring-[#0A2947]"
+                        className="w-full justify-between cursor-pointer bg-gading border-navy/20 text-navy hover:bg-navy/5 focus:ring-1 focus:ring-navy"
                       >
                         <span
                           className={
                             field.value
                               ? "font-bold"
-                              : "font-normal text-[#0A2947]/50"
+                              : "font-normal text-navy/50"
                           }
                         >
                           {field.value
@@ -345,16 +345,16 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent
-                      className="w-[--radix-popover-trigger-width] p-0 border-[#0A2947]/10"
+                      className="w-[--radix-popover-trigger-width] p-0 border-navy/10"
                       align="start"
                     >
-                      <Command className="bg-[#FFFAF3]">
+                      <Command className="bg-gading">
                         <CommandInput
                           placeholder="Cari kategori..."
-                          className="text-[#0A2947]"
+                          className="text-navy"
                         />
                         <CommandList>
-                          <CommandEmpty className="py-6 text-center text-sm text-[#0A2947]/60 font-medium">
+                          <CommandEmpty className="py-6 text-center text-sm text-navy/60 font-medium">
                             Kategori tidak ditemukan.
                           </CommandEmpty>
                           <CommandGroup>
@@ -368,11 +368,11 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                                     field.onChange(katId);
                                     setOpenCombobox(false);
                                   }}
-                                  className="cursor-pointer text-[#0A2947] aria-selected:bg-[#0A2947]/5 font-medium"
+                                  className="cursor-pointer text-navy aria-selected:bg-navy/5 font-medium"
                                 >
                                   <Check
                                     className={cn(
-                                      "mr-2 h-4 w-4 text-[#718355]",
+                                      "mr-2 h-4 w-4 text-sage",
                                       field.value === katId
                                         ? "opacity-100"
                                         : "opacity-0",
@@ -400,11 +400,11 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
 
             <div className="space-y-2">
               <label
-                className="text-sm font-bold text-[#0A2947]"
+                className="text-sm font-bold text-navy"
                 htmlFor="gambarProduk"
               >
                 Link Gambar Produk{" "}
-                <span className="text-[#0A2947]/50 font-medium">
+                <span className="text-navy/50 font-medium">
                   (Opsional)
                 </span>
               </label>
@@ -412,17 +412,17 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                 id="gambarProduk"
                 {...register("gambarProduk")}
                 placeholder="https://example.com/gambar.jpg"
-                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
+                className="bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy"
               />
             </div>
 
             <div className="space-y-2">
               <label
-                className="text-sm font-bold text-[#0A2947]"
+                className="text-sm font-bold text-navy"
                 htmlFor="keteranganProduk"
               >
                 Keterangan{" "}
-                <span className="text-[#0A2947]/50 font-medium">
+                <span className="text-navy/50 font-medium">
                   (Opsional)
                 </span>
               </label>
@@ -430,26 +430,26 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                 id="keteranganProduk"
                 {...register("keterangan")}
                 placeholder="Catatan singkat mengenai produk ini..."
-                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
+                className="bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy"
               />
             </div>
           </div>
 
           {/* KOLOM KANAN: Harga & Stok */}
           <div className="flex flex-col gap-6">
-            <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col gap-5">
-              <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-                <span className="h-5 w-5 rounded-full bg-[#D4A373] text-white flex items-center justify-center font-bold text-xs">
+            <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-5">
+              <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
+                <span className="h-5 w-5 rounded-full bg-karamel text-white flex items-center justify-center font-bold text-xs">
                   $
                 </span>
-                <h3 className="text-base font-bold text-[#0A2947]">
+                <h3 className="text-base font-bold text-navy">
                   Manajemen Harga
                 </h3>
               </div>
 
               <div className="space-y-2">
                 <label
-                  className="text-sm font-bold text-[#0A2947]"
+                  className="text-sm font-bold text-navy"
                   htmlFor="hargaDasar"
                 >
                   Harga Dasar (Rp) <span className="text-red-500">*</span>
@@ -473,7 +473,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                           field.onChange(raw ? Number(raw) : 0);
                         }}
                         className={cn(
-                          "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947]",
+                          "bg-gading border-navy/20 text-navy placeholder:text-navy/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-navy",
                           errors.hargaDasar && "border-rose-500",
                         )}
                         inputMode="numeric"
@@ -487,7 +487,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                       {errors.hargaDasar.message}
                     </span>
                   ) : (
-                    <p className="text-xs font-medium text-[#0A2947]/50">
+                    <p className="text-xs font-medium text-navy/50">
                       Modal produksi per item.
                     </p>
                   )}
@@ -496,7 +496,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
 
               <div className="space-y-2">
                 <label
-                  className="text-sm font-bold text-[#0A2947]"
+                  className="text-sm font-bold text-navy"
                   htmlFor="hargaJual"
                 >
                   Harga Jual (Rp) <span className="text-red-500">*</span>
@@ -520,7 +520,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                           field.onChange(raw ? Number(raw) : 0);
                         }}
                         className={cn(
-                          "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947]",
+                          "bg-gading border-navy/20 text-navy placeholder:text-navy/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-navy",
                           errors.hargaJual && "border-rose-500",
                         )}
                         inputMode="numeric"
@@ -534,7 +534,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                       {errors.hargaJual.message}
                     </span>
                   ) : (
-                    <p className="text-xs font-medium text-[#0A2947]/50">
+                    <p className="text-xs font-medium text-navy/50">
                       Harga yang ditawarkan ke pelanggan.
                     </p>
                   )}
@@ -542,18 +542,18 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col gap-5">
-              <div className="flex items-center justify-between border-b border-[#0A2947]/10 pb-3">
+            <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-5">
+              <div className="flex items-center justify-between border-b border-navy/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <PackagePlus className="h-5 w-5 text-[#D4A373]" />
-                  <h3 id="judulStok" className="text-base font-bold text-[#0A2947]">
+                  <PackagePlus className="h-5 w-5 text-karamel" />
+                  <h3 id="judulStok" className="text-base font-bold text-navy">
                     {teks.judulStok}
                   </h3>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center space-x-2 mb-3 bg-[#FFFAF3] p-3 rounded-xl border border-[#0A2947]/10">
+                <div className="flex items-center space-x-2 mb-3 bg-gading p-3 rounded-xl border border-navy/10">
                   <Controller
                     name="isUnlimitedStok"
                     control={control}
@@ -564,18 +564,18 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                         checked={field.value}
                         onCheckedChange={field.onChange}
                         disabled={hasResep}
-                        className="data-[state=checked]:bg-[#718355] data-[state=checked]:text-white border-[#0A2947]/30"
+                        className="data-[state=checked]:bg-sage data-[state=checked]:text-white border-navy/30"
                       />
                     )}
                   />
                   <div className="space-y-1 leading-none">
                     <label
                       htmlFor="unlimited"
-                      className="text-sm font-bold text-[#0A2947] cursor-pointer"
+                      className="text-sm font-bold text-navy cursor-pointer"
                     >
                       Produk Tanpa Stok (Unlimited)
                     </label>
-                    <p className="text-[10px] font-medium text-[#0A2947]/50">
+                    <p className="text-[10px] font-medium text-navy/50">
                       Aktifkan jika produk ini berupa layanan (jasa) atau stok
                       tidak terbatas.
                     </p>
@@ -587,19 +587,19 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                   aria-labelledby="judulStok"
                   type="number"
                   {...register("stok", { setValueAs: keAngka })}
-                  className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-[#0A2947] disabled:opacity-50 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="bg-gading border-navy/20 text-navy placeholder:text-navy/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-navy disabled:opacity-50 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   placeholder="0"
                   disabled={hasResep || isUnlimitedStok}
                 />
                 <div className="flex items-start gap-2 mt-2">
-                  <Info className="w-4 h-4 text-[#0A2947]/50 shrink-0 mt-0.5" />
+                  <Info className="w-4 h-4 text-navy/50 shrink-0 mt-0.5" />
                   <div className="flex flex-col gap-1 min-h-4">
                     {errors.stok ? (
                       <span className="text-xs font-bold text-rose-500">
                         {errors.stok.message}
                       </span>
                     ) : (
-                      <p className="text-xs font-medium text-[#0A2947]/60 leading-relaxed">
+                      <p className="text-xs font-medium text-navy/60 leading-relaxed">
                         {hasResep
                           ? teks.petunjukStokResep
                           : isUnlimitedStok
@@ -617,16 +617,16 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
         </div>
 
         {/* SECTION: RESEP BAHAN BAKU (USE FIELD ARRAY) */}
-        <div className="rounded-2xl border border-[#0A2947]/10 bg-[#FFFAF3] shadow-sm overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-[#0A2947]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#F2EAE1]">
+        <div className="rounded-2xl border border-navy/10 bg-gading shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-navy/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-krem">
             <div>
               <div className="flex items-center gap-2">
-                <ChefHat className="h-5 w-5 text-[#D4A373]" />
-                <h3 className="text-base font-bold text-[#0A2947]">
+                <ChefHat className="h-5 w-5 text-karamel" />
+                <h3 className="text-base font-bold text-navy">
                   Resep & Komposisi (BOM)
                 </h3>
               </div>
-              <p className="text-xs font-medium text-[#0A2947]/60 mt-1">
+              <p className="text-xs font-medium text-navy/60 mt-1">
                 {teks.deskripsiResep}
               </p>
             </div>
@@ -635,7 +635,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
               onClick={() =>
                 append({ bahanBakuID: "", jumlah: 0, satuan: "gram" })
               }
-              className="cursor-pointer bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/90 font-bold shadow-sm h-9"
+              className="cursor-pointer bg-karamel text-navy hover:bg-karamel/90 font-bold shadow-sm h-9"
             >
               <Plus className="w-4 h-4 mr-2" /> Tambah Bahan
             </Button>
@@ -643,19 +643,19 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
 
           <div className="p-6">
             {fields.length === 0 ? (
-              <div className="text-center py-8 px-4 border-2 border-dashed border-[#0A2947]/10 rounded-xl bg-white/50">
-                <ChefHat className="w-8 h-8 text-[#0A2947]/20 mx-auto mb-2" />
-                <p className="text-sm font-bold text-[#0A2947]/50">
+              <div className="text-center py-8 px-4 border-2 border-dashed border-navy/10 rounded-xl bg-white/50">
+                <ChefHat className="w-8 h-8 text-navy/20 mx-auto mb-2" />
+                <p className="text-sm font-bold text-navy/50">
                   Tidak ada resep yang ditambahkan.
                 </p>
-                <p className="text-xs font-medium text-[#0A2947]/40 mt-1">
+                <p className="text-xs font-medium text-navy/40 mt-1">
                   {teks.resepKosong}
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
                 {/* Header Tabel (Desktop) */}
-                <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-2 text-xs font-bold text-[#0A2947]/60 uppercase tracking-wider">
+                <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-2 text-xs font-bold text-navy/60 uppercase tracking-wider">
                   <div className="col-span-5">Pilih Bahan Baku</div>
                   <div className="col-span-3 text-center">Jumlah</div>
                   <div className="col-span-3 text-center">Satuan</div>
@@ -665,11 +665,11 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                 {fields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start p-4 sm:p-2 border sm:border-none border-[#0A2947]/10 rounded-xl sm:rounded-none bg-white sm:bg-transparent shadow-sm sm:shadow-none"
+                    className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start p-4 sm:p-2 border sm:border-none border-navy/10 rounded-xl sm:rounded-none bg-white sm:bg-transparent shadow-sm sm:shadow-none"
                   >
                     {/* Pilih Bahan Baku */}
                     <div className="col-span-1 sm:col-span-5">
-                      <label className="text-xs font-bold text-[#0A2947] mb-1.5 block sm:hidden">
+                      <label className="text-xs font-bold text-navy mb-1.5 block sm:hidden">
                         Bahan Baku
                       </label>
                       <Controller
@@ -700,14 +700,14 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
 
                     {/* Jumlah */}
                     <div className="col-span-1 sm:col-span-3">
-                      <label className="text-xs font-bold text-[#0A2947] mb-1.5 block sm:hidden">
+                      <label className="text-xs font-bold text-navy mb-1.5 block sm:hidden">
                         Jumlah
                       </label>
                       <Input
                         type="number"
                         {...register(`resep.${index}.jumlah`, { setValueAs: keAngka })}
                         className={cn(
-                          "w-full text-center bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold h-10 focus-visible:ring-1 focus-visible:ring-[#0A2947] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+                          "w-full text-center bg-white border-navy/20 text-navy font-mono font-bold h-10 focus-visible:ring-1 focus-visible:ring-navy [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
                           errors.resep?.[index]?.jumlah && "border-rose-500",
                         )}
                         placeholder="0"
@@ -722,7 +722,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
 
                     {/* Satuan */}
                     <div className="col-span-1 sm:col-span-3">
-                      <label className="text-xs font-bold text-[#0A2947] mb-1.5 block sm:hidden">
+                      <label className="text-xs font-bold text-navy mb-1.5 block sm:hidden">
                         Satuan
                       </label>
                       <Controller
@@ -735,21 +735,21 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                           >
                             <SelectTrigger
                               className={cn(
-                                "w-full bg-white border-[#0A2947]/20 text-[#0A2947] font-bold h-10 focus:ring-1 focus:ring-[#0A2947]",
+                                "w-full bg-white border-navy/20 text-navy font-bold h-10 focus:ring-1 focus:ring-navy",
                                 errors.resep?.[index]?.satuan &&
                                   "border-rose-500",
                               )}
                             >
                               <SelectValue placeholder="Satuan" />
                             </SelectTrigger>
-                            <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
+                            <SelectContent className="bg-white border-navy/10 text-navy">
                               {satuanResepUntukBahan(
                                 bahanBakuList.find((b) => b.id === resepTerisi?.[index]?.bahanBakuID),
                               ).map((sat) => (
                                 <SelectItem
                                   key={sat}
                                   value={sat}
-                                  className="cursor-pointer hover:bg-[#0A2947]/5 font-bold"
+                                  className="cursor-pointer hover:bg-navy/5 font-bold"
                                 >
                                   {sat}
                                 </SelectItem>
@@ -785,20 +785,20 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
 
         {/* Aksi Tombol */}
         {/* FIX 2: flex-col-reverse untuk responsivitas Mobile */}
-        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-6 border-t border-[#0A2947]/10 mt-2">
+        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-6 border-t border-navy/10 mt-2">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push("/dashboard/outlet/inventaris/produk")}
             disabled={simpanMutation.isPending}
-            className="w-full sm:w-auto cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold h-12 px-8"
+            className="w-full sm:w-auto cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold h-12 px-8"
           >
             Batal
           </Button>
           <Button
             type="submit"
             disabled={simpanMutation.isPending}
-            className="w-full sm:w-auto cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold h-12 px-8"
+            className="w-full sm:w-auto cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm font-bold h-12 px-8"
           >
             {simpanMutation.isPending ? teks.tombolMenyimpan : teks.tombolSimpan}
           </Button>

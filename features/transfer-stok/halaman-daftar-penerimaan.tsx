@@ -102,10 +102,10 @@ export default function HalamanDaftarPenerimaan() {
             <PackageOpen className="w-7 h-7" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+            <h1 className="text-2xl font-bold tracking-tight text-navy">
               Penerimaan Barang (Inbound)
             </h1>
-            <p className="text-sm font-medium text-[#0A2947]/60">
+            <p className="text-sm font-medium text-navy/60">
               Pantau dan konfirmasi fisik barang yang sedang dikirim dari Gudang Pusat.
             </p>
           </div>
@@ -115,12 +115,12 @@ export default function HalamanDaftarPenerimaan() {
           <PemilihLokasiOutlet lokasiOutlet={cakupan.lokasiOutlet} nilai={pilihanLokasi} onUbah={setPilihanLokasi} />
         )}
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0A2947]/40" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
           <Input
             placeholder="Cari SJ / Nama Gudang Asal..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 bg-white border-[#0A2947]/20 text-[#0A2947] focus-visible:ring-[#0A2947] h-11"
+            className="pl-9 bg-white border-navy/20 text-navy focus-visible:ring-navy h-11"
           />
         </div>
       </div>
@@ -130,17 +130,17 @@ export default function HalamanDaftarPenerimaan() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-55 w-full rounded-2xl bg-[#0A2947]/10" />
+            <Skeleton key={i} className="h-55 w-full rounded-2xl bg-navy/10" />
           ))
         ) : filteredData.length === 0 ? (
-          <div className="col-span-full py-20 text-center bg-white border border-[#0A2947]/10 rounded-2xl shadow-sm">
+          <div className="col-span-full py-20 text-center bg-white border border-navy/10 rounded-2xl shadow-sm">
             <div className="flex flex-col items-center justify-center gap-4">
-              <div className="bg-[#F2EAE1] p-6 rounded-full text-[#0A2947]/20">
+              <div className="bg-krem p-6 rounded-full text-navy/20">
                 <CheckCircle2 className="w-16 h-16" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-xl font-bold text-[#0A2947]">Tidak Ada Kiriman Tertunda</h3>
-                <p className="text-sm font-medium text-[#0A2947]/50 max-w-md mx-auto">
+                <h3 className="text-xl font-bold text-navy">Tidak Ada Kiriman Tertunda</h3>
+                <p className="text-sm font-medium text-navy/50 max-w-md mx-auto">
                   Belum ada armada logistik yang sedang dalam perjalanan menuju Outlet ini. Sistem akan otomatis memunculkan data jika Gudang memproses Surat Jalan baru.
                 </p>
               </div>
@@ -148,16 +148,16 @@ export default function HalamanDaftarPenerimaan() {
           </div>
         ) : (
           filteredData.map((item) => (
-            <div key={item.id} className="bg-white border border-[#0A2947]/10 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col relative group">
+            <div key={item.id} className="bg-white border border-navy/10 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col relative group">
               {/* Efek Garis Samping */}
               <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-400 opacity-80" />
               
-              <div className="pl-5 pr-4 py-4 border-b border-[#0A2947]/5 flex justify-between items-start">
+              <div className="pl-5 pr-4 py-4 border-b border-navy/5 flex justify-between items-start">
                 <div className="flex flex-col gap-1">
-                  <span className="font-mono font-bold text-[#0A2947] text-lg leading-none">
+                  <span className="font-mono font-bold text-navy text-lg leading-none">
                     {item.nomorTransfer}
                   </span>
-                  <span className="text-xs font-bold text-[#0A2947]/50 capitalize">
+                  <span className="text-xs font-bold text-navy/50 capitalize">
                     Pengirim: {item.pengirim?.nama || "Admin Gudang"}
                   </span>
                 </div>
@@ -170,14 +170,14 @@ export default function HalamanDaftarPenerimaan() {
                 {/* Rute Visual */}
                 <div className="flex items-start gap-3">
                   <div className="flex flex-col items-center mt-1">
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#0A2947]/20" />
-                    <div className="w-0.5 h-6 bg-[#0A2947]/10" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-navy/20" />
+                    <div className="w-0.5 h-6 bg-navy/10" />
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
                   </div>
                   <div className="flex flex-col justify-between h-11.5 flex-1">
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-[#0A2947]/40 uppercase">Dari Pusat</span>
-                      <span className="text-sm font-bold text-[#0A2947] truncate leading-tight">{item.dariLokasi?.nama || "Gudang"}</span>
+                      <span className="text-[10px] font-bold text-navy/40 uppercase">Dari Pusat</span>
+                      <span className="text-sm font-bold text-navy truncate leading-tight">{item.dariLokasi?.nama || "Gudang"}</span>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[10px] font-bold text-emerald-600/70 uppercase">Tujuan</span>
@@ -186,13 +186,13 @@ export default function HalamanDaftarPenerimaan() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 bg-[#FFFAF3] p-3 rounded-xl border border-[#0A2947]/5 mt-2">
+                <div className="grid grid-cols-2 gap-4 bg-gading p-3 rounded-xl border border-navy/5 mt-2">
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-[#0A2947]/50 uppercase">Diberangkatkan</span>
-                    <span className="text-xs font-bold text-[#0A2947]">{formatTanggal(item.tanggalKirim)}</span>
+                    <span className="text-[10px] font-bold text-navy/50 uppercase">Diberangkatkan</span>
+                    <span className="text-xs font-bold text-navy">{formatTanggal(item.tanggalKirim)}</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-[#0A2947]/50 uppercase">Estimasi Waktu</span>
+                    <span className="text-[10px] font-bold text-navy/50 uppercase">Estimasi Waktu</span>
                     <span className="text-xs font-bold text-amber-600">{getLamaPerjalanan(item.tanggalKirim)}</span>
                   </div>
                 </div>
@@ -205,7 +205,7 @@ export default function HalamanDaftarPenerimaan() {
                 </div>
                 <Button 
                   size="sm" 
-                  className="font-bold bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm"
+                  className="font-bold bg-navy text-gading hover:bg-navy/90 shadow-sm"
                   onClick={() => router.push(`/dashboard/outlet/inventaris/penerimaanBarang/${item.id}`)}
                 >
                   Proses Terima <ArrowRight className="w-4 h-4 ml-1.5" />

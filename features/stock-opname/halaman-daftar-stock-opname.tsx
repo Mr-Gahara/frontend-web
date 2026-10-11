@@ -35,11 +35,11 @@ const formatTanggal = (iso: string) => {
 
 const badgeStatusOpname = (status: StatusOpname) => {
   const map: Record<StatusOpname, string> = {
-    DRAFT: "bg-[#D4A373] text-[#0A2947] border-none shadow-sm", // Mustard
+    DRAFT: "bg-karamel text-navy border-none shadow-sm", // Mustard
     SUBMITTED: "bg-blue-100 text-blue-700 border-none shadow-sm", // Soft Blue
-    APPROVED: "bg-[#718355] text-[#FFFAF3] border-none shadow-sm", // Sage Green
+    APPROVED: "bg-sage text-gading border-none shadow-sm", // Sage Green
     REJECTED: "bg-rose-100 text-rose-700 border-none shadow-sm", // Light Red
-    CANCELLED: "bg-[#0A2947]/10 text-[#0A2947]/60 border-none shadow-sm", // Navy Muted
+    CANCELLED: "bg-navy/10 text-navy/60 border-none shadow-sm", // Navy Muted
   };
 
   const labels: Record<StatusOpname, string> = {
@@ -50,7 +50,7 @@ const badgeStatusOpname = (status: StatusOpname) => {
     CANCELLED: "Dibatalkan",
   };
 
-  const className = map[status] || "bg-[#0A2947]/5 text-[#0A2947]/60";
+  const className = map[status] || "bg-navy/5 text-navy/60";
   return (
     <Badge className={`${className} px-2.5 py-0.5 font-bold`}>
       {labels[status] || status}
@@ -131,7 +131,7 @@ export default function HalamanDaftarStockOpname({
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] cursor-pointer"
+            className="h-auto p-0 text-xs font-bold text-navy/60 hover:bg-transparent hover:text-navy cursor-pointer"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             No. Opname
@@ -139,7 +139,7 @@ export default function HalamanDaftarStockOpname({
           </Button>
         ),
         cell: ({ row }) => (
-          <span className="font-bold font-mono text-[#0A2947] text-xs sm:text-sm">
+          <span className="font-bold font-mono text-navy text-xs sm:text-sm">
             {row.original.nomorOpname}
           </span>
         ),
@@ -150,7 +150,7 @@ export default function HalamanDaftarStockOpname({
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] cursor-pointer hidden sm:flex"
+            className="h-auto p-0 text-xs font-bold text-navy/60 hover:bg-transparent hover:text-navy cursor-pointer hidden sm:flex"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Tanggal Dibuat
@@ -158,7 +158,7 @@ export default function HalamanDaftarStockOpname({
           </Button>
         ),
         cell: ({ row }) => (
-          <span className="text-xs sm:text-sm font-medium text-[#0A2947]/70 hidden sm:inline">
+          <span className="text-xs sm:text-sm font-medium text-navy/70 hidden sm:inline">
             {formatTanggal(row.original.tanggal || row.original.createdAt)}
           </span>
         ),
@@ -166,12 +166,12 @@ export default function HalamanDaftarStockOpname({
       {
         accessorKey: "lokasi", // Ganti dari locationID ke lokasi
         header: () => (
-          <span className="text-xs font-bold text-[#0A2947]/60 hidden md:inline">
+          <span className="text-xs font-bold text-navy/60 hidden md:inline">
             Lokasi
           </span>
         ),
         cell: ({ row }) => (
-          <span className="hidden md:inline text-xs sm:text-sm font-medium text-[#0A2947]/80">
+          <span className="hidden md:inline text-xs sm:text-sm font-medium text-navy/80">
             {/* Membaca dari objek relasi mapper */}
             {row.original.lokasi?.nama || "Lokasi Tidak Diketahui"}
           </span>
@@ -180,14 +180,14 @@ export default function HalamanDaftarStockOpname({
       {
         accessorKey: "status",
         header: () => (
-          <span className="text-xs font-bold text-[#0A2947]/60">Status</span>
+          <span className="text-xs font-bold text-navy/60">Status</span>
         ),
         cell: ({ row }) => badgeStatusOpname(row.original.status),
       },
       {
         id: "aksi",
         header: () => (
-          <div className="text-right text-xs font-bold text-[#0A2947]/60">
+          <div className="text-right text-xs font-bold text-navy/60">
             Aksi
           </div>
         ),
@@ -198,7 +198,7 @@ export default function HalamanDaftarStockOpname({
               <Button
                 variant="outline"
                 size="sm"
-                className="cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold shadow-sm h-8 px-3"
+                className="cursor-pointer bg-gading border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm h-8 px-3"
                 onClick={() => router.push(`${teks.urlDaftar}/${targetId}`)}
               >
                 <Eye className="w-3.5 h-3.5 mr-1.5" />
@@ -217,14 +217,14 @@ export default function HalamanDaftarStockOpname({
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg shadow-sm hidden sm:block">
-            <ClipboardCheck className="w-6 h-6 text-[#0A2947]" />
+          <div className="p-2 bg-gading border border-navy/10 rounded-lg shadow-sm hidden sm:block">
+            <ClipboardCheck className="w-6 h-6 text-navy" />
           </div>
           <div className="space-y-0.5 min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0A2947] truncate">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-navy truncate">
               {teks.judul}
             </h1>
-            <p className="text-xs sm:text-sm font-medium text-[#0A2947]/60 hidden sm:block">
+            <p className="text-xs sm:text-sm font-medium text-navy/60 hidden sm:block">
               {teks.deskripsi}
             </p>
           </div>
@@ -235,7 +235,7 @@ export default function HalamanDaftarStockOpname({
               router.push(`${teks.urlDaftar}/buatStockOpname`)
             }
             size="sm"
-            className="cursor-pointer gap-1.5 bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm w-full sm:w-auto"
+            className="cursor-pointer gap-1.5 bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm w-full sm:w-auto"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>{teks.tombolBuat}</span>
@@ -246,10 +246,10 @@ export default function HalamanDaftarStockOpname({
       {penghalang}
 
       {/* FILTER SECTION */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row gap-4 items-end">
+      <div className="rounded-2xl border border-navy/10 bg-krem p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row gap-4 items-end">
         {pemilihLokasi}
         <div className="space-y-1.5 w-full sm:w-64">
-          <label className="text-xs font-bold text-[#0A2947]">
+          <label className="text-xs font-bold text-navy">
             Filter Status
           </label>
           <Select
@@ -258,43 +258,43 @@ export default function HalamanDaftarStockOpname({
               setStatusFilter(val as StatusOpname | "ALL")
             }
           >
-            <SelectTrigger className="cursor-pointer w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-bold">
+            <SelectTrigger className="cursor-pointer w-full bg-gading border-navy/20 text-navy font-bold">
               <SelectValue placeholder="Semua Status" />
             </SelectTrigger>
-            <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+            <SelectContent className="bg-gading border-navy/10 text-navy">
               <SelectItem
                 value="ALL"
-                className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+                className="cursor-pointer font-bold hover:bg-navy/5"
               >
                 Semua Status
               </SelectItem>
               <SelectItem
                 value="DRAFT"
-                className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+                className="cursor-pointer font-bold hover:bg-navy/5"
               >
                 Draft
               </SelectItem>
               <SelectItem
                 value="SUBMITTED"
-                className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+                className="cursor-pointer font-bold hover:bg-navy/5"
               >
                 Menunggu Review
               </SelectItem>
               <SelectItem
                 value="APPROVED"
-                className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+                className="cursor-pointer font-bold hover:bg-navy/5"
               >
                 Disetujui
               </SelectItem>
               <SelectItem
                 value="REJECTED"
-                className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+                className="cursor-pointer font-bold hover:bg-navy/5"
               >
                 Ditolak
               </SelectItem>
               <SelectItem
                 value="CANCELLED"
-                className="cursor-pointer font-bold hover:bg-[#0A2947]/5"
+                className="cursor-pointer font-bold hover:bg-navy/5"
               >
                 Dibatalkan
               </SelectItem>
@@ -305,7 +305,7 @@ export default function HalamanDaftarStockOpname({
         <Button
           variant="outline"
           onClick={handleResetFilter}
-          className="cursor-pointer shrink-0 border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold shadow-sm h-10 w-full sm:w-auto"
+          className="cursor-pointer shrink-0 border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm h-10 w-full sm:w-auto"
         >
           <RotateCcw className="h-4 w-4 mr-2 sm:mr-0" />
           <span className="sm:hidden">Reset Filter</span>
@@ -313,7 +313,7 @@ export default function HalamanDaftarStockOpname({
       </div>
 
       {/* DATA TABLE SECTION */}
-      <div className="w-full overflow-x-auto rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-4 sm:p-6 shadow-sm">
+      <div className="w-full overflow-x-auto rounded-2xl border border-navy/10 bg-krem p-4 sm:p-6 shadow-sm">
         <DataTable
           columns={columns}
           data={opnameList}

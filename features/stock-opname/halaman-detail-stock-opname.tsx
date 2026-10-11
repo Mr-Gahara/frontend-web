@@ -57,11 +57,11 @@ const formatTanggal = (iso: string | null) => {
 
 const badgeStatusOpname = (status: StatusOpname) => {
   const map: Record<StatusOpname, string> = {
-    DRAFT: "bg-[#D4A373] text-[#0A2947]",
+    DRAFT: "bg-karamel text-navy",
     SUBMITTED: "bg-blue-100 text-blue-700",
-    APPROVED: "bg-[#718355] text-[#FFFAF3]",
+    APPROVED: "bg-sage text-gading",
     REJECTED: "bg-rose-100 text-rose-700",
-    CANCELLED: "bg-[#0A2947]/10 text-[#0A2947]/60",
+    CANCELLED: "bg-navy/10 text-navy/60",
   };
   
   const labels: Record<StatusOpname, string> = {
@@ -72,7 +72,7 @@ const badgeStatusOpname = (status: StatusOpname) => {
     CANCELLED: "Dibatalkan",
   };
 
-  const className = map[status] || "bg-[#0A2947]/5 text-[#0A2947]/60";
+  const className = map[status] || "bg-navy/5 text-navy/60";
   return (
     <Badge className={`${className} px-3 py-1 font-bold border-none shadow-sm text-xs`}>
       {labels[status] || status}
@@ -255,15 +255,15 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
   if (isLoading) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0A2947] border-t-transparent"></div>
-        <p className="text-sm font-bold text-[#0A2947]/60">Memuat rincian opname...</p>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-navy border-t-transparent"></div>
+        <p className="text-sm font-bold text-navy/60">Memuat rincian opname...</p>
       </div>
     );
   }
 
   if (error || !opname) {
     return (
-      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-[#0A2947]">
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-navy">
         <Ban className="h-10 w-10 text-rose-500" />
         <p className="font-bold">
           {!error || isNotFound(error)
@@ -283,7 +283,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
   const tipeLokasi = opname.lokasi?.tipe;
   if (tipeLokasi && tipeLokasi !== TIPE_LOKASI_RUANG[ruang]) {
     return (
-      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-[#0A2947]">
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-navy">
         <Ban className="h-10 w-10 text-rose-500" />
         <p className="font-bold">
           Dokumen stok opname ini milik lokasi {tipeLokasi} dan tidak ditampilkan di ruang ini.
@@ -311,19 +311,19 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
           <Button
             variant="ghost"
             size="sm"
-            className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+            className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
             onClick={() => router.push(teks.urlDaftar)}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Kembali ke Daftar Opname
           </Button>
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+            <h1 className="text-2xl font-bold tracking-tight text-navy">
               {teks.judul}
             </h1>
-            <p className="text-sm font-medium text-[#0A2947]/60">
+            <p className="text-sm font-medium text-navy/60">
               No. Ref:{" "}
-              <span className="font-bold font-mono text-[#0A2947]">
+              <span className="font-bold font-mono text-navy">
                 {opname.nomorOpname}
               </span>
             </p>
@@ -337,7 +337,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
           {opname.status === "APPROVED" && tautanSetuju && (
             <Button
               size="sm"
-              className="bg-[#718355] hover:bg-[#718355]/90 text-[#FFFAF3] font-bold shadow-sm"
+              className="bg-sage hover:bg-sage/90 text-gading font-bold shadow-sm"
               onClick={() => router.push(tautanSetuju)}
             >
               <Scale className="w-4 h-4 mr-2" />
@@ -349,61 +349,61 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
 
       {/* INFORMASI UMUM & CATATAN */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-            <ClipboardCheck className="h-5 w-5 text-[#D4A373]" />
-            <h2 className="font-bold text-[#0A2947]">
+        <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-4">
+          <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
+            <ClipboardCheck className="h-5 w-5 text-karamel" />
+            <h2 className="font-bold text-navy">
               Informasi Sesi
             </h2>
           </div>
           <div className="grid grid-cols-2 gap-y-5 text-sm">
             <div>
-              <p className="text-[#0A2947]/60 font-bold text-xs mb-1 flex items-center gap-1">
+              <p className="text-navy/60 font-bold text-xs mb-1 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" /> Tanggal Mulai
               </p>
-              <p className="font-semibold text-[#0A2947]">
+              <p className="font-semibold text-navy">
                 {formatTanggal(opname.tanggal)}
               </p>
             </div>
             <div>
-              <p className="text-[#0A2947]/60 font-bold text-xs mb-1 flex items-center gap-1">
+              <p className="text-navy/60 font-bold text-xs mb-1 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5" /> Lokasi / Gudang
               </p>
               {/* FIX: Ambil dari relasi lokasi */}
-              <p className="font-semibold text-[#0A2947]">
+              <p className="font-semibold text-navy">
                 {opname.lokasi?.nama || opname.lokasi?.id || "-"}
               </p>
             </div>
             <div>
-              <p className="text-[#0A2947]/60 font-bold text-xs mb-1 flex items-center gap-1">
+              <p className="text-navy/60 font-bold text-xs mb-1 flex items-center gap-1">
                 <User className="w-3.5 h-3.5" /> PIC / Staf
               </p>
               {/* FIX: Ambil dari relasi pic */}
-              <p className="font-semibold text-[#0A2947]">
+              <p className="font-semibold text-navy">
                 {opname.pic?.nama || "-"}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm space-y-4 flex flex-col">
-          <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-            <MessageSquare className="h-5 w-5 text-[#D4A373]" />
-            <h2 className="font-bold text-[#0A2947]">
+        <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-4 flex flex-col">
+          <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
+            <MessageSquare className="h-5 w-5 text-karamel" />
+            <h2 className="font-bold text-navy">
               Catatan & Ulasan
             </h2>
           </div>
           <div className="flex-1 space-y-3">
             <div>
-              <span className="text-xs font-bold text-[#0A2947]/60 block mb-0.5">Catatan Pembuatan:</span>
-              <p className="text-sm font-medium text-[#0A2947]/80 italic">
+              <span className="text-xs font-bold text-navy/60 block mb-0.5">Catatan Pembuatan:</span>
+              <p className="text-sm font-medium text-navy/80 italic">
                 {opname.catatan || "Tidak ada catatan saat pembuatan draft."}
               </p>
             </div>
             {opname.catatanReview && (
-              <div className="p-3 bg-white/50 rounded-xl border border-[#0A2947]/10">
-                <span className="text-xs font-bold text-[#0A2947]/60 block mb-1">Pesan dari Manajer/Reviewer:</span>
-                <p className="text-sm font-bold text-[#0A2947]">
+              <div className="p-3 bg-white/50 rounded-xl border border-navy/10">
+                <span className="text-xs font-bold text-navy/60 block mb-1">Pesan dari Manajer/Reviewer:</span>
+                <p className="text-sm font-bold text-navy">
                   &ldquo;{opname.catatanReview}&rdquo;
                 </p>
               </div>
@@ -413,9 +413,9 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
       </div>
 
       {/* TABEL ITEM OPNAME */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] shadow-sm overflow-hidden flex flex-col">
-        <div className="p-5 border-b border-[#0A2947]/5 flex items-center justify-between bg-[#FFFAF3]">
-          <h2 className="font-bold text-[#0A2947]">Daftar Item & Hasil Perhitungan</h2>
+      <div className="rounded-2xl border border-navy/10 bg-krem shadow-sm overflow-hidden flex flex-col">
+        <div className="p-5 border-b border-navy/5 flex items-center justify-between bg-gading">
+          <h2 className="font-bold text-navy">Daftar Item & Hasil Perhitungan</h2>
           
           {/* Tombol Simpan Draft khusus Staf (Jika DRAFT/REJECTED) */}
           {isEditable && (
@@ -424,7 +424,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
               variant="outline"
               onClick={simpanHitungan}
               disabled={saveItemsMutation.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold shadow-sm"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm"
             >
               {saveItemsMutation.isPending ? "Menyimpan..." : (
                 <><Save className="w-4 h-4 mr-2" /> Simpan Angka Sementara</>
@@ -435,7 +435,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
         
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-[#FFFAF3] text-[#0A2947]/60 border-b border-[#0A2947]/5 uppercase tracking-wider text-[10px]">
+            <thead className="bg-gading text-navy/60 border-b border-navy/5 uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="px-5 py-4 font-bold">Nama Item</th>
                 <th className="px-5 py-4 font-bold text-center">Stok Sistem</th>
@@ -444,7 +444,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
                 <th className="px-5 py-4 font-bold min-w-50">Catatan / Alasan Selisih</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#0A2947]/5 bg-[#FFFAF3]">
+            <tbody className="divide-y divide-navy/5 bg-gading">
               {/* FIX: Tambahkan optional chaining pada opname.items */}
               {opname.items?.map((item) => {
                 // Menentukan display value untuk stok fisik
@@ -465,13 +465,13 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
                 }
 
                 return (
-                  <tr key={item.itemId} className="hover:bg-[#0A2947]/5 transition-colors">
+                  <tr key={item.itemId} className="hover:bg-navy/5 transition-colors">
                     <td className="px-5 py-4">
-                      <p className="font-bold text-[#0A2947]">{item.namaSnapshot}</p>
-                      <p className="text-xs text-[#0A2947]/50 font-medium">Satuan: {item.satuanSnapshot}</p>
+                      <p className="font-bold text-navy">{item.namaSnapshot}</p>
+                      <p className="text-xs text-navy/50 font-medium">Satuan: {item.satuanSnapshot}</p>
                     </td>
                     
-                    <td className="px-5 py-4 text-center font-bold text-[#0A2947] font-mono bg-[#0A2947]/5">
+                    <td className="px-5 py-4 text-center font-bold text-navy font-mono bg-navy/5">
                       {item.qtySystemSnapshot}
                     </td>
                     
@@ -483,10 +483,10 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
                           placeholder="0"
                           value={localData?.qtyPhysical ?? ""}
                           onChange={(e) => handleInputPhysical(item.itemId, e.target.value)}
-                          className="w-full text-center font-bold font-mono bg-white border-[#0A2947]/20 focus-visible:ring-[#0A2947]"
+                          className="w-full text-center font-bold font-mono bg-white border-navy/20 focus-visible:ring-navy"
                         />
                       ) : (
-                        <div className="text-center font-bold text-[#0A2947] font-mono">
+                        <div className="text-center font-bold text-navy font-mono">
                           {displayQtyPhys}
                         </div>
                       )}
@@ -497,12 +497,12 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
                         variant="outline"
                         className={`border-none font-bold font-mono px-2 py-0.5 ${
                           diffDisplay === "-"
-                            ? "bg-transparent text-[#0A2947]/30"
+                            ? "bg-transparent text-navy/30"
                             : Number(diffDisplay) > 0
                             ? "bg-emerald-100 text-emerald-700"
                             : Number(diffDisplay) < 0
                             ? "bg-rose-100 text-rose-700"
-                            : "bg-[#0A2947]/10 text-[#0A2947]"
+                            : "bg-navy/10 text-navy"
                         }`}
                       >
                         {Number(diffDisplay) > 0 ? `+${diffDisplay}` : diffDisplay}
@@ -515,12 +515,12 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
                           value={localData?.catatanItem ?? ""}
                           onChange={(e) => handleItemChange(item.itemId, "catatanItem", e.target.value)}
                           placeholder="Jika ada selisih, beri alasan..."
-                          className={`w-full text-sm bg-white border-[#0A2947]/20 focus-visible:ring-[#0A2947] ${
+                          className={`w-full text-sm bg-white border-navy/20 focus-visible:ring-navy ${
                             isMismatch && !(localData?.catatanItem) ? "border-rose-300 bg-rose-50 placeholder:text-rose-300" : ""
                           }`}
                         />
                       ) : (
-                        <p className="text-sm font-medium text-[#0A2947]/70 italic line-clamp-2">
+                        <p className="text-sm font-medium text-navy/70 italic line-clamp-2">
                           {item.catatanItem || "-"}
                         </p>
                       )}
@@ -532,7 +532,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
               {/* Fallback Jika tidak ada item */}
               {(!opname.items || opname.items.length === 0) && (
                  <tr>
-                   <td colSpan={5} className="text-center py-6 text-[#0A2947]/50 font-medium">
+                   <td colSpan={5} className="text-center py-6 text-navy/50 font-medium">
                       Tidak ada data item dalam dokumen opname ini.
                    </td>
                  </tr>
@@ -546,14 +546,14 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
       
       {/* 1. AKSI STAF: SUBMIT */}
       {isEditable && (
-        <div className="rounded-2xl border border-[#0A2947]/10 bg-[#0A2947] p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
-          <div className="text-[#FFFAF3]">
+        <div className="rounded-2xl border border-navy/10 bg-navy p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
+          <div className="text-gading">
             <h3 className="font-bold text-sm">Selesai Menghitung?</h3>
-            <p className="text-xs text-[#FFFAF3]/70">Pastikan semua stok fisik sudah diisi. Setelah diajukan, data akan dikunci untuk direview Manajer.</p>
+            <p className="text-xs text-gading/70">Pastikan semua stok fisik sudah diisi. Setelah diajukan, data akan dikunci untuk direview Manajer.</p>
           </div>
           <Button
             onClick={() => setShowSubmitModal(true)}
-            className="cursor-pointer bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/90 font-bold shadow-sm w-full sm:w-auto"
+            className="cursor-pointer bg-karamel text-navy hover:bg-karamel/90 font-bold shadow-sm w-full sm:w-auto"
           >
             <Send className="w-4 h-4 mr-2" /> Ajukan Pengajuan Opname
           </Button>
@@ -566,7 +566,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
           <Button
             variant="ghost"
             onClick={() => setShowCancelModal(true)}
-            className="cursor-pointer text-[#0A2947]/50 hover:bg-[#0A2947]/5 hover:text-[#0A2947] font-bold"
+            className="cursor-pointer text-navy/50 hover:bg-navy/5 hover:text-navy font-bold"
           >
             Batalkan Sesi Opname
           </Button>
@@ -583,7 +583,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Button
               onClick={() => setShowApproveModal(true)}
-              className="cursor-pointer bg-[#718355] text-[#FFFAF3] hover:bg-[#718355]/90 font-bold shadow-sm"
+              className="cursor-pointer bg-sage text-gading hover:bg-sage/90 font-bold shadow-sm"
             >
               <CheckCircle2 className="w-4 h-4 mr-2" /> Setujui & Sesuaikan Stok
             </Button>
@@ -598,7 +598,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
             <Button
               variant="ghost"
               onClick={() => setShowCancelModal(true)}
-              className="cursor-pointer text-[#0A2947]/50 hover:bg-[#0A2947]/5 hover:text-[#0A2947] font-bold"
+              className="cursor-pointer text-navy/50 hover:bg-navy/5 hover:text-navy font-bold"
             >
               Batalkan Sesi Opname
             </Button>
@@ -610,16 +610,16 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
 
       {/* 1. Modal Submit (Staf) */}
       <AlertDialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">Kirim Pengajuan Opname?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
-              Pastikan Anda telah menekan tombol <strong className="text-[#0A2947]">Simpan Angka Sementara</strong> sebelum mengajukan. Setelah dikirim, Anda tidak dapat mengubah angka fisik lagi kecuali manajer mengembalikannya (Reject).
+            <AlertDialogTitle className="text-navy">Kirim Pengajuan Opname?</AlertDialogTitle>
+            <AlertDialogDescription className="text-navy/70 font-medium">
+              Pastikan Anda telah menekan tombol <strong className="text-navy">Simpan Angka Sementara</strong> sebelum mengajukan. Setelah dikirim, Anda tidak dapat mengubah angka fisik lagi kecuali manajer mengembalikannya (Reject).
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={submitMutation.isPending} className="border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold cursor-pointer">Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={(e) => { e.preventDefault(); submitMutation.mutate(); }} disabled={submitMutation.isPending} className="bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold cursor-pointer">
+            <AlertDialogCancel disabled={submitMutation.isPending} className="border-navy/20 text-navy hover:bg-navy/5 font-bold cursor-pointer">Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); submitMutation.mutate(); }} disabled={submitMutation.isPending} className="bg-navy text-gading hover:bg-navy/90 font-bold cursor-pointer">
               {submitMutation.isPending ? "Mengajukan..." : "Ya, Kirim Pengajuan"}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -628,27 +628,27 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
 
       {/* 2. Modal Approve (Manajer) */}
       <AlertDialog open={showApproveModal} onOpenChange={setShowApproveModal}>
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947] flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-[#718355]" /> Setujui Pengajuan
+            <AlertDialogTitle className="text-navy flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-sage" /> Setujui Pengajuan
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogDescription className="text-navy/70 font-medium">
               Menyetujui dokumen ini akan langsung memicu {teks.namaJurnal}. Saldo persediaan di sistem akan diubah mengikuti angka fisik yang diinput.
             </AlertDialogDescription>
             <div className="pt-4">
-              <label className="text-xs font-bold text-[#0A2947] mb-1.5 block">Catatan Persetujuan (Opsional)</label>
+              <label className="text-xs font-bold text-navy mb-1.5 block">Catatan Persetujuan (Opsional)</label>
               <Textarea
                 placeholder="Misal: Selisih disetujui, sesuai dengan laporan kehilangan."
                 value={approveAlasan}
                 onChange={(e) => setApproveAlasan(e.target.value)}
-                className="bg-white border-[#0A2947]/20 font-medium text-[#0A2947]"
+                className="bg-white border-navy/20 font-medium text-navy"
               />
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-2">
-            <AlertDialogCancel disabled={approveMutation.isPending} className="border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold cursor-pointer">Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={(e) => { e.preventDefault(); approveMutation.mutate(approveAlasan.trim() || teks.alasanSetujuiBawaan); }} disabled={approveMutation.isPending} className="bg-[#718355] text-[#FFFAF3] hover:bg-[#718355]/90 font-bold cursor-pointer border-none shadow-sm">
+            <AlertDialogCancel disabled={approveMutation.isPending} className="border-navy/20 text-navy hover:bg-navy/5 font-bold cursor-pointer">Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); approveMutation.mutate(approveAlasan.trim() || teks.alasanSetujuiBawaan); }} disabled={approveMutation.isPending} className="bg-sage text-gading hover:bg-sage/90 font-bold cursor-pointer border-none shadow-sm">
               {approveMutation.isPending ? "Memproses Eksekusi..." : "Eksekusi Penyesuaian Stok"}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -657,12 +657,12 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
 
       {/* 3. Modal Reject (Manajer) */}
       <AlertDialog open={showRejectModal} onOpenChange={setShowRejectModal}>
-        <AlertDialogContent className="bg-[#FFFAF3] border-rose-200">
+        <AlertDialogContent className="bg-gading border-rose-200">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-rose-700 flex items-center gap-2">
               <XCircle className="w-5 h-5" /> Tolak & Kembalikan ke Staf
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogDescription className="text-navy/70 font-medium">
               Status opname akan kembali menjadi <strong>REJECTED</strong>. Staf dapat mengedit ulang angka fisik berdasarkan instruksi Anda.
             </AlertDialogDescription>
             <div className="pt-4">
@@ -671,16 +671,16 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
                 placeholder="Misal: Harap hitung ulang bagian rak belakang."
                 value={rejectCatatan}
                 onChange={(e) => setRejectCatatan(e.target.value)}
-                className="bg-white border-rose-200 focus-visible:ring-rose-500 font-medium text-[#0A2947]"
+                className="bg-white border-rose-200 focus-visible:ring-rose-500 font-medium text-navy"
               />
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-2">
-            <AlertDialogCancel disabled={rejectMutation.isPending} className="border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold cursor-pointer">Batal</AlertDialogCancel>
+            <AlertDialogCancel disabled={rejectMutation.isPending} className="border-navy/20 text-navy hover:bg-navy/5 font-bold cursor-pointer">Batal</AlertDialogCancel>
             <AlertDialogAction 
               onClick={(e) => { e.preventDefault(); rejectMutation.mutate(rejectCatatan.trim()); }} 
               disabled={rejectMutation.isPending || rejectCatatan.trim().length === 0} 
-              className="bg-rose-600 text-[#FFFAF3] hover:bg-rose-700 font-bold cursor-pointer border-none shadow-sm"
+              className="bg-rose-600 text-gading hover:bg-rose-700 font-bold cursor-pointer border-none shadow-sm"
             >
               {rejectMutation.isPending ? "Memproses..." : "Tolak Pengajuan"}
             </AlertDialogAction>
@@ -690,18 +690,18 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
 
       {/* 4. Modal Cancel */}
       <AlertDialog open={showCancelModal} onOpenChange={setShowCancelModal}>
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947] flex items-center gap-2">
+            <AlertDialogTitle className="text-navy flex items-center gap-2">
               <Ban className="w-5 h-5 text-rose-500" /> Batalkan Sesi Opname?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogDescription className="text-navy/70 font-medium">
               Tindakan ini akan membatalkan sesi perhitungan stok secara permanen. Anda tidak dapat melanjutkan proses ini lagi. Lanjutkan?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={cancelMutation.isPending} className="border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold cursor-pointer">Kembali</AlertDialogCancel>
-            <AlertDialogAction onClick={(e) => { e.preventDefault(); cancelMutation.mutate(); }} disabled={cancelMutation.isPending} className="bg-rose-600 text-[#FFFAF3] hover:bg-rose-700 font-bold cursor-pointer border-none shadow-sm">
+            <AlertDialogCancel disabled={cancelMutation.isPending} className="border-navy/20 text-navy hover:bg-navy/5 font-bold cursor-pointer">Kembali</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); cancelMutation.mutate(); }} disabled={cancelMutation.isPending} className="bg-rose-600 text-gading hover:bg-rose-700 font-bold cursor-pointer border-none shadow-sm">
               {cancelMutation.isPending ? "Membatalkan..." : "Ya, Batalkan Permanen"}
             </AlertDialogAction>
           </AlertDialogFooter>

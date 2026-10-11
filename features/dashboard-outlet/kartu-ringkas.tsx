@@ -37,20 +37,20 @@ function KartuRingkas({
   const lencana =
     pertumbuhan !== null && pertumbuhan > 0
       ? "bg-[#A3B18A]/20 text-[#A3B18A]"
-      : "bg-[#F2EAE2]/10 text-[#F2EAE2]";
+      : "bg-krem/10 text-krem";
   return (
     <section
       aria-label={judul}
-      className="bg-[#0A2947] text-[#FFFAF3] rounded-2xl sm:rounded-3xl border-t-4 border-[#D4A373] p-3 sm:p-5 flex flex-col justify-between gap-2 sm:gap-3 shadow-sm min-w-0 sm:min-h-36"
+      className="bg-navy text-gading rounded-2xl sm:rounded-3xl border-t-4 border-karamel p-3 sm:p-5 flex flex-col justify-between gap-2 sm:gap-3 shadow-sm min-w-0 sm:min-h-36"
     >
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs sm:text-sm font-semibold text-[#F2EAE2]/80 truncate min-w-0">{judul}</p>
-        <span className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-[#D4A373]/20 text-[#D4A373] shrink-0">
+        <p className="text-xs sm:text-sm font-semibold text-krem/80 truncate min-w-0">{judul}</p>
+        <span className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-karamel/20 text-karamel shrink-0">
           <Ikon className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
         </span>
       </div>
       {memuat ? (
-        <Skeleton className="h-6 sm:h-8 w-24 sm:w-32 bg-[#FFFAF3]/15 rounded-md" />
+        <Skeleton className="h-6 sm:h-8 w-24 sm:w-32 bg-gading/15 rounded-md" />
       ) : (
         <p className="text-base sm:text-2xl font-black tracking-tight truncate">{nilai ?? "-"}</p>
       )}
@@ -61,7 +61,7 @@ function KartuRingkas({
           <span className={`px-2 py-0.5 rounded-full font-bold ${lencana}`}>
             {teksPertumbuhan(pertumbuhan)}
           </span>
-          <span className="hidden sm:inline font-medium text-[#F2EAE2]/70">{pembanding}</span>
+          <span className="hidden sm:inline font-medium text-krem/70">{pembanding}</span>
         </p>
       )}
     </section>

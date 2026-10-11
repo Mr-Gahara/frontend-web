@@ -107,7 +107,7 @@ export function FormPengajuanStok({ pengajuan }: Props) {
 
   if (sedangMemuat || (!lintasOutlet && aktif.isLoading)) {
     return (
-      <div className="py-20 text-center text-sm font-medium text-[#0A2947]/60">
+      <div className="py-20 text-center text-sm font-medium text-navy/60">
         Memuat lokasi outlet...
       </div>
     );
@@ -124,7 +124,7 @@ export function FormPengajuanStok({ pengajuan }: Props) {
     if (pesan) {
       return (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <p className="text-sm font-bold text-[#0A2947]">{pesan}</p>
+          <p className="text-sm font-bold text-navy">{pesan}</p>
           <Button variant="outline" onClick={() => router.push(URL_DAFTAR)}>
             Kembali
           </Button>
@@ -199,32 +199,32 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
           type="button"
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
           onClick={() => router.back()}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           {teks.kembali}
         </Button>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">
             {pengajuan
               ? `Revisi Draft Pengajuan: ${pengajuan.nomorPengajuan}`
               : "Buat Draft Pengajuan Stok"}
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">{teks.deskripsi}</p>
+          <p className="text-sm font-medium text-navy/60">{teks.deskripsi}</p>
         </div>
       </div>
 
       {/* SECTION 1: RUTE LOGISTIK */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-white p-6 shadow-sm space-y-4">
-        <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-          <MapPin className="h-5 w-5 text-[#D4A373]" />
-          <h2 className="font-bold text-[#0A2947]">Rute Logistik</h2>
+      <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
+          <MapPin className="h-5 w-5 text-karamel" />
+          <h2 className="font-bold text-navy">Rute Logistik</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
           <div className="space-y-2">
-            <label htmlFor="pengajuan-outlet" className="text-sm font-bold text-[#0A2947]">
+            <label htmlFor="pengajuan-outlet" className="text-sm font-bold text-navy">
               Outlet Peminta <span className="text-rose-500">*</span>
             </label>
             <Controller
@@ -234,7 +234,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
                 <Select value={field.value} onValueChange={field.onChange} disabled={outletTerkunci !== null || memuatLokasi}>
                   <SelectTrigger
                     id="pengajuan-outlet"
-                    className="w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus:ring-[#0A2947]"
+                    className="w-full bg-gading border-navy/20 text-navy focus:ring-navy"
                   >
                     <SelectValue placeholder="Pilih Outlet Anda..." />
                   </SelectTrigger>
@@ -251,7 +251,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="pengajuan-gudang" className="text-sm font-bold text-[#0A2947]">
+            <label htmlFor="pengajuan-gudang" className="text-sm font-bold text-navy">
               Gudang Asal Barang <span className="text-rose-500">*</span>
             </label>
             <Controller
@@ -261,7 +261,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
                 <Select value={field.value} onValueChange={field.onChange} disabled={memuatLokasi}>
                   <SelectTrigger
                     id="pengajuan-gudang"
-                    className="w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus:ring-[#0A2947]"
+                    className="w-full bg-gading border-navy/20 text-navy focus:ring-navy"
                   >
                     <SelectValue placeholder="Pilih Gudang..." />
                   </SelectTrigger>
@@ -280,18 +280,18 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
       </div>
 
       {/* SECTION 2: DAFTAR BARANG YANG DIMINTA */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-[#0A2947]/10 pb-3">
+      <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-navy/10 pb-3">
           <div className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-[#D4A373]" />
-            <h2 className="font-bold text-[#0A2947]">Daftar Kebutuhan Barang</h2>
+            <Package className="h-5 w-5 text-karamel" />
+            <h2 className="font-bold text-navy">Daftar Kebutuhan Barang</h2>
           </div>
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => append({ ...BARIS_KOSONG })}
-            className="border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold shadow-sm h-8 cursor-pointer"
+            className="border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm h-8 cursor-pointer"
           >
             <Plus className="w-4 h-4 mr-1" /> Tambah Baris
           </Button>
@@ -301,10 +301,10 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
           {fields.map((baris, index) => (
             <div
               key={baris.id}
-              className="flex flex-col sm:flex-row items-start sm:items-end gap-3 bg-white p-3 rounded-xl border border-[#0A2947]/10"
+              className="flex flex-col sm:flex-row items-start sm:items-end gap-3 bg-white p-3 rounded-xl border border-navy/10"
             >
               <div className="w-full sm:flex-1 space-y-1.5">
-                <label htmlFor={`pengajuan-bahan-${index}`} className="text-xs font-bold text-[#0A2947]/70">
+                <label htmlFor={`pengajuan-bahan-${index}`} className="text-xs font-bold text-navy/70">
                   Pilih Barang <span className="text-rose-500">*</span>
                 </label>
                 <Controller
@@ -322,7 +322,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
                     >
                       <SelectTrigger
                         id={`pengajuan-bahan-${index}`}
-                        className="w-full bg-transparent border-[#0A2947]/20 focus:ring-[#0A2947]"
+                        className="w-full bg-transparent border-navy/20 focus:ring-navy"
                       >
                         <SelectValue placeholder="Pilih..." />
                       </SelectTrigger>
@@ -339,7 +339,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
               </div>
 
               <div className="w-full sm:w-32 space-y-1.5">
-                <label htmlFor={`pengajuan-jumlah-${index}`} className="text-xs font-bold text-[#0A2947]/70">
+                <label htmlFor={`pengajuan-jumlah-${index}`} className="text-xs font-bold text-navy/70">
                   Jumlah <span className="text-rose-500">*</span>
                 </label>
                 <Input
@@ -347,12 +347,12 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
                   type="number"
                   placeholder="0"
                   {...register(`items.${index}.jumlah`)}
-                  className="bg-transparent border-[#0A2947]/20 focus-visible:ring-[#0A2947] font-mono font-bold no-spinner"
+                  className="bg-transparent border-navy/20 focus-visible:ring-navy font-mono font-bold no-spinner"
                 />
               </div>
 
               <div className="w-full sm:w-32 space-y-1.5">
-                <label htmlFor={`pengajuan-satuan-${index}`} className="text-xs font-bold text-[#0A2947]/70">
+                <label htmlFor={`pengajuan-satuan-${index}`} className="text-xs font-bold text-navy/70">
                   Satuan
                 </label>
                 <Input
@@ -360,7 +360,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
                   type="text"
                   readOnly
                   value={items?.[index]?.satuan || "-"}
-                  className="bg-[#0A2947]/5 border-transparent font-medium text-[#0A2947]/50 cursor-not-allowed"
+                  className="bg-navy/5 border-transparent font-medium text-navy/50 cursor-not-allowed"
                   tabIndex={-1}
                 />
               </div>
@@ -382,15 +382,15 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
       </div>
 
       {/* SECTION 3: INFORMASI TAMBAHAN */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-white p-6 shadow-sm space-y-4">
-        <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-          <CalendarClock className="h-5 w-5 text-[#D4A373]" />
-          <h2 className="font-bold text-[#0A2947]">Informasi Pengiriman</h2>
+      <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
+          <CalendarClock className="h-5 w-5 text-karamel" />
+          <h2 className="font-bold text-navy">Informasi Pengiriman</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
           <div className="space-y-2">
-            <label htmlFor="pengajuan-tanggal" className="text-sm font-bold text-[#0A2947]">
+            <label htmlFor="pengajuan-tanggal" className="text-sm font-bold text-navy">
               Tanggal Kebutuhan (Opsional)
             </label>
             <Controller
@@ -404,17 +404,17 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
                       type="button"
                       variant="outline"
                       className={cn(
-                        "w-full h-10 justify-start text-left font-bold cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]",
-                        !field.value && "text-[#0A2947]/50",
+                        "w-full h-10 justify-start text-left font-bold cursor-pointer bg-gading border-navy/20 text-navy",
+                        !field.value && "text-navy/50",
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4 text-[#D4A373]" />
+                      <CalendarIcon className="mr-2 h-4 w-4 text-karamel" />
                       {field.value
                         ? format(field.value, "dd MMMM yyyy", { locale: localeID })
                         : "Pilih tanggal..."}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 border-[#0A2947]/10 bg-[#FFFAF3]" align="start">
+                  <PopoverContent className="w-auto p-0 border-navy/10 bg-gading" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value}
@@ -426,20 +426,20 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
                 </Popover>
               )}
             />
-            <p className="text-[10px] text-[#0A2947]/50 font-medium">
+            <p className="text-[10px] text-navy/50 font-medium">
               Batas waktu maksimal barang harus tiba di Outlet.
             </p>
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="pengajuan-catatan" className="text-sm font-bold text-[#0A2947]">
+            <label htmlFor="pengajuan-catatan" className="text-sm font-bold text-navy">
               Catatan / Pesan ke Gudang
             </label>
             <Textarea
               id="pengajuan-catatan"
               placeholder="Misal: Tolong kirimkan batch produksi terbaru..."
               {...register("catatan")}
-              className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus-visible:ring-[#0A2947] font-medium resize-none"
+              className="bg-gading border-navy/20 text-navy focus-visible:ring-navy font-medium resize-none"
               rows={3}
             />
           </div>
@@ -453,7 +453,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
             type="button"
             variant="ghost"
             onClick={() => router.back()}
-            className="font-bold text-[#0A2947]/60 hover:text-[#0A2947] cursor-pointer"
+            className="font-bold text-navy/60 hover:text-navy cursor-pointer"
           >
             Batal
           </Button>
@@ -462,7 +462,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
           type="button"
           onClick={simpan}
           disabled={menyimpan || (!pengajuan && (!keLocationID || !dariLocationID))}
-          className="bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-md cursor-pointer"
+          className="bg-navy text-gading hover:bg-navy/90 font-bold shadow-md cursor-pointer"
         >
           <Save className="w-4 h-4 mr-2" />
           {menyimpan ? "Menyimpan..." : teks.simpan}

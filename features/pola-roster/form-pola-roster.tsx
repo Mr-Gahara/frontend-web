@@ -108,17 +108,17 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
       >
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
           <div className="sm:col-span-8 space-y-2">
-            <label htmlFor="nama-pola" className="text-sm font-bold text-[#041E3F]">Nama Pola Roster</label>
+            <label htmlFor="nama-pola" className="text-sm font-bold text-navy">Nama Pola Roster</label>
             <Input
               id="nama-pola"
               {...register("namaPola")}
               placeholder="Misal: Reguler 5-2"
-              className="bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50 font-bold h-12 rounded-xl px-4"
+              className="bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl px-4"
               required
             />
           </div>
           <div className="sm:col-span-4 space-y-2">
-            <label htmlFor="siklus-pola" className="text-sm font-bold text-[#041E3F]">Siklus (Hari)</label>
+            <label htmlFor="siklus-pola" className="text-sm font-bold text-navy">Siklus (Hari)</label>
             <Controller
               control={control}
               name="siklus"
@@ -137,7 +137,7 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
                     }
                   }}
                   onBlur={field.onBlur}
-                  className="bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50 font-bold h-12 rounded-xl text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   required
                 />
               )}
@@ -145,10 +145,10 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
           </div>
         </div>
 
-        <div className="space-y-3 pt-2 border-t border-[#041E3F]/10">
+        <div className="space-y-3 pt-2 border-t border-navy/10">
           <div className="flex items-center justify-between">
-            <span id="label-rincian-siklus" className="text-sm font-bold text-[#041E3F]">Rincian Siklus</span>
-            <span className="text-xs font-bold text-[#041E3F]/50 bg-[#041E3F]/5 px-2 py-1 rounded-md">
+            <span id="label-rincian-siklus" className="text-sm font-bold text-navy">Rincian Siklus</span>
+            <span className="text-xs font-bold text-navy/50 bg-navy/5 px-2 py-1 rounded-md">
               {rincian.length} Hari Terdeteksi
             </span>
           </div>
@@ -157,8 +157,8 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
             {rincian.map((row, index) => {
               const shiftNonaktif = !row.isLibur && row.shiftID !== "" && !idShiftAktif.has(row.shiftID);
               return (
-                <div key={row.hariKe} className="flex items-center gap-3 bg-[#FFFAF3] p-2 rounded-xl border border-[#041E3F]/10 shadow-sm transition-all hover:border-[#041E3F]/30">
-                  <div className="flex h-10 w-20 shrink-0 flex-col items-center justify-center rounded-lg bg-[#041E3F]/5 border border-[#041E3F]/5 text-[#041E3F]">
+                <div key={row.hariKe} className="flex items-center gap-3 bg-gading p-2 rounded-xl border border-navy/10 shadow-sm transition-all hover:border-navy/30">
+                  <div className="flex h-10 w-20 shrink-0 flex-col items-center justify-center rounded-lg bg-navy/5 border border-navy/5 text-navy">
                     <span className="text-[10px] font-bold uppercase tracking-wider opacity-60 leading-none">Hari</span>
                     <span className="text-sm font-black leading-tight">{row.hariKe}</span>
                   </div>
@@ -169,19 +169,19 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
                   >
                     <SelectTrigger
                       aria-label={`Shift hari ke-${row.hariKe}`}
-                      className="flex-1 bg-transparent border-none shadow-none focus:ring-0 text-[#041E3F] font-bold px-2 h-10 cursor-pointer"
+                      className="flex-1 bg-transparent border-none shadow-none focus:ring-0 text-navy font-bold px-2 h-10 cursor-pointer"
                     >
                       <SelectValue placeholder="Pilih shift..." />
                     </SelectTrigger>
 
-                    <SelectContent className="bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F] font-bold rounded-xl max-h-56">
+                    <SelectContent className="bg-krem border-navy/10 text-navy font-bold rounded-xl max-h-56">
                       <SelectItem value="libur" className="cursor-pointer text-red-600 focus:text-red-700">
                         <div className="flex items-center gap-2">
                           <Coffee className="h-4 w-4" /> Libur / Off
                         </div>
                       </SelectItem>
 
-                      {shiftAktif.length > 0 && <div className="h-px bg-[#041E3F]/10 my-1 mx-2" />}
+                      {shiftAktif.length > 0 && <div className="h-px bg-navy/10 my-1 mx-2" />}
 
                       {shiftAktif.map((shift) => (
                         <SelectItem key={shift.id} value={shift.id} className="cursor-pointer">
@@ -209,12 +209,12 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
         </div>
       </form>
 
-      <div className="pt-4 mt-2 border-t border-[#041E3F]/10 shrink-0">
+      <div className="pt-4 mt-2 border-t border-navy/10 shrink-0">
         <Button
           type="submit"
           form="pola-form"
           disabled={isPending || rincian.length === 0}
-          className="w-full h-14 rounded-xl cursor-pointer bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90 text-base font-bold shadow-md transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full h-14 rounded-xl cursor-pointer bg-navy text-gading hover:bg-navy/90 text-base font-bold shadow-md transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPending ? "Menyimpan..." : "Simpan Pola Roster"}
         </Button>
@@ -233,18 +233,18 @@ export function PolaFormDialog({
 }: PolaFormDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-137.5 border-[#041E3F]/10 bg-[#F2EAE1] p-6 sm:p-8 [&>button]:hidden rounded-[1.5rem] shadow-xl flex flex-col max-h-[90vh]">
+      <DialogContent className="sm:max-w-137.5 border-navy/10 bg-krem p-6 sm:p-8 [&>button]:hidden rounded-[1.5rem] shadow-xl flex flex-col max-h-[90vh]">
         
         <div className="flex items-start justify-between mb-2 shrink-0">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#041E3F]/15 bg-[#FFFAF3] text-[#041E3F]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-navy/15 bg-gading text-navy">
               <CalendarDays className="h-6 w-6" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold text-[#041E3F]">
+              <DialogTitle className="text-2xl font-bold text-navy">
                 {editTarget ? "Edit Pola Roster" : "Buat Pola Roster"}
               </DialogTitle>
-              <DialogDescription className="text-sm font-semibold text-[#041E3F]/60 mt-0.5">
+              <DialogDescription className="text-sm font-semibold text-navy/60 mt-0.5">
                 Rancang template siklus hari kerja karyawan.
               </DialogDescription>
             </div>
@@ -252,7 +252,7 @@ export function PolaFormDialog({
           <button
             aria-label="Tutup"
             onClick={() => onOpenChange(false)}
-            className="flex items-center justify-center p-2 rounded-md text-[#041E3F] hover:bg-[#041E3F]/10 transition-colors cursor-pointer"
+            className="flex items-center justify-center p-2 rounded-md text-navy hover:bg-navy/10 transition-colors cursor-pointer"
           >
             <X className="h-6 w-6 stroke-[2.5px]" />
           </button>

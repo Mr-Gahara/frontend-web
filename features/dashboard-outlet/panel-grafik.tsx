@@ -25,29 +25,29 @@ export function PanelGrafik({ hari }: { hari: Date }) {
     : null;
   const lencana =
     pertumbuhan === null || pertumbuhan === 0
-      ? "bg-[#0A2947]/10 text-[#0A2947]/70"
+      ? "bg-navy/10 text-navy/70"
       : pertumbuhan > 0
-        ? "bg-[#718355]/15 text-[#4F5E3A]"
+        ? "bg-sage/15 text-[#4F5E3A]"
         : "bg-rose-100 text-rose-700";
 
   return (
     <section
       aria-label="Pendapatan Bulan Ini"
-      className="bg-[#F2EAE2] border border-[#0A2947]/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-[#0A2947] shadow-sm flex flex-col gap-3 sm:gap-4 h-full"
+      className="bg-krem border border-navy/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-navy shadow-sm flex flex-col gap-3 sm:gap-4 h-full"
     >
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-[#D4A373] rounded-xl shadow-sm shrink-0">
-          <IkonGrafik className="w-5 h-5 text-[#FFFAF3]" aria-hidden="true" />
+        <div className="p-2 bg-karamel rounded-xl shadow-sm shrink-0">
+          <IkonGrafik className="w-5 h-5 text-gading" aria-hidden="true" />
         </div>
         <h2 className="text-sm sm:text-lg font-bold tracking-wide">Pendapatan Bulan Ini</h2>
       </div>
       {kini.isLoading ? (
         <div className="flex flex-col gap-4">
-          <Skeleton className="h-10 w-48 bg-[#0A2947]/10 rounded-md" />
-          <Skeleton className="h-64 w-full bg-[#0A2947]/5 rounded-xl" />
+          <Skeleton className="h-10 w-48 bg-navy/10 rounded-md" />
+          <Skeleton className="h-64 w-full bg-navy/5 rounded-xl" />
         </div>
       ) : kini.isError ? (
-        <div className="flex flex-col items-center justify-center py-10 gap-3 text-[#0A2947]/60">
+        <div className="flex flex-col items-center justify-center py-10 gap-3 text-navy/60">
           <AlertTriangle className="w-10 h-10 text-rose-500/50" />
           <p className="font-bold">Gagal memuat data pendapatan.</p>
         </div>
@@ -58,7 +58,7 @@ export function PanelGrafik({ hari }: { hari: Date }) {
             <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${lencana}`}>
               {teksPertumbuhan(pertumbuhan)}
             </span>
-            <span className="text-xs text-[#0A2947]/60 font-medium">vs periode sebelumnya</span>
+            <span className="text-xs text-navy/60 font-medium">vs periode sebelumnya</span>
           </div>
           <div className="w-full h-44 sm:h-80">
             <GrafikLaporan data={titikOmzet(kini.data ?? [])} interval={4} />

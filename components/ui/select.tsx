@@ -115,8 +115,8 @@ function SelectItem({
       data-slot="select-item"
       className={cn(
         // py-3 dan pl-3 agar opsi di dropdown lebih lebar & proporsional
-        // focus:bg-[#6c5d4c] dan focus:text-[#FFFAF3] untuk efek hover
-        "relative flex w-full cursor-pointer items-center gap-1.5 rounded-md py-3 pr-8 pl-3 text-sm outline-hidden select-none focus:bg-[#6c5d4c] focus:text-[#FFFAF3] data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2 transition-colors",
+        // focus:bg-[#6c5d4c] dan focus:text-gading untuk efek hover
+        "relative flex w-full cursor-pointer items-center gap-1.5 rounded-md py-3 pr-8 pl-3 text-sm outline-hidden select-none focus:bg-[#6c5d4c] focus:text-gading data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2 transition-colors",
         className
       )}
       {...props}

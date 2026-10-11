@@ -10,10 +10,10 @@ import { payloadUbahPajak } from "./payload";
 import { skemaPajak, type NilaiPajak } from "./schema";
 import { pajakTransaksiTerdampak } from "./tampilan";
 
-const kelasLabel = "text-sm font-bold text-[#0A2947]";
-const kelasIsian = "bg-white border-[#0A2947]/20 text-[#0A2947]";
-const kelasIsiPilihan = "bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]";
-const kelasPilihan = "cursor-pointer hover:bg-[#0A2947]/5";
+const kelasLabel = "text-sm font-bold text-navy";
+const kelasIsian = "bg-white border-navy/20 text-navy";
+const kelasIsiPilihan = "bg-gading border-navy/10 text-navy";
+const kelasPilihan = "cursor-pointer hover:bg-navy/5";
 const kelasGalat = "text-xs font-bold text-red-600";
 
 type PropsForm = {
@@ -180,7 +180,7 @@ export function FormPajak({ nilaiAwal, asal, daftar, sedangMenyimpan, galat, onS
       </div>
 
       {terdampak.length > 0 && (
-        <p className="rounded-lg border border-[#D4A373]/40 bg-[#D4A373]/10 p-3 text-sm font-medium text-[#0A2947]">
+        <p className="rounded-lg border border-karamel/40 bg-karamel/10 p-3 text-sm font-medium text-navy">
           Menyimpan pajak per transaksi yang aktif akan menonaktifkan {terdampak.map((p) => p.namaPajak).join(", ")}.
           Hanya satu pajak per transaksi yang aktif dalam satu waktu.
         </p>
@@ -194,14 +194,14 @@ export function FormPajak({ nilaiAwal, asal, daftar, sedangMenyimpan, galat, onS
           variant="outline"
           onClick={onBatal}
           disabled={sedangMenyimpan}
-          className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+          className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
         >
           Batal
         </Button>
         <Button
           type="submit"
           disabled={sedangMenyimpan || !adaPerubahan}
-          className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold"
+          className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm font-bold"
         >
           {sedangMenyimpan ? "Menyimpan..." : "Simpan"}
         </Button>

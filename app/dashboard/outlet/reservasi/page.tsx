@@ -24,7 +24,7 @@ const COLORS = {
   navy: "#0A2947",
   navyLight: "#0D365E",
   cream: "#FFFAF3",
-  darkCream: "#F2EAE1",
+  darkCream: "#E0D2C2",
   gold: "#D4A373",
   sage: "#7c9b4bff",
   rose: "#f9536eff",
@@ -195,7 +195,7 @@ export default function DasborTimelinePage() {
         >
           <button
             aria-label="Tanggal sebelumnya"
-            className="p-2.5 px-3.5 transition-colors cursor-pointer text-[#FFFAF399] hover:text-[#D4A373] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A373] focus-visible:ring-offset-2"
+            className="p-2.5 px-3.5 transition-colors cursor-pointer text-[#FFFAF399] hover:text-karamel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
             onClick={() =>
               setSelectedDate(
                 (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1),
@@ -219,7 +219,7 @@ export default function DasborTimelinePage() {
 
           <button
             aria-label="Tanggal berikutnya"
-            className="p-2.5 px-3.5 transition-colors cursor-pointer text-[#FFFAF399] hover:text-[#D4A373] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A373] focus-visible:ring-offset-2"
+            className="p-2.5 px-3.5 transition-colors cursor-pointer text-[#FFFAF399] hover:text-karamel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
             onClick={() =>
               setSelectedDate(
                 (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1),

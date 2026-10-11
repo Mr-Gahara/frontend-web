@@ -73,19 +73,19 @@ export default function PenggunaFormDialog({
         TWEAK: sm:max-w-[540px] untuk memperlebar pop up 
         p-6 sm:p-8 untuk memberikan ruang lega (breathing room)
       */}
-      <DialogContent className="sm:max-w-135 border-[#041E3F]/10 bg-[#F2EAE1] p-6 sm:p-8 [&>button]:hidden rounded-[1.5rem] shadow-xl">
+      <DialogContent className="sm:max-w-135 border-navy/10 bg-krem p-6 sm:p-8 [&>button]:hidden rounded-[1.5rem] shadow-xl">
         
         {/* CUSTOM HEADER */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#041E3F]/15 bg-[#FFFAF3] text-[#041E3F]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-navy/15 bg-gading text-navy">
               {editTarget ? <UserCog className="h-6 w-6" /> : <UserPlus className="h-6 w-6" />}
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold text-[#041E3F]">
+              <DialogTitle className="text-2xl font-bold text-navy">
                 {editTarget ? "Edit Pengguna" : "Tambah Pengguna"}
               </DialogTitle>
-              <DialogDescription className="text-sm font-semibold text-[#041E3F]/60 mt-0.5">
+              <DialogDescription className="text-sm font-semibold text-navy/60 mt-0.5">
                 {editTarget
                   ? "Perbarui data informasi akun pengguna."
                   : "Isi form berikut untuk menambahkan akun baru."}
@@ -95,7 +95,7 @@ export default function PenggunaFormDialog({
           {/* TWEAK: Tombol X dibikin clean tanpa border bundar, cursor pointer */}
           <button 
             onClick={() => setShowDialog(false)}
-            className="flex items-center justify-center p-2 rounded-md text-[#041E3F] hover:bg-[#041E3F]/10 transition-colors cursor-pointer"
+            className="flex items-center justify-center p-2 rounded-md text-navy hover:bg-navy/10 transition-colors cursor-pointer"
           >
             <X className="h-6 w-6 stroke-[2.5px]" />
           </button>
@@ -105,15 +105,15 @@ export default function PenggunaFormDialog({
           
           {/* HAK AKSES PLATFORM - CARD SELECTION */}
           <div className="space-y-2.5">
-            <label className="text-sm font-bold text-[#041E3F]">Hak Akses Platform</label>
+            <label className="text-sm font-bold text-navy">Hak Akses Platform</label>
             <div className="grid grid-cols-3 gap-3">
               {/* Opsi App */}
               <div 
                 onClick={() => handleAksesSelect("app")}
                 className={`flex flex-col items-center justify-center py-4 px-2 rounded-xl border transition-all cursor-pointer ${
                   isAppOnly 
-                    ? "bg-[#041E3F] border-[#041E3F] text-[#FFFAF3] shadow-md" 
-                    : "bg-[#FFFAF3] border-[#041E3F]/15 text-[#041E3F] hover:border-[#041E3F]/40"
+                    ? "bg-navy border-navy text-gading shadow-md" 
+                    : "bg-gading border-navy/15 text-navy hover:border-navy/40"
                 } ${isSelf ? "opacity-60 cursor-not-allowed" : ""}`}
               >
                 <Smartphone className={`h-7 w-7 mb-2.5 ${isAppOnly ? "stroke-[2.5px]" : "stroke-[2px]"}`} />
@@ -125,8 +125,8 @@ export default function PenggunaFormDialog({
                 onClick={() => handleAksesSelect("web")}
                 className={`flex flex-col items-center justify-center py-4 px-2 rounded-xl border transition-all cursor-pointer ${
                   isWebOnly 
-                    ? "bg-[#041E3F] border-[#041E3F] text-[#FFFAF3] shadow-md" 
-                    : "bg-[#FFFAF3] border-[#041E3F]/15 text-[#041E3F] hover:border-[#041E3F]/40"
+                    ? "bg-navy border-navy text-gading shadow-md" 
+                    : "bg-gading border-navy/15 text-navy hover:border-navy/40"
                 } ${isSelf ? "opacity-60 cursor-not-allowed" : ""}`}
               >
                 <Monitor className={`h-7 w-7 mb-2.5 ${isWebOnly ? "stroke-[2.5px]" : "stroke-[2px]"}`} />
@@ -138,8 +138,8 @@ export default function PenggunaFormDialog({
                 onClick={() => handleAksesSelect("both")}
                 className={`flex flex-col items-center justify-center py-4 px-2 rounded-xl border transition-all cursor-pointer ${
                   isBoth 
-                    ? "bg-[#041E3F] border-[#041E3F] text-[#FFFAF3] shadow-md" 
-                    : "bg-[#FFFAF3] border-[#041E3F]/15 text-[#041E3F] hover:border-[#041E3F]/40"
+                    ? "bg-navy border-navy text-gading shadow-md" 
+                    : "bg-gading border-navy/15 text-navy hover:border-navy/40"
                 } ${isSelf ? "opacity-60 cursor-not-allowed" : ""}`}
               >
                 <MonitorSmartphone className={`h-7 w-7 mb-2.5 ${isBoth ? "stroke-[2.5px]" : "stroke-[2px]"}`} />
@@ -149,34 +149,34 @@ export default function PenggunaFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-[#041E3F]" htmlFor="nama">Nama Lengkap</label>
+            <label className="text-sm font-bold text-navy" htmlFor="nama">Nama Lengkap</label>
             <Input
               id="nama"
               value={form.nama}
               onChange={(e) => setForm({ ...form, nama: e.target.value })}
               placeholder="Masukkan nama pengguna"
-              className="bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50 font-medium h-12 rounded-xl px-4"
+              className="bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-medium h-12 rounded-xl px-4"
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#041E3F]" htmlFor="nomorHp">
-                Nomor HP <span className="text-[#041E3F]/50 font-semibold">(opsional)</span>
+              <label className="text-sm font-bold text-navy" htmlFor="nomorHp">
+                Nomor HP <span className="text-navy/50 font-semibold">(opsional)</span>
               </label>
               <Input
                 id="nomorHp"
                 value={form.nomorHp ?? ""}
                 onChange={(e) => setForm({ ...form, nomorHp: e.target.value })}
                 placeholder="081234..."
-                className="bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50 font-medium h-12 rounded-xl px-4"
+                className="bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-medium h-12 rounded-xl px-4"
               />
             </div>
 
             {(!isSelf || isOwner) ? (
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#041E3F]" htmlFor="pin">PIN Keamanan</label>
+                <label className="text-sm font-bold text-navy" htmlFor="pin">PIN Keamanan</label>
                 <Input
                   id="pin"
                   type="password"
@@ -190,29 +190,29 @@ export default function PenggunaFormDialog({
                     })
                   }
                   placeholder={editTarget ? "Kosongkan jika tetap" : "Masukkan PIN"}
-                  className="bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50 font-medium h-12 rounded-xl px-4"
+                  className="bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-medium h-12 rounded-xl px-4"
                   required={!editTarget}
                 />
               </div>
             ) : (
               <div className="space-y-2 flex flex-col justify-end">
-                <span className="text-sm font-semibold text-[#041E3F]/50 italic pb-3">PIN hanya dapat diubah oleh Owner</span>
+                <span className="text-sm font-semibold text-navy/50 italic pb-3">PIN hanya dapat diubah oleh Owner</span>
               </div>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#041E3F]">Peran / Role</label>
+              <label className="text-sm font-bold text-navy">Peran / Role</label>
               <Select
                 value={form.roleID}
                 onValueChange={(value) => setForm({ ...form, roleID: value })}
                 disabled={isSelf}
               >
-                <SelectTrigger className="w-full bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus:ring-[#041E3F]/50 font-medium h-12 rounded-xl px-4">
+                <SelectTrigger className="w-full bg-gading text-navy text-sm border-navy/15 focus:ring-navy/50 font-medium h-12 rounded-xl px-4">
                   <SelectValue placeholder="Pilih role" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F] font-medium">
+                <SelectContent className="bg-krem border-navy/10 text-navy font-medium">
                   {roleList
                     .filter((role: Role) => role.level < currentUserLevel)
                     .map((role: Role) => {
@@ -228,16 +228,16 @@ export default function PenggunaFormDialog({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#041E3F]">Status</label>
+              <label className="text-sm font-bold text-navy">Status</label>
               <Select
                 value={form.status}
                 onValueChange={(value) => setForm({ ...form, status: value as "aktif" | "non-aktif" })}
                 disabled={isSelf}
               >
-                <SelectTrigger className="w-full bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus:ring-[#041E3F]/50 font-medium h-12 rounded-xl px-4">
+                <SelectTrigger className="w-full bg-gading text-navy text-sm border-navy/15 focus:ring-navy/50 font-medium h-12 rounded-xl px-4">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F] font-medium">
+                <SelectContent className="bg-krem border-navy/10 text-navy font-medium">
                   <SelectItem value="aktif" className="cursor-pointer text-sm">Aktif</SelectItem>
                   <SelectItem value="non-aktif" className="cursor-pointer text-red-600 focus:text-red-700 text-sm">Non-Aktif</SelectItem>
                 </SelectContent>
@@ -255,7 +255,7 @@ export default function PenggunaFormDialog({
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full h-14 mt-4 rounded-xl cursor-pointer bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90 text-base font-bold shadow-md transition-all active:scale-[0.98]"
+            className="w-full h-14 mt-4 rounded-xl cursor-pointer bg-navy text-gading hover:bg-navy/90 text-base font-bold shadow-md transition-all active:scale-[0.98]"
           >
             {isPending ? "Menyimpan Data..." : "Simpan Pengguna"}
           </Button>

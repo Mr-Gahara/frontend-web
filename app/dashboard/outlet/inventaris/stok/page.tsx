@@ -155,32 +155,32 @@ export default function StokInventoryPage() {
       {/* HEADER & FILTERS */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">
             Stok & Inventory
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <p className="text-sm font-medium text-navy/60">
             Pantau dan kelola ketersediaan stok fisik secara real-time.
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-[#0A2947]/40" />
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-navy/40" />
             <Input
               placeholder="Cari nama barang..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus-visible:ring-[#0A2947]"
+              className="pl-9 bg-gading border-navy/20 text-navy focus-visible:ring-navy"
             />
           </div>
 
           {cakupan.status === "lintas" && (
           <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-            <SelectTrigger className="w-full sm:w-48 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-semibold focus:ring-[#0A2947]">
-              <MapPin className="w-4 h-4 mr-2 text-[#D4A373]" />
+            <SelectTrigger className="w-full sm:w-48 bg-gading border-navy/20 text-navy font-semibold focus:ring-navy">
+              <MapPin className="w-4 h-4 mr-2 text-karamel" />
               <SelectValue placeholder="Pilih Lokasi" />
             </SelectTrigger>
-            <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
+            <SelectContent className="bg-white border-navy/10 text-navy">
               <SelectItem value="all" className="font-bold cursor-pointer">
                 Semua Lokasi
               </SelectItem>
@@ -216,15 +216,15 @@ export default function StokInventoryPage() {
       )}
 
       {/* QUICK TABS */}
-      <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-4">
+      <div className="flex items-center gap-2 border-b border-navy/10 pb-4">
         <Button
           variant="ghost"
           onClick={() => setFilterTab("ALL")}
           className={cn(
             "rounded-full px-6 font-bold transition-all",
             filterTab === "ALL"
-              ? "bg-[#0A2947] text-white hover:bg-[#0A2947]/90"
-              : "text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-[#0A2947]/5",
+              ? "bg-navy text-white hover:bg-navy/90"
+              : "text-navy/60 hover:text-navy hover:bg-navy/5",
           )}
         >
           Semua Stok
@@ -245,10 +245,10 @@ export default function StokInventoryPage() {
       </div>
 
       {/* TABLE SECTION */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-[#F2EAE1] text-xs uppercase font-bold text-[#0A2947]/70">
+            <thead className="bg-krem text-xs uppercase font-bold text-navy/70">
               <tr>
                 <th className="px-6 py-4">Nama Barang</th>
                 <th className="px-6 py-4">Lokasi</th>
@@ -257,24 +257,24 @@ export default function StokInventoryPage() {
                 <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#0A2947]/5">
+            <tbody className="divide-y divide-navy/5">
               {isLoadingLokasi || isLoadingInventory ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
                     <td className="px-6 py-4">
-                      <Skeleton className="h-5 w-48 bg-[#0A2947]/10" />
+                      <Skeleton className="h-5 w-48 bg-navy/10" />
                     </td>
                     <td className="px-6 py-4">
-                      <Skeleton className="h-5 w-32 bg-[#0A2947]/10" />
+                      <Skeleton className="h-5 w-32 bg-navy/10" />
                     </td>
                     <td className="px-6 py-4">
-                      <Skeleton className="h-5 w-20 mx-auto bg-[#0A2947]/10" />
+                      <Skeleton className="h-5 w-20 mx-auto bg-navy/10" />
                     </td>
                     <td className="px-6 py-4">
-                      <Skeleton className="h-5 w-20 mx-auto bg-[#0A2947]/10" />
+                      <Skeleton className="h-5 w-20 mx-auto bg-navy/10" />
                     </td>
                     <td className="px-6 py-4">
-                      <Skeleton className="h-8 w-28 ml-auto bg-[#0A2947]/10" />
+                      <Skeleton className="h-8 w-28 ml-auto bg-navy/10" />
                     </td>
                   </tr>
                 ))
@@ -282,9 +282,9 @@ export default function StokInventoryPage() {
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-6 py-12 text-center text-[#0A2947]/50 font-medium"
+                    className="px-6 py-12 text-center text-navy/50 font-medium"
                   >
-                    <Package className="w-12 h-12 mx-auto mb-3 text-[#0A2947]/20" />
+                    <Package className="w-12 h-12 mx-auto mb-3 text-navy/20" />
                     Tidak ada data stok yang ditemukan.
                   </td>
                 </tr>
@@ -292,21 +292,21 @@ export default function StokInventoryPage() {
                 filteredInventory.map((inv) => (
                   <tr
                     key={inv.id}
-                    className="hover:bg-[#FFFAF3] transition-colors"
+                    className="hover:bg-gading transition-colors"
                   >
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="font-bold text-[#0A2947]">
+                        <span className="font-bold text-navy">
                           {inv.item?.nama || "Item Tidak Dikenal"}
                         </span>
-                        <span className="text-xs font-medium text-[#0A2947]/50">
+                        <span className="text-xs font-medium text-navy/50">
                           {inv.item?.tipeItem === "BAHAN_BAKU"
                             ? "Bahan Baku"
                             : "Barang Inventory"}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-medium text-[#0A2947]/80">
+                    <td className="px-6 py-4 font-medium text-navy/80">
                       {inv.lokasi?.nama || "-"}
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -316,7 +316,7 @@ export default function StokInventoryPage() {
                             "text-base font-mono font-bold",
                             inv.isStokKritis
                               ? "text-rose-600"
-                              : "text-[#0A2947]",
+                              : "text-navy",
                           )}
                         >
                           {inv.stok}{" "}
@@ -336,13 +336,13 @@ export default function StokInventoryPage() {
                     </td>
                     <td className="px-6 py-4 text-center group">
                       <div className="flex items-center justify-center gap-2">
-                        <span className="font-mono font-bold text-[#0A2947]/70">
+                        <span className="font-mono font-bold text-navy/70">
                           {inv.stokMinimum}
                         </span>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="w-7 h-7 text-[#0A2947]/40 hover:text-[#D4A373] hover:bg-[#D4A373]/10 cursor-pointer"
+                          className="w-7 h-7 text-navy/40 hover:text-karamel hover:bg-karamel/10 cursor-pointer"
                           onClick={() =>
                             setMinStockModal({
                               isOpen: true,
@@ -367,9 +367,9 @@ export default function StokInventoryPage() {
                             catatan: "",
                           })
                         }
-                        className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold shadow-sm"
+                        className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm"
                       >
-                        <Scale className="w-4 h-4 mr-2 text-[#D4A373]" />
+                        <Scale className="w-4 h-4 mr-2 text-karamel" />
                         Sesuaikan Stok
                       </Button>
                     </td>
@@ -388,19 +388,19 @@ export default function StokInventoryPage() {
           !open && setMinStockModal((prev) => ({ ...prev, isOpen: false }))
         }
       >
-        <DialogContent className="bg-[#FFFAF3] border-[#0A2947]/10 sm:max-w-md">
+        <DialogContent className="bg-gading border-navy/10 sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#0A2947] font-bold">
+            <DialogTitle className="text-navy font-bold">
               Atur Batas Minimum Stok
             </DialogTitle>
-            <DialogDescription className="text-[#0A2947]/60 font-medium">
+            <DialogDescription className="text-navy/60 font-medium">
               Sistem akan memberikan peringatan jika stok{" "}
               {minStockModal.data?.item?.nama} menyentuh atau berada di bawah
               batas ini.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-2">
-            <label className="text-sm font-bold text-[#0A2947]">
+            <label className="text-sm font-bold text-navy">
               Stok Minimum ({minStockModal.data?.item?.satuan || "pcs"})
             </label>
             <Input
@@ -412,7 +412,7 @@ export default function StokInventoryPage() {
                   inputValue: e.target.value ? Number(e.target.value) : "",
                 }))
               }
-              className="bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold focus-visible:ring-[#0A2947] no-spinner"
+              className="bg-white border-navy/20 text-navy font-mono font-bold focus-visible:ring-navy no-spinner"
             />
           </div>
           <DialogFooter>
@@ -421,14 +421,14 @@ export default function StokInventoryPage() {
               onClick={() =>
                 setMinStockModal((prev) => ({ ...prev, isOpen: false }))
               }
-              className="font-bold text-[#0A2947]/60"
+              className="font-bold text-navy/60"
             >
               Batal
             </Button>
             <Button
               onClick={handleUpdateMinStock}
               disabled={updateMinStockMutation.isPending}
-              className="bg-[#0A2947] text-white hover:bg-[#0A2947]/90 font-bold"
+              className="bg-navy text-white hover:bg-navy/90 font-bold"
             >
               {updateMinStockMutation.isPending && (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -446,23 +446,23 @@ export default function StokInventoryPage() {
           !open && setOpnameModal((prev) => ({ ...prev, isOpen: false }))
         }
       >
-        <DialogContent className="bg-[#FFFAF3] border-[#0A2947]/10 sm:max-w-md">
+        <DialogContent className="bg-gading border-navy/10 sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#0A2947] font-bold">
+            <DialogTitle className="text-navy font-bold">
               Penyesuaian Fisik (Quick Opname)
             </DialogTitle>
-            <DialogDescription className="text-[#0A2947]/60 font-medium">
+            <DialogDescription className="text-navy/60 font-medium">
               Koreksi stok aktual untuk {opnameModal.data?.item?.nama}. Selisih
               akan otomatis dicatat pada Jurnal Stok.
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-4 py-4">
-            <div className="bg-[#0A2947]/5 p-3 rounded-lg border border-[#0A2947]/10 flex justify-between items-center">
-              <span className="text-sm font-bold text-[#0A2947]/70">
+            <div className="bg-navy/5 p-3 rounded-lg border border-navy/10 flex justify-between items-center">
+              <span className="text-sm font-bold text-navy/70">
                 Stok Tercatat di Sistem:
               </span>
-              <span className="font-mono font-bold text-[#0A2947] text-lg">
+              <span className="font-mono font-bold text-navy text-lg">
                 {opnameModal.data?.stok}{" "}
                 <span className="text-sm font-sans">
                   {opnameModal.data?.item?.satuan}
@@ -471,7 +471,7 @@ export default function StokInventoryPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-navy">
                 Stok Fisik Sebenarnya <span className="text-rose-500">*</span>
               </label>
               <Input
@@ -483,13 +483,13 @@ export default function StokInventoryPage() {
                     fisikAktual: e.target.value ? Number(e.target.value) : "",
                   }))
                 }
-                className="bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold focus-visible:ring-[#0A2947] no-spinner"
+                className="bg-white border-navy/20 text-navy font-mono font-bold focus-visible:ring-navy no-spinner"
                 placeholder="Masukkan hitungan fisik riil..."
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-navy">
                 Alasan / Catatan Penyesuaian{" "}
                 <span className="text-rose-500">*</span>
               </label>
@@ -501,7 +501,7 @@ export default function StokInventoryPage() {
                     catatan: e.target.value,
                   }))
                 }
-                className="bg-white border-[#0A2947]/20 text-[#0A2947] focus-visible:ring-[#0A2947]"
+                className="bg-white border-navy/20 text-navy focus-visible:ring-navy"
                 placeholder="Contoh: Barang tumpah, kemasan rusak..."
               />
             </div>
@@ -513,7 +513,7 @@ export default function StokInventoryPage() {
               onClick={() =>
                 setOpnameModal((prev) => ({ ...prev, isOpen: false }))
               }
-              className="font-bold text-[#0A2947]/60"
+              className="font-bold text-navy/60"
             >
               Batal
             </Button>
@@ -524,7 +524,7 @@ export default function StokInventoryPage() {
                 opnameModal.fisikAktual === "" ||
                 opnameModal.catatan.trim() === ""
               }
-              className="bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/90 font-bold"
+              className="bg-karamel text-navy hover:bg-karamel/90 font-bold"
             >
               {submitOpnameMutation.isPending && (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

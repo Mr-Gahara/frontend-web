@@ -34,13 +34,13 @@ import {
 import { formatRupiah } from "@/lib/format";
 
 const KELAS_ISIAN =
-  "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]";
+  "bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy";
 
 function Keadaan({ judul, isi }: { judul: string; isi: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-[#0A2947]/20 bg-[#F2EAE1] p-12 text-center">
-      <p className="text-base font-bold text-[#0A2947] mb-1">{judul}</p>
-      <p className="text-sm font-medium text-[#0A2947]/60 max-w-md mx-auto">{isi}</p>
+    <div className="rounded-2xl border border-dashed border-navy/20 bg-krem p-12 text-center">
+      <p className="text-base font-bold text-navy mb-1">{judul}</p>
+      <p className="text-sm font-medium text-navy/60 max-w-md mx-auto">{isi}</p>
     </div>
   );
 }
@@ -60,13 +60,13 @@ export function HalamanUbahAkunKas() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:py-8">
       <Link
         href={URL_DAFTAR_AKUN_KAS}
-        className="inline-flex w-fit items-center text-sm font-semibold text-[#0A2947]/60 hover:text-[#0A2947]"
+        className="inline-flex w-fit items-center text-sm font-semibold text-navy/60 hover:text-navy"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Kembali ke Daftar Akun Kas
       </Link>
       {isLoading ? (
-        <Skeleton className="h-96 w-full rounded-2xl bg-[#0A2947]/10" />
+        <Skeleton className="h-96 w-full rounded-2xl bg-navy/10" />
       ) : isError ? (
         <Keadaan
           judul="Gagal memuat akun kas"
@@ -132,18 +132,18 @@ function FormUbah({ akun }: { akun: AkunKas }) {
   return (
     <>
       <div className="space-y-0.5">
-        <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">Ubah Akun Kas</h1>
-        <p className="text-sm font-medium text-[#0A2947]/60">{akun.namaAkun}</p>
+        <h1 className="text-2xl font-bold tracking-tight text-navy">Ubah Akun Kas</h1>
+        <p className="text-sm font-medium text-navy/60">{akun.namaAkun}</p>
       </div>
 
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] shadow-sm">
+      <div className="rounded-2xl border border-navy/10 bg-krem shadow-sm">
         <form
           noValidate
           onSubmit={handleSubmit(kirim)}
           className="flex flex-col gap-6 p-5 sm:p-8"
         >
           <div className="space-y-2">
-            <label htmlFor="tipe-akun" className="text-sm font-bold text-[#0A2947]">
+            <label htmlFor="tipe-akun" className="text-sm font-bold text-navy">
               Tipe Akun
             </label>
             <Controller
@@ -157,7 +157,7 @@ function FormUbah({ akun }: { akun: AkunKas }) {
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                  <SelectContent className="bg-gading border-navy/10 text-navy">
                     <SelectItem value="Kas Fisik">Kas Fisik</SelectItem>
                     <SelectItem value="Rekening Bank">Rekening Bank</SelectItem>
                   </SelectContent>
@@ -171,7 +171,7 @@ function FormUbah({ akun }: { akun: AkunKas }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label htmlFor="nama-akun" className="text-sm font-bold text-[#0A2947]">
+              <label htmlFor="nama-akun" className="text-sm font-bold text-navy">
                 Nama Akun
               </label>
               <Input
@@ -185,7 +185,7 @@ function FormUbah({ akun }: { akun: AkunKas }) {
               )}
             </div>
             <div className="space-y-2">
-              <label htmlFor="nomor-akun" className="text-sm font-bold text-[#0A2947]">
+              <label htmlFor="nomor-akun" className="text-sm font-bold text-navy">
                 Nomor Akun
               </label>
               <Input
@@ -201,9 +201,9 @@ function FormUbah({ akun }: { akun: AkunKas }) {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="keterangan-akun" className="text-sm font-bold text-[#0A2947]">
+            <label htmlFor="keterangan-akun" className="text-sm font-bold text-navy">
               Keterangan{" "}
-              <span className="text-[#0A2947]/50 font-medium">(Opsional)</span>
+              <span className="text-navy/50 font-medium">(Opsional)</span>
             </label>
             <Input
               id="keterangan-akun"
@@ -217,29 +217,29 @@ function FormUbah({ akun }: { akun: AkunKas }) {
           </div>
 
           <div className="space-y-1">
-            <p className="text-sm font-bold text-[#0A2947]">Saldo Saat Ini</p>
-            <p className="font-mono text-lg font-bold text-[#0A2947]">
+            <p className="text-sm font-bold text-navy">Saldo Saat Ini</p>
+            <p className="font-mono text-lg font-bold text-navy">
               {formatRupiah(akun.saldo ?? 0)}
             </p>
-            <p className="text-xs font-medium text-[#0A2947]/50">
+            <p className="text-xs font-medium text-navy/50">
               Saldo tidak dapat diubah di sini; saldo hanya berubah lewat transaksi.
             </p>
           </div>
 
-          <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-6 border-t border-[#0A2947]/10">
+          <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-6 border-t border-navy/10">
             <Button
               type="button"
               variant="outline"
               onClick={() => router.push(URL_DAFTAR_AKUN_KAS)}
               disabled={memuat}
-              className="w-full sm:w-auto border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold px-6"
+              className="w-full sm:w-auto border-navy/20 text-navy hover:bg-navy/5 font-bold px-6"
             >
               Batal
             </Button>
             <Button
               type="submit"
               disabled={memuat || !berubah}
-              className="w-full sm:w-auto bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold px-6 shadow-sm"
+              className="w-full sm:w-auto bg-navy text-gading hover:bg-navy/90 font-bold px-6 shadow-sm"
             >
               {memuat ? (
                 "Menyimpan..."
@@ -254,12 +254,12 @@ function FormUbah({ akun }: { akun: AkunKas }) {
         </form>
       </div>
 
-      <section className="flex flex-col gap-3 rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+      <section className="flex flex-col gap-3 rounded-2xl border border-navy/10 bg-krem p-5 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div>
-          <h2 className="text-base font-bold text-[#0A2947]">
+          <h2 className="text-base font-bold text-navy">
             Status: {aktif ? "Aktif" : "Non-aktif"}
           </h2>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <p className="text-sm font-medium text-navy/60">
             {aktif
               ? "Akun hanya dapat dinonaktifkan bila saldonya 0 dan tidak dipakai metode pembayaran."
               : "Akun non-aktif dapat diaktifkan kembali selama akun aktif belum mencapai 10."}
@@ -270,7 +270,7 @@ function FormUbah({ akun }: { akun: AkunKas }) {
           variant="outline"
           onClick={() => setTujuanStatus(aktif ? "non-aktif" : "aktif")}
           disabled={memuat}
-          className="w-full sm:w-auto border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+          className="w-full sm:w-auto border-navy/20 text-navy hover:bg-navy/5 font-bold"
         >
           {aktif ? "Nonaktifkan Akun" : "Aktifkan Kembali"}
         </Button>

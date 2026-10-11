@@ -19,28 +19,28 @@ const settingsModules = [
     description: "Kelola tarif pajak, service charge, aturan inklusif, dan prioritas pemungutan.",
     icon: Receipt,
     href: "/dashboard/outlet/pengaturan/pajak",
-    iconColor: "text-[#D4A373]", // Mustard
+    iconColor: "text-karamel", // Mustard
   },
   {
     title: "Manajemen Role (Hak Akses)",
     description: "Atur peran pengguna dan batas kewenangan staf di dalam sistem aplikasi.",
     icon: Users,
     href: "/dashboard/outlet/pengaturan/roles",
-    iconColor: "text-[#718355]", // Sage Green
+    iconColor: "text-sage", // Sage Green
   },
   {
     title: "Profil Toko",
     description: "Konfigurasi informasi dasar, alamat, dan lokasi outlet toko Anda.",
     icon: Store,
     href: "/dashboard/outlet/pengaturan/toko",
-    iconColor: "text-[#D4A373]", // Mustard
+    iconColor: "text-karamel", // Mustard
   },
   {
     title: "Metode Pembayaran",
     description: "Konfigurasi metode pembayaran",
     icon: Wallet,
     href: "/dashboard/outlet/pengaturan/metodePembayaran",
-    iconColor: "text-[#718355]", // Sage Green
+    iconColor: "text-sage", // Sage Green
   }
 ]
 
@@ -53,16 +53,16 @@ export default function PengaturanPage() {
     <div className="p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full overflow-x-hidden">
       
       {/* Header Utama */}
-      <div className="flex flex-col gap-1.5 w-full border-b border-[#0A2947]/10 pb-6">
+      <div className="flex flex-col gap-1.5 w-full border-b border-navy/10 pb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#F2EAE1] rounded-lg shrink-0 border border-[#0A2947]/10 shadow-sm">
-            <Settings className="w-6 h-6 text-[#0A2947]" />
+          <div className="p-2 bg-krem rounded-lg shrink-0 border border-navy/10 shadow-sm">
+            <Settings className="w-6 h-6 text-navy" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947] wrap-break-words">
+          <h1 className="text-2xl font-bold tracking-tight text-navy wrap-break-words">
             Pengaturan Outlet
           </h1>
         </div>
-        <p className="text-sm font-medium text-[#0A2947]/60 ml-11 md:pr-12 wrap-break-words">
+        <p className="text-sm font-medium text-navy/60 ml-11 md:pr-12 wrap-break-words">
           Pilih modul di bawah ini untuk mengonfigurasi preferensi operasional dan sistem Anda.
         </p>
       </div>
@@ -75,22 +75,22 @@ export default function PengaturanPage() {
             <Link 
               key={idx} 
               href={modul.href}
-              className="group bg-[#F2EAE1] rounded-2xl p-6 shadow-sm flex flex-col h-full hover:shadow-md hover:-translate-y-1 transition-all duration-300 border border-[#0A2947]/10 hover:border-[#0A2947]/30 overflow-hidden"
+              className="group bg-krem rounded-2xl p-6 shadow-sm flex flex-col h-full hover:shadow-md hover:-translate-y-1 transition-all duration-300 border border-navy/10 hover:border-navy/30 overflow-hidden"
             >
               <div className="flex flex-col h-full w-full">
                 <div className="flex justify-between items-start mb-4">
                   {/* Kotak Ikon Cream Terang agar ikon menonjol */}
-                  <div className="p-3 bg-[#FFFAF3] rounded-lg shadow-sm border border-[#0A2947]/5 shrink-0">
+                  <div className="p-3 bg-gading rounded-lg shadow-sm border border-navy/5 shrink-0">
                     <Icon className={`w-6 h-6 ${modul.iconColor}`} />
                   </div>
                   {/* Panah akan menggelap saat di-hover */}
-                  <ArrowRight className="w-5 h-5 text-[#0A2947]/20 group-hover:text-[#0A2947] transition-colors shrink-0 mt-1" />
+                  <ArrowRight className="w-5 h-5 text-navy/20 group-hover:text-navy transition-colors shrink-0 mt-1" />
                 </div>
                 
-                <h3 className="text-xl font-bold tracking-tight text-[#0A2947] wrap-break-words pr-2">
+                <h3 className="text-xl font-bold tracking-tight text-navy wrap-break-words pr-2">
                   {modul.title}
                 </h3>
-                <p className="text-sm font-medium text-[#0A2947]/60 mt-2 leading-relaxed wrap-break-words line-clamp-3">
+                <p className="text-sm font-medium text-navy/60 mt-2 leading-relaxed wrap-break-words line-clamp-3">
                   {modul.description}
                 </p>
               </div>

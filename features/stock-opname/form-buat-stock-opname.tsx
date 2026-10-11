@@ -189,21 +189,21 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
           onClick={() => router.push(teks.urlDaftar)}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali ke Daftar Opname
         </Button>
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg shrink-0 shadow-sm">
-            <ClipboardList className="w-6 h-6 text-[#D4A373]" />
+          <div className="p-2 bg-gading border border-navy/10 rounded-lg shrink-0 shadow-sm">
+            <ClipboardList className="w-6 h-6 text-karamel" />
           </div>
           <div className="space-y-0.5">
-            <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+            <h1 className="text-2xl font-bold tracking-tight text-navy">
               {teks.judul}
             </h1>
-            <p className="text-sm font-medium text-[#0A2947]/60">
+            <p className="text-sm font-medium text-navy/60">
               {teks.deskripsi}
             </p>
           </div>
@@ -233,7 +233,7 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
 
       {/* FORM SECTION */}
       {!isLocationEmpty && (
-        <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-navy/10 bg-krem shadow-sm overflow-hidden">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-6 p-6 sm:p-8"
@@ -241,12 +241,12 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
             <div className="space-y-5">
               {/* Read-Only Lokasi (Auto-detect Tenant) */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#0A2947] flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-[#D4A373]" />
+                <label className="text-sm font-bold text-navy flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-karamel" />
                   Lokasi Audit / Gudang
                 </label>
                 {sumberLokasi.jenis === "tetap" ? (
-                <div className="flex items-center w-full h-12 px-4 bg-[#0A2947]/5 border border-[#0A2947]/10 rounded-lg text-[#0A2947]/60 font-bold cursor-not-allowed">
+                <div className="flex items-center w-full h-12 px-4 bg-navy/5 border border-navy/10 rounded-lg text-navy/60 font-bold cursor-not-allowed">
                     {isLoadingLokasi ? "Memeriksa lokasi aktif..." : namaLokasiTetap}
                   </div>
                 ) : (
@@ -257,11 +257,11 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
                   >
                     <SelectTrigger
                       aria-label="Lokasi Audit / Gudang"
-                      className="w-full h-12 bg-white border-[#0A2947]/20 text-[#0A2947] font-bold cursor-pointer"
+                      className="w-full h-12 bg-white border-navy/20 text-navy font-bold cursor-pointer"
                     >
                       <SelectValue placeholder={isLoadingLokasi ? "Memuat gudang..." : "Pilih Gudang..."} />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                    <SelectContent className="bg-gading border-navy/10 text-navy">
                       {sumberLokasi.pilihan.map((lokasi) => (
                         <SelectItem key={lokasi.id} value={lokasi.id} className="cursor-pointer font-bold">
                           {lokasi.nama || "Gudang Tanpa Nama"}
@@ -276,7 +276,7 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
                       {teks.pesanLokasi}
                     </span>
                   ) : (
-                    <p className="text-xs font-medium text-[#0A2947]/50 mt-1">
+                    <p className="text-xs font-medium text-navy/50 mt-1">
                       {keteranganLokasi(sumberLokasi)}
                     </p>
                   )}
@@ -284,12 +284,12 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
               </div>
 
               {/* Read-Only PIC */}
-              <div className="space-y-2 pt-2 border-t border-[#0A2947]/10 mt-2">
-                <label className="text-sm font-bold text-[#0A2947] flex items-center gap-2">
-                  <User className="h-4 w-4 text-[#D4A373]" />
+              <div className="space-y-2 pt-2 border-t border-navy/10 mt-2">
+                <label className="text-sm font-bold text-navy flex items-center gap-2">
+                  <User className="h-4 w-4 text-karamel" />
                   Penanggung Jawab (PIC)
                 </label>
-                <div className="flex items-center w-full h-12 px-4 bg-[#0A2947]/5 border border-[#0A2947]/10 rounded-lg text-[#0A2947]/60 font-bold cursor-not-allowed">
+                <div className="flex items-center w-full h-12 px-4 bg-navy/5 border border-navy/10 rounded-lg text-navy/60 font-bold cursor-not-allowed">
                   {currentUserName}
                 </div>
                 <div className="min-h-4">
@@ -298,7 +298,7 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
                       {errors.picID.message}
                     </span>
                   ) : (
-                    <p className="text-xs font-medium text-[#0A2947]/50 mt-1">
+                    <p className="text-xs font-medium text-navy/50 mt-1">
                       Sistem otomatis mencatat Anda sebagai PIC sesi opname
                       ini.
                     </p>
@@ -307,30 +307,30 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
               </div>
 
               {/* Input Catatan */}
-              <div className="space-y-2 pt-2 border-t border-[#0A2947]/10 mt-2">
-                <label className="text-sm font-bold text-[#0A2947] flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-[#D4A373]" />
+              <div className="space-y-2 pt-2 border-t border-navy/10 mt-2">
+                <label className="text-sm font-bold text-navy flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-karamel" />
                   Catatan Opname{" "}
-                  <span className="text-[#0A2947]/50 font-medium">
+                  <span className="text-navy/50 font-medium">
                     (Opsional)
                   </span>
                 </label>
                 <Input
                   {...register("catatan")}
                   placeholder={teks.placeholderCatatan}
-                  className="bg-[#FFFAF3] h-12 border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 font-medium focus-visible:ring-1 focus-visible:ring-[#0A2947]"
+                  className="bg-gading h-12 border-navy/20 text-navy placeholder:text-navy/30 font-medium focus-visible:ring-1 focus-visible:ring-navy"
                 />
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-6 border-t border-[#0A2947]/10 mt-4">
+            <div className="flex items-center justify-end gap-3 pt-6 border-t border-navy/10 mt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.push(teks.urlDaftar)}
                 disabled={createMutation.isPending}
-                className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold h-11 px-6"
+                className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold h-11 px-6"
               >
                 Batal
               </Button>
@@ -343,13 +343,13 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
                   !watchPicID ||
                   isLoadingLokasi
                 }
-                className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold h-11 px-6 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold h-11 px-6 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {createMutation.isPending ? (
                   "Memproses Draft..."
                 ) : (
                   <>
-                    <Save className="mr-2 h-4 w-4 text-[#D4A373]" />
+                    <Save className="mr-2 h-4 w-4 text-karamel" />
                     Buat Draft & Mulai Opname
                   </>
                 )}

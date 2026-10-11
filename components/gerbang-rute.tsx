@@ -24,9 +24,9 @@ export function GerbangRute({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-2 text-center text-[#0A2947]">
+    <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-2 text-center text-navy">
       <p className="font-bold">Anda tidak memiliki izin membuka halaman ini.</p>
-      <p className="text-sm font-medium text-[#0A2947]/60">
+      <p className="text-sm font-medium text-navy/60">
         Hubungi pemilik toko bila Anda memerlukannya.
       </p>
     </div>

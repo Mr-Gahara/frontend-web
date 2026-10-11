@@ -34,7 +34,7 @@ export function ReservasiNavTabs() {
   return (
     <div className="w-full mb-6">
       <nav
-        className="flex flex-row overflow-x-auto overflow-y-hidden w-full border-b border-[#0A2947]/10 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="flex flex-row overflow-x-auto overflow-y-hidden w-full border-b border-navy/10 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         aria-label="Navigasi Reservasi"
       >
         {tabs.map(({ label, href, icon: Icon }) => {
@@ -53,8 +53,8 @@ export function ReservasiNavTabs() {
               className={cn(
                 "flex flex-1 items-center justify-center gap-2 py-3 px-4 text-sm font-bold whitespace-nowrap transition-all border-b-4 rounded-none bg-transparent cursor-pointer -mb-px focus-visible:ring-0 focus-visible:outline-none",
                 isActive
-                  ? "border-[#0A2947] text-[#0A2947] shadow-none"
-                  : "border-transparent text-[#0A2947]/50 hover:text-[#0A2947]/80 hover:bg-transparent hover:border-[#0A2947]/20"
+                  ? "border-navy text-navy shadow-none"
+                  : "border-transparent text-navy/50 hover:text-navy/80 hover:bg-transparent hover:border-navy/20"
               )}
             >
               <Icon className="w-4 h-4" />

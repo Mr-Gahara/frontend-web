@@ -32,10 +32,10 @@ import {
 import { IsianAturanDiskon } from "./aturan-diskon";
 import { skemaDiskon, type NilaiFormDiskon } from "./schema";
 
-const KELAS_LABEL = "text-sm font-bold text-[#041E3F]";
+const KELAS_LABEL = "text-sm font-bold text-navy";
 const KELAS_PEMICU =
-  "w-full bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus:ring-[#041E3F]/50 font-medium h-12 rounded-xl px-4";
-const KELAS_ISI_PILIHAN = "bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F] font-medium";
+  "w-full bg-gading text-navy text-sm border-navy/15 focus:ring-navy/50 font-medium h-12 rounded-xl px-4";
+const KELAS_ISI_PILIHAN = "bg-krem border-navy/10 text-navy font-medium";
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
@@ -116,7 +116,7 @@ function IsiFormDiskon({ diskon, batasTercapai, onTutup }: IsiProps) {
           id="diskon-nama"
           {...register("namaDiskon")}
           placeholder="Contoh: Diskon Kemerdekaan"
-          className="bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50 font-medium h-12 rounded-xl px-4"
+          className="bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-medium h-12 rounded-xl px-4"
         />
         <PesanIsian pesan={errors.namaDiskon?.message} />
       </div>
@@ -165,17 +165,17 @@ function IsiFormDiskon({ diskon, batasTercapai, onTutup }: IsiProps) {
         <label htmlFor="diskon-nilai" className={KELAS_LABEL}>Nilai Potongan</label>
         <div className="relative">
           {tipe === "nominal" && (
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#041E3F]/50 font-bold">Rp</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-navy/50 font-bold">Rp</span>
           )}
           <Input
             id="diskon-nilai"
             {...register("nilai")}
             inputMode="decimal"
-            className={`no-spinner bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50 font-bold h-12 rounded-xl ${tipe === "nominal" ? "pl-11" : "px-4"}`}
+            className={`no-spinner bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl ${tipe === "nominal" ? "pl-11" : "px-4"}`}
             placeholder="0"
           />
           {tipe === "persen" && (
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#041E3F]/50 font-bold">%</span>
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-navy/50 font-bold">%</span>
           )}
         </div>
         <PesanIsian pesan={errors.nilai?.message} />
@@ -200,7 +200,7 @@ function IsiFormDiskon({ diskon, batasTercapai, onTutup }: IsiProps) {
             )}
           />
           {aktifTerkunci && (
-            <p className="text-xs font-medium text-[#041E3F]/60">
+            <p className="text-xs font-medium text-navy/60">
               Batas diskon aktif tercapai; diskon ini hanya dapat disimpan Non-Aktif.
             </p>
           )}
@@ -240,7 +240,7 @@ function IsiFormDiskon({ diskon, batasTercapai, onTutup }: IsiProps) {
       <Button
         type="submit"
         disabled={memproses}
-        className="w-full h-14 mt-2 rounded-xl cursor-pointer bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90 text-base font-bold shadow-md transition-all active:scale-[0.98]"
+        className="w-full h-14 mt-2 rounded-xl cursor-pointer bg-navy text-gading hover:bg-navy/90 text-base font-bold shadow-md transition-all active:scale-[0.98]"
       >
         {memproses ? "Menyimpan Data..." : "Simpan Konfigurasi"}
       </Button>
@@ -261,17 +261,17 @@ export function DialogFormDiskon({
         if (!buka) onTutup();
       }}
     >
-      <DialogContent className="sm:max-w-135 max-h-[90vh] overflow-y-auto border-[#041E3F]/10 bg-[#F2EAE1] p-6 sm:p-8 [&>button]:hidden rounded-[1.5rem] shadow-xl">
+      <DialogContent className="sm:max-w-135 max-h-[90vh] overflow-y-auto border-navy/10 bg-krem p-6 sm:p-8 [&>button]:hidden rounded-[1.5rem] shadow-xl">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#041E3F]/15 bg-[#FFFAF3] text-[#041E3F]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-navy/15 bg-gading text-navy">
               <Tag className="h-6 w-6" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold text-[#041E3F]">
+              <DialogTitle className="text-2xl font-bold text-navy">
                 {diskon ? "Edit Diskon" : "Tambah Diskon"}
               </DialogTitle>
-              <DialogDescription className="text-sm font-semibold text-[#041E3F]/60 mt-0.5">
+              <DialogDescription className="text-sm font-semibold text-navy/60 mt-0.5">
                 {diskon
                   ? "Perbarui konfigurasi diskon."
                   : "Buat konfigurasi diskon atau promosi baru."}
@@ -282,7 +282,7 @@ export function DialogFormDiskon({
             type="button"
             aria-label="Tutup"
             onClick={onTutup}
-            className="flex items-center justify-center p-2 rounded-md text-[#041E3F] hover:bg-[#041E3F]/10 transition-colors cursor-pointer"
+            className="flex items-center justify-center p-2 rounded-md text-navy hover:bg-navy/10 transition-colors cursor-pointer"
           >
             <X className="h-6 w-6 stroke-[2.5px]" />
           </button>

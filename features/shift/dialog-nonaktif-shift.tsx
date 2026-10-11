@@ -33,7 +33,7 @@ export function ShiftDeleteDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="border-[#041E3F]/10 bg-[#FFFAF3] sm:max-w-112.5 rounded-2xl p-6 shadow-xl">
+      <AlertDialogContent className="border-navy/10 bg-gading sm:max-w-112.5 rounded-2xl p-6 shadow-xl">
         <AlertDialogHeader className="flex flex-col items-center gap-2 text-center sm:text-left sm:items-start sm:flex-row">
           {/* Ikon Peringatan */}
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0">
@@ -41,10 +41,10 @@ export function ShiftDeleteDialog({
           </div>
           
           <div className="flex flex-col gap-1.5 mt-2 sm:mt-0">
-            <AlertDialogTitle className="text-xl font-bold text-[#041E3F]">
+            <AlertDialogTitle className="text-xl font-bold text-navy">
               Non-Aktifkan Shift?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm font-semibold leading-relaxed text-[#041E3F]/70">
+            <AlertDialogDescription className="text-sm font-semibold leading-relaxed text-navy/70">
               Anda yakin ingin menonaktifkan <strong>{targetShift.namaShift}</strong>?
               <br />
               <br />
@@ -56,7 +56,7 @@ export function ShiftDeleteDialog({
         <AlertDialogFooter className="mt-6 sm:mt-4 flex gap-3 sm:justify-end">
           <AlertDialogCancel
             disabled={isPending}
-            className="w-full sm:w-auto h-11 cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent font-bold rounded-xl m-0"
+            className="w-full sm:w-auto h-11 cursor-pointer border-navy/20 text-navy hover:bg-navy/5 bg-transparent font-bold rounded-xl m-0"
           >
             Batal
           </AlertDialogCancel>

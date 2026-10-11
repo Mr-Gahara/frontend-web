@@ -10,13 +10,13 @@ export function PesanPajak({ judul, pesan, onCobaLagi }: { judul: string; pesan:
   return (
     <div role="alert" className="flex flex-col items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4">
       <p className="text-sm font-bold text-red-600">{judul}</p>
-      <p className="text-sm font-medium text-[#0A2947]/70">{pesan}</p>
+      <p className="text-sm font-medium text-navy/70">{pesan}</p>
       {onCobaLagi && (
         <Button
           type="button"
           variant="outline"
           onClick={onCobaLagi}
-          className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+          className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
         >
           Coba Lagi
         </Button>

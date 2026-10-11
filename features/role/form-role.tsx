@@ -78,15 +78,15 @@ export default function FormRole(props: PropsFormRole) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-3 text-center">
         <AlertTriangle className="h-8 w-8 text-red-600" />
-        <p className="text-sm font-bold text-[#0A2947]">
+        <p className="text-sm font-bold text-navy">
           Posisi tidak dapat dimuat.
         </p>
-        <p className="text-sm font-medium text-[#0A2947]/60">
+        <p className="text-sm font-medium text-navy/60">
           {pesanError(detailError, "Data posisi tidak ditemukan.")}
         </p>
         <Link
           href={urlKembali}
-          className="text-sm font-bold text-[#0A2947] underline"
+          className="text-sm font-bold text-navy underline"
         >
           {labelKembali}
         </Link>
@@ -97,8 +97,8 @@ export default function FormRole(props: PropsFormRole) {
   if (modeEdit && (!roleDetail || !isFetchedAfterMount)) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-[#0A2947]/60" />
-        <p className="text-sm font-bold text-[#0A2947]/60">
+        <Loader2 className="h-8 w-8 animate-spin text-navy/60" />
+        <p className="text-sm font-bold text-navy/60">
           Memuat rincian posisi...
         </p>
       </div>
@@ -326,7 +326,7 @@ function IsiFormRole({
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
           onClick={() => router.push(urlKembali)}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -334,22 +334,22 @@ function IsiFormRole({
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">
             {judul}
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <p className="text-sm font-medium text-navy/60">
             {deskripsiHalaman}
           </p>
         </div>
       </div>
 
       {/* Main Container Card */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm">
+      <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm">
         <form onSubmit={tanganiSubmit(kirim)} noValidate className="flex flex-col gap-7">
           <div className="space-y-2">
-            <label htmlFor="namaRole" className="text-sm font-bold text-[#0A2947]">Nama Posisi / Jabatan</label>
+            <label htmlFor="namaRole" className="text-sm font-bold text-navy">Nama Posisi / Jabatan</label>
             <Input
-              className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
+              className="bg-gading border-navy/20 text-navy placeholder:text-navy/30"
               id="namaRole"
               {...register("namaRole")}
               aria-invalid={!!errors.namaRole}
@@ -361,14 +361,14 @@ function IsiFormRole({
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="deskripsiRole" className="text-sm font-bold text-[#0A2947]">
+            <label htmlFor="deskripsiRole" className="text-sm font-bold text-navy">
               Deskripsi Pekerjaan{" "}
-              <span className="text-[#0A2947]/50 font-medium">
+              <span className="text-navy/50 font-medium">
                 (opsional)
               </span>
             </label>
             <Input
-              className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
+              className="bg-gading border-navy/20 text-navy placeholder:text-navy/30"
               id="deskripsiRole"
               {...register("deskripsi")}
               aria-invalid={!!errors.deskripsi}
@@ -380,10 +380,10 @@ function IsiFormRole({
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="levelRole" className="text-sm font-bold text-[#0A2947]">Level Otoritas</label>
+            <label htmlFor="levelRole" className="text-sm font-bold text-navy">Level Otoritas</label>
             <Input
               type="number"
-              className="no-spinner bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30"
+              className="no-spinner bg-gading border-navy/20 text-navy placeholder:text-navy/30"
               id="levelRole"
               {...register("level")}
               aria-invalid={!!errors.level}
@@ -393,7 +393,7 @@ function IsiFormRole({
               <p className="text-xs font-bold text-red-600">{errors.level.message}</p>
             )}
             {currentUserLevel > 0 && (
-              <p className="text-xs font-medium text-[#0A2947]/60 mt-1">
+              <p className="text-xs font-medium text-navy/60 mt-1">
                 Level harus antara 1 hingga {currentUserLevel - 1}. Semakin
                 tinggi angka, semakin tinggi otoritas jabatan.
               </p>
@@ -401,13 +401,13 @@ function IsiFormRole({
           </div>
 
           {/* Area Hak Akses */}
-          <div className="flex flex-col gap-4 pt-4 border-t border-[#0A2947]/10 mt-2">
+          <div className="flex flex-col gap-4 pt-4 border-t border-navy/10 mt-2">
             <div className="flex items-center justify-between">
               <div>
-                <label className="text-sm font-bold text-[#0A2947]">
+                <label className="text-sm font-bold text-navy">
                   Wewenang Menu Sistem
                 </label>
-                <p className="text-xs font-medium text-[#0A2947]/60 mt-1">
+                <p className="text-xs font-medium text-navy/60 mt-1">
                   {selectedPermissions.length} dari {allowedPermissions.length}{" "}
                   pilihan aktif.
                 </p>
@@ -417,7 +417,7 @@ function IsiFormRole({
                 variant="outline"
                 size="sm"
                 onClick={handleSelectAllGlobal}
-                className="h-8 text-xs font-bold cursor-pointer transition-colors border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 shadow-sm"
+                className="h-8 text-xs font-bold cursor-pointer transition-colors border-navy/20 text-navy hover:bg-navy/5 shadow-sm"
                 disabled={permissionsLoading}
               >
                 {selectedPermissions.length === allowedPermissions.length &&
@@ -428,14 +428,14 @@ function IsiFormRole({
             </div>
 
             {permissionsLoading ? (
-              <div className="flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[#0A2947]/20 bg-[#FFFAF3]">
-                <Loader2 className="h-6 w-6 animate-spin text-[#0A2947]/40" />
-                <p className="text-sm font-bold text-[#0A2947]/60">
+              <div className="flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-navy/20 bg-gading">
+                <Loader2 className="h-6 w-6 animate-spin text-navy/40" />
+                <p className="text-sm font-bold text-navy/60">
                   Memuat daftar wewenang...
                 </p>
               </div>
             ) : (
-              <div className="rounded-xl border border-[#0A2947]/10 bg-[#FFFAF3] overflow-hidden shadow-inner">
+              <div className="rounded-xl border border-navy/10 bg-gading overflow-hidden shadow-inner">
                 {Object.entries(groupedPermissions).map(([grup, items], i) => {
                   const itemNames = items.map((item) => item.nama);
                   const isGroupAllSelected = itemNames.every((name) =>
@@ -447,12 +447,12 @@ function IsiFormRole({
                       key={grup}
                       className={`px-5 py-5 ${
                         i < Object.keys(groupedPermissions).length - 1
-                          ? "border-b border-[#0A2947]/10"
+                          ? "border-b border-navy/10"
                           : ""
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-5 border-b border-[#0A2947]/5 pb-2">
-                        <p className="text-xs font-bold text-[#0A2947]/50 uppercase tracking-wider">
+                      <div className="flex items-center justify-between mb-5 border-b border-navy/5 pb-2">
+                        <p className="text-xs font-bold text-navy/50 uppercase tracking-wider">
                           {grup}
                         </p>
                         <Button
@@ -462,8 +462,8 @@ function IsiFormRole({
                           onClick={() => handleSelectGroup(items)}
                           className={`h-7 px-3 text-[11px] font-bold rounded-md transition-colors cursor-pointer ${
                             isGroupAllSelected
-                              ? "text-[#D4A373] hover:bg-[#D4A373]/10" 
-                              : "text-[#718355] hover:bg-[#718355]/10" 
+                              ? "text-karamel hover:bg-karamel/10" 
+                              : "text-sage hover:bg-sage/10" 
                           }`}
                         >
                           {isGroupAllSelected
@@ -486,16 +486,16 @@ function IsiFormRole({
                               onCheckedChange={() =>
                                 handleCheckbox(permission.nama)
                               }
-                              className="mt-0.5 cursor-pointer border-[#0A2947]/30 data-[state=checked]:bg-[#0A2947] data-[state=checked]:border-[#0A2947] data-[state=checked]:text-[#FFFAF3]"
+                              className="mt-0.5 cursor-pointer border-navy/30 data-[state=checked]:bg-navy data-[state=checked]:border-navy data-[state=checked]:text-gading"
                             />
                             <div className="grid gap-1 leading-none">
                               <label
                                 htmlFor={`edit-${permission.id}`}
-                                className="text-sm font-bold cursor-pointer text-[#0A2947]"
+                                className="text-sm font-bold cursor-pointer text-navy"
                               >
                                 {permission.deskripsi || permission.nama}
                               </label>
-                              <p className="text-xs font-medium text-[#0A2947]/50 font-mono">
+                              <p className="text-xs font-medium text-navy/50 font-mono">
                                 {permission.nama}
                               </p>
                             </div>
@@ -518,13 +518,13 @@ function IsiFormRole({
           )}
 
           {/* Tombol Simpan Bawah */}
-          <div className="flex justify-end gap-3 border-t border-[#0A2947]/10 pt-6 mt-2">
+          <div className="flex justify-end gap-3 border-t border-navy/10 pt-6 mt-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => router.push(urlKembali)}
               disabled={simpanRoleMutation.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Batal
             </Button>
@@ -535,7 +535,7 @@ function IsiFormRole({
                 permissionsLoading ||
                 tanpaPerubahan
               }
-              className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm px-6"
+              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm px-6"
             >
               {simpanRoleMutation.isPending
                 ? "Menyimpan Perubahan..."
@@ -552,15 +552,15 @@ function IsiFormRole({
           if (!open) setWarningDialog(null);
         }}
       >
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-[#0A2947]">
-              <AlertTriangle className="h-5 w-5 text-[#D4A373]" />
+            <AlertDialogTitle className="flex items-center gap-2 text-navy">
+              <AlertTriangle className="h-5 w-5 text-karamel" />
               Peringatan Hak Akses Vital
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm font-medium text-[#0A2947]/70 leading-relaxed pt-2">
+            <AlertDialogDescription className="text-sm font-medium text-navy/70 leading-relaxed pt-2">
               Anda mencoba menonaktifkan hak akses dasar{" "}
-              <strong className="text-[#0A2947]">{warningDialog?.nama}</strong>.
+              <strong className="text-navy">{warningDialog?.nama}</strong>.
               <br />
               <br />
               {warningDialog?.penjelasan}
@@ -571,7 +571,7 @@ function IsiFormRole({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="pt-2">
-            <AlertDialogCancel className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold">
+            <AlertDialogCancel className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold">
               Batal (Tetap Aktifkan)
             </AlertDialogCancel>
             <AlertDialogAction

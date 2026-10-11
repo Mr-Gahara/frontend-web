@@ -70,14 +70,14 @@ export default function PolaUtama({
       {/* 1. HEADER & TOOLBAR */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#041E3F]">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">
             Pola Roster {tipeRuang === "outlet" ? "Outlet" : "Gudang"}
           </h1>
-          <p className="text-sm text-[#041E3F]/60 font-medium">
+          <p className="text-sm text-navy/60 font-medium">
             Kelola template siklus kerja untuk auto-generate jadwal.
           </p>
           {!polaTerpisahPerRuang() && (
-            <p className="text-xs text-[#041E3F]/50 font-semibold">
+            <p className="text-xs text-navy/50 font-semibold">
               Daftar pola roster masih dipakai bersama ruang outlet dan gudang
               sampai backend mendukung pola roster per lokasi.
             </p>
@@ -89,53 +89,53 @@ export default function PolaUtama({
             setSelectedPola(null);
             setFormOpen(true);
           }}
-          className="h-11 bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
+          className="h-11 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
         >
           <Plus className="mr-2 h-4 w-4" /> Buat Pola Roster
         </Button>
       </div>
 
       {/* 2. FILTER & SEARCH */}
-      <div className="flex flex-col sm:flex-row items-center gap-4 bg-[#F2EAE1] p-4 rounded-2xl border border-[#041E3F]/10 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center gap-4 bg-krem p-4 rounded-2xl border border-navy/10 shadow-sm">
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#041E3F]/40" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari nama pola..."
             aria-label="Cari nama pola"
-            className="pl-9 h-11 bg-[#FFFAF3] border-[#041E3F]/15 text-[#041E3F] focus-visible:ring-[#041E3F]/50 rounded-xl font-medium"
+            className="pl-9 h-11 bg-gading border-navy/15 text-navy focus-visible:ring-navy/50 rounded-xl font-medium"
           />
         </div>
       </div>
 
       {/* 3. TABEL DATA */}
-      <div className="rounded-2xl border border-[#041E3F]/10 bg-[#FFFAF3] shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-navy/10 bg-gading shadow-sm overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-[#F8F3EB] border-b border-[#041E3F]/10">
+            <thead className="bg-[#F8F3EB] border-b border-navy/10">
               <tr>
-                <th className="p-4 font-bold text-[#041E3F]/70 uppercase tracking-wider text-xs w-[20%]">
+                <th className="p-4 font-bold text-navy/70 uppercase tracking-wider text-xs w-[20%]">
                   Nama Pola
                 </th>
-                <th className="p-4 font-bold text-[#041E3F]/70 uppercase tracking-wider text-xs w-[15%]">
+                <th className="p-4 font-bold text-navy/70 uppercase tracking-wider text-xs w-[15%]">
                   Siklus
                 </th>
-                <th className="p-4 font-bold text-[#041E3F]/70 uppercase tracking-wider text-xs w-[55%]">
+                <th className="p-4 font-bold text-navy/70 uppercase tracking-wider text-xs w-[55%]">
                   Preview Pola
                 </th>
 
-                <th className="p-4 font-bold text-[#041E3F]/70 uppercase tracking-wider text-xs w-[10%] text-right">
+                <th className="p-4 font-bold text-navy/70 uppercase tracking-wider text-xs w-[10%] text-right">
                   Aksi
                 </th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-[#041E3F]/5">
+            <tbody className="divide-y divide-navy/5">
               {isLoading ? (
                 <tr>
                   <td colSpan={4} className="h-32 text-center align-middle">
-                    <div className="flex flex-col items-center justify-center text-[#041E3F]/50">
+                    <div className="flex flex-col items-center justify-center text-navy/50">
                       <Loader2 className="h-6 w-6 animate-spin mb-2" />
                       <span className="text-sm font-bold">
                         Memuat Data Pola Roster...
@@ -157,7 +157,7 @@ export default function PolaUtama({
                 <tr>
                   <td
                     colSpan={4}
-                    className="h-32 text-center align-middle text-[#041E3F]/50 text-sm font-bold"
+                    className="h-32 text-center align-middle text-navy/50 text-sm font-bold"
                   >
                     {dataPola.length === 0
                       ? "Belum ada pola roster."
@@ -168,14 +168,14 @@ export default function PolaUtama({
                 filteredData.map((pola) => (
                   <tr
                     key={pola.id}
-                    className="hover:bg-[#041E3F]/2 transition-colors group"
+                    className="hover:bg-navy/2 transition-colors group"
                   >
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#041E3F]/5 text-[#041E3F]">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy/5 text-navy">
                           <CalendarRange className="h-4 w-4" />
                         </div>
-                        <span className="font-bold text-[#041E3F] text-base">
+                        <span className="font-bold text-navy text-base">
                           {pola.namaPola}
                         </span>
                       </div>
@@ -183,8 +183,8 @@ export default function PolaUtama({
 
                     <td className="p-4">
                       <div className="flex items-center gap-2">
-                        <RefreshCw className="h-3.5 w-3.5 text-[#041E3F]/50" />
-                        <span className="font-bold text-[#041E3F]/80 font-mono text-sm">
+                        <RefreshCw className="h-3.5 w-3.5 text-navy/50" />
+                        <span className="font-bold text-navy/80 font-mono text-sm">
                           {pola.siklusHari} Hari
                         </span>
                       </div>
@@ -201,7 +201,7 @@ export default function PolaUtama({
                               ${
                                 detail.isLibur
                                   ? "bg-red-50 text-red-600 border-red-200"
-                                  : "bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/20"
+                                  : "bg-gading text-navy border-navy/20"
                               }
                             `}
                           >
@@ -220,26 +220,26 @@ export default function PolaUtama({
                             variant="ghost"
                             size="icon"
                             aria-label="Buka menu"
-                            className="h-8 w-8 text-[#041E3F]/50 hover:text-[#041E3F] hover:bg-[#041E3F]/10 cursor-pointer"
+                            className="h-8 w-8 text-navy/50 hover:text-navy hover:bg-navy/10 cursor-pointer"
                           >
                             <MoreHorizontal className="h-5 w-5" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                           align="end"
-                          className="w-44 bg-[#FFFAF3] border-[#041E3F]/10 rounded-xl shadow-lg"
+                          className="w-44 bg-gading border-navy/10 rounded-xl shadow-lg"
                         >
                           <DropdownMenuItem
                             onClick={() => {
                               setSelectedPola(pola);
                               setFormOpen(true);
                             }}
-                            className="cursor-pointer font-bold text-[#041E3F] hover:bg-[#041E3F]/5 rounded-lg m-1"
+                            className="cursor-pointer font-bold text-navy hover:bg-navy/5 rounded-lg m-1"
                           >
                             <Edit className="mr-2 h-4 w-4" /> Edit Pola
                           </DropdownMenuItem>
 
-                          <DropdownMenuSeparator className="bg-[#041E3F]/5" />
+                          <DropdownMenuSeparator className="bg-navy/5" />
                           <DropdownMenuItem
                             onClick={() => {
                               setSelectedPola(pola);

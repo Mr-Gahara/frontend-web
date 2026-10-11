@@ -24,12 +24,12 @@ import { useLepasPajak, usePasangPajak, useRelasiPajakProduk } from "./hooks";
 import { PesanPajak } from "./pesan-pajak";
 import { labelModelRelasi, pajakTerpasang, pilihanPajakProduk, relasiNonaktif } from "./tampilan";
 
-const kelasLabel = "text-sm font-bold text-[#0A2947]";
-const kelasPemicu = "border-[#0A2947]/20 bg-[#FFFAF3] text-[#0A2947]";
-const kelasIsiPilihan = "bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]";
-const kelasPilihan = "cursor-pointer hover:bg-[#0A2947]/5";
-const kelasKepala = "font-bold text-[#0A2947]/60";
-const kelasSelKosong = "text-center text-[#0A2947]/60 font-medium py-6";
+const kelasLabel = "text-sm font-bold text-navy";
+const kelasPemicu = "border-navy/20 bg-gading text-navy";
+const kelasIsiPilihan = "bg-gading border-navy/10 text-navy";
+const kelasPilihan = "cursor-pointer hover:bg-navy/5";
+const kelasKepala = "font-bold text-navy/60";
+const kelasSelKosong = "text-center text-navy/60 font-medium py-6";
 
 /**
  * Tab pajak per produk (keputusan PO6a). Backend menyimpan relasi lewat
@@ -88,7 +88,7 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
   };
 
   return (
-    <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm space-y-6">
+    <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-6">
       <div className="space-y-2">
         <label htmlFor="pajak-produk" className={kelasLabel}>
           Pilih Produk
@@ -126,7 +126,7 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
           <label htmlFor="pajak-pasang" className={kelasLabel}>
             Assign Pajak
           </label>
-          <p className="text-xs font-medium text-[#0A2947]/60">
+          <p className="text-xs font-medium text-navy/60">
             Satu produk hanya dapat memiliki satu pajak per produk. Memasang pajak lain menggantikan pajak yang
             terpasang.
           </p>
@@ -146,7 +146,7 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
             <Button
               onClick={tekanPasang}
               disabled={pasang.isPending || !pilihan || relasi.isLoading}
-              className="cursor-pointer bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/90 shadow-sm font-bold shrink-0"
+              className="cursor-pointer bg-karamel text-navy hover:bg-karamel/90 shadow-sm font-bold shrink-0"
             >
               {pasang.isPending && !konfirmasi ? "Menyimpan..." : "Assign"}
             </Button>
@@ -155,10 +155,10 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
       )}
 
       {produkId && (
-        <div className="rounded-xl border border-[#0A2947]/10 bg-[#FFFAF3] overflow-hidden mt-4">
+        <div className="rounded-xl border border-navy/10 bg-gading overflow-hidden mt-4">
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-[#0A2947]/10 hover:bg-transparent">
+              <TableRow className="border-b border-navy/10 hover:bg-transparent">
                 <TableHead className={kelasKepala}>Nama Pajak</TableHead>
                 <TableHead className={kelasKepala}>Tarif</TableHead>
                 <TableHead className={kelasKepala}>Model</TableHead>
@@ -189,20 +189,20 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
                   </TableCell>
                 </TableRow>
               ) : (
-                <TableRow className="border-b border-[#0A2947]/5 hover:bg-[#0A2947]/5 transition-colors">
-                  <TableCell className="font-bold text-[#0A2947]">
+                <TableRow className="border-b border-navy/5 hover:bg-navy/5 transition-colors">
+                  <TableCell className="font-bold text-navy">
                     {terpasang.pajak.nama}
                     {relasiNonaktif(terpasang) && (
                       <>
-                        <span className="ml-1 font-medium text-[#0A2947]/60">(nonaktif)</span>
-                        <p className="text-xs font-medium text-[#0A2947]/60">
+                        <span className="ml-1 font-medium text-navy/60">(nonaktif)</span>
+                        <p className="text-xs font-medium text-navy/60">
                           Pajak ini nonaktif dan tidak dikenakan saat penjualan.
                         </p>
                       </>
                     )}
                   </TableCell>
-                  <TableCell className="font-semibold text-[#0A2947]">{terpasang.pajak.tarif}%</TableCell>
-                  <TableCell className="font-medium text-[#0A2947]/80">{labelModelRelasi(terpasang.pajak.model)}</TableCell>
+                  <TableCell className="font-semibold text-navy">{terpasang.pajak.tarif}%</TableCell>
+                  <TableCell className="font-medium text-navy/80">{labelModelRelasi(terpasang.pajak.model)}</TableCell>
                   <TableCell className="text-right">
                     {bolehPasang && (
                     <Button
@@ -232,10 +232,10 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
           }
         }}
       >
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">Ganti pajak {namaProduk}?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogTitle className="text-navy">Ganti pajak {namaProduk}?</AlertDialogTitle>
+            <AlertDialogDescription className="text-navy/70 font-medium">
               Pajak {terpasang?.pajak.nama} akan diganti dengan {pajakPilihan?.namaPajak}. Satu produk hanya dapat
               memiliki satu pajak per produk.
             </AlertDialogDescription>
@@ -244,7 +244,7 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={pasang.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Batal
             </AlertDialogCancel>
@@ -254,7 +254,7 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
                 e.preventDefault();
                 kirimPasang();
               }}
-              className="cursor-pointer bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/90 font-bold"
+              className="cursor-pointer bg-karamel text-navy hover:bg-karamel/90 font-bold"
             >
               {pasang.isPending ? "Menyimpan..." : "Ganti"}
             </AlertDialogAction>

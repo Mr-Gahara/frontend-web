@@ -41,9 +41,9 @@ import { LABEL_MODEL } from "./tampilan";
 type Tab = "pajak" | "relasi";
 type ModeDialog = { mode: "buat" } | { mode: "ubah"; pajak: Pajak };
 
-const kelasKepalaKolom = "text-xs font-bold text-[#0A2947]/60";
+const kelasKepalaKolom = "text-xs font-bold text-navy/60";
 const kelasTab =
-  "cursor-pointer rounded-none border-0 border-b-2 border-transparent bg-transparent px-5 py-2 text-sm font-semibold text-[#0A2947]/50 hover:text-[#0A2947] data-[state=active]:border-b-[#0A2947] data-[state=active]:bg-transparent data-[state=active]:font-bold data-[state=active]:text-[#0A2947] data-[state=active]:shadow-none";
+  "cursor-pointer rounded-none border-0 border-b-2 border-transparent bg-transparent px-5 py-2 text-sm font-semibold text-navy/50 hover:text-navy data-[state=active]:border-b-navy data-[state=active]:bg-transparent data-[state=active]:font-bold data-[state=active]:text-navy data-[state=active]:shadow-none";
 
 /**
  * Halaman pengaturan pajak (submodul 2 modul Pengaturan outlet). Tampilan
@@ -116,38 +116,38 @@ function IsiHalamanPajak() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947]"
+            className="h-auto p-0 text-xs font-bold text-navy/60 hover:bg-transparent hover:text-navy"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Nama Pajak
             <ArrowUpDown className="ml-1 h-3 w-3" />
           </Button>
         ),
-        cell: ({ row }) => <span className="font-bold text-[#0A2947]">{row.original.namaPajak}</span>,
+        cell: ({ row }) => <span className="font-bold text-navy">{row.original.namaPajak}</span>,
       },
       {
         accessorKey: "tarifPajak",
         header: () => <span className={kelasKepalaKolom}>Tarif</span>,
-        cell: ({ row }) => <span className="font-semibold text-[#0A2947]">{row.original.tarifPajak}%</span>,
+        cell: ({ row }) => <span className="font-semibold text-navy">{row.original.tarifPajak}%</span>,
       },
       {
         accessorKey: "modelPerhitungan",
         header: () => <span className={kelasKepalaKolom}>Model</span>,
         cell: ({ row }) => (
-          <span className="font-medium text-[#0A2947]/80">{LABEL_MODEL[row.original.modelPerhitungan]}</span>
+          <span className="font-medium text-navy/80">{LABEL_MODEL[row.original.modelPerhitungan]}</span>
         ),
       },
       {
         accessorKey: "prioritas",
         header: () => <span className={kelasKepalaKolom}>Prioritas</span>,
-        cell: ({ row }) => <span className="font-medium text-[#0A2947]/80">{row.original.prioritas}</span>,
+        cell: ({ row }) => <span className="font-medium text-navy/80">{row.original.prioritas}</span>,
       },
       {
         accessorKey: "statusPajak",
         header: () => <span className={kelasKepalaKolom}>Status</span>,
         cell: ({ row }) => (
           <span
-            className={`rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${row.original.statusPajak ? "bg-[#718355] text-[#FFFAF3]" : "bg-[#0A2947]/10 text-[#0A2947]/60"}`}
+            className={`rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${row.original.statusPajak ? "bg-sage text-gading" : "bg-navy/10 text-navy/60"}`}
           >
             {row.original.statusPajak ? "Aktif" : "Non-Aktif"}
           </span>
@@ -156,7 +156,7 @@ function IsiHalamanPajak() {
       {
         id: "aksi",
         header: () =>
-          adaAksiBaris ? <div className="text-right text-xs font-bold text-[#0A2947]/60">Aksi</div> : null,
+          adaAksiBaris ? <div className="text-right text-xs font-bold text-navy/60">Aksi</div> : null,
         cell: ({ row }) =>
           !adaAksiBaris ? null : (
           <div className="flex justify-end">
@@ -166,15 +166,15 @@ function IsiHalamanPajak() {
                   variant="ghost"
                   size="icon"
                   aria-label={`Aksi ${row.original.namaPajak}`}
-                  className="h-8 w-8 cursor-pointer text-[#0A2947]/70 hover:text-[#0A2947] hover:bg-[#0A2947]/5"
+                  className="h-8 w-8 cursor-pointer text-navy/70 hover:text-navy hover:bg-navy/5"
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#FFFAF3] border-[#0A2947]/10">
+              <DropdownMenuContent align="end" className="bg-gading border-navy/10">
                 {aksi.ubah && (
                 <DropdownMenuItem
-                  className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5"
+                  className="cursor-pointer text-navy hover:bg-navy/5"
                   onSelect={() => {
                     setGalatForm("");
                     setDialog({ mode: "ubah", pajak: row.original });
@@ -183,7 +183,7 @@ function IsiHalamanPajak() {
                   Edit
                 </DropdownMenuItem>
                 )}
-                {aksi.ubah && aksi.hapus && <DropdownMenuSeparator className="bg-[#0A2947]/10" />}
+                {aksi.ubah && aksi.hapus && <DropdownMenuSeparator className="bg-navy/10" />}
                 {aksi.hapus && (
                 <DropdownMenuItem
                   className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10"
@@ -210,7 +210,7 @@ function IsiHalamanPajak() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold"
           onClick={() => router.push("/dashboard/outlet/pengaturan")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -219,14 +219,14 @@ function IsiHalamanPajak() {
 
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">Pengaturan Pajak</h1>
-            <p className="text-sm font-medium text-[#0A2947]/60">Kelola pajak dan relasi produk.</p>
+            <h1 className="text-2xl font-bold tracking-tight text-navy">Pengaturan Pajak</h1>
+            <p className="text-sm font-medium text-navy/60">Kelola pajak dan relasi produk.</p>
           </div>
 
           {tab === "pajak" && aksi.buat && (
             <Button
               onClick={() => bukaDialog({ mode: "buat" })}
-              className="cursor-pointer font-bold bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm"
+              className="cursor-pointer font-bold bg-navy text-gading hover:bg-navy/90 shadow-sm"
             >
               <Plus className="mr-2 h-4 w-4" />
               Tambah Pajak
@@ -246,7 +246,7 @@ function IsiHalamanPajak() {
         </TabsList>
 
         <TabsContent value="pajak">
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col gap-4">
+          <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-4">
             {daftar.isError ? (
               <PesanPajak
                 judul="Gagal memuat pajak"
@@ -277,10 +277,10 @@ function IsiHalamanPajak() {
           if (!buka && !sedangMenyimpan) setDialog(null);
         }}
       >
-        <DialogContent className="sm:max-w-lg bg-[#FFFAF3] border-[#0A2947]/10">
+        <DialogContent className="sm:max-w-lg bg-gading border-navy/10">
           <DialogHeader>
-            <DialogTitle className="text-[#0A2947]">{dialog?.mode === "ubah" ? "Edit Pajak" : "Tambah Pajak"}</DialogTitle>
-            <DialogDescription className="text-[#0A2947]/60 font-medium">Kelola data pajak sistem.</DialogDescription>
+            <DialogTitle className="text-navy">{dialog?.mode === "ubah" ? "Edit Pajak" : "Tambah Pajak"}</DialogTitle>
+            <DialogDescription className="text-navy/60 font-medium">Kelola data pajak sistem.</DialogDescription>
           </DialogHeader>
           {dialog && (
             <FormPajak
@@ -303,10 +303,10 @@ function IsiHalamanPajak() {
           if (!buka && !hapus.isPending) setTarget(null);
         }}
       >
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">Hapus pajak {target?.namaPajak}?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogTitle className="text-navy">Hapus pajak {target?.namaPajak}?</AlertDialogTitle>
+            <AlertDialogDescription className="text-navy/70 font-medium">
               Tindakan ini tidak dapat dibatalkan. Produk yang memakai pajak ini akan dilepas darinya, dan pajak ini
               tidak lagi dikenakan pada penjualan berikutnya.
             </AlertDialogDescription>
@@ -315,7 +315,7 @@ function IsiHalamanPajak() {
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={hapus.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Batal
             </AlertDialogCancel>

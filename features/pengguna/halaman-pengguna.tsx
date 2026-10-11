@@ -213,14 +213,14 @@ export default function HalamanPengguna({
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-transparent"
+          className="h-auto p-0 text-xs font-bold text-navy/60 hover:text-navy hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <span>Nama Pengguna</span> <ArrowUpDown className="ml-1 h-3 w-3" />
         </Button>
       ),
       cell: ({ row }) => (
-        <span className="font-bold text-[#0A2947]">{row.getValue("nama")}</span>
+        <span className="font-bold text-navy">{row.getValue("nama")}</span>
       ),
     },
     {
@@ -229,14 +229,14 @@ export default function HalamanPengguna({
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-transparent"
+          className="h-auto p-0 text-xs font-bold text-navy/60 hover:text-navy hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <span>Nomor HP</span> <ArrowUpDown className="ml-1 h-3 w-3" />
         </Button>
       ),
       cell: ({ row }) => (
-        <span className="font-mono text-xs font-medium text-[#0A2947]/70">
+        <span className="font-mono text-xs font-medium text-navy/70">
           {row.getValue("nomorHp") || "-"}
         </span>
       ),
@@ -244,11 +244,11 @@ export default function HalamanPengguna({
     {
       id: "role",
       header: () => (
-        <span className="text-xs font-bold text-[#0A2947]/60">Role</span>
+        <span className="text-xs font-bold text-navy/60">Role</span>
       ),
       accessorFn: (row) => namaPeran(row, roleList),
       cell: ({ row }) => (
-        <span className="text-sm font-semibold capitalize text-[#0A2947]">
+        <span className="text-sm font-semibold capitalize text-navy">
           {row.getValue("role") as string}
         </span>
       ),
@@ -256,14 +256,14 @@ export default function HalamanPengguna({
     {
       accessorKey: "statusPengguna",
       header: () => (
-        <div className="text-xs font-bold text-[#0A2947]/60">Status</div>
+        <div className="text-xs font-bold text-navy/60">Status</div>
       ),
       cell: ({ row }) => {
         const isActive = row.original.status === "aktif";
         return (
           // PALET WARNA: Menggunakan Sage Green untuk status Aktif
           <span
-            className={`rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${isActive ? "bg-[#718355] text-[#FFFAF3]" : "bg-[#0A2947]/10 text-[#0A2947]/60"}`}
+            className={`rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${isActive ? "bg-sage text-gading" : "bg-navy/10 text-navy/60"}`}
           >
             {isActive ? "Aktif" : "Non-Aktif"}
           </span>
@@ -273,7 +273,7 @@ export default function HalamanPengguna({
     {
       id: "aksi",
       header: () => (
-        <div className="text-right text-xs font-bold text-[#0A2947]/60">
+        <div className="text-right text-xs font-bold text-navy/60">
           Aksi
         </div>
       ),
@@ -305,7 +305,7 @@ export default function HalamanPengguna({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 cursor-pointer text-[#0A2947]/70 hover:text-[#0A2947] hover:bg-[#0A2947]/5"
+                  className="h-8 w-8 cursor-pointer text-navy/70 hover:text-navy hover:bg-navy/5"
                 >
                   <MoreHorizontal className="h-4 w-4" />{" "}
                   <span className="sr-only">Buka menu</span>
@@ -313,16 +313,16 @@ export default function HalamanPengguna({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="bg-[#FFFAF3] border-[#0A2947]/10"
+                className="bg-gading border-navy/10"
               >
                 <DropdownMenuItem
-                  className="cursor-pointer font-bold text-[#0A2947] hover:bg-[#0A2947]/5"
+                  className="cursor-pointer font-bold text-navy hover:bg-navy/5"
                   onClick={() => openEdit(row.original)}
                   disabled={!canEdit}
                 >
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-[#0A2947]/10" />
+                <DropdownMenuSeparator className="bg-navy/10" />
                 <DropdownMenuItem
                   className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10"
                   onClick={() => {
@@ -345,16 +345,16 @@ export default function HalamanPengguna({
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">
             Kelola Pengguna
           </h1>
-          <p className="text-sm text-[#0A2947]/60 font-medium">
+          <p className="text-sm text-navy/60 font-medium">
             Kelola seluruh entitas akun dan hak akses platform.
           </p>
         </div>
         <Button
           onClick={openCreate}
-          className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold"
+          className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm font-bold"
         >
           <Plus className="mr-2 h-4 w-4" /> Tambah Pengguna
         </Button>
@@ -380,8 +380,8 @@ export default function HalamanPengguna({
 
         {/* TABEL DATA */}
         <div className="col-span-1 md:col-span-12 xl:col-span-9 flex flex-col h-full min-h-112.5">
-          <div className="rounded-xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col gap-4 grow h-full">
-            <h2 className="text-lg font-bold text-[#0A2947] mb-1">
+          <div className="rounded-xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-4 grow h-full">
+            <h2 className="text-lg font-bold text-navy mb-1">
               Daftar Pengguna Sistem
             </h2>
             <DataTable
@@ -424,12 +424,12 @@ export default function HalamanPengguna({
           if (!open) setDeleteTarget(null);
         }}
       >
-        <AlertDialogContent className="border-[#0A2947]/10 bg-[#FFFAF3]">
+        <AlertDialogContent className="border-navy/10 bg-gading">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">
+            <AlertDialogTitle className="text-navy">
               Hapus pengguna {deleteTarget?.nama}?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70">
+            <AlertDialogDescription className="text-navy/70">
               Tindakan ini tidak dapat dibatalkan. Pengguna akan dihapus secara
               permanen dari sistem.
             </AlertDialogDescription>
@@ -437,7 +437,7 @@ export default function HalamanPengguna({
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={deleting}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 bg-transparent font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 bg-transparent font-bold"
             >
               Batal
             </AlertDialogCancel>

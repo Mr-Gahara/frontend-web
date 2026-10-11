@@ -122,8 +122,8 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-5xl mx-auto">
-        <Skeleton className="h-8 w-64 bg-[#0A2947]/10" />
-        <Skeleton className="h-64 w-full bg-[#0A2947]/10 rounded-2xl" />
+        <Skeleton className="h-8 w-64 bg-navy/10" />
+        <Skeleton className="h-64 w-full bg-navy/10 rounded-2xl" />
       </div>
     );
   }
@@ -131,7 +131,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
   if (!detail) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <h2 className="text-xl font-bold text-[#0A2947]">
+        <h2 className="text-xl font-bold text-navy">
           Data tidak ditemukan
         </h2>
         <Button variant="link" onClick={() => router.back()} className="mt-4">
@@ -147,22 +147,22 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-5xl mx-auto">
       {/* HEADER & STATUS */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#0A2947]/10 pb-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-navy/10 pb-6">
         <div className="flex flex-col gap-4">
           <Button
             variant="ghost"
             size="sm"
-            className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+            className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
             onClick={() => router.push("/dashboard/gudang/transferStok")}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Kembali ke Daftar Surat Jalan
           </Button>
           <div className="space-y-1.5">
-            <h1 className="text-3xl font-black font-mono tracking-tight text-[#0A2947] flex items-center gap-3">
+            <h1 className="text-3xl font-black font-mono tracking-tight text-navy flex items-center gap-3">
               {detail.nomorTransfer}
             </h1>
-            <div className="flex items-center gap-3 text-sm font-medium text-[#0A2947]/60">
+            <div className="flex items-center gap-3 text-sm font-medium text-navy/60">
               <span className="flex items-center gap-1">
                 <Truck className="w-4 h-4" /> Transfer Logistik
               </span>
@@ -179,19 +179,19 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* KOLOM KIRI: DETAIL ITEM */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-white shadow-sm overflow-hidden">
-            <div className="bg-[#F2EAE1] px-6 py-4 border-b border-[#0A2947]/10 flex items-center justify-between">
+          <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
+            <div className="bg-krem px-6 py-4 border-b border-navy/10 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Package className="w-5 h-5 text-[#D4A373]" />
-                <h2 className="font-bold text-[#0A2947]">Muatan Pengiriman</h2>
+                <Package className="w-5 h-5 text-karamel" />
+                <h2 className="font-bold text-navy">Muatan Pengiriman</h2>
               </div>
-              <span className="text-xs font-bold bg-white px-3 py-1 rounded-full text-[#0A2947]/60 shadow-sm border border-[#0A2947]/10">
+              <span className="text-xs font-bold bg-white px-3 py-1 rounded-full text-navy/60 shadow-sm border border-navy/10">
                 Total {detail.items.length} Macam Barang
               </span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="bg-[#FFFAF3] text-xs uppercase font-bold text-[#0A2947]/50 border-b border-[#0A2947]/5">
+                <thead className="bg-gading text-xs uppercase font-bold text-navy/50 border-b border-navy/5">
                   <tr>
                     <th className="px-6 py-4">Nama Barang</th>
                     <th className="px-6 py-4 text-center">Dikirim</th>
@@ -204,12 +204,12 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#0A2947]/5">
+                <tbody className="divide-y divide-navy/5">
                   {detail.items.map((item, index) => (
-                    <tr key={index} className="hover:bg-[#FFFAF3]/50">
+                    <tr key={index} className="hover:bg-gading/50">
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="font-bold text-[#0A2947]">
+                          <span className="font-bold text-navy">
                             {item.bahanBaku?.namaBahan || "Item Tidak Dikenal"}
                           </span>
                           {item.catatanItem && (
@@ -220,16 +220,16 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="font-mono font-bold text-[#0A2947] bg-[#0A2947]/5 px-3 py-1 rounded-md border border-[#0A2947]/10">
+                        <span className="font-mono font-bold text-navy bg-navy/5 px-3 py-1 rounded-md border border-navy/10">
                           {item.qtyKirim}{" "}
-                          <span className="text-xs font-sans font-medium text-[#0A2947]/60">
+                          <span className="text-xs font-sans font-medium text-navy/60">
                             {item.bahanBaku?.satuan}
                           </span>
                         </span>
                       </td>
                       {detail.status === "DITERIMA" && (
                         <>
-                          <td className="px-6 py-4 text-center font-mono font-bold text-[#0A2947]">
+                          <td className="px-6 py-4 text-center font-mono font-bold text-navy">
                             {item.qtyTerima}
                           </td>
                           <td className="px-6 py-4 text-center">
@@ -255,50 +255,50 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
 
         {/* KOLOM KANAN: INFO RUTE & ACTION BUTTONS */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-white p-6 shadow-sm space-y-5">
-            <h2 className="font-bold text-[#0A2947] flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-              <MapPin className="w-4 h-4 text-[#D4A373]" /> Rute Pengiriman
+          <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-5">
+            <h2 className="font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
+              <MapPin className="w-4 h-4 text-karamel" /> Rute Pengiriman
             </h2>
 
             <div className="space-y-4">
               <div className="flex flex-col gap-1 relative pl-6">
-                <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-[#0A2947]" />
-                <div className="absolute left-1.5 top-4 -bottom-4 w-0.5 bg-[#0A2947]/10" />
-                <span className="text-xs font-bold text-[#0A2947]/50 uppercase">
+                <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-navy" />
+                <div className="absolute left-1.5 top-4 -bottom-4 w-0.5 bg-navy/10" />
+                <span className="text-xs font-bold text-navy/50 uppercase">
                   Asal (Gudang Anda)
                 </span>
-                <span className="font-bold text-[#0A2947]">
+                <span className="font-bold text-navy">
                   {detail.dariLokasi?.nama || "-"}
                 </span>
               </div>
               <div className="flex flex-col gap-1 relative pl-6">
-                <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-[#D4A373]" />
-                <span className="text-xs font-bold text-[#0A2947]/50 uppercase">
+                <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-karamel" />
+                <span className="text-xs font-bold text-navy/50 uppercase">
                   Tujuan (Outlet)
                 </span>
-                <span className="font-bold text-[#0A2947]">
+                <span className="font-bold text-navy">
                   {detail.keLokasi?.nama || "-"}
                 </span>
               </div>
             </div>
 
-            <div className="border-t border-[#0A2947]/10 pt-4 mt-2 space-y-3">
+            <div className="border-t border-navy/10 pt-4 mt-2 space-y-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="font-bold text-[#0A2947]/60">
+                <span className="font-bold text-navy/60">
                   Pengirim (Gudang)
                 </span>
-                <span className="font-bold text-[#0A2947] capitalize text-right">
+                <span className="font-bold text-navy capitalize text-right">
                   {detail.pengirim?.nama || "-"}
                 </span>
               </div>
 
               {/* Tampilkan Penerima jika sudah sampai */}
               {detail.penerima && (
-                <div className="flex justify-between items-center text-sm border-t border-[#0A2947]/5 pt-2">
-                  <span className="font-bold text-[#0A2947]/60">
+                <div className="flex justify-between items-center text-sm border-t border-navy/5 pt-2">
+                  <span className="font-bold text-navy/60">
                     Penerima (Outlet)
                   </span>
-                  <span className="font-bold text-[#0A2947] capitalize text-right">
+                  <span className="font-bold text-navy capitalize text-right">
                     {detail.penerima.nama}
                   </span>
                 </div>
@@ -308,8 +308,8 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
 
           {/* DOKUMEN TERKAIT (Pengajuan Stok) */}
           {detail.pengajuanStokID && (
-            <div className="rounded-2xl border border-[#0A2947]/10 bg-white p-6 shadow-sm flex flex-col gap-3">
-              <h3 className="text-sm font-bold text-[#0A2947] text-center mb-1">
+            <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm flex flex-col gap-3">
+              <h3 className="text-sm font-bold text-navy text-center mb-1">
                 Dokumen Referensi
               </h3>
               <Button
@@ -319,7 +319,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
                     `/dashboard/gudang/pengajuanStok/${detail.pengajuanStokID}`,
                   )
                 }
-                className="w-full border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold cursor-pointer"
+                className="w-full border-navy/20 text-navy hover:bg-navy/5 font-bold cursor-pointer"
               >
                 <ClipboardList className="w-4 h-4 mr-2" /> Lihat Pengajuan
                 Outlet
@@ -336,7 +336,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
               {aksi.kirim && (
               <Button
                 onClick={() => setShowConfirmKirim(true)}
-                className="w-full bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-md cursor-pointer"
+                className="w-full bg-navy text-gading hover:bg-navy/90 font-bold shadow-md cursor-pointer"
               >
                 <Send className="w-4 h-4 mr-2" /> Kirim Barang Sekarang
               </Button>
@@ -348,7 +348,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
                 onClick={() =>
                   router.push(`/dashboard/gudang/transferStok/${id}/edit`)
                 }
-                className="w-full border-[#0A2947]/20 text-[#0A2947] hover:bg-white font-bold cursor-pointer"
+                className="w-full border-navy/20 text-navy hover:bg-white font-bold cursor-pointer"
               >
                 <FileEdit className="w-4 h-4 mr-2" /> Revisi Kuantitas
               </Button>
@@ -384,9 +384,9 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
 
       {/* MODAL KONFIRMASI KIRIM (EKSEKUSI STOK) */}
       <AlertDialog open={showConfirmKirim} onOpenChange={setShowConfirmKirim}>
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">
+            <AlertDialogTitle className="text-navy">
               Konfirmasi Pengiriman Barang?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-rose-600 font-bold bg-rose-50 p-3 rounded-lg border border-rose-200 mt-2">
@@ -398,7 +398,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={kirimMutation.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Tunggu Sebentar
             </AlertDialogCancel>
@@ -408,7 +408,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
                 kirimMutation.mutate();
               }}
               disabled={kirimMutation.isPending}
-              className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold border-none"
+              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold border-none"
             >
               {kirimMutation.isPending ? "Memproses..." : "Ya, Kirim Sekarang"}
             </AlertDialogAction>
@@ -418,12 +418,12 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
 
       {/* MODAL KONFIRMASI BATAL */}
       <AlertDialog open={showConfirmBatal} onOpenChange={setShowConfirmBatal}>
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-rose-600 flex items-center gap-2">
               <Ban className="w-5 h-5" /> Batalkan Surat Jalan?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogDescription className="text-navy/70 font-medium">
               Surat Jalan ini akan dibatalkan secara permanen. Jika ini terkait
               dengan permintaan Outlet, status pengajuan mereka akan kembali
               menjadi &quot;Perlu Tinjauan&quot;.
@@ -432,7 +432,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={batalMutation.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Tutup
             </AlertDialogCancel>

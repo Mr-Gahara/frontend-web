@@ -20,7 +20,7 @@ import { useDaftarPelanggan } from "./hooks";
 import { aksiPelanggan } from "./izin";
 
 const KELAS_KEPALA =
-  "h-auto p-0 text-xs font-semibold text-[#041E3F]/60 hover:text-[#041E3F] hover:bg-transparent";
+  "h-auto p-0 text-xs font-semibold text-navy/60 hover:text-navy hover:bg-transparent";
 
 function KartuStatistik({
   ikon,
@@ -34,7 +34,7 @@ function KartuStatistik({
   nilai: number;
 }) {
   return (
-    <div className="rounded-xl border border-[#041E3F]/10 bg-[#F2EAE1] p-6 shadow-sm flex items-center gap-4">
+    <div className="rounded-xl border border-navy/10 bg-krem p-6 shadow-sm flex items-center gap-4">
       <div className={`flex h-12 w-12 items-center justify-center rounded-full ${kelasIkon}`}>
         {ikon}
       </div>
@@ -86,9 +86,9 @@ export function HalamanPelanggan() {
       ),
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-medium text-[#041E3F]">{row.original.namaPelanggan}</span>
+          <span className="font-medium text-navy">{row.original.namaPelanggan}</span>
           {row.original.alamat && (
-            <span className="text-xs text-[#041E3F]/60 line-clamp-1 mt-0.5">
+            <span className="text-xs text-navy/60 line-clamp-1 mt-0.5">
               {row.original.alamat}
             </span>
           )}
@@ -97,11 +97,11 @@ export function HalamanPelanggan() {
     },
     {
       accessorKey: "nomorHp",
-      header: () => <span className="text-xs font-semibold text-[#041E3F]/60">Kontak</span>,
+      header: () => <span className="text-xs font-semibold text-navy/60">Kontak</span>,
       cell: ({ row }) => (
         <div className="flex flex-col space-y-1">
-          <span className="text-xs text-[#041E3F]">{row.original.nomorHp || "-"}</span>
-          {row.original.email && <span className="text-xs text-[#041E3F]/60">{row.original.email}</span>}
+          <span className="text-xs text-navy">{row.original.nomorHp || "-"}</span>
+          {row.original.email && <span className="text-xs text-navy/60">{row.original.email}</span>}
         </div>
       ),
     },
@@ -125,7 +125,7 @@ export function HalamanPelanggan() {
             ? "bg-amber-100 text-amber-700 font-bold dark:bg-amber-900/30 dark:text-amber-400"
             : tipe === "korporat"
               ? "bg-sky-100 text-sky-700 font-bold dark:bg-sky-900/30 dark:text-sky-400"
-              : "bg-[#041E3F]/10 text-[#041E3F] font-bold";
+              : "bg-navy/10 text-navy font-bold";
 
         return (
           <span className={`rounded-full px-2.5 py-0.5 text-xs capitalize ${colorClass}`}>
@@ -148,30 +148,30 @@ export function HalamanPelanggan() {
         </Button>
       ),
       cell: ({ row }) => (
-        <span className="font-mono text-sm font-medium text-[#041E3F]">{row.original.poinLoyalitas}</span>
+        <span className="font-mono text-sm font-medium text-navy">{row.original.poinLoyalitas}</span>
       ),
     },
     {
       id: "aksi",
-      header: () => <div className="text-right text-xs text-[#041E3F]/60">Aksi</div>,
+      header: () => <div className="text-right text-xs text-navy/60">Aksi</div>,
       cell: ({ row }) => {
         if (!aksi.ubah && !aksi.hapus) return null;
         return (
           <div className="flex justify-end">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer text-[#041E3F]/70 hover:text-[#041E3F] hover:bg-[#041E3F]/5">
+                <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer text-navy/70 hover:text-navy hover:bg-navy/5">
                   <MoreHorizontal className="h-4 w-4" />
                   <span className="sr-only">Buka menu</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-[#F2EAE1] border-[#041E3F]/10">
+              <DropdownMenuContent align="end" className="bg-krem border-navy/10">
                 {aksi.ubah && (
-                  <DropdownMenuItem className="cursor-pointer font-bold text-[#041E3F]/80 focus:bg-[#8d8377]/20" onClick={() => setDiubah(row.original)}>
+                  <DropdownMenuItem className="cursor-pointer font-bold text-navy/80 focus:bg-[#8d8377]/20" onClick={() => setDiubah(row.original)}>
                     Edit
                   </DropdownMenuItem>
                 )}
-                {aksi.ubah && aksi.hapus && <DropdownMenuSeparator className="bg-[#041E3F]/10" />}
+                {aksi.ubah && aksi.hapus && <DropdownMenuSeparator className="bg-navy/10" />}
                 {aksi.hapus && (
                   <DropdownMenuItem
                     className="cursor-pointer font-bold text-red-600/60 focus:text-red-700 focus:bg-red-500/10"
@@ -191,7 +191,7 @@ export function HalamanPelanggan() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-[#041E3F]">Manajemen Pelanggan</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-navy">Manajemen Pelanggan</h1>
         <p className="text-sm font-medium text-[#6c5d4c]/60">
           Kelola data pelanggan, keanggotaan, dan informasi kontak.
         </p>
@@ -220,11 +220,11 @@ export function HalamanPelanggan() {
         </div>
 
         <div
-          className={`rounded-xl border border-[#041E3F]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col gap-4 ${
+          className={`rounded-xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-4 ${
             aksi.buat ? "lg:col-span-8" : "lg:col-span-12"
           }`}
         >
-          <h2 className="text-sm font-semibold text-[#041E3F]">Daftar Pelanggan</h2>
+          <h2 className="text-sm font-semibold text-navy">Daftar Pelanggan</h2>
           {daftar.isError ? (
             <div className="flex flex-col items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-8 text-center">
               <p className="text-sm font-medium text-red-600">
@@ -247,10 +247,10 @@ export function HalamanPelanggan() {
         </div>
 
         {aksi.buat && (
-          <div className="rounded-xl border border-[#041E3F]/10 bg-[#F2EAE1] p-6 shadow-sm lg:col-span-4 lg:sticky lg:top-6">
+          <div className="rounded-xl border border-navy/10 bg-krem p-6 shadow-sm lg:col-span-4 lg:sticky lg:top-6">
             <div className="mb-4">
-              <h2 className="text-sm font-semibold text-[#041E3F]">Tambah Pelanggan Cepat</h2>
-              <p className="text-xs text-[#041E3F]/60 mt-1">
+              <h2 className="text-sm font-semibold text-navy">Tambah Pelanggan Cepat</h2>
+              <p className="text-xs text-navy/60 mt-1">
                 Tambahkan data pelanggan baru langsung dari panel ini.
               </p>
             </div>

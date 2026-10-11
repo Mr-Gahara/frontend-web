@@ -31,9 +31,9 @@ type PropsTooltip = {
 function TooltipGrafik({ active, payload, label }: PropsTooltip) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg px-3 py-2 text-[#0A2947] text-xs shadow-lg">
-      <p className="text-[#0A2947]/70 font-medium mb-1">{label}</p>
-      <p className="font-bold text-[#718355]">
+    <div className="bg-gading border border-navy/10 rounded-lg px-3 py-2 text-navy text-xs shadow-lg">
+      <p className="text-navy/70 font-medium mb-1">{label}</p>
+      <p className="font-bold text-sage">
         {formatRupiah(Number(payload[0].value) || 0)}
       </p>
     </div>

@@ -23,7 +23,7 @@ export function ShiftCell({ namaKaryawan, day, isSunday, shifts, onClick }: Shif
   };
   return (
     <td
-      className={`border-b border-r border-[#041E3F]/5 p-1.5 md:p-2 align-top ${
+      className={`border-b border-r border-navy/5 p-1.5 md:p-2 align-top ${
         isSunday ? "bg-red-50/20" : ""
       }`}
     >
@@ -34,12 +34,12 @@ export function ShiftCell({ namaKaryawan, day, isSunday, shifts, onClick }: Shif
             key={shift.id || idx}
             onClick={onClick}
             aria-label={labelSel(shift)}
-            className={`flex flex-col justify-center p-1.5 md:p-2 rounded-lg cursor-pointer transition-all hover:ring-2 hover:ring-offset-1 hover:ring-[#041E3F]/30 min-h-11 md:min-h-13
-              ${shift.type === "pagi" ? "bg-[#041E3F]/10 text-[#041E3F]" : ""}
+            className={`flex flex-col justify-center p-1.5 md:p-2 rounded-lg cursor-pointer transition-all hover:ring-2 hover:ring-offset-1 hover:ring-navy/30 min-h-11 md:min-h-13
+              ${shift.type === "pagi" ? "bg-navy/10 text-navy" : ""}
               ${shift.type === "sore" ? "bg-sky-100 text-sky-700" : ""}
-              ${shift.type === "malam" ? "bg-[#041E3F] text-[#FFFAF3] shadow-md" : ""}
+              ${shift.type === "malam" ? "bg-navy text-gading shadow-md" : ""}
               ${shift.type === "cuti" ? "bg-amber-100 text-amber-700" : ""}
-              ${shift.type === "off" ? "bg-transparent text-[#041E3F]/30 border border-dashed border-[#041E3F]/20 hover:bg-[#041E3F]/5" : ""}
+              ${shift.type === "off" ? "bg-transparent text-navy/30 border border-dashed border-navy/20 hover:bg-navy/5" : ""}
             `}
           >
             {shift.type !== "off" ? (
@@ -49,7 +49,7 @@ export function ShiftCell({ namaKaryawan, day, isSunday, shifts, onClick }: Shif
                 </span>
                 <span
                   className={`text-[8px] md:text-[9px] font-semibold text-center truncate ${
-                    shift.type === "malam" ? "text-[#FFFAF3]/70" : "opacity-70"
+                    shift.type === "malam" ? "text-gading/70" : "opacity-70"
                   }`}
                 >
                   {shift.label}

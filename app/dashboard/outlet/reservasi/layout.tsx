@@ -12,28 +12,28 @@ export default function ReservasiLayout({ children }: { children: React.ReactNod
       {/* HEADER UTAMA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">
             Manajemen Booking
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <p className="text-sm font-medium text-navy/60">
             Kelola jadwal, sewa aset, dan pemantauan sesi aktif secara real-time.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
-            className="cursor-pointer border-[#0A2947]/20 bg-[#FFFAF3] text-[#0A2947] hover:bg-[#0A2947]/5 font-bold shadow-sm h-11 px-4"
+            className="cursor-pointer border-navy/20 bg-gading text-navy hover:bg-navy/5 font-bold shadow-sm h-11 px-4"
             onClick={() => {}}
           >
-            <Filter className="w-4 h-4 mr-2 text-[#D4A373]" /> Filter Aset
+            <Filter className="w-4 h-4 mr-2 text-karamel" /> Filter Aset
           </Button>
           <Button
-            className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm h-11 px-5"
+            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm h-11 px-5"
             onClick={() => {
               router.push("/dashboard/outlet/reservasi/buatReservasi") // ✅ leading slash, tanpa "app/"
             }}
           >
-            <Plus className="w-4 h-4 mr-2 text-[#D4A373]" /> Buat Reservasi Baru
+            <Plus className="w-4 h-4 mr-2 text-karamel" /> Buat Reservasi Baru
           </Button>
         </div>
       </div>

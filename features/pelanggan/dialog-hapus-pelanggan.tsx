@@ -44,17 +44,17 @@ export function DialogHapusPelanggan({
         if (!buka && !hapus.isPending) onTutup();
       }}
     >
-      <AlertDialogContent className="border-[#041E3F]/10 bg-[#F2EAE1]">
+      <AlertDialogContent className="border-navy/10 bg-krem">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-[#041E3F]">Hapus pelanggan {pelanggan?.namaPelanggan}?</AlertDialogTitle>
-          <AlertDialogDescription className="text-[#041E3F]/70">
+          <AlertDialogTitle className="text-navy">Hapus pelanggan {pelanggan?.namaPelanggan}?</AlertDialogTitle>
+          <AlertDialogDescription className="text-navy/70">
             Tindakan ini tidak dapat dibatalkan. Riwayat transaksi mungkin tetap tersimpan di sistem, namun data profil ini akan dihapus.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
             disabled={hapus.isPending}
-            className="cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent"
+            className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 bg-transparent"
           >
             Batal
           </AlertDialogCancel>

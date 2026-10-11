@@ -86,11 +86,11 @@ export default function HalamanDaftarTransfer() {
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947] flex items-center gap-2">
-            <Truck className="w-6 h-6 text-[#D4A373]" /> Surat Jalan (Transfer
+          <h1 className="text-2xl font-bold tracking-tight text-navy flex items-center gap-2">
+            <Truck className="w-6 h-6 text-karamel" /> Surat Jalan (Transfer
             Stok)
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <p className="text-sm font-medium text-navy/60">
             Pantau dan kelola pengiriman fisik barang dari Gudang Pusat ke
             Outlet.
           </p>
@@ -98,7 +98,7 @@ export default function HalamanDaftarTransfer() {
       </div>
 
       {/* FILTER & TABS */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#0A2947]/10 pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-navy/10 pb-4">
         <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 hide-scrollbar">
           {TAB_TRANSFER.map(
             (tab) => (
@@ -109,8 +109,8 @@ export default function HalamanDaftarTransfer() {
                 onClick={() => setActiveTab(tab)}
                 className={`rounded-full px-4 font-bold transition-all text-xs ${
                   activeTab === tab
-                    ? "bg-[#0A2947] text-white hover:bg-[#0A2947]/90"
-                    : "text-[#0A2947]/60 hover:text-[#0A2947] hover:bg-[#0A2947]/5"
+                    ? "bg-navy text-white hover:bg-navy/90"
+                    : "text-navy/60 hover:text-navy hover:bg-navy/5"
                 }`}
               >
                 {LABEL_TAB_TRANSFER[tab]}
@@ -120,21 +120,21 @@ export default function HalamanDaftarTransfer() {
         </div>
 
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0A2947]/40" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
           <Input
             placeholder="Cari No. Transfer / Outlet Tujuan..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 bg-white border-[#0A2947]/20 text-[#0A2947] focus-visible:ring-[#0A2947]"
+            className="pl-9 bg-white border-navy/20 text-navy focus-visible:ring-navy"
           />
         </div>
       </div>
 
       {/* TABLE SECTION */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-[#F2EAE1] text-xs uppercase font-bold text-[#0A2947]/70">
+            <thead className="bg-krem text-xs uppercase font-bold text-navy/70">
               <tr>
                 <th className="px-6 py-4">Informasi Surat Jalan</th>
                 <th className="px-6 py-4">Tujuan Pengiriman</th>
@@ -143,25 +143,25 @@ export default function HalamanDaftarTransfer() {
                 <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#0A2947]/5">
+            <tbody className="divide-y divide-navy/5">
               {isLoading ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <tr key={i}>
                     <td className="px-6 py-4">
-                      <Skeleton className="h-5 w-40 bg-[#0A2947]/10 mb-2" />
-                      <Skeleton className="h-4 w-24 bg-[#0A2947]/10" />
+                      <Skeleton className="h-5 w-40 bg-navy/10 mb-2" />
+                      <Skeleton className="h-4 w-24 bg-navy/10" />
                     </td>
                     <td className="px-6 py-4">
-                      <Skeleton className="h-5 w-32 bg-[#0A2947]/10" />
+                      <Skeleton className="h-5 w-32 bg-navy/10" />
                     </td>
                     <td className="px-6 py-4">
-                      <Skeleton className="h-5 w-16 mx-auto bg-[#0A2947]/10" />
+                      <Skeleton className="h-5 w-16 mx-auto bg-navy/10" />
                     </td>
                     <td className="px-6 py-4">
-                      <Skeleton className="h-6 w-24 mx-auto bg-[#0A2947]/10 rounded-full" />
+                      <Skeleton className="h-6 w-24 mx-auto bg-navy/10 rounded-full" />
                     </td>
                     <td className="px-6 py-4">
-                      <Skeleton className="h-8 w-24 ml-auto bg-[#0A2947]/10" />
+                      <Skeleton className="h-8 w-24 ml-auto bg-navy/10" />
                     </td>
                   </tr>
                 ))
@@ -169,9 +169,9 @@ export default function HalamanDaftarTransfer() {
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-6 py-12 text-center text-[#0A2947]/50 font-medium"
+                    className="px-6 py-12 text-center text-navy/50 font-medium"
                   >
-                    <PackageSearch className="w-12 h-12 mx-auto mb-3 text-[#0A2947]/20" />
+                    <PackageSearch className="w-12 h-12 mx-auto mb-3 text-navy/20" />
                     Tidak ada dokumen Surat Jalan yang ditemukan.
                   </td>
                 </tr>
@@ -179,24 +179,24 @@ export default function HalamanDaftarTransfer() {
                 filteredData.map((item) => (
                   <tr
                     key={item.id}
-                    className="hover:bg-[#FFFAF3] transition-colors"
+                    className="hover:bg-gading transition-colors"
                   >
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="font-bold font-mono text-[#0A2947]">
+                        <span className="font-bold font-mono text-navy">
                           {item.nomorTransfer}
                         </span>
-                        <span className="text-xs font-medium text-[#0A2947]/50 mt-1">
+                        <span className="text-xs font-medium text-navy/50 mt-1">
                           {formatTanggal(item.createdAt)}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="font-bold text-[#0A2947]">
+                        <span className="font-bold text-navy">
                           {item.keLokasi?.nama || "Outlet Tidak Dikenal"}
                         </span>
-                        <span className="text-xs font-medium text-[#0A2947]/50 mt-1 capitalize">
+                        <span className="text-xs font-medium text-navy/50 mt-1 capitalize">
                           Terkait:{" "}
                           {item.pengajuanStokID
                             ? "Pengajuan Stok"
@@ -205,7 +205,7 @@ export default function HalamanDaftarTransfer() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className="font-bold text-[#0A2947] bg-[#0A2947]/5 px-3 py-1 rounded-lg">
+                      <span className="font-bold text-navy bg-navy/5 px-3 py-1 rounded-lg">
                         {item.items?.length || 0} Macam
                       </span>
                     </td>
@@ -225,8 +225,8 @@ export default function HalamanDaftarTransfer() {
                         }
                         className={
                           item.status === "PENDING"
-                            ? "bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm cursor-pointer"
-                            : "cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold shadow-sm"
+                            ? "bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm cursor-pointer"
+                            : "cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm"
                         }
                       >
                         <Eye className="w-4 h-4 mr-2" /> Detail

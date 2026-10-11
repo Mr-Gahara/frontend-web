@@ -39,8 +39,8 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
   if (isLoading) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0A2947] border-t-transparent"></div>
-        <p className="text-sm font-bold text-[#0A2947]/60">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-navy border-t-transparent"></div>
+        <p className="text-sm font-bold text-navy/60">
           Memuat audit trail...
         </p>
       </div>
@@ -50,7 +50,7 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
   if (error || !adjustment) {
     const tidakAda = !error || isNotFound(error);
     return (
-      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-[#0A2947]">
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-navy">
         <Ban className="h-10 w-10 text-rose-500" />
         <p className="font-bold">
           {tidakAda
@@ -76,7 +76,7 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
   const tipeLokasi = adjustment.lokasi?.tipe;
   if (tipeLokasi && tipeLokasi !== TIPE_LOKASI_RUANG[ruang]) {
     return (
-      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-[#0A2947]">
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-navy">
         <Ban className="h-10 w-10 text-rose-500" />
         <p className="font-bold">
           Jurnal Penyesuaian ini milik lokasi {tipeLokasi} dan tidak ditampilkan di ruang ini.
@@ -96,19 +96,19 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
           <Button
             variant="ghost"
             size="sm"
-            className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+            className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
             onClick={() => router.push(urlDaftar)}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Kembali ke Daftar Jurnal
           </Button>
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+            <h1 className="text-2xl font-bold tracking-tight text-navy">
               Detail Jurnal Penyesuaian
             </h1>
-            <p className="text-sm font-medium text-[#0A2947]/60">
+            <p className="text-sm font-medium text-navy/60">
               No. Ref:{" "}
-              <span className="font-bold font-mono text-[#0A2947]">
+              <span className="font-bold font-mono text-navy">
                 {adjustment.nomorAdjustment}
               </span>
             </p>
@@ -116,42 +116,42 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
         </div>
 
         <div className="flex shrink-0">
-          <Badge className="bg-[#718355] text-[#FFFAF3] px-3 py-1 font-bold border-none shadow-sm text-xs">
+          <Badge className="bg-sage text-gading px-3 py-1 font-bold border-none shadow-sm text-xs">
             Selesai
           </Badge>
         </div>
       </div>
 
       {/* INFORMASI UMUM (READ-ONLY) */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 shadow-sm flex flex-col md:flex-row gap-8">
+      <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col md:flex-row gap-8">
         <div className="flex-1 space-y-5">
-          <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-            <ArchiveRestore className="h-5 w-5 text-[#D4A373]" />
-            <h2 className="font-bold text-[#0A2947]">Audit Trail Informasi</h2>
+          <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
+            <ArchiveRestore className="h-5 w-5 text-karamel" />
+            <h2 className="font-bold text-navy">Audit Trail Informasi</h2>
           </div>
 
           <div className="grid grid-cols-2 gap-y-5 text-sm">
             <div>
-              <p className="text-[#0A2947]/60 font-bold text-xs mb-1 flex items-center gap-1">
+              <p className="text-navy/60 font-bold text-xs mb-1 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" /> Tanggal Eksekusi
               </p>
-              <p className="font-semibold text-[#0A2947]">
+              <p className="font-semibold text-navy">
                 {formatTanggalAdjustment(adjustment.tanggal)}
               </p>
             </div>
             <div>
-              <p className="text-[#0A2947]/60 font-bold text-xs mb-1 flex items-center gap-1">
+              <p className="text-navy/60 font-bold text-xs mb-1 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5" /> Lokasi / Gudang
               </p>
-              <p className="font-semibold text-[#0A2947]">
+              <p className="font-semibold text-navy">
                 {adjustment.lokasi?.nama || adjustment.lokasi?.id || "-"}
               </p>
             </div>
             <div>
-              <p className="text-[#0A2947]/60 font-bold text-xs mb-1 flex items-center gap-1">
+              <p className="text-navy/60 font-bold text-xs mb-1 flex items-center gap-1">
                 <User className="w-3.5 h-3.5" /> Dieksekusi Oleh
               </p>
-              <p className="font-semibold text-[#0A2947]">
+              <p className="font-semibold text-navy">
                 {adjustment.pic?.nama || "-"}
               </p>
             </div>
@@ -159,13 +159,13 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
         </div>
 
         {/* FIX UI: Ubah ke flex-col dan flex-1 untuk mencegah overflow */}
-        <div className="flex-1 flex flex-col gap-3 md:border-l border-[#0A2947]/10 md:pl-8">
-          <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-            <FileText className="h-5 w-5 text-[#D4A373]" />
-            <h2 className="font-bold text-[#0A2947]">Alasan Penyesuaian</h2>
+        <div className="flex-1 flex flex-col gap-3 md:border-l border-navy/10 md:pl-8">
+          <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
+            <FileText className="h-5 w-5 text-karamel" />
+            <h2 className="font-bold text-navy">Alasan Penyesuaian</h2>
           </div>
-          <div className="flex-1 p-4 bg-white/60 rounded-xl border border-[#0A2947]/5 min-h-25">
-            <p className="text-sm font-bold text-[#0A2947]/40 italic leading-relaxed">
+          <div className="flex-1 p-4 bg-white/60 rounded-xl border border-navy/5 min-h-25">
+            <p className="text-sm font-bold text-navy/40 italic leading-relaxed">
               {adjustment.alasan ? (
                 <>&quot;{adjustment.alasan}&quot;</>
               ) : (
@@ -173,24 +173,24 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
               )}
             </p>
           </div>
-          <p className="text-sm font-medium text-[#0A2947]/70">
+          <p className="text-sm font-medium text-navy/70">
             Sumber Dokumen:{" "}
-            <TautanSumber adjustment={adjustment} className="font-bold text-[#0A2947]" />
+            <TautanSumber adjustment={adjustment} className="font-bold text-navy" />
           </p>
         </div>
       </div>
 
       {/* TABEL ITEM MUTASI */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#FFFAF3] shadow-sm overflow-hidden flex flex-col">
-        <div className="p-5 border-b border-[#0A2947]/5 flex items-center justify-between bg-[#FFFAF3]">
-          <h2 className="font-bold text-[#0A2947]">
+      <div className="rounded-2xl border border-navy/10 bg-gading shadow-sm overflow-hidden flex flex-col">
+        <div className="p-5 border-b border-navy/5 flex items-center justify-between bg-gading">
+          <h2 className="font-bold text-navy">
             Rekapitulasi Perubahan Saldo Fisik
           </h2>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-[#F2EAE1] text-[#0A2947]/60 border-b border-[#0A2947]/10 uppercase tracking-wider text-[10px]">
+            <thead className="bg-krem text-navy/60 border-b border-navy/10 uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="px-5 py-4 font-bold">Nama Item</th>
                 <th className="px-5 py-4 font-bold text-center">
@@ -202,7 +202,7 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#0A2947]/5">
+            <tbody className="divide-y divide-navy/5">
               {adjustment.items?.map((item) => {
                 const baris = susunBarisItem(item);
                 const warnaKoreksi =
@@ -210,30 +210,30 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
                     ? "bg-emerald-100 text-emerald-700"
                     : baris.arah === "kurang"
                       ? "bg-rose-100 text-rose-700"
-                      : "bg-[#0A2947]/10 text-[#0A2947]";
+                      : "bg-navy/10 text-navy";
 
                 return (
                   <tr
                     key={baris.itemId}
-                    className="hover:bg-[#0A2947]/5 transition-colors"
+                    className="hover:bg-navy/5 transition-colors"
                   >
                     <td className="px-5 py-4">
-                      <p className="font-bold text-[#0A2947]">{baris.nama}</p>
-                      <p className="text-xs text-[#0A2947]/50 font-medium">
+                      <p className="font-bold text-navy">{baris.nama}</p>
+                      <p className="text-xs text-navy/50 font-medium">
                         Satuan: {baris.satuan}
                       </p>
                     </td>
 
-                    <td className="px-5 py-4 text-center font-bold text-[#0A2947]/60 font-mono">
+                    <td className="px-5 py-4 text-center font-bold text-navy/60 font-mono">
                       {baris.qtySistem}
                       {baris.qtySaatDraf !== null && (
-                        <p className="text-[10px] font-medium text-[#0A2947]/50 font-sans">
+                        <p className="text-[10px] font-medium text-navy/50 font-sans">
                           Saat draf: {baris.qtySaatDraf}
                         </p>
                       )}
                     </td>
 
-                    <td className="px-5 py-4 text-center font-bold text-[#0A2947] font-mono bg-[#0A2947]/5">
+                    <td className="px-5 py-4 text-center font-bold text-navy font-mono bg-navy/5">
                       {baris.qtyFisik}
                     </td>
 
@@ -253,7 +253,7 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
                 <tr>
                   <td
                     colSpan={5}
-                    className="text-center py-8 text-[#0A2947]/50 font-medium"
+                    className="text-center py-8 text-navy/50 font-medium"
                   >
                     Tidak ada detail item yang direkam dalam jurnal ini.
                   </td>

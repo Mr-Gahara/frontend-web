@@ -91,16 +91,16 @@ function EditAsetForm({
           type="button"
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
           onClick={() => router.push("/dashboard/outlet/reservasi/aset")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Daftar Aset
         </Button>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">
             Edit Aset
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <p className="text-sm font-medium text-navy/60">
             Perbarui nama, kategori tarif, atau ubah status operasional dari
             fasilitas Anda.
           </p>
@@ -108,24 +108,24 @@ function EditAsetForm({
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-6 sm:p-8 shadow-sm flex flex-col gap-6">
-          <div className="flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-            <Edit3 className="h-5 w-5 text-[#D4A373]" />
-            <h3 className="text-base font-bold text-[#0A2947]">
+        <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm flex flex-col gap-6">
+          <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
+            <Edit3 className="h-5 w-5 text-karamel" />
+            <h3 className="text-base font-bold text-navy">
               Informasi Detail Aset
             </h3>
           </div>
 
           {/* NAMA ASET */}
           <div className="space-y-2">
-            <label className="text-sm font-bold text-[#0A2947]">
+            <label className="text-sm font-bold text-navy">
               Nama Aset / Nomor Meja <span className="text-rose-500">*</span>
             </label>
             <Input
               {...register("namaAset")}
               placeholder="Contoh: Meja Billiard 01, VIP Room A..."
               className={cn(
-                "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947] h-11",
+                "bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy h-11",
                 errors.namaAset &&
                   "border-rose-500 focus-visible:ring-rose-500",
               )}
@@ -136,7 +136,7 @@ function EditAsetForm({
                   {errors.namaAset.message}
                 </span>
               ) : (
-                <p className="text-[10px] font-medium text-[#0A2947]/50">
+                <p className="text-[10px] font-medium text-navy/50">
                   Identitas unik aset ini agar mudah dikenali oleh kasir dan
                   pelanggan.
                 </p>
@@ -146,8 +146,8 @@ function EditAsetForm({
 
           {/* TIPE ASET */}
           <div className="space-y-2">
-            <label className="text-sm font-bold text-[#0A2947] flex items-center gap-1.5">
-              <Layers className="w-4 h-4 text-[#0A2947]/60" />
+            <label className="text-sm font-bold text-navy flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-navy/60" />
               Tipe / Kategori Aset <span className="text-rose-500">*</span>
             </label>
             <Controller
@@ -157,16 +157,16 @@ function EditAsetForm({
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger
                     className={cn(
-                      "w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-bold h-11 focus:ring-1 focus:ring-[#0A2947]",
+                      "w-full bg-gading border-navy/20 text-navy font-bold h-11 focus:ring-1 focus:ring-navy",
                       errors.tipeAsetID &&
                         "border-rose-500 focus:ring-rose-500",
                     )}
                   >
                     <SelectValue placeholder="Pilih kategori tipe aset" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                  <SelectContent className="bg-gading border-navy/10 text-navy">
                     {tipeAsetList.length === 0 ? (
-                      <div className="p-3 text-sm text-center font-medium text-[#0A2947]/60">
+                      <div className="p-3 text-sm text-center font-medium text-navy/60">
                         Belum ada tipe aset. <br /> Buat tipe aset terlebih
                         dahulu.
                       </div>
@@ -175,7 +175,7 @@ function EditAsetForm({
                         <SelectItem
                           key={tipe.id}
                           value={tipe.id}
-                          className="cursor-pointer hover:bg-[#0A2947]/5 font-bold"
+                          className="cursor-pointer hover:bg-navy/5 font-bold"
                         >
                           {tipe.namaTipeAset}
                         </SelectItem>
@@ -191,7 +191,7 @@ function EditAsetForm({
                   {errors.tipeAsetID.message}
                 </span>
               ) : (
-                <p className="text-[10px] font-medium text-[#0A2947]/50">
+                <p className="text-[10px] font-medium text-navy/50">
                   Tipe aset menentukan harga/tarif sewa yang akan diberlakukan
                   pada aset ini.
                 </p>
@@ -201,7 +201,7 @@ function EditAsetForm({
 
           {/* STATUS */}
           <div className="space-y-2">
-            <label className="text-sm font-bold text-[#0A2947]">
+            <label className="text-sm font-bold text-navy">
               Status Operasional
             </label>
             <Controller
@@ -209,10 +209,10 @@ function EditAsetForm({
               control={control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-bold h-11 focus:ring-1 focus:ring-[#0A2947]">
+                  <SelectTrigger className="w-full bg-gading border-navy/20 text-navy font-bold h-11 focus:ring-1 focus:ring-navy">
                     <SelectValue placeholder="Pilih Status" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                  <SelectContent className="bg-gading border-navy/10 text-navy">
                     <SelectItem
                       value="tersedia"
                       className="cursor-pointer hover:bg-emerald-50 focus:bg-emerald-50 text-emerald-700 font-bold"
@@ -256,7 +256,7 @@ function EditAsetForm({
                 </p>
               </div>
             ) : (
-              <p className="text-[10px] font-medium text-[#0A2947]/50 pt-1">
+              <p className="text-[10px] font-medium text-navy/50 pt-1">
                 Catatan: Status &quot;Digunakan&quot; akan diatur secara otomatis oleh
                 sistem saat transaksi berjalan.
               </p>
@@ -264,20 +264,20 @@ function EditAsetForm({
           </div>
         </div>
 
-        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[#0A2947]/10 mt-2">
+        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-navy/10 mt-2">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push("/dashboard/outlet/reservasi/aset")}
             disabled={updateMutation.isPending}
-            className="w-full sm:w-auto cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold h-12 px-8"
+            className="w-full sm:w-auto cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold h-12 px-8"
           >
             Batal
           </Button>
           <Button
             type="submit"
             disabled={updateMutation.isPending}
-            className="w-full sm:w-auto cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold h-12 px-8"
+            className="w-full sm:w-auto cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm font-bold h-12 px-8"
           >
             {updateMutation.isPending
               ? "Menyimpan Perubahan..."
@@ -311,16 +311,16 @@ export default function EditAsetPage() {
     return (
       <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4 text-center px-4">
         <AlertTriangle className="h-12 w-12 text-rose-500" />
-        <h2 className="text-xl font-bold text-[#0A2947]">
+        <h2 className="text-xl font-bold text-navy">
           ID Aset Tidak Valid
         </h2>
-        <p className="text-sm font-medium text-[#0A2947]/80">
+        <p className="text-sm font-medium text-navy/80">
           Sistem mendeteksi bahwa ID pada URL ini rusak. Silakan kembali ke
           halaman sebelumnya.
         </p>
         <Button
           onClick={() => router.push("/dashboard/outlet/reservasi/aset")}
-          className="mt-4 bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold"
+          className="mt-4 bg-navy text-gading hover:bg-navy/90 font-bold"
         >
           <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Daftar Aset
         </Button>
@@ -331,8 +331,8 @@ export default function EditAsetPage() {
   if (isLoadingAset || isLoadingTipeAset) {
     return (
       <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-[#0A2947]/60" />
-        <p className="text-sm font-bold text-[#0A2947]/80">
+        <Loader2 className="h-10 w-10 animate-spin text-navy/60" />
+        <p className="text-sm font-bold text-navy/80">
           Memuat data aset...
         </p>
       </div>
@@ -346,16 +346,16 @@ export default function EditAsetPage() {
     return (
       <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4 text-center px-4">
         <AlertTriangle className="h-12 w-12 text-rose-500" />
-        <h2 className="text-xl font-bold text-[#0A2947]">
+        <h2 className="text-xl font-bold text-navy">
           Data Tidak Ditemukan
         </h2>
-        <p className="text-sm font-medium text-[#0A2947]/80">
+        <p className="text-sm font-medium text-navy/80">
           Gagal mengambil data aset. Data mungkin sudah dihapus atau server
           sedang bermasalah.
         </p>
         <Button
           onClick={() => router.push("/dashboard/outlet/reservasi/aset")}
-          className="mt-4 bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold"
+          className="mt-4 bg-navy text-gading hover:bg-navy/90 font-bold"
         >
           <ArrowLeft className="w-4 h-4 mr-2" /> Kembali
         </Button>

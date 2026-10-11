@@ -48,17 +48,17 @@ import { skemaPindahDana, type IsianPindahDana } from "./schema";
 
 const SEMUA = "semua";
 const KELAS_ISIAN =
-  "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 focus-visible:ring-1 focus-visible:ring-[#0A2947]";
-const KELAS_LABEL = "text-sm font-bold text-[#0A2947]";
+  "bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy";
+const KELAS_LABEL = "text-sm font-bold text-navy";
 const KELAS_GALAT = "text-xs font-bold text-rose-500";
-const KELAS_LABEL_FILTER = "text-xs font-bold text-[#0A2947]/70";
-const KELAS_PEMICU_FILTER = "w-52 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]";
+const KELAS_LABEL_FILTER = "text-xs font-bold text-navy/70";
+const KELAS_PEMICU_FILTER = "w-52 bg-gading border-navy/20 text-navy";
 
 function Keadaan({ judul, isi }: { judul: string; isi: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-[#0A2947]/20 bg-[#F2EAE1] p-12 text-center">
-      <p className="text-base font-bold text-[#0A2947] mb-1">{judul}</p>
-      <p className="text-sm font-medium text-[#0A2947]/60 max-w-md mx-auto">{isi}</p>
+    <div className="rounded-2xl border border-dashed border-navy/20 bg-krem p-12 text-center">
+      <p className="text-base font-bold text-navy mb-1">{judul}</p>
+      <p className="text-sm font-medium text-navy/60 max-w-md mx-auto">{isi}</p>
     </div>
   );
 }
@@ -78,14 +78,14 @@ export function HalamanPindahDana() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:py-8">
       <Link
         href={URL_DAFTAR_AKUN_KAS}
-        className="inline-flex w-fit items-center text-sm font-semibold text-[#0A2947]/60 hover:text-[#0A2947]"
+        className="inline-flex w-fit items-center text-sm font-semibold text-navy/60 hover:text-navy"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Kembali ke Daftar Akun Kas
       </Link>
       <div className="space-y-0.5">
-        <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">Pindah Dana</h1>
-        <p className="text-sm font-medium text-[#0A2947]/60">
+        <h1 className="text-2xl font-bold tracking-tight text-navy">Pindah Dana</h1>
+        <p className="text-sm font-medium text-navy/60">
           Pindahkan saldo antar akun kas toko. Transfer tidak dapat diubah; koreksinya dibatalkan
           lalu dicatat ulang.
         </p>
@@ -100,7 +100,7 @@ export function HalamanPindahDana() {
         <>
           {aksi.buat &&
             (akunKas.isLoading ? (
-              <Skeleton className="h-72 w-full rounded-2xl bg-[#0A2947]/10" />
+              <Skeleton className="h-72 w-full rounded-2xl bg-navy/10" />
             ) : akunKas.isError ? (
               <Keadaan
                 judul="Gagal memuat akun kas"
@@ -163,7 +163,7 @@ function FormPindahDana({ akunAktif }: { akunAktif: AkunKas[] }) {
   };
 
   return (
-    <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] shadow-sm">
+    <div className="rounded-2xl border border-navy/10 bg-krem shadow-sm">
       <form noValidate onSubmit={handleSubmit(kirim)} className="flex flex-col gap-6 p-5 sm:p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
@@ -188,7 +188,7 @@ function FormPindahDana({ akunAktif }: { akunAktif: AkunKas[] }) {
                   >
                     <SelectValue placeholder="Pilih akun sumber" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                  <SelectContent className="bg-gading border-navy/10 text-navy">
                     {akunAktif.map((akun) => (
                       <SelectItem key={akun.id} value={akun.id}>
                         {akun.namaAkun}
@@ -199,7 +199,7 @@ function FormPindahDana({ akunAktif }: { akunAktif: AkunKas[] }) {
               )}
             />
             {sumber && (
-              <p className="text-xs font-medium text-[#0A2947]/60">
+              <p className="text-xs font-medium text-navy/60">
                 Saldo tersedia {formatRupiah(sumber.saldo)}
               </p>
             )}
@@ -223,7 +223,7 @@ function FormPindahDana({ akunAktif }: { akunAktif: AkunKas[] }) {
                   >
                     <SelectValue placeholder="Pilih akun tujuan" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                  <SelectContent className="bg-gading border-navy/10 text-navy">
                     {pilihanTujuan(akunAktif, kasSumberID).map((akun) => (
                       <SelectItem key={akun.id} value={akun.id}>
                         {akun.namaAkun}
@@ -269,11 +269,11 @@ function FormPindahDana({ akunAktif }: { akunAktif: AkunKas[] }) {
           </div>
         </div>
 
-        <div className="flex justify-end pt-6 border-t border-[#0A2947]/10">
+        <div className="flex justify-end pt-6 border-t border-navy/10">
           <Button
             type="submit"
             disabled={memuat}
-            className="w-full sm:w-auto bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold px-6 shadow-sm"
+            className="w-full sm:w-auto bg-navy text-gading hover:bg-navy/90 font-bold px-6 shadow-sm"
           >
             {memuat ? (
               "Memindahkan..."
@@ -308,7 +308,7 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
         accessorKey: "tanggal",
         header: "Tanggal",
         cell: ({ row }) => (
-          <span className="font-medium text-[#0A2947]">{formatTanggal(row.original.tanggal)}</span>
+          <span className="font-medium text-navy">{formatTanggal(row.original.tanggal)}</span>
         ),
       },
       { id: "sumber", header: "Dari", cell: ({ row }) => namaAkunTransfer(row.original.kasSumber) },
@@ -317,7 +317,7 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
         id: "jumlah",
         header: () => <div className="text-right">Jumlah</div>,
         cell: ({ row }) => (
-          <div className="text-right font-mono font-bold text-[#0A2947]">
+          <div className="text-right font-mono font-bold text-navy">
             {formatRupiah(row.original.jumlah)}
           </div>
         ),
@@ -329,7 +329,7 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
           <div>
             <p>{row.original.keterangan}</p>
             {row.original.status === "VOID" && row.original.catatan && (
-              <p className="text-xs text-[#0A2947]/60">Alasan batal: {row.original.catatan}</p>
+              <p className="text-xs text-navy/60">Alasan batal: {row.original.catatan}</p>
             )}
           </div>
         ),
@@ -375,13 +375,13 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
   return (
     <section
       aria-label="Riwayat transfer"
-      className="bg-[#F2EAE1] border border-[#0A2947]/10 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col gap-6 w-full overflow-hidden"
+      className="bg-krem border border-navy/10 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col gap-6 w-full overflow-hidden"
     >
       <div>
-        <h2 className="text-base sm:text-lg font-bold tracking-wide text-[#0A2947]">
+        <h2 className="text-base sm:text-lg font-bold tracking-wide text-navy">
           Riwayat Transfer
         </h2>
-        <p className="text-sm font-medium text-[#0A2947]/60 mt-1">
+        <p className="text-sm font-medium text-navy/60 mt-1">
           Transfer antar akun kas, terbaru lebih dulu.
         </p>
       </div>

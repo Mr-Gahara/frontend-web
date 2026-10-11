@@ -81,15 +81,15 @@ export default function EditBahanBakuPage() {
   if (isLoadingDetail) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-[#0A2947]/60" />
-        <p className="text-sm font-bold text-[#0A2947]/60">Memuat data bahan baku...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-navy/60" />
+        <p className="text-sm font-bold text-navy/60">Memuat data bahan baku...</p>
       </div>
     );
   }
 
   if (isErrorDetail || !detailBahan) {
     return (
-      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-[#0A2947]">
+      <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-navy">
         <Ban className="h-10 w-10 text-rose-500" />
         <p className="font-bold">Data bahan baku tidak ditemukan.</p>
         <Button onClick={() => router.push("/dashboard/outlet/inventaris/bahanBaku")} variant="outline">
@@ -107,7 +107,7 @@ export default function EditBahanBakuPage() {
           type="button"
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
           onClick={() => router.push("/dashboard/outlet/inventaris/bahanBaku")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -115,24 +115,24 @@ export default function EditBahanBakuPage() {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">
             Edit Master Bahan Baku
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <p className="text-sm font-medium text-navy/60">
             Perbarui informasi identitas master data bahan baku.
           </p>
         </div>
       </div>
 
       {/* FORM SECTION */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-navy/10 bg-krem shadow-sm overflow-hidden">
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-6 p-6 sm:p-8"
         >
-          <div className="flex items-center gap-2 mb-2 border-b border-[#0A2947]/10 pb-4">
-            <PackageCheck className="h-5 w-5 text-[#D4A373]" />
-            <h3 className="text-base font-bold text-[#0A2947]">
+          <div className="flex items-center gap-2 mb-2 border-b border-navy/10 pb-4">
+            <PackageCheck className="h-5 w-5 text-karamel" />
+            <h3 className="text-base font-bold text-navy">
               Informasi Dasar
             </h3>
           </div>
@@ -140,14 +140,14 @@ export default function EditBahanBakuPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Nama Bahan Baku */}
             <div className="space-y-2 sm:col-span-2">
-              <label htmlFor="namaBahan" className="text-sm font-bold text-[#0A2947]">
+              <label htmlFor="namaBahan" className="text-sm font-bold text-navy">
                 Nama Bahan Baku <span className="text-red-500">*</span>
               </label>
               <Input
                 id="namaBahan"
                 {...register("namaBahan")}
                 placeholder="Contoh: Biji Kopi Arabica, Susu Segar, dsb."
-                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/30 h-12 focus-visible:ring-1 focus-visible:ring-[#0A2947]"
+                className="bg-gading border-navy/20 text-navy placeholder:text-navy/30 h-12 focus-visible:ring-1 focus-visible:ring-navy"
               />
               <div className="min-h-4">
                 {errors.namaBahan && (
@@ -160,7 +160,7 @@ export default function EditBahanBakuPage() {
             
             {/* Satuan */}
             <div className="space-y-2 sm:col-span-2">
-              <label className="text-sm font-bold text-[#0A2947]">
+              <label className="text-sm font-bold text-navy">
                 Satuan <span className="text-red-500">*</span>
               </label>
               <Controller
@@ -171,15 +171,15 @@ export default function EditBahanBakuPage() {
                     onValueChange={field.onChange}
                     value={field.value}
                   >
-                    <SelectTrigger className="w-full h-12 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-bold focus:ring-1 focus:ring-[#0A2947]">
+                    <SelectTrigger className="w-full h-12 bg-gading border-navy/20 text-navy font-bold focus:ring-1 focus:ring-navy">
                       <SelectValue placeholder="Pilih Satuan..." />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+                    <SelectContent className="bg-gading border-navy/10 text-navy">
                       {SATUAN_BAHAN_OPTIONS.map((satuan) => (
                         <SelectItem
                           key={satuan}
                           value={satuan}
-                          className="cursor-pointer hover:bg-[#0A2947]/5 font-bold"
+                          className="cursor-pointer hover:bg-navy/5 font-bold"
                         >
                           {satuan}
                         </SelectItem>
@@ -199,20 +199,20 @@ export default function EditBahanBakuPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-6 border-t border-[#0A2947]/10 mt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-6 border-t border-navy/10 mt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => router.push("/dashboard/outlet/inventaris/bahanBaku")}
               disabled={updateMutation.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold h-11 w-full sm:w-auto px-6"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold h-11 w-full sm:w-auto px-6"
             >
               Batal
             </Button>
             <Button
               type="submit"
               disabled={updateMutation.isPending || !isDirty}
-              className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm h-11 w-full sm:w-auto px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm h-11 w-full sm:w-auto px-6 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {updateMutation.isPending ? (
                 <span className="flex items-center gap-2">
@@ -220,7 +220,7 @@ export default function EditBahanBakuPage() {
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  <Save className="mr-2 h-4 w-4 text-[#D4A373]" /> Simpan Perubahan
+                  <Save className="mr-2 h-4 w-4 text-karamel" /> Simpan Perubahan
                 </span>
               )}
             </Button>

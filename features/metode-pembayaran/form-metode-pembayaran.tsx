@@ -18,10 +18,10 @@ import { BATAS_METODE_AKTIF, pilihanAkun } from "./tampilan";
 
 export const URL_DAFTAR_METODE = "/dashboard/outlet/pengaturan/metodePembayaran";
 
-const kelasIsian = "bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]";
-const kelasIsiPilihan = "bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]";
-const kelasPilihan = "cursor-pointer hover:bg-[#0A2947]/5 font-medium";
-const kelasLabel = "text-sm font-bold text-[#0A2947]";
+const kelasIsian = "bg-gading border-navy/20 text-navy";
+const kelasIsiPilihan = "bg-gading border-navy/10 text-navy";
+const kelasPilihan = "cursor-pointer hover:bg-navy/5 font-medium";
+const kelasLabel = "text-sm font-bold text-navy";
 const kelasGalat = "text-xs font-bold text-red-600";
 
 /** Tombol kembali dan judul halaman buat dan ubah, sama dengan halaman lama. */
@@ -32,14 +32,14 @@ export function KepalaFormMetode({ judul, keterangan }: { judul: string; keteran
       <Button
         variant="ghost"
         size="sm"
-        className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+        className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
         onClick={() => router.push(URL_DAFTAR_METODE)}
       >
         <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Laman Metode
       </Button>
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">{judul}</h1>
-        <p className="text-sm font-medium text-[#0A2947]/60">{keterangan}</p>
+        <h1 className="text-2xl font-bold tracking-tight text-navy">{judul}</h1>
+        <p className="text-sm font-medium text-navy/60">{keterangan}</p>
       </div>
     </div>
   );
@@ -49,8 +49,8 @@ export function KepalaFormMetode({ judul, keterangan }: { judul: string; keteran
 export function MemuatMetode({ teks }: { teks: string }) {
   return (
     <div className="flex h-[40vh] w-full flex-col items-center justify-center gap-4">
-      <Loader2 className="h-8 w-8 animate-spin text-[#0A2947]/60" />
-      <p className="text-sm font-bold text-[#0A2947]/60">{teks}</p>
+      <Loader2 className="h-8 w-8 animate-spin text-navy/60" />
+      <p className="text-sm font-bold text-navy/60">{teks}</p>
     </div>
   );
 }
@@ -153,11 +153,11 @@ export function FormMetodePembayaran({
   });
 
   return (
-    <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] shadow-sm">
+    <div className="rounded-2xl border border-navy/10 bg-krem shadow-sm">
       <form onSubmit={kirim} noValidate className="flex flex-col gap-6 p-6 sm:p-8">
         <div className="space-y-4">
-          <h3 className="text-base font-bold flex items-center gap-2 text-[#0A2947]">
-            <Wallet className="h-4 w-4 text-[#D4A373]" /> Informasi Dasar
+          <h3 className="text-base font-bold flex items-center gap-2 text-navy">
+            <Wallet className="h-4 w-4 text-karamel" /> Informasi Dasar
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -168,7 +168,7 @@ export function FormMetodePembayaran({
                 id="metode-nama"
                 placeholder="Misal: Transfer Bank Mandiri"
                 {...register("namaPembayaran")}
-                className={`${kelasIsian} placeholder:text-[#0A2947]/30`}
+                className={`${kelasIsian} placeholder:text-navy/30`}
               />
               {errors.namaPembayaran && <p className={kelasGalat}>{errors.namaPembayaran.message}</p>}
             </div>
@@ -195,7 +195,7 @@ export function FormMetodePembayaran({
           </div>
         </div>
 
-        <div className="h-px w-full bg-[#0A2947]/10" />
+        <div className="h-px w-full bg-navy/10" />
 
         <div className="space-y-2">
           <label htmlFor="metode-akun" className={kelasLabel}>
@@ -211,7 +211,7 @@ export function FormMetodePembayaran({
                 </SelectTrigger>
                 <SelectContent position="popper" sideOffset={4} className={kelasIsiPilihan}>
                   {pilihan.length === 0 ? (
-                    <div className="p-3 text-sm text-[#0A2947]/50 font-medium text-center">Tidak ada Akun Kas aktif.</div>
+                    <div className="p-3 text-sm text-navy/50 font-medium text-center">Tidak ada Akun Kas aktif.</div>
                   ) : (
                     pilihan.map((p) => (
                       <SelectItem key={p.id} value={p.id} disabled={!p.aktif} className={kelasPilihan}>
@@ -224,12 +224,12 @@ export function FormMetodePembayaran({
             )}
           />
           {errors.akunKasID && <p className={kelasGalat}>{errors.akunKasID.message}</p>}
-          <p className="text-xs font-medium text-[#0A2947]/60">
+          <p className="text-xs font-medium text-navy/60">
             Semua uang yang masuk melalui metode ini akan bermuara ke Akun Kas di atas.
           </p>
         </div>
 
-        <div className="h-px w-full bg-[#0A2947]/10" />
+        <div className="h-px w-full bg-navy/10" />
 
         <div className="space-y-2">
           <label htmlFor="metode-status" className={kelasLabel}>Status Operasional</label>
@@ -249,12 +249,12 @@ export function FormMetodePembayaran({
             )}
           />
           {!bolehAktif && (
-            <p className="text-xs font-medium text-[#0A2947]/60">
+            <p className="text-xs font-medium text-navy/60">
               Toko sudah punya {BATAS_METODE_AKTIF} metode aktif, sehingga metode ini hanya dapat disimpan nonaktif.
             </p>
           )}
           {!bolehNonaktif && (
-            <p className="text-xs font-medium text-[#0A2947]/60">
+            <p className="text-xs font-medium text-navy/60">
               Ini satu-satunya metode aktif di toko, sehingga tidak dapat dinonaktifkan. Aktifkan atau buat metode lain lebih dulu.
             </p>
           )}
@@ -265,13 +265,13 @@ export function FormMetodePembayaran({
           <div className="rounded-md bg-red-500/10 p-3 text-sm font-bold text-red-600 border border-red-500/20">{galat}</div>
         )}
 
-        <div className="flex justify-end gap-3 pt-6 border-t border-[#0A2947]/10 mt-2">
+        <div className="flex justify-end gap-3 pt-6 border-t border-navy/10 mt-2">
           <Link href={URL_DAFTAR_METODE}>
             <Button
               type="button"
               variant="outline"
               disabled={sedangMenyimpan}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Batal
             </Button>
@@ -279,7 +279,7 @@ export function FormMetodePembayaran({
           <Button
             type="submit"
             disabled={sedangMenyimpan || !adaPerubahan}
-            className="cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 shadow-sm font-bold px-6 disabled:cursor-not-allowed"
+            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm font-bold px-6 disabled:cursor-not-allowed"
           >
             {sedangMenyimpan ? (
               "Menyimpan..."

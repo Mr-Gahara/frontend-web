@@ -180,7 +180,7 @@ export default function HalamanDaftarPenjualan({
         accessorKey: "noReferensi",
         header: ({ column }) => <KepalaUrut column={column} judul="No. Referensi" />,
         cell: ({ row }) => (
-          <span className="font-bold font-mono text-[#0A2947] text-xs sm:text-sm">
+          <span className="font-bold font-mono text-navy text-xs sm:text-sm">
             {row.original.noReferensi}
           </span>
         ),
@@ -189,7 +189,7 @@ export default function HalamanDaftarPenjualan({
         accessorKey: "tanggalTransaksi",
         header: ({ column }) => <KepalaUrut column={column} judul="Tanggal" className="hidden sm:inline-flex" />,
         cell: ({ row }) => (
-          <span className="text-xs sm:text-sm font-medium text-[#0A2947]/70 hidden sm:inline">
+          <span className="text-xs sm:text-sm font-medium text-navy/70 hidden sm:inline">
             {formatTanggal(row.original.tanggalTransaksi)}
           </span>
         ),
@@ -197,12 +197,12 @@ export default function HalamanDaftarPenjualan({
       {
         accessorKey: "dataPelanggan",
         header: () => (
-          <span className="text-xs font-bold text-[#0A2947]/60 hidden md:inline">
+          <span className="text-xs font-bold text-navy/60 hidden md:inline">
             Pelanggan
           </span>
         ),
         cell: ({ row }) => (
-          <span className="hidden md:inline text-sm font-medium text-[#0A2947]/80 capitalize">
+          <span className="hidden md:inline text-sm font-medium text-navy/80 capitalize">
             {row.original.dataPelanggan?.namaPelanggan ?? "-"}
           </span>
         ),
@@ -211,7 +211,7 @@ export default function HalamanDaftarPenjualan({
         accessorKey: "totalTagihan",
         header: ({ column }) => <KepalaUrut column={column} judul="Total" />,
         cell: ({ row }) => (
-          <span className="font-bold text-[#0A2947] text-xs sm:text-sm font-mono">
+          <span className="font-bold text-navy text-xs sm:text-sm font-mono">
             {formatRupiah(row.original.totalTagihan)}
           </span>
         ),
@@ -219,7 +219,7 @@ export default function HalamanDaftarPenjualan({
       {
         accessorKey: "statusPenjualan",
         header: () => (
-          <span className="text-xs font-bold text-[#0A2947]/60">
+          <span className="text-xs font-bold text-navy/60">
             Status
           </span>
         ),
@@ -227,7 +227,7 @@ export default function HalamanDaftarPenjualan({
       },
       {
         id: "aksi",
-        header: () => <div className="text-right text-xs font-bold text-[#0A2947]/60">Aksi</div>,
+        header: () => <div className="text-right text-xs font-bold text-navy/60">Aksi</div>,
         cell: ({ row }) => {
           const aksi = aksiPenjualan(row.original, permissions);
           const targetId = row.original.id;
@@ -239,14 +239,14 @@ export default function HalamanDaftarPenjualan({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 cursor-pointer text-[#0A2947]/70 hover:text-[#0A2947] hover:bg-[#0A2947]/5"
+                    className="h-8 w-8 cursor-pointer text-navy/70 hover:text-navy hover:bg-navy/5"
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-[#FFFAF3] border-[#0A2947]/10">
+                <DropdownMenuContent align="end" className="w-48 bg-gading border-navy/10">
                   <DropdownMenuItem
-                    className="cursor-pointer font-bold text-[#0A2947] hover:bg-[#0A2947]/5"
+                    className="cursor-pointer font-bold text-navy hover:bg-navy/5"
                     onClick={() =>
                       router.push(`/dashboard/outlet/penjualan/${targetId}`)
                     }
@@ -256,9 +256,9 @@ export default function HalamanDaftarPenjualan({
 
                   {aksi.bayar && (
                     <>
-                      <DropdownMenuSeparator className="bg-[#0A2947]/10" />
+                      <DropdownMenuSeparator className="bg-navy/10" />
                       <DropdownMenuItem
-                        className="cursor-pointer text-[#718355] focus:text-[#718355] focus:bg-[#718355]/10 font-bold"
+                        className="cursor-pointer text-sage focus:text-sage focus:bg-sage/10 font-bold"
                         onClick={() =>
                           router.push(
                             `/dashboard/outlet/penjualan/${targetId}/pembayaran`,
@@ -271,9 +271,9 @@ export default function HalamanDaftarPenjualan({
                   )}
                   {aksi.void && (
                     <>
-                      <DropdownMenuSeparator className="bg-[#0A2947]/10" />
+                      <DropdownMenuSeparator className="bg-navy/10" />
                       <DropdownMenuItem
-                        className="cursor-pointer text-[#D4A373] focus:text-[#D4A373] focus:bg-[#D4A373]/10 font-bold"
+                        className="cursor-pointer text-karamel focus:text-karamel focus:bg-karamel/10 font-bold"
                         onClick={() => setVoidTarget(row.original)}
                       >
                         Void Penjualan
@@ -282,7 +282,7 @@ export default function HalamanDaftarPenjualan({
                   )}
                   {aksi.hapus && (
                     <>
-                      <DropdownMenuSeparator className="bg-[#0A2947]/10" />
+                      <DropdownMenuSeparator className="bg-navy/10" />
                       <DropdownMenuItem
                         className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10 font-bold"
                         onClick={() => setDeleteTarget(row.original)}
@@ -306,14 +306,14 @@ export default function HalamanDaftarPenjualan({
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg shadow-sm hidden sm:block">
-            <ReceiptText className="w-6 h-6 text-[#0A2947]" />
+          <div className="p-2 bg-gading border border-navy/10 rounded-lg shadow-sm hidden sm:block">
+            <ReceiptText className="w-6 h-6 text-navy" />
           </div>
           <div className="space-y-0.5 sm:space-y-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0A2947] truncate">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-navy truncate">
               Data Penjualan
             </h1>
-            <p className="text-xs sm:text-sm font-medium text-[#0A2947]/60 hidden sm:block">
+            <p className="text-xs sm:text-sm font-medium text-navy/60 hidden sm:block">
               Kelola invoice penjualan dan pantau status pembayaran.
             </p>
           </div>
@@ -323,7 +323,7 @@ export default function HalamanDaftarPenjualan({
             variant="outline"
             size="sm"
             onClick={() => setShowFilter(!showFilter)}
-            className="cursor-pointer gap-1.5 border-[#0A2947]/20 font-bold text-[#0A2947] hover:bg-[#0A2947]/5"
+            className="cursor-pointer gap-1.5 border-navy/20 font-bold text-navy hover:bg-navy/5"
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Filter</span>
@@ -331,7 +331,7 @@ export default function HalamanDaftarPenjualan({
           <Button
             onClick={() => router.push("/dashboard/outlet/penjualan/buatPenjualan")}
             size="sm"
-            className="cursor-pointer gap-1.5 bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm"
+            className="cursor-pointer gap-1.5 bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm"
           >
             <Plus className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Buat Penjualan</span>
@@ -343,24 +343,24 @@ export default function HalamanDaftarPenjualan({
       {pemilihLokasi}
       {/* Filter Bar (DIKEMBALIKAN UTUH 100%) */}
       {showFilter && (
-        <div className="rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-4 sm:p-5 shadow-sm">
+        <div className="rounded-2xl border border-navy/10 bg-krem p-4 sm:p-5 shadow-sm">
           <div className="flex flex-col gap-4">
             {/* Baris 1: Search full width */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#0A2947]">Cari Nomor Invoice</label>
+              <label className="text-xs font-bold text-navy">Cari Nomor Invoice</label>
               <Input
                 placeholder="Masukkan no. referensi..."
                 value={filters.noReferensi ?? ""}
                 onChange={(e) =>
                   setFilters({ ...filters, noReferensi: e.target.value })
                 }
-                className="bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] placeholder:text-[#0A2947]/40"
+                className="bg-gading border-navy/20 text-navy placeholder:text-navy/40"
               />
             </div>
 
             {/* Baris 2: Status */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#0A2947]">Status</label>
+              <label className="text-xs font-bold text-navy">Status</label>
               <Select
                 value={filters.statusPenjualan ?? "ALL"}
                 onValueChange={(val) =>
@@ -370,13 +370,13 @@ export default function HalamanDaftarPenjualan({
                   })
                 }
               >
-                <SelectTrigger className="cursor-pointer w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]">
+                <SelectTrigger className="cursor-pointer w-full bg-gading border-navy/20 text-navy">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
-                  <SelectItem value="ALL" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Semua Status</SelectItem>
+                <SelectContent className="bg-gading border-navy/10 text-navy">
+                  <SelectItem value="ALL" className="cursor-pointer font-medium hover:bg-navy/5">Semua Status</SelectItem>
                   {URUTAN_STATUS_PENJUALAN.map((status) => (
-                    <SelectItem key={status} value={status} className="cursor-pointer font-medium hover:bg-[#0A2947]/5">
+                    <SelectItem key={status} value={status} className="cursor-pointer font-medium hover:bg-navy/5">
                       {TAMPILAN_STATUS_PENJUALAN[status].label}
                     </SelectItem>
                   ))}
@@ -387,7 +387,7 @@ export default function HalamanDaftarPenjualan({
             {/* Baris 3: 2 kolom Jenis */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#0A2947]">Tipe Transaksi</label>
+                <label className="text-xs font-bold text-navy">Tipe Transaksi</label>
                 <Select
                   value={filters.jenisTransaksi ?? "ALL"}
                   onValueChange={(val) =>
@@ -398,19 +398,19 @@ export default function HalamanDaftarPenjualan({
                     })
                   }
                 >
-                  <SelectTrigger className="cursor-pointer w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]">
+                  <SelectTrigger className="cursor-pointer w-full bg-gading border-navy/20 text-navy">
                     <SelectValue placeholder="Jenis transaksi" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
-                    <SelectItem value="ALL" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Semua Transaksi</SelectItem>
-                    <SelectItem value="POS" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">POS Kasir</SelectItem>
-                    <SelectItem value="INVOICE" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Invoice Online</SelectItem>
+                  <SelectContent className="bg-gading border-navy/10 text-navy">
+                    <SelectItem value="ALL" className="cursor-pointer font-medium hover:bg-navy/5">Semua Transaksi</SelectItem>
+                    <SelectItem value="POS" className="cursor-pointer font-medium hover:bg-navy/5">POS Kasir</SelectItem>
+                    <SelectItem value="INVOICE" className="cursor-pointer font-medium hover:bg-navy/5">Invoice Online</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#0A2947]">Metode Penjualan</label>
+                <label className="text-xs font-bold text-navy">Metode Penjualan</label>
                 <Select
                   value={filters.jenisPenjualan ?? "ALL"}
                   onValueChange={(val) =>
@@ -421,14 +421,14 @@ export default function HalamanDaftarPenjualan({
                     })
                   }
                 >
-                  <SelectTrigger className="cursor-pointer w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]">
+                  <SelectTrigger className="cursor-pointer w-full bg-gading border-navy/20 text-navy">
                     <SelectValue placeholder="Jenis penjualan" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
-                    <SelectItem value="ALL" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Semua Jenis</SelectItem>
-                    <SelectItem value="dine-in" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Dine-in</SelectItem>
-                    <SelectItem value="takeaway" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Takeaway</SelectItem>
-                    <SelectItem value="booking" className="cursor-pointer font-medium hover:bg-[#0A2947]/5">Booking</SelectItem>
+                  <SelectContent className="bg-gading border-navy/10 text-navy">
+                    <SelectItem value="ALL" className="cursor-pointer font-medium hover:bg-navy/5">Semua Jenis</SelectItem>
+                    <SelectItem value="dine-in" className="cursor-pointer font-medium hover:bg-navy/5">Dine-in</SelectItem>
+                    <SelectItem value="takeaway" className="cursor-pointer font-medium hover:bg-navy/5">Takeaway</SelectItem>
+                    <SelectItem value="booking" className="cursor-pointer font-medium hover:bg-navy/5">Booking</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -437,7 +437,7 @@ export default function HalamanDaftarPenjualan({
             {/* Baris 4: 2 kolom tanggal */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label htmlFor="filter-dari-tanggal" className="text-xs font-bold text-[#0A2947]">
+                <label htmlFor="filter-dari-tanggal" className="text-xs font-bold text-navy">
                   Dari Tanggal
                 </label>
                 <PilihTanggal
@@ -450,7 +450,7 @@ export default function HalamanDaftarPenjualan({
                 />
               </div>
               <div className="space-y-1.5">
-                <label htmlFor="filter-sampai-tanggal" className="text-xs font-bold text-[#0A2947]">
+                <label htmlFor="filter-sampai-tanggal" className="text-xs font-bold text-navy">
                   Sampai Tanggal
                 </label>
                 <PilihTanggal
@@ -468,7 +468,7 @@ export default function HalamanDaftarPenjualan({
             <div className="flex gap-3 pt-2">
               <Button
                 onClick={handleApplyFilter}
-                className="flex-1 cursor-pointer bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-sm"
+                className="flex-1 cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm"
               >
                 Terapkan Pencarian
               </Button>
@@ -476,7 +476,7 @@ export default function HalamanDaftarPenjualan({
                 variant="outline"
                 size="icon"
                 onClick={handleResetFilter}
-                className="cursor-pointer shrink-0 border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5"
+                className="cursor-pointer shrink-0 border-navy/20 text-navy hover:bg-navy/5"
                 title="Reset filter"
               >
                 <RotateCcw className="h-4 w-4" />
@@ -487,7 +487,7 @@ export default function HalamanDaftarPenjualan({
       )}
 
       {/* Tabel */}
-      <div className="w-full overflow-x-auto rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-4 sm:p-6 shadow-sm">
+      <div className="w-full overflow-x-auto rounded-2xl border border-navy/10 bg-krem p-4 sm:p-6 shadow-sm">
         {penghalang ? (
           penghalang
         ) : daftar.isError ? (
@@ -544,19 +544,19 @@ export default function HalamanDaftarPenjualan({
           if (!open) setDeleteTarget(null);
         }}
       >
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10 max-w-[90vw] sm:max-w-md">
+        <AlertDialogContent className="bg-gading border-navy/10 max-w-[90vw] sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">
+            <AlertDialogTitle className="text-navy">
               Hapus penjualan {deleteTarget?.noReferensi}?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogDescription className="text-navy/70 font-medium">
               Tindakan ini akan menghapus data penjualan secara permanen.
               Penjualan hanya dapat dihapus jika masih berstatus Draft. Apakah
               Anda yakin?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel className="cursor-pointer w-full sm:w-auto border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold">
+            <AlertDialogCancel className="cursor-pointer w-full sm:w-auto border-navy/20 text-navy hover:bg-navy/5 font-bold">
               Batal
             </AlertDialogCancel>
             <AlertDialogAction

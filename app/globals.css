@@ -116,6 +116,11 @@ input.no-spinner[type="number"] {
   appearance: textfield;
 }
 :root {
+  --krem: #E0D2C2;
+  --navy: #0A2947;
+  --gading: #FFFAF3;
+  --karamel: #D4A373;
+  --sage: #718355;
   /* PALET DASAR */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -137,8 +142,8 @@ input.no-spinner[type="number"] {
   --radius: 0.625rem;
 
   /* PALET SIDEBAR GELAP */
-  --sidebar-background: #041E3F;
-  --sidebar: #041E3F; /* Tambahan untuk jaga-jaga shadcn versi terbaru */
+  --sidebar-background: var(--navy);
+  --sidebar: var(--navy); /* Tambahan untuk jaga-jaga shadcn versi terbaru */
   --sidebar-foreground: oklch(92.191% 0.0001 271.152);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -163,6 +168,11 @@ input.no-spinner[type="number"] {
 
 /* BLOK INJEKSI TEMA TAILWIND V4 */
 @theme inline {
+  --color-krem: var(--krem);
+  --color-navy: var(--navy);
+  --color-gading: var(--gading);
+  --color-karamel: var(--karamel);
+  --color-sage: var(--sage);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

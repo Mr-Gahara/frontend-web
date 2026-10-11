@@ -23,7 +23,7 @@ export default function Topbar() {
       <div className="flex items-center gap-4">
         {/* Tombol Trigger Shadcn UI */}
         <SidebarTrigger 
-          className="bg-[#0A2947] text-white hover:bg-[#0A2947]/80 hover:text-white cursor-pointer transition-colors" 
+          className="bg-navy text-white hover:bg-navy/80 hover:text-white cursor-pointer transition-colors" 
         />
         
         <span className="text-base font-semibold text-gray-800">
@@ -37,7 +37,7 @@ export default function Topbar() {
           disabled
           aria-label="Notifikasi belum tersedia"
           title="Notifikasi belum tersedia"
-          className="flex items-center justify-center p-2.5 bg-[#0A2947] text-white rounded-lg border-none shadow-sm opacity-50 cursor-not-allowed"
+          className="flex items-center justify-center p-2.5 bg-navy text-white rounded-lg border-none shadow-sm opacity-50 cursor-not-allowed"
         >
           <Bell size={20} />
         </button>

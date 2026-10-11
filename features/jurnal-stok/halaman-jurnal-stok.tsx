@@ -102,26 +102,26 @@ export default function HalamanJurnalStok({
   return (
     <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-7xl mx-auto">
       {/* HEADER & FILTERS */}
-      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between border-b border-[#0A2947]/10 pb-6">
+      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between border-b border-navy/10 pb-6">
         <div className="space-y-1.5">
-          <h1 className="text-3xl font-black tracking-tight text-[#0A2947] flex items-center gap-2">
-            <BookOpen className="w-8 h-8 text-[#D4A373]" />
+          <h1 className="text-3xl font-black tracking-tight text-navy flex items-center gap-2">
+            <BookOpen className="w-8 h-8 text-karamel" />
             Buku Jurnal Stok
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">{deskripsi}</p>
+          <p className="text-sm font-medium text-navy/60">{deskripsi}</p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           {pemilihLokasi}
           <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#0A2947]/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
             <Input
               placeholder="Cari nama barang..."
               aria-label="Cari nama barang"
               value={cari}
               onChange={(e) => setCari(e.target.value)}
               disabled={nonaktif}
-              className="pl-9 h-10 bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] focus-visible:ring-[#0A2947] font-medium shadow-sm"
+              className="pl-9 h-10 bg-gading border-navy/20 text-navy focus-visible:ring-navy font-medium shadow-sm"
             />
           </div>
 
@@ -133,12 +133,12 @@ export default function HalamanJurnalStok({
             >
               <SelectTrigger
                 aria-label="Filter arah"
-                className="w-full sm:w-[140px] h-10 bg-white border-[#0A2947]/20 text-[#0A2947] font-bold focus:ring-[#0A2947] shadow-sm"
+                className="w-full sm:w-[140px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
               >
-                <Filter className="w-3.5 h-3.5 mr-2 text-[#0A2947]/50" />
+                <Filter className="w-3.5 h-3.5 mr-2 text-navy/50" />
                 <SelectValue placeholder="Semua Arah" />
               </SelectTrigger>
-              <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
+              <SelectContent className="bg-white border-navy/10 text-navy">
                 <SelectItem value="ALL" className="font-bold">Semua Arah</SelectItem>
                 <SelectItem value="Masuk" className="font-bold text-emerald-600">Barang Masuk</SelectItem>
                 <SelectItem value="Keluar" className="font-bold text-rose-600">Barang Keluar</SelectItem>
@@ -152,11 +152,11 @@ export default function HalamanJurnalStok({
             >
               <SelectTrigger
                 aria-label="Filter alasan"
-                className="w-full sm:w-[160px] h-10 bg-white border-[#0A2947]/20 text-[#0A2947] font-bold focus:ring-[#0A2947] shadow-sm"
+                className="w-full sm:w-[160px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
               >
                 <SelectValue placeholder="Semua Alasan" />
               </SelectTrigger>
-              <SelectContent className="bg-white border-[#0A2947]/10 text-[#0A2947]">
+              <SelectContent className="bg-white border-navy/10 text-navy">
                 <SelectItem value="ALL" className="font-bold">Semua Alasan</SelectItem>
                 <SelectItem value="Transfer Gudang" className="font-medium">{teks.labelTransfer}</SelectItem>
                 <SelectItem value="Stok Opname" className="font-medium">Stok Opname</SelectItem>
@@ -169,10 +169,10 @@ export default function HalamanJurnalStok({
       </div>
 
       {penghalang ?? (
-        <div className="rounded-2xl border border-[#0A2947]/10 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left whitespace-nowrap">
-              <thead className="bg-[#F2EAE1] text-[11px] uppercase tracking-wider font-black text-[#0A2947]/60 border-b border-[#0A2947]/10">
+              <thead className="bg-krem text-[11px] uppercase tracking-wider font-black text-navy/60 border-b border-navy/10">
                 <tr>
                   <th className="px-6 py-4 rounded-tl-2xl">Waktu Transaksi</th>
                   <th className="px-6 py-4">Informasi Barang</th>
@@ -181,15 +181,15 @@ export default function HalamanJurnalStok({
                   <th className="px-6 py-4 rounded-tr-2xl">PIC (Penanggung Jawab)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#0A2947]/5">
+              <tbody className="divide-y divide-navy/5">
                 {memuat ? (
                   Array.from({ length: teks.jumlahSkeleton }).map((_, i) => (
                     <tr key={i}>
-                      <td className="px-6 py-4"><Skeleton className="h-5 w-32 bg-[#0A2947]/10" /></td>
-                      <td className="px-6 py-4"><Skeleton className="h-5 w-48 bg-[#0A2947]/10" /></td>
-                      <td className="px-6 py-4"><Skeleton className="h-5 w-24 bg-[#0A2947]/10" /></td>
-                      <td className="px-6 py-4"><Skeleton className="h-6 w-20 ml-auto bg-[#0A2947]/10" /></td>
-                      <td className="px-6 py-4"><Skeleton className="h-5 w-32 bg-[#0A2947]/10" /></td>
+                      <td className="px-6 py-4"><Skeleton className="h-5 w-32 bg-navy/10" /></td>
+                      <td className="px-6 py-4"><Skeleton className="h-5 w-48 bg-navy/10" /></td>
+                      <td className="px-6 py-4"><Skeleton className="h-5 w-24 bg-navy/10" /></td>
+                      <td className="px-6 py-4"><Skeleton className="h-6 w-20 ml-auto bg-navy/10" /></td>
+                      <td className="px-6 py-4"><Skeleton className="h-5 w-32 bg-navy/10" /></td>
                     </tr>
                   ))
                 ) : isError ? (
@@ -206,9 +206,9 @@ export default function HalamanJurnalStok({
                       colSpan={5}
                       className="px-6 py-16 text-center flex flex-col items-center justify-center w-full"
                     >
-                      <BookOpen className="w-12 h-12 mb-3 text-[#0A2947]/20" />
-                      <span className="text-[#0A2947]/50 font-bold text-lg">{teks.kosongJudul}</span>
-                      <span className="text-[#0A2947]/40 font-medium text-sm mt-1">{teks.kosongIsi}</span>
+                      <BookOpen className="w-12 h-12 mb-3 text-navy/20" />
+                      <span className="text-navy/50 font-bold text-lg">{teks.kosongJudul}</span>
+                      <span className="text-navy/40 font-medium text-sm mt-1">{teks.kosongIsi}</span>
                     </td>
                   </tr>
                 ) : (
@@ -228,15 +228,15 @@ function BarisJurnal({ jurnal }: { jurnal: JurnalStok }) {
   const waktu = formatWaktuJurnal(jurnal.tanggal);
 
   return (
-    <tr className="hover:bg-[#FFFAF3]/60 transition-colors group">
+    <tr className="hover:bg-gading/60 transition-colors group">
       {/* KOLOM 1: TANGGAL */}
       <td className="px-6 py-4 align-top">
         <div className="flex flex-col gap-1">
-          <span className="font-bold text-[#0A2947] flex items-center gap-1.5">
-            <CalendarClock className="w-3.5 h-3.5 text-[#0A2947]/40" />
+          <span className="font-bold text-navy flex items-center gap-1.5">
+            <CalendarClock className="w-3.5 h-3.5 text-navy/40" />
             {waktu.tanggal}
           </span>
-          <span className="text-[11px] font-bold text-[#0A2947]/50">Pukul {waktu.jam}</span>
+          <span className="text-[11px] font-bold text-navy/50">Pukul {waktu.jam}</span>
         </div>
       </td>
 
@@ -246,13 +246,13 @@ function BarisJurnal({ jurnal }: { jurnal: JurnalStok }) {
           <span
             className={cn(
               "font-bold text-base",
-              jurnal.bahanBakuID ? "text-[#0A2947]" : "text-rose-500 line-through",
+              jurnal.bahanBakuID ? "text-navy" : "text-rose-500 line-through",
             )}
           >
             {jurnal.bahanBakuID?.namaBahan || "Master Data Terhapus"}
           </span>
-          <span className="text-[10px] font-bold text-[#0A2947]/50 uppercase flex items-center gap-1">
-            <MapPin className="w-3 h-3 text-[#D4A373]" />
+          <span className="text-[10px] font-bold text-navy/50 uppercase flex items-center gap-1">
+            <MapPin className="w-3 h-3 text-karamel" />
             {jurnal.locationID?.nama || "Lokasi Tidak Diketahui"}
           </span>
         </div>
@@ -272,7 +272,7 @@ function BarisJurnal({ jurnal }: { jurnal: JurnalStok }) {
           </Badge>
           {jurnal.keterangan && (
             <span
-              className="text-[11px] font-medium text-[#0A2947]/60 italic max-w-[200px] truncate"
+              className="text-[11px] font-medium text-navy/60 italic max-w-[200px] truncate"
               title={jurnal.keterangan}
             >
               &quot;{jurnal.keterangan}&quot;
@@ -313,10 +313,10 @@ function BarisJurnal({ jurnal }: { jurnal: JurnalStok }) {
       {/* KOLOM 5: PENCATAT */}
       <td className="px-6 py-4 align-top">
         <div className="flex items-center gap-2 mt-1">
-          <div className="w-6 h-6 rounded-full bg-[#0A2947]/10 flex items-center justify-center">
-            <User className="w-3.5 h-3.5 text-[#0A2947]/50" />
+          <div className="w-6 h-6 rounded-full bg-navy/10 flex items-center justify-center">
+            <User className="w-3.5 h-3.5 text-navy/50" />
           </div>
-          <span className="font-bold text-[#0A2947] capitalize">
+          <span className="font-bold text-navy capitalize">
             {jurnal.dicatatOleh?.nama || "Sistem Otomatis"}
           </span>
         </div>

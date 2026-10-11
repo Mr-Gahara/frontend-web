@@ -75,7 +75,7 @@ export default function HalamanDaftarStockAdjustment({
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] cursor-pointer"
+            className="h-auto p-0 text-xs font-bold text-navy/60 hover:bg-transparent hover:text-navy cursor-pointer"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             No. Jurnal
@@ -83,7 +83,7 @@ export default function HalamanDaftarStockAdjustment({
           </Button>
         ),
         cell: ({ row }) => (
-          <span className="font-bold font-mono text-[#0A2947] text-sm">
+          <span className="font-bold font-mono text-navy text-sm">
             {row.original.nomorAdjustment}
           </span>
         ),
@@ -94,7 +94,7 @@ export default function HalamanDaftarStockAdjustment({
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-xs font-bold text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] cursor-pointer"
+            className="h-auto p-0 text-xs font-bold text-navy/60 hover:bg-transparent hover:text-navy cursor-pointer"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Tanggal Eksekusi
@@ -102,7 +102,7 @@ export default function HalamanDaftarStockAdjustment({
           </Button>
         ),
         cell: ({ row }) => (
-          <span className="text-sm font-medium text-[#0A2947]/70">
+          <span className="text-sm font-medium text-navy/70">
             {formatTanggalAdjustment(row.original.tanggal)}
           </span>
         ),
@@ -110,19 +110,19 @@ export default function HalamanDaftarStockAdjustment({
       {
         id: "sumber",
         header: () => (
-          <div className="text-xs font-bold text-[#0A2947]/60">Sumber</div>
+          <div className="text-xs font-bold text-navy/60">Sumber</div>
         ),
         cell: ({ row }) => (
           <TautanSumber
             adjustment={row.original}
-            className="text-sm font-bold text-[#0A2947]"
+            className="text-sm font-bold text-navy"
           />
         ),
       },
       {
         id: "aksi",
         header: () => (
-          <div className="text-right text-xs font-bold text-[#0A2947]/60">Aksi</div>
+          <div className="text-right text-xs font-bold text-navy/60">Aksi</div>
         ),
         cell: ({ row }) => {
 
@@ -131,7 +131,7 @@ export default function HalamanDaftarStockAdjustment({
               <Button
                 variant="outline"
                 size="sm"
-                className="cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold shadow-sm h-8 px-3"
+                className="cursor-pointer bg-gading border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm h-8 px-3"
                 onClick={() => router.push(`${urlDaftar}/${row.original.id}`)}
               >
                 <Eye className="w-3.5 h-3.5 mr-1.5" />
@@ -149,14 +149,14 @@ export default function HalamanDaftarStockAdjustment({
     <div className="mx-auto flex w-full flex-col gap-6 px-4 py-8">
       {/* HEADER SECTION */}
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-[#FFFAF3] border border-[#0A2947]/10 rounded-lg shadow-sm hidden sm:block">
-          <Scale className="w-6 h-6 text-[#0A2947]" />
+        <div className="p-2 bg-gading border border-navy/10 rounded-lg shadow-sm hidden sm:block">
+          <Scale className="w-6 h-6 text-navy" />
         </div>
         <div className="space-y-0.5">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947]">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">
             {teks.judul}
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <p className="text-sm font-medium text-navy/60">
             {teks.deskripsi}
           </p>
         </div>
@@ -166,7 +166,7 @@ export default function HalamanDaftarStockAdjustment({
 
       {/* DATA TABLE SECTION */}
       {penghalang ?? (
-        <div className="w-full overflow-x-auto rounded-2xl border border-[#0A2947]/10 bg-[#F2EAE1] p-4 sm:p-6 shadow-sm">
+        <div className="w-full overflow-x-auto rounded-2xl border border-navy/10 bg-krem p-4 sm:p-6 shadow-sm">
           <DataTable
             columns={columns}
             data={adjustmentList}

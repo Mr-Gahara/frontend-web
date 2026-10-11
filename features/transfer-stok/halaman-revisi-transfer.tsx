@@ -39,8 +39,8 @@ export default function HalamanRevisiTransfer({ id }: { id: string }) {
   if (isLoading || !isFetchedAfterMount) {
     return (
       <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-4xl mx-auto">
-        <Skeleton className="h-8 w-64 bg-[#0A2947]/10" />
-        <Skeleton className="h-100 w-full bg-[#0A2947]/10 rounded-2xl" />
+        <Skeleton className="h-8 w-64 bg-navy/10" />
+        <Skeleton className="h-100 w-full bg-navy/10 rounded-2xl" />
       </div>
     );
   }
@@ -49,7 +49,7 @@ export default function HalamanRevisiTransfer({ id }: { id: string }) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <AlertTriangle className="w-12 h-12 text-rose-500/50" />
-        <h2 className="text-xl font-bold text-[#0A2947]">
+        <h2 className="text-xl font-bold text-navy">
           Data tidak ditemukan
         </h2>
         <Button variant="outline" onClick={() => router.back()}>
@@ -64,14 +64,14 @@ export default function HalamanRevisiTransfer({ id }: { id: string }) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <AlertTriangle className="w-12 h-12 text-amber-500/80" />
-        <h2 className="text-xl font-bold text-[#0A2947]">Akses Ditolak</h2>
-        <p className="text-sm font-medium text-[#0A2947]/60">
+        <h2 className="text-xl font-bold text-navy">Akses Ditolak</h2>
+        <p className="text-sm font-medium text-navy/60">
           Surat Jalan ini sudah berstatus {detail.status} dan tidak dapat
           direvisi lagi.
         </p>
         <Button
           variant="default"
-          className="bg-[#0A2947]"
+          className="bg-navy"
           onClick={() => router.push(`/dashboard/gudang/transferStok/${id}`)}
         >
           Lihat Detail Saja
@@ -140,18 +140,18 @@ function FormRevisiTransfer({ detail }: { detail: TransferStok }) {
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
           onClick={() => router.back()}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Batal Revisi
         </Button>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0A2947] flex items-center gap-2">
-            <FileEdit className="w-6 h-6 text-[#D4A373]" /> Revisi Kuantitas
+          <h1 className="text-2xl font-bold tracking-tight text-navy flex items-center gap-2">
+            <FileEdit className="w-6 h-6 text-karamel" /> Revisi Kuantitas
             Pengiriman
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60">
+          <p className="text-sm font-medium text-navy/60">
             Surat Jalan:{" "}
             <strong className="font-mono">{detail.nomorTransfer}</strong>
           </p>
@@ -159,18 +159,18 @@ function FormRevisiTransfer({ detail }: { detail: TransferStok }) {
       </div>
 
       {/* DAFTAR BARANG */}
-      <div className="rounded-2xl border border-[#0A2947]/10 bg-white shadow-sm overflow-hidden">
-        <div className="bg-[#F2EAE1] px-6 py-4 border-b border-[#0A2947]/10 flex items-center justify-between">
+      <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
+        <div className="bg-krem px-6 py-4 border-b border-navy/10 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Package className="w-5 h-5 text-[#D4A373]" />
-            <h2 className="font-bold text-[#0A2947]">
+            <Package className="w-5 h-5 text-karamel" />
+            <h2 className="font-bold text-navy">
               Sesuaikan Jumlah yang Akan Dikirim
             </h2>
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-[#FFFAF3] text-xs uppercase font-bold text-[#0A2947]/50 border-b border-[#0A2947]/5">
+            <thead className="bg-gading text-xs uppercase font-bold text-navy/50 border-b border-navy/5">
               <tr>
                 <th className="px-6 py-4">Nama Barang</th>
                 <th className="px-6 py-4 w-48 text-right">
@@ -178,10 +178,10 @@ function FormRevisiTransfer({ detail }: { detail: TransferStok }) {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#0A2947]/5">
+            <tbody className="divide-y divide-navy/5">
               {items.map((item) => (
-                <tr key={item.id_lokal} className="hover:bg-[#FFFAF3]/50">
-                  <td className="px-6 py-4 font-bold text-[#0A2947]">
+                <tr key={item.id_lokal} className="hover:bg-gading/50">
+                  <td className="px-6 py-4 font-bold text-navy">
                     {item.namaBahan}
                   </td>
                   <td className="px-6 py-4">
@@ -193,9 +193,9 @@ function FormRevisiTransfer({ detail }: { detail: TransferStok }) {
                         onChange={(e) =>
                           handleQtyChange(item.id_lokal, e.target.value)
                         }
-                        className="w-24 bg-white border-[#0A2947]/20 text-[#0A2947] font-mono font-bold text-right no-spinner"
+                        className="w-24 bg-white border-navy/20 text-navy font-mono font-bold text-right no-spinner"
                       />
-                      <span className="text-xs font-bold text-[#0A2947]/50 w-8">
+                      <span className="text-xs font-bold text-navy/50 w-8">
                         {item.satuan}
                       </span>
                     </div>
@@ -217,7 +217,7 @@ function FormRevisiTransfer({ detail }: { detail: TransferStok }) {
         <Button
           onClick={simpan}
           disabled={updateMutation.isPending}
-          className="bg-[#0A2947] text-[#FFFAF3] hover:bg-[#0A2947]/90 font-bold shadow-md cursor-pointer w-full sm:w-auto whitespace-nowrap"
+          className="bg-navy text-gading hover:bg-navy/90 font-bold shadow-md cursor-pointer w-full sm:w-auto whitespace-nowrap"
         >
           <Save className="w-4 h-4 mr-2" />
           {updateMutation.isPending ? "Menyimpan..." : "Simpan Revisi"}

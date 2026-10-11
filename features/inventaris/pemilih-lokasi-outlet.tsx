@@ -20,17 +20,17 @@ interface Props {
 export default function PemilihLokasiOutlet({ lokasiOutlet, nilai, onUbah }: Props) {
   return (
     <div className="space-y-1.5 w-full sm:w-64">
-      <label htmlFor="pemilih-lokasi-outlet" className="text-xs font-bold text-[#0A2947]">
+      <label htmlFor="pemilih-lokasi-outlet" className="text-xs font-bold text-navy">
         Filter Lokasi
       </label>
       <Select value={nilai} onValueChange={onUbah}>
         <SelectTrigger
           id="pemilih-lokasi-outlet"
-          className="cursor-pointer w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-bold"
+          className="cursor-pointer w-full bg-gading border-navy/20 text-navy font-bold"
         >
           <SelectValue placeholder="Semua Outlet" />
         </SelectTrigger>
-        <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+        <SelectContent className="bg-gading border-navy/10 text-navy">
           <SelectItem value={SEMUA_OUTLET} className="cursor-pointer font-bold">
             Semua Outlet
           </SelectItem>

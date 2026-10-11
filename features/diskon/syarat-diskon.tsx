@@ -10,6 +10,6 @@ export function SyaratDiskon({ diskon }: { diskon: Diskon }) {
   const syarat = syaratPemakaian(diskon);
   if (syarat.length === 0) return null;
   return (
-    <span className="text-[10px] font-medium text-[#0A2947]/60">{syarat.join(", ")}</span>
+    <span className="text-[10px] font-medium text-navy/60">{syarat.join(", ")}</span>
   );
 }

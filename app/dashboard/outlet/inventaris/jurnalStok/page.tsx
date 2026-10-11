@@ -67,7 +67,7 @@ export default function JurnalStokOutletPage() {
       deskripsi={
         <>
           CCTV Operasional: Melacak riwayat masuk-keluar barang khusus di{" "}
-          <strong className="text-[#0A2947]">{namaCakupan}</strong>.
+          <strong className="text-navy">{namaCakupan}</strong>.
         </>
       }
     />

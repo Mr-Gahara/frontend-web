@@ -41,8 +41,8 @@ export function KeuanganNavTabs() {
               className={cn(
                 "flex flex-1 items-center justify-center gap-2 py-3 px-1 text-sm font-bold whitespace-nowrap transition-all border-b-4 rounded-none bg-transparent cursor-pointer -mb-px focus-visible:ring-0 focus-visible:outline-none",
                 isActive
-                  ? "border-[#0A2947] text-[#0A2947] shadow-none"
-                  : "border-transparent text-[#0A2947]/50 hover:text-[#0A2947] hover:bg-transparent",
+                  ? "border-navy text-navy shadow-none"
+                  : "border-transparent text-navy/50 hover:text-navy hover:bg-transparent",
               )}
             >
               <Icon className="w-4 h-4" />

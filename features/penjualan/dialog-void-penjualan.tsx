@@ -37,7 +37,7 @@ export function DialogVoidPenjualan({ noReferensi, terbuka, memproses, onTutup, 
         if (!open) onTutup();
       }}
     >
-      <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10 max-w-[90vw] sm:max-w-md">
+      <AlertDialogContent className="bg-gading border-navy/10 max-w-[90vw] sm:max-w-md">
         <IsiDialogVoid noReferensi={noReferensi} memproses={memproses} onKonfirmasi={onKonfirmasi} />
       </AlertDialogContent>
     </AlertDialog>
@@ -53,14 +53,14 @@ function IsiDialogVoid({
   return (
     <>
       <AlertDialogHeader>
-        <AlertDialogTitle className="text-[#0A2947]">Void Penjualan {noReferensi}?</AlertDialogTitle>
-        <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+        <AlertDialogTitle className="text-navy">Void Penjualan {noReferensi}?</AlertDialogTitle>
+        <AlertDialogDescription className="text-navy/70 font-medium">
           {PESAN_VOID_PENJUALAN}
         </AlertDialogDescription>
       </AlertDialogHeader>
       <div className="space-y-2">
-        <label htmlFor="alasanVoidPenjualan" className="text-sm font-bold text-[#0A2947]">
-          Alasan <span className="text-[#0A2947]/50 font-medium">(Opsional)</span>
+        <label htmlFor="alasanVoidPenjualan" className="text-sm font-bold text-navy">
+          Alasan <span className="text-navy/50 font-medium">(Opsional)</span>
         </label>
         <Input
           id="alasanVoidPenjualan"
@@ -68,13 +68,13 @@ function IsiDialogVoid({
           onChange={(e) => setAlasan(e.target.value)}
           placeholder="Misal: pesanan dibatalkan pelanggan"
           maxLength={500}
-          className="bg-white border-[#0A2947]/20 text-[#0A2947]"
+          className="bg-white border-navy/20 text-navy"
         />
       </div>
       <AlertDialogFooter className="flex-col sm:flex-row gap-2">
         <AlertDialogCancel
           disabled={memproses}
-          className="cursor-pointer w-full sm:w-auto border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+          className="cursor-pointer w-full sm:w-auto border-navy/20 text-navy hover:bg-navy/5 font-bold"
         >
           Batal
         </AlertDialogCancel>
@@ -84,7 +84,7 @@ function IsiDialogVoid({
             onKonfirmasi(alasan);
           }}
           disabled={memproses}
-          className="cursor-pointer bg-[#D4A373] text-[#0A2947] hover:bg-[#D4A373]/90 font-bold w-full sm:w-auto"
+          className="cursor-pointer bg-karamel text-navy hover:bg-karamel/90 font-bold w-full sm:w-auto"
         >
           {memproses ? "Memproses..." : "Ya, Void Penjualan"}
         </AlertDialogAction>

@@ -68,9 +68,9 @@ export function DialogBatalTransfer({
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2">
-          <label htmlFor="alasan-batal-transfer" className="text-sm font-bold text-[#0A2947]">
+          <label htmlFor="alasan-batal-transfer" className="text-sm font-bold text-navy">
             Alasan pembatalan{" "}
-            <span className="text-[#0A2947]/50 font-medium">(Opsional)</span>
+            <span className="text-navy/50 font-medium">(Opsional)</span>
           </label>
           <Input
             id="alasan-batal-transfer"

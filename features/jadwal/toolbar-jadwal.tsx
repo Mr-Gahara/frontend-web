@@ -31,10 +31,10 @@ export function JadwalToolbar({
       {/* HEADER & BUTTONS */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#041E3F]">
+          <h1 className="text-2xl font-bold tracking-tight text-navy">
             Jadwal Shift {tipeRuang === "outlet" ? "Outlet" : "Gudang"}
           </h1>
-          <p className="text-sm text-[#041E3F]/60 font-medium">
+          <p className="text-sm text-navy/60 font-medium">
             Kelola dan pantau jadwal kerja karyawan bulanan.
           </p>
         </div>
@@ -43,13 +43,13 @@ export function JadwalToolbar({
           <Button
             variant="outline"
             onClick={onAddManual}
-            className="h-11 border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent font-bold rounded-xl"
+            className="h-11 border-navy/20 text-navy hover:bg-navy/5 bg-transparent font-bold rounded-xl"
           >
             <Plus className="mr-2 h-4 w-4" /> Tambah Manual
           </Button>
           <Button
             onClick={onAutoGenerate}
-            className="h-11 bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
+            className="h-11 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
           >
             <Wand2 className="mr-2 h-4 w-4" /> Auto-Generate
           </Button>
@@ -59,24 +59,24 @@ export function JadwalToolbar({
       {/* FILTER & NAVIGASI WAKTU */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="relative w-full md:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#041E3F]/40" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
           <Input
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Cari nama karyawan..."
             aria-label="Cari nama karyawan"
-            className="pl-9 h-11 bg-[#FFFAF3] border-[#041E3F]/15 text-[#041E3F] focus-visible:ring-[#041E3F]/50 rounded-xl font-medium"
+            className="pl-9 h-11 bg-gading border-navy/15 text-navy focus-visible:ring-navy/50 rounded-xl font-medium"
           />
         </div>
 
-        <div className="flex items-center gap-2 bg-[#FFFAF3] border border-[#041E3F]/15 rounded-xl p-1 shadow-sm">
-          <Button variant="ghost" size="icon" onClick={onPrevMonth} aria-label="Bulan sebelumnya" className="h-9 w-9 rounded-lg text-[#041E3F] hover:bg-[#041E3F]/10">
+        <div className="flex items-center gap-2 bg-gading border border-navy/15 rounded-xl p-1 shadow-sm">
+          <Button variant="ghost" size="icon" onClick={onPrevMonth} aria-label="Bulan sebelumnya" className="h-9 w-9 rounded-lg text-navy hover:bg-navy/10">
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <div className="flex items-center font-bold text-[#041E3F] px-4 min-w-35 justify-center">
+          <div className="flex items-center font-bold text-navy px-4 min-w-35 justify-center">
             {currentDate.toLocaleString("id-ID", { month: "long", year: "numeric" })}
           </div>
-          <Button variant="ghost" size="icon" onClick={onNextMonth} aria-label="Bulan berikutnya" className="h-9 w-9 rounded-lg text-[#041E3F] hover:bg-[#041E3F]/10">
+          <Button variant="ghost" size="icon" onClick={onNextMonth} aria-label="Bulan berikutnya" className="h-9 w-9 rounded-lg text-navy hover:bg-navy/10">
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>

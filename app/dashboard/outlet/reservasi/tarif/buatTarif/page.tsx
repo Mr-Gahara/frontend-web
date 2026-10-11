@@ -29,7 +29,7 @@ import {
 const COLORS = {
   navy: "#0A2947",
   cream: "#FFFAF3",
-  darkCream: "#F2EAE1",
+  darkCream: "#E0D2C2",
   gold: "#D4A373",
   sage: "#718355",
   rose: "#F43F5E",
@@ -90,7 +90,7 @@ export default function BuatTarifPage() {
             variant="ghost"
             size="icon"
             onClick={() => router.push("/dashboard/outlet/reservasi/tarif")}
-            className="rounded-full transition-colors hover:bg-[#F2EAE1]"
+            className="rounded-full transition-colors hover:bg-krem"
             style={{ color: COLORS.navy }}
           >
             <ArrowLeft className="w-5 h-5" />
@@ -205,7 +205,7 @@ export default function BuatTarifPage() {
                     <Checkbox
                       checked={field.value}
                       onCheckedChange={(val) => field.onChange(val === true)}
-                      className="data-[state=checked]:bg-[#718355] data-[state=checked]:border-[#718355] data-[state=checked]:text-[#FFFAF3]"
+                      className="data-[state=checked]:bg-sage data-[state=checked]:border-sage data-[state=checked]:text-gading"
                     />
                   )}
                 />
@@ -391,7 +391,7 @@ export default function BuatTarifPage() {
                                     );
                                   }
                                 }}
-                                className="data-[state=checked]:bg-[#0A2947] data-[state=checked]:border-[#0A2947] data-[state=checked]:text-[#FFFAF3]"
+                                className="data-[state=checked]:bg-navy data-[state=checked]:border-navy data-[state=checked]:text-gading"
                               />
                               <span
                                 className="text-sm font-semibold"
@@ -552,7 +552,7 @@ export default function BuatTarifPage() {
                                     );
                                   }
                                 }}
-                                className="mt-0.5 data-[state=checked]:bg-[#0A2947] data-[state=checked]:border-[#0A2947] data-[state=checked]:text-[#FFFAF3]"
+                                className="mt-0.5 data-[state=checked]:bg-navy data-[state=checked]:border-navy data-[state=checked]:text-gading"
                               />
                               <div className="flex flex-col">
                                 <span

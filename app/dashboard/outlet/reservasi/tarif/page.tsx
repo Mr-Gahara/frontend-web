@@ -34,7 +34,7 @@ import { formatRupiah } from "@/lib/format";
 const COLORS = {
   navy: "#0A2947",
   cream: "#FFFAF3",
-  darkCream: "#F2EAE1",
+  darkCream: "#E0D2C2",
   gold: "#D4A373",
   sage: "#718355",
   rose: "#F43F5E",
@@ -216,7 +216,7 @@ export default function DaftarTarifPage() {
                 filteredList.map((item) => (
                   <tr
                     key={item.id}
-                    className="transition-colors hover:bg-[#F2EAE1]"
+                    className="transition-colors hover:bg-krem"
                   >
                     {/* NAMA TARIF & STATUS */}
                     <td className="px-6 py-4">
@@ -361,7 +361,7 @@ export default function DaftarTarifPage() {
                               `/dashboard/outlet/reservasi/tarif/${item.id}/edit`,
                             )
                           }
-                          className="h-8 px-3 transition-colors hover:bg-[#F2EAE1] hover:text-[#0A2947] font-bold"
+                          className="h-8 px-3 transition-colors hover:bg-krem hover:text-navy font-bold"
                           style={{ color: `${COLORS.navy}80` }}
                         >
                           <Edit className="w-4 h-4 mr-2" /> Edit

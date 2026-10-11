@@ -27,10 +27,10 @@ export default function DashboardLayout({
 
   return (
     <TooltipProvider>
-      <SidebarProvider className="bg-[#041E3F]">
+      <SidebarProvider className="bg-navy">
         <AppSidebar />
         <div className="flex flex-1 flex-col p-3 pr-4 md:p-4 md:pr-6 overflow-hidden h-screen bg-transparent">
-          <main className="flex flex-1 flex-col min-w-0 bg-[#FFFAF3] rounded-[2rem] overflow-hidden shadow-xl relative">
+          <main className="flex flex-1 flex-col min-w-0 bg-gading rounded-[2rem] overflow-hidden shadow-xl relative">
             <Topbar />
             <div className="flex-1 overflow-y-auto p-6 md:p-8">
               <GerbangRute>{children}</GerbangRute>

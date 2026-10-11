@@ -32,11 +32,11 @@ import type { Diskon } from "@/types/diskon";
 import type { NilaiFormDiskon } from "./schema";
 import { ringkasAturan } from "./tampilan";
 
-const KELAS_LABEL = "text-sm font-bold text-[#041E3F]";
-const KELAS_KETERANGAN = "text-xs font-medium text-[#041E3F]/60";
+const KELAS_LABEL = "text-sm font-bold text-navy";
+const KELAS_KETERANGAN = "text-xs font-medium text-navy/60";
 const KELAS_INPUT =
-  "bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50 font-medium h-12 rounded-xl px-4";
-const KELAS_HAPUS = "text-xs font-semibold text-[#041E3F]/60 underline hover:text-[#041E3F] cursor-pointer";
+  "bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-medium h-12 rounded-xl px-4";
+const KELAS_HAPUS = "text-xs font-semibold text-navy/60 underline hover:text-navy cursor-pointer";
 
 /** Urutan tampil Senin sampai Minggu; nilainya mengikuti backend (0 Minggu). */
 const HARI = [
@@ -99,7 +99,7 @@ function PilihanProduk({
         aria-label="Cari produk"
         className={KELAS_INPUT}
       />
-      <div className="max-h-44 overflow-y-auto rounded-xl border border-[#041E3F]/15 bg-[#FFFAF3] p-3 space-y-2">
+      <div className="max-h-44 overflow-y-auto rounded-xl border border-navy/15 bg-gading p-3 space-y-2">
         {produk.isLoading && <p className={KELAS_KETERANGAN}>Memuat produk...</p>}
         {!produk.isLoading && daftar.length === 0 && (
           <p className={KELAS_KETERANGAN}>Tidak ada produk yang cocok.</p>
@@ -117,7 +117,7 @@ function PilihanProduk({
             />
             <label
               htmlFor={`diskon-produk-${p.id}`}
-              className="text-sm font-medium text-[#041E3F] cursor-pointer"
+              className="text-sm font-medium text-navy cursor-pointer"
             >
               {p.namaProduk}
             </label>
@@ -166,7 +166,7 @@ export function IsianAturanDiskon({ register, control, errors, diskon }: Props) 
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className="flex w-full items-center justify-between rounded-xl border border-[#041E3F]/15 bg-[#FFFAF3] px-4 py-3 text-sm font-bold text-[#041E3F] cursor-pointer"
+          className="flex w-full items-center justify-between rounded-xl border border-navy/15 bg-gading px-4 py-3 text-sm font-bold text-navy cursor-pointer"
         >
           Aturan tambahan
           <ChevronDown className={`h-4 w-4 transition-transform ${terbuka ? "rotate-180" : ""}`} />
@@ -280,7 +280,7 @@ export function IsianAturanDiskon({ register, control, errors, diskon }: Props) 
                     />
                     <label
                       htmlFor={`diskon-hari-${hari.nilai}`}
-                      className="text-sm font-medium text-[#041E3F] cursor-pointer"
+                      className="text-sm font-medium text-navy cursor-pointer"
                     >
                       {hari.label}
                     </label>
@@ -361,7 +361,7 @@ export function IsianAturanDiskon({ register, control, errors, diskon }: Props) 
                 />
                 <label
                   htmlFor="diskon-per-barang"
-                  className="text-sm font-medium text-[#041E3F] cursor-pointer"
+                  className="text-sm font-medium text-navy cursor-pointer"
                 >
                   Hitung per barang
                   <span className={`block ${KELAS_KETERANGAN}`}>

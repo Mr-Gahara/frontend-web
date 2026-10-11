@@ -63,10 +63,10 @@ export function KartuFasilitas({
   const galatItem = errors.items?.[index];
 
   return (
-    <div className="rounded-xl border border-[#0A2947]/10 p-4 sm:p-5 bg-white shadow-sm flex flex-col gap-5">
+    <div className="rounded-xl border border-navy/10 p-4 sm:p-5 bg-white shadow-sm flex flex-col gap-5">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#0A2947]/5 pb-3">
-        <span className="text-xs font-bold px-2.5 py-1 bg-[#0A2947]/5 text-[#0A2947]/80 rounded-md">
+      <div className="flex items-center justify-between border-b border-navy/5 pb-3">
+        <span className="text-xs font-bold px-2.5 py-1 bg-navy/5 text-navy/80 rounded-md">
           Fasilitas #{nomor}
         </span>
         {bisaDihapus && (
@@ -83,8 +83,8 @@ export function KartuFasilitas({
 
       {/* Pilih Aset */}
       <div className="space-y-2">
-        <label className="text-xs font-bold text-[#0A2947] flex items-center gap-1.5">
-          <Box className="w-3.5 h-3.5 text-[#D4A373]" /> Pilih Aset / Meja / Ruangan
+        <label className="text-xs font-bold text-navy flex items-center gap-1.5">
+          <Box className="w-3.5 h-3.5 text-karamel" /> Pilih Aset / Meja / Ruangan
         </label>
         <Controller
           name={`items.${index}.dataAset`}
@@ -93,17 +93,17 @@ export function KartuFasilitas({
             <Select onValueChange={f.onChange} value={f.value || undefined} disabled={memuatAset}>
               <SelectTrigger
                 className={cn(
-                  "w-full bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947] font-bold h-11",
+                  "w-full bg-gading border-navy/20 text-navy font-bold h-11",
                   galatItem?.dataAset && "border-rose-500",
                 )}
               >
                 <SelectValue placeholder={memuatAset ? "Memuat aset..." : "Pilih aset yang tersedia"} />
               </SelectTrigger>
-              <SelectContent className="bg-[#FFFAF3] border-[#0A2947]/10 text-[#0A2947]">
+              <SelectContent className="bg-gading border-navy/10 text-navy">
                 {asetList.map((aset) => (
-                  <SelectItem key={aset.id} value={aset.id} className="cursor-pointer font-bold hover:bg-[#0A2947]/5">
+                  <SelectItem key={aset.id} value={aset.id} className="cursor-pointer font-bold hover:bg-navy/5">
                     {aset.namaAset}{" "}
-                    <span className="text-xs font-medium text-[#0A2947]/50 ml-1">
+                    <span className="text-xs font-medium text-navy/50 ml-1">
                       ({aset.dataAset?.namaTipeAset ?? "Tipe Umum"})
                     </span>
                   </SelectItem>
@@ -122,9 +122,9 @@ export function KartuFasilitas({
         <div className="space-y-2">
           <label
             htmlFor={`tanggal-fasilitas-${nomor}`}
-            className="text-xs font-bold text-[#0A2947] flex items-center gap-1.5"
+            className="text-xs font-bold text-navy flex items-center gap-1.5"
           >
-            <CalendarIcon className="w-3.5 h-3.5 text-[#D4A373]" /> Tanggal
+            <CalendarIcon className="w-3.5 h-3.5 text-karamel" /> Tanggal
           </label>
           <PilihTanggal
             id={`tanggal-fasilitas-${nomor}`}
@@ -138,9 +138,9 @@ export function KartuFasilitas({
         <div className="space-y-2">
           <label
             htmlFor={`jam-fasilitas-${nomor}`}
-            className="text-xs font-bold text-[#0A2947] flex items-center gap-1.5"
+            className="text-xs font-bold text-navy flex items-center gap-1.5"
           >
-            <Clock className="w-3.5 h-3.5 text-[#718355]" /> Jam Mulai
+            <Clock className="w-3.5 h-3.5 text-sage" /> Jam Mulai
           </label>
           <InputWaktu
             id={`jam-fasilitas-${nomor}`}
@@ -155,8 +155,8 @@ export function KartuFasilitas({
 
       {/* PILIH DURASI */}
       <div className="space-y-2">
-        <label className="text-xs font-bold text-[#0A2947] flex items-center gap-1.5">
-          <Timer className="w-3.5 h-3.5 text-[#D4A373]" /> Durasi Sewa
+        <label className="text-xs font-bold text-navy flex items-center gap-1.5">
+          <Timer className="w-3.5 h-3.5 text-karamel" /> Durasi Sewa
         </label>
         <div className="flex flex-wrap gap-2">
           {DURASI_PILIHAN.map((d) => (
@@ -167,8 +167,8 @@ export function KartuFasilitas({
               className={cn(
                 "h-10 px-4 rounded-lg text-sm font-bold border transition-all cursor-pointer",
                 waktu.durasi === d
-                  ? "bg-[#0A2947] text-[#FFFAF3] border-[#0A2947] shadow-sm"
-                  : "bg-[#FFFAF3] text-[#0A2947]/70 border-[#0A2947]/20 hover:border-[#0A2947]/50 hover:text-[#0A2947]",
+                  ? "bg-navy text-gading border-navy shadow-sm"
+                  : "bg-gading text-navy/70 border-navy/20 hover:border-navy/50 hover:text-navy",
               )}
             >
               {d} jam
@@ -178,26 +178,26 @@ export function KartuFasilitas({
       </div>
 
       {/* DISKON ITEM */}
-      <div className="space-y-2 pt-2 border-t border-[#0A2947]/5 mt-2">
+      <div className="space-y-2 pt-2 border-t border-navy/5 mt-2">
         <div className="flex justify-between items-center">
-          <label className="text-xs font-bold flex items-center gap-1.5 text-[#0A2947]">
-            <Tag className="h-3.5 w-3.5 text-[#D4A373]" /> Tambah Diskon (Opsional)
+          <label className="text-xs font-bold flex items-center gap-1.5 text-navy">
+            <Tag className="h-3.5 w-3.5 text-karamel" /> Tambah Diskon (Opsional)
           </label>
           <Popover open={bukaDiskon} onOpenChange={setBukaDiskon}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 text-xs cursor-pointer font-bold border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5"
+                className="h-7 text-xs cursor-pointer font-bold border-navy/20 text-navy hover:bg-navy/5"
               >
                 Pilih Diskon
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-64 p-0 border-[#0A2947]/10">
-              <Command className="bg-[#FFFAF3]">
-                <CommandInput placeholder="Cari diskon fasilitas..." className="text-[#0A2947]" />
+            <PopoverContent align="end" className="w-64 p-0 border-navy/10">
+              <Command className="bg-gading">
+                <CommandInput placeholder="Cari diskon fasilitas..." className="text-navy" />
                 <CommandList>
-                  <CommandEmpty className="py-4 text-center text-xs font-medium text-[#0A2947]/60">
+                  <CommandEmpty className="py-4 text-center text-xs font-medium text-navy/60">
                     Belum ada diskon aktif.
                   </CommandEmpty>
                   <CommandGroup>
@@ -207,16 +207,16 @@ export function KartuFasilitas({
                         <CommandItem
                           key={d.id}
                           onSelect={() => onPilihDiskon(d.id)}
-                          className="cursor-pointer text-[#0A2947] hover:bg-[#0A2947]/5 font-medium"
+                          className="cursor-pointer text-navy hover:bg-navy/5 font-medium"
                         >
                           <div className="flex flex-1 items-center gap-2">
                             <div
                               className={cn(
                                 "flex h-4 w-4 items-center justify-center rounded-sm border",
-                                terpilih ? "bg-[#0A2947] border-[#0A2947]" : "border-[#0A2947]/30",
+                                terpilih ? "bg-navy border-navy" : "border-navy/30",
                               )}
                             >
-                              {terpilih && <Check className="h-3 w-3 text-[#FFFAF3]" />}
+                              {terpilih && <Check className="h-3 w-3 text-gading" />}
                             </div>
                             <span className="flex flex-col"><span>{d.namaDiskon}</span><SyaratDiskon diskon={d} /></span>
                           </div>
@@ -238,7 +238,7 @@ export function KartuFasilitas({
               return (
                 <div
                   key={d.id}
-                  className="px-2 py-1 rounded-md bg-[#D4A373] text-[#0A2947] text-[10px] font-bold shadow-sm"
+                  className="px-2 py-1 rounded-md bg-karamel text-navy text-[10px] font-bold shadow-sm"
                 >
                   {d.namaDiskon} ({d.tipe === "persen" ? `${d.nilai}%` : `Rp ${d.nilai.toLocaleString("id-ID")}`})
                 </div>
@@ -295,17 +295,17 @@ export function KartuFasilitas({
       <div
         className={cn(
           "flex items-center gap-3 rounded-xl border px-4 py-3 transition-colors",
-          bentrok ? "bg-rose-50/50 border-rose-200/50 opacity-80" : "bg-[#0A2947]/5 border-[#0A2947]/10",
+          bentrok ? "bg-rose-50/50 border-rose-200/50 opacity-80" : "bg-navy/5 border-navy/10",
         )}
       >
-        <Clock className={cn("w-4 h-4 shrink-0", bentrok ? "text-rose-400" : "text-[#D4A373]")} />
-        <div className="flex flex-wrap items-center gap-2 text-sm font-bold text-[#0A2947]">
+        <Clock className={cn("w-4 h-4 shrink-0", bentrok ? "text-rose-400" : "text-karamel")} />
+        <div className="flex flex-wrap items-center gap-2 text-sm font-bold text-navy">
           <span className="font-mono">{teksRentang(rentang?.mulai ?? waktu.tanggal, rentang?.mulai ?? null)}</span>
-          <span className="text-[#0A2947]/40 font-normal">→</span>
+          <span className="text-navy/40 font-normal">→</span>
           <span className="font-mono">
             {teksRentang(rentang?.selesai ?? waktu.tanggal, rentang?.selesai ?? null)}
           </span>
-          <span className="px-2 py-0.5 rounded-md bg-[#718355]/15 text-[#718355] text-xs">{waktu.durasi} jam</span>
+          <span className="px-2 py-0.5 rounded-md bg-sage/15 text-sage text-xs">{waktu.durasi} jam</span>
         </div>
       </div>
 

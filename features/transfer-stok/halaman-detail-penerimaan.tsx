@@ -65,10 +65,10 @@ export default function HalamanDetailPenerimaan({ id }: { id: string }) {
   if (isLoading || !isFetchedAfterMount) {
     return (
       <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-5xl mx-auto">
-        <Skeleton className="h-8 w-64 bg-[#0A2947]/10" />
+        <Skeleton className="h-8 w-64 bg-navy/10" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Skeleton className="h-96 w-full lg:col-span-2 bg-[#0A2947]/10 rounded-2xl" />
-          <Skeleton className="h-72 w-full lg:col-span-1 bg-[#0A2947]/10 rounded-2xl" />
+          <Skeleton className="h-96 w-full lg:col-span-2 bg-navy/10 rounded-2xl" />
+          <Skeleton className="h-72 w-full lg:col-span-1 bg-navy/10 rounded-2xl" />
         </div>
       </div>
     );
@@ -78,7 +78,7 @@ export default function HalamanDetailPenerimaan({ id }: { id: string }) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <AlertTriangle className="w-12 h-12 text-rose-500/50" />
-        <h2 className="text-xl font-bold text-[#0A2947]">
+        <h2 className="text-xl font-bold text-navy">
           Surat Jalan Tidak Ditemukan
         </h2>
         <Button
@@ -99,17 +99,17 @@ export default function HalamanDetailPenerimaan({ id }: { id: string }) {
         <div className="p-4 bg-blue-50 rounded-full border border-blue-100">
           <ClipboardCheck className="w-12 h-12 text-blue-600" />
         </div>
-        <h2 className="text-xl font-bold text-[#0A2947]">
+        <h2 className="text-xl font-bold text-navy">
           Pengiriman Sudah Selesai
         </h2>
-        <p className="text-sm font-medium text-[#0A2947]/60">
+        <p className="text-sm font-medium text-navy/60">
           Surat Jalan ini berstatus{" "}
-          <strong className="text-[#0A2947]">{detail.status}</strong> dan barang
+          <strong className="text-navy">{detail.status}</strong> dan barang
           sudah dieksekusi masuk ke dalam stok kasir Anda.
         </p>
         <Button
           variant="default"
-          className="bg-[#0A2947] cursor-pointer mt-4"
+          className="bg-navy cursor-pointer mt-4"
           onClick={() =>
             router.push("/dashboard/outlet/inventaris/penerimaanBarang")
           }
@@ -199,17 +199,17 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
         <Button
           variant="ghost"
           size="sm"
-          className="w-fit cursor-pointer px-0 text-[#0A2947]/60 hover:bg-transparent hover:text-[#0A2947] font-semibold transition-colors"
+          className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
           onClick={() => router.back()}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Batal & Kembali
         </Button>
         <div className="space-y-1">
-          <h1 className="text-3xl font-black font-mono tracking-tight text-[#0A2947]">
+          <h1 className="text-3xl font-black font-mono tracking-tight text-navy">
             {detail.nomorTransfer}
           </h1>
-          <p className="text-sm font-medium text-[#0A2947]/60 flex items-center gap-2">
+          <p className="text-sm font-medium text-navy/60 flex items-center gap-2">
             <Truck className="w-4 h-4 text-emerald-600" />
             Pengiriman Logistik dari {detail.dariLokasi?.nama || "Pusat"}
           </p>
@@ -219,13 +219,13 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* KOLOM KIRI: DAFTAR PERIKSA FISIK (CHECKLIST) */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-white shadow-sm overflow-hidden flex flex-col">
-            <div className="bg-[#F2EAE1] px-6 py-4 border-b border-[#0A2947]/10 flex flex-col gap-1">
-              <h2 className="font-bold text-[#0A2947] flex items-center gap-2">
+          <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden flex flex-col">
+            <div className="bg-krem px-6 py-4 border-b border-navy/10 flex flex-col gap-1">
+              <h2 className="font-bold text-navy flex items-center gap-2">
                 <PackageCheck className="w-5 h-5 text-emerald-700" />
                 Daftar Periksa Fisik Barang
               </h2>
-              <p className="text-[11px] font-medium text-[#0A2947]/60 pl-7">
+              <p className="text-[11px] font-medium text-navy/60 pl-7">
                 Hitung fisik barang dan sesuaikan jumlah yang diterima. Jika ada
                 selisih, wajib mengisi alasan.
               </p>
@@ -237,7 +237,7 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
                 return (
                   <div
                     key={item.kunci}
-                    className="flex flex-col gap-3 p-4 rounded-xl border border-[#0A2947]/10 bg-[#FFFAF3] shadow-sm relative overflow-hidden transition-all"
+                    className="flex flex-col gap-3 p-4 rounded-xl border border-navy/10 bg-gading shadow-sm relative overflow-hidden transition-all"
                   >
                     {/* Indikator Selisih */}
                     {isSelisih && (
@@ -247,16 +247,16 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       {/* Info Barang */}
                       <div className="flex-1">
-                        <span className="text-[10px] font-bold text-[#0A2947]/40 uppercase tracking-wider block mb-0.5">
+                        <span className="text-[10px] font-bold text-navy/40 uppercase tracking-wider block mb-0.5">
                           Item #{index + 1}
                         </span>
-                        <h3 className="font-bold text-[#0A2947] text-base leading-tight">
+                        <h3 className="font-bold text-navy text-base leading-tight">
                           {item.bahanBaku?.namaBahan ||
                             "Master Data Terhapus"}
                         </h3>
-                        <p className="text-xs font-medium text-[#0A2947]/50 mt-1">
+                        <p className="text-xs font-medium text-navy/50 mt-1">
                           Dikirim Gudang:{" "}
-                          <strong className="text-[#0A2947]">
+                          <strong className="text-navy">
                             {item.qtyKirim} {item.bahanBaku?.satuan}
                           </strong>
                         </p>
@@ -289,7 +289,7 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
                                   : "border-emerald-200 bg-emerald-50 text-emerald-700 focus-visible:ring-emerald-600",
                               )}
                             />
-                            <span className="text-sm font-bold text-[#0A2947]/50 shrink-0 w-8">
+                            <span className="text-sm font-bold text-navy/50 shrink-0 w-8">
                               {item.bahanBaku?.satuan}
                             </span>
                           </div>
@@ -313,7 +313,7 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
                             handleNoteChange(item.kunci, e.target.value)
                           }
                           className={cn(
-                            "bg-white border-rose-200 text-[#0A2947] h-10 placeholder:text-rose-300",
+                            "bg-white border-rose-200 text-navy h-10 placeholder:text-rose-300",
                             item.catatanItem.trim() === ""
                               ? "focus-visible:ring-rose-500 ring-1 ring-rose-300"
                               : "focus-visible:ring-emerald-500",
@@ -336,42 +336,42 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
 
         {/* KOLOM KANAN: RINGKASAN & EKSEKUSI */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="rounded-2xl border border-[#0A2947]/10 bg-white p-6 shadow-sm space-y-5">
-            <h2 className="font-bold text-[#0A2947] flex items-center gap-2 border-b border-[#0A2947]/10 pb-3">
-              <MapPin className="w-4 h-4 text-[#D4A373]" /> Info Logistik
+          <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-5">
+            <h2 className="font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
+              <MapPin className="w-4 h-4 text-karamel" /> Info Logistik
             </h2>
 
             <div className="space-y-3 pt-1">
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#0A2947]/50 uppercase">
+                <span className="text-[10px] font-bold text-navy/50 uppercase">
                   Asal Barang
                 </span>
-                <span className="font-bold text-[#0A2947]">
+                <span className="font-bold text-navy">
                   {detail.dariLokasi?.nama || "-"}
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#0A2947]/50 uppercase">
+                <span className="text-[10px] font-bold text-navy/50 uppercase">
                   Tujuan
                 </span>
-                <span className="font-bold text-[#0A2947]">
+                <span className="font-bold text-navy">
                   {detail.keLokasi?.nama || "-"}
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#0A2947]/50 uppercase">
+                <span className="text-[10px] font-bold text-navy/50 uppercase">
                   Waktu Berangkat
                 </span>
-                <span className="font-bold text-[#0A2947] flex items-center gap-1.5">
+                <span className="font-bold text-navy flex items-center gap-1.5">
                   <CalendarClock className="w-3.5 h-3.5" />{" "}
                   {formatTanggal(detail.tanggalKirim)}
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-[#0A2947]/50 uppercase">
+                <span className="text-[10px] font-bold text-navy/50 uppercase">
                   PIC Pengirim
                 </span>
-                <span className="font-bold text-[#0A2947] capitalize">
+                <span className="font-bold text-navy capitalize">
                   {detail.pengirim?.nama || "-"}
                 </span>
               </div>
@@ -417,14 +417,14 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
 
       {/* MODAL KONFIRMASI */}
       <AlertDialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
-        <AlertDialogContent className="bg-[#FFFAF3] border-[#0A2947]/10">
+        <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#0A2947]">
+            <AlertDialogTitle className="text-navy">
               Selesaikan Inbound & Update Stok?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#0A2947]/70 font-medium">
+            <AlertDialogDescription className="text-navy/70 font-medium">
               Sistem akan memproses dokumen Surat Jalan{" "}
-              <strong className="text-[#0A2947]">{detail.nomorTransfer}</strong>{" "}
+              <strong className="text-navy">{detail.nomorTransfer}</strong>{" "}
               dan langsung menambahkan barang ke dalam pembukuan inventaris
               Outlet Anda. Pastikan jumlah fisik sudah benar.
               {hasSelisih && (
@@ -439,7 +439,7 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={terimaMutation.isPending}
-              className="cursor-pointer border-[#0A2947]/20 text-[#0A2947] hover:bg-[#0A2947]/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Batal
             </AlertDialogCancel>
@@ -455,7 +455,7 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
                 terimaMutation.mutate(hasil.payload);
               }}
               disabled={terimaMutation.isPending}
-              className="cursor-pointer bg-emerald-600 text-[#FFFAF3] hover:bg-emerald-700 font-bold border-none"
+              className="cursor-pointer bg-emerald-600 text-gading hover:bg-emerald-700 font-bold border-none"
             >
               {terimaMutation.isPending
                 ? "Mengeksekusi Data..."

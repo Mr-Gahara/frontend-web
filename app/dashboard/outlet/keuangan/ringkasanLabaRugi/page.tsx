@@ -42,8 +42,8 @@ function PeriodeToggle({
       onClick={() => onClick(value)}
       className={`px-1 sm:px-4 py-1.5 text-[10px] min-[375px]:text-xs sm:text-sm font-bold rounded-md transition-colors cursor-pointer w-full flex items-center justify-center text-center overflow-hidden ${
         isActive
-          ? "bg-[#718355] text-[#FFFAF3] shadow-sm"
-          : "text-[#0A2947]/60 hover:text-[#0A2947]"
+          ? "bg-sage text-gading shadow-sm"
+          : "text-navy/60 hover:text-navy"
       }`}
     >
       <span className="truncate w-full">{children}</span>
@@ -91,24 +91,24 @@ export default function RingkasanLabaRugiPage() {
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
       {/* Chart card */}
-      <div className="bg-[#F2EAE2] border border-[#0A2947]/10 rounded-2xl p-5 sm:p-6 text-[#0A2947] shadow-sm flex flex-col w-full gap-6 overflow-hidden">
+      <div className="bg-krem border border-navy/10 rounded-2xl p-5 sm:p-6 text-navy shadow-sm flex flex-col w-full gap-6 overflow-hidden">
         {/* Toolbar chart */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#D4A373] rounded-lg shadow-sm shrink-0">
-              <LineChartIcon className="w-5 h-5 text-[#FFFAF3]" />
+            <div className="p-2 bg-karamel rounded-lg shadow-sm shrink-0">
+              <LineChartIcon className="w-5 h-5 text-gading" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold tracking-wide text-[#0A2947]">
+              <h2 className="text-base sm:text-lg font-bold tracking-wide text-navy">
                 Arus Kas &amp; Laba Bersih
               </h2>
-              <p className="text-xs text-[#0A2947]/70 font-medium">
+              <p className="text-xs text-navy/70 font-medium">
                 {labelPeriode}
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 sm:flex w-full md:w-auto bg-[#675a41]/20 rounded-lg p-1 border border-[#0A2947]/10 shadow-inner gap-0.5 sm:gap-0">
+          <div className="grid grid-cols-3 sm:flex w-full md:w-auto bg-[#675a41]/20 rounded-lg p-1 border border-navy/10 shadow-inner gap-0.5 sm:gap-0">
             <PeriodeToggle active={periode} value="harian" onClick={setPeriode}>
               Harian
             </PeriodeToggle>
@@ -132,11 +132,11 @@ export default function RingkasanLabaRugiPage() {
         {/* LOADING & ERROR STATES */}
         {isLoading ? (
           <div className="flex flex-col gap-4">
-            <Skeleton className="h-10 w-48 bg-[#0A2947]/10 rounded-md" />
-            <Skeleton className="h-64 w-full bg-[#0A2947]/5 rounded-xl" />
+            <Skeleton className="h-10 w-48 bg-navy/10 rounded-md" />
+            <Skeleton className="h-64 w-full bg-navy/5 rounded-xl" />
           </div>
         ) : isError ? (
-          <div className="flex flex-col items-center justify-center py-10 gap-3 text-[#0A2947]/60">
+          <div className="flex flex-col items-center justify-center py-10 gap-3 text-navy/60">
             <AlertTriangle className="w-10 h-10 text-rose-500/50" />
             <p className="font-bold">Gagal memuat data laporan.</p>
           </div>
@@ -144,22 +144,22 @@ export default function RingkasanLabaRugiPage() {
           <>
             {/* Total nilai */}
             <div>
-              <p className="text-2xl sm:text-3xl font-black tracking-tight text-[#0A2947]">
+              <p className="text-2xl sm:text-3xl font-black tracking-tight text-navy">
                 {formatRupiah(totalNilai)}
               </p>
               <div className="flex items-center gap-1 mt-1">
                 <span
                   className={
                     pertumbuhan === null || pertumbuhan === 0
-                      ? "text-xs text-[#0A2947]/60 font-bold"
+                      ? "text-xs text-navy/60 font-bold"
                       : pertumbuhan > 0
-                        ? "text-xs text-[#718355] font-bold"
+                        ? "text-xs text-sage font-bold"
                         : "text-xs text-rose-500 font-bold"
                   }
                 >
                   {persentaseNaikTurun}
                 </span>
-                <span className="text-xs text-[#0A2947]/60 font-medium">
+                <span className="text-xs text-navy/60 font-medium">
                   vs periode sebelumnya
                 </span>
               </div>

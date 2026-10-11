@@ -167,7 +167,7 @@ function IsiFormJadwal({
       {!isEditMode && !penggunaId && (
         <div className="grid grid-cols-1 gap-4">
           <div className="space-y-2">
-            <label htmlFor="karyawan-jadwal" className="text-sm font-bold text-[#041E3F]">
+            <label htmlFor="karyawan-jadwal" className="text-sm font-bold text-navy">
               Pilih Karyawan
             </label>
             <Controller
@@ -177,11 +177,11 @@ function IsiFormJadwal({
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger
                     id="karyawan-jadwal"
-                    className="w-full bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 font-bold h-12 rounded-xl px-4"
+                    className="w-full bg-gading text-navy text-sm border-navy/15 font-bold h-12 rounded-xl px-4"
                   >
                     <SelectValue placeholder="Pilih karyawan..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F] font-medium rounded-xl">
+                  <SelectContent className="bg-krem border-navy/10 text-navy font-medium rounded-xl">
                     {karyawanList.map((k) => (
                       <SelectItem key={k.id} value={k.id} className="cursor-pointer font-bold">
                         {k.nama}
@@ -193,7 +193,7 @@ function IsiFormJadwal({
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="tanggal-jadwal" className="text-sm font-bold text-[#041E3F]">
+            <label htmlFor="tanggal-jadwal" className="text-sm font-bold text-navy">
               Pilih Tanggal
             </label>
             <Controller
@@ -214,7 +214,7 @@ function IsiFormJadwal({
       )}
 
       <div className="space-y-2.5">
-        <span id="label-status-jadwal" className="text-sm font-bold text-[#041E3F]">
+        <span id="label-status-jadwal" className="text-sm font-bold text-navy">
           Status Kehadiran
         </span>
         <div role="group" aria-labelledby="label-status-jadwal" className="grid grid-cols-2 gap-3">
@@ -222,7 +222,7 @@ function IsiFormJadwal({
             type="button"
             aria-pressed={status === "kerja"}
             onClick={() => setValue("status", "kerja")}
-            className={`flex flex-col items-center justify-center py-4 px-2 rounded-xl border transition-all cursor-pointer ${status === "kerja" ? "bg-[#041E3F] border-[#041E3F] text-[#FFFAF3] shadow-md" : "bg-[#FFFAF3] border-[#041E3F]/15 text-[#041E3F] hover:border-[#041E3F]/40"}`}
+            className={`flex flex-col items-center justify-center py-4 px-2 rounded-xl border transition-all cursor-pointer ${status === "kerja" ? "bg-navy border-navy text-gading shadow-md" : "bg-gading border-navy/15 text-navy hover:border-navy/40"}`}
           >
             <Briefcase
               className={`h-6 w-6 mb-2 ${status === "kerja" ? "stroke-[2.5px]" : "stroke-[2px]"}`}
@@ -233,7 +233,7 @@ function IsiFormJadwal({
             type="button"
             aria-pressed={status === "libur"}
             onClick={() => setValue("status", "libur")}
-            className={`flex flex-col items-center justify-center py-4 px-2 rounded-xl border transition-all cursor-pointer ${status === "libur" ? "bg-[#041E3F] border-[#041E3F] text-[#FFFAF3] shadow-md" : "bg-[#FFFAF3] border-[#041E3F]/15 text-[#041E3F] hover:border-[#041E3F]/40"}`}
+            className={`flex flex-col items-center justify-center py-4 px-2 rounded-xl border transition-all cursor-pointer ${status === "libur" ? "bg-navy border-navy text-gading shadow-md" : "bg-gading border-navy/15 text-navy hover:border-navy/40"}`}
           >
             <Coffee
               className={`h-6 w-6 mb-2 ${status === "libur" ? "stroke-[2.5px]" : "stroke-[2px]"}`}
@@ -244,8 +244,8 @@ function IsiFormJadwal({
       </div>
 
       {status === "kerja" && (
-        <div className="space-y-3 p-4 bg-[#041E3F]/3 border border-[#041E3F]/10 rounded-xl">
-          <span className="text-sm font-bold text-[#041E3F]">Pilih Master Shift</span>
+        <div className="space-y-3 p-4 bg-navy/3 border border-navy/10 rounded-xl">
+          <span className="text-sm font-bold text-navy">Pilih Master Shift</span>
           {shiftIds.map((nilai, index) => {
             const nonaktif = nilai !== "" && !shiftAktif.some((s) => s.id === nilai);
             return (
@@ -253,11 +253,11 @@ function IsiFormJadwal({
                 <Select value={nilai} onValueChange={(val) => ubahShift(index, val)}>
                   <SelectTrigger
                     aria-label={`Shift ${index + 1}`}
-                    className="flex-1 bg-[#FFFAF3] text-[#041E3F] text-sm border-[#041E3F]/15 font-bold h-12 rounded-xl px-4"
+                    className="flex-1 bg-gading text-navy text-sm border-navy/15 font-bold h-12 rounded-xl px-4"
                   >
                     <SelectValue placeholder="Pilih shift..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#F2EAE1] border-[#041E3F]/10 text-[#041E3F] font-medium rounded-xl">
+                  <SelectContent className="bg-krem border-navy/10 text-navy font-medium rounded-xl">
                     {shiftAktif.map((s) => (
                       <SelectItem key={s.id} value={s.id} className="cursor-pointer font-bold">
                         {s.namaShift} ({s.jamMasuk} - {s.jamPulang})
@@ -290,7 +290,7 @@ function IsiFormJadwal({
             type="button"
             variant="ghost"
             onClick={tambahBaris}
-            className="w-full mt-1 border border-dashed border-[#041E3F]/20 text-[#041E3F]/70 font-bold h-10 rounded-xl hover:bg-[#041E3F]/5"
+            className="w-full mt-1 border border-dashed border-navy/20 text-navy/70 font-bold h-10 rounded-xl hover:bg-navy/5"
           >
             <Plus className="mr-2 h-4 w-4" /> Tambah Split Shift
           </Button>
@@ -298,9 +298,9 @@ function IsiFormJadwal({
       )}
 
       <div className="space-y-2">
-        <label htmlFor="catatan-jadwal" className="text-sm font-bold text-[#041E3F]">
+        <label htmlFor="catatan-jadwal" className="text-sm font-bold text-navy">
           Catatan Khusus{" "}
-          <span className="text-[#041E3F]/50 font-semibold">
+          <span className="text-navy/50 font-semibold">
             (Opsional)
           </span>
         </label>
@@ -308,7 +308,7 @@ function IsiFormJadwal({
           id="catatan-jadwal"
           {...register("catatan")}
           placeholder="Contoh: Menggantikan shift Andi..."
-          className="bg-[#FFFAF3] border-[#041E3F]/15 font-medium rounded-xl px-4 py-3 resize-none"
+          className="bg-gading border-navy/15 font-medium rounded-xl px-4 py-3 resize-none"
         />
       </div>
 
@@ -337,7 +337,7 @@ function IsiFormJadwal({
             (!isEditMode && !tanggalTerpilih) ||
             (status === "kerja" && !shiftIds[0])
           }
-          className="flex-1 h-14 rounded-xl bg-[#041E3F] text-[#FFFAF3] hover:bg-[#041E3F]/90 text-base font-bold shadow-md"
+          className="flex-1 h-14 rounded-xl bg-navy text-gading hover:bg-navy/90 text-base font-bold shadow-md"
         >
           {isPending
             ? "Memproses..."
@@ -377,17 +377,17 @@ export function FormJadwalDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-125 border-[#041E3F]/10 bg-[#F2EAE1] p-6 sm:p-8 [&>button]:hidden rounded-[1.5rem] shadow-xl">
+      <DialogContent className="sm:max-w-125 border-navy/10 bg-krem p-6 sm:p-8 [&>button]:hidden rounded-[1.5rem] shadow-xl">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#041E3F]/15 bg-[#FFFAF3] text-[#041E3F]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-navy/15 bg-gading text-navy">
               <CalendarPlus className="h-6 w-6" />
             </div>
             <div className="flex flex-col">
-              <DialogTitle className="text-2xl font-bold text-[#041E3F]">
+              <DialogTitle className="text-2xl font-bold text-navy">
                 {isEditMode ? "Ubah Jadwal" : "Kelola Jadwal"}
               </DialogTitle>
-              <DialogDescription className="text-sm font-semibold text-[#041E3F]/60 mt-0.5">
+              <DialogDescription className="text-sm font-semibold text-navy/60 mt-0.5">
                 {isEditMode
                   ? `${namaKaryawan} • ${formatTanggal}`
                   : "Tambahkan jadwal shift baru untuk karyawan."}
@@ -397,7 +397,7 @@ export function FormJadwalDialog({
           <button
             aria-label="Tutup"
             onClick={() => onOpenChange(false)}
-            className="flex items-center justify-center p-2 rounded-md text-[#041E3F] hover:bg-[#041E3F]/10 transition-colors cursor-pointer shrink-0"
+            className="flex items-center justify-center p-2 rounded-md text-navy hover:bg-navy/10 transition-colors cursor-pointer shrink-0"
           >
             <X className="h-6 w-6 stroke-[2.5px]" />
           </button>

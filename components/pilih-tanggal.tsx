@@ -53,16 +53,16 @@ export function PilihTanggal({
           aria-label={`${label}, ${teks}`}
           aria-invalid={invalid || undefined}
           className={cn(
-            "w-full h-12 justify-start text-left font-bold cursor-pointer bg-[#FFFAF3] border-[#0A2947]/20 text-[#0A2947]",
+            "w-full h-12 justify-start text-left font-bold cursor-pointer bg-gading border-navy/20 text-navy",
             invalid && "border-rose-500",
             className,
           )}
         >
-          <CalendarIcon aria-hidden="true" className="mr-2 h-4 w-4 text-[#D4A373]" />
+          <CalendarIcon aria-hidden="true" className="mr-2 h-4 w-4 text-karamel" />
           {teks}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 border-[#0A2947]/10 bg-[#FFFAF3]" align="start">
+      <PopoverContent className="w-auto p-0 border-navy/10 bg-gading" align="start">
         <Calendar
           mode="single"
           selected={value}
