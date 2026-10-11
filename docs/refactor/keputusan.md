@@ -1617,6 +1617,73 @@ sehingga `ridho` cukup di-fast-forward. Labelnya RH.
   `test.fixme` diambil dari respons `DELETE` dan dari daftar yang dibaca
   ulang, bukan dari baris yang tidak ada di tabel.
 
+### Fase UI/UX: dashboard outlet, token warna, dan tabel
+
+Diputuskan pemilik proyek pada 11 Oktober 2026. Rancangannya ditentukan
+pemilik proyek lewat pratinjau yang disetujui sebelum diterapkan. Labelnya
+DB (dashboard outlet), WR (warna), dan TB (tabel).
+
+- **DB1a: Transaksi Hari Ini adalah penjualan PAID hari ini**, dengan
+  jumlah dari `pagination.total` `GET /penjualan`. Batas hari dikirim
+  sebagai waktu ISO utuh (`kontrak/temuan.md` butir 147) (`3812763`,
+  `0c5822b`).
+- **DB2a: kartu laba bersih dan HPP menampilkan angka kemarin, dan
+  pembandingnya hari sebelum kemarin** (`0c5822b`).
+- **DB3a: status staf adalah absensi ditambah sakit, izin, dan cuti** dari
+  `GET /izincuti` yang disetujui dan berlaku hari ini. Kehadiran nyata
+  menang atas izin, dan status alpha ditunda (`3812763`).
+- **DB4a: lonceng notifikasi dipasang nonaktif** dengan keterangan belum
+  tersedia, karena belum ada sumber datanya (`0c5822b`).
+- **DB5a: grafik dashboard memplot omzet (`totalOmzet`) per tanggal bulan
+  berjalan**, dibandingkan periode yang sama bulan lalu. Grafik halaman
+  ringkasan laba rugi tetap memplot laba bersih (`342dcd3`, `0c5822b`).
+- **DB6a: petak venue mengikuti status aset dari `GET /aset`**, dan
+  rinciannya (pelanggan dan sisa waktu) dari booking yang sedang berjalan
+  (`3812763`, `0c5822b`).
+
+Susunan dashboard outlet: empat kartu navy di atas, grafik pendapatan di
+samping petak venue (rasio 3 banding 2), dan tabel status staf selebar
+penuh. Sampai enam aset petaknya besar, lebih dari itu ringkas, dan paling
+banyak sepuluh yang tampil dengan aset terpakai lebih dulu. Di HP kartu
+menjadi 2x2, venue berada di atas grafik, dan daftar staf menampilkan lima
+baris pertama dengan tombol "Tampilkan semua". Izin ditegakkan per panel
+(`features/dashboard-outlet/izin.ts`, keputusan rancangan butir 9): panel
+yang izinnya tidak dipegang tidak dipasang.
+
+- **WR1a: lima warna utama menjadi token**, yaitu `navy` (`#0A2947`),
+  `gading` (`#FFFAF3`), `krem`, `karamel` (`#D4A373`), dan `sage`
+  (`#718355`) (`584a2d8`; keputusan rancangan butir 25).
+- **WR2a: navy kedua `#041E3F` dilebur ke navy utama**, termasuk latar
+  sidebar (`584a2d8`).
+- **WR3a: krem bernilai `#F2EAE2` dan berperan sebagai aksen sekunder**
+  (sorotan baris, lencana netral, panel), bukan isian bidang lebar. Krem
+  yang digelapkan menjadi `#E0D2C2` sempat diterapkan lalu ditolak, karena
+  sebagai isian baris tabel terasa berat dan kusam (`ba28f25`).
+- **WR4a: permukaan berwarna putih di atas latar halaman gading**, lewat
+  token peran `permukaan`; dipakai kartu baris tabel dan isian (`ba28f25`,
+  `cc1092e`).
+
+- **TB1a: tiap baris tabel adalah kartu terpisah**, di desktop maupun HP.
+  Di desktop isinya sejajar dalam kolom; di HP tersusun ke bawah
+  (`93490bb`).
+- **TB2a: kepala kolom tanpa warna latar**, hanya teks (`93490bb`).
+- **TB3a: kontrol kaki tabel polos**, tanpa latar maupun kotak
+  (`93490bb`).
+- **TB4a: cakupannya seluruh tabel**: dasar tabel, tabel daftar yang masih
+  ditulis sendiri, tabel rincian, dan kalender jadwal dengan pratinjau
+  tersendiri.
+- **TB5a: tabel daftar berdiri langsung di atas latar halaman**, tanpa
+  panel pembungkus; kartu barisnya putih, bersudut bulat, dan berbayangan
+  halus. Bingkai putus-putus dan garis kiri berwarna status dicoba dan
+  ditolak (`cc1092e`).
+- **TB6a: tabel tidak digeser ke samping.** Kolom dibatasi ke yang
+  penting, dan rincian lengkap dibuka dari menu titik tiga sebagai dialog
+  di tengah layar. Pada mutasi arus kas, pencatat, saldo, dan tautan
+  penjualan (NZ2a) pindah dari baris tabel ke dialog itu (`f44db05`).
+- **TB7a: semua tabel daftar memakai `DataTable`**, dengan aksi baris di
+  menu titik tiga (`9cd22e1` untuk bahan baku; keputusan rancangan butir
+  26).
+
 ## Keputusan rancangan yang mengikat
 
 1. **Tipe selalu memakai `id`**, tidak pernah `_id`, karena `lib/api/client.ts` menormalkan respons. Pola `id || _id` tidak boleh ditulis lagi.
@@ -1759,6 +1826,21 @@ sehingga `ridho` cukup di-fast-forward. Labelnya RH.
     `formatRupiah`, bukan `Intl.NumberFormat` sendiri; sembilan berkas
     yang masih memformat sendiri dipindah di `006d7f8`
     (pemilik proyek, 4 Oktober 2026, `4c9c4ed`).
+
+25. **Warna utama dipakai lewat token, bukan heksadesimal.** Nilainya ada
+    di `:root` `app/globals.css` (`--navy`, `--gading`, `--krem`,
+    `--karamel`, `--sage`, dan peran `--permukaan`) dan dirujuk
+    `@theme inline` sebagai `--color-*`, sehingga kelasnya `bg-navy`,
+    `text-gading`, `border-karamel/20`, dan seterusnya. Kode baru tidak
+    menulis `[#0A2947]` dan sejenisnya; mengubah satu warna berarti
+    mengubah satu baris (pemilik proyek, 11 Oktober 2026, `584a2d8`,
+    `ba28f25`).
+26. **Tabel daftar memakai `DataTable`, dan tabel lain memakai `Table`
+    dari `components/ui/table.tsx`.** Halaman tidak menulis `<table>`
+    sendiri dan tidak membungkus tabel dengan panel berlatar. Aksi baris
+    berada di menu titik tiga, dan kolom yang tidak muat pindah ke dialog
+    rincian (pemilik proyek, 11 Oktober 2026, `93490bb`, `cc1092e`,
+    `f44db05`, `9cd22e1`; keputusan TB1a sampai TB7a).
 
 ### Penyesuaian backend `fc29433`
 

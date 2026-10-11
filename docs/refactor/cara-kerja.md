@@ -1676,6 +1676,43 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   skrip berhenti bila sasaran tidak tepat satu atau sudah diterapkan
   (dokumen penutup `2dd57aa`).
 
+### Pelajaran dari fase UI/UX (11 Oktober 2026)
+
+- **Rancangan tampilan ditunjukkan sebagai pratinjau sebelum kode
+  ditulis.** Pemilik proyek menilai dari pratinjau, memilih atau
+  mengoreksi, baru kode diterapkan. Setelan kecil sesudahnya (satu angka
+  bayangan, satu kelas) langsung diterapkan dan dinilai dari tangkapan
+  layar. Dashboard outlet melewati tiga pratinjau, dan tabel empat.
+- **Yang diubah pemilik proyek bisa lebih luas dari yang ditanyakan.**
+  Saat ditanya warna kartu baris, yang dimaksud adalah warna krem
+  utamanya di seluruh aplikasi. Bila jawaban menyebut salah satu warna
+  utama, tanyakan apakah yang berubah nilainya atau hanya pemakaiannya.
+- **Hierarki permukaan dibuat lewat terang-gelap, bingkai, dan bayangan;
+  warna dipakai sebagai aksen.** Krem sebagai isian baris tabel yang lebar
+  terasa berat, padahal cocok di bidang kecil (keputusan WR3a).
+- **Penggantian massal memakai skrip bermode tinjau yang berhenti bila
+  hitungannya tidak cocok,** dan cara menghitung di skrip harus sama
+  dengan cara menghitung pembandingnya. Skrip token warna berhenti karena
+  mencari `#FFFAF3` tanpa batas, sedangkan pembandingnya `grep` berpola
+  `\b`; selisih dua ternyata `#FFFAF399`.
+- **Bayangan baris tabel dipasang pada `tr`, bukan pada sel.** Bayangan
+  per sel meninggalkan garis tegak di tiap batas kolom. Jangkauannya harus
+  lebih pendek dari celah antarbaris: bayangan selebar celah terbaca
+  sebagai pita latar, dan pembungkus ber-`overflow-x-auto` memotong
+  tepinya lurus.
+- **Blok penerap yang panjang dipecah per berkas,** masing-masing dengan
+  berkas markanya sendiri. Satu blok sekitar 300 baris tidak dapat
+  ditempel utuh di terminal. Blok yang sudah menjawab OK tidak dijalankan
+  ulang.
+- **Komponen yang hook-nya tidak dapat dimatikan dipasang bersyarat.**
+  Izin per panel dashboard ditegakkan dengan tidak memasang komponennya,
+  karena `useLabaRugi` dan `useDaftarSesiBooking` tidak menerima opsi
+  untuk dimatikan.
+- **Gerbang commit membandingkan waktu berkas dengan laporan e2e.** Blok
+  commit menolak bila ada berkas yang lebih baru daripada laporan
+  (`find -newer`), sehingga perubahan sesudah run tidak ikut ter-commit
+  tanpa diuji.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:

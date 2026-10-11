@@ -46,7 +46,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
 | Menu | Gate saat ini | Endpoint GET di halaman | Permission dibutuhkan | Penilaian |
 |---|---|---|---|---|
-| `/dashboard/outlet` | - | - | - | Data dimuat lewat komponen, periksa manual |
+| `/dashboard/outlet` | - | `/laporan/laba-rugi`, `/penjualan`, `/aset`, `/sesibooking`, `/absensi/monitoring`, `/pengguna`, `/izincuti` | `read-laporan`, `read-penjualan`, `read-booking`, `read-absensi`, `read-pengguna`, `read-izin-cuti`; `/aset` tanpa izin | Rute tanpa syarat di `IZIN_HALAMAN`; izin ditegakkan per panel (`features/dashboard-outlet/izin.ts`, `0c5822b`): panel yang izinnya tidak dipegang tidak dipasang. Status staf menuntut `read-absensi` dan `read-pengguna` sekaligus, dan petak venue selalu tampil |
 | `/dashboard/outlet/reservasi` | `read-booking` | `/aset`, `/sesibooking` | `read-booking` | Sejalan |
 | `/dashboard/outlet/diskon` | - | `/diskon` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/keuangan` | `read-akunkas` | - | - | Tidak ada halaman (grup menu atau rute kosong) |

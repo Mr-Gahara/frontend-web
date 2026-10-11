@@ -96,6 +96,20 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per fase UI/UX 11 Oktober 2026** (commit `9cd22e1`): 653 test
+unit dan integrasi lolos di 79 berkas, bertambah 19: dua belas test
+lapisan data dashboard (`3812763`), serta enam test izin panel dan susunan
+petak dan satu test label tanggal pendek (`0c5822b`). Suite penuh 11
+Oktober 2026 pukul 19.44, atas pohon kerja yang memuat isi `584a2d8` dan
+`93490bb` sebelum keduanya di-commit, menghasilkan 455 lolos, 0 gagal,
+dan 14 skipped: 451 dan 14 dari harapan sebelumnya, ditambah empat
+skenario dashboard outlet. Sesudah itu suite penuh tidak dijalankan
+ulang. Spec terdampak tiap commit lolos (155 lolos dan 3 skipped untuk
+halaman pemakai tabel, 7 lolos untuk mutasi dan tutup akun bersaldo,
+serta 4 lolos dan 1 skipped untuk bahan baku), dan jumlah skenarionya
+tidak berubah, sehingga harapan suite penuh tetap 455 lolos dan 14
+skipped.
+
 **Baseline per penyesuaian backend `ridho` `2dd57aa`** (commit
 `43f09af`): 634 test unit dan integrasi lolos di 77 berkas, bertambah
 tiga (dua test gate stock adjustment di `f61e146`, dan satu test
@@ -853,7 +867,9 @@ satu putaran.
   dipanggil setelah halaman tidak dipakai lagi.
 - Nama pada `getByRole` dicocokkan sebagian. Tombol "Next" milik footer
   `DataTable` bertabrakan dengan tombol lain yang namanya memuat kata itu
-  di mode pengembangan, sehingga dipakai `exact: true` (`e129f9d`).
+  di mode pengembangan, sehingga dipakai `exact: true` (`e129f9d`). Sejak
+  `93490bb` kedua tombol halaman berupa panah ber-`aria-label` "Previous"
+  dan "Next", sehingga selector yang sama tetap berlaku.
 - Kegagalan suite penuh yang pesannya berasal dari backend, misalnya 500
   "Connection operation buffering timed out", dinilai dari pesannya, lalu
   spec itu dijalankan ulang sendiri dengan `--repeat-each 2`. Hasilnya
@@ -1076,7 +1092,9 @@ Urutan debug kegagalan e2e di atas).
   penjualan** (`tests/e2e/penjualan/daftar-penjualan.spec.ts`). Mode
   klien kesembilan tabel lain tidak berubah di `b63cf08`, dan tidak diuji
   ulang khusus. Urutan server (`urutanServer`, `a4304ce`) juga hanya
-  dipakai dan teruji di daftar penjualan.
+  dipakai dan teruji di daftar penjualan. Sejak `93490bb` `DataTable`
+  menampilkan kartu per baris dan susunan kartu di HP; keduanya belum
+  punya test integrasi, dan susunan HP tidak diuji spec mana pun.
 - **Batas 10 metode aktif hanya teruji lewat simulasi** respons daftar
   yang ditandai `// simulasi:`, karena sepuluh metode aktif tidak dapat
   dibuat di data uji tanpa menumpuk metode permanen. Peringatan metode
@@ -1392,7 +1410,8 @@ Urutan debug kegagalan e2e di atas).
   baru memakai `bukaDenganAuth` (`tests/helpers/transfer-uji.ts`), dan spec
   ini dipindah ke pola itu saat disentuh lagi.
 - `tests/e2e/inventaris/bahanBaku/hapus-bahan-baku.spec.ts`: dialog yang harus
-  tetap terbuka saat operasi gagal.
+  tetap terbuka saat operasi gagal. Sejak `9cd22e1` aksi hapus dibuka
+  lewat menu titik tiga di baris, bukan tombol di baris.
 - `tests/e2e/inventaris/penerimaanBarang/terima-penerimaan.spec.ts`: surat
   jalan disiapkan lewat API dari pengajuan yang layak dan ditutup di
   `finally`, token API mengikuti `pin-refresh` halaman, payload terima
@@ -1695,7 +1714,18 @@ Urutan debug kegagalan e2e di atas).
   `tests/e2e/keuangan/mutasi-kas.spec.ts` (`d23844a`): penunggu respons
   dipasang sebelum helper pembuka, karena permintaannya terkirim saat
   halaman dimuat; baris dipilih lewat indeksnya di respons; dan tautan
-  dibuktikan dari `href` lalu dibuka.
+  dibuktikan dari `href` lalu dibuka. Sejak `f44db05` pencatat, saldo, dan
+  tautan diperiksa di dialog rincian yang dibuka lewat menu titik tiga
+  (`bukaRincian`). Label "Penjualan terkait" sengaja berada di luar elemen
+  tautan, agar `toHaveText` tetap membandingkan nomor referensi saja.
+- `tests/e2e/dashboard/dashboard-outlet.spec.ts` (`0c5822b`): spec
+  baca-saja untuk halaman berpanel banyak. Penunggu respons dipasang
+  setelah `goto` ber-`waitUntil: "commit"`, dan permintaan yang serupa
+  dibedakan lewat query-nya (periode dan batas tanggal). Panel dicari
+  lewat `getByRole("region")` dengan nama dari `aria-label`. Skenario
+  lebar HP memakai `setViewportSize` sebelum login, dan menghitung baris
+  yang tampil lewat `getByRole("row")`, yang tidak menghitung baris
+  tersembunyi.
 - Skenario riwayat di `tests/e2e/keuangan/pindah-dana.spec.ts`
   (`8072214`): query filter dibuktikan dari permintaan nyata, sedangkan
   kembali ke kunci yang masih segar (Reset Filter) dibuktikan dari

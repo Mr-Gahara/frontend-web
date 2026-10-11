@@ -97,57 +97,119 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Penyesuaian backend `nizar` `8dc6211` | `4539c85` (gerbang rute), `fe9631f` (pemilih pelanggan), `1bb26c0` (pengosongan kontak), `5b92d14` (spec kembar) | Selesai (keputusan NZ8a sampai NZ10a; Catatan dari penyesuaian backend `nizar` `8dc6211`) |
 | Penyesuaian backend `yoga` `55328f1` | `50e6485` (ubah pajak), `f64b518` (satuan resep) | Selesai (keputusan NZ11a sampai NZ13a; Catatan dari penyesuaian backend `yoga` `55328f1`) |
 | Penyesuaian backend `ridho` `2dd57aa` | `936f073` (fixme jurnal), `26093b0` (idempotensi pembayaran), `a8aec53` (penyetuju uji), `f61e146` (izin stock adjustment), `ed4bfd3` (pajak nonaktif), `43f09af` (fixme hapus bahan baku) | Selesai (keputusan RH1a sampai RH6a; Catatan dari penyesuaian backend `ridho` `2dd57aa`) |
-| Rancangan dan perbaikan UI/UX, layout, dan palet warna | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Dashboard outlet | `342dcd3` (grafik bersama), `3812763` (lapisan data), `0c5822b` (halaman) | Selesai (keputusan DB1a sampai DB6a; Catatan dari fase UI/UX 11 Oktober 2026) |
+| Token warna utama | `584a2d8` (lima warna), `ba28f25` (krem dan permukaan) | Selesai (keputusan WR1a sampai WR4a; Catatan dari fase UI/UX 11 Oktober 2026) |
+| Tabel seragam: dasar tabel, panel pembungkus, mutasi arus kas, bahan baku | `93490bb` (dasar), `cc1092e` (kartu dan panel), `f44db05` (mutasi), `9cd22e1` (bahan baku) | Selesai (keputusan TB1a sampai TB7a; Catatan dari fase UI/UX 11 Oktober 2026) |
+| Tabel seragam: sembilan halaman berikutnya | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per penyesuaian `nizar` (`729c16a`), tidak berubah dari `597a163`:
+Diukur ulang per penyesuaian `nizar` (`729c16a`), tidak berubah dari `597a163`.
+Baris warna diukur ulang per `9cd22e1` (11 Oktober 2026); keempat angka
+lain tidak berubah sampai commit itu:
 
 | Hal | Awal | Per `729c16a` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 0 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), 4 setelah halaman profil, login, dan sidebar (`57a7084`), dan 0 setelah error ESLint warisan (`4f19e77`) |
 | Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna |
 | `useAuthGuard()` berulang di halaman | 49 | 2 | Dihitung di `app/` saja. Yang tersisa `app/dashboard/layout.tsx`, satu-satunya pemanggil, dan berkas hook-nya sendiri; ke-24 pemanggilan berulang di `app/` dan ke-13 di `features/` dibuang di `628f52e` (26 sebelum itu). Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, halaman diskon, dan halaman profil) |
-| Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | - | Ditunda ke tahap desain token tersendiri |
+| Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | 68 (per `9cd22e1`) | Lima warna utama menjadi token di `app/globals.css` (`584a2d8`, `ba28f25`; keputusan WR1a sampai WR4a). Tepat sebelum penggantian terukur 3.764 di `app`, `components`, `features`, dan `lib`. Yang tersisa: warna utama di luar kelas (konstanta palet lokal halaman reservasi dan tarif, serta warna grafik) dan warna lain yang belum punya token |
 | Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.087 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702). Per `9195472` menjadi 4: `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700 (714 baris) karena penjaga ruang (`eb0181f`), dan buat penjualan menjadi 1.087 baris setelah kode mati dibuang (`6b5e1cc`). Per `b887278` form produk menjadi 809 baris (pemeriksaan satuan resep). Per `628f52e` tetap 4; detail stock opname menjadi 712 baris setelah pemanggilan guard dibuang |
 
-Tahap desain token (warna, tipografi, spasi) sengaja ditunda dan tidak
-dicampur dengan refactor arsitektur, agar setiap commit tetap fokus.
+Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
+setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
+11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: rancangan dan perbaikan UI/UX, layout, dan palet warna
+## Pekerjaan berikutnya: tabel seragam di sembilan halaman
 
-Form role selesai di `597a163`. Pekerjaan berikutnya, atas keputusan
-pemilik proyek (6 Oktober 2026), adalah fase rancangan dan perbaikan
-UI/UX, layout, dan palet warna. Seluruh rancangannya ditentukan pemilik
-proyek sendiri: tidak ada usulan desain yang diterapkan tanpa arahannya
-(`keputusan.md`, Form role).
+Fase rancangan dan perbaikan UI/UX berjalan sejak 11 Oktober 2026, dan
+seluruh rancangannya ditentukan pemilik proyek: tidak ada usulan desain
+yang diterapkan tanpa pratinjau yang disetujuinya (`keputusan.md`, Fase
+UI/UX). Dashboard outlet, token warna utama, dasar tabel, dan enam halaman
+tabel sudah selesai (Catatan dari fase UI/UX 11 Oktober 2026).
 
-Pemetaannya belum diambil, dan cakupan serta urutannya menunggu arahan
-pemilik proyek. Yang sudah tercatat menunggu fase ini: tahap 2.7 desain
-token (warna, tipografi, spasi) dan metrik warna heksadesimal hardcoded;
-dashboard gudang dan outlet yang masih placeholder (keputusan GD1a); dan
-layout serta tampilan panel admin (Utang kecil dari modul panel admin).
+Pekerjaan berikutnya, atas arahan pemilik proyek, adalah menyeragamkan
+tabel di sembilan halaman berikut mengikuti keputusan TB1a sampai TB7a:
+
+| Halaman | Berkas |
+|---|---|
+| `/dashboard/outlet/inventaris/stok` | `app/dashboard/outlet/inventaris/stok/page.tsx` |
+| `/dashboard/gudang/inventaris` | `app/dashboard/gudang/inventaris/page.tsx` |
+| `/dashboard/outlet/inventaris/jurnalStok` dan `/dashboard/gudang/jurnalStok` | `features/jurnal-stok/halaman-jurnal-stok.tsx` |
+| `/dashboard/outlet/inventaris/pengajuanStok` dan `/dashboard/gudang/pengajuanStok` | `features/pengajuan-stok/halaman-daftar-pengajuan-stok.tsx` |
+| `/dashboard/gudang/transferStok` | `features/transfer-stok/halaman-daftar-transfer.tsx` |
+| `/dashboard/outlet/shift` dan `/dashboard/gudang/shift` | `features/shift/halaman-shift.tsx` |
+
+Pemetaan halaman ke berkas di atas diturunkan dari nama berkas hasil
+pencarian `<table`, dan belum dibuktikan dari isi tiap rute. Isi halaman
+dan spec-nya belum dibaca.
+
+Cara kerja tiap halaman mengikuti mutasi arus kas (`f44db05`) dan bahan
+baku (`9cd22e1`): halaman dan spec terdampaknya dibaca utuh, kolom yang
+tetap di tabel dan yang pindah ke dialog rincian diusulkan, pemilik proyek
+menyetujui, lalu perubahan diterapkan dan di-commit per halaman atau per
+kelompok modul. Sesudah sembilan halaman ini masih tersisa tabel rincian,
+kalender jadwal, dan butir lain di Utang kecil dari fase UI/UX.
+
 Langkah pertama sesi berikutnya: backend di-`fetch` dan dibandingkan
-dengan acuan (`cara-kerja.md`), lalu arahan pemilik proyek. Perintah di
-bawah memetakan warna yang dipakai sekarang, bila dibutuhkan. Suite e2e
-penuh tidak dijalankan di awal sesi; harapan hitungannya 451 lolos dan
-14 skipped (`pengujian.md`). Backend lokal berada di cabang `ridho`
-`2dd57aa`, hasil fast-forward ke `origin/yoga` pada 11 Oktober 2026 dan
-sudah di-push (`backend.md` bagian Pemilik modul backend). Ketiga
-perubahan `yoga` yang sempat tertunda, B36 sampai B38 (Yoga), sudah
-dinilai dan dimanfaatkan (Catatan dari penyesuaian backend `yoga`
-`55328f1`).
-Perubahan `yoga` dan `nizar` sampai `2dd57aa` sudah dinilai (Catatan dari
-penyesuaian backend `ridho` `2dd57aa`).
+dengan acuan (`cara-kerja.md`), lalu pemetaan di bawah. Suite e2e penuh
+tidak dijalankan di awal sesi; harapan hitungannya 455 lolos dan 14
+skipped (`pengujian.md`). Backend lokal berada di cabang `ridho`
+`2dd57aa`.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline --remotes --not HEAD | head -20
-grep -rhoE '#[0-9A-Fa-f]{6}\b' app components features | tr 'a-f' 'A-F' | sort | uniq -c | sort -rn | head -30
-grep -nE '^\s*--[a-z-]+:' app/globals.css | cut -c1-100 | head -60
+cd ~/Documents/frontend-web
+wc -l app/dashboard/outlet/inventaris/stok/page.tsx app/dashboard/gudang/inventaris/page.tsx features/jurnal-stok/halaman-jurnal-stok.tsx features/pengajuan-stok/halaman-daftar-pengajuan-stok.tsx features/transfer-stok/halaman-daftar-transfer.tsx features/shift/halaman-shift.tsx
+grep -rlE '<table\b' app features components | grep -v 'components/ui/' | sort
 ```
+
+## Catatan dari fase UI/UX 11 Oktober 2026
+
+Dikerjakan pada 11 Oktober 2026 dalam sembilan commit, atas arahan pemilik
+proyek. Setiap rancangan ditunjukkan sebagai pratinjau dan disetujui
+sebelum diterapkan (`cara-kerja.md`, Pelajaran dari fase UI/UX).
+
+| Commit | Isi |
+|---|---|
+| `342dcd3` | Grafik garis halaman ringkasan laba rugi menjadi `GrafikLaporan` di `features/laporan` |
+| `3812763` | Lapisan data dashboard outlet (`features/dashboard-outlet`) dan `features/izin-cuti` |
+| `0c5822b` | Halaman dashboard outlet; lonceng notifikasi di topbar dinonaktifkan |
+| `584a2d8` | Lima warna utama menjadi token di `app/globals.css` |
+| `93490bb` | Dasar tabel menjadi kartu per baris (`components/ui/table.tsx` dan `components/ui/data-table.tsx`) |
+| `ba28f25` | Krem kembali ke `#F2EAE2` dan token peran `permukaan` |
+| `cc1092e` | Kartu baris putih berbayang; panel pembungkus tabel dibuang di sebelas halaman |
+| `f44db05` | Mutasi arus kas: kolom ringkas dan dialog rincian |
+| `9cd22e1` | Daftar bahan baku memakai `DataTable` |
+
+- Keputusan pemilik proyek tercatat di `keputusan.md` (Fase UI/UX): DB1a
+  sampai DB6a untuk dashboard outlet, WR1a sampai WR4a untuk warna, dan
+  TB1a sampai TB7a untuk tabel; ditambah keputusan rancangan butir 25
+  dan 26.
+- Yang dicoba lalu ditolak pemilik proyek: krem yang digelapkan menjadi
+  `#E0D2C2` (masuk di `584a2d8`, dikembalikan di `ba28f25`), kartu baris
+  berwarna krem, bingkai kartu putus-putus, dan garis kiri berwarna
+  status. Dua yang terakhir tidak pernah di-commit.
+- Vitest 653 lolos di 79 berkas, bertambah 19 dari 634: dua belas test
+  lapisan data dashboard, enam test izin panel dan susunan petak, dan
+  satu test label tanggal pendek.
+- Suite e2e penuh dijalankan sekali, atas pohon kerja yang memuat isi
+  `584a2d8` dan `93490bb` sebelum keduanya di-commit: 455 lolos, 0 gagal,
+  dan 14 skipped. Sesudah itu hanya spec terdampak yang dijalankan: 155
+  lolos dan 3 skipped untuk halaman pemakai tabel (`ba28f25`, `cc1092e`),
+  7 lolos untuk mutasi dan tutup akun bersaldo (`f44db05`), serta 4 lolos
+  dan 1 skipped untuk bahan baku (`9cd22e1`).
+- Dua skenario `mutasi-kas.spec.ts` dan tiga langkah di dua spec bahan
+  baku diubah mengikuti perilaku baru yang diputuskan pemilik proyek:
+  rincian dan aksi dibuka lewat menu titik tiga. Asersi sesudahnya tetap.
+- Dokumentasi kesembilan commit ditulis sekaligus di commit penutup, atas
+  keputusan pemilik proyek menundanya sampai pekerjaan tabel hari itu
+  selesai.
+- Dua temuan backend dicatat dan belum diserahkan (`kontrak/temuan.md`
+  butir 146 dan 147).
 
 ## Catatan dari penyesuaian backend `ridho` `2dd57aa`
 
@@ -1260,6 +1322,38 @@ Yang masih berlaku:
 
 ## Utang kecil yang tertunda
 
+### Utang kecil dari fase UI/UX 11 Oktober 2026
+
+- `DataTable` belum punya test integrasi. Teks kaki, nama tombol halaman,
+  dan label sel di HP hanya terbukti lewat spec e2e halaman pemakainya.
+- Label sel di HP hanya tampil bila kolom punya `meta.label` atau `header`
+  berupa teks. Sebagian besar halaman menulis `header` sebagai komponen,
+  sehingga kartu baris di HP menampilkan nilai tanpa label. Dilengkapi
+  saat tiap halaman dirapikan.
+- 19 berkas masih memakai `<table>` yang ditulis sendiri: sembilan halaman
+  di Pekerjaan berikutnya (enam berkas), tabel rincian di halaman detail
+  dan form, dan kalender jadwal (`features/jadwal/grid-jadwal.tsx`), yang
+  perlu pratinjau tersendiri (keputusan TB4a).
+- Daftar akun admin dan tab pajak per produk
+  (`features/pajak/tab-pajak-produk.tsx`) belum ditinjau terhadap aturan
+  tabel yang baru.
+- Dashboard gudang (`app/dashboard/gudang/page.tsx`) masih placeholder.
+- Layout dan tampilan panel admin masih menunggu fase ini (Utang kecil
+  dari modul panel admin).
+- Lonceng notifikasi nonaktif sampai ada sumber datanya (DB4a), dan status
+  alpha staf ditunda (DB3a).
+- Sisa 68 warna heksadesimal belum menjadi token: konstanta palet lokal di
+  tiga halaman reservasi dan tarif (termasuk `#FFFAF399` yang memakai
+  akhiran alfa), warna grafik di `features/laporan/grafik-laporan.tsx`,
+  dan warna di luar lima warna utama. Tipografi dan spasi juga belum.
+- Bayangan kartu baris memakai `filter` pada elemen `tr`. Di browser yang
+  tidak mendukungnya, kartu tampil dengan bingkai saja.
+- Suite e2e penuh belum dijalankan ulang sejak `93490bb`; harapannya tetap
+  455 lolos dan 14 skipped, karena perubahan spec sesudahnya tidak
+  menambah atau mengurangi skenario.
+- Laporan untuk tim backend atas butir 146 dan 147 `kontrak/temuan.md`
+  belum diserahkan.
+
 ### Utang kecil dari penyesuaian backend `ridho` `2dd57aa`
 
 - Hapus bahan baku selalu ditolak 409 sampai backend tidak menghitung
@@ -1416,9 +1510,10 @@ Yang masih berlaku:
 - Dashboard gudang (`app/dashboard/gudang/page.tsx`) masih placeholder.
   Sumber datanya sudah diputuskan (GD1a), tetapi eksekusinya ditunda
   sampai pemilik proyek menentukan layout dan UI/UX-nya.
-- Dashboard outlet (`app/dashboard/outlet/page.tsx`) juga placeholder,
-  dan `GET /dashboard/outlet` belum dipakai web; di luar cakupan modul
-  Gudang.
+- Dashboard outlet selesai di `0c5822b` (keputusan DB1a sampai DB6a).
+  `GET /dashboard/outlet` tetap tidak dipakai web: isinya hitungan
+  pengajuan, surat jalan, dan lima jurnal terbaru, bukan isi dashboard
+  yang diputuskan pemilik proyek.
 
 ### Utang kecil dari modul Pengaturan outlet
 
@@ -1457,7 +1552,8 @@ Yang masih berlaku:
   proyek.
 - Halaman ringkasan laba rugi memicu peringatan ukuran grafik di konsol
   (lebar dan tinggi -1 saat render pertama). Penyebabnya belum ditelusuri
-  dari kode, dan grafiknya tetap tampil.
+  dari kode, dan grafiknya tetap tampil. Sejak `0c5822b` komponen grafik
+  yang sama (`GrafikLaporan`) juga dipakai dashboard outlet.
 
 ### Utang kecil dari modul panel admin
 
