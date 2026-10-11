@@ -158,6 +158,10 @@ export const EP = {
     monitoring: "/absensi/monitoring",
   },
 
+  izinCuti: {
+    list: "/izincuti",
+  },
+
   laporan: {
     labaRugi: "/laporan/laba-rugi",
   },

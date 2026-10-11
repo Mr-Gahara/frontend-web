@@ -174,6 +174,10 @@ export const queryKeys = {
     semua: kunci(["absensi"] as const),
     monitoring: (tanggal: string) => ["absensi", "monitoring", tanggal] as const,
   },
+  izinCuti: {
+    semua: kunci(["izinCuti"] as const),
+    daftar: () => ["izinCuti", "daftar"] as const,
+  },
 
   // --- IAM ---
   pengguna: {
