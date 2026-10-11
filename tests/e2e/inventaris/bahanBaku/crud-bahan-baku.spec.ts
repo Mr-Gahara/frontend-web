@@ -81,7 +81,8 @@ test.describe("E2E - Bahan Baku (CRUD)", () => {
     });
 
     await test.step("Edit nama bahan baku", async () => {
-      await barisBahan(page, nama).getByRole("button", { name: /edit master/i }).click();
+      await barisBahan(page, nama).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: "Edit" }).click();
       await page.waitForURL("**/edit", { timeout: 15_000 });
 
       const inputNama = page.getByLabel(/nama bahan baku/i);
@@ -118,9 +119,8 @@ test.describe("E2E - Bahan Baku (CRUD)", () => {
 
     await cari(page, nama);
     await expect(barisBahan(page, nama)).toBeVisible({ timeout: 15_000 });
-    await barisBahan(page, nama)
-      .getByRole("button", { name: /hapus bahan baku/i })
-      .click();
+    await barisBahan(page, nama).getByRole("button", { name: "Buka menu" }).click();
+    await page.getByRole("menuitem", { name: "Hapus" }).click();
     const dialog = page.getByRole("alertdialog");
     await expect(dialog).toBeVisible();
     const tHapus = page.waitForResponse(

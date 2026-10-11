@@ -40,7 +40,8 @@ test.describe("Hapus bahan baku", () => {
         : route.continue(),
     );
 
-    await page.getByRole("button", { name: /hapus bahan baku/i }).first().click();
+    await page.locator("tbody tr").first().getByRole("button", { name: "Buka menu" }).click();
+    await page.getByRole("menuitem", { name: "Hapus" }).click();
     const dialog = page.getByRole("alertdialog");
     await dialog.getByRole("button", { name: /ya, hapus data master/i }).click();
 
