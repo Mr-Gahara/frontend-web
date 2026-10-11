@@ -24,7 +24,7 @@ const COLORS = {
   navy: "#0A2947",
   navyLight: "#0D365E",
   cream: "#FFFAF3",
-  darkCream: "#E0D2C2",
+  darkCream: "#F2EAE2",
   gold: "#D4A373",
   sage: "#7c9b4bff",
   rose: "#f9536eff",
