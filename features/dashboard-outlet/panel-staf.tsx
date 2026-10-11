@@ -30,12 +30,12 @@ export const LABEL_STATUS_STAF: Record<StatusStafDashboard, string> = {
 };
 
 const WARNA_STATUS_STAF: Record<StatusStafDashboard, { lencana: string; titik: string }> = {
-  sedang_bekerja: { lencana: "bg-[#718355]/15 text-[#4F5E3A]", titik: "bg-[#718355]" },
-  sudah_pulang: { lencana: "bg-[#0A2947]/10 text-[#0A2947]", titik: "bg-[#0A2947]" },
-  belum_absen: { lencana: "bg-[#0A2947]/5 text-[#0A2947]/70", titik: "bg-[#0A2947]/30" },
+  sedang_bekerja: { lencana: "bg-sage/15 text-[#4F5E3A]", titik: "bg-sage" },
+  sudah_pulang: { lencana: "bg-navy/10 text-navy", titik: "bg-navy" },
+  belum_absen: { lencana: "bg-navy/5 text-navy/70", titik: "bg-navy/30" },
   sakit: { lencana: "bg-rose-100 text-rose-700", titik: "bg-rose-500" },
-  izin: { lencana: "bg-[#D4A373]/25 text-[#7A5226]", titik: "bg-[#D4A373]" },
-  cuti: { lencana: "bg-[#D4A373]/25 text-[#7A5226]", titik: "bg-[#D4A373]" },
+  izin: { lencana: "bg-karamel/25 text-[#7A5226]", titik: "bg-karamel" },
+  cuti: { lencana: "bg-karamel/25 text-[#7A5226]", titik: "bg-karamel" },
 };
 
 /** Urutan baris: yang hadir lebih dulu, lalu izin, sakit, dan cuti, lalu yang belum absen. */
@@ -63,8 +63,8 @@ function AngkaRingkas({
   titik: string;
 }) {
   return (
-    <div className="bg-[#FFFAF3] rounded-xl sm:rounded-2xl px-2 py-2 sm:px-4 sm:py-3 border border-[#0A2947]/5 min-w-0">
-      <p className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-medium text-[#0A2947]/70 min-w-0">
+    <div className="bg-gading rounded-xl sm:rounded-2xl px-2 py-2 sm:px-4 sm:py-3 border border-navy/5 min-w-0">
+      <p className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-medium text-navy/70 min-w-0">
         <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${titik}`} aria-hidden="true" />
         <span className="hidden sm:inline truncate">{label}</span>
         <span className="sm:hidden truncate">{labelPendek ?? label}</span>
@@ -110,38 +110,38 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
   return (
     <section
       aria-label="Status Staf"
-      className="bg-[#F2EAE2] border border-[#0A2947]/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-[#0A2947] shadow-sm flex flex-col gap-3 sm:gap-4"
+      className="bg-krem border border-navy/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-navy shadow-sm flex flex-col gap-3 sm:gap-4"
     >
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-sm sm:text-lg font-bold tracking-wide">Status Staf</h2>
         {!memuat && !pesanGalat && baris.length > 0 && (
-          <span className="text-xs font-medium text-[#0A2947]/70">
+          <span className="text-xs font-medium text-navy/70">
             {sudahAbsen} dari {baris.length} sudah absen
           </span>
         )}
       </div>
       {memuat ? (
-        <Skeleton className="h-40 w-full bg-[#0A2947]/5 rounded-xl" />
+        <Skeleton className="h-40 w-full bg-navy/5 rounded-xl" />
       ) : pesanGalat ? (
         <p className="text-sm font-medium text-rose-600">{pesanGalat}</p>
       ) : baris.length === 0 ? (
-        <p className="text-sm text-[#0A2947]/60">Belum ada staf di ruang outlet.</p>
+        <p className="text-sm text-navy/60">Belum ada staf di ruang outlet.</p>
       ) : (
         <>
           <div className="grid grid-cols-4 gap-1.5 sm:gap-3">
-            <AngkaRingkas label="Masuk" jumlah={jumlah("sedang_bekerja")} titik="bg-[#718355]" />
-            <AngkaRingkas label="Pulang" jumlah={jumlah("sudah_pulang")} titik="bg-[#0A2947]" />
+            <AngkaRingkas label="Masuk" jumlah={jumlah("sedang_bekerja")} titik="bg-sage" />
+            <AngkaRingkas label="Pulang" jumlah={jumlah("sudah_pulang")} titik="bg-navy" />
             <AngkaRingkas
               label="Izin, sakit, cuti"
               labelPendek="Izin"
               jumlah={jumlah("izin", "sakit", "cuti")}
-              titik="bg-[#D4A373]"
+              titik="bg-karamel"
             />
-            <AngkaRingkas label="Belum absen" labelPendek="Belum" jumlah={jumlah("belum_absen")} titik="bg-[#0A2947]/30" />
+            <AngkaRingkas label="Belum absen" labelPendek="Belum" jumlah={jumlah("belum_absen")} titik="bg-navy/30" />
           </div>
-          <div className="sm:max-h-96 sm:overflow-y-auto rounded-xl sm:rounded-2xl bg-[#FFFAF3] border border-[#0A2947]/10">
+          <div className="sm:max-h-96 sm:overflow-y-auto [--warna-baris:#FFFAF3]">
             <Table>
-              <TableHeader className="hidden sm:table-header-group sticky top-0 bg-[#FFFAF3]">
+              <TableHeader className="hidden sm:table-header-group sticky top-0 bg-krem">
                 <TableRow>
                   <TableHead>Nama</TableHead>
                   <TableHead>Peran</TableHead>
@@ -154,20 +154,20 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
                     <TableCell>
                       <span className="flex items-center gap-3 min-w-0">
                         <span
-                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0A2947] text-[#FFFAF3] flex items-center justify-center text-[11px] sm:text-xs font-bold shrink-0"
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-navy text-gading flex items-center justify-center text-[11px] sm:text-xs font-bold shrink-0"
                           aria-hidden="true"
                         >
                           {inisialNama(b.nama)}
                         </span>
                         <span className="flex flex-col min-w-0">
                           <span className="font-semibold truncate">{b.nama}</span>
-                          <span className="sm:hidden text-[11px] text-[#0A2947]/60 truncate">
+                          <span className="sm:hidden text-[11px] text-navy/60 truncate">
                             {peran.get(b.penggunaID) ?? "-"}
                           </span>
                         </span>
                       </span>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell text-[#0A2947]/70">{peran.get(b.penggunaID) ?? "-"}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-navy/70">{peran.get(b.penggunaID) ?? "-"}</TableCell>
                     <TableCell className="text-right">
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-bold ${WARNA_STATUS_STAF[b.status].lencana}`}
@@ -187,7 +187,7 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
               <button
                 type="button"
                 onClick={() => setTampilSemua(true)}
-                className="sm:hidden w-full border-t border-[#0A2947]/10 py-2.5 text-xs font-bold text-[#0A2947]"
+                className="sm:hidden w-full border-t border-navy/10 py-2.5 text-xs font-bold text-navy"
               >
                 Tampilkan semua ({baris.length})
               </button>

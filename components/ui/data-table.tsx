@@ -29,6 +29,26 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+/**
+ * Di HP tiap baris menjadi satu kartu dan selnya tersusun ke bawah
+ * (keputusan TB1a). Kelas ber-first dan ber-last menimpa bingkai kartu
+ * per sel milik TableCell, yang hanya berlaku di lebar meja.
+ */
+const KELAS_BARIS_HP =
+  "max-sm:relative max-sm:mb-2 max-sm:flex max-sm:flex-col max-sm:gap-1.5 max-sm:rounded-xl max-sm:border max-sm:border-navy/10 max-sm:bg-[var(--warna-baris,var(--krem))] max-sm:p-3";
+const KELAS_SEL_HP =
+  "max-sm:block max-sm:border-0 max-sm:bg-transparent max-sm:p-0 max-sm:whitespace-normal max-sm:first:border-l-0 max-sm:first:rounded-none max-sm:first:pr-10 max-sm:first:text-base max-sm:first:font-bold max-sm:last:border-r-0 max-sm:last:rounded-none";
+const KELAS_AKSI_HP = "max-sm:absolute max-sm:right-2 max-sm:top-2";
+
+/** Label kecil sel di HP: meta.label kolom, atau header bila berupa teks. */
+function labelKolom(kolom: { meta?: unknown; header?: unknown }): string | null {
+  const label = (kolom.meta as { label?: unknown } | undefined)?.label;
+  if (typeof label === "string") return label;
+  return typeof kolom.header === "string" ? kolom.header : null;
+}
 
 /** Paginasi dari server: angka dan aksi footer datang dari pemakai tabel. */
 export interface PaginasiServerTabel {
@@ -122,71 +142,77 @@ export function DataTable<TData, TValue>({
             suppressHydrationWarning
             value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
             onChange={(e) => table.getColumn(searchKey)?.setFilterValue(e.target.value)}
-            className="max-w-sm text-sm bg-[#FFFAF3] text-[#041E3F] border-[#041E3F]/15 focus-visible:ring-[#041E3F]/50 h-11 rounded-xl px-4 font-medium"
+            className="max-w-sm text-sm bg-gading text-navy border-navy/15 focus-visible:ring-navy/50 h-11 rounded-xl px-4 font-medium"
           />
         </div>
       )}
 
-      {/* Table Wrapper - Diubah warnanya agar "Pop Out" dari background card */}
-      <div className="overflow-hidden rounded-xl border border-[#041E3F]/10 bg-[#FFFAF3] shadow-sm">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-[#041E3F]/3 hover:bg-[#041E3F]/3 border-b-[#041E3F]/10">
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="text-xs font-bold text-[#041E3F]/60 uppercase tracking-wider h-12"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-32 text-center text-sm font-medium text-[#041E3F]/60">
-                  Memuat data...
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-32 text-center text-sm font-medium text-[#041E3F]/60">
-                  {emptyMessage}
-                </TableCell>
-              </TableRow>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="border-b border-[#041E3F]/10 last:border-0 hover:bg-[#041E3F]/2 transition-colors">
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="text-sm px-4 py-3">
+      {/* Tiap baris adalah kartu terpisah (TB1a); di HP kepala kolom disembunyikan dan sel tersusun ke bawah. */}
+      <Table className="max-sm:block">
+        <TableHeader className="max-sm:hidden">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody className="max-sm:block">
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-32 text-center text-sm text-navy/60">
+                Memuat data...
+              </TableCell>
+            </TableRow>
+          ) : table.getRowModel().rows.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-32 text-center text-sm text-navy/60">
+                {emptyMessage}
+              </TableCell>
+            </TableRow>
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id} className={KELAS_BARIS_HP}>
+                {row.getVisibleCells().map((cell) => {
+                  const label = labelKolom(cell.column.columnDef);
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      className={cn("text-sm", KELAS_SEL_HP, cell.column.id === "aksi" && KELAS_AKSI_HP)}
+                    >
+                      {label && (
+                        <span className="sm:hidden block text-[11px] font-semibold text-navy/60">
+                          {label}
+                        </span>
+                      )}
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                  );
+                })}
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
 
-      {/* Pagination: klien, atau angka dan aksi dari server bila paginasiServer diisi */}
-      <div className="flex items-center justify-between mt-1">
-        <p className="text-xs font-semibold text-[#041E3F]/60">
+      {/* Kaki tabel: kontrol polos tanpa latar maupun kotak (TB3a); klien, atau angka dan aksi dari server. */}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-1">
+        <p className="text-xs font-semibold text-navy/60">
           {totalData} total data
         </p>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 sm:gap-2">
           {server?.pilihanUkuran && server.onGantiUkuran && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-[#041E3F]/60">Tampilkan</span>
+            <div className="flex items-center gap-1">
+              <span className="text-xs font-semibold text-navy/60">Tampilkan</span>
               <Select value={String(server.ukuran)} onValueChange={(nilai) => server.onGantiUkuran?.(Number(nilai))}>
                 <SelectTrigger
                   aria-label="Jumlah baris per halaman"
-                  className="h-9 w-[76px] cursor-pointer rounded-lg border-[#041E3F]/20 bg-transparent text-xs font-bold text-[#041E3F]"
+                  className="h-8 w-auto cursor-pointer gap-1 border-0 bg-transparent px-1 text-xs font-bold text-navy shadow-none focus-visible:ring-1 focus-visible:ring-navy/40"
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -201,25 +227,27 @@ export function DataTable<TData, TValue>({
             </div>
           )}
           <Button
-            variant="outline"
-            size="sm"
+            variant="ghost"
+            size="icon"
+            aria-label="Previous"
             onClick={keSebelumnya}
             disabled={!bisaSebelumnya}
-            className="text-xs cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent font-bold rounded-lg h-9"
+            className="h-8 w-8 cursor-pointer text-navy hover:bg-transparent hover:text-navy/60"
           >
-            Previous
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <span className="text-xs font-semibold text-[#041E3F]/60">
+          <span className="text-xs font-semibold text-navy/60">
             Halaman {halamanKini} dari {jumlahHalaman}
           </span>
           <Button
-            variant="outline"
-            size="sm"
+            variant="ghost"
+            size="icon"
+            aria-label="Next"
             onClick={keBerikutnya}
             disabled={!bisaBerikutnya}
-            className="text-xs cursor-pointer border-[#041E3F]/20 text-[#041E3F] hover:bg-[#041E3F]/5 bg-transparent font-bold rounded-lg h-9"
+            className="h-8 w-8 cursor-pointer text-navy hover:bg-transparent hover:text-navy/60"
           >
-            Next
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
       </div>
