@@ -1,12 +1,25 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
-import { login } from "../../helpers/transfer-uji";
+import { BASIS, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import {
+  batalkanPenjualanUji,
+  bayarLewatApi,
+  buatDraftLewatUi,
+  detailPenjualan,
+  metodeUji,
+  siapkanFixture,
+  simpanLewatApi,
+} from "../../helpers/penjualan-uji";
 import { formatRupiah } from "../../../lib/format";
 
 /*
  * Halaman mutasi arus kas (keputusan MK1a sampai MK3a): buku gabungan dari
  * GET /akunkas/mutasi dengan filter dan paginasi server. Harapan dihitung
- * dari respons yang dibaca halaman itu sendiri. Hanya membaca; satu jalur
- * gagal disimulasikan lewat page.route (keputusan rancangan butir 21).
+ * dari respons yang dibaca halaman itu sendiri. Hanya membaca, kecuali test
+ * rincian pembayaran: ia menyiapkan penjualan lunasnya sendiri lewat helper
+ * penjualan, karena halaman pertama bulan berjalan tidak selalu memuat
+ * pembayaran (spec keuangan berjalan sebelum spec penjualan), lalu
+ * membatalkannya di akhir. Satu jalur gagal disimulasikan lewat page.route
+ * (keputusan rancangan butir 21).
  */
 
 interface BarisMutasi {
@@ -61,9 +74,12 @@ async function bukaRincian(page: Page, i: number) {
 const responsMutasi = (syarat: (q: URLSearchParams) => boolean) => (r: Response) =>
   r.request().method() === "GET" && POLA_MUTASI.test(r.url()) && syarat(new URL(r.url()).searchParams);
 
-/** Membuka halaman dan mengembalikan respons mutasi pertama serta daftar akun kas. */
-async function bukaMutasi(page: Page) {
-  await login(page);
+/**
+ * Membuka halaman dan mengembalikan respons mutasi pertama serta daftar akun
+ * kas. `masuk: false` untuk test yang sudah login dan menyiapkan data lebih dulu.
+ */
+async function bukaMutasi(page: Page, { masuk = true }: { masuk?: boolean } = {}) {
+  if (masuk) await login(page);
   const tMutasi = page.waitForResponse(responsMutasi((q) => q.get("page") === "1"));
   const tAkun = page.waitForResponse((r) => r.request().method() === "GET" && POLA_AKUN.test(r.url()));
   await page.goto(URL_MUTASI);
@@ -179,20 +195,38 @@ test.describe("Mutasi arus kas", () => {
   });
 
   test("rincian baris pembayaran menampilkan pencatat dan tautan ke detail penjualannya (NZ2a)", async ({ page }) => {
-    const { mutasi } = await bukaMutasi(page);
-    const data = mutasi.data as unknown as BarisNz[];
-    const i = data.findIndex((m) => m.referensi?.penjualanID && m.pengguna?.nama);
-    test.skip(i < 0, "Belum ada mutasi pembayaran di halaman pertama bulan berjalan");
-    const m = data[i];
-    const idPenjualan = m.referensi?.penjualanID ?? "";
-    await expect(barisTabel(page)).toHaveCount(data.length, { timeout: 15_000 });
-    const rincian = await bukaRincian(page, i);
-    await expect(rincian).toContainText(m.pengguna?.nama ?? "");
-    const tautan = rincian.getByRole("link");
-    await expect(tautan).toHaveText(m.referensi?.noReferensi || "Lihat penjualan");
-    await expect(tautan).toHaveAttribute("href", `/dashboard/outlet/penjualan/${idPenjualan}`);
-    await tautan.click();
-    await expect(page).toHaveURL(new RegExp(`/dashboard/outlet/penjualan/${idPenjualan}$`));
+    test.setTimeout(90_000);
+    await login(page);
+    const auth = await bukaDenganAuth(page, BASIS + URL_MUTASI);
+    let idPenjualan: string | undefined;
+    try {
+      const fx = await siapkanFixture(page, auth, 20);
+      const penjualan = await buatDraftLewatUi(page, 1);
+      idPenjualan = penjualan.id;
+      await simpanLewatApi(page, auth, penjualan.id, fx);
+      const tagihan = (await detailPenjualan(page, auth, penjualan.id)).sisaTagihan;
+      expect(tagihan, "penjualan uji tersimpan dengan tagihan").toBeGreaterThan(0);
+      const metode = await metodeUji(page, auth);
+      await bayarLewatApi(page, auth, penjualan.id, metode.id, tagihan, "E2E rincian mutasi pembayaran");
+
+      const { mutasi } = await bukaMutasi(page, { masuk: false });
+      const data = mutasi.data as unknown as BarisNz[];
+      const i = data.findIndex((b) => b.referensi?.penjualanID === penjualan.id);
+      expect(i, "mutasi pembayaran penjualan uji ada di halaman pertama").toBeGreaterThanOrEqual(0);
+      const m = data[i];
+      const pencatat = m.pengguna?.nama ?? "";
+      expect(pencatat, "pencatat pembayaran dikirim backend").not.toBe("");
+      await expect(barisTabel(page)).toHaveCount(data.length, { timeout: 15_000 });
+      const rincian = await bukaRincian(page, i);
+      await expect(rincian).toContainText(pencatat);
+      const tautan = rincian.getByRole("link");
+      await expect(tautan).toHaveText(m.referensi?.noReferensi || "Lihat penjualan");
+      await expect(tautan).toHaveAttribute("href", `/dashboard/outlet/penjualan/${penjualan.id}`);
+      await tautan.click();
+      await expect(page).toHaveURL(new RegExp(`/dashboard/outlet/penjualan/${penjualan.id}$`));
+    } finally {
+      await batalkanPenjualanUji(page, auth, idPenjualan);
+    }
   });
 
   test("mutasi gagal dimuat: pesan backend tampil, lalu Coba Lagi memuat datanya", async ({ page }) => {
