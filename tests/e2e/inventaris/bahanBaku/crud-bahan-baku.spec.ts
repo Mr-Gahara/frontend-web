@@ -97,14 +97,16 @@ test.describe("E2E - Bahan Baku (CRUD)", () => {
     });
   });
 
-  // Menunggu backend: entri stok yang dibuat otomatis saat bahan dibuat
+  // Butir 143: entri stok yang dibuat otomatis saat bahan dibuat sempat
   // dihitung sebagai keterkaitan (label "stok lokasi" di bahanBakuService,
   // backend yoga 3b2417d), sehingga bahan yang baru dibuat pun ditolak 409.
+  // Sejak backend yoga 43a052f (B95 Yoga, di ridho 7d28135), catatan stok
+  // lokasi tidak lagi menghalangi dan ikut terhapus dalam transaksi.
   // Aturan pemilik proyek: bahan yang belum punya riwayat (resep, opname,
   // transfer, pengajuan, pembelian, jurnal) dapat dihapus walau diisi stok
   // awal dan batas minimum. Bukti diambil dari respons DELETE dan dari daftar
   // yang dibaca ulang, bukan dari baris yang sesaat tidak ada di tabel.
-  test.fixme("bahan yang baru dibuat dapat dihapus walau diisi stok awal dan batas minimum", async ({ page }) => {
+  test("bahan yang baru dibuat dapat dihapus walau diisi stok awal dan batas minimum", async ({ page }) => {
     const nama = `Bahan E2E Hapus ${Date.now()}`;
 
     await page.getByRole("button", { name: /tambah bahan baru/i }).click();
