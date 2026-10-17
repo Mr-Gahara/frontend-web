@@ -122,6 +122,15 @@ Lampiran A: route `/pembelianstok` kini memeriksa izin `read-`,
 `GET /stockopname/adjustments` menerima juga
 `read-stock-adjustment-outlet` dan `read-stock-adjustment-gudang`;
 Lampiran A masih mencatat keadaan lama.
+Pada 16 Oktober 2026 acuan backend menjadi `ridho` `7d28135`, gabungan
+`origin/yoga` `723b12f` (sembilan commit) dan `origin/nizar` `38f523a`
+(satu commit) di atas `2dd57aa`. Bagian beban operasional, pengajuan
+stok, penjualan, dan bahan baku di `endpoint.md`, `payload.md`, dan
+`temuan.md` dikoreksi terhadapnya, hanya untuk yang terbukti lewat e2e
+atau permintaan nyata. Terhadap Lampiran A: `DELETE /bebanoperasional/:id`
+sudah dibuang (dijawab 404), dan beban dibatalkan lewat
+`PUT /bebanoperasional/:id` berstatus VOID; Lampiran A masih mencatat
+keadaan lama.
 
 ## 1. Acuan dan metodologi
 

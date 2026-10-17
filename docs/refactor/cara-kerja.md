@@ -1713,6 +1713,39 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   (`find -newer`), sehingga perubahan sesudah run tidak ikut ter-commit
   tanpa diuji.
 
+### Pelajaran dari penyesuaian backend `ridho` `7d28135` (16 Oktober 2026)
+
+- **Status perintah dalam pipa dibaca lewat `${pipestatus[1]}`.** Di zsh,
+  `$?` sesudah pipa adalah status perintah terakhir; `merge-tree` yang
+  berkonflik tercetak berkode 0 karena dipipa ke `head`.
+- **Kelengkapan gabungan diperiksa per jenis berkas.** Berkas yang hanya
+  diubah satu sisi dibandingkan langsung dengan versi sisinya
+  (`git diff --quiet <sisi> -- <berkas>`); pencocokan baris hanya untuk
+  berkas yang disentuh kedua sisi. Pencocokan baris lewat himpunan
+  menghasilkan 54 temuan palsu dari baris umum seperti `});`.
+- **Skrip yang dipakai lintas langkah disimpan di
+  `~/.cache/frontend-web/sesi/`**, bukan `/tmp`, yang dikosongkan saat
+  mesin dinyalakan ulang di tengah sesi.
+- **Nilai enum dibuktikan dari respons, bukan ditebak.** Status akun kas
+  adalah `aktif` dan `non-aktif`; skrip bukti yang mencari `AKTIF`
+  berhenti tanpa menemukan akun.
+- **Tabel field kontrak dibaca utuh per bagian**, bukan lewat `grep` kata
+  kunci: `keterangan` wajib di `POST /bebanoperasional` terlewat karena
+  barisnya terpotong.
+- **Field yang dibaca mapper belum tentu tersimpan di dokumen.**
+  `referensi.penjualanID` mutasi kas diisi service dari dokumen pembayaran
+  saat respons dibentuk; pemeriksaan di tingkat dokumen menyimpulkan
+  tidak ada.
+- **Daftar panjang di keluaran diringkas per kelompok.** Daftar akun kas
+  yang dicetak per baris mencapai lebih dari 250 baris.
+- **Skrip bukti berhenti begitu langkah pembuat gagal.** Langkah sesudah
+  `POST` yang gagal memanggil path tanpa id, sehingga menghasilkan 404
+  yang tercatat sebagai lolos maupun gagal palsu.
+- **Spec yang bergantung pada data folder lain menyiapkan datanya
+  sendiri.** Suite berjalan urut abjad: spec `keuangan/` berjalan sebelum
+  `penjualan/`, sehingga data yang dibuat spec penjualan belum ada saat
+  spec mutasi kas berjalan (RG5a).
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:

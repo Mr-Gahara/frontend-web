@@ -96,6 +96,18 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per penyesuaian backend `ridho` `7d28135`** (commit
+`cfaaa92`): 653 test unit dan integrasi lolos di 79 berkas, tidak
+berubah. Suite penuh 16 Oktober 2026 pukul 22.02 terhadap `7d28135`,
+sebelum perubahan web, menghasilkan 453 lolos, 1 gagal, dan 15 skipped.
+Yang gagal habis waktu sesaat di hapus tarif (lolos 9 dari 9 saat diulang
+bersama kembarannya), dan lewatan tambahan adalah test rincian pembayaran
+mutasi kas yang bergantung pada urutan spec. Sesudah `f338c74` (test itu
+menyiapkan datanya sendiri; `mutasi-kas.spec.ts` 12 lolos dalam dua
+putaran) dan `cfaaa92` (fixme butir 143 dilepas; folder `bahanBaku` 5
+lolos), harapan suite penuh 456 lolos dan 13 skipped; angka itu hitungan,
+karena suite penuh tidak dijalankan ulang.
+
 **Baseline per fase UI/UX 11 Oktober 2026** (commit `9cd22e1`): 653 test
 unit dan integrasi lolos di 79 berkas, bertambah 19: dua belas test
 lapisan data dashboard (`3812763`), serta enam test izin panel dan susunan
@@ -449,7 +461,10 @@ jumlah per run belum diukur ulang. Spec keuangan menambah satu akun kas
 non-aktif bersaldo 0 per run (PB13a), dan spec kelola metode pembayaran
 satu metode uji nonaktif per run (PO10a). Spec pajak menghapus pajak
 ujinya lewat UI di setiap run; kategori dan produk uji pajak dibuat
-sekali. Aturan data uji
+sekali. Sejak `f338c74`, test rincian pembayaran di spec mutasi kas
+menambah satu penjualan VOID, mutasi `PEMBAYARAN` dan `VOID_PEMBAYARAN`,
+serta entri jurnal stok bahan uji penjualan dari opname persiapan dan
+pemotongan stok per run (RG5a); jumlah per run belum diukur. Aturan data uji
 spec tulis ada di Test yang ditandai fixme dan skip bersyarat, di bawah.
 
 ## Kredensial uji
@@ -519,7 +534,7 @@ Pola kegagalan yang berulang:
 | Skenario tulis `skipped` padahal kode tidak berubah | Dokumen aktif sisa run yang gagal menghalangi pembuatan (409). Baca pesan `POST` di trace (backend menyebut nomornya), lalu batalkan dokumen itu dari halaman detail |
 | `net::ERR_NETWORK_IO_SUSPENDED` saat `page.goto` | Mesin menangguhkan jaringan (tidur atau hemat daya) di tengah suite; jalankan ulang test itu sendirian, lalu suite penuh diawali `systemd-inhibit --what=idle:sleep` |
 | Surat jalan uji ditolak karena nomornya bentrok, sekali lalu hilang | Backend membentuk akhiran nomor dari empat digit terakhir `Date.now()` (`transferStokService.js` baris 148 sampai 150), dan setiap run spec transfer membuat surat jalan baru dari pengajuan uji yang sama (124 surat jalan untuk `PGJ/202608/0001` per 28 September 2026), sehingga peluang bentrok naik setiap run (`kontrak/temuan.md` butir 60; terjadi di suite penuh `074e98c` dan `0cfb3bd`). Jalankan ulang test itu sendirian, lalu suite penuh |
-| `page.request` di `finally` habis waktu, sekali lalu hilang | Backend sesaat tidak menjawab; permintaan ini tidak melewati `page.route`, sehingga bukan akibat simulasi spec (suite penuh `074e98c`). Jalankan ulang suite penuh sebelum mengubah spec |
+| `page.request` di `finally` habis waktu, sekali lalu hilang | Backend sesaat tidak menjawab; permintaan ini tidak melewati `page.route`, sehingga bukan akibat simulasi spec (suite penuh `074e98c`; juga `api()` di hapus tarif pada suite penuh terhadap backend `ridho` `7d28135`, lolos 9 dari 9 saat diulang). Jalankan ulang suite penuh sebelum mengubah spec |
 | `waitForResponse` habis waktu setelah kembali ke halaman atau filter yang sudah pernah dimuat | Kunci query masih segar (`staleTime` 5 menit di `components/providers/query-provider.tsx`), sehingga tidak ada permintaan. Buktikan dari tampilan; penunggu jaringan hanya untuk kunci yang belum pernah dimuat (`b63cf08`) |
 | Pembersihan tampak lolos, tetapi data uji menumpuk di basis data | Helper pembersihan membuang jawaban permintaannya. Periksa statusnya dengan `expect.soft`, dan jalankan audit endpoint: route yang dihapus backend juga menjawab 404 (`b5a55c4`) |
 | `POST /pengajuanstok` ditolak 409 nomor kembar, menetap saat diulang | Backend membentuk nomor dari dokumen terakhir menurut `createdAt` (`kontrak/temuan.md` butir 139). Bandingkan `createdAt` dan waktu `_id` dokumen bernomor terbesar dengan jam sistem lewat skrip baca-saja; dokumen ber-`createdAt` di depan mengunci pembuatan sampai bulan berganti |
@@ -901,7 +916,6 @@ Menunggu perbaikan backend:
 |---|---|
 | Edit pola roster | Validator memakai `this.siklusHari` dalam konteks `findOneAndUpdate` |
 | Hitungan tersimpan dapat dikosongkan kembali (`inventaris/stockOpname/draft-stok-opname.spec.ts`) | Validator stock opname menerima `qtyPhysical` null (`kontrak/temuan.md` butir 22). Badannya berupa penanda; skenario ditulis saat `SERVER_TERIMA_HITUNGAN_KOSONG` dibalik |
-| Bahan yang baru dibuat dapat dihapus walau diisi stok awal dan batas minimum (`inventaris/bahanBaku/crud-bahan-baku.spec.ts`) | Backend tidak lagi menghitung entri stok otomatis sebagai keterkaitan, dan menghapusnya bersama master (`kontrak/temuan.md` butir 143). Badannya lengkap tetapi belum pernah berjalan: status sukses `DELETE` dan parameter pencarian inventory diluruskan saat dilepas |
 | Delapan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, dan stock adjustment | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
 | Shift yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/shift/crud-shift.spec.ts`) | Backend memisahkan shift per lokasi dan `KUNCI_LOKASI_SHIFT` di `features/shift/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
 | Pola yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | Backend memisahkan pola roster per lokasi dan `KUNCI_LOKASI_POLA_ROSTER` di `features/pola-roster/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
@@ -925,6 +939,10 @@ putaran berturut-turut.
 Pada 11 Oktober 2026, setelah backend `ridho` `2dd57aa`, kedua
 `test.fixme` jurnal stok di spec alur penjualan dilepas (`936f073`),
 setelah lolos dua putaran berturut-turut.
+
+Pada 16 Oktober 2026, setelah backend `ridho` `7d28135`, `test.fixme`
+hapus bahan baku yang baru dibuat dilepas (`cfaaa92`), setelah lolos dua
+putaran berturut-turut tanpa perubahan badannya.
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
 terhitung di angka skipped pada baseline:
@@ -1643,8 +1661,11 @@ Urutan debug kegagalan e2e di atas).
   password baru dibuktikan dengan login di konteks terpisah; dan satu
   jalur gagal (bekukan dijawab 500) memakai akun yang sudah ada agar
   tidak ada akun sungguhan yang ikut beku.
-- `tests/e2e/keuangan/mutasi-kas.spec.ts` (`e129f9d`): spec baca-saja
-  untuk daftar berpaginasi dan berfilter server. Query awal dibandingkan
+- `tests/e2e/keuangan/mutasi-kas.spec.ts` (`e129f9d`, `f338c74`): spec
+  untuk daftar berpaginasi dan berfilter server, baca-saja kecuali test
+  rincian pembayaran, yang menyiapkan penjualan lunasnya sendiri lewat
+  helper penjualan karena spec keuangan berjalan sebelum spec penjualan,
+  lalu membatalkannya di `finally`. Query awal dibandingkan
   dengan batas hari lokal yang dihitung spec, baris tabel dengan respons
   yang sama, filter dibuktikan dari query permintaan dan dari isi
   respons, ringkasan dari respons `ringkasan`, dan jalur gagal dipulihkan

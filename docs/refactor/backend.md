@@ -155,6 +155,17 @@ Pada 11 Oktober 2026 `yoga` maju ke `2dd57aa`, 42 commit di atas
 `8dc6211`, dan sudah memuat `nizar` `b0a77d4`, sehingga `ridho` kembali
 cukup di-fast-forward. Gabungan Yoga sendiri (`1d3f2d7`) tetap diperiksa
 kelengkapannya untuk berkas yang diubah kedua induknya.
+Pada 16 Oktober 2026 `yoga` maju sembilan commit dan `nizar` satu commit
+di atas `2dd57aa`, ke arah yang berbeda. `ridho` di-fast-forward ke
+`yoga` `723b12f`, lalu `nizar` `38f523a` digabung menjadi `7d28135` dan
+di-push. Konflik hanya di `docs/pengembangan/klien.md`: B96 (Yoga) serta
+B89 dan B90 (Nizar) ditambahkan di titik yang sama, dan B89 serta B90
+dipakai keduanya. Nomornya tidak diubah; baris Nizar dipindah ke bagian
+Modul Akun Kas, Pembayaran, dan Penjualan, paragraf nomor kembar
+ditambahkan seperti B27 sampai B38, dan nomor baru dimulai dari B97
+(keputusan RG2a). Setelah itu permission diselaraskan
+(`delete-beban-operasional` dibuang dari seed), lalu
+`npm run db:lokasi-penjualan` dan `npm run db:indeks` dijalankan.
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari
@@ -480,6 +491,10 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   filter tanggal, dan `startDate` bertanggal saja di
   `GET /penjualan` yang dibaca sebagai tengah malam UTC
   (`kontrak/temuan.md` butir 146 dan 147)
+- Penyesuaian 16 Oktober 2026 terhadap `ridho` `7d28135` tanpa temuan
+  baru, sehingga tanpa laporan. Pembuktian butir 143 sampai 145, 147, dan
+  B89 sampai B94 (Yoga) tercatat di `kontrak/temuan.md`; Yoga dan Nizar
+  diberi tahu gabungannya
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

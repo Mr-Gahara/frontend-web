@@ -1617,6 +1617,45 @@ sehingga `ridho` cukup di-fast-forward. Labelnya RH.
   `test.fixme` diambil dari respons `DELETE` dan dari daftar yang dibaca
   ulang, bukan dari baris yang tidak ada di tabel.
 
+### Penyesuaian backend `ridho` `7d28135`
+
+Diputuskan pemilik proyek pada 16 Oktober 2026, setelah `origin/yoga`
+maju sembilan commit dan `origin/nizar` satu commit di atas `ridho`
+`2dd57aa`, ke arah yang berbeda. Labelnya RG.
+
+- **RG1a: penyesuaian backend didahulukan, lalu tabel seragam**, agar spec
+  tabel dijalankan terhadap backend yang sudah final, dan baseline suite
+  penuh ditetapkan sekali.
+- **RG2a: konflik `docs/pengembangan/klien.md` backend diselesaikan tanpa
+  mengubah nomor.**
+  B96 (Yoga) tetap di tabel Modul Pengajuan Stok; B89 dan B90 milik Nizar
+  dipindah ke tabel Modul Akun Kas, Pembayaran, dan Penjualan di bawah
+  B70; paragraf nomor kembar ditambahkan dan nomor baru dimulai dari B97;
+  rujukan di baris temuan 144 dan filter tanggal ditandai (Nizar).
+  Gabungannya di-commit di `ridho` lokal lalu di-push langsung, seperti
+  `2dd57aa`, dan Yoga serta Nizar diberi tahu.
+- **RG3a: tabel seragam mencakup empat belas halaman di sepuluh berkas**,
+  termasuk daftar aset, tarif, tipe aset, dan pola roster, yang sama-sama
+  melanggar TB2a dan TB7a.
+- **RG4a: cakupan daftar penjualan pindah ke filter `locationID` server
+  sesudah tabel seragam.** Syarat RH2b terpenuhi di `7d28135`; sampai
+  dikerjakan, RH2b tetap berlaku.
+- **RG5a: test rincian pembayaran mutasi kas menyiapkan penjualan
+  lunasnya sendiri** (`f338c74`) lewat helper penjualan yang sudah
+  teruji, dengan draft dibuat lewat UI, bukan helper baru lewat
+  `POST /penjualan`. Sebelumnya test itu dilewati setiap suite penuh di
+  bulan berjalan, karena spec keuangan berjalan sebelum spec penjualan.
+- **RG6a: pengeluaran tetap ditunda**; perbaikan beban cukup dibuktikan
+  lewat permintaan nyata dengan skrip sekali pakai berisi bacaan dan satu
+  siklus beban `jumlah` 1 yang di-VOID, bukan spec permanen, karena spec
+  beban masuk bersama halamannya.
+- **RG7a: kategori beban uji adalah fixture tetap "E2E Kategori Beban"**,
+  dicari menurut nama, dibuat sekali bila belum ada, lalu dipakai ulang,
+  seperti fixture penjualan. Kategori yang dipakai beban tidak dapat
+  dihapus (B72 Yoga).
+- **RG8a: Lampiran A tidak dibangkitkan ulang sekarang**;
+  ketertinggalannya dicatat di `status.md`.
+
 ### Fase UI/UX: dashboard outlet, token warna, dan tabel
 
 Diputuskan pemilik proyek pada 11 Oktober 2026. Rancangannya ditentukan

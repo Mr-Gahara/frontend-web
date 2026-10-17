@@ -100,7 +100,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Dashboard outlet | `342dcd3` (grafik bersama), `3812763` (lapisan data), `0c5822b` (halaman) | Selesai (keputusan DB1a sampai DB6a; Catatan dari fase UI/UX 11 Oktober 2026) |
 | Token warna utama | `584a2d8` (lima warna), `ba28f25` (krem dan permukaan) | Selesai (keputusan WR1a sampai WR4a; Catatan dari fase UI/UX 11 Oktober 2026) |
 | Tabel seragam: dasar tabel, panel pembungkus, mutasi arus kas, bahan baku | `93490bb` (dasar), `cc1092e` (kartu dan panel), `f44db05` (mutasi), `9cd22e1` (bahan baku) | Selesai (keputusan TB1a sampai TB7a; Catatan dari fase UI/UX 11 Oktober 2026) |
-| Tabel seragam: sembilan halaman berikutnya | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Penyesuaian backend `ridho` `7d28135` | `f338c74` (pembayaran uji mutasi kas), `cfaaa92` (fixme hapus bahan baku) | Selesai (keputusan RG1a sampai RG8a; Catatan dari penyesuaian backend `ridho` `7d28135`) |
+| Tabel seragam: empat belas halaman berikutnya | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -123,7 +124,7 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: tabel seragam di sembilan halaman
+## Pekerjaan berikutnya: tabel seragam di empat belas halaman
 
 Fase rancangan dan perbaikan UI/UX berjalan sejak 11 Oktober 2026, dan
 seluruh rancangannya ditentukan pemilik proyek: tidak ada usulan desain
@@ -132,7 +133,8 @@ UI/UX). Dashboard outlet, token warna utama, dasar tabel, dan enam halaman
 tabel sudah selesai (Catatan dari fase UI/UX 11 Oktober 2026).
 
 Pekerjaan berikutnya, atas arahan pemilik proyek, adalah menyeragamkan
-tabel di sembilan halaman berikut mengikuti keputusan TB1a sampai TB7a:
+tabel di empat belas halaman berikut mengikuti keputusan TB1a sampai TB7a
+(cakupan RG3a):
 
 | Halaman | Berkas |
 |---|---|
@@ -142,30 +144,83 @@ tabel di sembilan halaman berikut mengikuti keputusan TB1a sampai TB7a:
 | `/dashboard/outlet/inventaris/pengajuanStok` dan `/dashboard/gudang/pengajuanStok` | `features/pengajuan-stok/halaman-daftar-pengajuan-stok.tsx` |
 | `/dashboard/gudang/transferStok` | `features/transfer-stok/halaman-daftar-transfer.tsx` |
 | `/dashboard/outlet/shift` dan `/dashboard/gudang/shift` | `features/shift/halaman-shift.tsx` |
+| `/dashboard/outlet/reservasi/aset` | `app/dashboard/outlet/reservasi/aset/page.tsx` |
+| `/dashboard/outlet/reservasi/tarif` | `app/dashboard/outlet/reservasi/tarif/page.tsx` |
+| `/dashboard/outlet/reservasi/tipeAset` | `app/dashboard/outlet/reservasi/tipeAset/page.tsx` |
+| `/dashboard/outlet/pola-roster` dan `/dashboard/gudang/pola-roster` | `features/pola-roster/halaman-pola-roster.tsx` |
 
 Pemetaan halaman ke berkas di atas diturunkan dari nama berkas hasil
-pencarian `<table`, dan belum dibuktikan dari isi tiap rute. Isi halaman
-dan spec-nya belum dibaca.
+pencarian `<table`, dan belum dibuktikan dari isi tiap rute. Keempat
+berkas terakhir ditemukan pada 16 Oktober 2026: semuanya menulis
+`<table>` sendiri tanpa `DataTable`, dengan kepala kolom berlatar
+(`bg-krem` di ketiga halaman reservasi, `#F8F3EB` di pola roster). Isi
+halaman dan spec-nya belum dibaca. Kesepuluh berkas lebih dari 150 baris
+(244 sampai 539), sehingga diunggah, bukan dibaca lewat terminal.
 
 Cara kerja tiap halaman mengikuti mutasi arus kas (`f44db05`) dan bahan
 baku (`9cd22e1`): halaman dan spec terdampaknya dibaca utuh, kolom yang
 tetap di tabel dan yang pindah ke dialog rincian diusulkan, pemilik proyek
 menyetujui, lalu perubahan diterapkan dan di-commit per halaman atau per
-kelompok modul. Sesudah sembilan halaman ini masih tersisa tabel rincian,
-kalender jadwal, dan butir lain di Utang kecil dari fase UI/UX.
+kelompok modul. Sesudah empat belas halaman ini masih tersisa tabel
+rincian, kalender jadwal, dan butir lain di Utang kecil dari fase UI/UX.
+Sesudah tabel seragam, cakupan daftar penjualan pindah ke filter
+`locationID` server (RG4a); sampai dikerjakan, RH2b tetap berlaku.
 
-Langkah pertama sesi berikutnya: backend di-`fetch` dan dibandingkan
-dengan acuan (`cara-kerja.md`), lalu pemetaan di bawah. Suite e2e penuh
-tidak dijalankan di awal sesi; harapan hitungannya 455 lolos dan 14
-skipped (`pengujian.md`). Backend lokal berada di cabang `ridho`
-`2dd57aa`.
+Langkah pertama sesi berikutnya: backend di-`fetch` dan setiap cabang
+remote dihitung maju dan mundurnya terhadap acuan (`cara-kerja.md`), lalu
+pemetaan di bawah. Suite e2e penuh tidak dijalankan di awal sesi; harapan
+hitungannya 456 lolos dan 13 skipped (`pengujian.md`). Backend lokal
+berada di cabang `ridho` `7d28135`.
 
 ```bash
-BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; git -C "$BE" --no-pager log --oneline --remotes --not HEAD | head -20
+BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in $(git -C "$BE" for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -v '^origin$' | grep -v '/HEAD$'); do echo "$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...$r | tr '\t' ' ')"; done
 cd ~/Documents/frontend-web
-wc -l app/dashboard/outlet/inventaris/stok/page.tsx app/dashboard/gudang/inventaris/page.tsx features/jurnal-stok/halaman-jurnal-stok.tsx features/pengajuan-stok/halaman-daftar-pengajuan-stok.tsx features/transfer-stok/halaman-daftar-transfer.tsx features/shift/halaman-shift.tsx
+wc -l app/dashboard/outlet/inventaris/stok/page.tsx app/dashboard/gudang/inventaris/page.tsx features/jurnal-stok/halaman-jurnal-stok.tsx features/pengajuan-stok/halaman-daftar-pengajuan-stok.tsx features/transfer-stok/halaman-daftar-transfer.tsx features/shift/halaman-shift.tsx app/dashboard/outlet/reservasi/aset/page.tsx app/dashboard/outlet/reservasi/tarif/page.tsx app/dashboard/outlet/reservasi/tipeAset/page.tsx features/pola-roster/halaman-pola-roster.tsx
 grep -rlE '<table\b' app features components | grep -v 'components/ui/' | sort
 ```
+
+## Catatan dari penyesuaian backend `ridho` `7d28135`
+
+Dikerjakan pada 16 Oktober 2026 dalam dua commit test, atas keputusan
+pemilik proyek mendahulukan penyesuaian backend sebelum tabel (RG1a).
+`origin/yoga` maju sembilan commit dan `origin/nizar` satu commit di atas
+`ridho` `2dd57aa`, ke arah yang berbeda, sehingga `ridho` di-fast-forward
+ke `yoga` `723b12f`, lalu `nizar` `38f523a` digabung menjadi `7d28135` dan
+di-push pada hari yang sama (`backend.md`).
+
+| Commit | Isi |
+|---|---|
+| `f338c74` | Test rincian pembayaran mutasi kas menyiapkan penjualan lunasnya sendiri (RG5a) |
+| `cfaaa92` | `test.fixme` hapus bahan baku yang baru dibuat dilepas (butir 143) |
+
+- Konflik gabungan hanya di `docs/pengembangan/klien.md` backend, dan
+  diselesaikan menurut RG2a. Hanya berkas itu dan
+  `docs/pengembangan/status.md` backend yang disentuh kedua sisi; setiap
+  berkas yang diubah satu sisi sama persis dengan versi sisinya. Jest
+  modul yang disentuh: 43 suite, 1.644 test lolos.
+- Permission diselaraskan: `delete-beban-operasional` dilepas dari tiga
+  role Owner lalu dihapus, seed sinkron 140, dan ketiga Owner memegang 137
+  izin (tanpa tiga izin kelola permission yang dibatasi untuk platform).
+  Penjualan lama diberi lokasi lewat `npm run db:lokasi-penjualan`: 996
+  diisi, dan 4 penjualan toko tanpa lokasi tetap null. `npm run db:indeks`
+  tidak mengubah apa pun, dan cache izin di Redis kosong.
+- Suite e2e penuh terhadap `7d28135`: 453 lolos, 1 gagal, dan 15 skipped.
+  Yang gagal habis waktu sesaat di hapus tarif, lalu lolos 9 dari 9 saat
+  diulang. Lewatan baru di test rincian pembayaran bergantung pada urutan
+  spec, bukan regresi backend (RG5a).
+- Terbukti lewat permintaan nyata (RG6a): butir 144, 145, dan 147, serta
+  B89 sampai B94 Yoga untuk beban. Butir 143 terbukti lewat e2e
+  (`cfaaa92`). Siklus bukti beban meninggalkan satu beban VOID dan
+  kategori fixture "E2E Kategori Beban" (RG7a); saldo akun kas kembali
+  utuh.
+- Tidak ada temuan backend baru, sehingga tidak ada laporan untuk tim
+  backend. Kategori beban yang dikirim dengan `_id` sesuai kontrak backend
+  (tanpa mapper).
+- Yoga dan Nizar diberi tahu gabungan dan penyelesaian konfliknya,
+  termasuk dokumen status Yoga yang masih menulis P22 belum di-commit.
+- Vitest 653 lolos di 79 berkas, tidak berubah.
+- Keputusan: `keputusan.md` (Penyesuaian backend `ridho` `7d28135`, RG1a
+  sampai RG8a).
 
 ## Catatan dari fase UI/UX 11 Oktober 2026
 
@@ -1330,10 +1385,14 @@ Yang masih berlaku:
   berupa teks. Sebagian besar halaman menulis `header` sebagai komponen,
   sehingga kartu baris di HP menampilkan nilai tanpa label. Dilengkapi
   saat tiap halaman dirapikan.
-- 19 berkas masih memakai `<table>` yang ditulis sendiri: sembilan halaman
-  di Pekerjaan berikutnya (enam berkas), tabel rincian di halaman detail
-  dan form, dan kalender jadwal (`features/jadwal/grid-jadwal.tsx`), yang
-  perlu pratinjau tersendiri (keputusan TB4a).
+- 19 berkas masih memakai `<table>` yang ditulis sendiri: empat belas
+  halaman di Pekerjaan berikutnya (sepuluh berkas), tabel rincian di
+  halaman detail dan form (delapan berkas, termasuk
+  `features/jadwal/langkah-dua.tsx`), dan kalender jadwal
+  (`features/jadwal/grid-jadwal.tsx`), yang perlu pratinjau tersendiri
+  (keputusan TB4a). Sampai 16 Oktober 2026 daftar aset, tarif, tipe aset,
+  dan pola roster tersirat masuk tabel rincian, padahal keempatnya tabel
+  daftar (RG3a).
 - Daftar akun admin dan tab pajak per produk
   (`features/pajak/tab-pajak-produk.tsx`) belum ditinjau terhadap aturan
   tabel yang baru.
@@ -1348,18 +1407,38 @@ Yang masih berlaku:
   dan warna di luar lima warna utama. Tipografi dan spasi juga belum.
 - Bayangan kartu baris memakai `filter` pada elemen `tr`. Di browser yang
   tidak mendukungnya, kartu tampil dengan bingkai saja.
-- Suite e2e penuh belum dijalankan ulang sejak `93490bb`; harapannya tetap
-  455 lolos dan 14 skipped, karena perubahan spec sesudahnya tidak
-  menambah atau mengurangi skenario.
+- Suite e2e penuh dijalankan ulang pada 16 Oktober 2026 terhadap backend
+  `ridho` `7d28135` (Catatan dari penyesuaian backend `ridho` `7d28135`);
+  harapan sesudahnya 456 lolos dan 13 skipped.
+
+### Utang kecil dari penyesuaian backend `ridho` `7d28135`
+
+- Lampiran A (`kontrak/route-backend.md`) tertinggal: masih mencatat
+  `DELETE /bebanoperasional/:id`, yang sudah dibuang backend.
+  Dibangkitkan ulang hanya atas perintah pemilik proyek (RG8a).
+- Belum dibuktikan dari web: penyaringan beban VOID di laporan laba rugi
+  (butir 132), cache daftar beban saat kategori berubah (butir 135),
+  penolakan beban saat saldo kurang atau akun nonaktif (butir 133), serta
+  bentuk `tanggal`, batas `keterangan`, dan pembatas laju beban (butir
+  137).
+- Empat penjualan toko uji yang belum punya lokasi tetap tanpa
+  `locationID`, sesuai rancangan backend.
+- Kategori fixture "E2E Kategori Beban" dan satu beban VOID menetap di
+  basis data development (RG7a).
+- Pemilik proyek memutuskan untuk backend pada 17 Oktober 2026: tanggal
+  lampau di beban operasional dan jurnal transfer hanya untuk Owner, dan
+  peran lain memakai waktu server hari ini WIB. Halaman pengeluaran nanti
+  mengikuti aturan itu; Pindah Dana tidak terdampak karena tidak mengirim
+  tanggal (DN3a).
 
 ### Utang kecil dari penyesuaian backend `ridho` `2dd57aa`
 
-- Hapus bahan baku selalu ditolak 409 sampai backend tidak menghitung
-  entri stok otomatis sebagai keterkaitan (`kontrak/temuan.md` butir
-  143); skenarionya `test.fixme`, dan setiap run meninggalkan satu bahan
-  uji.
-- Cakupan daftar penjualan pindah ke filter server begitu setiap
-  penjualan punya `locationID` (butir 144, RH2b).
+- Hapus bahan baku yang baru dibuat diperbaiki backend di `7d28135`
+  (`kontrak/temuan.md` butir 143), dan `test.fixme`-nya dilepas
+  (`cfaaa92`).
+- Cakupan daftar penjualan pindah ke filter server: syaratnya terpenuhi
+  di `7d28135` (butir 144), dan pekerjaannya dijadwalkan sesudah tabel
+  seragam (RG4a).
 - Izin pembelian stok belum masuk template role, dan modul pembelian
   stok belum punya halaman di web (RH6a). Izin stock adjustment per
   ruang juga belum masuk template role (RH3a).
@@ -1367,8 +1446,8 @@ Yang masih berlaku:
   cache produk saat pajak berubah (`kontrak/README.md`).
 - Hapus aset yang punya booking (butir 52) dan hapus kategori yang
   dipakai produk (butir 12) belum diuji dari web.
-- Nama penyetuju di daftar pengajuan stok kosong (butir 145); belum
-  dipakai web.
+- Nama penyetuju di daftar pengajuan stok terisi sejak `7d28135` (butir
+  145); belum dipakai web.
 
 ### Utang kecil dari penyesuaian backend `nizar`
 
@@ -1377,7 +1456,8 @@ Yang masih berlaku:
   cabang itu digabung ulang dengan pemeriksaan kelengkapan
   (`backend.md`), lalu kontrak dicocokkan ulang. Cabang uji lokal
   `uji-yoga-nizar` sudah dihapus (8 Oktober 2026).
-  Sejak 11 Oktober 2026 `ridho` berada di `2dd57aa`.
+  Sejak 11 Oktober 2026 `ridho` berada di `2dd57aa`. Sejak 16 Oktober 2026
+  di `7d28135` (gabungan `yoga` `723b12f` dan `nizar` `38f523a`).
 - Indeks pelanggan di basis data development belum sesuai skema
   (`kontrak/temuan.md` butir 142); dibiarkan sebagai bukti sampai backend
   menyediakan migrasi indeks.
@@ -1388,6 +1468,8 @@ Yang masih berlaku:
 - Penyesuaian terhadap `yoga` `55328f1` selesai di `50e6485` dan
   `f64b518`. Yang tersisa: pengeluaran tetap ditunda sampai
   `kontrak/temuan.md` butir 131 sampai 134 diperbaiki backend (NZ11a).
+  Butir itu diperbaiki di `7d28135` dan terbukti lewat permintaan nyata;
+  pengeluaran tetap ditunda sampai dijadwalkan pemilik proyek (RG6a).
 - Bagian Sesi Booking di detail penjualan memakai tata letak sederhana di
   atas grid informasi; penempatannya menunggu fase UI/UX.
 - Timeline reservasi tidak punya aksi Tandai Selesai (NZ7a). Booking lama
