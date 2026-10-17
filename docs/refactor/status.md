@@ -101,7 +101,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Token warna utama | `584a2d8` (lima warna), `ba28f25` (krem dan permukaan) | Selesai (keputusan WR1a sampai WR4a; Catatan dari fase UI/UX 11 Oktober 2026) |
 | Tabel seragam: dasar tabel, panel pembungkus, mutasi arus kas, bahan baku | `93490bb` (dasar), `cc1092e` (kartu dan panel), `f44db05` (mutasi), `9cd22e1` (bahan baku) | Selesai (keputusan TB1a sampai TB7a; Catatan dari fase UI/UX 11 Oktober 2026) |
 | Penyesuaian backend `ridho` `7d28135` | `f338c74` (pembayaran uji mutasi kas), `cfaaa92` (fixme hapus bahan baku) | Selesai (keputusan RG1a sampai RG8a; Catatan dari penyesuaian backend `ridho` `7d28135`) |
-| Tabel seragam: empat belas halaman berikutnya | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Tabel seragam K-A: jurnal stok dan pengajuan stok | `4677447` (pilihan ukuran), `9b06283` (jurnal stok), `fc6ddd3` (warna keluar mutasi), `20e332f` (pengajuan stok) | Selesai (keputusan TB8a sampai TB12a; Catatan dari tabel seragam K-A) |
+| Tabel seragam K-C, K-B, K-D, dan K-E: sepuluh halaman berikutnya | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -124,44 +125,42 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: tabel seragam di empat belas halaman
+## Pekerjaan berikutnya: tabel seragam K-C, transfer stok gudang
 
 Fase rancangan dan perbaikan UI/UX berjalan sejak 11 Oktober 2026, dan
-seluruh rancangannya ditentukan pemilik proyek: tidak ada usulan desain
-yang diterapkan tanpa pratinjau yang disetujuinya (`keputusan.md`, Fase
-UI/UX). Dashboard outlet, token warna utama, dasar tabel, dan enam halaman
-tabel sudah selesai (Catatan dari fase UI/UX 11 Oktober 2026).
+seluruh rancangannya ditentukan pemilik proyek lewat pratinjau
+(`keputusan.md`, Fase UI/UX). Kelompok K-A selesai (Catatan dari tabel
+seragam K-A), dan urutan kelompok mengikuti TB8a.
 
-Pekerjaan berikutnya, atas arahan pemilik proyek, adalah menyeragamkan
-tabel di empat belas halaman berikut mengikuti keputusan TB1a sampai TB7a
-(cakupan RG3a):
+Sisa tabel seragam, sepuluh halaman di delapan berkas (cakupan RG3a):
 
-| Halaman | Berkas |
-|---|---|
-| `/dashboard/outlet/inventaris/stok` | `app/dashboard/outlet/inventaris/stok/page.tsx` |
-| `/dashboard/gudang/inventaris` | `app/dashboard/gudang/inventaris/page.tsx` |
-| `/dashboard/outlet/inventaris/jurnalStok` dan `/dashboard/gudang/jurnalStok` | `features/jurnal-stok/halaman-jurnal-stok.tsx` |
-| `/dashboard/outlet/inventaris/pengajuanStok` dan `/dashboard/gudang/pengajuanStok` | `features/pengajuan-stok/halaman-daftar-pengajuan-stok.tsx` |
-| `/dashboard/gudang/transferStok` | `features/transfer-stok/halaman-daftar-transfer.tsx` |
-| `/dashboard/outlet/shift` dan `/dashboard/gudang/shift` | `features/shift/halaman-shift.tsx` |
-| `/dashboard/outlet/reservasi/aset` | `app/dashboard/outlet/reservasi/aset/page.tsx` |
-| `/dashboard/outlet/reservasi/tarif` | `app/dashboard/outlet/reservasi/tarif/page.tsx` |
-| `/dashboard/outlet/reservasi/tipeAset` | `app/dashboard/outlet/reservasi/tipeAset/page.tsx` |
-| `/dashboard/outlet/pola-roster` dan `/dashboard/gudang/pola-roster` | `features/pola-roster/halaman-pola-roster.tsx` |
+| Kelompok | Halaman | Berkas |
+|---|---|---|
+| K-C | `/dashboard/gudang/transferStok` | `features/transfer-stok/halaman-daftar-transfer.tsx` |
+| K-B | `/dashboard/outlet/inventaris/stok` | `app/dashboard/outlet/inventaris/stok/page.tsx` |
+| K-B | `/dashboard/gudang/inventaris` | `app/dashboard/gudang/inventaris/page.tsx` |
+| K-D | `/dashboard/outlet/shift` dan `/dashboard/gudang/shift` | `features/shift/halaman-shift.tsx` |
+| K-D | `/dashboard/outlet/pola-roster` dan `/dashboard/gudang/pola-roster` | `features/pola-roster/halaman-pola-roster.tsx` |
+| K-E | `/dashboard/outlet/reservasi/aset` | `app/dashboard/outlet/reservasi/aset/page.tsx` |
+| K-E | `/dashboard/outlet/reservasi/tarif` | `app/dashboard/outlet/reservasi/tarif/page.tsx` |
+| K-E | `/dashboard/outlet/reservasi/tipeAset` | `app/dashboard/outlet/reservasi/tipeAset/page.tsx` |
 
-Pemetaan halaman ke berkas di atas diturunkan dari nama berkas hasil
-pencarian `<table`, dan belum dibuktikan dari isi tiap rute. Keempat
-berkas terakhir ditemukan pada 16 Oktober 2026: semuanya menulis
-`<table>` sendiri tanpa `DataTable`, dengan kepala kolom berlatar
-(`bg-krem` di ketiga halaman reservasi, `#F8F3EB` di pola roster). Isi
-halaman dan spec-nya belum dibaca. Kesepuluh berkas lebih dari 150 baris
-(244 sampai 539), sehingga diunggah, bukan dibaca lewat terminal.
+Spec terdampak per kelompok, dari rute yang disebut spec: K-C
+`alur-transfer-stok`; K-B `lihat-stok` dan `memuat-stok`; K-D
+`crud-shift`, `crud-pola-roster`, dan `generate-jadwal`; K-E `crud-aset`,
+`crud-tarif`, `crud-tipeAset`, dan `guard-dashboard`. Rute shift dan pola
+roster memakai `HalamanShiftRuang` dan `HalamanPolaRosterRuang`; bahwa
+keduanya memuat berkas di tabel itu belum dibuktikan dari isinya. Daftar
+aset, tarif, tipe aset, dan pola roster menulis `<table>` sendiri dengan
+kepala kolom berlatar (`bg-krem` di ketiga halaman reservasi, `#F8F3EB`
+di pola roster), melanggar TB2a dan TB7a.
 
-Cara kerja tiap halaman mengikuti mutasi arus kas (`f44db05`) dan bahan
-baku (`9cd22e1`): halaman dan spec terdampaknya dibaca utuh, kolom yang
-tetap di tabel dan yang pindah ke dialog rincian diusulkan, pemilik proyek
-menyetujui, lalu perubahan diterapkan dan di-commit per halaman atau per
-kelompok modul. Sesudah empat belas halaman ini masih tersisa tabel
+Cara kerja tiap kelompok mengikuti K-A: halaman, spec terdampak, dan
+acuan pola (`components/ui/data-table.tsx`, mutasi kas, dan jurnal stok)
+dikemas dalam satu arsip lalu diunggah, karena berkasnya di atas 150
+baris; rancangan diajukan sebagai pratinjau; aksi baris di menu titik
+tiga, paginasi klien dengan `pilihanUkuranKlien`, dan teks keluar
+`red-800` (TB11a, TB12a). Sesudah keempat kelompok masih tersisa tabel
 rincian, kalender jadwal, dan butir lain di Utang kecil dari fase UI/UX.
 Sesudah tabel seragam, cakupan daftar penjualan pindah ke filter
 `locationID` server (RG4a); sampai dikerjakan, RH2b tetap berlaku.
@@ -169,15 +168,44 @@ Sesudah tabel seragam, cakupan daftar penjualan pindah ke filter
 Langkah pertama sesi berikutnya: backend di-`fetch` dan setiap cabang
 remote dihitung maju dan mundurnya terhadap acuan (`cara-kerja.md`), lalu
 pemetaan di bawah. Suite e2e penuh tidak dijalankan di awal sesi; harapan
-hitungannya 456 lolos dan 13 skipped (`pengujian.md`). Backend lokal
-berada di cabang `ridho` `7d28135`.
+hitungannya 458 lolos dan 13 skipped (`pengujian.md`). Backend lokal
+berada di cabang `ridho` `00de455`.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in $(git -C "$BE" for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -v '^origin$' | grep -v '/HEAD$'); do echo "$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...$r | tr '\t' ' ')"; done
 cd ~/Documents/frontend-web
-wc -l app/dashboard/outlet/inventaris/stok/page.tsx app/dashboard/gudang/inventaris/page.tsx features/jurnal-stok/halaman-jurnal-stok.tsx features/pengajuan-stok/halaman-daftar-pengajuan-stok.tsx features/transfer-stok/halaman-daftar-transfer.tsx features/shift/halaman-shift.tsx app/dashboard/outlet/reservasi/aset/page.tsx app/dashboard/outlet/reservasi/tarif/page.tsx app/dashboard/outlet/reservasi/tipeAset/page.tsx features/pola-roster/halaman-pola-roster.tsx
+wc -l features/transfer-stok/halaman-daftar-transfer.tsx features/transfer-stok/filter.ts features/transfer-stok/tampilan.ts tests/e2e/inventaris/transferStok/alur-transfer-stok.spec.ts
 grep -rlE '<table\b' app features components | grep -v 'components/ui/' | sort
 ```
+
+## Catatan dari tabel seragam K-A
+
+Dikerjakan pada 17 Oktober 2026 dalam empat commit, setelah `ridho`
+di-fast-forward ke `00de455` (dua commit dokumen `nizar`, tanpa perubahan
+kode). Setiap rancangan ditunjukkan sebagai pratinjau dan disetujui
+pemilik proyek sebelum diterapkan.
+
+| Commit | Isi |
+|---|---|
+| `4677447` | `DataTable`: pilihan ukuran klien opt-in dan test integrasi pertamanya (TB11a) |
+| `9b06283` | Jurnal stok: `DataTable`, dialog rincian, dan teks keluar `red-800` (TB9a, TB12a) |
+| `fc6ddd3` | Mutasi kas: teks keluar `red-800` (TB12a) |
+| `20e332f` | Pengajuan stok: `DataTable` dan menu titik tiga (TB10a) |
+
+- Rute pemakai komponen bersama dibuktikan dari `app/`: jurnal stok dan
+  pengajuan stok dipakai ruang outlet dan gudang.
+- Spec yang menghitung seluruh baris kini membandingkan halaman pertama
+  (paling banyak 10) dan kaki "N total data"; tombol baris diganti menu
+  titik tiga.
+- Gerbang ESLint pertama menolak warning `react-hooks/incompatible-library`
+  di `data-table.tsx` yang sudah tercatat dan sengaja dibiarkan; yang
+  diperbaiki gerbangnya, bukan kodenya (`cara-kerja.md`).
+- Pemilik proyek menilai `red-600` terlalu terang dan memilih `red-800`
+  dari pembanding empat warna; `red-700` yang direkomendasikan tidak
+  dipilih (TB12a).
+- Vitest 659 lolos di 81 berkas. Spec terdampak lolos per commit; suite
+  penuh tidak dijalankan (`pengujian.md`).
+- Keputusan: `keputusan.md` (Fase UI/UX, TB8a sampai TB12a).
 
 ## Catatan dari penyesuaian backend `ridho` `7d28135`
 
@@ -1379,14 +1407,15 @@ Yang masih berlaku:
 
 ### Utang kecil dari fase UI/UX 11 Oktober 2026
 
-- `DataTable` belum punya test integrasi. Teks kaki, nama tombol halaman,
-  dan label sel di HP hanya terbukti lewat spec e2e halaman pemakainya.
+- `DataTable` punya test integrasi untuk pemilih ukuran klien sejak
+  `4677447`. Teks kaki lainnya, nama tombol halaman, dan label sel di HP
+  masih hanya terbukti lewat spec e2e halaman pemakainya.
 - Label sel di HP hanya tampil bila kolom punya `meta.label` atau `header`
   berupa teks. Sebagian besar halaman menulis `header` sebagai komponen,
   sehingga kartu baris di HP menampilkan nilai tanpa label. Dilengkapi
   saat tiap halaman dirapikan.
-- 19 berkas masih memakai `<table>` yang ditulis sendiri: empat belas
-  halaman di Pekerjaan berikutnya (sepuluh berkas), tabel rincian di
+- 17 berkas masih memakai `<table>` yang ditulis sendiri (19 sebelum
+  K-A): sepuluh halaman di Pekerjaan berikutnya (delapan berkas), tabel rincian di
   halaman detail dan form (delapan berkas, termasuk
   `features/jadwal/langkah-dua.tsx`), dan kalender jadwal
   (`features/jadwal/grid-jadwal.tsx`), yang perlu pratinjau tersendiri
@@ -1457,7 +1486,8 @@ Yang masih berlaku:
   (`backend.md`), lalu kontrak dicocokkan ulang. Cabang uji lokal
   `uji-yoga-nizar` sudah dihapus (8 Oktober 2026).
   Sejak 11 Oktober 2026 `ridho` berada di `2dd57aa`. Sejak 16 Oktober 2026
-  di `7d28135` (gabungan `yoga` `723b12f` dan `nizar` `38f523a`).
+  di `7d28135` (gabungan `yoga` `723b12f` dan `nizar` `38f523a`). Sejak
+  17 Oktober 2026 di `00de455`, fast-forward dua commit dokumen `nizar`.
 - Indeks pelanggan di basis data development belum sesuai skema
   (`kontrak/temuan.md` butir 142); dibiarkan sebagai bukti sampai backend
   menyediakan migrasi indeks.

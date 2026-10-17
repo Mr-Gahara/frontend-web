@@ -96,6 +96,15 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per tabel seragam K-A** (commit `20e332f`): 659 test unit dan
+integrasi lolos di 81 berkas, bertambah enam: tiga test integrasi
+`DataTable` (`4677447`) dan tiga test `teksJumlahJurnal` (`9b06283`).
+Suite penuh tidak dijalankan; spec terdampak lolos per commit (11 lolos
+untuk mutasi kas dan bahan baku, 17 lolos dan 1 skipped untuk jurnal stok
+dan ruang gudang, 6 lolos untuk mutasi kas, serta 13 lolos dan 2 skipped
+untuk pengajuan stok). Dua skenario baru di spec jurnal stok menambah
+harapan suite penuh menjadi 458 lolos dan 13 skipped; angka itu hitungan.
+
 **Baseline per penyesuaian backend `ridho` `7d28135`** (commit
 `cfaaa92`): 653 test unit dan integrasi lolos di 79 berkas, tidak
 berubah. Suite penuh 16 Oktober 2026 pukul 22.02 terhadap `7d28135`,
@@ -1389,7 +1398,10 @@ Urutan debug kegagalan e2e di atas).
   server, filter Radix Select dibuka lewat teks nilainya, simulasi kegagalan
   GET dengan `page.route` pada endpoint lokasi yang dipakai jalurnya, dan
   skenario lintas outlet (pilih satu outlet, dengan pemeriksaan bahwa
-  permintaan membawa `locationID`) sebagai `test.fixme` bersyarat.
+  permintaan membawa `locationID`) sebagai `test.fixme` bersyarat. Sejak
+  `9b06283` jumlah baris dibandingkan dengan halaman pertama (paling
+  banyak 10) ditambah kaki "N total data", dan dialog rincian dicocokkan
+  dengan jurnal terbaru menurut urutan yang sama dengan `saringJurnal`.
 - `tests/e2e/inventaris/stok/lihat-stok.spec.ts`: penunggu dipasang setelah
   `goto(..., { waitUntil: "commit" })`, harapan dihitung dari respons
   permintaan itu sendiri, operasi tulis yang mengembalikan nilai semula,
@@ -1413,7 +1425,8 @@ Urutan debug kegagalan e2e di atas).
   dengan tampilan (`diOutlet` dan `diGudang` lewat `arahBenar`), payload buat
   diperiksa lewat `page.route` yang menjawab gagal sehingga tidak ada data
   tersimpan, dan label tab diambil dari
-  kode.
+  kode. Sejak `20e332f` baris dibuka lewat menu titik tiga, dan jumlah
+  baris dibandingkan dengan halaman pertama ditambah kaki "N total data".
 - `tests/e2e/inventaris/pengajuanStok/alur-pengajuan-stok.spec.ts`: spec
   pembanding alur tulis yang ditulis dan dijalankan terhadap kode lama
   sebelum migrasi (pilihan A, `status.md` Catatan dari modul inventaris).

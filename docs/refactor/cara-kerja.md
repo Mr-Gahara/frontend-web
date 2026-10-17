@@ -1746,6 +1746,34 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   `penjualan/`, sehingga data yang dibuat spec penjualan belum ada saat
   spec mutasi kas berjalan (RG5a).
 
+### Pelajaran dari tabel seragam K-A (17 Oktober 2026)
+
+- **Gerbang ESLint menerima warning yang sudah tercatat, bukan log
+  kosong.** Berkas yang memanggil `useReactTable` selalu memuat satu
+  `react-hooks/incompatible-library` yang sengaja dibiarkan (`status.md`).
+  Gerbangnya mensyaratkan ringkasan `✖ 1 problem (0 errors, 1 warning)`
+  dengan aturan itu; warning lain tetap menghentikan commit.
+- **Angka harapan `ls` dihitung dari berkas yang benar-benar dibuat
+  blok**: tiga per pasangan teks, empat per rentang, ditambah berkas
+  `.berkas` yang dibuat perulangan lebih dulu. Angka yang diperkirakan
+  meleset tiga kali pada 16 dan 17 Oktober 2026.
+- **Berkas marka `ganti-rentang.js` disimpan di luar direktori pasangan**,
+  karena `terapkan-dok.js` membaca setiap nama berkas di direktori itu.
+- **`Select` Radix di jsdom butuh polyfill** `ResizeObserver`,
+  `hasPointerCapture`, `releasePointerCapture`, dan `scrollIntoView` di
+  `beforeAll`; dengan itu `user-event` 14 membuka dan memilih opsinya
+  (`tests/integration/components/data-table/data-table.test.tsx`).
+- **Warna dipisah menurut arti sebelum diganti.** `text-red-600` di modul
+  keuangan dipakai untuk uang keluar, pesan galat, dan status VOID;
+  penggantian massal hanya untuk berkas yang seluruh pemakaiannya satu
+  arti (jurnal stok), selebihnya per tempat (mutasi kas).
+- **E2e didahului pemeriksaan kedua server.** `ERR_CONNECTION_REFUSED` di
+  langkah pertama berarti server mati, bukan kode yang gagal; blok
+  pemeriksaan memastikan port 3000 dan 4000 menjawab lewat `curl`
+  sebelum Playwright dijalankan.
+- **Blok penerap yang panjang dipecah sejak awal** (pemilik proyek, 17
+  Oktober 2026), masing-masing diakhiri hitungan `ls` sebagai pengaman.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:

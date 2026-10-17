@@ -1722,6 +1722,27 @@ yang izinnya tidak dipegang tidak dipasang.
 - **TB7a: semua tabel daftar memakai `DataTable`**, dengan aksi baris di
   menu titik tiga (`9cd22e1` untuk bahan baku; keputusan rancangan butir
   26).
+- **TB8a: tabel seragam dikerjakan per kelompok**, berurutan K-A (jurnal
+  stok dan pengajuan stok), K-C (transfer stok gudang), K-B (stok outlet
+  dan inventaris gudang), K-D (shift dan pola roster), lalu K-E
+  (reservasi), karena K-A menguji pola `DataTable` di ruang outlet dan
+  gudang sekaligus, dan reservasi masih memakai palet lokal (17 Oktober
+  2026).
+- **TB9a: tabel jurnal stok berkolom Barang (dengan lokasi), Waktu,
+  Alasan, Jumlah, dan menu titik tiga.** Barang di depan sebagai judul
+  kartu di HP; pencatat dan keterangan utuh pindah ke dialog rincian
+  (`9b06283`).
+- **TB10a: aksi baris pengajuan stok di menu titik tiga langsung membuka
+  halaman detail**, tanpa dialog ringkasan: "Tinjau" di gudang,
+  "Lanjutkan draft" atau "Lihat detail" di outlet (`20e332f`).
+- **TB11a: paginasi klien memakai pilihan 10, 20, dan 50 yang opt-in**
+  lewat `pilihanUkuranKlien`; tabel yang tidak mengirimnya tetap 10 baris
+  tanpa pemilih, dan pemilihnya dibuktikan lewat test integrasi
+  `DataTable` (`4677447`).
+- **TB12a: teks jumlah keluar memakai `red-800`**, karena `red-600` terlalu
+  terang di atas kartu putih; masuk tetap `emerald-700`. Berlaku untuk
+  jurnal stok dan mutasi kas (`9b06283`, `fc6ddd3`); pesan galat dan
+  status VOID tetap `red-600`, dan latar ikon tetap `bg-red-500/10`.
 
 ## Keputusan rancangan yang mengikat
 
