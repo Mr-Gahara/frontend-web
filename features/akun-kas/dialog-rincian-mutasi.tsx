@@ -40,7 +40,7 @@ function IsiRincian({ mutasi, namaAkun }: { mutasi: MutasiKas; namaAkun: string 
       <DialogHeader className="flex-row items-center gap-3 pr-8 text-left">
         <span
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-            masuk ? "bg-emerald-600/10 text-emerald-700" : "bg-red-500/10 text-red-600"
+            masuk ? "bg-emerald-600/10 text-emerald-700" : "bg-red-500/10 text-red-800"
           }`}
         >
           <Ikon className="h-5 w-5" aria-hidden="true" />
@@ -57,7 +57,7 @@ function IsiRincian({ mutasi, namaAkun }: { mutasi: MutasiKas; namaAkun: string 
         <p className={KELAS_LABEL}>Jumlah</p>
         <p
           className={`font-mono text-2xl sm:text-3xl font-bold ${
-            masuk ? "text-emerald-700" : "text-red-600"
+            masuk ? "text-emerald-700" : "text-red-800"
           }`}
         >
           {teksJumlahMutasi(mutasi)}

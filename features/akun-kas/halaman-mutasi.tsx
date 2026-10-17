@@ -132,7 +132,7 @@ export function HalamanMutasi() {
         cell: ({ row }) => (
           <div
             className={`text-right font-mono font-bold ${
-              row.original.arah === "MASUK" ? "text-emerald-700" : "text-red-600"
+              row.original.arah === "MASUK" ? "text-emerald-700" : "text-red-800"
             }`}
           >
             {teksJumlahMutasi(row.original)}
