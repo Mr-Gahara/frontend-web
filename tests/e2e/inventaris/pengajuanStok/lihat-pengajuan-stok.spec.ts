@@ -54,13 +54,17 @@ async function buka(page: Page, url: string, statusBawaan: string | null) {
   return isiRespons(await page.waitForResponse(daftarPengajuan(statusBawaan)));
 }
 
+/** Ukuran halaman awal tabel pengajuan; baris di luar halaman pertama dibuktikan lewat kaki tabel. */
+const UKURAN_AWAL = 10;
+
 async function periksaJumlahBaris(page: Page, jumlah: number, pesanKosong: string) {
   const baris = page.locator("table tbody tr");
   if (jumlah === 0) {
     await expect(page.getByText(pesanKosong)).toBeVisible();
-    return;
+  } else {
+    await expect(baris).toHaveCount(Math.min(jumlah, UKURAN_AWAL));
   }
-  await expect(baris).toHaveCount(jumlah);
+  await expect(page.getByText(`${jumlah} total data`, { exact: true })).toBeVisible();
 }
 
 // Arah backend: dariLokasi adalah gudang asal barang dan keLokasi outlet
@@ -212,11 +216,13 @@ test.describe("Daftar pengajuan stok outlet", () => {
     await page.unroute(polaPost);
   });
 
-  test("tombol pada baris membuka detail pengajuan itu", async ({ page }) => {
+  test("menu titik tiga pada baris membuka detail pengajuan itu (P-A)", async ({ page }) => {
     const data = (await buka(page, URL_OUTLET, null)).filter(diOutlet);
     test.skip(data.length === 0, "Belum ada pengajuan stok");
     const baris = page.locator("table tbody tr").first();
-    await baris.getByRole("button", { name: /lanjutkan draft|detail/i }).click();
+    await baris.getByRole("button", { name: "Buka menu" }).click();
+    const harapan = data[0].status === "DRAFT" ? "Lanjutkan draft" : "Lihat detail";
+    await page.getByRole("menuitem", { name: harapan }).click();
     await page.waitForURL(new RegExp(`/dashboard/outlet/inventaris/pengajuanStok/${data[0].id}$`));
   });
 });
@@ -266,10 +272,11 @@ test.describe("Daftar pengajuan stok gudang", () => {
     await periksaJumlahBaris(page, harapan.length, KOSONG);
   });
 
-  test("tombol Tinjau membuka detail pengajuan itu", async ({ page }) => {
+  test("menu Tinjau pada baris membuka detail pengajuan itu (P-A)", async ({ page }) => {
     const data = (await bukaSemua(page)).filter(diGudang);
     test.skip(data.length === 0, "Belum ada pengajuan stok");
-    await page.locator("table tbody tr").first().getByRole("button", { name: "Tinjau" }).click();
+    await page.locator("table tbody tr").first().getByRole("button", { name: "Buka menu" }).click();
+    await page.getByRole("menuitem", { name: "Tinjau" }).click();
     await page.waitForURL(new RegExp(`/dashboard/gudang/pengajuanStok/${data[0].id}$`));
   });
 });

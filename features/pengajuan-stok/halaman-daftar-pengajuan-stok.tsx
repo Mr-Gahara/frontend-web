@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
-import type { StatusPengajuan } from "@/types/pengajuanStok";
+import type { PengajuanStok, StatusPengajuan } from "@/types/pengajuanStok";
 import type { LingkupLokasi } from "@/features/inventaris/cakupan";
 import { useSession } from "@/lib/auth/useSession";
 import { useDaftarPengajuanStok } from "./hooks";
@@ -14,17 +15,21 @@ import { tabTerlihat, type TabPengajuan } from "./izin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DataTable } from "@/components/ui/data-table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Search,
   PlusCircle,
-  PackageSearch,
   Clock,
   CheckCircle2,
   XCircle,
-  FileEdit,
-  Eye,
-  Inbox
+  Inbox,
+  MoreHorizontal,
 } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
 
@@ -51,6 +56,9 @@ const getStatusBadge = (status: StatusPengajuan, label: string) => {
       return <Badge variant="outline">{label}</Badge>;
   }
 };
+
+/** Pilihan baris per halaman (DataTable opt-in, pemilik proyek 17 Oktober 2026). */
+const PILIHAN_UKURAN = [10, 20, 50] as const;
 
 interface TeksRuang {
   judul: string;
@@ -147,6 +155,95 @@ export default function HalamanDaftarPengajuanStok({
   // Penyaringan per ruang (tipe lokasi, draf, pencarian): features/pengajuan-stok/filter.ts
   const filteredData = saringPengajuan(daftarPengajuan, ruang, debouncedSearch);
 
+  // Aksi baris di menu titik tiga (TB7a, P-A): langsung membuka halaman detail.
+  const kolom = useMemo<ColumnDef<PengajuanStok>[]>(
+    () => [
+      {
+        id: "info",
+        header: teks.kolomInfo,
+        cell: ({ row }) => (
+          <div className="flex flex-col">
+            <span className="font-bold font-mono text-navy">{row.original.nomorPengajuan}</span>
+            <span className="text-xs font-medium text-navy/50 mt-1">
+              {formatTanggal(row.original.createdAt)}
+            </span>
+          </div>
+        ),
+      },
+      {
+        id: "lokasi",
+        header: teks.kolomLokasi,
+        cell: ({ row }) =>
+          ruang === "outlet" ? (
+            <span className="font-medium text-navy/80">
+              {row.original.dariLokasi?.nama || "Gudang Pusat"}
+            </span>
+          ) : (
+            <div className="flex flex-col">
+              <span className="font-bold text-navy">
+                {row.original.keLokasi?.nama || "Outlet Tidak Dikenal"}
+              </span>
+              <span className="text-xs font-medium text-navy/50 capitalize mt-1">
+                Pembuat: {row.original.dimintaOleh?.nama || "-"}
+              </span>
+            </div>
+          ),
+      },
+      {
+        id: "item",
+        header: teks.kolomItem,
+        cell: ({ row }) => (
+          <span className="font-bold text-navy bg-navy/5 px-3 py-1 rounded-lg">
+            {row.original.items?.length || 0} Macam
+          </span>
+        ),
+      },
+      {
+        id: "status",
+        header: "Status",
+        cell: ({ row }) =>
+          getStatusBadge(row.original.status, teks.labelStatus[row.original.status] ?? row.original.status),
+      },
+      {
+        id: "aksi",
+        header: () => <div className="text-right">Aksi</div>,
+        cell: ({ row }) => {
+          const label =
+            ruang === "gudang"
+              ? "Tinjau"
+              : row.original.status === "DRAFT"
+                ? "Lanjutkan draft"
+                : "Lihat detail";
+          return (
+            <div className="flex justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 cursor-pointer text-navy/70 hover:text-navy hover:bg-navy/5"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only">Buka menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-gading border-navy/10">
+                  <DropdownMenuItem
+                    className="cursor-pointer font-bold text-navy/80"
+                    onClick={() => router.push(`${teks.urlDaftar}/${row.original.id}`)}
+                  >
+                    {label}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          );
+        },
+      },
+    ],
+    [ruang, teks, router],
+  );
+
   return (
     <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-7xl mx-auto">
       {/* HEADER SECTION */}
@@ -206,103 +303,23 @@ export default function HalamanDaftarPengajuanStok({
         </div>
       </div>
 
-      {/* TABLE SECTION */}
-      <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-krem text-xs uppercase font-bold text-navy/70">
-              <tr>
-                <th className="px-6 py-4">{teks.kolomInfo}</th>
-                <th className="px-6 py-4">{teks.kolomLokasi}</th>
-                <th className="px-6 py-4 text-center">{teks.kolomItem}</th>
-                <th className="px-6 py-4 text-center">Status</th>
-                <th className="px-6 py-4 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/5">
-              {isLoading ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <tr key={i}>
-                    <td className="px-6 py-4"><Skeleton className="h-5 w-40 bg-navy/10 mb-2" /><Skeleton className="h-4 w-24 bg-navy/10" /></td>
-                    <td className="px-6 py-4"><Skeleton className="h-5 w-32 bg-navy/10" /></td>
-                    <td className="px-6 py-4"><Skeleton className="h-5 w-16 mx-auto bg-navy/10" /></td>
-                    <td className="px-6 py-4"><Skeleton className="h-6 w-24 mx-auto bg-navy/10 rounded-full" /></td>
-                    <td className="px-6 py-4"><Skeleton className="h-8 w-24 ml-auto bg-navy/10" /></td>
-                  </tr>
-                ))
-              ) : isError ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-rose-600 font-medium">
-                    Gagal memuat pengajuan stok. Periksa koneksi, lalu muat ulang halaman.
-                  </td>
-                </tr>
-              ) : filteredData.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-navy/50 font-medium">
-                    <PackageSearch className="w-12 h-12 mx-auto mb-3 text-navy/20" />
-                    {teks.kosong}
-                  </td>
-                </tr>
-              ) : (
-                filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-gading transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-bold font-mono text-navy">
-                          {item.nomorPengajuan}
-                        </span>
-                        <span className="text-xs font-medium text-navy/50 mt-1">
-                          {formatTanggal(item.createdAt)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {ruang === "outlet" ? (
-                        <div className="flex items-center gap-2 font-medium text-navy/80">
-                          {item.dariLokasi?.nama || "Gudang Pusat"}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col">
-                          <span className="font-bold text-navy">
-                            {item.keLokasi?.nama || "Outlet Tidak Dikenal"}
-                          </span>
-                          <span className="text-xs font-medium text-navy/50 capitalize mt-1">
-                            Pembuat: {item.dimintaOleh?.nama || "-"}
-                          </span>
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="font-bold text-navy bg-navy/5 px-3 py-1 rounded-lg">
-                        {item.items?.length || 0} Macam
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      {getStatusBadge(item.status, teks.labelStatus[item.status] ?? item.status)}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Button
-                        variant={ruang === "gudang" && item.status === "SUBMITTED" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => router.push(`${teks.urlDaftar}/${item.id}`)}
-                        className={ruang === "gudang" && item.status === "SUBMITTED" ? "bg-karamel text-navy hover:bg-karamel/90 font-bold shadow-sm cursor-pointer" : "cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm"}
-                      >
-                        {ruang === "gudang" ? (
-                          <><Eye className="w-4 h-4 mr-2" /> Tinjau</>
-                        ) : item.status === "DRAFT" ? (
-                          <><FileEdit className="w-4 h-4 mr-2 text-karamel" /> Lanjutkan Draft</>
-                        ) : (
-                          <><Eye className="w-4 h-4 mr-2" /> Detail</>
-                        )}
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* TABEL: DataTable, kartu per baris (TB1a sampai TB7a) */}
+      {isError ? (
+        <p
+          role="alert"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+        >
+          Gagal memuat pengajuan stok. Periksa koneksi, lalu muat ulang halaman.
+        </p>
+      ) : (
+        <DataTable
+          columns={kolom}
+          data={filteredData}
+          loading={isLoading}
+          emptyMessage={teks.kosong}
+          pilihanUkuranKlien={PILIHAN_UKURAN}
+        />
+      )}
     </div>
   );
 }
