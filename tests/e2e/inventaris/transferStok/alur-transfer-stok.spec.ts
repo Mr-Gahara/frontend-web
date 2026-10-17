@@ -38,9 +38,12 @@ test.describe("Alur surat jalan gudang", () => {
     let dibatalkan = false;
 
     try {
-      await test.step("daftar menampilkan surat jalan dan tab menyaring status", async () => {
+      await test.step("pencarian menemukan surat jalan di daftar berpaginasi dan tab menyaring status", async () => {
         await page.reload({ waitUntil: "commit" });
         await page.waitForResponse((r) => r.request().method() === "GET" && POLA_DAFTAR.test(r.url()));
+        // Daftar dipaginasi di klien dan diurutkan server menurut tanggalKirim,
+        // sehingga baris uji dicari lewat pencarian, bukan diharapkan di halaman 1.
+        await page.getByPlaceholder("Cari No. Transfer / Outlet Tujuan...").fill(transfer.nomorTransfer);
         const baris = page.locator("tr", { hasText: transfer.nomorTransfer });
         await expect(baris).toBeVisible();
 
@@ -56,7 +59,8 @@ test.describe("Alur surat jalan gudang", () => {
       });
 
       await test.step("detail menampilkan barang, lokasi, dan tombol PENDING", async () => {
-        await page.locator("tr", { hasText: transfer.nomorTransfer }).getByRole("button", { name: /detail/i }).click();
+        await page.locator("tr", { hasText: transfer.nomorTransfer }).getByRole("button", { name: "Buka menu" }).click();
+        await page.getByRole("menuitem", { name: "Lihat detail" }).click();
         await expect(page).toHaveURL(new RegExp(`/transferStok/${transfer.id}$`));
         await expect(page.getByRole("button", { name: /kirim barang sekarang/i })).toBeVisible();
         await expect(page.getByRole("button", { name: /revisi kuantitas/i })).toBeVisible();
@@ -123,5 +127,13 @@ test.describe("Alur surat jalan gudang", () => {
     } finally {
       if (!dibatalkan) await tutupSuratJalanUji(page, auth, transfer.id);
     }
+  });
+
+  test("daftar yang gagal dimuat menampilkan pesan galat, bukan tabel kosong", async ({ page }) => {
+    // Setiap GET daftar dijawab 500; React Query mengulang sekali (retry 1).
+    await page.route(POLA_DAFTAR, (route) => route.fulfill(JAWAB_GAGAL));
+    await page.goto(URL_DAFTAR, { waitUntil: "commit" });
+    await expect(page.getByRole("alert").filter({ hasText: "Gagal memuat surat jalan" })).toBeVisible();
+    await expect(page.locator("table")).toHaveCount(0);
   });
 });

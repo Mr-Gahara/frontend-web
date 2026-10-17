@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import { useDebounce } from "@/hooks/use-debounce";
-import type { StatusTransfer } from "@/types/transferStok";
+import type { StatusTransfer, TransferStok } from "@/types/transferStok";
 import { useDaftarTransferStok } from "./hooks";
 import { filterServerTransfer, saringTransfer, type TabTransfer } from "./filter";
 import { LABEL_TAB_TRANSFER, TAB_TRANSFER } from "./tampilan";
@@ -13,17 +14,25 @@ import { LABEL_TAB_TRANSFER, TAB_TRANSFER } from "./tampilan";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DataTable } from "@/components/ui/data-table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Search,
-  PackageSearch,
   Clock,
   CheckCircle2,
   XCircle,
-  Eye,
   Truck,
   Send,
+  MoreHorizontal,
 } from "lucide-react";
+
+/** Pilihan baris per halaman (DataTable opt-in, keputusan TB11a). */
+const PILIHAN_UKURAN = [10, 20, 50] as const;
 
 // --- Helpers ---
 const formatTanggal = (iso: string | null) => {
@@ -78,8 +87,87 @@ export default function HalamanDaftarTransfer() {
   // Status disaring server; pencarian disaring di klien lewat saringTransfer
   // (nomor atau nama outlet tujuan).
   const kriteria = { status: activeTab, cari: debouncedSearch };
-  const { data: daftarTransfer = [], isLoading } = useDaftarTransferStok(filterServerTransfer(kriteria));
+  const {
+    data: daftarTransfer = [],
+    isLoading,
+    isError,
+  } = useDaftarTransferStok(filterServerTransfer(kriteria));
   const filteredData = saringTransfer(daftarTransfer, kriteria);
+
+  // Aksi baris di menu titik tiga (TB7a): seluruh status membuka halaman detail.
+  const kolom = useMemo<ColumnDef<TransferStok>[]>(
+    () => [
+      {
+        id: "info",
+        header: "Informasi Surat Jalan",
+        cell: ({ row }) => (
+          <div className="flex flex-col">
+            <span className="font-bold font-mono text-navy">{row.original.nomorTransfer}</span>
+            <span className="text-xs font-medium text-navy/50 mt-1">
+              {formatTanggal(row.original.createdAt)}
+            </span>
+          </div>
+        ),
+      },
+      {
+        id: "tujuan",
+        header: "Tujuan Pengiriman",
+        cell: ({ row }) => (
+          <div className="flex flex-col">
+            <span className="font-bold text-navy">
+              {row.original.keLokasi?.nama || "Outlet Tidak Dikenal"}
+            </span>
+            <span className="text-xs font-medium text-navy/50 mt-1 capitalize">
+              Terkait: {row.original.pengajuanStokID ? "Pengajuan Stok" : "Transfer Manual"}
+            </span>
+          </div>
+        ),
+      },
+      {
+        id: "item",
+        header: "Jumlah Item",
+        cell: ({ row }) => (
+          <span className="font-bold text-navy bg-navy/5 px-3 py-1 rounded-lg">
+            {row.original.items?.length || 0} Macam
+          </span>
+        ),
+      },
+      {
+        id: "status",
+        header: "Status",
+        cell: ({ row }) => getStatusBadge(row.original.status),
+      },
+      {
+        id: "aksi",
+        header: () => <div className="text-right">Aksi</div>,
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 cursor-pointer text-navy/70 hover:text-navy hover:bg-navy/5"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Buka menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-gading border-navy/10">
+                <DropdownMenuItem
+                  className="cursor-pointer font-bold text-navy/80"
+                  onClick={() => router.push(`/dashboard/gudang/transferStok/${row.original.id}`)}
+                >
+                  Lihat detail
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ),
+      },
+    ],
+    [router],
+  );
 
   return (
     <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-7xl mx-auto">
@@ -130,115 +218,23 @@ export default function HalamanDaftarTransfer() {
         </div>
       </div>
 
-      {/* TABLE SECTION */}
-      <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-krem text-xs uppercase font-bold text-navy/70">
-              <tr>
-                <th className="px-6 py-4">Informasi Surat Jalan</th>
-                <th className="px-6 py-4">Tujuan Pengiriman</th>
-                <th className="px-6 py-4 text-center">Jumlah Item</th>
-                <th className="px-6 py-4 text-center">Status</th>
-                <th className="px-6 py-4 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/5">
-              {isLoading ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <tr key={i}>
-                    <td className="px-6 py-4">
-                      <Skeleton className="h-5 w-40 bg-navy/10 mb-2" />
-                      <Skeleton className="h-4 w-24 bg-navy/10" />
-                    </td>
-                    <td className="px-6 py-4">
-                      <Skeleton className="h-5 w-32 bg-navy/10" />
-                    </td>
-                    <td className="px-6 py-4">
-                      <Skeleton className="h-5 w-16 mx-auto bg-navy/10" />
-                    </td>
-                    <td className="px-6 py-4">
-                      <Skeleton className="h-6 w-24 mx-auto bg-navy/10 rounded-full" />
-                    </td>
-                    <td className="px-6 py-4">
-                      <Skeleton className="h-8 w-24 ml-auto bg-navy/10" />
-                    </td>
-                  </tr>
-                ))
-              ) : filteredData.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-6 py-12 text-center text-navy/50 font-medium"
-                  >
-                    <PackageSearch className="w-12 h-12 mx-auto mb-3 text-navy/20" />
-                    Tidak ada dokumen Surat Jalan yang ditemukan.
-                  </td>
-                </tr>
-              ) : (
-                filteredData.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-gading transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-bold font-mono text-navy">
-                          {item.nomorTransfer}
-                        </span>
-                        <span className="text-xs font-medium text-navy/50 mt-1">
-                          {formatTanggal(item.createdAt)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-navy">
-                          {item.keLokasi?.nama || "Outlet Tidak Dikenal"}
-                        </span>
-                        <span className="text-xs font-medium text-navy/50 mt-1 capitalize">
-                          Terkait:{" "}
-                          {item.pengajuanStokID
-                            ? "Pengajuan Stok"
-                            : "Transfer Manual"}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="font-bold text-navy bg-navy/5 px-3 py-1 rounded-lg">
-                        {item.items?.length || 0} Macam
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      {getStatusBadge(item.status)}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Button
-                        variant={
-                          item.status === "PENDING" ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/gudang/transferStok/${item.id}`,
-                          )
-                        }
-                        className={
-                          item.status === "PENDING"
-                            ? "bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm cursor-pointer"
-                            : "cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm"
-                        }
-                      >
-                        <Eye className="w-4 h-4 mr-2" /> Detail
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* TABEL: DataTable, kartu per baris (TB1a sampai TB7a) */}
+      {isError ? (
+        <p
+          role="alert"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+        >
+          Gagal memuat surat jalan. Periksa koneksi, lalu muat ulang halaman.
+        </p>
+      ) : (
+        <DataTable
+          columns={kolom}
+          data={filteredData}
+          loading={isLoading}
+          emptyMessage="Tidak ada dokumen Surat Jalan yang ditemukan."
+          pilihanUkuranKlien={PILIHAN_UKURAN}
+        />
+      )}
     </div>
   );
 }
