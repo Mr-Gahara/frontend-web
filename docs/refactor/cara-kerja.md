@@ -1797,6 +1797,20 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   (`grep '\.sort('`) dan dari permintaan nyata (`api-surat-jalan.js`)
   sebelum cara spec menemukannya dipilih (TB14a).
 
+### Pelajaran dari tabel seragam K-B (17 Oktober 2026)
+
+- **Berkas baru yang dibuat manual dibuktikan lewat sidik isinya, bukan
+  `wc -l`.** Editor dapat menyimpan tanpa baris baru di akhir, sehingga
+  `wc -l` kurang satu (45 alih-alih 46 pada `menu-aksi-stok.tsx`).
+  Gerbang menormalkan baris baru akhir lalu membandingkan `md5`:
+  `{ cat f; [ -n "$(tail -c1 f)" ] && echo; } | md5sum`.
+- **Hook di halaman yang punya `return` awal diletakkan sebelum `return`
+  itu.** `kolom` inventaris gudang (`useMemo`) ditempatkan sebelum layar
+  memuat global.
+- **Simulasi juga memeriksa sintaks hasil penerapan** lewat
+  `ts.transpileModule` dari `typescript` global, sehingga galat sintaks
+  TSX tertangkap sebelum blok dikirim.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:

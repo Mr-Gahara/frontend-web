@@ -180,7 +180,8 @@ produk (`152088b`). Labelnya PR:
   dimuat** (4 Oktober 2026, `eb0181f`), bukan "Tidak ada data stok yang
   ditemukan.": selama itu query stok belum berjalan, sehingga daftar
   kosong belum dapat disimpulkan. Diterapkan tanpa ditanyakan, sejalan
-  dengan keputusan submodul jurnal stok.
+  dengan keputusan submodul jurnal stok. Sejak `753f61e` keadaan memuat
+  itu ditampilkan `DataTable` sebagai "Memuat data...", bukan kerangka.
 
 ### Submodul stock opname
 
@@ -1755,6 +1756,16 @@ yang izinnya tidak dipegang tidak dipasang.
 - **TB15a: tabel daftar yang gagal dimuat diganti pesan `role="alert"`**,
   seperti pengajuan stok dan jurnal stok, dan jalur itu diuji lewat
   `page.route` yang menjawab setiap `GET` daftar dengan 500 (`6f9d3eb`).
+- **TB16a: aksi baris tabel stok outlet dan inventaris gudang di menu
+  titik tiga bersama** (`features/inventaris/menu-aksi-stok.tsx`), dengan
+  label seragam "Ubah batas minimum" dan "Sesuaikan stok", karena kedua
+  aksi dan endpoint-nya sama; judul dialog tidak berubah (`753f61e`).
+- **TB17a: kolom inventaris gudang dibatasi ke Nama Barang, Stok Saat Ini,
+  Batas Minimum, dan Aksi**: kolom "Kategori / Tipe" yang selalu "Bahan
+  Baku" dan baris "ID:" di bawah nama barang dibuang (TB6a, `753f61e`).
+- **TB18a: pesan `role="alert"` stok hanya untuk daftar stok yang gagal
+  dimuat**; gagal memuat lokasi outlet tetap ditangani `PesanLokasi`,
+  sehingga keduanya tidak tumpang tindih (`753f61e`).
 
 ## Keputusan rancangan yang mengikat
 

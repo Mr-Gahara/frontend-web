@@ -96,6 +96,13 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per tabel seragam K-B** (commit `753f61e`): 659 test unit dan
+integrasi lolos di 81 berkas, tidak berubah. Suite penuh tidak
+dijalankan; `tests/e2e/inventaris/stok` 14 lolos dan 3 skipped (dua
+fixme lintas outlet, satu tab kritis gudang tanpa stok kritis). Dua
+skenario galat baru menambah harapan suite penuh menjadi 461 lolos dan
+13 skipped; angka itu hitungan.
+
 **Baseline per tabel seragam K-C** (commit `6f9d3eb`): 659 test unit dan
 integrasi lolos di 81 berkas, tidak berubah. Suite penuh tidak
 dijalankan; spec `alur-transfer-stok` 2 lolos. Skenario galat baru di
@@ -1412,7 +1419,11 @@ Urutan debug kegagalan e2e di atas).
   `goto(..., { waitUntil: "commit" })`, harapan dihitung dari respons
   permintaan itu sendiri, operasi tulis yang mengembalikan nilai semula,
   aturan tombol nonaktif, dan jalur gagal tambah barang dengan `page.route`
-  pada POST saja.
+  pada POST saja. Sejak `753f61e` jumlah baris memakai pola K-A, dialog
+  dibuka lewat menu titik tiga dengan indeks sel per tabel
+  (`KOLOM_OUTLET`, `KOLOM_GUDANG`), target ubah dan opname diambil dari
+  sepuluh data pertama karena tabel mempertahankan urutan respons, dan
+  dua skenario galat menjawab `GET /inventory` dengan 500 (TB18a).
 - `tests/e2e/inventaris/stockOpname/lihat-stok-opname.spec.ts`: tabel
   berpaginasi diperiksa lewat dokumen pertama dari respons, dan skenario
   lintas outlet (pilih satu outlet) sebagai `test.fixme` bersyarat.
