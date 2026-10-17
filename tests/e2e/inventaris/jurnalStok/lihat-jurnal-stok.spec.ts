@@ -9,6 +9,8 @@ type JurnalMentah = Relasi & {
   tipeKoreksi: "Masuk" | "Keluar";
   bahanBakuID: (Relasi & { namaBahan: string }) | null;
   locationID: (Relasi & { tipe: string; nama?: string }) | null;
+  tanggal: string;
+  dicatatOleh: { nama?: string } | null;
 };
 
 // ============================================================
@@ -70,13 +72,17 @@ function barisTabel(page: Page) {
   return page.locator("table tbody tr");
 }
 
+/** Ukuran halaman awal tabel jurnal; baris di luar halaman pertama dibuktikan lewat kaki tabel. */
+const UKURAN_AWAL = 10;
+
 async function periksaJumlahBaris(page: Page, jumlah: number) {
   if (jumlah === 0) {
     await expect(barisTabel(page)).toHaveCount(1);
     await expect(barisTabel(page).first()).toContainText(/kosong|tidak ada catatan/i);
   } else {
-    await expect(barisTabel(page)).toHaveCount(jumlah);
+    await expect(barisTabel(page)).toHaveCount(Math.min(jumlah, UKURAN_AWAL));
   }
+  await expect(page.getByText(`${jumlah} total data`, { exact: true })).toBeVisible();
 }
 
 // ============================================================
@@ -135,6 +141,34 @@ test.describe("Jurnal stok", () => {
         j.bahanBakuID?.namaBahan?.toLowerCase().includes(nama!.toLowerCase()),
       ).length,
     );
+  });
+
+  test("outlet: menu titik tiga membuka rincian jurnal beserta pencatatnya (J-A)", async ({ page }) => {
+    const { jurnal } = await bukaJurnal(page, URL_OUTLET);
+    // Urutan yang sama dengan saringJurnal: tanggal terbaru lebih dulu, sort stabil.
+    const diLokasi = jurnal
+      .filter((j) => j.locationID?.tipe === "Outlet")
+      .sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
+    test.skip(diLokasi.length === 0, "Belum ada jurnal outlet");
+    const pertama = diLokasi[0];
+
+    await barisTabel(page).first().getByRole("button", { name: "Buka menu" }).click();
+    await page.getByRole("menuitem", { name: "Lihat detail" }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText(pertama.bahanBakuID?.namaBahan || "Master Data Terhapus");
+    await expect(dialog).toContainText(pertama.dicatatOleh?.nama || "Sistem Otomatis");
+  });
+
+  test("outlet: pemilih ukuran menampilkan lebih banyak baris per halaman", async ({ page }) => {
+    const { jurnal } = await bukaJurnal(page, URL_OUTLET);
+    const jumlah = jurnal.filter((j) => j.locationID?.tipe === "Outlet").length;
+    test.skip(jumlah <= UKURAN_AWAL, "Jurnal outlet belum lebih dari satu halaman");
+
+    await page.getByRole("combobox", { name: "Jumlah baris per halaman" }).click();
+    await page.getByRole("option", { name: "20", exact: true }).click();
+    await expect(barisTabel(page)).toHaveCount(Math.min(jumlah, 20));
+    await expect(page.getByText(`${jumlah} total data`, { exact: true })).toBeVisible();
   });
 
   test("gudang: hanya menampilkan jurnal di lokasi bertipe gudang", async ({ page }) => {

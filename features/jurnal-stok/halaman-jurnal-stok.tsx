@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 import type { JurnalStok } from "@/types/jurnalStok";
@@ -11,7 +12,8 @@ import {
   type FilterArah,
   type LingkupJurnal,
 } from "./filter";
-import { formatWaktuJurnal } from "./tampilan";
+import { formatWaktuJurnal, teksJumlahJurnal } from "./tampilan";
+import { DialogRincianJurnal } from "./dialog-rincian-jurnal";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -22,17 +24,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { DataTable } from "@/components/ui/data-table";
 import {
-  Search,
-  BookOpen,
-  ArrowDownRight,
-  ArrowUpRight,
-  MapPin,
-  CalendarClock,
-  User,
-  Filter,
-} from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Search, BookOpen, MapPin, Filter, MoreHorizontal } from "lucide-react";
 
 const TEKS = {
   outlet: {
@@ -41,7 +41,6 @@ const TEKS = {
     kolomJumlah: "Pergerakan Angka",
     kosongJudul: "Buku Jurnal Kosong",
     kosongIsi: "Belum ada riwayat pergerakan barang di outlet ini.",
-    jumlahSkeleton: 5,
   },
   gudang: {
     labelTransfer: "Transfer Distribusi",
@@ -49,7 +48,6 @@ const TEKS = {
     kolomJumlah: "Pergerakan Fisik",
     kosongJudul: "Tidak Ada Catatan Ditemukan",
     kosongIsi: "Belum ada pergerakan stok yang sesuai dengan filter Anda.",
-    jumlahSkeleton: 6,
   },
 } as const;
 
@@ -59,6 +57,9 @@ const WARNA_ALASAN: Record<string, string> = {
   "Rusak/Hilang": "bg-rose-50 text-rose-700 border-rose-200",
 };
 const WARNA_ALASAN_LAIN = "bg-slate-50 text-slate-700 border-slate-200";
+
+/** Pilihan baris per halaman (DataTable opt-in, pemilik proyek 17 Oktober 2026). */
+const PILIHAN_UKURAN = [10, 20, 50] as const;
 
 interface Props {
   ruang: keyof typeof TEKS;
@@ -98,6 +99,105 @@ export default function HalamanJurnalStok({
 
   const memuat = isLoading || memuatLingkup;
   const nonaktif = Boolean(penghalang);
+  const [dirinci, setDirinci] = useState<JurnalStok | null>(null);
+
+  // Kolom ringkas (TB6a, J-A): pencatat dan keterangan utuh ada di dialog rincian.
+  const kolom = useMemo<ColumnDef<JurnalStok>[]>(
+    () => [
+      {
+        id: "barang",
+        header: "Barang",
+        cell: ({ row }) => (
+          <div className="flex flex-col gap-1">
+            <span
+              className={cn(
+                "font-bold",
+                row.original.bahanBakuID ? "text-navy" : "text-rose-500 line-through",
+              )}
+            >
+              {row.original.bahanBakuID?.namaBahan || "Master Data Terhapus"}
+            </span>
+            <span className="flex items-center gap-1 text-xs font-medium text-navy/60">
+              <MapPin className="h-3 w-3 text-karamel" aria-hidden="true" />
+              {row.original.locationID?.nama || "Lokasi Tidak Diketahui"}
+            </span>
+          </div>
+        ),
+      },
+      {
+        id: "waktu",
+        header: "Waktu",
+        cell: ({ row }) => {
+          const waktu = formatWaktuJurnal(row.original.tanggal);
+          return (
+            <div>
+              <p className="font-medium text-navy">{waktu.tanggal}</p>
+              <p className="text-xs text-navy/60">Pukul {waktu.jam}</p>
+            </div>
+          );
+        },
+      },
+      {
+        id: "alasan",
+        header: teks.kolomAlasan,
+        cell: ({ row }) => (
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-[10px] uppercase font-black tracking-wider border",
+              WARNA_ALASAN[row.original.alasan] ?? WARNA_ALASAN_LAIN,
+            )}
+          >
+            {row.original.alasan}
+          </Badge>
+        ),
+      },
+      {
+        id: "jumlah",
+        header: () => <div className="text-right">{teks.kolomJumlah}</div>,
+        meta: { label: teks.kolomJumlah },
+        cell: ({ row }) => (
+          <div
+            className={cn(
+              "text-right font-mono font-bold",
+              row.original.tipeKoreksi === "Masuk" ? "text-emerald-700" : "text-red-800",
+            )}
+          >
+            {teksJumlahJurnal(row.original)}
+          </div>
+        ),
+      },
+      {
+        id: "aksi",
+        header: () => <div className="text-right">Aksi</div>,
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 cursor-pointer text-navy/70 hover:text-navy hover:bg-navy/5"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Buka menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-gading border-navy/10">
+                <DropdownMenuItem
+                  className="cursor-pointer font-bold text-navy/80"
+                  onClick={() => setDirinci(row.original)}
+                >
+                  Lihat detail
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ),
+      },
+    ],
+    [teks],
+  );
 
   return (
     <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-7xl mx-auto">
@@ -168,159 +268,25 @@ export default function HalamanJurnalStok({
         </div>
       </div>
 
-      {penghalang ?? (
-        <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left whitespace-nowrap">
-              <thead className="bg-krem text-[11px] uppercase tracking-wider font-black text-navy/60 border-b border-navy/10">
-                <tr>
-                  <th className="px-6 py-4 rounded-tl-2xl">Waktu Transaksi</th>
-                  <th className="px-6 py-4">Informasi Barang</th>
-                  <th className="px-6 py-4">{teks.kolomAlasan}</th>
-                  <th className="px-6 py-4 text-right">{teks.kolomJumlah}</th>
-                  <th className="px-6 py-4 rounded-tr-2xl">PIC (Penanggung Jawab)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-navy/5">
-                {memuat ? (
-                  Array.from({ length: teks.jumlahSkeleton }).map((_, i) => (
-                    <tr key={i}>
-                      <td className="px-6 py-4"><Skeleton className="h-5 w-32 bg-navy/10" /></td>
-                      <td className="px-6 py-4"><Skeleton className="h-5 w-48 bg-navy/10" /></td>
-                      <td className="px-6 py-4"><Skeleton className="h-5 w-24 bg-navy/10" /></td>
-                      <td className="px-6 py-4"><Skeleton className="h-6 w-20 ml-auto bg-navy/10" /></td>
-                      <td className="px-6 py-4"><Skeleton className="h-5 w-32 bg-navy/10" /></td>
-                    </tr>
-                  ))
-                ) : isError ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-16 text-center">
-                      <span className="text-rose-600 font-bold">
-                        Gagal memuat jurnal stok. Coba muat ulang halaman.
-                      </span>
-                    </td>
-                  </tr>
-                ) : daftar.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="px-6 py-16 text-center flex flex-col items-center justify-center w-full"
-                    >
-                      <BookOpen className="w-12 h-12 mb-3 text-navy/20" />
-                      <span className="text-navy/50 font-bold text-lg">{teks.kosongJudul}</span>
-                      <span className="text-navy/40 font-medium text-sm mt-1">{teks.kosongIsi}</span>
-                    </td>
-                  </tr>
-                ) : (
-                  daftar.map((jurnal) => <BarisJurnal key={jurnal.id} jurnal={jurnal} />)
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      <DialogRincianJurnal jurnal={dirinci} onTutup={() => setDirinci(null)} />
+
+      {penghalang ??
+        (isError ? (
+          <p
+            role="alert"
+            className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+          >
+            Gagal memuat jurnal stok. Coba muat ulang halaman.
+          </p>
+        ) : (
+          <DataTable
+            columns={kolom}
+            data={daftar}
+            loading={memuat}
+            emptyMessage={`${teks.kosongJudul}. ${teks.kosongIsi}`}
+            pilihanUkuranKlien={PILIHAN_UKURAN}
+          />
+        ))}
     </div>
-  );
-}
-
-function BarisJurnal({ jurnal }: { jurnal: JurnalStok }) {
-  const masuk = jurnal.tipeKoreksi === "Masuk";
-  const waktu = formatWaktuJurnal(jurnal.tanggal);
-
-  return (
-    <tr className="hover:bg-gading/60 transition-colors group">
-      {/* KOLOM 1: TANGGAL */}
-      <td className="px-6 py-4 align-top">
-        <div className="flex flex-col gap-1">
-          <span className="font-bold text-navy flex items-center gap-1.5">
-            <CalendarClock className="w-3.5 h-3.5 text-navy/40" />
-            {waktu.tanggal}
-          </span>
-          <span className="text-[11px] font-bold text-navy/50">Pukul {waktu.jam}</span>
-        </div>
-      </td>
-
-      {/* KOLOM 2: BARANG & LOKASI */}
-      <td className="px-6 py-4 align-top">
-        <div className="flex flex-col gap-1">
-          <span
-            className={cn(
-              "font-bold text-base",
-              jurnal.bahanBakuID ? "text-navy" : "text-rose-500 line-through",
-            )}
-          >
-            {jurnal.bahanBakuID?.namaBahan || "Master Data Terhapus"}
-          </span>
-          <span className="text-[10px] font-bold text-navy/50 uppercase flex items-center gap-1">
-            <MapPin className="w-3 h-3 text-karamel" />
-            {jurnal.locationID?.nama || "Lokasi Tidak Diketahui"}
-          </span>
-        </div>
-      </td>
-
-      {/* KOLOM 3: ALASAN */}
-      <td className="px-6 py-4 align-top">
-        <div className="flex flex-col items-start gap-1.5">
-          <Badge
-            variant="outline"
-            className={cn(
-              "text-[10px] uppercase font-black tracking-wider border",
-              WARNA_ALASAN[jurnal.alasan] ?? WARNA_ALASAN_LAIN,
-            )}
-          >
-            {jurnal.alasan}
-          </Badge>
-          {jurnal.keterangan && (
-            <span
-              className="text-[11px] font-medium text-navy/60 italic max-w-[200px] truncate"
-              title={jurnal.keterangan}
-            >
-              &quot;{jurnal.keterangan}&quot;
-            </span>
-          )}
-        </div>
-      </td>
-
-      {/* KOLOM 4: PERGERAKAN */}
-      <td className="px-6 py-4 align-top text-right">
-        <div
-          className={cn(
-            "inline-flex flex-col items-end px-3 py-1.5 rounded-lg border",
-            masuk ? "bg-emerald-50 border-emerald-100" : "bg-rose-50 border-rose-100",
-          )}
-        >
-          <span
-            className={cn(
-              "text-lg font-mono font-black flex items-center gap-1",
-              masuk ? "text-emerald-700" : "text-rose-700",
-            )}
-          >
-            {masuk ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-            {masuk ? "+" : "-"}
-            {jurnal.jumlah}
-          </span>
-          <span
-            className={cn(
-              "text-[10px] font-bold uppercase",
-              masuk ? "text-emerald-700/60" : "text-rose-700/60",
-            )}
-          >
-            {jurnal.bahanBakuID?.satuan || "UNIT"}
-          </span>
-        </div>
-      </td>
-
-      {/* KOLOM 5: PENCATAT */}
-      <td className="px-6 py-4 align-top">
-        <div className="flex items-center gap-2 mt-1">
-          <div className="w-6 h-6 rounded-full bg-navy/10 flex items-center justify-center">
-            <User className="w-3.5 h-3.5 text-navy/50" />
-          </div>
-          <span className="font-bold text-navy capitalize">
-            {jurnal.dicatatOleh?.nama || "Sistem Otomatis"}
-          </span>
-        </div>
-      </td>
-    </tr>
   );
 }
