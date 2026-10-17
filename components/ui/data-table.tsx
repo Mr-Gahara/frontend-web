@@ -87,6 +87,13 @@ interface DataTableProps<TData, TValue> {
   paginasiServer?: PaginasiServerTabel;
   /** Urutan dari server: pengurutan klien dimatikan dan urutan datang dari pemakai tabel. */
   urutanServer?: UrutanServerTabel;
+  /**
+   * Pilihan jumlah baris per halaman untuk paginasi klien, opt-in (pemilik
+   * proyek, 17 Oktober 2026). Tanpa prop ini tabel tetap 10 baris tanpa
+   * pemilih. Nilai pertama menjadi ukuran awal; mengganti ukuran kembali ke
+   * halaman 1.
+   */
+  pilihanUkuranKlien?: readonly number[];
 }
 
 export function DataTable<TData, TValue>({
@@ -98,6 +105,7 @@ export function DataTable<TData, TValue>({
   searchPlaceholder = "Cari...",
   paginasiServer,
   urutanServer,
+  pilihanUkuranKlien,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -119,7 +127,7 @@ export function DataTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: { sorting: urutanServer ? urutanServer.urutan : sorting, columnFilters, columnVisibility },
-    initialState: { pagination: { pageSize: 10 } },
+    initialState: { pagination: { pageSize: pilihanUkuranKlien?.[0] ?? 10 } },
   });
 
   const server = paginasiServer;
@@ -130,6 +138,11 @@ export function DataTable<TData, TValue>({
   const bisaBerikutnya = server ? !server.sibuk && server.halaman < server.jumlahHalaman : table.getCanNextPage();
   const keSebelumnya = () => (server ? server.onGantiHalaman(server.halaman - 1) : table.previousPage());
   const keBerikutnya = () => (server ? server.onGantiHalaman(server.halaman + 1) : table.nextPage());
+  const pilihanUkuran = server ? server.pilihanUkuran : pilihanUkuranKlien;
+  const ukuranKini = server ? server.ukuran : table.getState().pagination.pageSize;
+  const gantiUkuran = server
+    ? server.onGantiUkuran
+    : (ukuran: number) => table.setPagination({ pageIndex: 0, pageSize: ukuran });
 
   return (
     <div className="flex flex-col gap-4">
@@ -206,10 +219,10 @@ export function DataTable<TData, TValue>({
           {totalData} total data
         </p>
         <div className="flex items-center gap-1 sm:gap-2">
-          {server?.pilihanUkuran && server.onGantiUkuran && (
+          {pilihanUkuran && gantiUkuran && (
             <div className="flex items-center gap-1">
               <span className="text-xs font-semibold text-navy/60">Tampilkan</span>
-              <Select value={String(server.ukuran)} onValueChange={(nilai) => server.onGantiUkuran?.(Number(nilai))}>
+              <Select value={String(ukuranKini)} onValueChange={(nilai) => gantiUkuran(Number(nilai))}>
                 <SelectTrigger
                   aria-label="Jumlah baris per halaman"
                   className="h-8 w-auto cursor-pointer gap-1 border-0 bg-transparent px-1 text-xs font-bold text-navy shadow-none focus-visible:ring-1 focus-visible:ring-navy/40"
@@ -217,7 +230,7 @@ export function DataTable<TData, TValue>({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {server.pilihanUkuran.map((n) => (
+                  {pilihanUkuran.map((n) => (
                     <SelectItem key={n} value={String(n)}>
                       {n}
                     </SelectItem>
