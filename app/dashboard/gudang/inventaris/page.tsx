@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
 import { pesanError } from "@/lib/api/error";
 import {
@@ -11,6 +12,7 @@ import {
   useUbahStokMinimum,
 } from "@/features/inventaris/hooks";
 import { useDaftarBahanBaku } from "@/features/bahan-baku/hooks";
+import MenuAksiStok from "@/features/inventaris/menu-aksi-stok";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Inventory } from "@/types/inventory";
@@ -34,19 +36,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DataTable } from "@/components/ui/data-table";
 import {
   Search,
   AlertTriangle,
-  Edit2,
-  Scale,
-  Package,
   Loader2,
   Warehouse,
   Plus,
   PackagePlus,
   Save
 } from "lucide-react";
+
+/** Pilihan baris per halaman (DataTable opt-in, keputusan TB11a). */
+const PILIHAN_UKURAN = [10, 20, 50] as const;
 
 export default function GudangInventoryPage() {
 
@@ -83,7 +85,11 @@ export default function GudangInventoryPage() {
   const { lokasiId: gudangId, isLoading: isLoadingLokasi } = useLokasiBertipe("Gudang");
 
   // 2. Fetch Inventory Gudang
-  const { data: inventoryData = [], isLoading: isLoadingInventory } = useDaftarInventory(
+  const {
+    data: inventoryData = [],
+    isLoading: isLoadingInventory,
+    isError: gagalMemuatStok,
+  } = useDaftarInventory(
     gudangId ? { locationID: gudangId, search: debouncedSearch || undefined } : null,
   );
 
@@ -161,6 +167,64 @@ export default function GudangInventoryPage() {
     },
   });
 
+  // Aksi baris di menu titik tiga (TB7a, TB16a). Kolom tipe yang selalu
+  // "Bahan Baku" dan potongan ID barang dibuang (TB17a).
+  const kolom = useMemo<ColumnDef<Inventory>[]>(
+    () => [
+      {
+        id: "nama",
+        header: "Nama Barang",
+        cell: ({ row }) => (
+          <span className="font-bold text-navy">{row.original.item?.nama || "Item Tidak Dikenal"}</span>
+        ),
+      },
+      {
+        id: "stok",
+        header: "Stok Saat Ini",
+        cell: ({ row }) => (
+          <div className="flex flex-col items-start gap-1">
+            <span
+              className={cn(
+                "text-base font-mono font-bold px-2 py-0.5 rounded-md",
+                row.original.isStokKritis ? "bg-rose-50 text-rose-600" : "bg-navy/5 text-navy",
+              )}
+            >
+              {row.original.stok}{" "}
+              <span className="text-xs font-sans font-bold opacity-70">{row.original.item?.satuan || ""}</span>
+            </span>
+            {row.original.isStokKritis && (
+              <Badge variant="outline" className="text-[10px] bg-rose-100 text-rose-700 border-none shadow-sm px-1.5 py-0">
+                Stok Kritis
+              </Badge>
+            )}
+          </div>
+        ),
+      },
+      {
+        id: "minimum",
+        header: "Batas Minimum",
+        cell: ({ row }) => (
+          <span className="font-mono font-bold text-navy/70">{row.original.stokMinimum}</span>
+        ),
+      },
+      {
+        id: "aksi",
+        header: () => <div className="text-right">Aksi</div>,
+        cell: ({ row }) => (
+          <MenuAksiStok
+            onUbahMinimum={() =>
+              setMinStockModal({ isOpen: true, data: row.original, inputValue: row.original.stokMinimum })
+            }
+            onSesuaikanStok={() =>
+              setOpnameModal({ isOpen: true, data: row.original, fisikAktual: row.original.stok, catatan: "" })
+            }
+          />
+        ),
+      },
+    ],
+    [],
+  );
+
   // --- Render Loading Global ---
   if (isLoadingLokasi) {
     return (
@@ -237,113 +301,23 @@ export default function GudangInventoryPage() {
         </Button>
       </div>
 
-      {/* TABLE SECTION */}
-      <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-krem text-xs uppercase font-bold text-navy/70 border-b border-navy/10">
-              <tr>
-                <th className="px-6 py-4">Nama Barang</th>
-                <th className="px-6 py-4">Kategori / Tipe</th>
-                <th className="px-6 py-4 text-center">Stok Saat Ini</th>
-                <th className="px-6 py-4 text-center">Batas Minimum</th>
-                <th className="px-6 py-4 text-right">Aksi Penyesuaian</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/5">
-              {isLoadingInventory ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}>
-                    <td className="px-6 py-4"><Skeleton className="h-5 w-48 bg-navy/10" /></td>
-                    <td className="px-6 py-4"><Skeleton className="h-5 w-32 bg-navy/10" /></td>
-                    <td className="px-6 py-4"><Skeleton className="h-5 w-20 mx-auto bg-navy/10" /></td>
-                    <td className="px-6 py-4"><Skeleton className="h-5 w-20 mx-auto bg-navy/10" /></td>
-                    <td className="px-6 py-4"><Skeleton className="h-8 w-28 ml-auto bg-navy/10" /></td>
-                  </tr>
-                ))
-              ) : filteredInventory.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-16 text-center text-navy/50">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="bg-navy/5 p-4 rounded-full">
-                        <Package className="w-10 h-10 text-navy/30" />
-                      </div>
-                      <div className="space-y-1">
-                        <h3 className="font-bold text-navy">Gudang Masih Kosong</h3>
-                        <p className="text-sm font-medium">Klik tombol &quot;Masukkan Master Data&quot; di atas untuk mendaftarkan barang.</p>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filteredInventory.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-gading transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-navy">
-                          {inv.item?.nama || "Item Tidak Dikenal"}
-                        </span>
-                        <span className="text-xs font-medium text-navy/50 mt-0.5">
-                          ID: {inv.item?.id?.substring(0, 8)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className="bg-navy/5 text-navy/70 border-none font-bold">
-                        Bahan Baku
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex flex-col items-center gap-1">
-                        <span className={cn(
-                          "text-base font-mono font-bold px-2 py-0.5 rounded-md",
-                          inv.isStokKritis ? "bg-rose-50 text-rose-600" : "bg-navy/5 text-navy"
-                        )}>
-                          {inv.stok} <span className="text-xs font-sans font-bold opacity-70">{inv.item?.satuan || ""}</span>
-                        </span>
-                        {inv.isStokKritis && (
-                          <Badge variant="outline" className="text-[10px] bg-rose-100 text-rose-700 border-none shadow-sm px-1.5 py-0">
-                            Stok Kritis
-                          </Badge>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center group">
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="font-mono font-bold text-navy/70">
-                          {inv.stokMinimum}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="w-7 h-7 text-navy/40 hover:text-emerald-700 hover:bg-emerald-50 cursor-pointer"
-                          onClick={() =>
-                            setMinStockModal({ isOpen: true, data: inv, inputValue: inv.stokMinimum })
-                          }
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setOpnameModal({ isOpen: true, data: inv, fisikAktual: inv.stok, catatan: "" })
-                        }
-                        className="cursor-pointer border-emerald-200 text-emerald-800 hover:bg-emerald-50 font-bold shadow-sm"
-                      >
-                        <Scale className="w-4 h-4 mr-2 text-emerald-600" /> Quick Opname
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* TABEL: DataTable, kartu per baris (TB1a sampai TB7a); galat daftar stok (TB18a) */}
+      {gagalMemuatStok ? (
+        <p
+          role="alert"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+        >
+          Gagal memuat stok gudang. Periksa koneksi, lalu muat ulang halaman.
+        </p>
+      ) : (
+        <DataTable
+          columns={kolom}
+          data={filteredInventory}
+          loading={isLoadingInventory}
+          emptyMessage={'Gudang masih kosong. Klik tombol "Masukkan Master Data" di atas untuk mendaftarkan barang.'}
+          pilihanUkuranKlien={PILIHAN_UKURAN}
+        />
+      )}
 
       {/* MODAL BARU: TAMBAH MASTER DATA KE GUDANG */}
       <Dialog open={addItemModal} onOpenChange={(open) => !open && setAddItemModal(false)}>

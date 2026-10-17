@@ -76,13 +76,26 @@ function baris(page: Page) {
   return page.locator("table tbody tr");
 }
 
+/**
+ * Ukuran halaman awal tabel stok. Baris di luar halaman pertama dibuktikan
+ * lewat kaki tabel, dan target ubah serta opname diambil dari halaman
+ * pertama karena tabel mempertahankan urutan respons server.
+ */
+const UKURAN_AWAL = 10;
+
+/** Indeks sel per tabel: stok outlet berkolom Lokasi, inventaris gudang tidak (TB17a). */
+const KOLOM_OUTLET = { stok: 2, minimum: 3 };
+const KOLOM_GUDANG = { stok: 1, minimum: 2 };
+type KolomStok = typeof KOLOM_OUTLET;
+
 async function periksaBaris(page: Page, jumlah: number, teksKosong?: string) {
   if (jumlah === 0 && teksKosong) {
     await expect(baris(page)).toHaveCount(1);
     await expect(baris(page).first()).toContainText(teksKosong);
   } else {
-    await expect(baris(page)).toHaveCount(jumlah);
+    await expect(baris(page)).toHaveCount(Math.min(jumlah, UKURAN_AWAL));
   }
+  await expect(page.getByText(`${jumlah} total data`, { exact: true })).toBeVisible();
 }
 
 async function bukaOutlet(page: Page) {
@@ -115,8 +128,9 @@ async function bukaGudang(page: Page) {
 // ============================================================
 // HELPER: Dialog stok minimum dan opname
 // ============================================================
-async function ubahStokMinimum(page: Page, target: Locator, nilai: number) {
-  await target.getByRole("cell").nth(3).getByRole("button").click();
+async function ubahStokMinimum(page: Page, target: Locator, nilai: number, kolom: KolomStok) {
+  await target.getByRole("button", { name: "Buka menu" }).click();
+  await page.getByRole("menuitem", { name: "Ubah batas minimum" }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   await dialog.locator("input").first().fill(String(nilai));
@@ -131,17 +145,19 @@ async function ubahStokMinimum(page: Page, target: Locator, nilai: number) {
   expect(res.request().postDataJSON()).toEqual({ stokMinimum: nilai });
 
   await expect(dialog).toBeHidden();
-  await expect(target.getByRole("cell").nth(3)).toContainText(polaAngka(nilai));
+  await expect(target.getByRole("cell").nth(kolom.minimum)).toContainText(polaAngka(nilai));
 }
 
 async function opnameTanpaSelisih(
   page: Page,
   target: Locator,
   stok: number,
+  kolom: KolomStok,
   placeholderFisik: string,
   placeholderCatatan: string,
 ) {
-  await target.getByRole("cell").nth(4).getByRole("button").first().click();
+  await target.getByRole("button", { name: "Buka menu" }).click();
+  await page.getByRole("menuitem", { name: "Sesuaikan stok" }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   await dialog.getByPlaceholder(placeholderFisik).fill(String(stok));
@@ -163,7 +179,7 @@ async function opnameTanpaSelisih(
   expect(body.catatan).toBe(CATATAN_OPNAME);
 
   await expect(dialog).toBeHidden();
-  await expect(target.getByRole("cell").nth(2)).toContainText(polaAngka(stok));
+  await expect(target.getByRole("cell").nth(kolom.stok)).toContainText(polaAngka(stok));
 }
 
 // ============================================================
@@ -236,20 +252,20 @@ test.describe("Stok outlet", () => {
 
   test("ubah batas minimum lalu kembalikan ke nilai semula", async ({ page }) => {
     const { inventory } = await bukaOutlet(page);
-    const inv = inventory.find((i) => i.item?.nama && i.lokasi?.nama);
+    const inv = inventory.slice(0, UKURAN_AWAL).find((i) => i.item?.nama && i.lokasi?.nama);
     test.skip(!inv, "Belum ada stok outlet yang bisa diuji");
 
     const target = baris(page)
       .filter({ hasText: inv!.item!.nama! })
       .filter({ hasText: inv!.lokasi!.nama! })
       .first();
-    await ubahStokMinimum(page, target, inv!.stokMinimum + 1);
-    await ubahStokMinimum(page, target, inv!.stokMinimum);
+    await ubahStokMinimum(page, target, inv!.stokMinimum + 1, KOLOM_OUTLET);
+    await ubahStokMinimum(page, target, inv!.stokMinimum, KOLOM_OUTLET);
   });
 
   test("opname tanpa selisih mengirim fisik aktual dan menutup dialog", async ({ page }) => {
     const { inventory } = await bukaOutlet(page);
-    const inv = inventory.find((i) => i.item?.nama && i.lokasi?.nama);
+    const inv = inventory.slice(0, UKURAN_AWAL).find((i) => i.item?.nama && i.lokasi?.nama);
     test.skip(!inv, "Belum ada stok outlet yang bisa diuji");
 
     const target = baris(page)
@@ -260,9 +276,24 @@ test.describe("Stok outlet", () => {
       page,
       target,
       inv!.stok,
+      KOLOM_OUTLET,
       "Masukkan hitungan fisik riil...",
       "Contoh: Barang tumpah, kemasan rusak...",
     );
+  });
+
+  test("daftar stok yang gagal dimuat menampilkan pesan galat, bukan tabel kosong", async ({ page }) => {
+    // Setiap GET daftar stok dijawab 500; React Query mengulang sekali (retry 1).
+    await page.route(/\/api\/inventory(\?|$)/, (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ status: "error", message: "uji gagal memuat stok" }),
+      }),
+    );
+    await page.goto(URL_OUTLET, { waitUntil: "commit" });
+    await expect(page.getByRole("alert").filter({ hasText: "Gagal memuat stok." })).toBeVisible();
+    await expect(page.locator("table")).toHaveCount(0);
   });
 });
 
@@ -304,17 +335,17 @@ test.describe("Inventaris gudang", () => {
 
   test("ubah batas minimum lalu kembalikan ke nilai semula", async ({ page }) => {
     const inventory = await bukaGudang(page);
-    const inv = inventory.find((i) => i.item?.nama);
+    const inv = inventory.slice(0, UKURAN_AWAL).find((i) => i.item?.nama);
     test.skip(!inv, "Belum ada stok gudang yang bisa diuji");
 
     const target = baris(page).filter({ hasText: inv!.item!.nama! }).first();
-    await ubahStokMinimum(page, target, inv!.stokMinimum + 1);
-    await ubahStokMinimum(page, target, inv!.stokMinimum);
+    await ubahStokMinimum(page, target, inv!.stokMinimum + 1, KOLOM_GUDANG);
+    await ubahStokMinimum(page, target, inv!.stokMinimum, KOLOM_GUDANG);
   });
 
   test("opname tanpa selisih mengirim fisik aktual dan menutup dialog", async ({ page }) => {
     const inventory = await bukaGudang(page);
-    const inv = inventory.find((i) => i.item?.nama);
+    const inv = inventory.slice(0, UKURAN_AWAL).find((i) => i.item?.nama);
     test.skip(!inv, "Belum ada stok gudang yang bisa diuji");
 
     const target = baris(page).filter({ hasText: inv!.item!.nama! }).first();
@@ -322,6 +353,7 @@ test.describe("Inventaris gudang", () => {
       page,
       target,
       inv!.stok,
+      KOLOM_GUDANG,
       "Masukkan hitungan riil...",
       "Contoh: Barang tumpah...",
     );
@@ -374,5 +406,19 @@ test.describe("Inventaris gudang", () => {
     await expect(page.getByText("Gagal Menambahkan Barang")).toBeVisible();
     await expect(dialog).toBeVisible();
     await page.unroute(pola);
+  });
+
+  test("daftar stok gudang yang gagal dimuat menampilkan pesan galat, bukan tabel kosong", async ({ page }) => {
+    // Setiap GET daftar stok dijawab 500; React Query mengulang sekali (retry 1).
+    await page.route(/\/api\/inventory(\?|$)/, (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ status: "error", message: "uji gagal memuat stok" }),
+      }),
+    );
+    await page.goto(URL_GUDANG, { waitUntil: "commit" });
+    await expect(page.getByRole("alert").filter({ hasText: "Gagal memuat stok gudang." })).toBeVisible();
+    await expect(page.locator("table")).toHaveCount(0);
   });
 });
