@@ -130,7 +130,9 @@ stok, penjualan, dan bahan baku di `endpoint.md`, `payload.md`, dan
 atau permintaan nyata. Terhadap Lampiran A: `DELETE /bebanoperasional/:id`
 sudah dibuang (dijawab 404), dan beban dibatalkan lewat
 `PUT /bebanoperasional/:id` berstatus VOID; Lampiran A masih mencatat
-keadaan lama.
+keadaan lama. Pada 17 Oktober 2026 urutan daftar `GET /transferstok`
+(`tanggalKirim` lalu `createdAt` turun) ditambahkan ke `endpoint.md`
+terhadap `ridho` `00de455`.
 
 ## 1. Acuan dan metodologi
 

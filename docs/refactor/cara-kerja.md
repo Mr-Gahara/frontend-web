@@ -719,6 +719,9 @@ polanya salah.
   pemeriksaan pendahulu seperti `wc -c` atas berkas yang belum dibuat,
   sehingga `tsc` sesudahnya tidak berjalan tanpa tanda. Pemeriksaan yang
   boleh gagal ditulis `echo "x: $(wc -c < f 2>/dev/null || echo TIDAK ADA)"`.
+- **`ls` di terminal pemilik proyek adalah alias `lsd`**, yang menolak
+  opsi GNU seperti `--time-style`. Waktu ubah berkas dibaca lewat
+  `stat -c '%y %n' <berkas>` (17 Oktober 2026, gerbang commit K-C).
 
 ## Catatan form (React Hook Form dan Zod)
 
@@ -1773,6 +1776,26 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   sebelum Playwright dijalankan.
 - **Blok penerap yang panjang dipecah sejak awal** (pemilik proyek, 17
   Oktober 2026), masing-masing diakhiri hitungan `ls` sebagai pengaman.
+
+### Pelajaran dari tabel seragam K-C (17 Oktober 2026)
+
+- **Gerbang commit mencetak nilai setiap syarat dalam satu baris**
+  sebelum `if`, misalnya `tsc 0 eslint 0 vitest 0 lulus659 1`. Gerbang
+  pertama `6f9d3eb` hanya mencetak "GAGAL", dan penyebabnya butuh satu
+  putaran pemeriksaan terpisah.
+- **Keluaran vitest yang dialihkan ke berkas tetap berwarna.**
+  `/tmp/v.log` memuat kode ANSI di antara `Tests` dan `659 passed`,
+  sehingga `grep -E 'Tests +659 passed'` tidak pernah cocok. Kodenya
+  dibuang lebih dulu lewat `sed 's/\x1b\[[0-9;]*m//g'`.
+- **Blok penerap disimulasikan sebelum dikirim**: marka dijalankan dengan
+  salinan helper terhadap berkas dari arsip unggahan, dan angka harapan
+  (`wc -l`, hitungan `grep`) diambil dari hasil simulasi. Keenam blok
+  penerap K-C masuk tanpa ulang. Harapan `wc -l` pesan commit, yang tidak
+  disimulasikan, meleset (29 alih-alih 27).
+- **Spec untuk daftar yang baru dipaginasi diperiksa langkah yang mencari
+  baris tertentu**, lalu urutan server dibuktikan dari service
+  (`grep '\.sort('`) dan dari permintaan nyata (`api-surat-jalan.js`)
+  sebelum cara spec menemukannya dipilih (TB14a).
 
 ## Kapan berhenti dan bertanya
 

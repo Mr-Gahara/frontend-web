@@ -1743,6 +1743,18 @@ yang izinnya tidak dipegang tidak dipasang.
   terang di atas kartu putih; masuk tetap `emerald-700`. Berlaku untuk
   jurnal stok dan mutasi kas (`9b06283`, `fc6ddd3`); pesan galat dan
   status VOID tetap `red-600`, dan latar ikon tetap `bg-red-500/10`.
+- **TB13a: aksi baris surat jalan gudang di menu titik tiga adalah "Lihat
+  detail" untuk semua status**, langsung membuka halaman detail seperti
+  TB10a; tombol "Detail" yang menonjolkan Draft SJ tidak dipertahankan
+  (`6f9d3eb`).
+- **TB14a: spec mencari baris tertentu di daftar berpaginasi klien lewat
+  kotak pencarian**, bukan mengharapkannya di halaman pertama, karena
+  urutan server tidak menjamin data uji berada di sana. Surat jalan
+  diurutkan `tanggalKirim` lalu `createdAt` turun di antara 374 surat
+  jalan development (`6f9d3eb`).
+- **TB15a: tabel daftar yang gagal dimuat diganti pesan `role="alert"`**,
+  seperti pengajuan stok dan jurnal stok, dan jalur itu diuji lewat
+  `page.route` yang menjawab setiap `GET` daftar dengan 500 (`6f9d3eb`).
 
 ## Keputusan rancangan yang mengikat
 

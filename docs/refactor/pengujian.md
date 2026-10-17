@@ -96,6 +96,12 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per tabel seragam K-C** (commit `6f9d3eb`): 659 test unit dan
+integrasi lolos di 81 berkas, tidak berubah. Suite penuh tidak
+dijalankan; spec `alur-transfer-stok` 2 lolos. Skenario galat baru di
+spec itu menambah harapan suite penuh menjadi 459 lolos dan 13 skipped;
+angka itu hitungan.
+
 **Baseline per tabel seragam K-A** (commit `20e332f`): 659 test unit dan
 integrasi lolos di 81 berkas, bertambah enam: tiga test integrasi
 `DataTable` (`4677447`) dan tiga test `teksJumlahJurnal` (`9b06283`).
@@ -1459,7 +1465,12 @@ Urutan debug kegagalan e2e di atas).
   status diperiksa dengan `toHaveCount(0)` pada baris yang tidak boleh
   tampil, revisi kuantitas disimpan sungguhan dan dicek lewat API, dan
   pembatalan dari PENDING lewat UI sekaligus menjadi pembersihnya (tanda
-  `dibatalkan` mencegah pembatalan ganda di `finally`).
+  `dibatalkan` mencegah pembatalan ganda di `finally`). Sejak `6f9d3eb`
+  baris uji dicari lewat kotak pencarian karena daftar dipaginasi klien
+  (TB14a), detail dibuka lewat menu titik tiga, dan skenario galat
+  menjawab setiap `GET` daftar dengan 500, lalu menegaskan pesan
+  `role="alert"` yang disaring teksnya serta tidak adanya `<table>`
+  (TB15a).
 - `tests/e2e/inventaris/transferStok/pengiriman-penerimaan.spec.ts`: harapan
   jumlah kartu dihitung dari seluruh surat jalan berstatus DIKIRIM yang
   dibaca tanpa query, lalu dibandingkan dengan jumlah tombol per kartu di

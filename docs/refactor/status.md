@@ -102,7 +102,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Tabel seragam: dasar tabel, panel pembungkus, mutasi arus kas, bahan baku | `93490bb` (dasar), `cc1092e` (kartu dan panel), `f44db05` (mutasi), `9cd22e1` (bahan baku) | Selesai (keputusan TB1a sampai TB7a; Catatan dari fase UI/UX 11 Oktober 2026) |
 | Penyesuaian backend `ridho` `7d28135` | `f338c74` (pembayaran uji mutasi kas), `cfaaa92` (fixme hapus bahan baku) | Selesai (keputusan RG1a sampai RG8a; Catatan dari penyesuaian backend `ridho` `7d28135`) |
 | Tabel seragam K-A: jurnal stok dan pengajuan stok | `4677447` (pilihan ukuran), `9b06283` (jurnal stok), `fc6ddd3` (warna keluar mutasi), `20e332f` (pengajuan stok) | Selesai (keputusan TB8a sampai TB12a; Catatan dari tabel seragam K-A) |
-| Tabel seragam K-C, K-B, K-D, dan K-E: sepuluh halaman berikutnya | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Tabel seragam K-C: daftar surat jalan gudang | `6f9d3eb` | Selesai (keputusan TB13a sampai TB15a; Catatan dari tabel seragam K-C) |
+| Tabel seragam K-B, K-D, dan K-E: sembilan halaman berikutnya | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -125,18 +126,17 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: tabel seragam K-C, transfer stok gudang
+## Pekerjaan berikutnya: tabel seragam K-B, stok outlet dan inventaris gudang
 
 Fase rancangan dan perbaikan UI/UX berjalan sejak 11 Oktober 2026, dan
 seluruh rancangannya ditentukan pemilik proyek lewat pratinjau
-(`keputusan.md`, Fase UI/UX). Kelompok K-A selesai (Catatan dari tabel
-seragam K-A), dan urutan kelompok mengikuti TB8a.
+(`keputusan.md`, Fase UI/UX). Kelompok K-A dan K-C selesai (Catatan dari
+tabel seragam K-C dan K-A), dan urutan kelompok mengikuti TB8a.
 
-Sisa tabel seragam, sepuluh halaman di delapan berkas (cakupan RG3a):
+Sisa tabel seragam, sembilan halaman di tujuh berkas (cakupan RG3a):
 
 | Kelompok | Halaman | Berkas |
 |---|---|---|
-| K-C | `/dashboard/gudang/transferStok` | `features/transfer-stok/halaman-daftar-transfer.tsx` |
 | K-B | `/dashboard/outlet/inventaris/stok` | `app/dashboard/outlet/inventaris/stok/page.tsx` |
 | K-B | `/dashboard/gudang/inventaris` | `app/dashboard/gudang/inventaris/page.tsx` |
 | K-D | `/dashboard/outlet/shift` dan `/dashboard/gudang/shift` | `features/shift/halaman-shift.tsx` |
@@ -145,38 +145,74 @@ Sisa tabel seragam, sepuluh halaman di delapan berkas (cakupan RG3a):
 | K-E | `/dashboard/outlet/reservasi/tarif` | `app/dashboard/outlet/reservasi/tarif/page.tsx` |
 | K-E | `/dashboard/outlet/reservasi/tipeAset` | `app/dashboard/outlet/reservasi/tipeAset/page.tsx` |
 
-Spec terdampak per kelompok, dari rute yang disebut spec: K-C
-`alur-transfer-stok`; K-B `lihat-stok` dan `memuat-stok`; K-D
-`crud-shift`, `crud-pola-roster`, dan `generate-jadwal`; K-E `crud-aset`,
-`crud-tarif`, `crud-tipeAset`, dan `guard-dashboard`. Rute shift dan pola
-roster memakai `HalamanShiftRuang` dan `HalamanPolaRosterRuang`; bahwa
-keduanya memuat berkas di tabel itu belum dibuktikan dari isinya. Daftar
-aset, tarif, tipe aset, dan pola roster menulis `<table>` sendiri dengan
-kepala kolom berlatar (`bg-krem` di ketiga halaman reservasi, `#F8F3EB`
-di pola roster), melanggar TB2a dan TB7a.
+Spec terdampak per kelompok, dari rute yang disebut spec: K-B
+`lihat-stok` dan `memuat-stok`; K-D `crud-shift`, `crud-pola-roster`, dan
+`generate-jadwal`; K-E `crud-aset`, `crud-tarif`, `crud-tipeAset`, dan
+`guard-dashboard`. Rute shift dan pola roster memakai `HalamanShiftRuang`
+dan `HalamanPolaRosterRuang`; bahwa keduanya memuat berkas di tabel itu
+belum dibuktikan dari isinya. Daftar aset, tarif, tipe aset, dan pola
+roster menulis `<table>` sendiri dengan kepala kolom berlatar (`bg-krem`
+di ketiga halaman reservasi, `#F8F3EB` di pola roster), melanggar TB2a dan
+TB7a. Kedua halaman K-B masih berada di `app/` dan juga menulis `<table>`
+sendiri (grep `<table` per `4cbcec0`).
 
-Cara kerja tiap kelompok mengikuti K-A: halaman, spec terdampak, dan
-acuan pola (`components/ui/data-table.tsx`, mutasi kas, dan jurnal stok)
-dikemas dalam satu arsip lalu diunggah, karena berkasnya di atas 150
-baris; rancangan diajukan sebagai pratinjau; aksi baris di menu titik
-tiga, paginasi klien dengan `pilihanUkuranKlien`, dan teks keluar
-`red-800` (TB11a, TB12a). Sesudah keempat kelompok masih tersisa tabel
-rincian, kalender jadwal, dan butir lain di Utang kecil dari fase UI/UX.
-Sesudah tabel seragam, cakupan daftar penjualan pindah ke filter
-`locationID` server (RG4a); sampai dikerjakan, RH2b tetap berlaku.
+Cara kerja tiap kelompok mengikuti K-A dan K-C: halaman, spec terdampak,
+dan acuan pola (`components/ui/data-table.tsx`, daftar pengajuan stok,
+dan jurnal stok) dikemas dalam satu arsip di `~/Downloads` lalu diunggah
+bila berkasnya di atas 150 baris;
+rancangan diajukan sebagai pratinjau; aksi baris di menu titik tiga,
+paginasi klien dengan `pilihanUkuranKlien`, teks keluar `red-800`, dan
+pesan galat `role="alert"` (TB11a, TB12a, TB15a). Sebelum spec diubah,
+urutan server dan langkah spec yang mencari baris tertentu dibuktikan
+lebih dulu (TB14a). Sesudah ketiga kelompok masih tersisa tabel rincian,
+kalender jadwal, dan butir lain di Utang kecil dari fase UI/UX. Sesudah
+tabel seragam, cakupan daftar penjualan pindah ke filter `locationID`
+server (RG4a); sampai dikerjakan, RH2b tetap berlaku.
 
 Langkah pertama sesi berikutnya: backend di-`fetch` dan setiap cabang
 remote dihitung maju dan mundurnya terhadap acuan (`cara-kerja.md`), lalu
 pemetaan di bawah. Suite e2e penuh tidak dijalankan di awal sesi; harapan
-hitungannya 458 lolos dan 13 skipped (`pengujian.md`). Backend lokal
+hitungannya 459 lolos dan 13 skipped (`pengujian.md`). Backend lokal
 berada di cabang `ridho` `00de455`.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in $(git -C "$BE" for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -v '^origin$' | grep -v '/HEAD$'); do echo "$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...$r | tr '\t' ' ')"; done
 cd ~/Documents/frontend-web
-wc -l features/transfer-stok/halaman-daftar-transfer.tsx features/transfer-stok/filter.ts features/transfer-stok/tampilan.ts tests/e2e/inventaris/transferStok/alur-transfer-stok.spec.ts
-grep -rlE '<table\b' app features components | grep -v 'components/ui/' | sort
+wc -l app/dashboard/outlet/inventaris/stok/page.tsx app/dashboard/gudang/inventaris/page.tsx tests/e2e/inventaris/stok/lihat-stok.spec.ts tests/e2e/inventaris/stok/memuat-stok.spec.ts
+grep -rn "inventaris/stok\|gudang/inventaris" tests/e2e app components features | cut -c1-160
 ```
+
+## Catatan dari tabel seragam K-C
+
+Dikerjakan pada 17 Oktober 2026 dalam satu commit, terhadap backend
+`ridho` `00de455` yang tidak berubah sejak K-A: tidak ada cabang remote
+yang membawa commit baru. Rancangan ditunjukkan sebagai pratinjau dan
+disetujui pemilik proyek sebelum diterapkan.
+
+| Commit | Isi |
+|---|---|
+| `6f9d3eb` | Surat jalan gudang: `DataTable`, menu titik tiga, pesan galat, dan spec lewat pencarian (TB13a sampai TB15a) |
+
+- Satu-satunya pemakai halaman adalah
+  `app/dashboard/gudang/transferStok/page.tsx`, dan satu-satunya spec yang
+  membuka rutenya `alur-transfer-stok`; `alur-pengajuan-stok` hanya
+  menyebut field `transferStokID`.
+- `GET /transferstok` mengembalikan seluruh surat jalan tanpa paginasi,
+  diurutkan `tanggalKirim` lalu `createdAt` turun (`transferStokService`
+  baris 360, dikunci test unit backend). Data development berisi 374
+  surat jalan (212 BATAL, 162 DITERIMA), yang sebelumnya dirender
+  sekaligus.
+- Isi kelima kolom dan urutan server tidak berubah. Tanggal yang tampil
+  tetap `createdAt`, walau urutannya menurut `tanggalKirim`.
+- Spec mendapat skenario galat: setiap `GET` daftar dijawab 500, React
+  Query mengulang sekali (`retry: 1` di
+  `components/providers/query-provider.tsx`), lalu pesan `role="alert"`
+  tampil tanpa `<table>`.
+- Gerbang commit pertama menolak karena `/tmp/v.log` berisi kode warna
+  ANSI; yang diperbaiki gerbangnya, bukan kodenya (`cara-kerja.md`).
+- Vitest 659 lolos di 81 berkas; spec `alur-transfer-stok` 2 lolos.
+  Suite penuh tidak dijalankan (`pengujian.md`).
+- Keputusan: `keputusan.md` (Fase UI/UX, TB13a sampai TB15a).
 
 ## Catatan dari tabel seragam K-A
 
