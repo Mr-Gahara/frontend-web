@@ -1,5 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
-import { api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
+import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import {
+  KATEGORI_FIXTURE,
+  daftarKategori,
+  idKategori as idDari,
+  pastikanKategoriFixture as pastikanFixture,
+  type KategoriUji as Kategori,
+} from "../../helpers/beban-uji";
 import { unik } from "../../helpers/reservasi-uji";
 
 /*
@@ -15,25 +22,7 @@ const URL_PENGATURAN = "/dashboard/outlet/pengaturan";
 const URL_KATEGORI = URL_PENGATURAN + "/kategoriBeban";
 const POLA_DAFTAR = /\/api\/kategoribeban(\?|$)/i;
 const POLA_ID = /\/api\/kategoribeban\/[a-f0-9]{24}(\?|$)/i;
-const FIXTURE = "E2E Kategori Beban";
-
-type Kategori = { _id?: string; id?: string; namaKategori: string };
-const idDari = (k: Kategori) => (k.id ?? k._id) as string;
-
-async function daftarKategori(page: Page, auth: Auth) {
-  const baca = await api<Kategori[]>(page, auth, "GET", "/kategoribeban");
-  expect(baca.status, "baca kategori beban: " + baca.pesan).toBe(200);
-  return baca.data ?? [];
-}
-
-/** Fixture tetap (RG7a): dicari menurut nama, dibuat sekali bila belum ada. */
-async function pastikanFixture(page: Page, auth: Auth) {
-  const ada = (await daftarKategori(page, auth)).find((k) => k.namaKategori === FIXTURE);
-  if (ada) return idDari(ada);
-  const buat = await api<Kategori>(page, auth, "POST", "/kategoribeban", { namaKategori: FIXTURE });
-  expect(buat.status, "buat fixture kategori beban: " + buat.pesan).toBe(201);
-  return idDari(buat.data as Kategori);
-}
+const FIXTURE = KATEGORI_FIXTURE;
 
 /** Daftar dipaginasi klien, sehingga baris dicari lewat kotak pencarian (TB14a). */
 async function cariBaris(page: Page, nama: string) {

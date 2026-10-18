@@ -180,7 +180,9 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/penjualan/buatPenjualan": [[IZIN.produk, IZIN.aksesPos], IZIN.pelanggan, IZIN.buatPenjualan],
   "/dashboard/outlet/penjualan/[id]": [IZIN.penjualan],
   "/dashboard/outlet/penjualan/[id]/pembayaran": [IZIN.penjualan, IZIN.buatPembayaran],
-  "/dashboard/outlet/pengeluaran": [IZIN.pembayaran],
+  "/dashboard/outlet/pengeluaran": [IZIN.bebanOperasional],
+  // Kategori dan akun kas wajib untuk menyimpan (keputusan GR5a dan GR7a).
+  "/dashboard/outlet/pengeluaran/catatBeban": [IZIN.kategoriBeban, IZIN.akunKas, IZIN.buatBebanOperasional],
   "/dashboard/outlet/keuangan/akunkas": [IZIN.akunKas],
   "/dashboard/outlet/keuangan/akunkas/buatAkunKas": [IZIN.buatAkunKas],
   "/dashboard/outlet/keuangan/akunkas/[id]/ubah": [IZIN.akunKas, IZIN.ubahAkunKas],
