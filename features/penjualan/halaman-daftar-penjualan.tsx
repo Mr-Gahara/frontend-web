@@ -9,7 +9,7 @@ import { pesanError } from "@/lib/api/error";
 import { useDaftarPenjualan, useHapusPenjualan, useVoidPenjualan } from "./hooks";
 import {
   PILIHAN_UKURAN_HALAMAN,
-  saringPenjualan,
+  paramLingkupPenjualan,
   UKURAN_HALAMAN_BAWAAN,
   type LingkupPenjualan,
   type UkuranHalaman,
@@ -119,16 +119,32 @@ export default function HalamanDaftarPenjualan({
   // Urutan per kolom diterapkan server (keputusan PB14a, backend yoga).
   const [urutan, setUrutan] = useState<SortingState>([]);
   const [showFilter, setShowFilter] = useState(false);
+  // Mengganti outlet kembali ke halaman 1, seperti mengganti jumlah baris dan
+  // urutan; filter dan urutan dipertahankan (keputusan LP1a). Disesuaikan saat
+  // render, bukan lewat effect, agar halaman lama tidak sempat diminta untuk
+  // lingkup baru.
+  const kunciLingkup = lingkup?.jenis === "lokasi" ? lingkup.locationID : (lingkup?.jenis ?? "");
+  const [lingkupTerakhir, setLingkupTerakhir] = useState(kunciLingkup);
+  if (lingkupTerakhir !== kunciLingkup) {
+    setLingkupTerakhir(kunciLingkup);
+    setHalaman(1);
+  }
 
   const [deleteTarget, setDeleteTarget] = useState<Penjualan | null>(null);
   const [voidTarget, setVoidTarget] = useState<Penjualan | null>(null);
 
-  const daftar = useDaftarPenjualan(appliedFilters, halaman, ukuranHalaman, lingkup !== null && !penghalang, urutan);
-  // Backend tidak dapat menyaring lokasi; lingkup outlet diterapkan di klien
-  // per halaman (features/penjualan/filter.ts). Pada MVP satu outlet hasilnya
-  // sama dengan tanpa penyaringan; wajib ditinjau sebelum multi-outlet.
+  const daftar = useDaftarPenjualan(
+    appliedFilters,
+    halaman,
+    ukuranHalaman,
+    lingkup !== null && !penghalang,
+    urutan,
+    paramLingkupPenjualan(lingkup),
+  );
+  // Lingkup outlet disaring server lewat locationID (keputusan RG4a), sehingga
+  // baris, jumlah halaman, dan total data sama-sama berasal dari lingkup itu.
   const penjualanList = useMemo(
-    () => (lingkup ? saringPenjualan(daftar.data?.data ?? [], lingkup) : []),
+    () => (lingkup ? (daftar.data?.data ?? []) : []),
     [daftar.data, lingkup],
   );
 

@@ -3,43 +3,12 @@ import {
   filterServerPenjualan,
   PILIHAN_UKURAN_HALAMAN,
   UKURAN_HALAMAN_BAWAAN,
-  saringPenjualan,
+  paramLingkupPenjualan,
   tentukanLingkupPenjualan,
-  type LingkupPenjualan,
   type MasukanLingkupPenjualan,
 } from "@/features/penjualan/filter";
 import { bolehCakupanPenjualan } from "@/features/penjualan/izin";
 import type { CakupanLokasiOutlet } from "@/features/inventaris/cakupan";
-import type { Penjualan } from "@/types/penjualan";
-
-function penjualan(id: string, locationID: string | null): Penjualan {
-  return {
-    id,
-    tenantID: "t",
-    locationID,
-    noReferensi: "INV-" + id,
-    dataPengguna: null,
-    dataPelanggan: null,
-    jenisTransaksi: "INVOICE",
-    jenisPenjualan: "dine-in",
-    tanggalTransaksi: "",
-    jatuhTempo: null,
-    itemPenjualan: [],
-    totalHargaProduk: 0,
-    diskonGlobal: [],
-    jumlahDiskonTransaksi: 0,
-    pajakTransaksi: [],
-    jumlahPajakTransaksi: 0,
-    totalTagihan: 0,
-    totalDibayar: 0,
-    sisaTagihan: 0,
-    statusBayar: "UNPAID",
-    statusPenjualan: "DRAFT",
-    keterangan: "",
-    createdAt: "",
-    updatedAt: "",
-  };
-}
 
 const terkunci: CakupanLokasiOutlet = { status: "terkunci", lokasi: null, lokasiId: "outlet-a" };
 const lintas: CakupanLokasiOutlet = { status: "lintas", lokasiOutlet: [] };
@@ -49,8 +18,6 @@ const dasar: MasukanLingkupPenjualan = {
   bolehCakupan: true,
   cakupan: terkunci,
   pilihan: "SEMUA",
-  outletTenantId: "outlet-a",
-  memuatOutletTenant: false,
 };
 
 describe("filterServerPenjualan", () => {
@@ -79,11 +46,7 @@ describe("tentukanLingkupPenjualan", () => {
   });
 
   it("terkunci: satu lokasi, yaitu outlet tenant", () => {
-    expect(tentukanLingkupPenjualan(dasar)).toEqual({
-      jenis: "lokasi",
-      locationID: "outlet-a",
-      outletTenantId: "outlet-a",
-    });
+    expect(tentukanLingkupPenjualan(dasar)).toEqual({ jenis: "lokasi", locationID: "outlet-a" });
   });
 
   it("terkunci tanpa outlet: belum siap", () => {
@@ -102,25 +65,19 @@ describe("tentukanLingkupPenjualan", () => {
     });
   });
 
-  it("lintas outlet dengan satu outlet: menunggu outlet tenant, lalu satu lokasi", () => {
-    const masukan = { ...dasar, cakupan: lintas, pilihan: "outlet-b" };
-    expect(tentukanLingkupPenjualan({ ...masukan, memuatOutletTenant: true })).toBeNull();
-    expect(tentukanLingkupPenjualan(masukan)).toEqual({
+  it("lintas outlet dengan satu outlet: langsung satu lokasi, tanpa menunggu outlet tenant", () => {
+    expect(tentukanLingkupPenjualan({ ...dasar, cakupan: lintas, pilihan: "outlet-b" })).toEqual({
       jenis: "lokasi",
       locationID: "outlet-b",
-      outletTenantId: "outlet-a",
     });
   });
 });
 
-describe("saringPenjualan", () => {
-  it("penjualan tanpa lokasi dianggap milik outlet tenant, urutan dipertahankan", () => {
-    const daftar = [penjualan("1", "outlet-a"), penjualan("2", null), penjualan("3", "outlet-b")];
-    const lokasiA: LingkupPenjualan = { jenis: "lokasi", locationID: "outlet-a", outletTenantId: "outlet-a" };
-    const lokasiB: LingkupPenjualan = { jenis: "lokasi", locationID: "outlet-b", outletTenantId: "outlet-a" };
-    expect(saringPenjualan(daftar, lokasiA).map((p) => p.id)).toEqual(["1", "2"]);
-    expect(saringPenjualan(daftar, lokasiB).map((p) => p.id)).toEqual(["3"]);
-    expect(saringPenjualan(daftar, { jenis: "semua" }).map((p) => p.id)).toEqual(["1", "2", "3"]);
+describe("paramLingkupPenjualan", () => {
+  it("satu lokasi dikirim sebagai locationID; semua dan belum siap tanpa query (RG4a)", () => {
+    expect(paramLingkupPenjualan({ jenis: "lokasi", locationID: "outlet-b" })).toEqual({ locationID: "outlet-b" });
+    expect(paramLingkupPenjualan({ jenis: "semua" })).toEqual({});
+    expect(paramLingkupPenjualan(null)).toEqual({});
   });
 });
 

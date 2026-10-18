@@ -24,10 +24,13 @@ export function useDaftarPenjualan(
   ukuran: number,
   siap: boolean,
   urutan: readonly { id: string; desc: boolean }[] = [],
+  // Query lingkup outlet dari paramLingkupPenjualan; kosong berarti seluruh tenant (RG4a).
+  paramLokasi: Record<string, string> = {},
 ) {
   const params = {
     ...filterServerPenjualan(filter),
     ...paramUrutanPenjualan(urutan),
+    ...paramLokasi,
     page: String(halaman),
     limit: String(ukuran),
   };

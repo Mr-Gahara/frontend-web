@@ -1,5 +1,5 @@
 import { lingkupOutlet, type CakupanLokasiOutlet } from "@/features/inventaris/cakupan";
-import type { Penjualan, PenjualanFilterParams } from "@/types/penjualan";
+import type { PenjualanFilterParams } from "@/types/penjualan";
 
 /**
  * Filter daftar yang dikirim sebagai query. Sejak backend 465b438 filter ini
@@ -15,25 +15,21 @@ export function filterServerPenjualan(filter: PenjualanFilterParams): Record<str
 }
 
 /** Lingkup outlet daftar penjualan: seluruh penjualan tenant, atau satu lokasi. */
-export type LingkupPenjualan =
-  | { jenis: "semua" }
-  | { jenis: "lokasi"; locationID: string; outletTenantId: string };
+export type LingkupPenjualan = { jenis: "semua" } | { jenis: "lokasi"; locationID: string };
 
 export interface MasukanLingkupPenjualan {
   sesiMemuat: boolean;
   bolehCakupan: boolean;
   cakupan: CakupanLokasiOutlet;
   pilihan: string;
-  outletTenantId: string;
-  memuatOutletTenant: boolean;
 }
 
 /**
  * Pengguna tanpa read-location melihat seluruh penjualan tenant (keputusan
  * K11b). Pemegang izin lintas outlet yang memilih "Semua Outlet" juga,
  * karena penjualan hanya terjadi di outlet. Selain itu lingkupnya satu
- * lokasi. Null berarti belum siap: sesi, lokasi, atau outlet tenant masih
- * dimuat, gagal, atau tenant belum punya outlet.
+ * lokasi. Null berarti belum siap: sesi atau lokasi masih dimuat, gagal,
+ * atau tenant belum punya outlet.
  */
 export function tentukanLingkupPenjualan(m: MasukanLingkupPenjualan): LingkupPenjualan | null {
   if (m.sesiMemuat) return null;
@@ -41,22 +37,18 @@ export function tentukanLingkupPenjualan(m: MasukanLingkupPenjualan): LingkupPen
   const lingkup = lingkupOutlet(m.cakupan, m.pilihan);
   if (!lingkup) return null;
   if (!lingkup.locationID) return { jenis: "semua" };
-  if (m.memuatOutletTenant) return null;
-  return { jenis: "lokasi", locationID: lingkup.locationID, outletTenantId: m.outletTenantId };
+  return { jenis: "lokasi", locationID: lingkup.locationID };
 }
 
 /**
- * Penjualan tanpa locationID (draf dari web sebelum locationID dikirim)
- * dianggap milik outlet tenant, sama dengan cadangan backend saat
- * finalisasi (lokasi Outlet pertama tenant).
+ * Lingkup satu lokasi dikirim sebagai query locationID dan disaring server
+ * bersama pagination (keputusan RG4a), sehingga baris, jumlah halaman, dan
+ * total data sama-sama milik lingkup itu. Sejak backend nizar 38f523a setiap
+ * penjualan menyimpan locationID, sehingga filter yang dicocokkan persis itu
+ * tidak menyembunyikan penjualan (kontrak/temuan.md butir 144).
  */
-export function dalamLingkupPenjualan(p: Penjualan, lingkup: LingkupPenjualan): boolean {
-  if (lingkup.jenis === "semua") return true;
-  return (p.locationID ?? lingkup.outletTenantId) === lingkup.locationID;
-}
-
-export function saringPenjualan(daftar: Penjualan[], lingkup: LingkupPenjualan): Penjualan[] {
-  return daftar.filter((p) => dalamLingkupPenjualan(p, lingkup));
+export function paramLingkupPenjualan(lingkup: LingkupPenjualan | null): Record<string, string> {
+  return lingkup?.jenis === "lokasi" ? { locationID: lingkup.locationID } : {};
 }
 
 /** Pilihan jumlah baris daftar penjualan; backend menerima limit 1 sampai 100 (LIMIT_MAKS). */

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { login } from "../../helpers/transfer-uji";
+import { ADA_IZIN_LINTAS } from "../../helpers/lintas-outlet";
 
 /*
  * Daftar penjualan per halaman (keputusan PB6a). Backend 465b438 menjawab
@@ -112,5 +113,54 @@ test.describe("E2E — Daftar penjualan per halaman", () => {
     await expect(page.getByText(`${r20.pagination.total} total data`, { exact: true })).toBeVisible();
     await expect(page.getByText(teksHalaman(r20, 1), { exact: true })).toBeVisible();
     await expect(page.locator("tbody tr")).toHaveCount(r20.data.length);
+  });
+
+  test("terkunci: daftar disaring server lewat locationID outlet tenant (RG4a)", async ({ page }) => {
+    test.skip(ADA_IZIN_LINTAS, "Ridho memegang izin lintas outlet; jalur terkunci butuh akun uji tanpa izin itu");
+    type ResponsLokasi = { data: { locationID: string | null }[]; pagination: ResponsDaftar["pagination"] };
+    await page.goto(URL_DAFTAR, { waitUntil: "commit" });
+    const tLokasi = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/location\/current/i.test(r.url()),
+    );
+    const tDaftar = tungguDaftar(page, 1, 10);
+    const lokasi = (await (await tLokasi).json()) as { data: { id: string } };
+    const res = await tDaftar;
+    const daftar = (await res.json()) as ResponsLokasi;
+    expect(new URL(res.url()).searchParams.get("locationID"), "locationID outlet tenant").toBe(lokasi.data.id);
+    expect(daftar.data.every((p) => p.locationID === lokasi.data.id), "seluruh baris milik outlet tenant").toBe(true);
+    await expect(page.getByText(`${daftar.pagination.total} total data`, { exact: true })).toBeVisible();
+    await expect(page.locator("tbody tr")).toHaveCount(daftar.data.length);
+  });
+
+  test("lintas outlet: memilih satu outlet mengirim locationID dan kembali ke halaman 1 (RG4a, LP1a)", async ({ page }) => {
+    test.fixme(!ADA_IZIN_LINTAS, "Menunggu permission lintas outlet dari backend (kontrak/temuan.md butir 39)");
+    type ResponsLokasiDaftar = { data: { id: string; nama: string; tipe: string }[] };
+    await page.goto(URL_DAFTAR, { waitUntil: "commit" });
+    const tLokasi = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/location(\?.*)?$/i.test(r.url()),
+    );
+    const tAwal = tungguDaftar(page, 1, 10);
+    const lokasi = (await (await tLokasi).json()) as ResponsLokasiDaftar;
+    const resAwal = await tAwal;
+    const awal = (await resAwal.json()) as ResponsDaftar;
+    expect(new URL(resAwal.url()).searchParams.get("locationID"), "Semua Outlet tanpa locationID").toBeNull();
+    expect(awal.pagination.total, "data uji perlu lebih dari 10 penjualan").toBeGreaterThan(10);
+    const outlet = lokasi.data.find((l) => l.tipe === "Outlet");
+    if (!outlet) throw new Error("tenant uji tidak punya lokasi bertipe Outlet");
+
+    const tHalaman2 = tungguDaftar(page, 2, 10);
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await tHalaman2;
+
+    const tOutlet = page.waitForResponse((r) => {
+      if (r.request().method() !== "GET" || !POLA_DAFTAR.test(r.url())) return false;
+      const q = new URL(r.url()).searchParams;
+      return q.get("locationID") === outlet.id && q.get("page") === "1";
+    });
+    await page.getByRole("combobox").filter({ hasText: "Semua Outlet" }).click();
+    await page.getByRole("option", { name: outlet.nama, exact: true }).click();
+    const hasil = (await (await tOutlet).json()) as ResponsDaftar;
+    await expect(page.getByText(teksHalaman(hasil, 1), { exact: true })).toBeVisible();
+    await expect(page.getByText(`${hasil.pagination.total} total data`, { exact: true })).toBeVisible();
   });
 });

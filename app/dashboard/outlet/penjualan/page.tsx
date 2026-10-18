@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import HalamanDaftarPenjualan from "@/features/penjualan/halaman-daftar-penjualan";
-import { useCakupanLokasiOutlet, useLokasiAktif } from "@/features/inventaris/hooks";
+import { useCakupanLokasiOutlet } from "@/features/inventaris/hooks";
 import { SEMUA_OUTLET } from "@/features/inventaris/cakupan";
 import PemilihLokasiOutlet from "@/features/inventaris/pemilih-lokasi-outlet";
 import PesanLokasi from "@/features/inventaris/pesan-lokasi";
@@ -14,19 +14,16 @@ export default function PenjualanPage() {
   // Cakupan outlet (keputusan K5b) hanya bagi pemegang read-location (K11b):
   // lokasi tidak dapat dibaca tanpa izin itu, sehingga pengguna lain melihat
   // penjualan seluruh tenant, yang pada MVP satu outlet sama dengan outlet
-  // tenant.
+  // tenant. Lingkup satu lokasi disaring server (keputusan RG4a).
   const { sedangMemuat, permissions } = useSession();
   const boleh = bolehCakupanPenjualan(permissions);
   const cakupan = useCakupanLokasiOutlet({ aktif: boleh });
-  const outletTenant = useLokasiAktif({ aktif: boleh });
   const [pilihanLokasi, setPilihanLokasi] = useState<string>(SEMUA_OUTLET);
   const lingkup = tentukanLingkupPenjualan({
     sesiMemuat: sedangMemuat,
     bolehCakupan: boleh,
     cakupan,
     pilihan: pilihanLokasi,
-    outletTenantId: outletTenant.lokasiId,
-    memuatOutletTenant: outletTenant.isLoading,
   });
 
   let penghalang: ReactNode = null;
