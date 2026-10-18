@@ -1656,6 +1656,7 @@ maju sembilan commit dan `origin/nizar` satu commit di atas `ridho`
   beban masuk bersama halamannya.
   Dijadwalkan pemilik proyek pada 18 Oktober 2026 sebagai pekerjaan
   setelah RG4a.
+  Halamannya dibangun di `1d7fa7b` (Halaman pengeluaran).
 - **RG7a: kategori beban uji adalah fixture tetap "E2E Kategori Beban"**,
   dicari menurut nama, dibuat sekali bila belum ada, lalu dipakai ulang,
   seperti fixture penjualan. Kategori yang dipakai beban tidak dapat
@@ -1819,6 +1820,40 @@ Diputuskan pemilik proyek pada 18 Oktober 2026, saat RG4a diterapkan
   lingkup tidak lagi membawa `outletTenantId`, sehingga halaman daftar
   tidak memuat `useLokasiAktif` sendiri; lingkup dikirim lewat argumen
   `paramLokasi` di `useDaftarPenjualan`; dan K11b tidak berubah.
+
+### Halaman pengeluaran
+
+Diputuskan pemilik proyek pada 18 Oktober 2026, saat pengeluaran
+dibangun setelah RG4a (`61275ac` sampai `1d7fa7b`). Melanjutkan label BO.
+
+- **BO3a: daftar pengeluaran dengan halaman catat tersendiri.** Daftar
+  memakai DataTable berpaginasi server dengan filter akun kas, kategori,
+  status, dan periode; Catat Beban berada di
+  `/dashboard/outlet/pengeluaran/catatBeban`. Menggantikan BO2a.
+- **BO4a: kategori beban dikelola di Pengaturan**, sejajar metode
+  pembayaran dan pajak. Form catat menautkan ke sana bila belum ada
+  kategori.
+- **BO5a: Owner memilih tanggal beban, peran lain hari ini**, sesuai
+  keputusan pemilik proyek 17 Oktober 2026 dan P23 backend. Owner
+  dikenali dari level role 100, dan tanggal masa depan dinonaktifkan.
+  Backend belum menegakkannya untuk beban.
+- **BO6a: menu titik tiga Lihat rincian, Ubah (keterangan dan
+  kategori), dan Batalkan (VOID beralasan)**; dua yang terakhir hanya
+  untuk beban AKTIF.
+- **BO7a: data uji beban Rp1 dari akun aktif bersaldo, lalu di-VOID
+  lewat UI**, dengan kategori fixture RG7a. Setiap run meninggalkan satu
+  beban berstatus Dibatalkan.
+- **Pekerjaan setelah ini adalah dashboard gudang**; tata letak dan
+  UI/UX-nya menunggu rancangan pemilik proyek (GD1a).
+- Diterapkan tanpa ditanyakan: gerbang daftar pindah ke
+  `read-beban-operasional`, dan halaman catat menuntut
+  `read-kategori-beban`, `read-akunkas`, dan `create-beban-operasional`
+  (GR5a, GR7a); filter akun dan kategori hanya bagi pemegang izin
+  bacanya; mutasi beban menginvalidasi akar beban, akunKas, dan laporan;
+  form menahan jumlah di atas saldo; keterangan dan nama kategori
+  dibatasi 500 dan 100 karakter, karena backend belum membatasinya; dan
+  nama kategori uji unik per run dan dihapus di run yang sama.
+  Penundaan BO1a, NZ11a, dan RG6a berakhir.
 
 ## Keputusan rancangan yang mengikat
 
@@ -1992,6 +2027,7 @@ dari `50eede7` ke `fc29433`.
 - **FC2a: izin beban operasional masuk template bersama halaman
   pengeluaran**, bukan sekarang, karena kategori beban masih dijawab 403
   dan kontrak beban belum final.
+  Diterapkan di `61275ac`.
 - **FC3a: halaman pajak mendapat entri `IZIN_HALAMAN`** (`read-pajak`
   atau `akses-pos`, `d3443e2`), diturunkan dari endpoint yang dipanggil
   halaman. Karena `IZIN_HALAMAN` hanya dibaca sidebar dan halaman pajak

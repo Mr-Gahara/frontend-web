@@ -96,6 +96,15 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per halaman pengeluaran** (commit `1d7fa7b`, 18 Oktober
+2026): 678 test unit dan integrasi lolos di 83 berkas, bertambah 19 test
+di dua berkas di `b2d84a6`. Suite penuh tidak dijalankan. Yang
+dijalankan: `tests/e2e/pengaturan` dan spec gerbang rute (38 lolos di
+`87fbf7a`), serta spec pengeluaran, kategori beban, dan gerbang rute (8
+lolos di `1d7fa7b`). Spec pengeluaran berganti dari satu menjadi tiga
+skenario, dan spec kategori beban menambah tiga, sehingga harapan suite
+penuh menjadi 467 lolos dan 14 skipped; angka itu hitungan.
+
 **Baseline per cakupan daftar penjualan** (commit `20c026b`, 18 Oktober
 2026): 659 test unit dan integrasi lolos di 81 berkas, tidak berubah:
 test `saringPenjualan` diganti test `paramLingkupPenjualan`. Suite penuh
@@ -1064,6 +1073,12 @@ Urutan debug kegagalan e2e di atas).
   punya satu outlet, sehingga hasilnya sama dengan tanpa penyaringan.
   Jalur lintas outlet berupa `test.fixme` bersyarat (LP2a), dan aturan
   lingkup diuji di `tests/unit/features/penjualan/filter.test.ts`.
+- **Jalur tanggal terkunci bagi peran selain Owner di catat beban hanya
+  teruji di unit test** (`payloadBuatBeban`), karena pengguna uji
+  berperan Owner (BO5a).
+- **Penolakan backend saat mencatat beban** (saldo kurang atau akun
+  nonaktif, 409) tidak punya skenario e2e: form menahan jumlah di atas
+  saldo sebelum permintaan dikirim.
 - **Jalur tanpa `read-location` di halaman penjualan** (tanpa cakupan, dan
   tanpa `locationID` saat membuat) hanya teruji di unit test, dengan alasan
   yang sama: satu-satunya akun uji berperan Owner.
@@ -1759,9 +1774,19 @@ Urutan debug kegagalan e2e di atas).
   hanya bila penanda `dibatalkan` belum diset. Penahanan form dibuktikan
   dengan penghitung permintaan yang tetap nol, dan pemicu Select dipilih
   lewat nama label.
-- `tests/e2e/keuangan/pengeluaran.spec.ts` (`7fce871`): halaman yang
-  menunggu backend diuji lewat keterangannya dan lewat penghitung
-  permintaan ke endpoint yang belum dapat dipakai, yang harus tetap nol.
+- `tests/e2e/keuangan/pengeluaran.spec.ts` (sejak `1d7fa7b`, menggantikan
+  spec keterangan `7fce871`): alur catat, ubah keterangan, dan VOID lewat
+  UI dari akun aktif bersaldo dengan kategori fixture (BO7a), dibuktikan
+  dari payload persis setiap permintaan, saldo yang berkurang lalu pulih,
+  dan rincian yang memuat alasan batal. Form dan galat daftar diuji tanpa
+  data: isian kosong dan jumlah di atas saldo ditahan tanpa permintaan,
+  dan daftar yang dijawab 500 lewat `page.route` tampil sebagai pesan
+  tanpa tabel.
+- `tests/e2e/pengaturan/kategori-beban.spec.ts` (`87fbf7a`): kategori
+  bernama unik ditambah, diganti nama, dan dihapus lewat UI di run yang
+  sama, lalu daftar backend dibaca ulang; penolakan diuji pada fixture
+  tetap (nama kembar, dan hapus kategori yang dipakai beban, 409).
+  Helper fixture-nya di `tests/helpers/beban-uji.ts`.
 - `tests/e2e/keuangan/tutup-akun-bersaldo.spec.ts` (`f7805ca`): alur
   lintas halaman ber-`test.step` yang membuat datanya sendiri lewat UI,
   sehingga halaman baca-saja (mutasi) diperiksa dengan jumlah dan urutan

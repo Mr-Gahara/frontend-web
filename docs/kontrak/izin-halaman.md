@@ -42,6 +42,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 8 Oktober 2026: pengeluaran, terhadap `yoga` `55328f1`. Route `/kategoribeban` kini memeriksa izin per operasi (`read-`, `create-`, `update-`, dan `delete-kategori-beban`), seperti `/bebanoperasional` sejak `fc29433`, dan keduanya menjawab 200 bagi Owner. Halaman tetap menampilkan keterangan belum tersedia (keputusan NZ11a), sehingga gate `read-pembayaran` belum diselaraskan.
 - 11 Oktober 2026: stock adjustment outlet dan gudang setelah `f61e146`, terhadap backend `ridho` `2dd57aa`. `GET /stockopname/adjustments` dan detailnya kini menerima `read-stock-adjustment`, `read-stock-adjustment-outlet`, atau `read-stock-adjustment-gudang`, dan menyaring menurut ruang. Gate daftar dan detail di tiap ruang menerima izin umum atau izin ruangnya; izin ruang lain tidak diterima (keputusan RH3a).
 - 18 Oktober 2026: penjualan setelah `20c026b`, tanpa perubahan gate (`read-penjualan`). Bagi pemegang `read-location`, daftar mengirim `locationID` lingkup outletnya dan disaring server (keputusan RG4a); pengguna lain tetap melihat seluruh penjualan tenant (K11b).
+- 18 Oktober 2026: pengeluaran setelah `1d7fa7b`, terhadap backend `ridho` `00de455`. Gate daftar pindah dari `read-pembayaran` ke `read-beban-operasional` (keputusan BO3a). Filter akun kas dan kategori memanggil `GET /akunkas` dan `GET /kategoribeban` hanya bagi pemegang `read-akunkas` dan `read-kategori-beban`; menu Ubah dan Batalkan memanggil `PUT /bebanoperasional/:id` dan hanya tampil bagi pemegang `update-beban-operasional`. Rute baru catat beban dan Kategori Beban di Pengaturan dicatat di 5.1. Ketujuh izin beban dan kategori beban ada di template Manajer dan General Manajer sejak `61275ac`.
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -52,7 +53,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/diskon` | - | `/diskon` | - | Backend tidak memeriksa izin |
 | `/dashboard/outlet/keuangan` | `read-akunkas` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/penjualan` | `read-penjualan` | `/penjualan` (per halaman, `page` dan `limit`, serta `locationID` lingkup outlet bagi pemegang `read-location` sejak `20c026b`); `/location` dan `/location/current` hanya bagi pemegang `read-location` | `read-penjualan`; `read-location` opsional untuk cakupan outlet | Sejalan; gate sengaja tidak menambah `read-location` agar Guest, Staff, dan Kasir tetap dapat membuka daftar (keputusan K11b) |
-| `/dashboard/outlet/pengeluaran` | `read-pembayaran` | - | - | Keterangan belum tersedia tanpa data (`7fce871`, keputusan BO2a); endpoint beban memeriksa `kelola-beban-operasional` di controller dan menjawab 403 bagi setiap pengguna (`temuan.md` butir 130), sehingga gate belum diselaraskan. Sejak `fc29433` dan `yoga` `55328f1` kedua route beban memeriksa izin per operasi dan menjawab 200; halaman tetap ditunda (NZ11a) |
+| `/dashboard/outlet/pengeluaran` | `read-beban-operasional` | `/bebanoperasional` (per halaman, dengan filter); `/akunkas` dan `/kategoribeban` hanya bagi pemegang izin bacanya | `read-beban-operasional`; `read-akunkas` dan `read-kategori-beban` opsional untuk filter | Sejalan sejak `1d7fa7b` (keputusan BO3a); sebelumnya keterangan belum tersedia dengan gate `read-pembayaran` (BO2a) |
 | `/dashboard/outlet/keuangan/ringkasanLabaRugi` | `read-laporan` | `/laporan/laba-rugi` (periode berjalan dan pembanding); kartu ringkasan di layout juga `/akunkas` | `read-laporan`; `/akunkas` butuh `read-akunkas` | Sejalan sejak backend `465b438` memeriksa `read-laporan`; tanpa `read-akunkas` kartu saldo menampilkan `-` (KU2a) |
 | `/dashboard/outlet/inventaris-data` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/produk` | `read-produk` | `/produk` | `read-produk` atau `akses-pos` | Sejalan |
@@ -118,9 +119,11 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/outlet/keuangan/akunkas/buatAkunKas` | `create-akunkas` | - | Form |
 | `/dashboard/outlet/keuangan/akunkas/[id]/ubah` | `read-akunkas`, `update-akunkas` | `/akunkas` | Form; cabang keterangan tanpa `update-akunkas` di halaman dibuang di `dc0af1c` |
 | `/dashboard/outlet/keuangan/akunkas/pindahDana` | - | `/akunkas`, `/jurnaltransfer` | Izin per bagian di dalam halaman (DN1a) |
+| `/dashboard/outlet/pengeluaran/catatBeban` | `read-kategori-beban`, `read-akunkas`, `create-beban-operasional` | `/kategoribeban`, `/akunkas` | Form; kategori dan akun kas wajib (GR5a, GR7a) |
 | `/dashboard/outlet/pengaturan/metodePembayaran` | - | `/metodepembayaran` | `GET` tanpa izin di backend |
 | `/dashboard/outlet/pengaturan/metodePembayaran/buatMetodePembayaran` | `read-akunkas`, `create-metode-pembayaran` | `/akunkas` | Form; akun tujuan wajib |
 | `/dashboard/outlet/pengaturan/metodePembayaran/[id]` | `update-metode-pembayaran` | `/metodepembayaran/:id`; `/akunkas` opsional | Form; `read-akunkas` hanya untuk pindah akun |
+| `/dashboard/outlet/pengaturan/kategoriBeban` | `read-kategori-beban` | `/kategoribeban` | Daftar dengan dialog tambah, ganti nama, dan hapus; tombol mengikuti `create-`, `update-`, dan `delete-kategori-beban` (BO4a) |
 | `/dashboard/outlet/pengaturan/roles` | `read-role` | `/role`, `/permission` | Daftar; sebelum `bc388c6` tanpa gate |
 | `/dashboard/outlet/pengaturan/roles/buatRole` | `read-role`, `create-role` | `/role`, `/permission` | Form dari template |
 | `/dashboard/outlet/pengaturan/roles/buatRole/kostum` | `read-role`, `create-role` | `/role`, `/permission` | Form |

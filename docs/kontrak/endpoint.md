@@ -75,6 +75,14 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | PUT | `/bahanbaku/:id` | authPengguna | `update-bahan` | - | - | `features/bahan-baku/api.ts` |
 | DELETE | `/bahanbaku/:id` | authPengguna | `delete-bahan` | - | - | `features/bahan-baku/api.ts` |
 
+#### `/bebanoperasional`
+
+| Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
+|---|---|---|---|---|---|---|
+| GET | `/bebanoperasional` | authPengguna | `read-beban-operasional` | `{ data, pagination }` | `id` | `features/beban-operasional/api.ts` (query `page` dan `limit`, serta `akunKasID`, `kategoriBebanID`, `status`, `dari`, dan `sampai` bila diisi) |
+| POST | `/bebanoperasional` | authPengguna | `create-beban-operasional` | `{ data }` | `id` | `features/beban-operasional/api.ts` |
+| PUT | `/bebanoperasional/:id` | authPengguna | `update-beban-operasional` | `{ data }` | `id` | `features/beban-operasional/api.ts` (ubah keterangan dan kategori, dan VOID) |
+
 #### `/diskon`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
@@ -131,6 +139,15 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | POST | `/kategori` | authPengguna | `create-kategori` | - | - | `features/kategori/api.ts` |
 | PUT | `/kategori/:id` | authPengguna | `update-kategori` | - | - | `features/kategori/api.ts` |
 | DELETE | `/kategori/:id` | authPengguna | `delete-kategori` | - | - | `features/kategori/api.ts` |
+
+#### `/kategoribeban`
+
+| Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
+|---|---|---|---|---|---|---|
+| GET | `/kategoribeban` | authPengguna | `read-kategori-beban` | `{ data }` | `_id` | `features/kategori-beban/api.ts` |
+| POST | `/kategoribeban` | authPengguna | `create-kategori-beban` | `{ data }` | `_id` | `features/kategori-beban/api.ts` |
+| PUT | `/kategoribeban/:id` | authPengguna | `update-kategori-beban` | `{ data }` | `_id` | `features/kategori-beban/api.ts` |
+| DELETE | `/kategoribeban/:id` | authPengguna | `delete-kategori-beban` | - | - | `features/kategori-beban/api.ts` |
 
 #### `/laporan`
 
@@ -352,6 +369,7 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /aset/:param`: createdAt, dataAset{deskripsi, id, namaTipeAset}, id, namaAset, status, tenantID, updatedAt
 - `GET /bahanbaku`: availableUnits[], createdAt, id, namaBahan, satuan, tenantID, updatedAt
 - `GET /bahanbaku/:param`: availableUnits[], createdAt, id, namaBahan, satuan, tenantID, updatedAt
+- `GET /bebanoperasional` (dari `mappers/bebanOperasionalMapper.js` dan `docs/api/endpoint/bebanOperasional.md` backend `ridho` `00de455`, dicocokkan dengan respons nyata 18 Oktober 2026): akunKas{id, namaAkun, nomorAkun}, alasanVoid, createdAt, dicatatOleh{id, nama}, divoidOleh{id, nama}, id, jumlah, kategori{id, namaKategori}, keterangan, status, tanggal, tanggalVoid, updatedAt. `status` AKTIF atau VOID, dan beban lama tanpa status dijawab AKTIF; `alasanVoid`, `divoidOleh`, dan `tanggalVoid` null selama AKTIF; relasi yang terhapus bernilai null; `tenantID` tidak dikirim. Diurutkan menurut `tanggal` lalu waktu dicatat, terbaru dulu, termasuk beban VOID. Query yang dibaca service: `dari` dan `sampai` atas `tanggal` (`YYYY-MM-DD` dibaca hari WIB), `akunKasID`, `kategoriBebanID`, `status`, serta `page` dan `limit` (paling besar 100; tanpa keduanya daftar dijawab utuh tanpa `pagination`). Query lain ditolak 400 "Query tidak dikenal". Daftar tidak di-cache, sedangkan detail di-cache 300 detik. `GET /bebanoperasional/:id` berbentuk sama dan tidak dipakai web
 - `GET /diskon`: bisaDigabung, cakupan, createdAt, hariAktif[], hitungPerBarang, id, jamMulai, jamSelesai, khususMember, kuota, kuotaPerPelanggan, minimalBelanja, namaDiskon, nilai, produkIDs[], sedangBerlaku, sisaKuota, status, tanggalBerakhir, tanggalMulai, tenantID, terpakai, tipe, updatedAt (dari `mappers/diskonMapper.js` backend `yoga` `50eede7`: `sisaKuota` dihitung dari `kuota` dan `terpakai`, null bila tanpa kuota; `sedangBerlaku` dihitung saat respons dibuat dari status, masa berlaku, jam dan hari dalam WIB, dan kuota, `temuan.md` butir 109. Service membaca query `status`, `cakupan`, dan `tipe`, serta `page` dan `limit` yang opsional; daftar diurutkan status lalu terbaru dan di-cache 300 detik. Web memuat daftar tanpa query dan menyaring di klien)
 - `GET /inventory`: createdAt, id, isStokKritis, item{id, kategori, nama, satuan, tipeItem}, lokasi{id, nama, tipe}, stok, stokMinimum, tenantID, updatedAt (dari `mappers/inventoryMapper.js` backend `f27f093`: `item.kategori` berisi `tipe` barang inventory; `isStokKritis` hanya true bila `stokMinimum` lebih dari 0 dan stok tidak melebihinya, sehingga `stokMinimum` 0 berarti tidak dipantau. Query yang dibaca service: `locationID`, `kategori` (dicocokkan dengan `BarangInventory.tipe`), dan `search`; tanpa `locationID` mengirim stok seluruh lokasi tenant. Respons `POST /inventory` kini ter-populate dan berbentuk sama)
 - `GET /izincuti` (dari `mappers/izinCutiMapper.js` backend `ridho` `2dd57aa`): catatan, createdAt, dicatatOleh{id, nama}, id, keterangan, pengguna{id, nama, email}, status, tanggalMulai, tanggalSelesai, tenantID, tipe, updatedAt
@@ -359,6 +377,7 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /jurnaltransfer` (dari `mappers/jurnalTransferMapper.js` backend `yoga` `50eede7` dan respons nyata 4 Oktober 2026): catatan, createdAt, dicatatOleh{id, nama}, id, jumlah, kasSumber{id, namaAkun, nomorAkun}, kasTujuan{id, namaAkun, nomorAkun}, keterangan, status, tanggal, tenantID, updatedAt. `namaAkun` berasal dari salinan nama saat transfer dicatat, sehingga tidak ikut berubah bila akunnya diganti nama; `status` AKTIF atau VOID; `catatan` null sampai diisi, dan berisi alasan bila dikirim bersama VOID. Diurutkan menurut `tanggal` lalu `createdAt`, terbaru dulu. Query yang dibaca service: `status` dan `akunKasID` (sebagai sumber atau tujuan), yang tidak sah dijawab 400; `page` dan `limit` opsional (tanpa keduanya daftar dijawab utuh tanpa `pagination`, `limit` paling besar 100). Query lain, termasuk periode, diabaikan tanpa galat (`temuan.md` butir 129). `GET /jurnaltransfer/:id` berbentuk sama untuk satu transfer, menjawab 404 untuk id yang tidak ada atau tidak sah, dan tidak dipakai web. Sejak `nizar` `c29310c` service juga membaca `dari` dan `sampai` atas `tanggal` (`YYYY-MM-DD` dibaca hari WIB), dan query di luar `status`, `akunKasID`, `dari`, `sampai`, `page`, dan `limit` ditolak 400 (butir 129)
 - `GET /jurnalstok`: _id, alasan, bahanBakuID{_id, namaBahan, satuan}, createdAt, dicatatOleh{_id, nama}, jumlah, keterangan, locationID{_id, nama, tipe}, tanggal, tenantID, tipeKoreksi, updatedAt
 - `GET /kategori`: __v, _id, createdAt, keterangan, kodeKategori, namaKategori, tenantID{_id, namaToko}, updatedAt
+- `GET /kategoribeban` (dari `kategoriBebanService` backend `ridho` `00de455` dan respons nyata 18 Oktober 2026): _id, createdAt, namaKategori, tenantID, updatedAt. Dokumen dikirim tanpa mapper, diurutkan menurut nama, dan di-cache 3.600 detik; nama unik per toko
 - `GET /laporan/laba-rugi`: tanggal, totalBebanOperasional, totalDiskon, totalHPP, totalLabaBersih, totalLabaKotor, totalOmzet, totalPajak, totalPenjualanKotor, totalPenjualanSewa (dari `laporanController` dan `laporanService`: array per kelompok waktu, per jam untuk `harian` dan per tanggal untuk `mingguan` dan `bulanan`; respons juga membawa `ringkasan`, yang belum dibaca web. Sejak backend `465b438`, `startDate` dan `endDate` hanya diterima sebagai tanggal `YYYY-MM-DD` (ISO ditolak), `harian` wajib `startDate` sama dengan `endDate`, omzet tidak lagi memuat pajak, dan route memeriksa `read-laporan`. Web selalu mengirim ketiga query lewat `features/laporan` sebagai tanggal lokal (`keTanggalLokal`))
 - `GET /location`: alamat, createdAt, id, koordinat{coordinates, type}, nama, radiusAbsen, tenantID, tipe, updatedAt (diurutkan dari yang terbaru, `locationService` baris 90 di backend `00b9957`, sehingga lokasi pertama bertipe Gudang adalah gudang terbaru; `koordinat.coordinates` berurutan longitude, latitude)
 - `GET /location/current`: alamat, createdAt, id, koordinat{coordinates, type}, nama, radiusAbsen, tenantID, tipe, updatedAt (dari `locationService.getByTenant` backend `9cd1439` baris 108: lokasi pertama tenant bertipe Outlet, sama untuk setiap pengguna; null bila tenant belum punya outlet)

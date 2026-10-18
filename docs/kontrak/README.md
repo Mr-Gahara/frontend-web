@@ -136,6 +136,11 @@ terhadap `ridho` `00de455`. Pada 18 Oktober 2026 bagian penjualan di
 `endpoint.md`, `izin-halaman.md`, dan `temuan.md` diperbarui terhadap
 backend yang sama, setelah web memakai filter `locationID` daftar
 penjualan (`20c026b`).
+Pada hari yang sama, bagian beban operasional dan kategori beban
+ditambahkan ke `endpoint.md`, `payload.md`, dan `izin-halaman.md`
+terhadap backend yang sama, setelah web memakainya (`61275ac` sampai
+`1d7fa7b`), dan temuan beban dinilai ulang (butir 132 sampai 137, dan
+butir 148 baru di `temuan.md`).
 
 ## 1. Acuan dan metodologi
 

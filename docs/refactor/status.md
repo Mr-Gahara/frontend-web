@@ -80,7 +80,7 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Keuangan: mutasi arus kas dan akun kas non-aktif | `e129f9d` (mutasi arus kas), `6a57d12` (akun kas non-aktif dipisah) | Selesai (keputusan MK1a sampai MK3a dan AK1a; Catatan dari pekerjaan mutasi arus kas dan akun kas) |
 | Keuangan: ubah dan aktifkan kembali akun kas | `1bc76f4` | Selesai (keputusan UA1a sampai UA4a; Catatan dari pekerjaan ubah akun kas) |
 | Keuangan: Pindah Dana antar akun kas | `e053a67` (izin di template role), `e53c016` | Selesai (keputusan DN1a sampai DN4a; Catatan dari pekerjaan Pindah Dana) |
-| Keuangan: pengeluaran (beban operasional) | `7fce871` (keterangan belum tersedia) | Ditunda (keputusan BO1a dan BO2a; Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang): endpoint beban menjawab 403 bagi setiap pengguna di backend `50eede7` |
+| Keuangan: pengeluaran (beban operasional) | `7fce871` (keterangan belum tersedia) | Digantikan halaman sungguhan (baris Keuangan: halaman pengeluaran) |
 | Transfer stok: daftar surat jalan memakai penyaringan server (butir 33) | `03c4eb3` | Selesai (keputusan TS1a; Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang) |
 | Keuangan: utang kecil (menutup akun bersaldo lewat Pindah Dana, dan tampilan mutasi transfer) | `f7805ca` | Selesai (keputusan UK1a sampai UK3a; Catatan dari penundaan pengeluaran dan pemeriksaan ulang utang) |
 | Produk: utang kecil (dialog hapus, spec produk, dan `BahanBakuCombobox`) | `152088b` | Selesai (keputusan PR1a sampai PR3a; Catatan dari utang kecil modul produk dan pemformat rupiah) |
@@ -107,7 +107,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Tabel seragam K-D: shift dan pola roster | `2177ac3` | Selesai (keputusan TB19a dan TB20a; Catatan dari tabel seragam K-D) |
 | Tabel seragam K-E: aset, tarif, dan tipe aset | `eb81a1f` | Selesai (keputusan TB21a sampai TB23a; Catatan dari tabel seragam K-E) |
 | Cakupan daftar penjualan lewat filter `locationID` server (RG4a) | `20c026b` | Selesai (keputusan LP1a dan LP2a; Catatan dari cakupan daftar penjualan) |
-| Keuangan: halaman pengeluaran (beban operasional) | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Keuangan: halaman pengeluaran (beban operasional) | `61275ac`, `b2d84a6`, `87fbf7a`, `1d7fa7b` | Selesai (keputusan BO3a sampai BO7a; Catatan dari halaman pengeluaran) |
+| Dashboard gudang: tata letak dan isi (GD1a) | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -130,42 +131,67 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: pengeluaran (beban operasional)
+## Pekerjaan berikutnya: dashboard gudang
 
-Cakupan daftar penjualan pindah ke filter `locationID` server pada
-18 Oktober 2026 (`20c026b`, Catatan dari cakupan daftar penjualan).
-Pemilik proyek lalu menjadwalkan pengeluaran sebagai pekerjaan
-berikutnya, mengakhiri penundaan BO1a, NZ11a, dan RG6a.
+Halaman pengeluaran selesai pada 18 Oktober 2026 dalam empat commit
+(Catatan dari halaman pengeluaran). Pemilik proyek lalu memilih
+dashboard gudang sebagai pekerjaan berikutnya.
 
-Halaman `/dashboard/outlet/pengeluaran` masih menampilkan keterangan
-belum tersedia (BO2a) dengan gate `read-pembayaran`. Backend `ridho`
-`7d28135` memperbaiki beban: buku mutasi, VOID beralasan tanpa
-`DELETE`, `PUT` terbatas, daftar berpaginasi, dan bentuk galat
-(`kontrak/temuan.md` butir 131 sampai 137, terbukti lewat permintaan
-nyata 16 Oktober 2026). Yang belum dicocokkan: penyaringan beban VOID
-di laporan laba rugi (butir 132), cache daftar beban saat kategori
-berubah (butir 135), penolakan saldo kurang dan akun nonaktif (butir
-133), serta bentuk `tanggal`, batas `keterangan`, dan pembatas laju
-(butir 137). Kontrak beban belum ada di `kontrak/endpoint.md` maupun
-`kontrak/payload.md`, dan izin beban belum masuk template role (FC2a).
-Aturan tanggal lampau hanya untuk Owner (pemilik proyek, 17 Oktober
-2026) diperiksa di backend saat pemetaan.
+`/dashboard/gudang` masih placeholder. Sumber datanya sudah diputuskan
+(GD1a), tetapi tata letak dan UI/UX-nya menunggu rancangan pemilik
+proyek. Pemetaan awal diambil lebih dulu, lalu rancangannya ditanyakan
+sebelum kode ditulis.
 
 Pemetaan awal belum diambil, sehingga langkah pertama sesi berikutnya
 mengambilnya, setelah cabang backend diperiksa (`cara-kerja.md`).
 Backend lokal berada di `ridho` `00de455`; `origin/nizar` membawa
 `96e890e` dan `3efd05b` (Catatan dari tabel seragam K-D). Suite e2e
-penuh tidak dijalankan di awal sesi; harapannya 462 lolos dan 14
-skipped (`pengujian.md`). Tiga belas `test.fixme` menunggu backend
-(`pengujian.md`, Test yang ditandai fixme dan skip bersyarat).
+penuh belum dijalankan sejak `eb81a1f`; harapannya 467 lolos dan 14
+skipped (`pengujian.md`). Tiga belas `test.fixme` menunggu backend.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in $(git -C "$BE" for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -v '^origin$' | grep -v '/HEAD$'); do echo "$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...$r | tr '\t' ' ')"; done
 cd ~/Documents/frontend-web
-wc -l app/dashboard/outlet/pengeluaran/page.tsx tests/e2e/keuangan/pengeluaran.spec.ts
-grep -rn 'beban\|Beban\|pengeluaran' lib/api/endpoints.ts lib/auth/permissions.ts lib/roleTemplates.ts lib/queryKeys.ts types components/sidebar-menu.ts | cut -c1-140
-ls ~/Documents/backend-js/routes ~/Documents/backend-js/controllers ~/Documents/backend-js/services ~/Documents/backend-js/validators ~/Documents/backend-js/mappers ~/Documents/backend-js/docs/api/endpoint ~/Documents/backend-js/docs/api/payload | grep -i beban
+wc -l app/dashboard/gudang/page.tsx
+grep -n "GD1a\|GD2a\|GD3a\|GD4a" docs/refactor/keputusan.md | cut -c1-160
 ```
+
+## Catatan dari halaman pengeluaran
+
+Dikerjakan pada 18 Oktober 2026 dalam empat commit, terhadap backend
+`ridho` `00de455`. `origin/nizar` tetap dua commit di depan (`96e890e`
+dan `3efd05b`), dan cabang lain tidak maju.
+
+| Commit | Isi |
+|---|---|
+| `61275ac` | Izin beban operasional di template Manajer dan General Manajer (FC2a) |
+| `b2d84a6` | Fondasi beban operasional dan kategori beban |
+| `87fbf7a` | Kategori beban di Pengaturan (BO4a) |
+| `1d7fa7b` | Halaman pengeluaran dan catat beban (BO3a, BO5a, BO6a, BO7a) |
+
+- Kontrak diambil dari kode dan dokumen API backend, lalu dicocokkan
+  dengan respons nyata: daftar beban berpaginasi, query asing ditolak
+  400, dan kategori dikirim tanpa mapper.
+- Dari kode `00de455`: laporan laba rugi menyaring beban VOID (butir
+  132), saldo kurang dan akun nonaktif ditolak 409 di dalam transaksi
+  (butir 133), dan daftar beban tidak lagi di-cache serta ganti nama
+  kategori membuang cache detail beban (butir 135). Hapus kategori yang
+  dipakai beban ditolak 409, terbukti lewat e2e.
+- P23 (tanggal lampau hanya untuk Owner) sudah ditetapkan backend, tetapi
+  baru diterapkan di jurnal transfer. Web menahannya lebih dulu di beban
+  (BO5a). Dokumen backend sendiri mencatat sisi beban masih menunggu,
+  sehingga tidak dilaporkan ulang.
+- Temuan baru: nama kategori beban kembar dijawab 400, bukan 409
+  (`kontrak/temuan.md` butir 148), dilaporkan ke Yoga.
+- Run e2e pertama commit kategori gagal di login karena server dev
+  menjawab 500: Turbopack mencatat folder rute baru sebagai berkas.
+  Dipulihkan dengan memulai ulang server dev (`cara-kerja.md`).
+- Setiap run spec pengeluaran meninggalkan satu beban Rp1 berstatus
+  Dibatalkan (BO7a). Kategori milik e2e tetap satu, fixture "E2E
+  Kategori Beban".
+- Vitest 678 lolos di 83 berkas. Suite e2e penuh tidak dijalankan
+  (`pengujian.md`).
+- Keputusan: `keputusan.md` (Halaman pengeluaran, BO3a sampai BO7a).
 
 ## Catatan dari cakupan daftar penjualan
 
@@ -1618,6 +1644,9 @@ Yang masih berlaku:
   `locationID`, sesuai rancangan backend. Tenant uji tidak terdampak:
   total dengan filter outletnya sama dengan total tenant (18 Oktober
   2026).
+- Butir 132, 133, dan 135 dicocokkan dari kode `00de455` pada 18 Oktober
+  2026 (Catatan dari halaman pengeluaran). Yang tersisa dari butir 137:
+  batas tanggal masa depan, panjang keterangan, dan pembatas laju.
 - Kategori fixture "E2E Kategori Beban" dan satu beban VOID menetap di
   basis data development (RG7a).
 - Pemilik proyek memutuskan untuk backend pada 17 Oktober 2026: tanggal
@@ -1667,6 +1696,7 @@ Yang masih berlaku:
   Butir itu diperbaiki di `7d28135` dan terbukti lewat permintaan nyata;
   pengeluaran tetap ditunda sampai dijadwalkan pemilik proyek (RG6a).
   Dijadwalkan sebagai pekerjaan berikutnya pada 18 Oktober 2026.
+  Selesai di `1d7fa7b` (BO3a sampai BO7a).
 - Bagian Sesi Booking di detail penjualan memakai tata letak sederhana di
   atas grid informasi; penempatannya menunggu fase UI/UX.
 - Timeline reservasi tidak punya aksi Tandai Selesai (NZ7a). Booking lama
@@ -1689,6 +1719,7 @@ Yang masih berlaku:
 
 - Izin beban operasional belum masuk template role (keputusan FC2a);
   ditambahkan bersama halaman pengeluaran.
+  Ditambahkan di `61275ac`.
 - Pilihan satuan resep hanya terbukti dari respons nyata untuk bahan
   bersatuan pcs, gram, dan ml. Untuk kg, liter, pak, dan unit, isi
   `availableUnits` dibaca dari kode backend, karena data development
@@ -1745,6 +1776,7 @@ Yang masih berlaku:
   (`yoga` `55328f1`); yang ditunggu tinggal butir 131 sampai 134 (NZ11a).
   Keempatnya diperbaiki di `7d28135` (RG6a), dan halamannya dijadwalkan
   setelah RG4a.
+  Halamannya selesai di `1d7fa7b`, dengan gate `read-beban-operasional`.
 - `DELETE /akunkas/:id` tidak ada lagi sejak backend `465b438`, dan akun
   bersaldo tidak dapat ditutup (`kontrak/temuan.md` butir 81). Ubah,
   nonaktifkan, dan aktifkan kembali tersedia sejak `1bc76f4`, dan Pindah

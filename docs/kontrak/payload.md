@@ -211,6 +211,18 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Diisi server: `tenantID`
 - Sejak `yoga` `968749a` (dari kode `2dd57aa`): `locationID` diperiksa format dan tenant-nya sebelum master disimpan (400); tanpa `locationID` dipakai Outlet tenant, dan gudang tidak pernah dipilih otomatis; tenant tanpa outlet ditolak 400 bila stok awal di atas 0 (butir 38 tertutup). Entri inventory dibuat setiap kali lokasi ada, berapa pun stok awalnya, dan entri itu menghalangi `DELETE /bahanbaku/:id` (409, `temuan.md` butir 143)
 
+#### `POST /bebanoperasional`
+
+- Aturan: `validateBebanPayload` (validators/bebanOperasionalValidator.js), dipanggil `bebanOperasionalService.create` setelah `checkPermission("create-beban-operasional")` di route. Ditambahkan 18 Oktober 2026 terhadap backend `ridho` `00de455`
+- Field yang dibaca (`FIELD_BUAT`): `akunKasID`, `kategoriBebanID`, `tanggal`, `jumlah`, dan `keterangan`; field lain di body diabaikan, dan beban selalu dicatat AKTIF
+- Wajib dari klien: `akunKasID` dan `kategoriBebanID` (string 24 heksadesimal), `jumlah` (number bilangan bulat minimal 1; teks dan pecahan ditolak 400), `tanggal` (teks tanggal yang sah, `YYYY-MM-DD` atau ISO), dan `keterangan` (tidak kosong setelah `trim`)
+- Belum dibatasi backend: tanggal masa depan, panjang `keterangan`, dan pembatas laju tulis (`temuan.md` butir 137). Aturan tanggal lampau hanya untuk Owner (P23 backend) baru diterapkan di jurnal transfer
+- Aturan service, dalam satu transaksi: kategori harus milik toko (400); saldo dipotong hanya bila akun aktif milik toko dan saldonya cukup, selain itu akun yang tidak ada di toko 400, akun nonaktif 409, dan saldo kurang 409 dengan saldo di pesan; dokumen beban dan baris mutasi `BEBAN` bertanggal beban ditulis bersama
+- Galat isian berbentuk `{ status, message: "Data yang dikirim tidak valid.", errors }`
+- Web mengirim hasil `payloadBuatBeban` (`features/beban-operasional/payload.ts`, `b2d84a6`): kelima field, dengan `jumlah` bilangan bulat minimal 1 yang tidak melebihi saldo akun terpilih, `keterangan` dipangkas dan paling panjang 500, dan `tanggal` `YYYY-MM-DD` hari lokal. Owner memilih tanggal (masa depan dinonaktifkan), dan peran lain mengirim hari ini (keputusan BO5a)
+- Respons 201 dengan `data` berbentuk item `GET /bebanoperasional` dan `message` "Beban Operasional berhasil dibuat"
+- Diisi server: `tenantID`, `dicatatOleh`, `status`
+
 #### `POST /diskon`
 
 - Aturan: validateDiskonPayload (validators/diskonValidator.js) di route, setelah pembatas laju tulis dan `checkPermission("create-diskon")`. Dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7`
@@ -281,6 +293,15 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Field lain yang dikenali: `namaKategori`, `kodeKategori`, `keterangan`
 - Duplikat nama atau kode: 400 `{ errors: ["tenantID sudah digunakan di tenant ini"] }` tanpa `message`; field yang bentrok tidak disebut (`temuan.md` butir 14)
 - Dibaca controller dari body: `-`
+- Diisi server: `tenantID`
+
+#### `POST /kategoribeban`
+
+- Aturan: `validateKategoriPayload` (validators/kategoriBebanValidator.js), dipanggil `kategoriBebanService.create` setelah `checkPermission("create-kategori-beban")`
+- Wajib dari klien: `namaKategori` (tidak kosong)
+- Nama kembar di toko yang sama dijawab 400 "Nama kategori sudah ada di tenant ini.", bukan 409 (`temuan.md` butir 148, permintaan nyata 18 Oktober 2026)
+- Web mengirim `{ namaKategori }` yang dipangkas dan paling panjang 100 (`skemaKategoriBeban`, `b2d84a6`)
+- Respons 201 dengan `data` berupa dokumen tanpa mapper (`_id`, `tenantID`) dan `message` "Kategori beban berhasil dibuat"
 - Diisi server: `tenantID`
 
 #### `POST /location`
@@ -533,6 +554,15 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
+#### `PUT /bebanoperasional/:id`
+
+- Aturan: `validateUbahBeban` (validators/bebanOperasionalValidator.js), dipanggil `bebanOperasionalService.update` setelah `checkPermission("update-beban-operasional")`. Satu endpoint untuk dua bentuk, dibedakan ada tidaknya `status`
+- Ubah: hanya `keterangan` (tidak kosong) dan `kategoriBebanID` (milik toko), minimal satu. `jumlah`, `akunKasID`, dan `tanggal` ditolak 400 dengan anjuran VOID lalu catat ulang; field lain ditolak 400 "Field tidak dikenal"; beban VOID dijawab 409
+- VOID: `{ status: "VOID", alasanVoid }` tanpa field lain, dengan `alasanVoid` tidak kosong dan paling panjang 500. Dalam satu transaksi: status VOID beserta `divoidOleh` dan `tanggalVoid`, saldo dikembalikan, dan baris `PEMBALIK_BEBAN` ditulis dengan `mutasiAsalID` ke baris `BEBAN`-nya. VOID kedua 409, dan akun kas yang sudah nonaktif 409
+- Tidak ada `DELETE`: dijawab 404
+- Web mengirim hasil `payloadUbahBeban` (hanya field yang berubah, keputusan BO6a) dan `payloadBatalBeban` (`features/beban-operasional/payload.ts`); Ubah dan Batalkan hanya ditawarkan untuk beban AKTIF
+- Respons 200 dengan `data` berbentuk item `GET /bebanoperasional` dan `message` "Beban Operasional diperbarui"
+
 #### `PUT /diskon/:id`
 
 - Aturan: validateDiskonPayload mode update (validators/diskonValidator.js) di route, setelah pembatas laju tulis dan `checkPermission("update-diskon")`: seluruh field opsional, minimal satu, dengan allowlist dan aturan nilai yang sama dengan `POST`. Dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7`; sebelumnya `namaDiskon` tercatat wajib
@@ -573,6 +603,15 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Duplikat nama atau kode: 400 `{ errors: ["tenantID sudah digunakan di tenant ini"] }` tanpa `message`, sama seperti `POST /kategori` (`temuan.md` butir 14)
 - Diisi server: -
 - Sejak `yoga` `ee8ca7f` (dari kode `2dd57aa`): hanya field kategori yang ditulis lewat `$set`, dan field lain ditolak "Field tidak dikenal". `DELETE /kategori/:id` menolak 409 kategori yang masih dipakai produk (`666b918`, butir 12)
+
+#### `PUT /kategoribeban/:id`
+
+- Aturan: `validateKategoriPayload` dengan `isUpdate`, setelah `checkPermission("update-kategori-beban")`; `tenantID` dari body dibuang, dan field di luar skema diabaikan tanpa allowlist
+- Field yang dikenali: `namaKategori` (tidak kosong bila dikirim, unik per toko; nama kembar 400 "Nama kategori sudah digunakan.")
+- Aturan service: cache kategori dan cache detail beban yang memakainya dibuang, sehingga nama baru langsung tampil di beban (`temuan.md` butir 135)
+- `DELETE /kategoribeban/:id` (`delete-kategori-beban`) ditolak 409 bila kategori masih dipakai beban, termasuk beban VOID, dengan pesan yang menyebut jumlah bebannya; berhasil 200 `{ message }`
+- Web mengirim `{ namaKategori }` dari dialog ganti nama, yang hanya dapat disimpan bila nama berubah (`87fbf7a`)
+- Respons 200 dengan `data` berupa dokumen dan `message` "Kategori beban berhasil diperbarui"
 
 #### `PUT /location/:id`
 

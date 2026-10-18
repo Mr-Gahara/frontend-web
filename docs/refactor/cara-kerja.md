@@ -1865,6 +1865,21 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Angka harapan pesan commit diambil dari `wc -l` setelah berkasnya
   ditulis**, lalu dipakai gerbang. Perkiraan 53 baris ternyata 48.
 
+### Pelajaran dari halaman pengeluaran (18 Oktober 2026)
+
+- **Server dev yang menjawab 500 "Is a directory" untuk folder rute baru
+  dipulihkan dengan memulai ulang `npm run dev`.** Turbopack sempat
+  mencatat folder `kategoriBeban` sebagai berkas, padahal `tsc` bersih
+  dan berkasnya benar. Penyebabnya dibaca dari HTML 500 lewat `curl`.
+- **Blok e2e menahan bila server frontend tidak menjawab 200**, bukan
+  hanya mencetak statusnya. Tanpa itu suite tetap berjalan, dan setiap
+  test tertahan di login.
+- **Angka harapan audit dibaca dari baseline tercatat, bukan diingat.**
+  Harapan 149 panggilan dan 243 route ternyata 150 dan 242.
+- **Pencarian dampak untuk beberapa commit menjalankan istilah perilaku
+  sekali saja.** Empat run dengan istilah yang sama menghasilkan 1.059
+  baris yang sebagian besar berulang.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:
