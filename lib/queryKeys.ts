@@ -116,6 +116,14 @@ export const queryKeys = {
     semua: kunci(["jurnalTransfer"] as const),
     daftar: (params?: Filter) => ["jurnalTransfer", "daftar", params] as const,
   },
+  bebanOperasional: {
+    semua: kunci(["bebanOperasional"] as const),
+    daftar: (params?: Filter) => ["bebanOperasional", "daftar", params] as const,
+  },
+  kategoriBeban: {
+    semua: kunci(["kategoriBeban"] as const),
+    daftar: () => ["kategoriBeban", "daftar"] as const,
+  },
   diskon: {
     semua: kunci(["diskon"] as const),
     daftar: (filter?: Filter) => ["diskon", "daftar", filter] as const,
