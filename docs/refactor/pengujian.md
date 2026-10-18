@@ -96,6 +96,12 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per tabel seragam K-D** (commit `2177ac3`): 659 test unit dan
+integrasi lolos di 81 berkas, tidak berubah. Suite penuh tidak
+dijalankan; `tests/e2e/jadwal/shift` dan `tests/e2e/jadwal/pola-roster`
+26 lolos dan 3 skipped (tiga fixme yang menunggu backend). Tidak ada test
+baru, sehingga harapan suite penuh tetap 461 lolos dan 13 skipped.
+
 **Baseline per tabel seragam K-B** (commit `753f61e`): 659 test unit dan
 integrasi lolos di 81 berkas, tidak berubah. Suite penuh tidak
 dijalankan; `tests/e2e/inventaris/stok` 14 lolos dan 3 skipped (dua
@@ -805,6 +811,12 @@ satu putaran.
   labelnya, sehingga dipilih lewat `getByRole("combobox", { name })`
   (helper `pilihOpsi` di `tests/helpers/pajak-uji.ts`); pemicu tanpa label
   tetap dipilih lewat teks yang tampil.
+- Pemilih jumlah baris `DataTable` (`pilihanUkuranKlien`) adalah sebuah
+  combobox bernama "Jumlah baris per halaman", sehingga
+  `page.getByRole("combobox")` tanpa nama menjadi ganda di halaman yang
+  juga punya filter Select. Filter dipilih lewat namanya, misalnya
+  `{ name: /filter status shift/i }` dari `aria-label` pemicunya (K-D,
+  `2177ac3`).
 - Spec yang meninggalkan data uji permanen di sebuah daftar membuat spec
   lain di halaman yang sama ikut gagal begitu daftarnya melewati satu
   halaman tabel. Saat menulis spec semacam itu, periksa juga spec lain di
@@ -1573,12 +1585,14 @@ Urutan debug kegagalan e2e di atas).
   bersyarat pada `shiftTerpisahPerRuang()`, keterangan yang hanya berlaku
   selama konstanta null memakai `test.skip` bersyarat, dan penolakan
   validasi browser dibuktikan lewat `validity.valid` beserta penghitung
-  permintaan.
+  permintaan. Sejak `2177ac3` baris uji dicari lewat `cariShift` (TB14a),
+  uji ruang gudang memakai pola K-A, dan combobox filter disebut namanya.
 - `tests/e2e/jadwal/pola-roster/crud-pola-roster.spec.ts` (sejak
   `dcc22e0`): skenario migrasi berada di `describe` tersendiri yang
   memakai helper bersama `tests/helpers`, dan data uji yang tidak dapat
   dibuat lewat UI (pola dengan shift yang kemudian dinonaktifkan)
-  disiapkan lewat API lalu dihapus di `finally`.
+  disiapkan lewat API lalu dihapus di `finally`. Sejak `2177ac3` baris uji
+  dicari lewat `cariPola` (TB14a) dan uji ruang gudang memakai pola K-A.
 - `tests/e2e/jadwal/jadwal/` (sejak `19227f8`): penolakan backend (J2a)
   dibuktikan dengan fixture shift kedua yang jamnya bertumpuk
   (`pastikanShiftSiang`), bukan dengan respons tiruan, dan penahanan

@@ -1811,6 +1811,25 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   `ts.transpileModule` dari `typescript` global, sehingga galat sintaks
   TSX tertangkap sebelum blok dikirim.
 
+### Pelajaran dari tabel seragam K-D (18 Oktober 2026)
+
+- **Gerbang memeriksa keberadaan berkas pembanding sebelum
+  membandingkannya.** Saat `/tmp` bersih setelah mesin dinyalakan ulang,
+  `find ... -newer /tmp/p.json` gagal dan `wc -l` tetap mencetak 0,
+  sehingga syarat "tidak ada berkas lebih baru" lolos keliru. Gerbang
+  kini mensyaratkan `[ -f /tmp/p.json ]` dan mencetaknya sebagai
+  `laporan`.
+- **Pemeriksaan backend di awal sesi dibaca dulu sebelum blok lain
+  dijalankan.** Pada 18 Oktober `origin/nizar` membawa dua commit baru,
+  tetapi gerbang commit sudah dijalankan di pesan yang sama. Commit
+  `2177ac3` tetap sah karena diuji terhadap backend lokal yang tidak
+  berubah; dampak commit baru dinilai sesudahnya (Catatan K-D).
+- **Penutupan tabel seragam ikut mencari `<table` dan menghitung ulang
+  berkasnya.** Butir utang di `status.md` tentang berkas yang masih
+  memakai `<table>` tertinggal di angka 17 sejak K-A, karena tidak
+  menyebut nama berkas yang diubah K-C dan K-B, sehingga lolos dari
+  pencarian dampak. Penutupan K-D menghitungnya ulang di gerbang commit.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:

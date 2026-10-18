@@ -1766,6 +1766,15 @@ yang izinnya tidak dipegang tidak dipasang.
 - **TB18a: pesan `role="alert"` stok hanya untuk daftar stok yang gagal
   dimuat**; gagal memuat lokasi outlet tetap ditangani `PesanLokasi`,
   sehingga keduanya tidak tumpang tindih (`753f61e`).
+- **TB19a: menu titik tiga shift dan pola roster dipertahankan apa
+  adanya** di kolom aksi `DataTable`, termasuk ikon, pemisah, dan aksi
+  merah untuk Non-Aktifkan dan Hapus Pola, karena warna merah menandai
+  aksi yang mengarsipkan atau menghapus dan labelnya disebut spec
+  (`2177ac3`).
+- **TB20a: panel filter berlatar krem di halaman shift dan pola roster
+  dibereskan bersama tabelnya**: baris filter bergaris bawah tanpa panel
+  seperti K-A dan K-C, isian `bg-permukaan` (WR4a), dan daftar pilihan
+  filter `bg-gading` seperti menu titik tiga (WR3a, `2177ac3`).
 
 ## Keputusan rancangan yang mengikat
 

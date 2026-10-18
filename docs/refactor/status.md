@@ -104,7 +104,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Tabel seragam K-A: jurnal stok dan pengajuan stok | `4677447` (pilihan ukuran), `9b06283` (jurnal stok), `fc6ddd3` (warna keluar mutasi), `20e332f` (pengajuan stok) | Selesai (keputusan TB8a sampai TB12a; Catatan dari tabel seragam K-A) |
 | Tabel seragam K-C: daftar surat jalan gudang | `6f9d3eb` | Selesai (keputusan TB13a sampai TB15a; Catatan dari tabel seragam K-C) |
 | Tabel seragam K-B: stok outlet dan inventaris gudang | `753f61e` | Selesai (keputusan TB16a sampai TB18a; Catatan dari tabel seragam K-B) |
-| Tabel seragam K-D dan K-E: tujuh halaman berikutnya | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Tabel seragam K-D: shift dan pola roster | `2177ac3` | Selesai (keputusan TB19a dan TB20a; Catatan dari tabel seragam K-D) |
+| Tabel seragam K-E: tiga halaman berikutnya | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -127,60 +128,98 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: tabel seragam K-D, shift dan pola roster
+## Pekerjaan berikutnya: tabel seragam K-E, aset, tarif, dan tipe aset
 
 Fase rancangan dan perbaikan UI/UX berjalan sejak 11 Oktober 2026, dan
 seluruh rancangannya ditentukan pemilik proyek lewat pratinjau
-(`keputusan.md`, Fase UI/UX). Kelompok K-A, K-C, dan K-B selesai (Catatan
-dari tabel seragam K-B, K-C, dan K-A), dan urutan kelompok mengikuti
-TB8a.
+(`keputusan.md`, Fase UI/UX). Kelompok K-A, K-C, K-B, dan K-D selesai
+(Catatan dari tabel seragam K-D, K-B, K-C, dan K-A), dan urutan kelompok
+mengikuti TB8a. K-E adalah kelompok terakhir.
 
-Sisa tabel seragam, tujuh halaman di lima berkas (cakupan RG3a):
+Sisa tabel seragam, tiga halaman di tiga berkas (cakupan RG3a):
 
 | Kelompok | Halaman | Berkas |
 |---|---|---|
-| K-D | `/dashboard/outlet/shift` dan `/dashboard/gudang/shift` | `features/shift/halaman-shift.tsx` |
-| K-D | `/dashboard/outlet/pola-roster` dan `/dashboard/gudang/pola-roster` | `features/pola-roster/halaman-pola-roster.tsx` |
 | K-E | `/dashboard/outlet/reservasi/aset` | `app/dashboard/outlet/reservasi/aset/page.tsx` |
 | K-E | `/dashboard/outlet/reservasi/tarif` | `app/dashboard/outlet/reservasi/tarif/page.tsx` |
 | K-E | `/dashboard/outlet/reservasi/tipeAset` | `app/dashboard/outlet/reservasi/tipeAset/page.tsx` |
 
-Spec terdampak per kelompok, dari rute yang disebut spec: K-D
-`crud-shift`, `crud-pola-roster`, dan `generate-jadwal`; K-E `crud-aset`,
-`crud-tarif`, `crud-tipeAset`, dan `guard-dashboard`. Rute shift dan pola
-roster memakai `HalamanShiftRuang` dan `HalamanPolaRosterRuang`; bahwa
-keduanya memuat berkas di tabel itu belum dibuktikan dari isinya. Daftar
-aset, tarif, tipe aset, dan pola roster menulis `<table>` sendiri dengan
-kepala kolom berlatar (`bg-krem` di ketiga halaman reservasi, `#F8F3EB` di
-pola roster), melanggar TB2a dan TB7a.
+Spec terdampak, dari rute yang disebut spec: `crud-aset`, `crud-tarif`,
+`crud-tipeAset`, dan `guard-dashboard`. Pemetaan di bawah membuktikannya
+ulang, karena di K-D `generate-jadwal` ternyata hanya memanggil API.
+Ketiga halaman menulis `<table>` sendiri dengan kepala kolom `bg-krem`,
+melanggar TB2a dan TB7a. Bila halaman K-E juga punya panel filter
+berlatar krem, perlakuannya diajukan dengan acuan TB20a.
 
-Cara kerja tiap kelompok mengikuti K-A, K-C, dan K-B: halaman, spec
-terdampak, dan acuan pola (`components/ui/data-table.tsx`, daftar
-pengajuan stok, jurnal stok, dan `features/inventaris/menu-aksi-stok.tsx`
-untuk dua aksi baris) dikemas dalam satu arsip di `~/Downloads` lalu
-diunggah bila berkasnya di atas 150 baris; rancangan diajukan sebagai
-pratinjau; aksi baris di menu titik tiga, paginasi klien dengan
-`pilihanUkuranKlien`, teks keluar `red-800`, dan pesan galat
-`role="alert"` (TB11a, TB12a, TB15a). Sebelum spec diubah, urutan server
-dan langkah spec yang mencari baris tertentu dibuktikan lebih dulu
-(TB14a). Sesudah kedua kelompok masih tersisa tabel rincian, kalender
-jadwal, dan butir lain di Utang kecil dari fase UI/UX. Sesudah tabel
-seragam, cakupan daftar penjualan pindah ke filter `locationID` server
-(RG4a); sampai dikerjakan, RH2b tetap berlaku.
+Cara kerja mengikuti kelompok sebelumnya: halaman, spec terdampak, dan
+acuan pola (`components/ui/data-table.tsx`, daftar pengajuan stok, jurnal
+stok, dan `features/inventaris/menu-aksi-stok.tsx` untuk dua aksi baris)
+dikemas dalam satu arsip di `~/Downloads` lalu diunggah bila berkasnya di
+atas 150 baris; rancangan diajukan sebagai pratinjau; aksi baris di menu
+titik tiga, paginasi klien dengan `pilihanUkuranKlien`, teks keluar
+`red-800`, dan pesan galat `role="alert"` (TB11a, TB12a, TB15a). Sebelum
+spec diubah, urutan server, langkah spec yang mencari baris tertentu
+(TB14a), dan pemanggilan combobox tanpa nama di tingkat halaman
+(`pengujian.md`, Catatan Playwright) dibuktikan lebih dulu. Sesudah K-E
+masih tersisa tabel rincian, kalender jadwal, dan butir lain di Utang
+kecil dari fase UI/UX. Sesudah tabel seragam, cakupan daftar penjualan
+pindah ke filter `locationID` server (RG4a); sampai dikerjakan, RH2b
+tetap berlaku.
 
 Langkah pertama sesi berikutnya: backend di-`fetch` dan setiap cabang
 remote dihitung maju dan mundurnya terhadap acuan (`cara-kerja.md`), lalu
-pemetaan di bawah. Suite e2e penuh tidak dijalankan di awal sesi; harapan
+pemetaan di bawah; commit baru di cabang remote dinilai dulu sebelum
+blok lain. Suite e2e penuh tidak dijalankan di awal sesi; harapan
 hitungannya 461 lolos dan 13 skipped (`pengujian.md`). Backend lokal
-berada di cabang `ridho` `00de455`.
+berada di cabang `ridho` `00de455`; `origin/nizar` membawa `96e890e`
+dan `3efd05b` (Catatan dari tabel seragam K-D).
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in $(git -C "$BE" for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -v '^origin$' | grep -v '/HEAD$'); do echo "$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...$r | tr '\t' ' ')"; done
 cd ~/Documents/frontend-web
-wc -l features/shift/halaman-shift.tsx features/shift/halaman-shift-ruang.tsx features/pola-roster/halaman-pola-roster.tsx features/pola-roster/halaman-pola-roster-ruang.tsx tests/e2e/jadwal/shift/crud-shift.spec.ts tests/e2e/jadwal/pola-roster/crud-pola-roster.spec.ts tests/e2e/jadwal/jadwal/generate-jadwal.spec.ts
-grep -rn "halaman-shift\"\|halaman-pola-roster\"" app features | cut -c1-160
-grep -rn "/shift\|/pola-roster" tests/e2e | cut -c1-160
+wc -l app/dashboard/outlet/reservasi/aset/page.tsx app/dashboard/outlet/reservasi/tarif/page.tsx app/dashboard/outlet/reservasi/tipeAset/page.tsx tests/e2e/reservasi/aset/crud-aset.spec.ts tests/e2e/reservasi/tarif/crud-tarif.spec.ts tests/e2e/reservasi/tipeAset/crud-tipeAset.spec.ts tests/e2e/auth/guard-dashboard.spec.ts
+grep -rn "reservasi/aset\|reservasi/tarif\|reservasi/tipeAset" tests/e2e app components features | cut -c1-160
+grep -n 'page.getByRole("combobox")' tests/e2e/reservasi/aset/crud-aset.spec.ts tests/e2e/reservasi/tarif/crud-tarif.spec.ts tests/e2e/reservasi/tipeAset/crud-tipeAset.spec.ts
 ```
+
+## Catatan dari tabel seragam K-D
+
+Dikerjakan pada 17 dan 18 Oktober 2026 dalam satu commit, terhadap
+backend `ridho` `00de455`. Rancangan ditunjukkan sebagai pratinjau dan
+disetujui pemilik proyek sebelum diterapkan.
+
+| Commit | Isi |
+|---|---|
+| `2177ac3` | Shift dan pola roster: `DataTable` dengan menu lama, panel filter krem dibereskan, pesan galat menggantikan tabel, dan spec lewat pencarian (TB19a dan TB20a) |
+
+- `halaman-shift-ruang.tsx` dan `halaman-pola-roster-ruang.tsx` terbukti
+  memuat kedua berkas tabel lewat impor, sehingga satu berkas melayani
+  rute outlet dan gudang. `generate-jadwal` hanya memanggil API `/shift`
+  untuk data uji dan tidak terdampak, berbeda dari catatan sebelumnya.
+- Menu titik tiga dan pesan `role="alert"` sudah ada sebelum K-D; yang
+  diganti bingkai tabel, kepala kolom `#F8F3EB`, `whitespace-nowrap`, dan
+  pesan galat yang tadinya berupa sel tabel. `handleOpenEdit` dan
+  `handleOpenDelete` shift diganti setter langsung agar `kolom` dapat
+  di-`useMemo` tanpa dependensi.
+- Sembilan tempat di kedua spec mencari baris uji tanpa pencarian, dan
+  shift yang dinonaktifkan tetap tersimpan sehingga daftarnya bertambah
+  setiap run. Semuanya kini lewat `cariShift` dan `cariPola` (TB14a).
+  Empat pemanggilan combobox tanpa nama di spec shift disebut namanya,
+  karena pemilih jumlah baris `DataTable` juga combobox (`pengujian.md`).
+- Gerbang commit pertama pada 18 Oktober menolak karena `/tmp/p.json`
+  hilang setelah mesin dinyalakan ulang; e2e dijalankan ulang dengan hasil
+  yang sama (`cara-kerja.md`).
+- `origin/nizar` membawa `96e890e` dan `3efd05b` (18 Oktober): tanggal
+  lampau jurnal transfer hanya dipakai untuk Owner (P23), peran lain
+  dicatat dengan waktu sekarang. Belum di `ridho`. Tidak berdampak ke web,
+  karena pindah dana tidak mengirim `tanggal` (DN3a,
+  `features/jurnal-transfer/payload.ts`); kontrak diperbarui saat acuan
+  pindah.
+- Butir utang berkas yang masih memakai `<table>` dihitung ulang menjadi
+  12 (tertinggal di 17 sejak K-A).
+- Vitest 659 lolos di 81 berkas; kedua spec 26 lolos dan 3 skipped (fixme
+  yang menunggu backend). Suite penuh tidak dijalankan (`pengujian.md`).
+- Keputusan: `keputusan.md` (Fase UI/UX, TB19a dan TB20a).
 
 ## Catatan dari tabel seragam K-B
 
@@ -1483,9 +1522,10 @@ Yang masih berlaku:
   berupa teks. Sebagian besar halaman menulis `header` sebagai komponen,
   sehingga kartu baris di HP menampilkan nilai tanpa label. Dilengkapi
   saat tiap halaman dirapikan.
-- 17 berkas masih memakai `<table>` yang ditulis sendiri (19 sebelum
-  K-A): sepuluh halaman di Pekerjaan berikutnya (delapan berkas), tabel rincian di
-  halaman detail dan form (delapan berkas, termasuk
+- 12 berkas masih memakai `<table>` yang ditulis sendiri (19 sebelum
+  K-A, per `2177ac3`): tiga halaman K-E di Pekerjaan berikutnya (tiga
+  berkas), tabel rincian di halaman detail dan form (delapan berkas,
+  termasuk
   `features/jadwal/langkah-dua.tsx`), dan kalender jadwal
   (`features/jadwal/grid-jadwal.tsx`), yang perlu pratinjau tersendiri
   (keputusan TB4a). Sampai 16 Oktober 2026 daftar aset, tarif, tipe aset,
