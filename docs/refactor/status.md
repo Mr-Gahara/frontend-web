@@ -106,7 +106,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Tabel seragam K-B: stok outlet dan inventaris gudang | `753f61e` | Selesai (keputusan TB16a sampai TB18a; Catatan dari tabel seragam K-B) |
 | Tabel seragam K-D: shift dan pola roster | `2177ac3` | Selesai (keputusan TB19a dan TB20a; Catatan dari tabel seragam K-D) |
 | Tabel seragam K-E: aset, tarif, dan tipe aset | `eb81a1f` | Selesai (keputusan TB21a sampai TB23a; Catatan dari tabel seragam K-E) |
-| Cakupan daftar penjualan lewat filter `locationID` server (RG4a) | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Cakupan daftar penjualan lewat filter `locationID` server (RG4a) | `20c026b` | Selesai (keputusan LP1a dan LP2a; Catatan dari cakupan daftar penjualan) |
+| Keuangan: halaman pengeluaran (beban operasional) | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -129,38 +130,73 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: daftar penjualan lewat filter `locationID` server
+## Pekerjaan berikutnya: pengeluaran (beban operasional)
 
-Tabel seragam selesai pada 18 Oktober 2026: kelompok K-A, K-C, K-B, K-D,
-dan K-E (Catatan dari tabel seragam K-E sampai K-A), dan suite e2e penuh
-lolos terhadap backend `ridho` `00de455` (461 lolos, 13 skipped). Sisa
-fase UI/UX tercatat di Utang kecil dari fase UI/UX: tabel rincian,
-kalender jadwal, label sel di HP, dan token tipografi.
+Cakupan daftar penjualan pindah ke filter `locationID` server pada
+18 Oktober 2026 (`20c026b`, Catatan dari cakupan daftar penjualan).
+Pemilik proyek lalu menjadwalkan pengeluaran sebagai pekerjaan
+berikutnya, mengakhiri penundaan BO1a, NZ11a, dan RG6a.
 
-Sesuai RG4a, pekerjaan berikutnya memindahkan cakupan daftar penjualan
-dari saringan klien (K5b dan K11b) ke filter `locationID` server. Syarat
-RH2b terpenuhi di `7d28135`, setelah backend mengisi `locationID` setiap
-penjualan (`kontrak/temuan.md` butir 144); sampai dikerjakan, RH2b tetap
-berlaku. Pemetaan awal belum diambil, sehingga langkah pertama sesi
-berikutnya mengambilnya. Di luar itu, dua belas `test.fixme` menunggu
-backend (`pengujian.md`, Test yang ditandai fixme dan skip bersyarat);
-pemeriksaan kode backend untuk memastikan statusnya dijadwalkan terpisah.
+Halaman `/dashboard/outlet/pengeluaran` masih menampilkan keterangan
+belum tersedia (BO2a) dengan gate `read-pembayaran`. Backend `ridho`
+`7d28135` memperbaiki beban: buku mutasi, VOID beralasan tanpa
+`DELETE`, `PUT` terbatas, daftar berpaginasi, dan bentuk galat
+(`kontrak/temuan.md` butir 131 sampai 137, terbukti lewat permintaan
+nyata 16 Oktober 2026). Yang belum dicocokkan: penyaringan beban VOID
+di laporan laba rugi (butir 132), cache daftar beban saat kategori
+berubah (butir 135), penolakan saldo kurang dan akun nonaktif (butir
+133), serta bentuk `tanggal`, batas `keterangan`, dan pembatas laju
+(butir 137). Kontrak beban belum ada di `kontrak/endpoint.md` maupun
+`kontrak/payload.md`, dan izin beban belum masuk template role (FC2a).
+Aturan tanggal lampau hanya untuk Owner (pemilik proyek, 17 Oktober
+2026) diperiksa di backend saat pemetaan.
 
-Langkah pertama sesi berikutnya: backend di-`fetch` dan setiap cabang
-remote dihitung maju dan mundurnya terhadap acuan (`cara-kerja.md`);
-commit baru di cabang remote dinilai dulu sebelum blok lain. Backend
-lokal berada di cabang `ridho` `00de455`; `origin/nizar` membawa
+Pemetaan awal belum diambil, sehingga langkah pertama sesi berikutnya
+mengambilnya, setelah cabang backend diperiksa (`cara-kerja.md`).
+Backend lokal berada di `ridho` `00de455`; `origin/nizar` membawa
 `96e890e` dan `3efd05b` (Catatan dari tabel seragam K-D). Suite e2e
-penuh tidak dijalankan di awal sesi; harapannya 461 lolos dan 13 skipped
-(`pengujian.md`).
+penuh tidak dijalankan di awal sesi; harapannya 462 lolos dan 14
+skipped (`pengujian.md`). Tiga belas `test.fixme` menunggu backend
+(`pengujian.md`, Test yang ditandai fixme dan skip bersyarat).
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in $(git -C "$BE" for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -v '^origin$' | grep -v '/HEAD$'); do echo "$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...$r | tr '\t' ' ')"; done
 cd ~/Documents/frontend-web
-wc -l features/penjualan/halaman-daftar-penjualan.tsx features/penjualan/filter.ts features/penjualan/api.ts features/penjualan/hooks.ts tests/e2e/penjualan/daftar-penjualan.spec.ts tests/unit/features/penjualan/filter.test.ts
-grep -rn "locationID\|K5b\|K11b\|RH2b" features/penjualan tests/e2e/penjualan tests/unit/features/penjualan | cut -c1-160
-git -C ~/Documents/backend-js merge-base --is-ancestor 38f523a HEAD && echo "38f523a termuat di acuan"
+wc -l app/dashboard/outlet/pengeluaran/page.tsx tests/e2e/keuangan/pengeluaran.spec.ts
+grep -rn 'beban\|Beban\|pengeluaran' lib/api/endpoints.ts lib/auth/permissions.ts lib/roleTemplates.ts lib/queryKeys.ts types components/sidebar-menu.ts | cut -c1-140
+ls ~/Documents/backend-js/routes ~/Documents/backend-js/controllers ~/Documents/backend-js/services ~/Documents/backend-js/validators ~/Documents/backend-js/mappers ~/Documents/backend-js/docs/api/endpoint ~/Documents/backend-js/docs/api/payload | grep -i beban
 ```
+
+## Catatan dari cakupan daftar penjualan
+
+Dikerjakan pada 18 Oktober 2026 dalam satu commit, terhadap backend
+`ridho` `00de455`. `origin/nizar` tetap dua commit di depan (`96e890e`
+dan `3efd05b`), dan cabang lain tidak maju.
+
+| Commit | Isi |
+|---|---|
+| `20c026b` | Cakupan daftar penjualan disaring server lewat `locationID` (RG4a, LP1a, LP2a) |
+
+- Syarat RG4a dibuktikan lewat permintaan nyata sebelum kode diubah:
+  total penjualan tenant uji dan total dengan `?locationID=` outlet
+  tenant sama-sama 1.685, dan 100 penjualan terbaru seluruhnya membawa
+  `locationID` (`kontrak/temuan.md` butir 144).
+- Penyaringan klien lama berjalan setelah server memotong halaman,
+  sehingga dengan lebih dari satu outlet satu halaman dapat tampil
+  kurang dari ukurannya, dan footer menghitung penjualan di luar
+  lingkup. Pada MVP satu outlet cacat ini tidak terlihat.
+- K11b tidak berubah: pengguna tanpa `read-location` tetap melihat
+  seluruh penjualan tenant, tanpa `locationID`.
+- `outletTenantId` di `lokasiFinalisasi` (`features/penjualan/payload.ts`)
+  tetap: itu cadangan lokasi finalisasi, bukan lingkup daftar.
+- Gerbang commit pertama menolak karena pemeriksaan sisanya mencakup
+  seluruh `features/penjualan`, bukan berkas yang di-commit; yang
+  diperbaiki gerbangnya (`cara-kerja.md`).
+- Vitest 659 lolos di 81 berkas, tidak berubah. Spec daftar penjualan 4
+  lolos dan 1 skipped (fixme lintas outlet). Suite penuh tidak
+  dijalankan (`pengujian.md`).
+- Tidak ada temuan backend baru, sehingga tidak ada laporan.
+- Keputusan: `keputusan.md` (Cakupan daftar penjualan, LP1a dan LP2a).
 
 ## Catatan dari tabel seragam K-E
 
@@ -1564,7 +1600,9 @@ Yang masih berlaku:
   tidak mendukungnya, kartu tampil dengan bingkai saja.
 - Suite e2e penuh dijalankan ulang pada 16 Oktober 2026 terhadap backend
   `ridho` `7d28135` (Catatan dari penyesuaian backend `ridho` `7d28135`);
-  harapan sesudahnya 456 lolos dan 13 skipped.
+  harapan sesudahnya 456 lolos dan 13 skipped. Suite penuh terakhir
+  18 Oktober 2026 (`eb81a1f`): 461 lolos dan 13 skipped; harapan
+  sesudah `20c026b` 462 lolos dan 14 skipped.
 
 ### Utang kecil dari penyesuaian backend `ridho` `7d28135`
 
@@ -1576,8 +1614,10 @@ Yang masih berlaku:
   penolakan beban saat saldo kurang atau akun nonaktif (butir 133), serta
   bentuk `tanggal`, batas `keterangan`, dan pembatas laju beban (butir
   137).
-- Empat penjualan toko uji yang belum punya lokasi tetap tanpa
-  `locationID`, sesuai rancangan backend.
+- Empat penjualan milik toko yang belum punya lokasi tetap tanpa
+  `locationID`, sesuai rancangan backend. Tenant uji tidak terdampak:
+  total dengan filter outletnya sama dengan total tenant (18 Oktober
+  2026).
 - Kategori fixture "E2E Kategori Beban" dan satu beban VOID menetap di
   basis data development (RG7a).
 - Pemilik proyek memutuskan untuk backend pada 17 Oktober 2026: tanggal
@@ -1593,7 +1633,7 @@ Yang masih berlaku:
   (`cfaaa92`).
 - Cakupan daftar penjualan pindah ke filter server: syaratnya terpenuhi
   di `7d28135` (butir 144), dan pekerjaannya dijadwalkan sesudah tabel
-  seragam (RG4a).
+  seragam (RG4a). Selesai di `20c026b`.
 - Izin pembelian stok belum masuk template role, dan modul pembelian
   stok belum punya halaman di web (RH6a). Izin stock adjustment per
   ruang juga belum masuk template role (RH3a).
@@ -1626,6 +1666,7 @@ Yang masih berlaku:
   `kontrak/temuan.md` butir 131 sampai 134 diperbaiki backend (NZ11a).
   Butir itu diperbaiki di `7d28135` dan terbukti lewat permintaan nyata;
   pengeluaran tetap ditunda sampai dijadwalkan pemilik proyek (RG6a).
+  Dijadwalkan sebagai pekerjaan berikutnya pada 18 Oktober 2026.
 - Bagian Sesi Booking di detail penjualan memakai tata letak sederhana di
   atas grid informasi; penempatannya menunggu fase UI/UX.
 - Timeline reservasi tidak punya aksi Tandai Selesai (NZ7a). Booking lama
@@ -1675,6 +1716,8 @@ Yang masih berlaku:
   punya pemilih outlet bagi pemegang izin lintas outlet. Keduanya wajib
   ditutup sebelum multi-outlet (`kontrak/temuan.md` butir 48 dan 49).
   Filter `?locationID=` backend belum dapat dipakai (butir 144, RH2b).
+  Daftar memakainya sejak `20c026b` (RG4a); jalur tanpa `read-location`
+  dan pemilih outlet di halaman buat tetap terbuka.
 - Dua `test.fixme` di spec alur penjualan menunggu backend, keduanya
   untuk cache daftar jurnal (`kontrak/temuan.md` butir 46). Yang ketiga
   (butir 37) dilepas di `a17d584` setelah backend `fc29433`.
@@ -1700,6 +1743,8 @@ Yang masih berlaku:
   begitu backend memperbaiki izin beban dan menetapkan kontraknya
   (`kontrak/temuan.md` butir 130 sampai 132). Izinnya sudah diperbaiki
   (`yoga` `55328f1`); yang ditunggu tinggal butir 131 sampai 134 (NZ11a).
+  Keempatnya diperbaiki di `7d28135` (RG6a), dan halamannya dijadwalkan
+  setelah RG4a.
 - `DELETE /akunkas/:id` tidak ada lagi sejak backend `465b438`, dan akun
   bersaldo tidak dapat ditutup (`kontrak/temuan.md` butir 81). Ubah,
   nonaktifkan, dan aktifkan kembali tersedia sejak `1bc76f4`, dan Pindah

@@ -96,6 +96,13 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per cakupan daftar penjualan** (commit `20c026b`, 18 Oktober
+2026): 659 test unit dan integrasi lolos di 81 berkas, tidak berubah:
+test `saringPenjualan` diganti test `paramLingkupPenjualan`. Suite penuh
+tidak dijalankan; `tests/e2e/penjualan/daftar-penjualan.spec.ts` 4 lolos
+dan 1 skipped (fixme lintas outlet). Dua skenario baru menambah harapan
+suite penuh menjadi 462 lolos dan 14 skipped; angka itu hitungan.
+
 **Baseline per tabel seragam K-E** (commit `eb81a1f`, 18 Oktober 2026):
 659 test unit dan integrasi lolos di 81 berkas, tidak berubah. Suite e2e
 penuh dijalankan terhadap backend `ridho` `00de455`: 461 lolos, 0 gagal,
@@ -957,7 +964,7 @@ Menunggu perbaikan backend:
 |---|---|
 | Edit pola roster | Validator memakai `this.siklusHari` dalam konteks `findOneAndUpdate` |
 | Hitungan tersimpan dapat dikosongkan kembali (`inventaris/stockOpname/draft-stok-opname.spec.ts`) | Validator stock opname menerima `qtyPhysical` null (`kontrak/temuan.md` butir 22). Badannya berupa penanda; skenario ditulis saat `SERVER_TERIMA_HITUNGAN_KOSONG` dibalik |
-| Delapan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, dan stock adjustment | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
+| Sembilan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, stock adjustment, dan daftar penjualan (`20c026b`) | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
 | Shift yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/shift/crud-shift.spec.ts`) | Backend memisahkan shift per lokasi dan `KUNCI_LOKASI_SHIFT` di `features/shift/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
 | Pola yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | Backend memisahkan pola roster per lokasi dan `KUNCI_LOKASI_POLA_ROSTER` di `features/pola-roster/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
 
@@ -992,7 +999,7 @@ terhitung di angka skipped pada baseline:
 |---|---|
 | `inventaris/stok/lihat-stok.spec.ts`, tab kritis gudang | Tidak ada stok gudang yang kritis (terjadi pada data uji sekarang) |
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
-| Skenario jalur terkunci di spec stok, pengajuan stok (daftar), dan stock adjustment | `IZIN_LINTAS_OUTLET` sudah diisi, sehingga Ridho memegangnya; butuh akun uji tanpa izin itu. Tidak terjadi selama konstanta null, sehingga belum terhitung di baseline |
+| Skenario jalur terkunci di spec stok, pengajuan stok (daftar), stock adjustment, dan daftar penjualan (`20c026b`) | `IZIN_LINTAS_OUTLET` sudah diisi, sehingga Ridho memegangnya; butuh akun uji tanpa izin itu. Tidak terjadi selama konstanta null, sehingga belum terhitung di baseline |
 | Halaman shift gudang dengan keterangan pemakaian bersama (`jadwal/shift/crud-shift.spec.ts`) | `KUNCI_LOKASI_SHIFT` sudah diisi, sehingga keterangan tidak tampil lagi. Tidak terjadi selama konstanta null |
 | Halaman pola roster gudang dengan keterangan pemakaian bersama (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | `KUNCI_LOKASI_POLA_ROSTER` sudah diisi, sehingga keterangan tidak tampil lagi. Tidak terjadi selama konstanta null |
 | Enam belas skenario di `tests/e2e/admin/` (sesi, akun klien, langganan, dan kelola akun) | `.env.e2e` tidak berisi kredensial admin uji (PA5a). Tidak terjadi di mesin pemilik proyek, sehingga tidak terhitung di baseline |
@@ -1051,10 +1058,12 @@ Urutan debug kegagalan e2e di atas).
   (`kontrak/temuan.md` butir 22). Yang teruji saat ini hanya perilaku
   sementara: pengosongan ditahan dengan pesan, tanpa `PATCH`.
 
-- **Cakupan per lokasi di daftar penjualan tidak punya skenario e2e.** Data
-  uji hanya punya satu outlet, sehingga penyaringan per lokasi tidak dapat
-  dibedakan dari tanpa penyaringan. Aturannya, termasuk K11b dan penjualan
-  tanpa lokasi, diuji di `tests/unit/features/penjualan/filter.test.ts`.
+- **Cakupan per lokasi di daftar penjualan teruji e2e hanya untuk jalur
+  terkunci** (`20c026b`): `locationID` yang terkirim sama dengan
+  `/location/current`, dan seluruh baris milik outlet itu. Data uji hanya
+  punya satu outlet, sehingga hasilnya sama dengan tanpa penyaringan.
+  Jalur lintas outlet berupa `test.fixme` bersyarat (LP2a), dan aturan
+  lingkup diuji di `tests/unit/features/penjualan/filter.test.ts`.
 - **Jalur tanpa `read-location` di halaman penjualan** (tanpa cakupan, dan
   tanpa `locationID` saat membuat) hanya teruji di unit test, dengan alasan
   yang sama: satu-satunya akun uji berperan Owner.
@@ -1633,7 +1642,11 @@ Urutan debug kegagalan e2e di atas).
   perpindahan ke kunci yang masih segar di cache dibuktikan dari
   tampilan, dan tidak ada data yang ditulis. Sejak `a4304ce`, urutan
   server dibuktikan dari parameter permintaan dan urutan baris respons,
-  mulai dari halaman 2 agar kembalinya ke halaman 1 ikut teruji.
+  mulai dari halaman 2 agar kembalinya ke halaman 1 ikut teruji. Sejak
+  `20c026b`, query `locationID` dibandingkan dengan respons
+  `/location/current` yang dibaca halaman itu sendiri, dan fixme lintas
+  outlet menunggu respons halaman 1 berlokasi setelah outlet dipilih
+  dari halaman 2 (LP1a).
 - `tests/e2e/pengaturan/metode-pembayaran.spec.ts` (`9ca273a`) dan
   `kelola-metode-pembayaran.spec.ts` (`3359497`): spec pembanding dan
   spec migrasi dipisah, dan berkas pembanding hanya berubah bila asumsinya

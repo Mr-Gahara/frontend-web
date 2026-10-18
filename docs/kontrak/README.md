@@ -132,7 +132,10 @@ sudah dibuang (dijawab 404), dan beban dibatalkan lewat
 `PUT /bebanoperasional/:id` berstatus VOID; Lampiran A masih mencatat
 keadaan lama. Pada 17 Oktober 2026 urutan daftar `GET /transferstok`
 (`tanggalKirim` lalu `createdAt` turun) ditambahkan ke `endpoint.md`
-terhadap `ridho` `00de455`.
+terhadap `ridho` `00de455`. Pada 18 Oktober 2026 bagian penjualan di
+`endpoint.md`, `izin-halaman.md`, dan `temuan.md` diperbarui terhadap
+backend yang sama, setelah web memakai filter `locationID` daftar
+penjualan (`20c026b`).
 
 ## 1. Acuan dan metodologi
 

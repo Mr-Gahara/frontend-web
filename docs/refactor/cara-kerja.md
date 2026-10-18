@@ -1848,6 +1848,23 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Daftar berkas di zsh dipecah dengan `${=VAR}`**, karena zsh tidak
   memecah isi variabel menjadi kata seperti bash.
 
+### Pelajaran dari cakupan daftar penjualan (18 Oktober 2026)
+
+- **Syarat filter server dibuktikan dari data sebelum kode diubah.**
+  Total dengan dan tanpa filter dibandingkan lewat satu skrip baca-saja
+  (1.685 dan 1.685), bersama jumlah baris tanpa nilai di 100 terbaru.
+- **Harapan setiap blok dihitung untuk keadaan sesudah blok itu saja.**
+  Pemeriksaan sisa blok E ikut menghitung baris yang baru dibuang blok
+  E2, sehingga harapan `sisa: 0` keliru walau penerapannya benar.
+- **Pola pemeriksaan sisa hanya cocok dengan bentuk yang dibuang, dan
+  barisnya dicetak, bukan hanya jumlahnya.** `Penjualan \}` cocok dengan
+  impor `bolehCakupanPenjualan }`.
+- **Pemeriksaan sisa di gerbang memakai cakupan berkas yang di-commit**
+  (`cat ${=F}`). Cakupan seluruh folder menangkap `outletTenantId` yang
+  sah di `lokasiFinalisasi`, dan gerbang menolak commit yang benar.
+- **Angka harapan pesan commit diambil dari `wc -l` setelah berkasnya
+  ditulis**, lalu dipakai gerbang. Perkiraan 53 baris ternyata 48.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:

@@ -381,6 +381,8 @@ keputusan rancangan butir 17.
   milik outlet tenant, sama dengan cadangan backend saat finalisasi. Wajib
   ditutup sebelum multi-outlet (`kontrak/temuan.md` butir 48 dan 49).
   Tetap di klien setelah backend punya filter `locationID` (RH2b).
+  Disaring server sejak `20c026b` (RG4a), dan anggapan penjualan tanpa
+  `locationID` milik outlet tenant ikut dibuang.
 - **K6b: spec alur membuktikan alur bisnis sampai stok dan pembayaran**,
   dengan stok disiapkan sesuai kebutuhan setiap test, walau meninggalkan
   penjualan FINAL (sejak backend `465b438` berstatus PAID) dan pembayaran
@@ -1584,6 +1586,7 @@ sehingga `ridho` cukup di-fast-forward. Labelnya RH.
   (`kontrak/temuan.md` butir 144). K5b tetap di klien sampai backend
   mengisi lokasi setiap penjualan. Menggantikan RH2a, yang semula
   memilih memindahkannya ke server.
+  Dicabut di `20c026b` setelah syaratnya terpenuhi (RG4a).
 - **RH3a: gate stock adjustment menerima izin per ruang** (`f61e146`)
   sebagai alternatif izin umum: `read-stock-adjustment-outlet` di ruang
   outlet dan `read-stock-adjustment-gudang` di ruang gudang (keputusan
@@ -1641,6 +1644,7 @@ maju sembilan commit dan `origin/nizar` satu commit di atas `ridho`
 - **RG4a: cakupan daftar penjualan pindah ke filter `locationID` server
   sesudah tabel seragam.** Syarat RH2b terpenuhi di `7d28135`; sampai
   dikerjakan, RH2b tetap berlaku.
+  Diterapkan di `20c026b` (Cakupan daftar penjualan, LP1a dan LP2a).
 - **RG5a: test rincian pembayaran mutasi kas menyiapkan penjualan
   lunasnya sendiri** (`f338c74`) lewat helper penjualan yang sudah
   teruji, dengan draft dibuat lewat UI, bukan helper baru lewat
@@ -1650,6 +1654,8 @@ maju sembilan commit dan `origin/nizar` satu commit di atas `ridho`
   lewat permintaan nyata dengan skrip sekali pakai berisi bacaan dan satu
   siklus beban `jumlah` 1 yang di-VOID, bukan spec permanen, karena spec
   beban masuk bersama halamannya.
+  Dijadwalkan pemilik proyek pada 18 Oktober 2026 sebagai pekerjaan
+  setelah RG4a.
 - **RG7a: kategori beban uji adalah fixture tetap "E2E Kategori Beban"**,
   dicari menurut nama, dibuat sekali bila belum ada, lalu dipakai ulang,
   seperti fixture penjualan. Kategori yang dipakai beban tidak dapat
@@ -1786,6 +1792,33 @@ yang izinnya tidak dipegang tidak dipasang.
 - **TB23a: tabel dan baris filter tarif memakai token, bukan objek hex
   lokal**, dengan keenam kolom dipertahankan; `COLORS` tinggal tiga warna
   untuk dialog hapus yang di luar tabel (WR3a, WR4a, `eb81a1f`).
+
+### Cakupan daftar penjualan
+
+Diputuskan pemilik proyek pada 18 Oktober 2026, saat RG4a diterapkan
+(`20c026b`). Labelnya LP.
+
+- **LP1a: mengganti outlet di daftar penjualan kembali ke halaman 1**,
+  dengan filter, urutan, dan jumlah baris dipertahankan, seperti
+  mengganti jumlah baris (PB14a) dan urutan (PY6a). Halaman disesuaikan
+  saat render, bukan lewat effect, agar halaman lama tidak diminta untuk
+  lingkup baru. Hanya tercapai bagi pemegang izin lintas outlet.
+- **LP2a: jalur lintas outlet daftar penjualan ditulis sebagai
+  `test.fixme` bersyarat** pada `IZIN_LINTAS_OUTLET` (keputusan
+  rancangan butir 18), dengan badan lengkap: memilih satu outlet
+  mengirim `locationID` dan kembali ke halaman 1.
+- **Rancangan tidak menutup multi-outlet** (pemilik proyek): setiap
+  outlet disaring server, dan pemilih outlet serta pilihan "Semua
+  Outlet" tetap ada. Multi-outlet direncanakan setelah rilis produksi.
+- **Pekerjaan setelah ini adalah pengeluaran (beban operasional)**,
+  mengakhiri penundaan BO1a, NZ11a, dan RG6a.
+- Diterapkan tanpa ditanyakan (`20c026b`): `saringPenjualan`,
+  `dalamLingkupPenjualan`, dan anggapan penjualan tanpa `locationID`
+  milik outlet tenant dibuang, karena syaratnya terbukti dari data
+  (total dengan filter outlet tenant sama dengan total tenant, 1.685);
+  lingkup tidak lagi membawa `outletTenantId`, sehingga halaman daftar
+  tidak memuat `useLokasiAktif` sendiri; lingkup dikirim lewat argumen
+  `paramLokasi` di `useDaftarPenjualan`; dan K11b tidak berubah.
 
 ## Keputusan rancangan yang mengikat
 
