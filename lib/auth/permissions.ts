@@ -210,6 +210,8 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   // Akun tujuan wajib saat membuat metode, sehingga read-akunkas ikut (GR7a).
   "/dashboard/outlet/pengaturan/metodePembayaran/buatMetodePembayaran": [IZIN.akunKas, IZIN.buatMetodePembayaran],
   "/dashboard/outlet/pengaturan/metodePembayaran/[id]": [IZIN.ubahMetodePembayaran],
+  // Bukan menu sidebar: dibuka dari kartu indeks pengaturan (keputusan BO4a).
+  "/dashboard/outlet/pengaturan/kategoriBeban": [IZIN.kategoriBeban],
   "/dashboard/outlet/pengaturan/roles": [IZIN.role],
   "/dashboard/outlet/pengaturan/roles/buatRole": [IZIN.role, IZIN.buatRole],
   "/dashboard/outlet/pengaturan/roles/buatRole/kostum": [IZIN.role, IZIN.buatRole],

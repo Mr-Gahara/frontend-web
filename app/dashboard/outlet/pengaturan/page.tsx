@@ -9,7 +9,8 @@ import {
   Store, 
   ArrowRight,
   Settings,
-  Wallet
+  Wallet,
+  Tags
 } from "lucide-react"
 
 // Data rute pengaturan dengan palet Tetradic (Mustard & Sage Green)
@@ -41,6 +42,13 @@ const settingsModules = [
     icon: Wallet,
     href: "/dashboard/outlet/pengaturan/metodePembayaran",
     iconColor: "text-sage", // Sage Green
+  },
+  {
+    title: "Kategori Beban",
+    description: "Kelompokkan pengeluaran operasional, misalnya listrik, sewa, atau gaji.",
+    icon: Tags,
+    href: "/dashboard/outlet/pengaturan/kategoriBeban",
+    iconColor: "text-karamel", // Mustard
   }
 ]
 
