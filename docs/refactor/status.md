@@ -105,7 +105,8 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Tabel seragam K-C: daftar surat jalan gudang | `6f9d3eb` | Selesai (keputusan TB13a sampai TB15a; Catatan dari tabel seragam K-C) |
 | Tabel seragam K-B: stok outlet dan inventaris gudang | `753f61e` | Selesai (keputusan TB16a sampai TB18a; Catatan dari tabel seragam K-B) |
 | Tabel seragam K-D: shift dan pola roster | `2177ac3` | Selesai (keputusan TB19a dan TB20a; Catatan dari tabel seragam K-D) |
-| Tabel seragam K-E: tiga halaman berikutnya | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Tabel seragam K-E: aset, tarif, dan tipe aset | `eb81a1f` | Selesai (keputusan TB21a sampai TB23a; Catatan dari tabel seragam K-E) |
+| Cakupan daftar penjualan lewat filter `locationID` server (RG4a) | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
 
 Keputusan produk tiap modul tercatat di `keputusan.md`.
 
@@ -128,59 +129,73 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: tabel seragam K-E, aset, tarif, dan tipe aset
+## Pekerjaan berikutnya: daftar penjualan lewat filter `locationID` server
 
-Fase rancangan dan perbaikan UI/UX berjalan sejak 11 Oktober 2026, dan
-seluruh rancangannya ditentukan pemilik proyek lewat pratinjau
-(`keputusan.md`, Fase UI/UX). Kelompok K-A, K-C, K-B, dan K-D selesai
-(Catatan dari tabel seragam K-D, K-B, K-C, dan K-A), dan urutan kelompok
-mengikuti TB8a. K-E adalah kelompok terakhir.
+Tabel seragam selesai pada 18 Oktober 2026: kelompok K-A, K-C, K-B, K-D,
+dan K-E (Catatan dari tabel seragam K-E sampai K-A), dan suite e2e penuh
+lolos terhadap backend `ridho` `00de455` (461 lolos, 13 skipped). Sisa
+fase UI/UX tercatat di Utang kecil dari fase UI/UX: tabel rincian,
+kalender jadwal, label sel di HP, dan token tipografi.
 
-Sisa tabel seragam, tiga halaman di tiga berkas (cakupan RG3a):
-
-| Kelompok | Halaman | Berkas |
-|---|---|---|
-| K-E | `/dashboard/outlet/reservasi/aset` | `app/dashboard/outlet/reservasi/aset/page.tsx` |
-| K-E | `/dashboard/outlet/reservasi/tarif` | `app/dashboard/outlet/reservasi/tarif/page.tsx` |
-| K-E | `/dashboard/outlet/reservasi/tipeAset` | `app/dashboard/outlet/reservasi/tipeAset/page.tsx` |
-
-Spec terdampak, dari rute yang disebut spec: `crud-aset`, `crud-tarif`,
-`crud-tipeAset`, dan `guard-dashboard`. Pemetaan di bawah membuktikannya
-ulang, karena di K-D `generate-jadwal` ternyata hanya memanggil API.
-Ketiga halaman menulis `<table>` sendiri dengan kepala kolom `bg-krem`,
-melanggar TB2a dan TB7a. Bila halaman K-E juga punya panel filter
-berlatar krem, perlakuannya diajukan dengan acuan TB20a.
-
-Cara kerja mengikuti kelompok sebelumnya: halaman, spec terdampak, dan
-acuan pola (`components/ui/data-table.tsx`, daftar pengajuan stok, jurnal
-stok, dan `features/inventaris/menu-aksi-stok.tsx` untuk dua aksi baris)
-dikemas dalam satu arsip di `~/Downloads` lalu diunggah bila berkasnya di
-atas 150 baris; rancangan diajukan sebagai pratinjau; aksi baris di menu
-titik tiga, paginasi klien dengan `pilihanUkuranKlien`, teks keluar
-`red-800`, dan pesan galat `role="alert"` (TB11a, TB12a, TB15a). Sebelum
-spec diubah, urutan server, langkah spec yang mencari baris tertentu
-(TB14a), dan pemanggilan combobox tanpa nama di tingkat halaman
-(`pengujian.md`, Catatan Playwright) dibuktikan lebih dulu. Sesudah K-E
-masih tersisa tabel rincian, kalender jadwal, dan butir lain di Utang
-kecil dari fase UI/UX. Sesudah tabel seragam, cakupan daftar penjualan
-pindah ke filter `locationID` server (RG4a); sampai dikerjakan, RH2b
-tetap berlaku.
+Sesuai RG4a, pekerjaan berikutnya memindahkan cakupan daftar penjualan
+dari saringan klien (K5b dan K11b) ke filter `locationID` server. Syarat
+RH2b terpenuhi di `7d28135`, setelah backend mengisi `locationID` setiap
+penjualan (`kontrak/temuan.md` butir 144); sampai dikerjakan, RH2b tetap
+berlaku. Pemetaan awal belum diambil, sehingga langkah pertama sesi
+berikutnya mengambilnya. Di luar itu, dua belas `test.fixme` menunggu
+backend (`pengujian.md`, Test yang ditandai fixme dan skip bersyarat);
+pemeriksaan kode backend untuk memastikan statusnya dijadwalkan terpisah.
 
 Langkah pertama sesi berikutnya: backend di-`fetch` dan setiap cabang
-remote dihitung maju dan mundurnya terhadap acuan (`cara-kerja.md`), lalu
-pemetaan di bawah; commit baru di cabang remote dinilai dulu sebelum
-blok lain. Suite e2e penuh tidak dijalankan di awal sesi; harapan
-hitungannya 461 lolos dan 13 skipped (`pengujian.md`). Backend lokal
-berada di cabang `ridho` `00de455`; `origin/nizar` membawa `96e890e`
-dan `3efd05b` (Catatan dari tabel seragam K-D).
+remote dihitung maju dan mundurnya terhadap acuan (`cara-kerja.md`);
+commit baru di cabang remote dinilai dulu sebelum blok lain. Backend
+lokal berada di cabang `ridho` `00de455`; `origin/nizar` membawa
+`96e890e` dan `3efd05b` (Catatan dari tabel seragam K-D). Suite e2e
+penuh tidak dijalankan di awal sesi; harapannya 461 lolos dan 13 skipped
+(`pengujian.md`).
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in $(git -C "$BE" for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -v '^origin$' | grep -v '/HEAD$'); do echo "$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...$r | tr '\t' ' ')"; done
 cd ~/Documents/frontend-web
-wc -l app/dashboard/outlet/reservasi/aset/page.tsx app/dashboard/outlet/reservasi/tarif/page.tsx app/dashboard/outlet/reservasi/tipeAset/page.tsx tests/e2e/reservasi/aset/crud-aset.spec.ts tests/e2e/reservasi/tarif/crud-tarif.spec.ts tests/e2e/reservasi/tipeAset/crud-tipeAset.spec.ts tests/e2e/auth/guard-dashboard.spec.ts
-grep -rn "reservasi/aset\|reservasi/tarif\|reservasi/tipeAset" tests/e2e app components features | cut -c1-160
-grep -n 'page.getByRole("combobox")' tests/e2e/reservasi/aset/crud-aset.spec.ts tests/e2e/reservasi/tarif/crud-tarif.spec.ts tests/e2e/reservasi/tipeAset/crud-tipeAset.spec.ts
+wc -l features/penjualan/halaman-daftar-penjualan.tsx features/penjualan/filter.ts features/penjualan/api.ts features/penjualan/hooks.ts tests/e2e/penjualan/daftar-penjualan.spec.ts tests/unit/features/penjualan/filter.test.ts
+grep -rn "locationID\|K5b\|K11b\|RH2b" features/penjualan tests/e2e/penjualan tests/unit/features/penjualan | cut -c1-160
+git -C ~/Documents/backend-js merge-base --is-ancestor 38f523a HEAD && echo "38f523a termuat di acuan"
 ```
+
+## Catatan dari tabel seragam K-E
+
+Dikerjakan pada 18 Oktober 2026 dalam satu commit, terhadap backend
+`ridho` `00de455`. Rancangan ditunjukkan sebagai pratinjau dan disetujui
+pemilik proyek sebelum diterapkan.
+
+| Commit | Isi |
+|---|---|
+| `eb81a1f` | Aset, tarif, dan tipe aset: `DataTable`, menu `MenuEditHapus`, baris filter tanpa panel dan chip Total, token di tarif, dan spec lewat pencarian (TB21a sampai TB23a) |
+
+- `guard-dashboard` tidak terdampak: satu-satunya rute K-E yang ia buka
+  adalah halaman ubah tarif, bukan daftar. Ini koreksi kedua atas daftar
+  spec terdampak, sesudah `generate-jadwal` di K-D.
+- Ketiga halaman menghitung daftar tersaring lewat `.filter()` di badan
+  komponen, sehingga `DataTable` akan kembali ke halaman 1 setiap render,
+  termasuk saat dialog hapus dibuka. Daftar dan kolom kini di-`useMemo`
+  (`arsitektur.md`, Tabel data).
+- Tarif memakai objek warna hex lokal di hampir setiap sel; tabel dan
+  baris filternya kini memakai token, dan `COLORS` tinggal tiga warna
+  untuk dialog hapus. Baris `ID:` di aset dibuang mengikuti TB17a.
+- Ketiga spec diubah lewat skrip sekali pakai berhitungan
+  (`cara-kerja.md`): 30 `cariBaris`, 10 hapus dan 3 edit lewat menu, 11
+  pernyataan Total, dan pencarian kategori sebelum baris tipe aset. Lima
+  baris sesudah pencarian eksplisit sengaja tidak diubah, termasuk uji
+  huruf kapital.
+- Penerapan pertama gagal di semua gerbang karena terminal berada di
+  subdirektori, dan gerbang commit pertama menolak karena `/tmp/p.json`
+  hilang setelah mesin dinyalakan ulang; e2e dijalankan ulang dengan
+  penjaga posisi backend (`cara-kerja.md`).
+- Suite e2e penuh sesudah commit: 461 lolos, 0 gagal, dan 13 skipped,
+  sama dengan harapan hitungan sejak K-B (`pengujian.md`).
+- Butir utang berkas yang masih memakai `<table>` dihitung ulang menjadi
+  9, seluruhnya tabel rincian dan kalender jadwal.
+- Keputusan: `keputusan.md` (Fase UI/UX, TB21a sampai TB23a).
 
 ## Catatan dari tabel seragam K-D
 
@@ -1522,10 +1537,9 @@ Yang masih berlaku:
   berupa teks. Sebagian besar halaman menulis `header` sebagai komponen,
   sehingga kartu baris di HP menampilkan nilai tanpa label. Dilengkapi
   saat tiap halaman dirapikan.
-- 12 berkas masih memakai `<table>` yang ditulis sendiri (19 sebelum
-  K-A, per `2177ac3`): tiga halaman K-E di Pekerjaan berikutnya (tiga
-  berkas), tabel rincian di halaman detail dan form (delapan berkas,
-  termasuk
+- 9 berkas masih memakai `<table>` yang ditulis sendiri (19 sebelum K-A,
+  per `eb81a1f`; seluruh tabel daftar selesai di K-A sampai K-E): tabel
+  rincian di halaman detail dan form (delapan berkas, termasuk
   `features/jadwal/langkah-dua.tsx`), dan kalender jadwal
   (`features/jadwal/grid-jadwal.tsx`), yang perlu pratinjau tersendiri
   (keputusan TB4a). Sampai 16 Oktober 2026 daftar aset, tarif, tipe aset,
@@ -1543,6 +1557,9 @@ Yang masih berlaku:
   tiga halaman reservasi dan tarif (termasuk `#FFFAF399` yang memakai
   akhiran alfa), warna grafik di `features/laporan/grafik-laporan.tsx`,
   dan warna di luar lima warna utama. Tipografi dan spasi juga belum.
+  Sejak `eb81a1f` tabel dan baris filter tarif memakai token, dan
+  `COLORS` di daftar tarif tinggal tiga warna untuk dialog hapus (TB23a);
+  angka 68 belum diukur ulang.
 - Bayangan kartu baris memakai `filter` pada elemen `tr`. Di browser yang
   tidak mendukungnya, kartu tampil dengan bingkai saja.
 - Suite e2e penuh dijalankan ulang pada 16 Oktober 2026 terhadap backend

@@ -312,6 +312,14 @@ kepala kolom dan menyusun sel ke bawah dalam satu kartu: sel pertama
 menjadi judul, kolom ber-id `aksi` menempel di kanan atas, dan label kecil
 per sel tampil bila kolom punya `meta.label` atau `header` berupa teks.
 
+Data yang diberikan ke `DataTable` harus stabil di antara render
+(`useMemo`), karena tabel kembali ke halaman 1 setiap kali datanya
+berganti; daftar hasil `.filter()` langsung di badan komponen membuat
+pengguna terlempar ke halaman 1 saat dialog dibuka (K-E, `eb81a1f`).
+Aksi baris memakai menu titik tiga bersama bila pola aksinya sama:
+`features/inventaris/menu-aksi-stok.tsx` (TB16a) dan
+`components/menu-edit-hapus.tsx` (TB21a).
+
 ### Token warna (`app/globals.css`)
 
 Lima warna utama dan satu peran permukaan didefinisikan di `:root` dan

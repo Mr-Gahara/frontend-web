@@ -1830,6 +1830,24 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   menyebut nama berkas yang diubah K-C dan K-B, sehingga lolos dari
   pencarian dampak. Penutupan K-D menghitungnya ulang di gerbang commit.
 
+### Pelajaran dari tabel seragam K-E (18 Oktober 2026)
+
+- **Setiap blok diawali `cd ~/Documents/frontend-web &&`.** Terminal
+  sempat berada di `app/dashboard/outlet/pola-roster`, sehingga semua path
+  relatif gagal; gerbang menahan penerapan, tetapi seluruh putaran itu
+  terbuang.
+- **Penjaga posisi backend ditulis di dalam blok e2e.** Blok
+  membandingkan HEAD dan hitungan maju-mundur setiap cabang remote dengan
+  keadaan yang terakhir dinilai, lalu berhenti tanpa menjalankan e2e bila
+  berbeda, sehingga pelajaran K-D tidak bergantung pada pembaca berhenti
+  di tengah.
+- **Penggantian berulang di spec memakai skrip sekali pakai berhitungan.**
+  Setiap pola punya jumlah harapan, baris yang dikecualikan atau disisipi
+  diperiksa isinya lebih dulu, dan tidak ada berkas yang ditulis bila satu
+  hitungan meleset (`/tmp/ke-spec.js`, 30 `cariBaris` di tiga spec).
+- **Daftar berkas di zsh dipecah dengan `${=VAR}`**, karena zsh tidak
+  memecah isi variabel menjadi kata seperti bash.
+
 ## Kapan berhenti dan bertanya
 
 Beberapa keputusan bukan milik sisi teknis dan harus ditanyakan lebih dulu:

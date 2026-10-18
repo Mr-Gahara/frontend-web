@@ -1775,6 +1775,17 @@ yang izinnya tidak dipegang tidak dipasang.
   dibereskan bersama tabelnya**: baris filter bergaris bawah tanpa panel
   seperti K-A dan K-C, isian `bg-permukaan` (WR4a), dan daftar pilihan
   filter `bg-gading` seperti menu titik tiga (WR3a, `2177ac3`).
+- **TB21a: Edit dan Hapus di daftar aset, tarif, dan tipe aset memakai
+  menu titik tiga bergaya K-D** lewat komponen bersama
+  `components/menu-edit-hapus.tsx`: ikon, pemisah, dan Hapus merah,
+  karena hapus di ketiganya permanen (TB19a, `eb81a1f`).
+- **TB22a: panel filter krem di ketiga halaman reservasi dibereskan
+  seperti TB20a, dan chip "Total: N" dibuang**, karena kaki tabel
+  `DataTable` sudah menampilkan "N total data" untuk daftar tersaring yang
+  sama (`eb81a1f`).
+- **TB23a: tabel dan baris filter tarif memakai token, bukan objek hex
+  lokal**, dengan keenam kolom dipertahankan; `COLORS` tinggal tiga warna
+  untuk dialog hapus yang di luar tabel (WR3a, WR4a, `eb81a1f`).
 
 ## Keputusan rancangan yang mengikat
 

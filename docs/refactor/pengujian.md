@@ -96,6 +96,13 @@ seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua
 di spec login, satu di spec tipe aset, dan satu di spec ruang gudang sejak
 `2d7225b`).
 
+**Baseline per tabel seragam K-E** (commit `eb81a1f`, 18 Oktober 2026):
+659 test unit dan integrasi lolos di 81 berkas, tidak berubah. Suite e2e
+penuh dijalankan terhadap backend `ridho` `00de455`: 461 lolos, 0 gagal,
+0 flaky, dan 13 skipped, sama dengan harapan hitungan sejak K-B. Ketiga
+belas skipped adalah dua belas fixme yang menunggu backend dan satu skip
+bersyarat data (tab stok kritis gudang).
+
 **Baseline per tabel seragam K-D** (commit `2177ac3`): 659 test unit dan
 integrasi lolos di 81 berkas, tidak berubah. Suite penuh tidak
 dijalankan; `tests/e2e/jadwal/shift` dan `tests/e2e/jadwal/pola-roster`
@@ -1541,6 +1548,11 @@ Urutan debug kegagalan e2e di atas).
   (tarif terhapus walau `DELETE` menjawab 500; skenario utama dilepas di
   `8134842`), serta selector untuk input
   `Controller` tanpa `name` dan checkbox Radix berlabel.
+- Ketiga spec reservasi di atas sejak `eb81a1f`: baris uji dicari lewat
+  `cariBaris` (TB14a), hapus dan edit lewat menu titik tiga
+  (`MenuEditHapus`), dan total dibaca dari kaki tabel "N total data".
+  Penggantiannya dilakukan skrip sekali pakai yang menghitung setiap pola
+  dan memeriksa isi baris yang dikecualikan (`cara-kerja.md`).
 - `tests/e2e/reservasi/daftar/lihat-reservasi.spec.ts`: fixture booking
   tetap dengan pembersihan lewat penjualan (`batalkanBooking`, keputusan
   R2c, sejak `b85c2bd` PB8a), booking yang dibaca helper dari daftar
