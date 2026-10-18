@@ -76,6 +76,12 @@ async function bukaDaftar(page: Page): Promise<TarifMentah[]> {
 
 const baris = (page: Page, nama: string) => page.getByRole("row").filter({ hasText: nama });
 
+/** Daftar dipaginasi di klien (10 baris awal), sehingga baris uji dicari lewat pencarian (TB14a). */
+async function cariBaris(page: Page, nama: string) {
+  await page.getByPlaceholder(/cari nama tarif/i).fill(nama);
+  return baris(page, nama);
+}
+
 test.describe("E2E — Tarif › Halaman Daftar", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
@@ -120,7 +126,7 @@ test.describe("E2E — Tarif › Halaman Daftar", () => {
         prioritas: 1,
       });
       await bukaDaftar(page);
-      const barisA = baris(page, namaA);
+      const barisA = (await cariBaris(page, namaA));
       await expect(barisA).toContainText(/Rp\s?150\.000/);
       await expect(barisA).toContainText("per jam");
       await expect(barisA).toContainText("Min. 2 Jam");
@@ -128,7 +134,7 @@ test.describe("E2E — Tarif › Halaman Daftar", () => {
       await expect(barisA).toContainText("08:00 - 17:00");
       await expect(barisA).toContainText("Prioritas: 3");
       await expect(barisA).not.toContainText(POLA_NONAKTIF);
-      const barisB = baris(page, namaB);
+      const barisB = (await cariBaris(page, namaB));
       await expect(barisB).toContainText(/Rp\s?250\.000/);
       await expect(barisB).toContainText("per sesi");
       await expect(barisB).toContainText("Min. 1 Sesi");
@@ -156,7 +162,7 @@ test.describe("E2E — Tarif › Halaman Daftar", () => {
       const permintaan = pantauPermintaan(page, "GET", POLA_DAFTAR);
       await page.getByPlaceholder(/cari nama tarif/i).fill(nama);
       await expect(baris(page, nama)).toBeVisible();
-      await expect(page.getByRole("button", { name: /^edit$/i })).toHaveCount(1);
+      await expect(page.getByRole("button", { name: "Buka menu" })).toHaveCount(1);
       expect(permintaan.jumlah(), "pencarian tidak memanggil backend").toBe(0);
       permintaan.lepas();
     } finally {
@@ -168,7 +174,7 @@ test.describe("E2E — Tarif › Halaman Daftar", () => {
     await bukaDaftar(page);
     await page.getByPlaceholder(/cari nama tarif/i).fill("tidak-ada-" + unik());
     await expect(page.getByText("Tidak ada tarif yang cocok.")).toBeVisible();
-    await expect(page.getByRole("button", { name: /^edit$/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Buka menu" })).toHaveCount(0);
   });
 
   test("hapus: Batal menutup dialog tanpa mengirim DELETE", async ({ page }) => {
@@ -184,7 +190,8 @@ test.describe("E2E — Tarif › Halaman Daftar", () => {
       });
       await bukaDaftar(page);
       const permintaan = pantauPermintaan(page, "DELETE", POLA_SATU);
-      await baris(page, nama).getByRole("button").last().click();
+      await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: /^hapus$/i }).click();
       const dialog = page.getByRole("alertdialog");
       await expect(dialog).toContainText("Hapus Tarif?");
       await dialog.getByRole("button", { name: "Batal", exact: true }).click();
@@ -192,7 +199,7 @@ test.describe("E2E — Tarif › Halaman Daftar", () => {
       expect(permintaan.jumlah(), "Batal tidak mengirim DELETE").toBe(0);
       permintaan.lepas();
       expect((await bacaTarif(page, auth, t.id)).status).toBe(200);
-      await expect(baris(page, nama)).toBeVisible();
+      await expect((await cariBaris(page, nama))).toBeVisible();
     } finally {
       await hapusLewatApi(page, auth, "/tarif", t?.id);
     }
@@ -211,7 +218,8 @@ test.describe("E2E — Tarif › Halaman Daftar", () => {
       });
       await bukaDaftar(page);
       await tahanLaluTeruskan(page, "DELETE", POLA_SATU);
-      await baris(page, nama).getByRole("button").last().click();
+      await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: /^hapus$/i }).click();
       const dialog = page.getByRole("alertdialog");
       const tHapus = page.waitForResponse(cocok("DELETE", POLA_SATU));
       await dialog.getByRole("button", { name: /ya, hapus tarif/i }).click();
@@ -245,7 +253,8 @@ test.describe("E2E — Tarif › Halaman Daftar", () => {
         durasiMinimum: 1,
       });
       await bukaDaftar(page);
-      await baris(page, nama).getByRole("button").last().click();
+      await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: /^hapus$/i }).click();
       const dialog = page.getByRole("alertdialog");
       const tHapus = page.waitForResponse(cocok("DELETE", POLA_SATU));
       await dialog.getByRole("button", { name: /ya, hapus tarif/i }).click();
@@ -253,7 +262,7 @@ test.describe("E2E — Tarif › Halaman Daftar", () => {
       expect(res.status(), "DELETE /tarif/:id harus menjawab sukses").toBeLessThan(300);
       await expect(page.getByText("Tarif Berhasil Dihapus")).toBeVisible();
       await expect(dialog).toBeHidden();
-      await expect(baris(page, nama)).toHaveCount(0);
+      await expect((await cariBaris(page, nama))).toHaveCount(0);
       expect((await bacaTarif(page, auth, t.id)).status).toBe(404);
     } finally {
       await hapusLewatApi(page, auth, "/tarif", t?.id);
@@ -324,7 +333,7 @@ test.describe("E2E — Tarif › Halaman Buat", () => {
       id = (await res.json()).data?.id;
       expect(id, "respons buat harus membawa id").toBeTruthy();
       await page.waitForURL("**/reservasi/tarif");
-      await expect(baris(page, nama)).toBeVisible();
+      await expect((await cariBaris(page, nama))).toBeVisible();
       const tersimpan = await bacaTarif(page, auth, id ?? "");
       expect(tersimpan.status).toBe(200);
       expect(tersimpan.data.basisPerhitungan).toBe("per sesi");
@@ -460,9 +469,9 @@ test.describe("E2E — Tarif › Daftar: tipe aset, keadaan, navigasi, dan hapus
       });
       const data = await bukaDaftar(page);
       expect(data.find((x) => x.id === a?.id)?.dataAset.map((x) => x.id)).toEqual([tipe.id]);
-      await expect(baris(page, namaA)).toContainText(tipe.namaTipeAset);
-      await expect(baris(page, namaA)).not.toContainText("Semua Aset");
-      await expect(baris(page, namaB)).toContainText("Semua Aset");
+      await expect((await cariBaris(page, namaA))).toContainText(tipe.namaTipeAset);
+      await expect((await cariBaris(page, namaA))).not.toContainText("Semua Aset");
+      await expect((await cariBaris(page, namaB))).toContainText("Semua Aset");
     } finally {
       await hapusLewatApi(page, auth, "/tarif", a?.id);
       await hapusLewatApi(page, auth, "/tarif", b?.id);
@@ -491,6 +500,7 @@ test.describe("E2E — Tarif › Daftar: tipe aset, keadaan, navigasi, dan hapus
         tipeAsetID: [tipe.id],
       });
       await page.goto(URL_TIPE_ASET);
+      await page.getByPlaceholder(/cari kategori/i).fill(tipe.namaTipeAset);
       const barisTipe = page.getByRole("row").filter({ hasText: tipe.namaTipeAset });
       await expect(barisTipe).toContainText("1 Tarif Terhubung", { timeout: 10_000 });
       await page.goto(urlEdit(t.id));
@@ -512,6 +522,7 @@ test.describe("E2E — Tarif › Daftar: tipe aset, keadaan, navigasi, dan hapus
         dataTipe.find((x) => x.id === tipe?.id)?.dataTarif.length,
         "daftar tipe aset harus dibaca ulang setelah tarif diubah",
       ).toBe(0);
+      await page.getByPlaceholder(/cari kategori/i).fill(tipe.namaTipeAset);
       await expect(barisTipe).toContainText("0 Tarif Terhubung");
     } finally {
       await hapusLewatApi(page, auth, "/tarif", t?.id);
@@ -532,9 +543,9 @@ test.describe("E2E — Tarif › Daftar: tipe aset, keadaan, navigasi, dan hapus
       });
       await tahanLaluTeruskan(page, "GET", POLA_DAFTAR);
       await page.goto(URL_DAFTAR);
-      await expect(page.getByText("Memuat data tarif...")).toBeVisible();
-      await expect(baris(page, nama)).toBeVisible({ timeout: 10_000 });
-      await expect(page.getByText("Memuat data tarif...")).toHaveCount(0);
+      await expect(page.getByText("Memuat data...")).toBeVisible();
+      await expect((await cariBaris(page, nama))).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByText("Memuat data...")).toHaveCount(0);
       await page.unroute(POLA_DAFTAR);
     } finally {
       await hapusLewatApi(page, auth, "/tarif", t?.id);
@@ -569,7 +580,8 @@ test.describe("E2E — Tarif › Daftar: tipe aset, keadaan, navigasi, dan hapus
       await page.getByRole("button", { name: /tambah tarif/i }).click();
       await page.waitForURL("**/tarif/buatTarif");
       await bukaDaftar(page);
-      await baris(page, nama).getByRole("button", { name: /edit/i }).click();
+      await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: /^edit$/i }).click();
       await page.waitForURL(urlEdit(t.id));
     } finally {
       await hapusLewatApi(page, auth, "/tarif", t?.id);
@@ -591,7 +603,8 @@ test.describe("E2E — Tarif › Daftar: tipe aset, keadaan, navigasi, dan hapus
       await page.route(POLA_SATU, (route) =>
         route.request().method() === "DELETE" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
       );
-      await baris(page, nama).getByRole("button").last().click();
+      await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: /^hapus$/i }).click();
       const dialog = page.getByRole("alertdialog");
       await dialog.getByRole("button", { name: /ya, hapus tarif/i }).click();
       await expect(page.getByText("Gagal Menghapus")).toBeVisible();
@@ -853,8 +866,8 @@ test.describe("E2E — Tarif › Edit: guard, navigasi, validasi, basis, dan gag
       expect(payload.basisPerhitungan).toBe("per sesi");
       expect(payload.isActive).toBe(false);
       await page.waitForURL("**/reservasi/tarif");
-      await expect(baris(page, nama)).toContainText("per sesi");
-      await expect(baris(page, nama)).toContainText(POLA_NONAKTIF);
+      await expect((await cariBaris(page, nama))).toContainText("per sesi");
+      await expect((await cariBaris(page, nama))).toContainText(POLA_NONAKTIF);
       const tersimpan = await bacaTarif(page, auth, t.id);
       expect(tersimpan.data.basisPerhitungan).toBe("per sesi");
       expect(tersimpan.data.isActive).toBe(false);

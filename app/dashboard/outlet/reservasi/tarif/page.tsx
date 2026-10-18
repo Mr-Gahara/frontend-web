@@ -1,11 +1,15 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useDaftarTarif, useHapusTarif } from "@/features/tarif/hooks";
 import { pesanError } from "@/lib/api/error";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DataTable } from "@/components/ui/data-table";
+import MenuEditHapus from "@/components/menu-edit-hapus";
+import type { Tarif } from "@/types/tarif";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,9 +23,6 @@ import {
 import {
   Plus,
   Search,
-  Edit,
-  Trash2,
-  Tags,
   AlertTriangle,
   Clock,
   CalendarDays,
@@ -30,17 +31,22 @@ import {
 } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
 
-// --- COLORS (Design Tokens) ---
+// Warna sisa untuk dialog hapus; tabel dan baris filter memakai token (TB23a).
 const COLORS = {
   navy: "#0A2947",
   cream: "#FFFAF3",
-  darkCream: "#F2EAE2",
-  gold: "#D4A373",
-  sage: "#718355",
   rose: "#F43F5E",
 };
 
 const HARI_MAP = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+
+/** Pilihan baris per halaman (DataTable opt-in, keputusan TB11a). */
+const PILIHAN_UKURAN = [10, 20, 50] as const;
+
+function formatHariAktif(hariArray?: number[]) {
+  if (!hariArray || hariArray.length === 0 || hariArray.length === 7) return "Setiap Hari";
+  return hariArray.map((h) => HARI_MAP[h]).join(", ");
+}
 
 export default function DaftarTarifPage() {
   const router = useRouter();
@@ -56,10 +62,7 @@ export default function DaftarTarifPage() {
   // --- MUTATION HAPUS ---
   const deleteMutation = useHapusTarif();
 
-  const handleDeleteClick = (id: string) => {
-    setSelectedTarifId(id);
-    setDeleteModalOpen(true);
-  };
+  // Hapus dibuka dari menu titik tiga di kolom aksi.
 
   const confirmDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -79,311 +82,159 @@ export default function DaftarTarifPage() {
     });
   };
 
-  // --- FILTERING ---
-  const filteredList = tarifList.filter((item) =>
-    item.namaTarif.toLowerCase().includes(searchQuery.toLowerCase()),
+  // --- FILTERING --- (dimemo agar DataTable tidak kembali ke halaman 1)
+  const filteredList = useMemo(
+    () =>
+      tarifList.filter((item) =>
+        item.namaTarif.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    [tarifList, searchQuery],
   );
 
-  // Helper Format Hari Aktif
-  const formatHariAktif = (hariArray?: number[]) => {
-    if (!hariArray || hariArray.length === 0 || hariArray.length === 7)
-      return "Setiap Hari";
-    return hariArray.map((h) => HARI_MAP[h]).join(", ");
-  };
+  // Enam kolom tetap; warna dari token, bukan objek hex lokal (TB23a).
+  // Aksi baris di menu titik tiga bergaya K-D (TB7a, TB21a).
+  const kolom = useMemo<ColumnDef<Tarif>[]>(
+    () => [
+      {
+        id: "nama",
+        header: "Nama & Status Tarif",
+        cell: ({ row }) => (
+          <div className="flex flex-col gap-1.5">
+            <p className="font-bold text-[15px] tracking-tight text-navy">{row.original.namaTarif}</p>
+            <div className="flex items-center gap-2">
+              {row.original.isActive ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-sage/20 text-sage">
+                  <CheckCircle2 className="w-3 h-3" /> Aktif
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/15 text-rose-500">
+                  <XCircle className="w-3 h-3" /> Nonaktif
+                </span>
+              )}
+              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-karamel/20 text-navy/80">
+                Prioritas: {row.original.prioritas}
+              </span>
+            </div>
+          </div>
+        ),
+      },
+      {
+        id: "harga",
+        header: () => <div className="text-right">Harga Sewa</div>,
+        cell: ({ row }) => (
+          <div className="text-right font-bold text-[15px] text-navy">{formatRupiah(row.original.harga)}</div>
+        ),
+      },
+      {
+        id: "basis",
+        header: "Basis / Durasi Min.",
+        cell: ({ row }) => (
+          <div className="flex flex-col gap-1">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase px-2.5 py-1 rounded-lg w-fit bg-navy/5 text-navy">
+              <Clock className="w-3.5 h-3.5 text-karamel" />
+              {row.original.basisPerhitungan}
+            </span>
+            {row.original.durasiMinimum && (
+              <span className="text-[11px] font-medium ml-1 text-navy/70">
+                Min. {row.original.durasiMinimum}{" "}
+                {row.original.basisPerhitungan === "per jam" ? "Jam" : "Sesi"}
+              </span>
+            )}
+          </div>
+        ),
+      },
+      {
+        id: "jadwal",
+        header: "Jadwal Berlaku",
+        cell: ({ row }) => (
+          <div className="flex flex-col gap-1">
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-navy/80">
+              <CalendarDays className="w-3.5 h-3.5" />
+              {formatHariAktif(row.original.hariAktif)}
+            </span>
+            <span className="text-[11px] font-medium ml-5 text-navy/60">
+              {row.original.jamMulai && row.original.jamSelesai
+                ? `${row.original.jamMulai} - ${row.original.jamSelesai}`
+                : "24 Jam Penuh"}
+            </span>
+          </div>
+        ),
+      },
+      {
+        id: "tipe",
+        header: "Kategori Aset",
+        cell: ({ row }) => (
+          <div className="flex flex-wrap gap-1 max-w-45">
+            {row.original.dataAset && row.original.dataAset.length > 0 ? (
+              row.original.dataAset.map((aset, i) => (
+                <span
+                  key={aset.id || i}
+                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full border border-navy/20 text-navy/80"
+                >
+                  {aset.namaTipeAset}
+                </span>
+              ))
+            ) : (
+              <span className="text-[11px] font-medium italic text-navy/50">Semua Aset</span>
+            )}
+          </div>
+        ),
+      },
+      {
+        id: "aksi",
+        header: () => <div className="text-right">Aksi</div>,
+        cell: ({ row }) => (
+          <MenuEditHapus
+            onEdit={() => router.push(`/dashboard/outlet/reservasi/tarif/${row.original.id}/edit`)}
+            onHapus={() => {
+              setSelectedTarifId(row.original.id);
+              setDeleteModalOpen(true);
+            }}
+          />
+        ),
+      },
+    ],
+    [router],
+  );
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* HEADER SECTION (Sub-header) */}
-      <div
-        className="flex flex-col sm:flex-row gap-4 items-center justify-between rounded-2xl p-4 sm:p-5 border shadow-sm"
-        style={{
-          background: COLORS.darkCream,
-          borderColor: `${COLORS.navy}15`,
-        }}
-      >
+      {/* FILTER & TOMBOL TAMBAH: baris tanpa panel, warna dari token (TB22a, TB23a) */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between border-b border-navy/10 pb-4">
         <div className="relative w-full sm:max-w-md">
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
-            style={{ color: `${COLORS.navy}80` }}
-          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/50" />
           <Input
             placeholder="Cari nama tarif..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 font-medium h-11 border-none shadow-sm focus-visible:ring-1"
-            style={{
-              background: COLORS.cream,
-              color: COLORS.navy,
-              boxShadow: "0 1px 2px rgba(10,41,71,0.05)",
-            }}
+            className="pl-10 h-11 bg-permukaan border-navy/20 text-navy font-medium"
           />
         </div>
         <Button
-          onClick={() =>
-            router.push("/dashboard/outlet/reservasi/tarif/buatTarif")
-          }
-          className="w-full sm:w-auto font-bold h-11 px-6 shadow-sm hover:-translate-y-0.5 transition-transform"
-          style={{ background: COLORS.navy, color: COLORS.cream }}
+          onClick={() => router.push("/dashboard/outlet/reservasi/tarif/buatTarif")}
+          className="w-full sm:w-auto font-bold h-11 px-6 shadow-sm bg-navy text-gading hover:bg-navy/90"
         >
-          <Plus className="w-4 h-4 mr-2" style={{ color: COLORS.gold }} />{" "}
-          Tambah Tarif
+          <Plus className="w-4 h-4 mr-2 text-karamel" /> Tambah Tarif
         </Button>
       </div>
 
-      {/* DATA TABLE SECTION */}
-      <div
-        className="rounded-2xl border shadow-sm overflow-hidden flex flex-col"
-        style={{ background: COLORS.cream, borderColor: `${COLORS.navy}15` }}
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead
-              className="uppercase tracking-wider text-[11px]"
-              style={{
-                background: COLORS.darkCream,
-                color: `${COLORS.navy}99`,
-              }}
-            >
-              <tr>
-                <th className="px-6 py-4 font-bold">Nama & Status Tarif</th>
-                <th className="px-6 py-4 font-bold text-right">Harga Sewa</th>
-                <th className="px-6 py-4 font-bold">Basis / Durasi Min.</th>
-                <th className="px-6 py-4 font-bold">Jadwal Berlaku</th>
-                <th className="px-6 py-4 font-bold">Kategori Aset</th>
-                <th className="px-6 py-4 font-bold text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody
-              className="divide-y"
-              style={{ borderColor: `${COLORS.navy}10` }}
-            >
-              {isLoading ? (
-                <tr key="loading">
-                  {/* FIX: colSpan disesuaikan dari 5 -> 6 (jumlah kolom aktual di <thead>) */}
-                  <td colSpan={6} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div
-                        className="h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
-                        style={{
-                          borderColor: COLORS.navy,
-                          borderTopColor: "transparent",
-                        }}
-                      ></div>
-                      <p
-                        className="text-sm font-bold"
-                        style={{ color: `${COLORS.navy}80` }}
-                      >
-                        Memuat data tarif...
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ) : isError ? (
-                <tr key="error">
-                  <td
-                    colSpan={6}
-                    className="px-6 py-12 text-center font-bold"
-                    style={{ color: COLORS.rose }}
-                  >
-                    Gagal memuat data tarif. Pastikan server terhubung.
-                  </td>
-                </tr>
-              ) : filteredList.length === 0 ? (
-                <tr key="empty">
-                  <td colSpan={6} className="px-6 py-16 text-center">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center"
-                        style={{ background: `${COLORS.navy}05` }}
-                      >
-                        <Tags
-                          className="w-6 h-6"
-                          style={{ color: `${COLORS.navy}40` }}
-                        />
-                      </div>
-                      <p
-                        className="text-sm font-bold mt-2"
-                        style={{ color: `${COLORS.navy}60` }}
-                      >
-                        {searchQuery
-                          ? "Tidak ada tarif yang cocok."
-                          : "Belum ada data tarif yang dibuat."}
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filteredList.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="transition-colors hover:bg-krem"
-                  >
-                    {/* NAMA TARIF & STATUS */}
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-1.5">
-                        <p
-                          className="font-bold text-[15px] tracking-tight"
-                          style={{ color: COLORS.navy }}
-                        >
-                          {item.namaTarif}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          {item.isActive ? (
-                            <span
-                              className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded"
-                              style={{
-                                background: `${COLORS.sage}20`,
-                                color: COLORS.sage,
-                              }}
-                            >
-                              <CheckCircle2 className="w-3 h-3" /> Aktif
-                            </span>
-                          ) : (
-                            <span
-                              className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded"
-                              style={{
-                                background: `${COLORS.rose}15`,
-                                color: COLORS.rose,
-                              }}
-                            >
-                              <XCircle className="w-3 h-3" /> Nonaktif
-                            </span>
-                          )}
-                          <span
-                            className="text-[10px] font-bold uppercase px-2 py-0.5 rounded"
-                            style={{
-                              background: `${COLORS.gold}20`,
-                              color: "#A67C00",
-                            }}
-                          >
-                            Prioritas: {item.prioritas}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* HARGA */}
-                    <td className="px-6 py-4 text-right">
-                      <span
-                        className="font-bold text-[15px]"
-                        style={{ color: COLORS.navy }}
-                      >
-                        {formatRupiah(item.harga)}
-                      </span>
-                    </td>
-
-                    {/* BASIS PERHITUNGAN */}
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-1">
-                        <span
-                          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase px-2.5 py-1 rounded-lg w-fit"
-                          style={{
-                            background: `${COLORS.navy}08`,
-                            color: COLORS.navy,
-                          }}
-                        >
-                          <Clock
-                            className="w-3.5 h-3.5"
-                            style={{ color: COLORS.gold }}
-                          />
-                          {item.basisPerhitungan}
-                        </span>
-                        {item.durasiMinimum && (
-                          <span
-                            className="text-[11px] font-medium ml-1"
-                            style={{ color: `${COLORS.navy}70` }}
-                          >
-                            Min. {item.durasiMinimum}{" "}
-                            {item.basisPerhitungan === "per jam"
-                              ? "Jam"
-                              : "Sesi"}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* JADWAL BERLAKU */}
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-1">
-                        <span
-                          className="flex items-center gap-1.5 text-xs font-semibold"
-                          style={{ color: `${COLORS.navy}80` }}
-                        >
-                          <CalendarDays className="w-3.5 h-3.5" />
-                          {formatHariAktif(item.hariAktif)}
-                        </span>
-                        <span
-                          className="text-[11px] font-medium ml-5"
-                          style={{ color: `${COLORS.navy}60` }}
-                        >
-                          {item.jamMulai && item.jamSelesai
-                            ? `${item.jamMulai} - ${item.jamSelesai}`
-                            : "24 Jam Penuh"}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* TIPE ASET TERKAIT */}
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1 max-w-45">
-                        {item.dataAset && item.dataAset.length > 0 ? (
-                          item.dataAset.map((aset, i) => (
-                            <span
-                              key={aset.id || i}
-                              className="text-[10px] font-semibold px-2 py-0.5 rounded-full border"
-                              style={{
-                                borderColor: `${COLORS.navy}20`,
-                                color: `${COLORS.navy}80`,
-                              }}
-                            >
-                              {aset.namaTipeAset}
-                            </span>
-                          ))
-                        ) : (
-                          <span
-                            className="text-[11px] font-medium italic"
-                            style={{ color: `${COLORS.navy}50` }}
-                          >
-                            Semua Aset
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* AKSI */}
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/outlet/reservasi/tarif/${item.id}/edit`,
-                            )
-                          }
-                          className="h-8 px-3 transition-colors hover:bg-krem hover:text-navy font-bold"
-                          style={{ color: `${COLORS.navy}80` }}
-                        >
-                          <Edit className="w-4 h-4 mr-2" /> Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteClick(item.id)}
-                          className="h-8 px-2 transition-colors hover:bg-rose-50 hover:text-rose-600"
-                          style={{ color: COLORS.rose }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* TABEL DATA: DataTable (TB1a sampai TB7a); galat menggantikan tabel (TB15a) */}
+      {isError ? (
+        <p
+          role="alert"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+        >
+          Gagal memuat data tarif. Pastikan server terhubung.
+        </p>
+      ) : (
+        <DataTable
+          columns={kolom}
+          data={filteredList}
+          loading={isLoading}
+          emptyMessage={searchQuery ? "Tidak ada tarif yang cocok." : "Belum ada data tarif yang dibuat."}
+          pilihanUkuranKlien={PILIHAN_UKURAN}
+        />
+      )}
 
       {/* MODAL KONFIRMASI HAPUS */}
       <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>

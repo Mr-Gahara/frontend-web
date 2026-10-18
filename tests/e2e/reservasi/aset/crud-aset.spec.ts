@@ -43,6 +43,12 @@ async function bukaDaftar(page: Page): Promise<AsetMentah[]> {
 
 const baris = (page: Page, nama: string) => page.getByRole("row").filter({ hasText: nama });
 
+/** Daftar dipaginasi di klien (10 baris awal), sehingga baris uji dicari lewat pencarian (TB14a). */
+async function cariBaris(page: Page, nama: string) {
+  await page.getByPlaceholder(/cari nama aset/i).fill(nama);
+  return baris(page, nama);
+}
+
 test.describe("E2E — Aset › Halaman Daftar", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
@@ -56,7 +62,7 @@ test.describe("E2E — Aset › Halaman Daftar", () => {
     await expect(page.getByPlaceholder(/cari nama aset/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /tambah/i })).toBeVisible();
     await expect(page.getByRole("columnheader")).toHaveCount(4);
-    await expect(page.getByText("Total: " + data.length + " Aset")).toBeVisible();
+    await expect(page.getByText(data.length + " total data", { exact: true })).toBeVisible();
   });
 
   test("menampilkan nama, tipe, dan badge status sesuai data backend", async ({ page }) => {
@@ -77,12 +83,11 @@ test.describe("E2E — Aset › Halaman Daftar", () => {
       const data = await bukaDaftar(page);
       expect(data.find((x) => x.id === a?.id)?.status).toBe("tersedia");
       expect(data.find((x) => x.id === b?.id)?.status).toBe("perbaikan");
-      await expect(page.getByText("Total: " + data.length + " Aset")).toBeVisible();
-      await expect(baris(page, namaTersedia)).toContainText(tipe.namaTipeAset);
-      await expect(baris(page, namaTersedia)).toContainText("ID: " + a.id.substring(0, 8));
-      await expect(baris(page, namaTersedia)).toContainText("Tersedia");
-      await expect(baris(page, namaPerbaikan)).toContainText(tipe.namaTipeAset);
-      await expect(baris(page, namaPerbaikan)).toContainText("Perbaikan");
+      await expect(page.getByText(data.length + " total data", { exact: true })).toBeVisible();
+      await expect((await cariBaris(page, namaTersedia))).toContainText(tipe.namaTipeAset);
+      await expect((await cariBaris(page, namaTersedia))).toContainText("Tersedia");
+      await expect((await cariBaris(page, namaPerbaikan))).toContainText(tipe.namaTipeAset);
+      await expect((await cariBaris(page, namaPerbaikan))).toContainText("Perbaikan");
     } finally {
       await hapusLewatApi(page, auth, "/aset", a?.id);
       await hapusLewatApi(page, auth, "/aset", b?.id);
@@ -103,7 +108,7 @@ test.describe("E2E — Aset › Halaman Daftar", () => {
       const permintaan = pantauPermintaan(page, "GET", POLA_DAFTAR);
       await page.getByPlaceholder(/cari nama aset/i).fill(nama);
       await expect(baris(page, nama)).toBeVisible();
-      await expect(page.getByText("Total: 1 Aset")).toBeVisible();
+      await expect(page.getByText("1 total data", { exact: true })).toBeVisible();
       expect(permintaan.jumlah(), "pencarian tidak memanggil backend").toBe(0);
       permintaan.lepas();
     } finally {
@@ -125,7 +130,8 @@ test.describe("E2E — Aset › Halaman Daftar", () => {
       aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await bukaDaftar(page);
       await tahanLaluTeruskan(page, "DELETE", POLA_SATU);
-      await baris(page, nama).getByRole("button").last().click();
+      await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: /^hapus$/i }).click();
       const dialog = page.getByRole("alertdialog");
       await expect(dialog).toContainText("Hapus Data Aset?");
       const tHapus = page.waitForResponse(cocok("DELETE", POLA_SATU));
@@ -136,7 +142,7 @@ test.describe("E2E — Aset › Halaman Daftar", () => {
       expect((await tHapus).status()).toBeLessThan(300);
       terhapus = true;
       await expect(dialog).toBeHidden();
-      await expect(baris(page, nama)).toHaveCount(0);
+      await expect((await cariBaris(page, nama))).toHaveCount(0);
       expect((await bacaAset(page, auth, aset.id)).status).toBe(404);
       await page.unroute(POLA_SATU);
     } finally {
@@ -192,7 +198,7 @@ test.describe("E2E — Aset › Halaman Buat", () => {
       id = (await res.json()).data?.id;
       expect(id, "respons buat harus membawa id").toBeTruthy();
       await page.waitForURL("**/reservasi/aset");
-      await expect(baris(page, nama)).toContainText("Perbaikan");
+      await expect((await cariBaris(page, nama))).toContainText("Perbaikan");
       const tersimpan = await bacaAset(page, auth, id ?? "");
       expect(tersimpan.status).toBe(200);
       expect(tersimpan.data.namaAset).toBe(nama);
@@ -259,7 +265,7 @@ test.describe("E2E — Aset › Halaman Edit", () => {
       expect(res.status()).toBeLessThan(300);
       expect(res.request().postDataJSON().namaAset).toBe(namaBaru);
       await page.waitForURL("**/reservasi/aset");
-      await expect(baris(page, namaBaru)).toBeVisible();
+      await expect((await cariBaris(page, namaBaru))).toBeVisible();
       const tersimpan = await bacaAset(page, auth, aset.id);
       expect(tersimpan.data.namaAset).toBe(namaBaru);
       expect(tersimpan.data.dataAset?.id).toBe(tipe.id);
@@ -285,7 +291,7 @@ test.describe("E2E — Aset › Daftar: keadaan, navigasi, dan hapus", () => {
       await tahanLaluTeruskan(page, "GET", POLA_DAFTAR);
       await page.goto(URL_DAFTAR);
       await expect(page.getByText("Memuat data...")).toBeVisible();
-      await expect(baris(page, nama)).toBeVisible({ timeout: 10_000 });
+      await expect((await cariBaris(page, nama))).toBeVisible({ timeout: 10_000 });
       await expect(page.getByText("Memuat data...")).toHaveCount(0);
       await page.unroute(POLA_DAFTAR);
     } finally {
@@ -316,12 +322,12 @@ test.describe("E2E — Aset › Daftar: keadaan, navigasi, dan hapus", () => {
       await test.step("huruf besar", async () => {
         await cari.fill(nama.toUpperCase());
         await expect(baris(page, nama)).toBeVisible();
-        await expect(page.getByText("Total: 1 Aset")).toBeVisible();
+        await expect(page.getByText("1 total data", { exact: true })).toBeVisible();
       });
       await test.step("tanpa hasil", async () => {
         await cari.fill("tidak-ada-" + unik());
         await expect(page.getByText("Tidak ada aset yang cocok dengan pencarian.")).toBeVisible();
-        await expect(page.getByText("Total: 0 Aset")).toBeVisible();
+        await expect(page.getByText("0 total data", { exact: true })).toBeVisible();
       });
     } finally {
       await hapusLewatApi(page, auth, "/aset", aset?.id);
@@ -343,7 +349,8 @@ test.describe("E2E — Aset › Daftar: keadaan, navigasi, dan hapus", () => {
       await page.getByRole("button", { name: /tambah/i }).click();
       await page.waitForURL("**/aset/buatAset");
       await bukaDaftar(page);
-      await baris(page, nama).getByRole("button", { name: /edit/i }).click();
+      await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: /^edit$/i }).click();
       await page.waitForURL(urlEdit(aset.id));
     } finally {
       await hapusLewatApi(page, auth, "/aset", aset?.id);
@@ -361,7 +368,8 @@ test.describe("E2E — Aset › Daftar: keadaan, navigasi, dan hapus", () => {
       aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await bukaDaftar(page);
       const permintaan = pantauPermintaan(page, "DELETE", POLA_SATU);
-      await baris(page, nama).getByRole("button").last().click();
+      await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: /^hapus$/i }).click();
       const dialog = page.getByRole("alertdialog");
       await expect(dialog).toContainText("Hapus Data Aset?");
       await dialog.getByRole("button", { name: "Batal", exact: true }).click();
@@ -369,7 +377,7 @@ test.describe("E2E — Aset › Daftar: keadaan, navigasi, dan hapus", () => {
       expect(permintaan.jumlah(), "Batal tidak mengirim DELETE").toBe(0);
       permintaan.lepas();
       expect((await bacaAset(page, auth, aset.id)).status).toBe(200);
-      await expect(baris(page, nama)).toBeVisible();
+      await expect((await cariBaris(page, nama))).toBeVisible();
     } finally {
       await hapusLewatApi(page, auth, "/aset", aset?.id);
       await hapusLewatApi(page, auth, "/tipeaset", tipe?.id);
@@ -388,7 +396,8 @@ test.describe("E2E — Aset › Daftar: keadaan, navigasi, dan hapus", () => {
       await page.route(POLA_SATU, (route) =>
         route.request().method() === "DELETE" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
       );
-      await baris(page, nama).getByRole("button").last().click();
+      await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: /^hapus$/i }).click();
       const dialog = page.getByRole("alertdialog");
       await dialog.getByRole("button", { name: /ya, hapus aset/i }).click();
       await expect(page.getByText("Gagal", { exact: true })).toBeVisible();
@@ -580,8 +589,8 @@ test.describe("E2E — Aset › Edit: guard, navigasi, validasi, dan gagal", () 
       expect(payload.tipeAsetID).toBe(tipeB.id);
       expect(payload.status).toBe("perbaikan");
       await page.waitForURL("**/reservasi/aset");
-      await expect(baris(page, nama)).toContainText(tipeB.namaTipeAset);
-      await expect(baris(page, nama)).toContainText("Perbaikan");
+      await expect((await cariBaris(page, nama))).toContainText(tipeB.namaTipeAset);
+      await expect((await cariBaris(page, nama))).toContainText("Perbaikan");
       const tersimpan = await bacaAset(page, auth, aset.id);
       expect(tersimpan.data.dataAset?.id).toBe(tipeB.id);
       expect(tersimpan.data.status).toBe("perbaikan");

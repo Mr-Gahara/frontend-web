@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import type { TipeAset } from "@/types/tipeAset";
 import { useDaftarTipeAset, useHapusTipeAset } from "@/features/tipe-aset/hooks";
@@ -11,6 +12,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { DataTable } from "@/components/ui/data-table";
+import MenuEditHapus from "@/components/menu-edit-hapus";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,13 +27,13 @@ import {
 import {
   Plus,
   Search,
-  Edit,
-  Trash2,
   AlertTriangle,
-  ServerCrash,
   Layers,
   Tags,
 } from "lucide-react";
+
+/** Pilihan baris per halaman (DataTable opt-in, keputusan TB11a). */
+const PILIHAN_UKURAN = [10, 20, 50] as const;
 
 export default function TipeAsetPage() {
   const router = useRouter();
@@ -49,10 +52,6 @@ export default function TipeAsetPage() {
   const deleteMutation = useHapusTipeAset();
 
   // --- HANDLERS ---
-  const handleDeleteClick = (tipeAset: TipeAset) => {
-    setSelectedTipeAset(tipeAset);
-    setIsDeleteModalOpen(true);
-  };
 
   // preventDefault menahan dialog tetap terbuka sampai hapus berhasil,
   // sehingga dialog bertahan saat gagal (keputusan Fase 0).
@@ -71,8 +70,60 @@ export default function TipeAsetPage() {
     });
   };
 
-  const filteredList = tipeAsetList.filter((item) =>
-    item.namaTipeAset.toLowerCase().includes(searchQuery.toLowerCase()),
+  // Dimemo agar DataTable tidak kembali ke halaman 1 setiap render ulang.
+  const filteredList = useMemo(
+    () =>
+      tipeAsetList.filter((item) =>
+        item.namaTipeAset.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    [tipeAsetList, searchQuery],
+  );
+
+  // Aksi baris di menu titik tiga bergaya K-D (TB7a, TB21a).
+  const kolom = useMemo<ColumnDef<TipeAset>[]>(
+    () => [
+      {
+        id: "nama",
+        header: "Nama Kategori",
+        cell: ({ row }) => <span className="font-bold text-navy">{row.original.namaTipeAset}</span>,
+      },
+      {
+        id: "deskripsi",
+        header: "Deskripsi",
+        cell: ({ row }) => (
+          <p className="font-medium text-navy/70 line-clamp-2 max-w-xs">
+            {row.original.deskripsi || <span className="italic opacity-50">Tidak ada deskripsi</span>}
+          </p>
+        ),
+      },
+      {
+        id: "relasi",
+        header: "Relasi Tarif",
+        cell: ({ row }) => (
+          <Badge
+            variant="outline"
+            className="bg-navy/5 text-navy border-none shadow-sm px-2.5 py-1 font-bold"
+          >
+            <Tags className="w-3 h-3 mr-1.5" />
+            {row.original.dataTarif?.length || 0} Tarif Terhubung
+          </Badge>
+        ),
+      },
+      {
+        id: "aksi",
+        header: () => <div className="text-right">Aksi</div>,
+        cell: ({ row }) => (
+          <MenuEditHapus
+            onEdit={() => router.push(`/dashboard/outlet/reservasi/tipeAset/${row.original.id}/edit`)}
+            onHapus={() => {
+              setSelectedTipeAset(row.original);
+              setIsDeleteModalOpen(true);
+            }}
+          />
+        ),
+      },
+    ],
+    [router],
   );
 
   return (
@@ -104,133 +155,40 @@ export default function TipeAsetPage() {
         </Button>
       </div>
 
-      {/* FILTER & PENCARIAN */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-krem p-4 rounded-2xl border border-navy/10 shadow-sm">
+      {/* FILTER & PENCARIAN: baris tanpa panel; total ada di kaki tabel (TB22a) */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center border-b border-navy/10 pb-4">
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
           <Input
             placeholder="Cari kategori..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-gading border-navy/20 text-navy placeholder:text-navy/40 font-medium h-11"
+            className="pl-10 bg-permukaan border-navy/20 text-navy placeholder:text-navy/40 font-medium h-11"
           />
-        </div>
-        <div className="text-sm font-bold text-navy/60 bg-white/50 px-4 py-2 rounded-lg border border-navy/10 w-full sm:w-auto text-center">
-          Total: {filteredList.length} Tipe
         </div>
       </div>
 
-      {/* TABEL DATA */}
-      <div className="rounded-2xl border border-navy/10 bg-gading shadow-sm overflow-hidden flex flex-col">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-krem text-navy/60 border-b border-navy/10 uppercase tracking-wider text-[10px]">
-              <tr>
-                <th className="px-6 py-4 font-bold">Nama Kategori</th>
-                <th className="px-6 py-4 font-bold">Deskripsi</th>
-                <th className="px-6 py-4 font-bold text-center">
-                  Relasi Tarif
-                </th>
-                <th className="px-6 py-4 font-bold text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/5">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-navy border-t-transparent"></div>
-                      <p className="text-sm font-bold text-navy/60">
-                        Memuat data...
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ) : isError ? (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="px-6 py-12 text-center text-rose-500 font-bold"
-                  >
-                    <ServerCrash className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                    Gagal memuat data tipe aset.
-                  </td>
-                </tr>
-              ) : filteredList.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-16 text-center">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="h-12 w-12 rounded-xl bg-navy/5 flex items-center justify-center">
-                        <Layers className="w-6 h-6 text-navy/30" />
-                      </div>
-                      <p className="text-sm font-bold text-navy/50 mt-2">
-                        {searchQuery
-                          ? "Tidak ada tipe aset yang cocok dengan pencarian."
-                          : "Belum ada master data tipe aset."}
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filteredList.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-navy/5 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <p className="font-bold text-navy">
-                        {item.namaTipeAset}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-navy/70 line-clamp-2 max-w-xs">
-                        {item.deskripsi || (
-                          <span className="italic opacity-50">
-                            Tidak ada deskripsi
-                          </span>
-                        )}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <Badge
-                        variant="outline"
-                        className="bg-navy/5 text-navy border-none shadow-sm px-2.5 py-1 font-bold"
-                      >
-                        <Tags className="w-3 h-3 mr-1.5" />
-                        {item.dataTarif?.length || 0} Tarif Terhubung
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/outlet/reservasi/tipeAset/${item.id}/edit`,
-                            )
-                          }
-                          className="h-8 px-3 cursor-pointer text-navy/60 hover:text-navy hover:bg-navy/10 font-bold"
-                        >
-                          <Edit className="w-4 h-4 mr-2" /> Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteClick(item)}
-                          className="h-8 px-2 cursor-pointer text-rose-500 hover:text-rose-700 hover:bg-rose-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* TABEL DATA: DataTable (TB1a sampai TB7a); galat menggantikan tabel (TB15a) */}
+      {isError ? (
+        <p
+          role="alert"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+        >
+          Gagal memuat data tipe aset.
+        </p>
+      ) : (
+        <DataTable
+          columns={kolom}
+          data={filteredList}
+          loading={isLoading}
+          emptyMessage={
+            searchQuery
+              ? "Tidak ada tipe aset yang cocok dengan pencarian."
+              : "Belum ada master data tipe aset."
+          }
+          pilihanUkuranKlien={PILIHAN_UKURAN}
+        />
+      )}
 
       {/* MODAL KONFIRMASI HAPUS */}
       <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
