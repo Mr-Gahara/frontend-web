@@ -42,6 +42,14 @@ function getPolaRow(page: Page, namaPola: string) {
   return page.locator("tbody tr").filter({ hasText: namaPola });
 }
 
+/** Daftar dipaginasi di klien (10 baris awal), sehingga baris uji dicari lewat pencarian (TB14a). */
+const UKURAN_AWAL = 10;
+
+async function cariPola(page: Page, namaPola: string) {
+  await page.getByPlaceholder(/cari nama pola/i).fill(namaPola);
+  return getPolaRow(page, namaPola);
+}
+
 // ============================================================
 // HELPER: Form Actions
 // ============================================================
@@ -91,7 +99,7 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
       await expect(dialog).toBeHidden({ timeout: 10_000 });
 
       // Verifikasi di Tabel
-      const row = getPolaRow(page, namaBaru);
+      const row = await cariPola(page, namaBaru);
       await expect(row).toBeVisible({ timeout: 10_000 });
       await expect(row).toContainText("3 Hari");
     });
@@ -299,7 +307,7 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
     await expect(dialog).toBeHidden({ timeout: 10_000 });
 
     // Buka menu Hapus
-    const row = getPolaRow(page, namaPola);
+    const row = await cariPola(page, namaPola);
     await row.getByRole("cell").last().getByRole("button").click();
     await page.getByRole("menuitem", { name: /hapus pola/i }).click();
 
@@ -333,6 +341,7 @@ test.describe("E2E - Pola Roster setelah migrasi features/pola-roster", () => {
     try {
       await page.reload();
       await expect(page.getByText(/gagal memuat data pola roster/i)).toBeVisible({ timeout: 20_000 });
+      await expect(page.locator("table")).toHaveCount(0);
     } finally {
       await page.unroute(POLA_DAFTAR_POLA);
     }
@@ -382,7 +391,7 @@ test.describe("E2E - Pola Roster setelah migrasi features/pola-roster", () => {
       const nonaktif = await api<unknown>(page, auth, "DELETE", `/shift/${shift.data.id}`);
       expect(nonaktif.status, `DELETE /shift: ${nonaktif.pesan}`).toBe(200);
       await page.reload();
-      const baris = page.locator("tbody tr").filter({ hasText: namaPola });
+      const baris = await cariPola(page, namaPola);
       await expect(baris).toContainText(`${namaShift} (nonaktif)`, { timeout: 15_000 });
     } finally {
       const hapus = await api<unknown>(page, auth, "DELETE", `/polaroster/${pola.data.id}`);
@@ -430,7 +439,8 @@ test.describe("E2E - Pola Roster setelah migrasi features/pola-roster", () => {
     const data = ((await (await tunggu).json()).data ?? []) as unknown[];
     await expect(page.getByRole("heading", { name: /pola roster gudang/i })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/masih dipakai bersama ruang outlet dan gudang/i)).toBeVisible();
-    await expect(page.locator("tbody tr")).toHaveCount(Math.max(data.length, 1));
+    await expect(page.locator("tbody tr")).toHaveCount(Math.min(Math.max(data.length, 1), UKURAN_AWAL));
+    await expect(page.getByText(`${data.length} total data`, { exact: true })).toBeVisible();
   });
 
   test("pola yang dibuat di ruang outlet tidak tampil di ruang gudang (keputusan PL5)", async ({ page }) => {

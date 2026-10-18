@@ -42,6 +42,14 @@ function getShiftRow(page: Page, namaShift: string) {
   return page.locator("tbody tr").filter({ hasText: namaShift });
 }
 
+/** Daftar dipaginasi di klien (10 baris awal), sehingga baris uji dicari lewat pencarian (TB14a). */
+const UKURAN_AWAL = 10;
+
+async function cariShift(page: Page, namaShift: string) {
+  await page.getByPlaceholder(/cari nama shift/i).fill(namaShift);
+  return getShiftRow(page, namaShift);
+}
+
 // ============================================================
 // HELPER: Form Actions
 // ============================================================
@@ -136,7 +144,7 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
         .click();
       await expect(dialog).toBeHidden({ timeout: 10_000 });
 
-      const row = getShiftRow(page, namaBaru);
+      const row = await cariShift(page, namaBaru);
       await expect(row).toBeVisible({ timeout: 10_000 });
       await expect(row).toContainText("08:00 - 16:00");
       await expect(row).toContainText("15 Menit");
@@ -172,10 +180,9 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
         .click();
       await expect(dialog).toBeHidden({ timeout: 10_000 });
 
-      // Clear pencarian untuk melihat data terbaru
-      await page.getByPlaceholder(/cari nama shift/i).clear();
-
-      const editedRow = getShiftRow(page, namaEdit);
+      // Nama baru dicari: tanpa pencarian, baris hasil edit belum tentu
+      // berada di halaman pertama daftar yang dipaginasi (TB14a).
+      const editedRow = await cariShift(page, namaEdit);
       await expect(editedRow).toBeVisible({ timeout: 10_000 });
       await expect(editedRow).toContainText("09:00 - 17:00");
       await expect(editedRow).toContainText("10 Menit");
@@ -201,7 +208,7 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     });
 
     await test.step("Verifikasi Soft Delete di Tab Non-Aktif", async () => {
-      await page.getByRole("combobox").click();
+      await page.getByRole("combobox", { name: /filter status shift/i }).click();
       await page.getByRole("option", { name: /^non-aktif$/i }).click();
 
       const inactiveRow = getShiftRow(page, namaEdit);
@@ -375,7 +382,8 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
   // ----------------------------------------------------------
   test("filter: memilah data berdasarkan status shift", async ({ page }) => {
     await test.step("Filter Aktif", async () => {
-      await page.getByRole("combobox").click();
+      // Disebut namanya: pemilih jumlah baris DataTable juga sebuah combobox.
+      await page.getByRole("combobox", { name: /filter status shift/i }).click();
       await page.getByRole("option", { name: /^aktif$/i }).click();
 
       // Seluruh row yang memiliki data harus memiliki teks "Aktif"
@@ -395,7 +403,7 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     });
 
     await test.step("Kembali ke filter Semua Status", async () => {
-      const select = page.getByRole("combobox");
+      const select = page.getByRole("combobox", { name: /filter status shift/i });
       await select.click();
       await page.getByRole("option", { name: /semua status/i }).click();
       await expect(select).toContainText("Semua Status");
@@ -423,7 +431,7 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     await dialog.getByRole("button", { name: /simpan master shift/i }).click();
     await expect(dialog).toBeHidden({ timeout: 10_000 });
 
-    const row = getShiftRow(page, namaShift);
+    const row = await cariShift(page, namaShift);
     await row
       .getByRole("button", { name: /buka menu/i })
       .first()
@@ -492,7 +500,7 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     await expect(dialog).toBeHidden({ timeout: 10_000 });
 
     // 2. Buka Edit dan verifikasi isinya
-    const row = getShiftRow(page, namaShift);
+    const row = await cariShift(page, namaShift);
     await row.getByRole("cell").last().getByRole("button").click();
     await page.getByRole("menuitem", { name: /edit shift/i }).click();
 
@@ -533,7 +541,7 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     await expect(dialog).toBeHidden({ timeout: 10_000 });
 
     // 2. Edit dan ubah status
-    const row = getShiftRow(page, namaShift);
+    const row = await cariShift(page, namaShift);
     await row.getByRole("cell").last().getByRole("button").click();
     await page.getByRole("menuitem", { name: /edit shift/i }).click();
 
@@ -547,7 +555,7 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     // klik di luar dialog modal yang masih terbuka hanya menutupnya.
     await expect(dialog).toBeHidden({ timeout: 10_000 });
     // 3. Verifikasi pindah ke tab non-aktif
-    await page.getByRole("combobox").first().click(); // Dropdown filter di luar
+    await page.getByRole("combobox", { name: /filter status shift/i }).click(); // Dropdown filter di luar
     await page.getByRole("option", { name: /^non-aktif$/i }).click();
 
     const inactiveRow = getShiftRow(page, namaShift);
@@ -578,6 +586,7 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
       await page.reload();
       await expect(page.getByText(/gagal memuat data shift/i)).toBeVisible({ timeout: 20_000 });
       await expect(page.getByText("Belum ada master shift.")).toHaveCount(0);
+      await expect(page.locator("table")).toHaveCount(0);
     } finally {
       await page.unroute(POLA_DAFTAR_SHIFT);
     }
@@ -632,7 +641,8 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
       timeout: 15_000,
     });
     await expect(page.getByText(/masih dipakai bersama ruang outlet dan gudang/i)).toBeVisible();
-    await expect(page.locator("tbody tr")).toHaveCount(Math.max(data.length, 1));
+    await expect(page.locator("tbody tr")).toHaveCount(Math.min(Math.max(data.length, 1), UKURAN_AWAL));
+    await expect(page.getByText(`${data.length} total data`, { exact: true })).toBeVisible();
   });
 
   test("shift yang dibuat di ruang outlet tidak tampil di ruang gudang (keputusan SH1b)", async ({
@@ -644,7 +654,7 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     );
     const namaShift = `Shift Ruang ${Date.now()}`;
     await buatShiftLewatUi(page, namaShift);
-    await expect(getShiftRow(page, namaShift)).toBeVisible();
+    await expect(await cariShift(page, namaShift)).toBeVisible();
     await page.goto(`${BASE}/dashboard/gudang/shift`);
     await expect(page.getByRole("heading", { name: /master shift gudang/i })).toBeVisible({
       timeout: 15_000,

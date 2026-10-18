@@ -25,7 +25,6 @@ import {
   ArchiveX,
   Clock,
   MoonStar,
-  Loader2,
 } from "lucide-react";
 
 // Import tipe data dan komponen anak
@@ -34,6 +33,11 @@ import { ShiftFormDialog } from "./form-shift";
 import { ShiftDeleteDialog } from "./dialog-nonaktif-shift";
 import { shiftTerpisahPerRuang, type RuangShift } from "./ruang";
 import type { NilaiFormShift } from "./schema";
+import { DataTable } from "@/components/ui/data-table";
+import type { ColumnDef } from "@tanstack/react-table";
+
+/** Pilihan baris per halaman (DataTable opt-in, keputusan TB11a). */
+const PILIHAN_UKURAN = [10, 20, 50] as const;
 
 interface ShiftUtamaProps {
   tipeRuang: RuangShift;
@@ -87,16 +91,6 @@ export default function ShiftUtama({
     setFormOpen(true);
   };
 
-  const handleOpenEdit = (shift: ShiftItem) => {
-    setSelectedShift(shift);
-    setFormOpen(true);
-  };
-
-  const handleOpenDelete = (shift: ShiftItem) => {
-    setSelectedShift(shift);
-    setDeleteOpen(true);
-  };
-
   const handleFormSubmit = async (nilai: NilaiFormShift) => {
     // Jika ada selectedShift, berarti Edit (kirim ID). Jika tidak, berarti Create Baru.
     try {
@@ -118,6 +112,113 @@ export default function ShiftUtama({
       // Error sudah ditangani onError mutation di halaman induk.
     }
   };
+
+  // Menu titik tiga yang sudah ada dipertahankan di kolom aksi (TB7a, TB19a).
+  const kolom = useMemo<ColumnDef<ShiftItem>[]>(
+    () => [
+      {
+        id: "nama",
+        header: "Nama Shift",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy/5 text-navy">
+              <Clock className="h-4 w-4" />
+            </div>
+            <span className="font-bold text-navy text-base">{row.original.namaShift}</span>
+          </div>
+        ),
+      },
+      {
+        id: "jam",
+        header: "Jam Kerja",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-navy/80 font-mono tracking-tight text-sm">
+              {row.original.jamMasuk} - {row.original.jamPulang}
+            </span>
+            {row.original.isLintasHari && (
+              <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                <MoonStar className="h-3 w-3" /> Lintas Hari
+              </span>
+            )}
+          </div>
+        ),
+      },
+      {
+        id: "toleransi",
+        header: "Toleransi",
+        cell: ({ row }) => (
+          <span className="font-semibold text-navy/60">
+            {row.original.toleransiTerlambat > 0 ? (
+              <span className="text-navy font-bold">{row.original.toleransiTerlambat} Menit</span>
+            ) : (
+              "Tepat Waktu (0 Menit)"
+            )}
+          </span>
+        ),
+      },
+      {
+        id: "status",
+        header: "Status",
+        cell: ({ row }) => (
+          <span
+            className={`inline-flex items-center justify-center rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${
+              row.original.status === "Aktif" ? "bg-sage text-gading" : "bg-navy/10 text-navy/60"
+            }`}
+          >
+            {row.original.status}
+          </span>
+        ),
+      },
+      {
+        id: "aksi",
+        header: () => <div className="text-right">Aksi</div>,
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Buka menu"
+                  className="h-8 w-8 text-navy/50 hover:text-navy hover:bg-navy/10 cursor-pointer"
+                >
+                  <MoreHorizontal className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40 bg-gading border-navy/10 rounded-xl shadow-lg">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelectedShift(row.original);
+                    setFormOpen(true);
+                  }}
+                  className="cursor-pointer font-bold text-navy hover:bg-navy/5 rounded-lg m-1"
+                >
+                  <Edit className="mr-2 h-4 w-4" /> Edit Shift
+                </DropdownMenuItem>
+                {/* Opsi non-aktifkan hanya untuk shift yang masih Aktif */}
+                {row.original.status === "Aktif" && (
+                  <>
+                    <DropdownMenuSeparator className="bg-navy/5" />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedShift(row.original);
+                        setDeleteOpen(true);
+                      }}
+                      className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10 rounded-lg m-1"
+                    >
+                      <ArchiveX className="mr-2 h-4 w-4" /> Non-Aktifkan
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ),
+      },
+    ],
+    [],
+  );
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-[95vw] mx-auto">
@@ -147,7 +248,7 @@ export default function ShiftUtama({
       </div>
 
       {/* 2. FILTER & SEARCH */}
-      <div className="flex flex-col sm:flex-row items-center gap-4 bg-krem p-4 rounded-2xl border border-navy/10 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center gap-4 border-b border-navy/10 pb-4">
         {/* Search */}
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
@@ -156,7 +257,7 @@ export default function ShiftUtama({
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari nama shift..."
             aria-label="Cari nama shift"
-            className="pl-9 h-11 bg-gading border-navy/15 text-navy focus-visible:ring-navy/50 rounded-xl font-medium"
+            className="pl-9 h-11 bg-permukaan border-navy/15 text-navy focus-visible:ring-navy/50 rounded-xl font-medium"
           />
         </div>
 
@@ -168,11 +269,11 @@ export default function ShiftUtama({
           >
             <SelectTrigger
               aria-label="Filter status shift"
-              className="w-full bg-gading text-navy text-sm border-navy/15 focus:ring-navy/50 font-bold h-11 rounded-xl px-4"
+              className="w-full bg-permukaan text-navy text-sm border-navy/15 focus:ring-navy/50 font-bold h-11 rounded-xl px-4"
             >
               <SelectValue placeholder="Semua Status" />
             </SelectTrigger>
-            <SelectContent className="bg-krem border-navy/10 text-navy font-medium rounded-xl">
+            <SelectContent className="bg-gading border-navy/10 text-navy font-medium rounded-xl">
               <SelectItem value="Semua" className="cursor-pointer font-bold">
                 Semua Status
               </SelectItem>
@@ -190,170 +291,27 @@ export default function ShiftUtama({
         </div>
       </div>
 
-      {/* 3. TABEL DATA */}
-      <div className="rounded-2xl border border-navy/10 bg-gading shadow-sm overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            {/* Table Header */}
-            <thead className="bg-[#F8F3EB] border-b border-navy/10">
-              <tr>
-                <th className="p-4 font-bold text-navy/70 uppercase tracking-wider text-xs w-[30%]">
-                  Nama Shift
-                </th>
-                <th className="p-4 font-bold text-navy/70 uppercase tracking-wider text-xs w-[25%]">
-                  Jam Kerja
-                </th>
-                <th className="p-4 font-bold text-navy/70 uppercase tracking-wider text-xs w-[20%]">
-                  Toleransi
-                </th>
-                <th className="p-4 font-bold text-navy/70 uppercase tracking-wider text-xs w-[15%] text-center">
-                  Status
-                </th>
-                <th className="p-4 font-bold text-navy/70 uppercase tracking-wider text-xs w-[10%] text-right">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-
-            {/* Table Body */}
-            <tbody className="divide-y divide-navy/5">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="h-32 text-center align-middle">
-                    <div className="flex flex-col items-center justify-center text-navy/50">
-                      <Loader2 className="h-6 w-6 animate-spin mb-2" />
-                      <span className="text-sm font-bold">
-                        Memuat Data Shift...
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ) : isError ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    role="alert"
-                    className="h-32 text-center align-middle text-red-600 text-sm font-bold"
-                  >
-                    Gagal memuat data shift. Muat ulang halaman untuk mencoba lagi.
-                  </td>
-                </tr>
-              ) : filteredData.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="h-32 text-center align-middle text-navy/50 text-sm font-bold"
-                  >
-                    {dataShift.length === 0
-                      ? "Belum ada master shift."
-                      : "Tidak ada shift yang cocok dengan pencarian atau filter."}
-                  </td>
-                </tr>
-              ) : (
-                filteredData.map((shift) => (
-                  <tr
-                    key={shift.id}
-                    className="hover:bg-navy/2 transition-colors group"
-                  >
-                    {/* Kolom Nama */}
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy/5 text-navy">
-                          <Clock className="h-4 w-4" />
-                        </div>
-                        <span className="font-bold text-navy text-base">
-                          {shift.namaShift}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Kolom Jam Kerja */}
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-navy/80 font-mono tracking-tight text-sm">
-                          {shift.jamMasuk} - {shift.jamPulang}
-                        </span>
-                        {shift.isLintasHari && (
-                          <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
-                            <MoonStar className="h-3 w-3" /> Lintas Hari
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Kolom Toleransi */}
-                    <td className="p-4">
-                      <span className="font-semibold text-navy/60">
-                        {shift.toleransiTerlambat > 0 ? (
-                          <span className="text-navy font-bold">
-                            {shift.toleransiTerlambat} Menit
-                          </span>
-                        ) : (
-                          "Tepat Waktu (0 Menit)"
-                        )}
-                      </span>
-                    </td>
-
-                    {/* Kolom Status */}
-                    <td className="p-4 text-center">
-                      <span
-                        className={`inline-flex items-center justify-center rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${
-                          shift.status === "Aktif"
-                            ? "bg-sage text-gading" // Sage Green
-                            : "bg-navy/10 text-navy/60" // Abu-abu
-                        }`}
-                      >
-                        {shift.status}
-                      </span>
-                    </td>
-
-                    {/* Kolom Aksi */}
-                    <td className="p-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Buka menu" /* [PERBAIKAN] Tambahkan ini agar bisa dibaca Playwright & Screen Reader */
-                            className="h-8 w-8 text-navy/50 hover:text-navy hover:bg-navy/10 cursor-pointer"
-                          >
-                            <MoreHorizontal className="h-5 w-5" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="w-40 bg-gading border-navy/10 rounded-xl shadow-lg"
-                        >
-                          <DropdownMenuItem
-                            onClick={() => handleOpenEdit(shift)}
-                            className="cursor-pointer font-bold text-navy hover:bg-navy/5 rounded-lg m-1"
-                          >
-                            <Edit className="mr-2 h-4 w-4" /> Edit Shift
-                          </DropdownMenuItem>
-
-                          {/* Hanya tampilkan opsi hapus/non-aktif jika statusnya masih Aktif */}
-                          {shift.status === "Aktif" && (
-                            <>
-                              <DropdownMenuSeparator className="bg-navy/5" />
-                              <DropdownMenuItem
-                                onClick={() => handleOpenDelete(shift)}
-                                className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10 rounded-lg m-1"
-                              >
-                                <ArchiveX className="mr-2 h-4 w-4" />{" "}
-                                Non-Aktifkan
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* 3. TABEL DATA: DataTable, kartu per baris (TB1a sampai TB7a); galat menggantikan tabel (TB15a) */}
+      {isError ? (
+        <p
+          role="alert"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+        >
+          Gagal memuat data shift. Muat ulang halaman untuk mencoba lagi.
+        </p>
+      ) : (
+        <DataTable
+          columns={kolom}
+          data={filteredData}
+          loading={isLoading}
+          emptyMessage={
+            dataShift.length === 0
+              ? "Belum ada master shift."
+              : "Tidak ada shift yang cocok dengan pencarian atau filter."
+          }
+          pilihanUkuranKlien={PILIHAN_UKURAN}
+        />
+      )}
 
       {/* 4. DIALOG COMPONENTS */}
       <ShiftFormDialog
