@@ -148,6 +148,8 @@ export const EP = {
     terima: (id: string) => `/transferstok/${id}/terima`,
     batal: (id: string) => `/transferstok/${id}/batal`,
   },
+  /** Ringkasan dashboard gudang (dashboardRoute.js, read-dashboard-gudang). */
+  dashboardGudang: "/dashboard/gudang",
 
   shift: {
     list: "/shift",

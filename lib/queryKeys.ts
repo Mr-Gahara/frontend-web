@@ -89,6 +89,12 @@ export const queryKeys = {
     semua: kunci(["transferStok"] as const),
     daftar: (filter?: Filter) => ["transferStok", "daftar", filter] as const,
     detail: (id: string) => ["transferStok", "detail", id] as const,
+    /**
+     * Ringkasan GET /dashboard/gudang. Diletakkan di bawah akar transferStok
+     * karena web hanya memakai hitungan surat jalannya, sehingga invalidasi
+     * akar transferStok setelah buat, kirim, atau batal ikut memperbaruinya.
+     */
+    ringkasanGudang: () => ["transferStok", "ringkasanGudang"] as const,
   },
 
   // --- Penjualan dan keuangan ---
