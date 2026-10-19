@@ -9,72 +9,50 @@ describe("susunPayloadHitungan", () => {
     c: { qtyPhysical: 0, catatanItem: null },
   };
 
-  describe("selama server belum menerima hitungan kosong", () => {
-    it("hanya mengirim item yang berubah, selalu dengan hitungannya", () => {
-      const hasil = susunPayloadHitungan(
+  it("hanya mengirim item dan field yang berubah", () => {
+    expect(
+      susunPayloadHitungan(
         {
           a: { qtyPhysical: "12", catatanItem: "" },
           b: { qtyPhysical: "10", catatanItem: "  perlu dicek ulang  " },
           c: { qtyPhysical: "0", catatanItem: "" },
         },
         server,
-      );
-      expect(hasil).toEqual({
-        payload: {
-          items: [
-            { itemId: "a", qtyPhysical: 12 },
-            { itemId: "b", qtyPhysical: 10, catatanItem: "perlu dicek ulang" },
-          ],
-        },
-        ditahan: [],
-      });
-    });
-
-    it("menahan item berubah yang hitungannya kosong", () => {
-      const hasil = susunPayloadHitungan(
-        {
-          a: { qtyPhysical: "", catatanItem: "belum sempat" },
-          b: { qtyPhysical: " ", catatanItem: "sudah dihitung" },
-        },
-        server,
-      );
-      expect(hasil).toEqual({ payload: { items: [] }, ditahan: ["a", "b"] });
-    });
-
-    it("mengirim string kosong untuk catatan yang dihapus", () => {
-      expect(
-        susunPayloadHitungan({ b: { qtyPhysical: "10", catatanItem: "   " } }, server).payload.items,
-      ).toEqual([{ itemId: "b", qtyPhysical: 10, catatanItem: "" }]);
-    });
-
-    it("tidak mengirim dan tidak menahan apa pun bila tidak ada perubahan", () => {
-      expect(
-        susunPayloadHitungan({ a: { qtyPhysical: " ", catatanItem: "" } }, server),
-      ).toEqual({ payload: { items: [] }, ditahan: [] });
+      ),
+    ).toEqual({
+      items: [
+        { itemId: "a", qtyPhysical: 12 },
+        { itemId: "b", catatanItem: "perlu dicek ulang" },
+      ],
     });
   });
 
-  describe("setelah server menerima hitungan kosong", () => {
-    it("mengirim null untuk hitungan yang dikosongkan dan hanya field yang berubah", () => {
-      const hasil = susunPayloadHitungan(
+  it("mengirim null untuk hitungan yang dikosongkan (butir 22, B98)", () => {
+    expect(
+      susunPayloadHitungan(
         {
           a: { qtyPhysical: "", catatanItem: "belum sempat" },
           b: { qtyPhysical: " ", catatanItem: "sudah dihitung" },
           c: { qtyPhysical: "0", catatanItem: "" },
         },
         server,
-        true,
-      );
-      expect(hasil).toEqual({
-        payload: {
-          items: [
-            { itemId: "a", catatanItem: "belum sempat" },
-            { itemId: "b", qtyPhysical: null },
-          ],
-        },
-        ditahan: [],
-      });
+      ),
+    ).toEqual({
+      items: [
+        { itemId: "a", catatanItem: "belum sempat" },
+        { itemId: "b", qtyPhysical: null },
+      ],
     });
+  });
+
+  it("mengirim string kosong untuk catatan yang dihapus", () => {
+    expect(susunPayloadHitungan({ b: { qtyPhysical: "10", catatanItem: "   " } }, server).items).toEqual([
+      { itemId: "b", catatanItem: "" },
+    ]);
+  });
+
+  it("tidak mengirim apa pun bila tidak ada perubahan", () => {
+    expect(susunPayloadHitungan({ a: { qtyPhysical: " ", catatanItem: "" } }, server)).toEqual({ items: [] });
   });
 });
 

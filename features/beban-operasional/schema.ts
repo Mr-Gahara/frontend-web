@@ -10,8 +10,8 @@ const keterangan = z
  * Skema form catat beban (keputusan BO3a dan BO5a). Jumlah disimpan sebagai
  * teks agar isian kosong tetap kosong; yang sah hanya bilangan bulat minimal
  * 1, sesuai validator backend. Tanggal berupa YYYY-MM-DD hari lokal dan tidak
- * boleh melewati hari ini; backend belum membatasinya. Keterangan paling
- * panjang 500, sejalan alasan VOID; backend belum membatasi panjangnya.
+ * boleh melewati hari ini, dan keterangan paling panjang 500; keduanya sama
+ * dengan validator backend sejak B100 (kontrak/temuan.md butir 137).
  */
 export function buatSkemaCatatBeban(hariIni: string) {
   return z.object({

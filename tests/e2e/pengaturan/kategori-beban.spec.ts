@@ -118,7 +118,7 @@ test.describe("kategori beban", () => {
     );
     await dialog.getByRole("button", { name: "Simpan" }).click();
     const buat = await tBuat;
-    expect([400, 409], "nama kembar ditolak").toContain(buat.status());
+    expect(buat.status(), "nama kembar ditolak 409 (B99)").toBe(409);
     const pesan = ((await buat.json()) as { message: string }).message;
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole("alert")).toHaveText(pesan);

@@ -176,21 +176,11 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
   });
 
   const simpanHitungan = () => {
-    const { payload, ditahan } = susunPayloadHitungan(
-      editedItems,
-      petakanNilaiServer(opname?.items ?? []),
-    );
-    if (ditahan.length > 0) {
-      toast.warning("Sebagian perubahan tidak disimpan", {
-        description: `${ditahan.length} item dengan hitungan kosong tidak dikirim karena server belum menerima hitungan kosong. Isi angkanya untuk menyimpan item itu.`,
-      });
-    }
+    const payload = susunPayloadHitungan(editedItems, petakanNilaiServer(opname?.items ?? []));
     if (payload.items.length === 0) {
-      if (ditahan.length === 0) {
-        toast.info("Tidak ada perubahan", {
-          description: "Tidak ada perubahan untuk disimpan.",
-        });
-      }
+      toast.info("Tidak ada perubahan", {
+        description: "Tidak ada perubahan untuk disimpan.",
+      });
       return;
     }
     saveItemsMutation.mutate(payload);
