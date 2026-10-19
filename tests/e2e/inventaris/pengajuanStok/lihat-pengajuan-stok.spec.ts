@@ -316,6 +316,26 @@ test.describe("Daftar pengajuan stok gudang", () => {
     await expect(page.getByRole("button", { name: "Buat Surat Jalan" })).toBeVisible();
   });
 
+  test("?tab=perlu-surat-jalan membuka tab itu; klik tab menulis ?tab=, tab bawaan menghapusnya", async ({ page }) => {
+    await buka(page, `${URL_GUDANG}?tab=perlu-surat-jalan`, null);
+    await expect(page.getByRole("button", { name: "PERLU SURAT JALAN", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("button", { name: "Semua", exact: true }).click();
+    await expect(page).toHaveURL(`${URL_GUDANG}?tab=semua`);
+    await expect(page.getByRole("button", { name: "Semua", exact: true })).toHaveAttribute("aria-pressed", "true");
+    const tunggu = page.waitForResponse(daftarPengajuan("SUBMITTED"));
+    await page.getByRole("button", { name: "PERLU TINJAUAN", exact: true }).click();
+    await tunggu;
+    await expect(page).toHaveURL(URL_GUDANG);
+  });
+
+  test("?tab= yang tidak dikenal kembali ke tab bawaan tanpa menampilkan nilainya", async ({ page }) => {
+    const nilai = "<b>ujitab</b>__proto__";
+    await buka(page, `${URL_GUDANG}?tab=${encodeURIComponent(nilai)}`, "SUBMITTED");
+    await expect(page.getByRole("button", { name: "PERLU TINJAUAN", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByText("ujitab")).toHaveCount(0);
+    await expect(page.locator("b", { hasText: "ujitab" })).toHaveCount(0);
+  });
+
   test("pencarian nama outlet peminta menyaring baris", async ({ page }) => {
     const data = (await bukaSemua(page)).filter(diGudang);
     const contoh = data.find((p) => p.keLokasi?.nama);

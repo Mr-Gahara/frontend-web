@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { Suspense, useMemo, useState, type ReactNode } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -12,6 +12,7 @@ import { useDaftarPengajuanStok } from "./hooks";
 import { cocokTab, saringPengajuan, statusServerTab } from "./filter";
 import { tabTerlihat, type TabPengajuan } from "./izin";
 import { tahapPengajuan, type TahapPengajuan } from "./tahap";
+import { SLUG_TAB_PENGAJUAN } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useTabUrl } from "@/hooks/use-tab-url";
 
 // --- Helpers ---
 const formatTanggal = (iso: string | null) => {
@@ -123,7 +125,7 @@ interface Props {
   penghalang?: ReactNode;
 }
 
-export default function HalamanDaftarPengajuanStok({
+function IsiDaftarPengajuanStok({
   ruang,
   lingkup,
   memuatLingkup = false,
@@ -140,7 +142,8 @@ export default function HalamanDaftarPengajuanStok({
   // --- States ---
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
-  const [activeTab, setActiveTab] = useState<TabPengajuan>(teks.tabBawaan);
+  // Tab dari ?tab= (lib/tab-url.ts); tab yang disembunyikan izin tidak dapat dibuka lewat URL.
+  const [activeTab, setActiveTab] = useTabUrl(SLUG_TAB_PENGAJUAN[ruang], tabTampil, teks.tabBawaan);
 
   // --- Queries ---
   // Lingkup null berarti cakupan lokasi belum siap: belum ada permintaan.
@@ -285,6 +288,7 @@ export default function HalamanDaftarPengajuanStok({
               key={tab}
               variant="ghost"
               size="sm"
+              aria-pressed={activeTab === tab}
               onClick={() => setActiveTab(tab)}
               className={`rounded-full px-4 font-bold transition-all text-xs ${
                 activeTab === tab
@@ -329,5 +333,14 @@ export default function HalamanDaftarPengajuanStok({
         />
       )}
     </div>
+  );
+}
+
+/** useSearchParams membutuhkan batas Suspense agar halaman tetap dapat dirender statis. */
+export default function HalamanDaftarPengajuanStok(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <IsiDaftarPengajuanStok {...props} />
+    </Suspense>
   );
 }

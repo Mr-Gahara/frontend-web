@@ -1,15 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useTabUrl } from "@/hooks/use-tab-url";
 import type { StatusTransfer, TransferStok } from "@/types/transferStok";
 import { useDaftarTransferStok } from "./hooks";
 import { filterServerTransfer, saringTransfer, type TabTransfer } from "./filter";
-import { LABEL_TAB_TRANSFER, TAB_TRANSFER } from "./tampilan";
+import { LABEL_TAB_TRANSFER, SLUG_TAB_TRANSFER, TAB_TRANSFER } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,13 +76,14 @@ const getStatusBadge = (status: StatusTransfer) => {
  * Daftar surat jalan di ruang gudang. Tab disaring server lewat query status
  * (kontrak/temuan.md butir 33).
  */
-export default function HalamanDaftarTransfer() {
+function IsiDaftarTransfer() {
   const router = useRouter();
 
   // --- States ---
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
-  const [activeTab, setActiveTab] = useState<TabTransfer>("ALL");
+  // Tab dari ?tab= (lib/tab-url.ts), misalnya tautan "Kirim sekarang" dari dashboard gudang.
+  const [activeTab, setActiveTab] = useTabUrl<TabTransfer>(SLUG_TAB_TRANSFER, TAB_TRANSFER, "ALL");
 
   // --- Queries ---
   // Status disaring server; pencarian disaring di klien lewat saringTransfer
@@ -194,6 +196,7 @@ export default function HalamanDaftarTransfer() {
                 key={tab}
                 variant="ghost"
                 size="sm"
+                aria-pressed={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
                 className={`rounded-full px-4 font-bold transition-all text-xs ${
                   activeTab === tab
@@ -236,5 +239,14 @@ export default function HalamanDaftarTransfer() {
         />
       )}
     </div>
+  );
+}
+
+/** useSearchParams membutuhkan batas Suspense agar halaman tetap dapat dirender statis. */
+export default function HalamanDaftarTransfer() {
+  return (
+    <Suspense fallback={null}>
+      <IsiDaftarTransfer />
+    </Suspense>
   );
 }

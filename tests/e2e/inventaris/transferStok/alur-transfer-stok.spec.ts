@@ -129,6 +129,22 @@ test.describe("Alur surat jalan gudang", () => {
     }
   });
 
+  test("?tab=draf membuka tab DRAFT SJ dengan status PENDING; klik tab menulis ?tab=, tab bawaan menghapusnya", async ({ page }) => {
+    const berstatus = (status: string) => (r: import("@playwright/test").Response) =>
+      r.request().method() === "GET" && POLA_DAFTAR.test(r.url()) && new URL(r.url()).searchParams.get("status") === status;
+    const tDraf = page.waitForResponse(berstatus("PENDING"));
+    await page.goto(`${URL_DAFTAR}?tab=draf`, { waitUntil: "commit" });
+    expect((await tDraf).status()).toBe(200);
+    await expect(page.getByRole("button", { name: "DRAFT SJ", exact: true })).toHaveAttribute("aria-pressed", "true");
+    const tDikirim = page.waitForResponse(berstatus("DIKIRIM"));
+    await page.getByRole("button", { name: "SEDANG DIKIRIM", exact: true }).click();
+    await tDikirim;
+    await expect(page).toHaveURL(`${URL_DAFTAR}?tab=dikirim`);
+    await page.getByRole("button", { name: "Semua Status", exact: true }).click();
+    await expect(page).toHaveURL(URL_DAFTAR);
+    await expect(page.getByRole("button", { name: "Semua Status", exact: true })).toHaveAttribute("aria-pressed", "true");
+  });
+
   test("daftar yang gagal dimuat menampilkan pesan galat, bukan tabel kosong", async ({ page }) => {
     // Setiap GET daftar dijawab 500; React Query mengulang sekali (retry 1).
     await page.route(POLA_DAFTAR, (route) => route.fulfill(JAWAB_GAGAL));
