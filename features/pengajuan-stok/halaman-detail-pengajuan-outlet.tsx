@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { isNotFound, pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
-import type { StatusPengajuan } from "@/types/pengajuanStok";
+import { tahapPengajuan, type TahapPengajuan } from "./tahap";
 import { useAjukanPengajuan, usePengajuanStok } from "./hooks";
 import { bolehUbahPengajuan } from "./izin";
 import { formatTanggalPengajuan } from "./tampilan";
@@ -38,8 +38,8 @@ import {
 
 const URL_DAFTAR = "/dashboard/outlet/inventaris/pengajuanStok";
 
-function badgeStatus(status: StatusPengajuan) {
-  switch (status) {
+function badgeTahap(tahap: TahapPengajuan) {
+  switch (tahap) {
     case "DRAFT":
       return (
         <Badge className="bg-slate-200 text-slate-700 border-none font-bold text-sm px-4 py-1">
@@ -47,16 +47,21 @@ function badgeStatus(status: StatusPengajuan) {
         </Badge>
       );
     case "SUBMITTED":
-    case "PENDING":
       return (
         <Badge className="bg-amber-100 text-amber-700 border-none font-bold text-sm px-4 py-1">
           <Clock className="w-4 h-4 mr-1.5" /> Menunggu Persetujuan Gudang
         </Badge>
       );
-    case "APPROVED":
+    case "PERLU_SURAT_JALAN":
       return (
         <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-sm px-4 py-1">
           <CheckCircle2 className="w-4 h-4 mr-1.5" /> Telah Disetujui
+        </Badge>
+      );
+    case "SURAT_JALAN_DIBUAT":
+      return (
+        <Badge className="bg-indigo-100 text-indigo-700 border-none font-bold text-sm px-4 py-1">
+          Surat Jalan Dibuat
         </Badge>
       );
     case "COMPLETED":
@@ -72,7 +77,7 @@ function badgeStatus(status: StatusPengajuan) {
         </Badge>
       );
     default:
-      return <Badge variant="outline">{status}</Badge>;
+      return <Badge variant="outline">{tahap}</Badge>;
   }
 }
 
@@ -152,7 +157,7 @@ export default function HalamanDetailPengajuanOutlet() {
           </div>
         </div>
         <div className="flex flex-col items-start md:items-end gap-2">
-          {badgeStatus(detail.status)}
+          {badgeTahap(tahapPengajuan(detail))}
         </div>
       </div>
 

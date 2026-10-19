@@ -1,5 +1,7 @@
-import type { PengajuanStok } from "@/types/pengajuanStok";
+import type { PengajuanStok, StatusPengajuan } from "@/types/pengajuanStok";
 import { arahPengajuanValid } from "./arah";
+import { statusDicakupTab, type TabPengajuan } from "./izin";
+import { tahapPengajuan } from "./tahap";
 
 export type RuangPengajuan = "outlet" | "gudang";
 
@@ -20,4 +22,20 @@ export function saringPengajuan(data: PengajuanStok[], ruang: RuangPengajuan, ka
     if (p.status === "DRAFT") return false;
     return !cari || cocokNomor || (p.keLokasi?.nama ?? "").toLowerCase().includes(cari);
   });
+}
+
+/**
+ * Status yang dikirim ke server untuk sebuah tab. Tab Semua dan tab gabungan
+ * meminta tanpa status, karena backend hanya menerima satu status.
+ */
+export function statusServerTab(tab: TabPengajuan): StatusPengajuan | undefined {
+  const status = statusDicakupTab(tab);
+  return status?.length === 1 ? status[0] : undefined;
+}
+
+/** Penyaringan tab di klien, pelengkap statusServerTab. */
+export function cocokTab(p: PengajuanStok, tab: TabPengajuan): boolean {
+  if (tab === "PERLU_SURAT_JALAN") return tahapPengajuan(p) === "PERLU_SURAT_JALAN";
+  const status = statusDicakupTab(tab);
+  return !status || status.includes(p.status);
 }

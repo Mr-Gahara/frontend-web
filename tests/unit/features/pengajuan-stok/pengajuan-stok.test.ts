@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { PengajuanStok } from "@/types/pengajuanStok";
-import { saringPengajuan } from "@/features/pengajuan-stok/filter";
+import { cocokTab, saringPengajuan, statusServerTab } from "@/features/pengajuan-stok/filter";
+import { tahapPengajuan } from "@/features/pengajuan-stok/tahap";
 import { arahPengajuanValid } from "@/features/pengajuan-stok/arah";
 import {
   bolehBuatSuratJalan,
@@ -158,5 +159,59 @@ describe("tabTerlihat", () => {
   it("pemegang izin setujui, atau tanpa izin transfer, melihat semua tab", () => {
     expect(tabTerlihat(TAB, ["create-transfer-stok", "approve-pengajuan-stok"])).toEqual([...TAB]);
     expect(tabTerlihat(TAB, ["read-pengajuan-stok"])).toEqual([...TAB]);
+  });
+
+  it("tab gabungan tampil bila salah satu statusnya boleh dilihat", () => {
+    const GUDANG = ["SUBMITTED", "PERLU_SURAT_JALAN", "COMPLETED", "REJECTED", "ALL"] as const;
+    expect(tabTerlihat(GUDANG, ["create-transfer-stok"])).toEqual(["SUBMITTED", "PERLU_SURAT_JALAN", "COMPLETED", "ALL"]);
+    expect(tabTerlihat(["ALL", "DISETUJUI"], ["create-transfer-stok"])).toEqual(["ALL", "DISETUJUI"]);
+  });
+});
+
+describe("tahapPengajuan", () => {
+  it("APPROVED dan PENDING tanpa surat jalan perlu surat jalan", () => {
+    expect(tahapPengajuan({ status: "APPROVED", transferStokID: null })).toBe("PERLU_SURAT_JALAN");
+    expect(tahapPengajuan({ status: "PENDING", transferStokID: null })).toBe("PERLU_SURAT_JALAN");
+  });
+
+  it("APPROVED dan PENDING yang punya surat jalan sudah dibuatkan surat jalan", () => {
+    expect(tahapPengajuan({ status: "APPROVED", transferStokID: "SJ-1" })).toBe("SURAT_JALAN_DIBUAT");
+    expect(tahapPengajuan({ status: "PENDING", transferStokID: "SJ-2" })).toBe("SURAT_JALAN_DIBUAT");
+  });
+
+  it("status lain menjadi tahapnya sendiri", () => {
+    for (const status of ["DRAFT", "SUBMITTED", "COMPLETED", "REJECTED"] as const) {
+      expect(tahapPengajuan({ status, transferStokID: null })).toBe(status);
+    }
+  });
+});
+
+describe("tab pengajuan", () => {
+  const denganSuratJalan = (p: PengajuanStok): PengajuanStok => ({ ...p, transferStokID: "SJ-" + p.id });
+  const disetujui = pengajuan("REQ-010", "APPROVED", "Outlet Kota", "Gudang", "Outlet");
+  const dibatalkan = pengajuan("REQ-011", "PENDING", "Outlet Kota", "Gudang", "Outlet");
+  const disetujuiBerSJ = denganSuratJalan(pengajuan("REQ-012", "APPROVED", "Outlet Kota", "Gudang", "Outlet"));
+  const dibatalkanBerSJ = denganSuratJalan(pengajuan("REQ-013", "PENDING", "Outlet Kota", "Gudang", "Outlet"));
+  const diajukan = pengajuan("REQ-014", "SUBMITTED", "Outlet Kota", "Gudang", "Outlet");
+  const SEMUA = [disetujui, dibatalkan, disetujuiBerSJ, dibatalkanBerSJ, diajukan];
+
+  it("tab satu status mengirim statusnya; tab Semua dan tab gabungan tanpa status", () => {
+    expect(statusServerTab("SUBMITTED")).toBe("SUBMITTED");
+    expect(statusServerTab("ALL")).toBeUndefined();
+    expect(statusServerTab("DISETUJUI")).toBeUndefined();
+    expect(statusServerTab("PERLU_SURAT_JALAN")).toBeUndefined();
+  });
+
+  it("PERLU_SURAT_JALAN: APPROVED dan PENDING yang belum punya surat jalan", () => {
+    expect(SEMUA.filter((p) => cocokTab(p, "PERLU_SURAT_JALAN"))).toEqual([disetujui, dibatalkan]);
+  });
+
+  it("DISETUJUI: APPROVED dan PENDING, dengan atau tanpa surat jalan", () => {
+    expect(SEMUA.filter((p) => cocokTab(p, "DISETUJUI"))).toEqual([disetujui, dibatalkan, disetujuiBerSJ, dibatalkanBerSJ]);
+  });
+
+  it("tab satu status hanya statusnya, tab Semua seluruhnya", () => {
+    expect(SEMUA.filter((p) => cocokTab(p, "SUBMITTED"))).toEqual([diajukan]);
+    expect(SEMUA.filter((p) => cocokTab(p, "ALL"))).toEqual(SEMUA);
   });
 });

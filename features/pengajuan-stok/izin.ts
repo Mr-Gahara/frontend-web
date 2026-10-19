@@ -1,7 +1,32 @@
 import { IZIN } from "@/lib/auth/permissions";
 import type { StatusPengajuan } from "@/types/pengajuanStok";
 
-export type TabPengajuan = StatusPengajuan | "ALL";
+/**
+ * Tab yang mencakup lebih dari satu status. Backend hanya menerima satu
+ * status per permintaan (pengajuanStokService.getAll baris 97 sampai 100),
+ * sehingga tab ini meminta tanpa status lalu disaring di klien
+ * (filter.ts, cocokTab).
+ * - DISETUJUI (outlet): APPROVED dan PENDING, dengan atau tanpa surat jalan.
+ * - PERLU_SURAT_JALAN (gudang): APPROVED dan PENDING yang belum punya surat
+ *   jalan (tahap.ts).
+ */
+export const STATUS_TAB_GABUNGAN = {
+  DISETUJUI: ["APPROVED", "PENDING"],
+  PERLU_SURAT_JALAN: ["APPROVED", "PENDING"],
+} as const satisfies Record<string, readonly StatusPengajuan[]>;
+
+export type TabGabungan = keyof typeof STATUS_TAB_GABUNGAN;
+export type TabPengajuan = StatusPengajuan | "ALL" | TabGabungan;
+
+function tabGabungan(tab: TabPengajuan): tab is TabGabungan {
+  return Object.hasOwn(STATUS_TAB_GABUNGAN, tab);
+}
+
+/** Status yang dicakup tab, atau null untuk tab Semua. */
+export function statusDicakupTab(tab: TabPengajuan): readonly StatusPengajuan[] | null {
+  if (tab === "ALL") return null;
+  return tabGabungan(tab) ? STATUS_TAB_GABUNGAN[tab] : [tab];
+}
 
 /**
  * Cermin aturan backend pengajuanStokService.getAll (baris 30 sampai 47):
@@ -19,10 +44,13 @@ export function statusTerlihat(permissions: readonly string[]): readonly StatusP
   return !bolehSetujui && bolehTransfer ? STATUS_PETUGAS_TRANSFER : null;
 }
 
-/** Tab yang ditampilkan: "ALL" selalu, status lain hanya bila boleh dilihat. */
+/** Tab yang ditampilkan: "ALL" selalu, tab lain bila salah satu statusnya boleh dilihat. */
 export function tabTerlihat(tab: readonly TabPengajuan[], permissions: readonly string[]): TabPengajuan[] {
   const terlihat = statusTerlihat(permissions);
-  return tab.filter((t) => t === "ALL" || !terlihat || terlihat.includes(t));
+  return tab.filter((t) => {
+    const status = statusDicakupTab(t);
+    return !status || !terlihat || status.some((s) => terlihat.includes(s));
+  });
 }
 
 /** Revisi draft dan ajukan memakai izin yang sama (route PUT dan PATCH submit). */

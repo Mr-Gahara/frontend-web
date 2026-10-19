@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { isNotFound, pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
-import type { StatusPengajuan } from "@/types/pengajuanStok";
+import { tahapPengajuan, type TahapPengajuan } from "./tahap";
 import { useBuatSuratJalan } from "@/features/transfer-stok/hooks";
 import { usePengajuanStok, useSetujuiPengajuan, useTolakPengajuan } from "./hooks";
 import { arahPengajuanValid } from "./arah";
@@ -53,19 +53,24 @@ import {
 const URL_DAFTAR = "/dashboard/gudang/pengajuanStok";
 const URL_TRANSFER = "/dashboard/gudang/transferStok";
 
-function badgeStatus(status: StatusPengajuan) {
-  switch (status) {
+function badgeTahap(tahap: TahapPengajuan) {
+  switch (tahap) {
     case "SUBMITTED":
-    case "PENDING":
       return (
         <Badge className="bg-amber-100 text-amber-700 border-none font-bold text-sm px-4 py-1">
           <Clock className="w-4 h-4 mr-1.5" /> Perlu Tinjauan
         </Badge>
       );
-    case "APPROVED":
+    case "PERLU_SURAT_JALAN":
       return (
         <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-sm px-4 py-1">
-          <CheckCircle2 className="w-4 h-4 mr-1.5" /> Siap Dikirim
+          <CheckCircle2 className="w-4 h-4 mr-1.5" /> Perlu Surat Jalan
+        </Badge>
+      );
+    case "SURAT_JALAN_DIBUAT":
+      return (
+        <Badge className="bg-indigo-100 text-indigo-700 border-none font-bold text-sm px-4 py-1">
+          Surat Jalan Dibuat
         </Badge>
       );
     case "COMPLETED":
@@ -81,7 +86,7 @@ function badgeStatus(status: StatusPengajuan) {
         </Badge>
       );
     default:
-      return <Badge variant="outline">{status}</Badge>;
+      return <Badge variant="outline">{tahap}</Badge>;
   }
 }
 
@@ -162,8 +167,10 @@ export default function HalamanDetailPengajuanGudang() {
     );
   }
 
+  const tahap = tahapPengajuan(detail);
   const isSubmitted = detail.status === "SUBMITTED";
-  const isApproved = detail.status === "APPROVED";
+  // APPROVED, atau PENDING karena surat jalan sebelumnya dibatalkan, yang belum punya surat jalan (tahap.ts).
+  const perluSuratJalan = tahap === "PERLU_SURAT_JALAN";
   const hasSuratJalan = !!detail.transferStokID;
   const arahValid = arahPengajuanValid(detail);
   const isStockInsufficient = detail.items.some(
@@ -171,7 +178,7 @@ export default function HalamanDetailPengajuanGudang() {
   );
   // Status menentukan tahap; izin menentukan siapa yang boleh bertindak (butir 14).
   const panelTinjau = isSubmitted && (bolehSetujui || bolehTolak);
-  const panelSuratJalan = isApproved && !hasSuratJalan && bolehSuratJalan;
+  const panelSuratJalan = perluSuratJalan && bolehSuratJalan;
 
   return (
     <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-5xl mx-auto">
@@ -201,7 +208,7 @@ export default function HalamanDetailPengajuanGudang() {
           </div>
         </div>
         <div className="flex flex-col items-start md:items-end gap-2">
-          {badgeStatus(detail.status)}
+          {badgeTahap(tahap)}
         </div>
       </div>
 
@@ -339,7 +346,7 @@ export default function HalamanDetailPengajuanGudang() {
             </div>
           </div>
 
-          {!arahValid && (isSubmitted || (isApproved && !hasSuratJalan)) && (
+          {!arahValid && (isSubmitted || perluSuratJalan) && (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 flex items-start gap-2">
               <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
               <p className="text-xs font-medium text-rose-700 leading-snug">
@@ -393,7 +400,7 @@ export default function HalamanDetailPengajuanGudang() {
             </div>
           )}
 
-          {/* ACTION BUTTONS: APPROVED tanpa surat jalan, dan pemegang create-transfer-stok */}
+          {/* ACTION BUTTONS: APPROVED atau PENDING tanpa surat jalan, dan pemegang create-transfer-stok */}
           {panelSuratJalan && (
             <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6 shadow-sm flex flex-col gap-3">
               <h3 className="text-sm font-bold text-blue-900 text-center mb-1">

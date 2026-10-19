@@ -5,12 +5,13 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
-import type { PengajuanStok, StatusPengajuan } from "@/types/pengajuanStok";
+import type { PengajuanStok } from "@/types/pengajuanStok";
 import type { LingkupLokasi } from "@/features/inventaris/cakupan";
 import { useSession } from "@/lib/auth/useSession";
 import { useDaftarPengajuanStok } from "./hooks";
-import { saringPengajuan } from "./filter";
+import { cocokTab, saringPengajuan, statusServerTab } from "./filter";
 import { tabTerlihat, type TabPengajuan } from "./izin";
+import { tahapPengajuan, type TahapPengajuan } from "./tahap";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,15 +40,16 @@ const formatTanggal = (iso: string | null) => {
   return format(new Date(iso), "dd MMM yyyy, HH:mm", { locale: localeID });
 };
 
-const getStatusBadge = (status: StatusPengajuan, label: string) => {
-  switch (status) {
+const getStatusBadge = (tahap: TahapPengajuan, label: string) => {
+  switch (tahap) {
     case "DRAFT":
       return <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 border-none font-bold">{label}</Badge>;
     case "SUBMITTED":
-    case "PENDING":
       return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-none font-bold"><Clock className="w-3 h-3 mr-1" /> {label}</Badge>;
-    case "APPROVED":
+    case "PERLU_SURAT_JALAN":
       return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none font-bold"><CheckCircle2 className="w-3 h-3 mr-1" /> {label}</Badge>;
+    case "SURAT_JALAN_DIBUAT":
+      return <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border-none font-bold">{label}</Badge>;
     case "COMPLETED":
       return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-none font-bold">{label}</Badge>;
     case "REJECTED":
@@ -68,7 +70,8 @@ interface TeksRuang {
   tab: readonly TabPengajuan[];
   tabBawaan: TabPengajuan;
   labelTab: Partial<Record<TabPengajuan, string>>;
-  labelStatus: Partial<Record<StatusPengajuan, string>>;
+  /** Label per tahap (tahap.ts), bukan per status: tahap membedakan ada tidaknya surat jalan. */
+  labelStatus: Partial<Record<TahapPengajuan, string>>;
   placeholderCari: string;
   kolomInfo: string;
   kolomLokasi: string;
@@ -82,10 +85,10 @@ const TEKS: Record<"outlet" | "gudang", TeksRuang> = {
     deskripsi: "Kelola permintaan suplai bahan baku dan barang jadi ke Gudang Pusat.",
     urlDaftar: "/dashboard/outlet/inventaris/pengajuanStok",
     urlBuat: "/dashboard/outlet/inventaris/pengajuanStok/buatPengajuan",
-    tab: ["ALL", "DRAFT", "SUBMITTED", "APPROVED", "REJECTED", "COMPLETED"],
+    tab: ["ALL", "DRAFT", "SUBMITTED", "DISETUJUI", "REJECTED", "COMPLETED"],
     tabBawaan: "ALL",
-    labelTab: { ALL: "Semua Status", SUBMITTED: "MENUNGGU" },
-    labelStatus: { DRAFT: "Draft", SUBMITTED: "Menunggu", PENDING: "Menunggu", APPROVED: "Disetujui", COMPLETED: "Selesai", REJECTED: "Ditolak" },
+    labelTab: { ALL: "Semua Status", SUBMITTED: "MENUNGGU", DISETUJUI: "DISETUJUI" },
+    labelStatus: { DRAFT: "Draft", SUBMITTED: "Menunggu", PERLU_SURAT_JALAN: "Disetujui", SURAT_JALAN_DIBUAT: "Surat Jalan Dibuat", COMPLETED: "Selesai", REJECTED: "Ditolak" },
     placeholderCari: "Cari No. Pengajuan...",
     kolomInfo: "Informasi Pengajuan",
     kolomLokasi: "Gudang Asal",
@@ -97,10 +100,10 @@ const TEKS: Record<"outlet" | "gudang", TeksRuang> = {
     deskripsi: "Tinjau dan proses permintaan pasokan barang dari berbagai Outlet.",
     urlDaftar: "/dashboard/gudang/pengajuanStok",
     urlBuat: null,
-    tab: ["SUBMITTED", "APPROVED", "COMPLETED", "REJECTED", "ALL"],
+    tab: ["SUBMITTED", "PERLU_SURAT_JALAN", "COMPLETED", "REJECTED", "ALL"],
     tabBawaan: "SUBMITTED",
-    labelTab: { ALL: "Semua", SUBMITTED: "PERLU TINJAUAN" },
-    labelStatus: { SUBMITTED: "Perlu Tinjauan", PENDING: "Perlu Tinjauan", APPROVED: "Siap Dikirim", COMPLETED: "Selesai", REJECTED: "Ditolak" },
+    labelTab: { ALL: "Semua", SUBMITTED: "PERLU TINJAUAN", PERLU_SURAT_JALAN: "PERLU SURAT JALAN" },
+    labelStatus: { SUBMITTED: "Perlu Tinjauan", PERLU_SURAT_JALAN: "Perlu Surat Jalan", SURAT_JALAN_DIBUAT: "Surat Jalan Dibuat", COMPLETED: "Selesai", REJECTED: "Ditolak" },
     placeholderCari: "Cari No. Pengajuan / Outlet...",
     kolomInfo: "Nomor & Tanggal",
     kolomLokasi: "Outlet Peminta",
@@ -147,13 +150,16 @@ export default function HalamanDaftarPengajuanStok({
     isError,
   } = useDaftarPengajuanStok(
     lingkup
-      ? { status: activeTab !== "ALL" ? activeTab : undefined, locationID: lingkup.locationID }
+      ? { status: statusServerTab(activeTab), locationID: lingkup.locationID }
       : null,
   );
   const isLoading = memuatLingkup || memuatDaftar;
 
-  // Penyaringan per ruang (tipe lokasi, draf, pencarian): features/pengajuan-stok/filter.ts
-  const filteredData = saringPengajuan(daftarPengajuan, ruang, debouncedSearch);
+  // Penyaringan per ruang (tipe lokasi, draf, pencarian) dan per tab (tab gabungan
+  // meminta tanpa status): features/pengajuan-stok/filter.ts
+  const filteredData = saringPengajuan(daftarPengajuan, ruang, debouncedSearch).filter((p) =>
+    cocokTab(p, activeTab),
+  );
 
   // Aksi baris di menu titik tiga (TB7a, P-A): langsung membuka halaman detail.
   const kolom = useMemo<ColumnDef<PengajuanStok>[]>(
@@ -201,8 +207,10 @@ export default function HalamanDaftarPengajuanStok({
       {
         id: "status",
         header: "Status",
-        cell: ({ row }) =>
-          getStatusBadge(row.original.status, teks.labelStatus[row.original.status] ?? row.original.status),
+        cell: ({ row }) => {
+          const tahap = tahapPengajuan(row.original);
+          return getStatusBadge(tahap, teks.labelStatus[tahap] ?? row.original.status);
+        },
       },
       {
         id: "aksi",

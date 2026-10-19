@@ -12,6 +12,8 @@ type PengajuanMentah = {
   status: string;
   dariLokasi: { id?: string; nama?: string; tipe?: string } | null;
   keLokasi: { id?: string; nama?: string; tipe?: string } | null;
+  /** Kosong atau tidak ada setelah surat jalan dibatalkan (transferStokService $unset). */
+  transferStokID?: unknown;
 };
 
 // ============================================================
@@ -73,6 +75,20 @@ const arahBenar = (p: PengajuanMentah) => p.dariLokasi?.tipe === "Gudang" && p.k
 const diOutlet = (p: PengajuanMentah) => arahBenar(p);
 // Ruang gudang: tanpa draf, karena draf tidak pernah tampil (keputusan produk).
 const diGudang = (p: PengajuanMentah) => arahBenar(p) && p.status !== "DRAFT";
+// Disetujui: APPROVED, atau PENDING karena surat jalannya dibatalkan (features/pengajuan-stok/tahap.ts).
+const disetujui = (p: PengajuanMentah) => p.status === "APPROVED" || p.status === "PENDING";
+const perluSuratJalan = (p: PengajuanMentah) => disetujui(p) && !p.transferStokID;
+
+/** Catat permintaan daftar pengajuan yang membawa parameter status. */
+function catatPermintaanBerstatus(page: Page): string[] {
+  const status: string[] = [];
+  page.on("request", (r) => {
+    if (r.method() !== "GET" || !/\/api\/pengajuanstok(\?|$)/i.test(r.url())) return;
+    const s = new URL(r.url()).searchParams.get("status");
+    if (s) status.push(s);
+  });
+  return status;
+}
 
 // ============================================================
 // OUTLET
@@ -98,6 +114,15 @@ test.describe("Daftar pengajuan stok outlet", () => {
     const data = await isiRespons(await tunggu);
     expect(data.every((p) => p.status === "SUBMITTED")).toBe(true);
     await periksaJumlahBaris(page, data.filter(diOutlet).length, KOSONG);
+  });
+
+  test("tab DISETUJUI: tanpa filter status, APPROVED dan PENDING berlabel Disetujui", async ({ page }) => {
+    const data = await buka(page, URL_OUTLET, null);
+    const berstatus = catatPermintaanBerstatus(page);
+    await page.getByRole("button", { name: "DISETUJUI", exact: true }).click();
+    await periksaJumlahBaris(page, data.filter((p) => diOutlet(p) && disetujui(p)).length, KOSONG);
+    await expect(page.locator("table tbody tr", { hasText: "Menunggu" })).toHaveCount(0);
+    expect(berstatus).toEqual([]);
   });
 
   test("pencarian nomor pengajuan menyaring baris", async ({ page }) => {
@@ -257,6 +282,38 @@ test.describe("Daftar pengajuan stok gudang", () => {
     for (const draf of data.filter((p) => p.status === "DRAFT")) {
       await expect(page.locator("table tbody tr", { hasText: draf.nomorPengajuan })).toHaveCount(0);
     }
+  });
+
+  test("tab PERLU SURAT JALAN: tanpa filter status, hanya pengajuan disetujui yang belum punya surat jalan", async ({ page }) => {
+    await buka(page, URL_GUDANG, "SUBMITTED");
+    const tunggu = page.waitForResponse(daftarPengajuan(null));
+    await page.getByRole("button", { name: "PERLU SURAT JALAN", exact: true }).click();
+    const data = await isiRespons(await tunggu);
+    const perlu = data.filter((p) => diGudang(p) && perluSuratJalan(p));
+    await periksaJumlahBaris(page, perlu.length, KOSONG);
+    if (perlu.length > 0) {
+      await expect(page.locator("table tbody tr").filter({ hasNotText: "Perlu Surat Jalan" })).toHaveCount(0);
+    }
+  });
+
+  test("detail pengajuan PENDING tanpa surat jalan menampilkan tombol buat surat jalan", async ({ page }) => {
+    // Keadaan setelah surat jalan dibatalkan: status PENDING dan transferStokID dihapus
+    // (transferStokService baris 654 sampai 655). Tombol tidak diklik (strategi data uji A).
+    await page.route(/\/api\/pengajuanstok\/[0-9a-f]{24}(\?|$)/i, async (route) => {
+      if (route.request().method() !== "GET") return route.continue();
+      const respons = await route.fetch();
+      const isi = (await respons.json()) as { data: Record<string, unknown> };
+      isi.data.status = "PENDING";
+      isi.data.transferStokID = null;
+      await route.fulfill({ response: respons, json: isi });
+    });
+    const data = await bukaSemua(page);
+    test.skip(data.filter(diGudang).length === 0, "Tidak ada pengajuan berarah benar di ruang gudang.");
+    await page.locator("table tbody tr").first().getByRole("button", { name: "Buka menu" }).click();
+    await page.getByRole("menuitem", { name: "Tinjau" }).click();
+    await page.waitForURL(/\/dashboard\/gudang\/pengajuanStok\/[0-9a-f]{24}/i);
+    await expect(page.getByText("Perlu Surat Jalan", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Buat Surat Jalan" })).toBeVisible();
   });
 
   test("pencarian nama outlet peminta menyaring baris", async ({ page }) => {
