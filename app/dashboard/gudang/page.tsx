@@ -1,9 +1,5 @@
-const GudangPage = () => {
-  return (
-    <>
-      <h1>Gudang Page</h1>
-    </>
-  );
-};
+import { HalamanDashboardGudang } from "@/features/dashboard-gudang/halaman-dashboard-gudang";
 
-export default GudangPage;
+export default function DashboardGudangPage() {
+  return <HalamanDashboardGudang />;
+}

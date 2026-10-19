@@ -1,4 +1,11 @@
 import { describe, expect, it } from "vitest";
+import {
+  formatAngka,
+  formatHari,
+  formatWaktuSingkat,
+  lebarBatang,
+  teksJumlahRingkas,
+} from "@/features/dashboard-gudang/tampilan";
 import { IZIN } from "@/lib/auth/permissions";
 import { panelDashboardGudang, urlBoleh } from "@/features/dashboard-gudang/izin";
 import {
@@ -167,5 +174,32 @@ describe("izin panel dashboard gudang", () => {
     expect(
       urlBoleh(TAUTAN_DASHBOARD_GUDANG.inventaris, [IZIN.location, IZIN.inventoryGudang, IZIN.bahan]),
     ).toBe("/dashboard/gudang/inventaris");
+  });
+});
+
+describe("tampilan dashboard gudang", () => {
+  it("angka bergaya Indonesia", () => {
+    expect(formatAngka(1200)).toBe("1.200");
+    expect(formatAngka(1.5)).toBe("1,5");
+    expect(formatAngka(0)).toBe("0");
+  });
+
+  it("hari dan waktu singkat berbahasa Indonesia", () => {
+    expect(formatHari(new Date(2026, 9, 19))).toBe("Senin, 19 Oktober 2026");
+    expect(formatWaktuSingkat(new Date(2026, 9, 19, 10, 42).toISOString())).toBe("19 Okt, 10.42");
+    expect(formatWaktuSingkat(null)).toBe("-");
+    expect(formatWaktuSingkat("bukan tanggal")).toBe("-");
+  });
+
+  it("jumlah jurnal bertanda arah dengan pemisah ribuan", () => {
+    const bahan = { id: "b", namaBahan: "Kopi", satuan: "gram" };
+    expect(teksJumlahRingkas({ tipeKoreksi: "Keluar", jumlah: 2000, bahanBakuID: bahan })).toBe("\u22122.000 gram");
+    expect(teksJumlahRingkas({ tipeKoreksi: "Masuk", jumlah: 0.5, bahanBakuID: null })).toBe("+0,5 unit");
+  });
+
+  it("batang minimal 2% dan maksimal 100%", () => {
+    expect(lebarBatang(0)).toBe("2%");
+    expect(lebarBatang(0.24)).toBe("24%");
+    expect(lebarBatang(1)).toBe("100%");
   });
 });
