@@ -395,6 +395,23 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
 - Keputusan pemilik proyek untuk modul ini ada di `modul/keuangan.md` (Modul
   keuangan, KU1a sampai KU7a).
 
+### Catatan dari penyesuaian backend `ridho` `af5f315`
+
+- B99 (butir 148): nama kategori beban kembar dijawab 409 saat membuat
+  maupun mengganti nama. Asersi spec kategori beban diperketat dari
+  `[400, 409]` menjadi 409 (`d6f8ba0`).
+- B100 (butir 137): beban operasional menolak tanggal masa depan,
+  membatasi keterangan 500 karakter, membatasi tulis 30 per menit per
+  pengguna, dan galat validatornya berbentuk `message` beserta `errors`.
+  Pembatas laju hanya dilewati saat `NODE_ENV=test`; backend development
+  memakai `development`, tetapi spec pengeluaran menulis jauh di bawah
+  batasnya. Form web sudah menahan tanggal dan keterangan dengan aturan
+  yang sama, sehingga hanya komentar
+  `features/beban-operasional/schema.ts` yang diperbarui. Penolakan
+  backend tidak dapat dipicu lewat UI dan dibuktikan dari kode.
+- B97 (Nizar): tanggal lampau jurnal transfer hanya untuk Owner; Pindah
+  Dana tidak mengirim tanggal, sehingga tidak berubah.
+
 ## Utang terbuka
 
 ### Utang kecil dari modul keuangan

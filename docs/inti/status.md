@@ -27,29 +27,34 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: dashboard gudang
+## Pekerjaan berikutnya: label tab berbahasa awam
 
-Halaman pengeluaran selesai pada 18 Oktober 2026 dalam empat commit
-(Catatan dari halaman pengeluaran). Pemilik proyek lalu memilih
-dashboard gudang sebagai pekerjaan berikutnya.
+Dashboard gudang selesai pada 19 Oktober 2026 (`modul/gudang.md`, Catatan
+dari dashboard gudang), bersama perbaikan pengajuan PENDING, font Geist,
+tab di `?tab=`, penyesuaian backend `ridho` `af5f315`, dan pemecahan
+dokumentasi menjadi lapis inti, modul, referensi, dan arsip
+(`4cbb38f`). Pemilik proyek lalu memilih label tab berbahasa awam
+sebagai pekerjaan berikutnya.
 
-`/dashboard/gudang` masih placeholder. Sumber datanya sudah diputuskan
-(GD1a), tetapi tata letak dan UI/UX-nya menunggu rancangan pemilik
-proyek. Pemetaan awal diambil lebih dulu, lalu rancangannya ditanyakan
-sebelum kode ditulis.
+Tab daftar pengajuan stok masih menampilkan sebagian kode status mentah:
+`labelTab` di `halaman-daftar-pengajuan-stok.tsx` hanya mengisi sebagian
+tab, sehingga DRAFT, REJECTED, dan COMPLETED di outlet serta COMPLETED dan
+REJECTED di gudang tampil apa adanya. Label tab daftar surat jalan
+(`LABEL_TAB_TRANSFER` di `features/transfer-stok/tampilan.ts`, misalnya
+DRAFT SJ) masih diambil dari halaman lama dan ikut ditinjau. Desain harus
+mudah dipahami orang awam, sehingga perubahannya didahului pratinjau
+visual. Langkah pertama sesi berikutnya: periksa cabang backend, lalu
+petakan seluruh tab dan labelnya.
 
-Pemetaan awal belum diambil, sehingga langkah pertama sesi berikutnya
-mengambilnya, setelah cabang backend diperiksa (`inti/cara-kerja.md`).
-Backend lokal berada di `ridho` `00de455`; `origin/nizar` membawa
-`96e890e` dan `3efd05b` (Catatan dari tabel seragam K-D). Suite e2e
-penuh belum dijalankan sejak `eb81a1f`; harapannya 467 lolos dan 14
-skipped (`inti/pengujian.md`). Tiga belas `test.fixme` menunggu backend.
+Backend lokal berada di `ridho` `af5f315` (fast-forward ke `origin/yoga`,
+yang memuat `origin/nizar`). Suite e2e penuh terakhir: 476 lolos dan 14
+skipped di `d6f8ba0` (`inti/pengujian.md`, Baseline). Dua belas
+`test.fixme` menunggu backend.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in $(git -C "$BE" for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -v '^origin$' | grep -v '/HEAD$'); do echo "$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...$r | tr '\t' ' ')"; done
 cd ~/Documents/frontend-web
-wc -l app/dashboard/gudang/page.tsx
-grep -n "GD1a\|GD2a\|GD3a\|GD4a" docs/modul/gudang.md | cut -c1-160
+grep -nE 'labelTab|LABEL_TAB|tab:' features/pengajuan-stok/halaman-daftar-pengajuan-stok.tsx features/transfer-stok/tampilan.ts | cut -c1-160
 ```
 
 ## Utang kecil yang tertunda
@@ -71,6 +76,8 @@ grep -n "GD1a\|GD2a\|GD3a\|GD4a" docs/modul/gudang.md | cut -c1-160
 - Butir 132, 133, dan 135 dicocokkan dari kode `00de455` pada 18 Oktober
   2026 (Catatan dari halaman pengeluaran). Yang tersisa dari butir 137:
   batas tanggal masa depan, panjang keterangan, dan pembatas laju.
+  Ketiganya diperbaiki di `yoga` `186fa19` (B100) dan dibuktikan dari kode
+  `ridho` `af5f315` pada 19 Oktober 2026 (`kontrak/temuan.md` butir 137).
 - Kategori fixture "E2E Kategori Beban" dan satu beban VOID menetap di
   basis data development (RG7a).
 - Pemilik proyek memutuskan untuk backend pada 17 Oktober 2026: tanggal
@@ -78,6 +85,9 @@ grep -n "GD1a\|GD2a\|GD3a\|GD4a" docs/modul/gudang.md | cut -c1-160
   peran lain memakai waktu server hari ini WIB. Halaman pengeluaran nanti
   mengikuti aturan itu; Pindah Dana tidak terdampak karena tidak mengirim
   tanggal (DN3a).
+  Diterapkan backend: jurnal transfer di `nizar` `96e890e` (B97) dan beban
+  operasional di `yoga` `186fa19` (B100), keduanya termuat di `ridho`
+  `af5f315`.
 
 ## Utang kecil dari penyesuaian backend `ridho` `2dd57aa`
 
@@ -107,6 +117,8 @@ grep -n "GD1a\|GD2a\|GD3a\|GD4a" docs/modul/gudang.md | cut -c1-160
   Sejak 11 Oktober 2026 `ridho` berada di `2dd57aa`. Sejak 16 Oktober 2026
   di `7d28135` (gabungan `yoga` `723b12f` dan `nizar` `38f523a`). Sejak
   17 Oktober 2026 di `00de455`, fast-forward dua commit dokumen `nizar`.
+  Sejak 19 Oktober 2026 di `af5f315`, fast-forward ke `origin/yoga` yang
+  memuat `origin/nizar` (`referensi/keputusan-penyesuaian-backend.md`).
 - Indeks pelanggan di basis data development belum sesuai skema
   (`kontrak/temuan.md` butir 142); dibiarkan sebagai bukti sampai backend
   menyediakan migrasi indeks.
@@ -149,6 +161,8 @@ grep -n "GD1a\|GD2a\|GD3a\|GD4a" docs/modul/gudang.md | cut -c1-160
   butir 22): balik `SERVER_TERIMA_HITUNGAN_KOSONG` menjadi true, tulis badan
   `test.fixme` "hitungan tersimpan dapat dikosongkan kembali", dan pastikan
   hanya field yang berubah yang terkirim.
+  Selesai di `d6f8ba0` (B98): penanganan sementaranya dihapus, bukan
+  dibalik, dan skenarionya menjadi langkah sungguhan.
 - Kontrak dikoreksi tertarget terhadap `f27f093`, lalu terhadap `9cd1439`
   untuk transfer stok dan validator inventory. Pembangkitan ulang penuh
   ditunda sampai backend menyelesaikan modul produk, bahan baku, stok, dan
@@ -157,3 +171,14 @@ grep -n "GD1a\|GD2a\|GD3a\|GD4a" docs/modul/gudang.md | cut -c1-160
   baris (714) sejak penjaga ruang ditambahkan di `eb0181f`, dan kini 712
   baris setelah pemanggilan guard dibuang (`628f52e`). Pisahkan dialog
   aksi dan tabel hitungan saat halaman itu disentuh lagi.
+
+## Utang kecil dari 19 Oktober 2026
+
+- Riwayat baseline lama masih di `referensi/playwright.md` (Perintah
+  verifikasi yang biasa dipakai); pindahkan ke arsip saat dokumen itu
+  disentuh. Baseline terkini ada di `inti/pengujian.md`.
+- `inti/pengujian.md` melewati batas inti sekitar 400 baris; utang
+  pengujian yang sudah lunas dipindah ke arsip saat ditinjau.
+- Satu skip bersyarat data bertambah di suite penuh `d6f8ba0`
+  dibanding hitungan, dan skenarionya belum diidentifikasi
+  (`inti/pengujian.md`, Baseline).

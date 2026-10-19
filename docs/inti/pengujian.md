@@ -1,12 +1,26 @@
 # Pengujian
 
-Sifat perubahan: **Sering**: baseline dan spec rujukan setiap modul; bagian lain bertambah saat ada pelajaran.
+Sifat perubahan: **Sering**: baseline setiap modul; bagian lain bertambah saat ada pelajaran.
 
 Lapis inti: kirim di setiap chat baru. Isinya dipindah dari docs/refactor pada 19 Oktober 2026 tanpa perubahan.
 
-Perintah verifikasi dan baseline, cara menelusuri kegagalan e2e, catatan
-Playwright, test yang ditandai fixme atau dilewati, utang pengujian, dan spec
-rujukan. Baseline dan spec rujukan diperbarui setiap modul.
+Baseline, kredensial uji, cara menelusuri kegagalan e2e, test yang ditandai
+fixme atau dilewati, dan utang pengujian. Baseline diperbarui setiap modul.
+Perintah verifikasi, catatan Playwright, spec rujukan, dan riwayat baseline
+ada di `referensi/playwright.md`.
+
+## Baseline
+
+**Baseline per penyesuaian backend `ridho` `af5f315`** (commit `d6f8ba0`,
+19 Oktober 2026): 710 test unit dan integrasi lolos di 85 berkas. Suite
+e2e penuh dijalankan terhadap backend `ridho` `af5f315`: 476 lolos dan
+14 skipped, tanpa kegagalan, dalam 23,6 menit. Totalnya 490, sama dengan
+hitungan: 481 per halaman pengeluaran, ditambah sepuluh skenario baru
+(tiga di daftar pengajuan stok, `781c861`; tiga untuk `?tab=`,
+`a68a75f`; empat di dashboard gudang, `50dca2f`), dikurangi satu
+`test.fixme` yang menjadi langkah di skenario draft stock opname
+(`d6f8ba0`). Harapan lolosnya 477; satu skip bersyarat data bertambah,
+sehingga skipped tetap 14. Skenarionya belum diidentifikasi.
 
 ## Kredensial uji
 
@@ -93,7 +107,6 @@ Menunggu perbaikan backend:
 | Test | Menunggu |
 |---|---|
 | Edit pola roster | Validator memakai `this.siklusHari` dalam konteks `findOneAndUpdate` |
-| Hitungan tersimpan dapat dikosongkan kembali (`inventaris/stockOpname/draft-stok-opname.spec.ts`) | Validator stock opname menerima `qtyPhysical` null (`kontrak/temuan.md` butir 22). Badannya berupa penanda; skenario ditulis saat `SERVER_TERIMA_HITUNGAN_KOSONG` dibalik |
 | Sembilan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, stock adjustment, dan daftar penjualan (`20c026b`) | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
 | Shift yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/shift/crud-shift.spec.ts`) | Backend memisahkan shift per lokasi dan `KUNCI_LOKASI_SHIFT` di `features/shift/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
 | Pola yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | Backend memisahkan pola roster per lokasi dan `KUNCI_LOKASI_POLA_ROSTER` di `features/pola-roster/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
@@ -121,6 +134,10 @@ setelah lolos dua putaran berturut-turut.
 Pada 16 Oktober 2026, setelah backend `ridho` `7d28135`, `test.fixme`
 hapus bahan baku yang baru dibuat dilepas (`cfaaa92`), setelah lolos dua
 putaran berturut-turut tanpa perubahan badannya.
+
+Pada 19 Oktober 2026, setelah backend `ridho` `af5f315`, `test.fixme`
+hitungan tersimpan dapat dikosongkan kembali diganti langkah sungguhan di
+skenario draft stock opname (`d6f8ba0`).
 
 Selain itu ada `test.skip` bersyarat data, bukan penantian backend, yang ikut
 terhitung di angka skipped pada baseline:
@@ -183,10 +200,6 @@ Urutan debug kegagalan e2e di atas).
   ruang),
   dengan alasan yang sama.
   Izin per ruang (RH3a) juga hanya teruji di unit test.
-- **Pengosongan hitungan stock opname** baru berupa penanda `test.fixme`
-  tanpa badan, karena backend belum menerima `qtyPhysical` null
-  (`kontrak/temuan.md` butir 22). Yang teruji saat ini hanya perilaku
-  sementara: pengosongan ditahan dengan pesan, tanpa `PATCH`.
 
 - **Cakupan per lokasi di daftar penjualan teruji e2e hanya untuk jalur
   terkunci** (`20c026b`): `locationID` yang terkirim sama dengan

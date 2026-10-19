@@ -83,6 +83,12 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | POST | `/bebanoperasional` | authPengguna | `create-beban-operasional` | `{ data }` | `id` | `features/beban-operasional/api.ts` |
 | PUT | `/bebanoperasional/:id` | authPengguna | `update-beban-operasional` | `{ data }` | `id` | `features/beban-operasional/api.ts` (ubah keterangan dan kategori, dan VOID) |
 
+#### `/dashboard`
+
+| Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
+|---|---|---|---|---|---|---|
+| GET | `/dashboard/gudang` | authPengguna | `read-dashboard-gudang` | `{ data, success }` | - | `features/dashboard-gudang/api.ts` (sejak `06581f3`; hanya angka pengiriman yang dipakai, angka pengajuan tidak karena `kontrak/temuan.md` butir 149) |
+
 #### `/diskon`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
@@ -370,6 +376,7 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /bahanbaku`: availableUnits[], createdAt, id, namaBahan, satuan, tenantID, updatedAt
 - `GET /bahanbaku/:param`: availableUnits[], createdAt, id, namaBahan, satuan, tenantID, updatedAt
 - `GET /bebanoperasional` (dari `mappers/bebanOperasionalMapper.js` dan `docs/api/endpoint/bebanOperasional.md` backend `ridho` `00de455`, dicocokkan dengan respons nyata 18 Oktober 2026): akunKas{id, namaAkun, nomorAkun}, alasanVoid, createdAt, dicatatOleh{id, nama}, divoidOleh{id, nama}, id, jumlah, kategori{id, namaKategori}, keterangan, status, tanggal, tanggalVoid, updatedAt. `status` AKTIF atau VOID, dan beban lama tanpa status dijawab AKTIF; `alasanVoid`, `divoidOleh`, dan `tanggalVoid` null selama AKTIF; relasi yang terhapus bernilai null; `tenantID` tidak dikirim. Diurutkan menurut `tanggal` lalu waktu dicatat, terbaru dulu, termasuk beban VOID. Query yang dibaca service: `dari` dan `sampai` atas `tanggal` (`YYYY-MM-DD` dibaca hari WIB), `akunKasID`, `kategoriBebanID`, `status`, serta `page` dan `limit` (paling besar 100; tanpa keduanya daftar dijawab utuh tanpa `pagination`). Query lain ditolak 400 "Query tidak dikenal". Daftar tidak di-cache, sedangkan detail di-cache 300 detik. `GET /bebanoperasional/:id` berbentuk sama dan tidak dipakai web
+- `GET /dashboard/gudang` (dari `dashboardGudangService.getSummary` `ridho` `af5f315`, objek ringkasan): inventory{stokKritis}, jurnalTerbaru[], pengajuan{menungguApproval, siapDibuatSuratJalan}, transfer{sedangDikirim, suratJalanPending}
 - `GET /diskon`: bisaDigabung, cakupan, createdAt, hariAktif[], hitungPerBarang, id, jamMulai, jamSelesai, khususMember, kuota, kuotaPerPelanggan, minimalBelanja, namaDiskon, nilai, produkIDs[], sedangBerlaku, sisaKuota, status, tanggalBerakhir, tanggalMulai, tenantID, terpakai, tipe, updatedAt (dari `mappers/diskonMapper.js` backend `yoga` `50eede7`: `sisaKuota` dihitung dari `kuota` dan `terpakai`, null bila tanpa kuota; `sedangBerlaku` dihitung saat respons dibuat dari status, masa berlaku, jam dan hari dalam WIB, dan kuota, `temuan.md` butir 109. Service membaca query `status`, `cakupan`, dan `tipe`, serta `page` dan `limit` yang opsional; daftar diurutkan status lalu terbaru dan di-cache 300 detik. Web memuat daftar tanpa query dan menyaring di klien)
 - `GET /inventory`: createdAt, id, isStokKritis, item{id, kategori, nama, satuan, tipeItem}, lokasi{id, nama, tipe}, stok, stokMinimum, tenantID, updatedAt (dari `mappers/inventoryMapper.js` backend `f27f093`: `item.kategori` berisi `tipe` barang inventory; `isStokKritis` hanya true bila `stokMinimum` lebih dari 0 dan stok tidak melebihinya, sehingga `stokMinimum` 0 berarti tidak dipantau. Query yang dibaca service: `locationID`, `kategori` (dicocokkan dengan `BarangInventory.tipe`), dan `search`; tanpa `locationID` mengirim stok seluruh lokasi tenant. Respons `POST /inventory` kini ter-populate dan berbentuk sama)
 - `GET /izincuti` (dari `mappers/izinCutiMapper.js` backend `ridho` `2dd57aa`): catatan, createdAt, dicatatOleh{id, nama}, id, keterangan, pengguna{id, nama, email}, status, tanggalMulai, tanggalSelesai, tenantID, tipe, updatedAt

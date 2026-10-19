@@ -185,6 +185,29 @@ Lapis per modul: kirim hanya saat modul ini dikerjakan. Isinya dipindah dari doc
 - **Revisi hanya untuk DRAFT** di halaman edit, walau backend masih
   mengizinkan APPROVED dan PENDING diubah (`kontrak/temuan.md` butir 25).
 
+Diputuskan pemilik proyek pada 19 Oktober 2026 (perbaikan pengajuan
+PENDING, `781c861`, dan tab di URL, `a68a75f`):
+
+- **Pengajuan PENDING kembali dapat dibuatkan surat jalan.** Membatalkan
+  surat jalan atau menghapus drafnya mengembalikan pengajuan ke PENDING
+  dan mengosongkan `transferStokID`. Backend mengizinkan surat jalan dari
+  APPROVED maupun PENDING, tetapi web dulu hanya mengenali APPROVED,
+  sehingga pengajuan itu macet tanpa tombol, berlabel "Perlu Tinjauan" di
+  gudang dan "Menunggu" di outlet.
+- **Tahap, bukan status, menjadi dasar tampilan** (`tahap.ts`): APPROVED
+  dan PENDING menjadi PERLU_SURAT_JALAN atau SURAT_JALAN_DIBUAT menurut
+  ada tidaknya `transferStokID`, karena membuat surat jalan tidak
+  mengubah status pengajuan. Badge, label, tab, panel surat jalan, dan
+  hitungan dashboard gudang memakai fungsi yang sama.
+- **Tab gabungan**: gudang "PERLU SURAT JALAN" (APPROVED atau PENDING
+  tanpa surat jalan) dan outlet "DISETUJUI" (APPROVED dan PENDING)
+  menggantikan tab "APPROVED". Backend hanya menerima satu status per
+  permintaan, sehingga tab gabungan meminta tanpa status lalu disaring
+  di klien (`statusServerTab` dan `cocokTab` di `filter.ts`).
+- **Tab tersimpan di `?tab=`**, dengan slug terbaca per ruang di
+  `tampilan.ts`. Aturan keamanannya ada di `referensi/arsitektur.md`
+  (bagian `lib/tab-url.ts`).
+
 ### Submodul transfer, pengiriman, dan penerimaan
 
 Diputuskan pemilik proyek pada 21 September 2026, dengan satu prinsip yang
@@ -331,3 +354,32 @@ Yang masih berlaku:
     sehingga pemegang izin lintas outlet di pilihan "Semua Outlet" tidak
     dapat membedakan outlet pengaju. Relevan begitu tenant punya lebih dari
     satu outlet.
+
+### Catatan dari perbaikan pengajuan PENDING dan tab di URL
+
+- `781c861`: pengajuan PENDING dapat dibuatkan surat jalan lagi (tahap
+  pengajuan dan tab gabungan). Skenario e2e baru di
+  `lihat-pengajuan-stok.spec.ts`: tab DISETUJUI, tab PERLU SURAT JALAN,
+  dan detail PENDING tanpa surat jalan yang menampilkan tombol buat surat
+  jalan (respons detail diubah lewat `page.route`; tombol tidak diklik
+  sesuai strategi data uji pilihan A, Catatan dari modul inventaris).
+- `a68a75f`: tab daftar pengajuan dan surat jalan disimpan di `?tab=`,
+  dengan `aria-pressed` di tombol tab. Skenario e2e: `?tab=` membuka tab,
+  klik tab menulis dan tab bawaan menghapusnya, dan `?tab=` berisi markup
+  serta `__proto__` kembali ke tab bawaan tanpa dirender.
+- `d6f8ba0` (penyesuaian backend `ridho` `af5f315`, B98): penanganan
+  sementara hitungan kosong stock opname dihapus; `susunPayloadHitungan`
+  kini hanya mengirim field yang berubah, dan hitungan yang dikosongkan
+  dikirim null. `test.fixme` "hitungan tersimpan dapat dikosongkan
+  kembali" menjadi langkah sungguhan di `draft-stok-opname.spec.ts`.
+- Tab daftar pengajuan yang tidak diisi `labelTab` masih tampil sebagai
+  kode mentah (DRAFT, REJECTED, dan COMPLETED di outlet; COMPLETED dan
+  REJECTED di gudang), dan label tab surat jalan (`LABEL_TAB_TRANSFER`,
+  misalnya DRAFT SJ) masih diambil dari halaman lama; dijadwalkan sebagai
+  pekerjaan berikutnya (`inti/status.md`).
+- Tiga spec transfer (`alur-transfer-stok.spec.ts`,
+  `pengiriman-penerimaan.spec.ts`, dan `terima-penerimaan.spec.ts`)
+  merujuk keputusan pemilik proyek "K3 pilihan B" dan K4, dan
+  `alur-transfer-stok.spec.ts` juga merujuk R8 dan R13. Keempat label itu
+  tidak tercatat di dokumentasi (diperiksa 19 Oktober 2026). Komentarnya
+  dibetulkan ke rujukan yang benar saat spec itu disentuh lagi.

@@ -380,3 +380,23 @@ dari `50eede7` ke `fc29433`.
   satuan di web (keputusan rancangan butir 12); bahan tanpa satuan resep
   yang sah (pak dan unit) ditolak dengan pesan tersendiri; `skemaProduk`
   tetap diekspor dan pemeriksaannya ditambahkan lewat `buatSkemaProduk`.
+
+## Penyesuaian backend `ridho` `af5f315`
+
+Diputuskan pemilik proyek pada 19 Oktober 2026, setelah `origin/yoga`
+maju lima commit (perbaikan butir 22, 137, dan 148, serta catatan B98
+sampai B100) dan menggabungkan `origin/nizar`.
+
+- **`ridho` di-fast-forward ke `origin/yoga`**, bukan digabung dengan
+  commit merge: `ridho` leluhur `yoga` dan `origin/nizar` sudah termuat di
+  `yoga`, sehingga isinya sama, riwayatnya tetap lurus, dan `--ff-only`
+  menolak berjalan bila ternyata ada perbedaan. Sudah di-push.
+- **Laporan butir 149 ditunda dan digabung** dengan pembuktian B98 sampai
+  B100, agar Yoga menerima satu laporan.
+- **Penanganan sementara butir 22 dibersihkan dalam satu putaran**,
+  bukan sekadar dibalik: konstanta, cabang lamanya, mekanisme
+  `ditahan`, dan test unit perilaku lama dihapus.
+- **Asersi status yang menerima dua kemungkinan diperketat** begitu
+  kontraknya pasti (kategori beban kembar 409), agar regresi terdeteksi.
+- Suite e2e penuh dijalankan karena ini penyesuaian backend: 476 lolos
+  dan 14 skipped, tanpa kegagalan (`d6f8ba0`).

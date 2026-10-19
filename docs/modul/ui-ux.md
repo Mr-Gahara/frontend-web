@@ -158,6 +158,17 @@ yang izinnya tidak dipegang tidak dipasang.
   lokal**, dengan keenam kolom dipertahankan; `COLORS` tinggal tiga warna
   untuk dialog hapus yang di luar tabel (WR3a, WR4a, `eb81a1f`).
 
+### Font aplikasi
+
+Diputuskan pemilik proyek pada 19 Oktober 2026, setelah membandingkan
+Arial dan Geist pada pratinjau komponen dashboard: **Geist** dipakai di
+seluruh aplikasi (`cdc8c47`). Geist sudah dimuat `next/font` di
+`app/layout.tsx`, tetapi tidak pernah dipakai: `--font-sans` di kedua
+blok `@theme` merujuk dirinya sendiri, dan kedua aturan `body` menulis
+Arial langsung. Kini `--font-sans` dan `body` memakai
+`--font-geist-sans`; `--font-mono` tidak berubah. Ukuran huruf dan
+tinggi baris belum menjadi token.
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E

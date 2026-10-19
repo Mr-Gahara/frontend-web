@@ -272,6 +272,11 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   baru, sehingga tanpa laporan. Pembuktian butir 143 sampai 145, 147, dan
   B89 sampai B94 (Yoga) tercatat di `kontrak/temuan.md`; Yoga dan Nizar
   diberi tahu gabungannya
+- Laporan untuk Yoga: 1 temuan dan pembuktian, disusun 19 Oktober 2026
+  terhadap `ridho` `af5f315`: hitungan `siapDibuatSuratJalan` dashboard
+  gudang ikut menghitung pengajuan yang sudah punya surat jalan (butir
+  149); B98 sampai B100 terbukti (butir 22, 148, dan 137), dan B97
+  dicatat
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

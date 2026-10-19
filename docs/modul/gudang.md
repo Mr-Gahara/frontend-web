@@ -17,9 +17,10 @@ keputusan rancangan butir 17 dan 21.
   sedangkan stok kritis dan jurnal terbaru dari hook `features/` yang
   hanya menghitung lokasi Gudang, karena endpoint itu menghitung seluruh
   lokasi tenant termasuk outlet (Model bisnis MVP: stok outlet dan gudang
-  tidak boleh tercampur). **Eksekusinya ditunda**: layout dan UI/UX
-  dashboard ditentukan pemilik proyek sendiri, dan halamannya tetap
-  placeholder sampai itu (`modul/gudang.md`, Utang kecil dari modul Gudang).
+  tidak boleh tercampur). Eksekusinya sempat ditunda sampai pemilik
+  proyek menentukan layout dan UI/UX-nya, lalu dijalankan pada 19 Oktober
+  2026 dengan penyesuaian sumber data kartu pengajuan (Dashboard gudang di
+  bawah).
 - **GD2a: pengaturan gudang berisi profil gudang yang dapat diubah**
   (nama, alamat, koordinat, dan radius absen) lewat `PUT /location/:id`
   bagi pemegang `update-location`, dan baca-saja bagi pengguna lain,
@@ -60,6 +61,40 @@ keputusan rancangan butir 17 dan 21.
   `updatedAt` (keputusan rancangan butir 8); dan gate halaman
   `read-location`, diturunkan dari endpoint yang dipanggilnya.
 
+### Dashboard gudang
+
+Diputuskan pemilik proyek pada 19 Oktober 2026.
+
+- **Isi: GD1a ditambah daftar stok kritis.** Dari empat pratinjau (satu
+  mengikuti pola dashboard outlet, tiga alternatif), dipilih desain B
+  "Alur barang": dua kelompok kartu berlatar krem (Pengajuan dari outlet;
+  Pengiriman ke outlet) yang dihubungkan panah, stok kritis sebagai
+  batang isi, dan jurnal terbaru sebagai linimasa.
+- **Bahasa awam di setiap kartu.** Label "Langkah 1 sampai 4" di pratinjau
+  pertama dibuang karena tidak dipahami pengguna. Setiap kartu menyebut
+  arti angkanya ("pengajuan perlu disetujui") dan tindakannya ("Periksa
+  dan setujui"); kartu bernilai nol berisi kalimat keadaan tanpa tautan.
+- **Kartu pengajuan dihitung dari daftar pengajuan, bukan dari
+  `GET /dashboard/gudang`.** Hitungan `siapDibuatSuratJalan` di backend
+  ikut menghitung pengajuan yang sudah punya surat jalan
+  (`kontrak/temuan.md` butir 149), sehingga angkanya tidak akan sama
+  dengan isi tab tujuannya. `hitungAntreanPengajuan` memakai
+  `saringPengajuan` dan `cocokTab` yang sama dengan daftar gudang.
+- **Kartu surat jalan tetap dari `GET /dashboard/gudang`**, karena
+  filternya terbukti sama dengan tab DRAFT SJ dan halaman pengiriman
+  (`transferStokService.getAll` tidak membatasi per izin atau lokasi),
+  dan hitungan server tetap ringan berapa pun jumlah surat jalan.
+- **Panel mengikuti izin endpoint-nya**
+  (`features/dashboard-gudang/izin.ts`): pengajuan butuh
+  `read-pengajuan-stok`, pengiriman `read-dashboard-gudang`, stok kritis
+  `read-location` ditambah `read-inventory` atau `read-inventory-gudang`,
+  dan jurnal `read-jurnal-stok`. Kelompok pengajuan disembunyikan, bukan
+  ditampilkan tanpa angka, bagi pengguna tanpa izin bacanya. Tanpa satu
+  pun panel, halaman menampilkan "Belum ada ringkasan untuk akun Anda".
+- **Tautan kartu hanya aktif bila gerbang halaman tujuannya terpenuhi**
+  (`urlBoleh` lewat `bolehBukaRute`); tanpa izin, kartu tampil tanpa
+  tautan.
+
 ## Catatan
 
 ### Catatan dari modul Gudang
@@ -88,13 +123,44 @@ layout, setup, dan lokasi sidebar (`9ce288b`), serta pengaturan gudang
 - Keputusan pemilik proyek untuk modul ini ada di `modul/gudang.md` (Modul
   gudang, GD1a sampai GD6a).
 
+### Catatan dari dashboard gudang
+
+Dashboard gudang selesai pada 19 Oktober 2026 dalam dua commit, setelah
+tiga commit penyiapan: perbaikan pengajuan PENDING (`781c861`), font
+Geist (`cdc8c47`), dan tab di `?tab=` (`a68a75f`).
+
+- `06581f3`: lapisan data dan aturan murni (`api.ts`, `hooks.ts`,
+  `izin.ts`, `ringkasan.ts`), `EP.dashboardGudang`, dan kunci
+  `queryKeys.transferStok.ringkasanGudang()` di bawah akar
+  `transferStok`, sehingga invalidasi setelah buat, kirim, atau batal
+  surat jalan ikut memperbarui angka dashboard.
+- `50dca2f`: tampilan desain B (`panel-alur.tsx`,
+  `panel-stok-kritis.tsx`, `panel-jurnal.tsx`, `pesan-gagal.tsx`,
+  `halaman-dashboard-gudang.tsx`). Setiap panel memuat sendiri, dengan
+  kerangka saat memuat dan pesan galat `role=alert` beserta Coba lagi;
+  setiap kelompok adalah region bernama. Teks aksi memakai `amber-800`,
+  bukan heksadesimal cokelat pratinjau, agar tidak menambah warna
+  hardcoded.
+- Stok kritis memakai `isStokKritis` dari backend, tidak dihitung ulang,
+  untuk lokasi Gudang pertama (MVP satu gudang); jurnal disaring ke
+  lokasi bertipe Gudang lewat `saringJurnal`.
+- Tes: 14 unit di `tests/unit/features/dashboard-gudang/`, dan 4
+  skenario e2e di `tests/e2e/dashboard/dashboard-gudang.spec.ts` yang
+  mencocokkan angka dengan respons memakai aturan halaman tujuan, lalu
+  mengklik kartu dan mencocokkan jumlah baris tab tujuan.
+- Temuan backend baru: butir 149, dilaporkan ke Yoga 19 Oktober 2026
+  (`arsip/laporan-backend.md`). Dokumen endpoint dashboard di backend
+  masih kerangka yang ditandai pemiliknya sendiri, sehingga tidak
+  dilaporkan.
+
 ## Utang terbuka
 
 ### Utang kecil dari modul Gudang
 
-- Dashboard gudang (`app/dashboard/gudang/page.tsx`) masih placeholder.
-  Sumber datanya sudah diputuskan (GD1a), tetapi eksekusinya ditunda
-  sampai pemilik proyek menentukan layout dan UI/UX-nya.
+- Dashboard gudang selesai di `06581f3` dan `50dca2f`. Setelah backend
+  memperbaiki butir 149, kartu pengajuan dapat kembali memakai angka
+  `GET /dashboard/gudang`, sehingga daftar pengajuan tidak perlu diambil
+  utuh hanya untuk menghitung.
 - Dashboard outlet selesai di `0c5822b` (keputusan DB1a sampai DB6a).
   `GET /dashboard/outlet` tetap tidak dipakai web: isinya hitungan
   pengajuan, surat jalan, dan lima jurnal terbaru, bukan isi dashboard
