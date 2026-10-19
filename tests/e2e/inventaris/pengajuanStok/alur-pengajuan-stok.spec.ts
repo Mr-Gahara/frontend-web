@@ -4,7 +4,7 @@ import { bukaDenganAuth, type Auth } from "../../../helpers/transfer-uji";
 
 /*
  * Spec pembanding alur tulis pengajuan stok (keputusan pemilik proyek,
- * pilihan A, docs/refactor/status.md). Pengajuan tidak dapat dihapus atau
+ * pilihan A, docs/modul/inventaris.md). Pengajuan tidak dapat dihapus atau
  * dibatalkan, sehingga alur utama membuat dokumen baru dan menutupnya
  * sebagai REJECTED. Setujui dan buat surat jalan hanya diuji jalur gagalnya
  * lewat page.route, memakai pengajuan SUBMITTED atau APPROVED yang sudah ada,
@@ -70,7 +70,7 @@ function getDetail(id: string) {
  * yang mengikuti setiap `pin-refresh` dan mengembalikan fungsi, bukan string
  * beku. Versi lokal sebelumnya mengambil header dari permintaan API pertama,
  * sehingga tokennya bisa milik halaman sebelumnya dan dijawab 401 setelah
- * navigasi penuh berikutnya (`docs/refactor/pengujian.md`, Catatan Playwright).
+ * navigasi penuh berikutnya (`docs/referensi/playwright.md`, Catatan Playwright).
  */
 
 async function daftarPengajuan(page: Page, auth: Auth, status: string): Promise<PengajuanMentah[]> {

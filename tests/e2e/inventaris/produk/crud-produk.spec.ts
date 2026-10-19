@@ -105,7 +105,7 @@ async function klikTombolAksiProduk(row: ReturnType<Page["getByRole"]>) {
 // ============================================================
 // HELPER: Pemicu pemilih bahan baku di baris resep yang belum terisi.
 // Dipilih lewat teks yang tampil, bukan urutan combobox
-// (pengujian.md, Catatan Playwright).
+// (docs/referensi/playwright.md, Catatan Playwright).
 // ============================================================
 const pemilihBahan = (page: Page) =>
   page.getByRole("combobox").filter({ hasText: /pilih bahan/i });

@@ -5,7 +5,7 @@ import { test, expect, type Page } from "@playwright/test";
 // yang tidak dapat dibuat backend secara deterministik, atau untuk menahan
 // permintaan lalu meneruskannya (route.continue) agar keadaan memuat terlihat.
 // Respons sukses tidak dipalsukan; simulasi yang tidak terhindarkan ditandai
-// "// simulasi:" beserta alasannya (docs/refactor/pengujian.md).
+// "// simulasi:" beserta alasannya (docs/referensi/playwright.md).
 // =============================================================================
 const EMAIL_UJI = "toko@gmail.com";
 const PASSWORD_UJI = "Toko1234";

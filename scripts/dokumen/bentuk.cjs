@@ -3,10 +3,11 @@ const fs = require("fs");
 const path = require("path");
 const { DOCS, bacaBaris, temuanBaru } = require("./umum.cjs");
 
-// Nama berkas sebelum dokumentasi dipecah (20 September 2026). Hanya boleh
-// muncul di catatan asal-usul.
-const NAMA_LAMA = /refactor-progress\.md|kontrak-api\.md/;
-const ASAL_USUL = /Sebelum 20 September|Awalnya satu berkas|dokumen asal|seluruh isi `kontrak\/`/;
+// Nama berkas sebelum dokumentasi dipecah (20 September 2026) dan sebelum
+// docs/refactor dipecah menjadi lapis inti, modul, referensi, dan arsip
+// (19 Oktober 2026). Hanya boleh muncul di catatan asal-usul.
+const NAMA_LAMA = /refactor-progress\.md|kontrak-api\.md|refactor\/[a-z-]+\.md/;
+const ASAL_USUL = /Sebelum (20 September|19 Oktober)|Awalnya satu berkas|dokumen asal|seluruh isi `kontrak\/`/;
 // Nama .md yang bukan berkas di docs/: snapshot Playwright dan catatan untuk
 // tim backend (disimpan di ~/Documents/catatan-backend/).
 const BUKAN_DOKUMEN = /^(error-context|catatan-lanjutan-[a-z-]+)\.md$/;
@@ -68,10 +69,11 @@ function periksaBentuk(berkas) {
         temuan.push(temuanBaru(f, b.nomor, "nama berkas lama", b.teks));
       }
 
-      for (const m of b.teks.matchAll(/`((?:docs\/)?(?:refactor\/|kontrak\/)?[a-z][a-z-]*\.md)`/g)) {
+      for (const m of b.teks.matchAll(/`((?:docs\/)?(?:(?:refactor|kontrak|inti|modul|referensi|arsip)\/)?[a-z][a-z-]*\.md)`/g)) {
         const nama = m[1].replace(/^docs\//, "");
         if (NAMA_LAMA.test(nama) || BUKAN_DOKUMEN.test(nama)) continue;
-        const ada = [nama, "refactor/" + nama, "kontrak/" + nama].some((n) => fs.existsSync(path.join(DOCS, n)));
+        // Rujukan tanpa folder hanya sah untuk README di akar dan dokumen kontrak.
+        const ada = [nama, "kontrak/" + nama].some((n) => fs.existsSync(path.join(DOCS, n)));
         if (!ada) temuan.push(temuanBaru(f, b.nomor, "rujukan berkas tidak ada", m[1]));
       }
     });

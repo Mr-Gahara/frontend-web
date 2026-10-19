@@ -53,7 +53,7 @@ function periksaCommit(berkas, temuan) {
 
 /** Tabel features/ di arsitektur.md harus sama dengan folder dan berkasnya. */
 function periksaFeatures(temuan) {
-  const f = path.join(DOCS, "refactor", "arsitektur.md");
+  const f = path.join(DOCS, "referensi", "arsitektur.md");
   const baris = bacaBaris(f);
   const awal = baris.findIndex((b) => b.teks.startsWith("Isi tiap `features/` yang sudah ada"));
   if (awal < 0) {
@@ -91,29 +91,6 @@ function periksaFeatures(temuan) {
   }
 }
 
-/** Setiap tabel di status.md paling banyak punya satu **Berikutnya**. */
-function periksaBerikutnya(temuan) {
-  const f = path.join(DOCS, "refactor", "status.md");
-  let blok = [];
-  let total = 0;
-  const tutupBlok = () => {
-    blok.slice(1).forEach((n) => temuan.push(temuanBaru(f, n, "lebih dari satu **Berikutnya** dalam satu tabel")));
-    blok = [];
-  };
-  for (const b of bacaBaris(f)) {
-    if (!b.teks.startsWith("|")) {
-      tutupBlok();
-      continue;
-    }
-    if (b.teks.includes("**Berikutnya**")) {
-      blok.push(b.nomor);
-      total++;
-    }
-  }
-  tutupBlok();
-  if (total === 0) temuan.push(temuanBaru(f, 1, "tidak ada **Berikutnya** di tabel status"));
-}
-
 // Definisi sama dengan perintah angka di docs/README.md. Toleransi mengikuti
 // aturan "perbarui bila angkanya berubah cukup jauh".
 const METRIK = [
@@ -127,9 +104,9 @@ const METRIK = [
   },
 ];
 
-/** Angka metrik di status.md dihitung ulang dan dibandingkan. */
+/** Angka metrik di inti/status.md dihitung ulang dan dibandingkan. */
 function periksaMetrik(temuan) {
-  const f = path.join(DOCS, "refactor", "status.md");
+  const f = path.join(DOCS, "inti", "status.md");
   const baris = bacaBaris(f);
   for (const m of METRIK) {
     const b = baris.find((x) => x.teks.startsWith(`| ${m.label} |`));
@@ -150,7 +127,6 @@ function periksaFakta(berkas, { metrik }) {
   periksaPath(berkas, temuan);
   periksaCommit(berkas, temuan);
   periksaFeatures(temuan);
-  periksaBerikutnya(temuan);
   if (metrik) periksaMetrik(temuan);
   return temuan;
 }

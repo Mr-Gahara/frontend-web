@@ -6,7 +6,7 @@ import * as z from "zod";
  * (waktu-booking.ts); jam yang kosong atau belum lengkap membuat keduanya
  * kosong, sehingga ditolak di sini (keputusan K-TW5a). diskonItem selalu
  * diberikan di nilai awal, sehingga skema tidak memakai .default() dan tipe
- * masukan sama dengan tipe keluaran (cara-kerja.md, Catatan form).
+ * masukan sama dengan tipe keluaran (docs/referensi/helper-dan-shell.md, Catatan form).
  */
 const skemaItemBooking = z
   .object({

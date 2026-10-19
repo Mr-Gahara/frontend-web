@@ -9,7 +9,7 @@ import { cocok, tanggalLokal } from "./reservasi-uji";
  * membersihkan hari ujinya sendiri di awal dan di finally. Hari uji hanya
  * dipakai spec jadwal, di bulan 30 hari pertama mulai dua bulan ke depan
  * (keputusan J4; data development adalah data pengujian,
- * docs/refactor/backend.md). Respons sukses tidak pernah dipalsukan
+ * docs/inti/backend.md). Respons sukses tidak pernah dipalsukan
  * (keputusan rancangan butir 21).
  */
 

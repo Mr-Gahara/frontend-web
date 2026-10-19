@@ -5,7 +5,7 @@ import { expect, Page } from "@playwright/test";
  * pemanggilan API lewat page.request, serta penyiapan dan pembatalan surat
  * jalan uji. Dipakai spec penerimaan dan spec transfer gudang, agar
  * penanganan token dan pembersihan data cukup ada di satu tempat
- * (docs/refactor/pengujian.md, Catatan Playwright).
+ * (docs/referensi/playwright.md, Catatan Playwright).
  */
 
 export const BASIS = "http://localhost:3000";

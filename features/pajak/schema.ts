@@ -3,7 +3,7 @@ import * as z from "zod";
 /**
  * Skema form buat dan ubah pajak (keputusan PO8a). Tarif dan prioritas
  * disimpan sebagai teks isian; payload.ts mengubahnya menjadi angka setelah
- * lolos skema, tanpa z.coerce (cara-kerja.md, Catatan form).
+ * lolos skema, tanpa z.coerce (docs/referensi/helper-dan-shell.md, Catatan form).
  * - Nama dipangkas, sehingga isian berisi spasi saja ditolak (sejalan KU7a).
  * - Tarif kosong ditolak (sejalan T3b), sedangkan 0 yang diketik sah.
  *   Rentang 0 sampai 100 sama dengan validatePajakPayload backend.

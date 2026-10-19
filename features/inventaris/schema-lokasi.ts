@@ -9,7 +9,7 @@ import type {
 /**
  * Skema form lokasi: setup gudang (keputusan GD3a), dan kelak profil
  * gudang di pengaturan (GD2a). Isian disimpan sebagai teks tanpa z.coerce
- * (cara-kerja.md, Catatan form), sehingga isian kosong tetap kosong, lalu
+ * (docs/referensi/helper-dan-shell.md, Catatan form), sehingga isian kosong tetap kosong, lalu
  * diubah menjadi angka di payloadBuatLokasi. Aturannya mengikuti
  * validators/locationValidator.js backend: nama dan alamat wajib teks yang
  * tidak kosong, koordinat wajib angka sungguhan dalam rentang -90 sampai 90

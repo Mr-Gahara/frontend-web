@@ -6,9 +6,9 @@ const { periksaFakta } = require("./fakta.cjs");
 const { periksaTetap } = require("./tetap.cjs");
 
 const argumen = process.argv.slice(2);
-// Metrik dihitung ulang bila diminta, atau otomatis saat status.md sedang
+// Metrik dihitung ulang bila diminta, atau otomatis saat inti/status.md sedang
 // diubah (menutup modul), karena saat itulah angkanya harus benar.
-const statusBerubah = Boolean(cobaJalankan("git status --porcelain docs/refactor/status.md"));
+const statusBerubah = Boolean(cobaJalankan("git status --porcelain docs/inti/status.md"));
 const metrik = argumen.includes("--metrik") || statusBerubah;
 const izinkanTetap = argumen.includes("--izinkan-tetap");
 

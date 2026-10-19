@@ -12,7 +12,7 @@ import {
 
 /*
  * Spec pembanding alur surat jalan di ruang gudang (keputusan pemilik proyek
- * K3 pilihan B, docs/refactor/keputusan.md). Surat jalan dibuat lewat API dari
+ * K3 pilihan B, docs/modul/inventaris.md). Surat jalan dibuat lewat API dari
  * pengajuan uji milik spec (keputusan R8 dan R13) dan dibiarkan PENDING.
  * Daftar, detail, revisi kuantitas, dan pembatalan dari PENDING diuji dengan
  * data sungguhan; pembatalan di akhir mengembalikan pengajuan uji ke PENDING,

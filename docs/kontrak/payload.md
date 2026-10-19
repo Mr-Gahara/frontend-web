@@ -169,7 +169,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Field lain yang dikenali: `status`, `saldo`, `keterangan` (string paling panjang 255 setelah `trim`, atau `null`). Sejak validator `50eede7` (dibaca 3 Oktober 2026) body diperiksa terhadap daftar putih `FIELD_CREATE`, dan field di luar daftar ditolak 400 "Field tidak dikenal". Sejak `nizar` `c29310c` `saldo` wajib bilangan bulat tidak negatif (dari diff validator)
 - Nilai sah: `VALID_TIPE_AKUN`: Kas Fisik, Rekening Bank; `VALID_STATUS`: aktif, non-aktif
 - Nomor atau nama akun duplikat dalam tenant, tanpa membedakan huruf besar-kecil, dijawab 409 "Nomor Akun sudah digunakan di tenant ini" atau "Nama Akun sudah digunakan di tenant ini" (`errorDuplikat` di `akunKasService`, dari indeks unik; dibaca dari kode `50eede7` pada 3 Oktober 2026, menggantikan catatan lama 400)
-- Sejak backend `465b438`, setiap tenant dibatasi 10 akun kas aktif, dan buat ditolak 409 bila sudah penuh (`akunKasService` baris 141 sampai 144); saldo awal lebih dari 0 dicatat sebagai mutasi `SALDO_AWAL`. Akun bersaldo tidak dapat ditutup, dan `DELETE /akunkas/:id` tidak ada lagi (`temuan.md` butir 81), sehingga spec web tidak membuat akun uji bersaldo (`refactor/pengujian.md`)
+- Sejak backend `465b438`, setiap tenant dibatasi 10 akun kas aktif, dan buat ditolak 409 bila sudah penuh (`akunKasService` baris 141 sampai 144); saldo awal lebih dari 0 dicatat sebagai mutasi `SALDO_AWAL`. Akun bersaldo tidak dapat ditutup, dan `DELETE /akunkas/:id` tidak ada lagi (`temuan.md` butir 81), sehingga spec web tidak membuat akun uji bersaldo (`inti/pengujian.md`)
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 
@@ -702,7 +702,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validatePolaRosterPayload mode update (validators/polaRosterValidator.js): seluruh field opsional, tetapi `siklusHari` dan `detailSiklus` wajib dikirim bersamaan
 - Wajib dari klien: -
 - Field lain yang dikenali: `namaPola`, `siklusHari`, `detailSiklus`, `keterangan`
-- Selalu gagal selama `detailSiklus` ikut dikirim: validator model memakai `this.siklusHari` di dalam `findOneAndUpdate`, dan di sana `this` adalah query (`test.fixme` di `refactor/pengujian.md`); web selalu mengirimnya. Service menjalankan `$set` atas seluruh body, sehingga `tenantID` yang dikirim ikut disimpan bila berupa ObjectId yang sah (`temuan.md` butir 72); web tidak mengirimnya. Dikoreksi 29 September 2026
+- Selalu gagal selama `detailSiklus` ikut dikirim: validator model memakai `this.siklusHari` di dalam `findOneAndUpdate`, dan di sana `this` adalah query (`test.fixme` di `inti/pengujian.md`); web selalu mengirimnya. Service menjalankan `$set` atas seluruh body, sehingga `tenantID` yang dikirim ikut disimpan bila berupa ObjectId yang sah (`temuan.md` butir 72); web tidak mengirimnya. Dikoreksi 29 September 2026
 - Dibaca controller dari body: `-`
 - Diisi server: - (`tenantID` hanya diisi saat create)
 
