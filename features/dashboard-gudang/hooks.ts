@@ -8,10 +8,10 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { useDaftarInventory, useLokasiBertipe } from "@/features/inventaris/hooks";
-import { useDaftarJurnalStok } from "@/features/jurnal-stok/hooks";
+import { useHalamanJurnalStok } from "@/features/jurnal-stok/hooks";
 import { queryKeys } from "@/lib/queryKeys";
 import { dashboardGudangApi } from "./api";
-import { antreanDariRingkasan, jurnalTerbaruGudang, stokKritis } from "./ringkasan";
+import { BATAS_BARIS, antreanDariRingkasan, jurnalTerbaruGudang, stokKritis } from "./ringkasan";
 
 /** Hitungan surat jalan; filternya sama dengan tab DRAFT SJ dan halaman pengiriman. */
 export function useRingkasanPengiriman() {
@@ -59,13 +59,22 @@ export function useStokKritisGudang() {
   };
 }
 
-/** Lima jurnal terbaru lokasi bertipe Gudang. */
+/**
+ * Lima jurnal terbaru di gudang (MVP: lokasi bertipe Gudang yang pertama).
+ * Server menyaring lokasi dan memotong lima baris; jurnalTerbaruGudang tetap
+ * menjaga tipe lokasi dan urutannya di klien.
+ */
 export function useJurnalTerbaruGudang() {
-  const kueri = useDaftarJurnalStok({ tipeLokasi: "Gudang" });
+  const gudang = useLokasiBertipe("Gudang");
+  const kueri = useHalamanJurnalStok(
+    gudang.lokasiId ? { lokasiID: gudang.lokasiId, arah: "ALL", alasan: "ALL" } : null,
+    1,
+    BATAS_BARIS,
+  );
   return {
-    data: kueri.data ? jurnalTerbaruGudang(kueri.data) : null,
-    memuat: kueri.isLoading,
-    gagal: kueri.isError,
-    ulangi: () => void kueri.refetch(),
+    data: kueri.data ? jurnalTerbaruGudang(kueri.data.data) : null,
+    memuat: gudang.isLoading || kueri.isLoading,
+    gagal: gudang.isError || kueri.isError,
+    ulangi: () => void (gudang.isError ? gudang.refetch() : kueri.refetch()),
   };
 }

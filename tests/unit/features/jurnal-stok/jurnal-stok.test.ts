@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { JurnalStok } from "@/types/jurnalStok";
-import { dalamLingkup, filterServer, saringJurnal } from "@/features/jurnal-stok/filter";
+import { dalamLingkup, filterServer, paramHalamanJurnal, saringJurnal } from "@/features/jurnal-stok/filter";
 import { formatWaktuJurnal } from "@/features/jurnal-stok/tampilan";
 import { lokasiTunggal } from "@/features/inventaris/lokasi";
 
@@ -108,5 +108,39 @@ describe("filterServer", () => {
   it("mengirim locationID hanya untuk lingkup satu lokasi", () => {
     expect(filterServer({ lokasiID: "l1" })).toEqual({ locationID: "l1" });
     expect(filterServer({ tipeLokasi: "Gudang" })).toEqual({});
+  });
+});
+
+describe("paramHalamanJurnal", () => {
+  it("mengirim lokasi, halaman, dan ukuran; pilihan ALL dan periode kosong tidak dikirim", () => {
+    expect(paramHalamanJurnal({ lokasiID: "l1", arah: "ALL", alasan: "ALL" }, 1, 20)).toEqual({
+      locationID: "l1",
+      page: "1",
+      limit: "20",
+    });
+  });
+
+  it("mengirim periode sebagai tanggal lokal, arah sebagai tipeKoreksi, dan alasan", () => {
+    expect(
+      paramHalamanJurnal(
+        {
+          lokasiID: "l1",
+          arah: "Keluar",
+          alasan: "Stok Opname",
+          dari: new Date(2026, 9, 1),
+          sampai: new Date(2026, 9, 21, 15, 30),
+        },
+        3,
+        10,
+      ),
+    ).toEqual({
+      locationID: "l1",
+      dari: "2026-10-01",
+      sampai: "2026-10-21",
+      tipeKoreksi: "Keluar",
+      alasan: "Stok Opname",
+      page: "3",
+      limit: "10",
+    });
   });
 });

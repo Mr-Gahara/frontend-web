@@ -1,3 +1,4 @@
+import { keTanggalLokal } from "@/lib/waktu";
 import type { AlasanJurnal, JurnalStok, TipeKoreksi } from "@/types/jurnalStok";
 import type { FilterJurnalStok } from "./api";
 
@@ -17,14 +18,42 @@ export interface KriteriaJurnal {
 export type LingkupJurnal = { lokasiID: string } | { tipeLokasi: string };
 
 /**
- * Filter yang dikirim ke server untuk sebuah lingkup. Hanya lingkup satu
- * lokasi yang membawa locationID; lingkup tipe lokasi disaring di klien.
- * Hari ini backend mengabaikan query ini (jurnalStokController tidak membaca
- * req.query), sehingga penyaringan klien lewat dalamLingkup tetap wajib.
- * Dikirim agar data langsung tersaring di server begitu backend membacanya.
+ * Filter daftar utuh untuk sebuah lingkup (mode klien). Hanya lingkup satu
+ * lokasi yang membawa locationID; lingkup tipe lokasi disaring di klien lewat
+ * dalamLingkup. Dipakai sampai halaman jurnal beralih ke paramHalamanJurnal.
  */
 export function filterServer(lingkup: LingkupJurnal): FilterJurnalStok {
   return "lokasiID" in lingkup ? { locationID: lingkup.lokasiID } : {};
+}
+
+/** Kriteria GET /jurnalstok berhalaman (B102). Server membaca dari dan sampai sebagai hari WIB. */
+export interface KriteriaServerJurnal {
+  lokasiID: string;
+  arah: FilterArah;
+  alasan: FilterAlasan;
+  dari?: Date;
+  sampai?: Date;
+}
+
+/**
+ * Query satu halaman jurnal: lokasi, filter yang terisi, lalu page dan limit.
+ * Pilihan "ALL" dan periode kosong tidak dikirim, karena backend menolak query
+ * yang tidak dikenalnya dengan 400.
+ */
+export function paramHalamanJurnal(
+  kriteria: KriteriaServerJurnal,
+  halaman: number,
+  ukuran: number,
+): Record<string, string> {
+  return {
+    locationID: kriteria.lokasiID,
+    ...(kriteria.dari ? { dari: keTanggalLokal(kriteria.dari) } : {}),
+    ...(kriteria.sampai ? { sampai: keTanggalLokal(kriteria.sampai) } : {}),
+    ...(kriteria.arah !== "ALL" ? { tipeKoreksi: kriteria.arah } : {}),
+    ...(kriteria.alasan !== "ALL" ? { alasan: kriteria.alasan } : {}),
+    page: String(halaman),
+    limit: String(ukuran),
+  };
 }
 
 export function dalamLingkup(jurnal: JurnalStok, lingkup: LingkupJurnal): boolean {

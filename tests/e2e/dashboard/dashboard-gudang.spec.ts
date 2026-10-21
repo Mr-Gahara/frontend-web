@@ -53,6 +53,7 @@ async function bukaDashboard(page: Page) {
     ringkasan: await isi<RingkasanMentah>(rRingkasan),
     inventory: await isi<InventoryMentah[]>(rInventory),
     jurnal: await isi<JurnalMentah[]>(rJurnal),
+    urlJurnal: rJurnal.url(),
   };
 }
 
@@ -112,7 +113,7 @@ test.describe("Dashboard gudang", () => {
   });
 
   test("stok kritis dan jurnal hanya gudang, paling banyak lima baris", async ({ page }) => {
-    const { inventory, jurnal } = await bukaDashboard(page);
+    const { inventory, jurnal, urlJurnal } = await bukaDashboard(page);
     const kritis = inventory.filter((i) => i.isStokKritis).length;
     const panelStok = page.getByRole("region", { name: /^Stok kritis/ });
     if (kritis === 0) {
@@ -123,6 +124,11 @@ test.describe("Dashboard gudang", () => {
     }
 
     const jurnalGudang = jurnal.filter((j) => j.locationID?.tipe === "Gudang").length;
+    const query = new URL(urlJurnal).searchParams;
+    expect(query.get("page"), "panel jurnal meminta halaman pertama").toBe("1");
+    expect(query.get("limit"), "panel jurnal meminta lima baris").toBe("5");
+    expect(query.get("locationID"), "panel jurnal menyaring satu lokasi gudang").toBeTruthy();
+    expect(jurnalGudang, "server hanya mengirim jurnal gudang").toBe(jurnal.length);
     const panelJurnal = page.getByRole("region", { name: "Jurnal terbaru" });
     if (jurnalGudang === 0) {
       await expect(panelJurnal).toContainText("Belum ada jurnal stok di gudang.");
