@@ -10,41 +10,12 @@ import { IZIN } from "@/lib/auth/permissions";
 import { panelDashboardGudang, urlBoleh } from "@/features/dashboard-gudang/izin";
 import {
   TAUTAN_DASHBOARD_GUDANG,
-  hitungAntreanPengajuan,
+  antreanDariRingkasan,
   jurnalTerbaruGudang,
   stokKritis,
 } from "@/features/dashboard-gudang/ringkasan";
 import type { Inventory } from "@/types/inventory";
 import type { JurnalStok } from "@/types/jurnalStok";
-import type { PengajuanStok } from "@/types/pengajuanStok";
-
-function pengajuan(
-  nomor: string,
-  status: PengajuanStok["status"],
-  opsi: { terbalik?: boolean; suratJalan?: boolean } = {},
-): PengajuanStok {
-  return {
-    id: nomor,
-    tenantID: null,
-    nomorPengajuan: nomor,
-    jenisPengajuan: "PERMINTAAN",
-    status,
-    dariLokasi: { id: "g", nama: "Gudang Utama", tipe: opsi.terbalik ? "Outlet" : "Gudang" },
-    keLokasi: { id: "o", nama: "Outlet Kota", tipe: opsi.terbalik ? "Gudang" : "Outlet" },
-    dimintaOleh: null,
-    disetujuiOleh: null,
-    ditolakOleh: null,
-    items: [],
-    catatan: null,
-    catatanPenolakan: null,
-    tanggalKebutuhan: null,
-    tanggalApprove: null,
-    tanggalReject: null,
-    transferStokID: opsi.suratJalan ? "SJ-" + nomor : null,
-    createdAt: "2026-10-19T00:00:00.000Z",
-    updatedAt: "2026-10-19T00:00:00.000Z",
-  };
-}
 
 function inventori(id: string, nama: string, stok: number, stokMinimum: number, isStokKritis: boolean): Inventory {
   return {
@@ -76,22 +47,24 @@ function jurnal(id: string, tanggal: string, tipeLokasi: string): JurnalStok {
   };
 }
 
-describe("hitungAntreanPengajuan", () => {
-  it("sama dengan isi tab gudang: tanpa draf, tanpa arah terbalik, tanpa yang sudah punya surat jalan", () => {
-    const hasil = hitungAntreanPengajuan([
-      pengajuan("A", "SUBMITTED"),
-      pengajuan("B", "SUBMITTED", { terbalik: true }),
-      pengajuan("C", "DRAFT"),
-      pengajuan("D", "APPROVED"),
-      pengajuan("E", "PENDING"),
-      pengajuan("F", "APPROVED", { suratJalan: true }),
-      pengajuan("G", "COMPLETED"),
-    ]);
-    expect(hasil).toEqual({ perluTinjauan: 1, perluSuratJalan: 2 });
+describe("antreanDariRingkasan", () => {
+  it("memetakan hitungan pengajuan server ke kartu, tanpa tercampur hitungan surat jalan", () => {
+    expect(
+      antreanDariRingkasan({
+        pengajuan: { menungguApproval: 3, siapDibuatSuratJalan: 2 },
+        transfer: { suratJalanPending: 1, sedangDikirim: 4 },
+        inventory: { stokKritis: 7 },
+        jurnalTerbaru: [],
+      }),
+    ).toEqual({ perluTinjauan: 3, perluSuratJalan: 2 });
   });
+});
 
-  it("daftar kosong menghasilkan nol", () => {
-    expect(hitungAntreanPengajuan([])).toEqual({ perluTinjauan: 0, perluSuratJalan: 0 });
+describe("panelDashboardGudang: kartu pengajuan", () => {
+  it("butuh read-pengajuan-stok dan read-dashboard-gudang sekaligus", () => {
+    expect(panelDashboardGudang([IZIN.pengajuanStok, IZIN.dashboardGudang]).pengajuan).toBe(true);
+    expect(panelDashboardGudang([IZIN.pengajuanStok]).pengajuan).toBe(false);
+    expect(panelDashboardGudang([IZIN.dashboardGudang]).pengajuan).toBe(false);
   });
 });
 

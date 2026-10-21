@@ -90,9 +90,10 @@ export const queryKeys = {
     daftar: (filter?: Filter) => ["transferStok", "daftar", filter] as const,
     detail: (id: string) => ["transferStok", "detail", id] as const,
     /**
-     * Ringkasan GET /dashboard/gudang. Diletakkan di bawah akar transferStok
-     * karena web hanya memakai hitungan surat jalannya, sehingga invalidasi
-     * akar transferStok setelah buat, kirim, atau batal ikut memperbaruinya.
+     * Ringkasan GET /dashboard/gudang: hitungan surat jalan dan, sejak B101,
+     * hitungan pengajuan. Diletakkan di bawah akar transferStok, sehingga
+     * invalidasi akar itu setelah buat, kirim, atau batal surat jalan ikut
+     * memperbaruinya; aksi pengajuan menginvalidasi kunci ini sendiri.
      */
     ringkasanGudang: () => ["transferStok", "ringkasanGudang"] as const,
   },

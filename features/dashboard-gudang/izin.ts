@@ -7,7 +7,10 @@ import { IZIN, bolehBukaRute } from "@/lib/auth/permissions";
 import type { Tautan } from "./ringkasan";
 
 export interface PanelDashboardGudang {
-  /** Kartu pengajuan, dihitung dari GET /pengajuanstok. */
+  /**
+   * Kartu pengajuan, dari GET /dashboard/gudang. read-pengajuan-stok tetap
+   * disyaratkan agar hanya pengguna yang berurusan dengan pengajuan melihatnya.
+   */
   pengajuan: boolean;
   /** Kartu surat jalan, dari GET /dashboard/gudang. */
   pengiriman: boolean;
@@ -20,7 +23,7 @@ export interface PanelDashboardGudang {
 export function panelDashboardGudang(permissions: readonly string[]): PanelDashboardGudang {
   const punya = (izin: string) => permissions.includes(izin);
   return {
-    pengajuan: punya(IZIN.pengajuanStok),
+    pengajuan: punya(IZIN.pengajuanStok) && punya(IZIN.dashboardGudang),
     pengiriman: punya(IZIN.dashboardGudang),
     stokKritis: punya(IZIN.location) && (punya(IZIN.inventory) || punya(IZIN.inventoryGudang)),
     jurnal: punya(IZIN.jurnalStok),

@@ -9,10 +9,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useDaftarInventory, useLokasiBertipe } from "@/features/inventaris/hooks";
 import { useDaftarJurnalStok } from "@/features/jurnal-stok/hooks";
-import { useDaftarPengajuanStok } from "@/features/pengajuan-stok/hooks";
 import { queryKeys } from "@/lib/queryKeys";
 import { dashboardGudangApi } from "./api";
-import { hitungAntreanPengajuan, jurnalTerbaruGudang, stokKritis } from "./ringkasan";
+import { antreanDariRingkasan, jurnalTerbaruGudang, stokKritis } from "./ringkasan";
 
 /** Hitungan surat jalan; filternya sama dengan tab DRAFT SJ dan halaman pengiriman. */
 export function useRingkasanPengiriman() {
@@ -29,11 +28,19 @@ export function useRingkasanPengiriman() {
   };
 }
 
-/** Kartu pengajuan. Kuncinya sama dengan tab Semua daftar pengajuan gudang, sehingga cache dipakai bersama. */
+/**
+ * Kartu pengajuan, dari ringkasan yang sama dengan kartu surat jalan: satu
+ * permintaan untuk kedua kelompok. Aksi pengajuan ikut menginvalidasi kuncinya
+ * (features/pengajuan-stok/hooks.ts).
+ */
 export function useAntreanPengajuan() {
-  const kueri = useDaftarPengajuanStok({});
+  const kueri = useQuery({
+    queryKey: queryKeys.transferStok.ringkasanGudang(),
+    queryFn: dashboardGudangApi.ringkasan,
+    select: antreanDariRingkasan,
+  });
   return {
-    data: kueri.data ? hitungAntreanPengajuan(kueri.data) : null,
+    data: kueri.data ?? null,
     memuat: kueri.isLoading,
     gagal: kueri.isError,
     ulangi: () => void kueri.refetch(),

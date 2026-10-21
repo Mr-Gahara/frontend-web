@@ -11,7 +11,10 @@ const URL_DASHBOARD = BASIS + "/dashboard/gudang";
 
 type Lokasi = { tipe?: string } | null | undefined;
 type PengajuanMentah = { status: string; dariLokasi?: Lokasi; keLokasi?: Lokasi; transferStokID?: unknown };
-type RingkasanMentah = { transfer: { suratJalanPending: number; sedangDikirim: number } };
+type RingkasanMentah = {
+  pengajuan: { menungguApproval: number; siapDibuatSuratJalan: number };
+  transfer: { suratJalanPending: number; sedangDikirim: number };
+};
 type InventoryMentah = { isStokKritis?: boolean };
 type JurnalMentah = { locationID?: Lokasi };
 
@@ -34,16 +37,19 @@ const perluTinjauan = (p: PengajuanMentah) => arahBenar(p) && p.status === "SUBM
 const perluSuratJalan = (p: PengajuanMentah) =>
   arahBenar(p) && (p.status === "APPROVED" || p.status === "PENDING") && !p.transferStokID;
 
-/** Buka dashboard dan tangkap keempat sumber datanya. */
+/** Buka dashboard dan tangkap ketiga sumber datanya, serta permintaan daftar pengajuan bila ada. */
 async function bukaDashboard(page: Page) {
+  const permintaanPengajuan: string[] = [];
+  page.on("request", (r) => {
+    if (r.method() === "GET" && POLA_PENGAJUAN.test(r.url())) permintaanPengajuan.push(r.url());
+  });
   const tunggu = Promise.all(
-    [POLA_PENGAJUAN, POLA_RINGKASAN, POLA_INVENTORY, POLA_JURNAL].map((p) => page.waitForResponse(dapatGet(p))),
+    [POLA_RINGKASAN, POLA_INVENTORY, POLA_JURNAL].map((p) => page.waitForResponse(dapatGet(p))),
   );
   await page.goto(URL_DASHBOARD, { waitUntil: "commit" });
-  const [rPengajuan, rRingkasan, rInventory, rJurnal] = await tunggu;
-  expect(new URL(rPengajuan.url()).searchParams.get("status")).toBeNull();
+  const [rRingkasan, rInventory, rJurnal] = await tunggu;
   return {
-    pengajuan: await isi<PengajuanMentah[]>(rPengajuan),
+    permintaanPengajuan: [...permintaanPengajuan],
     ringkasan: await isi<RingkasanMentah>(rRingkasan),
     inventory: await isi<InventoryMentah[]>(rInventory),
     jurnal: await isi<JurnalMentah[]>(rJurnal),
@@ -55,26 +61,38 @@ test.describe("Dashboard gudang", () => {
     await login(page);
   });
 
-  test("angka pengajuan sama dengan isi tab tujuannya", async ({ page }) => {
-    const { pengajuan } = await bukaDashboard(page);
+  test("angka pengajuan dari ringkasan sama dengan isi tab tujuannya", async ({ page }) => {
+    const { ringkasan, permintaanPengajuan } = await bukaDashboard(page);
+    expect(permintaanPengajuan, "dashboard tidak mengambil daftar pengajuan").toEqual([]);
     const grup = page.getByRole("region", { name: "Pengajuan dari outlet" });
-    const tinjau = pengajuan.filter(perluTinjauan).length;
-    const suratJalan = pengajuan.filter(perluSuratJalan).length;
-    await expect(grup).toContainText(`${angka(tinjau)} pengajuan perlu disetujui`);
-    await expect(grup).toContainText(`${angka(suratJalan)} pengajuan sudah disetujui, surat jalannya belum dibuat`);
-
-    if (suratJalan === 0) {
-      await expect(grup.getByRole("link")).toHaveCount(tinjau === 0 ? 0 : 1);
-      await expect(grup).toContainText("Semua sudah dibuatkan surat jalan");
-      return;
-    }
-    await grup.getByRole("link", { name: /surat jalannya belum dibuat/ }).click();
-    await expect(page).toHaveURL(BASIS + "/dashboard/gudang/pengajuanStok?tab=perlu-surat-jalan");
-    await expect(page.getByRole("button", { name: "PERLU SURAT JALAN", exact: true })).toHaveAttribute(
-      "aria-pressed",
-      "true",
+    const { menungguApproval, siapDibuatSuratJalan } = ringkasan.pengajuan;
+    await expect(grup).toContainText(`${angka(menungguApproval)} pengajuan perlu disetujui`);
+    await expect(grup).toContainText(
+      `${angka(siapDibuatSuratJalan)} pengajuan sudah disetujui, surat jalannya belum dibuat`,
     );
-    await expect(page.getByText(`${suratJalan} total data`, { exact: true })).toBeVisible();
+
+    const tungguDaftar = page.waitForResponse(dapatGet(POLA_PENGAJUAN));
+    if (siapDibuatSuratJalan === 0) {
+      await expect(grup.getByRole("link")).toHaveCount(menungguApproval === 0 ? 0 : 1);
+      await expect(grup).toContainText("Semua sudah dibuatkan surat jalan");
+      await page.goto(BASIS + "/dashboard/gudang/pengajuanStok?tab=perlu-surat-jalan", { waitUntil: "commit" });
+    } else {
+      await grup.getByRole("link", { name: /surat jalannya belum dibuat/ }).click();
+      await expect(page).toHaveURL(BASIS + "/dashboard/gudang/pengajuanStok?tab=perlu-surat-jalan");
+      await expect(page.getByRole("button", { name: "PERLU SURAT JALAN", exact: true })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      await expect(page.getByText(`${siapDibuatSuratJalan} total data`, { exact: true })).toBeVisible();
+    }
+
+    // B101: hitungan server sama dengan aturan tab daftar gudang. Selisih berarti
+    // ada pengajuan Outlet ke Gudang (P8) yang belum ditampilkan web.
+    const rDaftar = await tungguDaftar;
+    expect(new URL(rDaftar.url()).searchParams.get("status")).toBeNull();
+    const pengajuan = await isi<PengajuanMentah[]>(rDaftar);
+    expect(pengajuan.filter(perluTinjauan).length, "perlu tinjauan").toBe(menungguApproval);
+    expect(pengajuan.filter(perluSuratJalan).length, "perlu surat jalan").toBe(siapDibuatSuratJalan);
   });
 
   test("angka pengiriman dari ringkasan dan tautan Kirim sekarang ke tab DRAFT SJ", async ({ page }) => {

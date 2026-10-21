@@ -4,13 +4,12 @@
  * yang tampil di sana.
  */
 import { saringJurnal } from "@/features/jurnal-stok/filter";
-import { cocokTab, saringPengajuan } from "@/features/pengajuan-stok/filter";
 import { SLUG_TAB_PENGAJUAN } from "@/features/pengajuan-stok/tampilan";
 import { SLUG_TAB_TRANSFER } from "@/features/transfer-stok/tampilan";
 import { urlDenganTab } from "@/lib/tab-url";
+import type { RingkasanDashboardGudang } from "@/types/dashboardGudang";
 import type { Inventory } from "@/types/inventory";
 import type { JurnalStok } from "@/types/jurnalStok";
-import type { PengajuanStok } from "@/types/pengajuanStok";
 
 /** Jumlah baris stok kritis dan jurnal yang ditampilkan. */
 export const BATAS_BARIS = 5;
@@ -21,14 +20,17 @@ export interface AntreanPengajuan {
 }
 
 /**
- * Hitungan kartu pengajuan: sama dengan isi tab PERLU TINJAUAN dan PERLU SURAT
- * JALAN di daftar gudang, termasuk penyaringan arah lokasi dan draf.
+ * Hitungan kartu pengajuan dari GET /dashboard/gudang. Sejak B101 aturan server
+ * sama dengan tab PERLU TINJAUAN dan PERLU SURAT JALAN di daftar gudang:
+ * SUBMITTED, serta APPROVED atau PENDING yang belum punya surat jalan. Server
+ * menghitung kedua arah pengajuan (P8), sedangkan daftar gudang baru
+ * menampilkan Gudang ke Outlet, sehingga angkanya berbeda begitu ada
+ * pengembalian dari outlet sebelum alur itu didukung web.
  */
-export function hitungAntreanPengajuan(daftar: PengajuanStok[]): AntreanPengajuan {
-  const tampil = saringPengajuan(daftar, "gudang", "");
+export function antreanDariRingkasan(ringkasan: RingkasanDashboardGudang): AntreanPengajuan {
   return {
-    perluTinjauan: tampil.filter((p) => cocokTab(p, "SUBMITTED")).length,
-    perluSuratJalan: tampil.filter((p) => cocokTab(p, "PERLU_SURAT_JALAN")).length,
+    perluTinjauan: ringkasan.pengajuan.menungguApproval,
+    perluSuratJalan: ringkasan.pengajuan.siapDibuatSuratJalan,
   };
 }
 

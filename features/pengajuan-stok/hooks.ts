@@ -30,13 +30,17 @@ export function usePengajuanStok(id: string) {
 
 type OpsiMutasi<V> = Pick<UseMutationOptions<unknown, Error, V>, "onSuccess" | "onError">;
 
-/** Semua perubahan pengajuan menginvalidasi akar domain: daftar dan detail sekaligus. */
+/**
+ * Semua perubahan pengajuan menginvalidasi akar domain: daftar dan detail
+ * sekaligus, ditambah ringkasan dashboard gudang yang menghitung pengajuan.
+ */
 function useMutasiPengajuan<V>(jalankan: (vars: V) => Promise<unknown>, opsi: OpsiMutasi<V>) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: jalankan,
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.pengajuanStok.semua });
+      queryClient.invalidateQueries({ queryKey: queryKeys.transferStok.ringkasanGudang() });
       opsi.onSuccess?.(...args);
     },
     onError: opsi.onError,
