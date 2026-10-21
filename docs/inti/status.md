@@ -34,7 +34,11 @@ dari dashboard gudang), bersama perbaikan pengajuan PENDING, font Geist,
 tab di `?tab=`, penyesuaian backend `ridho` `af5f315`, dan pemecahan
 dokumentasi menjadi lapis inti, modul, referensi, dan arsip
 (`4cbb38f`). Pemilik proyek lalu memilih label tab berbahasa awam
-sebagai pekerjaan berikutnya.
+sebagai pekerjaan berikutnya. Sebelum itu, penyesuaian backend `ridho`
+`b5b367a` diselesaikan pada 21 Oktober 2026
+(`referensi/keputusan-penyesuaian-backend.md`): template role, kartu
+pengajuan dashboard gudang dari server, jurnal stok berhalaman di
+server, dan izin jurnal gudang.
 
 Tab daftar pengajuan stok masih menampilkan sebagian kode status mentah:
 `labelTab` di `halaman-daftar-pengajuan-stok.tsx` hanya mengisi sebagian
@@ -43,12 +47,13 @@ REJECTED di gudang tampil apa adanya. Label tab daftar surat jalan
 (`LABEL_TAB_TRANSFER` di `features/transfer-stok/tampilan.ts`, misalnya
 DRAFT SJ) masih diambil dari halaman lama dan ikut ditinjau. Desain harus
 mudah dipahami orang awam, sehingga perubahannya didahului pratinjau
-visual. Langkah pertama sesi berikutnya: periksa cabang backend, lalu
-petakan seluruh tab dan labelnya.
+visual. Halaman bertab di web ada tiga: daftar pengajuan stok, daftar
+surat jalan, dan pajak (21 Oktober 2026). Langkah pertama sesi
+berikutnya: periksa cabang backend, lalu petakan label ketiganya.
 
-Backend lokal berada di `ridho` `af5f315` (fast-forward ke `origin/yoga`,
-yang memuat `origin/nizar`). Suite e2e penuh terakhir: 476 lolos dan 14
-skipped di `d6f8ba0` (`inti/pengujian.md`, Baseline). Dua belas
+Backend lokal berada di `ridho` `b5b367a` (fast-forward ke `origin/yoga`,
+yang memuat `origin/nizar`). Suite e2e penuh terakhir: 478 lolos dan 14
+skipped di `b03c276` (`inti/pengujian.md`, Baseline). Dua belas
 `test.fixme` menunggu backend.
 
 ```bash
@@ -58,6 +63,24 @@ grep -nE 'labelTab|LABEL_TAB|tab:' features/pengajuan-stok/halaman-daftar-pengaj
 ```
 
 ## Utang kecil yang tertunda
+
+## Utang kecil dari penyesuaian backend `ridho` `b5b367a`
+
+- Stock opname, stock adjustment, surat jalan, dan pengajuan stok tetap
+  mode klien, karena backend belum punya pencarian teks
+  (`kontrak/temuan.md` butir 150). Paginasi B104 sampai B106 dipakai
+  bersama pencarian begitu tersedia (keputusan rancangan butir 27).
+  Pengajuan stok juga menunggu filter tab gabungan (butir 152).
+- Kotak cari nama bahan jurnal stok disembunyikan sampai backend
+  menerima query pencarian (butir 150), lalu dikembalikan.
+- Lingkup per tipe lokasi dikirim sebagai satu `locationID` (MVP);
+  multi-lokasi menunggu filter tipe lokasi (butir 151).
+- Pengajuan Outlet ke Gudang (P8 backend) belum tampil di web; alurnya
+  dikerjakan terpisah dengan pratinjau (`modul/inventaris.md`). Sampai
+  itu kartu pengajuan dashboard gudang dapat melebihi isi tab bila ada
+  pengembalian dari outlet.
+- `lokasiJurnalOutlet` dipindah ke `features/inventaris/cakupan.ts` bila
+  daftar lain ikut pindah ke server (keputusan rancangan butir 12).
 
 ## Utang kecil dari penyesuaian backend `ridho` `7d28135`
 
@@ -100,6 +123,7 @@ grep -nE 'labelTab|LABEL_TAB|tab:' features/pengajuan-stok/halaman-daftar-pengaj
 - Izin pembelian stok belum masuk template role, dan modul pembelian
   stok belum punya halaman di web (RH6a). Izin stock adjustment per
   ruang juga belum masuk template role (RH3a).
+  Izin stock adjustment per ruang masuk template di `4088d9e`.
 - Belum dicocokkan dari 42 commit backend: modul pembelian stok, dan
   cache produk saat pajak berubah (`kontrak/README.md`).
 - Hapus aset yang punya booking (butir 52) dan hapus kategori yang
@@ -119,6 +143,7 @@ grep -nE 'labelTab|LABEL_TAB|tab:' features/pengajuan-stok/halaman-daftar-pengaj
   17 Oktober 2026 di `00de455`, fast-forward dua commit dokumen `nizar`.
   Sejak 19 Oktober 2026 di `af5f315`, fast-forward ke `origin/yoga` yang
   memuat `origin/nizar` (`referensi/keputusan-penyesuaian-backend.md`).
+  Sejak 21 Oktober 2026 di `b5b367a`, fast-forward ke `origin/yoga`.
 - Indeks pelanggan di basis data development belum sesuai skema
   (`kontrak/temuan.md` butir 142); dibiarkan sebagai bukti sampai backend
   menyediakan migrasi indeks.
@@ -182,3 +207,6 @@ grep -nE 'labelTab|LABEL_TAB|tab:' features/pengajuan-stok/halaman-daftar-pengaj
 - Satu skip bersyarat data bertambah di suite penuh `d6f8ba0`
   dibanding hitungan, dan skenarionya belum diidentifikasi
   (`inti/pengujian.md`, Baseline).
+  Teridentifikasi 21 Oktober 2026: "buat surat jalan gagal" di spec
+  alur pengajuan, dilewati karena tenant uji tidak punya pengajuan
+  APPROVED tanpa surat jalan.

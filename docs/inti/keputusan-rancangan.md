@@ -223,3 +223,13 @@ sama (submodul pengajuan stok, di bawah).
     berada di menu titik tiga, dan kolom yang tidak muat pindah ke dialog
     rincian (pemilik proyek, 11 Oktober 2026, `93490bb`, `cc1092e`,
     `f44db05`, `9cd22e1`; keputusan TB1a sampai TB7a).
+27. **Daftar dipindah ke paginasi server hanya bersama seluruh
+    filternya, termasuk pencarian.** Filter tanpa padanan di server
+    tidak disaring di klien atas halaman yang sedang tampil, karena
+    hasilnya keliru diam-diam. Bila backend belum punya pencariannya,
+    padanannya diminta ke backend, dan daftar tetap mode klien dengan
+    pencarian yang berfungsi sampai keduanya dapat dipindah bersama.
+    Pengecualian yang diputuskan: jurnal stok berhalaman di server tanpa
+    kotak cari, karena tumbuh satu baris per bahan setiap penjualan
+    (pemilik proyek, 21 Oktober 2026, `b03c276`; `kontrak/temuan.md`
+    butir 150).

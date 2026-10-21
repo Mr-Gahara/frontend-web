@@ -400,3 +400,36 @@ sampai B100) dan menggabungkan `origin/nizar`.
   kontraknya pasti (kategori beban kembar 409), agar regresi terdeteksi.
 - Suite e2e penuh dijalankan karena ini penyesuaian backend: 476 lolos
   dan 14 skipped, tanpa kegagalan (`d6f8ba0`).
+
+## Penyesuaian backend `ridho` `b5b367a`
+
+Diputuskan pemilik proyek pada 21 Oktober 2026, setelah `origin/yoga`
+maju sembilan commit di atas `af5f315` (paginasi B102 sampai B106,
+filter pembelian stok B103, hitungan dashboard B101, serta jurnal manual
+P24 dan B107).
+
+- **`ridho` di-fast-forward ke `b5b367a` dan di-push**, seperti
+  `af5f315`. Permission diselaraskan: `delete-jurnal-stok` dilepas dari
+  5 role lalu dihapus, basis data dan seed sama-sama 139 nama.
+- **Template role mengikuti seed dan dilengkapi** (`ffd3994`,
+  `4088d9e`; `modul/akses.md`, Template role), termasuk RH3a.
+- **B101 dibuktikan dulu, lalu kartu pengajuan dashboard gudang memakai
+  angka server** (`74b6af4`; `modul/gudang.md`). Kelompok pengajuan
+  tetap menuntut `read-pengajuan-stok`.
+- **Pengajuan stok dua arah mengikuti P8** sebagai pekerjaan terpisah
+  dengan pratinjau; penjaga web tetap sampai itu (`modul/inventaris.md`,
+  submodul pengajuan stok).
+- **Paginasi server hanya bersama pencarian** (keputusan rancangan butir
+  27): jurnal stok pindah ke server tanpa kotak cari (`081d5dc`,
+  `b03c276`), dengan filter periode baru; stock opname, stock
+  adjustment, surat jalan, dan pengajuan stok tetap mode klien. Kotak
+  cari kedua daftar stok sempat diputuskan dibuang, lalu dibalik pemilik
+  proyek: pencarian tidak dibuang, padanannya diminta ke backend.
+- **Filter Sumber stock adjustment** (`referenceType`) tidak
+  ditambahkan.
+- **Izin jurnal gudang dan panel jurnal dashboard menuntut
+  `read-location`** (`029413d`), ditemukan saat penilaian dampak.
+- Laporan untuk Yoga: butir 150 sampai 153, serta pembuktian butir 149
+  dan 46.
+- Suite e2e penuh dijalankan karena ini penyesuaian backend: 478 lolos
+  dan 14 skipped, tanpa kegagalan (`b03c276`).

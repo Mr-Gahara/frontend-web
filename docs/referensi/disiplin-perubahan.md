@@ -891,3 +891,18 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   dan path, atau judul bagian), kalimat ditambahkan di akhirnya, dan
   skrip berhenti bila sasaran tidak tepat satu atau sudah diterapkan
   (dokumen penutup `2dd57aa`).
+- **Alat diperiksa keberadaannya sebelum dipakai.** `npx` untuk paket
+  yang tidak ada di `node_modules/.bin` menunggu konfirmasi unduh, dan
+  bila keluarannya dibuang ke `/dev/null` terminal tampak macet
+  (Prettier, 21 Oktober 2026). Sebelum menulis alat sekali pakai, baca
+  daftar helper di `referensi/helper-dan-shell.md`: `/tmp/tambal.js`
+  sempat ditulis ulang padahal `ganti-blok.js` sudah melakukannya.
+- **Grep peta kode untuk teks antarmuka memakai `-i`.** Kotak cari
+  bawaan `DataTable` ("Cari no. opname...") lolos dari pola huruf kecil
+  `cari`, sehingga pemetaan stock opname sempat keliru menyatakan tanpa
+  pencarian.
+- **Endpoint baru di halaman atau panel berarti syarat izinnya dinilai
+  ulang di commit yang sama** (keputusan rancangan butir 9 dan 16).
+  Jurnal gudang dan panel jurnal dashboard mulai memanggil `/location`
+  di `081d5dc` dan `b03c276` tanpa menuntut `read-location`; ditemukan
+  saat penilaian dampak dan diperbaiki di `029413d`.

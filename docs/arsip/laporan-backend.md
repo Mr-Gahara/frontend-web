@@ -277,6 +277,11 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   gudang ikut menghitung pengajuan yang sudah punya surat jalan (butir
   149); B98 sampai B100 terbukti (butir 22, 148, dan 137), dan B97
   dicatat
+- Laporan untuk Yoga: 4 temuan dan pembuktian, disusun 21 Oktober 2026
+  terhadap `ridho` `b5b367a`: pencarian teks di lima daftar stok (butir
+  150), filter tipe lokasi (butir 151), filter tab gabungan pengajuan
+  (butir 152), dan komentar arah surat jalan (butir 153); butir 149
+  (B101) dan 46 (B102) terbukti
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

@@ -86,6 +86,10 @@ data disilang dengan seed lebih dulu, lalu diselaraskan dengan urutan ini
 
 1. Tinjau dengan skrip baca-saja: jumlah permission basis data dan seed,
    nama di luar seed, nama seed yang belum ada, dan role pemegangnya.
+   Nama seed dibaca dari ekspor `permissionsList` (aman di-`require`,
+   karena koneksi hanya dibuka bila berkasnya dijalankan langsung),
+   bukan dari pola teks: sebagian entri ditulis satu baris, dan pola
+   `nama:` di awal baris pernah melewatkan 28 nama (21 Oktober 2026).
 2. Nama yang dikeluarkan dari seed dilepas dari role (`$pull`) lalu
    dihapus, hanya bila daftar di luar seed sama dengan nama yang
    diharapkan, agar permission kustom tidak ikut terhapus.
@@ -168,6 +172,11 @@ ditambahkan seperti B27 sampai B38, dan nomor baru dimulai dari B97
 (keputusan RG2a). Setelah itu permission diselaraskan
 (`delete-beban-operasional` dibuang dari seed), lalu
 `npm run db:lokasi-penjualan` dan `npm run db:indeks` dijalankan.
+Pada 21 Oktober 2026 `yoga` maju sembilan commit di atas `af5f315`, dan
+`ridho` tidak punya commit di luarnya, sehingga `ridho` di-fast-forward
+ke `b5b367a` dan di-push tanpa pemeriksaan kelengkapan. Seed membuang
+`delete-jurnal-stok` (P24); permission diselaraskan lewat langkah di
+atas, lalu `npm run db:indeks` dijalankan.
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari

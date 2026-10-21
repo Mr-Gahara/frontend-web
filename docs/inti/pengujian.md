@@ -11,16 +11,17 @@ ada di `referensi/playwright.md`.
 
 ## Baseline
 
-**Baseline per penyesuaian backend `ridho` `af5f315`** (commit `d6f8ba0`,
-19 Oktober 2026): 710 test unit dan integrasi lolos di 85 berkas. Suite
-e2e penuh dijalankan terhadap backend `ridho` `af5f315`: 476 lolos dan
-14 skipped, tanpa kegagalan, dalam 23,6 menit. Totalnya 490, sama dengan
-hitungan: 481 per halaman pengeluaran, ditambah sepuluh skenario baru
-(tiga di daftar pengajuan stok, `781c861`; tiga untuk `?tab=`,
-`a68a75f`; empat di dashboard gudang, `50dca2f`), dikurangi satu
-`test.fixme` yang menjadi langkah di skenario draft stock opname
-(`d6f8ba0`). Harapan lolosnya 477; satu skip bersyarat data bertambah,
-sehingga skipped tetap 14. Skenarionya belum diidentifikasi.
+**Baseline per penyesuaian backend `ridho` `b5b367a`** (commit `b03c276`,
+21 Oktober 2026): 721 test unit dan integrasi lolos di 86 berkas. Suite
+e2e penuh dijalankan terhadap backend `ridho` `b5b367a`: 478 lolos dan
+14 skipped, tanpa kegagalan, dalam 23,3 menit. Totalnya 492: 490 per
+`d6f8ba0`, ditambah dua di spec jurnal stok (skenario pencarian
+dibuang; alasan, periode, dan halaman berikutnya ditambahkan). Skip
+bersyarat data yang di `d6f8ba0` belum teridentifikasi adalah "buat
+surat jalan gagal" di spec alur pengajuan: tenant uji tidak punya
+pengajuan APPROVED tanpa surat jalan. Sesudahnya `029413d` menambah
+satu test unit (722); suite penuh tidak dijalankan ulang, dan spec
+terdampaknya lolos 16 dengan 1 skipped.
 
 ## Kredensial uji
 
@@ -93,6 +94,7 @@ Pola kegagalan yang berulang:
 | `waitForResponse` habis waktu setelah kembali ke halaman atau filter yang sudah pernah dimuat | Kunci query masih segar (`staleTime` 5 menit di `components/providers/query-provider.tsx`), sehingga tidak ada permintaan. Buktikan dari tampilan; penunggu jaringan hanya untuk kunci yang belum pernah dimuat (`b63cf08`) |
 | Pembersihan tampak lolos, tetapi data uji menumpuk di basis data | Helper pembersihan membuang jawaban permintaannya. Periksa statusnya dengan `expect.soft`, dan jalankan audit endpoint: route yang dihapus backend juga menjawab 404 (`b5a55c4`) |
 | `POST /pengajuanstok` ditolak 409 nomor kembar, menetap saat diulang | Backend membentuk nomor dari dokumen terakhir menurut `createdAt` (`kontrak/temuan.md` butir 139). Bandingkan `createdAt` dan waktu `_id` dokumen bernomor terbesar dengan jam sistem lewat skrip baca-saja; dokumen ber-`createdAt` di depan mengunci pembuatan sampai bulan berganti |
+| `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena
 tombol hapus sempat disabled sampai daftar role selesai dimuat (level
@@ -520,8 +522,7 @@ Urutan debug kegagalan e2e di atas).
   izin membuka setiap rute terpetakan (unit), dan spec terdampak lolos.
 - **Suite e2e penuh tidak lagi dijalankan di akhir setiap pekerjaan**
   (6 Oktober 2026), sehingga baseline suite penuh dapat berupa hitungan
-  selama beberapa pekerjaan. Angka terukur terakhir 436 lolos dan 16
-  skipped, terhadap `628f52e`.
+  selama beberapa pekerjaan. Angka terukur terakhir ada di Baseline.
 
 - **Jumlah skenario lolos suite penuh 7 Oktober 2026 adalah 440, bukan
   444**: empat skenario gagal karena nomor pengajuan kembar di backend
@@ -560,3 +561,26 @@ Urutan debug kegagalan e2e di atas).
   web**, karena akun uji berperan Owner.
 - **Penahanan pembayaran kembar di backend tidak diuji dari web**; yang
   teruji kunci yang sama saat permintaan diulang.
+
+- **Periode jurnal stok diuji lewat tanggal 8 sampai 15 bulan
+  berjalan**, agar tanggal itu tidak kembar dengan tanggal bulan lain di
+  kalender; skenarionya dilewati sebelum tanggal 8. Sampai tanggal tidak
+  diubah lewat kalender; pemetaannya teruji di `paramHalamanJurnal`.
+  Skenario ukuran dan halaman berikutnya dilewati bila jurnal outlet
+  bulan berjalan belum lebih dari satu halaman, sehingga skipped dapat
+  naik di awal bulan.
+- **Semua Outlet dengan beberapa outlet di jurnal stok** (meminta
+  memilih satu outlet) hanya teruji di unit test (`lokasiJurnalOutlet`),
+  karena tenant uji punya satu outlet dan izin lintas outlet null.
+- **Pesan lokasi gudang gagal dimuat atau belum didaftarkan di jurnal
+  stok gudang** belum teruji e2e.
+- **Kartu pengajuan dashboard gudang hanya teruji cabang tanpa
+  pengajuan siap surat jalan** pada data uji sekarang; cabang klik kartu
+  ke tab PERLU SURAT JALAN berjalan bila ada pengajuan APPROVED atau
+  PENDING tanpa surat jalan.
+- **Template role hanya teruji pemetaan namanya** (skenario e2e template
+  dan `tests/unit/lib/roleTemplates.test.ts`); role dari template belum
+  dipakai untuk membuka halaman stock opname, adjustment, atau absensi.
+- **Pengajuan Outlet ke Gudang tidak punya skenario**, karena web belum
+  menampilkannya (P8); skenario dashboard gudang gagal dengan jujur bila
+  data uji memuatnya.

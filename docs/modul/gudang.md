@@ -20,7 +20,8 @@ keputusan rancangan butir 17 dan 21.
   tidak boleh tercampur). Eksekusinya sempat ditunda sampai pemilik
   proyek menentukan layout dan UI/UX-nya, lalu dijalankan pada 19 Oktober
   2026 dengan penyesuaian sumber data kartu pengajuan (Dashboard gudang di
-  bawah).
+  bawah). Sejak `74b6af4` kartu pengajuan kembali memakai
+  `GET /dashboard/gudang`.
 - **GD2a: pengaturan gudang berisi profil gudang yang dapat diubah**
   (nama, alamat, koordinat, dan radius absen) lewat `PUT /location/:id`
   bagi pemegang `update-location`, dan baca-saja bagi pengguna lain,
@@ -80,6 +81,13 @@ Diputuskan pemilik proyek pada 19 Oktober 2026.
   (`kontrak/temuan.md` butir 149), sehingga angkanya tidak akan sama
   dengan isi tab tujuannya. `hitungAntreanPengajuan` memakai
   `saringPengajuan` dan `cocokTab` yang sama dengan daftar gudang.
+  Dibalik di `74b6af4` setelah B101 terbukti (pemilik proyek, 21 Oktober
+  2026): kartu memakai `pengajuan` dari ringkasan yang sama dengan kartu
+  surat jalan (`antreanDariRingkasan`), satu permintaan untuk kedua
+  kelompok, dan aksi pengajuan ikut menginvalidasi kuncinya. Server
+  menghitung kedua arah pengajuan (P8), sehingga angkanya dapat melebihi
+  isi tab bila ada pengembalian dari outlet sebelum alur itu didukung
+  web.
 - **Kartu surat jalan tetap dari `GET /dashboard/gudang`**, karena
   filternya terbukti sama dengan tab DRAFT SJ dan halaman pengiriman
   (`transferStokService.getAll` tidak membatasi per izin atau lokasi),
@@ -91,6 +99,9 @@ Diputuskan pemilik proyek pada 19 Oktober 2026.
   dan jurnal `read-jurnal-stok`. Kelompok pengajuan disembunyikan, bukan
   ditampilkan tanpa angka, bagi pengguna tanpa izin bacanya. Tanpa satu
   pun panel, halaman menampilkan "Belum ada ringkasan untuk akun Anda".
+  Sejak 21 Oktober 2026 kelompok pengajuan juga menuntut
+  `read-dashboard-gudang` (endpoint angkanya), dan jurnal juga menuntut
+  `read-location` (`029413d`), karena panelnya mencari lokasi gudang.
 - **Tautan kartu hanya aktif bila gerbang halaman tujuannya terpenuhi**
   (`urlBoleh` lewat `bolehBukaRute`); tanpa izin, kartu tampil tanpa
   tautan.
@@ -143,7 +154,9 @@ Geist (`cdc8c47`), dan tab di `?tab=` (`a68a75f`).
   hardcoded.
 - Stok kritis memakai `isStokKritis` dari backend, tidak dihitung ulang,
   untuk lokasi Gudang pertama (MVP satu gudang); jurnal disaring ke
-  lokasi bertipe Gudang lewat `saringJurnal`.
+  lokasi bertipe Gudang lewat `saringJurnal`. Sejak `081d5dc` jurnal
+  diminta lima baris dari lokasi Gudang pertama, dan
+  `jurnalTerbaruGudang` tinggal penjaga tipe lokasi dan urutan.
 - Tes: 14 unit di `tests/unit/features/dashboard-gudang/`, dan 4
   skenario e2e di `tests/e2e/dashboard/dashboard-gudang.spec.ts` yang
   mencocokkan angka dengan respons memakai aturan halaman tujuan, lalu
@@ -160,7 +173,7 @@ Geist (`cdc8c47`), dan tab di `?tab=` (`a68a75f`).
 - Dashboard gudang selesai di `06581f3` dan `50dca2f`. Setelah backend
   memperbaiki butir 149, kartu pengajuan dapat kembali memakai angka
   `GET /dashboard/gudang`, sehingga daftar pengajuan tidak perlu diambil
-  utuh hanya untuk menghitung.
+  utuh hanya untuk menghitung. Selesai di `74b6af4`.
 - Dashboard outlet selesai di `0c5822b` (keputusan DB1a sampai DB6a).
   `GET /dashboard/outlet` tetap tidak dipakai web: isinya hitungan
   pengajuan, surat jalan, dan lima jurnal terbaru, bukan isi dashboard

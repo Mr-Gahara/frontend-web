@@ -55,6 +55,30 @@ Lapis per modul: kirim hanya saat modul ini dikerjakan. Isinya dipindah dari doc
   menampilkan pesan error, dan halaman outlet membedakan "gagal memuat
   lokasi" dari "lokasi belum dikonfigurasi".
 
+Diputuskan pemilik proyek pada 21 Oktober 2026 (penyesuaian backend
+`ridho` `b5b367a`, B102; `081d5dc`, `b03c276`):
+
+- **Daftar jurnal berhalaman di server**: lokasi, periode, arah, dan
+  alasan dikirim sebagai query, dan `DataTable` memakai paginasi server
+  (10, 20, atau 50 baris). Mengganti filter, ukuran, atau lokasi kembali
+  ke halaman 1.
+- **Kotak cari nama bahan disembunyikan** sampai backend menerima query
+  pencarian (`kontrak/temuan.md` butir 150), lalu dikembalikan. Jurnal
+  stok adalah pengecualian keputusan rancangan butir 27, karena tumbuh
+  satu baris per bahan setiap penjualan.
+- **Lingkup per tipe lokasi dikirim sebagai satu `locationID`**: ruang
+  gudang memakai lokasi Gudang pertama, dan pilihan Semua Outlet memakai
+  satu-satunya outlet; bila outlet lebih dari satu, halaman meminta
+  memilih satu outlet (`lokasiJurnalOutlet`, MVP). Filter tipe lokasi
+  diminta ke backend (butir 151).
+- **Filter periode** Dari tanggal dan Sampai tanggal memakai
+  `PilihTanggal`, dengan periode awal tanggal 1 bulan berjalan sampai
+  hari ini, disetujui dari pratinjau. Reset Filter mengembalikan periode,
+  arah, dan alasan.
+- **Rute jurnal gudang menuntut `read-location`** selain
+  `read-jurnal-stok`, karena halamannya mencari lokasi gudang
+  (`029413d`).
+
 ### Submodul stok dan inventaris gudang
 
 - **Gagal mengubah batas minimum atau opname di gudang kini menampilkan
@@ -208,6 +232,19 @@ PENDING, `781c861`, dan tab di URL, `a68a75f`):
   `tampilan.ts`. Aturan keamanannya ada di `referensi/arsitektur.md`
   (bagian `lib/tab-url.ts`).
 
+Diputuskan pemilik proyek pada 21 Oktober 2026:
+
+- **Pengajuan stok berjalan dua arah, mengikuti P8 backend**: gudang
+  mengirim ke outlet, dan outlet mengembalikan ke gudang. Dukungan web
+  untuk pengembalian dikerjakan terpisah dengan pratinjau; sampai itu
+  penjaga `arahPengajuanValid` tetap menyembunyikan arah Outlet ke
+  Gudang. Keputusan "arah lokasi mengikuti backend" dan "pengajuan yang
+  tersimpan terbalik" di atas ditinjau ulang bersama pekerjaan itu.
+- **Daftar pengajuan, surat jalan, stock opname, dan stock adjustment
+  tetap mode klien** dengan pencarian yang berfungsi, sampai backend
+  punya pencarian teks (butir 150) dan, untuk pengajuan, filter tab
+  gabungan (butir 152); keputusan rancangan butir 27.
+
 ### Submodul transfer, pengiriman, dan penerimaan
 
 Diputuskan pemilik proyek pada 21 September 2026, dengan satu prinsip yang
@@ -341,6 +378,9 @@ Yang masih berlaku:
     diperbarui bersama.
   - `jenisPengajuan` `PENGIRIMAN` tidak dipakai backend maupun frontend:
     semua pengajuan adalah permintaan dari outlet ke gudang.
+    Sejak keputusan 21 Oktober 2026 (P8), pengajuan juga dapat berupa
+    pengembalian dari outlet ke gudang; `jenisPengajuan` tetap tidak
+    dipakai.
   - Strategi data uji spec alur (keputusan pemilik proyek, pilihan A): buat,
     edit, ajukan, lalu tolak, dengan dokumen baru per run yang berakhir
     REJECTED; setujui dan buat surat jalan diuji jalur gagalnya saja dengan
@@ -383,3 +423,20 @@ Yang masih berlaku:
   `alur-transfer-stok.spec.ts` juga merujuk R8 dan R13. Keempat label itu
   tidak tercatat di dokumentasi (diperiksa 19 Oktober 2026). Komentarnya
   dibetulkan ke rujukan yang benar saat spec itu disentuh lagi.
+
+### Catatan dari penyesuaian backend `ridho` `b5b367a`
+
+- `081d5dc`: `jurnalStokApi.halaman`, `paramHalamanJurnal`, dan
+  `useHalamanJurnalStok` (`keepPreviousData`); panel jurnal dashboard
+  gudang meminta lima baris dari lokasi Gudang pertama.
+- `b03c276`: halaman jurnal stok mode server. `saringJurnal`,
+  `dalamLingkup`, `filterServer`, `useDaftarJurnalStok`, dan
+  `jurnalStokApi.daftar` dibuang; spec disusun ulang agar setiap
+  skenario membuktikan query yang terkirim, lalu mencocokkan tabel dengan
+  respons halaman itu.
+- `029413d`: rute jurnal gudang dan panel jurnal dashboard menuntut
+  `read-location`.
+- Pemetaan paginasi kelima daftar: hanya jurnal stok yang pindah ke
+  server. Empat daftar lain mencari di klien (`saringTransfer`,
+  `saringPengajuan`, dan `searchKey` `DataTable` di stock opname serta
+  stock adjustment), sedangkan backend tidak membaca query pencarian.

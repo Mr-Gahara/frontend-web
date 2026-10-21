@@ -110,6 +110,23 @@ Diputuskan pemilik proyek pada 6 Oktober 2026 (`597a163`). Labelnya RL:
   kedua mode; dan kedua skenario e2e dibuktikan gagal terhadap form lama
   sebelum form diubah.
 
+### Template role
+
+Diputuskan pemilik proyek pada 21 Oktober 2026 (`ffd3994`, `4088d9e`):
+
+- **Nama izin template mengikuti seed backend.** `delete-jurnal-stok`
+  dibuang setelah P24; nama yang tidak ada di basis data membuat
+  pembuatan role dijawab 400, dan skenario e2e template menangkapnya.
+- **Stock opname**: Supervisor `create`, `read`, dan `submit`; Manajer
+  dan General Manajer keempatnya, termasuk `review`.
+- **Absensi**: `read-absensi` untuk Supervisor ke atas; `create-absensi`
+  dan `update-absensi` untuk Manajer dan General Manajer. Absen diri
+  sendiri tidak butuh izin.
+- **Stock adjustment per ruang** (`read-stock-adjustment-outlet` dan
+  `read-stock-adjustment-gudang`, RH3a) untuk Supervisor ke atas.
+- Guest, Staff, dan Kasir tidak mendapat izin tambahan; izin pembelian
+  stok tetap di luar template (RH6a).
+
 ## Catatan
 
 ### Catatan dari form role
