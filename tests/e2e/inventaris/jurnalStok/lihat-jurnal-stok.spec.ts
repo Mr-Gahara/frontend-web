@@ -7,10 +7,15 @@ const URL_GUDANG = "http://localhost:3000/dashboard/gudang/jurnalStok";
 type Relasi = { _id?: string; id?: string };
 type JurnalMentah = Relasi & {
   tipeKoreksi: "Masuk" | "Keluar";
+  alasan: string;
   bahanBakuID: (Relasi & { namaBahan: string }) | null;
   locationID: (Relasi & { tipe: string; nama?: string }) | null;
   tanggal: string;
   dicatatOleh: { nama?: string } | null;
+};
+type HalamanMentah = {
+  data: JurnalMentah[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
 };
 
 // ============================================================
@@ -45,17 +50,40 @@ function isiData<T>(body: unknown): T {
   return (body as { data: T }).data;
 }
 
-/** Membuka halaman jurnal dan mengembalikan seluruh jurnal yang dikirim server. */
+const POLA_JURNAL = /\/api\/jurnalstok(\?|$)/i;
+
+/** Ukuran halaman awal tabel jurnal (pilihan ukuran pertama). */
+const UKURAN_AWAL = 10;
+
+/** Periode awal halaman: tanggal 1 bulan berjalan sampai hari ini, sebagai YYYY-MM-DD. */
+const kini = new Date();
+const awalanBulan = `${kini.getFullYear()}-${String(kini.getMonth() + 1).padStart(2, "0")}-`;
+const AWAL_BULAN = awalanBulan + "01";
+const HARI_INI = awalanBulan + String(kini.getDate()).padStart(2, "0");
+
+/** Menunggu GET /jurnalstok berikutnya yang query-nya memenuhi syarat. */
+function tungguJurnal(page: Page, syarat: (q: URLSearchParams) => boolean = () => true) {
+  return page.waitForResponse(
+    (r) => r.request().method() === "GET" && POLA_JURNAL.test(r.url()) && syarat(new URL(r.url()).searchParams),
+  );
+}
+
+/** Isi satu halaman respons beserta query permintaannya. */
+async function bacaHalaman(r: Response) {
+  expect(r.status(), r.url()).toBe(200);
+  const isi = (await r.json()) as HalamanMentah;
+  return { ...isi, query: new URL(r.url()).searchParams };
+}
+
+/** Membuka halaman jurnal dan mengembalikan halaman pertama dari server beserta query-nya. */
 async function bukaJurnal(page: Page, url: string, tungguLokasi = false) {
-  const tJurnal = page.waitForResponse(responsGet(/\/api\/jurnalstok(\?|$)/i));
+  const tJurnal = tungguJurnal(page);
   const tLokasi = tungguLokasi
     ? page.waitForResponse(responsGet(/\/api\/location\/current(\?|$)/))
     : null;
   await page.goto(url);
 
-  const rJurnal = await tJurnal;
-  expect(rJurnal.status()).toBe(200);
-  const jurnal = isiData<JurnalMentah[]>(await rJurnal.json());
+  const halaman = await bacaHalaman(await tJurnal);
 
   let lokasiAktif: string | undefined;
   if (tLokasi) {
@@ -65,24 +93,22 @@ async function bukaJurnal(page: Page, url: string, tungguLokasi = false) {
   }
 
   await expect(page.getByRole("heading", { name: /buku jurnal stok/i })).toBeVisible();
-  return { jurnal, lokasiAktif };
+  return { ...halaman, lokasiAktif };
 }
 
 function barisTabel(page: Page) {
   return page.locator("table tbody tr");
 }
 
-/** Ukuran halaman awal tabel jurnal; baris di luar halaman pertama dibuktikan lewat kaki tabel. */
-const UKURAN_AWAL = 10;
-
-async function periksaJumlahBaris(page: Page, jumlah: number) {
-  if (jumlah === 0) {
+/** Isi tabel sama dengan halaman respons: jumlah baris dan total data dari pagination. */
+async function periksaHalaman(page: Page, halaman: HalamanMentah) {
+  if (halaman.data.length === 0) {
     await expect(barisTabel(page)).toHaveCount(1);
     await expect(barisTabel(page).first()).toContainText(/kosong|tidak ada catatan/i);
   } else {
-    await expect(barisTabel(page)).toHaveCount(Math.min(jumlah, UKURAN_AWAL));
+    await expect(barisTabel(page)).toHaveCount(halaman.data.length);
   }
-  await expect(page.getByText(`${jumlah} total data`, { exact: true })).toBeVisible();
+  await expect(page.getByText(`${halaman.pagination.total} total data`, { exact: true })).toBeVisible();
 }
 
 // ============================================================
@@ -93,64 +119,82 @@ test.describe("Jurnal stok", () => {
     await login(page);
   });
 
-  test("outlet: hanya jurnal lokasi outlet, tanpa jurnal gudang", async ({ page }) => {
-    const { jurnal } = await bukaJurnal(page, URL_OUTLET);
-    await periksaJumlahBaris(page, jurnal.filter((j) => j.locationID?.tipe === "Outlet").length);
+  test("outlet: halaman pertama bulan berjalan untuk satu lokasi outlet, tanpa jurnal gudang", async ({ page }) => {
+    const halaman = await bukaJurnal(page, URL_OUTLET, !ADA_IZIN_LINTAS);
+    expect(halaman.query.get("dari")).toBe(AWAL_BULAN);
+    expect(halaman.query.get("sampai")).toBe(HARI_INI);
+    expect(halaman.query.get("page")).toBe("1");
+    expect(halaman.query.get("limit")).toBe(String(UKURAN_AWAL));
+    const lokasi = halaman.query.get("locationID");
+    if (halaman.lokasiAktif) expect(lokasi).toBe(halaman.lokasiAktif);
+    else expect(lokasi).toBeTruthy();
+    expect(
+      halaman.data.every((j) => idDari(j.locationID) === lokasi && j.locationID?.tipe === "Outlet"),
+    ).toBe(true);
+    await periksaHalaman(page, halaman);
   });
 
-  test("lintas outlet: pilih satu outlet menyaring jurnal outlet itu", async ({ page }) => {
+  test("lintas outlet: pilih satu outlet mengirim locationID outlet itu", async ({ page }) => {
     test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
-    const { jurnal } = await bukaJurnal(page, URL_OUTLET);
-    const target = jurnal.find((j) => j.locationID?.tipe === "Outlet" && j.locationID?.nama);
-    test.skip(!target, "Belum ada jurnal outlet");
-    const idTarget = idDari(target!.locationID);
+    const tLokasi = page.waitForResponse(responsGet(/\/api\/location(\?|$)/));
+    await page.goto(URL_OUTLET);
+    const lokasi = isiData<(Relasi & { tipe: string; nama: string })[]>(await (await tLokasi).json());
+    const target = lokasi.find((l) => l.tipe === "Outlet");
+    test.skip(!target, "Tenant uji belum punya outlet");
 
     await page.getByText("Semua Outlet", { exact: true }).click();
-    const tTersaring = page.waitForResponse(responsGet(/\/api\/jurnalstok\?(.*&)?locationID=/i));
-    await page.getByRole("option", { name: target!.locationID!.nama!, exact: true }).click();
-    const rTersaring = await tTersaring;
-    expect(new URL(rTersaring.url()).searchParams.get("locationID")).toBe(idTarget);
-    await periksaJumlahBaris(page, jurnal.filter((j) => idDari(j.locationID) === idTarget).length);
+    const tTersaring = tungguJurnal(page, (q) => q.get("locationID") === idDari(target));
+    await page.getByRole("option", { name: target!.nama, exact: true }).click();
+    await periksaHalaman(page, await bacaHalaman(await tTersaring));
   });
 
-  test("outlet: filter arah menyaring barang keluar", async ({ page }) => {
-    const { jurnal } = await bukaJurnal(page, URL_OUTLET);
-    const diLokasi = jurnal.filter((j) => j.locationID?.tipe === "Outlet");
-    test.skip(diLokasi.length === 0, "Belum ada jurnal outlet");
-
+  test("outlet: filter arah dikirim sebagai tipeKoreksi dan kembali ke halaman 1", async ({ page }) => {
+    await bukaJurnal(page, URL_OUTLET);
+    const tKeluar = tungguJurnal(page, (q) => q.get("tipeKoreksi") === "Keluar" && q.get("page") === "1");
     await page.getByText("Semua Arah", { exact: true }).click();
     await page.getByRole("option", { name: "Barang Keluar" }).click();
 
-    await periksaJumlahBaris(
-      page,
-      diLokasi.filter((j) => j.tipeKoreksi === "Keluar").length,
-    );
+    const halaman = await bacaHalaman(await tKeluar);
+    expect(halaman.data.every((j) => j.tipeKoreksi === "Keluar")).toBe(true);
+    await periksaHalaman(page, halaman);
   });
 
-  test("outlet: pencarian menyaring berdasarkan nama barang", async ({ page }) => {
-    const { jurnal } = await bukaJurnal(page, URL_OUTLET);
-    const diLokasi = jurnal.filter((j) => j.locationID?.tipe === "Outlet");
-    const nama = diLokasi.find((j) => j.bahanBakuID?.namaBahan)?.bahanBakuID?.namaBahan;
-    test.skip(!nama, "Belum ada jurnal outlet bernama barang");
+  test("outlet: filter alasan dikirim ke server", async ({ page }) => {
+    await bukaJurnal(page, URL_OUTLET);
+    const tAlasan = tungguJurnal(page, (q) => q.get("alasan") === "Stok Opname" && q.get("page") === "1");
+    await page.getByText("Semua Alasan", { exact: true }).click();
+    await page.getByRole("option", { name: "Stok Opname" }).click();
 
-    await page.getByPlaceholder("Cari nama barang...").fill(nama!);
+    const halaman = await bacaHalaman(await tAlasan);
+    expect(halaman.data.every((j) => j.alasan === "Stok Opname")).toBe(true);
+    await periksaHalaman(page, halaman);
+  });
 
-    await periksaJumlahBaris(
-      page,
-      diLokasi.filter((j) =>
-        j.bahanBakuID?.namaBahan?.toLowerCase().includes(nama!.toLowerCase()),
-      ).length,
-    );
+  test("outlet: periode dikirim sebagai tanggal YYYY-MM-DD, dan Reset Filter mengembalikan bulan berjalan", async ({ page }) => {
+    const hari = Math.min(kini.getDate(), 15);
+    test.skip(hari < 8, "Awal bulan: tanggal uji 8 sampai 15 belum lewat");
+    const awal = await bukaJurnal(page, URL_OUTLET);
+    const dari = awalanBulan + String(hari).padStart(2, "0");
+
+    const tDari = tungguJurnal(page, (q) => q.get("dari") === dari && q.get("sampai") === HARI_INI);
+    await page.getByRole("button", { name: /^Dari tanggal, / }).click();
+    await page.getByRole("grid").getByText(String(hari), { exact: true }).click();
+    await expect(page.getByRole("grid")).toHaveCount(0);
+    const periode = await bacaHalaman(await tDari);
+    expect(periode.query.get("page")).toBe("1");
+    expect(periode.pagination.total).toBeLessThanOrEqual(awal.pagination.total);
+    await periksaHalaman(page, periode);
+
+    await page.getByRole("button", { name: "Reset Filter" }).click();
+    await expect(page.getByRole("button", { name: /^Dari tanggal, 01 / })).toBeVisible();
+    await expect(page.getByText(`${awal.pagination.total} total data`, { exact: true })).toBeVisible();
   });
 
   test("outlet: menu titik tiga membuka rincian jurnal beserta pencatatnya (J-A)", async ({ page }) => {
-    const { jurnal } = await bukaJurnal(page, URL_OUTLET);
-    // Urutan yang sama dengan saringJurnal: tanggal terbaru lebih dulu, sort stabil.
-    const diLokasi = jurnal
-      .filter((j) => j.locationID?.tipe === "Outlet")
-      .sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
-    test.skip(diLokasi.length === 0, "Belum ada jurnal outlet");
-    const pertama = diLokasi[0];
+    const halaman = await bukaJurnal(page, URL_OUTLET);
+    test.skip(halaman.data.length === 0, "Belum ada jurnal outlet bulan ini");
+    // Baris pertama tabel adalah baris pertama respons: server mengurutkan tanggal terbaru lebih dulu.
+    const pertama = halaman.data[0];
 
     await barisTabel(page).first().getByRole("button", { name: "Buka menu" }).click();
     await page.getByRole("menuitem", { name: "Lihat detail" }).click();
@@ -160,28 +204,44 @@ test.describe("Jurnal stok", () => {
     await expect(dialog).toContainText(pertama.dicatatOleh?.nama || "Sistem Otomatis");
   });
 
-  test("outlet: pemilih ukuran menampilkan lebih banyak baris per halaman", async ({ page }) => {
-    const { jurnal } = await bukaJurnal(page, URL_OUTLET);
-    const jumlah = jurnal.filter((j) => j.locationID?.tipe === "Outlet").length;
-    test.skip(jumlah <= UKURAN_AWAL, "Jurnal outlet belum lebih dari satu halaman");
+  test("outlet: pemilih ukuran meminta 20 baris dari halaman 1", async ({ page }) => {
+    const awal = await bukaJurnal(page, URL_OUTLET);
+    test.skip(awal.pagination.total <= UKURAN_AWAL, "Jurnal outlet bulan ini belum lebih dari satu halaman");
 
+    const t20 = tungguJurnal(page, (q) => q.get("limit") === "20" && q.get("page") === "1");
     await page.getByRole("combobox", { name: "Jumlah baris per halaman" }).click();
     await page.getByRole("option", { name: "20", exact: true }).click();
-    await expect(barisTabel(page)).toHaveCount(Math.min(jumlah, 20));
-    await expect(page.getByText(`${jumlah} total data`, { exact: true })).toBeVisible();
+    await periksaHalaman(page, await bacaHalaman(await t20));
   });
 
-  test("gudang: hanya menampilkan jurnal di lokasi bertipe gudang", async ({ page }) => {
-    const { jurnal } = await bukaJurnal(page, URL_GUDANG);
+  test("outlet: tombol berikutnya meminta halaman 2 dari server", async ({ page }) => {
+    const awal = await bukaJurnal(page, URL_OUTLET);
+    test.skip(awal.pagination.totalPages < 2, "Jurnal outlet bulan ini belum lebih dari satu halaman");
 
-    await periksaJumlahBaris(
-      page,
-      jurnal.filter((j) => j.locationID?.tipe === "Gudang").length,
-    );
+    const t2 = tungguJurnal(page, (q) => q.get("page") === "2" && q.get("limit") === String(UKURAN_AWAL));
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await periksaHalaman(page, await bacaHalaman(await t2));
+    await expect(page.getByText(`Halaman 2 dari ${awal.pagination.totalPages}`, { exact: true })).toBeVisible();
+  });
+
+  test("gudang: satu lokasi gudang, hanya jurnal gudang", async ({ page }) => {
+    // Penunggu dipasang setelah commit, agar permintaan lokasi milik /dashboard
+    // (sidebar) yang dibuang saat berpindah halaman tidak ikut tertangkap.
+    await page.goto(URL_GUDANG, { waitUntil: "commit" });
+    const tLokasi = page.waitForResponse(responsGet(/\/api\/location(\?|$)/));
+    const tJurnal = tungguJurnal(page);
+    const lokasi = isiData<(Relasi & { tipe: string })[]>(await (await tLokasi).json());
+    const halaman = await bacaHalaman(await tJurnal);
+    const gudang = lokasi.find((l) => l.tipe === "Gudang");
+    expect(gudang, "tenant uji punya gudang").toBeTruthy();
+
+    expect(halaman.query.get("locationID")).toBe(idDari(gudang));
+    expect(halaman.data.every((j) => j.locationID?.tipe === "Gudang")).toBe(true);
+    await periksaHalaman(page, halaman);
   });
 
   test("gudang: gagal memuat jurnal menampilkan pesan, bukan daftar kosong", async ({ page }) => {
-    const pola = "**/api/jurnalstok";
+    const pola = POLA_JURNAL;
     await page.route(pola, (route) =>
       route.request().method() === "GET"
         ? route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ status: "error", message: "uji" }) })

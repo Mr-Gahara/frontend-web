@@ -2,9 +2,9 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import HalamanJurnalStok from "@/features/jurnal-stok/halaman-jurnal-stok";
-import type { LingkupJurnal } from "@/features/jurnal-stok/filter";
+import { lokasiJurnalOutlet } from "@/features/jurnal-stok/filter";
 import { useCakupanLokasiOutlet } from "@/features/inventaris/hooks";
-import { lingkupOutlet, SEMUA_OUTLET } from "@/features/inventaris/cakupan";
+import { SEMUA_OUTLET } from "@/features/inventaris/cakupan";
 import PemilihLokasiOutlet from "@/features/inventaris/pemilih-lokasi-outlet";
 import PesanLokasi from "@/features/inventaris/pesan-lokasi";
 
@@ -13,14 +13,8 @@ export default function JurnalStokOutletPage() {
   const cakupan = useCakupanLokasiOutlet();
   const [pilihanLokasi, setPilihanLokasi] = useState<string>(SEMUA_OUTLET);
 
-  // Jurnal disaring di klien, jadi lingkup diterjemahkan ke bentuk LingkupJurnal.
-  const lingkup = useMemo<LingkupJurnal | null>(() => {
-    const hasil = lingkupOutlet(cakupan, pilihanLokasi);
-    if (!hasil) return null;
-    return hasil.locationID
-      ? { lokasiID: hasil.locationID }
-      : { tipeLokasi: hasil.tipeLokasi ?? "Outlet" };
-  }, [cakupan, pilihanLokasi]);
+  // GET /jurnalstok hanya menyaring satu locationID (lokasiJurnalOutlet).
+  const lokasi = useMemo(() => lokasiJurnalOutlet(cakupan, pilihanLokasi), [cakupan, pilihanLokasi]);
 
   let penghalang: ReactNode = null;
   if (cakupan.status === "gagal") {
@@ -39,6 +33,15 @@ export default function JurnalStokOutletPage() {
     );
   }
 
+  if (!penghalang && lokasi && "pilihSatuOutlet" in lokasi) {
+    penghalang = (
+      <PesanLokasi
+        judul="Pilih Satu Outlet"
+        isi="Jurnal stok ditampilkan per outlet. Pilih outlet di kotak lokasi untuk melihat jurnalnya."
+      />
+    );
+  }
+
   let namaCakupan = "Outlet Saat Ini";
   if (cakupan.status === "lintas") {
     namaCakupan =
@@ -52,7 +55,7 @@ export default function JurnalStokOutletPage() {
   return (
     <HalamanJurnalStok
       ruang="outlet"
-      lingkup={lingkup}
+      lokasiID={lokasi && "lokasiID" in lokasi ? lokasi.lokasiID : null}
       memuatLingkup={cakupan.status === "memuat"}
       penghalang={penghalang}
       pemilihLokasi={

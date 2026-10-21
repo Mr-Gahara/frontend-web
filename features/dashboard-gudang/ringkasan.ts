@@ -3,7 +3,6 @@
  * dengan isi halaman tujuannya, agar angka yang diklik selalu sama dengan baris
  * yang tampil di sana.
  */
-import { saringJurnal } from "@/features/jurnal-stok/filter";
 import { SLUG_TAB_PENGAJUAN } from "@/features/pengajuan-stok/tampilan";
 import { SLUG_TAB_TRANSFER } from "@/features/transfer-stok/tampilan";
 import { urlDenganTab } from "@/lib/tab-url";
@@ -69,11 +68,16 @@ export function stokKritis(
   return { baris: semua.slice(0, batas), total: semua.length };
 }
 
-const LINGKUP_GUDANG = { tipeLokasi: "Gudang" };
-
-/** Jurnal terbaru lokasi bertipe Gudang saja; backend mengirim jurnal seluruh tenant. */
+/**
+ * Jurnal terbaru lokasi bertipe Gudang, terbaru dulu, tanpa mengubah array
+ * masukan. Server sudah menyaring satu lokasi gudang; ini penjaga terakhir
+ * agar stok outlet dan gudang tidak tercampur di panel.
+ */
 export function jurnalTerbaruGudang(daftar: JurnalStok[], batas = BATAS_BARIS): JurnalStok[] {
-  return saringJurnal(daftar, LINGKUP_GUDANG, { cari: "", arah: "ALL", alasan: "ALL" }).slice(0, batas);
+  return daftar
+    .filter((j) => j.locationID?.tipe === "Gudang")
+    .sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime())
+    .slice(0, batas);
 }
 
 /** Halaman tujuan; path dipisah karena gerbang rute (bolehBukaRute) hanya menerima path. */

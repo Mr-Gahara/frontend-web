@@ -2,20 +2,14 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 import type { JurnalStok } from "@/types/jurnalStok";
-import { useDaftarJurnalStok } from "./hooks";
-import {
-  saringJurnal,
-  type FilterAlasan,
-  type FilterArah,
-  type LingkupJurnal,
-} from "./filter";
+import { useHalamanJurnalStok } from "./hooks";
+import { periodeAwalJurnal, type FilterAlasan, type FilterArah } from "./filter";
 import { formatWaktuJurnal, teksJumlahJurnal } from "./tampilan";
 import { DialogRincianJurnal } from "./dialog-rincian-jurnal";
 
-import { Input } from "@/components/ui/input";
+import { PilihTanggal } from "@/components/pilih-tanggal";
 import {
   Select,
   SelectContent,
@@ -32,7 +26,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, BookOpen, MapPin, Filter, MoreHorizontal } from "lucide-react";
+import { BookOpen, MapPin, Filter, MoreHorizontal } from "lucide-react";
 
 const TEKS = {
   outlet: {
@@ -58,13 +52,18 @@ const WARNA_ALASAN: Record<string, string> = {
 };
 const WARNA_ALASAN_LAIN = "bg-slate-50 text-slate-700 border-slate-200";
 
-/** Pilihan baris per halaman (DataTable opt-in, pemilik proyek 17 Oktober 2026). */
+/** Pilihan baris per halaman (pemilik proyek 17 Oktober 2026); yang pertama menjadi ukuran awal. */
 const PILIHAN_UKURAN = [10, 20, 50] as const;
+
+const KELAS_LABEL_FILTER = "text-xs font-bold text-navy/70";
 
 interface Props {
   ruang: keyof typeof TEKS;
-  /** Cakupan data; null selama lokasi belum diketahui. */
-  lingkup: LingkupJurnal | null;
+  /**
+   * Lokasi yang jurnalnya ditampilkan; null selama lokasi belum diketahui.
+   * GET /jurnalstok hanya menyaring satu locationID (B102).
+   */
+  lokasiID: string | null;
   /** Teks di bawah judul halaman. */
   deskripsi: ReactNode;
   /** Bila diisi, tampil menggantikan tabel dan seluruh filter dinonaktifkan. */
@@ -77,25 +76,45 @@ interface Props {
 
 export default function HalamanJurnalStok({
   ruang,
-  lingkup,
+  lokasiID,
   deskripsi,
   penghalang,
   memuatLingkup = false,
   pemilihLokasi,
 }: Props) {
   const teks = TEKS[ruang];
-  const [cari, setCari] = useState("");
-  const cariTertunda = useDebounce(cari, 500);
+  const [periode, setPeriode] = useState(() => periodeAwalJurnal());
   const [arah, setArah] = useState<FilterArah>("ALL");
   const [alasan, setAlasan] = useState<FilterAlasan>("ALL");
+  const [halaman, setHalaman] = useState(1);
+  const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN[0]);
 
-  const { data: semua = [], isLoading, isError } = useDaftarJurnalStok(lingkup);
+  // Mengganti lokasi kembali ke halaman 1, disesuaikan saat render, bukan lewat
+  // effect, agar halaman lama tidak sempat diminta untuk lokasi baru.
+  const [lokasiSebelumnya, setLokasiSebelumnya] = useState(lokasiID);
+  if (lokasiSebelumnya !== lokasiID) {
+    setLokasiSebelumnya(lokasiID);
+    setHalaman(1);
+  }
 
-  const daftar = useMemo(
-    () =>
-      lingkup ? saringJurnal(semua, lingkup, { cari: cariTertunda, arah, alasan }) : [],
-    [semua, lingkup, cariTertunda, arah, alasan],
+  const { data, isLoading, isFetching, isError } = useHalamanJurnalStok(
+    lokasiID ? { lokasiID, arah, alasan, dari: periode.dari, sampai: periode.sampai } : null,
+    halaman,
+    ukuran,
   );
+  const daftar = useMemo(() => data?.data ?? [], [data]);
+
+  /** Setiap perubahan filter kembali ke halaman 1. */
+  const ubahFilter = (ubah: () => void) => {
+    ubah();
+    setHalaman(1);
+  };
+  const resetFilter = () =>
+    ubahFilter(() => {
+      setPeriode(periodeAwalJurnal());
+      setArah("ALL");
+      setAlasan("ALL");
+    });
 
   const memuat = isLoading || memuatLingkup;
   const nonaktif = Boolean(penghalang);
@@ -211,60 +230,79 @@ export default function HalamanJurnalStok({
           <p className="text-sm font-medium text-navy/60">{deskripsi}</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          {pemilihLokasi}
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
-            <Input
-              placeholder="Cari nama barang..."
-              aria-label="Cari nama barang"
-              value={cari}
-              onChange={(e) => setCari(e.target.value)}
+        <div className="grid grid-cols-2 gap-3 w-full sm:flex sm:flex-wrap sm:items-end md:w-auto">
+          {pemilihLokasi && <div className="col-span-2 sm:col-span-1">{pemilihLokasi}</div>}
+          <div className="flex flex-col gap-1">
+            <span className={KELAS_LABEL_FILTER}>Dari tanggal</span>
+            <PilihTanggal
+              label="Dari tanggal"
+              value={periode.dari}
+              onChange={(dari) => ubahFilter(() => setPeriode((p) => ({ ...p, dari })))}
+              tanggalNonaktif={{ after: periode.sampai }}
               disabled={nonaktif}
-              className="pl-9 h-10 bg-gading border-navy/20 text-navy focus-visible:ring-navy font-medium shadow-sm"
+              className="h-10 w-full sm:w-44"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className={KELAS_LABEL_FILTER}>Sampai tanggal</span>
+            <PilihTanggal
+              label="Sampai tanggal"
+              value={periode.sampai}
+              onChange={(sampai) => ubahFilter(() => setPeriode((p) => ({ ...p, sampai })))}
+              tanggalNonaktif={{ before: periode.dari }}
+              disabled={nonaktif}
+              className="h-10 w-full sm:w-44"
             />
           </div>
 
-          <div className="flex gap-2">
-            <Select
-              value={arah}
-              onValueChange={(nilai) => setArah(nilai as FilterArah)}
-              disabled={nonaktif}
+          <Select
+            value={arah}
+            onValueChange={(nilai) => ubahFilter(() => setArah(nilai as FilterArah))}
+            disabled={nonaktif}
+          >
+            <SelectTrigger
+              aria-label="Filter arah"
+              className="w-full sm:w-[140px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
             >
-              <SelectTrigger
-                aria-label="Filter arah"
-                className="w-full sm:w-[140px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
-              >
-                <Filter className="w-3.5 h-3.5 mr-2 text-navy/50" />
-                <SelectValue placeholder="Semua Arah" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-navy/10 text-navy">
-                <SelectItem value="ALL" className="font-bold">Semua Arah</SelectItem>
-                <SelectItem value="Masuk" className="font-bold text-emerald-600">Barang Masuk</SelectItem>
-                <SelectItem value="Keluar" className="font-bold text-rose-600">Barang Keluar</SelectItem>
-              </SelectContent>
-            </Select>
+              <Filter className="w-3.5 h-3.5 mr-2 text-navy/50" />
+              <SelectValue placeholder="Semua Arah" />
+            </SelectTrigger>
+            <SelectContent className="bg-white border-navy/10 text-navy">
+              <SelectItem value="ALL" className="font-bold">Semua Arah</SelectItem>
+              <SelectItem value="Masuk" className="font-bold text-emerald-600">Barang Masuk</SelectItem>
+              <SelectItem value="Keluar" className="font-bold text-rose-600">Barang Keluar</SelectItem>
+            </SelectContent>
+          </Select>
 
-            <Select
-              value={alasan}
-              onValueChange={(nilai) => setAlasan(nilai as FilterAlasan)}
-              disabled={nonaktif}
+          <Select
+            value={alasan}
+            onValueChange={(nilai) => ubahFilter(() => setAlasan(nilai as FilterAlasan))}
+            disabled={nonaktif}
+          >
+            <SelectTrigger
+              aria-label="Filter alasan"
+              className="w-full sm:w-[160px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
             >
-              <SelectTrigger
-                aria-label="Filter alasan"
-                className="w-full sm:w-[160px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
-              >
-                <SelectValue placeholder="Semua Alasan" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-navy/10 text-navy">
-                <SelectItem value="ALL" className="font-bold">Semua Alasan</SelectItem>
-                <SelectItem value="Transfer Gudang" className="font-medium">{teks.labelTransfer}</SelectItem>
-                <SelectItem value="Stok Opname" className="font-medium">Stok Opname</SelectItem>
-                <SelectItem value="Rusak/Hilang" className="font-medium">Rusak / Hilang</SelectItem>
-                <SelectItem value="Lainnya" className="font-medium">Lainnya</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              <SelectValue placeholder="Semua Alasan" />
+            </SelectTrigger>
+            <SelectContent className="bg-white border-navy/10 text-navy">
+              <SelectItem value="ALL" className="font-bold">Semua Alasan</SelectItem>
+              <SelectItem value="Transfer Gudang" className="font-medium">{teks.labelTransfer}</SelectItem>
+              <SelectItem value="Stok Opname" className="font-medium">Stok Opname</SelectItem>
+              <SelectItem value="Rusak/Hilang" className="font-medium">Rusak / Hilang</SelectItem>
+              <SelectItem value="Lainnya" className="font-medium">Lainnya</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={resetFilter}
+            disabled={nonaktif}
+            className="col-span-2 h-10 justify-self-end font-bold text-amber-800 hover:bg-navy/5 hover:text-amber-900 sm:col-span-1"
+          >
+            Reset Filter
+          </Button>
         </div>
       </div>
 
@@ -284,7 +322,19 @@ export default function HalamanJurnalStok({
             data={daftar}
             loading={memuat}
             emptyMessage={`${teks.kosongJudul}. ${teks.kosongIsi}`}
-            pilihanUkuranKlien={PILIHAN_UKURAN}
+            paginasiServer={{
+              halaman,
+              jumlahHalaman: data?.pagination?.totalPages ?? 1,
+              total: data?.pagination?.total ?? 0,
+              ukuran,
+              pilihanUkuran: PILIHAN_UKURAN,
+              sibuk: isFetching,
+              onGantiHalaman: setHalaman,
+              onGantiUkuran: (berikut) => {
+                setUkuran(berikut);
+                setHalaman(1);
+              },
+            }}
           />
         ))}
     </div>

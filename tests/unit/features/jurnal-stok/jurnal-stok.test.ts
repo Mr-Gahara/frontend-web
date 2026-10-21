@@ -1,87 +1,49 @@
 import { describe, expect, it } from "vitest";
-import type { JurnalStok } from "@/types/jurnalStok";
-import { dalamLingkup, filterServer, paramHalamanJurnal, saringJurnal } from "@/features/jurnal-stok/filter";
+import {
+  lokasiJurnalOutlet,
+  paramHalamanJurnal,
+  periodeAwalJurnal,
+} from "@/features/jurnal-stok/filter";
+import { SEMUA_OUTLET, type CakupanLokasiOutlet } from "@/features/inventaris/cakupan";
 import { formatWaktuJurnal } from "@/features/jurnal-stok/tampilan";
 import { lokasiTunggal } from "@/features/inventaris/lokasi";
+import type { Lokasi } from "@/types/location";
 
-function buat(sebagian: Partial<JurnalStok> & { id: string }): JurnalStok {
-  return {
-    bahanBakuID: { id: "b1", namaBahan: "Gula Pasir", satuan: "gram" },
-    tanggal: "2026-09-10T06:45:25.678Z",
-    tipeKoreksi: "Keluar",
-    jumlah: 30,
-    alasan: "Lainnya",
-    keterangan: null,
-    dicatatOleh: { id: "p1", nama: "Ridho" },
-    locationID: { id: "outlet-1", nama: "Outlet Pontianak Kota", tipe: "Outlet" },
-    tenantID: "t1",
-    createdAt: "2026-09-10T06:45:25.679Z",
-    updatedAt: "2026-09-10T06:45:25.679Z",
-    ...sebagian,
-  };
-}
+const outletA = { id: "outlet-1", nama: "Outlet Pontianak Kota", tipe: "Outlet" } as Lokasi;
+const outletB = { id: "outlet-2", nama: "Outlet Sungai Raya", tipe: "Outlet" } as Lokasi;
 
-const tanpaKriteria = { cari: "", arah: "ALL", alasan: "ALL" } as const;
-const outlet1 = { lokasiID: "outlet-1" };
-const gudangA = { id: "gudang-1", nama: "Gudang A", tipe: "Gudang" };
-
-describe("dalamLingkup", () => {
-  it("mencocokkan lokasi aktif dan menolak lokasi lain atau lokasi kosong", () => {
-    expect(dalamLingkup(buat({ id: "a" }), outlet1)).toBe(true);
-    expect(dalamLingkup(buat({ id: "b", locationID: gudangA }), outlet1)).toBe(false);
-    expect(dalamLingkup(buat({ id: "c", locationID: null }), outlet1)).toBe(false);
+describe("lokasiJurnalOutlet", () => {
+  it("jalur terkunci memakai lokasi aktif, dan null bila lokasi aktif kosong", () => {
+    const terkunci: CakupanLokasiOutlet = { status: "terkunci", lokasi: outletA, lokasiId: "outlet-1" };
+    expect(lokasiJurnalOutlet(terkunci, SEMUA_OUTLET)).toEqual({ lokasiID: "outlet-1" });
+    expect(lokasiJurnalOutlet({ status: "terkunci", lokasi: null, lokasiId: "" }, SEMUA_OUTLET)).toBeNull();
   });
 
-  it("mencocokkan tipe lokasi untuk lingkup gudang", () => {
-    const lingkup = { tipeLokasi: "Gudang" };
-    expect(dalamLingkup(buat({ id: "a", locationID: gudangA }), lingkup)).toBe(true);
-    expect(dalamLingkup(buat({ id: "b" }), lingkup)).toBe(false);
+  it("cakupan yang memuat atau gagal belum punya lokasi", () => {
+    expect(lokasiJurnalOutlet({ status: "memuat" }, SEMUA_OUTLET)).toBeNull();
+    expect(lokasiJurnalOutlet({ status: "gagal" }, SEMUA_OUTLET)).toBeNull();
+  });
+
+  it("lintas outlet: satu outlet terpilih dikirim apa adanya", () => {
+    const lintas: CakupanLokasiOutlet = { status: "lintas", lokasiOutlet: [outletA, outletB] };
+    expect(lokasiJurnalOutlet(lintas, "outlet-2")).toEqual({ lokasiID: "outlet-2" });
+  });
+
+  it("lintas outlet: Semua Outlet memakai satu-satunya outlet, dan meminta pilihan bila lebih dari satu", () => {
+    expect(lokasiJurnalOutlet({ status: "lintas", lokasiOutlet: [outletA] }, SEMUA_OUTLET)).toEqual({
+      lokasiID: "outlet-1",
+    });
+    expect(lokasiJurnalOutlet({ status: "lintas", lokasiOutlet: [outletA, outletB] }, SEMUA_OUTLET)).toEqual({
+      pilihSatuOutlet: true,
+    });
   });
 });
 
-describe("saringJurnal", () => {
-  it("hanya menyisakan jurnal di dalam lingkup", () => {
-    const hasil = saringJurnal(
-      [buat({ id: "a" }), buat({ id: "b", locationID: gudangA })],
-      outlet1,
-      tanpaKriteria,
-    );
-    expect(hasil.map((j) => j.id)).toEqual(["a"]);
-  });
-
-  it("mencari nama barang tanpa membedakan huruf besar kecil dan spasi tepi", () => {
-    const daftar = [buat({ id: "a" })];
-    expect(saringJurnal(daftar, outlet1, { ...tanpaKriteria, cari: "  gula " })).toHaveLength(1);
-    expect(saringJurnal(daftar, outlet1, { ...tanpaKriteria, cari: "kopi" })).toHaveLength(0);
-  });
-
-  it("menyembunyikan jurnal tanpa bahan baku hanya saat pencarian terisi", () => {
-    const daftar = [buat({ id: "a", bahanBakuID: null })];
-    expect(saringJurnal(daftar, outlet1, tanpaKriteria)).toHaveLength(1);
-    expect(saringJurnal(daftar, outlet1, { ...tanpaKriteria, cari: "gula" })).toHaveLength(0);
-  });
-
-  it("menyaring berdasarkan arah dan alasan", () => {
-    const daftar = [
-      buat({ id: "a", tipeKoreksi: "Masuk", alasan: "Transfer Gudang" }),
-      buat({ id: "b", tipeKoreksi: "Keluar", alasan: "Lainnya" }),
-    ];
-    expect(
-      saringJurnal(daftar, outlet1, { ...tanpaKriteria, arah: "Masuk" }).map((j) => j.id),
-    ).toEqual(["a"]);
-    expect(
-      saringJurnal(daftar, outlet1, { ...tanpaKriteria, alasan: "Lainnya" }).map((j) => j.id),
-    ).toEqual(["b"]);
-  });
-
-  it("mengurutkan dari yang terbaru tanpa mengubah array masukan", () => {
-    const daftar = [
-      buat({ id: "lama", tanggal: "2026-09-01T00:00:00.000Z" }),
-      buat({ id: "baru", tanggal: "2026-09-10T00:00:00.000Z" }),
-    ];
-    const hasil = saringJurnal(daftar, outlet1, tanpaKriteria);
-    expect(hasil.map((j) => j.id)).toEqual(["baru", "lama"]);
-    expect(daftar.map((j) => j.id)).toEqual(["lama", "baru"]);
+describe("periodeAwalJurnal", () => {
+  it("tanggal 1 bulan berjalan sampai hari ini, pukul 00.00 waktu lokal", () => {
+    const { dari, sampai } = periodeAwalJurnal(new Date(2026, 9, 21, 15, 30));
+    expect(dari).toEqual(new Date(2026, 9, 1));
+    expect(sampai).toEqual(new Date(2026, 9, 21));
   });
 });
 
@@ -104,13 +66,6 @@ describe("lokasiTunggal", () => {
     expect(lokasiTunggal({ nama: "tanpa id" })).toBeNull();
   });
 });
-describe("filterServer", () => {
-  it("mengirim locationID hanya untuk lingkup satu lokasi", () => {
-    expect(filterServer({ lokasiID: "l1" })).toEqual({ locationID: "l1" });
-    expect(filterServer({ tipeLokasi: "Gudang" })).toEqual({});
-  });
-});
-
 describe("paramHalamanJurnal", () => {
   it("mengirim lokasi, halaman, dan ukuran; pilihan ALL dan periode kosong tidak dikirim", () => {
     expect(paramHalamanJurnal({ lokasiID: "l1", arah: "ALL", alasan: "ALL" }, 1, 20)).toEqual({
