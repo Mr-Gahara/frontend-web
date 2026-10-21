@@ -16,7 +16,7 @@ export interface PanelDashboardGudang {
   pengiriman: boolean;
   /** Daftar stok kritis: GET /location dan GET /inventory. */
   stokKritis: boolean;
-  /** Linimasa jurnal: GET /jurnalstok. */
+  /** Linimasa jurnal: GET /location (lokasi gudang) dan GET /jurnalstok. */
   jurnal: boolean;
 }
 
@@ -26,7 +26,7 @@ export function panelDashboardGudang(permissions: readonly string[]): PanelDashb
     pengajuan: punya(IZIN.pengajuanStok) && punya(IZIN.dashboardGudang),
     pengiriman: punya(IZIN.dashboardGudang),
     stokKritis: punya(IZIN.location) && (punya(IZIN.inventory) || punya(IZIN.inventoryGudang)),
-    jurnal: punya(IZIN.jurnalStok),
+    jurnal: punya(IZIN.location) && punya(IZIN.jurnalStok),
   };
 }
 

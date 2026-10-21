@@ -41,6 +41,12 @@ describe("syaratRute", () => {
 });
 
 describe("bolehBukaRute", () => {
+  it("jurnal stok gudang menuntut read-location, karena halamannya mencari lokasi gudang", () => {
+    const rute = "/dashboard/gudang/jurnalStok";
+    expect(bolehBukaRute(rute, [IZIN.jurnalStok])).toBe(false);
+    expect(bolehBukaRute(rute, [IZIN.jurnalStok, IZIN.location])).toBe(true);
+  });
+
   it("halaman detail hanya menuntut izin baca (GR5a)", () => {
     const rute = `${OUTLET}/inventaris/stockOpname/abc123`;
     expect(bolehBukaRute(rute, [IZIN.stockOpname])).toBe(true);

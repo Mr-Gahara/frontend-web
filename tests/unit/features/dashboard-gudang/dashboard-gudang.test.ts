@@ -129,12 +129,13 @@ describe("izin panel dashboard gudang", () => {
   });
 
   it("panel mengikuti izin endpoint masing-masing", () => {
-    expect(panelDashboardGudang([IZIN.dashboardGudang, IZIN.jurnalStok])).toEqual({
+    expect(panelDashboardGudang([IZIN.dashboardGudang, IZIN.jurnalStok, IZIN.location])).toEqual({
       pengajuan: false,
       pengiriman: true,
       stokKritis: false,
       jurnal: true,
     });
+    expect(panelDashboardGudang([IZIN.dashboardGudang, IZIN.jurnalStok]).jurnal).toBe(false);
     expect(panelDashboardGudang([IZIN.location, IZIN.inventoryGudang]).stokKritis).toBe(true);
     expect(panelDashboardGudang([IZIN.inventory]).stokKritis).toBe(false);
     expect(panelDashboardGudang([])).toEqual({ pengajuan: false, pengiriman: false, stokKritis: false, jurnal: false });

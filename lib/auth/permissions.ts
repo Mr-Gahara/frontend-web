@@ -256,7 +256,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   // Layout gudang sudah memutuskan siapa yang boleh setup (keputusan GD4a).
   "/dashboard/gudang/setup": [],
   "/dashboard/gudang/inventaris": [IZIN.location, [IZIN.inventory, IZIN.inventoryGudang], IZIN.bahan],
-  "/dashboard/gudang/jurnalStok": [IZIN.jurnalStok],
+  "/dashboard/gudang/jurnalStok": [IZIN.jurnalStok, IZIN.location],
   "/dashboard/gudang/stockOpname": [IZIN.stockOpname],
   "/dashboard/gudang/stockOpname/buatStockOpname": [IZIN.location, IZIN.buatStockOpname],
   "/dashboard/gudang/stockOpname/[id]": [IZIN.stockOpname],
