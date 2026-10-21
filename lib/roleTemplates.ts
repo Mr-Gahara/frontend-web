@@ -115,6 +115,12 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "create-inventory",
       "opname-inventory",
       "update-inventory-minimum",
+      // Stock Opname & Stock Adjustment
+      "create-stock-opname",
+      "read-stock-opname",
+      "submit-stock-opname",
+      "read-stock-adjustment-outlet",
+      "read-stock-adjustment-gudang",
       // Lokasi
       "read-location",
       // Jurnal Stok
@@ -124,6 +130,8 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "read-pengajuan-stok",
       "create-pengajuan-stok",
       "update-pengajuan-stok",
+      // SDM
+      "read-absensi",
       // Laporan & Dashboard
       "read-laporan",
       "read-dashboard-outlet",
@@ -200,6 +208,12 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "delete-inventory",
       "opname-inventory",
       "update-inventory-minimum",
+      "create-stock-opname",
+      "read-stock-opname",
+      "submit-stock-opname",
+      "review-stock-opname",
+      "read-stock-adjustment-outlet",
+      "read-stock-adjustment-gudang",
       "read-location",
       "create-location",
       "update-location",
@@ -235,6 +249,9 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "read-izin-cuti",
       "create-izin-cuti",
       "update-izin-cuti",
+      "read-absensi",
+      "create-absensi",
+      "update-absensi",
       // Laporan & Dashboard
       "read-laporan",
       "read-dashboard-outlet",
@@ -312,6 +329,12 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "delete-inventory",
       "opname-inventory",
       "update-inventory-minimum",
+      "create-stock-opname",
+      "read-stock-opname",
+      "submit-stock-opname",
+      "review-stock-opname",
+      "read-stock-adjustment-outlet",
+      "read-stock-adjustment-gudang",
       "read-location",
       "create-location",
       "update-location",
@@ -365,6 +388,9 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "read-izin-cuti",
       "create-izin-cuti",
       "update-izin-cuti",
+      "read-absensi",
+      "create-absensi",
+      "update-absensi",
       // Laporan & Dashboard
       "read-laporan",
       "read-dashboard-outlet",
