@@ -1,20 +1,23 @@
 "use client";
 
-import { useMemo, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useParams, useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowLeft, Ban, CheckCircle2, Info, Lock, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Ban, CheckCircle2, Info, Lock, Pencil, ShoppingCart, Trash2 } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { useDaftarLokasi } from "@/features/inventaris/hooks";
+import { useLevelPenggunaAktif } from "@/features/role/hooks";
+import { useSession } from "@/lib/auth/useSession";
+import { DialogHapusPembelian, DialogUbahPembelian } from "./dialog-pembelian";
 import { isNotFound } from "@/lib/api/error";
 import { formatRupiah, formatTanggal } from "@/lib/format";
 import type { ItemPembelianStok } from "@/types/pembelianStok";
 import { usePembelianStok } from "./hooks";
-import type { RuangPembelian } from "./izin";
+import { aksiPembelianStok, type RuangPembelian } from "./izin";
 import { TIPE_LOKASI_PEMBELIAN, URL_PEMBELIAN } from "./ruang";
 import {
   lokasiPembelian,
@@ -73,6 +76,10 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
   const { data: pembelian, isLoading, error } = usePembelianStok(id);
   const daftarLokasi = useDaftarLokasi();
   const barang = useMemo(() => pembelian?.items ?? [], [pembelian]);
+  const { permissions } = useSession();
+  const aksi = aksiPembelianStok(permissions, ruang);
+  const owner = useLevelPenggunaAktif() === 100;
+  const [terbuka, setTerbuka] = useState<"ubah" | "hapus" | null>(null);
 
   if (isLoading || daftarLokasi.isLoading) {
     return (
@@ -149,16 +156,44 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
             </p>
           </div>
         </div>
-        <div>
-          {pembelian.stokDitambahkan ? (
-            <Badge className="bg-sage text-gading px-3 py-1 font-bold border-none shadow-sm text-xs">
-              <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
-              Stok masuk ke {namaLokasi}
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="border-navy/20 text-navy/70 px-3 py-1 font-bold text-xs">
-              Dicatat sebelum stok bertambah otomatis
-            </Badge>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            {pembelian.stokDitambahkan ? (
+              <Badge className="bg-sage text-gading px-3 py-1 font-bold border-none shadow-sm text-xs">
+                <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
+                Stok masuk ke {namaLokasi}
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="border-navy/20 text-navy/70 px-3 py-1 font-bold text-xs">
+                Dicatat sebelum stok bertambah otomatis
+              </Badge>
+            )}
+          </div>
+          {(aksi.ubah || aksi.hapus) && (
+            <div className="flex w-full gap-2 sm:w-auto">
+              {aksi.ubah && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setTerbuka("ubah")}
+                  className="flex-1 sm:flex-none cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Ubah Info
+                </Button>
+              )}
+              {aksi.hapus && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setTerbuka("hapus")}
+                  className="flex-1 sm:flex-none cursor-pointer border-rose-500/30 text-rose-600 hover:bg-rose-500/10 hover:text-rose-700 font-bold"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Hapus
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -204,6 +239,18 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
         <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
         {catatanKunci}
       </p>
+
+      {terbuka === "ubah" && (
+        <DialogUbahPembelian pembelian={pembelian} owner={owner} onTutup={() => setTerbuka(null)} />
+      )}
+      {terbuka === "hapus" && (
+        <DialogHapusPembelian
+          pembelian={pembelian}
+          namaLokasi={namaLokasi}
+          onTutup={() => setTerbuka(null)}
+          onTerhapus={() => router.push(urlDaftar)}
+        />
+      )}
     </div>
   );
 }
