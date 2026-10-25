@@ -123,7 +123,7 @@ function GrupAlur({
   );
 }
 
-/** Pengajuan dari outlet: angka sama dengan tab PERLU TINJAUAN dan PERLU SURAT JALAN. */
+/** Pengajuan dari outlet: angka sama dengan tab Perlu Disetujui dan Perlu Surat Jalan. */
 export function PanelPengajuan() {
   const { permissions } = useSession();
   const { data, memuat, gagal, ulangi } = useAntreanPengajuan();
@@ -156,7 +156,7 @@ export function PanelPengajuan() {
   );
 }
 
-/** Pengiriman ke outlet: angka sama dengan tab DRAFT SJ dan halaman pengiriman. */
+/** Pengiriman ke outlet: angka sama dengan tab Belum Dikirim dan halaman pengiriman. */
 export function PanelPengiriman() {
   const { permissions } = useSession();
   const { data, memuat, gagal, ulangi } = useRingkasanPengiriman();

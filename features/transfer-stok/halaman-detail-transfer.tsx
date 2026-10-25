@@ -10,6 +10,8 @@ import { useSession } from "@/lib/auth/useSession";
 import { pesanError } from "@/lib/api/error";
 import { useBatalSuratJalan, useKirimSuratJalan, useTransferStok } from "./hooks";
 import { aksiSuratJalan } from "./izin";
+import { LABEL_STATUS_TRANSFER } from "./tampilan";
+import { LABEL_TAHAP_PENGAJUAN } from "@/features/pengajuan-stok/tampilan";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,25 +51,25 @@ const getStatusBadge = (status: StatusTransfer) => {
     case "PENDING":
       return (
         <Badge className="bg-slate-200 text-slate-700 border-none font-bold text-sm px-4 py-1">
-          <Clock className="w-4 h-4 mr-1.5" /> Draft SJ
+          <Clock className="w-4 h-4 mr-1.5" /> {LABEL_STATUS_TRANSFER.PENDING}
         </Badge>
       );
     case "DIKIRIM":
       return (
         <Badge className="bg-amber-100 text-amber-700 border-none font-bold text-sm px-4 py-1">
-          <Send className="w-4 h-4 mr-1.5" /> Sedang Dikirim
+          <Send className="w-4 h-4 mr-1.5" /> {LABEL_STATUS_TRANSFER.DIKIRIM}
         </Badge>
       );
     case "DITERIMA":
       return (
         <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-sm px-4 py-1">
-          <CheckCircle2 className="w-4 h-4 mr-1.5" /> Selesai
+          <CheckCircle2 className="w-4 h-4 mr-1.5" /> {LABEL_STATUS_TRANSFER.DITERIMA}
         </Badge>
       );
     case "BATAL":
       return (
         <Badge className="bg-rose-100 text-rose-700 border-none font-bold text-sm px-4 py-1">
-          <XCircle className="w-4 h-4 mr-1.5" /> Dibatalkan
+          <XCircle className="w-4 h-4 mr-1.5" /> {LABEL_STATUS_TRANSFER.BATAL}
         </Badge>
       );
     default:
@@ -365,7 +367,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
             </div>
           )}
 
-          {/* ALERT SEDANG DIKIRIM */}
+          {/* ALERT DALAM PERJALANAN */}
           {isDikirim && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm text-center space-y-2">
               <Truck className="w-8 h-8 text-amber-500 mx-auto" />
@@ -426,7 +428,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
             <AlertDialogDescription className="text-navy/70 font-medium">
               Surat Jalan ini akan dibatalkan secara permanen. Jika ini terkait
               dengan permintaan Outlet, status pengajuan mereka akan kembali
-              menjadi &quot;Perlu Tinjauan&quot;.
+              menjadi &quot;{LABEL_TAHAP_PENGAJUAN.gudang.PERLU_SURAT_JALAN}&quot;, sehingga surat jalan baru dapat dibuat.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

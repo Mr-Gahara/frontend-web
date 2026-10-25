@@ -80,7 +80,7 @@ test.describe("Dashboard gudang", () => {
     } else {
       await grup.getByRole("link", { name: /surat jalannya belum dibuat/ }).click();
       await expect(page).toHaveURL(BASIS + "/dashboard/gudang/pengajuanStok?tab=perlu-surat-jalan");
-      await expect(page.getByRole("button", { name: "PERLU SURAT JALAN", exact: true })).toHaveAttribute(
+      await expect(page.getByRole("button", { name: "Perlu Surat Jalan", exact: true })).toHaveAttribute(
         "aria-pressed",
         "true",
       );
@@ -96,7 +96,7 @@ test.describe("Dashboard gudang", () => {
     expect(pengajuan.filter(perluSuratJalan).length, "perlu surat jalan").toBe(siapDibuatSuratJalan);
   });
 
-  test("angka pengiriman dari ringkasan dan tautan Kirim sekarang ke tab DRAFT SJ", async ({ page }) => {
+  test("angka pengiriman dari ringkasan dan tautan Kirim sekarang ke tab Belum Dikirim", async ({ page }) => {
     const { ringkasan } = await bukaDashboard(page);
     const grup = page.getByRole("region", { name: "Pengiriman ke outlet" });
     const { suratJalanPending, sedangDikirim } = ringkasan.transfer;
@@ -109,7 +109,7 @@ test.describe("Dashboard gudang", () => {
     }
     await grup.getByRole("link", { name: /surat jalan belum dikirim/ }).click();
     await expect(page).toHaveURL(BASIS + "/dashboard/gudang/transferStok?tab=draf");
-    await expect(page.getByRole("button", { name: "DRAFT SJ", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("button", { name: "Belum Dikirim", exact: true })).toHaveAttribute("aria-pressed", "true");
   });
 
   test("stok kritis dan jurnal hanya gudang, paling banyak lima baris", async ({ page }) => {

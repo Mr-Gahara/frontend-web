@@ -13,7 +13,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import { dashboardGudangApi } from "./api";
 import { BATAS_BARIS, antreanDariRingkasan, jurnalTerbaruGudang, stokKritis } from "./ringkasan";
 
-/** Hitungan surat jalan; filternya sama dengan tab DRAFT SJ dan halaman pengiriman. */
+/** Hitungan surat jalan; filternya sama dengan tab Belum Dikirim dan halaman pengiriman. */
 export function useRingkasanPengiriman() {
   const kueri = useQuery({
     queryKey: queryKeys.transferStok.ringkasanGudang(),

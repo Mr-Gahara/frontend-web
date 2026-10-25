@@ -10,7 +10,7 @@ import { useTabUrl } from "@/hooks/use-tab-url";
 import type { StatusTransfer, TransferStok } from "@/types/transferStok";
 import { useDaftarTransferStok } from "./hooks";
 import { filterServerTransfer, saringTransfer, type TabTransfer } from "./filter";
-import { LABEL_TAB_TRANSFER, SLUG_TAB_TRANSFER, TAB_TRANSFER } from "./tampilan";
+import { LABEL_STATUS_TRANSFER, LABEL_TAB_TRANSFER, SLUG_TAB_TRANSFER, TAB_TRANSFER } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,25 +46,25 @@ const getStatusBadge = (status: StatusTransfer) => {
     case "PENDING":
       return (
         <Badge className="bg-slate-200 text-slate-700 hover:bg-slate-300 border-none font-bold">
-          <Clock className="w-3 h-3 mr-1" /> Draft SJ
+          <Clock className="w-3 h-3 mr-1" /> {LABEL_STATUS_TRANSFER.PENDING}
         </Badge>
       );
     case "DIKIRIM":
       return (
         <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-none font-bold">
-          <Send className="w-3 h-3 mr-1" /> Sedang Dikirim
+          <Send className="w-3 h-3 mr-1" /> {LABEL_STATUS_TRANSFER.DIKIRIM}
         </Badge>
       );
     case "DITERIMA":
       return (
         <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none font-bold">
-          <CheckCircle2 className="w-3 h-3 mr-1" /> Selesai
+          <CheckCircle2 className="w-3 h-3 mr-1" /> {LABEL_STATUS_TRANSFER.DITERIMA}
         </Badge>
       );
     case "BATAL":
       return (
         <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 border-none font-bold">
-          <XCircle className="w-3 h-3 mr-1" /> Dibatalkan
+          <XCircle className="w-3 h-3 mr-1" /> {LABEL_STATUS_TRANSFER.BATAL}
         </Badge>
       );
     default:

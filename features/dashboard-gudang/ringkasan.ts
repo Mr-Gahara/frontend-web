@@ -20,7 +20,7 @@ export interface AntreanPengajuan {
 
 /**
  * Hitungan kartu pengajuan dari GET /dashboard/gudang. Sejak B101 aturan server
- * sama dengan tab PERLU TINJAUAN dan PERLU SURAT JALAN di daftar gudang:
+ * sama dengan tab Perlu Disetujui dan Perlu Surat Jalan di daftar gudang:
  * SUBMITTED, serta APPROVED atau PENDING yang belum punya surat jalan. Server
  * menghitung kedua arah pengajuan (P8), sedangkan daftar gudang baru
  * menampilkan Gudang ke Outlet, sehingga angkanya berbeda begitu ada

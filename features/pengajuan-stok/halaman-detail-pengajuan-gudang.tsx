@@ -11,7 +11,7 @@ import { useBuatSuratJalan } from "@/features/transfer-stok/hooks";
 import { usePengajuanStok, useSetujuiPengajuan, useTolakPengajuan } from "./hooks";
 import { arahPengajuanValid } from "./arah";
 import { bolehBuatSuratJalan, bolehSetujuiPengajuan, bolehTolakPengajuan } from "./izin";
-import { formatTanggalPengajuan } from "./tampilan";
+import { LABEL_TAHAP_PENGAJUAN, formatTanggalPengajuan } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,31 +58,31 @@ function badgeTahap(tahap: TahapPengajuan) {
     case "SUBMITTED":
       return (
         <Badge className="bg-amber-100 text-amber-700 border-none font-bold text-sm px-4 py-1">
-          <Clock className="w-4 h-4 mr-1.5" /> Perlu Tinjauan
+          <Clock className="w-4 h-4 mr-1.5" /> {LABEL_TAHAP_PENGAJUAN.gudang.SUBMITTED}
         </Badge>
       );
     case "PERLU_SURAT_JALAN":
       return (
         <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-sm px-4 py-1">
-          <CheckCircle2 className="w-4 h-4 mr-1.5" /> Perlu Surat Jalan
+          <CheckCircle2 className="w-4 h-4 mr-1.5" /> {LABEL_TAHAP_PENGAJUAN.gudang.PERLU_SURAT_JALAN}
         </Badge>
       );
     case "SURAT_JALAN_DIBUAT":
       return (
         <Badge className="bg-indigo-100 text-indigo-700 border-none font-bold text-sm px-4 py-1">
-          Surat Jalan Dibuat
+          {LABEL_TAHAP_PENGAJUAN.gudang.SURAT_JALAN_DIBUAT}
         </Badge>
       );
     case "COMPLETED":
       return (
         <Badge className="bg-blue-100 text-blue-700 border-none font-bold text-sm px-4 py-1">
-          Selesai
+          {LABEL_TAHAP_PENGAJUAN.gudang.COMPLETED}
         </Badge>
       );
     case "REJECTED":
       return (
         <Badge className="bg-rose-100 text-rose-700 border-none font-bold text-sm px-4 py-1">
-          <XCircle className="w-4 h-4 mr-1.5" /> Ditolak
+          <XCircle className="w-4 h-4 mr-1.5" /> {LABEL_TAHAP_PENGAJUAN.gudang.REJECTED}
         </Badge>
       );
     default:

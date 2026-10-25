@@ -9,9 +9,11 @@ import {
   bolehTolakPengajuan,
   bolehUbahPengajuan,
   tabTerlihat,
+  type TabPengajuan,
 } from "@/features/pengajuan-stok/izin";
 import { nilaiAwalPengajuan, susunPayloadPengajuan } from "@/features/pengajuan-stok/payload";
 import { skemaPengajuan } from "@/features/pengajuan-stok/schema";
+import { LABEL_TAHAP_PENGAJUAN, SLUG_TAB_PENGAJUAN, labelTabPengajuan } from "@/features/pengajuan-stok/tampilan";
 
 function pengajuan(nomor: string, status: PengajuanStok["status"], peminta: string, tipeDari: string, tipeKe: string): PengajuanStok {
   return {
@@ -213,5 +215,59 @@ describe("tab pengajuan", () => {
   it("tab satu status hanya statusnya, tab Semua seluruhnya", () => {
     expect(SEMUA.filter((p) => cocokTab(p, "SUBMITTED"))).toEqual([diajukan]);
     expect(SEMUA.filter((p) => cocokTab(p, "ALL"))).toEqual(SEMUA);
+  });
+});
+
+describe("label tab dan tahap pengajuan", () => {
+  const TAHAP = ["DRAFT", "SUBMITTED", "PERLU_SURAT_JALAN", "SURAT_JALAN_DIBUAT", "COMPLETED", "REJECTED"] as const;
+
+  it("setiap tahap berlabel di kedua ruang, tanpa kode status mentah", () => {
+    for (const ruang of ["outlet", "gudang"] as const) {
+      for (const tahap of TAHAP) {
+        const label = LABEL_TAHAP_PENGAJUAN[ruang][tahap];
+        expect(label).toBeTruthy();
+        expect(label).not.toBe(tahap);
+        expect(label).not.toBe(label.toUpperCase());
+      }
+    }
+  });
+
+  it("tab outlet berlabel bahasa awam sesuai urutan tab", () => {
+    const tab: TabPengajuan[] = ["ALL", "DRAFT", "SUBMITTED", "DISETUJUI", "REJECTED", "COMPLETED"];
+    expect(tab.map((t) => labelTabPengajuan("outlet", t))).toEqual([
+      "Semua",
+      "Draft",
+      "Menunggu Persetujuan",
+      "Disetujui",
+      "Ditolak",
+      "Selesai",
+    ]);
+  });
+
+  it("tab gudang berlabel bahasa awam sesuai urutan tab", () => {
+    const tab: TabPengajuan[] = ["SUBMITTED", "PERLU_SURAT_JALAN", "COMPLETED", "REJECTED", "ALL"];
+    expect(tab.map((t) => labelTabPengajuan("gudang", t))).toEqual([
+      "Perlu Disetujui",
+      "Perlu Surat Jalan",
+      "Selesai",
+      "Ditolak",
+      "Semua",
+    ]);
+  });
+
+  it("label tab sama dengan badge tahap yang dicakupnya", () => {
+    expect(labelTabPengajuan("outlet", "DISETUJUI")).toBe(LABEL_TAHAP_PENGAJUAN.outlet.PERLU_SURAT_JALAN);
+    expect(labelTabPengajuan("outlet", "SUBMITTED")).toBe(LABEL_TAHAP_PENGAJUAN.outlet.SUBMITTED);
+    expect(labelTabPengajuan("gudang", "SUBMITTED")).toBe(LABEL_TAHAP_PENGAJUAN.gudang.SUBMITTED);
+    expect(labelTabPengajuan("gudang", "PERLU_SURAT_JALAN")).toBe(LABEL_TAHAP_PENGAJUAN.gudang.PERLU_SURAT_JALAN);
+    expect(labelTabPengajuan("outlet", "APPROVED")).toBe("Disetujui");
+    expect(labelTabPengajuan("gudang", "PENDING")).toBe("Disetujui");
+  });
+
+  it("slug ?tab= tidak berubah walau label diganti", () => {
+    expect(SLUG_TAB_PENGAJUAN).toEqual({
+      outlet: { ALL: "semua", DRAFT: "draf", SUBMITTED: "menunggu", DISETUJUI: "disetujui", REJECTED: "ditolak", COMPLETED: "selesai" },
+      gudang: { SUBMITTED: "perlu-tinjauan", PERLU_SURAT_JALAN: "perlu-surat-jalan", COMPLETED: "selesai", REJECTED: "ditolak", ALL: "semua" },
+    });
   });
 });

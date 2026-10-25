@@ -12,7 +12,7 @@ import { useDaftarPengajuanStok } from "./hooks";
 import { cocokTab, saringPengajuan, statusServerTab } from "./filter";
 import { tabTerlihat, type TabPengajuan } from "./izin";
 import { tahapPengajuan, type TahapPengajuan } from "./tahap";
-import { SLUG_TAB_PENGAJUAN } from "./tampilan";
+import { LABEL_TAHAP_PENGAJUAN, SLUG_TAB_PENGAJUAN, labelTabPengajuan } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,9 +71,6 @@ interface TeksRuang {
   urlBuat: string | null;
   tab: readonly TabPengajuan[];
   tabBawaan: TabPengajuan;
-  labelTab: Partial<Record<TabPengajuan, string>>;
-  /** Label per tahap (tahap.ts), bukan per status: tahap membedakan ada tidaknya surat jalan. */
-  labelStatus: Partial<Record<TahapPengajuan, string>>;
   placeholderCari: string;
   kolomInfo: string;
   kolomLokasi: string;
@@ -89,8 +86,6 @@ const TEKS: Record<"outlet" | "gudang", TeksRuang> = {
     urlBuat: "/dashboard/outlet/inventaris/pengajuanStok/buatPengajuan",
     tab: ["ALL", "DRAFT", "SUBMITTED", "DISETUJUI", "REJECTED", "COMPLETED"],
     tabBawaan: "ALL",
-    labelTab: { ALL: "Semua Status", SUBMITTED: "MENUNGGU", DISETUJUI: "DISETUJUI" },
-    labelStatus: { DRAFT: "Draft", SUBMITTED: "Menunggu", PERLU_SURAT_JALAN: "Disetujui", SURAT_JALAN_DIBUAT: "Surat Jalan Dibuat", COMPLETED: "Selesai", REJECTED: "Ditolak" },
     placeholderCari: "Cari No. Pengajuan...",
     kolomInfo: "Informasi Pengajuan",
     kolomLokasi: "Gudang Asal",
@@ -104,8 +99,6 @@ const TEKS: Record<"outlet" | "gudang", TeksRuang> = {
     urlBuat: null,
     tab: ["SUBMITTED", "PERLU_SURAT_JALAN", "COMPLETED", "REJECTED", "ALL"],
     tabBawaan: "SUBMITTED",
-    labelTab: { ALL: "Semua", SUBMITTED: "PERLU TINJAUAN", PERLU_SURAT_JALAN: "PERLU SURAT JALAN" },
-    labelStatus: { SUBMITTED: "Perlu Tinjauan", PERLU_SURAT_JALAN: "Perlu Surat Jalan", SURAT_JALAN_DIBUAT: "Surat Jalan Dibuat", COMPLETED: "Selesai", REJECTED: "Ditolak" },
     placeholderCari: "Cari No. Pengajuan / Outlet...",
     kolomInfo: "Nomor & Tanggal",
     kolomLokasi: "Outlet Peminta",
@@ -212,7 +205,7 @@ function IsiDaftarPengajuanStok({
         header: "Status",
         cell: ({ row }) => {
           const tahap = tahapPengajuan(row.original);
-          return getStatusBadge(tahap, teks.labelStatus[tahap] ?? row.original.status);
+          return getStatusBadge(tahap, LABEL_TAHAP_PENGAJUAN[ruang][tahap]);
         },
       },
       {
@@ -296,7 +289,7 @@ function IsiDaftarPengajuanStok({
                   : "text-navy/60 hover:text-navy hover:bg-navy/5"
               }`}
             >
-              {teks.labelTab[tab] ?? tab}
+              {labelTabPengajuan(ruang, tab)}
             </Button>
           ))}
         </div>

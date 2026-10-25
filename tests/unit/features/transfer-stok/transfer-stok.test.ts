@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { filterServerTransfer, saringTransfer } from "@/features/transfer-stok/filter";
 import { aksiSuratJalan } from "@/features/transfer-stok/izin";
 import { susunPayloadRevisi } from "@/features/transfer-stok/payload";
+import { LABEL_STATUS_TRANSFER, LABEL_TAB_TRANSFER, SLUG_TAB_TRANSFER, TAB_TRANSFER } from "@/features/transfer-stok/tampilan";
 import type { StatusTransfer, TransferStok } from "@/types/transferStok";
 
 const lokasi = (id: string, nama: string, tipe: string) => ({ id, nama, tipe });
@@ -101,5 +102,33 @@ describe("susunPayloadRevisi", () => {
   it("menolak bila tidak ada satu pun baris valid", () => {
     const hasil = susunPayloadRevisi([{ bahanBakuID: "a", qtyKirim: "0" }]);
     expect(hasil.ok).toBe(false);
+  });
+});
+
+describe("label status surat jalan", () => {
+  it("setiap status berlabel bahasa awam, selaras dengan dashboard gudang", () => {
+    expect(LABEL_STATUS_TRANSFER).toEqual({
+      PENDING: "Belum Dikirim",
+      DIKIRIM: "Dalam Perjalanan",
+      DITERIMA: "Diterima",
+      BATAL: "Dibatalkan",
+    });
+  });
+
+  it("label tab memakai label status yang sama, ditambah Semua, sesuai urutan tab", () => {
+    expect(TAB_TRANSFER.map((t) => LABEL_TAB_TRANSFER[t])).toEqual([
+      "Semua",
+      "Belum Dikirim",
+      "Dalam Perjalanan",
+      "Diterima",
+      "Dibatalkan",
+    ]);
+    for (const status of ["PENDING", "DIKIRIM", "DITERIMA", "BATAL"] as const) {
+      expect(LABEL_TAB_TRANSFER[status]).toBe(LABEL_STATUS_TRANSFER[status]);
+    }
+  });
+
+  it("slug ?tab= tidak berubah walau label diganti", () => {
+    expect(SLUG_TAB_TRANSFER).toEqual({ ALL: "semua", PENDING: "draf", DIKIRIM: "dikirim", DITERIMA: "selesai", BATAL: "dibatalkan" });
   });
 });
