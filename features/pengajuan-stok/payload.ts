@@ -9,9 +9,9 @@ export interface ItemIsian {
 }
 
 export interface PayloadPengajuan {
-  /** Gudang asal barang (arah.ts). */
+  /** Asal barang (P8): gudang pada permintaan, outlet pada pengembalian. */
   dariLocationID: string;
-  /** Outlet peminta (arah.ts). */
+  /** Tujuan barang (P8): outlet pada permintaan, gudang pada pengembalian. */
   keLocationID: string;
   catatan: string;
   tanggalKebutuhan?: string;
@@ -30,8 +30,7 @@ export function itemValid(item: ItemIsian): boolean {
 
 export function susunPayloadPengajuan(nilai: NilaiFormPengajuan): PayloadPengajuan {
   return {
-    dariLocationID: nilai.dariLocationID,
-    keLocationID: nilai.keLocationID,
+    ...lokasiMenurutArah(nilai.arah, nilai),
     catatan: nilai.catatan,
     tanggalKebutuhan: nilai.tanggalKebutuhan ? nilai.tanggalKebutuhan.toISOString() : undefined,
     items: nilai.items.filter(itemValid).map((item) => ({
@@ -45,16 +44,23 @@ export function susunPayloadPengajuan(nilai: NilaiFormPengajuan): PayloadPengaju
 /** Nilai awal form: kosong untuk buat, dari dokumen untuk edit. */
 export function nilaiAwalPengajuan(pengajuan?: PengajuanStok): NilaiFormPengajuan {
   if (!pengajuan) {
-    return { keLocationID: "", dariLocationID: "", tanggalKebutuhan: undefined, catatan: "", items: [{ ...BARIS_KOSONG }] };
+    return { arah: "GUDANG_KE_OUTLET", outletID: "", gudangID: "", tanggalKebutuhan: undefined, catatan: "", items: [{ ...BARIS_KOSONG }] };
   }
   const items = pengajuan.items.map((item) => ({
     bahanBakuID: item.bahanBaku?.id ?? "",
     jumlah: String(item.jumlah),
     satuan: item.satuan ?? "",
   }));
+  // Dokumen berarah tidak sah memakai pemetaan permintaan; backend menolaknya saat disimpan.
+  const sisi = sisiMenurutDokumen(pengajuan) ?? {
+    arah: "GUDANG_KE_OUTLET" as const,
+    outletID: pengajuan.keLokasi?.id ?? "",
+    gudangID: pengajuan.dariLokasi?.id ?? "",
+  };
   return {
-    keLocationID: pengajuan.keLokasi?.id ?? "",
-    dariLocationID: pengajuan.dariLokasi?.id ?? "",
+    arah: sisi.arah,
+    outletID: sisi.outletID,
+    gudangID: sisi.gudangID,
     tanggalKebutuhan: pengajuan.tanggalKebutuhan ? new Date(pengajuan.tanggalKebutuhan) : undefined,
     catatan: pengajuan.catatan ?? "",
     items: items.length ? items : [{ ...BARIS_KOSONG }],

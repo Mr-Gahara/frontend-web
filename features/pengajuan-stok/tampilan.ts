@@ -2,8 +2,9 @@ import { format } from "date-fns";
 import type { SlugTab } from "@/lib/tab-url";
 import type { RuangPengajuan } from "./filter";
 import type { TabPengajuan } from "./izin";
-import type { TahapPengajuan } from "./tahap";
-import type { ArahPengajuan } from "./arah";
+import { tahapPengajuan, type TahapPengajuan } from "./tahap";
+import { arahLokasi, type ArahPengajuan } from "./arah";
+import type { PengajuanStok } from "@/types/pengajuanStok";
 import { id as localeID } from "date-fns/locale";
 
 export function formatTanggalPengajuan(iso: string | null | undefined): string {
@@ -70,3 +71,19 @@ export const LABEL_ARAH_PENGAJUAN: Record<ArahPengajuan, string> = {
   GUDANG_KE_OUTLET: "Permintaan",
   OUTLET_KE_GUDANG: "Pengembalian",
 };
+
+/**
+ * Label tahap untuk satu pengajuan di satu ruang. Pengembalian yang sudah
+ * disetujui menunggu surat jalan dari outlet, sehingga di ruang gudang
+ * labelnya menyebut itu (AR6a); selain itu sama dengan LABEL_TAHAP_PENGAJUAN.
+ */
+export function labelTahapPengajuan(
+  ruang: RuangPengajuan,
+  p: Pick<PengajuanStok, "status" | "transferStokID" | "dariLokasi" | "keLokasi">,
+): string {
+  const tahap = tahapPengajuan(p);
+  if (ruang === "gudang" && tahap === "PERLU_SURAT_JALAN" && arahLokasi(p.dariLokasi, p.keLokasi) === "OUTLET_KE_GUDANG") {
+    return "Menunggu Surat Jalan Outlet";
+  }
+  return LABEL_TAHAP_PENGAJUAN[ruang][tahap];
+}

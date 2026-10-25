@@ -9,9 +9,9 @@ import { useSession } from "@/lib/auth/useSession";
 import { tahapPengajuan, type TahapPengajuan } from "./tahap";
 import { useBuatSuratJalan } from "@/features/transfer-stok/hooks";
 import { usePengajuanStok, useSetujuiPengajuan, useTolakPengajuan } from "./hooks";
-import { arahPengajuanValid } from "./arah";
+import { arahLokasi, arahPengajuanValid, peranRuang } from "./arah";
 import { bolehBuatSuratJalan, bolehSetujuiPengajuan, bolehTolakPengajuan } from "./izin";
-import { LABEL_TAHAP_PENGAJUAN, formatTanggalPengajuan } from "./tampilan";
+import { LABEL_ARAH_PENGAJUAN, formatTanggalPengajuan, labelTahapPengajuan } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,36 +53,37 @@ import {
 const URL_DAFTAR = "/dashboard/gudang/pengajuanStok";
 const URL_TRANSFER = "/dashboard/gudang/transferStok";
 
-function badgeTahap(tahap: TahapPengajuan) {
+/** Badge tahap; label dari labelTahapPengajuan, karena pengembalian di tahap Perlu Surat Jalan berlabel lain (AR6a). */
+function badgeTahap(tahap: TahapPengajuan, label: string) {
   switch (tahap) {
     case "SUBMITTED":
       return (
         <Badge className="bg-amber-100 text-amber-700 border-none font-bold text-sm px-4 py-1">
-          <Clock className="w-4 h-4 mr-1.5" /> {LABEL_TAHAP_PENGAJUAN.gudang.SUBMITTED}
+          <Clock className="w-4 h-4 mr-1.5" /> {label}
         </Badge>
       );
     case "PERLU_SURAT_JALAN":
       return (
         <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-sm px-4 py-1">
-          <CheckCircle2 className="w-4 h-4 mr-1.5" /> {LABEL_TAHAP_PENGAJUAN.gudang.PERLU_SURAT_JALAN}
+          <CheckCircle2 className="w-4 h-4 mr-1.5" /> {label}
         </Badge>
       );
     case "SURAT_JALAN_DIBUAT":
       return (
         <Badge className="bg-indigo-100 text-indigo-700 border-none font-bold text-sm px-4 py-1">
-          {LABEL_TAHAP_PENGAJUAN.gudang.SURAT_JALAN_DIBUAT}
+          {label}
         </Badge>
       );
     case "COMPLETED":
       return (
         <Badge className="bg-blue-100 text-blue-700 border-none font-bold text-sm px-4 py-1">
-          {LABEL_TAHAP_PENGAJUAN.gudang.COMPLETED}
+          {label}
         </Badge>
       );
     case "REJECTED":
       return (
         <Badge className="bg-rose-100 text-rose-700 border-none font-bold text-sm px-4 py-1">
-          <XCircle className="w-4 h-4 mr-1.5" /> {LABEL_TAHAP_PENGAJUAN.gudang.REJECTED}
+          <XCircle className="w-4 h-4 mr-1.5" /> {label}
         </Badge>
       );
     default:
@@ -173,12 +174,16 @@ export default function HalamanDetailPengajuanGudang() {
   const perluSuratJalan = tahap === "PERLU_SURAT_JALAN";
   const hasSuratJalan = !!detail.transferStokID;
   const arahValid = arahPengajuanValid(detail);
+  const arah = arahLokasi(detail.dariLokasi, detail.keLokasi);
+  const pengembalian = arah === "OUTLET_KE_GUDANG";
+  // Surat jalan dibuat ruang asal barang (AR2a): pada pengembalian, outlet.
+  const gudangPengirim = arah !== null && peranRuang(arah, "gudang") === "pengirim";
   const isStockInsufficient = detail.items.some(
     (item) => item.jumlah > (item.stokGudangSaatIni || 0),
   );
   // Status menentukan tahap; izin menentukan siapa yang boleh bertindak (butir 14).
   const panelTinjau = isSubmitted && (bolehSetujui || bolehTolak);
-  const panelSuratJalan = perluSuratJalan && bolehSuratJalan;
+  const panelSuratJalan = perluSuratJalan && bolehSuratJalan && gudangPengirim;
 
   return (
     <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-5xl mx-auto">
@@ -200,7 +205,7 @@ export default function HalamanDetailPengajuanGudang() {
             </h1>
             <div className="flex items-center gap-3 text-sm font-medium text-navy/60">
               <span className="flex items-center gap-1">
-                <FileText className="w-4 h-4" /> {detail.jenisPengajuan}
+                <FileText className="w-4 h-4" /> {arah ? LABEL_ARAH_PENGAJUAN[arah] : "-"}
               </span>
               <span>•</span>
               <span>Dibuat: {formatTanggalPengajuan(detail.createdAt)}</span>
@@ -208,7 +213,7 @@ export default function HalamanDetailPengajuanGudang() {
           </div>
         </div>
         <div className="flex flex-col items-start md:items-end gap-2">
-          {badgeTahap(tahap)}
+          {badgeTahap(tahap, labelTahapPengajuan("gudang", detail))}
         </div>
       </div>
 
@@ -228,7 +233,7 @@ export default function HalamanDetailPengajuanGudang() {
           <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
             <div className="bg-krem px-6 py-4 border-b border-navy/10 flex items-center gap-2">
               <Package className="w-5 h-5 text-karamel" />
-              <h2 className="font-bold text-navy">Rincian Kebutuhan Outlet</h2>
+              <h2 className="font-bold text-navy">{pengembalian ? "Barang yang Dikembalikan" : "Rincian Kebutuhan Outlet"}</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
@@ -236,7 +241,7 @@ export default function HalamanDetailPengajuanGudang() {
                   <tr>
                     <th className="px-6 py-4">Nama Barang</th>
                     <th className="px-6 py-4 text-center">Permintaan</th>
-                    <th className="px-6 py-4 text-center">Stok Gudang</th>
+                    <th className="px-6 py-4 text-center">{pengembalian ? "Stok Outlet" : "Stok Gudang"}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-navy/5">
@@ -307,13 +312,13 @@ export default function HalamanDetailPengajuanGudang() {
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-navy" />
                 <div className="absolute left-1.5 top-4 -bottom-4 w-0.5 bg-navy/10" />
                 <span className="text-xs font-bold text-navy/50 uppercase">
-                  Gudang Asal (Lokasi Kita)
+                  {pengembalian ? "Outlet Asal Barang" : "Gudang Asal (Lokasi Kita)"}
                 </span>
                 <span className="font-bold text-navy">{detail.dariLokasi?.nama || "-"}</span>
               </div>
               <div className="flex flex-col gap-1 relative pl-6">
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-karamel" />
-                <span className="text-xs font-bold text-navy/50 uppercase">Outlet Peminta</span>
+                <span className="text-xs font-bold text-navy/50 uppercase">{pengembalian ? "Gudang Tujuan (Lokasi Kita)" : "Outlet Peminta"}</span>
                 <span className="font-bold text-navy">{detail.keLokasi?.nama || "-"}</span>
               </div>
             </div>
@@ -350,8 +355,8 @@ export default function HalamanDetailPengajuanGudang() {
             <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 flex items-start gap-2">
               <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
               <p className="text-xs font-medium text-rose-700 leading-snug">
-                Arah lokasi pengajuan ini terbalik: gudang asal dan outlet peminta tertukar.
-                Persetujuan dan surat jalan dikunci agar stok tidak bergerak ke arah yang salah.
+                Pasangan lokasi pengajuan ini tidak sah: pengajuan hanya berlaku antara Gudang dan Outlet.
+                Persetujuan dan surat jalan dikunci agar stok tidak bergerak ke lokasi yang salah.
                 Perbaiki data pengajuan ini lebih dulu.
               </p>
             </div>
@@ -368,7 +373,7 @@ export default function HalamanDetailPengajuanGudang() {
                 <div className="bg-rose-50 border border-rose-200 p-3 rounded-xl mb-2 flex items-start gap-2">
                   <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                   <p className="text-xs font-medium text-rose-700 leading-snug">
-                    Persetujuan dikunci karena stok gudang tidak mencukupi. Silakan tolak pengajuan
+                    Persetujuan dikunci karena stok {pengembalian ? "outlet" : "gudang"} tidak mencukupi. Silakan tolak pengajuan
                     atau lakukan opname stok terlebih dahulu.
                   </p>
                 </div>
@@ -385,7 +390,7 @@ export default function HalamanDetailPengajuanGudang() {
                       : "bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer",
                   )}
                 >
-                  <Check className="w-4 h-4 mr-2" /> Setujui Permintaan
+                  <Check className="w-4 h-4 mr-2" /> Setujui {pengembalian ? "Pengembalian" : "Permintaan"}
                 </Button>
               )}
               {bolehTolak && (
@@ -394,9 +399,20 @@ export default function HalamanDetailPengajuanGudang() {
                   onClick={() => setShowRejectModal(true)}
                   className="w-full bg-white border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800 font-bold cursor-pointer"
                 >
-                  <X className="w-4 h-4 mr-2" /> Tolak Permintaan
+                  <X className="w-4 h-4 mr-2" /> Tolak {pengembalian ? "Pengembalian" : "Permintaan"}
                 </Button>
               )}
+            </div>
+          )}
+
+          {/* Pengembalian yang disetujui: surat jalan dibuat outlet (AR2a), gudang menerima */}
+          {perluSuratJalan && arahValid && !gudangPengirim && (
+            <div className="rounded-2xl border border-navy/10 bg-krem p-4 flex items-start gap-2">
+              <Truck className="w-5 h-5 text-navy shrink-0 mt-0.5" />
+              <p className="text-xs font-medium text-navy leading-snug">
+                Pengembalian ini sudah disetujui. Outlet yang membuat dan mengirim surat jalannya, lalu
+                gudang menerima barangnya di menu Penerimaan Stok.
+              </p>
             </div>
           )}
 
@@ -445,7 +461,7 @@ export default function HalamanDetailPengajuanGudang() {
       <AlertDialog open={showConfirmApprove} onOpenChange={setShowConfirmApprove}>
         <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-navy">Setujui Permintaan Outlet?</AlertDialogTitle>
+            <AlertDialogTitle className="text-navy">{pengembalian ? "Setujui Pengembalian Outlet?" : "Setujui Permintaan Outlet?"}</AlertDialogTitle>
             <AlertDialogDescription className="text-navy/70 font-medium">
               Pastikan stok di gudang Anda mencukupi. Setelah disetujui, Anda harus membuat Surat
               Jalan (Transfer Stok) untuk mengirimkan barang ini secara fisik.

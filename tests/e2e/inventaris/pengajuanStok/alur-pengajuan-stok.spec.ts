@@ -140,7 +140,7 @@ test.describe("Alur tulis pengajuan stok", () => {
     });
 
     await test.step("ajukan gagal: dialog bertahan dan pesan tampil", async () => {
-      const tombol = page.getByRole("button", { name: /ajukan ke gudang pusat/i });
+      const tombol = page.getByRole("button", { name: /ajukan ke gudang/i });
       await expect(tombol).toBeVisible();
       const pola = /\/api\/pengajuanstok\/[^/]+\/submit(\?|$)/i;
       await page.route(pola, (route) =>
@@ -159,7 +159,7 @@ test.describe("Alur tulis pengajuan stok", () => {
     await test.step("ajukan", async () => {
       const dialog = page.getByRole("alertdialog");
       if (!(await dialog.isVisible())) {
-        await page.getByRole("button", { name: /ajukan ke gudang pusat/i }).click();
+        await page.getByRole("button", { name: /ajukan ke gudang/i }).click();
       }
       const t = page.waitForResponse(patchAksi("submit"));
       await dialog.getByRole("button", { name: "Ya, Ajukan Sekarang" }).click();
@@ -187,6 +187,87 @@ test.describe("Alur tulis pengajuan stok", () => {
       expect(res.request().postDataJSON()).toEqual({ alasan: ALASAN });
       await expect(dialog).toBeHidden();
       await expect(page.getByRole("button", { name: /setujui permintaan/i })).toHaveCount(0);
+    });
+  });
+
+  test("pengembalian: buat dari outlet, ajukan, tampil di inbox gudang, lalu tolak", async ({ page }) => {
+    test.setTimeout(120_000);
+    let id = "";
+    let nomor = "";
+
+    await test.step("buat draft pengembalian dari outlet", async () => {
+      await page.goto(URL_OUTLET + "/buatPengajuan");
+      const pilihKembali = page.getByRole("button", { name: /kembalikan ke gudang/i });
+      await pilihKembali.click();
+      await expect(pilihKembali).toHaveAttribute("aria-pressed", "true");
+      await expect(page.getByText("Outlet Asal Barang")).toBeVisible();
+      await expect(page.getByText("Gudang Tujuan")).toBeVisible();
+      if (ADA_IZIN_LINTAS) {
+        await page.getByText("Pilih Outlet Anda...", { exact: true }).click();
+        await page.getByRole("option").first().click();
+      }
+      await page.getByText("Pilih Gudang...", { exact: true }).click();
+      await page.getByRole("option").first().click();
+      if ((await page.getByText("Pilih...", { exact: true }).count()) === 0) {
+        await page.getByRole("button", { name: /tambah baris/i }).click();
+      }
+      await page.getByText("Pilih...", { exact: true }).first().click();
+      await page.getByRole("option").first().click();
+      await page.getByPlaceholder("0").first().fill("1");
+
+      const tPost = page.waitForResponse((r) => r.request().method() === "POST" && POLA_POST.test(r.url()));
+      await page.getByRole("button", { name: "Simpan sebagai Draft" }).click();
+      const res = await tPost;
+      expect(res.status()).toBe(201);
+      const data = ((await res.json()) as { data: PengajuanMentah }).data;
+      id = data.id;
+      nomor = data.nomorPengajuan;
+      expect(id).toBeTruthy();
+      await page.waitForURL(/\/pengajuanStok$/);
+    });
+
+    await test.step("detail outlet: outlet sebagai asal barang (P8)", async () => {
+      await page.goto(`${URL_OUTLET}/${id}`, { waitUntil: "commit" });
+      const detail = await page
+        .waitForResponse(getDetail(id))
+        .then(async (r) => ((await r.json()) as { data: PengajuanMentah }).data);
+      expect(detail.dariLokasi?.tipe, "asal barang pengembalian adalah outlet").toBe("Outlet");
+      expect(detail.keLokasi?.tipe, "tujuan barang pengembalian adalah gudang").toBe("Gudang");
+      await expect(page.getByText("Outlet Asal Barang")).toBeVisible();
+      await expect(page.getByText("Barang yang Dikembalikan")).toBeVisible();
+    });
+
+    await test.step("ajukan", async () => {
+      await page.getByRole("button", { name: /ajukan ke gudang/i }).click();
+      const dialog = page.getByRole("alertdialog");
+      const t = page.waitForResponse(patchAksi("submit"));
+      await dialog.getByRole("button", { name: "Ya, Ajukan Sekarang" }).click();
+      expect((await t).status()).toBe(200);
+      await expect(dialog).toBeHidden();
+    });
+
+    await test.step("inbox gudang: tampil sebagai pengembalian", async () => {
+      await page.goto(URL_GUDANG);
+      await page.getByRole("combobox", { name: "Filter arah" }).click();
+      await page.getByRole("option", { name: "Pengembalian" }).click();
+      const baris = page.getByRole("row").filter({ hasText: nomor });
+      await expect(baris).toBeVisible();
+      await expect(baris.getByText("Pengembalian", { exact: true })).toBeVisible();
+    });
+
+    await test.step("detail gudang: stok outlet, lalu tolak", async () => {
+      await page.goto(`${URL_GUDANG}/${id}`);
+      await expect(page.getByRole("columnheader", { name: "Stok Outlet" })).toBeVisible();
+      await page.getByRole("button", { name: "Tolak Pengembalian" }).click();
+      const dialog = page.getByRole("dialog");
+      await dialog.getByPlaceholder("Ketik alasan penolakan di sini...").fill(ALASAN);
+      const t = page.waitForResponse(patchAksi("reject"));
+      await dialog.getByRole("button", { name: "Tolak Permintaan" }).click();
+      const res = await t;
+      expect(res.status()).toBe(200);
+      expect(res.request().postDataJSON()).toEqual({ alasan: ALASAN });
+      await expect(dialog).toBeHidden();
+      await expect(page.getByRole("button", { name: /setujui pengembalian/i })).toHaveCount(0);
     });
   });
 

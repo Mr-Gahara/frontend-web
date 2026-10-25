@@ -8,7 +8,8 @@ import { useSession } from "@/lib/auth/useSession";
 import { tahapPengajuan, type TahapPengajuan } from "./tahap";
 import { useAjukanPengajuan, usePengajuanStok } from "./hooks";
 import { bolehUbahPengajuan } from "./izin";
-import { LABEL_TAHAP_PENGAJUAN, formatTanggalPengajuan } from "./tampilan";
+import { arahLokasi } from "./arah";
+import { LABEL_ARAH_PENGAJUAN, LABEL_TAHAP_PENGAJUAN, formatTanggalPengajuan } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -94,7 +95,7 @@ export default function HalamanDetailPengajuanOutlet() {
   const submitMutation = useAjukanPengajuan(id, {
     onSuccess: () => {
       toast.success("Berhasil Diajukan", {
-        description: "Permintaan stok telah dikirim ke Gudang Pusat.",
+        description: "Pengajuan stok telah dikirim ke Gudang untuk ditinjau.",
       });
       setShowConfirmSubmit(false);
     },
@@ -128,6 +129,8 @@ export default function HalamanDetailPengajuanOutlet() {
 
   // Status menentukan tahap; izin menentukan siapa yang boleh bertindak (butir 14).
   const bisaDiubah = detail.status === "DRAFT" && bolehUbah;
+  const arah = arahLokasi(detail.dariLokasi, detail.keLokasi);
+  const pengembalian = arah === "OUTLET_KE_GUDANG";
 
   return (
     <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-5xl mx-auto">
@@ -149,7 +152,7 @@ export default function HalamanDetailPengajuanOutlet() {
             </h1>
             <div className="flex items-center gap-3 text-sm font-medium text-navy/60">
               <span className="flex items-center gap-1">
-                <FileText className="w-4 h-4" /> {detail.jenisPengajuan}
+                <FileText className="w-4 h-4" /> {arah ? LABEL_ARAH_PENGAJUAN[arah] : "-"}
               </span>
               <span>•</span>
               <span>Dibuat: {formatTanggalPengajuan(detail.createdAt)}</span>
@@ -177,7 +180,7 @@ export default function HalamanDetailPengajuanOutlet() {
           <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
             <div className="bg-krem px-6 py-4 border-b border-navy/10 flex items-center gap-2">
               <Package className="w-5 h-5 text-karamel" />
-              <h2 className="font-bold text-navy">Daftar Barang yang Diminta</h2>
+              <h2 className="font-bold text-navy">{pengembalian ? "Barang yang Dikembalikan" : "Daftar Barang yang Diminta"}</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
@@ -230,12 +233,12 @@ export default function HalamanDetailPengajuanOutlet() {
               <div className="flex flex-col gap-1 relative pl-6">
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-navy" />
                 <div className="absolute left-1.5 top-4 -bottom-4 w-0.5 bg-navy/10" />
-                <span className="text-xs font-bold text-navy/50 uppercase">Gudang Asal</span>
+                <span className="text-xs font-bold text-navy/50 uppercase">{pengembalian ? "Outlet Asal Barang" : "Gudang Asal"}</span>
                 <span className="font-bold text-navy">{detail.dariLokasi?.nama || "-"}</span>
               </div>
               <div className="flex flex-col gap-1 relative pl-6">
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-karamel" />
-                <span className="text-xs font-bold text-navy/50 uppercase">Outlet Peminta</span>
+                <span className="text-xs font-bold text-navy/50 uppercase">{pengembalian ? "Gudang Tujuan" : "Outlet Peminta"}</span>
                 <span className="font-bold text-navy">{detail.keLokasi?.nama || "-"}</span>
               </div>
             </div>
@@ -273,7 +276,7 @@ export default function HalamanDetailPengajuanOutlet() {
                 onClick={() => setShowConfirmSubmit(true)}
                 className="w-full bg-navy text-white hover:bg-navy/90 font-bold shadow-md cursor-pointer"
               >
-                <Send className="w-4 h-4 mr-2" /> Ajukan ke Gudang Pusat
+                <Send className="w-4 h-4 mr-2" /> Ajukan ke Gudang
               </Button>
             </div>
           )}

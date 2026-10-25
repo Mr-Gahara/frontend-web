@@ -17,6 +17,8 @@ import { useDaftarBahanBaku } from "@/features/bahan-baku/hooks";
 import { useBuatPengajuan, usePerbaruiPengajuan } from "./hooks";
 import { BARIS_KOSONG, nilaiAwalPengajuan, susunPayloadPengajuan } from "./payload";
 import { skemaPengajuan, type NilaiFormPengajuan } from "./schema";
+import { LABEL_ARAH_PENGAJUAN } from "./tampilan";
+import type { ArahPengajuan } from "./arah";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +38,8 @@ import {
 import { Calendar } from "@/components/calendar";
 import {
   ArrowLeft,
+  ArrowRight,
+  ArrowRightLeft,
   Save,
   Plus,
   Trash2,
@@ -50,7 +54,7 @@ const URL_DAFTAR = "/dashboard/outlet/inventaris/pengajuanStok";
 const TEKS = {
   buat: {
     kembali: "Kembali ke Daftar Pengajuan",
-    deskripsi: "Pilih barang yang dibutuhkan dan simpan sebagai DRAFT sebelum diajukan ke Gudang.",
+    deskripsi: "Pilih arah dan barangnya, lalu simpan sebagai Draft sebelum diajukan ke Gudang.",
     simpan: "Simpan sebagai Draft",
     gagal: "Gagal Menyimpan",
   },
@@ -62,10 +66,16 @@ const TEKS = {
   },
 } as const;
 
+/** Pilihan arah di form buat (AR1a, P8). */
+const PILIHAN_ARAH: readonly { arah: ArahPengajuan; judul: string; keterangan: string }[] = [
+  { arah: "GUDANG_KE_OUTLET", judul: "Minta dari Gudang", keterangan: "Stok gudang dikirim ke outlet" },
+  { arah: "OUTLET_KE_GUDANG", judul: "Kembalikan ke Gudang", keterangan: "Stok outlet dikirim balik ke gudang" },
+];
+
 function pesanPertama(errors: FieldErrors<NilaiFormPengajuan>): string {
   return (
-    errors.keLocationID?.message ??
-    errors.dariLocationID?.message ??
+    errors.outletID?.message ??
+    errors.gudangID?.message ??
     errors.items?.message ??
     errors.items?.root?.message ??
     "Periksa kembali isian form."
@@ -88,8 +98,10 @@ interface Props {
 /**
  * Form bersama buat dan revisi pengajuan stok. Outlet peminta ditentukan
  * lebih dulu, lalu form dipasang, karena nilai awal dibaca sekali dari
- * defaultValues (keputusan rancangan butir 8). Pilihan outlet mengisi
- * keLocationID dan pilihan gudang mengisi dariLocationID (arah.ts).
+ * defaultValues (keputusan rancangan butir 8). Form selalu
+ * menampilkan outlet di atas dan gudang di bawah; arah menentukan sisi mana
+ * yang menjadi asal barang (lokasiMenurutArah di payload.ts, P8). Arah
+ * dipilih saat membuat dan terkunci saat revisi (AR5a).
  *
  * Staf outlet A hanya mengajukan untuk outlet A (keputusan pemilik proyek,
  * 22 September 2026): pengguna tanpa izin lintas outlet terkunci ke lokasi
@@ -118,7 +130,7 @@ export function FormPengajuanStok({ pengajuan }: Props) {
       ? "Gagal memuat lokasi outlet. Coba muat ulang halaman."
       : !aktif.lokasi
         ? "Lokasi outlet belum dikonfigurasi."
-        : pengajuan && pengajuan.keLokasi?.id !== aktif.lokasi.id
+        : pengajuan && nilaiAwalPengajuan(pengajuan).outletID !== aktif.lokasi.id
           ? "Pengajuan ini milik outlet lain dan hanya dapat direvisi oleh outlet itu."
           : null;
     if (pesan) {
@@ -154,13 +166,17 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
     resolver: zodResolver(skemaPengajuan),
     defaultValues: {
       ...nilaiAwalPengajuan(pengajuan),
-      ...(outletTerkunci ? { keLocationID: outletTerkunci.id } : {}),
+      ...(outletTerkunci ? { outletID: outletTerkunci.id } : {}),
     },
   });
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
   const items = useWatch({ control, name: "items" });
-  const keLocationID = useWatch({ control, name: "keLocationID" });
-  const dariLocationID = useWatch({ control, name: "dariLocationID" });
+  const arah = useWatch({ control, name: "arah" });
+  const outletID = useWatch({ control, name: "outletID" });
+  const gudangID = useWatch({ control, name: "gudangID" });
+  const pengembalian = arah === "OUTLET_KE_GUDANG";
+  const namaOutlet = outletList.find((l) => l.id === outletID)?.nama ?? "Outlet";
+  const namaGudang = gudangList.find((l) => l.id === gudangID)?.nama ?? "Gudang";
 
   const buatMutation = useBuatPengajuan({
     onSuccess: () => {
@@ -215,21 +231,64 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
         </div>
       </div>
 
+      {/* SECTION 0: ARAH PENGAJUAN (AR5a: dipilih saat membuat, terkunci saat revisi) */}
+      <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
+          <ArrowRightLeft className="h-5 w-5 text-karamel" />
+          <h2 className="font-bold text-navy">Arah Pengajuan</h2>
+        </div>
+        {pengajuan ? (
+          <p className="text-sm font-bold text-navy">{LABEL_ARAH_PENGAJUAN[arah]}</p>
+        ) : (
+          <Controller
+            control={control}
+            name="arah"
+            render={({ field }) => (
+              <div role="group" aria-label="Arah pengajuan" className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {PILIHAN_ARAH.map((pilihan) => (
+                  <button
+                    key={pilihan.arah}
+                    type="button"
+                    aria-pressed={field.value === pilihan.arah}
+                    onClick={() => field.onChange(pilihan.arah)}
+                    className={cn(
+                      "flex flex-col items-start gap-1 rounded-xl border px-4 py-3.5 text-left transition-colors cursor-pointer",
+                      field.value === pilihan.arah
+                        ? "bg-navy border-navy text-white"
+                        : "bg-gading border-navy/20 text-navy hover:bg-navy/5",
+                    )}
+                  >
+                    <span className="text-[15px] font-bold">{pilihan.judul}</span>
+                    <span className="text-[13px] font-medium opacity-85">{pilihan.keterangan}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          />
+        )}
+      </div>
+
       {/* SECTION 1: RUTE LOGISTIK */}
       <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-4">
         <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
           <MapPin className="h-5 w-5 text-karamel" />
           <h2 className="font-bold text-navy">Rute Logistik</h2>
         </div>
+        <div className="flex flex-wrap items-center gap-3 rounded-xl bg-krem px-4 py-3 text-sm font-semibold text-navy">
+          <span className="font-medium text-navy/70">Barang bergerak dari</span>
+          <span>{pengembalian ? namaOutlet : namaGudang}</span>
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          <span>{pengembalian ? namaGudang : namaOutlet}</span>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
           <div className="space-y-2">
             <label htmlFor="pengajuan-outlet" className="text-sm font-bold text-navy">
-              Outlet Peminta <span className="text-rose-500">*</span>
+              {pengembalian ? "Outlet Asal Barang" : "Outlet Peminta"} <span className="text-rose-500">*</span>
             </label>
             <Controller
               control={control}
-              name="keLocationID"
+              name="outletID"
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange} disabled={outletTerkunci !== null || memuatLokasi}>
                   <SelectTrigger
@@ -252,11 +311,11 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
 
           <div className="space-y-2">
             <label htmlFor="pengajuan-gudang" className="text-sm font-bold text-navy">
-              Gudang Asal Barang <span className="text-rose-500">*</span>
+              {pengembalian ? "Gudang Tujuan" : "Gudang Asal Barang"} <span className="text-rose-500">*</span>
             </label>
             <Controller
               control={control}
-              name="dariLocationID"
+              name="gudangID"
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange} disabled={memuatLokasi}>
                   <SelectTrigger
@@ -284,7 +343,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
         <div className="flex items-center justify-between border-b border-navy/10 pb-3">
           <div className="flex items-center gap-2">
             <Package className="h-5 w-5 text-karamel" />
-            <h2 className="font-bold text-navy">Daftar Kebutuhan Barang</h2>
+            <h2 className="font-bold text-navy">{pengembalian ? "Barang yang Dikembalikan" : "Daftar Kebutuhan Barang"}</h2>
           </div>
           <Button
             type="button"
@@ -461,7 +520,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
         <Button
           type="button"
           onClick={simpan}
-          disabled={menyimpan || (!pengajuan && (!keLocationID || !dariLocationID))}
+          disabled={menyimpan || (!pengajuan && (!outletID || !gudangID))}
           className="bg-navy text-gading hover:bg-navy/90 font-bold shadow-md cursor-pointer"
         >
           <Save className="w-4 h-4 mr-2" />

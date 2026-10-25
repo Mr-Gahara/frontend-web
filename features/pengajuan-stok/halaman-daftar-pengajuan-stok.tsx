@@ -9,13 +9,21 @@ import type { PengajuanStok } from "@/types/pengajuanStok";
 import type { LingkupLokasi } from "@/features/inventaris/cakupan";
 import { useSession } from "@/lib/auth/useSession";
 import { useDaftarPengajuanStok } from "./hooks";
-import { cocokTab, saringPengajuan, statusServerTab } from "./filter";
+import { cocokTab, saringPengajuan, statusServerTab, type FilterArah } from "./filter";
+import { arahLokasi } from "./arah";
 import { tabTerlihat, type TabPengajuan } from "./izin";
 import { tahapPengajuan, type TahapPengajuan } from "./tahap";
-import { LABEL_TAHAP_PENGAJUAN, SLUG_TAB_PENGAJUAN, labelTabPengajuan } from "./tampilan";
+import { LABEL_ARAH_PENGAJUAN, SLUG_TAB_PENGAJUAN, labelTabPengajuan, labelTahapPengajuan } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -81,27 +89,27 @@ interface TeksRuang {
 const TEKS: Record<"outlet" | "gudang", TeksRuang> = {
   outlet: {
     judul: "Pengajuan Stok Barang",
-    deskripsi: "Kelola permintaan suplai bahan baku dan barang jadi ke Gudang Pusat.",
+    deskripsi: "Kelola permintaan stok dari gudang dan pengembalian stok ke gudang.",
     urlDaftar: "/dashboard/outlet/inventaris/pengajuanStok",
     urlBuat: "/dashboard/outlet/inventaris/pengajuanStok/buatPengajuan",
     tab: ["ALL", "DRAFT", "SUBMITTED", "DISETUJUI", "REJECTED", "COMPLETED"],
     tabBawaan: "ALL",
     placeholderCari: "Cari No. Pengajuan...",
     kolomInfo: "Informasi Pengajuan",
-    kolomLokasi: "Gudang Asal",
+    kolomLokasi: "Rute",
     kolomItem: "Item",
     kosong: "Tidak ada data pengajuan stok yang ditemukan.",
   },
   gudang: {
     judul: "Inbox Permintaan Stok",
-    deskripsi: "Tinjau dan proses permintaan pasokan barang dari berbagai Outlet.",
+    deskripsi: "Tinjau permintaan stok dari outlet dan pengembalian stok ke gudang.",
     urlDaftar: "/dashboard/gudang/pengajuanStok",
     urlBuat: null,
     tab: ["SUBMITTED", "PERLU_SURAT_JALAN", "COMPLETED", "REJECTED", "ALL"],
     tabBawaan: "SUBMITTED",
     placeholderCari: "Cari No. Pengajuan / Outlet...",
     kolomInfo: "Nomor & Tanggal",
-    kolomLokasi: "Outlet Peminta",
+    kolomLokasi: "Rute",
     kolomItem: "Jumlah Item",
     kosong: "Belum ada permintaan stok di kategori ini.",
   },
@@ -135,6 +143,7 @@ function IsiDaftarPengajuanStok({
   // --- States ---
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
+  const [filterArah, setFilterArah] = useState<FilterArah>("SEMUA");
   // Tab dari ?tab= (lib/tab-url.ts); tab yang disembunyikan izin tidak dapat dibuka lewat URL.
   const [activeTab, setActiveTab] = useTabUrl(SLUG_TAB_PENGAJUAN[ruang], tabTampil, teks.tabBawaan);
 
@@ -153,8 +162,8 @@ function IsiDaftarPengajuanStok({
 
   // Penyaringan per ruang (tipe lokasi, draf, pencarian) dan per tab (tab gabungan
   // meminta tanpa status): features/pengajuan-stok/filter.ts
-  const filteredData = saringPengajuan(daftarPengajuan, ruang, debouncedSearch).filter((p) =>
-    cocokTab(p, activeTab),
+  const filteredData = saringPengajuan(daftarPengajuan, ruang, debouncedSearch, filterArah).filter((p) =>
+    cocokTab(p, activeTab, ruang),
   );
 
   // Aksi baris di menu titik tiga (TB7a, P-A): langsung membuka halaman detail.
@@ -173,23 +182,39 @@ function IsiDaftarPengajuanStok({
         ),
       },
       {
+        id: "arah",
+        header: "Arah",
+        cell: ({ row }) => {
+          const arah = arahLokasi(row.original.dariLokasi, row.original.keLokasi);
+          if (!arah) return <span className="text-navy/50">-</span>;
+          return (
+            <Badge
+              className={
+                arah === "OUTLET_KE_GUDANG"
+                  ? "bg-karamel/20 hover:bg-karamel/20 text-navy border border-karamel font-bold"
+                  : "bg-navy/10 hover:bg-navy/10 text-navy border border-transparent font-bold"
+              }
+            >
+              {LABEL_ARAH_PENGAJUAN[arah]}
+            </Badge>
+          );
+        },
+      },
+      {
         id: "lokasi",
         header: teks.kolomLokasi,
-        cell: ({ row }) =>
-          ruang === "outlet" ? (
+        cell: ({ row }) => (
+          <div className="flex flex-col">
             <span className="font-medium text-navy/80">
-              {row.original.dariLokasi?.nama || "Gudang Pusat"}
+              {row.original.dariLokasi?.nama || "-"} ke {row.original.keLokasi?.nama || "-"}
             </span>
-          ) : (
-            <div className="flex flex-col">
-              <span className="font-bold text-navy">
-                {row.original.keLokasi?.nama || "Outlet Tidak Dikenal"}
-              </span>
+            {ruang === "gudang" && (
               <span className="text-xs font-medium text-navy/50 capitalize mt-1">
                 Pembuat: {row.original.dimintaOleh?.nama || "-"}
               </span>
-            </div>
-          ),
+            )}
+          </div>
+        ),
       },
       {
         id: "item",
@@ -204,8 +229,7 @@ function IsiDaftarPengajuanStok({
         id: "status",
         header: "Status",
         cell: ({ row }) => {
-          const tahap = tahapPengajuan(row.original);
-          return getStatusBadge(tahap, LABEL_TAHAP_PENGAJUAN[ruang][tahap]);
+          return getStatusBadge(tahapPengajuan(row.original), labelTahapPengajuan(ruang, row.original));
         },
       },
       {
@@ -296,6 +320,16 @@ function IsiDaftarPengajuanStok({
 
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:items-end">
         {pemilihLokasi}
+        <Select value={filterArah} onValueChange={(v) => setFilterArah(v as FilterArah)}>
+          <SelectTrigger aria-label="Filter arah" className="w-full sm:w-44 bg-white border-navy/20 text-navy focus:ring-navy">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="SEMUA">Semua arah</SelectItem>
+            <SelectItem value="GUDANG_KE_OUTLET">{LABEL_ARAH_PENGAJUAN.GUDANG_KE_OUTLET}</SelectItem>
+            <SelectItem value="OUTLET_KE_GUDANG">{LABEL_ARAH_PENGAJUAN.OUTLET_KE_GUDANG}</SelectItem>
+          </SelectContent>
+        </Select>
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
           <Input
