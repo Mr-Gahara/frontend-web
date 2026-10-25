@@ -3,6 +3,7 @@ import type { SlugTab } from "@/lib/tab-url";
 import type { RuangPengajuan } from "./filter";
 import type { TabPengajuan } from "./izin";
 import type { TahapPengajuan } from "./tahap";
+import type { ArahPengajuan } from "./arah";
 import { id as localeID } from "date-fns/locale";
 
 export function formatTanggalPengajuan(iso: string | null | undefined): string {
@@ -63,3 +64,9 @@ export function labelTabPengajuan(ruang: RuangPengajuan, tab: TabPengajuan): str
       return LABEL_TAHAP_PENGAJUAN[ruang][tab];
   }
 }
+
+/** Label arah pengajuan untuk badge dan filter daftar (AR4a). */
+export const LABEL_ARAH_PENGAJUAN: Record<ArahPengajuan, string> = {
+  GUDANG_KE_OUTLET: "Permintaan",
+  OUTLET_KE_GUDANG: "Pengembalian",
+};

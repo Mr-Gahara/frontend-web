@@ -1,9 +1,12 @@
 import type { PengajuanStok, StatusPengajuan } from "@/types/pengajuanStok";
-import { arahPengajuanValid } from "./arah";
+import { arahLokasi, arahPengajuanValid, type ArahPengajuan } from "./arah";
 import { statusDicakupTab, type TabPengajuan } from "./izin";
 import { tahapPengajuan } from "./tahap";
 
 export type RuangPengajuan = "outlet" | "gudang";
+
+/** Filter arah daftar (AR4a): semua arah, atau satu arah. */
+export type FilterArah = "SEMUA" | ArahPengajuan;
 
 /**
  * Penyaringan daftar pengajuan di klien, per ruang. Hanya pengajuan dengan
@@ -12,11 +15,18 @@ export type RuangPengajuan = "outlet" | "gudang";
  * - Outlet: pencarian nomor.
  * - Gudang: tanpa draf, karena draf belum diajukan dan belum menjadi urusan
  *   gudang; pencarian nomor dan nama outlet peminta.
+ * - Arah: bawaan semua arah; selain itu hanya pengajuan berarah itu.
  */
-export function saringPengajuan(data: PengajuanStok[], ruang: RuangPengajuan, kata: string): PengajuanStok[] {
+export function saringPengajuan(
+  data: PengajuanStok[],
+  ruang: RuangPengajuan,
+  kata: string,
+  arah: FilterArah = "SEMUA",
+): PengajuanStok[] {
   const cari = kata.trim().toLowerCase();
   return data.filter((p) => {
     if (!arahPengajuanValid(p)) return false;
+    if (arah !== "SEMUA" && arahLokasi(p.dariLokasi, p.keLokasi) !== arah) return false;
     const cocokNomor = p.nomorPengajuan.toLowerCase().includes(cari);
     if (ruang === "outlet") return !cari || cocokNomor;
     if (p.status === "DRAFT") return false;

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { PengajuanStok } from "@/types/pengajuanStok";
 import { cocokTab, saringPengajuan, statusServerTab } from "@/features/pengajuan-stok/filter";
 import { tahapPengajuan } from "@/features/pengajuan-stok/tahap";
-import { arahPengajuanValid } from "@/features/pengajuan-stok/arah";
+import { arahLokasi, arahPengajuanValid, peranRuang } from "@/features/pengajuan-stok/arah";
 import {
   bolehBuatSuratJalan,
   bolehSetujuiPengajuan,
@@ -11,9 +11,9 @@ import {
   tabTerlihat,
   type TabPengajuan,
 } from "@/features/pengajuan-stok/izin";
-import { nilaiAwalPengajuan, susunPayloadPengajuan } from "@/features/pengajuan-stok/payload";
+import { lokasiMenurutArah, nilaiAwalPengajuan, sisiMenurutDokumen, susunPayloadPengajuan } from "@/features/pengajuan-stok/payload";
 import { skemaPengajuan } from "@/features/pengajuan-stok/schema";
-import { LABEL_TAHAP_PENGAJUAN, SLUG_TAB_PENGAJUAN, labelTabPengajuan } from "@/features/pengajuan-stok/tampilan";
+import { LABEL_ARAH_PENGAJUAN, LABEL_TAHAP_PENGAJUAN, SLUG_TAB_PENGAJUAN, labelTabPengajuan } from "@/features/pengajuan-stok/tampilan";
 
 function pengajuan(nomor: string, status: PengajuanStok["status"], peminta: string, tipeDari: string, tipeKe: string): PengajuanStok {
   return {
@@ -269,5 +269,78 @@ describe("label tab dan tahap pengajuan", () => {
       outlet: { ALL: "semua", DRAFT: "draf", SUBMITTED: "menunggu", DISETUJUI: "disetujui", REJECTED: "ditolak", COMPLETED: "selesai" },
       gudang: { SUBMITTED: "perlu-tinjauan", PERLU_SURAT_JALAN: "perlu-surat-jalan", COMPLETED: "selesai", REJECTED: "ditolak", ALL: "semua" },
     });
+  });
+});
+
+describe("arahLokasi", () => {
+  it("membaca arah dari tipe asal dan tujuan (P8)", () => {
+    expect(arahLokasi({ tipe: "Gudang" }, { tipe: "Outlet" })).toBe("GUDANG_KE_OUTLET");
+    expect(arahLokasi({ tipe: "Outlet" }, { tipe: "Gudang" })).toBe("OUTLET_KE_GUDANG");
+  });
+
+  it("null untuk pasangan sesama tipe atau lokasi yang tidak termuat", () => {
+    expect(arahLokasi({ tipe: "Gudang" }, { tipe: "Gudang" })).toBeNull();
+    expect(arahLokasi({ tipe: "Outlet" }, { tipe: "Outlet" })).toBeNull();
+    expect(arahLokasi(null, { tipe: "Outlet" })).toBeNull();
+    expect(arahLokasi({ tipe: null }, { tipe: "Gudang" })).toBeNull();
+  });
+});
+
+describe("peranRuang", () => {
+  it("ruang asal barang adalah pengirim, ruang tujuan penerima", () => {
+    expect(peranRuang("GUDANG_KE_OUTLET", "gudang")).toBe("pengirim");
+    expect(peranRuang("GUDANG_KE_OUTLET", "outlet")).toBe("penerima");
+    expect(peranRuang("OUTLET_KE_GUDANG", "outlet")).toBe("pengirim");
+    expect(peranRuang("OUTLET_KE_GUDANG", "gudang")).toBe("penerima");
+  });
+});
+
+describe("saringPengajuan menurut arah", () => {
+  it("bawaan semua arah sama dengan tanpa filter", () => {
+    expect(saringPengajuan(DATA, "outlet", "", "SEMUA")).toEqual(saringPengajuan(DATA, "outlet", ""));
+  });
+
+  it("menyaring satu arah", () => {
+    expect(saringPengajuan(DATA, "gudang", "", "GUDANG_KE_OUTLET").map((p) => p.nomorPengajuan)).toEqual(["REQ-002", "REQ-003"]);
+  });
+
+  it("pengembalian belum tampil selama penjaga arah hanya menerima permintaan", () => {
+    expect(saringPengajuan(DATA, "outlet", "", "OUTLET_KE_GUDANG")).toEqual([]);
+  });
+});
+
+describe("lokasiMenurutArah dan sisiMenurutDokumen", () => {
+  const sisi = { outletID: "o1", gudangID: "g1" };
+
+  it("permintaan: gudang asal, outlet tujuan", () => {
+    expect(lokasiMenurutArah("GUDANG_KE_OUTLET", sisi)).toEqual({ dariLocationID: "g1", keLocationID: "o1" });
+  });
+
+  it("pengembalian: outlet asal, gudang tujuan", () => {
+    expect(lokasiMenurutArah("OUTLET_KE_GUDANG", sisi)).toEqual({ dariLocationID: "o1", keLocationID: "g1" });
+  });
+
+  it("membaca sisi outlet dan gudang dari dokumen kedua arah", () => {
+    expect(sisiMenurutDokumen(DATA[1])).toEqual({ arah: "GUDANG_KE_OUTLET", outletID: "k-REQ-002", gudangID: "a-REQ-002" });
+    expect(sisiMenurutDokumen(DATA[3])).toEqual({ arah: "OUTLET_KE_GUDANG", outletID: "a-REQ-004", gudangID: "k-REQ-004" });
+  });
+
+  it("null untuk dokumen berarah tidak sah", () => {
+    expect(sisiMenurutDokumen({ dariLokasi: null, keLokasi: DATA[1].keLokasi })).toBeNull();
+  });
+
+  it("sisi dokumen dipetakan balik ke lokasi yang sama", () => {
+    for (const p of [DATA[1], DATA[3]]) {
+      const s = sisiMenurutDokumen(p);
+      expect(s).not.toBeNull();
+      if (!s) return;
+      expect(lokasiMenurutArah(s.arah, s)).toEqual({ dariLocationID: p.dariLokasi?.id, keLocationID: p.keLokasi?.id });
+    }
+  });
+});
+
+describe("label arah pengajuan", () => {
+  it("permintaan dan pengembalian", () => {
+    expect(LABEL_ARAH_PENGAJUAN).toEqual({ GUDANG_KE_OUTLET: "Permintaan", OUTLET_KE_GUDANG: "Pengembalian" });
   });
 });
