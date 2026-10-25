@@ -610,6 +610,21 @@ polanya salah.
   dikosongkan di setiap run, sehingga hasilnya selalu dari run terakhir.
 - Path berisi `[id]` selalu dikutip, karena kurung siku dibaca sebagai pola glob.
 - Perintah git yang dapat membuka pager ditulis `git --no-pager`.
+- ESLint 9 tidak punya formatter `unix`. `-f unix` gagal, dan bila
+  galatnya dibuang ke `/dev/null` keluarannya kosong seolah bersih.
+  Pakai `-f json` dengan helper yang sudah ada: `daftar-eslint.js` untuk
+  error per berkas dan aturan, atau `hitung-eslint.js` untuk jumlahnya.
+  Keduanya hanya membaca error; warning dibaca dari `warningCount` dan
+  `messages` lewat `node -e` (25 Oktober 2026, ketika helper itu
+  terlewat dan ringkasan ditulis ulang).
+- `npm run lint` dan `eslint .` mencakup `scripts/`, sedangkan `eslint`
+  per folder tidak. Bandingkan lingkupnya sebelum menyimpulkan bersih
+  atau gagal: per `a972956`, `eslint .` gagal di `scripts/dokumen/*.cjs`
+  sementara berkas yang diubah bersih.
+- Saat menyaring potongan JSX dengan `grep -v`, pola atribut seperti
+  `className=` ikut membuang baris teks yang memuat ikon
+  (`<Clock className="..." /> Draft SJ`). Saring hanya baris yang
+  seluruh isinya pembungkus, misalnya `^(return \(|\);|</Badge>)$`.
 - Argumen berpola seperti `--include=*.ts` pada grep juga terkena ekspansi
   glob. Kutip polanya: `--include='*.ts'`.
 - Variabel berisi daftar berkas tidak dipecah menjadi beberapa argumen di zsh,

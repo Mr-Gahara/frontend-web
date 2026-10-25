@@ -27,39 +27,40 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: label tab berbahasa awam
+## Pekerjaan berikutnya: merapikan dokumentasi pengujian
 
-Dashboard gudang selesai pada 19 Oktober 2026 (`modul/gudang.md`, Catatan
-dari dashboard gudang), bersama perbaikan pengajuan PENDING, font Geist,
-tab di `?tab=`, penyesuaian backend `ridho` `af5f315`, dan pemecahan
-dokumentasi menjadi lapis inti, modul, referensi, dan arsip
-(`4cbb38f`). Pemilik proyek lalu memilih label tab berbahasa awam
-sebagai pekerjaan berikutnya. Sebelum itu, penyesuaian backend `ridho`
-`b5b367a` diselesaikan pada 21 Oktober 2026
-(`referensi/keputusan-penyesuaian-backend.md`): template role, kartu
-pengajuan dashboard gudang dari server, jurnal stok berhalaman di
-server, dan izin jurnal gudang.
+Label tab berbahasa awam selesai pada 25 Oktober 2026 di `a972956`
+(`modul/inventaris.md`, Catatan dari label tab berbahasa awam): tab dan
+badge pengajuan stok serta surat jalan membaca satu peta label per
+modul, slug `?tab=` tidak berubah, dan label tab pajak sudah berbahasa
+awam sehingga tidak disentuh. Pemilik proyek memilih putaran khusus
+dokumen sebagai pekerjaan berikutnya (22 Oktober 2026):
 
-Tab daftar pengajuan stok masih menampilkan sebagian kode status mentah:
-`labelTab` di `halaman-daftar-pengajuan-stok.tsx` hanya mengisi sebagian
-tab, sehingga DRAFT, REJECTED, dan COMPLETED di outlet serta COMPLETED dan
-REJECTED di gudang tampil apa adanya. Label tab daftar surat jalan
-(`LABEL_TAB_TRANSFER` di `features/transfer-stok/tampilan.ts`, misalnya
-DRAFT SJ) masih diambil dari halaman lama dan ikut ditinjau. Desain harus
-mudah dipahami orang awam, sehingga perubahannya didahului pratinjau
-visual. Halaman bertab di web ada tiga: daftar pengajuan stok, daftar
-surat jalan, dan pajak (21 Oktober 2026). Langkah pertama sesi
-berikutnya: periksa cabang backend, lalu petakan label ketiganya.
+- Riwayat baseline lama di `referensi/playwright.md` (Perintah
+  verifikasi yang biasa dipakai) dipindah ke arsip (Utang kecil dari
+  19 Oktober 2026).
+- `inti/pengujian.md` (594 baris) dipangkas ke bawah batas inti sekitar
+  400 baris, dengan memindah utang pengujian yang sudah lunas ke arsip.
+- `npm run lint` gagal sejak `4cbb38f`: 18 error
+  `@typescript-eslint/no-require-imports` di enam berkas
+  `scripts/dokumen/*.cjs`, karena aturan TypeScript ikut berlaku pada
+  alat CommonJS. Cara membereskannya diputuskan di putaran ini, karena
+  alat pemeriksa dokumen ada di sana. Kode aplikasi dan test bersih;
+  dua warning `react-hooks/incompatible-library` di
+  `components/ui/data-table.tsx` dan
+  `features/stock-opname/form-buat-stock-opname.tsx` tidak berubah.
+
+Pemindahan dokumen memakai gerbang `npm run docs:periksa` (Pengecualian
+alur); perbaikan lint mengikuti alur biasa karena menyentuh konfigurasi
+atau skrip.
 
 Backend lokal berada di `ridho` `b5b367a` (fast-forward ke `origin/yoga`,
-yang memuat `origin/nizar`). Suite e2e penuh terakhir: 478 lolos dan 14
-skipped di `b03c276` (`inti/pengujian.md`, Baseline). Dua belas
-`test.fixme` menunggu backend.
+yang memuat `origin/nizar`), tanpa commit baru per 25 Oktober 2026.
+Suite e2e penuh terakhir: 478 lolos dan 14 skipped di `b03c276`
+(`inti/pengujian.md`, Baseline). Dua belas `test.fixme` menunggu backend.
 
 ```bash
-BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in $(git -C "$BE" for-each-ref --format='%(refname:short)' refs/remotes/origin | grep -v '^origin$' | grep -v '/HEAD$'); do echo "$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...$r | tr '\t' ' ')"; done
-cd ~/Documents/frontend-web
-grep -nE 'labelTab|LABEL_TAB|tab:' features/pengajuan-stok/halaman-daftar-pengajuan-stok.tsx features/transfer-stok/tampilan.ts | cut -c1-160
+cd ~/Documents/frontend-web/docs; wc -l inti/*.md referensi/playwright.md; grep -nE '^#{2,3} ' referensi/playwright.md inti/pengujian.md | cut -c1-120
 ```
 
 ## Utang kecil yang tertunda
@@ -202,8 +203,10 @@ grep -nE 'labelTab|LABEL_TAB|tab:' features/pengajuan-stok/halaman-daftar-pengaj
 - Riwayat baseline lama masih di `referensi/playwright.md` (Perintah
   verifikasi yang biasa dipakai); pindahkan ke arsip saat dokumen itu
   disentuh. Baseline terkini ada di `inti/pengujian.md`.
+  Dijadwalkan sebagai pekerjaan berikutnya pada 22 Oktober 2026.
 - `inti/pengujian.md` melewati batas inti sekitar 400 baris; utang
   pengujian yang sudah lunas dipindah ke arsip saat ditinjau.
+  Dijadwalkan sebagai pekerjaan berikutnya pada 22 Oktober 2026.
 - Satu skip bersyarat data bertambah di suite penuh `d6f8ba0`
   dibanding hitungan, dan skenarionya belum diidentifikasi
   (`inti/pengujian.md`, Baseline).

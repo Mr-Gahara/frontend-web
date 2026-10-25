@@ -228,6 +228,8 @@ PENDING, `781c861`, dan tab di URL, `a68a75f`):
   menggantikan tab "APPROVED". Backend hanya menerima satu status per
   permintaan, sehingga tab gabungan meminta tanpa status lalu disaring
   di klien (`statusServerTab` dan `cocokTab` di `filter.ts`).
+  Sejak `a972956` keduanya berlabel "Perlu Surat Jalan" dan "Disetujui"
+  (Label tab dan status pengajuan stok serta surat jalan).
 - **Tab tersimpan di `?tab=`**, dengan slug terbaca per ruang di
   `tampilan.ts`. Aturan keamanannya ada di `referensi/arsitektur.md`
   (bagian `lib/tab-url.ts`).
@@ -305,6 +307,35 @@ bug backend dilaporkan dan tidak diakali agar test lolos.
   tujuan, dan status tidak lagi disaring di klien. Lingkup per tipe
   lokasi dan pencarian tetap disaring di klien, karena tidak punya
   padanan di server.
+
+### Label tab dan status pengajuan stok serta surat jalan
+
+Diputuskan pemilik proyek pada 22 Oktober 2026, dari pratinjau
+(`a972956`):
+
+- **Label tab dan badge status berbahasa awam, berhuruf kapital awal**,
+  seragam dengan tab pajak. Kode status mentah tidak pernah tampil.
+- **Satu peta label per modul** dipakai tab, badge daftar, dan badge
+  detail: `LABEL_TAHAP_PENGAJUAN` dan `labelTabPengajuan` di
+  `features/pengajuan-stok/tampilan.ts`, serta `LABEL_STATUS_TRANSFER`
+  di `features/transfer-stok/tampilan.ts`, tempat `LABEL_TAB_TRANSFER`
+  diturunkan. Fungsi badge tetap per halaman, karena ukurannya berbeda.
+- **Istilahnya** selaras dengan dashboard gudang (perlu disetujui, belum
+  dikirim, dalam perjalanan):
+
+| Daftar | Label |
+|---|---|
+| Pengajuan outlet | Semua, Draft, Menunggu Persetujuan, Disetujui (tab DISETUJUI dan tahap PERLU_SURAT_JALAN), Surat Jalan Dibuat, Ditolak, Selesai |
+| Pengajuan gudang | Perlu Disetujui, Perlu Surat Jalan, Surat Jalan Dibuat, Selesai, Ditolak, Semua |
+| Surat jalan | Semua, Belum Dikirim, Dalam Perjalanan, Diterima, Dibatalkan |
+
+- **Draft tetap Draft**, seragam dengan penjualan dan stock opname.
+- **Badge detail memakai kata yang sama dengan tab dan daftar**:
+  Menunggu Persetujuan tanpa "Gudang", karena dengan P8 dua arah kata itu
+  tidak selalu benar, dan Disetujui menggantikan "Telah Disetujui".
+- **Slug `?tab=` tidak berubah** (`perlu-tinjauan`, `draf`, `selesai`, dan
+  lainnya), agar tautan dashboard gudang dan tautan tersimpan tetap
+  berlaku.
 
 ## Catatan
 
@@ -417,6 +448,7 @@ Yang masih berlaku:
   REJECTED di gudang), dan label tab surat jalan (`LABEL_TAB_TRANSFER`,
   misalnya DRAFT SJ) masih diambil dari halaman lama; dijadwalkan sebagai
   pekerjaan berikutnya (`inti/status.md`).
+  Selesai di `a972956` (Catatan dari label tab berbahasa awam).
 - Tiga spec transfer (`alur-transfer-stok.spec.ts`,
   `pengiriman-penerimaan.spec.ts`, dan `terima-penerimaan.spec.ts`)
   merujuk keputusan pemilik proyek "K3 pilihan B" dan K4, dan
@@ -440,3 +472,25 @@ Yang masih berlaku:
   server. Empat daftar lain mencari di klien (`saringTransfer`,
   `saringPengajuan`, dan `searchKey` `DataTable` di stock opname serta
   stock adjustment), sedangkan backend tidak membaca query pencarian.
+
+### Catatan dari label tab berbahasa awam
+
+- `a972956`: peta label di kedua `tampilan.ts`; `labelTab` dan
+  `labelStatus` dibuang dari `TeksRuang` daftar pengajuan, dan kedua
+  `badgeTahap` detail pengajuan serta kedua `getStatusBadge` surat jalan
+  membaca peta itu. Delapan test unit baru (lima di
+  `pengajuan-stok.test.ts`, tiga di `transfer-stok.test.ts`), termasuk
+  slug yang tetap. Nama tombol tab dan judul test diperbarui di spec
+  lihat pengajuan stok, alur transfer stok, dan dashboard gudang.
+- Dialog batal surat jalan sebelumnya menulis bahwa pengajuan kembali
+  menjadi Perlu Tinjauan. Backend `b5b367a` (`transferStokService.js`
+  baris 649 sampai 668) mengembalikannya ke PENDING tanpa
+  `transferStokID`, yaitu tahap Perlu Surat Jalan; teksnya kini membaca
+  `LABEL_TAHAP_PENGAJUAN.gudang.PERLU_SURAT_JALAN`.
+- Komentar `features/pengajuan-stok/tahap.ts` merujuk baris 636 sampai
+  655 `transferStokService.js` untuk pembatalan; di `b5b367a` bagian itu
+  berada di baris 649 sampai 668. Rujukannya dibetulkan saat berkas itu
+  disentuh lagi.
+- Label tab pajak sudah berbahasa awam, tetapi gayanya (garis bawah
+  `text-sm`) berbeda dengan tombol pil pengajuan dan surat jalan;
+  penyeragamannya bukan bagian putaran ini.

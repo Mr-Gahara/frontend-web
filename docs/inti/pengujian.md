@@ -21,7 +21,11 @@ bersyarat data yang di `d6f8ba0` belum teridentifikasi adalah "buat
 surat jalan gagal" di spec alur pengajuan: tenant uji tidak punya
 pengajuan APPROVED tanpa surat jalan. Sesudahnya `029413d` menambah
 satu test unit (722); suite penuh tidak dijalankan ulang, dan spec
-terdampaknya lolos 16 dengan 1 skipped.
+terdampaknya lolos 16 dengan 1 skipped. Sesudahnya `a972956` (label tab
+berbahasa awam) menambah delapan test unit, sehingga vitest penuh
+menjadi 730 lolos di 86 berkas; suite penuh tidak dijalankan ulang, dan
+spec terdampaknya lolos: pengajuan stok dan surat jalan 25 dengan 3
+skipped, serta dashboard gudang 4.
 
 ## Kredensial uji
 
@@ -576,7 +580,7 @@ Urutan debug kegagalan e2e di atas).
   stok gudang** belum teruji e2e.
 - **Kartu pengajuan dashboard gudang hanya teruji cabang tanpa
   pengajuan siap surat jalan** pada data uji sekarang; cabang klik kartu
-  ke tab PERLU SURAT JALAN berjalan bila ada pengajuan APPROVED atau
+  ke tab Perlu Surat Jalan berjalan bila ada pengajuan APPROVED atau
   PENDING tanpa surat jalan.
 - **Template role hanya teruji pemetaan namanya** (skenario e2e template
   dan `tests/unit/lib/roleTemplates.test.ts`); role dari template belum
@@ -584,3 +588,7 @@ Urutan debug kegagalan e2e di atas).
 - **Pengajuan Outlet ke Gudang tidak punya skenario**, karena web belum
   menampilkannya (P8); skenario dashboard gudang gagal dengan jujur bila
   data uji memuatnya.
+- **Teks badge status dan dialog batal surat jalan hanya teruji lewat
+  peta label di unit test** (`a972956`): e2e memeriksa nama tombol tab,
+  tetapi tidak membaca badge daftar, badge detail, maupun teks dialog
+  batal.

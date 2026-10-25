@@ -92,6 +92,8 @@ Diputuskan pemilik proyek pada 19 Oktober 2026.
   filternya terbukti sama dengan tab DRAFT SJ dan halaman pengiriman
   (`transferStokService.getAll` tidak membatasi per izin atau lokasi),
   dan hitungan server tetap ringan berapa pun jumlah surat jalan.
+  Sejak `a972956` tab itu berlabel Belum Dikirim (`modul/inventaris.md`,
+  Label tab dan status pengajuan stok serta surat jalan).
 - **Panel mengikuti izin endpoint-nya**
   (`features/dashboard-gudang/izin.ts`): pengajuan butuh
   `read-pengajuan-stok`, pengiriman `read-dashboard-gudang`, stok kritis
