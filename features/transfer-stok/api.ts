@@ -5,9 +5,11 @@ import type { ItemPayloadTerima } from "./payload";
 
 export interface FilterTransferStok {
   status?: StatusTransfer;
+  /** Lokasi asal surat jalan (P8): ruang pengirim. */
+  dariLocationID?: string;
   /**
    * Lokasi tujuan surat jalan. Server juga menerima locationID (asal atau
-   * tujuan) dan dariLocationID; web hanya memakai tujuan (kontrak/temuan.md
+   * tujuan); web memakai asal dan tujuan secara terpisah (kontrak/temuan.md
    * butir 33).
    */
   keLocationID?: string;

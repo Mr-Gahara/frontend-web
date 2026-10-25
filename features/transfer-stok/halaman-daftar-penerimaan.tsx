@@ -10,7 +10,7 @@ import { lingkupOutlet, SEMUA_OUTLET } from "@/features/inventaris/cakupan";
 import PemilihLokasiOutlet from "@/features/inventaris/pemilih-lokasi-outlet";
 import PesanLokasi from "@/features/inventaris/pesan-lokasi";
 import { useDaftarTransferStok } from "./hooks";
-import { filterServerTransfer, saringTransfer, type LingkupTujuan } from "./filter";
+import { filterServerTransfer, saringTransfer, type LingkupSisi } from "./filter";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,7 +55,7 @@ export default function HalamanDaftarPenerimaan() {
 
   // --- Queries ---
   const lingkup = lingkupOutlet(cakupan, pilihanLokasi);
-  const tujuan: LingkupTujuan | undefined = lingkup
+  const tujuan: LingkupSisi | undefined = lingkup
     ? lingkup.locationID
       ? { lokasiID: lingkup.locationID }
       : { tipeLokasi: lingkup.tipeLokasi ?? "Outlet" }

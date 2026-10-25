@@ -48,7 +48,8 @@ export default function HalamanPengiriman() {
   // Hanya surat jalan DIKIRIM, disaring server lewat query status
   // (kontrak/temuan.md butir 33); pencarian disaring di klien. Polling
   // 30 detik memantau penerimaan oleh outlet.
-  const kriteria = { status: "DIKIRIM" as const, cari: debouncedSearch };
+  // Hanya pengiriman gudang; pengembalian dari outlet dipantau di ruang outlet (AR2a).
+  const kriteria = { status: "DIKIRIM" as const, asal: { tipeLokasi: "Gudang" }, cari: debouncedSearch };
   const { data: daftarPengiriman = [], isLoading } = useDaftarTransferStok(filterServerTransfer(kriteria), {
     refetchInterval: 30000,
   });

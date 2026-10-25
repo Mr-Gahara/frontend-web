@@ -45,6 +45,18 @@ describe("saringTransfer", () => {
     expect(nomor(saringTransfer(daftar, { tujuan: { tipeLokasi: "Gudang" } }))).toEqual([]);
   });
 
+  it("menyaring lokasi asal per lokasi atau per tipe (P8)", () => {
+    const kembali = {
+      ...transfer("SJ-5", "DIKIRIM", "Outlet A"),
+      dariLokasi: lokasi("o1", "Outlet A", "Outlet"),
+      keLokasi: lokasi("g1", "Gudang A", "Gudang"),
+    };
+    const semua = [...daftar, kembali];
+    expect(nomor(saringTransfer(semua, { asal: { tipeLokasi: "Gudang" } }))).toEqual(["SJ-1", "SJ-2", "SJ-3", "SJ-4"]);
+    expect(nomor(saringTransfer(semua, { asal: { tipeLokasi: "Outlet" } }))).toEqual(["SJ-5"]);
+    expect(nomor(saringTransfer(semua, { asal: { lokasiID: "o1" } }))).toEqual(["SJ-5"]);
+  });
+
   it("mencari nomor dan nama lokasi tujuan, atau asal bila diminta", () => {
     expect(nomor(saringTransfer(daftar, { cari: "outlet b" }))).toEqual(["SJ-3", "SJ-4"]);
     expect(nomor(saringTransfer(daftar, { cari: "timur", cariPada: "asal" }))).toEqual(["SJ-3"]);
@@ -60,6 +72,14 @@ describe("filterServerTransfer", () => {
       keLocationID: "o1",
     });
     expect(filterServerTransfer({ tujuan: { tipeLokasi: "Outlet" } })).toEqual({});
+  });
+
+  it("mengirim lokasi asal tunggal sebagai dariLocationID, bukan tipe lokasi", () => {
+    expect(filterServerTransfer({ status: "PENDING", asal: { lokasiID: "o1" } })).toEqual({
+      status: "PENDING",
+      dariLocationID: "o1",
+    });
+    expect(filterServerTransfer({ asal: { tipeLokasi: "Gudang" } })).toEqual({});
   });
 });
 

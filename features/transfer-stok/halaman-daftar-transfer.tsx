@@ -87,8 +87,9 @@ function IsiDaftarTransfer() {
 
   // --- Queries ---
   // Status disaring server; pencarian disaring di klien lewat saringTransfer
-  // (nomor atau nama outlet tujuan).
-  const kriteria = { status: activeTab, cari: debouncedSearch };
+  // (nomor atau nama outlet tujuan). Hanya surat jalan berasal Gudang: surat
+  // jalan pengembalian dikirim dan dibatalkan dari ruang outlet (P8, AR2a).
+  const kriteria = { status: activeTab, asal: { tipeLokasi: "Gudang" }, cari: debouncedSearch };
   const {
     data: daftarTransfer = [],
     isLoading,
