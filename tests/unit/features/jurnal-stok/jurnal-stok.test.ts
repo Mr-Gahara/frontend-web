@@ -1,43 +1,7 @@
 import { describe, expect, it } from "vitest";
-import {
-  lokasiJurnalOutlet,
-  paramHalamanJurnal,
-  periodeAwalJurnal,
-} from "@/features/jurnal-stok/filter";
-import { SEMUA_OUTLET, type CakupanLokasiOutlet } from "@/features/inventaris/cakupan";
+import { paramHalamanJurnal, periodeAwalJurnal } from "@/features/jurnal-stok/filter";
 import { formatWaktuJurnal } from "@/features/jurnal-stok/tampilan";
 import { lokasiTunggal } from "@/features/inventaris/lokasi";
-import type { Lokasi } from "@/types/location";
-
-const outletA = { id: "outlet-1", nama: "Outlet Pontianak Kota", tipe: "Outlet" } as Lokasi;
-const outletB = { id: "outlet-2", nama: "Outlet Sungai Raya", tipe: "Outlet" } as Lokasi;
-
-describe("lokasiJurnalOutlet", () => {
-  it("jalur terkunci memakai lokasi aktif, dan null bila lokasi aktif kosong", () => {
-    const terkunci: CakupanLokasiOutlet = { status: "terkunci", lokasi: outletA, lokasiId: "outlet-1" };
-    expect(lokasiJurnalOutlet(terkunci, SEMUA_OUTLET)).toEqual({ lokasiID: "outlet-1" });
-    expect(lokasiJurnalOutlet({ status: "terkunci", lokasi: null, lokasiId: "" }, SEMUA_OUTLET)).toBeNull();
-  });
-
-  it("cakupan yang memuat atau gagal belum punya lokasi", () => {
-    expect(lokasiJurnalOutlet({ status: "memuat" }, SEMUA_OUTLET)).toBeNull();
-    expect(lokasiJurnalOutlet({ status: "gagal" }, SEMUA_OUTLET)).toBeNull();
-  });
-
-  it("lintas outlet: satu outlet terpilih dikirim apa adanya", () => {
-    const lintas: CakupanLokasiOutlet = { status: "lintas", lokasiOutlet: [outletA, outletB] };
-    expect(lokasiJurnalOutlet(lintas, "outlet-2")).toEqual({ lokasiID: "outlet-2" });
-  });
-
-  it("lintas outlet: Semua Outlet memakai satu-satunya outlet, dan meminta pilihan bila lebih dari satu", () => {
-    expect(lokasiJurnalOutlet({ status: "lintas", lokasiOutlet: [outletA] }, SEMUA_OUTLET)).toEqual({
-      lokasiID: "outlet-1",
-    });
-    expect(lokasiJurnalOutlet({ status: "lintas", lokasiOutlet: [outletA, outletB] }, SEMUA_OUTLET)).toEqual({
-      pilihSatuOutlet: true,
-    });
-  });
-});
 
 describe("periodeAwalJurnal", () => {
   it("tanggal 1 bulan berjalan sampai hari ini, pukul 00.00 waktu lokal", () => {

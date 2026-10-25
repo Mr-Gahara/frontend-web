@@ -2,9 +2,8 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import HalamanJurnalStok from "@/features/jurnal-stok/halaman-jurnal-stok";
-import { lokasiJurnalOutlet } from "@/features/jurnal-stok/filter";
 import { useCakupanLokasiOutlet } from "@/features/inventaris/hooks";
-import { SEMUA_OUTLET } from "@/features/inventaris/cakupan";
+import { SEMUA_OUTLET, lokasiSatuOutlet } from "@/features/inventaris/cakupan";
 import PemilihLokasiOutlet from "@/features/inventaris/pemilih-lokasi-outlet";
 import PesanLokasi from "@/features/inventaris/pesan-lokasi";
 
@@ -13,8 +12,8 @@ export default function JurnalStokOutletPage() {
   const cakupan = useCakupanLokasiOutlet();
   const [pilihanLokasi, setPilihanLokasi] = useState<string>(SEMUA_OUTLET);
 
-  // GET /jurnalstok hanya menyaring satu locationID (lokasiJurnalOutlet).
-  const lokasi = useMemo(() => lokasiJurnalOutlet(cakupan, pilihanLokasi), [cakupan, pilihanLokasi]);
+  // GET /jurnalstok hanya menyaring satu locationID (lokasiSatuOutlet).
+  const lokasi = useMemo(() => lokasiSatuOutlet(cakupan, pilihanLokasi), [cakupan, pilihanLokasi]);
 
   let penghalang: ReactNode = null;
   if (cakupan.status === "gagal") {

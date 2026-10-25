@@ -65,3 +65,25 @@ export function lingkupOutlet(
   }
   return null;
 }
+
+/**
+ * Satu lokasi outlet untuk daftar yang hanya menyaring satu locationID di
+ * server (jurnal stok B102, pembelian stok B103). Pilihan Semua Outlet
+ * memakai satu-satunya outlet tenant (MVP). Bila outlet lebih dari satu,
+ * halaman meminta pengguna memilih satu outlet sampai backend punya filter
+ * tipe lokasi (kontrak/temuan.md butir 151). null berarti cakupan belum
+ * siap, gagal, atau lokasi aktif kosong. Dipindah dari
+ * features/jurnal-stok/filter.ts (lokasiJurnalOutlet) begitu daftar kedua
+ * memakainya (keputusan rancangan butir 12).
+ */
+export type LokasiSatuOutlet = { lokasiID: string } | { pilihSatuOutlet: true } | null;
+
+export function lokasiSatuOutlet(cakupan: CakupanLokasiOutlet, pilihan: string): LokasiSatuOutlet {
+  const lingkup = lingkupOutlet(cakupan, pilihan);
+  if (!lingkup) return null;
+  if (lingkup.locationID) return { lokasiID: lingkup.locationID };
+  if (cakupan.status !== "lintas") return null;
+  return cakupan.lokasiOutlet.length === 1
+    ? { lokasiID: cakupan.lokasiOutlet[0].id }
+    : { pilihSatuOutlet: true };
+}

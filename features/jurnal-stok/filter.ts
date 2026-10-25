@@ -1,28 +1,8 @@
-import { lingkupOutlet, type CakupanLokasiOutlet } from "@/features/inventaris/cakupan";
 import { keTanggalLokal } from "@/lib/waktu";
 import type { AlasanJurnal, TipeKoreksi } from "@/types/jurnalStok";
 
 export type FilterArah = TipeKoreksi | "ALL";
 export type FilterAlasan = AlasanJurnal | "ALL";
-
-/**
- * Lokasi jurnal ruang outlet. GET /jurnalstok hanya menyaring satu
- * locationID, sehingga pilihan Semua Outlet memakai satu-satunya outlet
- * tenant (MVP). Bila outlet lebih dari satu, halaman meminta pengguna memilih
- * satu outlet sampai backend punya filter tipe lokasi. null berarti cakupan
- * belum siap, gagal, atau lokasi aktif kosong.
- */
-export type LokasiJurnalOutlet = { lokasiID: string } | { pilihSatuOutlet: true } | null;
-
-export function lokasiJurnalOutlet(cakupan: CakupanLokasiOutlet, pilihan: string): LokasiJurnalOutlet {
-  const lingkup = lingkupOutlet(cakupan, pilihan);
-  if (!lingkup) return null;
-  if (lingkup.locationID) return { lokasiID: lingkup.locationID };
-  if (cakupan.status !== "lintas") return null;
-  return cakupan.lokasiOutlet.length === 1
-    ? { lokasiID: cakupan.lokasiOutlet[0].id }
-    : { pilihSatuOutlet: true };
-}
 
 /** Periode awal halaman jurnal: tanggal 1 bulan berjalan sampai hari ini, sama dengan mutasi arus kas. */
 export function periodeAwalJurnal(sekarang: Date = new Date()): { dari: Date; sampai: Date } {

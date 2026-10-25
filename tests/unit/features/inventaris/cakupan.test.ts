@@ -2,12 +2,15 @@ import { describe, expect, it } from "vitest";
 import type { Lokasi } from "@/types/location";
 import {
   lingkupOutlet,
+  lokasiSatuOutlet,
   SEMUA_OUTLET,
   tentukanCakupan,
+  type CakupanLokasiOutlet,
   type MasukanCakupan,
 } from "@/features/inventaris/cakupan";
 
 const outletA = { id: "o1", nama: "Outlet A", tipe: "Outlet" } as Lokasi;
+const outletB = { id: "o2", nama: "Outlet B", tipe: "Outlet" } as Lokasi;
 const gudang = { id: "g1", nama: "Gudang Pusat", tipe: "Gudang" } as Lokasi;
 
 const dasar: MasukanCakupan = {
@@ -63,5 +66,32 @@ describe("lingkupOutlet", () => {
     expect(lingkupOutlet({ status: "terkunci", lokasi: null, lokasiId: "" }, SEMUA_OUTLET)).toBeNull();
     expect(lingkupOutlet({ status: "memuat" }, SEMUA_OUTLET)).toBeNull();
     expect(lingkupOutlet({ status: "gagal" }, SEMUA_OUTLET)).toBeNull();
+  });
+});
+
+describe("lokasiSatuOutlet", () => {
+  it("jalur terkunci memakai lokasi aktif, dan null bila lokasi aktif kosong", () => {
+    const terkunci: CakupanLokasiOutlet = { status: "terkunci", lokasi: outletA, lokasiId: "o1" };
+    expect(lokasiSatuOutlet(terkunci, SEMUA_OUTLET)).toEqual({ lokasiID: "o1" });
+    expect(lokasiSatuOutlet({ status: "terkunci", lokasi: null, lokasiId: "" }, SEMUA_OUTLET)).toBeNull();
+  });
+
+  it("cakupan yang memuat atau gagal belum punya lokasi", () => {
+    expect(lokasiSatuOutlet({ status: "memuat" }, SEMUA_OUTLET)).toBeNull();
+    expect(lokasiSatuOutlet({ status: "gagal" }, SEMUA_OUTLET)).toBeNull();
+  });
+
+  it("lintas outlet: satu outlet terpilih dikirim apa adanya", () => {
+    const lintas: CakupanLokasiOutlet = { status: "lintas", lokasiOutlet: [outletA, outletB] };
+    expect(lokasiSatuOutlet(lintas, "o2")).toEqual({ lokasiID: "o2" });
+  });
+
+  it("lintas outlet: Semua Outlet memakai satu-satunya outlet, dan meminta pilihan bila lebih dari satu", () => {
+    expect(lokasiSatuOutlet({ status: "lintas", lokasiOutlet: [outletA] }, SEMUA_OUTLET)).toEqual({
+      lokasiID: "o1",
+    });
+    expect(lokasiSatuOutlet({ status: "lintas", lokasiOutlet: [outletA, outletB] }, SEMUA_OUTLET)).toEqual({
+      pilihSatuOutlet: true,
+    });
   });
 });
