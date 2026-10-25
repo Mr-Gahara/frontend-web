@@ -255,6 +255,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   // backend (IZIN_PEMBELIAN_STOK_RUANG di features/pembelian-stok/izin.ts).
   "/dashboard/outlet/inventaris/pembelianStok": [IZIN.pembelianStok, IZIN.location],
   "/dashboard/outlet/inventaris/pembelianStok/[id]": [IZIN.pembelianStok, IZIN.location],
+  "/dashboard/outlet/inventaris/pembelianStok/catatPembelian": [IZIN.bahan, IZIN.akunKas, IZIN.location, IZIN.buatPembelianStok],
 
   // Jadwal outlet: izin shift, pola roster, dan jadwal belum ada di backend,
   // sehingga gate memakai izin data yang benar-benar diperiksa (daftar karyawan).
@@ -280,6 +281,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/gudang/transferStok/[id]": [IZIN.transferStok],
   "/dashboard/gudang/pembelianStok": [IZIN.pembelianStok, IZIN.location],
   "/dashboard/gudang/pembelianStok/[id]": [IZIN.pembelianStok, IZIN.location],
+  "/dashboard/gudang/pembelianStok/catatPembelian": [IZIN.bahan, IZIN.akunKas, IZIN.location, IZIN.buatPembelianStok],
   "/dashboard/gudang/transferStok/[id]/edit": [IZIN.transferStok, IZIN.buatTransferStok],
   "/dashboard/gudang/pengirimanStok": [IZIN.transferStok],
   "/dashboard/gudang/penerimaanStok": [IZIN.transferStok],

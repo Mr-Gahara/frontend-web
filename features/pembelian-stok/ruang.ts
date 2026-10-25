@@ -11,6 +11,10 @@ export function urlDetailPembelian(ruang: RuangPembelian, id: string): string {
   return `${URL_PEMBELIAN[ruang]}/${id}`;
 }
 
+export function urlCatatPembelian(ruang: RuangPembelian): string {
+  return `${URL_PEMBELIAN[ruang]}/catatPembelian`;
+}
+
 /**
  * Tipe lokasi penerima yang pembeliannya ditampilkan di tiap ruang. Stok
  * outlet dan gudang tidak dicampur di tampilan mana pun (Model bisnis MVP),

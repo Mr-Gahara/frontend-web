@@ -3,7 +3,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, ShoppingCart } from "lucide-react";
+import { MoreHorizontal, Plus, ShoppingCart } from "lucide-react";
 
 import { PilihTanggal } from "@/components/pilih-tanggal";
 import { Button } from "@/components/ui/button";
@@ -30,14 +30,14 @@ import { useSession } from "@/lib/auth/useSession";
 import { formatRupiah, formatTanggalPendek } from "@/lib/format";
 import type { PembelianStok } from "@/types/pembelianStok";
 import { useDaftarPembelianStok } from "./hooks";
-import type { RuangPembelian } from "./izin";
+import { aksiPembelianStok, type RuangPembelian } from "./izin";
 import {
   PANJANG_CARI_SUPPLIER,
   filterAwalDaftarPembelian,
   paramDaftarPembelian,
   type FilterPembelian,
 } from "./payload";
-import { urlDetailPembelian } from "./ruang";
+import { urlCatatPembelian, urlDetailPembelian } from "./ruang";
 import { namaAkunPembelian, ringkasBarang } from "./tampilan";
 
 const PILIHAN_UKURAN = [10, 20, 50] as const;
@@ -77,6 +77,7 @@ export default function HalamanDaftarPembelianStok({
   // seperti filter akun di halaman pengeluaran.
   const bolehAkun = permissions.includes(IZIN.akunKas);
   const bolehBahan = permissions.includes(IZIN.bahan);
+  const aksi = aksiPembelianStok(permissions, ruang);
 
   const [filter, setFilter] = useState<FilterPembelian>(() => filterAwalDaftarPembelian());
   const [cari, setCari] = useState("");
@@ -197,14 +198,26 @@ export default function HalamanDaftarPembelianStok({
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:py-8">
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-gading border border-navy/10 rounded-lg shrink-0 shadow-sm">
-          <ShoppingCart className="w-6 h-6 text-karamel" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gading border border-navy/10 rounded-lg shrink-0 shadow-sm">
+            <ShoppingCart className="w-6 h-6 text-karamel" />
+          </div>
+          <div className="space-y-0.5">
+            <h1 className="text-2xl font-bold tracking-tight text-navy">Pembelian Stok</h1>
+            <p className="text-sm font-medium text-navy/60">{deskripsi}</p>
+          </div>
         </div>
-        <div className="space-y-0.5">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">Pembelian Stok</h1>
-          <p className="text-sm font-medium text-navy/60">{deskripsi}</p>
-        </div>
+        {aksi.buat && (
+          <Button
+            asChild
+            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto font-bold"
+          >
+            <Link href={urlCatatPembelian(ruang)}>
+              <Plus className="mr-2 h-4 w-4" /> Catat Pembelian
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-3 border-b border-navy/10 pb-4 sm:flex sm:flex-wrap sm:items-end">

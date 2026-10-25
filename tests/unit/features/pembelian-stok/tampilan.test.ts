@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { FILTER_AWAL_PEMBELIAN, filterAwalDaftarPembelian } from "@/features/pembelian-stok/payload";
-import { TIPE_LOKASI_PEMBELIAN, URL_PEMBELIAN, urlDetailPembelian } from "@/features/pembelian-stok/ruang";
+import {
+  TIPE_LOKASI_PEMBELIAN,
+  URL_PEMBELIAN,
+  urlCatatPembelian,
+  urlDetailPembelian,
+} from "@/features/pembelian-stok/ruang";
 import {
   lokasiPembelian,
   namaAkunPembelian,
@@ -77,6 +82,7 @@ describe("ruang pembelian", () => {
   it("URL dan tipe lokasi per ruang", () => {
     expect(URL_PEMBELIAN.outlet).toBe("/dashboard/outlet/inventaris/pembelianStok");
     expect(urlDetailPembelian("gudang", "beli-1")).toBe("/dashboard/gudang/pembelianStok/beli-1");
+    expect(urlCatatPembelian("outlet")).toBe("/dashboard/outlet/inventaris/pembelianStok/catatPembelian");
     expect(TIPE_LOKASI_PEMBELIAN).toEqual({ outlet: "Outlet", gudang: "Gudang" });
   });
 });
