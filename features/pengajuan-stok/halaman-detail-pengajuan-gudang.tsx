@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { isNotFound, pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
 import { tahapPengajuan, type TahapPengajuan } from "./tahap";
-import { useBuatSuratJalan } from "@/features/transfer-stok/hooks";
+import { PanelBuatSuratJalan } from "./panel-surat-jalan";
 import { usePengajuanStok, useSetujuiPengajuan, useTolakPengajuan } from "./hooks";
 import { arahLokasi, arahPengajuanValid, peranRuang } from "./arah";
 import { bolehBuatSuratJalan, bolehSetujuiPengajuan, bolehTolakPengajuan } from "./izin";
@@ -131,17 +131,6 @@ export default function HalamanDetailPengajuanGudang() {
     },
     onError: (err) =>
       toast.error("Gagal Menolak", { description: pesanError(err, "Gagal menolak pengajuan.") }),
-  });
-
-  const suratJalanMutation = useBuatSuratJalan({
-    onSuccess: (dibuat) => {
-      toast.success("Surat Jalan Berhasil Dibuat", {
-        description: "Draft pengiriman telah disiapkan.",
-      });
-      router.push(dibuat?.id ? `${URL_TRANSFER}/${dibuat.id}` : URL_TRANSFER);
-    },
-    onError: (err) =>
-      toast.error("Gagal Membuat Surat Jalan", { description: pesanError(err, "Gagal membuat surat jalan.") }),
   });
 
   if (isLoading) {
@@ -417,29 +406,7 @@ export default function HalamanDetailPengajuanGudang() {
           )}
 
           {/* ACTION BUTTONS: APPROVED atau PENDING tanpa surat jalan, dan pemegang create-transfer-stok */}
-          {panelSuratJalan && (
-            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6 shadow-sm flex flex-col gap-3">
-              <h3 className="text-sm font-bold text-blue-900 text-center mb-1">
-                Tindakan Eksekusi Logistik
-              </h3>
-              <Button
-                onClick={() =>
-                  suratJalanMutation.mutate({
-                    pengajuanStokID: id,
-                    tanggalKirim: new Date().toISOString(),
-                  })
-                }
-                disabled={!arahValid || suratJalanMutation.isPending}
-                className="w-full bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-md cursor-pointer"
-              >
-                <Truck className="w-4 h-4 mr-2" />
-                {suratJalanMutation.isPending ? "Memproses..." : "Buat Surat Jalan"}
-              </Button>
-              <p className="text-[10px] font-medium text-blue-800/60 text-center">
-                Sistem otomatis menarik data item untuk divalidasi ke dalam Surat Jalan (Draft).
-              </p>
-            </div>
-          )}
+          {panelSuratJalan && <PanelBuatSuratJalan pengajuanID={id} urlSuratJalan={URL_TRANSFER} dikunci={!arahValid} />}
 
           {/* ACTION BUTTONS (JIKA SUDAH ADA SJ) */}
           {hasSuratJalan && (

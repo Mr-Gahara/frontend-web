@@ -15,6 +15,7 @@ import {
   Ticket,
   ArrowRightLeft,
   Truck,
+  PackageCheck,
   BookOpen,
   ClipboardList,
   Scale,
@@ -140,12 +141,16 @@ export const outletMenus: MenuGroup[] = [
         icon: Truck,
         subItems: [
           {
-            label: "Minta Barang",
+            label: "Pengajuan Barang",
             href: "/dashboard/outlet/inventaris/pengajuanStok",
           },
           {
             label: "Terima Barang",
             href: "/dashboard/outlet/inventaris/penerimaanBarang",
+          },
+          {
+            label: "Kirim Barang",
+            href: "/dashboard/outlet/inventaris/pengirimanBarang",
           },
         ],
       },
@@ -247,6 +252,11 @@ export const gudangMenus: MenuGroup[] = [
         label: "Pengiriman Stok",
         href: "/dashboard/gudang/pengirimanStok",
         icon: Truck,
+      },
+      {
+        label: "Penerimaan Stok",
+        href: "/dashboard/gudang/penerimaanStok",
+        icon: PackageCheck,
       },
     ],
   },

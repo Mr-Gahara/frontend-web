@@ -243,6 +243,9 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/inventaris/pengajuanStok/[id]/edit": [IZIN.pengajuanStok, IZIN.bahan, IZIN.location, IZIN.ubahPengajuanStok],
   "/dashboard/outlet/inventaris/penerimaanBarang": [IZIN.location, IZIN.transferStok],
   "/dashboard/outlet/inventaris/penerimaanBarang/[id]": [IZIN.transferStok],
+  "/dashboard/outlet/inventaris/pengirimanBarang": [IZIN.transferStok],
+  "/dashboard/outlet/inventaris/pengirimanBarang/[id]": [IZIN.transferStok],
+  "/dashboard/outlet/inventaris/pengirimanBarang/[id]/edit": [IZIN.transferStok, IZIN.buatTransferStok],
 
   // Jadwal outlet: izin shift, pola roster, dan jadwal belum ada di backend,
   // sehingga gate memakai izin data yang benar-benar diperiksa (daftar karyawan).
@@ -268,6 +271,8 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/gudang/transferStok/[id]": [IZIN.transferStok],
   "/dashboard/gudang/transferStok/[id]/edit": [IZIN.transferStok, IZIN.buatTransferStok],
   "/dashboard/gudang/pengirimanStok": [IZIN.transferStok],
+  "/dashboard/gudang/penerimaanStok": [IZIN.transferStok],
+  "/dashboard/gudang/penerimaanStok/[id]": [IZIN.transferStok],
   "/dashboard/gudang/jadwal": [IZIN.pengguna],
   "/dashboard/gudang/jadwal/generate": [IZIN.pengguna],
   "/dashboard/gudang/shift": [],

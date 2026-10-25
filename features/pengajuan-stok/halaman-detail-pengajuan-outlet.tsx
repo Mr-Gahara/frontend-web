@@ -7,8 +7,10 @@ import { isNotFound, pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
 import { tahapPengajuan, type TahapPengajuan } from "./tahap";
 import { useAjukanPengajuan, usePengajuanStok } from "./hooks";
-import { bolehUbahPengajuan } from "./izin";
-import { arahLokasi } from "./arah";
+import { bolehBuatSuratJalan, bolehUbahPengajuan } from "./izin";
+import { arahLokasi, peranRuang } from "./arah";
+import { PanelBuatSuratJalan } from "./panel-surat-jalan";
+import { RUANG_SURAT_JALAN } from "@/features/transfer-stok/ruang";
 import { LABEL_ARAH_PENGAJUAN, LABEL_TAHAP_PENGAJUAN, formatTanggalPengajuan } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
@@ -131,6 +133,11 @@ export default function HalamanDetailPengajuanOutlet() {
   const bisaDiubah = detail.status === "DRAFT" && bolehUbah;
   const arah = arahLokasi(detail.dariLokasi, detail.keLokasi);
   const pengembalian = arah === "OUTLET_KE_GUDANG";
+  // Pada pengembalian, outlet yang membuat dan mengirim surat jalannya (AR2a).
+  const outletPengirim = arah !== null && peranRuang(arah, "outlet") === "pengirim";
+  const panelSuratJalan =
+    tahapPengajuan(detail) === "PERLU_SURAT_JALAN" && outletPengirim && bolehBuatSuratJalan(permissions ?? []);
+  const urlSuratJalanOutlet = RUANG_SURAT_JALAN.outlet.urlSuratJalan;
 
   return (
     <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-5xl mx-auto">
@@ -277,6 +284,23 @@ export default function HalamanDetailPengajuanOutlet() {
                 className="w-full bg-navy text-white hover:bg-navy/90 font-bold shadow-md cursor-pointer"
               >
                 <Send className="w-4 h-4 mr-2" /> Ajukan ke Gudang
+              </Button>
+            </div>
+          )}
+
+          {/* Pengembalian disetujui: outlet membuat surat jalan (AR2a) */}
+          {panelSuratJalan && <PanelBuatSuratJalan pengajuanID={id} urlSuratJalan={urlSuratJalanOutlet} />}
+
+          {/* Pengembalian yang sudah punya surat jalan */}
+          {outletPengirim && detail.transferStokID && (
+            <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm flex flex-col gap-3">
+              <h3 className="text-sm font-bold text-navy text-center mb-1">Dokumen Terkait</h3>
+              <Button
+                variant="outline"
+                onClick={() => router.push(`${urlSuratJalanOutlet}/${detail.transferStokID}`)}
+                className="w-full border-navy/20 text-navy hover:bg-navy/5 font-bold cursor-pointer"
+              >
+                <FileText className="w-4 h-4 mr-2" /> Lihat Surat Jalan
               </Button>
             </div>
           )}
