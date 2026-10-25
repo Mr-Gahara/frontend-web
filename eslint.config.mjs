@@ -51,6 +51,17 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  // Alat pemeriksa dokumen di scripts/ adalah CommonJS (.cjs) yang dijalankan
+  // langsung oleh Node (npm run docs:periksa), sehingga require adalah cara
+  // impor yang benar untuknya. Aturan TypeScript dari
+  // eslint-config-next/typescript ini tidak berlaku di sana; aturan lain
+  // tetap berlaku.
+  {
+    files: ["scripts/**/*.cjs"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
