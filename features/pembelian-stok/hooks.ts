@@ -9,6 +9,7 @@ import type {
   PembelianStokTersimpan,
 } from "@/types/pembelianStok";
 import { pembelianStokApi } from "./api";
+import { UKURAN_HALAMAN_RINGKASAN, kumpulkanPembelian } from "./ringkasan";
 
 /** Callback halaman untuk toast, dialog, dan navigasi (keputusan rancangan butir 13). */
 type Callback<T = void> = { onSuccess?: (hasil: T) => void; onError?: (err: unknown) => void };
@@ -23,6 +24,28 @@ export function useDaftarPembelianStok(params: Record<string, string> | null) {
     queryKey: queryKeys.pembelianStok.daftar(params ?? undefined),
     queryFn: () => pembelianStokApi.daftar(params ?? {}),
     enabled: params !== null,
+    placeholderData: keepPreviousData,
+  });
+}
+
+/**
+ * Ringkasan Belanja Stok di Keuangan: seluruh halaman daftar pada filter
+ * yang sama, dijumlahkan di frontend karena backend belum punya endpoint
+ * ringkasan pembelian. Berada di bawah akar pembelianStok, sehingga catat,
+ * ubah, dan hapus ikut memperbaruinya. Hasil sebelumnya dipertahankan
+ * selama filter baru dihitung.
+ */
+export function useRingkasanBelanjaStok(filter: Record<string, string>) {
+  return useQuery({
+    queryKey: queryKeys.pembelianStok.ringkasan(filter),
+    queryFn: () =>
+      kumpulkanPembelian((halaman) =>
+        pembelianStokApi.daftar({
+          ...filter,
+          page: String(halaman),
+          limit: String(UKURAN_HALAMAN_RINGKASAN),
+        }),
+      ),
     placeholderData: keepPreviousData,
   });
 }

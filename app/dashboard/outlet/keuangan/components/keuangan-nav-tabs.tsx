@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeftRight, LineChart, FileText } from "lucide-react";
+import { ArrowLeftRight, LineChart, FileText, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
@@ -20,6 +20,13 @@ const tabs = [
     label: "Akun Kas & Bank",
     href: "/dashboard/outlet/keuangan/akunkas",
     icon: FileText,
+  },
+  {
+    // Gabungan pembelian stok seluruh outlet dan gudang (keputusan pemilik
+    // proyek, 25 Oktober 2026); ubah dan hapus tetap di ruang asal.
+    label: "Belanja Stok",
+    href: "/dashboard/outlet/keuangan/belanjaStok",
+    icon: Package,
   },
 ];
 

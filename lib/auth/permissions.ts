@@ -194,6 +194,9 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/keuangan/akunkas/pindahDana": [],
   "/dashboard/outlet/keuangan/mutasiArusKas": [IZIN.akunKas],
   "/dashboard/outlet/keuangan/ringkasanLabaRugi": [IZIN.laporan],
+  // Belanja Stok: pembelian seluruh lokasi; nama lokasi dan ruang asal dibaca
+  // dari daftar lokasi, karena locationID pembelian tidak di-populate.
+  "/dashboard/outlet/keuangan/belanjaStok": [IZIN.pembelianStok, IZIN.akunKas, IZIN.location],
   "/dashboard/outlet/pelanggan": [IZIN.pelanggan],
   "/dashboard/outlet/reservasi": [IZIN.booking],
   "/dashboard/outlet/reservasi/buatReservasi": [IZIN.booking, IZIN.pelanggan, IZIN.buatBooking],

@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { api, BASIS, bukaDenganAuth, login } from "../../../helpers/transfer-uji";
 import { unik } from "../../../helpers/reservasi-uji";
 import { daftarAkun, pilihAkun, type AkunKasUji } from "../../../helpers/akun-kas-uji";
+import { BAHAN_FIXTURE, idBahanFixture, idDari, lokasiBertipe, type Berid } from "../../../helpers/pembelian-uji";
 import { formatRupiah } from "../../../../lib/format";
 
 /*
@@ -18,9 +19,7 @@ import { formatRupiah } from "../../../../lib/format";
  */
 
 type Auth = Parameters<typeof api>[1];
-type Berid = { id?: string; _id?: string };
 
-const BAHAN_FIXTURE = "E2E Bahan Pak";
 const POLA_BUAT = /\/api\/pembelianstok(\?|$)/i;
 const POLA_ID = /\/api\/pembelianstok\/[a-f0-9]{24}(\?|$)/i;
 const PESAN_409 = "Stok dari pembelian ini sudah terpakai sehingga pembelian tidak dapat dihapus.";
@@ -28,25 +27,6 @@ const RUANG = [
   { ruang: "outlet", url: "/dashboard/outlet/inventaris/pembelianStok", tipe: "Outlet" },
   { ruang: "gudang", url: "/dashboard/gudang/pembelianStok", tipe: "Gudang" },
 ] as const;
-
-const idDari = (x: Berid | string | null | undefined) =>
-  typeof x === "string" ? x : String(x?.id ?? x?._id ?? "");
-
-async function lokasiBertipe(page: Page, auth: Auth, tipe: string) {
-  const baca = await api<(Berid & { tipe: string; nama: string })[]>(page, auth, "GET", "/location");
-  expect(baca.status, "baca lokasi: " + baca.pesan).toBe(200);
-  const lokasi = (baca.data ?? []).find((l) => l.tipe === tipe);
-  expect(lokasi, "lokasi bertipe " + tipe).toBeTruthy();
-  return { id: idDari(lokasi), nama: (lokasi as { nama: string }).nama };
-}
-
-async function idBahanFixture(page: Page, auth: Auth) {
-  const baca = await api<(Berid & { namaBahan: string })[]>(page, auth, "GET", "/bahanbaku");
-  expect(baca.status, "baca bahan baku: " + baca.pesan).toBe(200);
-  const bahan = (baca.data ?? []).find((b) => b.namaBahan === BAHAN_FIXTURE);
-  expect(bahan, "bahan fixture " + BAHAN_FIXTURE).toBeTruthy();
-  return idDari(bahan);
-}
 
 /**
  * Stok satu bahan di satu lokasi. Respons GET /inventory memetakan bahan ke
