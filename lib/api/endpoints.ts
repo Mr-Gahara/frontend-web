@@ -87,6 +87,10 @@ export const EP = {
     list: "/kategoribeban",
     detail: (id: string) => `/kategoribeban/${id}`,
   },
+  pembelianStok: {
+    list: "/pembelianstok",
+    detail: (id: string) => `/pembelianstok/${id}`,
+  },
   pelanggan: {
     list: "/pelanggan",
     detail: (id: string) => `/pelanggan/${id}`,

@@ -44,6 +44,7 @@ export const IZIN = {
   stockAdjustmentGudang: "read-stock-adjustment-gudang",
   pengajuanStok: "read-pengajuan-stok",
   transferStok: "read-transfer-stok",
+  pembelianStok: "read-pembelian-stok",
 
   penjualan: "read-penjualan",
   pembayaran: "read-pembayaran",
@@ -88,6 +89,7 @@ export const IZIN = {
   ubahPengajuanStok: "update-pengajuan-stok",
   buatTransferStok: "create-transfer-stok",
   buatBebanOperasional: "create-beban-operasional",
+  buatPembelianStok: "create-pembelian-stok",
 
   // Izin aksi di dalam halaman: tombol dan bagian mengikuti izin
   // endpoint-nya lewat features/<modul>/izin.ts (keputusan rancangan
@@ -120,6 +122,8 @@ export const IZIN = {
   buatKategoriBeban: "create-kategori-beban",
   ubahKategoriBeban: "update-kategori-beban",
   hapusKategoriBeban: "delete-kategori-beban",
+  ubahPembelianStok: "update-pembelian-stok",
+  hapusPembelianStok: "delete-pembelian-stok",
 } as const;
 
 export type Izin = (typeof IZIN)[keyof typeof IZIN];
