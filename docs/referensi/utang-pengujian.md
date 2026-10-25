@@ -383,9 +383,19 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Template role hanya teruji pemetaan namanya** (skenario e2e template
   dan `tests/unit/lib/roleTemplates.test.ts`); role dari template belum
   dipakai untuk membuka halaman stock opname, adjustment, atau absensi.
-- **Pengajuan Outlet ke Gudang tidak punya skenario**, karena web belum
-  menampilkannya (P8); skenario dashboard gudang gagal dengan jujur bila
-  data uji memuatnya.
+- **Kartu siap surat jalan dashboard gudang belum diuji dengan
+  pengembalian yang disetujui** (AR6a): kartu menghitung kedua arah,
+  sedangkan tab hanya permintaan; skenario dashboard gudang gagal dengan
+  jujur bila data uji memuat pengembalian seperti itu.
+- **Spec alur pengembalian memindahkan satu satuan stok outlet ke gudang
+  per run** (`a505783`), karena surat jalan DIKIRIM tidak dapat
+  dibatalkan (P12). Bila berhenti setelah disetujui dan sebelum surat
+  jalan dibuat, pengajuan APPROVED tertinggal di tab Semua gudang.
+- **Pemilihan baris menurut data di spec daftar pengajuan** (`7f1de56`)
+  bergantung pada baris itu berada di halaman pertama tabel (10 baris).
+- **Kirim Barang dan Penerimaan Stok hanya teruji lewat alur penuh**:
+  jalur gagal kirim, revisi, dan batal surat jalan pengembalian, serta
+  terima sebagian di gudang, belum punya skenario.
 - **Teks badge status dan dialog batal surat jalan hanya teruji lewat
   peta label di unit test** (`a972956`): e2e memeriksa nama tombol tab,
   tetapi tidak membaca badge daftar, badge detail, maupun teks dialog

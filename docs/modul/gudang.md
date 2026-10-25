@@ -85,9 +85,11 @@ Diputuskan pemilik proyek pada 19 Oktober 2026.
   2026): kartu memakai `pengajuan` dari ringkasan yang sama dengan kartu
   surat jalan (`antreanDariRingkasan`), satu permintaan untuk kedua
   kelompok, dan aksi pengajuan ikut menginvalidasi kuncinya. Server
-  menghitung kedua arah pengajuan (P8), sehingga angkanya dapat melebihi
-  isi tab bila ada pengembalian dari outlet sebelum alur itu didukung
-  web.
+  menghitung kedua arah pengajuan (P8). Sejak `7f1de56` tab Perlu
+  Disetujui gudang memuat kedua arah, tetapi tab Perlu Surat Jalan hanya
+  memuat permintaan (AR6a), sehingga kartu siap surat jalan dapat
+  melebihi isi tab bila ada pengembalian yang disetujui dan menunggu
+  surat jalan outlet (`inti/status.md`, utang kecil pengembalian).
 - **Kartu surat jalan tetap dari `GET /dashboard/gudang`**, karena
   filternya terbukti sama dengan tab DRAFT SJ dan halaman pengiriman
   (`transferStokService.getAll` tidak membatasi per izin atau lokasi),

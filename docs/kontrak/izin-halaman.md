@@ -68,6 +68,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/inventaris-suplai` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/pengajuanStok` | `read-pengajuan-stok`, `read-location` | `/pengajuanstok`, `/location`, `/location/current` | `read-pengajuan-stok`, `read-location` | Sejalan |
 | `/dashboard/outlet/inventaris/penerimaanBarang` | `read-location`, `read-transfer-stok` | `/location`, `/location/current`, `/transferstok` | `read-location`, `read-transfer-stok` | Sejalan |
+| `/dashboard/outlet/inventaris/pengirimanBarang` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/outlet/jadwal` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Sejalan; baris ini sempat tertinggal dari `IZIN_HALAMAN` (dikoreksi 29 September 2026) |
 | `/dashboard/outlet/jadwal/generate` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift/bulk` | `read-pengguna` | Sejalan; entri `IZIN_HALAMAN` ditambahkan di `19227f8` |
 | `/dashboard/outlet/pola-roster` | - | `/shift`, `/polaroster` | - | Backend tidak memeriksa izin |
@@ -84,6 +85,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/gudang/pengajuanStok` | `read-pengajuan-stok` | `/pengajuanstok` | `read-pengajuan-stok` | Sejalan |
 | `/dashboard/gudang/transferStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/gudang/pengirimanStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
+| `/dashboard/gudang/penerimaanStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/gudang/jadwal` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Sejalan; baris ini sempat tertinggal dari `IZIN_HALAMAN` (dikoreksi 29 September 2026) |
 | `/dashboard/gudang/jadwal/generate` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift/bulk` | `read-pengguna` | Sejalan; halaman dibuat di `19227f8` (keputusan J5b dan JD13c) |
 | `/dashboard/gudang/pola-roster` | - | `/shift`, `/polaroster` | - | Backend tidak memeriksa izin; halaman dibuat di `dcc22e0` (keputusan PL5) |
@@ -106,9 +108,12 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/gudang/stockOpname/buatStockOpname` | `read-location`, `create-stock-opname` | `/location`, `/pengguna/:id` | Form |
 | `/dashboard/gudang/transferStok/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; aksi mengikuti izin tombolnya |
 | `/dashboard/gudang/transferStok/[id]/edit` | `read-transfer-stok`, `create-transfer-stok` | `/transferstok/:id` | Form; `PUT /transferstok/:id` menuntut `create-transfer-stok` |
+| `/dashboard/outlet/inventaris/pengirimanBarang/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; aksi hanya di ruang pengirim (AR11a) |
+| `/dashboard/outlet/inventaris/pengirimanBarang/[id]/edit` | `read-transfer-stok`, `create-transfer-stok` | `/transferstok/:id` | Form; `PUT /transferstok/:id` menuntut `create-transfer-stok` |
 | `/dashboard/outlet/inventaris/bahanBaku/buatBahanBaku` | `create-bahan` | `/location/current` (opsional) | Form; `locationID` opsional di payload |
 | `/dashboard/outlet/inventaris/bahanBaku/[id]/edit` | `read-bahan`, `update-bahan` | `/bahanbaku/:id` | Form |
 | `/dashboard/outlet/inventaris/penerimaanBarang/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; terima mengikuti `receive-transfer-stok` |
+| `/dashboard/gudang/penerimaanStok/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; terima mengikuti `receive-transfer-stok`, hanya di ruang tujuan |
 | `/dashboard/outlet/inventaris/pengajuanStok/buatPengajuan` | `read-bahan`, `read-location`, `create-pengajuan-stok` | `/bahanbaku`, `/location`, `/location/current` | Form |
 | `/dashboard/outlet/inventaris/pengajuanStok/[id]` | `read-pengajuan-stok` | `/pengajuanstok/:id` | Detail; tanpa `read-location`, berbeda dari daftarnya |
 | `/dashboard/outlet/inventaris/pengajuanStok/[id]/edit` | `read-pengajuan-stok`, `read-bahan`, `read-location`, `update-pengajuan-stok` | `/pengajuanstok/:id`, `/bahanbaku`, `/location`, `/location/current` | Form |

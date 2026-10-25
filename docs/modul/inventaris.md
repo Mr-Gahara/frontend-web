@@ -176,11 +176,20 @@ Diputuskan pemilik proyek pada 21 Oktober 2026 (penyesuaian backend
   `dariLocationID`, outlet peminta di `keLocationID`. Halaman buat dan edit
   tetap menampilkan outlet di atas dan gudang di bawah; yang berubah hanya
   field yang diikat dan labelnya ("Outlet Peminta", "Gudang Asal Barang").
+  Ditinjau ulang di `7f1de56` (P8, AR1a dan AR5a): `dariLocationID`
+  adalah asal barang, bukan selalu gudang. Form menyimpan sisi outlet dan
+  gudang beserta arahnya, dan `lokasiMenurutArah` menentukan field yang
+  diikat; label mengikuti arah ("Outlet Asal Barang" dan "Gudang Tujuan"
+  pada pengembalian).
 - **Pengajuan yang tersimpan terbalik tidak tampil di daftar mana pun**, dan
   di detail gudang tombol setujui serta buat surat jalannya dikunci dengan
   keterangan, agar stok tidak bergerak ke arah salah. Tolak tetap aktif.
   Penjaga ini dipertahankan sampai backend memvalidasi tipe lokasi
   (`kontrak/temuan.md` butir 24).
+  Ditinjau ulang di `7f1de56` (AR3a): sejak P8 backend memeriksa pasangan
+  Gudang dan Outlet saat buat, ubah lokasi, dan setujui, sehingga butir 24
+  terjawab. `arahPengajuanValid` kini menerima kedua arah dan menjadi
+  cadangan tampilan untuk pasangan lain.
 - **Data development yang terbalik dibalik langsung di basis data**, atas
   izin pemilik proyek karena belum ada data produksi (8 pengajuan,
   21 September 2026).
@@ -230,6 +239,8 @@ PENDING, `781c861`, dan tab di URL, `a68a75f`):
   di klien (`statusServerTab` dan `cocokTab` di `filter.ts`).
   Sejak `a972956` keduanya berlabel "Perlu Surat Jalan" dan "Disetujui"
   (Label tab dan status pengajuan stok serta surat jalan).
+  Sejak `7f1de56` tab gudang Perlu Surat Jalan hanya memuat pengajuan
+  yang surat jalannya dibuat gudang (AR6a).
 - **Tab tersimpan di `?tab=`**, dengan slug terbaca per ruang di
   `tampilan.ts`. Aturan keamanannya ada di `referensi/arsitektur.md`
   (bagian `lib/tab-url.ts`).
@@ -238,14 +249,42 @@ Diputuskan pemilik proyek pada 21 Oktober 2026:
 
 - **Pengajuan stok berjalan dua arah, mengikuti P8 backend**: gudang
   mengirim ke outlet, dan outlet mengembalikan ke gudang. Dukungan web
-  untuk pengembalian dikerjakan terpisah dengan pratinjau; sampai itu
-  penjaga `arahPengajuanValid` tetap menyembunyikan arah Outlet ke
-  Gudang. Keputusan "arah lokasi mengikuti backend" dan "pengajuan yang
-  tersimpan terbalik" di atas ditinjau ulang bersama pekerjaan itu.
+  untuk pengembalian dikerjakan terpisah dengan pratinjau, dan selesai
+  di `621e753` sampai `a505783` (keputusan 25 Oktober 2026, di bawah).
 - **Daftar pengajuan, surat jalan, stock opname, dan stock adjustment
   tetap mode klien** dengan pencarian yang berfungsi, sampai backend
   punya pencarian teks (butir 150) dan, untuk pengajuan, filter tab
   gabungan (butir 152); keputusan rancangan butir 27.
+
+Diputuskan pemilik proyek pada 25 Oktober 2026, dari pratinjau desain
+(pengembalian Outlet ke Gudang):
+
+- **Pengembalian dibuat di ruang outlet dan disetujui di inbox ruang
+  gudang** (AR1a). Form buat punya pilihan arah "Minta dari Gudang" atau
+  "Kembalikan ke Gudang".
+- **Surat jalan dibuat dan dikirim ruang asal barang, dan diterima ruang
+  tujuannya** (AR2a): pada pengembalian, outlet membuat dan mengirim,
+  gudang menerima. Komponen surat jalan dan penerimaan sadar-ruang
+  (`features/transfer-stok/ruang.ts`) dan dipasang di kedua ruang.
+- **`arahPengajuanValid` menjadi penjaga pasangan Gudang dan Outlet di
+  kedua arah** (AR3a), cadangan tampilan untuk pasangan lain.
+- **Satu daftar per ruang dengan penanda arah** (AR4a): kolom Arah
+  (Permintaan atau Pengembalian), kolom Rute, dan filter arah di klien.
+- **Arah terkunci sejak dibuat** (AR5a); revisi draf menampilkannya
+  sebagai teks.
+- **Pengembalian yang disetujui berlabel "Menunggu Surat Jalan Outlet" di
+  inbox gudang dan hanya tampil di tab Semua** (AR6a); tab Perlu Surat
+  Jalan gudang hanya memuat permintaan.
+- **Menu**: sub-menu Kirim Barang di bawah Suplai Gudang (AR7b,
+  menggantikan AR7a "Pengiriman Barang" setelah sidebar yang ada
+  diperiksa), Minta Barang menjadi Pengajuan Barang (AR8a), dan
+  Penerimaan Stok di Distribusi & WMS setelah Pengiriman Stok (AR9a).
+- **Daftar Kirim Barang memakai asal bertipe Outlet tanpa pemilih**
+  (AR10a), setara di MVP satu outlet per tenant; cakupan outlet untuk
+  multi-outlet menjadi utang.
+- **Detail surat jalan di ruang yang bukan pengirimnya tampil baca-saja**
+  (AR11a): kirim, revisi, dan batal hanya di ruang pengirim, dan ruang
+  penerima mendapat tombol Buka Penerimaan saat surat jalan DIKIRIM.
 
 ### Submodul transfer, pengiriman, dan penerimaan
 
@@ -411,7 +450,9 @@ Yang masih berlaku:
     semua pengajuan adalah permintaan dari outlet ke gudang.
     Sejak keputusan 21 Oktober 2026 (P8), pengajuan juga dapat berupa
     pengembalian dari outlet ke gudang; `jenisPengajuan` tetap tidak
-    dipakai.
+    dipakai. Arah dibaca dari tipe lokasi asal dan tujuan
+    (`arahLokasi`), dan kepala kedua detail menampilkan label arah,
+    bukan kode `jenisPengajuan` (`7f1de56`).
   - Strategi data uji spec alur (keputusan pemilik proyek, pilihan A): buat,
     edit, ajukan, lalu tolak, dengan dokumen baru per run yang berakhir
     REJECTED; setujui dan buat surat jalan diuji jalur gagalnya saja dengan
@@ -494,3 +535,34 @@ Yang masih berlaku:
 - Label tab pajak sudah berbahasa awam, tetapi gayanya (garis bawah
   `text-sm`) berbeda dengan tombol pil pengajuan dan surat jalan;
   penyeragamannya bukan bagian putaran ini.
+
+### Catatan dari pengembalian Outlet ke Gudang
+
+- `621e753`: lapisan murni di `arah.ts` (`arahLokasi`, `peranRuang`),
+  `payload.ts` (`lokasiMenurutArah`, `sisiMenurutDokumen`),
+  `tampilan.ts` (`LABEL_ARAH_PENGAJUAN`), dan filter arah di
+  `saringPengajuan`, tanpa perubahan perilaku.
+- `7f1de56`: form, daftar, dan kedua detail pengajuan. `cocokTab`
+  menerima ruang secara wajib, agar tidak ada pemanggil yang diam-diam
+  memakai aturan satu arah. `stokGudangSaatIni` adalah stok di
+  `dariLocationID` (`pengajuanStokService.js` baris 152 sampai 159),
+  sehingga kolom stok detail gudang berlabel Stok Outlet pada
+  pengembalian.
+- `0590920`: lingkup asal di `filter.ts` (`LingkupTujuan` menjadi
+  `LingkupSisi`); daftar surat jalan dan pemantauan pengiriman gudang
+  hanya memuat surat jalan berasal Gudang.
+- `96985cd`: prop `ruang` di kelima komponen surat jalan dan
+  penerimaan. `transferStokApi.daftar` sebelumnya tidak meneruskan
+  `dariLocationID`.
+- `77fb600`: rute Kirim Barang dan Penerimaan Stok, sidebar,
+  `IZIN_HALAMAN`, dan `PanelBuatSuratJalan`
+  (`features/pengajuan-stok/panel-surat-jalan.tsx`).
+- `a505783`: spec alur pengembalian penuh dengan bukti stok kedua lokasi.
+- Spec yang membuka baris pertama sebuah daftar rapuh begitu daftar
+  memuat dua jenis data: test detail PENDING membuka pengembalian yang
+  baru dibuat spec alur. Pilih baris menurut data yang memenuhi syarat,
+  lewat nomornya.
+- Istilah pencarian dampak harus nama yang khas: "arah" mencocokkan
+  "ke arah yang berbeda" dan "arah perbaikan" di 58 baris yang tidak
+  relevan. Baca keluarannya per berkas tujuan, tanpa digabung lewat
+  `sort -u` lalu dipotong.

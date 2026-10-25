@@ -27,39 +27,54 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: pengajuan Outlet ke Gudang
+## Pekerjaan berikutnya: halaman pembelian stok
 
-Putaran dokumen selesai pada 25 Oktober 2026. Utang pengujian yang masih
-terbuka pindah ke `referensi/utang-pengujian.md`; riwayat baseline,
-riwayat pelepasan fixme, utang yang lunas, dan kejadian sesekali yang
-tidak berulang ke `arsip/riwayat-pengujian.md`, sehingga
-`inti/pengujian.md` kembali di bawah batas inti sekitar 400 baris.
-`npm run lint` kembali bersih di `78c82d7`, lewat pengecualian
-`@typescript-eslint/no-require-imports` untuk `scripts/**/*.cjs`.
+Pengembalian Outlet ke Gudang (P8) selesai pada 25 Oktober 2026, dalam
+enam commit dari `621e753` sampai `a505783` (`modul/inventaris.md`,
+keputusan AR1a sampai AR11a). Pengembalian dibuat dan diajukan di ruang
+outlet, disetujui di inbox gudang, dibuatkan surat jalan dan dikirim dari
+menu Kirim Barang, lalu diterima di menu Penerimaan Stok; spec
+`alur-pengembalian.spec.ts` membuktikan perpindahan stoknya.
 
-Pemilik proyek memilih pengajuan Outlet ke Gudang sebagai pekerjaan
-berikutnya (25 Oktober 2026): alur pengembalian P8 backend, yang menurut
-keputusan 21 Oktober 2026 dikerjakan dengan pratinjau desain lebih dulu
-(`modul/inventaris.md`, submodul pengajuan stok). Penjaga
-`arahPengajuanValid` masih menyembunyikan arah Outlet ke Gudang, dan
-keputusan "arah lokasi mengikuti backend" serta "pengajuan yang
-tersimpan terbalik" ditinjau ulang bersama pekerjaan itu. Sampai itu
-kartu pengajuan dashboard gudang dapat melebihi isi tab bila ada
-pengembalian dari outlet.
+Pemilik proyek memilih halaman pembelian stok sebagai pekerjaan
+berikutnya (25 Oktober 2026). Modul ini belum punya halaman di web, dan
+izinnya belum masuk template role (RH6a). Backend punya route, service,
+dan validator pembelian stok, serta rangka kontraknya di dokumen API
+backend (status Yoga).
 
-Backend lokal berada di `ridho` `b5b367a` (fast-forward ke `origin/yoga`,
-yang memuat `origin/nizar`), tanpa commit baru per 25 Oktober 2026.
-Suite e2e penuh terakhir: 478 lolos dan 14 skipped di `b03c276`
-(`inti/pengujian.md`, Baseline). Dua belas `test.fixme` menunggu backend.
-Langkah pertama sesi berikutnya: periksa cabang backend, lalu petakan
-pemakaian `arahPengajuanValid` dan catatan P8.
+Backend lokal berada di `ridho` `b5b367a`, tanpa commit baru per 25
+Oktober 2026. Suite e2e penuh terakhir: 478 lolos dan 14 skipped di
+`b03c276`; suite kini berisi 495 test (`inti/pengujian.md`, Baseline).
+Dua belas `test.fixme` menunggu backend. Langkah pertama sesi
+berikutnya: periksa cabang backend, lalu petakan
+route, dokumen kontrak, dan sisa pemakaian pembelian stok di web.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho nizar yoga; do echo "origin/$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...origin/$r | tr '\t' ' ')"; done
-cd ~/Documents/frontend-web; grep -rnE '\barahPengajuanValid\b' features app tests | cut -c1-140; grep -rnE '\bP8\b' docs/kontrak docs/referensi docs/modul | cut -c1-140 | head -12
+BE=~/Documents/backend-js; grep -nE 'checkPermission|router\.(get|post|put|patch|delete)' "$BE/routes/pembelianStokRoute.js" | cut -c1-130; ls "$BE/docs/api/endpoint" "$BE/docs/api/payload" | grep -i pembelian; grep -rniE 'pembelian' ~/Documents/frontend-web/lib ~/Documents/frontend-web/features ~/Documents/frontend-web/components | cut -c1-120 | head -10
 ```
 
 ## Utang kecil yang tertunda
+
+### Utang kecil dari pengembalian Outlet ke Gudang
+
+- Daftar Kirim Barang memakai asal bertipe Outlet tanpa pemilih (AR10a).
+  Untuk multi-outlet, terapkan cakupan outlet seperti Terima Barang
+  (`lingkupOutlet` dan `PemilihLokasiOutlet`).
+- Kartu siap surat jalan dashboard gudang dihitung server untuk kedua
+  arah, sedangkan tab Perlu Surat Jalan gudang hanya memuat permintaan
+  (AR6a). Angkanya melebihi isi tab bila ada pengembalian yang disetujui
+  dan menunggu surat jalan outlet; perlu hitungan per arah dari backend
+  atau kartu tersendiri.
+- Halaman revisi surat jalan tidak memeriksa ruang pengirim: tombolnya
+  tersembunyi di ruang lawan (AR11a), tetapi URL-nya dapat dibuka
+  langsung.
+- Repo frontend dibuat ulang sebagai repo baru dengan pemilik proyek
+  sebagai satu-satunya kontributor, setelah seluruh pekerjaan selesai dan
+  masuk produksi (pemilik proyek, 25 Oktober 2026). Seluruh commit yang
+  terjangkau per tanggal itu ditulis `Mr-Gahara` tanpa atribusi lain,
+  dan remote hanya punya `main` tanpa ref pull request, tetapi daftar
+  kontributor GitHub masih menampilkan Claude.
 
 ### Utang kecil dari penyesuaian backend `ridho` `b5b367a`
 
@@ -76,6 +91,9 @@ cd ~/Documents/frontend-web; grep -rnE '\barahPengajuanValid\b' features app tes
   dikerjakan terpisah dengan pratinjau (`modul/inventaris.md`). Sampai
   itu kartu pengajuan dashboard gudang dapat melebihi isi tab bila ada
   pengembalian dari outlet.
+  Selesai di `621e753` sampai `a505783`. Yang tersisa: kartu siap surat
+  jalan menghitung pengembalian yang menunggu surat jalan outlet,
+  sedangkan tab gudang tidak (AR6a; utang kecil pengembalian, di atas).
 - `lokasiJurnalOutlet` dipindah ke `features/inventaris/cakupan.ts` bila
   daftar lain ikut pindah ke server (keputusan rancangan butir 12).
 

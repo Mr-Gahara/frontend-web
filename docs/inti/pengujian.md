@@ -12,6 +12,17 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per pengembalian Outlet ke Gudang** (commit `a505783`, 25
+Oktober 2026): 755 test unit dan integrasi lolos di 86 berkas. Suite e2e
+berisi 495 test di 72 berkas: 492 per `b03c276`, ditambah skenario
+pengembalian di spec alur dan spec daftar pengajuan stok, serta
+`alur-pengembalian.spec.ts`. Suite penuh tidak dijalankan ulang; spec
+terdampak (pengajuan stok, surat jalan, penerimaan barang, dan dashboard
+gudang) lolos 30 dengan 3 skipped dari 33. Catatan `a972956` di bawah
+menulis spec pengajuan stok dan surat jalan lolos 25 dengan 3 skipped;
+angka itu tidak dapat dicocokkan, karena kedua folder berisi 24 test,
+26 bersama penerimaan barang, dan tidak ada spec yang berubah sesudahnya.
+
 **Baseline per penyesuaian backend `ridho` `b5b367a`** (commit `b03c276`,
 21 Oktober 2026): 721 test unit dan integrasi lolos di 86 berkas. Suite
 e2e penuh dijalankan terhadap backend `ridho` `b5b367a`: 478 lolos dan
@@ -25,8 +36,9 @@ satu test unit (722); suite penuh tidak dijalankan ulang, dan spec
 terdampaknya lolos 16 dengan 1 skipped. Sesudahnya `a972956` (label tab
 berbahasa awam) menambah delapan test unit, sehingga vitest penuh
 menjadi 730 lolos di 86 berkas; suite penuh tidak dijalankan ulang, dan
-spec terdampaknya lolos: pengajuan stok dan surat jalan 25 dengan 3
-skipped, serta dashboard gudang 4.
+spec terdampaknya dicatat lolos 25 dengan 3 skipped untuk pengajuan
+stok dan surat jalan, angka yang tidak dapat dicocokkan dengan isi spec
+(paragraf di atas), serta dashboard gudang 4.
 
 ## Kredensial uji
 
@@ -99,6 +111,7 @@ Pola kegagalan yang berulang:
 | `waitForResponse` habis waktu setelah kembali ke halaman atau filter yang sudah pernah dimuat | Kunci query masih segar (`staleTime` 5 menit di `components/providers/query-provider.tsx`), sehingga tidak ada permintaan. Buktikan dari tampilan; penunggu jaringan hanya untuk kunci yang belum pernah dimuat (`b63cf08`) |
 | Pembersihan tampak lolos, tetapi data uji menumpuk di basis data | Helper pembersihan membuang jawaban permintaannya. Periksa statusnya dengan `expect.soft`, dan jalankan audit endpoint: route yang dihapus backend juga menjawab 404 (`b5a55c4`) |
 | `POST /pengajuanstok` ditolak 409 nomor kembar, menetap saat diulang | Backend membentuk nomor dari dokumen terakhir menurut `createdAt` (`kontrak/temuan.md` butir 139). Bandingkan `createdAt` dan waktu `_id` dokumen bernomor terbesar dengan jam sistem lewat skrip baca-saja; dokumen ber-`createdAt` di depan mengunci pembuatan sampai bulan berganti |
+| Lolos sendirian, gagal saat dijalankan bersama spec lain | Test memilih baris pertama daftar, padahal spec yang berjalan lebih dulu membuat data dari jenis lain (berurutan menurut nama berkas, `workers: 1`). Pilih baris menurut data yang memenuhi syarat, lewat nomornya (`7f1de56`) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

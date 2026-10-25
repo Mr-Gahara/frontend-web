@@ -59,7 +59,11 @@ Memastikan tidak ada spec yang memalsukan respons sukses (helper
 `audit-fulfill.js`, keputusan rancangan butir 21). Helper keluar dengan
 kode gagal bila ada `route.fulfill` berstatus sukses tanpa tanda
 `// simulasi:`, sehingga dipakai sebagai gerbang di blok commit spec.
-Audit seluruh suite bersih sejak `04830b7`; jalankan untuk seluruh suite
+Audit seluruh suite bersih sejak `7f1de56`, setelah penanda simulasi
+detail PENDING di spec daftar pengajuan stok dipasang tepat di atas
+`route.fulfill`. Kekurangannya sempat terlewat karena kode keluar dibaca
+dari ujung pipa (`referensi/helper-dan-shell.md`, kode keluar di pipa).
+Jalankan untuk seluruh suite
 sebelum commit spec, atau untuk folder spec yang diubah saat iterasi:
 
 ```bash

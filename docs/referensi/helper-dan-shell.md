@@ -689,6 +689,14 @@ polanya salah.
   sehingga `tsc` sesudahnya tidak berjalan tanpa tanda. Pemeriksaan yang
   boleh gagal ditulis `echo "x: $(wc -c < f 2>/dev/null || echo TIDAK ADA)"`.
 
+Kode keluar perintah yang keluarannya disalurkan lewat pipa tidak
+terbaca dari `$?`, karena `$?` adalah kode keluar perintah terakhir di
+pipa, misalnya `tail`. Di zsh, bacalah `${pipestatus[1]}` (huruf kecil,
+mulai dari 1); `${PIPESTATUS[0]}` hanya ada di bash. Untuk gerbang,
+jalankan tanpa pipa dengan keluaran ke `/dev/null`, lalu rangkai dengan
+`&&`. Pada putaran pengembalian (25 Oktober 2026), audit-fulfill.js
+yang disalurkan ke `tail -3` mencetak kode 0 padahal alat itu keluar 1.
+
 ## Catatan form (React Hook Form dan Zod)
 
 - **Hindari `z.coerce`.** Ia membuat tipe input dan output skema berbeda,
