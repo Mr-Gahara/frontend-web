@@ -198,7 +198,7 @@ sama (submodul pengajuan stok, di bawah).
     lama yang menahan submit sampai prioritas diketik (pemilik proyek,
     1 Oktober 2026, `9586e3c`). Spec yang ditulis sebelumnya dan masih
     menyiapkan data uji lewat API disesuaikan saat spec itu disentuh
-    (`inti/pengujian.md`, Utang pengujian).
+    (`referensi/utang-pengujian.md`).
 24. **Rupiah ditampilkan lewat satu pemformat, `formatRupiah`
     (`lib/format.ts`), dengan batas pecahan yang eksplisit.** Batas
     pecahan bawaan `Intl` untuk IDR bergantung pada versi ICU runtime (0

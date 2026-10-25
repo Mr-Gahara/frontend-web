@@ -49,7 +49,7 @@ keputusan rancangan butir 17 dan 21.
   respons nyata** (`// simulasi:`), karena tenant uji sudah punya gudang
   yang menyimpan stok, dan `POST /location` dijawab gagal agar tidak ada
   lokasi yang tersimpan (`2d7225b`). Setup yang berhasil tidak diuji e2e
-  (`inti/pengujian.md`, Utang pengujian).
+  (`referensi/utang-pengujian.md`).
 - Diputuskan tanpa ditanyakan, diterapkan di `9ce288b`: pemeriksaan
   nama role Owner di layout dibuang (keputusan rancangan butir 2), dan
   `urlSetup` form buat stock opname gudang diarahkan ke

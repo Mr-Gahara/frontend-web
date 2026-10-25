@@ -102,7 +102,7 @@ empat commit, dan dengan itu modul Pelanggan dan diskon selesai.
   disimpan. Web kini dapat membuat dan mengubah aturan itu, dan pilihan
   diskon kasir hanya menawarkan diskon yang sedang berlaku.
 - Diskon tidak dapat dihapus, sehingga diskon uji dibuat Non-Aktif dan
-  tertinggal lima per run suite penuh (`inti/pengujian.md`, Utang pengujian).
+  tertinggal lima per run suite penuh (`referensi/utang-pengujian.md`).
 - Temuan backend baru: butir 107 sampai 109, dilaporkan 2 Oktober 2026
   (`arsip/laporan-backend.md`). Kontrak diskon dikoreksi terhadap `yoga`
   (`kontrak/payload.md`, `kontrak/endpoint.md`).

@@ -27,45 +27,41 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: merapikan dokumentasi pengujian
+## Pekerjaan berikutnya: pengajuan Outlet ke Gudang
 
-Label tab berbahasa awam selesai pada 25 Oktober 2026 di `a972956`
-(`modul/inventaris.md`, Catatan dari label tab berbahasa awam): tab dan
-badge pengajuan stok serta surat jalan membaca satu peta label per
-modul, slug `?tab=` tidak berubah, dan label tab pajak sudah berbahasa
-awam sehingga tidak disentuh. Pemilik proyek memilih putaran khusus
-dokumen sebagai pekerjaan berikutnya (22 Oktober 2026):
+Putaran dokumen selesai pada 25 Oktober 2026. Utang pengujian yang masih
+terbuka pindah ke `referensi/utang-pengujian.md`; riwayat baseline,
+riwayat pelepasan fixme, utang yang lunas, dan kejadian sesekali yang
+tidak berulang ke `arsip/riwayat-pengujian.md`, sehingga
+`inti/pengujian.md` kembali di bawah batas inti sekitar 400 baris.
+`npm run lint` kembali bersih di `78c82d7`, lewat pengecualian
+`@typescript-eslint/no-require-imports` untuk `scripts/**/*.cjs`.
 
-- Riwayat baseline lama di `referensi/playwright.md` (Perintah
-  verifikasi yang biasa dipakai) dipindah ke arsip (Utang kecil dari
-  19 Oktober 2026).
-- `inti/pengujian.md` (594 baris) dipangkas ke bawah batas inti sekitar
-  400 baris, dengan memindah utang pengujian yang sudah lunas ke arsip.
-- `npm run lint` gagal sejak `4cbb38f`: 18 error
-  `@typescript-eslint/no-require-imports` di enam berkas
-  `scripts/dokumen/*.cjs`, karena aturan TypeScript ikut berlaku pada
-  alat CommonJS. Cara membereskannya diputuskan di putaran ini, karena
-  alat pemeriksa dokumen ada di sana. Kode aplikasi dan test bersih;
-  dua warning `react-hooks/incompatible-library` di
-  `components/ui/data-table.tsx` dan
-  `features/stock-opname/form-buat-stock-opname.tsx` tidak berubah.
-
-Pemindahan dokumen memakai gerbang `npm run docs:periksa` (Pengecualian
-alur); perbaikan lint mengikuti alur biasa karena menyentuh konfigurasi
-atau skrip.
+Pemilik proyek memilih pengajuan Outlet ke Gudang sebagai pekerjaan
+berikutnya (25 Oktober 2026): alur pengembalian P8 backend, yang menurut
+keputusan 21 Oktober 2026 dikerjakan dengan pratinjau desain lebih dulu
+(`modul/inventaris.md`, submodul pengajuan stok). Penjaga
+`arahPengajuanValid` masih menyembunyikan arah Outlet ke Gudang, dan
+keputusan "arah lokasi mengikuti backend" serta "pengajuan yang
+tersimpan terbalik" ditinjau ulang bersama pekerjaan itu. Sampai itu
+kartu pengajuan dashboard gudang dapat melebihi isi tab bila ada
+pengembalian dari outlet.
 
 Backend lokal berada di `ridho` `b5b367a` (fast-forward ke `origin/yoga`,
 yang memuat `origin/nizar`), tanpa commit baru per 25 Oktober 2026.
 Suite e2e penuh terakhir: 478 lolos dan 14 skipped di `b03c276`
 (`inti/pengujian.md`, Baseline). Dua belas `test.fixme` menunggu backend.
+Langkah pertama sesi berikutnya: periksa cabang backend, lalu petakan
+pemakaian `arahPengajuanValid` dan catatan P8.
 
 ```bash
-cd ~/Documents/frontend-web/docs; wc -l inti/*.md referensi/playwright.md; grep -nE '^#{2,3} ' referensi/playwright.md inti/pengujian.md | cut -c1-120
+BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho nizar yoga; do echo "origin/$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...origin/$r | tr '\t' ' ')"; done
+cd ~/Documents/frontend-web; grep -rnE '\barahPengajuanValid\b' features app tests | cut -c1-140; grep -rnE '\bP8\b' docs/kontrak docs/referensi docs/modul | cut -c1-140 | head -12
 ```
 
 ## Utang kecil yang tertunda
 
-## Utang kecil dari penyesuaian backend `ridho` `b5b367a`
+### Utang kecil dari penyesuaian backend `ridho` `b5b367a`
 
 - Stock opname, stock adjustment, surat jalan, dan pengajuan stok tetap
   mode klien, karena backend belum punya pencarian teks
@@ -83,7 +79,7 @@ cd ~/Documents/frontend-web/docs; wc -l inti/*.md referensi/playwright.md; grep 
 - `lokasiJurnalOutlet` dipindah ke `features/inventaris/cakupan.ts` bila
   daftar lain ikut pindah ke server (keputusan rancangan butir 12).
 
-## Utang kecil dari penyesuaian backend `ridho` `7d28135`
+### Utang kecil dari penyesuaian backend `ridho` `7d28135`
 
 - Lampiran A (`kontrak/route-backend.md`) tertinggal: masih mencatat
   `DELETE /bebanoperasional/:id`, yang sudah dibuang backend.
@@ -113,7 +109,7 @@ cd ~/Documents/frontend-web/docs; wc -l inti/*.md referensi/playwright.md; grep 
   operasional di `yoga` `186fa19` (B100), keduanya termuat di `ridho`
   `af5f315`.
 
-## Utang kecil dari penyesuaian backend `ridho` `2dd57aa`
+### Utang kecil dari penyesuaian backend `ridho` `2dd57aa`
 
 - Hapus bahan baku yang baru dibuat diperbaiki backend di `7d28135`
   (`kontrak/temuan.md` butir 143), dan `test.fixme`-nya dilepas
@@ -132,7 +128,7 @@ cd ~/Documents/frontend-web/docs; wc -l inti/*.md referensi/playwright.md; grep 
 - Nama penyetuju di daftar pengajuan stok terisi sejak `7d28135` (butir
   145); belum dipakai web.
 
-## Utang kecil dari penyesuaian backend `nizar`
+### Utang kecil dari penyesuaian backend `nizar`
 
 - Backend lokal berada di cabang `ridho` `8dc6211` (fast-forward ke
   `origin/nizar`, sudah di-push). Setiap kali `yoga` atau `nizar` maju,
@@ -170,7 +166,7 @@ cd ~/Documents/frontend-web/docs; wc -l inti/*.md referensi/playwright.md; grep 
 - Mutasi transfer di buku mutasi tidak bertaut ke riwayat Pindah Dana,
   karena riwayat itu tidak punya halaman per transfer.
 
-## Utang kecil dari penyesuaian backend `fc29433`
+### Utang kecil dari penyesuaian backend `fc29433`
 
 - Izin beban operasional belum masuk template role (keputusan FC2a);
   ditambahkan bersama halaman pengeluaran.
@@ -181,7 +177,7 @@ cd ~/Documents/frontend-web/docs; wc -l inti/*.md referensi/playwright.md; grep 
   tidak punya bahan bersatuan itu. Sejak `f64b518` bahan bersatuan pak
   terbukti lewat e2e.
 
-## Utang kecil dari penyesuaian backend `f27f093`
+### Utang kecil dari penyesuaian backend `f27f093`
 
 - Setelah validator stock opname diperbaiki backend (`kontrak/temuan.md`
   butir 22): balik `SERVER_TERIMA_HITUNGAN_KOSONG` menjadi true, tulis badan
@@ -198,15 +194,17 @@ cd ~/Documents/frontend-web/docs; wc -l inti/*.md referensi/playwright.md; grep 
   baris setelah pemanggilan guard dibuang (`628f52e`). Pisahkan dialog
   aksi dan tabel hitungan saat halaman itu disentuh lagi.
 
-## Utang kecil dari 19 Oktober 2026
+### Utang kecil dari 19 Oktober 2026
 
 - Riwayat baseline lama masih di `referensi/playwright.md` (Perintah
   verifikasi yang biasa dipakai); pindahkan ke arsip saat dokumen itu
   disentuh. Baseline terkini ada di `inti/pengujian.md`.
   Dijadwalkan sebagai pekerjaan berikutnya pada 22 Oktober 2026.
+  Selesai pada putaran dokumen 25 Oktober 2026 (`arsip/riwayat-pengujian.md`).
 - `inti/pengujian.md` melewati batas inti sekitar 400 baris; utang
   pengujian yang sudah lunas dipindah ke arsip saat ditinjau.
   Dijadwalkan sebagai pekerjaan berikutnya pada 22 Oktober 2026.
+  Selesai pada putaran dokumen 25 Oktober 2026 (`arsip/riwayat-pengujian.md`).
 - Satu skip bersyarat data bertambah di suite penuh `d6f8ba0`
   dibanding hitungan, dan skenarionya belum diidentifikasi
   (`inti/pengujian.md`, Baseline).

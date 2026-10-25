@@ -51,7 +51,7 @@ Inti selalu dikirim. Tabel ini menyebut tambahannya.
 
 | Pekerjaan | Tambahan selain inti |
 |---|---|
-| Modul atau halaman | `modul/<modul>.md`, `referensi/arsitektur.md`, dan baris kontrak modul itu dari `kontrak/endpoint.md`, `kontrak/payload.md`, dan `kontrak/izin-halaman.md` (lewat `grep`) |
+| Modul atau halaman | `modul/<modul>.md`, `referensi/arsitektur.md`, `referensi/utang-pengujian.md`, dan baris kontrak modul itu dari `kontrak/endpoint.md`, `kontrak/payload.md`, dan `kontrak/izin-halaman.md` (lewat `grep`) |
 | Fase UI/UX | `modul/ui-ux.md` dan dokumen modul halaman yang disentuh |
 | Penyesuaian backend | `kontrak/temuan.md`, `referensi/keputusan-penyesuaian-backend.md`, dan dokumen modul yang terdampak |
 | Laporan untuk tim backend | `kontrak/temuan.md` |
@@ -75,7 +75,7 @@ cd ~/Documents/frontend-web && cat docs/modul/gudang.md docs/referensi/arsitektu
 | `inti/status.md` | Pekerjaan berikutnya, metrik, dan utang lintas modul | **Sering**: setiap modul |
 | `inti/keputusan-rancangan.md` | Model bisnis MVP dan keputusan rancangan bernomor yang mengikat semua modul | **Jarang**: bertambah saat ada keputusan baru. Butir lama boleh dilengkapi, tetapi tidak dibalik tanpa pembahasan |
 | `inti/cara-kerja.md` | Alur setiap perubahan, aturan blok perintah, cara berbagi konteks, kapan berhenti, belajar dari setiap putaran | **Jarang**: bertambah saat ada pelajaran. Alur dan aturan blok perintah **tetap** |
-| `inti/pengujian.md` | Kredensial uji, baseline, urutan debug e2e, fixme dan skip, utang pengujian | **Sering**: baseline setiap modul |
+| `inti/pengujian.md` | Kredensial uji, baseline, urutan debug e2e, fixme dan skip | **Sering**: baseline setiap modul |
 | `inti/backend.md` | Membaca backend, cache kontrak, penyelarasan permission, bug backend, pemilik modul, bentuk laporan | **Jarang**: bertambah saat prosedurnya berubah |
 
 ### Per modul
@@ -109,6 +109,7 @@ Semua dokumen modul berlabel **Jarang**: bertambah saat modulnya dikerjakan.
 | `referensi/helper-dan-shell.md` | Helper penggantian, catatan shell, dan catatan form | **Jarang**: bertambah saat ada pelajaran |
 | `referensi/disiplin-perubahan.md` | Disiplin saat menerapkan perubahan | **Jarang**: bertambah saat ada pelajaran |
 | `referensi/playwright.md` | Perintah verifikasi, catatan Playwright, dan spec rujukan | **Jarang**: bertambah saat ada pelajaran atau spec rujukan baru |
+| `referensi/utang-pengujian.md` | Utang pengujian yang masih terbuka, per modul | **Sering**: bertambah saat modul dikerjakan; butir yang lunas dipindah ke arsip |
 | `referensi/keputusan-penyesuaian-backend.md` | Keputusan yang diambil saat menyesuaikan diri dengan backend, per commit acuan | **Jarang**: bertambah saat penyesuaian backend menghasilkan keputusan |
 
 ### Kontrak
@@ -131,6 +132,7 @@ Semua dokumen modul berlabel **Jarang**: bertambah saat modulnya dikerjakan.
 | `arsip/pelajaran.md` | Pelajaran bertanggal per putaran |
 | `arsip/keputusan-lama.md` | Keputusan Fase 0 dan error ESLint warisan |
 | `arsip/laporan-backend.md` | Daftar laporan yang sudah diserahkan ke tim backend |
+| `arsip/riwayat-pengujian.md` | Riwayat baseline, riwayat pelepasan fixme, utang pengujian yang lunas, dan kejadian sesekali yang tidak berulang |
 
 Semua dokumen arsip berlabel **Jarang**: hanya bertambah saat isi dipindah
 dari lapis lain; isi lama tidak diubah.
@@ -185,6 +187,7 @@ Yang berubah setiap kali:
 | `referensi/arsitektur.md`, daftar `features/` | Tambahkan modul dan berkas baru |
 | `inti/pengujian.md`, baseline | Perbarui jumlah test dan commit acuannya |
 | `inti/pengujian.md`, fixme dan skip | Tambah atau hapus bila ada perubahan |
+| `referensi/utang-pengujian.md` | Tambah utang pengujian modul yang dikerjakan; pindahkan yang lunas ke `arsip/riwayat-pengujian.md` |
 | `referensi/playwright.md`, spec rujukan | Tambahkan spec yang memperkenalkan pola baru |
 | `kontrak/izin-halaman.md` | Perbarui baris halaman yang dimigrasikan dari `IZIN_HALAMAN` |
 

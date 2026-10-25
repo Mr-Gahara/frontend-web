@@ -621,6 +621,8 @@ polanya salah.
   per folder tidak. Bandingkan lingkupnya sebelum menyimpulkan bersih
   atau gagal: per `a972956`, `eslint .` gagal di `scripts/dokumen/*.cjs`
   sementara berkas yang diubah bersih.
+  Sejak `78c82d7` `eslint .` bersih dari error, lewat pengecualian
+  `@typescript-eslint/no-require-imports` untuk `scripts/**/*.cjs`.
 - Saat menyaring potongan JSX dengan `grep -v`, pola atribut seperti
   `className=` ikut membuang baris teks yang memuat ikon
   (`<Clock className="..." /> Draft SJ`). Saring hanya baris yang
@@ -648,7 +650,8 @@ polanya salah.
   `head -1`.
 - `ls` di mesin pemilik proyek adalah alias `lsd`, yang tidak mengenal opsi
   GNU seperti `--time-style`. Pakai `command ls` bila opsi `ls` asli
-  dibutuhkan.
+  dibutuhkan, dan baca waktu ubah berkas lewat `stat -c '%y %n' <berkas>`
+  (17 Oktober 2026, gerbang commit K-C).
 
 - **Kata yang diawali `=` diperluas zsh.** `echo ====` gagal dengan
   `=== not found`, karena zsh membaca `=perintah` sebagai path perintah
@@ -685,9 +688,6 @@ polanya salah.
   pemeriksaan pendahulu seperti `wc -c` atas berkas yang belum dibuat,
   sehingga `tsc` sesudahnya tidak berjalan tanpa tanda. Pemeriksaan yang
   boleh gagal ditulis `echo "x: $(wc -c < f 2>/dev/null || echo TIDAK ADA)"`.
-- **`ls` di terminal pemilik proyek adalah alias `lsd`**, yang menolak
-  opsi GNU seperti `--time-style`. Waktu ubah berkas dibaca lewat
-  `stat -c '%y %n' <berkas>` (17 Oktober 2026, gerbang commit K-C).
 
 ## Catatan form (React Hook Form dan Zod)
 

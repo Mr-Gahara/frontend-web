@@ -257,4 +257,4 @@ backend `yoga` `fc29433`; `origin/yoga` tidak maju sejak itu.
 - Pesan gerbang bersifat umum dan tidak menyebut halaman maupun izin yang
   kurang.
 - Syarat 44 entri baru diturunkan dari nama hook dan kontrak, bukan dari
-  trace per halaman (`inti/pengujian.md`, Utang pengujian).
+  trace per halaman (`referensi/utang-pengujian.md`).
