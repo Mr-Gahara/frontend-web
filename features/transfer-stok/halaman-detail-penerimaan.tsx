@@ -12,6 +12,7 @@ import { pesanError } from "@/lib/api/error";
 import { useTerimaSuratJalan, useTransferStok } from "./hooks";
 import { susunPayloadTerima } from "./payload";
 import { bolehTerimaSuratJalan } from "./izin";
+import { RUANG_SURAT_JALAN, ruangPenerima, type RuangSuratJalan } from "./ruang";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +59,8 @@ type FormItem = {
  * dimuat ulang (keputusan rancangan butir 8), sehingga nilai awalnya selalu
  * dari data terbaru dan tidak diisi ulang lewat effect.
  */
-export default function HalamanDetailPenerimaan({ id }: { id: string }) {
+export default function HalamanDetailPenerimaan({ id, ruang }: { id: string; ruang: RuangSuratJalan }) {
+  const konfig = RUANG_SURAT_JALAN[ruang];
   const router = useRouter();
   const { data: detail, isLoading, isFetchedAfterMount } = useTransferStok(id);
 
@@ -111,7 +113,7 @@ export default function HalamanDetailPenerimaan({ id }: { id: string }) {
           variant="default"
           className="bg-navy cursor-pointer mt-4"
           onClick={() =>
-            router.push("/dashboard/outlet/inventaris/penerimaanBarang")
+            router.push(konfig.urlPenerimaan)
           }
         >
           Kembali ke Daftar Inbound
@@ -120,14 +122,15 @@ export default function HalamanDetailPenerimaan({ id }: { id: string }) {
     );
   }
 
-  return <FormPenerimaan detail={detail} />;
+  return <FormPenerimaan ruang={ruang} detail={detail} />;
 }
 
-function FormPenerimaan({ detail }: { detail: TransferStok }) {
+function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangSuratJalan }) {
+  const konfig = RUANG_SURAT_JALAN[ruang];
   const router = useRouter();
   const { permissions } = useSession();
   const id = detail.id;
-  const bolehTerima = bolehTerimaSuratJalan(permissions);
+  const bolehTerima = bolehTerimaSuratJalan(permissions) && ruangPenerima(ruang, detail);
 
   // --- Form State ---
   // Kunci baris dari id bahan baku: unik per surat jalan. Menggantikan
@@ -182,9 +185,9 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
   const terimaMutation = useTerimaSuratJalan(id, {
     onSuccess: () => {
       toast.success("Barang Berhasil Diterima", {
-        description: "Stok Outlet telah diperbarui dan Jurnal Stok telah dicatat.",
+        description: `Stok ${konfig.tipe} telah diperbarui dan Jurnal Stok telah dicatat.`,
       });
-      router.push("/dashboard/outlet/inventaris/penerimaanBarang");
+      router.push(konfig.urlPenerimaan);
     },
     onError: (err) => {
       // Dialog tetap terbuka saat gagal (keputusan Fase 0).
@@ -211,7 +214,7 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
           </h1>
           <p className="text-sm font-medium text-navy/60 flex items-center gap-2">
             <Truck className="w-4 h-4 text-emerald-600" />
-            Pengiriman Logistik dari {detail.dariLokasi?.nama || "Pusat"}
+            Pengiriman Logistik dari {detail.dariLokasi?.nama || "-"}
           </p>
         </div>
       </div>
@@ -255,7 +258,7 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
                             "Master Data Terhapus"}
                         </h3>
                         <p className="text-xs font-medium text-navy/50 mt-1">
-                          Dikirim Gudang:{" "}
+                          Dikirim {detail.dariLokasi?.tipe ?? "Asal"}:{" "}
                           <strong className="text-navy">
                             {item.qtyKirim} {item.bahanBaku?.satuan}
                           </strong>
@@ -426,7 +429,7 @@ function FormPenerimaan({ detail }: { detail: TransferStok }) {
               Sistem akan memproses dokumen Surat Jalan{" "}
               <strong className="text-navy">{detail.nomorTransfer}</strong>{" "}
               dan langsung menambahkan barang ke dalam pembukuan inventaris
-              Outlet Anda. Pastikan jumlah fisik sudah benar.
+              {konfig.tipe} Anda. Pastikan jumlah fisik sudah benar.
               {hasSelisih && (
                 <div className="mt-4 p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 font-medium">
                   <strong>Catatan:</strong> Terdapat selisih kurang pada

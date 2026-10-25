@@ -10,6 +10,7 @@ import { useTabUrl } from "@/hooks/use-tab-url";
 import type { StatusTransfer, TransferStok } from "@/types/transferStok";
 import { useDaftarTransferStok } from "./hooks";
 import { filterServerTransfer, saringTransfer, type TabTransfer } from "./filter";
+import { RUANG_SURAT_JALAN, type RuangSuratJalan } from "./ruang";
 import { LABEL_STATUS_TRANSFER, LABEL_TAB_TRANSFER, SLUG_TAB_TRANSFER, TAB_TRANSFER } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
@@ -76,7 +77,8 @@ const getStatusBadge = (status: StatusTransfer) => {
  * Daftar surat jalan di ruang gudang. Tab disaring server lewat query status
  * (kontrak/temuan.md butir 33).
  */
-function IsiDaftarTransfer() {
+function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
+  const konfig = RUANG_SURAT_JALAN[ruang];
   const router = useRouter();
 
   // --- States ---
@@ -87,9 +89,10 @@ function IsiDaftarTransfer() {
 
   // --- Queries ---
   // Status disaring server; pencarian disaring di klien lewat saringTransfer
-  // (nomor atau nama outlet tujuan). Hanya surat jalan berasal Gudang: surat
-  // jalan pengembalian dikirim dan dibatalkan dari ruang outlet (P8, AR2a).
-  const kriteria = { status: activeTab, asal: { tipeLokasi: "Gudang" }, cari: debouncedSearch };
+  // (nomor atau nama lokasi tujuan). Hanya surat jalan yang dikirim ruang ini
+  // (P8, AR2a). Di ruang outlet cukup tipe Outlet, karena MVP punya satu
+  // outlet per tenant (AR10a); multi-outlet memakai cakupan outlet nanti.
+  const kriteria = { status: activeTab, asal: { tipeLokasi: konfig.tipe }, cari: debouncedSearch };
   const {
     data: daftarTransfer = [],
     isLoading,
@@ -118,7 +121,7 @@ function IsiDaftarTransfer() {
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="font-bold text-navy">
-              {row.original.keLokasi?.nama || "Outlet Tidak Dikenal"}
+              {row.original.keLokasi?.nama || "-"}
             </span>
             <span className="text-xs font-medium text-navy/50 mt-1 capitalize">
               Terkait: {row.original.pengajuanStokID ? "Pengajuan Stok" : "Transfer Manual"}
@@ -159,7 +162,7 @@ function IsiDaftarTransfer() {
               <DropdownMenuContent align="end" className="bg-gading border-navy/10">
                 <DropdownMenuItem
                   className="cursor-pointer font-bold text-navy/80"
-                  onClick={() => router.push(`/dashboard/gudang/transferStok/${row.original.id}`)}
+                  onClick={() => router.push(`${konfig.urlSuratJalan}/${row.original.id}`)}
                 >
                   Lihat detail
                 </DropdownMenuItem>
@@ -169,7 +172,7 @@ function IsiDaftarTransfer() {
         ),
       },
     ],
-    [router],
+    [router, konfig.urlSuratJalan],
   );
 
   return (
@@ -182,8 +185,9 @@ function IsiDaftarTransfer() {
             Stok)
           </h1>
           <p className="text-sm font-medium text-navy/60">
-            Pantau dan kelola pengiriman fisik barang dari Gudang Pusat ke
-            Outlet.
+            {ruang === "gudang"
+              ? "Pantau dan kelola pengiriman fisik barang dari gudang ke outlet."
+              : "Pantau dan kelola pengembalian barang dari outlet ke gudang."}
           </p>
         </div>
       </div>
@@ -214,7 +218,7 @@ function IsiDaftarTransfer() {
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
           <Input
-            placeholder="Cari No. Transfer / Outlet Tujuan..."
+            placeholder={`Cari No. Transfer / ${konfig.lawan} Tujuan...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9 bg-white border-navy/20 text-navy focus-visible:ring-navy"
@@ -244,10 +248,10 @@ function IsiDaftarTransfer() {
 }
 
 /** useSearchParams membutuhkan batas Suspense agar halaman tetap dapat dirender statis. */
-export default function HalamanDaftarTransfer() {
+export default function HalamanDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
   return (
     <Suspense fallback={null}>
-      <IsiDaftarTransfer />
+      <IsiDaftarTransfer ruang={ruang} />
     </Suspense>
   );
 }

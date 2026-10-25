@@ -10,6 +10,7 @@ import { useSession } from "@/lib/auth/useSession";
 import { pesanError } from "@/lib/api/error";
 import { useBatalSuratJalan, useKirimSuratJalan, useTransferStok } from "./hooks";
 import { aksiSuratJalan } from "./izin";
+import { RUANG_SURAT_JALAN, ruangPengirim, ruangPenerima, type RuangSuratJalan } from "./ruang";
 import { LABEL_STATUS_TRANSFER } from "./tampilan";
 import { LABEL_TAHAP_PENGAJUAN } from "@/features/pengajuan-stok/tampilan";
 
@@ -82,7 +83,8 @@ const getStatusBadge = (status: StatusTransfer) => {
  * (aksiSuratJalan), dan dialog hanya tertutup bila aksinya berhasil
  * (keputusan Fase 0).
  */
-export default function HalamanDetailTransfer({ id }: { id: string }) {
+export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang: RuangSuratJalan }) {
+  const konfig = RUANG_SURAT_JALAN[ruang];
   const router = useRouter();
   const { permissions } = useSession();
 
@@ -143,7 +145,11 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
     );
   }
 
-  const aksi = aksiSuratJalan(detail.status, permissions);
+  // Kirim, revisi, dan batal hanya di ruang pengirim; ruang lawan baca-saja (AR11a).
+  const ruangIniPengirim = ruangPengirim(ruang, detail);
+  const aksiPenuh = aksiSuratJalan(detail.status, permissions);
+  const aksi = ruangIniPengirim ? aksiPenuh : { ...aksiPenuh, kirim: false, revisi: false, batal: false };
+  const bolehBukaPenerimaan = detail.status === "DIKIRIM" && ruangPenerima(ruang, detail);
   const isDikirim = detail.status === "DIKIRIM";
 
   return (
@@ -155,7 +161,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
             variant="ghost"
             size="sm"
             className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
-            onClick={() => router.push("/dashboard/gudang/transferStok")}
+            onClick={() => router.push(konfig.urlSuratJalan)}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Kembali ke Daftar Surat Jalan
@@ -267,7 +273,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-navy" />
                 <div className="absolute left-1.5 top-4 -bottom-4 w-0.5 bg-navy/10" />
                 <span className="text-xs font-bold text-navy/50 uppercase">
-                  Asal (Gudang Anda)
+                  Asal ({detail.dariLokasi?.tipe ?? "-"})
                 </span>
                 <span className="font-bold text-navy">
                   {detail.dariLokasi?.nama || "-"}
@@ -276,7 +282,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
               <div className="flex flex-col gap-1 relative pl-6">
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-karamel" />
                 <span className="text-xs font-bold text-navy/50 uppercase">
-                  Tujuan (Outlet)
+                  Tujuan ({detail.keLokasi?.tipe ?? "-"})
                 </span>
                 <span className="font-bold text-navy">
                   {detail.keLokasi?.nama || "-"}
@@ -287,7 +293,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
             <div className="border-t border-navy/10 pt-4 mt-2 space-y-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="font-bold text-navy/60">
-                  Pengirim (Gudang)
+                  Pengirim ({detail.dariLokasi?.tipe ?? "-"})
                 </span>
                 <span className="font-bold text-navy capitalize text-right">
                   {detail.pengirim?.nama || "-"}
@@ -298,7 +304,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
               {detail.penerima && (
                 <div className="flex justify-between items-center text-sm border-t border-navy/5 pt-2">
                   <span className="font-bold text-navy/60">
-                    Penerima (Outlet)
+                    Penerima ({detail.keLokasi?.tipe ?? "-"})
                   </span>
                   <span className="font-bold text-navy capitalize text-right">
                     {detail.penerima.nama}
@@ -318,7 +324,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
                 variant="outline"
                 onClick={() =>
                   router.push(
-                    `/dashboard/gudang/pengajuanStok/${detail.pengajuanStokID}`,
+                    `${konfig.urlPengajuan}/${detail.pengajuanStokID}`,
                   )
                 }
                 className="w-full border-navy/20 text-navy hover:bg-navy/5 font-bold cursor-pointer"
@@ -348,7 +354,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
               <Button
                 variant="outline"
                 onClick={() =>
-                  router.push(`/dashboard/gudang/transferStok/${id}/edit`)
+                  router.push(`${konfig.urlSuratJalan}/${id}/edit`)
                 }
                 className="w-full border-navy/20 text-navy hover:bg-white font-bold cursor-pointer"
               >
@@ -372,13 +378,22 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm text-center space-y-2">
               <Truck className="w-8 h-8 text-amber-500 mx-auto" />
               <h3 className="text-sm font-bold text-amber-800">
-                Menunggu Outlet
+                Menunggu {detail.keLokasi?.tipe ?? "Penerima"}
               </h3>
               <p className="text-xs font-medium text-amber-700/80">
-                Barang sudah dipotong dari stok Gudang dan sedang dalam
-                perjalanan. Menunggu manajer Outlet melakukan konfirmasi
-                penerimaan di aplikasi mereka.
+                Barang sudah dipotong dari stok {detail.dariLokasi?.tipe ?? "asal"} dan sedang dalam
+                perjalanan. Menunggu {detail.keLokasi?.tipe ?? "penerima"} melakukan konfirmasi
+                penerimaan, lewat web atau aplikasi.
               </p>
+              {bolehBukaPenerimaan && (
+                <Button
+                  variant="outline"
+                  onClick={() => router.push(`${konfig.urlPenerimaan}/${id}`)}
+                  className="w-full border-amber-300 text-amber-800 hover:bg-amber-100 font-bold cursor-pointer"
+                >
+                  Buka Penerimaan
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -392,7 +407,7 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
               Konfirmasi Pengiriman Barang?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-rose-600 font-bold bg-rose-50 p-3 rounded-lg border border-rose-200 mt-2">
-              PERHATIAN: Tindakan ini akan memotong stok fisik Gudang Anda saat
+              PERHATIAN: Tindakan ini akan memotong stok fisik {konfig.tipe} Anda saat
               ini juga dan status akan berubah menjadi &quot;DIKIRIM&quot;. Pastikan
               barang sudah dimuat ke armada pengiriman.
             </AlertDialogDescription>
@@ -427,8 +442,8 @@ export default function HalamanDetailTransfer({ id }: { id: string }) {
             </AlertDialogTitle>
             <AlertDialogDescription className="text-navy/70 font-medium">
               Surat Jalan ini akan dibatalkan secara permanen. Jika ini terkait
-              dengan permintaan Outlet, status pengajuan mereka akan kembali
-              menjadi &quot;{LABEL_TAHAP_PENGAJUAN.gudang.PERLU_SURAT_JALAN}&quot;, sehingga surat jalan baru dapat dibuat.
+              dengan pengajuan stok, status pengajuan itu akan kembali
+              menjadi &quot;{LABEL_TAHAP_PENGAJUAN[ruang].PERLU_SURAT_JALAN}&quot;, sehingga surat jalan baru dapat dibuat.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

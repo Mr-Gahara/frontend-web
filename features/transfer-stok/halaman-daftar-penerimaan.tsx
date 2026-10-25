@@ -11,6 +11,7 @@ import PemilihLokasiOutlet from "@/features/inventaris/pemilih-lokasi-outlet";
 import PesanLokasi from "@/features/inventaris/pesan-lokasi";
 import { useDaftarTransferStok } from "./hooks";
 import { filterServerTransfer, saringTransfer, type LingkupSisi } from "./filter";
+import { RUANG_SURAT_JALAN, type RuangSuratJalan } from "./ruang";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,7 +45,8 @@ const getLamaPerjalanan = (tanggalKirim: string | null) => {
  * menyaring status dan lokasi tujuan tunggal (kontrak/temuan.md butir 33);
  * lingkup per tipe lokasi dan pencarian disaring di klien.
  */
-export default function HalamanDaftarPenerimaan() {
+export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJalan }) {
+  const konfig = RUANG_SURAT_JALAN[ruang];
   const router = useRouter();
 
   // --- State ---
@@ -54,30 +56,35 @@ export default function HalamanDaftarPenerimaan() {
   const [pilihanLokasi, setPilihanLokasi] = useState<string>(SEMUA_OUTLET);
 
   // --- Queries ---
-  const lingkup = lingkupOutlet(cakupan, pilihanLokasi);
-  const tujuan: LingkupSisi | undefined = lingkup
-    ? lingkup.locationID
-      ? { lokasiID: lingkup.locationID }
-      : { tipeLokasi: lingkup.tipeLokasi ?? "Outlet" }
-    : undefined;
+  // Outlet mengikuti cakupan outlet; gudang menerima di seluruh gudang tenant (Model bisnis MVP).
+  const lingkup = ruang === "outlet" ? lingkupOutlet(cakupan, pilihanLokasi) : null;
+  const siap = ruang === "gudang" || lingkup !== null;
+  const tujuan: LingkupSisi | undefined =
+    ruang === "gudang"
+      ? { tipeLokasi: konfig.tipe }
+      : lingkup
+        ? lingkup.locationID
+          ? { lokasiID: lingkup.locationID }
+          : { tipeLokasi: lingkup.tipeLokasi ?? "Outlet" }
+        : undefined;
   const kriteria = { status: "DIKIRIM" as const, tujuan, cari: debouncedSearch, cariPada: "asal" as const };
   const {
     data: semuaTransfer = [],
     isLoading: isLoadingTransfers,
     isError,
-  } = useDaftarTransferStok(lingkup ? filterServerTransfer(kriteria) : null, { refetchInterval: 30000 });
+  } = useDaftarTransferStok(siap ? filterServerTransfer(kriteria) : null, { refetchInterval: 30000 });
   const filteredData = saringTransfer(semuaTransfer, kriteria);
-  const isLoading = cakupan.status === "memuat" || isLoadingTransfers;
+  const isLoading = (ruang === "outlet" && cakupan.status === "memuat") || isLoadingTransfers;
 
   let penghalang: ReactNode = null;
-  if (cakupan.status === "gagal") {
+  if (ruang === "outlet" && cakupan.status === "gagal") {
     penghalang = (
       <PesanLokasi
         judul="Gagal Memuat Lokasi Outlet"
         isi="Lokasi kerja Anda tidak dapat dimuat. Periksa koneksi, lalu muat ulang halaman."
       />
     );
-  } else if (cakupan.status === "terkunci" && !cakupan.lokasiId) {
+  } else if (ruang === "outlet" && cakupan.status === "terkunci" && !cakupan.lokasiId) {
     penghalang = (
       <PesanLokasi
         judul="Identitas Outlet Tidak Ditemukan"
@@ -106,18 +113,20 @@ export default function HalamanDaftarPenerimaan() {
               Penerimaan Barang (Inbound)
             </h1>
             <p className="text-sm font-medium text-navy/60">
-              Pantau dan konfirmasi fisik barang yang sedang dikirim dari Gudang Pusat.
+              {ruang === "outlet"
+                ? "Pantau dan konfirmasi fisik barang yang sedang dikirim dari gudang."
+                : "Pantau dan konfirmasi fisik barang pengembalian yang sedang dikirim dari outlet."}
             </p>
           </div>
         </div>
 
-        {cakupan.status === "lintas" && (
+        {ruang === "outlet" && cakupan.status === "lintas" && (
           <PemilihLokasiOutlet lokasiOutlet={cakupan.lokasiOutlet} nilai={pilihanLokasi} onUbah={setPilihanLokasi} />
         )}
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
           <Input
-            placeholder="Cari SJ / Nama Gudang Asal..."
+            placeholder={`Cari SJ / Nama ${konfig.lawan} Asal...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9 bg-white border-navy/20 text-navy focus-visible:ring-navy h-11"
@@ -141,7 +150,7 @@ export default function HalamanDaftarPenerimaan() {
               <div className="space-y-1">
                 <h3 className="text-xl font-bold text-navy">Tidak Ada Kiriman Tertunda</h3>
                 <p className="text-sm font-medium text-navy/50 max-w-md mx-auto">
-                  Belum ada armada logistik yang sedang dalam perjalanan menuju Outlet ini. Sistem akan otomatis memunculkan data jika Gudang memproses Surat Jalan baru.
+                  Belum ada armada logistik yang sedang dalam perjalanan menuju {konfig.tipe} ini. Sistem akan otomatis memunculkan data jika Gudang memproses Surat Jalan baru.
                 </p>
               </div>
             </div>
@@ -158,7 +167,7 @@ export default function HalamanDaftarPenerimaan() {
                     {item.nomorTransfer}
                   </span>
                   <span className="text-xs font-bold text-navy/50 capitalize">
-                    Pengirim: {item.pengirim?.nama || "Admin Gudang"}
+                    Pengirim: {item.pengirim?.nama || "-"}
                   </span>
                 </div>
                 <Badge className="bg-amber-100 text-amber-700 border-none text-[10px] font-bold px-2 py-0.5 animate-pulse shrink-0">
@@ -176,7 +185,7 @@ export default function HalamanDaftarPenerimaan() {
                   </div>
                   <div className="flex flex-col justify-between h-11.5 flex-1">
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-navy/40 uppercase">Dari Pusat</span>
+                      <span className="text-[10px] font-bold text-navy/40 uppercase">Dari {konfig.lawan}</span>
                       <span className="text-sm font-bold text-navy truncate leading-tight">{item.dariLokasi?.nama || "Gudang"}</span>
                     </div>
                     <div className="flex flex-col">
@@ -206,7 +215,7 @@ export default function HalamanDaftarPenerimaan() {
                 <Button 
                   size="sm" 
                   className="font-bold bg-navy text-gading hover:bg-navy/90 shadow-sm"
-                  onClick={() => router.push(`/dashboard/outlet/inventaris/penerimaanBarang/${item.id}`)}
+                  onClick={() => router.push(`${konfig.urlPenerimaan}/${item.id}`)}
                 >
                   Proses Terima <ArrowRight className="w-4 h-4 ml-1.5" />
                 </Button>

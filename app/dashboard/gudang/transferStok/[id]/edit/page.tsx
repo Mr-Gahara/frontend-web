@@ -5,5 +5,5 @@ import HalamanRevisiTransfer from "@/features/transfer-stok/halaman-revisi-trans
 
 export default function EditTransferStokGudangPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  return <HalamanRevisiTransfer id={id} />;
+  return <HalamanRevisiTransfer id={id} ruang="gudang" />;
 }

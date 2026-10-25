@@ -5,5 +5,5 @@ import HalamanDetailTransfer from "@/features/transfer-stok/halaman-detail-trans
 
 export default function DetailTransferStokGudangPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  return <HalamanDetailTransfer id={id} />;
+  return <HalamanDetailTransfer id={id} ruang="gudang" />;
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { filterServerTransfer, saringTransfer } from "@/features/transfer-stok/filter";
+import { RUANG_SURAT_JALAN, ruangPenerima, ruangPengirim } from "@/features/transfer-stok/ruang";
 import { aksiSuratJalan } from "@/features/transfer-stok/izin";
 import { susunPayloadRevisi } from "@/features/transfer-stok/payload";
 import { LABEL_STATUS_TRANSFER, LABEL_TAB_TRANSFER, SLUG_TAB_TRANSFER, TAB_TRANSFER } from "@/features/transfer-stok/tampilan";
@@ -150,5 +151,23 @@ describe("label status surat jalan", () => {
 
   it("slug ?tab= tidak berubah walau label diganti", () => {
     expect(SLUG_TAB_TRANSFER).toEqual({ ALL: "semua", PENDING: "draf", DIKIRIM: "dikirim", DITERIMA: "selesai", BATAL: "dibatalkan" });
+  });
+});
+
+describe("ruang surat jalan", () => {
+  const kembali = { dariLokasi: lokasi("o1", "Outlet A", "Outlet"), keLokasi: lokasi("g1", "Gudang A", "Gudang") };
+
+  it("pengirim adalah ruang asal, penerima ruang tujuan (P8, AR2a)", () => {
+    expect(ruangPengirim("gudang", daftar[0])).toBe(true);
+    expect(ruangPenerima("outlet", daftar[0])).toBe(true);
+    expect(ruangPengirim("outlet", kembali)).toBe(true);
+    expect(ruangPenerima("gudang", kembali)).toBe(true);
+    expect(ruangPengirim("gudang", kembali)).toBe(false);
+    expect(ruangPenerima("outlet", kembali)).toBe(false);
+  });
+
+  it("URL per ruang", () => {
+    expect(RUANG_SURAT_JALAN.gudang.urlPenerimaan).toBe("/dashboard/gudang/penerimaanStok");
+    expect(RUANG_SURAT_JALAN.outlet.urlSuratJalan).toBe("/dashboard/outlet/inventaris/pengirimanBarang");
   });
 });

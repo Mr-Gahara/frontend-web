@@ -1,4 +1,5 @@
 "use client";
+import { RUANG_SURAT_JALAN, type RuangSuratJalan } from "./ruang";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -32,7 +33,8 @@ type EditItem = {
  * ulang (keputusan rancangan butir 8), sehingga nilai awalnya selalu dari data
  * terbaru dan tidak diisi ulang lewat effect.
  */
-export default function HalamanRevisiTransfer({ id }: { id: string }) {
+export default function HalamanRevisiTransfer({ id, ruang }: { id: string; ruang: RuangSuratJalan }) {
+  const konfig = RUANG_SURAT_JALAN[ruang];
   const router = useRouter();
   const { data: detail, isLoading, isFetchedAfterMount } = useTransferStok(id);
 
@@ -72,7 +74,7 @@ export default function HalamanRevisiTransfer({ id }: { id: string }) {
         <Button
           variant="default"
           className="bg-navy"
-          onClick={() => router.push(`/dashboard/gudang/transferStok/${id}`)}
+          onClick={() => router.push(`${konfig.urlSuratJalan}/${id}`)}
         >
           Lihat Detail Saja
         </Button>
@@ -80,10 +82,10 @@ export default function HalamanRevisiTransfer({ id }: { id: string }) {
     );
   }
 
-  return <FormRevisiTransfer detail={detail} />;
+  return <FormRevisiTransfer urlSuratJalan={konfig.urlSuratJalan} detail={detail} />;
 }
 
-function FormRevisiTransfer({ detail }: { detail: TransferStok }) {
+function FormRevisiTransfer({ detail, urlSuratJalan }: { detail: TransferStok; urlSuratJalan: string }) {
   const router = useRouter();
   const id = detail.id;
 
@@ -108,7 +110,7 @@ function FormRevisiTransfer({ detail }: { detail: TransferStok }) {
       toast.success("Revisi Berhasil", {
         description: "Kuantitas Surat Jalan telah diperbarui.",
       });
-      router.push(`/dashboard/gudang/transferStok/${id}`);
+      router.push(`${urlSuratJalan}/${id}`);
     },
     onError: (err) => {
       toast.error("Gagal Memperbarui", { description: pesanError(err, "Revisi gagal disimpan.") });

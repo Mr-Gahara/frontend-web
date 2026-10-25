@@ -40,6 +40,7 @@ export const transferStokApi = {
   daftar: (filter: FilterTransferStok) => {
     const params: Record<string, string> = {};
     if (filter.status) params.status = filter.status;
+    if (filter.dariLocationID) params.dariLocationID = filter.dariLocationID;
     if (filter.keLocationID) params.keLocationID = filter.keLocationID;
     return apiData.get<TransferStok[]>(EP.transferStok.list, params);
   },
