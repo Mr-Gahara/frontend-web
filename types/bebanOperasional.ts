@@ -63,7 +63,7 @@ export interface PayloadBuatBeban {
   akunKasID: string;
   kategoriBebanID: string;
   jumlah: number;
-  /** YYYY-MM-DD hari lokal. */
+  /** YYYY-MM-DD untuk tanggal lampau pilihan Owner; selain itu waktu simpan ISO (payloadBuatBeban). */
   tanggal: string;
   keterangan: string;
 }

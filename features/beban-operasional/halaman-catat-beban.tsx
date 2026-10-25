@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { useHariIni } from "@/hooks/use-hari-ini";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -59,7 +60,7 @@ function Keadaan({ judul, isi, aksi }: { judul: string; isi: string; aksi?: Reac
  * atas saldonya ditahan sebelum dikirim.
  */
 export function HalamanCatatBeban() {
-  const [hariIni] = useState(() => keTanggalLokal(new Date()));
+  const hariIni = useHariIni();
   const owner = useLevelPenggunaAktif() === 100;
   const { permissions } = useSession();
   const akunKas = useDaftarAkunKas();
@@ -152,12 +153,19 @@ function FormCatatBeban({
     handleSubmit,
     control,
     setError,
-    formState: { errors },
+    setValue,
+    formState: { errors, dirtyFields },
   } = useForm<IsianCatatBeban>({
     resolver: zodResolver(buatSkemaCatatBeban(hariIni)),
     defaultValues: isianAwalCatat(hariIni),
   });
   const akunKasID = useWatch({ control, name: "akunKasID" });
+  // Tanggal yang belum diubah Owner ikut berganti saat hari berganti, dan
+  // dikirim sebagai waktu simpan (payloadBuatBeban).
+  const tanggalDipilih = Boolean(dirtyFields.tanggal);
+  useEffect(() => {
+    if (!tanggalDipilih) setValue("tanggal", hariIni);
+  }, [hariIni, tanggalDipilih, setValue]);
   const akun = akunAktif.find((a) => a.id === akunKasID);
 
   const buat = useBuatBeban({
@@ -179,7 +187,7 @@ function FormCatatBeban({
       setError("jumlah", { message: kurang });
       return;
     }
-    buat.mutate(payloadBuatBeban(isian, owner, hariIni));
+    buat.mutate(payloadBuatBeban(isian, owner, tanggalDipilih, new Date()));
   };
 
   return (

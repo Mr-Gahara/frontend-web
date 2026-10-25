@@ -22,20 +22,27 @@ export function isianAwalCatat(hariIni: string): IsianCatatBeban {
 }
 
 /**
- * Body POST /bebanoperasional. Owner mengirim tanggal pilihannya, peran lain
- * selalu hari ini (keputusan BO5a, P23 backend). Backend ridho 00de455 belum
- * menegakkan aturan itu untuk beban, sehingga web menahannya lebih dulu.
+ * Body POST /bebanoperasional. Hanya Owner yang dapat mencatat beban
+ * bertanggal lampau (keputusan BO5a, P23 backend): tanggal lampau yang ia
+ * pilih dikirim YYYY-MM-DD. Selain itu, yaitu peran lain, Owner yang tidak
+ * mengubah tanggal, atau Owner yang memilih hari ini, dikirim waktu saat
+ * simpan (ISO). Backend membaca YYYY-MM-DD sebagai 00.00 UTC (07.00 WIB),
+ * sehingga tanggal hari ini ditolak sebagai masa depan antara 00.00 dan
+ * 07.00 WIB, dan form yang dibuka sebelum tengah malam tidak boleh mencatat
+ * ke hari kemarin (keputusan pemilik proyek, 26 Oktober 2026).
  */
 export function payloadBuatBeban(
   isian: IsianCatatBeban,
   owner: boolean,
-  hariIni: string,
+  tanggalDipilih: boolean,
+  sekarang: Date,
 ): PayloadBuatBeban {
+  const lampau = owner && tanggalDipilih && isian.tanggal < keTanggalLokal(sekarang);
   return {
     akunKasID: isian.akunKasID,
     kategoriBebanID: isian.kategoriBebanID,
     jumlah: Number(isian.jumlah.trim()),
-    tanggal: owner ? isian.tanggal : hariIni,
+    tanggal: lampau ? isian.tanggal : sekarang.toISOString(),
     keterangan: isian.keterangan.trim(),
   };
 }

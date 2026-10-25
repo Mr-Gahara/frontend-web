@@ -19,11 +19,6 @@ const URL_CATAT = URL_PENGELUARAN + "/catatBeban";
 const POLA_DAFTAR = /\/api\/bebanoperasional(\?|$)/i;
 const POLA_ID = /\/api\/bebanoperasional\/[a-f0-9]{24}(\?|$)/i;
 
-function hariIniLokal() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
 test.describe("pengeluaran", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
@@ -64,13 +59,19 @@ test.describe("pengeluaran", () => {
       await page.getByRole("button", { name: "Simpan Beban" }).click();
       const buat = await tBuat;
       expect(buat.status(), "POST /bebanoperasional").toBe(201);
-      expect(buat.request().postDataJSON()).toEqual({
+      const kiriman = buat.request().postDataJSON() as { tanggal: string };
+      expect(kiriman).toEqual({
         akunKasID: akun.id,
         kategoriBebanID: idKategori,
         jumlah: 1,
-        tanggal: hariIniLokal(),
+        tanggal: expect.any(String),
         keterangan,
       });
+      // Tanggal yang tidak diubah dikirim sebagai waktu simpan, bukan YYYY-MM-DD
+      // yang dibaca backend sebagai 07.00 WIB (ditolak 00.00 sampai 07.00 WIB).
+      const selisih = Date.now() - new Date(kiriman.tanggal).getTime();
+      expect(selisih, "tanggal adalah waktu simpan").toBeGreaterThanOrEqual(0);
+      expect(selisih, "tanggal adalah waktu simpan").toBeLessThan(60_000);
       idBeban = ((await buat.json()) as { data: { id: string } }).data.id;
       expect(idBeban, "id beban dari respons").toBeTruthy();
       await page.waitForURL("**" + URL_PENGELUARAN);
@@ -132,6 +133,49 @@ test.describe("pengeluaran", () => {
         expect.soft(void_.status, `batalkan beban uji: ${void_.pesan}`).toBe(200);
       }
     }
+  });
+
+  test("beban yang diisi sebelum tengah malam dan disimpan sesudahnya: tanggal ikut berganti dan waktu simpan yang dikirim", async ({
+    page,
+  }) => {
+    const kini = new Date();
+    const sebelum = new Date(kini.getFullYear(), kini.getMonth(), kini.getDate() - 1, 23, 59, 0);
+    const tengahMalam = new Date(kini.getFullYear(), kini.getMonth(), kini.getDate(), 0, 0, 0);
+    const label = (d: Date) =>
+      "Tanggal Beban, " + d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    await page.clock.install({ time: sebelum });
+    const auth = await bukaDenganAuth(page, URL_PENGELUARAN);
+    await pastikanKategoriFixture(page, auth);
+    const sumber = (await daftarAkun(page, auth)).find(
+      (a) => a.status === "aktif" && a.saldo >= 1 && !a.namaAkun.startsWith("E2E"),
+    );
+    test.skip(!sumber, "tidak ada akun kas aktif bersaldo");
+
+    await page.goto(URL_CATAT);
+    await expect(page.getByRole("button", { name: label(sebelum) }), "tanggal bawaan hari form dibuka").toBeVisible();
+    await pilihAkun(page, "Akun Kas", (sumber as AkunKasUji).namaAkun);
+    await pilihAkun(page, "Kategori", KATEGORI_FIXTURE);
+    await page.getByLabel("Jumlah (Rp)").fill("1");
+    await page.getByLabel("Keterangan", { exact: true }).fill("E2E beban lewat tengah malam");
+
+    await page.clock.runFor(90_000);
+    await expect(page.getByRole("button", { name: label(tengahMalam) }), "tanggal bawaan ikut berganti").toBeVisible();
+
+    await page.route(POLA_DAFTAR, (route) =>
+      route.request().method() === "POST"
+        ? route.fulfill({
+            status: 400,
+            contentType: "application/json",
+            body: JSON.stringify({ status: "error", message: "E2E beban ditahan" }),
+          })
+        : route.continue(),
+    );
+    const tBuat = page.waitForRequest((r) => r.method() === "POST" && POLA_DAFTAR.test(r.url()));
+    await page.getByRole("button", { name: "Simpan Beban" }).click();
+    const kiriman = (await tBuat).postDataJSON() as { tanggal: string };
+    const waktu = new Date(kiriman.tanggal).getTime();
+    expect(waktu, "waktu simpan sesudah tengah malam").toBeGreaterThanOrEqual(tengahMalam.getTime());
+    expect(waktu, "waktu simpan, bukan tanggal kemarin").toBeLessThan(tengahMalam.getTime() + 5 * 60_000);
   });
 
   test("form menahan isian kosong dan jumlah di atas saldo, tanpa permintaan", async ({ page }) => {

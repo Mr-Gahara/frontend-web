@@ -51,8 +51,10 @@ describe("buatSkemaCatatBeban", () => {
 });
 
 describe("payloadBuatBeban", () => {
-  it("Owner mengirim tanggal pilihannya, jumlah sebagai angka, dan keterangan dipangkas", () => {
-    expect(payloadBuatBeban(isian, true, HARI_INI)).toEqual({
+  const SEKARANG = new Date(2026, 9, 18, 14, 30);
+
+  it("Owner yang memilih tanggal lampau mengirim YYYY-MM-DD, jumlah sebagai angka, dan keterangan dipangkas", () => {
+    expect(payloadBuatBeban(isian, true, true, SEKARANG)).toEqual({
       akunKasID: "akun-a",
       kategoriBebanID: "kat-a",
       jumlah: 250000,
@@ -61,8 +63,29 @@ describe("payloadBuatBeban", () => {
     });
   });
 
-  it("peran lain selalu mengirim hari ini (BO5a)", () => {
-    expect(payloadBuatBeban(isian, false, HARI_INI).tanggal).toBe(HARI_INI);
+  it("peran lain dan Owner yang tidak mengubah tanggal mengirim waktu simpan (BO5a)", () => {
+    expect(payloadBuatBeban(isian, false, true, SEKARANG).tanggal).toBe(SEKARANG.toISOString());
+    expect(payloadBuatBeban(isian, true, false, SEKARANG).tanggal).toBe(SEKARANG.toISOString());
+  });
+
+  it("Owner yang memilih hari ini mengirim waktu simpan", () => {
+    expect(payloadBuatBeban({ ...isian, tanggal: HARI_INI }, true, true, SEKARANG).tanggal).toBe(
+      SEKARANG.toISOString(),
+    );
+  });
+
+  it("dini hari: hari ini dikirim sebagai waktu simpan, bukan YYYY-MM-DD yang dibaca backend sebagai 07.00 WIB", () => {
+    const diniHari = new Date(2026, 9, 26, 0, 30);
+    const tanggal = payloadBuatBeban({ ...isian, tanggal: "2026-10-26" }, true, false, diniHari).tanggal;
+    expect(tanggal).toBe(diniHari.toISOString());
+    expect(new Date(tanggal).getTime()).toBeLessThanOrEqual(diniHari.getTime());
+  });
+
+  it("form yang dibuka sebelum tengah malam dan disimpan sesudahnya mencatat waktu simpan", () => {
+    const sesudah = new Date(2026, 9, 26, 0, 1);
+    expect(payloadBuatBeban({ ...isian, tanggal: "2026-10-25" }, true, false, sesudah).tanggal).toBe(
+      sesudah.toISOString(),
+    );
   });
 
   it("isian awal bertanggal hari ini", () => {

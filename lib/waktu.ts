@@ -86,6 +86,15 @@ export function keTanggalLokal(tanggal: Date): string {
   return `${tanggal.getFullYear()}-${bulan}-${hari}`;
 }
 
+/**
+ * Milidetik sampai 00.00 lokal berikutnya, ditambah jeda kecil agar saat
+ * timer berbunyi jam sudah melewati tengah malam (dipakai useHariIni).
+ */
+export function msSampaiTengahMalam(sekarang: Date): number {
+  const besok = new Date(sekarang.getFullYear(), sekarang.getMonth(), sekarang.getDate() + 1);
+  return besok.getTime() - sekarang.getTime() + 50;
+}
+
 /** Date lokal pukul 00.00 dari teks YYYY-MM-DD; undefined untuk teks lain atau tanggal yang tidak ada. */
 export function dariTanggalLokal(teks: string | null | undefined): Date | undefined {
   const cocok = /^(\d{4})-(\d{2})-(\d{2})$/.exec(teks ?? "");
