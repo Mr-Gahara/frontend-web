@@ -117,6 +117,18 @@ export type FilterPembelian = {
 export const FILTER_AWAL_PEMBELIAN: FilterPembelian = { akunKasID: "", bahanBakuID: "", supplier: "" };
 
 /**
+ * Filter awal daftar per ruang: tanggal 1 bulan berjalan sampai hari ini,
+ * sama dengan jurnal stok dan mutasi arus kas.
+ */
+export function filterAwalDaftarPembelian(sekarang: Date = new Date()): FilterPembelian {
+  return {
+    ...FILTER_AWAL_PEMBELIAN,
+    dari: new Date(sekarang.getFullYear(), sekarang.getMonth(), 1),
+    sampai: new Date(sekarang.getFullYear(), sekarang.getMonth(), sekarang.getDate()),
+  };
+}
+
+/**
  * Query GET /pembelianstok (B103): hanya filter yang diisi. locationID dari
  * ruang, atau null untuk seluruh lokasi tenant (Belanja Stok di Keuangan).
  * Periode dikirim sebagai YYYY-MM-DD, yang dibaca backend sebagai hari WIB.

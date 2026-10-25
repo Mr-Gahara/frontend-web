@@ -23,6 +23,7 @@ import {
   CalendarDays,
   CalendarRange,
   Clock,
+  ShoppingCart,
 } from "lucide-react";
 
 // --- TIPE DATA ---
@@ -152,6 +153,10 @@ export const outletMenus: MenuGroup[] = [
             label: "Kirim Barang",
             href: "/dashboard/outlet/inventaris/pengirimanBarang",
           },
+          {
+            label: "Pembelian Stok",
+            href: "/dashboard/outlet/inventaris/pembelianStok",
+          },
         ],
       },
     ],
@@ -257,6 +262,11 @@ export const gudangMenus: MenuGroup[] = [
         label: "Penerimaan Stok",
         href: "/dashboard/gudang/penerimaanStok",
         icon: PackageCheck,
+      },
+      {
+        label: "Pembelian Stok",
+        href: "/dashboard/gudang/pembelianStok",
+        icon: ShoppingCart,
       },
     ],
   },

@@ -250,6 +250,11 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/inventaris/pengirimanBarang": [IZIN.transferStok],
   "/dashboard/outlet/inventaris/pengirimanBarang/[id]": [IZIN.transferStok],
   "/dashboard/outlet/inventaris/pengirimanBarang/[id]/edit": [IZIN.transferStok, IZIN.buatTransferStok],
+  // Pembelian stok: daftar memakai cakupan lokasi outlet, detail membaca tipe
+  // lokasi penerima dari GET /location (penjaga ruang). Izin per ruang menunggu
+  // backend (IZIN_PEMBELIAN_STOK_RUANG di features/pembelian-stok/izin.ts).
+  "/dashboard/outlet/inventaris/pembelianStok": [IZIN.pembelianStok, IZIN.location],
+  "/dashboard/outlet/inventaris/pembelianStok/[id]": [IZIN.pembelianStok, IZIN.location],
 
   // Jadwal outlet: izin shift, pola roster, dan jadwal belum ada di backend,
   // sehingga gate memakai izin data yang benar-benar diperiksa (daftar karyawan).
@@ -273,6 +278,8 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/gudang/pengajuanStok/[id]": [IZIN.pengajuanStok],
   "/dashboard/gudang/transferStok": [IZIN.transferStok],
   "/dashboard/gudang/transferStok/[id]": [IZIN.transferStok],
+  "/dashboard/gudang/pembelianStok": [IZIN.pembelianStok, IZIN.location],
+  "/dashboard/gudang/pembelianStok/[id]": [IZIN.pembelianStok, IZIN.location],
   "/dashboard/gudang/transferStok/[id]/edit": [IZIN.transferStok, IZIN.buatTransferStok],
   "/dashboard/gudang/pengirimanStok": [IZIN.transferStok],
   "/dashboard/gudang/penerimaanStok": [IZIN.transferStok],
