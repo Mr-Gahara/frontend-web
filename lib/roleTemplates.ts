@@ -124,6 +124,8 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       // Lokasi
       "read-location",
       // Jurnal Stok
+      // Pembelian stok: Supervisor memantau stok masuk (RH6a).
+      "read-pembelian-stok",
       "read-jurnal-stok",
       "create-jurnal-stok",
       // Pengajuan Stok
@@ -217,6 +219,11 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "read-location",
       "create-location",
       "update-location",
+      // Pembelian stok, setara beban operasional (RH6a).
+      "read-pembelian-stok",
+      "create-pembelian-stok",
+      "update-pembelian-stok",
+      "delete-pembelian-stok",
       "read-jurnal-stok",
       "create-jurnal-stok",
       "update-jurnal-stok",
@@ -339,6 +346,11 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "create-location",
       "update-location",
       "delete-location",
+      // Pembelian stok, setara beban operasional (RH6a).
+      "read-pembelian-stok",
+      "create-pembelian-stok",
+      "update-pembelian-stok",
+      "delete-pembelian-stok",
       "read-jurnal-stok",
       "create-jurnal-stok",
       "update-jurnal-stok",

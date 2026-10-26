@@ -49,3 +49,31 @@ describe("ROLE_TEMPLATES: stock opname, stock adjustment per ruang, dan absensi"
     expect(new Set(permissions).size).toBe(permissions.length);
   });
 });
+
+const PEMBELIAN = [
+  "read-pembelian-stok",
+  "create-pembelian-stok",
+  "update-pembelian-stok",
+  "delete-pembelian-stok",
+];
+
+describe("ROLE_TEMPLATES: pembelian stok (RH6a)", () => {
+  it.each(["guest", "staff", "kasir"])("%s tidak memegang izin pembelian stok", (id) => {
+    expect(izinTemplate(id).filter((nama) => PEMBELIAN.includes(nama))).toEqual([]);
+  });
+
+  it("supervisor hanya melihat pembelian, dengan izin lokasi untuk membuka daftar dan detail per ruang", () => {
+    const izin = izinTemplate("supervisor");
+    expect(izin.filter((nama) => PEMBELIAN.includes(nama))).toEqual(["read-pembelian-stok"]);
+    expect(izin).toContain("read-location");
+  });
+
+  it.each(["manajer", "general-manajer"])(
+    "%s memegang seluruh izin pembelian stok beserta izin yang dituntut halaman catat",
+    (id) => {
+      expect(izinTemplate(id)).toEqual(
+        expect.arrayContaining([...PEMBELIAN, "read-bahan", "read-akunkas", "read-location"]),
+      );
+    },
+  );
+});
