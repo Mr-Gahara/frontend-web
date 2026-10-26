@@ -1,6 +1,6 @@
 import type { PerubahanPenjualan } from "./api";
 import type { JenisPenjualan, PenjualanRequest } from "@/types/penjualan";
-import { gabungTanggalWaktu, waktuLengkap, type NilaiWaktu } from "@/lib/waktu";
+import { gabungTanggalWaktu, waktuDari, waktuLengkap, type NilaiWaktu } from "@/lib/waktu";
 
 export interface IsianPenjualan {
   pelangganID: string;
@@ -11,6 +11,23 @@ export interface IsianPenjualan {
   diskonGlobalIDs: string[];
   keterangan: string;
   locationID: string | undefined;
+}
+
+export interface WaktuTransaksi {
+  tanggal: Date;
+  waktu: NilaiWaktu;
+}
+
+/**
+ * Tanggal dan jam transaksi yang dipakai form buat penjualan. Selama kasir
+ * belum mengubah Tanggal atau Jam Transaksi (dipilih null), keduanya
+ * mengikuti sekarang: jam berjalan untuk tampilan, waktu saat simpan untuk
+ * payload. Sebelumnya keduanya dikunci saat layar dibuka, sehingga
+ * penjualan yang dikonfirmasi lewat tengah malam masuk hari kemarin
+ * (keputusan pemilik proyek, 26 Oktober 2026).
+ */
+export function waktuTransaksi(dipilih: WaktuTransaksi | null, sekarang: Date): WaktuTransaksi {
+  return dipilih ?? { tanggal: sekarang, waktu: waktuDari(sekarang) };
 }
 
 /** Pesan validasi form buat penjualan, atau null bila sah; teks pesan lama dipertahankan. */

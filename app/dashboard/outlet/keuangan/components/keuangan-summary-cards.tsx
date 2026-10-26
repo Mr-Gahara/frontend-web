@@ -6,6 +6,7 @@ import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
 import { useLabaRugi } from "@/features/laporan/hooks";
 import { jumlahkan, rentangBulanIni, type KolomNilaiLaporan } from "@/features/laporan/periode";
 import { formatRupiah } from "@/lib/format";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 
 type SummaryCard = {
   title: string;
@@ -55,8 +56,10 @@ function SummaryCardItem({ card, nilai }: { card: SummaryCard; nilai: number | n
 }
 
 export function KeuanganSummaryCards() {
-  // Bulan kalender penuh, dihitung sekali per pemasangan layout.
-  const rentang = useMemo(() => rentangBulanIni(), []);
+  // Bulan kalender penuh; ikut berganti saat bulan berganti, karena layout
+  // keuangan dapat terbuka melewati tengah malam (useTanggalHariIni).
+  const hariIni = useTanggalHariIni();
+  const rentang = useMemo(() => rentangBulanIni(hariIni), [hariIni]);
   const laporan = useLabaRugi(rentang);
   const akunKas = useDaftarAkunKas();
 

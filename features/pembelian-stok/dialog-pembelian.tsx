@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useHariIni } from "@/hooks/use-hari-ini";
 import { toast } from "sonner";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,7 +71,7 @@ export function DialogUbahPembelian({
   owner: boolean;
   onTutup: () => void;
 }) {
-  const [hariIni] = useState(() => keTanggalLokal(new Date()));
+  const hariIni = useHariIni();
   const [galat, setGalat] = useState("");
   const {
     register,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 
 import { useLokasiBertipe } from "@/features/inventaris/hooks";
 import { IZIN } from "@/lib/auth/permissions";
@@ -26,7 +26,10 @@ function NamaGudang() {
 export function HalamanDashboardGudang() {
   const { permissions } = useSession();
   const panel = panelDashboardGudang(permissions);
-  const [hari] = useState(() => new Date());
+  // "Hari ini" berganti sendiri setelah 00.00; layar yang dibiarkan menyala
+  // semalaman tidak menampilkan data kemarin (keputusan pemilik proyek,
+  // 26 Oktober 2026).
+  const hari = useTanggalHariIni();
   const adaAlur = panel.pengajuan || panel.pengiriman;
   const adaBawah = panel.stokKritis || panel.jurnal;
   const alurPenuh = panel.pengajuan !== panel.pengiriman ? "lg:col-span-2" : "";

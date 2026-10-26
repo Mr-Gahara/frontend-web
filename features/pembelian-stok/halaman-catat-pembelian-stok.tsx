@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { useHariIni } from "@/hooks/use-hari-ini";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -70,7 +71,7 @@ interface Props {
  * (keputusan rancangan butir 8).
  */
 export default function HalamanCatatPembelianStok({ ruang }: Props) {
-  const [hariIni] = useState(() => keTanggalLokal(new Date()));
+  const hariIni = useHariIni();
   const owner = useLevelPenggunaAktif() === 100;
   const lokasi = useLokasiBertipe(TIPE_RUANG[ruang]);
   const akunKas = useDaftarAkunKas();
@@ -172,7 +173,8 @@ function FormCatatPembelian({
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    setValue,
+    formState: { errors, dirtyFields },
   } = useForm<IsianCatatPembelian>({
     resolver: zodResolver(buatSkemaCatatPembelian(hariIni)),
     defaultValues: isianAwalCatat(hariIni),
@@ -180,6 +182,13 @@ function FormCatatPembelian({
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
   const items = useWatch({ control, name: "items" }) ?? [];
   const akunKasID = useWatch({ control, name: "akunKasID" });
+  // Tanggal yang belum diubah Owner ikut berganti saat hari berganti, agar
+  // tetap sama dengan hari ini dan tidak terkirim sebagai tanggal lampau
+  // (payloadBuatPembelian tidak mengirim tanggal hari ini).
+  const tanggalDipilih = Boolean(dirtyFields.tanggal);
+  useEffect(() => {
+    if (!tanggalDipilih) setValue("tanggal", hariIni);
+  }, [hariIni, tanggalDipilih, setValue]);
   const akun = akunAktif.find((a) => a.id === akunKasID);
 
   const buat = useBuatPembelianStok({

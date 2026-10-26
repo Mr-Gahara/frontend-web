@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useHariIni } from "@/hooks/use-hari-ini";
+import { useHariIni, useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { msSampaiTengahMalam } from "@/lib/waktu";
 
 const SEHARI = 24 * 60 * 60 * 1000;
@@ -67,5 +67,20 @@ describe("useHariIni", () => {
     const { unmount } = renderHook(() => useHariIni());
     unmount();
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("useTanggalHariIni: Date pukul 00.00 yang sama sepanjang hari, lalu berganti setelah tengah malam", () => {
+    vi.setSystemTime(new Date(2026, 9, 25, 23, 59, 0));
+    const { result } = renderHook(() => useTanggalHariIni());
+    const awal = result.current;
+    expect(awal).toEqual(new Date(2026, 9, 25));
+    act(() => {
+      vi.advanceTimersByTime(30_000);
+    });
+    expect(result.current, "objek yang sama selama hari belum berganti").toBe(awal);
+    act(() => {
+      vi.advanceTimersByTime(31_000);
+    });
+    expect(result.current).toEqual(new Date(2026, 9, 26));
   });
 });

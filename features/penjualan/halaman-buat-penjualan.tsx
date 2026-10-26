@@ -13,15 +13,16 @@ import { diskonAktif } from "@/features/diskon/filter";
 import { useDaftarPajak } from "@/features/pajak/hooks";
 import { pajakTransaksiAktif } from "@/features/pajak/filter";
 import { useBuatPenjualan } from "./hooks";
-import { susunPayloadPenjualan, validasiPenjualan } from "./payload";
+import { susunPayloadPenjualan, validasiPenjualan, waktuTransaksi, type WaktuTransaksi } from "./payload";
 import { InputWaktu } from "@/components/input-waktu";
 import { PilihTanggal } from "@/components/pilih-tanggal";
-import { waktuDari, waktuLengkap, type NilaiWaktu } from "@/lib/waktu";
+import { waktuLengkap, type NilaiWaktu } from "@/lib/waktu";
 import { bolehCakupanPenjualan } from "./izin";
 import { JenisPenjualan, PenjualanRequest } from "@/types/penjualan";
 import type { Diskon } from "@/types/diskon";
 import { useDaftarProduk } from "@/features/produk/hooks";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useJamBerjalan } from "@/hooks/use-jam-berjalan";
 import { formatRupiah } from "@/lib/format";
 
 import { toast } from "sonner";
@@ -105,8 +106,15 @@ export default function HalamanBuatPenjualan() {
   const [jenisPenjualan, setJenisPenjualan] = useState<
     "dine-in" | "takeaway" | "booking"
   >("dine-in");
-  const [tanggalInput, setTanggalInput] = useState<Date>(new Date());
-  const [waktu, setWaktu] = useState<NilaiWaktu>(() => waktuDari(new Date()));
+  // Tanggal dan jam transaksi mengikuti jam berjalan sampai kasir mengubah
+  // salah satunya; yang tidak diubah memakai waktu saat simpan, sehingga
+  // penjualan yang dikonfirmasi lewat tengah malam tidak masuk hari kemarin
+  // (keputusan pemilik proyek, 26 Oktober 2026).
+  const jamBerjalan = useJamBerjalan();
+  const [waktuDipilih, setWaktuDipilih] = useState<WaktuTransaksi | null>(null);
+  const { tanggal: tanggalInput, waktu } = waktuTransaksi(waktuDipilih, jamBerjalan);
+  const setTanggalInput = (tanggal: Date) => setWaktuDipilih({ tanggal, waktu });
+  const setWaktu = (baru: NilaiWaktu) => setWaktuDipilih({ tanggal: tanggalInput, waktu: baru });
   const [keterangan, setKeterangan] = useState("");
   const [items, setItems] = useState<ItemState[]>([emptyItem()]);
   const [diskonGlobalIDs, setDiskonGlobalIDs] = useState<string[]>([]); // State Diskon Global
@@ -366,8 +374,7 @@ export default function HalamanBuatPenjualan() {
       susunPayloadPenjualan({
         pelangganID,
         jenisPenjualan,
-        tanggal: tanggalInput,
-        waktu,
+        ...waktuTransaksi(waktuDipilih, new Date()),
         items,
         diskonGlobalIDs,
         keterangan,

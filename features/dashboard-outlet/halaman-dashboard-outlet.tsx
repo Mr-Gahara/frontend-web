@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { Banknote, Package, TrendingUp } from "lucide-react";
 
 import { panelDashboard } from "./izin";
@@ -19,7 +19,10 @@ export function HalamanDashboardOutlet() {
   const { permissions } = useSession();
   const panel = panelDashboard(permissions);
   // Hari acuan dihitung sekali per pemasangan, agar kunci query tetap.
-  const [hari] = useState(() => new Date());
+  // "Hari ini" berganti sendiri setelah 00.00; layar yang dibiarkan menyala
+  // semalaman tidak menampilkan data kemarin (keputusan pemilik proyek,
+  // 26 Oktober 2026).
+  const hari = useTanggalHariIni();
 
   return (
     <div className="p-3 sm:p-6 flex flex-col gap-3 sm:gap-6 w-full">

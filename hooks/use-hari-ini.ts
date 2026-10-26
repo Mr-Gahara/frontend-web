@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { keTanggalLokal, msSampaiTengahMalam } from "@/lib/waktu";
+import { useEffect, useMemo, useState } from "react";
+import { dariTanggalLokal, keTanggalLokal, msSampaiTengahMalam } from "@/lib/waktu";
 
 /**
  * Tanggal lokal hari ini (YYYY-MM-DD) yang berganti sendiri tepat setelah
@@ -33,4 +33,14 @@ export function useHariIni(): string {
   }, []);
 
   return hariIni;
+}
+
+/**
+ * useHariIni sebagai Date lokal pukul 00.00, untuk komponen yang menerima
+ * Date (dashboard, rentang laporan). Objeknya hanya berganti saat hari
+ * berganti, sehingga aman menjadi bagian kunci query.
+ */
+export function useTanggalHariIni(): Date {
+  const hariIni = useHariIni();
+  return useMemo(() => dariTanggalLokal(hariIni) as Date, [hariIni]);
 }
