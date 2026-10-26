@@ -199,6 +199,9 @@ dibangun setelah RG4a (`61275ac` sampai `1d7fa7b`). Melanjutkan label BO.
   keputusan pemilik proyek 17 Oktober 2026 dan P23 backend. Owner
   dikenali dari level role 100, dan tanggal masa depan dinonaktifkan.
   Backend belum menegakkannya untuk beban.
+  Sejak `6d07b8d` tanggal yang tidak dipilih Owner, dan tanggal hari
+  ini, dikirim sebagai waktu simpan (`inti/keputusan-rancangan.md` butir
+  28, `kontrak/temuan.md` butir 154).
 - **BO6a: menu titik tiga Lihat rincian, Ubah (keterangan dan
   kategori), dan Batalkan (VOID beralasan)**; dua yang terakhir hanya
   untuk beban AKTIF.
@@ -217,7 +220,51 @@ dibangun setelah RG4a (`61275ac` sampai `1d7fa7b`). Melanjutkan label BO.
   nama kategori uji unik per run dan dihapus di run yang sama.
   Penundaan BO1a, NZ11a, dan RG6a berakhir.
 
+### Tab Belanja Stok
+
+Diputuskan pemilik proyek pada 25 dan 26 Oktober 2026, dari pratinjau
+desain yang disetujui (`e073a9d`):
+
+- **BS1a: pembelian stok seluruh outlet dan gudang dalam satu tab
+  Keuangan**, `/dashboard/outlet/keuangan/belanjaStok`. Filter periode,
+  lokasi penerima, akun kas, dan supplier; kartu total, porsi per lokasi
+  penerima, porsi per akun kas, dan lima supplier terbesar; lalu daftar
+  gabungan dengan kolom Lokasi. Baris dibuka di detail ruang asalnya;
+  ubah dan hapus tetap di sana (PS8a, `modul/inventaris.md`).
+- **BS2a: ringkasan dihitung di frontend dari seluruh halaman**
+  `GET /pembelianstok` (`limit` 100) pada filter yang sama, paling
+  banyak 20 halaman, karena backend belum punya endpoint ringkasan.
+  Endpoint ringkasan beserta paginasinya diminta ke backend
+  (`kontrak/temuan.md` butir 157). Hasilnya dibuat unik per id (butir
+  156), dan peringatan tampil bila terpotong atau jumlahnya berbeda dari
+  `pagination.total`.
+- **BS3a: tab selalu tampil seperti tiga tab lain**; gerbang halaman
+  `read-pembelian-stok`, `read-akunkas`, dan `read-location`, karena
+  nama lokasi dan ruang asal dibaca dari daftar lokasi. Tab yang tampil
+  tanpa izin dicatat sebagai temuan frontend (butir 163).
+- Kartu mengikuti seluruh filter, seperti ringkasan mutasi arus kas.
+  Pembelian disebut persediaan, bukan beban, sehingga tidak masuk laba
+  rugi, dan saldo akun kas belum terpotong.
+
 ## Catatan
+
+### Catatan dari tab Belanja Stok
+
+- `e073a9d`: `features/pembelian-stok/ringkasan.ts`
+  (`kumpulkanPembelian`, `ringkasBelanja`, `bagianRingkasan`,
+  `ruangLokasi`, `teksPeriode`), `useRingkasanBelanjaStok` di bawah akar
+  `pembelianStok`, dan `halaman-belanja-stok.tsx`. Layout Keuangan
+  memasang kartu ringkasan laba rugi di atas setiap tab, sehingga kartu
+  Belanja Stok berada di dalam tab.
+- Verifikasi pertama commit itu gagal di spec pengeluaran pukul 00.03
+  WIB. Kegagalannya terbukti juga di pohon kerja bersih lewat
+  `git stash`, sehingga bukan dari Belanja Stok; penyebabnya diperbaiki
+  di `6d07b8d`, dan Belanja Stok di-commit sesudahnya.
+- `6d07b8d`: `payloadBuatBeban(isian, owner, tanggalDipilih, sekarang)`,
+  dan form catat beban memakai `useHariIni`. Field tanggal yang belum
+  diubah Owner disinkronkan lewat `setValue` tanpa menandainya dirty.
+- `7a08b63`: kartu ringkasan Keuangan memakai `useTanggalHariIni`,
+  sehingga bulan berjalan ikut berganti.
 
 ### Catatan dari halaman pengeluaran
 
@@ -443,3 +490,7 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   nyata. Tampilan mutasi transfer dan pembatalan transfer masuk teruji
   e2e sejak `f7805ca`; pembatalan transfer keluar hanya teruji di unit
   test.
+- Tab Keuangan tampil bagi pengguna tanpa izin halamannya dan baru
+  ditolak saat dibuka (`kontrak/temuan.md` butir 163).
+- Ringkasan Belanja Stok lebih dari satu halaman hanya teruji di unit
+  test (`referensi/utang-pengujian.md`).

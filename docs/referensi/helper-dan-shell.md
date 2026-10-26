@@ -697,6 +697,19 @@ jalankan tanpa pipa dengan keluaran ke `/dev/null`, lalu rangkai dengan
 `&&`. Pada putaran pengembalian (25 Oktober 2026), audit-fulfill.js
 yang disalurkan ke `tail -3` mencetak kode 0 padahal alat itu keluar 1.
 
+- **Daftar berkas dalam variabel tidak dipecah zsh.**
+  `npx playwright test $S` meneruskan seluruh isi `S` sebagai satu
+  argumen, sehingga Playwright tidak menemukan spec dan melaporkan
+  `passed:0 failed:0` (26 Oktober 2026). Tulis path langsung, atau pecah
+  dengan `${=S}`. Gerbang e2e menolak run tanpa test lolos, bukan hanya
+  memeriksa `failed:0`.
+- **Pola glob di argumen dikutip.** `grep --include=*.tsx` gagal di zsh
+  dengan "no matches found" sebelum grep berjalan; tulis
+  `--include='*.tsx'`.
+- **Ringkasan reporter dibaca setelah kode ANSI dibuang.** Baris
+  "1 failed" yang berwarna lolos dari grep tanpa `sed`, sehingga suite
+  yang gagal sempat terbaca bersih (26 Oktober 2026).
+
 ## Catatan form (React Hook Form dan Zod)
 
 - **Hindari `z.coerce`.** Ia membuat tipe input dan output skema berbeda,

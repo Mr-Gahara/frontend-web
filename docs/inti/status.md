@@ -21,40 +21,64 @@ lain tidak berubah sampai commit itu:
 | Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna |
 | `useAuthGuard()` berulang di halaman | 49 | 2 | Dihitung di `app/` saja. Yang tersisa `app/dashboard/layout.tsx`, satu-satunya pemanggil, dan berkas hook-nya sendiri; ke-24 pemanggilan berulang di `app/` dan ke-13 di `features/` dibuang di `628f52e` (26 sebelum itu). Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, halaman diskon, dan halaman profil) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | 68 (per `9cd22e1`) | Lima warna utama menjadi token di `app/globals.css` (`584a2d8`, `ba28f25`; keputusan WR1a sampai WR4a). Tepat sebelum penggantian terukur 3.764 di `app`, `components`, `features`, dan `lib`. Yang tersisa: warna utama di luar kelas (konstanta palet lokal halaman reservasi dan tarif, serta warna grafik) dan warna lain yang belum punya token |
-| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.087 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702). Per `9195472` menjadi 4: `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700 (714 baris) karena penjaga ruang (`eb0181f`), dan buat penjualan menjadi 1.087 baris setelah kode mati dibuang (`6b5e1cc`). Per `b887278` form produk menjadi 809 baris (pemeriksaan satuan resep). Per `628f52e` tetap 4; detail stock opname menjadi 712 baris setelah pemanggilan guard dibuang |
+| Berkas di atas 700 baris | 7 | 4 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.087 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702). Per `9195472` menjadi 4: `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700 (714 baris) karena penjaga ruang (`eb0181f`), dan buat penjualan menjadi 1.087 baris setelah kode mati dibuang (`6b5e1cc`). Per `b887278` form produk menjadi 809 baris (pemeriksaan satuan resep). Per `628f52e` tetap 4; detail stock opname menjadi 712 baris setelah pemanggilan guard dibuang. Per `5b8cbd9` tetap 4: buat penjualan 1.098 baris (`waktuTransaksi` dan jam berjalan, `7a08b63`), form produk 809, detail stock opname 702, dan `components/ui/sidebar.tsx` 702 |
 
 Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: halaman pembelian stok
+## Pekerjaan berikutnya: suite e2e penuh, lalu login akun dan pengguna
 
-Pengembalian Outlet ke Gudang (P8) selesai pada 25 Oktober 2026, dalam
-enam commit dari `621e753` sampai `a505783` (`modul/inventaris.md`,
-keputusan AR1a sampai AR11a). Pengembalian dibuat dan diajukan di ruang
-outlet, disetujui di inbox gudang, dibuatkan surat jalan dan dikirim dari
-menu Kirim Barang, lalu diterima di menu Penerimaan Stok; spec
-`alur-pengembalian.spec.ts` membuktikan perpindahan stoknya.
+Modul pembelian stok selesai pada 25 dan 26 Oktober 2026, dalam sembilan
+commit dari `7f5c3ee` sampai `5b8cbd9` (`modul/inventaris.md`, Submodul
+pembelian stok; `modul/keuangan.md`, Tab Belanja Stok). Di tengahnya,
+spec pengeluaran yang gagal pukul 00.03 WIB membuka audit pergantian
+hari: beban hari ini ditolak backend antara 00.00 dan 07.00 WIB, dan
+beberapa halaman mengunci "hari ini" saat dibuka. Keduanya diperbaiki di
+frontend (`6d07b8d`, `7a08b63`; `inti/keputusan-rancangan.md` butir 28),
+dan sisi backend dicatat sebagai temuan (`kontrak/temuan.md` butir 154
+sampai 162).
 
-Pemilik proyek memilih halaman pembelian stok sebagai pekerjaan
-berikutnya (25 Oktober 2026). Modul ini belum punya halaman di web, dan
-izinnya belum masuk template role (RH6a). Backend punya route, service,
-dan validator pembelian stok, serta rangka kontraknya di dokumen API
-backend (status Yoga).
+**Langkah pertama sesi berikutnya, wajib sebelum pekerjaan lain**: suite
+e2e penuh di atas `5b8cbd9`. Suite penuh terakhir dijalankan di
+`e073a9d` (493 lolos dan 14 skipped); `7a08b63` dan `5b8cbd9` hanya
+menjalankan spec terdampak (keputusan pemilik proyek, 26 Oktober 2026;
+`referensi/utang-pengujian.md`). Sebaiknya dijalankan di jendela 00.00
+sampai 07.00 WIB, satu-satunya cara menguji backend sungguhan di jam
+rawan. Suite kini berisi 509 test (`inti/pengujian.md`, Baseline).
 
-Backend lokal berada di `ridho` `b5b367a`, tanpa commit baru per 25
-Oktober 2026. Suite e2e penuh terakhir: 478 lolos dan 14 skipped di
-`b03c276`; suite kini berisi 495 test (`inti/pengujian.md`, Baseline).
-Dua belas `test.fixme` menunggu backend. Langkah pertama sesi
-berikutnya: periksa cabang backend, lalu petakan
-route, dokumen kontrak, dan sisa pemakaian pembelian stok di web.
+Sesudahnya, urutan pilihan pemilik proyek (26 Oktober 2026):
+
+1. **Halaman login akun dan login pengguna dibangun ulang.** Murni
+   frontend; tata letak dan alurnya dirancang lewat pratinjau sebelum
+   kode (`modul/profil-login.md`).
+2. **Plan tier per akun** (Basic, Advanced, dan Full) yang membatasi
+   akses fitur. Menunggu rancangan dan penegakan backend: model tier,
+   pemeriksaan di route, dan tier di respons sesi. Frontend menyaring
+   menu, halaman, dan tombol per tier begitu kontraknya ada; rancangannya
+   dipetakan sambil login dikerjakan.
+
+Backend lokal masih di `ridho` `b5b367a`. Catatan untuk tim backend dari
+modul pembelian dan audit pergantian hari disusun sesudah commit
+dokumentasi pembelian stok.
 
 ```bash
+cd ~/Documents/frontend-web && npx vitest run 2>&1 | tail -5 && date && npx playwright test --reporter=json > /tmp/p.json 2>/dev/null; date && node ~/.cache/frontend-web/alat/ringkas-e2e.js | head -20
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho nizar yoga; do echo "origin/$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...origin/$r | tr '\t' ' ')"; done
-BE=~/Documents/backend-js; grep -nE 'checkPermission|router\.(get|post|put|patch|delete)' "$BE/routes/pembelianStokRoute.js" | cut -c1-130; ls "$BE/docs/api/endpoint" "$BE/docs/api/payload" | grep -i pembelian; grep -rniE 'pembelian' ~/Documents/frontend-web/lib ~/Documents/frontend-web/features ~/Documents/frontend-web/components | cut -c1-120 | head -10
 ```
 
 ## Utang kecil yang tertunda
+
+### Utang kecil dari pembelian stok dan audit pergantian hari
+
+- Suite e2e penuh di atas `5b8cbd9` (Pekerjaan berikutnya).
+- Catatan untuk tim backend dari modul pembelian dan audit pergantian
+  hari (`kontrak/temuan.md` butir 154 sampai 162) disusun sesudah commit
+  dokumentasi, lalu dicatat di `arsip/laporan-backend.md`.
+- Sisi frontend: tab Keuangan tampil tanpa izin (butir 163), filter
+  periode bawaan tidak bergeser saat hari berganti, dan saldo akun kas
+  yang belum terpotong pembelian (`modul/inventaris.md`, Utang kecil
+  dari pembelian stok).
 
 ### Utang kecil dari pengembalian Outlet ke Gudang
 
@@ -99,6 +123,12 @@ BE=~/Documents/backend-js; grep -nE 'checkPermission|router\.(get|post|put|patch
 
 ### Utang kecil dari penyesuaian backend `ridho` `7d28135`
 
+- Baris `/pembelianstok` di Lampiran A (`kontrak/route-backend.md`)
+  masih mencatat tanpa izin, padahal backend memeriksa `read-`,
+  `create-`, `update-`, dan `delete-pembelian-stok` (B74); izinnya
+  tercatat di `kontrak/endpoint.md`. Lampiran itu bertanda Tetap dan
+  diperbarui utuh saat dibangkitkan ulang (pemilik proyek, 26 Oktober
+  2026).
 - Lampiran A (`kontrak/route-backend.md`) tertinggal: masih mencatat
   `DELETE /bebanoperasional/:id`, yang sudah dibuang backend.
   Dibangkitkan ulang hanya atas perintah pemilik proyek (RG8a).
@@ -126,6 +156,9 @@ BE=~/Documents/backend-js; grep -nE 'checkPermission|router\.(get|post|put|patch
   Diterapkan backend: jurnal transfer di `nizar` `96e890e` (B97) dan beban
   operasional di `yoga` `186fa19` (B100), keduanya termuat di `ridho`
   `af5f315`.
+  Sejak `6d07b8d` web mengirim waktu simpan untuk tanggal beban hari ini,
+  karena validator membaca `YYYY-MM-DD` sebagai 07.00 WIB
+  (`kontrak/temuan.md` butir 154).
 
 ### Utang kecil dari penyesuaian backend `ridho` `2dd57aa`
 
@@ -139,8 +172,13 @@ BE=~/Documents/backend-js; grep -nE 'checkPermission|router\.(get|post|put|patch
   stok belum punya halaman di web (RH6a). Izin stock adjustment per
   ruang juga belum masuk template role (RH3a).
   Izin stock adjustment per ruang masuk template di `4088d9e`.
+  Halaman pembelian selesai di `0db77ed` sampai `1e4f042`, dan izinnya
+  masuk template di `5b8cbd9`.
 - Belum dicocokkan dari 42 commit backend: modul pembelian stok, dan
   cache produk saat pajak berubah (`kontrak/README.md`).
+  Modul pembelian stok dicocokkan dari kode `b5b367a` saat halamannya
+  dibangun (`modul/inventaris.md`, Submodul pembelian stok); cache
+  produk saat pajak berubah belum.
 - Hapus aset yang punya booking (butir 52) dan hapus kategori yang
   dipakai produk (butir 12) belum diuji dari web.
 - Nama penyetuju di daftar pengajuan stok terisi sejak `7d28135` (butir
@@ -208,8 +246,9 @@ BE=~/Documents/backend-js; grep -nE 'checkPermission|router\.(get|post|put|patch
   ditunda sampai backend menyelesaikan modul produk, bahan baku, stok, dan
   WMS, dan hanya atas perintah pemilik proyek.
 - `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700
-  baris (714) sejak penjaga ruang ditambahkan di `eb0181f`, dan kini 712
-  baris setelah pemanggilan guard dibuang (`628f52e`). Pisahkan dialog
+  baris (714) sejak penjaga ruang ditambahkan di `eb0181f`, lalu 712
+  baris setelah pemanggilan guard dibuang (`628f52e`), dan 702 per
+  `5b8cbd9`. Pisahkan dialog
   aksi dan tabel hitungan saat halaman itu disentuh lagi.
 
 ### Utang kecil dari 19 Oktober 2026

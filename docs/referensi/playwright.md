@@ -931,3 +931,13 @@ bersyarat).
   tetap dibuat lewat API hanya bila belum ada dan tidak dihapus, payload
   dibaca dari permintaan `POST /produk` milik respons yang ditunggu, dan
   produknya dihapus lewat UI.
+- `tests/e2e/inventaris/pembelianStok/catat-pembelian-stok.spec.ts`
+  (`1e4f042`): satu skenario per ruang menjalankan catat, ubah info, dan
+  hapus lewat UI dengan payload persis; hapus yang ditolak 409 dijawab
+  `route.fulfill` lalu `unroute`, dan bukti stok dibaca ulang lewat API.
+- `tests/e2e/keuangan/pengeluaran.spec.ts` dan
+  `tests/e2e/penjualan/waktu-penjualan.spec.ts` (`6d07b8d`, `7a08b63`):
+  `page.clock.install` pukul 23.58 atau 23.59 kemarin sebelum halaman
+  dibuka, form diisi, `page.clock.runFor` melewati 00.00, lalu payload
+  dibaca dari permintaan yang dijawab gagal, sehingga tidak ada data
+  tersimpan.

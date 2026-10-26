@@ -282,7 +282,8 @@ sehingga `ridho` cukup di-fast-forward. Labelnya RH.
   pengajuannya sendiri teruji. Pengguna "E2E Penyetuju" dibiarkan di
   basis data development. Menggantikan bagian penyetuju di PB10a.
 - **RH6a: izin pembelian stok masuk template role bersama halamannya**,
-  seperti FC2a.
+  seperti FC2a. Terlaksana di `5b8cbd9` (`modul/akses.md`, Template
+  role).
 - **Bahan baku yang belum punya riwayat dapat dihapus**, walau saat
   dibuat diisi stok awal dan batas minimum: setelah dihapus, bahan itu
   dianggap tidak pernah ada. Yang tidak dapat dihapus adalah bahan yang

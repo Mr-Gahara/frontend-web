@@ -906,3 +906,16 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   Jurnal gudang dan panel jurnal dashboard mulai memanggil `/location`
   di `081d5dc` dan `b03c276` tanpa menuntut `read-location`; ditemukan
   saat penilaian dampak dan diperbaiki di `029413d`.
+
+- **Mayoritas berkas repo tidak diakhiri baris baru** (487 dari 699
+  berkas `.ts` dan `.tsx` per 26 Oktober 2026). Teks lama di skrip
+  pengganti tidak memuat `\n` sesudah baris terakhir berkas, dan skrip
+  mempertahankan bentuk akhir semula. Perapian akhir berkas tidak
+  dicampur dengan commit fitur; perintah yang menyentuh banyak berkas
+  sekaligus dibatasi pada berkas commit itu.
+- **Berkas baru yang ditempel manual diperiksa isinya sebelum test
+  dijalankan** (`head -3`): berkas test yang tertempel isi hook membuat
+  vitest menjawab "No test suite found" (26 Oktober 2026).
+- **Kandidat pekerjaan diturunkan dari baris yang dibaca, bukan dari
+  jumlah hasil grep.** Ketiga "pemakaian `apiClient`" yang tersisa
+  ternyata komentar (26 Oktober 2026).

@@ -124,8 +124,13 @@ Diputuskan pemilik proyek pada 21 Oktober 2026 (`ffd3994`, `4088d9e`):
   sendiri tidak butuh izin.
 - **Stock adjustment per ruang** (`read-stock-adjustment-outlet` dan
   `read-stock-adjustment-gudang`, RH3a) untuk Supervisor ke atas.
-- Guest, Staff, dan Kasir tidak mendapat izin tambahan; izin pembelian
-  stok tetap di luar template (RH6a).
+- Guest, Staff, dan Kasir tidak mendapat izin tambahan.
+- **Pembelian stok** (RH6a, pemilik proyek 26 Oktober 2026, `5b8cbd9`):
+  Supervisor `read-pembelian-stok` saja, untuk memantau stok masuk lewat
+  daftar dan detail per ruang. Ia tidak membuka catat maupun Belanja
+  Stok, karena tidak memegang `read-akunkas`, dan izin itu sengaja tidak
+  ditambahkan agar saldo akun kas tidak terbuka baginya. Manajer dan
+  General Manajer memegang keempat izin, setara beban operasional.
 
 ## Catatan
 

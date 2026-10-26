@@ -206,6 +206,16 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | POST | `/pembayaran` | authPengguna | `create-pembayaran` | - | - | `features/pembayaran/api.ts` (header `x-idempotency-key` sejak `26093b0`, keputusan RH1a) |
 | PUT | `/pembayaran/:id` | authPengguna | `update-pembayaran` | - | - | `features/pembayaran/api.ts` (pembatalan lewat `status: "VOID"`) |
 
+#### `/pembelianstok`
+
+| Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
+|---|---|---|---|---|---|---|
+| GET | `/pembelianstok` | authPengguna | `read-pembelian-stok` | `{ data, pagination }` | `id` | `features/pembelian-stok/api.ts` (query `page` dan `limit` 1 sampai 100, serta `dari`, `sampai`, `akunKasID`, `locationID`, `bahanBakuID`, dan `supplier`; query lain ditolak 400). Daftar per ruang mengirim `locationID` ruangnya; Belanja Stok tanpa `locationID` dan mengambil seluruh halaman `limit=100` untuk ringkasan (`e073a9d`) |
+| POST | `/pembelianstok` | authPengguna | `create-pembelian-stok` | `{ data }` | `id` | `features/pembelian-stok/api.ts` (`09c931e`) |
+| GET | `/pembelianstok/:id` | authPengguna | `read-pembelian-stok` | `{ data }` | `id` | `features/pembelian-stok/api.ts` |
+| PUT | `/pembelianstok/:id` | authPengguna | `update-pembelian-stok` | `{ data }` | `id` | `features/pembelian-stok/api.ts` (`1e4f042`) |
+| DELETE | `/pembelianstok/:id` | authPengguna | `delete-pembelian-stok` | - | - | `features/pembelian-stok/api.ts` (`1e4f042`; 409 bila stoknya sudah terpakai) |
+
 #### `/pengajuanstok`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
@@ -386,6 +396,7 @@ Kunci item pertama (atau objek detail) pada sampel respons. Objek bertingkat dit
 - `GET /kategori`: __v, _id, createdAt, keterangan, kodeKategori, namaKategori, tenantID{_id, namaToko}, updatedAt
 - `GET /kategoribeban` (dari `kategoriBebanService` backend `ridho` `00de455` dan respons nyata 18 Oktober 2026): _id, createdAt, namaKategori, tenantID, updatedAt. Dokumen dikirim tanpa mapper, diurutkan menurut nama, dan di-cache 3.600 detik; nama unik per toko
 - `GET /laporan/laba-rugi`: tanggal, totalBebanOperasional, totalDiskon, totalHPP, totalLabaBersih, totalLabaKotor, totalOmzet, totalPajak, totalPenjualanKotor, totalPenjualanSewa (dari `laporanController` dan `laporanService`: array per kelompok waktu, per jam untuk `harian` dan per tanggal untuk `mingguan` dan `bulanan`; respons juga membawa `ringkasan`, yang belum dibaca web. Sejak backend `465b438`, `startDate` dan `endDate` hanya diterima sebagai tanggal `YYYY-MM-DD` (ISO ditolak), `harian` wajib `startDate` sama dengan `endDate`, omzet tidak lagi memuat pajak, dan route memeriksa `read-laporan`. Web selalu mengirim ketiga query lewat `features/laporan` sebagai tanggal lokal (`keTanggalLokal`))
+- `GET /pembelianstok` (dari `pembelianStokService.js` `ridho` `b5b367a` dan respons nyata 25 Oktober 2026, tanpa mapper): akunKasID{id, namaAkun, nomorAkun}, createdAt, dicatatOleh{id, nama}, id, items[]{bahanBakuID{id, namaBahan, satuan}, hargaBeli, jumlah, subtotal}, keterangan, locationID (id, tidak di-populate), nomorFaktur, stokDitambahkan, supplier, tanggal, tenantID, totalBiaya, updatedAt
 - `GET /location`: alamat, createdAt, id, koordinat{coordinates, type}, nama, radiusAbsen, tenantID, tipe, updatedAt (diurutkan dari yang terbaru, `locationService` baris 90 di backend `00b9957`, sehingga lokasi pertama bertipe Gudang adalah gudang terbaru; `koordinat.coordinates` berurutan longitude, latitude)
 - `GET /location/current`: alamat, createdAt, id, koordinat{coordinates, type}, nama, radiusAbsen, tenantID, tipe, updatedAt (dari `locationService.getByTenant` backend `9cd1439` baris 108: lokasi pertama tenant bertipe Outlet, sama untuk setiap pengguna; null bila tenant belum punya outlet)
 - `GET /metodepembayaran`: akunKas{id, namaAkun, nomorAkun}, createdAt, id, isActive, kategori, namaPembayaran, tenantID, updatedAt (sejak backend `465b438`, tanpa `showAll=true` hanya metode aktif yang dikirim)

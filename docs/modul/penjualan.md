@@ -64,6 +64,13 @@ keputusan rancangan butir 17.
 - **Dialog void, hapus, finalisasi, konfirmasi pembayaran, dan buat
   penjualan hanya tertutup saat berhasil** (keputusan Fase 0).
 
+- **WK1a: tanggal dan jam transaksi mengikuti jam berjalan sampai kasir
+  mengubahnya**, dan penjualan yang tidak diubah memakai waktu saat
+  simpan (pemilik proyek, 26 Oktober 2026, `7a08b63`;
+  `inti/keputusan-rancangan.md` butir 28). Sebelumnya keduanya terisi
+  waktu layar dibuka, sehingga penjualan yang dikonfirmasi lewat tengah
+  malam masuk hari kemarin.
+
 ### Cakupan daftar penjualan
 
 Diputuskan pemilik proyek pada 18 Oktober 2026, saat RG4a diterapkan
@@ -137,7 +144,7 @@ dan `3efd05b`), dan cabang lain tidak maju.
   `PajakDariProdukLama`; 5 per `3359497`, yang menghapus `AkunKasLama`,
   `AkunKasRefLama`, dan `MetodePembayaranLama`, dan pesan commit itu
   keliru menyebut enam). Per `d9365d3` tersisa 1, dan per `1e05df6` 0.
-- `features/penjualan/halaman-buat-penjualan.tsx` masih 1.087 baris:
+- `features/penjualan/halaman-buat-penjualan.tsx` masih 1.098 baris per `7a08b63` (1.087 sebelumnya):
   migrasi memindahkan lapisan data dan membuang `any`, tetapi tidak memecah
   komponennya. Pisahkan pemilih pelanggan, pemilih diskon, dan pratinjau
   total saat halaman itu disentuh lagi.

@@ -12,6 +12,21 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per pembelian stok dan audit pergantian hari** (commit
+`5b8cbd9`, 26 Oktober 2026): 827 test unit dan integrasi lolos di 92
+berkas. Suite e2e berisi 509 test. Suite penuh terakhir dijalankan di
+`e073a9d`, pukul 01.42 sampai 02.06 WIB: 493 lolos dan 14 skipped (12
+`test.fixme` menunggu backend dan 2 skip bersyarat data), tanpa
+kegagalan. Sebelumnya di `6d07b8d` (00.53 sampai 01.18 WIB): 490 lolos
+dan 14 skipped. Suite penuh pertama di jendela dini hari (00.11 sampai
+00.35 WIB, di atas `1e4f042` dengan isi `e073a9d` yang belum di-commit)
+gagal 1 dari 506 di spec pengeluaran, yang membuka audit pergantian
+hari. Sesudah `e073a9d`, `7a08b63` menambah dua skenario penjualan dan
+`5b8cbd9` tidak menambah e2e; keduanya hanya menjalankan spec terdampak
+(dashboard, keuangan, pembelian stok, dan penjualan 77 lolos dengan 1
+skipped; spec template role 18 lolos dengan 2 skipped), dan suite
+penuhnya menjadi utang (`referensi/utang-pengujian.md`).
+
 **Baseline per pengembalian Outlet ke Gudang** (commit `a505783`, 25
 Oktober 2026): 755 test unit dan integrasi lolos di 86 berkas. Suite e2e
 berisi 495 test di 72 berkas: 492 per `b03c276`, ditambah skenario
@@ -111,6 +126,7 @@ Pola kegagalan yang berulang:
 | `waitForResponse` habis waktu setelah kembali ke halaman atau filter yang sudah pernah dimuat | Kunci query masih segar (`staleTime` 5 menit di `components/providers/query-provider.tsx`), sehingga tidak ada permintaan. Buktikan dari tampilan; penunggu jaringan hanya untuk kunci yang belum pernah dimuat (`b63cf08`) |
 | Pembersihan tampak lolos, tetapi data uji menumpuk di basis data | Helper pembersihan membuang jawaban permintaannya. Periksa statusnya dengan `expect.soft`, dan jalankan audit endpoint: route yang dihapus backend juga menjawab 404 (`b5a55c4`) |
 | `POST /pengajuanstok` ditolak 409 nomor kembar, menetap saat diulang | Backend membentuk nomor dari dokumen terakhir menurut `createdAt` (`kontrak/temuan.md` butir 139). Bandingkan `createdAt` dan waktu `_id` dokumen bernomor terbesar dengan jam sistem lewat skrip baca-saja; dokumen ber-`createdAt` di depan mengunci pembuatan sampai bulan berganti |
+| Spec gagal hanya pada jam tertentu, berulang, juga di pohon kerja bersih | Cek `date` dan `date -u`, lalu bandingkan dengan `git stash -u`. Tanggal `YYYY-MM-DD` dibaca backend sebagai 00.00 UTC, sehingga tanggal hari ini ditolak antara 00.00 dan 07.00 WIB (`kontrak/temuan.md` butir 154) |
 | Lolos sendirian, gagal saat dijalankan bersama spec lain | Test memilih baris pertama daftar, padahal spec yang berjalan lebih dulu membuat data dari jenis lain (berurutan menurut nama berkas, `workers: 1`). Pilih baris menurut data yang memenuhi syarat, lewat nomornya (`7f1de56`) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 

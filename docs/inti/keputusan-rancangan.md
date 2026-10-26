@@ -233,3 +233,19 @@ sama (submodul pengajuan stok, di bawah).
     kotak cari, karena tumbuh satu baris per bahan setiap penjualan
     (pemilik proyek, 21 Oktober 2026, `b03c276`; `kontrak/temuan.md`
     butir 150).
+28. **"Hari ini" dan "sekarang" di layar tidak dikunci saat halaman
+    dibuka, dan waktu yang tidak dipilih pengguna adalah waktu saat
+    simpan.** Layar POS dibiarkan menyala melewati tengah malam di kedai
+    yang buka 24 jam atau sampai dini hari. Tanggal hari ini memakai
+    `useHariIni` atau `useTanggalHariIni` (`hooks/use-hari-ini.ts`), yang
+    berganti sendiri setelah 00.00 dan diperiksa ulang saat tab terlihat
+    kembali; isian yang mengikuti jam memakai `useJamBerjalan`
+    (`hooks/use-jam-berjalan.ts`). Isian tanggal yang belum diubah
+    pengguna ikut berganti, dan payload mengirim waktu saat simpan;
+    tanggal yang dipilih pengguna dikirim apa adanya. Tanggal hari ini
+    tidak dikirim sebagai `YYYY-MM-DD`, karena backend membacanya sebagai
+    00.00 UTC, yaitu 07.00 WIB (`kontrak/temuan.md` butir 154). Perilaku
+    lewat tengah malam diuji dengan `vi.setSystemTime` dan Playwright
+    `page.clock`. Filter periode bawaan di daftar sengaja tidak ikut
+    bergeser, karena tanggalnya terlihat dan ada Reset Filter (pemilik
+    proyek, 26 Oktober 2026, `6d07b8d`, `7a08b63`).

@@ -85,11 +85,11 @@ Setiap dokumen berisi kelompok Keputusan (keputusan produk), Catatan
 
 | Berkas | Cakupan |
 |---|---|
-| `modul/inventaris.md` | Stock adjustment, jurnal stok, stok dan inventaris gudang, stock opname, pengajuan stok, transfer, pengiriman, dan penerimaan |
+| `modul/inventaris.md` | Stock adjustment, jurnal stok, stok dan inventaris gudang, stock opname, pengajuan stok, transfer, pengiriman, penerimaan, dan pembelian stok |
 | `modul/produk-kategori.md` | Produk, kategori, dan bahan baku |
 | `modul/penjualan.md` | Penjualan, pembayaran, dan cakupan daftar penjualan |
 | `modul/reservasi.md` | Sesi booking, aset, tipe aset, dan tarif |
-| `modul/keuangan.md` | Akun kas, mutasi arus kas, Pindah Dana, laba rugi, dan pengeluaran |
+| `modul/keuangan.md` | Akun kas, mutasi arus kas, Pindah Dana, laba rugi, pengeluaran, dan Belanja Stok |
 | `modul/jadwal-shift.md` | Jadwal, shift, dan pola roster |
 | `modul/gudang.md` | Ruang gudang, pengaturan gudang, dan dashboard gudang |
 | `modul/pengaturan-outlet.md` | Profil outlet, pajak, dan metode pembayaran |

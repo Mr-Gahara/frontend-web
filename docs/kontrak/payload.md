@@ -220,6 +220,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan service, dalam satu transaksi: kategori harus milik toko (400); saldo dipotong hanya bila akun aktif milik toko dan saldonya cukup, selain itu akun yang tidak ada di toko 400, akun nonaktif 409, dan saldo kurang 409 dengan saldo di pesan; dokumen beban dan baris mutasi `BEBAN` bertanggal beban ditulis bersama
 - Galat isian berbentuk `{ status, message: "Data yang dikirim tidak valid.", errors }`
 - Web mengirim hasil `payloadBuatBeban` (`features/beban-operasional/payload.ts`, `b2d84a6`): kelima field, dengan `jumlah` bilangan bulat minimal 1 yang tidak melebihi saldo akun terpilih, `keterangan` dipangkas dan paling panjang 500, dan `tanggal` `YYYY-MM-DD` hari lokal. Owner memilih tanggal (masa depan dinonaktifkan), dan peran lain mengirim hari ini (keputusan BO5a)
+- Sejak `6d07b8d`: `tanggal` berupa waktu simpan ISO, kecuali tanggal lampau yang dipilih Owner (`YYYY-MM-DD`). Validator membaca `YYYY-MM-DD` sebagai 00.00 UTC, sehingga tanggal hari ini ditolak antara 00.00 dan 07.00 WIB (`temuan.md` butir 154)
 - Respons 201 dengan `data` berbentuk item `GET /bebanoperasional` dan `message` "Beban Operasional berhasil dibuat"
 - Diisi server: `tenantID`, `dicatatOleh`, `status`
 
@@ -362,6 +363,17 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
 - Header: `x-idempotency-key` (opsional, paling panjang 100 karakter; lebih dari itu 400) sejak `nizar` `3c9c19f`. Kunci disimpan di dokumen pembayaran, unik per toko; kiriman ulang berkunci sama dijawab 201 dengan pembayaran pertama tanpa menambah saldo lagi (dari kode `2dd57aa`, `temuan.md` butir 44). Web mengirim satu kunci per pengisian form sejak `26093b0` (keputusan RH1a), terbukti lewat e2e: percobaan ulang setelah gagal memakai kunci yang sama
+
+#### `POST /pembelianstok`
+
+- Aturan: `validators/pembelianStokValidator.js` dan `pembelianStokService.create`, setelah `checkPermission("create-pembelian-stok")` di route; dicocokkan dari kode `ridho` `b5b367a` pada 25 Oktober 2026
+- Wajib dari klien: `akunKasID`, `supplier`, `keterangan`, dan `items` (minimal satu) berisi `bahanBakuID`, `jumlah`, dan `hargaBeli`
+- Opsional: `locationID` (tanpa itu dipakai Outlet tenant), `nomorFaktur` (kosong diisi server `INV/YYYYMMDD/HHmmssSSS` dari jam lokal server, `temuan.md` butir 155), dan `tanggal` (tanpa itu waktu sekarang)
+- Aturan service, dalam satu transaksi: stok setiap bahan bertambah di lokasi penerima dan jurnal stok Masuk ditulis (P17). Saldo akun kas belum dipotong, dan buku mutasi kas tidak ditulis
+- Validator menolak `jumlah` 0 atau kurang, sedangkan skema menuntut minimal 1; `keterangan` wajib menurut skema tetapi tidak diperiksa validator (`temuan.md` butir 160)
+- Web mengirim hasil `payloadBuatPembelian` (`features/pembelian-stok/payload.ts`, `09c931e`): `jumlah` desimal minimal 1 (koma atau titik), `hargaBeli` bilangan bulat minimal 0, bahan tidak ganda antarbaris, `nomorFaktur` hanya bila diisi, `tanggal` hanya bila Owner memilih tanggal selain hari ini, dan `locationID` selalu lokasi ruang
+- Respons berisi `data` dokumen tanpa populate (relasinya berupa id)
+- Diisi server: `tenantID`, `dicatatOleh`, `subtotal`, `totalBiaya`, dan `stokDitambahkan`
 
 #### `POST /pengajuanstok`
 
@@ -665,6 +677,13 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan service: membatalkan pembayaran PAID mengurangi saldo akun kas tujuannya dan mencatat mutasi `VOID_PEMBAYARAN` beserta alasannya (baris 506 sampai 518), lalu status bayar dan sisa tagihan penjualan disinkronkan. Sejak backend `yoga` alasan mutasi diambil dari `alasanVoid`, dan `catatan` asli tidak lagi ditimpa: `catatan` yang dikirim bersama VOID dipindah ke `alasanVoid` bila `alasanVoid` tidak dikirim. Sampai `465b438` catatan asli ditimpa alasan pembatalan (`temuan.md` butir 75)
 - Wajib dari klien: -
 - Diisi server: -
+
+#### `PUT /pembelianstok/:id`
+
+- Hanya `supplier`, `keterangan`, `nomorFaktur`, dan `tanggal` diterima (B76); `items`, `locationID`, dan `akunKasID` ditolak 400, sehingga pembelian yang barang, lokasi, atau akun kasnya keliru dihapus lalu dicatat ulang
+- Indeks unik `{ tenantID, nomorFaktur }` ikut mengindeks nilai kosong, sehingga web menuntut nomor faktur saat mengubah (`temuan.md` butir 162)
+- Web mengirim hasil `payloadUbahPembelian` (`1e4f042`): hanya field yang berubah (keputusan rancangan butir 15), dan `tanggal` hanya bagi Owner
+- Respons berisi `data` dokumen tanpa populate
 
 #### `PUT /pengajuanstok/:id`
 

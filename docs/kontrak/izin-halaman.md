@@ -44,6 +44,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 18 Oktober 2026: penjualan setelah `20c026b`, tanpa perubahan gate (`read-penjualan`). Bagi pemegang `read-location`, daftar mengirim `locationID` lingkup outletnya dan disaring server (keputusan RG4a); pengguna lain tetap melihat seluruh penjualan tenant (K11b).
 - 18 Oktober 2026: pengeluaran setelah `1d7fa7b`, terhadap backend `ridho` `00de455`. Gate daftar pindah dari `read-pembayaran` ke `read-beban-operasional` (keputusan BO3a). Filter akun kas dan kategori memanggil `GET /akunkas` dan `GET /kategoribeban` hanya bagi pemegang `read-akunkas` dan `read-kategori-beban`; menu Ubah dan Batalkan memanggil `PUT /bebanoperasional/:id` dan hanya tampil bagi pemegang `update-beban-operasional`. Rute baru catat beban dan Kategori Beban di Pengaturan dicatat di 5.1. Ketujuh izin beban dan kategori beban ada di template Manajer dan General Manajer sejak `61275ac`.
 - 19 Oktober 2026: dashboard gudang setelah `50dca2f`. Rute tetap tanpa syarat di `IZIN_HALAMAN`; panel dipasang menurut izin endpoint-nya, dan tautan kartu hanya aktif bila gerbang halaman tujuannya terpenuhi.
+- 25 dan 26 Oktober 2026: pembelian stok outlet dan gudang (`0db77ed`, `09c931e`, `1e4f042`) dan tab Belanja Stok di Keuangan (`e073a9d`), terhadap backend `ridho` `b5b367a`. `/pembelianstok` memeriksa `read-`, `create-`, `update-`, dan `delete-pembelian-stok` (B74), sama untuk kedua ruang (`temuan.md` butir 158).
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -56,6 +57,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/penjualan` | `read-penjualan` | `/penjualan` (per halaman, `page` dan `limit`, serta `locationID` lingkup outlet bagi pemegang `read-location` sejak `20c026b`); `/location` dan `/location/current` hanya bagi pemegang `read-location` | `read-penjualan`; `read-location` opsional untuk cakupan outlet | Sejalan; gate sengaja tidak menambah `read-location` agar Guest, Staff, dan Kasir tetap dapat membuka daftar (keputusan K11b) |
 | `/dashboard/outlet/pengeluaran` | `read-beban-operasional` | `/bebanoperasional` (per halaman, dengan filter); `/akunkas` dan `/kategoribeban` hanya bagi pemegang izin bacanya | `read-beban-operasional`; `read-akunkas` dan `read-kategori-beban` opsional untuk filter | Sejalan sejak `1d7fa7b` (keputusan BO3a); sebelumnya keterangan belum tersedia dengan gate `read-pembayaran` (BO2a) |
 | `/dashboard/outlet/keuangan/ringkasanLabaRugi` | `read-laporan` | `/laporan/laba-rugi` (periode berjalan dan pembanding); kartu ringkasan di layout juga `/akunkas` | `read-laporan`; `/akunkas` butuh `read-akunkas` | Sejalan sejak backend `465b438` memeriksa `read-laporan`; tanpa `read-akunkas` kartu saldo menampilkan `-` (KU2a) |
+| `/dashboard/outlet/keuangan/belanjaStok` | `read-pembelian-stok`, `read-akunkas`, `read-location` | `/pembelianstok` (seluruh halaman untuk ringkasan, satu halaman untuk daftar), `/akunkas`, `/location`; kartu ringkasan di layout juga `/laporan/laba-rugi` | `read-pembelian-stok`, `read-akunkas`, `read-location`; layout butuh `read-laporan` | Sejalan (`e073a9d`) |
 | `/dashboard/outlet/inventaris-data` | `read-inventory-outlet` | - | - | Tidak ada halaman (grup menu atau rute kosong) |
 | `/dashboard/outlet/inventaris/produk` | `read-produk` | `/produk` | `read-produk` atau `akses-pos` | Sejalan |
 | `/dashboard/outlet/inventaris/kategori` | `read-kategori` | `/kategori`, `/produk` | `read-kategori`; `/produk` opsional (`read-produk` atau `akses-pos`) untuk hitungan pemakaian | Sejalan |
@@ -69,6 +71,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/outlet/inventaris/pengajuanStok` | `read-pengajuan-stok`, `read-location` | `/pengajuanstok`, `/location`, `/location/current` | `read-pengajuan-stok`, `read-location` | Sejalan |
 | `/dashboard/outlet/inventaris/penerimaanBarang` | `read-location`, `read-transfer-stok` | `/location`, `/location/current`, `/transferstok` | `read-location`, `read-transfer-stok` | Sejalan |
 | `/dashboard/outlet/inventaris/pengirimanBarang` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
+| `/dashboard/outlet/inventaris/pembelianStok` | `read-pembelian-stok`, `read-location` | `/pembelianstok`, `/location`, `/location/current`; `/akunkas` dan `/bahanbaku` hanya bagi pemegang izin bacanya | `read-pembelian-stok`, `read-location` | Sejalan (`0db77ed`) |
 | `/dashboard/outlet/jadwal` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Sejalan; baris ini sempat tertinggal dari `IZIN_HALAMAN` (dikoreksi 29 September 2026) |
 | `/dashboard/outlet/jadwal/generate` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift/bulk` | `read-pengguna` | Sejalan; entri `IZIN_HALAMAN` ditambahkan di `19227f8` |
 | `/dashboard/outlet/pola-roster` | - | `/shift`, `/polaroster` | - | Backend tidak memeriksa izin |
@@ -86,6 +89,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/gudang/transferStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/gudang/pengirimanStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/gudang/penerimaanStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
+| `/dashboard/gudang/pembelianStok` | `read-pembelian-stok`, `read-location` | `/pembelianstok`, `/location`; `/akunkas` dan `/bahanbaku` hanya bagi pemegang izin bacanya | `read-pembelian-stok`, `read-location` | Sejalan (`0db77ed`) |
 | `/dashboard/gudang/jadwal` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift` | `read-pengguna` | Sejalan; baris ini sempat tertinggal dari `IZIN_HALAMAN` (dikoreksi 29 September 2026) |
 | `/dashboard/gudang/jadwal/generate` | `read-pengguna` | `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift/bulk` | `read-pengguna` | Sejalan; halaman dibuat di `19227f8` (keputusan J5b dan JD13c) |
 | `/dashboard/gudang/pola-roster` | - | `/shift`, `/polaroster` | - | Backend tidak memeriksa izin; halaman dibuat di `dcc22e0` (keputusan PL5) |
@@ -108,11 +112,15 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/gudang/stockOpname/buatStockOpname` | `read-location`, `create-stock-opname` | `/location`, `/pengguna/:id` | Form |
 | `/dashboard/gudang/transferStok/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; aksi mengikuti izin tombolnya |
 | `/dashboard/gudang/transferStok/[id]/edit` | `read-transfer-stok`, `create-transfer-stok` | `/transferstok/:id` | Form; `PUT /transferstok/:id` menuntut `create-transfer-stok` |
+| `/dashboard/gudang/pembelianStok/[id]` | `read-pembelian-stok`, `read-location` | `/pembelianstok/:id`, `/location` | Detail; Ubah Info dan Hapus mengikuti `update-` dan `delete-pembelian-stok` (`1e4f042`) |
+| `/dashboard/gudang/pembelianStok/catatPembelian` | `read-bahan`, `read-akunkas`, `read-location`, `create-pembelian-stok` | `/bahanbaku`, `/akunkas`, `/location` | Form (`09c931e`) |
 | `/dashboard/outlet/inventaris/pengirimanBarang/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; aksi hanya di ruang pengirim (AR11a) |
 | `/dashboard/outlet/inventaris/pengirimanBarang/[id]/edit` | `read-transfer-stok`, `create-transfer-stok` | `/transferstok/:id` | Form; `PUT /transferstok/:id` menuntut `create-transfer-stok` |
 | `/dashboard/outlet/inventaris/bahanBaku/buatBahanBaku` | `create-bahan` | `/location/current` (opsional) | Form; `locationID` opsional di payload |
 | `/dashboard/outlet/inventaris/bahanBaku/[id]/edit` | `read-bahan`, `update-bahan` | `/bahanbaku/:id` | Form |
 | `/dashboard/outlet/inventaris/penerimaanBarang/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; terima mengikuti `receive-transfer-stok` |
+| `/dashboard/outlet/inventaris/pembelianStok/[id]` | `read-pembelian-stok`, `read-location` | `/pembelianstok/:id`, `/location` | Detail; Ubah Info dan Hapus mengikuti `update-` dan `delete-pembelian-stok` (`1e4f042`) |
+| `/dashboard/outlet/inventaris/pembelianStok/catatPembelian` | `read-bahan`, `read-akunkas`, `read-location`, `create-pembelian-stok` | `/bahanbaku`, `/akunkas`, `/location` | Form (`09c931e`) |
 | `/dashboard/gudang/penerimaanStok/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; terima mengikuti `receive-transfer-stok`, hanya di ruang tujuan |
 | `/dashboard/outlet/inventaris/pengajuanStok/buatPengajuan` | `read-bahan`, `read-location`, `create-pengajuan-stok` | `/bahanbaku`, `/location`, `/location/current` | Form |
 | `/dashboard/outlet/inventaris/pengajuanStok/[id]` | `read-pengajuan-stok` | `/pengajuanstok/:id` | Detail; tanpa `read-location`, berbeda dari daftarnya |

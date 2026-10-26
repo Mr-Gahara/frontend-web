@@ -106,6 +106,12 @@ halaman, dan daftar ketidaksesuaian. Awalnya satu berkas `docs/kontrak-api.md`
 | Tabel seragam K-E: aset, tarif, dan tipe aset | `eb81a1f` | Selesai (keputusan TB21a sampai TB23a; Catatan dari tabel seragam K-E) |
 | Cakupan daftar penjualan lewat filter `locationID` server (RG4a) | `20c026b` | Selesai (keputusan LP1a dan LP2a; Catatan dari cakupan daftar penjualan) |
 | Keuangan: halaman pengeluaran (beban operasional) | `61275ac`, `b2d84a6`, `87fbf7a`, `1d7fa7b` | Selesai (keputusan BO3a sampai BO7a; Catatan dari halaman pengeluaran) |
-| Dashboard gudang: tata letak dan isi (GD1a) | - | **Berikutnya** (lihat Pekerjaan berikutnya) |
+| Dashboard gudang: tata letak dan isi (GD1a) | `06581f3`, `50dca2f` | Selesai (`modul/gudang.md`, Dashboard gudang) |
+| Penyesuaian backend `ridho` `b5b367a` | `ffd3994`, `4088d9e` (template role), `74b6af4` (kartu pengajuan dashboard gudang), `029413d` (izin jurnal gudang), `081d5dc`, `b03c276` (jurnal stok berpaginasi server) | Selesai (`referensi/keputusan-penyesuaian-backend.md`) |
+| Label tab dan status pengajuan stok serta surat jalan berbahasa awam | `a972956` | Selesai (`modul/inventaris.md`) |
+| Pengembalian Outlet ke Gudang (P8) | `621e753`, `7f1de56`, `0590920`, `96985cd`, `77fb600`, `a505783` | Selesai (keputusan AR1a sampai AR11a; Catatan dari pengembalian Outlet ke Gudang) |
+| Pembelian stok outlet dan gudang | `7f5c3ee` (fondasi), `21abcd8` (cakupan satu outlet), `0db77ed` (daftar dan detail), `09c931e` (catat), `1e4f042` (ubah dan hapus), `5b8cbd9` (template role) | Selesai (keputusan PS1a sampai PS9a dan RH6a; Catatan dari pembelian stok) |
+| Keuangan: tab Belanja Stok | `e073a9d` | Selesai (keputusan BS1a sampai BS3a; Catatan dari tab Belanja Stok) |
+| Audit pergantian hari dan jendela 00.00 sampai 07.00 WIB | `6d07b8d` (beban dan `useHariIni`), `7a08b63` (penjualan, dashboard, kartu Keuangan, dan catat pembelian) | Selesai (keputusan rancangan butir 28) |
 
 Keputusan produk tiap modul tercatat di `modul/produk-kategori.md`.

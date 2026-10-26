@@ -400,3 +400,28 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   peta label di unit test** (`a972956`): e2e memeriksa nama tombol tab,
   tetapi tidak membaca badge daftar, badge detail, maupun teks dialog
   batal.
+- **Suite e2e penuh belum dijalankan di atas `7a08b63` dan `5b8cbd9`**
+  (keputusan pemilik proyek, 26 Oktober 2026); hanya spec terdampak.
+  Wajib dijalankan sebelum pekerjaan berikutnya (`inti/status.md`).
+- **Backend di jam rawan hanya teruji saat suite dijalankan pada
+  jamnya.** `page.clock` dan `vi.setSystemTime` hanya memalsukan jam
+  frontend, sedangkan validator backend memakai jam server. Jendela
+  00.00 sampai 07.00 WIB teruji lewat suite penuh 26 Oktober 2026 pukul
+  00.11 dan 00.53.
+- **Ringkasan Belanja Stok lebih dari satu halaman hanya teruji di unit
+  test** (`kumpulkanPembelian`), karena data uji di atas 100 pembelian
+  tidak dibuat dan respons sukses palsu dilarang.
+- **Perpindahan hari di dashboard outlet dan gudang, kartu ringkasan
+  Keuangan, serta catat pembelian** hanya teruji lewat hook (unit) dan
+  pola yang sama di catat beban (e2e `6d07b8d`), tanpa skenario
+  `page.clock` tersendiri.
+- **Jalur tanggal pembelian bagi peran selain Owner** hanya teruji di
+  unit test (`payloadBuatPembelian`), karena akun uji berperan Owner.
+- **Tombol Ubah Info dan Hapus pembelian menurut izin** hanya teruji
+  lewat `aksiPembelianStok` di unit test.
+- **Template role pembelian hanya teruji pemetaan namanya**; role dari
+  template belum dipakai membuka halaman pembelian.
+- **Spec Belanja Stok menyiapkan dua pembelian lewat API** (keputusan
+  rancangan butir 23 mengizinkannya, karena halaman itu hanya membaca);
+  setiap run menambah lalu mengurangi stok bahan fixture di outlet dan
+  gudang.

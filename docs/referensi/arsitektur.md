@@ -21,7 +21,7 @@ dan urutan migrasi satu modul.
 | `app/` | Rute Next.js. Idealnya tipis: tata letak dan interaksi saja |
 | `features/<modul>/` | Api, hooks, schema, komponen halaman dan form bersama, serta fungsi murni per modul |
 | `components/` | Komponen UI yang dipakai lintas modul, termasuk shadcn di `components/ui/` |
-| `hooks/` | Hook lintas modul yang bukan milik satu domain: `use-debounce.ts`, `use-mobile.ts`, dan `use-sudah-hidrasi.ts` (deteksi hidrasi, `039ead4`) |
+| `hooks/` | Hook lintas modul yang bukan milik satu domain: `use-debounce.ts`, `use-mobile.ts`, `use-sudah-hidrasi.ts` (deteksi hidrasi, `039ead4`), serta `use-hari-ini.ts` dan `use-jam-berjalan.ts` (hari dan jam yang berganti sendiri, `6d07b8d`, `7a08b63`; `inti/keputusan-rancangan.md` butir 28) |
 | `lib/` | Fondasi: `api/`, `auth/`, `queryKeys.ts`, `apiClient.ts`, `decodeToken.ts` |
 | `types/` | Tipe respons dan payload, diturunkan dari kontrak |
 | `tests/e2e/` | Playwright, memakai backend sungguhan; `page.route` hanya untuk jalur gagal (`referensi/playwright.md`, Catatan Playwright) |
@@ -167,7 +167,7 @@ Pola yang sudah terbukti di bahan baku, pengguna, role, produk, kategori,
 stock adjustment, jurnal stok, stok, stock opname, pengajuan stok, transfer
 stok, penjualan, tipe aset, aset, tarif, sesi booking, akun kas, laporan,
 shift, pola roster, jadwal, absensi, metode pembayaran, pajak, tenant,
-pelanggan, diskon, auth, admin-akun, dan jurnal-transfer:
+pelanggan, diskon, auth, admin-akun, jurnal-transfer, dan pembelian-stok:
 
 - `api.ts` — pemanggilan endpoint memakai `apiData` dan `EP`
 - `hooks.ts` — `useQuery` dan `useMutation`, termasuk aturan invalidasi. Hook mutation menerima `onSuccess` dan `onError` dari halaman untuk toast dan reset dialog (`inti/keputusan-rancangan.md` butir 13)
@@ -206,6 +206,7 @@ Isi tiap `features/` yang sudah ada:
 | `pajak` | `api.ts`, `hooks.ts`, `izin.ts`, `filter.ts`, `schema.ts`, `payload.ts`, `tampilan.ts`, `halaman-pajak.tsx`, `form-pajak.tsx`, `tab-pajak-produk.tsx`, `pesan-pajak.tsx` | Dibuat untuk modul penjualan (K1a), dilengkapi submodul pajak modul Pengaturan outlet (`e0aaeca`). `useDaftarPajak` (kunci `daftar()`) dipakai halaman pengaturan dan buat penjualan (`pajakTransaksiAktif`, urut prioritas); `useRelasiPajakProduk(produkId)` memakai `queryKeys.produk.pajak`. Invalidasi ditunggu sebelum callback: buat ke akar pajak, perbarui dan hapus ke akar pajak dan produk, pasang dan lepas ke akar produk. `schema.ts` memuat `skemaPajak` (PO8a; tarif dan prioritas sebagai teks, anotasi `boolean` pada `refine`); `payload.ts` memuat `NILAI_AWAL_PAJAK`, `nilaiAwalPajak`, `payloadBuatPajak`, dan `payloadUbahPajak` (hanya field yang berubah sejak `50e6485`, NZ12a; sebelumnya ditambah `tipePajak`, `kontrak/temuan.md` butir 91); `tampilan.ts` memuat `LABEL_MODEL`, `labelModelRelasi`, `pajakTerpasang`, `pilihanPajakProduk` (PO6a), dan `pajakTransaksiTerdampak` (PO7a). `HalamanPajak` memasang `FormPajak` setiap kali dialog dibuka (butir 8) dan `TabPajakProduk`; `PesanPajak` untuk galat memuat. Sejak `d3443e2`: `izin.ts` memuat `URL_PAJAK` dan `aksiPajak`; `HalamanPajak` menjadi gerbang yang memasang `IsiHalamanPajak` hanya bagi pemegang `read-pajak` atau `akses-pos`, dan tombolnya mengikuti izin backend `fc29433`. Sejak `bc388c6` izin baca ditegakkan gerbang rute, dan `HalamanPajak` memasang `IsiHalamanPajak` langsung (GR4a) Sejak `ed4bfd3`: `tampilan.ts` memuat `relasiNonaktif`, dan `TabPajakProduk` menandai relasi ke pajak nonaktif (RH4a) |
 | `beban-operasional` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `izin.ts`, `halaman-pengeluaran.tsx`, `halaman-catat-beban.tsx`, `dialog-beban.tsx` | Daftar beban berpaginasi server dengan filter, catat beban (Owner memilih tanggal, BO5a), ubah keterangan dan kategori, dan VOID beralasan (BO6a). Mencatat dan membatalkan menginvalidasi akar beban, akunKas, dan laporan. |
 | `kategori-beban` | `api.ts`, `hooks.ts`, `schema.ts`, `izin.ts`, `halaman-kategori-beban.tsx` | Kelola kategori beban di Pengaturan (BO4a); mutasinya menginvalidasi akar kategori dan beban. |
+| `pembelian-stok` | `api.ts`, `hooks.ts`, `izin.ts`, `schema.ts`, `payload.ts`, `ruang.ts`, `tampilan.ts`, `ringkasan.ts`, `halaman-daftar-pembelian-stok.tsx`, `halaman-detail-pembelian-stok.tsx`, `halaman-catat-pembelian-stok.tsx`, `dialog-pembelian.tsx`, `halaman-belanja-stok.tsx` | Pembelian stok per ruang (`7f5c3ee` sampai `1e4f042`, keputusan PS1a sampai PS9a) dan tab Belanja Stok di Keuangan (`e073a9d`, BS1a sampai BS3a). `ringkasan.ts` mengambil seluruh halaman daftar untuk ringkasan; mencatat dan menghapus menginvalidasi akar pembelian, inventory, jurnal stok, dan bahan baku. |
 | `tipe-aset` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts` | Submodul reservasi (`074e98c`). `useDaftarTipeAset` memakai kunci `daftar()` (keputusan rancangan butir 12), dan dipakai juga form aset serta form buat dan edit tarif; `useTipeAset` tidak mengulang saat 404. Mutation menginvalidasi akar tipe aset, tarif, dan aset, karena daftar tarif dan aset menampilkan nama tipe aset. Satu skema buat dan edit dengan trim; `payloadBuatTipeAset` tidak mengirim deskripsi kosong, sedangkan `payloadUbahTipeAset` mengirim `""` agar deskripsi yang dikosongkan terhapus |
 | `aset` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts`, `tampilan.ts` | Submodul reservasi (`d3ae182`). `tampilan.ts` memuat `namaTipeAset`, untuk aset yang tipe asetnya sudah tidak ada (PB9a). `useDaftarAset` memakai kunci `daftar()` dan dimuat ulang setiap halaman dibuka, karena status aset dihitung backend dari sesi booking yang sedang berjalan; `useAset` tidak mengulang saat 404. Mutation menginvalidasi akar aset dan sesi booking. Satu skema buat dan edit dengan trim; `payloadAset` tidak mengirim status "digunakan", karena status itu dihitung, bukan disimpan |
 | `tarif` | `api.ts`, `hooks.ts`, `schema.ts`, `payload.ts` | Submodul reservasi (`365553f`). `useDaftarTarif` memakai kunci `daftar()`; `useTarif` tidak mengulang saat 404 dan dimuat ulang setiap halaman edit dibuka, dan halaman edit memasang `FormEditTarif` setelah `isFetchedAfterMount` (keputusan rancangan butir 8). Mutation menginvalidasi akar tarif dan tipe aset, karena daftar tipe aset menampilkan tarif terkait. `skemaTarif` dipakai buat dan edit: `z.coerce` dengan tipe masukan dan keluaran eksplisit (keputusan T2a), harga kosong ditolak lewat `z.preprocess` (T3b), dan nama dipangkas (T4a); `NILAI_AWAL_TARIF` untuk buat. `payloadTarif` menyebut sepuluh field form satu per satu, dan `nilaiAwalTarif` menyusun nilai awal edit, termasuk id tipe aset dari `dataAset`. Jam mulai dan selesai memakai `InputWaktu` dengan `pisahTeksWaktu` dan `gabungTeksWaktu`, sehingga isian yang belum lengkap tetap tersimpan dan divalidasi skema (`e43e000`) |
@@ -300,7 +301,14 @@ date, time, datetime-local, month, maupun week di JSX, di `app`,
   `dariTeksWaktu` (teks "HH:mm" ketat), `pisahTeksWaktu` dan
   `gabungTeksWaktu` (teks mentah untuk form yang memvalidasi di skema),
   `waktuDari`, `gabungTanggalWaktu` (null untuk waktu belum lengkap), serta
-  `keTanggalLokal` dan `dariTanggalLokal` (YYYY-MM-DD lokal).
+  `keTanggalLokal` dan `dariTanggalLokal` (YYYY-MM-DD lokal), serta
+  `msSampaiTengahMalam`.
+- `hooks/use-hari-ini.ts` — `useHariIni` (YYYY-MM-DD lokal yang berganti
+  sendiri setelah 00.00) dan `useTanggalHariIni` (Date pukul 00.00 yang
+  objeknya hanya berganti saat hari berganti); `hooks/use-jam-berjalan.ts`
+  — `useJamBerjalan` (waktu sekarang setiap 30 detik). Keduanya diperiksa
+  ulang saat tab terlihat kembali (`inti/keputusan-rancangan.md` butir
+  28).
 
 ### Tabel data (`components/ui/data-table.tsx`)
 

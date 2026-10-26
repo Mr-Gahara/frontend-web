@@ -347,6 +347,46 @@ bug backend dilaporkan dan tidak diakali agar test lolos.
   lokasi dan pencarian tetap disaring di klien, karena tidak punya
   padanan di server.
 
+### Submodul pembelian stok
+
+Diputuskan pemilik proyek pada 25 Oktober 2026, dari pratinjau desain
+yang disetujui (`7f5c3ee` sampai `1e4f042`):
+
+- **PS1a: pembelian dicatat di ruang outlet dan ruang gudang.** Barang
+  dan stok dipisah per lokasi, sedangkan uang (akun kas milik tenant),
+  katalog bahan, nomor faktur, supplier, dan pengawasan pemilik tetap
+  satu. Lokasi penerima selalu lokasi ruang itu; pandangan gabungan ada
+  di Keuangan (BS1a, `modul/keuangan.md`).
+- **PS2a: menu Pembelian Stok** di sidebar outlet sesudah Kirim Barang,
+  dan di sidebar gudang sesudah Penerimaan Stok.
+- **PS3a: daftar** memakai `DataTable` berpaginasi server dengan filter
+  supplier, akun kas, bahan baku, dan periode (bawaan tanggal 1 bulan
+  berjalan sampai hari ini). Filter akun dan bahan hanya dipasang bagi
+  pemegang izin bacanya. Di ponsel baris menjadi kartu seperti daftar
+  lain.
+- **PS4a: catat** memakai form dengan baris barang. Jumlah desimal
+  minimal 1 (koma atau titik), harga beli bilangan bulat boleh 0, dan
+  bahan yang sama di dua baris ditolak dengan pesan.
+- **PS5a: tanggal lampau hanya untuk Owner**, seperti beban (BO5a);
+  peran lain mencatat hari ini, dan backend memakai waktu sekarang.
+- **PS6a: akun kas pembayar adalah seluruh akun kas aktif**, dengan
+  gerbang `read-akunkas`. Form dan detail menerangkan bahwa saldo akun
+  kas belum terpotong oleh pembelian, karena backend belum memotongnya.
+- **PS7a: detail** menampilkan barang di `DataTable` tanpa paginasi
+  server, total, pencatat, lokasi penerima, dan penanda pembelian yang
+  dicatat sebelum stok bertambah otomatis.
+- **PS8a: ubah info dan hapus dari detail.** Ubah info (supplier, nomor
+  faktur, tanggal bagi Owner, dan keterangan) lewat dialog dan hanya
+  mengirim field yang berubah. Hapus lewat konfirmasi yang menyebut stok
+  yang akan dikurangi kembali; penolakan 409 (stok sudah terpakai) tampil
+  di dalam dialog. Barang, lokasi, dan akun kas tidak dapat diubah; yang
+  keliru dihapus lalu dicatat ulang.
+- **PS9a: izin per ruang diminta ke backend** (`kontrak/temuan.md` butir
+  158). Sampai itu `IZIN_PEMBELIAN_STOK_RUANG` di
+  `features/pembelian-stok/izin.ts` bernilai null, dan kedua ruang
+  memakai izin yang sama.
+- Pembagian izin di template role (RH6a) ada di `modul/akses.md`.
+
 ### Label tab dan status pengajuan stok serta surat jalan
 
 Diputuskan pemilik proyek pada 22 Oktober 2026, dari pratinjau
@@ -566,3 +606,50 @@ Yang masih berlaku:
   "ke arah yang berbeda" dan "arah perbaikan" di 58 baris yang tidak
   relevan. Baca keluarannya per berkas tujuan, tanpa digabung lewat
   `sort -u` lalu dipotong.
+
+### Catatan dari pembelian stok
+
+- `7f5c3ee`: tipe, `EP.pembelianStok`, `queryKeys.pembelianStok`, izin
+  `read-`, `create-`, `update-`, dan `delete-pembelian-stok`, serta
+  lapisan murni `features/pembelian-stok` (`api.ts`, `izin.ts`,
+  `schema.ts`, `payload.ts`, `hooks.ts`). Mencatat dan menghapus
+  menginvalidasi akar pembelian, inventory, jurnal stok, dan bahan baku;
+  akun kas tidak, karena saldo belum terpotong.
+- `21abcd8`: `lokasiJurnalOutlet` dipindah ke
+  `features/inventaris/cakupan.ts` sebagai `lokasiSatuOutlet`, dipakai
+  jurnal stok dan pembelian outlet.
+- `0db77ed`: daftar dan detail per ruang (`ruang.ts`, `tampilan.ts`,
+  `halaman-daftar-pembelian-stok.tsx`,
+  `halaman-detail-pembelian-stok.tsx`), rute, `IZIN_HALAMAN`, dan
+  sidebar. `09c931e`: catat (`halaman-catat-pembelian-stok.tsx`).
+  `1e4f042`: ubah info dan hapus (`dialog-pembelian.tsx`).
+- Respons `GET /pembelianstok` tidak melewati mapper: `akunKasID`,
+  `items.bahanBakuID`, dan `dicatatOleh` di-populate, sedangkan
+  `locationID` tetap id, sehingga nama lokasi dibaca dari daftar lokasi
+  (`lokasiPembelian`). Respons POST dan PUT tanpa populate.
+- Item sidebar tanpa subItem dirender `SidebarMenuButton` berperan
+  `button`, bukan `link`: menu Pembelian Stok gudang dicari dengan
+  `getByRole("button")`.
+- Respons `GET /inventory` memetakan bahan ke `item` (`tipeItem`, `id`,
+  `nama`, `satuan`), bukan `bahanBakuID`. Helper stok di spec catat
+  sempat membaca 0 karena itu, padahal backend benar; trace dan basis
+  data membuktikannya.
+- Spec catat menjalankan alur penuh lewat UI di kedua ruang: catat, ubah
+  info, hapus yang dijawab 409 lewat `route.fulfill`, lalu hapus
+  sungguhan dengan bukti stok pulih. Helper e2e pembelian ada di
+  `tests/helpers/pembelian-uji.ts` sejak `e073a9d`.
+- `7a08b63`: form catat memakai `useHariIni`; tanggal yang belum diubah
+  Owner ikut berganti saat hari berganti (`inti/keputusan-rancangan.md`
+  butir 28).
+
+## Utang terbuka
+
+### Utang kecil dari pembelian stok
+
+- Saldo akun kas belum dipotong dan buku mutasi kas belum ditulis oleh
+  pembelian. Begitu backend memotongnya, akar `akunKas` ditambahkan ke
+  `useInvalidasiPembelian`, dan keterangan di form serta detail dibuang.
+- Izin per ruang menunggu backend (PS9a, `kontrak/temuan.md` butir 158).
+- Filter periode bawaan tidak ikut bergeser saat hari berganti
+  (keputusan pemilik proyek, 26 Oktober 2026); tanggalnya terlihat dan
+  Reset Filter tersedia.
