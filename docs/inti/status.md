@@ -37,7 +37,7 @@ hari: beban hari ini ditolak backend antara 00.00 dan 07.00 WIB, dan
 beberapa halaman mengunci "hari ini" saat dibuka. Keduanya diperbaiki di
 frontend (`6d07b8d`, `7a08b63`; `inti/keputusan-rancangan.md` butir 28),
 dan sisi backend dicatat sebagai temuan (`kontrak/temuan.md` butir 154
-sampai 162).
+sampai 162 dan 164).
 
 **Langkah pertama sesi berikutnya, wajib sebelum pekerjaan lain**: suite
 e2e penuh di atas `5b8cbd9`. Suite penuh terakhir dijalankan di
@@ -59,8 +59,8 @@ Sesudahnya, urutan pilihan pemilik proyek (26 Oktober 2026):
    dipetakan sambil login dikerjakan.
 
 Backend lokal masih di `ridho` `b5b367a`. Catatan untuk tim backend dari
-modul pembelian dan audit pergantian hari disusun sesudah commit
-dokumentasi pembelian stok.
+modul pembelian dan audit pergantian hari diserahkan ke Yoga pada 26
+Oktober 2026 (`arsip/laporan-backend.md`).
 
 ```bash
 cd ~/Documents/frontend-web && npx vitest run 2>&1 | tail -5 && date && npx playwright test --reporter=json > /tmp/p.json 2>/dev/null; date && node ~/.cache/frontend-web/alat/ringkas-e2e.js | head -20
@@ -73,8 +73,8 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
 
 - Suite e2e penuh di atas `5b8cbd9` (Pekerjaan berikutnya).
 - Catatan untuk tim backend dari modul pembelian dan audit pergantian
-  hari (`kontrak/temuan.md` butir 154 sampai 162) disusun sesudah commit
-  dokumentasi, lalu dicatat di `arsip/laporan-backend.md`.
+  hari (`kontrak/temuan.md` butir 154 sampai 162 dan 164) diserahkan ke
+  Yoga pada 26 Oktober 2026 dan dicatat di `arsip/laporan-backend.md`.
 - Sisi frontend: tab Keuangan tampil tanpa izin (butir 163), filter
   periode bawaan tidak bergeser saat hari berganti, dan saldo akun kas
   yang belum terpotong pembelian (`modul/inventaris.md`, Utang kecil

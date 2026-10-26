@@ -282,6 +282,16 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   150), filter tipe lokasi (butir 151), filter tab gabungan pengajuan
   (butir 152), dan komentar arah surat jalan (butir 153); butir 149
   (B101) dan 46 (B102) terbukti
+- Laporan untuk Yoga: 10 temuan dalam sembilan bagian, diserahkan 26
+  Oktober 2026 terhadap `ridho` `b5b367a`, setelah `383468b`: tanggal
+  hari ini ditolak 00.00 sampai 07.00 WIB di beban dan jurnal transfer
+  (butir 154, juga menyangkut Nizar), jam lokal server di nomor dokumen
+  dan masa langganan (butir 155), urutan pembelian tanpa pemecah seri
+  (butir 156), endpoint ringkasan pembelian beserta paginasinya (butir
+  157), izin pembelian per ruang (butir 158), populate lokasi (butir
+  159), validator dan skema pembelian (butir 160), dokumen API usang
+  (butir 161), indeks nomor faktur kosong (butir 162), dan tanggal lampau
+  pembelian bagi peran selain Owner (butir 164)
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi
