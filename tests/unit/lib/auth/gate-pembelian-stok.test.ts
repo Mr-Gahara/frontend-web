@@ -42,6 +42,11 @@ describe("gate pembelian stok per ruang (B116)", () => {
     expect(bolehBukaHalaman(`${GUDANG}/catatPembelian`, [...DASAR_CATAT, IZIN.buatPembelianStokOutlet])).toBe(false);
   });
 
+  it("detail tidak menuntut read-location, karena lokasinya ter-populate (B112)", () => {
+    expect(bolehBukaRute(OUTLET + "/" + ID, [IZIN.pembelianStokOutlet])).toBe(true);
+    expect(bolehBukaRute(GUDANG + "/" + ID, [IZIN.pembelianStokGudang])).toBe(true);
+  });
+
   it("Belanja Stok terbuka bagi izin baca umum atau salah satu izin ruang", () => {
     const href = "/dashboard/outlet/keuangan/belanjaStok";
     const dasar = [IZIN.akunKas, IZIN.location];

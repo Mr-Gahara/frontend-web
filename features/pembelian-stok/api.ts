@@ -6,6 +6,7 @@ import type {
   PayloadUbahPembelianStok,
   PembelianStok,
   PembelianStokTersimpan,
+  RingkasanPembelianStok,
 } from "@/types/pembelianStok";
 
 export type HalamanPembelianStok = { data: PembelianStok[]; pagination: Paginasi | null };
@@ -16,6 +17,9 @@ export const pembelianStokApi = {
     const hasil = await api.get<PembelianStok[]>(EP.pembelianStok.list, params);
     return { data: hasil.data, pagination: hasil.pagination ?? null };
   },
+  /** Ringkasan pada filter yang sama dengan daftar (B117); page dan limit hanya memotong supplier. */
+  ringkasan: (params: Record<string, string>) =>
+    apiData.get<RingkasanPembelianStok>(EP.pembelianStok.list + "/ringkasan", params),
   detail: (id: string) => apiData.get<PembelianStok>(EP.pembelianStok.detail(id)),
   buat: (payload: PayloadBuatPembelianStok) =>
     apiData.post<PembelianStokTersimpan>(EP.pembelianStok.list, payload),

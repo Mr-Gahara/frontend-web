@@ -9,7 +9,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { useDaftarLokasi } from "@/features/inventaris/hooks";
 import { useLevelPenggunaAktif } from "@/features/role/hooks";
 import { useSession } from "@/lib/auth/useSession";
 import { DialogHapusPembelian, DialogUbahPembelian } from "./dialog-pembelian";
@@ -74,14 +73,13 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
   const urlDaftar = URL_PEMBELIAN[ruang];
 
   const { data: pembelian, isLoading, error } = usePembelianStok(id);
-  const daftarLokasi = useDaftarLokasi();
   const barang = useMemo(() => pembelian?.items ?? [], [pembelian]);
   const { permissions } = useSession();
   const aksi = aksiPembelianStok(permissions, ruang);
   const owner = useLevelPenggunaAktif() === 100;
   const [terbuka, setTerbuka] = useState<"ubah" | "hapus" | null>(null);
 
-  if (isLoading || daftarLokasi.isLoading) {
+  if (isLoading) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-navy border-t-transparent"></div>
@@ -110,9 +108,9 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
   // ruang lain yang dibuka lewat URL ditolak di sini, seperti detail stock
   // adjustment. Ini penjaga tampilan bagi pemegang izin umum; pemegang izin
   // per ruang sudah dijawab 403 oleh backend untuk ruang lain (B116). Lokasi
-  // yang tidak diketahui, karena terhapus atau daftar lokasi gagal dimuat,
-  // tetap ditampilkan.
-  const lokasi = lokasiPembelian(pembelian, daftarLokasi.data);
+  // dibaca dari locationID ter-populate (B112); pembelian tanpa lokasi atau
+  // dengan lokasi terhapus tetap ditampilkan.
+  const lokasi = lokasiPembelian(pembelian);
   if (lokasi && lokasi.tipe !== TIPE_LOKASI_PEMBELIAN[ruang]) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4 text-navy">

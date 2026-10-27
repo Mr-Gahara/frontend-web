@@ -204,8 +204,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/keuangan/ringkasanLabaRugi": [IZIN.laporan],
   // Belanja Stok: pembelian di ruang yang diizinkan (izin umum untuk semua
   // ruang, atau izin per ruang yang dijumlahkan backend sesuai ruangnya, B116);
-  // nama lokasi dan ruang asal dibaca dari daftar lokasi, karena locationID
-  // pembelian tidak di-populate.
+  // daftar lokasi mengisi pilihan filter lokasi penerima.
   "/dashboard/outlet/keuangan/belanjaStok": [
     [IZIN.pembelianStok, IZIN.pembelianStokOutlet, IZIN.pembelianStokGudang],
     IZIN.akunKas,
@@ -268,10 +267,11 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/inventaris/pengirimanBarang/[id]": [IZIN.transferStok],
   "/dashboard/outlet/inventaris/pengirimanBarang/[id]/edit": [IZIN.transferStok, IZIN.buatTransferStok],
   // Pembelian stok: daftar memakai cakupan lokasi outlet, detail membaca tipe
-  // lokasi penerima dari GET /location (penjaga ruang). Izin umum atau izin
-  // ruangnya, seperti route backend (B116; aksi di features/pembelian-stok/izin.ts).
+  // lokasi penerima dari locationID ter-populate (B112, penjaga ruang). Izin
+  // umum atau izin ruangnya, seperti route backend (B116; aksi di
+  // features/pembelian-stok/izin.ts).
   "/dashboard/outlet/inventaris/pembelianStok": [[IZIN.pembelianStok, IZIN.pembelianStokOutlet], IZIN.location],
-  "/dashboard/outlet/inventaris/pembelianStok/[id]": [[IZIN.pembelianStok, IZIN.pembelianStokOutlet], IZIN.location],
+  "/dashboard/outlet/inventaris/pembelianStok/[id]": [[IZIN.pembelianStok, IZIN.pembelianStokOutlet]],
   "/dashboard/outlet/inventaris/pembelianStok/catatPembelian": [
     IZIN.bahan,
     IZIN.akunKas,
@@ -302,7 +302,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/gudang/transferStok": [IZIN.transferStok],
   "/dashboard/gudang/transferStok/[id]": [IZIN.transferStok],
   "/dashboard/gudang/pembelianStok": [[IZIN.pembelianStok, IZIN.pembelianStokGudang], IZIN.location],
-  "/dashboard/gudang/pembelianStok/[id]": [[IZIN.pembelianStok, IZIN.pembelianStokGudang], IZIN.location],
+  "/dashboard/gudang/pembelianStok/[id]": [[IZIN.pembelianStok, IZIN.pembelianStokGudang]],
   "/dashboard/gudang/pembelianStok/catatPembelian": [
     IZIN.bahan,
     IZIN.akunKas,

@@ -22,7 +22,6 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { pesanError } from "@/lib/api/error";
 import { formatRupiah, formatTanggalPendek } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import type { Lokasi } from "@/types/location";
 import type { PembelianStok } from "@/types/pembelianStok";
 import { useDaftarPembelianStok, useRingkasanBelanjaStok } from "./hooks";
 import {
@@ -35,12 +34,10 @@ import {
 import {
   LOKASI_TIDAK_DIKENAL,
   bagianRingkasan,
-  ringkasBelanja,
-  ringkasanLengkap,
+  petakanRingkasan,
   ruangLokasi,
   teksAriaBagian,
   teksPeriode,
-  teksRingkasanTidakLengkap,
   type BarisRingkasan,
 } from "./ringkasan";
 import { urlDetailPembelian } from "./ruang";
@@ -146,24 +143,13 @@ function PeringkatSupplier({ baris }: { baris: readonly BarisRingkasan[] }) {
 }
 
 /**
- * Kartu ringkasan untuk filter yang sama dengan daftar. Dihitung dari
- * seluruh halaman daftar (useRingkasanBelanjaStok); peringatan tampil bila
- * hasilnya tidak mencakup seluruh pembelian pada filter.
+ * Kartu ringkasan untuk filter yang sama dengan daftar, dari
+ * GET /pembelianstok/ringkasan (useRingkasanBelanjaStok, B117). Angkanya
+ * dijumlahkan backend untuk seluruh periode, sehingga selalu lengkap.
  */
-function RingkasanBelanjaStok({
-  filter,
-  daftarLokasi,
-  periode,
-}: {
-  filter: Record<string, string>;
-  daftarLokasi: readonly Lokasi[] | undefined;
-  periode: string;
-}) {
+function RingkasanBelanjaStok({ filter, periode }: { filter: Record<string, string>; periode: string }) {
   const ringkasan = useRingkasanBelanjaStok(filter);
-  const hasil = useMemo(
-    () => (ringkasan.data ? ringkasBelanja(ringkasan.data.daftar, daftarLokasi) : null),
-    [ringkasan.data, daftarLokasi],
-  );
+  const hasil = useMemo(() => (ringkasan.data ? petakanRingkasan(ringkasan.data) : null), [ringkasan.data]);
 
   if (ringkasan.isError) {
     return (
@@ -185,20 +171,12 @@ function RingkasanBelanjaStok({
       </div>
     );
   }
-  if (!ringkasan.data || !hasil) {
+  if (!hasil) {
     return <p className="text-sm font-medium text-navy/60">Menghitung ringkasan...</p>;
   }
 
   return (
     <section aria-label="Ringkasan belanja stok" aria-busy={ringkasan.isFetching} className="flex flex-col gap-4">
-      {!ringkasanLengkap(ringkasan.data) && (
-        <p
-          role="status"
-          className="rounded-xl border border-karamel/40 bg-karamel/15 px-4 py-3 text-sm font-medium text-navy"
-        >
-          {teksRingkasanTidakLengkap(ringkasan.data)}
-        </p>
-      )}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         <Kartu judul="Total belanja stok">
           <p className="text-2xl font-black tracking-tight tabular-nums text-navy">{formatRupiah(hasil.total)}</p>
@@ -216,10 +194,11 @@ function RingkasanBelanjaStok({
 
 /**
  * Belanja Stok di Keuangan: pembelian stok seluruh outlet dan gudang dalam
- * satu pandangan (keputusan pemilik proyek, 25 Oktober 2026). Filter,
- * ringkasan, dan daftar memakai GET /pembelianstok tanpa locationID kecuali
- * satu lokasi dipilih. Baris dibuka di detail ruang asalnya; ubah dan hapus
- * hanya di sana.
+ * satu pandangan (keputusan pemilik proyek, 25 Oktober 2026). Ringkasan
+ * (GET /pembelianstok/ringkasan) dan daftar (GET /pembelianstok) memakai
+ * filter yang sama, tanpa locationID kecuali satu lokasi dipilih. Lokasi
+ * tiap baris dibaca dari locationID ter-populate (B112). Baris dibuka di
+ * detail ruang asalnya; ubah dan hapus hanya di sana.
  */
 export function HalamanBelanjaStok() {
   const lokasi = useDaftarLokasi();
@@ -279,7 +258,7 @@ export function HalamanBelanjaStok() {
         header: "Lokasi",
         meta: { label: "Lokasi" },
         cell: ({ row }) => {
-          const l = lokasiPembelian(row.original, lokasi.data);
+          const l = lokasiPembelian(row.original);
           return (
             <span
               className={cn(
@@ -312,7 +291,7 @@ export function HalamanBelanjaStok() {
         id: "aksi",
         header: () => <span className="sr-only">Buka</span>,
         cell: ({ row }) => {
-          const ruang = ruangLokasi(lokasiPembelian(row.original, lokasi.data));
+          const ruang = ruangLokasi(lokasiPembelian(row.original));
           if (!ruang) return null;
           return (
             <div className="flex justify-end">
@@ -328,7 +307,7 @@ export function HalamanBelanjaStok() {
         },
       },
     ],
-    [lokasi.data],
+    [],
   );
 
   return (
@@ -431,7 +410,6 @@ export function HalamanBelanjaStok() {
 
         <RingkasanBelanjaStok
           filter={filterServer}
-          daftarLokasi={lokasi.data}
           periode={teksPeriode(filter.dari, filter.sampai)}
         />
 

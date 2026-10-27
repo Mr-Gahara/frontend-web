@@ -15,15 +15,16 @@ import { keTanggalLokal } from "../../../lib/waktu";
  * Tab Belanja Stok di Keuangan: gabungan pembelian stok seluruh outlet dan
  * gudang. Halaman ini hanya membaca, sehingga pembelian uji disiapkan lewat
  * API (keputusan rancangan butir 23; alur catat lewat UI dibuktikan spec
- * catat pembelian) dan dihapus di akhir. Pengambilan ringkasan lebih dari
- * satu halaman hanya teruji di unit test (kumpulkanPembelian), karena data
- * uji di atas 100 pembelian tidak dibuat dan respons sukses palsu dilarang
- * (butir 21). Satu jalur gagal dijawab route.fulfill.
+ * catat pembelian) dan dihapus di akhir. Ringkasan dibaca dari
+ * GET /pembelianstok/ringkasan (B117), terpisah dari daftar. Satu jalur
+ * gagal dijawab route.fulfill (butir 21).
  */
 
 const URL_BELANJA = "/dashboard/outlet/keuangan/belanjaStok";
 const POLA_DAFTAR = /\/api\/pembelianstok(\?|$)/i;
-const LIMIT_RINGKASAN = "100";
+const POLA_RINGKASAN = /\/api\/pembelianstok\/ringkasan(\?|$)/i;
+/** Ringkasan hanya meminta supplier teratas; page dan limit tidak memotong angka lain. */
+const LIMIT_SUPPLIER = "5";
 
 /** Rupiah seperti yang ditampilkan halaman (formatRupiah); spasi tak-putus diganti spasi biasa. */
 const rupiah = (nilai: number) => formatRupiah(nilai).replace(/\u00a0/g, " ");
@@ -37,7 +38,7 @@ test.describe("Keuangan: Belanja Stok", () => {
   test("tab Belanja Stok membuka gabungan seluruh lokasi dengan periode bulan berjalan", async ({ page }) => {
     await page.goto("/dashboard/outlet/keuangan/akunkas");
     const tRingkasan = page.waitForRequest(
-      (r) => r.method() === "GET" && POLA_DAFTAR.test(r.url()) && query(r.url()).get("limit") === LIMIT_RINGKASAN,
+      (r) => r.method() === "GET" && POLA_RINGKASAN.test(r.url()),
     );
     const tDaftar = page.waitForRequest(
       (r) => r.method() === "GET" && POLA_DAFTAR.test(r.url()) && query(r.url()).get("limit") === "10",
@@ -55,7 +56,7 @@ test.describe("Keuangan: Belanja Stok", () => {
       expect(q.get("sampai"), "sampai hari ini").toBe(sampai);
       expect(q.has("locationID"), "seluruh lokasi").toBe(false);
     }
-    expect(query(ringkasan.url()).get("page"), "ringkasan mulai dari halaman 1").toBe("1");
+    expect(query(ringkasan.url()).get("limit"), "ringkasan hanya meminta supplier teratas").toBe(LIMIT_SUPPLIER);
     await expect(page.getByRole("heading", { name: "Belanja Stok", exact: true })).toBeVisible();
     await expect(page.getByText("Pembelian stok dicatat sebagai persediaan, bukan beban")).toBeVisible();
   });
@@ -98,9 +99,8 @@ test.describe("Keuangan: Belanja Stok", () => {
       const tCari = page.waitForResponse(
         (r) =>
           r.request().method() === "GET" &&
-          POLA_DAFTAR.test(r.url()) &&
-          query(r.url()).get("supplier") === supplier &&
-          query(r.url()).get("limit") === LIMIT_RINGKASAN,
+          POLA_RINGKASAN.test(r.url()) &&
+          query(r.url()).get("supplier") === supplier,
       );
       await page.getByLabel("Cari supplier").fill(supplier);
       expect((await tCari).status(), "ringkasan dengan supplier").toBe(200);
@@ -134,9 +134,8 @@ test.describe("Keuangan: Belanja Stok", () => {
       const tLokasi = page.waitForRequest(
         (r) =>
           r.method() === "GET" &&
-          POLA_DAFTAR.test(r.url()) &&
-          query(r.url()).get("locationID") === gudang.id &&
-          query(r.url()).get("limit") === LIMIT_RINGKASAN,
+          POLA_RINGKASAN.test(r.url()) &&
+          query(r.url()).get("locationID") === gudang.id,
       );
       await page.getByRole("combobox", { name: "Lokasi penerima" }).click();
       await page.getByRole("option", { name: gudang.nama, exact: true }).click();
@@ -154,14 +153,12 @@ test.describe("Keuangan: Belanja Stok", () => {
   });
 
   test("ringkasan gagal dimuat: pesan backend dan Coba Lagi tampil, daftar tetap termuat", async ({ page }) => {
-    await page.route(POLA_DAFTAR, (route) =>
-      route.request().method() === "GET" && query(route.request().url()).get("limit") === LIMIT_RINGKASAN
-        ? route.fulfill({
-            status: 500,
-            contentType: "application/json",
-            body: JSON.stringify({ status: "error", message: "Ringkasan uji gagal" }),
-          })
-        : route.continue(),
+    await page.route(POLA_RINGKASAN, (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ status: "error", message: "Ringkasan uji gagal" }),
+      }),
     );
     await page.goto(URL_BELANJA);
     const galat = page.getByRole("alert").filter({ hasText: "Ringkasan uji gagal" });

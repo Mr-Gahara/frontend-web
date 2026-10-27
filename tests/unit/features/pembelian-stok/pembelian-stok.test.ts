@@ -48,7 +48,7 @@ const pembelian: PembelianStok = {
     { bahanBakuID: { id: "gula", namaBahan: "Gula Pasir", satuan: "kg" }, jumlah: 20, hargaBeli: 15000, subtotal: 300000 },
   ],
   totalBiaya: 300000,
-  locationID: "lok-outlet",
+  locationID: { id: "lok-outlet", nama: "Outlet Pusat", tipe: "Outlet" },
   nomorFaktur: "INV/20261024/101532118",
   dicatatOleh: { id: "peng-1", nama: "Budi" },
   stokDitambahkan: true,

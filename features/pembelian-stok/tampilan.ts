@@ -1,5 +1,4 @@
-import type { Lokasi } from "@/types/location";
-import type { ItemPembelianStok, PembelianStok } from "@/types/pembelianStok";
+import type { ItemPembelianStok, LokasiPembelian, PembelianStok } from "@/types/pembelianStok";
 
 /** Nama bahan satu barang; bahan yang sudah terhapus dari master ditandai. */
 export function namaBahanItem(item: ItemPembelianStok): string {
@@ -38,13 +37,9 @@ export function namaPencatat(pembelian: PembelianStok): string {
 }
 
 /**
- * Lokasi penerima dari daftar lokasi, karena respons pembelian hanya membawa
- * id-nya. null selama daftar belum termuat, atau bila lokasinya terhapus.
+ * Lokasi penerima dari locationID ter-populate (B112). null bila pembelian
+ * lama tanpa lokasi, atau lokasinya terhapus.
  */
-export function lokasiPembelian(
-  pembelian: PembelianStok,
-  daftarLokasi: readonly Lokasi[] | undefined,
-): Lokasi | null {
-  if (!pembelian.locationID || !daftarLokasi) return null;
-  return daftarLokasi.find((l) => l.id === pembelian.locationID) ?? null;
+export function lokasiPembelian(pembelian: PembelianStok): LokasiPembelian | null {
+  return pembelian.locationID ?? null;
 }

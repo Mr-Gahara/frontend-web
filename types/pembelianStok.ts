@@ -1,3 +1,4 @@
+import type { Lokasi } from "@/types/location";
 /**
  * Pembelian stok, sesuai models/pembelianStokModel.js dan
  * services/pembelianStokService.js backend ridho b5b367a. Backend mengirim
@@ -37,10 +38,29 @@ export interface ItemPembelianStok {
   subtotal: number;
 }
 
+/** Lokasi penerima ter-populate di daftar, detail, dan respons tulis (B112). */
+export type LokasiPembelian = Pick<Lokasi, "id" | "nama" | "tipe">;
+
+/**
+ * GET /pembelianstok/ringkasan (B117, backend ridho 877e493). Angka untuk
+ * seluruh periode pada filter dan aturan ruang yang sama dengan daftar;
+ * page dan limit hanya memotong supplier. Setiap daftar berurutan total
+ * terbesar dulu. Lokasi dan akun bernilai null bila pembelian lama tanpa
+ * lokasi, atau bila relasinya terhapus.
+ */
+export interface RingkasanPembelianStok {
+  total: number;
+  jumlahPembelian: number;
+  perLokasi: { locationID: string | null; nama: string | null; tipe: string | null; total: number; jumlah: number }[];
+  perAkunKas: { akunKasID: string | null; namaAkun: string | null; total: number; jumlah: number }[];
+  supplier: { nama: string; total: number; jumlah: number }[];
+}
+
 /**
  * Satu pembelian dari GET /pembelianstok dan GET /pembelianstok/:id.
- * locationID tidak di-populate, sehingga nama lokasi dibaca dari daftar
- * lokasi. stokDitambahkan false menandai pembelian sebelum P17 backend,
+ * locationID di-populate sejak B112 (backend ridho 877e493); null bila
+ * pembelian lama tanpa lokasi atau lokasinya terhapus. stokDitambahkan
+ * false menandai pembelian sebelum P17 backend,
  * yang tidak pernah menambah stok dan dihapus tanpa menyentuh stok.
  */
 export interface PembelianStok {
@@ -51,7 +71,7 @@ export interface PembelianStok {
   keterangan: string;
   items: ItemPembelianStok[];
   totalBiaya: number;
-  locationID: string | null;
+  locationID: LokasiPembelian | null;
   nomorFaktur: string | null;
   dicatatOleh: PencatatPembelian | null;
   stokDitambahkan: boolean;

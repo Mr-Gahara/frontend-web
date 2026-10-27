@@ -14,7 +14,6 @@ import {
   ringkasBarang,
   teksJumlahItem,
 } from "@/features/pembelian-stok/tampilan";
-import type { Lokasi } from "@/types/location";
 import type { ItemPembelianStok, PembelianStok } from "@/types/pembelianStok";
 
 const gula: ItemPembelianStok = {
@@ -33,7 +32,7 @@ const pembelian: PembelianStok = {
   keterangan: "Belanja mingguan",
   items: [gula],
   totalBiaya: 22500,
-  locationID: "lok-outlet",
+  locationID: { id: "lok-outlet", nama: "Outlet Pusat", tipe: "Outlet" },
   nomorFaktur: "FK-1",
   dicatatOleh: { id: "peng-1", nama: "Budi" },
   stokDitambahkan: true,
@@ -69,12 +68,9 @@ describe("relasi pembelian", () => {
     expect(namaPencatat({ ...pembelian, dicatatOleh: null })).toBe("-");
   });
 
-  it("lokasi penerima dicari di daftar lokasi", () => {
-    const outlet = { id: "lok-outlet", nama: "Outlet Pusat", tipe: "Outlet" } as Lokasi;
-    expect(lokasiPembelian(pembelian, [outlet])).toBe(outlet);
-    expect(lokasiPembelian(pembelian, [])).toBeNull();
-    expect(lokasiPembelian(pembelian, undefined)).toBeNull();
-    expect(lokasiPembelian({ ...pembelian, locationID: null }, [outlet])).toBeNull();
+  it("lokasi penerima dibaca dari locationID ter-populate (B112)", () => {
+    expect(lokasiPembelian(pembelian)).toEqual({ id: "lok-outlet", nama: "Outlet Pusat", tipe: "Outlet" });
+    expect(lokasiPembelian({ ...pembelian, locationID: null })).toBeNull();
   });
 });
 

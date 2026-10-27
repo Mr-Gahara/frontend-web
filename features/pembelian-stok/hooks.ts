@@ -9,7 +9,7 @@ import type {
   PembelianStokTersimpan,
 } from "@/types/pembelianStok";
 import { pembelianStokApi } from "./api";
-import { UKURAN_HALAMAN_RINGKASAN, kumpulkanPembelian } from "./ringkasan";
+import { BATAS_SUPPLIER_TERATAS } from "./ringkasan";
 
 /** Callback halaman untuk toast, dialog, dan navigasi (keputusan rancangan butir 13). */
 type Callback<T = void> = { onSuccess?: (hasil: T) => void; onError?: (err: unknown) => void };
@@ -29,23 +29,16 @@ export function useDaftarPembelianStok(params: Record<string, string> | null) {
 }
 
 /**
- * Ringkasan Belanja Stok di Keuangan: seluruh halaman daftar pada filter
- * yang sama, dijumlahkan di frontend karena backend belum punya endpoint
- * ringkasan pembelian. Berada di bawah akar pembelianStok, sehingga catat,
- * ubah, dan hapus ikut memperbaruinya. Hasil sebelumnya dipertahankan
- * selama filter baru dihitung.
+ * Ringkasan Belanja Stok di Keuangan dari GET /pembelianstok/ringkasan
+ * (B117), dengan filter yang sama dengan daftar. page dan limit hanya
+ * memotong daftar supplier, sehingga hanya supplier teratas yang diminta.
+ * Berada di bawah akar pembelianStok, sehingga catat, ubah, dan hapus ikut
+ * memperbaruinya. Hasil sebelumnya dipertahankan selama filter baru dimuat.
  */
 export function useRingkasanBelanjaStok(filter: Record<string, string>) {
   return useQuery({
     queryKey: queryKeys.pembelianStok.ringkasan(filter),
-    queryFn: () =>
-      kumpulkanPembelian((halaman) =>
-        pembelianStokApi.daftar({
-          ...filter,
-          page: String(halaman),
-          limit: String(UKURAN_HALAMAN_RINGKASAN),
-        }),
-      ),
+    queryFn: () => pembelianStokApi.ringkasan({ ...filter, page: "1", limit: String(BATAS_SUPPLIER_TERATAS) }),
     placeholderData: keepPreviousData,
   });
 }
