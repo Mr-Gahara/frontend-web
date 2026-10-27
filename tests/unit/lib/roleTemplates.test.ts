@@ -50,29 +50,44 @@ describe("ROLE_TEMPLATES: stock opname, stock adjustment per ruang, dan absensi"
   });
 });
 
-const PEMBELIAN = [
+const PEMBELIAN_UMUM = [
   "read-pembelian-stok",
   "create-pembelian-stok",
   "update-pembelian-stok",
   "delete-pembelian-stok",
 ];
+const PEMBELIAN_RUANG = ["read", "create", "update", "delete"].flatMap((aksi) => [
+  aksi + "-pembelian-stok-outlet",
+  aksi + "-pembelian-stok-gudang",
+]);
+const PEMBELIAN = [...PEMBELIAN_UMUM, ...PEMBELIAN_RUANG];
 
-describe("ROLE_TEMPLATES: pembelian stok (RH6a)", () => {
+describe("ROLE_TEMPLATES: pembelian stok (RH6a, per ruang B116)", () => {
   it.each(["guest", "staff", "kasir"])("%s tidak memegang izin pembelian stok", (id) => {
     expect(izinTemplate(id).filter((nama) => PEMBELIAN.includes(nama))).toEqual([]);
   });
 
-  it("supervisor hanya melihat pembelian, dengan izin lokasi untuk membuka daftar dan detail per ruang", () => {
+  it.each(ROLE_TEMPLATES)(
+    "$id tidak memegang izin umum pembelian stok, yang tinggal milik Owner",
+    ({ permissions }) => {
+      expect(permissions.filter((nama) => PEMBELIAN_UMUM.includes(nama))).toEqual([]);
+    },
+  );
+
+  it("supervisor hanya melihat pembelian di kedua ruang, dengan izin lokasi untuk membuka daftar dan detail", () => {
     const izin = izinTemplate("supervisor");
-    expect(izin.filter((nama) => PEMBELIAN.includes(nama))).toEqual(["read-pembelian-stok"]);
+    expect(izin.filter((nama) => PEMBELIAN.includes(nama))).toEqual([
+      "read-pembelian-stok-outlet",
+      "read-pembelian-stok-gudang",
+    ]);
     expect(izin).toContain("read-location");
   });
 
   it.each(["manajer", "general-manajer"])(
-    "%s memegang seluruh izin pembelian stok beserta izin yang dituntut halaman catat",
+    "%s memegang seluruh izin pembelian stok per ruang beserta izin yang dituntut halaman catat",
     (id) => {
       expect(izinTemplate(id)).toEqual(
-        expect.arrayContaining([...PEMBELIAN, "read-bahan", "read-akunkas", "read-location"]),
+        expect.arrayContaining([...PEMBELIAN_RUANG, "read-bahan", "read-akunkas", "read-location"]),
       );
     },
   );

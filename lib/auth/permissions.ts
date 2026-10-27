@@ -45,6 +45,8 @@ export const IZIN = {
   pengajuanStok: "read-pengajuan-stok",
   transferStok: "read-transfer-stok",
   pembelianStok: "read-pembelian-stok",
+  pembelianStokOutlet: "read-pembelian-stok-outlet",
+  pembelianStokGudang: "read-pembelian-stok-gudang",
 
   penjualan: "read-penjualan",
   pembayaran: "read-pembayaran",
@@ -90,6 +92,8 @@ export const IZIN = {
   buatTransferStok: "create-transfer-stok",
   buatBebanOperasional: "create-beban-operasional",
   buatPembelianStok: "create-pembelian-stok",
+  buatPembelianStokOutlet: "create-pembelian-stok-outlet",
+  buatPembelianStokGudang: "create-pembelian-stok-gudang",
 
   // Izin aksi di dalam halaman: tombol dan bagian mengikuti izin
   // endpoint-nya lewat features/<modul>/izin.ts (keputusan rancangan
@@ -123,7 +127,11 @@ export const IZIN = {
   ubahKategoriBeban: "update-kategori-beban",
   hapusKategoriBeban: "delete-kategori-beban",
   ubahPembelianStok: "update-pembelian-stok",
+  ubahPembelianStokOutlet: "update-pembelian-stok-outlet",
+  ubahPembelianStokGudang: "update-pembelian-stok-gudang",
   hapusPembelianStok: "delete-pembelian-stok",
+  hapusPembelianStokOutlet: "delete-pembelian-stok-outlet",
+  hapusPembelianStokGudang: "delete-pembelian-stok-gudang",
 } as const;
 
 export type Izin = (typeof IZIN)[keyof typeof IZIN];
@@ -194,9 +202,15 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/keuangan/akunkas/pindahDana": [],
   "/dashboard/outlet/keuangan/mutasiArusKas": [IZIN.akunKas],
   "/dashboard/outlet/keuangan/ringkasanLabaRugi": [IZIN.laporan],
-  // Belanja Stok: pembelian seluruh lokasi; nama lokasi dan ruang asal dibaca
-  // dari daftar lokasi, karena locationID pembelian tidak di-populate.
-  "/dashboard/outlet/keuangan/belanjaStok": [IZIN.pembelianStok, IZIN.akunKas, IZIN.location],
+  // Belanja Stok: pembelian di ruang yang diizinkan (izin umum untuk semua
+  // ruang, atau izin per ruang yang dijumlahkan backend sesuai ruangnya, B116);
+  // nama lokasi dan ruang asal dibaca dari daftar lokasi, karena locationID
+  // pembelian tidak di-populate.
+  "/dashboard/outlet/keuangan/belanjaStok": [
+    [IZIN.pembelianStok, IZIN.pembelianStokOutlet, IZIN.pembelianStokGudang],
+    IZIN.akunKas,
+    IZIN.location,
+  ],
   "/dashboard/outlet/pelanggan": [IZIN.pelanggan],
   "/dashboard/outlet/reservasi": [IZIN.booking],
   "/dashboard/outlet/reservasi/buatReservasi": [IZIN.booking, IZIN.pelanggan, IZIN.buatBooking],
@@ -254,11 +268,16 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/inventaris/pengirimanBarang/[id]": [IZIN.transferStok],
   "/dashboard/outlet/inventaris/pengirimanBarang/[id]/edit": [IZIN.transferStok, IZIN.buatTransferStok],
   // Pembelian stok: daftar memakai cakupan lokasi outlet, detail membaca tipe
-  // lokasi penerima dari GET /location (penjaga ruang). Izin per ruang menunggu
-  // backend (IZIN_PEMBELIAN_STOK_RUANG di features/pembelian-stok/izin.ts).
-  "/dashboard/outlet/inventaris/pembelianStok": [IZIN.pembelianStok, IZIN.location],
-  "/dashboard/outlet/inventaris/pembelianStok/[id]": [IZIN.pembelianStok, IZIN.location],
-  "/dashboard/outlet/inventaris/pembelianStok/catatPembelian": [IZIN.bahan, IZIN.akunKas, IZIN.location, IZIN.buatPembelianStok],
+  // lokasi penerima dari GET /location (penjaga ruang). Izin umum atau izin
+  // ruangnya, seperti route backend (B116; aksi di features/pembelian-stok/izin.ts).
+  "/dashboard/outlet/inventaris/pembelianStok": [[IZIN.pembelianStok, IZIN.pembelianStokOutlet], IZIN.location],
+  "/dashboard/outlet/inventaris/pembelianStok/[id]": [[IZIN.pembelianStok, IZIN.pembelianStokOutlet], IZIN.location],
+  "/dashboard/outlet/inventaris/pembelianStok/catatPembelian": [
+    IZIN.bahan,
+    IZIN.akunKas,
+    IZIN.location,
+    [IZIN.buatPembelianStok, IZIN.buatPembelianStokOutlet],
+  ],
 
   // Jadwal outlet: izin shift, pola roster, dan jadwal belum ada di backend,
   // sehingga gate memakai izin data yang benar-benar diperiksa (daftar karyawan).
@@ -282,9 +301,14 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/gudang/pengajuanStok/[id]": [IZIN.pengajuanStok],
   "/dashboard/gudang/transferStok": [IZIN.transferStok],
   "/dashboard/gudang/transferStok/[id]": [IZIN.transferStok],
-  "/dashboard/gudang/pembelianStok": [IZIN.pembelianStok, IZIN.location],
-  "/dashboard/gudang/pembelianStok/[id]": [IZIN.pembelianStok, IZIN.location],
-  "/dashboard/gudang/pembelianStok/catatPembelian": [IZIN.bahan, IZIN.akunKas, IZIN.location, IZIN.buatPembelianStok],
+  "/dashboard/gudang/pembelianStok": [[IZIN.pembelianStok, IZIN.pembelianStokGudang], IZIN.location],
+  "/dashboard/gudang/pembelianStok/[id]": [[IZIN.pembelianStok, IZIN.pembelianStokGudang], IZIN.location],
+  "/dashboard/gudang/pembelianStok/catatPembelian": [
+    IZIN.bahan,
+    IZIN.akunKas,
+    IZIN.location,
+    [IZIN.buatPembelianStok, IZIN.buatPembelianStokGudang],
+  ],
   "/dashboard/gudang/transferStok/[id]/edit": [IZIN.transferStok, IZIN.buatTransferStok],
   "/dashboard/gudang/pengirimanStok": [IZIN.transferStok],
   "/dashboard/gudang/penerimaanStok": [IZIN.transferStok],

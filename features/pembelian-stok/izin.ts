@@ -9,7 +9,10 @@ export interface IzinPembelianStok {
   hapus: string;
 }
 
-/** Izin umum, sesuai routes/pembelianStokRoute.js backend ridho b5b367a (B74). */
+/**
+ * Izin umum, membuka kedua ruang. Sesuai routes/pembelianStokRoute.js backend
+ * ridho 877e493 (B74, B116).
+ */
 export const IZIN_PEMBELIAN_STOK: IzinPembelianStok = {
   baca: IZIN.pembelianStok,
   buat: IZIN.buatPembelianStok,
@@ -18,36 +21,35 @@ export const IZIN_PEMBELIAN_STOK: IzinPembelianStok = {
 };
 
 /**
- * Izin pembelian stok per ruang (keputusan rancangan butir 18). Backend
- * belum membedakan pembelian di outlet dan di gudang, dan POST menerima
- * lokasi penerima mana pun milik tenant; pembedaannya diminta ke tim
- * backend (pemilik proyek, 25 Oktober 2026). Selama null, kedua ruang
- * memakai izin umum. Isi dengan nama dari seeder permission backend begitu
- * tersedia; tombol dan data di dalam halaman langsung mengikutinya. Syarat
- * gerbang rute di IZIN_HALAMAN ikut diganti saat itu, karena IZIN_HALAMAN
- * hanya menerima nama yang ada di IZIN.
+ * Izin pembelian stok per ruang (B116, backend ridho 877e493; kontrak/temuan.md
+ * butir 158). Backend menerima izin umum atau izin ruangnya di setiap route;
+ * pemegang izin ruang hanya melihat, mencatat, mengubah, dan menghapus
+ * pembelian di lokasi bertipe ruangnya, dan dijawab 403 di ruang lain.
+ * Template role memakai izin ini, sedangkan izin umum tinggal milik Owner
+ * lewat seed.
  */
-export const IZIN_PEMBELIAN_STOK_RUANG: Record<RuangPembelian, IzinPembelianStok> | null = null;
+export const IZIN_PEMBELIAN_STOK_RUANG: Record<RuangPembelian, IzinPembelianStok> = {
+  outlet: {
+    baca: IZIN.pembelianStokOutlet,
+    buat: IZIN.buatPembelianStokOutlet,
+    ubah: IZIN.ubahPembelianStokOutlet,
+    hapus: IZIN.hapusPembelianStokOutlet,
+  },
+  gudang: {
+    baca: IZIN.pembelianStokGudang,
+    buat: IZIN.buatPembelianStokGudang,
+    ubah: IZIN.ubahPembelianStokGudang,
+    hapus: IZIN.hapusPembelianStokGudang,
+  },
+};
 
-/** Nama izin yang berlaku di satu ruang; izin umum selama izin per ruang belum ditetapkan. */
-export function izinPembelianStok(
-  ruang: RuangPembelian,
-  peta: Record<RuangPembelian, IzinPembelianStok> | null = IZIN_PEMBELIAN_STOK_RUANG,
-): IzinPembelianStok {
-  return peta?.[ruang] ?? IZIN_PEMBELIAN_STOK;
-}
-
-/** Aksi yang boleh dijalankan pengguna di satu ruang (keputusan rancangan butir 14). */
-export function aksiPembelianStok(
-  permissions: readonly string[],
-  ruang: RuangPembelian,
-  peta: Record<RuangPembelian, IzinPembelianStok> | null = IZIN_PEMBELIAN_STOK_RUANG,
-) {
-  const izin = izinPembelianStok(ruang, peta);
-  return {
-    baca: permissions.includes(izin.baca),
-    buat: permissions.includes(izin.buat),
-    ubah: permissions.includes(izin.ubah),
-    hapus: permissions.includes(izin.hapus),
-  };
+/**
+ * Aksi yang boleh dijalankan pengguna di satu ruang (keputusan rancangan butir
+ * 14): izin umum atau izin ruangnya, sama dengan checkPermission backend.
+ */
+export function aksiPembelianStok(permissions: readonly string[], ruang: RuangPembelian) {
+  const ruangnya = IZIN_PEMBELIAN_STOK_RUANG[ruang];
+  const boleh = (aksi: keyof IzinPembelianStok) =>
+    permissions.includes(IZIN_PEMBELIAN_STOK[aksi]) || permissions.includes(ruangnya[aksi]);
+  return { baca: boleh("baca"), buat: boleh("buat"), ubah: boleh("ubah"), hapus: boleh("hapus") };
 }

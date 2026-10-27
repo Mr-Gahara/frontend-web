@@ -108,10 +108,10 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
   // Stok outlet dan gudang tidak dicampur di tampilan mana pun (Model bisnis
   // MVP). Detail diambil per id tanpa melihat lokasi, sehingga pembelian milik
   // ruang lain yang dibuka lewat URL ditolak di sini, seperti detail stock
-  // adjustment. Ini penjaga tampilan, bukan pengaman akses: backend belum
-  // membedakan pembelian per ruang (IZIN_PEMBELIAN_STOK_RUANG). Lokasi yang
-  // tidak diketahui, karena terhapus atau daftar lokasi gagal dimuat, tetap
-  // ditampilkan.
+  // adjustment. Ini penjaga tampilan bagi pemegang izin umum; pemegang izin
+  // per ruang sudah dijawab 403 oleh backend untuk ruang lain (B116). Lokasi
+  // yang tidak diketahui, karena terhapus atau daftar lokasi gagal dimuat,
+  // tetap ditampilkan.
   const lokasi = lokasiPembelian(pembelian, daftarLokasi.data);
   if (lokasi && lokasi.tipe !== TIPE_LOKASI_PEMBELIAN[ruang]) {
     return (

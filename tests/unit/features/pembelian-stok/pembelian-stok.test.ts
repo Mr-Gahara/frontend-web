@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   IZIN_PEMBELIAN_STOK,
+  IZIN_PEMBELIAN_STOK_RUANG,
   aksiPembelianStok,
-  izinPembelianStok,
-  type IzinPembelianStok,
-  type RuangPembelian,
 } from "@/features/pembelian-stok/izin";
 import {
   FILTER_AWAL_PEMBELIAN,
@@ -267,31 +265,48 @@ describe("filterServerPembelian, paramDaftarPembelian, dan adaFilterPembelian", 
   });
 });
 
-describe("izinPembelianStok dan aksiPembelianStok", () => {
-  const peta: Record<RuangPembelian, IzinPembelianStok> = {
-    outlet: { baca: "read-po", buat: "create-po", ubah: "update-po", hapus: "delete-po" },
-    gudang: { baca: "read-pg", buat: "create-pg", ubah: "update-pg", hapus: "delete-pg" },
-  };
+describe("aksiPembelianStok", () => {
+  const SEMUA = { baca: true, buat: true, ubah: true, hapus: true };
 
-  it("selama izin per ruang null, kedua ruang memakai izin umum", () => {
-    expect(izinPembelianStok("outlet")).toEqual(IZIN_PEMBELIAN_STOK);
-    expect(izinPembelianStok("gudang")).toEqual(IZIN_PEMBELIAN_STOK);
+  it("nama izin umum dan per ruang sama dengan seed dan route backend (B74, B116)", () => {
     expect(IZIN_PEMBELIAN_STOK).toEqual({
       baca: "read-pembelian-stok",
       buat: "create-pembelian-stok",
       ubah: "update-pembelian-stok",
       hapus: "delete-pembelian-stok",
     });
+    expect(IZIN_PEMBELIAN_STOK_RUANG).toEqual({
+      outlet: {
+        baca: "read-pembelian-stok-outlet",
+        buat: "create-pembelian-stok-outlet",
+        ubah: "update-pembelian-stok-outlet",
+        hapus: "delete-pembelian-stok-outlet",
+      },
+      gudang: {
+        baca: "read-pembelian-stok-gudang",
+        buat: "create-pembelian-stok-gudang",
+        ubah: "update-pembelian-stok-gudang",
+        hapus: "delete-pembelian-stok-gudang",
+      },
+    });
   });
 
-  it("begitu izin per ruang diisi, tiap ruang memakai namanya sendiri", () => {
-    expect(izinPembelianStok("gudang", peta)).toEqual(peta.gudang);
-    expect(aksiPembelianStok(["read-pg", "create-po"], "gudang", peta)).toEqual({
-      baca: true,
-      buat: false,
-      ubah: false,
-      hapus: false,
-    });
+  it("izin umum membuka setiap aksi di kedua ruang", () => {
+    const umum = Object.values(IZIN_PEMBELIAN_STOK);
+    expect(aksiPembelianStok(umum, "outlet")).toEqual(SEMUA);
+    expect(aksiPembelianStok(umum, "gudang")).toEqual(SEMUA);
+  });
+
+  it("izin ruang hanya membuka ruangnya", () => {
+    const izin = ["read-pembelian-stok-gudang", "create-pembelian-stok-outlet"];
+    expect(aksiPembelianStok(izin, "gudang")).toEqual({ baca: true, buat: false, ubah: false, hapus: false });
+    expect(aksiPembelianStok(izin, "outlet")).toEqual({ baca: false, buat: true, ubah: false, hapus: false });
+  });
+
+  it("seluruh izin satu ruang tidak membuka ruang lain", () => {
+    const outlet = Object.values(IZIN_PEMBELIAN_STOK_RUANG.outlet);
+    expect(aksiPembelianStok(outlet, "outlet")).toEqual(SEMUA);
+    expect(aksiPembelianStok(outlet, "gudang")).toEqual({ baca: false, buat: false, ubah: false, hapus: false });
   });
 
   it("aksi mengikuti izin yang dipegang", () => {
