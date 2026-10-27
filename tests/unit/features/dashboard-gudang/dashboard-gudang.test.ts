@@ -48,10 +48,14 @@ function jurnal(id: string, tanggal: string, tipeLokasi: string): JurnalStok {
 }
 
 describe("antreanDariRingkasan", () => {
-  it("memetakan hitungan pengajuan server ke kartu, tanpa tercampur hitungan surat jalan", () => {
+  it("memetakan hitungan pengajuan server ke kartu; surat jalan hanya permintaan (B111, AR6a)", () => {
     expect(
       antreanDariRingkasan({
-        pengajuan: { menungguApproval: 3, siapDibuatSuratJalan: 2 },
+        pengajuan: {
+          menungguApproval: 3,
+          siapDibuatSuratJalan: 5,
+          siapDibuatSuratJalanPerArah: { permintaan: 2, pengembalian: 3 },
+        },
         transfer: { suratJalanPending: 1, sedangDikirim: 4 },
         inventory: { stokKritis: 7 },
         jurnalTerbaru: [],

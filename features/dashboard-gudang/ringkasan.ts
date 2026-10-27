@@ -22,14 +22,14 @@ export interface AntreanPengajuan {
  * Hitungan kartu pengajuan dari GET /dashboard/gudang. Sejak B101 aturan server
  * sama dengan tab Perlu Disetujui dan Perlu Surat Jalan di daftar gudang:
  * SUBMITTED, serta APPROVED atau PENDING yang belum punya surat jalan. Server
- * menghitung kedua arah pengajuan (P8), sedangkan daftar gudang baru
- * menampilkan Gudang ke Outlet, sehingga angkanya berbeda begitu ada
- * pengembalian dari outlet sebelum alur itu didukung web.
+ * menghitung kedua arah pengajuan (P8), sedangkan tab Perlu Surat Jalan gudang
+ * hanya memuat permintaan, karena surat jalan pengembalian dibuat outlet
+ * (AR6a). Kartu surat jalan karena itu memakai rincian permintaan (B111).
  */
 export function antreanDariRingkasan(ringkasan: RingkasanDashboardGudang): AntreanPengajuan {
   return {
     perluTinjauan: ringkasan.pengajuan.menungguApproval,
-    perluSuratJalan: ringkasan.pengajuan.siapDibuatSuratJalan,
+    perluSuratJalan: ringkasan.pengajuan.siapDibuatSuratJalanPerArah.permintaan,
   };
 }
 

@@ -12,7 +12,11 @@ const URL_DASHBOARD = BASIS + "/dashboard/gudang";
 type Lokasi = { tipe?: string } | null | undefined;
 type PengajuanMentah = { status: string; dariLokasi?: Lokasi; keLokasi?: Lokasi; transferStokID?: unknown };
 type RingkasanMentah = {
-  pengajuan: { menungguApproval: number; siapDibuatSuratJalan: number };
+  pengajuan: {
+    menungguApproval: number;
+    siapDibuatSuratJalan: number;
+    siapDibuatSuratJalanPerArah: { permintaan: number; pengembalian: number };
+  };
   transfer: { suratJalanPending: number; sedangDikirim: number };
 };
 type InventoryMentah = { isStokKritis?: boolean };
@@ -66,7 +70,12 @@ test.describe("Dashboard gudang", () => {
     const { ringkasan, permintaanPengajuan } = await bukaDashboard(page);
     expect(permintaanPengajuan, "dashboard tidak mengambil daftar pengajuan").toEqual([]);
     const grup = page.getByRole("region", { name: "Pengajuan dari outlet" });
-    const { menungguApproval, siapDibuatSuratJalan } = ringkasan.pengajuan;
+    const { menungguApproval, siapDibuatSuratJalanPerArah: perArah } = ringkasan.pengajuan;
+    // B111: kartu gudang memakai permintaan; surat jalan pengembalian dibuat outlet (AR6a).
+    const siapDibuatSuratJalan = perArah.permintaan;
+    expect(perArah.permintaan + perArah.pengembalian, "rincian per arah menjumlah ke total").toBe(
+      ringkasan.pengajuan.siapDibuatSuratJalan,
+    );
     await expect(grup).toContainText(`${angka(menungguApproval)} pengajuan perlu disetujui`);
     await expect(grup).toContainText(
       `${angka(siapDibuatSuratJalan)} pengajuan sudah disetujui, surat jalannya belum dibuat`,
@@ -87,8 +96,8 @@ test.describe("Dashboard gudang", () => {
       await expect(page.getByText(`${siapDibuatSuratJalan} total data`, { exact: true })).toBeVisible();
     }
 
-    // B101: hitungan server sama dengan aturan tab daftar gudang. Selisih berarti
-    // ada pengajuan Outlet ke Gudang (P8) yang belum ditampilkan web.
+    // B101 dan B111: hitungan server sama dengan aturan tab daftar gudang, yang
+    // memuat permintaan saja (arahBenar).
     const rDaftar = await tungguDaftar;
     expect(new URL(rDaftar.url()).searchParams.get("status")).toBeNull();
     const pengajuan = await isi<PengajuanMentah[]>(rDaftar);

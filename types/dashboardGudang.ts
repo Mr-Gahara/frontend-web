@@ -10,7 +10,13 @@
  * - jurnalTerbaru mencampur jurnal semua lokasi (kontrak/temuan.md butir 74).
  */
 export interface RingkasanDashboardGudang {
-  pengajuan: { menungguApproval: number; siapDibuatSuratJalan: number };
+  pengajuan: {
+    menungguApproval: number;
+    /** Kedua arah pengajuan (P8). */
+    siapDibuatSuratJalan: number;
+    /** B111: permintaan (surat jalan dibuat gudang) dan pengembalian (dibuat outlet). */
+    siapDibuatSuratJalanPerArah: { permintaan: number; pengembalian: number };
+  };
   transfer: { suratJalanPending: number; sedangDikirim: number };
   inventory: { stokKritis: number };
   jurnalTerbaru: unknown[];
