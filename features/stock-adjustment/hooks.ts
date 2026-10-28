@@ -1,18 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { isNotFound } from "@/lib/api/error";
 import { queryKeys } from "@/lib/queryKeys";
-import { stockAdjustmentApi, type FilterAdjustment } from "./api";
+import { stockAdjustmentApi } from "./api";
 
 /**
- * Daftar stock adjustment. filter null berarti lingkup belum siap, sehingga
- * tidak ada permintaan; filter tanpa locationID berarti seluruh lokasi, dan
- * halaman wajib menyaring tipe lokasinya sendiri.
+ * Satu halaman stock adjustment dari server (B105, B108, B109). params null
+ * berarti lingkup belum siap, sehingga tidak ada permintaan. Halaman
+ * sebelumnya tetap tampil selama halaman berikutnya dimuat.
  */
-export function useDaftarStockAdjustment(filter: FilterAdjustment | null) {
+export function useHalamanStockAdjustment(params: Record<string, string> | null) {
   return useQuery({
-    queryKey: queryKeys.stockAdjustment.daftar(filter ?? undefined),
-    queryFn: () => stockAdjustmentApi.daftar(filter ?? {}),
-    enabled: filter !== null,
+    queryKey: queryKeys.stockAdjustment.daftar(params ?? undefined),
+    queryFn: () => stockAdjustmentApi.halaman(params ?? {}),
+    enabled: params !== null,
+    placeholderData: keepPreviousData,
   });
 }
 

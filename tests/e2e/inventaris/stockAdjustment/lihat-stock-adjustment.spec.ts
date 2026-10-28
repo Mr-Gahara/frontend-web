@@ -60,6 +60,9 @@ async function bukaDaftar(
   await page.goto(url);
   const res = await tunggu;
   expect(res.status()).toBe(200);
+  const q = new URL(res.url()).searchParams;
+  expect(q.get("page"), "halaman pertama dari server (B105)").toBe("1");
+  expect(q.get("limit"), "ukuran halaman bawaan").toBe("10");
   const body = await res.json();
   await expect(
     page.getByRole("heading", { name: /jurnal penyesuaian stok/i }),
@@ -91,14 +94,21 @@ test.describe("Stock adjustment outlet", () => {
     }
   });
 
-  test("daftar: pencarian menyaring berdasarkan nomor jurnal", async ({
+  test("daftar: pencarian nomor jurnal dikirim ke server (B108)", async ({
     page,
   }) => {
     const daftar = await bukaDaftar(page);
     test.skip(daftar.length < 2, "Butuh minimal dua stock adjustment");
     const [a, b] = daftar;
 
+    const tCari = page.waitForResponse(
+      (r) => responsDaftar(r) && new URL(r.url()).searchParams.get("cari") === a.nomorAdjustment,
+    );
     await page.getByPlaceholder("Cari nomor jurnal...").fill(a.nomorAdjustment);
+    const rCari = await tCari;
+    expect(new URL(rCari.url()).searchParams.get("page"), "pencarian kembali ke halaman 1").toBe("1");
+    const hasil = normalizeId((await rCari.json()).data) as RingkasAdjustment[];
+    expect(hasil.map((x) => x.nomorAdjustment)).toContain(a.nomorAdjustment);
 
     await expect(barisBerisi(page, a.nomorAdjustment)).toBeVisible();
     await expect(barisBerisi(page, b.nomorAdjustment)).toHaveCount(0);
@@ -125,12 +135,12 @@ test.describe("Stock adjustment outlet", () => {
     test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     await page.goto(URL_DAFTAR, { waitUntil: "commit" });
     const rDaftar = await page.waitForResponse(responsDaftar);
-    expect(new URL(rDaftar.url()).searchParams.has("locationID")).toBe(false);
+    const q = new URL(rDaftar.url()).searchParams;
+    expect(q.has("locationID")).toBe(false);
+    expect(q.get("tipeLokasi"), "seluruh outlet disaring server (B109)").toBe("Outlet");
     const semua = normalizeId((await rDaftar.json()).data) as RingkasAdjustment[];
-    for (const a of semua.filter((x) => x.lokasi?.tipe !== "Outlet").slice(0, 5)) {
-      await expect(barisBerisi(page, a.nomorAdjustment)).toHaveCount(0);
-    }
-    for (const a of semua.filter((x) => x.lokasi?.tipe === "Outlet").slice(0, 5)) {
+    expect(semua.every((x) => x.lokasi?.tipe === "Outlet")).toBe(true);
+    for (const a of semua.slice(0, 5)) {
       await expect(barisBerisi(page, a.nomorAdjustment)).toBeVisible();
     }
   });
@@ -280,6 +290,22 @@ test.describe("Stock adjustment gudang", () => {
     test.skip(outlet.length === 0, "Belum ada stock adjustment outlet di database");
     await bukaDaftar(page, URL_DAFTAR_GUDANG, "Gudang");
     await expect(barisBerisi(page, outlet[0].nomorAdjustment)).toHaveCount(0);
+  });
+
+  test("daftar: tipeLokasi Gudang, halaman, dan ukuran dikirim ke server; total dari pagination", async ({
+    page,
+  }) => {
+    const tunggu = page.waitForResponse(responsDaftar);
+    await page.goto(URL_DAFTAR_GUDANG);
+    const res = await tunggu;
+    const q = new URL(res.url()).searchParams;
+    expect(q.get("tipeLokasi"), "seluruh gudang disaring server (B109)").toBe("Gudang");
+    expect(q.has("locationID")).toBe(false);
+    expect(q.get("page")).toBe("1");
+    expect(q.get("limit")).toBe("10");
+    const body = (await res.json()) as { pagination?: { total: number } };
+    expect(body.pagination, "respons memuat pagination").toBeTruthy();
+    await expect(page.getByText(body.pagination!.total + " total data", { exact: true })).toBeVisible();
   });
 
   test("detail: dibuka dari daftar gudang, lalu kembali ke daftar gudang", async ({ page }) => {

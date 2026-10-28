@@ -44,8 +44,9 @@ export function tentukanCakupan(m: MasukanCakupan): CakupanLokasiOutlet {
 }
 
 /**
- * locationID dikirim ke server; tipeLokasi disaring di klien karena backend
- * tidak mendukung filter tipe lokasi.
+ * locationID dikirim ke server. tipeLokasi dikirim sebagai filter tipe lokasi
+ * oleh daftar yang sudah berhalaman di server (B109, mulai stock adjustment);
+ * daftar yang masih mode klien menyaringnya di klien.
  */
 export interface LingkupLokasi {
   locationID?: string;
