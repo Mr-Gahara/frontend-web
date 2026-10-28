@@ -1,15 +1,21 @@
-import { useMutation, useQuery, useQueryClient, type UseMutationOptions } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient, type UseMutationOptions } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { isNotFound } from "@/lib/api/error";
-import { pengajuanStokApi, type FilterPengajuanStok } from "./api";
+import { pengajuanStokApi } from "./api";
 import type { PayloadPengajuan } from "./payload";
 
-/** Daftar pengajuan stok; argumen null berarti cakupan belum siap, tanpa permintaan. */
-export function useDaftarPengajuanStok(filter: FilterPengajuanStok | null) {
+/**
+ * Satu halaman pengajuan stok dari server (B104, B108, B109, B110). params
+ * null berarti tidak ada permintaan: cakupan belum siap, atau hasilnya pasti
+ * kosong (paramHalamanPengajuan). Halaman sebelumnya tetap tampil selama
+ * halaman berikutnya dimuat.
+ */
+export function useHalamanPengajuanStok(params: Record<string, string> | null) {
   return useQuery({
-    queryKey: queryKeys.pengajuanStok.daftar({ ...filter }),
-    queryFn: () => pengajuanStokApi.daftar(filter ?? {}),
-    enabled: filter !== null,
+    queryKey: queryKeys.pengajuanStok.daftar(params ?? undefined),
+    queryFn: () => pengajuanStokApi.halaman(params ?? {}),
+    enabled: params !== null,
+    placeholderData: keepPreviousData,
   });
 }
 

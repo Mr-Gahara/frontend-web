@@ -1,20 +1,17 @@
-import { apiData } from "@/lib/api/client";
+import { api, apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
-import type { PengajuanStok, StatusPengajuan } from "@/types/pengajuanStok";
+import type { Paginasi } from "@/lib/api/normalize";
+import type { PengajuanStok } from "@/types/pengajuanStok";
 import type { PayloadPengajuan } from "./payload";
 
-export interface FilterPengajuanStok {
-  status?: StatusPengajuan;
-  /** Backend mencocokkan lokasi asal atau tujuan (pengajuanStokService.getAll). */
-  locationID?: string;
-}
+/** Satu halaman pengajuan (B104): dengan page atau limit, server mengirim pagination. */
+export type HalamanPengajuanStok = { data: PengajuanStok[]; pagination: Paginasi | null };
 
 export const pengajuanStokApi = {
-  daftar: (filter: FilterPengajuanStok) => {
-    const params: Record<string, string> = {};
-    if (filter.status) params.status = filter.status;
-    if (filter.locationID) params.locationID = filter.locationID;
-    return apiData.get<PengajuanStok[]>(EP.pengajuanStok.list, params);
+  /** params disusun paramHalamanPengajuan (filter.ts). */
+  halaman: async (params: Record<string, string>): Promise<HalamanPengajuanStok> => {
+    const hasil = await api.get<PengajuanStok[]>(EP.pengajuanStok.list, params);
+    return { data: hasil.data, pagination: hasil.pagination ?? null };
   },
   detail: (id: string) => apiData.get<PengajuanStok>(EP.pengajuanStok.detail(id)),
   /** Semua pengajuan dari web adalah permintaan outlet ke gudang. */

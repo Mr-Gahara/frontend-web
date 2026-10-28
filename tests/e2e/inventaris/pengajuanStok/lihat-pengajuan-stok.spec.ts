@@ -1,5 +1,6 @@
 import { test, expect, Page, Response } from "@playwright/test";
 import { ADA_IZIN_LINTAS, JALUR_TERKUNCI, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
+import { LABEL_ARAH_PENGAJUAN } from "../../../../features/pengajuan-stok/tampilan";
 
 type LokasiMentah = { id?: string; _id?: string; nama: string; tipe: string };
 
@@ -36,65 +37,55 @@ async function login(page: Page) {
 // ============================================================
 // HELPER: Respons daftar pengajuan
 // ============================================================
-// Path dicocokkan tanpa membedakan huruf: halaman lama memanggil
-// /pengajuanStok, features/ memakai /pengajuanstok.
-function daftarPengajuan(status: string | null) {
+// Daftar berhalaman di server (B104, B108, B109, B110): tab, arah, lokasi,
+// dan pencarian dikirim sebagai query, dan kaki tabel memakai
+// pagination.total. Harapan tidak lagi dihitung ulang dari respons di klien.
+type Kueri = Record<string, string | null>;
+
+/** Respons daftar yang query-nya memuat nilai yang diharapkan; null berarti parameter tidak ada. */
+function daftarPengajuan(harap: Kueri) {
   return (r: Response) => {
     if (r.request().method() !== "GET" || !/\/api\/pengajuanstok(\?|$)/i.test(r.url())) return false;
-    return new URL(r.url()).searchParams.get("status") === status;
+    const q = new URL(r.url()).searchParams;
+    return Object.entries(harap).every(([k, v]) => q.get(k) === v);
   };
 }
 
-async function isiRespons(r: Response): Promise<PengajuanMentah[]> {
+type HalamanMentah = { data: PengajuanMentah[]; total: number };
+
+async function isiRespons(r: Response): Promise<HalamanMentah> {
   expect(r.status()).toBe(200);
-  return ((await r.json()) as { data: PengajuanMentah[] }).data;
+  const body = (await r.json()) as { data: PengajuanMentah[]; pagination?: { total: number } };
+  expect(body.pagination, "daftar berhalaman memuat pagination").toBeTruthy();
+  return { data: body.data, total: body.pagination!.total };
 }
 
-/** Buka halaman dan tangkap daftar yang dimuatnya sendiri. */
-async function buka(page: Page, url: string, statusBawaan: string | null) {
+/** Buka halaman dan tangkap halaman pertama yang dimuatnya sendiri. */
+async function buka(page: Page, url: string, harap: Kueri) {
   await page.goto(url, { waitUntil: "commit" });
-  return isiRespons(await page.waitForResponse(daftarPengajuan(statusBawaan)));
+  return isiRespons(await page.waitForResponse(daftarPengajuan({ page: "1", limit: "10", ...harap })));
 }
 
-/** Ukuran halaman awal tabel pengajuan; baris di luar halaman pertama dibuktikan lewat kaki tabel. */
-const UKURAN_AWAL = 10;
-
-async function periksaJumlahBaris(page: Page, jumlah: number, pesanKosong: string) {
+/** Baris tabel sama dengan isi halaman dari server, dan kaki tabel dengan pagination.total. */
+async function periksaHalaman(page: Page, h: HalamanMentah, pesanKosong: string) {
   const baris = page.locator("table tbody tr");
-  if (jumlah === 0) {
+  if (h.total === 0) {
     await expect(page.getByText(pesanKosong)).toBeVisible();
   } else {
-    await expect(baris).toHaveCount(Math.min(jumlah, UKURAN_AWAL));
+    await expect(baris).toHaveCount(h.data.length);
+    await expect(baris.first()).toContainText(h.data[0].nomorPengajuan);
   }
-  await expect(page.getByText(`${jumlah} total data`, { exact: true })).toBeVisible();
+  await expect(page.getByText(`${h.total} total data`, { exact: true })).toBeVisible();
 }
 
-// Pasangan lokasi yang sah menurut P8: Gudang dan Outlet, ke kedua arah
-// (features/pengajuan-stok/arah.ts, AR3a). Pasangan lain tidak tampil.
-const pasanganSah = (p: PengajuanMentah) =>
-  (p.dariLokasi?.tipe === "Gudang" && p.keLokasi?.tipe === "Outlet") ||
-  (p.dariLokasi?.tipe === "Outlet" && p.keLokasi?.tipe === "Gudang");
-/** Nama outlet di sisi mana pun: peminta pada permintaan, asal pada pengembalian. */
-const namaOutlet = (p: PengajuanMentah) => (p.dariLokasi?.tipe === "Outlet" ? p.dariLokasi : p.keLokasi)?.nama ?? "";
 const permintaan = (p: PengajuanMentah) => p.dariLokasi?.tipe === "Gudang" && p.keLokasi?.tipe === "Outlet";
 const pengembalian = (p: PengajuanMentah) => p.dariLokasi?.tipe === "Outlet" && p.keLokasi?.tipe === "Gudang";
-const diOutlet = (p: PengajuanMentah) => pasanganSah(p);
-// Ruang gudang: tanpa draf, karena draf tidak pernah tampil (keputusan produk).
-const diGudang = (p: PengajuanMentah) => pasanganSah(p) && p.status !== "DRAFT";
+/** Nama outlet di sisi mana pun: peminta pada permintaan, asal pada pengembalian. */
+const namaOutlet = (p: PengajuanMentah) => (p.dariLokasi?.tipe === "Outlet" ? p.dariLokasi : p.keLokasi)?.nama ?? "";
 // Disetujui: APPROVED, atau PENDING karena surat jalannya dibatalkan (features/pengajuan-stok/tahap.ts).
 const disetujui = (p: PengajuanMentah) => p.status === "APPROVED" || p.status === "PENDING";
-const perluSuratJalan = (p: PengajuanMentah) => disetujui(p) && !p.transferStokID;
-
-/** Catat permintaan daftar pengajuan yang membawa parameter status. */
-function catatPermintaanBerstatus(page: Page): string[] {
-  const status: string[] = [];
-  page.on("request", (r) => {
-    if (r.method() !== "GET" || !/\/api\/pengajuanstok(\?|$)/i.test(r.url())) return;
-    const s = new URL(r.url()).searchParams.get("status");
-    if (s) status.push(s);
-  });
-  return status;
-}
+/** Tab Semua gudang: seluruh status selain draf (STATUS_TANPA_DRAF), bagi Owner yang tidak dibatasi. */
+const STATUS_GUDANG_SEMUA = "SUBMITTED,APPROVED,PENDING,REJECTED,COMPLETED";
 
 // ============================================================
 // OUTLET
@@ -106,61 +97,67 @@ test.describe("Daftar pengajuan stok outlet", () => {
     await login(page);
   });
 
-  test("bawaan Semua: tanpa filter status, pengajuan dari outlet", async ({ page }) => {
-    const data = await buka(page, URL_OUTLET, null);
+  test("bawaan Semua: tanpa filter status, halaman pertama dari server", async ({ page }) => {
+    const h = await buka(page, URL_OUTLET, { status: null });
     await expect(page.getByRole("heading", { name: "Pengajuan Stok Barang" })).toBeVisible();
-    await periksaJumlahBaris(page, data.filter(diOutlet).length, KOSONG);
+    await periksaHalaman(page, h, KOSONG);
   });
 
-  test("tab status mengirim status ke server dan menampilkan hasilnya", async ({ page }) => {
-    await buka(page, URL_OUTLET, null);
-    const tunggu = page.waitForResponse(daftarPengajuan("SUBMITTED"));
+  test("tab status mengirim status ke server dan kembali ke halaman 1", async ({ page }) => {
+    await buka(page, URL_OUTLET, { status: null });
+    const tunggu = page.waitForResponse(daftarPengajuan({ status: "SUBMITTED", page: "1" }));
     // Di ruang outlet, tab SUBMITTED berlabel "Menunggu Persetujuan".
     await page.getByRole("button", { name: "Menunggu Persetujuan", exact: true }).click();
-    const data = await isiRespons(await tunggu);
-    expect(data.every((p) => p.status === "SUBMITTED")).toBe(true);
-    await periksaJumlahBaris(page, data.filter(diOutlet).length, KOSONG);
+    const h = await isiRespons(await tunggu);
+    expect(h.data.every((p) => p.status === "SUBMITTED")).toBe(true);
+    await periksaHalaman(page, h, KOSONG);
   });
 
-  test("tab DISETUJUI: tanpa filter status, APPROVED dan PENDING berlabel Disetujui", async ({ page }) => {
-    const data = await buka(page, URL_OUTLET, null);
-    const berstatus = catatPermintaanBerstatus(page);
+  test("tab DISETUJUI mengirim APPROVED dan PENDING sekaligus (B110), berlabel Disetujui", async ({ page }) => {
+    await buka(page, URL_OUTLET, { status: null });
+    const tunggu = page.waitForResponse(daftarPengajuan({ status: "APPROVED,PENDING", page: "1" }));
     await page.getByRole("button", { name: "Disetujui", exact: true }).click();
-    await periksaJumlahBaris(page, data.filter((p) => diOutlet(p) && disetujui(p)).length, KOSONG);
+    const h = await isiRespons(await tunggu);
+    expect(h.data.every(disetujui)).toBe(true);
+    await periksaHalaman(page, h, KOSONG);
     await expect(page.locator("table tbody tr", { hasText: "Menunggu" })).toHaveCount(0);
-    expect(berstatus).toEqual([]);
   });
 
-  test("pencarian nomor pengajuan menyaring baris", async ({ page }) => {
-    const data = (await buka(page, URL_OUTLET, null)).filter(diOutlet);
-    test.skip(data.length === 0, "Belum ada pengajuan stok");
-    const kata = data[0].nomorPengajuan;
+  test("pencarian nomor pengajuan dikirim ke server (B108)", async ({ page }) => {
+    const awal = await buka(page, URL_OUTLET, { status: null });
+    test.skip(awal.data.length === 0, "Belum ada pengajuan stok");
+    const kata = awal.data[0].nomorPengajuan;
+    const tunggu = page.waitForResponse(daftarPengajuan({ cari: kata, page: "1" }));
     await page.getByPlaceholder("Cari No. Pengajuan...").fill(kata);
-    const harapan = data.filter((p) => p.nomorPengajuan.toLowerCase().includes(kata.toLowerCase()));
-    await periksaJumlahBaris(page, harapan.length, KOSONG);
-    await expect(page.locator("table tbody tr").first()).toContainText(kata);
+    const h = await isiRespons(await tunggu);
+    expect(h.data.map((p) => p.nomorPengajuan)).toContain(kata);
+    await periksaHalaman(page, h, KOSONG);
+  });
+
+  test("filter arah pengembalian dikirim sebagai dariTipeLokasi Outlet (B109)", async ({ page }) => {
+    await buka(page, URL_OUTLET, { status: null });
+    const tunggu = page.waitForResponse(daftarPengajuan({ dariTipeLokasi: "Outlet", page: "1" }));
+    await page.getByRole("combobox", { name: "Filter arah" }).click();
+    await page.getByRole("option", { name: LABEL_ARAH_PENGAJUAN.OUTLET_KE_GUDANG, exact: true }).click();
+    const h = await isiRespons(await tunggu);
+    expect(h.data.every(pengembalian)).toBe(true);
+    await periksaHalaman(page, h, KOSONG);
   });
 
   test("lintas outlet: pilih satu outlet mengirim locationID outlet itu", async ({ page }) => {
     test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
-    const data = (await buka(page, URL_OUTLET, null)).filter(diOutlet);
-    const contoh = data.find((p) => p.keLokasi?.id && p.keLokasi?.nama);
+    const awal = await buka(page, URL_OUTLET, { status: null });
+    const contoh = awal.data.find((p) => p.keLokasi?.id && p.keLokasi?.nama);
     test.skip(!contoh, "Belum ada pengajuan outlet");
     const idOutlet = contoh!.keLokasi!.id!;
-    const tunggu = page.waitForResponse(
-      (r) =>
-        r.request().method() === "GET" &&
-        /\/api\/pengajuanstok(\?|$)/i.test(r.url()) &&
-        new URL(r.url()).searchParams.get("locationID") === idOutlet,
-    );
+    const tunggu = page.waitForResponse(daftarPengajuan({ locationID: idOutlet, page: "1" }));
     await page.getByText("Semua Outlet", { exact: true }).click();
     await page.getByRole("option", { name: contoh!.keLokasi!.nama!, exact: true }).click();
-    const hasil = await isiRespons(await tunggu);
-    await periksaJumlahBaris(page, hasil.filter(diOutlet).length, KOSONG);
+    await periksaHalaman(page, await isiRespons(await tunggu), KOSONG);
   });
 
   test("tombol buat membuka halaman buat pengajuan", async ({ page }) => {
-    await buka(page, URL_OUTLET, null);
+    await buka(page, URL_OUTLET, { status: null });
     await page.getByRole("button", { name: /buat pengajuan baru/i }).click();
     await page.waitForURL(/\/pengajuanStok\/buatPengajuan$/);
   });
@@ -248,13 +245,13 @@ test.describe("Daftar pengajuan stok outlet", () => {
   });
 
   test("menu titik tiga pada baris membuka detail pengajuan itu (P-A)", async ({ page }) => {
-    const data = (await buka(page, URL_OUTLET, null)).filter(diOutlet);
-    test.skip(data.length === 0, "Belum ada pengajuan stok");
+    const h = await buka(page, URL_OUTLET, { status: null });
+    test.skip(h.data.length === 0, "Belum ada pengajuan stok");
     const baris = page.locator("table tbody tr").first();
     await baris.getByRole("button", { name: "Buka menu" }).click();
-    const harapan = data[0].status === "DRAFT" ? "Lanjutkan draft" : "Lihat detail";
+    const harapan = h.data[0].status === "DRAFT" ? "Lanjutkan draft" : "Lihat detail";
     await page.getByRole("menuitem", { name: harapan }).click();
-    await page.waitForURL(new RegExp(`/dashboard/outlet/inventaris/pengajuanStok/${data[0].id}$`));
+    await page.waitForURL(new RegExp(`/dashboard/outlet/inventaris/pengajuanStok/${h.data[0].id}$`));
   });
 });
 
@@ -269,36 +266,35 @@ test.describe("Daftar pengajuan stok gudang", () => {
   });
 
   async function bukaSemua(page: Page) {
-    await buka(page, URL_GUDANG, "SUBMITTED");
-    const tunggu = page.waitForResponse(daftarPengajuan(null));
+    await buka(page, URL_GUDANG, { status: "SUBMITTED" });
+    const tunggu = page.waitForResponse(daftarPengajuan({ status: STATUS_GUDANG_SEMUA, page: "1" }));
     await page.getByRole("button", { name: "Semua", exact: true }).click();
     return isiRespons(await tunggu);
   }
 
   test("bawaan Perlu Disetujui: mengirim status SUBMITTED", async ({ page }) => {
-    const data = await buka(page, URL_GUDANG, "SUBMITTED");
+    const h = await buka(page, URL_GUDANG, { status: "SUBMITTED" });
     await expect(page.getByRole("heading", { name: /inbox permintaan stok/i })).toBeVisible();
-    expect(data.every((p) => p.status === "SUBMITTED")).toBe(true);
-    await periksaJumlahBaris(page, data.filter(diGudang).length, KOSONG);
+    expect(h.data.every((p) => p.status === "SUBMITTED")).toBe(true);
+    await periksaHalaman(page, h, KOSONG);
   });
 
-  test("tab Semua tanpa filter status, tanpa draf", async ({ page }) => {
-    const data = await bukaSemua(page);
-    await periksaJumlahBaris(page, data.filter(diGudang).length, KOSONG);
-    for (const draf of data.filter((p) => p.status === "DRAFT")) {
-      await expect(page.locator("table tbody tr", { hasText: draf.nomorPengajuan })).toHaveCount(0);
-    }
+  test("tab Semua mengirim seluruh status selain draf", async ({ page }) => {
+    const h = await bukaSemua(page);
+    expect(h.data.every((p) => p.status !== "DRAFT")).toBe(true);
+    await periksaHalaman(page, h, KOSONG);
   });
 
-  test("tab Perlu Surat Jalan: tanpa filter status, hanya pengajuan disetujui yang belum punya surat jalan", async ({ page }) => {
-    await buka(page, URL_GUDANG, "SUBMITTED");
-    const tunggu = page.waitForResponse(daftarPengajuan(null));
+  test("tab Perlu Surat Jalan: permintaan disetujui yang belum punya surat jalan, disaring server (B110, AR6a)", async ({ page }) => {
+    await buka(page, URL_GUDANG, { status: "SUBMITTED" });
+    const tunggu = page.waitForResponse(
+      daftarPengajuan({ status: "APPROVED,PENDING", suratJalan: "belum", dariTipeLokasi: "Gudang", page: "1" }),
+    );
     await page.getByRole("button", { name: "Perlu Surat Jalan", exact: true }).click();
-    const data = await isiRespons(await tunggu);
-    // Tab gudang hanya berisi permintaan; pengembalian menunggu surat jalan outlet (AR6a).
-    const perlu = data.filter((p) => diGudang(p) && perluSuratJalan(p) && permintaan(p));
-    await periksaJumlahBaris(page, perlu.length, KOSONG);
-    if (perlu.length > 0) {
+    const h = await isiRespons(await tunggu);
+    expect(h.data.every((p) => disetujui(p) && !p.transferStokID && permintaan(p))).toBe(true);
+    await periksaHalaman(page, h, KOSONG);
+    if (h.total > 0) {
       await expect(page.locator("table tbody tr").filter({ hasNotText: "Perlu Surat Jalan" })).toHaveCount(0);
     }
   });
@@ -315,10 +311,10 @@ test.describe("Daftar pengajuan stok gudang", () => {
       // simulasi: PENDING tanpa surat jalan hanya muncul setelah surat jalan dibatalkan; spec tidak membatalkan surat jalan (strategi data uji A)
       await route.fulfill({ response: respons, json: isi });
     });
-    const data = await bukaSemua(page);
+    const h = await bukaSemua(page);
     // Baris pertama tidak selalu permintaan sejak P8; sisi pengembalian diuji di skenario berikutnya.
-    const sasaran = data.find((p) => diGudang(p) && permintaan(p));
-    test.skip(!sasaran, "Tidak ada permintaan di ruang gudang.");
+    const sasaran = h.data.find(permintaan);
+    test.skip(!sasaran, "Tidak ada permintaan di halaman pertama ruang gudang.");
     await page.locator("table tbody tr", { hasText: sasaran!.nomorPengajuan }).getByRole("button", { name: "Buka menu" }).click();
     await page.getByRole("menuitem", { name: "Tinjau" }).click();
     await page.waitForURL(/\/dashboard\/gudang\/pengajuanStok\/[0-9a-f]{24}/i);
@@ -336,9 +332,9 @@ test.describe("Daftar pengajuan stok gudang", () => {
       // simulasi: PENDING tanpa surat jalan muncul setelah surat jalan pengembalian dibatalkan dari ruang outlet, yang belum ada di web
       await route.fulfill({ response: respons, json: isi });
     });
-    const data = await bukaSemua(page);
-    const sasaran = data.find((p) => diGudang(p) && pengembalian(p));
-    test.skip(!sasaran, "Tidak ada pengembalian di ruang gudang.");
+    const h = await bukaSemua(page);
+    const sasaran = h.data.find(pengembalian);
+    test.skip(!sasaran, "Tidak ada pengembalian di halaman pertama ruang gudang.");
     await page.locator("table tbody tr", { hasText: sasaran!.nomorPengajuan }).getByRole("button", { name: "Buka menu" }).click();
     await page.getByRole("menuitem", { name: "Tinjau" }).click();
     await page.waitForURL(/\/dashboard\/gudang\/pengajuanStok\/[0-9a-f]{24}/i);
@@ -348,12 +344,12 @@ test.describe("Daftar pengajuan stok gudang", () => {
   });
 
   test("?tab=perlu-surat-jalan membuka tab itu; klik tab menulis ?tab=, tab bawaan menghapusnya", async ({ page }) => {
-    await buka(page, `${URL_GUDANG}?tab=perlu-surat-jalan`, null);
+    await buka(page, `${URL_GUDANG}?tab=perlu-surat-jalan`, { status: "APPROVED,PENDING", suratJalan: "belum" });
     await expect(page.getByRole("button", { name: "Perlu Surat Jalan", exact: true })).toHaveAttribute("aria-pressed", "true");
     await page.getByRole("button", { name: "Semua", exact: true }).click();
     await expect(page).toHaveURL(`${URL_GUDANG}?tab=semua`);
     await expect(page.getByRole("button", { name: "Semua", exact: true })).toHaveAttribute("aria-pressed", "true");
-    const tunggu = page.waitForResponse(daftarPengajuan("SUBMITTED"));
+    const tunggu = page.waitForResponse(daftarPengajuan({ status: "SUBMITTED" }));
     await page.getByRole("button", { name: "Perlu Disetujui", exact: true }).click();
     await tunggu;
     await expect(page).toHaveURL(URL_GUDANG);
@@ -361,30 +357,33 @@ test.describe("Daftar pengajuan stok gudang", () => {
 
   test("?tab= yang tidak dikenal kembali ke tab bawaan tanpa menampilkan nilainya", async ({ page }) => {
     const nilai = "<b>ujitab</b>__proto__";
-    await buka(page, `${URL_GUDANG}?tab=${encodeURIComponent(nilai)}`, "SUBMITTED");
+    await buka(page, `${URL_GUDANG}?tab=${encodeURIComponent(nilai)}`, { status: "SUBMITTED" });
     await expect(page.getByRole("button", { name: "Perlu Disetujui", exact: true })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByText("ujitab")).toHaveCount(0);
     await expect(page.locator("b", { hasText: "ujitab" })).toHaveCount(0);
   });
 
-  test("pencarian nama outlet menyaring baris, di sisi asal maupun tujuan", async ({ page }) => {
-    const data = (await bukaSemua(page)).filter(diGudang);
-    const contoh = data.find((p) => namaOutlet(p));
+  test("pencarian nama outlet dikirim ke server dan mencocokkan lokasi asal maupun tujuan (B108)", async ({ page }) => {
+    const awal = await bukaSemua(page);
+    const contoh = awal.data.find((p) => namaOutlet(p));
     test.skip(!contoh, "Belum ada pengajuan dengan nama outlet");
     const kata = namaOutlet(contoh!);
+    const tunggu = page.waitForResponse(daftarPengajuan({ cari: kata, status: STATUS_GUDANG_SEMUA, page: "1" }));
     await page.getByPlaceholder("Cari No. Pengajuan / Outlet...").fill(kata);
+    const h = await isiRespons(await tunggu);
     const kecil = kata.toLowerCase();
-    const harapan = data.filter(
-      (p) => p.nomorPengajuan.toLowerCase().includes(kecil) || namaOutlet(p).toLowerCase().includes(kecil),
-    );
-    await periksaJumlahBaris(page, harapan.length, KOSONG);
+    const cocok = (p: PengajuanMentah) =>
+      [p.nomorPengajuan, p.dariLokasi?.nama ?? "", p.keLokasi?.nama ?? ""].some((t) => t.toLowerCase().includes(kecil));
+    expect(h.data.length).toBeGreaterThan(0);
+    expect(h.data.every(cocok)).toBe(true);
+    await periksaHalaman(page, h, KOSONG);
   });
 
   test("menu Tinjau pada baris membuka detail pengajuan itu (P-A)", async ({ page }) => {
-    const data = (await bukaSemua(page)).filter(diGudang);
-    test.skip(data.length === 0, "Belum ada pengajuan stok");
+    const h = await bukaSemua(page);
+    test.skip(h.data.length === 0, "Belum ada pengajuan stok");
     await page.locator("table tbody tr").first().getByRole("button", { name: "Buka menu" }).click();
     await page.getByRole("menuitem", { name: "Tinjau" }).click();
-    await page.waitForURL(new RegExp(`/dashboard/gudang/pengajuanStok/${data[0].id}$`));
+    await page.waitForURL(new RegExp(`/dashboard/gudang/pengajuanStok/${h.data[0].id}$`));
   });
 });

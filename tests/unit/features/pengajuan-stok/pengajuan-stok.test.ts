@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PengajuanStok } from "@/types/pengajuanStok";
-import { cocokTab, saringPengajuan, statusServerTab } from "@/features/pengajuan-stok/filter";
+import { STATUS_TANPA_DRAF, paramHalamanPengajuan } from "@/features/pengajuan-stok/filter";
 import { tahapPengajuan } from "@/features/pengajuan-stok/tahap";
 import { arahLokasi, arahPengajuanValid, peranRuang } from "@/features/pengajuan-stok/arah";
 import {
@@ -55,24 +55,6 @@ describe("arahPengajuanValid", () => {
   it("pasangan sesama tipe dan lokasi yang tidak termuat tidak valid", () => {
     expect(arahPengajuanValid(pengajuan("REQ-020", "SUBMITTED", "Gudang Dua", "Gudang", "Gudang"))).toBe(false);
     expect(arahPengajuanValid({ dariLokasi: null, keLokasi: DATA[1].keLokasi })).toBe(false);
-  });
-});
-
-describe("saringPengajuan", () => {
-  it("outlet: pengajuan berpasangan sah di kedua arah, pencarian nomor", () => {
-    expect(saringPengajuan(DATA, "outlet", "").map((p) => p.nomorPengajuan)).toEqual(["REQ-001", "REQ-002", "REQ-003", "REQ-004"]);
-    expect(saringPengajuan(DATA, "outlet", "req-003").map((p) => p.nomorPengajuan)).toEqual(["REQ-003"]);
-    expect(saringPengajuan(DATA, "outlet", "Outlet Barat")).toEqual([]);
-  });
-
-  it("gudang: pengajuan berpasangan sah di kedua arah, tanpa draf", () => {
-    expect(saringPengajuan(DATA, "gudang", "").map((p) => p.nomorPengajuan)).toEqual(["REQ-002", "REQ-003", "REQ-004"]);
-  });
-
-  it("gudang: pencarian nomor atau nama outlet peminta", () => {
-    expect(saringPengajuan(DATA, "gudang", "barat").map((p) => p.nomorPengajuan)).toEqual(["REQ-003"]);
-    expect(saringPengajuan(DATA, "gudang", "req-002").map((p) => p.nomorPengajuan)).toEqual(["REQ-002"]);
-    expect(saringPengajuan(DATA, "gudang", "timur")).toEqual([]);
   });
 });
 
@@ -226,40 +208,59 @@ describe("tahapPengajuan", () => {
   });
 });
 
-describe("tab pengajuan", () => {
-  const denganSuratJalan = (p: PengajuanStok): PengajuanStok => ({ ...p, transferStokID: "SJ-" + p.id });
-  const disetujui = pengajuan("REQ-010", "APPROVED", "Outlet Kota", "Gudang", "Outlet");
-  const dibatalkan = pengajuan("REQ-011", "PENDING", "Outlet Kota", "Gudang", "Outlet");
-  const disetujuiBerSJ = denganSuratJalan(pengajuan("REQ-012", "APPROVED", "Outlet Kota", "Gudang", "Outlet"));
-  const dibatalkanBerSJ = denganSuratJalan(pengajuan("REQ-013", "PENDING", "Outlet Kota", "Gudang", "Outlet"));
-  const diajukan = pengajuan("REQ-014", "SUBMITTED", "Outlet Kota", "Gudang", "Outlet");
-  const SEMUA = [disetujui, dibatalkan, disetujuiBerSJ, dibatalkanBerSJ, diajukan];
+describe("paramHalamanPengajuan", () => {
+  const dasar = { arah: "SEMUA" as const, lingkup: {}, cari: "", statusTerlihat: null };
 
-  it("tab satu status mengirim statusnya; tab Semua dan tab gabungan tanpa status", () => {
-    expect(statusServerTab("SUBMITTED")).toBe("SUBMITTED");
-    expect(statusServerTab("ALL")).toBeUndefined();
-    expect(statusServerTab("DISETUJUI")).toBeUndefined();
-    expect(statusServerTab("PERLU_SURAT_JALAN")).toBeUndefined();
+  it("tab satu status dan tab gabungan mengirim statusnya, dipisah koma (B110)", () => {
+    expect(paramHalamanPengajuan({ ...dasar, ruang: "gudang", tab: "SUBMITTED" }, 1, 10)).toEqual({
+      page: "1",
+      limit: "10",
+      status: "SUBMITTED",
+    });
+    expect(paramHalamanPengajuan({ ...dasar, ruang: "outlet", tab: "DISETUJUI" }, 2, 20)).toEqual({
+      page: "2",
+      limit: "20",
+      status: "APPROVED,PENDING",
+    });
   });
 
-  it("PERLU_SURAT_JALAN: APPROVED dan PENDING yang belum punya surat jalan", () => {
-    expect(SEMUA.filter((p) => cocokTab(p, "PERLU_SURAT_JALAN", "gudang"))).toEqual([disetujui, dibatalkan]);
+  it("tab Semua: outlet tanpa status, gudang seluruh status selain draf yang boleh dilihat", () => {
+    expect(paramHalamanPengajuan({ ...dasar, ruang: "outlet", tab: "ALL" }, 1, 10)).toEqual({ page: "1", limit: "10" });
+    expect(paramHalamanPengajuan({ ...dasar, ruang: "gudang", tab: "ALL" }, 1, 10)?.status).toBe(STATUS_TANPA_DRAF.join(","));
+    expect(STATUS_TANPA_DRAF).not.toContain("DRAFT");
+    const petugas = paramHalamanPengajuan(
+      { ...dasar, ruang: "gudang", tab: "ALL", statusTerlihat: ["SUBMITTED", "APPROVED", "PENDING", "COMPLETED"] },
+      1,
+      10,
+    );
+    expect(petugas?.status).toBe("SUBMITTED,APPROVED,PENDING,COMPLETED");
   });
 
-  it("DISETUJUI: APPROVED dan PENDING, dengan atau tanpa surat jalan", () => {
-    expect(SEMUA.filter((p) => cocokTab(p, "DISETUJUI", "outlet"))).toEqual([disetujui, dibatalkan, disetujuiBerSJ, dibatalkanBerSJ]);
+  it("Perlu Surat Jalan gudang: belum bersurat jalan dan hanya permintaan (AR6a)", () => {
+    expect(paramHalamanPengajuan({ ...dasar, ruang: "gudang", tab: "PERLU_SURAT_JALAN" }, 1, 10)).toEqual({
+      page: "1",
+      limit: "10",
+      status: "APPROVED,PENDING",
+      suratJalan: "belum",
+      dariTipeLokasi: "Gudang",
+    });
   });
 
-  it("tab satu status hanya statusnya, tab Semua seluruhnya", () => {
-    expect(SEMUA.filter((p) => cocokTab(p, "SUBMITTED", "gudang"))).toEqual([diajukan]);
-    expect(SEMUA.filter((p) => cocokTab(p, "ALL", "gudang"))).toEqual(SEMUA);
+  it("filter arah dikirim sebagai tipe lokasi asal; yang bertentangan dengan Perlu Surat Jalan tidak diminta", () => {
+    expect(paramHalamanPengajuan({ ...dasar, ruang: "outlet", tab: "ALL", arah: "OUTLET_KE_GUDANG" }, 1, 10)?.dariTipeLokasi).toBe(
+      "Outlet",
+    );
+    expect(
+      paramHalamanPengajuan({ ...dasar, ruang: "gudang", tab: "PERLU_SURAT_JALAN", arah: "GUDANG_KE_OUTLET" }, 1, 10)
+        ?.dariTipeLokasi,
+    ).toBe("Gudang");
+    expect(paramHalamanPengajuan({ ...dasar, ruang: "gudang", tab: "PERLU_SURAT_JALAN", arah: "OUTLET_KE_GUDANG" }, 1, 10)).toBeNull();
   });
 
-  it("PERLU_SURAT_JALAN di gudang tidak memuat pengembalian yang menunggu surat jalan outlet (AR6a)", () => {
-    const kembali = pengajuan("REQ-015", "APPROVED", "Outlet Kota", "Outlet", "Gudang");
-    expect(cocokTab(kembali, "PERLU_SURAT_JALAN", "gudang")).toBe(false);
-    expect(cocokTab(kembali, "ALL", "gudang")).toBe(true);
-    expect(cocokTab(kembali, "DISETUJUI", "outlet")).toBe(true);
+  it("satu lokasi dikirim sebagai locationID, dan pencarian dipangkas", () => {
+    expect(
+      paramHalamanPengajuan({ ...dasar, ruang: "outlet", tab: "ALL", lingkup: { locationID: "lok-1" }, cari: " REQ-0 " }, 1, 10),
+    ).toEqual({ page: "1", limit: "10", locationID: "lok-1", cari: "REQ-0" });
   });
 });
 
@@ -337,25 +338,6 @@ describe("peranRuang", () => {
     expect(peranRuang("GUDANG_KE_OUTLET", "outlet")).toBe("penerima");
     expect(peranRuang("OUTLET_KE_GUDANG", "outlet")).toBe("pengirim");
     expect(peranRuang("OUTLET_KE_GUDANG", "gudang")).toBe("penerima");
-  });
-});
-
-describe("saringPengajuan menurut arah", () => {
-  it("bawaan semua arah sama dengan tanpa filter", () => {
-    expect(saringPengajuan(DATA, "outlet", "", "SEMUA")).toEqual(saringPengajuan(DATA, "outlet", ""));
-  });
-
-  it("menyaring satu arah", () => {
-    expect(saringPengajuan(DATA, "gudang", "", "GUDANG_KE_OUTLET").map((p) => p.nomorPengajuan)).toEqual(["REQ-002", "REQ-003"]);
-  });
-
-  it("pengembalian tampil sebagai arah sendiri", () => {
-    expect(saringPengajuan(DATA, "outlet", "", "OUTLET_KE_GUDANG").map((p) => p.nomorPengajuan)).toEqual(["REQ-004"]);
-  });
-
-  it("gudang: pencarian nama outlet di sisi asal pengembalian", () => {
-    const kembali = { ...pengajuan("REQ-021", "SUBMITTED", "Gudang Utama", "Outlet", "Gudang"), dariLokasi: { id: "o-21", nama: "Outlet Selatan", tipe: "Outlet" } };
-    expect(saringPengajuan([kembali], "gudang", "selatan").map((p) => p.nomorPengajuan)).toEqual(["REQ-021"]);
   });
 });
 

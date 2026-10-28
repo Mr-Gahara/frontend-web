@@ -6,12 +6,12 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import type { PengajuanStok } from "@/types/pengajuanStok";
-import type { LingkupLokasi } from "@/features/inventaris/cakupan";
+import { PANJANG_CARI_SERVER, type LingkupLokasi } from "@/features/inventaris/cakupan";
 import { useSession } from "@/lib/auth/useSession";
-import { useDaftarPengajuanStok } from "./hooks";
-import { cocokTab, saringPengajuan, statusServerTab, type FilterArah } from "./filter";
+import { useHalamanPengajuanStok } from "./hooks";
+import { paramHalamanPengajuan, type FilterArah } from "./filter";
 import { arahLokasi } from "./arah";
-import { tabTerlihat, type TabPengajuan } from "./izin";
+import { statusTerlihat, tabTerlihat, type TabPengajuan } from "./izin";
 import { tahapPengajuan, type TahapPengajuan } from "./tahap";
 import { LABEL_ARAH_PENGAJUAN, SLUG_TAB_PENGAJUAN, labelTabPengajuan, labelTahapPengajuan } from "./tampilan";
 
@@ -147,24 +147,44 @@ function IsiDaftarPengajuanStok({
   // Tab dari ?tab= (lib/tab-url.ts); tab yang disembunyikan izin tidak dapat dibuka lewat URL.
   const [activeTab, setActiveTab] = useTabUrl(SLUG_TAB_PENGAJUAN[ruang], tabTampil, teks.tabBawaan);
 
-  // --- Queries ---
-  // Lingkup null berarti cakupan lokasi belum siap: belum ada permintaan.
-  const {
-    data: daftarPengajuan = [],
-    isLoading: memuatDaftar,
-    isError,
-  } = useDaftarPengajuanStok(
-    lingkup
-      ? { status: statusServerTab(activeTab), locationID: lingkup.locationID }
-      : null,
-  );
-  const isLoading = memuatLingkup || memuatDaftar;
+  const [halaman, setHalaman] = useState(1);
+  const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN[0]);
 
-  // Penyaringan per ruang (tipe lokasi, draf, pencarian) dan per tab (tab gabungan
-  // meminta tanpa status): features/pengajuan-stok/filter.ts
-  const filteredData = saringPengajuan(daftarPengajuan, ruang, debouncedSearch, filterArah).filter((p) =>
-    cocokTab(p, activeTab, ruang),
-  );
+  // Mengganti lingkup, tab, arah, atau pencarian kembali ke halaman 1,
+  // disesuaikan saat render seperti Belanja Stok, agar halaman lama tidak
+  // sempat diminta.
+  const kunciKriteria = JSON.stringify([lingkup, activeTab, filterArah, debouncedSearch]);
+  const [kunciSebelumnya, setKunciSebelumnya] = useState(kunciKriteria);
+  if (kunciSebelumnya !== kunciKriteria) {
+    setKunciSebelumnya(kunciKriteria);
+    setHalaman(1);
+  }
+
+  // --- Queries ---
+  // Tab, arah, lingkup, dan pencarian disaring server, sehingga halaman dan
+  // total tetap benar (B104, B108, B109, B110; keputusan rancangan butir 27):
+  // features/pengajuan-stok/filter.ts. Lingkup null berarti cakupan lokasi
+  // belum siap; params null berarti filter arah bertentangan dengan tab,
+  // sehingga tabel kosong tanpa permintaan, bukan data tab sebelumnya.
+  const params = lingkup
+    ? paramHalamanPengajuan(
+        {
+          ruang,
+          tab: activeTab,
+          arah: filterArah,
+          lingkup,
+          cari: debouncedSearch,
+          statusTerlihat: statusTerlihat(permissions ?? []),
+        },
+        halaman,
+        ukuran,
+      )
+    : null;
+  const { data, isLoading: memuatDaftar, isError, isFetching } = useHalamanPengajuanStok(params);
+  const isLoading = memuatLingkup || memuatDaftar;
+  const filteredData = params ? (data?.data ?? []) : [];
+  const total = params ? (data?.pagination?.total ?? 0) : 0;
+  const jumlahHalaman = params ? (data?.pagination?.totalPages ?? 1) : 1;
 
   // Aksi baris di menu titik tiga (TB7a, P-A): langsung membuka halaman detail.
   const kolom = useMemo<ColumnDef<PengajuanStok>[]>(
@@ -334,6 +354,7 @@ function IsiDaftarPengajuanStok({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
           <Input
             placeholder={teks.placeholderCari}
+            maxLength={PANJANG_CARI_SERVER}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9 bg-white border-navy/20 text-navy focus-visible:ring-navy"
@@ -356,7 +377,19 @@ function IsiDaftarPengajuanStok({
           data={filteredData}
           loading={isLoading}
           emptyMessage={teks.kosong}
-          pilihanUkuranKlien={PILIHAN_UKURAN}
+          paginasiServer={{
+            halaman,
+            jumlahHalaman,
+            total,
+            ukuran,
+            pilihanUkuran: PILIHAN_UKURAN,
+            sibuk: isFetching,
+            onGantiHalaman: setHalaman,
+            onGantiUkuran: (berikut) => {
+              setUkuran(berikut);
+              setHalaman(1);
+            },
+          }}
         />
       )}
     </div>

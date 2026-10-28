@@ -10,7 +10,6 @@ import { BASIS, login } from "../../helpers/transfer-uji";
 const URL_DASHBOARD = BASIS + "/dashboard/gudang";
 
 type Lokasi = { tipe?: string } | null | undefined;
-type PengajuanMentah = { status: string; dariLokasi?: Lokasi; keLokasi?: Lokasi; transferStokID?: unknown };
 type RingkasanMentah = {
   pengajuan: {
     menungguApproval: number;
@@ -35,11 +34,11 @@ async function isi<T>(r: Response): Promise<T> {
   return ((await r.json()) as { data: T }).data;
 }
 
-// Aturan yang sama dengan features/pengajuan-stok (arah.ts, filter.ts, tahap.ts).
-const arahBenar = (p: PengajuanMentah) => p.dariLokasi?.tipe === "Gudang" && p.keLokasi?.tipe === "Outlet";
-const perluTinjauan = (p: PengajuanMentah) => arahBenar(p) && p.status === "SUBMITTED";
-const perluSuratJalan = (p: PengajuanMentah) =>
-  arahBenar(p) && (p.status === "APPROVED" || p.status === "PENDING") && !p.transferStokID;
+/** pagination.total respons daftar berhalaman. */
+async function totalHalaman(r: Response): Promise<number | undefined> {
+  expect(r.status(), r.url()).toBe(200);
+  return ((await r.json()) as { pagination?: { total: number } }).pagination?.total;
+}
 
 /** Buka dashboard dan tangkap ketiga sumber datanya, serta permintaan daftar pengajuan bila ada. */
 async function bukaDashboard(page: Page) {
@@ -96,13 +95,21 @@ test.describe("Dashboard gudang", () => {
       await expect(page.getByText(`${siapDibuatSuratJalan} total data`, { exact: true })).toBeVisible();
     }
 
-    // B101 dan B111: hitungan server sama dengan aturan tab daftar gudang, yang
-    // memuat permintaan saja (arahBenar).
+    // B101, B110, dan B111: tab Perlu Surat Jalan meminta syarat yang sama
+    // dengan kartu (permintaan saja), dan totalnya dihitung server.
     const rDaftar = await tungguDaftar;
-    expect(new URL(rDaftar.url()).searchParams.get("status")).toBeNull();
-    const pengajuan = await isi<PengajuanMentah[]>(rDaftar);
-    expect(pengajuan.filter(perluTinjauan).length, "perlu tinjauan").toBe(menungguApproval);
-    expect(pengajuan.filter(perluSuratJalan).length, "perlu surat jalan").toBe(siapDibuatSuratJalan);
+    const q = new URL(rDaftar.url()).searchParams;
+    expect(q.get("status")).toBe("APPROVED,PENDING");
+    expect(q.get("suratJalan")).toBe("belum");
+    expect(q.get("dariTipeLokasi")).toBe("Gudang");
+    expect(await totalHalaman(rDaftar), "perlu surat jalan").toBe(siapDibuatSuratJalan);
+
+    // menungguApproval menghitung seluruh SUBMITTED, sama dengan tab Perlu Disetujui.
+    const tTinjauan = page.waitForResponse(
+      (r) => dapatGet(POLA_PENGAJUAN)(r) && new URL(r.url()).searchParams.get("status") === "SUBMITTED",
+    );
+    await page.getByRole("button", { name: "Perlu Disetujui", exact: true }).click();
+    expect(await totalHalaman(await tTinjauan), "perlu tinjauan").toBe(menungguApproval);
   });
 
   test("angka pengiriman dari ringkasan dan tautan Kirim sekarang ke tab Belum Dikirim", async ({ page }) => {

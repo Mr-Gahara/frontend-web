@@ -2,13 +2,11 @@ import { IZIN } from "@/lib/auth/permissions";
 import type { StatusPengajuan } from "@/types/pengajuanStok";
 
 /**
- * Tab yang mencakup lebih dari satu status. Backend hanya menerima satu
- * status per permintaan (pengajuanStokService.getAll baris 97 sampai 100),
- * sehingga tab ini meminta tanpa status lalu disaring di klien
- * (filter.ts, cocokTab).
+ * Tab yang mencakup lebih dari satu status, dikirim sebagai status dipisah
+ * koma (B110; filter.ts, paramHalamanPengajuan).
  * - DISETUJUI (outlet): APPROVED dan PENDING, dengan atau tanpa surat jalan.
  * - PERLU_SURAT_JALAN (gudang): APPROVED dan PENDING yang belum punya surat
- *   jalan (tahap.ts).
+ *   jalan (suratJalan=belum; tahap.ts).
  */
 export const STATUS_TAB_GABUNGAN = {
   DISETUJUI: ["APPROVED", "PENDING"],
