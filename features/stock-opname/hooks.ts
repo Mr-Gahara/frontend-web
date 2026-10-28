@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -6,16 +7,21 @@ import {
 } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { isNotFound } from "@/lib/api/error";
-import { stockOpnameApi, type FilterStockOpname } from "./api";
+import { stockOpnameApi } from "./api";
 import type { ItemHitungan } from "./payload";
 import type { CreateOpnameRequest, StockOpname } from "@/types/stockOpname";
 
-/** filter null berarti belum siap (cakupan lokasi belum diketahui). */
-export function useDaftarStockOpname(filter: FilterStockOpname | null) {
+/**
+ * Satu halaman stock opname dari server. params null berarti cakupan lokasi
+ * belum diketahui, sehingga tidak ada permintaan. Halaman sebelumnya tetap
+ * tampil selama halaman berikutnya dimuat.
+ */
+export function useHalamanStockOpname(params: Record<string, string> | null) {
   return useQuery({
-    queryKey: queryKeys.stockOpname.daftar(filter ?? undefined),
-    queryFn: () => stockOpnameApi.daftar(filter ?? {}),
-    enabled: filter !== null,
+    queryKey: queryKeys.stockOpname.daftar(params ?? undefined),
+    queryFn: () => stockOpnameApi.halaman(params ?? {}),
+    enabled: params !== null,
+    placeholderData: keepPreviousData,
   });
 }
 

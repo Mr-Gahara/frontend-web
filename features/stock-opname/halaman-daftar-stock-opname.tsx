@@ -4,7 +4,9 @@ import { useState, useMemo, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { StockOpname, StatusOpname } from "@/types/stockOpname";
 import type { LingkupLokasi } from "@/features/inventaris/cakupan";
-import { useDaftarStockOpname } from "./hooks";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useHalamanStockOpname } from "./hooks";
+import { PANJANG_CARI_OPNAME, paramHalamanOpname } from "./filter";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
@@ -12,6 +14,7 @@ import { id as localeID } from "date-fns/locale";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -22,10 +25,12 @@ import {
 import {
   ClipboardCheck,
   Plus,
-  ArrowUpDown,
   Eye,
   RotateCcw,
+  Search,
 } from "lucide-react";
+
+const PILIHAN_UKURAN = [10, 20, 50] as const;
 
 // --- HELPERS ---
 const formatTanggal = (iso: string) => {
@@ -97,29 +102,33 @@ export default function HalamanDaftarStockOpname({
 
   // --- STATE FILTER ---
   const [statusFilter, setStatusFilter] = useState<StatusOpname | "ALL">("ALL");
+  const [cari, setCari] = useState("");
+  const cariTertunda = useDebounce(cari, 400);
+  const [halaman, setHalaman] = useState(1);
+  const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN[0]);
+
+  // Mengganti lingkup, status, atau pencarian kembali ke halaman 1, disesuaikan
+  // saat render seperti Belanja Stok, agar halaman lama tidak sempat diminta.
+  const kunciKriteria = JSON.stringify([lingkup, statusFilter, cariTertunda]);
+  const [kunciSebelumnya, setKunciSebelumnya] = useState(kunciKriteria);
+  if (kunciSebelumnya !== kunciKriteria) {
+    setKunciSebelumnya(kunciKriteria);
+    setHalaman(1);
+  }
 
   // --- QUERY FETCH DATA ---
-  // Satu lokasi dikirim ke server; tipe lokasi disaring di klien karena
-  // backend tidak mendukung filter tipe.
-  const { data: semuaOpname = [], isLoading: memuatOpname } = useDaftarStockOpname(
-    lingkup
-      ? {
-          ...(lingkup.locationID ? { locationID: lingkup.locationID } : {}),
-          ...(statusFilter !== "ALL" ? { status: statusFilter } : {}),
-        }
-      : null,
-  );
-  const opnameList = useMemo(
-    () =>
-      lingkup?.tipeLokasi
-        ? semuaOpname.filter((opn) => opn.lokasi?.tipe === lingkup.tipeLokasi)
-        : semuaOpname,
-    [semuaOpname, lingkup],
-  );
+  // Lokasi atau tipe lokasi, status, dan pencarian disaring server, sehingga
+  // halaman dan total tetap benar (B106, B108, B109; keputusan rancangan butir 27).
+  // Urutan mengikuti backend, terbaru dulu: mengurutkan di klien hanya
+  // mengurutkan satu halaman.
+  const params = lingkup ? paramHalamanOpname(lingkup, statusFilter, cariTertunda, halaman, ukuran) : null;
+  const { data, isLoading: memuatOpname, isError, isFetching } = useHalamanStockOpname(params);
+  const opnameList = useMemo(() => data?.data ?? [], [data]);
   const isLoading = memuatOpname || memuatLingkup;
 
   const handleResetFilter = () => {
     setStatusFilter("ALL");
+    setCari("");
   };
 
   // --- COLUMNS DEFINITION ---
@@ -127,17 +136,7 @@ export default function HalamanDaftarStockOpname({
     () => [
       {
         accessorKey: "nomorOpname",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto p-0 text-xs font-bold text-navy/60 hover:bg-transparent hover:text-navy cursor-pointer"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            No. Opname
-            <ArrowUpDown className="ml-1 h-3 w-3" />
-          </Button>
-        ),
+        header: () => <span className="text-xs font-bold text-navy/60">No. Opname</span>,
         cell: ({ row }) => (
           <span className="font-bold font-mono text-navy text-xs sm:text-sm">
             {row.original.nomorOpname}
@@ -146,16 +145,8 @@ export default function HalamanDaftarStockOpname({
       },
       {
         accessorKey: "tanggal",
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto p-0 text-xs font-bold text-navy/60 hover:bg-transparent hover:text-navy cursor-pointer hidden sm:flex"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Tanggal Dibuat
-            <ArrowUpDown className="ml-1 h-3 w-3" />
-          </Button>
+        header: () => (
+          <span className="text-xs font-bold text-navy/60 hidden sm:inline">Tanggal Dibuat</span>
         ),
         cell: ({ row }) => (
           <span className="text-xs sm:text-sm font-medium text-navy/70 hidden sm:inline">
@@ -164,7 +155,7 @@ export default function HalamanDaftarStockOpname({
         ),
       },
       {
-        accessorKey: "lokasi", // Ganti dari locationID ke lokasi
+        accessorKey: "lokasi",
         header: () => (
           <span className="text-xs font-bold text-navy/60 hidden md:inline">
             Lokasi
@@ -172,7 +163,6 @@ export default function HalamanDaftarStockOpname({
         ),
         cell: ({ row }) => (
           <span className="hidden md:inline text-xs sm:text-sm font-medium text-navy/80">
-            {/* Membaca dari objek relasi mapper */}
             {row.original.lokasi?.nama || "Lokasi Tidak Diketahui"}
           </span>
         ),
@@ -191,22 +181,19 @@ export default function HalamanDaftarStockOpname({
             Aksi
           </div>
         ),
-        cell: ({ row }) => {
-          const targetId = row.original.id; 
-          return (
-            <div className="flex justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                className="cursor-pointer bg-gading border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm h-8 px-3"
-                onClick={() => router.push(`${teks.urlDaftar}/${targetId}`)}
-              >
-                <Eye className="w-3.5 h-3.5 mr-1.5" />
-                Detail
-              </Button>
-            </div>
-          );
-        },
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              className="cursor-pointer bg-gading border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm h-8 px-3"
+              onClick={() => router.push(`${teks.urlDaftar}/${row.original.id}`)}
+            >
+              <Eye className="w-3.5 h-3.5 mr-1.5" />
+              Detail
+            </Button>
+          </div>
+        ),
       },
     ],
     [router, teks.urlDaftar],
@@ -302,6 +289,24 @@ export default function HalamanDaftarStockOpname({
           </Select>
         </div>
 
+        <div className="space-y-1.5 w-full sm:w-64">
+          <label htmlFor={`cari-opname-${ruang}`} className="text-xs font-bold text-navy">
+            Cari No. Opname
+          </label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy/40" />
+            <Input
+              id={`cari-opname-${ruang}`}
+              type="search"
+              placeholder="Cari no. opname..."
+              value={cari}
+              onChange={(e) => setCari(e.target.value)}
+              maxLength={PANJANG_CARI_OPNAME}
+              className="h-10 pl-9 bg-gading border-navy/20 text-navy"
+            />
+          </div>
+        </div>
+
         <Button
           variant="outline"
           onClick={handleResetFilter}
@@ -318,9 +323,24 @@ export default function HalamanDaftarStockOpname({
           columns={columns}
           data={opnameList}
           loading={isLoading}
-          emptyMessage="Belum ada data stok opname."
-          searchKey="nomorOpname"
-          searchPlaceholder="Cari no. opname..."
+          emptyMessage={
+            isError
+              ? "Gagal memuat stok opname. Coba muat ulang halaman."
+              : "Belum ada data stok opname."
+          }
+          paginasiServer={{
+            halaman,
+            jumlahHalaman: data?.pagination?.totalPages ?? 1,
+            total: data?.pagination?.total ?? 0,
+            ukuran,
+            pilihanUkuran: PILIHAN_UKURAN,
+            sibuk: isFetching,
+            onGantiHalaman: setHalaman,
+            onGantiUkuran: (berikut) => {
+              setUkuran(berikut);
+              setHalaman(1);
+            },
+          }}
         />
       </div>
     </div>

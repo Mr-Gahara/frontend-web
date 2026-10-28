@@ -61,7 +61,7 @@ async function bukaDaftar(
   const res = await tunggu;
   expect(res.status()).toBe(200);
   const q = new URL(res.url()).searchParams;
-  expect(q.get("page"), "halaman pertama dari server (B105)").toBe("1");
+  expect(q.get("page"), "halaman pertama dari server (B106)").toBe("1");
   expect(q.get("limit"), "ukuran halaman bawaan").toBe("10");
   const body = await res.json();
   await expect(

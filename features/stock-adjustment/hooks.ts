@@ -4,7 +4,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import { stockAdjustmentApi } from "./api";
 
 /**
- * Satu halaman stock adjustment dari server (B105, B108, B109). params null
+ * Satu halaman stock adjustment dari server (B106, B108, B109). params null
  * berarti lingkup belum siap, sehingga tidak ada permintaan. Halaman
  * sebelumnya tetap tampil selama halaman berikutnya dimuat.
  */

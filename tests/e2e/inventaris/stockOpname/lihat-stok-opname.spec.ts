@@ -70,10 +70,13 @@ async function periksaTidakTampil(page: Page, daftar: OpnameMentah[]) {
 
 async function bukaDaftar(page: Page, url: string) {
   // Penunggu dipasang setelah dokumen baru ter-commit (lihat spec stok).
+  // Halaman pertama berukuran 10 diminta ke server (paginasi opt-in).
   await page.goto(url, { waitUntil: "commit" });
   const daftar = await tunggu<OpnameMentah[]>(
     page,
-    getOpname((u) => !u.searchParams.has("status")),
+    getOpname(
+      (u) => !u.searchParams.has("status") && u.searchParams.get("page") === "1" && u.searchParams.get("limit") === "10",
+    ),
   );
   await expect(page.getByRole("columnheader", { name: /no\. opname/i })).toBeVisible();
   return daftar;
@@ -82,7 +85,7 @@ async function bukaDaftar(page: Page, url: string) {
 async function pilihStatus(page: Page, label: string, nilai: string) {
   const pHasil = tunggu<OpnameMentah[]>(
     page,
-    getOpname((u) => u.searchParams.get("status") === nilai),
+    getOpname((u) => u.searchParams.get("status") === nilai && u.searchParams.get("page") === "1"),
   );
   await page.getByText("Semua Status", { exact: true }).click();
   await page.getByRole("option", { name: label, exact: true }).click();
@@ -99,6 +102,7 @@ test.describe("Daftar stock opname outlet", () => {
 
   test("outlet: hanya dokumen lokasi outlet, tanpa dokumen gudang", async ({ page }) => {
     const daftar = await bukaDaftar(page, URL_OUTLET);
+    expect(daftar.every((o) => o.lokasi?.tipe === "Outlet"), "server hanya mengirim dokumen outlet").toBe(true);
     const outlet = diOutlet(daftar);
     test.skip(outlet.length === 0, "Belum ada dokumen stock opname outlet");
 
@@ -133,6 +137,23 @@ test.describe("Daftar stock opname outlet", () => {
     await periksaTampil(page, hasil);
   });
 
+  test("pencarian nomor opname dikirim ke server dan kembali ke halaman 1 (B108)", async ({ page }) => {
+    const daftar = diOutlet(await bukaDaftar(page, URL_OUTLET));
+    test.skip(daftar.length < 2, "Butuh minimal dua dokumen stock opname outlet");
+    const [a, b] = daftar;
+
+    const pCari = tunggu<OpnameMentah[]>(
+      page,
+      getOpname((u) => u.searchParams.get("cari") === a.nomorOpname && u.searchParams.get("page") === "1"),
+    );
+    await page.getByPlaceholder("Cari no. opname...").fill(a.nomorOpname);
+    const hasil = await pCari;
+
+    expect(hasil.map((o) => o.nomorOpname)).toContain(a.nomorOpname);
+    await expect(barisDokumen(page, a.nomorOpname)).toHaveCount(1);
+    await expect(barisDokumen(page, b.nomorOpname)).toHaveCount(0);
+  });
+
   test("tombol buat membuka halaman buat opname", async ({ page }) => {
     await bukaDaftar(page, URL_OUTLET);
     await page.getByRole("button", { name: /buat opname baru/i }).click();
@@ -162,6 +183,21 @@ test.describe("Daftar stock opname gudang", () => {
 
     await periksaTampil(page, draft);
     await periksaTidakTampil(page, semua.filter((o) => o.status !== "DRAFT"));
+  });
+
+  test("tipeLokasi Gudang, halaman, dan ukuran dikirim ke server; total dari pagination", async ({ page }) => {
+    await page.goto(URL_GUDANG, { waitUntil: "commit" });
+    const res = await page.waitForResponse(getOpname((u) => !u.searchParams.has("status")));
+    expect(res.status()).toBe(200);
+    const q = new URL(res.url()).searchParams;
+    expect(q.get("tipeLokasi"), "seluruh gudang disaring server (B109)").toBe("Gudang");
+    expect(q.has("locationID")).toBe(false);
+    expect(q.get("page")).toBe("1");
+    expect(q.get("limit")).toBe("10");
+    const body = (await res.json()) as { data: OpnameMentah[]; pagination?: { total: number } };
+    expect(body.data.every((o) => o.lokasi?.tipe === "Gudang"), "server hanya mengirim dokumen gudang").toBe(true);
+    expect(body.pagination, "respons memuat pagination").toBeTruthy();
+    await expect(page.getByText(body.pagination!.total + " total data", { exact: true })).toBeVisible();
   });
 
   test("tombol buat membuka halaman buat opname gudang", async ({ page }) => {

@@ -3,7 +3,7 @@ import { EP } from "@/lib/api/endpoints";
 import type { Paginasi } from "@/lib/api/normalize";
 import type { StockAdjustment } from "@/types/stockOpname";
 
-/** Satu halaman adjustment (B105): dengan page atau limit, server mengirim pagination. */
+/** Satu halaman adjustment (B106): dengan page atau limit, server mengirim pagination. */
 export type HalamanStockAdjustment = { data: StockAdjustment[]; pagination: Paginasi | null };
 
 export const stockAdjustmentApi = {

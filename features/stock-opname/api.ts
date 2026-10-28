@@ -1,12 +1,11 @@
-import { apiData } from "@/lib/api/client";
+import { api, apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
-import type { CreateOpnameRequest, StatusOpname, StockOpname } from "@/types/stockOpname";
+import type { Paginasi } from "@/lib/api/normalize";
+import type { CreateOpnameRequest, StockOpname } from "@/types/stockOpname";
 import type { ItemHitungan } from "./payload";
 
-export interface FilterStockOpname {
-  status?: StatusOpname;
-  locationID?: string;
-}
+/** Satu halaman stock opname (B106): dengan page atau limit, server mengirim pagination. */
+export type HalamanStockOpname = { data: StockOpname[]; pagination: Paginasi | null };
 
 export const stockOpnameApi = {
   detail: (id: string) => apiData.get<StockOpname>(EP.stockOpname.detail(id)),
@@ -19,9 +18,9 @@ export const stockOpnameApi = {
   tolak: (id: string, catatanReview: string) =>
     apiData.patch<unknown>(EP.stockOpname.reject(id), { catatanReview }),
   batalkan: (id: string) => apiData.patch<unknown>(EP.stockOpname.cancel(id), {}),
-  daftar: (filter: FilterStockOpname) =>
-    apiData.get<StockOpname[]>(EP.stockOpname.list, {
-      ...(filter.status ? { status: filter.status } : {}),
-      ...(filter.locationID ? { locationID: filter.locationID } : {}),
-    }),
+  /** params disusun paramHalamanOpname (filter.ts). */
+  halaman: async (params: Record<string, string>): Promise<HalamanStockOpname> => {
+    const hasil = await api.get<StockOpname[]>(EP.stockOpname.list, params);
+    return { data: hasil.data, pagination: hasil.pagination ?? null };
+  },
 };

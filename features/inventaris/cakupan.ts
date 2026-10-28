@@ -45,12 +45,34 @@ export function tentukanCakupan(m: MasukanCakupan): CakupanLokasiOutlet {
 
 /**
  * locationID dikirim ke server. tipeLokasi dikirim sebagai filter tipe lokasi
- * oleh daftar yang sudah berhalaman di server (B109, mulai stock adjustment);
- * daftar yang masih mode klien menyaringnya di klien.
+ * oleh daftar yang sudah berhalaman di server (B109: stock adjustment dan
+ * stock opname, lewat queryLingkup); daftar yang masih mode klien
+ * menyaringnya di klien.
  */
 export interface LingkupLokasi {
   locationID?: string;
   tipeLokasi?: string;
+}
+
+/** Panjang cari terpanjang yang diterima daftar stok backend (B108). */
+export const PANJANG_CARI_SERVER = 100;
+
+/**
+ * Query lokasi daftar berhalaman server (B109): locationID didahulukan;
+ * tanpa itu tipe lokasi lingkup, sehingga pagination.total hanya menghitung
+ * ruang ini (keputusan rancangan butir 27). Dipindah dari filter stock
+ * adjustment begitu stock opname memakainya (keputusan rancangan butir 12).
+ */
+export function queryLingkup(lingkup: LingkupLokasi): Record<string, string> {
+  if (lingkup.locationID) return { locationID: lingkup.locationID };
+  if (lingkup.tipeLokasi) return { tipeLokasi: lingkup.tipeLokasi };
+  return {};
+}
+
+/** Query cari daftar stok (B108): dipangkas, yang kosong tidak dikirim, dan panjangnya dibatasi. */
+export function queryCari(cari: string): Record<string, string> {
+  const kata = cari.trim();
+  return kata ? { cari: kata.slice(0, PANJANG_CARI_SERVER) } : {};
 }
 
 /** null berarti daftar belum boleh dimuat (cakupan belum siap, gagal, atau lokasi kosong). */

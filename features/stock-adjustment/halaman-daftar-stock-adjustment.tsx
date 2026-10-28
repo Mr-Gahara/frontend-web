@@ -70,7 +70,7 @@ export default function HalamanDaftarStockAdjustment({
   }
 
   // Lokasi, tipe lokasi, dan pencarian disaring server, sehingga halaman dan
-  // total tetap benar (B105, B108, B109; keputusan rancangan butir 27). Stok
+  // total tetap benar (B106, B108, B109; keputusan rancangan butir 27). Stok
   // outlet dan gudang tidak dicampur (keputusan pemilik proyek, 22 September
   // 2026). Urutan mengikuti backend, terbaru dulu: mengurutkan di klien hanya
   // mengurutkan satu halaman.
