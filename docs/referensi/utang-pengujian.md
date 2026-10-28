@@ -400,17 +400,12 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   peta label di unit test** (`a972956`): e2e memeriksa nama tombol tab,
   tetapi tidak membaca badge daftar, badge detail, maupun teks dialog
   batal.
-- **Suite e2e penuh belum dijalankan di atas `7a08b63` dan `5b8cbd9`**
-  (keputusan pemilik proyek, 26 Oktober 2026); hanya spec terdampak.
-  Wajib dijalankan sebelum pekerjaan berikutnya (`inti/status.md`).
 - **Backend di jam rawan hanya teruji saat suite dijalankan pada
   jamnya.** `page.clock` dan `vi.setSystemTime` hanya memalsukan jam
   frontend, sedangkan validator backend memakai jam server. Jendela
   00.00 sampai 07.00 WIB teruji lewat suite penuh 26 Oktober 2026 pukul
-  00.11 dan 00.53.
-- **Ringkasan Belanja Stok lebih dari satu halaman hanya teruji di unit
-  test** (`kumpulkanPembelian`), karena data uji di atas 100 pembelian
-  tidak dibuat dan respons sukses palsu dilarang.
+  00.11 dan 00.53, dan 28 Oktober 2026 pukul 00.17; B113 dan B118
+  dibuktikan lewat permintaan nyata pukul 00.57.
 - **Perpindahan hari di dashboard outlet dan gudang, kartu ringkasan
   Keuangan, serta catat pembelian** hanya teruji lewat hook (unit) dan
   pola yang sama di catat beban (e2e `6d07b8d`), tanpa skenario
@@ -418,10 +413,20 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Jalur tanggal pembelian bagi peran selain Owner** hanya teruji di
   unit test (`payloadBuatPembelian`), karena akun uji berperan Owner.
 - **Tombol Ubah Info dan Hapus pembelian menurut izin** hanya teruji
-  lewat `aksiPembelianStok` di unit test.
+  lewat `aksiPembelianStok` di unit test, termasuk izin per ruang (B116).
+  Gerbang halaman per ruang teruji di `gate-pembelian-stok.test.ts`;
+  jalur pemegang izin ruang saja belum teruji e2e, karena akun uji Owner
+  memegang izin umum.
 - **Template role pembelian hanya teruji pemetaan namanya**; role dari
   template belum dipakai membuka halaman pembelian.
 - **Spec Belanja Stok menyiapkan dua pembelian lewat API** (keputusan
   rancangan butir 23 mengizinkannya, karena halaman itu hanya membaca);
   setiap run menambah lalu mengurangi stok bahan fixture di outlet dan
   gudang.
+- **Navigasi halaman berikutnya pada daftar berhalaman server** hanya
+  teruji di jurnal stok. Stock adjustment, stock opname, surat jalan, dan
+  pengajuan stok menguji halaman pertama, parameter query, dan total dari
+  `pagination` (`98054b8` sampai `ebf782b`).
+- **Skenario daftar pengajuan dan surat jalan memilih contoh dari halaman
+  pertama**, sehingga dilewati bila halaman itu tidak memuat permintaan,
+  pengembalian, atau dua dokumen untuk dibandingkan.

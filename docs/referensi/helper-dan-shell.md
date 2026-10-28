@@ -25,8 +25,9 @@ console.log("OK");
 Untuk penggantian di banyak berkas, kumpulkan pasangan dalam array dan tulis
 berkas hanya bila seluruhnya cocok.
 
-Dua belas helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan dengan cache
-kontrak. Sampai submodul stok, helper disimpan di `/tmp`, dan folder itu dua
+Tiga belas helper disimpan di `~/.cache/frontend-web/alat/`, bersebelahan
+dengan cache kontrak. Sampai submodul stok, helper disimpan di `/tmp`, dan
+folder itu dua
 kali dikosongkan sistem dalam sehari: sekali membuat perbaikan dokumen tidak
 masuk sebelum commit (`b0d11d2` menyusulkannya). Skrip sekali pakai tetap di
 `/tmp`. Skrip tinjau data yang dipakai berulang lintas sesi
@@ -595,6 +596,26 @@ sebuah penggantian melaporkan 0 kecocokan padahal seharusnya ada, periksa dulu
 apakah perubahannya sudah masuk dari tempelan pertama, sebelum menyimpulkan
 polanya salah.
 
+**`ganti-tepat.js`** adalah modul yang di-`require` dari skrip
+`node - <<'EOF'` untuk mengganti banyak pasangan di satu berkas:
+`ubah(berkas, [[lama, baru, n]])` memeriksa setiap teks lama ditemukan
+tepat `n` kali (bawaan 1) sebelum menulis apa pun, lalu mengganti
+seluruhnya. `n` lebih dari satu untuk blok yang memang berulang,
+misalnya izin pembelian di template manajer dan general manajer. Dibuat
+28 Oktober 2026 di `/tmp`, hilang saat mesin menyala ulang di tengah
+pekerjaan, lalu dipindah ke sini; `/tmp/ganti-tepat.js` dibuat sebagai
+tautan agar blok yang menuliskan path lama tetap berjalan:
+
+```bash
+ln -sf ~/.cache/frontend-web/alat/ganti-tepat.js /tmp/ganti-tepat.js
+```
+
+Teks lama harus persis, termasuk indentasi dan baris baru di ujung
+berkas. Bila ditemukan 0 kali, periksa dengan `cat -A` sebelum menulis
+ulang: berkas tanpa baris baru di ujung (`tests/unit/lib/roleTemplates.test.ts`)
+dan properti di dalam `return {` berindentasi 4 spasi, bukan 6
+(`features/jurnal-stok/filter.ts`), pernah menggagalkannya.
+
 ## Catatan shell (zsh)
 
 - Tanda `!` di dalam kutip tunggal (`node -e '...'`) dan di heredoc
@@ -709,6 +730,22 @@ yang disalurkan ke `tail -3` mencetak kode 0 padahal alat itu keluar 1.
 - **Ringkasan reporter dibaca setelah kode ANSI dibuang.** Baris
   "1 failed" yang berwarna lolos dari grep tanpa `sed`, sehingga suite
   yang gagal sempat terbaca bersih (26 Oktober 2026).
+
+- **Gerbang commit dijalankan di subshell dengan `set -o pipefail`.**
+  Tanpa itu, `npx vitest run | tail -4 && ... && git commit` membaca
+  status keluar `tail`, sehingga commit tetap berjalan meski test gagal.
+  Pada 28 Oktober 2026 `4227228` ter-push dengan tiga spec merah karena
+  ini; kegagalannya ternyata dari kontrak backend dan dibetulkan
+  `cab57a9`. Bentuknya:
+  `(set -o pipefail; npx tsc --noEmit && ... && git commit ...)`.
+- **`echo ==` gagal di zsh** dengan `zsh: = not found`, karena `=kata`
+  diekspansi menjadi path perintah. Tulis pemisah berkutip: `echo '=='`.
+- **Tempelan blok panjang dapat menyisipkan `\` sebelum `;` di ujung
+  baris.** Pada 28 Oktober 2026 dua konstanta URL di spec yang ditulis
+  lewat heredoc berakhir `"\;` alih-alih `";`, dan baru tertangkap `tsc`
+  ("Invalid character"). Jalankan `npx tsc --noEmit` segera setelah
+  berkas ditulis lewat heredoc, dan periksa baris yang dilaporkan dengan
+  `cat -A` atau `od -c`.
 
 ## Catatan form (React Hook Form dan Zod)
 

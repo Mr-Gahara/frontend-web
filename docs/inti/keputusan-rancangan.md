@@ -232,7 +232,12 @@ sama (submodul pengajuan stok, di bawah).
     Pengecualian yang diputuskan: jurnal stok berhalaman di server tanpa
     kotak cari, karena tumbuh satu baris per bahan setiap penjualan
     (pemilik proyek, 21 Oktober 2026, `b03c276`; `kontrak/temuan.md`
-    butir 150).
+    butir 150). Pengecualian itu berakhir 28 Oktober 2026: backend
+    `877e493` menerima pencarian di kelima daftar (B108), sehingga jurnal
+    stok kembali punya kotak cari dan keempat daftar lain pindah ke
+    paginasi server (`98054b8` sampai `c2a1e73`). Tombol urut kolom ikut
+    dibuang di daftar yang pindah, karena urutan klien hanya mengurutkan
+    satu halaman.
 28. **"Hari ini" dan "sekarang" di layar tidak dikunci saat halaman
     dibuka, dan waktu yang tidak dipilih pengguna adalah waktu saat
     simpan.** Layar POS dibiarkan menyala melewati tengah malam di kedai

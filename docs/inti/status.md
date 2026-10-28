@@ -27,27 +27,22 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: suite e2e penuh, lalu login akun dan pengguna
+## Pekerjaan berikutnya: login akun dan pengguna
 
-Modul pembelian stok selesai pada 25 dan 26 Oktober 2026, dalam sembilan
-commit dari `7f5c3ee` sampai `5b8cbd9` (`modul/inventaris.md`, Submodul
-pembelian stok; `modul/keuangan.md`, Tab Belanja Stok). Di tengahnya,
-spec pengeluaran yang gagal pukul 00.03 WIB membuka audit pergantian
-hari: beban hari ini ditolak backend antara 00.00 dan 07.00 WIB, dan
-beberapa halaman mengunci "hari ini" saat dibuka. Keduanya diperbaiki di
-frontend (`6d07b8d`, `7a08b63`; `inti/keputusan-rancangan.md` butir 28),
-dan sisi backend dicatat sebagai temuan (`kontrak/temuan.md` butir 154
-sampai 162 dan 164).
+Penyesuaian ke backend `ridho` `877e493` selesai pada 28 Oktober 2026,
+dalam delapan commit dari `4227228` sampai `c2a1e73`
+(`referensi/keputusan-penyesuaian-backend.md`, Penyesuaian backend
+`ridho` `877e493`): izin pembelian per ruang (B116), lokasi pembelian
+dari populate dan Belanja Stok lewat ringkasan server (B112, B117),
+kartu siap surat jalan gudang per arah (B111), paginasi server bersama
+pencarian untuk stock adjustment, stock opname, surat jalan gudang, dan
+pengajuan stok, serta pencarian jurnal stok (B104 sampai B110).
+Sebelumnya suite penuh di atas `5b8cbd9` dijalankan di jendela rawan dan
+lolos, dan B113 serta B118 dibuktikan lewat permintaan nyata pukul 00.57
+WIB. Suite penuh di atas `c2a1e73`: 503 lolos dan 14 skipped
+(`inti/pengujian.md`, Baseline).
 
-**Langkah pertama sesi berikutnya, wajib sebelum pekerjaan lain**: suite
-e2e penuh di atas `5b8cbd9`. Suite penuh terakhir dijalankan di
-`e073a9d` (493 lolos dan 14 skipped); `7a08b63` dan `5b8cbd9` hanya
-menjalankan spec terdampak (keputusan pemilik proyek, 26 Oktober 2026;
-`referensi/utang-pengujian.md`). Sebaiknya dijalankan di jendela 00.00
-sampai 07.00 WIB, satu-satunya cara menguji backend sungguhan di jam
-rawan. Suite kini berisi 509 test (`inti/pengujian.md`, Baseline).
-
-Sesudahnya, urutan pilihan pemilik proyek (26 Oktober 2026):
+Urutan pilihan pemilik proyek (26 Oktober 2026), tidak berubah:
 
 1. **Halaman login akun dan login pengguna dibangun ulang.** Murni
    frontend; tata letak dan alurnya dirancang lewat pratinjau sebelum
@@ -58,20 +53,34 @@ Sesudahnya, urutan pilihan pemilik proyek (26 Oktober 2026):
    menu, halaman, dan tombol per tier begitu kontraknya ada; rancangannya
    dipetakan sambil login dikerjakan.
 
-Backend lokal masih di `ridho` `b5b367a`. Catatan untuk tim backend dari
-modul pembelian dan audit pergantian hari diserahkan ke Yoga pada 26
-Oktober 2026 (`arsip/laporan-backend.md`).
+Backend lokal di `ridho` `877e493`. Laporan pembuktian 28 Oktober 2026
+untuk Yoga dan Nizar disusun di akhir penyesuaian, tanpa temuan baru, dan
+dicatat di `arsip/laporan-backend.md` saat diserahkan. Butir 155 bagian
+langganan, trial, dan zona waktu server masih terbuka untuk modul Ridho
+di backend.
 
 ```bash
-cd ~/Documents/frontend-web && npx vitest run 2>&1 | tail -5 && date && npx playwright test --reporter=json > /tmp/p.json 2>/dev/null; date && node ~/.cache/frontend-web/alat/ringkas-e2e.js | head -20
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho nizar yoga; do echo "origin/$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...origin/$r | tr '\t' ' ')"; done
 ```
 
 ## Utang kecil yang tertunda
 
+### Utang kecil dari penyesuaian backend `ridho` `877e493`
+
+- Jalur pemegang izin pembelian per ruang saja belum teruji e2e, karena
+  akun uji Owner memegang izin umum (`kontrak/temuan.md` butir 158,
+  Menunggu verifikasi).
+- B112 (urutan stabil, validasi selaras skema, indeks nomor faktur),
+  B114, dan B115 dipakai atau tidak lagi diakali web, tetapi belum
+  dibuktikan khusus.
+- Penerimaan (outlet) dan pengiriman (gudang) tetap daftar kartu mode
+  klien dengan polling; tidak termasuk butir 150.
+- Tombol urut kolom dibuang di stock adjustment dan stock opname, karena
+  urutan klien hanya mengurutkan satu halaman; urutan mengikuti backend.
+- Laporan 28 Oktober 2026 belum tercatat di `arsip/laporan-backend.md`.
+
 ### Utang kecil dari pembelian stok dan audit pergantian hari
 
-- Suite e2e penuh di atas `5b8cbd9` (Pekerjaan berikutnya).
 - Catatan untuk tim backend dari modul pembelian dan audit pergantian
   hari (`kontrak/temuan.md` butir 154 sampai 162 dan 164) diserahkan ke
   Yoga pada 26 Oktober 2026 dan dicatat di `arsip/laporan-backend.md`.

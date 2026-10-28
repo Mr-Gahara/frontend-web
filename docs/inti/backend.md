@@ -34,6 +34,10 @@ dipakai berulang disimpan sebagai helper (`referensi/helper-dan-shell.md`, Helpe
 penggantian): `tinjau-surat-jalan.js` untuk membaca surat jalan beserta
 jurnal dan pengajuannya, dan `api-surat-jalan.js` untuk daftar, detail,
 batal, dan terima lewat API. Skrip sekali pakai tetap di `/tmp`.
+Skrip yang menulis memilih data yang memenuhi syarat, misalnya akun kas
+aktif bersaldo yang bukan sisa uji E2E, bukan baris pertama daftar, dan
+keluaran mode tinjaunya diperiksa sebelum mode kirim: pada 28 Oktober
+2026 baris pertama ternyata akun E2E nonaktif bersaldo 0.
 
 Data development adalah data pengujian; belum ada produksi (pemilik
 proyek, 21 September 2026). Yang dijaga adalah kebenaran alur dan aturan,
@@ -177,6 +181,12 @@ Pada 21 Oktober 2026 `yoga` maju sembilan commit di atas `af5f315`, dan
 ke `b5b367a` dan di-push tanpa pemeriksaan kelengkapan. Seed membuang
 `delete-jurnal-stok` (P24); permission diselaraskan lewat langkah di
 atas, lalu `npm run db:indeks` dijalankan.
+Pada 28 Oktober 2026 `nizar` maju 16 commit dan `yoga` 14 commit di atas
+`b5b367a`, dan `nizar` `877e493` memuat seluruh `yoga` `57841d4`, sehingga
+`ridho` di-fast-forward ke `877e493` dan di-push tanpa pemeriksaan
+kelengkapan. Seed hanya menambah delapan izin pembelian per ruang (B116),
+sehingga penyelarasan permission melewati langkah 2; sesudahnya
+`npm run db:indeks` dijalankan.
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari
@@ -237,3 +247,9 @@ disebut, cukup nomornya. Sebelum laporan disusun, setiap calon butir
 dicocokkan dengan daftar laporan di bawah dan dengan
 `docs/pengembangan/klien.md` backend. Bila tidak ada temuan baru maupun
 pembuktian baru, tidak ada laporan yang dibuat.
+
+Label B ditulis di kode, commit, dan laporan hanya setelah dicocokkan
+dengan barisnya di `docs/pengembangan/klien.md` backend. Paginasi stock
+adjustment sempat ditulis B105 di `98054b8`, padahal B105 milik surat
+jalan dan paginasi stock opname serta adjustment adalah B106
+(dibetulkan di `0ca6764`).

@@ -12,6 +12,22 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per penyesuaian backend `ridho` `877e493`** (commit `c2a1e73`,
+28 Oktober 2026): 838 test unit dan integrasi lolos. Suite e2e penuh
+dijalankan terhadap backend `ridho` `877e493`, pukul 11.09 sampai 11.33
+WIB: 503 lolos dan 14 skipped (12 `test.fixme` menunggu backend dan 2
+skip bersyarat data), tanpa kegagalan. Totalnya 517, bertambah 8 dari
+509 lewat skenario baru di spec stock adjustment, stock opname,
+pengajuan stok, jurnal stok, dan spec baru daftar surat jalan
+(`tests/e2e/inventaris/transferStok/daftar-surat-jalan.spec.ts`).
+Sebelum penyesuaian, suite penuh di atas `5b8cbd9` terhadap backend
+`b5b367a` dijalankan di jendela rawan, pukul 00.17 sampai 00.47 WIB: 495
+lolos dan 14 skipped, tanpa kegagalan, sehingga utang suite penuh
+`7a08b63` dan `5b8cbd9` lunas. Kedelapan commit penyesuaian
+masing-masing menjalankan spec terdampaknya, lewat gerbang
+ber-`pipefail` sejak `cab57a9` (`referensi/helper-dan-shell.md`,
+Catatan shell).
+
 **Baseline per pembelian stok dan audit pergantian hari** (commit
 `5b8cbd9`, 26 Oktober 2026): 827 test unit dan integrasi lolos di 92
 berkas. Suite e2e berisi 509 test. Suite penuh terakhir dijalankan di

@@ -434,3 +434,47 @@ P24 dan B107).
   dan 46.
 - Suite e2e penuh dijalankan karena ini penyesuaian backend: 478 lolos
   dan 14 skipped, tanpa kegagalan (`b03c276`).
+
+## Penyesuaian backend `ridho` `877e493`
+
+Diputuskan pemilik proyek pada 28 Oktober 2026, setelah `origin/nizar`
+maju 16 commit dan `origin/yoga` 14 commit di atas `b5b367a`; `nizar`
+memuat seluruh `yoga` (B108 sampai B118, P25).
+
+- **Suite penuh di atas `5b8cbd9` lebih dulu, terhadap backend lama**, di
+  jendela 00.00 sampai 07.00 WIB, sebagai bukti bersih sebelum
+  penyesuaian: 495 lolos dan 14 skipped.
+- **`ridho` di-fast-forward ke `877e493` dan di-push.** Permission
+  diselaraskan tanpa langkah 2, karena seed hanya menambah delapan izin
+  pembelian per ruang (basis data dan seed 147 nama, Owner 144), lalu
+  `npm run db:indeks`.
+- **B113 dan B118 dibuktikan lewat permintaan nyata di jam rawan**
+  (00.57 WIB), karena di luar jam itu tidak dapat dibuktikan. Web tetap
+  mengirim waktu simpan untuk tanggal hari ini (keputusan rancangan butir
+  28), yang juga sah menurut P25, sehingga tidak ada kode yang diubah.
+- **Izin pembelian per ruang** (`4227228`): aksi dan gerbang menerima
+  izin umum atau izin ruangnya, seperti backend. Template role memakai
+  izin ruang seperti stock adjustment, izin umum tinggal milik Owner, dan
+  Belanja Stok menerima keduanya agar template tidak kehilangan halaman
+  itu.
+- **Lokasi dari populate dan Belanja Stok lewat ringkasan server digabung
+  dalam satu commit** (`cab57a9`), agar test agregasi klien tidak ditulis
+  ulang hanya untuk dibuang. Detail pembelian tidak lagi menuntut
+  `read-location`.
+- **Kartu siap surat jalan gudang memakai permintaan** (B111,
+  `f865254`), sama dengan isi tab Perlu Surat Jalan.
+- **Empat daftar pindah ke paginasi server bersama pencarian, satu commit
+  per daftar, sebelum login**: stock adjustment, stock opname, surat
+  jalan gudang, dan pengajuan stok (`98054b8`, `0ca6764`, `cc969db`,
+  `ebf782b`), lalu kotak cari jurnal stok kembali (`c2a1e73`). Cakupan
+  cari mengikuti backend apa adanya, termasuk nama lokasi sisi sendiri;
+  penjaga pasangan lokasi tidak sah di daftar pengajuan dibuang, karena
+  validasi arah ditutup backend (butir 24); tombol urut kolom dibuang di
+  daftar yang pindah; penerimaan dan pengiriman tetap mode klien.
+  Penyusun query lokasi dan cari bersama dipindah ke
+  `features/inventaris/cakupan.ts` begitu daftar kedua memakainya
+  (keputusan rancangan butir 12).
+- **Laporan berisi pembuktian saja**, tanpa temuan baru; butir yang
+  dipakai web tetapi belum dibuktikan khusus tidak ditulis terbukti.
+- Suite e2e penuh dijalankan karena ini penyesuaian backend: 503 lolos
+  dan 14 skipped, tanpa kegagalan (`c2a1e73`).
