@@ -3,6 +3,8 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
+import { useDebounce } from "@/hooks/use-debounce";
+import { PANJANG_CARI_SERVER } from "@/features/inventaris/cakupan";
 import type { JurnalStok } from "@/types/jurnalStok";
 import { useHalamanJurnalStok } from "./hooks";
 import { periodeAwalJurnal, type FilterAlasan, type FilterArah } from "./filter";
@@ -19,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/data-table";
 import {
   DropdownMenu,
@@ -86,19 +89,25 @@ export default function HalamanJurnalStok({
   const [periode, setPeriode] = useState(() => periodeAwalJurnal());
   const [arah, setArah] = useState<FilterArah>("ALL");
   const [alasan, setAlasan] = useState<FilterAlasan>("ALL");
+  const [cari, setCari] = useState("");
+  const cariTertunda = useDebounce(cari, 400);
   const [halaman, setHalaman] = useState(1);
   const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN[0]);
 
-  // Mengganti lokasi kembali ke halaman 1, disesuaikan saat render, bukan lewat
-  // effect, agar halaman lama tidak sempat diminta untuk lokasi baru.
-  const [lokasiSebelumnya, setLokasiSebelumnya] = useState(lokasiID);
-  if (lokasiSebelumnya !== lokasiID) {
-    setLokasiSebelumnya(lokasiID);
+  // Mengganti lokasi atau pencarian (yang ditunda) kembali ke halaman 1,
+  // disesuaikan saat render, bukan lewat effect, agar halaman lama tidak
+  // sempat diminta untuk kriteria baru.
+  const kunciKriteria = JSON.stringify([lokasiID, cariTertunda]);
+  const [kunciSebelumnya, setKunciSebelumnya] = useState(kunciKriteria);
+  if (kunciSebelumnya !== kunciKriteria) {
+    setKunciSebelumnya(kunciKriteria);
     setHalaman(1);
   }
 
   const { data, isLoading, isFetching, isError } = useHalamanJurnalStok(
-    lokasiID ? { lokasiID, arah, alasan, dari: periode.dari, sampai: periode.sampai } : null,
+    lokasiID
+      ? { lokasiID, arah, alasan, dari: periode.dari, sampai: periode.sampai, cari: cariTertunda }
+      : null,
     halaman,
     ukuran,
   );
@@ -114,6 +123,7 @@ export default function HalamanJurnalStok({
       setPeriode(periodeAwalJurnal());
       setArah("ALL");
       setAlasan("ALL");
+      setCari("");
     });
 
   const memuat = isLoading || memuatLingkup;
@@ -293,6 +303,22 @@ export default function HalamanJurnalStok({
               <SelectItem value="Lainnya" className="font-medium">Lainnya</SelectItem>
             </SelectContent>
           </Select>
+
+          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
+            <label htmlFor={`cari-jurnal-${ruang}`} className={KELAS_LABEL_FILTER}>
+              Cari bahan
+            </label>
+            <Input
+              id={`cari-jurnal-${ruang}`}
+              type="search"
+              placeholder="Cari nama bahan..."
+              value={cari}
+              onChange={(e) => setCari(e.target.value)}
+              maxLength={PANJANG_CARI_SERVER}
+              disabled={nonaktif}
+              className="h-10 w-full sm:w-48 bg-white border-navy/20 text-navy"
+            />
+          </div>
 
           <Button
             type="button"

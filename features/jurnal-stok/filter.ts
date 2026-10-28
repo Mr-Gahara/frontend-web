@@ -1,3 +1,4 @@
+import { queryCari } from "@/features/inventaris/cakupan";
 import { keTanggalLokal } from "@/lib/waktu";
 import type { AlasanJurnal, TipeKoreksi } from "@/types/jurnalStok";
 
@@ -19,6 +20,8 @@ export interface KriteriaServerJurnal {
   alasan: FilterAlasan;
   dari?: Date;
   sampai?: Date;
+  /** Sebagian nama bahan (B108). */
+  cari?: string;
 }
 
 /**
@@ -37,6 +40,7 @@ export function paramHalamanJurnal(
     ...(kriteria.sampai ? { sampai: keTanggalLokal(kriteria.sampai) } : {}),
     ...(kriteria.arah !== "ALL" ? { tipeKoreksi: kriteria.arah } : {}),
     ...(kriteria.alasan !== "ALL" ? { alasan: kriteria.alasan } : {}),
+    ...queryCari(kriteria.cari ?? ""),
     page: String(halaman),
     limit: String(ukuran),
   };

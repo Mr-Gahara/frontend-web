@@ -100,6 +100,11 @@ function barisTabel(page: Page) {
   return page.locator("table tbody tr");
 }
 
+/** Nama bahan jurnal mentah; kosong bila bahannya terhapus dari master. */
+function namaBahan(j: unknown): string {
+  return (j as { bahanBakuID?: { namaBahan?: string } | null }).bahanBakuID?.namaBahan ?? "";
+}
+
 /** Isi tabel sama dengan halaman respons: jumlah baris dan total data dari pagination. */
 async function periksaHalaman(page: Page, halaman: HalamanMentah) {
   if (halaman.data.length === 0) {
@@ -168,6 +173,23 @@ test.describe("Jurnal stok", () => {
     const halaman = await bacaHalaman(await tAlasan);
     expect(halaman.data.every((j) => j.alasan === "Stok Opname")).toBe(true);
     await periksaHalaman(page, halaman);
+  });
+
+  test("outlet: pencarian nama bahan dikirim ke server dan dikosongkan Reset Filter (B108)", async ({ page }) => {
+    const awal = await bukaJurnal(page, URL_OUTLET);
+    const kata = awal.data.map(namaBahan).find(Boolean);
+    test.skip(!kata, "Belum ada jurnal outlet bulan ini dengan bahan yang masih ada");
+
+    const tCari = tungguJurnal(page, (q) => q.get("cari") === kata && q.get("page") === "1");
+    await page.getByLabel("Cari bahan").fill(kata!);
+    const hasil = await bacaHalaman(await tCari);
+    expect(hasil.data.length).toBeGreaterThan(0);
+    expect(hasil.data.every((j) => namaBahan(j).toLowerCase().includes(kata!.toLowerCase()))).toBe(true);
+    await periksaHalaman(page, hasil);
+
+    await page.getByRole("button", { name: "Reset Filter" }).click();
+    await expect(page.getByLabel("Cari bahan")).toHaveValue("");
+    await expect(page.getByText(awal.pagination.total + " total data", { exact: true })).toBeVisible();
   });
 
   test("outlet: periode dikirim sebagai tanggal YYYY-MM-DD, dan Reset Filter mengembalikan bulan berjalan", async ({ page }) => {
