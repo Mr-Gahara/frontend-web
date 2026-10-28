@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, type QueryKey, type UseMutationOptions } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient, type QueryKey, type UseMutationOptions } from "@tanstack/react-query";
 import { isNotFound } from "@/lib/api/error";
 import { queryKeys } from "@/lib/queryKeys";
 import {
@@ -27,11 +27,25 @@ export function useBuatSuratJalan(opsi: OpsiMutasi<TransferDibuat, TransferDariP
 }
 
 /**
- * Daftar surat jalan. Argumen null berarti belum siap (misalnya cakupan
- * lokasi masih dimuat). Status dan lokasi tujuan disaring server; lingkup per
- * tipe lokasi dan pencarian disaring halaman lewat saringTransfer (filter.ts).
- * Data filter sebelumnya tidak dipertahankan, sehingga berganti filter tidak
- * menampilkan baris milik filter lama.
+ * Satu halaman daftar surat jalan dari server (B105, B108, B109); params
+ * disusun paramHalamanSuratJalan (filter.ts). Halaman sebelumnya tetap tampil
+ * selama halaman berikutnya dimuat.
+ */
+export function useHalamanSuratJalan(params: Record<string, string>) {
+  return useQuery({
+    queryKey: queryKeys.transferStok.daftar(params),
+    queryFn: () => transferStokApi.halaman(params),
+    placeholderData: keepPreviousData,
+  });
+}
+
+/**
+ * Surat jalan tanpa paginasi, untuk pemantauan penerimaan dan pengiriman
+ * (daftar kartu berstatus DIKIRIM). Argumen null berarti belum siap
+ * (misalnya cakupan lokasi masih dimuat). Status dan lokasi tujuan disaring
+ * server; lingkup per tipe lokasi dan pencarian disaring halaman lewat
+ * saringTransfer (filter.ts). Data filter sebelumnya tidak dipertahankan,
+ * sehingga berganti filter tidak menampilkan baris milik filter lama.
  */
 export function useDaftarTransferStok(filter: FilterTransferStok | null, opsi: { refetchInterval?: number } = {}) {
   return useQuery({

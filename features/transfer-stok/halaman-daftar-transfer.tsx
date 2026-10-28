@@ -7,9 +7,10 @@ import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useTabUrl } from "@/hooks/use-tab-url";
+import { PANJANG_CARI_SERVER } from "@/features/inventaris/cakupan";
 import type { StatusTransfer, TransferStok } from "@/types/transferStok";
-import { useDaftarTransferStok } from "./hooks";
-import { filterServerTransfer, saringTransfer, type TabTransfer } from "./filter";
+import { useHalamanSuratJalan } from "./hooks";
+import { paramHalamanSuratJalan, type TabTransfer } from "./filter";
 import { RUANG_SURAT_JALAN, type RuangSuratJalan } from "./ruang";
 import { LABEL_STATUS_TRANSFER, LABEL_TAB_TRANSFER, SLUG_TAB_TRANSFER, TAB_TRANSFER } from "./tampilan";
 
@@ -33,7 +34,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 
-/** Pilihan baris per halaman (DataTable opt-in, keputusan TB11a). */
+/** Pilihan baris per halaman (keputusan TB11a). */
 const PILIHAN_UKURAN = [10, 20, 50] as const;
 
 // --- Helpers ---
@@ -74,8 +75,8 @@ const getStatusBadge = (status: StatusTransfer) => {
 };
 
 /**
- * Daftar surat jalan di ruang gudang. Tab disaring server lewat query status
- * (kontrak/temuan.md butir 33).
+ * Daftar surat jalan yang dikirim ruang ini (P8, AR2a), berhalaman di server.
+ * Tab dikirim sebagai status (kontrak/temuan.md butir 33).
  */
 function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
   const konfig = RUANG_SURAT_JALAN[ruang];
@@ -86,19 +87,26 @@ function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
   const debouncedSearch = useDebounce(searchTerm, 500);
   // Tab dari ?tab= (lib/tab-url.ts), misalnya tautan "Kirim sekarang" dari dashboard gudang.
   const [activeTab, setActiveTab] = useTabUrl<TabTransfer>(SLUG_TAB_TRANSFER, TAB_TRANSFER, "ALL");
+  const [halaman, setHalaman] = useState(1);
+  const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN[0]);
+
+  // Mengganti tab atau pencarian kembali ke halaman 1, disesuaikan saat render
+  // seperti Belanja Stok, agar halaman lama tidak sempat diminta.
+  const kunciKriteria = JSON.stringify([activeTab, debouncedSearch]);
+  const [kunciSebelumnya, setKunciSebelumnya] = useState(kunciKriteria);
+  if (kunciSebelumnya !== kunciKriteria) {
+    setKunciSebelumnya(kunciKriteria);
+    setHalaman(1);
+  }
 
   // --- Queries ---
-  // Status disaring server; pencarian disaring di klien lewat saringTransfer
-  // (nomor atau nama lokasi tujuan). Hanya surat jalan yang dikirim ruang ini
-  // (P8, AR2a). Di ruang outlet cukup tipe Outlet, karena MVP punya satu
-  // outlet per tenant (AR10a); multi-outlet memakai cakupan outlet nanti.
-  const kriteria = { status: activeTab, asal: { tipeLokasi: konfig.tipe }, cari: debouncedSearch };
-  const {
-    data: daftarTransfer = [],
-    isLoading,
-    isError,
-  } = useDaftarTransferStok(filterServerTransfer(kriteria));
-  const filteredData = saringTransfer(daftarTransfer, kriteria);
+  // Status, tipe lokasi asal, dan pencarian (nomor atau nama lokasi asal
+  // maupun tujuan) disaring server, sehingga halaman dan total tetap benar
+  // (B105, B108, B109; keputusan rancangan butir 27). Di ruang outlet cukup
+  // tipe Outlet, karena MVP punya satu outlet per tenant (AR10a).
+  const params = paramHalamanSuratJalan(activeTab, konfig.tipe, debouncedSearch, halaman, ukuran);
+  const { data, isLoading, isError, isFetching } = useHalamanSuratJalan(params);
+  const daftarTransfer = useMemo(() => data?.data ?? [], [data]);
 
   // Aksi baris di menu titik tiga (TB7a): seluruh status membuka halaman detail.
   const kolom = useMemo<ColumnDef<TransferStok>[]>(
@@ -221,6 +229,7 @@ function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
             placeholder={`Cari No. Transfer / ${konfig.lawan} Tujuan...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            maxLength={PANJANG_CARI_SERVER}
             className="pl-9 bg-white border-navy/20 text-navy focus-visible:ring-navy"
           />
         </div>
@@ -237,10 +246,22 @@ function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
       ) : (
         <DataTable
           columns={kolom}
-          data={filteredData}
+          data={daftarTransfer}
           loading={isLoading}
           emptyMessage="Tidak ada dokumen Surat Jalan yang ditemukan."
-          pilihanUkuranKlien={PILIHAN_UKURAN}
+          paginasiServer={{
+            halaman,
+            jumlahHalaman: data?.pagination?.totalPages ?? 1,
+            total: data?.pagination?.total ?? 0,
+            ukuran,
+            pilihanUkuran: PILIHAN_UKURAN,
+            sibuk: isFetching,
+            onGantiHalaman: setHalaman,
+            onGantiUkuran: (berikut) => {
+              setUkuran(berikut);
+              setHalaman(1);
+            },
+          }}
         />
       )}
     </div>

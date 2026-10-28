@@ -1,5 +1,6 @@
-import { apiData } from "@/lib/api/client";
+import { api, apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
+import type { Paginasi } from "@/lib/api/normalize";
 import type { StatusTransfer, TransferStok } from "@/types/transferStok";
 import type { ItemPayloadTerima } from "./payload";
 
@@ -14,6 +15,9 @@ export interface FilterTransferStok {
    */
   keLocationID?: string;
 }
+
+/** Satu halaman surat jalan (B105): dengan page atau limit, server mengirim pagination. */
+export type HalamanSuratJalan = { data: TransferStok[]; pagination: Paginasi | null };
 
 /** PUT hanya mengirim items; backend tidak memeriksa jumlah maupun stok (kontrak/temuan.md butir 32). */
 export interface PayloadRevisi {
@@ -43,6 +47,11 @@ export const transferStokApi = {
     if (filter.dariLocationID) params.dariLocationID = filter.dariLocationID;
     if (filter.keLocationID) params.keLocationID = filter.keLocationID;
     return apiData.get<TransferStok[]>(EP.transferStok.list, params);
+  },
+  /** params disusun paramHalamanSuratJalan (filter.ts). */
+  halaman: async (params: Record<string, string>): Promise<HalamanSuratJalan> => {
+    const hasil = await api.get<TransferStok[]>(EP.transferStok.list, params);
+    return { data: hasil.data, pagination: hasil.pagination ?? null };
   },
   detail: (id: string) => apiData.get<TransferStok>(EP.transferStok.detail(id)),
   revisi: (id: string, payload: PayloadRevisi) => apiData.put<TransferStok>(EP.transferStok.detail(id), payload),

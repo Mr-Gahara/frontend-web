@@ -1,4 +1,5 @@
 import type { StatusTransfer, TransferStok } from "@/types/transferStok";
+import { queryCari } from "@/features/inventaris/cakupan";
 import type { FilterTransferStok } from "./api";
 
 export type TabTransfer = StatusTransfer | "ALL";
@@ -53,4 +54,28 @@ export function saringTransfer(daftar: readonly TransferStok[], k: KriteriaTrans
 
 function cocokSisi(lokasi: TransferStok["dariLokasi"], lingkup: LingkupSisi): boolean {
   return "lokasiID" in lingkup ? lokasi?.id === lingkup.lokasiID : lokasi?.tipe === lingkup.tipeLokasi;
+}
+/**
+ * Query satu halaman daftar surat jalan (B105, B108, B109): status bila
+ * bukan tab Semua, tipe lokasi asal sebagai dariTipeLokasi (ruang pengirim,
+ * P8), dan pencarian nomor atau nama lokasi asal maupun tujuan (cakupan
+ * backend, keputusan pemilik proyek 28 Oktober 2026). Seluruhnya disaring
+ * server, sehingga pagination.total benar (keputusan rancangan butir 27).
+ * Penerimaan dan pengiriman tetap memakai filterServerTransfer dan
+ * saringTransfer.
+ */
+export function paramHalamanSuratJalan(
+  status: TabTransfer,
+  tipeAsal: string,
+  cari: string,
+  halaman: number,
+  ukuran: number,
+): Record<string, string> {
+  return {
+    page: String(halaman),
+    limit: String(ukuran),
+    ...(status !== "ALL" ? { status } : {}),
+    dariTipeLokasi: tipeAsal,
+    ...queryCari(cari),
+  };
 }
