@@ -18,6 +18,7 @@ import {
   siapkanFixtureJadwal,
   tanggalUji,
   NAMA_SHIFT_SIANG,
+  pastikanShiftMalam,
   pastikanShiftSiang,
   URL_JADWAL_GUDANG,
   URL_JADWAL_OUTLET,
@@ -131,6 +132,40 @@ test("ubah jadwal menjadi libur lewat klik item jadwal", async ({ page }) => {
     await expect(page.getByText("Jadwal Diperbarui")).toBeVisible();
     const tersimpan = await jadwalRentang(page, auth, fx, tgl, tgl);
     expect(tersimpan.map((j) => [j.id, j.isLibur, j.shift])).toEqual([[id, true, null]]);
+  } finally {
+    await bersihkanHari(page, auth, fx, tgl, tgl);
+  }
+});
+
+test("split shift diubah menjadi libur: satu PUT, sisanya dihapus backend (B165)", async ({ page }) => {
+  const auth = await bukaDenganAuth(page, URL_JADWAL_OUTLET);
+  const fx = await siapkanFixtureJadwal(page, auth);
+  const shiftMalam = await pastikanShiftMalam(page, auth);
+  const b = bulanUji();
+  const hari = 12;
+  const tgl = tanggalUji(b, hari);
+  await bersihkanHari(page, auth, fx, tgl, tgl);
+  try {
+    await buatJadwalApi(page, auth, fx, tgl, fx.shiftPagi);
+    await buatJadwalApi(page, auth, fx, tgl, shiftMalam);
+    await page.reload();
+    await keBulanUji(page, b);
+    const hapus: string[] = [];
+    page.on("request", (r) => {
+      if (r.method() === "DELETE" && /\/api\/jadwalshift\//i.test(r.url())) hapus.push(r.url());
+    });
+    await itemSel(page, hari).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Ubah Jadwal");
+    await dialog.getByText("Libur / Off", { exact: true }).click();
+    const tunggu = page.waitForResponse(cocok("PUT", /\/api\/jadwalshift\/[^/]+$/i));
+    await dialog.getByRole("button", { name: "Simpan Perubahan" }).click();
+    const res = await tunggu;
+    expect(res.status()).toBe(200);
+    await expect(page.getByText("Jadwal Diperbarui")).toBeVisible();
+    expect(hapus, "tidak ada DELETE setelah ubah ke libur").toEqual([]);
+    const tersimpan = await jadwalRentang(page, auth, fx, tgl, tgl);
+    expect(tersimpan.map((j) => [j.isLibur, j.shift])).toEqual([[true, null]]);
   } finally {
     await bersihkanHari(page, auth, fx, tgl, tgl);
   }

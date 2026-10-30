@@ -228,18 +228,25 @@ export async function pilihShift(page: Page, nama: string) {
 
 export const NAMA_SHIFT_SIANG = "E2E Jadwal Siang";
 export const JAM_SIANG = { masuk: "12:00", pulang: "20:00" };
+export const NAMA_SHIFT_MALAM = "E2E Jadwal Malam";
+export const JAM_MALAM = { masuk: "18:00", pulang: "22:00" };
 
-/** Shift uji kedua yang jamnya bertumpuk dengan shift pagi uji, untuk jadwal yang ditolak backend (J2a). */
-export async function pastikanShiftSiang(page: Page, auth: Auth): Promise<string> {
+/** Shift uji outlet bernama tetap; dibuat bila belum ada. */
+async function pastikanShiftUji(
+  page: Page,
+  auth: Auth,
+  nama: string,
+  jam: { masuk: string; pulang: string },
+): Promise<string> {
   const lokasiId = await idLokasiRuang(page, auth);
   const res = await api<unknown>(page, auth, "GET", `/shift?status=Aktif&locationID=${lokasiId}`);
   expect(res.status, `GET /shift: ${res.pesan}`).toBe(200);
-  const ada = daftar(res.data).find((s) => s.namaShift === NAMA_SHIFT_SIANG);
+  const ada = daftar(res.data).find((s) => s.namaShift === nama);
   if (ada) return ada.id;
   const buat = await api<unknown>(page, auth, "POST", "/shift", {
-    namaShift: NAMA_SHIFT_SIANG,
-    jamMasuk: JAM_SIANG.masuk,
-    jamPulang: JAM_SIANG.pulang,
+    namaShift: nama,
+    jamMasuk: jam.masuk,
+    jamPulang: jam.pulang,
     isLintasHari: false,
     toleransiTerlambat: 0,
     status: "Aktif",
@@ -248,3 +255,9 @@ export async function pastikanShiftSiang(page: Page, auth: Auth): Promise<string
   expect([200, 201], `POST /shift: ${buat.pesan}`).toContain(buat.status);
   return String(idDari(normalizeId(buat.data) as unknown));
 }
+
+/** Shift uji kedua yang jamnya bertumpuk dengan shift pagi uji, untuk jadwal yang ditolak backend (J2a). */
+export const pastikanShiftSiang = (page: Page, auth: Auth) => pastikanShiftUji(page, auth, NAMA_SHIFT_SIANG, JAM_SIANG);
+
+/** Shift uji yang tidak bertumpuk dengan shift pagi uji, untuk split shift. */
+export const pastikanShiftMalam = (page: Page, auth: Auth) => pastikanShiftUji(page, auth, NAMA_SHIFT_MALAM, JAM_MALAM);

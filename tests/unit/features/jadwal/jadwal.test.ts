@@ -98,9 +98,15 @@ describe("rencanaSimpanJadwal (keputusan JD6a)", () => {
     expect(rencanaSimpanJadwal([{ ...SEL("off"), type: "off" }], MANUAL)).toEqual([{ jenis: "buat", payload: MANUAL }]);
   });
 
-  it("menjadi libur: jadwal pertama diubah dan sisanya dihapus", () => {
+  it("menjadi libur: hanya jadwal pertama diubah, sisanya dihapus backend (B165)", () => {
     expect(rencanaSimpanJadwal([SEL("a"), SEL("b")], { ...MANUAL, isLibur: true, shiftIds: [] })).toEqual([
       { jenis: "ubah", id: "a", payload: { isLibur: true, shiftID: null, catatan: "" } },
+    ]);
+  });
+
+  it("kerja dengan shift lebih sedikit: jadwal berlebih tetap dihapus web", () => {
+    expect(rencanaSimpanJadwal([SEL("a"), SEL("b")], { ...MANUAL, shiftIds: ["s1"] })).toEqual([
+      { jenis: "ubah", id: "a", payload: { isLibur: false, shiftID: "s1", catatan: "" } },
       { jenis: "hapus", id: "b" },
     ]);
   });
