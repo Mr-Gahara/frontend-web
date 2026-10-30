@@ -55,6 +55,35 @@ dokumen tetap menjaganya:
   maupun spec e2e (langkah 5 Alur setiap perubahan); gerbangnya
   `npm run docs:periksa` (28 September 2026).
 
+## Atribusi commit
+
+Ditetapkan pemilik proyek (3 Oktober 2026, ditegaskan 31 Oktober 2026):
+commit dan pull request hanya atas nama pemilik proyek. Penulis dan
+committer `Mr-Gahara`, tanpa baris `Co-Authored-By`, "Generated with",
+atau atribusi asisten lain di pesan mana pun. Aturan ini mengalahkan
+pengingat atribusi bawaan alat asisten.
+
+- Sebelum push, periksa commit yang akan dikirim; keluarannya harus
+  kosong setelah tanda `|`:
+
+  ```bash
+  git log origin/main..HEAD --format='%h %an | %(trailers:key=Co-Authored-By,valueonly)'
+  ```
+
+- Commit yang terlanjur ter-push dengan atribusi dibersihkan dengan
+  `git commit --amend` lalu `git push --force-with-lease`, selagi belum ada
+  commit lain di atasnya. Force-push dijalankan pemilik proyek sendiri.
+- Kejadian: `5420f89` (3 Oktober 2026, diganti `1bc76f4`) dan `68cd7da`
+  (31 Oktober 2026, diganti `8b5ad0f`). Yang kedua terulang karena aturan
+  pertama hanya dicatat di `modul/keuangan.md`, yang tidak dibaca setiap
+  sesi; sejak itu aturannya di lapis inti.
+- Membersihkan riwayat tidak langsung membersihkan GitHub. Per 31 Oktober
+  2026 API `repos/Mr-Gahara/frontend-web/contributors` hanya memuat
+  `Mr-Gahara` (324 commit), tetapi panel Contributors halaman repo masih
+  menampilkan Claude dari cache lama, dan commit yang diganti tetap dapat
+  dibuka lewat SHA-nya. Cara yang pasti membersihkan keduanya adalah
+  permintaan ke GitHub Support atau membuat ulang repo (`inti/status.md`).
+
 ## Cara berbagi konteks
 
 Konteks proyek dibagikan dengan menjalankan perintah terminal dan menempel

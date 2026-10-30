@@ -108,6 +108,9 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
   terjangkau per tanggal itu ditulis `Mr-Gahara` tanpa atribusi lain,
   dan remote hanya punya `main` tanpa ref pull request, tetapi daftar
   kontributor GitHub masih menampilkan Claude.
+  Per 31 Oktober 2026 API contributors hanya memuat `Mr-Gahara`; yang
+  tertinggal panel Contributors halaman repo dan commit `68cd7da` yang
+  diganti `8b5ad0f` (`inti/cara-kerja.md`, Atribusi commit).
 
 ### Utang kecil dari penyesuaian backend `ridho` `b5b367a`
 
