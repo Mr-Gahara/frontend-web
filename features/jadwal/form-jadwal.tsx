@@ -36,7 +36,8 @@ interface FormJadwalDialogProps {
   shiftList: MasterShift[];
   karyawanList?: KaryawanJadwal[];
   onSimpan: (payload: PayloadJadwalManual) => Promise<void>;
-  onHapus: (id: string) => Promise<void>;
+  /** Tidak diisi bila pengguna tidak memegang delete-jadwal-shift; tombol hapus disembunyikan. */
+  onHapus?: (id: string) => Promise<void>;
   isPending?: boolean;
 }
 
@@ -48,7 +49,8 @@ interface IsiFormJadwalProps {
   karyawanList: KaryawanJadwal[];
   isEditMode: boolean;
   onSimpan: (payload: PayloadJadwalManual) => Promise<void>;
-  onHapus: (id: string) => Promise<void>;
+  /** Tidak diisi bila pengguna tidak memegang delete-jadwal-shift; tombol hapus disembunyikan. */
+  onHapus?: (id: string) => Promise<void>;
   onSelesai: () => void;
   isPending: boolean;
 }
@@ -145,6 +147,7 @@ function IsiFormJadwal({
   });
 
   const hapus = async (id: string) => {
+    if (!onHapus) return;
     try {
       await onHapus(id);
       onSelesai();
@@ -313,7 +316,7 @@ function IsiFormJadwal({
       </div>
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-2">
-        {targetJadwalId && (
+        {targetJadwalId && onHapus && (
           <Button
             type="button"
             disabled={isPending}

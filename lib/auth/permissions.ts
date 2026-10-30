@@ -63,6 +63,18 @@ export const IZIN = {
   role: "read-role",
   absensi: "read-absensi",
   izinCuti: "read-izin-cuti",
+  shift: "read-shift",
+  polaRoster: "read-pola-roster",
+  jadwalShift: "read-jadwal-shift",
+  buatShift: "create-shift",
+  ubahShift: "update-shift",
+  hapusShift: "delete-shift",
+  buatPolaRoster: "create-pola-roster",
+  ubahPolaRoster: "update-pola-roster",
+  hapusPolaRoster: "delete-pola-roster",
+  buatJadwalShift: "create-jadwal-shift",
+  ubahJadwalShift: "update-jadwal-shift",
+  hapusJadwalShift: "delete-jadwal-shift",
 
   // Izin tulis halaman form: syarat gerbang rute di samping izin bacanya
   // (keputusan GR5a).
@@ -172,9 +184,9 @@ export type SyaratIzin = Izin | readonly Izin[];
  * karena halaman memanggil semua endpoint itu saat dimuat. Daftar kosong
  * berarti halaman tidak memuat data berizin.
  *
- * Catatan: route shift, pola roster, dan jadwal shift belum memakai
- * checkPermission di backend (catatan tim backend nomor 2 dan 12), dan
- * monitoring absensi memeriksa read-absensi di controller. Laporan memeriksa
+ * Catatan: shift, pola roster, dan jadwal shift diperiksa per operasi di
+ * route sejak backend ridho 02b5a60 (B139, B140), dan monitoring absensi
+ * memeriksa read-absensi di route (B141). Laporan memeriksa
  * read-laporan sejak backend 465b438, dan pelanggan memeriksa read-pelanggan
  * sejak backend nizar 8dc6211; gate keduanya sudah dipasang lebih dulu
  * memakai permission yang ada di seed. Untuk data referensi yang memang
@@ -279,12 +291,19 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
     [IZIN.buatPembelianStok, IZIN.buatPembelianStokOutlet],
   ],
 
-  // Jadwal outlet: izin shift, pola roster, dan jadwal belum ada di backend,
-  // sehingga gate memakai izin data yang benar-benar diperiksa (daftar karyawan).
-  "/dashboard/outlet/jadwal": [IZIN.pengguna],
-  "/dashboard/outlet/jadwal/generate": [IZIN.pengguna],
-  "/dashboard/outlet/pola-roster": [],
-  "/dashboard/outlet/shift": [],
+  // Jadwal outlet: lokasi ruang dimuat untuk menyaring shift dan pola per
+  // lokasi (B168). Tanpa read-jadwal-shift backend hanya mengirim jadwal
+  // sendiri (B140), sehingga kalender karyawan ruang menuntutnya.
+  "/dashboard/outlet/jadwal": [IZIN.location, IZIN.pengguna, IZIN.jadwalShift, IZIN.shift],
+  "/dashboard/outlet/jadwal/generate": [
+    IZIN.location,
+    IZIN.pengguna,
+    IZIN.shift,
+    IZIN.polaRoster,
+    IZIN.buatJadwalShift,
+  ],
+  "/dashboard/outlet/pola-roster": [IZIN.location, IZIN.polaRoster, IZIN.shift],
+  "/dashboard/outlet/shift": [IZIN.location, IZIN.shift],
 
   // Gudang
   "/dashboard/gudang": [],
@@ -313,10 +332,16 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/gudang/pengirimanStok": [IZIN.transferStok],
   "/dashboard/gudang/penerimaanStok": [IZIN.transferStok],
   "/dashboard/gudang/penerimaanStok/[id]": [IZIN.transferStok],
-  "/dashboard/gudang/jadwal": [IZIN.pengguna],
-  "/dashboard/gudang/jadwal/generate": [IZIN.pengguna],
-  "/dashboard/gudang/shift": [],
-  "/dashboard/gudang/pola-roster": [],
+  "/dashboard/gudang/jadwal": [IZIN.location, IZIN.pengguna, IZIN.jadwalShift, IZIN.shift],
+  "/dashboard/gudang/jadwal/generate": [
+    IZIN.location,
+    IZIN.pengguna,
+    IZIN.shift,
+    IZIN.polaRoster,
+    IZIN.buatJadwalShift,
+  ],
+  "/dashboard/gudang/shift": [IZIN.location, IZIN.shift],
+  "/dashboard/gudang/pola-roster": [IZIN.location, IZIN.polaRoster, IZIN.shift],
   "/dashboard/gudang/pengguna": [IZIN.pengguna, IZIN.role],
   "/dashboard/gudang/pengaturan": [IZIN.location],
 };

@@ -12,8 +12,9 @@ interface JadwalToolbarProps {
   onNextMonth: () => void;
   searchQuery: string;
   onSearchChange: (value: string) => void;
-  onAddManual: () => void;
-  onAutoGenerate: () => void;
+  /** Tombol hanya tampil bila diisi; halaman mengisinya menurut izin (features/jadwal/izin.ts). */
+  onAddManual?: () => void;
+  onAutoGenerate?: () => void;
 }
 
 export function JadwalToolbar({
@@ -40,19 +41,23 @@ export function JadwalToolbar({
         </div>
 
         <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            onClick={onAddManual}
-            className="h-11 border-navy/20 text-navy hover:bg-navy/5 bg-transparent font-bold rounded-xl"
-          >
-            <Plus className="mr-2 h-4 w-4" /> Tambah Manual
-          </Button>
-          <Button
-            onClick={onAutoGenerate}
-            className="h-11 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
-          >
-            <Wand2 className="mr-2 h-4 w-4" /> Auto-Generate
-          </Button>
+          {onAddManual && (
+            <Button
+              variant="outline"
+              onClick={onAddManual}
+              className="h-11 border-navy/20 text-navy hover:bg-navy/5 bg-transparent font-bold rounded-xl"
+            >
+              <Plus className="mr-2 h-4 w-4" /> Tambah Manual
+            </Button>
+          )}
+          {onAutoGenerate && (
+            <Button
+              onClick={onAutoGenerate}
+              className="h-11 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
+            >
+              <Wand2 className="mr-2 h-4 w-4" /> Auto-Generate
+            </Button>
+          )}
         </div>
       </div>
 

@@ -25,7 +25,9 @@ import type { ShiftItem } from "@/types/shift";
 import { PolaFormDialog } from "./form-pola-roster";
 import { PolaDeleteDialog } from "./dialog-hapus-pola-roster";
 import { labelShiftPola, teksLabelShift } from "./payload";
+import { aksiPolaRoster } from "./izin";
 import { polaTerpisahPerRuang, type RuangPolaRoster } from "./ruang";
+import { useSession } from "@/lib/auth/useSession";
 import { DataTable } from "@/components/ui/data-table";
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -55,6 +57,10 @@ export default function PolaUtama({
   isSaving = false,
   isDeleting = false,
 }: PolaUtamaProps) {
+  const { permissions } = useSession();
+  const aksi = aksiPolaRoster(permissions);
+  const { ubah: bolehUbah, hapus: bolehHapus } = aksi;
+
   // --- STATE LOKAL ---
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -116,46 +122,51 @@ export default function PolaUtama({
       {
         id: "aksi",
         header: () => <div className="text-right">Aksi</div>,
-        cell: ({ row }) => (
-          <div className="flex justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Buka menu"
-                  className="h-8 w-8 text-navy/50 hover:text-navy hover:bg-navy/10 cursor-pointer"
-                >
-                  <MoreHorizontal className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44 bg-gading border-navy/10 rounded-xl shadow-lg">
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedPola(row.original);
-                    setFormOpen(true);
-                  }}
-                  className="cursor-pointer font-bold text-navy hover:bg-navy/5 rounded-lg m-1"
-                >
-                  <Edit className="mr-2 h-4 w-4" /> Edit Pola
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-navy/5" />
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedPola(row.original);
-                    setDeleteOpen(true);
-                  }}
-                  className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10 rounded-lg m-1"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Hapus Pola
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        ),
+        cell: ({ row }) =>
+          !bolehUbah && !bolehHapus ? null : (
+            <div className="flex justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Buka menu"
+                    className="h-8 w-8 text-navy/50 hover:text-navy hover:bg-navy/10 cursor-pointer"
+                  >
+                    <MoreHorizontal className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44 bg-gading border-navy/10 rounded-xl shadow-lg">
+                  {bolehUbah && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedPola(row.original);
+                        setFormOpen(true);
+                      }}
+                      className="cursor-pointer font-bold text-navy hover:bg-navy/5 rounded-lg m-1"
+                    >
+                      <Edit className="mr-2 h-4 w-4" /> Edit Pola
+                    </DropdownMenuItem>
+                  )}
+                  {bolehUbah && bolehHapus && <DropdownMenuSeparator className="bg-navy/5" />}
+                  {bolehHapus && (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedPola(row.original);
+                        setDeleteOpen(true);
+                      }}
+                      className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10 rounded-lg m-1"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Hapus Pola
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ),
       },
     ],
-    [shiftList],
+    [shiftList, bolehUbah, bolehHapus],
   );
 
   return (
@@ -177,15 +188,17 @@ export default function PolaUtama({
           )}
         </div>
 
-        <Button
-          onClick={() => {
-            setSelectedPola(null);
-            setFormOpen(true);
-          }}
-          className="h-11 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Buat Pola Roster
-        </Button>
+        {aksi.buat && (
+          <Button
+            onClick={() => {
+              setSelectedPola(null);
+              setFormOpen(true);
+            }}
+            className="h-11 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Buat Pola Roster
+          </Button>
+        )}
       </div>
 
       {/* 2. FILTER & SEARCH */}

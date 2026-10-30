@@ -92,3 +92,24 @@ describe("ROLE_TEMPLATES: pembelian stok (RH6a, per ruang B116)", () => {
     },
   );
 });
+
+const SDM_JADWAL = ["shift", "pola-roster", "jadwal-shift"].flatMap((modul) =>
+  ["read", "create", "update", "delete"].map((aksi) => `${aksi}-${modul}`),
+);
+const SDM_BACA = ["read-shift", "read-pola-roster", "read-jadwal-shift"];
+
+describe("ROLE_TEMPLATES: izin shift, pola roster, dan jadwal shift (B139, B140)", () => {
+  it.each(["guest", "staff", "kasir"])("%s tidak memegangnya", (id) => {
+    expect(izinTemplate(id).filter((nama) => SDM_JADWAL.includes(nama))).toEqual([]);
+  });
+
+  it("supervisor hanya membaca", () => {
+    expect(izinTemplate("supervisor").filter((nama) => SDM_JADWAL.includes(nama)).sort()).toEqual(
+      [...SDM_BACA].sort(),
+    );
+  });
+
+  it.each(["manajer", "general-manajer"])("%s memegang kedua belas izin", (id) => {
+    expect(izinTemplate(id)).toEqual(expect.arrayContaining(SDM_JADWAL));
+  });
+});

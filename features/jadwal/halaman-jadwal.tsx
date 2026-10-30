@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { JadwalToolbar } from "./toolbar-jadwal";
 import { JadwalGrid } from "./grid-jadwal";
 import { FormJadwalDialog } from "./form-jadwal";
+import { aksiJadwal } from "./izin";
 import type { PayloadJadwalManual, RuangJadwal } from "./tipe";
+import { useSession } from "@/lib/auth/useSession";
 import type { KaryawanJadwal, ShiftItem } from "@/types/jadwal";
 import type { ShiftItem as MasterShift } from "@/types/shift";
 
@@ -63,8 +65,16 @@ export default function JadwalUtama({
     [daysInMonth],
   );
 
+  const basePath = tipeRuang === "outlet" ? "/dashboard/outlet" : "/dashboard/gudang";
+  const { permissions } = useSession();
+  const aksi = aksiJadwal(permissions, `${basePath}/jadwal/generate`);
+  const { buat: bolehBuat, ubah: bolehUbah } = aksi;
+
   const handleCellClick = React.useCallback(
     (id: string, day: number, shifts: ShiftItem[]) => {
+      // Sel berisi jadwal diubah lewat PUT, sel kosong dibuat lewat POST (B140).
+      const berisi = shifts.some((s) => s.id !== "off");
+      if (berisi ? !bolehUbah : !bolehBuat) return;
       const emp = dataKaryawan.find((e) => e.id === id);
       if (emp) {
         setSelectedKaryawan({ id: emp.id, nama: emp.nama });
@@ -73,7 +83,7 @@ export default function JadwalUtama({
         setIsManualOpen(true);
       }
     },
-    [dataKaryawan, year, month],
+    [dataKaryawan, year, month, bolehBuat, bolehUbah],
   );
 
   // Handler untuk tombol "+ Tambah Manual" (Buka pop-up kosongan)
@@ -86,10 +96,8 @@ export default function JadwalUtama({
 
   // ✅ LOGIKA BARU: Navigasi ke halaman Dedicated Auto-Generate
   const handleOpenGenerate = React.useCallback(() => {
-    const basePath =
-      tipeRuang === "outlet" ? "/dashboard/outlet" : "/dashboard/gudang";
     router.push(`${basePath}/jadwal/generate`);
-  }, [router, tipeRuang]);
+  }, [router, basePath]);
 
   return (
     <div className="flex flex-col w-full max-w-[95vw] mx-auto">
@@ -100,8 +108,8 @@ export default function JadwalUtama({
         onNextMonth={onNextMonth}
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
-        onAddManual={handleOpenManualEmpty}
-        onAutoGenerate={handleOpenGenerate} // ✅ Menggunakan fungsi routing
+        onAddManual={bolehBuat ? handleOpenManualEmpty : undefined}
+        onAutoGenerate={aksi.generate ? handleOpenGenerate : undefined}
       />
 
       <JadwalGrid
@@ -128,7 +136,7 @@ export default function JadwalUtama({
         karyawanList={dataKaryawan}
         isPending={isSaving}
         onSimpan={(payload) => onSimpan(payload, selectedExistingShifts)}
-        onHapus={onHapus}
+        onHapus={aksi.hapus ? onHapus : undefined}
       />
     </div>
   );

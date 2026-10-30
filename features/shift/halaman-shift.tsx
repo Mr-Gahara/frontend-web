@@ -31,7 +31,9 @@ import {
 import type { ShiftItem } from "@/types/shift";
 import { ShiftFormDialog } from "./form-shift";
 import { ShiftDeleteDialog } from "./dialog-nonaktif-shift";
+import { aksiShift } from "./izin";
 import { shiftTerpisahPerRuang, type RuangShift } from "./ruang";
+import { useSession } from "@/lib/auth/useSession";
 import type { NilaiFormShift } from "./schema";
 import { DataTable } from "@/components/ui/data-table";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -60,6 +62,10 @@ export default function ShiftUtama({
   isSaving = false,
   isDeleting = false,
 }: ShiftUtamaProps) {
+  const { permissions } = useSession();
+  const aksi = aksiShift(permissions);
+  const { ubah: bolehUbah, nonaktifkan: bolehNonaktifkan } = aksi;
+
   // --- STATE LOKAL ---
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<
@@ -173,51 +179,57 @@ export default function ShiftUtama({
       {
         id: "aksi",
         header: () => <div className="text-right">Aksi</div>,
-        cell: ({ row }) => (
-          <div className="flex justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Buka menu"
-                  className="h-8 w-8 text-navy/50 hover:text-navy hover:bg-navy/10 cursor-pointer"
-                >
-                  <MoreHorizontal className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40 bg-gading border-navy/10 rounded-xl shadow-lg">
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedShift(row.original);
-                    setFormOpen(true);
-                  }}
-                  className="cursor-pointer font-bold text-navy hover:bg-navy/5 rounded-lg m-1"
-                >
-                  <Edit className="mr-2 h-4 w-4" /> Edit Shift
-                </DropdownMenuItem>
-                {/* Opsi non-aktifkan hanya untuk shift yang masih Aktif */}
-                {row.original.status === "Aktif" && (
-                  <>
-                    <DropdownMenuSeparator className="bg-navy/5" />
+        cell: ({ row }) => {
+          const nonaktif = bolehNonaktifkan && row.original.status === "Aktif";
+          if (!bolehUbah && !nonaktif) return null;
+          return (
+            <div className="flex justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Buka menu"
+                    className="h-8 w-8 text-navy/50 hover:text-navy hover:bg-navy/10 cursor-pointer"
+                  >
+                    <MoreHorizontal className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40 bg-gading border-navy/10 rounded-xl shadow-lg">
+                  {bolehUbah && (
                     <DropdownMenuItem
                       onClick={() => {
                         setSelectedShift(row.original);
-                        setDeleteOpen(true);
+                        setFormOpen(true);
                       }}
-                      className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10 rounded-lg m-1"
+                      className="cursor-pointer font-bold text-navy hover:bg-navy/5 rounded-lg m-1"
                     >
-                      <ArchiveX className="mr-2 h-4 w-4" /> Non-Aktifkan
+                      <Edit className="mr-2 h-4 w-4" /> Edit Shift
                     </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        ),
+                  )}
+                  {/* Opsi non-aktifkan hanya untuk shift yang masih Aktif */}
+                  {nonaktif && (
+                    <>
+                      {bolehUbah && <DropdownMenuSeparator className="bg-navy/5" />}
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedShift(row.original);
+                          setDeleteOpen(true);
+                        }}
+                        className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10 rounded-lg m-1"
+                      >
+                        <ArchiveX className="mr-2 h-4 w-4" /> Non-Aktifkan
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          );
+        },
       },
     ],
-    [],
+    [bolehUbah, bolehNonaktifkan],
   );
 
   return (
@@ -239,12 +251,14 @@ export default function ShiftUtama({
           )}
         </div>
 
-        <Button
-          onClick={handleOpenCreate}
-          className="h-11 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Tambah Master Shift
-        </Button>
+        {aksi.buat && (
+          <Button
+            onClick={handleOpenCreate}
+            className="h-11 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Tambah Master Shift
+          </Button>
+        )}
       </div>
 
       {/* 2. FILTER & SEARCH */}
