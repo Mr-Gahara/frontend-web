@@ -3,13 +3,13 @@ import type { RuangShift } from "@/features/shift/ruang";
 /** Ruang kerja jadwal: outlet dan gudang punya karyawan dan jadwal masing-masing. */
 export type RuangJadwal = RuangShift;
 
-/** Item GET /jadwalshift, sesuai mappers/jadwalShiftMapper.js backend 00b9957. */
+/** Item GET /jadwalshift, sesuai mappers/jadwalShiftMapper.js backend ridho b699939 (B148). */
 export interface JadwalItem {
   id: string;
   tanggalKerja: string; // YYYY-MM-DD
   isLibur: boolean;
   catatan: string | null;
-  karyawan: { id: string; namaLengkap?: string; role?: string } | null;
+  karyawan: { id: string; nama: string | null; roleID: string | null; role: string | null } | null;
   shift: {
     id: string;
     namaShift: string;
@@ -31,8 +31,9 @@ export interface KaryawanRuang {
 export type DitolakJadwal = { reason?: string; penggunaID?: string; tanggalKerja?: string };
 
 /**
- * Hasil POST /jadwalshift (201) dan POST /jadwalshift/bulk (200), juga saat
- * seluruh jadwal ditolak (kontrak/temuan.md butir 66, keputusan J2a).
+ * Hasil POST /jadwalshift (201) dan POST /jadwalshift/bulk (200). Sejak B147
+ * penolakan seluruhnya dijawab 409, lalu dibentuk ulang menjadi hasil ini
+ * oleh hasilDariPenolakanSeluruh (keputusan J2a).
  */
 export interface HasilJadwal {
   message: string;

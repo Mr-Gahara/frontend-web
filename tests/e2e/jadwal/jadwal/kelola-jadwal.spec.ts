@@ -245,10 +245,13 @@ test("jadwal yang ditolak backend ditampilkan dan dialog bertahan (keputusan J2a
     await dialog.getByRole("button", { name: "Simpan Perubahan" }).click();
     const res = await tunggu;
     const body = await res.json().catch(() => ({}));
-    expect(res.status(), `POST /jadwalshift: ${JSON.stringify(body).slice(0, 200)}`).toBe(201);
-    expect(body.data?.ditolak, "shift siang bertumpuk jam dengan shift pagi").toBe(1);
+    // Sejak B147 penolakan seluruhnya dijawab 409 dengan errors berisi detailDitolak.
+    expect(res.status(), `POST /jadwalshift: ${JSON.stringify(body).slice(0, 200)}`).toBe(409);
+    expect(body.errors, "shift siang bertumpuk jam dengan shift pagi").toHaveLength(1);
+    const alasan = String(body.errors[0].reason);
     await expect(page.getByText("Gagal Menyimpan")).toBeVisible();
-    await expect(page.getByText(/1 jadwal ditolak/)).toBeVisible();
+    await expect(page.getByText(`1 jadwal ditolak: ${NAMA_PENGGUNA}`)).toContainText(alasan);
+    await expect(page.getByText(/"reason"/), "alasan tidak tampil sebagai JSON mentah").toHaveCount(0);
     await expect(dialog, "dialog bertahan saat jadwal ditolak").toBeVisible();
     const tersimpan = await jadwalRentang(page, auth, fx, tgl, tgl);
     expect(tersimpan.map((j) => j.shift?.id)).toEqual([fx.shiftPagi]);

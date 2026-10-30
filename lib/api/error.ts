@@ -14,18 +14,22 @@ export class ApiError extends Error {
   readonly status: number;
   readonly errors: string[];
   readonly code?: string;
+  /** Isi errors apa adanya, untuk galat yang membawa data terstruktur (misalnya jadwal yang ditolak, B147). */
+  readonly rincian: unknown[];
 
   constructor(
     status: number,
     message: string,
     errors: string[] = [],
     code?: string,
+    rincian: unknown[] = [],
   ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.errors = errors;
     this.code = code;
+    this.rincian = rincian;
   }
 
   /** Pesan siap tampil: daftar errors bila ada, selain itu message. */

@@ -1,7 +1,8 @@
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
+import { isApiError } from "@/lib/api/error";
 import { uraiTanggalLokal } from "./rentang";
-import type { HasilJadwal } from "./tipe";
+import type { DitolakJadwal, HasilJadwal } from "./tipe";
 
 /**
  * Pesan untuk jadwal yang ditolak backend (keputusan J2a), atau null bila
@@ -30,4 +31,21 @@ export function gabungHasil(daftar: HasilJadwal[]): HasilJadwal {
     ditolak: daftar.reduce((n, h) => n + h.ditolak, 0),
     detailDitolak: daftar.flatMap((h) => h.detailDitolak),
   };
+}
+const teks = (nilai: unknown) => (typeof nilai === "string" ? nilai : undefined);
+
+/**
+ * Hasil jadwal dari galat 409 "Seluruh jadwal ditolak." (B147, R22). Sejak
+ * backend ridho b699939 buat manual dan generate yang tidak menyimpan satu
+ * jadwal pun dijawab 409 dengan errors berisi detailDitolak, bukan sukses.
+ * Dibentuk ulang agar halaman tetap menampilkan penolakan lewat pesanDitolak
+ * (keputusan J2a). Galat lain menghasilkan null dan dilempar ulang pemanggil.
+ */
+export function hasilDariPenolakanSeluruh(err: unknown): HasilJadwal | null {
+  if (!isApiError(err) || err.status !== 409) return null;
+  const detailDitolak: DitolakJadwal[] = err.rincian
+    .filter((d): d is Record<string, unknown> => typeof d === "object" && d !== null)
+    .map((d) => ({ reason: teks(d.reason), penggunaID: teks(d.penggunaID), tanggalKerja: teks(d.tanggalKerja) }));
+  if (detailDitolak.length === 0) return null;
+  return { message: err.message, berhasilDiproses: 0, ditolak: detailDitolak.length, detailDitolak };
 }

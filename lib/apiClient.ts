@@ -217,13 +217,15 @@ async function request<T>(
     let pesan = "Terjadi kesalahan server.";
     let daftarError: string[] = [];
     let kode: string | undefined;
+    let rincian: unknown[] = [];
 
     try {
       const error = await res.json();
 
       if (error.errors && Array.isArray(error.errors)) {
-        daftarError = error.errors.map((e: string | { msg?: string; message?: string }) =>
-          typeof e === "string" ? e : e.msg || e.message || JSON.stringify(e),
+        rincian = error.errors;
+        daftarError = error.errors.map((e: string | { msg?: string; message?: string; reason?: string }) =>
+          typeof e === "string" ? e : e.msg || e.message || e.reason || JSON.stringify(e),
         );
       } else if (error.errors && typeof error.errors === "object") {
         daftarError = Object.values(error.errors).map((e: unknown) =>
@@ -245,7 +247,7 @@ async function request<T>(
       if (typeof window !== "undefined") window.location.href = "/login";
     }
 
-    throw new ApiError(res.status, pesan, daftarError, kode);
+    throw new ApiError(res.status, pesan, daftarError, kode, rincian);
   }
 
   return res.json() as Promise<T>;

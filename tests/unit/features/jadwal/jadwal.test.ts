@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { entriBulkJadwal, pesanMasalahSimulasi, simulasiGenerate } from "@/features/jadwal/generate";
-import { gabungHasil, pesanDitolak } from "@/features/jadwal/hasil";
+import { gabungHasil, hasilDariPenolakanSeluruh, pesanDitolak } from "@/features/jadwal/hasil";
+import { ApiError } from "@/lib/api/error";
 import { itemJadwal, keKaryawanRuang, petakanJadwalKaryawan } from "@/features/jadwal/pemetaan";
 import { rencanaSimpanJadwal } from "@/features/jadwal/rencana";
 import { daftarTanggal, rentangBulan } from "@/features/jadwal/rentang";
@@ -26,7 +27,7 @@ const JADWAL = (id: string, karyawanId: string, tanggalKerja: string, isi: Parti
   tanggalKerja,
   isLibur: false,
   catatan: null,
-  karyawan: { id: karyawanId },
+  karyawan: { id: karyawanId, nama: "Ridho", roleID: "r1", role: "Owner" },
   shift: { id: "s1", namaShift: "Pagi", jamMasuk: "08:00", jamPulang: "16:00", isLintasHari: false, status: "Aktif" },
   ...isi,
 });
@@ -197,5 +198,36 @@ describe("skema form jadwal", () => {
     expect(hasil.success ? null : hasil.error.issues[0].message).toBe(
       "Tanggal mulai tidak boleh lebih besar dari tanggal selesai.",
     );
+  });
+});
+describe("hasilDariPenolakanSeluruh (B147)", () => {
+  const DITOLAK = {
+    tenantID: "t1",
+    penggunaID: "p1",
+    tanggalKerja: "2026-11-10T00:00:00.000Z",
+    isLibur: false,
+    shiftID: "s1",
+    reason: "Bentrokan jam dengan jadwal yang sudah ada.",
+  };
+
+  it("409 dengan detailDitolak menjadi hasil yang dapat ditampilkan pesanDitolak", () => {
+    const hasil = hasilDariPenolakanSeluruh(
+      new ApiError(409, "Seluruh jadwal ditolak.", [DITOLAK.reason], undefined, [DITOLAK]),
+    );
+    expect(hasil).toEqual({
+      message: "Seluruh jadwal ditolak.",
+      berhasilDiproses: 0,
+      ditolak: 1,
+      detailDitolak: [{ reason: DITOLAK.reason, penggunaID: "p1", tanggalKerja: DITOLAK.tanggalKerja }],
+    });
+    expect(pesanDitolak(hasil!, () => "Ridho")).toBe(
+      "1 jadwal ditolak: Ridho, 10 Nov 2026, Bentrokan jam dengan jadwal yang sudah ada.",
+    );
+  });
+
+  it("galat lain, 409 tanpa rincian, dan bukan ApiError menghasilkan null", () => {
+    expect(hasilDariPenolakanSeluruh(new ApiError(400, "x", [], undefined, [DITOLAK]))).toBeNull();
+    expect(hasilDariPenolakanSeluruh(new ApiError(409, "Nomor kembar"))).toBeNull();
+    expect(hasilDariPenolakanSeluruh(new Error("jaringan"))).toBeNull();
   });
 });
