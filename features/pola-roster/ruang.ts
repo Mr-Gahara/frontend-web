@@ -3,19 +3,17 @@ import type { RuangShift } from "@/features/shift/ruang";
 /**
  * Ruang kerja pola roster (keputusan PL5).
  *
- * Outlet dan gudang punya jadwal dan pola kerja masing-masing, tetapi
- * backend 00b9957 belum memisahkan pola roster per lokasi: polaRosterModel
- * tidak punya field lokasi, dan GET /polaroster hanya menyaring tenant. Tim
- * backend diminta menambah locationID (keputusan SH5a).
+ * Outlet dan gudang punya jadwal dan pola kerja masing-masing. Sejak backend
+ * ridho 7a5ff21 (B168) pola roster wajib locationID, dan GET /polaroster
+ * menerima ?locationID=.
  *
  * KUNCI_LOKASI_POLA_ROSTER adalah nama field lokasi di query daftar dan
  * payload simpan, terpisah dari KUNCI_LOKASI_SHIFT karena backend dapat
  * menambahkannya di waktu yang berbeda. Selama null, kedua ruang
- * menampilkan daftar tenant yang sama beserta keterangan (keputusan
- * rancangan butir 18). Berbeda dengan GET /shift, GET /polaroster tanpa
- * query tidak bermasalah, sehingga selama null tidak ada query yang dikirim.
+ * menampilkan daftar tenant yang sama beserta keterangan, dan tidak ada
+ * query yang dikirim (keputusan rancangan butir 18).
  */
-export const KUNCI_LOKASI_POLA_ROSTER = null as string | null;
+export const KUNCI_LOKASI_POLA_ROSTER = "locationID" as string | null;
 
 export type RuangPolaRoster = RuangShift;
 

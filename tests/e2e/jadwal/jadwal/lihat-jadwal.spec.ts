@@ -53,7 +53,7 @@ for (const ruang of ["outlet", "gudang"] as const) {
 
     test("jadwal uji tampil di sel harinya", async ({ page }) => {
       const auth = await bukaDenganAuth(page, url);
-      const fx = await siapkanFixtureJadwal(page, auth);
+      const fx = await siapkanFixtureJadwal(page, auth, ruang);
       const b = bulanUji();
       const tgl = tanggalUji(b, HARI_UJI);
       await bersihkanHari(page, auth, fx, tgl, tgl);

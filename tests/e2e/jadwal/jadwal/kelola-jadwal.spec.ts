@@ -251,7 +251,9 @@ test("form ubah memuat catatan tersimpan dan mengirimnya kembali (keputusan JD4)
 
 test("jadwal gudang dapat dibuat lewat klik sel (keputusan J5b)", async ({ page }) => {
   const auth = await bukaDenganAuth(page, URL_JADWAL_GUDANG);
-  const fx = await siapkanFixtureJadwal(page, auth);
+  const fx = await siapkanFixtureJadwal(page, auth, "gudang");
+  // Fixture gudang dapat baru dibuat setelah halaman memuat daftar shift dan pola.
+  await page.reload();
   const b = bulanUji();
   const hari = 26;
   const tgl = tanggalUji(b, hari);

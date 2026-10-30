@@ -4,6 +4,7 @@ import { cocok } from "../../../helpers/reservasi-uji";
 import {
   bersihkanHari,
   bulanUji,
+  idLokasiRuang,
   jadwalRentang,
   NAMA_PENGGUNA,
   NAMA_POLA,
@@ -124,6 +125,7 @@ test("pola dengan shift nonaktif ditandai dan simpan ditahan (keputusan GN2a)", 
   const akhiran = Date.now();
   const namaShift = `Shift Arsip Generate ${akhiran}`;
   const namaPola = `Pola Arsip Generate ${akhiran}`;
+  const locationID = await idLokasiRuang(page, auth);
   const shift = await api<{ id: string }>(page, auth, "POST", "/shift", {
     namaShift,
     jamMasuk: "07:00",
@@ -131,12 +133,14 @@ test("pola dengan shift nonaktif ditandai dan simpan ditahan (keputusan GN2a)", 
     isLintasHari: false,
     toleransiTerlambat: 0,
     status: "Aktif",
+    locationID,
   });
   expect(shift.status, `POST /shift: ${shift.pesan}`).toBe(201);
   const pola = await api<{ id: string }>(page, auth, "POST", "/polaroster", {
     namaPola,
     siklusHari: 1,
     detailSiklus: [{ hariKe: 1, isLibur: false, shiftID: shift.data.id }],
+    locationID,
   });
   expect(pola.status, `POST /polaroster: ${pola.pesan}`).toBe(201);
   try {
@@ -162,7 +166,9 @@ test("pola dengan shift nonaktif ditandai dan simpan ditahan (keputusan GN2a)", 
 
 test("generate jadwal gudang tersimpan dan kembali ke kalender gudang (keputusan J5b)", async ({ page }) => {
   const auth = await bukaDenganAuth(page, URL_GENERATE_GUDANG);
-  const fx = await siapkanFixtureJadwal(page, auth);
+  const fx = await siapkanFixtureJadwal(page, auth, "gudang");
+  // Fixture gudang dapat baru dibuat setelah halaman memuat daftar shift dan pola.
+  await page.reload();
   const b = bulanUji();
   const dari = tanggalUji(b, DARI);
   const sampai = tanggalUji(b, SAMPAI);

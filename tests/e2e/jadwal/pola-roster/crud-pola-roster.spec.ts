@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { api, BASIS, bukaDenganAuth, JAWAB_GAGAL, login as loginUji } from "../../../helpers/transfer-uji";
 import { cocok } from "../../../helpers/reservasi-uji";
+import { idLokasiRuang } from "../../../helpers/jadwal-uji";
 import { polaTerpisahPerRuang } from "@/features/pola-roster/ruang";
 
 // ============================================================
@@ -372,6 +373,7 @@ test.describe("E2E - Pola Roster setelah migrasi features/pola-roster", () => {
     const akhiran = Date.now();
     const namaShift = `Shift Arsip ${akhiran}`;
     const namaPola = `Pola Arsip ${akhiran}`;
+    const locationID = await idLokasiRuang(page, auth);
     const shift = await api<{ id: string }>(page, auth, "POST", "/shift", {
       namaShift,
       jamMasuk: "07:00",
@@ -379,12 +381,14 @@ test.describe("E2E - Pola Roster setelah migrasi features/pola-roster", () => {
       isLintasHari: false,
       toleransiTerlambat: 0,
       status: "Aktif",
+      locationID,
     });
     expect(shift.status, `POST /shift: ${shift.pesan}`).toBe(201);
     const pola = await api<{ id: string }>(page, auth, "POST", "/polaroster", {
       namaPola,
       siklusHari: 1,
       detailSiklus: [{ hariKe: 1, isLibur: false, shiftID: shift.data.id }],
+      locationID,
     });
     expect(pola.status, `POST /polaroster: ${pola.pesan}`).toBe(201);
     try {
@@ -406,6 +410,7 @@ test.describe("E2E - Pola Roster setelah migrasi features/pola-roster", () => {
       namaPola,
       siklusHari: 1,
       detailSiklus: [{ hariKe: 1, isLibur: true }],
+      locationID: await idLokasiRuang(page, auth),
     });
     expect(pola.status, `POST /polaroster: ${pola.pesan}`).toBe(201);
     try {

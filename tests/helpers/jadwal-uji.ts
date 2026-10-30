@@ -39,6 +39,8 @@ export type JadwalMentah = {
 
 export type FixtureJadwal = { penggunaId: string; shiftPagi: string; polaId: string };
 
+export type Ruang = "outlet" | "gudang";
+
 export type BulanUji = { tahun: number; bulan: number; selisih: number };
 
 type Entri = { id: string } & Record<string, unknown>;
@@ -61,8 +63,26 @@ async function idPengguna(page: Page, auth: Auth): Promise<string> {
   return String(ada?.id);
 }
 
-async function pastikanShiftPagi(page: Page, auth: Auth): Promise<string> {
-  const res = await api<unknown>(page, auth, "GET", "/shift?status=Aktif");
+/**
+ * Lokasi ruang, dipilih sama dengan useLokasiRuang: outlet tenant, atau
+ * gudang pertama. Shift dan pola roster wajib locationID dan disaring per
+ * lokasi (B168), sehingga setiap ruang punya fixture sendiri bernama sama.
+ */
+export async function idLokasiRuang(page: Page, auth: Auth, ruang: Ruang = "outlet"): Promise<string> {
+  if (ruang === "outlet") {
+    const res = await api<unknown>(page, auth, "GET", "/location/current");
+    expect(res.status, `GET /location/current: ${res.pesan}`).toBe(200);
+    return String(idDari(normalizeId(res.data) as unknown));
+  }
+  const res = await api<unknown>(page, auth, "GET", "/location");
+  expect(res.status, `GET /location: ${res.pesan}`).toBe(200);
+  const gudang = daftar(res.data).find((l) => l.tipe === "Gudang");
+  expect(gudang, "tenant uji harus punya gudang").toBeTruthy();
+  return String(gudang?.id);
+}
+
+async function pastikanShiftPagi(page: Page, auth: Auth, lokasiId: string): Promise<string> {
+  const res = await api<unknown>(page, auth, "GET", `/shift?status=Aktif&locationID=${lokasiId}`);
   expect(res.status, `GET /shift: ${res.pesan}`).toBe(200);
   const ada = daftar(res.data).find((s) => s.namaShift === NAMA_SHIFT_PAGI);
   if (ada) return ada.id;
@@ -73,13 +93,14 @@ async function pastikanShiftPagi(page: Page, auth: Auth): Promise<string> {
     isLintasHari: false,
     toleransiTerlambat: 0,
     status: "Aktif",
+    locationID: lokasiId,
   });
   expect([200, 201], `POST /shift: ${buat.pesan}`).toContain(buat.status);
   return String(idDari(normalizeId(buat.data) as unknown));
 }
 
-async function pastikanPola(page: Page, auth: Auth, shiftPagi: string): Promise<string> {
-  const res = await api<unknown>(page, auth, "GET", "/polaroster");
+async function pastikanPola(page: Page, auth: Auth, shiftPagi: string, lokasiId: string): Promise<string> {
+  const res = await api<unknown>(page, auth, "GET", `/polaroster?locationID=${lokasiId}`);
   expect(res.status, `GET /polaroster: ${res.pesan}`).toBe(200);
   const ada = daftar(res.data).find((p) => p.namaPola === NAMA_POLA);
   if (ada) {
@@ -98,15 +119,17 @@ async function pastikanPola(page: Page, auth: Auth, shiftPagi: string): Promise<
       { hariKe: 1, isLibur: false, shiftID: shiftPagi },
       { hariKe: 2, isLibur: true, shiftID: null },
     ],
+    locationID: lokasiId,
   });
   expect([200, 201], `POST /polaroster: ${buat.pesan}`).toContain(buat.status);
   return String(idDari(normalizeId(buat.data) as unknown));
 }
 
-export async function siapkanFixtureJadwal(page: Page, auth: Auth): Promise<FixtureJadwal> {
+export async function siapkanFixtureJadwal(page: Page, auth: Auth, ruang: Ruang = "outlet"): Promise<FixtureJadwal> {
+  const lokasiId = await idLokasiRuang(page, auth, ruang);
   const penggunaId = await idPengguna(page, auth);
-  const shiftPagi = await pastikanShiftPagi(page, auth);
-  const polaId = await pastikanPola(page, auth, shiftPagi);
+  const shiftPagi = await pastikanShiftPagi(page, auth, lokasiId);
+  const polaId = await pastikanPola(page, auth, shiftPagi, lokasiId);
   return { penggunaId, shiftPagi, polaId };
 }
 
@@ -208,7 +231,8 @@ export const JAM_SIANG = { masuk: "12:00", pulang: "20:00" };
 
 /** Shift uji kedua yang jamnya bertumpuk dengan shift pagi uji, untuk jadwal yang ditolak backend (J2a). */
 export async function pastikanShiftSiang(page: Page, auth: Auth): Promise<string> {
-  const res = await api<unknown>(page, auth, "GET", "/shift?status=Aktif");
+  const lokasiId = await idLokasiRuang(page, auth);
+  const res = await api<unknown>(page, auth, "GET", `/shift?status=Aktif&locationID=${lokasiId}`);
   expect(res.status, `GET /shift: ${res.pesan}`).toBe(200);
   const ada = daftar(res.data).find((s) => s.namaShift === NAMA_SHIFT_SIANG);
   if (ada) return ada.id;
@@ -219,6 +243,7 @@ export async function pastikanShiftSiang(page: Page, auth: Auth): Promise<string
     isLintasHari: false,
     toleransiTerlambat: 0,
     status: "Aktif",
+    locationID: lokasiId,
   });
   expect([200, 201], `POST /shift: ${buat.pesan}`).toContain(buat.status);
   return String(idDari(normalizeId(buat.data) as unknown));
