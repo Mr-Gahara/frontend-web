@@ -17,6 +17,7 @@ import type {
   PerpanjangPayload,
 } from "@/types/adminAkun";
 import { adminAkunApi } from "./api";
+import { akunTidakAda } from "./tampilan";
 
 /** Callback halaman (toast, pengalihan). Invalidasi diurus hook. */
 type OpsiMutasi<H, V> = Pick<UseMutationOptions<H, Error, V>, "onSuccess" | "onError">;
@@ -30,6 +31,21 @@ export function useDaftarAkun() {
   return useQuery({
     queryKey: queryKeys.adminAkun.daftar(),
     queryFn: adminAkunApi.daftar,
+  });
+}
+
+/**
+ * Detail satu akun (B176). Tidak diulang bila akunnya tidak ada, dan dimuat
+ * ulang setiap halaman dibuka agar form ubah diisi dari data terbaru
+ * (keputusan rancangan butir 8).
+ */
+export function useAkun(id: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.adminAkun.detail(id ?? ""),
+    queryFn: () => adminAkunApi.detail(id!),
+    enabled: Boolean(id),
+    refetchOnMount: "always",
+    retry: (jumlah, err) => !akunTidakAda(err) && jumlah < 3,
   });
 }
 
@@ -115,10 +131,9 @@ export interface HapusAkunVars {
 }
 
 /**
- * Callback halaman dijalankan sebelum invalidasi: halaman detail membaca akun
- * dari cache daftar, sehingga bila daftar dimuat ulang lebih dulu, detail
- * akun yang baru dihapus sempat tampil sebagai tidak ditemukan sebelum
- * berpindah ke daftar.
+ * Callback halaman dijalankan sebelum invalidasi: bila detail dimuat ulang
+ * lebih dulu, akun yang baru dihapus sempat tampil sebagai tidak ditemukan
+ * sebelum halaman berpindah ke daftar.
  */
 export function useHapusAkun(opsi: OpsiMutasi<unknown, HapusAkunVars> = {}) {
   const queryClient = useQueryClient();

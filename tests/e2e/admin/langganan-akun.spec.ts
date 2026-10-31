@@ -209,12 +209,23 @@ test.describe("Langganan akun klien", () => {
     await expect(riwayat(page)).toHaveCount(0);
   });
 
-  test("id yang tidak ada di daftar menampilkan pesan tidak ditemukan", async ({ page }) => {
-    await loginAdmin(page, wajibAdmin());
-    await page.goto("/admin/akun/000000000000000000000000");
-    await expect(page.getByRole("alert").filter({ hasText: "Akun tidak ditemukan" })).toBeVisible({
-      timeout: 15_000,
+  for (const [id, status] of [
+    ["000000000000000000000000", 404],
+    ["bukan-id", 400],
+  ] as const) {
+    test(`id ${id} dijawab ${status} oleh detail akun dan menampilkan pesan tidak ditemukan (B176)`, async ({
+      page,
+    }) => {
+      await loginAdmin(page, wajibAdmin());
+      await page.goto("/admin/akun/" + id, { waitUntil: "commit" });
+      const respons = await page.waitForResponse(
+        (r) => r.url().endsWith("/api/akun/admin/users/" + id) && r.request().method() === "GET",
+      );
+      expect(respons.status()).toBe(status);
+      await expect(page.getByRole("alert").filter({ hasText: "Akun tidak ditemukan" })).toBeVisible({
+        timeout: 15_000,
+      });
+      await expect(page.getByRole("link", { name: "Kembali ke Daftar Akun" })).toBeVisible();
     });
-    await expect(page.getByRole("link", { name: "Kembali ke Daftar Akun" })).toBeVisible();
-  });
+  }
 });

@@ -20,6 +20,8 @@ interface ResponsRiwayat {
 /** Seluruh endpoint admin memakai token akun (authAkun dan adminOnly di backend). */
 export const adminAkunApi = {
   daftar: () => apiData.get<AkunAdmin[]>(EP.akun.adminDaftar, undefined, "akun"),
+  /** Satu akun, sebentuk item daftar (B176). Id rusak 400, akun tidak ada 404. */
+  detail: (id: string) => apiData.get<AkunAdmin>(EP.akun.adminAkunDetail(id), undefined, "akun"),
   buat: (payload: BuatAkunKlienPayload) =>
     apiData.post<AkunAdmin>(EP.akun.adminAkun, payload, "akun"),
   bekukan: (id: string, payload: BekukanPayload) =>

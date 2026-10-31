@@ -10,10 +10,11 @@ import { formatTanggal, formatTanggalPendek } from "@/lib/format";
 import type { AkunAdmin } from "@/types/adminAkun";
 import { DialogHapusAkun } from "./dialog-hapus-akun";
 import { DialogLangganan, type JenisAksi } from "./dialog-langganan";
-import { useDaftarAkun } from "./hooks";
+import { useAkun } from "./hooks";
 import { aksiLangganan } from "./langganan";
 import { DaftarRiwayatLangganan } from "./riwayat-langganan";
 import {
+  akunTidakAda,
   LABEL_ROLE,
   URL_DAFTAR_AKUN,
   teksMasaAkses,
@@ -53,38 +54,37 @@ function RingkasanAkun({ akun }: { akun: AkunAdmin }) {
 }
 
 /**
- * Detail akun (keputusan PA10b). Backend tidak punya endpoint detail satu
- * akun, sehingga akun dibaca dari cache daftar; id yang tidak ada di daftar
- * menampilkan pesan, bukan loader tanpa akhir.
+ * Detail akun (keputusan PA10b), dibaca dari GET /akun/admin/users/:id
+ * (B176); akun yang tidak ada menampilkan pesan, bukan loader tanpa akhir.
  */
 export function HalamanDetailAkun() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
-  const daftar = useDaftarAkun();
+  const detail = useAkun(id);
   const [jenis, setJenis] = useState<JenisAksi | null>(null);
   const [menghapus, setMenghapus] = useState(false);
-  const akun = daftar.data?.find((a) => a.id === id);
+  const akun = detail.data;
 
   let isi: ReactNode;
-  if (daftar.isError) {
-    isi = (
-      <div role="alert" className="flex flex-col items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-6">
-        <p className="text-sm font-medium text-destructive">
-          {pesanError(daftar.error, "Gagal memuat data akun.")}
-        </p>
-        <Button type="button" variant="outline" onClick={() => daftar.refetch()} disabled={daftar.isFetching}>
-          Coba Lagi
-        </Button>
-      </div>
-    );
-  } else if (!daftar.data) {
-    isi = <p className="text-sm text-muted-foreground">Memuat data akun...</p>;
-  } else if (!akun) {
+  if (detail.isError && akunTidakAda(detail.error)) {
     isi = (
       <p role="alert" className="rounded-lg border border-border p-6 text-sm font-medium">
         Akun tidak ditemukan. Akun ini mungkin sudah dihapus.
       </p>
     );
+  } else if (detail.isError) {
+    isi = (
+      <div role="alert" className="flex flex-col items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-6">
+        <p className="text-sm font-medium text-destructive">
+          {pesanError(detail.error, "Gagal memuat data akun.")}
+        </p>
+        <Button type="button" variant="outline" onClick={() => detail.refetch()} disabled={detail.isFetching}>
+          Coba Lagi
+        </Button>
+      </div>
+    );
+  } else if (!akun) {
+    isi = <p className="text-sm text-muted-foreground">Memuat data akun...</p>;
   } else {
     const aksi = aksiLangganan(akun);
     const kelola = aksiKelolaAkun(akun);

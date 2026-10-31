@@ -1,3 +1,4 @@
+import { isApiError } from "@/lib/api/error";
 import { formatTanggalPendek } from "@/lib/format";
 import type { AkunRole } from "@/types/auth";
 import type { AkunAdmin } from "@/types/adminAkun";
@@ -6,6 +7,10 @@ export const URL_DAFTAR_AKUN = "/admin";
 export const URL_BUAT_AKUN = "/admin/akun/buat";
 export const urlDetailAkun = (id: string) => `/admin/akun/${id}`;
 export const urlUbahAkun = (id: string) => `/admin/akun/${id}/ubah`;
+
+/** Id rusak (400) dan akun yang tidak ada (404) sama-sama berarti akun tidak ditemukan (B176). */
+export const akunTidakAda = (err: unknown): boolean =>
+  isApiError(err) && (err.status === 404 || err.status === 400);
 
 export type FilterStatusAkun = "semua" | "aktif" | "non-aktif";
 

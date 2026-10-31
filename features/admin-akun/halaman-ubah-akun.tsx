@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { pesanError } from "@/lib/api/error";
 import type { AkunAdmin } from "@/types/adminAkun";
-import { useDaftarAkun, usePerbaruiAkun } from "./hooks";
-import { urlDetailAkun, URL_DAFTAR_AKUN } from "./tampilan";
+import { useAkun, usePerbaruiAkun } from "./hooks";
+import { akunTidakAda, urlDetailAkun, URL_DAFTAR_AKUN } from "./tampilan";
 import {
   aksiKelolaAkun,
   nilaiAwalUbahAkun,
@@ -133,35 +133,35 @@ function FormUbahAkun({ akun }: { akun: AkunAdmin }) {
 
 /**
  * Halaman ubah akun klien (keputusan PA12a dan PA13a). Akun dibaca dari
- * cache daftar, dan form dipasang setelah datanya ada, dengan key id dan
- * updatedAt (keputusan rancangan butir 8).
+ * GET /akun/admin/users/:id (B176), dan form dipasang setelah datanya ada,
+ * dengan key id dan updatedAt (keputusan rancangan butir 8).
  */
 export function HalamanUbahAkun() {
   const params = useParams<{ id: string }>();
   const id = params?.id;
-  const daftar = useDaftarAkun();
-  const akun = daftar.data?.find((a) => a.id === id);
+  const detail = useAkun(id);
+  const akun = detail.data;
 
   let isi: ReactNode;
-  if (daftar.isError) {
-    isi = (
-      <div role="alert" className="flex flex-col items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-6">
-        <p className="text-sm font-medium text-destructive">
-          {pesanError(daftar.error, "Gagal memuat data akun.")}
-        </p>
-        <Button type="button" variant="outline" onClick={() => daftar.refetch()} disabled={daftar.isFetching}>
-          Coba Lagi
-        </Button>
-      </div>
-    );
-  } else if (!daftar.data) {
-    isi = <p className="text-sm text-muted-foreground">Memuat data akun...</p>;
-  } else if (!akun) {
+  if (detail.isError && akunTidakAda(detail.error)) {
     isi = (
       <p role="alert" className="rounded-lg border border-border p-6 text-sm font-medium">
         Akun tidak ditemukan. Akun ini mungkin sudah dihapus.
       </p>
     );
+  } else if (detail.isError) {
+    isi = (
+      <div role="alert" className="flex flex-col items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-6">
+        <p className="text-sm font-medium text-destructive">
+          {pesanError(detail.error, "Gagal memuat data akun.")}
+        </p>
+        <Button type="button" variant="outline" onClick={() => detail.refetch()} disabled={detail.isFetching}>
+          Coba Lagi
+        </Button>
+      </div>
+    );
+  } else if (!akun) {
+    isi = <p className="text-sm text-muted-foreground">Memuat data akun...</p>;
   } else if (!aksiKelolaAkun(akun).ubah) {
     isi = (
       <p role="alert" className="rounded-lg border border-border p-6 text-sm font-medium">

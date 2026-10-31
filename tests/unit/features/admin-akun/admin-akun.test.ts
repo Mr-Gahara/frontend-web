@@ -2,12 +2,14 @@ import { describe, it, expect } from "vitest";
 import { payloadBuatAkunKlien } from "@/features/admin-akun/payload";
 import { skemaBuatAkunKlien, type NilaiBuatAkunKlien } from "@/features/admin-akun/schema";
 import {
+  akunTidakAda,
   namaToko,
   saringAkun,
   teksMasaAkses,
   teksStatus,
   teksToko,
 } from "@/features/admin-akun/tampilan";
+import { ApiError } from "@/lib/api/error";
 import { formatTanggalPendek } from "@/lib/format";
 import type { AkunAdmin } from "@/types/adminAkun";
 
@@ -137,5 +139,17 @@ describe("tampilan daftar akun", () => {
     expect(teksMasaAkses(berbatas)).toBe(formatTanggalPendek(berakhir));
     expect(teksMasaAkses(akun())).toBe("Tidak dibatasi");
     expect(teksMasaAkses(akun({ role: "admin" }))).toBe("-");
+  });
+});
+describe("akunTidakAda (B176)", () => {
+  it("404 dan id rusak 400 berarti akun tidak ditemukan", () => {
+    expect(akunTidakAda(new ApiError(404, "Akun tidak ditemukan."))).toBe(true);
+    expect(akunTidakAda(new ApiError(400, "Format ID akun tidak valid."))).toBe(true);
+  });
+
+  it("galat lain tetap galat muat", () => {
+    expect(akunTidakAda(new ApiError(500, "Server error"))).toBe(false);
+    expect(akunTidakAda(new ApiError(403, "Forbidden"))).toBe(false);
+    expect(akunTidakAda(new Error("jaringan"))).toBe(false);
   });
 });
