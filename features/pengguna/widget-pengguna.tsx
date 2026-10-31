@@ -15,6 +15,8 @@ import { namaPeran } from "./peran";
 import { useMonitoringAbsensi } from "@/features/absensi/hooks";
 import { hitungAbsensi, jamWIB } from "@/features/absensi/ringkasan";
 import { isForbidden } from "@/lib/api/error";
+import { IZIN } from "@/lib/auth/permissions";
+import { useSession } from "@/lib/auth/useSession";
 
 /**
  * Widget staf yang sedang bekerja hari ini, dari GET /absensi/monitoring.
@@ -32,16 +34,23 @@ export function WidgetActiveUsers({
   penggunaList: PenggunaItem[];
   roleList: Role[];
 }) {
-  const monitoring = useMonitoringAbsensi(new Date(), workspace);
+  // Monitoring per lokasi memuat lokasi ruang, yang menuntut read-location
+  // (B183); halaman pengguna sendiri tidak menuntutnya.
+  const { sedangMemuat, permissions } = useSession();
+  const bolehLokasi = permissions.includes(IZIN.location);
+  const monitoring = useMonitoringAbsensi(new Date(), workspace, { aktif: bolehLokasi });
   const { sedangBekerja, sudahAbsen } = useMemo(
     () => hitungAbsensi(monitoring.data?.daftar ?? []),
     [monitoring.data],
   );
-  const pesanGalat = monitoring.isError
-    ? isForbidden(monitoring.error)
-      ? "Anda tidak memiliki izin melihat absensi staf."
-      : "Gagal memuat data absensi. Muat ulang halaman untuk mencoba lagi."
-    : null;
+  const tanpaIzinLokasi = !sedangMemuat && !bolehLokasi;
+  const pesanGalat = tanpaIzinLokasi
+    ? "Anda tidak memiliki izin melihat lokasi ruang, sehingga absensi staf tidak dapat dimuat."
+    : monitoring.isError
+      ? isForbidden(monitoring.error)
+        ? "Anda tidak memiliki izin melihat absensi staf."
+        : "Gagal memuat data absensi. Muat ulang halaman untuk mencoba lagi."
+      : null;
 
   return (
     <div className="rounded-xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col w-full h-full relative overflow-hidden">

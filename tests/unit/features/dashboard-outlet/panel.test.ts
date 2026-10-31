@@ -19,10 +19,11 @@ describe("panelDashboard", () => {
     });
   });
 
-  it("panel staf menuntut read-absensi dan read-pengguna sekaligus", () => {
+  it("panel staf menuntut read-absensi, read-pengguna, dan read-location sekaligus (B183)", () => {
     expect(panelDashboard(["read-absensi"]).staf).toBe(false);
     expect(panelDashboard(["read-pengguna"]).staf).toBe(false);
-    expect(panelDashboard(["read-absensi", "read-pengguna"]).staf).toBe(true);
+    expect(panelDashboard(["read-absensi", "read-pengguna"]).staf).toBe(false);
+    expect(panelDashboard(["read-absensi", "read-pengguna", "read-location"]).staf).toBe(true);
   });
 
   it("setiap panel mengikuti izin endpoint-nya", () => {

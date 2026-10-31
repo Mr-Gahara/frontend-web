@@ -12,7 +12,7 @@ export interface PanelDashboard {
   transaksi: boolean;
   /** Pelanggan dan sisa waktu di petak venue; petaknya sendiri tanpa izin. */
   rincianVenue: boolean;
-  /** Tabel status staf: monitoring absensi dan daftar pengguna ruang outlet. */
+  /** Tabel status staf: monitoring absensi per lokasi outlet (B183) dan daftar pengguna ruang outlet. */
   staf: boolean;
   /** Izin dan cuti di tabel status staf. */
   izinCuti: boolean;
@@ -24,7 +24,7 @@ export function panelDashboard(permissions: readonly string[]): PanelDashboard {
     laporan: punya(IZIN.laporan),
     transaksi: punya(IZIN.penjualan),
     rincianVenue: punya(IZIN.booking),
-    staf: punya(IZIN.absensi) && punya(IZIN.pengguna),
+    staf: punya(IZIN.absensi) && punya(IZIN.pengguna) && punya(IZIN.location),
     izinCuti: punya(IZIN.izinCuti),
   };
 }

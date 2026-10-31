@@ -6,6 +6,7 @@
  * Untuk hari ini data dimuat ulang setiap 30 detik, sama dengan masa cache
  * backend. Jawaban 403 tidak diulang, agar pesan izin langsung tampil
  * (keputusan AB3a). Lokasi yang gagal dimuat dilaporkan sebagai galat.
+ * aktif false menahan lokasi dan monitoring, misalnya tanpa read-location.
  */
 import { useQuery } from "@tanstack/react-query";
 import { absensiApi } from "./api";
@@ -14,14 +15,18 @@ import { isForbidden } from "@/lib/api/error";
 import { queryKeys } from "@/lib/queryKeys";
 import { keTanggalLokal } from "@/lib/waktu";
 
-export function useMonitoringAbsensi(tanggal: Date, ruang: "outlet" | "gudang") {
-  const lokasi = useLokasiRuang(ruang);
+export function useMonitoringAbsensi(
+  tanggal: Date,
+  ruang: "outlet" | "gudang",
+  { aktif = true }: { aktif?: boolean } = {},
+) {
+  const lokasi = useLokasiRuang(ruang, { aktif });
   const tanggalStr = keTanggalLokal(tanggal);
   const hariIni = tanggalStr === keTanggalLokal(new Date());
   const kueri = useQuery({
     queryKey: queryKeys.absensi.monitoring(tanggalStr, lokasi.lokasiId ?? ""),
     queryFn: () => absensiApi.monitoring(tanggalStr, lokasi.lokasiId!),
-    enabled: lokasi.lokasiId !== null,
+    enabled: aktif && lokasi.lokasiId !== null,
     refetchInterval: hariIni ? 30_000 : false,
     retry: (percobaan, galat) => !isForbidden(galat) && percobaan < 3,
   });
