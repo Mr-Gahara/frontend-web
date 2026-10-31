@@ -1,5 +1,6 @@
 import { test, expect, Page, Response } from "@playwright/test";
-import { ADA_IZIN_LINTAS, JALUR_TERKUNCI, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
+import { ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
+import { masukTanpaIzinLintas } from "../../../helpers/terkunci-uji";
 import { LABEL_ARAH_PENGAJUAN } from "../../../../features/pengajuan-stok/tampilan";
 
 type LokasiMentah = { id?: string; _id?: string; nama: string; tipe: string };
@@ -164,7 +165,7 @@ test.describe("Daftar pengajuan stok outlet", () => {
   });
 
   test("buat tanpa izin lintas outlet: outlet peminta terkunci ke outlet tenant dan gudang asal di dariLocationID", async ({ page }) => {
-    test.skip(ADA_IZIN_LINTAS, JALUR_TERKUNCI);
+    await masukTanpaIzinLintas(page);
     // POST dijawab gagal lewat page.route agar tidak ada pengajuan yang
     // tersimpan; yang diperiksa adalah isi payload.
     const polaPost = /\/api\/pengajuanstok(\?|$)/i;

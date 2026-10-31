@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { login } from "../../helpers/transfer-uji";
 import { ADA_IZIN_LINTAS } from "../../helpers/lintas-outlet";
+import { masukTanpaIzinLintas } from "../../helpers/terkunci-uji";
 
 /*
  * Daftar penjualan per halaman (keputusan PB6a). Backend 465b438 menjawab
@@ -116,7 +117,7 @@ test.describe("E2E — Daftar penjualan per halaman", () => {
   });
 
   test("terkunci: daftar disaring server lewat locationID outlet tenant (RG4a)", async ({ page }) => {
-    test.skip(ADA_IZIN_LINTAS, "Ridho memegang izin lintas outlet; jalur terkunci butuh akun uji tanpa izin itu");
+    await masukTanpaIzinLintas(page);
     type ResponsLokasi = { data: { locationID: string | null }[]; pagination: ResponsDaftar["pagination"] };
     await page.goto(URL_DAFTAR, { waitUntil: "commit" });
     const tLokasi = page.waitForResponse(

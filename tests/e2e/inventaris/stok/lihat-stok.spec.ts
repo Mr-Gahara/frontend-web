@@ -1,5 +1,6 @@
 import { test, expect, Locator, Page, Response } from "@playwright/test";
-import { ADA_IZIN_LINTAS, JALUR_TERKUNCI, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
+import { ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
+import { masukTanpaIzinLintas } from "../../../helpers/terkunci-uji";
 
 const URL_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/stok";
 const URL_GUDANG = "http://localhost:3000/dashboard/gudang/inventaris";
@@ -197,7 +198,7 @@ test.describe("Stok outlet", () => {
   });
 
   test("tanpa izin lintas outlet: stok outlet tenant tanpa pemilih lokasi", async ({ page }) => {
-    test.skip(ADA_IZIN_LINTAS, JALUR_TERKUNCI);
+    await masukTanpaIzinLintas(page);
     await page.goto(URL_OUTLET, { waitUntil: "commit" });
     const pAktif = tunggu<LokasiMentah | null>(page, getLokasiAktif);
     const tInventory = page.waitForRequest(

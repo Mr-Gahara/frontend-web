@@ -2,7 +2,8 @@ import { test, expect, Page, Response } from "@playwright/test";
 import type { StockAdjustment } from "../../../../types/stockOpname";
 import { formatKoreksi, susunSumber } from "../../../../features/stock-adjustment/tampilan";
 import { normalizeId } from "../../../../lib/api/normalize";
-import { ADA_IZIN_LINTAS, JALUR_TERKUNCI, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
+import { ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
+import { masukTanpaIzinLintas } from "../../../helpers/terkunci-uji";
 
 const URL_DAFTAR =
   "http://localhost:3000/dashboard/outlet/inventaris/stockAdjustment";
@@ -115,7 +116,7 @@ test.describe("Stock adjustment outlet", () => {
   });
 
   test("tanpa izin lintas outlet: hanya adjustment outlet tenant", async ({ page }) => {
-    test.skip(ADA_IZIN_LINTAS, JALUR_TERKUNCI);
+    await masukTanpaIzinLintas(page);
     await page.goto(URL_DAFTAR, { waitUntil: "commit" });
     const tAktif = page.waitForResponse(
       (r) => r.request().method() === "GET" && /\/api\/location\/current(\?|$)/.test(r.url()),
