@@ -93,6 +93,25 @@ async function pengajuanUjiSiap(page: Page, auth: Auth): Promise<string> {
   return buatPengajuanUji(page, auth);
 }
 
+/**
+ * Pengajuan uji transfer berstatus APPROVED tanpa surat jalan, untuk skenario
+ * yang hanya menguji jalur gagal buat surat jalan. Yang masih PENDING (setelah
+ * surat jalannya dibatalkan) diajukan lalu disetujui; bila tidak ada, dibuat
+ * baru, lalu dipakai ulang spec transfer.
+ */
+export async function pengajuanUjiDisetujui(page: Page, auth: Auth): Promise<string> {
+  const id = await pengajuanUjiSiap(page, auth);
+  const detail = await api<{ status?: string }>(page, auth, "GET", `/pengajuanstok/${id}`);
+  expect(detail.status, `GET pengajuan uji: ${detail.pesan}`).toBe(200);
+  if (detail.data?.status === "PENDING") {
+    const ajukan = await api(page, auth, "PATCH", `/pengajuanstok/${id}/submit`, {});
+    expect(ajukan.status, `submit pengajuan uji: ${ajukan.pesan}`).toBeLessThan(300);
+    const setuju = await api(page, auth, "PATCH", `/pengajuanstok/${id}/approve`, {});
+    expect(setuju.status, `approve pengajuan uji: ${setuju.pesan}`).toBe(200);
+  }
+  return id;
+}
+
 const buatSuratJalan = (page: Page, auth: Auth, pengajuanStokID: string) =>
   api<Berid>(page, auth, "POST", "/transferstok", { pengajuanStokID, tanggalKirim: new Date().toISOString() });
 

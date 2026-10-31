@@ -1,6 +1,6 @@
 import { test, expect, Page, Response } from "@playwright/test";
 import { ADA_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
-import { bukaDenganAuth, type Auth } from "../../../helpers/transfer-uji";
+import { bukaDenganAuth, pengajuanUjiDisetujui, type Auth } from "../../../helpers/transfer-uji";
 
 /*
  * Spec pembanding alur tulis pengajuan stok (keputusan pemilik proyek,
@@ -306,10 +306,11 @@ test.describe("Alur tulis pengajuan stok", () => {
 
   test("buat surat jalan gagal menampilkan pesan dan tetap di detail", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_GUDANG);
-    const sasaran = (await daftarPengajuan(page, auth, "APPROVED")).find(
-      (p) => p.dariLokasi?.tipe === "Gudang" && p.keLokasi?.tipe === "Outlet" && !p.transferStokID,
-    );
-    test.skip(!sasaran, "Tidak ada pengajuan APPROVED berarah benar tanpa surat jalan");
+    // Pengajuan uji transfer disiapkan APPROVED bila belum ada; jalur gagal
+    // tidak mengubahnya, sehingga spec transfer memakainya ulang.
+    const idUji = await pengajuanUjiDisetujui(page, auth);
+    const sasaran = (await daftarPengajuan(page, auth, "APPROVED")).find((p) => p.id === idUji);
+    expect(sasaran, "pengajuan uji APPROVED tanpa surat jalan").toBeTruthy();
 
     const pola = /\/api\/transferstok(\?|$)/i;
     await page.route(pola, (route) =>
