@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowLeftRight, LineChart, FileText, Package } from "lucide-react";
+import { bolehBukaHalaman } from "@/lib/auth/permissions";
+import { useSession } from "@/lib/auth/useSession";
 import { cn } from "@/lib/utils";
 
 const tabs = [
@@ -32,6 +34,10 @@ const tabs = [
 
 export function KeuanganNavTabs() {
   const pathname = usePathname();
+  const { permissions } = useSession();
+  // Tab yang halamannya ditolak IZIN_HALAMAN disembunyikan, seperti sidebar
+  // (kontrak/temuan.md butir 163).
+  const tabTerlihat = tabs.filter(({ href }) => bolehBukaHalaman(href, permissions));
 
   return (
     <div className="w-full">
@@ -39,7 +45,7 @@ export function KeuanganNavTabs() {
         className="flex flex-row overflow-x-auto overflow-y-hidden w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         aria-label="Navigasi Keuangan"
       >
-        {tabs.map(({ label, href, icon: Icon }) => {
+        {tabTerlihat.map(({ label, href, icon: Icon }) => {
           const isActive = pathname === href;
           return (
             <Link
