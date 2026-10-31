@@ -110,6 +110,38 @@ export async function aktifkanAkunKlienUji(id: string, admin: KredensialAdmin) {
   }
 }
 
+/**
+ * Memastikan daftar akun lebih dari satu halaman (B177: limit 10) dengan
+ * membuat akun klien uji lewat API sebanyak kekurangannya, dan mengembalikan
+ * id akun yang dibuat agar dihapus lewat hapusAkunKlienUji di finally. Sama
+ * dengan hapusAkunKlienUji, login di konteks terpisah memutar tokenVersion
+ * admin, jadi dipanggil sebelum halaman login.
+ */
+export async function siapkanAkunLebihSatuHalaman(admin: KredensialAdmin): Promise<string[]> {
+  const ctx = await request.newContext({ baseURL: "http://localhost:3000" });
+  const dibuat: string[] = [];
+  try {
+    const masuk = await ctx.post("/api/akun/auth/login", {
+      data: { email: admin.email, password: admin.password },
+    });
+    const kepala = { Authorization: "Bearer " + (await masuk.json()).accessToken };
+    const semua = await ctx.get("/api/akun/admin/all", { headers: kepala });
+    expect(semua.status(), "baca seluruh akun").toBe(200);
+    const kurang = 11 - ((await semua.json()) as { data: unknown[] }).data.length;
+    for (let n = 1; n <= kurang; n++) {
+      const buat = await ctx.post("/api/akun/admin/users", {
+        headers: kepala,
+        data: { email: `e2e-halaman-${Date.now()}-${n}@uji.test`, password: PASSWORD_AKUN_UJI },
+      });
+      expect(buat.status(), "buat akun uji halaman berikutnya").toBe(201);
+      dibuat.push(((await buat.json()) as { data: AkunUji }).data.id);
+    }
+    return dibuat;
+  } finally {
+    await ctx.dispose();
+  }
+}
+
 export interface AkunUji {
   id: string;
   email: string;

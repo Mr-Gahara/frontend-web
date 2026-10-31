@@ -7,6 +7,7 @@ import {
   hapusAkunDariDetail,
   hapusAkunKlienUji,
   kredensialAdmin,
+  siapkanAkunLebihSatuHalaman,
   wajibAdmin,
 } from "../../helpers/admin-uji";
 
@@ -86,17 +87,25 @@ test.describe("Akun klien di panel admin", () => {
   });
 
   test("halaman berikutnya meminta page 2, dan pencarian kembali ke halaman 1 (B177)", async ({ page }) => {
-    const daftar = await bukaDaftar(page);
-    test.skip(daftar.length <= 10, "Akun di data uji belum lebih dari satu halaman");
+    // Akun uji dibuat sebanyak kekurangan dari 11 sebelum login, lalu dihapus
+    // di finally, sehingga data uji tidak bertambah.
+    const admin = wajibAdmin();
+    const dibuat = await siapkanAkunLebihSatuHalaman(admin);
+    try {
+      const daftar = await bukaDaftar(page);
+      expect(daftar.length, "akun lebih dari satu halaman").toBeGreaterThan(10);
 
-    const tKedua = tungguDaftarAkun(page, (q) => q.get("page") === "2" && q.get("limit") === "10");
-    await page.getByRole("button", { name: "Next", exact: true }).click();
-    const kedua = (await (await tKedua).json()) as { data: AkunRespons[] };
-    await expect(page.getByRole("link", { name: kedua.data[0].email })).toBeVisible();
+      const tKedua = tungguDaftarAkun(page, (q) => q.get("page") === "2" && q.get("limit") === "10");
+      await page.getByRole("button", { name: "Next", exact: true }).click();
+      const kedua = (await (await tKedua).json()) as { data: AkunRespons[] };
+      await expect(page.getByRole("link", { name: kedua.data[0].email })).toBeVisible();
 
-    const tCari = tungguDaftarAkun(page, (q) => q.get("cari") === "@" && q.get("page") === "1");
-    await kolomCari(page).fill("@");
-    await periksaTotalDaftar(page, await tCari);
+      const tCari = tungguDaftarAkun(page, (q) => q.get("cari") === "@" && q.get("page") === "1");
+      await kolomCari(page).fill("@");
+      await periksaTotalDaftar(page, await tCari);
+    } finally {
+      for (const id of dibuat) await hapusAkunKlienUji(id, admin);
+    }
   });
 
   test("form menolak isian kosong tanpa mengirim permintaan", async ({ page }) => {
