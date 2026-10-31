@@ -1,6 +1,6 @@
 # Cara Kerja
 
-Sifat perubahan: **Jarang**: bertambah saat ada pelajaran. "Alur setiap perubahan" dan "Aturan blok perintah" **tetap**.
+Sifat perubahan: **Jarang**: bertambah saat ada pelajaran. "Alur setiap perubahan" dan "Aturan perintah" **tetap**.
 
 Lapis inti: kirim di setiap chat baru. Isinya dipindah dari docs/refactor pada 19 Oktober 2026 tanpa perubahan.
 
@@ -13,9 +13,12 @@ atas permintaannya; bagian lain bertambah setiap ada pelajaran baru.
 
 Bagian **tetap**: hanya diubah atas perintah pemilik proyek.
 
-1. Komparasi lama dan baru, ditulis lengkap tanpa placeholder.
-2. Blok perintah siap tempel yang menerapkannya (menjalankannya adalah persetujuan).
-3. Perintah verifikasi: `tsc`, ESLint, dan pemeriksaan hasil.
+1. Rencana perubahan. Keputusan penting (bagian Kapan berhenti dan
+   bertanya) diajukan lewat dialog pilihan dan menunggu jawaban.
+2. Claude Code menerapkannya sendiri, dengan cara paling hemat token yang
+   tetap akurat: Edit langsung untuk perubahan kecil, skrip hanya untuk
+   banyak pasangan atau berkas.
+3. Verifikasi: `tsc`, ESLint, dan pemeriksaan hasil.
 4. Menjalankan test yang ada, menambah skenario untuk perubahan itu, menjalankan ulang.
 5. Sebelum commit: `tsc`, ESLint, vitest penuh, dan spec e2e yang terdampak
    perubahan itu, seluruhnya lolos. Suite e2e penuh hanya dijalankan saat
@@ -24,27 +27,30 @@ Bagian **tetap**: hanya diubah atas perintah pemilik proyek.
    6 Oktober 2026).
 6. Setelah lolos: `git add`, commit dengan pesan lengkap (masalah, keputusan rancangan beserta alasan, dampak, pengujian), lalu push.
 
-Tidak ada perubahan yang diterapkan tanpa persetujuan. Komparasi dan blok
-penerapnya dikirim dalam respons yang sama, dan menjalankan blok itulah bentuk
-persetujuannya. Setelah dijalankan, hasilnya diverifikasi sebelum melangkah ke
-perubahan berikutnya.
+Keputusan penting tidak dieksekusi sebelum pemilik proyek menjawab dialog
+pilihannya; perubahan teknis yang tidak menyangkut keputusan diterapkan
+langsung. Setiap perubahan diverifikasi sebelum melangkah ke perubahan
+berikutnya, dan hasilnya dilaporkan ringkas (pemilik proyek, 31 Oktober
+2026: pindah dari Claude chat ke Claude Code CLI).
 
-## Aturan blok perintah
+## Aturan perintah
 
 Bagian **tetap**: hanya diubah atas perintah pemilik proyek.
 
-- Hanya berisi perintah, tanpa baris komentar atau judul di dalamnya.
-- Efisien, tidak memakai pager, output ringkas dan mudah disalin.
-- Berkas baru di repo frontend-web diberikan sebagai isi lengkap untuk dibuat
-  manual, tanpa perintah terminal. Perubahan pada berkas yang sudah ada tetap
-  lewat terminal karena harus presisi. Pengecualian: berkas baru yang
-  dibangun dari salinan berkas lama (misalnya komponen form bersama) dibuat
-  dengan `cp` lalu diubah lewat helper, agar isi lamanya tidak diketik ulang.
-- Berkas di luar repo yang bersifat cache atau alat (helper di
-  `~/.cache/frontend-web/alat/`, skrip sekali pakai di `/tmp`) dibuat lewat
-  blok terminal, bukan manual (ditetapkan pemilik proyek, 21 September 2026).
-- Satu blok untuk satu berkas atau satu tujuan. Blok yang panjang tidak dapat
-  dijalankan sekaligus dan mudah terpotong saat ditempel.
+- Efisien dan hemat token: tanpa pager, output dibatasi (`head`,
+  `cut -c1-120`), berkas dibaca per potongan, dan yang sudah terbukti
+  tidak diperiksa ulang.
+- Berkas baru dibuat langsung (Write); berkas yang dibangun dari salinan
+  berkas lama dibuat dengan `cp` lalu diubah, agar isi lamanya tidak
+  diketik ulang.
+- Perubahan berkas yang sudah ada lewat Edit, atau lewat helper di
+  `~/.cache/frontend-web/alat/` bila pasangannya banyak; keduanya gagal
+  bila teks lama tidak cocok tepat satu kali.
+- Skrip sekali pakai di folder scratchpad sesi, bukan di repo.
+- Kedalaman berpikir disesuaikan dengan tugas (low, medium, atau high),
+  dan subagen tidak pernah dijalankan di atas high.
+- Sampai 31 Oktober 2026 aturan ini berupa blok siap tempel yang
+  dijalankan pemilik proyek (Claude chat); riwayatnya ada di git.
 
 ## Pengecualian alur
 
@@ -86,11 +92,11 @@ pengingat atribusi bawaan alat asisten.
 
 ## Cara berbagi konteks
 
-Konteks proyek dibagikan dengan menjalankan perintah terminal dan menempel
-outputnya. Berkas diunggah hanya untuk pemeriksaan dokumentasi yang terlalu
-panjang untuk ditempel. Karena itu setiap perintah harus ringkas
-outputnya: batasi jumlah baris, potong lebar dengan `cut -c1-110`, dan
-hindari pager.
+Sejak 31 Oktober 2026 Claude Code membaca repo dan backend sendiri, dan
+setiap keluaran yang dibaca menghabiskan token. Karena itu setiap perintah
+harus ringkas outputnya: batasi jumlah baris, potong lebar dengan
+`cut -c1-110`, dan hindari pager. Sebelumnya konteks dibagikan pemilik
+proyek dengan menempel output perintah ke Claude chat.
 
 Panjang setiap dokumen diperiksa lebih dulu dengan `wc -l` dan `wc -c`.
 Dokumen pendek dibaca lewat `cat`, `grep`, atau `sed`, dan hanya yang
