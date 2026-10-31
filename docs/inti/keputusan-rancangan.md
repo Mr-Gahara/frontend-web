@@ -164,7 +164,14 @@ sama (submodul pengajuan stok, di bawah).
     `KUNCI_LOKASI_POLA_ROSTER` di `8b5ad0f`, masing-masing tanpa perubahan
     aturan. Skenario yang baru berjalan setelah konstanta diisi diperiksa
     ulang, karena belum pernah dijalankan: dua spec lintas outlet ternyata
-    keliru menebak data (`2eb668a`).
+    keliru menebak data (`2eb668a`). Konstanta yang sudah terisi dan
+    tidak dapat kembali null, karena backend mewajibkan fieldnya, dibuang
+    bersama cabang null dan skenarionya: `KUNCI_LOKASI_SHIFT` dan
+    `KUNCI_LOKASI_POLA_ROSTER` di `7f6d623`. Skenario yang dilewati
+    karena konstanta terisi dikembalikan lewat data uji, bukan dibiarkan
+    `test.skip`: jalur terkunci lintas outlet login sebagai pengguna uji
+    tanpa izin itu (`tests/helpers/terkunci-uji.ts`, `1cd8211`)
+    (pemilik proyek, 31 Oktober 2026).
 19. **Tipe ber-`_id` yang masih dibaca halaman lama menjadi jembatan
     berakhiran `Lama`.** Nama kanonik menjadi tipe ber-`id` dari bentuk
     respons nyata, sedangkan halaman lama memakai tipe lamanya lewat alias

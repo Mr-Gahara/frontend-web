@@ -10,17 +10,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 
 ## Utang pengujian
 
-- **Cakupan lokasi di e2e hanya teruji satu jalur pada satu waktu**,
-  karena satu-satunya akun uji (Ridho) berperan Owner. Selama
-  `IZIN_LINTAS_OUTLET` null, Ridho terkunci ke outlet tenant dan jalur
-  terkunci teruji e2e, sedangkan jalur lintas outlet berupa `test.fixme`
-  bersyarat. Begitu konstanta diisi, keduanya bertukar dan jalur terkunci
-  butuh akun uji tanpa izin itu. Keduanya teruji di unit test
-  (`tests/unit/features/inventaris/cakupan.test.ts`). Konstanta diisi di
-  `2eb668a` (B142): jalur lintas outlet kini teruji e2e, dan empat
-  skenario jalur terkunci dilewati. Di MVP satu outlet, pemilih outlet
-  hanya berisi satu pilihan, sehingga pilih outlet di jurnal stok dan
-  pembelian stok tidak memicu permintaan baru.
+- **Pemilih outlet di jurnal stok dan pembelian stok hanya berisi satu
+  pilihan** di MVP satu outlet, sehingga memilih outlet tidak memicu
+  permintaan baru. Kedua jalur cakupan lokasi teruji e2e sejak
+  `1cd8211` (`arsip/riwayat-pengujian.md`).
 - **Tab pengajuan stok yang disembunyikan menurut izin** hanya teruji di
   unit test (`tests/unit/features/pengajuan-stok/pengajuan-stok.test.ts`),
   dengan alasan yang sama: aturannya hanya berlaku bagi petugas transfer
@@ -43,20 +36,21 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   ditutup lewat terima penuh di akhir, karena batal dari DIKIRIM ditolak
   backend `465b438` (PB10a); dari UI hanya jalur gagalnya yang diuji.
 - **Tombol aksi surat jalan yang disembunyikan menurut izin** hanya teruji
-  di unit test (`aksiSuratJalan`), dengan alasan yang sama dengan cakupan
-  lokasi: satu-satunya akun uji berperan Owner.
+  di unit test (`aksiSuratJalan`), karena satu-satunya akun uji berperan
+  Owner.
 - **Gate halaman yang menolak pengguna tanpa sebagian izin** hanya teruji
   di unit test (`tests/unit/lib/auth/gate-stock-adjustment.test.ts`, kedua
   ruang),
   dengan alasan yang sama.
   Izin per ruang (RH3a) juga hanya teruji di unit test.
 
-- **Cakupan per lokasi di daftar penjualan teruji e2e hanya untuk jalur
-  terkunci** (`20c026b`): `locationID` yang terkirim sama dengan
+- **Cakupan per lokasi di daftar penjualan hanya teruji pada satu
+  outlet** (`20c026b`): `locationID` yang terkirim sama dengan
   `/location/current`, dan seluruh baris milik outlet itu. Data uji hanya
   punya satu outlet, sehingga hasilnya sama dengan tanpa penyaringan.
-  Jalur lintas outlet berupa `test.fixme` bersyarat (LP2a), dan aturan
-  lingkup diuji di `tests/unit/features/penjualan/filter.test.ts`.
+  Jalur lintas outlet (LP2a) berjalan sejak `2eb668a` dan jalur terkunci
+  sejak `1cd8211`; aturan lingkup diuji di
+  `tests/unit/features/penjualan/filter.test.ts`.
 - **Jalur tanggal terkunci bagi peran selain Owner di catat beban hanya
   teruji di unit test** (`payloadBuatBeban`), karena pengguna uji
   berperan Owner (BO5a).
@@ -377,7 +371,7 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   naik di awal bulan.
 - **Semua Outlet dengan beberapa outlet di jurnal stok** (meminta
   memilih satu outlet) hanya teruji di unit test (`lokasiJurnalOutlet`),
-  karena tenant uji punya satu outlet dan izin lintas outlet null.
+  karena tenant uji punya satu outlet.
 - **Pesan lokasi gudang gagal dimuat atau belum didaftarkan di jurnal
   stok gudang** belum teruji e2e.
 - **Kartu pengajuan dashboard gudang hanya teruji cabang tanpa
@@ -441,6 +435,14 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   izin cuti dan backend tidak punya `DELETE /izincuti`. Setiap hari yang
   menjalankan spec dashboard menambah dua izin (disetujui dan ditolak hari
   itu); izin 2020 dibuat sekali.
+- **Peran dan pengguna uji "E2E Tanpa Lintas Outlet" menetap**
+  (`1cd8211`): dibuat sekali lewat API dan dipakai ulang setiap run,
+  sehingga tidak menumpuk; izin perannya diselaraskan dengan izin baca
+  Owner setiap kali.
+- **Suite e2e penuh belum dijalankan sejak `1cd8211` dan `7f6d623`**;
+  harapannya 518 lolos dan 4 skipped dari 522 (`inti/pengujian.md`,
+  Baseline). Dijalankan bersama penyesuaian backend berikutnya atau atas
+  permintaan pemilik proyek.
 - **Skenario aktifkan akun tanpa batas membekukan akun klien sungguhan**
   (`482ac79`), dipilih menurut syarat dan tidak pernah akun uji utama;
   setiap run menambah dua catatan di riwayat langganan akun itu.

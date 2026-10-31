@@ -461,6 +461,23 @@ Dipindah dari `inti/pengujian.md` (Utang pengujian) pada 25 Oktober 2026.
   (`SJ-PGJ/202609/0096-8045`), sisa run sebelum PB10a; suite tetap lolos
   dengannya. Ditutup lewat terima penuh dari halaman penerimaan.
 
+Dipindah dari `referensi/utang-pengujian.md` pada 31 Oktober 2026.
+
+- **Cakupan lokasi di e2e hanya teruji satu jalur pada satu waktu**,
+  karena satu-satunya akun uji (Ridho) berperan Owner. Selama
+  `IZIN_LINTAS_OUTLET` null, Ridho terkunci ke outlet tenant dan jalur
+  terkunci teruji e2e, sedangkan jalur lintas outlet berupa `test.fixme`
+  bersyarat. Begitu konstanta diisi, keduanya bertukar dan jalur terkunci
+  butuh akun uji tanpa izin itu. Keduanya teruji di unit test
+  (`tests/unit/features/inventaris/cakupan.test.ts`). Konstanta diisi di
+  `2eb668a` (B142): jalur lintas outlet kini teruji e2e, dan empat
+  skenario jalur terkunci dilewati. Di MVP satu outlet, pemilih outlet
+  hanya berisi satu pilihan, sehingga pilih outlet di jurnal stok dan
+  pembelian stok tidak memicu permintaan baru.
+  Lunas di `1cd8211`: jalur terkunci login sebagai pengguna uji "E2E
+  Tanpa Lintas Outlet" (`tests/helpers/terkunci-uji.ts`), sehingga
+  kedua jalur teruji e2e bersama.
+
 ## Kejadian sesekali yang tidak berulang
 
 Dipindah dari `inti/pengujian.md` (Utang pengujian) pada 25 Oktober 2026.

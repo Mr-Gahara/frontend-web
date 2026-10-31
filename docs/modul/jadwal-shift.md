@@ -61,6 +61,8 @@ keputusan rancangan butir 17 dan 21.
   punya field lokasi. Menggantikan SH1a (data shift milik tenant
   bersama), yang diputuskan sebelum kebutuhan pemisahan per ruang
   disampaikan. Konstanta diisi `"locationID"` di `8b5ad0f` (B168).
+  Konstanta dan keterangan pemakaian bersama dibuang di `7f6d623`,
+  karena backend mewajibkan `locationID`.
 - **SH2a: lintas hari dihitung dari jam** (jam pulang tidak lebih besar
   dari jam masuk, termasuk jam yang sama), dan kotak centangnya nonaktif
   beserta keterangan. Sebelumnya effect menimpa centang manual setiap
@@ -93,6 +95,8 @@ keputusan rancangan butir 17 dan 21.
   `KUNCI_LOKASI_POLA_ROSTER` bernilai null, terpisah dari
   `KUNCI_LOKASI_SHIFT`, karena backend dapat menambahkannya di waktu yang
   berbeda. Konstanta diisi `"locationID"` di `8b5ad0f` (B168).
+  Konstanta dan keterangan pemakaian bersama dibuang di `7f6d623`,
+  karena backend mewajibkan `locationID`.
 - **JD5a: jadwal libur tampil LIBUR** di sel kalender (`19227f8`), berbeda
   dari sel tanpa jadwal yang tetap tanda hubung.
 - **JD6a: simpan jadwal beruntun dengan satu ringkasan.** Ubah jadwal satu
@@ -231,7 +235,7 @@ modul ini yang memakai `apiClient`.
   karena backend menjawab 500 tanpa query apa pun (`kontrak/temuan.md`
   butir 8). Dibuang begitu backend diperbaiki (`features/shift/ruang.ts`).
   Sejak `8b5ad0f` web mengirim `locationID`; cabang `workspace` tinggal
-  untuk konstanta null.
+  untuk konstanta null, dan dibuang di `7f6d623`.
 - Pola roster outlet dan gudang masih memakai daftar tenant yang sama
   sampai backend memisahkannya per lokasi (`KUNCI_LOKASI_POLA_ROSTER`,
   keputusan PL5, `kontrak/temuan.md` butir 70). Selesai di `8b5ad0f`

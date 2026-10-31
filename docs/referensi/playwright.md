@@ -615,7 +615,17 @@ bersyarat).
   rancangan butir 18). Contoh pemakaiannya: jalur terkunci di spec stok,
   pengajuan stok (daftar), dan stock adjustment memeriksa `locationID`
   permintaan terhadap id dari `/location/current`. Sejak `2eb668a`
-  (B142) jalur lintas outlet berjalan dan jalur terkunci dilewati.
+  (B142) jalur lintas outlet berjalan dan jalur terkunci dilewati. Sejak
+  `1cd8211` jalur terkunci kembali berjalan lewat `masukTanpaIzinLintas`,
+  dan `JALUR_TERKUNCI` beserta `test.skip`-nya dibuang.
+- `tests/helpers/terkunci-uji.ts` (`1cd8211`): jalur yang menuntut
+  ketiadaan sebuah izin diuji lewat peran turunan Owner. Peran memegang
+  izin baca milik Owner ditambah izin tulis yang dibutuhkan skenario,
+  tanpa izin yang diuji, karena backend membatasi permissions peran 120
+  item. Peran dan pengguna dibuat sekali oleh Ridho lewat API, izinnya
+  diselaraskan ulang setiap run karena izin Owner bertambah setiap seed
+  berubah, dan levelnya 90 agar dapat diubah Owner (B186). Sesudahnya
+  `loginSebagai` login ulang di halaman yang sama.
 - `tests/helpers/izin-cuti-uji.ts` (`96a7b40`): fixture yang tidak dapat
   dihapus (web tanpa halaman izin cuti, backend tanpa `DELETE`) dibuat
   lewat API, dicari menurut keterangannya lebih dulu agar run berulang
@@ -707,6 +717,8 @@ bersyarat).
   validasi browser dibuktikan lewat `validity.valid` beserta penghitung
   permintaan. Sejak `2177ac3` baris uji dicari lewat `cariShift` (TB14a),
   uji ruang gudang memakai pola K-A, dan combobox filter disebut namanya.
+  Sejak `7f6d623` `test.fixme` itu berjalan tanpa syarat, dan
+  skenario keterangan dibuang bersama `shiftTerpisahPerRuang`.
 - `tests/e2e/jadwal/pola-roster/crud-pola-roster.spec.ts` (sejak
   `dcc22e0`): skenario migrasi berada di `describe` tersendiri yang
   memakai helper bersama `tests/helpers`, dan data uji yang tidak dapat

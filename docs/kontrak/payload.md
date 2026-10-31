@@ -430,7 +430,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Wajib dari klien: `namaPola`, `siklusHari`, `detailSiklus`, dan sejak B168 `locationID`
 - Field lain yang dikenali: `keterangan`, disimpan model tanpa aturan validator; sejak B174 field asing dan `tenantID` ditolak 400, termasuk di item `detailSiklus`
 - Aturan validator: `siklusHari` angka minimal 1; `detailSiklus` array yang panjangnya sama dengan `siklusHari`, dengan `hariKe` unik dari 1 sampai `siklusHari`; hari kerja wajib `shiftID` ObjectId yang sah, dan hari libur boleh tanpa `shiftID`. Controller menolak `detailSiklus` lebih dari 365 hari; web membatasi 31 (keputusan PL4a). Service menolak 400 bila ada shift yang tidak ditemukan atau sudah nonaktif. Nama ganda dalam tenant (indeks `{ tenantID, namaPola }`) dijawab 4xx tanpa pesan galat MongoDB (spec `dcc22e0`). Dikoreksi 29 September 2026
-- Web mengirim hasil `payloadPolaRoster` (`features/pola-roster/payload.ts`): nama dipangkas, `shiftID` hanya untuk hari kerja, dan `locationID` lokasi ruang (`KUNCI_LOKASI_POLA_ROSTER`, `8b5ad0f`)
+- Web mengirim hasil `payloadPolaRoster` (`features/pola-roster/payload.ts`): nama dipangkas, `shiftID` hanya untuk hari kerja, dan `locationID` lokasi ruang dari `useLokasiRuang` begitu termuat (`8b5ad0f`, `7f6d623`)
 - Respons 201 dengan `data` berbentuk item `GET /polaroster`
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
@@ -480,7 +480,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /shift`
 
 - Aturan: validateShiftPayload (validators/shiftValidator.js)
-- Wajib dari klien: `namaShift`, `jamMasuk`, `jamPulang`, dan sejak B168 `locationID` (web mengirim lokasi ruang lewat `KUNCI_LOKASI_SHIFT`, `8b5ad0f`)
+- Wajib dari klien: `namaShift`, `jamMasuk`, `jamPulang`, dan sejak B168 `locationID` (web mengirim lokasi ruang dari `useLokasiRuang` begitu termuat, `8b5ad0f`, `7f6d623`)
 - Field lain yang dikenali: `isLintasHari`, `toleransiTerlambat`, `status`; sejak B174 field asing dan `tenantID` ditolak 400
 - Jam divalidasi dengan pola yang titik duanya opsional, sehingga "0800" diterima (`temuan.md` butir 68; wajib `HH:mm` sejak B144); `isLintasHari` tidak dicocokkan dengan jam (butir 69; ditentukan jam sejak B145), dan jam masuk yang sama dengan jam pulang hanya sah bila lintas hari. Nama ganda dalam tenant (indeks `{ tenantID, namaShift }`) dijawab 4xx tanpa pesan galat MongoDB; spec `f99b7cf` menerima 400 maupun 409. Controller meneruskan `...req.body` ke `Shift.create`, dan field di luar skema dibuang Mongoose, termasuk `workspace` yang dahulu dikirim web. Web mengirim keenam field dari `payloadShift` (`features/shift/payload.ts`). Dikoreksi 29 September 2026
 - Respons 201 dengan `data` berbentuk item `GET /shift`

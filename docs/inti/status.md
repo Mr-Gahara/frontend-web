@@ -39,7 +39,11 @@ per lokasi (B168, B183, B184), izin SDM (B139, B140), izin lintas outlet
 B149, B150), fixme ubah pola roster (B128), panel admin (B154, B155,
 B176, B177), dan izin cuti hari ini (B160). Seluruh `test.fixme` yang
 menunggu backend sudah dilepas. Suite penuh di atas `b5a2578`: 514 lolos
-dan 10 skipped (`inti/pengujian.md`, Baseline).
+dan 10 skipped (`inti/pengujian.md`, Baseline). Sesudahnya jalur
+terkunci lintas outlet kembali berjalan lewat pengguna uji tanpa izin
+itu (`1cd8211`), dan penahan lokasi null shift serta pola roster
+dibuang (`7f6d623`); harapan suite penuh menjadi 518 lolos dan 4
+skipped, belum dijalankan.
 
 Urutan pilihan pemilik proyek (26 Oktober 2026), tidak berubah:
 
@@ -80,6 +84,9 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
 - Jalur role tanpa izin SDM baru, tanpa `read-location`, dan tanpa izin
   lintas outlet hanya teruji di unit test, karena akun uji berperan
   Owner (`referensi/utang-pengujian.md`).
+  Jalur tanpa izin lintas outlet teruji e2e sejak `1cd8211`, lewat
+  pengguna uji "E2E Tanpa Lintas Outlet"; jalur tanpa izin SDM baru dan
+  tanpa `read-location` tetap hanya teruji di unit test.
 - Jurnal stok tetap mengirim satu `locationID` untuk Semua Outlet,
   walau backend menerima `tipeLokasi` (B109); berpengaruh hanya bila
   tenant punya lebih dari satu outlet (`kontrak/temuan.md` butir 151).
