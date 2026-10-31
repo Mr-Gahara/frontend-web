@@ -26,7 +26,7 @@ import { PolaFormDialog } from "./form-pola-roster";
 import { PolaDeleteDialog } from "./dialog-hapus-pola-roster";
 import { labelShiftPola, teksLabelShift } from "./payload";
 import { aksiPolaRoster } from "./izin";
-import { polaTerpisahPerRuang, type RuangPolaRoster } from "./ruang";
+import type { RuangPolaRoster } from "./ruang";
 import { useSession } from "@/lib/auth/useSession";
 import { DataTable } from "@/components/ui/data-table";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -180,12 +180,6 @@ export default function PolaUtama({
           <p className="text-sm text-navy/60 font-medium">
             Kelola template siklus kerja untuk auto-generate jadwal.
           </p>
-          {!polaTerpisahPerRuang() && (
-            <p className="text-xs text-navy/50 font-semibold">
-              Daftar pola roster masih dipakai bersama ruang outlet dan gudang
-              sampai backend mendukung pola roster per lokasi.
-            </p>
-          )}
         </div>
 
         {aksi.buat && (

@@ -35,4 +35,6 @@ export interface PolaRosterRequest {
   namaPola: string;
   siklusHari: number;
   detailSiklus: { hariKe: number; isLibur: boolean; shiftID?: string }[];
+  /** Lokasi ruang, wajib saat buat sejak B168. */
+  locationID?: string;
 }

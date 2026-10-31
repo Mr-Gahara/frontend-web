@@ -1,4 +1,3 @@
-import { KUNCI_LOKASI_POLA_ROSTER } from "./ruang";
 import { BATAS_SIKLUS, type NilaiFormPolaRoster } from "./schema";
 import type { DetailSiklusItem, PolaRosterItem, PolaRosterRequest } from "@/types/pola-roster";
 import type { ShiftItem } from "@/types/shift";
@@ -64,15 +63,12 @@ export function payloadPolaRoster(nilai: NilaiFormPolaRoster): PolaRosterRequest
   };
 }
 
-/** Menambah lokasi ruang ke payload begitu backend memisahkan pola roster per lokasi (PL5). */
+/** Menambah lokasi ruang ke payload sebagai locationID (B168, PL5). */
 export function tambahLokasiPolaRoster(
   payload: PolaRosterRequest,
   lokasiId: string | null,
 ): PolaRosterRequest {
-  if (KUNCI_LOKASI_POLA_ROSTER !== null && lokasiId !== null) {
-    return { ...payload, [KUNCI_LOKASI_POLA_ROSTER]: lokasiId };
-  }
-  return payload;
+  return lokasiId === null ? payload : { ...payload, locationID: lokasiId };
 }
 
 export type LabelShiftPola = { nama: string; nonaktif: boolean };

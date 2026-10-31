@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { hitungLintasHari, nilaiAwalShift, payloadShift } from "@/features/shift/payload";
-import { filterDaftarShift, KUNCI_LOKASI_SHIFT } from "@/features/shift/ruang";
+import { filterDaftarShift } from "@/features/shift/ruang";
 import { skemaShift, type NilaiFormShift } from "@/features/shift/schema";
 import type { ShiftItem } from "@/types/shift";
 
@@ -102,25 +102,14 @@ describe("payloadShift", () => {
     });
   });
 
-  it("membawa lokasi hanya begitu backend memisahkan shift per lokasi (keputusan SH1b)", () => {
-    const payload = payloadShift(DASAR, "lokasi-1");
-    if (KUNCI_LOKASI_SHIFT === null) {
-      expect(Object.keys(payload).sort()).toEqual(
-        ["isLintasHari", "jamMasuk", "jamPulang", "namaShift", "status", "toleransiTerlambat"],
-      );
-    } else {
-      expect(payload).toMatchObject({ [KUNCI_LOKASI_SHIFT]: "lokasi-1" });
-    }
+  it("membawa locationID lokasi ruang (B168, keputusan SH1b)", () => {
+    expect(payloadShift(DASAR, "lokasi-1")).toMatchObject({ locationID: "lokasi-1" });
   });
 });
 
 describe("filterDaftarShift", () => {
-  it("mengikuti dukungan pemisahan lokasi di backend", () => {
-    if (KUNCI_LOKASI_SHIFT === null) {
-      expect(filterDaftarShift("gudang", "lokasi-1")).toEqual({ workspace: "gudang" });
-    } else {
-      expect(filterDaftarShift("outlet", null)).toBeNull();
-      expect(filterDaftarShift("outlet", "lokasi-1")).toEqual({ [KUNCI_LOKASI_SHIFT]: "lokasi-1" });
-    }
+  it("menyaring per lokasi ruang, dan menahan permintaan selama lokasi belum termuat (B168)", () => {
+    expect(filterDaftarShift(null)).toBeNull();
+    expect(filterDaftarShift("lokasi-1")).toEqual({ locationID: "lokasi-1" });
   });
 });

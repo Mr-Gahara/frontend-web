@@ -1,7 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { JAWAB_GAGAL } from "../../../helpers/transfer-uji";
 import { cocok, pantauPermintaan } from "../../../helpers/reservasi-uji";
-import { shiftTerpisahPerRuang } from "@/features/shift/ruang";
 
 // ============================================================
 // CONFIG & CONSTANTS
@@ -41,9 +40,6 @@ async function bukaHalamanShift(page: Page) {
 function getShiftRow(page: Page, namaShift: string) {
   return page.locator("tbody tr").filter({ hasText: namaShift });
 }
-
-/** Daftar dipaginasi di klien (10 baris awal), sehingga baris uji dicari lewat pencarian (TB14a). */
-const UKURAN_AWAL = 10;
 
 async function cariShift(page: Page, namaShift: string) {
   await page.getByPlaceholder(/cari nama shift/i).fill(namaShift);
@@ -630,28 +626,9 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     await expect(dialog).toBeVisible();
   });
 
-  test("halaman shift gudang memuat daftar dengan keterangan pemakaian bersama (keputusan SH1b)", async ({
-    page,
-  }) => {
-    test.skip(shiftTerpisahPerRuang(), "Keterangan hanya tampil selama shift belum terpisah per ruang");
-    const tunggu = page.waitForResponse(cocok("GET", /\/api\/shift\?workspace=gudang/i));
-    await page.goto(`${BASE}/dashboard/gudang/shift`);
-    const data = ((await (await tunggu).json()).data ?? []) as unknown[];
-    await expect(page.getByRole("heading", { name: /master shift gudang/i })).toBeVisible({
-      timeout: 15_000,
-    });
-    await expect(page.getByText(/masih dipakai bersama ruang outlet dan gudang/i)).toBeVisible();
-    await expect(page.locator("tbody tr")).toHaveCount(Math.min(Math.max(data.length, 1), UKURAN_AWAL));
-    await expect(page.getByText(`${data.length} total data`, { exact: true })).toBeVisible();
-  });
-
   test("shift yang dibuat di ruang outlet tidak tampil di ruang gudang (keputusan SH1b)", async ({
     page,
   }) => {
-    test.fixme(
-      !shiftTerpisahPerRuang(),
-      "Menunggu backend memisahkan shift per lokasi (KUNCI_LOKASI_SHIFT di features/shift/ruang.ts)",
-    );
     const namaShift = `Shift Ruang ${Date.now()}`;
     await buatShiftLewatUi(page, namaShift);
     await expect(await cariShift(page, namaShift)).toBeVisible();

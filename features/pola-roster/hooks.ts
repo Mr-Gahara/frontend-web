@@ -13,13 +13,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { polaRosterApi } from "./api";
 import { tambahLokasiPolaRoster } from "./payload";
-import { filterDaftarPola, polaTerpisahPerRuang, type RuangPolaRoster } from "./ruang";
+import { filterDaftarPola, type RuangPolaRoster } from "./ruang";
 import { useLokasiRuang } from "@/features/inventaris/hooks";
 import { queryKeys } from "@/lib/queryKeys";
 import type { PolaRosterRequest } from "@/types/pola-roster";
 
 export function useDaftarPolaRoster(ruang: RuangPolaRoster) {
-  const lokasi = useLokasiRuang(ruang, { aktif: polaTerpisahPerRuang() });
+  const lokasi = useLokasiRuang(ruang);
   const filter = filterDaftarPola(lokasi.lokasiId);
   const kueri = useQuery({
     queryKey: queryKeys.polaRoster.daftar(filter ?? undefined),
@@ -39,7 +39,7 @@ function useInvalidasiPolaRoster() {
 }
 
 export function useSimpanPolaRoster(ruang: RuangPolaRoster) {
-  const lokasi = useLokasiRuang(ruang, { aktif: polaTerpisahPerRuang() });
+  const lokasi = useLokasiRuang(ruang);
   const invalidasi = useInvalidasiPolaRoster();
   return useMutation({
     mutationFn: ({ id, payload }: { id?: string; payload: PolaRosterRequest }) => {

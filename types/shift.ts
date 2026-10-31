@@ -25,4 +25,6 @@ export interface ShiftRequest {
   isLintasHari: boolean;
   toleransiTerlambat: number;
   status: StatusShift;
+  /** Lokasi ruang, wajib saat buat sejak B168. */
+  locationID?: string;
 }

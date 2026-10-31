@@ -5,14 +5,13 @@
  *
  * useDaftarShift memakai kunci daftar dengan filter ruang. Mutation
  * menginvalidasi akar shift, pola roster, dan jadwal shift, karena pola
- * roster dan kalender jadwal menampilkan nama dan jam shift. Lokasi ruang
- * hanya dimuat begitu backend memisahkan shift per lokasi (ruang.ts,
- * keputusan SH1b); selama itu tidak ada permintaan lokasi sama sekali.
+ * roster dan kalender jadwal menampilkan nama dan jam shift. Daftar dan
+ * simpan memakai lokasi ruang (B168, keputusan SH1b).
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { shiftApi } from "./api";
 import { payloadShift } from "./payload";
-import { filterDaftarShift, shiftTerpisahPerRuang, type RuangShift } from "./ruang";
+import { filterDaftarShift, type RuangShift } from "./ruang";
 import type { NilaiFormShift } from "./schema";
 import { useLokasiRuang, type LokasiRuang } from "@/features/inventaris/hooks";
 import { queryKeys } from "@/lib/queryKeys";
@@ -24,12 +23,12 @@ import { queryKeys } from "@/lib/queryKeys";
  * daftar kosong seolah-olah belum ada shift.
  */
 function useLokasiRuangShift(ruang: RuangShift): LokasiRuang {
-  return useLokasiRuang(ruang, { aktif: shiftTerpisahPerRuang() });
+  return useLokasiRuang(ruang);
 }
 
 export function useDaftarShift(ruang: RuangShift) {
   const lokasi = useLokasiRuangShift(ruang);
-  const filter = filterDaftarShift(ruang, lokasi.lokasiId);
+  const filter = filterDaftarShift(lokasi.lokasiId);
   const kueri = useQuery({
     queryKey: queryKeys.shift.daftar(filter ?? undefined),
     queryFn: () => shiftApi.daftar(filter ?? {}),

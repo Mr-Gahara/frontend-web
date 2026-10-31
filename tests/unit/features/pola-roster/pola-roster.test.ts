@@ -8,7 +8,7 @@ import {
   teksLabelShift,
   terimaKetikanSiklus,
 } from "@/features/pola-roster/payload";
-import { filterDaftarPola, KUNCI_LOKASI_POLA_ROSTER } from "@/features/pola-roster/ruang";
+import { filterDaftarPola } from "@/features/pola-roster/ruang";
 import { buatSkemaPolaRoster, type NilaiFormPolaRoster } from "@/features/pola-roster/schema";
 import type { PolaRosterItem } from "@/types/pola-roster";
 import type { ShiftItem } from "@/types/shift";
@@ -138,16 +138,11 @@ describe("labelShiftPola (keputusan PL1a)", () => {
 });
 
 describe("pemisahan per ruang (keputusan PL5)", () => {
-  it("filter dan payload mengikuti dukungan lokasi di backend", () => {
+  it("filter dan payload memakai locationID lokasi ruang (B168)", () => {
     const payload = payloadPolaRoster(DASAR);
-    if (KUNCI_LOKASI_POLA_ROSTER === null) {
-      expect(filterDaftarPola("lokasi-1")).toEqual({});
-      expect(tambahLokasiPolaRoster(payload, "lokasi-1")).toEqual(payload);
-    } else {
-      expect(filterDaftarPola(null)).toBeNull();
-      expect(tambahLokasiPolaRoster(payload, "lokasi-1")).toMatchObject({
-        [KUNCI_LOKASI_POLA_ROSTER]: "lokasi-1",
-      });
-    }
+    expect(filterDaftarPola(null)).toBeNull();
+    expect(filterDaftarPola("lokasi-1")).toEqual({ locationID: "lokasi-1" });
+    expect(tambahLokasiPolaRoster(payload, "lokasi-1")).toMatchObject({ locationID: "lokasi-1" });
+    expect(tambahLokasiPolaRoster(payload, null)).toEqual(payload);
   });
 });

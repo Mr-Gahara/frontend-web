@@ -1,4 +1,3 @@
-import { KUNCI_LOKASI_SHIFT } from "./ruang";
 import { POLA_JAM, type NilaiFormShift } from "./schema";
 import type { ShiftItem, ShiftRequest } from "@/types/shift";
 
@@ -34,9 +33,8 @@ export function nilaiAwalShift(shift: ShiftItem | null): NilaiFormShift {
 /**
  * Payload POST dan PUT /shift. Nama dipangkas, toleransi kosong menjadi 0,
  * dan lintas hari dihitung dari jam. Field workspace dari halaman lama
- * tidak dikirim lagi, karena backend tidak membacanya. Lokasi ruang hanya
- * dikirim begitu backend memisahkan shift per lokasi (ruang.ts, keputusan
- * SH1b).
+ * tidak dikirim lagi, karena backend tidak membacanya. Lokasi ruang dikirim
+ * sebagai locationID (B168, keputusan SH1b) begitu lokasinya termuat.
  */
 export function payloadShift(nilai: NilaiFormShift, lokasiId: string | null): ShiftRequest {
   const payload: ShiftRequest = {
@@ -47,8 +45,5 @@ export function payloadShift(nilai: NilaiFormShift, lokasiId: string | null): Sh
     toleransiTerlambat: nilai.toleransi.trim() === "" ? 0 : Number(nilai.toleransi),
     status: nilai.status,
   };
-  if (KUNCI_LOKASI_SHIFT !== null && lokasiId !== null) {
-    return { ...payload, [KUNCI_LOKASI_SHIFT]: lokasiId };
-  }
-  return payload;
+  return lokasiId === null ? payload : { ...payload, locationID: lokasiId };
 }

@@ -32,7 +32,7 @@ import type { ShiftItem } from "@/types/shift";
 import { ShiftFormDialog } from "./form-shift";
 import { ShiftDeleteDialog } from "./dialog-nonaktif-shift";
 import { aksiShift } from "./izin";
-import { shiftTerpisahPerRuang, type RuangShift } from "./ruang";
+import type { RuangShift } from "./ruang";
 import { useSession } from "@/lib/auth/useSession";
 import type { NilaiFormShift } from "./schema";
 import { DataTable } from "@/components/ui/data-table";
@@ -243,12 +243,6 @@ export default function ShiftUtama({
           <p className="text-sm text-navy/60 font-medium">
             Kelola jam operasional, toleransi keterlambatan, dan status shift.
           </p>
-          {!shiftTerpisahPerRuang() && (
-            <p className="text-xs text-navy/50 font-semibold">
-              Daftar shift masih dipakai bersama ruang outlet dan gudang sampai
-              backend mendukung shift per lokasi.
-            </p>
-          )}
         </div>
 
         {aksi.buat && (

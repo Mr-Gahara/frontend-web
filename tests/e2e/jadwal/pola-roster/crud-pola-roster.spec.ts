@@ -2,7 +2,6 @@ import { test, expect, type Page } from "@playwright/test";
 import { api, BASIS, bukaDenganAuth, JAWAB_GAGAL, login as loginUji } from "../../../helpers/transfer-uji";
 import { cocok } from "../../../helpers/reservasi-uji";
 import { idLokasiRuang } from "../../../helpers/jadwal-uji";
-import { polaTerpisahPerRuang } from "@/features/pola-roster/ruang";
 
 // ============================================================
 // CONFIG & CONSTANTS
@@ -42,9 +41,6 @@ async function bukaHalamanPola(page: Page) {
 function getPolaRow(page: Page, namaPola: string) {
   return page.locator("tbody tr").filter({ hasText: namaPola });
 }
-
-/** Daftar dipaginasi di klien (10 baris awal), sehingga baris uji dicari lewat pencarian (TB14a). */
-const UKURAN_AWAL = 10;
 
 async function cariPola(page: Page, namaPola: string) {
   await page.getByPlaceholder(/cari nama pola/i).fill(namaPola);
@@ -452,24 +448,7 @@ test.describe("E2E - Pola Roster setelah migrasi features/pola-roster", () => {
     }
   });
 
-  test("halaman pola roster gudang memuat daftar dengan keterangan pemakaian bersama (keputusan PL5)", async ({
-    page,
-  }) => {
-    test.skip(polaTerpisahPerRuang(), "Keterangan hanya tampil selama pola roster belum terpisah per ruang");
-    const tunggu = page.waitForResponse(cocok("GET", POLA_DAFTAR_POLA));
-    await page.goto(URL_POLA_GUDANG);
-    const data = ((await (await tunggu).json()).data ?? []) as unknown[];
-    await expect(page.getByRole("heading", { name: /pola roster gudang/i })).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(/masih dipakai bersama ruang outlet dan gudang/i)).toBeVisible();
-    await expect(page.locator("tbody tr")).toHaveCount(Math.min(Math.max(data.length, 1), UKURAN_AWAL));
-    await expect(page.getByText(`${data.length} total data`, { exact: true })).toBeVisible();
-  });
-
   test("pola yang dibuat di ruang outlet tidak tampil di ruang gudang (keputusan PL5)", async ({ page }) => {
-    test.fixme(
-      !polaTerpisahPerRuang(),
-      "Menunggu backend memisahkan pola roster per lokasi (KUNCI_LOKASI_POLA_ROSTER di features/pola-roster/ruang.ts)",
-    );
     const auth = await bukaDenganAuth(page, URL_POLA);
     const namaPola = `Pola Ruang ${Date.now()}`;
     await page.getByRole("button", { name: /buat pola roster/i }).click();
