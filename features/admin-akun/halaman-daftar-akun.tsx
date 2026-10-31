@@ -14,20 +14,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useDebounce } from "@/hooks/use-debounce";
 import { pesanError } from "@/lib/api/error";
 import { formatTanggalPendek } from "@/lib/format";
 import type { AkunAdmin } from "@/types/adminAkun";
-import { useDaftarAkun } from "./hooks";
+import { useHalamanAkun } from "./hooks";
 import {
   LABEL_ROLE,
+  PANJANG_CARI_AKUN,
+  paramDaftarAkun,
   URL_BUAT_AKUN,
   urlDetailAkun,
-  saringAkun,
   teksMasaAkses,
   teksStatus,
   teksToko,
   type FilterStatusAkun,
 } from "./tampilan";
+
+const PILIHAN_UKURAN = [10, 20, 50] as const;
 
 const KOLOM: ColumnDef<AkunAdmin>[] = [
   {
@@ -58,16 +62,28 @@ const KOLOM: ColumnDef<AkunAdmin>[] = [
 
 /**
  * Daftar seluruh akun platform (keputusan PA7a): akun admin ikut tampil
- * dengan penanda peran. Pencarian dan filter status di klien, karena
- * backend mengirim seluruh akun sekali muat.
+ * dengan penanda peran. Pencarian, filter status, dan halaman disaring
+ * server (B177; keputusan rancangan butir 27). Urutan mengikuti backend.
  */
 export function HalamanDaftarAkun() {
-  const daftar = useDaftarAkun();
   const [kata, setKata] = useState("");
+  const kataTertunda = useDebounce(kata, 400);
   const [status, setStatus] = useState<FilterStatusAkun>("semua");
+  const [halaman, setHalaman] = useState(1);
+  const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN[0]);
 
-  const semua = useMemo(() => daftar.data ?? [], [daftar.data]);
-  const baris = useMemo(() => saringAkun(semua, kata, status), [semua, kata, status]);
+  // Mengganti pencarian atau status kembali ke halaman 1, disesuaikan saat
+  // render, agar halaman lama tidak sempat diminta.
+  const kunciKriteria = JSON.stringify([kataTertunda, status]);
+  const [kunciSebelumnya, setKunciSebelumnya] = useState(kunciKriteria);
+  if (kunciSebelumnya !== kunciKriteria) {
+    setKunciSebelumnya(kunciKriteria);
+    setHalaman(1);
+  }
+
+  const daftar = useHalamanAkun(paramDaftarAkun(kataTertunda, status, halaman, ukuran));
+  const baris = useMemo(() => daftar.data?.data ?? [], [daftar.data]);
+  const tersaring = kataTertunda.trim() !== "" || status !== "semua";
 
   return (
     <div className="space-y-6">
@@ -93,6 +109,7 @@ export function HalamanDaftarAkun() {
             id="cari-akun"
             value={kata}
             onChange={(e) => setKata(e.target.value)}
+            maxLength={PANJANG_CARI_AKUN}
             placeholder="Email, username, atau nama toko"
             className="w-72"
           />
@@ -112,9 +129,6 @@ export function HalamanDaftarAkun() {
             </SelectContent>
           </Select>
         </div>
-        <p className="pb-2 text-sm text-muted-foreground">
-          {baris.length} dari {semua.length} akun
-        </p>
       </div>
 
       {daftar.isError ? (
@@ -139,9 +153,20 @@ export function HalamanDaftarAkun() {
           columns={KOLOM}
           data={baris}
           loading={daftar.isLoading}
-          emptyMessage={
-            semua.length > 0 ? "Tidak ada akun yang cocok dengan pencarian." : "Belum ada akun."
-          }
+          emptyMessage={tersaring ? "Tidak ada akun yang cocok dengan pencarian." : "Belum ada akun."}
+          paginasiServer={{
+            halaman,
+            jumlahHalaman: daftar.data?.pagination?.totalPages ?? 1,
+            total: daftar.data?.pagination?.total ?? 0,
+            ukuran,
+            pilihanUkuran: PILIHAN_UKURAN,
+            sibuk: daftar.isFetching,
+            onGantiHalaman: setHalaman,
+            onGantiUkuran: (berikut) => {
+              setUkuran(berikut);
+              setHalaman(1);
+            },
+          }}
         />
       )}
     </div>

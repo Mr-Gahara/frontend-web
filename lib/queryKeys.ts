@@ -44,7 +44,7 @@ export const queryKeys = {
   // --- Panel admin ---
   adminAkun: {
     semua: kunci(["adminAkun"] as const),
-    daftar: () => ["adminAkun", "daftar"] as const,
+    daftar: (params?: Record<string, string>) => ["adminAkun", "daftar", params ?? {}] as const,
     detail: (id: string) => ["adminAkun", "detail", id] as const,
     riwayat: (id: string) => ["adminAkun", "riwayat", id] as const,
   },

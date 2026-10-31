@@ -101,19 +101,47 @@ const POLA_BUAT_AKUN = /\/api\/akun\/admin\/users(\?|$)/i;
 const POLA_BEKUKAN_AKUN = /\/api\/akun\/admin\/users\/[^/]+\/freeze(\?|$)/i;
 const POLA_SATU_AKUN = /\/api\/akun\/admin\/users\/[0-9a-f]{24}(\?|$)/i;
 
-/** Login admin, lalu muat ulang agar respons daftar milik halaman ini tertangkap. */
-export async function bukaDaftarAkun(page: Page): Promise<AkunUji[]> {
-  await loginAdmin(page, wajibAdmin());
-  await page.reload({ waitUntil: "commit" });
-  const respons = await page.waitForResponse(
-    (r) => POLA_DAFTAR_AKUN.test(r.url()) && r.request().method() === "GET",
+/** Menunggu GET /akun/admin/all berikutnya yang query-nya memenuhi syarat. */
+export function tungguDaftarAkun(page: Page, syarat: (q: URLSearchParams) => boolean = () => true) {
+  return page.waitForResponse(
+    (r) =>
+      POLA_DAFTAR_AKUN.test(r.url()) &&
+      r.request().method() === "GET" &&
+      syarat(new URL(r.url()).searchParams),
   );
-  expect(respons.status()).toBe(200);
-  const isi = (await respons.json()) as { data: AkunUji[] };
-  await expect(page.getByText(`${isi.data.length} dari ${isi.data.length} akun`)).toBeVisible({
+}
+
+/** Total dari pagination respons daftar, dan footer tabel yang menampilkannya. */
+export async function periksaTotalDaftar(page: Page, respons: Response): Promise<number> {
+  expect(respons.status(), respons.url()).toBe(200);
+  const isi = (await respons.json()) as { pagination: { total: number } };
+  await expect(page.getByText(`${isi.pagination.total} total data`, { exact: true })).toBeVisible({
     timeout: 15_000,
   });
-  return isi.data;
+  return isi.pagination.total;
+}
+
+/**
+ * Login admin, lalu muat ulang agar respons halaman pertama daftar milik
+ * halaman ini tertangkap (B177: page 1, limit 10). Seluruh akun dibaca
+ * lewat API sebagai bukti, dengan token permintaan halaman itu sendiri,
+ * karena login di konteks lain memutar tokenVersion admin.
+ */
+export async function bukaDaftarAkun<T = AkunUji>(page: Page): Promise<T[]> {
+  await loginAdmin(page, wajibAdmin());
+  await page.reload({ waitUntil: "commit" });
+  const respons = await tungguDaftarAkun(page);
+  const q = new URL(respons.url()).searchParams;
+  expect([q.get("page"), q.get("limit")]).toEqual(["1", "10"]);
+  const total = await periksaTotalDaftar(page, respons);
+
+  const semua = await page.request.get("/api/akun/admin/all", {
+    headers: { authorization: respons.request().headers()["authorization"] ?? "" },
+  });
+  expect(semua.status(), "baca seluruh akun").toBe(200);
+  const data = ((await semua.json()) as { data: T[] }).data;
+  expect(data.length, "total pagination sama dengan seluruh akun").toBe(total);
+  return data;
 }
 
 /** Dari halaman daftar: cari lewat email, lalu buka detailnya. */

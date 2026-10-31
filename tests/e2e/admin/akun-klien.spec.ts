@@ -1,17 +1,20 @@
 import { test, expect, type Page } from "@playwright/test";
 import {
   ALASAN_TANPA_ADMIN,
+  bukaDaftarAkun,
+  periksaTotalDaftar,
+  tungguDaftarAkun,
   hapusAkunDariDetail,
   hapusAkunKlienUji,
   kredensialAdmin,
-  loginAdmin,
   wajibAdmin,
 } from "../../helpers/admin-uji";
 
 /*
  * Daftar akun dan buat akun klien di panel admin (keputusan PA7a sampai
- * PA9a). Harapan daftar dihitung dari respons GET /akun/admin/all yang
- * dibaca halaman itu sendiri. Akun klien uji dibuat lewat UI dengan email
+ * PA9a). Pencarian, status, dan halaman disaring server (B177): query yang
+ * terkirim dan total dari pagination diperiksa, dan seluruh akun dibaca
+ * lewat API sebagai bukti. Akun klien uji dibuat lewat UI dengan email
  * unik per run, lalu dibekukan dan dihapus lewat API di finally, sampai
  * bekukan dan hapus tersedia di UI.
  */
@@ -25,26 +28,12 @@ interface AkunRespons {
   langganan: { aksesBerakhirPada: string | null };
 }
 
-const POLA_DAFTAR = /\/api\/akun\/admin\/all(\?|$)/i;
 const POLA_BUAT = /\/api\/akun\/admin\/users(\?|$)/i;
 
 const kolomCari = (page: Page) => page.getByLabel("Cari akun");
 const barisAkun = (page: Page, email: string) => page.getByRole("row").filter({ hasText: email });
 
-/** Login admin, lalu muat ulang agar respons daftar milik halaman ini tertangkap. */
-async function bukaDaftar(page: Page): Promise<AkunRespons[]> {
-  await loginAdmin(page, wajibAdmin());
-  await page.reload({ waitUntil: "commit" });
-  const respons = await page.waitForResponse(
-    (r) => POLA_DAFTAR.test(r.url()) && r.request().method() === "GET",
-  );
-  expect(respons.status()).toBe(200);
-  const isi = (await respons.json()) as { data: AkunRespons[] };
-  await expect(page.getByText(`${isi.data.length} dari ${isi.data.length} akun`)).toBeVisible({
-    timeout: 15_000,
-  });
-  return isi.data;
-}
+const bukaDaftar = (page: Page) => bukaDaftarAkun<AkunRespons>(page);
 
 async function bukaFormBuat(page: Page) {
   await page.getByRole("button", { name: "Buat Akun Klien" }).click();
@@ -64,24 +53,50 @@ test.describe("Akun klien di panel admin", () => {
     test.skip(!bertoko, "Tidak ada akun klien yang sudah punya toko di data uji");
     if (!bertoko) return;
 
+    const tCari = tungguDaftarAkun(page, (q) => q.get("cari") === bertoko.email && q.get("page") === "1");
     await kolomCari(page).fill(bertoko.email);
-    await expect(page.getByText(`1 dari ${daftar.length} akun`)).toBeVisible();
+    await periksaTotalDaftar(page, await tCari);
     await expect(barisAkun(page, bertoko.email)).toContainText(bertoko.daftarTenant[0].namaToko);
     await expect(barisAkun(page, bertoko.email)).toContainText("Klien");
   });
 
-  test("pencarian tanpa hasil dan filter status menghitung dari daftar yang sama", async ({ page }) => {
+  test("pencarian tanpa hasil dan filter status disaring server (B177)", async ({ page }) => {
     const daftar = await bukaDaftar(page);
 
-    await kolomCari(page).fill("tidak-ada-akun-" + Date.now());
-    await expect(page.getByText(`0 dari ${daftar.length} akun`)).toBeVisible();
+    const kosong = "tidak-ada-akun-" + Date.now();
+    const tKosong = tungguDaftarAkun(page, (q) => q.get("cari") === kosong);
+    await kolomCari(page).fill(kosong);
+    expect(await periksaTotalDaftar(page, await tKosong)).toBe(0);
     await expect(page.getByText("Tidak ada akun yang cocok dengan pencarian.")).toBeVisible();
 
+    // Kosong kembali ke kunci halaman pertama yang masih segar, sehingga tidak
+    // ada permintaan baru; penunggu status disyaratkan tanpa cari.
     await kolomCari(page).fill("");
     const nonAktif = daftar.filter((a) => a.status === "non-aktif").length;
+    const tStatus = tungguDaftarAkun(
+      page,
+      (q) => q.get("status") === "non-aktif" && q.get("page") === "1" && !q.has("cari"),
+    );
     await page.getByRole("combobox", { name: "Status" }).click();
     await page.getByRole("option", { name: "Non-aktif" }).click();
-    await expect(page.getByText(`${nonAktif} dari ${daftar.length} akun`)).toBeVisible();
+    const respons = await tStatus;
+    expect(await periksaTotalDaftar(page, respons)).toBe(nonAktif);
+    const isi = (await respons.json()) as { data: AkunRespons[] };
+    expect(isi.data.every((a) => a.status === "non-aktif")).toBe(true);
+  });
+
+  test("halaman berikutnya meminta page 2, dan pencarian kembali ke halaman 1 (B177)", async ({ page }) => {
+    const daftar = await bukaDaftar(page);
+    test.skip(daftar.length <= 10, "Akun di data uji belum lebih dari satu halaman");
+
+    const tKedua = tungguDaftarAkun(page, (q) => q.get("page") === "2" && q.get("limit") === "10");
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+    const kedua = (await (await tKedua).json()) as { data: AkunRespons[] };
+    await expect(page.getByRole("link", { name: kedua.data[0].email })).toBeVisible();
+
+    const tCari = tungguDaftarAkun(page, (q) => q.get("cari") === "@" && q.get("page") === "1");
+    await kolomCari(page).fill("@");
+    await periksaTotalDaftar(page, await tCari);
   });
 
   test("form menolak isian kosong tanpa mengirim permintaan", async ({ page }) => {

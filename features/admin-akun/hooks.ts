@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  keepPreviousData,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -23,14 +24,15 @@ import { akunTidakAda } from "./tampilan";
 type OpsiMutasi<H, V> = Pick<UseMutationOptions<H, Error, V>, "onSuccess" | "onError">;
 
 /**
- * Seluruh akun platform, termasuk akun admin (keputusan PA7a). Backend
- * mengirimnya sekali muat tanpa paginasi, sehingga pencarian dan filter
- * dilakukan di klien dari satu cache.
+ * Satu halaman akun platform dari server, termasuk akun admin (keputusan
+ * PA7a, B177). Halaman sebelumnya tetap tampil selama halaman berikutnya
+ * dimuat.
  */
-export function useDaftarAkun() {
+export function useHalamanAkun(params: Record<string, string>) {
   return useQuery({
-    queryKey: queryKeys.adminAkun.daftar(),
-    queryFn: adminAkunApi.daftar,
+    queryKey: queryKeys.adminAkun.daftar(params),
+    queryFn: () => adminAkunApi.halaman(params),
+    placeholderData: keepPreviousData,
   });
 }
 

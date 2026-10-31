@@ -1,5 +1,5 @@
-import { apiData, apiMentah } from "@/lib/api/client";
-import { normalizeId } from "@/lib/api/normalize";
+import { api, apiData, apiMentah } from "@/lib/api/client";
+import { normalizeId, type Paginasi } from "@/lib/api/normalize";
 import { EP } from "@/lib/api/endpoints";
 import type {
   AkunAdmin,
@@ -17,9 +17,16 @@ interface ResponsRiwayat {
   cursorBerikutnya?: string | null;
 }
 
+/** Satu halaman akun (B177): dengan page atau limit, server mengirim pagination. */
+export type HalamanAkun = { data: AkunAdmin[]; pagination: Paginasi | null };
+
 /** Seluruh endpoint admin memakai token akun (authAkun dan adminOnly di backend). */
 export const adminAkunApi = {
-  daftar: () => apiData.get<AkunAdmin[]>(EP.akun.adminDaftar, undefined, "akun"),
+  /** params disusun paramDaftarAkun (tampilan.ts). */
+  halaman: async (params: Record<string, string>): Promise<HalamanAkun> => {
+    const hasil = await api.get<AkunAdmin[]>(EP.akun.adminDaftar, params, "akun");
+    return { data: hasil.data, pagination: hasil.pagination ?? null };
+  },
   /** Satu akun, sebentuk item daftar (B176). Id rusak 400, akun tidak ada 404. */
   detail: (id: string) => apiData.get<AkunAdmin>(EP.akun.adminAkunDetail(id), undefined, "akun"),
   buat: (payload: BuatAkunKlienPayload) =>

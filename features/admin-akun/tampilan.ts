@@ -21,16 +21,25 @@ export function namaToko(akun: AkunAdmin): string | null {
   return akun.daftarTenant[0]?.namaToko ?? null;
 }
 
-/** Pencarian email, username, dan nama toko tanpa membedakan huruf, serta filter status. */
-export function saringAkun(daftar: AkunAdmin[], kata: string, status: FilterStatusAkun): AkunAdmin[] {
-  const kunci = kata.trim().toLowerCase();
-  return daftar.filter((akun) => {
-    if (status !== "semua" && akun.status !== status) return false;
-    if (!kunci) return true;
-    return [akun.email, akun.username ?? "", namaToko(akun) ?? ""].some((teks) =>
-      teks.toLowerCase().includes(kunci),
-    );
-  });
+/** Batas cari GET /akun/admin/all, sama dengan daftar lain yang disaring server. */
+export const PANJANG_CARI_AKUN = 100;
+
+/**
+ * Query satu halaman GET /akun/admin/all (B177). Server mencocokkan email,
+ * username, dan nama toko tanpa membedakan huruf, serta status, sehingga
+ * pagination.total benar (keputusan rancangan butir 27).
+ */
+export function paramDaftarAkun(
+  kata: string,
+  status: FilterStatusAkun,
+  halaman: number,
+  ukuran: number,
+): Record<string, string> {
+  const params: Record<string, string> = { page: String(halaman), limit: String(ukuran) };
+  const cari = kata.trim().slice(0, PANJANG_CARI_AKUN);
+  if (cari) params.cari = cari;
+  if (status !== "semua") params.status = status;
+  return params;
 }
 
 /** Status beserta alasan non-aktif, agar pembekuan manual terbedakan dari kedaluwarsa. */

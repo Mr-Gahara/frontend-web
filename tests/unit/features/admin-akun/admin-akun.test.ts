@@ -4,7 +4,8 @@ import { skemaBuatAkunKlien, type NilaiBuatAkunKlien } from "@/features/admin-ak
 import {
   akunTidakAda,
   namaToko,
-  saringAkun,
+  PANJANG_CARI_AKUN,
+  paramDaftarAkun,
   teksMasaAkses,
   teksStatus,
   teksToko,
@@ -98,24 +99,29 @@ describe("payloadBuatAkunKlien", () => {
   });
 });
 
+describe("paramDaftarAkun (B177)", () => {
+  it("tanpa kriteria hanya halaman dan ukuran", () => {
+    expect(paramDaftarAkun("", "semua", 1, 10)).toEqual({ page: "1", limit: "10" });
+    expect(paramDaftarAkun("   ", "semua", 2, 20)).toEqual({ page: "2", limit: "20" });
+  });
+
+  it("cari dipangkas dan dibatasi 100 karakter, status dikirim bila dipilih", () => {
+    expect(paramDaftarAkun(" senja ", "non-aktif", 1, 10)).toEqual({
+      page: "1",
+      limit: "10",
+      cari: "senja",
+      status: "non-aktif",
+    });
+    expect(paramDaftarAkun("a".repeat(150), "aktif", 1, 10).cari).toHaveLength(PANJANG_CARI_AKUN);
+  });
+});
+
 describe("tampilan daftar akun", () => {
   const daftar = [
     akun(),
     akun({ id: "a2", email: "SITI@contoh.id", username: null, daftarTenant: [], status: "non-aktif" }),
   ];
 
-  it("pencarian email tidak membedakan huruf", () => {
-    expect(saringAkun(daftar, "siti", "semua").map((a) => a.id)).toEqual(["a2"]);
-  });
-
-  it("pencarian mengenai nama toko", () => {
-    expect(saringAkun(daftar, "senja", "semua").map((a) => a.id)).toEqual(["a1"]);
-  });
-
-  it("filter status digabung dengan pencarian", () => {
-    expect(saringAkun(daftar, "", "non-aktif").map((a) => a.id)).toEqual(["a2"]);
-    expect(saringAkun(daftar, "budi", "non-aktif")).toEqual([]);
-  });
 
   it("toko: nama toko, belum punya toko, dan tanda hubung untuk admin", () => {
     expect(namaToko(daftar[1])).toBeNull();

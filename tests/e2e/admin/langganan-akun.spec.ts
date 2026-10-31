@@ -1,6 +1,7 @@
 import { test, expect, type Page, type Response } from "@playwright/test";
 import {
   ALASAN_TANPA_ADMIN,
+  bukaDaftarAkun,
   hapusAkunDariDetail,
   hapusAkunKlienUji,
   kredensialAdmin,
@@ -24,7 +25,6 @@ interface AkunRespons {
   langganan: { aksesBerakhirPada: string | null };
 }
 
-const POLA_DAFTAR = /\/api\/akun\/admin\/all(\?|$)/i;
 const POLA_BUAT = /\/api\/akun\/admin\/users(\?|$)/i;
 const POLA_BEKUKAN = /\/api\/akun\/admin\/users\/[^/]+\/freeze(\?|$)/i;
 const POLA_AKTIFKAN = /\/api\/akun\/admin\/users\/[^/]+\/unfreeze(\?|$)/i;
@@ -35,20 +35,7 @@ const riwayat = (page: Page) => page.getByRole("region", { name: "Riwayat Langga
 const tungguPos = (page: Page, pola: RegExp): Promise<Response> =>
   page.waitForResponse((r) => pola.test(r.url()) && r.request().method() === "POST");
 
-/** Login admin, lalu muat ulang agar respons daftar milik halaman ini tertangkap. */
-async function bukaDaftar(page: Page): Promise<AkunRespons[]> {
-  await loginAdmin(page, wajibAdmin());
-  await page.reload({ waitUntil: "commit" });
-  const respons = await page.waitForResponse(
-    (r) => POLA_DAFTAR.test(r.url()) && r.request().method() === "GET",
-  );
-  expect(respons.status()).toBe(200);
-  const isi = (await respons.json()) as { data: AkunRespons[] };
-  await expect(page.getByText(`${isi.data.length} dari ${isi.data.length} akun`)).toBeVisible({
-    timeout: 15_000,
-  });
-  return isi.data;
-}
+const bukaDaftar = (page: Page) => bukaDaftarAkun<AkunRespons>(page);
 
 async function bukaDetail(page: Page, akun: { id: string; email: string }) {
   await page.getByLabel("Cari akun").fill(akun.email);
