@@ -1,6 +1,7 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
 import { BASIS, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { NAMA_STAF_IZIN, siapkanIzinHari, type IzinMentah } from "../../helpers/izin-cuti-uji";
+import { jadwalkanStafMonitoring } from "../../helpers/staf-monitoring-uji";
 import { awalHari } from "../../../features/akun-kas/mutasi";
 import { rentangPeriode } from "../../../features/laporan/periode";
 import { formatRupiah } from "../../../lib/format";
@@ -184,13 +185,21 @@ test.describe("Dashboard outlet", () => {
   test("di lebar HP daftar staf dibatasi lima baris sampai Tampilkan semua ditekan", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await login(page);
-    const jumlahStaf = await bukaDanBacaStaf(page);
-    test.skip(jumlahStaf <= 5, "staf ruang outlet tidak lebih dari lima, tombol tidak tampil");
+    // Enam staf uji dijadwalkan hari ini di outlet, sehingga staf monitoring
+    // selalu lebih dari lima; jadwalnya dihapus di finally.
+    const auth = await bukaDenganAuth(page, BASIS + "/dashboard");
+    const bersihkan = await jadwalkanStafMonitoring(page, auth);
+    try {
+      const jumlahStaf = await bukaDanBacaStaf(page);
+      expect(jumlahStaf, "staf ruang outlet lebih dari lima").toBeGreaterThan(5);
 
-    const staf = panel(page, "Status Staf");
-    // Kepala tabel disembunyikan di HP, sehingga yang terhitung hanya baris staf.
-    await expect(staf.getByRole("row")).toHaveCount(5);
-    await staf.getByRole("button", { name: `Tampilkan semua (${jumlahStaf})` }).click();
-    await expect(staf.getByRole("row")).toHaveCount(jumlahStaf);
+      const staf = panel(page, "Status Staf");
+      // Kepala tabel disembunyikan di HP, sehingga yang terhitung hanya baris staf.
+      await expect(staf.getByRole("row")).toHaveCount(5);
+      await staf.getByRole("button", { name: `Tampilkan semua (${jumlahStaf})` }).click();
+      await expect(staf.getByRole("row")).toHaveCount(jumlahStaf);
+    } finally {
+      await bersihkan();
+    }
   });
 });
