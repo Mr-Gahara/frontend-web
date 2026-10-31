@@ -10,30 +10,33 @@ import {
   Clock,
   Loader2,
 } from "lucide-react";
+import type { Workspace } from "./api";
 import { namaPeran } from "./peran";
 import { useMonitoringAbsensi } from "@/features/absensi/hooks";
-import { hitungAbsensi, jamWIB, stafRuang } from "@/features/absensi/ringkasan";
+import { hitungAbsensi, jamWIB } from "@/features/absensi/ringkasan";
 import { isForbidden } from "@/lib/api/error";
 
 /**
  * Widget staf yang sedang bekerja hari ini, dari GET /absensi/monitoring.
- * Daftar disaring dengan karyawan ruang halaman ini (keputusan AB4a); angka
+ * Daftar disaring server menurut lokasi ruang halaman ini (B183); angka
  * besar adalah yang sedang bekerja, dan baris kecil yang sudah absen (AB5a).
  * 403 dan galat lain ditampilkan sebagai pesan, bukan daftar kosong (AB3a),
  * dan jam masuk diformat dalam WIB (AB7).
  */
 export function WidgetActiveUsers({
+  workspace,
   penggunaList,
   roleList,
 }: {
+  workspace: Workspace;
   penggunaList: PenggunaItem[];
   roleList: Role[];
 }) {
-  const monitoring = useMonitoringAbsensi(new Date());
-  const { sedangBekerja, sudahAbsen } = useMemo(() => {
-    const idRuang = new Set(penggunaList.map((p) => p.id));
-    return hitungAbsensi(stafRuang(monitoring.data?.daftar ?? [], idRuang));
-  }, [monitoring.data, penggunaList]);
+  const monitoring = useMonitoringAbsensi(new Date(), workspace);
+  const { sedangBekerja, sudahAbsen } = useMemo(
+    () => hitungAbsensi(monitoring.data?.daftar ?? []),
+    [monitoring.data],
+  );
   const pesanGalat = monitoring.isError
     ? isForbidden(monitoring.error)
       ? "Anda tidak memiliki izin melihat absensi staf."

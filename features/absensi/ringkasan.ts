@@ -1,14 +1,5 @@
 import type { MonitoringStaf } from "@/types/absensi";
 
-/**
- * Staf monitoring yang termasuk karyawan ruang itu (keputusan AB4a).
- * Backend memuat seluruh staf tenant; staf yang terdaftar di kedua ruang
- * tampil di keduanya.
- */
-export function stafRuang(daftar: MonitoringStaf[], idKaryawan: ReadonlySet<string>): MonitoringStaf[] {
-  return daftar.filter((s) => idKaryawan.has(String(s.penggunaID)));
-}
-
 /** Staf yang sedang bekerja, dan jumlah yang sudah absen hari ini (keputusan AB5a). */
 export function hitungAbsensi(daftar: MonitoringStaf[]) {
   return {

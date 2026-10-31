@@ -13,7 +13,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useMonitoringAbsensi } from "@/features/absensi/hooks";
-import { stafRuang } from "@/features/absensi/ringkasan";
 import { useIzinCutiHari } from "@/features/izin-cuti/hooks";
 import { useDaftarPengguna } from "@/features/pengguna/hooks";
 import { namaPeran } from "@/features/pengguna/peran";
@@ -75,11 +74,13 @@ function AngkaRingkas({
 }
 
 /**
- * Tabel status staf ruang outlet (keputusan DB3a). Izin dan cuti hanya
- * dimuat bagi pemegang read-izin-cuti; tanpa itu status absensi saja.
+ * Tabel status staf ruang outlet (keputusan DB3a): staf yang berjadwal atau
+ * absen di outlet hari itu, disaring server (B183), ditambah karyawan ruang
+ * yang izin hari itu (gabungStatusStaf). Izin dan cuti hanya dimuat bagi
+ * pemegang read-izin-cuti; tanpa itu status absensi saja.
  */
 export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti: boolean }) {
-  const monitoring = useMonitoringAbsensi(hari);
+  const monitoring = useMonitoringAbsensi(hari, "outlet");
   const pengguna = useDaftarPengguna("outlet");
   const izinCuti = useIzinCutiHari(hari, { aktif: denganIzinCuti });
   // Di HP hanya BATAS_STAF_HP baris pertama yang tampil sampai tombolnya ditekan.
@@ -89,10 +90,11 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
 
   const daftarPengguna = pengguna.data ?? [];
   const peran = new Map(daftarPengguna.map((p) => [p.id, namaPeran(p)]));
-  const idRuang = new Set(daftarPengguna.map((p) => p.id));
+  const karyawanRuang = new Map(daftarPengguna.map((p) => [p.id, p.nama]));
   const baris = gabungStatusStaf(
-    stafRuang(monitoring.data?.daftar ?? [], idRuang),
+    monitoring.data?.daftar ?? [],
     izinCuti.data ?? [],
+    karyawanRuang,
   ).sort((x, y) => URUTAN_STATUS_STAF[x.status] - URUTAN_STATUS_STAF[y.status]);
   const jumlah = (...status: StatusStafDashboard[]) =>
     baris.filter((b) => status.includes(b.status)).length;

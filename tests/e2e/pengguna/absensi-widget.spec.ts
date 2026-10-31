@@ -4,8 +4,8 @@ import { cocok } from "../../helpers/reservasi-uji";
 
 /*
  * Spec widget absensi di halaman pengguna outlet (submodul monitoring
- * absensi, keputusan AB3a, AB4a, dan AB5a). Angka dibandingkan dengan
- * respons nyata GET /absensi/monitoring dan GET /pengguna; route.fulfill
+ * absensi, keputusan AB3a dan AB5a, serta B183). Angka dibandingkan dengan
+ * respons nyata GET /absensi/monitoring per lokasi outlet; route.fulfill
  * hanya menyimulasikan kegagalan (keputusan rancangan butir 21).
  */
 
@@ -26,19 +26,19 @@ const widget = (page: Page) =>
     .filter({ has: page.getByText("Disinkronisasi secara real-time", { exact: true }) })
     .last();
 
-test("widget menampilkan staf ruang yang sedang bekerja dan yang sudah absen (keputusan AB4a dan AB5a)", async ({
+test("widget menampilkan staf outlet yang sedang bekerja dan yang sudah absen, per lokasi (keputusan AB5a, B183)", async ({
   page,
 }) => {
-  const tungguPengguna = page.waitForResponse(cocok("GET", /\/api\/pengguna\?workspace=outlet/i));
+  const tungguLokasi = page.waitForResponse(cocok("GET", /\/api\/location\/current$/i));
   const tungguMonitoring = page.waitForResponse(cocok("GET", POLA_MONITORING));
   await page.goto(URL_PENGGUNA);
-  const [resPengguna, resMonitoring] = await Promise.all([tungguPengguna, tungguMonitoring]);
+  const [resLokasi, resMonitoring] = await Promise.all([tungguLokasi, tungguMonitoring]);
   expect(resMonitoring.status(), "GET /absensi/monitoring").toBe(200);
-  const idRuang = new Set(
-    (((await resPengguna.json()).data ?? []) as { id: string }[]).map((p) => String(p.id)),
+  const lokasi = (await resLokasi.json()).data as { id?: string; _id?: string };
+  expect(new URL(resMonitoring.url()).searchParams.get("locationID"), "monitoring per lokasi outlet").toBe(
+    String(lokasi.id ?? lokasi._id),
   );
-  const daftar = (((await resMonitoring.json()).data?.daftar ?? []) as { penggunaID: string; status: string }[])
-    .filter((s) => idRuang.has(String(s.penggunaID)));
+  const daftar = ((await resMonitoring.json()).data?.daftar ?? []) as { penggunaID: string; status: string }[];
   const sedang = daftar.filter((s) => s.status === "sedang_bekerja").length;
   const sudah = daftar.filter((s) => s.status !== "belum_absen").length;
   const w = widget(page);

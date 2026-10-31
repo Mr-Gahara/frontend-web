@@ -365,7 +365,7 @@ export default function HalamanPengguna({
         {/* WIDGET KIRI: KARYAWAN AKTIF */}
         <div className="col-span-1 md:col-span-12 xl:col-span-3 xl:row-span-2 flex h-full min-h-125">
           {/* PERUBAHAN: Lempar penggunaList agar bisa mencocokkan Role karyawan di dalam widget */}
-          <WidgetActiveUsers penggunaList={penggunaList} roleList={roleList} />
+          <WidgetActiveUsers workspace={workspace} penggunaList={penggunaList} roleList={roleList} />
         </div>
 
         {/* WIDGET TENGAH: TOTAL USERS DARK CARD */}

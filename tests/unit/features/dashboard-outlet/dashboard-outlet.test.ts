@@ -56,9 +56,11 @@ function booking(ubah: Partial<SesiBookingResponse> = {}): SesiBookingResponse {
   };
 }
 
+const TANPA_RUANG: ReadonlyMap<string, string> = new Map();
+
 describe("gabungStatusStaf", () => {
   it("mempertahankan status absensi bagi staf yang sudah absen walau punya izin", () => {
-    const hasil = gabungStatusStaf([staf("p1", "sedang_bekerja")], [izin()]);
+    const hasil = gabungStatusStaf([staf("p1", "sedang_bekerja")], [izin()], TANPA_RUANG);
     expect(hasil).toEqual([{ penggunaID: "p1", nama: "Staf p1", status: "sedang_bekerja" }]);
   });
 
@@ -69,13 +71,32 @@ describe("gabungStatusStaf", () => {
       izin({ id: "i2", pengguna: { id: "p2", nama: null, email: null }, tipe: "izin" }),
       izin({ id: "i3", pengguna: { id: "p3", nama: null, email: null }, tipe: "cuti tahunan" }),
     ];
-    expect(gabungStatusStaf(daftar, izinCuti).map((b) => b.status)).toEqual(["sakit", "izin", "cuti"]);
+    expect(gabungStatusStaf(daftar, izinCuti, TANPA_RUANG).map((b) => b.status)).toEqual(["sakit", "izin", "cuti"]);
   });
 
   it("membiarkan belum absen bila tidak ada izin untuk staf itu", () => {
     // Status dan rentang disaring server (B160); yang tersisa hanya pencocokan staf.
     const izinCuti = [izin({ pengguna: { id: "lain", nama: null, email: null } })];
-    expect(gabungStatusStaf([staf("p1", "belum_absen")], izinCuti)[0].status).toBe("belum_absen");
+    expect(gabungStatusStaf([staf("p1", "belum_absen")], izinCuti, TANPA_RUANG)).toEqual([
+      { penggunaID: "p1", nama: "Staf p1", status: "belum_absen" },
+    ]);
+  });
+
+  it("menambah karyawan ruang yang izin tetapi tidak dimuat monitoring per lokasi (B183)", () => {
+    // Backend menjadikan jadwal staf yang izin sebagai libur tanpa shift,
+    // sehingga monitoring per lokasi tidak memuatnya.
+    const izinCuti = [
+      izin({ pengguna: { id: "p2", nama: null, email: null }, tipe: "izin" }),
+      izin({ id: "i3", pengguna: { id: "gudang", nama: null, email: null } }),
+    ];
+    const ruang = new Map([
+      ["p1", "Staf Satu"],
+      ["p2", "Staf Dua"],
+    ]);
+    expect(gabungStatusStaf([staf("p1", "sedang_bekerja")], izinCuti, ruang)).toEqual([
+      { penggunaID: "p1", nama: "Staf p1", status: "sedang_bekerja" },
+      { penggunaID: "p2", nama: "Staf Dua", status: "izin" },
+    ]);
   });
 });
 
