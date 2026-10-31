@@ -5,6 +5,7 @@ import {
   barisKaryawan,
   CATATAN_UJI,
   bersihkanHari,
+  idLokasiRuang,
   bulanUji,
   buatJadwalApi,
   JAM_PAGI,
@@ -66,6 +67,37 @@ for (const ruang of ["outlet", "gudang"] as const) {
         await expect(selHari(page, HARI_UJI + 1)).not.toContainText(NAMA_SHIFT_PAGI);
       } finally {
         await bersihkanHari(page, auth, fx, tgl, tgl);
+      }
+    });
+
+    test("jadwal di lokasi lain tampil sebagai penanda baca-saja, dan daftar disaring per lokasi (B184)", async ({
+      page,
+    }) => {
+      const lain = ruang === "outlet" ? "gudang" : "outlet";
+      const daftarJadwal: URLSearchParams[] = [];
+      page.on("request", (r) => {
+        if (r.method() === "GET" && POLA_DAFTAR_JADWAL.test(r.url())) daftarJadwal.push(new URL(r.url()).searchParams);
+      });
+      const auth = await bukaDenganAuth(page, url);
+      const lokasiRuang = await idLokasiRuang(page, auth, ruang);
+      const fxLain = await siapkanFixtureJadwal(page, auth, lain);
+      const b = bulanUji();
+      const hari = HARI_UJI + 2;
+      const tgl = tanggalUji(b, hari);
+      await bersihkanHari(page, auth, fxLain, tgl, tgl);
+      try {
+        await buatJadwalApi(page, auth, fxLain, tgl, fxLain.shiftPagi);
+        await keBulanUji(page, b);
+        const sel = selHari(page, hari);
+        await expect(sel).toContainText("Lokasi lain", { timeout: 15_000 });
+        await expect(sel).toContainText(NAMA_SHIFT_PAGI);
+        // Baca-saja: tidak ada tombol ubah maupun tombol buat di sel itu.
+        await expect(sel.getByRole("button")).toHaveCount(0);
+
+        expect(daftarJadwal.some((q) => q.get("locationID") === lokasiRuang), "daftar per lokasi ruang").toBe(true);
+        expect(daftarJadwal.some((q) => !q.has("locationID")), "daftar seluruh lokasi untuk penanda").toBe(true);
+      } finally {
+        await bersihkanHari(page, auth, fxLain, tgl, tgl);
       }
     });
 

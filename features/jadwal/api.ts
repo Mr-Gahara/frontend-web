@@ -10,6 +10,7 @@
  */
 import type {
   EntriBulkJadwal,
+  FilterDaftarJadwal,
   HasilJadwal,
   JadwalItem,
   PayloadJadwalManual,
@@ -26,8 +27,9 @@ function hasilAtauLempar(err: unknown): HasilJadwal {
 }
 
 export const jadwalApi = {
-  daftar: (rentang: { startDate: string; endDate: string }) =>
-    apiData.get<JadwalItem[]>(`${EP.jadwalShift.list}?${new URLSearchParams(rentang)}`),
+  /** locationID (B184): jadwal yang shift-nya di lokasi itu, ditambah libur karyawan yang berjadwal kerja di sana. */
+  daftar: (filter: FilterDaftarJadwal) =>
+    apiData.get<JadwalItem[]>(`${EP.jadwalShift.list}?${new URLSearchParams(filter)}`),
   buat: (payload: PayloadJadwalManual) =>
     apiData.post<HasilJadwal>(EP.jadwalShift.list, payload).catch(hasilAtauLempar),
   perbarui: (id: string, payload: PayloadUbahJadwal) =>

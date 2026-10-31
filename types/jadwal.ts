@@ -15,4 +15,6 @@ export type KaryawanJadwal = {
   role: string;
   // Key adalah tanggal (1-31), value adalah array shift di hari itu
   jadwalMap: Record<number, ShiftItem[]>;
+  // Jadwal kerja di lokasi lain pada hari itu (B184): penanda baca-saja
+  lainMap: Record<number, ShiftItem[]>;
 };

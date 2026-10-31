@@ -46,16 +46,30 @@ export function itemJadwal(j: JadwalItem): ShiftItem {
   };
 }
 
-/** Baris kalender: satu per karyawan ruang, dengan jadwal di hari tanggalKerja-nya. */
-export function petakanJadwalKaryawan(karyawan: KaryawanRuang[], jadwal: JadwalItem[]): KaryawanJadwal[] {
+/**
+ * Baris kalender: satu per karyawan ruang, dengan jadwal di hari
+ * tanggalKerja-nya. jadwal adalah jadwal lokasi ruang (B184); semua adalah
+ * jadwal seluruh lokasi pada rentang yang sama. Jadwal kerja yang hanya ada
+ * di semua berada di lokasi lain, dan masuk lainMap sebagai penanda
+ * baca-saja (pemilik proyek, 31 Oktober 2026). Libur tidak punya lokasi,
+ * sehingga libur dari semua tampil seperti biasa.
+ */
+export function petakanJadwalKaryawan(
+  karyawan: KaryawanRuang[],
+  jadwal: JadwalItem[],
+  semua: JadwalItem[] = [],
+): KaryawanJadwal[] {
   const baris = new Map<string, KaryawanJadwal>(
-    karyawan.map((k) => [k.id, { id: k.id, nama: k.nama, role: k.role, jadwalMap: {} }]),
+    karyawan.map((k) => [k.id, { id: k.id, nama: k.nama, role: k.role, jadwalMap: {}, lainMap: {} }]),
   );
-  for (const j of jadwal) {
+  const lokal = new Set(jadwal.map((j) => j.id));
+  const lain = semua.filter((j) => !lokal.has(j.id));
+  for (const j of [...jadwal, ...lain]) {
     const tujuan = baris.get(j.karyawan?.id ?? "");
     if (!tujuan) continue;
     const hari = Number(j.tanggalKerja.slice(8, 10));
-    (tujuan.jadwalMap[hari] ??= []).push(itemJadwal(j));
+    const peta = lokal.has(j.id) || j.isLibur ? tujuan.jadwalMap : tujuan.lainMap;
+    (peta[hari] ??= []).push(itemJadwal(j));
   }
   return [...baris.values()];
 }

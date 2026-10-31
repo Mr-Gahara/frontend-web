@@ -11,15 +11,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { jadwalApi } from "./api";
 import { gabungHasil } from "./hasil";
 import type { LangkahJadwal } from "./rencana";
-import type { EntriBulkJadwal, HasilJadwal } from "./tipe";
+import type { EntriBulkJadwal, FilterDaftarJadwal, HasilJadwal } from "./tipe";
 import { pesanError } from "@/lib/api/error";
 import { queryKeys } from "@/lib/queryKeys";
 
 
-export function useDaftarJadwal(rentang: { startDate: string; endDate: string }) {
+/**
+ * Jadwal satu rentang. aktif false menahan permintaan, misalnya selama
+ * lokasi ruang belum termuat.
+ */
+export function useDaftarJadwal(filter: FilterDaftarJadwal, { aktif = true }: { aktif?: boolean } = {}) {
   return useQuery({
-    queryKey: queryKeys.jadwalShift.daftar(rentang),
-    queryFn: () => jadwalApi.daftar(rentang),
+    queryKey: queryKeys.jadwalShift.daftar(filter),
+    queryFn: () => jadwalApi.daftar(filter),
+    enabled: aktif,
   });
 }
 

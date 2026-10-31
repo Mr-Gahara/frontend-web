@@ -76,6 +76,21 @@ describe("pemetaan jadwal ke sel", () => {
     expect(hasil[0].jadwalMap[10].map((s) => s.id)).toEqual(["j1", "j2"]);
     expect(hasil[0].jadwalMap[11]).toBeUndefined();
   });
+
+  it("jadwal kerja yang hanya ada di seluruh lokasi menjadi penanda lokasi lain, libur tetap biasa (B184)", () => {
+    const lokal = [JADWAL("j1", "p1", "2026-11-10")];
+    const semua = [
+      ...lokal,
+      JADWAL("j2", "p1", "2026-11-11", { shift: { ...lokal[0].shift!, id: "s-gudang", namaShift: "Gudang" } }),
+      JADWAL("j3", "p1", "2026-11-12", { isLibur: true, shift: null }),
+    ];
+    const [baris] = petakanJadwalKaryawan([{ id: "p1", nama: "Ridho", role: "Admin" }], lokal, semua);
+    expect(baris.jadwalMap[10].map((s) => s.id)).toEqual(["j1"]);
+    expect(baris.lainMap[10]).toBeUndefined();
+    expect(baris.jadwalMap[11]).toBeUndefined();
+    expect(baris.lainMap[11].map((s) => s.name)).toEqual(["Gudang"]);
+    expect(baris.jadwalMap[12].map((s) => s.name)).toEqual(["LIBUR"]);
+  });
 });
 
 describe("keKaryawanRuang (keputusan rancangan butir 12)", () => {

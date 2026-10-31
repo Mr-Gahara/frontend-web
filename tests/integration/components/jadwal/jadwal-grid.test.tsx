@@ -10,16 +10,20 @@ vi.mock("@/features/jadwal/sel-shift", () => ({
   ShiftCell: ({
     day,
     shifts,
+    lain,
     onClick,
     isSunday,
   }: {
     day: number;
     shifts: ShiftItem[];
+    lain?: ShiftItem[];
     onClick: () => void;
     isSunday: boolean;
   }) => (
     <td
       data-testid={`mock-shift-cell-${day}`}
+      data-jumlah-shift={shifts.length}
+      data-jumlah-lain={lain?.length ?? 0}
       onClick={onClick}
       className={isSunday ? "sunday-cell" : ""}
     >
@@ -40,12 +44,15 @@ describe("Integration - JadwalGrid", () => {
       role: "CEO / Admin",
       // Tanggal 1 ada shift pagi; tanggal 2 tanpa jadwal.
       jadwalMap: { 1: [SHIFT_PAGI] },
+      lainMap: {},
     },
     {
       id: "emp-2",
       nama: "Karyawan Tester",
       role: "Kasir",
       jadwalMap: {},
+      // Tanggal 3 hanya berisi jadwal di lokasi lain (B184).
+      lainMap: { 3: [SHIFT_PAGI] },
     },
   ];
 
@@ -102,5 +109,15 @@ describe("Integration - JadwalGrid", () => {
 
     expect(mockOnCellClick).toHaveBeenCalledTimes(1);
     expect(mockOnCellClick).toHaveBeenCalledWith("emp-1", 1, [SHIFT_PAGI]);
+  });
+
+  it("sel yang hanya berisi jadwal lokasi lain tidak membawa item kosong untuk dibuat (B184)", () => {
+    render(<JadwalGrid {...defaultProps} />);
+
+    const sel = screen.getAllByTestId("mock-shift-cell-3");
+    expect(sel[1]).toHaveAttribute("data-jumlah-shift", "0");
+    expect(sel[1]).toHaveAttribute("data-jumlah-lain", "1");
+    expect(sel[0]).toHaveAttribute("data-jumlah-shift", "1");
+    expect(sel[0]).toHaveAttribute("data-jumlah-lain", "0");
   });
 });

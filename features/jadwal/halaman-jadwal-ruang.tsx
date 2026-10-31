@@ -1,9 +1,10 @@
 "use client";
 
 /**
- * Halaman jadwal satu ruang: memuat karyawan ruang, jadwal sebulan (J1a),
- * dan shift, lalu memetakan jadwal ke sel. Dipakai rute outlet dan gudang
- * (keputusan J5b). Simpan menjalankan langkah beruntun dengan satu toast
+ * Halaman jadwal satu ruang: memuat karyawan ruang, jadwal sebulan (J1a)
+ * di lokasi ruang (B184) beserta jadwal seluruh lokasi untuk penanda
+ * jadwal di lokasi lain, dan shift, lalu memetakan jadwal ke sel. Dipakai
+ * rute outlet dan gudang (keputusan J5b). Simpan menjalankan langkah beruntun dengan satu toast
  * ringkasan (JD6a); penolakan backend ditampilkan sebagai galat (J2a).
  * Galat dilempar ulang agar dialog bertahan (keputusan Fase 0).
  */
@@ -16,6 +17,7 @@ import { keKaryawanRuang, petakanJadwalKaryawan } from "./pemetaan";
 import { rencanaSimpanJadwal } from "./rencana";
 import { rentangBulan } from "./rentang";
 import type { HasilJadwal, RuangJadwal } from "./tipe";
+import { useLokasiRuang } from "@/features/inventaris/hooks";
 import { useDaftarPengguna } from "@/features/pengguna/hooks";
 import { useDaftarShift } from "@/features/shift/hooks";
 import { pesanError } from "@/lib/api/error";
@@ -25,17 +27,24 @@ export function HalamanJadwalRuang({ ruang }: { ruang: RuangJadwal }) {
   const [cari, setCari] = useState("");
   const rentang = useMemo(() => rentangBulan(bulan), [bulan]);
   const karyawan = useDaftarPengguna(ruang);
-  const jadwal = useDaftarJadwal(rentang);
+  const lokasi = useLokasiRuang(ruang);
+  const jadwal = useDaftarJadwal(
+    { ...rentang, locationID: lokasi.lokasiId ?? "" },
+    { aktif: lokasi.lokasiId !== null },
+  );
+  const jadwalSemua = useDaftarJadwal(rentang);
   const shift = useDaftarShift(ruang);
   const simpan = useSimpanJadwalHari();
   const hapus = useHapusJadwal();
 
   const baris = useMemo(() => {
     const kata = cari.toLowerCase();
-    return petakanJadwalKaryawan(keKaryawanRuang(karyawan.data ?? []), jadwal.data ?? []).filter((k) =>
-      k.nama.toLowerCase().includes(kata),
-    );
-  }, [karyawan.data, jadwal.data, cari]);
+    return petakanJadwalKaryawan(
+      keKaryawanRuang(karyawan.data ?? []),
+      jadwal.data ?? [],
+      jadwalSemua.data ?? [],
+    ).filter((k) => k.nama.toLowerCase().includes(kata));
+  }, [karyawan.data, jadwal.data, jadwalSemua.data, cari]);
 
   const namaKaryawan = (id: string) => karyawan.data?.find((k) => k.id === id)?.nama;
 
@@ -44,8 +53,8 @@ export function HalamanJadwalRuang({ ruang }: { ruang: RuangJadwal }) {
       tipeRuang={ruang}
       dataKaryawan={baris}
       shiftList={shift.data}
-      isLoading={karyawan.isLoading || jadwal.isLoading || shift.memuat}
-      isError={karyawan.isError || jadwal.isError || shift.gagal}
+      isLoading={karyawan.isLoading || lokasi.memuat || jadwal.isLoading || jadwalSemua.isLoading || shift.memuat}
+      isError={karyawan.isError || lokasi.gagal || jadwal.isError || jadwalSemua.isError || shift.gagal}
       currentDate={bulan}
       onPrevMonth={() => setBulan((b) => new Date(b.getFullYear(), b.getMonth() - 1, 1))}
       onNextMonth={() => setBulan((b) => new Date(b.getFullYear(), b.getMonth() + 1, 1))}

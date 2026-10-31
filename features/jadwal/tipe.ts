@@ -20,6 +20,9 @@ export interface JadwalItem {
   } | null;
 }
 
+/** Query GET /jadwalshift: rentang, dan lokasi bila disaring per ruang (B184). */
+export type FilterDaftarJadwal = { startDate: string; endDate: string; locationID?: string };
+
 /** Karyawan satu ruang, dipetakan dari useDaftarPengguna (features/pengguna). */
 export interface KaryawanRuang {
   id: string;

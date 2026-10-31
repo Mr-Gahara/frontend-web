@@ -21,6 +21,7 @@ const ShiftCellMemo = React.memo(function ShiftCellMemo({
   day,
   isSunday,
   shifts,
+  lain,
   empId,
   namaKaryawan,
   onCellClick,
@@ -28,6 +29,7 @@ const ShiftCellMemo = React.memo(function ShiftCellMemo({
   day: number;
   isSunday: boolean;
   shifts: ShiftItem[];
+  lain: ShiftItem[] | undefined;
   empId: string;
   namaKaryawan: string;
   onCellClick: (id: string, day: number, shifts: ShiftItem[]) => void;
@@ -42,6 +44,7 @@ const ShiftCellMemo = React.memo(function ShiftCellMemo({
       day={day}
       isSunday={isSunday}
       shifts={shifts}
+      lain={lain}
       onClick={handleClick}
     />
   );
@@ -162,9 +165,12 @@ export function JadwalGrid({
                   {/* KOTAK-KOTAK SHIFT */}
                   {daysArray.map((day) => {
                     const isSunday = new Date(year, month, day).getDay() === 0;
-                    const shifts = emp.jadwalMap[day] || [
-                      { id: "off", type: "off", label: "OFF", name: "" },
-                    ];
+                    const lain = emp.lainMap[day];
+                    // Sel yang hanya berisi jadwal lokasi lain tidak menawarkan buat:
+                    // menjadikannya libur di sini menghapus jadwal lokasi itu (B165).
+                    const shifts =
+                      emp.jadwalMap[day] ||
+                      (lain ? [] : [{ id: "off", type: "off" as const, label: "OFF", name: "" }]);
 
                     return (
                       <ShiftCellMemo
@@ -172,6 +178,7 @@ export function JadwalGrid({
                         day={day}
                         isSunday={isSunday}
                         shifts={shifts}
+                        lain={lain}
                         empId={emp.id}
                         namaKaryawan={emp.nama}
                         onCellClick={onCellClick}

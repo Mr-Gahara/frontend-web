@@ -8,10 +8,12 @@ interface ShiftCellProps {
   day: number;
   isSunday: boolean;
   shifts: ShiftItem[];
+  /** Jadwal kerja di lokasi lain (B184): penanda baca-saja, bukan tombol. */
+  lain?: ShiftItem[];
   onClick: () => void;
 }
 
-export function ShiftCell({ namaKaryawan, day, isSunday, shifts, onClick }: ShiftCellProps) {
+export function ShiftCell({ namaKaryawan, day, isSunday, shifts, lain = [], onClick }: ShiftCellProps) {
   const labelSel = (shift: ShiftItem) => {
     const isi =
       shift.id === "off"
@@ -61,6 +63,22 @@ export function ShiftCell({ namaKaryawan, day, isSunday, shifts, onClick }: Shif
               </span>
             )}
           </button>
+        ))}
+        {lain.map((shift, idx) => (
+          <div
+            key={shift.id || `lain-${idx}`}
+            aria-label={`${namaKaryawan}, tanggal ${day}: bertugas di lokasi lain, ${shift.name}, ${shift.label}`}
+            title="Jadwal di lokasi lain; ubah dari ruang lokasi itu."
+            className="flex flex-col justify-center p-1.5 md:p-2 rounded-lg min-h-11 md:min-h-13 border border-dashed border-navy/20 text-navy/50"
+          >
+            <span className="text-[9px] md:text-[10px] font-semibold uppercase tracking-wide text-center">
+              Lokasi lain
+            </span>
+            <span className="text-[10px] md:text-xs font-bold truncate text-center">{shift.name}</span>
+            <span className="text-[8px] md:text-[9px] font-semibold text-center truncate opacity-70">
+              {shift.label}
+            </span>
+          </div>
         ))}
       </div>
     </td>
