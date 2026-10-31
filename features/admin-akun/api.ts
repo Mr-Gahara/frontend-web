@@ -15,6 +15,7 @@ import type {
 interface ResponsRiwayat {
   data?: RiwayatLangganan[];
   cursorBerikutnya?: string | null;
+  total?: number;
 }
 
 /** Satu halaman akun (B177): dengan page atau limit, server mengirim pagination. */
@@ -38,8 +39,9 @@ export const adminAkunApi = {
   perpanjang: (id: string, payload: PerpanjangPayload) =>
     apiData.post<AkunAdmin>(EP.akun.adminLangganan(id), payload, "akun"),
   /**
-   * Riwayat berkursor: cursorBerikutnya berada di tingkat atas respons,
-   * sehingga dibaca lewat apiMentah, lalu _id dokumennya dinormalkan di sini.
+   * Riwayat berkursor: cursorBerikutnya dan total (B155) berada di tingkat
+   * atas respons, sehingga dibaca lewat apiMentah. Item sudah ber-id sejak
+   * B155; normalizeId tetap dipakai dan mempertahankan id.
    */
   riwayat: async (id: string, cursor?: string): Promise<HalamanRiwayat> => {
     const mentah = await apiMentah.get<ResponsRiwayat>(
@@ -50,6 +52,7 @@ export const adminAkunApi = {
     return {
       data: normalizeId(mentah.data ?? []),
       cursorBerikutnya: mentah.cursorBerikutnya ?? null,
+      total: mentah.total ?? 0,
     };
   },
   /** Respons PUT tanpa langganan dan tanpa toko, sehingga tidak dipakai; daftar dimuat ulang. */

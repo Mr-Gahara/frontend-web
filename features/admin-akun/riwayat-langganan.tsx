@@ -8,12 +8,13 @@ import { LABEL_AKSI, pelakuRiwayat, teksPerubahanMasa } from "./langganan";
 
 /**
  * Riwayat langganan satu akun, terbaru lebih dulu (keputusan PA11a). Backend
- * memberi kursor tanpa jumlah total, sehingga yang tersedia hanya tombol
- * muat berikutnya, bukan nomor halaman.
+ * memberi kursor, sehingga halaman berikutnya dimuat lewat tombol, dan
+ * jumlah seluruh catatan dari total (B155).
  */
 export function DaftarRiwayatLangganan({ akunId }: { akunId: string }) {
   const riwayat = useRiwayatLangganan(akunId);
   const catatan = riwayat.data?.pages.flatMap((halaman) => halaman.data) ?? [];
+  const total = riwayat.data?.pages[0]?.total ?? 0;
 
   return (
     <section aria-labelledby="judul-riwayat" className="space-y-3">
@@ -35,26 +36,31 @@ export function DaftarRiwayatLangganan({ akunId }: { akunId: string }) {
       ) : catatan.length === 0 ? (
         <p className="text-sm text-muted-foreground">Belum ada riwayat langganan.</p>
       ) : (
-        <ul className="divide-y divide-border rounded-lg border border-border">
-          {catatan.map((c) => {
-            const perubahan = teksPerubahanMasa(c);
-            return (
-              <li key={c.id} className="space-y-1 p-4 text-sm">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <p className="font-medium">
-                    {LABEL_AKSI[c.aksi]}
-                    {c.durasiBulan ? ` ${c.durasiBulan} bulan` : ""}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatTanggal(c.createdAt)} oleh {pelakuRiwayat(c)}
-                  </p>
-                </div>
-                {perubahan && <p className="text-muted-foreground">{perubahan}</p>}
-                {c.alasan && <p className="text-muted-foreground">{c.alasan}</p>}
-              </li>
-            );
-          })}
-        </ul>
+        <>
+          <p className="text-sm text-muted-foreground">
+            Menampilkan {catatan.length} dari {total} catatan
+          </p>
+          <ul className="divide-y divide-border rounded-lg border border-border">
+            {catatan.map((c) => {
+              const perubahan = teksPerubahanMasa(c);
+              return (
+                <li key={c.id} className="space-y-1 p-4 text-sm">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="font-medium">
+                      {LABEL_AKSI[c.aksi]}
+                      {c.durasiBulan ? ` ${c.durasiBulan} bulan` : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatTanggal(c.createdAt)} oleh {pelakuRiwayat(c)}
+                    </p>
+                  </div>
+                  {perubahan && <p className="text-muted-foreground">{perubahan}</p>}
+                  {c.alasan && <p className="text-muted-foreground">{c.alasan}</p>}
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
 
       {riwayat.hasNextPage && (

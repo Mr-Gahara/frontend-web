@@ -47,6 +47,8 @@ export interface RiwayatLangganan {
   berakhirSesudah: string | null;
   /** null berarti dilakukan sistem (job pembeku), bukan admin. */
   olehAkunID: string | null;
+  /** Akun pelaku (B155); null untuk tindakan sistem dan akun pelaku yang sudah dihapus. */
+  oleh: { id: string; username: string | null; email: string } | null;
   alasan: string | null;
   createdAt: string;
 }
@@ -55,6 +57,8 @@ export interface RiwayatLangganan {
 export interface HalamanRiwayat {
   data: RiwayatLangganan[];
   cursorBerikutnya: string | null;
+  /** Seluruh riwayat akun, tidak terpengaruh kursor (B155). */
+  total: number;
 }
 
 export interface BekukanPayload {

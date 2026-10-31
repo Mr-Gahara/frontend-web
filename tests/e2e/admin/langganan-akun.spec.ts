@@ -75,10 +75,28 @@ test.describe("Langganan akun klien", () => {
       const berakhirAwal = uji.langganan.aksesBerakhirPada;
       expect(berakhirAwal, "masa percobaan memberi masa akses").toBeTruthy();
 
-      await test.step("detail: riwayat memuat catatan pembuatan", async () => {
+      await test.step("detail: riwayat memuat catatan pembuatan beserta pelaku dan total (B155)", async () => {
+        const tRiwayat = page.waitForResponse(
+          (r) => POLA_LANGGANAN.test(r.url()) && r.request().method() === "GET",
+        );
         await bukaDetail(page, uji);
+        const respons = await tRiwayat;
+        expect(respons.status()).toBe(200);
+        const isi = (await respons.json()) as {
+          total: number;
+          data: { id: string; _id?: string; oleh: { username: string | null; email: string } | null }[];
+        };
+        expect(isi.total).toBe(1);
+        expect(isi.data[0].id).toBeTruthy();
+        expect(isi.data[0]).not.toHaveProperty("_id");
+        const oleh = isi.data[0].oleh;
+        expect(oleh, "pembuatan lewat panel dicatat atas nama admin").not.toBeNull();
         await expect(riwayat(page).getByRole("listitem")).toHaveCount(1, { timeout: 15_000 });
         await expect(riwayat(page).getByRole("listitem").first()).toContainText("Akun dibuat");
+        await expect(riwayat(page).getByRole("listitem").first()).toContainText(
+          `oleh ${oleh!.username || oleh!.email}`,
+        );
+        await expect(riwayat(page).getByText("Menampilkan 1 dari 1 catatan")).toBeVisible();
       });
 
       await test.step("bekukan dengan alasan", async () => {
@@ -140,6 +158,7 @@ test.describe("Langganan akun klien", () => {
         await expect(dialog(page)).toBeHidden({ timeout: 15_000 });
         await expect(riwayat(page).getByRole("listitem")).toHaveCount(4);
         await expect(riwayat(page).getByRole("listitem").first()).toContainText("Diperpanjang 6 bulan");
+        await expect(riwayat(page).getByText("Menampilkan 4 dari 4 catatan")).toBeVisible();
       });
 
       await test.step("hapus akun uji lewat UI: bekukan, lalu hapus dengan password admin", async () => {

@@ -69,9 +69,14 @@ export const LABEL_AKSI: Record<AksiLangganan, string> = {
   kedaluwarsa: "Kedaluwarsa",
 };
 
-/** Catatan tanpa olehAkunID ditulis job pembeku backend. */
+/**
+ * Pelaku catatan (B155): username atau email akun pelaku. Catatan tanpa
+ * olehAkunID ditulis job pembeku backend; olehAkunID tanpa oleh berarti
+ * akun pelakunya sudah dihapus.
+ */
 export function pelakuRiwayat(catatan: RiwayatLangganan): string {
-  return catatan.olehAkunID ? "Admin" : "Sistem";
+  if (catatan.oleh) return catatan.oleh.username || catatan.oleh.email;
+  return catatan.olehAkunID ? "Admin (akun terhapus)" : "Sistem";
 }
 
 /** Perubahan masa akses sebuah catatan; null bila masa aksesnya tidak berubah. */

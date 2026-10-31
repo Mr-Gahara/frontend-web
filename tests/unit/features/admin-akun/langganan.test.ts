@@ -41,6 +41,7 @@ const catatan = (ubah: Partial<RiwayatLangganan> = {}): RiwayatLangganan => ({
   berakhirSebelum: null,
   berakhirSesudah: null,
   olehAkunID: "admin1",
+  oleh: { id: "admin1", username: "ridho", email: "admin@contoh.id" },
   alasan: null,
   createdAt: "2026-10-01T00:00:00.000Z",
   ...ubah,
@@ -126,8 +127,12 @@ describe("riwayat langganan", () => {
     );
   });
 
-  it("pelaku: admin, atau sistem bila tanpa olehAkunID", () => {
-    expect(pelakuRiwayat(catatan())).toBe("Admin");
-    expect(pelakuRiwayat(catatan({ olehAkunID: null }))).toBe("Sistem");
+  it("pelaku: username, email bila tanpa username, akun terhapus, atau sistem (B155)", () => {
+    expect(pelakuRiwayat(catatan())).toBe("ridho");
+    expect(pelakuRiwayat(catatan({ oleh: { id: "admin1", username: null, email: "admin@contoh.id" } }))).toBe(
+      "admin@contoh.id",
+    );
+    expect(pelakuRiwayat(catatan({ oleh: null }))).toBe("Admin (akun terhapus)");
+    expect(pelakuRiwayat(catatan({ olehAkunID: null, oleh: null }))).toBe("Sistem");
   });
 });
