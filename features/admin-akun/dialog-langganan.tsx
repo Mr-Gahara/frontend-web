@@ -62,8 +62,9 @@ function keterangan(jenis: JenisAksi, akun: AkunAdmin, durasiWajib: boolean): st
     return "Akun tidak dapat login, dan seluruh pengguna tokonya langsung keluar. Akun dapat diaktifkan kembali.";
   }
   if (jenis === "perpanjang") return akibatPerpanjang(akun);
-  return durasiWajib
-    ? "Masa akses akun ini sudah berakhir atau belum diatur, sehingga durasi langganan wajib dipilih."
+  if (durasiWajib) return "Masa akses akun ini sudah berakhir, sehingga durasi langganan wajib dipilih.";
+  return akun.langganan.aksesBerakhirPada === null
+    ? "Akun kembali dapat login tanpa batas masa akses. Memilih durasi membuat masa aksesnya berbatas."
     : "Akun kembali dapat login dengan masa akses yang masih berjalan.";
 }
 
@@ -156,7 +157,11 @@ function IsiDialog({
                   <SelectValue placeholder="Pilih durasi" />
                 </SelectTrigger>
                 <SelectContent>
-                  {!durasiWajib && <SelectItem value={TANPA_DURASI}>Tanpa perpanjangan</SelectItem>}
+                  {!durasiWajib && (
+                    <SelectItem value={TANPA_DURASI}>
+                      {akun.langganan.aksesBerakhirPada === null ? "Tetap tidak dibatasi" : "Tanpa perpanjangan"}
+                    </SelectItem>
+                  )}
                   {PILIHAN_DURASI_BULAN.map((bulan) => (
                     <SelectItem key={bulan} value={String(bulan)}>
                       {bulan} bulan

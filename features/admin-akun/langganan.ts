@@ -29,10 +29,14 @@ export function aksiLangganan(akun: AkunAdmin): AksiTersedia {
   };
 }
 
-/** Backend menolak aktifkan tanpa durasi bila masa akses kosong atau sudah lewat. */
+/**
+ * Backend menolak aktifkan tanpa durasi hanya bila masa akses sudah lewat.
+ * Masa akses kosong berarti tidak dibatasi, dan aktifkan tanpa durasi
+ * mempertahankannya (B154).
+ */
 export function durasiWajibSaatAktifkan(akun: AkunAdmin, sekarang: Date = new Date()): boolean {
   const berakhir = akun.langganan.aksesBerakhirPada;
-  return !berakhir || new Date(berakhir) <= sekarang;
+  return berakhir !== null && new Date(berakhir) <= sekarang;
 }
 
 /** Perpanjangan hanya membuka akun yang beku karena kedaluwarsa, bukan yang dibekukan admin. */

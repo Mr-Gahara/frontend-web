@@ -87,6 +87,29 @@ export async function hapusAkunKlienUji(id: string, admin: KredensialAdmin) {
   }
 }
 
+/**
+ * Memulihkan akun yang dibekukan spec (B154) lewat API bila langkah UI-nya
+ * gagal: aktifkan tanpa durasi, sehingga masa akses tanpa batas tetap
+ * tanpa batas. Sama dengan hapusAkunKlienUji, login di konteks terpisah
+ * memutar tokenVersion admin, jadi dipanggil setelah halaman tidak
+ * dipakai lagi.
+ */
+export async function aktifkanAkunKlienUji(id: string, admin: KredensialAdmin) {
+  const ctx = await request.newContext({ baseURL: "http://localhost:3000" });
+  try {
+    const masuk = await ctx.post("/api/akun/auth/login", {
+      data: { email: admin.email, password: admin.password },
+    });
+    const respons = await ctx.post("/api/akun/admin/users/" + id + "/unfreeze", {
+      headers: { Authorization: "Bearer " + (await masuk.json()).accessToken },
+      data: {},
+    });
+    expect.soft([200, 409], "pulihkan akun (409: sudah aktif)").toContain(respons.status());
+  } finally {
+    await ctx.dispose();
+  }
+}
+
 export interface AkunUji {
   id: string;
   email: string;

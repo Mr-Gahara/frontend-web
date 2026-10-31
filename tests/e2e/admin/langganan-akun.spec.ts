@@ -1,5 +1,6 @@
 import { test, expect, type Page, type Response } from "@playwright/test";
 import {
+  aktifkanAkunKlienUji,
   ALASAN_TANPA_ADMIN,
   bukaDaftarAkun,
   hapusAkunDariDetail,
@@ -29,6 +30,8 @@ const POLA_BUAT = /\/api\/akun\/admin\/users(\?|$)/i;
 const POLA_BEKUKAN = /\/api\/akun\/admin\/users\/[^/]+\/freeze(\?|$)/i;
 const POLA_AKTIFKAN = /\/api\/akun\/admin\/users\/[^/]+\/unfreeze(\?|$)/i;
 const POLA_LANGGANAN = /\/api\/akun\/admin\/users\/[^/]+\/langganan(\?|$)/i;
+
+const EMAIL_TOKO = "toko@gmail.com";
 
 const dialog = (page: Page) => page.getByRole("dialog");
 const riwayat = (page: Page) => page.getByRole("region", { name: "Riwayat Langganan" });
@@ -168,6 +171,53 @@ test.describe("Langganan akun klien", () => {
     } finally {
       const tersisa = akun as AkunRespons | null;
       if (tersisa && !terhapus) await hapusAkunKlienUji(tersisa.id, admin);
+    }
+  });
+
+  test("akun tanpa batas masa akses diaktifkan tanpa durasi dan tetap tanpa batas (B154)", async ({ page }) => {
+    const admin = wajibAdmin();
+    const daftar = await bukaDaftar(page);
+    // Akun uji utama tenant (EMAIL_TOKO) tidak dibekukan: pembekuan
+    // mengeluarkan seluruh pengguna tokonya, yang dipakai spec lain.
+    const sasaran = daftar.find(
+      (a) =>
+        a.role === "client" &&
+        a.status === "aktif" &&
+        a.langganan.aksesBerakhirPada === null &&
+        a.email !== EMAIL_TOKO,
+    );
+    test.skip(!sasaran, "Tidak ada akun klien aktif tanpa batas masa akses selain akun uji utama");
+    if (!sasaran) return;
+
+    let beku = false;
+    try {
+      await bukaDetail(page, sasaran);
+      await expect(page.getByText("Tidak dibatasi")).toBeVisible();
+      await page.getByRole("button", { name: "Bekukan Akun" }).click();
+      const tBeku = tungguPos(page, POLA_BEKUKAN);
+      await dialog(page).getByRole("button", { name: "Bekukan", exact: true }).click();
+      expect((await tBeku).status()).toBe(200);
+      beku = true;
+      await expect(dialog(page)).toBeHidden({ timeout: 15_000 });
+
+      await page.getByRole("button", { name: "Aktifkan Akun" }).click();
+      await expect(dialog(page)).toContainText("tanpa batas masa akses");
+      await expect(dialog(page).getByRole("combobox", { name: "Durasi" })).toContainText(
+        "Tetap tidak dibatasi",
+      );
+      const tAktif = tungguPos(page, POLA_AKTIFKAN);
+      await dialog(page).getByRole("button", { name: "Aktifkan", exact: true }).click();
+      const respons = await tAktif;
+      expect(respons.status()).toBe(200);
+      expect(respons.request().postDataJSON()).toEqual({});
+      const hasil = ((await respons.json()) as { data: AkunRespons }).data;
+      expect(hasil.status).toBe("aktif");
+      expect(hasil.langganan.aksesBerakhirPada, "tetap tanpa batas").toBeNull();
+      beku = false;
+      await expect(dialog(page)).toBeHidden({ timeout: 15_000 });
+      await expect(page.getByText("Tidak dibatasi")).toBeVisible();
+    } finally {
+      if (beku) await aktifkanAkunKlienUji(sasaran.id, admin);
     }
   });
 

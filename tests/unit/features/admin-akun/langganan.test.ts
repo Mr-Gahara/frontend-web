@@ -72,8 +72,9 @@ describe("aksiLangganan", () => {
 });
 
 describe("durasiWajibSaatAktifkan", () => {
-  it("wajib bila masa akses belum diatur", () => {
-    expect(durasiWajibSaatAktifkan(akun(), SEKARANG)).toBe(true);
+  it("opsional bila masa akses tidak dibatasi (B154)", () => {
+    expect(akun().langganan.aksesBerakhirPada).toBeNull();
+    expect(durasiWajibSaatAktifkan(akun(), SEKARANG)).toBe(false);
   });
 
   it("wajib bila masa akses sudah lewat", () => {
