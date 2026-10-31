@@ -23,17 +23,7 @@ import { id as localeID } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { DialogAksiOpname } from "./dialog-aksi-opname";
 import {
   ArrowLeft,
   ClipboardCheck,
@@ -596,108 +586,27 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
         </div>
       )}
 
-      {/* --- KUMPULAN DIALOG MODALS --- */}
-
-      {/* 1. Modal Submit (Staf) */}
-      <AlertDialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
-        <AlertDialogContent className="bg-gading border-navy/10">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-navy">Kirim Pengajuan Opname?</AlertDialogTitle>
-            <AlertDialogDescription className="text-navy/70 font-medium">
-              Pastikan Anda telah menekan tombol <strong className="text-navy">Simpan Angka Sementara</strong> sebelum mengajukan. Setelah dikirim, Anda tidak dapat mengubah angka fisik lagi kecuali manajer mengembalikannya (Reject).
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={submitMutation.isPending} className="border-navy/20 text-navy hover:bg-navy/5 font-bold cursor-pointer">Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={(e) => { e.preventDefault(); submitMutation.mutate(); }} disabled={submitMutation.isPending} className="bg-navy text-gading hover:bg-navy/90 font-bold cursor-pointer">
-              {submitMutation.isPending ? "Mengajukan..." : "Ya, Kirim Pengajuan"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* 2. Modal Approve (Manajer) */}
-      <AlertDialog open={showApproveModal} onOpenChange={setShowApproveModal}>
-        <AlertDialogContent className="bg-gading border-navy/10">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-navy flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-sage" /> Setujui Pengajuan
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-navy/70 font-medium">
-              Menyetujui dokumen ini akan langsung memicu {teks.namaJurnal}. Saldo persediaan di sistem akan diubah mengikuti angka fisik yang diinput.
-            </AlertDialogDescription>
-            <div className="pt-4">
-              <label className="text-xs font-bold text-navy mb-1.5 block">Catatan Persetujuan (Opsional)</label>
-              <Textarea
-                placeholder="Misal: Selisih disetujui, sesuai dengan laporan kehilangan."
-                value={approveAlasan}
-                onChange={(e) => setApproveAlasan(e.target.value)}
-                className="bg-white border-navy/20 font-medium text-navy"
-              />
-            </div>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-2">
-            <AlertDialogCancel disabled={approveMutation.isPending} className="border-navy/20 text-navy hover:bg-navy/5 font-bold cursor-pointer">Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={(e) => { e.preventDefault(); approveMutation.mutate(approveAlasan.trim() || teks.alasanSetujuiBawaan); }} disabled={approveMutation.isPending} className="bg-sage text-gading hover:bg-sage/90 font-bold cursor-pointer border-none shadow-sm">
-              {approveMutation.isPending ? "Memproses Eksekusi..." : "Eksekusi Penyesuaian Stok"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* 3. Modal Reject (Manajer) */}
-      <AlertDialog open={showRejectModal} onOpenChange={setShowRejectModal}>
-        <AlertDialogContent className="bg-gading border-rose-200">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-rose-700 flex items-center gap-2">
-              <XCircle className="w-5 h-5" /> Tolak & Kembalikan ke Staf
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-navy/70 font-medium">
-              Status opname akan kembali menjadi <strong>REJECTED</strong>. Staf dapat mengedit ulang angka fisik berdasarkan instruksi Anda.
-            </AlertDialogDescription>
-            <div className="pt-4">
-              <label className="text-xs font-bold text-rose-700 mb-1.5 block">Alasan Penolakan <span className="text-rose-500">*</span></label>
-              <Textarea
-                placeholder="Misal: Harap hitung ulang bagian rak belakang."
-                value={rejectCatatan}
-                onChange={(e) => setRejectCatatan(e.target.value)}
-                className="bg-white border-rose-200 focus-visible:ring-rose-500 font-medium text-navy"
-              />
-            </div>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-2">
-            <AlertDialogCancel disabled={rejectMutation.isPending} className="border-navy/20 text-navy hover:bg-navy/5 font-bold cursor-pointer">Batal</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={(e) => { e.preventDefault(); rejectMutation.mutate(rejectCatatan.trim()); }} 
-              disabled={rejectMutation.isPending || rejectCatatan.trim().length === 0} 
-              className="bg-rose-600 text-gading hover:bg-rose-700 font-bold cursor-pointer border-none shadow-sm"
-            >
-              {rejectMutation.isPending ? "Memproses..." : "Tolak Pengajuan"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* 4. Modal Cancel */}
-      <AlertDialog open={showCancelModal} onOpenChange={setShowCancelModal}>
-        <AlertDialogContent className="bg-gading border-navy/10">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-navy flex items-center gap-2">
-              <Ban className="w-5 h-5 text-rose-500" /> Batalkan Sesi Opname?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-navy/70 font-medium">
-              Tindakan ini akan membatalkan sesi perhitungan stok secara permanen. Anda tidak dapat melanjutkan proses ini lagi. Lanjutkan?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={cancelMutation.isPending} className="border-navy/20 text-navy hover:bg-navy/5 font-bold cursor-pointer">Kembali</AlertDialogCancel>
-            <AlertDialogAction onClick={(e) => { e.preventDefault(); cancelMutation.mutate(); }} disabled={cancelMutation.isPending} className="bg-rose-600 text-gading hover:bg-rose-700 font-bold cursor-pointer border-none shadow-sm">
-              {cancelMutation.isPending ? "Membatalkan..." : "Ya, Batalkan Permanen"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
+      <DialogAksiOpname
+        ajukan={{ open: showSubmitModal, onOpenChange: setShowSubmitModal, pending: submitMutation.isPending, onKonfirmasi: () => submitMutation.mutate() }}
+        setujui={{
+          open: showApproveModal,
+          onOpenChange: setShowApproveModal,
+          pending: approveMutation.isPending,
+          namaJurnal: teks.namaJurnal,
+          alasan: approveAlasan,
+          onAlasan: setApproveAlasan,
+          onKonfirmasi: () => approveMutation.mutate(approveAlasan.trim() || teks.alasanSetujuiBawaan),
+        }}
+        tolak={{
+          open: showRejectModal,
+          onOpenChange: setShowRejectModal,
+          pending: rejectMutation.isPending,
+          catatan: rejectCatatan,
+          onCatatan: setRejectCatatan,
+          onKonfirmasi: () => rejectMutation.mutate(rejectCatatan.trim()),
+        }}
+        batal={{ open: showCancelModal, onOpenChange: setShowCancelModal, pending: cancelMutation.isPending, onKonfirmasi: () => cancelMutation.mutate() }}
+      />
     </div>
   );
 }
