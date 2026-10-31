@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { useMonitoringAbsensi } from "@/features/absensi/hooks";
 import { stafRuang } from "@/features/absensi/ringkasan";
-import { useDaftarIzinCuti } from "@/features/izin-cuti/hooks";
+import { useIzinCutiHari } from "@/features/izin-cuti/hooks";
 import { useDaftarPengguna } from "@/features/pengguna/hooks";
 import { namaPeran } from "@/features/pengguna/peran";
 import { inisialNama } from "@/features/pengguna/schema-profil";
@@ -81,7 +81,7 @@ function AngkaRingkas({
 export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti: boolean }) {
   const monitoring = useMonitoringAbsensi(hari);
   const pengguna = useDaftarPengguna("outlet");
-  const izinCuti = useDaftarIzinCuti({ aktif: denganIzinCuti });
+  const izinCuti = useIzinCutiHari(hari, { aktif: denganIzinCuti });
   // Di HP hanya BATAS_STAF_HP baris pertama yang tampil sampai tombolnya ditekan.
   const [tampilSemua, setTampilSemua] = useState(false);
   const kelasBaris = (indeks: number) =>
@@ -93,7 +93,6 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
   const baris = gabungStatusStaf(
     stafRuang(monitoring.data?.daftar ?? [], idRuang),
     izinCuti.data ?? [],
-    hari,
   ).sort((x, y) => URUTAN_STATUS_STAF[x.status] - URUTAN_STATUS_STAF[y.status]);
   const jumlah = (...status: StatusStafDashboard[]) =>
     baris.filter((b) => status.includes(b.status)).length;

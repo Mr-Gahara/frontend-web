@@ -198,7 +198,7 @@ export const queryKeys = {
   },
   izinCuti: {
     semua: kunci(["izinCuti"] as const),
-    daftar: () => ["izinCuti", "daftar"] as const,
+    daftar: (filter?: object) => ["izinCuti", "daftar", filter ?? {}] as const,
   },
 
   // --- IAM ---

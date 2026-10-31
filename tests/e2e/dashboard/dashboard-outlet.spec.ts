@@ -1,8 +1,10 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
-import { login } from "../../helpers/transfer-uji";
+import { BASIS, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { NAMA_STAF_IZIN, siapkanIzinHari, type IzinMentah } from "../../helpers/izin-cuti-uji";
 import { awalHari } from "../../../features/akun-kas/mutasi";
 import { rentangPeriode } from "../../../features/laporan/periode";
 import { formatRupiah } from "../../../lib/format";
+import { keTanggalLokal } from "../../../lib/waktu";
 
 /*
  * Spec dashboard outlet (keputusan DB1a sampai DB6a). Baca-saja: tidak ada
@@ -126,6 +128,33 @@ test.describe("Dashboard outlet", () => {
     await expect(staf.getByRole("button", { name: /tampilkan semua/i })).toHaveCount(0);
 
     await expect(page.getByRole("button", { name: "Notifikasi belum tersedia" })).toBeDisabled();
+  });
+
+  test("izin dan cuti staf disaring server: disetujui dan berlaku hari ini (B160)", async ({ page }) => {
+    await login(page);
+    const hari = keTanggalLokal(new Date());
+    const auth = await bukaDenganAuth(page, BASIS + "/dashboard");
+    const fx = await siapkanIzinHari(page, auth, hari);
+
+    await page.goto(URL_DASHBOARD, { waitUntil: "commit" });
+    const respons = await page.waitForResponse((r) => get(r, /\/api\/izincuti$/i));
+    const q = new URL(respons.url()).searchParams;
+    expect(Object.fromEntries(q)).toEqual({ status: "disetujui", dari: hari, sampai: hari });
+    expect(respons.status(), "izin cuti").toBe(200);
+    const daftar = await isi<IzinMentah[]>(respons);
+    const ids = daftar.map((i) => String(i.id ?? i._id));
+    expect(ids, "izin disetujui hari ini termuat").toContain(fx.berlaku);
+    expect(ids, "izin ditolak tidak termuat").not.toContain(fx.ditolak);
+    expect(ids, "izin di luar periode tidak termuat").not.toContain(fx.lampau);
+    for (const izin of daftar) {
+      expect(izin.status).toBe("disetujui");
+      expect(keTanggalLokal(new Date(izin.tanggalMulai)) <= hari).toBe(true);
+      expect(keTanggalLokal(new Date(izin.tanggalSelesai)) >= hari).toBe(true);
+    }
+
+    // Staf uji tidak pernah absen, sehingga izinnya menggantikan belum absen.
+    const baris = panel(page, "Status Staf").getByRole("row").filter({ hasText: NAMA_STAF_IZIN });
+    await expect(baris).toContainText("Izin", { timeout: 15_000 });
   });
 
   test("di lebar HP daftar staf dibatasi lima baris sampai Tampilkan semua ditekan", async ({ page }) => {

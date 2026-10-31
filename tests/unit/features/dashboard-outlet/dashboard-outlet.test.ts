@@ -6,7 +6,7 @@ import {
   paramTransaksiLunas,
   titikOmzet,
 } from "@/features/dashboard-outlet/kartu";
-import { gabungStatusStaf, izinBerlaku } from "@/features/dashboard-outlet/staf";
+import { gabungStatusStaf } from "@/features/dashboard-outlet/staf";
 import { bookingBerjalan, petakVenue } from "@/features/dashboard-outlet/venue";
 import type { MonitoringStaf } from "@/types/absensi";
 import type { IzinCuti } from "@/types/izinCuti";
@@ -56,27 +56,9 @@ function booking(ubah: Partial<SesiBookingResponse> = {}): SesiBookingResponse {
   };
 }
 
-describe("izinBerlaku", () => {
-  it("menerima izin disetujui di dalam rentang, termasuk hari pertama dan terakhir", () => {
-    expect(izinBerlaku(izin(), HARI)).toBe(true);
-    expect(izinBerlaku(izin(), new Date(2026, 9, 10, 0, 5))).toBe(true);
-    expect(izinBerlaku(izin(), new Date(2026, 9, 12, 23, 55))).toBe(true);
-  });
-
-  it("menolak izin yang masih diajukan atau ditolak", () => {
-    expect(izinBerlaku(izin({ status: "diajukan" }), HARI)).toBe(false);
-    expect(izinBerlaku(izin({ status: "ditolak" }), HARI)).toBe(false);
-  });
-
-  it("menolak hari di luar rentang", () => {
-    expect(izinBerlaku(izin(), new Date(2026, 9, 9, 12))).toBe(false);
-    expect(izinBerlaku(izin(), new Date(2026, 9, 13, 12))).toBe(false);
-  });
-});
-
 describe("gabungStatusStaf", () => {
   it("mempertahankan status absensi bagi staf yang sudah absen walau punya izin", () => {
-    const hasil = gabungStatusStaf([staf("p1", "sedang_bekerja")], [izin()], HARI);
+    const hasil = gabungStatusStaf([staf("p1", "sedang_bekerja")], [izin()]);
     expect(hasil).toEqual([{ penggunaID: "p1", nama: "Staf p1", status: "sedang_bekerja" }]);
   });
 
@@ -87,15 +69,13 @@ describe("gabungStatusStaf", () => {
       izin({ id: "i2", pengguna: { id: "p2", nama: null, email: null }, tipe: "izin" }),
       izin({ id: "i3", pengguna: { id: "p3", nama: null, email: null }, tipe: "cuti tahunan" }),
     ];
-    expect(gabungStatusStaf(daftar, izinCuti, HARI).map((b) => b.status)).toEqual(["sakit", "izin", "cuti"]);
+    expect(gabungStatusStaf(daftar, izinCuti).map((b) => b.status)).toEqual(["sakit", "izin", "cuti"]);
   });
 
-  it("membiarkan belum absen bila tidak ada izin yang berlaku untuk staf itu", () => {
-    const izinCuti = [
-      izin({ pengguna: { id: "lain", nama: null, email: null } }),
-      izin({ id: "i2", status: "diajukan" }),
-    ];
-    expect(gabungStatusStaf([staf("p1", "belum_absen")], izinCuti, HARI)[0].status).toBe("belum_absen");
+  it("membiarkan belum absen bila tidak ada izin untuk staf itu", () => {
+    // Status dan rentang disaring server (B160); yang tersisa hanya pencocokan staf.
+    const izinCuti = [izin({ pengguna: { id: "lain", nama: null, email: null } })];
+    expect(gabungStatusStaf([staf("p1", "belum_absen")], izinCuti)[0].status).toBe("belum_absen");
   });
 });
 

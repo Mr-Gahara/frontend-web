@@ -3,7 +3,6 @@
  * digabung dengan izin dan cuti yang disetujui dan berlaku pada hari itu.
  * Alpha tidak dihitung, karena belum ada aturannya.
  */
-import { keTanggalLokal } from "@/lib/waktu";
 import type { MonitoringStaf, StatusAbsensi } from "@/types/absensi";
 import type { IzinCuti, TipeIzinCuti } from "@/types/izinCuti";
 
@@ -21,30 +20,17 @@ const STATUS_DARI_TIPE: Record<TipeIzinCuti, StatusStafDashboard> = {
   "cuti tahunan": "cuti",
 };
 
-/** True bila izin disetujui dan hari itu berada di dalam rentangnya (tanggal lokal). */
-export function izinBerlaku(izin: IzinCuti, hari: Date): boolean {
-  if (izin.status !== "disetujui") return false;
-  const tanggal = keTanggalLokal(hari);
-  return (
-    keTanggalLokal(new Date(izin.tanggalMulai)) <= tanggal &&
-    tanggal <= keTanggalLokal(new Date(izin.tanggalSelesai))
-  );
-}
-
 /**
- * Satu baris per staf monitoring. Kehadiran nyata menang: izin atau cuti
- * hanya menggantikan status belum absen.
+ * Satu baris per staf monitoring. izinCuti sudah disaring server: disetujui
+ * dan berlaku pada hari itu (B160, useIzinCutiHari). Kehadiran nyata
+ * menang: izin atau cuti hanya menggantikan status belum absen.
  */
-export function gabungStatusStaf(
-  daftar: MonitoringStaf[],
-  izinCuti: IzinCuti[],
-  hari: Date,
-): BarisStaf[] {
+export function gabungStatusStaf(daftar: MonitoringStaf[], izinCuti: IzinCuti[]): BarisStaf[] {
   const izinPerStaf = new Map<string, StatusStafDashboard>();
   for (const izin of izinCuti) {
     const id = izin.pengguna?.id;
     const status = STATUS_DARI_TIPE[izin.tipe];
-    if (!id || !status || izinPerStaf.has(id) || !izinBerlaku(izin, hari)) continue;
+    if (!id || !status || izinPerStaf.has(id)) continue;
     izinPerStaf.set(id, status);
   }
   return daftar.map((staf) => ({
