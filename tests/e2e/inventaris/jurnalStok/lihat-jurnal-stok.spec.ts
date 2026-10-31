@@ -141,16 +141,26 @@ test.describe("Jurnal stok", () => {
 
   test("lintas outlet: pilih satu outlet mengirim locationID outlet itu", async ({ page }) => {
     test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
+    // Semua Outlet memakai satu-satunya outlet (lokasiSatuOutlet), sehingga
+    // dengan satu outlet permintaan ber-locationID itu sudah terkirim saat
+    // halaman dimuat dan memilihnya tidak memicu permintaan baru. Karena itu
+    // seluruh respons jurnal dicatat sejak halaman dimuat.
+    const jurnal: Response[] = [];
+    page.on("response", (r) => {
+      if (r.request().method() === "GET" && POLA_JURNAL.test(r.url())) jurnal.push(r);
+    });
+    // Penunggu dipasang setelah commit, agar tidak menangkap respons halaman sesudah login.
+    await page.goto(URL_OUTLET, { waitUntil: "commit" });
     const tLokasi = page.waitForResponse(responsGet(/\/api\/location(\?|$)/));
-    await page.goto(URL_OUTLET);
     const lokasi = isiData<(Relasi & { tipe: string; nama: string })[]>(await (await tLokasi).json());
     const target = lokasi.find((l) => l.tipe === "Outlet");
     test.skip(!target, "Tenant uji belum punya outlet");
 
     await page.getByText("Semua Outlet", { exact: true }).click();
-    const tTersaring = tungguJurnal(page, (q) => q.get("locationID") === idDari(target));
     await page.getByRole("option", { name: target!.nama, exact: true }).click();
-    await periksaHalaman(page, await bacaHalaman(await tTersaring));
+    const tersaring = (r: Response) => new URL(r.url()).searchParams.get("locationID") === idDari(target);
+    await expect.poll(() => jurnal.some(tersaring)).toBe(true);
+    await periksaHalaman(page, await bacaHalaman(jurnal.filter(tersaring).at(-1)!));
   });
 
   test("outlet: filter arah dikirim sebagai tipeKoreksi dan kembali ke halaman 1", async ({ page }) => {

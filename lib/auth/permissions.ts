@@ -155,15 +155,16 @@ export type Izin = (typeof IZIN)[keyof typeof IZIN];
  * pemilik proyek 22 September 2026: akses ditentukan role dan permission,
  * bukan nama role maupun lokasi pengguna.
  *
- * Belum ada di backend; namanya ditetapkan tim backend. Selama null, tidak
- * ada pengguna yang memegangnya, owner pun tidak, sehingga semua pengguna
- * terkunci ke outlet tenant. Di MVP (satu outlet per tenant) datanya sama.
- * Isi dengan nama dari seeder permission backend begitu tersedia; tidak ada
- * perubahan lain yang dibutuhkan.
+ * Ditetapkan backend sebagai akses-lintas-outlet (grup Location, B142).
+ * Backend tidak memeriksanya, sehingga kunci outlet tetap di klien. Owner
+ * menerimanya lewat seedOwnerPermission, General Manajer lewat templat
+ * role, dan role lain lewat pengaturan role. Di MVP (satu outlet per
+ * tenant) datanya sama dengan pengguna yang terkunci. Tipenya tetap boleh
+ * null agar bolehLintasOutlet dan helper e2e tidak berubah.
  */
-export const IZIN_LINTAS_OUTLET: string | null = null;
+export const IZIN_LINTAS_OUTLET: string | null = "akses-lintas-outlet";
 
-/** True bila pengguna memegang izin lintas outlet; selalu false selama izinnya belum ditetapkan. */
+/** True bila pengguna memegang izin lintas outlet; selalu false bila izinnya null. */
 export function bolehLintasOutlet(
   permissions: readonly string[],
   izin: string | null = IZIN_LINTAS_OUTLET,

@@ -113,3 +113,12 @@ describe("ROLE_TEMPLATES: izin shift, pola roster, dan jadwal shift (B139, B140)
     expect(izinTemplate(id)).toEqual(expect.arrayContaining(SDM_JADWAL));
   });
 });
+
+describe("ROLE_TEMPLATES: izin lintas outlet (B142)", () => {
+  it("hanya general manajer yang memegangnya", () => {
+    const pemegang = ROLE_TEMPLATES.filter((t) => t.permissions.includes("akses-lintas-outlet")).map(
+      (t) => t.id,
+    );
+    expect(pemegang).toEqual(["general-manajer"]);
+  });
+});

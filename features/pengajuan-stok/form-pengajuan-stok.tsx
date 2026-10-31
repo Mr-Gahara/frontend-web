@@ -106,10 +106,9 @@ interface Props {
  * Staf outlet A hanya mengajukan untuk outlet A (keputusan pemilik proyek,
  * 22 September 2026): pengguna tanpa izin lintas outlet terkunci ke lokasi
  * aktif, yaitu outlet milik tenant, dan tidak dapat merevisi draf outlet
- * lain. Pemegang izin lintas outlet memilih dari seluruh outlet. Izin itu
- * belum ada di backend (IZIN_LINTAS_OUTLET di lib/auth/permissions.ts masih
- * null), sehingga sementara semua pengguna terkunci; di MVP outlet tenant
- * hanya satu, sehingga pilihannya sama.
+ * lain. Pemegang izin lintas outlet (IZIN_LINTAS_OUTLET di
+ * lib/auth/permissions.ts) memilih dari seluruh outlet; di MVP outlet
+ * tenant hanya satu, sehingga pilihannya sama.
  */
 export function FormPengajuanStok({ pengajuan }: Props) {
   const router = useRouter();

@@ -80,8 +80,9 @@ async function periksaHalaman(page: Page, h: HalamanMentah, pesanKosong: string)
 
 const permintaan = (p: PengajuanMentah) => p.dariLokasi?.tipe === "Gudang" && p.keLokasi?.tipe === "Outlet";
 const pengembalian = (p: PengajuanMentah) => p.dariLokasi?.tipe === "Outlet" && p.keLokasi?.tipe === "Gudang";
-/** Nama outlet di sisi mana pun: peminta pada permintaan, asal pada pengembalian. */
-const namaOutlet = (p: PengajuanMentah) => (p.dariLokasi?.tipe === "Outlet" ? p.dariLokasi : p.keLokasi)?.nama ?? "";
+/** Lokasi outlet di sisi mana pun: peminta pada permintaan, asal pada pengembalian. */
+const sisiOutlet = (p: PengajuanMentah) => (p.dariLokasi?.tipe === "Outlet" ? p.dariLokasi : p.keLokasi);
+const namaOutlet = (p: PengajuanMentah) => sisiOutlet(p)?.nama ?? "";
 // Disetujui: APPROVED, atau PENDING karena surat jalannya dibatalkan (features/pengajuan-stok/tahap.ts).
 const disetujui = (p: PengajuanMentah) => p.status === "APPROVED" || p.status === "PENDING";
 /** Tab Semua gudang: seluruh status selain draf (STATUS_TANPA_DRAF), bagi Owner yang tidak dibatasi. */
@@ -147,12 +148,12 @@ test.describe("Daftar pengajuan stok outlet", () => {
   test("lintas outlet: pilih satu outlet mengirim locationID outlet itu", async ({ page }) => {
     test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     const awal = await buka(page, URL_OUTLET, { status: null });
-    const contoh = awal.data.find((p) => p.keLokasi?.id && p.keLokasi?.nama);
-    test.skip(!contoh, "Belum ada pengajuan outlet");
-    const idOutlet = contoh!.keLokasi!.id!;
-    const tunggu = page.waitForResponse(daftarPengajuan({ locationID: idOutlet, page: "1" }));
+    // Sejak pengembalian (P8) keLokasi baris pertama dapat berupa gudang.
+    const outlet = awal.data.map(sisiOutlet).find((l) => l?.tipe === "Outlet" && l.id && l.nama);
+    test.skip(!outlet, "Belum ada pengajuan outlet");
+    const tunggu = page.waitForResponse(daftarPengajuan({ locationID: outlet!.id!, page: "1" }));
     await page.getByText("Semua Outlet", { exact: true }).click();
-    await page.getByRole("option", { name: contoh!.keLokasi!.nama!, exact: true }).click();
+    await page.getByRole("option", { name: outlet!.nama!, exact: true }).click();
     await periksaHalaman(page, await isiRespons(await tunggu), KOSONG);
   });
 

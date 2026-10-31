@@ -367,6 +367,8 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "create-location",
       "update-location",
       "delete-location",
+      // Lintas outlet hanya General Manajer (B142, pemilik proyek 31 Oktober 2026).
+      "akses-lintas-outlet",
       // Pembelian stok, setara beban operasional (RH6a), per ruang (B116).
       "read-pembelian-stok-outlet",
       "read-pembelian-stok-gudang",
