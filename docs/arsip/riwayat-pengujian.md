@@ -477,6 +477,13 @@ Dipindah dari `referensi/utang-pengujian.md` pada 31 Oktober 2026.
   Lunas di `1cd8211`: jalur terkunci login sebagai pengguna uji "E2E
   Tanpa Lintas Outlet" (`tests/helpers/terkunci-uji.ts`), sehingga
   kedua jalur teruji e2e bersama.
+- **Perpindahan halaman daftar akun dan pembatas lima baris staf di HP
+  tidak berjalan pada data uji sekarang** (skip bersyarat data,
+  `inti/pengujian.md`): akun platform tidak lebih dari 10, dan staf
+  monitoring per lokasi outlet tidak lebih dari lima sejak B183.
+  Lunas di `7ea8427` dan `cd07ae1`: kedua skenario menyiapkan datanya
+  sendiri (akun klien uji yang dihapus di finally, dan enam staf uji
+  berjadwal hari ini).
 
 ## Kejadian sesekali yang tidak berulang
 

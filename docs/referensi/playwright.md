@@ -631,6 +631,14 @@ bersyarat).
   lewat API, dicari menurut keterangannya lebih dulu agar run berulang
   tidak menambah data, dan dipasang ke pengguna uji tersendiri, bukan
   Ridho, karena izin disetujui menjadikan pemiliknya libur di jadwal.
+- Skenario yang dulu dilewati karena keadaan data menyiapkan datanya
+  sendiri lalu membersihkannya (pemilik proyek, 31 Oktober 2026): stok
+  kritis gudang lewat dialog batas minimum yang dikembalikan di `finally`
+  (`28eedc1`), `pengajuanUjiDisetujui` di `tests/helpers/transfer-uji.ts`
+  (`6cdb61a`), `siapkanAkunLebihSatuHalaman` di
+  `tests/helpers/admin-uji.ts` yang akunnya dihapus di `finally`
+  (`7ea8427`), dan `tests/helpers/staf-monitoring-uji.ts` yang menghapus
+  jadwalnya lewat fungsi yang dikembalikan (`cd07ae1`).
 - `tests/e2e/penjualan/alur-penjualan.spec.ts`: spec pembanding alur bisnis
   dengan fixture tetap (`tests/helpers/penjualan-uji.ts`). Bahan baku dan
   produk uji dibuat sekali, lalu stok outlet dan `produk.stok` disetel

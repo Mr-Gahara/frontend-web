@@ -42,6 +42,14 @@ Sesudahnya `e051906` menambah tiga test unit tab Keuangan (vitest 858
 lolos di 98 berkas), dan `5ba2a42` menambah satu langkah di alur surat
 jalan gudang, tanpa test baru; spec terdampak keuangan 34 lolos, transfer
 stok 7 lolos, dan stock opname 16 lolos (`a611b59`).
+Sesudah itu `28eedc1`, `6cdb61a`, `7ea8427`, dan `cd07ae1` membuat
+keempat skip bersyarat data (tab kritis gudang, buat surat jalan gagal,
+halaman berikutnya daftar akun, dan lebar HP Status Staf) menyiapkan
+datanya sendiri, sehingga harapan suite penuh menjadi 522 lolos tanpa
+skipped (hitungan). Spec terdampaknya lolos tanpa skip: stok dan
+dashboard gudang 21; pengajuan, transfer, penerimaan, dan dashboard
+gudang 37; admin 20; dashboard, jadwal, dan pengguna 76; serta auth,
+profil, roles, dan pengaturan 92.
 
 **Baseline per penyesuaian backend `ridho` `877e493`** (commit `c2a1e73`,
 28 Oktober 2026): 838 test unit dan integrasi lolos. Suite e2e penuh
@@ -204,10 +212,7 @@ terhitung di angka skipped pada baseline:
 
 | Spec | Dilewati bila |
 |---|---|
-| `inventaris/stok/lihat-stok.spec.ts`, tab kritis gudang | Tidak ada stok gudang yang kritis (terjadi pada data uji sekarang) |
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
-| `admin/akun-klien.spec.ts`, halaman berikutnya daftar akun (B177) | Data uji berisi tidak lebih dari 10 akun (terjadi pada data uji sekarang) |
-| `dashboard/dashboard-outlet.spec.ts`, lebar HP membatasi lima baris staf | Staf monitoring per lokasi outlet ditambah karyawan yang izin tidak lebih dari lima (terjadi sejak `44a81d0`, B183) |
 | Dua puluh skenario di `tests/e2e/admin/` (sesi, akun klien, langganan, dan kelola akun) | `.env.e2e` tidak berisi kredensial admin uji (PA5a). Tidak terjadi di mesin pemilik proyek, sehingga tidak terhitung di baseline |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan

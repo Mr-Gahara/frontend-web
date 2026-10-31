@@ -43,7 +43,9 @@ dan 10 skipped (`inti/pengujian.md`, Baseline). Sesudahnya jalur
 terkunci lintas outlet kembali berjalan lewat pengguna uji tanpa izin
 itu (`1cd8211`), dan penahan lokasi null shift serta pola roster
 dibuang (`7f6d623`); harapan suite penuh menjadi 518 lolos dan 4
-skipped, belum dijalankan.
+skipped, belum dijalankan. Keempat skip bersyarat data kemudian
+menyiapkan datanya sendiri (`28eedc1` sampai `cd07ae1`), sehingga
+harapannya 522 lolos tanpa skipped.
 
 Urutan pilihan pemilik proyek (26 Oktober 2026), tidak berubah:
 

@@ -439,17 +439,17 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (`1cd8211`): dibuat sekali lewat API dan dipakai ulang setiap run,
   sehingga tidak menumpuk; izin perannya diselaraskan dengan izin baca
   Owner setiap kali.
-- **Suite e2e penuh belum dijalankan sejak `1cd8211` dan `7f6d623`**;
-  harapannya 518 lolos dan 4 skipped dari 522 (`inti/pengujian.md`,
+- **Enam pengguna uji "E2E Staf Monitoring 1" sampai 6 menetap**
+  (`cd07ae1`), dibuat sekali dan dipakai ulang; jadwal hari ini mereka
+  dihapus setiap run. Mereka ikut tampil di daftar pengguna, kalender
+  jadwal ruang outlet, dan pilihan login PIN.
+- **Suite e2e penuh belum dijalankan sejak `1cd8211`**; harapannya 522
+  lolos tanpa skipped dari 522 (`inti/pengujian.md`,
   Baseline). Dijalankan bersama penyesuaian backend berikutnya atau atas
   permintaan pemilik proyek.
 - **Skenario aktifkan akun tanpa batas membekukan akun klien sungguhan**
   (`482ac79`), dipilih menurut syarat dan tidak pernah akun uji utama;
   setiap run menambah dua catatan di riwayat langganan akun itu.
-- **Perpindahan halaman daftar akun dan pembatas lima baris staf di HP
-  tidak berjalan pada data uji sekarang** (skip bersyarat data,
-  `inti/pengujian.md`): akun platform tidak lebih dari 10, dan staf
-  monitoring per lokasi outlet tidak lebih dari lima sejak B183.
 - **Kalender per lokasi hanya teruji untuk sel yang berisi penanda
   saja**; sel yang berisi jadwal lokal sekaligus penanda lokasi lain
   belum diuji e2e.
