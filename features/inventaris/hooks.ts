@@ -211,11 +211,12 @@ export type LokasiRuang = { lokasiId: string | null; memuat: boolean; gagal: boo
 
 /**
  * Lokasi satu ruang kerja: outlet tenant untuk ruang outlet, dan lokasi
- * Gudang pertama untuk ruang gudang (model MVP). Dipakai untuk memisahkan
- * data per ruang (shift, pola roster) begitu backend mendukungnya. aktif
- * false berarti pemisahan belum didukung, sehingga tidak ada permintaan
- * lokasi. Lokasi yang sudah termuat tetapi tidak ada dianggap gagal, agar
- * halaman tidak menampilkan daftar kosong seolah-olah belum ada data.
+ * Gudang pertama untuk ruang gudang (model MVP). Dipakai untuk menyaring
+ * data per ruang lewat locationID: shift dan pola roster (B168), kalender
+ * jadwal (B184), dan monitoring absensi (B183), keputusan rancangan butir
+ * 29. aktif false menahan permintaan lokasi, misalnya tanpa read-location.
+ * Lokasi yang sudah termuat tetapi tidak ada dianggap gagal, agar halaman
+ * tidak menampilkan daftar kosong seolah-olah belum ada data.
  */
 export function useLokasiRuang(
   ruang: "outlet" | "gudang",

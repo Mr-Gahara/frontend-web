@@ -85,10 +85,10 @@ export function useHapusPajak(opsi: Callback = {}) {
 
 /**
  * Pasang dan lepas mengubah relasi (queryKeys.produk.pajak, di bawah akar
- * produk). pajakList produk tidak ikut berubah, karena backend 465b438
- * membentuknya dari field pajak di dokumen produk, bukan dari relasi
- * (kontrak/temuan.md butir 88); invalidasi akar produk dipertahankan agar
- * pajakList ikut termuat ulang begitu backend menyatukan keduanya.
+ * produk). Sejak B40 backend membentuk pajakList produk dari relasi
+ * /produkpajak (kontrak/temuan.md butir 88), sehingga invalidasi akar
+ * produk ikut memuat ulang pajakList. Tab pajak tetap membaca relasinya
+ * sendiri (keputusan RH4a).
  */
 export function usePasangPajak(opsi: Callback = {}) {
   const queryClient = useQueryClient();
