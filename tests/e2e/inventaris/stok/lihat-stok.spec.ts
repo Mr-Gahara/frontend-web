@@ -310,12 +310,29 @@ test.describe("Inventaris gudang", () => {
   });
 
   test("tab stok kritis menyaring stok di bawah batas minimum", async ({ page }) => {
-    const inventory = await bukaGudang(page);
-    const kritis = inventory.filter((i) => i.isStokKritis).length;
-    test.skip(kritis === 0, "Tidak ada stok gudang yang kritis");
-
-    await page.getByText("Stok Kritis").first().click();
-    await periksaBaris(page, kritis);
+    let inventory = await bukaGudang(page);
+    // Bila data uji tidak punya stok kritis, satu bahan dijadikan kritis lewat
+    // dialog batas minimum (stokMinimum > 0 dan stok <= stokMinimum, aturan
+    // isStokKritis backend), lalu dikembalikan di finally.
+    let semula: InventoryMentah | null = null;
+    if (!inventory.some((i) => i.isStokKritis)) {
+      const inv = inventory.slice(0, UKURAN_AWAL).find((i) => i.item?.nama);
+      test.skip(!inv, "Belum ada stok gudang yang bisa diuji");
+      semula = inv!;
+      await ubahStokMinimum(page, baris(page).filter({ hasText: inv!.item!.nama! }).first(), Math.floor(inv!.stok) + 1, KOLOM_GUDANG);
+      inventory = await bukaGudang(page);
+    }
+    try {
+      const kritis = inventory.filter((i) => i.isStokKritis).length;
+      expect(kritis, "stok kritis gudang setelah disiapkan").toBeGreaterThan(0);
+      await page.getByText("Stok Kritis").first().click();
+      await periksaBaris(page, kritis);
+    } finally {
+      if (semula) {
+        await bukaGudang(page);
+        await ubahStokMinimum(page, baris(page).filter({ hasText: semula.item!.nama! }).first(), semula.stokMinimum, KOLOM_GUDANG);
+      }
+    }
   });
 
   test("pencarian mengirim kata kunci ke server dan menampilkan hasilnya", async ({ page }) => {
