@@ -132,7 +132,7 @@ test.describe("Kelola akun klien", () => {
         await page.waitForURL("**/admin/akun/" + uji.id);
 
         expect(await statusLogin(emailBaru, passwordBaru), "login dengan password baru").toBe(200);
-        expect(await statusLogin(emailBaru, PASSWORD_AKUN_UJI), "password lama ditolak").toBe(400);
+        expect(await statusLogin(emailBaru, PASSWORD_AKUN_UJI), "password lama ditolak (B149)").toBe(401);
       });
 
       await test.step("hapus akun uji lewat UI", async () => {
@@ -181,7 +181,8 @@ test.describe("Kelola akun klien", () => {
       const tungguSalah = tungguAkun(page, "DELETE");
       await kotak(page).getByRole("button", { name: "Hapus Permanen" }).click();
       const salah = await tungguSalah;
-      expect(salah.status()).toBe(401);
+      // B150: password admin yang salah 400, bukan 401 yang dibaca sebagai sesi berakhir.
+      expect(salah.status()).toBe(400);
       const pesan = ((await salah.json()) as { message: string }).message;
       await expect(kotak(page).getByRole("alert")).toContainText(pesan, { timeout: 15_000 });
       await expect(kotak(page)).toBeVisible();

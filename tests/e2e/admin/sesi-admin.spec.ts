@@ -72,8 +72,11 @@ test.describe("Sesi admin", () => {
     }, POLA_LOGIN_AKUN);
 
     expect(status).toBe(200);
-    expect(isi, "respons admin tanpa requireSetup").not.toHaveProperty("requireSetup");
-    expect((isi.data as { role?: string }).role).toBe("admin");
+    // B136: respons admin sebentuk dengan klien; admin dikenali dari data.role.
+    expect(isi.requireSetup).toBe(false);
+    const data = isi.data as { role?: string; daftarTenant?: unknown };
+    expect(data.role).toBe("admin");
+    expect(data.daftarTenant).toEqual([]);
     expect(permintaanPin, "tidak ada permintaan pin setelah login admin").toEqual([]);
     await expect(page).toHaveURL(/\/admin$/);
   });

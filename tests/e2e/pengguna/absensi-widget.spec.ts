@@ -53,7 +53,8 @@ test("tanpa izin read-absensi widget menampilkan pesan izin, bukan daftar kosong
       ? route.fulfill({
           status: 403,
           contentType: "application/json",
-          body: JSON.stringify({ status: "error", message: "Anda tidak memiliki izin melihat ringkasan absensi seluruh staf." }),
+          // B141: pesan umum checkPermission (middleware/authorizePermission.js).
+          body: JSON.stringify({ status: "error", message: "Akses ditolak. Anda tidak memiliki izin untuk tindakan ini." }),
         })
       : route.continue(),
   );

@@ -111,8 +111,9 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
 
       const res = await tLogin;
       const body = await res.json();
-      expect(res.status()).toBe(404);
-      expect(body.message, "respons gagal harus membawa message").toBeTruthy();
+      // B149: email tidak terdaftar dan password salah dijawab sama.
+      expect(res.status()).toBe(401);
+      expect(body.message).toBe("Email atau password salah.");
       await expect(page.getByText(body.message).first()).toBeVisible({ timeout: 10_000 });
       await expect(page).toHaveURL(/.*\/login$/);
     });
@@ -126,8 +127,8 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
 
       const res = await tLogin;
       const body = await res.json();
-      expect(res.status()).toBe(400);
-      expect(body.message, "respons gagal harus membawa message").toBeTruthy();
+      expect(res.status()).toBe(401);
+      expect(body.message).toBe("Email atau password salah.");
       await expect(page.getByText(body.message).first()).toBeVisible({ timeout: 10_000 });
       await expect(page).toHaveURL(/.*\/login$/);
 

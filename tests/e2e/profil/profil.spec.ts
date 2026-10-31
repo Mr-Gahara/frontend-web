@@ -115,12 +115,11 @@ test.describe("Profil pengguna", () => {
       await isianPinLama(hal).fill("000000");
       await isianPinBaru(hal).fill(PIN_PROFIL_BARU);
       const tolak = await simpan(hal);
-      expect(tolak.status()).toBe(401);
+      // B150: 400, bukan 401 yang dibaca apiClient sebagai sesi berakhir.
+      expect(tolak.status()).toBe(400);
       const isi = await tolak.json();
       expect(String(isi.message)).toMatch(/PIN lama/i);
-      // Tampilan pesan diperiksa lunak: cara halaman lama menangani 401 dari
-      // operasi ini belum terbukti, dan run inilah yang menjawabnya.
-      await expect.soft(hal.getByText(String(isi.message)).first()).toBeVisible();
+      await expect(hal.getByText(String(isi.message)).first()).toBeVisible();
     } finally {
       await ctx.close();
     }
