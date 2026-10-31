@@ -1,5 +1,5 @@
 "use client";
-import { RUANG_SURAT_JALAN, type RuangSuratJalan } from "./ruang";
+import { RUANG_SURAT_JALAN, ruangPengirim, type RuangSuratJalan } from "./ruang";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -61,16 +61,19 @@ export default function HalamanRevisiTransfer({ id, ruang }: { id: string; ruang
     );
   }
 
-  // Tembok Filter Keamanan: Hanya izinkan jika status PENDING
-  if (detail.status !== "PENDING") {
+  // Revisi hanya di ruang pengirim (AR11a), karena URL-nya dapat dibuka
+  // langsung dari ruang lawan, dan hanya selagi PENDING.
+  const alasanTolak = !ruangPengirim(ruang, detail)
+    ? "Surat Jalan ini dikirim dari ruang lain dan hanya dapat direvisi di ruang pengirimnya."
+    : detail.status !== "PENDING"
+      ? `Surat Jalan ini sudah berstatus ${detail.status} dan tidak dapat direvisi lagi.`
+      : null;
+  if (alasanTolak) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <AlertTriangle className="w-12 h-12 text-amber-500/80" />
         <h2 className="text-xl font-bold text-navy">Akses Ditolak</h2>
-        <p className="text-sm font-medium text-navy/60">
-          Surat Jalan ini sudah berstatus {detail.status} dan tidak dapat
-          direvisi lagi.
-        </p>
+        <p className="text-sm font-medium text-navy/60">{alasanTolak}</p>
         <Button
           variant="default"
           className="bg-navy"

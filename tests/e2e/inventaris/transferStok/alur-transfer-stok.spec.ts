@@ -110,6 +110,15 @@ test.describe("Alur surat jalan gudang", () => {
         expect(cek.data.items[0].qtyKirim, "jumlah kirim hasil revisi").toBe(baru);
       });
 
+      await test.step("revisi lewat URL ruang outlet ditolak, karena pengirimnya gudang (AR11a)", async () => {
+        await page.goto(`${BASIS}/dashboard/outlet/inventaris/pengirimanBarang/${transfer.id}/edit`);
+        await expect(page.getByRole("heading", { name: "Akses Ditolak" })).toBeVisible();
+        await expect(page.getByText("hanya dapat direvisi di ruang pengirimnya")).toBeVisible();
+        await expect(page.getByRole("button", { name: /simpan revisi/i })).toHaveCount(0);
+        await page.goto(`${URL_DAFTAR}/${transfer.id}`);
+        await expect(page.getByRole("button", { name: /batalkan pengiriman/i })).toBeVisible();
+      });
+
       await test.step("batal dari PENDING lewat UI", async () => {
         await page.getByRole("button", { name: /batalkan pengiriman/i }).click();
         const dialog = page.getByRole("alertdialog");
