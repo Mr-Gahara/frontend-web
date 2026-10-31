@@ -96,7 +96,9 @@ data disilang dengan seed lebih dulu, lalu diselaraskan dengan urutan ini
    `nama:` di awal baris pernah melewatkan 28 nama (21 Oktober 2026).
 2. Nama yang dikeluarkan dari seed dilepas dari role (`$pull`) lalu
    dihapus, hanya bila daftar di luar seed sama dengan nama yang
-   diharapkan, agar permission kustom tidak ikut terhapus.
+   diharapkan, agar permission kustom tidak ikut terhapus. Sejak backend
+   `6ba1d87` (B143) sinkron seed melakukannya sendiri, sehingga langkah
+   ini dilewati; tinjauan langkah 1 tetap dijalankan.
 3. `node seeds/permissionSeed.js` mode sinkron, tanpa `--reset`, dengan
    `MONGO_URI` dari `.env`.
 4. `node seeds/seedOwnerPermission.js`, yang menimpa izin setiap role
@@ -187,6 +189,13 @@ Pada 28 Oktober 2026 `nizar` maju 16 commit dan `yoga` 14 commit di atas
 kelengkapan. Seed hanya menambah delapan izin pembelian per ruang (B116),
 sehingga penyelarasan permission melewati langkah 2; sesudahnya
 `npm run db:indeks` dijalankan.
+Pada 30 Oktober 2026 `ridho` maju 75 commit di atas `877e493` ke
+`0024eb9`, memuat `yoga` `f102c53`, sedangkan `nizar` tidak maju, sehingga
+tidak ada yang perlu digabung. Dua migrasi backend dijalankan lebih dulu
+(`locationID` shift dan pola roster, indeks lama, dan hari jadwal ganda),
+lalu permission diselaraskan lewat langkah 1, 3, 4, dan 5 (160 nama,
+Owner 157), dan `npm run db:indeks`
+(`referensi/keputusan-penyesuaian-backend.md`).
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari

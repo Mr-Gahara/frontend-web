@@ -42,7 +42,10 @@ sama (submodul pengajuan stok, di bawah).
   mengajukan stok atas nama outlet lain. Namanya ditetapkan tim backend;
   sampai itu `IZIN_LINTAS_OUTLET` di `lib/auth/permissions.ts` bernilai
   null, dan semua pengguna, owner pun, terkunci ke outlet tenant
-  (`085ec78`, keputusan rancangan butir 18).
+  (`085ec78`, keputusan rancangan butir 18). Backend menetapkan
+  `akses-lintas-outlet` (B142), dan konstanta diisi di `2eb668a`; Owner
+  memegangnya lewat seed, General Manajer lewat templat role. Backend
+  tidak memeriksanya, sehingga kunci outlet tetap di klien.
 - **Data tidak dibatasi per lokasi pengguna** di backend, cukup per tenant
   dan per permission. Query `locationID` tetap sah sebagai penyaring
   pilihan, bukan pembatas akses. Ini jawaban atas SO-3
@@ -157,6 +160,11 @@ sama (submodul pengajuan stok, di bawah).
     hanya berlaku selama konstanta null memakai `test.skip` bersyarat.
     Contoh: `IZIN_LINTAS_OUTLET` di `lib/auth/permissions.ts` dan
     `tests/helpers/lintas-outlet.ts` (pemilik proyek, 22 September 2026).
+    Konstanta itu diisi di `2eb668a`, dan `KUNCI_LOKASI_SHIFT` serta
+    `KUNCI_LOKASI_POLA_ROSTER` di `8b5ad0f`, masing-masing tanpa perubahan
+    aturan. Skenario yang baru berjalan setelah konstanta diisi diperiksa
+    ulang, karena belum pernah dijalankan: dua spec lintas outlet ternyata
+    keliru menebak data (`2eb668a`).
 19. **Tipe ber-`_id` yang masih dibaca halaman lama menjadi jembatan
     berakhiran `Lama`.** Nama kanonik menjadi tipe ber-`id` dari bentuk
     respons nyata, sedangkan halaman lama memakai tipe lamanya lewat alias
@@ -254,3 +262,13 @@ sama (submodul pengajuan stok, di bawah).
     `page.clock`. Filter periode bawaan di daftar sengaja tidak ikut
     bergeser, karena tanggalnya terlihat dan ada Reset Filter (pemilik
     proyek, 26 Oktober 2026, `6d07b8d`, `7a08b63`).
+29. **Data per ruang disaring lewat satu sumber lokasi ruang,
+    `useLokasiRuang` (`features/inventaris/hooks.ts`).** Ruang outlet
+    memakai outlet tenant (`/location/current`), dan ruang gudang gudang
+    pertama (`/location`). Shift dan pola roster (B168), kalender jadwal
+    (B184), dan monitoring absensi (B183) mengirim `locationID` dari
+    sumber yang sama, sehingga halaman yang memakainya menuntut
+    `read-location`. Data yang tidak punya lokasi, seperti libur, tetap
+    dibaca dari daftar tanpa `locationID` (dari pilihan pemilik proyek
+    untuk B183 dan B184, 31 Oktober 2026; `8b5ad0f`, `44a81d0`,
+    `b5a2578`).

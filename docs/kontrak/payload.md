@@ -142,8 +142,8 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /akun/admin/users/:id/unfreeze`
 
 - Aturan: validateUnfreeze di route: body boleh kosong; `durasiBulan` dan `alasan` opsional, field lain ditolak 400
-- Aturan service (`langgananService.unfreeze`): hanya akun klien non-aktif (akun aktif 409). Dengan `durasiBulan`, masa akses diperpanjang; tanpa itu, akun yang masa aksesnya kosong atau sudah lewat ditolak 400 (`temuan.md` butir 115). Status menjadi aktif, `tokenVersion` diganti, dan riwayat `unfreeze` dicatat
-- Web mengirim hasil `payloadAktifkan`: body kosong, atau `durasiBulan` dan `alasan` yang diisi; dialognya mewajibkan durasi bila masa akses kosong atau sudah lewat (`durasiWajibSaatAktifkan`)
+- Aturan service (`langgananService.unfreeze`): hanya akun klien non-aktif (akun aktif 409). Dengan `durasiBulan`, masa akses diperpanjang; tanpa itu, akun yang masa aksesnya sudah lewat ditolak 400, sedangkan akun yang masa aksesnya kosong tetap tanpa batas sejak B154 (`temuan.md` butir 115). Status menjadi aktif, `tokenVersion` diganti, dan riwayat `unfreeze` dicatat
+- Web mengirim hasil `payloadAktifkan`: body kosong, atau `durasiBulan` dan `alasan` yang diisi; dialognya mewajibkan durasi hanya bila masa akses sudah lewat (`durasiWajibSaatAktifkan`), dan untuk akun tanpa batas bawaannya "Tetap tidak dibatasi" (`482ac79`)
 - Respons 200 dengan `data` akun; body kosong terbukti diterima lewat e2e (`10c7efb`)
 - Wajib dari klien: -
 
@@ -259,8 +259,8 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: tanpa validator di route. Service `createManual` mewajibkan `penggunaId` dan `tanggal`, serta minimal satu shift bila bukan libur (400), lalu menyusun satu entri per shift dan meneruskannya ke `generateBulk`, sehingga seluruh aturan `POST /jadwalshift/bulk` berlaku. Dikoreksi 29 September 2026; sebelumnya tercatat memakai field model
 - Body yang dibaca service: `penggunaId`, `tanggal` (YYYY-MM-DD), `isLibur`, `shiftIds[]`, dan `catatan`. Ejaannya berbeda dari field model (`penggunaID`, `tanggalKerja`, `shiftID`)
 - Wajib dari klien: `penggunaId`, `tanggal`, dan `shiftIds` yang tidak kosong bila `isLibur` false
-- Upsert per `tenantID`, `penggunaID`, `tanggalKerja`, dan `shiftID`: membuat jadwal yang sama dua kali tidak ditolak, hanya diperbarui. Libur disimpan sebagai dokumen ber-`shiftID` null, sehingga tidak menimpa shift di hari yang sama (`temuan.md` butir 64)
-- Respons 201 dengan `data` berisi `message`, `berhasilDiproses`, `ditolak`, dan `detailDitolak`, juga saat seluruh jadwal ditolak (`temuan.md` butir 66)
+- Upsert per `tenantID`, `penggunaID`, `tanggalKerja`, dan `shiftID`: membuat jadwal yang sama dua kali tidak ditolak, hanya diperbarui. Libur disimpan sebagai dokumen ber-`shiftID` null, sehingga tidak menimpa shift di hari yang sama (`temuan.md` butir 64). Sejak B164 satu hari berisi libur atau shift: libur menghapus jadwal kerja karyawan hari itu, jadwal kerja menghapus liburnya, dan respons memuat `digantikan`; libur yang membawa `shiftID` ditolak 400 (B166). Staf yang izin disetujui dijadikan libur dengan catatan otomatis, juga lewat buat manual (dibuktikan 31 Oktober 2026)
+- Respons 201 dengan `data` berisi `message`, `berhasilDiproses`, `ditolak`, dan `detailDitolak`; sejak B147 seluruhnya ditolak dijawab 409 `Seluruh jadwal ditolak.` dengan `errors` berisi `detailDitolak`, yang dibentuk ulang web menjadi hasil biasa (`hasilDariPenolakanSeluruh`, `2319662`). Sebelumnya 201 juga saat seluruh jadwal ditolak (`temuan.md` butir 66)
 - Diisi server: `tenantID`
 
 #### `POST /jadwalshift/bulk`
@@ -427,10 +427,10 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /polaroster`
 
 - Aturan: validatePolaRosterPayload (validators/polaRosterValidator.js)
-- Wajib dari klien: `namaPola`, `siklusHari`, `detailSiklus`
-- Field lain yang dikenali: `keterangan`, disimpan model tanpa aturan validator
+- Wajib dari klien: `namaPola`, `siklusHari`, `detailSiklus`, dan sejak B168 `locationID`
+- Field lain yang dikenali: `keterangan`, disimpan model tanpa aturan validator; sejak B174 field asing dan `tenantID` ditolak 400, termasuk di item `detailSiklus`
 - Aturan validator: `siklusHari` angka minimal 1; `detailSiklus` array yang panjangnya sama dengan `siklusHari`, dengan `hariKe` unik dari 1 sampai `siklusHari`; hari kerja wajib `shiftID` ObjectId yang sah, dan hari libur boleh tanpa `shiftID`. Controller menolak `detailSiklus` lebih dari 365 hari; web membatasi 31 (keputusan PL4a). Service menolak 400 bila ada shift yang tidak ditemukan atau sudah nonaktif. Nama ganda dalam tenant (indeks `{ tenantID, namaPola }`) dijawab 4xx tanpa pesan galat MongoDB (spec `dcc22e0`). Dikoreksi 29 September 2026
-- Web mengirim hasil `payloadPolaRoster` (`features/pola-roster/payload.ts`): nama dipangkas, dan `shiftID` hanya untuk hari kerja
+- Web mengirim hasil `payloadPolaRoster` (`features/pola-roster/payload.ts`): nama dipangkas, `shiftID` hanya untuk hari kerja, dan `locationID` lokasi ruang (`KUNCI_LOKASI_POLA_ROSTER`, `8b5ad0f`)
 - Respons 201 dengan `data` berbentuk item `GET /polaroster`
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
@@ -480,9 +480,9 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 #### `POST /shift`
 
 - Aturan: validateShiftPayload (validators/shiftValidator.js)
-- Wajib dari klien: `namaShift`, `jamMasuk`, `jamPulang`
-- Field lain yang dikenali: `isLintasHari`, `toleransiTerlambat`, `status`
-- Jam divalidasi dengan pola yang titik duanya opsional, sehingga "0800" diterima (`temuan.md` butir 68); `isLintasHari` tidak dicocokkan dengan jam (butir 69), dan jam masuk yang sama dengan jam pulang hanya sah bila lintas hari. Nama ganda dalam tenant (indeks `{ tenantID, namaShift }`) dijawab 4xx tanpa pesan galat MongoDB; spec `f99b7cf` menerima 400 maupun 409. Controller meneruskan `...req.body` ke `Shift.create`, dan field di luar skema dibuang Mongoose, termasuk `workspace` yang dahulu dikirim web. Web mengirim keenam field dari `payloadShift` (`features/shift/payload.ts`). Dikoreksi 29 September 2026
+- Wajib dari klien: `namaShift`, `jamMasuk`, `jamPulang`, dan sejak B168 `locationID` (web mengirim lokasi ruang lewat `KUNCI_LOKASI_SHIFT`, `8b5ad0f`)
+- Field lain yang dikenali: `isLintasHari`, `toleransiTerlambat`, `status`; sejak B174 field asing dan `tenantID` ditolak 400
+- Jam divalidasi dengan pola yang titik duanya opsional, sehingga "0800" diterima (`temuan.md` butir 68; wajib `HH:mm` sejak B144); `isLintasHari` tidak dicocokkan dengan jam (butir 69; ditentukan jam sejak B145), dan jam masuk yang sama dengan jam pulang hanya sah bila lintas hari. Nama ganda dalam tenant (indeks `{ tenantID, namaShift }`) dijawab 4xx tanpa pesan galat MongoDB; spec `f99b7cf` menerima 400 maupun 409. Controller meneruskan `...req.body` ke `Shift.create`, dan field di luar skema dibuang Mongoose, termasuk `workspace` yang dahulu dikirim web. Web mengirim keenam field dari `payloadShift` (`features/shift/payload.ts`). Dikoreksi 29 September 2026
 - Respons 201 dengan `data` berbentuk item `GET /shift`
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
@@ -589,7 +589,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 - Aturan: tanpa validator. Service `update` hanya membaca `isLibur`, `shiftID`, dan `catatan`; field yang tidak dikirim memakai nilai lama, dan pengguna maupun tanggal tidak dapat diubah. Dikoreksi 29 September 2026
 - Bukan libur: `shiftID` wajib (400) dan harus shift Aktif milik tenant (400 "Master Shift yang dipilih tidak ditemukan atau sudah tidak aktif."), lalu diperiksa bentrok jam dengan jadwal lain pengguna itu dari sehari sebelum sampai sehari sesudah (400)
-- Libur: `shiftID` dikosongkan
+- Libur: `shiftID` dikosongkan. Sejak B165 menjadikan libur menghapus jadwal lain karyawan hari itu, dan menjadikan kerja menghapus liburnya, sehingga web tidak lagi mengirim langkah hapus (`rencanaSimpanJadwal`, `6a344b0`)
 - Wajib dari klien: -
 - Respons 200 dengan detail jadwal, berbentuk seperti item `GET /jadwalshift`
 - Diisi server: -
@@ -721,7 +721,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validatePolaRosterPayload mode update (validators/polaRosterValidator.js): seluruh field opsional, tetapi `siklusHari` dan `detailSiklus` wajib dikirim bersamaan
 - Wajib dari klien: -
 - Field lain yang dikenali: `namaPola`, `siklusHari`, `detailSiklus`, `keterangan`
-- Selalu gagal selama `detailSiklus` ikut dikirim: validator model memakai `this.siklusHari` di dalam `findOneAndUpdate`, dan di sana `this` adalah query (`test.fixme` di `inti/pengujian.md`); web selalu mengirimnya. Service menjalankan `$set` atas seluruh body, sehingga `tenantID` yang dikirim ikut disimpan bila berupa ObjectId yang sah (`temuan.md` butir 72); web tidak mengirimnya. Dikoreksi 29 September 2026
+- Dulu selalu gagal selama `detailSiklus` ikut dikirim: validator model memakai `this.siklusHari` di dalam `findOneAndUpdate`, dan di sana `this` adalah query; web selalu mengirimnya. Diperbaiki backend (B128), dan skenario ubah pola roster lolos sejak `ea2e752`. Sejak B127 `tenantID` di body diabaikan, dan sejak B174 field asing serta `tenantID` ditolak 400. Sebelum B127 service menjalankan `$set` atas seluruh body, sehingga `tenantID` yang dikirim ikut disimpan bila berupa ObjectId yang sah (`temuan.md` butir 72); web tidak mengirimnya. Dikoreksi 29 September 2026
 - Dibaca controller dari body: `-`
 - Diisi server: - (`tenantID` hanya diisi saat create)
 
@@ -762,7 +762,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validateShiftPayload mode update (validators/shiftValidator.js): seluruh field opsional, tetapi yang dikirim diperiksa formatnya
 - Wajib dari klien: -
 - Field lain yang dikenali: `namaShift`, `jamMasuk`, `jamPulang`, `isLintasHari`, `toleransiTerlambat`, `status`
-- Service menjalankan `findOneAndUpdate` dengan `$set` atas seluruh body. `tenantID` yang dikirim ikut disimpan bila berupa ObjectId yang sah, sehingga shift dapat dipindah ke tenant lain (`temuan.md` butir 71); web tidak mengirimnya. Dikoreksi 29 September 2026
+- Sebelum B127 service menjalankan `findOneAndUpdate` dengan `$set` atas seluruh body. `tenantID` yang dikirim ikut disimpan bila berupa ObjectId yang sah, sehingga shift dapat dipindah ke tenant lain (`temuan.md` butir 71); web tidak mengirimnya. Sejak B127 `tenantID` diabaikan, dan sejak B174 field asing serta `tenantID` ditolak 400. Dikoreksi 29 September 2026
 - Dibaca controller dari body: `-`
 - Diisi server: - (`tenantID` hanya diisi saat create)
 

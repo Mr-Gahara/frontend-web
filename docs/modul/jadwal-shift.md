@@ -60,7 +60,7 @@ keputusan rancangan butir 17 dan 21.
   daftar tenant yang sama beserta keterangan, karena `shiftModel` belum
   punya field lokasi. Menggantikan SH1a (data shift milik tenant
   bersama), yang diputuskan sebelum kebutuhan pemisahan per ruang
-  disampaikan.
+  disampaikan. Konstanta diisi `"locationID"` di `8b5ad0f` (B168).
 - **SH2a: lintas hari dihitung dari jam** (jam pulang tidak lebih besar
   dari jam masuk, termasuk jam yang sama), dan kotak centangnya nonaktif
   beserta keterangan. Sebelumnya effect menimpa centang manual setiap
@@ -92,7 +92,7 @@ keputusan rancangan butir 17 dan 21.
   data masing-masing. Pemisahan per ruang ditulis lengkap dengan
   `KUNCI_LOKASI_POLA_ROSTER` bernilai null, terpisah dari
   `KUNCI_LOKASI_SHIFT`, karena backend dapat menambahkannya di waktu yang
-  berbeda.
+  berbeda. Konstanta diisi `"locationID"` di `8b5ad0f` (B168).
 - **JD5a: jadwal libur tampil LIBUR** di sel kalender (`19227f8`), berbeda
   dari sel tanpa jadwal yang tetap tanda hubung.
 - **JD6a: simpan jadwal beruntun dengan satu ringkasan.** Ubah jadwal satu
@@ -124,6 +124,8 @@ keputusan rancangan butir 17 dan 21.
 - **AB4a: monitoring absensi disaring dengan karyawan ruang** yang sudah
   dimuat halaman pengguna. Staf yang terdaftar di kedua ruang tampil di
   keduanya. Backend belum memisahkan absensi per lokasi (SH5a).
+  Digantikan monitoring per lokasi ruang di `44a81d0` (B183, keputusan
+  di bawah).
 - **AB5a: widget menampilkan yang sedang bekerja dan yang sudah absen.**
   Angka besar adalah staf yang sedang bekerja, dengan baris jumlah staf
   yang sudah absen hari ini; teks kosong dibedakan antara belum ada yang
@@ -132,6 +134,40 @@ keputusan rancangan butir 17 dan 21.
   `namaPeran` di `features/pengguna`, dipakai tabel pengguna, kalender
   jadwal, dan widget (keputusan rancangan butir 12); jam masuk dalam zona
   `Asia/Jakarta` agar label WIB selalu benar; log debug dibuang.
+
+### Penyesuaian backend `ridho` `0024eb9`
+
+Diputuskan pemilik proyek pada 30 dan 31 Oktober 2026
+(`referensi/keputusan-penyesuaian-backend.md`).
+
+- **Gerbang SDM mengikuti izin baru** (`90537c7`, B139, B140): shift
+  `read-location` dan `read-shift`; pola roster ditambah
+  `read-pola-roster`; kalender `read-location`, `read-pengguna`,
+  `read-jadwal-shift`, dan `read-shift`; generate `read-location`,
+  `read-pengguna`, `read-shift`, `read-pola-roster`, dan
+  `create-jadwal-shift`. Aksi per modul di `features/<modul>/izin.ts`
+  (`aksiShift`, `aksiPolaRoster`, `aksiJadwal`): menonaktifkan shift
+  memakai `DELETE`, sel kalender berisi menuntut `update-`, sel kosong
+  `create-`, dan menu titik tiga tidak dipasang tanpa aksi.
+- **Templat role SDM**: Manajer dan General Manajer memegang ke-12 izin,
+  Supervisor hanya `read-shift`, `read-pola-roster`, dan
+  `read-jadwal-shift`.
+- **Monitoring absensi per lokasi ruang** (`44a81d0`, B183),
+  menggantikan AB4a. Widget dan panel Status Staf mengirim `locationID`
+  dari `useLokasiRuang`, sumber yang sama dengan shift. Staf yang izin
+  disetujui dijadikan libur tanpa shift oleh backend dan tidak dimuat
+  monitoring per lokasi, sehingga panel Status Staf menambah karyawan
+  ruang outlet menurut peran yang izin hari itu (`kontrak/temuan.md`
+  butir 165).
+- **Kalender per lokasi ruang dengan penanda lokasi lain** (`b5a2578`,
+  B184). Jadwal kerja karyawan ruang di lokasi lain tampil "Lokasi lain"
+  sebagai penanda baca-saja; sel yang hanya berisi penanda tidak
+  menawarkan buat, karena menjadikan hari itu libur dari ruang ini
+  menghapus jadwal lokasi lain (B165). Libur tidak punya lokasi dan tetap
+  tampil biasa.
+- Diterapkan tanpa ditanyakan: ubah ke libur tanpa langkah hapus
+  (`6a344b0`, B165), dan penolakan seluruh jadwal 409 dibentuk ulang
+  menjadi hasil biasa (`2319662`, B147).
 
 ## Catatan
 
@@ -164,6 +200,23 @@ modul ini yang memakai `apiClient`.
   di `modul/jadwal-shift.md` (Modul jadwal dan shift), dan laporan backend di
   `kontrak/temuan.md` butir 62 sampai 73.
 
+### Catatan dari penyesuaian backend `ridho` `0024eb9`
+
+- `8b5ad0f`: kunci lokasi shift dan pola roster diisi; fixture e2e jadwal
+  dibuat per ruang (`siapkanFixtureJadwal(page, auth, ruang)`), karena
+  shift uji milik outlet tidak tampil di ruang gudang.
+- `6a344b0` dan `2319662`: `rencanaSimpanJadwal` tanpa langkah hapus;
+  `hasilDariPenolakanSeluruh` membentuk ulang 409; `apiClient` membaca
+  `reason`, dan `ApiError.rincian` menyimpan `errors` asli.
+- `ea2e752`: fixme ubah pola roster dilepas (B128), dengan pemeriksaan
+  payload PUT dan langkah hapus lewat UI.
+- `44a81d0`: `useMonitoringAbsensi(tanggal, ruang)`; `stafRuang` dibuang,
+  dan `gabungStatusStaf` menerima karyawan ruang. Backend menjadikan
+  jadwal staf yang izin disetujui libur, juga pada buat manual
+  ("Otomatis Libur: Karyawan sedang Cuti Disetujui.").
+- `b5a2578`: `useDaftarJadwal(filter, { aktif })`, `lainMap` di
+  `KaryawanJadwal`, dan penanda di `ShiftCell`.
+
 ## Utang terbuka
 
 ### Utang kecil dari modul jadwal dan shift
@@ -173,16 +226,36 @@ modul ini yang memakai `apiClient`.
   (`page.once("dialog")`). Diseragamkan bila pemilik proyek memutuskan.
 - Shift outlet dan gudang masih memakai daftar tenant yang sama sampai
   backend memisahkan shift per lokasi (`KUNCI_LOKASI_SHIFT`, keputusan
-  SH1b, `kontrak/temuan.md` butir 70).
+  SH1b, `kontrak/temuan.md` butir 70). Selesai di `8b5ad0f` (B168).
 - Query `?workspace=` pada `GET /shift` hanya penanganan sementara,
   karena backend menjawab 500 tanpa query apa pun (`kontrak/temuan.md`
   butir 8). Dibuang begitu backend diperbaiki (`features/shift/ruang.ts`).
+  Sejak `8b5ad0f` web mengirim `locationID`; cabang `workspace` tinggal
+  untuk konstanta null.
 - Pola roster outlet dan gudang masih memakai daftar tenant yang sama
   sampai backend memisahkannya per lokasi (`KUNCI_LOKASI_POLA_ROSTER`,
-  keputusan PL5, `kontrak/temuan.md` butir 70).
+  keputusan PL5, `kontrak/temuan.md` butir 70). Selesai di `8b5ad0f`
+  (B168).
 - Ubah pola roster tetap gagal karena validator model backend
   (`test.fixme` di `inti/pengujian.md`); tombol ubah tetap ditampilkan dan
-  galatnya diteruskan ke pengguna.
+  galatnya diteruskan ke pengguna. Selesai di backend (B128); fixme
+  dilepas di `ea2e752`.
 - `keterangan` dan `dibuatPada` di `PolaRosterItem` masih opsional, walau
   halaman generate lama yang memetakan pola sendiri sudah tidak ada
   (`19227f8`); dijadikan wajib bersama perapian tipe berikutnya.
+
+### Utang kecil dari penyesuaian backend `ridho` `0024eb9`
+
+- Monitoring per lokasi tidak memuat staf yang izin (`kontrak/temuan.md`
+  butir 165); baris izin di panel Status Staf disusun web dari karyawan
+  ruang menurut peran sampai backend memuat libur karyawan lokasi itu.
+- Widget absensi dan panel Status Staf memuat lokasi ruang, sehingga
+  menuntut `read-location`, sedangkan gerbang panel dan halaman pengguna
+  belum memeriksanya. Selesai di `b69d39a`: panel dipasang hanya dengan
+  `read-location`, dan widget menampilkan pesan izin lokasi; jalur itu
+  hanya teruji di unit test.
+- Jalur role tanpa izin SDM baru (B139, B140) hanya teruji di unit test,
+  karena akun uji berperan Owner.
+- Hapus jadwal masih `confirm` bawaan browser (utang di atas), dan sel
+  yang berisi jadwal lokal sekaligus penanda lokasi lain tetap dapat
+  dijadikan libur, yang menghapus jadwal lokasi lain (B165).

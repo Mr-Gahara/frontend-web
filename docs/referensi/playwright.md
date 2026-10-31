@@ -491,6 +491,17 @@ bersyarat).
   respons itu. Spec menegaskan responsnya gagal, bukan status
   tertentu, selama status itu belum dibaca dari respons nyata (form role,
   `f5fe574`).
+- Skenario yang selama ini `test.fixme` bersyarat konstanta belum pernah
+  berjalan, sehingga kegagalan pertamanya setelah konstanta diisi
+  diperiksa sebagai bug spec lebih dulu. Dari sembilan skenario lintas
+  outlet, dua keliru menebak data: `keLokasi` baris pertama yang sejak
+  pengembalian dapat berupa gudang, dan permintaan baru yang tidak
+  pernah terkirim karena Semua Outlet dengan satu outlet sudah memakai
+  outlet itu (`2eb668a`).
+- Bukti lewat API dalam spec admin memakai header `Authorization` dari
+  permintaan halaman itu sendiri (`respons.request().headers()`), bukan
+  login di konteks lain, karena login akun memutar `tokenVersion` admin
+  dan mengakhiri sesi halaman (`bukaDaftarAkun`, `1ccf0ef`).
 
 ## Spec rujukan
 
@@ -603,7 +614,13 @@ bersyarat).
   outlet dan `test.skip` bersyarat untuk jalur terkunci (keputusan
   rancangan butir 18). Contoh pemakaiannya: jalur terkunci di spec stok,
   pengajuan stok (daftar), dan stock adjustment memeriksa `locationID`
-  permintaan terhadap id dari `/location/current`.
+  permintaan terhadap id dari `/location/current`. Sejak `2eb668a`
+  (B142) jalur lintas outlet berjalan dan jalur terkunci dilewati.
+- `tests/helpers/izin-cuti-uji.ts` (`96a7b40`): fixture yang tidak dapat
+  dihapus (web tanpa halaman izin cuti, backend tanpa `DELETE`) dibuat
+  lewat API, dicari menurut keterangannya lebih dulu agar run berulang
+  tidak menambah data, dan dipasang ke pengguna uji tersendiri, bukan
+  Ridho, karena izin disetujui menjadikan pemiliknya libur di jadwal.
 - `tests/e2e/penjualan/alur-penjualan.spec.ts`: spec pembanding alur bisnis
   dengan fixture tetap (`tests/helpers/penjualan-uji.ts`). Bahan baku dan
   produk uji dibuat sekali, lalu stok outlet dan `produk.stok` disetel
@@ -704,7 +721,9 @@ bersyarat).
 - `tests/e2e/pengguna/absensi-widget.spec.ts` (sejak `845c2cf`): angka
   widget dibandingkan dengan respons nyata monitoring yang disaring
   karyawan ruang, dan jawaban 403 disimulasikan dengan `route.fulfill`
-  berstatus 403 untuk membuktikan pesan izin.
+  berstatus 403 untuk membuktikan pesan izin. Sejak `44a81d0` monitoring
+  disaring server per lokasi, dan `locationID` permintaan dicocokkan
+  dengan id dari `/location/current`.
 - `tests/e2e/gudang/ruang-gudang.spec.ts` (sejak `2d7225b`): keadaan
   tanpa gudang dibentuk dari respons `GET /location` nyata yang disaring,
   dengan `POST` pada pencegat yang sama dijawab gagal; penunggu respons

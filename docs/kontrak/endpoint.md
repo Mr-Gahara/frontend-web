@@ -16,7 +16,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/absensi/monitoring` | authPengguna | - | `{ data }` | - | `features/absensi/api.ts` |
+| GET | `/absensi/monitoring` | authPengguna | `read-absensi` (B141) | `{ data }` | - | `features/absensi/api.ts` (query `tanggal` dan `locationID` lokasi ruang, B183; tanpa `locationID` seluruh staf toko) |
 
 #### `/akun`
 
@@ -25,14 +25,15 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | POST | `/akun/auth/login` | public | - | - | - | `features/auth/api.ts` |
 | POST | `/akun/auth/refreshtoken` | public | - | - | - | 2 file (lewat `fetch`: `lib/apiClient.ts` dan `components/providers/session-provider.tsx`) |
 | POST | `/akun/auth/logout` | public | - | - | - | `features/auth/api.ts` |
-| GET | `/akun/admin/all` | authAkun+adminOnly | - | `{ data, message }` | `id` | `features/admin-akun/api.ts` |
+| GET | `/akun/admin/all` | authAkun+adminOnly | - | `{ data, message, pagination }` | `id` | `features/admin-akun/api.ts` (query `cari`, `status`, `page`, `limit`, B177; `pagination` hanya bila `page` atau `limit` dikirim) |
+| GET | `/akun/admin/users/:id` | authAkun+adminOnly | - | `{ data, message }` | `id` | `features/admin-akun/api.ts` (sebentuk item daftar, B176; id rusak 400, tidak ada 404) |
 | POST | `/akun/admin/users` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` |
 | PUT | `/akun/admin/users/:id` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` |
 | DELETE | `/akun/admin/users/:id` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` (password admin di body) |
 | POST | `/akun/admin/users/:id/freeze` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` |
 | POST | `/akun/admin/users/:id/unfreeze` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` |
 | POST | `/akun/admin/users/:id/langganan` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` |
-| GET | `/akun/admin/users/:id/langganan` | authAkun+adminOnly | - | `{ cursorBerikutnya, data, message }` | `_id`, `__v` | `features/admin-akun/api.ts` (query `cursor`; dibaca lewat `apiMentah.get`) |
+| GET | `/akun/admin/users/:id/langganan` | authAkun+adminOnly | - | `{ cursorBerikutnya, data, message, total }` | `id` (B155) | `features/admin-akun/api.ts` (query `cursor`; dibaca lewat `apiMentah.get`; item memuat `oleh` atau null) |
 
 #### `/akunkas`
 
@@ -111,17 +112,17 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/izincuti` | authPengguna | `read-izin-cuti` | `{ data }` | `id` | `features/izin-cuti/api.ts` (seluruh izin dan cuti tenant, tanpa query; `temuan.md` butir 146) |
+| GET | `/izincuti` | authPengguna | `read-izin-cuti` | `{ data }` | `id` | `features/izin-cuti/api.ts` (query `status`, `dari`, dan `sampai` hari WIB, B160; query lain 400) |
 
 #### `/jadwalshift`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/jadwalshift` | authPengguna | - | `{ data, message, success }` | `id` | `features/jadwal/api.ts` |
-| POST | `/jadwalshift` | authPengguna | - | - | - | `features/jadwal/api.ts` |
-| PUT | `/jadwalshift/:id` | authPengguna | - | - | - | `features/jadwal/api.ts` |
-| DELETE | `/jadwalshift/:id` | authPengguna | - | - | - | `features/jadwal/api.ts` |
-| POST | `/jadwalshift/bulk` | authPengguna | - | - | - | `features/jadwal/api.ts` |
+| GET | `/jadwalshift` | authPengguna | - (tanpa `read-jadwal-shift` hanya jadwal sendiri, B140) | `{ data, message, success }` | `id` | `features/jadwal/api.ts` (query `startDate`, `endDate`, dan `locationID` lokasi ruang, B184) |
+| POST | `/jadwalshift` | authPengguna | `create-jadwal-shift` (B140) | - | - | `features/jadwal/api.ts` (seluruhnya ditolak 409, B147) |
+| PUT | `/jadwalshift/:id` | authPengguna | `update-jadwal-shift` (B140) | - | - | `features/jadwal/api.ts` |
+| DELETE | `/jadwalshift/:id` | authPengguna | `delete-jadwal-shift` (B140) | - | - | `features/jadwal/api.ts` |
+| POST | `/jadwalshift/bulk` | authPengguna | `create-jadwal-shift` (B140) | - | - | `features/jadwal/api.ts` (seluruhnya ditolak 409, B147) |
 
 #### `/jurnaltransfer`
 
@@ -261,10 +262,10 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/polaroster` | authPengguna | - | `{ data, message, success }` | `id` | `features/pola-roster/api.ts` |
-| POST | `/polaroster` | authPengguna | - | - | - | `features/pola-roster/api.ts` |
-| PUT | `/polaroster/:id` | authPengguna | - | - | - | `features/pola-roster/api.ts` |
-| DELETE | `/polaroster/:id` | authPengguna | - | - | - | `features/pola-roster/api.ts` |
+| GET | `/polaroster` | authPengguna | `read-pola-roster` (B139) | `{ data, message, success }` | `id` | `features/pola-roster/api.ts` (query `locationID`, B168) |
+| POST | `/polaroster` | authPengguna | `create-pola-roster` (B139) | - | - | `features/pola-roster/api.ts` (`locationID` wajib, B168) |
+| PUT | `/polaroster/:id` | authPengguna | `update-pola-roster` (B139) | - | - | `features/pola-roster/api.ts` |
+| DELETE | `/polaroster/:id` | authPengguna | `delete-pola-roster` (B139) | - | - | `features/pola-roster/api.ts` |
 
 #### `/produk`
 
@@ -307,10 +308,10 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/shift` | authPengguna | - | `{ data, message, success }` | `id` | `features/shift/api.ts` (query `workspace` hanya penghindar 500, `temuan.md` butir 8) |
-| POST | `/shift` | authPengguna | - | - | - | `features/shift/api.ts` |
-| PUT | `/shift/:id` | authPengguna | - | - | - | `features/shift/api.ts` |
-| DELETE | `/shift/:id` | authPengguna | - | - | - | `features/shift/api.ts` |
+| GET | `/shift` | authPengguna | `read-shift` (B139) | `{ data, message, success }` | `id` | `features/shift/api.ts` (query `locationID`, B168) |
+| POST | `/shift` | authPengguna | `create-shift` (B139) | - | - | `features/shift/api.ts` (`locationID` wajib, B168) |
+| PUT | `/shift/:id` | authPengguna | `update-shift` (B139) | - | - | `features/shift/api.ts` |
+| DELETE | `/shift/:id` | authPengguna | `delete-shift` (B139) | - | - | `features/shift/api.ts` (menonaktifkan) |
 
 #### `/stockopname`
 

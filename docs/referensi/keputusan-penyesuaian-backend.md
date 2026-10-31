@@ -478,3 +478,78 @@ memuat seluruh `yoga` (B108 sampai B118, P25).
   dipakai web tetapi belum dibuktikan khusus tidak ditulis terbukti.
 - Suite e2e penuh dijalankan karena ini penyesuaian backend: 503 lolos
   dan 14 skipped, tanpa kegagalan (`c2a1e73`).
+
+## Penyesuaian backend `ridho` `0024eb9`
+
+Diputuskan pemilik proyek pada 30 dan 31 Oktober 2026, setelah
+`origin/ridho` maju 75 commit di atas `877e493` dan memuat `yoga`
+`f102c53`; `nizar` tidak maju. Isinya terutama modul SDM dan akun milik
+Ridho, serta serah utang backend ke Yoga dan Nizar.
+
+- **Lingkungan diselaraskan, lalu suite penuh lebih dulu terhadap backend
+  baru, sebelum kode web diubah.** Dua migrasi backend mengisi
+  `locationID` 787 shift dan 150 pola roster, membuang 2 indeks lama, dan
+  merapikan 11 hari jadwal ganda. Permission diselaraskan lewat langkah
+  1, 3, 4, dan 5 (`inti/backend.md`); langkah 2 dilewati karena sinkron
+  seed kini membuang nama lama sendiri (B143). Basis data dan seed 160
+  nama, Owner 157. Sesudahnya `npm run db:indeks`. Suite penuh: 486
+  lolos, 14 skipped, dan 17 gagal, seluruhnya cocok dengan perubahan
+  backend (10 B168, 1 B147, 5 B149 dan B150, 1 B136). B136 tidak ada di
+  catatan backend dan hanya tertangkap suite.
+- **Cakupan: yang rusak ditambah seluruh perubahan yang dapat dipakai
+  web.** OTP reset PIN Owner dan ubah profil (B178 sampai B181), B195,
+  dan B202 digabung ke pembangunan ulang login; logo toko (B203 sampai
+  B205) dan jam operasional (B206) belum dikerjakan.
+- **Shift dan pola roster per lokasi** (`8b5ad0f`, B168):
+  `KUNCI_LOKASI_SHIFT` dan `KUNCI_LOKASI_POLA_ROSTER` diisi
+  `"locationID"`, fixture e2e jadwal dibuat per ruang, dan kedua
+  `test.fixme` "dibuat di outlet tidak tampil di gudang" berjalan.
+- **Ubah ke libur tanpa langkah hapus** (`6a344b0`, B165), karena
+  backend kini menghapus jadwal lain hari itu sendiri.
+- **Penolakan seluruh jadwal 409 dibentuk ulang menjadi hasil biasa**
+  (`2319662`, B147, B148), agar pesan tetap menyebut karyawan dan
+  tanggal (J2a). `apiClient` ikut membaca `reason`, dan `ApiError`
+  menyimpan `errors` aslinya (`rincian`).
+- **Gerbang dan aksi SDM mengikuti izin baru** (`90537c7`, B139, B140):
+  halaman shift, pola roster, kalender, dan generate digerbangi izin
+  `read-` dan `create-` beserta `read-location`, tombol mengikuti izin
+  per operasi, dan templat Manajer serta General Manajer memegang ke-12
+  izin, Supervisor hanya tiga izin `read-`.
+- **Izin lintas outlet diisi `akses-lintas-outlet`** (`2eb668a`, B142),
+  dan hanya templat General Manajer yang memegangnya. Sembilan
+  `test.fixme` lintas outlet berjalan; dua di antaranya keliru di spec,
+  bukan di halaman, dan dibetulkan di commit yang sama.
+- **Assertion status dan bentuk respons baru** (`5cd4ffb`, B136, B141,
+  B149, B150). Tipe login menjadikan `requireSetup` dan `daftarTenant`
+  wajib.
+- **Fixme ubah pola roster dilepas** (`ea2e752`, B128), dengan
+  pemeriksaan payload dan langkah hapus lewat UI.
+- **Panel admin** (`25aa498`, `1ccf0ef`, `821b7de`, `482ac79`; B176,
+  B177, B155, B154): detail dan ubah dari `GET /akun/admin/users/:id`,
+  daftar berhalaman di server bersama cari dan status, pelaku dan total
+  di riwayat, serta aktifkan akun tanpa batas tanpa durasi. Keputusan
+  pemilik proyek: paginasi server, nama pelaku beserta total, dan durasi
+  opsional dengan bawaan "Tetap tidak dibatasi".
+- **Izin cuti hari ini disaring server** (`96a7b40`, B160). Fixture e2e
+  positif dan negatif dibuat lewat API dan menetap, karena web tidak
+  punya halaman izin cuti dan backend tidak punya hapus (pemilik proyek).
+- **Monitoring absensi per lokasi ruang** (`44a81d0`, B183), menggantikan
+  AB4a. Staf yang izin disetujui dijadikan libur tanpa shift oleh
+  backend, sehingga tidak pernah termuat monitoring per lokasi; karyawan
+  ruang yang izin hari itu ditambahkan sebagai baris tersendiri di panel
+  Status Staf (pemilik proyek), dan temuannya dicatat
+  (`kontrak/temuan.md` butir 165).
+- **Kalender per lokasi ruang dengan penanda jadwal lokasi lain**
+  (`b5a2578`, B184). Sel yang hanya berisi penanda tidak menawarkan buat,
+  karena menjadikannya libur dari ruang lain menghapus jadwal lokasi itu
+  (B165).
+- **Panel Status Staf dan widget absensi menuntut `read-location`**
+  (`b69d39a`), ditemukan saat penilaian dampak dokumentasi: monitoring
+  per lokasi memuat lokasi ruang, sedangkan gerbangnya belum
+  memeriksanya.
+- Suite e2e penuh dijalankan karena ini penyesuaian backend: 514 lolos
+  dan 10 skipped, tanpa kegagalan (`b5a2578`).
+- **Atribusi commit**: `68cd7da` ter-push dengan baris
+  `Co-Authored-By`, diganti `8b5ad0f` lewat force-push oleh pemilik
+  proyek, dan aturannya dipindah ke lapis inti (`90472fe`,
+  `inti/cara-kerja.md`, Atribusi commit).

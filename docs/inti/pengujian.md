@@ -12,6 +12,23 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per penyesuaian backend `ridho` `0024eb9`** (commit `b69d39a`,
+31 Oktober 2026): 855 test unit dan integrasi lolos. Suite e2e penuh
+dijalankan di atas `b5a2578` terhadap backend `ridho` `0024eb9`, pukul
+12.21 sampai 12.43 WIB: 514 lolos dan 10 skipped, tanpa kegagalan.
+Totalnya 524, bertambah 7 dari 517 lewat skenario baru admin (id rusak
+dan tidak ada, halaman berikutnya, dan akun tanpa batas), dashboard
+(izin hari ini), dan kalender (penanda lokasi lain di kedua ruang).
+Skipped turun dari 14 menjadi 10: ke-12 `test.fixme` dilepas, dan
+bertambah 8 skip bersyarat data (empat jalur terkunci lintas outlet,
+dua keterangan pemakaian bersama, halaman berikutnya daftar akun, dan
+lebar HP Status Staf), di samping tab kritis gudang dan buat surat
+jalan gagal. Sebelum kode web diubah, suite penuh terhadap backend baru
+gagal 17 dari 517, seluruhnya cocok dengan perubahan backend
+(`referensi/keputusan-penyesuaian-backend.md`). `b69d39a` sesudahnya
+hanya menjalankan spec terdampaknya (pengguna dan dashboard 25 lolos
+dengan 1 skipped).
+
 **Baseline per penyesuaian backend `ridho` `877e493`** (commit `c2a1e73`,
 28 Oktober 2026): 838 test unit dan integrasi lolos. Suite e2e penuh
 dijalankan terhadap backend `ridho` `877e493`, pukul 11.09 sampai 11.33
@@ -154,14 +171,12 @@ satu putaran.
 
 ## Test yang ditandai fixme dan skip bersyarat
 
-Menunggu perbaikan backend:
-
-| Test | Menunggu |
-|---|---|
-| Edit pola roster | Validator memakai `this.siklusHari` dalam konteks `findOneAndUpdate` |
-| Sembilan skenario lintas outlet di spec jurnal stok, stock opname (daftar), pengajuan stok (daftar), stok, stock adjustment, dan daftar penjualan (`20c026b`) | Backend menetapkan permission lintas outlet dan `IZIN_LINTAS_OUTLET` diisi (`kontrak/temuan.md` butir 39). `test.fixme` bersyarat lewat `tests/helpers/lintas-outlet.ts`; badannya lengkap dan berjalan sendiri begitu konstanta diisi |
-| Shift yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/shift/crud-shift.spec.ts`) | Backend memisahkan shift per lokasi dan `KUNCI_LOKASI_SHIFT` di `features/shift/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
-| Pola yang dibuat di ruang outlet tidak tampil di ruang gudang (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | Backend memisahkan pola roster per lokasi dan `KUNCI_LOKASI_POLA_ROSTER` di `features/pola-roster/ruang.ts` diisi (`kontrak/temuan.md` butir 70). `test.fixme` bersyarat; badannya lengkap |
+Menunggu perbaikan backend: tidak ada sejak penyesuaian backend `ridho`
+`0024eb9`. Ke-12 `test.fixme` yang terhitung di baseline sebelumnya
+dilepas pada 30 dan 31 Oktober 2026: sembilan skenario lintas outlet
+(B142, `2eb668a`), shift dan pola roster yang dibuat di ruang outlet tidak
+tampil di ruang gudang (B168, `8b5ad0f`), dan ubah pola roster (B128,
+`ea2e752`).
 
 Cara membuktikan sebuah fixme: lepas sementara, jalankan dua kali,
 kembalikan berkasnya dengan `git checkout`, lalu lepas dan commit per test
@@ -176,10 +191,12 @@ terhitung di angka skipped pada baseline:
 |---|---|
 | `inventaris/stok/lihat-stok.spec.ts`, tab kritis gudang | Tidak ada stok gudang yang kritis (terjadi pada data uji sekarang) |
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
-| Skenario jalur terkunci di spec stok, pengajuan stok (daftar), stock adjustment, dan daftar penjualan (`20c026b`) | `IZIN_LINTAS_OUTLET` sudah diisi, sehingga Ridho memegangnya; butuh akun uji tanpa izin itu. Tidak terjadi selama konstanta null, sehingga belum terhitung di baseline |
-| Halaman shift gudang dengan keterangan pemakaian bersama (`jadwal/shift/crud-shift.spec.ts`) | `KUNCI_LOKASI_SHIFT` sudah diisi, sehingga keterangan tidak tampil lagi. Tidak terjadi selama konstanta null |
-| Halaman pola roster gudang dengan keterangan pemakaian bersama (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | `KUNCI_LOKASI_POLA_ROSTER` sudah diisi, sehingga keterangan tidak tampil lagi. Tidak terjadi selama konstanta null |
-| Enam belas skenario di `tests/e2e/admin/` (sesi, akun klien, langganan, dan kelola akun) | `.env.e2e` tidak berisi kredensial admin uji (PA5a). Tidak terjadi di mesin pemilik proyek, sehingga tidak terhitung di baseline |
+| Empat skenario jalur terkunci di spec stok, pengajuan stok (daftar), stock adjustment, dan daftar penjualan (`20c026b`) | `IZIN_LINTAS_OUTLET` sudah diisi, sehingga Ridho memegangnya; butuh akun uji tanpa izin itu. Terjadi sejak `2eb668a` (B142) dan terhitung di baseline |
+| Halaman shift gudang dengan keterangan pemakaian bersama (`jadwal/shift/crud-shift.spec.ts`) | `KUNCI_LOKASI_SHIFT` sudah diisi, sehingga keterangan tidak tampil lagi. Terjadi sejak `8b5ad0f` (B168) dan terhitung di baseline |
+| Halaman pola roster gudang dengan keterangan pemakaian bersama (`jadwal/pola-roster/crud-pola-roster.spec.ts`) | `KUNCI_LOKASI_POLA_ROSTER` sudah diisi, sehingga keterangan tidak tampil lagi. Terjadi sejak `8b5ad0f` (B168) dan terhitung di baseline |
+| `admin/akun-klien.spec.ts`, halaman berikutnya daftar akun (B177) | Data uji berisi tidak lebih dari 10 akun (terjadi pada data uji sekarang) |
+| `dashboard/dashboard-outlet.spec.ts`, lebar HP membatasi lima baris staf | Staf monitoring per lokasi outlet ditambah karyawan yang izin tidak lebih dari lima (terjadi sejak `44a81d0`, B183) |
+| Dua puluh skenario di `tests/e2e/admin/` (sesi, akun klien, langganan, dan kelola akun) | `.env.e2e` tidak berisi kredensial admin uji (PA5a). Tidak terjadi di mesin pemilik proyek, sehingga tidak terhitung di baseline |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
 hapus bahan baku juga dilewati bila datanya kosong, tetapi tidak terjadi pada

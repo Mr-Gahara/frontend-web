@@ -919,3 +919,14 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
 - **Kandidat pekerjaan diturunkan dari baris yang dibaca, bukan dari
   jumlah hasil grep.** Ketiga "pemakaian `apiClient`" yang tersisa
   ternyata komentar (26 Oktober 2026).
+- **Tidak ada formatter otomatis di repo ini**: tidak ada konfigurasi
+  Prettier, dan baris dibiarkan sepanjang gaya berkasnya. Menjalankan
+  `prettier --write` pada satu berkas memformat ulang baris yang tidak
+  diubah (`riwayat-langganan.tsx`, 31 Oktober 2026; dibatalkan sebelum
+  commit). Indentasi blok sisipan disesuaikan oleh skrip pengganti, dan
+  hasilnya diperiksa dengan `git diff -w`.
+- **Blok sisipan ditulis utuh sekali, bukan dengan penanda yang
+  dirapikan kemudian.** Sisipan berisi test kosong dan kurung penutup
+  sementara sempat masuk ke spec dashboard lalu harus ditulis ulang
+  (31 Oktober 2026); `tsc` dan ESLint tidak selalu menangkapnya bila
+  sintaksnya kebetulan sah.

@@ -42,7 +42,10 @@ DB (dashboard outlet), WR (warna), dan TB (tabel).
   pembandingnya hari sebelum kemarin** (`0c5822b`).
 - **DB3a: status staf adalah absensi ditambah sakit, izin, dan cuti** dari
   `GET /izincuti` yang disetujui dan berlaku hari ini. Kehadiran nyata
-  menang atas izin, dan status alpha ditunda (`3812763`).
+  menang atas izin, dan status alpha ditunda (`3812763`). Sejak `96a7b40`
+  izin hari ini disaring server (B160), dan sejak `44a81d0` staf berasal
+  dari monitoring per lokasi outlet ditambah karyawan ruang yang izin
+  hari itu (B183, `modul/jadwal-shift.md`).
 - **DB4a: lonceng notifikasi dipasang nonaktif** dengan keterangan belum
   tersedia, karena belum ada sumber datanya (`0c5822b`).
 - **DB5a: grafik dashboard memplot omzet (`totalOmzet`) per tanggal bulan

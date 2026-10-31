@@ -16,7 +16,11 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   terkunci teruji e2e, sedangkan jalur lintas outlet berupa `test.fixme`
   bersyarat. Begitu konstanta diisi, keduanya bertukar dan jalur terkunci
   butuh akun uji tanpa izin itu. Keduanya teruji di unit test
-  (`tests/unit/features/inventaris/cakupan.test.ts`).
+  (`tests/unit/features/inventaris/cakupan.test.ts`). Konstanta diisi di
+  `2eb668a` (B142): jalur lintas outlet kini teruji e2e, dan empat
+  skenario jalur terkunci dilewati. Di MVP satu outlet, pemilih outlet
+  hanya berisi satu pilihan, sehingga pilih outlet di jurnal stok dan
+  pembelian stok tidak memicu permintaan baru.
 - **Tab pengajuan stok yang disembunyikan menurut izin** hanya teruji di
   unit test (`tests/unit/features/pengajuan-stok/pengajuan-stok.test.ts`),
   dengan alasan yang sama: aturannya hanya berlaku bagi petugas transfer
@@ -430,3 +434,20 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Skenario daftar pengajuan dan surat jalan memilih contoh dari halaman
   pertama**, sehingga dilewati bila halaman itu tidak memuat permintaan,
   pengembalian, atau dua dokumen untuk dibandingkan.
+- **Jalur role tanpa izin SDM baru** (B139, B140) hanya teruji di unit
+  test (`gate-sdm-jadwal`, templat role), karena akun uji berperan Owner.
+- **Fixture izin cuti menetap** (`96a7b40`): pengguna uji "E2E Izin
+  Cuti" dan izin uji dibuat lewat API, karena web tidak punya halaman
+  izin cuti dan backend tidak punya `DELETE /izincuti`. Setiap hari yang
+  menjalankan spec dashboard menambah dua izin (disetujui dan ditolak hari
+  itu); izin 2020 dibuat sekali.
+- **Skenario aktifkan akun tanpa batas membekukan akun klien sungguhan**
+  (`482ac79`), dipilih menurut syarat dan tidak pernah akun uji utama;
+  setiap run menambah dua catatan di riwayat langganan akun itu.
+- **Perpindahan halaman daftar akun dan pembatas lima baris staf di HP
+  tidak berjalan pada data uji sekarang** (skip bersyarat data,
+  `inti/pengujian.md`): akun platform tidak lebih dari 10, dan staf
+  monitoring per lokasi outlet tidak lebih dari lima sejak B183.
+- **Kalender per lokasi hanya teruji untuk sel yang berisi penanda
+  saja**; sel yang berisi jadwal lokal sekaligus penanda lokasi lain
+  belum diuji e2e.

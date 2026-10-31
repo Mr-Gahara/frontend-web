@@ -43,10 +43,11 @@ dan PA3a serta PA12a sampai PA14a di `c824f18`.
 - **PA10b: aksi langganan dan riwayat di halaman detail akun**,
   `/admin/akun/[id]`. Backend tidak punya endpoint detail satu akun,
   sehingga akun dibaca dari cache daftar, dan kekurangan itu dilaporkan
-  (`kontrak/temuan.md` butir 119).
+  (`kontrak/temuan.md` butir 119). Sejak `25aa498` detail dan ubah memuat
+  satu akun dari `GET /akun/admin/users/:id` (B176).
 - **PA11a: riwayat langganan bertahap dengan tombol muat berikutnya.**
   Backend memberi kursor tanpa jumlah total; kebutuhan total dilaporkan
-  (butir 120).
+  (butir 120). Sejak `821b7de` total dan pelaku tampil (B155).
 - **PA12a: form ubah akun di halaman tersendiri**,
   `/admin/akun/[id]/ubah`.
 - **PA13a: ubah dan hapus hanya untuk akun klien.** Akun admin baca-saja,
@@ -76,6 +77,27 @@ dan PA3a serta PA12a sampai PA14a di `c824f18`.
   adanya tanpa penanganan sementara (butir 17); dan halaman admin memakai
   token tema, bukan warna heksadesimal.
 
+### Penyesuaian backend `ridho` `0024eb9`
+
+Diputuskan pemilik proyek pada 31 Oktober 2026
+(`referensi/keputusan-penyesuaian-backend.md`).
+
+- **Daftar akun berhalaman di server bersama cari dan status**
+  (`1ccf0ef`, B177; keputusan rancangan butir 27). `paramDaftarAkun`
+  menggantikan `saringAkun`, cari dibatasi 100 karakter seperti backend,
+  dan total tampil di footer tabel.
+- **Riwayat menyebut pelaku dan total** (`821b7de`, B155): username atau
+  email pelaku, "Sistem" untuk job pembeku, dan "Admin (akun terhapus)"
+  bila akun pelakunya sudah dihapus; di atas daftar "Menampilkan x dari
+  y catatan".
+- **Aktifkan akun tanpa batas tidak mewajibkan durasi** (`482ac79`,
+  B154): bawaannya "Tetap tidak dibatasi", dan memilih durasi membuat
+  masa aksesnya berbatas. Durasi tetap wajib bila masa akses sudah
+  lewat.
+- Diterapkan tanpa ditanyakan (`25aa498`, B176): detail dan ubah dari
+  `useAkun`, dengan id rusak (400) dan akun tidak ada (404) sebagai
+  "Akun tidak ditemukan" (`akunTidakAda`).
+
 ## Catatan
 
 ### Catatan dari modul panel admin
@@ -95,20 +117,21 @@ dengan suite e2e penuh dijalankan sekali di akhir modul (keputusan PF6a):
   (PA1a). Akun admin tidak punya toko maupun pengguna: ia dikenali dari
   `role` di payload token akun, masuk tanpa login pengguna, dan sesinya
   dipulihkan lewat refresh akun saja. Respons login admin terbukti tanpa
-  `requireSetup` dan tanpa `daftarTenant`.
+  `requireSetup` dan tanpa `daftarTenant`; sejak B136 keduanya dikirim.
 - Lapisan data di `features/admin-akun`, seluruhnya dengan token akun
   (`referensi/arsitektur.md`). Cakupannya akun dan langganan (PA2a); daftar toko dan
   kelola permission tidak ikut.
 - Backend tidak punya endpoint detail satu akun, sehingga halaman detail
   dan halaman ubah membaca akun dari cache daftar (PA10b). Riwayat
   langganan berkursor tanpa jumlah total, sehingga dibaca lewat
-  `apiMentah.get` dan ditampilkan bertahap (PA11a).
+  `apiMentah.get` dan ditampilkan bertahap (PA11a). Keduanya tersedia
+  sejak B155 dan B176 (Catatan dari penyesuaian backend, di bawah).
 - Ubah hanya untuk username, email, dan password akun klien (PA3a, PA13a);
   hapus membawa password admin di body `DELETE` dan hanya untuk akun yang
   sudah dibekukan (PA14a).
 - Kredensial admin uji tidak ada di repo: spec membacanya dari `.env.e2e`
-  yang diabaikan git, dan tanpa berkas itu 16 skenario admin dilewati
-  (PA5a, PA6a, `inti/pengujian.md`).
+  yang diabaikan git, dan tanpa berkas itu 16 skenario admin (20 per 31
+  Oktober 2026) dilewati (PA5a, PA6a, `inti/pengujian.md`).
 - Password akun admin di basis data development diganti lewat model
   backend pada 2 Oktober 2026, karena password lamanya tidak diketahui dan
   tidak ada jalur API untuk itu tanpa login admin.
@@ -117,6 +140,20 @@ dengan suite e2e penuh dijalankan sekali di akhir modul (keputusan PF6a):
   `kontrak/endpoint.md` dan `kontrak/payload.md`.
 - Keputusan pemilik proyek: `modul/panel-admin.md` (Modul panel admin).
 
+### Catatan dari penyesuaian backend `ridho` `0024eb9`
+
+- Respons login admin kini sebentuk klien (`requireSetup: false`,
+  `daftarTenant: []`, B136), dan tipe login menjadikan keduanya wajib
+  (`5cd4ffb`). Password admin yang salah saat hapus dijawab 400 (B150).
+- Spec admin memakai satu pintu `bukaDaftarAkun` di
+  `tests/helpers/admin-uji.ts`: halaman pertama diperiksa `page=1` dan
+  `limit=10`, dan seluruh akun dibaca lewat API dengan token permintaan
+  halaman itu sendiri, karena login di konteks lain memutar
+  `tokenVersion` admin.
+- Skenario B154 memilih akun klien aktif tanpa batas selain akun uji
+  utama, karena pembekuan mengeluarkan seluruh pengguna tokonya; bila
+  langkah UI gagal, `aktifkanAkunKlienUji` memulihkannya di `finally`.
+
 ## Utang terbuka
 
 ### Utang kecil dari modul panel admin
@@ -124,17 +161,23 @@ dengan suite e2e penuh dijalankan sekali di akhir modul (keputusan PF6a):
 - Daftar akun dimuat seluruhnya tanpa paginasi, dan halaman detail serta
   halaman ubah membaca akun dari cache daftar, karena backend tidak punya
   endpoint detail maupun daftar yang dapat dipotong (`kontrak/temuan.md`
-  butir 119). Diganti begitu endpoint-nya ada.
+  butir 119). Diganti begitu endpoint-nya ada. Selesai di `25aa498` dan
+  `1ccf0ef` (B176, B177).
 - Akun admin baca-saja di panel (PA13a): tidak ada jalur web untuk
   mengubah atau mengganti password akun admin, termasuk miliknya sendiri.
 - Daftar toko (`GET /tenant`) dan kelola permission platform di luar
   cakupan putaran ini (PA2a).
 - Dialog aktifkan mewajibkan durasi untuk akun tanpa masa akses, mengikuti
   backend (`durasiWajibSaatAktifkan`, `kontrak/temuan.md` butir 115);
-  disesuaikan begitu makna masa akses kosong diputuskan.
+  disesuaikan begitu makna masa akses kosong diputuskan. Selesai di
+  `482ac79` (B154).
 - Password admin yang salah saat hapus dijawab 401, sehingga klien
   menyegarkan token lalu mengulang `DELETE` (butir 114); web menampilkan
-  pesannya tanpa penanganan sementara.
+  pesannya tanpa penanganan sementara. Sejak B150 dijawab 400.
 - Kepala panel admin tidak menampilkan identitas admin yang sedang masuk,
   karena token akun tidak membawa email, dan tampilannya masih sederhana
   dengan token tema; layout dan UI/UX-nya menunggu keputusan pemilik proyek.
+### Utang kecil dari penyesuaian backend `ridho` `0024eb9`
+
+- Perpindahan halaman daftar akun belum teruji e2e: skenarionya
+  dilewati selama data uji berisi tidak lebih dari 10 akun.

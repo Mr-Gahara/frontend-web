@@ -29,41 +29,63 @@ setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 
 ## Pekerjaan berikutnya: login akun dan pengguna
 
-Penyesuaian ke backend `ridho` `877e493` selesai pada 28 Oktober 2026,
-dalam delapan commit dari `4227228` sampai `c2a1e73`
+Penyesuaian ke backend `ridho` `0024eb9` selesai pada 31 Oktober 2026,
+dalam 15 commit kode dari `8b5ad0f` sampai `b69d39a`, ditambah commit
+dokumen atribusi `90472fe`
 (`referensi/keputusan-penyesuaian-backend.md`, Penyesuaian backend
-`ridho` `877e493`): izin pembelian per ruang (B116), lokasi pembelian
-dari populate dan Belanja Stok lewat ringkasan server (B112, B117),
-kartu siap surat jalan gudang per arah (B111), paginasi server bersama
-pencarian untuk stock adjustment, stock opname, surat jalan gudang, dan
-pengajuan stok, serta pencarian jurnal stok (B104 sampai B110).
-Sebelumnya suite penuh di atas `5b8cbd9` dijalankan di jendela rawan dan
-lolos, dan B113 serta B118 dibuktikan lewat permintaan nyata pukul 00.57
-WIB. Suite penuh di atas `c2a1e73`: 503 lolos dan 14 skipped
-(`inti/pengujian.md`, Baseline).
+`ridho` `0024eb9`): shift, pola roster, monitoring absensi, dan kalender
+per lokasi (B168, B183, B184), izin SDM (B139, B140), izin lintas outlet
+(B142), jadwal (B147, B148, B165), status dan bentuk respons login (B136,
+B149, B150), fixme ubah pola roster (B128), panel admin (B154, B155,
+B176, B177), dan izin cuti hari ini (B160). Seluruh `test.fixme` yang
+menunggu backend sudah dilepas. Suite penuh di atas `b5a2578`: 514 lolos
+dan 10 skipped (`inti/pengujian.md`, Baseline).
 
 Urutan pilihan pemilik proyek (26 Oktober 2026), tidak berubah:
 
 1. **Halaman login akun dan login pengguna dibangun ulang.** Murni
    frontend; tata letak dan alurnya dirancang lewat pratinjau sebelum
-   kode (`modul/profil-login.md`).
+   kode (`modul/profil-login.md`). Perubahan backend yang belum dipakai
+   web ikut dikerjakan di sini (keputusan 30 Oktober 2026): OTP reset PIN
+   Owner dan ubah email atau password akun (B178 sampai B180), hapus akun
+   oleh Owner (B181), register Owner yang ditolak 409 bila toko sudah
+   punya Owner (B195), dan pengguna nonaktif yang ditolak 403 saat login
+   PIN (B202).
 2. **Plan tier per akun** (Basic, Advanced, dan Full) yang membatasi
    akses fitur. Menunggu rancangan dan penegakan backend: model tier,
    pemeriksaan di route, dan tier di respons sesi. Frontend menyaring
    menu, halaman, dan tombol per tier begitu kontraknya ada; rancangannya
    dipetakan sambil login dikerjakan.
 
-Backend lokal di `ridho` `877e493`. Laporan pembuktian 28 Oktober 2026
-untuk Yoga dan Nizar disusun di akhir penyesuaian, tanpa temuan baru, dan
-dicatat di `arsip/laporan-backend.md` saat diserahkan. Butir 155 bagian
-langganan, trial, dan zona waktu server masih terbuka untuk modul Ridho
-di backend.
+Belum dijadwalkan: logo toko (B203 sampai B205) dan jam operasional
+(B206) di profil toko.
+
+Backend lokal di `ridho` `0024eb9`, yang memuat `yoga` `f102c53`;
+`nizar` di `877e493`. Laporan untuk tim backend dari penyesuaian ini
+memuat temuan baru `kontrak/temuan.md` butir 165 (Ridho) beserta
+pembuktian, dan dicatat di `arsip/laporan-backend.md` saat diserahkan.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho nizar yoga; do echo "origin/$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...origin/$r | tr '\t' ' ')"; done
 ```
 
 ## Utang kecil yang tertunda
+
+### Utang kecil dari penyesuaian backend `ridho` `0024eb9`
+
+- Monitoring per lokasi tidak memuat staf yang izin (`kontrak/temuan.md`
+  butir 165); panel Status Staf menambah karyawan ruang menurut peran
+  yang izin hari itu sampai backend memperbaikinya.
+- Jalur role tanpa izin SDM baru, tanpa `read-location`, dan tanpa izin
+  lintas outlet hanya teruji di unit test, karena akun uji berperan
+  Owner (`referensi/utang-pengujian.md`).
+- Jurnal stok tetap mengirim satu `locationID` untuk Semua Outlet,
+  walau backend menerima `tipeLokasi` (B109); berpengaruh hanya bila
+  tenant punya lebih dari satu outlet (`kontrak/temuan.md` butir 151).
+- Fixture izin cuti menetap di basis data development, karena backend
+  tidak punya hapus izin; setiap hari yang menjalankan spec dashboard
+  menambah dua izin.
+- Laporan untuk tim backend dari penyesuaian ini belum diserahkan.
 
 ### Utang kecil dari penyesuaian backend `ridho` `877e493`
 
@@ -209,6 +231,8 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
   Sejak 19 Oktober 2026 di `af5f315`, fast-forward ke `origin/yoga` yang
   memuat `origin/nizar` (`referensi/keputusan-penyesuaian-backend.md`).
   Sejak 21 Oktober 2026 di `b5b367a`, fast-forward ke `origin/yoga`.
+  Sejak 28 Oktober 2026 di `877e493`, dan sejak 30 Oktober 2026 di
+  `0024eb9` (`inti/backend.md`).
 - Indeks pelanggan di basis data development belum sesuai skema
   (`kontrak/temuan.md` butir 142); dibiarkan sebagai bukti sampai backend
   menyediakan migrasi indeks.
