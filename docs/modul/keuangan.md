@@ -241,7 +241,8 @@ desain yang disetujui (`e073a9d`):
 - **BS3a: tab selalu tampil seperti tiga tab lain**; gerbang halaman
   `read-pembelian-stok`, `read-akunkas`, dan `read-location`, karena
   nama lokasi dan ruang asal dibaca dari daftar lokasi. Tab yang tampil
-  tanpa izin dicatat sebagai temuan frontend (butir 163).
+  tanpa izin dicatat sebagai temuan frontend (butir 163). Sejak
+  `e051906` keempat tab disaring lewat `bolehBukaHalaman`.
 - Kartu mengikuti seluruh filter, seperti ringkasan mutasi arus kas.
   Pembelian disebut persediaan, bukan beban, sehingga tidak masuk laba
   rugi, dan saldo akun kas belum terpotong.
@@ -491,6 +492,7 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   e2e sejak `f7805ca`; pembatalan transfer keluar hanya teruji di unit
   test.
 - Tab Keuangan tampil bagi pengguna tanpa izin halamannya dan baru
-  ditolak saat dibuka (`kontrak/temuan.md` butir 163).
+  ditolak saat dibuka (`kontrak/temuan.md` butir 163). Selesai di
+  `e051906`.
 - Ringkasan Belanja Stok lebih dari satu halaman hanya teruji di unit
   test (`referensi/utang-pengujian.md`).

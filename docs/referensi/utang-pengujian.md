@@ -370,7 +370,7 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   bulan berjalan belum lebih dari satu halaman, sehingga skipped dapat
   naik di awal bulan.
 - **Semua Outlet dengan beberapa outlet di jurnal stok** (meminta
-  memilih satu outlet) hanya teruji di unit test (`lokasiJurnalOutlet`),
+  memilih satu outlet) hanya teruji di unit test (`lokasiSatuOutlet`),
   karena tenant uji punya satu outlet.
 - **Pesan lokasi gudang gagal dimuat atau belum didaftarkan di jurnal
   stok gudang** belum teruji e2e.

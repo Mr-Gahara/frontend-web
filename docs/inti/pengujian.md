@@ -38,6 +38,10 @@ Angka itu hitungan, karena suite penuh belum dijalankan ulang
 adjustment, pengajuan stok, daftar penjualan, role, dan gerbang rute 64
 lolos dengan 1 skipped (tab kritis gudang), dan `tests/e2e/jadwal` 50
 lolos tanpa skip. Vitest tetap 855; `2a9a47b` hanya mengubah komentar.
+Sesudahnya `e051906` menambah tiga test unit tab Keuangan (vitest 858
+lolos di 98 berkas), dan `5ba2a42` menambah satu langkah di alur surat
+jalan gudang, tanpa test baru; spec terdampak keuangan 34 lolos, transfer
+stok 7 lolos, dan stock opname 16 lolos (`a611b59`).
 
 **Baseline per penyesuaian backend `ridho` `877e493`** (commit `c2a1e73`,
 28 Oktober 2026): 838 test unit dan integrasi lolos. Suite e2e penuh

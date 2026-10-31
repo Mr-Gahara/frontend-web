@@ -69,7 +69,7 @@ Diputuskan pemilik proyek pada 21 Oktober 2026 (penyesuaian backend
 - **Lingkup per tipe lokasi dikirim sebagai satu `locationID`**: ruang
   gudang memakai lokasi Gudang pertama, dan pilihan Semua Outlet memakai
   satu-satunya outlet; bila outlet lebih dari satu, halaman meminta
-  memilih satu outlet (`lokasiJurnalOutlet`, MVP). Filter tipe lokasi
+  memilih satu outlet (`lokasiSatuOutlet`, MVP). Filter tipe lokasi
   diminta ke backend (butir 151).
 - **Filter periode** Dari tanggal dan Sampai tanggal memakai
   `PilihTanggal`, dengan periode awal tanggal 1 bulan berjalan sampai
