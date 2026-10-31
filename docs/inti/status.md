@@ -61,9 +61,10 @@ Belum dijadwalkan: logo toko (B203 sampai B205) dan jam operasional
 (B206) di profil toko.
 
 Backend lokal di `ridho` `0024eb9`, yang memuat `yoga` `f102c53`;
-`nizar` di `877e493`. Laporan untuk tim backend dari penyesuaian ini
-memuat temuan baru `kontrak/temuan.md` butir 165 (Ridho) beserta
-pembuktian, dan dicatat di `arsip/laporan-backend.md` saat diserahkan.
+`nizar` di `877e493`. Laporan penyesuaian ini, berisi temuan baru
+`kontrak/temuan.md` butir 165 beserta pembuktian, ditulis langsung ke
+dokumentasi backend (`128d0de`), dan butir 165 diserahkan ke Yoga
+(`arsip/laporan-backend.md`).
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho nizar yoga; do echo "origin/$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...origin/$r | tr '\t' ' ')"; done
@@ -85,7 +86,9 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
 - Fixture izin cuti menetap di basis data development, karena backend
   tidak punya hapus izin; setiap hari yang menjalankan spec dashboard
   menambah dua izin.
-- Laporan untuk tim backend dari penyesuaian ini belum diserahkan.
+- Laporan penyesuaian ini ditulis ke dokumentasi backend di `128d0de`
+  (`arsip/laporan-backend.md`); butir 165 kini utang Yoga, karena Ridho
+  sementara tidak memegang backend.
 
 ### Utang kecil dari penyesuaian backend `ridho` `877e493`
 
@@ -100,6 +103,7 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
 - Tombol urut kolom dibuang di stock adjustment dan stock opname, karena
   urutan klien hanya mengurutkan satu halaman; urutan mengikuti backend.
 - Laporan 28 Oktober 2026 belum tercatat di `arsip/laporan-backend.md`.
+  Dicatat pada 31 Oktober 2026.
 
 ### Utang kecil dari pembelian stok dan audit pergantian hari
 

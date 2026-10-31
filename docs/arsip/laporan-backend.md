@@ -292,6 +292,18 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   159), validator dan skema pembelian (butir 160), dokumen API usang
   (butir 161), indeks nomor faktur kosong (butir 162), dan tanggal lampau
   pembelian bagi peran selain Owner (butir 164)
+- Laporan pembuktian 28 Oktober 2026 terhadap `ridho` `877e493`, setelah
+  `c2a1e73`, tanpa temuan baru: butir 150 sampai 152, B104 sampai B106,
+  B111, butir 154 untuk beban dan jurnal transfer, 157, serta 159 dan 161
+  terbukti; tercatat di `docs/pengembangan/klien.md` backend
+- Laporan 31 Oktober 2026 terhadap `ridho` `0024eb9`, setelah `5f2f92a`,
+  ditulis langsung ke dokumentasi backend atas perintah pemilik proyek
+  (`128d0de`, `docs/pengembangan/klien.md` dan
+  `docs/pengembangan/status/yoga.md` backend): satu temuan, monitoring
+  absensi per lokasi tidak memuat staf yang izin (butir 165), diserahkan
+  ke Yoga bersama utang SDM berbasis lokasi, ditambah pembuktian B128,
+  B136, B139 sampai B142, B147 sampai B150, B154, B155, B160, B165, B168,
+  B176, B177, B183, dan B184
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi
