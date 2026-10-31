@@ -111,8 +111,7 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
       await expect(getPolaRow(page, namaBaru)).toBeVisible();
     });
 
-    // Langkah edit dipisah ke test [1b] yang ditandai fixme: backend saat ini
-    // menolak setiap update yang membawa detailSiklus.
+    // Langkah edit ada di test [1b].
 
     await test.step("Hapus Pola Roster", async () => {
       const row = getPolaRow(page, namaBaru);
@@ -141,14 +140,12 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
   });
 
   // ----------------------------------------------------------
-  // [1b] EDIT POLA ROSTER (fixme: bug backend)
-  // polaRosterModel memvalidasi detailSiklus dengan this.siklusHari. Pada
-  // findOneAndUpdate dengan runValidators, this adalah Query sehingga
-  // this.siklusHari undefined dan setiap update yang membawa detailSiklus
-  // ditolak 400. Payload frontend sudah benar (jumlah item = siklusHari).
-  // Ganti test.fixme menjadi test setelah backend diperbaiki.
+  // [1b] EDIT POLA ROSTER
+  // Update yang membawa detailSiklus tersimpan sejak backend 54c6c0b (B128);
+  // sebelumnya validator model membaca this.siklusHari dari Query dan
+  // menolak setiap update 400.
   // ----------------------------------------------------------
-  test.fixme("edit: nama dan jumlah siklus pola roster tersimpan", async ({
+  test("edit: nama dan jumlah siklus pola roster tersimpan, lalu dihapus", async ({
     page,
   }) => {
     const ts = Date.now();
@@ -176,13 +173,33 @@ test.describe("E2E - Manajemen Pola Roster (CRUD)", () => {
       const dialog = page.getByRole("dialog");
       await dialog.getByPlaceholder(/misal: reguler 5-2/i).fill(namaEdit);
       await dialog.locator('input[type="text"]').last().fill("2");
+      const tPut = page.waitForResponse(
+        (r) => r.request().method() === "PUT" && /\/api\/polaroster\/[^/?]+$/i.test(r.url()),
+      );
       await dialog.getByRole("button", { name: /simpan pola roster/i }).click();
+      const put = await tPut;
+      expect(put.status(), "PUT pola roster").toBe(200);
+      const dikirim = put.request().postDataJSON() as { siklusHari: number; detailSiklus: unknown[] };
+      expect(dikirim.siklusHari).toBe(2);
+      expect(dikirim.detailSiklus).toHaveLength(2);
+      const tersimpan = ((await put.json()) as { data: { siklusHari: number; detailSiklus: unknown[] } }).data;
+      expect(tersimpan.siklusHari).toBe(2);
+      expect(tersimpan.detailSiklus).toHaveLength(2);
       await expect(dialog).toBeHidden({ timeout: 10_000 });
 
       await page.getByPlaceholder(/cari nama pola/i).fill(namaEdit);
       const editedRow = getPolaRow(page, namaEdit);
       await expect(editedRow).toBeVisible({ timeout: 10_000 });
       await expect(editedRow).toContainText("2 Hari");
+    });
+
+    await test.step("Hapus pola hasil edit", async () => {
+      const row = getPolaRow(page, namaEdit);
+      await row.getByRole("cell").last().getByRole("button").click();
+      await page.getByRole("menuitem", { name: /hapus pola/i }).click();
+      await page.getByRole("alertdialog").getByRole("button", { name: /ya, hapus permanen/i }).click();
+      await expect(page.getByText(/pola roster berhasil dihapus/i)).toBeVisible({ timeout: 10_000 });
+      await expect(getPolaRow(page, namaEdit)).toHaveCount(0, { timeout: 10_000 });
     });
   });
 
