@@ -10,6 +10,21 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 
 ## Utang pengujian
 
+- **Spec `pengiriman-penerimaan` menghitung seluruh surat jalan DIKIRIM
+  tanpa melihat arahnya**, padahal halaman pengiriman hanya menampilkan
+  asal gudang dan penerimaan outlet hanya tujuan outlet. Satu surat jalan
+  Outlet ke Gudang yang tertinggal DIKIRIM cukup untuk menggagalkannya
+  (`arsip/riwayat-pengujian.md`, kejadian 1 November 2026). Harapannya
+  perlu disaring menurut asal dan tujuan.
+- **Pengguna nonaktif yang ditolak 403 saat login PIN (B202)** belum
+  teruji e2e; pesannya tampil lewat `pesanError` tanpa penanganan khusus.
+- **Verifikasi email, lupa password, dan reset PIN Owner** belum punya
+  spec, karena backend-nya belum ada (N3, N4, B178); rencana ujinya di
+  `modul/setup-akun.md`, Pengujian OTP.
+- **Tanggal di topbar tetap "Sabtu, 31 Oktober 2026" setelah jam palsu
+  melewati tengah malam**, diamati 1 November 2026 di spec yang memakai
+  `page.clock`. Mungkin menyalahi keputusan rancangan butir 28; belum
+  diselidiki apakah topbar memang tidak berganti hari tanpa muat ulang.
 - **Pemilih outlet di jurnal stok dan pembelian stok hanya berisi satu
   pilihan** di MVP satu outlet, sehingga memilih outlet tidak memicu
   permintaan baru. Kedua jalur cakupan lokasi teruji e2e sejak

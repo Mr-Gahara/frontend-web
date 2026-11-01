@@ -23,6 +23,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | POST | `/akun/auth/login` | public | - | - | - | `features/auth/api.ts` |
+| POST | `/akun/auth/register` | public | - | - | - | `features/auth/api.ts` |
 | POST | `/akun/auth/refreshtoken` | public | - | - | - | 2 file (lewat `fetch`: `lib/apiClient.ts` dan `components/providers/session-provider.tsx`) |
 | POST | `/akun/auth/logout` | public | - | - | - | `features/auth/api.ts` |
 | GET | `/akun/admin/all` | authAkun+adminOnly | - | `{ data, message, pagination }` | `id` | `features/admin-akun/api.ts` (query `cari`, `status`, `page`, `limit`, B177; `pagination` hanya bila `page` atau `limit` dikirim) |

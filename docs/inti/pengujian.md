@@ -12,6 +12,16 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per halaman login dan daftar** (commit `bb17c79`, 1 November
+2026): 858 test unit dan integrasi lolos. Suite e2e penuh dijalankan di
+atas `bb17c79`, pukul 16.12 sampai 16.34 WIB: 532 lolos dan 1 skipped,
+tanpa kegagalan. Totalnya 533: 522 pada suite penuh untuk `005ebb7`,
+ditambah spec tampilan login akun (3), tampilan login pengguna (3), dan
+daftar (5). Berkurangnya dua test dari 524 ke 522 dan turunnya skipped
+dari 10 belum ditelusuri. Satu-satunya yang dilewati adalah skip
+bersyarat data di jurnal stok, karena data bulan berjalan masih kosong
+pada tanggal 1.
+
 **Baseline per penyesuaian backend `ridho` `0024eb9`** (commit `b69d39a`,
 31 Oktober 2026): 855 test unit dan integrasi lolos. Suite e2e penuh
 dijalankan di atas `b5a2578` terhadap backend `ridho` `0024eb9`, pukul
@@ -216,8 +226,9 @@ terhitung di angka skipped pada baseline:
 | Dua puluh skenario di `tests/e2e/admin/` (sesi, akun klien, langganan, dan kelola akun) | `.env.e2e` tidak berisi kredensial admin uji (PA5a). Tidak terjadi di mesin pemilik proyek, sehingga tidak terhitung di baseline |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
-hapus bahan baku juga dilewati bila datanya kosong, tetapi tidak terjadi pada
-data uji sekarang.
+hapus bahan baku juga dilewati bila datanya kosong. Pada data uji sekarang
+itu hanya terjadi di jurnal stok pada tanggal 1, karena data bulan
+berjalan masih kosong (baseline 1 November 2026).
 
 Ketiga spec tulis stock opname membuat dokumen baru di setiap run dan
 menutupnya sebagai CANCELLED, sehingga dokumen CANCELLED bertambah tiga per

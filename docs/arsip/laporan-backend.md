@@ -313,6 +313,9 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   `pin-login` aplikasi, `registerOwner` dari web, stok minimal produk,
   penegakan fitur di route WMS, dan pajak di data toko, butir 166), serta
   perilaku aplikasi untuk Ajis
+- Laporan nama toko di login pengguna, disusun 1 November 2026 dan
+  diserahkan ke Yoga: token akun tidak memuat nama toko maupun email, dan
+  `GET /tenant/:id` menolak token akun (`kontrak/temuan.md` butir 167).
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

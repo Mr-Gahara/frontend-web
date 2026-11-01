@@ -125,6 +125,11 @@ bersyarat).
 
 ## Catatan Playwright
 
+- Jam yang dirender dari `Date.now()` diuji dengan
+  `page.clock.setFixedTime`: waktu tetap, sedangkan timer halaman tetap
+  berjalan, sehingga detak per detik membaca jam patokan. Patokan
+  diletakkan sebelum waktu nyata agar token tidak dianggap kedaluwarsa,
+  dan zona waktu dipatok lewat `test.use({ timezoneId })`.
 - Radix Select: buka lewat teks yang sedang tampil di trigger, yaitu placeholder (misalnya "Pilih role") atau nilai terpilih (misalnya "Semua Lokasi"), bukan `getByRole("combobox").nth()`, karena Radix merender trigger beserta select tersembunyi.
 - Setelah mutation, tunggu permintaan pemuatan ulang selesai sebelum memeriksa tabel, agar tidak berlomba dengan invalidasi cache.
 - Toast Sonner menutup sendiri; jangan jadikan satu-satunya bukti keberhasilan.

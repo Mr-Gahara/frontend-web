@@ -489,6 +489,19 @@ Dipindah dari `referensi/utang-pengujian.md` pada 31 Oktober 2026.
 
 Dipindah dari `inti/pengujian.md` (Utang pengujian) pada 25 Oktober 2026.
 
+- **Suite penuh 1 November 2026 (14.24 sampai 14.51 WIB) gagal di tiga
+  spec.** Buat reservasi (judul halaman buat tidak muncul) dan tarif
+  (`hapusLewatApi` tidak dijawab dalam 30 detik) lolos saat diulang
+  tersendiri; penyebabnya belum diketahui, sejalan dengan kejadian spec
+  tarif dan tipe aset di bawah. Spec pengiriman dan penerimaan surat
+  jalan gagal karena `SJ-PGJ/202611/0021-01` (Outlet Pontianak Kota ke
+  Gudang A) tertinggal DIKIRIM dari suite yang dihentikan dengan Ctrl+C
+  pukul 14.24. Surat jalan itu ditutup lewat
+  `PATCH /transferstok/:id/terima` dengan helper uji, bukan lewat Proses
+  Terima seperti tertulis di pesan commit `e7fda09`; spec lalu lolos.
+- **Suite penuh pertama 1 November 2026 mencatat sembilan skipped**,
+  sedangkan run berikutnya hanya satu. Judul test yang dilewati tidak
+  dicatat, sehingga penyebabnya tidak dapat dipastikan.
 - **Spec tarif sempat gagal sekali di suite penuh `074e98c`** (spinner,
   lolos 3 dari 3 saat diulang). Sebelum migrasi tarif, spec itu lolos 78
   dari 78 dalam tiga putaran terhadap kode lama; penyebab kegagalan

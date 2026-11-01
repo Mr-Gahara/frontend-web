@@ -146,15 +146,39 @@ memeriksa status setup fitur dari Y1, agar fitur hasil naik plan tetap
 terkunci sampai setup tambahannya selesai. Nama field dan kode galat di
 dokumen serah terima hanya usulan; nama akhirnya mengikuti label B.
 
+## Tampilan halaman
+
+Varian desain dibuat di kanvas "Varian Login Tachyon POS" dan dipilih
+pemilik proyek pada 1 November 2026. Ketiga halaman memakai font Geist
+dan token warna yang sudah ada.
+
+- **TP1a: login akun memakai desain A (Meja Navy)** (`e7fda09`): panel
+  navy berisi merek dan judul "Buka toko, mulai shift.", form di kanan.
+- **TP2a: login pengguna memakai desain E (Layar Kunci)** (`1f3b9e4`):
+  latar krem, panel navy dengan jam dan tanggal yang berganti tiap
+  menit, "Lupa PIN?" sebagai panel bantuan dua jalur (karyawan meminta
+  Owner; reset PIN Owner disebut belum tersedia di web), dan "Keluar dari
+  akun toko" menggantikan "Ganti Akun Bisnis". Panel menampilkan merek,
+  bukan nama toko dan email (`kontrak/temuan.md` butir 167).
+- **TP3a: daftar memakai desain E dengan carousel plan dan stepper**
+  (`bb17c79`). Stepper "Daftar akun, Verifikasi email, Siapkan toko"
+  (`features/auth/langkah-daftar.tsx`) dipakai lagi oleh wizard setup.
+  Varian E2 (krem dan navy) ditolak.
+- **TP4a: teks halaman tidak menjanjikan langkah yang belum ada.** Tombol
+  daftar bertuliskan "Daftar", bukan "Daftar dan kirim kode verifikasi",
+  dan sesudah daftar halaman menyebut verifikasi email serta penyiapan
+  toko belum tersedia. `/daftar` belum ditautkan dari login akun sampai
+  N3 dan Y1 ada.
+
 ## Peta halaman web
 
 | Halaman | Isi | Token | Menunggu |
 |---|---|---|---|
-| Daftar | Email dan password, lalu verifikasi email | Publik | N3 |
+| Daftar | Email dan password, lalu verifikasi email. Langkah 1 sudah ada di `/daftar` (`bb17c79`), belum ditautkan dari login akun | Publik | N3, Y1 |
 | Verifikasi email | Isian OTP dan kirim ulang | Publik | N3 |
-| Login akun | Email dan password; tautan daftar dan lupa password. Admin ke panel admin, akun belum terverifikasi ke verifikasi, setup belum selesai ke wizard | Publik | N1, N3, Y1 |
+| Login akun | Email dan password; tautan daftar dan lupa password. Admin ke panel admin, akun belum terverifikasi ke verifikasi, setup belum selesai ke wizard. Tampilan desain A sudah ada (`e7fda09`); kedua tautan dipasang setelah halamannya berfungsi | Publik | N1, N3, N4, Y1 |
 | Lupa password | Email, lalu OTP dan password baru | Publik | N4 |
-| Login pengguna | Nama dan PIN; lupa PIN Owner lewat OTP (B178); galat nonaktif 403 (B202) dan 429 | Akun | Sudah tersedia |
+| Login pengguna | Nama dan PIN; lupa PIN Owner lewat OTP (B178); galat nonaktif 403 (B202) dan 429. Tampilan desain E sudah ada (`1f3b9e4`); nama toko belum tampil (butir 167) | Akun | Sudah tersedia; nama toko menunggu butir 167 |
 | Wizard fase akun | Nama toko (`POST /tenant`), lalu Owner (`register-owner`, 409 bila sudah ada, B195) | Akun | Y3 |
 | Wizard fase Owner | Lokasi outlet, kategori, bahan baku bila ada resep, produk, dan pajak; Advanced dan Pro: tipe aset, aset, tarif; Pro: gudang | Pengguna | Y1 |
 | Langganan | Plan, masa berlaku, dan tombol hubungi admin | Pengguna | N1 |
@@ -189,6 +213,17 @@ Dibaca dari `ridho` `128d0de` pada 1 November 2026:
   140, dan 151 sampai 159); pajak di data toko tidak dipakai perhitungan
   (Y6).
 
+Diuji langsung terhadap backend development pada 1 November 2026:
+
+- Payload token akun berisi `id`, `role`, `version`, `tenantID`, `iat`,
+  dan `exp`. `GET /tenant/:id` dengan token akun dijawab 403.
+- `POST /akun/auth/register` menjawab 201 dengan data akun, tanpa token
+  dan tanpa email; akunnya langsung aktif tanpa toko, dengan masa
+  percobaan. Email dari layanan disposable ditolak.
+- `registerLimiter` hanya dilewati bila `NODE_ENV` bernilai `test`, jadi
+  di backend development batasnya tetap 10 pendaftaran per 15 menit per
+  IP (`middleware/rateLimiters.js` baris 14 dan 44).
+
 ## Pengujian OTP
 
 - Mailpit berjalan di Docker: SMTP `localhost:1025` dan API HTTP
@@ -209,4 +244,8 @@ Dibaca dari `ridho` `128d0de` pada 1 November 2026:
 - Domain alamat uji ber-OTP perlu dicocokkan dengan validator email
   `register`, karena buat akun klien oleh admin menolak domain disposable
   (`kontrak/payload.md`).
-- Varian desain login akun, login pengguna, dan daftar belum dibuat.
+- Nama toko dan email akun belum dapat ditampilkan di login pengguna,
+  karena token akun tidak memuatnya dan `GET /tenant/:id` menolak token
+  akun (`kontrak/temuan.md` butir 167, diserahkan ke Yoga).
+- Tautan "Daftar" dan "Lupa password?" di login akun dipasang setelah N3,
+  N4, dan Y1 tersedia; sampai itu `/daftar` hanya dapat dibuka langsung.

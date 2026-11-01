@@ -204,3 +204,31 @@ Lapis arsip: tidak perlu dikirim di chat baru. Isinya dipindah dari docs/refacto
 - **Pencarian dampak untuk beberapa commit menjalankan istilah perilaku
   sekali saja.** Empat run dengan istilah yang sama menghasilkan 1.059
   baris yang sebagian besar berulang.
+
+## Pelajaran dari halaman login dan daftar (1 November 2026)
+
+- **Suite penuh tidak dihentikan dengan Ctrl+C.** Blok `finally` test
+  yang sedang berjalan tidak sempat menutup datanya, dan surat jalan uji
+  yang tertinggal DIKIRIM menggagalkan spec lain di run berikutnya. Bila
+  terpaksa dihentikan, periksa data uji setengah jadi sebelum
+  menyimpulkan kegagalan.
+- **Keluaran suite penuh di blok commit tidak dialirkan ke `tail`.**
+  Tanpa progres, run setengah jam terlihat macet; reporter `line` tanpa
+  `tail` menampilkan progresnya.
+- **Kelas varian Tailwind ikut tertulis di atribut `class`**, sehingga
+  selector `[class*='destructive']` cocok juga dengan isian bergaya
+  `aria-invalid:border-destructive`, bukan hanya kotak galat.
+- **Skrip sekali pakai lewat `npx tsx` yang memakai helper uji perlu
+  `baseURL`**, karena helper memakai URL relatif yang di dalam test
+  disambung dari konfigurasi Playwright.
+- **Tangkapan layar menunggu `document.fonts.ready`.** Tanpa itu teks
+  dapat tertangkap dengan font cadangan dan tampak tidak seragam; font
+  yang sebenarnya dipastikan lewat computed `font-family`.
+- **Pencarian dampak beberapa commit kembali dijalankan per commit
+  dengan istilah yang sama** (1.020 baris), mengulang pelajaran halaman
+  pengeluaran. Selain itu bentuk prosa dari nama berkas seperti
+  `halaman-daftar` membawa kata umum "daftar" yang cocok dengan ratusan
+  baris; hasilnya disaring dengan pola istilah perubahan sebelum dinilai.
+- **Bahan yang dibutuhkan dikumpulkan dalam satu perintah baca**, bukan
+  berkas demi berkas, agar pemilik proyek tidak menjalankan belasan
+  perintah untuk satu putaran.

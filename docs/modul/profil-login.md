@@ -117,9 +117,6 @@ empat commit, dengan suite e2e penuh dijalankan sekali di akhir modul
   butir 112).
 - Unggah foto profil belum ada; avatar memakai inisial (PF9a). Bukan
   kebutuhan MVP, dan ditinjau setelah rilis.
-- Teks tombol saat memuat di login pengguna masih "Menerbitkan Token
-  C...", istilah internal; penggantiannya menunggu keputusan pemilik
-  proyek.
 - Halaman ringkasan laba rugi memicu peringatan ukuran grafik di konsol
   (lebar dan tinggi -1 saat render pertama). Penyebabnya belum ditelusuri
   dari kode, dan grafiknya tetap tampil. Sejak `0c5822b` komponen grafik

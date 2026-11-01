@@ -43,19 +43,20 @@ Urutannya:
 1. **Backend mengerjakan plan dan status setup.** Rancangannya diserahkan
    ke Nizar (N1 sampai N6), Yoga (Y1 sampai Y6), dan Ajis untuk aplikasi
    pada 1 November 2026. Plan menjadi prasyarat status setup.
-2. **Varian desain login akun, login pengguna, dan daftar** dibuat sebagai
-   pratinjau untuk dipilih pemilik proyek, paralel dengan langkah 1 karena
-   tidak bergantung pada plan. Gaya terpilih diterapkan juga ke wizard
-   setup.
-3. **Halaman login dibangun ulang** dengan gaya terpilih, beserta perubahan
-   backend yang belum dipakai web (keputusan 30 Oktober 2026): OTP reset
-   PIN Owner dan ubah email atau password akun (B178 sampai B180), hapus
-   akun oleh Owner (B181), register Owner yang ditolak 409 bila toko sudah
-   punya Owner (B195), dan pengguna nonaktif yang ditolak 403 saat login
-   PIN (B202). Teks memuat "Menerbitkan Token C..." diganti di sini
-   (`modul/profil-login.md`).
-4. **Daftar, verifikasi email, lupa password, wizard setup, halaman
-   langganan, dan penyaringan per plan** begitu kontrak Nizar dan Yoga
+2. **Varian desain login akun, login pengguna, dan daftar**: selesai 1
+   November 2026. Terpilih A untuk login akun, E untuk login pengguna, dan
+   E untuk daftar (`modul/setup-akun.md`, Tampilan halaman). Gaya terpilih
+   diterapkan juga ke wizard setup.
+3. **Halaman login dibangun ulang**: tampilannya selesai 1 November
+   2026, yaitu login akun (`e7fda09`), login pengguna (`1f3b9e4`), dan
+   daftar langkah 1 yang belum ditautkan (`bb17c79`). Yang tersisa adalah
+   perubahan backend yang belum dipakai web (keputusan 30 Oktober 2026):
+   OTP reset PIN Owner dan ubah email atau password akun (B178 sampai
+   B180), hapus akun oleh Owner (B181), register Owner yang ditolak 409
+   bila toko sudah punya Owner (B195), dan uji e2e pengguna nonaktif yang
+   ditolak 403 saat login PIN (B202).
+4. **Verifikasi email dan tautan daftar, lupa password, wizard setup,
+   halaman langganan, dan penyaringan per plan** begitu kontrak Nizar dan Yoga
    tersedia (`modul/setup-akun.md`, Peta halaman web).
 
 Belum dijadwalkan: logo toko (B203 sampai B205) dan jam operasional
