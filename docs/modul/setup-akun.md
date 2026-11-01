@@ -249,3 +249,8 @@ Diuji langsung terhadap backend development pada 1 November 2026:
   akun (`kontrak/temuan.md` butir 167, diserahkan ke Yoga).
 - Tautan "Daftar" dan "Lupa password?" di login akun dipasang setelah N3,
   N4, dan Y1 tersedia; sampai itu `/daftar` hanya dapat dibuka langsung.
+- Tombol "Buka aplikasi" di halaman setup selesai belum ada, karena
+  aplikasi kasir belum rilis. Wajib ada saat aplikasi rilis: tombol
+  membuka aplikasi lewat deep link, dan bila aplikasi belum terpasang
+  mengarah ke halaman Play Store. Yang dibutuhkan dari Ajis: skema deep
+  link atau Android App Links, serta nama paket atau tautan Play Store.
