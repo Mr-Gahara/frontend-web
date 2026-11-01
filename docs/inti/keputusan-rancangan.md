@@ -25,7 +25,9 @@ sama (submodul pengajuan stok, di bawah).
 - **Satu tenant adalah satu brand dengan tepat satu outlet dan satu
   gudang** pada MVP. Multi-outlet dan multi-gudang direncanakan di patch
   berikutnya; relasi outlet dan gudang (many-to-many atau many-to-one)
-  belum diputuskan.
+  belum diputuskan. Sejak 1 November 2026 gudang hanya ada di plan Pro:
+  tenant Basic dan Advanced punya satu outlet tanpa gudang
+  (`modul/setup-akun.md`, PL6a).
 - **Pengguna dan akun hanya terikat ke tenant**, tidak ke lokasi. Tempat
   dan peran kerja seseorang (petugas gudang, kasir outlet) dibedakan lewat
   role dan permission. Petugas gudang yang sedang berada di outlet tetap
@@ -67,7 +69,9 @@ sama (submodul pengajuan stok, di bawah).
   tenant. Setup tenant (`POST /tenant`, `tenantService.createWithOwner`)
   selalu untuk akun pemanggilnya, dan membuat role Owner berizin penuh,
   akun kas "Kas Kecil (Laci)" `CASH-001`, serta metode pembayaran
-  "Tunai".
+  "Tunai". Diganti 1 November 2026: pendaftaran dan seluruh setup akun
+  pindah ke web, dan aplikasi hanya memakai akun yang setup intinya
+  selesai (`modul/setup-akun.md`, SA1a sampai SA11a).
 
 ## Keputusan rancangan yang mengikat
 

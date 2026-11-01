@@ -12,7 +12,7 @@ dan urutan migrasi satu modul.
 - **Produk**: Tachyon POS, SaaS POS multi-tenant untuk coffeeshop.
 - **Dua frontend berbagi satu backend**: Flutter (mobile) dan Next.js (web ini).
 - **Dua ruang kerja**: outlet (POS, keuangan, inventaris, reservasi, jadwal) dan gudang (WMS).
-- **Model MVP**: satu tenant satu outlet dan satu gudang; pengguna hanya terikat ke tenant, dan tugas outlet atau gudang dibedakan lewat role dan permission (`inti/keputusan-rancangan.md`, Model bisnis MVP).
+- **Model MVP**: satu tenant satu outlet, ditambah satu gudang khusus plan Pro (`modul/setup-akun.md`, PL6a); pengguna hanya terikat ke tenant, dan tugas outlet atau gudang dibedakan lewat role dan permission (`inti/keputusan-rancangan.md`, Model bisnis MVP).
 
 ### Struktur direktori
 

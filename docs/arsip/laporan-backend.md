@@ -304,6 +304,15 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   ke Yoga bersama utang SDM berbasis lokasi, ditambah pembuktian B128,
   B136, B139 sampai B142, B147 sampai B150, B154, B155, B160, B165, B168,
   B176, B177, B183, dan B184
+- Rancangan plan dan setup akun 1 November 2026 terhadap `ridho`
+  `128d0de`, diserahkan sebagai teks siap salin per orang
+  (`modul/setup-akun.md`): untuk Nizar butir N1 sampai N6 (plan dan
+  langganan, penegakan fitur per plan, verifikasi email saat daftar, lupa
+  password akun, transport email SMTP non-produksi, dan pelanggan
+  "customer"), untuk Yoga butir Y1 sampai Y6 (status setup, penolakan
+  `pin-login` aplikasi, `registerOwner` dari web, stok minimal produk,
+  penegakan fitur di route WMS, dan pajak di data toko, butir 166), serta
+  perilaku aplikasi untuk Ajis
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi

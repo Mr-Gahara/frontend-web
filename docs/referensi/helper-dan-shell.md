@@ -746,6 +746,15 @@ yang disalurkan ke `tail -3` mencetak kode 0 padahal alat itu keluar 1.
   ("Invalid character"). Jalankan `npx tsc --noEmit` segera setelah
   berkas ditulis lewat heredoc, dan periksa baris yang dilaporkan dengan
   `cat -A` atau `od -c`.
+- **Variabel berkas yang kosong membuat `grep` menunggu masukan.** Bila
+  `F=$(grep -rl ...)` tidak menemukan apa pun, `grep pola $F` berjalan
+  tanpa nama berkas dan membaca stdin, sehingga terminal tampak macet (1
+  November 2026: validator tenant dicari di folder validator backend,
+  padahal didefinisikan di berkas route). Jaga dengan
+  `[ -n "$F" ] && grep pola "$F"`.
+- **Catatan shell ini dibaca sebelum menyusun blok perintah, termasuk
+  untuk repo backend.** Pada 1 November 2026 tiga blok gagal karena
+  `--include` tanpa kutip, padahal sudah tercatat di atas.
 
 ## Catatan form (React Hook Form dan Zod)
 

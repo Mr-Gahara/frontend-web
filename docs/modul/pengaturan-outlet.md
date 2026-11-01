@@ -128,7 +128,8 @@ dan diterapkan di `fcf2dd2` bersama PO15a; PO16a diterapkan di `ca6eb3d`.
   Diputuskan saat pemetaan (1 Oktober 2026) dan diterapkan di commit yang
   sama: tenant tanpa outlet (`/location/current` menjawab null)
   menampilkan pesan di kartu lokasi, sejalan GD4a, karena setup outlet
-  urusan onboarding lewat aplikasi; frasa "jam operasional" dibuang dari
+  urusan onboarding lewat aplikasi (sejak 1 November 2026 pindah ke wizard
+  setup web, `modul/setup-akun.md`); frasa "jam operasional" dibuang dari
   kartu indeks pengaturan, karena tidak punya field; dan tipe `Tenant`
   dipindah ke `id` (keputusan rancangan butir 1).
 

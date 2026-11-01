@@ -27,41 +27,36 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: login akun dan pengguna
+## Pekerjaan berikutnya: plan, setup akun, dan login
 
-Penyesuaian ke backend `ridho` `0024eb9` selesai pada 31 Oktober 2026,
-dalam 15 commit kode dari `8b5ad0f` sampai `b69d39a`, ditambah commit
-dokumen atribusi `90472fe`
-(`referensi/keputusan-penyesuaian-backend.md`, Penyesuaian backend
-`ridho` `0024eb9`): shift, pola roster, monitoring absensi, dan kalender
-per lokasi (B168, B183, B184), izin SDM (B139, B140), izin lintas outlet
-(B142), jadwal (B147, B148, B165), status dan bentuk respons login (B136,
-B149, B150), fixme ubah pola roster (B128), panel admin (B154, B155,
-B176, B177), dan izin cuti hari ini (B160). Seluruh `test.fixme` yang
-menunggu backend sudah dilepas. Suite penuh di atas `b5a2578`: 514 lolos
-dan 10 skipped (`inti/pengujian.md`, Baseline). Sesudahnya jalur
-terkunci lintas outlet kembali berjalan lewat pengguna uji tanpa izin
-itu (`1cd8211`), dan penahan lokasi null shift serta pola roster
-dibuang (`7f6d623`); harapan suite penuh menjadi 518 lolos dan 4
-skipped, belum dijalankan. Keempat skip bersyarat data kemudian
-menyiapkan datanya sendiri (`28eedc1` sampai `cd07ae1`), sehingga
-harapannya 522 lolos tanpa skipped.
+Pemilik proyek memutuskan pada 1 November 2026 bahwa pendaftaran dan
+seluruh setup akun pindah ke web, dan aplikasi hanya memakai akun yang
+setup intinya selesai. Plan tier ditetapkan Basic, Advanced, dan Pro,
+menggantikan rancangan Basic, Advanced, dan Full. Rancangan lengkap,
+kriteria setup per plan, pembagian kerja backend, dan peta halaman web ada
+di `modul/setup-akun.md`. Penyesuaian terakhir ke backend `ridho`
+`0024eb9` selesai pada 31 Oktober 2026
+(`referensi/keputusan-penyesuaian-backend.md`).
 
-Urutan pilihan pemilik proyek (26 Oktober 2026), tidak berubah:
+Urutannya:
 
-1. **Halaman login akun dan login pengguna dibangun ulang.** Murni
-   frontend; tata letak dan alurnya dirancang lewat pratinjau sebelum
-   kode (`modul/profil-login.md`). Perubahan backend yang belum dipakai
-   web ikut dikerjakan di sini (keputusan 30 Oktober 2026): OTP reset PIN
-   Owner dan ubah email atau password akun (B178 sampai B180), hapus akun
-   oleh Owner (B181), register Owner yang ditolak 409 bila toko sudah
+1. **Backend mengerjakan plan dan status setup.** Rancangannya diserahkan
+   ke Nizar (N1 sampai N6), Yoga (Y1 sampai Y6), dan Ajis untuk aplikasi
+   pada 1 November 2026. Plan menjadi prasyarat status setup.
+2. **Varian desain login akun, login pengguna, dan daftar** dibuat sebagai
+   pratinjau untuk dipilih pemilik proyek, paralel dengan langkah 1 karena
+   tidak bergantung pada plan. Gaya terpilih diterapkan juga ke wizard
+   setup.
+3. **Halaman login dibangun ulang** dengan gaya terpilih, beserta perubahan
+   backend yang belum dipakai web (keputusan 30 Oktober 2026): OTP reset
+   PIN Owner dan ubah email atau password akun (B178 sampai B180), hapus
+   akun oleh Owner (B181), register Owner yang ditolak 409 bila toko sudah
    punya Owner (B195), dan pengguna nonaktif yang ditolak 403 saat login
-   PIN (B202).
-2. **Plan tier per akun** (Basic, Advanced, dan Full) yang membatasi
-   akses fitur. Menunggu rancangan dan penegakan backend: model tier,
-   pemeriksaan di route, dan tier di respons sesi. Frontend menyaring
-   menu, halaman, dan tombol per tier begitu kontraknya ada; rancangannya
-   dipetakan sambil login dikerjakan.
+   PIN (B202). Teks memuat "Menerbitkan Token C..." diganti di sini
+   (`modul/profil-login.md`).
+4. **Daftar, verifikasi email, lupa password, wizard setup, halaman
+   langganan, dan penyaringan per plan** begitu kontrak Nizar dan Yoga
+   tersedia (`modul/setup-akun.md`, Peta halaman web).
 
 Belum dijadwalkan: logo toko (B203 sampai B205) dan jam operasional
 (B206) di profil toko.

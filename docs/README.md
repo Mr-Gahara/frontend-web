@@ -95,6 +95,7 @@ Setiap dokumen berisi kelompok Keputusan (keputusan produk), Catatan
 | `modul/pengaturan-outlet.md` | Profil outlet, pajak, dan metode pembayaran |
 | `modul/pelanggan-diskon.md` | Pelanggan dan diskon |
 | `modul/profil-login.md` | Profil pengguna, login, dan sidebar |
+| `modul/setup-akun.md` | Plan, pendaftaran, verifikasi email, lupa password, wizard setup, dan halaman langganan |
 | `modul/panel-admin.md` | Panel admin: akun klien dan langganan |
 | `modul/akses.md` | Gerbang rute, `useAuthGuard`, dan form role |
 | `modul/ui-ux.md` | Dashboard outlet, token warna, tabel seragam, dan komponen tanggal dan waktu |
