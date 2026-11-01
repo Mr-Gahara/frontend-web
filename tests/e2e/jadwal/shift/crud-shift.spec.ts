@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { JAWAB_GAGAL } from "../../../helpers/transfer-uji";
 import { cocok, pantauPermintaan } from "../../../helpers/reservasi-uji";
+import { masuk } from "../../../helpers/masuk-uji";
 
 // ============================================================
 // CONFIG & CONSTANTS
@@ -12,19 +13,7 @@ const SHIFT_PATH = "/dashboard/outlet/shift";
 // HELPER: Login
 // ============================================================
 async function login(page: Page) {
-  await page.goto(`${BASE}/login`);
-
-  await page.getByLabel(/email/i).fill("toko@gmail.com");
-  await page.getByLabel(/password/i).fill("Toko1234");
-  await page.getByRole("button", { name: /login/i }).click();
-
-  await page.waitForURL("**/login/pengguna");
-
-  await page.getByLabel(/nama/i).fill("Ridho");
-  await page.getByLabel(/pin/i).fill("123456");
-  await page.getByRole("button", { name: /login/i }).click();
-
-  await page.waitForURL("**/dashboard");
+  await masuk(page);
 }
 
 // ============================================================

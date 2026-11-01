@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { expect, request, type Page, type Response } from "@playwright/test";
+import { isiLoginAkun } from "./masuk-uji";
 
 /*
  * Akun admin uji untuk spec panel admin (keputusan PA4a dan PA5a).
@@ -41,12 +42,10 @@ export function kredensialAdmin(): KredensialAdmin | null {
 /** Login akun admin lewat UI sampai panel admin; mengembalikan respons login. */
 export async function loginAdmin(page: Page, admin: KredensialAdmin): Promise<Response> {
   await page.goto("/login");
-  await page.getByLabel(/email/i).fill(admin.email);
-  await page.getByLabel(/password/i).fill(admin.password);
   const tunggu = page.waitForResponse(
     (r) => POLA_LOGIN_AKUN.test(r.url()) && r.request().method() === "POST",
   );
-  await page.getByRole("button", { name: /login/i }).click();
+  await isiLoginAkun(page, admin.email, admin.password);
   const respons = await tunggu;
   await page.waitForURL("**/admin");
   return respons;

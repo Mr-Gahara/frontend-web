@@ -1,6 +1,7 @@
 import { test, expect, Locator, Page, Response } from "@playwright/test";
 import { ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
 import { masukTanpaIzinLintas } from "../../../helpers/terkunci-uji";
+import { masuk } from "../../../helpers/masuk-uji";
 
 const URL_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/stok";
 const URL_GUDANG = "http://localhost:3000/dashboard/gudang/inventaris";
@@ -21,17 +22,7 @@ type LokasiMentah = { id?: string; _id?: string; nama: string; tipe: string };
 // HELPER: Login
 // ============================================================
 async function login(page: Page) {
-  await page.goto("http://localhost:3000/login");
-  await page.getByLabel(/email/i).fill("toko@gmail.com");
-  await page.getByLabel(/password/i).fill("Toko1234");
-  await page.getByRole("button", { name: /login/i }).click();
-
-  await page.waitForURL("**/login/pengguna");
-  await page.getByLabel(/nama/i).fill("Ridho");
-  await page.getByLabel(/pin/i).fill("123456");
-  await page.getByRole("button", { name: /login/i }).click();
-
-  await page.waitForURL("**/dashboard");
+  await masuk(page);
 }
 
 // ============================================================

@@ -1,19 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
+import { masuk } from "../../../helpers/masuk-uji";
 
 const BASE = "http://localhost:3000";
 const DAFTAR = "/dashboard/outlet/inventaris/bahanBaku";
 
 async function login(page: Page) {
-  await page.goto(`${BASE}/login`);
-  await page.getByLabel(/email/i).fill("toko@gmail.com");
-  await page.getByLabel(/password/i).fill("Toko1234");
-  await page.getByRole("button", { name: /masuk|login/i }).click();
-
-  await page.waitForURL("**/login/pengguna");
-  await page.getByLabel(/nama/i).fill("Ridho");
-  await page.getByLabel(/pin/i).fill("123456");
-  await page.getByRole("button", { name: /masuk|login/i }).click();
-  await page.waitForURL("**/dashboard/**", { timeout: 15_000 });
+  await masuk(page);
 }
 
 async function bukaDaftar(page: Page) {

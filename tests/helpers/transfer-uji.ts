@@ -1,4 +1,5 @@
 import { expect, Page } from "@playwright/test";
+import { masuk } from "./masuk-uji";
 
 /*
  * Helper spec transfer stok: login, token API yang mengikuti pin-refresh,
@@ -122,15 +123,7 @@ const idDari = (x: Berid | null | undefined) => String(x?.id ?? x?._id ?? "");
 const CATATAN_PENGAJUAN_UJI = "E2E pengajuan uji transfer";
 
 export async function login(page: Page) {
-  await page.goto(BASIS + "/login");
-  await page.getByLabel(/email/i).fill("toko@gmail.com");
-  await page.getByLabel(/password/i).fill("Toko1234");
-  await page.getByRole("button", { name: /login/i }).click();
-  await page.waitForURL("**/login/pengguna");
-  await page.getByLabel(/nama/i).fill("Ridho");
-  await page.getByLabel(/pin/i).fill("123456");
-  await page.getByRole("button", { name: /login/i }).click();
-  await page.waitForURL("**/dashboard");
+  await masuk(page);
 }
 
 /** Mencari access token (JWT) di mana pun di dalam isi respons. */

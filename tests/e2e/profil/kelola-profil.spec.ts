@@ -11,6 +11,7 @@ import {
   pulihkanPenggunaProfil,
   siapkanPenggunaProfil,
 } from "../../helpers/profil-uji";
+import { isiLoginPengguna } from "../../helpers/masuk-uji";
 
 /*
  * Spec migrasi halaman profil (keputusan PF2a, PF7a, PF8a, dan PF9a).
@@ -152,9 +153,7 @@ test.describe("Kelola profil pengguna", () => {
 
       await hal.waitForURL("**/login/pengguna");
       await expect(hal.getByText("Silakan login kembali dengan PIN baru Anda.")).toBeVisible();
-      await hal.getByLabel(/nama/i).fill(NAMA_PROFIL);
-      await hal.getByLabel(/pin/i).fill(PIN_PROFIL_BARU);
-      await hal.getByRole("button", { name: /login/i }).click();
+      await isiLoginPengguna(hal, NAMA_PROFIL, PIN_PROFIL_BARU);
       await hal.waitForURL("**/dashboard");
     } finally {
       await ctx.close();

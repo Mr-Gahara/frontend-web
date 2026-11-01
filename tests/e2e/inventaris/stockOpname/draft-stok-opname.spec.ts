@@ -1,4 +1,5 @@
 import { test, expect, Page, Response } from "@playwright/test";
+import { masuk } from "../../../helpers/masuk-uji";
 
 const URL_DAFTAR_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/stockOpname";
 const URL_BUAT_OUTLET = `${URL_DAFTAR_OUTLET}/buatStockOpname`;
@@ -12,17 +13,7 @@ type ItemMentah = {
 type DetailMentah = { id: string; status: string; items: ItemMentah[] };
 
 async function login(page: Page) {
-  await page.goto("http://localhost:3000/login");
-  await page.getByLabel(/email/i).fill("toko@gmail.com");
-  await page.getByLabel(/password/i).fill("Toko1234");
-  await page.getByRole("button", { name: /login/i }).click();
-
-  await page.waitForURL("**/login/pengguna");
-  await page.getByLabel(/nama/i).fill("Ridho");
-  await page.getByLabel(/pin/i).fill("123456");
-  await page.getByRole("button", { name: /login/i }).click();
-
-  await page.waitForURL("**/dashboard");
+  await masuk(page);
 }
 
 function patchAksi(aksi: string) {

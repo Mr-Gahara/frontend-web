@@ -1,5 +1,6 @@
 import { expect, request, type Browser, type Page } from "@playwright/test";
 import { BASIS, api, bukaDenganAuth, login, type Auth } from "./transfer-uji";
+import { masuk } from "./masuk-uji";
 
 /*
  * Pengguna uji halaman profil (keputusan PF5a). Nama dan PIN diubah
@@ -95,15 +96,7 @@ export async function bacaPenggunaProfil(page: Page, auth: Auth, id: string) {
 
 /** Login akun lalu login PIN lewat UI, dengan nama dan PIN yang diberikan. */
 export async function loginSebagai(page: Page, nama: string, pin: string) {
-  await page.goto(BASIS + "/login");
-  await page.getByLabel(/email/i).fill("toko@gmail.com");
-  await page.getByLabel(/password/i).fill("Toko1234");
-  await page.getByRole("button", { name: /login/i }).click();
-  await page.waitForURL("**/login/pengguna");
-  await page.getByLabel(/nama/i).fill(nama);
-  await page.getByLabel(/pin/i).fill(pin);
-  await page.getByRole("button", { name: /login/i }).click();
-  await page.waitForURL("**/dashboard");
+  await masuk(page, nama, pin);
 }
 
 /**

@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { api, BASIS, bukaDenganAuth, JAWAB_GAGAL, login as loginUji } from "../../../helpers/transfer-uji";
 import { cocok } from "../../../helpers/reservasi-uji";
 import { idLokasiRuang } from "../../../helpers/jadwal-uji";
+import { masuk } from "../../../helpers/masuk-uji";
 
 // ============================================================
 // CONFIG & CONSTANTS
@@ -13,19 +14,7 @@ const POLA_PATH = "/dashboard/outlet/pola-roster";
 // HELPER: Login
 // ============================================================
 async function login(page: Page) {
-  await page.goto(`${BASE}/login`);
-
-  await page.getByLabel(/email/i).fill("toko@gmail.com");
-  await page.getByLabel(/password/i).fill("Toko1234");
-  await page.getByRole("button", { name: /login/i }).click();
-
-  await page.waitForURL("**/login/pengguna");
-
-  await page.getByLabel(/nama/i).fill("Ridho");
-  await page.getByLabel(/pin/i).fill("123456");
-  await page.getByRole("button", { name: /login/i }).click();
-
-  await page.waitForURL("**/dashboard");
+  await masuk(page);
 }
 
 // ============================================================
