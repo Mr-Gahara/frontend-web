@@ -23,6 +23,12 @@ export function useLoginPengguna() {
 }
 
 /** Logout akun ke backend, agar cookie refresh akun tidak berlaku lagi. */
+export function useDaftarAkun() {
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof authApi.daftarAkun>[0]) => authApi.daftarAkun(payload),
+  });
+}
+
 export function useLogoutAkun() {
   return useMutation({ mutationFn: () => authApi.logoutAkun() });
 }

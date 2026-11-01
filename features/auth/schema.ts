@@ -29,3 +29,26 @@ export const skemaLoginPengguna = z.object({
 });
 
 export type NilaiLoginPengguna = z.infer<typeof skemaLoginPengguna>;
+
+/**
+ * Skema daftar akun. Aturan password sama dengan validateRegister backend
+ * (minimal 8 karakter, huruf kapital, dan angka), supaya kesalahan tertangkap
+ * sebelum dikirim. ulangiPassword hanya diperiksa di klien.
+ */
+export const skemaDaftarAkun = z
+  .object({
+    email: z.string().trim().min(1, "Email wajib diisi").email("Format email tidak valid"),
+    password: z
+      .string()
+      .min(1, "Password wajib diisi")
+      .min(8, "Password minimal 8 karakter")
+      .regex(/[A-Z]/, "Password harus mengandung minimal 1 huruf kapital")
+      .regex(/[0-9]/, "Password harus mengandung minimal 1 angka"),
+    ulangiPassword: z.string().min(1, "Ulangi password wajib diisi"),
+  })
+  .refine((n) => n.password === n.ulangiPassword, {
+    path: ["ulangiPassword"],
+    message: "Password tidak sama",
+  });
+
+export type NilaiDaftarAkun = z.infer<typeof skemaDaftarAkun>;

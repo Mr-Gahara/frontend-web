@@ -12,6 +12,7 @@
 export const EP = {
   akun: {
     login: "/akun/auth/login",
+    register: "/akun/auth/register",
     logout: "/akun/auth/logout",
     refresh: "/akun/auth/refreshtoken",
     adminDaftar: "/akun/admin/all",
