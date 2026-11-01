@@ -142,7 +142,7 @@ test.describe("pengeluaran", () => {
     const sebelum = new Date(kini.getFullYear(), kini.getMonth(), kini.getDate() - 1, 23, 59, 0);
     const tengahMalam = new Date(kini.getFullYear(), kini.getMonth(), kini.getDate(), 0, 0, 0);
     const label = (d: Date) =>
-      "Tanggal Beban, " + d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+      "Tanggal Beban, " + d.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
     await page.clock.install({ time: sebelum });
     const auth = await bukaDenganAuth(page, URL_PENGELUARAN);
     await pastikanKategoriFixture(page, auth);
