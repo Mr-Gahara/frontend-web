@@ -59,7 +59,7 @@ test.describe("Validasi form login", () => {
       await expect(page.getByText("Nama pengguna wajib diisi")).toBeVisible();
       await expect(page.getByText("PIN wajib diisi")).toBeVisible();
       expect(hitung.jumlah()).toBe(0);
-      await expect(page.getByRole("button", { name: "Ganti Akun Bisnis" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Keluar dari akun toko" })).toBeVisible();
     } finally {
       hitung.lepas();
     }

@@ -419,11 +419,11 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
         await expect(pinInput).not.toHaveValue("12A34B");
       });
 
-      test("tombol 'Ganti Akun Bisnis' harus terlihat di halaman", async ({
+      test("tombol 'Keluar dari akun toko' harus terlihat di halaman", async ({
         page,
       }) => {
         await page.goto("http://localhost:3000/login/pengguna");
-        await expect(page.getByText(/ganti akun bisnis/i)).toBeVisible();
+        await expect(page.getByRole("button", { name: /keluar dari akun toko/i })).toBeVisible();
       });
     });
 
@@ -509,7 +509,7 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
 
         // [PERBAIKAN] Pastikan teks DOM berubah dulu, baru cek disabled
         const loadingBtn = page.getByRole("button", {
-          name: /menerbitkan token/i,
+          name: /membuka kasir/i,
         });
         await expect(loadingBtn).toBeVisible();
         await expect(loadingBtn).toBeDisabled();
@@ -543,14 +543,14 @@ test.describe("E2E — /login/pengguna (Login PIN Karyawan/Owner)", () => {
     });
 
     // ---------------------------------------------------------------------------
-    // 2.6 Fitur: Ganti Akun Bisnis
+    // 2.6 Fitur: Keluar dari akun toko
     // ---------------------------------------------------------------------------
-    test.describe("Fitur — Ganti Akun Bisnis", () => {
+    test.describe("Fitur — Keluar dari akun toko", () => {
       test("harus mengakhiri sesi dan kembali ke /login saat tombol diklik", async ({
         page,
       }) => {
         await siapkanSesiAkun(page);
-        await page.getByText(/ganti akun bisnis/i).click();
+        await page.getByRole("button", { name: /keluar dari akun toko/i }).click();
 
         await expect(page).toHaveURL(/.*\/login$/);
 

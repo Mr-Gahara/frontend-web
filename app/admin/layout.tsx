@@ -19,7 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const keluar = useLogoutAkun();
 
   // Sesi lokal tetap diakhiri walau permintaan logout gagal, sejalan
-  // dengan "Ganti Akun Bisnis" di login pengguna.
+  // dengan "Keluar dari akun toko" di login pengguna.
   const logout = () => {
     keluar.mutate(undefined, {
       onSettled: () => {
