@@ -206,7 +206,7 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
 
       // [PERBAIKAN] Pastikan teks berubah DULU (sinkronisasi DOM), baru cek disabled state
       const loadingBtn = page.getByRole("button", {
-        name: /membuka akses sesi/i,
+        name: /memeriksa akun/i,
       });
       await expect(loadingBtn).toBeVisible();
       await expect(loadingBtn).toBeDisabled();

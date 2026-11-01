@@ -11,7 +11,7 @@ export const AKUN_UJI = { email: "toko@gmail.com", password: "Toko1234" } as con
 export const PENGGUNA_UJI = { nama: "Ridho", pin: "123456" } as const;
 
 /** Tombol kirim di halaman login akun dan login pengguna. */
-export const tombolMasuk = (page: Page) => page.getByRole("button", { name: /login/i });
+export const tombolMasuk = (page: Page) => page.getByRole("button", { name: /masuk|login/i });
 
 /** Mengisi dan mengirim form login akun, tanpa menunggu pengalihan. */
 export async function isiLoginAkun(page: Page, email: string, password: string) {
