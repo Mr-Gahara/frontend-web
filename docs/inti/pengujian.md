@@ -12,6 +12,29 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per halaman Langganan** (commit `2716f86`, 3 November 2026):
+886 test unit dan integrasi lolos. Suite e2e penuh tidak dijalankan; yang
+dijalankan `tests/e2e/pengaturan` dan spec gerbang rute (41 lolos dan 1
+gagal karena locator spec, lalu spec Langganan 4 lolos setelah
+perbaikan). Harapan suite penuh 547: 543 pada suite penuh `6db571d`
+ditambah 4 spec Langganan; angka itu hitungan.
+
+**Suite penuh di atas `6db571d`** (verifikasi email dan lupa password):
+878 test unit dan integrasi lolos; e2e 539 lolos, 1 skipped, dan 3 gagal
+dari 543. Dua kegagalan adalah spec daftar yang dijawab 429 oleh
+`registerLimiter` backend development, karena spec auth dijalankan
+berulang dalam 15 menit; sejak `d94a48c` keduanya dilewati dengan alasan
+tertulis bila dijawab 429 (Test yang ditandai fixme dan skip bersyarat, di
+bawah). Kegagalan ketiga, "Batalkan kembali ke daftar" di spec buat
+reservasi, lolos 8 dari 8 bila dijalankan sendiri
+(`referensi/utang-pengujian.md`). Judul skenario yang dilewati tidak
+tercatat.
+
+**Suite penuh di atas `50c99ae`** (wizard setup): 870 test unit dan
+integrasi lolos; e2e 536 lolos dan 2 skipped dari 538, tanpa kegagalan.
+Salah satu yang dilewati adalah skip bersyarat jurnal stok; yang lain belum
+diidentifikasi. Totalnya bertambah 5 dari 533 lewat spec wizard setup.
+
 **Baseline per halaman login dan daftar** (commit `bb17c79`, 1 November
 2026): 858 test unit dan integrasi lolos. Suite e2e penuh dijalankan di
 atas `bb17c79`, pukul 16.12 sampai 16.34 WIB: 532 lolos dan 1 skipped,
@@ -229,6 +252,14 @@ Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
 hapus bahan baku juga dilewati bila datanya kosong. Pada data uji sekarang
 itu hanya terjadi di jurnal stok pada tanggal 1, karena data bulan
 berjalan masih kosong (baseline 1 November 2026).
+
+Dua skenario di `auth/daftar.spec.ts` (email terdaftar 409 dan daftar
+berhasil) dilewati bila backend development menjawab 429. Itu bukan syarat
+data: `registerLimiter` hanya dilewati bila `NODE_ENV` bernilai `test`,
+sehingga di development batasnya 10 pendaftaran per 15 menit per IP, dan
+spec auth yang diulang dalam rentang itu kehabisan kuota. Alasannya
+tertulis di `ALASAN_KUOTA` (`d94a48c`); usulan ke backend ada di
+`modul/setup-akun.md`, Utang terbuka.
 
 Ketiga spec tulis stock opname membuat dokumen baru di setiap run dan
 menutupnya sebagai CANCELLED, sehingga dokumen CANCELLED bertambah tiga per

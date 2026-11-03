@@ -93,6 +93,19 @@ PF6a). Commit yang hanya mengubah dokumentasi
 dikecualikan; gerbangnya `npm run docs:periksa` (pemilik proyek, 28
 September 2026).
 
+Bila suite penuh gagal, perbaikannya dibuktikan dengan spec yang terdampak
+saja, tanpa mengulang suite penuh (pemilik proyek, 3 November 2026). Suite
+penuh dijalankan dengan reporter `line` untuk progres dan `json` untuk
+judul test yang tidak lolos, agar skenario yang gagal atau dilewati
+teridentifikasi tanpa run tambahan. Laporannya ditulis ke
+`~/.cache/frontend-web/`, bukan `/tmp`, karena `/tmp` dapat dikosongkan
+sistem:
+
+```bash
+PLAYWRIGHT_JSON_OUTPUT_NAME=$HOME/.cache/frontend-web/penuh.json npx playwright test --reporter=line,json
+node -e 'const j=s=>{for(const x of s.suites||[])j(x);for(const p of s.specs||[])for(const t of p.tests)if(t.status!==`expected`)console.log(t.status,p.title)};j(require(process.env.HOME+`/.cache/frontend-web/penuh.json`))'
+```
+
 Seluruh spec memakai `page.route` hanya untuk jalur gagal atau untuk
 menahan permintaan lalu meneruskannya: audit `audit-fulfill.js` atas
 seluruh suite bersih sejak `04830b7`, dengan empat simulasi beralasan (dua

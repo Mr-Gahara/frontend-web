@@ -24,7 +24,10 @@ Bagian **tetap**: hanya diubah atas perintah pemilik proyek.
    perubahan itu, seluruhnya lolos. Suite e2e penuh hanya dijalankan saat
    penting: penyesuaian backend, penelusuran bug atau galat yang butuh uji
    menyeluruh, atau atas permintaan pemilik proyek (pemilik proyek,
-   6 Oktober 2026).
+   6 Oktober 2026). Kegagalan dari suite penuh diperbaiki lalu dibuktikan
+   dengan spec yang terdampak saja, tanpa mengulang suite penuh; yang tidak
+   dapat dibuktikan dengan spec terdampak dicatat sebagai utang pengujian
+   (pemilik proyek, 3 November 2026).
 6. Setelah lolos: `git add`, commit dengan pesan lengkap (masalah, keputusan rancangan beserta alasan, dampak, pengujian), lalu push.
 
 Keputusan penting tidak dieksekusi sebelum pemilik proyek menjawab dialog

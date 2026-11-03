@@ -232,3 +232,38 @@ Lapis arsip: tidak perlu dikirim di chat baru. Isinya dipindah dari docs/refacto
 - **Bahan yang dibutuhkan dikumpulkan dalam satu perintah baca**, bukan
   berkas demi berkas, agar pemilik proyek tidak menjalankan belasan
   perintah untuk satu putaran.
+
+## Pelajaran dari setup akun dan Langganan (3 November 2026)
+
+- **Kegagalan suite penuh dibuktikan dengan spec terdampak, bukan suite
+  penuh ulang.** Suite penuh sempat diulang dalam satu pekerjaan, dan satu
+  skip tanpa judul dicari lewat run sebagian selama sekitar sembilan menit
+  tanpa hasil. Sejak itu suite penuh memakai reporter `json` yang mencatat
+  judul test yang tidak lolos (`referensi/playwright.md`).
+- **Spec auth yang diulang dalam 15 menit menghabiskan kuota pendaftaran
+  backend development** (429), sehingga suite penuh yang dimulai segera
+  sesudah run spec auth gagal di spec daftar.
+- **Skrip sekali pakai di luar repo perlu `NODE_PATH=$PWD/node_modules`**
+  agar `@playwright/test` dan helper uji terbaca.
+- **Blok penerap yang diawali `ls` berkas baru berhenti seluruhnya bila
+  satu berkas belum dibuat.** Perubahan berkas lama ikut tertahan, dan
+  galat yang menyusul berasal dari situ. Berkas baru dibuat lebih dulu.
+- **Blok yang dilewati membuat jangkar perubahan berikutnya tidak
+  cocok.** Perbaikan stepper HP di `bb17c79` tidak pernah diterapkan,
+  sehingga jangkar `langkah-daftar.tsx` di wizard gagal; berkasnya dibaca
+  ulang dengan `cat -A` sebelum jangkar baru ditulis.
+- **`AlertDialogAction` membawa `bg-primary`**
+  (`referensi/helper-dan-shell.md`).
+- **Potret `fullPage` hanya menangkap satu layar halaman dashboard**,
+  karena isinya menggulir di wadahnya sendiri; potret pemeriksaan memakai
+  viewport yang cukup tinggi.
+- **`getByText` dengan string mencocokkan sebagian teks tanpa membedakan
+  huruf besar-kecil**, sehingga lencana "Masa percobaan" bentrok dengan
+  baris riwayat "masa percobaan Basic". Teks yang mungkin muncul di
+  kalimat lain dipilih dengan `exact`.
+- **Tabel yang digeser di HP tampak seperti teks terpotong** bila tidak
+  ada penanda geser; data pendek di layar sempit ditampilkan sebagai
+  daftar.
+- **Langkah wajib dan langkah yang bergantung plan dipisah per berkas.**
+  Pajak dan sesi booking sempat disatukan dalam satu berkas, padahal pajak
+  wajib di semua plan dan sesi booking hanya di Advanced dan Pro.

@@ -783,6 +783,9 @@ yang disalurkan ke `tail -3` mencetak kode 0 padahal alat itu keluar 1.
   Bila dialog harus bertahan sampai operasi berhasil (keputusan Fase 0),
   panggil `e.preventDefault()` di `onClick`. Bug hapus bahan baku (`50e8815`)
   berasal dari sini.
+- `AlertDialogAction` membawa kelas `bg-primary` bawaan, yang tampil
+  hitam di tema ini. Tombol konfirmasi berwarna lain memakai `button` biasa
+  bergaya navy, seperti dialog koordinat wizard setup (`50c99ae`).
 - **Callback `refine` diberi anotasi `: boolean`** bila isian harus tetap
   bertipe lebar. TypeScript 5.5 ke atas menyimpulkan
   `(v) => v === "1" || v === "2"` sebagai predikat tipe, dan zod 4

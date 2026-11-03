@@ -78,6 +78,22 @@ Basic, Advanced, dan Full.
 - **PL6a: gudang hanya ada di Pro.** Tenant Basic dan Advanced punya satu
   outlet tanpa gudang.
 
+### Halaman langganan
+
+Diputuskan pemilik proyek pada 3 November 2026.
+
+- **LG1a: kontak admin lewat WhatsApp.** Nomornya belum ditetapkan;
+  selama `NOMOR_WA_ADMIN` kosong, halaman menampilkan teks tanpa tautan,
+  bukan tautan palsu.
+- **LG2a: hanya Owner, di menu Pengaturan.** Backend belum punya
+  permission langganan, sehingga kartu dan halamannya dibatasi lewat role
+  (`bolehLihatLangganan`), sebagai pengecualian dari gerbang berbasis
+  permission. Entri `IZIN_HALAMAN` dibiarkan kosong dengan komentar, dan
+  diganti pemeriksaan izin begitu permission-nya ada.
+- **LG3a: pratinjau dengan data contoh**, seperti wizard setup: masa
+  percobaan Basic 14 hari yang dimulai dua hari sebelum hari ini, dengan
+  spanduk pratinjau, sampai N1 tersedia.
+
 ### Akun dan OTP
 
 - **AK1a: OTP selalu dikirim ke email akun.**
@@ -163,25 +179,52 @@ dan token warna yang sudah ada.
 - **TP3a: daftar memakai desain E dengan carousel plan dan stepper**
   (`bb17c79`). Stepper "Daftar akun, Verifikasi email, Siapkan toko"
   (`features/auth/langkah-daftar.tsx`) dipakai lagi oleh wizard setup.
-  Varian E2 (krem dan navy) ditolak.
+  Varian E2 (krem dan navy) ditolak. Stepper tegak di layar sempit yang
+  disebut pesan commit `bb17c79` baru masuk di `50c99ae`, karena blok
+  perbaikannya tidak diterapkan saat itu.
 - **TP4a: teks halaman tidak menjanjikan langkah yang belum ada.** Tombol
   daftar bertuliskan "Daftar", bukan "Daftar dan kirim kode verifikasi",
   dan sesudah daftar halaman menyebut verifikasi email serta penyiapan
   toko belum tersedia. `/daftar` belum ditautkan dari login akun sampai
   N3 dan Y1 ada.
+- **TP5a: wizard setup di `/setup`** (`50c99ae`), bergaya daftar E dengan
+  stepper tegak dan daftar periksa langkah. Langkah mengikuti plan
+  (`features/setup/langkah.ts`): Basic tujuh langkah, Advanced menambah
+  sesi booking, dan Pro menambah sesi booking serta gudang. Koordinat
+  outlet dan gudang diambil dari lokasi perangkat dengan dua peringatan:
+  kotak peringatan bahwa koordinat diambil di lokasi itu sendiri, lalu
+  dialog konfirmasi bahwa lokasinya sudah benar (keputusan pemilik
+  proyek). Skema dipakai ulang dari modul yang ada: lokasi (radius absen 10
+  sampai 50 meter), kategori, pajak, satuan resep, dan satuan bahan baku.
+  Langkah selesai menyebut aplikasi kasir juga siap dipakai, dengan tombol
+  "Masuk ke dashboard". Data pratinjau, belum menyimpan apa pun.
+- **TP6a: verifikasi email dan lupa password** (`6db571d`).
+  `/daftar/verifikasi?email=` berisi isian kode enam kotak (pindah
+  otomatis, hapus mundur, dan tempel) dan kirim ulang berhitung mundur;
+  kode lengkap mengarah ke `/setup`. `/lupa-password` bergaya A dalam tiga
+  tahap: email, kode dan password baru, lalu selesai. Aturan password
+  dipakai bersama form daftar (`aturanPassword`). Keduanya belum
+  ditautkan dan belum memanggil backend.
+- **TP7a: halaman Langganan** (`2716f86`) di
+  `/dashboard/outlet/pengaturan/langganan`, desain F: plan aktif dengan
+  lencana masa percobaan, tanggal berakhir, sisa hari, dan bilah masa
+  berlaku; perbandingan tiga plan dengan catatan PL5a; dan riwayat. Di
+  bawah `sm` riwayat tampil sebagai daftar, karena tabel yang digeser di
+  HP tampak terpotong. Kalimat kanvas "kasir tidak bisa membuka shift"
+  tidak dipakai, karena perilakunya belum dipastikan di backend.
 
 ## Peta halaman web
 
 | Halaman | Isi | Token | Menunggu |
 |---|---|---|---|
 | Daftar | Email dan password, lalu verifikasi email. Langkah 1 sudah ada di `/daftar` (`bb17c79`), belum ditautkan dari login akun | Publik | N3, Y1 |
-| Verifikasi email | Isian OTP dan kirim ulang | Publik | N3 |
+| Verifikasi email | Isian OTP dan kirim ulang. Tampilan pratinjau ada di `/daftar/verifikasi` (`6db571d`), belum ditautkan | Publik | N3 |
 | Login akun | Email dan password; tautan daftar dan lupa password. Admin ke panel admin, akun belum terverifikasi ke verifikasi, setup belum selesai ke wizard. Tampilan desain A sudah ada (`e7fda09`); kedua tautan dipasang setelah halamannya berfungsi | Publik | N1, N3, N4, Y1 |
-| Lupa password | Email, lalu OTP dan password baru | Publik | N4 |
+| Lupa password | Email, lalu OTP dan password baru. Tampilan pratinjau ada di `/lupa-password` (`6db571d`), belum ditautkan | Publik | N4 |
 | Login pengguna | Nama dan PIN; lupa PIN Owner lewat OTP (B178); galat nonaktif 403 (B202) dan 429. Tampilan desain E sudah ada (`1f3b9e4`); nama toko belum tampil (butir 167) | Akun | Sudah tersedia; nama toko menunggu butir 167 |
-| Wizard fase akun | Nama toko (`POST /tenant`), lalu Owner (`register-owner`, 409 bila sudah ada, B195) | Akun | Y3 |
-| Wizard fase Owner | Lokasi outlet, kategori, bahan baku bila ada resep, produk, dan pajak; Advanced dan Pro: tipe aset, aset, tarif; Pro: gudang | Pengguna | Y1 |
-| Langganan | Plan, masa berlaku, dan tombol hubungi admin | Pengguna | N1 |
+| Wizard fase akun | Nama toko (`POST /tenant`), lalu Owner (`register-owner`, 409 bila sudah ada, B195). Tampilan pratinjau kedua fase wizard ada di `/setup` (`50c99ae`), belum ditautkan | Akun | Y3 |
+| Wizard fase Owner | Lokasi outlet, kategori, bahan baku bila ada resep, produk, dan pajak; Advanced dan Pro: tipe aset, aset, tarif; Pro: gudang | Pengguna | Y1; stok minimal produk Y4 |
+| Langganan | Plan, masa berlaku, perbandingan plan, riwayat, dan kontak admin lewat WhatsApp. Tampilan pratinjau ada di Pengaturan (`2716f86`), hanya Owner (LG2a) | Pengguna | N1; permission langganan |
 | Penyaringan per plan | Menu, halaman, dan tombol di luar plan atau yang setup fiturnya belum selesai | Pengguna | N1, N2, Y1 |
 | Panel admin | Plan dan durasi saat membuat akun dan memperpanjang langganan | Akun admin | N1 |
 
@@ -237,8 +280,8 @@ Diuji langsung terhadap backend development pada 1 November 2026:
 
 ## Utang terbuka
 
-- Kontak admin di halaman langganan (WhatsApp atau email) belum
-  ditetapkan.
+- Nomor WhatsApp admin belum ditetapkan (LG1a); `NOMOR_WA_ADMIN` di
+  `features/langganan/data.ts` masih kosong.
 - Ajis diminta mendaftar layar aplikasi yang menyentuh pembuatan toko,
   pendaftaran Owner, dan `requireSetup`.
 - Domain alamat uji ber-OTP perlu dicocokkan dengan validator email
@@ -248,9 +291,20 @@ Diuji langsung terhadap backend development pada 1 November 2026:
   karena token akun tidak memuatnya dan `GET /tenant/:id` menolak token
   akun (`kontrak/temuan.md` butir 167, diserahkan ke Yoga).
 - Tautan "Daftar" dan "Lupa password?" di login akun dipasang setelah N3,
-  N4, dan Y1 tersedia; sampai itu `/daftar` hanya dapat dibuka langsung.
+  N4, dan Y1 tersedia; sampai itu `/daftar`, `/daftar/verifikasi`,
+  `/lupa-password`, dan `/setup` hanya dapat dibuka langsung.
 - Tombol "Buka aplikasi" di halaman setup selesai belum ada, karena
   aplikasi kasir belum rilis. Wajib ada saat aplikasi rilis: tombol
   membuka aplikasi lewat deep link, dan bila aplikasi belum terpasang
   mengarah ke halaman Play Store. Yang dibutuhkan dari Ajis: skema deep
   link atau Android App Links, serta nama paket atau tautan Play Store.
+- Permission langganan belum ada di backend (LG2a). Usulan: permission
+  baca langganan yang dimiliki Owner, diserahkan bersama N1; sampai itu
+  web membatasi lewat role.
+- Kuota `registerLimiter` di backend development (Fakta backend) membuat
+  spec daftar dilewati bila spec auth diulang dalam 15 menit (`d94a48c`).
+  Usulan: batasnya dapat dilonggarkan lewat env di backend non-produksi,
+  seperti batas OTP di N5.
+- Halaman pratinjau disambungkan ke backend di chat berikutnya
+  (`inti/status.md`, Pekerjaan berikutnya): data contoh dan spanduk
+  pratinjau dibuang halaman demi halaman begitu endpoint-nya tersedia.

@@ -55,9 +55,17 @@ Urutannya:
    B180), hapus akun oleh Owner (B181), register Owner yang ditolak 409
    bila toko sudah punya Owner (B195), dan uji e2e pengguna nonaktif yang
    ditolak 403 saat login PIN (B202).
-4. **Verifikasi email dan tautan daftar, lupa password, wizard setup,
-   halaman langganan, dan penyaringan per plan** begitu kontrak Nizar dan Yoga
-   tersedia (`modul/setup-akun.md`, Peta halaman web).
+4. **Tampilan pratinjau setup akun**: selesai 3 November 2026, belum
+   tersambung ke backend dan belum ditautkan. Wizard setup di `/setup`
+   (`50c99ae`), verifikasi email di `/daftar/verifikasi` dan lupa password
+   di `/lupa-password` (`6db571d`), serta halaman Langganan bagi Owner di
+   Pengaturan (`2716f86`). Datanya contoh, dengan spanduk pratinjau.
+5. **Pekerjaan chat berikutnya: menyambungkan halaman pratinjau ke
+   backend** begitu kontrak Nizar dan Yoga tersedia: daftar dan verifikasi
+   (N3, Y1), lupa password (N4), wizard (Y1, Y3, Y4), dan Langganan (N1).
+   Sesudahnya tautan daftar dan lupa password di login akun, penyaringan
+   per plan (N1, N2, Y1, Y5), dan perbaikan bug yang ditemukan saat
+   penyambungan. Utangnya ada di `modul/setup-akun.md`, Utang terbuka.
 
 Belum dijadwalkan: logo toko (B203 sampai B205) dan jam operasional
 (B206) di profil toko.
