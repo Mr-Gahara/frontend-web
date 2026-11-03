@@ -253,6 +253,9 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/pengaturan/roles/[id]/edit": [IZIN.role, IZIN.ubahRole],
   // Izin per bagian di dalam halaman (keputusan PO14a).
   "/dashboard/outlet/pengaturan/toko": [],
+  // Tanpa permission backend: halaman membatasi bagi Owner lewat role
+  // (bolehLihatLangganan), pengecualian sementara sampai permission langganan ada.
+  "/dashboard/outlet/pengaturan/langganan": [],
   "/dashboard/outlet/pengguna": [IZIN.pengguna, IZIN.role],
 
   // Inventaris outlet

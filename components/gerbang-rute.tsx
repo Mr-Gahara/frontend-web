@@ -23,6 +23,11 @@ export function GerbangRute({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
+  return <PesanTanpaIzin />;
+}
+
+/** Pesan di tempat untuk halaman yang tidak boleh dibuka; dipakai juga halaman berpengecualian role (Langganan). */
+export function PesanTanpaIzin() {
   return (
     <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-2 text-center text-navy">
       <p className="font-bold">Anda tidak memiliki izin membuka halaman ini.</p>

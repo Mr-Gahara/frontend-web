@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useSession } from "@/lib/auth/useSession";
 import { bolehBukaHalaman } from "@/lib/auth/permissions";
+import { bolehLihatLangganan } from "@/features/langganan/data";
 import { 
   Receipt, 
   Users, 
@@ -10,7 +11,8 @@ import {
   ArrowRight,
   Settings,
   Wallet,
-  Tags
+  Tags,
+  CreditCard
 } from "lucide-react"
 
 // Data rute pengaturan dengan palet Tetradic (Mustard & Sage Green)
@@ -49,14 +51,25 @@ const settingsModules = [
     icon: Tags,
     href: "/dashboard/outlet/pengaturan/kategoriBeban",
     iconColor: "text-karamel", // Mustard
+  },
+  {
+    title: "Langganan",
+    description: "Plan toko, masa berlaku, dan naik plan lewat admin.",
+    icon: CreditCard,
+    href: "/dashboard/outlet/pengaturan/langganan",
+    iconColor: "text-sage", // Sage Green
+    hanyaOwner: true,
   }
 ]
 
 export default function PengaturanPage() {
   // Kartu mengikuti gerbang halamannya (IZIN_HALAMAN): kartu Pajak hanya
-  // tampil bagi pemegang read-pajak atau akses-pos (keputusan FC3a).
-  const { permissions } = useSession();
-  const modulTampil = settingsModules.filter((modul) => bolehBukaHalaman(modul.href, permissions));
+  // tampil bagi pemegang read-pajak atau akses-pos (keputusan FC3a). Kartu
+  // Langganan hanya bagi Owner, pengecualian role sementara (bolehLihatLangganan).
+  const { permissions, role } = useSession();
+  const modulTampil = settingsModules.filter(
+    (modul) => bolehBukaHalaman(modul.href, permissions) && (!modul.hanyaOwner || bolehLihatLangganan(role)),
+  );
   return (
     <div className="p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full overflow-x-hidden">
       
