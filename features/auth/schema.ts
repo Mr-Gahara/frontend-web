@@ -30,6 +30,14 @@ export const skemaLoginPengguna = z.object({
 
 export type NilaiLoginPengguna = z.infer<typeof skemaLoginPengguna>;
 
+/** Aturan password akun, sama dengan validateRegister backend; dipakai daftar dan password baru. */
+const aturanPassword = z
+  .string()
+  .min(1, "Password wajib diisi")
+  .min(8, "Password minimal 8 karakter")
+  .regex(/[A-Z]/, "Password harus mengandung minimal 1 huruf kapital")
+  .regex(/[0-9]/, "Password harus mengandung minimal 1 angka");
+
 /**
  * Skema daftar akun. Aturan password sama dengan validateRegister backend
  * (minimal 8 karakter, huruf kapital, dan angka), supaya kesalahan tertangkap
@@ -38,12 +46,7 @@ export type NilaiLoginPengguna = z.infer<typeof skemaLoginPengguna>;
 export const skemaDaftarAkun = z
   .object({
     email: z.string().trim().min(1, "Email wajib diisi").email("Format email tidak valid"),
-    password: z
-      .string()
-      .min(1, "Password wajib diisi")
-      .min(8, "Password minimal 8 karakter")
-      .regex(/[A-Z]/, "Password harus mengandung minimal 1 huruf kapital")
-      .regex(/[0-9]/, "Password harus mengandung minimal 1 angka"),
+    password: aturanPassword,
     ulangiPassword: z.string().min(1, "Ulangi password wajib diisi"),
   })
   .refine((n) => n.password === n.ulangiPassword, {
@@ -52,3 +55,30 @@ export const skemaDaftarAkun = z
   });
 
 export type NilaiDaftarAkun = z.infer<typeof skemaDaftarAkun>;
+
+/** Enam kotak kode verifikasi kosong; larik baru setiap dipanggil. */
+export const kodeKosong = (): string[] => ["", "", "", "", "", ""];
+
+/** Sah bila keenam kotak terisi angka. */
+const aturanKode = z
+  .array(z.string())
+  .refine((kotak) => /^\d{6}$/.test(kotak.join("")), "Masukkan 6 digit kode verifikasi.");
+
+export const skemaKode = z.object({ kode: aturanKode });
+export type NilaiKode = z.infer<typeof skemaKode>;
+
+/** Lupa password tahap pertama: email dengan aturan yang sama dengan login akun. */
+export const skemaLupaPassword = skemaLoginAkun.pick({ email: true });
+export type NilaiLupaPassword = z.infer<typeof skemaLupaPassword>;
+
+export const skemaPasswordBaru = z
+  .object({
+    kode: aturanKode,
+    password: aturanPassword,
+    ulangiPassword: z.string().min(1, "Ulangi password wajib diisi"),
+  })
+  .refine((n) => n.password === n.ulangiPassword, {
+    path: ["ulangiPassword"],
+    message: "Password tidak sama",
+  });
+export type NilaiPasswordBaru = z.infer<typeof skemaPasswordBaru>;
