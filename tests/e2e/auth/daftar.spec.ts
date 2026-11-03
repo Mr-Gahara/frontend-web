@@ -12,6 +12,8 @@ import { ALASAN_TANPA_ADMIN, hapusAkunKlienUji, kredensialAdmin } from "../../he
  */
 const POLA_DAFTAR = /\/api\/akun\/auth\/register$/;
 const PASSWORD_BARU = "Daftar1234";
+/** registerLimiter backend development tetap aktif; 429 berarti kuota jendela 15 menit habis, bukan kegagalan halaman. */
+const ALASAN_KUOTA = "Kuota registerLimiter backend habis (429); jalankan ulang setelah jendela 15 menit (utang pengujian)";
 const langkahAktif = (page: Page) =>
   page.getByRole("list", { name: "Langkah pendaftaran" }).locator('[aria-current="step"]');
 
@@ -87,7 +89,9 @@ test.describe("Halaman daftar", () => {
   test("email yang sudah terdaftar ditolak dengan pesan backend", async ({ page }) => {
     const jawab = page.waitForResponse(POLA_DAFTAR);
     await isiForm(page, AKUN_UJI.email, PASSWORD_BARU);
-    expect((await jawab).status()).toBe(409);
+    const status = (await jawab).status();
+    test.skip(status === 429, ALASAN_KUOTA);
+    expect(status).toBe(409);
     await expect(page.getByText("Email sudah terdaftar.")).toBeVisible();
     await expect(page.getByRole("heading", { level: 1, name: "Buat akun toko" })).toBeVisible();
   });
@@ -103,6 +107,7 @@ test.describe("Halaman daftar", () => {
       const res = await jawab;
       const isi = await res.json();
       id = String(isi.data?._id ?? isi.data?.id ?? "");
+      test.skip(res.status() === 429, ALASAN_KUOTA);
       expect(res.status(), JSON.stringify(isi).slice(0, 200)).toBe(201);
 
       await expect(page.getByRole("heading", { level: 1, name: "Akun dibuat" })).toBeVisible();
