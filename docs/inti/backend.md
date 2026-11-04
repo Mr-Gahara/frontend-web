@@ -196,6 +196,16 @@ tidak ada yang perlu digabung. Dua migrasi backend dijalankan lebih dulu
 lalu permission diselaraskan lewat langkah 1, 3, 4, dan 5 (160 nama,
 Owner 157), dan `npm run db:indeks`
 (`referensi/keputusan-penyesuaian-backend.md`).
+Pada 4 November 2026 `nizar` maju 33 commit dan `yoga` 23 commit di atas
+`ridho` `6c665b3`, dan `nizar` `4759208` memuat seluruh `yoga` `a07c0b1`,
+sehingga `ridho` lokal di-fast-forward ke `4759208` tanpa pemeriksaan
+kelengkapan dan tanpa di-push: pemilik proyek menetapkan backend hanya
+diambil (fast-forward, atau merge beserta konflik bila ada), tanpa
+perubahan lain. Langkah sesudah tarik kini tercatat di
+`docs/pengembangan/status.md` backend: kedua seed, `db:indeks`,
+`db:lokasi-penjualan`, `db:data-bawaan` (N6), dan `db:setup-toko-lama`
+(Y2, P48). Seed menambah empat izin (164 nama, Owner 161), tanpa nama
+dibuang.
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari

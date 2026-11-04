@@ -12,6 +12,20 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per penyesuaian backend `ridho` lokal `4759208`** (commit
+`c868870`, 4 November 2026): 892 test unit dan integrasi lolos di 102
+berkas. Suite e2e penuh dijalankan sekali terhadap backend `4759208`
+sebelum kode web diubah, pukul 09.41 sampai 10.13 WIB: 544 lolos, 2
+skipped, dan 1 gagal dari 547. Kegagalannya skenario 409 di spec daftar
+(B231), yang kemudian diubah; judul kedua skip tidak tercatat. Sesudahnya
+suite penuh tidak dijalankan ulang atas perintah pemilik proyek. Spec
+terdampak: spec auth (daftar, verifikasi-lupa-password, tampilan login
+akun, login, validasi login) 44 lolos di `67ec690`, dan
+`tests/e2e/pengaturan` bersama gerbang rute 42 lolos di `c868870`.
+Harapan suite penuh 549: 547 ditambah satu skenario di spec daftar
+(login sebelum verifikasi) dan satu di spec verifikasi-lupa-password
+(lupa password sampai login); angka itu hitungan.
+
 **Baseline per halaman Langganan** (commit `2716f86`, 3 November 2026):
 886 test unit dan integrasi lolos. Suite e2e penuh tidak dijalankan; yang
 dijalankan `tests/e2e/pengaturan` dan spec gerbang rute (41 lolos dan 1
@@ -153,6 +167,21 @@ stok dan surat jalan, angka yang tidak dapat dicocokkan dengan isi spec
   (akar repo, diabaikan git) atau dari variabel lingkungan, lewat
   `tests/helpers/admin-uji.ts`
 
+## Menjalankan layanan uji
+
+Frontend `npm run dev`, MongoDB dan Redis lokal. Backend dijalankan dengan
+env inline, karena `.env` backend tidak diubah dari sisi frontend
+(4 November 2026); dotenv backend tidak menimpa variabel yang sudah ada:
+
+```bash
+cd ~/Documents/backend-js && EMAIL_TRANSPORT=smtp SMTP_HOST=127.0.0.1 SMTP_PORT=1025 EMAIL_PENGIRIM=noreply@tachyon.test OTP_JEDA_KIRIM_DETIK=0 OTP_MAKS_KIRIM_HARIAN=1000 EMAIL_KUOTA_HARIAN=5000 REGISTER_LIMIT_MAX=1000 npm start
+```
+
+Mailpit menangkap email OTP (UJ1a): `docker start mailpit`, atau pertama
+kali `docker run -d --name mailpit -p 127.0.0.1:1025:1025 -p
+127.0.0.1:8025:8025 axllent/mailpit:v1.21`. Spec membaca kode lewat
+`tests/helpers/mailpit-uji.ts`.
+
 ## Menelusuri kegagalan e2e
 
 Jangan menebak selector. Ambil bukti:
@@ -253,13 +282,15 @@ hapus bahan baku juga dilewati bila datanya kosong. Pada data uji sekarang
 itu hanya terjadi di jurnal stok pada tanggal 1, karena data bulan
 berjalan masih kosong (baseline 1 November 2026).
 
-Dua skenario di `auth/daftar.spec.ts` (email terdaftar 409 dan daftar
-berhasil) dilewati bila backend development menjawab 429. Itu bukan syarat
-data: `registerLimiter` hanya dilewati bila `NODE_ENV` bernilai `test`,
-sehingga di development batasnya 10 pendaftaran per 15 menit per IP, dan
-spec auth yang diulang dalam rentang itu kehabisan kuota. Alasannya
-tertulis di `ALASAN_KUOTA` (`d94a48c`); usulan ke backend ada di
-`modul/setup-akun.md`, Utang terbuka.
+Tiga skenario pendaftaran di `auth/daftar.spec.ts` dilewati bila backend
+menjawab 429 (`ALASAN_KUOTA`, `d94a48c`): batas `registerLimiter` 10 per
+15 menit per IP berlaku kecuali backend dijalankan dengan
+`REGISTER_LIMIT_MAX` lebih besar (B230; perintah di Menjalankan layanan
+uji). Skenario ber-OTP di spec daftar dan verifikasi-lupa-password juga
+dilewati bila Mailpit tidak menyala (`ALASAN_TANPA_MAILPIT`) atau
+kredensial admin uji tidak ada, karena akunnya dibersihkan lewat API
+admin. Ketiganya tidak terjadi bila layanan uji dijalankan seperti di
+atas.
 
 Ketiga spec tulis stock opname membuat dokumen baru di setiap run dan
 menutupnya sebagai CANCELLED, sehingga dokumen CANCELLED bertambah tiga per

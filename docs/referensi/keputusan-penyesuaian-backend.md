@@ -553,3 +553,41 @@ Ridho, serta serah utang backend ke Yoga dan Nizar.
   `Co-Authored-By`, diganti `8b5ad0f` lewat force-push oleh pemilik
   proyek, dan aturannya dipindah ke lapis inti (`90472fe`,
   `inti/cara-kerja.md`, Atribusi commit).
+
+## Penyesuaian backend `ridho` lokal `4759208`
+
+Diputuskan pemilik proyek pada 4 November 2026, setelah `nizar` maju 33
+commit ke `4759208` yang memuat `yoga` `a07c0b1` (23 commit). Isinya plan
+dan setup akun dari web (N1 sampai N6, Y1 sampai Y3, P48) serta modul sesi
+kasir.
+
+- **Backend hanya diambil**: fast-forward atau merge beserta konflik,
+  tanpa perubahan kode, tanpa mengubah `.env`, dan `ridho` tidak di-push.
+  Layanan uji dijalankan dengan env inline (`inti/pengujian.md`,
+  Menjalankan layanan uji), dan Mailpit sebagai kontainer Docker.
+- **Basis data lokal diselaraskan atas persetujuan pemilik proyek**:
+  kedua seed (164 nama, Owner 161), `db:indeks`, `db:lokasi-penjualan`
+  (0 diisi), `db:data-bawaan` (4 pelanggan `Customer`, 3 akun kas, 3
+  metode Tunai), dan `db:setup-toko-lama` (4 toko). Cache Redis izin
+  kosong saat dihapus.
+- **Akun uji dinaikkan ke Pro lewat `PUT /admin/users/:id/plan`**, karena
+  akun lama dibaca Basic (B212) dan Basic menolak sesi booking, aset,
+  tipe aset, dan tarif (B216); gudang juga hanya Pro (PL6a).
+- **Suite penuh lebih dulu terhadap backend baru**, sebelum kode web
+  diubah (09.41 sampai 10.13 WIB): 544 lolos, 2 skipped, dan 1 gagal dari
+  547. Satu-satunya kegagalan adalah skenario email terdaftar 409 di
+  spec daftar (B231). Judul kedua skip tidak tercatat.
+- **Skenario email terdaftar diubah ke perilaku baru, bukan dibuang**:
+  email terdaftar tetap lanjut ke isian kode tanpa disebut sudah dipakai.
+- **Cakupan: seluruh perubahan yang dapat dipakai web**, dikerjakan
+  bertahap dengan satu commit hijau per bagian: daftar, verifikasi, dan
+  lupa password (`67ec690`); Langganan (`c868870`); lalu plan di panel
+  admin, pelanggan bawaan, jenis mutasi baru, wizard, penyaringan per
+  plan, dan halaman sesi kasir (`inti/status.md`, Pekerjaan berikutnya).
+- **Verifikasi email langsung login dengan password titipan di memori**
+  (`features/auth/kredensial-daftar.ts`), karena backend tidak
+  menerbitkan token saat verifikasi; tanpa titipan pendaftar diarahkan
+  ke login.
+- **Suite e2e penuh tidak dijalankan ulang setelah perubahan web** atas
+  perintah pemilik proyek; spec terdampak masing-masing lolos
+  (`inti/pengujian.md`, Baseline).

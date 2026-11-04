@@ -458,34 +458,47 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (`cd07ae1`), dibuat sekali dan dipakai ulang; jadwal hari ini mereka
   dihapus setiap run. Mereka ikut tampil di daftar pengguna, kalender
   jadwal ruang outlet, dan pilihan login PIN.
-- **Suite e2e penuh belum dijalankan sejak `6db571d`**; harapannya 547
-  (`inti/pengujian.md`, Baseline), angka hitungan. Dijalankan bersama
-  penyesuaian backend berikutnya atau atas permintaan pemilik proyek.
+- **Suite e2e penuh belum dijalankan setelah perubahan web `67ec690` dan
+  `c868870`**; yang terakhir dijalankan adalah suite terhadap backend
+  `4759208` sebelum kode web diubah (544 lolos, 2 skipped, 1 gagal dari
+  547). Harapannya 549 (`inti/pengujian.md`, Baseline), angka hitungan.
+  Dijalankan atas permintaan pemilik proyek atau bersama penyesuaian
+  backend berikutnya, dengan layanan uji seperti di `inti/pengujian.md`
+  (Menjalankan layanan uji), agar skenario ber-OTP tidak dilewati.
 - **Skenario aktifkan akun tanpa batas membekukan akun klien sungguhan**
   (`482ac79`), dipilih menurut syarat dan tidak pernah akun uji utama;
   setiap run menambah dua catatan di riwayat langganan akun itu.
 - **Kalender per lokasi hanya teruji untuk sel yang berisi penanda
   saja**; sel yang berisi jadwal lokal sekaligus penanda lokasi lain
   belum diuji e2e.
-- **Skenario 409 dan daftar berhasil di spec daftar dilewati bila kuota
-  pendaftaran backend development habis** (`d94a48c`, `inti/pengujian.md`,
-  Test yang ditandai fixme dan skip bersyarat). Lunas bila backend
-  melonggarkan batasnya di non-produksi (`modul/setup-akun.md`, Utang
-  terbuka).
+- **Skenario pendaftaran di spec daftar dilewati bila kuota pendaftaran
+  backend habis** (`d94a48c`). Backend kini menerima `REGISTER_LIMIT_MAX`
+  di non-produksi (B230), dan perintah layanan uji menyetelnya; skip itu
+  tinggal pengaman bila backend dijalankan tanpa env tersebut.
 - **Skenario "Batalkan kembali ke daftar" di spec buat reservasi gagal di
   suite penuh** (1 November 2026 dan `6db571d`), tetapi lolos 8 dari 8 bila
   dijalankan sendiri; penyebabnya belum ditelusuri. Ditelusuri lewat trace
   saat suite penuh berikutnya menggagalkannya lagi, tanpa run tambahan
-  untuk memancingnya.
-- **Dua skenario dilewati tanpa judul tercatat**: satu di suite penuh
-  `50c99ae` selain jurnal stok, dan satu di `6db571d`. Tidak dicari dengan
+  untuk memancingnya. Suite terhadap backend `4759208` (4 November 2026)
+  meloloskannya.
+- **Skenario dilewati tanpa judul tercatat**: satu di suite penuh
+  `50c99ae` selain jurnal stok, satu di `6db571d`, dan dua di suite
+  terhadap backend `4759208` (spec daftar tidak termasuk; 29 spec lain
+  ber-skip bersyarat). Tidak dicari dengan
   menjalankan ulang sebagian suite; reporter `json` di suite penuh
   berikutnya mencatat judulnya (`referensi/playwright.md`).
-- **Halaman pratinjau setup akun hanya diuji tampilan dan validasinya**:
-  wizard `/setup` (`50c99ae`), verifikasi email dan lupa password
-  (`6db571d`), dan Langganan (`2716f86`). Alur nyatanya (OTP lewat Mailpit,
-  penyimpanan setup, serta plan dan masa berlaku asli) diuji saat N1, N3,
-  N4, dan Y1 tersedia (`modul/setup-akun.md`, Pengujian OTP).
-- **Jalur non-Owner halaman Langganan hanya teruji di unit test**
-  (`bolehLihatLangganan`), karena akun uji berperan Owner. Penolakannya
-  memakai `PesanTanpaIzin`, yang sama dengan gerbang rute.
+- **Wizard `/setup` hanya diuji tampilan dan validasinya** (`50c99ae`);
+  penyimpanan setup diuji saat wizard tersambung ke backend. Verifikasi
+  email, lupa password, dan Langganan sudah diuji terhadap backend sejak
+  `67ec690` dan `c868870`.
+- **Kirim ulang kode belum diuji e2e** di verifikasi email maupun lupa
+  password, karena tombolnya menunggu hitung mundur 60 detik; perlu
+  `page.clock`. Jalur verifikasi tanpa password titipan (halaman dimuat
+  ulang, lalu diarahkan ke login dengan pesan) juga belum diuji e2e.
+- **Keadaan masa berlaku Langganan hanya teruji di unit test**: masa
+  percobaan, bilah masa berlaku, masa akses lewat dan masa tenggang, serta
+  Muat riwayat lainnya. Akun uji Pro tanpa batas waktu dengan satu catatan
+  riwayat, sehingga e2e hanya membuktikan keadaan tanpa batas.
+- **Jalur tanpa `read-langganan` hanya teruji di unit test** (gerbang
+  rute, `c868870`), karena pengguna uji yang ada memegang seluruh izin
+  `read-`. Penolakannya lewat gerbang rute yang sama dengan halaman lain.

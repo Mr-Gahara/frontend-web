@@ -89,10 +89,13 @@ Diputuskan pemilik proyek pada 3 November 2026.
   permission langganan, sehingga kartu dan halamannya dibatasi lewat role
   (`bolehLihatLangganan`), sebagai pengecualian dari gerbang berbasis
   permission. Entri `IZIN_HALAMAN` dibiarkan kosong dengan komentar, dan
-  diganti pemeriksaan izin begitu permission-nya ada.
+  diganti pemeriksaan izin begitu permission-nya ada. Diganti di `c868870`
+  (B229, `read-langganan`).
 - **LG3a: pratinjau dengan data contoh**, seperti wizard setup: masa
   percobaan Basic 14 hari yang dimulai dua hari sebelum hari ini, dengan
-  spanduk pratinjau, sampai N1 tersedia.
+  spanduk pratinjau, sampai N1 tersedia. Data contoh dibuang di
+  `c868870`; masa percobaan dan awal masa berlaku dibaca dari riwayat,
+  karena respons tidak memuat keduanya (`ringkasLangganan`).
 
 ### Akun dan OTP
 
@@ -186,7 +189,8 @@ dan token warna yang sudah ada.
   daftar bertuliskan "Daftar", bukan "Daftar dan kirim kode verifikasi",
   dan sesudah daftar halaman menyebut verifikasi email serta penyiapan
   toko belum tersedia. `/daftar` belum ditautkan dari login akun sampai
-  N3 dan Y1 ada.
+  N3 dan Y1 ada. Sejak `67ec690` daftar langsung ke isian kode
+  (B231), dan halaman tidak pernah menyebut email sudah dipakai.
 - **TP5a: wizard setup di `/setup`** (`50c99ae`), bergaya daftar E dengan
   stepper tegak dan daftar periksa langkah. Langkah mengikuti plan
   (`features/setup/langkah.ts`): Basic tujuh langkah, Advanced menambah
@@ -204,7 +208,11 @@ dan token warna yang sudah ada.
   kode lengkap mengarah ke `/setup`. `/lupa-password` bergaya A dalam tiga
   tahap: email, kode dan password baru, lalu selesai. Aturan password
   dipakai bersama form daftar (`aturanPassword`). Keduanya belum
-  ditautkan dan belum memanggil backend.
+  ditautkan dan belum memanggil backend. Tersambung di `67ec690` (B217, B232):
+  kode benar memverifikasi lalu langsung login dengan password titipan di
+  memori (`kredensial-daftar.ts`), lalu ke `/setup` bila `requireSetup`;
+  tanpa titipan ke login. Login yang dijawab `EMAIL_BELUM_TERVERIFIKASI`
+  meminta kode baru lalu membuka isian kode.
 - **TP7a: halaman Langganan** (`2716f86`) di
   `/dashboard/outlet/pengaturan/langganan`, desain F: plan aktif dengan
   lencana masa percobaan, tanggal berakhir, sisa hari, dan bilah masa
@@ -217,16 +225,16 @@ dan token warna yang sudah ada.
 
 | Halaman | Isi | Token | Menunggu |
 |---|---|---|---|
-| Daftar | Email dan password, lalu verifikasi email. Langkah 1 sudah ada di `/daftar` (`bb17c79`), belum ditautkan dari login akun | Publik | N3, Y1 |
-| Verifikasi email | Isian OTP dan kirim ulang. Tampilan pratinjau ada di `/daftar/verifikasi` (`6db571d`), belum ditautkan | Publik | N3 |
-| Login akun | Email dan password; tautan daftar dan lupa password. Admin ke panel admin, akun belum terverifikasi ke verifikasi, setup belum selesai ke wizard. Tampilan desain A sudah ada (`e7fda09`); kedua tautan dipasang setelah halamannya berfungsi | Publik | N1, N3, N4, Y1 |
-| Lupa password | Email, lalu OTP dan password baru. Tampilan pratinjau ada di `/lupa-password` (`6db571d`), belum ditautkan | Publik | N4 |
+| Daftar | Email dan password, lalu verifikasi email. Langkah 1 sudah ada di `/daftar` (`bb17c79`), belum ditautkan dari login akun Tersambung ke backend di `67ec690` (B231). | Publik | Tersambung (`67ec690`); tautan dari login menunggu wizard |
+| Verifikasi email | Isian OTP dan kirim ulang. Tampilan pratinjau ada di `/daftar/verifikasi` (`6db571d`), belum ditautkan Tersambung di `67ec690` (B232). | Publik | Tersambung (`67ec690`) |
+| Login akun | Email dan password; tautan daftar dan lupa password. Admin ke panel admin, akun belum terverifikasi ke verifikasi, setup belum selesai ke wizard. Tampilan desain A sudah ada (`e7fda09`); kedua tautan dipasang setelah halamannya berfungsi Sejak `67ec690`: `requireSetup` ke `/setup` (B223), belum terverifikasi ke isian kode (B232), dan tautan lupa password terpasang. | Publik | Tautan daftar menunggu wizard |
+| Lupa password | Email, lalu OTP dan password baru. Tampilan pratinjau ada di `/lupa-password` (`6db571d`), belum ditautkan Tersambung dan ditautkan dari login akun di `67ec690` (B217). | Publik | Tersambung (`67ec690`) |
 | Login pengguna | Nama dan PIN; lupa PIN Owner lewat OTP (B178); galat nonaktif 403 (B202) dan 429. Tampilan desain E sudah ada (`1f3b9e4`); nama toko belum tampil (butir 167) | Akun | Sudah tersedia; nama toko menunggu butir 167 |
-| Wizard fase akun | Nama toko (`POST /tenant`), lalu Owner (`register-owner`, 409 bila sudah ada, B195). Tampilan pratinjau kedua fase wizard ada di `/setup` (`50c99ae`), belum ditautkan | Akun | Y3 |
+| Wizard fase akun | Nama toko (`POST /tenant`), lalu Owner (`register-owner`, 409 bila sudah ada, B195). Tampilan pratinjau kedua fase wizard ada di `/setup` (`50c99ae`), belum ditautkan | Akun | Y3 tersedia (B219); penyambungan berikutnya |
 | Wizard fase Owner | Lokasi outlet, kategori, bahan baku bila ada resep, produk, dan pajak; Advanced dan Pro: tipe aset, aset, tarif; Pro: gudang | Pengguna | Y1; stok minimal produk Y4 |
-| Langganan | Plan, masa berlaku, perbandingan plan, riwayat, dan kontak admin lewat WhatsApp. Tampilan pratinjau ada di Pengaturan (`2716f86`), hanya Owner (LG2a) | Pengguna | N1; permission langganan |
+| Langganan | Plan, masa berlaku, perbandingan plan, riwayat, dan kontak admin lewat WhatsApp. Tampilan pratinjau ada di Pengaturan (`2716f86`), hanya Owner (LG2a) Sejak `c868870` datanya dari `GET /akun/langganan` dan bergerbang `read-langganan` (B229). | Pengguna | Tersambung (`c868870`) |
 | Penyaringan per plan | Menu, halaman, dan tombol di luar plan atau yang setup fiturnya belum selesai | Pengguna | N1, N2, Y1 |
-| Panel admin | Plan dan durasi saat membuat akun dan memperpanjang langganan | Akun admin | N1 |
+| Panel admin | Plan dan durasi saat membuat akun dan memperpanjang langganan | Akun admin | N1 tersedia (B213); dikerjakan berikutnya |
 
 ## Fakta backend
 
@@ -267,6 +275,22 @@ Diuji langsung terhadap backend development pada 1 November 2026:
   di backend development batasnya tetap 10 pendaftaran per 15 menit per
   IP (`middleware/rateLimiters.js` baris 14 dan 44).
 
+Diperbarui dari `nizar` `4759208` pada 4 November 2026:
+
+- `requireSetup` di login akun berarti setup inti belum selesai, termasuk
+  toko yang sudah ada, dan respons menambah `setup: { adaToko, inti,
+  fitur }` (B223). Rincian langkah dari `GET /api/setup/status` bertoken
+  akun (B220), sebelas langkah; `bahanBaku` tidak wajib selama tidak ada
+  produk beresep, dan stok minimal belum menjadi kriteria sampai Y4.
+- `register-owner` tanpa `installationId` membuat Owner ber-`aksesType`
+  web dan app dengan token web di `accessToken` tingkat atas (B219).
+- Akun punya `plan` dan `aksesBerakhirPada` (B212); akun lama dibaca
+  Basic. Token pengguna dan respons `pin-login` memuat `langganan: {
+  plan, aksesBerakhirPada }` (B214).
+- Register selalu 201 dengan email tersamar, tanpa id (B231). Login
+  pendaftar belum terverifikasi 403 `EMAIL_BELUM_TERVERIFIKASI` (B232).
+- Pelanggan bawaan `Customer` (`isBawaan`) dibuat untuk setiap toko (B218).
+
 ## Pengujian OTP
 
 - Mailpit berjalan di Docker: SMTP `localhost:1025` dan API HTTP
@@ -293,6 +317,8 @@ Diuji langsung terhadap backend development pada 1 November 2026:
 - Tautan "Daftar" dan "Lupa password?" di login akun dipasang setelah N3,
   N4, dan Y1 tersedia; sampai itu `/daftar`, `/daftar/verifikasi`,
   `/lupa-password`, dan `/setup` hanya dapat dibuka langsung.
+  "Lupa password?" terpasang di `67ec690`; "Daftar" menunggu wizard
+  tersambung, karena daftar berakhir di `/setup`.
 - Tombol "Buka aplikasi" di halaman setup selesai belum ada, karena
   aplikasi kasir belum rilis. Wajib ada saat aplikasi rilis: tombol
   membuka aplikasi lewat deep link, dan bila aplikasi belum terpasang
@@ -301,10 +327,17 @@ Diuji langsung terhadap backend development pada 1 November 2026:
 - Permission langganan belum ada di backend (LG2a). Usulan: permission
   baca langganan yang dimiliki Owner, diserahkan bersama N1; sampai itu
   web membatasi lewat role.
+  Selesai di `c868870`: backend menyediakan `read-langganan` (B229), dan
+  halaman serta kartunya bergerbang izin itu.
 - Kuota `registerLimiter` di backend development (Fakta backend) membuat
   spec daftar dilewati bila spec auth diulang dalam 15 menit (`d94a48c`).
   Usulan: batasnya dapat dilonggarkan lewat env di backend non-produksi,
-  seperti batas OTP di N5.
+  seperti batas OTP di N5. Tersedia sebagai `REGISTER_LIMIT_MAX` (B230)
+  dan disetel di perintah layanan uji (`inti/pengujian.md`).
 - Halaman pratinjau disambungkan ke backend di chat berikutnya
   (`inti/status.md`, Pekerjaan berikutnya): data contoh dan spanduk
   pratinjau dibuang halaman demi halaman begitu endpoint-nya tersedia.
+  Daftar, verifikasi email, dan lupa password tersambung di `67ec690`,
+  dan Langganan di `c868870`; wizard masih pratinjau.
+- Panel admin belum mengenal plan (B213), dan riwayat langganannya
+  menampilkan aksi `ubah-plan` tanpa label (`inti/status.md`).

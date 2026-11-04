@@ -27,58 +27,90 @@ Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 11 Oktober 2026; tipografi dan spasi belum.
 
-## Pekerjaan berikutnya: plan, setup akun, dan login
+## Pekerjaan berikutnya: lanjutan penyesuaian backend `4759208`
 
-Pemilik proyek memutuskan pada 1 November 2026 bahwa pendaftaran dan
-seluruh setup akun pindah ke web, dan aplikasi hanya memakai akun yang
-setup intinya selesai. Plan tier ditetapkan Basic, Advanced, dan Pro,
-menggantikan rancangan Basic, Advanced, dan Full. Rancangan lengkap,
-kriteria setup per plan, pembagian kerja backend, dan peta halaman web ada
-di `modul/setup-akun.md`. Penyesuaian terakhir ke backend `ridho`
-`0024eb9` selesai pada 31 Oktober 2026
-(`referensi/keputusan-penyesuaian-backend.md`).
+Pada 4 November 2026 backend lokal di-fast-forward ke `nizar` `4759208`,
+yang memuat `yoga` `a07c0b1` (`referensi/keputusan-penyesuaian-backend.md`,
+Penyesuaian backend `ridho` lokal `4759208`). Kontrak yang ditunggu
+halaman pratinjau tersedia: N1 (B212 sampai B214, B229), N2 (B216,
+B224), N3 (B231 sampai B233), N4 (B217), N5 (B215), N6 (B218), Y1
+(B220, B223), Y2 (B221), Y3 (B219), P48 (B222), dan sesi kasir (B225
+sampai B228). Y4 (stok minimal produk) dan Y5 (penegakan WMS) belum.
 
-Urutannya:
+Sudah selesai di sesi itu:
 
-1. **Backend mengerjakan plan dan status setup.** Rancangannya diserahkan
-   ke Nizar (N1 sampai N6), Yoga (Y1 sampai Y6), dan Ajis untuk aplikasi
-   pada 1 November 2026. Plan menjadi prasyarat status setup.
-2. **Varian desain login akun, login pengguna, dan daftar**: selesai 1
-   November 2026. Terpilih A untuk login akun, E untuk login pengguna, dan
-   E untuk daftar (`modul/setup-akun.md`, Tampilan halaman). Gaya terpilih
-   diterapkan juga ke wizard setup.
-3. **Halaman login dibangun ulang**: tampilannya selesai 1 November
-   2026, yaitu login akun (`e7fda09`), login pengguna (`1f3b9e4`), dan
-   daftar langkah 1 yang belum ditautkan (`bb17c79`). Yang tersisa adalah
-   perubahan backend yang belum dipakai web (keputusan 30 Oktober 2026):
-   OTP reset PIN Owner dan ubah email atau password akun (B178 sampai
-   B180), hapus akun oleh Owner (B181), register Owner yang ditolak 409
-   bila toko sudah punya Owner (B195), dan uji e2e pengguna nonaktif yang
-   ditolak 403 saat login PIN (B202).
-4. **Tampilan pratinjau setup akun**: selesai 3 November 2026, belum
-   tersambung ke backend dan belum ditautkan. Wizard setup di `/setup`
-   (`50c99ae`), verifikasi email di `/daftar/verifikasi` dan lupa password
-   di `/lupa-password` (`6db571d`), serta halaman Langganan bagi Owner di
-   Pengaturan (`2716f86`). Datanya contoh, dengan spanduk pratinjau.
-5. **Pekerjaan chat berikutnya: menyambungkan halaman pratinjau ke
-   backend** begitu kontrak Nizar dan Yoga tersedia: daftar dan verifikasi
-   (N3, Y1), lupa password (N4), wizard (Y1, Y3, Y4), dan Langganan (N1).
-   Sesudahnya tautan daftar dan lupa password di login akun, penyaringan
-   per plan (N1, N2, Y1, Y5), dan perbaikan bug yang ditemukan saat
-   penyambungan. Utangnya ada di `modul/setup-akun.md`, Utang terbuka.
+1. Daftar, verifikasi email, dan lupa password tersambung ke backend,
+   login akun mengarahkan `requireSetup` ke `/setup` dan
+   `EMAIL_BELUM_TERVERIFIKASI` ke isian kode, dan tautan "Lupa
+   password?" terpasang (`67ec690`).
+2. Halaman Langganan memakai data backend dan izin `read-langganan`
+   (`c868870`).
+
+Urutan berikutnya, semuanya sudah disetujui pemilik proyek pada 4
+November 2026:
+
+1. **Plan di panel admin (B213)**, didahului bug yang sudah terlihat:
+   `LABEL_AKSI` di `features/admin-akun/langganan.ts` tidak punya
+   `ubah-plan`, sehingga riwayat langganan akun uji di panel admin
+   menampilkan baris tanpa label. Lalu pilihan plan dan durasi 24 bulan
+   di buat akun (Advanced dan Pro wajib durasi), `PUT
+   /admin/users/:id/plan`, plan opsional saat perpanjang, dan plan di
+   daftar serta detail akun. `PILIHAN_DURASI_BULAN` dan
+   `DurasiLangganan` masih 1, 3, 6, 12.
+2. **Pelanggan bawaan (B218)**: pelanggan `isBawaan` tidak dapat
+   dihapus (409) dan hanya namanya yang boleh diubah; sembunyikan hapus
+   dan field selain nama.
+3. **Dua jenis mutasi baru (B228)**: `SELISIH_KAS_MASUK` dan
+   `SELISIH_KAS_KELUAR` di `ARAH_JENIS` dan label
+   `features/akun-kas/mutasi.ts`, dengan rujukan `SesiKasir`.
+4. **Wizard setup tersambung** (B220, B219, B223): status dari `GET
+   /api/setup/status` bertoken akun, melanjutkan dari langkah pertama
+   yang belum selesai, nama toko lewat `POST /tenant`, Owner lewat
+   `register-owner` tanpa `installationId` (memakai `accessToken`
+   tingkat atas responsnya untuk langkah berikutnya), lalu lokasi,
+   kategori, bahan baku, produk, pajak, tipe aset, aset, tarif, dan
+   gudang lewat endpoint modul yang ada. Stok minimal produk menunggu
+   Y4 dan tidak ditampilkan seolah tersimpan (TP4a). Pemulihan sesi saat
+   `/setup` dimuat ulang perlu diperiksa, karena token hanya di memori.
+   Sesudahnya tautan "Daftar" di login akun dipasang.
+5. **Penyaringan per plan** (B214, B216, B224): menu dan halaman sesi
+   booking disembunyikan untuk Basic dari `langganan.plan` di token
+   pengguna, dan 403 `PLAN_TIDAK_MENCAKUP` serta
+   `SETUP_FITUR_BELUM_SELESAI` ditampilkan sebagai ajakan upgrade atau
+   melengkapi setup, bukan pesan izin. Pesan backend saat ini sudah
+   tampil apa adanya lewat `pesanError`, dan tidak memicu logout paksa.
+6. **Halaman sesi kasir (B227)**: modul baru, pemetaan perangkat ke akun
+   kas `Kas Fisik` dan laporan sesi (`read-sesi-kasir`,
+   `kelola-perangkat-kasir`). Perlu varian desain lebih dulu, dan
+   sumber `installationId` perangkat untuk form pemetaan perlu
+   dipastikan dari backend.
 
 Belum dijadwalkan: logo toko (B203 sampai B205) dan jam operasional
 (B206) di profil toko.
 
-Backend lokal di `ridho` `0024eb9`, yang memuat `yoga` `f102c53`;
-`nizar` di `877e493`. Laporan penyesuaian ini, berisi temuan baru
-`kontrak/temuan.md` butir 165 beserta pembuktian, ditulis langsung ke
-dokumentasi backend (`128d0de`), dan butir 165 diserahkan ke Yoga
-(`arsip/laporan-backend.md`).
+Backend lokal di `ridho` lokal `4759208`, belum di-push ke
+`origin/ridho` atas keputusan pemilik proyek (backend hanya diambil).
+Backend dijalankan dengan env inline agar `.env` backend tidak diubah
+(`inti/pengujian.md`, Menjalankan layanan uji). Kode backend tidak
+diubah sama sekali.
 
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho nizar yoga; do echo "origin/$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...origin/$r | tr '\t' ' ')"; done
 ```
+
+### Utang kecil dari penyesuaian backend `4759208`
+
+- Riwayat admin tanpa label `ubah-plan` (butir 1 di atas).
+- Seed data bawaan menambah akun kas "Kas Kecil (Laci)" dan metode
+  "Tunai" ke tenant uji Toko3, yang sebelumnya tidak dikenali skrip
+  sebagai ada; suite penuh sebelum perubahan web tidak terpengaruh,
+  tetapi daftar akun kas dan metode pembayaran kini memuat entri itu.
+- Akun uji `toko@gmail.com` dinaikkan ke Pro lewat API admin, karena
+  akun lama dibaca Basic (B212) dan Basic menolak sesi booking (B216).
+  Riwayat langganannya kini berisi satu catatan `ubah-plan`.
+- `db:setup-toko-lama` menandai empat toko yang ada saat itu selesai
+  setup inti. Jangan dijalankan ulang di basis data lokal setelah spec
+  membuat akun pendaftar, karena akun itu ikut ditandai selesai.
 
 ## Utang kecil yang tertunda
 
