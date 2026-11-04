@@ -86,7 +86,11 @@ November 2026:
    dipastikan dari backend.
 
 Belum dijadwalkan: logo toko (B203 sampai B205) dan jam operasional
-(B206) di profil toko.
+(B206) di profil toko, serta perubahan backend 30 Oktober 2026 yang belum
+dipakai web: OTP reset PIN Owner dan ubah email atau password akun (B178
+sampai B180), hapus akun oleh Owner (B181), uji e2e pengguna nonaktif 403
+saat login PIN (B202), dan register Owner 409 bila toko sudah punya Owner
+(B195, masuk ke penyambungan wizard).
 
 Backend lokal di `ridho` lokal `4759208`, belum di-push ke
 `origin/ridho` atas keputusan pemilik proyek (backend hanya diambil).
@@ -101,10 +105,22 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
 ### Utang kecil dari penyesuaian backend `4759208`
 
 - Riwayat admin tanpa label `ubah-plan` (butir 1 di atas).
-- Seed data bawaan menambah akun kas "Kas Kecil (Laci)" dan metode
-  "Tunai" ke tenant uji Toko3, yang sebelumnya tidak dikenali skrip
-  sebagai ada; suite penuh sebelum perubahan web tidak terpengaruh,
-  tetapi daftar akun kas dan metode pembayaran kini memuat entri itu.
+- `db:data-bawaan` mencocokkan nama persis, jadi Toko3 yang sudah punya
+  metode tunai "CASH" dan kas fisik "kas kasir" mendapat metode "Tunai"
+  dan akun kas "Kas Kecil (Laci)" baru (dihitung baca-saja 4 November
+  2026: tiga metode berkategori tunai, tiga kas fisik aktif). Calon temuan
+  untuk Nizar (N6): skrip menggandakan metode tunai toko lama yang
+  namanya lain.
+- Calon temuan kontrak untuk Nizar: `GET /akun/langganan` tidak memuat
+  penanda masa percobaan maupun awal masa berlaku, sehingga web
+  menyimpulkannya dari riwayat berhalaman (`ringkasLangganan`).
+- Laporan untuk tim backend belum disusun: kedua calon temuan di atas,
+  serta pembuktian B215, B217, B229, B230, B231, dan B232 dari web
+  (`inti/backend.md`, Bila menemukan bug backend). Baris temuan belum
+  ditulis di `kontrak/temuan.md`.
+- Enam endpoint baru belum dicatat di `kontrak/endpoint.md`:
+  verifikasi email dan kirim ulangnya, lupa password, reset password,
+  langganan, dan riwayat langganan.
 - Akun uji `toko@gmail.com` dinaikkan ke Pro lewat API admin, karena
   akun lama dibaca Basic (B212) dan Basic menolak sesi booking (B216).
   Riwayat langganannya kini berisi satu catatan `ubah-plan`.

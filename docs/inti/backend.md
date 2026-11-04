@@ -155,6 +155,10 @@ seutuhnya. Sumber kepemilikan adalah
 riwayat commit: `kategoriBebanService.js` ditulis Nizar, tercatat milik
 Ridho, lalu dipindahkan ke Yoga di `149f17f`.
 
+Sejak 4 November 2026 (pemilik proyek) backend hanya diambil: fast-forward,
+atau merge beserta penyelesaian konflik bila ada. Kode dan `.env` backend
+tidak diubah, dan `ridho` tidak di-push.
+
 Cabang `ridho` adalah tempat ketiganya disatukan, dan menjadi acuan web
 sejak `92d4f27` (7 Oktober 2026: `yoga` `55328f1` digabung `nizar`
 `9d45efc`). Setiap kali `yoga` atau `nizar` maju, `ridho` digabung ulang
