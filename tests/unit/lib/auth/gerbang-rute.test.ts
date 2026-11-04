@@ -86,6 +86,13 @@ describe("bolehBukaRute", () => {
     }
   });
 
+  it("Langganan bergerbang read-langganan, bukan role Owner (B229)", () => {
+    const rute = `${OUTLET}/pengaturan/langganan`;
+    expect(bolehBukaRute(rute, [])).toBe(false);
+    expect(bolehBukaRute(rute, [IZIN.role, IZIN.pengguna])).toBe(false);
+    expect(bolehBukaRute(rute, [IZIN.langganan])).toBe(true);
+  });
+
   it("pemilik seluruh izin membuka setiap rute terpetakan", () => {
     const semua = Object.values(IZIN);
     for (const kunci of Object.keys(IZIN_HALAMAN)) {

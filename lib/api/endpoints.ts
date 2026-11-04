@@ -17,6 +17,8 @@ export const EP = {
     kirimVerifikasiEmail: "/akun/auth/verifikasi-email/kirim",
     lupaPassword: "/akun/auth/lupa-password",
     resetPassword: "/akun/auth/reset-password",
+    langganan: "/akun/langganan",
+    langgananRiwayat: "/akun/langganan/riwayat",
     logout: "/akun/auth/logout",
     refresh: "/akun/auth/refreshtoken",
     adminDaftar: "/akun/admin/all",

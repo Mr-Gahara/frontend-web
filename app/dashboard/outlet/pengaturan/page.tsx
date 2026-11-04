@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { useSession } from "@/lib/auth/useSession";
 import { bolehBukaHalaman } from "@/lib/auth/permissions";
-import { bolehLihatLangganan } from "@/features/langganan/data";
 import { 
   Receipt, 
   Users, 
@@ -58,18 +57,15 @@ const settingsModules = [
     icon: CreditCard,
     href: "/dashboard/outlet/pengaturan/langganan",
     iconColor: "text-sage", // Sage Green
-    hanyaOwner: true,
   }
 ]
 
 export default function PengaturanPage() {
   // Kartu mengikuti gerbang halamannya (IZIN_HALAMAN): kartu Pajak hanya
-  // tampil bagi pemegang read-pajak atau akses-pos (keputusan FC3a). Kartu
-  // Langganan hanya bagi Owner, pengecualian role sementara (bolehLihatLangganan).
-  const { permissions, role } = useSession();
-  const modulTampil = settingsModules.filter(
-    (modul) => bolehBukaHalaman(modul.href, permissions) && (!modul.hanyaOwner || bolehLihatLangganan(role)),
-  );
+  // tampil bagi pemegang read-pajak atau akses-pos (keputusan FC3a), dan
+  // kartu Langganan bagi pemegang read-langganan (B229).
+  const { permissions } = useSession();
+  const modulTampil = settingsModules.filter((modul) => bolehBukaHalaman(modul.href, permissions));
   return (
     <div className="p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full overflow-x-hidden">
       

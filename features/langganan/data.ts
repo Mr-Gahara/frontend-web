@@ -1,9 +1,11 @@
 /**
  * Data dan aturan halaman Langganan (modul/setup-akun.md, PL1a sampai PL6a).
- * Plan dan masa berlaku asli menunggu backend (N1); selama itu halaman
- * memakai data contoh dan spanduk pratinjau.
+ * Plan, masa berlaku, dan riwayat dari GET /akun/langganan dan riwayatnya
+ * (B229); aturan tampilannya fungsi murni agar teruji unit.
  */
-export type KunciPlan = "basic" | "advanced" | "pro";
+import type { KunciPlan, LanggananToko, RiwayatLanggananToko } from "@/types/langganan";
+
+export type { KunciPlan };
 
 export interface FiturPlan {
   teks: string;
@@ -77,40 +79,76 @@ export function persenTerpakai(mulai: Date, berakhir: Date, kini: Date): number 
   return Math.min(100, Math.max(0, persen));
 }
 
-/**
- * Pengecualian sementara: backend belum punya permission langganan, jadi
- * kartu dan halaman Langganan dibatasi lewat role (keputusan pemilik
- * proyek). Diganti pemeriksaan izin begitu permission-nya tersedia.
- */
-export function bolehLihatLangganan(role: string): boolean {
-  return role === "Owner";
-}
+export const namaPlan = (kunci: KunciPlan | null | undefined): string =>
+  DAFTAR_PLAN.find((p) => p.kunci === kunci)?.nama ?? "Basic";
 
-export interface RiwayatLangganan {
-  tanggal: Date;
-  perubahan: string;
-  berlakuSampai: Date;
-}
-
-export interface DataLangganan {
+export interface RingkasanLangganan {
   plan: KunciPlan;
+  /** Basic dengan masa gratis yang belum pernah diperpanjang (PL3a). */
   percobaan: boolean;
-  mulai: Date;
-  berakhir: Date;
-  riwayat: RiwayatLangganan[];
+  /** null berarti masa akses tidak dibatasi. */
+  berakhir: Date | null;
+  /** Awal masa berlaku sekarang, dari catatan riwayat yang menetapkannya; null bila tidak diketahui. */
+  mulai: Date | null;
+  /** Masa akses sudah lewat tetapi akun masih dalam masa tenggang. */
+  lewat: boolean;
+  tenggangSampai: Date | null;
 }
 
-/** Data contoh pratinjau: masa percobaan Basic 14 hari yang dimulai dua hari lalu. */
-export function langgananContoh(kini: Date): DataLangganan {
-  const mulai = new Date(kini.getTime() - 2 * SEHARI);
-  const berakhir = new Date(mulai.getTime() + 14 * SEHARI);
+const samaWaktu = (a: string | null, b: Date) => a !== null && new Date(a).getTime() === b.getTime();
+
+/**
+ * Backend tidak mengirim penanda masa percobaan maupun tanggal mulai, jadi
+ * keduanya dibaca dari riwayat yang sudah dimuat: percobaan berarti Basic
+ * berbatas waktu tanpa satu pun catatan berdurasi, dan mulai adalah waktu
+ * catatan terbaru yang menetapkan tanggal berakhir sekarang. Bila catatan
+ * itu belum dimuat (riwayat panjang), bilah masa berlaku tidak ditampilkan.
+ */
+export function ringkasLangganan(
+  langganan: LanggananToko,
+  riwayat: readonly RiwayatLanggananToko[],
+  kini: Date,
+): RingkasanLangganan {
+  const berakhir = langganan.aksesBerakhirPada ? new Date(langganan.aksesBerakhirPada) : null;
+  const penetap = berakhir ? riwayat.find((r) => samaWaktu(r.berakhirSesudah, berakhir)) : undefined;
+  const lewat = berakhir !== null && berakhir.getTime() <= kini.getTime();
+  const tenggang = langganan.masaTenggangHari ?? 0;
   return {
-    plan: "basic",
-    percobaan: true,
-    mulai,
+    plan: langganan.plan,
+    percobaan:
+      langganan.plan === "basic" &&
+      berakhir !== null &&
+      riwayat.some((r) => r.aksi === "buat" && !r.durasiBulan) &&
+      !riwayat.some((r) => (r.durasiBulan ?? 0) > 0),
     berakhir,
-    riwayat: [{ tanggal: mulai, perubahan: "Akun dibuat, masa percobaan Basic 14 hari", berlakuSampai: berakhir }],
+    mulai: penetap ? new Date(penetap.createdAt) : null,
+    lewat,
+    tenggangSampai: lewat && berakhir ? new Date(berakhir.getTime() + tenggang * SEHARI) : null,
   };
+}
+
+const bulan = (n: number | null) => (n ? `${n} bulan` : "");
+
+/** Kalimat satu catatan riwayat, dengan nama plan bila berubah. */
+export function teksRiwayat(r: RiwayatLanggananToko): string {
+  const berubah = r.planSebelum !== null && r.planSesudah !== null && r.planSebelum !== r.planSesudah;
+  const ubahPlan = berubah ? `plan ${namaPlan(r.planSebelum)} ke ${namaPlan(r.planSesudah)}` : "";
+  switch (r.aksi) {
+    case "buat":
+      return r.durasiBulan
+        ? `Akun dibuat, plan ${namaPlan(r.planSesudah)} ${bulan(r.durasiBulan)}`
+        : `Akun dibuat, masa percobaan ${namaPlan(r.planSesudah)}`;
+    case "perpanjang":
+      return [`Diperpanjang ${bulan(r.durasiBulan)}`.trim(), ubahPlan].filter(Boolean).join(", ");
+    case "ubah-plan":
+      return berubah ? `Plan diubah dari ${namaPlan(r.planSebelum)} ke ${namaPlan(r.planSesudah)}` : "Plan diubah";
+    case "freeze":
+      return "Akun dibekukan";
+    case "unfreeze":
+      return r.durasiBulan ? `Akun diaktifkan kembali, ${bulan(r.durasiBulan)}` : "Akun diaktifkan kembali";
+    case "kedaluwarsa":
+      return "Masa berlaku habis";
+  }
 }
 
 /** Tanggal panjang zona toko (WIB), sama di server dan browser. */

@@ -49,6 +49,13 @@ export const queryKeys = {
     riwayat: (id: string) => ["adminAkun", "riwayat", id] as const,
   },
 
+  // --- Langganan toko (B229) ---
+  langganan: {
+    semua: kunci(["langganan"] as const),
+    toko: () => ["langganan", "toko"] as const,
+    riwayat: () => ["langganan", "riwayat"] as const,
+  },
+
   // --- Tenant ---
   tenant: {
     semua: kunci(["tenant"] as const),

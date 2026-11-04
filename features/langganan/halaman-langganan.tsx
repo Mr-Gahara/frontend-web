@@ -1,39 +1,57 @@
 "use client";
 
-import { Check, MessageCircle, Minus } from "lucide-react";
-import { PesanTanpaIzin } from "@/components/gerbang-rute";
+import { Check, Loader2, MessageCircle, Minus } from "lucide-react";
 import { useTenant } from "@/features/tenant/hooks";
-import { useSession } from "@/lib/auth/useSession";
+import { pesanError } from "@/lib/api/error";
+import type { RiwayatLanggananToko } from "@/types/langganan";
 import {
   DAFTAR_PLAN,
   NOMOR_WA_ADMIN,
-  bolehLihatLangganan,
   formatTanggal,
-  langgananContoh,
   persenTerpakai,
+  ringkasLangganan,
   sisaHari,
   tautanWhatsapp,
+  teksRiwayat,
 } from "./data";
+import { useLanggananToko, useRiwayatLanggananToko } from "./hooks";
 
 const KELAS_TOMBOL_WA =
   "inline-flex h-[54px] items-center justify-center gap-2 rounded-xl bg-navy px-6 text-base font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2";
 
+const berlakuSampai = (r: RiwayatLanggananToko) =>
+  r.berakhirSesudah ? formatTanggal(new Date(r.berakhirSesudah)) : "Tanpa batas";
+
 /**
- * Halaman Langganan (desain F): plan aktif, perbandingan plan, dan riwayat.
- * Hanya Owner (bolehLihatLangganan). Pratinjau tampilan dengan data contoh
- * sampai backend menyediakan plan dan masa berlaku (N1).
+ * Halaman Langganan (desain F): plan aktif, perbandingan plan, dan riwayat,
+ * dari GET /akun/langganan dan riwayatnya (B229). Gerbangnya read-langganan
+ * lewat IZIN_HALAMAN, menggantikan pembatasan role Owner (LG2a).
  */
 export function HalamanLangganan() {
-  const { status, role } = useSession();
   const tenant = useTenant();
+  const langganan = useLanggananToko();
+  const riwayat = useRiwayatLanggananToko();
+  const daftarRiwayat = riwayat.data?.pages.flatMap((h) => h.data) ?? [];
 
-  if (status === "masuk" && !bolehLihatLangganan(role)) return <PesanTanpaIzin />;
+  if (langganan.isPending || riwayat.isPending) {
+    return (
+      <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        Memuat langganan...
+      </p>
+    );
+  }
+  if (langganan.isError || riwayat.isError) {
+    return (
+      <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+        {pesanError(langganan.error ?? riwayat.error, "Langganan gagal dimuat.")}
+      </p>
+    );
+  }
 
   const kini = new Date();
-  const data = langgananContoh(kini);
+  const data = ringkasLangganan(langganan.data, daftarRiwayat, kini);
   const plan = DAFTAR_PLAN.find((p) => p.kunci === data.plan) ?? DAFTAR_PLAN[0];
-  const sisa = sisaHari(data.berakhir, kini);
-  const persen = persenTerpakai(data.mulai, data.berakhir, kini);
   const tautan = tautanWhatsapp(NOMOR_WA_ADMIN, tenant.data?.namaToko ?? "", plan.nama);
 
   return (
@@ -42,11 +60,6 @@ export function HalamanLangganan() {
         <h1 className="text-2xl font-bold tracking-tight">Langganan</h1>
         <p className="mt-1 text-sm text-muted-foreground">Plan toko, masa berlaku, dan cara naik plan.</p>
       </div>
-
-      <p role="note" className="rounded-lg bg-krem px-4 py-3 text-sm">
-        Pratinjau tampilan: data di halaman ini masih contoh. Plan dan masa berlaku asli tampil setelah backend
-        menyediakannya.
-      </p>
 
       <section
         aria-labelledby="langganan-aktif"
@@ -63,20 +76,40 @@ export function HalamanLangganan() {
               </span>
             )}
           </div>
-          <p className="text-[15px] text-muted-foreground">
-            Berakhir {formatTanggal(data.berakhir)}, <strong className="whitespace-nowrap text-navy">{sisa} hari lagi</strong>.
-          </p>
-          <div
-            role="progressbar"
-            aria-label="Masa berlaku terpakai"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={persen}
-            className="h-2 overflow-hidden rounded-full bg-krem"
-          >
-            <div className="h-full rounded-full bg-navy" style={{ width: `${persen}%` }} />
-          </div>
-          <p className="text-sm text-muted-foreground">Perpanjang sebelum masa berlaku habis agar toko tetap bisa dipakai.</p>
+          {data.berakhir === null ? (
+            <p className="text-[15px] text-muted-foreground">Masa berlaku tidak dibatasi.</p>
+          ) : data.lewat ? (
+            <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-[15px] font-medium text-destructive">
+              Masa berlaku habis {formatTanggal(data.berakhir)}.
+              {data.tenggangSampai && <> Toko masih dapat dipakai sampai {formatTanggal(data.tenggangSampai)}.</>}{" "}
+              Hubungi admin untuk perpanjang.
+            </p>
+          ) : (
+            <>
+              <p className="text-[15px] text-muted-foreground">
+                Berakhir {formatTanggal(data.berakhir)},{" "}
+                <strong className="whitespace-nowrap text-navy">{sisaHari(data.berakhir, kini)} hari lagi</strong>.
+              </p>
+              {data.mulai && (
+                <div
+                  role="progressbar"
+                  aria-label="Masa berlaku terpakai"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={persenTerpakai(data.mulai, data.berakhir, kini)}
+                  className="h-2 overflow-hidden rounded-full bg-krem"
+                >
+                  <div
+                    className="h-full rounded-full bg-navy"
+                    style={{ width: `${persenTerpakai(data.mulai, data.berakhir, kini)}%` }}
+                  />
+                </div>
+              )}
+              <p className="text-sm text-muted-foreground">
+                Perpanjang sebelum masa berlaku habis agar toko tetap bisa dipakai.
+              </p>
+            </>
+          )}
         </div>
         <div className="flex w-full flex-col gap-2.5 sm:w-auto sm:max-w-[300px]">
           {tautan ? (
@@ -144,11 +177,11 @@ export function HalamanLangganan() {
           Riwayat
         </h2>
         <ul className="flex flex-col divide-y divide-navy/10 rounded-2xl border border-navy/10 bg-permukaan sm:hidden">
-          {data.riwayat.map((r) => (
-            <li key={r.tanggal.getTime() + r.perubahan} className="flex flex-col gap-1 px-4 py-3 text-sm">
-              <span className="font-semibold">{r.perubahan}</span>
+          {daftarRiwayat.map((r) => (
+            <li key={r.id} className="flex flex-col gap-1 px-4 py-3 text-sm">
+              <span className="font-semibold">{teksRiwayat(r)}</span>
               <span className="text-muted-foreground">
-                {formatTanggal(r.tanggal)}, berlaku sampai {formatTanggal(r.berlakuSampai)}
+                {formatTanggal(new Date(r.createdAt))}, berlaku sampai {berlakuSampai(r)}
               </span>
             </li>
           ))}
@@ -169,16 +202,27 @@ export function HalamanLangganan() {
               </tr>
             </thead>
             <tbody>
-              {data.riwayat.map((r) => (
-                <tr key={r.tanggal.getTime() + r.perubahan} className="border-t border-navy/10">
-                  <td className="px-4 py-3">{formatTanggal(r.tanggal)}</td>
-                  <td className="px-4 py-3">{r.perubahan}</td>
-                  <td className="px-4 py-3">{formatTanggal(r.berlakuSampai)}</td>
+              {daftarRiwayat.map((r) => (
+                <tr key={r.id} className="border-t border-navy/10">
+                  <td className="px-4 py-3">{formatTanggal(new Date(r.createdAt))}</td>
+                  <td className="px-4 py-3">{teksRiwayat(r)}</td>
+                  <td className="px-4 py-3">{berlakuSampai(r)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        {daftarRiwayat.length === 0 && <p className="text-sm text-muted-foreground">Belum ada riwayat.</p>}
+        {riwayat.hasNextPage && (
+          <button
+            type="button"
+            onClick={() => riwayat.fetchNextPage()}
+            disabled={riwayat.isFetchingNextPage}
+            className="self-start rounded-lg border border-navy/15 px-4 py-2 text-sm font-semibold hover:bg-krem disabled:opacity-60"
+          >
+            {riwayat.isFetchingNextPage ? "Memuat..." : "Muat riwayat lainnya"}
+          </button>
+        )}
       </section>
     </div>
   );
