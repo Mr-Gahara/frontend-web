@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { isRateLimited, pesanError } from "@/lib/api/error";
+import { isApiError, isRateLimited, pesanError } from "@/lib/api/error";
 import { setTokenAkun, setTokenPengguna } from "@/lib/auth/session";
+import { authApi } from "./api";
 import { useLoginAkun } from "./hooks";
+import { titipKredensial } from "./kredensial-daftar";
 import { skemaLoginAkun, type NilaiLoginAkun } from "./schema";
 import { TandaTachyon } from "./tanda-tachyon";
 
@@ -46,18 +49,24 @@ export function HalamanLoginAkun() {
           router.push("/admin");
           return;
         }
-        // Onboarding toko hanya tersedia di aplikasi mobile. Sesi tidak disimpan
-        // agar pengguna tanpa toko tidak tertahan di alur web.
-        if (res.requireSetup) {
-          setGalat(
-            "Akun ini belum memiliki toko. Selesaikan pembuatan toko melalui aplikasi Tachyon POS, lalu login kembali di sini.",
-          );
-          return;
-        }
+        // requireSetup berarti setup inti belum selesai, termasuk toko yang
+        // sudah ada (B223); setup dikerjakan di web (SA1a), lewat wizard
+        // yang memakai token akun ini.
         setTokenAkun(res.accessToken);
-        router.push("/login/pengguna");
+        router.push(res.requireSetup ? "/setup" : "/login/pengguna");
       },
       onError: (err) => {
+        // Pendaftar mandiri yang belum memasukkan OTP (B232): kode baru
+        // dikirim, lalu isian kode ditampilkan. Password dititipkan agar
+        // setelah verifikasi langsung masuk tanpa mengetik ulang.
+        if (isApiError(err) && err.code === "EMAIL_BELUM_TERVERIFIKASI") {
+          titipKredensial(nilai);
+          authApi
+            .kirimVerifikasiEmail(nilai.email)
+            .catch(() => undefined)
+            .finally(() => router.push(`/daftar/verifikasi?email=${encodeURIComponent(nilai.email)}`));
+          return;
+        }
         // 429: percobaan login dibatasi backend. Pesan dibedakan agar
         // pengguna tahu ini sementara, bukan kesalahan kredensial.
         setGalat(
@@ -154,6 +163,13 @@ export function HalamanLoginAkun() {
               </button>
             </div>
             <PesanIsian pesan={errors.password?.message} />
+            {/* Sesudah isian, agar Tab dari email langsung ke password. */}
+            <Link
+              href="/lupa-password"
+              className="self-end rounded-sm text-sm font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+            >
+              Lupa password?
+            </Link>
           </div>
 
           {galat && (

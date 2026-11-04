@@ -1,19 +1,24 @@
 import { test, expect, type Page } from "@playwright/test";
 import { AKUN_UJI } from "../../helpers/masuk-uji";
-import { ALASAN_TANPA_ADMIN, hapusAkunKlienUji, kredensialAdmin } from "../../helpers/admin-uji";
+import { ALASAN_TANPA_ADMIN, hapusAkunKlienUji, idAkunLewatEmail, kredensialAdmin } from "../../helpers/admin-uji";
+import { ALASAN_TANPA_MAILPIT, ambilOtp, mailpitMenyala } from "../../helpers/mailpit-uji";
+import { tempelKode } from "../../helpers/kode-uji";
 
 /*
- * Halaman daftar desain E (modul/setup-akun.md). Belum ditautkan dari login
- * akun sampai OTP daftar (N3) dan wizard setup (Y1) tersedia. registerLimiter
- * tetap aktif di backend development (10 pendaftaran per 15 menit per IP),
- * jadi spec ini hanya mengirim dua pendaftaran per run: satu ditolak 409,
- * satu berhasil lalu akunnya dihapus lewat API admin (dibekukan dulu, karena
- * backend hanya menghapus akun non-aktif).
+ * Halaman daftar desain E (modul/setup-akun.md). Register selalu menjawab
+ * 201 dengan email tersamar (B231), jadi email terdaftar tidak lagi
+ * dibedakan, dan pendaftar baru memasukkan OTP dari email (B232) yang
+ * dibaca dari Mailpit (UJ1a). registerLimiter di backend development
+ * dibatasi 10 per 15 menit per IP kecuali dilonggarkan lewat
+ * REGISTER_LIMIT_MAX (B230); spec ini mengirim dua pendaftaran per run, dan
+ * akun barunya dihapus lewat API admin (dibekukan dulu, karena backend
+ * hanya menghapus akun non-aktif).
  */
 const POLA_DAFTAR = /\/api\/akun\/auth\/register$/;
 const PASSWORD_BARU = "Daftar1234";
 /** registerLimiter backend development tetap aktif; 429 berarti kuota jendela 15 menit habis, bukan kegagalan halaman. */
-const ALASAN_KUOTA = "Kuota registerLimiter backend habis (429); jalankan ulang setelah jendela 15 menit (utang pengujian)";
+const ALASAN_KUOTA =
+  "Kuota registerLimiter backend habis (429); jalankan backend dengan REGISTER_LIMIT_MAX lebih besar (B230), atau ulang setelah 15 menit";
 const langkahAktif = (page: Page) =>
   page.getByRole("list", { name: "Langkah pendaftaran" }).locator('[aria-current="step"]');
 
@@ -86,36 +91,93 @@ test.describe("Halaman daftar", () => {
     expect(jumlah).toBe(0);
   });
 
-  test("email yang sudah terdaftar ditolak dengan pesan backend", async ({ page }) => {
+  test("email yang sudah terdaftar tidak dibocorkan: tetap lanjut ke isian kode", async ({ page }) => {
     const jawab = page.waitForResponse(POLA_DAFTAR);
     await isiForm(page, AKUN_UJI.email, PASSWORD_BARU);
-    const status = (await jawab).status();
-    test.skip(status === 429, ALASAN_KUOTA);
-    expect(status).toBe(409);
-    await expect(page.getByText("Email sudah terdaftar.")).toBeVisible();
-    await expect(page.getByRole("heading", { level: 1, name: "Buat akun toko" })).toBeVisible();
+    const res = await jawab;
+    test.skip(res.status() === 429, ALASAN_KUOTA);
+    expect(res.status()).toBe(201);
+    const isi = await res.json();
+    expect(isi.data?.id, "respons register tanpa id (B231)").toBeUndefined();
+    expect(isi.data?.email, "email tersamar (B231)").not.toBe(AKUN_UJI.email);
+
+    await page.waitForURL(/\/daftar\/verifikasi\?email=/);
+    await expect(page.getByRole("heading", { level: 1, name: "Cek email Anda" })).toBeVisible();
+    await expect(page.getByText(AKUN_UJI.email)).toBeVisible();
+    await expect(page.getByText(/sudah terdaftar/i)).toHaveCount(0);
   });
 
-  test("pendaftaran berhasil memindahkan stepper ke verifikasi email", async ({ page }) => {
+  test("pendaftaran berhasil: kode dari email memverifikasi lalu masuk ke wizard setup", async ({ page }) => {
     const admin = kredensialAdmin();
     test.skip(!admin, ALASAN_TANPA_ADMIN);
+    test.skip(!(await mailpitMenyala()), ALASAN_TANPA_MAILPIT);
     const email = `e2e-daftar-${Date.now()}@contoh.test`;
-    let id = "";
+    let terkirim = false;
     try {
+      const sejak = new Date();
       const jawab = page.waitForResponse(POLA_DAFTAR);
       await isiForm(page, email, PASSWORD_BARU);
       const res = await jawab;
-      const isi = await res.json();
-      id = String(isi.data?._id ?? isi.data?.id ?? "");
       test.skip(res.status() === 429, ALASAN_KUOTA);
-      expect(res.status(), JSON.stringify(isi).slice(0, 200)).toBe(201);
+      expect(res.status()).toBe(201);
+      terkirim = true;
 
-      await expect(page.getByRole("heading", { level: 1, name: "Akun dibuat" })).toBeVisible();
-      await expect(page.getByText(email)).toBeVisible();
+      await page.waitForURL(/\/daftar\/verifikasi\?email=/);
       await expect(langkahAktif(page)).toContainText("Verifikasi email");
-      await expect(page.getByRole("link", { name: "Kembali ke halaman masuk" })).toHaveAttribute("href", "/login");
+      const kode = await ambilOtp(email, sejak);
+
+      const verifikasi = page.waitForResponse(/\/api\/akun\/auth\/verifikasi-email$/);
+      const login = page.waitForResponse(/\/api\/akun\/auth\/login$/);
+      await tempelKode(page.getByLabel("Digit 1 dari 6"), kode);
+      await page.getByRole("button", { name: "Verifikasi email" }).click();
+      expect((await verifikasi).status()).toBe(200);
+      const masuk = await login;
+      expect(masuk.status()).toBe(200);
+      expect((await masuk.json()).requireSetup, "akun baru belum selesai setup (B223)").toBe(true);
+      await page.waitForURL("**/setup");
     } finally {
-      if (id && admin) await hapusAkunKlienUji(id, admin);
+      if (terkirim && admin) {
+        const id = await idAkunLewatEmail(email, admin);
+        expect.soft(id, "akun pendaftar ditemukan untuk dibersihkan").not.toBe("");
+        if (id) await hapusAkunKlienUji(id, admin);
+      }
+    }
+  });
+
+  test("login sebelum verifikasi diarahkan ke isian kode, lalu kode baru memverifikasi", async ({ page }) => {
+    const admin = kredensialAdmin();
+    test.skip(!admin, ALASAN_TANPA_ADMIN);
+    test.skip(!(await mailpitMenyala()), ALASAN_TANPA_MAILPIT);
+    const email = `e2e-belum-verif-${Date.now()}@contoh.test`;
+    let terkirim = false;
+    try {
+      const daftar = await page.request.post("/api/akun/auth/register", { data: { email, password: PASSWORD_BARU } });
+      test.skip(daftar.status() === 429, ALASAN_KUOTA);
+      expect(daftar.status()).toBe(201);
+      terkirim = true;
+
+      await page.goto("/login");
+      const sejak = new Date();
+      const login = page.waitForResponse(/\/api\/akun\/auth\/login$/);
+      const kirimUlang = page.waitForResponse(/\/api\/akun\/auth\/verifikasi-email\/kirim$/);
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password", { exact: true }).fill(PASSWORD_BARU);
+      await page.getByRole("button", { name: "Masuk" }).click();
+      const tolak = await login;
+      expect(tolak.status()).toBe(403);
+      expect((await tolak.json()).code).toBe("EMAIL_BELUM_TERVERIFIKASI");
+      expect((await kirimUlang).status()).toBe(200);
+      await page.waitForURL(/\/daftar\/verifikasi\?email=/);
+
+      const kode = await ambilOtp(email, sejak);
+      await tempelKode(page.getByLabel("Digit 1 dari 6"), kode);
+      await page.getByRole("button", { name: "Verifikasi email" }).click();
+      await page.waitForURL("**/setup");
+    } finally {
+      if (terkirim && admin) {
+        const id = await idAkunLewatEmail(email, admin);
+        if (id) await hapusAkunKlienUji(id, admin);
+      }
     }
   });
 });

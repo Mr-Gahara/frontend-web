@@ -4,8 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check } from "lucide-react";
+import { AlertCircle, Check, Loader2 } from "lucide-react";
+import { isRateLimited, pesanError } from "@/lib/api/error";
 import { useHitungMundur } from "./hitung-mundur";
+import { useLupaPassword, useResetPassword } from "./hooks";
 import { IsianKode, KirimUlangKode } from "./isian-kode";
 import {
   kodeKosong,
@@ -20,7 +22,7 @@ const KELAS_ISIAN =
   "flex h-12 w-full rounded-lg border border-input bg-permukaan px-3.5 text-[15px] text-navy placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
 
 const KELAS_TOMBOL =
-  "inline-flex h-[52px] w-full cursor-pointer items-center justify-center rounded-[10px] bg-navy text-base font-bold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading";
+  "disabled:cursor-not-allowed disabled:opacity-60 inline-flex h-[52px] w-full cursor-pointer items-center justify-center rounded-[10px] bg-navy text-base font-bold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading";
 
 const KELAS_TAUTAN =
   "cursor-pointer rounded-sm font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel";
@@ -30,7 +32,29 @@ function PesanIsian({ pesan }: { pesan?: string }) {
   return <p className="text-xs font-medium text-destructive">{pesan}</p>;
 }
 
+function PesanGalat({ pesan }: { pesan: string }) {
+  if (!pesan) return null;
+  return (
+    <div
+      role="alert"
+      className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+    >
+      <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+      <span>{pesan}</span>
+    </div>
+  );
+}
+
+const pesanGagal = (err: unknown, fallback: string) =>
+  isRateLimited(err) ? pesanError(err, "Terlalu banyak percobaan. Coba lagi beberapa saat lagi.") : pesanError(err, fallback);
+
+/**
+ * Langkah 1: POST /akun/auth/lupa-password selalu dijawab 200 dengan pesan
+ * yang sama, terdaftar atau tidak (B217), jadi isian kode selalu menyusul.
+ */
 function FormEmail({ awal, onKirim }: { awal: string; onKirim: (email: string) => void }) {
+  const minta = useLupaPassword();
+  const [galat, setGalat] = useState("");
   const {
     register,
     handleSubmit,
@@ -38,7 +62,17 @@ function FormEmail({ awal, onKirim }: { awal: string; onKirim: (email: string) =
   } = useForm<NilaiLupaPassword>({ resolver: zodResolver(skemaLupaPassword), defaultValues: { email: awal } });
 
   return (
-    <form onSubmit={handleSubmit((n) => onKirim(n.email))} noValidate className="flex flex-col gap-6">
+    <form
+      onSubmit={handleSubmit((n) => {
+        setGalat("");
+        minta.mutate(n.email, {
+          onSuccess: () => onKirim(n.email),
+          onError: (err) => setGalat(pesanGagal(err, "Kode gagal dikirim. Coba lagi.")),
+        });
+      })}
+      noValidate
+      className="flex flex-col gap-6"
+    >
       <div className="flex flex-col gap-2">
         <h2 className="text-[28px] font-bold">Lupa password</h2>
         <p className="text-[15px] leading-normal text-muted-foreground">
@@ -60,7 +94,9 @@ function FormEmail({ awal, onKirim }: { awal: string; onKirim: (email: string) =
         />
         <PesanIsian pesan={errors.email?.message} />
       </div>
-      <button type="submit" className={KELAS_TOMBOL}>
+      <PesanGalat pesan={galat} />
+      <button type="submit" disabled={minta.isPending} className={KELAS_TOMBOL}>
+        {minta.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
         Kirim kode
       </button>
       <p className="text-center text-[15px]">
@@ -83,6 +119,9 @@ function FormPasswordBaru({
 }) {
   const { sisa, ulang } = useHitungMundur(60);
   const [status, setStatus] = useState("");
+  const [galat, setGalat] = useState("");
+  const atur = useResetPassword();
+  const minta = useLupaPassword();
   const {
     register,
     control,
@@ -94,7 +133,20 @@ function FormPasswordBaru({
   });
 
   return (
-    <form onSubmit={handleSubmit(onSelesai)} noValidate className="flex flex-col gap-[22px]">
+    <form
+      onSubmit={handleSubmit((n) => {
+        setGalat("");
+        atur.mutate(
+          { email, otp: n.kode.join(""), passwordBaru: n.password },
+          {
+            onSuccess: onSelesai,
+            onError: (err) => setGalat(pesanGagal(err, "Kode OTP salah atau sudah kedaluwarsa.")),
+          },
+        );
+      })}
+      noValidate
+      className="flex flex-col gap-[22px]"
+    >
       <div className="flex flex-col gap-2">
         <h2 className="text-[28px] font-bold">Buat password baru</h2>
         <p className="text-[15px] leading-normal text-muted-foreground">
@@ -146,15 +198,23 @@ function FormPasswordBaru({
         />
         <PesanIsian pesan={errors.ulangiPassword?.message} />
       </div>
-      <button type="submit" className={KELAS_TOMBOL}>
+      <PesanGalat pesan={galat} />
+      <button type="submit" disabled={atur.isPending} className={KELAS_TOMBOL}>
+        {atur.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
         Simpan password baru
       </button>
       <div className="flex flex-col gap-1">
         <KirimUlangKode
           sisa={sisa}
           onKirim={() => {
-            ulang();
-            setStatus("Pratinjau: pengiriman ulang belum tersambung ke server.");
+            setStatus("");
+            minta.mutate(email, {
+              onSuccess: () => {
+                ulang();
+                setStatus("Kode baru dikirim. Periksa email Anda.");
+              },
+              onError: (err) => setStatus(pesanGagal(err, "Kode baru gagal dikirim. Coba lagi.")),
+            });
           }}
         />
         {status && (
@@ -168,9 +228,10 @@ function FormPasswordBaru({
 }
 
 /**
- * Lupa password akun toko (desain F, gaya A). Pratinjau tampilan: kode dan
- * penggantian password menyusul setelah backend siap (N4). Belum ditautkan
- * dari login akun.
+ * Lupa password akun toko (desain F, gaya A; B217), ditautkan dari login
+ * akun. OTP salah, kedaluwarsa, dan email tak terdaftar dijawab 400 yang
+ * sama. Password baru memutus seluruh sesi akun, sehingga tahap selesai
+ * selalu mengarah ke login.
  */
 export function HalamanLupaPassword() {
   const [tahap, setTahap] = useState<"email" | "kode" | "selesai">("email");
@@ -199,10 +260,6 @@ export function HalamanLupaPassword() {
 
       <main className="flex min-w-0 flex-[1_1_420px] items-center justify-center px-6 py-14">
         <div className="flex w-full max-w-[400px] flex-col gap-6">
-          <p role="note" className="rounded-lg bg-krem px-4 py-3 text-sm">
-            Pratinjau tampilan: kode belum benar-benar dikirim dan password belum diganti. Lupa password menyusul
-            setelah backend siap.
-          </p>
           {tahap === "email" && (
             <FormEmail
               awal={email}

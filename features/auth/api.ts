@@ -4,7 +4,9 @@
  * hilang bila envelope dibuka. Login pengguna (POST /pengguna/pin-login)
  * memakai token akun (authAkun). Daftar akun (POST /akun/auth/register) tidak
  * memerlukan token; jenis token akun dipakai karena belum ada token apa pun,
- * sama seperti login akun.
+ * sama seperti login akun. Begitu pula verifikasi email (B231, B232) dan lupa
+ * password (B217): keempatnya publik, dan jawabannya sengaja seragam agar
+ * daftar email tidak terbuka.
  */
 import { apiData, apiMentah } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
@@ -16,6 +18,13 @@ export const authApi = {
     apiMentah.post<LoginResponse>(EP.akun.login, payload, "akun"),
   daftarAkun: (payload: { email: string; password: string }) =>
     apiData.post<unknown>(EP.akun.register, payload, "akun"),
+  verifikasiEmail: (payload: { email: string; otp: string }) =>
+    apiData.post<unknown>(EP.akun.verifikasiEmail, payload, "akun"),
+  kirimVerifikasiEmail: (email: string) =>
+    apiData.post<unknown>(EP.akun.kirimVerifikasiEmail, { email }, "akun"),
+  lupaPassword: (email: string) => apiData.post<unknown>(EP.akun.lupaPassword, { email }, "akun"),
+  resetPassword: (payload: { email: string; otp: string; passwordBaru: string }) =>
+    apiData.post<unknown>(EP.akun.resetPassword, payload, "akun"),
   loginPengguna: (payload: PayloadLoginPengguna) =>
     apiMentah.post<ResponsLoginPengguna>(EP.pengguna.pinLogin, payload, "akun"),
   logoutAkun: () => apiData.post<unknown>(EP.akun.logout, {}, "akun"),

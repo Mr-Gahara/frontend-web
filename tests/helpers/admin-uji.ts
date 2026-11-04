@@ -256,3 +256,49 @@ export async function hapusAkunDariDetail(page: Page, email: string, admin: Kred
   await page.getByLabel("Cari akun").fill(email);
   await expect(page.getByRole("link", { name: email })).toHaveCount(0);
 }
+
+/**
+ * Menjalankan fn dengan token admin di konteks permintaan terpisah. Sama
+ * dengan hapusAkunKlienUji, login ini memutar tokenVersion admin, jadi
+ * dipanggil saat halaman tidak sedang memakai sesi admin.
+ */
+async function denganAdmin<T>(
+  admin: KredensialAdmin,
+  fn: (ctx: Awaited<ReturnType<typeof request.newContext>>, kepala: Record<string, string>) => Promise<T>,
+): Promise<T> {
+  const ctx = await request.newContext({ baseURL: "http://localhost:3000" });
+  try {
+    const masuk = await ctx.post("/api/akun/auth/login", {
+      data: { email: admin.email, password: admin.password },
+    });
+    return await fn(ctx, { Authorization: "Bearer " + (await masuk.json()).accessToken });
+  } finally {
+    await ctx.dispose();
+  }
+}
+
+/**
+ * Id akun lewat pencarian email di daftar admin, untuk akun pendaftar
+ * mandiri: respons register tidak lagi memuat id (B231). String kosong
+ * bila tidak ditemukan.
+ */
+export function idAkunLewatEmail(email: string, admin: KredensialAdmin): Promise<string> {
+  return denganAdmin(admin, async (ctx, kepala) => {
+    const res = await ctx.get("/api/akun/admin/all", { headers: kepala, params: { cari: email } });
+    expect.soft(res.status(), "cari akun uji").toBe(200);
+    const daftar = ((await res.json()) as { data?: AkunUji[] }).data ?? [];
+    return daftar.find((a) => a.email === email.toLowerCase())?.id ?? "";
+  });
+}
+
+/** Membuat akun klien uji terverifikasi lewat API admin (AK2a), berpassword PASSWORD_AKUN_UJI. */
+export function buatAkunKlienUji(email: string, admin: KredensialAdmin): Promise<string> {
+  return denganAdmin(admin, async (ctx, kepala) => {
+    const buat = await ctx.post("/api/akun/admin/users", {
+      headers: kepala,
+      data: { email, password: PASSWORD_AKUN_UJI },
+    });
+    expect(buat.status(), "buat akun klien uji").toBe(201);
+    return ((await buat.json()) as { data: AkunUji }).data.id;
+  });
+}

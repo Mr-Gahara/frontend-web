@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Check, ChevronLeft, ChevronRight, Loader2, Minus } from "lucide-react";
 import { isRateLimited, pesanError } from "@/lib/api/error";
 import { useDaftarAkun } from "./hooks";
+import { titipKredensial } from "./kredensial-daftar";
 import { LangkahDaftar } from "./langkah-daftar";
 import { skemaDaftarAkun, type NilaiDaftarAkun } from "./schema";
 import { TandaTachyon } from "./tanda-tachyon";
@@ -145,15 +147,15 @@ function PilihanPlan() {
 }
 
 /**
- * Halaman daftar akun toko (desain E, modul/setup-akun.md). Langkah 1 memakai
- * POST /akun/auth/register yang sudah ada. Verifikasi email (N3) dan
- * penyiapan toko di web (Y1) belum tersedia di backend, jadi sesudah daftar
- * halaman ini menyebutnya terus terang, dan halaman ini belum ditautkan dari
- * login akun.
+ * Halaman daftar akun toko (desain E, modul/setup-akun.md), langkah 1.
+ * POST /akun/auth/register selalu menjawab 201 dengan email tersamar, baik
+ * email baru maupun sudah terdaftar (B231), sehingga halaman tidak pernah
+ * menyebut email sudah dipakai dan selalu lanjut ke isian kode. Password
+ * dititipkan di memori agar langkah verifikasi dapat langsung login.
  */
 export function HalamanDaftar() {
   const [galat, setGalat] = useState("");
-  const [terdaftar, setTerdaftar] = useState<string | null>(null);
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -170,7 +172,10 @@ export function HalamanDaftar() {
     daftar.mutate(
       { email, password },
       {
-        onSuccess: () => setTerdaftar(email),
+        onSuccess: () => {
+          titipKredensial({ email, password });
+          router.push(`/daftar/verifikasi?email=${encodeURIComponent(email)}`);
+        },
         onError: (err) =>
           setGalat(
             isRateLimited(err)
@@ -189,26 +194,11 @@ export function HalamanDaftar() {
           <span className="text-lg font-bold">Tachyon POS</span>
         </div>
         <PilihanPlan />
-        <LangkahDaftar aktif={terdaftar ? 2 : 1} />
+        <LangkahDaftar aktif={1} />
       </aside>
 
       <main className="flex min-w-0 flex-[1_1_400px] items-center justify-center px-2 py-10">
-        {terdaftar ? (
-          <section className="flex w-full max-w-[380px] flex-col gap-5">
-            <h1 className="text-3xl font-bold tracking-tight">Akun dibuat</h1>
-            <p className="text-[15px] leading-normal text-muted-foreground">
-              Akun <span className="font-semibold text-navy">{terdaftar}</span> sudah aktif di plan Basic dengan
-              masa percobaan 14 hari.
-            </p>
-            <div role="status" className="rounded-lg bg-krem p-4 text-sm leading-relaxed">
-              Verifikasi email dan penyiapan toko di web belum tersedia. Langkah itu menyusul; sampai tokonya
-              disiapkan, akun ini belum bisa dipakai untuk membuka kasir.
-            </div>
-            <Link href="/login" className={KELAS_TAUTAN + " self-start text-[15px]"}>
-              Kembali ke halaman masuk
-            </Link>
-          </section>
-        ) : (
+        {
           <form
             onSubmit={handleSubmit(kirim)}
             method="POST"
@@ -309,7 +299,7 @@ export function HalamanDaftar() {
               </Link>
             </p>
           </form>
-        )}
+        }
       </main>
     </div>
   );

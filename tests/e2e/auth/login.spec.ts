@@ -236,13 +236,11 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
       await expect(page).toHaveURL(/.*\/login\/pengguna/);
     });
 
-    test("harus tetap di /login dan mengarahkan ke aplikasi saat requireSetup=true, tanpa menyimpan sesi", async ({
-      page,
-    }) => {
+    test("requireSetup=true menyimpan token akun dan mengarahkan ke wizard setup (B223)", async ({ page }) => {
       await page.route(POLA_LOGIN_AKUN, async (route) => {
         const asli = await route.fetch();
         const body = await asli.json();
-        // simulasi: akun uji selalu punya toko (needsSetup false); akun baru tanpa toko akan permanen
+        // simulasi: akun uji sudah selesai setup inti; jalur akun baru yang sungguhan ada di spec daftar
         await route.fulfill({ status: asli.status(), json: { ...body, requireSetup: true } });
       });
 
@@ -251,18 +249,9 @@ test.describe("E2E — /login (Login Akun SaaS)", () => {
       await page.getByLabel(/password/i).fill("Toko1234");
       await page.getByRole("button", { name: /masuk|login/i }).click();
 
-      // Onboarding toko hanya di aplikasi mobile: tampilkan arahan, jangan pindah halaman
-      await expect(
-        page.getByText(/selesaikan pembuatan toko melalui aplikasi/i),
-      ).toBeVisible({ timeout: 10_000 });
-      await expect(page).toHaveURL(/.*\/login$/);
-
-      // Sesi tidak boleh tersimpan untuk akun tanpa toko: membuka halaman
-      // PIN harus tetap ditolak dan kembali ke login akun.
-      // Blok finally tetap berjalan setelah return: tombol kembali aktif
-      await expect(
-        page.getByRole("button", { name: /masuk|login/i }),
-      ).toBeEnabled();
+      // Setup akun di web (SA1a): login akun berlanjut ke wizard, bukan ke login PIN.
+      await page.waitForURL("**/setup");
+      await expect(page.getByText(/selesaikan pembuatan toko melalui aplikasi/i)).toHaveCount(0);
     });
   });
 });

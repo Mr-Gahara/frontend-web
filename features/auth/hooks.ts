@@ -29,6 +29,26 @@ export function useDaftarAkun() {
   });
 }
 
+export function useVerifikasiEmail() {
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof authApi.verifikasiEmail>[0]) => authApi.verifikasiEmail(payload),
+  });
+}
+
+export function useKirimVerifikasiEmail() {
+  return useMutation({ mutationFn: (email: string) => authApi.kirimVerifikasiEmail(email) });
+}
+
+export function useLupaPassword() {
+  return useMutation({ mutationFn: (email: string) => authApi.lupaPassword(email) });
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof authApi.resetPassword>[0]) => authApi.resetPassword(payload),
+  });
+}
+
 export function useLogoutAkun() {
   return useMutation({ mutationFn: () => authApi.logoutAkun() });
 }
