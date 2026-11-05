@@ -14,6 +14,12 @@ test.describe("Tampilan login akun", () => {
     await expect(tombolMasuk(page)).toHaveText("Masuk");
   });
 
+  test("tautan Daftar membuka halaman daftar (TP4a)", async ({ page }) => {
+    await page.getByRole("link", { name: "Daftar", exact: true }).click();
+    await page.waitForURL("**/daftar");
+    await expect(page.getByRole("button", { name: "Daftar", exact: true })).toBeVisible();
+  });
+
   test("tombol Tampilkan membuka dan menutup isi password", async ({ page }) => {
     const sandi = page.getByLabel("Password", { exact: true });
     await sandi.fill("RahasiaUji1");

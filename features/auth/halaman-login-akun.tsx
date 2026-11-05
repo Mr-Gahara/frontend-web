@@ -193,6 +193,16 @@ export function HalamanLoginAkun() {
               "Masuk"
             )}
           </button>
+          {/* Ditautkan setelah wizard setup tersambung (TP4a). */}
+          <p className="text-center text-[15px] text-muted-foreground">
+            Belum punya akun?{" "}
+            <Link
+              href="/daftar"
+              className="rounded-sm font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+            >
+              Daftar
+            </Link>
+          </p>
         </form>
       </main>
     </div>
