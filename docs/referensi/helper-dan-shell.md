@@ -629,6 +629,17 @@ dan properti di dalam `return {` berindentasi 4 spasi, bukan 6
   meredamnya. Untuk berkas yang mungkin tidak ada, pakai `find`, misalnya
   `find test-results -name trace.zip | head -1`. Folder `test-results`
   dikosongkan di setiap run, sehingga hasilnya selalu dari run terakhir.
+- Opsi grep berpola glob juga kena aturan itu: `--include=*.ts` tanpa kutip
+  gagal `no matches found` sebelum grep berjalan. Tulis
+  `--include='*.ts'`, atau grep folder tanpa `--include` (terjadi lima kali
+  pada 5 November 2026).
+- `read -t N < /dev/zero` tidak menunggu N detik di zsh, melainkan
+  menggantung, karena `/dev/zero` tidak pernah memberi baris baru. Untuk
+  menunggu layanan, pakai `curl --retry 20 --retry-delay 1
+  --retry-connrefused`.
+- `pkill -f` dengan pola yang juga muncul di baris perintah shell alat
+  ikut membunuh shell itu (keluar 144), dan proses sasarannya bisa tetap
+  hidup. Matikan lewat pid dari `ss -ltnp | grep ':4000 '`.
 - Path berisi `[id]` selalu dikutip, karena kurung siku dibaca sebagai pola glob.
 - Perintah git yang dapat membuka pager ditulis `git --no-pager`.
 - ESLint 9 tidak punya formatter `unix`. `-f unix` gagal, dan bila

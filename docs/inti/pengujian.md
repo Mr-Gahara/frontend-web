@@ -15,7 +15,10 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 **Baseline per wizard setup tersambung** (commit `4322dba`, 5 November
 2026): 920 test unit dan integrasi lolos. Suite e2e penuh tidak
 dijalankan; spec setup ditulis ulang ke alur nyata (6 skenario, lolos 12
-dari 2 kali ulang), dan spec auth 58 serta pengaturan lolos. Harapan
+dari 2 kali ulang; skenario kategori wajib kemudian memakai akun Advanced
+dan memeriksa delapan langkah tanpa gudang, lolos sendiri), dan spec auth
+58 serta pengaturan lolos. Skenario `?plan=asing` dan unit test
+`bacaPlan` ikut dibuang bersama `?plan=`. Harapan
 suite penuh 554: 552 ditambah satu skenario setup (5 menjadi 6) dan
 tautan Daftar; angka itu hitungan.
 
@@ -306,6 +309,7 @@ terhitung di angka skipped pada baseline:
 |---|---|
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
 | Dua puluh skenario di `tests/e2e/admin/` (sesi, akun klien, langganan, dan kelola akun) | `.env.e2e` tidak berisi kredensial admin uji (PA5a). Tidak terjadi di mesin pemilik proyek, sehingga tidak terhitung di baseline |
+| Keenam skenario `tests/e2e/setup/setup.spec.ts` | Sama: akun uji wizard dibuat dan dihapus lewat API admin (`41194b7`). Sebelumnya spec pratinjau selalu berjalan |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
 hapus bahan baku juga dilewati bila datanya kosong. Pada data uji sekarang
