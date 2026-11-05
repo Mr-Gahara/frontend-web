@@ -58,6 +58,11 @@ Selesai 5 November 2026:
 5. Jenis mutasi `SELISIH_KAS_MASUK` dan `SELISIH_KAS_KELUAR` (B228) di
    buku mutasi dan filter jenis (`d696354`). Rujukan sesi kasir belum
    ditautkan sampai halaman sesi kasir ada (butir 6).
+6. Wizard setup tersambung (B219 sampai B223, B237, B238, B240): status,
+   guard, dan kembali dari login PIN (`3205982`); seluruh langkah
+   menyimpan ke server dan dapat dilanjutkan setelah dimuat ulang tanpa
+   PIN (`41194b7`); tautan Daftar di login akun (`4322dba`). Keputusan
+   WS1a sampai WS4a di `modul/setup-akun.md`.
 
 Urutan berikutnya, semuanya sudah disetujui pemilik proyek pada 4
 November 2026:
@@ -79,7 +84,8 @@ November 2026:
    **Dua jenis mutasi baru (B228)**: `SELISIH_KAS_MASUK` dan
    `SELISIH_KAS_KELUAR` di `ARAH_JENIS` dan label
    `features/akun-kas/mutasi.ts`, dengan rujukan `SesiKasir`.
-4. **Wizard setup tersambung** (B220, B219, B223): status dari `GET
+4. Selesai di `3205982`, `41194b7`, dan `4322dba` (di atas).
+   **Wizard setup tersambung** (B220, B219, B223): status dari `GET
    /api/setup/status` bertoken akun, melanjutkan dari langkah pertama
    yang belum selesai, nama toko lewat `POST /tenant`, Owner lewat
    `register-owner` tanpa `installationId` (memakai `accessToken`
@@ -128,6 +134,18 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
 ```
 
 ### Utang kecil dari penyesuaian backend `4759208`
+
+- Calon temuan untuk Ridho (tenant): `POST /tenant` memasang cookie refresh
+  akun bernama `refreshToken` di path `/`, sedangkan login akun memasangnya
+  di `/api/akun/auth` dan cookie refresh pengguna juga `refreshToken` di
+  `/`. `register-owner` sesudahnya menimpa cookie itu. Pemulihan sesi tetap
+  berjalan karena cookie login akun di path yang lebih khusus tetap
+  berlaku (`POST /tenant` tidak memutar `tokenVersion`); terbukti lewat
+  muat ulang di spec setup (`41194b7`). Belum dilaporkan.
+- Data toko uji wizard (lokasi, kategori, produk, pajak, dan seterusnya)
+  menetap di basis data development setelah akun ujinya dihapus, karena
+  hapus akun tidak menghapus tokonya; setiap run spec setup menambah enam
+  toko.
 
 - Riwayat admin tanpa label `ubah-plan` (butir 1 di atas). Selesai di
   `475bf0b`: tipe `AksiLangganan` ganda di `types/adminAkun.ts` dibuang.

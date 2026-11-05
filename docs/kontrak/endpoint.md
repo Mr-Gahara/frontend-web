@@ -26,6 +26,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | POST | `/akun/auth/register` | public | - | - | - | `features/auth/api.ts` |
 | POST | `/akun/auth/refreshtoken` | public | - | - | - | 2 file (lewat `fetch`: `lib/apiClient.ts` dan `components/providers/session-provider.tsx`) |
 | POST | `/akun/auth/logout` | public | - | - | - | `features/auth/api.ts` |
+| GET | `/akun/me` | authAkun | - | `{ data, message }` | `id` | `features/setup/api.ts` (sebentuk data login akun; wizard membaca `daftarTenant[0].namaToko`; B240) |
 | GET | `/akun/admin/all` | authAkun+adminOnly | - | `{ data, message, pagination }` | `id` | `features/admin-akun/api.ts` (query `cari`, `status`, `page`, `limit`, B177; `pagination` hanya bila `page` atau `limit` dikirim) |
 | GET | `/akun/admin/users/:id` | authAkun+adminOnly | - | `{ data, message }` | `id` | `features/admin-akun/api.ts` (sebentuk item daftar, B176; id rusak 400, tidak ada 404) |
 | POST | `/akun/admin/users` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` (`plan` opsional, bawaan Basic; Advanced dan Pro wajib `durasiBulan`; durasi 1, 3, 6, 12, 24; B213) |
@@ -240,6 +241,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | PUT | `/pengguna/:id` | authPengguna | `update-pengguna`, atau diri sendiri tanpa izin (`checkPermissionOrSelf`) | - | - | `features/pengguna/api.ts` |
 | DELETE | `/pengguna/:id` | authPengguna | `delete-pengguna` | - | - | `features/pengguna/api.ts` |
 | POST | `/pengguna/pin-login` | authAkun | - | - | - | `features/auth/api.ts` |
+| POST | `/pengguna/register-owner` | authAkun | - | `{ accessToken, data, message, refreshToken, success }` | `id` | `features/setup/api.ts` (`{ nama, pin }` tanpa `installationId`: Owner web dan app; `accessToken` tingkat atas dipakai sebagai sesi pengguna; cookie refresh pengguna dipasang; B219) |
 | POST | `/pengguna/pin-logout` | authPengguna | - | - | - | `features/auth/api.ts` |
 | POST | `/pengguna/pin-refresh` | public | - | - | - | 2 file (lewat `fetch`: `lib/apiClient.ts` dan `components/providers/session-provider.tsx`) |
 | POST | `/pengguna/register-pengguna` | authPengguna | `create-pengguna` | - | - | `features/pengguna/api.ts` |
@@ -340,10 +342,17 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | PUT | `/tarif/:id` | authPengguna | `update-tarif` | - | - | `features/tarif/api.ts` |
 | DELETE | `/tarif/:id` | authPengguna | `delete-tarif` | - | - | `features/tarif/api.ts` |
 
+#### `/setup`
+
+| Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
+|---|---|---|---|---|---|---|
+| GET | `/setup/status` | authAkun | - | `{ data, message }` | - | `features/setup/api.ts` (`adaToko`, `plan`, `inti`, `fitur`, dan sebelas `langkah`; B220) |
+
 #### `/tenant`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
+| POST | `/tenant` | authAkun | - | `{ data, message }` | `id` | `features/setup/api.ts` (`{ namaToko }`; `data.accessToken` akun baru membawa `tenantID`; cookie refresh akun dipasang di path `/`) |
 | GET | `/tenant/:id` | authPengguna | - | - | - | `features/tenant/api.ts` |
 | PUT | `/tenant/:id` | authPengguna | `update-tenant` | - | - | `features/tenant/api.ts` |
 

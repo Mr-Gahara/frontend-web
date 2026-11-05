@@ -12,6 +12,13 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per wizard setup tersambung** (commit `4322dba`, 5 November
+2026): 920 test unit dan integrasi lolos. Suite e2e penuh tidak
+dijalankan; spec setup ditulis ulang ke alur nyata (6 skenario, lolos 12
+dari 2 kali ulang), dan spec auth 58 serta pengaturan lolos. Harapan
+suite penuh 554: 552 ditambah satu skenario setup (5 menjadi 6) dan
+tautan Daftar; angka itu hitungan.
+
 **Suite penuh per backend `ridho` lokal `aa978cc`** (di atas `d005d22`,
 5 November 2026, pukul 11.48 sampai 12.10 WIB): 550 lolos dan 2 skipped
 dari 552, tanpa kegagalan, sesuai harapan hitungan 552. Judul kedua skip

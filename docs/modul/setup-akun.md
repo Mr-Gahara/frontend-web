@@ -202,6 +202,22 @@ dan token warna yang sudah ada.
   sampai 50 meter), kategori, pajak, satuan resep, dan satuan bahan baku.
   Langkah selesai menyebut aplikasi kasir juga siap dipakai, dengan tombol
   "Masuk ke dashboard". Data pratinjau, belum menyimpan apa pun.
+  Tersambung di `3205982` dan `41194b7` (5 November 2026): status dan
+  plan dari `GET /api/setup/status`, dan `?plan=` dibuang.
+- **WS1a: setiap butir langsung tersimpan di server.** Kategori, bahan
+  baku, dan produk disimpan dan dihapus per butir, dan daftar yang tampil
+  selalu dari server (pemilik proyek, 5 November 2026).
+- **WS2a: wizard dibuka di langkah pertama yang belum selesai, dan
+  langkah yang selesai dapat dibuka lagi.** Langkah satu data (nama toko,
+  Owner, outlet, pajak, sesi booking, gudang) menampilkan ringkasan
+  tersimpan; langkah daftar tetap dapat ditambah. Bahan baku tanpa resep,
+  yang dilaporkan backend selesai, tetap disinggahi sampai produk selesai.
+- **WS3a: Owner terdaftar tanpa sesi pengguna masuk lewat login PIN**
+  (`/login/pengguna?kembali=/setup`), lalu kembali ke wizard; `kembali`
+  hanya menerima `/setup`.
+- **WS4a: setup fitur boleh dilewati** dengan "Lewati, lengkapi nanti";
+  fiturnya terkunci sampai dilengkapi dari `/setup`. Setup yang tuntas
+  mengalihkan `/setup` ke dashboard.
 - **TP6a: verifikasi email dan lupa password** (`6db571d`).
   `/daftar/verifikasi?email=` berisi isian kode enam kotak (pindah
   otomatis, hapus mundur, dan tempel) dan kirim ulang berhitung mundur;
@@ -225,13 +241,13 @@ dan token warna yang sudah ada.
 
 | Halaman | Isi | Token | Menunggu |
 |---|---|---|---|
-| Daftar | Email dan password, lalu verifikasi email. Langkah 1 sudah ada di `/daftar` (`bb17c79`), belum ditautkan dari login akun Tersambung ke backend di `67ec690` (B231). | Publik | Tersambung (`67ec690`); tautan dari login menunggu wizard |
+| Daftar | Email dan password, lalu verifikasi email. Langkah 1 sudah ada di `/daftar` (`bb17c79`), belum ditautkan dari login akun Tersambung ke backend di `67ec690` (B231). | Publik | Tersambung (`67ec690`); ditautkan dari login akun di `4322dba` |
 | Verifikasi email | Isian OTP dan kirim ulang. Tampilan pratinjau ada di `/daftar/verifikasi` (`6db571d`), belum ditautkan Tersambung di `67ec690` (B232). | Publik | Tersambung (`67ec690`) |
-| Login akun | Email dan password; tautan daftar dan lupa password. Admin ke panel admin, akun belum terverifikasi ke verifikasi, setup belum selesai ke wizard. Tampilan desain A sudah ada (`e7fda09`); kedua tautan dipasang setelah halamannya berfungsi Sejak `67ec690`: `requireSetup` ke `/setup` (B223), belum terverifikasi ke isian kode (B232), dan tautan lupa password terpasang. | Publik | Tautan daftar menunggu wizard |
+| Login akun | Email dan password; tautan daftar dan lupa password. Admin ke panel admin, akun belum terverifikasi ke verifikasi, setup belum selesai ke wizard. Tampilan desain A sudah ada (`e7fda09`); kedua tautan dipasang setelah halamannya berfungsi Sejak `67ec690`: `requireSetup` ke `/setup` (B223), belum terverifikasi ke isian kode (B232), dan tautan lupa password terpasang. | Publik | Tautan daftar terpasang di `4322dba` |
 | Lupa password | Email, lalu OTP dan password baru. Tampilan pratinjau ada di `/lupa-password` (`6db571d`), belum ditautkan Tersambung dan ditautkan dari login akun di `67ec690` (B217). | Publik | Tersambung (`67ec690`) |
 | Login pengguna | Nama dan PIN; lupa PIN Owner lewat OTP (B178); galat nonaktif 403 (B202) dan 429. Tampilan desain E sudah ada (`1f3b9e4`); nama toko belum tampil (butir 167) | Akun | Sudah tersedia; nama toko menunggu butir 167 |
-| Wizard fase akun | Nama toko (`POST /tenant`), lalu Owner (`register-owner`, 409 bila sudah ada, B195). Tampilan pratinjau kedua fase wizard ada di `/setup` (`50c99ae`), belum ditautkan | Akun | Y3 tersedia (B219); penyambungan berikutnya |
-| Wizard fase Owner | Lokasi outlet, kategori, bahan baku bila ada resep, produk, dan pajak; Advanced dan Pro: tipe aset, aset, tarif; Pro: gudang | Pengguna | Y1; stok minimal produk Y4 |
+| Wizard fase akun | Nama toko (`POST /tenant`), lalu Owner (`register-owner`, 409 bila sudah ada, B195). Tampilan pratinjau kedua fase wizard ada di `/setup` (`50c99ae`), belum ditautkan Tersambung di `41194b7`, dibuka dari login akun lewat `requireSetup`. | Akun | Tersambung (`41194b7`) |
+| Wizard fase Owner | Lokasi outlet, kategori, bahan baku bila ada resep, produk, dan pajak; Advanced dan Pro: tipe aset, aset, tarif; Pro: gudang Tersambung di `41194b7`, dengan stok minimal produk (B237, B238). | Pengguna | Tersambung (`41194b7`) |
 | Langganan | Plan, masa berlaku, perbandingan plan, riwayat, dan kontak admin lewat WhatsApp. Tampilan pratinjau ada di Pengaturan (`2716f86`), hanya Owner (LG2a) Sejak `c868870` datanya dari `GET /akun/langganan` dan bergerbang `read-langganan` (B229). | Pengguna | Tersambung (`c868870`) |
 | Penyaringan per plan | Menu, halaman, dan tombol di luar plan atau yang setup fiturnya belum selesai | Pengguna | N1, N2, Y1 |
 | Panel admin | Plan dan durasi saat membuat akun dan memperpanjang langganan Sejak `468a3bd` juga Ubah Plan, serta plan di daftar, detail, dan riwayat. | Akun admin | Tersambung (`475bf0b`, `468a3bd`) |
