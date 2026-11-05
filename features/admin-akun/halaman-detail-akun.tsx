@@ -19,6 +19,7 @@ import {
   URL_DAFTAR_AKUN,
   teksMasaAkses,
   teksStatus,
+  teksPlan,
   teksToko,
   urlUbahAkun,
 } from "./tampilan";
@@ -40,6 +41,7 @@ function RingkasanAkun({ akun }: { akun: AkunAdmin }) {
       <Butir label="Username">{akun.username ?? "Tanpa username"}</Butir>
       <Butir label="Peran">{LABEL_ROLE[akun.role]}</Butir>
       <Butir label="Toko">{teksToko(akun)}</Butir>
+      <Butir label="Plan">{teksPlan(akun)}</Butir>
       <Butir label="Status">{teksStatus(akun)}</Butir>
       <Butir label="Masa akses">{teksMasaAkses(akun)}</Butir>
       <Butir label="Dibekukan pada">
@@ -101,6 +103,11 @@ export function HalamanDetailAkun() {
               {aksi.perpanjang && (
                 <Button type="button" onClick={() => setJenis("perpanjang")}>
                   Perpanjang Langganan
+                </Button>
+              )}
+              {aksi.ubahPlan && (
+                <Button type="button" variant="outline" onClick={() => setJenis("ubahPlan")}>
+                  Ubah Plan
                 </Button>
               )}
               {aksi.aktifkan && (

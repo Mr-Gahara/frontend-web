@@ -20,19 +20,23 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { pesanError } from "@/lib/api/error";
+import { namaPlan } from "@/features/langganan/data";
 import type { AkunAdmin, DurasiLangganan } from "@/types/adminAkun";
-import { useAktifkanAkun, useBekukanAkun, usePerpanjangLangganan } from "./hooks";
+import type { KunciPlan } from "@/types/langganan";
+import { useAktifkanAkun, useBekukanAkun, usePerpanjangLangganan, useUbahPlan } from "./hooks";
 import {
   BATAS_ALASAN,
   PILIHAN_DURASI_BULAN,
+  PILIHAN_PLAN,
   akibatPerpanjang,
   durasiWajibSaatAktifkan,
   payloadAktifkan,
   payloadBekukan,
   payloadPerpanjang,
+  payloadUbahPlan,
 } from "./langganan";
 
-export type JenisAksi = "bekukan" | "aktifkan" | "perpanjang";
+export type JenisAksi = "bekukan" | "aktifkan" | "perpanjang" | "ubahPlan";
 
 const TANPA_DURASI = "tanpa";
 
@@ -55,6 +59,12 @@ const TEKS: Record<JenisAksi, { judul: string; tombol: string; berhasil: string;
     berhasil: "Langganan diperpanjang",
     gagal: "Gagal memperpanjang langganan.",
   },
+  ubahPlan: {
+    judul: "Ubah plan",
+    tombol: "Ubah Plan",
+    berhasil: "Plan diubah",
+    gagal: "Gagal mengubah plan.",
+  },
 };
 
 function keterangan(jenis: JenisAksi, akun: AkunAdmin, durasiWajib: boolean): string {
@@ -62,6 +72,9 @@ function keterangan(jenis: JenisAksi, akun: AkunAdmin, durasiWajib: boolean): st
     return "Akun tidak dapat login, dan seluruh pengguna tokonya langsung keluar. Akun dapat diaktifkan kembali.";
   }
   if (jenis === "perpanjang") return akibatPerpanjang(akun);
+  if (jenis === "ubahPlan") {
+    return `Plan sekarang ${namaPlan(akun.plan)}. Masa akses tidak berubah. Turun plan tidak menghapus data, tetapi fitur di luar plan baru terkunci.`;
+  }
   if (durasiWajib) return "Masa akses akun ini sudah berakhir, sehingga durasi langganan wajib dipilih.";
   return akun.langganan.aksesBerakhirPada === null
     ? "Akun kembali dapat login tanpa batas masa akses. Memilih durasi membuat masa aksesnya berbatas."
@@ -98,6 +111,9 @@ function IsiDialog({
 }) {
   const durasiWajib = jenis === "perpanjang" || (jenis === "aktifkan" && durasiWajibSaatAktifkan(akun));
   const [durasi, setDurasi] = useState(durasiWajib ? "" : TANPA_DURASI);
+  // Perpanjang dapat sekaligus mengganti plan (B213); bawaannya plan sekarang.
+  // Ubah plan tidak menawarkan plan sekarang, karena backend menolaknya 409.
+  const [plan, setPlan] = useState<KunciPlan | "">(jenis === "ubahPlan" ? "" : (akun.plan ?? "basic"));
   const [alasan, setAlasan] = useState("");
   const [galat, setGalat] = useState("");
 
@@ -111,13 +127,22 @@ function IsiDialog({
   const bekukan = useBekukanAkun(opsi);
   const aktifkan = useAktifkanAkun(opsi);
   const perpanjang = usePerpanjangLangganan(opsi);
-  const memuat = bekukan.isPending || aktifkan.isPending || perpanjang.isPending;
+  const ubahPlan = useUbahPlan(opsi);
+  const memuat = bekukan.isPending || aktifkan.isPending || perpanjang.isPending || ubahPlan.isPending;
 
   const kirim = () => {
     setGalat("");
     const terpilih = durasi && durasi !== TANPA_DURASI ? (Number(durasi) as DurasiLangganan) : null;
     if (jenis === "bekukan") {
       bekukan.mutate({ id: akun.id, payload: payloadBekukan(alasan) });
+      return;
+    }
+    if (jenis === "ubahPlan") {
+      if (!plan) {
+        setGalat("Pilih plan baru.");
+        return;
+      }
+      ubahPlan.mutate({ id: akun.id, payload: payloadUbahPlan(plan, alasan) });
       return;
     }
     if (durasiWajib && !terpilih) {
@@ -128,7 +153,9 @@ function IsiDialog({
       aktifkan.mutate({ id: akun.id, payload: payloadAktifkan(terpilih, alasan) });
       return;
     }
-    if (terpilih) perpanjang.mutate({ id: akun.id, payload: payloadPerpanjang(terpilih, alasan) });
+    if (terpilih) {
+      perpanjang.mutate({ id: akun.id, payload: payloadPerpanjang(terpilih, alasan, plan || null, akun.plan) });
+    }
   };
 
   return (
@@ -147,7 +174,27 @@ function IsiDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          {jenis !== "bekukan" && (
+          {(jenis === "perpanjang" || jenis === "ubahPlan") && (
+            <div className="space-y-2">
+              <label htmlFor="plan-langganan" className="text-sm font-medium">
+                {jenis === "ubahPlan" ? "Plan baru" : "Plan"}
+              </label>
+              <Select value={plan} onValueChange={(v) => setPlan(v as KunciPlan)} disabled={memuat}>
+                <SelectTrigger id="plan-langganan" className="w-full">
+                  <SelectValue placeholder="Pilih plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PILIHAN_PLAN.filter((p) => jenis !== "ubahPlan" || p !== akun.plan).map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {p === akun.plan ? `${namaPlan(p)} (sekarang)` : namaPlan(p)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {(jenis === "aktifkan" || jenis === "perpanjang") && (
             <div className="space-y-2">
               <label htmlFor="durasi-langganan" className="text-sm font-medium">
                 Durasi

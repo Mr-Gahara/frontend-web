@@ -27,6 +27,7 @@ export const EP = {
     adminBekukan: (id: string) => `/akun/admin/users/${id}/freeze`,
     adminAktifkan: (id: string) => `/akun/admin/users/${id}/unfreeze`,
     adminLangganan: (id: string) => `/akun/admin/users/${id}/langganan`,
+    adminPlan: (id: string) => `/akun/admin/users/${id}/plan`,
   },
   pengguna: {
     list: "/pengguna",

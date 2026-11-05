@@ -5,7 +5,7 @@ export type { AksiLangganan };
 
 export type StatusAkun = "aktif" | "non-aktif";
 export type AlasanNonAktif = "manual" | "kedaluwarsa";
-export type DurasiLangganan = 1 | 3 | 6 | 12;
+export type DurasiLangganan = 1 | 3 | 6 | 12 | 24;
 
 export interface LanggananAkun {
   /** null berarti masa akses tidak dibatasi (akun lama, atau akun admin). */
@@ -25,6 +25,8 @@ export interface AkunAdmin {
   email: string;
   role: AkunRole;
   status: StatusAkun;
+  /** Plan akun klien (B212); null untuk akun admin. */
+  plan: KunciPlan | null;
   daftarTenant: TenantEntry[];
   createdAt: string;
   updatedAt: string;
@@ -37,6 +39,8 @@ export interface BuatAkunKlienPayload {
   password: string;
   username?: string;
   durasiBulan?: DurasiLangganan;
+  /** Tanpa plan berarti Basic; Advanced dan Pro wajib durasiBulan (B213). */
+  plan?: KunciPlan;
 }
 
 /** Catatan GET /akun/admin/users/:id/langganan, setelah _id dinormalkan menjadi id. */
@@ -77,6 +81,14 @@ export interface AktifkanPayload {
 
 export interface PerpanjangPayload {
   durasiBulan: DurasiLangganan;
+  /** Naik atau turun plan sekaligus (B213); tidak dikirim bila plan tetap. */
+  plan?: KunciPlan;
+  alasan?: string;
+}
+
+/** PUT /akun/admin/users/:id/plan (B213): masa akses tidak berubah; plan yang sama 409. */
+export interface UbahPlanPayload {
+  plan: KunciPlan;
   alasan?: string;
 }
 

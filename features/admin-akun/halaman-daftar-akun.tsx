@@ -27,6 +27,7 @@ import {
   urlDetailAkun,
   teksMasaAkses,
   teksStatus,
+  teksPlan,
   teksToko,
   type FilterStatusAkun,
 } from "./tampilan";
@@ -51,6 +52,7 @@ const KOLOM: ColumnDef<AkunAdmin>[] = [
   },
   { id: "role", header: "Peran", cell: ({ row }) => LABEL_ROLE[row.original.role] },
   { id: "toko", header: "Toko", cell: ({ row }) => teksToko(row.original) },
+  { id: "plan", header: "Plan", cell: ({ row }) => teksPlan(row.original) },
   { id: "status", header: "Status", cell: ({ row }) => teksStatus(row.original) },
   { id: "masaAkses", header: "Masa Akses", cell: ({ row }) => teksMasaAkses(row.original) },
   {

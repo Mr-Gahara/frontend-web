@@ -1,13 +1,13 @@
 import { z } from "zod";
 import type { AkunAdmin, PerbaruiAkunPayload } from "@/types/adminAkun";
-import { skemaBuatAkunKlien } from "./schema";
+import { objekAkunKlien } from "./schema";
 
 /**
  * PUT /akun/admin/users/:id tidak punya validator di backend, sehingga
  * aturannya ditegakkan di sini dengan aturan yang sama dengan buat akun.
  * Password kosong berarti tidak diganti.
  */
-export const skemaUbahAkun = skemaBuatAkunKlien.pick({ email: true, username: true }).extend({
+export const skemaUbahAkun = objekAkunKlien.pick({ email: true, username: true }).extend({
   password: z
     .string()
     .refine(

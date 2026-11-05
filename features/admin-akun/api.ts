@@ -10,6 +10,7 @@ import type {
   PerbaruiAkunPayload,
   PerpanjangPayload,
   RiwayatLangganan,
+  UbahPlanPayload,
 } from "@/types/adminAkun";
 
 interface ResponsRiwayat {
@@ -38,6 +39,8 @@ export const adminAkunApi = {
     apiData.post<AkunAdmin>(EP.akun.adminAktifkan(id), payload, "akun"),
   perpanjang: (id: string, payload: PerpanjangPayload) =>
     apiData.post<AkunAdmin>(EP.akun.adminLangganan(id), payload, "akun"),
+  ubahPlan: (id: string, payload: UbahPlanPayload) =>
+    apiData.put<AkunAdmin>(EP.akun.adminPlan(id), payload, "akun"),
   /**
    * Riwayat berkursor: cursorBerikutnya dan total (B155) berada di tingkat
    * atas respons, sehingga dibaca lewat apiMentah. Item sudah ber-id sejak

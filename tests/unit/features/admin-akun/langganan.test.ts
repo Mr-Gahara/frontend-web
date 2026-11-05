@@ -7,6 +7,7 @@ import {
   payloadAktifkan,
   payloadBekukan,
   payloadPerpanjang,
+  payloadUbahPlan,
   pelakuRiwayat,
   teksPerubahanMasa,
   teksPerubahanPlan,
@@ -28,6 +29,7 @@ const akun = (ubah: Partial<AkunAdmin> = {}): AkunAdmin => ({
   email: "klien@contoh.id",
   role: "client",
   status: "aktif",
+  plan: "basic",
   daftarTenant: [],
   createdAt: "2026-09-01T00:00:00.000Z",
   updatedAt: "2026-09-01T00:00:00.000Z",
@@ -55,7 +57,12 @@ const SEKARANG = new Date("2026-10-02T12:00:00.000Z");
 
 describe("aksiLangganan", () => {
   it("klien aktif: bekukan dan perpanjang", () => {
-    expect(aksiLangganan(akun())).toEqual({ bekukan: true, aktifkan: false, perpanjang: true });
+    expect(aksiLangganan(akun())).toEqual({
+      bekukan: true,
+      aktifkan: false,
+      perpanjang: true,
+      ubahPlan: true,
+    });
   });
 
   it("klien non-aktif: aktifkan dan perpanjang", () => {
@@ -63,6 +70,7 @@ describe("aksiLangganan", () => {
       bekukan: false,
       aktifkan: true,
       perpanjang: true,
+      ubahPlan: true,
     });
   });
 
@@ -71,6 +79,7 @@ describe("aksiLangganan", () => {
       bekukan: false,
       aktifkan: false,
       perpanjang: false,
+      ubahPlan: false,
     });
   });
 });
@@ -111,6 +120,20 @@ describe("payload langganan", () => {
   it("aktifkan: durasi hanya dikirim bila dipilih", () => {
     expect(payloadAktifkan(null, "")).toEqual({});
     expect(payloadAktifkan(6, " lunas ")).toEqual({ durasiBulan: 6, alasan: "lunas" });
+  });
+
+  it("perpanjang: plan hanya dikirim bila berbeda dari plan sekarang (B213)", () => {
+    expect(payloadPerpanjang(24, "", "basic", "basic")).toEqual({ durasiBulan: 24 });
+    expect(payloadPerpanjang(12, " naik ", "pro", "basic")).toEqual({
+      durasiBulan: 12,
+      plan: "pro",
+      alasan: "naik",
+    });
+  });
+
+  it("ubah plan: plan selalu dikirim, alasan bila diisi (B213)", () => {
+    expect(payloadUbahPlan("advanced", " ")).toEqual({ plan: "advanced" });
+    expect(payloadUbahPlan("basic", "turun")).toEqual({ plan: "basic", alasan: "turun" });
   });
 
   it("perpanjang: durasi selalu dikirim", () => {

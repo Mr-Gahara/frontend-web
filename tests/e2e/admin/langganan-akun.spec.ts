@@ -23,6 +23,7 @@ interface AkunRespons {
   email: string;
   role: "client" | "admin";
   status: string;
+  plan: "basic" | "advanced" | "pro" | null;
   langganan: { aksesBerakhirPada: string | null };
 }
 
@@ -30,6 +31,7 @@ const POLA_BUAT = /\/api\/akun\/admin\/users(\?|$)/i;
 const POLA_BEKUKAN = /\/api\/akun\/admin\/users\/[^/]+\/freeze(\?|$)/i;
 const POLA_AKTIFKAN = /\/api\/akun\/admin\/users\/[^/]+\/unfreeze(\?|$)/i;
 const POLA_LANGGANAN = /\/api\/akun\/admin\/users\/[^/]+\/langganan(\?|$)/i;
+const POLA_PLAN = /\/api\/akun\/admin\/users\/[^/]+\/plan(\?|$)/i;
 
 const EMAIL_TOKO = "toko@gmail.com";
 
@@ -165,6 +167,118 @@ test.describe("Langganan akun klien", () => {
       });
 
       await test.step("hapus akun uji lewat UI: bekukan, lalu hapus dengan password admin", async () => {
+        await hapusAkunDariDetail(page, email, admin);
+        terhapus = true;
+      });
+    } finally {
+      const tersisa = akun as AkunRespons | null;
+      if (tersisa && !terhapus) await hapusAkunKlienUji(tersisa.id, admin);
+    }
+  });
+
+  test("plan: buat Pro 24 bulan, ubah plan, dan perpanjang sekaligus ganti plan (B213)", async ({ page }) => {
+    test.setTimeout(90_000);
+    const admin = wajibAdmin();
+    const email = `e2e.plan.${Date.now().toString(36)}@tachyon-uji.com`;
+    let akun: AkunRespons | null = null;
+    let terhapus = false;
+    const butirPlan = page.locator("dl div").filter({ has: page.locator("dt", { hasText: /^Plan$/ }) });
+
+    try {
+      await test.step("buat akun Pro: masa percobaan tidak ditawarkan, durasi wajib, lalu 24 bulan", async () => {
+        await bukaDaftar(page);
+        await page.getByRole("button", { name: "Buat Akun Klien" }).click();
+        await page.waitForURL("**/admin/akun/buat");
+        await page.getByLabel("Email", { exact: true }).fill(email);
+        await page.getByLabel("Password awal").fill("UjiKlien123");
+        await page.getByRole("combobox", { name: "Plan" }).click();
+        await page.getByRole("option", { name: "Pro" }).click();
+
+        let terkirim = 0;
+        const catat = (r: { url(): string; method(): string }) => {
+          if (POLA_BUAT.test(r.url()) && r.method() === "POST") terkirim += 1;
+        };
+        page.on("request", catat);
+        await page.getByRole("button", { name: "Simpan Akun" }).click();
+        await expect(page.getByText("Pilih durasi langganan.")).toBeVisible();
+        page.off("request", catat);
+        expect(terkirim, "tanpa durasi tidak ada permintaan").toBe(0);
+
+        await page.getByRole("combobox", { name: "Langganan" }).click();
+        await expect(page.getByRole("option", { name: "Masa percobaan" })).toHaveCount(0);
+        await page.getByRole("option", { name: "24 bulan" }).click();
+        const tunggu = tungguPos(page, POLA_BUAT);
+        await page.getByRole("button", { name: "Simpan Akun" }).click();
+        const respons = await tunggu;
+        akun = ((await respons.json()) as { data?: AkunRespons }).data ?? null;
+        expect(respons.status()).toBe(201);
+        expect(respons.request().postDataJSON()).toEqual({
+          email,
+          password: "UjiKlien123",
+          plan: "pro",
+          durasiBulan: 24,
+        });
+        expect(akun?.plan).toBe("pro");
+        await page.waitForURL("**/admin");
+      });
+      if (!akun) throw new Error("akun uji tidak terbentuk");
+      const uji: AkunRespons = akun;
+
+      await test.step("daftar dan detail menampilkan plan, riwayat mencatat plan awal", async () => {
+        await page.getByLabel("Cari akun").fill(email);
+        const baris = page.getByRole("row").filter({ hasText: email });
+        await expect(baris.getByRole("cell", { name: "Pro", exact: true })).toBeVisible({ timeout: 15_000 });
+        await page.getByRole("link", { name: email }).click();
+        await page.waitForURL("**/admin/akun/" + uji.id);
+        await expect(butirPlan).toContainText("Pro");
+        const pertama = riwayat(page).getByRole("listitem").first();
+        await expect(pertama).toContainText("Akun dibuat 24 bulan", { timeout: 15_000 });
+        await expect(pertama).toContainText("Plan Pro");
+      });
+
+      await test.step("ubah plan: plan sekarang tidak ditawarkan, Pro menjadi Advanced", async () => {
+        await page.getByRole("button", { name: "Ubah Plan" }).click();
+        await expect(dialog(page)).toContainText("Plan sekarang Pro. Masa akses tidak berubah.");
+        await dialog(page).getByRole("combobox", { name: "Plan baru" }).click();
+        await expect(page.getByRole("option", { name: /^Pro/ })).toHaveCount(0);
+        await page.getByRole("option", { name: "Advanced" }).click();
+        const tunggu = page.waitForResponse((r) => POLA_PLAN.test(r.url()) && r.request().method() === "PUT");
+        await dialog(page).getByRole("button", { name: "Ubah Plan", exact: true }).click();
+        const respons = await tunggu;
+        expect(respons.status()).toBe(200);
+        expect(respons.request().postDataJSON()).toEqual({ plan: "advanced" });
+        const hasil = ((await respons.json()) as { data: AkunRespons }).data;
+        expect(hasil.plan).toBe("advanced");
+        expect(hasil.langganan.aksesBerakhirPada, "masa akses tidak berubah").toBe(
+          uji.langganan.aksesBerakhirPada,
+        );
+        await expect(dialog(page)).toBeHidden({ timeout: 15_000 });
+        await expect(butirPlan).toContainText("Advanced");
+        const pertama = riwayat(page).getByRole("listitem").first();
+        await expect(pertama).toContainText("Plan diubah");
+        await expect(pertama).toContainText("Plan Pro menjadi Advanced");
+      });
+
+      await test.step("perpanjang 1 bulan sekaligus kembali ke Pro", async () => {
+        await page.getByRole("button", { name: "Perpanjang Langganan" }).click();
+        await expect(dialog(page).getByRole("combobox", { name: "Plan" })).toContainText("Advanced (sekarang)");
+        await dialog(page).getByRole("combobox", { name: "Durasi" }).click();
+        await page.getByRole("option", { name: "1 bulan", exact: true }).click();
+        await dialog(page).getByRole("combobox", { name: "Plan" }).click();
+        await page.getByRole("option", { name: "Pro" }).click();
+        const tunggu = tungguPos(page, POLA_LANGGANAN);
+        await dialog(page).getByRole("button", { name: "Perpanjang", exact: true }).click();
+        const respons = await tunggu;
+        expect(respons.status()).toBe(200);
+        expect(respons.request().postDataJSON()).toEqual({ durasiBulan: 1, plan: "pro" });
+        await expect(dialog(page)).toBeHidden({ timeout: 15_000 });
+        await expect(butirPlan).toContainText("Pro");
+        const pertama = riwayat(page).getByRole("listitem").first();
+        await expect(pertama).toContainText("Diperpanjang 1 bulan");
+        await expect(pertama).toContainText("Plan Advanced menjadi Pro");
+      });
+
+      await test.step("hapus akun uji lewat UI", async () => {
         await hapusAkunDariDetail(page, email, admin);
         terhapus = true;
       });

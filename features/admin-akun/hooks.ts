@@ -16,6 +16,7 @@ import type {
   BuatAkunKlienPayload,
   PerbaruiAkunPayload,
   PerpanjangPayload,
+  UbahPlanPayload,
 } from "@/types/adminAkun";
 import { adminAkunApi } from "./api";
 import { akunTidakAda } from "./tampilan";
@@ -102,6 +103,10 @@ export function usePerpanjangLangganan(
     ({ id, payload }) => adminAkunApi.perpanjang(id, payload),
     opsi,
   );
+}
+
+export function useUbahPlan(opsi: OpsiMutasi<AkunAdmin, AksiAkunVars<UbahPlanPayload>> = {}) {
+  return useAksiAkun<UbahPlanPayload>(({ id, payload }) => adminAkunApi.ubahPlan(id, payload), opsi);
 }
 
 /** Riwayat langganan bertahap (keputusan PA11a): halaman berikutnya memakai kursor dari backend. */

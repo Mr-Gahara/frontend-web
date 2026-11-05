@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -17,11 +17,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { pesanError } from "@/lib/api/error";
+import { namaPlan } from "@/features/langganan/data";
 import { useBuatAkunKlien } from "./hooks";
 import { NILAI_AWAL_AKUN_KLIEN, payloadBuatAkunKlien } from "./payload";
 import {
   LABEL_DURASI,
   PILIHAN_DURASI,
+  PLAN_AKUN,
   skemaBuatAkunKlien,
   type NilaiBuatAkunKlien,
 } from "./schema";
@@ -43,6 +45,8 @@ export function HalamanBuatAkun() {
     register,
     control,
     handleSubmit,
+    setValue,
+    getValues,
     formState: { errors },
   } = useForm<NilaiBuatAkunKlien>({
     resolver: zodResolver(skemaBuatAkunKlien),
@@ -56,6 +60,14 @@ export function HalamanBuatAkun() {
     onError: (err) => setGalat(pesanError(err, "Gagal membuat akun klien.")),
   });
   const memuat = buat.isPending;
+  const plan = useWatch({ control, name: "plan" });
+  // Masa percobaan hanya untuk Basic (B213): pilihan itu tidak ditawarkan
+  // untuk Advanced dan Pro, dan durasi dikosongkan agar admin memilihnya.
+  const pilihanDurasi = PILIHAN_DURASI.filter((p) => plan === "basic" || p !== "percobaan");
+  const gantiPlan = (baru: NilaiBuatAkunKlien["plan"]) => {
+    setValue("plan", baru);
+    if (baru !== "basic" && getValues("durasi") === "percobaan") setValue("durasi", "");
+  };
 
   const kirim = (nilai: NilaiBuatAkunKlien) => {
     setGalat("");
@@ -131,6 +143,24 @@ export function HalamanBuatAkun() {
         </div>
 
         <div className="space-y-2">
+          <label htmlFor="plan" className={KELAS_LABEL}>
+            Plan
+          </label>
+          <Select value={plan} onValueChange={(v) => gantiPlan(v as NilaiBuatAkunKlien["plan"])} disabled={memuat}>
+            <SelectTrigger id="plan" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PLAN_AKUN.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {namaPlan(p)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
           <label htmlFor="durasi" className={KELAS_LABEL}>
             Langganan
           </label>
@@ -139,11 +169,15 @@ export function HalamanBuatAkun() {
             name="durasi"
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange} disabled={memuat}>
-                <SelectTrigger id="durasi" className="w-full">
-                  <SelectValue />
+                <SelectTrigger
+                  id="durasi"
+                  className="w-full"
+                  aria-invalid={errors.durasi ? true : undefined}
+                >
+                  <SelectValue placeholder="Pilih durasi" />
                 </SelectTrigger>
                 <SelectContent>
-                  {PILIHAN_DURASI.map((pilihan) => (
+                  {pilihanDurasi.map((pilihan) => (
                     <SelectItem key={pilihan} value={pilihan}>
                       {LABEL_DURASI[pilihan]}
                     </SelectItem>
@@ -153,8 +187,11 @@ export function HalamanBuatAkun() {
             )}
           />
           <p className={KELAS_KETERANGAN}>
-            Masa percobaan mengikuti pengaturan backend; pilih durasi untuk langsung berlangganan.
+            {plan === "basic"
+              ? "Masa percobaan mengikuti pengaturan backend; pilih durasi untuk langsung berlangganan."
+              : "Masa percobaan hanya untuk plan Basic; Advanced dan Pro wajib memilih durasi."}
           </p>
+          {errors.durasi && <p className={KELAS_GALAT}>{errors.durasi.message}</p>}
         </div>
 
         {galat && (

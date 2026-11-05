@@ -5,17 +5,19 @@ export const NILAI_AWAL_AKUN_KLIEN: NilaiBuatAkunKlien = {
   email: "",
   username: "",
   password: "",
+  plan: "basic",
   durasi: "percobaan",
 };
 
 /**
- * Payload POST /akun/admin/users. Username kosong dan masa percobaan tidak
- * dikirim, karena backend memperlakukan ketiadaannya sebagai bawaan.
+ * Payload POST /akun/admin/users. Username kosong, plan Basic, dan masa
+ * percobaan tidak dikirim, karena backend memperlakukan ketiadaannya sebagai bawaan.
  */
 export function payloadBuatAkunKlien(nilai: NilaiBuatAkunKlien): BuatAkunKlienPayload {
   const payload: BuatAkunKlienPayload = { email: nilai.email.trim(), password: nilai.password };
   const username = nilai.username.trim();
   if (username) payload.username = username;
-  if (nilai.durasi !== "percobaan") payload.durasiBulan = Number(nilai.durasi) as DurasiLangganan;
+  if (nilai.plan !== "basic") payload.plan = nilai.plan;
+  if (nilai.durasi && nilai.durasi !== "percobaan") payload.durasiBulan = Number(nilai.durasi) as DurasiLangganan;
   return payload;
 }

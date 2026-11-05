@@ -2,6 +2,7 @@ import { isApiError } from "@/lib/api/error";
 import { formatTanggalPendek } from "@/lib/format";
 import type { AkunRole } from "@/types/auth";
 import type { AkunAdmin } from "@/types/adminAkun";
+import { namaPlan } from "@/features/langganan/data";
 
 export const URL_DAFTAR_AKUN = "/admin";
 export const URL_BUAT_AKUN = "/admin/akun/buat";
@@ -55,6 +56,11 @@ export function teksMasaAkses(akun: AkunAdmin): string {
   if (akun.role === "admin") return "-";
   const berakhir = akun.langganan.aksesBerakhirPada;
   return berakhir ? formatTanggalPendek(berakhir) : "Tidak dibatasi";
+}
+
+/** Akun admin tidak berplan; namaPlan(null) berarti Basic, sehingga admin ditangani lebih dulu. */
+export function teksPlan(akun: AkunAdmin): string {
+  return akun.role === "admin" || !akun.plan ? "-" : namaPlan(akun.plan);
 }
 
 /** Kolom toko: akun admin tidak punya toko, akun klien bisa belum men-setup toko. */

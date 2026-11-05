@@ -1,12 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { payloadBuatAkunKlien } from "@/features/admin-akun/payload";
-import { skemaBuatAkunKlien, type NilaiBuatAkunKlien } from "@/features/admin-akun/schema";
+import { PESAN_PERCOBAAN_BASIC, skemaBuatAkunKlien, type NilaiBuatAkunKlien } from "@/features/admin-akun/schema";
 import {
   akunTidakAda,
   namaToko,
   PANJANG_CARI_AKUN,
   paramDaftarAkun,
   teksMasaAkses,
+  teksPlan,
   teksStatus,
   teksToko,
 } from "@/features/admin-akun/tampilan";
@@ -18,6 +19,7 @@ const isian = (ubah: Partial<NilaiBuatAkunKlien> = {}): NilaiBuatAkunKlien => ({
   email: "klien@contoh.id",
   username: "",
   password: "Rahasia123",
+  plan: "basic",
   durasi: "percobaan",
   ...ubah,
 });
@@ -28,6 +30,7 @@ const akun = (ubah: Partial<AkunAdmin> = {}): AkunAdmin => ({
   email: "budi@contoh.id",
   role: "client",
   status: "aktif",
+  plan: "basic",
   daftarTenant: [{ tenantID: "t1", namaToko: "Kopi Senja" }],
   createdAt: "2026-09-01T00:00:00.000Z",
   updatedAt: "2026-09-01T00:00:00.000Z",
@@ -78,6 +81,17 @@ describe("skemaBuatAkunKlien", () => {
   it("menolak username 26 karakter", () => {
     expect(sah(isian({ username: "a".repeat(26) }))).toBe(false);
   });
+
+  it("masa percobaan hanya untuk Basic, dan durasi kosong ditolak (B213)", () => {
+    expect(sah(isian({ plan: "advanced" }))).toBe(false);
+    expect(sah(isian({ plan: "pro", durasi: "12" }))).toBe(true);
+    expect(sah(isian({ durasi: "" }))).toBe(false);
+    const hasil = skemaBuatAkunKlien.safeParse(isian({ plan: "pro" }));
+    expect(hasil.success ? null : hasil.error.issues[0]).toMatchObject({
+      path: ["durasi"],
+      message: PESAN_PERCOBAAN_BASIC,
+    });
+  });
 });
 
 describe("payloadBuatAkunKlien", () => {
@@ -90,6 +104,15 @@ describe("payloadBuatAkunKlien", () => {
 
   it("durasi terpilih dikirim sebagai angka", () => {
     expect(payloadBuatAkunKlien(isian({ durasi: "6" })).durasiBulan).toBe(6);
+  });
+
+  it("plan selain Basic dikirim bersama durasinya (B213)", () => {
+    expect(payloadBuatAkunKlien(isian({ plan: "pro", durasi: "24" }))).toEqual({
+      email: "klien@contoh.id",
+      password: "Rahasia123",
+      plan: "pro",
+      durasiBulan: 24,
+    });
   });
 
   it("email dan username dipangkas, password apa adanya", () => {
@@ -127,6 +150,9 @@ describe("tampilan daftar akun", () => {
     expect(namaToko(daftar[1])).toBeNull();
     expect(teksToko(daftar[0])).toBe("Kopi Senja");
     expect(teksToko(daftar[1])).toBe("Belum punya toko");
+    expect(teksPlan(daftar[1])).toBe("Basic");
+    expect(teksPlan({ ...daftar[1], plan: "pro" })).toBe("Pro");
+    expect(teksPlan({ ...daftar[1], role: "admin", plan: null })).toBe("-");
     expect(teksToko(akun({ role: "admin", daftarTenant: [] }))).toBe("-");
   });
 

@@ -8,16 +8,21 @@ import type {
   DurasiLangganan,
   PerpanjangPayload,
   RiwayatLangganan,
+  UbahPlanPayload,
 } from "@/types/adminAkun";
+import type { KunciPlan } from "@/types/langganan";
 
 /** Sama dengan DURASI_LANGGANAN_BULAN backend. */
-export const PILIHAN_DURASI_BULAN: readonly DurasiLangganan[] = [1, 3, 6, 12];
+export const PILIHAN_DURASI_BULAN: readonly DurasiLangganan[] = [1, 3, 6, 12, 24];
+/** Sama dengan PLAN backend. */
+export const PILIHAN_PLAN: readonly KunciPlan[] = ["basic", "advanced", "pro"];
 export const BATAS_ALASAN = 200;
 
 export interface AksiTersedia {
   bekukan: boolean;
   aktifkan: boolean;
   perpanjang: boolean;
+  ubahPlan: boolean;
 }
 
 /** Akun admin tidak berlangganan dan tidak dapat dibekukan (ditolak backend dengan 400). */
@@ -27,6 +32,7 @@ export function aksiLangganan(akun: AkunAdmin): AksiTersedia {
     bekukan: klien && akun.status === "aktif",
     aktifkan: klien && akun.status === "non-aktif",
     perpanjang: klien,
+    ubahPlan: klien,
   };
 }
 
@@ -62,8 +68,20 @@ export function payloadAktifkan(durasi: DurasiLangganan | null, alasan: string):
   return payload;
 }
 
-export function payloadPerpanjang(durasi: DurasiLangganan, alasan: string): PerpanjangPayload {
-  return { durasiBulan: durasi, ...payloadBekukan(alasan) };
+/** Plan hanya dikirim bila berbeda dari plan akun sekarang (B213). */
+export function payloadPerpanjang(
+  durasi: DurasiLangganan,
+  alasan: string,
+  plan: KunciPlan | null = null,
+  planSekarang: KunciPlan | null = null,
+): PerpanjangPayload {
+  const payload: PerpanjangPayload = { durasiBulan: durasi };
+  if (plan && plan !== planSekarang) payload.plan = plan;
+  return { ...payload, ...payloadBekukan(alasan) };
+}
+
+export function payloadUbahPlan(plan: KunciPlan, alasan: string): UbahPlanPayload {
+  return { plan, ...payloadBekukan(alasan) };
 }
 
 export const LABEL_AKSI: Record<AksiLangganan, string> = {
