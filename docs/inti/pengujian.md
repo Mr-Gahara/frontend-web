@@ -12,6 +12,12 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per plan di panel admin** (commit `468a3bd`, 5 November 2026):
+898 test unit dan integrasi lolos. Suite e2e penuh tidak dijalankan; spec
+terdampak `tests/e2e/admin` dan gerbang rute 23 lolos, termasuk skenario
+baru plan B213 di spec langganan admin. Harapan suite penuh 550: 549
+ditambah skenario itu; angka itu hitungan.
+
 **Baseline per penyesuaian backend `ridho` lokal `4759208`** (commit
 `c868870`, 4 November 2026): 892 test unit dan integrasi lolos di 102
 berkas. Suite e2e penuh dijalankan sekali terhadap backend `4759208`

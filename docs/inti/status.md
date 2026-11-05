@@ -46,10 +46,18 @@ Sudah selesai di sesi itu:
 2. Halaman Langganan memakai data backend dan izin `read-langganan`
    (`c868870`).
 
+Selesai 5 November 2026:
+
+3. Plan di panel admin (B213): label riwayat `ubah-plan` dan perubahan
+   plan di riwayat (`475bf0b`), lalu plan di buat akun, durasi 24 bulan,
+   aksi Ubah Plan, plan opsional saat perpanjang, serta plan di daftar
+   dan detail akun (`468a3bd`).
+
 Urutan berikutnya, semuanya sudah disetujui pemilik proyek pada 4
 November 2026:
 
-1. **Plan di panel admin (B213)**, didahului bug yang sudah terlihat:
+1. Selesai di `475bf0b` dan `468a3bd` (di atas).
+   **Plan di panel admin (B213)**, didahului bug yang sudah terlihat:
    `LABEL_AKSI` di `features/admin-akun/langganan.ts` tidak punya
    `ubah-plan`, sehingga riwayat langganan akun uji di panel admin
    menampilkan baris tanpa label. Lalu pilihan plan dan durasi 24 bulan
@@ -104,7 +112,8 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
 
 ### Utang kecil dari penyesuaian backend `4759208`
 
-- Riwayat admin tanpa label `ubah-plan` (butir 1 di atas).
+- Riwayat admin tanpa label `ubah-plan` (butir 1 di atas). Selesai di
+  `475bf0b`: tipe `AksiLangganan` ganda di `types/adminAkun.ts` dibuang.
 - `db:data-bawaan` mencocokkan nama persis, jadi Toko3 yang sudah punya
   metode tunai "CASH" dan kas fisik "kas kasir" mendapat metode "Tunai"
   dan akun kas "Kas Kecil (Laci)" baru (dihitung baca-saja 4 November
@@ -118,6 +127,8 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
   serta pembuktian B215, B217, B229, B230, B231, dan B232 dari web
   (`inti/backend.md`, Bila menemukan bug backend). Baris temuan belum
   ditulis di `kontrak/temuan.md`.
+- `PUT /akun/admin/users/:id/plan` dan plan di buat akun, perpanjang,
+  serta riwayat admin dicatat di `kontrak/endpoint.md` (5 November 2026).
 - Enam endpoint baru belum dicatat di `kontrak/endpoint.md`:
   verifikasi email dan kirim ulangnya, lupa password, reset password,
   langganan, dan riwayat langganan.

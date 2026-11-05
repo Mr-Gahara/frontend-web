@@ -234,7 +234,7 @@ dan token warna yang sudah ada.
 | Wizard fase Owner | Lokasi outlet, kategori, bahan baku bila ada resep, produk, dan pajak; Advanced dan Pro: tipe aset, aset, tarif; Pro: gudang | Pengguna | Y1; stok minimal produk Y4 |
 | Langganan | Plan, masa berlaku, perbandingan plan, riwayat, dan kontak admin lewat WhatsApp. Tampilan pratinjau ada di Pengaturan (`2716f86`), hanya Owner (LG2a) Sejak `c868870` datanya dari `GET /akun/langganan` dan bergerbang `read-langganan` (B229). | Pengguna | Tersambung (`c868870`) |
 | Penyaringan per plan | Menu, halaman, dan tombol di luar plan atau yang setup fiturnya belum selesai | Pengguna | N1, N2, Y1 |
-| Panel admin | Plan dan durasi saat membuat akun dan memperpanjang langganan | Akun admin | N1 tersedia (B213); dikerjakan berikutnya |
+| Panel admin | Plan dan durasi saat membuat akun dan memperpanjang langganan Sejak `468a3bd` juga Ubah Plan, serta plan di daftar, detail, dan riwayat. | Akun admin | Tersambung (`475bf0b`, `468a3bd`) |
 
 ## Fakta backend
 
@@ -340,4 +340,5 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
   Daftar, verifikasi email, dan lupa password tersambung di `67ec690`,
   dan Langganan di `c868870`; wizard masih pratinjau.
 - Panel admin belum mengenal plan (B213), dan riwayat langganannya
-  menampilkan aksi `ubah-plan` tanpa label (`inti/status.md`).
+  menampilkan aksi `ubah-plan` tanpa label (`inti/status.md`). Selesai di
+  `475bf0b` dan `468a3bd`.

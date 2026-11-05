@@ -28,13 +28,14 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | POST | `/akun/auth/logout` | public | - | - | - | `features/auth/api.ts` |
 | GET | `/akun/admin/all` | authAkun+adminOnly | - | `{ data, message, pagination }` | `id` | `features/admin-akun/api.ts` (query `cari`, `status`, `page`, `limit`, B177; `pagination` hanya bila `page` atau `limit` dikirim) |
 | GET | `/akun/admin/users/:id` | authAkun+adminOnly | - | `{ data, message }` | `id` | `features/admin-akun/api.ts` (sebentuk item daftar, B176; id rusak 400, tidak ada 404) |
-| POST | `/akun/admin/users` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` |
+| POST | `/akun/admin/users` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` (`plan` opsional, bawaan Basic; Advanced dan Pro wajib `durasiBulan`; durasi 1, 3, 6, 12, 24; B213) |
 | PUT | `/akun/admin/users/:id` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` |
 | DELETE | `/akun/admin/users/:id` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` (password admin di body) |
 | POST | `/akun/admin/users/:id/freeze` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` |
 | POST | `/akun/admin/users/:id/unfreeze` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` |
-| POST | `/akun/admin/users/:id/langganan` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` |
-| GET | `/akun/admin/users/:id/langganan` | authAkun+adminOnly | - | `{ cursorBerikutnya, data, message, total }` | `id` (B155) | `features/admin-akun/api.ts` (query `cursor`; dibaca lewat `apiMentah.get`; item memuat `oleh` atau null) |
+| POST | `/akun/admin/users/:id/langganan` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` (`plan` opsional untuk ganti plan sekaligus, B213) |
+| PUT | `/akun/admin/users/:id/plan` | authAkun+adminOnly | - | `{ data, message }` | `id` | `features/admin-akun/api.ts` (`{ plan, alasan? }`; masa akses tetap; plan yang sama 409; B213) |
+| GET | `/akun/admin/users/:id/langganan` | authAkun+adminOnly | - | `{ cursorBerikutnya, data, message, total }` | `id` (B155) | `features/admin-akun/api.ts` (query `cursor`; dibaca lewat `apiMentah.get`; item memuat `oleh` atau null, serta `planSebelum` dan `planSesudah` sejak B213) |
 
 #### `/akunkas`
 
