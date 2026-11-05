@@ -201,7 +201,7 @@ export async function bukaDaftarAkun<T = AkunUji>(page: Page): Promise<T[]> {
 /** Dari halaman daftar: cari lewat email, lalu buka detailnya. */
 export async function bukaDetailAkun(page: Page, akun: Pick<AkunUji, "id" | "email">) {
   await page.getByLabel("Cari akun").fill(akun.email);
-  await page.getByRole("link", { name: akun.email }).click();
+  await page.getByRole("link", { name: akun.email, exact: true }).click();
   await page.waitForURL("**/admin/akun/" + akun.id);
   await expect(page.getByRole("heading", { name: "Detail Akun" })).toBeVisible();
 }
@@ -254,7 +254,7 @@ export async function hapusAkunDariDetail(page: Page, email: string, admin: Kred
   expect((await tungguHapus).status(), "hapus akun uji lewat UI").toBe(200);
   await page.waitForURL("**/admin");
   await page.getByLabel("Cari akun").fill(email);
-  await expect(page.getByRole("link", { name: email })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: email, exact: true })).toHaveCount(0);
 }
 
 /**

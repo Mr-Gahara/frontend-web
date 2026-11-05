@@ -44,7 +44,7 @@ const bukaDaftar = (page: Page) => bukaDaftarAkun<AkunRespons>(page);
 
 async function bukaDetail(page: Page, akun: { id: string; email: string }) {
   await page.getByLabel("Cari akun").fill(akun.email);
-  await page.getByRole("link", { name: akun.email }).click();
+  await page.getByRole("link", { name: akun.email, exact: true }).click();
   await page.waitForURL("**/admin/akun/" + akun.id);
   await expect(page.getByRole("heading", { name: "Detail Akun" })).toBeVisible();
 }
@@ -228,7 +228,7 @@ test.describe("Langganan akun klien", () => {
         await page.getByLabel("Cari akun").fill(email);
         const baris = page.getByRole("row").filter({ hasText: email });
         await expect(baris.getByRole("cell", { name: "Pro", exact: true })).toBeVisible({ timeout: 15_000 });
-        await page.getByRole("link", { name: email }).click();
+        await page.getByRole("link", { name: email, exact: true }).click();
         await page.waitForURL("**/admin/akun/" + uji.id);
         await expect(butirPlan).toContainText("Pro");
         const pertama = riwayat(page).getByRole("listitem").first();
