@@ -55,6 +55,9 @@ Selesai 5 November 2026:
 4. Pelanggan bawaan (B218): Hapus disembunyikan, dialog ubah hanya
    memuat nama, dan sel nama bertanda "Bawaan", karena tenant uji punya
    pelanggan lama biasa yang juga bernama "Customer" (`77d4380`).
+5. Jenis mutasi `SELISIH_KAS_MASUK` dan `SELISIH_KAS_KELUAR` (B228) di
+   buku mutasi dan filter jenis (`d696354`). Rujukan sesi kasir belum
+   ditautkan sampai halaman sesi kasir ada (butir 6).
 
 Urutan berikutnya, semuanya sudah disetujui pemilik proyek pada 4
 November 2026:
@@ -72,7 +75,8 @@ November 2026:
    **Pelanggan bawaan (B218)**: pelanggan `isBawaan` tidak dapat
    dihapus (409) dan hanya namanya yang boleh diubah; sembunyikan hapus
    dan field selain nama.
-3. **Dua jenis mutasi baru (B228)**: `SELISIH_KAS_MASUK` dan
+3. Selesai di `d696354` (di atas).
+   **Dua jenis mutasi baru (B228)**: `SELISIH_KAS_MASUK` dan
    `SELISIH_KAS_KELUAR` di `ARAH_JENIS` dan label
    `features/akun-kas/mutasi.ts`, dengan rujukan `SesiKasir`.
 4. **Wizard setup tersambung** (B220, B219, B223): status dari `GET

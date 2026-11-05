@@ -44,7 +44,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | GET | `/akunkas` | authPengguna | `read-akunkas` | `{ data }` | `id` | `features/akun-kas/api.ts` |
 | POST | `/akunkas` | authPengguna | `create-akunkas` | - | - | `features/akun-kas/api.ts` |
 | PUT | `/akunkas/:id` | authPengguna | `update-akunkas` | `{ data }` | `id` | `features/akun-kas/api.ts` (ubah isian, nonaktifkan, dan aktifkan kembali; tulisan dibatasi 30 per menit per pengguna) |
-| GET | `/akunkas/mutasi` | authPengguna | `read-akunkas` | `{ data, pagination }` | `id` | `features/akun-kas/api.ts` (query `page`, `limit`, `dari`, `sampai`, `akunKasID`, `arah`, dan `jenis`) |
+| GET | `/akunkas/mutasi` | authPengguna | `read-akunkas` | `{ data, pagination }` | `id` | `features/akun-kas/api.ts` (query `page`, `limit`, `dari`, `sampai`, `akunKasID`, `arah`, dan `jenis`; jenis `SELISIH_KAS_MASUK` dan `SELISIH_KAS_KELUAR` dari sesi kasir sejak B228) |
 | GET | `/akunkas/:id/ringkasan` | authPengguna | `read-akunkas` | `{ data }` | - | `features/akun-kas/api.ts` (query `dari` dan `sampai`) |
 | GET | `/akunkas/ringkasan` | authPengguna | `read-akunkas` | `{ data }` | - | `features/akun-kas/api.ts` (query `dari` dan `sampai`; gabungan seluruh akun kas, sejak `d23844a`) |
 

@@ -490,7 +490,9 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
 - Label jenis mutasi saldo awal dan beban belum pernah tampil dengan data
   nyata. Tampilan mutasi transfer dan pembatalan transfer masuk teruji
   e2e sejak `f7805ca`; pembatalan transfer keluar hanya teruji di unit
-  test.
+  test. Selisih kas lebih dan kurang (B228, `d696354`) juga belum pernah
+  tampil dengan data nyata, karena sesi kasir dibuka dari aplikasi; filter
+  kedua jenis teruji e2e terhadap server.
 - Tab Keuangan tampil bagi pengguna tanpa izin halamannya dan baru
   ditolak saat dibuka (`kontrak/temuan.md` butir 163). Selesai di
   `e051906`.

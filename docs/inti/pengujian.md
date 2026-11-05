@@ -12,6 +12,12 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per jenis mutasi selisih kas** (commit `d696354`, 5 November
+2026): 900 test unit dan integrasi lolos. Suite e2e penuh tidak
+dijalankan; spec terdampak `tests/e2e/keuangan` 35 lolos, termasuk
+skenario baru filter selisih kas. Harapan suite penuh 552: 551 ditambah
+skenario itu; angka itu hitungan.
+
 **Baseline per pelanggan bawaan** (commit `77d4380`, 5 November 2026):
 900 test unit dan integrasi lolos. Suite e2e penuh tidak dijalankan; spec
 terdampak `tests/e2e/pelanggan` 14 lolos, termasuk skenario baru
