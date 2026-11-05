@@ -12,7 +12,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { skemaLokasi, type NilaiFormLokasi } from "@/features/inventaris/schema-lokasi";
-import { JudulLangkah, KotakPeringatan, NavigasiLangkah, PesanIsian } from "./bagian";
+import { JudulLangkah, KotakPeringatan, NavigasiLangkah, PesanGalat, PesanIsian } from "./bagian";
+import { useKirim } from "./kirim";
 import { KELAS_AREA, KELAS_BANTU, KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS } from "./gaya";
 import type { PropsLangkah } from "./langkah";
 
@@ -54,8 +55,10 @@ export function LangkahLokasi({
   awal,
   onLanjut,
   onKembali,
+  onLewati,
 }: PropsLangkah<NilaiFormLokasi> & { jenis: "outlet" | "gudang" }) {
   const teks = TEKS[jenis];
+  const { kirim, sibuk, galat } = useKirim(onLanjut, `Gagal menyimpan ${teks.tempat}.`);
   const [deteksi, setDeteksi] = useState<StatusDeteksi>("diam");
   const [konfirmasi, setKonfirmasi] = useState<NilaiFormLokasi | null>(null);
   const {
@@ -203,7 +206,8 @@ export function LangkahLokasi({
         </section>
 
         {teks.catatanAkhir && <p className="text-sm leading-normal text-muted-foreground">{teks.catatanAkhir}</p>}
-        <NavigasiLangkah onKembali={onKembali} teksLanjut={teksLanjut} />
+        <PesanGalat pesan={galat} />
+        <NavigasiLangkah onKembali={onKembali} onLewati={onLewati} teksLanjut={teksLanjut} sibuk={sibuk} />
       </form>
 
       <AlertDialog
@@ -233,7 +237,7 @@ export function LangkahLokasi({
               onClick={() => {
                 const nilai = konfirmasi;
                 setKonfirmasi(null);
-                if (nilai) onLanjut(nilai);
+                if (nilai) void kirim(nilai);
               }}
             >
               Ya, saya di {teks.tempat}

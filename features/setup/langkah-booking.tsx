@@ -2,7 +2,8 @@
 
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { JudulLangkah, NavigasiLangkah, PesanIsian, PilihanTombol } from "./bagian";
+import { JudulLangkah, NavigasiLangkah, PesanGalat, PesanIsian, PilihanTombol } from "./bagian";
+import { useKirim } from "./kirim";
 import { KELAS_ISIAN, KELAS_LABEL } from "./gaya";
 import type { PropsLangkah } from "./langkah";
 import { skemaBookingSetup, type NilaiBookingSetup } from "./schema";
@@ -28,7 +29,9 @@ export function LangkahBooking({
   awal,
   onLanjut,
   onKembali,
-}: PropsLangkah<NilaiBookingSetup | null>) {
+  onLewati,
+}: Omit<PropsLangkah<NilaiBookingSetup>, "awal"> & { awal?: NilaiBookingSetup | null }) {
+  const { kirim, sibuk, galat } = useKirim(onLanjut, "Gagal menyimpan sesi booking.");
   const {
     register,
     handleSubmit,
@@ -62,7 +65,7 @@ export function LangkahBooking({
   );
 
   return (
-    <form onSubmit={handleSubmit(onLanjut)} noValidate className="flex flex-col gap-[22px]">
+    <form onSubmit={handleSubmit(kirim)} noValidate className="flex flex-col gap-[22px]">
       <JudulLangkah
         nomor={nomor}
         total={total}
@@ -96,7 +99,8 @@ export function LangkahBooking({
           {isian("durasiMinimum", "Durasi minimum", { inputMode: "numeric", className: "flex-[1_1_160px]" })}
         </div>
       </section>
-      <NavigasiLangkah onKembali={onKembali} teksLanjut={teksLanjut} />
+      <PesanGalat pesan={galat} />
+      <NavigasiLangkah onKembali={onKembali} onLewati={onLewati} teksLanjut={teksLanjut} sibuk={sibuk} />
     </form>
   );
 }

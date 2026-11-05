@@ -291,12 +291,20 @@ export function idAkunLewatEmail(email: string, admin: KredensialAdmin): Promise
   });
 }
 
-/** Membuat akun klien uji terverifikasi lewat API admin (AK2a), berpassword PASSWORD_AKUN_UJI. */
-export function buatAkunKlienUji(email: string, admin: KredensialAdmin): Promise<string> {
+/**
+ * Membuat akun klien uji terverifikasi lewat API admin (AK2a), berpassword
+ * PASSWORD_AKUN_UJI. Tanpa plan berarti Basic bermasa percobaan; Advanced
+ * dan Pro wajib durasi (B213).
+ */
+export function buatAkunKlienUji(
+  email: string,
+  admin: KredensialAdmin,
+  langganan: { plan?: "basic" | "advanced" | "pro"; durasiBulan?: number } = {},
+): Promise<string> {
   return denganAdmin(admin, async (ctx, kepala) => {
     const buat = await ctx.post("/api/akun/admin/users", {
       headers: kepala,
-      data: { email, password: PASSWORD_AKUN_UJI },
+      data: { email, password: PASSWORD_AKUN_UJI, ...langganan },
     });
     expect(buat.status(), "buat akun klien uji").toBe(201);
     return ((await buat.json()) as { data: AkunUji }).data.id;

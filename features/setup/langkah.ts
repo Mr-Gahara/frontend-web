@@ -1,18 +1,11 @@
+import type { KunciPlan } from "@/types/langganan";
+
 /**
  * Daftar langkah wizard setup per plan (modul/setup-akun.md, Kriteria setup
  * dan PL1a sampai PL6a). Basic memuat setup inti; Advanced menambah sesi
- * booking; Pro menambah sesi booking lalu gudang. Selama status setup dari
- * backend (Y1) belum ada, plan untuk pratinjau dibaca dari ?plan=.
+ * booking; Pro menambah sesi booking lalu gudang. Plan dibaca dari status
+ * setup (features/setup/status.ts).
  */
-export const PLAN_SETUP = ["basic", "advanced", "pro"] as const;
-export type PlanSetup = (typeof PLAN_SETUP)[number];
-
-export const NAMA_PLAN: Record<PlanSetup, string> = {
-  basic: "Basic",
-  advanced: "Advanced",
-  pro: "Pro",
-};
-
 export type KunciLangkah =
   | "toko"
   | "owner"
@@ -42,15 +35,10 @@ const LANGKAH_INTI: readonly LangkahSetup[] = [
 const LANGKAH_BOOKING: LangkahSetup = { kunci: "booking", judul: "Sesi booking" };
 const LANGKAH_GUDANG: LangkahSetup = { kunci: "gudang", judul: "Gudang" };
 
-export function daftarLangkah(plan: PlanSetup): readonly LangkahSetup[] {
+export function daftarLangkah(plan: KunciPlan): readonly LangkahSetup[] {
   if (plan === "pro") return [...LANGKAH_INTI, LANGKAH_BOOKING, LANGKAH_GUDANG];
   if (plan === "advanced") return [...LANGKAH_INTI, LANGKAH_BOOKING];
   return LANGKAH_INTI;
-}
-
-/** Nilai plan yang tidak dikenal, kosong, atau tidak ada dianggap Basic. */
-export function bacaPlan(nilai: string | null | undefined): PlanSetup {
-  return (PLAN_SETUP as readonly string[]).includes(nilai ?? "") ? (nilai as PlanSetup) : "basic";
 }
 
 /** Properti bersama setiap komponen langkah. */
@@ -59,6 +47,31 @@ export interface PropsLangkah<T> {
   total: number;
   teksLanjut: string;
   awal: T;
-  onLanjut: (nilai: T) => void;
+  /** Boleh mengembalikan Promise penyimpanan; penolakannya tampil di langkah (useKirim). */
+  onLanjut: (nilai: T) => unknown;
+  onKembali?: () => void;
+  /** Hanya untuk setup fitur yang boleh dilengkapi nanti (sesi booking dan gudang). */
+  onLewati?: () => void;
+}
+/** Butir daftar tersimpan di server (kategori, bahan baku, produk). */
+export interface ButirDaftar {
+  id: string;
+  label: string;
+  keterangan?: string;
+}
+
+/**
+ * Langkah berisi daftar: setiap butir langsung disimpan dan dihapus di
+ * server (keputusan pemilik proyek, 5 November 2026), dan daftar yang
+ * tampil selalu dari server.
+ */
+export interface PropsDaftar<N> {
+  nomor: number;
+  total: number;
+  teksLanjut: string;
+  butir: ButirDaftar[];
+  onTambah: (nilai: N) => unknown;
+  onHapus: (id: string) => unknown;
+  onLanjut: () => void;
   onKembali?: () => void;
 }

@@ -1,7 +1,5 @@
 import * as z from "zod";
 import { SATUAN_RESEP } from "@/features/produk/schema";
-import type { NilaiFormLokasi } from "@/features/inventaris/schema-lokasi";
-import type { NilaiPajak } from "@/features/pajak/schema";
 import { SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
 
 /**
@@ -22,6 +20,13 @@ export function masalahAngka(teks: string, label: string, min = 0): string | nul
   return null;
 }
 
+/** Seperti masalahAngka, tetapi nilainya harus lebih dari 0 (stok produk setup, B238). */
+export function masalahAngkaPositif(teks: string, label: string): string | null {
+  const pesan = masalahAngka(teks, label);
+  if (pesan) return pesan;
+  return Number(teks.trim()) > 0 ? null : `${label} harus lebih dari 0.`;
+}
+
 const teksAngka = (label: string, min = 0) =>
   z.string().superRefine((t, ctx) => {
     const pesan = masalahAngka(t, label, min);
@@ -36,7 +41,13 @@ export type NilaiNamaToko = z.infer<typeof skemaNamaToko>;
 
 export const skemaOwner = z
   .object({
-    nama: z.string().trim().min(1, "Nama Owner wajib diisi."),
+    // Sama dengan validateRegisterOwnerPayload backend: 3 sampai 50 karakter.
+    nama: z
+      .string()
+      .trim()
+      .min(1, "Nama Owner wajib diisi.")
+      .min(3, "Nama Owner minimal 3 karakter.")
+      .max(50, "Nama Owner maksimal 50 karakter."),
     pin: z.string().regex(/^\d{6}$/, "PIN harus 6 digit angka."),
     ulangiPin: z.string().min(1, "Ulangi PIN wajib diisi."),
   })
@@ -57,8 +68,9 @@ export const skemaBahanSetup = z.object({
 export type NilaiBahanSetup = z.infer<typeof skemaBahanSetup>;
 
 /**
- * Produk setup. Stok dan resep hanya diperiksa bila dipakai. Stok minimal
- * produk belum ada di backend (Y4); isiannya tetap ditanyakan sesuai desain.
+ * Produk setup. Stok dan resep hanya diperiksa bila dipakai. Produk berstok
+ * wajib punya stok awal dan stok minimal di atas 0 agar langkah produk
+ * selesai (B238); resep membuat stok dihitung dari bahan baku.
  */
 export const skemaProdukSetup = z
   .object({
@@ -73,12 +85,12 @@ export const skemaProdukSetup = z
     resep: z.array(z.object({ bahan: z.string(), jumlah: z.string(), satuan: z.enum(SATUAN_RESEP) })),
   })
   .superRefine((n, ctx) => {
-    if (n.pakaiStok) {
+    if (n.pakaiStok && !n.pakaiResep) {
       for (const [field, label] of [
         ["stok", "Stok awal"],
         ["stokMinimal", "Stok minimal"],
       ] as const) {
-        const pesan = masalahAngka(n[field], label);
+        const pesan = masalahAngkaPositif(n[field], label);
         if (pesan) ctx.addIssue({ code: "custom", path: [field], message: pesan });
       }
     }
@@ -110,35 +122,3 @@ export const skemaBookingSetup = z.object({
   durasiMinimum: teksAngka("Durasi minimum", 1),
 });
 export type NilaiBookingSetup = z.infer<typeof skemaBookingSetup>;
-
-export interface KategoriSetup {
-  id: string;
-  namaKategori: string;
-  kodeKategori: string;
-}
-
-export interface BahanSetup {
-  id: string;
-  namaBahan: string;
-  satuan: string;
-}
-
-export interface ProdukSetup {
-  id: string;
-  nama: string;
-  ringkasan: string;
-}
-
-/** Isian seluruh wizard, disimpan di state halaman selama pratinjau. */
-export interface DataSetup {
-  toko: NilaiNamaToko;
-  owner: NilaiOwner;
-  lokasi: NilaiFormLokasi;
-  kategori: KategoriSetup[];
-  adaResep: boolean;
-  bahan: BahanSetup[];
-  produk: ProdukSetup[];
-  pajak: NilaiPajak | null;
-  booking: NilaiBookingSetup | null;
-  gudang: NilaiFormLokasi;
-}

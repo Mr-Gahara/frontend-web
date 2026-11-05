@@ -4,7 +4,8 @@ import type { ChangeEvent } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { hanyaAngka } from "@/features/pengguna/schema-profil";
-import { JudulLangkah, KotakInfo, NavigasiLangkah, PesanIsian } from "./bagian";
+import { JudulLangkah, KotakInfo, NavigasiLangkah, PesanGalat, PesanIsian } from "./bagian";
+import { useKirim } from "./kirim";
 import { KELAS_BANTU, KELAS_ISIAN, KELAS_LABEL } from "./gaya";
 import type { PropsLangkah } from "./langkah";
 import { skemaNamaToko, skemaOwner, type NilaiNamaToko, type NilaiOwner } from "./schema";
@@ -15,9 +16,10 @@ export function LangkahNamaToko({ nomor, total, teksLanjut, awal, onLanjut }: Pr
     handleSubmit,
     formState: { errors },
   } = useForm<NilaiNamaToko>({ resolver: zodResolver(skemaNamaToko), defaultValues: awal });
+  const { kirim, sibuk, galat } = useKirim(onLanjut, "Gagal menyimpan nama toko.");
 
   return (
-    <form onSubmit={handleSubmit(onLanjut)} noValidate className="flex flex-col gap-6">
+    <form onSubmit={handleSubmit(kirim)} noValidate className="flex flex-col gap-6">
       <JudulLangkah
         nomor={nomor}
         total={total}
@@ -40,7 +42,8 @@ export function LangkahNamaToko({ nomor, total, teksLanjut, awal, onLanjut }: Pr
         </p>
         <PesanIsian pesan={errors.namaToko?.message} />
       </div>
-      <NavigasiLangkah teksLanjut={teksLanjut} />
+      <PesanGalat pesan={galat} />
+      <NavigasiLangkah teksLanjut={teksLanjut} sibuk={sibuk} />
     </form>
   );
 }
@@ -51,6 +54,7 @@ export function LangkahOwner({ nomor, total, teksLanjut, awal, onLanjut, onKemba
     handleSubmit,
     formState: { errors },
   } = useForm<NilaiOwner>({ resolver: zodResolver(skemaOwner), defaultValues: awal });
+  const { kirim, sibuk, galat } = useKirim(onLanjut, "Gagal mendaftarkan Owner.");
   const isianPin = register("pin");
   const isianUlang = register("ulangiPin");
   const angkaSaja = (e: ChangeEvent<HTMLInputElement>) => {
@@ -58,7 +62,7 @@ export function LangkahOwner({ nomor, total, teksLanjut, awal, onLanjut, onKemba
   };
 
   return (
-    <form onSubmit={handleSubmit(onLanjut)} noValidate className="flex flex-col gap-6">
+    <form onSubmit={handleSubmit(kirim)} noValidate className="flex flex-col gap-6">
       <JudulLangkah
         nomor={nomor}
         total={total}
@@ -125,7 +129,8 @@ export function LangkahOwner({ nomor, total, teksLanjut, awal, onLanjut, onKemba
         Akses Owner selalu web dan aplikasi. Sesudah disimpan, Anda langsung masuk sebagai Owner untuk
         melanjutkan langkah berikutnya.
       </KotakInfo>
-      <NavigasiLangkah onKembali={onKembali} teksLanjut={teksLanjut} />
+      <PesanGalat pesan={galat} />
+      <NavigasiLangkah onKembali={onKembali} teksLanjut={teksLanjut} sibuk={sibuk} />
     </form>
   );
 }

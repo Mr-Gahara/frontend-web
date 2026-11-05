@@ -12,6 +12,8 @@
 export const EP = {
   akun: {
     login: "/akun/auth/login",
+    /** GET bertoken akun: sebentuk data login akun, termasuk daftarTenant (B240). */
+    me: "/akun/me",
     register: "/akun/auth/register",
     verifikasiEmail: "/akun/auth/verifikasi-email",
     kirimVerifikasiEmail: "/akun/auth/verifikasi-email/kirim",

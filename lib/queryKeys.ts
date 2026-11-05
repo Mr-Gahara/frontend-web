@@ -53,6 +53,7 @@ export const queryKeys = {
   setup: {
     semua: kunci(["setup"] as const),
     status: () => ["setup", "status"] as const,
+    akun: () => ["setup", "akun"] as const,
   },
   langganan: {
     semua: kunci(["langganan"] as const),

@@ -5,7 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { skemaPajak, type NilaiPajak } from "@/features/pajak/schema";
 import { LABEL_MODEL } from "@/features/pajak/tampilan";
 import type { ModelPerhitungan } from "@/types/pajak";
-import { JudulLangkah, NavigasiLangkah, PesanIsian, PilihanTombol } from "./bagian";
+import { JudulLangkah, NavigasiLangkah, PesanGalat, PesanIsian, PilihanTombol } from "./bagian";
+import { useKirim } from "./kirim";
 import { KELAS_ISIAN, KELAS_LABEL } from "./gaya";
 import type { PropsLangkah } from "./langkah";
 
@@ -37,7 +38,8 @@ export function LangkahPajak({
   awal,
   onLanjut,
   onKembali,
-}: PropsLangkah<NilaiPajak | null>) {
+}: Omit<PropsLangkah<NilaiPajak>, "awal"> & { awal?: NilaiPajak | null }) {
+  const { kirim, sibuk, galat } = useKirim(onLanjut, "Gagal menyimpan pajak.");
   const {
     register,
     handleSubmit,
@@ -49,7 +51,7 @@ export function LangkahPajak({
   const model = useWatch({ control, name: "modelPerhitungan" });
 
   return (
-    <form onSubmit={handleSubmit(onLanjut)} noValidate className="flex flex-col gap-[22px]">
+    <form onSubmit={handleSubmit(kirim)} noValidate className="flex flex-col gap-[22px]">
       <JudulLangkah
         nomor={nomor}
         total={total}
@@ -107,7 +109,8 @@ export function LangkahPajak({
       <p className="text-sm leading-normal text-muted-foreground">
         Hanya satu pajak seluruh transaksi yang bisa aktif. Pajak lain bisa ditambahkan nanti dari Pengaturan.
       </p>
-      <NavigasiLangkah onKembali={onKembali} teksLanjut={teksLanjut} />
+      <PesanGalat pesan={galat} />
+      <NavigasiLangkah onKembali={onKembali} teksLanjut={teksLanjut} sibuk={sibuk} />
     </form>
   );
 }

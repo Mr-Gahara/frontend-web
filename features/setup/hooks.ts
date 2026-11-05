@@ -26,11 +26,27 @@ function useMutasiSetup<H, V>(jalankan: (v: V) => Promise<H>, simpanSesi: (h: H)
     mutationFn: jalankan,
     onSuccess: async (...args) => {
       simpanSesi(args[0]);
-      await queryClient.invalidateQueries({ queryKey: queryKeys.setup.status() });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.setup.semua });
       opsi.onSuccess?.(...args);
     },
     onError: opsi.onError,
   });
+}
+
+/** Nama toko akun dari GET /akun/me (B240), untuk kerangka dan ringkasan setelah dimuat ulang. */
+export function useNamaToko(aktif: boolean) {
+  return useQuery({
+    queryKey: queryKeys.setup.akun(),
+    queryFn: setupApi.akunSaya,
+    enabled: aktif,
+    select: (akun) => akun.daftarTenant?.[0]?.namaToko ?? "",
+  });
+}
+
+/** Status setup dimuat ulang setelah sebuah langkah tersimpan, agar daftar periksa ikut berubah. */
+export function useSegarkanSetup() {
+  const queryClient = useQueryClient();
+  return () => queryClient.invalidateQueries({ queryKey: queryKeys.setup.semua });
 }
 
 /** Buat toko lalu pakai token akun barunya, yang membawa tenantID untuk daftar Owner. */

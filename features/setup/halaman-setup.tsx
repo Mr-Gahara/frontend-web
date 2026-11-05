@@ -1,105 +1,186 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { useSearchParams } from "next/navigation";
-import { NILAI_AWAL_LOKASI } from "@/features/inventaris/schema-lokasi";
+import { useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { pesanError } from "@/lib/api/error";
+import { tujuanGuardSetup } from "@/lib/auth/tujuan";
+import { useSession } from "@/lib/auth/useSession";
 import { KerangkaSetup } from "./kerangka-setup";
+import { useBuatToko, useDaftarOwner, useNamaToko, useStatusSetup } from "./hooks";
 import { LangkahNamaToko, LangkahOwner } from "./langkah-akun";
-import { LangkahLokasi } from "./langkah-lokasi";
-import { LangkahBahanBaku, LangkahKategori, LangkahProduk } from "./langkah-menu";
-import { LangkahBooking } from "./langkah-booking";
-import { LangkahPajak } from "./langkah-pajak";
-import { LangkahSelesai } from "./langkah-selesai";
-import { bacaPlan, daftarLangkah } from "./langkah";
-import type { DataSetup } from "./schema";
-
-const DATA_AWAL: DataSetup = {
-  toko: { namaToko: "" },
-  owner: { nama: "", pin: "", ulangiPin: "" },
-  lokasi: NILAI_AWAL_LOKASI,
-  kategori: [],
-  adaResep: true,
-  bahan: [],
-  produk: [],
-  pajak: null,
-  booking: null,
-  gudang: NILAI_AWAL_LOKASI,
-};
+import {
+  LangkahBahanTersambung,
+  LangkahBookingTersambung,
+  LangkahKategoriTersambung,
+  LangkahLokasiTersambung,
+  LangkahPajakTersambung,
+  LangkahProdukTersambung,
+  SelesaiTersambung,
+} from "./langkah-tersambung";
+import { LangkahTersimpan } from "./langkah-tersimpan";
+import {
+  indeksAwal,
+  langkahDariStatus,
+  ownerTerdaftar,
+  planSetup,
+  selesaiPerLangkah,
+  setupTuntas,
+  type StatusSetup,
+} from "./status";
 
 /**
- * Wizard setup toko (modul/setup-akun.md, desain F). Pratinjau tampilan:
- * isian disimpan di state halaman, belum ke backend. Penyimpanan, status
- * setup (Y1), dan plan dari backend (N1) disambungkan kemudian; selama itu
- * plan dibaca dari ?plan= dan rute ini belum ditautkan dari halaman lain.
+ * Wizard setup toko (modul/setup-akun.md, desain F, B219 sampai B223).
+ * Status dan plan dibaca dari GET /api/setup/status; wizard dibuka di
+ * langkah pertama yang belum selesai, dan setiap langkah langsung tersimpan
+ * di server (keputusan pemilik proyek, 5 November 2026).
  */
 export function HalamanSetup() {
-  const plan = bacaPlan(useSearchParams().get("plan"));
-  const langkah = daftarLangkah(plan);
-  const [indeks, setIndeks] = useState(0);
-  const [data, setData] = useState<DataSetup>(DATA_AWAL);
+  const router = useRouter();
+  const sesi = useSession();
+  const aktif = sesi.status !== "memuat" && sesi.adaTokenAkun && !sesi.adalahAdmin;
+  const status = useStatusSetup(aktif);
+  // Setelah bertindak di wizard, setup yang menjadi tuntas tidak lagi
+  // mengalihkan ke dashboard, agar layar selesai tetap tampil.
+  const [bertindak, setBertindak] = useState(false);
+  const data = status.data;
+  const tujuan = tujuanGuardSetup(
+    { status: sesi.status, adaTokenAkun: sesi.adaTokenAkun, adalahAdmin: sesi.adalahAdmin },
+    data ? { tuntas: !bertindak && setupTuntas(data), ownerTerdaftar: ownerTerdaftar(data) } : null,
+  );
 
-  const maju = (ubah: Partial<DataSetup>) => {
-    setData((d) => ({ ...d, ...ubah }));
-    setIndeks((i) => i + 1);
+  useEffect(() => {
+    if (tujuan) router.replace(tujuan);
+  }, [tujuan, router]);
+
+  if (status.isError) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-permukaan p-6 text-navy">
+        <p role="alert" className="text-sm font-medium text-destructive">
+          {pesanError(status.error, "Gagal memuat status setup toko.")}
+        </p>
+        <button type="button" onClick={() => status.refetch()} className="text-sm font-semibold underline">
+          Coba lagi
+        </button>
+      </div>
+    );
+  }
+  if (!data || tujuan) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-permukaan text-sm text-muted-foreground">
+        Memuat setup toko...
+      </div>
+    );
+  }
+  return <WizardSetup status={data} onBertindak={() => setBertindak(true)} />;
+}
+
+const PESAN_FITUR = { booking: "sesi booking", gudang: "gudang" } as const;
+
+/**
+ * Isi wizard. Dipasang setelah status pertama termuat, sehingga langkah
+ * awal dihitung sekali; penyegaran status sesudahnya hanya mengubah daftar
+ * periksa, tidak memindahkan langkah.
+ */
+function WizardSetup({ status, onBertindak }: { status: StatusSetup; onBertindak: () => void }) {
+  const plan = planSetup(status);
+  const langkah = langkahDariStatus(status);
+  const selesai = selesaiPerLangkah(status);
+  const [indeks, setIndeks] = useState(() => indeksAwal(status));
+  const [adaResep, setAdaResep] = useState<boolean | null>(null);
+  const [dilewati, setDilewati] = useState<string[]>([]);
+  const namaToko = useNamaToko(status.adaToko);
+  const buatToko = useBuatToko();
+  const daftarOwner = useDaftarOwner();
+
+  const pindah = (ke: number) => {
+    setIndeks(ke);
     window.scrollTo({ top: 0 });
+  };
+  const maju = () => {
+    onBertindak();
+    pindah(indeks + 1);
+  };
+  const lewati = (fitur: keyof typeof PESAN_FITUR) => {
+    setDilewati((d) => (d.includes(PESAN_FITUR[fitur]) ? d : [...d, PESAN_FITUR[fitur]]));
+    maju();
   };
   const umum = {
     nomor: indeks + 1,
     total: langkah.length,
     teksLanjut: indeks === langkah.length - 1 ? "Simpan dan selesaikan" : "Simpan dan lanjut",
-    onKembali: indeks > 0 ? () => setIndeks((i) => i - 1) : undefined,
+    onKembali: indeks > 0 ? () => pindah(indeks - 1) : undefined,
+    onLanjut: maju,
   };
+  const kunci = langkah[indeks]?.kunci;
+  const teksLanjutTersimpan = indeks === langkah.length - 1 ? "Selesaikan" : "Lanjut";
 
   let isi: ReactNode;
-  switch (langkah[indeks]?.kunci) {
+  switch (kunci) {
     case "toko":
-      isi = <LangkahNamaToko {...umum} awal={data.toko} onLanjut={(toko) => maju({ toko })} />;
+      isi = selesai.toko ? (
+        <LangkahTersimpan
+          {...umum}
+          teksLanjut={teksLanjutTersimpan}
+          judul="Nama toko"
+          baris={[{ label: "Nama toko", nilai: namaToko.data || "-" }]}
+          catatan="Nama toko dapat diubah nanti dari Profil Toko."
+        />
+      ) : (
+        <LangkahNamaToko
+          {...umum}
+          awal={{ namaToko: "" }}
+          onLanjut={async ({ namaToko: nama }) => {
+            await buatToko.mutateAsync(nama.trim());
+            maju();
+          }}
+        />
+      );
       break;
     case "owner":
-      isi = <LangkahOwner {...umum} awal={data.owner} onLanjut={(owner) => maju({ owner })} />;
+      isi = selesai.owner ? (
+        <LangkahTersimpan
+          {...umum}
+          teksLanjut={teksLanjutTersimpan}
+          judul="Owner toko"
+          baris={[{ label: "Owner", nilai: "Sudah terdaftar, masuk dengan nama dan PIN" }]}
+          catatan="Nama dan PIN Owner dapat diubah nanti dari menu Pengguna."
+        />
+      ) : (
+        <LangkahOwner
+          {...umum}
+          awal={{ nama: "", pin: "", ulangiPin: "" }}
+          onLanjut={async ({ nama, pin }) => {
+            await daftarOwner.mutateAsync({ nama: nama.trim(), pin });
+            maju();
+          }}
+        />
+      );
       break;
     case "lokasi":
-      isi = (
-        <LangkahLokasi key="outlet" jenis="outlet" {...umum} awal={data.lokasi} onLanjut={(lokasi) => maju({ lokasi })} />
-      );
+      isi = <LangkahLokasiTersambung key="outlet" jenis="outlet" {...umum} />;
       break;
     case "kategori":
-      isi = <LangkahKategori {...umum} awal={data.kategori} onLanjut={(kategori) => maju({ kategori })} />;
+      isi = <LangkahKategoriTersambung {...umum} />;
       break;
     case "bahanBaku":
-      isi = (
-        <LangkahBahanBaku
-          {...umum}
-          awal={{ adaResep: data.adaResep, bahan: data.bahan }}
-          onLanjut={(nilai) => maju(nilai)}
-        />
-      );
+      isi = <LangkahBahanTersambung {...umum} adaResep={adaResep} onPilihResep={setAdaResep} />;
       break;
     case "produk":
-      isi = (
-        <LangkahProduk
-          {...umum}
-          awal={data.produk}
-          kategori={data.kategori}
-          bahan={data.bahan}
-          adaResep={data.adaResep}
-          onLanjut={(produk) => maju({ produk })}
-        />
-      );
+      isi = <LangkahProdukTersambung {...umum} adaResep={adaResep} />;
       break;
     case "pajak":
-      isi = <LangkahPajak {...umum} awal={data.pajak} onLanjut={(pajak) => maju({ pajak })} />;
+      isi = <LangkahPajakTersambung {...umum} />;
       break;
     case "booking":
-      isi = <LangkahBooking {...umum} awal={data.booking} onLanjut={(booking) => maju({ booking })} />;
+      isi = <LangkahBookingTersambung {...umum} selesai={selesai.booking} onLewati={() => lewati("booking")} />;
       break;
     case "gudang":
       isi = (
-        <LangkahLokasi key="gudang" jenis="gudang" {...umum} awal={data.gudang} onLanjut={(gudang) => maju({ gudang })} />
+        <LangkahLokasiTersambung key="gudang" jenis="gudang" {...umum} onLewati={() => lewati("gudang")} />
       );
       break;
     default:
-      isi = <LangkahSelesai data={data} plan={plan} />;
+      isi = <SelesaiTersambung plan={plan} dilewati={dilewati} />;
   }
 
   return (
@@ -107,8 +188,8 @@ export function HalamanSetup() {
       plan={plan}
       langkah={langkah}
       indeksAktif={indeks}
-      namaToko={data.toko.namaToko}
-      namaOwner={data.owner.nama}
+      selesaiLangkah={selesai}
+      namaToko={namaToko.data ?? ""}
     >
       {isi}
     </KerangkaSetup>

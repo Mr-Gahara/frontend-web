@@ -17,7 +17,13 @@ interface ResponsOwner {
  * Langkah awal setup berjalan sebelum Owner ada, sehingga status, buat toko,
  * dan daftar Owner memakai token akun.
  */
+/** data GET /api/akun/me yang dipakai wizard (B240). */
+interface AkunSaya {
+  daftarTenant?: { namaToko?: string }[];
+}
+
 export const setupApi = {
+  akunSaya: () => apiData.get<AkunSaya>(EP.akun.me, undefined, "akun"),
   status: () => apiData.get<StatusSetup>(EP.setup.status, undefined, "akun"),
   buatToko: (namaToko: string) => apiData.post<ResponsBuatToko>(EP.tenant.list, { namaToko }, "akun"),
   /** Tanpa installationId dan aksesType: backend memberi Owner akses web dan app (SA6a, B219). */

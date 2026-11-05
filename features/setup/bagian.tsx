@@ -53,28 +53,58 @@ export function KotakPeringatan({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Tombol Kembali, Lewati (setup fitur yang boleh dilengkapi nanti), dan
+ * lanjut. sibuk menahan tombol selama penyimpanan ke server berjalan.
+ */
 export function NavigasiLangkah({
   onKembali,
   onLanjut,
+  onLewati,
   teksLanjut,
+  sibuk = false,
 }: {
   onKembali?: () => void;
   onLanjut?: () => void;
+  onLewati?: () => void;
   teksLanjut: string;
+  sibuk?: boolean;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       {onKembali ? (
-        <button type="button" onClick={onKembali} className={KELAS_TOMBOL_KEDUA}>
+        <button type="button" onClick={onKembali} disabled={sibuk} className={KELAS_TOMBOL_KEDUA}>
           Kembali
         </button>
       ) : (
         <span aria-hidden="true" />
       )}
-      <button type={onLanjut ? "button" : "submit"} onClick={onLanjut} className={KELAS_TOMBOL_UTAMA}>
-        {teksLanjut}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        {onLewati && (
+          <button type="button" onClick={onLewati} disabled={sibuk} className={KELAS_TOMBOL_KEDUA}>
+            Lewati, lengkapi nanti
+          </button>
+        )}
+        <button
+          type={onLanjut ? "button" : "submit"}
+          onClick={onLanjut}
+          disabled={sibuk}
+          className={KELAS_TOMBOL_UTAMA}
+        >
+          {sibuk ? "Menyimpan..." : teksLanjut}
+        </button>
+      </div>
     </div>
+  );
+}
+
+/** Penolakan server atau syarat langkah yang belum terpenuhi. */
+export function PesanGalat({ pesan }: { pesan: string }) {
+  if (!pesan) return null;
+  return (
+    <p role="alert" className="text-sm font-medium text-destructive">
+      {pesan}
+    </p>
   );
 }
 

@@ -2,26 +2,28 @@ import type { ReactNode } from "react";
 import { Check } from "lucide-react";
 import { LangkahDaftar } from "@/features/auth/langkah-daftar";
 import { TandaTachyon } from "@/features/auth/tanda-tachyon";
-import { NAMA_PLAN, type LangkahSetup, type PlanSetup } from "./langkah";
+import { namaPlan } from "@/features/langganan/data";
+import type { KunciPlan } from "@/types/langganan";
+import type { KunciLangkah, LangkahSetup } from "./langkah";
 
 /**
  * Kerangka wizard setup (desain F, gaya E daftar): panel krem berisi merek,
  * toko, daftar langkah per plan, dan penanda langkah pendaftaran; form di
- * kanan. Spanduk pratinjau menyatakan isian belum disimpan ke server (TP4a).
+ * kanan. Tanda centang mengikuti status server, bukan posisi langkah.
  */
 export function KerangkaSetup({
   plan,
   langkah,
   indeksAktif,
+  selesaiLangkah,
   namaToko,
-  namaOwner,
   children,
 }: {
-  plan: PlanSetup;
+  plan: KunciPlan;
   langkah: readonly LangkahSetup[];
   indeksAktif: number;
+  selesaiLangkah: Record<KunciLangkah, boolean>;
   namaToko: string;
-  namaOwner: string;
   children: ReactNode;
 }) {
   const selesai = indeksAktif >= langkah.length;
@@ -33,18 +35,17 @@ export function KerangkaSetup({
             <TandaTachyon ukuran={34} />
             <span className="text-lg font-bold">Tachyon POS</span>
           </div>
-          {namaOwner && <span className="text-sm text-muted-foreground">Masuk sebagai {namaOwner}, Owner</span>}
         </div>
         <div className="flex flex-col gap-1.5">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-navy/70">
             {selesai ? "Setup selesai" : "Siapkan toko"}
           </p>
           <p className="text-[22px] font-bold">{namaToko || "Toko baru"}</p>
-          <p className="text-sm text-muted-foreground">Plan {NAMA_PLAN[plan]}</p>
+          <p className="text-sm text-muted-foreground">Plan {namaPlan(plan)}</p>
         </div>
         <ol aria-label="Langkah setup toko" className="flex flex-col gap-0.5">
           {langkah.map((l, i) => {
-            const lewat = i < indeksAktif;
+            const lewat = selesaiLangkah[l.kunci];
             const kini = i === indeksAktif;
             return (
               <li
@@ -76,10 +77,6 @@ export function KerangkaSetup({
 
       <main className="flex min-w-0 flex-[1_1_560px] items-center justify-center px-2 py-10">
         <div className="flex w-full max-w-[560px] flex-col gap-6">
-          <p role="note" className="rounded-lg bg-krem px-4 py-3 text-sm">
-            Pratinjau tampilan: isian belum disimpan ke server. Penyimpanan menyusul setelah status setup
-            tersedia di backend.
-          </p>
           {children}
         </div>
       </main>

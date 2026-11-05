@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bacaPlan, daftarLangkah } from "@/features/setup/langkah";
+import { daftarLangkah } from "@/features/setup/langkah";
 import { masalahAngka, skemaOwner, skemaProdukSetup } from "@/features/setup/schema";
 
 const INTI = ["toko", "owner", "lokasi", "kategori", "bahanBaku", "produk", "pajak"];
@@ -13,19 +13,6 @@ describe("daftarLangkah", () => {
   });
   it("Pro menambah sesi booking lalu gudang", () => {
     expect(daftarLangkah("pro").map((l) => l.kunci)).toEqual([...INTI, "booking", "gudang"]);
-  });
-});
-
-describe("bacaPlan", () => {
-  it("membaca plan yang dikenal", () => {
-    expect(bacaPlan("advanced")).toBe("advanced");
-    expect(bacaPlan("pro")).toBe("pro");
-  });
-  it("nilai kosong, tidak ada, atau asing menjadi Basic", () => {
-    expect(bacaPlan(null)).toBe("basic");
-    expect(bacaPlan("")).toBe("basic");
-    expect(bacaPlan("Pro")).toBe("basic");
-    expect(bacaPlan("enterprise")).toBe("basic");
   });
 });
 

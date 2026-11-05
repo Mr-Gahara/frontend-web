@@ -37,6 +37,8 @@ export interface ProdukRequest {
   kategoriID: string;
   stok?: number;
   isUnlimitedStok?: boolean;
+  /** Batas stok kritis produk berstok langsung (B237); 0 berarti tidak dipantau. */
+  stokMinimum?: number;
   keterangan?: string;
   gambarProduk?: string;
   resep?: ResepItem[];
