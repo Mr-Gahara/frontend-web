@@ -13,6 +13,11 @@ export interface Pelanggan {
   email?: string | null;
   alamat?: string | null;
   poinLoyalitas: number;
+  /**
+   * Pelanggan bawaan toko ("Customer", B218): tidak dapat dihapus (409) dan
+   * hanya namanya yang boleh diubah (400 untuk field lain).
+   */
+  isBawaan: boolean;
   createdAt: string;
   updatedAt: string;
 }

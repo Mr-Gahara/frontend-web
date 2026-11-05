@@ -11,6 +11,10 @@ export const IZIN_PELANGGAN = {
   hapus: IZIN.hapusPelanggan,
 } as const;
 
+/** Hapus per baris: pelanggan bawaan tidak dapat dihapus (B218). */
+export const bolehHapusPelanggan = (bolehHapus: boolean, pelanggan: { isBawaan: boolean }): boolean =>
+  bolehHapus && !pelanggan.isBawaan;
+
 export function aksiPelanggan(permissions: string[]) {
   return {
     buat: permissions.includes(IZIN_PELANGGAN.buat),

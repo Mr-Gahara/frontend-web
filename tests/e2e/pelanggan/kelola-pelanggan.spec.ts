@@ -22,6 +22,7 @@ type PelangganMentah = {
   nomorHp: string | null;
   email: string | null;
   alamat: string | null;
+  isBawaan: boolean;
 };
 
 const baris = (page: Page, nama: string) => page.locator("tbody tr").filter({ hasText: nama });
@@ -273,6 +274,55 @@ test.describe("Kelola pelanggan", () => {
       expect(sesudah.filter((p) => p.nomorHp === data.nomorHp)).toHaveLength(1);
     } finally {
       await hapusLewatApi(page, auth, "/pelanggan", id);
+    }
+  });
+
+  test("pelanggan bawaan: tanpa Hapus, dan ubah hanya nama (B218)", async ({ page }) => {
+    const auth = await bukaPelanggan(page);
+    const bawaan = (await daftarPelanggan(page, auth)).find((p) => p.isBawaan);
+    expect(bawaan, "setiap toko punya pelanggan bawaan (B218, db:data-bawaan)").toBeTruthy();
+    const asli = bawaan!.namaPelanggan;
+    const namaUji = `${asli} E2E ${unik()}`;
+    try {
+      await test.step("menu baris tanpa Hapus", async () => {
+        await pencarian(page).fill(asli);
+        const barisBawaan = baris(page, asli).filter({ hasText: "Bawaan" });
+        await expect(barisBawaan).toHaveCount(1);
+        await barisBawaan.getByRole("button", { name: "Buka menu" }).click();
+        await expect(page.getByRole("menuitem", { name: "Edit" })).toBeVisible();
+        await expect(page.getByRole("menuitem", { name: "Hapus" })).toHaveCount(0);
+        await page.keyboard.press("Escape");
+      });
+
+      await test.step("dialog ubah hanya memuat nama, dan PUT hanya mengirim nama", async () => {
+        const dialog = await bukaDialogUbah(page, "Bawaan");
+        await expect(dialog.getByText("hanya namanya yang dapat diubah")).toBeVisible();
+        await expect(dialog.getByLabel("Tipe Pelanggan")).toHaveCount(0);
+        await expect(dialog.getByLabel(/^Alamat/)).toHaveCount(0);
+        await dialog.getByLabel(/^Nama Pelanggan/).fill(namaUji);
+        const tPut = tunggu(page, "PUT", POLA_SATU);
+        await dialog.getByRole("button", { name: "Simpan Perubahan" }).click();
+        const res = await tPut;
+        expect(res.status(), "PUT /pelanggan/:id").toBe(200);
+        expect(res.request().postDataJSON()).toEqual({ namaPelanggan: namaUji });
+        await expect(dialog).toBeHidden({ timeout: 15_000 });
+      });
+
+      await test.step("nama dikembalikan lewat UI", async () => {
+        await pencarian(page).fill(namaUji);
+        const dialog = await bukaDialogUbah(page, namaUji);
+        await dialog.getByLabel(/^Nama Pelanggan/).fill(asli);
+        const tPut = tunggu(page, "PUT", POLA_SATU);
+        await dialog.getByRole("button", { name: "Simpan Perubahan" }).click();
+        expect((await tPut).status()).toBe(200);
+        await expect(dialog).toBeHidden({ timeout: 15_000 });
+      });
+    } finally {
+      const kini = (await daftarPelanggan(page, auth)).find((p) => p.id === bawaan!.id);
+      if (kini && kini.namaPelanggan !== asli) {
+        const r = await api(page, auth, "PUT", `/pelanggan/${bawaan!.id}`, { namaPelanggan: asli });
+        expect.soft(r.status, r.pesan).toBe(200);
+      }
     }
   });
 

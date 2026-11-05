@@ -74,10 +74,12 @@ interface IsianProps {
   /** Awalan id isian, agar setiap label terhubung ke isiannya dan id unik per form. */
   idAwalan: string;
   ragam: Ragam;
+  /** Pelanggan bawaan hanya boleh diubah namanya (B218). */
+  hanyaNama?: boolean;
 }
 
 /** Isian form pelanggan, dipakai panel tambah dan dialog ubah. */
-function IsianPelanggan({ register, control, errors, idAwalan, ragam }: IsianProps) {
+function IsianPelanggan({ register, control, errors, idAwalan, ragam, hanyaNama = false }: IsianProps) {
   const kelas = RAGAM[ragam];
   const id = (nama: string) => `${idAwalan}-${nama}`;
   return (
@@ -95,6 +97,28 @@ function IsianPelanggan({ register, control, errors, idAwalan, ragam }: IsianPro
         <PesanIsian pesan={errors.namaPelanggan?.message} />
       </div>
 
+      {hanyaNama ? (
+        <p className="text-xs text-navy/60">
+          Pelanggan bawaan toko dipakai untuk transaksi tanpa data pelanggan, sehingga hanya namanya
+          yang dapat diubah.
+        </p>
+      ) : (
+        <IsianLain register={register} control={control} errors={errors} id={id} ragam={ragam} />
+      )}
+    </>
+  );
+}
+
+function IsianLain({
+  register,
+  control,
+  errors,
+  id,
+  ragam,
+}: Pick<IsianProps, "register" | "control" | "errors" | "ragam"> & { id: (nama: string) => string }) {
+  const kelas = RAGAM[ragam];
+  return (
+    <>
       <div className={kelas.bungkus}>
         <label htmlFor={id("tipe")} className={kelas.label}>
           Tipe Pelanggan
@@ -308,6 +332,7 @@ function IsiFormUbah({ pelanggan, onTutup }: { pelanggan: Pelanggan; onTutup: ()
         errors={errors}
         idAwalan="ubah-pelanggan"
         ragam="ubah"
+        hanyaNama={pelanggan.isBawaan}
       />
 
       {galat && (

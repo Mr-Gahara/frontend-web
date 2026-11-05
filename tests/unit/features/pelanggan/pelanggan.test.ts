@@ -6,7 +6,7 @@ import {
   payloadBuatPelanggan,
   payloadPerbaruiPelanggan,
 } from "@/features/pelanggan/payload";
-import { aksiPelanggan } from "@/features/pelanggan/izin";
+import { aksiPelanggan, bolehHapusPelanggan } from "@/features/pelanggan/izin";
 import type { Pelanggan } from "@/types/pelanggan";
 
 const pelanggan: Pelanggan = {
@@ -18,6 +18,7 @@ const pelanggan: Pelanggan = {
   email: null,
   alamat: "Jl. Sudirman No. 123",
   poinLoyalitas: 0,
+  isBawaan: false,
   createdAt: "2026-09-01T00:00:00.000Z",
   updatedAt: "2026-09-01T00:00:00.000Z",
 };
@@ -92,6 +93,23 @@ describe("payloadPerbaruiPelanggan", () => {
   });
 });
 
+
+describe("pelanggan bawaan (B218)", () => {
+  const bawaan: Pelanggan = { ...pelanggan, namaPelanggan: "Customer", tipePelanggan: "umum", isBawaan: true };
+
+  it("ubah hanya mengirim nama; field lain diabaikan", () => {
+    expect(
+      payloadPerbaruiPelanggan(isian({ namaPelanggan: "Pelanggan Umum", tipePelanggan: "korporat", nomorHp: "" }), bawaan),
+    ).toEqual({ namaPelanggan: "Pelanggan Umum" });
+    expect(payloadPerbaruiPelanggan(isian({ namaPelanggan: "Customer", email: "a@b.id" }), bawaan)).toEqual({});
+  });
+
+  it("tidak dapat dihapus walau pengguna memegang izin hapus", () => {
+    expect(bolehHapusPelanggan(true, bawaan)).toBe(false);
+    expect(bolehHapusPelanggan(true, pelanggan)).toBe(true);
+    expect(bolehHapusPelanggan(false, pelanggan)).toBe(false);
+  });
+});
 
 describe("aksiPelanggan", () => {
   it("mengikuti izin endpoint masing-masing", () => {

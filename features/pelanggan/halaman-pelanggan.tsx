@@ -17,7 +17,7 @@ import type { Pelanggan } from "@/types/pelanggan";
 import { DialogHapusPelanggan } from "./dialog-hapus-pelanggan";
 import { DialogUbahPelanggan, FormTambahPelanggan } from "./form-pelanggan";
 import { useDaftarPelanggan } from "./hooks";
-import { aksiPelanggan } from "./izin";
+import { aksiPelanggan, bolehHapusPelanggan } from "./izin";
 
 const KELAS_KEPALA =
   "h-auto p-0 text-xs font-semibold text-navy/60 hover:text-navy hover:bg-transparent";
@@ -86,7 +86,17 @@ export function HalamanPelanggan() {
       ),
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-medium text-navy">{row.original.namaPelanggan}</span>
+          <span className="font-medium text-navy">
+            {row.original.namaPelanggan}
+            {row.original.isBawaan && (
+              <span
+                title="Pelanggan bawaan toko untuk transaksi tanpa data pelanggan"
+                className="ml-2 rounded-full bg-navy/10 px-2 py-0.5 text-[11px] font-semibold text-navy/70"
+              >
+                Bawaan
+              </span>
+            )}
+          </span>
           {row.original.alamat && (
             <span className="text-xs text-navy/60 line-clamp-1 mt-0.5">
               {row.original.alamat}
@@ -155,7 +165,8 @@ export function HalamanPelanggan() {
       id: "aksi",
       header: () => <div className="text-right text-xs text-navy/60">Aksi</div>,
       cell: ({ row }) => {
-        if (!aksi.ubah && !aksi.hapus) return null;
+        const hapus = bolehHapusPelanggan(aksi.hapus, row.original);
+        if (!aksi.ubah && !hapus) return null;
         return (
           <div className="flex justify-end">
             <DropdownMenu>
@@ -171,8 +182,8 @@ export function HalamanPelanggan() {
                     Edit
                   </DropdownMenuItem>
                 )}
-                {aksi.ubah && aksi.hapus && <DropdownMenuSeparator className="bg-navy/10" />}
-                {aksi.hapus && (
+                {aksi.ubah && hapus && <DropdownMenuSeparator className="bg-navy/10" />}
+                {hapus && (
                   <DropdownMenuItem
                     className="cursor-pointer font-bold text-red-600/60 focus:text-red-700 focus:bg-red-500/10"
                     onClick={() => setDihapus(row.original)}

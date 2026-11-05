@@ -46,7 +46,8 @@ export function payloadBuatPelanggan(nilai: NilaiFormPelanggan): BuatPelangganPa
 /**
  * Payload PUT /pelanggan/:id: hanya field yang berbeda dari data server
  * (keputusan rancangan butir 15). Isian yang dikosongkan dikirim sebagai
- * teks kosong. Hasil kosong berarti tidak ada perubahan.
+ * teks kosong. Hasil kosong berarti tidak ada perubahan. Pelanggan bawaan
+ * hanya mengirim nama, karena field lain ditolak backend (B218).
  */
 export function payloadPerbaruiPelanggan(
   nilai: NilaiFormPelanggan,
@@ -55,6 +56,7 @@ export function payloadPerbaruiPelanggan(
   const awal = nilaiAwalPelanggan(tersimpan);
   const payload: PerbaruiPelangganPayload = {};
   if (nilai.namaPelanggan !== awal.namaPelanggan) payload.namaPelanggan = nilai.namaPelanggan;
+  if (tersimpan.isBawaan) return payload;
   if (nilai.tipePelanggan !== awal.tipePelanggan) payload.tipePelanggan = nilai.tipePelanggan;
   for (const [field] of ISIAN_OPSIONAL) {
     if (nilai[field] !== awal[field]) payload[field] = nilai[field];
