@@ -152,6 +152,33 @@ Keputusan diajukan lewat dialog pilihan, bukan ditulis sebagai teks,
 agar jawabannya diberikan sebelum respons berlanjut (pemilik proyek,
 29 September 2026).
 
+### Opsi terpilih diterapkan persis
+
+Ditetapkan pemilik proyek pada 5 November 2026. Teks opsi yang dipilih
+pemilik proyek mengikat kata per kata, termasuk rincian yang ditulis Claude
+sendiri di deskripsi opsi. Bila saat menerapkan muncul alasan untuk
+menyimpang, atau ada perilaku yang tidak disebut opsi, berhenti dan ajukan
+dialog baru sebelum menulis kodenya; jangan menerapkan dulu lalu meminta
+persetujuan.
+
+- **Sebelum menulis kode sebuah keputusan**, tulis ulang rencana dalam
+  satu kalimat per butir opsi, lalu cocokkan dengan teks opsi. Setiap
+  butir rencana yang tidak ada di teks opsi adalah keputusan baru.
+- **Saran reviewer atau alasan teknis bukan izin.** Saran yang mengubah
+  isi opsi terpilih diajukan ke pemilik proyek lebih dulu.
+- **Saat menyimpang terlanjur terjadi**, akui di laporan, ajukan
+  pilihannya (kembali ke opsi atau keputusan baru beserta untung rugi),
+  dan catat keputusannya atas nama pemilik proyek, bukan atas nama
+  Claude.
+
+Kejadian: wizard setup, opsi "Bisa dibuka lagi" menyebut pajak sebagai
+langkah daftar yang boleh ditambah dan hanya nama toko serta Owner yang
+terkunci. Penerapan `41194b7` mengunci pajak, outlet, sesi booking, dan
+gudang tanpa bertanya, karena saran reviewer agar tidak ada data kedua
+diperluas sendiri ke pajak. Dikembalikan di `493f49c`: pajak dapat
+ditambah, dan ketiga langkah lain menjadi ringkasan bertautan atas
+keputusan baru pemilik proyek.
+
 ## Keputusan berdasar bukti
 
 Setiap keputusan harus bersandar pada kode atau output yang benar-benar

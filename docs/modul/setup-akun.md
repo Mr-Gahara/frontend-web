@@ -208,10 +208,18 @@ dan token warna yang sudah ada.
   baku, dan produk disimpan dan dihapus per butir, dan daftar yang tampil
   selalu dari server (pemilik proyek, 5 November 2026).
 - **WS2a: wizard dibuka di langkah pertama yang belum selesai, dan
-  langkah yang selesai dapat dibuka lagi.** Langkah satu data (nama toko,
-  Owner, outlet, pajak, sesi booking, gudang) menampilkan ringkasan
-  tersimpan; langkah daftar tetap dapat ditambah. Bahan baku tanpa resep,
-  yang dilaporkan backend selesai, tetap disinggahi sampai produk selesai.
+  langkah yang selesai dapat dibuka lagi.** Nama toko dan Owner terkunci
+  setelah tersimpan; kategori, bahan baku, produk, dan pajak tetap dapat
+  ditambah (pajak lewat "Tambah pajak", `493f49c`). Bahan baku tanpa
+  resep, yang dilaporkan backend selesai, tetap disinggahi sampai produk
+  selesai. Penerapan pertama (`41194b7`) sempat mengunci pajak tanpa
+  bertanya (`inti/cara-kerja.md`, Opsi terpilih diterapkan persis).
+- **WS5a: outlet, sesi booking, dan gudang yang tersimpan tampil sebagai
+  ringkasan bertautan** ke halaman ubahnya: Profil Toko, Pengaturan
+  Gudang, Aset, dan Tarif. Dipilih pemilik proyek setelah perbandingan
+  untung rugi dengan "booking dan gudang bisa ditambah" (bertentangan
+  dengan satu outlet dan satu gudang pada MVP) dan "bisa diubah di
+  wizard" (kode dan risiko terbesar) (5 November 2026, `493f49c`).
 - **WS3a: Owner terdaftar tanpa sesi pengguna masuk lewat login PIN**
   (`/login/pengguna?kembali=/setup`), lalu kembali ke wizard; `kembali`
   hanya menerima `/setup`.

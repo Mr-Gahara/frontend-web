@@ -61,8 +61,9 @@ Selesai 5 November 2026:
 6. Wizard setup tersambung (B219 sampai B223, B237, B238, B240): status,
    guard, dan kembali dari login PIN (`3205982`); seluruh langkah
    menyimpan ke server dan dapat dilanjutkan setelah dimuat ulang tanpa
-   PIN (`41194b7`); tautan Daftar di login akun (`4322dba`). Keputusan
-   WS1a sampai WS4a di `modul/setup-akun.md`.
+   PIN (`41194b7`); tautan Daftar di login akun (`4322dba`); pajak dapat
+   ditambah dan ringkasan bertautan (`493f49c`). Keputusan WS1a sampai
+   WS5a di `modul/setup-akun.md`.
 
 Urutan berikutnya, semuanya sudah disetujui pemilik proyek pada 4
 November 2026:

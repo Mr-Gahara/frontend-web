@@ -6,6 +6,10 @@ Lapis referensi: kirim bila pekerjaannya membutuhkan. Isinya dipindah dari docs/
 
 ## Disiplin saat menerapkan perubahan
 
+Opsi yang dipilih pemilik proyek diterapkan persis; menyimpang ditanyakan
+sebelum menulis kode (`inti/cara-kerja.md`, Opsi terpilih diterapkan
+persis).
+
 Kesalahan yang pernah terjadi dan cara menghindarinya:
 
 - **Jangan mengubah test dua kali tanpa bukti baru.** Bila perbaikan
