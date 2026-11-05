@@ -107,6 +107,16 @@ November 2026:
    `kelola-perangkat-kasir`). Perlu varian desain lebih dulu, dan
    sumber `installationId` perangkat untuk form pemetaan perlu
    dipastikan dari backend.
+7. **Penanda dan pemandu wizard setup** (pemilik proyek, 5 November
+   2026, sesudah butir 6): pemilik proyek mencoba wizard sendiri, mengisi
+   form produk lalu menekan "Simpan dan lanjut" tanpa "Simpan produk",
+   sehingga produk tidak pernah terkirim (log backend hanya `GET
+   /api/produk`) dan galat "Tambahkan minimal satu produk." menyesatkan.
+   Jebakan yang sama ada di langkah Kategori dan Bahan baku. Arahnya:
+   tombol yang harus ditekan lebih dulu di setiap langkah ditonjolkan,
+   dan setelah wizard selesai ditambah pemandu UI (sorotan atau tur)
+   yang menunjukkan apa yang diisi dan tombol apa yang ditekan. Rancangan
+   dan perilakunya diajukan lewat dialog sebelum dikerjakan.
 
 Belum dijadwalkan: logo toko (B203 sampai B205) dan jam operasional
 (B206) di profil toko, serta perubahan backend 30 Oktober 2026 yang belum
