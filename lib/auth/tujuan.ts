@@ -28,3 +28,33 @@ export function tujuanGuardAdmin(k: KeadaanSesi): string | null {
   if (k.adalahAdmin) return null;
   return k.status === "masuk" ? "/dashboard" : "/login/pengguna";
 }
+/** Ringkasan status setup yang dibaca guard wizard (features/setup/status.ts). */
+export interface KeadaanSetup {
+  tuntas: boolean;
+  ownerTerdaftar: boolean;
+}
+
+/** Satu-satunya tujuan kembali yang diterima login pengguna, agar parameter tidak menjadi pengalih terbuka. */
+export const KEMBALI_SETUP = "/setup";
+export const URL_LOGIN_OWNER_SETUP = `/login/pengguna?kembali=${encodeURIComponent(KEMBALI_SETUP)}`;
+
+/** Tujuan sesudah login pengguna: /setup bila diminta, selain itu dashboard. */
+export function tujuanSesudahLoginPengguna(kembali: string | null): string {
+  return kembali === KEMBALI_SETUP ? KEMBALI_SETUP : "/dashboard";
+}
+
+/**
+ * Tujuan pengalihan guard wizard setup; null berarti tetap di halaman.
+ * setup null berarti status setup belum termuat. Setup yang tuntas tidak
+ * dibuka lagi; Owner yang sudah terdaftar tetapi belum masuk (browser lain
+ * atau cookie habis) masuk lewat login PIN lalu kembali ke wizard.
+ */
+export function tujuanGuardSetup(k: KeadaanSesi, setup: KeadaanSetup | null): string | null {
+  if (k.status === "memuat") return null;
+  if (!k.adaTokenAkun) return "/login";
+  if (k.adalahAdmin) return "/admin";
+  if (!setup) return null;
+  if (setup.tuntas) return k.status === "masuk" ? "/dashboard" : "/login/pengguna";
+  if (setup.ownerTerdaftar && k.status !== "masuk") return URL_LOGIN_OWNER_SETUP;
+  return null;
+}

@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore, type ChangeEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { pesanError } from "@/lib/api/error";
 import { akhiriSesi, setTokenPengguna } from "@/lib/auth/session";
+import { tujuanSesudahLoginPengguna } from "@/lib/auth/tujuan";
 import { useSession } from "@/lib/auth/useSession";
 import { hanyaAngka } from "@/features/pengguna/schema-profil";
 import { hasilLoginPengguna } from "./hasil";
@@ -70,6 +71,8 @@ export function HalamanLoginPengguna() {
     defaultValues: { nama: "", pin: "" },
   });
   const masuk = useLoginPengguna();
+  // Wizard setup mengirim Owner ke sini lalu menunggunya kembali (kembali=/setup).
+  const tujuan = tujuanSesudahLoginPengguna(useSearchParams().get("kembali"));
   const keluarAkun = useLogoutAkun();
   const memuat = masuk.isPending;
 
@@ -80,7 +83,7 @@ export function HalamanLoginPengguna() {
 
     // Sudah punya sesi pengguna: langsung ke dashboard.
     if (sudahMasuk) {
-      router.replace("/dashboard");
+      router.replace(tujuan);
       return;
     }
 
@@ -93,7 +96,7 @@ export function HalamanLoginPengguna() {
     // Tanpa token akun, login pengguna tidak dapat dikirim (endpoint-nya
     // memerlukan token akun), sehingga pengguna dikembalikan ke login akun.
     if (!adaTokenAkun) router.replace("/login");
-  }, [status, sudahMasuk, adaTokenAkun, adalahAdmin, router]);
+  }, [status, sudahMasuk, adaTokenAkun, adalahAdmin, router, tujuan]);
 
   const kirim = (nilai: NilaiLoginPengguna) => {
     setGalat("");
@@ -105,7 +108,7 @@ export function HalamanLoginPengguna() {
           return;
         }
         setTokenPengguna(hasil.token);
-        router.push("/dashboard");
+        router.push(tujuan);
       },
       onError: (err) => setGalat(pesanError(err, "Nama atau PIN tidak valid.")),
     });

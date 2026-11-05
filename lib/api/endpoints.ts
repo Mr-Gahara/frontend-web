@@ -36,6 +36,8 @@ export const EP = {
     pinLogout: "/pengguna/pin-logout",
     pinRefresh: "/pengguna/pin-refresh",
     register: "/pengguna/register-pengguna",
+    /** Owner dari web tanpa installationId (B219), bertoken akun. */
+    registerOwner: "/pengguna/register-owner",
   },
   role: {
     list: "/role",
@@ -122,7 +124,13 @@ export const EP = {
   },
 
   tenant: {
+    /** POST: buat toko untuk akun pemanggil (token akun). */
+    list: "/tenant",
     detail: (id: string) => `/tenant/${id}`,
+  },
+  setup: {
+    /** GET bertoken akun: status setup per plan (B220). */
+    status: "/setup/status",
   },
   location: {
     list: "/location",

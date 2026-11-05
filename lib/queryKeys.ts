@@ -50,6 +50,10 @@ export const queryKeys = {
   },
 
   // --- Langganan toko (B229) ---
+  setup: {
+    semua: kunci(["setup"] as const),
+    status: () => ["setup", "status"] as const,
+  },
   langganan: {
     semua: kunci(["langganan"] as const),
     toko: () => ["langganan", "toko"] as const,

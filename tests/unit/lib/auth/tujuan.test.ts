@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { akhiriSesi, bacaSesi, setTokenAkun } from "@/lib/auth/session";
-import { tujuanGuardAdmin, tujuanGuardDashboard } from "@/lib/auth/tujuan";
+import {
+  tujuanGuardAdmin,
+  tujuanGuardDashboard,
+  tujuanGuardSetup,
+  tujuanSesudahLoginPengguna,
+} from "@/lib/auth/tujuan";
 
 /** JWT palsu yang dapat didekode decodeJWT (tanpa verifikasi tanda tangan). */
 function jwtPalsu(payload: Record<string, unknown>): string {
@@ -84,5 +89,45 @@ describe("sesi akun dari token akun", () => {
     setTokenAkun(jwtPalsu({ id: "a1", role: "admin", version: 1 }));
     setTokenAkun(null);
     expect(bacaSesi().akun).toBeNull();
+  });
+});
+describe("tujuanGuardSetup", () => {
+  const klien = (status: "memuat" | "masuk" | "keluar") => ({ status, adaTokenAkun: true, adalahAdmin: false });
+  const belum = { tuntas: false, ownerTerdaftar: false };
+
+  it("menunggu sesi dan status setup", () => {
+    expect(tujuanGuardSetup({ status: "memuat", adaTokenAkun: false, adalahAdmin: false }, null)).toBeNull();
+    expect(tujuanGuardSetup(klien("keluar"), null)).toBeNull();
+  });
+
+  it("tanpa token akun ke login akun, admin ke panel admin", () => {
+    expect(tujuanGuardSetup({ status: "keluar", adaTokenAkun: false, adalahAdmin: false }, belum)).toBe("/login");
+    expect(tujuanGuardSetup({ status: "keluar", adaTokenAkun: true, adalahAdmin: true }, null)).toBe("/admin");
+  });
+
+  it("sebelum Owner ada, wizard tetap terbuka tanpa sesi pengguna", () => {
+    expect(tujuanGuardSetup(klien("keluar"), belum)).toBeNull();
+  });
+
+  it("Owner terdaftar tanpa sesi pengguna masuk lewat login PIN lalu kembali", () => {
+    expect(tujuanGuardSetup(klien("keluar"), { tuntas: false, ownerTerdaftar: true })).toBe(
+      "/login/pengguna?kembali=%2Fsetup",
+    );
+    expect(tujuanGuardSetup(klien("masuk"), { tuntas: false, ownerTerdaftar: true })).toBeNull();
+  });
+
+  it("setup tuntas tidak dibuka lagi", () => {
+    const tuntas = { tuntas: true, ownerTerdaftar: true };
+    expect(tujuanGuardSetup(klien("masuk"), tuntas)).toBe("/dashboard");
+    expect(tujuanGuardSetup(klien("keluar"), tuntas)).toBe("/login/pengguna");
+  });
+});
+
+describe("tujuanSesudahLoginPengguna", () => {
+  it("hanya /setup yang diterima sebagai tujuan kembali", () => {
+    expect(tujuanSesudahLoginPengguna("/setup")).toBe("/setup");
+    expect(tujuanSesudahLoginPengguna(null)).toBe("/dashboard");
+    expect(tujuanSesudahLoginPengguna("https://contoh.id")).toBe("/dashboard");
+    expect(tujuanSesudahLoginPengguna("/admin")).toBe("/dashboard");
   });
 });
