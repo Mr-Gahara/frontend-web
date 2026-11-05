@@ -1,4 +1,5 @@
 import { formatTanggalPendek } from "@/lib/format";
+import { namaPlan } from "@/features/langganan/data";
 import type {
   AkunAdmin,
   AksiLangganan,
@@ -71,6 +72,7 @@ export const LABEL_AKSI: Record<AksiLangganan, string> = {
   freeze: "Dibekukan",
   unfreeze: "Diaktifkan kembali",
   kedaluwarsa: "Kedaluwarsa",
+  "ubah-plan": "Plan diubah",
 };
 
 /**
@@ -81,6 +83,16 @@ export const LABEL_AKSI: Record<AksiLangganan, string> = {
 export function pelakuRiwayat(catatan: RiwayatLangganan): string {
   if (catatan.oleh) return catatan.oleh.username || catatan.oleh.email;
   return catatan.olehAkunID ? "Admin (akun terhapus)" : "Sistem";
+}
+
+/**
+ * Plan sebuah catatan (B213): plan awal saat akun dibuat, atau perpindahan
+ * plan. null bila plan tidak berubah atau catatan lama tanpa plan.
+ */
+export function teksPerubahanPlan(catatan: RiwayatLangganan): string | null {
+  const { planSebelum: sebelum, planSesudah: sesudah } = catatan;
+  if (!sesudah || sebelum === sesudah) return null;
+  return sebelum ? `Plan ${namaPlan(sebelum)} menjadi ${namaPlan(sesudah)}` : `Plan ${namaPlan(sesudah)}`;
 }
 
 /** Perubahan masa akses sebuah catatan; null bila masa aksesnya tidak berubah. */

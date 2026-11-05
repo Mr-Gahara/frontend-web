@@ -2,15 +2,17 @@ import { describe, it, expect } from "vitest";
 import {
   akibatPerpanjang,
   aksiLangganan,
+  LABEL_AKSI,
   durasiWajibSaatAktifkan,
   payloadAktifkan,
   payloadBekukan,
   payloadPerpanjang,
   pelakuRiwayat,
   teksPerubahanMasa,
+  teksPerubahanPlan,
 } from "@/features/admin-akun/langganan";
 import { formatTanggalPendek } from "@/lib/format";
-import type { AkunAdmin, LanggananAkun, RiwayatLangganan } from "@/types/adminAkun";
+import type { AksiLangganan, AkunAdmin, LanggananAkun, RiwayatLangganan } from "@/types/adminAkun";
 
 const langganan = (ubah: Partial<LanggananAkun> = {}): LanggananAkun => ({
   aksesBerakhirPada: null,
@@ -40,6 +42,8 @@ const catatan = (ubah: Partial<RiwayatLangganan> = {}): RiwayatLangganan => ({
   durasiBulan: 3,
   berakhirSebelum: null,
   berakhirSesudah: null,
+  planSebelum: "basic",
+  planSesudah: "basic",
   olehAkunID: "admin1",
   oleh: { id: "admin1", username: "ridho", email: "admin@contoh.id" },
   alasan: null,
@@ -126,6 +130,21 @@ describe("riwayat langganan", () => {
     expect(teksPerubahanMasa(catatan({ berakhirSebelum: awal, berakhirSesudah: akhir }))).toBe(
       `Masa akses ${formatTanggalPendek(awal)} menjadi ${formatTanggalPendek(akhir)}`,
     );
+  });
+
+  it("setiap aksi punya label, termasuk ubah-plan (B213)", () => {
+    const aksi: AksiLangganan[] = ["buat", "perpanjang", "freeze", "unfreeze", "kedaluwarsa", "ubah-plan"];
+    for (const a of aksi) expect(LABEL_AKSI[a], a).toBeTruthy();
+    expect(LABEL_AKSI["ubah-plan"]).toBe("Plan diubah");
+  });
+
+  it("perubahan plan: plan awal, berpindah, tetap, dan catatan lama (B213)", () => {
+    expect(teksPerubahanPlan(catatan({ aksi: "buat", planSebelum: null, planSesudah: "pro" }))).toBe("Plan Pro");
+    expect(teksPerubahanPlan(catatan({ aksi: "ubah-plan", planSesudah: "advanced" }))).toBe(
+      "Plan Basic menjadi Advanced",
+    );
+    expect(teksPerubahanPlan(catatan())).toBeNull();
+    expect(teksPerubahanPlan(catatan({ planSebelum: null, planSesudah: null }))).toBeNull();
   });
 
   it("pelaku: username, email bila tanpa username, akun terhapus, atau sistem (B155)", () => {

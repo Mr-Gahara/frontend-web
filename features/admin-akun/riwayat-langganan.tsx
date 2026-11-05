@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { pesanError } from "@/lib/api/error";
 import { formatTanggal } from "@/lib/format";
 import { useRiwayatLangganan } from "./hooks";
-import { LABEL_AKSI, pelakuRiwayat, teksPerubahanMasa } from "./langganan";
+import { LABEL_AKSI, pelakuRiwayat, teksPerubahanMasa, teksPerubahanPlan } from "./langganan";
 
 /**
  * Riwayat langganan satu akun, terbaru lebih dulu (keputusan PA11a). Backend
@@ -43,6 +43,7 @@ export function DaftarRiwayatLangganan({ akunId }: { akunId: string }) {
           <ul className="divide-y divide-border rounded-lg border border-border">
             {catatan.map((c) => {
               const perubahan = teksPerubahanMasa(c);
+              const plan = teksPerubahanPlan(c);
               return (
                 <li key={c.id} className="space-y-1 p-4 text-sm">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -54,6 +55,7 @@ export function DaftarRiwayatLangganan({ akunId }: { akunId: string }) {
                       {formatTanggal(c.createdAt)} oleh {pelakuRiwayat(c)}
                     </p>
                   </div>
+                  {plan && <p className="text-muted-foreground">{plan}</p>}
                   {perubahan && <p className="text-muted-foreground">{perubahan}</p>}
                   {c.alasan && <p className="text-muted-foreground">{c.alasan}</p>}
                 </li>

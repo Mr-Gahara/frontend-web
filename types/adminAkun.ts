@@ -1,4 +1,7 @@
 import type { AkunRole, TenantEntry } from "./auth";
+import type { AksiLangganan, KunciPlan } from "./langganan";
+
+export type { AksiLangganan };
 
 export type StatusAkun = "aktif" | "non-aktif";
 export type AlasanNonAktif = "manual" | "kedaluwarsa";
@@ -35,7 +38,6 @@ export interface BuatAkunKlienPayload {
   username?: string;
   durasiBulan?: DurasiLangganan;
 }
-export type AksiLangganan = "buat" | "perpanjang" | "freeze" | "unfreeze" | "kedaluwarsa";
 
 /** Catatan GET /akun/admin/users/:id/langganan, setelah _id dinormalkan menjadi id. */
 export interface RiwayatLangganan {
@@ -45,6 +47,9 @@ export interface RiwayatLangganan {
   durasiBulan: number | null;
   berakhirSebelum: string | null;
   berakhirSesudah: string | null;
+  /** Plan sebelum dan sesudah catatan (B213); null pada catatan lama. */
+  planSebelum: KunciPlan | null;
+  planSesudah: KunciPlan | null;
   /** null berarti dilakukan sistem (job pembeku), bukan admin. */
   olehAkunID: string | null;
   /** Akun pelaku (B155); null untuk tindakan sistem dan akun pelaku yang sudah dihapus. */
