@@ -29,6 +29,8 @@ export function useSession() {
     adalahAdmin: sesi.akun?.role === "admin",
     pengguna: sesi.pengguna,
     permissions: sesi.pengguna?.permissions ?? [],
+    /** Plan toko dari token pengguna; Basic selama belum masuk. */
+    plan: sesi.pengguna?.plan ?? ("basic" as const),
     role: sesi.pengguna?.role ?? "",
     status: sesi.status,
     sudahMasuk: sesi.status === "masuk",

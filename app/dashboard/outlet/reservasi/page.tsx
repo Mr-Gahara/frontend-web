@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useDaftarAset } from "@/features/aset/hooks";
 import { useDaftarSesiBooking } from "@/features/sesi-booking/hooks";
+import { ajakanGalatFitur } from "@/features/langganan/ajakan-fitur";
 import { bookingPerAset, tautanPenjualanBooking } from "@/features/sesi-booking/tampilan";
 import { labelStatusBooking } from "@/features/sesi-booking/status";
 import { TautanPenjualanBooking } from "@/features/sesi-booking/tautan-penjualan";
@@ -118,12 +119,14 @@ export default function DasborTimelinePage() {
     data: asetList = [],
     isLoading: asetLoading,
     isError: asetError,
+    error: galatAset,
   } = useDaftarAset();
 
   const {
     data: bookingList = [],
     isLoading: bookingLoading,
     isError: bookingError,
+    error: galatBooking,
   } = useDaftarSesiBooking(tanggalParam);
 
   // ── Timeline ──
@@ -167,6 +170,10 @@ export default function DasborTimelinePage() {
 
   const isLoading = asetLoading || bookingLoading;
   const isError = asetError || bookingError;
+  // Setup sesi booking yang belum selesai (dilewati di wizard) dijawab 403
+  // SETUP_FITUR_BELUM_SELESAI oleh daftar sesi booking (B224); tampil sebagai
+  // ajakan melengkapi setup, bukan galat koneksi (butir 5).
+  const ajakanFitur = ajakanGalatFitur(galatBooking, "sesi-booking") ?? ajakanGalatFitur(galatAset, "sesi-booking");
 
   // ─── Render ────────────────────────────────────────────────────────────────
 
@@ -313,7 +320,9 @@ export default function DasborTimelinePage() {
               className="flex flex-col divide-y"
               style={{ borderColor: `${COLORS.navy}10` }}
             >
-              {isError ? (
+              {ajakanFitur ? (
+                ajakanFitur
+              ) : isError ? (
                 <ErrorState message="Gagal memuat data. Periksa koneksi atau coba lagi." />
               ) : isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)

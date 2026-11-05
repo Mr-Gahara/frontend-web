@@ -16,6 +16,8 @@
  */
 
 import { decodeJWT, isTokenExpired } from "@/lib/decodeToken";
+import type { KunciPlan } from "@/types/langganan";
+import { bacaPlanToken } from "./fitur-plan";
 
 export interface PenggunaSesi {
   id: string;
@@ -25,6 +27,8 @@ export interface PenggunaSesi {
   tenantID: string;
   aksesType?: string[];
   loginType?: string;
+  /** Plan toko dari token (B212); basi sampai token diperbarui, backend tetap menegakkannya. */
+  plan: KunciPlan;
 }
 
 export type StatusSesi = "memuat" | "masuk" | "keluar";
@@ -87,6 +91,7 @@ function keSesiPengguna(token: string): PenggunaSesi | null {
     tenantID: String(p.tenantID),
     aksesType: Array.isArray(p.aksesType) ? p.aksesType.map(String) : undefined,
     loginType: p.loginType ? String(p.loginType) : undefined,
+    plan: bacaPlanToken(p.plan),
   };
 }
 

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth/useSession";
 import { IZIN, bolehBukaGrup, bolehBukaHalaman } from "@/lib/auth/permissions";
 import { useDaftarLokasi } from "@/features/inventaris/hooks";
+import { bolehMenurutPlan, planMencakup } from "@/lib/auth/fitur-plan";
 import { useTenant } from "@/features/tenant/hooks";
 import { SidebarPengguna } from "@/components/sidebar-pengguna";
 import { gudangMenus, outletMenus, type MenuItem } from "@/components/sidebar-menu";
@@ -60,8 +61,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Izin dibaca langsung dari sesi saat render, bukan disalin ke state
   // lewat effect, sehingga menu berizin mengikuti sesi begitu pulih setelah
   // halaman dimuat ulang (keputusan PO16a).
-  const { pengguna } = useSession();
+  const { pengguna, plan } = useSession();
   const permissions = pengguna?.permissions ?? [];
+  // Menu fitur di luar plan disembunyikan (butir 5): gudang hanya Pro, sesi
+  // booking mulai Advanced (lib/auth/fitur-plan.ts).
+  const bolehHref = (href: string) => bolehMenurutPlan(href, plan) && bolehBukaHalaman(href, permissions);
+  const adaWms = planMencakup(plan, "wms");
   // Lokasi dimuat lewat features/inventaris dan berbagi cache dengan layout
   // gudang, sehingga menu Ruang Gudang muncul setelah setup tanpa muat
   // ulang (keputusan GD5a). Tanpa read-location permintaan dimatikan.
@@ -94,10 +99,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const bolehLihatItem = (item: MenuItem) =>
     item.subItems?.length
       ? bolehBukaGrup(
-          item.subItems.map((s) => s.href),
+          item.subItems.map((s) => s.href).filter((h) => bolehMenurutPlan(h, plan)),
           permissions,
         )
-      : bolehBukaHalaman(item.href, permissions);
+      : bolehHref(item.href);
 
   const isGudangWorkspace = pathname.startsWith("/dashboard/gudang");
   const activeMenus = isGudangWorkspace ? gudangMenus : outletMenus;
@@ -116,11 +121,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // pesannya (keputusan GD4a dan GD5a). Setup hanya ditawarkan bila daftar
   // lokasi terbukti tidak memuat gudang.
   const tawarkanRuangGudang =
+    adaWms &&
     canAccessGudang &&
     !isLoadingLokasi &&
     (hasGudang || !bacaLokasi || daftarLokasi.isError);
   const tawarkanSetupGudang =
-    canCreateLocation && daftarLokasi.isSuccess && !hasGudang;
+    adaWms && canCreateLocation && daftarLokasi.isSuccess && !hasGudang;
 
   return (
     <Sidebar
@@ -227,7 +233,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu>
                 {visibleItems.map((item) => {
                   const visibleSubItems = item.subItems?.filter((sub) =>
-                    bolehBukaHalaman(sub.href, permissions),
+                    bolehHref(sub.href),
                   );
                   const hasSubItems =
                     visibleSubItems && visibleSubItems.length > 0;

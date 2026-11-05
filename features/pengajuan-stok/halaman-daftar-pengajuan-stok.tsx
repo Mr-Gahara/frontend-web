@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useTabUrl } from "@/hooks/use-tab-url";
+import { ajakanGalatFitur } from "@/features/langganan/ajakan-fitur";
 
 // --- Helpers ---
 const formatTanggal = (iso: string | null) => {
@@ -180,7 +181,9 @@ function IsiDaftarPengajuanStok({
         ukuran,
       )
     : null;
-  const { data, isLoading: memuatDaftar, isError, isFetching } = useHalamanPengajuanStok(params);
+  const { data, isLoading: memuatDaftar, isError, isFetching, error } = useHalamanPengajuanStok(params);
+  // Toko Pro tanpa gudang dijawab 403 SETUP_FITUR_BELUM_SELESAI (B234): ajakan melengkapi setup (butir 5).
+  const ajakanFitur = ajakanGalatFitur(error, "wms");
   const isLoading = memuatLingkup || memuatDaftar;
   const filteredData = params ? (data?.data ?? []) : [];
   const total = params ? (data?.pagination?.total ?? 0) : 0;
@@ -364,7 +367,9 @@ function IsiDaftarPengajuanStok({
       </div>
 
       {/* TABEL: DataTable, kartu per baris (TB1a sampai TB7a) */}
-      {isError ? (
+      {ajakanFitur ? (
+        ajakanFitur
+      ) : isError ? (
         <p
           role="alert"
           className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"

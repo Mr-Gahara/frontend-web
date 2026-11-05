@@ -1,13 +1,21 @@
-import { test, expect, type Page, type Response } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import {
   ALASAN_TANPA_ADMIN,
   PASSWORD_AKUN_UJI,
-  buatAkunKlienUji,
   hapusAkunKlienUji,
   kredensialAdmin,
   wajibAdmin,
 } from "../../helpers/admin-uji";
 import { isiLoginAkun, isiLoginPengguna } from "../../helpers/masuk-uji";
+import {
+  PIN_OWNER,
+  akunBaru,
+  daftarLangkah,
+  isiTokoDanOwner,
+  langkahAktif,
+  lanjut,
+  tunggu,
+} from "../../helpers/setup-uji";
 
 /*
  * Wizard setup /setup tersambung ke backend (B219 sampai B223, keputusan
@@ -18,44 +26,6 @@ import { isiLoginAkun, isiLoginPengguna } from "../../helpers/masuk-uji";
  */
 test.use({ geolocation: { latitude: -0.02633, longitude: 109.342503 }, permissions: ["geolocation"] });
 test.describe.configure({ timeout: 120_000 });
-
-const PIN_OWNER = "123456";
-
-const lanjut = (page: Page) => page.getByRole("button", { name: "Simpan dan lanjut" });
-const daftarLangkah = (page: Page) => page.getByRole("list", { name: "Langkah setup toko" });
-const langkahAktif = (page: Page) => daftarLangkah(page).locator('[aria-current="step"]');
-const tunggu = (page: Page, metode: string, pola: RegExp): Promise<Response> =>
-  page.waitForResponse((r) => r.request().method() === metode && pola.test(r.url()));
-
-/** Akun klien baru, login akun lewat UI sampai wizard (requireSetup, B223). */
-async function akunBaru(page: Page, nama: string, langganan: Parameters<typeof buatAkunKlienUji>[2] = {}) {
-  const email = `e2e.setup.${nama}.${Date.now().toString(36)}@tachyon-uji.com`;
-  const id = await buatAkunKlienUji(email, wajibAdmin(), langganan);
-  await page.goto("/login");
-  await isiLoginAkun(page, email, PASSWORD_AKUN_UJI);
-  await page.waitForURL("**/setup");
-  await expect(langkahAktif(page)).toHaveText("1Nama toko", { timeout: 15_000 });
-  return { id, email };
-}
-
-async function isiTokoDanOwner(page: Page) {
-  await page.getByLabel("Nama toko").fill("Kopi Senja E2E");
-  const tToko = tunggu(page, "POST", /\/api\/tenant$/);
-  await lanjut(page).click();
-  expect((await tToko).status(), "POST /tenant").toBe(201);
-  await page.getByLabel("Nama Owner").fill("Rina E2E");
-  await page.getByLabel("PIN", { exact: true }).fill(PIN_OWNER);
-  await page.getByLabel("Ulangi PIN").fill(PIN_OWNER);
-  const tOwner = tunggu(page, "POST", /\/api\/pengguna\/register-owner$/);
-  await lanjut(page).click();
-  const owner = await tOwner;
-  expect(owner.status(), "register-owner").toBe(201);
-  expect(owner.request().postDataJSON(), "Owner web tanpa installationId (B219)").toEqual({
-    nama: "Rina E2E",
-    pin: PIN_OWNER,
-  });
-  await expect(langkahAktif(page)).toContainText("Lokasi outlet");
-}
 
 async function isiLokasi(page: Page, jenis: "outlet" | "gudang", nama: string) {
   await page.getByLabel(jenis === "outlet" ? "Nama outlet" : "Nama gudang").fill(nama);

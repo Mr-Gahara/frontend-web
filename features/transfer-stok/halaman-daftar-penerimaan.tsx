@@ -25,6 +25,7 @@ import {
   Package,
   CheckCircle2
 } from "lucide-react";
+import { ajakanGalatFitur } from "@/features/langganan/ajakan-fitur";
 
 // --- Helpers ---
 const formatTanggal = (iso: string | null) => {
@@ -72,6 +73,7 @@ export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJa
     data: semuaTransfer = [],
     isLoading: isLoadingTransfers,
     isError,
+    error,
   } = useDaftarTransferStok(siap ? filterServerTransfer(kriteria) : null, { refetchInterval: 30000 });
   const filteredData = saringTransfer(semuaTransfer, kriteria);
   const isLoading = (ruang === "outlet" && cakupan.status === "memuat") || isLoadingTransfers;
@@ -91,6 +93,9 @@ export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJa
         isi="Lokasi kerja Anda saat ini belum dikonfigurasi, sehingga penerimaan barang tidak dapat ditampilkan. Hubungi owner atau admin."
       />
     );
+  } else if (ajakanGalatFitur(error, "wms")) {
+    // Toko Pro tanpa gudang dijawab 403 SETUP_FITUR_BELUM_SELESAI (B234): ajakan melengkapi setup (butir 5).
+    penghalang = ajakanGalatFitur(error, "wms");
   } else if (isError) {
     penghalang = (
       <PesanLokasi

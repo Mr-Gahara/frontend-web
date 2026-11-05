@@ -104,3 +104,20 @@ export function setupTuntas(status: StatusSetup): boolean {
 export function ownerTerdaftar(status: StatusSetup): boolean {
   return status.langkah.some((l) => l.kunci === "owner" && l.selesai);
 }
+
+/** Izin untuk menindaklanjuti setup sebuah fitur (keputusan pemilik proyek, 5 November 2026). */
+const IZIN_SETUP_FITUR: Record<"sesi-booking" | "wms", readonly string[]> = {
+  "sesi-booking": ["create-tipe-aset", "create-aset", "create-tarif"],
+  wms: ["create-location"],
+};
+
+/**
+ * Fitur termasuk plan yang setup-nya belum pernah selesai dan dapat
+ * dilengkapi pengguna ini, untuk banner "Lengkapi setup" di dashboard.
+ */
+export function fiturPerluSetup(status: StatusSetup, permissions: readonly string[]): ("sesi-booking" | "wms")[] {
+  return (["sesi-booking", "wms"] as const).filter((f) => {
+    const fitur = status.fitur[f];
+    return fitur.termasukPlan && !fitur.selesai && IZIN_SETUP_FITUR[f].every((i) => permissions.includes(i));
+  });
+}

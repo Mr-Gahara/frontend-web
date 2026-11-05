@@ -12,6 +12,7 @@ import { lokasiFinalisasi } from "./payload";
 import { aksiPenjualan, bolehBatalkanPembayaran, bolehCakupanPenjualan } from "./izin";
 import { DialogVoidPenjualan } from "./dialog-void-penjualan";
 import { BookingPenjualan } from "@/features/sesi-booking/booking-penjualan";
+import { planMencakup } from "@/lib/auth/fitur-plan";
 import { PESAN_BATAL_PEMBAYARAN, TAMPILAN_STATUS_PENJUALAN } from "./tampilan";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -75,7 +76,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
   const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
   const [showVoidConfirm, setShowVoidConfirm] = useState(false);
 
-  const { permissions } = useSession();
+  const { permissions, plan } = useSession();
   // Outlet tenant hanya dapat dibaca pemegang read-location (keputusan K11b);
   // tanpa izin itu locationID finalisasi tidak dikirim dan backend memakai
   // lokasi Outlet pertama tenant.
@@ -240,7 +241,8 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
         </div>
       </div>
 
-      {penjualan.jenisPenjualan === "booking" && (
+      {/* Toko yang turun dari plan bersesi booking tidak dapat membaca sesinya (403, butir 5). */}
+      {penjualan.jenisPenjualan === "booking" && planMencakup(plan, "sesi-booking") && (
         <BookingPenjualan
           idBooking={(penjualan.itemPenjualan ?? []).flatMap((i) => (i.sesiBookingID ? [i.sesiBookingID] : []))}
         />

@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDaftarAset } from "@/features/aset/hooks";
 import { useDaftarSesiBooking } from "@/features/sesi-booking/hooks";
 import { keTanggalLokal } from "@/lib/waktu";
+import { isApiError } from "@/lib/api/error";
 import type { SesiBookingResponse } from "@/types/sesiBooking";
 
 /** Waktu sekarang yang diperbarui berkala, agar sisa waktu petak ikut berjalan. */
@@ -69,7 +70,14 @@ function Petak({ petak, ringkas }: { petak: PetakVenue; ringkas: boolean }) {
  * Petak status venue (keputusan DB6a). Sampai enam aset petaknya besar;
  * lebih dari itu mengecil, dan paling banyak sepuluh yang tampil.
  */
-export function PanelVenue({ booking }: { booking: SesiBookingResponse[] }) {
+export function PanelVenue({
+  booking,
+  setupBelumSelesai = false,
+}: {
+  booking: SesiBookingResponse[];
+  /** Sesi booking dijawab 403 SETUP_FITUR_BELUM_SELESAI (B224): ajakan melengkapi setup (butir 5). */
+  setupBelumSelesai?: boolean;
+}) {
   const aset = useDaftarAset();
   const sekarang = useSekarang();
   const daftar = aset.data ?? [];
@@ -92,7 +100,14 @@ export function PanelVenue({ booking }: { booking: SesiBookingResponse[] }) {
           </span>
         )}
       </div>
-      {aset.isLoading ? (
+      {setupBelumSelesai ? (
+        <p className="text-sm text-navy/70">
+          Setup sesi booking belum selesai.{" "}
+          <Link href="/setup" className="font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px]">
+            Lengkapi setup
+          </Link>
+        </p>
+      ) : aset.isLoading ? (
         <Skeleton className="h-40 w-full bg-navy/5 rounded-xl" />
       ) : aset.isError ? (
         <p className="text-sm font-medium text-rose-600">Gagal memuat status venue.</p>
@@ -147,5 +162,7 @@ export function PanelVenue({ booking }: { booking: SesiBookingResponse[] }) {
 /** Panel venue beserta rincian booking hari ini, bagi pemegang read-booking. */
 export function PanelVenueBooking({ hari }: { hari: Date }) {
   const booking = useDaftarSesiBooking(keTanggalLokal(hari));
-  return <PanelVenue booking={booking.data ?? []} />;
+  const galat = booking.error;
+  const setupBelumSelesai = isApiError(galat) && galat.code === "SETUP_FITUR_BELUM_SELESAI";
+  return <PanelVenue booking={booking.data ?? []} setupBelumSelesai={setupBelumSelesai} />;
 }

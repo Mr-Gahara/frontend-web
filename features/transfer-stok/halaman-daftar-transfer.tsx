@@ -33,6 +33,7 @@ import {
   Send,
   MoreHorizontal,
 } from "lucide-react";
+import { ajakanGalatFitur } from "@/features/langganan/ajakan-fitur";
 
 /** Pilihan baris per halaman (keputusan TB11a). */
 const PILIHAN_UKURAN = [10, 20, 50] as const;
@@ -105,7 +106,9 @@ function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
   // (B105, B108, B109; keputusan rancangan butir 27). Di ruang outlet cukup
   // tipe Outlet, karena MVP punya satu outlet per tenant (AR10a).
   const params = paramHalamanSuratJalan(activeTab, konfig.tipe, debouncedSearch, halaman, ukuran);
-  const { data, isLoading, isError, isFetching } = useHalamanSuratJalan(params);
+  const { data, isLoading, isError, isFetching, error } = useHalamanSuratJalan(params);
+  // Toko Pro tanpa gudang dijawab 403 SETUP_FITUR_BELUM_SELESAI (B234): ajakan melengkapi setup (butir 5).
+  const ajakanFitur = ajakanGalatFitur(error, "wms");
   const daftarTransfer = useMemo(() => data?.data ?? [], [data]);
 
   // Aksi baris di menu titik tiga (TB7a): seluruh status membuka halaman detail.
@@ -236,7 +239,9 @@ function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
       </div>
 
       {/* TABEL: DataTable, kartu per baris (TB1a sampai TB7a) */}
-      {isError ? (
+      {ajakanFitur ? (
+        ajakanFitur
+      ) : isError ? (
         <p
           role="alert"
           className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"

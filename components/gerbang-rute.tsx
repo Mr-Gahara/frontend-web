@@ -14,10 +14,16 @@
 import { usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth/useSession";
 import { bolehBukaRute } from "@/lib/auth/permissions";
+import { fiturRute, planMencakup } from "@/lib/auth/fitur-plan";
+import { AjakanNaikPlan } from "@/features/langganan/ajakan-fitur";
 
 export function GerbangRute({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { status, permissions } = useSession();
+  const { status, permissions, plan } = useSession();
+  // Fitur di luar plan didahulukan dari izin: isinya tidak dipasang, sehingga
+  // tidak ada permintaan yang pasti ditolak 403 PLAN_TIDAK_MENCAKUP (butir 5).
+  const fitur = fiturRute(pathname);
+  if (status === "masuk" && fitur && !planMencakup(plan, fitur)) return <AjakanNaikPlan fitur={fitur} />;
 
   if (status !== "masuk" || bolehBukaRute(pathname, permissions)) {
     return <>{children}</>;
