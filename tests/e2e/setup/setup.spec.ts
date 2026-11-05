@@ -311,9 +311,13 @@ test.describe("Wizard setup", () => {
     }
   });
 
-  test("kategori wajib minimal satu sebelum lanjut", async ({ page }) => {
-    const { id } = await akunBaru(page, "kategori");
+  test("plan Advanced: delapan langkah tanpa gudang, dan kategori wajib minimal satu", async ({ page }) => {
+    const { id } = await akunBaru(page, "advanced", { plan: "advanced", durasiBulan: 1 });
     try {
+      const langkah = daftarLangkah(page).getByRole("listitem");
+      await expect(langkah).toHaveCount(8);
+      await expect(langkah.last()).toContainText("Sesi booking");
+      await expect(daftarLangkah(page).getByText("Gudang")).toHaveCount(0);
       await isiTokoDanOwner(page);
       await isiLokasi(page, "outlet", "Outlet E2E");
       await lanjut(page).click();
