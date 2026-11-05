@@ -185,7 +185,7 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
   serta riwayat admin dicatat di `kontrak/endpoint.md` (5 November 2026).
 - Enam endpoint baru belum dicatat di `kontrak/endpoint.md`:
   verifikasi email dan kirim ulangnya, lupa password, reset password,
-  langganan, dan riwayat langganan.
+  langganan, dan riwayat langganan. Dicatat pada 5 November 2026.
 - Akun uji `toko@gmail.com` dinaikkan ke Pro lewat API admin, karena
   akun lama dibaca Basic (B212) dan Basic menolak sesi booking (B216).
   Riwayat langganannya kini berisi satu catatan `ubah-plan`.

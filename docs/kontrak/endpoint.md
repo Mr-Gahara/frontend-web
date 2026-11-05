@@ -24,8 +24,14 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 |---|---|---|---|---|---|---|
 | POST | `/akun/auth/login` | public | - | - | - | `features/auth/api.ts` |
 | POST | `/akun/auth/register` | public | - | - | - | `features/auth/api.ts` |
+| POST | `/akun/auth/verifikasi-email` | public | - | - | - | `features/auth/api.ts` (`{ email, otp }`; pembatas 10 per 15 menit per IP dan email; B232) |
+| POST | `/akun/auth/verifikasi-email/kirim` | public | - | - | - | `features/auth/api.ts` (`{ email }`, selalu 200; pembatas 5 per 15 menit; B232) |
+| POST | `/akun/auth/lupa-password` | public | - | - | - | `features/auth/api.ts` (`{ email }`, selalu 200 dengan pesan yang sama; B217) |
+| POST | `/akun/auth/reset-password` | public | - | - | - | `features/auth/api.ts` (`{ email, otp, passwordBaru }`; OTP salah dan email tak terdaftar 400 yang sama; memutus seluruh sesi akun; B217) |
 | POST | `/akun/auth/refreshtoken` | public | - | - | - | 2 file (lewat `fetch`: `lib/apiClient.ts` dan `components/providers/session-provider.tsx`) |
 | POST | `/akun/auth/logout` | public | - | - | - | `features/auth/api.ts` |
+| GET | `/akun/langganan` | authPengguna | `read-langganan` | `{ data, message }` | - | `features/langganan/api.ts` (`plan`, `status`, `aksesBerakhirPada`, `masaTenggangHari`; B229) |
+| GET | `/akun/langganan/riwayat` | authPengguna | `read-langganan` | `{ cursorBerikutnya, data, message, total }` | `id` | `features/langganan/api.ts` (query `limit` dan `cursor`; dibaca lewat `apiMentah.get`; tanpa identitas admin dan `alasan`; B229) |
 | GET | `/akun/me` | authAkun | - | `{ data, message }` | `id` | `features/setup/api.ts` (sebentuk data login akun; wizard membaca `daftarTenant[0].namaToko`; B240) |
 | GET | `/akun/admin/all` | authAkun+adminOnly | - | `{ data, message, pagination }` | `id` | `features/admin-akun/api.ts` (query `cari`, `status`, `page`, `limit`, B177; `pagination` hanya bila `page` atau `limit` dikirim) |
 | GET | `/akun/admin/users/:id` | authAkun+adminOnly | - | `{ data, message }` | `id` | `features/admin-akun/api.ts` (sebentuk item daftar, B176; id rusak 400, tidak ada 404) |
