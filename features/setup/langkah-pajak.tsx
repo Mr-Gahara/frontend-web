@@ -5,10 +5,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { skemaPajak, type NilaiPajak } from "@/features/pajak/schema";
 import { LABEL_MODEL } from "@/features/pajak/tampilan";
 import type { ModelPerhitungan } from "@/types/pajak";
-import { JudulLangkah, NavigasiLangkah, PesanGalat, PesanIsian, PilihanTombol } from "./bagian";
+import {
+  DaftarTambahan,
+  JudulLangkah,
+  NavigasiLangkah,
+  PesanGalat,
+  PesanIsian,
+  PilihanTombol,
+} from "./bagian";
 import { useKirim } from "./kirim";
-import { KELAS_ISIAN, KELAS_LABEL } from "./gaya";
-import type { PropsLangkah } from "./langkah";
+import { KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS } from "./gaya";
+import type { ButirDaftar, PropsLangkah } from "./langkah";
 
 /**
  * Langkah pajak, wajib di semua plan (modul/setup-akun.md, Kriteria setup).
@@ -31,6 +38,12 @@ const KETERANGAN_MODEL: Record<NilaiPajak["modelPerhitungan"], string> = {
   "3": "Dihitung di atas pajak lain",
 };
 
+/**
+ * Tanpa pajak tersimpan, simpan sekaligus melanjutkan. Bila sudah ada
+ * pajak (wizard dibuka ulang atau pajak kedua), daftarnya tampil dan form
+ * menambah pajak tanpa berpindah langkah; onSelesai melanjutkan
+ * (keputusan pemilik proyek, 5 November 2026).
+ */
 export function LangkahPajak({
   nomor,
   total,
@@ -38,26 +51,48 @@ export function LangkahPajak({
   awal,
   onLanjut,
   onKembali,
-}: Omit<PropsLangkah<NilaiPajak>, "awal"> & { awal?: NilaiPajak | null }) {
-  const { kirim, sibuk, galat } = useKirim(onLanjut, "Gagal menyimpan pajak.");
+  tersimpan = [],
+  adaAktif = false,
+  onSelesai,
+}: Omit<PropsLangkah<NilaiPajak>, "awal"> & {
+  awal?: NilaiPajak | null;
+  tersimpan?: ButirDaftar[];
+  /** Setup selesai bila minimal satu pajak aktif. */
+  adaAktif?: boolean;
+  onSelesai?: () => void;
+}) {
+  const modeDaftar = tersimpan.length > 0;
   const {
     register,
     handleSubmit,
     control,
     setValue,
+    reset,
     formState: { errors },
-  } = useForm<NilaiPajak>({ resolver: zodResolver(skemaPajak), defaultValues: awal ?? NILAI_AWAL_PAJAK });
+  } = useForm<NilaiPajak>({
+    resolver: zodResolver(skemaPajak),
+    defaultValues: awal ?? NILAI_AWAL_PAJAK,
+  });
+  const { kirim, sibuk, galat, setGalat } = useKirim(async (n: NilaiPajak) => {
+    await onLanjut(n);
+    if (modeDaftar) reset(NILAI_AWAL_PAJAK);
+  }, "Gagal menyimpan pajak.");
   const tipePajak = useWatch({ control, name: "tipePajak" });
   const model = useWatch({ control, name: "modelPerhitungan" });
 
   return (
-    <form onSubmit={handleSubmit(kirim)} noValidate className="flex flex-col gap-[22px]">
+    <form
+      onSubmit={handleSubmit(kirim)}
+      noValidate
+      className="flex flex-col gap-[22px]"
+    >
       <JudulLangkah
         nomor={nomor}
         total={total}
         judul="Pajak"
         keterangan="Minimal satu pajak aktif. Pajak dihitung otomatis di setiap transaksi kasir."
       />
+      <DaftarTambahan judul="Pajak tersimpan" butir={tersimpan} />
       <div className="flex flex-wrap gap-3">
         <div className="flex flex-[2_1_220px] flex-col gap-2">
           <label htmlFor="setup-pajak-nama" className={KELAS_LABEL}>
@@ -89,8 +124,16 @@ export function LangkahPajak({
         id="setup-pajak-tipe"
         pertanyaan="Berlaku untuk"
         opsi={[
-          { nilai: "transaksi", label: "Seluruh transaksi", keterangan: "Dihitung dari total belanja" },
-          { nilai: "produk", label: "Produk tertentu", keterangan: "Produknya dipilih di halaman Pajak" },
+          {
+            nilai: "transaksi",
+            label: "Seluruh transaksi",
+            keterangan: "Dihitung dari total belanja",
+          },
+          {
+            nilai: "produk",
+            label: "Produk tertentu",
+            keterangan: "Produknya dipilih di halaman Pajak",
+          },
         ]}
         nilai={tipePajak ? "produk" : "transaksi"}
         onUbah={(n) => setValue("tipePajak", n === "produk")}
@@ -107,10 +150,32 @@ export function LangkahPajak({
         onUbah={(n) => setValue("modelPerhitungan", n)}
       />
       <p className="text-sm leading-normal text-muted-foreground">
-        Hanya satu pajak seluruh transaksi yang bisa aktif. Pajak lain bisa ditambahkan nanti dari Pengaturan.
+        Hanya satu pajak seluruh transaksi yang bisa aktif. Pajak lain bisa
+        ditambahkan nanti dari Pengaturan.
       </p>
+      {modeDaftar && (
+        <button
+          type="submit"
+          disabled={sibuk}
+          className={KELAS_TOMBOL_GARIS + " self-start"}
+        >
+          {sibuk ? "Menyimpan..." : "Tambah pajak"}
+        </button>
+      )}
       <PesanGalat pesan={galat} />
-      <NavigasiLangkah onKembali={onKembali} teksLanjut={teksLanjut} sibuk={sibuk} />
+      <NavigasiLangkah
+        onKembali={onKembali}
+        onLanjut={
+          modeDaftar
+            ? () =>
+                adaAktif
+                  ? onSelesai?.()
+                  : setGalat("Minimal satu pajak aktif sebelum lanjut.")
+            : undefined
+        }
+        teksLanjut={teksLanjut}
+        sibuk={sibuk}
+      />
     </form>
   );
 }

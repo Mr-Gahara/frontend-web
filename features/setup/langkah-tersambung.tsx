@@ -1,15 +1,33 @@
 "use client";
 
 import { useDaftarAset, useSimpanAset } from "@/features/aset/hooks";
-import { useDaftarBahanBaku, useBuatBahanBaku, useHapusBahanBaku } from "@/features/bahan-baku/hooks";
+import {
+  useDaftarBahanBaku,
+  useBuatBahanBaku,
+  useHapusBahanBaku,
+} from "@/features/bahan-baku/hooks";
 import { useBuatLokasi, useDaftarLokasi } from "@/features/inventaris/hooks";
-import { NILAI_AWAL_LOKASI, payloadBuatLokasi } from "@/features/inventaris/schema-lokasi";
-import { useDaftarKategori, useHapusKategori, useSimpanKategori } from "@/features/kategori/hooks";
+import {
+  NILAI_AWAL_LOKASI,
+  payloadBuatLokasi,
+} from "@/features/inventaris/schema-lokasi";
+import {
+  useDaftarKategori,
+  useHapusKategori,
+  useSimpanKategori,
+} from "@/features/kategori/hooks";
 import { useBuatPajak, useDaftarPajak } from "@/features/pajak/hooks";
 import { payloadBuatPajak } from "@/features/pajak/payload";
-import { useDaftarProduk, useHapusProduk, useSimpanProduk } from "@/features/produk/hooks";
+import {
+  useDaftarProduk,
+  useHapusProduk,
+  useSimpanProduk,
+} from "@/features/produk/hooks";
 import { useDaftarTarif, useSimpanTarif } from "@/features/tarif/hooks";
-import { useDaftarTipeAset, useSimpanTipeAset } from "@/features/tipe-aset/hooks";
+import {
+  useDaftarTipeAset,
+  useSimpanTipeAset,
+} from "@/features/tipe-aset/hooks";
 import type { KunciPlan } from "@/types/langganan";
 import type { Lokasi, TipeLokasi } from "@/types/location";
 import { useSegarkanSetup } from "./hooks";
@@ -45,9 +63,23 @@ export interface PropsTersambung {
   onKembali?: () => void;
 }
 
-const sama = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+const sama = (a: string, b: string) =>
+  a.trim().toLowerCase() === b.trim().toLowerCase();
 
-const lokasiBertipe = (daftar: Lokasi[] | undefined, tipe: TipeLokasi) => daftar?.find((l) => l.tipe === tipe);
+/** Halaman ubah lokasi: outlet di Profil Toko, gudang di Pengaturan Gudang. */
+const TAUTAN_LOKASI = {
+  outlet: {
+    href: "/dashboard/outlet/pengaturan/toko",
+    teks: "Ubah di Profil Toko",
+  },
+  gudang: {
+    href: "/dashboard/gudang/pengaturan",
+    teks: "Ubah di Pengaturan Gudang",
+  },
+} as const;
+
+const lokasiBertipe = (daftar: Lokasi[] | undefined, tipe: TipeLokasi) =>
+  daftar?.find((l) => l.tipe === tipe);
 
 function Memuat() {
   return <p className="text-sm text-muted-foreground">Memuat data toko...</p>;
@@ -75,7 +107,8 @@ export function LangkahLokasiTersambung({
           { label: "Alamat", nilai: ada.alamat || "-" },
           { label: "Radius absen", nilai: `${ada.radiusAbsen} meter` },
         ]}
-        catatan="Lokasi dan titik absen dapat diubah nanti dari menu Lokasi."
+        catatan="Lokasi dan titik absen dapat diubah dari halaman berikut."
+        tautan={[TAUTAN_LOKASI[jenis]]}
       />
     );
   }
@@ -121,7 +154,10 @@ export function LangkahBahanTersambung({
   adaResep,
   onPilihResep,
   ...umum
-}: PropsTersambung & { adaResep: boolean | null; onPilihResep: (ya: boolean) => void }) {
+}: PropsTersambung & {
+  adaResep: boolean | null;
+  onPilihResep: (ya: boolean) => void;
+}) {
   const daftar = useDaftarBahanBaku();
   const buat = useBuatBahanBaku();
   const hapus = useHapusBahanBaku();
@@ -149,14 +185,18 @@ export function LangkahBahanTersambung({
   );
 }
 
-export function LangkahProdukTersambung({ adaResep, ...umum }: PropsTersambung & { adaResep: boolean | null }) {
+export function LangkahProdukTersambung({
+  adaResep,
+  ...umum
+}: PropsTersambung & { adaResep: boolean | null }) {
   const produk = useDaftarProduk();
   const kategori = useDaftarKategori();
   const bahan = useDaftarBahanBaku();
   const simpan = useSimpanProduk();
   const hapus = useHapusProduk();
   const segarkan = useSegarkanSetup();
-  if (produk.isLoading || kategori.isLoading || bahan.isLoading) return <Memuat />;
+  if (produk.isLoading || kategori.isLoading || bahan.isLoading)
+    return <Memuat />;
   const daftarKategori = kategori.data ?? [];
   const daftarBahan = bahan.data ?? [];
   return (
@@ -179,31 +219,32 @@ export function LangkahProdukTersambung({ adaResep, ...umum }: PropsTersambung &
   );
 }
 
-/** Pajak: setup cukup satu pajak aktif; pajak lain ditambahkan dari halaman Pajak. */
+/**
+ * Pajak: langkah daftar (keputusan pemilik proyek, 5 November 2026). Pajak
+ * pertama langsung melanjutkan; sesudahnya pajak tersimpan tampil dan
+ * dapat ditambah.
+ */
 export function LangkahPajakTersambung(umum: PropsTersambung) {
   const daftar = useDaftarPajak();
   const buat = useBuatPajak();
   const segarkan = useSegarkanSetup();
   if (daftar.isLoading) return <Memuat />;
-  const aktif = (daftar.data ?? []).filter((p) => p.statusPajak);
-  if (aktif.length > 0) {
-    return (
-      <LangkahTersimpan
-        {...umum}
-        judul="Pajak"
-        baris={aktif.map((p) => ({ label: p.namaPajak, nilai: `${p.tarifPajak}%` }))}
-        catatan="Pajak lain dapat ditambahkan dan diubah nanti dari halaman Pajak."
-      />
-    );
-  }
+  const pajak = daftar.data ?? [];
   return (
     <LangkahPajak
       {...umum}
       awal={null}
+      tersimpan={pajak.map((p) => ({
+        id: p.id,
+        label: p.namaPajak,
+        keterangan: `${p.tarifPajak}%, ${p.statusPajak ? "aktif" : "nonaktif"}`,
+      }))}
+      adaAktif={pajak.some((p) => p.statusPajak)}
+      onSelesai={umum.onLanjut}
       onLanjut={async (nilai) => {
         await buat.mutateAsync(payloadBuatPajak(nilai));
         await segarkan();
-        umum.onLanjut();
+        if (pajak.length === 0) umum.onLanjut();
       }}
     />
   );
@@ -233,11 +274,30 @@ export function LangkahBookingTersambung({
         {...umum}
         judul="Sesi booking"
         baris={[
-          { label: "Tipe aset", nilai: (tipe.data ?? []).map((t) => t.namaTipeAset).join(", ") },
-          { label: "Aset", nilai: (aset.data ?? []).map((a) => a.namaAset).join(", ") },
-          { label: "Tarif", nilai: (tarif.data ?? []).map((t) => t.namaTarif).join(", ") },
+          {
+            label: "Tipe aset",
+            nilai: (tipe.data ?? []).map((t) => t.namaTipeAset).join(", "),
+          },
+          {
+            label: "Aset",
+            nilai: (aset.data ?? []).map((a) => a.namaAset).join(", "),
+          },
+          {
+            label: "Tarif",
+            nilai: (tarif.data ?? []).map((t) => t.namaTarif).join(", "),
+          },
         ]}
-        catatan="Aset dan tarif lain dapat ditambahkan nanti dari menu Reservasi."
+        catatan="Aset dan tarif dapat diubah atau ditambah dari halaman berikut."
+        tautan={[
+          {
+            href: "/dashboard/outlet/reservasi/aset",
+            teks: "Ubah di halaman Aset",
+          },
+          {
+            href: "/dashboard/outlet/reservasi/tarif",
+            teks: "Ubah di halaman Tarif",
+          },
+        ]}
       />
     );
   }
@@ -247,12 +307,26 @@ export function LangkahBookingTersambung({
       awal={null}
       onLewati={onLewati}
       onLanjut={async (n) => {
-        const tipeAda = (tipe.data ?? []).find((t) => sama(t.namaTipeAset, n.namaTipeAset));
+        const tipeAda = (tipe.data ?? []).find((t) =>
+          sama(t.namaTipeAset, n.namaTipeAset),
+        );
         const tipeAsetID =
-          tipeAda?.id ?? (await simpanTipe.mutateAsync({ data: { namaTipeAset: n.namaTipeAset.trim() } })).id;
-        const asetAda = (aset.data ?? []).find((a) => sama(a.namaAset, n.namaAset));
-        if (!asetAda) await simpanAset.mutateAsync({ data: { namaAset: n.namaAset.trim(), tipeAsetID } });
-        await simpanTarif.mutateAsync({ data: payloadTarifSetup(n, tipeAsetID) });
+          tipeAda?.id ??
+          (
+            await simpanTipe.mutateAsync({
+              data: { namaTipeAset: n.namaTipeAset.trim() },
+            })
+          ).id;
+        const asetAda = (aset.data ?? []).find((a) =>
+          sama(a.namaAset, n.namaAset),
+        );
+        if (!asetAda)
+          await simpanAset.mutateAsync({
+            data: { namaAset: n.namaAset.trim(), tipeAsetID },
+          });
+        await simpanTarif.mutateAsync({
+          data: payloadTarifSetup(n, tipeAsetID),
+        });
         await segarkan();
         umum.onLanjut();
       }}
@@ -286,12 +360,16 @@ export function SelesaiTersambung({
         kategori: kategori.data?.length ?? 0,
         produk: produk.data?.length ?? 0,
         bahan: bahan.data?.length ?? 0,
-        pajak: pajakAktif ? `${pajakAktif.namaPajak} ${pajakAktif.tarifPajak}%` : null,
-        booking: asetPertama && tarifPertama ? `${asetPertama.namaAset}, tarif ${tarifPertama.namaTarif}` : null,
+        pajak: pajakAktif
+          ? `${pajakAktif.namaPajak} ${pajakAktif.tarifPajak}%`
+          : null,
+        booking:
+          asetPertama && tarifPertama
+            ? `${asetPertama.namaAset}, tarif ${tarifPertama.namaTarif}`
+            : null,
         gudang: lokasiBertipe(lokasi.data, "Gudang")?.nama ?? null,
         dilewati,
       }}
     />
   );
 }
-

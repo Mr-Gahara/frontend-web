@@ -1,10 +1,12 @@
+import Link from "next/link";
 import { JudulLangkah, NavigasiLangkah } from "./bagian";
 
 /**
  * Langkah satu data yang sudah tersimpan di server (nama toko, Owner,
  * lokasi, pajak, sesi booking, gudang): ringkasannya ditampilkan alih-alih
- * form, agar wizard yang dibuka ulang tidak membuat data kedua. Perubahan
- * dilakukan dari dashboard.
+ * form, agar wizard yang dibuka ulang tidak membuat data kedua. Tautan
+ * mengarah ke halaman modul untuk memperbaikinya (keputusan pemilik
+ * proyek, 5 November 2026).
  */
 export function LangkahTersimpan({
   nomor,
@@ -12,7 +14,7 @@ export function LangkahTersimpan({
   judul,
   baris,
   catatan,
-  teksLanjut,
+  tautan = [],
   onLanjut,
   onKembali,
 }: {
@@ -21,7 +23,9 @@ export function LangkahTersimpan({
   judul: string;
   baris: { label: string; nilai: string }[];
   catatan: string;
-  teksLanjut: string;
+  tautan?: { href: string; teks: string }[];
+  /** Diabaikan: tidak ada yang disimpan, jadi tombolnya Lanjut atau Selesaikan. */
+  teksLanjut?: string;
   onLanjut: () => void;
   onKembali?: () => void;
 }) {
@@ -37,7 +41,25 @@ export function LangkahTersimpan({
         ))}
       </dl>
       <p className="text-sm leading-normal text-muted-foreground">{catatan}</p>
-      <NavigasiLangkah onKembali={onKembali} onLanjut={onLanjut} teksLanjut={teksLanjut} />
+      {tautan.length > 0 && (
+        <ul className="flex flex-wrap gap-x-5 gap-y-2">
+          {tautan.map((t) => (
+            <li key={t.href}>
+              <Link
+                href={t.href}
+                className="rounded-sm text-sm font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+              >
+                {t.teks}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+      <NavigasiLangkah
+        onKembali={onKembali}
+        onLanjut={onLanjut}
+        teksLanjut={nomor === total ? "Selesaikan" : "Lanjut"}
+      />
     </div>
   );
 }

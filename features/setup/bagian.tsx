@@ -27,7 +27,9 @@ export function JudulLangkah({
         {catatan ? ", " + catatan : ""}
       </p>
       <h1 className="text-3xl font-bold tracking-tight">{judul}</h1>
-      <p className="text-[15px] leading-normal text-muted-foreground">{keterangan}</p>
+      <p className="text-[15px] leading-normal text-muted-foreground">
+        {keterangan}
+      </p>
     </div>
   );
 }
@@ -73,7 +75,12 @@ export function NavigasiLangkah({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       {onKembali ? (
-        <button type="button" onClick={onKembali} disabled={sibuk} className={KELAS_TOMBOL_KEDUA}>
+        <button
+          type="button"
+          onClick={onKembali}
+          disabled={sibuk}
+          className={KELAS_TOMBOL_KEDUA}
+        >
           Kembali
         </button>
       ) : (
@@ -81,7 +88,12 @@ export function NavigasiLangkah({
       )}
       <div className="flex flex-wrap items-center gap-3">
         {onLewati && (
-          <button type="button" onClick={onLewati} disabled={sibuk} className={KELAS_TOMBOL_KEDUA}>
+          <button
+            type="button"
+            onClick={onLewati}
+            disabled={sibuk}
+            className={KELAS_TOMBOL_KEDUA}
+          >
             Lewati, lengkapi nanti
           </button>
         )}
@@ -144,11 +156,17 @@ export function PilihanTombol<T extends string>({
               onClick={() => onUbah(o.nilai)}
               className={
                 "flex min-h-12 flex-[1_1_11rem] cursor-pointer flex-col items-start justify-center gap-0.5 rounded-xl px-4 py-2.5 text-left text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel " +
-                (aktif ? "border-2 border-navy bg-gading" : "border border-input bg-permukaan")
+                (aktif
+                  ? "border-2 border-navy bg-gading"
+                  : "border border-input bg-permukaan")
               }
             >
               <span className="text-[15px] font-semibold">{o.label}</span>
-              {o.keterangan && <span className="text-[13px] text-muted-foreground">{o.keterangan}</span>}
+              {o.keterangan && (
+                <span className="text-[13px] text-muted-foreground">
+                  {o.keterangan}
+                </span>
+              )}
             </button>
           );
         })}
@@ -165,7 +183,8 @@ export function DaftarTambahan({
 }: {
   judul: string;
   butir: { id: string; label: string; keterangan?: string }[];
-  onHapus: (id: string) => void;
+  /** Tanpa onHapus, butir hanya ditampilkan. */
+  onHapus?: (id: string) => void;
 }) {
   if (butir.length === 0) return null;
   return (
@@ -181,16 +200,22 @@ export function DaftarTambahan({
           >
             <span className="flex min-w-0 flex-col">
               <span className="text-[15px] font-semibold">{b.label}</span>
-              {b.keterangan && <span className="text-[13px] text-muted-foreground">{b.keterangan}</span>}
+              {b.keterangan && (
+                <span className="text-[13px] text-muted-foreground">
+                  {b.keterangan}
+                </span>
+              )}
             </span>
-            <button
-              type="button"
-              aria-label={"Hapus " + b.label}
-              onClick={() => onHapus(b.id)}
-              className="flex h-11 w-11 flex-none cursor-pointer items-center justify-center rounded-full hover:bg-krem focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"
-            >
-              <X className="h-4 w-4" aria-hidden="true" />
-            </button>
+            {onHapus && (
+              <button
+                type="button"
+                aria-label={"Hapus " + b.label}
+                onClick={() => onHapus(b.id)}
+                className="flex h-11 w-11 flex-none cursor-pointer items-center justify-center rounded-full hover:bg-krem focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+            )}
           </li>
         ))}
       </ul>

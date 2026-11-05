@@ -140,6 +140,13 @@ test.describe("Wizard setup", () => {
         await expect(langkahAktif(page)).toContainText("Bahan baku", { timeout: 15_000 });
         await page.getByRole("button", { name: "Kembali" }).click();
         await expect(page.getByRole("region", { name: "Kategori ditambahkan" })).toContainText("Kopi");
+        await page.getByRole("button", { name: "Kembali" }).click();
+        await expect(page.getByText("Kopi Senja Pontianak Kota")).toBeVisible();
+        await expect(page.getByRole("link", { name: "Ubah di Profil Toko" })).toHaveAttribute(
+          "href",
+          "/dashboard/outlet/pengaturan/toko",
+        );
+        await page.getByRole("button", { name: "Lanjut", exact: true }).click();
         await lanjut(page).click();
       });
 
@@ -216,9 +223,22 @@ test.describe("Wizard setup", () => {
         await expect(page.getByText(/Setup sesi booking dan gudang dilewati/)).toBeVisible();
       });
 
-      await test.step("wizard dibuka lagi mulai dari sesi booking", async () => {
+      await test.step("wizard dibuka lagi mulai dari sesi booking; pajak dapat ditambah", async () => {
         await page.goto("/setup");
         await expect(langkahAktif(page)).toContainText("Sesi booking", { timeout: 15_000 });
+        await page.getByRole("button", { name: "Kembali" }).click();
+        const tersimpan = page.getByRole("region", { name: "Pajak tersimpan" });
+        await expect(tersimpan).toContainText("PB1");
+        await page.getByLabel("Nama pajak").fill("Pajak minuman");
+        await page.getByLabel("Tarif (%)").fill("5");
+        await page.getByRole("button", { name: "Produk tertentu" }).click();
+        const tPajak = tunggu(page, "POST", /\/api\/pajak$/);
+        await page.getByRole("button", { name: "Tambah pajak" }).click();
+        expect((await tPajak).status(), "POST /pajak kedua").toBe(201);
+        await expect(tersimpan.getByRole("listitem")).toHaveCount(2);
+        await expect(page.getByLabel("Nama pajak")).toHaveValue("");
+        await lanjut(page).click();
+        await expect(langkahAktif(page)).toContainText("Sesi booking");
         await page.getByLabel("Nama tipe aset").fill("Meja biliar");
         await page.getByLabel("Nama aset").fill("Meja 1");
         await page.getByLabel("Nama tarif").fill("Reguler");
@@ -228,6 +248,12 @@ test.describe("Wizard setup", () => {
         const tarif = await tTarif;
         expect(tarif.status(), "POST /tarif").toBe(201);
         expect(tarif.request().postDataJSON()).toMatchObject({ namaTarif: "Reguler", harga: 30000, isActive: true });
+        await page.getByRole("button", { name: "Kembali" }).click();
+        await expect(page.getByRole("link", { name: "Ubah di halaman Tarif" })).toHaveAttribute(
+          "href",
+          "/dashboard/outlet/reservasi/tarif",
+        );
+        await page.getByRole("button", { name: "Lanjut", exact: true }).click();
       });
 
       await isiLokasi(page, "gudang", "Gudang E2E");

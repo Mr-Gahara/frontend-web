@@ -112,7 +112,6 @@ function WizardSetup({ status, onBertindak }: { status: StatusSetup; onBertindak
     onLanjut: maju,
   };
   const kunci = langkah[indeks]?.kunci;
-  const teksLanjutTersimpan = indeks === langkah.length - 1 ? "Selesaikan" : "Lanjut";
 
   let isi: ReactNode;
   switch (kunci) {
@@ -120,7 +119,6 @@ function WizardSetup({ status, onBertindak }: { status: StatusSetup; onBertindak
       isi = selesai.toko ? (
         <LangkahTersimpan
           {...umum}
-          teksLanjut={teksLanjutTersimpan}
           judul="Nama toko"
           baris={[{ label: "Nama toko", nilai: namaToko.data || "-" }]}
           catatan="Nama toko dapat diubah nanti dari Profil Toko."
@@ -140,7 +138,6 @@ function WizardSetup({ status, onBertindak }: { status: StatusSetup; onBertindak
       isi = selesai.owner ? (
         <LangkahTersimpan
           {...umum}
-          teksLanjut={teksLanjutTersimpan}
           judul="Owner toko"
           baris={[{ label: "Owner", nilai: "Sudah terdaftar, masuk dengan nama dan PIN" }]}
           catatan="Nama dan PIN Owner dapat diubah nanti dari menu Pengguna."
