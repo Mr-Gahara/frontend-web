@@ -64,6 +64,13 @@ Selesai 5 November 2026:
    PIN (`41194b7`); tautan Daftar di login akun (`4322dba`); pajak dapat
    ditambah dan ringkasan bertautan (`493f49c`). Keputusan WS1a sampai
    WS5a di `modul/setup-akun.md`.
+7. Penyaringan per plan (B216, B224, B234): menu dan rute fitur di luar
+   plan disembunyikan dengan ajakan naik plan, setup fitur yang belum
+   selesai tampil sebagai ajakan Lengkapi setup, dan banner dashboard
+   outlet (`8d0f1dd`). Keputusan PF1a sampai PF6a di
+   `modul/setup-akun.md`. Suite penuh 554 lolos, 1 skipped, 2 gagal dari
+   557; locator admin diperbaiki di `2d3344b`, dan waktu penjualan lolos
+   12 dari 12 saat diulang.
 
 Urutan berikutnya, semuanya sudah disetujui pemilik proyek pada 4
 November 2026:
@@ -96,7 +103,8 @@ November 2026:
    Y4 dan tidak ditampilkan seolah tersimpan (TP4a). Pemulihan sesi saat
    `/setup` dimuat ulang perlu diperiksa, karena token hanya di memori.
    Sesudahnya tautan "Daftar" di login akun dipasang.
-5. **Penyaringan per plan** (B214, B216, B224): menu dan halaman sesi
+5. Selesai di `8d0f1dd` (di atas).
+   **Penyaringan per plan** (B214, B216, B224): menu dan halaman sesi
    booking disembunyikan untuk Basic dari `langganan.plan` di token
    pengguna, dan 403 `PLAN_TIDAK_MENCAKUP` serta
    `SETUP_FITUR_BELUM_SELESAI` ditampilkan sebagai ajakan upgrade atau

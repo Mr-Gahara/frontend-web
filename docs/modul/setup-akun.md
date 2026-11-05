@@ -226,6 +226,26 @@ dan token warna yang sudah ada.
 - **WS4a: setup fitur boleh dilewati** dengan "Lewati, lengkapi nanti";
   fiturnya terkunci sampai dilengkapi dari `/setup`. Setup yang tuntas
   mengalihkan `/setup` ke dashboard.
+- **PF1a: menu fitur di luar plan disembunyikan** (sesi booking untuk
+  Basic; gudang untuk Basic dan Advanced): Sesi Booking & Reservasi,
+  Pengajuan, Terima, dan Kirim Barang, ruang gudang, dan Setup Gudang
+  Baru. Pembelian Stok outlet ada di semua plan. URL langsung menampilkan
+  ajakan naik plan dari gerbang rute tanpa memasang isinya (pemilik
+  proyek, 5 November 2026, `8d0f1dd`).
+- **PF2a: ajakan naik plan menuju halaman Langganan** bagi pemegang
+  `read-langganan`; pengguna lain diminta menghubungi pemilik toko.
+- **PF3a: setup fitur yang belum selesai tampil sebagai ajakan Lengkapi
+  setup ke `/setup`** di halaman fitur yang terkunci (timeline Reservasi,
+  Pengajuan, Terima, dan Kirim Barang), bukan "Gagal memuat data",
+  ditambah banner di dashboard outlet.
+- **PF4a: panel Status Venue dan bagian Sesi Booking di detail penjualan
+  disembunyikan** untuk plan tanpa sesi booking; panel venue mengajak
+  melengkapi setup bila setupnya belum selesai.
+- **PF5a: ruang gudang Pro tanpa gudang tetap ke Setup Gudang**
+  (`/dashboard/gudang/setup`), bukan ajakan ke `/setup`.
+- **PF6a: banner Lengkapi setup hanya bagi pemegang izin buat data setup
+  fitur itu**: tipe aset, aset, dan tarif untuk sesi booking, dan
+  `create-location` untuk gudang.
 - **TP6a: verifikasi email dan lupa password** (`6db571d`).
   `/daftar/verifikasi?email=` berisi isian kode enam kotak (pindah
   otomatis, hapus mundur, dan tempel) dan kirim ulang berhitung mundur;
@@ -257,7 +277,7 @@ dan token warna yang sudah ada.
 | Wizard fase akun | Nama toko (`POST /tenant`), lalu Owner (`register-owner`, 409 bila sudah ada, B195). Tampilan pratinjau kedua fase wizard ada di `/setup` (`50c99ae`), belum ditautkan Tersambung di `41194b7`, dibuka dari login akun lewat `requireSetup`. | Akun | Tersambung (`41194b7`) |
 | Wizard fase Owner | Lokasi outlet, kategori, bahan baku bila ada resep, produk, dan pajak; Advanced dan Pro: tipe aset, aset, tarif; Pro: gudang Tersambung di `41194b7`, dengan stok minimal produk (B237, B238). | Pengguna | Tersambung (`41194b7`) |
 | Langganan | Plan, masa berlaku, perbandingan plan, riwayat, dan kontak admin lewat WhatsApp. Tampilan pratinjau ada di Pengaturan (`2716f86`), hanya Owner (LG2a) Sejak `c868870` datanya dari `GET /akun/langganan` dan bergerbang `read-langganan` (B229). | Pengguna | Tersambung (`c868870`) |
-| Penyaringan per plan | Menu, halaman, dan tombol di luar plan atau yang setup fiturnya belum selesai | Pengguna | N1, N2, Y1 |
+| Penyaringan per plan | Menu, halaman, dan tombol di luar plan atau yang setup fiturnya belum selesai Tersambung di `8d0f1dd` (PF1a sampai PF6a). | Pengguna | Tersambung (`8d0f1dd`) |
 | Panel admin | Plan dan durasi saat membuat akun dan memperpanjang langganan Sejak `468a3bd` juga Ubah Plan, serta plan di daftar, detail, dan riwayat. | Akun admin | Tersambung (`475bf0b`, `468a3bd`) |
 
 ## Fakta backend

@@ -12,6 +12,18 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per penyaringan per plan** (commit `8d0f1dd`, 5 November
+2026, pukul 13.36 sampai 14.16 WIB): 925 test unit dan integrasi lolos;
+e2e 554 lolos, 1 skipped, dan 2 gagal dari 557. Kegagalan pertama:
+locator tautan `tes1@gmail.com` di spec langganan admin ikut cocok dengan
+`tokotes1@gmail.com`, akun uji manual pemilik proyek; diperbaiki dengan
+`exact: true` di `2d3344b` (spec admin 21 lolos). Kegagalan kedua:
+"jam yang diubah kasir dikunci" di spec waktu penjualan, klik pilihan
+produk mendapati elemen tidak stabil lalu terlepas dari DOM; lolos 12
+dari 12 dengan `--repeat-each 3`, sehingga dinilai flaky. Judul skip
+tidak tercatat. Totalnya 557: 554 per hitungan sebelumnya, ditambah tiga
+skenario spec `tests/e2e/setup/plan-fitur.spec.ts`.
+
 **Baseline per wizard setup tersambung** (commit `4322dba`, 5 November
 2026): 920 test unit dan integrasi lolos. Suite e2e penuh tidak
 dijalankan; spec setup ditulis ulang ke alur nyata (6 skenario, lolos 12
@@ -309,6 +321,7 @@ terhitung di angka skipped pada baseline:
 |---|---|
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
 | Dua puluh skenario di `tests/e2e/admin/` (sesi, akun klien, langganan, dan kelola akun) | `.env.e2e` tidak berisi kredensial admin uji (PA5a). Tidak terjadi di mesin pemilik proyek, sehingga tidak terhitung di baseline |
+| Ketiga skenario `tests/e2e/setup/plan-fitur.spec.ts` | Sama: akun uji Basic, Advanced, dan Pro dibuat lewat API admin (`8d0f1dd`) |
 | Keenam skenario `tests/e2e/setup/setup.spec.ts` | Sama: akun uji wizard dibuat dan dihapus lewat API admin (`41194b7`). Sebelumnya spec pratinjau selalu berjalan |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
