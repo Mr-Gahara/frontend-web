@@ -242,7 +242,12 @@ async function request<T>(
     // Akun atau toko yang dibekukan, dan pengguna yang dinonaktifkan, tidak
     // dapat dipulihkan dengan mencoba ulang. Sesi diakhiri agar pengguna
     // tidak terjebak pada halaman yang seluruh datanya ditolak.
-    if (res.status === 403 && /dinonaktifkan|dibekukan|tidak aktif/i.test(pesan)) {
+    // Pengecualian: pin-login yang menolak pengguna non-aktif (B202) hanya
+    // menolak pengguna itu; akun toko tetap sah, sehingga pesannya tampil di
+    // halaman login pengguna dan pengguna lain tetap dapat masuk.
+    const penggunaNonaktifSaatLogin =
+      endpoint.includes("/pengguna/pin-login") && /akun pengguna sedang dinonaktifkan/i.test(pesan);
+    if (res.status === 403 && !penggunaNonaktifSaatLogin && /dinonaktifkan|dibekukan|tidak aktif/i.test(pesan)) {
       akhiriSesi();
       if (typeof window !== "undefined") window.location.href = "/login";
     }

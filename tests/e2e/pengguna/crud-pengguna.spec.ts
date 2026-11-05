@@ -1,5 +1,5 @@
 import { test, expect, Page } from "@playwright/test";
-import { masuk } from "../../helpers/masuk-uji";
+import { AKUN_UJI, isiLoginAkun, isiLoginPengguna, masuk } from "../../helpers/masuk-uji";
 
 // ============================================================
 // HELPER: Login
@@ -223,6 +223,46 @@ test.describe("E2E - Siklus Hidup Pengguna (CRUD)", () => {
     await test.step("Cleanup", async () => {
       await bersihkanPengguna(page, namaUpdate);
     });
+  });
+
+  test("pengguna non-aktif ditolak 403 saat login PIN dan tidak mendapat sesi (B202)", async ({ page, browser }) => {
+    test.setTimeout(90_000);
+    const nama = `E2E Nonaktif ${Date.now()}`;
+    await login(page);
+    await bukaHalamanPengguna(page);
+    await tambahPenggunaBaru(page, nama, "web");
+    const lain = await browser.newContext();
+    try {
+      await test.step("nonaktifkan lewat dialog edit", async () => {
+        await cariPengguna(page, nama);
+        const row = page.getByRole("row", { name: new RegExp(nama, "i") }).first();
+        await row.getByRole("button", { name: /buka menu/i }).click();
+        await page.getByRole("menuitem", { name: /^edit$/i }).click();
+        await page.getByRole("dialog").getByRole("combobox").nth(1).click();
+        await page.getByRole("option", { name: "Non-Aktif" }).click();
+        await page.getByRole("button", { name: /simpan/i }).click();
+        await expect(page.getByText(/pengguna berhasil diperbarui/i).first()).toBeVisible({ timeout: 10000 });
+      });
+
+      await test.step("login PIN di browser lain ditolak dengan pesan backend", async () => {
+        const halaman = await lain.newPage();
+        await halaman.goto("/login");
+        await isiLoginAkun(halaman, AKUN_UJI.email, AKUN_UJI.password);
+        await halaman.waitForURL("**/login/pengguna");
+        const tPin = halaman.waitForResponse((r) => /\/api\/pengguna\/pin-login$/.test(r.url()));
+        await isiLoginPengguna(halaman, nama, "777888");
+        const res = await tPin;
+        expect(res.status(), "pin-login pengguna non-aktif").toBe(403);
+        expect(await res.text(), "token tidak terbit").not.toContain("accessToken");
+        // Hanya pengguna itu yang ditolak: halaman tetap di login pengguna dengan
+        // pesan backend, dan sesi akun toko tidak diakhiri.
+        await expect(halaman.getByText("Akses ditolak. Akun pengguna sedang dinonaktifkan.")).toBeVisible();
+        await expect(halaman).toHaveURL(/\/login\/pengguna/);
+      });
+    } finally {
+      await lain.close();
+      await bersihkanPengguna(page, nama);
+    }
   });
 
   // ==========================================================
