@@ -290,6 +290,8 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
 - Register selalu 201 dengan email tersamar, tanpa id (B231). Login
   pendaftar belum terverifikasi 403 `EMAIL_BELUM_TERVERIFIKASI` (B232).
 - Pelanggan bawaan `Customer` (`isBawaan`) dibuat untuk setiap toko (B218).
+  Halaman pelanggan web menyembunyikan hapus dan isian selain nama untuk
+  pelanggan itu sejak `77d4380`.
 
 ## Pengujian OTP
 

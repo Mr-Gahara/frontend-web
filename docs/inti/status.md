@@ -52,6 +52,9 @@ Selesai 5 November 2026:
    plan di riwayat (`475bf0b`), lalu plan di buat akun, durasi 24 bulan,
    aksi Ubah Plan, plan opsional saat perpanjang, serta plan di daftar
    dan detail akun (`468a3bd`).
+4. Pelanggan bawaan (B218): Hapus disembunyikan, dialog ubah hanya
+   memuat nama, dan sel nama bertanda "Bawaan", karena tenant uji punya
+   pelanggan lama biasa yang juga bernama "Customer" (`77d4380`).
 
 Urutan berikutnya, semuanya sudah disetujui pemilik proyek pada 4
 November 2026:
@@ -65,7 +68,8 @@ November 2026:
    /admin/users/:id/plan`, plan opsional saat perpanjang, dan plan di
    daftar serta detail akun. `PILIHAN_DURASI_BULAN` dan
    `DurasiLangganan` masih 1, 3, 6, 12.
-2. **Pelanggan bawaan (B218)**: pelanggan `isBawaan` tidak dapat
+2. Selesai di `77d4380` (di atas).
+   **Pelanggan bawaan (B218)**: pelanggan `isBawaan` tidak dapat
    dihapus (409) dan hanya namanya yang boleh diubah; sembunyikan hapus
    dan field selain nama.
 3. **Dua jenis mutasi baru (B228)**: `SELISIH_KAS_MASUK` dan

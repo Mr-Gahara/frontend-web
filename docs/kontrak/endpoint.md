@@ -198,8 +198,8 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 |---|---|---|---|---|---|---|
 | GET | `/pelanggan` | authPengguna | `read-pelanggan` | `{ data }` | `id` | `features/pelanggan/api.ts` (tanpa query; backend menerima `q`, `tipePelanggan`, `page`, dan `limit`, dan menolak query lain dengan 400) |
 | POST | `/pelanggan` | authPengguna | `create-pelanggan` | - | - | `features/pelanggan/api.ts` |
-| PUT | `/pelanggan/:id` | authPengguna | `update-pelanggan` | - | - | `features/pelanggan/api.ts` |
-| DELETE | `/pelanggan/:id` | authPengguna | `delete-pelanggan` | - | - | `features/pelanggan/api.ts` |
+| PUT | `/pelanggan/:id` | authPengguna | `update-pelanggan` | - | - | `features/pelanggan/api.ts` (pelanggan `isBawaan` hanya boleh diubah namanya, field lain 400; B218) |
+| DELETE | `/pelanggan/:id` | authPengguna | `delete-pelanggan` | - | - | `features/pelanggan/api.ts` (pelanggan `isBawaan` 409, B218) |
 
 #### `/pembayaran`
 
