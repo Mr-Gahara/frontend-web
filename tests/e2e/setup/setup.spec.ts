@@ -252,6 +252,40 @@ test.describe("Wizard setup", () => {
     }
   });
 
+  test("Owner yang sudah didaftarkan tab lain dijawab 409 dan pesannya tampil (B195)", async ({ page }) => {
+    const { id } = await akunBaru(page, "owner409");
+    const tabLain = await page.context().newPage();
+    try {
+      await page.getByLabel("Nama toko").fill("Kopi Senja E2E");
+      await lanjut(page).click();
+      await expect(langkahAktif(page)).toContainText("Owner");
+      await tabLain.goto("/setup");
+      await expect(langkahAktif(tabLain)).toContainText("Owner", { timeout: 15_000 });
+
+      for (const tab of [page, tabLain]) {
+        await tab.getByLabel("Nama Owner").fill("Rina E2E");
+        await tab.getByLabel("PIN", { exact: true }).fill(PIN_OWNER);
+        await tab.getByLabel("Ulangi PIN").fill(PIN_OWNER);
+      }
+      // Membuka tab kedua memutar token akun, sehingga permintaan pertama tab
+      // ini dijawab 401 lalu diulang apiClient setelah refresh; yang dinilai
+      // jawaban akhirnya.
+      const akhir = (tab: typeof page) =>
+        tab.waitForResponse((r) => /\/api\/pengguna\/register-owner$/.test(r.url()) && r.status() !== 401);
+      const tPertama = akhir(page);
+      await lanjut(page).click();
+      expect((await tPertama).status()).toBe(201);
+
+      const tKedua = akhir(tabLain);
+      await lanjut(tabLain).click();
+      expect((await tKedua).status(), "toko sudah punya Owner").toBe(409);
+      await expect(tabLain.getByText("Owner sudah terdaftar untuk toko ini.")).toBeVisible();
+    } finally {
+      await tabLain.close();
+      await hapusAkunKlienUji(id, wajibAdmin());
+    }
+  });
+
   test("koordinat dijaga dua peringatan; Batal di pop up tidak menyimpan", async ({ page }) => {
     const { id } = await akunBaru(page, "koordinat");
     try {
