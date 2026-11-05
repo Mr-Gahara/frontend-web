@@ -155,6 +155,34 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
     });
   });
 
+  test("stok minimal: produk berstok di bawah batas ditandai Kritis dan tampil di tab Stok Kritis (B237)", async ({
+    page,
+  }) => {
+    const namaProduk = `Produk E2E Kritis ${Date.now()}`;
+    await login(page);
+    await bukaHalamanProduk(page);
+    await bukaBuatProduk(page);
+    await isiFormDasarProduk(page, { nama: namaProduk, hargaDasar: "10000", hargaJual: "15000" });
+    await page.locator("#stok").fill("3");
+    await page.getByLabel("Stok minimal").fill("5");
+    const tPost = page.waitForResponse((r) => r.request().method() === "POST" && /\/api\/produk$/i.test(r.url()));
+    await page.getByRole("button", { name: /simpan produk baru/i }).click();
+    const res = await tPost;
+    expect(res.status(), "POST /produk").toBe(201);
+    expect(res.request().postDataJSON()).toMatchObject({ stok: 3, stokMinimum: 5, isUnlimitedStok: false });
+    await page.waitForURL("**/inventaris/produk");
+    try {
+      await page.getByPlaceholder(/cari nama produk/i).fill(namaProduk);
+      const baris = page.getByRole("row", { name: new RegExp(namaProduk, "i") });
+      await expect(baris).toContainText("Kritis", { timeout: 15_000 });
+      await page.getByRole("button", { name: "Stok Kritis" }).click();
+      await expect(baris).toBeVisible();
+      await page.getByRole("button", { name: "Semua Produk" }).click();
+    } finally {
+      await hapusProduk(page, namaProduk);
+    }
+  });
+
   // ----------------------------------------------------------
   // [2] HAPPY PATH: Tambah produk dengan stok unlimited
   // ----------------------------------------------------------

@@ -17,6 +17,10 @@ export interface Produk {
   hargaDasar: number;
   stok: number;
   isUnlimitedStok?: boolean;
+  /** Batas stok kritis (B237); 0 berarti tidak dipantau. */
+  stokMinimum?: number;
+  /** Stok di bawah atau sama dengan batas; hanya produk berstok langsung (B237). */
+  isStokKritis?: boolean;
   /** Nama kategori hasil lookup; kosong bila kategorinya sudah dihapus. */
   kategori?: string;
   /** Id kategori mentah; produkService tidak mem-populate field ini. */

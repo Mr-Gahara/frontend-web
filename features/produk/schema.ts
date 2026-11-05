@@ -35,6 +35,8 @@ export const skemaProduk = z.object({
   hargaDasar: z.number().min(0, "Harga dasar tidak boleh negatif"),
   hargaJual: z.number().min(0, "Harga jual tidak boleh negatif"),
   stok: z.number().min(0, "Stok tidak boleh negatif"),
+  /** 0 berarti tidak dipantau (B237); hanya berlaku untuk produk berstok langsung. */
+  stokMinimum: z.number().min(0, "Stok minimal tidak boleh negatif"),
   isUnlimitedStok: z.boolean(),
   resep: z.array(skemaResep),
 });

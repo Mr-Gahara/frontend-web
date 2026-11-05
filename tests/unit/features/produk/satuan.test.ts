@@ -19,6 +19,7 @@ const nilai = (resep: NilaiFormProduk["resep"]): NilaiFormProduk => ({
   hargaDasar: 1000,
   hargaJual: 2000,
   stok: 0,
+  stokMinimum: 0,
   isUnlimitedStok: false,
   resep,
 });

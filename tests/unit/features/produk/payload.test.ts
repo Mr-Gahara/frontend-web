@@ -10,6 +10,7 @@ const dasar: NilaiFormProduk = {
   hargaDasar: 10000,
   hargaJual: 15000,
   stok: 25,
+  stokMinimum: 5,
   isUnlimitedStok: false,
   resep: [],
 };
@@ -17,6 +18,13 @@ const dasar: NilaiFormProduk = {
 const resep = [{ bahanBakuID: "b1", jumlah: 20, satuan: "gram" as const }];
 
 describe("susunPayloadProduk", () => {
+  it("stok minimal hanya dikirim untuk produk berstok langsung, termasuk 0 (B237)", () => {
+    expect(susunPayloadProduk(dasar, { resepAwalAda: false }).stokMinimum).toBe(5);
+    expect(susunPayloadProduk({ ...dasar, stokMinimum: 0 }, { resepAwalAda: false }).stokMinimum).toBe(0);
+    expect(susunPayloadProduk({ ...dasar, isUnlimitedStok: true }, { resepAwalAda: false })).not.toHaveProperty("stokMinimum");
+    expect(susunPayloadProduk({ ...dasar, resep }, { resepAwalAda: false })).not.toHaveProperty("stokMinimum");
+  });
+
   it("buat tanpa resep: resep tidak dikirim dan stok dipertahankan", () => {
     const payload = susunPayloadProduk(dasar, { resepAwalAda: false });
     expect(payload.resep).toBeUndefined();

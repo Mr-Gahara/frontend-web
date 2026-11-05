@@ -111,6 +111,7 @@ function nilaiAwalDari(produk?: Produk): NilaiFormProduk {
       hargaDasar: 0,
       hargaJual: 0,
       stok: 0,
+      stokMinimum: 0,
       isUnlimitedStok: false,
       resep: [],
     };
@@ -123,6 +124,7 @@ function nilaiAwalDari(produk?: Produk): NilaiFormProduk {
     hargaDasar: produk.hargaDasar,
     hargaJual: produk.hargaJual,
     stok: produk.stok,
+    stokMinimum: produk.stokMinimum ?? 0,
     isUnlimitedStok: produk.isUnlimitedStok ?? false,
     resep: produk.resep.map((r) => ({
       bahanBakuID: r.bahanBakuID,
@@ -610,6 +612,30 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                       </p>
                     )}
                   </div>
+                </div>
+
+                {/* Stok minimal (B237): 0 berarti tidak dipantau; hanya produk berstok langsung. */}
+                <div className="flex flex-col gap-1.5 mt-4">
+                  <label htmlFor="stokMinimum" className="text-sm font-bold text-navy">
+                    Stok minimal
+                  </label>
+                  <Input
+                    id="stokMinimum"
+                    type="number"
+                    {...register("stokMinimum", { setValueAs: keAngka })}
+                    className="bg-gading border-navy/20 text-navy placeholder:text-navy/30 font-mono font-bold focus-visible:ring-1 focus-visible:ring-navy disabled:opacity-50 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="0"
+                    disabled={hasResep || isUnlimitedStok}
+                  />
+                  {errors.stokMinimum ? (
+                    <span className="text-xs font-bold text-rose-500">{errors.stokMinimum.message}</span>
+                  ) : (
+                    <p className="text-xs font-medium text-navy/60 leading-relaxed">
+                      {hasResep || isUnlimitedStok
+                        ? "Hanya untuk produk berstok langsung; produk beresep dipantau lewat stok bahan bakunya."
+                        : "Produk ditandai kritis bila stoknya mencapai angka ini. Isi 0 bila tidak perlu dipantau."}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

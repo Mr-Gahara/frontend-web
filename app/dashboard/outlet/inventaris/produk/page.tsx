@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatRupiah } from "@/lib/format";
-import { ArrowUpDown, MoreHorizontal, Plus, Package, Infinity } from "lucide-react"; // <-- Import Infinity Icon
+import { AlertTriangle, ArrowUpDown, MoreHorizontal, Plus, Package, Infinity } from "lucide-react";
 
 export default function ProdukPage() {
   // 1. PROTEKSI HALAMAN
@@ -36,6 +36,7 @@ export default function ProdukPage() {
   const router = useRouter();
 
   const [deleteTarget, setDeleteTarget] = useState<Produk | null>(null);
+  const [tabKritis, setTabKritis] = useState(false);
 
   // =========================
   // QUERY PRODUK
@@ -152,17 +153,26 @@ export default function ProdukPage() {
             );
           }
 
-          // Render Normal
+          // Stok kritis dari backend (B237): stok di bawah atau sama dengan
+          // stok minimal, hanya untuk produk berstok langsung.
+          const kritis = row.original.isStokKritis === true;
           return (
-            <span
-              className={`rounded-md px-2 py-0.5 text-xs font-bold shadow-sm ${
-                isHabis
-                  ? "bg-red-100 text-red-700 border border-red-200"
-                  : "bg-navy/5 text-navy border border-navy/10"
-              }`}
-            >
-              {stok} item
-            </span>
+            <div className="flex flex-col items-start gap-1">
+              <span
+                className={`rounded-md px-2 py-0.5 text-xs font-bold shadow-sm ${
+                  isHabis || kritis
+                    ? "bg-red-100 text-red-700 border border-red-200"
+                    : "bg-navy/5 text-navy border border-navy/10"
+                }`}
+              >
+                {stok} item
+              </span>
+              {kritis && (
+                <span className="rounded-md border border-rose-200 bg-rose-50 px-1.5 text-[10px] font-semibold text-rose-600">
+                  Kritis
+                </span>
+              )}
+            </div>
           );
         },
       },
@@ -230,13 +240,36 @@ export default function ProdukPage() {
         </Button>
       </div>
 
+      {/* Tab cepat, sama dengan halaman Stok Saat Ini (B237) */}
+      <div className="flex items-center gap-2 border-b border-navy/10 pb-4">
+        <Button
+          variant="ghost"
+          onClick={() => setTabKritis(false)}
+          className={`rounded-full px-6 font-bold transition-all ${
+            !tabKritis ? "bg-navy text-white hover:bg-navy/90" : "text-navy/60 hover:text-navy hover:bg-navy/5"
+          }`}
+        >
+          Semua Produk
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={() => setTabKritis(true)}
+          className={`rounded-full px-6 font-bold transition-all flex items-center gap-2 ${
+            tabKritis ? "bg-rose-500 text-white hover:bg-rose-600" : "text-rose-500/70 hover:text-rose-600 hover:bg-rose-50"
+          }`}
+        >
+          <AlertTriangle className="w-4 h-4" />
+          Stok Kritis
+        </Button>
+      </div>
+
       {/* Tabel Wrapper (Card Cream Gelap) */}
       <div className="flex flex-col gap-4 w-full">
         <DataTable
           columns={columns}
-          data={produkList}
+          data={tabKritis ? produkList.filter((p) => p.isStokKritis) : produkList}
           loading={produkLoading}
-          emptyMessage="Belum ada produk. Silakan tambah produk baru."
+          emptyMessage={tabKritis ? "Tidak ada produk dengan stok kritis." : "Belum ada produk. Silakan tambah produk baru."}
           searchKey="namaProduk"
           searchPlaceholder="Cari nama produk..."
         />

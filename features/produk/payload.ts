@@ -34,6 +34,8 @@ export function susunPayloadProduk(
     stok: adaResep || isUnlimitedStok ? 0 : nilai.stok,
   };
 
+  // Stok minimal hanya bermakna untuk produk berstok langsung (B237); 0 berarti tidak dipantau.
+  if (!adaResep && !isUnlimitedStok) payload.stokMinimum = nilai.stokMinimum;
   if (adaResep || opsi.resepAwalAda) payload.resep = nilai.resep;
   if (adaResep && opsi.locationID) payload.locationID = opsi.locationID;
   return payload;
