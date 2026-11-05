@@ -153,6 +153,30 @@ test.describe("Mutasi arus kas", () => {
     await expect(barisTabel(page).filter({ hasText: "Pembatalan pembayaran" })).toHaveCount(isi.data.length);
   });
 
+  test("jenis selisih kas sesi kasir ditawarkan sesuai arah dan diterima server (B228)", async ({ page }) => {
+    await bukaMutasi(page);
+    for (const [arah, label, jenis, lawan] of [
+      ["Uang masuk", "Selisih kas lebih", "SELISIH_KAS_MASUK", "Selisih kas kurang"],
+      ["Uang keluar", "Selisih kas kurang", "SELISIH_KAS_KELUAR", "Selisih kas lebih"],
+    ] as const) {
+      await test.step(`${arah}: ${label}`, async () => {
+        await pemilih(page, "Arah").click();
+        await page.getByRole("option", { name: arah, exact: true }).click();
+        await pemilih(page, "Jenis").click();
+        await expect(page.getByRole("option", { name: lawan, exact: true })).toHaveCount(0);
+        const tJenis = page.waitForResponse(responsMutasi((q) => q.get("jenis") === jenis));
+        await page.getByRole("option", { name: label, exact: true }).click();
+        const respons = await tJenis;
+        expect(respons.status(), `jenis ${jenis} diterima server`).toBe(200);
+        const isi = (await respons.json()) as ResponsMutasi;
+        expect(isi.data.every((b) => b.jenis === jenis)).toBe(true);
+        if (isi.data.length > 0) {
+          await expect(barisTabel(page).filter({ hasText: label })).toHaveCount(isi.data.length, { timeout: 15_000 });
+        }
+      });
+    }
+  });
+
   test("ringkasan gabungan tanpa akun terpilih, lalu ringkasan akun saat satu akun dipilih (NZ1a)", async ({ page }) => {
     const tGabungan = page.waitForResponse(
       (r) => r.request().method() === "GET" && POLA_RINGKASAN_GABUNGAN.test(r.url()),

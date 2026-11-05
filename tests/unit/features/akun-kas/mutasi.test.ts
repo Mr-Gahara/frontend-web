@@ -68,17 +68,19 @@ describe("filterServerMutasi", () => {
 describe("arah dan jenis", () => {
   it("setiap jenis punya arah dan label", () => {
     expect(Object.keys(LABEL_JENIS).sort()).toEqual(Object.keys(ARAH_JENIS).sort());
-    expect(Object.keys(ARAH_JENIS)).toHaveLength(9);
+    expect(Object.keys(ARAH_JENIS)).toHaveLength(11);
   });
 
   it("pilihan jenis mengikuti arah", () => {
-    expect(pilihanJenis("")).toHaveLength(9);
+    expect(pilihanJenis("")).toHaveLength(11);
     expect(pilihanJenis("KELUAR")).toEqual([
       "VOID_PEMBAYARAN",
       "BEBAN",
       "TRANSFER_KELUAR",
       "VOID_TRANSFER_MASUK",
+      "SELISIH_KAS_KELUAR",
     ]);
+    expect(pilihanJenis("MASUK")).toContain("SELISIH_KAS_MASUK");
   });
 
   it("mengganti arah mengosongkan jenis yang tidak searah", () => {

@@ -22,6 +22,8 @@ export const ARAH_JENIS: Record<JenisMutasi, ArahMutasi> = {
   TRANSFER_MASUK: "MASUK",
   VOID_TRANSFER_KELUAR: "MASUK",
   VOID_TRANSFER_MASUK: "KELUAR",
+  SELISIH_KAS_MASUK: "MASUK",
+  SELISIH_KAS_KELUAR: "KELUAR",
 };
 
 export const LABEL_JENIS: Record<JenisMutasi, string> = {
@@ -34,6 +36,8 @@ export const LABEL_JENIS: Record<JenisMutasi, string> = {
   TRANSFER_MASUK: "Transfer masuk",
   VOID_TRANSFER_KELUAR: "Pembatalan transfer keluar",
   VOID_TRANSFER_MASUK: "Pembatalan transfer masuk",
+  SELISIH_KAS_MASUK: "Selisih kas lebih",
+  SELISIH_KAS_KELUAR: "Selisih kas kurang",
 };
 
 export const LABEL_ARAH: Record<ArahMutasi, string> = {
