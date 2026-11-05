@@ -12,6 +12,13 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per stok minimal produk** (commit `7d4c234`, 5 November
+2026): 926 test unit dan integrasi lolos. Suite e2e penuh tidak
+dijalankan sesudah `8d0f1dd`; spec terdampak: auth dan pengguna 76 lolos
+(`9a85817`, termasuk B202), setup dan plan-fitur 10 lolos (`eacb5ed`,
+termasuk B195), serta produk dan stok 37 lolos (`7d4c234`). Harapan suite
+penuh 560: 557 ditambah tiga skenario itu; angka itu hitungan.
+
 **Suite penuh per penyaringan per plan** (commit `8d0f1dd`, 5 November
 2026, pukul 13.36 sampai 14.16 WIB): 925 test unit dan integrasi lolos;
 e2e 554 lolos, 1 skipped, dan 2 gagal dari 557. Kegagalan pertama:
