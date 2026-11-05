@@ -108,7 +108,16 @@ sampai B180), hapus akun oleh Owner (B181), uji e2e pengguna nonaktif 403
 saat login PIN (B202), dan register Owner 409 bila toko sudah punya Owner
 (B195, masuk ke penyambungan wizard).
 
-Backend lokal di `ridho` lokal `4759208`, belum di-push ke
+Pada 5 November 2026 backend lokal di-fast-forward ke `nizar` `aa978cc`
+(memuat `yoga` `e37bf26`): Y4 stok minimal produk (B237, B238), Y5 WMS
+khusus Pro (B234 sampai B236), `GET /api/akun/me` (B240), pajak toko
+usang (B239), kunci izin cuti yang sudah diputuskan (B242), edit
+pengajuan stok atomik (B241), dan self-approve perangkat (B243, B244).
+Yang dipakai web masuk butir 4 (B237, B238, B240); B239, B242, B243, dan
+B244 tidak menyentuh web, dan B234 serta B235 tidak memutus apa pun
+karena akun uji Pro. Suite penuh 550 lolos dan 2 skipped dari 552.
+
+Backend lokal di `ridho` lokal `aa978cc`, belum di-push ke
 `origin/ridho` atas keputusan pemilik proyek (backend hanya diambil).
 Backend dijalankan dengan env inline agar `.env` backend tidak diubah
 (`inti/pengujian.md`, Menjalankan layanan uji). Kode backend tidak

@@ -12,6 +12,11 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per backend `ridho` lokal `aa978cc`** (di atas `d005d22`,
+5 November 2026, pukul 11.48 sampai 12.10 WIB): 550 lolos dan 2 skipped
+dari 552, tanpa kegagalan, sesuai harapan hitungan 552. Judul kedua skip
+tidak tercatat (reporter line). Vitest tetap 900.
+
 **Baseline per jenis mutasi selisih kas** (commit `d696354`, 5 November
 2026): 900 test unit dan integrasi lolos. Suite e2e penuh tidak
 dijalankan; spec terdampak `tests/e2e/keuangan` 35 lolos, termasuk

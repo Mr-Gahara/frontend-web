@@ -591,3 +591,22 @@ kasir.
 - **Suite e2e penuh tidak dijalankan ulang setelah perubahan web** atas
   perintah pemilik proyek; spec terdampak masing-masing lolos
   (`inti/pengujian.md`, Baseline).
+
+## Penyesuaian backend `ridho` lokal `aa978cc`
+
+Diminta pemilik proyek pada 5 November 2026 sebelum butir 4 (wizard):
+`nizar` maju 20 commit ke `aa978cc` dan memuat seluruh `yoga` `e37bf26`,
+sehingga cukup fast-forward.
+
+- **Backend hanya diambil**, seperti `4759208`: tanpa merge, tanpa
+  perubahan kode atau `.env`, dan `ridho` tidak di-push.
+- **Langkah sesudah tarik tanpa `db:setup-toko-lama`**, karena di basis
+  data lokal skrip itu ikut menandai akun pendaftar uji selesai setup.
+  `db:plan-toko-gudang` menaikkan 0 akun; seed, indeks, lokasi
+  penjualan, dan data bawaan tidak mengubah apa pun. Cache Redis izin
+  dihapus.
+- **Suite penuh sebelum kode web diubah**: 550 lolos dan 2 skipped dari
+  552, tanpa kegagalan.
+- **Tidak ada perubahan web tersendiri**: B237, B238 (stok minimal
+  produk dan syarat setup produk), dan B240 (`GET /api/akun/me`)
+  dikerjakan bersama wizard (butir 4).

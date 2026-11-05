@@ -210,6 +210,12 @@ perubahan lain. Langkah sesudah tarik kini tercatat di
 `db:lokasi-penjualan`, `db:data-bawaan` (N6), dan `db:setup-toko-lama`
 (Y2, P48). Seed menambah empat izin (164 nama, Owner 161), tanpa nama
 dibuang.
+Pada 5 November 2026 `nizar` maju 20 commit ke `aa978cc`, memuat seluruh
+`yoga` `e37bf26` (18 commit), sehingga `ridho` lokal di-fast-forward ke
+`aa978cc` tanpa di-push. Langkah sesudah tarik dijalankan kecuali
+`db:setup-toko-lama` (mengulangnya ikut menandai akun pendaftar uji),
+ditambah `db:plan-toko-gudang` yang baru (0 akun dinaikkan); seed tidak
+berubah (164 nama, Owner 161) dan tidak ada data yang diisi.
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari
