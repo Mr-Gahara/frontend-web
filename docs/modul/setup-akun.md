@@ -256,7 +256,12 @@ dan token warna yang sudah ada.
   kode benar memverifikasi lalu langsung login dengan password titipan di
   memori (`kredensial-daftar.ts`), lalu ke `/setup` bila `requireSetup`;
   tanpa titipan ke login. Login yang dijawab `EMAIL_BELUM_TERVERIFIKASI`
-  meminta kode baru lalu membuka isian kode.
+  meminta kode baru lalu membuka isian kode. Sejak `efb05db` (B248, pilihan
+  pemilik proyek 6 November 2026) password titipan ikut dikirim saat
+  verifikasi dan bertahan saat kode salah; tanpa titipan kode tidak
+  dikirim, dan halaman pindah ke login dengan pesan "Masuk lagi". Isian
+  password di halaman verifikasi untuk keadaan itu didesain pemilik
+  proyek.
 - **TP7a: halaman Langganan** (`2716f86`) di
   `/dashboard/outlet/pengaturan/langganan`, desain F: plan aktif dengan
   lencana masa percobaan, tanggal berakhir, sisa hari, dan bilah masa

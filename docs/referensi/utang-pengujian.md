@@ -463,8 +463,9 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   berikutnya mencatat judulnya (`referensi/playwright.md`).
 - **Kirim ulang kode belum diuji e2e** di verifikasi email maupun lupa
   password, karena tombolnya menunggu hitung mundur 60 detik; perlu
-  `page.clock`. Jalur verifikasi tanpa password titipan (halaman dimuat
-  ulang, lalu diarahkan ke login dengan pesan) juga belum diuji e2e.
+  `page.clock`. Jalur verifikasi tanpa password titipan (halaman dibuka
+  langsung, lalu diarahkan ke login dengan pesan) teruji e2e sejak
+  `efb05db`.
 - **Keadaan masa berlaku Langganan hanya teruji di unit test**: masa
   percobaan, bilah masa berlaku, masa akses lewat dan masa tenggang, serta
   Muat riwayat lainnya. Akun uji Pro tanpa batas waktu dengan satu catatan

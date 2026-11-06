@@ -107,6 +107,12 @@ Tertunda dari penyesuaian itu, atas keputusan pemilik proyek 6 November
   penuh (`kontrak/temuan.md` butir 171). Bagian tanpa UI, mengirim
   password titipan daftar atau login, dapat dikerjakan lebih dulu; bentuk
   isiannya diajukan lewat dialog sebelum ditulis.
+  Bagian tanpa UI selesai di `efb05db`: password titipan dikirim, titipan
+  bertahan saat kode salah, dan tanpa titipan halaman pindah ke login
+  dengan pesan "Masuk lagi" tanpa mengirim kode (pilihan pemilik proyek).
+  Pendaftaran web berjalan lagi. Yang tersisa isian password di halaman
+  verifikasi untuk keadaan tanpa titipan, yang didesain sendiri oleh
+  pemilik proyek.
 - **Laporan untuk tim backend**: disusun sekali jalan setelah pekerjaan
   backend dari audit selesai. Temuan baru tetap dicatat di
   `kontrak/temuan.md` begitu terverifikasi.
@@ -241,8 +247,8 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
   (`inti/backend.md`, Bila menemukan bug backend). Baris temuan belum
   ditulis di `kontrak/temuan.md`.
   Baris temuannya ditulis 6 November 2026 (butir 168 sampai 170). Bahan
-  laporan bertambah pembuktian B251 dari web (`a207fae`), lalu B248 dan
-  B250 setelah web mengerjakannya. Laporannya ditunda
+  laporan bertambah pembuktian B251 (`a207fae`) dan B248 (`efb05db`) dari
+  web, lalu B250 setelah web mengerjakannya. Laporannya ditunda
   sampai pekerjaan backend dari audit selesai, agar diserahkan sekali
   jalan (pemilik proyek, 6 November 2026).
 - `PUT /akun/admin/users/:id/plan` dan plan di buat akun, perpanjang,

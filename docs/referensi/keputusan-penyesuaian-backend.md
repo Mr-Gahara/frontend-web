@@ -640,7 +640,8 @@ aplikasi mobile) di bagian Nizar, serta B245 dan B246 dari Yoga.
 - **Perubahan web**: B251 (perpanjang bersamaan dijawab 409) di
   `a207fae`. B248 (verifikasi email wajib `password`) ditunda pemilik
   proyek karena butuh isian baru di halaman verifikasi
-  (`kontrak/temuan.md` butir 171). B247 dan B250 tidak mengubah web
+  (`kontrak/temuan.md` butir 171); bagian tanpa UI menyusul di `efb05db`
+  setelah suite penuh. B247 dan B250 tidak mengubah web
   sekarang dan dipakai di butir 6. B245, B246, dan B249 tidak menyentuh
   web: payload pengajuan web sudah sah, web tidak punya hapus lokasi, dan
   token web tidak membawa `installationId`.

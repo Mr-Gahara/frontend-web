@@ -12,6 +12,14 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per B248 tanpa UI** (commit `efb05db`, 6 November 2026): 928
+test unit dan integrasi lolos. Suite e2e penuh tidak dijalankan; spec
+terdampak `tests/e2e/auth` 58 lolos tanpa skip terhadap backend `ridho`
+`c031bde`, termasuk ketiga skenario B248 yang gagal di suite penuh 6
+November 2026. Ketiganya gagal bila perubahan kode dicabut. Jumlah
+skenario tetap; harapan suite penuh 564 lolos tanpa kegagalan B248
+(hitungan).
+
 **Baseline per utang pengujian 6 November 2026** (commit `e0d3bb4`):
 927 test unit dan integrasi lolos. Suite e2e penuh tidak dijalankan
 sesudah `a207fae`; spec terdampak: dashboard 10 lolos (`c6f9ec0`, tanggal
