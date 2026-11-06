@@ -452,3 +452,199 @@ dalam delapan commit, dengan keputusan PB1a sampai PB14a
 - Lima akun kas uji bersaldo yang tertinggal dihapus langsung dari basis
   data development beserta mutasi saldo awalnya (PB13a); setiap run kini
   meninggalkan satu akun kas uji non-aktif bersaldo 0.
+
+## Catatan dari perapian utang status 6 November 2026
+
+Dipindah dari `inti/status.md` (utang kecil) atas permintaan pemilik
+proyek. Setiap butir sudah selesai, tercatat di tempat lain, atau
+kembar dengan butir yang tetap terbuka; butir yang selesai sebagian
+diganti sisanya di `inti/status.md`. Butir terbuka yang meragukan
+dicek ulang terhadap kode web dan backend `ridho` `c031bde`.
+
+- Calon temuan untuk Ridho (tenant): `POST /tenant` memasang cookie refresh
+  akun bernama `refreshToken` di path `/`, sedangkan login akun memasangnya
+  di `/api/akun/auth` dan cookie refresh pengguna juga `refreshToken` di
+  `/`. `register-owner` sesudahnya menimpa cookie itu. Pemulihan sesi tetap
+  berjalan karena cookie login akun di path yang lebih khusus tetap
+  berlaku (`POST /tenant` tidak memutar `tokenVersion`); terbukti lewat
+  muat ulang di spec setup (`41194b7`). Belum dilaporkan. Dicatat
+  sebagai `kontrak/temuan.md` butir 168 (6 November 2026).
+  Tercatat sebagai `kontrak/temuan.md` butir 168; pelaporannya ikut
+  butir laporan untuk tim backend.
+- Riwayat admin tanpa label `ubah-plan` (butir 1 di atas). Selesai di
+  `475bf0b`: tipe `AksiLangganan` ganda di `types/adminAkun.ts` dibuang.
+- `db:data-bawaan` mencocokkan nama persis, jadi Toko3 yang sudah punya
+  metode tunai "CASH" dan kas fisik "kas kasir" mendapat metode "Tunai"
+  dan akun kas "Kas Kecil (Laci)" baru (dihitung baca-saja 4 November
+  2026: tiga metode berkategori tunai, tiga kas fisik aktif). Calon temuan
+  untuk Nizar (N6): skrip menggandakan metode tunai toko lama yang
+  namanya lain. Dicatat sebagai `kontrak/temuan.md` butir 169
+  (6 November 2026).
+  Tercatat sebagai `kontrak/temuan.md` butir 169.
+- Calon temuan kontrak untuk Nizar: `GET /akun/langganan` tidak memuat
+  penanda masa percobaan maupun awal masa berlaku, sehingga web
+  menyimpulkannya dari riwayat berhalaman (`ringkasLangganan`). Dicatat
+  sebagai `kontrak/temuan.md` butir 170 (6 November 2026).
+  Tercatat sebagai `kontrak/temuan.md` butir 170.
+- `PUT /akun/admin/users/:id/plan` dan plan di buat akun, perpanjang,
+  serta riwayat admin dicatat di `kontrak/endpoint.md` (5 November 2026).
+- Enam endpoint baru belum dicatat di `kontrak/endpoint.md`:
+  verifikasi email dan kirim ulangnya, lupa password, reset password,
+  langganan, dan riwayat langganan. Dicatat pada 5 November 2026.
+- Laporan penyesuaian ini ditulis ke dokumentasi backend di `128d0de`
+  (`arsip/laporan-backend.md`); butir 165 kini utang Yoga, karena Ridho
+  sementara tidak memegang backend.
+  Butir 165 milik Yoga tetap terbuka di utang `0024eb9`.
+- Laporan 28 Oktober 2026 belum tercatat di `arsip/laporan-backend.md`.
+  Dicatat pada 31 Oktober 2026.
+- Catatan untuk tim backend dari modul pembelian dan audit pergantian
+  hari (`kontrak/temuan.md` butir 154 sampai 162 dan 164) diserahkan ke
+  Yoga pada 26 Oktober 2026 dan dicatat di `arsip/laporan-backend.md`.
+- Sisi frontend: tab Keuangan tampil tanpa izin (butir 163), filter
+  periode bawaan tidak bergeser saat hari berganti, dan saldo akun kas
+  yang belum terpotong pembelian (`modul/inventaris.md`, Utang kecil
+  dari pembelian stok). Tab Keuangan disaring menurut izin halamannya
+  sejak `e051906` (butir 163 selesai).
+  Filter periode bawaan yang tidak bergeser disengaja (keputusan
+  rancangan butir 28). Saldo akun kas yang belum terpotong pembelian
+  tetap terbuka sebagai butir sendiri.
+- Halaman revisi surat jalan tidak memeriksa ruang pengirim: tombolnya
+  tersembunyi di ruang lawan (AR11a), tetapi URL-nya dapat dibuka
+  langsung. Selesai di `5ba2a42`: halaman revisi menolak ruang yang
+  bukan pengirim.
+- Stock opname, stock adjustment, surat jalan, dan pengajuan stok tetap
+  mode klien, karena backend belum punya pencarian teks
+  (`kontrak/temuan.md` butir 150). Paginasi B104 sampai B106 dipakai
+  bersama pencarian begitu tersedia (keputusan rancangan butir 27).
+  Pengajuan stok juga menunggu filter tab gabungan (butir 152).
+  Selesai di `98054b8` sampai `c2a1e73` (B108, keputusan rancangan butir
+  27), dan tab gabungan pengajuan disaring server di `ebf782b` (butir
+  152 selesai).
+- Kotak cari nama bahan jurnal stok disembunyikan sampai backend
+  menerima query pencarian (butir 150), lalu dikembalikan.
+  Dikembalikan bersama B108 (keputusan rancangan butir 27).
+- Lingkup per tipe lokasi dikirim sebagai satu `locationID` (MVP);
+  multi-lokasi menunggu filter tipe lokasi (butir 151).
+  Sama dengan butir jurnal stok di utang `0024eb9` (butir 151), yang
+  tetap terbuka di sana.
+- Pengajuan Outlet ke Gudang (P8 backend) belum tampil di web; alurnya
+  dikerjakan terpisah dengan pratinjau (`modul/inventaris.md`). Sampai
+  itu kartu pengajuan dashboard gudang dapat melebihi isi tab bila ada
+  pengembalian dari outlet.
+  Selesai di `621e753` sampai `a505783`. Yang tersisa: kartu siap surat
+  jalan menghitung pengembalian yang menunggu surat jalan outlet,
+  sedangkan tab gudang tidak (AR6a; utang kecil pengembalian, di atas).
+  Sisanya (AR6a) tetap terbuka di utang pengembalian Outlet ke Gudang.
+- `lokasiJurnalOutlet` dipindah ke `features/inventaris/cakupan.ts` bila
+  daftar lain ikut pindah ke server (keputusan rancangan butir 12).
+  Selesai di `21abcd8` sebagai `lokasiSatuOutlet`, dipakai jurnal stok
+  dan pembelian stok.
+- Belum dibuktikan dari web: penyaringan beban VOID di laporan laba rugi
+  (butir 132), cache daftar beban saat kategori berubah (butir 135),
+  penolakan beban saat saldo kurang atau akun nonaktif (butir 133), serta
+  bentuk `tanggal`, batas `keterangan`, dan pembatas laju beban (butir
+  137).
+  Dicocokkan dari kode (butir berikut); jalur e2e penolakan beban
+  tercatat di `referensi/utang-pengujian.md`.
+- Empat penjualan milik toko yang belum punya lokasi tetap tanpa
+  `locationID`, sesuai rancangan backend. Tenant uji tidak terdampak:
+  total dengan filter outletnya sama dengan total tenant (18 Oktober
+  2026).
+  Catatan keadaan data tanpa tindakan lanjutan.
+- Butir 132, 133, dan 135 dicocokkan dari kode `00de455` pada 18 Oktober
+  2026 (Catatan dari halaman pengeluaran). Yang tersisa dari butir 137:
+  batas tanggal masa depan, panjang keterangan, dan pembatas laju.
+  Ketiganya diperbaiki di `yoga` `186fa19` (B100) dan dibuktikan dari kode
+  `ridho` `af5f315` pada 19 Oktober 2026 (`kontrak/temuan.md` butir 137).
+- Pemilik proyek memutuskan untuk backend pada 17 Oktober 2026: tanggal
+  lampau di beban operasional dan jurnal transfer hanya untuk Owner, dan
+  peran lain memakai waktu server hari ini WIB. Halaman pengeluaran nanti
+  mengikuti aturan itu; Pindah Dana tidak terdampak karena tidak mengirim
+  tanggal (DN3a).
+  Diterapkan backend: jurnal transfer di `nizar` `96e890e` (B97) dan beban
+  operasional di `yoga` `186fa19` (B100), keduanya termuat di `ridho`
+  `af5f315`.
+  Sejak `6d07b8d` web mengirim waktu simpan untuk tanggal beban hari ini,
+  karena validator membaca `YYYY-MM-DD` sebagai 07.00 WIB
+  (`kontrak/temuan.md` butir 154).
+- Hapus bahan baku yang baru dibuat diperbaiki backend di `7d28135`
+  (`kontrak/temuan.md` butir 143), dan `test.fixme`-nya dilepas
+  (`cfaaa92`).
+- Cakupan daftar penjualan pindah ke filter server: syaratnya terpenuhi
+  di `7d28135` (butir 144), dan pekerjaannya dijadwalkan sesudah tabel
+  seragam (RG4a). Selesai di `20c026b`.
+- Izin pembelian stok belum masuk template role, dan modul pembelian
+  stok belum punya halaman di web (RH6a). Izin stock adjustment per
+  ruang juga belum masuk template role (RH3a).
+  Izin stock adjustment per ruang masuk template di `4088d9e`.
+  Halaman pembelian selesai di `0db77ed` sampai `1e4f042`, dan izinnya
+  masuk template di `5b8cbd9`.
+- Belum dicocokkan dari 42 commit backend: modul pembelian stok, dan
+  cache produk saat pajak berubah (`kontrak/README.md`).
+  Modul pembelian stok dicocokkan dari kode `b5b367a` saat halamannya
+  dibangun (`modul/inventaris.md`, Submodul pembelian stok); cache
+  produk saat pajak berubah belum.
+  Bagian modul pembelian stok selesai; cache produk saat pajak berubah
+  tetap terbuka sebagai butir sendiri.
+- Backend lokal berada di cabang `ridho` `8dc6211` (fast-forward ke
+  `origin/nizar`, sudah di-push). Setiap kali `yoga` atau `nizar` maju,
+  cabang itu digabung ulang dengan pemeriksaan kelengkapan
+  (`inti/backend.md`), lalu kontrak dicocokkan ulang. Cabang uji lokal
+  `uji-yoga-nizar` sudah dihapus (8 Oktober 2026).
+  Sejak 11 Oktober 2026 `ridho` berada di `2dd57aa`. Sejak 16 Oktober 2026
+  di `7d28135` (gabungan `yoga` `723b12f` dan `nizar` `38f523a`). Sejak
+  17 Oktober 2026 di `00de455`, fast-forward dua commit dokumen `nizar`.
+  Sejak 19 Oktober 2026 di `af5f315`, fast-forward ke `origin/yoga` yang
+  memuat `origin/nizar` (`referensi/keputusan-penyesuaian-backend.md`).
+  Sejak 21 Oktober 2026 di `b5b367a`, fast-forward ke `origin/yoga`.
+  Sejak 28 Oktober 2026 di `877e493`, dan sejak 30 Oktober 2026 di
+  `0024eb9` (`inti/backend.md`).
+  Riwayat posisi backend kini di `inti/backend.md` (Pemilik modul
+  backend); per 6 November 2026 `ridho` di `c031bde`.
+- Indeks pelanggan di basis data development belum sesuai skema
+  (`kontrak/temuan.md` butir 142); dibiarkan sebagai bukti sampai backend
+  menyediakan migrasi indeks.
+  Diselaraskan lewat `npm run db:indeks` pada 11 Oktober 2026 (butir 142
+  tertutup).
+- Penyesuaian terhadap `yoga` `55328f1` selesai di `50e6485` dan
+  `f64b518`. Yang tersisa: pengeluaran tetap ditunda sampai
+  `kontrak/temuan.md` butir 131 sampai 134 diperbaiki backend (NZ11a).
+  Butir itu diperbaiki di `7d28135` dan terbukti lewat permintaan nyata;
+  pengeluaran tetap ditunda sampai dijadwalkan pemilik proyek (RG6a).
+  Dijadwalkan sebagai pekerjaan berikutnya pada 18 Oktober 2026.
+  Selesai di `1d7fa7b` (BO3a sampai BO7a).
+- Izin beban operasional belum masuk template role (keputusan FC2a);
+  ditambahkan bersama halaman pengeluaran.
+  Ditambahkan di `61275ac`.
+- Setelah validator stock opname diperbaiki backend (`kontrak/temuan.md`
+  butir 22): balik `SERVER_TERIMA_HITUNGAN_KOSONG` menjadi true, tulis badan
+  `test.fixme` "hitungan tersimpan dapat dikosongkan kembali", dan pastikan
+  hanya field yang berubah yang terkirim.
+  Selesai di `d6f8ba0` (B98): penanganan sementaranya dihapus, bukan
+  dibalik, dan skenarionya menjadi langkah sungguhan.
+- `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700
+  baris (714) sejak penjaga ruang ditambahkan di `eb0181f`, lalu 712
+  baris setelah pemanggilan guard dibuang (`628f52e`), dan 702 per
+  `5b8cbd9`. Pisahkan dialog
+  aksi dan tabel hitungan saat halaman itu disentuh lagi.
+  Dialog aksi dipisah ke `features/stock-opname/dialog-aksi-opname.tsx`
+  di `a611b59` (612 baris); tabel hitungan tetap di halaman, karena
+  memisahkannya menyeret state hitungan tanpa manfaat baru.
+- Riwayat baseline lama masih di `referensi/playwright.md` (Perintah
+  verifikasi yang biasa dipakai); pindahkan ke arsip saat dokumen itu
+  disentuh. Baseline terkini ada di `inti/pengujian.md`.
+  Dijadwalkan sebagai pekerjaan berikutnya pada 22 Oktober 2026.
+  Selesai pada putaran dokumen 25 Oktober 2026 (`arsip/riwayat-pengujian.md`).
+- `inti/pengujian.md` melewati batas inti sekitar 400 baris; utang
+  pengujian yang sudah lunas dipindah ke arsip saat ditinjau.
+  Dijadwalkan sebagai pekerjaan berikutnya pada 22 Oktober 2026.
+  Selesai pada putaran dokumen 25 Oktober 2026 (`arsip/riwayat-pengujian.md`).
+- Satu skip bersyarat data bertambah di suite penuh `d6f8ba0`
+  dibanding hitungan, dan skenarionya belum diidentifikasi
+  (`inti/pengujian.md`, Baseline).
+  Teridentifikasi 21 Oktober 2026: "buat surat jalan gagal" di spec
+  alur pengajuan, dilewati karena tenant uji tidak punya pengajuan
+  APPROVED tanpa surat jalan.
+- Tombol urut kolom dibuang di stock adjustment dan stock opname, karena
+  urutan klien hanya mengurutkan satu halaman; urutan mengikuti backend.
+  Dicatat di keputusan rancangan butir 27.
