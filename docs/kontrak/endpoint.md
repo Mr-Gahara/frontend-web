@@ -24,7 +24,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 |---|---|---|---|---|---|---|
 | POST | `/akun/auth/login` | public | - | - | - | `features/auth/api.ts` |
 | POST | `/akun/auth/register` | public | - | - | - | `features/auth/api.ts` |
-| POST | `/akun/auth/verifikasi-email` | public | - | - | - | `features/auth/api.ts` (`{ email, otp }`; pembatas 10 per 15 menit per IP dan email; B232) |
+| POST | `/akun/auth/verifikasi-email` | public | - | - | - | `features/auth/api.ts` (`{ email, otp }`; pembatas 10 per 15 menit per IP dan email; B232). Sejak `nizar` `1901cdc` (B248, A-01) backend mewajibkan `{ email, otp, password }` dengan aturan password daftar, password itu menjadi password akun, dan `tokenVersion` diganti; tanpa `password` dijawab 400 "Password baru wajib diisi." sebelum OTP diperiksa. Web belum mengirimnya (`kontrak/temuan.md` butir 171) |
 | POST | `/akun/auth/verifikasi-email/kirim` | public | - | - | - | `features/auth/api.ts` (`{ email }`, selalu 200; pembatas 5 per 15 menit; B232) |
 | POST | `/akun/auth/lupa-password` | public | - | - | - | `features/auth/api.ts` (`{ email }`, selalu 200 dengan pesan yang sama; B217) |
 | POST | `/akun/auth/reset-password` | public | - | - | - | `features/auth/api.ts` (`{ email, otp, passwordBaru }`; OTP salah dan email tak terdaftar 400 yang sama; memutus seluruh sesi akun; B217) |
@@ -40,7 +40,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | DELETE | `/akun/admin/users/:id` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` (password admin di body) |
 | POST | `/akun/admin/users/:id/freeze` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` |
 | POST | `/akun/admin/users/:id/unfreeze` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` |
-| POST | `/akun/admin/users/:id/langganan` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` (`plan` opsional untuk ganti plan sekaligus, B213) |
+| POST | `/akun/admin/users/:id/langganan` | authAkun+adminOnly | - | - | - | `features/admin-akun/api.ts` (`plan` opsional untuk ganti plan sekaligus, B213). Perpanjang yang bersamaan dengan perpanjang lain dijawab 409 "Langganan baru saja diubah permintaan lain. Muat ulang lalu coba lagi." (B251, L-01); web memuat ulang akun dan riwayatnya saat aksi langganan ditolak 409 (`a207fae`) |
 | PUT | `/akun/admin/users/:id/plan` | authAkun+adminOnly | - | `{ data, message }` | `id` | `features/admin-akun/api.ts` (`{ plan, alasan? }`; masa akses tetap; plan yang sama 409; B213) |
 | GET | `/akun/admin/users/:id/langganan` | authAkun+adminOnly | - | `{ cursorBerikutnya, data, message, total }` | `id` (B155) | `features/admin-akun/api.ts` (query `cursor`; dibaca lewat `apiMentah.get`; item memuat `oleh` atau null, serta `planSebelum` dan `planSesudah` sejak B213) |
 
@@ -50,8 +50,8 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 |---|---|---|---|---|---|---|
 | GET | `/akunkas` | authPengguna | `read-akunkas` | `{ data }` | `id` | `features/akun-kas/api.ts` |
 | POST | `/akunkas` | authPengguna | `create-akunkas` | - | - | `features/akun-kas/api.ts` |
-| PUT | `/akunkas/:id` | authPengguna | `update-akunkas` | `{ data }` | `id` | `features/akun-kas/api.ts` (ubah isian, nonaktifkan, dan aktifkan kembali; tulisan dibatasi 30 per menit per pengguna) |
-| GET | `/akunkas/mutasi` | authPengguna | `read-akunkas` | `{ data, pagination }` | `id` | `features/akun-kas/api.ts` (query `page`, `limit`, `dari`, `sampai`, `akunKasID`, `arah`, dan `jenis`; jenis `SELISIH_KAS_MASUK` dan `SELISIH_KAS_KELUAR` dari sesi kasir sejak B228) |
+| PUT | `/akunkas/:id` | authPengguna | `update-akunkas` | `{ data }` | `id` | `features/akun-kas/api.ts` (ubah isian, nonaktifkan, dan aktifkan kembali; tulisan dibatasi 30 per menit per pengguna). Mengganti `tipeAkun` dari `Kas Fisik` pada akun yang dipetakan ke perangkat kasir dijawab 409 (B250, K-07); halaman ubah menampilkan pesan backend, belum dibuktikan karena web belum punya pemetaan perangkat |
+| GET | `/akunkas/mutasi` | authPengguna | `read-akunkas` | `{ data, pagination }` | `id` | `features/akun-kas/api.ts` (query `page`, `limit`, `dari`, `sampai`, `akunKasID`, `arah`, dan `jenis`; jenis `SELISIH_KAS_MASUK` dan `SELISIH_KAS_KELUAR` dari sesi kasir sejak B228). `referensi.tipe` selisih kasir untuk baris baru `SesiKasirBuka` atau `SesiKasirTutup` sejak `nizar` `709b24f` (B247, K-02), baris lama tetap `SesiKasir`; web belum membaca `referensi.tipe` |
 | GET | `/akunkas/:id/ringkasan` | authPengguna | `read-akunkas` | `{ data }` | - | `features/akun-kas/api.ts` (query `dari` dan `sampai`) |
 | GET | `/akunkas/ringkasan` | authPengguna | `read-akunkas` | `{ data }` | - | `features/akun-kas/api.ts` (query `dari` dan `sampai`; gabungan seluruh akun kas, sejak `d23844a`) |
 

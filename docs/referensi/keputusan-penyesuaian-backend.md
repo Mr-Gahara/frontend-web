@@ -610,3 +610,43 @@ sehingga cukup fast-forward.
 - **Tidak ada perubahan web tersendiri**: B237, B238 (stok minimal
   produk dan syarat setup produk), dan B240 (`GET /api/akun/me`)
   dikerjakan bersama wizard (butir 4).
+
+## Penyesuaian backend `ridho` `c031bde`
+
+Diminta pemilik proyek pada 6 November 2026 sebelum butir 6 (sesi
+kasir): `nizar` maju 18 commit ke `4d221f5` dan memuat seluruh `yoga`
+`cec04de`, sehingga lokal `ridho` cukup di-fast-forward dari `aa978cc`.
+Isinya perbaikan audit backend 5 November 2026 (laporan Ajis dari
+aplikasi mobile) di bagian Nizar, serta B245 dan B246 dari Yoga.
+
+- **Backend diambil lalu di-push atas perintah pemilik proyek.** Satu
+  commit dokumen ditambahkan di atas `4d221f5`: paket AR26 di
+  `docs/pengembangan/status/ridho.md` backend untuk temuan audit A-06
+  (cache sesi pengguna saat perangkat pertama dipercaya), yang akan
+  dikerjakan pemilik proyek sendiri saat kembali memegang backend.
+  `ridho` di-push ke `c031bde` agar Yoga dan Nizar menarik dari cabang
+  itu. A-05 diserahkan pemilik proyek langsung ke Nizar, tanpa catatan.
+  Kode dan `.env` backend tetap tidak diubah.
+- **Langkah sesudah tarik tidak dijalankan**: seed tidak menambah atau
+  membuang nama izin (hanya membersihkan cache izin di Redis), dan tidak
+  ada model maupun skrip migrasi baru.
+- **Kesembilan temuan audit yang dialamatkan Nizar ke Ridho dan Yoga
+  dicek ulang dari kode `4d221f5`** (D-01, D-02, D-03, D-05, D-06, A-05,
+  A-06, P-01, P-02): seluruhnya masih ada. Pembagian Nizar benar kecuali
+  A-05, yang barisnya berasal dari commit Nizar `30b1e9f` (Y1) dan
+  diserahkan pemilik proyek ke Nizar; A-06 dipegang Ridho (AR26), dan
+  sisanya milik Yoga. Temuan audit tidak dicatat di `kontrak/temuan.md`,
+  karena bukan temuan web.
+- **Perubahan web**: B251 (perpanjang bersamaan dijawab 409) di
+  `a207fae`. B248 (verifikasi email wajib `password`) ditunda pemilik
+  proyek karena butuh isian baru di halaman verifikasi
+  (`kontrak/temuan.md` butir 171). B247 dan B250 tidak mengubah web
+  sekarang dan dipakai di butir 6. B245, B246, dan B249 tidak menyentuh
+  web: payload pengajuan web sudah sah, web tidak punya hapus lokasi, dan
+  token web tidak membawa `installationId`.
+- **Suite penuh sesudah `a207fae`**: 556 lolos, 3 gagal, dan 2 skipped
+  dari 561, seluruh kegagalan karena B248 (`inti/pengujian.md`).
+- **Laporan untuk tim backend ditunda** sampai pekerjaan backend dari
+  audit selesai, agar diserahkan sekali jalan (pemilik proyek,
+  6 November 2026). Temuan tetap dicatat di `kontrak/temuan.md` begitu
+  terverifikasi (butir 168 sampai 171).

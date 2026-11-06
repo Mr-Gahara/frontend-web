@@ -157,7 +157,10 @@ Ridho, lalu dipindahkan ke Yoga di `149f17f`.
 
 Sejak 4 November 2026 (pemilik proyek) backend hanya diambil: fast-forward,
 atau merge beserta penyelesaian konflik bila ada. Kode dan `.env` backend
-tidak diubah, dan `ridho` tidak di-push.
+tidak diubah, dan `ridho` tidak di-push. Pengecualian hanya atas perintah
+pemilik proyek per kejadian: pada 6 November 2026 satu commit dokumen di
+`docs/pengembangan/status/ridho.md` backend ditambahkan dan `ridho`
+di-push, agar Yoga dan Nizar menarik dari cabang itu.
 
 Cabang `ridho` adalah tempat ketiganya disatukan, dan menjadi acuan web
 sejak `92d4f27` (7 Oktober 2026: `yoga` `55328f1` digabung `nizar`
@@ -216,6 +219,13 @@ Pada 5 November 2026 `nizar` maju 20 commit ke `aa978cc`, memuat seluruh
 `db:setup-toko-lama` (mengulangnya ikut menandai akun pendaftar uji),
 ditambah `db:plan-toko-gudang` yang baru (0 akun dinaikkan); seed tidak
 berubah (164 nama, Owner 161) dan tidak ada data yang diisi.
+Pada 6 November 2026 `nizar` maju 18 commit ke `4d221f5`, memuat seluruh
+`yoga` `cec04de` (7 commit), sehingga `ridho` lokal di-fast-forward.
+Langkah sesudah tarik tidak dijalankan: seed tidak mengubah daftar nama
+izin, dan tidak ada model maupun skrip migrasi baru. Di atasnya
+ditambahkan commit dokumen `c031bde` (paket AR26 untuk temuan audit A-06
+milik Ridho), lalu `ridho` di-push ke `c031bde` atas perintah pemilik
+proyek (`referensi/keputusan-penyesuaian-backend.md`).
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari

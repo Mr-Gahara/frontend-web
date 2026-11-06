@@ -12,6 +12,22 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per backend `ridho` `c031bde`** (kode backend `nizar`
+`4d221f5`, web `a207fae`, 6 November 2026, pukul 07.22 sampai 07.55
+WIB): 926 test unit dan integrasi lolos; e2e 556 lolos, 3 gagal, dan 2
+skipped dari 561. Totalnya 560 per hitungan stok minimal produk,
+ditambah skenario B251 di spec langganan admin (`a207fae`). Ketiga
+kegagalan karena B248, verifikasi email wajib `password` yang belum
+dikirim web (`kontrak/temuan.md` butir 171), dibuktikan lewat pesan dan
+snapshot DOM: `auth/daftar.spec.ts` pendaftaran berhasil (verifikasi
+dijawab 400) dan login sebelum verifikasi ("Password baru wajib
+diisi." lalu timeout), serta `auth/verifikasi-lupa-password.spec.ts`
+kode salah (yang tampil pesan password, bukan pesan OTP salah). Ketiganya
+tidak ditandai `test.fixme` dan lolos lagi bersama perbaikan B248. Judul
+kedua skip tidak tercatat (reporter line); jumlahnya sama dengan suite
+penuh `aa978cc`. Spec terdampak `a207fae` sebelumnya: `tests/e2e/admin`
+22 lolos.
+
 **Baseline per stok minimal produk** (commit `7d4c234`, 5 November
 2026): 926 test unit dan integrasi lolos. Suite e2e penuh tidak
 dijalankan sesudah `8d0f1dd`; spec terdampak: auth dan pengguna 76 lolos

@@ -78,6 +78,31 @@ Selesai 5 November 2026:
    (B195, `eacb5ed`); dan stok minimal produk beserta badge serta tab Stok
    Kritis di daftar Produk (B237, `7d4c234`).
 
+Selesai 6 November 2026, sebelum butir 6:
+
+9. Backend ditarik ke `nizar` `4d221f5` (perbaikan audit backend 5
+   November 2026 di bagian Nizar, serta B245 sampai B251), paket AR26
+   untuk temuan audit A-06 dicatat di status Ridho backend, dan `ridho`
+   di-push ke `c031bde` atas perintah pemilik proyek
+   (`referensi/keputusan-penyesuaian-backend.md`, Penyesuaian backend
+   `ridho` `c031bde`). Perpanjang bersamaan yang ditolak 409 memuat ulang
+   akun di panel admin (B251, `a207fae`). Suite penuh 556 lolos, 3 gagal
+   karena B248, dan 2 skipped dari 561 (`inti/pengujian.md`).
+
+Tertunda dari penyesuaian itu, atas keputusan pemilik proyek 6 November
+2026:
+
+- **B248, verifikasi email wajib `password`**: ditunda karena keadaan
+  tanpa password di memori butuh isian baru di halaman verifikasi (UI
+  baru). Sampai dikerjakan, pendaftaran dan login akun yang belum
+  terverifikasi di web tertahan, dan tiga skenario auth gagal di suite
+  penuh (`kontrak/temuan.md` butir 171). Bagian tanpa UI, mengirim
+  password titipan daftar atau login, dapat dikerjakan lebih dulu; bentuk
+  isiannya diajukan lewat dialog sebelum ditulis.
+- **Laporan untuk tim backend**: disusun sekali jalan setelah pekerjaan
+  backend dari audit selesai. Temuan baru tetap dicatat di
+  `kontrak/temuan.md` begitu terverifikasi.
+
 Urutan berikutnya, semuanya sudah disetujui pemilik proyek pada 4
 November 2026:
 
@@ -120,7 +145,17 @@ November 2026:
    kas `Kas Fisik` dan laporan sesi (`read-sesi-kasir`,
    `kelola-perangkat-kasir`). Perlu varian desain lebih dulu, dan
    sumber `installationId` perangkat untuk form pemetaan perlu
-   dipastikan dari backend.
+   dipastikan dari backend. Sejak backend `4d221f5`: pindah dan hapus
+   pemetaan ditolak selama sesi masih terbuka (K-04, K-05), tipe laci
+   terpetakan terkunci (B250), dan `referensi.tipe` selisih kasir bernilai
+   `SesiKasir`, `SesiKasirBuka`, atau `SesiKasirTutup` (B247). Audit
+   backend 5 November 2026 menyebut halaman pemetaan pemblokir utama
+   sebelum kasir dipakai, dan menyisakan dua dugaan yang menyentuh
+   rancangan form: pemetaan menerima perangkat PENDING atau REVOKED
+   (K-18), dan `installationId` seluruh HP keluar di laporan sesi (K-19).
+   Keputusan bisnis nomor 1 sampai 3 di audit (laci untuk VOID tunai,
+   pemicu sesi lama, dan tunai tanpa sesi kasir termasuk dari web; K-08
+   sampai K-10) dibahas pemilik proyek bersama tim backend.
 7. **Penanda dan pemandu wizard setup** (pemilik proyek, 5 November
    2026, sesudah butir 6): pemilik proyek mencoba wizard sendiri, mengisi
    form produk lalu menekan "Simpan dan lanjut" tanpa "Simpan produk",
@@ -153,8 +188,10 @@ Yang dipakai web masuk butir 4 (B237, B238, B240); B239, B242, B243, dan
 B244 tidak menyentuh web, dan B234 serta B235 tidak memutus apa pun
 karena akun uji Pro. Suite penuh 550 lolos dan 2 skipped dari 552.
 
-Backend lokal di `ridho` lokal `aa978cc`, belum di-push ke
-`origin/ridho` atas keputusan pemilik proyek (backend hanya diambil).
+Pada 6 November 2026 backend lokal di-fast-forward ke `nizar` `4d221f5`
+(memuat `yoga` `cec04de`), lalu `ridho` di-push ke `c031bde` atas
+perintah pemilik proyek, dengan satu commit dokumen AR26 di atasnya
+(butir 9 di atas).
 Backend dijalankan dengan env inline agar `.env` backend tidak diubah
 (`inti/pengujian.md`, Menjalankan layanan uji). Kode backend tidak
 diubah sama sekali.
@@ -171,7 +208,8 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
   `/`. `register-owner` sesudahnya menimpa cookie itu. Pemulihan sesi tetap
   berjalan karena cookie login akun di path yang lebih khusus tetap
   berlaku (`POST /tenant` tidak memutar `tokenVersion`); terbukti lewat
-  muat ulang di spec setup (`41194b7`). Belum dilaporkan.
+  muat ulang di spec setup (`41194b7`). Belum dilaporkan. Dicatat
+  sebagai `kontrak/temuan.md` butir 168 (6 November 2026).
 - Data toko uji wizard (lokasi, kategori, produk, pajak, dan seterusnya)
   menetap di basis data development setelah akun ujinya dihapus, karena
   hapus akun tidak menghapus tokonya; setiap run spec setup menambah enam
@@ -184,14 +222,21 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
   dan akun kas "Kas Kecil (Laci)" baru (dihitung baca-saja 4 November
   2026: tiga metode berkategori tunai, tiga kas fisik aktif). Calon temuan
   untuk Nizar (N6): skrip menggandakan metode tunai toko lama yang
-  namanya lain.
+  namanya lain. Dicatat sebagai `kontrak/temuan.md` butir 169
+  (6 November 2026).
 - Calon temuan kontrak untuk Nizar: `GET /akun/langganan` tidak memuat
   penanda masa percobaan maupun awal masa berlaku, sehingga web
-  menyimpulkannya dari riwayat berhalaman (`ringkasLangganan`).
+  menyimpulkannya dari riwayat berhalaman (`ringkasLangganan`). Dicatat
+  sebagai `kontrak/temuan.md` butir 170 (6 November 2026).
 - Laporan untuk tim backend belum disusun: kedua calon temuan di atas,
   serta pembuktian B215, B217, B229, B230, B231, dan B232 dari web
   (`inti/backend.md`, Bila menemukan bug backend). Baris temuan belum
   ditulis di `kontrak/temuan.md`.
+  Baris temuannya ditulis 6 November 2026 (butir 168 sampai 170). Bahan
+  laporan bertambah pembuktian B251 dari web (`a207fae`), lalu B248 dan
+  B250 setelah web mengerjakannya. Laporannya ditunda
+  sampai pekerjaan backend dari audit selesai, agar diserahkan sekali
+  jalan (pemilik proyek, 6 November 2026).
 - `PUT /akun/admin/users/:id/plan` dan plan di buat akun, perpanjang,
   serta riwayat admin dicatat di `kontrak/endpoint.md` (5 November 2026).
 - Enam endpoint baru belum dicatat di `kontrak/endpoint.md`:

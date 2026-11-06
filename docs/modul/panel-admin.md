@@ -154,6 +154,19 @@ dengan suite e2e penuh dijalankan sekali di akhir modul (keputusan PF6a):
   utama, karena pembekuan mengeluarkan seluruh pengguna tokonya; bila
   langkah UI gagal, `aktifkanAkunKlienUji` memulihkannya di `finally`.
 
+### Catatan dari penyesuaian backend `ridho` `c031bde`
+
+- Aksi langganan yang ditolak 409 memuat ulang akun dan riwayatnya lewat
+  `useAksiAkun`, dan dialog bertahan dengan pesan backend (`a207fae`).
+  Pemicunya B251: perpanjang yang bersamaan dengan perpanjang lain
+  dijawab 409 (L-01). Berlaku untuk keempat aksi, karena 409 di aksi mana
+  pun berarti data di layar tidak sesuai server.
+- Skenario B251 meneruskan perpanjang dialog sungguhan ke backend lewat
+  `route.fetch` sebagai perpanjang pemenang, lalu menjawab dialog dengan
+  409 milik perpanjang yang kalah. Perpanjang bersamaan yang sungguhan
+  tidak deterministik, dan admin kedua tidak dapat dipakai karena login
+  memutar `tokenVersion` admin. Skenario itu gagal tanpa perubahan hook.
+
 ## Utang terbuka
 
 ### Utang kecil dari modul panel admin
