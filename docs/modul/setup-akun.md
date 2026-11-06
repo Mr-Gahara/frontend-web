@@ -358,9 +358,10 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
 - Wizard: isian kategori, bahan baku, atau produk yang belum disimpan
   dengan tombol "Tambah ..." atau "Simpan produk" tidak ikut terkirim
   oleh "Simpan dan lanjut", dan galatnya hanya menyebut daftar kosong
-  (ditemukan pemilik proyek, 5 November 2026). Diantrikan sebagai butir 7
-  di `inti/status.md`: penanda tombol yang harus ditekan lebih dulu, dan
-  pemandu UI setelah wizard selesai.
+  (ditemukan pemilik proyek, 5 November 2026). Diantrikan di
+  `inti/status.md` (Pekerjaan berikutnya, Menunggu desain pemilik
+  proyek): penanda tombol yang harus ditekan lebih dulu, dan pemandu UI
+  setelah wizard selesai.
 - Nomor WhatsApp admin belum ditetapkan (LG1a); `NOMOR_WA_ADMIN` di
   `features/langganan/data.ts` masih kosong.
 - Ajis diminta mendaftar layar aplikasi yang menyentuh pembuatan toko,

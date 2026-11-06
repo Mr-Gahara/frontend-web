@@ -648,3 +648,195 @@ dicek ulang terhadap kode web dan backend `ridho` `c031bde`.
 - Tombol urut kolom dibuang di stock adjustment dan stock opname, karena
   urutan klien hanya mengurutkan satu halaman; urutan mengikuti backend.
   Dicatat di keputusan rancangan butir 27.
+
+## Catatan dari penyesuaian backend `4759208` sampai `c031bde`
+
+Dipindah dari `inti/status.md` (Pekerjaan berikutnya) pada 6 November
+2026 atas permintaan pemilik proyek, tanpa perubahan isi. Butir yang
+belum selesai (halaman sesi kasir dan pemandu wizard) tetap di
+`inti/status.md`.
+
+Pada 4 November 2026 backend lokal di-fast-forward ke `nizar` `4759208`,
+yang memuat `yoga` `a07c0b1` (`referensi/keputusan-penyesuaian-backend.md`,
+Penyesuaian backend `ridho` lokal `4759208`). Kontrak yang ditunggu
+halaman pratinjau tersedia: N1 (B212 sampai B214, B229), N2 (B216,
+B224), N3 (B231 sampai B233), N4 (B217), N5 (B215), N6 (B218), Y1
+(B220, B223), Y2 (B221), Y3 (B219), P48 (B222), dan sesi kasir (B225
+sampai B228). Y4 (stok minimal produk) dan Y5 (penegakan WMS) belum.
+
+Sudah selesai di sesi itu:
+
+1. Daftar, verifikasi email, dan lupa password tersambung ke backend,
+   login akun mengarahkan `requireSetup` ke `/setup` dan
+   `EMAIL_BELUM_TERVERIFIKASI` ke isian kode, dan tautan "Lupa
+   password?" terpasang (`67ec690`).
+2. Halaman Langganan memakai data backend dan izin `read-langganan`
+   (`c868870`).
+
+Selesai 5 November 2026:
+
+3. Plan di panel admin (B213): label riwayat `ubah-plan` dan perubahan
+   plan di riwayat (`475bf0b`), lalu plan di buat akun, durasi 24 bulan,
+   aksi Ubah Plan, plan opsional saat perpanjang, serta plan di daftar
+   dan detail akun (`468a3bd`).
+4. Pelanggan bawaan (B218): Hapus disembunyikan, dialog ubah hanya
+   memuat nama, dan sel nama bertanda "Bawaan", karena tenant uji punya
+   pelanggan lama biasa yang juga bernama "Customer" (`77d4380`).
+5. Jenis mutasi `SELISIH_KAS_MASUK` dan `SELISIH_KAS_KELUAR` (B228) di
+   buku mutasi dan filter jenis (`d696354`). Rujukan sesi kasir belum
+   ditautkan sampai halaman sesi kasir ada (butir 6).
+6. Wizard setup tersambung (B219 sampai B223, B237, B238, B240): status,
+   guard, dan kembali dari login PIN (`3205982`); seluruh langkah
+   menyimpan ke server dan dapat dilanjutkan setelah dimuat ulang tanpa
+   PIN (`41194b7`); tautan Daftar di login akun (`4322dba`); pajak dapat
+   ditambah dan ringkasan bertautan (`493f49c`). Keputusan WS1a sampai
+   WS5a di `modul/setup-akun.md`.
+7. Penyaringan per plan (B216, B224, B234): menu dan rute fitur di luar
+   plan disembunyikan dengan ajakan naik plan, setup fitur yang belum
+   selesai tampil sebagai ajakan Lengkapi setup, dan banner dashboard
+   outlet (`8d0f1dd`). Keputusan PF1a sampai PF6a di
+   `modul/setup-akun.md`. Suite penuh 554 lolos, 1 skipped, 2 gagal dari
+   557; locator admin diperbaiki di `2d3344b`, dan waktu penjualan lolos
+   12 dari 12 saat diulang.
+8. Pekerjaan tanpa desain yang dipilih pemilik proyek: enam endpoint akun
+   di kontrak (`273a6ff`); pengguna non-aktif yang login PIN kini mendapat
+   pesan B202 di halaman login pengguna, bukan dikeluarkan dari akun toko
+   (`9a85817`, bug apiClient yang terbukti spec baru); uji Owner kedua 409
+   (B195, `eacb5ed`); dan stok minimal produk beserta badge serta tab Stok
+   Kritis di daftar Produk (B237, `7d4c234`).
+
+Selesai 6 November 2026, sebelum butir 6:
+
+9. Backend ditarik ke `nizar` `4d221f5` (perbaikan audit backend 5
+   November 2026 di bagian Nizar, serta B245 sampai B251), paket AR26
+   untuk temuan audit A-06 dicatat di status Ridho backend, dan `ridho`
+   di-push ke `c031bde` atas perintah pemilik proyek
+   (`referensi/keputusan-penyesuaian-backend.md`, Penyesuaian backend
+   `ridho` `c031bde`). Perpanjang bersamaan yang ditolak 409 memuat ulang
+   akun di panel admin (B251, `a207fae`). Suite penuh 556 lolos, 3 gagal
+   karena B248, dan 2 skipped dari 561 (`inti/pengujian.md`).
+10. Utang pengujian tanpa UI baru yang dipilih pemilik proyek: tanggal
+    topbar kini berganti sendiri setelah 00.00 (`c6f9ec0`, bug yang
+    menyalahi keputusan rancangan butir 28), delapan butir utang yang
+    lunas dipindah ke arsip (`0273d45` dan commit dokumen ini), harapan
+    spec kirim dan terima disaring per arah (`bc49152`), dan nama
+    pelanggan kembar diuji di daftar serta pemilih (`e0d3bb4`). Butir 6
+    dan 7 dilewati dulu karena butuh UI baru (pemilik proyek, 6 November
+    2026).
+
+Tertunda dari penyesuaian itu, atas keputusan pemilik proyek 6 November
+2026:
+
+- **B248, verifikasi email wajib `password`**: ditunda karena keadaan
+  tanpa password di memori butuh isian baru di halaman verifikasi (UI
+  baru). Sampai dikerjakan, pendaftaran dan login akun yang belum
+  terverifikasi di web tertahan, dan tiga skenario auth gagal di suite
+  penuh (`kontrak/temuan.md` butir 171). Bagian tanpa UI, mengirim
+  password titipan daftar atau login, dapat dikerjakan lebih dulu; bentuk
+  isiannya diajukan lewat dialog sebelum ditulis.
+  Bagian tanpa UI selesai di `efb05db`: password titipan dikirim, titipan
+  bertahan saat kode salah, dan tanpa titipan halaman pindah ke login
+  dengan pesan "Masuk lagi" tanpa mengirim kode (pilihan pemilik proyek).
+  Pendaftaran web berjalan lagi. Yang tersisa isian password di halaman
+  verifikasi untuk keadaan tanpa titipan, yang didesain sendiri oleh
+  pemilik proyek.
+- **Laporan untuk tim backend**: disusun sekali jalan setelah pekerjaan
+  backend dari audit selesai. Temuan baru tetap dicatat di
+  `kontrak/temuan.md` begitu terverifikasi.
+
+Urutan berikutnya, semuanya sudah disetujui pemilik proyek pada 4
+November 2026:
+
+1. Selesai di `475bf0b` dan `468a3bd` (di atas).
+   **Plan di panel admin (B213)**, didahului bug yang sudah terlihat:
+   `LABEL_AKSI` di `features/admin-akun/langganan.ts` tidak punya
+   `ubah-plan`, sehingga riwayat langganan akun uji di panel admin
+   menampilkan baris tanpa label. Lalu pilihan plan dan durasi 24 bulan
+   di buat akun (Advanced dan Pro wajib durasi), `PUT
+   /admin/users/:id/plan`, plan opsional saat perpanjang, dan plan di
+   daftar serta detail akun. `PILIHAN_DURASI_BULAN` dan
+   `DurasiLangganan` masih 1, 3, 6, 12.
+2. Selesai di `77d4380` (di atas).
+   **Pelanggan bawaan (B218)**: pelanggan `isBawaan` tidak dapat
+   dihapus (409) dan hanya namanya yang boleh diubah; sembunyikan hapus
+   dan field selain nama.
+3. Selesai di `d696354` (di atas).
+   **Dua jenis mutasi baru (B228)**: `SELISIH_KAS_MASUK` dan
+   `SELISIH_KAS_KELUAR` di `ARAH_JENIS` dan label
+   `features/akun-kas/mutasi.ts`, dengan rujukan `SesiKasir`.
+4. Selesai di `3205982`, `41194b7`, dan `4322dba` (di atas).
+   **Wizard setup tersambung** (B220, B219, B223): status dari `GET
+   /api/setup/status` bertoken akun, melanjutkan dari langkah pertama
+   yang belum selesai, nama toko lewat `POST /tenant`, Owner lewat
+   `register-owner` tanpa `installationId` (memakai `accessToken`
+   tingkat atas responsnya untuk langkah berikutnya), lalu lokasi,
+   kategori, bahan baku, produk, pajak, tipe aset, aset, tarif, dan
+   gudang lewat endpoint modul yang ada. Stok minimal produk menunggu
+   Y4 dan tidak ditampilkan seolah tersimpan (TP4a). Pemulihan sesi saat
+   `/setup` dimuat ulang perlu diperiksa, karena token hanya di memori.
+   Sesudahnya tautan "Daftar" di login akun dipasang.
+5. Selesai di `8d0f1dd` (di atas).
+   **Penyaringan per plan** (B214, B216, B224): menu dan halaman sesi
+   booking disembunyikan untuk Basic dari `langganan.plan` di token
+   pengguna, dan 403 `PLAN_TIDAK_MENCAKUP` serta
+   `SETUP_FITUR_BELUM_SELESAI` ditampilkan sebagai ajakan upgrade atau
+   melengkapi setup, bukan pesan izin. Pesan backend saat ini sudah
+   tampil apa adanya lewat `pesanError`, dan tidak memicu logout paksa.
+6. **Halaman sesi kasir (B227)**: modul baru, pemetaan perangkat ke akun
+   kas `Kas Fisik` dan laporan sesi (`read-sesi-kasir`,
+   `kelola-perangkat-kasir`). Perlu varian desain lebih dulu, dan
+   sumber `installationId` perangkat untuk form pemetaan perlu
+   dipastikan dari backend. Sejak backend `4d221f5`: pindah dan hapus
+   pemetaan ditolak selama sesi masih terbuka (K-04, K-05), tipe laci
+   terpetakan terkunci (B250), dan `referensi.tipe` selisih kasir bernilai
+   `SesiKasir`, `SesiKasirBuka`, atau `SesiKasirTutup` (B247). Audit
+   backend 5 November 2026 menyebut halaman pemetaan pemblokir utama
+   sebelum kasir dipakai, dan menyisakan dua dugaan yang menyentuh
+   rancangan form: pemetaan menerima perangkat PENDING atau REVOKED
+   (K-18), dan `installationId` seluruh HP keluar di laporan sesi (K-19).
+   Keputusan bisnis nomor 1 sampai 3 di audit (laci untuk VOID tunai,
+   pemicu sesi lama, dan tunai tanpa sesi kasir termasuk dari web; K-08
+   sampai K-10) dibahas pemilik proyek bersama tim backend.
+7. **Penanda dan pemandu wizard setup** (pemilik proyek, 5 November
+   2026, sesudah butir 6): pemilik proyek mencoba wizard sendiri, mengisi
+   form produk lalu menekan "Simpan dan lanjut" tanpa "Simpan produk",
+   sehingga produk tidak pernah terkirim (log backend hanya `GET
+   /api/produk`) dan galat "Tambahkan minimal satu produk." menyesatkan.
+   Jebakan yang sama ada di langkah Kategori dan Bahan baku. Arahnya:
+   tombol yang harus ditekan lebih dulu di setiap langkah ditonjolkan,
+   dan setelah wizard selesai ditambah pemandu UI (sorotan atau tur)
+   yang menunjukkan apa yang diisi dan tombol apa yang ditekan. Rancangan
+   dan perilakunya diajukan lewat dialog sebelum dikerjakan.
+
+Belum dijadwalkan: logo toko (B203 sampai B205) dan jam operasional
+(B206) di profil toko, serta perubahan backend 30 Oktober 2026 yang belum
+dipakai web: OTP reset PIN Owner dan ubah email atau password akun (B178
+sampai B180), dan hapus akun oleh Owner (B181). Keempatnya perlu desain
+(pemilik proyek, 5 November 2026: butir yang perlu desain tidak
+dikerjakan dulu). B202 dan B195 selesai di `9a85817` dan `eacb5ed`.
+Juga belum dijadwalkan, dari pertanyaan pemilik proyek 5 November 2026:
+nomor WhatsApp admin untuk halaman Langganan (LG1a, `NOMOR_WA_ADMIN`
+masih kosong), dan pengingat masa langganan yang hampir habis di luar
+halaman Langganan (perlu desain). Laporan untuk tim backend juga belum
+disusun (Utang kecil, di bawah).
+
+Pada 5 November 2026 backend lokal di-fast-forward ke `nizar` `aa978cc`
+(memuat `yoga` `e37bf26`): Y4 stok minimal produk (B237, B238), Y5 WMS
+khusus Pro (B234 sampai B236), `GET /api/akun/me` (B240), pajak toko
+usang (B239), kunci izin cuti yang sudah diputuskan (B242), edit
+pengajuan stok atomik (B241), dan self-approve perangkat (B243, B244).
+Yang dipakai web masuk butir 4 (B237, B238, B240); B239, B242, B243, dan
+B244 tidak menyentuh web, dan B234 serta B235 tidak memutus apa pun
+karena akun uji Pro. Suite penuh 550 lolos dan 2 skipped dari 552.
+
+Pada 6 November 2026 backend lokal di-fast-forward ke `nizar` `4d221f5`
+(memuat `yoga` `cec04de`), lalu `ridho` di-push ke `c031bde` atas
+perintah pemilik proyek, dengan satu commit dokumen AR26 di atasnya
+(butir 9 di atas).
+Backend dijalankan dengan env inline agar `.env` backend tidak diubah
+(`inti/pengujian.md`, Menjalankan layanan uji). Kode backend tidak
+diubah sama sekali.
+
+```bash
+BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho nizar yoga; do echo "origin/$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...origin/$r | tr '\t' ' ')"; done
+```
