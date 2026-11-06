@@ -16,15 +16,9 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   Outlet ke Gudang yang tertinggal DIKIRIM cukup untuk menggagalkannya
   (`arsip/riwayat-pengujian.md`, kejadian 1 November 2026). Harapannya
   perlu disaring menurut asal dan tujuan.
-- **Pengguna nonaktif yang ditolak 403 saat login PIN (B202)** belum
-  teruji e2e; pesannya tampil lewat `pesanError` tanpa penanganan khusus.
-- **Verifikasi email, lupa password, dan reset PIN Owner** belum punya
-  spec, karena backend-nya belum ada (N3, N4, B178); rencana ujinya di
+- **Reset PIN Owner belum punya spec**, karena web belum memakai OTP
+  reset PIN Owner (B178, belum dijadwalkan); rencana ujinya di
   `modul/setup-akun.md`, Pengujian OTP.
-- **Tanggal di topbar tetap "Sabtu, 31 Oktober 2026" setelah jam palsu
-  melewati tengah malam**, diamati 1 November 2026 di spec yang memakai
-  `page.clock`. Mungkin menyalahi keputusan rancangan butir 28; belum
-  diselidiki apakah topbar memang tidak berganti hari tanpa muat ulang.
 - **Pemilih outlet di jurnal stok dan pembelian stok hanya berisi satu
   pilihan** di MVP satu outlet, sehingga memilih outlet tidak memicu
   permintaan baru. Kedua jalur cakupan lokasi teruji e2e sejak
@@ -458,13 +452,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (`cd07ae1`), dibuat sekali dan dipakai ulang; jadwal hari ini mereka
   dihapus setiap run. Mereka ikut tampil di daftar pengguna, kalender
   jadwal ruang outlet, dan pilihan login PIN.
-- **Suite e2e penuh belum dijalankan setelah perubahan web `67ec690` dan
-  `c868870`**; yang terakhir dijalankan adalah suite terhadap backend
-  `4759208` sebelum kode web diubah (544 lolos, 2 skipped, 1 gagal dari
-  547). Harapannya 549 (`inti/pengujian.md`, Baseline), angka hitungan.
-  Dijalankan atas permintaan pemilik proyek atau bersama penyesuaian
-  backend berikutnya, dengan layanan uji seperti di `inti/pengujian.md`
-  (Menjalankan layanan uji), agar skenario ber-OTP tidak dilewati.
 - **Skenario aktifkan akun tanpa batas membekukan akun klien sungguhan**
   (`482ac79`), dipilih menurut syarat dan tidak pernah akun uji utama;
   setiap run menambah dua catatan di riwayat langganan akun itu.
@@ -484,13 +471,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Skenario dilewati tanpa judul tercatat**: satu di suite penuh
   `50c99ae` selain jurnal stok, satu di `6db571d`, dan dua di suite
   terhadap backend `4759208` (spec daftar tidak termasuk; 29 spec lain
-  ber-skip bersyarat). Tidak dicari dengan
+  ber-skip bersyarat), serta dua di suite penuh terhadap backend `ridho`
+  `c031bde` (6 November 2026). Tidak dicari dengan
   menjalankan ulang sebagian suite; reporter `json` di suite penuh
   berikutnya mencatat judulnya (`referensi/playwright.md`).
-- **Wizard `/setup` hanya diuji tampilan dan validasinya** (`50c99ae`);
-  penyimpanan setup diuji saat wizard tersambung ke backend. Verifikasi
-  email, lupa password, dan Langganan sudah diuji terhadap backend sejak
-  `67ec690` dan `c868870`.
 - **Kirim ulang kode belum diuji e2e** di verifikasi email maupun lupa
   password, karena tombolnya menunggu hitung mundur 60 detik; perlu
   `page.clock`. Jalur verifikasi tanpa password titipan (halaman dimuat

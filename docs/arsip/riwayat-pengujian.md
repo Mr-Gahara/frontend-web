@@ -485,6 +485,44 @@ Dipindah dari `referensi/utang-pengujian.md` pada 31 Oktober 2026.
   sendiri (akun klien uji yang dihapus di finally, dan enam staf uji
   berjadwal hari ini).
 
+Dipindah dari `referensi/utang-pengujian.md` pada 6 November 2026.
+
+- **Pengguna nonaktif yang ditolak 403 saat login PIN (B202)** belum
+  teruji e2e; pesannya tampil lewat `pesanError` tanpa penanganan khusus.
+  Lunas di `9a85817`: skenario "pengguna non-aktif ditolak 403 saat
+  login PIN dan tidak mendapat sesi (B202)" di
+  `tests/e2e/pengguna/crud-pengguna.spec.ts`.
+- **Verifikasi email, lupa password, dan reset PIN Owner** belum punya
+  spec, karena backend-nya belum ada (N3, N4, B178); rencana ujinya di
+  `modul/setup-akun.md`, Pengujian OTP.
+  Verifikasi email dan lupa password lunas di `67ec690`
+  (`tests/e2e/auth/verifikasi-lupa-password.spec.ts` dan
+  `tests/e2e/auth/daftar.spec.ts`); reset PIN Owner tetap terbuka di
+  `referensi/utang-pengujian.md`.
+- **Tanggal di topbar tetap "Sabtu, 31 Oktober 2026" setelah jam palsu
+  melewati tengah malam**, diamati 1 November 2026 di spec yang memakai
+  `page.clock`. Mungkin menyalahi keputusan rancangan butir 28; belum
+  diselidiki apakah topbar memang tidak berganti hari tanpa muat ulang.
+  Lunas di `c6f9ec0`: topbar memang tidak berganti hari tanpa muat
+  ulang. Kini memakai `useTanggalHariIni`, dengan unit test
+  `tests/unit/components/topbar.test.tsx` dan skenario `page.clock` di
+  spec dashboard outlet.
+- **Suite e2e penuh belum dijalankan setelah perubahan web `67ec690` dan
+  `c868870`**; yang terakhir dijalankan adalah suite terhadap backend
+  `4759208` sebelum kode web diubah (544 lolos, 2 skipped, 1 gagal dari
+  547). Harapannya 549 (`inti/pengujian.md`, Baseline), angka hitungan.
+  Dijalankan atas permintaan pemilik proyek atau bersama penyesuaian
+  backend berikutnya, dengan layanan uji seperti di `inti/pengujian.md`
+  (Menjalankan layanan uji), agar skenario ber-OTP tidak dilewati.
+  Lunas oleh suite penuh 6 November 2026 terhadap backend `ridho`
+  `c031bde` (`inti/pengujian.md`, Baseline).
+- **Wizard `/setup` hanya diuji tampilan dan validasinya** (`50c99ae`);
+  penyimpanan setup diuji saat wizard tersambung ke backend. Verifikasi
+  email, lupa password, dan Langganan sudah diuji terhadap backend sejak
+  `67ec690` dan `c868870`.
+  Lunas di `41194b7`: spec setup menjalankan alur nyata yang menyimpan
+  setiap langkah ke server, termasuk melanjutkan setelah dimuat ulang.
+
 ## Kejadian sesekali yang tidak berulang
 
 Dipindah dari `inti/pengujian.md` (Utang pengujian) pada 25 Oktober 2026.
