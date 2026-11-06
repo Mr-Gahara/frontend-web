@@ -134,6 +134,23 @@ test.describe("Dashboard outlet", () => {
     }
   });
 
+  test("tanggal topbar berganti sendiri setelah 00.00 tanpa muat ulang (keputusan rancangan butir 28)", async ({
+    page,
+  }) => {
+    const kini = new Date();
+    const sebelum = new Date(kini.getFullYear(), kini.getMonth(), kini.getDate() - 1, 23, 59, 0);
+    const opsi = { weekday: "long", day: "numeric", month: "long", year: "numeric" } as const;
+    const teks = (d: Date) => d.toLocaleDateString("id-ID", opsi);
+    await page.clock.install({ time: sebelum });
+    await login(page);
+    await page.goto(URL_DASHBOARD);
+    await expect(page.getByText(teks(sebelum), { exact: true }), "tanggal saat dashboard dibuka").toBeVisible();
+
+    await page.clock.runFor(90_000);
+    await expect(page.getByText(teks(kini), { exact: true }), "tanggal hari berikutnya").toBeVisible();
+    await expect(page.getByText(teks(sebelum), { exact: true })).toHaveCount(0);
+  });
+
   test("status staf memuat staf ruang outlet, dan lonceng nonaktif", async ({ page }) => {
     await login(page);
     const jumlahStaf = await bukaDanBacaStaf(page);

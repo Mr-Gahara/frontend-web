@@ -1,4 +1,5 @@
 "use client";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { useSudahHidrasi } from "@/hooks/use-sudah-hidrasi";
 import { Bell } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -13,9 +14,12 @@ const OPSI_TANGGAL: Intl.DateTimeFormatOptions = {
 export default function Topbar() {
   // Tanggal dihitung setelah hidrasi, karena jam server dapat berbeda dari
   // jam browser; sebelum itu teksnya kosong, sama dengan render server.
+  // Hari ini berganti sendiri setelah 00.00 (keputusan rancangan butir 28),
+  // karena dashboard sering dibiarkan terbuka melewati tengah malam.
   const sudahHidrasi = useSudahHidrasi();
+  const hariIni = useTanggalHariIni();
   const currentDate = sudahHidrasi
-    ? new Date().toLocaleDateString("id-ID", OPSI_TANGGAL)
+    ? hariIni.toLocaleDateString("id-ID", OPSI_TANGGAL)
     : "";
 
   return (
