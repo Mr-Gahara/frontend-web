@@ -277,6 +277,35 @@ test.describe("Kelola pelanggan", () => {
     }
   });
 
+  test("nama yang sama dengan pelanggan lain diterima, dan keduanya tampil di daftar", async ({ page }) => {
+    // Nama boleh kembar sejak backend nizar 8dc6211; indeks unik hanya untuk
+    // nomor HP dan email (kontrak/temuan.md butir 142 tertutup).
+    const auth = await bukaPelanggan(page);
+    const data = dataUji();
+    const nomorKedua = data.nomorHp.slice(0, -1) + String((Number(data.nomorHp.slice(-1)) + 1) % 10);
+    const ids: string[] = [];
+    try {
+      ids.push(await buatLewatUi(page, auth, data));
+      await page.getByLabel(/^Nama Pelanggan/).fill(data.nama);
+      await page.getByLabel(/^Nomor WhatsApp/).fill(nomorKedua);
+      await page.getByRole("button", { name: "Simpan Pelanggan" }).click();
+      const tPost = tunggu(page, "POST", POLA_DAFTAR);
+      await dialogKonfirmasi(page).getByRole("button", { name: "Ya, Simpan" }).click();
+      const res = await tPost;
+      expect(res.status(), "POST /pelanggan dengan nama kembar").toBe(201);
+      ids.push(String(((await res.json()) as { data: { id: string } }).data.id));
+      await expect(dialogKonfirmasi(page)).toBeHidden({ timeout: 15_000 });
+
+      const kembar = (await daftarPelanggan(page, auth)).filter((p) => p.namaPelanggan === data.nama);
+      expect(kembar.map((p) => p.nomorHp).sort()).toEqual([data.nomorHp, nomorKedua].sort());
+      await pencarian(page).fill(data.nama);
+      await expect(baris(page, data.nama)).toHaveCount(2, { timeout: 15_000 });
+      await expect(baris(page, data.nama).filter({ hasText: nomorKedua })).toHaveCount(1);
+    } finally {
+      for (const id of ids) await hapusLewatApi(page, auth, "/pelanggan", id);
+    }
+  });
+
   test("pelanggan bawaan: tanpa Hapus, dan ubah hanya nama (B218)", async ({ page }) => {
     const auth = await bukaPelanggan(page);
     const bawaan = (await daftarPelanggan(page, auth)).find((p) => p.isBawaan);
