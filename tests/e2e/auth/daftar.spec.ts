@@ -130,7 +130,13 @@ test.describe("Halaman daftar", () => {
       const login = page.waitForResponse(/\/api\/akun\/auth\/login$/);
       await tempelKode(page.getByLabel("Digit 1 dari 6"), kode);
       await page.getByRole("button", { name: "Verifikasi email" }).click();
-      expect((await verifikasi).status()).toBe(200);
+      const resVerifikasi = await verifikasi;
+      expect(resVerifikasi.status()).toBe(200);
+      expect(resVerifikasi.request().postDataJSON(), "password titipan daftar ikut dikirim (B248)").toEqual({
+        email,
+        otp: kode,
+        password: PASSWORD_BARU,
+      });
       const masuk = await login;
       expect(masuk.status()).toBe(200);
       expect((await masuk.json()).requireSetup, "akun baru belum selesai setup (B223)").toBe(true);
@@ -144,7 +150,9 @@ test.describe("Halaman daftar", () => {
     }
   });
 
-  test("login sebelum verifikasi diarahkan ke isian kode, lalu kode baru memverifikasi", async ({ page }) => {
+  test("login sebelum verifikasi diarahkan ke isian kode; kode salah diulang, lalu kode baru memverifikasi", async ({
+    page,
+  }) => {
     const admin = kredensialAdmin();
     test.skip(!admin, ALASAN_TANPA_ADMIN);
     test.skip(!(await mailpitMenyala()), ALASAN_TANPA_MAILPIT);
@@ -170,8 +178,28 @@ test.describe("Halaman daftar", () => {
       await page.waitForURL(/\/daftar\/verifikasi\?email=/);
 
       const kode = await ambilOtp(email, sejak);
+      // Kode salah lebih dulu: password titipan login tidak boleh hilang,
+      // agar kode yang benar sesudahnya tetap membawanya (B248).
+      const salah = kode === "000000" ? "111111" : "000000";
+      const tSalah = page.waitForResponse(/\/api\/akun\/auth\/verifikasi-email$/);
+      await tempelKode(page.getByLabel("Digit 1 dari 6"), salah);
+      await page.getByRole("button", { name: "Verifikasi email" }).click();
+      const resSalah = await tSalah;
+      expect(resSalah.status(), "kode salah ditolak").toBe(400);
+      expect(resSalah.request().postDataJSON()).toEqual({ email, otp: salah, password: PASSWORD_BARU });
+      await expect(page.getByRole("alert").filter({ hasText: "Kode OTP salah atau sudah kedaluwarsa." })).toBeVisible();
+      await expect(page).toHaveURL(/\/daftar\/verifikasi/);
+
+      const tBenar = page.waitForResponse(/\/api\/akun\/auth\/verifikasi-email$/);
       await tempelKode(page.getByLabel("Digit 1 dari 6"), kode);
       await page.getByRole("button", { name: "Verifikasi email" }).click();
+      const resBenar = await tBenar;
+      expect(resBenar.status()).toBe(200);
+      expect(resBenar.request().postDataJSON(), "password titipan login masih ada").toEqual({
+        email,
+        otp: kode,
+        password: PASSWORD_BARU,
+      });
       await page.waitForURL("**/setup");
     } finally {
       if (terkirim && admin) {

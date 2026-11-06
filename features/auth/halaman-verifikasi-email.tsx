@@ -11,7 +11,7 @@ import { titipPesanLogin } from "@/lib/auth/pesan-login";
 import { setTokenAkun } from "@/lib/auth/session";
 import { useHitungMundur } from "./hitung-mundur";
 import { useKirimVerifikasiEmail, useLoginAkun, useVerifikasiEmail } from "./hooks";
-import { ambilKredensial } from "./kredensial-daftar";
+import { ambilKredensial, lihatKredensial } from "./kredensial-daftar";
 import { IsianKode, KirimUlangKode } from "./isian-kode";
 import { LangkahDaftar } from "./langkah-daftar";
 import { kodeKosong, skemaKode, type NilaiKode } from "./schema";
@@ -22,13 +22,23 @@ const PESAN_MASUK_LAGI = {
   deskripsi: "Masuk dengan email dan password akun Anda untuk menyiapkan toko.",
 };
 
+const PESAN_KODE_BARU = {
+  judul: "Masuk lagi",
+  deskripsi: "Masuk dengan email dan password akun Anda untuk menerima kode verifikasi baru.",
+};
+
 /**
  * Verifikasi email sesudah daftar (desain F, langkah 2; B231 dan B232).
- * Kode diperiksa lewat POST /akun/auth/verifikasi-email. Backend tidak
- * menerbitkan token di sana, jadi halaman langsung login dengan kredensial
- * titipan daftar atau login, lalu ke wizard bila setup inti belum selesai
- * (requireSetup, B223). Tanpa titipan, misalnya setelah dimuat ulang,
- * pendaftar diarahkan ke login. Kirim ulang selalu dijawab 200 yang sama.
+ * Kode diperiksa lewat POST /akun/auth/verifikasi-email bersama password
+ * titipan daftar atau login, karena sejak B248 password itu wajib dan
+ * menjadi password akun (A-01). Backend tidak menerbitkan token di sana,
+ * jadi halaman langsung login dengan kredensial yang sama, lalu ke wizard
+ * bila setup inti belum selesai (requireSetup, B223). Titipan dibiarkan
+ * saat kode salah dan baru dikosongkan setelah verifikasi berhasil. Tanpa
+ * titipan, misalnya setelah dimuat ulang, kode tidak dikirim dan pendaftar
+ * diarahkan ke login, yang mengirim kode baru dan menitipkan password lagi
+ * (pemilik proyek, 6 November 2026; isian password di halaman ini menunggu
+ * desain). Kirim ulang selalu dijawab 200 yang sama.
  */
 export function HalamanVerifikasiEmail() {
   const router = useRouter();
@@ -41,8 +51,8 @@ export function HalamanVerifikasiEmail() {
   const masuk = useLoginAkun();
   const memuat = verifikasi.isPending || masuk.isPending;
 
-  const keLogin = () => {
-    titipPesanLogin(PESAN_MASUK_LAGI);
+  const keLogin = (pesan = PESAN_MASUK_LAGI) => {
+    titipPesanLogin(pesan);
     router.push("/login");
   };
 
@@ -54,7 +64,7 @@ export function HalamanVerifikasiEmail() {
         setTokenAkun(res.accessToken);
         router.push(res.requireSetup ? "/setup" : "/login/pengguna");
       },
-      onError: keLogin,
+      onError: () => keLogin(),
     });
   };
 
@@ -64,8 +74,10 @@ export function HalamanVerifikasiEmail() {
       setGalat("Email pendaftaran tidak diketahui. Daftar ulang atau masuk dari halaman login.");
       return;
     }
+    const kredensial = lihatKredensial(email);
+    if (!kredensial) return keLogin(PESAN_KODE_BARU);
     verifikasi.mutate(
-      { email, otp: kode.join("") },
+      { email, otp: kode.join(""), password: kredensial.password },
       {
         onSuccess: lanjutMasuk,
         onError: (err) =>

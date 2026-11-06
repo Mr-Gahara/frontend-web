@@ -18,7 +18,7 @@ export const authApi = {
     apiMentah.post<LoginResponse>(EP.akun.login, payload, "akun"),
   daftarAkun: (payload: { email: string; password: string }) =>
     apiData.post<unknown>(EP.akun.register, payload, "akun"),
-  verifikasiEmail: (payload: { email: string; otp: string }) =>
+  verifikasiEmail: (payload: { email: string; otp: string; password: string }) =>
     apiData.post<unknown>(EP.akun.verifikasiEmail, payload, "akun"),
   kirimVerifikasiEmail: (email: string) =>
     apiData.post<unknown>(EP.akun.kirimVerifikasiEmail, { email }, "akun"),

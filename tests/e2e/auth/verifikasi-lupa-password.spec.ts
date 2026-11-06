@@ -12,8 +12,9 @@ import {
 /*
  * Verifikasi email (/daftar/verifikasi, B232) dan lupa password
  * (/lupa-password, B217), desain F. Alur berhasil verifikasi email ada di
- * spec daftar; di sini kotak kode, validasi klien, kode salah dari backend,
- * dan lupa password sampai login dengan password baru. Kode dibaca dari
+ * spec daftar, termasuk kode salah dengan password di memori (B248); di sini
+ * kotak kode, validasi klien, halaman tanpa password di memori, dan lupa
+ * password sampai login dengan password baru. Kode dibaca dari
  * Mailpit (UJ1a). Kedua endpoint menjawab seragam untuk email terdaftar
  * maupun tidak, jadi alamat acak cukup untuk jalur kode salah.
  */
@@ -55,7 +56,13 @@ test.describe("Verifikasi email", () => {
     }
   });
 
-  test("kode belum lengkap ditahan klien; kode salah dijawab pesan backend dan tetap di halaman", async ({ page }) => {
+  test("kode belum lengkap ditahan klien; tanpa password di memori kode tidak dikirim dan halaman pindah ke login (B248)", async ({
+    page,
+  }) => {
+    // Halaman dibuka langsung, jadi tidak ada password titipan daftar atau
+    // login. Sejak B248 verifikasi tanpa password pasti dijawab 400, sehingga
+    // kode tidak dikirim (pemilik proyek, 6 November 2026). Kode salah dengan
+    // password di memori diuji lewat alur login di spec daftar.
     const kirim = catatPermintaan(page);
     const email = alamatAcak("verifikasi");
     await page.goto("/daftar/verifikasi?email=" + encodeURIComponent(email));
@@ -64,13 +71,13 @@ test.describe("Verifikasi email", () => {
     expect(kirim).toEqual([]);
 
     await tempelKode(page.getByLabel("Digit 1 dari 6"), "000000");
-    const jawab = page.waitForResponse(/\/api\/akun\/auth\/verifikasi-email$/);
     await page.getByRole("button", { name: "Verifikasi email" }).click();
-    const res = await jawab;
-    expect(res.status()).toBe(400);
-    expect(res.request().postDataJSON()).toEqual({ email, otp: "000000" });
-    await expect(page.getByRole("alert").filter({ hasText: OTP_SALAH })).toBeVisible();
-    await expect(page).toHaveURL(/\/daftar\/verifikasi/);
+    await page.waitForURL(/\/login$/);
+    await expect(page.getByText("Masuk lagi", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Masuk dengan email dan password akun Anda untuk menerima kode verifikasi baru."),
+    ).toBeVisible();
+    expect(kirim, "tidak ada permintaan verifikasi tanpa password").toEqual([]);
   });
 });
 
