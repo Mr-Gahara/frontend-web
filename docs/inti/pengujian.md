@@ -12,6 +12,14 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per utang pengujian 6 November 2026** (commit `e0d3bb4`):
+927 test unit dan integrasi lolos. Suite e2e penuh tidak dijalankan
+sesudah `a207fae`; spec terdampak: dashboard 10 lolos (`c6f9ec0`, tanggal
+topbar lewat tengah malam), transfer stok 7 lolos (`bc49152`, harapan
+kirim dan terima per arah), dan pelanggan 16 lolos (`e0d3bb4`, nama
+kembar di daftar dan pemilih). Harapan suite penuh 564: 561 ditambah tiga
+skenario itu, dengan tiga kegagalan B248 yang sama; angka itu hitungan.
+
 **Suite penuh per backend `ridho` `c031bde`** (kode backend `nizar`
 `4d221f5`, web `a207fae`, 6 November 2026, pukul 07.22 sampai 07.55
 WIB): 926 test unit dan integrasi lolos; e2e 556 lolos, 3 gagal, dan 2

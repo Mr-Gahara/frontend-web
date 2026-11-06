@@ -522,6 +522,28 @@ Dipindah dari `referensi/utang-pengujian.md` pada 6 November 2026.
   `67ec690` dan `c868870`.
   Lunas di `41194b7`: spec setup menjalankan alur nyata yang menyimpan
   setiap langkah ke server, termasuk melanjutkan setelah dimuat ulang.
+- **Spec `pengiriman-penerimaan` menghitung seluruh surat jalan DIKIRIM
+  tanpa melihat arahnya**, padahal halaman pengiriman hanya menampilkan
+  asal gudang dan penerimaan outlet hanya tujuan outlet. Satu surat jalan
+  Outlet ke Gudang yang tertinggal DIKIRIM cukup untuk menggagalkannya
+  (`arsip/riwayat-pengujian.md`, kejadian 1 November 2026). Harapannya
+  perlu disaring menurut asal dan tujuan.
+  Lunas di `bc49152`: harapan pengiriman disaring asal Gudang dan
+  penerimaan tujuan Outlet, langsung dari respons API.
+- **Nama pelanggan kembar yang diterima tidak teruji**, karena basis
+  data development masih menolaknya lewat indeks lama
+  (`kontrak/temuan.md` butir 142). Email kembar yang dijawab 409 hanya
+  dibaca dari kode; e2e menguji nomor HP kembar.
+  Sejak 11 Oktober 2026 indeksnya diselaraskan dan butir 142 tertutup;
+  skenario nama kembar yang diterima belum ditulis.
+  Bagian nama kembar lunas di `e0d3bb4` (spec kelola pelanggan); bagian
+  email kembar tetap terbuka di `referensi/utang-pengujian.md`.
+- **Dua pelanggan bernama sama di pemilih hanya teruji di unit test**
+  (`tests/unit/features/pelanggan/tampilan.test.ts`), dengan alasan yang
+  sama. E2E menguji pencarian lewat nomor HP dan tampilannya.
+  Alasan itu gugur sejak butir 142 tertutup; skenarionya belum ditulis.
+  Lunas di `e0d3bb4`: skenario dua pelanggan bernama sama di pemilih buat
+  penjualan (`tests/e2e/pelanggan/pemilih-pelanggan.spec.ts`).
 
 ## Kejadian sesekali yang tidak berulang
 

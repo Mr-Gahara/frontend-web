@@ -88,6 +88,14 @@ Selesai 6 November 2026, sebelum butir 6:
    `ridho` `c031bde`). Perpanjang bersamaan yang ditolak 409 memuat ulang
    akun di panel admin (B251, `a207fae`). Suite penuh 556 lolos, 3 gagal
    karena B248, dan 2 skipped dari 561 (`inti/pengujian.md`).
+10. Utang pengujian tanpa UI baru yang dipilih pemilik proyek: tanggal
+    topbar kini berganti sendiri setelah 00.00 (`c6f9ec0`, bug yang
+    menyalahi keputusan rancangan butir 28), delapan butir utang yang
+    lunas dipindah ke arsip (`0273d45` dan commit dokumen ini), harapan
+    spec kirim dan terima disaring per arah (`bc49152`), dan nama
+    pelanggan kembar diuji di daftar serta pemilih (`e0d3bb4`). Butir 6
+    dan 7 dilewati dulu karena butuh UI baru (pemilik proyek, 6 November
+    2026).
 
 Tertunda dari penyesuaian itu, atas keputusan pemilik proyek 6 November
 2026:

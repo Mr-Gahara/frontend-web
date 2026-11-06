@@ -10,12 +10,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 
 ## Utang pengujian
 
-- **Spec `pengiriman-penerimaan` menghitung seluruh surat jalan DIKIRIM
-  tanpa melihat arahnya**, padahal halaman pengiriman hanya menampilkan
-  asal gudang dan penerimaan outlet hanya tujuan outlet. Satu surat jalan
-  Outlet ke Gudang yang tertinggal DIKIRIM cukup untuk menggagalkannya
-  (`arsip/riwayat-pengujian.md`, kejadian 1 November 2026). Harapannya
-  perlu disaring menurut asal dan tujuan.
 - **Reset PIN Owner belum punya spec**, karena web belum memakai OTP
   reset PIN Owner (B178, belum dijadwalkan); rencana ujinya di
   `modul/setup-akun.md`, Pengujian OTP.
@@ -184,16 +178,8 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Pengosongan email dan alamat pelanggan tidak teruji e2e**; yang
   teruji hanya nomor HP. Peringatan `isianTidakTerkosongkan` dibuang di
   `1bb26c0`.
-- **Nama pelanggan kembar yang diterima tidak teruji**, karena basis
-  data development masih menolaknya lewat indeks lama
-  (`kontrak/temuan.md` butir 142). Email kembar yang dijawab 409 hanya
-  dibaca dari kode; e2e menguji nomor HP kembar.
-  Sejak 11 Oktober 2026 indeksnya diselaraskan dan butir 142 tertutup;
-  skenario nama kembar yang diterima belum ditulis.
-- **Dua pelanggan bernama sama di pemilih hanya teruji di unit test**
-  (`tests/unit/features/pelanggan/tampilan.test.ts`), dengan alasan yang
-  sama. E2E menguji pencarian lewat nomor HP dan tampilannya.
-  Alasan itu gugur sejak butir 142 tertutup; skenarionya belum ditulis.
+- **Email pelanggan kembar yang dijawab 409 hanya dibaca dari kode**;
+  e2e menguji nomor HP kembar.
 - **Spec pemilih pelanggan menambah dua pelanggan terhapus lunak per
   run**, dan skenario nomor HP kembar satu.
 - **Bahan uji "E2E Bahan Pak" permanen** di basis data development,
