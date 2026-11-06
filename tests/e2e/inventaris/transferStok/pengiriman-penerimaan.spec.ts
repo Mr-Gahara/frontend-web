@@ -18,8 +18,11 @@ import {
  * Setiap run memindahkan satu unit bahan uji dari gudang ke outlet secara
  * permanen. Harapan jumlah kartu dihitung dari seluruh surat jalan yang
  * berstatus DIKIRIM, karena backend dahulu mengabaikan query status
- * (kontrak/temuan.md butir 33); cara hitung ini tetap benar sesudah
- * perbaikannya.
+ * (kontrak/temuan.md butir 33), lalu disaring menurut arah yang
+ * ditampilkan halamannya: pengiriman hanya asal Gudang, dan penerimaan
+ * hanya tujuan Outlet. Tanpa saringan itu, satu surat jalan Outlet ke
+ * Gudang yang tertinggal DIKIRIM menggagalkan kedua hitungan
+ * (arsip/riwayat-pengujian.md, kejadian 1 November 2026).
  */
 
 const URL_PENGIRIMAN = BASIS + "/dashboard/gudang/pengirimanStok";
@@ -38,13 +41,18 @@ test.describe("Daftar surat jalan DIKIRIM", () => {
       const semua = await api<TransferMentah[]>(page, auth, "GET", "/transferstok");
       expect(semua.status, `GET daftar surat jalan: ${semua.pesan}`).toBe(200);
       const dikirim = (semua.data ?? []).filter((t) => t.status === "DIKIRIM");
+      const dariGudang = dikirim.filter((t) => t.dariLokasi?.tipe === "Gudang");
+      const keOutlet = dikirim.filter((t) => t.keLokasi?.tipe === "Outlet");
 
       await test.step("pengiriman gudang", async () => {
         await page.goto(URL_PENGIRIMAN);
         await expect(page.getByText(transfer.nomorTransfer).first()).toBeVisible();
         await expect
-          .soft(page.getByRole("button", { name: /cek detail muatan/i }), "hanya surat jalan DIKIRIM yang tampil")
-          .toHaveCount(dikirim.length);
+          .soft(
+            page.getByRole("button", { name: /cek detail muatan/i }),
+            "hanya surat jalan DIKIRIM dari gudang yang tampil",
+          )
+          .toHaveCount(dariGudang.length);
       });
 
       await test.step("penerimaan outlet: surat jalan DIKIRIM ke outlet tenant", async () => {
@@ -55,9 +63,9 @@ test.describe("Daftar surat jalan DIKIRIM", () => {
         await expect
           .soft(
             page.getByRole("button", { name: /proses terima/i }),
-            "seluruh surat jalan DIKIRIM tampil, karena di MVP semuanya menuju satu-satunya outlet tenant",
+            "seluruh surat jalan DIKIRIM ke outlet tampil, karena di MVP semuanya menuju satu-satunya outlet tenant",
           )
-          .toHaveCount(dikirim.length);
+          .toHaveCount(keOutlet.length);
       });
     } finally {
       await tutupSuratJalanUji(page, auth, transfer.id);
