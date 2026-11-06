@@ -8,6 +8,7 @@ import {
   useQueryClient,
   type UseMutationOptions,
 } from "@tanstack/react-query";
+import { isConflict } from "@/lib/api/error";
 import { queryKeys } from "@/lib/queryKeys";
 import type {
   AkunAdmin,
@@ -71,7 +72,10 @@ export interface AksiAkunVars<P> {
 
 /**
  * Aksi langganan. Invalidasi akar ditunggu sebelum callback, sehingga daftar
- * dan riwayat sudah termuat ulang saat dialog tertutup.
+ * dan riwayat sudah termuat ulang saat dialog tertutup. Penolakan 409 juga
+ * memuat ulang akun: perpanjang yang bersamaan dengan perpanjang lain ditolak
+ * (B251), dan keterangan dialog harus memakai masa akses terbaru sebelum
+ * admin mengulang. Pesan backend tetap tampil di dialog yang masih terbuka.
  */
 function useAksiAkun<P>(
   jalankan: (vars: AksiAkunVars<P>) => Promise<AkunAdmin>,
@@ -84,7 +88,10 @@ function useAksiAkun<P>(
       await queryClient.invalidateQueries({ queryKey: queryKeys.adminAkun.semua });
       opsi.onSuccess?.(...args);
     },
-    onError: opsi.onError,
+    onError: (...args) => {
+      if (isConflict(args[0])) void queryClient.invalidateQueries({ queryKey: queryKeys.adminAkun.semua });
+      opsi.onError?.(...args);
+    },
   });
 }
 

@@ -2,6 +2,7 @@ import { test, expect, type Page, type Response } from "@playwright/test";
 import {
   aktifkanAkunKlienUji,
   ALASAN_TANPA_ADMIN,
+  buatAkunKlienLewatUi,
   bukaDaftarAkun,
   hapusAkunDariDetail,
   hapusAkunKlienUji,
@@ -360,6 +361,58 @@ test.describe("Langganan akun klien", () => {
     await dialog(page).getByRole("button", { name: "Batal" }).click();
     await expect(dialog(page)).toBeHidden();
     await expect(page.getByRole("button", { name: "Bekukan Akun" })).toBeVisible();
+  });
+
+  test("perpanjang bersamaan ditolak 409: pesan tampil dan akun dimuat ulang (B251)", async ({ page }) => {
+    test.setTimeout(90_000);
+    const admin = wajibAdmin();
+    const email = `e2e.bersamaan.${Date.now().toString(36)}@tachyon-uji.com`;
+    let akun: { id: string; email: string } | null = null;
+    try {
+      await bukaDaftar(page);
+      akun = await buatAkunKlienLewatUi(page, email);
+      await bukaDetail(page, akun);
+      await expect(riwayat(page).getByRole("listitem")).toHaveCount(1, { timeout: 15_000 });
+
+      // Perpanjang lain yang menang tidak dapat dibuat deterministik, dan login
+      // admin kedua memutus sesi halaman ini. Permintaan dialog diteruskan
+      // sungguhan sebagai perpanjang pemenang, lalu dialog dijawab 409 yang
+      // dikirim backend untuk perpanjang yang kalah.
+      const PESAN_409 = "Langganan baru saja diubah permintaan lain. Muat ulang lalu coba lagi.";
+      let diteruskan = 0;
+      await page.route(POLA_LANGGANAN, async (route) => {
+        if (route.request().method() !== "POST") return route.continue();
+        const asli = await route.fetch();
+        if (asli.status() === 200) diteruskan += 1;
+        await route.fulfill({
+          status: 409,
+          contentType: "application/json",
+          body: JSON.stringify({ status: "error", message: PESAN_409 }),
+        });
+      });
+      try {
+        await page.getByRole("button", { name: "Perpanjang Langganan" }).click();
+        await dialog(page).getByRole("combobox", { name: "Durasi" }).click();
+        await page.getByRole("option", { name: "1 bulan" }).click();
+        const tRiwayat = page.waitForResponse(
+          (r) => POLA_LANGGANAN.test(r.url()) && r.request().method() === "GET",
+        );
+        await dialog(page).getByRole("button", { name: "Perpanjang", exact: true }).click();
+        await expect(dialog(page).getByRole("alert")).toContainText(PESAN_409);
+        expect((await tRiwayat).status(), "riwayat dimuat ulang setelah 409").toBe(200);
+        await expect(dialog(page)).toBeVisible();
+        expect(diteruskan, "perpanjang pemenang tercatat di backend").toBe(1);
+      } finally {
+        await page.unroute(POLA_LANGGANAN);
+      }
+
+      await dialog(page).getByRole("button", { name: "Batal" }).click();
+      await expect(dialog(page)).toBeHidden();
+      await expect(riwayat(page).getByRole("listitem")).toHaveCount(2);
+      await expect(riwayat(page).getByRole("listitem").first()).toContainText("Diperpanjang 1 bulan");
+    } finally {
+      if (akun) await hapusAkunKlienUji(akun.id, admin);
+    }
   });
 
   test("akun admin: tanpa aksi langganan dan tanpa riwayat", async ({ page }) => {
