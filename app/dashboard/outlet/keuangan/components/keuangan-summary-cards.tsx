@@ -10,19 +10,33 @@ import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 
 type SummaryCard = {
   title: string;
+  /** Judul ringkas untuk kartu dua kolom di HP. */
+  judulPendek: string;
   source: "laporan" | "kas";
   dataKey?: KolomNilaiLaporan; // Kunci data yang mau dijumlahkan
 };
 
 const SUMMARY_CARDS: SummaryCard[] = [
-  { title: "Total Omzet Bulan Ini", source: "laporan", dataKey: "totalOmzet" },
+  {
+    title: "Total Omzet Bulan Ini",
+    judulPendek: "Omzet bulan ini",
+    source: "laporan",
+    dataKey: "totalOmzet",
+  },
   {
     title: "Total Pengeluaran",
+    judulPendek: "Pengeluaran",
     source: "laporan",
     dataKey: "totalBebanOperasional",
   },
-  { title: "Laba Bersih", source: "laporan", dataKey: "totalLabaBersih" },
-  { title: "Saldo Kas Total", source: "kas" }, // Saldo Kas punya endpoint sendiri
+  {
+    title: "Laba Bersih",
+    judulPendek: "Laba bersih",
+    source: "laporan",
+    dataKey: "totalLabaBersih",
+  },
+  // Saldo Kas punya endpoint sendiri
+  { title: "Saldo Kas Total", judulPendek: "Saldo kas total", source: "kas" },
 ];
 
 /**
@@ -32,20 +46,23 @@ const SUMMARY_CARDS: SummaryCard[] = [
 function SummaryCardItem({ card, nilai }: { card: SummaryCard; nilai: number | null }) {
   return (
     // Background Cream konsisten
-    <div className="bg-krem p-5 rounded-2xl text-navy flex flex-col justify-between shadow-sm min-h-27.5 border border-navy/10">
-      <div className="flex justify-between items-center mb-4">
+    <div className="bg-krem p-3.5 sm:p-5 rounded-2xl text-navy flex flex-col justify-between shadow-sm sm:min-h-27.5 border border-navy/10 min-w-0">
+      <div className="flex justify-between items-center mb-1.5 sm:mb-4">
         {/* Teks title dengan sedikit transparansi */}
-        <p className="text-sm font-medium text-navy/70">{card.title}</p>
+        <p className="text-[13px] sm:text-sm font-medium text-navy/70">
+          <span className="sm:hidden">{card.judulPendek}</span>
+          <span className="hidden sm:inline">{card.title}</span>
+        </p>
 
         {/* Badge menggunakan aksen Sage Green agar serasi dengan card Cream */}
-        <div className="flex items-center gap-1 bg-sage/10 px-2 py-1 rounded-md">
+        <div className="hidden sm:flex items-center gap-1 bg-sage/10 px-2 py-1 rounded-md">
           <TrendingUp className="w-3 h-3 text-sage" />
           <span className="text-xs text-sage font-bold">—</span>
         </div>
       </div>
 
       {/* Angka dengan warna Navy pekat untuk kontras di atas Cream */}
-      <h3 className="text-2xl font-black tracking-tight text-navy">
+      <h3 className="text-[17px] sm:text-2xl font-black tracking-tight text-navy">
         {nilai === null ? "-" : nilai === 0 ? "Rp 0" : formatRupiah(nilai)}
       </h3>
       {nilai === null && (
@@ -73,7 +90,7 @@ export function KeuanganSummaryCards() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-4 w-full">
       {SUMMARY_CARDS.map((card) => (
         <SummaryCardItem key={card.title} card={card} nilai={nilaiKartu(card)} />
       ))}

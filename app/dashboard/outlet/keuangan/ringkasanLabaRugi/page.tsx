@@ -89,7 +89,7 @@ export default function RingkasanLabaRugiPage() {
   }[periode];
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
+    <div className="sm:p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
       {/* Chart card */}
       <div className="bg-krem border border-navy/10 rounded-2xl p-5 sm:p-6 text-navy shadow-sm flex flex-col w-full gap-6 overflow-hidden">
         {/* Toolbar chart */}

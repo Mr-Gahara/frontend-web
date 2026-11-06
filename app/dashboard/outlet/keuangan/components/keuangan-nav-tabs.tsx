@@ -42,7 +42,7 @@ export function KeuanganNavTabs() {
   return (
     <div className="w-full">
       <nav
-        className="flex flex-row overflow-x-auto overflow-y-hidden w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="flex flex-wrap gap-2 w-full sm:flex-nowrap sm:gap-0 sm:overflow-x-auto sm:overflow-y-hidden sm:[&::-webkit-scrollbar]:hidden sm:[-ms-overflow-style:none] sm:[scrollbar-width:none]"
         aria-label="Navigasi Keuangan"
       >
         {tabTerlihat.map(({ label, href, icon: Icon }) => {
@@ -51,14 +51,18 @@ export function KeuanganNavTabs() {
             <Link
               key={href}
               href={href}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex flex-1 items-center justify-center gap-2 py-3 px-1 text-sm font-bold whitespace-nowrap transition-all border-b-4 rounded-none bg-transparent cursor-pointer -mb-px focus-visible:ring-0 focus-visible:outline-none",
+                // HP: pil yang turun ke baris berikutnya, sehingga setiap tab dan
+                // tab aktif selalu terlihat. Sejak sm: garis bawah seperti semula.
+                "flex items-center justify-center gap-2 h-10 px-3.5 rounded-full border text-sm font-semibold whitespace-nowrap transition-all cursor-pointer focus-visible:ring-0 focus-visible:outline-none",
+                "sm:flex-1 sm:h-auto sm:py-3 sm:px-1 sm:rounded-none sm:border-x-0 sm:border-t-0 sm:border-b-4 sm:font-bold sm:bg-transparent sm:-mb-px",
                 isActive
-                  ? "border-navy text-navy shadow-none"
-                  : "border-transparent text-navy/50 hover:text-navy hover:bg-transparent",
+                  ? "bg-navy text-gading border-navy sm:text-navy sm:shadow-none"
+                  : "bg-white text-navy border-navy/15 hover:bg-krem sm:border-transparent sm:text-navy/50 sm:hover:text-navy sm:hover:bg-transparent",
               )}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="hidden sm:block w-4 h-4" aria-hidden="true" />
               {label}
             </Link>
           );
