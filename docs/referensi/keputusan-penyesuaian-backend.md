@@ -651,3 +651,49 @@ aplikasi mobile) di bagian Nizar, serta B245 dan B246 dari Yoga.
   audit selesai, agar diserahkan sekali jalan (pemilik proyek,
   6 November 2026). Temuan tetap dicatat di `kontrak/temuan.md` begitu
   terverifikasi (butir 168 sampai 171).
+
+## Penyesuaian backend `ridho` lokal `1584222`
+
+Diminta pemilik proyek pada 6 November 2026, sebelum membahas pekerjaan
+tanpa UI baru: `yoga` maju 12 commit tepat di atas `c031bde` ke
+`1584222`, sedangkan `nizar` dan `ridho` remote tidak maju, sehingga
+`ridho` lokal di-fast-forward tanpa commit gabungan dan tanpa di-push
+(maju 12 dari `origin/ridho`). Isinya P53 sampai P59 serta B252 sampai
+B262, sebagian di modul Ridho atas penugasan sementara.
+
+- **Langkah sesudah tarik**: seed membuang lima izin
+  `*-pengiriman-stok` (P56, B258). Tinjauan sebelum sinkron: seed 159,
+  basis data 164, di luar seed hanya kelima nama itu, dipegang 10 role.
+  Sinkron seed (dibuang 5), seed Owner, dan pembersihan cache izin
+  Redis, lalu tinjauan ulang: 159 nama, Owner 156, tanpa nama di luar
+  seed. `db:indeks` selaras tanpa perubahan; `db:setup-toko-lama` tidak
+  dijalankan (akun pendaftar uji ikut ditandai).
+- **Migrasi baru di RUNBOOK backend**: `rapikanJamShift.js` mode laporan
+  memeriksa 957 shift tanpa jam yang perlu dirapikan dan tanpa
+  `perluManual`, sehingga tidak diterapkan. `hapusFieldUsang.js` mode
+  laporan menemukan `pajak` di 9 produk dan `stok` di 46 master bahan
+  baku; mode `--terapkan` belum dijalankan, karena perintahnya ditolak
+  penjaga izin sesi dan diserahkan ke pemilik proyek. Sisa field itu
+  tidak dibaca model baru.
+- **Suite penuh sebelum kode web diubah** (pukul 15.52 sampai 16.21
+  WIB): 562 lolos, 1 gagal, dan 1 skipped dari 564. Kegagalannya
+  templat role Manajer: 116 dari 118 izin terpetakan ke id, karena
+  templat masih memuat izin `*-pengiriman-stok` (B258).
+- **Perubahan web**: ketujuh nama `*-pengiriman-stok` dibuang dari
+  `lib/roleTemplates.ts`; nama yang tidak ada sudah dilewati saat
+  dipetakan ke id, sehingga role yang dibuat dari templat tidak berubah.
+  Komentar halaman edit pengajuan diselaraskan dengan B255.
+- **Tidak mengubah web**: B255 (edit web sudah hanya `DRAFT`), B259
+  (form edit bahan baku hanya mengirim nama dan satuan), B261 (payload
+  form produk dan wizard berada di daftar validator), B252 (galat
+  `{ errors }` dibaca `ApiError`; web hanya menawarkan kategori toko
+  sendiri), B253 dan B254 (web tidak menulis izin cuti maupun absensi,
+  selain fixture spec bertanggal `YYYY-MM-DD`), B256 dan B257 (web
+  belum punya ubah email maupun hapus akun sendiri, B178 sampai B181),
+  dan B262 (web tidak memanggil `GET /dashboard/outlet`). Dashboard
+  gudang tidak mendapat rincian per arah, sehingga utang AR6a tetap.
+- **Bukti respons nyata** (skrip API, 6 November 2026): `PUT /produk/:id`
+  dengan `tenantID` dan `pajak` 400 beserta `errors` (B261); respons
+  produk tanpa `pajak` dan detail ber-`createdAt` (B260, B252);
+  `PUT /bahanbaku/:id` dengan `stok` 400 (B259). B255 belum dibuktikan,
+  karena tenant uji tidak punya pengajuan APPROVED maupun PENDING.

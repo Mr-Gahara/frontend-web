@@ -82,7 +82,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | GET | `/bahanbaku` | authPengguna | `read-bahan` | `{ data, success }` | `id` | `features/bahan-baku/api.ts` |
 | POST | `/bahanbaku` | authPengguna | `create-bahan` | - | - | `features/bahan-baku/api.ts` |
 | GET | `/bahanbaku/:id` | authPengguna | `read-bahan` | `{ data, success }` | `id` | `features/bahan-baku/api.ts` |
-| PUT | `/bahanbaku/:id` | authPengguna | `update-bahan` | - | - | `features/bahan-baku/api.ts` |
+| PUT | `/bahanbaku/:id` | authPengguna | `update-bahan` | - | - | `features/bahan-baku/api.ts` (`stok` 400 sejak `yoga` `1584222`, B259; form edit hanya mengirim nama dan satuan) |
 | DELETE | `/bahanbaku/:id` | authPengguna | `delete-bahan` | - | - | `features/bahan-baku/api.ts` |
 
 #### `/bebanoperasional`
@@ -233,7 +233,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | GET | `/pengajuanstok` | authPengguna | `read-pengajuan-stok` | `{ data, success }` | `id` | `features/pengajuan-stok/api.ts` (query `status`, `locationID`) |
 | POST | `/pengajuanstok` | authPengguna | `create-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` |
 | GET | `/pengajuanstok/:id` | authPengguna | `read-pengajuan-stok` | `{ data, success }` | `id` | `features/pengajuan-stok/api.ts` |
-| PUT | `/pengajuanstok/:id` | authPengguna | `update-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` |
+| PUT | `/pengajuanstok/:id` | authPengguna | `update-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` (hanya `DRAFT` sejak `yoga` `1584222`, B255) |
 | PATCH | `/pengajuanstok/:id/approve` | authPengguna | `approve-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` |
 | PATCH | `/pengajuanstok/:id/reject` | authPengguna | `reject-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` |
 | PATCH | `/pengajuanstok/:id/submit` | authPengguna | `update-pengajuan-stok` | - | - | `features/pengajuan-stok/api.ts` |
@@ -284,7 +284,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | GET | `/produk` | authPengguna | `read-produk` atau `akses-pos` | `{ data, success }` | `_id` | `features/produk/api.ts` |
 | POST | `/produk` | authPengguna | `create-produk` | - | - | `features/produk/api.ts` |
 | GET | `/produk/:id` | authPengguna | `read-produk` atau `akses-pos` | `{ data, success }` | `_id` | `features/produk/api.ts` |
-| PUT | `/produk/:id` | authPengguna | `update-produk` | - | - | `features/produk/api.ts` |
+| PUT | `/produk/:id` | authPengguna | `update-produk` | - | - | `features/produk/api.ts` (sejak `yoga` `1584222` hanya field di daftar validator, field lain 400 `{ errors }` (B261); galat validasi `{ message, errors }` dan nama bentrok 409 (B252)) |
 | DELETE | `/produk/:id` | authPengguna | `delete-produk` | - | - | `features/produk/api.ts` |
 
 #### `/produkpajak`

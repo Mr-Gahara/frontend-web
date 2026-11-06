@@ -14,8 +14,8 @@ const URL_DAFTAR = "/dashboard/outlet/inventaris/pengajuanStok";
 /**
  * Revisi draft pengajuan. Form dipasang setelah detail termuat ulang saat
  * halaman dibuka, karena nilai awalnya hanya dibaca sekali (butir 8).
- * Selain DRAFT ditolak di sini; backend masih mengizinkan APPROVED dan
- * PENDING diubah (kontrak/temuan.md butir 25).
+ * Selain DRAFT ditolak di sini, sama dengan backend sejak yoga 1584222
+ * (B255, kontrak/temuan.md butir 25).
  */
 export default function HalamanEditPengajuanStok() {
   const router = useRouter();

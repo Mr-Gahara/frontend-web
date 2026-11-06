@@ -29,9 +29,10 @@ setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 
 ## Pekerjaan berikutnya
 
-Keadaan per 6 November 2026: backend lokal `ridho` `c031bde` (kode
-`nizar` `4d221f5` ditambah commit dokumen AR26), sudah di-push atas
-perintah pemilik proyek (`inti/backend.md`). Pekerjaan yang selesai sejak
+Keadaan per 6 November 2026: backend lokal `ridho` `1584222`
+(fast-forward ke `yoga`, 12 commit di atas `c031bde` yang sudah di-push),
+belum di-push (`inti/backend.md`; penyesuaiannya di
+`referensi/keputusan-penyesuaian-backend.md`). Pekerjaan yang selesai sejak
 penyesuaian `4759208` (4 sampai 6 November 2026, butir 1 sampai 10
 beserta urutan yang disetujui 4 November 2026) dipindah ke
 `arsip/catatan-putaran.md` (Catatan dari penyesuaian backend `4759208`
@@ -108,7 +109,9 @@ Diajukan lewat dialog sebelum dikerjakan:
 - Pecah berkas di atas 700 baris tanpa mengubah perilaku: buat penjualan
   dan form produk (Metrik sisa pekerjaan, di atas).
 - Suite penuh dengan reporter `json`, untuk mengukur harapan 564 dan
-  mencatat judul skip (`inti/pengujian.md`, Baseline).
+  mencatat judul skip (`inti/pengujian.md`, Baseline). Angkanya sudah
+  terukur di suite penuh penyesuaian `1584222` (564, satu skip bersyarat
+  tanggal); dibahas ulang apakah butir ini masih perlu.
 - Sisa utang pengujian yang tidak butuh pengguna uji non-Owner maupun
   data permanen (`referensi/utang-pengujian.md`).
 
@@ -121,13 +124,19 @@ Diajukan lewat dialog sebelum dikerjakan:
 - Laporan untuk tim backend belum disusun (`inti/backend.md`, Bila
   menemukan bug backend). Bahannya: `kontrak/temuan.md` butir 168 sampai
   170, serta pembuktian B215, B217, B229, B230, B231, B232, B251
-  (`a207fae`), dan B248 (`efb05db`) dari web, lalu B250 setelah web
-  mengerjakannya. Laporannya ditunda sampai pekerjaan backend dari audit
+  (`a207fae`), dan B248 (`efb05db`) dari web, B252, B259, B260, dan B261
+  dari respons nyata (penyesuaian `1584222`), lalu B250 setelah web
+  mengerjakannya, dan B255 setelah ada pengajuan APPROVED atau PENDING
+  untuk diuji. Laporannya ditunda sampai pekerjaan backend dari audit
   selesai, agar diserahkan sekali jalan (pemilik proyek, 6 November
   2026).
 - Akun uji `toko@gmail.com` dinaikkan ke Pro lewat API admin, karena
   akun lama dibaca Basic (B212) dan Basic menolak sesi booking (B216).
   Riwayat langganannya kini berisi satu catatan `ubah-plan`.
+- `hapusFieldUsang.js --terapkan` (P57) belum dijalankan di basis data
+  lokal: perintahnya ditolak penjaga izin sesi 6 November 2026, sehingga
+  dijalankan pemilik proyek sendiri. Sisanya `pajak` di 9 produk dan
+  `stok` di 46 master bahan baku, tidak dibaca model baru.
 - `db:setup-toko-lama` menandai empat toko yang ada saat itu selesai
   setup inti. Jangan dijalankan ulang di basis data lokal setelah spec
   membuat akun pendaftar, karena akun itu ikut ditandai selesai.

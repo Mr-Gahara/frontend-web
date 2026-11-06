@@ -226,6 +226,13 @@ izin, dan tidak ada model maupun skrip migrasi baru. Di atasnya
 ditambahkan commit dokumen `c031bde` (paket AR26 untuk temuan audit A-06
 milik Ridho), lalu `ridho` di-push ke `c031bde` atas perintah pemilik
 proyek (`referensi/keputusan-penyesuaian-backend.md`).
+Pada hari yang sama `yoga` maju 12 commit tepat di atas `c031bde` ke
+`1584222`, sehingga `ridho` lokal di-fast-forward tanpa di-push. Seed
+membuang lima izin `*-pengiriman-stok` (P56); permission diselaraskan
+lewat langkah 1, 3, 4, dan 5 (159 nama, Owner 156), lalu
+`npm run db:indeks`. Dua skrip migrasi baru tercatat di RUNBOOK backend
+(`rapikanJamShift.js` dan `hapusFieldUsang.js`), dijalankan mode laporan
+lebih dulu (`referensi/keputusan-penyesuaian-backend.md`).
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari

@@ -245,8 +245,6 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "create-transfer-stok",
       "approve-transfer-stok",
       "receive-transfer-stok",
-      "read-pengiriman-stok",
-      "create-pengiriman-stok",
       // Aset & Booking
       "create-tipe-aset",
       "update-tipe-aset",
@@ -391,11 +389,6 @@ export const ROLE_TEMPLATES: RoleTemplate[] = [
       "approve-transfer-stok",
       "receive-transfer-stok",
       "cancel-transfer-stok",
-      "read-pengiriman-stok",
-      "create-pengiriman-stok",
-      "update-pengiriman-stok",
-      "approve-pengiriman-stok",
-      "reject-pengiriman-stok",
       // Aset & Booking
       "create-tipe-aset",
       "update-tipe-aset",

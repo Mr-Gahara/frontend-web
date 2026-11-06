@@ -12,6 +12,17 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per backend `ridho` lokal `1584222`** (web `2f3cf51`, 6
+November 2026, pukul 15.52 sampai 16.21 WIB, reporter `line,json`): e2e
+562 lolos, 1 gagal, dan 1 skipped dari 564, sesuai harapan hitungan 564.
+Kegagalannya templat role (B258), diperbaiki di commit penyesuaian dan
+dibuktikan `tests/e2e/roles` 7 lolos; vitest 928 lolos. Yang dilewati
+skip bersyarat tanggal di `lihat-jurnal-stok.spec.ts` ("outlet: periode
+dikirim sebagai tanggal YYYY-MM-DD, dan Reset Filter mengembalikan bulan
+berjalan"; alasan "Awal bulan: tanggal uji 8 sampai 15 belum lewat").
+Harapan suite penuh sesudahnya 563 lolos dan 1 skipped sampai tanggal 8
+(hitungan).
+
 **Baseline per B248 tanpa UI** (commit `efb05db`, 6 November 2026): 928
 test unit dan integrasi lolos. Suite e2e penuh tidak dijalankan; spec
 terdampak `tests/e2e/auth` 58 lolos tanpa skip terhadap backend `ridho`
