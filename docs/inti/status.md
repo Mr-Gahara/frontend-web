@@ -48,27 +48,66 @@ cabang backend maju:
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho nizar yoga; do echo "origin/$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...origin/$r | tr '\t' ' ')"; done
 ```
 
+### Penyambungan Mesin Kasir ke backend
+
+Berikutnya, dari halaman sesi kasir (B227). Desainnya disetujui pemilik
+proyek 6 November 2026 (pratinjau Revisi 1 dan Revisi 2), dan
+tampilannya selesai tanpa API di `b86e4b7` (tipe dan fungsi tampilan),
+`0178550` (komponen dan pratinjau development), dan `23d00f0` (entri
+`IZIN_HALAMAN` rute pratinjau). Keputusan produknya di
+`modul/keuangan.md` (Mesin Kasir, MK1a sampai MK9). Saat development,
+pratinjau dibuka di `/dashboard/outlet/keuangan/pratinjauMesinKasir`
+dengan pemilih keadaan.
+
+Daftar periksa penyambungan (pemilik proyek, 6 November 2026):
+
+1. Rute final `/dashboard/outlet/keuangan/mesinKasir` beserta rute
+   rinciannya, entri `IZIN_HALAMAN` (`read-sesi-kasir` atau
+   `kelola-perangkat-kasir`, keputusan rancangan butir 16), tab kelima
+   "Mesin Kasir" di `keuangan-nav-tabs.tsx`, dan baris di
+   `kontrak/izin-halaman.md`.
+2. Nama berkas, komponen, dan rute ditinjau ulang terhadap pola modul
+   (`referensi/arsitektur.md`): komponen yang kini menerima data lewat
+   props disambung ke hook, nama yang menyebut pratinjau tidak dipakai
+   lagi, dan `api.ts`, `hooks.ts`, `izin.ts`, serta `pesan.ts`
+   ditambahkan di `features/sesi-kasir`.
+3. Endpoint: `GET /sesikasir?status=BUKA` untuk kasir yang buka,
+   `GET /sesikasir?status=TUTUP` dengan `installationId`, `dari`,
+   `sampai`, `page`, dan `limit` untuk riwayat, `GET /sesikasir/:id`,
+   `POST /sesikasir/:id/tutup`, `GET` dan `POST /sesikasir/perangkat`,
+   `DELETE /sesikasir/perangkat/:id`, serta `GET /device/:userId` per
+   karyawan untuk pilihan perangkat (`read-pengguna`). Terakhir dipakai
+   per mesin dibaca dari sesi terbarunya (`installationId`, `limit` 1).
+4. Pesan lewat `pesan.ts`: 409 pindah dan hapus pemetaan selama sesi
+   terbuka (K-04, K-05), 409 laci dipakai perangkat lain, 404 perangkat
+   tidak ditemukan, dan 400 catatan wajib saat tutup, yang ditampilkan
+   "Hitungan berbeda dengan catatan sistem. Tulis catatan penyebabnya,
+   lalu tutup lagi."
+5. Spec alur nyata menggantikan spec pratinjau: mesin kasir ditambah,
+   diubah, dan dilepas lewat UI; sesi dibuka lewat API aplikasi sebagai
+   data milik modul lain (keputusan rancangan butir 23), lalu ditutup
+   dari web.
+6. Setelah seluruh uji alur nyata lolos, hapus
+   `features/sesi-kasir/data-contoh.ts`,
+   `features/sesi-kasir/pratinjau.tsx`, kedua rute
+   `pratinjauMesinKasir`, entrinya di `IZIN_HALAMAN`, dan
+   `tests/e2e/keuangan/pratinjau-mesin-kasir.spec.ts`.
+
+Yang masih terbuka di sisi backend: `kontrak/temuan.md` butir 172
+sampai 174; keputusan bisnis nomor 1 sampai 3 di audit backend
+5 November 2026 (laci untuk VOID tunai, pemicu sesi lama, dan tunai
+tanpa sesi kasir termasuk dari web; K-08 sampai K-10), yang dibahas
+pemilik proyek bersama tim backend; serta K-18 (pemetaan menerima
+perangkat berstatus apa pun) dan K-19 (`installationId` seluruh HP
+keluar di laporan sesi). Di web, K-18 ditangani dengan menyaring
+perangkat `trusted`, dan K-19 dengan tidak menampilkan `installationId`.
+
 ### Menunggu desain pemilik proyek
 
 Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 6 November 2026). Urutannya disetujui 4 dan 5 November 2026.
 
-1. **Halaman sesi kasir (B227)**: modul baru, pemetaan perangkat ke akun
-   kas `Kas Fisik` dan laporan sesi (`read-sesi-kasir`,
-   `kelola-perangkat-kasir`). Perlu varian desain lebih dulu, dan
-   sumber `installationId` perangkat untuk form pemetaan perlu
-   dipastikan dari backend. Sejak backend `4d221f5`: pindah dan hapus
-   pemetaan ditolak selama sesi masih terbuka (K-04, K-05), tipe laci
-   terpetakan terkunci (B250), dan `referensi.tipe` selisih kasir bernilai
-   `SesiKasir`, `SesiKasirBuka`, atau `SesiKasirTutup` (B247). Audit
-   backend 5 November 2026 menyebut halaman pemetaan pemblokir utama
-   sebelum kasir dipakai, dan menyisakan dua dugaan yang menyentuh
-   rancangan form: pemetaan menerima perangkat PENDING atau REVOKED
-   (K-18), dan `installationId` seluruh HP keluar di laporan sesi (K-19).
-   Keputusan bisnis nomor 1 sampai 3 di audit (laci untuk VOID tunai,
-   pemicu sesi lama, dan tunai tanpa sesi kasir termasuk dari web; K-08
-   sampai K-10) dibahas pemilik proyek bersama tim backend.
-2. **Penanda dan pemandu wizard setup** (pemilik proyek, 5 November
+1. **Penanda dan pemandu wizard setup** (pemilik proyek, 5 November
    2026, sesudah halaman sesi kasir): pemilik proyek mencoba wizard
    sendiri, mengisi form produk lalu menekan "Simpan dan lanjut" tanpa
    "Simpan produk", sehingga produk tidak pernah terkirim (log backend
@@ -79,11 +118,11 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
    dan setelah wizard selesai ditambah pemandu UI (sorotan atau tur)
    yang menunjukkan apa yang diisi dan tombol apa yang ditekan. Rancangan
    dan perilakunya diajukan lewat dialog sebelum dikerjakan.
-3. **Isian password di halaman verifikasi email**, sisa B248: keadaan
+2. **Isian password di halaman verifikasi email**, sisa B248: keadaan
    tanpa password titipan (halaman dimuat ulang atau dibuka langsung)
    kini pindah ke login dengan pesan "Masuk lagi" (`efb05db`). Isiannya
    didesain sendiri oleh pemilik proyek (`kontrak/temuan.md` butir 171).
-4. **Belum dijadwalkan, perlu desain**: logo toko (B203 sampai B205) dan
+3. **Belum dijadwalkan, perlu desain**: logo toko (B203 sampai B205) dan
    jam operasional (B206) di profil toko; OTP reset PIN Owner dan ubah
    email atau password akun (B178 sampai B180); hapus akun oleh Owner
    (B181); dan pengingat masa langganan yang hampir habis di luar
@@ -94,7 +133,7 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 - Nomor WhatsApp admin untuk halaman Langganan (LG1a, `NOMOR_WA_ADMIN`
   masih kosong).
 - Keputusan bisnis nomor 1 sampai 3 di audit backend 5 November 2026
-  (butir halaman sesi kasir, di atas).
+  (Penyambungan Mesin Kasir, di atas).
 - Laporan untuk tim backend, yang ditunda sampai pekerjaan backend dari
   audit selesai (utang kecil, di bawah).
 
@@ -123,7 +162,7 @@ Diajukan lewat dialog sebelum dikerjakan:
   toko.
 - Laporan untuk tim backend belum disusun (`inti/backend.md`, Bila
   menemukan bug backend). Bahannya: `kontrak/temuan.md` butir 168 sampai
-  170, serta pembuktian B215, B217, B229, B230, B231, B232, B251
+  170 dan 172 sampai 174, serta pembuktian B215, B217, B229, B230, B231, B232, B251
   (`a207fae`), dan B248 (`efb05db`) dari web, B252, B259, B260, dan B261
   dari respons nyata (penyesuaian `1584222`), lalu B250 setelah web
   mengerjakannya, dan B255 setelah ada pengajuan APPROVED atau PENDING
@@ -138,6 +177,14 @@ Diajukan lewat dialog sebelum dikerjakan:
   membuat akun pendaftar, karena akun itu ikut ditandai selesai.
 
 ## Utang kecil yang tertunda
+
+### Utang kecil dari perbaikan HP Keuangan
+
+- Padding area gulir dashboard di HP turun dari 24 px menjadi 16 px
+  untuk seluruh halaman (`b3f8698`, `modul/keuangan.md` KH2b). Spec yang
+  punya skenario lebar HP lolos (Keuangan, dashboard outlet, dan
+  langganan), tetapi halaman lain belum dilihat langsung di HP, dan
+  suite e2e penuh belum dijalankan sesudahnya.
 
 ### Utang kecil dari penyesuaian backend `ridho` `0024eb9`
 

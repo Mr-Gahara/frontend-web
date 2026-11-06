@@ -12,6 +12,18 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per tampilan Mesin Kasir** (commit `23d00f0`, 6 November
+2026): 944 test unit dan integrasi lolos. Suite e2e penuh tidak
+dijalankan sesudah `2f3cf51`. Spec terdampak: `tests/e2e/keuangan` 45
+lolos tanpa skip sesudah `0178550`, termasuk spec baru
+`tampilan-hp.spec.ts` (3 skenario, `b3f8698`) dan
+`pratinjau-mesin-kasir.spec.ts` (7 skenario, `0178550`); bersama
+`dashboard/dashboard-outlet.spec.ts` dan `pengaturan/langganan.spec.ts`
+48 lolos di `b3f8698`, karena padding HP area gulir dashboard ikut
+berubah. Harapan suite penuh 574: 564 ditambah sepuluh skenario itu,
+dengan 573 lolos dan 1 skipped bersyarat tanggal sampai tanggal 8
+(hitungan).
+
 **Suite penuh per backend `ridho` lokal `1584222`** (web `2f3cf51`, 6
 November 2026, pukul 15.52 sampai 16.21 WIB, reporter `line,json`): e2e
 562 lolos, 1 gagal, dan 1 skipped dari 564, sesuai harapan hitungan 564.

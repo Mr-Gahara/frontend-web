@@ -934,3 +934,10 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   sementara sempat masuk ke spec dashboard lalu harus ditulis ulang
   (31 Oktober 2026); `tsc` dan ESLint tidak selalu menangkapnya bila
   sintaksnya kebetulan sah.
+- **Rute dashboard baru didaftarkan di `IZIN_HALAMAN` di commit yang
+  sama, termasuk rute tanpa syarat izin.** Test kelengkapan gerbang
+  (`tests/unit/lib/auth/gerbang-rute.test.ts`, GR3a) gagal untuk
+  halaman yang tidak terdaftar, walau `bolehBukaRute` meloloskannya saat
+  berjalan. Rute pratinjau Mesin Kasir sempat ter-push tanpa entri
+  (`0178550`, diperbaiki `23d00f0`), karena kesimpulan diambil dari
+  perilaku saat berjalan tanpa mencari test yang menjaga aturannya.

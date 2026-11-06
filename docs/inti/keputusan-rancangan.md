@@ -241,7 +241,10 @@ sama (submodul pengajuan stok, di bawah).
     sendiri dan tidak membungkus tabel dengan panel berlatar. Aksi baris
     berada di menu titik tiga, dan kolom yang tidak muat pindah ke dialog
     rincian (pemilik proyek, 11 Oktober 2026, `93490bb`, `cc1092e`,
-    `f44db05`, `9cd22e1`; keputusan TB1a sampai TB7a).
+    `f44db05`, `9cd22e1`; keputusan TB1a sampai TB7a). Pengecualian:
+    riwayat buka-tutup kasir Mesin Kasir dikelompokkan per hari, bukan
+    `DataTable` (pemilik proyek, 6 November 2026; `modul/keuangan.md`,
+    MK2).
 27. **Daftar dipindah ke paginasi server hanya bersama seluruh
     filternya, termasuk pencarian.** Filter tanpa padanan di server
     tidak disaring di klien atas halaman yang sedang tampil, karena
@@ -283,3 +286,21 @@ sama (submodul pengajuan stok, di bawah).
     dibaca dari daftar tanpa `locationID` (dari pilihan pemilik proyek
     untuk B183 dan B184, 31 Oktober 2026; `8b5ad0f`, `44a81d0`,
     `b5a2578`).
+30. **Tampilan yang belum disambung ke backend dipratinjau lewat rute
+    development, bukan halaman final.** Komponen menerima data lewat
+    props. Satu rute pratinjau memakai data contoh dan pemilih keadaan,
+    memanggil `notFound()` bila `NODE_ENV` production, dan tercatat di
+    `IZIN_HALAMAN` dengan syarat kosong agar test kelengkapan gerbang
+    (GR3a) tetap lolos. Tab dan rute final baru ditambah saat
+    penyambungan. Data contoh, rute pratinjau beserta entrinya, dan spec
+    pratinjau dihapus setelah uji alur nyata lolos. Contoh:
+    `features/sesi-kasir/pratinjau.tsx` dan
+    `app/dashboard/outlet/keuangan/pratinjauMesinKasir` (pemilik proyek,
+    6 November 2026, `0178550`, `23d00f0`).
+31. **Tata letak yang bergantung pada lebar bagiannya sendiri memakai
+    container query**, bukan breakpoint layar, karena sidebar dan
+    padding dashboard membuat lebar isi berbeda dari lebar layar.
+    Contoh: baris riwayat Mesin Kasir berbentuk kolom mulai riwayat
+    selebar 640 px (`@container` dan `@[40rem]:`), sehingga panel mesin
+    kasir tetap di samping di laptop 1280 px (pemilik proyek,
+    6 November 2026, `0178550`).

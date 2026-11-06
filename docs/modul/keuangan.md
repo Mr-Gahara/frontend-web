@@ -247,7 +247,101 @@ desain yang disetujui (`e073a9d`):
   Pembelian disebut persediaan, bukan beban, sehingga tidak masuk laba
   rugi, dan saldo akun kas belum terpotong.
 
+### Tampilan HP tab Keuangan
+
+Diputuskan pemilik proyek pada 6 November 2026, dari pratinjau Revisi 1
+(perbaikan Akun Kas di HP) dan dialog sesudahnya (`b3f8698`):
+
+- **KH1a: tiga bug tampilan HP tab Keuangan diperbaiki bersama Mesin
+  Kasir**: label tombol Pindah Dana dan Tambah Akun terpotong, bar tab
+  terpotong sehingga tab aktif tidak terlihat, dan empat kartu ringkasan
+  memenuhi satu layar. Di bawah `sm` tab menjadi pil yang turun ke baris
+  berikutnya tanpa ikon (tab aktif navy, `aria-current`), kartu ringkasan
+  dua kolom dengan judul pendek tanpa badge tren, dan kedua tombol header
+  Akun Kas bertumpuk penuh setinggi 48 px dengan Tambah Akun di atas.
+  Sejak `sm` tampilan tidak berubah.
+- **KH2b: padding HP hanya dari dashboard**: area gulir dashboard `p-4`
+  di bawah `sm` (dari `p-6`), dan layout Keuangan serta halaman di
+  dalamnya tidak menambah padding sendiri di bawah `sm`. Isi tab di HP
+  menjadi sekitar 330 px dari lebar 390 px, sebelumnya sekitar 234 px.
+  Opsi lainnya: hanya layout Keuangan, atau dibiarkan.
+- **KH3a: halaman Ringkasan Laba/Rugi ikut dibersihkan** dari padding
+  sendirinya di HP, sama dengan Akun Kas.
+
+### Mesin Kasir
+
+Diputuskan pemilik proyek pada 6 November 2026, dari tiga gaya desain,
+pratinjau Revisi 1 dan Revisi 2 di kanvas desain, dan dialog sesudahnya
+(`b86e4b7`, `0178550`). Akhiran huruf mengikuti opsi dialog yang
+dipilih; kode tanpa huruf adalah jawaban yang ditulis pemilik proyek
+sendiri.
+
+- **MK1a: nama "Mesin Kasir"** untuk perangkat yang dipakai berjualan
+  dan dipasangkan ke laci uang (`PerangkatKasir` di backend), agar tidak
+  tertukar dengan perangkat login karyawan dan owner untuk absen
+  (`Device`). Tombol "Tambah mesin kasir", menu "Ubah nama dan laci" dan
+  "Berhenti jadi mesin kasir". Nama tipe di kode tetap `PerangkatKasir`.
+- **MK2: gaya C dengan data riwayat gaya B**: kasir yang sedang buka di
+  kartu navy paling atas, riwayat buka-tutup kasir dikelompokkan per
+  hari sebagai isi utama, dan panel mesin kasir di samping (di HP paling
+  bawah). Setiap baris riwayat memuat nama mesin, orang, jam buka sampai
+  tutup, uang akhir, dan satu label selisih saat tutup. Sesi yang masih
+  buka hanya tampil di kartu atas. Pengecualian keputusan rancangan
+  butir 26 (`inti/keputusan-rancangan.md`).
+- **MK3a: pilihan perangkat digabung dari perangkat setiap karyawan**
+  (`GET /device/:userId`), satu baris per `installationId`, hanya status
+  `trusted` (K-18), karena backend belum punya daftar perangkat se-toko
+  (`kontrak/temuan.md` butir 172).
+- **MK4a: tampilan dulu, penyambungan menyusul**: komponen menerima data
+  lewat props, dan dipratinjau di rute development `pratinjauMesinKasir`
+  dengan data contoh dan pemilih keadaan (keputusan rancangan butir 30).
+  Daftar periksa penyambungan di `inti/status.md`.
+- **MK5a: asal penutupan sesi tidak ditulis**: riwayat menulis "Sari,
+  ditutup Ridho" bila penutupnya berbeda, tanpa "dari web", karena
+  respons tidak membawa penandanya (`kontrak/temuan.md` butir 174).
+- **MK6a: waktu perangkat diberi label "Terakhir aktif"**, sesuai arti
+  `lastSeenAt`, bukan "Terakhir login" seperti di pratinjau.
+- **MK7a: filter riwayat memakai dua `PilihTanggal`**, "Dibuka dari" dan
+  "Dibuka sampai", seperti Pindah Dana, bukan satu tombol rentang seperti
+  di pratinjau.
+- **MK8a: panel mesin kasir tetap di samping di laptop 1280 px**:
+  riwayat menyempit, dan barisnya bertumpuk seperti di HP selama riwayat
+  lebih sempit dari 640 px (keputusan rancangan butir 31).
+- **MK9: menu, dialog, dan keadaan Revisi 2 disetujui**. Selama kasir di
+  sebuah mesin buka, Berhenti nonaktif beserta alasannya dan laci
+  terkunci di dialog ubah, sedangkan nama tetap dapat diubah (K-04,
+  K-05). Konfirmasi berhenti menyebut riwayat tetap tersimpan. Tutup
+  kasir dari web tanpa angka sistem (hitung buta, `sesiKasirService`
+  baris 79 sampai 103), dengan catatan diminta bila backend menjawab
+  catatan wajib. Ada keadaan semua kasir tutup, riwayat kosong, gagal
+  dimuat, memuat, dan form tambah tanpa perangkat atau laci. Tanpa
+  `kelola-perangkat-kasir`, tombol tutup dan panel mesin kasir tidak
+  tampil dan nama mesin menjadi "Mesin kasir" (`kontrak/temuan.md`
+  butir 173). Saat belum ada mesin kasir, langkah menambah naik ke
+  paling atas.
+- Halaman Mesin Kasir menjadi tab kelima Keuangan saat disambung. Laci
+  hanya akun Kas Fisik aktif, satu laci untuk satu mesin (indeks unik
+  `tenantID` dan `akunKasID`).
+
 ## Catatan
+
+### Catatan dari tampilan Mesin Kasir dan perbaikan HP Keuangan
+
+- Selisih sesi kasir dihitung `nominal - saldo` (`sesiKasirService.js`
+  baris 99): positif berarti uang di laci lebih dari catatan sistem.
+- Respons mesin kasir hanya membawa `namaAkun` laci; nomor akun diambil
+  dari daftar akun kas. `GET /sesikasir` berhalaman server (`page` dan
+  `limit`, bawaan dari `bacaPaginasiWajib`) dan membaca `status`,
+  `installationId`, `dari`, dan `sampai`; parameter lain ditolak 400.
+- Lebar isi halaman di HP dan laptop diukur dari rantai pembungkusnya,
+  bukan diperkirakan dari pratinjau. Kanvas desain digambar tanpa
+  sidebar, sehingga lebar isi di laptop 1280 px (sekitar 880 px) jauh di
+  bawah bingkai 1440 px pratinjau. Langkah ukur sementara di spec
+  mencetak posisi, lebar, padding, dan margin setiap pembungkus.
+- Spec tampilan menguji posisi dan ukuran (`boundingBox`), label tidak
+  terpotong (`scrollWidth` terhadap `clientWidth`), dan halaman tanpa
+  gulir ke samping, lalu dibuktikan gagal terhadap kode lama lewat
+  `git stash push` atas berkas yang diubah.
 
 ### Catatan dari tab Belanja Stok
 
@@ -498,3 +592,16 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   `e051906`.
 - Ringkasan Belanja Stok lebih dari satu halaman hanya teruji di unit
   test (`referensi/utang-pengujian.md`).
+
+### Utang kecil dari Mesin Kasir dan perbaikan HP Keuangan
+
+- Halaman Akun Kas tenant uji menampilkan "Akun non-aktif (518)"
+  (tangkapan layar pemilik proyek, 6 November 2026). Asalnya belum
+  ditelusuri; dugaan awal, akun uji spec Keuangan yang dinonaktifkan
+  karena `DELETE /akunkas/:id` tidak ada lagi (`kontrak/temuan.md`
+  butir 81).
+- Tab Keuangan memakai `focus-visible:ring-0`, sehingga tab tidak punya
+  penanda fokus saat dipakai dengan keyboard. Dipertahankan di
+  `b3f8698` karena tidak ada di pratinjau yang disetujui.
+- Spec pratinjau Mesin Kasir hanya menguji data contoh; alur nyata
+  menunggu penyambungan (`inti/status.md`).

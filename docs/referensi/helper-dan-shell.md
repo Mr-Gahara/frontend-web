@@ -749,6 +749,9 @@ yang disalurkan ke `tail -3` mencetak kode 0 padahal alat itu keluar 1.
   ini; kegagalannya ternyata dari kontrak backend dan dibetulkan
   `cab57a9`. Bentuknya:
   `(set -o pipefail; npx tsc --noEmit && ... && git commit ...)`.
+  Pada 6 November 2026 `0178550` ter-push dengan test GR3a gagal:
+  blok commit disusun tanpa membaca catatan ini, sehingga vitest, spec,
+  dan commit berjalan sebagai baris terpisah. Perbaikannya `23d00f0`.
 - **`echo ==` gagal di zsh** dengan `zsh: = not found`, karena `=kata`
   diekspansi menjadi path perintah. Tulis pemisah berkutip: `echo '=='`.
 - **Tempelan blok panjang dapat menyisipkan `\` sebelum `;` di ujung

@@ -520,6 +520,16 @@ bersyarat).
   permintaan halaman itu sendiri (`respons.request().headers()`), bukan
   login di konteks lain, karena login akun memutar `tokenVersion` admin
   dan mengakhiri sesi halaman (`bukaDaftarAkun`, `1ccf0ef`).
+- **Locator judul menyebut tingkatnya bila nama yang sama dapat muncul
+  sebagai judul lain.** Di pratinjau Mesin Kasir tanpa izin kelola, nama
+  mesin di kartu kasir buka adalah `h3` "Mesin kasir", sama dengan judul
+  panel `h2`, sehingga `getByRole("heading", { name, exact: true })` ikut
+  menangkapnya. Halaman di bawah layout Keuangan punya dua `h1`
+  ("Manajemen Keuangan" dan judul halamannya), sehingga
+  `getByRole("heading", { level: 1 })` perlu `name`. Teks ganda untuk HP
+  dan desktop yang disembunyikan CSS tetap ditemukan `getByText`; pilih
+  lewat lebar viewport atau pola teks yang hanya cocok dengan satu bentuk
+  (`0178550`).
 
 ## Spec rujukan
 
@@ -998,3 +1008,11 @@ bersyarat).
   dibuka, form diisi, `page.clock.runFor` melewati 00.00, lalu payload
   dibaca dari permintaan yang dijawab gagal, sehingga tidak ada data
   tersimpan.
+- `tests/e2e/keuangan/tampilan-hp.spec.ts`: pemeriksaan tampilan
+  responsif di lebar 390 dan 1280 px. Elemen diperiksa berada di dalam
+  layar (`boundingBox`), label tidak terpotong (`scrollWidth` terhadap
+  `clientWidth`), halaman tidak menggulir ke samping, dan lebar isi
+  dibandingkan dengan elemen pembanding di halaman, bukan dengan lebar
+  layar (`b3f8698`). `pratinjau-mesin-kasir.spec.ts` memakai pola yang
+  sama untuk setiap keadaan pratinjau, dan membandingkan kotak region
+  bagian untuk tata letak berdampingan (`0178550`).

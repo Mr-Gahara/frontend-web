@@ -136,6 +136,8 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/outlet/keuangan/akunkas/buatAkunKas` | `create-akunkas` | - | Form |
 | `/dashboard/outlet/keuangan/akunkas/[id]/ubah` | `read-akunkas`, `update-akunkas` | `/akunkas` | Form; cabang keterangan tanpa `update-akunkas` di halaman dibuang di `dc0af1c` |
 | `/dashboard/outlet/keuangan/akunkas/pindahDana` | - | `/akunkas`, `/jurnaltransfer` | Izin per bagian di dalam halaman (DN1a) |
+| `/dashboard/outlet/keuangan/pratinjauMesinKasir` | - | - | Pratinjau development Mesin Kasir dengan data contoh, tanpa API; `notFound()` di produksi, dan dihapus saat penyambungan (`inti/keputusan-rancangan.md` butir 30) |
+| `/dashboard/outlet/keuangan/pratinjauMesinKasir/rincian` | - | - | Pratinjau development rincian sesi kasir; sama dengan baris di atas |
 | `/dashboard/outlet/pengeluaran/catatBeban` | `read-kategori-beban`, `read-akunkas`, `create-beban-operasional` | `/kategoribeban`, `/akunkas` | Form; kategori dan akun kas wajib (GR5a, GR7a) |
 | `/dashboard/outlet/pengaturan/metodePembayaran` | - | `/metodepembayaran` | `GET` tanpa izin di backend |
 | `/dashboard/outlet/pengaturan/metodePembayaran/buatMetodePembayaran` | `read-akunkas`, `create-metode-pembayaran` | `/akunkas` | Form; akun tujuan wajib |
