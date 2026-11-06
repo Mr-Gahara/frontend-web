@@ -232,7 +232,8 @@ membuang lima izin `*-pengiriman-stok` (P56); permission diselaraskan
 lewat langkah 1, 3, 4, dan 5 (159 nama, Owner 156), lalu
 `npm run db:indeks`. Dua skrip migrasi baru tercatat di RUNBOOK backend
 (`rapikanJamShift.js` dan `hapusFieldUsang.js`), dijalankan mode laporan
-lebih dulu (`referensi/keputusan-penyesuaian-backend.md`).
+lebih dulu; hanya `hapusFieldUsang.js` yang diterapkan
+(`referensi/keputusan-penyesuaian-backend.md`).
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari

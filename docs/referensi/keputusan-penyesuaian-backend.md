@@ -672,9 +672,9 @@ B262, sebagian di modul Ridho atas penugasan sementara.
   memeriksa 957 shift tanpa jam yang perlu dirapikan dan tanpa
   `perluManual`, sehingga tidak diterapkan. `hapusFieldUsang.js` mode
   laporan menemukan `pajak` di 9 produk dan `stok` di 46 master bahan
-  baku; mode `--terapkan` belum dijalankan, karena perintahnya ditolak
-  penjaga izin sesi dan diserahkan ke pemilik proyek. Sisa field itu
-  tidak dibaca model baru.
+  baku; mode `--terapkan` ditolak penjaga izin sesi, lalu dijalankan
+  pemilik proyek sendiri pada hari yang sama (9 dan 46 diterapkan), dan
+  laporan ulang menunjukkan 0 dan 0.
 - **Suite penuh sebelum kode web diubah** (pukul 15.52 sampai 16.21
   WIB): 562 lolos, 1 gagal, dan 1 skipped dari 564. Kegagalannya
   templat role Manajer: 116 dari 118 izin terpetakan ke id, karena

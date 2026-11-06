@@ -133,10 +133,6 @@ Diajukan lewat dialog sebelum dikerjakan:
 - Akun uji `toko@gmail.com` dinaikkan ke Pro lewat API admin, karena
   akun lama dibaca Basic (B212) dan Basic menolak sesi booking (B216).
   Riwayat langganannya kini berisi satu catatan `ubah-plan`.
-- `hapusFieldUsang.js --terapkan` (P57) belum dijalankan di basis data
-  lokal: perintahnya ditolak penjaga izin sesi 6 November 2026, sehingga
-  dijalankan pemilik proyek sendiri. Sisanya `pajak` di 9 produk dan
-  `stok` di 46 master bahan baku, tidak dibaca model baru.
 - `db:setup-toko-lama` menandai empat toko yang ada saat itu selesai
   setup inti. Jangan dijalankan ulang di basis data lokal setelah spec
   membuat akun pendaftar, karena akun itu ikut ditandai selesai.
