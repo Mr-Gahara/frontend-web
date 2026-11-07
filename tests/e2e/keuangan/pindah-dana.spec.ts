@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { unik } from "../../helpers/reservasi-uji";
+import { masukBacaSaja } from "../../helpers/terkunci-uji";
 import { daftarAkun, saldoAkun, buatAkunUji, tutupAkunUji, pilihAkun, type AkunKasUji } from "../../helpers/akun-kas-uji";
 
 /*
@@ -197,5 +198,27 @@ test.describe("pindah dana", () => {
       page.off("request", hitung);
       await tutupAkunUji(page, auth, idSumber);
     }
+  });
+});
+
+test.describe("pindah dana: pengguna baca-saja", () => {
+  test("riwayat tampil tanpa form Pindahkan Dana dan tanpa Batalkan", async ({ page }) => {
+    await login(page);
+    await masukBacaSaja(page);
+    const tRiwayat = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/jurnaltransfer(\?|$)/i.test(r.url()),
+    );
+    await page.goto(URL_PINDAH, { waitUntil: "commit" });
+    const riwayat = await tRiwayat;
+    expect(riwayat.status(), "riwayat dibaca pemegang izin baca").toBe(200);
+    const isi = (await riwayat.json()) as { data?: { status?: string }[] };
+    await expect(page.getByRole("heading", { name: "Pindah Dana", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Reset Filter" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Pindahkan Dana" })).toHaveCount(0);
+    // Batalkan hanya untuk baris AKTIF; tanpa baris AKTIF pemeriksaan ini tidak membedakan.
+    if ((isi.data ?? []).some((t) => t.status === "AKTIF")) {
+      await expect(page.getByRole("cell", { name: "Aktif", exact: true }).first()).toBeVisible();
+    }
+    await expect(page.getByRole("button", { name: "Batalkan" })).toHaveCount(0);
   });
 });

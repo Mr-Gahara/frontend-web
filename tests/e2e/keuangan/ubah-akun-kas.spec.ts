@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { masukBacaSaja } from "../../helpers/terkunci-uji";
 import { NAMA_LACI_UJI, PERANGKAT_UJI, bersihkanMesinUji, siapkanLaciUji } from "../../helpers/sesi-kasir-uji";
 import { ID_TIDAK_ADA, cocok, pantauPermintaan, unik } from "../../helpers/reservasi-uji";
 import { daftarAkun, buatAkunUji, tutupAkunUji, type AkunKasUji } from "../../helpers/akun-kas-uji";
@@ -223,6 +224,32 @@ test.describe("ubah akun kas", () => {
   test("akun yang tidak ada: keterangan tampil tanpa form", async ({ page }) => {
     await page.goto(urlUbah(ID_TIDAK_ADA));
     await expect(page.getByText("Akun kas tidak ditemukan")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Simpan Perubahan" })).toHaveCount(0);
+  });
+});
+
+test.describe("akun kas: pengguna baca-saja", () => {
+  test("tanpa Tambah Akun, Ubah, dan Aktifkan kembali; rute ubah ditolak gerbang", async ({ page }) => {
+    await login(page);
+    const auth = await bukaDenganAuth(page, URL_AKUN);
+    const semua = await daftarAkun(page, auth);
+    const aktif = semua.find((a) => a.status === "aktif");
+    expect(aktif, "akun kas aktif di tenant uji").toBeTruthy();
+    const adaNonAktif = semua.some((a) => a.status !== "aktif");
+
+    await masukBacaSaja(page);
+    await page.goto(URL_AKUN);
+    await expect(page.getByRole("heading", { name: aktif!.namaAkun, exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Tambah Akun", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /^Ubah / })).toHaveCount(0);
+    if (adaNonAktif) {
+      await page.getByRole("button", { name: /^Akun non-aktif \(\d+\)$/ }).click();
+      await expect(page.locator("#daftar-akun-non-aktif").getByRole("listitem").first()).toBeVisible();
+    }
+    await expect(page.getByRole("button", { name: /^Aktifkan kembali / })).toHaveCount(0);
+
+    await page.goto(urlUbah(aktif!.id));
+    await expect(page.getByRole("main").getByText("Anda tidak memiliki izin membuka halaman ini.")).toBeVisible();
     await expect(page.getByRole("button", { name: "Simpan Perubahan" })).toHaveCount(0);
   });
 });

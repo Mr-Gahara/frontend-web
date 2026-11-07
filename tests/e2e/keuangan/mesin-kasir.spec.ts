@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { saldoAkun } from "../../helpers/akun-kas-uji";
 import { unik } from "../../helpers/reservasi-uji";
+import { masukBacaSaja } from "../../helpers/terkunci-uji";
 import {
   NAMA_LACI_UJI,
   PERANGKAT_UJI,
@@ -167,5 +168,27 @@ test.describe("Mesin Kasir", () => {
     await baris.click();
     await expect(page.getByRole("link", { name: "Kembali ke Mesin Kasir" })).toBeVisible({ timeout: 20_000 });
     await tanpaGulir("rincian sesi");
+  });
+});
+
+test.describe("Mesin Kasir: pengguna baca-saja", () => {
+  test("tanpa kelola-perangkat-kasir: tambah, ubah, dan lepas mesin tidak tersedia, dan daftar mesin tidak diminta", async ({
+    page,
+  }) => {
+    await login(page);
+    await masukBacaSaja(page);
+    let mintaMesin = 0;
+    page.on("request", (r) => {
+      if (r.method() === "GET" && /\/api\/sesikasir\/perangkat(\?|$)/i.test(r.url())) mintaMesin += 1;
+    });
+    const tKasirBuka = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/sesikasir\?/i.test(r.url()),
+    );
+    await page.goto(URL, { waitUntil: "commit" });
+    expect((await tKasirBuka).status(), "sesi kasir dibaca pemegang read-sesi-kasir").toBe(200);
+    await expect(page.getByRole("link", { name: "Mesin Kasir" })).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("button", { name: "Tambah mesin kasir" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Aksi / })).toHaveCount(0);
+    expect(mintaMesin, "GET /sesikasir/perangkat tidak dikirim tanpa izin kelola").toBe(0);
   });
 });

@@ -4,6 +4,7 @@ import { unik } from "../../../helpers/reservasi-uji";
 import { daftarAkun, pilihAkun, type AkunKasUji } from "../../../helpers/akun-kas-uji";
 import { BAHAN_FIXTURE, idBahanFixture, idDari, lokasiBertipe, type Berid } from "../../../helpers/pembelian-uji";
 import { formatRupiah } from "../../../../lib/format";
+import { masukPembelianOutlet } from "../../../helpers/terkunci-uji";
 
 /*
  * Spec catat pembelian stok, tanpa respons sukses palsu (keputusan rancangan
@@ -190,5 +191,70 @@ test.describe("Pembelian stok: catat", () => {
     await expect(page.getByText("Harga beli harus bilangan bulat, boleh 0.")).toBeVisible();
     await expect(page.getByText("Bahan ini sudah ada di baris lain.")).toBeVisible();
     expect(terkirim, "tidak ada POST selama isian belum sah").toBe(0);
+  });
+});
+
+test.describe("Pembelian stok: pemegang izin ruang outlet saja (B116, butir 158)", () => {
+  test("outlet: catat, lihat, dan hapus diterima backend; ruang gudang ditolak gerbang", async ({ page }) => {
+    await login(page);
+    const r = RUANG[0];
+    let auth = await bukaDenganAuth(page, BASIS + r.url);
+    const lokasi = await lokasiBertipe(page, auth, r.tipe);
+    const bahanID = await idBahanFixture(page, auth);
+    const akun = (await daftarAkun(page, auth)).find(
+      (a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E"),
+    ) as AkunKasUji | undefined;
+    test.skip(!akun, "tidak ada akun kas aktif");
+    const supplier = "E2E Supplier Outlet " + unik();
+    let idPembelian: string | undefined;
+    let terhapus = false;
+
+    try {
+      await masukPembelianOutlet(page);
+      const tDaftar = page.waitForResponse((res) => res.request().method() === "GET" && POLA_BUAT.test(res.url()));
+      await page.goto(BASIS + r.url, { waitUntil: "commit" });
+      expect((await tDaftar).status(), "GET /pembelianstok dengan izin ruang outlet").toBe(200);
+
+      await page.getByRole("link", { name: "Catat Pembelian" }).click();
+      await page.waitForURL("**" + r.url + "/catatPembelian");
+      await expect(page.getByText(lokasi.nama, { exact: true }), "lokasi penerima outlet").toBeVisible();
+      await page.getByLabel("Supplier", { exact: true }).fill(supplier);
+      await pilihAkun(page, "Dibayar dari akun kas", akun!.namaAkun);
+      await pilihAkun(page, "Bahan baku baris 1", BAHAN_FIXTURE);
+      await page.locator("#pembelian-jumlah-0").fill("1");
+      await page.locator("#pembelian-harga-0").fill("1000");
+      const tBuat = page.waitForResponse((res) => res.request().method() === "POST" && POLA_BUAT.test(res.url()));
+      await page.getByRole("button", { name: "Simpan Pembelian" }).click();
+      const buat = await tBuat;
+      expect(buat.status(), "POST /pembelianstok dengan izin ruang outlet").toBe(201);
+      expect(buat.request().postDataJSON()).toMatchObject({
+        akunKasID: akun!.id,
+        supplier,
+        locationID: lokasi.id,
+        items: [{ bahanBakuID: bahanID, jumlah: 1, hargaBeli: 1000 }],
+      });
+      idPembelian = idDari(((await buat.json()) as { data: Berid }).data);
+      expect(idPembelian, "id pembelian dari respons").toBeTruthy();
+
+      await page.waitForURL("**" + r.url + "/" + idPembelian);
+      await expect(page.getByRole("heading", { name: "Pembelian dari " + supplier })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Ubah Info" })).toBeVisible();
+      await page.getByRole("button", { name: "Hapus", exact: true }).click();
+      const dialogHapus = page.getByRole("alertdialog");
+      const tHapus = page.waitForResponse((res) => res.request().method() === "DELETE" && POLA_ID.test(res.url()));
+      await dialogHapus.getByRole("button", { name: "Hapus Pembelian" }).click();
+      expect((await tHapus).status(), "DELETE /pembelianstok/:id dengan izin ruang outlet").toBe(200);
+      terhapus = true;
+
+      await page.goto(BASIS + RUANG[1].url);
+      await expect(page.getByRole("main").getByText("Anda tidak memiliki izin membuka halaman ini.")).toBeVisible();
+    } finally {
+      if (idPembelian && !terhapus) {
+        await login(page);
+        auth = await bukaDenganAuth(page, BASIS + r.url);
+        const hapus = await api(page, auth, "DELETE", "/pembelianstok/" + idPembelian);
+        expect.soft(hapus.status, `hapus sisa pembelian uji: ${hapus.pesan}`).toBe(200);
+      }
+    }
   });
 });

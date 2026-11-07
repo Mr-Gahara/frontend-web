@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { BASIS, JAWAB_GAGAL, api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
 import { cocok, pantauPermintaan, tunda, unik } from "../../helpers/reservasi-uji";
+import { masukBacaSaja } from "../../helpers/terkunci-uji";
 
 /*
  * Spec pengaturan gudang (keputusan GD2a): profil lokasi Gudang tenant
@@ -108,5 +109,21 @@ test.describe("Pengaturan gudang", () => {
     await tunda(1_000);
     pantau.lepas();
     expect(pantau.jumlah()).toBe(0);
+  });
+});
+
+test.describe("Pengaturan gudang: pengguna baca-saja", () => {
+  test("profil gudang hanya dibaca, tanpa Simpan Perubahan dan deteksi lokasi", async ({ page }) => {
+    await login(page);
+    await masukBacaSaja(page);
+    await page.goto(URL_PENGATURAN);
+    await expect(page.getByText("Nama, alamat, koordinat, dan radius absen gudang Anda.")).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(isianNama(page)).not.toHaveValue("");
+    await expect(isianNama(page)).toHaveAttribute("readonly", "");
+    await expect(page.getByLabel("Alamat Lengkap")).toHaveAttribute("readonly", "");
+    await expect(page.getByRole("button", { name: "Simpan Perubahan" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Deteksi Otomatis" })).toHaveCount(0);
   });
 });

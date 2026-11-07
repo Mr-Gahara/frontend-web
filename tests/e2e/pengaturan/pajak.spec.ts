@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { cocok, unik } from "../../helpers/reservasi-uji";
+import { masukBacaSaja } from "../../helpers/terkunci-uji";
 import { normalizeId } from "../../../lib/api/normalize";
 import {
   NAMA_PRODUK_UJI,
@@ -207,5 +208,24 @@ test.describe("E2E — Pengaturan pajak (pembanding)", () => {
     await page.goto(URL_PAJAK);
     await page.getByRole("button", { name: "Kembali ke Laman Pengaturan" }).click();
     await expect(page).toHaveURL(/\/dashboard\/outlet\/pengaturan$/);
+  });
+});
+
+test.describe("Pengaturan pajak: pengguna baca-saja", () => {
+  test("kartu Pajak di indeks membuka daftar tanpa Tambah Pajak dan tanpa menu aksi baris", async ({ page }) => {
+    await login(page);
+    await masukBacaSaja(page);
+    await page.goto("/dashboard/outlet/pengaturan");
+    const tDaftar = page.waitForResponse(cocok("GET", POLA_DAFTAR));
+    await page.locator('a[href="/dashboard/outlet/pengaturan/pajak"]').click();
+    await page.waitForURL("**/dashboard/outlet/pengaturan/pajak");
+    const res = await tDaftar;
+    expect(res.status()).toBe(200);
+    const data = normalizeId(((await res.json()) as { data: PajakItem[] }).data) as PajakItem[];
+    expect(data.length, "tenant uji punya minimal satu pajak").toBeGreaterThan(0);
+    await cari(page, data[0].namaPajak);
+    await expect(barisPajak(page, data[0].namaPajak)).toHaveCount(1);
+    await expect(page.getByText("Tambah Pajak", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Aksi / })).toHaveCount(0);
   });
 });

@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { BASIS, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { unik } from "../../helpers/reservasi-uji";
 import { daftarAkun } from "../../helpers/akun-kas-uji";
+import { masukBacaSaja } from "../../helpers/terkunci-uji";
 import {
   buatPembelianUji,
   hapusPembelianUji,
@@ -165,5 +166,47 @@ test.describe("Keuangan: Belanja Stok", () => {
     await expect(galat, "pesan tampil setelah percobaan ulang selesai").toBeVisible({ timeout: 20_000 });
     await expect(galat.getByRole("button", { name: "Coba Lagi" })).toBeVisible();
     await expect(page.getByRole("region", { name: "Seluruh pembelian" }).getByRole("table")).toBeVisible();
+  });
+});
+
+test.describe("Keuangan: Belanja Stok, pengguna baca-saja", () => {
+  test("pembelian tampil, dan detailnya tanpa Ubah Info dan Hapus", async ({ page }) => {
+    await login(page);
+    let auth = await bukaDenganAuth(page, BASIS + URL_BELANJA);
+    const outlet = await lokasiBertipe(page, auth, "Outlet");
+    const bahanID = await idBahanFixture(page, auth);
+    const akun = (await daftarAkun(page, auth)).find((a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E"));
+    test.skip(!akun, "tidak ada akun kas aktif");
+    const supplier = "E2E Baca Saja " + unik();
+    let id: string | undefined;
+
+    try {
+      // Pembelian uji disiapkan Ridho lewat API, seperti skenario di atas.
+      id = await buatPembelianUji(page, auth, {
+        akunKasID: akun!.id,
+        supplier,
+        locationID: outlet.id,
+        bahanBakuID: bahanID,
+        jumlah: 1,
+        hargaBeli: 1000,
+      });
+
+      await masukBacaSaja(page);
+      await page.goto(URL_BELANJA);
+      await page.getByLabel("Cari supplier").fill(supplier);
+      const baris = page.getByRole("row").filter({ hasText: supplier });
+      await expect(baris).toHaveCount(1);
+      await baris.getByRole("link", { name: `Buka pembelian ${supplier} di ruang outlet` }).click();
+      await page.waitForURL("**/dashboard/outlet/inventaris/pembelianStok/" + id);
+      await expect(page.getByRole("heading", { name: "Pembelian dari " + supplier })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Ubah Info" })).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "Hapus", exact: true })).toHaveCount(0);
+    } finally {
+      if (id) {
+        await login(page);
+        auth = await bukaDenganAuth(page, BASIS + URL_BELANJA);
+        await hapusPembelianUji(page, auth, id);
+      }
+    }
   });
 });

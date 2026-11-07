@@ -46,7 +46,8 @@ export default function AkunKasPage() {
   const akunAktif = akunKasAktif(akunKasList);
   const akunNonAktif = akunKasNonAktif(akunKasList);
   // Ubah dan aktifkan kembali hanya bagi pemegang update-akunkas (keputusan
-  // UA1a dan UA2a); pengguna lain melihat daftar tanpa tombol aksi.
+  // UA1a dan UA2a); pengguna lain melihat daftar tanpa tombol aksi. Tambah
+  // Akun hanya bagi pemegang create-akunkas (keputusan rancangan butir 14).
   const { permissions } = useSession();
   const aksi = aksiAkunKas(permissions);
   const [akunDiaktifkan, setAkunDiaktifkan] = useState<AkunKas | null>(null);
@@ -97,17 +98,19 @@ export default function AkunKasPage() {
           )}
 
           {/* Menambahkan class `block w-full` pada Link agar mengisi penuh sel Grid-nya */}
-          <Link
-            href="/dashboard/outlet/keuangan/akunkas/buatAkunKas"
-            className="block w-full sm:w-auto"
-          >
-            <Button className="w-full max-sm:h-12 bg-navy text-gading hover:bg-navy/90 border-none font-bold shadow-sm cursor-pointer px-2 sm:px-4">
-              <Plus className="w-4 h-4 mr-1.5 shrink-0" />
-              <span className="truncate text-sm max-sm:text-base">
-                Tambah Akun
-              </span>
-            </Button>
-          </Link>
+          {aksi.buat && (
+            <Link
+              href="/dashboard/outlet/keuangan/akunkas/buatAkunKas"
+              className="block w-full sm:w-auto"
+            >
+              <Button className="w-full max-sm:h-12 bg-navy text-gading hover:bg-navy/90 border-none font-bold shadow-sm cursor-pointer px-2 sm:px-4">
+                <Plus className="w-4 h-4 mr-1.5 shrink-0" />
+                <span className="truncate text-sm max-sm:text-base">
+                  Tambah Akun
+                </span>
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 

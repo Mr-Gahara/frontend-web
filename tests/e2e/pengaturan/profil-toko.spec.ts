@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { BASIS, JAWAB_GAGAL, api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
 import { unik } from "../../helpers/reservasi-uji";
+import { masukBacaSaja } from "../../helpers/terkunci-uji";
 
 /*
  * Spec Profil Toko (keputusan PO12a sampai PO16a). Profil tenant dan lokasi
@@ -206,5 +207,20 @@ test.describe("Profil Toko", () => {
         expect.soft(r.status, "alamat outlet dikembalikan: " + r.pesan).toBe(200);
       }
     }
+  });
+});
+
+test.describe("Profil Toko: pengguna baca-saja", () => {
+  test("kartu profil dan lokasi outlet hanya dibaca, tanpa tombol simpan dan deteksi lokasi", async ({ page }) => {
+    await login(page);
+    await masukBacaSaja(page);
+    await page.goto(URL_PROFIL);
+    await expect(page.getByRole("heading", { name: "Profil Toko", exact: true })).toBeVisible({ timeout: 15_000 });
+    await expect(namaToko(page)).not.toHaveValue("");
+    await expect(namaToko(page)).toHaveAttribute("readonly", "");
+    await expect(page.getByLabel("Latitude", { exact: true })).toHaveAttribute("readonly", "");
+    await expect(page.getByRole("button", { name: "Simpan Profil Toko" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Simpan Lokasi Outlet" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Deteksi Otomatis" })).toHaveCount(0);
   });
 });

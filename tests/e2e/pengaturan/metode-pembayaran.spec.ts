@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { JAWAB_GAGAL, login } from "../../helpers/transfer-uji";
 import { cocok, pantauPermintaan, unik } from "../../helpers/reservasi-uji";
+import { masukBacaSaja } from "../../helpers/terkunci-uji";
 
 /*
  * Spec pembanding metode pembayaran (modul Pengaturan outlet, submodul 1,
@@ -138,5 +139,18 @@ test.describe("E2E — Pengaturan metode pembayaran (pembanding)", () => {
     expect((await tKirim).postDataJSON().namaPembayaran).toBe(m.namaPembayaran + " E2E");
     await expect(page.getByRole("main").getByText("uji", { exact: true })).toBeVisible();
     await expect(page).toHaveURL(new RegExp(m.id + "$"));
+  });
+});
+
+test.describe("Metode pembayaran: pengguna baca-saja", () => {
+  test("daftar tampil tanpa Tambah Metode dan tanpa menu aksi baris", async ({ page }) => {
+    await login(page);
+    await masukBacaSaja(page);
+    const daftar = await bukaDaftar(page);
+    expect(daftar.length, "tenant uji punya metode pembayaran").toBeGreaterThan(0);
+    await cari(page, daftar[0].namaPembayaran);
+    await expect(barisMetode(page, daftar[0].namaPembayaran)).toHaveCount(1);
+    await expect(page.getByText("Tambah Metode", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Aksi / })).toHaveCount(0);
   });
 });

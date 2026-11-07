@@ -113,6 +113,11 @@ describe("izin dan rute", () => {
     expect(aksiAkunKas(["read-akunkas", "update-akunkas"]).ubah).toBe(true);
   });
 
+  it("aksi buat hanya untuk pemegang create-akunkas", () => {
+    expect(aksiAkunKas(["read-akunkas", "update-akunkas"]).buat).toBe(false);
+    expect(aksiAkunKas(["read-akunkas", "create-akunkas"]).buat).toBe(true);
+  });
+
   it("rute ubah berada di bawah daftar akun kas", () => {
     expect(urlUbahAkunKas("a1")).toBe("/dashboard/outlet/keuangan/akunkas/a1/ubah");
   });

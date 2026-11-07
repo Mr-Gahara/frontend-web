@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { BASIS, api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
 import { hapusLewatApi, unik } from "../../helpers/reservasi-uji";
+import { masukBacaSaja } from "../../helpers/terkunci-uji";
 
 /*
  * Spec pembanding halaman pelanggan, ditulis terhadap kode sebelum migrasi
@@ -163,4 +164,23 @@ test.describe("Pelanggan", () => {
     expect(jumlahPost).toBe(0);
   });
 
+});
+
+test.describe("Pelanggan: pengguna baca-saja", () => {
+  test("daftar tampil tanpa panel Tambah Pelanggan Cepat dan tanpa menu aksi baris", async ({ page }) => {
+    await login(page);
+    await masukBacaSaja(page);
+    const tDaftar = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/pelanggan(\?|$)/i.test(r.url()),
+    );
+    await page.goto(URL_PELANGGAN, { waitUntil: "commit" });
+    const res = await tDaftar;
+    expect(res.status(), "GET daftar pelanggan").toBe(200);
+    const data = ((await res.json()) as { data?: { nama?: string }[] }).data ?? [];
+    expect(data.length, "tenant uji punya pelanggan").toBeGreaterThan(0);
+    await expect(page.getByRole("heading", { name: "Manajemen Pelanggan" })).toBeVisible();
+    await expect(page.getByRole("row").nth(1)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Tambah Pelanggan Cepat" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Buka menu" })).toHaveCount(0);
+  });
 });

@@ -8,6 +8,7 @@ import {
   siapkanSuratJalan,
   type TransferMentah,
 } from "../../../helpers/transfer-uji";
+import { masukBacaSaja } from "../../../helpers/terkunci-uji";
 
 /*
  * Spec pembanding daftar surat jalan DIKIRIM: pengiriman di ruang gudang dan
@@ -68,6 +69,44 @@ test.describe("Daftar surat jalan DIKIRIM", () => {
           .toHaveCount(keOutlet.length);
       });
     } finally {
+      await tutupSuratJalanUji(page, auth, transfer.id);
+    }
+  });
+});
+
+test.describe("Detail surat jalan: pengguna baca-saja", () => {
+  test("gudang tanpa Kirim, Revisi, dan Batalkan pada PENDING; outlet tanpa Konfirmasi Terima pada DIKIRIM", async ({
+    page,
+  }) => {
+    await login(page);
+    let auth = await bukaDenganAuth(page, URL_PENGIRIMAN);
+    // Surat jalan uji disiapkan dan dikirim Ridho lewat API, seperti skenario di atas.
+    const transfer: TransferMentah = await siapkanSuratJalan(page, auth, { kirim: false });
+
+    try {
+      await test.step("gudang: PENDING tanpa aksi", async () => {
+        await masukBacaSaja(page);
+        await page.goto(`${BASIS}/dashboard/gudang/transferStok/${transfer.id}`);
+        await expect(page.getByText(transfer.nomorTransfer).first()).toBeVisible({ timeout: 15_000 });
+        await expect(page.getByRole("button", { name: /kirim barang sekarang/i })).toHaveCount(0);
+        await expect(page.getByRole("button", { name: /revisi kuantitas/i })).toHaveCount(0);
+        await expect(page.getByRole("button", { name: /batalkan pengiriman/i })).toHaveCount(0);
+      });
+
+      await login(page);
+      auth = await bukaDenganAuth(page, URL_PENGIRIMAN);
+      const kirim = await api(page, auth, "PATCH", `/transferstok/${transfer.id}/kirim`, {});
+      expect(kirim.status, `kirim surat jalan uji: ${kirim.pesan}`).toBe(200);
+
+      await test.step("outlet: DIKIRIM tanpa Konfirmasi Terima", async () => {
+        await masukBacaSaja(page);
+        await page.goto(`${URL_PENERIMAAN}/${transfer.id}`);
+        await expect(page.getByText(transfer.nomorTransfer).first()).toBeVisible({ timeout: 15_000 });
+        await expect(page.getByRole("button", { name: /konfirmasi terima barang/i })).toHaveCount(0);
+      });
+    } finally {
+      await login(page);
+      auth = await bukaDenganAuth(page, URL_PENGIRIMAN);
       await tutupSuratJalanUji(page, auth, transfer.id);
     }
   });
