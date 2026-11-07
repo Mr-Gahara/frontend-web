@@ -9,6 +9,11 @@ import {
   buatTipeAset,
   buatAset,
   hapusLewatApi,
+  NAMA_ASET_BOOKING,
+  batalkanBooking,
+  bersihkanSisaBooking,
+  buatBooking,
+  siapkanFixtureBooking,
   type AsetMentah,
   type TipeAsetMentah,
 } from "../../../helpers/reservasi-uji";
@@ -148,6 +153,33 @@ test.describe("E2E — Aset › Halaman Daftar", () => {
     } finally {
       if (!terhapus) await hapusLewatApi(page, auth, "/aset", aset?.id);
       await hapusLewatApi(page, auth, "/tipeaset", tipe?.id);
+    }
+  });
+
+  test("hapus aset yang masih punya booking mendatang ditolak 409 dan asetnya tetap ada (kontrak/temuan.md butir 52)", async ({
+    page,
+  }) => {
+    // Booking milik alur buat reservasi, sehingga disiapkan lewat API
+    // (keputusan rancangan butir 23); yang diuji lewat UI adalah hapus aset.
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const fx = await siapkanFixtureBooking(page, auth);
+    await bersihkanSisaBooking(page, auth, fx);
+    const mulai = new Date(Date.now() + 5 * 60 * 60 * 1000);
+    mulai.setSeconds(0, 0);
+    const booking = await buatBooking(page, auth, fx, mulai, new Date(mulai.getTime() + 60 * 60 * 1000));
+    try {
+      await bukaDaftar(page);
+      await (await cariBaris(page, NAMA_ASET_BOOKING)).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: /^hapus$/i }).click();
+      const dialog = page.getByRole("alertdialog");
+      const tHapus = page.waitForResponse(cocok("DELETE", POLA_SATU));
+      await dialog.getByRole("button", { name: /ya, hapus aset/i }).click();
+      const res = await tHapus;
+      expect(res.status()).toBe(409);
+      await expect(page.getByText(/Aset tidak bisa dihapus karena masih punya 1 booking aktif atau terjadwal/)).toBeVisible();
+      expect((await bacaAset(page, auth, fx.asetId)).status).toBe(200);
+    } finally {
+      await batalkanBooking(page, auth, booking.dataPenjualan?.id);
     }
   });
 });
