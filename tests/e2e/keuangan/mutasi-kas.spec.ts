@@ -114,6 +114,43 @@ test.describe("Mutasi arus kas", () => {
     await expect(rincian).toContainText(rupiah(pertama.saldoSesudah));
   });
 
+  test("periode diubah lewat PilihTanggal dikirim sebagai awal dan akhir hari lokal, lalu Reset Filter kembali ke bulan berjalan", async ({
+    page,
+  }) => {
+    await bukaMutasi(page);
+    const kini = new Date();
+    const tanggal = (hari: number) => new Date(kini.getFullYear(), kini.getMonth(), hari);
+    const awalBulan = tanggal(1).toISOString();
+    const akhir20 = new Date(kini.getFullYear(), kini.getMonth(), 20, 23, 59, 59, 999).toISOString();
+
+    // Tanggal 15 dan 20 tidak pernah tampil sebagai hari bulan lain di kalender.
+    // "Sampai" diisi lebih dulu, karena "dari" tidak boleh melewati "sampai".
+    const tSampai = page.waitForResponse(
+      responsMutasi((q) => q.get("dari") === awalBulan && q.get("sampai") === akhir20),
+    );
+    await page.getByRole("button", { name: /^Dicatat sampai, / }).click();
+    await page.getByRole("grid").getByText("20", { exact: true }).click();
+    await expect(page.getByRole("grid")).toHaveCount(0);
+    expect((await tSampai).status()).toBe(200);
+
+    const tDari = page.waitForResponse(
+      responsMutasi((q) => q.get("dari") === tanggal(15).toISOString() && q.get("sampai") === akhir20 && q.get("page") === "1"),
+    );
+    await page.getByRole("button", { name: /^Dicatat dari, / }).click();
+    await page.getByRole("grid").getByText("15", { exact: true }).click();
+    await expect(page.getByRole("grid")).toHaveCount(0);
+    expect((await tDari).status()).toBe(200);
+
+    // Kunci periode bawaan sudah pernah dimuat (staleTime), sehingga reset
+    // dibuktikan dari tampilan tanggal, bukan dari permintaan baru.
+    await page.getByRole("button", { name: "Reset Filter" }).click();
+    // Format tombol PilihTanggal: "dd MMMM yyyy" berbahasa Indonesia.
+    const teks = (d: Date) =>
+      `${String(d.getDate()).padStart(2, "0")} ${new Intl.DateTimeFormat("id-ID", { month: "long" }).format(d)} ${d.getFullYear()}`;
+    await expect(page.getByRole("button", { name: `Dicatat dari, ${teks(tanggal(1))}`, exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: `Dicatat sampai, ${teks(kini)}`, exact: true })).toBeVisible();
+  });
+
   test("pindah halaman meminta page berikutnya dan menampilkan barisnya", async ({ page }) => {
     const { mutasi } = await bukaMutasi(page);
     test.skip(mutasi.pagination.totalPages < 2, "Mutasi bulan berjalan belum sampai dua halaman");

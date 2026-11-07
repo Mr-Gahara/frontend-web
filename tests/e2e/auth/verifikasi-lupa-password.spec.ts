@@ -6,6 +6,7 @@ import {
   PASSWORD_AKUN_UJI,
   buatAkunKlienUji,
   hapusAkunKlienUji,
+  idAkunLewatEmail,
   kredensialAdmin,
 } from "../../helpers/admin-uji";
 
@@ -30,6 +31,104 @@ function catatPermintaan(page: Page) {
   });
   return kirim;
 }
+
+/**
+ * Melewati hitung mundur kirim ulang 60 detik dengan jam palsu. Hitung
+ * mundurnya setTimeout berantai per detik (features/auth/hitung-mundur.ts),
+ * sehingga jam dimajukan satu detik per langkah agar React sempat memasang
+ * timer berikutnya; satu lompatan 61 detik hanya memicu timer yang sedang
+ * terpasang.
+ */
+async function lewatiHitungMundur(page: Page) {
+  const tombol = page.getByRole("button", { name: "Kirim ulang kode" });
+  for (let i = 0; i < 65 && !(await tombol.isVisible()); i++) await page.clock.runFor(1_000);
+  await expect(tombol).toBeEnabled();
+  return tombol;
+}
+
+/** Jeda nyata agar kode lama di Mailpit tidak terbaca sebagai kode baru (ambilOtp menoleransi 2 detik). */
+const jedaMailpit = () => new Promise((r) => setTimeout(r, 3_000));
+
+test.describe("Kirim ulang kode", () => {
+  test("verifikasi email: setelah hitung mundur, kode baru dikirim ulang dan memverifikasi", async ({ page }) => {
+    const admin = kredensialAdmin();
+    test.skip(!admin, ALASAN_TANPA_ADMIN);
+    test.skip(!(await mailpitMenyala()), ALASAN_TANPA_MAILPIT);
+    const email = alamatAcak("kirim-ulang");
+    const password = "KirimUlang2026";
+    let terkirim = false;
+    try {
+      const daftar = await page.request.post("/api/akun/auth/register", { data: { email, password } });
+      expect(daftar.status(), "daftar akun uji").toBe(201);
+      terkirim = true;
+
+      await page.clock.install();
+      await page.goto("/login");
+      const login = page.waitForResponse(/\/api\/akun\/auth\/login$/);
+      await page.getByLabel("Email").fill(email);
+      await page.getByLabel("Password", { exact: true }).fill(password);
+      await page.getByRole("button", { name: "Masuk" }).click();
+      expect((await login).status()).toBe(403);
+      await page.waitForURL(/\/daftar\/verifikasi\?email=/);
+      await expect(page.getByRole("button", { name: /Kirim ulang dalam/ })).toBeDisabled();
+
+      const tombol = await lewatiHitungMundur(page);
+      await jedaMailpit();
+      const sejak = new Date();
+      const kirim = page.waitForResponse(/\/api\/akun\/auth\/verifikasi-email\/kirim$/);
+      await tombol.click();
+      expect((await kirim).status()).toBe(200);
+      await expect(page.getByRole("button", { name: /Kirim ulang dalam/ })).toBeDisabled();
+      const kode = await ambilOtp(email, sejak);
+
+      const verifikasi = page.waitForResponse(/\/api\/akun\/auth\/verifikasi-email$/);
+      await tempelKode(page.getByLabel("Digit 1 dari 6"), kode);
+      await page.getByRole("button", { name: "Verifikasi email" }).click();
+      expect((await verifikasi).status(), "kode kiriman ulang memverifikasi").toBe(200);
+    } finally {
+      if (terkirim && admin) {
+        const id = await idAkunLewatEmail(email, admin);
+        expect.soft(id, "akun uji ditemukan untuk dibersihkan").not.toBe("");
+        if (id) await hapusAkunKlienUji(id, admin);
+      }
+    }
+  });
+
+  test("lupa password: setelah hitung mundur, kode baru dikirim ulang dan mengganti password", async ({ page }) => {
+    const admin = kredensialAdmin();
+    test.skip(!admin, ALASAN_TANPA_ADMIN);
+    test.skip(!(await mailpitMenyala()), ALASAN_TANPA_MAILPIT);
+    const email = alamatAcak("reset-ulang");
+    const passwordBaru = "ResetUlang2026";
+    let id = "";
+    try {
+      id = await buatAkunKlienUji(email, admin!);
+      await page.clock.install();
+      await page.goto("/lupa-password");
+      await page.getByLabel("Email").fill(email);
+      await page.getByRole("button", { name: "Kirim kode" }).click();
+      await expect(page.getByRole("heading", { name: "Buat password baru" })).toBeVisible();
+
+      const tombol = await lewatiHitungMundur(page);
+      await jedaMailpit();
+      const sejak = new Date();
+      const kirim = page.waitForResponse(/\/api\/akun\/auth\/lupa-password$/);
+      await tombol.click();
+      expect((await kirim).status()).toBe(200);
+      const kode = await ambilOtp(email, sejak);
+
+      await tempelKode(page.getByLabel("Digit 1 dari 6"), kode);
+      await page.getByLabel("Password baru", { exact: true }).fill(passwordBaru);
+      await page.getByLabel("Ulangi password baru").fill(passwordBaru);
+      const atur = page.waitForResponse(/\/api\/akun\/auth\/reset-password$/);
+      await page.getByRole("button", { name: "Simpan password baru" }).click();
+      expect((await atur).status(), "kode kiriman ulang mengganti password").toBe(200);
+      await expect(page.getByRole("heading", { name: "Password diganti" })).toBeVisible();
+    } finally {
+      if (id && admin) await hapusAkunKlienUji(id, admin);
+    }
+  });
+});
 
 test.describe("Verifikasi email", () => {
   test("email, stepper langkah 2, dan kirim ulang yang menunggu hitung mundur", async ({ page }) => {

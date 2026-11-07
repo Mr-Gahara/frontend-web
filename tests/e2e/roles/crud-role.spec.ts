@@ -158,6 +158,51 @@ test.describe("E2E - Role (CRUD)", () => {
     await expect(page).toHaveURL(new RegExp(`${DAFTAR}$`), { timeout: 15_000 });
   });
 
+  test("edit: penanda memuat tampil setiap detail dimuat ulang, dan galat server menampilkan pesannya", async ({
+    page,
+  }) => {
+    const tDaftar = page.waitForResponse(
+      (r) => /\/api\/role(\?|$)/i.test(r.url()) && r.request().method() === "GET",
+    );
+    await page.reload();
+    const daftar = ((await (await tDaftar).json()) as { data: { _id?: string; id?: string; namaRole: string }[] }).data;
+    const role = daftar.find((r) => r.namaRole !== "Owner") ?? daftar[0];
+    const id = role._id ?? role.id;
+    const polaDetail = new RegExp(`/api/role/${id}$`, "i");
+    const isianNama = page.getByLabel(/nama posisi|nama role/i);
+    const memuat = page.getByText("Memuat rincian posisi...");
+
+    // Detail ditahan lalu diteruskan ke backend (keputusan rancangan butir 21).
+    await page.route(polaDetail, async (route) => {
+      if (route.request().method() === "GET") await new Promise((r) => setTimeout(r, 1_500));
+      await route.continue();
+    });
+    await page.goto(`${BASE}${DAFTAR}/${id}/edit`);
+    await expect(memuat).toBeVisible({ timeout: 15_000 });
+    await expect(isianNama).toHaveValue(role.namaRole, { timeout: 20_000 });
+
+    // Kembali lewat navigasi klien: cache detail masih ada, tetapi detail
+    // dimuat ulang (refetchOnMount "always") dan penandanya tampil lagi.
+    await page.getByRole("button", { name: "Kembali ke Daftar Posisi" }).click();
+    await expect(page).toHaveURL(new RegExp(`${DAFTAR}$`), { timeout: 15_000 });
+    await kartuRole(page, role.namaRole).getByRole("button", { name: /edit/i }).first().click();
+    await page.waitForURL("**/edit", { timeout: 15_000 });
+    await expect(memuat).toBeVisible();
+    await expect(isianNama).toHaveValue(role.namaRole, { timeout: 20_000 });
+    await page.unroute(polaDetail);
+
+    // Galat server tidak dapat dibuat backend secara deterministik.
+    await page.route(polaDetail, (route) =>
+      route.request().method() === "GET" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
+    );
+    await page.goto(`${BASE}${DAFTAR}/${id}/edit`);
+    const main = page.getByRole("main");
+    await expect(main.getByText("Posisi tidak dapat dimuat.")).toBeVisible({ timeout: 20_000 });
+    await expect(main.getByText("uji", { exact: true })).toBeVisible();
+    await expect(isianNama).toHaveCount(0);
+    await page.unroute(polaDetail);
+  });
+
   test("validasi form: nama terlalu pendek dan level desimal ditolak tanpa permintaan", async ({
     page,
   }) => {

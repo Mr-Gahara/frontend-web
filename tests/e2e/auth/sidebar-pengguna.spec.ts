@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { BASIS, login } from "../../helpers/transfer-uji";
+import { BASIS, JAWAB_GAGAL, login } from "../../helpers/transfer-uji";
 import {
   NAMA_PROFIL,
   NAMA_PROFIL_UBAH,
@@ -51,6 +51,27 @@ test.describe("Kaki sidebar", () => {
     await page.waitForURL(/\/login$/);
 
     // Cookie refresh sudah tidak berlaku: membuka dashboard kembali ke login.
+    await page.goto(BASIS + "/dashboard");
+    await page.waitForURL(/\/login$/);
+  });
+
+  test("logout pengguna yang gagal tetap memutus sesi akun dan kembali ke login", async ({ page }) => {
+    await login(page);
+    const pemicu = page.getByRole("button", { name: /Ridho/ });
+    await expect(pemicu).toBeVisible({ timeout: 15_000 });
+    // Jalur gagal yang tidak dapat dibuat backend secara deterministik (keputusan rancangan butir 21).
+    await page.route(POLA_LOGOUT_PENGGUNA, (route) => route.fulfill(JAWAB_GAGAL));
+    await pemicu.click();
+
+    const tPengguna = page.waitForResponse((r) => POLA_LOGOUT_PENGGUNA.test(r.url()));
+    const tAkun = page.waitForResponse((r) => POLA_LOGOUT_AKUN.test(r.url()));
+    await page.getByRole("menuitem", { name: "Logout" }).click();
+    expect((await tPengguna).status(), "pin-logout").toBe(500);
+    expect((await tAkun).status(), "logout akun tetap dikirim").toBeLessThan(400);
+    await page.waitForURL(/\/login$/);
+    await page.unroute(POLA_LOGOUT_PENGGUNA);
+
+    // Sesi akun sudah diputus backend: dashboard kembali ke login.
     await page.goto(BASIS + "/dashboard");
     await page.waitForURL(/\/login$/);
   });
