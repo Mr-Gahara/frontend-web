@@ -137,7 +137,8 @@ export function PilihanTombol<T extends string>({
   id: string;
   pertanyaan: string;
   opsi: readonly OpsiPilihan<T>[];
-  nilai: T;
+  /** null bila belum ada yang dipilih, misalnya jam buka sebelum memilih. */
+  nilai: T | null;
   onUbah: (nilai: T) => void;
 }) {
   return (

@@ -10,6 +10,7 @@ export type KunciLangkah =
   | "toko"
   | "owner"
   | "lokasi"
+  | "jamBuka"
   | "kategori"
   | "bahanBaku"
   | "produk"
@@ -34,6 +35,13 @@ const LANGKAH_INTI: readonly LangkahSetup[] = [
 
 const LANGKAH_BOOKING: LangkahSetup = { kunci: "booking", judul: "Sesi booking" };
 const LANGKAH_GUDANG: LangkahSetup = { kunci: "gudang", judul: "Gudang" };
+
+/**
+ * Jam buka toko, sesudah lokasi outlet (keputusan pemilik proyek, 7 November
+ * 2026). Belum masuk daftarLangkah: status setup backend belum mengenalnya,
+ * sehingga baru dipakai rute pratinjau sampai penyambungan.
+ */
+export const LANGKAH_JAM_BUKA: LangkahSetup = { kunci: "jamBuka", judul: "Jam buka toko" };
 
 export function daftarLangkah(plan: KunciPlan): readonly LangkahSetup[] {
   if (plan === "pro") return [...LANGKAH_INTI, LANGKAH_BOOKING, LANGKAH_GUDANG];

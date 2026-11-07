@@ -46,6 +46,9 @@ const PETA_LANGKAH: Record<KunciLangkah, KunciLangkahServer[]> = {
   toko: ["namaToko"],
   owner: ["owner"],
   lokasi: ["outlet"],
+  // Belum ada padanan di GET /api/setup/status; langkahnya belum masuk
+  // daftarLangkah sampai penyambungan, sehingga nilai ini belum dibaca.
+  jamBuka: [],
   kategori: ["kategoriProduk"],
   bahanBaku: ["bahanBaku"],
   produk: ["produk"],
