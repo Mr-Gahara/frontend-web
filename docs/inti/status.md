@@ -142,8 +142,10 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
   format nomor B115, P18 hapus bahan, P19 hapus kategori, dan hapus aset
   ber-booking (7 November 2026; `kontrak/temuan.md` butir 12, 52, 94,
   141, 155, 156, 160, 162, dan 164), temuan baru butir 177 (logout akun
-  tidak mencabut sesi pengguna), serta B250, B255, dan B116 (butir 158)
-  yang terbukti e2e 7 November 2026 (`778eb2d`, `cbfa23b`, `4601d91`).
+  tidak mencabut sesi pengguna), butir 178 (penyimpanan penjualan
+  bersamaan memotong stok tanpa status, dari uji beban tulis 7 November
+  2026), serta B250, B255, dan B116 (butir 158) yang terbukti e2e 7
+  November 2026 (`778eb2d`, `cbfa23b`, `4601d91`).
   Laporannya ditunda sampai pekerjaan backend dari audit
   selesai, agar diserahkan sekali jalan (pemilik proyek, 6 November
   2026).
