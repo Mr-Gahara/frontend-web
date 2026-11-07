@@ -352,6 +352,12 @@ Diputuskan pemilik proyek pada 7 November 2026, saat penyambungan
   memberi total 0. Bila sudah ada sesi, riwayat dan filternya tampil
   seperti biasa dengan nama "Mesin kasir yang sudah dilepas". Susunan
   Revisi 2 menyembunyikan riwayat itu begitu mesin terakhir dilepas.
+- **MK14b: pesan galat backend diteruskan apa adanya**, kecuali catatan
+  wajib saat tutup kasir. Penolakan saat menyimpan atau melepas mesin
+  kasir (409 sesi terbuka, 409 laci dipakai mesin lain, dan 404 perangkat
+  tidak ditemukan) tampil dengan teks backend, misalnya "Akun Kas ini
+  sudah dipakai perangkat lain.", bukan terjemahan berisi "mesin kasir"
+  dan "laci" yang sempat ditulis Claude di `b74f30a` tanpa ditanyakan.
 
 ## Catatan
 
@@ -373,8 +379,7 @@ Diputuskan pemilik proyek pada 7 November 2026, saat penyambungan
   menampilkan keadaan tanpa perangkat selama memuat.
 - Tutup kasir menjawab 400 untuk catatan wajib, akun nonaktif, dan
   validator, sehingga `pesan.ts` mengenali kasus dari teks pesan, bukan
-  dari status saja. Pesan backend memakai "perangkat" dan "akun kas";
-  terjemahannya memakai "mesin kasir" dan "laci" (MK1a).
+  dari status saja. Pesan lain diteruskan apa adanya (MK14b).
 - Tutup dari web menginvalidasi akar `sesiKasir` dan `akunKas`, karena
   selisih menyamakan saldo laci dan menulis mutasi selisih kas.
 - Rate limit hitungan kasir 10 per menit per pengguna berlaku juga di

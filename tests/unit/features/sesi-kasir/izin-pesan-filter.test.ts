@@ -40,26 +40,24 @@ describe("pesan Mesin Kasir (sesiKasirService backend ridho 1584222)", () => {
     expect(pesanTutupKasir(err)).toBe("Akun Kas tersebut sudah nonaktif.");
   });
 
-  it("409 sesi terbuka, laci dipakai, dan 404 perangkat saat simpan", () => {
-    expect(pesanSimpanMesin(new ApiError(409, "Perangkat atau akun kas ini masih punya sesi kasir terbuka."))).toMatch(
-      /masih buka/,
-    );
-    expect(pesanSimpanMesin(new ApiError(409, "Akun Kas ini sudah dipakai perangkat lain."))).toBe(
-      "Laci ini sudah dipakai mesin kasir lain. Pilih laci lain.",
-    );
-    expect(pesanSimpanMesin(new ApiError(404, "Perangkat tidak ditemukan di toko ini."))).toMatch(/tidak terdaftar/);
-  });
-
-  it("409 sesi terbuka saat lepas mesin", () => {
+  it("409 dan 404 saat simpan dan lepas diteruskan apa adanya dari backend (MK14b)", () => {
+    for (const [status, teks] of [
+      [409, "Perangkat atau akun kas ini masih punya sesi kasir terbuka."],
+      [409, "Akun Kas ini sudah dipakai perangkat lain."],
+      [404, "Perangkat tidak ditemukan di toko ini."],
+    ] as const) {
+      expect(pesanSimpanMesin(new ApiError(status, teks))).toBe(teks);
+    }
     expect(pesanHapusMesin(new ApiError(409, "Perangkat ini masih punya sesi kasir terbuka."))).toBe(
-      "Kasir di mesin ini masih buka. Tutup kasirnya dulu, lalu lepas lagi.",
+      "Perangkat ini masih punya sesi kasir terbuka.",
     );
   });
 
-  it("status yang sama dengan teks lain tidak diterjemahkan", () => {
-    expect(pesanHapusMesin(new ApiError(404, "Perangkat kasir tidak ditemukan."))).toBe(
-      "Perangkat kasir tidak ditemukan.",
-    );
+  it("teks catatan wajib dengan status lain tidak diterjemahkan", () => {
+    expect(pesanTutupKasir(new ApiError(409, "catatan wajib diisi"))).toBe("catatan wajib diisi");
+  });
+
+  it("galat bukan ApiError memakai pesannya atau cadangan", () => {
     expect(pesanSimpanMesin(new Error("putus"))).toBe("putus");
     expect(pesanSimpanMesin(null)).toBe("Mesin kasir gagal disimpan.");
   });
