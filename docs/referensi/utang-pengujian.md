@@ -74,8 +74,9 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   samping shift uji lama spec shift. Fixture "E2E Jadwal Siang" dibuat
   sekali lalu dipakai ulang. Pola roster uji dihapus di akhir setiap
   skenario baru.
-- **Status aset "Digunakan" dan penghapusan aset yang punya booking**
-  belum teruji. Spec daftar reservasi kini membuat booking sungguhan yang
+- **Status aset "Digunakan"** belum teruji (penghapusan aset yang punya
+  booking teruji di `reservasi/aset/crud-aset.spec.ts` sejak `66ea7a4`).
+  Spec daftar reservasi kini membuat booking sungguhan yang
   mencakup waktu sekarang, tetapi label status aset uji hanya dibandingkan
   dengan respons `GET /aset`, karena daftar aset di-cache backend 60 detik
   dan belum terbukti dibersihkan saat booking dibuat.
@@ -208,9 +209,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   HP-nya dipulihkan Ridho di awal setiap test (PF5a).
 - **Profil Owner hanya teruji dibuka**, tidak diubah, karena nama dan PIN
   Ridho dipakai login seluruh suite.
-- **Profil yang gagal dimuat dan logout yang gagal belum teruji e2e**:
-  pesan beserta tombol coba lagi, dan logout akun yang tetap berjalan
-  walau logout pengguna gagal, hanya terbukti dari kode.
 - **Pesan titipan setelah PIN berubah hilang bila halaman dimuat ulang**,
   karena hanya hidup di memori; itu tidak diuji.
 
@@ -244,8 +242,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (`tutup-akun-bersaldo.spec.ts`). Label dan arah kesembilan jenis
   teruji di
   `tests/unit/features/akun-kas/mutasi.test.ts`.
-- **Filter periode mutasi lewat `PilihTanggal` dan tombol reset belum
-  teruji e2e**; query periode awal dan fungsi pembentuknya teruji.
 - **Keadaan seluruh akun kas non-aktif belum teruji e2e**, karena tenant
   uji selalu punya akun aktif.
 - **Tampilan tanpa `update-akunkas` belum teruji e2e** (tombol Ubah dan
@@ -292,10 +288,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   test** (`tests/unit/features/role/form-role.test.ts`), karena akun uji
   berperan Owner. Penolakan backend saat simpan, yang tampil di atas
   tombol simpan, belum teruji e2e.
-- **Form role yang gagal dimuat hanya teruji untuk id yang tidak ada.**
-  Galat server saat memuat detail dan penanda memuat selama detail dimuat
-  ulang belum teruji e2e. `nilaiAwalRole` teruji di
-  `tests/unit/features/role/nilai-awal.test.ts`.
 
 - **Penjaga ruang detail stock opname hanya teruji untuk dokumen yang
   tipe lokasinya diketahui**, dan kedua skenarionya dilewati bila ruang
@@ -335,11 +327,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Filter periode riwayat Pindah Dana diuji dengan tanggal 15 sampai 20
   bulan berjalan**, yang hampir selalu memberi daftar kosong; isi daftar
   dalam periode tidak dibandingkan per baris.
-- **Booking lama berstatus Batal** masih ada di data development dan
-  tampil di timeline (`kontrak/temuan.md` butir 141); tidak ada test
-  untuknya.
-  Sejak `nizar` `8dc6211` booking itu dibaca VOID dan menurut kode tidak
-  tampil lagi; belum dilihat langsung di timeline (`inti/status.md`).
 
 - **Hapus bahan baku yang berhasil tidak teruji e2e** sejak `43f09af`:
   skenarionya `test.fixme` menunggu backend (`kontrak/temuan.md` butir
@@ -350,8 +337,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   bukti.
   Sejak `cfaaa92` `test.fixme`-nya dilepas, setelah butir 143 tertutup
   (`arsip/riwayat-pengujian.md`, Riwayat pelepasan fixme).
-- **Penolakan hapus bahan yang punya riwayat tidak teruji e2e**; yang
-  teruji hanya dialog yang bertahan saat hapus dijawab gagal.
 - **Penyaringan stock adjustment per ruang di server tidak teruji dari
   web**, karena akun uji berperan Owner.
 - **Penahanan pembayaran kembar di backend tidak diuji dari web**; yang
@@ -461,11 +446,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   `c031bde` (6 November 2026). Tidak dicari dengan
   menjalankan ulang sebagian suite; reporter `json` di suite penuh
   berikutnya mencatat judulnya (`referensi/playwright.md`).
-- **Kirim ulang kode belum diuji e2e** di verifikasi email maupun lupa
-  password, karena tombolnya menunggu hitung mundur 60 detik; perlu
-  `page.clock`. Jalur verifikasi tanpa password titipan (halaman dibuka
-  langsung, lalu diarahkan ke login dengan pesan) teruji e2e sejak
-  `efb05db`.
 - **Keadaan masa berlaku Langganan hanya teruji di unit test**: masa
   percobaan, bilah masa berlaku, masa akses lewat dan masa tenggang, serta
   Muat riwayat lainnya. Akun uji Pro tanpa batas waktu dengan satu catatan
@@ -473,11 +453,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Jalur tanpa `read-langganan` hanya teruji di unit test** (gerbang
   rute, `c868870`), karena pengguna uji yang ada memegang seluruh izin
   `read-`. Penolakannya lewat gerbang rute yang sama dengan halaman lain.
-- **Suite e2e penuh belum dijalankan sejak `c8a2e83`** (ditunda pemilik
-  proyek, 7 November 2026). Sejak commit itu `playwright.config.ts`
-  mengisi `tachyon.panduan.otomatis=mati` lewat `storageState` untuk
-  semua spec; yang sudah teruji hanya `tests/e2e/setup` dan
-  `tests/e2e/dashboard`. Harapannya di `inti/pengujian.md` (Baseline).
 - **Keadaan Mesin Kasir di luar alur utama tidak teruji e2e** sejak
   spec pratinjau dihapus (`b74f30a`): memuat, gagal dimuat, sesi lintas
   tengah malam, Muat hari sebelumnya, form tambah tanpa perangkat atau

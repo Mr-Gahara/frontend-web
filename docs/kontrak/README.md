@@ -116,7 +116,10 @@ stok, bahan baku, kategori, transfer stok, penjualan, dan stock
 adjustment di `endpoint.md`, `payload.md`, `izin-halaman.md`, dan
 `temuan.md` dikoreksi terhadapnya, hanya untuk yang terbukti dari kode
 atau dari web. Yang belum dicocokkan dari 42 commit itu: modul
-pembelian stok, dan cache produk saat pajak berubah. Terhadap
+pembelian stok, dan cache produk saat pajak berubah. Cache produk saat
+pajak berubah dicocokkan terhadap `1584222` pada 7 November 2026
+(`temuan.md` butir 94), dan pembelian stok dibuktikan lewat B112 dan
+B114 (butir 156 sampai 164). Terhadap
 Lampiran A: route `/pembelianstok` kini memeriksa izin `read-`,
 `create-`, `update-`, dan `delete-pembelian-stok`, dan kedua route
 `GET /stockopname/adjustments` menerima juga

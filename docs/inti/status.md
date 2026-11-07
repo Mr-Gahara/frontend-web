@@ -21,7 +21,7 @@ lain tidak berubah sampai commit itu:
 | Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna |
 | `useAuthGuard()` berulang di halaman | 49 | 2 | Dihitung di `app/` saja. Yang tersisa `app/dashboard/layout.tsx`, satu-satunya pemanggil, dan berkas hook-nya sendiri; ke-24 pemanggilan berulang di `app/` dan ke-13 di `features/` dibuang di `628f52e` (26 sebelum itu). Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, halaman diskon, dan halaman profil) |
 | Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | 68 (per `9cd22e1`) | Lima warna utama menjadi token di `app/globals.css` (`584a2d8`, `ba28f25`; keputusan WR1a sampai WR4a). Tepat sebelum penggantian terukur 3.764 di `app`, `components`, `features`, dan `lib`. Yang tersisa: warna utama di luar kelas (konstanta palet lokal halaman reservasi dan tarif, serta warna grafik) dan warna lain yang belum punya token |
-| Berkas di atas 700 baris | 7 | 3 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.087 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702). Per `9195472` menjadi 4: `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700 (714 baris) karena penjaga ruang (`eb0181f`), dan buat penjualan menjadi 1.087 baris setelah kode mati dibuang (`6b5e1cc`). Per `b887278` form produk menjadi 809 baris (pemeriksaan satuan resep). Per `628f52e` tetap 4; detail stock opname menjadi 712 baris setelah pemanggilan guard dibuang. Per `7d4c234` form produk 835 baris (isian stok minimal, B237). Per `5b8cbd9` tetap 4: buat penjualan 1.098 baris (`waktuTransaksi` dan jam berjalan, `7a08b63`), form produk 809, detail stock opname 702, dan `components/ui/sidebar.tsx` 702. Per `a611b59` menjadi 3: dialog aksi detail stock opname dipisah, sehingga halamannya 612 baris |
+| Berkas di atas 700 baris | 7 | 1 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.087 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702). Per `9195472` menjadi 4: `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700 (714 baris) karena penjaga ruang (`eb0181f`), dan buat penjualan menjadi 1.087 baris setelah kode mati dibuang (`6b5e1cc`). Per `b887278` form produk menjadi 809 baris (pemeriksaan satuan resep). Per `628f52e` tetap 4; detail stock opname menjadi 712 baris setelah pemanggilan guard dibuang. Per `7d4c234` form produk 835 baris (isian stok minimal, B237). Per `5b8cbd9` tetap 4: buat penjualan 1.098 baris (`waktuTransaksi` dan jam berjalan, `7a08b63`), form produk 809, detail stock opname 702, dan `components/ui/sidebar.tsx` 702. Per `a611b59` menjadi 3: dialog aksi detail stock opname dipisah, sehingga halamannya 612 baris. Per `11ed2d4` menjadi 1: buat penjualan dipecah menjadi 693 baris (`584d6ae`) dan form produk 673 baris; tersisa `components/ui/sidebar.tsx` (702, berkas shadcn) |
 
 Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
 setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
@@ -114,26 +114,30 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
   (Mesin Kasir, sisi backend, di atas).
 - Laporan untuk tim backend, yang ditunda sampai pekerjaan backend dari
   audit selesai (utang kecil, di bawah).
+- Sesi pengguna yang pulih setelah pin-logout gagal: dibiarkan, atau
+  diminta ke backend agar logout akun ikut mencabut sesi pengguna
+  (`modul/profil-login.md`, Utang terbuka).
 
-### Tanpa UI baru, disetujui 7 November 2026
+### Tanpa UI baru, selesai 7 November 2026
 
-Dipilih pemilik proyek lewat dialog 7 November 2026, dikerjakan sesudah
-Mesin Kasir. E2E tidak dijalankan per commit: tiap commit diperiksa
-`tsc`, ESLint, dan vitest penuh, lalu satu suite e2e penuh di akhir
-putaran (pemilik proyek, 7 November 2026).
+Keempat butir yang dipilih pemilik proyek lewat dialog 7 November 2026
+selesai. E2E tidak dijalankan per commit: tiap commit diperiksa `tsc`,
+ESLint, dan vitest penuh, lalu satu suite e2e penuh di akhir putaran
+(pemilik proyek, 7 November 2026).
 
-1. Pecah berkas di atas 700 baris tanpa mengubah perilaku: buat penjualan
-   dan form produk (Metrik sisa pekerjaan, di atas).
-2. Bukti dari kode backend: cocokkan cache produk saat pajak berubah,
-   uji hapus aset yang punya booking dan hapus kategori yang dipakai
-   produk dari web, buktikan B112, B114, dan B115, dan lihat langsung
-   booking Batal di timeline (utang kecil, di bawah).
-3. Sisa utang pengujian yang tidak butuh pengguna uji non-Owner maupun
-   data permanen (`referensi/utang-pengujian.md`); rinciannya diajukan
-   dulu sebelum dikerjakan.
-4. Suite e2e penuh dengan reporter `line,json` di akhir putaran, yang
-   melunasi utang suite penuh sejak `c8a2e83` dan mencatat judul skip
-   (`inti/pengujian.md`, Baseline).
+1. Berkas di atas 700 baris dipecah tanpa mengubah perilaku: buat
+   penjualan (`584d6ae`) dan form produk (`11ed2d4`).
+2. Bukti dari kode backend dan respons nyata `1584222`: cache produk saat
+   pajak berubah (butir 94), hapus kategori yang dipakai produk 409
+   (butir 12), hapus aset yang punya booking dari web (butir 52,
+   `66ea7a4`), B112, B114 jalur Owner, format nomor B115, dan booking
+   Batal yang tidak lagi dikirim ke web (butir 141). Yang tersisa: B114
+   bagi peran selain Owner (butuh pengguna non-Owner) dan nomor B115
+   pada 00.00 sampai 07.00 WIB.
+3. Lima utang pengujian dilunasi (`5c9ed69`, `af77b1f`;
+   `arsip/riwayat-pengujian.md`).
+4. Suite e2e penuh 589 test, 585 lolos dan 1 skipped; ketiga kegagalan
+   skenario baru diperbaiki (`inti/pengujian.md`, Baseline).
 
 ### Utang kecil dari penyesuaian backend `4759208`
 
@@ -146,7 +150,10 @@ putaran (pemilik proyek, 7 November 2026).
   170 dan 172 sampai 174, serta pembuktian B215, B217, B229, B230,
   B231, B232, B251 (`a207fae`), dan B248 (`efb05db`) dari web, B252,
   B259, B260, dan B261
-  dari respons nyata (penyesuaian `1584222`), lalu B250 setelah web
+  dari respons nyata (penyesuaian `1584222`), B112, B114 jalur Owner,
+  format nomor B115, P18 hapus bahan, P19 hapus kategori, dan hapus aset
+  ber-booking (7 November 2026; `kontrak/temuan.md` butir 12, 52, 94,
+  141, 155, 156, 160, 162, dan 164), lalu B250 setelah web
   mengerjakannya, dan B255 setelah ada pengajuan APPROVED atau PENDING
   untuk diuji. Laporannya ditunda sampai pekerjaan backend dari audit
   selesai, agar diserahkan sekali jalan (pemilik proyek, 6 November
@@ -166,9 +173,6 @@ Penanda dan tur sorotan wizard serta dashboard selesai di `58d7eb9`,
 `aa3c1c6`, `c8a2e83`, dan `5c3da45`, dan ringkasan tersimpan tanpa
 tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 
-- Suite e2e penuh belum dijalankan sejak `c8a2e83`, ditunda pemilik
-  proyek 7 November 2026, padahal saklar tur di `playwright.config.ts`
-  berlaku untuk semua spec (`referensi/utang-pengujian.md`).
 - Ruang gudang dan langkah jam buka belum punya tur
   (`modul/setup-akun.md`, Utang terbuka).
 
@@ -177,8 +181,8 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 - Padding area gulir dashboard di HP turun dari 24 px menjadi 16 px
   untuk seluruh halaman (`b3f8698`, `modul/keuangan.md` KH2b). Spec yang
   punya skenario lebar HP lolos (Keuangan, dashboard outlet, dan
-  langganan), tetapi halaman lain belum dilihat langsung di HP, dan
-  suite e2e penuh belum dijalankan sesudahnya.
+  langganan), tetapi halaman lain belum dilihat langsung di HP. Suite
+  e2e penuh 7 November 2026 lolos untuk seluruh spec lama.
 
 ### Utang kecil dari penyesuaian backend `ridho` `0024eb9`
 
@@ -203,9 +207,9 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 - Jalur pemegang izin pembelian per ruang saja belum teruji e2e, karena
   akun uji Owner memegang izin umum (`kontrak/temuan.md` butir 158,
   Menunggu verifikasi).
-- B112 (urutan stabil, validasi selaras skema, indeks nomor faktur),
-  B114, dan B115 dipakai atau tidak lagi diakali web, tetapi belum
-  dibuktikan khusus.
+- B112 terbukti dari respons nyata 7 November 2026; B114 hanya jalur
+  Owner dan B115 hanya formatnya (`kontrak/temuan.md` butir 155 dan
+  164).
 - Penerimaan (outlet) dan pengiriman (gudang) tetap daftar kartu mode
   klien dengan polling; tidak termasuk butir 150.
 
@@ -252,10 +256,6 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 
 ### Utang kecil dari penyesuaian backend `ridho` `2dd57aa`
 
-- Cache produk saat pajak berubah belum dicocokkan dari kode backend
-  (`kontrak/README.md`).
-- Hapus aset yang punya booking (butir 52) dan hapus kategori yang
-  dipakai produk (butir 12) belum diuji dari web.
 - Nama penyetuju di daftar pengajuan stok terisi sejak `7d28135` (butir
   145); belum dipakai web.
 
@@ -266,9 +266,9 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 - Bagian Sesi Booking di detail penjualan memakai tata letak sederhana di
   atas grid informasi; penempatannya menunggu fase UI/UX.
 - Timeline reservasi tidak punya aksi Tandai Selesai (NZ7a). Booking lama
-  berstatus Batal dibaca VOID sejak backend `nizar` `8dc6211`, sehingga
-  menurut kode tidak tampil lagi (`kontrak/temuan.md` butir 141); belum
-  dilihat langsung di timeline.
+  berstatus Batal dibaca VOID sejak backend `nizar` `8dc6211`; respons
+  7 November 2026 tidak memuat satu pun status Batal, sehingga timeline
+  tidak dapat menampilkannya (`kontrak/temuan.md` butir 141).
 - Khusus member belum ditawarkan di form diskon (NZ6a); ditinjau bersama
   modul membership.
 - Mutasi transfer di buku mutasi tidak bertaut ke riwayat Pindah Dana,

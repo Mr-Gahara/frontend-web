@@ -544,6 +544,49 @@ Dipindah dari `referensi/utang-pengujian.md` pada 6 November 2026.
   Alasan itu gugur sejak butir 142 tertutup; skenarionya belum ditulis.
   Lunas di `e0d3bb4`: skenario dua pelanggan bernama sama di pemilih buat
   penjualan (`tests/e2e/pelanggan/pemilih-pelanggan.spec.ts`).
+- **Profil yang gagal dimuat dan logout yang gagal belum teruji e2e**:
+  pesan beserta tombol coba lagi, dan logout akun yang tetap berjalan
+  walau logout pengguna gagal, hanya terbukti dari kode.
+  Lunas di `5c9ed69` dan `af77b1f`: `profil/profil-gagal-dimuat.spec.ts`
+  dan skenario logout gagal di `auth/sidebar-pengguna.spec.ts`. Membuka
+  dashboard lagi setelah pin-logout gagal ternyata memulihkan sesi
+  (`modul/profil-login.md`), sehingga skenarionya berhenti di halaman login.
+- **Filter periode mutasi lewat `PilihTanggal` dan tombol reset belum
+  teruji e2e**; query periode awal dan fungsi pembentuknya teruji.
+  Lunas di `5c9ed69`: skenario periode dan Reset Filter di
+  `keuangan/mutasi-kas.spec.ts`.
+- **Form role yang gagal dimuat hanya teruji untuk id yang tidak ada.**
+  Galat server saat memuat detail dan penanda memuat selama detail dimuat
+  ulang belum teruji e2e. `nilaiAwalRole` teruji di
+  `tests/unit/features/role/nilai-awal.test.ts`.
+  Lunas di `5c9ed69` dan `af77b1f`: skenario penanda memuat dan galat
+  server di `roles/crud-role.spec.ts`.
+- **Penolakan hapus bahan yang punya riwayat tidak teruji e2e**; yang
+  teruji hanya dialog yang bertahan saat hapus dijawab gagal.
+  Lunas di `5c9ed69`: hapus "E2E Bahan Pak" ditolak 409 di
+  `inventaris/bahanBaku/hapus-bahan-baku.spec.ts`.
+- **Kirim ulang kode belum diuji e2e** di verifikasi email maupun lupa
+  password, karena tombolnya menunggu hitung mundur 60 detik; perlu
+  `page.clock`. Jalur verifikasi tanpa password titipan (halaman dibuka
+  langsung, lalu diarahkan ke login dengan pesan) teruji e2e sejak
+  `efb05db`.
+  Lunas di `5c9ed69`: dua skenario kirim ulang dengan `page.clock` di
+  `auth/verifikasi-lupa-password.spec.ts`.
+- **Suite e2e penuh belum dijalankan sejak `c8a2e83`** (ditunda pemilik
+  proyek, 7 November 2026). Sejak commit itu `playwright.config.ts`
+  mengisi `tachyon.panduan.otomatis=mati` lewat `storageState` untuk
+  semua spec; yang sudah teruji hanya `tests/e2e/setup` dan
+  `tests/e2e/dashboard`. Harapannya di `inti/pengujian.md` (Baseline).
+  Lunas 7 November 2026: suite penuh 589 test, 585 lolos dan 1 skipped
+  (`inti/pengujian.md`, Baseline).
+- **Booking lama berstatus Batal** masih ada di data development dan
+  tampil di timeline (`kontrak/temuan.md` butir 141); tidak ada test
+  untuknya.
+  Sejak `nizar` `8dc6211` booking itu dibaca VOID dan menurut kode tidak
+  tampil lagi; belum dilihat langsung di timeline (`inti/status.md`).
+  Lunas 7 November 2026 tanpa test: basis data masih memuat 150 booking
+  Batal, tetapi `GET /sesibooking` tidak mengirim satu pun
+  (`kontrak/temuan.md` butir 141).
 
 ## Kejadian sesekali yang tidak berulang
 

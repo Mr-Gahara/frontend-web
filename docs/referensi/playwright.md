@@ -138,6 +138,17 @@ bersyarat).
 
 ## Catatan Playwright
 
+- Hitung mundur berbentuk `setTimeout` berantai per detik
+  (`features/auth/hitung-mundur.ts`) dilewati dengan `page.clock.runFor`
+  satu detik per langkah dalam loop sampai tombolnya berubah; satu
+  lompatan 61 detik hanya memicu timer yang sedang terpasang, karena
+  timer berikutnya baru dipasang React setelah render (`5c9ed69`). Kode
+  OTP baru dibaca dari Mailpit setelah jeda nyata 3 detik, karena
+  `ambilOtp` menoleransi 2 detik sebelum `sejak`.
+- Nama fixture yang menjadi awalan nama fixture lain ("E2E Reservasi
+  Aset Booking" dan "E2E Reservasi Aset Perbaikan") dicocokkan lewat
+  `filter({ has: getByText(nama, { exact: true }) })`, bukan
+  `filter({ hasText })`, yang mencocokkan sebagian (`af77b1f`).
 - Jam yang dirender dari `Date.now()` diuji dengan
   `page.clock.setFixedTime`: waktu tetap, sedangkan timer halaman tetap
   berjalan, sehingga detak per detik membaca jam patokan. Patokan

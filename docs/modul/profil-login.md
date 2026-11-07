@@ -112,6 +112,14 @@ empat commit, dengan suite e2e penuh dijalankan sekali di akhir modul
 
 ### Utang kecil dari modul Profil, login, dan sidebar
 
+- Bila `POST /pengguna/pin-logout` gagal, logout tetap mengakhiri sesi
+  lokal dan memutus sesi akun, tetapi cookie refresh pengguna tetap
+  berlaku di backend, sehingga membuka `/dashboard` lagi di browser yang
+  sama memulihkan sesi pengguna itu (suite penuh 7 November 2026, skenario
+  logout gagal di `auth/sidebar-pengguna.spec.ts`). Cookie itu httpOnly
+  dan tidak dapat dihapus web. Perlu keputusan pemilik proyek: dibiarkan,
+  atau diminta ke backend agar logout akun ikut mencabut sesi pengguna.
+
 - Tombol hapus akun di halaman profil tampil nonaktif (PF2a) sampai
   backend punya jalur hapus akun sendiri bagi Owner (`kontrak/temuan.md`
   butir 112).

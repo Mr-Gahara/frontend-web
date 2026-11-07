@@ -12,6 +12,23 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per putaran 7 November 2026** (web `5c9ed69`, backend
+`ridho` lokal `1584222`, pukul 15.59 sampai 16.37 WIB, reporter
+`line,json`): e2e 585 lolos, 3 gagal, dan 1 skipped dari 589, sesuai
+harapan hitungan 581 ditambah delapan skenario baru (hapus aset
+ber-booking, periode mutasi, profil gagal dimuat, logout gagal, form
+role gagal dimuat, hapus bahan berriwayat, dan dua kirim ulang kode).
+Ketiga kegagalan skenario baru itu sendiri (locator aset, penunggu daftar
+role, dan pemulihan sesi setelah pin-logout gagal), diperbaiki di
+`af77b1f` dan dibuktikan spec terdampak `auth/sidebar-pengguna`,
+`reservasi/aset/crud-aset`, dan `roles/crud-role` 38 lolos. Yang
+dilewati skip bersyarat tanggal di `lihat-jurnal-stok.spec.ts` ("outlet:
+periode dikirim sebagai tanggal YYYY-MM-DD, dan Reset Filter
+mengembalikan bulan berjalan"); skip status staf dan skip HP Mesin Kasir
+tidak terjadi. Vitest 1001 lolos (5 test baru `hitungSimulasi`, `584d6ae`).
+Harapan suite penuh sesudahnya 588 lolos dan 1 skipped sampai tanggal 8
+(hitungan).
+
 **Baseline per penyambungan Mesin Kasir** (commit `b74f30a`, 7 November
 2026): 996 test unit dan integrasi lolos, bertambah 13 dari 983: izin,
 pesan, dan filter Mesin Kasir (11) serta tab Keuangan (2). Spec e2e
