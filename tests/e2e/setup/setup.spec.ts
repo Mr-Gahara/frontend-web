@@ -115,10 +115,10 @@ test.describe("Wizard setup", () => {
         await expect(page.getByRole("region", { name: "Kategori ditambahkan" })).toContainText("Kopi");
         await page.getByRole("button", { name: "Kembali" }).click();
         await expect(page.getByText("Kopi Senja Pontianak Kota")).toBeVisible();
-        await expect(page.getByRole("link", { name: "Ubah di Profil Toko" })).toHaveAttribute(
-          "href",
-          "/dashboard/outlet/pengaturan/toko",
-        );
+        // Ringkasan hanya menyebut tempat mengubahnya, tanpa tautan yang
+        // membawa keluar dari wizard (WS6a, kontrak/temuan.md butir 175).
+        await expect(page.getByText("Lokasi dan titik absen dapat diubah nanti dari Profil Toko.")).toBeVisible();
+        await expect(page.getByRole("main").getByRole("link")).toHaveCount(0);
         await page.getByRole("button", { name: "Lanjut", exact: true }).click();
         await lanjut(page).click();
       });
@@ -228,10 +228,12 @@ test.describe("Wizard setup", () => {
         expect(tarif.status(), "POST /tarif").toBe(201);
         expect(tarif.request().postDataJSON()).toMatchObject({ namaTarif: "Reguler", harga: 30000, isActive: true });
         await page.getByRole("button", { name: "Kembali" }).click();
-        await expect(page.getByRole("link", { name: "Ubah di halaman Tarif" })).toHaveAttribute(
-          "href",
-          "/dashboard/outlet/reservasi/tarif",
-        );
+        await expect(
+          page.getByText(
+            "Aset dan tarif dapat diubah atau ditambah nanti dari halaman Aset dan Tarif di menu Sesi Booking & Reservasi.",
+          ),
+        ).toBeVisible();
+        await expect(page.getByRole("main").getByRole("link")).toHaveCount(0);
         await page.getByRole("button", { name: "Lanjut", exact: true }).click();
       });
 

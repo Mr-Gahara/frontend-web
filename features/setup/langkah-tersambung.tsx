@@ -66,16 +66,10 @@ export interface PropsTersambung {
 const sama = (a: string, b: string) =>
   a.trim().toLowerCase() === b.trim().toLowerCase();
 
-/** Halaman ubah lokasi: outlet di Profil Toko, gudang di Pengaturan Gudang. */
-const TAUTAN_LOKASI = {
-  outlet: {
-    href: "/dashboard/outlet/pengaturan/toko",
-    teks: "Ubah di Profil Toko",
-  },
-  gudang: {
-    href: "/dashboard/gudang/pengaturan",
-    teks: "Ubah di Pengaturan Gudang",
-  },
+/** Tempat mengubah lokasi sesudah setup: outlet di Profil Toko, gudang di Pengaturan Gudang (WS6a). */
+const CATATAN_LOKASI = {
+  outlet: "Lokasi dan titik absen dapat diubah nanti dari Profil Toko.",
+  gudang: "Lokasi dan titik absen gudang dapat diubah nanti dari Pengaturan Gudang.",
 } as const;
 
 const lokasiBertipe = (daftar: Lokasi[] | undefined, tipe: TipeLokasi) =>
@@ -107,8 +101,7 @@ export function LangkahLokasiTersambung({
           { label: "Alamat", nilai: ada.alamat || "-" },
           { label: "Radius absen", nilai: `${ada.radiusAbsen} meter` },
         ]}
-        catatan="Lokasi dan titik absen dapat diubah dari halaman berikut."
-        tautan={[TAUTAN_LOKASI[jenis]]}
+        catatan={CATATAN_LOKASI[jenis]}
       />
     );
   }
@@ -287,17 +280,7 @@ export function LangkahBookingTersambung({
             nilai: (tarif.data ?? []).map((t) => t.namaTarif).join(", "),
           },
         ]}
-        catatan="Aset dan tarif dapat diubah atau ditambah dari halaman berikut."
-        tautan={[
-          {
-            href: "/dashboard/outlet/reservasi/aset",
-            teks: "Ubah di halaman Aset",
-          },
-          {
-            href: "/dashboard/outlet/reservasi/tarif",
-            teks: "Ubah di halaman Tarif",
-          },
-        ]}
+        catatan="Aset dan tarif dapat diubah atau ditambah nanti dari halaman Aset dan Tarif di menu Sesi Booking & Reservasi."
       />
     );
   }
