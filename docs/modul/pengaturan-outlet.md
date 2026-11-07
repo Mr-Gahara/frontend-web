@@ -74,7 +74,8 @@ dan diterapkan di `fcf2dd2` bersama PO15a; PO16a diterapkan di `ca6eb3d`.
   tidak ditampilkan.** Pajak tenant tidak dipakai backend di luar model
   dan mapper (pajak penjualan lewat modul pajak), logo hanya teks tanpa
   unggah, dan flag setup dapat diubah klien. Ketiganya dilaporkan bersama
-  submodul profil outlet.
+  submodul profil outlet. Pajak tenant dibuang backend di `ridho`
+  `a949910` (B266), dan tipe `Tenant` web mengikutinya di `5b6ff0d`.
 - **PO14a: halaman tanpa entri `IZIN_HALAMAN`, dengan izin per bagian.**
   Profil tenant dibaca semua pengguna dan diubah pemegang `update-tenant`;
   lokasi dimuat bagi pemegang `read-location` dan diubah bagi pemegang

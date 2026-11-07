@@ -29,11 +29,10 @@ setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 
 ## Pekerjaan berikutnya
 
-Keadaan per 7 November 2026 (cabang backend tidak maju sejak 6 November):
-backend lokal `ridho` `1584222`
-(fast-forward ke `yoga`, 12 commit di atas `c031bde` yang sudah di-push),
-belum di-push (`inti/backend.md`; penyesuaiannya di
-`referensi/keputusan-penyesuaian-backend.md`). Pekerjaan yang selesai sejak
+Keadaan per 7 November 2026: backend lokal `ridho` `d267f03`, sama
+dengan `origin/ridho` (tujuh commit Ridho di atas `1584222`: AR26 sampai
+AR29, B263 sampai B266). Penyesuaiannya hanya B266 (`5b6ff0d`), dicatat
+di `referensi/keputusan-penyesuaian-backend.md`. Pekerjaan yang selesai sejak
 penyesuaian `4759208` (4 sampai 6 November 2026, butir 1 sampai 10
 beserta urutan yang disetujui 4 November 2026) dipindah ke
 `arsip/catatan-putaran.md` (Catatan dari penyesuaian backend `4759208`
@@ -133,7 +132,8 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
   170 dan 172 sampai 174, serta pembuktian B215, B217, B229, B230,
   B231, B232, B251 (`a207fae`), dan B248 (`efb05db`) dari web, B252,
   B259, B260, dan B261
-  dari respons nyata (penyesuaian `1584222`), B112, B114 jalur Owner,
+  dari respons nyata (penyesuaian `1584222`), B266 dari respons nyata
+  (penyesuaian `d267f03`), B112, B114 jalur Owner,
   format nomor B115, P18 hapus bahan, P19 hapus kategori, dan hapus aset
   ber-booking (7 November 2026; `kontrak/temuan.md` butir 12, 52, 94,
   141, 155, 156, 160, 162, dan 164), temuan baru butir 177 (logout akun

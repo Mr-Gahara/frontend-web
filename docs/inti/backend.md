@@ -234,6 +234,13 @@ lewat langkah 1, 3, 4, dan 5 (159 nama, Owner 156), lalu
 (`rapikanJamShift.js` dan `hapusFieldUsang.js`), dijalankan mode laporan
 lebih dulu; hanya `hapusFieldUsang.js` yang diterapkan
 (`referensi/keputusan-penyesuaian-backend.md`).
+Pada 7 November 2026 `ridho` remote maju tujuh commit tepat di atas
+`1584222` ke `d267f03` (AR26 sampai AR29, B263 sampai B266), sedangkan
+`nizar` dan `yoga` tidak maju, sehingga `ridho` lokal sama dengan
+remote. Seed tidak berubah; `db:indeks` dijalankan (wajib sejak AR27:
+indeks unik `installationId` perangkat diganti), dan migrasi
+`hapusPajakToko.js` dijalankan mode laporan lebih dulu
+(`referensi/keputusan-penyesuaian-backend.md`).
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari

@@ -697,3 +697,41 @@ B262, sebagian di modul Ridho atas penugasan sementara.
   produk tanpa `pajak` dan detail ber-`createdAt` (B260, B252);
   `PUT /bahanbaku/:id` dengan `stok` 400 (B259). B255 belum dibuktikan,
   karena tenant uji tidak punya pengajuan APPROVED maupun PENDING.
+
+## Penyesuaian backend `ridho` `d267f03`
+
+Diminta pemilik proyek pada 7 November 2026: `ridho` remote maju tujuh
+commit tepat di atas `1584222` ke `d267f03` (AR26 sampai AR29, milik
+Ridho), sedangkan `nizar` dan `yoga` tidak maju, sehingga `ridho` lokal
+sama dengan `origin/ridho` tanpa gabungan. Label baru B263 sampai B266.
+
+- **Langkah sesudah tarik**: seed tidak berubah, sehingga permission
+  tidak diselaraskan. `db:indeks`, yang wajib sejak AR27, membuang indeks
+  unik lama `installationId_1` perangkat dan membentuk
+  `{ installationId, status }`; indeks lain selaras tanpa perubahan.
+  Migrasi baru `hapusPajakToko.js` (AR28) mode laporan: 8 toko masih
+  membawa `persenPajak` atau `tipePajak`, dan `tanpaPajakAktif` kosong,
+  sehingga tidak ada tarif yang hilang. Mode `--terapkan` ditolak
+  penjaga izin sesi, lalu dijalankan pemilik proyek sendiri pada hari
+  yang sama (8 dibersihkan), dan laporan ulang menunjukkan
+  `tokoBerfield` 0.
+- **Perubahan web** (`5b6ff0d`): `persenPajak`, `tipePajak`, dan tipe
+  `TipePajak` tenant dibuang dari `types/tenant.ts`, beserta fixture unit
+  test dan komentar PO13a (B266). Payload tidak berubah, karena web tidak
+  mengirim keduanya sejak PO13a.
+- **Tidak mengubah web**: B263 (cache sesi perangkat app pertama; web
+  login tanpa `installationId`), B264 dan B265 (tablet kasir bersama;
+  web tidak menyetujui maupun mencabut perangkat, dan pilihan perangkat
+  Mesin Kasir sudah satu baris per `installationId` dengan seluruh
+  pemakainya lewat `pilihanPerangkat`). Helper
+  `tests/helpers/sesi-kasir-uji.ts` login app sebagai Owner di tablet
+  yang sudah `trusted` miliknya, sehingga jalurnya tidak berubah. AR29
+  hanya pengukuran hapus akun, tanpa perubahan kontrak.
+- **Bukti respons nyata** (skrip API, 7 November 2026): `GET /tenant/:id`
+  200 tanpa `persenPajak` dan `tipePajak`, dan `PUT /tenant/:id` dengan
+  `persenPajak` 400 `Field berikut tidak diizinkan pada data tenant:
+  persenPajak.` (B266).
+- **Temuan baru di status backend** (milik Nizar, belum ada label B):
+  setelah AR27 sesi kasir terikat perangkat, bukan pengguna, sehingga
+  kasir berikutnya di tablet bersama dapat berjualan di sesi yang dibuka
+  rekannya. Tidak mengubah web.

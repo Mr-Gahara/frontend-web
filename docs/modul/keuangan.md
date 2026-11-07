@@ -291,7 +291,9 @@ sendiri.
 - **MK3a: pilihan perangkat digabung dari perangkat setiap karyawan**
   (`GET /device/:userId`), satu baris per `installationId`, hanya status
   `trusted` (K-18), karena backend belum punya daftar perangkat se-toko
-  (`kontrak/temuan.md` butir 172).
+  (`kontrak/temuan.md` butir 172). Sejak backend `a3a391b` (B264) satu
+  tablet boleh `trusted` untuk beberapa pengguna setoko; tablet itu tetap
+  satu pilihan dengan seluruh pemakainya, tanpa perubahan web.
 - **MK4a: tampilan dulu, penyambungan menyusul**: komponen menerima data
   lewat props, dan dipratinjau di rute development `pratinjauMesinKasir`
   dengan data contoh dan pemilih keadaan (keputusan rancangan butir 30).
