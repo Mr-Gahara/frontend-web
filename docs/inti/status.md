@@ -108,7 +108,8 @@ perangkat `trusted`, dan K-19 dengan tidak menampilkan `installationId`.
 Tampilan langkah jam buka selesai tanpa API (`b48cfdb`, `1386a30`;
 `modul/setup-akun.md`, JB1a sampai JB7a) dan dipratinjau di
 `/setup/pratinjauJamBuka`. Penyambungannya menunggu backend
-(`kontrak/temuan.md` butir 176). Daftar periksa:
+(`kontrak/temuan.md` butir 176), yang kebutuhannya diserahkan ke Ridho,
+Yoga, dan Nizar pada 7 November 2026. Daftar periksa:
 
 1. Kontrak backend jam per hari: status Buka, 24 jam, atau Libur beserta
    jam buka dan tutup per hari, penanda 24 jam yang berbeda dari belum
@@ -190,7 +191,7 @@ Diajukan lewat dialog sebelum dikerjakan:
   toko.
 - Laporan untuk tim backend belum disusun (`inti/backend.md`, Bila
   menemukan bug backend). Bahannya: `kontrak/temuan.md` butir 168 sampai
-  170, 172 sampai 174, dan 176, serta pembuktian B215, B217, B229, B230,
+  170 dan 172 sampai 174, serta pembuktian B215, B217, B229, B230,
   B231, B232, B251 (`a207fae`), dan B248 (`efb05db`) dari web, B252,
   B259, B260, dan B261
   dari respons nyata (penyesuaian `1584222`), lalu B250 setelah web

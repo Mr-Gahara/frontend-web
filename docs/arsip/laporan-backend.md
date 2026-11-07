@@ -316,6 +316,13 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
 - Laporan nama toko di login pengguna, disusun 1 November 2026 dan
   diserahkan ke Yoga: token akun tidak memuat nama toko maupun email, dan
   `GET /tenant/:id` menolak token akun (`kontrak/temuan.md` butir 167).
+- Kebutuhan backend jam buka toko di wizard setup, disusun dan diserahkan
+  7 November 2026 per pemilik (`kontrak/temuan.md` butir 176): jam
+  operasional per hari dan penanda 24 jam yang berbeda dari belum diatur
+  di tenant untuk Ridho, langkah dan kriteria `jamBuka` di status setup
+  tanpa menahan toko lama untuk Yoga, booking yang membaca jam per hari
+  untuk Nizar, serta pemakaian jam buka di shift dan jadwal sebagai
+  keputusan yang ditunggu.
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi
