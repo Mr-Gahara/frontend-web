@@ -77,8 +77,11 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
   const [indeks, setIndeks] = useState(0);
   // Arah langkah terakhir, agar titik yang dilewati mengikuti arah pengguna.
   const [mundur, setMundur] = useState(false);
-  const [kotak, setKotak] = useState<Kotak | null>(null);
-  const kotakRef = useRef<Kotak | null>(null);
+  // Kotak sorotan terakhir beserta titik pemiliknya. Saat pindah titik,
+  // sorotan lama tetap tampil sampai elemen titik baru ditemukan, sedangkan
+  // balon baru dipasang setelah itu (lihat milik di bawah).
+  const [kotak, setKotak] = useState<{ kotak: Kotak; milik: number } | null>(null);
+  const kotakRef = useRef<{ kotak: Kotak; milik: number } | null>(null);
   // Penangan dan daftar titik disimpan di ref agar fungsi atau array baru
   // dari induk (yang dibuat ulang setiap ketikan) tidak memulai ulang
   // pelacakan posisi di bawah; pelacakan hanya bergantung pada target titik.
@@ -111,10 +114,13 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
         el.scrollIntoView({ block: "center", behavior: "smooth" });
         digulir = true;
       }
-      const baru = el ? kotakSorotan(el.getBoundingClientRect()) : null;
-      if (!kotakSama(baru, kotakRef.current)) {
-        kotakRef.current = baru;
-        setKotak(baru);
+      if (el) {
+        const baru = kotakSorotan(el.getBoundingClientRect());
+        const lama = kotakRef.current;
+        if (!lama || lama.milik !== indeks || !kotakSama(baru, lama.kotak)) {
+          kotakRef.current = { kotak: baru, milik: indeks };
+          setKotak(kotakRef.current);
+        }
       }
       if (!el && performance.now() - mulai > BATAS_TUNGGU_MS) {
         // Elemen titik ini tidak ada di layar: lewati searah langkah pengguna.
@@ -132,6 +138,12 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
   }, [target, indeks, mundur, titik.length]);
 
   if (!aktif || !kotak) return null;
+  const k = kotak.kotak;
+  // Balon dipasang ulang di setiap titik, sesudah elemennya ditemukan. Dengan
+  // begitu balon selalu menjadi lapisan Radix teratas, termasuk di atas
+  // sidebar HP yang baru dibuka untuk titik itu, sehingga tetap dapat diklik
+  // dan difokus.
+  const balonSiap = kotak.milik === indeks;
   const terakhir = indeks === titik.length - 1;
   const idJudul = `panduan-judul-${indeks}`;
   const idIsi = `panduan-isi-${indeks}`;
@@ -141,84 +153,90 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
       <div
         aria-hidden="true"
         className="pointer-events-none fixed z-[60] rounded-[14px] shadow-[0_0_0_3px_var(--navy),0_0_0_9999px_rgba(10,41,71,0.35)] transition-[top,left,width,height] duration-200"
-        style={{ top: kotak.top, left: kotak.left, width: kotak.width, height: kotak.height }}
+        style={{ top: k.top, left: k.left, width: k.width, height: k.height }}
       />
       <PopoverAnchor asChild>
         <div
           aria-hidden="true"
           className="pointer-events-none fixed"
-          style={{ top: kotak.top, left: kotak.left, width: kotak.width, height: kotak.height }}
+          style={{ top: k.top, left: k.left, width: k.width, height: k.height }}
         />
       </PopoverAnchor>
-      <PopoverContent
-        side={aktif.sisi ?? "bottom"}
-        align="start"
-        sideOffset={12}
-        updatePositionStrategy="always"
-        collisionPadding={16}
-        aria-labelledby={idJudul}
-        aria-describedby={aktif.isi ? idIsi : undefined}
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={onTutup}
-        className="z-[70] w-[min(320px,calc(100vw-32px))] gap-2.5 rounded-[18px] border border-input bg-permukaan px-[18px] py-4 text-navy shadow-[0_12px_32px_rgba(10,41,71,0.18)] ring-0"
-      >
-        <PopoverPrimitive.Arrow width={18} height={9} className="fill-permukaan" />
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-muted-foreground">
-            Panduan {indeks + 1} dari {titik.length}
-          </span>
-          <button
-            type="button"
-            aria-label="Tutup panduan"
-            onClick={onTutup}
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full hover:bg-krem focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"
-          >
-            <X className="h-4 w-4" aria-hidden="true" />
-          </button>
-        </div>
-        <p id={idJudul} className="text-[17px] font-bold leading-snug">
-          {aktif.judul}
-        </p>
-        {aktif.isi && (
-          <p id={idIsi} className="text-sm leading-normal text-muted-foreground">
-            {aktif.isi}
+      {balonSiap && (
+        <PopoverContent
+          side={aktif.sisi ?? "bottom"}
+          align="start"
+          sideOffset={12}
+          updatePositionStrategy="always"
+          collisionPadding={16}
+          aria-labelledby={idJudul}
+          aria-describedby={aktif.isi ? idIsi : undefined}
+          onInteractOutside={(e) => e.preventDefault()}
+          // Klik di balon tidak diteruskan ke pendeteksi klik luar lapisan lain
+          // (Radix DismissableLayer di document); tanpa ini sidebar HP, yang
+          // berupa dialog modal, tertutup setiap kali Lanjut ditekan.
+          onPointerDown={(e) => e.nativeEvent.stopImmediatePropagation()}
+          onEscapeKeyDown={onTutup}
+          className="z-[70] w-[min(320px,calc(100vw-32px))] gap-2.5 rounded-[18px] border border-input bg-permukaan px-[18px] py-4 text-navy shadow-[0_12px_32px_rgba(10,41,71,0.18)] ring-0"
+        >
+          <PopoverPrimitive.Arrow width={18} height={9} className="fill-permukaan" />
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-muted-foreground">
+              Panduan {indeks + 1} dari {titik.length}
+            </span>
+            <button
+              type="button"
+              aria-label="Tutup panduan"
+              onClick={onTutup}
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full hover:bg-krem focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+          <p id={idJudul} className="text-[17px] font-bold leading-snug">
+            {aktif.judul}
           </p>
-        )}
-        <div className="mt-1 flex flex-wrap items-center justify-between gap-2.5">
-          <button
-            type="button"
-            onClick={onTutup}
-            className="cursor-pointer rounded-sm text-[13px] font-semibold underline decoration-karamel underline-offset-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"
-          >
-            Lewati panduan
-          </button>
-          <div className="flex gap-2">
-            {indeks > 0 && (
+          {aktif.isi && (
+            <p id={idIsi} className="text-sm leading-normal text-muted-foreground">
+              {aktif.isi}
+            </p>
+          )}
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-2.5">
+            <button
+              type="button"
+              onClick={onTutup}
+              className="cursor-pointer rounded-sm text-[13px] font-semibold underline decoration-karamel underline-offset-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"
+            >
+              Lewati panduan
+            </button>
+            <div className="flex gap-2">
+              {indeks > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMundur(true);
+                    setIndeks(indeks - 1);
+                  }}
+                  className={KELAS_TOMBOL_KECIL + " border border-input bg-permukaan text-navy hover:bg-krem/60"}
+                >
+                  Kembali
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => {
-                  setMundur(true);
-                  setIndeks(indeks - 1);
+                  if (terakhir) return onTutup();
+                  setMundur(false);
+                  setIndeks(indeks + 1);
                 }}
-                className={KELAS_TOMBOL_KECIL + " border border-input bg-permukaan text-navy hover:bg-krem/60"}
+                className={KELAS_TOMBOL_KECIL + " bg-navy text-gading hover:bg-navy/90"}
               >
-                Kembali
+                {terakhir ? "Selesai" : "Lanjut"}
               </button>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                if (terakhir) return onTutup();
-                setMundur(false);
-                setIndeks(indeks + 1);
-              }}
-              className={KELAS_TOMBOL_KECIL + " bg-navy text-gading hover:bg-navy/90"}
-            >
-              {terakhir ? "Selesai" : "Lanjut"}
-            </button>
+            </div>
           </div>
-        </div>
-      </PopoverContent>
+        </PopoverContent>
+      )}
     </Popover>
   );
 }

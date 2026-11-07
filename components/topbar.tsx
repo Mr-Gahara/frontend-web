@@ -3,6 +3,8 @@ import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { useSudahHidrasi } from "@/hooks/use-sudah-hidrasi";
 import { Bell } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { TombolPanduanDashboard } from "@/components/panduan/panduan-dashboard";
+import { TARGET_MENU_UTAMA } from "@/components/panduan/titik-dashboard";
 
 const OPSI_TANGGAL: Intl.DateTimeFormatOptions = {
   weekday: "long",
@@ -27,6 +29,7 @@ export default function Topbar() {
       <div className="flex items-center gap-4">
         {/* Tombol Trigger Shadcn UI */}
         <SidebarTrigger 
+          data-panduan={TARGET_MENU_UTAMA}
           className="bg-navy text-white hover:bg-navy/80 hover:text-white cursor-pointer transition-colors" 
         />
         
@@ -35,7 +38,8 @@ export default function Topbar() {
         </span>
       </div>
 
-      <div>
+      <div className="flex items-center gap-2">
+        <TombolPanduanDashboard />
         <button
           type="button"
           disabled

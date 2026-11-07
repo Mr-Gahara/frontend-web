@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { balonPanduan, jalaniTur } from "../../helpers/panduan-uji";
 import { ALASAN_TANPA_ADMIN, hapusAkunKlienUji, kredensialAdmin, wajibAdmin } from "../../helpers/admin-uji";
 import { PIN_OWNER, akunBaru, langkahAktif, lanjut } from "../../helpers/setup-uji";
 
@@ -11,38 +12,7 @@ import { PIN_OWNER, akunBaru, langkahAktif, lanjut } from "../../helpers/setup-u
 test.use({ storageState: { cookies: [], origins: [] } });
 test.describe.configure({ timeout: 120_000 });
 
-const balon = (page: Page) => page.getByRole("dialog");
-// Nama aksesibel balon adalah judul titiknya (misalnya "Isi nama toko"), yang
-// memuat label isian. Isian karena itu dicari dengan label persis.
-
-/** Balon seluruhnya di dalam layar dan elemen yang disorot sudah digulir ke layar. */
-async function periksaLetak(page: Page, target: string) {
-  const layar = page.viewportSize();
-  if (!layar) throw new Error("viewport tidak diketahui");
-  const di = (k: { x: number; y: number; width: number; height: number } | null) =>
-    !!k && k.x >= 0 && k.y >= 0 && k.x + k.width <= layar.width + 0.5 && k.y + k.height <= layar.height + 0.5;
-  await expect
-    .poll(async () => di(await balon(page).boundingBox()), { message: `balon titik ${target} di dalam layar` })
-    .toBe(true);
-  await expect
-    .poll(async () => di(await page.locator(`[data-panduan="${target}"]`).boundingBox()), {
-      message: `elemen ${target} tergulir ke layar`,
-    })
-    .toBe(true);
-}
-
-/** Menjalani tur dari titik pertama sampai Selesai, memeriksa nomor dan letak setiap titik. */
-async function jalaniTur(page: Page, target: string[]) {
-  for (const [i, t] of target.entries()) {
-    await expect(balon(page)).toContainText(`Panduan ${i + 1} dari ${target.length}`);
-    await periksaLetak(page, t);
-    await expect(balon(page).getByRole("button", { name: "Kembali" })).toHaveCount(i === 0 ? 0 : 1);
-    await balon(page)
-      .getByRole("button", { name: i === target.length - 1 ? "Selesai" : "Lanjut" })
-      .click();
-  }
-  await expect(balon(page)).toHaveCount(0);
-}
+const balon = balonPanduan;
 
 const tersimpan = (page: Page, kunci: string) =>
   page.evaluate((k) => localStorage.getItem(`tachyon.panduan.v1.setup.${k}`), kunci);

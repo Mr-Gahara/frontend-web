@@ -3,12 +3,13 @@
 import * as React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth/useSession";
-import { IZIN, bolehBukaGrup, bolehBukaHalaman } from "@/lib/auth/permissions";
+import { IZIN, bolehBukaHalaman } from "@/lib/auth/permissions";
 import { useDaftarLokasi } from "@/features/inventaris/hooks";
 import { bolehMenurutPlan, planMencakup } from "@/lib/auth/fitur-plan";
 import { useTenant } from "@/features/tenant/hooks";
 import { SidebarPengguna } from "@/components/sidebar-pengguna";
-import { gudangMenus, outletMenus, type MenuItem } from "@/components/sidebar-menu";
+import { bolehLihatMenu, gudangMenus, outletMenus, type MenuItem } from "@/components/sidebar-menu";
+import { targetMenu } from "@/components/panduan/titik-dashboard";
 
 // Impor Ikon (Tambahan ikon Archive untuk Data Barang)
 import {
@@ -96,13 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
    * Pemeriksaan nama role dihapus: Owner memegang seluruh permission di
    * backend, sehingga pemeriksaan berbasis daftar permission sudah mencakupnya.
    */
-  const bolehLihatItem = (item: MenuItem) =>
-    item.subItems?.length
-      ? bolehBukaGrup(
-          item.subItems.map((s) => s.href).filter((h) => bolehMenurutPlan(h, plan)),
-          permissions,
-        )
-      : bolehHref(item.href);
+  const bolehLihatItem = (item: MenuItem) => bolehLihatMenu(item, plan, permissions);
 
   const isGudangWorkspace = pathname.startsWith("/dashboard/gudang");
   const activeMenus = isGudangWorkspace ? gudangMenus : outletMenus;
@@ -260,6 +255,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             <SidebarMenuButton
                               tooltip={item.label}
                               isActive={isParentActive}
+                              data-panduan={targetMenu(item.href)}
                               className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer"
                             >
                               <item.icon />
@@ -306,6 +302,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <SidebarMenuButton
                         tooltip={item.label}
                         isActive={pathname === item.href}
+                        data-panduan={targetMenu(item.href)}
                         onClick={() => handleNavigation(item.href)}
                         className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer"
                       >

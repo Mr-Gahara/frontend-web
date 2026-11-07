@@ -4,6 +4,8 @@
  * halamannya di lib/auth/permissions.ts, bukan di sini.
  */
 import type * as React from "react";
+import { bolehBukaGrup, bolehBukaHalaman } from "@/lib/auth/permissions";
+import { bolehMenurutPlan } from "@/lib/auth/fitur-plan";
 import {
   LayoutDashboard,
   CircleDollarSign,
@@ -43,6 +45,25 @@ export type MenuGroup = {
   grup: string | null;
   items: MenuItem[];
 };
+
+/**
+ * Menu tampil di sidebar: menu berinduk bila salah satu anaknya (yang
+ * termasuk plan) boleh dibuka, menu tunggal bila halamannya termasuk plan
+ * dan boleh dibuka. Dipakai sidebar dan tur dashboard, agar keduanya
+ * menyaring menu dengan aturan yang sama.
+ */
+export function bolehLihatMenu(
+  item: MenuItem,
+  plan: Parameters<typeof bolehMenurutPlan>[1],
+  permissions: string[],
+): boolean {
+  return item.subItems?.length
+    ? bolehBukaGrup(
+        item.subItems.map((s) => s.href).filter((h) => bolehMenurutPlan(h, plan)),
+        permissions,
+      )
+    : bolehMenurutPlan(item.href, plan) && bolehBukaHalaman(item.href, permissions);
+}
 
 // --- 1. DEFINISI MENU OUTLET (TELAH DIRESTUKTURISASI) ---
 export const outletMenus: MenuGroup[] = [
