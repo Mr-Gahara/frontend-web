@@ -1,5 +1,4 @@
 import { test, expect, Page, Response } from "@playwright/test";
-import { ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
 import { masuk } from "../../../helpers/masuk-uji";
 
 const URL_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/stockOpname";
@@ -110,7 +109,6 @@ test.describe("Daftar stock opname outlet", () => {
   });
 
   test("lintas outlet: pilih satu outlet mengirim locationID", async ({ page }) => {
-    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     const daftar = await bukaDaftar(page, URL_OUTLET);
     const target = daftar.find((o) => o.lokasi?.tipe === "Outlet" && o.lokasi?.id && o.lokasi?.nama);
     test.skip(!target, "Belum ada dokumen stock opname outlet");

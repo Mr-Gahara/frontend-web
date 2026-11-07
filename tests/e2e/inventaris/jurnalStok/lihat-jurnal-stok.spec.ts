@@ -1,5 +1,4 @@
 import { test, expect, Page, Response } from "@playwright/test";
-import { ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
 import { masuk } from "../../../helpers/masuk-uji";
 
 const URL_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/jurnalStok";
@@ -67,24 +66,12 @@ async function bacaHalaman(r: Response) {
 }
 
 /** Membuka halaman jurnal dan mengembalikan halaman pertama dari server beserta query-nya. */
-async function bukaJurnal(page: Page, url: string, tungguLokasi = false) {
+async function bukaJurnal(page: Page, url: string) {
   const tJurnal = tungguJurnal(page);
-  const tLokasi = tungguLokasi
-    ? page.waitForResponse(responsGet(/\/api\/location\/current(\?|$)/))
-    : null;
   await page.goto(url);
-
   const halaman = await bacaHalaman(await tJurnal);
-
-  let lokasiAktif: string | undefined;
-  if (tLokasi) {
-    const rLokasi = await tLokasi;
-    const data = isiData<Relasi | Relasi[] | null>(await rLokasi.json());
-    lokasiAktif = idDari(Array.isArray(data) ? data[0] : data);
-  }
-
   await expect(page.getByRole("heading", { name: /buku jurnal stok/i })).toBeVisible();
-  return { ...halaman, lokasiAktif };
+  return halaman;
 }
 
 function barisTabel(page: Page) {
@@ -116,14 +103,13 @@ test.describe("Jurnal stok", () => {
   });
 
   test("outlet: halaman pertama bulan berjalan untuk satu lokasi outlet, tanpa jurnal gudang", async ({ page }) => {
-    const halaman = await bukaJurnal(page, URL_OUTLET, !ADA_IZIN_LINTAS);
+    const halaman = await bukaJurnal(page, URL_OUTLET);
     expect(halaman.query.get("dari")).toBe(AWAL_BULAN);
     expect(halaman.query.get("sampai")).toBe(HARI_INI);
     expect(halaman.query.get("page")).toBe("1");
     expect(halaman.query.get("limit")).toBe(String(UKURAN_AWAL));
     const lokasi = halaman.query.get("locationID");
-    if (halaman.lokasiAktif) expect(lokasi).toBe(halaman.lokasiAktif);
-    else expect(lokasi).toBeTruthy();
+    expect(lokasi).toBeTruthy();
     expect(
       halaman.data.every((j) => idDari(j.locationID) === lokasi && j.locationID?.tipe === "Outlet"),
     ).toBe(true);
@@ -131,7 +117,6 @@ test.describe("Jurnal stok", () => {
   });
 
   test("lintas outlet: pilih satu outlet mengirim locationID outlet itu", async ({ page }) => {
-    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     // Semua Outlet memakai satu-satunya outlet (lokasiSatuOutlet), sehingga
     // dengan satu outlet permintaan ber-locationID itu sudah terkirim saat
     // halaman dimuat dan memilihnya tidak memicu permintaan baru. Karena itu
@@ -276,8 +261,8 @@ test.describe("Jurnal stok", () => {
   });
 
   test("outlet: gagal memuat lokasi dibedakan dari lokasi yang belum dikonfigurasi", async ({ page }) => {
-    // Jalur terkunci memakai /location/current, pemegang izin lintas outlet memakai daftar lokasi.
-    const pola = ADA_IZIN_LINTAS ? "**/api/location" : "**/api/location/current";
+    // Pemegang izin lintas outlet (akun uji Owner) memakai daftar lokasi.
+    const pola = "**/api/location";
     await page.route(pola, (route) =>
       route.request().method() === "GET"
         ? route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ status: "error", message: "uji" }) })

@@ -279,7 +279,9 @@ bersyarat).
   peran. `bukaOutlet` di spec stok sempat menunggu `GET /inventory` tanpa
   `locationID` (jalur owner lama), sehingga saat cakupan berubah, enam test
   yang perilakunya tidak berubah ikut gagal. Penunggu mengikuti lingkup
-  halaman (`ADA_IZIN_LINTAS`).
+  pengguna yang masuk: pembuka untuk akun uji Owner menunggu jalur lintas
+  outlet, dan jalur terkunci punya pembuka sendiri setelah
+  `masukTanpaIzinLintas` (`ADA_IZIN_LINTAS` dibuang 7 November 2026).
 - Ringkasan `passed:0 failed:0 skipped:0` berarti tidak ada test yang
   berjalan, biasanya karena spec gagal dikompilasi (misalnya modul helper
   belum ada), bukan hasil bersih. Jalankan `tsc` lebih dulu.
@@ -662,7 +664,7 @@ bersyarat).
   ruang gudang dan outlet. Sejak `03c4eb3` halaman tidak lagi menyaring
   status di klien, sehingga skenario ini hanya lolos bila server
   menyaring (`kontrak/temuan.md` butir 33).
-- `tests/helpers/lintas-outlet.ts`: satu sumber keadaan izin lintas outlet
+- `lintas-outlet.ts` di `tests/helpers`: satu sumber keadaan izin lintas outlet
   untuk seluruh spec, dengan `test.fixme` bersyarat untuk jalur lintas
   outlet dan `test.skip` bersyarat untuk jalur terkunci (keputusan
   rancangan butir 18). Contoh pemakaiannya: jalur terkunci di spec stok,
@@ -670,7 +672,10 @@ bersyarat).
   permintaan terhadap id dari `/location/current`. Sejak `2eb668a`
   (B142) jalur lintas outlet berjalan dan jalur terkunci dilewati. Sejak
   `1cd8211` jalur terkunci kembali berjalan lewat `masukTanpaIzinLintas`,
-  dan `JALUR_TERKUNCI` beserta `test.skip`-nya dibuang.
+  dan `JALUR_TERKUNCI` beserta `test.skip`-nya dibuang. Pada 7 November
+  2026 berkas ini dibuang bersama sembilan `test.fixme(!ADA_IZIN_LINTAS)`
+  dan cabang null-nya, karena konstanta tidak kembali null (keputusan
+  rancangan butir 18; pemilik proyek).
 - `tests/helpers/terkunci-uji.ts` (`1cd8211`): jalur yang menuntut
   ketiadaan sebuah izin diuji lewat peran turunan Owner. Peran memegang
   izin baca milik Owner ditambah izin tulis yang dibutuhkan skenario,

@@ -1,5 +1,4 @@
 import { test, expect, Page, Response } from "@playwright/test";
-import { ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
 import { masukTanpaIzinLintas } from "../../../helpers/terkunci-uji";
 import { LABEL_ARAH_PENGAJUAN } from "../../../../features/pengajuan-stok/tampilan";
 import { masuk } from "../../../helpers/masuk-uji";
@@ -138,7 +137,6 @@ test.describe("Daftar pengajuan stok outlet", () => {
   });
 
   test("lintas outlet: pilih satu outlet mengirim locationID outlet itu", async ({ page }) => {
-    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     const awal = await buka(page, URL_OUTLET, { status: null });
     // Sejak pengembalian (P8) keLokasi baris pertama dapat berupa gudang.
     const outlet = awal.data.map(sisiOutlet).find((l) => l?.tipe === "Outlet" && l.id && l.nama);
@@ -201,7 +199,6 @@ test.describe("Daftar pengajuan stok outlet", () => {
   });
 
   test("buat dengan izin lintas outlet: outlet peminta dipilih dan dikirim di keLocationID", async ({ page }) => {
-    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     // POST dijawab gagal lewat page.route agar tidak ada pengajuan yang
     // tersimpan; yang diperiksa adalah isi payload.
     const polaPost = /\/api\/pengajuanstok(\?|$)/i;

@@ -163,7 +163,10 @@ sama (submodul pengajuan stok, di bawah).
     yang menunggu backend memakai `test.fixme` bersyarat, skenario yang
     hanya berlaku selama konstanta null memakai `test.skip` bersyarat.
     Contoh: `IZIN_LINTAS_OUTLET` di `lib/auth/permissions.ts` dan
-    `tests/helpers/lintas-outlet.ts` (pemilik proyek, 22 September 2026).
+    `lintas-outlet.ts` di `tests/helpers` (pemilik proyek, 22 September 2026;
+    berkas itu beserta fixme bersyaratnya dibuang 7 November 2026, karena
+    `akses-lintas-outlet` ditetapkan backend dan Owner memegangnya lewat
+    seed).
     Konstanta itu diisi di `2eb668a`, dan `KUNCI_LOKASI_SHIFT` serta
     `KUNCI_LOKASI_POLA_ROSTER` di `8b5ad0f`, masing-masing tanpa perubahan
     aturan. Skenario yang baru berjalan setelah konstanta diisi diperiksa

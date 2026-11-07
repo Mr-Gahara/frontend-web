@@ -1,5 +1,4 @@
 import { test, expect, Page, Response } from "@playwright/test";
-import { ADA_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
 import { bukaDenganAuth, pengajuanUjiDisetujui, type Auth } from "../../../helpers/transfer-uji";
 import { masuk } from "../../../helpers/masuk-uji";
 
@@ -84,12 +83,8 @@ test.describe("Alur tulis pengajuan stok", () => {
 
     await test.step("buat draft dari outlet", async () => {
       await page.goto(URL_OUTLET + "/buatPengajuan");
-      if (ADA_IZIN_LINTAS) {
-        await page.getByText("Pilih Outlet Anda...", { exact: true }).click();
-        await page.getByRole("option").first().click();
-      } else {
-        await expect(page.locator("#pengajuan-outlet"), "outlet peminta terkunci ke outlet tenant").toBeDisabled();
-      }
+      await page.getByText("Pilih Outlet Anda...", { exact: true }).click();
+      await page.getByRole("option").first().click();
       await page.getByText("Pilih Gudang...", { exact: true }).click();
       await page.getByRole("option").first().click();
       if ((await page.getByText("Pilih...", { exact: true }).count()) === 0) {
@@ -193,10 +188,8 @@ test.describe("Alur tulis pengajuan stok", () => {
       await expect(pilihKembali).toHaveAttribute("aria-pressed", "true");
       await expect(page.getByText("Outlet Asal Barang")).toBeVisible();
       await expect(page.getByText("Gudang Tujuan")).toBeVisible();
-      if (ADA_IZIN_LINTAS) {
-        await page.getByText("Pilih Outlet Anda...", { exact: true }).click();
-        await page.getByRole("option").first().click();
-      }
+      await page.getByText("Pilih Outlet Anda...", { exact: true }).click();
+      await page.getByRole("option").first().click();
       await page.getByText("Pilih Gudang...", { exact: true }).click();
       await page.getByRole("option").first().click();
       if ((await page.getByText("Pilih...", { exact: true }).count()) === 0) {

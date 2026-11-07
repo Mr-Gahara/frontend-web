@@ -2,7 +2,6 @@ import { test, expect, Page, Response } from "@playwright/test";
 import type { StockAdjustment } from "../../../../types/stockOpname";
 import { formatKoreksi, susunSumber } from "../../../../features/stock-adjustment/tampilan";
 import { normalizeId } from "../../../../lib/api/normalize";
-import { ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
 import { masukTanpaIzinLintas } from "../../../helpers/terkunci-uji";
 import { masuk } from "../../../helpers/masuk-uji";
 
@@ -124,7 +123,6 @@ test.describe("Stock adjustment outlet", () => {
   });
 
   test("lintas outlet: semua outlet tanpa adjustment gudang", async ({ page }) => {
-    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     await page.goto(URL_DAFTAR, { waitUntil: "commit" });
     const rDaftar = await page.waitForResponse(responsDaftar);
     const q = new URL(rDaftar.url()).searchParams;
@@ -138,7 +136,6 @@ test.describe("Stock adjustment outlet", () => {
   });
 
   test("lintas outlet: pilih satu outlet mengirim locationID", async ({ page }) => {
-    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     const daftar = await bukaDaftar(page);
     const target = daftar.find((a) => a.lokasi?.id && a.lokasi?.nama);
     const namaTarget = target?.lokasi?.nama;

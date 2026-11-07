@@ -423,7 +423,10 @@ dilepas pada 30 dan 31 Oktober 2026: sembilan skenario lintas outlet
 (B142, `2eb668a`), shift dan pola roster yang dibuat di ruang outlet tidak
 tampil di ruang gudang (B168, `8b5ad0f`), dan ubah pola roster (B128,
 `ea2e752`). Kedua fixme shift dan pola roster itu tadinya bersyarat
-konstanta lokasi; syaratnya dibuang di `7f6d623`.
+konstanta lokasi; syaratnya dibuang di `7f6d623`. Sembilan
+`test.fixme(!ADA_IZIN_LINTAS)` lintas outlet yang selalu berjalan sejak
+`2eb668a` dibuang syaratnya pada 7 November 2026, bersama
+`lintas-outlet.ts` di `tests/helpers`; jumlah skenario tidak berubah.
 
 Cara membuktikan sebuah fixme: lepas sementara, jalankan dua kali,
 kembalikan berkasnya dengan `git checkout`, lalu lepas dan commit per test

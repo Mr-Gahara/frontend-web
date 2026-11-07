@@ -1,6 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
 import { login } from "../../helpers/transfer-uji";
-import { ADA_IZIN_LINTAS } from "../../helpers/lintas-outlet";
 import { masukTanpaIzinLintas } from "../../helpers/terkunci-uji";
 
 /*
@@ -134,7 +133,6 @@ test.describe("E2E — Daftar penjualan per halaman", () => {
   });
 
   test("lintas outlet: memilih satu outlet mengirim locationID dan kembali ke halaman 1 (RG4a, LP1a)", async ({ page }) => {
-    test.fixme(!ADA_IZIN_LINTAS, "Menunggu permission lintas outlet dari backend (kontrak/temuan.md butir 39)");
     type ResponsLokasiDaftar = { data: { id: string; nama: string; tipe: string }[] };
     await page.goto(URL_DAFTAR, { waitUntil: "commit" });
     const tLokasi = page.waitForResponse(

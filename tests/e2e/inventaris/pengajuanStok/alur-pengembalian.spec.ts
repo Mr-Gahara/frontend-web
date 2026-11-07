@@ -1,5 +1,4 @@
 import { test, expect, type Page, type Response } from "@playwright/test";
-import { ADA_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
 import { BASIS, api, bukaDenganAuth, login, tutupSuratJalanUji, type Auth } from "../../../helpers/transfer-uji";
 
 /*
@@ -79,10 +78,8 @@ test.describe("Alur pengembalian Outlet ke Gudang", () => {
       await test.step("outlet membuat pengembalian", async () => {
         await page.goto(URL_OUTLET + "/buatPengajuan");
         await page.getByRole("button", { name: /kembalikan ke gudang/i }).click();
-        if (ADA_IZIN_LINTAS) {
-          await page.getByText("Pilih Outlet Anda...", { exact: true }).click();
-          await page.getByRole("option", { name: outlet!.nama ?? "", exact: true }).click();
-        }
+        await page.getByText("Pilih Outlet Anda...", { exact: true }).click();
+        await page.getByRole("option", { name: outlet!.nama ?? "", exact: true }).click();
         await page.getByText("Pilih Gudang...", { exact: true }).click();
         await page.getByRole("option", { name: gudang!.nama ?? "", exact: true }).click();
         if ((await page.getByText("Pilih...", { exact: true }).count()) === 0) {

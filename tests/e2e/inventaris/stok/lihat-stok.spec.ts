@@ -1,5 +1,4 @@
 import { test, expect, Locator, Page, Response } from "@playwright/test";
-import { ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS } from "../../../helpers/lintas-outlet";
 import { masukTanpaIzinLintas } from "../../../helpers/terkunci-uji";
 import { masuk } from "../../../helpers/masuk-uji";
 
@@ -93,13 +92,14 @@ async function periksaBaris(page: Page, jumlah: number, teksKosong?: string) {
 async function bukaOutlet(page: Page) {
   // Penunggu dipasang setelah dokumen baru ter-commit, agar respons dari
   // halaman sebelumnya (dashboard setelah login) tidak ikut tertangkap.
-  // Pemegang izin lintas outlet memuat stok seluruh lokasi (tanpa
-  // locationID); pengguna lain memuat stok lokasi aktif, yaitu outlet tenant.
+  // Hanya dipakai setelah login akun uji Owner, pemegang izin lintas outlet
+  // lewat seed, yang memuat stok seluruh lokasi (tanpa locationID). Jalur
+  // terkunci membuka halamannya sendiri lewat masukTanpaIzinLintas.
   await page.goto(URL_OUTLET, { waitUntil: "commit" });
   const pLokasi = tunggu<LokasiMentah[]>(page, getLokasi);
   const pInventory = tunggu<InventoryMentah[]>(
     page,
-    getInventory((u) => u.searchParams.has("locationID") !== ADA_IZIN_LINTAS),
+    getInventory((u) => !u.searchParams.has("locationID")),
   );
   const [lokasi, inventory] = await Promise.all([pLokasi, pInventory]);
   await expect(page.getByRole("columnheader", { name: "Nama Barang" })).toBeVisible();
@@ -183,7 +183,6 @@ test.describe("Stok outlet", () => {
   });
 
   test("lintas outlet: semua lokasi hanya stok di lokasi bertipe outlet", async ({ page }) => {
-    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     const { inventory } = await bukaOutlet(page);
     await periksaBaris(page, inventory.length, KOSONG_OUTLET);
   });
@@ -225,7 +224,6 @@ test.describe("Stok outlet", () => {
   });
 
   test("lintas outlet: pilih lokasi mengirim locationID dan menampilkan stok lokasi itu", async ({ page }) => {
-    test.fixme(!ADA_IZIN_LINTAS, MENUNGGU_IZIN_LINTAS);
     const { lokasi } = await bukaOutlet(page);
     const outlet = lokasi.find((l) => l.tipe === "Outlet");
     test.skip(!outlet, "Belum ada lokasi bertipe outlet");
