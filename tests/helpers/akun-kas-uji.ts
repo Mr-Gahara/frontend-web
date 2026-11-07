@@ -13,6 +13,7 @@ export type AkunKasUji = {
   id: string;
   namaAkun: string;
   nomorAkun: string;
+  tipeAkun: string;
   saldo: number;
   status: string;
   keterangan: string | null;

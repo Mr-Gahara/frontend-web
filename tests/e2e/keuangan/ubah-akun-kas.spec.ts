@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
-import { bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { NAMA_LACI_UJI, PERANGKAT_UJI, bersihkanMesinUji, siapkanLaciUji } from "../../helpers/sesi-kasir-uji";
 import { ID_TIDAK_ADA, cocok, pantauPermintaan, unik } from "../../helpers/reservasi-uji";
 import { daftarAkun, buatAkunUji, tutupAkunUji, type AkunKasUji } from "../../helpers/akun-kas-uji";
 
@@ -115,6 +116,44 @@ test.describe("ubah akun kas", () => {
     } finally {
       await tutupAkunUji(page, auth, idB);
       await tutupAkunUji(page, auth, idA);
+    }
+  });
+
+  test("laci mesin kasir diganti tipenya ditolak 409 (B250): pesan backend tampil, tipe tetap Kas Fisik", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_AKUN);
+    const laci = await siapkanLaciUji(page, auth);
+    await bersihkanMesinUji(page, auth, laci.id);
+    try {
+      // Pemetaan mesin kasir adalah data modul lain (keputusan rancangan butir 23).
+      const petakan = await api(page, auth, "POST", "/sesikasir/perangkat", {
+        installationId: PERANGKAT_UJI.installationId,
+        akunKasID: laci.id,
+        namaPerangkat: "E2E Mesin B250",
+      });
+      expect(petakan.status, "petakan mesin kasir uji: " + petakan.pesan).toBe(201);
+
+      await page.goto(urlUbah(laci.id));
+      await expect(page.getByLabel("Nama Akun")).toHaveValue(NAMA_LACI_UJI);
+      await page.locator("#tipe-akun").click();
+      await page.getByRole("option", { name: "Rekening Bank", exact: true }).click();
+      const tKirim = page.waitForResponse(cocok("PUT", POLA_AKUN_ID));
+      await page.getByRole("button", { name: "Simpan Perubahan" }).click();
+      const res = await tKirim;
+      expect(res.request().postDataJSON()).toEqual({ tipeAkun: "Rekening Bank" });
+      expect(res.status()).toBe(409);
+      const pesan = String((await res.json().catch(() => ({}))).message ?? "");
+      expect(pesan).toContain("dipetakan ke perangkat kasir");
+      await expect(page.getByText(pesan)).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(`/akunkas/${laci.id}/ubah$`));
+      const tetap = (await daftarAkun(page, auth)).find((a) => a.id === laci.id);
+      expect(tetap?.tipeAkun).toBe("Kas Fisik");
+    } finally {
+      await bersihkanMesinUji(page, auth, laci.id);
+      const akhir = (await daftarAkun(page, auth)).find((a) => a.id === laci.id);
+      if (akhir && akhir.tipeAkun !== "Kas Fisik") {
+        const balik = await api(page, auth, "PUT", "/akunkas/" + laci.id, { tipeAkun: "Kas Fisik" });
+        expect.soft(balik.status, "kembalikan tipe laci uji: " + balik.pesan).toBe(200);
+      }
     }
   });
 

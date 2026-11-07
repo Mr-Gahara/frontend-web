@@ -308,4 +308,31 @@ test.describe("Alur tulis pengajuan stok", () => {
     await expect(page).toHaveURL(new RegExp(`/pengajuanStok/${sasaran!.id}$`));
     await page.unroute(pola);
   });
+
+  test("pengajuan APPROVED tidak dapat direvisi (B255): tanpa Revisi Draft, halaman edit menolak, PUT 400", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_OUTLET);
+    const idUji = await pengajuanUjiDisetujui(page, auth);
+    const sasaran = (await daftarPengajuan(page, auth, "APPROVED")).find((p) => p.id === idUji);
+    expect(sasaran, "pengajuan uji APPROVED").toBeTruthy();
+
+    await page.goto(`${URL_OUTLET}/${idUji}`, { waitUntil: "commit" });
+    expect((await (await page.waitForResponse(getDetail(idUji))).json()).data.status).toBe("APPROVED");
+    await expect(page.getByText(sasaran!.nomorPengajuan).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /revisi draft/i })).toHaveCount(0);
+
+    await page.goto(`${URL_OUTLET}/${idUji}/edit`);
+    await expect(page.getByRole("heading", { name: "Akses Ditolak" })).toBeVisible();
+    await expect(page.getByText("Dokumen ini sudah berstatus APPROVED")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Simpan Perubahan" })).toHaveCount(0);
+
+    // Bukti aturan backend: badan sah menurut validator, ditolak karena statusnya.
+    const res = await page.request.put("http://localhost:3000/api/pengajuanstok/" + idUji, {
+      headers: { Authorization: auth() },
+      data: { catatan: "E2E B255" },
+    });
+    expect(res.status()).toBe(400);
+    expect(((await res.json()) as { message?: string }).message).toBe("Data sudah diproses dan tidak dapat diubah.");
+    const tetap = (await daftarPengajuan(page, auth, "APPROVED")).find((p) => p.id === idUji);
+    expect(tetap?.status).toBe("APPROVED");
+  });
 });
