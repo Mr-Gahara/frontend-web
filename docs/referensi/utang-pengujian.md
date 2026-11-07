@@ -478,6 +478,18 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   mengisi `tachyon.panduan.otomatis=mati` lewat `storageState` untuk
   semua spec; yang sudah teruji hanya `tests/e2e/setup` dan
   `tests/e2e/dashboard`. Harapannya di `inti/pengujian.md` (Baseline).
+- **Keadaan Mesin Kasir di luar alur utama tidak teruji e2e** sejak
+  spec pratinjau dihapus (`b74f30a`): memuat, gagal dimuat, sesi lintas
+  tengah malam, Muat hari sebelumnya, form tambah tanpa perangkat atau
+  tanpa laci, dan posisi panel di HP dan desktop. Yang tersisa
+  `tests/e2e/keuangan/mesin-kasir.spec.ts` (alur tambah, buka dari
+  aplikasi, tutup dengan catatan, ubah, lepas, dan HP tanpa gulir ke
+  samping) serta unit test `tampilan.ts`, `filter.ts`, dan `pesan.ts`.
+- **Jalur Mesin Kasir tanpa izin kelola hanya teruji di unit test**
+  (`bolehKelolaMesinKasir`, tab Keuangan), karena akun uji berperan
+  Owner. Termasuk pemegang `kelola-perangkat-kasir` tanpa `read-pengguna`
+  atau `read-akunkas` (MK11a), dan pemilihan perangkat yang melewati
+  pengguna berlevel sama atau lebih tinggi (403 `GET /device/:userId`).
 - **Penyaringan titik tur dashboard menurut izin dan plan hanya teruji
   di unit test** (`tests/unit/components/panduan/titik-dashboard.test.ts`),
   karena akun uji e2e berperan Owner sehingga kelima titik selalu

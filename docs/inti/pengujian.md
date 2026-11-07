@@ -12,6 +12,18 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per penyambungan Mesin Kasir** (commit `b74f30a`, 7 November
+2026): 996 test unit dan integrasi lolos, bertambah 13 dari 983: izin,
+pesan, dan filter Mesin Kasir (11) serta tab Keuangan (2). Spec e2e
+terdampak dijalankan lebih dulu, sebelum pemilik proyek menetapkan e2e
+hanya dijalankan sebagai suite penuh di akhir putaran: spec baru
+`tests/e2e/keuangan/mesin-kasir.spec.ts` 2 lolos, dan skenario alurnya
+lolos lagi dengan `--repeat-each 2`. `pratinjau-mesin-kasir.spec.ts` (7
+skenario) dihapus. Harapan suite penuh 581: 586 dikurangi 7 ditambah 2,
+dengan skip bersyarat tanggal sampai tanggal 8, skip status staf bila
+datanya kosong, dan skip HP Mesin Kasir bila riwayat tujuh hari
+terakhir kosong (hitungan).
+
 **Baseline per penanda dan panduan wizard** (commit `daf9e3a`, 7
 November 2026): 983 test unit dan integrasi lolos, bertambah 18 dari
 965: penanda (4, `58d7eb9`), catatan tur dan kotak sorotan (6,
@@ -418,7 +430,9 @@ itu hanya terjadi di jurnal stok pada tanggal 1, karena data bulan
 berjalan masih kosong (baseline 1 November 2026). Skenario status staf
 di `dashboard/dashboard-outlet.spec.ts` dilewati bila monitoring absensi
 tidak memuat staf ruang outlet; terjadi di spec terdampak 7 November
-2026.
+2026. Skenario HP di `keuangan/mesin-kasir.spec.ts` dilewati bila
+riwayat tujuh hari terakhir kosong; skenario alur di berkas yang sama,
+yang berjalan lebih dulu, selalu meninggalkan satu sesi tertutup.
 
 Tiga skenario pendaftaran di `auth/daftar.spec.ts` dilewati bila backend
 menjawab 429 (`ALASAN_KUOTA`, `d94a48c`): batas `registerLimiter` 10 per

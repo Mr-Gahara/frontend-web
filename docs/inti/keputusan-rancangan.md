@@ -294,9 +294,13 @@ sama (submodul pengajuan stok, di bawah).
     (GR3a) tetap lolos. Tab dan rute final baru ditambah saat
     penyambungan. Data contoh, rute pratinjau beserta entrinya, dan spec
     pratinjau dihapus setelah uji alur nyata lolos. Contoh:
-    `features/sesi-kasir/pratinjau.tsx` dan
-    `app/dashboard/outlet/keuangan/pratinjauMesinKasir` (pemilik proyek,
-    6 November 2026, `0178550`, `23d00f0`).
+    `pratinjau.tsx` di `features/sesi-kasir` dan
+    rute `pratinjauMesinKasir` (pemilik proyek,
+    6 November 2026, `0178550`, `23d00f0`), dihapus bersama spec
+    pratinjaunya di `b74f30a` setelah spec alur nyata lolos. Keadaan
+    pratinjau dinilai ulang terhadap data nyata saat penyambungan: keadaan
+    "belum ada mesin kasir" ternyata menyembunyikan riwayat mesin yang
+    sudah dilepas.
 31. **Tata letak yang bergantung pada lebar bagiannya sendiri memakai
     container query**, bukan breakpoint layar, karena sidebar dan
     padding dashboard membuat lebar isi berbeda dari lebar layar.

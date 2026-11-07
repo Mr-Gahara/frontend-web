@@ -295,7 +295,9 @@ sendiri.
 - **MK4a: tampilan dulu, penyambungan menyusul**: komponen menerima data
   lewat props, dan dipratinjau di rute development `pratinjauMesinKasir`
   dengan data contoh dan pemilih keadaan (keputusan rancangan butir 30).
-  Daftar periksa penyambungan di `inti/status.md`.
+  Disambung di `b74f30a`; pratinjau, data contoh, dan spec pratinjaunya
+  dihapus di commit yang sama, dan daftar periksanya dipindah ke
+  `arsip/catatan-putaran.md` (Catatan dari penyambungan Mesin Kasir).
 - **MK5a: asal penutupan sesi tidak ditulis**: riwayat menulis "Sari,
   ditutup Ridho" bila penutupnya berbeda, tanpa "dari web", karena
   respons tidak membawa penandanya (`kontrak/temuan.md` butir 174).
@@ -323,7 +325,66 @@ sendiri.
   hanya akun Kas Fisik aktif, satu laci untuk satu mesin (indeks unik
   `tenantID` dan `akunKasID`).
 
+Diputuskan pemilik proyek pada 7 November 2026, saat penyambungan
+(`b74f30a`):
+
+- **MK10a: gerbang halaman wajib `read-sesi-kasir`**, untuk
+  `/dashboard/outlet/keuangan/mesinKasir` dan rinciannya
+  `/mesinKasir/[id]`. Panel mesin kasir dan tombol tutup tampil tambahan
+  bagi pemegang izin kelola; pemegang `kelola-perangkat-kasir` saja tidak
+  melihat tab Mesin Kasir.
+- **MK11a: kelola butuh ketiga izin**: panel mesin kasir dan tombol
+  tutup tampil hanya bila memegang `kelola-perangkat-kasir`,
+  `read-pengguna`, dan `read-akunkas` sekaligus (`bolehKelolaMesinKasir`
+  di `features/sesi-kasir/izin.ts`), karena form membaca perangkat
+  karyawan dan laci. Tanpa salah satunya halaman tampil seperti tanpa
+  izin kelola.
+- **MK12a: data uji spec alur nyata**: sesi dibuka lewat login app
+  sebagai Ridho di perangkat trusted miliknya `OWNER-DEVICE-UUID-001`
+  (login app tidak memutar `tokenVersion` web), dengan satu akun Kas
+  Fisik uji tetap "E2E Laci Mesin Kasir" yang dibuat sekali lalu dipakai
+  ulang. Mesin kasir ditambah, diubah, dan dilepas lewat UI; sisa uji
+  dibersihkan di `finally` lewat API.
+- **MK13a: pesan pemakaian pertama hanya bila belum pernah ada sesi**.
+  Langkah tambah mesin kasir tetap paling atas selama belum ada mesin
+  kasir, tetapi pesan "Riwayat tampil di sini setelah kasir pertama
+  ditutup" hanya tampil bila `GET /sesikasir?limit=1` tanpa filter
+  memberi total 0. Bila sudah ada sesi, riwayat dan filternya tampil
+  seperti biasa dengan nama "Mesin kasir yang sudah dilepas". Susunan
+  Revisi 2 menyembunyikan riwayat itu begitu mesin terakhir dilepas.
+
 ## Catatan
+
+### Catatan dari penyambungan Mesin Kasir
+
+- `GET /sesikasir` selalu berhalaman (`bacaPaginasiWajib`, bawaan 20
+  baris, maksimal 100), sehingga kasir yang buka dimuat dengan `limit`
+  100 agar tidak terpotong diam-diam. Riwayat memakai `useInfiniteQuery`
+  20 sesi per halaman lewat tombol "Muat hari sebelumnya".
+- `dari` dan `sampai` dikirim `YYYY-MM-DD` lokal (`keTanggalLokal`);
+  backend membacanya sebagai awal dan akhir hari WIB (`bacaTanggal` di
+  `utils/periodeWIB.js`).
+- `GET /device/:userId` menjawab 403 bila level role peminta tidak di
+  atas level pengguna itu, kecuali perangkat milik sendiri, dan respons
+  tidak mem-populate pemiliknya. Pilihan perangkat memuat perangkat
+  setiap karyawan outlet lewat `useQueries` tanpa retry, melewati yang
+  ditolak, dan mengisi nama pemilik dari daftar pengguna. Dimuat saat
+  halaman dibuka bagi pemegang izin kelola, agar form tidak sempat
+  menampilkan keadaan tanpa perangkat selama memuat.
+- Tutup kasir menjawab 400 untuk catatan wajib, akun nonaktif, dan
+  validator, sehingga `pesan.ts` mengenali kasus dari teks pesan, bukan
+  dari status saja. Pesan backend memakai "perangkat" dan "akun kas";
+  terjemahannya memakai "mesin kasir" dan "laci" (MK1a).
+- Tutup dari web menginvalidasi akar `sesiKasir` dan `akunKas`, karena
+  selisih menyamakan saldo laci dan menulis mutasi selisih kas.
+- Rate limit hitungan kasir 10 per menit per pengguna berlaku juga di
+  backend development (dilewati hanya bila `NODE_ENV=test`); spec
+  memakai tiga hitungan per run (buka, tutup ditolak, tutup).
+- Keadaan pratinjau yang disetujui perlu diuji ulang dengan data nyata:
+  keadaan "belum ada mesin kasir" di pratinjau selalu tanpa riwayat,
+  padahal di data nyata riwayat mesin yang sudah dilepas tetap ada
+  (MK13a). Ketahuan dari skenario HP yang terlewati karena riwayat
+  tidak tampil, lewat snapshot `error-context.md`.
 
 ### Catatan dari tampilan Mesin Kasir dan perbaikan HP Keuangan
 
@@ -603,5 +664,11 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
 - Tab Keuangan memakai `focus-visible:ring-0`, sehingga tab tidak punya
   penanda fokus saat dipakai dengan keyboard. Dipertahankan di
   `b3f8698` karena tidak ada di pratinjau yang disetujui.
-- Spec pratinjau Mesin Kasir hanya menguji data contoh; alur nyata
-  menunggu penyambungan (`inti/status.md`).
+- Keadaan memuat, gagal dimuat, sesi lintas tengah malam, Muat hari
+  sebelumnya, serta posisi panel di HP dan desktop tidak lagi teruji e2e
+  sejak spec pratinjau dihapus di `b74f30a` (daftar periksa nomor 6);
+  spec alur nyata hanya memeriksa tanpa gulir ke samping di HP
+  (`referensi/utang-pengujian.md`).
+- `kontrak/temuan.md` butir 172 sampai 174, K-18, dan K-19 tetap
+  terbuka di backend; web menanganinya seperti sebelum penyambungan
+  (MK3a, MK5a, dan `NAMA_MESIN_TANPA_DAFTAR`).

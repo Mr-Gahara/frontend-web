@@ -47,6 +47,7 @@ Baris halaman yang sudah dimigrasikan diperbarui manual dari `IZIN_HALAMAN` (`li
 - 25 dan 26 Oktober 2026: pembelian stok outlet dan gudang (`0db77ed`, `09c931e`, `1e4f042`) dan tab Belanja Stok di Keuangan (`e073a9d`), terhadap backend `ridho` `b5b367a`. `/pembelianstok` memeriksa `read-`, `create-`, `update-`, dan `delete-pembelian-stok` (B74), sama untuk kedua ruang (`temuan.md` butir 158).
 - 31 Oktober 2026: shift, pola roster, jadwal, dan generate jadwal kedua ruang setelah penyesuaian backend `ridho` `0024eb9` (`90537c7`, B139, B140). `read-location` ikut wajib karena halaman memuat lokasi ruang sejak B168.
 - 4 November 2026: Langganan setelah `c868870`, terhadap backend `ridho` lokal `4759208`. Gate pindah dari pengecualian role Owner ke `read-langganan` (B229).
+- 7 November 2026: Mesin Kasir setelah `b74f30a`, terhadap backend `ridho` lokal `1584222`. Kedua rute pratinjau dihapus; rute final `/dashboard/outlet/keuangan/mesinKasir` dan rinciannya bergate `read-sesi-kasir`, sedangkan panel mesin kasir dan tutup dari web mengikuti `bolehKelolaMesinKasir` (`kelola-perangkat-kasir`, `read-pengguna`, dan `read-akunkas` sekaligus).
 
 Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 
@@ -136,8 +137,8 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/outlet/keuangan/akunkas/buatAkunKas` | `create-akunkas` | - | Form |
 | `/dashboard/outlet/keuangan/akunkas/[id]/ubah` | `read-akunkas`, `update-akunkas` | `/akunkas` | Form; cabang keterangan tanpa `update-akunkas` di halaman dibuang di `dc0af1c` |
 | `/dashboard/outlet/keuangan/akunkas/pindahDana` | - | `/akunkas`, `/jurnaltransfer` | Izin per bagian di dalam halaman (DN1a) |
-| `/dashboard/outlet/keuangan/pratinjauMesinKasir` | - | - | Pratinjau development Mesin Kasir dengan data contoh, tanpa API; `notFound()` di produksi, dan dihapus saat penyambungan (`inti/keputusan-rancangan.md` butir 30) |
-| `/dashboard/outlet/keuangan/pratinjauMesinKasir/rincian` | - | - | Pratinjau development rincian sesi kasir; sama dengan baris di atas |
+| `/dashboard/outlet/keuangan/mesinKasir` | `read-sesi-kasir` | `/sesikasir` (kasir buka, riwayat, terakhir dipakai per mesin, dan ada sesi); bagi pemegang kelola juga `/sesikasir/perangkat`, `/akunkas`, `/pengguna`, dan `/device/:userId` | Tab kelima Keuangan; bagian kelola menurut `features/sesi-kasir/izin.ts` |
+| `/dashboard/outlet/keuangan/mesinKasir/[id]` | `read-sesi-kasir` | `/sesikasir/:id`; bagi pemegang kelola juga `/sesikasir/perangkat` dan `/akunkas` | Rincian sesi; tutup dari web bagi pemegang kelola |
 | `/dashboard/outlet/pengeluaran/catatBeban` | `read-kategori-beban`, `read-akunkas`, `create-beban-operasional` | `/kategoribeban`, `/akunkas` | Form; kategori dan akun kas wajib (GR5a, GR7a) |
 | `/dashboard/outlet/pengaturan/metodePembayaran` | - | `/metodepembayaran` | `GET` tanpa izin di backend |
 | `/dashboard/outlet/pengaturan/metodePembayaran/buatMetodePembayaran` | `read-akunkas`, `create-metode-pembayaran` | `/akunkas` | Form; akun tujuan wajib |

@@ -99,6 +99,12 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 |---|---|---|---|---|---|---|
 | GET | `/dashboard/gudang` | authPengguna | `read-dashboard-gudang` | `{ data, success }` | - | `features/dashboard-gudang/api.ts` (sejak `06581f3`; angka pengiriman, dan angka pengajuan sejak `74b6af4` setelah `kontrak/temuan.md` butir 149 ditutup) |
 
+#### `/device`
+
+| Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
+|---|---|---|---|---|---|---|
+| GET | `/device/:userId` | authPengguna | `read-pengguna` | `{ data }` | `id` | `features/sesi-kasir/api.ts` (pilihan perangkat mesin kasir, digabung per karyawan outlet, MK3a; 403 bila level role peminta tidak di atas pengguna itu, kecuali milik sendiri; `pengguna` null karena `penggunaID` tidak di-populate) |
+
 #### `/diskon`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
@@ -313,6 +319,17 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | POST | `/sesibooking` | authPengguna | `create-booking` | - | - | `features/sesi-booking/api.ts` |
 | GET | `/sesibooking/:id` | authPengguna | `read-booking` | - | - | `features/sesi-booking/api.ts` (dimuat detail penjualan per booking, sejak `729c16a`) |
 | PUT | `/sesibooking/:id` | authPengguna | `update-booking` | - | - | `features/sesi-booking/api.ts` (hanya `{ status: "Selesai" }`, keputusan NZ7a) |
+
+#### `/sesikasir`
+
+| Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
+|---|---|---|---|---|---|---|
+| GET | `/sesikasir` | authPengguna | `read-sesi-kasir` | `{ data, pagination }` | `id` | `features/sesi-kasir/api.ts` (query `status`, `installationId`, `dari`, `sampai`, `page`, `limit`; selalu berhalaman, bawaan 20 baris, maksimal 100; parameter lain 400) |
+| GET | `/sesikasir/:id` | authPengguna | `read-sesi-kasir` | `{ data }` | `id` | `features/sesi-kasir/api.ts` (dengan `ringkasan` tunai selama sesi) |
+| POST | `/sesikasir/:id/tutup` | authPengguna | `kelola-perangkat-kasir` | `{ data, message }` | `id` | `features/sesi-kasir/api.ts` (`{ nominal, catatan? }`; hitung buta, respons tanpa angka; 400 catatan wajib bila selisih tanpa catatan; 10 per menit per pengguna) |
+| GET | `/sesikasir/perangkat` | authPengguna | `kelola-perangkat-kasir` | `{ data }` | `id` | `features/sesi-kasir/api.ts` |
+| POST | `/sesikasir/perangkat` | authPengguna | `kelola-perangkat-kasir` | `{ data, message }` | `id` | `features/sesi-kasir/api.ts` (upsert per `installationId`: `{ installationId, akunKasID, namaPerangkat }`; 404 perangkat bukan milik toko, 409 sesi terbuka atau laci dipakai mesin lain) |
+| DELETE | `/sesikasir/perangkat/:id` | authPengguna | `kelola-perangkat-kasir` | - | - | `features/sesi-kasir/api.ts` (409 selama sesi terbuka) |
 
 #### `/shift`
 

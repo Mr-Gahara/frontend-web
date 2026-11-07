@@ -840,3 +840,52 @@ diubah sama sekali.
 ```bash
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho nizar yoga; do echo "origin/$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...origin/$r | tr '\t' ' ')"; done
 ```
+
+## Catatan dari penyambungan Mesin Kasir
+
+Selesai di `b74f30a` (7 November 2026), dengan keputusan MK10a sampai
+MK13a (`modul/keuangan.md`). Bagian di bawah dipindah utuh dari
+`inti/status.md`.
+
+Berikutnya, dari halaman sesi kasir (B227). Desainnya disetujui pemilik
+proyek 6 November 2026 (pratinjau Revisi 1 dan Revisi 2), dan
+tampilannya selesai tanpa API di `b86e4b7` (tipe dan fungsi tampilan),
+`0178550` (komponen dan pratinjau development), dan `23d00f0` (entri
+`IZIN_HALAMAN` rute pratinjau). Keputusan produknya di
+`modul/keuangan.md` (Mesin Kasir, MK1a sampai MK9). Saat development,
+pratinjau dibuka di `/dashboard/outlet/keuangan/pratinjauMesinKasir`
+dengan pemilih keadaan.
+
+Daftar periksa penyambungan (pemilik proyek, 6 November 2026):
+
+1. Rute final `/dashboard/outlet/keuangan/mesinKasir` beserta rute
+   rinciannya, entri `IZIN_HALAMAN` (`read-sesi-kasir` atau
+   `kelola-perangkat-kasir`, keputusan rancangan butir 16), tab kelima
+   "Mesin Kasir" di `keuangan-nav-tabs.tsx`, dan baris di
+   `kontrak/izin-halaman.md`.
+2. Nama berkas, komponen, dan rute ditinjau ulang terhadap pola modul
+   (`referensi/arsitektur.md`): komponen yang kini menerima data lewat
+   props disambung ke hook, nama yang menyebut pratinjau tidak dipakai
+   lagi, dan `api.ts`, `hooks.ts`, `izin.ts`, serta `pesan.ts`
+   ditambahkan di `features/sesi-kasir`.
+3. Endpoint: `GET /sesikasir?status=BUKA` untuk kasir yang buka,
+   `GET /sesikasir?status=TUTUP` dengan `installationId`, `dari`,
+   `sampai`, `page`, dan `limit` untuk riwayat, `GET /sesikasir/:id`,
+   `POST /sesikasir/:id/tutup`, `GET` dan `POST /sesikasir/perangkat`,
+   `DELETE /sesikasir/perangkat/:id`, serta `GET /device/:userId` per
+   karyawan untuk pilihan perangkat (`read-pengguna`). Terakhir dipakai
+   per mesin dibaca dari sesi terbarunya (`installationId`, `limit` 1).
+4. Pesan lewat `pesan.ts`: 409 pindah dan hapus pemetaan selama sesi
+   terbuka (K-04, K-05), 409 laci dipakai perangkat lain, 404 perangkat
+   tidak ditemukan, dan 400 catatan wajib saat tutup, yang ditampilkan
+   "Hitungan berbeda dengan catatan sistem. Tulis catatan penyebabnya,
+   lalu tutup lagi."
+5. Spec alur nyata menggantikan spec pratinjau: mesin kasir ditambah,
+   diubah, dan dilepas lewat UI; sesi dibuka lewat API aplikasi sebagai
+   data milik modul lain (keputusan rancangan butir 23), lalu ditutup
+   dari web.
+6. Setelah seluruh uji alur nyata lolos, hapus
+   `data-contoh.ts`,
+   `pratinjau.tsx` di `features/sesi-kasir`, kedua rute
+   `pratinjauMesinKasir`, entrinya di `IZIN_HALAMAN`, dan
+   `pratinjau-mesin-kasir.spec.ts`.

@@ -49,54 +49,14 @@ cabang backend maju:
 BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho nizar yoga; do echo "origin/$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...origin/$r | tr '\t' ' ')"; done
 ```
 
-### Penyambungan Mesin Kasir ke backend
+### Mesin Kasir, sisi backend
 
-Berikutnya, dari halaman sesi kasir (B227). Desainnya disetujui pemilik
-proyek 6 November 2026 (pratinjau Revisi 1 dan Revisi 2), dan
-tampilannya selesai tanpa API di `b86e4b7` (tipe dan fungsi tampilan),
-`0178550` (komponen dan pratinjau development), dan `23d00f0` (entri
-`IZIN_HALAMAN` rute pratinjau). Keputusan produknya di
-`modul/keuangan.md` (Mesin Kasir, MK1a sampai MK9). Saat development,
-pratinjau dibuka di `/dashboard/outlet/keuangan/pratinjauMesinKasir`
-dengan pemilih keadaan.
-
-Daftar periksa penyambungan (pemilik proyek, 6 November 2026):
-
-1. Rute final `/dashboard/outlet/keuangan/mesinKasir` beserta rute
-   rinciannya, entri `IZIN_HALAMAN` (`read-sesi-kasir` atau
-   `kelola-perangkat-kasir`, keputusan rancangan butir 16), tab kelima
-   "Mesin Kasir" di `keuangan-nav-tabs.tsx`, dan baris di
-   `kontrak/izin-halaman.md`.
-2. Nama berkas, komponen, dan rute ditinjau ulang terhadap pola modul
-   (`referensi/arsitektur.md`): komponen yang kini menerima data lewat
-   props disambung ke hook, nama yang menyebut pratinjau tidak dipakai
-   lagi, dan `api.ts`, `hooks.ts`, `izin.ts`, serta `pesan.ts`
-   ditambahkan di `features/sesi-kasir`.
-3. Endpoint: `GET /sesikasir?status=BUKA` untuk kasir yang buka,
-   `GET /sesikasir?status=TUTUP` dengan `installationId`, `dari`,
-   `sampai`, `page`, dan `limit` untuk riwayat, `GET /sesikasir/:id`,
-   `POST /sesikasir/:id/tutup`, `GET` dan `POST /sesikasir/perangkat`,
-   `DELETE /sesikasir/perangkat/:id`, serta `GET /device/:userId` per
-   karyawan untuk pilihan perangkat (`read-pengguna`). Terakhir dipakai
-   per mesin dibaca dari sesi terbarunya (`installationId`, `limit` 1).
-4. Pesan lewat `pesan.ts`: 409 pindah dan hapus pemetaan selama sesi
-   terbuka (K-04, K-05), 409 laci dipakai perangkat lain, 404 perangkat
-   tidak ditemukan, dan 400 catatan wajib saat tutup, yang ditampilkan
-   "Hitungan berbeda dengan catatan sistem. Tulis catatan penyebabnya,
-   lalu tutup lagi."
-5. Spec alur nyata menggantikan spec pratinjau: mesin kasir ditambah,
-   diubah, dan dilepas lewat UI; sesi dibuka lewat API aplikasi sebagai
-   data milik modul lain (keputusan rancangan butir 23), lalu ditutup
-   dari web.
-6. Setelah seluruh uji alur nyata lolos, hapus
-   `features/sesi-kasir/data-contoh.ts`,
-   `features/sesi-kasir/pratinjau.tsx`, kedua rute
-   `pratinjauMesinKasir`, entrinya di `IZIN_HALAMAN`, dan
-   `tests/e2e/keuangan/pratinjau-mesin-kasir.spec.ts`.
-
-Yang masih terbuka di sisi backend: `kontrak/temuan.md` butir 172
-sampai 174; keputusan bisnis nomor 1 sampai 3 di audit backend
-5 November 2026 (laci untuk VOID tunai, pemicu sesi lama, dan tunai
+Penyambungan selesai di `b74f30a` (`modul/keuangan.md`, MK10a sampai
+MK13a; daftar periksanya di `arsip/catatan-putaran.md`, Catatan dari
+penyambungan Mesin Kasir). Yang masih terbuka di sisi backend:
+`kontrak/temuan.md` butir 172 sampai 174; keputusan bisnis nomor 1
+sampai 3 di audit backend 5 November 2026 (laci untuk VOID tunai,
+pemicu sesi lama, dan tunai
 tanpa sesi kasir termasuk dari web; K-08 sampai K-10), yang dibahas
 pemilik proyek bersama tim backend; serta K-18 (pemetaan menerima
 perangkat berstatus apa pun) dan K-19 (`installationId` seluruh HP
@@ -151,26 +111,29 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 - Nomor WhatsApp admin untuk halaman Langganan (LG1a, `NOMOR_WA_ADMIN`
   masih kosong).
 - Keputusan bisnis nomor 1 sampai 3 di audit backend 5 November 2026
-  (Penyambungan Mesin Kasir, di atas).
+  (Mesin Kasir, sisi backend, di atas).
 - Laporan untuk tim backend, yang ditunda sampai pekerjaan backend dari
   audit selesai (utang kecil, di bawah).
 
-### Tanpa UI baru, belum dijadwalkan
+### Tanpa UI baru, disetujui 7 November 2026
 
-Diajukan lewat dialog sebelum dikerjakan:
+Dipilih pemilik proyek lewat dialog 7 November 2026, dikerjakan sesudah
+Mesin Kasir. E2E tidak dijalankan per commit: tiap commit diperiksa
+`tsc`, ESLint, dan vitest penuh, lalu satu suite e2e penuh di akhir
+putaran (pemilik proyek, 7 November 2026).
 
-- Cocokkan cache produk saat pajak berubah dari kode backend, uji hapus
-  aset yang punya booking dan hapus kategori yang dipakai produk dari
-  web, buktikan B112, B114, dan B115, dan lihat langsung booking Batal
-  di timeline (utang kecil, di bawah).
-- Pecah berkas di atas 700 baris tanpa mengubah perilaku: buat penjualan
-  dan form produk (Metrik sisa pekerjaan, di atas).
-- Suite penuh dengan reporter `json`, untuk mengukur harapan 564 dan
-  mencatat judul skip (`inti/pengujian.md`, Baseline). Angkanya sudah
-  terukur di suite penuh penyesuaian `1584222` (564, satu skip bersyarat
-  tanggal); dibahas ulang apakah butir ini masih perlu.
-- Sisa utang pengujian yang tidak butuh pengguna uji non-Owner maupun
-  data permanen (`referensi/utang-pengujian.md`).
+1. Pecah berkas di atas 700 baris tanpa mengubah perilaku: buat penjualan
+   dan form produk (Metrik sisa pekerjaan, di atas).
+2. Bukti dari kode backend: cocokkan cache produk saat pajak berubah,
+   uji hapus aset yang punya booking dan hapus kategori yang dipakai
+   produk dari web, buktikan B112, B114, dan B115, dan lihat langsung
+   booking Batal di timeline (utang kecil, di bawah).
+3. Sisa utang pengujian yang tidak butuh pengguna uji non-Owner maupun
+   data permanen (`referensi/utang-pengujian.md`); rinciannya diajukan
+   dulu sebelum dikerjakan.
+4. Suite e2e penuh dengan reporter `line,json` di akhir putaran, yang
+   melunasi utang suite penuh sejak `c8a2e83` dan mencatat judul skip
+   (`inti/pengujian.md`, Baseline).
 
 ### Utang kecil dari penyesuaian backend `4759208`
 
