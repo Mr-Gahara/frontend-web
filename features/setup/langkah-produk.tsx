@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChangeEvent } from "react";
+import { useRef, type ChangeEvent } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SATUAN_RESEP } from "@/features/produk/schema";
@@ -8,11 +8,13 @@ import {
   DaftarTambahan,
   JudulLangkah,
   NavigasiLangkah,
+  PenandaBelumTersimpan,
   PesanGalat,
   PesanIsian,
   PilihanTombol,
 } from "./bagian";
-import { KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS } from "./gaya";
+import { KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS, KELAS_TOMBOL_TAMBAH_AKTIF } from "./gaya";
+import { adaIsian, gulirKe, pesanBelumTersimpan } from "./penanda";
 import { useKirim } from "./kirim";
 import type { PropsDaftar } from "./langkah";
 import { skemaProdukSetup, type NilaiProdukSetup } from "./schema";
@@ -91,6 +93,17 @@ export function LangkahProduk({
     "Gagal menyimpan produk.",
   );
   const hapus = useKirim(onHapus, "Gagal menghapus produk.");
+  const isian = useWatch({ control });
+  const tertinggal = adaIsian([
+    isian.namaProduk,
+    isian.kategoriID,
+    isian.hargaDasar,
+    isian.hargaJual,
+    isian.stok,
+    isian.stokMinimal,
+    ...(isian.resep ?? []).flatMap((r) => [r?.bahan, r?.jumlah]),
+  ]);
+  const simpanProdukRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div className="flex flex-col gap-6">
@@ -339,23 +352,27 @@ export function LangkahProduk({
           </>
         )}
         <button
+          ref={simpanProdukRef}
           type="submit"
           disabled={sibuk}
-          className={KELAS_TOMBOL_GARIS + " self-start"}
+          className={(tertinggal ? KELAS_TOMBOL_TAMBAH_AKTIF : KELAS_TOMBOL_GARIS) + " self-start"}
         >
           {sibuk ? "Menyimpan..." : "Simpan produk"}
         </button>
+        {tertinggal && <PenandaBelumTersimpan teksTombol="Simpan produk" />}
       </form>
       <PesanGalat pesan={galat || hapus.galat} />
       <NavigasiLangkah
         onKembali={onKembali}
         teksLanjut={teksLanjut}
         sibuk={sibuk || hapus.sibuk}
-        onLanjut={() =>
-          butir.length === 0
-            ? setGalat("Tambahkan minimal satu produk.")
-            : onLanjut()
-        }
+        onLanjut={() => {
+          if (tertinggal) {
+            setGalat(pesanBelumTersimpan("Produk", isian.namaProduk, "Simpan produk", "disimpan"));
+            gulirKe(simpanProdukRef.current);
+          } else if (butir.length === 0) setGalat("Tambahkan minimal satu produk.");
+          else onLanjut();
+        }}
       />
     </div>
   );

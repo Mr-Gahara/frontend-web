@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { AlertTriangle, Info, X } from "lucide-react";
+import { AlertTriangle, ArrowUp, Info, X } from "lucide-react";
 import { KELAS_TOMBOL_KEDUA, KELAS_TOMBOL_UTAMA } from "./gaya";
 
 export function PesanIsian({ pesan }: { pesan?: string }) {
@@ -107,6 +107,16 @@ export function NavigasiLangkah({
         </button>
       </div>
     </div>
+  );
+}
+
+/** Penanda isian yang belum ditambahkan, di bawah tombol tambahnya (penanda, 7 November 2026). */
+export function PenandaBelumTersimpan({ teksTombol }: { teksTombol: string }) {
+  return (
+    <p className="inline-flex items-center gap-2 self-start rounded-full bg-karamel/20 py-1.5 pl-2.5 pr-3.5 text-[13px] font-semibold">
+      <ArrowUp className="h-[15px] w-[15px] flex-none" aria-hidden="true" />
+      Belum tersimpan. Tekan {teksTombol}.
+    </p>
   );
 }
 

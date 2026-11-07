@@ -1,10 +1,12 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useRef } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { skemaKategori } from "@/features/kategori/schema";
-import { DaftarTambahan, JudulLangkah, NavigasiLangkah, PesanGalat, PesanIsian } from "./bagian";
-import { KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS } from "./gaya";
+import { DaftarTambahan, JudulLangkah, NavigasiLangkah, PenandaBelumTersimpan, PesanGalat, PesanIsian } from "./bagian";
+import { KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS, KELAS_TOMBOL_TAMBAH_AKTIF } from "./gaya";
+import { adaIsian, gulirKe, pesanBelumTersimpan } from "./penanda";
 import { useKirim } from "./kirim";
 import type { PropsDaftar } from "./langkah";
 
@@ -29,6 +31,7 @@ export function LangkahKategori({
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<NilaiKategori>({ resolver: zodResolver(skemaKategori), defaultValues: NILAI_AWAL_KATEGORI });
 
@@ -37,6 +40,9 @@ export function LangkahKategori({
     reset(NILAI_AWAL_KATEGORI);
   }, "Gagal menyimpan kategori.");
   const hapus = useKirim(onHapus, "Gagal menghapus kategori.");
+  const isian = useWatch({ control });
+  const tertinggal = adaIsian([isian.namaKategori, isian.kodeKategori]);
+  const tambahRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div className="flex flex-col gap-6">
@@ -75,9 +81,15 @@ export function LangkahKategori({
             <PesanIsian pesan={errors.kodeKategori?.message} />
           </div>
         </div>
-        <button type="submit" disabled={sibuk} className={KELAS_TOMBOL_GARIS + " self-start"}>
+        <button
+          ref={tambahRef}
+          type="submit"
+          disabled={sibuk}
+          className={(tertinggal ? KELAS_TOMBOL_TAMBAH_AKTIF : KELAS_TOMBOL_GARIS) + " self-start"}
+        >
           {sibuk ? "Menyimpan..." : "Tambah kategori"}
         </button>
+        {tertinggal && <PenandaBelumTersimpan teksTombol="Tambah kategori" />}
       </form>
       <DaftarTambahan
         judul="Kategori ditambahkan"
@@ -89,7 +101,13 @@ export function LangkahKategori({
         onKembali={onKembali}
         teksLanjut={teksLanjut}
         sibuk={sibuk || hapus.sibuk}
-        onLanjut={() => (butir.length === 0 ? setGalat("Tambahkan minimal satu kategori.") : onLanjut())}
+        onLanjut={() => {
+          if (tertinggal) {
+            setGalat(pesanBelumTersimpan("Kategori", isian.namaKategori, "Tambah kategori"));
+            gulirKe(tambahRef.current);
+          } else if (butir.length === 0) setGalat("Tambahkan minimal satu kategori.");
+          else onLanjut();
+        }}
       />
     </div>
   );

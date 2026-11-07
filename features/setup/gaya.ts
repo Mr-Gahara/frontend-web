@@ -14,5 +14,9 @@ export const KELAS_TOMBOL_UTAMA =
 export const KELAS_TOMBOL_KEDUA =
   "inline-flex h-[54px] cursor-pointer items-center justify-center rounded-xl border border-input bg-permukaan px-6 text-base font-semibold text-navy transition-colors hover:bg-krem/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-permukaan";
 
+/** Tombol tambah saat ada isian yang belum ditambahkan (penanda, 7 November 2026). */
+export const KELAS_TOMBOL_TAMBAH_AKTIF =
+  "inline-flex h-12 cursor-pointer items-center justify-center rounded-xl border border-navy bg-navy px-5 text-[15px] font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-permukaan disabled:cursor-not-allowed disabled:opacity-60";
+
 export const KELAS_TOMBOL_GARIS =
   "inline-flex h-12 cursor-pointer items-center justify-center rounded-xl border border-navy bg-permukaan px-5 text-[15px] font-semibold text-navy transition-colors hover:bg-krem/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-permukaan disabled:cursor-not-allowed disabled:opacity-60";

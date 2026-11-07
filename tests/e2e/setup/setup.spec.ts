@@ -86,6 +86,9 @@ async function isiPajak(page: Page, nama: string) {
   expect((await tPajak).status(), "POST /pajak").toBe(201);
 }
 
+/** Galat langkah; dibatasi ke main agar pengumum rute Next.js (role alert) tidak ikut. */
+const galat = (page: Page) => page.getByRole("main").getByRole("alert");
+
 test.describe("Wizard setup", () => {
   test.skip(!kredensialAdmin(), ALASAN_TANPA_ADMIN);
 
@@ -201,6 +204,12 @@ test.describe("Wizard setup", () => {
         await expect(tersimpan).toContainText("PB1");
         await page.getByLabel("Nama pajak").fill("Pajak minuman");
         await page.getByLabel("Tarif (%)").fill("5");
+        await expect(page.getByText("Belum tersimpan. Tekan Tambah pajak.")).toBeVisible();
+        await lanjut(page).click();
+        await expect(galat(page)).toHaveText(
+          'Pajak "Pajak minuman" belum ditambahkan. Tekan Tambah pajak dulu, atau kosongkan isiannya.',
+        );
+        await expect(langkahAktif(page)).toContainText("Pajak");
         await page.getByRole("button", { name: "Produk tertentu" }).click();
         const tPajak = tunggu(page, "POST", /\/api\/pajak$/);
         await page.getByRole("button", { name: "Tambah pajak" }).click();
@@ -353,6 +362,75 @@ test.describe("Wizard setup", () => {
       await lanjut(page).click();
       await expect(page.getByText("Tambahkan minimal satu kategori.")).toBeVisible();
       await expect(langkahAktif(page)).toContainText("Kategori");
+    } finally {
+      await hapusAkunKlienUji(id, wajibAdmin());
+    }
+  });
+
+  test("penanda: isian yang belum ditambahkan ditonjolkan, dan Simpan dan lanjut tidak membuangnya diam-diam", async ({
+    page,
+  }) => {
+    const { id } = await akunBaru(page, "penanda");
+    let kategoriTerkirim = 0;
+    let produkTerkirim = 0;
+    page.on("request", (r) => {
+      if (r.method() !== "POST") return;
+      if (/\/api\/kategori$/.test(r.url())) kategoriTerkirim += 1;
+      if (/\/api\/produk$/.test(r.url())) produkTerkirim += 1;
+    });
+    try {
+      await isiTokoDanOwner(page);
+      await isiLokasi(page, "outlet", "Outlet E2E");
+
+      await test.step("kategori", async () => {
+        const penanda = page.getByText("Belum tersimpan. Tekan Tambah kategori.");
+        await expect(penanda).toHaveCount(0);
+        await page.getByLabel("Nama kategori").fill("Kopi");
+        await expect(penanda).toBeVisible();
+        await lanjut(page).click();
+        await expect(galat(page)).toHaveText(
+          'Kategori "Kopi" belum ditambahkan. Tekan Tambah kategori dulu, atau kosongkan isiannya.',
+        );
+        await expect(langkahAktif(page)).toContainText("Kategori");
+        expect(kategoriTerkirim, "Simpan dan lanjut tidak mengirim kategori").toBe(0);
+        await page.getByLabel("Kode kategori").fill("KOP");
+        const tKategori = tunggu(page, "POST", /\/api\/kategori$/);
+        await page.getByRole("button", { name: "Tambah kategori" }).click();
+        expect((await tKategori).status(), "POST /kategori").toBe(201);
+        await expect(penanda).toHaveCount(0);
+        await expect(galat(page)).toHaveCount(0);
+        await lanjut(page).click();
+      });
+
+      await test.step("bahan baku", async () => {
+        const penanda = page.getByText("Belum tersimpan. Tekan Tambah bahan baku.");
+        await page.getByRole("button", { name: "Ya, ada yang pakai resep" }).click();
+        await page.getByLabel("Nama bahan").fill("Susu");
+        await expect(penanda).toBeVisible();
+        await lanjut(page).click();
+        await expect(galat(page)).toHaveText(
+          'Bahan baku "Susu" belum ditambahkan. Tekan Tambah bahan baku dulu, atau kosongkan isiannya.',
+        );
+        await page.getByRole("button", { name: "Tidak, lewati langkah ini" }).click();
+        await expect(penanda).toHaveCount(0);
+        await lanjut(page).click();
+      });
+
+      await test.step("produk", async () => {
+        const penanda = page.getByText("Belum tersimpan. Tekan Simpan produk.");
+        await expect(langkahAktif(page)).toContainText("Produk");
+        await page.getByLabel("Nama produk").fill("Air mineral");
+        await expect(penanda).toBeVisible();
+        await lanjut(page).click();
+        await expect(galat(page)).toHaveText(
+          'Produk "Air mineral" belum disimpan. Tekan Simpan produk dulu, atau kosongkan isiannya.',
+        );
+        expect(produkTerkirim, "Simpan dan lanjut tidak mengirim produk").toBe(0);
+        await page.getByLabel("Nama produk").fill("");
+        await expect(penanda).toHaveCount(0);
+        await lanjut(page).click();
+        await expect(galat(page)).toHaveText("Tambahkan minimal satu produk.");
+      });
     } finally {
       await hapusAkunKlienUji(id, wajibAdmin());
     }

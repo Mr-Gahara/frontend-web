@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
-import { DaftarTambahan, JudulLangkah, NavigasiLangkah, PesanGalat, PesanIsian, PilihanTombol } from "./bagian";
-import { KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS } from "./gaya";
+import {
+  DaftarTambahan,
+  JudulLangkah,
+  NavigasiLangkah,
+  PenandaBelumTersimpan,
+  PesanGalat,
+  PesanIsian,
+  PilihanTombol,
+} from "./bagian";
+import { KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS, KELAS_TOMBOL_TAMBAH_AKTIF } from "./gaya";
+import { adaIsian, gulirKe, pesanBelumTersimpan } from "./penanda";
 import { useKirim } from "./kirim";
 import type { PropsDaftar } from "./langkah";
 import { skemaBahanSetup, type NilaiBahanSetup } from "./schema";
@@ -35,6 +44,7 @@ export function LangkahBahanBaku({
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<NilaiBahanSetup>({ resolver: zodResolver(skemaBahanSetup), defaultValues: NILAI_AWAL_BAHAN });
 
@@ -43,8 +53,16 @@ export function LangkahBahanBaku({
     reset(NILAI_AWAL_BAHAN);
   }, "Gagal menyimpan bahan baku.");
   const hapus = useKirim(onHapus, "Gagal menghapus bahan baku.");
+  const isian = useWatch({ control });
+  const tertinggal = adaResep && adaIsian([isian.namaBahan, isian.stok, isian.stokMinimum]);
+  const tambahRef = useRef<HTMLButtonElement>(null);
 
   const lanjut = () => {
+    if (tertinggal) {
+      setGalat(pesanBelumTersimpan("Bahan baku", isian.namaBahan, "Tambah bahan baku"));
+      gulirKe(tambahRef.current);
+      return;
+    }
     if (adaResep && butir.length === 0) {
       setGalat("Tambahkan minimal satu bahan baku, atau pilih tidak ada resep.");
       return;
@@ -131,9 +149,15 @@ export function LangkahBahanBaku({
                 <PesanIsian pesan={errors.stokMinimum?.message} />
               </div>
             </div>
-            <button type="submit" disabled={sibuk} className={KELAS_TOMBOL_GARIS + " self-start"}>
+            <button
+              ref={tambahRef}
+              type="submit"
+              disabled={sibuk}
+              className={(tertinggal ? KELAS_TOMBOL_TAMBAH_AKTIF : KELAS_TOMBOL_GARIS) + " self-start"}
+            >
               {sibuk ? "Menyimpan..." : "Tambah bahan baku"}
             </button>
+            {tertinggal && <PenandaBelumTersimpan teksTombol="Tambah bahan baku" />}
           </form>
           <DaftarTambahan
             judul="Bahan baku ditambahkan"

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { skemaPajak, type NilaiPajak } from "@/features/pajak/schema";
@@ -9,12 +10,14 @@ import {
   DaftarTambahan,
   JudulLangkah,
   NavigasiLangkah,
+  PenandaBelumTersimpan,
   PesanGalat,
   PesanIsian,
   PilihanTombol,
 } from "./bagian";
 import { useKirim } from "./kirim";
-import { KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS } from "./gaya";
+import { KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS, KELAS_TOMBOL_TAMBAH_AKTIF } from "./gaya";
+import { adaIsian, gulirKe, pesanBelumTersimpan } from "./penanda";
 import type { ButirDaftar, PropsLangkah } from "./langkah";
 
 /**
@@ -79,6 +82,12 @@ export function LangkahPajak({
   }, "Gagal menyimpan pajak.");
   const tipePajak = useWatch({ control, name: "tipePajak" });
   const model = useWatch({ control, name: "modelPerhitungan" });
+  const namaPajak = useWatch({ control, name: "namaPajak" });
+  const tarifPajak = useWatch({ control, name: "tarifPajak" });
+  // Pajak pertama dikirim langsung oleh tombol lanjut; penanda hanya untuk
+  // pajak berikutnya yang memakai Tambah pajak.
+  const tertinggal = modeDaftar && adaIsian([namaPajak, tarifPajak]);
+  const tambahRef = useRef<HTMLButtonElement>(null);
 
   return (
     <form
@@ -154,23 +163,30 @@ export function LangkahPajak({
         ditambahkan nanti dari Pengaturan.
       </p>
       {modeDaftar && (
-        <button
-          type="submit"
-          disabled={sibuk}
-          className={KELAS_TOMBOL_GARIS + " self-start"}
-        >
-          {sibuk ? "Menyimpan..." : "Tambah pajak"}
-        </button>
+        <>
+          <button
+            ref={tambahRef}
+            type="submit"
+            disabled={sibuk}
+            className={(tertinggal ? KELAS_TOMBOL_TAMBAH_AKTIF : KELAS_TOMBOL_GARIS) + " self-start"}
+          >
+            {sibuk ? "Menyimpan..." : "Tambah pajak"}
+          </button>
+          {tertinggal && <PenandaBelumTersimpan teksTombol="Tambah pajak" />}
+        </>
       )}
       <PesanGalat pesan={galat} />
       <NavigasiLangkah
         onKembali={onKembali}
         onLanjut={
           modeDaftar
-            ? () =>
-                adaAktif
-                  ? onSelesai?.()
-                  : setGalat("Minimal satu pajak aktif sebelum lanjut.")
+            ? () => {
+                if (tertinggal) {
+                  setGalat(pesanBelumTersimpan("Pajak", namaPajak, "Tambah pajak"));
+                  gulirKe(tambahRef.current);
+                } else if (adaAktif) onSelesai?.();
+                else setGalat("Minimal satu pajak aktif sebelum lanjut.");
+              }
             : undefined
         }
         teksLanjut={teksLanjut}
