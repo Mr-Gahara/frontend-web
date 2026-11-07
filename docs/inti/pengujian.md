@@ -12,6 +12,14 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per langkah jam buka** (commit `1386a30`, 7 November 2026):
+965 test unit dan integrasi lolos, termasuk 21 test baru
+`tests/unit/features/setup/jam-buka.test.ts` (`b48cfdb`). Suite e2e penuh
+tidak dijalankan; spec terdampak `tests/e2e/setup` 16 lolos, termasuk spec
+baru `pratinjau-jam-buka.spec.ts` (6 skenario). Harapan suite penuh 580:
+574 ditambah enam skenario itu, dengan 579 lolos dan 1 skipped bersyarat
+tanggal sampai tanggal 8 (hitungan).
+
 **Baseline per tampilan Mesin Kasir** (commit `23d00f0`, 6 November
 2026): 944 test unit dan integrasi lolos. Suite e2e penuh tidak
 dijalankan sesudah `2f3cf51`. Spec terdampak: `tests/e2e/keuangan` 45

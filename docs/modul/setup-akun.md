@@ -123,6 +123,44 @@ Diputuskan pemilik proyek pada 3 November 2026.
   tanpa email asli dan tanpa jalan pintas di logika OTP (Pengujian OTP, di
   bawah).
 
+### Jam buka toko
+
+Diputuskan pemilik proyek pada 7 November 2026, dari kanvas desain "Langkah
+Jam Buka Toko - Wizard Setup" (lima gaya). Tampilan selesai tanpa API di
+`b48cfdb` (logika murni) dan `1386a30` (komponen dan pratinjau);
+penyambungannya menunggu backend (`kontrak/temuan.md` butir 176).
+
+- **JB1a: langkah jam buka wajib, sesudah Lokasi outlet**, untuk shift dan
+  jadwal karyawan. Pilihan "Buka 24 jam" atau "Jam tertentu" tanpa bawaan;
+  Simpan dan lanjut menolak bila belum memilih atau ada hari Buka yang
+  jamnya belum lengkap.
+- **JB2a: jam tertentu diatur per hari**, Senin sampai Minggu, masing-masing
+  berstatus Buka dengan jam, 24 jam, atau Libur. Backend B206 baru
+  menyimpan satu pasang jam untuk semua hari.
+- **JB3a: isi satu hari, lalu samakan.** Hari mulai berstatus Buka dengan
+  jam kosong; "Samakan semua hari dengan <hari>" mengambil jam hari pertama
+  berstatus Buka yang sah dan menimpa setiap hari Buka lain, tanpa mengubah
+  hari 24 jam dan Libur.
+- **JB4a: semua hari Libur tetap boleh disimpan, dengan peringatan** bahwa
+  jam buka dapat diubah dari Pengaturan, Profil Toko.
+- **JB5a: tutup lewat tengah malam dibaca dari jamnya.** Jam tutup lebih
+  kecil dari jam buka berarti tutup keesokan harinya, sama dengan B206;
+  keterangannya menyebut nama hari berikutnya ("Tutup keesokan harinya,
+  Selasa pukul 02.00") dalam kotak karamel berikon bulan, dan hari lain
+  diberi "Tutup di hari yang sama, pukul 22.00". Jam buka sama dengan jam
+  tutup ditolak, mengikuti `tenantValidator`.
+- **JB6a: desain C (garis waktu).** Kartu per hari berisi nama hari,
+  ringkasan jam, bilah 00 sampai 24 sebagai hiasan, keterangan tutup
+  keesokan harinya, tombol status, lalu isian; baris 24 jam dan Libur
+  diberi keterangan, dan kartu Libur berlatar gading. Isian memakai
+  `InputWaktu`, dengan tampilan isian setup lewat `className` di langkah
+  ini saja.
+- **JB7a: pratinjau dengan kerangka wizard** di `/setup/pratinjauJamBuka`
+  (keputusan rancangan butir 30). `KunciLangkah` mendapat `jamBuka`, tetapi
+  `daftarLangkah` final tidak berubah sampai penyambungan, karena langkah
+  tanpa padanan status server akan membuka wizard yang sudah tuntas di
+  langkah itu.
+
 ## Kriteria setup
 
 | Kriteria | Minimal | Plan |
@@ -220,6 +258,14 @@ dan token warna yang sudah ada.
   untung rugi dengan "booking dan gudang bisa ditambah" (bertentangan
   dengan satu outlet dan satu gudang pada MVP) dan "bisa diubah di
   wizard" (kode dan risiko terbesar) (5 November 2026, `493f49c`).
+  Tautannya diganti teks petunjuk oleh WS6a.
+- **WS6a: ringkasan tersimpan tidak bertautan** (pemilik proyek, 7 November
+  2026, menggantikan tautan WS5a). Tautan "Ubah di ..." membawa pengguna
+  keluar dari wizard ke dashboard sebelum setup selesai
+  (`kontrak/temuan.md` butir 175). Ringkasan lokasi outlet, sesi booking,
+  dan gudang cukup menyebut halaman untuk mengubahnya nanti, seperti
+  catatan Nama toko ("Nama toko dapat diubah nanti dari Profil Toko.").
+  Belum diterapkan.
 - **WS3a: Owner terdaftar tanpa sesi pengguna masuk lewat login PIN**
   (`/login/pengguna?kembali=/setup`), lalu kembali ke wizard; `kembali`
   hanya menerima `/setup`.
@@ -400,3 +446,9 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
 - Panel admin belum mengenal plan (B213), dan riwayat langganannya
   menampilkan aksi `ubah-plan` tanpa label (`inti/status.md`). Selesai di
   `475bf0b` dan `468a3bd`.
+- Langkah jam buka (JB1a sampai JB7a) belum tersambung: tampilannya hanya
+  di rute pratinjau `/setup/pratinjauJamBuka`, menunggu kontrak jam per
+  hari dari backend (`kontrak/temuan.md` butir 176). Daftar periksa
+  penyambungannya di `inti/status.md`.
+- WS6a belum diterapkan: ringkasan tersimpan lokasi outlet, sesi booking,
+  dan gudang masih bertautan (`kontrak/temuan.md` butir 175).

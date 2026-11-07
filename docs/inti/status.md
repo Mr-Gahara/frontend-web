@@ -29,7 +29,8 @@ setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 
 ## Pekerjaan berikutnya
 
-Keadaan per 6 November 2026: backend lokal `ridho` `1584222`
+Keadaan per 7 November 2026 (cabang backend tidak maju sejak 6 November):
+backend lokal `ridho` `1584222`
 (fast-forward ke `yoga`, 12 commit di atas `c031bde` yang sudah di-push),
 belum di-push (`inti/backend.md`; penyesuaiannya di
 `referensi/keputusan-penyesuaian-backend.md`). Pekerjaan yang selesai sejak
@@ -102,6 +103,28 @@ perangkat berstatus apa pun) dan K-19 (`installationId` seluruh HP
 keluar di laporan sesi). Di web, K-18 ditangani dengan menyaring
 perangkat `trusted`, dan K-19 dengan tidak menampilkan `installationId`.
 
+### Penyambungan langkah jam buka
+
+Tampilan langkah jam buka selesai tanpa API (`b48cfdb`, `1386a30`;
+`modul/setup-akun.md`, JB1a sampai JB7a) dan dipratinjau di
+`/setup/pratinjauJamBuka`. Penyambungannya menunggu backend
+(`kontrak/temuan.md` butir 176). Daftar periksa:
+
+1. Kontrak backend jam per hari: status Buka, 24 jam, atau Libur beserta
+   jam buka dan tutup per hari, penanda 24 jam yang berbeda dari belum
+   diatur, dan kriteria jam buka di `GET /api/setup/status`.
+2. `LANGKAH_JAM_BUKA` masuk `daftarLangkah` sesudah lokasi,
+   `PETA_LANGKAH.jamBuka` diisi kunci server, dan langkah tersambung
+   menyimpan lewat `features/tenant` dengan nilai awal dari data tenant.
+3. Langkah yang sudah tersimpan tampil sebagai ringkasan tanpa tautan
+   (WS6a).
+4. Spec alur nyata di `tests/e2e/setup/setup.spec.ts` (jumlah langkah per
+   plan bertambah satu), lalu hapus `features/setup/pratinjau-jam-buka.tsx`,
+   `app/setup/pratinjauJamBuka`, dan
+   `tests/e2e/setup/pratinjau-jam-buka.spec.ts`.
+5. Jam buka di Profil Toko memakai komponen yang sama; pemakaiannya di
+   shift dan jadwal diputuskan pemilik proyek saat penyambungan.
+
 ### Menunggu desain pemilik proyek
 
 Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
@@ -122,8 +145,9 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
    tanpa password titipan (halaman dimuat ulang atau dibuka langsung)
    kini pindah ke login dengan pesan "Masuk lagi" (`efb05db`). Isiannya
    didesain sendiri oleh pemilik proyek (`kontrak/temuan.md` butir 171).
-3. **Belum dijadwalkan, perlu desain**: logo toko (B203 sampai B205) dan
-   jam operasional (B206) di profil toko; OTP reset PIN Owner dan ubah
+3. **Belum dijadwalkan, perlu desain**: logo toko (B203 sampai B205) di
+   profil toko (jam operasional B206 menyusul penyambungan langkah jam
+   buka, di atas); OTP reset PIN Owner dan ubah
    email atau password akun (B178 sampai B180); hapus akun oleh Owner
    (B181); dan pengingat masa langganan yang hampir habis di luar
    halaman Langganan.
@@ -141,6 +165,10 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 
 Diajukan lewat dialog sebelum dikerjakan:
 
+- Ringkasan tersimpan wizard tanpa tautan (WS6a, `kontrak/temuan.md`
+  butir 175): tautan "Ubah di ..." membawa pengguna keluar dari wizard
+  sebelum setup selesai. Dikerjakan bersama penanda wizard (Menunggu
+  desain pemilik proyek, butir 1).
 - Cocokkan cache produk saat pajak berubah dari kode backend, uji hapus
   aset yang punya booking dan hapus kategori yang dipakai produk dari
   web, buktikan B112, B114, dan B115, dan lihat langsung booking Batal
@@ -162,8 +190,9 @@ Diajukan lewat dialog sebelum dikerjakan:
   toko.
 - Laporan untuk tim backend belum disusun (`inti/backend.md`, Bila
   menemukan bug backend). Bahannya: `kontrak/temuan.md` butir 168 sampai
-  170 dan 172 sampai 174, serta pembuktian B215, B217, B229, B230, B231, B232, B251
-  (`a207fae`), dan B248 (`efb05db`) dari web, B252, B259, B260, dan B261
+  170, 172 sampai 174, dan 176, serta pembuktian B215, B217, B229, B230,
+  B231, B232, B251 (`a207fae`), dan B248 (`efb05db`) dari web, B252,
+  B259, B260, dan B261
   dari respons nyata (penyesuaian `1584222`), lalu B250 setelah web
   mengerjakannya, dan B255 setelah ada pengajuan APPROVED atau PENDING
   untuk diuji. Laporannya ditunda sampai pekerjaan backend dari audit
