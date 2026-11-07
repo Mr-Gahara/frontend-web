@@ -45,3 +45,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Instruksi asisten AI, hanya di lokal (pemilik proyek, 7 November 2026)
+/CLAUDE.md
+/AGENTS.md

@@ -156,6 +156,23 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 
 ## Utang kecil yang tertunda
 
+### Utang kecil dari kerapian repo
+
+- Folder `tests/` (225 berkas) masih ikut di repo publik GitHub, termasuk
+  kredensial uji. Rencananya (pemilik proyek, 7 November 2026, dicatat
+  sebagai utang): isi `tests/` dipindah ke repo privat terpisah, misalnya
+  `Mr-Gahara/frontend-web-tests`; di `frontend-web`, `tests/` masuk
+  `.gitignore` dan dikeluarkan dari pelacakan (`git rm -r --cached
+  tests`). Di laptop lain: `git clone` `frontend-web`, lalu `git clone`
+  repo test ke folder `tests`. Commit test dijalankan di dalam `tests/`.
+  Riwayat lama tidak ditulis ulang; isinya hilang saat repo dibuat ulang
+  (keputusan 25 Oktober 2026).
+- `CLAUDE.md` dan `AGENTS.md` dikeluarkan dari repo dan masuk
+  `.gitignore` (pemilik proyek, 7 November 2026). Di laptop lain keduanya
+  dibuat ulang: `CLAUDE.md` berisi `@AGENTS.md`, dan `AGENTS.md` berisi
+  peringatan bahwa versi Next.js ini berbeda dari data latih dan panduan
+  di `node_modules/next/dist/docs/` dibaca sebelum menulis kode.
+
 ### Utang kecil dari penanda dan panduan wizard
 
 Penanda dan tur sorotan wizard serta dashboard selesai di `58d7eb9`,
