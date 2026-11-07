@@ -249,8 +249,7 @@ function Kartu({
  * masing-masing. Profil tenant dibaca setiap pengguna lewat GET /tenant/:id
  * dan diubah pemegang update-tenant; lokasi Outlet dimuat bagi pemegang
  * read-location dan diubah pemegang update-location. Entri IZIN_HALAMAN-nya
- * kosong (PO14a). persenPajak, tipePajak, logoUrl, dan isSetupComplete tidak
- * ditampilkan (PO13a).
+ * kosong (PO14a). logoUrl dan isSetupComplete tidak ditampilkan (PO13a).
  */
 export function HalamanProfilToko() {
   const { permissions } = useSession();

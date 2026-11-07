@@ -15,8 +15,6 @@ const tenant: Tenant = {
   logoUrl: null,
   footerStruk: null,
   idNPWP: null,
-  persenPajak: 0,
-  tipePajak: "Sudah Termasuk (Inclusive)",
   isSetupComplete: true,
   absensiLokasiAktif: false,
   createdAt: "2026-09-01T00:00:00.000Z",

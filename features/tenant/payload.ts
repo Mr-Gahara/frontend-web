@@ -2,8 +2,8 @@ import type { PerbaruiTenantPayload, Tenant } from "@/types/tenant";
 import type { NilaiFormTenant } from "./schema";
 
 /**
- * Field profil toko yang dikelola web (keputusan PO13a). persenPajak,
- * tipePajak, logoUrl, dan isSetupComplete sengaja tidak termasuk.
+ * Field profil toko yang dikelola web (keputusan PO13a). logoUrl dan
+ * isSetupComplete sengaja tidak termasuk.
  */
 export const FIELD_PROFIL_TOKO = [
   "namaToko",

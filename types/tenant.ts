@@ -1,9 +1,9 @@
 export type TenantStatus = "aktif" | "non-aktif";
-export type TipePajak =
-  | "Sudah Termasuk (Inclusive)"
-  | "Belum Termasuk (Exclusive)";
 
-/** Bentuk GET /tenant/:id (mappers/tenantMapper.js backend). */
+/**
+ * Bentuk GET /tenant/:id (mappers/tenantMapper.js backend). persenPajak dan
+ * tipePajak dibuang backend di a949910 (B266); pajak toko hanya lewat /pajak.
+ */
 export interface Tenant {
   id: string;
   namaToko: string;
@@ -16,8 +16,6 @@ export interface Tenant {
   logoUrl: string | null;
   footerStruk: string | null;
   idNPWP: string | null;
-  persenPajak: number;
-  tipePajak: TipePajak;
   isSetupComplete: boolean;
   absensiLokasiAktif: boolean;
   createdAt: string;
@@ -26,8 +24,7 @@ export interface Tenant {
 
 /**
  * Field profil toko yang diubah web lewat PUT /tenant/:id (keputusan
- * PO13a: persenPajak, tipePajak, logoUrl, dan isSetupComplete tidak
- * dikirim). Seluruhnya opsional, karena hanya field yang berubah yang
+ * PO13a: logoUrl dan isSetupComplete tidak dikirim). Seluruhnya opsional, karena hanya field yang berubah yang
  * dikirim.
  */
 export interface PerbaruiTenantPayload {
