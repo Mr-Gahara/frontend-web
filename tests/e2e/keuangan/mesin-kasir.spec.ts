@@ -186,7 +186,7 @@ test.describe("Mesin Kasir: pengguna baca-saja", () => {
     );
     await page.goto(URL, { waitUntil: "commit" });
     expect((await tKasirBuka).status(), "sesi kasir dibaca pemegang read-sesi-kasir").toBe(200);
-    await expect(page.getByRole("link", { name: "Mesin Kasir" })).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("link", { name: "Mesin Kasir", exact: true })).toHaveAttribute("aria-current", "page");
     await expect(page.getByRole("button", { name: "Tambah mesin kasir" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /^Aksi / })).toHaveCount(0);
     expect(mintaMesin, "GET /sesikasir/perangkat tidak dikirim tanpa izin kelola").toBe(0);

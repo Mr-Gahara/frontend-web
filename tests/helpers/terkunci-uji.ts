@@ -54,7 +54,10 @@ const PERAN_BACA_SAJA: PeranUji = {
 /**
  * Pemegang izin pembelian stok ruang outlet saja (B116, kontrak/temuan.md
  * butir 158), tanpa izin umum maupun ruang gudang. Izin baca lain hanya
- * yang dituntut halaman pembelian outlet: bahan baku, akun kas, dan lokasi.
+ * yang dituntut halaman pembelian outlet (bahan baku, akun kas, dan lokasi)
+ * serta penjaga layout kedua ruang (read-dashboard-outlet dan
+ * read-dashboard-gudang), agar penolakan di ruang gudang datang dari gerbang
+ * rute pembelian, bukan dari layout ruangnya.
  */
 const PERAN_PEMBELIAN_OUTLET: PeranUji = {
   nama: "E2E Pembelian Outlet",
@@ -69,6 +72,8 @@ const PERAN_PEMBELIAN_OUTLET: PeranUji = {
       IZIN.bahan,
       IZIN.akunKas,
       IZIN.location,
+      IZIN.dashboardOutlet,
+      IZIN.dashboardGudang,
     ] as string[]).includes(n),
 };
 
@@ -132,6 +137,9 @@ async function masukSebagai(page: Page, peranUji: PeranUji) {
   const idPeran = await pastikanPeran(page, auth, peranUji);
   await pastikanPengguna(page, auth, peranUji, idPeran);
   await loginSebagai(page, peranUji.nama, peranUji.pin);
+  // /dashboard mengalihkan sendiri menurut izin (app/dashboard/page.tsx); tanpa
+  // menunggu, pengalihan ke /dashboard/profil dapat menyalip goto spec berikutnya.
+  await page.waitForURL((u) => u.pathname !== "/dashboard");
 }
 
 export const NAMA_TERKUNCI = PERAN_TERKUNCI.nama;

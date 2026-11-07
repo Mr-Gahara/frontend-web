@@ -220,6 +220,7 @@ test.describe("Pembelian stok: pemegang izin ruang outlet saja (B116, butir 158)
       await expect(page.getByText(lokasi.nama, { exact: true }), "lokasi penerima outlet").toBeVisible();
       await page.getByLabel("Supplier", { exact: true }).fill(supplier);
       await pilihAkun(page, "Dibayar dari akun kas", akun!.namaAkun);
+      await page.getByLabel("Keterangan", { exact: true }).fill("E2E pembelian izin ruang outlet");
       await pilihAkun(page, "Bahan baku baris 1", BAHAN_FIXTURE);
       await page.locator("#pembelian-jumlah-0").fill("1");
       await page.locator("#pembelian-harga-0").fill("1000");

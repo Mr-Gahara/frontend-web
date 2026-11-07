@@ -131,7 +131,8 @@ test.describe("ubah akun kas", () => {
         akunKasID: laci.id,
         namaPerangkat: "E2E Mesin B250",
       });
-      expect(petakan.status, "petakan mesin kasir uji: " + petakan.pesan).toBe(201);
+      // Upsert per installationId: backend menjawab 200 (sesiKasirController.tetapkanPerangkat).
+      expect(petakan.status, "petakan mesin kasir uji: " + petakan.pesan).toBe(200);
 
       await page.goto(urlUbah(laci.id));
       await expect(page.getByLabel("Nama Akun")).toHaveValue(NAMA_LACI_UJI);
