@@ -72,6 +72,10 @@ Diputuskan pemilik proyek pada 3 Oktober 2026, untuk mutasi arus kas
 - **UA4a: form ubah mengirim hanya field yang berubah.** Tombol simpan
   mati bila tidak ada perubahan, keterangan yang dikosongkan dikirim
   `null`, dan saldo hanya ditampilkan.
+- **Tombol Tambah Akun mengikuti `create-akunkas`** (pemilik proyek,
+  7 November 2026, `cbfa23b`): sebelumnya tampil bagi semua pengguna
+  dan baru ditolak gerbang rute halaman buat. Aturannya `aksiAkunKas`
+  (keputusan rancangan butir 14), dibuktikan pengguna uji baca-saja.
 - **Pekerjaan setelah ini adalah Pindah Dana antar akun kas** (selesai di
   `e53c016`, DN1a sampai DN4a di bawah).
 - Diterapkan tanpa ditanyakan (`e129f9d`): batas periode dikirim sebagai

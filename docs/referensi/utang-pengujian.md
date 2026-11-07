@@ -38,9 +38,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   memotong stok gudang. Kirim dijalankan lewat API di persiapan spec dan
   ditutup lewat terima penuh di akhir, karena batal dari DIKIRIM ditolak
   backend `465b438` (PB10a); dari UI hanya jalur gagalnya yang diuji.
-- **Tombol aksi surat jalan yang disembunyikan menurut izin** hanya teruji
-  di unit test (`aksiSuratJalan`), karena satu-satunya akun uji berperan
-  Owner.
 - **Gate halaman yang menolak pengguna tanpa sebagian izin** hanya teruji
   di unit test (`tests/unit/lib/auth/gate-stock-adjustment.test.ts`, kedua
   ruang),
@@ -116,9 +113,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   `read-location`, tanpa `create-location`, dan tenant tanpa gudang,
   karena satu-satunya akun uji berperan Owner dan tenant uji sudah punya
   gudang.
-- **Mode baca-saja pengaturan gudang belum teruji**, karena satu-satunya
-  akun uji memegang `update-location`. Yang teruji e2e hanya jalur ubah,
-  dan `bacaSaja` di `IsianLokasi` belum punya test.
 - **Akun kas uji menumpuk sebagai non-aktif**, satu per run spec
   keuangan, lima per run spec ubah akun kas (`1bc76f4`), dua per run
   spec Pindah Dana (`e53c016`), dan satu per run spec tutup akun
@@ -152,9 +146,9 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   Peringatan itu diganti penahanan di `3b4f35b` (NZ4a), yang teruji e2e.
 - **Metode uji menumpuk sebagai nonaktif**, satu per run spec kelola
   metode pembayaran, karena metode tidak dapat dihapus (PO10a).
-- **Tombol metode pembayaran yang disembunyikan menurut izin hanya teruji
-  di unit test** (`aksiMetodePembayaran`), dan form tanpa `read-akunkas`
-  belum teruji, karena satu-satunya akun uji berperan Owner.
+- **Form metode pembayaran tanpa `read-akunkas` belum teruji e2e.** Tombol
+  yang disembunyikan menurut izin (`aksiMetodePembayaran`) teruji e2e
+  sejak `cbfa23b` lewat pengguna baca-saja.
 - **Pajak per transaksi hanya diuji jalur gagalnya** (PO10a): membuat atau
   mengaktifkannya menonaktifkan `PPN` tenant uji. Penonaktifan otomatis
   yang tidak atomik (`kontrak/temuan.md` butir 90) terbukti dari kode
@@ -163,16 +157,15 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   menyiapkan sebagian data uji lewat API**, misalnya fixture metode
   pembayaran di spec kelola dan booking uji di spec reservasi;
   disesuaikan saat spec itu disentuh.
-- **Mode baca-saja Profil Toko belum teruji**: kartu profil tanpa
-  `update-tenant`, kartu lokasi tanpa `update-location`, dan kartu lokasi
-  tanpa `read-location`, karena satu-satunya akun uji berperan Owner.
-  Tenant tanpa outlet juga belum teruji, karena tenant uji punya outlet.
+- **Kartu lokasi Profil Toko tanpa `read-location` belum teruji**, karena
+  pengguna uji terbatas memegang izin itu; tenant tanpa outlet juga belum
+  teruji, karena tenant uji punya outlet. Kartu profil tanpa
+  `update-tenant` dan kartu lokasi tanpa `update-location` teruji e2e
+  sejak `cbfa23b` lewat pengguna baca-saja.
 - **Spec profil toko mengubah nama toko tenant uji untuk sementara**,
   lalu mengembalikannya lewat UI dan, bila test berhenti di tengah, lewat
   API di `finally`. Kode pos tenant uji menjadi teks kosong, bukan null,
   setelah run pertama.
-- **Tombol pelanggan yang disembunyikan menurut izin hanya teruji di unit
-  test** (`aksiPelanggan`), karena satu-satunya akun uji berperan Owner.
 - **Pelanggan uji dihapus lunak**, sehingga setiap run spec pelanggan
   menambah dokumen ber-`isDeleted` di basis data development; daftar dan
   indeks unik backend mengabaikannya.
@@ -244,11 +237,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   `tests/unit/features/akun-kas/mutasi.test.ts`.
 - **Keadaan seluruh akun kas non-aktif belum teruji e2e**, karena tenant
   uji selalu punya akun aktif.
-- **Tampilan tanpa `update-akunkas` belum teruji e2e** (tombol Ubah dan
-  Aktifkan kembali tidak tampil, dan rute ubah ditolak gerbang rute sejak
-  `bc388c6`),
-  karena data uji tidak punya pengguna tanpa izin itu; `aksiAkunKas`
-  teruji di unit test.
 - **Penolakan 409 karena batas 10 akun kas aktif belum teruji e2e.**
   Skenario nonaktifkan yang ditolak memakai akun aktif bersaldo yang
   sudah ada dan dilewati bila tidak ada; penolakannya dapat berasal dari
@@ -266,11 +254,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   yang ditolak karena saldo akun tujuan tidak cukup. Statusnya (400)
   dibuktikan lewat skrip sekali pakai pada 4 Oktober 2026
   (`kontrak/temuan.md` butir 128).
-- **Tampilan Pindah Dana menurut izin hanya teruji di unit test**
-  (`aksiTransfer`): form tanpa izin buat, riwayat tanpa izin baca, dan
-  tombol Batalkan tanpa izin ubah, karena satu-satunya akun uji berperan
-  Owner. Filter riwayat dan keadaan kurang dari dua akun aktif juga
-  belum teruji e2e.
+- **Riwayat Pindah Dana tanpa izin baca hanya teruji di unit test**
+  (`aksiTransfer`). Form tanpa izin buat dan tombol Batalkan tanpa izin
+  ubah teruji e2e sejak `cbfa23b` lewat pengguna baca-saja. Filter riwayat
+  dan keadaan kurang dari dua akun aktif juga belum teruji e2e.
 - **Beda `keLocationID` dan `locationID` di daftar surat jalan tidak
   teruji dari data**: seluruh surat jalan uji menuju outlet tenant,
   sehingga keduanya memberi hasil yang sama; bedanya terbukti dari kode
@@ -294,9 +281,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   itu belum punya dokumen. Nama PIC yang gagal dimuat (teks cadangan)
   belum teruji e2e.
 
-- **Sisi tanpa izin di halaman pajak hanya teruji di unit test**
-  (`tests/unit/features/pajak/izin.test.ts`): tombol dan kartu indeks
-  pengaturan tidak teruji e2e, karena akun uji berperan Owner. Pesan
+- **Kartu Pajak yang disembunyikan tanpa `read-pajak` hanya teruji di
+  unit test** (`tests/unit/features/pajak/izin.test.ts`). Tombol Tambah
+  Pajak dan menu aksi yang disembunyikan, serta kartu indeks bagi pemegang
+  izin baca, teruji e2e sejak `cbfa23b` lewat pengguna baca-saja. Pesan
   tanpa izin baca kini milik gerbang rute (`bc388c6`).
 - **Sisi tertolak gerbang rute hanya teruji e2e untuk rute yang ditolak
   peran pengguna uji profil**: daftar pengguna, serta ubah posisi dan
@@ -394,11 +382,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   `page.clock` tersendiri.
 - **Jalur tanggal pembelian bagi peran selain Owner** hanya teruji di
   unit test (`payloadBuatPembelian`), karena akun uji berperan Owner.
-- **Tombol Ubah Info dan Hapus pembelian menurut izin** hanya teruji
-  lewat `aksiPembelianStok` di unit test, termasuk izin per ruang (B116).
-  Gerbang halaman per ruang teruji di `gate-pembelian-stok.test.ts`;
-  jalur pemegang izin ruang saja belum teruji e2e, karena akun uji Owner
-  memegang izin umum.
 - **Template role pembelian hanya teruji pemetaan namanya**; role dari
   template belum dipakai membuka halaman pembelian.
 - **Spec Belanja Stok menyiapkan dua pembelian lewat API** (keputusan
@@ -423,6 +406,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (`1cd8211`): dibuat sekali lewat API dan dipakai ulang setiap run,
   sehingga tidak menumpuk; izin perannya diselaraskan dengan izin baca
   Owner setiap kali.
+- **Peran dan pengguna uji "E2E Baca Saja" dan "E2E Pembelian Outlet"
+  menetap** (`cbfa23b`), dibuat sekali lewat API oleh
+  `tests/helpers/terkunci-uji.ts`; izin perannya diselaraskan ulang setiap
+  run dari izin role Owner.
 - **Enam pengguna uji "E2E Staf Monitoring 1" sampai 6 menetap**
   (`cd07ae1`), dibuat sekali dan dipakai ulang; jadwal hari ini mereka
   dihapus setiap run. Mereka ikut tampil di daftar pengguna, kalender
@@ -464,9 +451,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   `tests/e2e/keuangan/mesin-kasir.spec.ts` (alur tambah, buka dari
   aplikasi, tutup dengan catatan, ubah, lepas, dan HP tanpa gulir ke
   samping) serta unit test `tampilan.ts`, `filter.ts`, dan `pesan.ts`.
-- **Jalur Mesin Kasir tanpa izin kelola hanya teruji di unit test**
-  (`bolehKelolaMesinKasir`, tab Keuangan), karena akun uji berperan
-  Owner. Termasuk pemegang `kelola-perangkat-kasir` tanpa `read-pengguna`
+- **Jalur Mesin Kasir tanpa izin kelola teruji e2e sejak `cbfa23b`**
+  lewat pengguna baca-saja (tanpa tambah, ubah, dan lepas, dan tanpa
+  `GET /sesikasir/perangkat`). Yang masih hanya teruji di unit test:
+  pemegang `kelola-perangkat-kasir` tanpa `read-pengguna`
   atau `read-akunkas` (MK11a), dan pemilihan perangkat yang melewati
   pengguna berlevel sama atau lebih tinggi (403 `GET /device/:userId`).
 - **Penyaringan titik tur dashboard menurut izin dan plan hanya teruji

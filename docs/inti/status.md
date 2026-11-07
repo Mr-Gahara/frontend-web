@@ -32,7 +32,12 @@ setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 Keadaan per 7 November 2026: backend lokal `ridho` `d267f03`, sama
 dengan `origin/ridho` (tujuh commit Ridho di atas `1584222`: AR26 sampai
 AR29, B263 sampai B266). Penyesuaiannya hanya B266 (`5b6ff0d`), dicatat
-di `referensi/keputusan-penyesuaian-backend.md`. Pekerjaan yang selesai sejak
+di `referensi/keputusan-penyesuaian-backend.md`. Sesudahnya utang tanpa UI
+baru dikerjakan (pemilik proyek, 7 November 2026): syarat fixme lintas
+outlet dibuang (`860ff15`), B250 dan B255 dibuktikan e2e (`778eb2d`), dan
+tombol tulis menurut izin serta butir 158 diuji lewat pengguna uji
+terbatas (`cbfa23b`, `4601d91`), termasuk tombol Tambah Akun yang kini
+menurut izin. Pekerjaan yang selesai sejak
 penyesuaian `4759208` (4 sampai 6 November 2026, butir 1 sampai 10
 beserta urutan yang disetujui 4 November 2026) dipindah ke
 `arsip/catatan-putaran.md` (Catatan dari penyesuaian backend `4759208`
@@ -137,9 +142,9 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
   format nomor B115, P18 hapus bahan, P19 hapus kategori, dan hapus aset
   ber-booking (7 November 2026; `kontrak/temuan.md` butir 12, 52, 94,
   141, 155, 156, 160, 162, dan 164), temuan baru butir 177 (logout akun
-  tidak mencabut sesi pengguna), lalu B250 setelah web
-  mengerjakannya, dan B255 setelah ada pengajuan APPROVED atau PENDING
-  untuk diuji. Laporannya ditunda sampai pekerjaan backend dari audit
+  tidak mencabut sesi pengguna), serta B250, B255, dan B116 (butir 158)
+  yang terbukti e2e 7 November 2026 (`778eb2d`, `cbfa23b`, `4601d91`).
+  Laporannya ditunda sampai pekerjaan backend dari audit
   selesai, agar diserahkan sekali jalan (pemilik proyek, 6 November
   2026).
 - Akun uji `toko@gmail.com` dinaikkan ke Pro lewat API admin, karena
@@ -189,9 +194,6 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 
 ### Utang kecil dari penyesuaian backend `ridho` `877e493`
 
-- Jalur pemegang izin pembelian per ruang saja belum teruji e2e, karena
-  akun uji Owner memegang izin umum (`kontrak/temuan.md` butir 158,
-  Menunggu verifikasi).
 - B112 terbukti dari respons nyata 7 November 2026; B114 hanya jalur
   Owner dan B115 hanya formatnya (`kontrak/temuan.md` butir 155 dan
   164).

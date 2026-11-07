@@ -12,6 +12,23 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per backend `ridho` `d267f03`** (web `cbfa23b`, 7 November
+2026, pukul 21.11 sampai 21.43 WIB, reporter `line,json`): e2e 598
+lolos, 3 gagal, dan 1 skipped dari 602, sesuai harapan hitungan 589
+ditambah B250 dan B255 (`778eb2d`) serta sebelas skenario pengguna uji
+terbatas (`cbfa23b`). Ketiga kegagalan skenario baru itu sendiri (status
+200 pemetaan mesin kasir, locator tab Mesin Kasir, dan pada peran
+pembelian outlet: pengalihan `/dashboard`, izin layout ruang, serta
+Keterangan wajib di form catat), diperbaiki di `4601d91`. Spec terdampak
+(15 berkas pemakai helper peran uji) 110 lolos dan 1 gagal, yaitu
+skenario pembelian outlet sebelum perbaikan izin layout dan Keterangan;
+skenario itu lalu lolos 2 dari 2 dengan `--repeat-each 2`, dan sekali
+lagi 2 dari 2 setelah ditambah tab Belanja Stok Keuangan. Yang dilewati
+skip bersyarat tanggal di
+`lihat-jurnal-stok.spec.ts`. Vitest 1002 lolos (unit test `aksiAkunKas`
+buat, `cbfa23b`). Harapan suite penuh sesudahnya 602 lolos tanpa skip
+mulai tanggal 8 (hitungan).
+
 **Suite penuh per putaran 7 November 2026** (web `5c9ed69`, backend
 `ridho` lokal `1584222`, pukul 15.59 sampai 16.37 WIB, reporter
 `line,json`): e2e 585 lolos, 3 gagal, dan 1 skipped dari 589, sesuai
@@ -407,6 +424,7 @@ Pola kegagalan yang berulang:
 | `POST /pengajuanstok` ditolak 409 nomor kembar, menetap saat diulang | Backend membentuk nomor dari dokumen terakhir menurut `createdAt` (`kontrak/temuan.md` butir 139). Bandingkan `createdAt` dan waktu `_id` dokumen bernomor terbesar dengan jam sistem lewat skrip baca-saja; dokumen ber-`createdAt` di depan mengunci pembuatan sampai bulan berganti |
 | Spec gagal hanya pada jam tertentu, berulang, juga di pohon kerja bersih | Cek `date` dan `date -u`, lalu bandingkan dengan `git stash -u`. Tanggal `YYYY-MM-DD` dibaca backend sebagai 00.00 UTC, sehingga tanggal hari ini ditolak antara 00.00 dan 07.00 WIB (`kontrak/temuan.md` butir 154) |
 | Lolos sendirian, gagal saat dijalankan bersama spec lain | Test memilih baris pertama daftar, padahal spec yang berjalan lebih dulu membuat data dari jenis lain (berurutan menurut nama berkas, `workers: 1`). Pilih baris menurut data yang memenuhi syarat, lewat nomornya (`7f1de56`) |
+| Pengguna uji terbatas berakhir di Profil Pengguna, dan permintaan halaman tujuan tidak pernah terkirim | `/dashboard` mengalihkan sendiri menurut izin (`app/dashboard/page.tsx`) dan dapat menyalip `goto` berikutnya; layout ruang outlet dan gudang menuntut `read-dashboard-outlet` dan `read-dashboard-gudang`. Helper peran uji menunggu URL meninggalkan `/dashboard`, dan peran uji memegang izin dashboard ruang yang dibukanya (`4601d91`) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

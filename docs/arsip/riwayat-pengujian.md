@@ -587,6 +587,40 @@ Dipindah dari `referensi/utang-pengujian.md` pada 6 November 2026.
   Lunas 7 November 2026 tanpa test: basis data masih memuat 150 booking
   Batal, tetapi `GET /sesibooking` tidak mengirim satu pun
   (`kontrak/temuan.md` butir 141).
+- **Tombol aksi surat jalan yang disembunyikan menurut izin** hanya teruji
+  di unit test (`aksiSuratJalan`), karena satu-satunya akun uji berperan
+  Owner.
+  Lunas 7 November 2026 (`cbfa23b`): pengguna uji "E2E Baca Saja" membuka
+  detail surat jalan PENDING di ruang gudang dan DIKIRIM di ruang outlet
+  tanpa tombol aksi (`pengiriman-penerimaan.spec.ts`).
+- **Mode baca-saja pengaturan gudang belum teruji**, karena satu-satunya
+  akun uji memegang `update-location`. Yang teruji e2e hanya jalur ubah,
+  dan `bacaSaja` di `IsianLokasi` belum punya test.
+  Lunas 7 November 2026 (`cbfa23b`): pengguna baca-saja melihat isian
+  `readonly` tanpa Simpan Perubahan dan Deteksi Otomatis
+  (`pengaturan-gudang.spec.ts`).
+- **Tombol pelanggan yang disembunyikan menurut izin hanya teruji di unit
+  test** (`aksiPelanggan`), karena satu-satunya akun uji berperan Owner.
+  Lunas 7 November 2026 (`cbfa23b`): pengguna baca-saja melihat daftar tanpa
+  panel Tambah Pelanggan Cepat dan tanpa menu aksi baris
+  (`pelanggan.spec.ts`).
+- **Tampilan tanpa `update-akunkas` belum teruji e2e** (tombol Ubah dan
+  Aktifkan kembali tidak tampil, dan rute ubah ditolak gerbang rute sejak
+  `bc388c6`),
+  karena data uji tidak punya pengguna tanpa izin itu; `aksiAkunKas`
+  teruji di unit test.
+  Lunas 7 November 2026 (`cbfa23b`): pengguna baca-saja melihat daftar tanpa
+  Ubah dan Aktifkan kembali, dan rute ubah ditolak gerbang
+  (`ubah-akun-kas.spec.ts`). Tombol Tambah Akun kini ikut menurut izin.
+- **Tombol Ubah Info dan Hapus pembelian menurut izin** hanya teruji
+  lewat `aksiPembelianStok` di unit test, termasuk izin per ruang (B116).
+  Gerbang halaman per ruang teruji di `gate-pembelian-stok.test.ts`;
+  jalur pemegang izin ruang saja belum teruji e2e, karena akun uji Owner
+  memegang izin umum.
+  Lunas 7 November 2026 (`cbfa23b`, `4601d91`): pengguna baca-saja membuka
+  detail tanpa kedua tombol (`belanja-stok.spec.ts`), dan pengguna "E2E
+  Pembelian Outlet" mencatat dan menghapus lewat UI di ruang outlet lalu
+  ditolak gerbang di ruang gudang (`catat-pembelian-stok.spec.ts`).
 
 ## Kejadian sesekali yang tidak berulang
 

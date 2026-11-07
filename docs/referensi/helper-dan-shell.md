@@ -665,7 +665,14 @@ dan properti di dalam `return {` berindentasi 4 spasi, bukan 6
   berbeda dengan bash: `grep pola $F` mengirim seluruh daftar sebagai satu nama
   berkas (`No such file or directory` dengan nama berisi banyak baris). Simpan
   daftarnya ke berkas lalu pakai `tr '\n' '\0' < daftar | xargs -0 grep ...`,
-  atau baca per baris dengan `while read f; do ...; done`.
+  atau baca per baris dengan `while read f; do ...; done`. Untuk satu
+  pemanggilan, `${=F}` memecah daftar berpemisah spasi
+  (`npx playwright test ${=F}`); `set -- $x` di dalam `for` juga tidak
+  memecah (7 November 2026).
+- `==` yang berdiri sendiri di awal kata dibaca zsh sebagai nama perintah
+  (`=cmd` mengembang menjadi path), sehingga `echo == judul` gagal dengan
+  `== not found` dan menghentikan rangkaian `;`. Tulis pemisah keluaran
+  dalam kutip (`echo "== judul"`) atau pakai `---`.
 - Pola `grep` selalu ditulis dalam kutip tunggal, tanpa pengecualian. Aturan
   tanda `!` di atas tetap terlanggar selama pola sesekali ditulis dalam kutip
   ganda; pada penyesuaian backend `f27f093`, pola `[=!]==` dalam kutip ganda
