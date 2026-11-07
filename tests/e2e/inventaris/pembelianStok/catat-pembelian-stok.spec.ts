@@ -239,6 +239,19 @@ test.describe("Pembelian stok: pemegang izin ruang outlet saja (B116, butir 158)
 
       await page.waitForURL("**" + r.url + "/" + idPembelian);
       await expect(page.getByRole("heading", { name: "Pembelian dari " + supplier })).toBeVisible();
+
+      // Tab Belanja Stok di Keuangan meminta daftar dan ringkasan tanpa locationID.
+      const getBelanja = (pola: RegExp) =>
+        page.waitForResponse((res) => res.request().method() === "GET" && pola.test(res.url()));
+      const tRingkasan = getBelanja(/\/api\/pembelianstok\/ringkasan(\?|$)/i);
+      const tDaftarBelanja = getBelanja(POLA_BUAT);
+      await page.goto(BASIS + "/dashboard/outlet/keuangan/belanjaStok", { waitUntil: "commit" });
+      expect((await tRingkasan).status(), "GET ringkasan Belanja Stok dengan izin ruang outlet").toBe(200);
+      expect((await tDaftarBelanja).status(), "GET daftar Belanja Stok dengan izin ruang outlet").toBe(200);
+      await page.getByLabel("Cari supplier").fill(supplier);
+      await expect(page.getByRole("row").filter({ hasText: supplier })).toHaveCount(1);
+
+      await page.goto(BASIS + r.url + "/" + idPembelian);
       await expect(page.getByRole("button", { name: "Ubah Info" })).toBeVisible();
       await page.getByRole("button", { name: "Hapus", exact: true }).click();
       const dialogHapus = page.getByRole("alertdialog");

@@ -57,7 +57,8 @@ const PERAN_BACA_SAJA: PeranUji = {
  * yang dituntut halaman pembelian outlet (bahan baku, akun kas, dan lokasi)
  * serta penjaga layout kedua ruang (read-dashboard-outlet dan
  * read-dashboard-gudang), agar penolakan di ruang gudang datang dari gerbang
- * rute pembelian, bukan dari layout ruangnya.
+ * rute pembelian, bukan dari layout ruangnya (pemilik proyek, 7 November
+ * 2026).
  */
 const PERAN_PEMBELIAN_OUTLET: PeranUji = {
   nama: "E2E Pembelian Outlet",
