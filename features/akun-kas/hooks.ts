@@ -9,10 +9,12 @@ import { queryKeys } from "@/lib/queryKeys";
  * Daftar akun kas tenant, dipakai halaman keuangan, kartu ringkasan,
  * pembayaran penjualan, dan form metode pembayaran (pilihan akun tujuan).
  */
-export function useDaftarAkunKas() {
+/** enabled: false menunda pemuatan bagi pengguna yang tidak memakainya. */
+export function useDaftarAkunKas(opsi: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.akunKas.daftar(),
     queryFn: akunKasApi.daftar,
+    enabled: opsi.enabled ?? true,
   });
 }
 

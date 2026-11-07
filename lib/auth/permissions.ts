@@ -51,6 +51,7 @@ export const IZIN = {
   penjualan: "read-penjualan",
   pembayaran: "read-pembayaran",
   akunKas: "read-akunkas",
+  sesiKasir: "read-sesi-kasir",
   langganan: "read-langganan",
   laporan: "read-laporan",
   pelanggan: "read-pelanggan",
@@ -119,6 +120,7 @@ export const IZIN = {
   bacaJurnalTransfer: "read-jurnal-transfer",
   buatJurnalTransfer: "create-jurnal-transfer",
   ubahJurnalTransfer: "update-jurnal-transfer",
+  kelolaPerangkatKasir: "kelola-perangkat-kasir",
   buatPajak: "create-pajak",
   ubahPajak: "update-pajak",
   hapusPajak: "delete-pajak",
@@ -216,11 +218,11 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/keuangan/akunkas/pindahDana": [],
   "/dashboard/outlet/keuangan/mutasiArusKas": [IZIN.akunKas],
   "/dashboard/outlet/keuangan/ringkasanLabaRugi": [IZIN.laporan],
-  // Pratinjau development Mesin Kasir dengan data contoh, tanpa API; notFound
-  // di produksi (pemilik proyek, 6 November 2026). Diganti rute final saat
-  // penyambungan, dengan izin read-sesi-kasir atau kelola-perangkat-kasir.
-  "/dashboard/outlet/keuangan/pratinjauMesinKasir": [],
-  "/dashboard/outlet/keuangan/pratinjauMesinKasir/rincian": [],
+  // Mesin Kasir: kasir yang buka dan riwayat butuh read-sesi-kasir; panel
+  // mesin kasir dan tutup dari web tambahan bagi pemegang kelola (keputusan
+  // pemilik proyek, 7 November 2026; features/sesi-kasir/izin.ts).
+  "/dashboard/outlet/keuangan/mesinKasir": [IZIN.sesiKasir],
+  "/dashboard/outlet/keuangan/mesinKasir/[id]": [IZIN.sesiKasir],
   // Belanja Stok: pembelian di ruang yang diizinkan (izin umum untuk semua
   // ruang, atau izin per ruang yang dijumlahkan backend sesuai ruangnya, B116);
   // daftar lokasi mengisi pilihan filter lokasi penerima.

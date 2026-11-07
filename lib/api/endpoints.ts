@@ -89,6 +89,16 @@ export const EP = {
   akunKasMutasi: "/akunkas/mutasi",
   akunKasRingkasan: (id: string) => `/akunkas/${id}/ringkasan`,
   akunKasRingkasanGabungan: "/akunkas/ringkasan",
+  /** Sesi kasir dan Mesin Kasir (sesiKasirRoute.js, B225 sampai B228). */
+  sesiKasir: {
+    list: "/sesikasir",
+    detail: (id: string) => `/sesikasir/${id}`,
+    tutup: (id: string) => `/sesikasir/${id}/tutup`,
+    perangkat: "/sesikasir/perangkat",
+    perangkatById: (id: string) => `/sesikasir/perangkat/${id}`,
+  },
+  /** Perangkat login satu pengguna (deviceRoute.js, read-pengguna). */
+  devicePengguna: (userId: string) => `/device/${userId}`,
   jurnalTransfer: "/jurnaltransfer",
   jurnalTransferById: (id: string) => `/jurnaltransfer/${id}`,
   bebanOperasional: {

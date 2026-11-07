@@ -8,16 +8,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatRupiah } from "@/lib/format";
 import type { PerangkatKasir, SesiKasir } from "@/types/sesiKasir";
 import type { StatusMuat } from "./bagian-kasir-buka";
+import { SEMUA_MESIN, type NilaiFilterRiwayat } from "./filter";
 import { ChipSelisih } from "./label";
 import { kelompokkanPerHari, labelSelisih, namaMesin, orangSesi, rentangJam } from "./tampilan";
 
-export const SEMUA_MESIN = "semua";
-
-export interface NilaiFilterRiwayat {
-  mesin: string;
-  dari: Date | undefined;
-  sampai: Date | undefined;
-}
+export { SEMUA_MESIN, type NilaiFilterRiwayat } from "./filter";
 
 const KELAS_LABEL = "text-sm font-semibold text-navy";
 

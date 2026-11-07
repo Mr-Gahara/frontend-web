@@ -1,8 +1,7 @@
 /**
  * Fungsi murni tampilan Mesin Kasir dan riwayat buka-tutup kasir (keputusan
- * rancangan butir 10). Tidak memanggil API, sehingga komponen, pratinjau
- * development, dan unit test memakainya dengan data apa pun yang berbentuk
- * tipe di types/sesiKasir.ts.
+ * rancangan butir 10). Tidak memanggil API, sehingga komponen dan unit test
+ * memakainya dengan data apa pun yang berbentuk tipe di types/sesiKasir.ts.
  */
 
 import type { AkunKas } from "@/types/akunKas";

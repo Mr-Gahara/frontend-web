@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeftRight, LineChart, FileText, Package } from "lucide-react";
+import { ArrowLeftRight, LineChart, FileText, MonitorSmartphone, Package } from "lucide-react";
 import { bolehBukaHalaman } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/useSession";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,12 @@ const tabs = [
     label: "Belanja Stok",
     href: "/dashboard/outlet/keuangan/belanjaStok",
     icon: Package,
+  },
+  {
+    // Buka-tutup kasir dan mesin kasir (MK1a, modul/keuangan.md).
+    label: "Mesin Kasir",
+    href: "/dashboard/outlet/keuangan/mesinKasir",
+    icon: MonitorSmartphone,
   },
 ];
 

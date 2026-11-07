@@ -26,6 +26,18 @@ describe("KeuanganNavTabs (kontrak/temuan.md butir 163)", () => {
     expect(namaTab()).toEqual(["Ringkasan Laba/Rugi", "Mutasi & Arus Kas", "Akun Kas & Bank", "Belanja Stok"]);
   });
 
+  it("Mesin Kasir tampil sebagai tab kelima dengan read-sesi-kasir saja", () => {
+    sesi.permissions = ["read-akunkas", "read-sesi-kasir"];
+    render(<KeuanganNavTabs />);
+    expect(namaTab()).toEqual(["Mutasi & Arus Kas", "Akun Kas & Bank", "Mesin Kasir"]);
+  });
+
+  it("Mesin Kasir tidak tampil dengan kelola-perangkat-kasir tanpa read-sesi-kasir", () => {
+    sesi.permissions = ["kelola-perangkat-kasir", "read-pengguna", "read-akunkas"];
+    render(<KeuanganNavTabs />);
+    expect(namaTab()).toEqual(["Mutasi & Arus Kas", "Akun Kas & Bank"]);
+  });
+
   it("tanpa izin keuangan tidak ada tab", () => {
     render(<KeuanganNavTabs />);
     expect(namaTab()).toEqual([]);

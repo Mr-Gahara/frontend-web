@@ -12,10 +12,12 @@ import { penggunaApi, type Workspace } from "./api";
 import { queryKeys } from "@/lib/queryKeys";
 import type { PenggunaRequest } from "@/types/pengguna";
 
-export function useDaftarPengguna(workspace: Workspace) {
+/** enabled: false menunda pemuatan, misalnya sampai form yang memakainya dibuka. */
+export function useDaftarPengguna(workspace: Workspace, opsi: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.pengguna.daftar(workspace),
     queryFn: () => penggunaApi.daftar(workspace),
+    enabled: opsi.enabled ?? true,
   });
 }
 

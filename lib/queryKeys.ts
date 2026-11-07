@@ -136,6 +136,18 @@ export const queryKeys = {
     semua: kunci(["jurnalTransfer"] as const),
     daftar: (params?: Filter) => ["jurnalTransfer", "daftar", params] as const,
   },
+  sesiKasir: {
+    semua: kunci(["sesiKasir"] as const),
+    /** Daftar sesi per filter (status, installationId, dari, sampai, limit). */
+    daftar: (params?: Filter) => ["sesiKasir", "daftar", params] as const,
+    detail: (id: string) => ["sesiKasir", "detail", id] as const,
+    perangkat: () => ["sesiKasir", "perangkat"] as const,
+  },
+  /** Perangkat login per pengguna (GET /device/:userId). */
+  devicePengguna: {
+    semua: kunci(["devicePengguna"] as const),
+    daftar: (userId: string) => ["devicePengguna", userId] as const,
+  },
   bebanOperasional: {
     semua: kunci(["bebanOperasional"] as const),
     daftar: (params?: Filter) => ["bebanOperasional", "daftar", params] as const,
