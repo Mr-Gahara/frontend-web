@@ -16,6 +16,7 @@ import { JudulLangkah, KotakPeringatan, NavigasiLangkah, PesanGalat, PesanIsian 
 import { useKirim } from "./kirim";
 import { KELAS_AREA, KELAS_BANTU, KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS } from "./gaya";
 import type { PropsLangkah } from "./langkah";
+import { titikLokasi } from "./titik-panduan";
 
 const TEKS = {
   outlet: {
@@ -95,31 +96,37 @@ export function LangkahLokasi({
           judul={teks.judul}
           keterangan={teks.keterangan}
           catatan={teks.catatanLangkah}
+          panduan={{
+            kunci: jenis === "outlet" ? "lokasi" : "gudang",
+            titik: titikLokasi(jenis, teksLanjut, Boolean(onLewati)),
+          }}
         />
-        <div className="flex flex-col gap-2">
-          <label htmlFor={id("nama")} className={KELAS_LABEL}>
-            {teks.labelNama}
-          </label>
-          <input
-            id={id("nama")}
-            {...register("nama")}
-            aria-invalid={errors.nama ? true : undefined}
-            className={KELAS_ISIAN}
-          />
-          <PesanIsian pesan={errors.nama?.message} />
-        </div>
-        <div className="flex flex-col gap-2">
-          <label htmlFor={id("alamat")} className={KELAS_LABEL}>
-            Alamat
-          </label>
-          <textarea
-            id={id("alamat")}
-            rows={3}
-            {...register("alamat")}
-            aria-invalid={errors.alamat ? true : undefined}
-            className={KELAS_AREA}
-          />
-          <PesanIsian pesan={errors.alamat?.message} />
+        <div data-panduan="lokasi-nama" className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <label htmlFor={id("nama")} className={KELAS_LABEL}>
+              {teks.labelNama}
+            </label>
+            <input
+              id={id("nama")}
+              {...register("nama")}
+              aria-invalid={errors.nama ? true : undefined}
+              className={KELAS_ISIAN}
+            />
+            <PesanIsian pesan={errors.nama?.message} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor={id("alamat")} className={KELAS_LABEL}>
+              Alamat
+            </label>
+            <textarea
+              id={id("alamat")}
+              rows={3}
+              {...register("alamat")}
+              aria-invalid={errors.alamat ? true : undefined}
+              className={KELAS_AREA}
+            />
+            <PesanIsian pesan={errors.alamat?.message} />
+          </div>
         </div>
 
         <section
@@ -141,6 +148,7 @@ export function LangkahLokasi({
           </KotakPeringatan>
           <button
             type="button"
+            data-panduan="lokasi-koordinat"
             onClick={ambilKoordinat}
             disabled={deteksi === "mencari"}
             className={KELAS_TOMBOL_GARIS + " self-start"}
@@ -186,7 +194,7 @@ export function LangkahLokasi({
               <PesanIsian pesan={errors.longitude?.message} />
             </div>
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div data-panduan="lokasi-radius" className="flex flex-col gap-1.5">
             <label htmlFor={id("radius")} className="text-[13px] font-semibold">
               Radius absen (meter)
             </label>

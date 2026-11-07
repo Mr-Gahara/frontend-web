@@ -18,6 +18,7 @@ import { adaIsian, gulirKe, pesanBelumTersimpan } from "./penanda";
 import { useKirim } from "./kirim";
 import type { PropsDaftar } from "./langkah";
 import { skemaBahanSetup, type NilaiBahanSetup } from "./schema";
+import { titikBahan } from "./titik-panduan";
 
 const NILAI_AWAL_BAHAN: NilaiBahanSetup = { namaBahan: "", satuan: SATUAN_BAHAN_OPTIONS[0], stok: "", stokMinimum: "" };
 
@@ -77,9 +78,11 @@ export function LangkahBahanBaku({
         total={total}
         judul="Bahan baku"
         keterangan="Bahan baku dipakai menu yang dibuat dari resep, misalnya biji kopi dan susu. Stoknya berkurang setiap menu itu terjual."
+        panduan={{ kunci: "bahanBaku", titik: titikBahan(teksLanjut, adaResep) }}
       />
       <PilihanTombol
         id="setup-bahan-tanya"
+        panduan="bahan-resep"
         pertanyaan="Ada menu yang dibuat dari resep?"
         opsi={[
           { nilai: "ya", label: "Ya, ada yang pakai resep" },
@@ -152,6 +155,7 @@ export function LangkahBahanBaku({
             <button
               ref={tambahRef}
               type="submit"
+              data-panduan="tambah"
               disabled={sibuk}
               className={(tertinggal ? KELAS_TOMBOL_TAMBAH_AKTIF : KELAS_TOMBOL_GARIS) + " self-start"}
             >

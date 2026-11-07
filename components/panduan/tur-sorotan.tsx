@@ -24,8 +24,9 @@ const BATAS_TUNGGU_MS = 800;
 /**
  * Buka dan tutup tur untuk satu layar. Tampil sendiri bila belum pernah
  * dilihat di perangkat ini (lib/panduan.ts); mulai() membukanya lagi dari
- * tombol Lihat panduan. Selesai, Lewati panduan, tombol tutup, dan Escape
- * sama-sama mencatat tur sudah dilihat.
+ * tombol Lihat panduan. Tur yang tertutup dengan cara apa pun dicatat sudah
+ * dilihat: Selesai, Lewati panduan, tombol tutup, Escape, maupun layarnya
+ * dilepas saat pengguna pindah langkah di tengah tur.
  */
 export function usePanduan(kunci: string | null, otomatis = true) {
   const [buka, setBuka] = useState(false);
@@ -35,11 +36,12 @@ export function usePanduan(kunci: string | null, otomatis = true) {
     const t = window.setTimeout(() => setBuka(true), 400);
     return () => window.clearTimeout(t);
   }, [kunci, otomatis]);
+  useEffect(() => {
+    if (!buka || !kunci) return;
+    return () => tandaiDilihat(penyimpananLokal(), kunci);
+  }, [buka, kunci]);
   const mulai = useCallback(() => setBuka(true), []);
-  const tutup = useCallback(() => {
-    if (kunci) tandaiDilihat(penyimpananLokal(), kunci);
-    setBuka(false);
-  }, [kunci]);
+  const tutup = useCallback(() => setBuka(false), []);
   return { buka, mulai, tutup };
 }
 
@@ -77,29 +79,34 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
   const [mundur, setMundur] = useState(false);
   const [kotak, setKotak] = useState<Kotak | null>(null);
   const kotakRef = useRef<Kotak | null>(null);
-  // Penangan disimpan di ref agar fungsi baru dari induk tidak memulai ulang
-  // pelacakan posisi di bawah.
+  // Penangan dan daftar titik disimpan di ref agar fungsi atau array baru
+  // dari induk (yang dibuat ulang setiap ketikan) tidak memulai ulang
+  // pelacakan posisi di bawah; pelacakan hanya bergantung pada target titik.
   const tutupRef = useRef(onTutup);
   const pindahRef = useRef(onPindah);
+  const titikRef = useRef(titik);
   useEffect(() => {
     tutupRef.current = onTutup;
     pindahRef.current = onPindah;
+    titikRef.current = titik;
   });
   const aktif = titik[indeks];
+  const target = aktif?.target;
 
   useEffect(() => {
-    if (aktif) pindahRef.current?.(aktif, indeks);
-  }, [aktif, indeks]);
+    const t = titikRef.current[indeks];
+    if (t) pindahRef.current?.(t, indeks);
+  }, [target, indeks]);
 
   // Mengikuti posisi elemen setiap frame, karena halaman dapat bergulir,
   // berubah ukuran, atau beranimasi (sidebar HP) selama tur terbuka.
   useEffect(() => {
-    if (!aktif) return;
+    if (!target) return;
     let frame = 0;
     let digulir = false;
     const mulai = performance.now();
     const ikuti = () => {
-      const el = cariElemen(aktif.target);
+      const el = cariElemen(target);
       if (el && !digulir) {
         el.scrollIntoView({ block: "center", behavior: "smooth" });
         digulir = true;
@@ -122,7 +129,7 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
     };
     frame = window.requestAnimationFrame(ikuti);
     return () => window.cancelAnimationFrame(frame);
-  }, [aktif, indeks, mundur, titik.length]);
+  }, [target, indeks, mundur, titik.length]);
 
   if (!aktif || !kotak) return null;
   const terakhir = indeks === titik.length - 1;
@@ -150,7 +157,7 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
         updatePositionStrategy="always"
         collisionPadding={16}
         aria-labelledby={idJudul}
-        aria-describedby={idIsi}
+        aria-describedby={aktif.isi ? idIsi : undefined}
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={onTutup}
         className="z-[70] w-[min(320px,calc(100vw-32px))] gap-2.5 rounded-[18px] border border-input bg-permukaan px-[18px] py-4 text-navy shadow-[0_12px_32px_rgba(10,41,71,0.18)] ring-0"
@@ -172,9 +179,11 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
         <p id={idJudul} className="text-[17px] font-bold leading-snug">
           {aktif.judul}
         </p>
-        <p id={idIsi} className="text-sm leading-normal text-muted-foreground">
-          {aktif.isi}
-        </p>
+        {aktif.isi && (
+          <p id={idIsi} className="text-sm leading-normal text-muted-foreground">
+            {aktif.isi}
+          </p>
+        )}
         <div className="mt-1 flex flex-wrap items-center justify-between gap-2.5">
           <button
             type="button"

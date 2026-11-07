@@ -7,6 +7,7 @@ import { useKirim } from "./kirim";
 import { KELAS_ISIAN, KELAS_LABEL } from "./gaya";
 import type { PropsLangkah } from "./langkah";
 import { skemaBookingSetup, type NilaiBookingSetup } from "./schema";
+import { titikBooking } from "./titik-panduan";
 
 /**
  * Langkah sesi booking, hanya untuk plan Advanced dan Pro (PL1a). Sesudah
@@ -72,16 +73,23 @@ export function LangkahBooking({
         judul="Sesi booking"
         catatan="fitur plan Advanced"
         keterangan="Siapkan yang bisa dipesan pelanggan per waktu, misalnya ruang meeting atau meja biliar. Kasir tetap bisa dipakai selama langkah ini belum selesai; hanya menu booking yang terkunci."
+        panduan={{ kunci: "booking", titik: titikBooking(teksLanjut, Boolean(onLewati)) }}
       />
-      <section aria-label="Tipe aset" className="flex flex-col gap-3 rounded-2xl border border-input p-[18px]">
-        <h2 className="text-base font-bold">1. Tipe aset</h2>
-        {isian("namaTipeAset", "Nama tipe aset")}
-      </section>
-      <section aria-label="Aset" className="flex flex-col gap-3 rounded-2xl border border-input p-[18px]">
-        <h2 className="text-base font-bold">2. Aset</h2>
-        {isian("namaAset", "Nama aset")}
-      </section>
-      <section aria-label="Tarif" className="flex flex-col gap-3.5 rounded-2xl border border-input p-[18px]">
+      <div data-panduan="booking-aset" className="flex flex-col gap-[22px]">
+        <section aria-label="Tipe aset" className="flex flex-col gap-3 rounded-2xl border border-input p-[18px]">
+          <h2 className="text-base font-bold">1. Tipe aset</h2>
+          {isian("namaTipeAset", "Nama tipe aset")}
+        </section>
+        <section aria-label="Aset" className="flex flex-col gap-3 rounded-2xl border border-input p-[18px]">
+          <h2 className="text-base font-bold">2. Aset</h2>
+          {isian("namaAset", "Nama aset")}
+        </section>
+      </div>
+      <section
+        aria-label="Tarif"
+        data-panduan="booking-tarif"
+        className="flex flex-col gap-3.5 rounded-2xl border border-input p-[18px]"
+      >
         <h2 className="text-base font-bold">3. Tarif</h2>
         {isian("namaTarif", "Nama tarif")}
         <PilihanTombol

@@ -18,6 +18,7 @@ import { adaIsian, gulirKe, pesanBelumTersimpan } from "./penanda";
 import { useKirim } from "./kirim";
 import type { PropsDaftar } from "./langkah";
 import { skemaProdukSetup, type NilaiProdukSetup } from "./schema";
+import { titikProduk } from "./titik-panduan";
 
 const NILAI_AWAL_PRODUK: NilaiProdukSetup = {
   namaProduk: "",
@@ -112,6 +113,7 @@ export function LangkahProduk({
         total={total}
         judul="Produk"
         keterangan="Tambahkan menu yang dijual. Minimal satu produk aktif agar kasir bisa dipakai."
+        panduan={{ kunci: "produk", titik: titikProduk(teksLanjut) }}
       />
       <DaftarTambahan
         judul="Produk ditambahkan"
@@ -127,63 +129,65 @@ export function LangkahProduk({
         <h2 id="setup-produk-judul" className="text-[17px] font-bold">
           Tambah produk
         </h2>
-        <div className="flex flex-col gap-2">
-          <label htmlFor="setup-produk-nama" className={KELAS_LABEL}>
-            Nama produk
-          </label>
-          <input
-            id="setup-produk-nama"
-            {...register("namaProduk")}
-            aria-invalid={errors.namaProduk ? true : undefined}
-            className={KELAS_ISIAN}
-          />
-          <PesanIsian pesan={errors.namaProduk?.message} />
-        </div>
-        <div className="flex flex-col gap-2">
-          <label htmlFor="setup-produk-kategori" className={KELAS_LABEL}>
-            Kategori
-          </label>
-          <select
-            id="setup-produk-kategori"
-            {...register("kategoriID")}
-            aria-invalid={errors.kategoriID ? true : undefined}
-            className={KELAS_ISIAN}
-          >
-            <option value="">Pilih kategori</option>
-            {kategori.map((k) => (
-              <option key={k.id} value={k.id}>
-                {k.namaKategori}
-              </option>
-            ))}
-          </select>
-          <PesanIsian pesan={errors.kategoriID?.message} />
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <div className="flex flex-[1_1_180px] flex-col gap-2">
-            <label htmlFor="setup-produk-dasar" className={KELAS_LABEL}>
-              Harga dasar
+        <div data-panduan="produk-isian" className="flex flex-col gap-[18px]">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="setup-produk-nama" className={KELAS_LABEL}>
+              Nama produk
             </label>
             <input
-              id="setup-produk-dasar"
-              inputMode="numeric"
-              {...register("hargaDasar")}
-              aria-invalid={errors.hargaDasar ? true : undefined}
+              id="setup-produk-nama"
+              {...register("namaProduk")}
+              aria-invalid={errors.namaProduk ? true : undefined}
               className={KELAS_ISIAN}
             />
-            <PesanIsian pesan={errors.hargaDasar?.message} />
+            <PesanIsian pesan={errors.namaProduk?.message} />
           </div>
-          <div className="flex flex-[1_1_180px] flex-col gap-2">
-            <label htmlFor="setup-produk-jual" className={KELAS_LABEL}>
-              Harga jual
+          <div className="flex flex-col gap-2">
+            <label htmlFor="setup-produk-kategori" className={KELAS_LABEL}>
+              Kategori
             </label>
-            <input
-              id="setup-produk-jual"
-              inputMode="numeric"
-              {...register("hargaJual")}
-              aria-invalid={errors.hargaJual ? true : undefined}
+            <select
+              id="setup-produk-kategori"
+              {...register("kategoriID")}
+              aria-invalid={errors.kategoriID ? true : undefined}
               className={KELAS_ISIAN}
-            />
-            <PesanIsian pesan={errors.hargaJual?.message} />
+            >
+              <option value="">Pilih kategori</option>
+              {kategori.map((k) => (
+                <option key={k.id} value={k.id}>
+                  {k.namaKategori}
+                </option>
+              ))}
+            </select>
+            <PesanIsian pesan={errors.kategoriID?.message} />
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <div className="flex flex-[1_1_180px] flex-col gap-2">
+              <label htmlFor="setup-produk-dasar" className={KELAS_LABEL}>
+                Harga dasar
+              </label>
+              <input
+                id="setup-produk-dasar"
+                inputMode="numeric"
+                {...register("hargaDasar")}
+                aria-invalid={errors.hargaDasar ? true : undefined}
+                className={KELAS_ISIAN}
+              />
+              <PesanIsian pesan={errors.hargaDasar?.message} />
+            </div>
+            <div className="flex flex-[1_1_180px] flex-col gap-2">
+              <label htmlFor="setup-produk-jual" className={KELAS_LABEL}>
+                Harga jual
+              </label>
+              <input
+                id="setup-produk-jual"
+                inputMode="numeric"
+                {...register("hargaJual")}
+                aria-invalid={errors.hargaJual ? true : undefined}
+                className={KELAS_ISIAN}
+              />
+              <PesanIsian pesan={errors.hargaJual?.message} />
+            </div>
           </div>
         </div>
 
@@ -354,6 +358,7 @@ export function LangkahProduk({
         <button
           ref={simpanProdukRef}
           type="submit"
+          data-panduan="tambah"
           disabled={sibuk}
           className={(tertinggal ? KELAS_TOMBOL_TAMBAH_AKTIF : KELAS_TOMBOL_GARIS) + " self-start"}
         >

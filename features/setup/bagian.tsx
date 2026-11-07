@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { AlertTriangle, ArrowUp, Info, X } from "lucide-react";
 import { KELAS_TOMBOL_KEDUA, KELAS_TOMBOL_UTAMA } from "./gaya";
+import { TombolPanduanLangkah, type PanduanLangkah } from "./panduan-langkah";
 
 export function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
@@ -13,19 +14,25 @@ export function JudulLangkah({
   judul,
   keterangan,
   catatan,
+  panduan,
 }: {
   nomor: number;
   total: number;
   judul: string;
   keterangan: string;
   catatan?: string;
+  /** Tur langkah dan tautan Lihat panduan; tanpa ini (ringkasan tersimpan) tautannya tidak tampil. */
+  panduan?: PanduanLangkah;
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-sm font-semibold text-navy/70">
-        Langkah {nomor} dari {total}
-        {catatan ? ", " + catatan : ""}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-semibold text-navy/70">
+          Langkah {nomor} dari {total}
+          {catatan ? ", " + catatan : ""}
+        </p>
+        {panduan && <TombolPanduanLangkah {...panduan} />}
+      </div>
       <h1 className="text-3xl font-bold tracking-tight">{judul}</h1>
       <p className="text-[15px] leading-normal text-muted-foreground">
         {keterangan}
@@ -90,6 +97,7 @@ export function NavigasiLangkah({
         {onLewati && (
           <button
             type="button"
+            data-panduan="lewati"
             onClick={onLewati}
             disabled={sibuk}
             className={KELAS_TOMBOL_KEDUA}
@@ -99,6 +107,7 @@ export function NavigasiLangkah({
         )}
         <button
           type={onLanjut ? "button" : "submit"}
+          data-panduan="lanjut"
           onClick={onLanjut}
           disabled={sibuk}
           className={KELAS_TOMBOL_UTAMA}
@@ -143,6 +152,7 @@ export function PilihanTombol<T extends string>({
   opsi,
   nilai,
   onUbah,
+  panduan,
 }: {
   id: string;
   pertanyaan: string;
@@ -150,9 +160,11 @@ export function PilihanTombol<T extends string>({
   /** null bila belum ada yang dipilih, misalnya jam buka sebelum memilih. */
   nilai: T | null;
   onUbah: (nilai: T) => void;
+  /** Nilai data-panduan bila kelompok ini disorot tur. */
+  panduan?: string;
 }) {
   return (
-    <div className="flex flex-col gap-2.5">
+    <div data-panduan={panduan} className="flex flex-col gap-2.5">
       <p id={id} className="text-[15px] font-semibold">
         {pertanyaan}
       </p>

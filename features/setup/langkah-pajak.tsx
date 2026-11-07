@@ -19,6 +19,7 @@ import { useKirim } from "./kirim";
 import { KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS, KELAS_TOMBOL_TAMBAH_AKTIF } from "./gaya";
 import { adaIsian, gulirKe, pesanBelumTersimpan } from "./penanda";
 import type { ButirDaftar, PropsLangkah } from "./langkah";
+import { titikPajak } from "./titik-panduan";
 
 /**
  * Langkah pajak, wajib di semua plan (modul/setup-akun.md, Kriteria setup).
@@ -100,9 +101,10 @@ export function LangkahPajak({
         total={total}
         judul="Pajak"
         keterangan="Minimal satu pajak aktif. Pajak dihitung otomatis di setiap transaksi kasir."
+        panduan={{ kunci: "pajak", titik: titikPajak(teksLanjut, modeDaftar) }}
       />
       <DaftarTambahan judul="Pajak tersimpan" butir={tersimpan} />
-      <div className="flex flex-wrap gap-3">
+      <div data-panduan="pajak-isian" className="flex flex-wrap gap-3">
         <div className="flex flex-[2_1_220px] flex-col gap-2">
           <label htmlFor="setup-pajak-nama" className={KELAS_LABEL}>
             Nama pajak
@@ -131,6 +133,7 @@ export function LangkahPajak({
       </div>
       <PilihanTombol
         id="setup-pajak-tipe"
+        panduan="pajak-cakupan"
         pertanyaan="Berlaku untuk"
         opsi={[
           {
@@ -149,6 +152,7 @@ export function LangkahPajak({
       />
       <PilihanTombol
         id="setup-pajak-model"
+        panduan="pajak-hitung"
         pertanyaan="Cara hitung"
         opsi={(["1", "2", "3"] as const).map((m) => ({
           nilai: m,
@@ -167,6 +171,7 @@ export function LangkahPajak({
           <button
             ref={tambahRef}
             type="submit"
+            data-panduan="tambah"
             disabled={sibuk}
             className={(tertinggal ? KELAS_TOMBOL_TAMBAH_AKTIF : KELAS_TOMBOL_GARIS) + " self-start"}
           >

@@ -9,6 +9,7 @@ import { KELAS_ISIAN, KELAS_LABEL, KELAS_TOMBOL_GARIS, KELAS_TOMBOL_TAMBAH_AKTIF
 import { adaIsian, gulirKe, pesanBelumTersimpan } from "./penanda";
 import { useKirim } from "./kirim";
 import type { PropsDaftar } from "./langkah";
+import { titikKategori } from "./titik-panduan";
 
 type NilaiKategori = { namaKategori: string; kodeKategori: string; keterangan: string };
 
@@ -51,9 +52,10 @@ export function LangkahKategori({
         total={total}
         judul="Kategori produk"
         keterangan="Kategori mengelompokkan menu di layar kasir. Tambahkan minimal satu."
+        panduan={{ kunci: "kategori", titik: titikKategori(teksLanjut) }}
       />
       <form onSubmit={handleSubmit(kirim)} noValidate className="flex flex-col gap-3">
-        <div className="flex flex-wrap gap-3">
+        <div data-panduan="kategori-isian" className="flex flex-wrap gap-3">
           <div className="flex flex-[2_1_220px] flex-col gap-2">
             <label htmlFor="setup-kategori-nama" className={KELAS_LABEL}>
               Nama kategori
@@ -84,6 +86,7 @@ export function LangkahKategori({
         <button
           ref={tambahRef}
           type="submit"
+          data-panduan="tambah"
           disabled={sibuk}
           className={(tertinggal ? KELAS_TOMBOL_TAMBAH_AKTIF : KELAS_TOMBOL_GARIS) + " self-start"}
         >

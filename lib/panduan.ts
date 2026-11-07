@@ -14,7 +14,8 @@ export interface TitikPanduan {
   /** Nilai atribut data-panduan pada elemen yang disorot. */
   target: string;
   judul: string;
-  isi: string;
+  /** Kosong bila judulnya sudah cukup, misalnya titik tombol lanjut. */
+  isi?: string;
   /** Sisi balon terhadap elemen; bawaan di bawah. */
   sisi?: "top" | "bottom" | "left" | "right";
 }

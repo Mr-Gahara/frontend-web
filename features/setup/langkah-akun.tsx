@@ -8,6 +8,7 @@ import { JudulLangkah, KotakInfo, NavigasiLangkah, PesanGalat, PesanIsian } from
 import { useKirim } from "./kirim";
 import { KELAS_BANTU, KELAS_ISIAN, KELAS_LABEL } from "./gaya";
 import type { PropsLangkah } from "./langkah";
+import { titikNamaToko, titikOwner } from "./titik-panduan";
 import { skemaNamaToko, skemaOwner, type NilaiNamaToko, type NilaiOwner } from "./schema";
 
 export function LangkahNamaToko({ nomor, total, teksLanjut, awal, onLanjut }: PropsLangkah<NilaiNamaToko>) {
@@ -25,8 +26,9 @@ export function LangkahNamaToko({ nomor, total, teksLanjut, awal, onLanjut }: Pr
         total={total}
         judul="Nama toko"
         keterangan="Nama ini tampil di kasir, struk, dan laporan. Bisa diubah nanti di Profil Toko."
+        panduan={{ kunci: "toko", titik: titikNamaToko(teksLanjut) }}
       />
-      <div className="flex flex-col gap-2">
+      <div data-panduan="nama-toko" className="flex flex-col gap-2">
         <label htmlFor="setup-nama-toko" className={KELAS_LABEL}>
           Nama toko
         </label>
@@ -68,8 +70,9 @@ export function LangkahOwner({ nomor, total, teksLanjut, awal, onLanjut, onKemba
         total={total}
         judul="Owner toko"
         keterangan="Owner memegang semua izin dan menambahkan karyawan lain nanti. Ia masuk dengan nama dan PIN, di web maupun di aplikasi kasir."
+        panduan={{ kunci: "owner", titik: titikOwner(teksLanjut) }}
       />
-      <div className="flex flex-col gap-2">
+      <div data-panduan="owner-nama" className="flex flex-col gap-2">
         <label htmlFor="setup-owner-nama" className={KELAS_LABEL}>
           Nama Owner
         </label>
@@ -81,7 +84,7 @@ export function LangkahOwner({ nomor, total, teksLanjut, awal, onLanjut, onKemba
         />
         <PesanIsian pesan={errors.nama?.message} />
       </div>
-      <div className="flex flex-wrap gap-4">
+      <div data-panduan="owner-pin" className="flex flex-wrap gap-4">
         <div className="flex flex-[1_1_200px] flex-col gap-2">
           <label htmlFor="setup-owner-pin" className={KELAS_LABEL}>
             PIN
