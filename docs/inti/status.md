@@ -40,6 +40,13 @@ beserta urutan yang disetujui 4 November 2026) dipindah ke
 sampai `c031bde`); rujukan "butir 4 (wizard)", "butir 6 (sesi kasir)",
 dan "butir 7" di dokumen lain merujuk daftar di sana.
 
+Pada 7 November 2026 Mesin Kasir disambung (`b74f30a`) dan keempat
+butir tanpa UI baru selesai (`arsip/catatan-putaran.md`, Catatan dari
+penyambungan Mesin Kasir dan Catatan dari pekerjaan tanpa UI baru
+7 November 2026). Yang dapat dikerjakan berikutnya menunggu backend
+(langkah jam buka, butir 176), desain pemilik proyek, atau keputusan
+pemilik proyek (bagian di bawah).
+
 Backend dijalankan dengan env inline agar `.env` backend tidak diubah
 (`inti/pengujian.md`, Menjalankan layanan uji). Kode backend tidak
 diubah dari sisi frontend. Langkah pertama setiap sesi memeriksa apakah
@@ -114,30 +121,6 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
   (Mesin Kasir, sisi backend, di atas).
 - Laporan untuk tim backend, yang ditunda sampai pekerjaan backend dari
   audit selesai (utang kecil, di bawah).
-- Sesi pengguna yang pulih setelah pin-logout gagal: dibiarkan, atau
-  diminta ke backend agar logout akun ikut mencabut sesi pengguna
-  (`modul/profil-login.md`, Utang terbuka).
-
-### Tanpa UI baru, selesai 7 November 2026
-
-Keempat butir yang dipilih pemilik proyek lewat dialog 7 November 2026
-selesai. E2E tidak dijalankan per commit: tiap commit diperiksa `tsc`,
-ESLint, dan vitest penuh, lalu satu suite e2e penuh di akhir putaran
-(pemilik proyek, 7 November 2026).
-
-1. Berkas di atas 700 baris dipecah tanpa mengubah perilaku: buat
-   penjualan (`584d6ae`) dan form produk (`11ed2d4`).
-2. Bukti dari kode backend dan respons nyata `1584222`: cache produk saat
-   pajak berubah (butir 94), hapus kategori yang dipakai produk 409
-   (butir 12), hapus aset yang punya booking dari web (butir 52,
-   `66ea7a4`), B112, B114 jalur Owner, format nomor B115, dan booking
-   Batal yang tidak lagi dikirim ke web (butir 141). Yang tersisa: B114
-   bagi peran selain Owner (butuh pengguna non-Owner) dan nomor B115
-   pada 00.00 sampai 07.00 WIB.
-3. Lima utang pengujian dilunasi (`5c9ed69`, `af77b1f`;
-   `arsip/riwayat-pengujian.md`).
-4. Suite e2e penuh 589 test, 585 lolos dan 1 skipped; ketiga kegagalan
-   skenario baru diperbaiki (`inti/pengujian.md`, Baseline).
 
 ### Utang kecil dari penyesuaian backend `4759208`
 
@@ -153,7 +136,8 @@ ESLint, dan vitest penuh, lalu satu suite e2e penuh di akhir putaran
   dari respons nyata (penyesuaian `1584222`), B112, B114 jalur Owner,
   format nomor B115, P18 hapus bahan, P19 hapus kategori, dan hapus aset
   ber-booking (7 November 2026; `kontrak/temuan.md` butir 12, 52, 94,
-  141, 155, 156, 160, 162, dan 164), lalu B250 setelah web
+  141, 155, 156, 160, 162, dan 164), temuan baru butir 177 (logout akun
+  tidak mencabut sesi pengguna), lalu B250 setelah web
   mengerjakannya, dan B255 setelah ada pengajuan APPROVED atau PENDING
   untuk diuji. Laporannya ditunda sampai pekerjaan backend dari audit
   selesai, agar diserahkan sekali jalan (pemilik proyek, 6 November
@@ -198,6 +182,7 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 - Jurnal stok tetap mengirim satu `locationID` untuk Semua Outlet,
   walau backend menerima `tipeLokasi` (B109); berpengaruh hanya bila
   tenant punya lebih dari satu outlet (`kontrak/temuan.md` butir 151).
+  Ditunda sampai multi-outlet (pemilik proyek, 7 November 2026).
 - Fixture izin cuti menetap di basis data development, karena backend
   tidak punya hapus izin; setiap hari yang menjalankan spec dashboard
   menambah dua izin.
@@ -224,7 +209,8 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 
 - Daftar Kirim Barang memakai asal bertipe Outlet tanpa pemilih (AR10a).
   Untuk multi-outlet, terapkan cakupan outlet seperti Terima Barang
-  (`lingkupOutlet` dan `PemilihLokasiOutlet`).
+  (`lingkupOutlet` dan `PemilihLokasiOutlet`). Ditunda sampai
+  multi-outlet (pemilik proyek, 7 November 2026).
 - Kartu siap surat jalan dashboard gudang dihitung server untuk kedua
   arah, sedangkan tab Perlu Surat Jalan gudang hanya memuat permintaan
   (AR6a). Angkanya melebihi isi tab bila ada pengembalian yang disetujui

@@ -20,14 +20,14 @@ Bagian **tetap**: hanya diubah atas perintah pemilik proyek.
    banyak pasangan atau berkas.
 3. Verifikasi: `tsc`, ESLint, dan pemeriksaan hasil.
 4. Menjalankan test yang ada, menambah skenario untuk perubahan itu, menjalankan ulang.
-5. Sebelum commit: `tsc`, ESLint, vitest penuh, dan spec e2e yang terdampak
-   perubahan itu, seluruhnya lolos. Suite e2e penuh hanya dijalankan saat
-   penting: penyesuaian backend, penelusuran bug atau galat yang butuh uji
-   menyeluruh, atau atas permintaan pemilik proyek (pemilik proyek,
-   6 Oktober 2026). Kegagalan dari suite penuh diperbaiki lalu dibuktikan
-   dengan spec yang terdampak saja, tanpa mengulang suite penuh; yang tidak
-   dapat dibuktikan dengan spec terdampak dicatat sebagai utang pengujian
-   (pemilik proyek, 3 November 2026).
+5. Sebelum commit: `tsc`, ESLint, dan vitest penuh, seluruhnya lolos. E2E
+   tidak dijalankan per commit; spec baru dan yang terdampak dijalankan
+   sebagai satu suite e2e penuh di akhir putaran (pemilik proyek,
+   7 November 2026, menggantikan spec terdampak per commit dan suite
+   penuh hanya saat penting sejak 6 Oktober 2026). Kegagalan dari suite
+   penuh diperbaiki lalu dibuktikan dengan spec yang terdampak saja, tanpa
+   mengulang suite penuh; yang tidak dapat dibuktikan dengan spec terdampak
+   dicatat sebagai utang pengujian (pemilik proyek, 3 November 2026).
 6. Setelah lolos: `git add`, commit dengan pesan lengkap (masalah, keputusan rancangan beserta alasan, dampak, pengujian), lalu push.
 
 Keputusan penting tidak dieksekusi sebelum pemilik proyek menjawab dialog

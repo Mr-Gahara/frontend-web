@@ -116,9 +116,13 @@ empat commit, dengan suite e2e penuh dijalankan sekali di akhir modul
   lokal dan memutus sesi akun, tetapi cookie refresh pengguna tetap
   berlaku di backend, sehingga membuka `/dashboard` lagi di browser yang
   sama memulihkan sesi pengguna itu (suite penuh 7 November 2026, skenario
-  logout gagal di `auth/sidebar-pengguna.spec.ts`). Cookie itu httpOnly
-  dan tidak dapat dihapus web. Perlu keputusan pemilik proyek: dibiarkan,
-  atau diminta ke backend agar logout akun ikut mencabut sesi pengguna.
+  logout gagal di `auth/sidebar-pengguna.spec.ts`). Jalur refresh web
+  `penggunaDeviceService.refreshToken` backend `ridho` `1584222` (baris
+  683 sampai 707) hanya memeriksa JWT refresh pengguna, `tokenVersion`
+  pengguna, dan status akun aktif (`_assertAkunAktif`, baris 32), tidak
+  sesi akun. Cookie itu httpOnly dan tidak dapat dihapus web. Pemilik
+  proyek memutuskan melaporkannya ke backend (7 November 2026,
+  `kontrak/temuan.md` butir 177).
 
 - Tombol hapus akun di halaman profil tampil nonaktif (PF2a) sampai
   backend punya jalur hapus akun sendiri bagi Owner (`kontrak/temuan.md`

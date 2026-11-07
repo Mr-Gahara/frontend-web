@@ -889,3 +889,26 @@ Daftar periksa penyambungan (pemilik proyek, 6 November 2026):
    `pratinjau.tsx` di `features/sesi-kasir`, kedua rute
    `pratinjauMesinKasir`, entrinya di `IZIN_HALAMAN`, dan
    `pratinjau-mesin-kasir.spec.ts`.
+
+## Catatan dari pekerjaan tanpa UI baru 7 November 2026
+
+Dipindah utuh dari `inti/status.md`.
+
+Keempat butir yang dipilih pemilik proyek lewat dialog 7 November 2026
+selesai. E2E tidak dijalankan per commit: tiap commit diperiksa `tsc`,
+ESLint, dan vitest penuh, lalu satu suite e2e penuh di akhir putaran
+(pemilik proyek, 7 November 2026).
+
+1. Berkas di atas 700 baris dipecah tanpa mengubah perilaku: buat
+   penjualan (`584d6ae`) dan form produk (`11ed2d4`).
+2. Bukti dari kode backend dan respons nyata `1584222`: cache produk saat
+   pajak berubah (butir 94), hapus kategori yang dipakai produk 409
+   (butir 12), hapus aset yang punya booking dari web (butir 52,
+   `66ea7a4`), B112, B114 jalur Owner, format nomor B115, dan booking
+   Batal yang tidak lagi dikirim ke web (butir 141). Yang tersisa: B114
+   bagi peran selain Owner (butuh pengguna non-Owner) dan nomor B115
+   pada 00.00 sampai 07.00 WIB.
+3. Lima utang pengujian dilunasi (`5c9ed69`, `af77b1f`;
+   `arsip/riwayat-pengujian.md`).
+4. Suite e2e penuh 589 test, 585 lolos dan 1 skipped; ketiga kegagalan
+   skenario baru diperbaiki (`inti/pengujian.md`, Baseline).

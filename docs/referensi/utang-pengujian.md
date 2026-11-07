@@ -308,7 +308,11 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   izin membuka setiap rute terpetakan (unit), dan spec terdampak lolos.
 - **Suite e2e penuh tidak lagi dijalankan di akhir setiap pekerjaan**
   (6 Oktober 2026), sehingga baseline suite penuh dapat berupa hitungan
-  selama beberapa pekerjaan. Angka terukur terakhir ada di
+  selama beberapa pekerjaan. Sejak 7 November 2026 e2e dijalankan
+  sebagai satu suite penuh di akhir setiap putaran, bukan per commit
+  (`inti/cara-kerja.md`, Alur setiap perubahan langkah 5); di antara
+  commit dan suite penuh, spec baru belum pernah dijalankan.
+  Angka terukur terakhir ada di
   `inti/pengujian.md` (Baseline).
 
 - **Batas 10 metode aktif dan metode aktif terakhir hanya teruji lewat
