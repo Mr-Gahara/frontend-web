@@ -13,6 +13,10 @@ import { diskonAktif } from "@/features/diskon/filter";
 import { useDaftarPajak } from "@/features/pajak/hooks";
 import { pajakTransaksiAktif } from "@/features/pajak/filter";
 import { useBuatPenjualan } from "./hooks";
+import { emptyItem, hitungSimulasi, type ItemState } from "./simulasi";
+import { KartuItemPenjualan } from "./kartu-item-penjualan";
+import { RingkasanTagihan } from "./ringkasan-tagihan";
+import { DialogKonfirmasiPenjualan } from "./dialog-konfirmasi-penjualan";
 import { susunPayloadPenjualan, validasiPenjualan, waktuTransaksi, type WaktuTransaksi } from "./payload";
 import { InputWaktu } from "@/components/input-waktu";
 import { PilihTanggal } from "@/components/pilih-tanggal";
@@ -52,41 +56,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   ArrowLeft,
   Check,
   ChevronsUpDown,
   Plus,
-  Trash2,
   Tag,
   Receipt,
   Users,
   ShoppingCart,
-  Calculator,
 } from "lucide-react";
-
-interface ItemState {
-  produkID: string;
-  jumlah: number;
-  jumlahStr: string;
-  diskonItemIDs: string[]; // State array ID Diskon Item
-}
-
-const emptyItem = (): ItemState => ({
-  produkID: "",
-  jumlah: 1,
-  jumlahStr: "1",
-  diskonItemIDs: [],
-});
 
 export default function HalamanBuatPenjualan() {
   const router = useRouter();
@@ -256,96 +234,18 @@ export default function HalamanBuatPenjualan() {
   // ==========================================
   //  ENGINE SIMULASI KALKULASI FRONTEND
   // ==========================================
-  const calc = useMemo(() => {
-    let grandTotalItem = 0;
-
-    // 1. Hitung Item & Diskon Item
-    const itemsCalc = items.map((item) => {
-      const produk = produkList.find(
-        (p) => p.id === item.produkID,
-      );
-      const subTotal = (item.jumlah || 1) * (produk?.hargaJual || 0);
-      let running = subTotal;
-      let totalDiskonItem = 0;
-
-      const selectedDiskon = activeDiskonItem.filter((d) =>
-        item.diskonItemIDs.includes(d.id),
-      );
-      for (const d of selectedDiskon) {
-        let potong =
-          d.tipe === "persen"
-            ? Math.ceil((running * d.nilai) / 100)
-            : d.nilai || 0;
-        if (potong > running) potong = running;
-        totalDiskonItem += potong;
-        running -= potong;
-      }
-
-      grandTotalItem += running;
-      return { subTotal, totalDiskonItem, totalHarga: running };
-    });
-
-    // 2. Hitung Diskon Global
-    let runningGlobal = grandTotalItem;
-    let totalDiskonGlobal = 0;
-
-    const selectedDiskonGlobal = activeDiskonGlobal.filter((d) =>
-      diskonGlobalIDs.includes(d.id),
-    );
-
-    for (const d of selectedDiskonGlobal) {
-      let potong =
-        d.tipe === "persen"
-          ? Math.ceil((runningGlobal * d.nilai) / 100)
-          : d.nilai || 0;
-      if (potong > runningGlobal) potong = runningGlobal;
-      totalDiskonGlobal += potong;
-      runningGlobal -= potong;
-    }
-
-    // 3. Hitung Pajak Transaksi Global
-    const dasarSetelahDiskon = runningGlobal;
-    let runningTotalPajak = dasarSetelahDiskon;
-    let totalPajak = 0;
-    const rincianPajak = [];
-
-    for (const p of activePajakGlobal) {
-      let nilaiPajak = 0;
-      if (p.modelPerhitungan === 1) {
-        nilaiPajak =
-          (runningTotalPajak / (1 + p.tarifPajak / 100)) * (p.tarifPajak / 100);
-      } else if (p.modelPerhitungan === 2) {
-        nilaiPajak = dasarSetelahDiskon * (p.tarifPajak / 100);
-        runningTotalPajak += nilaiPajak;
-      } else if (p.modelPerhitungan === 3) {
-        nilaiPajak = runningTotalPajak * (p.tarifPajak / 100);
-        runningTotalPajak += nilaiPajak;
-      }
-
-      totalPajak += Math.round(nilaiPajak);
-      rincianPajak.push({
-        namaPajak: p.namaPajak,
-        nominal: Math.round(nilaiPajak),
-        tipe: p.modelPerhitungan === 1 ? "Inc" : "Exc",
-      });
-    }
-
-    return {
-      itemsCalc,
-      grandTotalItem,
-      totalDiskonGlobal,
-      rincianPajak,
-      totalPajak,
-      grandTotal: Math.round(runningTotalPajak),
-    };
-  }, [
-    items,
-    produkList,
-    activeDiskonItem,
-    activeDiskonGlobal,
-    diskonGlobalIDs,
-    activePajakGlobal,
-  ]);
+  const calc = useMemo(
+    () =>
+      hitungSimulasi({
+        items,
+        produkList,
+        activeDiskonItem,
+        activeDiskonGlobal,
+        diskonGlobalIDs,
+        activePajakGlobal,
+      }),
+    [items, produkList, activeDiskonItem, activeDiskonGlobal, diskonGlobalIDs, activePajakGlobal],
+  );
 
   // --- SUBMIT LOGIC ---
   // Dialog konfirmasi hanya tertutup saat berhasil; saat gagal tetap terbuka
@@ -515,252 +415,26 @@ export default function HalamanBuatPenjualan() {
                 const itemCalc = calc.itemsCalc[index];
 
                 return (
-                  <div
+                  <KartuItemPenjualan
                     key={index}
-                    className="rounded-xl border border-navy/10 p-5 space-y-4 bg-gading shadow-inner"
-                  >
-                    <div className="flex items-center justify-between border-b border-navy/5 pb-3">
-                      <span className="text-xs font-bold text-navy/50 uppercase tracking-widest">
-                        Item #{index + 1}
-                      </span>
-                      {items.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
-                          onClick={() => removeItem(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-navy">
-                        Produk
-                      </label>
-                      <Popover
-                        open={openProduk === index}
-                        onOpenChange={(open) =>
-                          setOpenProduk(open ? index : null)
-                        }
-                      >
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            className="w-full justify-between font-bold cursor-pointer bg-white border-navy/20 text-navy"
-                          >
-                            <span
-                              className={
-                                item.produkID
-                                  ? ""
-                                  : "text-navy/40 font-medium"
-                              }
-                            >
-                              {item.produkID
-                                ? getProdukNama(item.produkID)
-                                : "Pilih produk..."}
-                            </span>
-                            <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-[--radix-popover-trigger-width] p-0 border-navy/10"
-                          align="start"
-                        >
-                          <Command className="bg-gading">
-                            <CommandInput
-                              placeholder="Cari produk..."
-                              className="text-navy"
-                            />
-                            <CommandList>
-                              <CommandEmpty className="py-6 text-center text-sm font-medium text-navy/60">
-                                Produk tidak ditemukan.
-                              </CommandEmpty>
-                              <CommandGroup>
-                                {produkList.map((p) => (
-                                  <CommandItem
-                                    key={p.id}
-                                    onSelect={() =>
-                                      handlePilihProduk(index, p.id)
-                                    }
-                                    className="cursor-pointer text-navy hover:bg-navy/5 font-medium"
-                                  >
-                                    <Check
-                                      className={cn(
-                                        "mr-2 h-4 w-4 text-sage",
-                                        item.produkID === p.id
-                                          ? "opacity-100"
-                                          : "opacity-0",
-                                      )}
-                                    />
-                                    <span className="flex-1">
-                                      {p.namaProduk}
-                                    </span>
-                                    <span className="ml-2 text-xs font-bold text-navy/50">
-                                      {formatRupiah(p.hargaJual)}
-                                    </span>
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-bold text-navy" htmlFor={`jumlah-${index}`}>
-                          Jumlah
-                        </label>
-                        <Input
-                          id={`jumlah-${index}`}
-                          type="number"
-                          min={1}
-                          value={item.jumlahStr}
-                          onChange={(e) =>
-                            handleJumlahChange(index, e.target.value)
-                          }
-                          onBlur={() => handleJumlahBlur(index)}
-                          className="bg-white border-navy/20 text-navy font-bold no-spinner"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-bold text-navy">
-                          Harga Satuan
-                        </label>
-                        <div className="flex h-10 items-center rounded-md border border-navy/10 bg-navy/5 px-3 text-sm font-bold text-navy/70 font-mono">
-                          {selectedProduk
-                            ? formatRupiah(selectedProduk.hargaJual)
-                            : "-"}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Diskon Item */}
-                    {selectedProduk && (
-                      <div className="space-y-2 pt-2">
-                        <div className="flex justify-between items-center">
-                          <label className="text-xs font-bold flex items-center gap-1.5 text-navy">
-                            <Tag className="h-3.5 w-3.5 text-karamel" />{" "}
-                            Diskon Produk
-                          </label>
-                          <Popover
-                            open={openDiskonItem === index}
-                            onOpenChange={(o) =>
-                              setOpenDiskonItem(o ? index : null)
-                            }
-                          >
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-7 text-xs cursor-pointer font-bold border-navy/20 text-navy hover:bg-navy/5"
-                              >
-                                Pilih Diskon
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              align="end"
-                              className="w-64 p-0 border-navy/10"
-                            >
-                              <Command className="bg-gading">
-                                <CommandInput
-                                  placeholder="Cari diskon item..."
-                                  className="text-navy"
-                                />
-                                <CommandList>
-                                  <CommandEmpty className="py-4 text-center text-xs font-medium text-navy/60">
-                                    Belum ada diskon aktif.
-                                  </CommandEmpty>
-                                  <CommandGroup>
-                                    {activeDiskonItem.map((d, idx) => {
-                                      const targetId = d.id;
-                                      const isSelected =
-                                        item.diskonItemIDs.includes(targetId);
-                                      const safeKey =
-                                        targetId || `item-diskon-${idx}`;
-
-                                      return (
-                                        <CommandItem
-                                          key={safeKey}
-                                          onSelect={() =>
-                                            toggleItemDiskon(index, targetId)
-                                          }
-                                          className="cursor-pointer text-navy hover:bg-navy/5 font-medium"
-                                        >
-                                          <div className="flex flex-1 items-center gap-2">
-                                            {/* Checkbox Custom untuk CommandItem */}
-                                            <div
-                                              className={cn(
-                                                "flex h-4 w-4 items-center justify-center rounded-sm border",
-                                                isSelected
-                                                  ? "bg-navy border-navy"
-                                                  : "border-navy/30",
-                                              )}
-                                            >
-                                              {isSelected && (
-                                                <Check className="h-3 w-3 text-gading" />
-                                              )}
-                                            </div>
-                                            <span className="flex flex-col"><span>{d.namaDiskon}</span><SyaratDiskon diskon={d} /></span>
-                                          </div>
-                                          <Badge className="text-[10px] bg-karamel text-navy hover:bg-karamel border-none font-bold">
-                                            {d.tipe === "persen"
-                                              ? `${d.nilai}%`
-                                              : "Rp"}
-                                          </Badge>
-                                        </CommandItem>
-                                      );
-                                    })}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-
-                        {item.diskonItemIDs.length > 0 && (
-                          <div className="flex flex-wrap gap-2 pt-1">
-                            {item.diskonItemIDs.map((id, idx) => {
-                              const d = activeDiskonItem.find(
-                                (x) => (x.id) === id,
-                              );
-                              if (!d) return null;
-                              return (
-                                <Badge
-                                  key={d.id || `badge-item-${idx}`}
-                                  className="bg-karamel text-navy border-none hover:bg-karamel text-[10px] font-bold shadow-sm"
-                                >
-                                  {d.namaDiskon} (
-                                  {d.tipe === "persen"
-                                    ? `${d.nilai}%`
-                                    : formatRupiah(d.nilai)}
-                                  )
-                                </Badge>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {selectedProduk && (
-                      <div className="flex flex-col items-end gap-1 pt-3 border-t border-navy/5 mt-2">
-                        {itemCalc.totalDiskonItem > 0 && (
-                          <span className="text-xs text-rose-500 line-through font-mono">
-                            {formatRupiah(itemCalc.subTotal)}
-                          </span>
-                        )}
-                        <span className="text-sm font-bold text-navy font-mono">
-                          {formatRupiah(itemCalc.totalHarga)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                    item={item}
+                    index={index}
+                    jumlahItem={items.length}
+                    selectedProduk={selectedProduk}
+                    itemCalc={itemCalc}
+                    namaProduk={getProdukNama(item.produkID)}
+                    produkList={produkList}
+                    activeDiskonItem={activeDiskonItem}
+                    produkTerbuka={openProduk === index}
+                    diskonTerbuka={openDiskonItem === index}
+                    onProdukTerbuka={(open) => setOpenProduk(open ? index : null)}
+                    onDiskonTerbuka={(o) => setOpenDiskonItem(o ? index : null)}
+                    onHapus={() => removeItem(index)}
+                    onPilihProduk={(produkID) => handlePilihProduk(index, produkID)}
+                    onJumlahChange={(raw) => handleJumlahChange(index, raw)}
+                    onJumlahBlur={() => handleJumlahBlur(index)}
+                    onToggleDiskon={(diskonId) => toggleItemDiskon(index, diskonId)}
+                  />
                 );
               })}
             </div>
@@ -977,60 +651,7 @@ export default function HalamanBuatPenjualan() {
           </div>
 
           {/* RINGKASAN TAGIHAN */}
-          <div className="rounded-2xl border border-navy/10 bg-navy text-gading p-6 shadow-md space-y-4">
-            <h2 className="text-sm font-bold border-b border-gading/20 pb-3 flex items-center gap-2 uppercase tracking-widest text-karamel">
-              <Calculator className="w-4 h-4" /> Ringkasan
-            </h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between text-gading/80 font-medium">
-                <span>Subtotal Produk</span>
-                <span className="font-mono text-gading">
-                  {formatRupiah(calc.grandTotalItem)}
-                </span>
-              </div>
-
-              {calc.totalDiskonGlobal > 0 && (
-                <div className="flex justify-between text-rose-300 font-bold">
-                  <span>Total Diskon</span>
-                  <span className="font-mono">
-                    -{formatRupiah(calc.totalDiskonGlobal)}
-                  </span>
-                </div>
-              )}
-
-              {calc.rincianPajak.length > 0 && (
-                <div className="space-y-1.5 pt-2">
-                  {calc.rincianPajak.map((p, idx) => (
-                    <div
-                      key={idx}
-                      className="flex justify-between text-gading/60 text-xs font-medium"
-                    >
-                      <span>Pajak: {p.namaPajak}</span>
-                      <span className="font-mono">
-                        {p.tipe === "Inc" ? "(Inc) " : ""}
-                        {formatRupiah(p.nominal)}
-                      </span>
-                    </div>
-                  ))}
-                  <div className="flex justify-between text-gading/80 font-bold border-t border-gading/20 border-dashed pt-2 mt-2">
-                    <span>Total Pajak</span>
-                    <span className="font-mono">
-                      {formatRupiah(calc.totalPajak)}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              <div className="border-t border-gading/20 pt-4 mt-2 flex justify-between items-end">
-                <span className="text-sm font-bold text-gading">
-                  Total Estimasi
-                </span>
-                <span className="text-2xl font-black text-sage leading-none font-mono">
-                  {formatRupiah(calc.grandTotal)}
-                </span>
-              </div>
-            </div>
-          </div>
+          <RingkasanTagihan calc={calc} />
         </div>
 
         {/* ================= AKSI & SUBMIT ================= */}
@@ -1061,38 +682,12 @@ export default function HalamanBuatPenjualan() {
         </div>
       </form>
 
-      {/* DIALOG KONFIRMASI */}
-      <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <AlertDialogContent className="bg-gading border-navy/10">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-navy">
-              Buat Transaksi Penjualan?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-navy/70 font-medium">
-              Apakah Anda yakin detail transaksi sudah benar? Data akan disimpan
-              sebagai transaksi baru yang belum dibayar.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              disabled={createMutation.isPending}
-              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
-            >
-              Batal
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                executeCreate();
-              }}
-              disabled={createMutation.isPending}
-              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold"
-            >
-              {createMutation.isPending ? "Memproses..." : "Ya, Lanjutkan"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DialogKonfirmasiPenjualan
+        buka={showConfirm}
+        onBukaChange={setShowConfirm}
+        memproses={createMutation.isPending}
+        onLanjutkan={executeCreate}
+      />
     </div>
   );
 }
