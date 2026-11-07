@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
+import dynamic from "next/dynamic";
 import { AlertTriangle, LineChart as IkonGrafik } from "lucide-react";
 
 import { titikOmzet } from "./kartu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { GrafikLaporan } from "@/features/laporan/grafik-laporan";
 import { useLabaRugi } from "@/features/laporan/hooks";
 import {
   jumlahkan,
@@ -16,7 +17,22 @@ import {
 import { formatRupiah } from "@/lib/format";
 
 /** Grafik omzet per tanggal bulan berjalan (keputusan DB5a). */
+
+/*
+ * Recharts adalah potongan JS terbesar di dashboard (sekitar 320 KB sebelum
+ * kompresi). Grafik dimuat terpisah agar bagian lain dashboard tidak
+ * menunggunya; unduhannya dimulai saat panel dipasang, paralel dengan
+ * pengambilan data laba rugi, sehingga grafik tidak tampil lebih lambat.
+ */
+const muatGrafik = () => import("@/features/laporan/grafik-laporan").then((m) => m.GrafikLaporan);
+const GrafikLaporan = dynamic(muatGrafik, {
+  loading: () => <Skeleton className="h-full w-full bg-navy/5 rounded-xl" />,
+});
+
 export function PanelGrafik({ hari }: { hari: Date }) {
+  useEffect(() => {
+    void muatGrafik();
+  }, []);
   const kini = useLabaRugi(rentangPeriode("bulanan", hari));
   const lalu = useLabaRugi(rentangPeriodeSebelumnya("bulanan", hari));
   const total = jumlahkan(kini.data ?? [], "totalOmzet");

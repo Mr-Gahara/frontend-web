@@ -156,6 +156,33 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 
 ## Utang kecil yang tertunda
 
+### Persiapan produksi di VPS
+
+Frontend ditempatkan di VPS yang sama dengan backend, di belakang Caddy
+backend, dengan subdomain sendiri: `/api/*` diteruskan Caddy langsung ke
+backend, sisanya ke container frontend; domain API tetap untuk aplikasi
+Flutter (pemilik proyek, 7 November 2026). Syarat dari pemilik proyek:
+lebih cepat dan efisien dengan tampilan dan hasil yang sama. Yang sudah
+selesai:
+
+- `output: "standalone"` di `next.config.ts`; `npm run build` menyalin
+  `public` dan `.next/static`, dan `npm start` menjalankan
+  `.next/standalone/server.js`. Dev server dan e2e tetap `next dev`.
+- `Dockerfile`, `.dockerignore`, `deploy/Caddyfile.web`,
+  `deploy/compose.web.yml`, dan `deploy/README.md`. Image dibangun dan
+  container sehat (user `node`, sekitar 56 MB RAM); Caddyfile lolos
+  `caddy validate`.
+- Grafik dashboard outlet dimuat terpisah lewat `next/dynamic`, dengan
+  unduhan dimulai saat panel dipasang: muatan awal dashboard turun dari
+  449 menjadi 356 KB gzip, dan `tests/e2e/dashboard` 12 lolos.
+
+Sisa, dikerjakan pemilik proyek di repo backend saat VPS siap
+(`deploy/README.md`, Langkah sekali): blok Caddy web, service `frontend`
+di compose, `WEB_DOMAIN`, domain web di `CORS_ORIGINS`, dan bagian
+Arsitektur `deploy/RUNBOOK.md` yang masih mencatat frontend di Vercel.
+Ukuran pada 7 November 2026: server produksi sekitar 112 sampai 165 MB
+RAM, build memuncak sekitar 2 GB.
+
 ### Utang kecil dari kerapian repo
 
 - Folder `tests/` (225 berkas) masih ikut di repo publik GitHub, termasuk

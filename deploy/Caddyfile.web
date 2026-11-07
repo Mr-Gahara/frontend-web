@@ -1,0 +1,28 @@
+# Blok situs web untuk ditambahkan ke deploy/Caddyfile repo backend, di bawah
+# blok {$API_DOMAIN} yang sudah ada (deploy/README.md). Satu domain untuk web:
+# /api/* langsung ke backend (tanpa lewat server Next.js), sisanya ke frontend.
+# Domain API tetap dipakai aplikasi Flutter dan tidak berubah.
+
+{$WEB_DOMAIN} {
+    encode zstd gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    handle /api/* {
+        # Sama dengan blok API: di atas batas upload foto backend.
+        request_body {
+            max_size 10MB
+        }
+        # SSE (text/event-stream) diteruskan tanpa buffering secara otomatis.
+        reverse_proxy backend:4000
+    }
+
+    handle {
+        reverse_proxy frontend:3000
+    }
+}
