@@ -169,7 +169,13 @@ test.describe("E2E — Aset › Halaman Daftar", () => {
     const booking = await buatBooking(page, auth, fx, mulai, new Date(mulai.getTime() + 60 * 60 * 1000));
     try {
       await bukaDaftar(page);
-      await (await cariBaris(page, NAMA_ASET_BOOKING)).getByRole("button", { name: "Buka menu" }).click();
+      // Nama fixture lain berawalan sama ("E2E Reservasi Aset ..."), sehingga baris dicocokkan tepat.
+      await page.getByPlaceholder(/cari nama aset/i).fill(NAMA_ASET_BOOKING);
+      await page
+        .getByRole("row")
+        .filter({ has: page.getByText(NAMA_ASET_BOOKING, { exact: true }) })
+        .getByRole("button", { name: "Buka menu" })
+        .click();
       await page.getByRole("menuitem", { name: /^hapus$/i }).click();
       const dialog = page.getByRole("alertdialog");
       const tHapus = page.waitForResponse(cocok("DELETE", POLA_SATU));

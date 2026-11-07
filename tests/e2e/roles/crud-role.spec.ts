@@ -161,10 +161,12 @@ test.describe("E2E - Role (CRUD)", () => {
   test("edit: penanda memuat tampil setiap detail dimuat ulang, dan galat server menampilkan pesannya", async ({
     page,
   }) => {
+    // Penunggu dipasang setelah navigasi commit, agar tidak menangkap respons
+    // daftar milik halaman sebelumnya (inti/pengujian.md, Urutan debug).
+    await page.goto(`${BASE}${DAFTAR}`, { waitUntil: "commit" });
     const tDaftar = page.waitForResponse(
       (r) => /\/api\/role(\?|$)/i.test(r.url()) && r.request().method() === "GET",
     );
-    await page.reload();
     const daftar = ((await (await tDaftar).json()) as { data: { _id?: string; id?: string; namaRole: string }[] }).data;
     const role = daftar.find((r) => r.namaRole !== "Owner") ?? daftar[0];
     const id = role._id ?? role.id;
