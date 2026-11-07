@@ -530,6 +530,20 @@ bersyarat).
   dan desktop yang disembunyikan CSS tetap ditemukan `getByText`; pilih
   lewat lebar viewport atau pola teks yang hanya cocok dengan satu bentuk
   (`0178550`).
+- Isi `use` di `playwright.config.ts` juga berlaku untuk
+  `browser.newContext()` dan `request.newContext()` di dalam test
+  (Playwright 1.59.1, `node_modules/playwright/lib/index.js` baris 283
+  sampai 293); itu sebabnya `goto` berpath relatif berjalan di context
+  kedua. Saklar tur di `storageState` (keputusan rancangan butir 32)
+  karena itu cukup dipasang di config, dan spec yang butuh localStorage
+  kosong menulis
+  `test.use({ storageState: { cookies: [], origins: [] } })`.
+- Balon tur berperan `dialog`, sama dengan sidebar HP, sehingga balon
+  dicari lewat teks "Panduan x dari y" (`balonPanduan` di
+  `tests/helpers/panduan-uji.ts`). Nama aksesibel balon adalah judul
+  titiknya, misalnya "Isi nama toko", yang ikut cocok dengan
+  `getByLabel("Nama toko")`; isian di belakang balon dicari dengan
+  `exact: true` (`c8a2e83`).
 
 ## Spec rujukan
 
@@ -1016,3 +1030,10 @@ bersyarat).
   layar (`b3f8698`). `pratinjau-mesin-kasir.spec.ts` memakai pola yang
   sama untuk setiap keadaan pratinjau, dan membandingkan kotak region
   bagian untuk tata letak berdampingan (`0178550`).
+- `tests/e2e/setup/panduan.spec.ts` dan
+  `tests/e2e/dashboard/panduan-dashboard.spec.ts` (`c8a2e83`, `5c3da45`):
+  `storageState` dikosongkan agar tur tampil sendiri; setiap titik
+  diperiksa nomornya serta letak balon dan elemen yang disorot di dalam
+  layar (`periksaLetak`), dan di HP keadaan sidebar diperiksa per titik
+  lewat `jalaniTur(page, target, periksa)`. Ketiadaan tur sesudah dimuat
+  ulang dibuktikan dengan menunggu lebih lama dari jeda buka otomatis.

@@ -225,7 +225,10 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   "No test suite found" atau tidak menambah jumlah test, `tsc` gagal
   menemukan modul, dan Playwright tidak menjalankan satu test pun. Terjadi
   tiga kali pada putaran izin lintas outlet: dua kali berkas belum dibuat,
-  sekali berukuran 0 byte.
+  sekali berukuran 0 byte. Terulang 7 November 2026:
+  `titik-panduan.test.ts` tersimpan 0 baris dan vitest menjawab "No test
+  suite found"; sejak itu blok cek sesudah berkas baru memuat `wc -l`
+  setiap berkas beserta angka harapannya.
 - **Keluaran panjang disimpan ke berkas lalu dibaca per bagian.** Pencarian
   dampak menghasilkan ratusan baris; simpan ke `/tmp`, cetak judul bagian
   dengan `grep -n '^=='`, lalu bagian tertentu dengan `awk`.
@@ -916,7 +919,15 @@ Kesalahan yang pernah terjadi dan cara menghindarinya:
   pengganti tidak memuat `\n` sesudah baris terakhir berkas, dan skrip
   mempertahankan bentuk akhir semula. Perapian akhir berkas tidak
   dicampur dengan commit fitur; perintah yang menyentuh banyak berkas
-  sekaligus dibatasi pada berkas commit itu.
+  sekaligus dibatasi pada berkas commit itu. Terulang 7 November 2026:
+  pengganti untuk `penanda.ts` mengandalkan baris baru di akhir berkas,
+  berhenti di tengah, dan meninggalkan impor `useRef` serta ekspor
+  `gulirKe` yang hilang. Pengganti memeriksa seluruh pasangan sebelum
+  menulis apa pun.
+- **E2E tidak dijalankan selagi `tsc` merah.** Galat kompilasi membuat
+  dev server menampilkan layar galat, sehingga spec menunggu sampai
+  habis waktu dan terminal tampak macet (7 November 2026, penanda
+  wizard). Urutan pemeriksaan: `tsc`, ESLint, vitest, baru Playwright.
 - **Berkas baru yang ditempel manual diperiksa isinya sebelum test
   dijalankan** (`head -3`): berkas test yang tertempel isi hook membuat
   vitest menjawab "No test suite found" (26 Oktober 2026).

@@ -117,36 +117,29 @@ Yoga, dan Nizar pada 7 November 2026. Daftar periksa:
 2. `LANGKAH_JAM_BUKA` masuk `daftarLangkah` sesudah lokasi,
    `PETA_LANGKAH.jamBuka` diisi kunci server, dan langkah tersambung
    menyimpan lewat `features/tenant` dengan nilai awal dari data tenant.
-3. Langkah yang sudah tersimpan tampil sebagai ringkasan tanpa tautan
-   (WS6a).
+3. Langkah yang sudah tersimpan tampil sebagai ringkasan tanpa tautan,
+   seperti ringkasan langkah lain sejak `daf9e3a` (WS6a).
 4. Spec alur nyata di `tests/e2e/setup/setup.spec.ts` (jumlah langkah per
    plan bertambah satu), lalu hapus `features/setup/pratinjau-jam-buka.tsx`,
    `app/setup/pratinjauJamBuka`, dan
    `tests/e2e/setup/pratinjau-jam-buka.spec.ts`.
 5. Jam buka di Profil Toko memakai komponen yang sama; pemakaiannya di
    shift dan jadwal diputuskan pemilik proyek saat penyambungan.
+6. Tur sorotan langkah jam buka: teksnya diajukan ke pemilik proyek,
+   lalu titiknya ditambah di `features/setup/titik-panduan.ts` dan
+   langkahnya memberi prop `panduan` ke `JudulLangkah` (keputusan
+   rancangan butir 32; `modul/setup-akun.md`, PN2a dan PN3a).
 
 ### Menunggu desain pemilik proyek
 
 Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 6 November 2026). Urutannya disetujui 4 dan 5 November 2026.
 
-1. **Penanda dan pemandu wizard setup** (pemilik proyek, 5 November
-   2026, sesudah halaman sesi kasir): pemilik proyek mencoba wizard
-   sendiri, mengisi form produk lalu menekan "Simpan dan lanjut" tanpa
-   "Simpan produk", sehingga produk tidak pernah terkirim (log backend
-   hanya `GET /api/produk`) dan galat "Tambahkan minimal satu produk."
-   menyesatkan.
-   Jebakan yang sama ada di langkah Kategori dan Bahan baku. Arahnya:
-   tombol yang harus ditekan lebih dulu di setiap langkah ditonjolkan,
-   dan setelah wizard selesai ditambah pemandu UI (sorotan atau tur)
-   yang menunjukkan apa yang diisi dan tombol apa yang ditekan. Rancangan
-   dan perilakunya diajukan lewat dialog sebelum dikerjakan.
-2. **Isian password di halaman verifikasi email**, sisa B248: keadaan
+1. **Isian password di halaman verifikasi email**, sisa B248: keadaan
    tanpa password titipan (halaman dimuat ulang atau dibuka langsung)
    kini pindah ke login dengan pesan "Masuk lagi" (`efb05db`). Isiannya
    didesain sendiri oleh pemilik proyek (`kontrak/temuan.md` butir 171).
-3. **Belum dijadwalkan, perlu desain**: logo toko (B203 sampai B205) di
+2. **Belum dijadwalkan, perlu desain**: logo toko (B203 sampai B205) di
    profil toko (jam operasional B206 menyusul penyambungan langkah jam
    buka, di atas); OTP reset PIN Owner dan ubah
    email atau password akun (B178 sampai B180); hapus akun oleh Owner
@@ -166,10 +159,6 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 
 Diajukan lewat dialog sebelum dikerjakan:
 
-- Ringkasan tersimpan wizard tanpa tautan (WS6a, `kontrak/temuan.md`
-  butir 175): tautan "Ubah di ..." membawa pengguna keluar dari wizard
-  sebelum setup selesai. Dikerjakan bersama penanda wizard (Menunggu
-  desain pemilik proyek, butir 1).
 - Cocokkan cache produk saat pajak berubah dari kode backend, uji hapus
   aset yang punya booking dan hapus kategori yang dipakai produk dari
   web, buktikan B112, B114, dan B115, dan lihat langsung booking Batal
@@ -207,6 +196,18 @@ Diajukan lewat dialog sebelum dikerjakan:
   membuat akun pendaftar, karena akun itu ikut ditandai selesai.
 
 ## Utang kecil yang tertunda
+
+### Utang kecil dari penanda dan panduan wizard
+
+Penanda dan tur sorotan wizard serta dashboard selesai di `58d7eb9`,
+`aa3c1c6`, `c8a2e83`, dan `5c3da45`, dan ringkasan tersimpan tanpa
+tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
+
+- Suite e2e penuh belum dijalankan sejak `c8a2e83`, ditunda pemilik
+  proyek 7 November 2026, padahal saklar tur di `playwright.config.ts`
+  berlaku untuk semua spec (`referensi/utang-pengujian.md`).
+- Ruang gudang dan langkah jam buka belum punya tur
+  (`modul/setup-akun.md`, Utang terbuka).
 
 ### Utang kecil dari perbaikan HP Keuangan
 

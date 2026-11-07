@@ -12,6 +12,24 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per penanda dan panduan wizard** (commit `daf9e3a`, 7
+November 2026): 983 test unit dan integrasi lolos, bertambah 18 dari
+965: penanda (4, `58d7eb9`), catatan tur dan kotak sorotan (6,
+`aa3c1c6`), titik tur wizard (5, `c8a2e83`), dan titik tur dashboard (3,
+`5c3da45`). Suite e2e penuh tidak dijalankan atas permintaan pemilik
+proyek (`referensi/utang-pengujian.md`). Spec terdampak:
+`tests/e2e/setup` 20 lolos di `daf9e3a` (satu skenario penanda baru di
+`setup.spec.ts`, dan spec baru `panduan.spec.ts` dengan 3 skenario), dan
+bersama `tests/e2e/dashboard` 31 lolos dan 1 skipped di `5c3da45` (spec
+baru `panduan-dashboard.spec.ts` dengan 2 skenario). Yang dilewati skip
+bersyarat data "status staf memuat staf ruang outlet, dan lonceng
+nonaktif", karena monitoring absensi tidak memuat staf ruang outlet.
+Sejak `c8a2e83` `playwright.config.ts` mematikan tur otomatis untuk
+semua spec lewat `storageState` (keputusan rancangan butir 32). Harapan
+suite penuh 586: 580 ditambah enam skenario itu, dengan 585 lolos dan 1
+skipped bersyarat tanggal sampai tanggal 8, ditambah skip status staf
+bila datanya kosong (hitungan).
+
 **Baseline per langkah jam buka** (commit `1386a30`, 7 November 2026):
 965 test unit dan integrasi lolos, termasuk 21 test baru
 `tests/unit/features/setup/jam-buka.test.ts` (`b48cfdb`). Suite e2e penuh
@@ -392,12 +410,15 @@ terhitung di angka skipped pada baseline:
 | `inventaris/stockOpname/alur-stok-opname*.spec.ts`, `draft-stok-opname.spec.ts` | Lokasi aktif outlet atau gudang terpilih masih punya opname DRAFT atau SUBMITTED; backend menjawab 409 (tidak terjadi pada data uji sekarang) |
 | Dua puluh skenario di `tests/e2e/admin/` (sesi, akun klien, langganan, dan kelola akun) | `.env.e2e` tidak berisi kredensial admin uji (PA5a). Tidak terjadi di mesin pemilik proyek, sehingga tidak terhitung di baseline |
 | Ketiga skenario `tests/e2e/setup/plan-fitur.spec.ts` | Sama: akun uji Basic, Advanced, dan Pro dibuat lewat API admin (`8d0f1dd`) |
-| Keenam skenario `tests/e2e/setup/setup.spec.ts` | Sama: akun uji wizard dibuat dan dihapus lewat API admin (`41194b7`). Sebelumnya spec pratinjau selalu berjalan |
+| Kedelapan skenario `tests/e2e/setup/setup.spec.ts` dan ketiga skenario `tests/e2e/setup/panduan.spec.ts` | Sama: akun uji wizard dibuat dan dihapus lewat API admin (`41194b7`, `c8a2e83`). Sebelumnya spec pratinjau selalu berjalan |
 
 Skenario lain di spec stok, stock adjustment, jurnal stok, stock opname, dan
 hapus bahan baku juga dilewati bila datanya kosong. Pada data uji sekarang
 itu hanya terjadi di jurnal stok pada tanggal 1, karena data bulan
-berjalan masih kosong (baseline 1 November 2026).
+berjalan masih kosong (baseline 1 November 2026). Skenario status staf
+di `dashboard/dashboard-outlet.spec.ts` dilewati bila monitoring absensi
+tidak memuat staf ruang outlet; terjadi di spec terdampak 7 November
+2026.
 
 Tiga skenario pendaftaran di `auth/daftar.spec.ts` dilewati bila backend
 menjawab 429 (`ALASAN_KUOTA`, `d94a48c`): batas `registerLimiter` 10 per

@@ -769,6 +769,12 @@ yang disalurkan ke `tail -3` mencetak kode 0 padahal alat itu keluar 1.
 - **Catatan shell ini dibaca sebelum menyusun blok perintah, termasuk
   untuk repo backend.** Pada 1 November 2026 tiga blok gagal karena
   `--include` tanpa kutip, padahal sudah tercatat di atas.
+- **Patch yang ditempel dari chat memakai `git apply --recount`.** Baris
+  konteks kosong di akhir patch terbuang saat blok kode disalin,
+  sehingga jumlah baris tidak lagi sesuai header `@@`, dan `git apply`
+  menjawab `corrupt patch at <stdin>:<baris>` tanpa mengubah apa pun (7
+  November 2026, `daf9e3a`). `--recount` menghitung ulang jumlah baris
+  dari isi patch.
 
 ## Catatan form (React Hook Form dan Zod)
 

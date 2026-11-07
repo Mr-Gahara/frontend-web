@@ -161,6 +161,53 @@ penyambungannya menunggu backend (`kontrak/temuan.md` butir 176).
   tanpa padanan status server akan membuka wizard yang sudah tuntas di
   langkah itu.
 
+### Penanda dan panduan wizard
+
+Diputuskan pemilik proyek pada 7 November 2026 dari kanvas desain
+"Panduan Wizard Setup": gaya B, dengan penanda isian dan tautan Lihat
+panduan dari gaya A. Menjawab isian yang tidak ikut terkirim oleh Simpan
+dan lanjut (ditemukan pemilik proyek, 5 November 2026; Utang terbuka).
+Mesinnya mengikuti keputusan rancangan butir 32.
+
+- **PN1a: isian yang belum ditambahkan ditonjolkan** (`58d7eb9`). Selama
+  isian kategori, bahan baku (bila ada resep), produk, atau pajak (bila
+  sudah ada pajak tersimpan) terisi tetapi belum ditambahkan, tombol
+  tambahnya menyala navy dan di bawahnya tampil "Belum tersimpan. Tekan
+  <tombol>." Simpan dan lanjut menolak dengan pesan seperti 'Kategori
+  "Minuman dingin" belum ditambahkan. Tekan Tambah kategori dulu, atau
+  kosongkan isiannya.' (produk: "belum disimpan", tombol Simpan produk)
+  dan menggulir ke tombolnya, alih-alih membuang isian diam-diam.
+- **PN2a: tur sorotan di setiap langkah form wizard** (`c8a2e83`): nama
+  toko, Owner, lokasi outlet, kategori, bahan baku, produk, pajak, sesi
+  booking, dan gudang. Tur tampil sendiri saat langkah pertama kali
+  dibuka di perangkat itu, dan dapat dibuka ulang lewat tautan Lihat
+  panduan di samping nomor langkah. Ringkasan langkah tersimpan tidak
+  punya tur maupun tautannya. Balon berisi "Panduan x dari y", tombol
+  tutup, judul dan isi titik, Lewati panduan, Kembali (tidak di titik
+  pertama), lalu Lanjut atau Selesai; layar diredupkan navy dengan
+  cincin navy di elemen yang disorot. Tur yang tertutup dengan cara apa
+  pun, termasuk karena pengguna pindah langkah, dicatat sudah dilihat.
+- **PN3a: teks tur wizard disimpan di kode**
+  (`features/setup/titik-panduan.ts`), disetujui pemilik proyek 7
+  November 2026. Titik terakhir selalu tombol lanjut, dengan judul
+  mengikuti teks tombolnya. Titik Tambah bahan baku hanya bila ada resep,
+  Tambah pajak hanya bila sudah ada pajak tersimpan, dan "Belum siap?
+  Lewati dulu" hanya di sesi booking dan gudang. Teks gudang tidak
+  menyebut penjualan, karena gudang tidak berjualan. Teks yang disetujui
+  pertama kali tidak tersimpan di kanvas, sehingga disusun ulang dari
+  kode dan disetujui lagi.
+- **PN4a: tur dashboard ruang outlet** (`5c3da45`): tombol bantuan
+  "Lihat panduan dashboard" di topbar, di samping lonceng, dengan bentuk
+  yang sama tetapi aktif. Lima titik: tombol menu, Data Barang, Karyawan
+  & Staff, Kalender Jadwal, dan Pengaturan Outlet
+  (`components/panduan/titik-dashboard.ts`; teks titik Karyawan dari
+  kanvas). Titik menu yang tidak tampil bagi pengguna menurut izin atau
+  plan tidak dimasukkan. Tur tampil sendiri bagi setiap pengguna web saat
+  pertama kali membuka ruang outlet di perangkat itu (kunci per id
+  pengguna). Di HP sidebar dibuka untuk titik menu dan ditutup lagi saat
+  tur selesai. Ruang gudang belum punya tur, sehingga tombolnya tidak
+  tampil di sana.
+
 ## Kriteria setup
 
 | Kriteria | Minimal | Plan |
@@ -258,14 +305,17 @@ dan token warna yang sudah ada.
   untung rugi dengan "booking dan gudang bisa ditambah" (bertentangan
   dengan satu outlet dan satu gudang pada MVP) dan "bisa diubah di
   wizard" (kode dan risiko terbesar) (5 November 2026, `493f49c`).
-  Tautannya diganti teks petunjuk oleh WS6a.
+  Tautannya diganti teks petunjuk oleh WS6a (`daf9e3a`).
 - **WS6a: ringkasan tersimpan tidak bertautan** (pemilik proyek, 7 November
   2026, menggantikan tautan WS5a). Tautan "Ubah di ..." membawa pengguna
   keluar dari wizard ke dashboard sebelum setup selesai
   (`kontrak/temuan.md` butir 175). Ringkasan lokasi outlet, sesi booking,
   dan gudang cukup menyebut halaman untuk mengubahnya nanti, seperti
   catatan Nama toko ("Nama toko dapat diubah nanti dari Profil Toko.").
-  Belum diterapkan.
+  Diterapkan di `daf9e3a`: lokasi outlet dapat diubah nanti dari Profil
+  Toko, gudang dari Pengaturan Gudang, dan sesi booking dari halaman Aset
+  dan Tarif di menu Sesi Booking & Reservasi; prop `tautan`
+  `LangkahTersimpan` dibuang.
 - **WS3a: Owner terdaftar tanpa sesi pengguna masuk lewat login PIN**
   (`/login/pengguna?kembali=/setup`), lalu kembali ke wizard; `kembali`
   hanya menerima `/setup`.
@@ -407,7 +457,8 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
   (ditemukan pemilik proyek, 5 November 2026). Diantrikan di
   `inti/status.md` (Pekerjaan berikutnya, Menunggu desain pemilik
   proyek): penanda tombol yang harus ditekan lebih dulu, dan pemandu UI
-  setelah wizard selesai.
+  setelah wizard selesai. Selesai di `58d7eb9` (penanda, PN1a) serta
+  `c8a2e83` dan `5c3da45` (tur wizard dan dashboard, PN2a sampai PN4a).
 - Nomor WhatsApp admin belum ditetapkan (LG1a); `NOMOR_WA_ADMIN` di
   `features/langganan/data.ts` masih kosong.
 - Ajis diminta mendaftar layar aplikasi yang menyentuh pembuatan toko,
@@ -451,4 +502,10 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
   hari dari backend (`kontrak/temuan.md` butir 176). Daftar periksa
   penyambungannya di `inti/status.md`.
 - WS6a belum diterapkan: ringkasan tersimpan lokasi outlet, sesi booking,
-  dan gudang masih bertautan (`kontrak/temuan.md` butir 175).
+  dan gudang masih bertautan (`kontrak/temuan.md` butir 175). Selesai di
+  `daf9e3a`.
+- Ruang gudang belum punya tur (PN4a). Menunya berbeda dari ruang outlet
+  (Petugas Gudang, Pengaturan Gudang), sehingga titik dan teksnya
+  diajukan ke pemilik proyek lebih dulu.
+- Langkah jam buka belum punya tur, karena teksnya belum diusulkan; ikut
+  penyambungannya (`inti/status.md`, Penyambungan langkah jam buka).

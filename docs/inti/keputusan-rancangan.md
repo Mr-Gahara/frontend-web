@@ -304,3 +304,18 @@ sama (submodul pengajuan stok, di bawah).
     selebar 640 px (`@container` dan `@[40rem]:`), sehingga panel mesin
     kasir tetap di samping di laptop 1280 px (pemilik proyek,
     6 November 2026, `0178550`).
+32. **Tur sorotan memakai mesin bersama dan tidak tampil sendiri di
+    e2e.** Mesinnya `usePanduan` dan `TurSorotan`
+    (`components/panduan/tur-sorotan.tsx`) serta `lib/panduan.ts`.
+    Elemen yang disorot ditandai `data-panduan`; teks titik ditulis
+    sebagai fungsi murni per layar dengan unit test; titik yang
+    elemennya tidak tampil bagi pengguna disaring sebelum tur dibuka,
+    dengan aturan yang sama seperti tampilannya, dan mesin hanya
+    melewatinya sebagai jaring pengaman. Status sudah dilihat disimpan
+    per perangkat di localStorage (`tachyon.panduan.v1.<kunci>`).
+    `playwright.config.ts` mengisi `tachyon.panduan.otomatis=mati` lewat
+    `storageState`, yang juga berlaku untuk `browser.newContext()` dan
+    `request.newContext()` di dalam test; hanya spec tur yang
+    mengosongkannya. Contoh: tur wizard setup dan dashboard outlet
+    (pemilik proyek, 7 November 2026, `aa3c1c6`, `c8a2e83`,
+    `5c3da45`).

@@ -473,3 +473,12 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Jalur tanpa `read-langganan` hanya teruji di unit test** (gerbang
   rute, `c868870`), karena pengguna uji yang ada memegang seluruh izin
   `read-`. Penolakannya lewat gerbang rute yang sama dengan halaman lain.
+- **Suite e2e penuh belum dijalankan sejak `c8a2e83`** (ditunda pemilik
+  proyek, 7 November 2026). Sejak commit itu `playwright.config.ts`
+  mengisi `tachyon.panduan.otomatis=mati` lewat `storageState` untuk
+  semua spec; yang sudah teruji hanya `tests/e2e/setup` dan
+  `tests/e2e/dashboard`. Harapannya di `inti/pengujian.md` (Baseline).
+- **Penyaringan titik tur dashboard menurut izin dan plan hanya teruji
+  di unit test** (`tests/unit/components/panduan/titik-dashboard.test.ts`),
+  karena akun uji e2e berperan Owner sehingga kelima titik selalu
+  tampil. Aturannya `bolehLihatMenu`, yang dipakai bersama sidebar.
