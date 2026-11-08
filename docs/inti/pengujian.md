@@ -12,6 +12,14 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per backend `ridho` lokal `e9112a8`** (web `d61bf7a`, 8
+November 2026, pukul 21.25 sampai 22.10 WIB, reporter `line,json`): e2e
+604 lolos dari 604, tanpa kegagalan dan tanpa skip, sesuai harapan
+hitungan. Skip bersyarat status staf tidak terjadi. Penyesuaiannya tanpa
+perubahan kode web, sehingga vitest tetap 1013. Harapan suite penuh
+sesudahnya 604 lolos, ditambah skip status staf bila datanya kosong
+(hitungan).
+
 **Suite penuh per backend `ridho` lokal `916e7df`** (web `9bffc66`, 8
 November 2026, pukul 12.18 sampai 12.52 WIB, reporter `line,json`): e2e
 602 lolos, 1 gagal, dan 1 skipped dari 604, sesuai harapan hitungan 602
@@ -503,6 +511,25 @@ dilewati bila Mailpit tidak menyala (`ALASAN_TANPA_MAILPIT`) atau
 kredensial admin uji tidak ada, karena akunnya dibersihkan lewat API
 admin. Ketiganya tidak terjadi bila layanan uji dijalankan seperti di
 atas.
+
+Lupa password dan verifikasi email dibatasi per IP sejak backend
+`e9112a8` (A-03): 20 kirim email (`lupa-password`,
+`verifikasi-email/kirim`) dan 30 periksa kode (`reset-password`,
+`verifikasi-email`) per 15 menit. Pembatasan ini memang tujuannya, tidak
+diakali dan tidak dapat dinaikkan lewat variabel lingkungan (pemilik
+proyek, 8 November 2026). Karena itu `auth/daftar.spec.ts` dan
+`auth/verifikasi-lupa-password.spec.ts` tidak dijalankan sering-sering,
+dan jumlah permintaannya tidak boleh melampaui batas:
+
+- Satu suite penuh memakai sekitar 6 kirim email dan 8 periksa kode.
+  Sesudahnya kedua spec itu dijalankan ulang paling banyak sekali dalam
+  15 menit yang sama, tanpa `--repeat-each`.
+- Bila perlu diulang lebih dari itu, tunggu 15 menit atau restart
+  backend (hitungannya di memori proses).
+- 429 di kedua endpoint tidak dilewati `ALASAN_KUOTA`, sehingga tercatat
+  sebagai gagal; bacanya sebagai batas yang terlampaui, bukan regresi.
+- Spec baru yang memanggil keempat endpoint itu dihitung pemakaiannya
+  lebih dulu dan dicatat di sini.
 
 Ketiga spec tulis stock opname membuat dokumen baru di setiap run dan
 menutupnya sebagai CANCELLED, sehingga dokumen CANCELLED bertambah tiga per
