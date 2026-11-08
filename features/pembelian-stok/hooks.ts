@@ -59,11 +59,11 @@ export function usePembelianStok(id: string) {
 
 /**
  * Mencatat dan menghapus pembelian mengubah stok, jurnal stok, dan riwayat
- * bahan baku (bahan yang pernah dibeli tidak dapat dihapus), sehingga akar
- * inventory, jurnalStok, dan bahanBaku ikut diinvalidasi bersama akar
- * pembelian (keputusan rancangan butir 3). Akar akunKas tidak ikut, karena
- * backend belum memotong saldo; tambahkan begitu backend memotongnya.
- * Mengubah info hanya menyentuh pembelian.
+ * bahan baku (bahan yang pernah dibeli tidak dapat dihapus), serta saldo dan
+ * buku mutasi akun kas (P64, B281, B282), sehingga akar inventory,
+ * jurnalStok, bahanBaku, dan akunKas ikut diinvalidasi bersama akar
+ * pembelian (keputusan rancangan butir 3). Mengubah info hanya menyentuh
+ * pembelian.
  */
 function useInvalidasiPembelian(ikutStok: boolean) {
   const queryClient = useQueryClient();
@@ -75,6 +75,7 @@ function useInvalidasiPembelian(ikutStok: boolean) {
             queryClient.invalidateQueries({ queryKey: queryKeys.inventory.semua }),
             queryClient.invalidateQueries({ queryKey: queryKeys.jurnalStok.semua }),
             queryClient.invalidateQueries({ queryKey: queryKeys.bahanBaku.semua }),
+            queryClient.invalidateQueries({ queryKey: queryKeys.akunKas.semua }),
           ]
         : []),
     ]);

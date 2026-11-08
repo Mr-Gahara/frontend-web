@@ -43,7 +43,16 @@ export function totalIsian(items: readonly IsianBarangPembelian[]): number {
 }
 
 /**
- * Body POST /pembelianstok. Lokasi penerima selalu lokasi ruang tempat
+ * Total pembelian melebihi saldo akun kas terpilih. Backend menolaknya 409
+ * "Saldo akun kas tidak mencukupi" (B281), sehingga form menahan simpan.
+ * Tanpa akun terpilih tidak ada yang dibandingkan.
+ */
+export function saldoTidakCukup(total: number, akun: { saldo: number } | undefined): boolean {
+  return akun !== undefined && total > akun.saldo;
+}
+
+/**
+ * Body POST /pembelianstok.Lokasi penerima selalu lokasi ruang tempat
  * pembelian dicatat. Nomor faktur kosong tidak dikirim, agar server memberi
  * nomor otomatis. Tanggal hanya dikirim Owner yang memilih hari selain hari
  * ini (aturan 17 Oktober 2026 untuk beban dan jurnal transfer, yang belum

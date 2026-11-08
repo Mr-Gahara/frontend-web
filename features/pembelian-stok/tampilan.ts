@@ -32,6 +32,14 @@ export function namaAkunPembelian(pembelian: PembelianStok): string {
   return pembelian.akunKasID?.namaAkun || "-";
 }
 
+/**
+ * Pembelian yang memotong saldo akun kas (P64, B281). Pembelian sebelum
+ * backend 916e7df tidak membawa saldoDipotong dan tidak memotong saldo.
+ */
+export function saldoTerpotong(pembelian: Pick<PembelianStok, "saldoDipotong">): boolean {
+  return pembelian.saldoDipotong === true;
+}
+
 export function namaPencatat(pembelian: PembelianStok): string {
   return pembelian.dicatatOleh?.nama || "-";
 }

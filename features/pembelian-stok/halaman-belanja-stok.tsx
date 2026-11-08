@@ -41,7 +41,7 @@ import {
   type BarisRingkasan,
 } from "./ringkasan";
 import { urlDetailPembelian } from "./ruang";
-import { lokasiPembelian, namaAkunPembelian, ringkasBarang } from "./tampilan";
+import { lokasiPembelian, namaAkunPembelian, ringkasBarang, saldoTerpotong } from "./tampilan";
 
 const SEMUA = "SEMUA";
 const PILIHAN_UKURAN = [10, 20, 50] as const;
@@ -275,7 +275,15 @@ export function HalamanBelanjaStok() {
         id: "akun",
         header: "Dibayar dari",
         meta: { label: "Dibayar dari" },
-        cell: ({ row }) => <span className="font-medium text-navy">{namaAkunPembelian(row.original)}</span>,
+        // Pembelian sebelum P64 (B281) tidak memotong saldo; ditandai per baris.
+        cell: ({ row }) => (
+          <div className="flex flex-col">
+            <span className="font-medium text-navy">{namaAkunPembelian(row.original)}</span>
+            {!saldoTerpotong(row.original) && (
+              <span className="text-xs font-medium text-navy/60">Saldo tidak terpotong</span>
+            )}
+          </div>
+        ),
       },
       {
         id: "total",
@@ -414,8 +422,7 @@ export function HalamanBelanjaStok() {
         />
 
         <p className="text-sm font-medium leading-relaxed text-navy/60">
-          Pembelian stok dicatat sebagai persediaan, bukan beban, sehingga tidak masuk ringkasan laba rugi. Saldo
-          akun kas belum terpotong oleh pembelian ini.
+          Pembelian stok dicatat sebagai persediaan, bukan beban, sehingga tidak masuk ringkasan laba rugi.
         </p>
 
         <section aria-label="Seluruh pembelian" className="flex flex-col gap-3">

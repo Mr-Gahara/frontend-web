@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { api, BASIS, bukaDenganAuth, login } from "../../../helpers/transfer-uji";
 import { unik } from "../../../helpers/reservasi-uji";
-import { daftarAkun, pilihAkun, type AkunKasUji } from "../../../helpers/akun-kas-uji";
+import { daftarAkun, pilihAkun, saldoAkun, type AkunKasUji } from "../../../helpers/akun-kas-uji";
 import { BAHAN_FIXTURE, idBahanFixture, idDari, lokasiBertipe, type Berid } from "../../../helpers/pembelian-uji";
 import { formatRupiah } from "../../../../lib/format";
 import { masukPembelianOutlet } from "../../../helpers/terkunci-uji";
@@ -14,7 +14,9 @@ import { masukPembelianOutlet } from "../../../helpers/terkunci-uji";
  * diubah dan pembeliannya dihapus lewat UI, yang mengurangi kembali
  * stoknya; hapus yang ditolak 409 dijawab route.fulfill, karena stok yang
  * sudah terpakai tidak dapat dibuat secara deterministik (butir 21). API
- * hanya membersihkan sisa run yang gagal. Pengguna uji berperan Owner, sehingga jalur
+ * hanya membersihkan sisa run yang gagal. Sejak P64 (B281, B282) pembelian
+ * memotong saldo akun kas dan hapus mengembalikannya, sehingga akun dipilih
+ * menurut saldo yang cukup. Pengguna uji berperan Owner, sehingga jalur
  * tanggal terkunci bagi peran lain hanya teruji di unit test
  * (payloadBuatPembelian).
  */
@@ -57,10 +59,11 @@ test.describe("Pembelian stok: catat", () => {
       const lokasi = await lokasiBertipe(page, auth, r.tipe);
       const bahanID = await idBahanFixture(page, auth);
       const akun = (await daftarAkun(page, auth)).find(
-        (a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E"),
+        (a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E") && a.saldo >= 3000,
       ) as AkunKasUji | undefined;
-      test.skip(!akun, "tidak ada akun kas aktif");
+      test.skip(!akun, "tidak ada akun kas aktif bersaldo minimal Rp 3.000");
       const stokAwal = await stokBahan(page, auth, lokasi.id, bahanID);
+      const saldoAwal = (akun as AkunKasUji).saldo;
       const supplier = "E2E Supplier " + unik();
       const keterangan = "E2E pembelian " + unik();
       let idPembelian: string | undefined;
@@ -109,6 +112,13 @@ test.describe("Pembelian stok: catat", () => {
         await expect(baris).toContainText("1,5 pak");
         await expect(baris).toContainText(formatRupiah(3000));
         expect(await stokBahan(page, auth, lokasi.id, bahanID), "stok bertambah 1,5").toBeCloseTo(stokAwal + 1.5);
+        expect(await saldoAkun(page, auth, (akun as AkunKasUji).id), "saldo akun kas terpotong (B281)").toBe(
+          saldoAwal - 3000,
+        );
+        await expect(
+          page.getByText("Saldo akun kas belum terpotong"),
+          "peringatan saldo hanya untuk pembelian lama",
+        ).toHaveCount(0);
 
         await page.getByRole("button", { name: "Kembali ke Pembelian Stok" }).click();
         await page.waitForURL("**" + r.url);
@@ -135,6 +145,9 @@ test.describe("Pembelian stok: catat", () => {
         const dialogHapus = page.getByRole("alertdialog");
         await expect(dialogHapus).toContainText(BAHAN_FIXTURE);
         await expect(dialogHapus).toContainText("1,5 pak");
+        await expect(dialogHapus).toContainText(
+          `Saldo ${formatRupiah(3000)} dikembalikan ke ${(akun as AkunKasUji).namaAkun}`,
+        );
 
         await page.route(POLA_ID, (route) =>
           route.request().method() === "DELETE"
@@ -157,6 +170,7 @@ test.describe("Pembelian stok: catat", () => {
         await page.waitForURL("**" + r.url);
         await expect(page.getByRole("row").filter({ hasText: supplierBaru })).toHaveCount(0);
         expect(await stokBahan(page, auth, lokasi.id, bahanID), "stok pulih setelah dihapus lewat UI").toBeCloseTo(stokAwal);
+        expect(await saldoAkun(page, auth, (akun as AkunKasUji).id), "saldo akun kas kembali (B282)").toBe(saldoAwal);
       } finally {
         if (idPembelian && !terhapus) {
           const hapus = await api(page, auth, "DELETE", "/pembelianstok/" + idPembelian);
@@ -192,6 +206,31 @@ test.describe("Pembelian stok: catat", () => {
     await expect(page.getByText("Bahan ini sudah ada di baris lain.")).toBeVisible();
     expect(terkirim, "tidak ada POST selama isian belum sah").toBe(0);
   });
+
+  test("total di atas saldo akun kas menahan simpan tanpa permintaan (B281)", async ({ page }) => {
+    let terkirim = 0;
+    page.on("request", (req) => {
+      if (req.method() === "POST" && POLA_BUAT.test(req.url())) terkirim++;
+    });
+    const auth = await bukaDenganAuth(page, BASIS + RUANG[0].url + "/catatPembelian");
+    const akun = (await daftarAkun(page, auth)).find((a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E"));
+    test.skip(!akun, "tidak ada akun kas aktif");
+    await expect(page.getByRole("heading", { name: "Catat Pembelian", exact: true })).toBeVisible();
+
+    await page.getByLabel("Supplier", { exact: true }).fill("E2E Supplier saldo kurang");
+    await pilihAkun(page, "Dibayar dari akun kas", akun!.namaAkun);
+    await page.getByLabel("Keterangan", { exact: true }).fill("E2E saldo kurang");
+    await pilihAkun(page, "Bahan baku baris 1", BAHAN_FIXTURE);
+    await page.locator("#pembelian-jumlah-0").fill("1");
+    await page.locator("#pembelian-harga-0").fill(String(akun!.saldo + 1));
+    await expect(page.getByText("Saldo akun kas tidak mencukupi")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Simpan Pembelian" })).toBeDisabled();
+
+    await page.locator("#pembelian-harga-0").fill(String(akun!.saldo));
+    await expect(page.getByText("Saldo akun kas tidak mencukupi"), "total sama dengan saldo diterima").toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Simpan Pembelian" })).toBeEnabled();
+    expect(terkirim, "tidak ada POST").toBe(0);
+  });
 });
 
 test.describe("Pembelian stok: pemegang izin ruang outlet saja (B116, butir 158)", () => {
@@ -202,9 +241,9 @@ test.describe("Pembelian stok: pemegang izin ruang outlet saja (B116, butir 158)
     const lokasi = await lokasiBertipe(page, auth, r.tipe);
     const bahanID = await idBahanFixture(page, auth);
     const akun = (await daftarAkun(page, auth)).find(
-      (a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E"),
+      (a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E") && a.saldo >= 1000,
     ) as AkunKasUji | undefined;
-    test.skip(!akun, "tidak ada akun kas aktif");
+    test.skip(!akun, "tidak ada akun kas aktif bersaldo minimal Rp 1.000");
     const supplier = "E2E Supplier Outlet " + unik();
     let idPembelian: string | undefined;
     let terhapus = false;

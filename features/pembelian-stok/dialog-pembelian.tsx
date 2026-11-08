@@ -28,14 +28,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { pesanError } from "@/lib/api/error";
-import { formatTanggal } from "@/lib/format";
+import { formatRupiah, formatTanggal } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { dariTanggalLokal, keTanggalLokal } from "@/lib/waktu";
 import type { PembelianStok } from "@/types/pembelianStok";
 import { useHapusPembelianStok, usePerbaruiPembelianStok } from "./hooks";
 import { isianAwalUbah, payloadUbahPembelian } from "./payload";
 import { buatSkemaUbahPembelian, type IsianUbahPembelian } from "./schema";
-import { namaBahanItem, teksJumlahItem } from "./tampilan";
+import { namaAkunPembelian, namaBahanItem, saldoTerpotong, teksJumlahItem } from "./tampilan";
 
 const KELAS_LABEL = "text-sm font-bold text-navy";
 const KELAS_ISIAN =
@@ -254,8 +254,12 @@ export function DialogHapusPembelian({
           <AlertDialogTitle className="text-navy">Hapus pembelian ini?</AlertDialogTitle>
           <AlertDialogDescription className="text-navy/70">
             {pembelian.stokDitambahkan
-              ? `Stok yang ditambahkan pembelian ini akan dikurangi kembali dari ${namaLokasi}, dan jurnal stok mencatatnya sebagai Keluar. Tindakan ini tidak dapat dibatalkan.`
-              : "Pembelian ini tidak pernah menambah stok, sehingga menghapusnya tidak mengubah stok mana pun. Tindakan ini tidak dapat dibatalkan."}
+              ? `Stok yang ditambahkan pembelian ini akan dikurangi kembali dari ${namaLokasi}, dan jurnal stok mencatatnya sebagai Keluar.`
+              : "Pembelian ini tidak pernah menambah stok, sehingga menghapusnya tidak mengubah stok mana pun."}
+            {/* P64 (B282): saldo yang dipotong pembelian dikembalikan saat dihapus. */}
+            {saldoTerpotong(pembelian) &&
+              ` Saldo ${formatRupiah(pembelian.totalBiaya)} dikembalikan ke ${namaAkunPembelian(pembelian)}, dan buku mutasi kas mencatat pembaliknya.`}
+            {" Tindakan ini tidak dapat dibatalkan."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         {pembelian.stokDitambahkan && (

@@ -69,8 +69,11 @@ test.describe("Keuangan: Belanja Stok", () => {
     const outlet = await lokasiBertipe(page, auth, "Outlet");
     const gudang = await lokasiBertipe(page, auth, "Gudang");
     const bahanID = await idBahanFixture(page, auth);
-    const akun = (await daftarAkun(page, auth)).find((a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E"));
-    test.skip(!akun, "tidak ada akun kas aktif");
+    // Pembelian memotong saldo akun kas sejak P64 (B281): 2 x 1.500 + 3 x 2.500.
+    const akun = (await daftarAkun(page, auth)).find(
+      (a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E") && a.saldo >= 10500,
+    );
+    test.skip(!akun, "tidak ada akun kas aktif bersaldo minimal Rp 10.500");
     const supplier = "E2E Belanja " + unik();
     const ids: string[] = [];
 
@@ -175,8 +178,10 @@ test.describe("Keuangan: Belanja Stok, pengguna baca-saja", () => {
     let auth = await bukaDenganAuth(page, BASIS + URL_BELANJA);
     const outlet = await lokasiBertipe(page, auth, "Outlet");
     const bahanID = await idBahanFixture(page, auth);
-    const akun = (await daftarAkun(page, auth)).find((a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E"));
-    test.skip(!akun, "tidak ada akun kas aktif");
+    const akun = (await daftarAkun(page, auth)).find(
+      (a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E") && a.saldo >= 1000,
+    );
+    test.skip(!akun, "tidak ada akun kas aktif bersaldo minimal Rp 1.000");
     const supplier = "E2E Baca Saja " + unik();
     let id: string | undefined;
 

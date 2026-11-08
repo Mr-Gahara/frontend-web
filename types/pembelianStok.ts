@@ -75,6 +75,12 @@ export interface PembelianStok {
   nomorFaktur: string | null;
   dicatatOleh: PencatatPembelian | null;
   stokDitambahkan: boolean;
+  /**
+   * true bila pembelian memotong saldo akun kas dan menulis mutasi PEMBELIAN
+   * (P64, B281, backend 916e7df). Pembelian sebelumnya tidak membawa field
+   * ini sama sekali, karena backend membaca dokumen apa adanya.
+   */
+  saldoDipotong?: boolean;
   tenantID: string;
   createdAt: string;
   updatedAt: string;

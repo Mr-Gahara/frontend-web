@@ -23,6 +23,7 @@ import {
   namaAkunPembelian,
   namaBahanItem,
   namaPencatat,
+  saldoTerpotong,
   teksJumlahItem,
 } from "./tampilan";
 
@@ -216,13 +217,16 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
         </div>
       </div>
 
-      <Alert className="border-karamel/50 bg-karamel/15 text-navy">
-        <Info className="h-4 w-4" />
-        <AlertTitle className="font-bold">Saldo akun kas belum terpotong</AlertTitle>
-        <AlertDescription className="text-navy/80">
-          Pembelian ini belum mengurangi saldo {namaAkunPembelian(pembelian)} dan tidak tampil di buku mutasi kas.
-        </AlertDescription>
-      </Alert>
+      {/* Hanya pembelian sebelum P64 (B281) yang tidak memotong saldo. */}
+      {!saldoTerpotong(pembelian) && (
+        <Alert className="border-karamel/50 bg-karamel/15 text-navy">
+          <Info className="h-4 w-4" />
+          <AlertTitle className="font-bold">Saldo akun kas belum terpotong</AlertTitle>
+          <AlertDescription className="text-navy/80">
+            Pembelian ini belum mengurangi saldo {namaAkunPembelian(pembelian)} dan tidak tampil di buku mutasi kas.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="flex flex-col gap-3">
         <h2 className="text-base font-bold text-navy">Barang yang dibeli</h2>

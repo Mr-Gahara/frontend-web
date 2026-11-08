@@ -5,12 +5,11 @@ import { useHariIni } from "@/hooks/use-hari-ini";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, Info, Lock, MapPin, Package, Plus, Save, ShoppingCart, Trash2 } from "lucide-react";
+import { ArrowLeft, Lock, MapPin, Package, Plus, Save, ShoppingCart, Trash2 } from "lucide-react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { PilihTanggal } from "@/components/pilih-tanggal";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -35,7 +34,14 @@ import type { BahanBaku } from "@/types/bahanBaku";
 import type { Lokasi, TipeLokasi } from "@/types/location";
 import { useBuatPembelianStok } from "./hooks";
 import type { RuangPembelian } from "./izin";
-import { barisBarangKosong, isianAwalCatat, payloadBuatPembelian, subtotalBaris, totalIsian } from "./payload";
+import {
+  barisBarangKosong,
+  isianAwalCatat,
+  payloadBuatPembelian,
+  saldoTidakCukup,
+  subtotalBaris,
+  totalIsian,
+} from "./payload";
 import { URL_PEMBELIAN, urlDetailPembelian } from "./ruang";
 import { buatSkemaCatatPembelian, type IsianCatatPembelian } from "./schema";
 
@@ -190,6 +196,9 @@ function FormCatatPembelian({
     if (!tanggalDipilih) setValue("tanggal", hariIni);
   }, [hariIni, tanggalDipilih, setValue]);
   const akun = akunAktif.find((a) => a.id === akunKasID);
+  // Pembelian memotong saldo akun kas (P64, B281); total di atas saldo
+  // ditolak backend 409, sehingga simpan ditahan sebelum dikirim.
+  const saldoKurang = saldoTidakCukup(totalIsian(items), akun);
 
   const buat = useBuatPembelianStok({
     onSuccess: (hasil) => {
@@ -272,6 +281,7 @@ function FormCatatPembelian({
             {akun && (
               <p className="text-xs font-medium text-navy/60">Saldo tercatat {formatRupiah(akun.saldo)}</p>
             )}
+            {saldoKurang && <span className={KELAS_GALAT}>Saldo akun kas tidak mencukupi</span>}
             {errors.akunKasID && <span className={KELAS_GALAT}>{errors.akunKasID.message}</span>}
           </div>
 
@@ -329,15 +339,6 @@ function FormCatatPembelian({
             {errors.keterangan && <span className={KELAS_GALAT}>{errors.keterangan.message}</span>}
           </div>
         </div>
-
-        <Alert className="border-karamel/50 bg-karamel/15 text-navy">
-          <Info className="h-4 w-4" />
-          <AlertTitle className="font-bold">Saldo akun kas belum terpotong</AlertTitle>
-          <AlertDescription className="text-navy/80">
-            Pembelian ini menambah stok {lokasi.nama}, tetapi belum mengurangi saldo akun kas yang dipilih dan
-            belum masuk buku mutasi kas.
-          </AlertDescription>
-        </Alert>
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-navy/10 pb-3">
@@ -489,7 +490,7 @@ function FormCatatPembelian({
           </Button>
           <Button
             type="submit"
-            disabled={memuat}
+            disabled={memuat || saldoKurang}
             className="w-full sm:w-auto cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold px-6 shadow-sm"
           >
             {memuat ? (

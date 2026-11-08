@@ -52,7 +52,10 @@ export type JenisMutasi =
   | "VOID_TRANSFER_MASUK"
   /** Selisih hitungan kasir saat buka atau tutup sesi kasir; referensi.tipe "SesiKasir" (B228). */
   | "SELISIH_KAS_MASUK"
-  | "SELISIH_KAS_KELUAR";
+  | "SELISIH_KAS_KELUAR"
+  /** Pembelian stok dan pembaliknya saat dihapus; referensi.tipe "PembelianStok" (B281, B282). */
+  | "PEMBELIAN"
+  | "PEMBALIK_PEMBELIAN";
 
 /**
  * Satu baris buku mutasi kas (GET /akunkas/mutasi). tanggal adalah tanggal

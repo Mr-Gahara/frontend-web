@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { FILTER_AWAL_PEMBELIAN, filterAwalDaftarPembelian } from "@/features/pembelian-stok/payload";
+import {
+  FILTER_AWAL_PEMBELIAN,
+  filterAwalDaftarPembelian,
+  saldoTidakCukup,
+} from "@/features/pembelian-stok/payload";
 import {
   TIPE_LOKASI_PEMBELIAN,
   URL_PEMBELIAN,
@@ -12,6 +16,7 @@ import {
   namaBahanItem,
   namaPencatat,
   ringkasBarang,
+  saldoTerpotong,
   teksJumlahItem,
 } from "@/features/pembelian-stok/tampilan";
 import type { ItemPembelianStok, PembelianStok } from "@/types/pembelianStok";
@@ -71,6 +76,21 @@ describe("relasi pembelian", () => {
   it("lokasi penerima dibaca dari locationID ter-populate (B112)", () => {
     expect(lokasiPembelian(pembelian)).toEqual({ id: "lok-outlet", nama: "Outlet Pusat", tipe: "Outlet" });
     expect(lokasiPembelian({ ...pembelian, locationID: null })).toBeNull();
+  });
+});
+
+describe("saldo akun kas pembelian (P64)", () => {
+  it("hanya saldoDipotong true yang terpotong; pembelian lama tanpa field tidak", () => {
+    expect(saldoTerpotong({ ...pembelian, saldoDipotong: true })).toBe(true);
+    expect(saldoTerpotong({ ...pembelian, saldoDipotong: false })).toBe(false);
+    expect(saldoTerpotong(pembelian)).toBe(false);
+  });
+
+  it("saldo tidak cukup hanya bila total melebihi saldo akun terpilih", () => {
+    expect(saldoTidakCukup(22501, { saldo: 22500 })).toBe(true);
+    expect(saldoTidakCukup(22500, { saldo: 22500 })).toBe(false);
+    expect(saldoTidakCukup(0, { saldo: 0 })).toBe(false);
+    expect(saldoTidakCukup(1000000, undefined)).toBe(false);
   });
 });
 
