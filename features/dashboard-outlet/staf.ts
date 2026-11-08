@@ -12,6 +12,22 @@ export interface BarisStaf {
   penggunaID: string;
   nama: string;
   status: StatusStafDashboard;
+  /** "Terlambat N menit" atau "Luar jadwal" bagi staf yang sudah absen (AB6a); selain itu null. */
+  keterangan: string | null;
+}
+
+/**
+ * Keterangan kedatangan dari sesi terakhir monitoring (backend P62, B278;
+ * keputusan AB6a). Tepat Waktu, belum absen, dan sesi tanpa status tidak
+ * diberi keterangan.
+ */
+export function keteranganKedatangan(sesi: MonitoringStaf["sesiTerakhir"]): string | null {
+  if (sesi?.statusAbsensi === "Terlambat") {
+    const menit = sesi.menitTerlambat ?? 0;
+    return menit > 0 ? `Terlambat ${menit} menit` : "Terlambat";
+  }
+  if (sesi?.statusAbsensi === "Luar Jadwal") return "Luar jadwal";
+  return null;
 }
 
 const STATUS_DARI_TIPE: Record<TipeIzinCuti, StatusStafDashboard> = {
@@ -31,6 +47,10 @@ const STATUS_DARI_TIPE: Record<TipeIzinCuti, StatusStafDashboard> = {
  * disetujui sebagai libur tanpa shift. Karena itu staf yang izin dan
  * termasuk karyawan ruang menurut peran (karyawanRuang, id ke nama)
  * ditambahkan sebagai baris tersendiri (pemilik proyek, 31 Oktober 2026).
+ * Sejak backend 916e7df (B278, butir 165) monitoring juga memuat staf yang
+ * lokasi kerjanya lokasi itu, termasuk yang izin, sebagai belum absen;
+ * tambahan ini tetap dibutuhkan bagi staf tanpa lokasi kerja, dan staf
+ * yang sudah termuat tidak ditambahkan dua kali.
  */
 export function gabungStatusStaf(
   daftar: MonitoringStaf[],
@@ -51,11 +71,12 @@ export function gabungStatusStaf(
       staf.status === "belum_absen"
         ? (izinPerStaf.get(staf.penggunaID) ?? "belum_absen")
         : staf.status,
+    keterangan: staf.status === "belum_absen" ? null : keteranganKedatangan(staf.sesiTerakhir),
   }));
   const dimuat = new Set(daftar.map((staf) => String(staf.penggunaID)));
   for (const [id, status] of izinPerStaf) {
     const nama = karyawanRuang.get(id);
-    if (nama !== undefined && !dimuat.has(id)) baris.push({ penggunaID: id, nama, status });
+    if (nama !== undefined && !dimuat.has(id)) baris.push({ penggunaID: id, nama, status, keterangan: null });
   }
   return baris;
 }

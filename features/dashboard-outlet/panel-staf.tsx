@@ -179,6 +179,9 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
                         />
                         {LABEL_STATUS_STAF[b.status]}
                       </span>
+                      {b.keterangan && (
+                        <span className="block mt-1 text-[11px] font-medium text-navy/60">{b.keterangan}</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

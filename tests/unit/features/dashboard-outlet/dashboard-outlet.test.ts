@@ -6,7 +6,7 @@ import {
   paramTransaksiLunas,
   titikOmzet,
 } from "@/features/dashboard-outlet/kartu";
-import { gabungStatusStaf } from "@/features/dashboard-outlet/staf";
+import { gabungStatusStaf, keteranganKedatangan } from "@/features/dashboard-outlet/staf";
 import { bookingBerjalan, petakVenue } from "@/features/dashboard-outlet/venue";
 import type { MonitoringStaf } from "@/types/absensi";
 import type { IzinCuti } from "@/types/izinCuti";
@@ -61,7 +61,7 @@ const TANPA_RUANG: ReadonlyMap<string, string> = new Map();
 describe("gabungStatusStaf", () => {
   it("mempertahankan status absensi bagi staf yang sudah absen walau punya izin", () => {
     const hasil = gabungStatusStaf([staf("p1", "sedang_bekerja")], [izin()], TANPA_RUANG);
-    expect(hasil).toEqual([{ penggunaID: "p1", nama: "Staf p1", status: "sedang_bekerja" }]);
+    expect(hasil).toEqual([{ penggunaID: "p1", nama: "Staf p1", status: "sedang_bekerja", keterangan: null }]);
   });
 
   it("memetakan sakit, izin, dan cuti tahunan bagi staf yang belum absen", () => {
@@ -78,7 +78,7 @@ describe("gabungStatusStaf", () => {
     // Status dan rentang disaring server (B160); yang tersisa hanya pencocokan staf.
     const izinCuti = [izin({ pengguna: { id: "lain", nama: null, email: null } })];
     expect(gabungStatusStaf([staf("p1", "belum_absen")], izinCuti, TANPA_RUANG)).toEqual([
-      { penggunaID: "p1", nama: "Staf p1", status: "belum_absen" },
+      { penggunaID: "p1", nama: "Staf p1", status: "belum_absen", keterangan: null },
     ]);
   });
 
@@ -94,8 +94,38 @@ describe("gabungStatusStaf", () => {
       ["p2", "Staf Dua"],
     ]);
     expect(gabungStatusStaf([staf("p1", "sedang_bekerja")], izinCuti, ruang)).toEqual([
-      { penggunaID: "p1", nama: "Staf p1", status: "sedang_bekerja" },
-      { penggunaID: "p2", nama: "Staf Dua", status: "izin" },
+      { penggunaID: "p1", nama: "Staf p1", status: "sedang_bekerja", keterangan: null },
+      { penggunaID: "p2", nama: "Staf Dua", status: "izin", keterangan: null },
+    ]);
+  });
+
+  it("staf berlokasi kerja yang izin sudah dimuat monitoring tidak ditambah dua kali (B278)", () => {
+    const izinCuti = [izin({ pengguna: { id: "p2", nama: null, email: null }, tipe: "izin" })];
+    const ruang = new Map([["p2", "Staf Dua"]]);
+    expect(gabungStatusStaf([staf("p2", "belum_absen")], izinCuti, ruang)).toEqual([
+      { penggunaID: "p2", nama: "Staf p2", status: "izin", keterangan: null },
+    ]);
+  });
+
+  it("keterangan kedatangan bagi staf yang sudah absen (B278, AB6a)", () => {
+    const sesi = (statusAbsensi: "Tepat Waktu" | "Terlambat" | "Luar Jadwal", menitTerlambat = 0) => ({
+      waktuMasuk: "2026-11-08T01:00:00.000Z",
+      waktuSelesai: null,
+      statusAbsensi,
+      menitTerlambat,
+    });
+    expect(keteranganKedatangan(sesi("Terlambat", 12))).toBe("Terlambat 12 menit");
+    expect(keteranganKedatangan(sesi("Terlambat"))).toBe("Terlambat");
+    expect(keteranganKedatangan(sesi("Luar Jadwal"))).toBe("Luar jadwal");
+    expect(keteranganKedatangan(sesi("Tepat Waktu"))).toBeNull();
+    expect(keteranganKedatangan({ waktuMasuk: "2026-11-08T01:00:00.000Z", waktuSelesai: null })).toBeNull();
+    expect(keteranganKedatangan(null)).toBeNull();
+
+    const terlambat = { ...staf("p1", "sedang_bekerja"), sesiTerakhir: sesi("Terlambat", 5) };
+    const pulang = { ...staf("p2", "sudah_pulang"), sesiTerakhir: sesi("Luar Jadwal") };
+    expect(gabungStatusStaf([terlambat, pulang], [], TANPA_RUANG).map((b) => b.keterangan)).toEqual([
+      "Terlambat 5 menit",
+      "Luar jadwal",
     ]);
   });
 });
