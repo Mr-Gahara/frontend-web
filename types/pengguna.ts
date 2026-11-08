@@ -22,6 +22,8 @@ export interface PenggunaItem extends Entitas, Timestamps {
   /** Nama peran dalam teks, dikirim GET /pengguna di samping roleID (kontrak/endpoint.md). */
   role?: string;
   tokenVersion: number;
+  /** Lokasi kerja (backend P61, B269); null berarti tidak dibatasi lokasi. */
+  locationID?: string | null;
 }
 
 export interface PenggunaRequest {
@@ -33,6 +35,11 @@ export interface PenggunaRequest {
   roleID: string;
   status: "aktif" | "non-aktif";
   aksesType: ("app" | "web")[]; // PERUBAHAN: Tanda '?' dihapus karena sekarang wajib
+  /**
+   * Lokasi kerja (B269): ObjectId Outlet atau Gudang toko, atau null untuk
+   * tidak dibatasi. Hanya dikirim bila berubah (features/pengguna/lokasi-kerja.ts).
+   */
+  locationID?: string | null;
 }
 
 export interface GetPenggunaResponse {

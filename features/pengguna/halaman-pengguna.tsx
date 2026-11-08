@@ -10,6 +10,9 @@ import {
 } from "./hooks";
 import { useDaftarRole, useLevelPenggunaAktif } from "@/features/role/hooks";
 import { namaPeran } from "./peran";
+import { lokasiKerjaDikirim, pilihanLokasiKerja, roleOwner, tampilkanLokasiKerja } from "./lokasi-kerja";
+import { useDaftarLokasi } from "@/features/inventaris/hooks";
+import { IZIN } from "@/lib/auth/permissions";
 import { pesanError } from "@/lib/api/error";
 import type { Workspace } from "./api";
 import { ColumnDef } from "@tanstack/react-table";
@@ -51,6 +54,7 @@ const emptyForm: PenggunaRequest = {
   roleID: "",
   status: "aktif",
   aksesType: ["web"],
+  locationID: null,
 };
 
 /**
@@ -65,7 +69,7 @@ export default function HalamanPengguna({
 }: {
   workspace: Workspace;
 }) {
-  const { pengguna } = useSession();
+  const { pengguna, permissions } = useSession();
   const currentUserId = pengguna?.id ?? "";
 
   const [showDialog, setShowDialog] = useState(false);
@@ -86,6 +90,12 @@ export default function HalamanPengguna({
 
   const isOwner = pengguna?.role === "Owner";
   const isSelf = editTarget ? editTarget.id === currentUserId : false;
+
+  // Pilihan lokasi kerja dibaca dari GET /location (read-location), yang
+  // tidak dituntut halaman ini; tanpa izin itu isiannya disembunyikan.
+  const bolehBacaLokasi = permissions.includes(IZIN.location);
+  const daftarLokasi = useDaftarLokasi({ aktif: bolehBacaLokasi });
+  const tampilLokasiKerja = tampilkanLokasiKerja(bolehBacaLokasi, roleOwner(roleList, form.roleID));
 
   useEffect(() => {
     if (penggunaError) {
@@ -144,6 +154,7 @@ export default function HalamanPengguna({
       roleID: roleIdValue || "",
       status: item.status,
       aksesType: safeAksesType,
+      locationID: item.locationID ?? null,
     });
     setFormError("");
     setShowDialog(true);
@@ -185,7 +196,14 @@ export default function HalamanPengguna({
       setFormError("Minimal satu Hak Akses Platform harus dipilih.");
       return;
     }
-    simpanPengguna(targetId, formData);
+    // Lokasi kerja hanya dikirim bila isiannya tampil dan nilainya berubah;
+    // backend mengabaikannya saat staf mengubah dirinya sendiri (B269).
+    const { locationID, ...tanpaLokasi } = formData;
+    const lokasiKirim =
+      tampilLokasiKerja && !isSelf
+        ? lokasiKerjaDikirim(locationID ?? null, editTarget?.locationID ?? null)
+        : undefined;
+    simpanPengguna(targetId, lokasiKirim === undefined ? tanpaLokasi : { ...tanpaLokasi, locationID: lokasiKirim });
   };
 
   const hapusPenggunaMutation = useHapusPengguna();
@@ -414,6 +432,11 @@ export default function HalamanPengguna({
           isOwner={isOwner}
           roleList={roleList}
           currentUserLevel={currentUserLevel}
+          lokasiKerja={{
+            tampil: tampilLokasiKerja,
+            pilihan: pilihanLokasiKerja(daftarLokasi.data ?? []),
+            memuat: daftarLokasi.isLoading,
+          }}
         />
       )}
 

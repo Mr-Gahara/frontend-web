@@ -5,6 +5,7 @@ import "@testing-library/jest-dom";
 import PenggunaFormDialog from "@/components/pengguna/pengguna-form-dialog";
 import type { PenggunaRequest } from "@/types/pengguna";
 import type { Role } from "@/types/role";
+import type { Lokasi } from "@/types/location";
 
 describe("Integration - PenggunaFormDialog", () => {
   const mockSetShowDialog = vi.fn();
@@ -25,7 +26,10 @@ describe("Integration - PenggunaFormDialog", () => {
     isOwner: true,
     roleList: [{ id: "1", namaRole: "Admin", deskripsi: null, level: 1, permissions: [] }] as Role[],
     currentUserLevel: 0,
+    lokasiKerja: { tampil: false, pilihan: [] as Lokasi[], memuat: false },
   };
+
+  const gudang = { id: "lok-gudang", nama: "Gudang Utama", tipe: "Gudang" } as Lokasi;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -76,5 +80,34 @@ describe("Integration - PenggunaFormDialog", () => {
     await user.click(closeButton);
 
     expect(mockSetShowDialog).toHaveBeenCalledWith(false);
+  });
+
+  it("isian Lokasi Kerja hanya tampil bila diizinkan, dengan Tidak dibatasi untuk null (B269)", () => {
+    const { rerender } = render(<PenggunaFormDialog {...defaultProps} />);
+    expect(screen.queryByText("Lokasi Kerja")).not.toBeInTheDocument();
+
+    rerender(
+      <PenggunaFormDialog
+        {...defaultProps}
+        form={{ ...defaultProps.form, locationID: null }}
+        lokasiKerja={{ tampil: true, pilihan: [gudang], memuat: false }}
+      />,
+    );
+    expect(screen.getByText("Lokasi Kerja")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Lokasi Kerja" })).toHaveTextContent("Tidak dibatasi");
+  });
+
+  it("lokasi kerja terkunci saat mengubah diri sendiri, karena backend mengabaikannya (B269)", () => {
+    render(
+      <PenggunaFormDialog
+        {...defaultProps}
+        isSelf
+        form={{ ...defaultProps.form, locationID: "lok-gudang" }}
+        lokasiKerja={{ tampil: true, pilihan: [gudang], memuat: false }}
+      />,
+    );
+    const isian = screen.getByRole("combobox", { name: "Lokasi Kerja" });
+    expect(isian).toBeDisabled();
+    expect(isian).toHaveTextContent("Gudang Utama (Gudang)");
   });
 });

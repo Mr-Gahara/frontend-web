@@ -225,6 +225,77 @@ test.describe("E2E - Siklus Hidup Pengguna (CRUD)", () => {
     });
   });
 
+  // ==========================================================
+  // [1a] LOKASI KERJA (backend P61, B269)
+  // Isian tampil bagi pemegang read-location (akun uji Owner). Payload
+  // hanya membawa locationID yang berubah (keputusan rancangan butir 15).
+  // ==========================================================
+  test("lokasi kerja: tambah dengan gudang, ubah nama tanpa locationID, lalu kembali Tidak dibatasi (B269)", async ({
+    page,
+  }) => {
+    const ts = Date.now();
+    const nama = `Karyawan Lokasi ${ts}`;
+    const namaUbah = `${nama} Ubah`;
+    let namaAkhir = nama;
+    const POLA_BUAT = /\/api\/pengguna\/register-pengguna$/;
+    const POLA_UBAH = /\/api\/pengguna\/[a-f0-9]{24}$/;
+    const isian = page.getByRole("combobox", { name: "Lokasi Kerja" });
+    const bukaEdit = async (n: string) => {
+      await cariPengguna(page, n);
+      await page.getByRole("row", { name: new RegExp(n, "i") }).first().getByRole("button", { name: /buka menu/i }).click();
+      await page.getByRole("menuitem", { name: /^edit$/i }).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+    };
+
+    await login(page);
+    await bukaHalamanPengguna(page);
+    try {
+      await bukaTambahPengguna(page);
+      await isiFormPengguna(page, {
+        nama,
+        nomorHp: `0812${ts.toString().slice(-8)}`,
+        pin: "777888",
+        pilihRole: true,
+        akses: "web",
+      });
+      await expect(isian, "bawaan pengguna baru").toHaveText("Tidak dibatasi");
+      await isian.click();
+      await page.getByRole("option", { name: /\(Gudang\)$/ }).first().click();
+      const tBuat = page.waitForResponse((r) => r.request().method() === "POST" && POLA_BUAT.test(r.url()));
+      await page.getByRole("button", { name: /simpan/i }).click();
+      const buat = await tBuat;
+      expect(buat.status(), "POST register-pengguna").toBe(201);
+      const lokasiGudang = buat.request().postDataJSON().locationID;
+      expect(lokasiGudang, "locationID gudang terkirim").toMatch(/^[a-f0-9]{24}$/);
+      expect(String((await buat.json()).data.locationID), "lokasi kerja tersimpan").toBe(lokasiGudang);
+      await expect(page.getByRole("dialog")).not.toBeVisible();
+
+      await bukaEdit(nama);
+      await expect(isian, "lokasi tersimpan terbaca saat edit").toContainText("(Gudang)");
+      await page.getByLabel(/nama lengkap/i).fill(namaUbah);
+      const tUbah = page.waitForResponse((r) => r.request().method() === "PUT" && POLA_UBAH.test(r.url()));
+      await page.getByRole("button", { name: /simpan/i }).click();
+      const ubah = await tUbah;
+      expect(ubah.status(), "PUT ubah nama").toBe(200);
+      namaAkhir = namaUbah;
+      expect(ubah.request().postDataJSON(), "lokasi yang tidak berubah tidak dikirim").not.toHaveProperty("locationID");
+      await expect(page.getByRole("dialog")).not.toBeVisible();
+
+      await bukaEdit(namaUbah);
+      await isian.click();
+      await page.getByRole("option", { name: "Tidak dibatasi" }).click();
+      const tLepas = page.waitForResponse((r) => r.request().method() === "PUT" && POLA_UBAH.test(r.url()));
+      await page.getByRole("button", { name: /simpan/i }).click();
+      const lepas = await tLepas;
+      expect(lepas.status(), "PUT lepas lokasi kerja").toBe(200);
+      expect(lepas.request().postDataJSON().locationID, "kembali tidak dibatasi").toBeNull();
+      expect((await lepas.json()).data.locationID, "lokasi kerja kosong").toBeNull();
+      await expect(page.getByRole("dialog")).not.toBeVisible();
+    } finally {
+      await bersihkanPengguna(page, namaAkhir);
+    }
+  });
+
   test("pengguna non-aktif ditolak 403 saat login PIN dan tidak mendapat sesi (B202)", async ({ page, browser }) => {
     test.setTimeout(90_000);
     const nama = `E2E Nonaktif ${Date.now()}`;

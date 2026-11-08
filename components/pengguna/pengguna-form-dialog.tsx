@@ -18,6 +18,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { PenggunaRequest, PenggunaItem } from "@/types/pengguna";
 import { Role } from "@/types/role";
+import type { Lokasi } from "@/types/location";
+import { TANPA_LOKASI_KERJA } from "@/features/pengguna/lokasi-kerja";
 import { X, UserPlus, UserCog, Smartphone, Monitor, MonitorSmartphone } from "lucide-react";
 
 interface PenggunaFormDialogProps {
@@ -33,6 +35,8 @@ interface PenggunaFormDialogProps {
   isOwner: boolean;
   roleList: Role[];
   currentUserLevel: number;
+  /** Isian lokasi kerja (B269); tampil hanya bila read-location dan bukan Owner. */
+  lokasiKerja: { tampil: boolean; pilihan: Lokasi[]; memuat: boolean };
 }
 
 export default function PenggunaFormDialog({
@@ -48,6 +52,7 @@ export default function PenggunaFormDialog({
   isOwner,
   roleList,
   currentUserLevel,
+  lokasiKerja,
 }: PenggunaFormDialogProps) {
 
   // Logic untuk menentukan kartu akses mana yang sedang aktif
@@ -244,6 +249,39 @@ export default function PenggunaFormDialog({
               </Select>
             </div>
           </div>
+
+          {lokasiKerja.tampil && (
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-navy" htmlFor="lokasi-kerja">Lokasi Kerja</label>
+              <Select
+                value={form.locationID ?? TANPA_LOKASI_KERJA}
+                onValueChange={(value) =>
+                  setForm({ ...form, locationID: value === TANPA_LOKASI_KERJA ? null : value })
+                }
+                disabled={isSelf || lokasiKerja.memuat}
+              >
+                <SelectTrigger
+                  id="lokasi-kerja"
+                  className="w-full bg-gading text-navy text-sm border-navy/15 focus:ring-navy/50 font-medium h-12 rounded-xl px-4"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-krem border-navy/10 text-navy font-medium">
+                  <SelectItem value={TANPA_LOKASI_KERJA} className="cursor-pointer text-sm">
+                    Tidak dibatasi
+                  </SelectItem>
+                  {lokasiKerja.pilihan.map((lokasi) => (
+                    <SelectItem key={lokasi.id} value={lokasi.id} className="cursor-pointer text-sm">
+                      {lokasi.nama} ({lokasi.tipe})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs font-medium text-navy/60">
+                Staf hanya dapat mengelola stok di lokasi ini. Pilih Tidak dibatasi untuk semua lokasi toko.
+              </p>
+            </div>
+          )}
 
           {formError && (
             <p className="text-sm text-red-600 font-bold bg-red-500/10 px-4 py-3 rounded-xl border border-red-500/20 mt-1">
