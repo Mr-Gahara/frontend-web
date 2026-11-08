@@ -12,6 +12,27 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per backend `ridho` lokal `916e7df`** (web `9bffc66`, 8
+November 2026, pukul 12.18 sampai 12.52 WIB, reporter `line,json`): e2e
+602 lolos, 1 gagal, dan 1 skipped dari 604, sesuai harapan hitungan 602
+ditambah skenario saldo kurang (`b66a6eb`) dan lokasi kerja
+(`4fe201b`). Kegagalannya "sesi diakhiri dan kembali ke /login saat
+backend menjawab 403 dibekukan" di `auth/login.spec.ts`: trace
+menunjukkan monitoring absensi panel Status Staf menyusul sekitar 300 ms
+setelah dashboard outlet termuat, dijawab 403 oleh route spec, lalu
+mengalihkan ke /login dan membatalkan `goto` produk (`net::ERR_ABORTED`;
+gagal 2 dari 3 saat diulang). Diperbaiki di spec: route dipasang setelah
+halaman produk termuat, lalu halaman dimuat ulang; lolos 8 dari 8 dengan
+`--repeat-each 8`. Spec terdampak `tests/e2e/auth` 60 lolos dan 1 gagal:
+skenario password salah berhenti oleh penjaga kuota login spec
+("sisa kuota login toko@gmail.com menipis") setelah puluhan login
+pengulangan tadi, bukan regresi; skenario itu lolos di suite penuh. Yang
+dilewati skip bersyarat data "status staf memuat staf ruang outlet, dan
+lonceng nonaktif" (monitoring tidak memuat staf ruang outlet); skip
+bersyarat tanggal jurnal stok tidak terjadi lagi mulai tanggal 8. Vitest
+1013 lolos. Harapan suite penuh sesudahnya 604 lolos, ditambah skip
+status staf bila datanya kosong (hitungan).
+
 **Suite penuh per backend `ridho` `d267f03`** (web `cbfa23b`, 7 November
 2026, pukul 21.11 sampai 21.43 WIB, reporter `line,json`): e2e 598
 lolos, 3 gagal, dan 1 skipped dari 602, sesuai harapan hitungan 589
@@ -425,6 +446,7 @@ Pola kegagalan yang berulang:
 | Spec gagal hanya pada jam tertentu, berulang, juga di pohon kerja bersih | Cek `date` dan `date -u`, lalu bandingkan dengan `git stash -u`. Tanggal `YYYY-MM-DD` dibaca backend sebagai 00.00 UTC, sehingga tanggal hari ini ditolak antara 00.00 dan 07.00 WIB (`kontrak/temuan.md` butir 154) |
 | Lolos sendirian, gagal saat dijalankan bersama spec lain | Test memilih baris pertama daftar, padahal spec yang berjalan lebih dulu membuat data dari jenis lain (berurutan menurut nama berkas, `workers: 1`). Pilih baris menurut data yang memenuhi syarat, lewat nomornya (`7f1de56`) |
 | Pengguna uji terbatas berakhir di Profil Pengguna, dan permintaan halaman tujuan tidak pernah terkirim | `/dashboard` mengalihkan sendiri menurut izin (`app/dashboard/page.tsx`) dan dapat menyalip `goto` berikutnya; layout ruang outlet dan gudang menuntut `read-dashboard-outlet` dan `read-dashboard-gudang`. Helper peran uji menunggu URL meninggalkan `/dashboard`, dan peran uji memegang izin dashboard ruang yang dibukanya (`4601d91`) |
+| `page.goto` `net::ERR_ABORTED` tepat setelah spec memasang `page.route` 403 | Halaman sebelumnya masih memuat permintaan susulan (panel dashboard) yang ikut dijawab 403 dan mengalihkan ke /login. Pasang route setelah halaman tujuan termuat, lalu `reload({ waitUntil: "commit" })` (suite penuh 8 November 2026) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena
