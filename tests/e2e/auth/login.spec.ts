@@ -272,6 +272,15 @@ test.describe("E2E — Penanganan 403 akun dibekukan", () => {
     await page.getByRole("button", { name: /masuk|login/i }).click();
     await page.waitForURL("**/dashboard/**", { timeout: 15_000 });
 
+    // Route 403 dipasang setelah halaman produk termuat. Bila dipasang
+    // selagi dashboard outlet masih memuat panelnya (monitoring absensi
+    // menyusul sekitar 300 ms), panel itu yang mengalihkan ke /login dan
+    // goto berikutnya dibatalkan (net::ERR_ABORTED, trace suite penuh
+    // 8 November 2026).
+    await page.goto("http://localhost:3000/dashboard/outlet/inventaris/produk");
+    await expect(page.getByRole("heading", { name: /data produk/i })).toBeVisible();
+    await page.waitForLoadState("networkidle");
+
     // Backend membekukan akun setelah sesi berjalan. Mencoba ulang tidak ada
     // gunanya, sehingga sesi diakhiri dan pengguna dikembalikan ke login.
     await page.route("**/api/**", (route) => {
@@ -287,9 +296,10 @@ test.describe("E2E — Penanganan 403 akun dibekukan", () => {
       });
     });
 
-    // Halaman dashboard outlet tidak memanggil API, jadi buka halaman yang
-    // memuat data agar 403 benar-benar melewati apiClient.
-    await page.goto("http://localhost:3000/dashboard/outlet/inventaris/produk");
+    // Muat ulang halaman yang memuat data agar 403 benar-benar melewati
+    // apiClient. Pengalihan ke /login dapat terjadi sebelum event load,
+    // sehingga cukup ditunggu sampai navigasi dimulai.
+    await page.reload({ waitUntil: "commit" });
     await expect(page).toHaveURL(/.*\/login$/, { timeout: 20_000 });
   });
 });
