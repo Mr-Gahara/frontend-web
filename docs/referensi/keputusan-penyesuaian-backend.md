@@ -735,3 +735,45 @@ sama dengan `origin/ridho` tanpa gabungan. Label baru B263 sampai B266.
   setelah AR27 sesi kasir terikat perangkat, bukan pengguna, sehingga
   kasir berikutnya di tablet bersama dapat berjualan di sesi yang dibuka
   rekannya. Tidak mengubah web.
+
+## Penyesuaian backend `ridho` lokal `916e7df`
+
+Diminta pemilik proyek pada 8 November 2026: `yoga` maju 16 commit tepat
+di atas `d267f03` ke `916e7df` (P53 sampai P59 dicatat hash-nya, B267
+dan B268, P61 sampai P64, B269 sampai B282), sedangkan `nizar` dan
+`ridho` remote tidak maju, sehingga `ridho` lokal di-fast-forward tanpa
+gabungan dan tanpa di-push. Lokasi kerja (P61) dan pencocokan absen ke
+jadwal (P62) dikerjakan Yoga di modul Ridho atas penugasan sementara.
+
+- **Langkah sesudah tarik**: seed dan indeks model tidak berubah,
+  sehingga permission tidak diselaraskan dan `db:indeks` tidak
+  dijalankan. Migrasi baru `isiLokasiKerja.js` (RUNBOOK backend) mode
+  laporan: `diisi` 0, dua toko bergudang (37 dan 3 staf) dibiarkan tanpa
+  lokasi kerja, `tokoTanpaOutlet` kosong; `--terapkan` tidak perlu
+  dijalankan.
+- **Pencocokan dengan permintaan web**: P64 sesuai (utang PS6a lunas).
+  B278 hanya sebagian menjawab butir 165, karena monitoring memuat staf
+  yang izin hanya bila lokasi kerjanya lokasi itu. P46 dan P61 membalik
+  keputusan produk Model bisnis MVP (SO-3, butir 20); pemilik proyek
+  memilih mengikuti backend (`inti/keputusan-rancangan.md`).
+- **Perubahan web**: PS10a pembelian memotong saldo (`b66a6eb`), LK1a
+  isian lokasi kerja di dialog pengguna (`4fe201b`), dan AB6a label
+  Terlambat dan Luar jadwal di Status Staf (`69f2b18`).
+- **Tidak mengubah web**: P63 beban (B279, B280) atas keputusan pemilik
+  proyek: payload tetap tanpa `locationID`, sehingga beban tetap tingkat
+  toko, tanpa kolom atau pilihan lokasi; ditinjau bersama laporan laba
+  rugi per outlet atau multi-outlet. B267 (validasi web sudah 0 sampai
+  100 dengan pesan sendiri), B268 (perbaikan kebocoran cache antar-toko),
+  B275 (web tidak punya hapus lokasi), dan B277 (galat absen terlalu
+  awal milik aplikasi). B270 sampai B274 tidak berlaku bagi pengguna
+  tanpa lokasi kerja, termasuk seluruh pengguna uji.
+- **Bukti respons nyata** (skrip API, 8 November 2026): `GET /pengguna`
+  memuat `locationID` null (B269); `GET /bebanoperasional` memuat
+  `lokasi` null (B279); `POST /pembelianstok` 201 `saldoDipotong` true,
+  saldo 231.000 menjadi 230.000 dengan mutasi `PEMBELIAN` ber-referensi
+  `{ tipe: "PembelianStok" }`, `DELETE` 200 mengembalikan saldo dengan
+  `PEMBALIK_PEMBELIAN` ber-`mutasiAsalID`, dan total di atas saldo 409
+  `Saldo akun kas tidak mencukupi (saldo Rp 231.000).` (B281, B282).
+  Pembelian lama tidak membawa `saldoDipotong` sama sekali, karena
+  dokumen dibaca apa adanya (`.lean()`); web membacanya sebagai belum
+  terpotong.

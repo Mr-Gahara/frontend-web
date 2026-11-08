@@ -32,6 +32,12 @@ sama (submodul pengajuan stok, di bawah).
   dan peran kerja seseorang (petugas gudang, kasir outlet) dibedakan lewat
   role dan permission. Petugas gudang yang sedang berada di outlet tetap
   dapat membuka ruang gudang, karena aksesnya ditentukan RBAC.
+  Diperbarui 8 November 2026 mengikuti backend P46 dan P61 (pemilik
+  proyek): pengguna tetap terikat ke tenant, dan staf non-owner dapat
+  diberi satu lokasi kerja opsional (`locationID`, null berarti tidak
+  dibatasi). Staf berlokasi kerja tanpa `akses-lintas-outlet` hanya dapat
+  membuka data stok lokasinya; Owner dan pemegang izin itu tidak dibatasi.
+  Lokasi kerja diisi di dialog pengguna (`modul/jadwal-shift.md`, LK1a).
 - **Lokasi hanya penanda posisi dan acuan absensi** (koordinat dan radius
   absen). Absensi urusan aplikasi; web hanya memantau.
 - **Lokasi aktif adalah outlet milik tenant**, bukan lokasi pribadi
@@ -51,7 +57,10 @@ sama (submodul pengajuan stok, di bawah).
 - **Data tidak dibatasi per lokasi pengguna** di backend, cukup per tenant
   dan per permission. Query `locationID` tetap sah sebagai penyaring
   pilihan, bukan pembatas akses. Ini jawaban atas SO-3
-  (`kontrak/temuan.md` butir 20).
+  (`kontrak/temuan.md` butir 20). Sejak 8 November 2026 (P61, di atas)
+  backend membatasinya per lokasi kerja bagi staf yang lokasinya terisi;
+  pengguna tanpa lokasi kerja tetap dibatasi per tenant dan permission
+  saja.
 - **Master data (produk, bahan baku, barang) milik tenant dan bersumber
   dari outlet.** Gudang tidak punya master sendiri; gudang baru mulai
   kosong, lalu menarik barang dari master lewat tambah barang di

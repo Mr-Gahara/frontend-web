@@ -173,6 +173,27 @@ Diputuskan pemilik proyek pada 30 dan 31 Oktober 2026
   (`6a344b0`, B165), dan penolakan seluruh jadwal 409 dibentuk ulang
   menjadi hasil biasa (`2319662`, B147).
 
+### Penyesuaian backend `ridho` lokal `916e7df`
+
+Diputuskan pemilik proyek pada 8 November 2026
+(`referensi/keputusan-penyesuaian-backend.md`; Model bisnis MVP di
+`inti/keputusan-rancangan.md` diperbarui mengikuti P61).
+
+- **LK1a: lokasi kerja diisi di dialog pengguna** (`4fe201b`, B269).
+  Dialog tambah dan ubah pengguna menambah pilihan Lokasi Kerja: Tidak
+  dibatasi (bawaan), outlet, atau gudang toko, dikirim sebagai
+  `locationID`. Tidak tampil untuk role Owner (dikenali dari level).
+  Daftar pengguna tidak menambah kolom, dan ruang tidak disesuaikan:
+  staf di luar lokasi kerjanya melihat pesan 403 backend. Tanpa
+  `read-location` isiannya disembunyikan dan `locationID` tidak dikirim.
+  Diterapkan tanpa ditanyakan: `locationID` hanya dikirim bila berubah
+  (keputusan rancangan butir 15), dan isiannya terkunci saat mengubah
+  diri sendiri seperti role dan status, karena backend mengabaikannya.
+- **AB6a: label kedatangan di Status Staf** (`69f2b18`, B276, B278).
+  Staf yang sudah absen mendapat label kecil "Terlambat N menit" atau
+  "Luar jadwal" dari `sesiTerakhir` monitoring; Tepat Waktu tanpa label.
+  Widget absensi halaman pengguna tidak berubah.
+
 ## Catatan
 
 ### Catatan dari modul jadwal dan shift
@@ -253,6 +274,9 @@ modul ini yang memakai `apiClient`.
 - Monitoring per lokasi tidak memuat staf yang izin (`kontrak/temuan.md`
   butir 165); baris izin di panel Status Staf disusun web dari karyawan
   ruang menurut peran sampai backend memuat libur karyawan lokasi itu.
+  Sejak backend `916e7df` (B278) monitoring memuat staf yang izin bila
+  lokasi kerjanya lokasi itu; tambahan web tetap untuk staf tanpa lokasi
+  kerja.
 - Widget absensi dan panel Status Staf memuat lokasi ruang, sehingga
   menuntut `read-location`, sedangkan gerbang panel dan halaman pengguna
   belum memeriksanya. Selesai di `b69d39a`: panel dipasang hanya dengan

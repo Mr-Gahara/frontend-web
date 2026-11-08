@@ -372,6 +372,7 @@ yang disetujui (`7f5c3ee` sampai `1e4f042`):
 - **PS6a: akun kas pembayar adalah seluruh akun kas aktif**, dengan
   gerbang `read-akunkas`. Form dan detail menerangkan bahwa saldo akun
   kas belum terpotong oleh pembelian, karena backend belum memotongnya.
+  Keterangan itu diganti PS10a sejak backend memotong saldo.
 - **PS7a: detail** menampilkan barang di `DataTable` tanpa paginasi
   server, total, pencatat, lokasi penerima, dan penanda pembelian yang
   dicatat sebelum stok bertambah otomatis.
@@ -385,6 +386,17 @@ yang disetujui (`7f5c3ee` sampai `1e4f042`):
   158). Sampai itu `IZIN_PEMBELIAN_STOK_RUANG` di
   `features/pembelian-stok/izin.ts` bernilai null, dan kedua ruang
   memakai izin yang sama.
+- **PS10a: pembelian memotong saldo akun kas** (pemilik proyek, 8
+  November 2026; backend `916e7df`, P64, B281, B282; `b66a6eb`).
+  Peringatan PS6a di form catat dibuang; di bawah pilihan akun tampil
+  galat "Saldo akun kas tidak mencukupi" bila total melebihi saldo, dan
+  simpan ditahan, sedangkan 409 backend tetap tampil sebagai toast.
+  Peringatan di detail hanya untuk pembelian lama (`saldoDipotong` bukan
+  true). Di Belanja Stok kalimat umum dibuang, dan baris pembelian lama
+  ditandai "Saldo tidak terpotong" di kolom Dibayar dari. Konfirmasi
+  hapus menyebut saldo dikembalikan bila `saldoDipotong` true. Buku
+  mutasi mengenal `PEMBELIAN` dan `PEMBALIK_PEMBELIAN`, belum bertaut ke
+  detail pembelian.
 - Pembagian izin di template role (RH6a) ada di `modul/akses.md`.
 
 ### Label tab dan status pengajuan stok serta surat jalan
@@ -646,9 +658,9 @@ Yang masih berlaku:
 
 ### Utang kecil dari pembelian stok
 
-- Saldo akun kas belum dipotong dan buku mutasi kas belum ditulis oleh
-  pembelian. Begitu backend memotongnya, akar `akunKas` ditambahkan ke
-  `useInvalidasiPembelian`, dan keterangan di form serta detail dibuang.
+- Mutasi `PEMBELIAN` di buku mutasi kas belum bertaut ke detail
+  pembelian, karena referensinya hanya membawa id, sedangkan rute detail
+  bergantung pada ruang lokasi penerimanya (PS10a).
 - Izin per ruang menunggu backend (PS9a, `kontrak/temuan.md` butir 158).
 - Filter periode bawaan tidak ikut bergeser saat hari berganti
   (keputusan pemilik proyek, 26 Oktober 2026); tanggalnya terlihat dan

@@ -29,6 +29,14 @@ setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 
 ## Pekerjaan berikutnya
 
+Keadaan per 8 November 2026: backend lokal `ridho` `916e7df`,
+di-fast-forward ke `yoga` (16 commit di atas `origin/ridho` `d267f03`:
+P61 sampai P64, B267 sampai B282) tanpa di-push. Penyesuaiannya PS10a
+pembelian memotong saldo (`b66a6eb`), LK1a lokasi kerja di dialog
+pengguna (`4fe201b`), dan AB6a label kedatangan di Status Staf
+(`69f2b18`); Model bisnis MVP diperbarui mengikuti P61
+(`referensi/keputusan-penyesuaian-backend.md`).
+
 Keadaan per 7 November 2026: backend lokal `ridho` `d267f03`, sama
 dengan `origin/ridho` (tujuh commit Ridho di atas `1584222`: AR26 sampai
 AR29, B263 sampai B266). Penyesuaiannya hanya B266 (`5b6ff0d`), dicatat
@@ -145,7 +153,10 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
   tidak mencabut sesi pengguna), butir 178 (penyimpanan penjualan
   bersamaan memotong stok tanpa status, dari uji beban tulis 7 November
   2026), serta B250, B255, dan B116 (butir 158) yang terbukti e2e 7
-  November 2026 (`778eb2d`, `cbfa23b`, `4601d91`).
+  November 2026 (`778eb2d`, `cbfa23b`, `4601d91`), dan dari penyesuaian
+  `916e7df`: B281 dan B282 serta B269 dan B279 dari respons nyata, serta
+  butir 165 yang hanya selesai sebagian (B278 hanya untuk staf berlokasi
+  kerja).
   Laporannya ditunda sampai pekerjaan backend dari audit
   selesai, agar diserahkan sekali jalan (pemilik proyek, 6 November
   2026).
@@ -223,7 +234,9 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 
 - Monitoring per lokasi tidak memuat staf yang izin (`kontrak/temuan.md`
   butir 165); panel Status Staf menambah karyawan ruang menurut peran
-  yang izin hari itu sampai backend memperbaikinya.
+  yang izin hari itu sampai backend memperbaikinya. Backend `916e7df`
+  (B278) memuat staf yang izin hanya bila lokasi kerjanya lokasi itu,
+  sehingga tambahan web tetap untuk staf tanpa lokasi kerja.
 - Jalur role tanpa izin SDM baru, tanpa `read-location`, dan tanpa izin
   lintas outlet hanya teruji di unit test, karena akun uji berperan
   Owner (`referensi/utang-pengujian.md`).
@@ -246,12 +259,17 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 - Penerimaan (outlet) dan pengiriman (gudang) tetap daftar kartu mode
   klien dengan polling; tidak termasuk butir 150.
 
-### Utang kecil dari pembelian stok dan audit pergantian hari
+### Utang kecil dari penyesuaian backend `ridho` lokal `916e7df`
 
-- Saldo akun kas belum terpotong pembelian, karena backend belum
-  memotongnya (`modul/inventaris.md`, PS6a); dicek ulang 6 November
-  2026: `pembelianStokService.js` `ridho` `c031bde` tidak menulis
-  mutasi kas.
+- Ruang tidak disesuaikan dengan lokasi kerja (LK1a): staf berlokasi
+  kerja yang membuka ruang lain melihat pesan 403 backend di setiap
+  halaman stok. Penjualan dan sesi kasir belum ditegakkan backend (milik
+  Nizar, P46).
+- Beban tetap dicatat tanpa `locationID` (tingkat toko) atas keputusan
+  pemilik proyek; pilihan lokasi beban ditinjau bersama laporan laba
+  rugi per outlet atau multi-outlet (P63, B279, B280).
+- Label kedatangan Status Staf (AB6a) hanya teruji di unit test
+  (`referensi/utang-pengujian.md`).
 
 ### Utang kecil dari pengembalian Outlet ke Gudang
 

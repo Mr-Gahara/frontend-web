@@ -241,6 +241,12 @@ remote. Seed tidak berubah; `db:indeks` dijalankan (wajib sejak AR27:
 indeks unik `installationId` perangkat diganti), dan migrasi
 `hapusPajakToko.js` dijalankan mode laporan lebih dulu
 (`referensi/keputusan-penyesuaian-backend.md`).
+Pada 8 November 2026 `yoga` maju 16 commit tepat di atas `d267f03` ke
+`916e7df` (P61 sampai P64, B267 sampai B282), sedangkan `nizar` dan
+`ridho` remote tidak maju, sehingga `ridho` lokal di-fast-forward tanpa
+di-push. Seed dan indeks tidak berubah; migrasi baru `isiLokasiKerja.js`
+mode laporan mengisi 0 pengguna, sehingga tidak diterapkan
+(`referensi/keputusan-penyesuaian-backend.md`).
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari

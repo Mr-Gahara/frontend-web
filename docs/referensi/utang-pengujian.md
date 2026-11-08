@@ -461,3 +461,14 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   di unit test** (`tests/unit/components/panduan/titik-dashboard.test.ts`),
   karena akun uji e2e berperan Owner sehingga kelima titik selalu
   tampil. Aturannya `bolehLihatMenu`, yang dipakai bersama sidebar.
+- **Label kedatangan Status Staf (AB6a) hanya teruji di unit test**
+  (`tests/unit/features/dashboard-outlet/dashboard-outlet.test.ts`),
+  karena absen dibuat aplikasi dengan foto dan koordinat, sehingga data
+  Terlambat dan Luar Jadwal tidak dapat disiapkan web secara
+  deterministik.
+- **Lokasi kerja (LK1a) tanpa `read-location` dan untuk role Owner
+  hanya teruji di unit dan integration test**
+  (`tests/unit/features/pengguna/lokasi-kerja.test.ts`), karena akun uji
+  berperan Owner. Pembatasan 403 bagi staf berlokasi kerja (B270 sampai
+  B274) tidak diuji web: pengguna uji tidak diberi lokasi kerja, dan
+  ruang tidak disesuaikan.
