@@ -365,6 +365,18 @@ Diputuskan pemilik proyek pada 7 November 2026, saat penyambungan
   sudah dipakai perangkat lain.", bukan terjemahan berisi "mesin kasir"
   dan "laci" yang sempat ditulis Claude di `b74f30a` tanpa ditanyakan.
 
+### Penyesuaian backend `ridho` lokal `e9112a8`
+
+Diputuskan pemilik proyek pada 8 November 2026
+(`referensi/keputusan-penyesuaian-backend.md`).
+
+- **LR1a: laporan laba rugi tetap seluruh toko** (B290). Tidak ada
+  pilihan outlet dan `locationID` tidak dikirim, karena MVP satu akun
+  satu outlet dan satu gudang; `totalBebanTingkatToko` tidak dibaca.
+  Ditinjau bersama lokasi beban (P63) saat multi-outlet.
+- **LR2a: halaman arus kas menunggu desain pemilik proyek** (B291,
+  `inti/status.md`).
+
 ## Catatan
 
 ### Catatan dari penyambungan Mesin Kasir

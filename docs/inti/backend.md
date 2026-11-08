@@ -247,6 +247,12 @@ Pada 8 November 2026 `yoga` maju 16 commit tepat di atas `d267f03` ke
 di-push. Seed dan indeks tidak berubah; migrasi baru `isiLokasiKerja.js`
 mode laporan mengisi 0 pengguna, sehingga tidak diterapkan
 (`referensi/keputusan-penyesuaian-backend.md`).
+Pada hari yang sama `nizar` maju 28 commit ke `e9112a8`, memuat seluruh
+`yoga` `1d3851d` (9 commit), sedangkan `ridho` lokal tidak punya commit
+di luarnya, sehingga `ridho` lokal di-fast-forward tanpa di-push. Seed
+tidak berubah; `db:indeks` membentuk indeks `PemakaianDiskon` per toko,
+dan tidak ada skrip migrasi baru
+(`referensi/keputusan-penyesuaian-backend.md`).
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari

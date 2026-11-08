@@ -38,6 +38,9 @@ sama (submodul pengajuan stok, di bawah).
   dibatasi). Staf berlokasi kerja tanpa `akses-lintas-outlet` hanya dapat
   membuka data stok lokasinya; Owner dan pemegang izin itu tidak dibatasi.
   Lokasi kerja diisi di dialog pengguna (`modul/jadwal-shift.md`, LK1a).
+  Sejak backend `e9112a8` pembatasan yang sama berlaku untuk pembelian
+  stok, penjualan, pembayaran, sesi kasir, monitoring absensi, dan laba
+  rugi (B283, B286 sampai B290).
 - **Lokasi hanya penanda posisi dan acuan absensi** (koordinat dan radius
   absen). Absensi urusan aplikasi; web hanya memantau.
 - **Lokasi aktif adalah outlet milik tenant**, bukan lokasi pribadi

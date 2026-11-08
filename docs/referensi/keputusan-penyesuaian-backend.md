@@ -777,3 +777,52 @@ jadwal (P62) dikerjakan Yoga di modul Ridho atas penugasan sementara.
   Pembelian lama tidak membawa `saldoDipotong` sama sekali, karena
   dokumen dibaca apa adanya (`.lean()`); web membacanya sebagai belum
   terpotong.
+
+## Penyesuaian backend `ridho` lokal `e9112a8`
+
+Diminta pemilik proyek pada 8 November 2026: `nizar` maju 28 commit ke
+`e9112a8`, memuat seluruh `yoga` `1d3851d` (9 commit: P65 sampai P67,
+B283 sampai B286), dan `ridho` lokal tidak punya commit di luarnya,
+sehingga `ridho` lokal di-fast-forward tanpa gabungan dan tanpa
+di-push. Label baru Nizar: B287 sampai B289 (P46 di penjualan,
+pembayaran, dan sesi kasir), B290 (laba rugi per lokasi), dan B291
+(arus kas); audit A-03, A-05, R1, dan P-03 bagian penjualan.
+
+- **Langkah sesudah tarik**: seed tidak berubah, sehingga permission
+  tidak diselaraskan. `db:indeks` membentuk indeks baru
+  `PemakaianDiskon` `{ tenantID, diskonID }` (R1); indeks lain selaras
+  tanpa perubahan. Tidak ada skrip migrasi baru.
+- **Keputusan pemilik proyek** (`modul/keuangan.md` dan
+  `modul/inventaris.md`):
+  - **LR1a**: laporan laba rugi tetap seluruh toko tanpa `locationID`,
+    karena MVP satu akun satu outlet dan satu gudang (B290). Tidak ada
+    perubahan kode.
+  - **LR2a**: halaman arus kas (B291) menunggu desain pemilik proyek.
+  - **PG1a**: tombol Setujui pengajuan tetap tampil bagi rekan
+    selokasi; pesan 403 B284 tampil apa adanya lewat toast yang sudah
+    ada, dan permintaan lokasi kerja pengaju di detail masuk bahan
+    laporan untuk Yoga (`kontrak/temuan.md` butir 179).
+- **Tidak mengubah web**: B283 dan B287 sampai B289 (web selalu
+  mengirim `locationID` ruang; pesan 403 "Lokasi di luar lokasi kerja
+  Anda." tidak cocok dengan pola pengalihan login di `lib/apiClient.ts`,
+  yang hanya untuk dinonaktifkan atau dibekukan), B285
+  (`menitPulangAwal` tidak ada di `sesiTerakhir` monitoring, dan web
+  tidak menampilkan riwayat absen), B286 (web selalu mengirim
+  `locationID`), A-05 (kontrak tetap), R1 dan P-03 (internal). Seluruh
+  pengguna uji tanpa lokasi kerja, sehingga jalurnya tidak berubah.
+- **A-03 dan e2e**: batas per IP 20 kirim email (`lupa-password`,
+  `verifikasi-email/kirim`) dan 30 periksa OTP (`reset-password`,
+  `verifikasi-email`) per 15 menit, ditulis tetap tanpa variabel
+  lingkungan dan disimpan di memori proses. Satu suite penuh memakai
+  sekitar 6 dan 8; menjalankan ulang `tests/e2e/auth` berkali-kali
+  sesudahnya dapat dijawab 429, yang tidak dilewati `ALASAN_KUOTA`.
+  Restart backend mengosongkan hitungannya.
+- **Bukti respons nyata** (skrip API, 8 November 2026): `GET
+  /laporan/laba-rugi` 200, baris `data` tetap sepuluh kunci yang sama,
+  dan `ringkasan` menambah `locationID` serta `totalBebanTingkatToko`
+  (keduanya null tanpa `locationID`; dengan `locationID` outlet,
+  `totalBebanTingkatToko` 0) (B290). `GET /laporan/arus-kas` 200 dengan
+  baris per hari (`penjualanMasuk`, `penjualanVoid`, `bebanKeluar`,
+  `pembelianKeluar`, `selisihKasMasuk`, `transferMasuk`, `saldoAwalAkun`,
+  `arusKasBersih`, dan pasangan pembaliknya) (B291). `GET
+  /pengajuanstok/:id` memuat `dimintaOleh` `{ id, nama }` (butir 179).

@@ -29,6 +29,13 @@ setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 
 ## Pekerjaan berikutnya
 
+Keadaan per 8 November 2026 (sore): backend lokal `ridho` `e9112a8`,
+di-fast-forward ke `nizar` (28 commit di atas `916e7df`, memuat `yoga`
+`1d3851d`: P65 sampai P67, B283 sampai B291) tanpa di-push. Tidak ada
+perubahan kode web: LR1a laba rugi tetap seluruh toko, LR2a arus kas
+menunggu desain, dan PG1a pesan 403 Setujui rekan selokasi tampil apa
+adanya (`referensi/keputusan-penyesuaian-backend.md`).
+
 Keadaan per 8 November 2026: backend lokal `ridho` `916e7df`,
 di-fast-forward ke `yoga` (16 commit di atas `origin/ridho` `d267f03`:
 P61 sampai P64, B267 sampai B282) tanpa di-push. Penyesuaiannya PS10a
@@ -124,6 +131,8 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
    email atau password akun (B178 sampai B180); hapus akun oleh Owner
    (B181); dan pengingat masa langganan yang hampir habis di luar
    halaman Langganan.
+3. **Halaman arus kas** (B291, LR2a): `GET /laporan/arus-kas` per hari
+   dengan pilihan akun kas, sudah tersedia di backend `e9112a8`.
 
 ### Menunggu keputusan pemilik proyek
 
@@ -156,7 +165,9 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
   November 2026 (`778eb2d`, `cbfa23b`, `4601d91`), dan dari penyesuaian
   `916e7df`: B281 dan B282 serta B269 dan B279 dari respons nyata, serta
   butir 165 yang hanya selesai sebagian (B278 hanya untuk staf berlokasi
-  kerja).
+  kerja), dan dari penyesuaian `e9112a8`: butir 179 (lokasi kerja
+  pengaju di detail pengajuan, B284) serta B290 dan B291 dari respons
+  nyata.
   Laporannya ditunda sampai pekerjaan backend dari audit
   selesai, agar diserahkan sekali jalan (pemilik proyek, 6 November
   2026).
@@ -263,11 +274,12 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 
 - Ruang tidak disesuaikan dengan lokasi kerja (LK1a): staf berlokasi
   kerja yang membuka ruang lain melihat pesan 403 backend di setiap
-  halaman stok. Penjualan dan sesi kasir belum ditegakkan backend (milik
-  Nizar, P46).
+  halaman stok, dan sejak backend `e9112a8` juga di pembelian stok,
+  penjualan, pembayaran, sesi kasir, panel Status Staf, dan laba rugi
+  (B283, B286 sampai B290).
 - Beban tetap dicatat tanpa `locationID` (tingkat toko) atas keputusan
   pemilik proyek; pilihan lokasi beban ditinjau bersama laporan laba
-  rugi per outlet atau multi-outlet (P63, B279, B280).
+  rugi per outlet saat multi-outlet (P63, B279, B280, LR1a).
 - Label kedatangan Status Staf (AB6a) hanya teruji di unit test
   (`referensi/utang-pengujian.md`).
 

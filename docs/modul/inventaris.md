@@ -285,6 +285,11 @@ Diputuskan pemilik proyek pada 25 Oktober 2026, dari pratinjau desain
 - **Detail surat jalan di ruang yang bukan pengirimnya tampil baca-saja**
   (AR11a): kirim, revisi, dan batal hanya di ruang pengirim, dan ruang
   penerima mendapat tombol Buka Penerimaan saat surat jalan DIKIRIM.
+- **Setujui oleh rekan selokasi pengaju ditolak backend apa adanya**
+  (PG1a, pemilik proyek, 8 November 2026; B284, P66). Tombol Setujui
+  tetap tampil, karena detail tidak memuat lokasi kerja pengaju; pesan
+  403 backend tampil lewat toast yang sudah ada. Permintaannya ke Yoga
+  di `kontrak/temuan.md` butir 179.
 
 ### Submodul transfer, pengiriman, dan penerimaan
 
