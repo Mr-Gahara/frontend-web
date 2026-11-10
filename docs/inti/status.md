@@ -169,24 +169,25 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
     butir 168 (cookie refresh `POST /tenant`), 169 (`db:data-bawaan`
     mencocokkan nama), 170 (penanda masa percobaan), 172 sampai 174
     (perangkat dan asal penutupan sesi kasir), 177 (logout akun tidak
-    mencabut sesi pengguna), 178 (penyimpanan penjualan bersamaan,
-    diuji ulang karena potong stok berubah di P-03), dan 179 (lokasi
+    mencabut sesi pengguna), 178 (penyimpanan penjualan bersamaan;
+    diuji ulang 10 November 2026 sesudah P-03 dan masih terjadi: stok
+    turun 6 untuk satu penjualan tersimpan), dan 179 (lokasi
     kerja pengaju, B284). Butir 180 (omzet per metode pembayaran, OM1a)
     sudah dicatat langsung di `docs/pengembangan/klien.md` backend
     `dd6bc98` atas perintah pemilik proyek, sehingga cukup dirujuk.
   - **Pembuktian, satu baris per butir**: butir 12 (hapus kategori yang
     dipakai, P19) dan 52 (hapus aset ber-booking), P18 hapus bahan,
     butir 14 (kembar 409, B304; spec `crud-kategori` lolos di suite
-    penuh 10 November 2026); B215, B217, B229 sampai B232, B251
+    penuh 10 November 2026), butir 13 (`kategoriID` produk diperiksa
+    keberadaannya) dan 16 (cache produk dibuang saat kategori berubah)
+    dari respons nyata 10 November 2026; B215, B217, B229 sampai B232, B251
     (`a207fae`), dan B248 (`efb05db`) dari web; B252 dan B259 sampai
     B261 (penyesuaian `1584222`) serta B266 (`d267f03`) dari respons
     nyata; B250 dan B255 terbukti e2e 7 November 2026 (`778eb2d`); B269,
     B279, B281, dan B282 (`916e7df`) serta B290 dan B291 (`e9112a8`)
     dari respons nyata.
   - **Belum dibuktikan**: butir 85 dan 107 (B50, B51), B169, dan B170
-    yang menunggu web sejak AR31 (VK1a), serta butir 13 (`kategoriID`
-    produk diperiksa keberadaannya) dan 16 (cache produk dibuang saat
-    kategori berubah), yang tampak diperbaiki di kode `0bbd261`.
+    yang menunggu web sejak AR31 (VK1a).
   - **Dikeluarkan karena basi**: butir 167 (selesai lewat B240,
     `GET /akun/me`; web belum memakainya, TP2a), 141, 155, 156, 158,
     160, 162, dan 164 beserta B112, B114, B115, dan B116 (ditutup
