@@ -12,6 +12,16 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per putaran 10 November 2026 malam** (web `fa6b223`,
+backend `ridho` `aeb6a52` dengan kode sama dengan `0bbd261`, pukul 19.31
+sampai 20.04 WIB, reporter `line,json`): e2e 608 lolos dari 608, tanpa
+kegagalan dan tanpa skip, sesuai harapan hitungan 604 ditambah skenario
+merek saat `GET /akun/me` gagal (TP2b, `19498b7`) dan tiga skenario ruang
+lokasi kerja (LK3a, `bce1362`, pengguna uji baru "E2E Lokasi Gudang").
+Skip status staf tidak terjadi. Vitest 1022 lolos. Harapan suite penuh
+sesudahnya 608 lolos, ditambah skip status staf bila datanya kosong
+(hitungan).
+
 **Suite penuh per backend `ridho` lokal `0bbd261`** (web `824517b`, 10
 November 2026, pukul 18.00 sampai 18.37 WIB, reporter `line,json`): e2e
 603 lolos dan 1 skipped dari 604, tanpa kegagalan, sesuai harapan
