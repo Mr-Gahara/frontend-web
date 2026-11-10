@@ -349,15 +349,9 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 
 ### Utang kecil dari penyesuaian backend `ridho` `7d28135`
 
-- Baris `/pembelianstok` di Lampiran A (`kontrak/route-backend.md`)
-  masih mencatat tanpa izin, padahal backend memeriksa `read-`,
-  `create-`, `update-`, dan `delete-pembelian-stok` (B74); izinnya
-  tercatat di `kontrak/endpoint.md`. Lampiran itu bertanda Tetap dan
-  diperbarui utuh saat dibangkitkan ulang (pemilik proyek, 26 Oktober
-  2026).
-- Lampiran A (`kontrak/route-backend.md`) tertinggal: masih mencatat
-  `DELETE /bebanoperasional/:id`, yang sudah dibuang backend.
-  Dibangkitkan ulang hanya atas perintah pemilik proyek (RG8a).
+- Ketertinggalan Lampiran A (izin `/pembelianstok` dan
+  `DELETE /bebanoperasional/:id`) lunas: Lampiran A dibangkitkan ulang
+  terhadap `aeb6a52` pada 10 November 2026 (RG9a).
 - Kategori fixture "E2E Kategori Beban" dan satu beban VOID menetap di
   basis data development (RG7a).
 

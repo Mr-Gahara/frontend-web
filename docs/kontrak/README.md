@@ -20,7 +20,7 @@ data, atau izin harus diturunkan dari sini, bukan dari dugaan.
 | Field payload operasi tulis, yang wajib dan yang diisi server | `payload.md` (bagian 4) |
 | Izin yang dibutuhkan sebuah halaman | `izin-halaman.md` (bagian 5) |
 | Ketidakselarasan yang sudah tercatat beserta pemiliknya | `temuan.md` (bagian 6) |
-| Seluruh 246 route backend, termasuk yang belum dipakai | `route-backend.md` (Lampiran A) |
+| Seluruh 269 route backend, termasuk yang belum dipakai | `route-backend.md` (Lampiran A, dibangkitkan ulang terhadap `aeb6a52`, RG9a) |
 
 Kontrak terikat pada commit backend `4310d1c` (18 September 2026). Bagian
 inventory dan stock opname di `endpoint.md`, `payload.md`, `izin-halaman.md`,
@@ -61,10 +61,13 @@ dan `route-backend.md` perlu dibangkitkan ulang; bagian 1 di bawah menjelaskan
 cara pembangkitannya. Gejala bahwa kontrak sudah tertinggal: endpoint yang
 dipanggil menjawab 404, permission yang tercatat tidak lagi diperiksa, atau
 bentuk respons berbeda dari tipe. Pembangkitan ulang hanya dilakukan atas
-permintaan pemilik proyek. Lampiran A (`route-backend.md`) sudah
-menunjukkan gejala itu terhadap backend `465b438` (audit 30 September
-2026): tujuh route tidak ada lagi, yaitu `DELETE` akun kas, diskon, jurnal
-transfer, metode pembayaran, pembayaran, dan sesi booking, serta
+permintaan pemilik proyek. Lampiran A dibangkitkan ulang terhadap
+backend `ridho` `aeb6a52` pada 10 November 2026 (RG9a); catatan di bawah
+tentang ketertinggalannya adalah riwayat sebelum itu. Lampiran A
+(`route-backend.md`) sudah menunjukkan gejala itu terhadap backend
+`465b438` (audit 30 September 2026): tujuh route tidak ada lagi, yaitu
+`DELETE` akun kas, diskon, jurnal transfer, metode pembayaran,
+pembayaran, dan sesi booking, serta
 `PATCH /metodepembayaran/:id/toggle-active`; dan empat route belum
 tercatat, yaitu `GET /akunkas/mutasi`, `GET /akunkas/:id/mutasi`,
 `GET /akunkas/:id/ringkasan`, dan `POST /sesibooking/:id/checkin`.
