@@ -253,6 +253,13 @@ di luarnya, sehingga `ridho` lokal di-fast-forward tanpa di-push. Seed
 tidak berubah; `db:indeks` membentuk indeks `PemakaianDiskon` per toko,
 dan tidak ada skrip migrasi baru
 (`referensi/keputusan-penyesuaian-backend.md`).
+Pada 10 November 2026 `ridho` remote maju 18 commit di atas `e9112a8`
+ke `0e43a6d`, lalu `yoga` maju delapan commit tepat di atasnya ke
+`0bbd261`, sedangkan `nizar` tidak maju, sehingga `ridho` lokal
+di-fast-forward tanpa di-push. Seed menambah empat izin
+`*-barang-inventory` (163 nama, Owner 160) tanpa nama dibuang, dan
+migrasi baru `izinBarangInventory.js` dijalankan sesudah kedua seed
+(`referensi/keputusan-penyesuaian-backend.md`).
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari

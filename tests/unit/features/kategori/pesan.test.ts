@@ -11,7 +11,9 @@ const daftar = [
   kategori("2", "Makanan", "MKN"),
 ];
 
-const duplikat = new Error("tenantID sudah digunakan di tenant ini");
+/** Bentuk 409 backend P72 (B304); field yang disebut index pertama yang bentrok. */
+const duplikat = new Error("namaKategori sudah dipakai kategori lain di toko ini.");
+const duplikatKode = new Error("kodeKategori sudah dipakai kategori lain di toko ini.");
 
 describe("pesanErrorKategori", () => {
   it("meneruskan pesan yang bukan penolakan duplikat", () => {
@@ -47,19 +49,25 @@ describe("pesanErrorKategori", () => {
   });
 
   it("tidak menganggap kategori yang sedang diedit sebagai bentrok", () => {
-    const pesan = pesanErrorKategori(duplikat, "Gagal", {
+    const pesan = pesanErrorKategori(duplikatKode, "Gagal", {
       nilai: { namaKategori: "Minuman", kodeKategori: "MNM" },
       daftar,
       idDiedit: "1",
     });
-    expect(pesan).toBe("Nama atau kode kategori sudah dipakai.");
+    expect(pesan).toBe("Kode kategori sudah dipakai.");
   });
 
-  it("memakai pesan umum bila bentrok tidak terlihat di daftar", () => {
-    const pesan = pesanErrorKategori(duplikat, "Gagal", {
-      nilai: { namaKategori: "Roti", kodeKategori: "RTI" },
+  it("memakai field dari pesan backend bila bentrok tidak terlihat di daftar", () => {
+    const konteks = { nilai: { namaKategori: "Roti", kodeKategori: "RTI" }, daftar };
+    expect(pesanErrorKategori(duplikat, "Gagal", konteks)).toBe("Nama kategori sudah dipakai.");
+    expect(pesanErrorKategori(duplikatKode, "Gagal", konteks)).toBe("Kode kategori sudah dipakai.");
+  });
+
+  it("meneruskan pesan lama yang tidak lagi dikirim backend apa adanya", () => {
+    const pesan = pesanErrorKategori(new Error("tenantID sudah digunakan di tenant ini"), "Gagal", {
+      nilai: { namaKategori: "Minuman", kodeKategori: "MNM" },
       daftar,
     });
-    expect(pesan).toBe("Nama atau kode kategori sudah dipakai.");
+    expect(pesan).toBe("tenantID sudah digunakan di tenant ini");
   });
 });

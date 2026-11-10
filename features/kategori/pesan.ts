@@ -1,15 +1,14 @@
 /**
  * Penerjemahan pesan kegagalan simpan kategori.
  *
- * Duplikat nama atau kode dijawab backend dengan 400 berisi errors
- * "<field> sudah digunakan di tenant ini" tanpa message. Nama field itu tidak
- * dapat diandalkan: kategoriService mengambil kunci pertama err.keyValue,
- * sedangkan indeks unik kategori berupa gabungan { tenantID, namaKategori }
- * dan { tenantID, kodeKategori }, sehingga yang terbaca selalu tenantID.
- *
- * Karena itu field yang bentrok ditentukan dari daftar kategori yang sudah
- * dimuat. Penanganan ini tetap benar setelah backend menyebut field yang
- * benar, dan dapat disederhanakan saat itu.
+ * Sejak backend P72 (B304) nama atau kode kembar dijawab 409
+ * "<field> sudah dipakai kategori lain di toko ini.", dengan field
+ * namaKategori atau kodeKategori. Backend hanya menyebut index pertama yang
+ * bentrok, sehingga bila nama dan kode sama-sama kembar hanya satu yang
+ * disebut. Karena itu field yang bentrok tetap ditentukan dari daftar
+ * kategori yang sudah dimuat, dan field dari pesan backend dipakai bila
+ * daftar tidak menunjukkan bentrok (misalnya kategori dibuat pengguna lain
+ * setelah daftar dimuat).
  */
 
 import { pesanError } from "@/lib/api/error";
@@ -22,13 +21,16 @@ export interface KonteksDuplikatKategori {
   idDiedit?: string;
 }
 
+const POLA_KEMBAR = /\b(namaKategori|kodeKategori) sudah dipakai kategori lain/;
+
 export function pesanErrorKategori(
   err: unknown,
   fallback: string,
   konteks: KonteksDuplikatKategori,
 ): string {
   const pesan = pesanError(err, fallback);
-  if (!pesan.includes("sudah digunakan di tenant ini")) return pesan;
+  const cocok = POLA_KEMBAR.exec(pesan);
+  if (!cocok) return pesan;
 
   const lain = konteks.daftar.filter((k) => k.id !== konteks.idDiedit);
   const bentrokNama = lain.some(
@@ -43,5 +45,7 @@ export function pesanErrorKategori(
   }
   if (bentrokNama) return "Nama kategori sudah dipakai.";
   if (bentrokKode) return "Kode kategori sudah dipakai.";
-  return "Nama atau kode kategori sudah dipakai.";
+  return cocok[1] === "kodeKategori"
+    ? "Kode kategori sudah dipakai."
+    : "Nama kategori sudah dipakai.";
 }

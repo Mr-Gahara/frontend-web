@@ -3,8 +3,8 @@ export interface Kategori {
   namaKategori: string;
   kodeKategori: string;
   keterangan?: string | null;
-  /** Di-populate backend dengan nama toko. */
-  tenantID?: { id: string; namaToko: string };
+  /** Id toko; sejak backend P72 (B305) tidak lagi di-populate dengan nama toko. */
+  tenantID?: string;
   createdAt: string;
   updatedAt: string;
 }

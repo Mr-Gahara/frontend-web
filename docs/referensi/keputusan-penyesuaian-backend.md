@@ -826,3 +826,53 @@ pembayaran, dan sesi kasir), B290 (laba rugi per lokasi), dan B291
   `pembelianKeluar`, `selisihKasMasuk`, `transferMasuk`, `saldoAwalAkun`,
   `arusKasBersih`, dan pasangan pembaliknya) (B291). `GET
   /pengajuanstok/:id` memuat `dimintaOleh` `{ id, nama }` (butir 179).
+
+## Penyesuaian backend `ridho` lokal `0bbd261`
+
+Diminta pemilik proyek pada 10 November 2026: `ridho` remote maju 18
+commit di atas `e9112a8` ke `0e43a6d` (Yoga P-03 dan P68 sampai P73,
+B292 sampai B306; Ridho AR30, AR31, AR33, AR34, dan P74, B307 sampai
+B311), dan `ridho` lokal sudah sama dengannya. `yoga` lalu maju delapan
+commit tepat di atas `0e43a6d` ke `0bbd261` (P75 sampai P77, B312 sampai
+B318), sehingga `ridho` lokal di-fast-forward tanpa gabungan dan tanpa
+di-push. `nizar` tidak maju.
+
+- **Langkah sesudah tarik**: seed menambah empat izin
+  `*-barang-inventory` (B297) tanpa nama dibuang, sehingga langkah 2
+  penyelarasan dilewati; harapannya 163 nama dan Owner 160. Migrasi baru
+  `izinBarangInventory.js` dijalankan sesudah kedua seed, dan
+  `hapusFieldUsang.js` kini juga membuang `namaPajak` dari relasi produk
+  pajak (P73). Skrip tinjau yang membaca `.env` backend ditolak penjaga
+  izin, sehingga seluruh langkah basis data dijalankan pemilik proyek
+  lewat perintah `!`.
+- **Keputusan pemilik proyek**:
+  - **KG1a**: kategori kembar (B304) tetap ditentukan dari daftar
+    kategori yang dimuat, sehingga nama dan kode yang sama-sama kembar
+    tetap disebut keduanya; field dari pesan 409 backend dipakai bila
+    daftar tidak menunjukkan bentrok (`features/kategori/pesan.ts`).
+  - **LK2a**: atasan berlokasi kerja yang memberi lokasi lain atau null
+    (B310) melihat pesan 403 apa adanya; pilihan lokasi kerja di dialog
+    pengguna tidak dibatasi, sejalan dengan PG1a dan utang LK1a.
+  - **VK1a**: butir 85 dan 107 (B50, B51), B169, dan B170 yang menunggu
+    pembuktian web (AR31) masuk bahan laporan, dibuktikan saat laporan
+    disusun.
+  - **RT1a**: templat role web tidak memuat izin `*-barang-inventory`,
+    karena web tidak punya halaman barang inventory; izinnya diberikan
+    lewat form role.
+  - **OM1a**: omzet per metode pembayaran di laporan diminta ke backend
+    lebih dulu (`kontrak/temuan.md` butir 180); tampilannya didesain
+    pemilik proyek setelah endpoint tersedia.
+- **Diubah di web**: pesan kategori kembar (KG1a), tipe `Kategori.tenantID`
+  menjadi id (B305), dan `useSimpanPengguna` memuat ulang daftar juga saat
+  gagal, karena PUT yang dijawab 409 B315 tetap menyimpan field lain.
+- **Tidak mengubah web**: B292 dan B301 sampai B303 serta B312 sampai
+  B314 (web tidak memakai `process-sale`, `jurnalstok/wms`, maupun
+  `baranginventory`; payload bahan baku sudah dalam daftar field: buat
+  `namaBahan`, `satuan`, `stok`, `stokMinimum`, `locationID`, ubah hanya
+  `namaBahan` dan `satuan`), B293 sampai B296 (payload pajak dalam daftar
+  field, ubah tanpa perubahan ditahan form, dan pesan galat dibaca dari
+  `errors`), B306 (nama pajak produk tetap dari populate master), B307
+  sampai B309 dan B311 (web hanya membaca izin cuti, tidak memakai
+  `PUT /absensi` maupun `DELETE /akun/profil`), B316 (kasir), dan B317
+  serta B318 (pengguna uji tanpa lokasi kerja). Payload API di helper
+  uji (bahan, kategori, izin cuti) juga dalam daftar field.

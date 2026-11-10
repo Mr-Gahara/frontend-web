@@ -26,13 +26,16 @@ export function useDaftarPengguna(workspace: Workspace, opsi: { enabled?: boolea
  *
  * Invalidasi mencakup akar pengguna, bukan satu workspace saja, karena
  * perubahan role atau status dapat memindahkan pengguna antar ruang kerja.
+ * Invalidasi juga saat gagal: PUT yang dijawab 409 karena lokasi kerjanya
+ * terhapus bersamaan tetap menyimpan field lain (backend P75, B315), sehingga
+ * daftar harus dimuat ulang.
  */
 export function useSimpanPengguna() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id?: string; data: PenggunaRequest }) =>
       id ? penggunaApi.perbarui(id, data) : penggunaApi.buat(data),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.pengguna.semua });
     },
   });
