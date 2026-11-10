@@ -189,6 +189,14 @@ Diputuskan pemilik proyek pada 8 November 2026
   Diterapkan tanpa ditanyakan: `locationID` hanya dikirim bila berubah
   (keputusan rancangan butir 15), dan isiannya terkunci saat mengubah
   diri sendiri seperti role dan status, karena backend mengabaikannya.
+- **LK3a: ruang mengikuti lokasi kerja** (pemilik proyek, 10 November
+  2026, mengganti bagian "ruang tidak disesuaikan" di LK1a). Bagi staf
+  berlokasi kerja tanpa `akses-lintas-outlet`, sidebar, pemilih ruang,
+  dan `/dashboard` hanya membuka ruang lokasi kerjanya, dan gerbang rute
+  menolak ruang lain. Lokasi kerja dibaca dari detail pengguna sendiri,
+  karena token tidak membawanya. Owner, pemegang `akses-lintas-outlet`,
+  dan staf tanpa lokasi kerja tidak berubah. Diuji unit dan e2e lewat
+  pengguna uji berlokasi kerja baru.
 - **AB6a: label kedatangan di Status Staf** (`69f2b18`, B276, B278).
   Staf yang sudah absen mendapat label kecil "Terlambat N menit" atau
   "Luar jadwal" dari `sesiTerakhir` monitoring; Tepat Waktu tanpa label.

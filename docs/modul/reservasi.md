@@ -55,7 +55,9 @@ keputusan rancangan butir 17 dan 21.
   bayar, bukan jalur batal** (`eef371a`). Web belum punya jalur
   membatalkan booking. Sejak `b85c2bd` booking dibatalkan lewat void
   penjualannya (PB2a).
-  Tandai Selesai ada di detail penjualan sejak `729c16a` (NZ7a).
+  Tandai Selesai ada di detail penjualan sejak `729c16a` (NZ7a), dan
+  tetap di sana tanpa aksi di blok timeline (pemilik proyek, 10 November
+  2026).
 - **R5a: booking Batal tidak ditampilkan di timeline daftar reservasi**
   (`eef371a`), karena slotnya sudah dilepas; backend tetap mengirimnya,
   karena daftar tidak disaring menurut status. Sejak backend `465b438`

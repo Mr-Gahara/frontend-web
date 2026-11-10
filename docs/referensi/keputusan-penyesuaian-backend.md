@@ -345,6 +345,12 @@ maju sembilan commit dan `origin/nizar` satu commit di atas `ridho`
   dihapus (B72 Yoga).
 - **RG8a: Lampiran A tidak dibangkitkan ulang sekarang**;
   ketertinggalannya dicatat di `inti/status.md`.
+- **RG9a: Lampiran A dibangkitkan ulang terhadap backend `aeb6a52`**
+  (pemilik proyek, 10 November 2026, mengganti RG8a), dari `routes/*.js`
+  dengan kolom "Dipakai frontend" dari `lib/api/endpoints.ts`.
+  `kontrak/endpoint.md` dan `kontrak/payload.md` tetap dikoreksi
+  tertarget; pembangkitan ulang penuh menunggu backend stabil menjelang
+  rilis.
 
 ## Penyesuaian backend `fc29433`
 

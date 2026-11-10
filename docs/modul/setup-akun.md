@@ -264,6 +264,11 @@ dan token warna yang sudah ada.
   Owner; reset PIN Owner disebut belum tersedia di web), dan "Keluar dari
   akun toko" menggantikan "Ganti Akun Bisnis". Panel menampilkan merek,
   bukan nama toko dan email (`kontrak/temuan.md` butir 167).
+- **TP2b: panel login pengguna menampilkan nama toko dan email akun**
+  (pemilik proyek, 10 November 2026, mengganti bagian merek di TP2a),
+  dari `GET /akun/me` (B240); bila gagal dimuat, kembali ke merek
+  Tachyon POS. Alasan memakai merek di TP2a, data yang belum tersedia,
+  sudah tidak berlaku.
 - **TP3a: daftar memakai desain E dengan carousel plan dan stepper**
   (`bb17c79`). Stepper "Daftar akun, Verifikasi email, Siapkan toko"
   (`features/auth/langkah-daftar.tsx`) dipakai lagi oleh wizard setup.

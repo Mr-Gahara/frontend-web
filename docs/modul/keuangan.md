@@ -377,6 +377,31 @@ Diputuskan pemilik proyek pada 8 November 2026
 - **LR2a: halaman arus kas menunggu desain pemilik proyek** (B291,
   `inti/status.md`).
 
+### Keputusan bisnis Mesin Kasir
+
+Diputuskan pemilik proyek pada 10 November 2026, atas keputusan bisnis
+nomor 1 sampai 3 audit backend 5 November 2026 (K-08 sampai K-10). Teks
+audit tidak tersimpan di repo, sehingga ketiganya dirumuskan dari aturan
+backend `aeb6a52`. Ketiganya perubahan backend (Nizar); web menyesuaikan
+setelah backend menerapkannya.
+
+- **MK15a: VOID pembayaran tunai mengurangi laci sesi yang sedang buka
+  di perangkat yang melakukan VOID**, tempat uang fisik keluar. Tanpa
+  sesi terbuka (web, Owner) tetap dari laci yang dulu menerima.
+  Sekarang selalu dari laci asal (`services/pembayaranService.js` baris
+  628), sehingga sesi berikutnya di laci asal selisih bila sesi asalnya
+  sudah ditutup.
+- **MK16a: login pengguna lain di perangkat mewajibkan tutup sesi lama
+  dengan hitungan** sebelum bertransaksi; Owner tetap dikecualikan.
+  Sekarang sesi terbuka dipakai siapa pun di perangkat itu
+  (`middleware/kasirBuka.js`), sehingga transaksi kasir berikutnya masuk
+  sesi kasir sebelumnya.
+- **MK17a: tunai ke laci yang dipetakan ke mesin kasir hanya lewat sesi
+  terbuka laci itu.** Selain itu, termasuk dari web dan dari perangkat
+  Owner tanpa sesi, ditolak dengan pesan buka kasir dulu atau pilih akun
+  kas lain (misalnya "Kas Kantor"). Web perlu menampilkan pesan itu di
+  pembayaran penjualan setelah backend menerapkannya.
+
 ## Catatan
 
 ### Catatan dari penyambungan Mesin Kasir

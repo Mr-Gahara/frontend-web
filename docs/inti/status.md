@@ -89,10 +89,9 @@ Penyambungan selesai di `b74f30a` (`modul/keuangan.md`, MK10a sampai
 MK13a; daftar periksanya di `arsip/catatan-putaran.md`, Catatan dari
 penyambungan Mesin Kasir). Yang masih terbuka di sisi backend:
 `kontrak/temuan.md` butir 172 sampai 174; keputusan bisnis nomor 1
-sampai 3 di audit backend 5 November 2026 (laci untuk VOID tunai,
-pemicu sesi lama, dan tunai
-tanpa sesi kasir termasuk dari web; K-08 sampai K-10), yang dibahas
-pemilik proyek bersama tim backend; serta K-18 (pemetaan menerima
+sampai 3 di audit backend 5 November 2026 (K-08 sampai K-10), yang
+diputuskan pemilik proyek 10 November 2026 sebagai MK15a sampai MK17a
+(`modul/keuangan.md`) dan menunggu diterapkan backend; serta K-18 (pemetaan menerima
 perangkat berstatus apa pun) dan K-19 (`installationId` seluruh HP
 keluar di laporan sesi). Di web, K-18 ditangani dengan menyaring
 perangkat `trusted`, dan K-19 dengan tidak menampilkan `installationId`.
@@ -147,15 +146,23 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 5. **Stok keluar di detail penjualan, termasuk yang VOID** (VD3a):
    menunggu backend mencatat rinciannya (`kontrak/temuan.md` butir 181),
    lalu didesain pemilik proyek.
+6. **Modul membership web** (paket dan pendaftaran member), syarat
+   menawarkan diskon khusus member (NZ6a, `modul/pelanggan-diskon.md`).
 
 ### Menunggu keputusan pemilik proyek
 
 - Nomor WhatsApp admin untuk halaman Langganan (LG1a, `NOMOR_WA_ADMIN`
   masih kosong).
-- Keputusan bisnis nomor 1 sampai 3 di audit backend 5 November 2026
-  (Mesin Kasir, sisi backend, di atas).
 - Laporan untuk tim backend, yang ditunda sampai pekerjaan backend dari
   audit selesai (utang kecil, di bawah).
+
+Diputuskan 10 November 2026: keputusan bisnis Mesin Kasir MK15a sampai
+MK17a (`modul/keuangan.md`, menunggu backend), ruang mengikuti lokasi
+kerja LK3a (`modul/jadwal-shift.md`), Tandai Selesai tetap di detail
+penjualan (NZ7a) dan khusus member menunggu modul membership (NZ6a),
+nama toko di login pengguna TP2b (`modul/setup-akun.md`), dan Lampiran
+A dibangkitkan ulang RG9a. Yang dapat dikerjakan web sekarang: TP2b,
+LK3a, dan RG9a.
 
 ### Utang kecil dari penyesuaian backend `4759208`
 

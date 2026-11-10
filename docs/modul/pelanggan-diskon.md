@@ -51,7 +51,10 @@ rancangan butir 17, 21, dan 23. PD1a dan PD5a diterapkan di `d9365d3`
   `Membership` aktif, sedangkan permission membership tidak ada di seed,
   sehingga membership tidak dapat dibuat siapa pun (`kontrak/temuan.md`
   butir 108). Diskon yang sudah ditandai diberi keterangan.
-  Dipertahankan setelah izin membership masuk seed (NZ6a).
+  Dipertahankan setelah izin membership masuk seed (NZ6a), dan sekali
+  lagi pada 10 November 2026 walau backend sudah memperbaiki butir 108:
+  khusus member ditawarkan setelah web punya modul membership, yang
+  menunggu desain pemilik proyek (`inti/status.md`).
 - **PD9a: aturan berada di bagian Aturan tambahan yang dapat dibuka dan
   ditutup**, terbuka sendiri bila diskon sudah punya aturan atau ada
   isian aturan yang ditolak. Enam isian dasar tetap seperti semula.
