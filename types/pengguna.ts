@@ -64,6 +64,8 @@ export interface PenggunaDetail extends Entitas {
   aksesType: ("app" | "web")[];
   roleID: string | null;
   role: string | null;
+  /** Lokasi kerja (B269); null berarti tidak dibatasi. Dibaca LK3a untuk ruang. */
+  locationID?: string | null;
 }
 
 /**

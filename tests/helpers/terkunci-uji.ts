@@ -22,6 +22,8 @@ interface PeranUji {
   deskripsi: string;
   /** Penyaring nama izin dari daftar izin role Owner. */
   izin: (nama: string) => boolean;
+  /** Tipe lokasi kerja pengguna uji (LK3a); tanpa ini tidak dibatasi. */
+  lokasiKerja?: "Outlet" | "Gudang";
 }
 
 const LEVEL_UJI = 90;
@@ -78,9 +80,23 @@ const PERAN_PEMBELIAN_OUTLET: PeranUji = {
     ] as string[]).includes(n),
 };
 
+/**
+ * Staf berlokasi kerja Gudang tanpa izin lintas outlet (LK3a; pemilik
+ * proyek, 10 November 2026): seluruh izin baca Owner, sehingga ruang outlet
+ * hanya tertutup karena lokasi kerjanya, bukan karena izin.
+ */
+const PERAN_LOKASI_GUDANG: PeranUji = {
+  nama: "E2E Lokasi Gudang",
+  pin: "864216",
+  deskripsi: "Peran uji e2e: izin baca Owner, berlokasi kerja Gudang",
+  izin: (n) => n !== IZIN_LINTAS_OUTLET && n.startsWith("read-"),
+  lokasiKerja: "Gudang",
+};
+
 type Mentah = { id?: string; _id?: string };
 type PeranMentah = Mentah & { namaRole?: string; level?: number; permissions?: (Mentah & { nama?: string })[] };
-type PenggunaMentah = Mentah & { nama?: string; roleID?: unknown };
+type PenggunaMentah = Mentah & { nama?: string; roleID?: unknown; locationID?: string | null };
+type LokasiMentah = Mentah & { tipe?: string };
 
 const idMilik = (x: Mentah | undefined) => String(x?.id ?? x?._id ?? "");
 
@@ -112,18 +128,37 @@ async function pastikanPeran(page: Page, auth: () => string, peranUji: PeranUji)
   return idMilik(ada);
 }
 
+/** Id lokasi pertama bertipe itu di tenant uji, untuk lokasi kerja pengguna uji. */
+async function idLokasiBertipe(page: Page, auth: () => string, tipe: string): Promise<string> {
+  const daftar = await api<LokasiMentah[]>(page, auth, "GET", "/location");
+  expect(daftar.status, `GET /location: ${daftar.pesan}`).toBe(200);
+  const lokasi = (daftar.data ?? []).find((l) => l.tipe === tipe);
+  expect(lokasi, `lokasi ${tipe} tenant uji`).toBeTruthy();
+  return idMilik(lokasi);
+}
+
 async function pastikanPengguna(page: Page, auth: () => string, peranUji: PeranUji, idPeran: string) {
   const cari = async () => {
     const daftar = await api<PenggunaMentah[]>(page, auth, "GET", "/pengguna");
     expect(daftar.status, `GET /pengguna: ${daftar.pesan}`).toBe(200);
     return (daftar.data ?? []).find((p) => p.nama === peranUji.nama);
   };
-  if (await cari()) return;
+  const lokasiKerja = peranUji.lokasiKerja ? await idLokasiBertipe(page, auth, peranUji.lokasiKerja) : undefined;
+  const ada = await cari();
+  if (ada) {
+    // Lokasi kerja diselaraskan ulang, seperti izin peran.
+    if (lokasiKerja && ada.locationID !== lokasiKerja) {
+      const ubah = await api(page, auth, "PUT", "/pengguna/" + idMilik(ada), { locationID: lokasiKerja });
+      expect(ubah.status, `selaraskan lokasi kerja ${peranUji.nama}: ${ubah.pesan}`).toBe(200);
+    }
+    return;
+  }
   const buat = await api(page, auth, "POST", "/pengguna/register-pengguna", {
     nama: peranUji.nama,
     pin: peranUji.pin,
     roleID: idPeran,
     aksesType: ["web"],
+    ...(lokasiKerja ? { locationID: lokasiKerja } : {}),
   });
   expect(buat.status, `buat pengguna uji ${peranUji.nama}: ${buat.pesan}`).toBeLessThan(300);
   expect(await cari(), `pengguna uji ${peranUji.nama} terbaca setelah dibuat`).toBeTruthy();
@@ -148,3 +183,4 @@ export const NAMA_TERKUNCI = PERAN_TERKUNCI.nama;
 export const masukTanpaIzinLintas = (page: Page) => masukSebagai(page, PERAN_TERKUNCI);
 export const masukBacaSaja = (page: Page) => masukSebagai(page, PERAN_BACA_SAJA);
 export const masukPembelianOutlet = (page: Page) => masukSebagai(page, PERAN_PEMBELIAN_OUTLET);
+export const masukLokasiGudang = (page: Page) => masukSebagai(page, PERAN_LOKASI_GUDANG);

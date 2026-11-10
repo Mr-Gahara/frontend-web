@@ -196,7 +196,16 @@ Diputuskan pemilik proyek pada 8 November 2026
   menolak ruang lain. Lokasi kerja dibaca dari detail pengguna sendiri,
   karena token tidak membawanya. Owner, pemegang `akses-lintas-outlet`,
   dan staf tanpa lokasi kerja tidak berubah. Diuji unit dan e2e lewat
-  pengguna uji berlokasi kerja baru.
+  pengguna uji berlokasi kerja baru ("E2E Lokasi Gudang",
+  `tests/e2e/auth/ruang-lokasi-kerja.spec.ts`). Dua keputusan lanjutan
+  pemilik proyek pada hari yang sama: staf berlokasi kerja tanpa
+  `read-location` tidak dibatasi, karena tipe lokasinya tidak dapat
+  dibaca (`kontrak/temuan.md` butir 182, diserahkan ke Ridho); dan ruang
+  lain ditolak seluruhnya, termasuk halaman tingkat toko seperti produk,
+  pajak, dan pengguna, sehingga staf yang mengurus master toko diberi
+  `akses-lintas-outlet` atau tanpa lokasi kerja. Penolakannya pesan di
+  tempat "Ruang ini di luar lokasi kerja Anda." dari `GerbangRute`, dan
+  isi dashboard ditahan sampai lokasi kerja diketahui.
 - **AB6a: label kedatangan di Status Staf** (`69f2b18`, B276, B278).
   Staf yang sudah absen mendapat label kecil "Terlambat N menit" atau
   "Luar jadwal" dari `sesiTerakhir` monitoring; Tepat Waktu tanpa label.

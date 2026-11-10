@@ -10,8 +10,11 @@ import {
   type UseMutationOptions,
 } from "@tanstack/react-query";
 import { useSession } from "@/lib/auth/useSession";
+import { bolehLintasOutlet, IZIN } from "@/lib/auth/permissions";
 import { queryKeys } from "@/lib/queryKeys";
+import { useDaftarLokasi } from "@/features/inventaris/hooks";
 import { penggunaApi } from "./api";
+import { ruangLokasiKerja, type RuangKerja } from "./lokasi-kerja";
 import type { PerbaruiProfilPayload } from "@/types/pengguna";
 
 /** Callback halaman (toast dan pengalihan). Invalidasi diurus hook. */
@@ -34,6 +37,23 @@ export function usePenggunaSaya() {
     enabled: id !== "",
     refetchOnMount: "always",
   });
+}
+
+/**
+ * Ruang lokasi kerja pengguna sesi (LK3a): null bila tidak dibatasi.
+ * `siap` false selama detail diri atau daftar lokasi masih dimuat, agar
+ * gerbang dan pengalihan tidak memutuskan dari data yang belum ada. Tanpa
+ * read-location daftar lokasi tidak diminta, sehingga ruang tidak dibatasi.
+ */
+export function useRuangLokasiKerja(): { ruang: RuangKerja | null; siap: boolean } {
+  const { permissions } = useSession();
+  const lintas = bolehLintasOutlet(permissions);
+  const saya = usePenggunaSaya();
+  const lokasiKerjaId = saya.data?.locationID ?? null;
+  const bacaLokasi = !lintas && lokasiKerjaId !== null && permissions.includes(IZIN.location);
+  const lokasi = useDaftarLokasi({ aktif: bacaLokasi });
+  const siap = lintas || (!saya.isPending && (!bacaLokasi || !lokasi.isPending));
+  return { ruang: ruangLokasiKerja(lokasiKerjaId, lintas, lokasi.data), siap };
 }
 
 export interface PerbaruiProfilVars {

@@ -182,7 +182,8 @@ LK3a, dan RG9a.
     mencabut sesi pengguna), 178 (penyimpanan penjualan bersamaan;
     diuji ulang 10 November 2026 sesudah P-03 dan masih terjadi: stok
     turun 6 untuk satu penjualan tersimpan), dan 179 (lokasi
-    kerja pengaju, B284). Butir 180 (omzet per metode pembayaran, OM1a)
+    kerja pengaju, B284), dan 182 (tipe lokasi kerja tidak terbaca tanpa
+  `read-location`, LK3a). Butir 180 (omzet per metode pembayaran, OM1a)
     sudah dicatat langsung di `docs/pengembangan/klien.md` backend
     `dd6bc98` atas perintah pemilik proyek, dan butir 181 (stok keluar
     per penjualan tidak tertelusur, VD2a) di `aeb6a52`; keduanya cukup
@@ -310,7 +311,9 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 
 ### Utang kecil dari penyesuaian backend `ridho` lokal `916e7df`
 
-- Ruang tidak disesuaikan dengan lokasi kerja (LK1a): staf berlokasi
+- Ruang mengikuti lokasi kerja sejak LK3a (10 November 2026), kecuali
+  bagi staf berlokasi kerja tanpa `read-location` (`kontrak/temuan.md`
+  butir 182). Sebelumnya staf berlokasi
   kerja yang membuka ruang lain melihat pesan 403 backend di setiap
   halaman stok, dan sejak backend `e9112a8` juga di pembelian stok,
   penjualan, pembayaran, sesi kasir, panel Status Staf, dan laba rugi

@@ -3,26 +3,29 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth/useSession";
 import { IZIN } from "@/lib/auth/permissions";
+import { useRuangLokasiKerja } from "@/features/pengguna/hooks-profil";
 
 const DashboardPage = () => {
   const router = useRouter();
   
   const { permissions, sudahMasuk } = useSession();
+  const { ruang, siap } = useRuangLokasiKerja();
 
   useEffect(() => {
-    // Tunggu pemulihan sesi selesai sebelum memutuskan tujuan.
-    if (!sudahMasuk) return;
+    // Tunggu pemulihan sesi dan lokasi kerja selesai sebelum memutuskan tujuan.
+    if (!sudahMasuk || !siap) return;
 
     // Owner memegang seluruh permission di backend, sehingga pemeriksaan
     // berbasis permission sudah mencakupnya tanpa perlu cek nama role.
-    if (permissions.includes(IZIN.dashboardOutlet)) {
+    // Ruang di luar lokasi kerja dilewati (LK3a).
+    if (permissions.includes(IZIN.dashboardOutlet) && ruang !== "gudang") {
       router.replace("/dashboard/outlet");
-    } else if (permissions.includes(IZIN.dashboardGudang)) {
+    } else if (permissions.includes(IZIN.dashboardGudang) && ruang !== "outlet") {
       router.replace("/dashboard/gudang");
     } else {
       router.replace("/dashboard/profil");
     }
-  }, [sudahMasuk, permissions, router]);
+  }, [sudahMasuk, siap, ruang, permissions, router]);
 
   // Kembalikan UI kosong dengan indikator loading yang elegan
   // karena user hanya akan melihat halaman ini selama beberapa milidetik

@@ -48,3 +48,41 @@ export function tampilkanLokasiKerja(bolehBacaLokasi: boolean, owner: boolean): 
 export function lokasiKerjaDikirim(pilihan: string | null, tersimpan: string | null): string | null | undefined {
   return pilihan === tersimpan ? undefined : pilihan;
 }
+
+/*
+ * Ruang mengikuti lokasi kerja (LK3a; pemilik proyek, 10 November 2026).
+ * Staf berlokasi kerja tanpa akses-lintas-outlet hanya membuka ruang
+ * lokasinya; ruang lain ditolak seluruhnya, termasuk halaman tingkat toko.
+ * Tipe lokasi dibaca dari GET /location (read-location), karena detail
+ * pengguna hanya mengirim id-nya. Bila tipe tidak dapat dibaca, ruang tidak
+ * dibatasi dan pesan 403 backend tetap tampil seperti sebelumnya
+ * (kontrak/temuan.md butir 182).
+ */
+
+export type RuangKerja = "outlet" | "gudang";
+
+const RUANG_DARI_TIPE: Record<Lokasi["tipe"], RuangKerja> = { Outlet: "outlet", Gudang: "gudang" };
+
+/** Ruang satu-satunya bagi pengguna, atau null bila tidak dibatasi. */
+export function ruangLokasiKerja(
+  lokasiKerjaId: string | null | undefined,
+  lintasOutlet: boolean,
+  lokasi: readonly Lokasi[] | undefined,
+): RuangKerja | null {
+  if (lintasOutlet || !lokasiKerjaId) return null;
+  const tipe = lokasi?.find((l) => l.id === lokasiKerjaId)?.tipe;
+  return tipe ? RUANG_DARI_TIPE[tipe] : null;
+}
+
+/** Ruang sebuah path dashboard, atau null untuk path di luar kedua ruang (misalnya profil). */
+export function ruangDariPath(pathname: string): RuangKerja | null {
+  if (/^\/dashboard\/outlet(\/|$)/.test(pathname)) return "outlet";
+  if (/^\/dashboard\/gudang(\/|$)/.test(pathname)) return "gudang";
+  return null;
+}
+
+/** True bila path berada di ruang lain dari ruang lokasi kerja pengguna. */
+export function ruangDitolak(pathname: string, ruang: RuangKerja | null): boolean {
+  const ruangPath = ruangDariPath(pathname);
+  return ruang !== null && ruangPath !== null && ruangPath !== ruang;
+}

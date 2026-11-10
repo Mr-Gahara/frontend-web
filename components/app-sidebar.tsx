@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth/useSession";
 import { IZIN, bolehBukaHalaman } from "@/lib/auth/permissions";
 import { useDaftarLokasi } from "@/features/inventaris/hooks";
+import { useRuangLokasiKerja } from "@/features/pengguna/hooks-profil";
 import { bolehMenurutPlan, planMencakup } from "@/lib/auth/fitur-plan";
 import { useTenant } from "@/features/tenant/hooks";
 import { SidebarPengguna } from "@/components/sidebar-pengguna";
@@ -105,10 +106,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ? "Gudang Ops."
     : "Outlet Ops.";
 
+  // Ruang di luar lokasi kerja tidak ditawarkan (LK3a).
+  const { ruang: ruangKerja } = useRuangLokasiKerja();
   const canAccessOutlet =
-    permissions.includes(IZIN.dashboardOutlet);
+    permissions.includes(IZIN.dashboardOutlet) && ruangKerja !== "gudang";
   const canAccessGudang =
-    permissions.includes(IZIN.dashboardGudang);
+    permissions.includes(IZIN.dashboardGudang) && ruangKerja !== "outlet";
   const canCreateLocation =
     permissions.includes(IZIN.buatLocation);
   // Ruang Gudang tetap ditawarkan saat lokasi tidak dapat dibaca (tanpa
@@ -121,7 +124,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     !isLoadingLokasi &&
     (hasGudang || !bacaLokasi || daftarLokasi.isError);
   const tawarkanSetupGudang =
-    adaWms && canCreateLocation && daftarLokasi.isSuccess && !hasGudang;
+    adaWms && canCreateLocation && ruangKerja !== "outlet" && daftarLokasi.isSuccess && !hasGudang;
 
   return (
     <Sidebar
