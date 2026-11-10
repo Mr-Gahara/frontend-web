@@ -144,6 +144,9 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 4. **Omzet per metode pembayaran di laporan** (OM1a): menunggu endpoint
    backend lebih dulu (`kontrak/temuan.md` butir 180), lalu didesain
    pemilik proyek.
+5. **Stok keluar di detail penjualan, termasuk yang VOID** (VD3a):
+   menunggu backend mencatat rinciannya (`kontrak/temuan.md` butir 181),
+   lalu didesain pemilik proyek.
 
 ### Menunggu keputusan pemilik proyek
 
@@ -174,7 +177,9 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
     turun 6 untuk satu penjualan tersimpan), dan 179 (lokasi
     kerja pengaju, B284). Butir 180 (omzet per metode pembayaran, OM1a)
     sudah dicatat langsung di `docs/pengembangan/klien.md` backend
-    `dd6bc98` atas perintah pemilik proyek, sehingga cukup dirujuk.
+    `dd6bc98` atas perintah pemilik proyek, dan butir 181 (stok keluar
+    per penjualan tidak tertelusur, VD2a) di `aeb6a52`; keduanya cukup
+    dirujuk.
   - **Pembuktian, satu baris per butir**: butir 12 (hapus kategori yang
     dipakai, P19) dan 52 (hapus aset ber-booking), P18 hapus bahan,
     butir 14 (kembar 409, B304; spec `crud-kategori` lolos di suite

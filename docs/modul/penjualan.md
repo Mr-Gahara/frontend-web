@@ -73,9 +73,17 @@ keputusan rancangan butir 17.
 - **VD1a: VOID penjualan tidak mengembalikan stok** (pemilik proyek,
   10 November 2026). Stok yang terpotong saat penjualan disimpan tetap
   keluar setelah penjualan di-VOID, dan menghapus draft tidak memulihkan
-  apa pun. Ini aturan produk, bukan bug; jangan dijadikan temuan. Data
-  uji yang memotong stok lalu di-VOID menurunkan stok bahan uji
-  seterusnya, sehingga spec menyetel stoknya di awal setiap test.
+  apa pun. Ini aturan produk, bukan bug; jangan dijadikan temuan. Tetapi
+  penjualan itu, termasuk setelah di-VOID, harus tetap mencatat stok apa
+  saja yang sudah berkurang karenanya. Data uji yang memotong stok lalu
+  di-VOID menurunkan stok bahan uji seterusnya, sehingga spec menyetel
+  stoknya di awal setiap test.
+- **VD2a: pencatatan stok keluar per penjualan diminta ke backend**
+  (pemilik proyek, 10 November 2026). Saat ini tidak tertelusur
+  (`kontrak/temuan.md` butir 181); dicatat langsung di
+  `docs/pengembangan/klien.md` backend `aeb6a52` untuk Nizar dan Yoga.
+- **VD3a: tampilan stok keluar di detail penjualan menunggu desain
+  pemilik proyek**, dikerjakan setelah backend mengirim rinciannya.
 
 ### Cakupan daftar penjualan
 
