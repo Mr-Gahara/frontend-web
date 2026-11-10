@@ -161,26 +161,38 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
   hapus akun tidak menghapus tokonya; setiap run spec setup menambah enam
   toko.
 - Laporan untuk tim backend belum disusun (`inti/backend.md`, Bila
-  menemukan bug backend). Bahannya: `kontrak/temuan.md` butir 168 sampai
-  170 dan 172 sampai 174, serta pembuktian B215, B217, B229, B230,
-  B231, B232, B251 (`a207fae`), dan B248 (`efb05db`) dari web, B252,
-  B259, B260, dan B261
-  dari respons nyata (penyesuaian `1584222`), B266 dari respons nyata
-  (penyesuaian `d267f03`), B112, B114 jalur Owner,
-  format nomor B115, P18 hapus bahan, P19 hapus kategori, dan hapus aset
-  ber-booking (7 November 2026; `kontrak/temuan.md` butir 12, 52, 94,
-  141, 155, 156, 160, 162, dan 164), temuan baru butir 177 (logout akun
-  tidak mencabut sesi pengguna), butir 178 (penyimpanan penjualan
-  bersamaan memotong stok tanpa status, dari uji beban tulis 7 November
-  2026), serta B250, B255, dan B116 (butir 158) yang terbukti e2e 7
-  November 2026 (`778eb2d`, `cbfa23b`, `4601d91`), dan dari penyesuaian
-  `916e7df`: B281 dan B282 serta B269 dan B279 dari respons nyata, serta
-  butir 165 yang hanya selesai sebagian (B278 hanya untuk staf berlokasi
-  kerja), dan dari penyesuaian `e9112a8`: butir 179 (lokasi kerja
-  pengaju di detail pengajuan, B284) serta B290 dan B291 dari respons
-  nyata, dan dari penyesuaian `0bbd261`: butir 180 (omzet per metode
-  pembayaran, OM1a) serta pembuktian butir 85 dan 107 (B50, B51), B169,
-  dan B170 yang menunggu web sejak AR31 (VK1a).
+  menemukan bug backend). Bahannya ditinjau ulang terhadap backend
+  `ridho` lokal `0bbd261` dan `docs/pengembangan/klien.md` backend pada
+  10 November 2026. Penomoran di sana bergeser satu mulai butir web
+  167 (tercatat 166), sehingga butir dicocokkan menurut isinya.
+  - **Temuan baru, masih berlaku di `0bbd261`**: `kontrak/temuan.md`
+    butir 168 (cookie refresh `POST /tenant`), 169 (`db:data-bawaan`
+    mencocokkan nama), 170 (penanda masa percobaan), 172 sampai 174
+    (perangkat dan asal penutupan sesi kasir), 177 (logout akun tidak
+    mencabut sesi pengguna), 178 (penyimpanan penjualan bersamaan,
+    diuji ulang karena potong stok berubah di P-03), dan 179 (lokasi
+    kerja pengaju, B284). Butir 180 (omzet per metode pembayaran, OM1a)
+    sudah dicatat langsung di `docs/pengembangan/klien.md` backend
+    `dd6bc98` atas perintah pemilik proyek, sehingga cukup dirujuk.
+  - **Pembuktian, satu baris per butir**: butir 12 (hapus kategori yang
+    dipakai, P19) dan 52 (hapus aset ber-booking), P18 hapus bahan,
+    butir 14 (kembar 409, B304; spec `crud-kategori` lolos di suite
+    penuh 10 November 2026); B215, B217, B229 sampai B232, B251
+    (`a207fae`), dan B248 (`efb05db`) dari web; B252 dan B259 sampai
+    B261 (penyesuaian `1584222`) serta B266 (`d267f03`) dari respons
+    nyata; B250 dan B255 terbukti e2e 7 November 2026 (`778eb2d`); B269,
+    B279, B281, dan B282 (`916e7df`) serta B290 dan B291 (`e9112a8`)
+    dari respons nyata.
+  - **Belum dibuktikan**: butir 85 dan 107 (B50, B51), B169, dan B170
+    yang menunggu web sejak AR31 (VK1a), serta butir 13 (`kategoriID`
+    produk diperiksa keberadaannya) dan 16 (cache produk dibuang saat
+    kategori berubah), yang tampak diperbaiki di kode `0bbd261`.
+  - **Dikeluarkan karena basi**: butir 167 (selesai lewat B240,
+    `GET /akun/me`; web belum memakainya, TP2a), 141, 155, 156, 158,
+    160, 162, dan 164 beserta B112, B114, B115, dan B116 (ditutup
+    `Selesai` oleh backend AR31 dengan bukti web), 165 (ditutup backend
+    dengan catatan staf tanpa lokasi kerja; tambahan web tetap), 94
+    (tertutup sejak `1584222`), dan 176 (dilaporkan 7 November 2026).
   Laporannya ditunda sampai pekerjaan backend dari audit
   selesai, agar diserahkan sekali jalan (pemilik proyek, 6 November
   2026).
