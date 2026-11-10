@@ -12,6 +12,18 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per backend `ridho` lokal `0bbd261`** (web `824517b`, 10
+November 2026, pukul 18.00 sampai 18.37 WIB, reporter `line,json`): e2e
+603 lolos dan 1 skipped dari 604, tanpa kegagalan, sesuai harapan
+hitungan. Yang dilewati skip bersyarat data "status staf memuat staf
+ruang outlet, dan lonceng nonaktif". Dijalankan setelah permission
+diselaraskan (163 nama, Owner 160), migrasi `izinBarangInventory.js` dan
+`hapusFieldUsang.js` diterapkan, dan `db:indeks`. Run pertama dihentikan
+di tengah atas permintaan pemilik proyek untuk pemeriksaan manual, lalu
+dijalankan ulang dari awal. Vitest 1014 lolos (unit test pesan kategori,
+KG1a). Harapan suite penuh sesudahnya 604 lolos, ditambah skip status
+staf bila datanya kosong (hitungan).
+
 **Suite penuh per backend `ridho` lokal `e9112a8`** (web `d61bf7a`, 8
 November 2026, pukul 21.25 sampai 22.10 WIB, reporter `line,json`): e2e
 604 lolos dari 604, tanpa kegagalan dan tanpa skip, sesuai harapan
