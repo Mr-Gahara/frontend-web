@@ -797,6 +797,28 @@ yang disalurkan ke `tail -3` mencetak kode 0 padahal alat itu keluar 1.
   `ps -eo pid,args | grep '[p]laywright test'`, lalu `kill <pid>`.
   Untuk suite yang dijalankan di latar belakang, hentikan lewat
   tugasnya (TaskStop).
+- **Skrip milik repo backend tidak dijalankan di tempatnya, termasuk
+  yang tampak hanya membaca.** `node scripts/dokumen/bangkit.cjs
+  --periksa` mengabaikan `--periksa` dan menulis ulang
+  `docs/api/route.md` backend (10 November 2026; dikembalikan dengan
+  `git checkout`). Baca dulu `writeFileSync` di skripnya; bila perlu
+  hasilnya, salin skrip ke folder scratchpad, ganti penulisannya dengan
+  cetak ke stdout, dan arahkan `REPO` ke backend. Sesudahnya pastikan
+  `git -C ~/Documents/backend-js status --short` kosong.
+- **Gerbang commit memeriksa kode keluar, bukan keluaran yang dipotong.**
+  `npm run docs:periksa 2>&1 | tail -1 && git commit` selalu
+  meloloskan commit, karena kode keluar pipa adalah milik `tail`; satu
+  commit RG9a lolos dengan temuan baris kepanjangan (10 November 2026,
+  diperbaiki lewat amend sebelum push). Pakai
+  `npm run docs:periksa >/dev/null 2>&1 && git commit`, atau
+  `set -o pipefail` lebih dulu.
+- **Merapikan baris panjang di Markdown hanya pada baris yang dilaporkan.**
+  Mencari batas paragraf lewat baris kosong lalu membungkus ulang dengan
+  `textwrap` menggabungkan tabel, judul, dan daftar menjadi satu paragraf
+  bila batasnya meleset: 226 baris `kontrak/README.md` berubah (10
+  November 2026). Ganti teks persis lewat Edit atau pasangan
+  `old`/`new` yang dicek `count == 1`, lalu periksa `git diff --stat`
+  sebelum commit.
 
 ## Catatan form (React Hook Form dan Zod)
 
