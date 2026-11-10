@@ -70,6 +70,12 @@ keputusan rancangan butir 17.
   `inti/keputusan-rancangan.md` butir 28). Sebelumnya keduanya terisi
   waktu layar dibuka, sehingga penjualan yang dikonfirmasi lewat tengah
   malam masuk hari kemarin.
+- **VD1a: VOID penjualan tidak mengembalikan stok** (pemilik proyek,
+  10 November 2026). Stok yang terpotong saat penjualan disimpan tetap
+  keluar setelah penjualan di-VOID, dan menghapus draft tidak memulihkan
+  apa pun. Ini aturan produk, bukan bug; jangan dijadikan temuan. Data
+  uji yang memotong stok lalu di-VOID menurunkan stok bahan uji
+  seterusnya, sehingga spec menyetel stoknya di awal setiap test.
 
 ### Cakupan daftar penjualan
 
