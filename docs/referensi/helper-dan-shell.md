@@ -782,6 +782,21 @@ yang disalurkan ke `tail -3` mencetak kode 0 padahal alat itu keluar 1.
   menjawab `corrupt patch at <stdin>:<baris>` tanpa mengubah apa pun (7
   November 2026, `daf9e3a`). `--recount` menghitung ulang jumlah baris
   dari isi patch.
+- **Skrip yang membaca `.env` backend dijalankan pemilik proyek lewat
+  `!`.** Penjaga izin Claude Code menolaknya, juga bila skripnya hanya
+  membaca, sama seperti migrasi `--terapkan`. Karena itu tinjauan
+  permission (langkah 1 di `inti/backend.md`) langsung masuk blok `!`
+  bersama seed dan laporan migrasi, lalu keluarannya diperiksa sebelum
+  blok `--terapkan` diberikan (10 November 2026, penyesuaian `0bbd261`).
+- **Jangan `pkill -f` dengan pola yang ikut tertulis di perintah itu
+  sendiri.** `pkill -f 'playwright test'` mencocokkan baris perintah
+  shell yang menjalankannya, sehingga shell itu ikut terbunuh dan
+  keluar dengan kode 144 tanpa menjalankan sisa perintah (10 November
+  2026). Cari PID lebih dulu dengan pola berkurung siku, yang tidak
+  cocok dengan dirinya sendiri, lalu hentikan per PID:
+  `ps -eo pid,args | grep '[p]laywright test'`, lalu `kill <pid>`.
+  Untuk suite yang dijalankan di latar belakang, hentikan lewat
+  tugasnya (TaskStop).
 
 ## Catatan form (React Hook Form dan Zod)
 
