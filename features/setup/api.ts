@@ -17,8 +17,9 @@ interface ResponsOwner {
  * Langkah awal setup berjalan sebelum Owner ada, sehingga status, buat toko,
  * dan daftar Owner memakai token akun.
  */
-/** data GET /api/akun/me yang dipakai wizard (B240). */
-interface AkunSaya {
+/** data GET /api/akun/me yang dipakai wizard dan login pengguna (B240). */
+export interface AkunSaya {
+  email?: string;
   daftarTenant?: { namaToko?: string }[];
 }
 

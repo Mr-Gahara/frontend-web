@@ -13,6 +13,8 @@ import { hanyaAngka } from "@/features/pengguna/schema-profil";
 import { hasilLoginPengguna } from "./hasil";
 import { useLoginPengguna, useLogoutAkun } from "./hooks";
 import { skemaLoginPengguna, type NilaiLoginPengguna } from "./schema";
+import { useAkunSaya } from "@/features/setup/hooks";
+import { identitasPanel } from "./identitas";
 import { TandaTachyon } from "./tanda-tachyon";
 
 const KELAS_ISIAN =
@@ -62,6 +64,7 @@ export function HalamanLoginPengguna() {
   const [galat, setGalat] = useState("");
   const [lupaPin, setLupaPin] = useState(false);
   const { status, sudahMasuk, adaTokenAkun, adalahAdmin } = useSession();
+  const identitas = identitasPanel(useAkunSaya(adaTokenAkun && !adalahAdmin).data);
   const {
     register,
     handleSubmit,
@@ -132,9 +135,12 @@ export function HalamanLoginPengguna() {
   return (
     <div className="flex min-h-screen flex-wrap gap-5 bg-gading p-4 text-navy sm:p-5">
       <aside className="flex min-w-0 flex-[1_1_560px] flex-col justify-between gap-10 rounded-[28px] bg-navy p-8 text-gading sm:p-10">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <TandaTachyon ukuran={34} />
-          <span className="text-lg font-bold">Tachyon POS</span>
+          <div className="min-w-0">
+            <p className="truncate text-lg font-bold">{identitas.judul}</p>
+            {identitas.email && <p className="truncate text-sm text-gading/75">{identitas.email}</p>}
+          </div>
         </div>
         <JamKunci />
         <p className="max-w-[420px] text-base leading-relaxed text-gading/75">

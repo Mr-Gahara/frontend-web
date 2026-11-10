@@ -43,6 +43,18 @@ export function useNamaToko(aktif: boolean) {
   });
 }
 
+/**
+ * Akun pemilik token akun dari GET /akun/me (B240), dibagi wizard dan login
+ * pengguna (keputusan rancangan butir 12). Kuncinya sama dengan useNamaToko.
+ */
+export function useAkunSaya(aktif: boolean) {
+  return useQuery({
+    queryKey: queryKeys.setup.akun(),
+    queryFn: setupApi.akunSaya,
+    enabled: aktif,
+  });
+}
+
 /** Status setup dimuat ulang setelah sebuah langkah tersimpan, agar daftar periksa ikut berubah. */
 export function useSegarkanSetup() {
   const queryClient = useQueryClient();
