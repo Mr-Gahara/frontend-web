@@ -263,7 +263,8 @@ migrasi baru `izinBarangInventory.js` dijalankan sesudah kedua seed
 perintah pemilik proyek, dua catatan web ditambahkan di
 `docs/pengembangan/klien.md` backend (`dd6bc98` omzet per metode
 pembayaran dan `aeb6a52` stok keluar per penjualan), lalu `ridho`
-di-push ke `aeb6a52`.
+di-push ke `aeb6a52`; sesudahnya keputusan bisnis Mesin Kasir MK15a
+sampai MK17a dicatat di `f110c04` dan ikut di-push.
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari
