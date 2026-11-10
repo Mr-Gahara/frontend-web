@@ -259,7 +259,11 @@ ke `0e43a6d`, lalu `yoga` maju delapan commit tepat di atasnya ke
 di-fast-forward tanpa di-push. Seed menambah empat izin
 `*-barang-inventory` (163 nama, Owner 160) tanpa nama dibuang, dan
 migrasi baru `izinBarangInventory.js` dijalankan sesudah kedua seed
-(`referensi/keputusan-penyesuaian-backend.md`).
+(`referensi/keputusan-penyesuaian-backend.md`). Pada hari yang sama, atas
+perintah pemilik proyek, dua catatan web ditambahkan di
+`docs/pengembangan/klien.md` backend (`dd6bc98` omzet per metode
+pembayaran dan `aeb6a52` stok keluar per penjualan), lalu `ridho`
+di-push ke `aeb6a52`.
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari
