@@ -85,6 +85,14 @@ keputusan rancangan butir 17.
 - **VD3a: tampilan stok keluar di detail penjualan menunggu desain
   pemilik proyek**, dikerjakan setelah backend mengirim rinciannya.
 
+- **BP1a: kolom kanan buat penjualan berhenti di atas baris aksi**
+  (pemilik proyek, 12 November 2026). Di lebar `lg` ke atas kolom kanan
+  yang `sticky` dibatasi seluruh form, sehingga saat digulir kartu
+  Ringkasan menutupi baris Batal dan Buat Penjualan. Kedua kolom kini
+  dibungkus grid sendiri; tampilan lain dan HP tidak berubah. Diuji
+  `tests/e2e/penjualan/tampilan-buat-penjualan.spec.ts` di 1024 dan
+  1280 px, yang gagal terhadap kode lama.
+
 ### Cakupan daftar penjualan
 
 Diputuskan pemilik proyek pada 18 Oktober 2026, saat RG4a diterapkan
@@ -158,7 +166,7 @@ dan `3efd05b`), dan cabang lain tidak maju.
   `PajakDariProdukLama`; 5 per `3359497`, yang menghapus `AkunKasLama`,
   `AkunKasRefLama`, dan `MetodePembayaranLama`, dan pesan commit itu
   keliru menyebut enam). Per `d9365d3` tersisa 1, dan per `1e05df6` 0.
-- `features/penjualan/halaman-buat-penjualan.tsx` masih 1.098 baris per `7a08b63` (1.087 sebelumnya):
+- `features/penjualan/halaman-buat-penjualan.tsx` 698 baris per BP1a (dipecah di `584d6ae`; 1.098 per `7a08b63`):
   migrasi memindahkan lapisan data dan membuang `any`, tetapi tidak memecah
   komponennya. Pisahkan pemilih pelanggan, pemilih diskon, dan pratinjau
   total saat halaman itu disentuh lagi.

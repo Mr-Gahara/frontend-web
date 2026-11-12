@@ -318,8 +318,12 @@ export default function HalamanBuatPenjualan() {
 
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
+        className="flex flex-col gap-6"
       >
+        {/* Kedua kolom dibungkus grid sendiri: kolom kanan yang sticky
+            dibatasi pembungkusnya, sehingga berhenti di atas baris aksi dan
+            tidak menutupi tombol Buat Penjualan saat digulir. */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ================= KOLOM KIRI (UTAMA) ================= */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           {/* INFO TRANSAKSI */}
@@ -653,9 +657,10 @@ export default function HalamanBuatPenjualan() {
           {/* RINGKASAN TAGIHAN */}
           <RingkasanTagihan calc={calc} />
         </div>
+        </div>
 
         {/* ================= AKSI & SUBMIT ================= */}
-        <div className="lg:col-span-12 flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
           {formError && (
             <p className="text-sm font-bold text-red-600 bg-red-50 p-3 rounded-xl border border-red-100">
               {formError}
