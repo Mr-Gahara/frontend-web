@@ -36,7 +36,7 @@ test.describe("Keuangan: Belanja Stok", () => {
     await login(page);
   });
 
-  test("tab Belanja Stok membuka gabungan seluruh lokasi dengan periode bulan berjalan", async ({ page }) => {
+  test("sub-menu Belanja Stok membuka gabungan seluruh lokasi dengan periode bulan berjalan", async ({ page }) => {
     await page.goto("/dashboard/outlet/keuangan/akunkas");
     const tRingkasan = page.waitForRequest(
       (r) => r.method() === "GET" && POLA_RINGKASAN.test(r.url()),
@@ -44,7 +44,8 @@ test.describe("Keuangan: Belanja Stok", () => {
     const tDaftar = page.waitForRequest(
       (r) => r.method() === "GET" && POLA_DAFTAR.test(r.url()) && query(r.url()).get("limit") === "10",
     );
-    await page.getByRole("navigation", { name: "Navigasi Keuangan" }).getByRole("link", { name: "Belanja Stok" }).click();
+    // Dibuka dari sub-menu Keuangan di sidebar (12 November 2026).
+    await page.getByRole("link", { name: "Belanja Stok", exact: true }).click();
     await page.waitForURL("**" + URL_BELANJA);
     const [ringkasan, daftar] = await Promise.all([tRingkasan, tDaftar]);
 

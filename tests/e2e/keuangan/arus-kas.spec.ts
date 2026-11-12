@@ -31,7 +31,7 @@ test.describe("Arus kas", () => {
     await login(page);
   });
 
-  test("tab Arus Kas dan Mutasi Kas; filter awal bulan berjalan per hari; angka sesuai respons", async ({ page }) => {
+  test("sub-menu Laporan Arus Kas; filter awal bulan berjalan per hari; angka sesuai respons", async ({ page }) => {
     const tunggu = tungguArusKas(page);
     await bukaDenganAuth(page, URL_ARUS_KAS);
     const res = await tunggu;
@@ -45,9 +45,9 @@ test.describe("Arus kas", () => {
     expect(q.get("akunKasID"), "Semua akun tidak mengirim akunKasID").toBeNull();
     expect(q.get("periode"), "periode tidak dikirim").toBeNull();
 
-    const nav = page.getByRole("navigation", { name: "Navigasi Keuangan" });
-    await expect(nav.getByRole("link", { name: "Arus Kas", exact: true })).toBeVisible();
-    await expect(nav.getByRole("link", { name: "Mutasi Kas", exact: true })).toBeVisible();
+    // Arus Kas dibuka dari sub-menu Laporan di sidebar (12 November 2026).
+    await expect(page.getByRole("link", { name: "Ringkasan Laba/Rugi", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Arus Kas", exact: true })).toHaveAttribute("aria-current", "page");
     await expect(page.getByRole("heading", { name: "Laporan Arus Kas" })).toBeVisible();
 
     const isi = (await res.json()) as ResponsArusKas;

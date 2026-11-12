@@ -2,12 +2,13 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { login } from "../../helpers/transfer-uji";
 
 /*
- * Tampilan tab Keuangan di lebar HP (perbaikan HP Keuangan, pratinjau Revisi 1
- * disetujui pemilik proyek 6 November 2026): bar tab turun ke baris berikutnya
- * sehingga tab aktif selalu terlihat, kartu ringkasan dua kolom berjudul
+ * Tampilan laman Keuangan di lebar HP (perbaikan HP Keuangan, pratinjau Revisi 1
+ * disetujui pemilik proyek 6 November 2026): kartu ringkasan dua kolom berjudul
  * pendek, tombol header Akun Kas bertumpuk penuh tanpa label terpotong, dan
- * halaman tidak menggulir ke samping. Skenario desktop memastikan tampilan
- * sejak sm tidak ikut berubah.
+ * halaman tidak menggulir ke samping. Sejak 12 November 2026 laman Keuangan
+ * dibuka dari sub-menu Keuangan dan Laporan di sidebar, dan bar tab dibuang
+ * (pemilik proyek). Skenario desktop memastikan tampilan sejak sm tidak ikut
+ * berubah.
  */
 
 const URL_AKUN = "/dashboard/outlet/keuangan/akunkas";
@@ -33,28 +34,14 @@ async function bukaAkunKas(page: Page, ukuran: { width: number; height: number }
   });
 }
 
-test.describe("tampilan tab Keuangan", () => {
-  test("di lebar HP bar tab, kartu ringkasan, dan tombol Akun Kas tampil utuh tanpa gulir ke samping", async ({
+test.describe("tampilan laman Keuangan", () => {
+  test("di lebar HP kartu ringkasan dan tombol Akun Kas tampil utuh tanpa bar tab dan tanpa gulir ke samping", async ({
     page,
   }) => {
     await bukaAkunKas(page, HP);
 
-    await test.step("setiap tab berada di dalam layar, labelnya utuh, dan tab aktif ditandai", async () => {
-      const nav = page.getByRole("navigation", { name: "Navigasi Keuangan" });
-      const tab = nav.getByRole("link");
-      const jumlah = await tab.count();
-      expect(jumlah, "tab Keuangan lebih dari satu").toBeGreaterThan(1);
-      for (let i = 0; i < jumlah; i++) {
-        await expect(tab.nth(i)).toBeVisible();
-        const k = await kotak(tab.nth(i));
-        expect(k.x, `tab ${i + 1} tidak keluar ke kiri`).toBeGreaterThanOrEqual(0);
-        expect(k.x + k.width, `tab ${i + 1} tidak keluar ke kanan`).toBeLessThanOrEqual(HP.width);
-        expect(await tidakTerpotong(tab.nth(i)), `label tab ${i + 1} utuh`).toBe(true);
-      }
-      await expect(nav.getByRole("link", { name: "Akun Kas & Bank" })).toHaveAttribute(
-        "aria-current",
-        "page",
-      );
+    await test.step("bar tab Keuangan tidak ada lagi", async () => {
+      await expect(page.getByRole("navigation", { name: "Navigasi Keuangan" })).toHaveCount(0);
     });
 
     await test.step("kartu ringkasan dua kolom dengan judul pendek", async () => {
@@ -100,36 +87,42 @@ test.describe("tampilan tab Keuangan", () => {
     });
   });
 
-  test("di lebar HP isi tab Akun Kas dan Ringkasan Laba/Rugi selebar bar tab tanpa padding tambahan", async ({
+  test("di lebar HP isi laman Akun Kas dan Ringkasan Laba/Rugi selebar judul layout tanpa padding tambahan", async ({
     page,
   }) => {
     await page.setViewportSize(HP);
     await login(page);
     for (const url of [URL_AKUN, URL_LABA_RUGI]) {
       await page.goto(url);
-      const nav = page.getByRole("navigation", { name: "Navigasi Keuangan" });
-      await expect(nav).toBeVisible({ timeout: 20_000 });
-      // Elemen pertama di dalam halaman: saudara bar tab di layout Keuangan.
-      const isi = nav.locator("xpath=../following-sibling::div[1]/div[1]/*[1]");
+      // Baris judul layout Keuangan selebar kolom layout; elemen pertama
+      // halaman berada di pembungkus terakhir layout itu.
+      const judul = page.getByRole("heading", { name: "Manajemen Keuangan" }).locator("..");
+      await expect(judul).toBeVisible({ timeout: 20_000 });
+      const isi = judul.locator("xpath=following-sibling::div[last()]/*[1]");
       await expect(isi).toBeVisible({ timeout: 20_000 });
-      const kNav = await kotak(nav);
+      const kJudul = await kotak(judul);
       const kIsi = await kotak(isi);
-      expect(Math.abs(kIsi.x - kNav.x), `${url}: isi rata kiri dengan bar tab`).toBeLessThan(2);
-      expect(Math.abs(kIsi.width - kNav.width), `${url}: isi ${kIsi.width}px selebar bar tab ${kNav.width}px`).toBeLessThan(2);
+      expect(Math.abs(kIsi.x - kJudul.x), `${url}: isi rata kiri dengan judul layout`).toBeLessThan(2);
+      expect(Math.abs(kIsi.width - kJudul.width), `${url}: isi ${kIsi.width}px selebar judul ${kJudul.width}px`).toBeLessThan(2);
     }
   });
 
-  test("di lebar desktop tampilan tetap: judul kartu lengkap, tab sebaris, dan tombol sebaris", async ({
+  test("di lebar desktop tampilan tetap: judul kartu lengkap, sub-menu sidebar aktif, dan tombol sebaris", async ({
     page,
   }) => {
     await bukaAkunKas(page, DESKTOP);
     await expect(page.getByText("Saldo Kas Total", { exact: true })).toBeVisible();
     await expect(page.getByText("Saldo kas total", { exact: true })).toBeHidden();
 
-    const tab = page.getByRole("navigation", { name: "Navigasi Keuangan" }).getByRole("link");
-    const pertama = await kotak(tab.first());
-    const terakhir = await kotak(tab.last());
-    expect(Math.abs(pertama.y - terakhir.y), "tab sebaris").toBeLessThan(2);
+    // Laman Keuangan dibuka dari sub-menu sidebar (12 November 2026).
+    await expect(page.getByRole("navigation", { name: "Navigasi Keuangan" })).toHaveCount(0);
+    for (const nama of ["Penjualan", "Pengeluaran", "Akun Kas & Bank", "Mutasi Kas", "Belanja Stok", "Mesin Kasir"]) {
+      await expect(page.getByRole("link", { name: nama, exact: true }), `sub-menu ${nama}`).toBeVisible();
+    }
+    await expect(page.getByRole("link", { name: "Akun Kas & Bank", exact: true })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
 
     const kPindah = await kotak(page.getByRole("button", { name: "Pindah Dana" }));
     const kTambah = await kotak(page.getByRole("button", { name: "Tambah Akun" }));

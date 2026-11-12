@@ -128,13 +128,16 @@ Yoga, dan Nizar pada 7 November 2026. Daftar periksa:
 Dicatat pemilik proyek 12 November 2026, dikerjakan sesudah putaran ini
 dengan alur kanvas desain seperti butir di bawah:
 
-1. **Laman Keuangan pindah ke sub-sidebar Keuangan.** Tab Keuangan sudah
-   terlalu banyak (Ringkasan Laba/Rugi, Arus Kas, Mutasi Kas, Akun Kas &
-   Bank, Belanja Stok, Mesin Kasir), sehingga seluruh laman itu dipindah
-   menjadi anak menu Keuangan di sidebar.
-2. **Perbaikan bug visual di laman buat penjualan**
-   (`features/penjualan/halaman-buat-penjualan.tsx`). Rincian bugnya
-   ditanyakan ke pemilik proyek saat butir ini dimulai.
+1. **Laman Keuangan pindah ke sub-sidebar Keuangan**: selesai 12 November
+   2026. Keuangan dan Laporan menjadi dua menu lipat, bar tab dibuang,
+   judul dan kartu ringkasan tetap (`modul/keuangan.md`, SK1a dan SK2a).
+2. **Perbaikan bug visual di laman buat penjualan**: selesai 12 November
+   2026. Kolom kanan sticky menutupi tombol Buat Penjualan saat digulir;
+   kini berhenti di atas baris aksi (`modul/penjualan.md`, BP1a).
+3. **Penyesuaian backend `yoga` `d6709a1`** (6 commit di atas `ridho`
+   lokal `f110c04`: P78 rincian stok per penjualan yang menutup butir
+   181, dan P79 paginasi opt-in produk, inventory, dan bahan baku):
+   dikerjakan sesudah butir 1 dan 2 (pemilik proyek, 12 November 2026).
 
 ### Menunggu desain pemilik proyek
 

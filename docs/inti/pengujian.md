@@ -12,6 +12,16 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per sub-menu Keuangan dan bug buat penjualan** (12 November
+2026): vitest 1048 lolos (5 unit test tab dibuang, 7 unit test baru
+`tests/unit/components/sidebar-menu-keuangan.test.ts`). Spec terdampak 39
+lolos: `keuangan/tampilan-hp`, `arus-kas`, `belanja-stok`, dan
+`mesin-kasir` (tab diganti sub-menu sidebar), `penjualan/alur-penjualan`,
+`buat-penjualan`, dan `waktu-penjualan`, serta spec baru
+`penjualan/tampilan-buat-penjualan.spec.ts` (2 skenario, 1024 dan 1280
+px), yang gagal terhadap kode lama. Harapan suite penuh 626: 624 ditambah
+dua skenario itu (hitungan); suite penuh menunggu izin pemilik proyek.
+
 **Suite penuh per putaran 12 November 2026** (web `bb64b5c`, backend
 `ridho` lokal `aeb6a52`, pukul 10.48 sampai 11.23 WIB, reporter
 `line,json`): e2e 622 lolos dan 2 gagal dari 624, tanpa skip, sesuai

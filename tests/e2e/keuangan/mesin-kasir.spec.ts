@@ -45,7 +45,7 @@ test.describe("Mesin Kasir", () => {
 
     try {
       await page.reload();
-      await expect(page.getByRole("link", { name: "Mesin Kasir" })).toHaveAttribute("aria-current", "page", {
+      await expect(page.getByRole("link", { name: "Mesin Kasir", exact: true })).toHaveAttribute("aria-current", "page", {
         timeout: 20_000,
       });
 

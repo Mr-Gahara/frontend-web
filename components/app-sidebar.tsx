@@ -297,6 +297,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     >
                                       <a
                                         href={subItem.href}
+                                        aria-current={isSubActive ? "page" : undefined}
                                         onClick={(e) => {
                                           e.preventDefault();
                                           handleNavigation(subItem.href);

@@ -1,6 +1,5 @@
 import React from "react";
 import { KeuanganSummaryCards } from "./components/keuangan-summary-cards";
-import { KeuanganNavTabs } from "./components/keuangan-nav-tabs";
 
 export default function KeuanganLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,10 +12,8 @@ export default function KeuanganLayout({ children }: { children: React.ReactNode
       {/* Summary cards */}
       <KeuanganSummaryCards />
 
-      {/* Navigasi tab keuangan */}
-      <KeuanganNavTabs />
-
-      {/* Konten tiap tab akan di-render di sini */}
+      {/* Laman Keuangan dibuka dari sub-menu Keuangan dan Laporan di sidebar
+          (components/sidebar-menu.ts); tab di sini dibuang 12 November 2026. */}
       <div className="w-full">
         {children}
       </div>

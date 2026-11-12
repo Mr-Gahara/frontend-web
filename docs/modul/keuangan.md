@@ -425,7 +425,39 @@ setelah backend menerapkannya.
   kas lain (misalnya "Kas Kantor"). Web perlu menampilkan pesan itu di
   pembayaran penjualan setelah backend menerapkannya.
 
+### Sub-menu Keuangan dan Laporan
+
+Diputuskan pemilik proyek pada 12 November 2026 (`inti/status.md`,
+Pekerjaan UI berikutnya butir 1), karena tab Keuangan sudah terlalu
+banyak. Menggantikan tab LR4a dan tab Belanja Stok serta Mesin Kasir
+sebagai jalan masuk; rutenya tidak berubah.
+
+- **SK1a: grup "Keuangan & Laporan" berisi dua menu lipat** dengan gaya
+  menu Keuangan yang sudah ada (`components/sidebar-menu.ts`). Keuangan:
+  Penjualan, Pengeluaran, Akun Kas & Bank, Mutasi Kas, Belanja Stok, dan
+  Mesin Kasir. Laporan: Ringkasan Laba/Rugi dan Arus Kas; menu Laporan
+  yang tadinya tautan tunggal ke Ringkasan Laba/Rugi memakai href semu
+  `/dashboard/outlet/laporan` sebagai induk.
+- **SK2a: bar tab di layout Keuangan dibuang**, sedangkan judul
+  "Manajemen Keuangan" dan empat kartu ringkasan tetap tampil di semua
+  laman Keuangan. Anak menu yang halamannya ditolak `IZIN_HALAMAN`
+  disembunyikan sidebar seperti tab sebelumnya (`kontrak/temuan.md` butir
+  163).
+
 ## Catatan
+
+### Catatan dari sub-menu Keuangan dan Laporan
+
+- Tautan sub-menu sidebar kini membawa `aria-current="page"` mengikuti
+  status aktifnya (termasuk halaman anak seperti `akunkas/[id]`), sehingga
+  spec yang dulu memeriksa tab aktif memeriksa sub-menu.
+- Unit test tab (`keuangan-nav-tabs.test.tsx`, 5 kasus) dibuang bersama
+  komponennya; kasus izinnya dibawa ke
+  `tests/unit/components/sidebar-menu-keuangan.test.ts` (7 kasus,
+  termasuk susunan dan href induk Laporan).
+- Sub-menu yang induknya tidak aktif tertutup dan isinya tidak dipasang,
+  sehingga spec mencari tautan Keuangan dari laman Keuangan dan tautan
+  Laporan dari laman Laporan.
 
 ### Catatan dari penyambungan Mesin Kasir
 

@@ -108,12 +108,43 @@ export const outletMenus: MenuGroup[] = [
             label: "Pengeluaran",
             href: "/dashboard/outlet/pengeluaran",
           },
+          // Laman yang tadinya tab Keuangan (pemilik proyek, 12 November 2026).
+          {
+            label: "Akun Kas & Bank",
+            href: "/dashboard/outlet/keuangan/akunkas",
+          },
+          {
+            label: "Mutasi Kas",
+            href: "/dashboard/outlet/keuangan/mutasiArusKas",
+          },
+          {
+            // Gabungan pembelian stok seluruh outlet dan gudang; ubah dan hapus
+            // tetap di ruang asal.
+            label: "Belanja Stok",
+            href: "/dashboard/outlet/keuangan/belanjaStok",
+          },
+          {
+            // Buka-tutup kasir dan mesin kasir (MK1a, modul/keuangan.md).
+            label: "Mesin Kasir",
+            href: "/dashboard/outlet/keuangan/mesinKasir",
+          },
         ],
       },
       {
         label: "Laporan",
-        href: "/dashboard/outlet/keuangan/ringkasanLabaRugi",
+        href: "/dashboard/outlet/laporan", // Href semu untuk parent
         icon: FileText,
+        subItems: [
+          {
+            label: "Ringkasan Laba/Rugi",
+            href: "/dashboard/outlet/keuangan/ringkasanLabaRugi",
+          },
+          {
+            // Laporan arus kas (B291, desain D, LR3a).
+            label: "Arus Kas",
+            href: "/dashboard/outlet/keuangan/arusKas",
+          },
+        ],
       },
     ],
   },
