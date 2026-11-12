@@ -14,7 +14,7 @@ import { useKirimVerifikasiEmail, useLoginAkun, useVerifikasiEmail } from "./hoo
 import { ambilKredensial, lihatKredensial } from "./kredensial-daftar";
 import { IsianKode, KirimUlangKode } from "./isian-kode";
 import { LangkahDaftar } from "./langkah-daftar";
-import { kodeKosong, skemaKode, type NilaiKode } from "./schema";
+import { kodeKosong, skemaVerifikasiEmail, type NilaiVerifikasiEmail } from "./schema";
 import { TandaTachyon } from "./tanda-tachyon";
 
 const PESAN_MASUK_LAGI = {
@@ -22,27 +22,39 @@ const PESAN_MASUK_LAGI = {
   deskripsi: "Masuk dengan email dan password akun Anda untuk menyiapkan toko.",
 };
 
+/** Jaring pengaman: titipan hilang setelah halaman dibuka dengan titipan. */
 const PESAN_KODE_BARU = {
   judul: "Masuk lagi",
   deskripsi: "Masuk dengan email dan password akun Anda untuk menerima kode verifikasi baru.",
 };
 
+const KELAS_ISIAN =
+  "flex h-12 w-full rounded-xl border border-input bg-permukaan px-4 text-base text-navy placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-permukaan transition-colors";
+
+function PesanIsian({ pesan }: { pesan?: string }) {
+  if (!pesan) return null;
+  return <p className="text-xs font-medium text-destructive">{pesan}</p>;
+}
+
 /**
  * Verifikasi email sesudah daftar (desain F, langkah 2; B231 dan B232).
- * Kode diperiksa lewat POST /akun/auth/verifikasi-email bersama password
- * titipan daftar atau login, karena sejak B248 password itu wajib dan
- * menjadi password akun (A-01). Backend tidak menerbitkan token di sana,
- * jadi halaman langsung login dengan kredensial yang sama, lalu ke wizard
- * bila setup inti belum selesai (requireSetup, B223). Titipan dibiarkan
- * saat kode salah dan baru dikosongkan setelah verifikasi berhasil. Tanpa
- * titipan, misalnya setelah dimuat ulang, kode tidak dikirim dan pendaftar
- * diarahkan ke login, yang mengirim kode baru dan menitipkan password lagi
- * (pemilik proyek, 6 November 2026; isian password di halaman ini menunggu
- * desain). Kirim ulang selalu dijawab 200 yang sama.
+ * Kode diperiksa lewat POST /akun/auth/verifikasi-email bersama password,
+ * karena sejak B248 password itu wajib dan menjadi password akun (A-01).
+ * Password diambil dari titipan daftar atau login; tanpa titipan, misalnya
+ * setelah dimuat ulang atau dibuka langsung, halaman menampilkan isian
+ * Password akun dan Ulangi password (opsi A, pemilik proyek 12 November
+ * 2026). Isian itu tidak dikosongkan saat kode salah. Backend tidak
+ * menerbitkan token di sana, jadi halaman langsung login dengan password
+ * yang sama, lalu ke wizard bila setup inti belum selesai (requireSetup,
+ * B223). Titipan dibiarkan saat kode salah dan baru dikosongkan setelah
+ * verifikasi berhasil. Tanpa email di alamat, isian password tidak tampil
+ * dan kode ditolak dengan pesan galat (pemilik proyek, 12 November 2026).
+ * Kirim ulang selalu dijawab 200 yang sama.
  */
 export function HalamanVerifikasiEmail() {
   const router = useRouter();
   const email = (useSearchParams().get("email") ?? "").trim();
+  const [perluPassword] = useState(() => Boolean(email) && !lihatKredensial(email));
   const { sisa, ulang } = useHitungMundur(60);
   const [status, setStatus] = useState("");
   const [galat, setGalat] = useState("");
@@ -56,30 +68,32 @@ export function HalamanVerifikasiEmail() {
     router.push("/login");
   };
 
-  const lanjutMasuk = () => {
-    const kredensial = ambilKredensial(email);
-    if (!kredensial) return keLogin();
-    masuk.mutate(kredensial, {
-      onSuccess: (res) => {
-        setTokenAkun(res.accessToken);
-        router.push(res.requireSetup ? "/setup" : "/login/pengguna");
+  const lanjutMasuk = (password: string) => {
+    ambilKredensial(email);
+    masuk.mutate(
+      { email, password },
+      {
+        onSuccess: (res) => {
+          setTokenAkun(res.accessToken);
+          router.push(res.requireSetup ? "/setup" : "/login/pengguna");
+        },
+        onError: () => keLogin(),
       },
-      onError: () => keLogin(),
-    });
+    );
   };
 
-  const kirim = ({ kode }: NilaiKode) => {
+  const kirim = ({ kode, password: passwordIsian }: NilaiVerifikasiEmail) => {
     setGalat("");
     if (!email) {
       setGalat("Email pendaftaran tidak diketahui. Daftar ulang atau masuk dari halaman login.");
       return;
     }
-    const kredensial = lihatKredensial(email);
-    if (!kredensial) return keLogin(PESAN_KODE_BARU);
+    const password = perluPassword ? passwordIsian : lihatKredensial(email)?.password;
+    if (!password) return keLogin(PESAN_KODE_BARU);
     verifikasi.mutate(
-      { email, otp: kode.join(""), password: kredensial.password },
+      { email, otp: kode.join(""), password },
       {
-        onSuccess: lanjutMasuk,
+        onSuccess: () => lanjutMasuk(password),
         onError: (err) =>
           setGalat(
             isRateLimited(err)
@@ -102,10 +116,14 @@ export function HalamanVerifikasiEmail() {
     });
   };
   const {
+    register,
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<NilaiKode>({ resolver: zodResolver(skemaKode), defaultValues: { kode: kodeKosong() } });
+  } = useForm<NilaiVerifikasiEmail>({
+    resolver: zodResolver(skemaVerifikasiEmail(perluPassword)),
+    defaultValues: { kode: kodeKosong(), password: "", ulangiPassword: "" },
+  });
 
   return (
     <div className="flex min-h-screen flex-wrap gap-5 bg-permukaan p-4 text-navy sm:p-5">
@@ -151,6 +169,44 @@ export function HalamanVerifikasiEmail() {
               </p>
             )}
           </div>
+          {perluPassword && (
+            <>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="verifikasi-password" className="text-sm font-semibold">
+                  Password akun
+                </label>
+                <input
+                  id="verifikasi-password"
+                  type="password"
+                  autoComplete="new-password"
+                  suppressHydrationWarning
+                  {...register("password")}
+                  aria-describedby="verifikasi-password-aturan"
+                  aria-invalid={errors.password ? true : undefined}
+                  className={KELAS_ISIAN}
+                />
+                <p id="verifikasi-password-aturan" className="text-[13px] text-muted-foreground">
+                  Dipakai untuk masuk ke akun toko. Minimal 8 karakter, dengan huruf kapital dan angka.
+                </p>
+                <PesanIsian pesan={errors.password?.message} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label htmlFor="verifikasi-ulangi-password" className="text-sm font-semibold">
+                  Ulangi password
+                </label>
+                <input
+                  id="verifikasi-ulangi-password"
+                  type="password"
+                  autoComplete="new-password"
+                  suppressHydrationWarning
+                  {...register("ulangiPassword")}
+                  aria-invalid={errors.ulangiPassword ? true : undefined}
+                  className={KELAS_ISIAN}
+                />
+                <PesanIsian pesan={errors.ulangiPassword?.message} />
+              </div>
+            </>
+          )}
           {galat && (
             <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
               {galat}
@@ -162,7 +218,7 @@ export function HalamanVerifikasiEmail() {
             className="disabled:cursor-not-allowed disabled:opacity-60 inline-flex h-[54px] w-full cursor-pointer items-center justify-center rounded-xl bg-navy text-base font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
           >
             {memuat && <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden="true" />}
-            Verifikasi email
+            Verifikasi dan masuk
           </button>
           <div className="flex flex-col gap-1">
             <KirimUlangKode

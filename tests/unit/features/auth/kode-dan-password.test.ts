@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatSisa } from "@/features/auth/hitung-mundur";
-import { kodeKosong, skemaKode, skemaPasswordBaru } from "@/features/auth/schema";
+import { kodeKosong, skemaKode, skemaPasswordBaru, skemaVerifikasiEmail } from "@/features/auth/schema";
 
 describe("formatSisa", () => {
   it("menulis sisa detik sebagai m:ss", () => {
@@ -41,5 +41,27 @@ describe("skemaPasswordBaru", () => {
   });
   it("sah bila kode, password, dan ulangan sesuai", () => {
     expect(skemaPasswordBaru.safeParse({ kode, password: "Senja2026", ulangiPassword: "Senja2026" }).success).toBe(true);
+  });
+});
+
+describe("skemaVerifikasiEmail", () => {
+  const kode = ["6", "0", "4", "2", "1", "8"];
+  it("tanpa titipan: password akun wajib, dengan aturan dan ulangan yang sama dengan daftar (B248)", () => {
+    const skema = skemaVerifikasiEmail(true);
+    expect(skema.safeParse({ kode, password: "", ulangiPassword: "" }).error?.issues[0]?.message).toBe(
+      "Password wajib diisi",
+    );
+    expect(skema.safeParse({ kode, password: "abcdefgh", ulangiPassword: "abcdefgh" }).error?.issues[0]?.message).toBe(
+      "Password harus mengandung minimal 1 huruf kapital",
+    );
+    expect(skema.safeParse({ kode, password: "Senja2026", ulangiPassword: "Senja2027" }).error?.issues[0]?.path).toEqual([
+      "ulangiPassword",
+    ]);
+    expect(skema.safeParse({ kode, password: "Senja2026", ulangiPassword: "Senja2026" }).success).toBe(true);
+  });
+  it("dengan titipan: hanya kode yang diperiksa", () => {
+    const skema = skemaVerifikasiEmail(false);
+    expect(skema.safeParse({ kode, password: "", ulangiPassword: "" }).success).toBe(true);
+    expect(skema.safeParse({ kode: kodeKosong(), password: "", ulangiPassword: "" }).success).toBe(false);
   });
 });

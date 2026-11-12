@@ -128,10 +128,11 @@ Yoga, dan Nizar pada 7 November 2026. Daftar periksa:
 Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 6 November 2026). Urutannya disetujui 4 dan 5 November 2026.
 
-1. **Isian password di halaman verifikasi email**, sisa B248: keadaan
-   tanpa password titipan (halaman dimuat ulang atau dibuka langsung)
-   kini pindah ke login dengan pesan "Masuk lagi" (`efb05db`). Isiannya
-   didesain sendiri oleh pemilik proyek (`kontrak/temuan.md` butir 171).
+1. **Isian password di halaman verifikasi email**, sisa B248: selesai
+   12 November 2026 (opsi A, `modul/setup-akun.md` TP6a). Tanpa password
+   titipan, halaman menampilkan Password akun dan Ulangi password, yang
+   tidak dikosongkan saat kode salah; tanpa email di alamat tetap pesan
+   galat. Spec e2e-nya menunggu suite penuh di akhir putaran.
 2. **Belum dijadwalkan, perlu desain**: logo toko (B203 sampai B205) di
    profil toko (jam operasional B206 menyusul penyambungan langkah jam
    buka, di atas); OTP reset PIN Owner dan ubah

@@ -6,9 +6,8 @@
  * menjadi password akun (A-01). Backend juga tidak menerbitkan token saat
  * verifikasi berhasil, sehingga klien login lagi dengan password yang sama.
  * Password dititipkan di memori, bukan di storage, sehingga hilang saat
- * halaman dimuat ulang. Tanpa titipan, halaman verifikasi tidak mengirim
- * kode dan mengarahkan ke login, yang mengirim kode baru dan menitipkan
- * password lagi.
+ * halaman dimuat ulang. Tanpa titipan, halaman verifikasi meminta pendaftar
+ * mengisi password akun sendiri (B248, opsi A).
  */
 export interface KredensialDaftar {
   email: string;

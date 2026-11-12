@@ -10,7 +10,7 @@ import { tempelKode } from "../../helpers/kode-uji";
  * dibedakan, dan pendaftar baru memasukkan OTP dari email (B232) yang
  * dibaca dari Mailpit (UJ1a). registerLimiter di backend development
  * dibatasi 10 per 15 menit per IP kecuali dilonggarkan lewat
- * REGISTER_LIMIT_MAX (B230); spec ini mengirim dua pendaftaran per run, dan
+ * REGISTER_LIMIT_MAX (B230); spec ini mengirim tiga pendaftaran per run, dan
  * akun barunya dihapus lewat API admin (dibekukan dulu, karena backend
  * hanya menghapus akun non-aktif).
  */
@@ -124,12 +124,13 @@ test.describe("Halaman daftar", () => {
 
       await page.waitForURL(/\/daftar\/verifikasi\?email=/);
       await expect(langkahAktif(page)).toContainText("Verifikasi email");
+      await expect(page.getByLabel("Password akun"), "password titipan ada, isian password tidak tampil").toHaveCount(0);
       const kode = await ambilOtp(email, sejak);
 
       const verifikasi = page.waitForResponse(/\/api\/akun\/auth\/verifikasi-email$/);
       const login = page.waitForResponse(/\/api\/akun\/auth\/login$/);
       await tempelKode(page.getByLabel("Digit 1 dari 6"), kode);
-      await page.getByRole("button", { name: "Verifikasi email" }).click();
+      await page.getByRole("button", { name: "Verifikasi dan masuk" }).click();
       const resVerifikasi = await verifikasi;
       expect(resVerifikasi.status()).toBe(200);
       expect(resVerifikasi.request().postDataJSON(), "password titipan daftar ikut dikirim (B248)").toEqual({
@@ -183,7 +184,7 @@ test.describe("Halaman daftar", () => {
       const salah = kode === "000000" ? "111111" : "000000";
       const tSalah = page.waitForResponse(/\/api\/akun\/auth\/verifikasi-email$/);
       await tempelKode(page.getByLabel("Digit 1 dari 6"), salah);
-      await page.getByRole("button", { name: "Verifikasi email" }).click();
+      await page.getByRole("button", { name: "Verifikasi dan masuk" }).click();
       const resSalah = await tSalah;
       expect(resSalah.status(), "kode salah ditolak").toBe(400);
       expect(resSalah.request().postDataJSON()).toEqual({ email, otp: salah, password: PASSWORD_BARU });
@@ -192,7 +193,7 @@ test.describe("Halaman daftar", () => {
 
       const tBenar = page.waitForResponse(/\/api\/akun\/auth\/verifikasi-email$/);
       await tempelKode(page.getByLabel("Digit 1 dari 6"), kode);
-      await page.getByRole("button", { name: "Verifikasi email" }).click();
+      await page.getByRole("button", { name: "Verifikasi dan masuk" }).click();
       const resBenar = await tBenar;
       expect(resBenar.status()).toBe(200);
       expect(resBenar.request().postDataJSON(), "password titipan login masih ada").toEqual({
@@ -204,6 +205,66 @@ test.describe("Halaman daftar", () => {
     } finally {
       if (terkirim && admin) {
         const id = await idAkunLewatEmail(email, admin);
+        if (id) await hapusAkunKlienUji(id, admin);
+      }
+    }
+  });
+
+  test("tanpa password titipan: password akun diisi di halaman verifikasi, tetap terisi saat kode salah, lalu kode benar memverifikasi dan masuk (B248)", async ({
+    page,
+  }) => {
+    // Halaman verifikasi dibuka langsung, sama seperti setelah dimuat ulang:
+    // password titipan daftar tidak ada di memori. Password yang diisi di
+    // halaman ini menjadi password akun (A-01), jadi sengaja berbeda dari
+    // password saat daftar (opsi A, pemilik proyek 12 November 2026).
+    const admin = kredensialAdmin();
+    test.skip(!admin, ALASAN_TANPA_ADMIN);
+    test.skip(!(await mailpitMenyala()), ALASAN_TANPA_MAILPIT);
+    const email = `e2e-tanpa-titipan-${Date.now()}@contoh.test`;
+    const passwordAkun = "Ganti5678";
+    let terkirim = false;
+    try {
+      const sejak = new Date();
+      const daftar = await page.request.post("/api/akun/auth/register", { data: { email, password: PASSWORD_BARU } });
+      test.skip(daftar.status() === 429, ALASAN_KUOTA);
+      expect(daftar.status()).toBe(201);
+      terkirim = true;
+      const kode = await ambilOtp(email, sejak);
+
+      await page.goto("/daftar/verifikasi?email=" + encodeURIComponent(email));
+      const isian = page.getByLabel("Password akun");
+      const ulangi = page.getByLabel("Ulangi password");
+      await expect(isian).toBeVisible();
+      await expect(page.getByText("Dipakai untuk masuk ke akun toko. Minimal 8 karakter, dengan huruf kapital dan angka.")).toBeVisible();
+      await isian.fill(passwordAkun);
+      await ulangi.fill(passwordAkun);
+
+      const salah = kode === "000000" ? "111111" : "000000";
+      const tSalah = page.waitForResponse(/\/api\/akun\/auth\/verifikasi-email$/);
+      await tempelKode(page.getByLabel("Digit 1 dari 6"), salah);
+      await page.getByRole("button", { name: "Verifikasi dan masuk" }).click();
+      const resSalah = await tSalah;
+      expect(resSalah.status(), "kode salah ditolak").toBe(400);
+      expect(resSalah.request().postDataJSON()).toEqual({ email, otp: salah, password: passwordAkun });
+      await expect(page.getByRole("alert").filter({ hasText: "Kode OTP salah atau sudah kedaluwarsa." })).toBeVisible();
+      await expect(isian, "password tidak dikosongkan saat kode salah").toHaveValue(passwordAkun);
+      await expect(ulangi).toHaveValue(passwordAkun);
+
+      const tBenar = page.waitForResponse(/\/api\/akun\/auth\/verifikasi-email$/);
+      const login = page.waitForResponse(/\/api\/akun\/auth\/login$/);
+      await tempelKode(page.getByLabel("Digit 1 dari 6"), kode);
+      await page.getByRole("button", { name: "Verifikasi dan masuk" }).click();
+      const resBenar = await tBenar;
+      expect(resBenar.status()).toBe(200);
+      expect(resBenar.request().postDataJSON()).toEqual({ email, otp: kode, password: passwordAkun });
+      const masuk = await login;
+      expect(masuk.status(), "password isian menjadi password akun (A-01)").toBe(200);
+      expect(masuk.request().postDataJSON()).toEqual({ email, password: passwordAkun });
+      await page.waitForURL("**/setup");
+    } finally {
+      if (terkirim && admin) {
+        const id = await idAkunLewatEmail(email, admin);
+        expect.soft(id, "akun pendaftar ditemukan untuk dibersihkan").not.toBe("");
         if (id) await hapusAkunKlienUji(id, admin);
       }
     }

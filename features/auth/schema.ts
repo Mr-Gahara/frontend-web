@@ -65,7 +65,6 @@ const aturanKode = z
   .refine((kotak) => /^\d{6}$/.test(kotak.join("")), "Masukkan 6 digit kode verifikasi.");
 
 export const skemaKode = z.object({ kode: aturanKode });
-export type NilaiKode = z.infer<typeof skemaKode>;
 
 /** Lupa password tahap pertama: email dengan aturan yang sama dengan login akun. */
 export const skemaLupaPassword = skemaLoginAkun.pick({ email: true });
@@ -82,3 +81,12 @@ export const skemaPasswordBaru = z
     message: "Password tidak sama",
   });
 export type NilaiPasswordBaru = z.infer<typeof skemaPasswordBaru>;
+
+/**
+ * Verifikasi email (B248). Tanpa password titipan daftar atau login, password
+ * akun ikut diisi dengan aturan yang sama dengan daftar, karena password itu
+ * menjadi password akun (A-01); dengan titipan hanya kode yang diperiksa.
+ */
+export const skemaVerifikasiEmail = (perluPassword: boolean) =>
+  perluPassword ? skemaPasswordBaru : skemaKode.extend({ password: z.string(), ulangiPassword: z.string() });
+export type NilaiVerifikasiEmail = NilaiPasswordBaru;

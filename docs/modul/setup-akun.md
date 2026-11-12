@@ -360,9 +360,15 @@ dan token warna yang sudah ada.
   meminta kode baru lalu membuka isian kode. Sejak `efb05db` (B248, pilihan
   pemilik proyek 6 November 2026) password titipan ikut dikirim saat
   verifikasi dan bertahan saat kode salah; tanpa titipan kode tidak
-  dikirim, dan halaman pindah ke login dengan pesan "Masuk lagi". Isian
-  password di halaman verifikasi untuk keadaan itu didesain pemilik
-  proyek.
+  dikirim, dan halaman pindah ke login dengan pesan "Masuk lagi". Sejak
+  12 November 2026 (opsi A dari tiga desain kanvas, pemilik proyek)
+  keadaan tanpa titipan menampilkan isian "Password akun" (keterangan
+  "Dipakai untuk masuk ke akun toko. Minimal 8 karakter, dengan huruf
+  kapital dan angka.") dan "Ulangi password" di bawah kotak kode; password
+  itu dikirim saat verifikasi lalu dipakai login, dan isiannya tidak
+  dikosongkan saat kode salah. Tombolnya menjadi "Verifikasi dan masuk"
+  di kedua keadaan. Tanpa `?email=` isian password tidak tampil dan kode
+  tetap ditolak dengan pesan galat (pemilik proyek, 12 November 2026).
 - **TP7a: halaman Langganan** (`2716f86`) di
   `/dashboard/outlet/pengaturan/langganan`, desain F: plan aktif dengan
   lencana masa percobaan, tanggal berakhir, sisa hari, dan bilah masa

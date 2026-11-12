@@ -543,7 +543,8 @@ proyek, 8 November 2026). Karena itu `auth/daftar.spec.ts` dan
 `auth/verifikasi-lupa-password.spec.ts` tidak dijalankan sering-sering,
 dan jumlah permintaannya tidak boleh melampaui batas:
 
-- Satu suite penuh memakai sekitar 6 kirim email dan 8 periksa kode.
+- Satu suite penuh memakai sekitar 6 kirim email dan 11 periksa kode
+  (bertambah 3 dari skenario tanpa password titipan, 12 November 2026).
   Sesudahnya kedua spec itu dijalankan ulang paling banyak sekali dalam
   15 menit yang sama, tanpa `--repeat-each`.
 - Bila perlu diulang lebih dari itu, tunggu 15 menit atau restart
