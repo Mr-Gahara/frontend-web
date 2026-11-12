@@ -7,7 +7,8 @@ import { IZIN, bolehBukaHalaman } from "@/lib/auth/permissions";
 import { useDaftarLokasi } from "@/features/inventaris/hooks";
 import { useRuangLokasiKerja } from "@/features/pengguna/hooks-profil";
 import { bolehMenurutPlan, planMencakup } from "@/lib/auth/fitur-plan";
-import { useTenant } from "@/features/tenant/hooks";
+import { useLogoToko, useTenant } from "@/features/tenant/hooks";
+import { useUrlObjek } from "@/hooks/use-url-objek";
 import { SidebarPengguna } from "@/components/sidebar-pengguna";
 import { bolehLihatMenu, gudangMenus, outletMenus, type MenuItem } from "@/components/sidebar-menu";
 import { targetMenu } from "@/components/panduan/titik-dashboard";
@@ -82,6 +83,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // sehingga nama ikut berubah setelah profil disimpan.
   const tenant = useTenant();
   const namaToko = tenant.data?.namaToko ?? (tenant.isError ? "Nama Toko" : "");
+  // Logo toko menggantikan ikon kepala sidebar bila ada (pemilik proyek,
+  // 12 November 2026); berbagi cache logo dengan Profil Toko.
+  const logo = useLogoToko(tenant.data?.logoUrl);
+  const urlLogo = useUrlObjek(tenant.data?.logoUrl ? logo.data : null);
 
   const handleNavigation = (href: string) => {
     router.push(href);
@@ -141,9 +146,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   size="lg"
                   className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! cursor-pointer"
                 >
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-emerald-700 text-sidebar-primary-foreground">
-                    <GalleryVerticalEnd className="size-4" />
-                  </div>
+                  {urlLogo ? (
+                    // Blob lokal dari URL objek; next/image tidak menangani blob: URL.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={urlLogo}
+                      alt={`Logo ${namaToko}`}
+                      className="aspect-square size-8 shrink-0 rounded-lg bg-gading object-contain"
+                    />
+                  ) : (
+                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-emerald-700 text-sidebar-primary-foreground">
+                      <GalleryVerticalEnd className="size-4" />
+                    </div>
+                  )}
                   <div className="grid flex-1 text-left text-sm leading-tight text-slate-50 hover:text-slate-900 transition-colors">
                     <span className="truncate font-semibold">{namaToko}</span>
                     <span className="truncate text-xs text-slate-50/70 group-hover:text-slate-500">

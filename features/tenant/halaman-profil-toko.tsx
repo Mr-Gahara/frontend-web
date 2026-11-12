@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2, MapPin, Save, Store } from "lucide-react";
+import { ImageIcon, Loader2, MapPin, Save, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,6 +22,7 @@ import {
 import type { Lokasi } from "@/types/location";
 import type { Tenant } from "@/types/tenant";
 import { usePerbaruiTenant, useTenant } from "./hooks";
+import { KartuLogoToko } from "./kartu-logo-toko";
 import { nilaiAwalTenant, payloadPerbaruiTenant } from "./payload";
 import { skemaTenant, type NilaiFormTenant } from "./schema";
 
@@ -249,7 +250,8 @@ function Kartu({
  * masing-masing. Profil tenant dibaca setiap pengguna lewat GET /tenant/:id
  * dan diubah pemegang update-tenant; lokasi Outlet dimuat bagi pemegang
  * read-location dan diubah pemegang update-location. Entri IZIN_HALAMAN-nya
- * kosong (PO14a). logoUrl dan isSetupComplete tidak ditampilkan (PO13a).
+ * kosong (PO14a). isSetupComplete tidak ditampilkan (PO13a); logo dikelola
+ * kartu Logo Toko sejak 12 November 2026 (desain C, B203 sampai B205).
  */
 export function HalamanProfilToko() {
   const { permissions } = useSession();
@@ -335,6 +337,15 @@ export function HalamanProfilToko() {
           Informasi dasar toko dan lokasi outlet Anda.
         </p>
       </div>
+      {tenant.data && (
+        <Kartu
+          ikon={<ImageIcon className="h-5 w-5" />}
+          judul="Logo Toko"
+          keterangan="Dicetak di bagian atas struk aplikasi kasir."
+        >
+          <KartuLogoToko tenant={tenant.data} bolehUbah={bolehUbahToko} />
+        </Kartu>
+      )}
       <Kartu
         ikon={<Store className="h-5 w-5" />}
         judul="Informasi Toko"

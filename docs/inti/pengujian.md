@@ -12,6 +12,15 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per logo toko** (12 November 2026): vitest 1038 lolos (3 unit
+test baru `tests/unit/features/tenant/logo.test.ts`). Spec terdampak 13
+lolos: spec baru `pengaturan/logo-toko.spec.ts` (5 skenario: unggah dan
+hapus sampai sidebar, validasi klien, serta tata letak 1280, 768, dan
+390 px) dan `pengaturan/profil-toko.spec.ts`, yang locator nama tokonya
+dibatasi ke sidebar karena nama juga tampil di pratinjau struk. Harapan
+suite penuh 619: 614 ditambah lima skenario logo (hitungan); suite penuh
+menunggu izin pemilik proyek.
+
 **Baseline per halaman arus kas** (12 November 2026): vitest 1035 lolos
 (11 unit test baru `tests/unit/features/laporan/arus-kas.test.ts`). Spec
 terdampak 13 lolos: spec baru `keuangan/arus-kas.spec.ts` (4 skenario,

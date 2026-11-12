@@ -133,9 +133,10 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
    titipan, halaman menampilkan Password akun dan Ulangi password, yang
    tidak dikosongkan saat kode salah; tanpa email di alamat tetap pesan
    galat. Spec e2e-nya menunggu suite penuh di akhir putaran.
-2. **Belum dijadwalkan, perlu desain**: logo toko (B203 sampai B205) di
-   profil toko (jam operasional B206 menyusul penyambungan langkah jam
-   buka, di atas); OTP reset PIN Owner dan ubah
+2. **Belum dijadwalkan, perlu desain**: logo toko selesai 12 November
+   2026 (`modul/pengaturan-outlet.md`, PO17a dan PO18a); jam operasional
+   B206 menyusul penyambungan langkah jam buka, di atas; OTP reset PIN
+   Owner dan ubah
    email atau password akun (B178 sampai B180); hapus akun oleh Owner
    (B181); dan pengingat masa langganan yang hampir habis di luar
    halaman Langganan.

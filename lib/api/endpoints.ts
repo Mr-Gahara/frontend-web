@@ -139,6 +139,8 @@ export const EP = {
     /** POST: buat toko untuk akun pemanggil (token akun). */
     list: "/tenant",
     detail: (id: string) => `/tenant/${id}`,
+    /** PUT multipart (field logo) dan DELETE, izin update-tenant (B203). */
+    logo: (id: string) => `/tenant/${id}/logo`,
   },
   setup: {
     /** GET bertoken akun: status setup per plan (B220). */

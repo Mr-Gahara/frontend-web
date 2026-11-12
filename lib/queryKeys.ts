@@ -65,6 +65,8 @@ export const queryKeys = {
   tenant: {
     semua: kunci(["tenant"] as const),
     detail: (id: string) => ["tenant", "detail", id] as const,
+    /** Berkas logo per logoUrl; URL berganti setiap logo diganti (B204). */
+    logo: (logoUrl: string) => ["tenant", "logo", logoUrl] as const,
   },
 
   // --- Inventaris dan gudang ---

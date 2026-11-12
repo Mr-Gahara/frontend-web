@@ -56,3 +56,40 @@ export function usePerbaruiTenant(opsi: OpsiMutasi<PerbaruiTenantVars> = {}) {
     onError: opsi.onError,
   });
 }
+/**
+ * Berkas logo toko sebagai Blob. Kunci memakai logoUrl, yang berganti
+ * setiap logo diganti, sehingga berkas lama tidak perlu dimuat ulang.
+ */
+export function useLogoToko(logoUrl: string | null | undefined) {
+  return useQuery({
+    queryKey: queryKeys.tenant.logo(logoUrl ?? ""),
+    queryFn: () => tenantApi.logo(logoUrl as string),
+    enabled: Boolean(logoUrl),
+    staleTime: Infinity,
+  });
+}
+
+/** Unggah dan hapus logo; invalidasi ditunggu agar profil dan sidebar membaca logoUrl baru. */
+export function useUnggahLogo(opsi: OpsiMutasi<{ id: string; berkas: File }> = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, berkas }: { id: string; berkas: File }) => tenantApi.unggahLogo(id, berkas),
+    onSuccess: async (...args) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tenant.semua });
+      opsi.onSuccess?.(...args);
+    },
+    onError: opsi.onError,
+  });
+}
+
+export function useHapusLogo(opsi: OpsiMutasi<string> = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => tenantApi.hapusLogo(id),
+    onSuccess: async (...args) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tenant.semua });
+      opsi.onSuccess?.(...args);
+    },
+    onError: opsi.onError,
+  });
+}

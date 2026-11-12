@@ -76,6 +76,7 @@ dan diterapkan di `fcf2dd2` bersama PO15a; PO16a diterapkan di `ca6eb3d`.
   unggah, dan flag setup dapat diubah klien. Ketiganya dilaporkan bersama
   submodul profil outlet. Pajak tenant dibuang backend di `ridho`
   `a949910` (B266), dan tipe `Tenant` web mengikutinya di `5b6ff0d`.
+  Logo kini diunggah sebagai berkas (B203), dan ditampilkan sejak PO17a.
 - **PO14a: halaman tanpa entri `IZIN_HALAMAN`, dengan izin per bagian.**
   Profil tenant dibaca semua pengguna dan diubah pemegang `update-tenant`;
   lokasi dimuat bagi pemegang `read-location` dan diubah bagi pemegang
@@ -88,6 +89,19 @@ dan diterapkan di `fcf2dd2` bersama PO15a; PO16a diterapkan di `ca6eb3d`.
   karena menjadi "Toko Tidak Diketahui" setelah `pin-refresh`
   (`kontrak/temuan.md` butir 98). Hanya pembacaan nama toko yang
   disentuh di sidebar dan halaman profil, seperti GD5a.
+- **PO17a: logo toko dengan pratinjau struk (desain C, pemilik proyek
+  12 November 2026; B203 sampai B205).** Kartu "Logo Toko" di atas
+  Informasi Toko (`features/tenant/kartu-logo-toko.tsx`): kolom Logo berisi
+  area seret-lepas krem bergaris putus karamel (logo saat ini atau ikon
+  kosong, "Pilih berkas", format) dan "Hapus logo" bila ada logo; kolom
+  Pratinjau struk berisi logo, nama toko, alamat, contoh item, total, dan
+  catatan kaki. Keduanya grid sejajar sama tinggi, bertumpuk di HP. Berkas
+  diperiksa di klien dengan pesan backend sebelum dikirim multipart
+  (`apiClient.unggah`), dan logo diambil sebagai blob ber-token
+  (`useLogoToko`). Unggah dan hapus hanya bagi pemegang `update-tenant`.
+- **PO18a: logo toko juga di kepala sidebar** (pemilik proyek, 12 November
+  2026), menggantikan kotak emerald berikon bila ada logo; tetap ikon bila
+  belum ada.
 - **PO16a: effect sidebar mengikuti sesi, sebagai commit tersendiri**
   (2 Oktober 2026, `ca6eb3d`) sebelum profil toko. Effect yang menyalin
   nama, role, dan izin berdependensi `[]` dan keluar selama sesi belum

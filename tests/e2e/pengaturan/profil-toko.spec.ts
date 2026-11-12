@@ -39,6 +39,8 @@ const kodePos = (page: Page) => page.getByLabel("Kode Pos", { exact: true });
 const alamatOutlet = (page: Page) => page.getByLabel("Alamat Lengkap");
 const simpanToko = (page: Page) => page.getByRole("button", { name: "Simpan Profil Toko" });
 const simpanLokasi = (page: Page) => page.getByRole("button", { name: "Simpan Lokasi Outlet" });
+/** Nama toko di kepala sidebar; sejak kartu Logo Toko nama juga tampil di pratinjau struk. */
+const diSidebar = (page: Page) => page.locator('[data-sidebar="sidebar"]');
 
 const tungguPut = (page: Page, pola: RegExp) =>
   page.waitForResponse((r) => r.request().method() === "PUT" && pola.test(r.url()));
@@ -105,16 +107,17 @@ test.describe("Profil Toko", () => {
       await namaToko(page).fill(baru);
       expect(await simpanProfil(page)).toEqual({ namaToko: baru });
       expect((await bacaTenant(page, auth, tenant.id)).namaToko).toBe(baru);
-      await expect(page.getByText(baru, { exact: true })).toBeVisible({ timeout: 15_000 });
+      await expect(diSidebar(page).getByText(baru, { exact: true })).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId("pratinjau-struk").getByText(baru, { exact: true })).toBeVisible();
 
       await page.reload();
       await expect(namaToko(page)).toHaveValue(baru, { timeout: 15_000 });
-      await expect(page.getByText(baru, { exact: true })).toBeVisible({ timeout: 15_000 });
+      await expect(diSidebar(page).getByText(baru, { exact: true })).toBeVisible({ timeout: 15_000 });
       await expect(page.getByText("Toko Tidak Diketahui")).toHaveCount(0);
 
       await namaToko(page).fill(tenant.namaToko);
       expect(await simpanProfil(page)).toEqual({ namaToko: tenant.namaToko });
-      await expect(page.getByText(tenant.namaToko, { exact: true })).toBeVisible({ timeout: 15_000 });
+      await expect(diSidebar(page).getByText(tenant.namaToko, { exact: true })).toBeVisible({ timeout: 15_000 });
     } finally {
       const kini = await api<TenantMentah>(page, auth, "GET", "/tenant/" + tenant.id);
       if (kini.data?.namaToko !== tenant.namaToko) {

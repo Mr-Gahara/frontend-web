@@ -177,10 +177,14 @@ async function request<T>(
 
   const activeKey = determineTokenKey(endpoint, explicitTokenType);
 
+  // Berkas (multipart): Content-Type diisi browser beserta boundary-nya.
+  const headerTanpaJenis = Object.fromEntries(
+    Object.entries(COMMON_HEADERS).filter(([nama]) => nama !== "Content-Type"),
+  );
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     credentials: "include",
     headers: {
-      ...COMMON_HEADERS,
+      ...(restOptions.body instanceof FormData ? headerTanpaJenis : COMMON_HEADERS),
       ...getAuthHeaders(activeKey),
       ...(extraHeaders as Record<string, string>),
     },
@@ -284,6 +288,10 @@ export const apiClient = {
    * Mengunduh berkas lewat token yang sama dengan permintaan lain, termasuk
    * refresh saat 401, karena tautan biasa tidak membawa header Authorization.
    */
+  /** Mengirim berkas sebagai multipart/form-data, misalnya logo toko. */
+  unggah: <T>(endpoint: string, data: FormData, tokenType?: TokenType) =>
+    request<T>(endpoint, { method: "PUT", body: data }, true, tokenType),
+
   unduh: async (endpoint: string, params: Record<string, unknown>, cadangan: string, tokenType?: TokenType) => {
     const res = await request<Response>(denganQuery(endpoint, params), { method: "GET" }, true, tokenType, "berkas");
     return { berkas: await res.blob(), nama: namaBerkasDari(res.headers.get("Content-Disposition"), cadangan) };
