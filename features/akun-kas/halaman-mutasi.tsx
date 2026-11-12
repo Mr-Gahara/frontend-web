@@ -181,7 +181,7 @@ export function HalamanMutasi() {
       <div className="flex flex-col gap-6 w-full">
         <div>
           <h2 className="text-base sm:text-lg font-bold tracking-wide text-navy">
-            Laporan Mutasi Arus Kas
+            Laporan Mutasi Kas
           </h2>
           <p className="text-sm font-medium text-navy/60 mt-1">
             Setiap perubahan saldo akun kas, terbaru dicatat lebih dulu.

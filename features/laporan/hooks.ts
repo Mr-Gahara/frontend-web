@@ -16,3 +16,10 @@ export function useLabaRugi(rentang: RentangLaporan) {
     queryFn: () => laporanApi.labaRugi(rentang),
   });
 }
+/** Arus kas (B291). Seluruh query, termasuk akun kas dan kelompok, menjadi kunci cache. */
+export function useArusKas(params: Record<string, string>) {
+  return useQuery({
+    queryKey: queryKeys.laporan.arusKas(params),
+    queryFn: () => laporanApi.arusKas(params),
+  });
+}

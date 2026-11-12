@@ -12,6 +12,15 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per halaman arus kas** (12 November 2026): vitest 1035 lolos
+(11 unit test baru `tests/unit/features/laporan/arus-kas.test.ts`). Spec
+terdampak 13 lolos: spec baru `keuangan/arus-kas.spec.ts` (4 skenario,
+termasuk unduhan PDF, Excel, dan CSV), `keuangan/mutasi-kas.spec.ts`, dan
+`keuangan/tutup-akun-bersaldo.spec.ts` (judul "Laporan Mutasi Kas"). Suite
+penuh menunggu izin pemilik proyek; harapannya 614: 608 ditambah dua
+skenario verifikasi email (`4e141a0`) dan empat skenario arus kas
+(hitungan).
+
 **Suite penuh per putaran 10 November 2026 malam** (web `fa6b223`,
 backend `ridho` `aeb6a52` dengan kode sama dengan `0bbd261`, pukul 19.31
 sampai 20.04 WIB, reporter `line,json`): e2e 608 lolos dari 608, tanpa

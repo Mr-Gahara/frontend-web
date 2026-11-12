@@ -139,8 +139,9 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
    email atau password akun (B178 sampai B180); hapus akun oleh Owner
    (B181); dan pengingat masa langganan yang hampir habis di luar
    halaman Langganan.
-3. **Halaman arus kas** (B291, LR2a): `GET /laporan/arus-kas` per hari
-   dengan pilihan akun kas, sudah tersedia di backend `e9112a8`.
+3. **Halaman arus kas** (B291, LR2a): selesai 12 November 2026, tab
+   Keuangan "Arus Kas" dengan desain D pemilik proyek (`modul/keuangan.md`,
+   LR3a sampai LR6a).
 4. **Omzet per metode pembayaran di laporan** (OM1a): menunggu endpoint
    backend lebih dulu (`kontrak/temuan.md` butir 180), lalu didesain
    pemilik proyek.

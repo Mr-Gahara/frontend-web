@@ -377,6 +377,29 @@ Diputuskan pemilik proyek pada 8 November 2026
 - **LR2a: halaman arus kas menunggu desain pemilik proyek** (B291,
   `inti/status.md`).
 
+### Halaman arus kas
+
+Diputuskan pemilik proyek pada 12 November 2026, dari lima desain kanvas
+(A sampai E). Menutup LR2a.
+
+- **LR3a: desain D** di `/dashboard/outlet/keuangan/arusKas`
+  (`features/laporan/halaman-arus-kas.tsx`): judul "Laporan Arus Kas",
+  pita filter Akun kas, Dari, Sampai, dan Hari/Minggu/Bulan beserta Reset
+  Filter; tiga kartu navy bergaris karamel (saldo awal, arus kas bersih
+  berlencana Naik/Turun/Tetap, saldo akhir); panel krem "Uang masuk" dan
+  "Uang keluar" per kategori dengan batang, pembatalan berlencana karamel
+  "Pembatalan"; lalu daftar per periode bergaya desain C dalam satu kolom
+  (tanpa kotak putih). Transfer hanya tampil bila satu akun kas dipilih,
+  mengikuti backend. Pilihan akun kas hanya bagi pemegang `read-akunkas`.
+- **LR4a: tab "Arus Kas"** di samping Ringkasan Laba/Rugi, dan tab buku
+  mutasi berganti nama dari "Mutasi & Arus Kas" menjadi "Mutasi Kas"
+  (judulnya "Laporan Mutasi Kas"); rutenya tetap `mutasiArusKas`.
+- **LR5a: "Unduh laporan" membuka menu PDF, Excel, dan CSV**, berkas dari
+  backend (`?format=`) dengan filter yang sama, diunduh lewat
+  `apiClient.unduh` karena butuh header Authorization.
+- **LR6a: filter awal bulan berjalan sampai hari ini**, Semua akun, per
+  hari.
+
 ### Keputusan bisnis Mesin Kasir
 
 Diputuskan pemilik proyek pada 10 November 2026, atas keputusan bisnis

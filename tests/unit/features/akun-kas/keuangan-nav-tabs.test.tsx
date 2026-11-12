@@ -17,25 +17,25 @@ describe("KeuanganNavTabs (kontrak/temuan.md butir 163)", () => {
   it("menyembunyikan tab yang halamannya ditolak IZIN_HALAMAN", () => {
     sesi.permissions = ["read-akunkas"];
     render(<KeuanganNavTabs />);
-    expect(namaTab()).toEqual(["Mutasi & Arus Kas", "Akun Kas & Bank"]);
+    expect(namaTab()).toEqual(["Mutasi Kas", "Akun Kas & Bank"]);
   });
 
   it("Belanja Stok tampil dengan izin pembelian per ruang", () => {
     sesi.permissions = ["read-akunkas", "read-location", "read-pembelian-stok-gudang", "read-laporan"];
     render(<KeuanganNavTabs />);
-    expect(namaTab()).toEqual(["Ringkasan Laba/Rugi", "Mutasi & Arus Kas", "Akun Kas & Bank", "Belanja Stok"]);
+    expect(namaTab()).toEqual(["Ringkasan Laba/Rugi", "Arus Kas", "Mutasi Kas", "Akun Kas & Bank", "Belanja Stok"]);
   });
 
   it("Mesin Kasir tampil sebagai tab kelima dengan read-sesi-kasir saja", () => {
     sesi.permissions = ["read-akunkas", "read-sesi-kasir"];
     render(<KeuanganNavTabs />);
-    expect(namaTab()).toEqual(["Mutasi & Arus Kas", "Akun Kas & Bank", "Mesin Kasir"]);
+    expect(namaTab()).toEqual(["Mutasi Kas", "Akun Kas & Bank", "Mesin Kasir"]);
   });
 
   it("Mesin Kasir tidak tampil dengan kelola-perangkat-kasir tanpa read-sesi-kasir", () => {
     sesi.permissions = ["kelola-perangkat-kasir", "read-pengguna", "read-akunkas"];
     render(<KeuanganNavTabs />);
-    expect(namaTab()).toEqual(["Mutasi & Arus Kas", "Akun Kas & Bank"]);
+    expect(namaTab()).toEqual(["Mutasi Kas", "Akun Kas & Bank"]);
   });
 
   it("tanpa izin keuangan tidak ada tab", () => {

@@ -137,7 +137,7 @@ test.describe("tutup akun kas bersaldo", () => {
           POLA_MUTASI.test(r.url()) &&
           new URL(r.url()).searchParams.get("akunKasID") === idAkun;
         await page.goto(URL_MUTASI);
-        await expect(page.getByRole("heading", { name: "Laporan Mutasi Arus Kas" })).toBeVisible();
+        await expect(page.getByRole("heading", { name: "Laporan Mutasi Kas" })).toBeVisible();
         const tMutasi = page.waitForResponse(mutasiAkun);
         const tRingkasan = page.waitForResponse(
           (r) => r.request().method() === "GET" && POLA_RINGKASAN.test(r.url()) && r.url().includes(idAkun),

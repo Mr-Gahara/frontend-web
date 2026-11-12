@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeftRight, LineChart, FileText, MonitorSmartphone, Package } from "lucide-react";
+import { ArrowLeftRight, LineChart, FileText, MonitorSmartphone, Package, Wallet } from "lucide-react";
 import { bolehBukaHalaman } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/useSession";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,15 @@ const tabs = [
     icon: LineChart,
   },
   {
-    label: "Mutasi & Arus Kas",
+    // Laporan arus kas (B291, desain D pemilik proyek 12 November 2026).
+    label: "Arus Kas",
+    href: "/dashboard/outlet/keuangan/arusKas",
+    icon: Wallet,
+  },
+  {
+    // Buku mutasi; nama tab dari "Mutasi & Arus Kas" agar tidak kembar dengan
+    // tab Arus Kas (pemilik proyek, 12 November 2026).
+    label: "Mutasi Kas",
     href: "/dashboard/outlet/keuangan/mutasiArusKas",
     icon: ArrowLeftRight,
   },

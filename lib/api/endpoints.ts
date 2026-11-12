@@ -206,5 +206,6 @@ export const EP = {
 
   laporan: {
     labaRugi: "/laporan/laba-rugi",
+    arusKas: "/laporan/arus-kas",
   },
 } as const;

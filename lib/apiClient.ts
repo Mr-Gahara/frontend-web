@@ -171,6 +171,7 @@ async function request<T>(
   options?: RequestInit,
   retry = true,
   explicitTokenType?: TokenType,
+  bacaSebagai: "json" | "berkas" = "json",
 ): Promise<T> {
   const { headers: extraHeaders, ...restOptions } = options || {};
 
@@ -195,7 +196,7 @@ async function request<T>(
     !endpoint.includes("/pengguna/pin-login")
   ) {
     const newToken = await refreshTerkoordinasi("pengguna", tryRefreshPenggunaToken);
-    if (newToken) return request<T>(endpoint, options, false, explicitTokenType);
+    if (newToken) return request<T>(endpoint, options, false, explicitTokenType, bacaSebagai);
     throw new ApiError(401, "Sesi pengguna telah berakhir.");
   }
 
@@ -209,7 +210,7 @@ async function request<T>(
     !endpoint.includes("/pengguna/pin-login")
   ) {
     const newToken = await refreshTerkoordinasi("akun", tryRefreshToken);
-    if (newToken) return request<T>(endpoint, options, false, explicitTokenType);
+    if (newToken) return request<T>(endpoint, options, false, explicitTokenType, bacaSebagai);
     throw new ApiError(401, "Sesi akun telah berakhir.");
   }
 
@@ -255,11 +256,39 @@ async function request<T>(
     throw new ApiError(res.status, pesan, daftarError, kode, rincian);
   }
 
+  // Unduhan laporan (CSV, Excel, PDF) dibaca sebagai berkas, bukan JSON.
+  if (bacaSebagai === "berkas") return res as T;
   return res.json() as Promise<T>;
+}
+
+/** Nama berkas dari Content-Disposition, atau cadangan bila tidak terbaca. */
+export function namaBerkasDari(header: string | null, cadangan: string): string {
+  const cocok = header?.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+  return cocok ? decodeURIComponent(cocok[1]) : cadangan;
+}
+
+/** Endpoint dengan query string; nilai kosong tidak dikirim, sama dengan apiClient.get. */
+function denganQuery(endpoint: string, params?: Record<string, unknown>): string {
+  if (!params) return endpoint;
+  const searchParams = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") searchParams.append(key, String(value));
+  });
+  const queryString = searchParams.toString();
+  return queryString ? endpoint + (endpoint.includes("?") ? "&" : "?") + queryString : endpoint;
 }
 
 export const apiClient = {
   // UPGRADE: Fungsi GET kini otomatis mengubah parameter object menjadi Query String URL
+  /**
+   * Mengunduh berkas lewat token yang sama dengan permintaan lain, termasuk
+   * refresh saat 401, karena tautan biasa tidak membawa header Authorization.
+   */
+  unduh: async (endpoint: string, params: Record<string, unknown>, cadangan: string, tokenType?: TokenType) => {
+    const res = await request<Response>(denganQuery(endpoint, params), { method: "GET" }, true, tokenType, "berkas");
+    return { berkas: await res.blob(), nama: namaBerkasDari(res.headers.get("Content-Disposition"), cadangan) };
+  },
+
   get: <T>(
     endpoint: string,
     params?: Record<string, unknown>,

@@ -87,7 +87,7 @@ async function bukaMutasi(page: Page, { masuk = true }: { masuk?: boolean } = {}
   expect(respons.status()).toBe(200);
   const mutasi = (await respons.json()) as ResponsMutasi;
   const akun = ((await (await tAkun).json()) as { data: AkunKasUji[] }).data;
-  await expect(page.getByRole("heading", { name: "Laporan Mutasi Arus Kas" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Laporan Mutasi Kas" })).toBeVisible();
   return { mutasi, akun, query: new URL(respons.url()).searchParams };
 }
 
