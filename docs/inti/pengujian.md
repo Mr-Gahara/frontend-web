@@ -547,6 +547,12 @@ dan jumlah permintaannya tidak boleh melampaui batas:
   (bertambah 3 dari skenario tanpa password titipan, 12 November 2026).
   Sesudahnya kedua spec itu dijalankan ulang paling banyak sekali dalam
   15 menit yang sama, tanpa `--repeat-each`.
+- Pengujian OTP dibatasi sesedikit mungkin, karena pemakaiannya terbatas
+  (pemilik proyek, 12 November 2026). Kedua spec itu, dan uji manual
+  yang meminta atau memeriksa kode, hanya dijalankan di suite penuh akhir
+  putaran, tidak sendirian untuk debug. Kegagalannya ditelusuri lewat
+  trace dan kode lebih dulu; pengulangan kedua dan seterusnya ditanyakan
+  ke pemilik proyek.
 - Bila perlu diulang lebih dari itu, tunggu 15 menit atau restart
   backend (hitungannya di memori proses).
 - 429 di kedua endpoint tidak dilewati `ALASAN_KUOTA`, sehingga tercatat
