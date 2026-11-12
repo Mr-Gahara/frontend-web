@@ -5,6 +5,8 @@ import Topbar from "@/components/topbar";
 vi.mock("@/components/ui/sidebar", () => ({ SidebarTrigger: () => null }));
 // Tombol panduan membaca sesi dan sidebar; tidak termasuk yang diuji di sini.
 vi.mock("@/components/panduan/panduan-dashboard", () => ({ TombolPanduanDashboard: () => null }));
+// Lonceng membaca sesi dan data langganan; diuji di unit test pengingat.
+vi.mock("@/features/notifikasi/lonceng-pemberitahuan", () => ({ LoncengPemberitahuan: () => null }));
 
 const OPSI = { weekday: "long", day: "numeric", month: "long", year: "numeric" } as const;
 const teks = (d: Date) => d.toLocaleDateString("id-ID", OPSI);

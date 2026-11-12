@@ -138,8 +138,8 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
    B206 menyusul penyambungan langkah jam buka, di atas; OTP reset PIN
    Owner dan ubah
    email atau password akun (B178 sampai B180); hapus akun oleh Owner
-   (B181); dan pengingat masa langganan yang hampir habis di luar
-   halaman Langganan.
+   (B181). Pengingat masa langganan selesai 12 November 2026 lewat
+   lonceng topbar (`modul/setup-akun.md`, TP8a).
 3. **Halaman arus kas** (B291, LR2a): selesai 12 November 2026, tab
    Keuangan "Arus Kas" dengan desain D pemilik proyek (`modul/keuangan.md`,
    LR3a sampai LR6a).

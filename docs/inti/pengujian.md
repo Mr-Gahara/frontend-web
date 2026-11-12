@@ -12,6 +12,16 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per lonceng pemberitahuan** (12 November 2026): vitest 1042
+lolos (4 unit test baru `tests/unit/features/langganan/pengingat.test.ts`).
+Spec terdampak: spec baru `dashboard/lonceng-pemberitahuan.spec.ts` (2
+skenario, desktop dan HP) bersama `dashboard/dashboard-outlet.spec.ts` 7
+lolos dan 1 skipped (skip bersyarat status staf), dan
+`dashboard/panduan-dashboard.spec.ts` 2 lolos setelah penanda topbarnya
+memakai lonceng baru. Skenario status staf tidak lagi memeriksa lonceng
+nonaktif. Harapan suite penuh 621: 619 ditambah dua skenario lonceng
+(hitungan); suite penuh menunggu izin pemilik proyek.
+
 **Baseline per logo toko** (12 November 2026): vitest 1038 lolos (3 unit
 test baru `tests/unit/features/tenant/logo.test.ts`). Spec terdampak 13
 lolos: spec baru `pengaturan/logo-toko.spec.ts` (5 skenario: unggah dan

@@ -376,6 +376,17 @@ dan token warna yang sudah ada.
   bawah `sm` riwayat tampil sebagai daftar, karena tabel yang digeser di
   HP tampak terpotong. Kalimat kanvas "kasir tidak bisa membuka shift"
   tidak dipakai, karena perilakunya belum dipastikan di backend.
+- **TP8a: pengingat masa langganan lewat lonceng topbar** (desain C,
+  pemilik proyek 12 November 2026). Lonceng yang tadinya nonaktif menjadi
+  pusat pemberitahuan (`features/notifikasi/lonceng-pemberitahuan.tsx`)
+  di semua halaman dashboard: titik karamel (hampir habis, mulai tujuh
+  hari sebelum akses berakhir) atau rose (masa tenggang sampai akun
+  dibekukan cron), dan klik membuka panel "Pemberitahuan" beranimasi
+  berisi judul, kalimat tanggal, bilah masa berlaku, dan "Lihat
+  langganan". Di HP panel selebar layar dikurangi tepi. Datanya
+  `GET /akun/langganan` sehingga hanya pemegang `read-langganan` yang
+  mendapat pengingat; pengguna lain dan keadaan tanpa pengingat melihat
+  "Belum ada pemberitahuan.". Logikanya `features/langganan/pengingat.ts`.
 
 ## Peta halaman web
 

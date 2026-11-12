@@ -151,7 +151,7 @@ test.describe("Dashboard outlet", () => {
     await expect(page.getByText(teks(sebelum), { exact: true })).toHaveCount(0);
   });
 
-  test("status staf memuat staf ruang outlet, dan lonceng nonaktif", async ({ page }) => {
+  test("status staf memuat staf ruang outlet", async ({ page }) => {
     await login(page);
     const jumlahStaf = await bukaDanBacaStaf(page);
     test.skip(jumlahStaf === 0, "tidak ada staf ruang outlet di monitoring absensi");
@@ -161,8 +161,6 @@ test.describe("Dashboard outlet", () => {
     // Satu baris kepala ditambah satu baris per staf; di lebar desktop tidak ada yang disembunyikan.
     await expect(staf.getByRole("row")).toHaveCount(jumlahStaf + 1);
     await expect(staf.getByRole("button", { name: /tampilkan semua/i })).toHaveCount(0);
-
-    await expect(page.getByRole("button", { name: "Notifikasi belum tersedia" })).toBeDisabled();
   });
 
   test("izin dan cuti staf disaring server: disetujui dan berlaku hari ini (B160)", async ({ page }) => {

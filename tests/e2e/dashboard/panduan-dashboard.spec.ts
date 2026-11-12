@@ -54,7 +54,8 @@ test.describe("Panduan dashboard", () => {
 
     await test.step("ruang gudang tidak punya tombol panduan dashboard", async () => {
       await page.goto("/dashboard/gudang");
-      await expect(page.getByRole("button", { name: "Notifikasi belum tersedia" })).toBeVisible({ timeout: 15_000 });
+      // Lonceng menandai topbar sudah termuat (aktif sejak desain C, 12 November 2026).
+      await expect(page.getByRole("button", { name: /^Pemberitahuan/ })).toBeVisible({ timeout: 15_000 });
       await expect(tombolPanduan(page)).toHaveCount(0);
       await expect(balon(page)).toHaveCount(0);
     });

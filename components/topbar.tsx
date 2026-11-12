@@ -1,10 +1,10 @@
 "use client";
 import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { useSudahHidrasi } from "@/hooks/use-sudah-hidrasi";
-import { Bell } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { TombolPanduanDashboard } from "@/components/panduan/panduan-dashboard";
 import { TARGET_MENU_UTAMA } from "@/components/panduan/titik-dashboard";
+import { LoncengPemberitahuan } from "@/features/notifikasi/lonceng-pemberitahuan";
 
 const OPSI_TANGGAL: Intl.DateTimeFormatOptions = {
   weekday: "long",
@@ -40,15 +40,7 @@ export default function Topbar() {
 
       <div className="flex items-center gap-2">
         <TombolPanduanDashboard />
-        <button
-          type="button"
-          disabled
-          aria-label="Notifikasi belum tersedia"
-          title="Notifikasi belum tersedia"
-          className="flex items-center justify-center p-2.5 bg-navy text-white rounded-lg border-none shadow-sm opacity-50 cursor-not-allowed"
-        >
-          <Bell size={20} />
-        </button>
+        <LoncengPemberitahuan />
       </div>
     </header>
   );
