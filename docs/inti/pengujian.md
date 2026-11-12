@@ -12,6 +12,15 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per tanggal filter HP** (12 November 2026): vitest 1059 lolos,
+tidak berubah. Spec baru `keuangan/tanggal-filter.spec.ts` (2 skenario, HP
+390 px dan desktop 1280 px, enam rute dengan jam dipatok 30 September 2026)
+lolos, dan gagal terhadap kode lama (HP: teks 182 px di tombol 141 px;
+desktop: 182 px di 174 px). Spec terdampak 32 lolos: `tanggal-filter`,
+`belanja-stok`, `mesin-kasir`, `inventaris/pembelianStok`, dan
+`inventaris/jurnalStok`. Harapan suite penuh 630: 628 ditambah dua skenario
+itu (hitungan); suite penuh menunggu izin pemilik proyek.
+
 **Baseline per tombol Catat pembelian** (12 November 2026): vitest 1059
 lolos (5 unit test baru
 `tests/unit/features/pembelian-stok/ruang-catat-belanja.test.ts`). Spec

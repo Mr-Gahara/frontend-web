@@ -265,6 +265,16 @@ desain yang disetujui (`e073a9d`):
   Suplai Gudang tidak tampil di Basic dan Advanced (pemilik proyek,
   12 November 2026).
 
+- **BS6a: isian tanggal filter tidak meluber** (pemilik proyek,
+  12 November 2026). Di HP "Dari" dan "Sampai" masing-masing selebar
+  layar dan bertumpuk seperti Arus Kas, dan sejak `sm` tombolnya 208 px
+  (`sm:w-52`, sebelumnya 176 px) agar "30 September 2026" muat dengan
+  padding utuh. Berlaku di lima laman yang terukur meluber: Belanja Stok,
+  Pembelian Stok outlet dan gudang, riwayat Mesin Kasir, dan Jurnal Stok
+  (Mesin Kasir tetap selebar penuhnya sendiri). Format tanggal tidak
+  berubah. Di ruang gudang lima filter Pembelian Stok tetap turun ke baris
+  kedua di 1280 px, seperti sebelumnya.
+
 ### Tampilan HP tab Keuangan
 
 Diputuskan pemilik proyek pada 6 November 2026, dari pratinjau Revisi 1
@@ -736,9 +746,8 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
 
 ### Utang kecil dari tombol Catat pembelian
 
-- Di lebar HP 390 px isian tanggal filter Belanja Stok ("Pembelian dari"
-  dan "Pembelian sampai") memotong atau melewati kotaknya; terlihat
-  12 November 2026, sudah ada sebelum BS4a.
+- Isian tanggal filter Belanja Stok yang meluber di HP lunas 12 November
+  2026 (BS6a, di bawah).
 - Menu tunggal Pembelian Stok hanya aktif di sidebar pada daftarnya, tidak
   di detail dan form catat, seperti menu tunggal lain (`isActive` cocok
   persis).

@@ -251,7 +251,7 @@ export default function HalamanDaftarPembelianStok({
             nonaktif={nonaktif}
           />
         )}
-        <div className="flex flex-col gap-1">
+        <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
           <span className={KELAS_LABEL_FILTER}>Pembelian dari</span>
           <PilihTanggal
             label="Pembelian dari"
@@ -259,10 +259,10 @@ export default function HalamanDaftarPembelianStok({
             onChange={(dari) => setFilter((f) => ({ ...f, dari }))}
             tanggalNonaktif={filter.sampai ? { after: filter.sampai } : undefined}
             disabled={nonaktif}
-            className="h-10 w-full sm:w-44"
+            className="h-10 w-full sm:w-52"
           />
         </div>
-        <div className="flex flex-col gap-1">
+        <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
           <span className={KELAS_LABEL_FILTER}>Pembelian sampai</span>
           <PilihTanggal
             label="Pembelian sampai"
@@ -270,7 +270,7 @@ export default function HalamanDaftarPembelianStok({
             onChange={(sampai) => setFilter((f) => ({ ...f, sampai }))}
             tanggalNonaktif={filter.dari ? { before: filter.dari } : undefined}
             disabled={nonaktif}
-            className="h-10 w-full sm:w-44"
+            className="h-10 w-full sm:w-52"
           />
         </div>
         <Button

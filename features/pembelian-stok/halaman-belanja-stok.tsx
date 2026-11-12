@@ -341,24 +341,24 @@ export function HalamanBelanjaStok() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 border-b border-navy/10 pb-4 sm:flex sm:flex-wrap sm:items-end">
-          <div className="flex flex-col gap-1">
+          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
             <span className={KELAS_LABEL_FILTER}>Pembelian dari</span>
             <PilihTanggal
               label="Pembelian dari"
               value={filter.dari}
               onChange={(dari) => setFilter((f) => ({ ...f, dari }))}
               tanggalNonaktif={filter.sampai ? { after: filter.sampai } : undefined}
-              className="h-10 w-full sm:w-44"
+              className="h-10 w-full sm:w-52"
             />
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
             <span className={KELAS_LABEL_FILTER}>Pembelian sampai</span>
             <PilihTanggal
               label="Pembelian sampai"
               value={filter.sampai}
               onChange={(sampai) => setFilter((f) => ({ ...f, sampai }))}
               tanggalNonaktif={filter.dari ? { before: filter.dari } : undefined}
-              className="h-10 w-full sm:w-44"
+              className="h-10 w-full sm:w-52"
             />
           </div>
           <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">

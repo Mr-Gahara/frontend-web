@@ -55,7 +55,7 @@ export function FilterRiwayat({
           </Select>
         </div>
       )}
-      <div className="flex min-w-0 flex-col gap-1">
+      <div className="col-span-2 flex min-w-0 flex-col gap-1 sm:col-span-1">
         <span className={KELAS_LABEL}>Dibuka dari</span>
         <PilihTanggal
           label="Dibuka dari"
@@ -65,7 +65,7 @@ export function FilterRiwayat({
           className="w-full"
         />
       </div>
-      <div className="flex min-w-0 flex-col gap-1">
+      <div className="col-span-2 flex min-w-0 flex-col gap-1 sm:col-span-1">
         <span className={KELAS_LABEL}>Dibuka sampai</span>
         <PilihTanggal
           label="Dibuka sampai"
