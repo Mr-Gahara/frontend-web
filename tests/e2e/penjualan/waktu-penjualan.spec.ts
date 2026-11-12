@@ -43,6 +43,10 @@ async function kirimDanBacaWaktu(page: Page) {
 }
 
 const URL_DAFTAR = "/dashboard/outlet/penjualan";
+
+// Kegagalan di bawah page.clock sulit dipicu ulang; trace disimpan agar
+// kegagalan di suite penuh dapat dibaca (12 November 2026).
+test.use({ trace: "retain-on-failure" });
 const POLA_POST = /\/api\/penjualan(\?|$)/i;
 
 test.describe("E2E — Penjualan › Tanggal dan jam transaksi", () => {

@@ -203,6 +203,23 @@ export async function hapusDraft(page: Page, auth: Auth, id: string) {
 }
 
 /** Mengisi pelanggan, produk uji, jumlah, dan keterangan di halaman buat penjualan, tanpa mengirim. */
+/**
+ * Menunggu popover pemilih benar-benar lepas dan fokus kembali ke tombol
+ * pemicunya. Radix mengembalikan fokus lewat setTimeout saat popover
+ * dilepas; di bawah page.clock pewaktu itu dapat berjalan setelah popover
+ * berikutnya dibuka, sehingga popover itu menutup karena fokus pindah ke
+ * luar dan opsinya terlepas dari DOM (suite penuh 5 dan 12 November 2026,
+ * waktu-penjualan).
+ */
+async function tungguPopoverLepas(page: Page, placeholderCari: string) {
+  await expect(page.getByPlaceholder(placeholderCari)).toBeHidden();
+  await expect
+    .poll(() => page.evaluate(() => document.activeElement?.getAttribute("role")), {
+      message: "fokus kembali ke tombol pemilih",
+    })
+    .toBe("combobox");
+}
+
 export async function isiIsianPenjualan(page: Page, jumlah: number) {
   await page.goto(BASIS + "/dashboard/outlet/penjualan/buatPenjualan");
   await expect(page.getByRole("heading", { name: /buat penjualan/i })).toBeVisible();
@@ -210,10 +227,12 @@ export async function isiIsianPenjualan(page: Page, jumlah: number) {
   await page.getByRole("combobox").filter({ hasText: /pilih pelanggan/i }).click();
   await page.getByPlaceholder("Cari pelanggan...").fill("a");
   await page.getByRole("option").first().click();
+  await tungguPopoverLepas(page, "Cari pelanggan...");
 
   await page.getByRole("combobox").filter({ hasText: /pilih produk/i }).click();
   await page.getByPlaceholder("Cari produk...").fill(NAMA_PRODUK);
   await page.getByRole("option", { name: new RegExp(NAMA_PRODUK) }).first().click();
+  await tungguPopoverLepas(page, "Cari produk...");
 
   const inputJumlah = page.getByLabel(/jumlah/i).first();
   await inputJumlah.clear();

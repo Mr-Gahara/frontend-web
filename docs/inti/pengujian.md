@@ -19,8 +19,15 @@ tanpa skip, sesuai harapan hitungan 632. Kedua kegagalan adalah skenario
 jam di `penjualan/waktu-penjualan.spec.ts` (`page.clock`): pilihan produk
 terus terlepas dari DOM saat diklik. Bukan regresi VD3a: spec itu lolos
 4 dari 4 sendirian, folder `penjualan` 31 dari 31, dan saat diulang gagal
-1 dari 84 run; trace tidak tertangkap, sehingga dicatat sebagai utang
-(`referensi/utang-pengujian.md`). Spec baru `stok-keluar` lolos. Vitest
+1 dari 84 run. Penyebabnya kemudian terbukti: pengembalian fokus Radix
+lewat `setTimeout` yang dipalsukan `page.clock` menutup popover produk
+(Urutan debug kegagalan e2e). Run ulang folder `penjualan` juga
+menemukan race login ulang di `daftar-penjualan` RG4a (pemulihan sesi
+Ridho menyalip login pengguna uji). Keduanya diperbaiki di helper uji dan
+dibuktikan dengan spec sementara yang memicunya secara pasti (gagal
+terhadap urutan lama, lolos terhadap yang baru). Spec terdampak: folder
+`penjualan` 31 lolos, `waktu-penjualan` 20 dari 20 dengan
+`--repeat-each 5`, dan ke-17 spec pemakai `masukSebagai` 117 lolos. Vitest
 1068 lolos. Harapan suite penuh sesudahnya 632 lolos, ditambah skip
 status staf bila datanya kosong (hitungan).
 
@@ -605,6 +612,8 @@ Pola kegagalan yang berulang:
 | Lolos sendirian, gagal saat dijalankan bersama spec lain | Test memilih baris pertama daftar, padahal spec yang berjalan lebih dulu membuat data dari jenis lain (berurutan menurut nama berkas, `workers: 1`). Pilih baris menurut data yang memenuhi syarat, lewat nomornya (`7f1de56`) |
 | Pengguna uji terbatas berakhir di Profil Pengguna, dan permintaan halaman tujuan tidak pernah terkirim | `/dashboard` mengalihkan sendiri menurut izin (`app/dashboard/page.tsx`) dan dapat menyalip `goto` berikutnya; layout ruang outlet dan gudang menuntut `read-dashboard-outlet` dan `read-dashboard-gudang`. Helper peran uji menunggu URL meninggalkan `/dashboard`, dan peran uji memegang izin dashboard ruang yang dibukanya (`4601d91`) |
 | `page.goto` `net::ERR_ABORTED` tepat setelah spec memasang `page.route` 403 | Halaman sebelumnya masih memuat permintaan susulan (panel dashboard) yang ikut dijawab 403 dan mengalihkan ke /login. Pasang route setelah halaman tujuan termuat, lalu `reload({ waitUntil: "commit" })` (suite penuh 8 November 2026) |
+| Opsi popover terlepas dari DOM sekali lalu tidak kembali, hanya di spec ber-`page.clock` | Radix mengembalikan fokus ke pemicu popover sebelumnya lewat `setTimeout`, yang dipalsukan `page.clock`; bila berjalan setelah popover berikutnya dibuka, popover itu menutup. Tunggu popover lepas dan fokus kembali sebelum membuka popover berikutnya (`tungguPopoverLepas` di `tests/helpers/penjualan-uji.ts`). Dibuktikan dengan `page.clock.pauseAt` lalu `runFor`, bukan dengan angka flaky (suite penuh 12 November 2026) |
+| Isian PIN terlepas dari DOM saat login ulang sebagai pengguna lain di tab yang sama, lalu halaman sampai di dashboard tanpa `pin-login` | `/login` memulihkan sesi lama lewat cookie (`refreshtoken`, `pin-refresh`) bersamaan dengan login baru, dan halaman login pengguna mengalihkan begitu sesi lama pulih. Buang cookie (`about:blank`, `clearCookies`) sebelum login ulang (`masukSebagai`). Dibuktikan dengan menahan `pin-refresh` sampai URL `/login/pengguna` (suite 12 November 2026, RG4a) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

@@ -172,6 +172,14 @@ async function masukSebagai(page: Page, peranUji: PeranUji) {
   const auth = await bukaDenganAuth(page, BASIS + "/dashboard");
   const idPeran = await pastikanPeran(page, auth, peranUji);
   await pastikanPengguna(page, auth, peranUji, idPeran);
+  // Cookie sesi Ridho dibuang dulu: tanpa itu /login memulihkan sesi Ridho
+  // (refreshtoken lalu pin-refresh) bersamaan dengan login akun di bawah, dan
+  // bila pin-refresh selesai belakangan, login pengguna mengalihkan ke
+  // dashboard sebagai Ridho sehingga isian PIN terlepas dari DOM (suite
+  // 12 November 2026, daftar-penjualan RG4a). localStorage tetap, karena
+  // penanda tur dari storageState ada di sana.
+  await page.goto("about:blank");
+  await page.context().clearCookies();
   await loginSebagai(page, peranUji.nama, peranUji.pin);
   // /dashboard mengalihkan sendiri menurut izin (app/dashboard/page.tsx); tanpa
   // menunggu, pengalihan ke /dashboard/profil dapat menyalip goto spec berikutnya.

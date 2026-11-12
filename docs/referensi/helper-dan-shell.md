@@ -618,6 +618,14 @@ dan properti di dalam `return {` berindentasi 4 spasi, bukan 6
 
 ## Catatan shell (zsh)
 
+- **Variabel berisi daftar berkas tidak dipecah zsh.** `F=$(grep -rl ...)`
+  lalu `npx playwright test $F` mengirim satu argumen panjang, dan
+  Playwright menjawab `No tests found` (`--list` memberi `Total: 0 tests`),
+  sementara `grep "passed"` di ujung pipa tidak mencetak apa pun sehingga
+  run tampak berhasil. Kirim daftarnya lewat `xargs`
+  (`grep -rl ... | xargs npx playwright test`) atau `${=F}`, dan periksa
+  jumlah test lewat `--list` atau statistik reporter `json` sebelum hasilnya
+  dipakai sebagai bukti (12 November 2026, spec terdampak `masukSebagai`).
 - Tanda `!` di dalam kutip tunggal (`node -e '...'`) dan di heredoc
   berdelimiter kutip (`<<'EOF'`) terbukti aman: skrip modul produk yang
   memuat `!==` berjalan normal. Di luar dua bentuk itu, jalankan

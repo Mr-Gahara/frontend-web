@@ -10,17 +10,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 
 ## Utang pengujian
 
-- **Kedua skenario jam di `penjualan/waktu-penjualan.spec.ts` flaky**
-  (`page.clock` terpasang): klik pilihan "E2E Penjualan Produk" di
-  combobox produk habis waktu karena elemennya berulang kali terlepas dari
-  DOM. Terjadi di suite penuh 5 November 2026 (satu skenario) dan
-  12 November 2026 (keduanya). Saat diulang sendirian gagal 1 dari 84 run,
-  dan trace kegagalannya tidak tertangkap (konfigurasi tidak menyimpan
-  trace). Folder `penjualan` utuh lolos 31 dari 31. Dugaan yang belum
-  terbukti: `cmdk` menyusun ulang opsi saat daftar produk dirender ulang
-  selama jam dipalsukan. Langkah berikutnya: jalankan spec ini dengan
-  `--trace retain-on-failure` di suite penuh berikutnya, lalu baca trace.
-
 - **Reset PIN Owner belum punya spec**, karena web belum memakai OTP
   reset PIN Owner (B178, belum dijadwalkan); rencana ujinya di
   `modul/setup-akun.md`, Pengujian OTP.
