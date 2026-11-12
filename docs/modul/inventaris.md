@@ -79,6 +79,19 @@ Diputuskan pemilik proyek pada 21 Oktober 2026 (penyesuaian backend
   `read-jurnal-stok`, karena halamannya mencari lokasi gudang
   (`029413d`).
 
+Diputuskan pemilik proyek pada 12 November 2026 (penyesuaian backend
+`ridho` lokal `d6709a1`, P78, B319):
+
+- **JS1a: filter alasan menerima "Pembelian" dan "Penjualan"**, dan
+  badge keduanya berwarna sendiri: Penjualan karamel, Pembelian sage
+  (teks navy, karena karamel di latar muda kurang kontras). Jurnal
+  penjualan lama tetap "Lainnya".
+- **JS2a: rincian jurnal beralasan Penjualan bertaut ke detail
+  penjualannya** ("Lihat penjualan <noReferensi>", seperti NZ2a). Nomor
+  dibaca dari keterangan bawaan backend karena `penjualanID` tidak
+  di-populate; keterangan yang diubah jatuh ke "Lihat penjualan", dan
+  tautan disembunyikan bila detail penjualan ditolak izinnya.
+
 ### Submodul stok dan inventaris gudang
 
 - **Gagal mengubah batas minimum atau opname di gudang kini menampilkan
@@ -660,6 +673,11 @@ Yang masih berlaku:
   butir 28).
 
 ## Utang terbuka
+
+### Utang kecil dari penyesuaian backend `d6709a1`
+
+- Pemicu filter arah jurnal stok terpotong menjadi "Semua ." di 1280 px
+  (terlihat 12 November 2026, sudah ada sebelum JS1a).
 
 ### Utang kecil dari pembelian stok
 

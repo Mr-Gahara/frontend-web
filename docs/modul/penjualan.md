@@ -84,6 +84,9 @@ keputusan rancangan butir 17.
   `docs/pengembangan/klien.md` backend `aeb6a52` untuk Nizar dan Yoga.
 - **VD3a: tampilan stok keluar di detail penjualan menunggu desain
   pemilik proyek**, dikerjakan setelah backend mengirim rinciannya.
+  Backend `d6709a1` mengirimnya sebagai `rincianStok` (P78, B320);
+  dikerjakan sebagai pekerjaan UI berikutnya lewat kanvas (pemilik proyek,
+  12 November 2026).
 
 - **BP1a: kolom kanan buat penjualan berhenti di atas baris aksi**
   (pemilik proyek, 12 November 2026). Di lebar `lg` ke atas kolom kanan

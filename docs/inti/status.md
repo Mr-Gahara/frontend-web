@@ -29,6 +29,14 @@ setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 
 ## Pekerjaan berikutnya
 
+Keadaan per 12 November 2026: backend lokal `ridho` `d6709a1`,
+di-fast-forward ke `yoga` (6 commit di atas `f110c04`: P78 dan P79,
+B319 sampai B323) tanpa di-push. Penyesuaiannya filter dan badge alasan
+jurnal Pembelian dan Penjualan (JS1a), tautan rincian jurnal ke
+penjualan (JS2a), serta helper spec jurnal penjualan lewat
+`?penjualanID=`; VD3a menjadi pekerjaan UI berikutnya dan paginasi
+server menunggu backend (`referensi/keputusan-penyesuaian-backend.md`).
+
 Keadaan per 10 November 2026: backend lokal `ridho` `0bbd261`,
 di-fast-forward ke `yoga` (8 commit di atas `origin/ridho` `0e43a6d`,
 yang maju 18 commit di atas `e9112a8`: P68 sampai P77, AR30 sampai AR34,
@@ -137,10 +145,13 @@ dengan alur kanvas desain seperti butir di bawah:
 3. **Belanja Stok untuk plan Basic**: selesai 12 November 2026, tombol
    Catat pembelian dan Pembelian Stok sebagai menu tunggal
    (`modul/keuangan.md`, BS4a dan BS5a).
-4. **Penyesuaian backend `yoga` `d6709a1`** (6 commit di atas `ridho`
-   lokal `f110c04`: P78 rincian stok per penjualan yang menutup butir
-   181, dan P79 paginasi opt-in produk, inventory, dan bahan baku):
-   dikerjakan sesudah butir 1 sampai 3 (pemilik proyek, 12 November 2026).
+4. **Penyesuaian backend `yoga` `d6709a1`**: selesai 12 November 2026
+   (`referensi/keputusan-penyesuaian-backend.md`).
+5. **Stok keluar di detail penjualan (VD3a)**: berikutnya, lewat kanvas
+   desain (pemilik proyek, 12 November 2026).
+6. **Paginasi server produk, bahan baku, dan inventory**: menunggu
+   padanan filter dari backend (`kontrak/temuan.md` butir 184), lalu
+   dipindah per daftar bersama filternya.
 
 ### Menunggu desain pemilik proyek
 
@@ -166,8 +177,8 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
    backend lebih dulu (`kontrak/temuan.md` butir 180), lalu didesain
    pemilik proyek.
 5. **Stok keluar di detail penjualan, termasuk yang VOID** (VD3a):
-   menunggu backend mencatat rinciannya (`kontrak/temuan.md` butir 181),
-   lalu didesain pemilik proyek.
+   data tersedia sejak backend `d6709a1` (`rincianStok`, B320);
+   pekerjaan UI berikutnya, di atas.
 6. **Modul membership web** (paket dan pendaftaran member), syarat
    menawarkan diskon khusus member (NZ6a, `modul/pelanggan-diskon.md`).
 

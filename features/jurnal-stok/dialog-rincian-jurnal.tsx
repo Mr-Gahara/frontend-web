@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import { ArrowDownLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 
 import {
   Dialog,
@@ -9,8 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { bolehBukaRute } from "@/lib/auth/permissions";
+import { useSession } from "@/lib/auth/useSession";
 import type { JurnalStok } from "@/types/jurnalStok";
-import { formatWaktuJurnal, teksJumlahJurnal } from "./tampilan";
+import { formatWaktuJurnal, tautanPenjualanJurnal, teksJumlahJurnal } from "./tampilan";
 
 const KELAS_LABEL = "text-xs font-semibold text-navy/60";
 
@@ -28,6 +31,11 @@ function IsiRincian({ jurnal }: { jurnal: JurnalStok }) {
   const Ikon = masuk ? ArrowDownLeft : ArrowUpRight;
   const waktu = formatWaktuJurnal(jurnal.tanggal);
   const lokasi = jurnal.locationID?.nama || "Lokasi Tidak Diketahui";
+  const { permissions } = useSession();
+  // Tautan disembunyikan bila detail penjualan ditolak izinnya (keputusan
+  // rancangan butir 14).
+  const tautanMentah = tautanPenjualanJurnal(jurnal);
+  const tautan = tautanMentah && bolehBukaRute(tautanMentah.url, permissions) ? tautanMentah : null;
   return (
     <>
       <DialogHeader className="flex-row items-center gap-3 pr-8 text-left">
@@ -72,6 +80,19 @@ function IsiRincian({ jurnal }: { jurnal: JurnalStok }) {
           {jurnal.keterangan || "-"}
         </p>
       </div>
+
+      {tautan && (
+        <div className="flex flex-col gap-1.5">
+          <p className={KELAS_LABEL}>Penjualan terkait</p>
+          <Link
+            href={tautan.url}
+            className="flex items-center justify-between gap-3 rounded-xl bg-navy px-4 py-3 text-sm font-bold text-gading hover:bg-navy/90"
+          >
+            <span className="min-w-0 truncate">{tautan.teks}</span>
+            <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+          </Link>
+        </div>
+      )}
     </>
   );
 }

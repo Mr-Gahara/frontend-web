@@ -882,3 +882,42 @@ di-push. `nizar` tidak maju.
   `PUT /absensi` maupun `DELETE /akun/profil`), B316 (kasir), dan B317
   serta B318 (pengguna uji tanpa lokasi kerja). Payload API di helper
   uji (bahan, kategori, izin cuti) juga dalam daftar field.
+
+## Penyesuaian backend `ridho` lokal `d6709a1`
+
+Diminta pemilik proyek pada 12 November 2026: `yoga` maju enam commit
+tepat di atas `ridho` `f110c04` ke `d6709a1` (P78 stok keluar per
+penjualan, menutup butir 181; P79 paginasi opt-in produk, inventory,
+dan bahan baku; B319 sampai B323), sehingga `ridho` lokal di-fast-forward
+tanpa gabungan dan tanpa di-push. `nizar` dan `ridho` remote tidak maju.
+
+- **Langkah sesudah tarik**: seed dan skrip migrasi tidak berubah
+  (`git diff f110c04..d6709a1 -- seeds scripts package.json` kosong).
+  Skema jurnal stok menambah index parsial `{ tenantID, penjualanID }`,
+  sehingga cukup `npm run db:indeks`, dijalankan pemilik proyek lewat
+  perintah `!`.
+- **Keputusan pemilik proyek**:
+  - **JS1a**: filter alasan jurnal stok menerima Pembelian dan
+    Penjualan, dengan badge karamel (Penjualan) dan sage (Pembelian)
+    (`modul/inventaris.md`).
+  - **JS2a**: rincian jurnal beralasan Penjualan bertaut ke detail
+    penjualannya (`modul/inventaris.md`).
+  - **VD3a**: tampilan `rincianStok` di detail penjualan menjadi
+    pekerjaan UI berikutnya lewat kanvas (`modul/penjualan.md`).
+  - **Paginasi P79**: diperiksa lalu direncanakan. Belum ada daftar yang
+    dapat dipindah tanpa melanggar keputusan rancangan butir 27; padanan
+    filternya diminta ke backend (`kontrak/temuan.md` butir 184).
+- **Diubah di web**: tipe `AlasanJurnal` ditambah `Pembelian` dan
+  `Penjualan`, `JurnalStok.penjualanID`, filter dan badge (JS1a), tautan
+  rincian (JS2a, `tautanPenjualanJurnal` di `features/jurnal-stok/tampilan.ts`),
+  dan helper `jurnalPenjualan` di `tests/helpers/penjualan-uji.ts`, yang
+  tadinya mencocokkan keterangan `Penjualan <produk> x<jumlah>` dan
+  menemukan 0 jurnal terhadap backend baru; kini lewat `?penjualanID=`.
+- **Dibuktikan dari respons nyata**: B319 (alasan, `penjualanID`,
+  keterangan bernomor referensi) dan B320 (`rincianStok` bahan resep
+  dalam satuan bahan di outlet tenant) lewat
+  `penjualan/alur-penjualan.spec.ts`.
+- **Tidak mengubah web**: B321 sampai B323 (web tidak mengirim `page`
+  maupun `limit` ke `/produk`, `/inventory`, dan `/bahanbaku`, sehingga
+  daftar tetap utuh), dan potong stok sekaligus (P78 butir 3; temuan 178
+  belum diuji ulang).

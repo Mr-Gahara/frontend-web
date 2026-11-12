@@ -161,6 +161,18 @@ test.describe("Jurnal stok", () => {
     await periksaHalaman(page, halaman);
   });
 
+  test("outlet: filter alasan Pembelian dan Penjualan dikirim ke server (B319)", async ({ page }) => {
+    await bukaJurnal(page, URL_OUTLET);
+    for (const alasan of ["Pembelian", "Penjualan"]) {
+      const t = tungguJurnal(page, (q) => q.get("alasan") === alasan && q.get("page") === "1");
+      await page.getByRole("combobox", { name: "Filter alasan" }).click();
+      await page.getByRole("option", { name: alasan, exact: true }).click();
+      const halaman = await bacaHalaman(await t);
+      expect(halaman.data.every((j) => j.alasan === alasan), `seluruh baris beralasan ${alasan}`).toBe(true);
+      await periksaHalaman(page, halaman);
+    }
+  });
+
   test("outlet: pencarian nama bahan dikirim ke server dan dikosongkan Reset Filter (B108)", async ({ page }) => {
     const awal = await bukaJurnal(page, URL_OUTLET);
     const kata = awal.data.map(namaBahan).find(Boolean);

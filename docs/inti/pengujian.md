@@ -12,6 +12,19 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per backend `ridho` lokal `d6709a1`** (12 November 2026):
+vitest 1062 lolos (3 unit test baru
+`tests/unit/features/jurnal-stok/tautan-penjualan.test.ts`). Spec terdampak
+96 lolos tanpa skip terhadap backend baru: `tests/e2e/penjualan`,
+`inventaris/jurnalStok`, `inventaris/pembelianStok`, `inventaris/stok`,
+`inventaris/produk`, dan `inventaris/bahanBaku`. Skenario jurnal penjualan
+di `alur-penjualan.spec.ts` kini lewat `?penjualanID=` dan membuktikan
+B319, B320, serta tautan rincian (JS2a); helper lama menemukan 0 jurnal
+terhadap backend baru. Skenario baru filter alasan Pembelian dan
+Penjualan di `lihat-jurnal-stok.spec.ts`. Harapan suite penuh 631: 630
+ditambah satu skenario itu (hitungan); suite penuh menunggu izin pemilik
+proyek.
+
 **Baseline per tanggal filter HP** (12 November 2026): vitest 1059 lolos,
 tidak berubah. Spec baru `keuangan/tanggal-filter.spec.ts` (2 skenario, HP
 390 px dan desktop 1280 px, enam rute dengan jam dipatok 30 September 2026)

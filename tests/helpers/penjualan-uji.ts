@@ -25,6 +25,14 @@ export type Fixture = {
 export type PenjualanUji = {
   id: string;
   noReferensi: string;
+  /** Stok yang dipotong saat disimpan (backend P78, B320); [] untuk DRAFT. */
+  rincianStok?: {
+    jenis: "PRODUK" | "BAHAN";
+    produkID: string | null;
+    bahanBakuID: string | null;
+    jumlah: number;
+    locationID: string | null;
+  }[];
   statusPenjualan: string;
   statusBayar: string;
   totalTagihan: number;
@@ -54,6 +62,8 @@ type Jurnal = {
   jumlah: number;
   tipeKoreksi: string;
   keterangan: string;
+  alasan: string;
+  penjualanID?: string | null;
   createdAt: string;
   bahanBakuID: { id: string } | null;
   locationID: { id: string } | null;
@@ -167,11 +177,17 @@ export async function siapkanFixture(page: Page, auth: Auth, stokAwal: number): 
   return fx;
 }
 
-/** Jurnal stok bahan uji dengan keterangan penjualan produk uji sejumlah itu. */
-export async function jurnalPenjualan(page: Page, auth: Auth, fx: Fixture, jumlahJual: number) {
-  const semua = wajib(await api<Jurnal[]>(page, auth, "GET", "/jurnalstok"), "GET /jurnalstok");
-  const keterangan = `Penjualan ${NAMA_PRODUK} x${jumlahJual}`;
-  return semua.filter((j) => j.bahanBakuID?.id === fx.bahanId && j.keterangan === keterangan);
+/**
+ * Jurnal stok bahan uji milik satu penjualan, lewat filter `?penjualanID=`
+ * (backend P78, B319): jurnal penjualan beralasan `Penjualan`, membawa
+ * `penjualanID`, dan berketerangan `Penjualan <noReferensi>: <produk> x<jumlah>`.
+ */
+export async function jurnalPenjualan(page: Page, auth: Auth, fx: Fixture, penjualanID: string) {
+  const semua = wajib(
+    await api<Jurnal[]>(page, auth, "GET", `/jurnalstok?penjualanID=${encodeURIComponent(penjualanID)}`),
+    "GET /jurnalstok?penjualanID=",
+  );
+  return semua.filter((j) => j.bahanBakuID?.id === fx.bahanId);
 }
 
 export async function detailPenjualan(page: Page, auth: Auth, id: string): Promise<PenjualanUji> {

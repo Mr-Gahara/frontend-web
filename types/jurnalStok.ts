@@ -1,5 +1,16 @@
 export type TipeKoreksi = "Masuk" | "Keluar";
-export type AlasanJurnal = "Stok Opname" | "Rusak/Hilang" | "Transfer Gudang" | "Lainnya";
+/**
+ * Alasan jurnal dari enum backend. "Pembelian" dari pembelian stok, dan
+ * "Penjualan" dari penjualan sejak backend P78 (B319); jurnal penjualan lama
+ * tetap "Lainnya".
+ */
+export type AlasanJurnal =
+  | "Stok Opname"
+  | "Rusak/Hilang"
+  | "Transfer Gudang"
+  | "Lainnya"
+  | "Pembelian"
+  | "Penjualan";
 
 /**
  * Bentuk respons GET /jurnalstok setelah dinormalkan lib/api/client.ts.
@@ -16,6 +27,8 @@ export interface JurnalStok {
   keterangan?: string | null;
   dicatatOleh: { id: string; nama: string } | null;
   locationID: { id: string; nama: string; tipe: string } | null;
+  /** Id penjualan pemotong stok (B319), tanpa populate; jurnal lain dan jurnal lama tanpa field ini. */
+  penjualanID?: string | null;
   tenantID: string;
   createdAt: string;
   updatedAt: string;

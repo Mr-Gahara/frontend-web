@@ -3,6 +3,8 @@ import { normalizeId } from "@/lib/api/normalize";
 import { BASIS, JAWAB_GAGAL, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { NAMA_DISKON_GLOBAL, NAMA_DISKON_ITEM, siapkanDiskonUji } from "../../helpers/reservasi-uji";
 import {
+  NAMA_BAHAN,
+  NAMA_PRODUK,
   TAKARAN,
   batalkanPenjualanUji,
   bayarLewatApi,
@@ -146,17 +148,45 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       const auth = await bukaDenganAuth(page, DAFTAR);
       const JUMLAH = 3;
       const fx = await siapkanFixture(page, auth, 20);
-      const jurnalAwal = (await jurnalPenjualan(page, auth, fx, JUMLAH)).length;
       const penjualan = await buatDraftLewatUi(page, JUMLAH);
+      expect(await jurnalPenjualan(page, auth, fx, penjualan.id), "draft belum punya jurnal").toHaveLength(0);
       const res = await finalisasiLewatDetail(page, penjualan.id);
       expect(res.status(), `PUT finalisasi: ${(await res.text()).slice(0, 200)}`).toBe(200);
 
-      const jurnal = await jurnalPenjualan(page, auth, fx, JUMLAH);
-      expect(jurnal.length - jurnalAwal, "jurnal Keluar bertambah tepat satu").toBe(1);
-      const terbaru = [...jurnal].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
-      expect(terbaru.tipeKoreksi).toBe("Keluar");
-      expect(terbaru.jumlah).toBe(JUMLAH * TAKARAN);
-      expect(terbaru.locationID?.id).toBe(fx.outletId);
+      // Jurnal penjualan bertaut ke penjualannya (backend P78, B319).
+      const jurnal = await jurnalPenjualan(page, auth, fx, penjualan.id);
+      expect(jurnal, "tepat satu jurnal bahan uji untuk penjualan ini").toHaveLength(1);
+      const [satu] = jurnal;
+      expect(satu.tipeKoreksi).toBe("Keluar");
+      expect(satu.alasan).toBe("Penjualan");
+      expect(satu.penjualanID).toBe(penjualan.id);
+      expect(satu.keterangan).toBe(`Penjualan ${penjualan.noReferensi}: ${NAMA_PRODUK} x${JUMLAH}`);
+      expect(satu.jumlah).toBe(JUMLAH * TAKARAN);
+      expect(satu.locationID?.id).toBe(fx.outletId);
+
+      // Rincian stok tersimpan di penjualan (B320): bahan resep dalam satuan
+      // bahan, di outlet tenant.
+      const detail = await detailPenjualan(page, auth, penjualan.id);
+      const bahan = (detail.rincianStok ?? []).filter((x) => x.jenis === "BAHAN" && x.bahanBakuID === fx.bahanId);
+      expect(bahan, "rincianStok memuat bahan uji").toHaveLength(1);
+      expect(bahan[0]).toMatchObject({ produkID: fx.produkId, jumlah: JUMLAH * TAKARAN, locationID: fx.outletId });
+
+      // Rincian jurnal bertaut ke penjualannya (pemilik proyek, 12 November 2026).
+      await page.goto(BASIS + "/dashboard/outlet/inventaris/jurnalStok");
+      const tCari = page.waitForResponse(
+        (r) => /\/api\/jurnalstok\?/.test(r.url()) && new URL(r.url()).searchParams.get("cari") === NAMA_BAHAN,
+      );
+      await page.getByLabel("Cari bahan").fill(NAMA_BAHAN);
+      await tCari;
+      // Server mengurutkan terbaru lebih dulu: baris pertama jurnal penjualan ini.
+      const baris = page.locator("tbody tr").first();
+      await expect(baris).toContainText("Penjualan");
+      await baris.getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: "Lihat detail" }).click();
+      const tautan = page.getByRole("dialog").getByRole("link", { name: `Lihat penjualan ${penjualan.noReferensi}` });
+      await expect(tautan).toBeVisible();
+      await tautan.click();
+      await page.waitForURL("**/dashboard/outlet/penjualan/" + penjualan.id);
     },
   );
 
@@ -169,10 +199,9 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       const penjualan = await buatDraftLewatUi(page, JUMLAH);
       try {
         await setelStokOutlet(page, auth, fx, JUMLAH * TAKARAN - 1);
-        const jurnalSebelum = (await jurnalPenjualan(page, auth, fx, JUMLAH)).length;
         const res = await finalisasiLewatDetail(page, penjualan.id);
         expect(res.status()).toBe(400);
-        expect((await jurnalPenjualan(page, auth, fx, JUMLAH)).length, "tidak ada jurnal baru").toBe(jurnalSebelum);
+        expect(await jurnalPenjualan(page, auth, fx, penjualan.id), "tidak ada jurnal untuk penjualan ini").toHaveLength(0);
       } finally {
         await hapusDraft(page, auth, penjualan.id);
       }

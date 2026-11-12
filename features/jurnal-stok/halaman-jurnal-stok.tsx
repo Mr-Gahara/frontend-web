@@ -52,6 +52,10 @@ const WARNA_ALASAN: Record<string, string> = {
   "Transfer Gudang": "bg-blue-50 text-blue-700 border-blue-200",
   "Stok Opname": "bg-amber-50 text-amber-700 border-amber-200",
   "Rusak/Hilang": "bg-rose-50 text-rose-700 border-rose-200",
+  // Penjualan karamel dan Pembelian sage (pemilik proyek, 12 November 2026);
+  // teks navy, karena karamel di atas latar muda kurang kontras.
+  Penjualan: "bg-karamel/15 text-navy border-karamel/40",
+  Pembelian: "bg-sage/15 text-navy border-sage/40",
 };
 const WARNA_ALASAN_LAIN = "bg-slate-50 text-slate-700 border-slate-200";
 
@@ -300,6 +304,8 @@ export default function HalamanJurnalStok({
               <SelectItem value="Transfer Gudang" className="font-medium">{teks.labelTransfer}</SelectItem>
               <SelectItem value="Stok Opname" className="font-medium">Stok Opname</SelectItem>
               <SelectItem value="Rusak/Hilang" className="font-medium">Rusak / Hilang</SelectItem>
+              <SelectItem value="Pembelian" className="font-medium">Pembelian</SelectItem>
+              <SelectItem value="Penjualan" className="font-medium">Penjualan</SelectItem>
               <SelectItem value="Lainnya" className="font-medium">Lainnya</SelectItem>
             </SelectContent>
           </Select>
