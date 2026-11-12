@@ -12,6 +12,17 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per tombol Catat pembelian** (12 November 2026): vitest 1059
+lolos (5 unit test baru
+`tests/unit/features/pembelian-stok/ruang-catat-belanja.test.ts`). Spec
+terdampak 21 lolos: `keuangan/belanja-stok.spec.ts` (skenario baru menu Ke
+outlet dan Ke gudang pada akun Pro, dan tombol tersembunyi bagi pengguna
+baca-saja), `setup/plan-fitur.spec.ts` (Basic: Pembelian Stok menu tunggal,
+Suplai Gudang tidak tampil, dan tombol langsung ke form outlet),
+`inventaris/pembelianStok`, dan `keuangan/tampilan-hp`. Harapan suite
+penuh 628: 627 ditambah satu skenario itu (hitungan); suite penuh menunggu
+izin pemilik proyek.
+
 **Baseline per kebocoran cache antarakun** (12 November 2026): vitest
 1054 lolos (6 unit test baru `tests/unit/lib/auth/pemilik-cache.test.ts`).
 Spec baru `auth/cache-ganti-pengguna.spec.ts` (1 skenario: logout lalu

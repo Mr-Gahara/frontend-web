@@ -37,12 +37,22 @@ test.describe("Fitur per plan", () => {
       await isiTokoDanOwner(page);
       await keDashboard(page);
       await expect(menu(page, "Sesi Booking & Reservasi")).toHaveCount(0);
-      await expect(menu(page, "Suplai Gudang")).toBeVisible();
-      await menu(page, "Suplai Gudang").click();
-      await expect(page.getByRole("link", { name: "Pembelian Stok", exact: true })).toBeVisible();
+      // Pembelian Stok menu tunggal di semua plan; Suplai Gudang hanya berisi
+      // menu Pro, sehingga tidak tampil di Basic (pemilik proyek, 12 November 2026).
+      await expect(menu(page, "Pembelian Stok")).toBeVisible();
+      await expect(menu(page, "Suplai Gudang")).toHaveCount(0);
       await expect(page.getByRole("link", { name: "Pengajuan Barang", exact: true })).toHaveCount(0);
       await expect(page.getByText("Status Venue")).toHaveCount(0);
       await expect(page.getByText(/Setup .* belum selesai/)).toHaveCount(0);
+
+      // Belanja Stok di Basic: tombol Catat pembelian langsung ke form outlet,
+      // tanpa pilihan gudang (pemilik proyek, 12 November 2026).
+      await page.goto("/dashboard/outlet/keuangan/belanjaStok");
+      const catat = page.getByRole("link", { name: /Catat pembelian/ });
+      await expect(catat).toHaveAttribute("href", "/dashboard/outlet/inventaris/pembelianStok/catatPembelian", {
+        timeout: 15_000,
+      });
+      await expect(page.getByRole("button", { name: /Catat pembelian/ })).toHaveCount(0);
 
       const fitur = catatPermintaan(page, /\/api\/(sesibooking|aset|tarif|tipeaset|pengajuanstok|transferstok|dashboard\/gudang)/);
       await page.goto("/dashboard/outlet/reservasi");

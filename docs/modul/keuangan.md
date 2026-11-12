@@ -251,6 +251,20 @@ desain yang disetujui (`e073a9d`):
   Pembelian disebut persediaan, bukan beban, sehingga tidak masuk laba
   rugi, dan saldo akun kas belum terpotong.
 
+- **BS4a: tombol "Catat pembelian" di kanan judul Belanja Stok** (pemilik
+  proyek, 12 November 2026), tampil bila pengguna boleh mencatat di
+  setidaknya satu ruang (`ruangCatatBelanja` di
+  `features/pembelian-stok/ruang.ts`: izin buat ruang itu, plan, dan
+  `IZIN_HALAMAN` rute catat; gudang juga `read-dashboard-gudang` dan lokasi
+  bertipe Gudang). Satu ruang langsung membuka form catatnya (Basic dan
+  Advanced: outlet); outlet dan gudang membuka menu "Ke outlet" dan "Ke
+  gudang". Sesudah simpan tetap ke detail pembelian.
+- **BS5a: Pembelian Stok ruang outlet menjadi menu tunggal** di grup
+  Manajemen Inventaris untuk semua plan, keluar dari Suplai Gudang, yang
+  kini hanya berisi Pengajuan, Terima, dan Kirim Barang (Pro), sehingga
+  Suplai Gudang tidak tampil di Basic dan Advanced (pemilik proyek,
+  12 November 2026).
+
 ### Tampilan HP tab Keuangan
 
 Diputuskan pemilik proyek pada 6 November 2026, dari pratinjau Revisi 1
@@ -719,6 +733,15 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   Dana tidak mengirim tanggal, sehingga tidak berubah.
 
 ## Utang terbuka
+
+### Utang kecil dari tombol Catat pembelian
+
+- Di lebar HP 390 px isian tanggal filter Belanja Stok ("Pembelian dari"
+  dan "Pembelian sampai") memotong atau melewati kotaknya; terlihat
+  12 November 2026, sudah ada sebelum BS4a.
+- Menu tunggal Pembelian Stok hanya aktif di sidebar pada daftarnya, tidak
+  di detail dan form catat, seperti menu tunggal lain (`isActive` cocok
+  persis).
 
 ### Utang kecil dari modul keuangan
 

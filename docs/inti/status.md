@@ -134,10 +134,13 @@ dengan alur kanvas desain seperti butir di bawah:
 2. **Perbaikan bug visual di laman buat penjualan**: selesai 12 November
    2026. Kolom kanan sticky menutupi tombol Buat Penjualan saat digulir;
    kini berhenti di atas baris aksi (`modul/penjualan.md`, BP1a).
-3. **Penyesuaian backend `yoga` `d6709a1`** (6 commit di atas `ridho`
+3. **Belanja Stok untuk plan Basic**: selesai 12 November 2026, tombol
+   Catat pembelian dan Pembelian Stok sebagai menu tunggal
+   (`modul/keuangan.md`, BS4a dan BS5a).
+4. **Penyesuaian backend `yoga` `d6709a1`** (6 commit di atas `ridho`
    lokal `f110c04`: P78 rincian stok per penjualan yang menutup butir
    181, dan P79 paginasi opt-in produk, inventory, dan bahan baku):
-   dikerjakan sesudah butir 1 dan 2 (pemilik proyek, 12 November 2026).
+   dikerjakan sesudah butir 1 sampai 3 (pemilik proyek, 12 November 2026).
 
 ### Menunggu desain pemilik proyek
 

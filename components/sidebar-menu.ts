@@ -189,6 +189,14 @@ export const outletMenus: MenuGroup[] = [
         ],
       },
       {
+        // Menu tunggal untuk semua plan, di luar Suplai Gudang yang hanya Pro,
+        // karena Basic dan Advanced tidak punya gudang (pemilik proyek,
+        // 12 November 2026).
+        label: "Pembelian Stok",
+        href: "/dashboard/outlet/inventaris/pembelianStok",
+        icon: ShoppingCart,
+      },
+      {
         label: "Suplai Gudang",
         href: "/dashboard/outlet/inventaris-suplai", // Href semu untuk parent
         icon: Truck,
@@ -204,10 +212,6 @@ export const outletMenus: MenuGroup[] = [
           {
             label: "Kirim Barang",
             href: "/dashboard/outlet/inventaris/pengirimanBarang",
-          },
-          {
-            label: "Pembelian Stok",
-            href: "/dashboard/outlet/inventaris/pembelianStok",
           },
         ],
       },

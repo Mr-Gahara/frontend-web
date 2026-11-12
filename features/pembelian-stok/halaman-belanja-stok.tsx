@@ -19,11 +19,14 @@ import {
 import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
 import { useDaftarLokasi } from "@/features/inventaris/hooks";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useSession } from "@/lib/auth/useSession";
 import { pesanError } from "@/lib/api/error";
 import { formatRupiah, formatTanggalPendek } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { PembelianStok } from "@/types/pembelianStok";
 import { useDaftarPembelianStok, useRingkasanBelanjaStok } from "./hooks";
+import { ruangCatatBelanja } from "./ruang";
+import { TombolCatatBelanja } from "./tombol-catat-belanja";
 import {
   PANJANG_CARI_SUPPLIER,
   filterAwalDaftarPembelian,
@@ -203,6 +206,12 @@ function RingkasanBelanjaStok({ filter, periode }: { filter: Record<string, stri
 export function HalamanBelanjaStok() {
   const lokasi = useDaftarLokasi();
   const akun = useDaftarAkunKas();
+  const { permissions, plan } = useSession();
+  const ruangCatat = ruangCatatBelanja({
+    permissions,
+    plan,
+    adaGudang: (lokasi.data ?? []).some((l) => l.tipe === "Gudang"),
+  });
   const [filter, setFilter] = useState<FilterPembelian>(() => filterAwalDaftarPembelian());
   const [lokasiID, setLokasiID] = useState("");
   const [cari, setCari] = useState("");
@@ -321,11 +330,14 @@ export function HalamanBelanjaStok() {
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
       <div className="flex flex-col gap-6 w-full">
-        <div>
-          <h2 className="text-base sm:text-lg font-bold tracking-wide text-navy">Belanja Stok</h2>
-          <p className="text-sm font-medium text-navy/60 mt-1">
-            Pembelian stok seluruh outlet dan gudang dalam satu pandangan.
-          </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-base sm:text-lg font-bold tracking-wide text-navy">Belanja Stok</h2>
+            <p className="text-sm font-medium text-navy/60 mt-1">
+              Pembelian stok seluruh outlet dan gudang dalam satu pandangan.
+            </p>
+          </div>
+          <TombolCatatBelanja ruang={ruangCatat} />
         </div>
 
         <div className="grid grid-cols-2 gap-3 border-b border-navy/10 pb-4 sm:flex sm:flex-wrap sm:items-end">

@@ -157,6 +157,25 @@ test.describe("Keuangan: Belanja Stok", () => {
     }
   });
 
+  test("Catat pembelian (Pro dengan gudang): menu Ke outlet dan Ke gudang membuka form catat ruangnya", async ({
+    page,
+  }) => {
+    for (const [pilihan, url] of [
+      ["Ke outlet", "/dashboard/outlet/inventaris/pembelianStok/catatPembelian"],
+      ["Ke gudang", "/dashboard/gudang/pembelianStok/catatPembelian"],
+    ] as const) {
+      await page.goto(URL_BELANJA);
+      await page.getByRole("button", { name: /Catat pembelian/ }).click();
+      const menu = page.getByRole("menu");
+      await expect(menu.getByRole("menuitem")).toHaveText(["Ke outlet", "Ke gudang"]);
+      await menu.getByRole("menuitem", { name: pilihan }).click();
+      await page.waitForURL("**" + url);
+      await expect(page.getByRole("heading", { name: "Catat Pembelian", exact: true })).toBeVisible({
+        timeout: 20_000,
+      });
+    }
+  });
+
   test("ringkasan gagal dimuat: pesan backend dan Coba Lagi tampil, daftar tetap termuat", async ({ page }) => {
     await page.route(POLA_RINGKASAN, (route) =>
       route.fulfill({
@@ -202,6 +221,9 @@ test.describe("Keuangan: Belanja Stok, pengguna baca-saja", () => {
       await page.getByLabel("Cari supplier").fill(supplier);
       const baris = page.getByRole("row").filter({ hasText: supplier });
       await expect(baris).toHaveCount(1);
+      // Tanpa izin buat pembelian, tombol Catat pembelian tidak tampil.
+      await expect(page.getByRole("button", { name: /Catat pembelian/ })).toHaveCount(0);
+      await expect(page.getByRole("link", { name: /Catat pembelian/ })).toHaveCount(0);
       await baris.getByRole("link", { name: `Buka pembelian ${supplier} di ruang outlet` }).click();
       await page.waitForURL("**/dashboard/outlet/inventaris/pembelianStok/" + id);
       await expect(page.getByRole("heading", { name: "Pembelian dari " + supplier })).toBeVisible();
