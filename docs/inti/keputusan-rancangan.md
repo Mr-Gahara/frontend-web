@@ -259,7 +259,9 @@ sama (submodul pengajuan stok, di bawah).
     `f44db05`, `9cd22e1`; keputusan TB1a sampai TB7a). Pengecualian:
     riwayat buka-tutup kasir Mesin Kasir dikelompokkan per hari, bukan
     `DataTable` (pemilik proyek, 6 November 2026; `modul/keuangan.md`,
-    MK2).
+    MK2), dan kartu Stok Keluar detail penjualan berupa daftar bergrid
+    dengan judul kelompok produk, bukan `Table` (pemilik proyek,
+    12 November 2026; `modul/penjualan.md`, VD4a).
 27. **Daftar dipindah ke paginasi server hanya bersama seluruh
     filternya, termasuk pencarian.** Filter tanpa padanan di server
     tidak disaring di klien atas halaman yang sedang tampil, karena

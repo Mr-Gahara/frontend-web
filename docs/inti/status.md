@@ -147,8 +147,8 @@ dengan alur kanvas desain seperti butir di bawah:
    (`modul/keuangan.md`, BS4a dan BS5a).
 4. **Penyesuaian backend `yoga` `d6709a1`**: selesai 12 November 2026
    (`referensi/keputusan-penyesuaian-backend.md`).
-5. **Stok keluar di detail penjualan (VD3a)**: berikutnya, lewat kanvas
-   desain (pemilik proyek, 12 November 2026).
+5. **Stok keluar di detail penjualan (VD3a)**: selesai 12 November 2026,
+   desain A kanvas (`modul/penjualan.md`, VD4a sampai VD10a).
 6. **Paginasi server produk, bahan baku, dan inventory**: menunggu
    padanan filter dari backend (`kontrak/temuan.md` butir 184), lalu
    dipindah per daftar bersama filternya.
@@ -177,8 +177,7 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
    backend lebih dulu (`kontrak/temuan.md` butir 180), lalu didesain
    pemilik proyek.
 5. **Stok keluar di detail penjualan, termasuk yang VOID** (VD3a):
-   data tersedia sejak backend `d6709a1` (`rincianStok`, B320);
-   pekerjaan UI berikutnya, di atas.
+   selesai 12 November 2026 (`modul/penjualan.md`, VD4a sampai VD10a).
 6. **Modul membership web** (paket dan pendaftaran member), syarat
    menawarkan diskon khusus member (NZ6a, `modul/pelanggan-diskon.md`).
 

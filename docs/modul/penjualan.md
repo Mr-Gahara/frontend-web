@@ -88,6 +88,41 @@ keputusan rancangan butir 17.
   dikerjakan sebagai pekerjaan UI berikutnya lewat kanvas (pemilik proyek,
   12 November 2026).
 
+### Stok keluar di detail penjualan
+
+Diputuskan pemilik proyek pada 12 November 2026 dari tiga desain kanvas
+"Stok Keluar Detail Penjualan" (A sampai C, desktop dan HP 390 px), lalu
+tiga revisi warna. Menutup VD3a.
+
+- **VD4a: desain A**, kartu "Stok Keluar" di bawah Rincian Item
+  (`features/penjualan/kartu-stok-keluar.tsx`, aturan di
+  `features/penjualan/stok-keluar.ts`). `rincianStok` dikelompokkan per
+  produk menurut urutan item (judul berlatar krem "Nama × jumlah"); baris
+  Barang, Jenis (lencana "Bahan baku" `bg-sage/15` dan "Stok produk"
+  `bg-navy/8`, teks navy), dan Jumlah keluar mono tebal merah lembut
+  `text-red-800` (sama dengan kolom Keluar Jurnal Stok dan Mutasi Kas);
+  judul kolomnya tetap warna biasa. Produk dan bahan yang sama di beberapa
+  baris item digabung. Di bawah `sm` baris bertumpuk dengan jumlah di
+  kanan. Kartu dibangun sebagai daftar, bukan `Table`, agar sama dengan
+  kanvas (pengecualian butir 26).
+- **VD5a: penjualan VOID** menampilkan "Penjualan ini di-VOID. Stok di
+  bawah tetap keluar dan tidak dikembalikan." tanpa latar: teks tebal
+  bergaris bawah tipis navy dengan ikon info.
+- **VD6a: tanpa tautan ke Jurnal Stok**; arah sebaliknya sudah ada (JS2a).
+- **VD7a: rincian kosong tetap tampil** dengan kalimat: DRAFT "Stok belum
+  dipotong. Rinciannya muncul setelah penjualan disimpan.", selain itu
+  "Tidak ada stok yang tercatat keluar untuk penjualan ini." Penjualan
+  sebelum backend `d6709a1` dan penjualan yang semua produknya Stok Tak
+  Terbatas tidak dapat dibedakan.
+- **VD8a: tampil bagi semua yang membuka detail penjualan**, tanpa izin
+  tambahan, mengikuti respons backend.
+- **VD9a: item tanpa rincian disebut tanpa alasan**: "Air Mineral tidak
+  memotong stok.", karena respons tidak membawa penanda Stok Tak Terbatas.
+- **VD10a: nama outlet di subjudul** ("Dipotong dari <outlet> saat
+  penjualan disimpan.") hanya bila outlet tenant terbaca (`read-location`)
+  dan sama dengan lokasi rincian; selain itu "Dipotong saat penjualan
+  disimpan."
+
 - **BP1a: kolom kanan buat penjualan berhenti di atas baris aksi**
   (pemilik proyek, 12 November 2026). Di lebar `lg` ke atas kolom kanan
   yang `sticky` dibatasi seluruh form, sehingga saat digulir kartu

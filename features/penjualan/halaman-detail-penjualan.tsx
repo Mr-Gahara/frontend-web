@@ -11,6 +11,7 @@ import { useFinalisasiPenjualan, usePenjualan, useVoidPenjualan } from "./hooks"
 import { lokasiFinalisasi } from "./payload";
 import { aksiPenjualan, bolehBatalkanPembayaran, bolehCakupanPenjualan } from "./izin";
 import { DialogVoidPenjualan } from "./dialog-void-penjualan";
+import { KartuStokKeluar } from "./kartu-stok-keluar";
 import { BookingPenjualan } from "@/features/sesi-booking/booking-penjualan";
 import { planMencakup } from "@/lib/auth/fitur-plan";
 import { PESAN_BATAL_PEMBAYARAN, TAMPILAN_STATUS_PENJUALAN } from "./tampilan";
@@ -376,6 +377,9 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
           </table>
         </div>
       </div>
+
+      {/* Nama outlet hanya terbaca pemegang read-location (outletTenant di atas). */}
+      <KartuStokKeluar penjualan={penjualan} outlet={outletTenant.lokasi} />
 
       {/* RINGKASAN BIAYA & PEMBAYARAN */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">

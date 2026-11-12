@@ -12,6 +12,14 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per stok keluar di detail penjualan** (12 November 2026):
+vitest 1068 lolos (6 unit test baru
+`tests/unit/features/penjualan/stok-keluar.test.ts`). Spec baru
+`penjualan/stok-keluar.spec.ts` (1 skenario: DRAFT, tersimpan, VOID, dan
+HP 390 px tanpa meluber) lolos terhadap backend `ridho` lokal `d6709a1`.
+Harapan suite penuh 632: 631 ditambah skenario itu (hitungan); suite
+penuh menunggu izin pemilik proyek.
+
 **Baseline per backend `ridho` lokal `d6709a1`** (12 November 2026):
 vitest 1062 lolos (3 unit test baru
 `tests/unit/features/jurnal-stok/tautan-penjualan.test.ts`). Spec terdampak

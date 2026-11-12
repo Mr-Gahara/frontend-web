@@ -77,6 +77,21 @@ export interface PembayaranPenjualan {
   alasanVoid?: string | null;
 }
 
+/**
+ * Satu baris stok keluar penjualan (B320). PRODUK untuk produk tanpa resep
+ * (bahanBakuID, satuan, dan locationID null); BAHAN per item per bahan
+ * resep, dalam satuan bahan. Produk Stok Tak Terbatas tidak muncul.
+ */
+export interface RincianStokPenjualan {
+  jenis: "PRODUK" | "BAHAN";
+  produkID: string;
+  bahanBakuID: string | null;
+  nama: string | null;
+  satuan: string | null;
+  jumlah: number;
+  locationID: string | null;
+}
+
 // ENTITAS PENJUALAN (response dari backend)
 /**
  * Bentuk respons GET /penjualan dan /penjualan/:id setelah dinormalkan,
@@ -109,6 +124,8 @@ export interface Penjualan {
   alasanVoid?: string | null;
   /** Hanya di detail: seluruh pembayaran penjualan ini, termasuk VOID, urut dari yang pertama (backend 465b438). */
   pembayaran?: PembayaranPenjualan[];
+  /** Stok yang dipotong saat disimpan, tetap ada setelah VOID; [] untuk DRAFT dan penjualan lama (backend P78, B320). */
+  rincianStok?: RincianStokPenjualan[];
   keterangan: string;
   createdAt: string;
   updatedAt: string;
