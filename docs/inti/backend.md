@@ -268,9 +268,11 @@ sampai MK17a dicatat di `f110c04` dan ikut di-push.
 Pada 12 November 2026 `yoga` maju enam commit tepat di atas `f110c04` ke
 `d6709a1` (P78, P79, B319 sampai B323), sedangkan `nizar` dan `ridho`
 remote tidak maju, sehingga `ridho` lokal di-fast-forward tanpa di-push.
-Seed dan skrip migrasi tidak berubah; skema jurnal stok menambah index
-`penjualanID`, sehingga langkah sesudah tarik cukup `npm run db:indeks`
-(`referensi/keputusan-penyesuaian-backend.md`).
+Seed dan skrip migrasi tidak berubah. Index baru jurnal stok
+`{ tenantID, penjualanID }` dibentuk Mongoose saat backend menyala, bukan
+oleh `npm run db:indeks` (skrip itu hanya menyelaraskan pelanggan, posisi,
+kontrak kompensasi, perangkat, dan pemakaian diskon); keberadaannya
+diperiksa lewat `getIndexes()` (`referensi/keputusan-penyesuaian-backend.md`).
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari

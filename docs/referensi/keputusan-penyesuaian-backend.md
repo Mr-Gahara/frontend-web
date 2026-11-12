@@ -893,9 +893,13 @@ tanpa gabungan dan tanpa di-push. `nizar` dan `ridho` remote tidak maju.
 
 - **Langkah sesudah tarik**: seed dan skrip migrasi tidak berubah
   (`git diff f110c04..d6709a1 -- seeds scripts package.json` kosong).
-  Skema jurnal stok menambah index parsial `{ tenantID, penjualanID }`,
-  sehingga cukup `npm run db:indeks`, dijalankan pemilik proyek lewat
-  perintah `!`.
+  Skema jurnal stok menambah index parsial `{ tenantID, penjualanID }`.
+  `npm run db:indeks` dijalankan pemilik proyek lewat perintah `!` dan
+  tidak mengubah apa pun, karena skrip itu hanya menyelaraskan lima model
+  lain; index jurnal dibentuk Mongoose saat backend direstart, dan
+  terbukti ada di `db_produk.jurnalstoks` lewat `getIndexes()`. Untuk
+  index model di luar daftar skrip, periksa langsung, jangan anggap
+  `db:indeks` membentuknya.
 - **Keputusan pemilik proyek**:
   - **JS1a**: filter alasan jurnal stok menerima Pembelian dan
     Penjualan, dengan badge karamel (Penjualan) dan sage (Pembelian)
