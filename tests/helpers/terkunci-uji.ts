@@ -179,6 +179,7 @@ async function masukSebagai(page: Page, peranUji: PeranUji) {
 }
 
 export const NAMA_TERKUNCI = PERAN_TERKUNCI.nama;
+export const NAMA_BACA_SAJA = PERAN_BACA_SAJA.nama;
 
 export const masukTanpaIzinLintas = (page: Page) => masukSebagai(page, PERAN_TERKUNCI);
 export const masukBacaSaja = (page: Page) => masukSebagai(page, PERAN_BACA_SAJA);

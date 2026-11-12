@@ -183,6 +183,10 @@ async function request<T>(
   );
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     credentials: "include",
+    // Respons API milik satu akun dan pengguna: tidak disimpan cache HTTP
+    // browser, yang kuncinya URL tanpa header Authorization (backend hanya
+    // mengirim ETag tanpa Cache-Control).
+    cache: "no-store",
     headers: {
       ...(restOptions.body instanceof FormData ? headerTanpaJenis : COMMON_HEADERS),
       ...getAuthHeaders(activeKey),

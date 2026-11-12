@@ -12,6 +12,19 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per kebocoran cache antarakun** (12 November 2026): vitest
+1054 lolos (6 unit test baru `tests/unit/lib/auth/pemilik-cache.test.ts`).
+Spec baru `auth/cache-ganti-pengguna.spec.ts` (1 skenario: logout lalu
+pengguna lain lewat UI tanpa `page.goto` meminta `/akunkas` sendiri) lolos,
+dan gagal terhadap provider lama (0 permintaan). Reproduksi lintas akun
+(`toko@gmail.com` lalu `tokotes1@gmail.com`) lewat skrip sekali pakai, karena
+akun kedua adalah akun uji manual pemilik proyek. Spec terdampak sesi,
+logout, profil, dan tampilan Keuangan lolos; `auth/ruang-lokasi-kerja`
+sekali gagal di `beforeEach` (login PIN "Sesi telah berakhir atau
+dihentikan"), lalu lolos sendirian, bersama spec sebelumnya, dan dengan
+`--repeat-each 3`. Harapan suite penuh 627: 626 ditambah satu skenario itu
+(hitungan); suite penuh menunggu izin pemilik proyek.
+
 **Baseline per sub-menu Keuangan dan bug buat penjualan** (12 November
 2026): vitest 1048 lolos (5 unit test tab dibuang, 7 unit test baru
 `tests/unit/components/sidebar-menu-keuangan.test.ts`). Spec terdampak 39

@@ -338,3 +338,17 @@ sama (submodul pengajuan stok, di bawah).
     mengosongkannya. Contoh: tur wizard setup dan dashboard outlet
     (pemilik proyek, 7 November 2026, `aa3c1c6`, `c8a2e83`,
     `5c3da45`).
+33. **Data di klien milik satu akun dan satu pengguna.** Logout hanya
+    berpindah halaman, sehingga apa pun yang disimpan di memori tab
+    (cache React Query, state modul, provider) bertahan sampai identitas
+    berikutnya. `QueryProvider` mencatat pemilik cache
+    (`lib/auth/pemilik-cache.ts`) dan, begitu akun atau pengguna lain masuk,
+    membersihkan cache lalu memasang ulang pohon aplikasi; pengguna yang
+    sama masuk lagi tetap memakai cache-nya. Respons API tidak disimpan cache
+    HTTP browser (`cache: "no-store"` di `lib/apiClient.ts`). Kode baru yang
+    menyimpan data toko di luar React Query (state modul, `localStorage`,
+    `sessionStorage`) wajib ikut dibersihkan di titik yang sama, dan
+    pembuktiannya memakai navigasi di dalam aplikasi tanpa `page.goto`,
+    karena memuat ulang halaman ikut membuang cache dan menyembunyikan
+    bug. Contoh: akun kas toko lain tampil di akun fresh tanpa permintaan
+    (`kontrak/temuan.md` butir 183; pemilik proyek, 12 November 2026).
