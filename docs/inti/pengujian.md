@@ -12,6 +12,18 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per stok keluar di detail penjualan** (web `eece2e2`,
+backend `ridho` lokal `d6709a1`, 12 November 2026, pukul 17.11 sampai
+17.47 WIB, reporter `line,json`): e2e 630 lolos dan 2 gagal dari 632,
+tanpa skip, sesuai harapan hitungan 632. Kedua kegagalan adalah skenario
+jam di `penjualan/waktu-penjualan.spec.ts` (`page.clock`): pilihan produk
+terus terlepas dari DOM saat diklik. Bukan regresi VD3a: spec itu lolos
+4 dari 4 sendirian, folder `penjualan` 31 dari 31, dan saat diulang gagal
+1 dari 84 run; trace tidak tertangkap, sehingga dicatat sebagai utang
+(`referensi/utang-pengujian.md`). Spec baru `stok-keluar` lolos. Vitest
+1068 lolos. Harapan suite penuh sesudahnya 632 lolos, ditambah skip
+status staf bila datanya kosong (hitungan).
+
 **Baseline per stok keluar di detail penjualan** (12 November 2026):
 vitest 1068 lolos (6 unit test baru
 `tests/unit/features/penjualan/stok-keluar.test.ts`). Spec baru
