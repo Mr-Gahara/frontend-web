@@ -19,7 +19,12 @@ interface Langganan {
 }
 
 /** Membuka halaman dan mengembalikan data langganan serta jumlah riwayat dari respons nyata. */
-async function bukaLangganan(page: Page, lewat: () => Promise<unknown>) {
+async function bukaLangganan(
+  page: Page,
+  lewat: () => Promise<unknown>,
+  sebelumPenunggu: () => Promise<unknown> = () => Promise.resolve(),
+) {
+  await sebelumPenunggu();
   const jawabLangganan = page.waitForResponse((r) => /\/api\/akun\/langganan$/.test(r.url()));
   const jawabRiwayat = page.waitForResponse((r) => /\/api\/akun\/langganan\/riwayat/.test(r.url()));
   await lewat();
@@ -30,6 +35,16 @@ async function bukaLangganan(page: Page, lewat: () => Promise<unknown>) {
   const data = (await l.json()).data as Langganan;
   const riwayat = ((await r.json()).data as unknown[]).length;
   return { data, riwayat };
+}
+
+/**
+ * Membuka halaman langsung. Lonceng topbar (TP8a) ikut meminta
+ * /akun/langganan di setiap halaman dashboard, jadi penunggu dipasang
+ * setelah navigasi commit, agar tidak menangkap respons halaman sebelumnya
+ * yang sudah dibuang.
+ */
+async function bukaLangsung(page: Page) {
+  return bukaLangganan(page, () => Promise.resolve(), () => page.goto(URL_LANGGANAN, { waitUntil: "commit" }));
 }
 
 test.describe("Langganan", () => {
@@ -53,7 +68,7 @@ test.describe("Langganan", () => {
   });
 
   test("perbandingan tiga plan dengan fitur sesuai plan, plan aktif ditandai", async ({ page }) => {
-    const { data } = await bukaLangganan(page, () => page.goto(URL_LANGGANAN));
+    const { data } = await bukaLangsung(page);
     for (const [kunci, nama] of Object.entries(NAMA_PLAN)) {
       const kartu = expect(kartuPlan(page, nama));
       if (kunci === data.plan) await kartu.toContainText("Plan Anda");
@@ -72,7 +87,7 @@ test.describe("Langganan", () => {
 
   test("di layar HP halaman tidak melebar; riwayat tampil sebagai daftar, bukan tabel", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    const { riwayat } = await bukaLangganan(page, () => page.goto(URL_LANGGANAN));
+    const { riwayat } = await bukaLangsung(page);
     await expect(page.getByRole("heading", { level: 2, name: "Riwayat" })).toBeVisible();
     await expect(page.getByRole("table")).toBeHidden();
     await expect(page.getByRole("listitem").filter({ hasText: "berlaku sampai" })).toHaveCount(riwayat);

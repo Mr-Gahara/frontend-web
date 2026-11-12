@@ -123,6 +123,19 @@ Yoga, dan Nizar pada 7 November 2026. Daftar periksa:
    langkahnya memberi prop `panduan` ke `JudulLangkah` (keputusan
    rancangan butir 32; `modul/setup-akun.md`, PN2a dan PN3a).
 
+### Pekerjaan UI berikutnya
+
+Dicatat pemilik proyek 12 November 2026, dikerjakan sesudah putaran ini
+dengan alur kanvas desain seperti butir di bawah:
+
+1. **Laman Keuangan pindah ke sub-sidebar Keuangan.** Tab Keuangan sudah
+   terlalu banyak (Ringkasan Laba/Rugi, Arus Kas, Mutasi Kas, Akun Kas &
+   Bank, Belanja Stok, Mesin Kasir), sehingga seluruh laman itu dipindah
+   menjadi anak menu Keuangan di sidebar.
+2. **Perbaikan bug visual di laman buat penjualan**
+   (`features/penjualan/halaman-buat-penjualan.tsx`). Rincian bugnya
+   ditanyakan ke pemilik proyek saat butir ini dimulai.
+
 ### Menunggu desain pemilik proyek
 
 Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan

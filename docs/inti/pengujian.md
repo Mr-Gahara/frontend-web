@@ -12,6 +12,20 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per putaran 12 November 2026** (web `bb64b5c`, backend
+`ridho` lokal `aeb6a52`, pukul 10.48 sampai 11.23 WIB, reporter
+`line,json`): e2e 622 lolos dan 2 gagal dari 624, tanpa skip, sesuai
+harapan hitungan 624. Skip bersyarat status staf tidak terjadi. Kedua
+kegagalan di `pengaturan/langganan.spec.ts` (perbandingan tiga plan, dan
+lebar HP): `response.json` "No resource with given identifier found",
+karena lonceng topbar (TP8a, `0033479`) kini meminta `/akun/langganan` di
+setiap halaman dashboard dan penunggu spec yang dipasang sebelum
+`page.goto` menangkap respons halaman sebelumnya. Diperbaiki di spec:
+penunggu dipasang setelah navigasi `commit`; spec terdampak 4 lolos, lalu
+12 dari 12 dengan `--repeat-each 3`. Vitest 1046 lolos. Harapan suite
+penuh sesudahnya 624 lolos, ditambah skip status staf bila datanya kosong
+(hitungan).
+
 **Baseline per halaman galat** (12 November 2026): vitest 1046 lolos (4
 unit test baru `tests/unit/components/galat/halaman-galat.test.tsx`).
 Spec terdampak 18 lolos: spec baru `galat/halaman-galat.spec.ts` (3
@@ -503,7 +517,7 @@ Pola kegagalan yang berulang:
 | Gagal tepat setelah perubahan kode, lalu hilang | Belum dapat dipastikan; jalankan `--repeat-each 5` sebelum menyimpulkan selesai |
 | Halaman tertahan di loader | Kondisi pemuatan yang tidak pernah terpenuhi; periksa trace, apakah request yang ditunggu benar-benar terkirim |
 | Klik habis waktu padahal tombol terlihat | Tombol `disabled` oleh validasi form, misalnya catatan wajib; baca kondisi `disabled` di kode sebelum mengubah spec |
-| `response.json` gagal dengan `No resource with given identifier found` | Penunggu menangkap respons milik halaman sebelumnya yang sudah dibuang; pasang penunggu setelah `goto(..., { waitUntil: "commit" })` atau `reload(...)` yang sama |
+| `response.json` gagal dengan `No resource with given identifier found` | Penunggu menangkap respons milik halaman sebelumnya yang sudah dibuang; pasang penunggu setelah `goto(..., { waitUntil: "commit" })` atau `reload(...)` yang sama. Komponen global (topbar, sidebar) yang meminta endpoint yang sama memicunya juga: lonceng TP8a dan spec langganan (suite penuh 12 November 2026). Saat menambah permintaan di komponen global, grep spec yang menunggu endpoint itu |
 | Skenario tulis `skipped` padahal kode tidak berubah | Dokumen aktif sisa run yang gagal menghalangi pembuatan (409). Baca pesan `POST` di trace (backend menyebut nomornya), lalu batalkan dokumen itu dari halaman detail |
 | `net::ERR_NETWORK_IO_SUSPENDED` saat `page.goto` | Mesin menangguhkan jaringan (tidur atau hemat daya) di tengah suite; jalankan ulang test itu sendirian, lalu suite penuh diawali `systemd-inhibit --what=idle:sleep` |
 | Surat jalan uji ditolak karena nomornya bentrok, sekali lalu hilang | Backend membentuk akhiran nomor dari empat digit terakhir `Date.now()` (`transferStokService.js` baris 148 sampai 150), dan setiap run spec transfer membuat surat jalan baru dari pengajuan uji yang sama (124 surat jalan untuk `PGJ/202608/0001` per 28 September 2026), sehingga peluang bentrok naik setiap run (`kontrak/temuan.md` butir 60; terjadi di suite penuh `074e98c` dan `0cfb3bd`). Jalankan ulang test itu sendirian, lalu suite penuh |
