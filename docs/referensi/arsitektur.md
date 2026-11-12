@@ -20,7 +20,7 @@ dan urutan migrasi satu modul.
 |---|---|
 | `app/` | Rute Next.js. Idealnya tipis: tata letak dan interaksi saja |
 | `features/<modul>/` | Api, hooks, schema, komponen halaman dan form bersama, serta fungsi murni per modul |
-| `components/` | Komponen UI yang dipakai lintas modul, termasuk shadcn di `components/ui/` |
+| `components/` | Komponen UI yang dipakai lintas modul, termasuk shadcn di `components/ui/` ; halaman galat bersama di `components/galat/` (GR8a) |
 | `hooks/` | Hook lintas modul yang bukan milik satu domain: `use-debounce.ts`, `use-mobile.ts`, `use-sudah-hidrasi.ts` (deteksi hidrasi, `039ead4`), `use-url-objek.ts` (URL objek untuk Blob seperti logo toko, dicabut otomatis), serta `use-hari-ini.ts` dan `use-jam-berjalan.ts` (hari dan jam yang berganti sendiri, `6d07b8d`, `7a08b63`; `inti/keputusan-rancangan.md` butir 28) |
 | `lib/` | Fondasi: `api/`, `auth/`, `queryKeys.ts`, `apiClient.ts`, `decodeToken.ts`, serta `panduan.ts` untuk tur sorotan (bagian Tur sorotan) |
 | `types/` | Tipe respons dan payload, diturunkan dari kontrak |

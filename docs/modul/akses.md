@@ -52,6 +52,17 @@ GR:
   menyimpan**, misalnya kategori di form produk dan akun tujuan di buat
   metode pembayaran. Data opsional tetap menampilkan pesan gagal memuat
   di tempat.
+- **GR8a: halaman galat desain A** (pemilik proyek, 12 November 2026):
+  satu komponen `components/galat/halaman-galat.tsx` bergaya halaman
+  daftar dan verifikasi (panel krem dengan tanda Tachyon, "Kode galat",
+  angka kode besar, dan "Data toko Anda aman"; di sampingnya judul,
+  penjelasan, tombol navy, dan tautan karamel). 404 (`app/not-found.tsx`)
+  dan 500 (`app/error.tsx`, `app/global-error.tsx`, dengan "Coba lagi"
+  lewat `unstable_retry` dan kode galat `digest`) memakai halaman penuh;
+  403 pesan di tempat GR2a memakai versi tertanam di area isi dashboard,
+  sehingga sidebar dan topbar tetap ada. Teks 400 tersedia di komponen
+  yang sama, tetapi belum ada rute yang memakainya, karena Next tidak
+  punya halaman 400 per rute.
 - **Suite e2e penuh hanya dijalankan saat penting** (6 Oktober 2026),
   menggantikan PF6a: penyesuaian backend, penelusuran bug atau galat
   yang butuh uji menyeluruh, atau atas permintaan pemilik proyek. Setiap

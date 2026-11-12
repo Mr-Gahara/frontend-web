@@ -12,6 +12,16 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per halaman galat** (12 November 2026): vitest 1046 lolos (4
+unit test baru `tests/unit/components/galat/halaman-galat.test.tsx`).
+Spec terdampak 18 lolos: spec baru `galat/halaman-galat.spec.ts` (3
+skenario: 404 di dalam dashboard pada lebar desktop dan HP, serta di luar
+dashboard dengan tautan kembali), `auth/gerbang-rute.spec.ts`,
+`inventaris/pembelianStok/catat-pembelian-stok.spec.ts`, dan
+`keuangan/ubah-akun-kas.spec.ts` (403 tertanam; kalimat izin lama tetap
+ada di teks 403). Harapan suite penuh 624: 621 ditambah tiga skenario
+galat (hitungan); suite penuh menunggu izin pemilik proyek.
+
 **Baseline per lonceng pemberitahuan** (12 November 2026): vitest 1042
 lolos (4 unit test baru `tests/unit/features/langganan/pengingat.test.ts`).
 Spec terdampak: spec baru `dashboard/lonceng-pemberitahuan.spec.ts` (2

@@ -18,6 +18,7 @@ import { fiturRute, planMencakup } from "@/lib/auth/fitur-plan";
 import { AjakanNaikPlan } from "@/features/langganan/ajakan-fitur";
 import { useRuangLokasiKerja } from "@/features/pengguna/hooks-profil";
 import { ruangDitolak } from "@/features/pengguna/lokasi-kerja";
+import { HalamanGalat } from "@/components/galat/halaman-galat";
 
 export function GerbangRute({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -53,14 +54,11 @@ export function PesanLuarLokasiKerja() {
   );
 }
 
-/** Pesan di tempat untuk halaman yang tidak boleh dibuka; dipakai juga halaman berpengecualian role (Langganan). */
+/**
+ * 403 di area isi dashboard (desain A tertanam, pemilik proyek 12 November
+ * 2026): sidebar dan topbar tetap ada. Dipakai juga halaman berpengecualian
+ * role (Langganan).
+ */
 export function PesanTanpaIzin() {
-  return (
-    <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-2 text-center text-navy">
-      <p className="font-bold">Anda tidak memiliki izin membuka halaman ini.</p>
-      <p className="text-sm font-medium text-navy/60">
-        Hubungi pemilik toko bila Anda memerlukannya.
-      </p>
-    </div>
-  );
+  return <HalamanGalat kode={403} tertanam />;
 }
