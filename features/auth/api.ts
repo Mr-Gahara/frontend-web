@@ -13,6 +13,12 @@ import { EP } from "@/lib/api/endpoints";
 import type { LoginResponse, PayloadLoginPengguna, ResponsLoginPengguna } from "@/types/auth";
 import type { NilaiLoginAkun } from "./schema";
 
+/** Data langkah kirim OTP aksi Owner (B178, B180): email tersamar dan masa berlaku. */
+export interface KirimanOtp {
+  email: string;
+  berlakuDetik: number;
+}
+
 export const authApi = {
   loginAkun: (payload: NilaiLoginAkun) =>
     apiMentah.post<LoginResponse>(EP.akun.login, payload, "akun"),
@@ -27,6 +33,11 @@ export const authApi = {
     apiData.post<unknown>(EP.akun.resetPassword, payload, "akun"),
   loginPengguna: (payload: PayloadLoginPengguna) =>
     apiMentah.post<ResponsLoginPengguna>(EP.pengguna.pinLogin, payload, "akun"),
+  /** Mengirim OTP ke email akun; menjawab email tersamar dan masa berlaku (B178). */
+  kirimOtpResetPinOwner: () =>
+    apiData.post<KirimanOtp>(EP.pengguna.resetPinOwnerOtp, {}, "akun"),
+  resetPinOwner: (payload: { password: string; pinBaru: string; otp: string }) =>
+    apiData.post<unknown>(EP.pengguna.resetPinOwner, payload, "akun"),
   logoutAkun: () => apiData.post<unknown>(EP.akun.logout, {}, "akun"),
   logoutPengguna: () => apiData.post<unknown>(EP.pengguna.pinLogout, {}, "pengguna"),
 };

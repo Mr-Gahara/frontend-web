@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +16,7 @@ import { useLoginPengguna, useLogoutAkun } from "./hooks";
 import { skemaLoginPengguna, type NilaiLoginPengguna } from "./schema";
 import { useAkunSaya } from "@/features/setup/hooks";
 import { identitasPanel } from "./identitas";
+import { JamKunci } from "./jam-kunci";
 import { TandaTachyon } from "./tanda-tachyon";
 
 const KELAS_ISIAN =
@@ -22,37 +24,6 @@ const KELAS_ISIAN =
 
 const KELAS_TAUTAN =
   "cursor-pointer rounded-sm font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:cursor-not-allowed disabled:opacity-50";
-
-/** Berdetak tiap detik; snapshot jam hanya berganti saat menit berganti. */
-function langgananDetak(beritahu: () => void) {
-  const t = setInterval(beritahu, 1000);
-  return () => clearInterval(t);
-}
-const menitSekarang = () => Math.floor(Date.now() / 60_000);
-const menitServer = () => null;
-
-/**
- * Jam layar kunci. Server merender tanpa jam (snapshot null) supaya tidak ada
- * selisih hidrasi; jam muncul setelah klien terpasang.
- */
-function JamKunci() {
-  const menit = useSyncExternalStore<number | null>(langgananDetak, menitSekarang, menitServer);
-  if (menit === null) return <div className="min-h-[clamp(6.5rem,15vw,10.5rem)]" aria-hidden="true" />;
-  const kini = new Date(menit * 60_000);
-  return (
-    <div className="flex min-h-[clamp(6.5rem,15vw,10.5rem)] flex-col gap-2">
-      <time
-        dateTime={kini.toISOString()}
-        className="text-[clamp(4.5rem,12vw,8rem)] font-semibold leading-none tracking-[-0.03em] tabular-nums"
-      >
-        {kini.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
-      </time>
-      <p className="text-xl text-gading/75">
-        {kini.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-      </p>
-    </div>
-  );
-}
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
@@ -219,8 +190,10 @@ export function HalamanLoginPengguna() {
                   <span className="font-semibold">Karyawan:</span> minta Owner mengatur ulang PIN Anda.
                 </li>
                 <li>
-                  <span className="font-semibold">Owner:</span> pengaturan ulang PIN Owner lewat kode di
-                  email akun toko belum tersedia di web.
+                  <span className="font-semibold">Owner:</span> atur ulang lewat kode di email akun toko.{" "}
+                  <Link href="/lupa-pin" className={KELAS_TAUTAN}>
+                    Atur ulang PIN Owner
+                  </Link>
                 </li>
               </ul>
             </div>

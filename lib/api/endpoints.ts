@@ -40,6 +40,9 @@ export const EP = {
     register: "/pengguna/register-pengguna",
     /** Owner dari web tanpa installationId (B219), bertoken akun. */
     registerOwner: "/pengguna/register-owner",
+    /** Reset PIN Owner dua langkah, bertoken akun (B178). */
+    resetPinOwnerOtp: "/pengguna/reset-pin-owner/otp",
+    resetPinOwner: "/pengguna/reset-pin-owner",
   },
   role: {
     list: "/role",

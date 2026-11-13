@@ -222,8 +222,11 @@ bagian reset PIN Owner di TP2a.
   kode). Sesudah kode terkirim, tahap 2 berisi kode, password akun toko,
   PIN baru, dan ulangi PIN, dengan kirim ulang berhitung mundur. Sesudah
   tersimpan, kembali ke login pengguna untuk masuk dengan PIN baru. Tata
-  letaknya sama dengan login pengguna (desain E). Rute
-  `/login/pengguna/reset-pin` dipilih sisi teknis.
+  letaknya sama dengan login pengguna (desain E). Rute `/lupa-pin`,
+  sejajar `/lupa-password`, dipilih sisi teknis: layout `/login` hanya
+  mengambil pesan titipan saat terpasang, sehingga rute di bawah `/login`
+  tidak akan menampilkan toast OA12a. Selesai di commit reset PIN Owner
+  (13 November 2026); panel jam dipindah ke `features/auth/jam-kunci.tsx`.
 - **OA2: setiap tahap satu layar tersendiri**, bukan beberapa tahap dalam
   satu layar; berlaku juga untuk Akun Toko dan hapus akun.
 - **OA3a: ubah email dan password akun lewat dialog di tengah, dua
@@ -324,7 +327,8 @@ dan token warna yang sudah ada.
 - **TP2a: login pengguna memakai desain E (Layar Kunci)** (`1f3b9e4`):
   latar krem, panel navy dengan jam dan tanggal yang berganti tiap
   menit, "Lupa PIN?" sebagai panel bantuan dua jalur (karyawan meminta
-  Owner; reset PIN Owner disebut belum tersedia di web), dan "Keluar dari
+  Owner; reset PIN Owner disebut belum tersedia di web, kini ditautkan ke
+  `/lupa-pin` sejak OA1a), dan "Keluar dari
   akun toko" menggantikan "Ganti Akun Bisnis". Panel menampilkan merek,
   bukan nama toko dan email (`kontrak/temuan.md` butir 167).
 - **TP2b: panel login pengguna menampilkan nama toko dan email akun**

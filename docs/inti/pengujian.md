@@ -12,6 +12,15 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per reset PIN Owner** (13 November 2026): vitest 1072 lolos (4
+unit test baru `tests/unit/features/auth/reset-pin-owner.test.ts`). Spec
+terdampak `auth/tampilan-login-pengguna.spec.ts` 5 lolos, termasuk
+skenario baru tahap 1 `/lupa-pin` tanpa meluber di 390, 768, dan 1280 px
+tanpa mengirim kode. Spec baru ber-OTP `auth/reset-pin-owner.spec.ts` (1
+skenario, akun klien sekali pakai) belum dijalankan dan menunggu suite
+penuh akhir putaran. Harapan suite penuh 634: 632 ditambah kedua skenario
+itu (hitungan).
+
 **Suite penuh per stok keluar di detail penjualan** (web `eece2e2`,
 backend `ridho` lokal `d6709a1`, 12 November 2026, pukul 17.11 sampai
 17.47 WIB, reporter `line,json`): e2e 630 lolos dan 2 gagal dari 632,
@@ -696,6 +705,11 @@ dan jumlah permintaannya tidak boleh melampaui batas:
   sebagai gagal; bacanya sebagai batas yang terlampaui, bukan regresi.
 - Spec baru yang memanggil keempat endpoint itu dihitung pemakaiannya
   lebih dulu dan dicatat di sini.
+- OTP aksi Owner (B178, B180) tidak termasuk batas per IP di atas; batasnya
+  per akun (jeda dan batas harian, dilonggarkan lewat env layanan uji) dan
+  `resetPinOwnerLimiter` serta `hapusAkunLimiter` yang hanya menghitung
+  percobaan gagal. Pemakaiannya tetap dicatat: `auth/reset-pin-owner.spec.ts`
+  1 kirim dan 1 periksa kode per run, pada akun klien sekali pakai.
 
 Ketiga spec tulis stock opname membuat dokumen baru di setiap run dan
 menutupnya sebagai CANCELLED, sehingga dokumen CANCELLED bertambah tiga per

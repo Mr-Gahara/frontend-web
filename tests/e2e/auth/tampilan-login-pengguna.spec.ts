@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { masukAkun } from "../../helpers/masuk-uji";
+import { tanpaGulirDiSemuaLebar } from "../../helpers/tata-letak-uji";
 
 /*
  * Tampilan login pengguna desain E (Layar Kunci), modul/setup-akun.md.
@@ -62,5 +63,30 @@ test.describe("Tampilan login pengguna", () => {
     await lupa.click();
     await expect(lupa).toHaveAttribute("aria-expanded", "false");
     await expect(page.getByText(BANTUAN_LUPA_PIN)).toBeHidden();
+  });
+
+  // OA1a: tahap 1 saja, tanpa mengirim kode, sehingga aman bagi akun uji bersama.
+  test("Lupa PIN? menautkan Owner ke atur ulang PIN tahap 1 tanpa meluber, lalu kembali", async ({ page }) => {
+    const kirimKode: string[] = [];
+    page.on("request", (r) => {
+      if (/\/api\/pengguna\/reset-pin-owner/.test(r.url())) kirimKode.push(r.url());
+    });
+    const akunSaya = page.waitForResponse((r) => /\/api\/akun\/me(\?|$)/.test(r.url()));
+    await masukAkun(page);
+    const email = ((await (await akunSaya).json()).data as { email: string }).email;
+
+    await page.getByRole("button", { name: "Lupa PIN?" }).click();
+    await page.getByRole("link", { name: "Atur ulang PIN Owner" }).click();
+    await page.waitForURL("**/lupa-pin");
+    await expect(page.getByRole("heading", { level: 1, name: "Atur ulang PIN Owner" })).toBeVisible();
+    await expect(page.getByText("Tahap 1 dari 2")).toBeVisible();
+    await expect(page.getByText(`Kode dikirim ke ${email}`)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Kirim kode" })).toBeEnabled();
+    await tanpaGulirDiSemuaLebar(page, "atur ulang PIN tahap 1");
+
+    await page.getByRole("link", { name: "Kembali ke masuk kasir" }).click();
+    await page.waitForURL("**/login/pengguna");
+    await expect(page.getByRole("heading", { level: 1, name: "Siapa yang bertugas?" })).toBeVisible();
+    expect(kirimKode, "tidak ada kode yang diminta").toEqual([]);
   });
 });

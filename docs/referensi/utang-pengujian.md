@@ -10,9 +10,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 
 ## Utang pengujian
 
-- **Reset PIN Owner belum punya spec**, karena web belum memakai OTP
-  reset PIN Owner (B178, belum dijadwalkan); rencana ujinya di
-  `modul/setup-akun.md`, Pengujian OTP.
+- **Spec reset PIN Owner (`auth/reset-pin-owner.spec.ts`) belum pernah
+  dijalankan**: ditulis 13 November 2026 (OA1a), dan sesuai pembatasan uji
+  OTP hanya dijalankan di suite penuh akhir putaran. Tahap 1 tanpa OTP
+  sudah lolos di `auth/tampilan-login-pengguna.spec.ts`.
 - **Pemilih outlet di jurnal stok dan pembelian stok hanya berisi satu
   pilihan** di MVP satu outlet, sehingga memilih outlet tidak memicu
   permintaan baru. Kedua jalur cakupan lokasi teruji e2e sejak

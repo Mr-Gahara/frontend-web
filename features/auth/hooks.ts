@@ -49,6 +49,16 @@ export function useResetPassword() {
   });
 }
 
+export function useKirimOtpResetPinOwner() {
+  return useMutation({ mutationFn: () => authApi.kirimOtpResetPinOwner() });
+}
+
+export function useResetPinOwner() {
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof authApi.resetPinOwner>[0]) => authApi.resetPinOwner(payload),
+  });
+}
+
 export function useLogoutAkun() {
   return useMutation({ mutationFn: () => authApi.logoutAkun() });
 }

@@ -83,6 +83,20 @@ export const skemaPasswordBaru = z
 export type NilaiPasswordBaru = z.infer<typeof skemaPasswordBaru>;
 
 /**
+ * Reset PIN Owner tahap 2 (B178): kode, password akun toko, dan PIN baru tepat
+ * 6 digit angka seperti aturan PIN saat dibuat (validators/penggunaValidator.js).
+ */
+export const skemaResetPinOwner = z
+  .object({
+    kode: aturanKode,
+    password: z.string().min(1, "Password akun toko wajib diisi"),
+    pinBaru: z.string().regex(/^\d{6}$/, "PIN baru harus 6 digit angka"),
+    ulangiPin: z.string().min(1, "Ulangi PIN baru wajib diisi"),
+  })
+  .refine((n) => n.pinBaru === n.ulangiPin, { path: ["ulangiPin"], message: "PIN tidak sama" });
+export type NilaiResetPinOwner = z.infer<typeof skemaResetPinOwner>;
+
+/**
  * Verifikasi email (B248). Tanpa password titipan daftar atau login, password
  * akun ikut diisi dengan aturan yang sama dengan daftar, karena password itu
  * menjadi password akun (A-01); dengan titipan hanya kode yang diperiksa.
