@@ -56,8 +56,11 @@ test("Owner mengatur ulang PIN lewat kode email, lalu masuk dengan PIN baru", as
 
     // HP: panel navy ringkas satu baris, panel penuh tersembunyi (OA6a).
     await hal.setViewportSize({ width: 390, height: 844 });
-    await expect(hal.locator("aside").filter({ has: hal.locator("time") })).toBeHidden();
-    await expect(hal.locator("aside").filter({ hasText: email })).toBeVisible();
+    // Panel penuh tetap di DOM (tersembunyi) dan memuat email juga, jadi yang diperiksa hanya panel terlihat.
+    const panelTampil = hal.locator("aside:visible");
+    await expect(panelTampil).toHaveCount(1);
+    await expect(panelTampil).toContainText(email);
+    await expect(panelTampil.locator("time")).toHaveCount(0);
     await hal.setViewportSize({ width: 1280, height: 800 });
 
     const kode = await ambilOtp(email, sejak);

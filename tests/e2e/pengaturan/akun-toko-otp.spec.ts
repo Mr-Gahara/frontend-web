@@ -15,7 +15,8 @@ import { akunBaru, isiTokoDanOwner } from "../../helpers/setup-uji";
  * Ubah email dan password akun lewat kode (OA3a, OA11a, OA12a; B179, B180)
  * pada akun klien sekali pakai (toko dan Owner lewat wizard), karena
  * keduanya benar-benar mengubah kredensial. Pemakaian OTP per run: 2 kirim
- * dan 3 periksa kode (inti/pengujian.md). Hanya dijalankan di suite penuh
+ * dan 2 periksa kode, karena password lama dan PIN diperiksa backend sebelum
+ * kode (inti/pengujian.md). Hanya dijalankan di suite penuh
  * akhir putaran.
  */
 const URL_AKUN = "/dashboard/outlet/pengaturan/akun";
@@ -100,7 +101,7 @@ test("Owner mengubah email, lalu password (salah password lama dulu), dan masuk 
   }
 });
 
-// OA5a, OA10a, OA11a, OA12a (B180, B181). Pemakaian OTP: 1 kirim dan 2 periksa kode.
+// OA5a, OA10a, OA11a, OA12a (B180, B181). Pemakaian OTP: 1 kirim dan 1 periksa kode (PIN salah ditolak sebelum kode).
 test("Owner menghapus akun beserta data toko: PIN salah ditolak di langkah 2, lalu terhapus", async ({ page }) => {
   const admin = kredensialAdmin();
   test.skip(!admin, ALASAN_TANPA_ADMIN);

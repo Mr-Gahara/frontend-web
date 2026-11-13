@@ -730,10 +730,11 @@ dan jumlah permintaannya tidak boleh melampaui batas:
   `resetPinOwnerLimiter` serta `hapusAkunLimiter` yang hanya menghitung
   percobaan gagal. Pemakaiannya tetap dicatat: `auth/reset-pin-owner.spec.ts`
   1 kirim dan 1 periksa kode per run, pada akun klien sekali pakai;
-  `pengaturan/akun-toko-otp.spec.ts` 2 kirim dan 3 periksa kode (satu
-  periksa sengaja ditolak karena password lama salah, OA11a), ditambah
-  skenario hapus akun 1 kirim dan 2 periksa (PIN salah lebih dulu). Total
-  OTP aksi Owner per suite penuh: 4 kirim dan 6 periksa kode.
+  `pengaturan/akun-toko-otp.spec.ts` 2 kirim dan 2 periksa kode untuk
+  ubah email dan password, ditambah 1 kirim dan 1 periksa untuk hapus akun.
+  Penolakan yang disengaja (password lama salah, PIN salah) tidak memakai
+  periksa kode, karena backend memeriksanya sebelum kode. Total OTP aksi
+  Owner per suite penuh: 4 kirim dan 4 periksa kode.
 
 Ketiga spec tulis stock opname membuat dokumen baru di setiap run dan
 menutupnya sebagai CANCELLED, sehingga dokumen CANCELLED bertambah tiga per

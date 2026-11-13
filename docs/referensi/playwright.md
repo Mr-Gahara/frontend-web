@@ -460,6 +460,28 @@ bersyarat).
   ikut berpindah ke halaman di luar layout itu. Pesan yang harus tampil
   setelah berpindah ke area login dititipkan lewat
   `lib/auth/pesan-login.ts` dan ditampilkan `app/login/layout.tsx`.
+  Layout itu hanya mengambil titipan saat terpasang, sehingga halaman yang
+  menitipkan pesan harus berada di luar `/login`: pindah antarrute di
+  bawah `/login` tidak memasang ulang layout, dan toastnya tidak pernah
+  muncul. Karena itu reset PIN Owner di `/lupa-pin`, bukan
+  `/login/pengguna/reset-pin` (OA12a).
+- `filter({ hasText })` dan `getByText` ikut mencocokkan elemen
+  tersembunyi CSS. Tata letak yang menyimpan dua versi panel (penuh dan
+  ringkas, satu disembunyikan per lebar layar) diperiksa lewat
+  `locator("aside:visible")` dengan jumlah 1, bukan `hasText`, yang
+  mencocokkan keduanya lalu gagal di mode strict (`/lupa-pin` tahap 2 di
+  HP, OA6a).
+- `masukSebagai` di `tests/helpers/terkunci-uji.ts` (`masukBacaSaja` dan
+  peran uji lain) membaca token lewat `pin-refresh`, jadi halaman harus
+  sudah login sebagai Ridho (`masuk(page)`) lebih dulu; tanpa itu
+  `bukaDenganAuth` habis waktu menunggu `pin-refresh` (spec Akun Toko,
+  13 November 2026).
+- Spec ber-OTP yang belum boleh dijalankan sendirian dibuktikan
+  prasyaratnya lewat spec sementara yang berhenti tepat sebelum
+  permintaan kode pertama (akun sekali pakai, halaman tujuan, dan locator
+  utama), lalu dihapus. Akun klien dari `akunBaru` dan `isiTokoDanOwner`
+  (Basic, tanpa lokasi outlet) terbukti dapat membuka halaman Pengaturan
+  dan `/lupa-pin` (13 November 2026).
 - Pemeriksaan "tidak ada" disempitkan ke bagian yang diuji. Locator
   gambar selebar halaman di spec profil mengenai avatar di sidebar, bukan
   halaman profil (`091be4e`).
