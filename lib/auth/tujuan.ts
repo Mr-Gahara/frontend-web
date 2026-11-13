@@ -44,6 +44,16 @@ export function tujuanSesudahLoginPengguna(kembali: string | null): string {
 }
 
 /**
+ * Meneruskan ?kembali=/setup ke halaman lain di jalur login pengguna (reset
+ * PIN Owner, OA1a), agar Owner yang sedang setup kembali ke wizard setelah
+ * masuk lagi. Nilai selain /setup tidak diteruskan, sama dengan
+ * tujuanSesudahLoginPengguna.
+ */
+export function denganKembali(path: string, kembali: string | null): string {
+  return kembali === KEMBALI_SETUP ? `${path}?kembali=${encodeURIComponent(KEMBALI_SETUP)}` : path;
+}
+
+/**
  * Tujuan pengalihan guard wizard setup; null berarti tetap di halaman.
  * setup null berarti status setup belum termuat. Setup yang tuntas tidak
  * dibuka lagi; Owner yang sudah terdaftar tetapi belum masuk (browser lain

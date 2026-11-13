@@ -12,6 +12,23 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per OTP aksi Owner** (web `8c3c1ea`, backend `ridho` lokal
+`d6709a1`, 13 November 2026, pukul 11.47 sampai 12.24 WIB, reporter
+`line,json`): e2e 636 lolos, 1 gagal, dan 1 skipped dari 638, sesuai
+harapan hitungan 638. Yang dilewati skip bersyarat status staf. Ketiga
+skenario ber-OTP Akun Toko (ubah email, ubah password dengan password lama
+salah lebih dulu, dan hapus akun) lolos pada run pertamanya.
+Kegagalannya `auth/reset-pin-owner.spec.ts`: PIN tersimpan dan login
+dengan PIN baru berhasil, tetapi Owner mendarat di dashboard, bukan
+kembali ke wizard, karena `/lupa-pin` tidak meneruskan `?kembali=/setup`
+(bug web, bukan spec). Diperbaiki lewat `denganKembali`
+(`lib/auth/tujuan.ts`) dan dibuktikan tanpa OTP: skenario Lupa PIN? di
+`auth/tampilan-login-pengguna.spec.ts` kini memeriksa `kembali` bertahan
+dua arah, dan bersama skenario wizard Owner tanpa sesi 3 lolos. Vitest
+1082 lolos. Spec ber-OTP reset PIN belum diulang (pembatasan uji OTP);
+harapan suite penuh berikutnya 637 lolos, ditambah skip status staf bila
+datanya kosong (hitungan).
+
 **Baseline per hapus akun** (13 November 2026): vitest 1081 lolos (3 unit
 test baru di `tests/unit/features/akun-toko/akun-toko.test.ts`). Spec
 terdampak `pengaturan/akun-toko.spec.ts` dan `tests/e2e/profil` 13 lolos:
@@ -642,6 +659,7 @@ Pola kegagalan yang berulang:
 | Pengguna uji terbatas berakhir di Profil Pengguna, dan permintaan halaman tujuan tidak pernah terkirim | `/dashboard` mengalihkan sendiri menurut izin (`app/dashboard/page.tsx`) dan dapat menyalip `goto` berikutnya; layout ruang outlet dan gudang menuntut `read-dashboard-outlet` dan `read-dashboard-gudang`. Helper peran uji menunggu URL meninggalkan `/dashboard`, dan peran uji memegang izin dashboard ruang yang dibukanya (`4601d91`) |
 | `page.goto` `net::ERR_ABORTED` tepat setelah spec memasang `page.route` 403 | Halaman sebelumnya masih memuat permintaan susulan (panel dashboard) yang ikut dijawab 403 dan mengalihkan ke /login. Pasang route setelah halaman tujuan termuat, lalu `reload({ waitUntil: "commit" })` (suite penuh 8 November 2026) |
 | Opsi popover terlepas dari DOM sekali lalu tidak kembali, hanya di spec ber-`page.clock` | Radix mengembalikan fokus ke pemicu popover sebelumnya lewat `setTimeout`, yang dipalsukan `page.clock`; bila berjalan setelah popover berikutnya dibuka, popover itu menutup. Tunggu popover lepas dan fokus kembali sebelum membuka popover berikutnya (`tungguPopoverLepas` di `tests/helpers/penjualan-uji.ts`). Dibuktikan dengan `page.clock.pauseAt` lalu `runFor`, bukan dengan angka flaky (suite penuh 12 November 2026) |
+| Alur berhasil tetapi mendarat di dashboard, bukan kembali ke wizard | Parameter `?kembali=/setup` hilang saat jalur login pengguna melewati halaman lain (`/lupa-pin`). Setiap halaman di jalur itu meneruskannya lewat `denganKembali` (`lib/auth/tujuan.ts`); periksa URL setelah tautan dan pengalihan, bukan hanya tujuan akhir (suite penuh 13 November 2026, OA1a) |
 | Isian PIN terlepas dari DOM saat login ulang sebagai pengguna lain di tab yang sama, lalu halaman sampai di dashboard tanpa `pin-login` | `/login` memulihkan sesi lama lewat cookie (`refreshtoken`, `pin-refresh`) bersamaan dengan login baru, dan halaman login pengguna mengalihkan begitu sesi lama pulih. Buang cookie (`about:blank`, `clearCookies`) sebelum login ulang (`masukSebagai`). Dibuktikan dengan menahan `pin-refresh` sampai URL `/login/pengguna` (suite 12 November 2026, RG4a) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 

@@ -4,6 +4,7 @@ import {
   tujuanGuardAdmin,
   tujuanGuardDashboard,
   tujuanGuardSetup,
+  denganKembali,
   tujuanSesudahLoginPengguna,
 } from "@/lib/auth/tujuan";
 
@@ -129,5 +130,14 @@ describe("tujuanSesudahLoginPengguna", () => {
     expect(tujuanSesudahLoginPengguna(null)).toBe("/dashboard");
     expect(tujuanSesudahLoginPengguna("https://contoh.id")).toBe("/dashboard");
     expect(tujuanSesudahLoginPengguna("/admin")).toBe("/dashboard");
+  });
+});
+
+describe("denganKembali (OA1a)", () => {
+  it("meneruskan hanya kembali=/setup", () => {
+    expect(denganKembali("/lupa-pin", "/setup")).toBe("/lupa-pin?kembali=%2Fsetup");
+    expect(denganKembali("/login/pengguna", "/setup")).toBe("/login/pengguna?kembali=%2Fsetup");
+    expect(denganKembali("/lupa-pin", null)).toBe("/lupa-pin");
+    expect(denganKembali("/lupa-pin", "https://contoh.id")).toBe("/lupa-pin");
   });
 });

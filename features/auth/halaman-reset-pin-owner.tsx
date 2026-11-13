@@ -2,12 +2,13 @@
 
 import { useEffect, useState, type ChangeEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { pesanError } from "@/lib/api/error";
 import { titipPesanLogin } from "@/lib/auth/pesan-login";
+import { denganKembali } from "@/lib/auth/tujuan";
 import { useSession } from "@/lib/auth/useSession";
 import { useAkunSaya } from "@/features/setup/hooks";
 import { hanyaAngka } from "@/features/pengguna/schema-profil";
@@ -88,7 +89,15 @@ function PanelKunci({ identitas, keterangan, ringkas }: { identitas: IdentitasPa
 }
 
 /** Tahap 1: penjelasan dan kirim kode ke email akun toko (B178 langkah pertama). */
-function TahapKirim({ email, onTerkirim }: { email: string | null; onTerkirim: (k: KirimanOtp) => void }) {
+function TahapKirim({
+  email,
+  urlLogin,
+  onTerkirim,
+}: {
+  email: string | null;
+  urlLogin: string;
+  onTerkirim: (k: KirimanOtp) => void;
+}) {
   const kirim = useKirimOtpResetPinOwner();
   const [galat, setGalat] = useState("");
   return (
@@ -118,7 +127,7 @@ function TahapKirim({ email, onTerkirim }: { email: string | null; onTerkirim: (
         {kirim.isPending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
         Kirim kode
       </button>
-      <Link href="/login/pengguna" className={KELAS_TAUTAN}>
+      <Link href={urlLogin} className={KELAS_TAUTAN}>
         Kembali ke masuk kasir
       </Link>
     </div>
@@ -285,6 +294,8 @@ export function HalamanResetPinOwner() {
   const { status, adaTokenAkun, adalahAdmin } = useSession();
   const identitas = identitasPanel(useAkunSaya(adaTokenAkun && !adalahAdmin).data);
   const [kiriman, setKiriman] = useState<KirimanOtp | null>(null);
+  // Owner yang dialihkan wizard (?kembali=/setup) kembali ke wizard setelah masuk lagi.
+  const urlLogin = denganKembali("/login/pengguna", useSearchParams().get("kembali"));
 
   useEffect(() => {
     if (status === "memuat") return;
@@ -311,11 +322,11 @@ export function HalamanResetPinOwner() {
               onKembali={() => setKiriman(null)}
               onSelesai={() => {
                 titipPesanLogin({ judul: "PIN Owner diubah", deskripsi: "Masuk dengan PIN baru." });
-                router.replace("/login/pengguna");
+                router.replace(urlLogin);
               }}
             />
           ) : (
-            <TahapKirim email={identitas.email} onTerkirim={setKiriman} />
+            <TahapKirim email={identitas.email} urlLogin={urlLogin} onTerkirim={setKiriman} />
           )}
         </div>
       </main>

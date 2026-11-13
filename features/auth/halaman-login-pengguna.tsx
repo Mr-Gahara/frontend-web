@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { pesanError } from "@/lib/api/error";
 import { akhiriSesi, setTokenPengguna } from "@/lib/auth/session";
-import { tujuanSesudahLoginPengguna } from "@/lib/auth/tujuan";
+import { denganKembali, tujuanSesudahLoginPengguna } from "@/lib/auth/tujuan";
 import { useSession } from "@/lib/auth/useSession";
 import { hanyaAngka } from "@/features/pengguna/schema-profil";
 import { hasilLoginPengguna } from "./hasil";
@@ -46,7 +46,8 @@ export function HalamanLoginPengguna() {
   });
   const masuk = useLoginPengguna();
   // Wizard setup mengirim Owner ke sini lalu menunggunya kembali (kembali=/setup).
-  const tujuan = tujuanSesudahLoginPengguna(useSearchParams().get("kembali"));
+  const kembali = useSearchParams().get("kembali");
+  const tujuan = tujuanSesudahLoginPengguna(kembali);
   const keluarAkun = useLogoutAkun();
   const memuat = masuk.isPending;
 
@@ -191,7 +192,7 @@ export function HalamanLoginPengguna() {
                 </li>
                 <li>
                   <span className="font-semibold">Owner:</span> atur ulang lewat kode di email akun toko.{" "}
-                  <Link href="/lupa-pin" className={KELAS_TAUTAN}>
+                  <Link href={denganKembali("/lupa-pin", kembali)} className={KELAS_TAUTAN}>
                     Atur ulang PIN Owner
                   </Link>
                 </li>

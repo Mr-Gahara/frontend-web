@@ -87,6 +87,14 @@ test.describe("Tampilan login pengguna", () => {
     await page.getByRole("link", { name: "Kembali ke masuk kasir" }).click();
     await page.waitForURL("**/login/pengguna");
     await expect(page.getByRole("heading", { level: 1, name: "Siapa yang bertugas?" })).toBeVisible();
+
+    // Owner yang dialihkan wizard (?kembali=/setup) tidak kehilangan jalan kembali ke wizard.
+    await page.goto("/login/pengguna?kembali=/setup");
+    await page.getByRole("button", { name: "Lupa PIN?" }).click();
+    await page.getByRole("link", { name: "Atur ulang PIN Owner" }).click();
+    await page.waitForURL(/\/lupa-pin\?kembali=%2Fsetup$/);
+    await page.getByRole("link", { name: "Kembali ke masuk kasir" }).click();
+    await page.waitForURL(/\/login\/pengguna\?kembali=%2Fsetup$/);
     expect(kirimKode, "tidak ada kode yang diminta").toEqual([]);
   });
 });
