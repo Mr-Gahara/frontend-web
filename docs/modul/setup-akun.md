@@ -258,7 +258,8 @@ bagian reset PIN Owner di TP2a.
   pemegang `update-akun`. Zona Bahaya nonaktif di Profil Pengguna
   dibuang. Halaman, kartu, ubah email, dan ubah password selesai di
   commit Akun Toko (13 November 2026, `features/akun-toko`); isian kode
-  memakai `IsianKode` 6 kotak bawaan (pilihan pemilik proyek).
+  memakai `IsianKode` 6 kotak bawaan (pilihan pemilik proyek). Hapus akun
+  (OA5a) dan pembuangan Zona Bahaya profil selesai di commit hapus akun.
 - **OA9a: judul `/dashboard/profil` tetap "Profil Pengguna"**, karena
   halaman itu kembali hanya berisi data pengguna. Permintaan sebelumnya
   untuk mengganti judul menjadi "Profil Akun" dibatalkan oleh OA8a.

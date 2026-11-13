@@ -8,6 +8,7 @@ import { pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
 import { useLevelPenggunaAktif } from "@/features/role/hooks";
 import { useAkunSaya } from "@/features/setup/hooks";
+import { DialogHapusAkun } from "./dialog-hapus-akun";
 import { DialogUbahEmail } from "./dialog-ubah-email";
 import { DialogUbahPassword } from "./dialog-ubah-password";
 import { bolehKelolaAkunToko } from "./izin";
@@ -36,7 +37,7 @@ export function HalamanAkunToko() {
   const { permissions } = useSession();
   const boleh = bolehKelolaAkunToko(permissions, useLevelPenggunaAktif());
   const akun = useAkunSaya(boleh);
-  const [dialog, setDialog] = useState<"email" | "password" | null>(null);
+  const [dialog, setDialog] = useState<"email" | "password" | "hapus" | null>(null);
 
   if (!boleh) return <HalamanGalat kode={403} tertanam />;
 
@@ -80,6 +81,39 @@ export function HalamanAkunToko() {
             open={dialog === "password"}
             onOpenChange={(buka) => setDialog(buka ? "password" : null)}
             idAkun={akun.data.id}
+          />
+        </section>
+      )}
+
+      {akun.data?.id && (
+        <section
+          aria-labelledby="judul-zona-bahaya"
+          className="flex flex-col gap-3 rounded-xl border border-destructive/50 bg-destructive/5 p-4 sm:p-6"
+        >
+          <h2 id="judul-zona-bahaya" className="text-sm font-semibold text-destructive">
+            Zona Bahaya
+          </h2>
+          <div className="flex flex-col items-start gap-3 border-t border-destructive/20 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-foreground">Hapus akun dan toko</p>
+              <p className="max-w-md text-[13px] leading-relaxed text-muted-foreground">
+                Menghapus akun toko beserta seluruh datanya. Semua pengguna toko langsung keluar. Tidak dapat
+                dibatalkan.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="destructive"
+              className="min-h-11 shrink-0 border border-destructive/20 sm:min-h-10"
+              onClick={() => setDialog("hapus")}
+            >
+              Hapus akun
+            </Button>
+          </div>
+          <DialogHapusAkun
+            open={dialog === "hapus"}
+            onOpenChange={(buka) => setDialog(buka ? "hapus" : null)}
+            namaToko={akun.data.daftarTenant?.[0]?.namaToko ?? ""}
           />
         </section>
       )}

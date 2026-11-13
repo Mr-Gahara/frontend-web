@@ -99,3 +99,58 @@ test("Owner mengubah email, lalu password (salah password lama dulu), dan masuk 
     await hapusAkunKlienUji(id, wajibAdmin());
   }
 });
+
+// OA5a, OA10a, OA11a, OA12a (B180, B181). Pemakaian OTP: 1 kirim dan 2 periksa kode.
+test("Owner menghapus akun beserta data toko: PIN salah ditolak di langkah 2, lalu terhapus", async ({ page }) => {
+  const admin = kredensialAdmin();
+  test.skip(!admin, ALASAN_TANPA_ADMIN);
+  test.skip(!(await mailpitMenyala()), ALASAN_TANPA_MAILPIT);
+  test.setTimeout(150_000);
+  const { id, email } = await akunBaru(page, "hapusakun");
+  let terhapus = false;
+  try {
+    await isiTokoDanOwner(page);
+    await page.goto(URL_AKUN);
+    const zona = page.getByRole("region", { name: "Zona Bahaya" });
+    await zona.getByRole("button", { name: "Hapus akun" }).click({ timeout: 15_000 });
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel(/Ketik nama toko/).fill("Kopi Senja E2E");
+    const sejak = new Date();
+    const kirim = tungguKirim(page);
+    await dialog.getByRole("button", { name: "Kirim kode dan lanjut" }).click();
+    expect((await kirim).request().postDataJSON()).toEqual({ tujuan: "hapus-akun" });
+    await expect(dialog.getByRole("heading", { name: 'Hapus "Kopi Senja E2E"' })).toBeVisible();
+
+    const kode = await ambilOtp(email, sejak);
+    await tempelKode(dialog.getByLabel("Digit 1 dari 6"), kode);
+    await dialog.getByLabel("PIN Owner").fill("000000");
+    await dialog.getByLabel("Password akun").fill(PASSWORD_AKUN_UJI);
+    const tungguHapus = () =>
+      page.waitForResponse((r) => r.request().method() === "DELETE" && /\/api\/akun\/profil$/.test(r.url()));
+    let hapus = tungguHapus();
+    await dialog.getByRole("button", { name: "Hapus permanen" }).click();
+    expect((await hapus).status(), "PIN salah").toBe(400);
+    await expect(dialog.getByRole("alert")).toContainText("PIN Owner salah");
+
+    await dialog.getByLabel("PIN Owner").fill("123456");
+    hapus = tungguHapus();
+    await dialog.getByRole("button", { name: "Hapus permanen" }).click();
+    const jawab = await hapus;
+    expect(jawab.status(), "DELETE /akun/profil").toBe(200);
+    expect(jawab.request().postDataJSON()).toEqual({
+      pin: "123456",
+      password: PASSWORD_AKUN_UJI,
+      namaToko: "Kopi Senja E2E",
+      otp: kode,
+    });
+    terhapus = true;
+
+    await page.waitForURL(/\/login$/);
+    await expect(page.getByText("Akun dihapus")).toBeVisible();
+    const login = page.waitForResponse((r) => /\/api\/akun\/auth\/login$/.test(r.url()));
+    await isiLoginAkun(page, email, PASSWORD_AKUN_UJI);
+    expect((await login).ok(), "akun yang dihapus tidak dapat masuk lagi").toBe(false);
+  } finally {
+    if (!terhapus) await hapusAkunKlienUji(id, wajibAdmin());
+  }
+});

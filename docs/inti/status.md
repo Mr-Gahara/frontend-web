@@ -168,9 +168,9 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
    B206 menyusul penyambungan langkah jam buka, di atas. Pengingat masa
    langganan selesai 12 November 2026 lewat lonceng topbar
    (`modul/setup-akun.md`, TP8a). OTP reset PIN Owner, ubah email atau
-   password akun, dan hapus akun oleh Owner (B178 sampai B181): desain
-   diputuskan 13 November 2026 (`modul/setup-akun.md`, OA1a sampai
-   OA12a), sedang dikerjakan.
+   password akun, dan hapus akun oleh Owner (B178 sampai B181): selesai
+   13 November 2026 (`modul/setup-akun.md`, OA1a sampai OA12a); spec
+   ber-OTP-nya menunggu suite penuh akhir putaran.
 3. **Halaman arus kas** (B291, LR2a): selesai 12 November 2026, tab
    Keuangan "Arus Kas" dengan desain D pemilik proyek (`modul/keuangan.md`,
    LR3a sampai LR6a).

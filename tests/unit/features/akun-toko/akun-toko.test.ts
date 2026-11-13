@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { bolehKelolaAkunToko } from "@/features/akun-toko/izin";
-import { kodeLengkap, skemaEmailBaru, skemaPasswordAkun } from "@/features/akun-toko/schema";
+import { kodeLengkap, namaTokoCocok, skemaBuktiOwner, skemaEmailBaru, skemaPasswordAkun } from "@/features/akun-toko/schema";
 
 describe("bolehKelolaAkunToko (OA8a)", () => {
   it("hanya Owner pemegang update-akun", () => {
@@ -44,5 +44,25 @@ describe("kodeLengkap", () => {
     expect(kodeLengkap(["4", "8", "2", "9", "1", "3"])).toBe(true);
     expect(kodeLengkap(["4", "8", "2", "9", "1", ""])).toBe(false);
     expect(kodeLengkap(["4", "8", "2", "9", "1", "a"])).toBe(false);
+  });
+});
+
+describe("namaTokoCocok (OA10a)", () => {
+  it("cocok persis, spasi di awal dan akhir diabaikan", () => {
+    expect(namaTokoCocok(" Kedai Tes ", "Kedai Tes")).toBe(true);
+  });
+  it("huruf besar-kecil harus sama, dan nama toko kosong tidak pernah cocok", () => {
+    expect(namaTokoCocok("kedai tes", "Kedai Tes")).toBe(false);
+    expect(namaTokoCocok("", "")).toBe(false);
+  });
+});
+
+describe("skemaBuktiOwner", () => {
+  it("PIN Owner 6 digit dan password akun terisi", () => {
+    expect(skemaBuktiOwner.safeParse({ pin: "123456", password: "x" }).success).toBe(true);
+    expect(skemaBuktiOwner.safeParse({ pin: "12345", password: "" }).error?.issues.map((i) => i.message)).toEqual([
+      "PIN Owner harus 6 digit angka",
+      "Password akun wajib diisi",
+    ]);
   });
 });

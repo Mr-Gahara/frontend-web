@@ -61,6 +61,21 @@ test("Owner membuka Akun Toko dari Pengaturan; tahap 1 kedua dialog memeriksa is
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
 
+  // Hapus akun langkah 1: kode baru dapat diminta setelah nama toko cocok persis (OA10a).
+  const zona = page.getByRole("region", { name: "Zona Bahaya" });
+  await zona.getByRole("button", { name: "Hapus akun" }).click();
+  await expect(dialog.getByText("Langkah 1 dari 2 · Pahami akibatnya")).toBeVisible();
+  const nama = (await dialog.locator('label[for="hapus-nama-toko"] span').innerText()).trim();
+  const lanjut = dialog.getByRole("button", { name: "Kirim kode dan lanjut" });
+  await expect(lanjut).toBeDisabled();
+  await dialog.getByLabel(/Ketik nama toko/).fill(nama.toLowerCase() === nama ? nama + "x" : nama.toLowerCase());
+  await expect(lanjut).toBeDisabled();
+  await dialog.getByLabel(/Ketik nama toko/).fill(` ${nama} `);
+  await expect(lanjut).toBeEnabled();
+  await tanpaGulirDiSemuaLebar(page, "dialog hapus akun");
+  await dialog.getByRole("button", { name: "Batal" }).click();
+  await expect(dialog).toBeHidden();
+
   expect(otp, "tidak ada kode maupun perubahan akun yang dikirim").toEqual([]);
 });
 

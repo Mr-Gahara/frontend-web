@@ -14,7 +14,6 @@ import {
   Shield,
   Store,
   Terminal,
-  Trash2,
   User,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -314,46 +313,6 @@ function KartuProfil({
   );
 }
 
-/**
- * Zona bahaya. Tombol hapus akun tampil nonaktif (keputusan PF2a): backend
- * belum punya jalur hapus akun sendiri, dan kebutuhannya (hanya Owner,
- * dengan autentikasi ulang) dicatat untuk tim backend.
- */
-function ZonaBahaya() {
-  return (
-    <div className="rounded-xl border border-destructive/50 bg-destructive/5 p-6 space-y-4">
-      <div>
-        <h2 className="text-sm font-semibold text-destructive">Zona Bahaya</h2>
-        <p className="text-xs text-muted-foreground">
-          Tindakan di bawah ini bersifat permanen dan memutus akses Anda dari
-          tenant.
-        </p>
-      </div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-t border-destructive/20 pt-4 gap-4">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-foreground">Hapus Akun Ini</p>
-          <p className="text-xs text-muted-foreground max-w-md">
-            Menghapus data kepegawaian Anda dari database tenant saat ini.
-            Sesi login akan segera dihentikan secara paksa.
-          </p>
-          <p id="keteranganHapusAkun" className="text-xs font-medium text-muted-foreground max-w-md">
-            Fitur ini belum tersedia.
-          </p>
-        </div>
-        <button
-          type="button"
-          disabled
-          aria-describedby="keteranganHapusAkun"
-          className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/20 h-10 py-2 px-4 shrink-0 cursor-pointer gap-2"
-        >
-          <Trash2 className="h-4 w-4" />
-          Hapus Akun
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export function HalamanProfil() {
   const { pengguna: sesi } = useSession();
   const profil = usePenggunaSaya();
@@ -404,7 +363,6 @@ export function HalamanProfil() {
         />
       )}
 
-      <ZonaBahaya />
     </div>
   );
 }

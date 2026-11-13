@@ -50,7 +50,10 @@ export function TahapKode({
   onKirimUlang,
   onKembali,
   onSimpan,
+  isianTambahan,
 }: {
+  /** Isian sesudah kode, misalnya PIN dan password saat hapus akun; divalidasi di onSimpan. */
+  isianTambahan?: ReactNode;
   kiriman: KirimanOtp;
   keterangan?: ReactNode;
   catatan?: ReactNode;
@@ -111,13 +114,22 @@ export function TahapKode({
           </p>
         )}
       </div>
+      {isianTambahan}
       {catatan && <p className="text-xs leading-relaxed text-muted-foreground">{catatan}</p>}
       <PesanGalat pesan={galat} />
       <DialogFooter className="sm:justify-between">
         <Button type="button" variant="outline" className="min-h-11 sm:min-h-9" onClick={onKembali} disabled={menyimpan}>
           Kembali
         </Button>
-        <Button type="submit" variant={varianSimpan} className="min-h-11 sm:min-h-9" disabled={menyimpan}>
+        <Button
+          type="submit"
+          variant={varianSimpan}
+          className={
+            "min-h-11 sm:min-h-9" +
+            (varianSimpan === "destructive" ? " bg-destructive text-white hover:bg-destructive/90" : "")
+          }
+          disabled={menyimpan}
+        >
           {menyimpan && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
           {labelSimpan}
         </Button>

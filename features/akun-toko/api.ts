@@ -18,4 +18,7 @@ export const akunTokoApi = {
     apiData.put<unknown>(EP.akun.profilUbah(id), payload),
   ubahPassword: (id: string, payload: { oldPassword: string; password: string; otp: string }) =>
     apiData.put<unknown>(EP.akun.profilUbah(id), payload),
+  /** Menghapus akun beserta seluruh data toko (B181); PIN, password, atau nama toko salah tidak menghanguskan kode. */
+  hapus: (payload: { pin: string; password: string; namaToko: string; otp: string }) =>
+    apiData.delete<unknown>(EP.akun.profil, "pengguna", payload),
 };

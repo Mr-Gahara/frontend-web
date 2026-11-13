@@ -16,6 +16,20 @@ export const skemaEmailBaru = (emailSaatIni: string) =>
   });
 export type NilaiEmailBaru = z.infer<ReturnType<typeof skemaEmailBaru>>;
 
+/**
+ * Hapus akun langkah 1 (OA10a): nama toko cocok persis seperti pemeriksaan
+ * backend (spasi di awal dan akhir diabaikan, huruf besar-kecil sama).
+ */
+export const namaTokoCocok = (diketik: string, namaToko: string) =>
+  namaToko.trim() !== "" && diketik.trim() === namaToko.trim();
+
+/** Hapus akun langkah 2: PIN Owner 6 digit dan password akun terisi. */
+export const skemaBuktiOwner = z.object({
+  pin: z.string().regex(/^\d{6}$/, "PIN Owner harus 6 digit angka"),
+  password: z.string().min(1, "Password akun wajib diisi"),
+});
+export type NilaiBuktiOwner = z.infer<typeof skemaBuktiOwner>;
+
 /** Ubah password tahap 1: aturan password baru sama dengan daftar dan validator backend. */
 export const skemaPasswordAkun = z
   .object({

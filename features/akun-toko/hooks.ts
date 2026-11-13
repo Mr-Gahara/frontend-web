@@ -23,6 +23,13 @@ export function useUbahEmailAkun() {
   });
 }
 
+/** Seluruh sesi toko langsung ditolak backend sesudahnya; pemanggil mengakhiri sesi lokal. */
+export function useHapusAkun() {
+  return useMutation({
+    mutationFn: (v: { pin: string; password: string; namaToko: string; otp: string }) => akunTokoApi.hapus(v),
+  });
+}
+
 /** Password baru mencabut seluruh sesi akun (M3 backend); pemanggil mengakhiri sesi lokal. */
 export function useUbahPasswordAkun() {
   return useMutation({

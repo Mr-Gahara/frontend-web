@@ -128,8 +128,9 @@ empat commit, dengan suite e2e penuh dijalankan sekali di akhir modul
 
 - Tombol hapus akun di halaman profil tampil nonaktif (PF2a) sampai
   backend punya jalur hapus akun sendiri bagi Owner (`kontrak/temuan.md`
-  butir 112). Backend menyediakannya di B181; sedang dikerjakan lewat
-  OA5a dan OA8a (`modul/setup-akun.md`).
+  butir 112). Backend menyediakannya di B181; selesai 13 November 2026
+  lewat OA5a dan OA8a: Zona Bahaya profil dibuang, dan hapus akun berada
+  di halaman Akun Toko (`modul/setup-akun.md`).
 - Unggah foto profil belum ada; avatar memakai inisial (PF9a). Bukan
   kebutuhan MVP, dan ditinjau setelah rilis.
 - Halaman ringkasan laba rugi memicu peringatan ukuran grafik di konsol

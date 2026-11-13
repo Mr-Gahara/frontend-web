@@ -36,7 +36,7 @@ async function simpan(hal: Page) {
 test.describe("Kelola profil pengguna", () => {
   test.setTimeout(120_000);
 
-  test("tampilan: simpan nonaktif tanpa perubahan, hapus akun nonaktif, dan isian tersaring", async ({
+  test("tampilan: simpan nonaktif tanpa perubahan, tanpa Zona Bahaya (OA8a), dan isian tersaring", async ({
     page,
     browser,
   }) => {
@@ -44,8 +44,9 @@ test.describe("Kelola profil pengguna", () => {
     const { ctx, hal } = await bukaProfil(browser);
     try {
       await expect(tombolSimpan(hal)).toBeDisabled();
-      await expect(hal.getByRole("button", { name: "Hapus Akun" })).toBeDisabled();
-      await expect(hal.getByText("Fitur ini belum tersedia.")).toBeVisible();
+      // Hapus akun pindah ke halaman Akun Toko di Pengaturan (OA8a).
+      await expect(hal.getByText("Zona Bahaya")).toHaveCount(0);
+      await expect(hal.getByRole("button", { name: /Hapus Akun/i })).toHaveCount(0);
       await expect(hal.getByRole("main").locator('img[src*="github.com"]')).toHaveCount(0);
 
       await isianHp(hal).fill("");
