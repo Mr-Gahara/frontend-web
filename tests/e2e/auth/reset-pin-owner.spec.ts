@@ -38,7 +38,8 @@ test("Owner mengatur ulang PIN lewat kode email, lalu masuk dengan PIN baru", as
     await hal.waitForURL(/\/login\/pengguna/);
     await hal.getByRole("button", { name: "Lupa PIN?" }).click();
     await hal.getByRole("link", { name: "Atur ulang PIN Owner" }).click();
-    await hal.waitForURL("**/lupa-pin");
+    // Wizard mengirim Owner ke sini dengan ?kembali=/setup, dan /lupa-pin meneruskannya.
+    await hal.waitForURL(/\/lupa-pin\?kembali=%2Fsetup$/);
 
     const sejak = new Date();
     const tKirim = hal.waitForResponse(

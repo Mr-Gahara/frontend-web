@@ -10,12 +10,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 
 ## Utang pengujian
 
-- **Spec reset PIN Owner (`auth/reset-pin-owner.spec.ts`) belum lolos
-  utuh**: di suite penuh 13 November 2026 reset dan login PIN baru
-  berhasil, tetapi langkah terakhir gagal karena `?kembali=/setup` hilang
-  (diperbaiki, `denganKembali`). Perbaikannya terbukti tanpa OTP; alur
-  ber-OTP-nya menunggu suite penuh berikutnya atau izin pemilik proyek
-  untuk diulang sendirian (1 kirim dan 1 periksa kode).
 - **Penolakan Akun Toko bagi pemegang `update-akun` yang bukan Owner hanya
   teruji di unit test** (`bolehKelolaAkunToko`): tidak ada peran uji yang
   memegang izin itu, dan e2e hanya membuktikan pengguna tanpa izinnya.
