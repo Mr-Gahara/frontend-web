@@ -12,6 +12,17 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per halaman Akun Toko** (13 November 2026): vitest 1078 lolos (6
+unit test baru `tests/unit/features/akun-toko/akun-toko.test.ts`). Spec
+terdampak `tests/e2e/pengaturan` dan `auth/gerbang-rute` 52 lolos, termasuk
+spec baru `pengaturan/akun-toko.spec.ts` (2 skenario: Owner membuka dari
+kartu Pengaturan dan memeriksa tahap 1 kedua dialog tanpa mengirim kode di
+390, 768, dan 1280 px; pengguna baca-saja tanpa kartu dan ditolak 403).
+Spec baru ber-OTP `pengaturan/akun-toko-otp.spec.ts` (1 skenario, akun
+klien sekali pakai) belum dijalankan dan menunggu suite penuh akhir
+putaran. Harapan suite penuh 637: 634 ditambah ketiga skenario itu
+(hitungan).
+
 **Baseline per reset PIN Owner** (13 November 2026): vitest 1072 lolos (4
 unit test baru `tests/unit/features/auth/reset-pin-owner.test.ts`). Spec
 terdampak `auth/tampilan-login-pengguna.spec.ts` 5 lolos, termasuk
@@ -709,7 +720,9 @@ dan jumlah permintaannya tidak boleh melampaui batas:
   per akun (jeda dan batas harian, dilonggarkan lewat env layanan uji) dan
   `resetPinOwnerLimiter` serta `hapusAkunLimiter` yang hanya menghitung
   percobaan gagal. Pemakaiannya tetap dicatat: `auth/reset-pin-owner.spec.ts`
-  1 kirim dan 1 periksa kode per run, pada akun klien sekali pakai.
+  1 kirim dan 1 periksa kode per run, pada akun klien sekali pakai;
+  `pengaturan/akun-toko-otp.spec.ts` 2 kirim dan 3 periksa kode (satu
+  periksa sengaja ditolak karena password lama salah, OA11a).
 
 Ketiga spec tulis stock opname membuat dokumen baru di setiap run dan
 menutupnya sebagai CANCELLED, sehingga dokumen CANCELLED bertambah tiga per

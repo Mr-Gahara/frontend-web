@@ -19,6 +19,7 @@ interface ResponsOwner {
  */
 /** data GET /api/akun/me yang dipakai wizard dan login pengguna (B240). */
 export interface AkunSaya {
+  id?: string;
   email?: string;
   daftarTenant?: { namaToko?: string }[];
 }

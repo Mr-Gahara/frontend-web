@@ -53,6 +53,8 @@ export const IZIN = {
   akunKas: "read-akunkas",
   sesiKasir: "read-sesi-kasir",
   langganan: "read-langganan",
+  /** Aksi Owner atas akun toko (B179 sampai B181); backend juga menuntut level Owner. */
+  ubahAkun: "update-akun",
   laporan: "read-laporan",
   pelanggan: "read-pelanggan",
   booking: "read-booking",
@@ -265,6 +267,8 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   // read-langganan dipegang Owner dan dapat diberikan ke role lain (B229),
   // menggantikan pengecualian role LG2a.
   "/dashboard/outlet/pengaturan/langganan": [IZIN.langganan],
+  // Bukan menu sidebar (OA7, OA8a); level Owner diperiksa halaman dan kartunya.
+  "/dashboard/outlet/pengaturan/akun": [IZIN.ubahAkun],
   "/dashboard/outlet/pengguna": [IZIN.pengguna, IZIN.role],
 
   // Inventaris outlet

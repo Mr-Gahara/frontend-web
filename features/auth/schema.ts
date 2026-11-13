@@ -31,7 +31,7 @@ export const skemaLoginPengguna = z.object({
 export type NilaiLoginPengguna = z.infer<typeof skemaLoginPengguna>;
 
 /** Aturan password akun, sama dengan validateRegister backend; dipakai daftar dan password baru. */
-const aturanPassword = z
+export const aturanPassword = z
   .string()
   .min(1, "Password wajib diisi")
   .min(8, "Password minimal 8 karakter")

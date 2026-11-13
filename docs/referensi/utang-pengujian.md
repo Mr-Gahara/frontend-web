@@ -13,7 +13,12 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Spec reset PIN Owner (`auth/reset-pin-owner.spec.ts`) belum pernah
   dijalankan**: ditulis 13 November 2026 (OA1a), dan sesuai pembatasan uji
   OTP hanya dijalankan di suite penuh akhir putaran. Tahap 1 tanpa OTP
-  sudah lolos di `auth/tampilan-login-pengguna.spec.ts`.
+  sudah lolos di `auth/tampilan-login-pengguna.spec.ts`. Begitu pula
+  `pengaturan/akun-toko-otp.spec.ts` (ubah email dan password, OA3a);
+  tahap 1 tanpa kode lolos di `pengaturan/akun-toko.spec.ts`.
+- **Penolakan Akun Toko bagi pemegang `update-akun` yang bukan Owner hanya
+  teruji di unit test** (`bolehKelolaAkunToko`): tidak ada peran uji yang
+  memegang izin itu, dan e2e hanya membuktikan pengguna tanpa izinnya.
 - **Pemilih outlet di jurnal stok dan pembelian stok hanya berisi satu
   pilihan** di MVP satu outlet, sehingga memilih outlet tidak memicu
   permintaan baru. Kedua jalur cakupan lokasi teruji e2e sejak

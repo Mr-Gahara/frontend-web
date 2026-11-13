@@ -11,8 +11,13 @@ import {
   Settings,
   Wallet,
   Tags,
-  CreditCard
+  CreditCard,
+  KeyRound
 } from "lucide-react"
+import { useLevelPenggunaAktif } from "@/features/role/hooks";
+import { bolehKelolaAkunToko } from "@/features/akun-toko/izin";
+
+const HREF_AKUN_TOKO = "/dashboard/outlet/pengaturan/akun"
 
 // Data rute pengaturan dengan palet Tetradic (Mustard & Sage Green)
 const settingsModules = [
@@ -57,6 +62,13 @@ const settingsModules = [
     icon: CreditCard,
     href: "/dashboard/outlet/pengaturan/langganan",
     iconColor: "text-sage", // Sage Green
+  },
+  {
+    title: "Akun Toko",
+    description: "Email dan password masuk akun toko, serta hapus akun beserta data toko. Hanya Owner.",
+    icon: KeyRound,
+    href: HREF_AKUN_TOKO,
+    iconColor: "text-karamel", // Mustard
   }
 ]
 
@@ -64,8 +76,12 @@ export default function PengaturanPage() {
   // Kartu mengikuti gerbang halamannya (IZIN_HALAMAN): kartu Pajak hanya
   // tampil bagi pemegang read-pajak atau akses-pos (keputusan FC3a), dan
   // kartu Langganan bagi pemegang read-langganan (B229).
+  // Kartu Akun Toko juga menuntut level Owner, seperti halamannya (OA8a).
   const { permissions } = useSession();
-  const modulTampil = settingsModules.filter((modul) => bolehBukaHalaman(modul.href, permissions));
+  const owner = bolehKelolaAkunToko(permissions, useLevelPenggunaAktif());
+  const modulTampil = settingsModules.filter(
+    (modul) => bolehBukaHalaman(modul.href, permissions) && (modul.href !== HREF_AKUN_TOKO || owner),
+  );
   return (
     <div className="p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full overflow-x-hidden">
       

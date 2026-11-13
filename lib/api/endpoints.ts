@@ -19,6 +19,10 @@ export const EP = {
     kirimVerifikasiEmail: "/akun/auth/verifikasi-email/kirim",
     lupaPassword: "/akun/auth/lupa-password",
     resetPassword: "/akun/auth/reset-password",
+    /** Aksi Owner atas akun sendiri, bertoken pengguna (B179 sampai B181). */
+    profil: "/akun/profil",
+    profilOtp: "/akun/profil/otp",
+    profilUbah: (id: string) => `/akun/profil/update/${id}`,
     langganan: "/akun/langganan",
     langgananRiwayat: "/akun/langganan/riwayat",
     logout: "/akun/auth/logout",
