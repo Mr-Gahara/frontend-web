@@ -18,7 +18,9 @@ rancangan butir 17, 21, dan 23.
   `alert`. Backend diminta menyediakan jalur hapus akun sendiri: hanya
   Owner, mencakup akun beserta tokonya, dengan konfirmasi password atau
   autentikasi dua kali, dan admin platform tetap berkuasa penuh atas
-  semua akun (`kontrak/temuan.md` butir 112).
+  semua akun (`kontrak/temuan.md` butir 112). Digantikan OA5a dan OA8a
+  (13 November 2026, `modul/setup-akun.md`): hapus akun pindah ke halaman
+  Akun Toko di Pengaturan, dan Zona Bahaya profil dibuang.
 - **PF3a: form login akun dan login pengguna memakai React Hook Form,
   Zod, dan `noValidate`**, menggantikan validasi HTML5 browser. Login
   pengguna hanya menuntut PIN terisi dan berupa angka; panjang tepat 6
@@ -126,7 +128,8 @@ empat commit, dengan suite e2e penuh dijalankan sekali di akhir modul
 
 - Tombol hapus akun di halaman profil tampil nonaktif (PF2a) sampai
   backend punya jalur hapus akun sendiri bagi Owner (`kontrak/temuan.md`
-  butir 112).
+  butir 112). Backend menyediakannya di B181; sedang dikerjakan lewat
+  OA5a dan OA8a (`modul/setup-akun.md`).
 - Unggah foto profil belum ada; avatar memakai inisial (PF9a). Bukan
   kebutuhan MVP, dan ditinjau setelah rilis.
 - Halaman ringkasan laba rugi memicu peringatan ukuran grafik di konsol

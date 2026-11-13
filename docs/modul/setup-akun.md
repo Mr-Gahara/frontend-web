@@ -208,6 +208,69 @@ Mesinnya mengikuti keputusan rancangan butir 32.
   tur selesai. Ruang gudang belum punya tur, sehingga tombolnya tidak
   tampil di sana.
 
+### OTP aksi Owner
+
+Diputuskan pemilik proyek pada 13 November 2026 dari kanvas desain "OTP
+Aksi Owner" (reset PIN, Akun Toko A dan B, hapus akun A dan B, desktop
+dan HP 390 px), memakai B178 sampai B181 backend. Akhiran huruf mengikuti
+opsi dialog yang dipilih; kode tanpa huruf adalah arahan yang ditulis
+pemilik proyek sendiri. Menggantikan PF2a (`modul/profil-login.md`) dan
+bagian reset PIN Owner di TP2a.
+
+- **OA1a: reset PIN Owner tiga layar.** Tautan "Atur ulang PIN Owner" di
+  panel Lupa PIN? login pengguna membuka tahap 1 (penjelasan dan Kirim
+  kode). Sesudah kode terkirim, tahap 2 berisi kode, password akun toko,
+  PIN baru, dan ulangi PIN, dengan kirim ulang berhitung mundur. Sesudah
+  tersimpan, kembali ke login pengguna untuk masuk dengan PIN baru. Tata
+  letaknya sama dengan login pengguna (desain E). Rute
+  `/login/pengguna/reset-pin` dipilih sisi teknis.
+- **OA2: setiap tahap satu layar tersendiri**, bukan beberapa tahap dalam
+  satu layar; berlaku juga untuk Akun Toko dan hapus akun.
+- **OA3a: ubah email dan password akun lewat dialog di tengah, dua
+  tahap**: isian (email baru, atau password lama, baru, dan ulangi) lalu
+  Kirim kode, kemudian kode dan Simpan. Email: toast sukses bawaan
+  aplikasi, dan kartu menampilkan email baru. Password: pindah ke login
+  akun dengan pesan masuk lagi.
+- **OA4: toast sukses memakai popup bawaan** (sonner `richColors`, hijau,
+  "Berhasil"), bukan toast berwarna navy.
+- **OA5a: hapus akun lewat dialog dua langkah** (desain B kanvas).
+  Langkah 1: akibat dan ketik nama toko, lalu "Kirim kode dan lanjut".
+  Langkah 2: kode, PIN Owner, dan password akun, lalu Hapus permanen.
+  Sesudahnya pindah ke login akun dengan pesan akun dan data toko telah
+  dihapus.
+- **OA6a: versi HP 390 px sesuai kanvas.** Tahap 2 reset PIN memakai
+  panel navy ringkas satu baris; dialog selebar layar dikurangi 16 px
+  dengan tombol bertumpuk (aksi utama di atas, tinggi minimal 44 px);
+  isian berhuruf 16 px; baris email dan password boleh terlipat; toast di
+  atas selebar layar; tablet memakai tata letak desktop. Dibuktikan e2e
+  di 390, 768, dan 1280 px tanpa meluber.
+- **OA7: Akun Toko tidak menambah atau mengubah sidebar.**
+- **OA8a: halaman sendiri "Akun Toko"** di
+  `/dashboard/outlet/pengaturan/akun`, dibuka dari kartu baru di halaman
+  Pengaturan (urutan terakhir, setelah Langganan, berketerangan "Email dan
+  password masuk akun toko, serta hapus akun beserta data toko. Hanya
+  Owner."). Halaman berjudul "Akun Toko" ("Email, password, dan
+  penghapusan akun toko. Hanya untuk Owner."), berisi kartu "Email dan
+  Password" dan Zona Bahaya. Kartu dan halamannya hanya bagi Owner
+  pemegang `update-akun`. Zona Bahaya nonaktif di Profil Pengguna
+  dibuang.
+- **OA9a: judul `/dashboard/profil` tetap "Profil Pengguna"**, karena
+  halaman itu kembali hanya berisi data pengguna. Permintaan sebelumnya
+  untuk mengganti judul menjadi "Profil Akun" dibatalkan oleh OA8a.
+- **OA10a: tombol "Kirim kode dan lanjut" hapus akun aktif hanya bila
+  nama toko cocok persis** (spasi di awal dan akhir diabaikan, huruf
+  besar-kecil sama seperti backend).
+- **OA11a: penolakan backend di tahap 2 tampil di tahap 2**, dan isian
+  kode tetap (backend tidak menghanguskan kode untuk password lama salah,
+  email terpakai, atau PIN dan password salah saat hapus). Untuk ubah
+  email atau password, Kembali membawa ke tahap 1 dengan isian tetap
+  terisi, dan Kirim kode di tahap 1 tidak wajib diulang: ada pilihan
+  "Lanjut dengan kode yang sama".
+- **OA12a: pesan sesudah keluar memakai toast bawaan login**
+  (`titipPesanLogin`, seperti PF7a): toast hijau di kanan atas halaman
+  login, bukan kotak di dalam form seperti di kanvas. Reset PIN kembali ke
+  login pengguna dengan toast "PIN Owner diubah".
+
 ## Kriteria setup
 
 | Kriteria | Minimal | Plan |

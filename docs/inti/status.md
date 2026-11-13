@@ -165,11 +165,12 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
    galat. Spec e2e-nya menunggu suite penuh di akhir putaran.
 2. **Belum dijadwalkan, perlu desain**: logo toko selesai 12 November
    2026 (`modul/pengaturan-outlet.md`, PO17a dan PO18a); jam operasional
-   B206 menyusul penyambungan langkah jam buka, di atas; OTP reset PIN
-   Owner dan ubah
-   email atau password akun (B178 sampai B180); hapus akun oleh Owner
-   (B181). Pengingat masa langganan selesai 12 November 2026 lewat
-   lonceng topbar (`modul/setup-akun.md`, TP8a).
+   B206 menyusul penyambungan langkah jam buka, di atas. Pengingat masa
+   langganan selesai 12 November 2026 lewat lonceng topbar
+   (`modul/setup-akun.md`, TP8a). OTP reset PIN Owner, ubah email atau
+   password akun, dan hapus akun oleh Owner (B178 sampai B181): desain
+   diputuskan 13 November 2026 (`modul/setup-akun.md`, OA1a sampai
+   OA12a), sedang dikerjakan.
 3. **Halaman arus kas** (B291, LR2a): selesai 12 November 2026, tab
    Keuangan "Arus Kas" dengan desain D pemilik proyek (`modul/keuangan.md`,
    LR3a sampai LR6a).
@@ -193,8 +194,8 @@ MK17a (`modul/keuangan.md`, menunggu backend), ruang mengikuti lokasi
 kerja LK3a (`modul/jadwal-shift.md`), Tandai Selesai tetap di detail
 penjualan (NZ7a) dan khusus member menunggu modul membership (NZ6a),
 nama toko di login pengguna TP2b (`modul/setup-akun.md`), dan Lampiran
-A dibangkitkan ulang RG9a. Yang dapat dikerjakan web sekarang: TP2b,
-LK3a, dan RG9a.
+A dibangkitkan ulang RG9a. Ketiganya selesai 10 November 2026: TP2b
+(`19498b7`), LK3a (`bce1362`), dan RG9a (`c2c5915`).
 
 ### Utang kecil dari penyesuaian backend `4759208`
 
