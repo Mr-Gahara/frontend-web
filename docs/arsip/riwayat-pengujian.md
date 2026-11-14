@@ -967,6 +967,48 @@ skenario draft stock opname (`d6f8ba0`).
 
 Dipindah dari `inti/pengujian.md` (Utang pengujian) pada 25 Oktober 2026.
 
+Dilunasi 14 November 2026 (`2bcb1ce`) dan dipindah dari
+`referensi/utang-pengujian.md` tanpa perubahan teks: jalur bukan-Owner
+lewat pengguna uji baru (E2E Akun Bukan Owner, E2E Pencatat Beban, E2E
+Tanpa Lokasi, E2E Tanpa SDM, ditambah E2E Pembelian Outlet untuk tanggal
+pembelian) di `tests/e2e/akses/jalur-bukan-owner.spec.ts`, B165 Tambah
+Manual dan sel lokal bersama penanda di `kelola-jadwal.spec.ts`, email
+pelanggan di `kelola-pelanggan.spec.ts`, dan skip tanpa judul (suite penuh
+14 November 2026 dengan reporter json tanpa skip).
+
+- **Penolakan Akun Toko bagi pemegang `update-akun` yang bukan Owner hanya
+  teruji di unit test** (`bolehKelolaAkunToko`): tidak ada peran uji yang
+  memegang izin itu, dan e2e hanya membuktikan pengguna tanpa izinnya.
+- **Jalur tanggal terkunci bagi peran selain Owner di catat beban hanya
+  teruji di unit test** (`payloadBuatBeban`), karena pengguna uji
+  berperan Owner (BO5a).
+- **Jalur tanpa `read-location` di halaman penjualan** (tanpa cakupan, dan
+  tanpa `locationID` saat membuat) hanya teruji di unit test, dengan alasan
+  yang sama: satu-satunya akun uji berperan Owner.
+- **Libur nonaktif selama jadwal tanggal Tambah Manual dimuat (CV10a)
+  dan tanggal Tambah Manual di luar bulan yang tampil** hanya teruji lewat
+  kode dan unit test `adaJadwalLokasiLain`; skenario e2e B165 memilih
+  tanggal di bulan yang sedang tampil.
+- **Pengosongan email dan alamat pelanggan tidak teruji e2e**; yang
+  teruji hanya nomor HP. Peringatan `isianTidakTerkosongkan` dibuang di
+  `1bb26c0`.
+- **Email pelanggan kembar yang dijawab 409 hanya dibaca dari kode**;
+  e2e menguji nomor HP kembar.
+- **Jalur tanggal pembelian bagi peran selain Owner** hanya teruji di
+  unit test (`payloadBuatPembelian`), karena akun uji berperan Owner.
+- **Jalur role tanpa izin SDM baru** (B139, B140) hanya teruji di unit
+  test (`gate-sdm-jadwal`, templat role), karena akun uji berperan Owner.
+- **Kalender per lokasi hanya teruji untuk sel yang berisi penanda
+  saja**; sel yang berisi jadwal lokal sekaligus penanda lokasi lain
+  belum diuji e2e.
+- **Skenario dilewati tanpa judul tercatat**: satu di suite penuh
+  `50c99ae` selain jurnal stok, satu di `6db571d`, dan dua di suite
+  terhadap backend `4759208` (spec daftar tidak termasuk; 29 spec lain
+  ber-skip bersyarat), serta dua di suite penuh terhadap backend `ridho`
+  `c031bde` (6 November 2026). Tidak dicari dengan
+  menjalankan ulang sebagian suite; reporter `json` di suite penuh
+  berikutnya mencatat judulnya (`referensi/playwright.md`).
+
 - **Relasi ke pajak nonaktif tidak dapat diuji dari web**, karena backend
   tidak mengirimnya (butir 93).
   Teruji e2e sejak `ed4bfd3`, setelah backend mengirimnya (RH4a).

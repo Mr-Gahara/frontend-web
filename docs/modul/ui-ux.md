@@ -291,6 +291,48 @@ sampel tampilan dan pengukuran DOM. Perbaikan di `883a79b`.
 - **CV19a: `inventaris-nav-tabs.tsx` dihapus**, karena tidak diimpor di
   mana pun; folder `components` di rute inventaris outlet ikut hilang.
 
+### Rapian UI 14 November 2026
+
+Diputuskan pemilik proyek pada 14 November 2026.
+
+- **CV20a: label kartu HP untuk kolom berkepala komponen**, setelah
+  pratinjau 13 halaman di 390 px: 43 kolom diberi `meta.label` sama dengan
+  kepala desktopnya; empat kolom yang isinya disembunyikan di HP (Tanggal
+  dan Pelanggan daftar penjualan, Tanggal dan Lokasi stock opname) tanpa
+  label (`ceb8c95`).
+- **CV21a: warna heksadesimal menjadi token** tanpa perubahan tampilan.
+  Sembilan belas token turunan (sage-tua, sage-muda, sage-pucat,
+  sage-terang, karamel-tua, karamel-redup, cokelat, cokelat-tua,
+  cokelat-zaitun, cokelat-abu, pasir, krem-muda, krem-hover, navy-terang,
+  emas, tembaga, merah-tingkat, rose-terang, abu-teks) ditambah rose-lama
+  untuk `#F43F5E`, karena rose-500 Tailwind 4 di proyek ini
+  `oklch(64.5% 0.246 16.439)`. `lib/warna.ts` memberi `WARNA` untuk style
+  dan recharts, dan `denganAlfa()` menggantikan akhiran alfa heksadesimal
+  dengan `color-mix` yang setara. Pembandingan piksel 11 tangkapan identik
+  (`c437d68`).
+- **CV22a: tabel rincian halaman detail memakai DataTable berkartu baris**
+  (kanvas "Tabel Rincian", arah A): panel berlatar dibuang, judul bagian
+  di atas, prop `rincian` (seluruh baris tanpa kaki tabel), nilai rata
+  kiri di kartu HP. Delapan berkas: detail penjualan (dua tabel), detail
+  dan revisi surat jalan, detail pengajuan outlet dan gudang, detail stock
+  adjustment, detail stock opname, dan riwayat Langganan (`eb64c70`).
+- **CV23a: grid langkah 2 generate jadwal ditunda** bersama kalender
+  jadwal (TB4a), karena bentuknya grid staf x tanggal, bukan tabel rincian.
+- **CV24a: skala tipografi tujuh tingkat** (kanvas "Token Tipografi dan
+  Spasi", arah A): tampilan 30/900, judul 24, subjudul 18, besar 16, isi
+  14, kecil 12, mikro 11/600. Seluruh kelas ukuran diganti nama token dan
+  ESLint menolak ukuran lain. Pembulatan: 13 dan 15 px menurut peran
+  (redup turun, lainnya naik), 20 ke 18, 36 ke 30; semua h1 menjadi judul
+  dan h2 subjudul; black dan extrabold di luar angka KPI menjadi bold
+  (`5e597c2`).
+- **CV25a: teks hero dikecualikan dari skala**: angka 404, angka besar
+  widget Pengguna, dan judul hero login serta lupa password, dengan
+  komentar `eslint-disable` beralasan.
+- **CV26a: judul dan subjudul tanpa ketebalan bawaan**, agar teks biasa
+  18 px tidak ikut tebal; h1 dan h2 menulis `font-bold` sendiri.
+- **CV27b: spasi tetap skala Tailwind dengan aturan tertulis** (arah B):
+  keputusan rancangan butir 35; halaman diseragamkan saat disentuh.
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E
@@ -515,7 +557,8 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
 - Label sel di HP hanya tampil bila kolom punya `meta.label` atau `header`
   berupa teks. Sebagian besar halaman menulis `header` sebagai komponen,
   sehingga kartu baris di HP menampilkan nilai tanpa label. Dilengkapi
-  saat tiap halaman dirapikan.
+  saat tiap halaman dirapikan. Selesai di `ceb8c95` (CV20a): 43 kolom di
+  13 halaman diberi `meta.label`.
 - 9 berkas masih memakai `<table>` yang ditulis sendiri (19 sebelum K-A,
   per `eb81a1f`; seluruh tabel daftar selesai di K-A sampai K-E): tabel
   rincian di halaman detail dan form (delapan berkas, termasuk
@@ -523,7 +566,9 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
   (`features/jadwal/grid-jadwal.tsx`), yang perlu pratinjau tersendiri
   (keputusan TB4a). Sampai 16 Oktober 2026 daftar aset, tarif, tipe aset,
   dan pola roster tersirat masuk tabel rincian, padahal keempatnya tabel
-  daftar (RG3a).
+  daftar (RG3a). Tabel rincian selesai di `eb64c70` (CV22a): delapan
+  berkas memakai `DataTable rincian`. Tersisa grid kalender jadwal dan grid
+  langkah 2 generate jadwal (CV23a), keduanya menunggu pratinjau TB4a.
 - Daftar akun admin dan tab pajak per produk
   (`features/pajak/tab-pajak-produk.tsx`) belum ditinjau terhadap aturan
   tabel yang baru.
@@ -542,7 +587,21 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
   dan warna di luar lima warna utama. Tipografi dan spasi juga belum.
   Sejak `eb81a1f` tabel dan baris filter tarif memakai token, dan
   `COLORS` di daftar tarif tinggal tiga warna untuk dialog hapus (TB23a);
-  angka 68 belum diukur ulang.
+  angka 68 belum diukur ulang. Selesai di `c437d68` (CV21a): tidak ada
+  heksadesimal tersisa di `app`, `components`, `features`, dan `lib` selain
+  `lib/warna.ts`. Tipografi selesai di `5e597c2` (CV24a sampai CV26a);
+  spasi dicatat sebagai aturan (keputusan rancangan butir 35, CV27b).
+- Pemindaian 768 px (14 November 2026): hampir 20 tabel daftar lebih lebar
+  dari wadahnya di lebar tablet (misalnya Produk +167, Stock Adjustment
+  +245, Penjualan +179, Tarif +184 px), karena kartu HP baru aktif di
+  bawah 640 px sedangkan wadah tabel dengan sidebar sekitar 600 px; luberan
+  halaman di Barang Gudang (+18) dan Pengajuan Stok outlet (+48); dan
+  label kartu Arus Kas terpotong. Perbaikannya keputusan desain (batas
+  kartu DataTable atau kolom per tabel).
+- Pesan "Gagal Memuat Lokasi Gudang" dan "Gudang Belum Didaftarkan" di
+  `app/dashboard/gudang/jurnalStok/page.tsx` tidak pernah tampil, karena
+  layout ruang gudang menghadang lebih dulu (kode mati; penghapusannya
+  menunggu keputusan pemilik proyek).
 - Temuan pemindaian 14 November 2026 yang dibiarkan karena dirancang:
   kalender jadwal dan deretan tab bergulir ke samping; keterangan Mutasi
   Kas di kartu HP dan nama aset di timeline reservasi dipotong "...".

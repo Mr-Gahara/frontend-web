@@ -129,6 +129,14 @@ dengan alur kanvas desain seperti butir di bawah:
    Dana, tab Booking, cincin fokus) selesai lewat kanvas desain di
    `883a79b` (CV15a sampai CV18a). Suite e2e penuh 14 November 2026:
    643 lolos dari 643 (`inti/pengujian.md`).
+8. **Fitur, rapian kode, dan utang pengujian**: selesai 14 November 2026.
+   Pemecahan buat penjualan dan `PolaRosterItem` wajib (`7c004c2`), label
+   kartu HP (`ceb8c95`), token warna (`c437d68`), tabel rincian
+   (`eb64c70`), tipografi tujuh tingkat (`5e597c2`), aturan spasi
+   (keputusan rancangan butir 35), dan utang pengujian bukan-Owner,
+   keadaan gagal, dan B165 (`2bcb1ce`). Suite e2e penuh berikutnya
+   menunggu izin pemilik proyek. Temuan baru: luberan tabel di 768 px dan
+   kode mati pesan lokasi jurnal stok gudang (`modul/ui-ux.md`).
 
 ### Menunggu desain pemilik proyek
 
@@ -311,7 +319,8 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
   Owner (`referensi/utang-pengujian.md`).
   Jalur tanpa izin lintas outlet teruji e2e sejak `1cd8211`, lewat
   pengguna uji "E2E Tanpa Lintas Outlet"; jalur tanpa izin SDM baru dan
-  tanpa `read-location` tetap hanya teruji di unit test.
+  tanpa `read-location` teruji e2e sejak `2bcb1ce` lewat pengguna uji "E2E
+  Tanpa SDM" dan "E2E Tanpa Lokasi".
 - Jurnal stok tetap mengirim satu `locationID` untuk Semua Outlet,
   walau backend menerima `tipeLokasi` (B109); berpengaruh hanya bila
   tenant punya lebih dari satu outlet (`kontrak/temuan.md` butir 151).

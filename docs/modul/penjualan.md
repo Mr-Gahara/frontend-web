@@ -207,7 +207,9 @@ dan `3efd05b`), dan cabang lain tidak maju.
 - `features/penjualan/halaman-buat-penjualan.tsx` 698 baris per BP1a (dipecah di `584d6ae`; 1.098 per `7a08b63`):
   migrasi memindahkan lapisan data dan membuang `any`, tetapi tidak memecah
   komponennya. Pisahkan pemilih pelanggan, pemilih diskon, dan pratinjau
-  total saat halaman itu disentuh lagi.
+  total saat halaman itu disentuh lagi. Selesai di `7c004c2`: kartu
+  Pelanggan, kartu Diskon Global dan Keterangan, dan `pilihan-diskon.ts`
+  dipisah; halaman 438 baris (ringkasan tagihan sudah terpisah).
 - Cakupan outlet daftar penjualan (K11b) dan `locationID` buat penjualan
   (K13a) hanya berlaku bagi pemegang `read-location`; pengguna lain melihat
   seluruh penjualan tenant dan tidak mengirim lokasi. Halaman buat belum

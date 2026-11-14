@@ -10,9 +10,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 
 ## Utang pengujian
 
-- **Penolakan Akun Toko bagi pemegang `update-akun` yang bukan Owner hanya
-  teruji di unit test** (`bolehKelolaAkunToko`): tidak ada peran uji yang
-  memegang izin itu, dan e2e hanya membuktikan pengguna tanpa izinnya.
 - **Pemilih outlet di jurnal stok dan pembelian stok hanya berisi satu
   pilihan** di MVP satu outlet, sehingga memilih outlet tidak memicu
   permintaan baru. Kedua jalur cakupan lokasi teruji e2e sejak
@@ -51,15 +48,9 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   Jalur lintas outlet (LP2a) berjalan sejak `2eb668a` dan jalur terkunci
   sejak `1cd8211`; aturan lingkup diuji di
   `tests/unit/features/penjualan/filter.test.ts`.
-- **Jalur tanggal terkunci bagi peran selain Owner di catat beban hanya
-  teruji di unit test** (`payloadBuatBeban`), karena pengguna uji
-  berperan Owner (BO5a).
 - **Penolakan backend saat mencatat beban** (saldo kurang atau akun
   nonaktif, 409) tidak punya skenario e2e: form menahan jumlah di atas
   saldo sebelum permintaan dikirim.
-- **Jalur tanpa `read-location` di halaman penjualan** (tanpa cakupan, dan
-  tanpa `locationID` saat membuat) hanya teruji di unit test, dengan alasan
-  yang sama: satu-satunya akun uji berperan Owner.
 - **Idempotensi hanya teruji dari sisi klien**: kunci terkirim dan sama saat
   permintaan diulang. Penahanan permintaan kembar di backend tidak diuji
   dari web.
@@ -113,12 +104,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   `read-location`, tanpa `create-location`, dan tenant tanpa gudang,
   karena satu-satunya akun uji berperan Owner dan tenant uji sudah punya
   gudang.
-- **Libur nonaktif selama jadwal tanggal Tambah Manual dimuat (CV10a)
-  dan tanggal Tambah Manual di luar bulan yang tampil** hanya teruji lewat
-  kode dan unit test `adaJadwalLokasiLain`; skenario e2e B165 memilih
-  tanggal di bulan yang sedang tampil.
-- **Lebar 768 px dan halaman ber-`[id]`** tidak ikut pemindaian visual
-  14 November 2026 (hanya rute statis di 1280 dan 390 px).
+- **Halaman ber-`[id]` selain tabel rincian belum dipindai visual.** Rute
+  statis di 768 px dipindai 14 November 2026 dan menemukan luberan tabel
+  di lebar tablet (`modul/ui-ux.md`, Utang terbuka); tabel rincian halaman
+  detail diukur di 1280 dan 390 px (CV22a).
 - **Akun kas uji menumpuk sebagai non-aktif**, satu per run spec
   keuangan, lima per run spec ubah akun kas (`1bc76f4`), dua per run
   spec Pindah Dana (`e53c016`), dan satu per run spec tutup akun
@@ -143,8 +132,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   klien kesembilan tabel lain tidak berubah di `b63cf08`, dan tidak diuji
   ulang khusus. Urutan server (`urutanServer`, `a4304ce`) juga hanya
   dipakai dan teruji di daftar penjualan. Sejak `93490bb` `DataTable`
-  menampilkan kartu per baris dan susunan kartu di HP; keduanya belum
-  punya test integrasi, dan susunan HP tidak diuji spec mana pun.
+  menampilkan kartu per baris dan susunan kartu di HP. Label kartu HP,
+  `lebarBungkus`, dan prop `rincian` punya test integrasi sejak `2bcb1ce`
+  (`tests/integration/components/data-table/data-table.test.tsx`); susunan
+  HP dilihat lewat tangkapan, bukan spec.
 - **Batas 10 metode aktif hanya teruji lewat simulasi** respons daftar
   yang ditandai `// simulasi:`, karena sepuluh metode aktif tidak dapat
   dibuat di data uji tanpa menumpuk metode permanen. Peringatan metode
@@ -177,11 +168,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Pelanggan uji dihapus lunak**, sehingga setiap run spec pelanggan
   menambah dokumen ber-`isDeleted` di basis data development; daftar dan
   indeks unik backend mengabaikannya.
-- **Pengosongan email dan alamat pelanggan tidak teruji e2e**; yang
-  teruji hanya nomor HP. Peringatan `isianTidakTerkosongkan` dibuang di
-  `1bb26c0`.
-- **Email pelanggan kembar yang dijawab 409 hanya dibaca dari kode**;
-  e2e menguji nomor HP kembar.
 - **Spec pemilih pelanggan menambah dua pelanggan terhapus lunak per
   run**, dan skenario nomor HP kembar satu.
 - **Bahan uji "E2E Bahan Pak" permanen** di basis data development,
@@ -281,8 +267,7 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Batas atas level, level pengguna yang tidak diketahui (RL3a), dan
   perubahan level atau wewenang di payload ubah hanya teruji di unit
   test** (`tests/unit/features/role/form-role.test.ts`), karena akun uji
-  berperan Owner. Penolakan backend saat simpan, yang tampil di atas
-  tombol simpan, belum teruji e2e.
+  berperan Owner. Penolakan backend saat simpan teruji e2e sejak `2bcb1ce`.
 
 - **Penjaga ruang detail stock opname hanya teruji untuk dokumen yang
   tipe lokasinya diketahui**, dan kedua skenarionya dilewati bila ruang
@@ -353,7 +338,9 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   memilih satu outlet) hanya teruji di unit test (`lokasiSatuOutlet`),
   karena tenant uji punya satu outlet.
 - **Pesan lokasi gudang gagal dimuat atau belum didaftarkan di jurnal
-  stok gudang** belum teruji e2e.
+  stok gudang** tidak dapat diuji: layout ruang gudang menghadang lebih
+  dulu, sehingga kedua pesan itu kode mati (`modul/ui-ux.md`). Penghadangan
+  layout teruji di `lihat-jurnal-stok.spec.ts` sejak `2bcb1ce`.
 - **Kartu pengajuan dashboard gudang hanya teruji cabang tanpa
   pengajuan siap surat jalan** pada data uji sekarang; cabang klik kartu
   ke tab Perlu Surat Jalan berjalan bila ada pengajuan APPROVED atau
@@ -374,10 +361,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Kirim Barang dan Penerimaan Stok hanya teruji lewat alur penuh**:
   jalur gagal kirim, revisi, dan batal surat jalan pengembalian, serta
   terima sebagian di gudang, belum punya skenario.
-- **Teks badge status dan dialog batal surat jalan hanya teruji lewat
-  peta label di unit test** (`a972956`): e2e memeriksa nama tombol tab,
-  tetapi tidak membaca badge daftar, badge detail, maupun teks dialog
-  batal.
+- **Teks dialog batal surat jalan hanya teruji bila ada surat jalan
+  Belum Dikirim**: badge daftar teruji e2e sejak `2bcb1ce`, sedangkan
+  skenario dialog batal dilewati bersyarat bila tidak ada surat jalan
+  PENDING (data uji 14 November 2026 tidak punya).
 - **Backend di jam rawan hanya teruji saat suite dijalankan pada
   jamnya.** `page.clock` dan `vi.setSystemTime` hanya memalsukan jam
   frontend, sedangkan validator backend memakai jam server. Jendela
@@ -388,8 +375,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   Keuangan, serta catat pembelian** hanya teruji lewat hook (unit) dan
   pola yang sama di catat beban (e2e `6d07b8d`), tanpa skenario
   `page.clock` tersendiri.
-- **Jalur tanggal pembelian bagi peran selain Owner** hanya teruji di
-  unit test (`payloadBuatPembelian`), karena akun uji berperan Owner.
 - **Template role pembelian hanya teruji pemetaan namanya**; role dari
   template belum dipakai membuka halaman pembelian.
 - **Spec Belanja Stok menyiapkan dua pembelian lewat API** (keputusan
@@ -403,8 +388,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Skenario daftar pengajuan dan surat jalan memilih contoh dari halaman
   pertama**, sehingga dilewati bila halaman itu tidak memuat permintaan,
   pengembalian, atau dua dokumen untuk dibandingkan.
-- **Jalur role tanpa izin SDM baru** (B139, B140) hanya teruji di unit
-  test (`gate-sdm-jadwal`, templat role), karena akun uji berperan Owner.
 - **Fixture izin cuti menetap** (`96a7b40`): pengguna uji "E2E Izin
   Cuti" dan izin uji dibuat lewat API, karena web tidak punya halaman
   izin cuti dan backend tidak punya `DELETE /izincuti`. Setiap hari yang
@@ -425,9 +408,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Skenario aktifkan akun tanpa batas membekukan akun klien sungguhan**
   (`482ac79`), dipilih menurut syarat dan tidak pernah akun uji utama;
   setiap run menambah dua catatan di riwayat langganan akun itu.
-- **Kalender per lokasi hanya teruji untuk sel yang berisi penanda
-  saja**; sel yang berisi jadwal lokal sekaligus penanda lokasi lain
-  belum diuji e2e.
 - **Skenario pendaftaran di spec daftar dilewati bila kuota pendaftaran
   backend habis** (`d94a48c`). Backend kini menerima `REGISTER_LIMIT_MAX`
   di non-produksi (B230), dan perintah layanan uji menyetelnya; skip itu
@@ -438,13 +418,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   saat suite penuh berikutnya menggagalkannya lagi, tanpa run tambahan
   untuk memancingnya. Suite terhadap backend `4759208` (4 November 2026)
   meloloskannya.
-- **Skenario dilewati tanpa judul tercatat**: satu di suite penuh
-  `50c99ae` selain jurnal stok, satu di `6db571d`, dan dua di suite
-  terhadap backend `4759208` (spec daftar tidak termasuk; 29 spec lain
-  ber-skip bersyarat), serta dua di suite penuh terhadap backend `ridho`
-  `c031bde` (6 November 2026). Tidak dicari dengan
-  menjalankan ulang sebagian suite; reporter `json` di suite penuh
-  berikutnya mencatat judulnya (`referensi/playwright.md`).
 - **Keadaan masa berlaku Langganan hanya teruji di unit test**: masa
   percobaan, bilah masa berlaku, masa akses lewat dan masa tenggang, serta
   Muat riwayat lainnya. Akun uji Pro tanpa batas waktu dengan satu catatan

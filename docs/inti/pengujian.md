@@ -12,6 +12,20 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per rapian UI dan utang pengujian** (web `2bcb1ce`, backend
+`ridho` lokal `d6709a1`, 14 November 2026): vitest 1100 lolos (5 unit test
+`toggleDiskonSelection`, 1 `denganAlfa`, 3 integrasi `DataTable`). Spec
+ditulis atau diubah dan dijalankan per berkas, tanpa OTP: `akses/jalur-bukan-owner`
+4, `kelola-jadwal` 3, `kelola-pelanggan` 3, `crud-role` 1,
+`lihat-jurnal-stok` 1, `daftar-surat-jalan` 1 lolos dan 1 skipped (tidak
+ada surat jalan Belum Dikirim), catat pembelian bukan-Owner 1, dan
+`generate-jadwal` 4. Perubahan tampilan sesudah suite penuh 14 November
+2026 (label kartu HP, tabel rincian, tipografi) belum dijalankan e2e dan
+masuk suite penuh berikutnya. Harapan suite penuh 653: 643 ditambah
+empat skenario bukan-Owner, satu B165, dua email pelanggan, satu jurnal
+gudang, dan dua surat jalan (hitungan), dengan skip bersyarat dialog
+batal surat jalan bila datanya kosong; menunggu izin pemilik proyek.
+
 **Suite penuh per cacat tampilan 14 November 2026** (web `a5fa419`,
 backend `ridho` lokal `d6709a1`, 14 November 2026, pukul 11.45 sampai
 12.24 WIB, reporter `line,json`, atas izin pemilik proyek): e2e 643 lolos
@@ -195,6 +209,8 @@ Pola kegagalan yang berulang:
 | Opsi popover terlepas dari DOM sekali lalu tidak kembali, hanya di spec ber-`page.clock` | Radix mengembalikan fokus ke pemicu popover sebelumnya lewat `setTimeout`, yang dipalsukan `page.clock`; bila berjalan setelah popover berikutnya dibuka, popover itu menutup. Tunggu popover lepas dan fokus kembali sebelum membuka popover berikutnya (`tungguPopoverLepas` di `tests/helpers/penjualan-uji.ts`). Dibuktikan dengan `page.clock.pauseAt` lalu `runFor`, bukan dengan angka flaky (suite penuh 12 November 2026) |
 | Alur berhasil tetapi mendarat di dashboard, bukan kembali ke wizard | Parameter `?kembali=/setup` hilang saat jalur login pengguna melewati halaman lain (`/lupa-pin`). Setiap halaman di jalur itu meneruskannya lewat `denganKembali` (`lib/auth/tujuan.ts`); periksa URL setelah tautan dan pengalihan, bukan hanya tujuan akhir (suite penuh 13 November 2026, OA1a). Penunggu glob seperti `waitForURL("**/lupa-pin")` tidak cocok dengan URL ber-query; pakai regex yang menyebut query-nya |
 | Isian PIN terlepas dari DOM saat login ulang sebagai pengguna lain di tab yang sama, lalu halaman sampai di dashboard tanpa `pin-login` | `/login` memulihkan sesi lama lewat cookie (`refreshtoken`, `pin-refresh`) bersamaan dengan login baru, dan halaman login pengguna mengalihkan begitu sesi lama pulih. Buang cookie (`about:blank`, `clearCookies`) sebelum login ulang (`masukSebagai`). Dibuktikan dengan menahan `pin-refresh` sampai URL `/login/pengguna` (suite 12 November 2026, RG4a) |
+| Tangkapan atau ukuran gaya tidak berubah sesudah token tema baru, atau kelas token tidak berpengaruh | Dev server melayani CSS basi setelah `git stash` bolak-balik atau perubahan `@theme`; `touch app/globals.css` tidak selalu cukup. Periksa `getComputedStyle` atau aturan di `document.styleSheets` lebih dulu; bila kosong, hentikan dev server, hapus `.next/dev`, lalu jalankan ulang (14 November 2026, tipografi CV24a) |
+| Klik tanggal kalender kena dua elemen (`strict mode violation`) untuk hari 22 sampai 31 | Grid kalender juga menampilkan tanggal bulan sebelumnya; pilih lewat `button[data-day="M/D/YYYY"]`, seperti `pilihTanggalKalender` di `tests/helpers/jadwal-uji.ts` (`2bcb1ce`) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

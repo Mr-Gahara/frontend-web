@@ -250,7 +250,10 @@ sama (submodul pengajuan stok, di bawah).
     `text-gading`, `border-karamel/20`, dan seterusnya. Kode baru tidak
     menulis `[#0A2947]` dan sejenisnya; mengubah satu warna berarti
     mengubah satu baris (pemilik proyek, 11 Oktober 2026, `584a2d8`,
-    `ba28f25`).
+    `ba28f25`). Sejak 14 November 2026 seluruh warna memakai token,
+    termasuk 20 warna turunan, dan nilai warna di JavaScript (style,
+    recharts) lewat `WARNA` dan `denganAlfa()` di `lib/warna.ts`
+    (`c437d68`; `modul/ui-ux.md`, CV21a).
 26. **Tabel daftar memakai `DataTable`, dan tabel lain memakai `Table`
     dari `components/ui/table.tsx`.** Halaman tidak menulis `<table>`
     sendiri dan tidak membungkus tabel dengan panel berlatar. Aksi baris
@@ -354,3 +357,18 @@ sama (submodul pengajuan stok, di bawah).
     karena memuat ulang halaman ikut membuang cache dan menyembunyikan
     bug. Contoh: akun kas toko lain tampil di akun fresh tanpa permintaan
     (`kontrak/temuan.md` butir 183; pemilik proyek, 12 November 2026).
+34. **Ukuran huruf hanya lewat tujuh token tipografi**: `text-tampilan`
+    (30/900), `text-judul` (24), `text-subjudul` (18), `text-besar` (16),
+    `text-isi` (14), `text-kecil` (12), dan `text-mikro` (11/600), di
+    `@theme inline` `app/globals.css`. h1 memakai judul dan h2 subjudul,
+    keduanya dengan `font-bold` tertulis; black hanya untuk teks tampilan
+    dan angka KPI. ESLint menolak kelas ukuran lain; teks hero yang
+    dikecualikan memakai komentar `eslint-disable` beralasan (pemilik
+    proyek, 14 November 2026, `5e597c2`; `modul/ui-ux.md`, CV24a sampai
+    CV26a).
+35. **Spasi memakai skala Tailwind dengan aturan tertulis.** Pembungkus
+    halaman `px-4 py-8 gap-6` dengan tiga lebar: `max-w-3xl` untuk form,
+    `max-w-6xl` untuk daftar, dan `max-w-7xl` untuk halaman lebar. Kartu
+    `p-4 sm:p-6 rounded-2xl`. Halaman yang masih berbeda diseragamkan saat
+    disentuh, bukan sekaligus (pemilik proyek, 14 November 2026;
+    `modul/ui-ux.md`, CV27b).

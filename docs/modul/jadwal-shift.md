@@ -285,7 +285,8 @@ modul ini yang memakai `apiClient`.
   dilepas di `ea2e752`.
 - `keterangan` dan `dibuatPada` di `PolaRosterItem` masih opsional, walau
   halaman generate lama yang memetakan pola sendiri sudah tidak ada
-  (`19227f8`); dijadikan wajib bersama perapian tipe berikutnya.
+  (`19227f8`); dijadikan wajib bersama perapian tipe berikutnya. Selesai
+  di `7c004c2`: mapper backend selalu mengirim keduanya (null bila kosong).
 
 ### Utang kecil dari penyesuaian backend `ridho` `0024eb9`
 
@@ -301,7 +302,8 @@ modul ini yang memakai `apiClient`.
   `read-location`, dan widget menampilkan pesan izin lokasi; jalur itu
   hanya teruji di unit test.
 - Jalur role tanpa izin SDM baru (B139, B140) hanya teruji di unit test,
-  karena akun uji berperan Owner.
+  karena akun uji berperan Owner. Teruji e2e sejak `2bcb1ce` lewat
+  pengguna uji "E2E Tanpa SDM".
 - Hapus jadwal masih `confirm` bawaan browser (utang di atas), dan sel
   yang berisi jadwal lokal sekaligus penanda lokasi lain tetap dapat
   dijadikan libur, yang menghapus jadwal lokasi lain (B165). Keduanya
