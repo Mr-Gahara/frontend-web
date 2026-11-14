@@ -113,13 +113,21 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   `read-location`, tanpa `create-location`, dan tenant tanpa gudang,
   karena satu-satunya akun uji berperan Owner dan tenant uji sudah punya
   gudang.
+- **Libur nonaktif selama jadwal tanggal Tambah Manual dimuat (CV10a)
+  dan tanggal Tambah Manual di luar bulan yang tampil** hanya teruji lewat
+  kode dan unit test `adaJadwalLokasiLain`; skenario e2e B165 memilih
+  tanggal di bulan yang sedang tampil.
+- **Lebar 768 px dan halaman ber-`[id]`** tidak ikut pemindaian visual
+  14 November 2026 (hanya rute statis di 1280 dan 390 px).
 - **Akun kas uji menumpuk sebagai non-aktif**, satu per run spec
   keuangan, lima per run spec ubah akun kas (`1bc76f4`), dua per run
   spec Pindah Dana (`e53c016`), dan satu per run spec tutup akun
   bersaldo (`f7805ca`), karena akun
   kas tidak dapat dihapus sejak backend `465b438`
   (PB13a, `kontrak/temuan.md` butir 81). Payload bersaldo hanya diperiksa
-  lewat `POST` yang dijawab gagal.
+  lewat `POST` yang dijawab gagal. Per 14 November 2026 tenant uji punya 663 akun
+  non-aktif, seluruhnya berawalan "E2E", dan halaman Akun Kas menampilkan
+  "Akun non-aktif (663)".
 - **`hapusLewatApi` menerima 404 sebagai sudah terhapus**, padahal route
   yang dihapus backend juga menjawab 404. Route hapus yang hilang tidak
   terdeteksi helper ini; yang menangkapnya adalah audit endpoint

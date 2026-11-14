@@ -136,4 +136,6 @@ empat commit, dengan suite e2e penuh dijalankan sekali di akhir modul
 - Halaman ringkasan laba rugi memicu peringatan ukuran grafik di konsol
   (lebar dan tinggi -1 saat render pertama). Penyebabnya belum ditelusuri
   dari kode, dan grafiknya tetap tampil. Sejak `0c5822b` komponen grafik
-  yang sama (`GrafikLaporan`) juga dipakai dashboard outlet.
+  yang sama (`GrafikLaporan`) juga dipakai dashboard outlet. Selesai di
+  `609b36a`: `ResponsiveContainer` recharts 3.8 memulai ukuran dari
+  `initialDimension` -1 x -1; kini 1 x 1 (`modul/ui-ux.md`, CV2b).

@@ -267,3 +267,7 @@ nonaktifkan (keputusan PO2a).
   dibuang diam-diam saat form role menyusun payload (`payloadBuatRole`),
   dan teks tombol simpan form role tetap "Simpan Perubahan" saat membuat
   posisi baru; keduanya dipertahankan dari form lama (`597a163`).
+  Keduanya ditutup 14 November 2026: tombol mode buat "Buat Posisi" di
+  `0df0ca5` (CV6a), dan pembuangan wewenang dinilai bukan bug, karena
+  daftar centang dan wewenang tersembunyi berasal dari daftar permission
+  utuh (CV7a; `modul/ui-ux.md`).

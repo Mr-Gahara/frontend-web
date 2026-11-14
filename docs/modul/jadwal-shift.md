@@ -266,6 +266,7 @@ modul ini yang memakai `apiClient`.
 - Hapus jadwal masih memakai `confirm` bawaan browser, berbeda dengan
   dialog konfirmasi di modul lain; spec kelola jadwal bergantung padanya
   (`page.once("dialog")`). Diseragamkan bila pemilik proyek memutuskan.
+  Selesai di `0df0ca5`: dialog "Hapus jadwal?" (`modul/ui-ux.md`, CV4a).
 - Shift outlet dan gudang masih memakai daftar tenant yang sama sampai
   backend memisahkan shift per lokasi (`KUNCI_LOKASI_SHIFT`, keputusan
   SH1b, `kontrak/temuan.md` butir 70). Selesai di `8b5ad0f` (B168).
@@ -303,4 +304,9 @@ modul ini yang memakai `apiClient`.
   karena akun uji berperan Owner.
 - Hapus jadwal masih `confirm` bawaan browser (utang di atas), dan sel
   yang berisi jadwal lokal sekaligus penanda lokasi lain tetap dapat
-  dijadikan libur, yang menghapus jadwal lokasi lain (B165).
+  dijadikan libur, yang menghapus jadwal lokasi lain (B165). Keduanya
+  selesai di `0df0ca5`: Libur dinonaktifkan dengan keterangan, lewat klik
+  sel dan Tambah Manual (`modul/ui-ux.md`, CV3a dan CV10a).
+- Kolom Staf / Karyawan kalender jadwal selebar sekitar 460 px di 1280 px,
+  sehingga hanya tiga hari yang terlihat tanpa gulir (terlihat 14
+  November 2026); kalender menunggu pratinjau tersendiri (TB4a).

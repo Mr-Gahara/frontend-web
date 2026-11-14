@@ -750,7 +750,8 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   2026 (BS6a, di bawah).
 - Menu tunggal Pembelian Stok hanya aktif di sidebar pada daftarnya, tidak
   di detail dan form catat, seperti menu tunggal lain (`isActive` cocok
-  persis).
+  persis). Selesai di `609b36a` untuk seluruh menu tunggal
+  (`hrefMenuAktif`, `modul/ui-ux.md` CV2b).
 
 ### Utang kecil dari modul keuangan
 
@@ -795,7 +796,11 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   (tangkapan layar pemilik proyek, 6 November 2026). Asalnya belum
   ditelusuri; dugaan awal, akun uji spec Keuangan yang dinonaktifkan
   karena `DELETE /akunkas/:id` tidak ada lagi (`kontrak/temuan.md`
-  butir 81).
+  butir 81). Ditelusuri 14 November 2026 lewat kueri baca-saja: kini 663,
+  seluruhnya akun bernama awalan "E2E" (Ubah Kembar 146, Keuangan Akun 97,
+  Ubah Status 73, Pindah Tujuan dan Pindah Sumber masing-masing 68, Tutup
+  Bersaldo 64, dan seterusnya). Bukan bug tampilan; tetap utang pengujian
+  (`referensi/utang-pengujian.md`, akun kas uji menumpuk).
 - Tab Keuangan memakai `focus-visible:ring-0`, sehingga tab tidak punya
   penanda fokus saat dipakai dengan keyboard. Dipertahankan di
   `b3f8698` karena tidak ada di pratinjau yang disetujui.

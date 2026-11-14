@@ -172,6 +172,93 @@ Arial langsung. Kini `--font-sans` dan `body` memakai
 `--font-geist-sans`; `--font-mono` tidak berubah. Ukuran huruf dan
 tinggi baris belum menjadi token.
 
+### Cacat tampilan 14 November 2026
+
+Diputuskan pemilik proyek pada 14 November 2026. Sampel tampilan diambil
+lebih dulu (tangkapan layar di `~/Downloads/sampel-visual/`), lalu seluruh
+rute statis `app/dashboard` dipindai di 1280 dan 390 px untuk teks yang
+terpotong dan luberan samping (helper `~/.cache/frontend-web/alat/pindai-visual`).
+Perbaikan di `609b36a` (tampilan) dan `0df0ca5` (perilaku).
+
+- **CV1a: tabel yang meluber di 1280 px dibungkus, kolom dipindah hanya
+  bila perlu.** Tujuh tabel `DataTable` lebih lebar dari wadahnya, sehingga
+  kolom Status dan Aksi tersembunyi di balik gulir samping: Diskon (+165
+  px), Pengguna kedua ruang (+83, +167), Tarif (+132), Penjualan (+15),
+  Pengajuan Stok kedua ruang (+19, +16), Mutasi Kas (+323), dan riwayat
+  Pindah Dana (+490). Uji coba di browser membuktikan membungkus teks saja
+  cukup untuk enam tabel. Kolom ber-`meta.lebarBungkus` (px) boleh turun
+  baris mulai lebar `sm` (`components/ui/data-table.tsx`), dengan teks
+  paling banyak dua baris lewat `TeksDuaBaris` (CV12a): Penjualan
+  Pelanggan 180; Pengajuan Stok Rute 200; Pengguna Nama 200; Diskon Nama
+  200 dan Aturan 180; Tarif Nama 200, Jadwal Berlaku 160, dan Kategori
+  Aset 150; Mutasi Kas Akun Kas 180 dan Keterangan 260; Pindah Dana Dari
+  dan Ke 160 serta Keterangan 180. Luberan ketujuh tabel menjadi 0; kartu
+  HP tidak berubah. Kategori Aset Tarif berupa deretan badge yang sudah
+  dibungkus sebelumnya (`max-w-45`) dan tidak dibatasi baris.
+- **CV2b: delapan cacat teknis diperbaiki lewat pratinjau.** (1) Pemicu
+  Arah dan Alasan jurnal stok terpotong "Semua ." di 1024 dan 1280 px
+  serta "Semu" di HP: dilebarkan (190 dan 200 px), di HP masing-masing
+  selebar penuh dengan teks rata kiri. (2) Menu sidebar tunggal tidak
+  menyala di halaman turunannya (Catat Pembelian, Akun Toko, Buat
+  Reservasi): `hrefMenuAktif` (`components/sidebar-menu.ts`) memilih menu
+  terdekat, sama untuk menu tunggal dan sub-menu; dashboard ruang dan
+  induk Keuangan hanya menyala bila sama persis. (3) Peringatan konsol
+  grafik "width(-1) and height(-1)": `initialDimension` 1 x 1 di
+  `GrafikLaporan`, karena bawaan recharts 3.8 -1 x -1. (4) Tombol periode
+  laba rugi "Mingg..." dan "Bulan..." di 1280 dan 1440 px: lebarnya
+  mengikuti teks. (5) Label kartu dashboard "Laba Bersih (Ke...)" di 1280
+  px dan ketiga label di HP: boleh dua baris. (6) HP: tombol Buat
+  Reservasi Baru keluar layar, tab Stok Kritis gudang terpotong, serta
+  luberan Kategori, Buat Pengajuan, dan Jadwal: baris tombol dan tab
+  dibungkus. (7) Tab status Pengajuan Stok terjepit 128 px di 1280 px:
+  filter pindah ke baris sendiri. (8) "Semua Cakupan" Diskon terpotong:
+  pemicu filter 176 px. Pratinjau disetujui (CV8a).
+- **CV3a: Libur dinonaktifkan di hari yang juga berjadwal di lokasi lain**
+  (B165), dengan keterangan; teksnya diganti CV10a.
+- **CV4a: hapus jadwal memakai dialog proyek**, bukan `confirm()`: judul
+  "Hapus jadwal?", teks "Jadwal karyawan ini pada tanggal tersebut akan
+  dihapus.", tombol Batal dan Hapus merah.
+- **CV5a: tombol Kosongkan di kalender `PilihTanggal`** lewat prop
+  opsional `onKosongkan`, tampil hanya bila tanggal terisi; dipakai kedua
+  isian tanggal filter daftar penjualan saja.
+- **CV6a: form buat posisi bertombol "Buat Posisi"** ("Membuat
+  Posisi..." saat terkirim); mode ubah tetap "Simpan Perubahan".
+- **CV7a: wewenang tanpa padanan id di form role ditutup sebagai bukan
+  bug.** Daftar centang dan wewenang tersembunyi sama-sama berasal dari
+  daftar permission utuh (`GET /permission`), sehingga nama tanpa id hanya
+  mungkin bila permission dihapus di server di tengah sesi.
+- **CV8a: pratinjau kedelapan perbaikan teknis disetujui** untuk
+  di-commit.
+- **CV9a: pencatat riwayat Pindah Dana menjadi baris kedua di sel
+  Tanggal** ("oleh Ridho"); kolom Dicatat oleh dibuang, termasuk di kartu
+  HP.
+- **CV10a: keterangan Libur berbunyi "Karyawan ini juga berjadwal di
+  lokasi lain pada tanggal ini; atur liburnya dari kalender lokasi itu
+  atau hapus jadwalnya lebih dulu."**, dan aturannya juga berlaku di
+  Tambah Manual begitu karyawan dan tanggal yang punya jadwal lokasi lain
+  dipilih. Tanggalnya bisa di luar bulan yang tampil, sehingga form
+  membaca jadwal tanggal itu lewat dua daftar (lokasi ruang dan seluruh
+  lokasi, `useJadwalLokasiLainPada`). Perilaku tambahan selama memuat
+  dan saat Libur terlanjur dipilih diputuskan CV13a.
+- **CV11a: label rincian Arus Kas boleh dua baris** di HP; "Pembelian
+  stok" bersama badge Pembatalan terpotong 7 px di 390 px.
+- **CV12a: teks yang dibungkus di tabel 1280 px paling banyak dua baris**,
+  kembali ke teks opsi CV1a. Penerapan pertama tanpa batas baris membuat
+  Keterangan Mutasi Kas, Dari, Ke, dan Keterangan Pindah Dana, serta nama
+  Tarif menjadi tiga baris atau lebih. Kini `TeksDuaBaris`
+  (`components/ui/teks-dua-baris.tsx`) memotong sisanya dengan "..." dan
+  teks lengkap di tooltip, mulai lebar `sm`; kartu HP tidak dibatasi.
+  Keterangan Mutasi Kas yang dulu satu baris terpotong kini dua baris.
+- **CV13a: dua perilaku Tambah Manual di luar teks opsi CV10a
+  dipertahankan**: Libur nonaktif tanpa keterangan selama jadwal tanggal
+  terpilih dimuat, dan simpan ditahan bila Libur terlanjur dipilih untuk
+  tanggal yang berjadwal di lokasi lain. Tanpa keduanya Libur dapat
+  tersimpan sebelum pemeriksaan selesai. Keduanya sempat diterapkan
+  sebelum ditanyakan; diakui dan diputuskan di putaran yang sama.
+- **CV14a: cara tabel 1280 px tidak menjadi keputusan rancangan lintas
+  modul.** Aturan yang sempat ditambahkan ke butir 26 tanpa ditanyakan
+  dicabut; caranya cukup tercatat di CV1a untuk ketujuh tabel itu.
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E
@@ -420,6 +507,12 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
   Sejak `eb81a1f` tabel dan baris filter tarif memakai token, dan
   `COLORS` di daftar tarif tinggal tiga warna untuk dialog hapus (TB23a);
   angka 68 belum diukur ulang.
+- Temuan pemindaian 14 November 2026 yang dibiarkan karena dirancang:
+  kalender jadwal dan deretan tab bergulir ke samping; keterangan Mutasi
+  Kas di kartu HP dan nama aset di timeline reservasi dipotong "...".
+  Belum ditinjau: aksi riwayat Pindah Dana masih tombol Batalkan, bukan
+  menu titik tiga (TB); tab Manajemen Booking tidak menandai tab mana pun
+  di Buat Reservasi.
 - Bayangan kartu baris memakai `filter` pada elemen `tr`. Di browser yang
   tidak mendukungnya, kartu tampil dengan bingkai saja.
 - Suite e2e penuh dijalankan ulang pada 16 Oktober 2026 terhadap backend

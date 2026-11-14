@@ -677,7 +677,11 @@ Yang masih berlaku:
 ### Utang kecil dari penyesuaian backend `d6709a1`
 
 - Pemicu filter arah jurnal stok terpotong menjadi "Semua ." di 1280 px
-  (terlihat 12 November 2026, sudah ada sebelum JS1a).
+  (terlihat 12 November 2026, sudah ada sebelum JS1a). Selesai di
+  `609b36a`: pemicu Arah dan Alasan 190 dan 200 px, di HP selebar penuh
+  (`modul/ui-ux.md`, CV2b).
+- Pemicu Arah dan Alasan jurnal stok tidak berlabel, berbeda dengan isian
+  filter lain di baris yang sama (terlihat 14 November 2026).
 
 ### Utang kecil dari pembelian stok
 

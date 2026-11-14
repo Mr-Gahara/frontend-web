@@ -13,6 +13,16 @@ npx vitest run 2>&1 | tail -5
 npx playwright test tests/e2e/<modul> --reporter=json > /tmp/p.json 2>/dev/null; node ~/.cache/frontend-web/alat/ringkas-e2e.js
 ```
 
+Mencari cacat tampilan di seluruh rute statis dashboard (teks terpotong
+ber-ellipsis dan luberan samping di 1280 dan 390 px), dengan tangkapan
+layar halaman bermasalah ke `~/Downloads/sampel-visual/`: helper
+`~/.cache/frontend-web/alat/pindai-visual` (cara pakai di `BACA.md`-nya).
+Spec helper itu disalin ke folder sementara di bawah `tests/` dan tidak
+di-commit. Pemicu Select Radix memotong lewat `line-clamp`, bukan
+ellipsis, sehingga tetap lihat tangkapannya; uji coba perbaikan tabel
+(membungkus kolom di browser lalu mengukur luberan) lebih cepat daripada
+mengubah kode lalu memotret ulang (14 November 2026).
+
 Menjalankan satu test saja, dan memeriksa ketahanannya terhadap flakiness:
 
 ```bash

@@ -12,6 +12,28 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per perbaikan cacat tampilan** (web `0df0ca5`, backend `ridho`
+lokal `d6709a1`, 14 November 2026): vitest 1091 lolos (9 unit test baru:
+`hrefMenuAktif` 4, `PilihTanggal` 3, dan `adaJadwalLokasiLain` 2). Spec e2e
+terdampak (dashboard, jurnal stok, pembelian stok, pengajuan stok, stok,
+kategori, produk, keuangan, reservasi, diskon, pengguna, jadwal, roles,
+daftar penjualan, kategori beban, gudang, dan pratinjau jam buka) 378 lolos,
+1 gagal, dan 1 skipped (skip bersyarat status staf), tanpa spec ber-OTP.
+Kegagalannya skenario baru Kosongkan di `penjualan/daftar-penjualan.spec.ts`
+(salah spec): Terapkan Pencarian menutup panel filter, dan filter tanpa
+tanggal sama dengan kunci query awal yang masih segar sehingga tidak ada
+permintaan baru. Setelah diperbaiki, spec itu lolos 6/6, dan skenarionya
+3/3 dengan `--repeat-each 3`. Skenario baru lain: Libur nonaktif B165 di
+`jadwal/jadwal/kelola-jadwal.spec.ts` (sel dan Tambah Manual). Sesudah
+batas dua baris (CV12a), spec tabel terdampak (daftar penjualan,
+pengajuan stok, diskon, pengguna, tarif, dan folder keuangan) dijalankan
+ulang atas izin pemilik proyek: 147 lolos, tanpa OTP. Kedua run itu
+bukan suite penuh dan tidak memakai kuota OTP (0 berkas OTP), tetapi run
+pertama mencakup lebih dari separuh suite; sesudahnya tidak ada run e2e
+sampai suite penuh atas izin pemilik proyek.
+Harapan suite penuh 639: 637 ditambah kedua skenario itu (hitungan); suite penuh
+menunggu izin pemilik proyek.
+
 **Suite penuh per OTP aksi Owner** (web `8c3c1ea`, backend `ridho` lokal
 `d6709a1`, 13 November 2026, pukul 11.47 sampai 12.24 WIB, reporter
 `line,json`): e2e 636 lolos, 1 gagal, dan 1 skipped dari 638, sesuai

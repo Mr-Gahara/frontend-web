@@ -152,6 +152,13 @@ dengan alur kanvas desain seperti butir di bawah:
 6. **Paginasi server produk, bahan baku, dan inventory**: menunggu
    padanan filter dari backend (`kontrak/temuan.md` butir 184), lalu
    dipindah per daftar bersama filternya.
+7. **Bug dan cacat tampilan**: selesai 14 November 2026 (`609b36a`,
+   `0df0ca5`; `modul/ui-ux.md`, CV1a sampai CV14a). Sampel tampilan dan
+   pemindaian seluruh rute dashboard di 1280 dan 390 px, lalu perbaikan
+   teks terpotong, luberan HP, tabel 1280, menu aktif sidebar, peringatan
+   grafik, Libur B165, dialog hapus jadwal, Kosongkan tanggal, dan Buat
+   Posisi. "Akun non-aktif" ternyata seluruhnya sisa uji E2E. Suite e2e
+   penuh menunggu izin pemilik proyek.
 
 ### Menunggu desain pemilik proyek
 

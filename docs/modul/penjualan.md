@@ -222,4 +222,5 @@ dan `3efd05b`), dan cabang lain tidak maju.
   Keduanya dilepas di `936f073`.
 - Filter tanggal daftar penjualan tidak dapat dikosongkan langsung,
   karena `PilihTanggal` tidak punya tombol kosongkan; filter dikosongkan
-  lewat reset filter.
+  lewat reset filter. Selesai di `0df0ca5`: tombol Kosongkan di kalender
+  (`modul/ui-ux.md`, CV5a).
