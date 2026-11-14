@@ -16,9 +16,8 @@ import { masukPembelianOutlet } from "../../../helpers/terkunci-uji";
  * sudah terpakai tidak dapat dibuat secara deterministik (butir 21). API
  * hanya membersihkan sisa run yang gagal. Sejak P64 (B281, B282) pembelian
  * memotong saldo akun kas dan hapus mengembalikannya, sehingga akun dipilih
- * menurut saldo yang cukup. Pengguna uji berperan Owner, sehingga jalur
- * tanggal terkunci bagi peran lain hanya teruji di unit test
- * (payloadBuatPembelian).
+ * menurut saldo yang cukup. Jalur tanggal terkunci bagi bukan-Owner teruji
+ * lewat pengguna uji "E2E Pembelian Outlet" (level 90).
  */
 
 type Auth = Parameters<typeof api>[1];
@@ -260,6 +259,9 @@ test.describe("Pembelian stok: pemegang izin ruang outlet saja (B116, butir 158)
       await page.getByLabel("Supplier", { exact: true }).fill(supplier);
       await pilihAkun(page, "Dibayar dari akun kas", akun!.namaAkun);
       await page.getByLabel("Keterangan", { exact: true }).fill("E2E pembelian izin ruang outlet");
+      // Bukan Owner (level 90): tanggal terkunci hari ini (payloadBuatPembelian).
+      await expect(page.getByText("Hanya Owner yang dapat mencatat pembelian bertanggal lampau.")).toBeVisible();
+      await expect(page.getByRole("button", { name: /^Tanggal pembelian,/ }), "tanpa pemilih tanggal").toHaveCount(0);
       await pilihAkun(page, "Bahan baku baris 1", BAHAN_FIXTURE);
       await page.locator("#pembelian-jumlah-0").fill("1");
       await page.locator("#pembelian-harga-0").fill("1000");
@@ -273,6 +275,7 @@ test.describe("Pembelian stok: pemegang izin ruang outlet saja (B116, butir 158)
         locationID: lokasi.id,
         items: [{ bahanBakuID: bahanID, jumlah: 1, hargaBeli: 1000 }],
       });
+      expect(buat.request().postDataJSON(), "bukan Owner tidak mengirim tanggal").not.toHaveProperty("tanggal");
       idPembelian = idDari(((await buat.json()) as { data: Berid }).data);
       expect(idPembelian, "id pembelian dari respons").toBeTruthy();
 

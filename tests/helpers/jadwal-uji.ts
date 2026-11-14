@@ -216,9 +216,20 @@ export const selHari = (page: Page, hari: number) => barisKaryawan(page).locator
 
 export const itemSel = (page: Page, hari: number) => selHari(page, hari).getByRole("button").first();
 
+/**
+ * Memilih tanggal di kalender yang terbuka: maju selisihBulan dari bulan
+ * berjalan, lalu klik hari lewat data-day (M/D/YYYY). Teks hari saja dapat
+ * kembar, karena grid juga menampilkan tanggal bulan sebelumnya (28 Maret di
+ * grid April).
+ */
 export async function pilihTanggalKalender(page: Page, selisihBulan: number, hari: number) {
   for (let i = 0; i < selisihBulan; i++) await page.getByRole("button", { name: /next month/i }).click();
-  await page.getByRole("grid").getByText(String(hari), { exact: true }).click();
+  const kini = new Date();
+  const target = new Date(kini.getFullYear(), kini.getMonth() + selisihBulan, hari);
+  await page
+    .getByRole("grid")
+    .locator(`button[data-day="${target.getMonth() + 1}/${target.getDate()}/${target.getFullYear()}"]`)
+    .click();
 }
 
 export async function pilihShift(page: Page, nama: string) {

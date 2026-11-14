@@ -94,6 +94,41 @@ const PERAN_LOKASI_GUDANG: PeranUji = {
 };
 
 type Mentah = { id?: string; _id?: string };
+/**
+ * Pemegang update-akun yang bukan Owner (level 90): Akun Toko tetap tertolak,
+ * karena bolehKelolaAkunToko menuntut level Owner (OA3a).
+ */
+const PERAN_AKUN_BUKAN_OWNER: PeranUji = {
+  nama: "E2E Akun Bukan Owner",
+  pin: "864217",
+  deskripsi: "Peran uji e2e: izin baca Owner ditambah update-akun, bukan Owner",
+  izin: (n) => n.startsWith("read-") || n === IZIN.ubahAkun,
+};
+
+/** Pencatat beban bukan Owner: tanggal beban terkunci hari ini (BO5a). */
+const PERAN_PENCATAT_BEBAN: PeranUji = {
+  nama: "E2E Pencatat Beban",
+  pin: "864218",
+  deskripsi: "Peran uji e2e: izin baca Owner ditambah catat beban, bukan Owner",
+  izin: (n) => n.startsWith("read-") || n === IZIN.buatBebanOperasional,
+};
+
+/** Izin baca Owner tanpa read-location (K11b, b69d39a, PO lokasi). */
+const PERAN_TANPA_LOKASI: PeranUji = {
+  nama: "E2E Tanpa Lokasi",
+  pin: "864219",
+  deskripsi: "Peran uji e2e: izin baca Owner tanpa read-location",
+  izin: (n) => n.startsWith("read-") && n !== IZIN.location,
+};
+
+/** Izin baca Owner tanpa izin baca shift, pola roster, dan jadwal (B139, B140). */
+const PERAN_TANPA_SDM: PeranUji = {
+  nama: "E2E Tanpa SDM",
+  pin: "864220",
+  deskripsi: "Peran uji e2e: izin baca Owner tanpa shift, pola roster, dan jadwal",
+  izin: (n) => n.startsWith("read-") && !([IZIN.shift, IZIN.polaRoster, IZIN.jadwalShift] as string[]).includes(n),
+};
+
 type PeranMentah = Mentah & { namaRole?: string; level?: number; permissions?: (Mentah & { nama?: string })[] };
 type PenggunaMentah = Mentah & { nama?: string; roleID?: unknown; locationID?: string | null };
 type LokasiMentah = Mentah & { tipe?: string };
@@ -193,3 +228,7 @@ export const masukTanpaIzinLintas = (page: Page) => masukSebagai(page, PERAN_TER
 export const masukBacaSaja = (page: Page) => masukSebagai(page, PERAN_BACA_SAJA);
 export const masukPembelianOutlet = (page: Page) => masukSebagai(page, PERAN_PEMBELIAN_OUTLET);
 export const masukLokasiGudang = (page: Page) => masukSebagai(page, PERAN_LOKASI_GUDANG);
+export const masukAkunBukanOwner = (page: Page) => masukSebagai(page, PERAN_AKUN_BUKAN_OWNER);
+export const masukPencatatBeban = (page: Page) => masukSebagai(page, PERAN_PENCATAT_BEBAN);
+export const masukTanpaLokasi = (page: Page) => masukSebagai(page, PERAN_TANPA_LOKASI);
+export const masukTanpaSdm = (page: Page) => masukSebagai(page, PERAN_TANPA_SDM);

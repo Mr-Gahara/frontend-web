@@ -253,6 +253,57 @@ test.describe("Kelola pelanggan", () => {
     }
   });
 
+  test("email dan alamat yang dikosongkan tersimpan kosong", async ({ page }) => {
+    const auth = await bukaPelanggan(page);
+    const data = dataUji();
+    const email = `e2e.${unik().toLowerCase()}@contoh.id`;
+    let id: string | undefined;
+    try {
+      await page.getByLabel(/^Email/).fill(email);
+      id = await buatLewatUi(page, auth, data);
+      const awal = (await daftarPelanggan(page, auth)).find((p) => p.id === id);
+      expect([awal?.email, awal?.alamat], "email dan alamat tersimpan").toEqual([email, data.alamat]);
+
+      const dialog = await bukaDialogUbah(page, data.nama);
+      await dialog.getByLabel(/^Email/).fill("");
+      await dialog.getByLabel(/^Alamat/).fill("");
+      const tPut = tunggu(page, "PUT", POLA_SATU);
+      await dialog.getByRole("button", { name: "Simpan Perubahan" }).click();
+      expect((await tPut).status(), "PUT /pelanggan/:id").toBe(200);
+      await expect(page.getByText("Data pelanggan berhasil diperbarui.")).toBeVisible();
+      const tersimpan = (await daftarPelanggan(page, auth)).find((p) => p.id === id);
+      expect([tersimpan?.email ?? "", tersimpan?.alamat ?? ""], "email dan alamat kosong").toEqual(["", ""]);
+    } finally {
+      await hapusLewatApi(page, auth, "/pelanggan", id);
+    }
+  });
+
+  test("email yang sudah terdaftar ditolak 409, dan pesan backend tampil", async ({ page }) => {
+    const auth = await bukaPelanggan(page);
+    const data = dataUji();
+    const email = `e2e.${unik().toLowerCase()}@contoh.id`;
+    let id: string | undefined;
+    try {
+      await page.getByLabel(/^Email/).fill(email);
+      id = await buatLewatUi(page, auth, data);
+      const kembar = dataUji();
+      await page.getByLabel(/^Nama Pelanggan/).fill(kembar.nama);
+      await page.getByLabel(/^Nomor WhatsApp/).fill(kembar.nomorHp);
+      await page.getByLabel(/^Email/).fill(email);
+      await page.getByRole("button", { name: "Simpan Pelanggan" }).click();
+      const tPost = tunggu(page, "POST", POLA_DAFTAR);
+      await dialogKonfirmasi(page).getByRole("button", { name: "Ya, Simpan" }).click();
+      const res = await tPost;
+      expect(res.status(), "POST /pelanggan dengan email kembar").toBe(409);
+      const pesan = String((await res.json()).message);
+      await expect(page.getByText(pesan)).toBeVisible({ timeout: 15_000 });
+      const sesudah = await daftarPelanggan(page, auth);
+      expect(sesudah.filter((p) => p.email === email)).toHaveLength(1);
+    } finally {
+      await hapusLewatApi(page, auth, "/pelanggan", id);
+    }
+  });
+
   test("nomor HP yang sudah terdaftar ditolak 409, dan pesan backend tampil", async ({ page }) => {
     const auth = await bukaPelanggan(page);
     const data = dataUji();

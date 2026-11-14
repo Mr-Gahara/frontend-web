@@ -206,7 +206,7 @@ test.describe("E2E - Role (CRUD)", () => {
     await page.unroute(polaDetail);
   });
 
-  test("validasi form: nama terlalu pendek dan level desimal ditolak tanpa permintaan", async ({
+  test("validasi form: nama terlalu pendek dan level desimal ditolak tanpa permintaan, dan penolakan backend tampil", async ({
     page,
   }) => {
     // POST dijawab gagal agar tidak ada posisi yang tersimpan, juga bila
@@ -243,6 +243,14 @@ test.describe("E2E - Role (CRUD)", () => {
     ).toBeVisible({ timeout: 10_000 });
 
     expect(terkirim, "POST /role selama isian ditolak form").toBe(0);
+
+    // Isian sah: POST terkirim, penolakan backend tampil di atas tombol simpan
+    // dan form bertahan (utang pengujian RL).
+    await level.fill("1");
+    await simpan.click();
+    await expect(page.getByText("Simulasi gagal simpan")).toBeVisible({ timeout: 10_000 });
+    expect(terkirim, "POST /role untuk isian sah").toBe(1);
+    await expect(nama).toHaveValue(/Posisi E2E Validasi/);
     await page.unroute(/\/api\/role$/i);
   });
 

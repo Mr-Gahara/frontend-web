@@ -64,3 +64,40 @@ describe("DataTable, paginasi klien", () => {
     expect(barisTubuh()[0]).toHaveTextContent("Baris 1");
   });
 });
+
+describe("DataTable, kartu HP dan tabel rincian", () => {
+  type Item = { nama: string; jumlah: number };
+  const kolomItem: ColumnDef<Item>[] = [
+    { accessorKey: "nama", header: "Nama" },
+    {
+      accessorKey: "jumlah",
+      header: () => <div className="text-right">Jumlah</div>,
+      meta: { label: "Jumlah", lebarBungkus: 120 },
+    },
+    { id: "tanpaLabel", header: () => <span>Ikon</span>, cell: () => "x" },
+  ];
+  const items: Item[] = Array.from({ length: 15 }, (_, i) => ({ nama: `Item ${i + 1}`, jumlah: i }));
+
+  it("label kartu HP dari header teks dan meta.label, tidak untuk header komponen tanpa meta", () => {
+    render(<DataTable columns={kolomItem} data={items.slice(0, 1)} />);
+    const sel = within(barisTubuh()[0]).getAllByRole("cell");
+    expect(sel[0].querySelector("span.sm\\:hidden")).toHaveTextContent("Nama");
+    expect(sel[1].querySelector("span.sm\\:hidden")).toHaveTextContent("Jumlah");
+    expect(sel[2].querySelector("span.sm\\:hidden")).toBeNull();
+  });
+
+  it("meta.lebarBungkus memasang lebar maksimum dan kelas bungkus pada selnya saja", () => {
+    render(<DataTable columns={kolomItem} data={items.slice(0, 1)} />);
+    const sel = within(barisTubuh()[0]).getAllByRole("cell");
+    expect(sel[1].style.getPropertyValue("--lebar-bungkus")).toBe("120px");
+    expect(sel[1].className).toContain("sm:whitespace-normal");
+    expect(sel[0].style.getPropertyValue("--lebar-bungkus")).toBe("");
+  });
+
+  it("rincian: seluruh baris tampil tanpa kaki tabel", () => {
+    render(<DataTable columns={kolomItem} data={items} rincian />);
+    expect(barisTubuh()).toHaveLength(15);
+    expect(screen.queryByText("15 total data")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Next" })).not.toBeInTheDocument();
+  });
+});

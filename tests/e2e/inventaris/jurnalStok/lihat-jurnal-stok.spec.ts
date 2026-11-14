@@ -102,6 +102,26 @@ test.describe("Jurnal stok", () => {
     await login(page);
   });
 
+  test("gudang: lokasi yang gagal dimuat ditangani layout ruang gudang sebelum halaman jurnal", async ({ page }) => {
+    // Pesan "Gagal Memuat Lokasi Gudang" dan "Gudang Belum Didaftarkan" di
+    // app/dashboard/gudang/jurnalStok/page.tsx tidak pernah tampil: layout
+    // ruang gudang memuat daftar lokasi yang sama dan menghadang lebih dulu
+    // (temuan 14 November 2026).
+    const polaLokasi = /\/api\/location(\?|$)/i;
+    await page.route(polaLokasi, (route) =>
+      route.request().method() === "GET"
+        ? route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ status: "error", message: "E2E lokasi gagal" }) })
+        : route.continue(),
+    );
+    try {
+      await page.goto("/dashboard/gudang/jurnalStok");
+      await expect(page.getByRole("heading", { name: "Gagal Memuat Data Gudang" })).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByText("Gagal Memuat Lokasi Gudang")).toHaveCount(0);
+    } finally {
+      await page.unroute(polaLokasi);
+    }
+  });
+
   test("outlet: halaman pertama bulan berjalan untuk satu lokasi outlet, tanpa jurnal gudang", async ({ page }) => {
     const halaman = await bukaJurnal(page, URL_OUTLET);
     expect(halaman.query.get("dari")).toBe(AWAL_BULAN);
