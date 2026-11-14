@@ -912,3 +912,46 @@ ESLint, dan vitest penuh, lalu satu suite e2e penuh di akhir putaran
    `arsip/riwayat-pengujian.md`).
 4. Suite e2e penuh 589 test, 585 lolos dan 1 skipped; ketiga kegagalan
    skenario baru diperbaiki (`inti/pengujian.md`, Baseline).
+
+## Keadaan pekerjaan 7 sampai 10 November 2026
+
+Dipindah dari `inti/status.md` (Pekerjaan berikutnya) pada 14 November
+2026 tanpa perubahan.
+
+Keadaan per 10 November 2026: backend lokal `ridho` `0bbd261`,
+di-fast-forward ke `yoga` (8 commit di atas `origin/ridho` `0e43a6d`,
+yang maju 18 commit di atas `e9112a8`: P68 sampai P77, AR30 sampai AR34,
+B292 sampai B318) tanpa di-push. Penyesuaiannya pesan kategori kembar
+(KG1a), tipe kategori, dan muat ulang pengguna setelah 409 B315;
+keputusan LK2a, VK1a, RT1a, dan OM1a tanpa perubahan kode
+(`referensi/keputusan-penyesuaian-backend.md`).
+
+Keadaan per 8 November 2026 (sore): backend lokal `ridho` `e9112a8`,
+di-fast-forward ke `nizar` (28 commit di atas `916e7df`, memuat `yoga`
+`1d3851d`: P65 sampai P67, B283 sampai B291) tanpa di-push. Tidak ada
+perubahan kode web: LR1a laba rugi tetap seluruh toko, LR2a arus kas
+menunggu desain, dan PG1a pesan 403 Setujui rekan selokasi tampil apa
+adanya (`referensi/keputusan-penyesuaian-backend.md`).
+
+Keadaan per 8 November 2026: backend lokal `ridho` `916e7df`,
+di-fast-forward ke `yoga` (16 commit di atas `origin/ridho` `d267f03`:
+P61 sampai P64, B267 sampai B282) tanpa di-push. Penyesuaiannya PS10a
+pembelian memotong saldo (`b66a6eb`), LK1a lokasi kerja di dialog
+pengguna (`4fe201b`), dan AB6a label kedatangan di Status Staf
+(`69f2b18`); Model bisnis MVP diperbarui mengikuti P61
+(`referensi/keputusan-penyesuaian-backend.md`).
+
+Keadaan per 7 November 2026: backend lokal `ridho` `d267f03`, sama
+dengan `origin/ridho` (tujuh commit Ridho di atas `1584222`: AR26 sampai
+AR29, B263 sampai B266). Penyesuaiannya hanya B266 (`5b6ff0d`), dicatat
+di `referensi/keputusan-penyesuaian-backend.md`. Sesudahnya utang tanpa UI
+baru dikerjakan (pemilik proyek, 7 November 2026): syarat fixme lintas
+outlet dibuang (`860ff15`), B250 dan B255 dibuktikan e2e (`778eb2d`), dan
+tombol tulis menurut izin serta butir 158 diuji lewat pengguna uji
+terbatas (`cbfa23b`, `4601d91`), termasuk tombol Tambah Akun yang kini
+menurut izin. Pekerjaan yang selesai sejak
+penyesuaian `4759208` (4 sampai 6 November 2026, butir 1 sampai 10
+beserta urutan yang disetujui 4 November 2026) dipindah ke
+`arsip/catatan-putaran.md` (Catatan dari penyesuaian backend `4759208`
+sampai `c031bde`); rujukan "butir 4 (wizard)", "butir 6 (sesi kasir)",
+dan "butir 7" di dokumen lain merujuk daftar di sana.

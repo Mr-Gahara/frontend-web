@@ -596,7 +596,7 @@ kasir.
   ke login.
 - **Suite e2e penuh tidak dijalankan ulang setelah perubahan web** atas
   perintah pemilik proyek; spec terdampak masing-masing lolos
-  (`inti/pengujian.md`, Baseline).
+  (`arsip/riwayat-pengujian.md`, Riwayat baseline).
 
 ## Penyesuaian backend `ridho` lokal `aa978cc`
 
