@@ -228,7 +228,7 @@ export default function HalamanPengguna({
   const columns: ColumnDef<PenggunaItem>[] = [
     {
       accessorKey: "nama",
-      meta: { lebarBungkus: 200 },
+      meta: { label: "Nama Pengguna", lebarBungkus: 200 },
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -245,6 +245,7 @@ export default function HalamanPengguna({
     },
     {
       accessorKey: "nomorHp",
+      meta: { label: "Nomor HP" },
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -263,6 +264,7 @@ export default function HalamanPengguna({
     },
     {
       id: "role",
+      meta: { label: "Role" },
       header: () => (
         <span className="text-xs font-bold text-navy/60">Role</span>
       ),
@@ -275,6 +277,7 @@ export default function HalamanPengguna({
     },
     {
       accessorKey: "statusPengguna",
+      meta: { label: "Status" },
       header: () => (
         <div className="text-xs font-bold text-navy/60">Status</div>
       ),

@@ -122,6 +122,7 @@ export default function DaftarTarifPage() {
       },
       {
         id: "harga",
+        meta: { label: "Harga Sewa" },
         header: () => <div className="text-right">Harga Sewa</div>,
         cell: ({ row }) => (
           <div className="text-right font-bold text-[15px] text-navy">{formatRupiah(row.original.harga)}</div>

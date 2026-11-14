@@ -129,6 +129,7 @@ export function HalamanMutasi() {
       },
       {
         id: "jumlah",
+        meta: { label: "Jumlah" },
         header: () => <div className="text-right">Jumlah</div>,
         cell: ({ row }) => (
           <div

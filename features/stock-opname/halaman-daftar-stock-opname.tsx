@@ -136,6 +136,7 @@ export default function HalamanDaftarStockOpname({
     () => [
       {
         accessorKey: "nomorOpname",
+        meta: { label: "No. Opname" },
         header: () => <span className="text-xs font-bold text-navy/60">No. Opname</span>,
         cell: ({ row }) => (
           <span className="font-bold font-mono text-navy text-xs sm:text-sm">
@@ -169,6 +170,7 @@ export default function HalamanDaftarStockOpname({
       },
       {
         accessorKey: "status",
+        meta: { label: "Status" },
         header: () => (
           <span className="text-xs font-bold text-navy/60">Status</span>
         ),

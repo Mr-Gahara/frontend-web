@@ -87,6 +87,7 @@ export default function ProdukPage() {
     () => [
       {
         accessorKey: "namaProduk",
+        meta: { label: "Nama Produk" },
         header: ({ column }) => (
           <Button
             variant="ghost"
@@ -104,6 +105,7 @@ export default function ProdukPage() {
       },
       {
         accessorKey: "kategori",
+        meta: { label: "Kategori" },
         header: () => (
           <span className="text-xs font-bold text-navy/60">
             Kategori
@@ -116,6 +118,7 @@ export default function ProdukPage() {
       },
       {
         accessorKey: "hargaDasar",
+        meta: { label: "Harga Dasar" },
         header: () => (
           <span className="text-xs font-bold text-navy/60">
             Harga Dasar
@@ -125,6 +128,7 @@ export default function ProdukPage() {
       },
       {
         accessorKey: "hargaJual",
+        meta: { label: "Harga Jual" },
         header: () => (
           <span className="text-xs font-bold text-navy/60">
             Harga Jual
@@ -134,6 +138,7 @@ export default function ProdukPage() {
       },
       {
         accessorKey: "stok",
+        meta: { label: "Stok" },
         header: () => (
           <span className="text-xs font-bold text-navy/60">
             Stok

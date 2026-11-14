@@ -337,6 +337,7 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
       },
       {
         id: "jumlah",
+        meta: { label: "Jumlah" },
         header: () => <div className="text-right">Jumlah</div>,
         cell: ({ row }) => (
           <div className="text-right font-mono font-bold text-navy">

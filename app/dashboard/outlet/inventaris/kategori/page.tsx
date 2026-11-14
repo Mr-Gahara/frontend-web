@@ -165,6 +165,7 @@ export default function KategoriPage() {
     () => [
       {
         accessorKey: "namaKategori",
+        meta: { label: "Nama Kategori" },
         header: ({ column }) => (
           <Button
             variant="ghost"
@@ -183,6 +184,7 @@ export default function KategoriPage() {
       },
       {
         accessorKey: "kodeKategori",
+        meta: { label: "Kode" },
         header: () => (
           <span className="text-xs font-bold text-navy/60">Kode</span>
         ),
@@ -194,6 +196,7 @@ export default function KategoriPage() {
       },
       {
         accessorKey: "keterangan",
+        meta: { label: "Keterangan" },
         header: () => (
           <span className="text-xs font-bold text-navy/60">
             Keterangan

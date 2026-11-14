@@ -67,7 +67,7 @@ export function HalamanDiskon() {
   const columns: ColumnDef<Diskon>[] = [
     {
       accessorKey: "namaDiskon",
-      meta: { lebarBungkus: 200 },
+      meta: { label: "Nama Diskon", lebarBungkus: 200 },
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -85,6 +85,7 @@ export function HalamanDiskon() {
     },
     {
       accessorKey: "cakupan",
+      meta: { label: "Cakupan" },
       header: () => <span className={KELAS_KEPALA}>Cakupan</span>,
       cell: ({ row }) => (
         <span
@@ -100,6 +101,7 @@ export function HalamanDiskon() {
     },
     {
       accessorKey: "tipe",
+      meta: { label: "Tipe" },
       header: () => <span className={KELAS_KEPALA}>Tipe</span>,
       cell: ({ row }) => (
         <span className="text-sm font-medium text-navy/70">
@@ -109,6 +111,7 @@ export function HalamanDiskon() {
     },
     {
       accessorKey: "nilai",
+      meta: { label: "Nilai" },
       header: () => <span className={KELAS_KEPALA}>Nilai</span>,
       cell: ({ row }) => (
         <span className="font-bold text-navy">{teksNilai(row.original)}</span>
@@ -116,6 +119,7 @@ export function HalamanDiskon() {
     },
     {
       accessorKey: "bisaDigabung",
+      meta: { label: "Digabung" },
       header: () => <span className={KELAS_KEPALA}>Digabung</span>,
       cell: ({ row }) => (
         <span className="text-sm font-medium text-navy/70">
@@ -125,7 +129,7 @@ export function HalamanDiskon() {
     },
     {
       id: "aturan",
-      meta: { lebarBungkus: 180 },
+      meta: { label: "Aturan", lebarBungkus: 180 },
       header: () => <span className={KELAS_KEPALA}>Aturan</span>,
       cell: ({ row }) => {
         const aturan = ringkasAturan(row.original);
@@ -145,6 +149,7 @@ export function HalamanDiskon() {
     },
     {
       accessorKey: "status",
+      meta: { label: "Status" },
       header: () => <span className={KELAS_KEPALA}>Status</span>,
       cell: ({ row }) => (
         <div className="flex flex-col items-start gap-1">

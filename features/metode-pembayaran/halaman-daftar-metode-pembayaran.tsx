@@ -71,6 +71,7 @@ export function HalamanDaftarMetodePembayaran() {
     () => [
       {
         accessorKey: "namaPembayaran",
+        meta: { label: "Nama Pembayaran" },
         header: ({ column }) => (
           <Button
             variant="ghost"
@@ -85,6 +86,7 @@ export function HalamanDaftarMetodePembayaran() {
       },
       {
         accessorKey: "kategori",
+        meta: { label: "Kategori" },
         header: () => <span className={kelasKepalaKolom}>Kategori</span>,
         cell: ({ row }) => (
           <span className="text-sm capitalize font-medium text-navy/80">{labelKategori(row.original.kategori)}</span>
@@ -92,6 +94,7 @@ export function HalamanDaftarMetodePembayaran() {
       },
       {
         id: "akunKas",
+        meta: { label: "Akun Tujuan" },
         header: () => <span className={kelasKepalaKolom}>Akun Tujuan</span>,
         cell: ({ row }) => {
           const akun = row.original.akunKas;
@@ -106,6 +109,7 @@ export function HalamanDaftarMetodePembayaran() {
       },
       {
         accessorKey: "isActive",
+        meta: { label: "Status" },
         header: () => <span className={kelasKepalaKolom}>Status</span>,
         cell: ({ row }) => {
           const aktif = row.original.isActive;

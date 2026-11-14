@@ -83,6 +83,7 @@ export default function HalamanDaftarStockAdjustment({
     () => [
       {
         accessorKey: "nomorAdjustment",
+        meta: { label: "No. Jurnal" },
         header: () => <div className="text-xs font-bold text-navy/60">No. Jurnal</div>,
         cell: ({ row }) => (
           <span className="font-bold font-mono text-navy text-sm">
@@ -92,6 +93,7 @@ export default function HalamanDaftarStockAdjustment({
       },
       {
         accessorKey: "tanggal",
+        meta: { label: "Tanggal Eksekusi" },
         header: () => <div className="text-xs font-bold text-navy/60">Tanggal Eksekusi</div>,
         cell: ({ row }) => (
           <span className="text-sm font-medium text-navy/70">
@@ -101,6 +103,7 @@ export default function HalamanDaftarStockAdjustment({
       },
       {
         id: "sumber",
+        meta: { label: "Sumber" },
         header: () => (
           <div className="text-xs font-bold text-navy/60">Sumber</div>
         ),

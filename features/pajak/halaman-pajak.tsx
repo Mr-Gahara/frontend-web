@@ -112,6 +112,7 @@ function IsiHalamanPajak() {
     () => [
       {
         accessorKey: "namaPajak",
+        meta: { label: "Nama Pajak" },
         header: ({ column }) => (
           <Button
             variant="ghost"
@@ -127,11 +128,13 @@ function IsiHalamanPajak() {
       },
       {
         accessorKey: "tarifPajak",
+        meta: { label: "Tarif" },
         header: () => <span className={kelasKepalaKolom}>Tarif</span>,
         cell: ({ row }) => <span className="font-semibold text-navy">{row.original.tarifPajak}%</span>,
       },
       {
         accessorKey: "modelPerhitungan",
+        meta: { label: "Model" },
         header: () => <span className={kelasKepalaKolom}>Model</span>,
         cell: ({ row }) => (
           <span className="font-medium text-navy/80">{LABEL_MODEL[row.original.modelPerhitungan]}</span>
@@ -139,11 +142,13 @@ function IsiHalamanPajak() {
       },
       {
         accessorKey: "prioritas",
+        meta: { label: "Prioritas" },
         header: () => <span className={kelasKepalaKolom}>Prioritas</span>,
         cell: ({ row }) => <span className="font-medium text-navy/80">{row.original.prioritas}</span>,
       },
       {
         accessorKey: "statusPajak",
+        meta: { label: "Status" },
         header: () => <span className={kelasKepalaKolom}>Status</span>,
         cell: ({ row }) => (
           <span

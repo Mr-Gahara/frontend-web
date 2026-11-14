@@ -195,6 +195,7 @@ export default function HalamanDaftarPenjualan({
     () => [
       {
         accessorKey: "noReferensi",
+        meta: { label: "No. Referensi" },
         header: ({ column }) => <KepalaUrut column={column} judul="No. Referensi" />,
         cell: ({ row }) => (
           <span className="font-bold font-mono text-navy text-xs sm:text-sm">
@@ -228,6 +229,7 @@ export default function HalamanDaftarPenjualan({
       },
       {
         accessorKey: "totalTagihan",
+        meta: { label: "Total" },
         header: ({ column }) => <KepalaUrut column={column} judul="Total" />,
         cell: ({ row }) => (
           <span className="font-bold text-navy text-xs sm:text-sm font-mono">
@@ -237,6 +239,7 @@ export default function HalamanDaftarPenjualan({
       },
       {
         accessorKey: "statusPenjualan",
+        meta: { label: "Status" },
         header: () => (
           <span className="text-xs font-bold text-navy/60">
             Status

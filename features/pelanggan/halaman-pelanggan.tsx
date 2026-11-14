@@ -73,6 +73,7 @@ export function HalamanPelanggan() {
   const columns: ColumnDef<Pelanggan>[] = [
     {
       accessorKey: "namaPelanggan",
+      meta: { label: "Nama Pelanggan" },
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -107,6 +108,7 @@ export function HalamanPelanggan() {
     },
     {
       accessorKey: "nomorHp",
+      meta: { label: "Kontak" },
       header: () => <span className="text-xs font-semibold text-navy/60">Kontak</span>,
       cell: ({ row }) => (
         <div className="flex flex-col space-y-1">
@@ -117,6 +119,7 @@ export function HalamanPelanggan() {
     },
     {
       accessorKey: "tipePelanggan",
+      meta: { label: "Tipe" },
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -146,6 +149,7 @@ export function HalamanPelanggan() {
     },
     {
       accessorKey: "poinLoyalitas",
+      meta: { label: "Poin" },
       header: ({ column }) => (
         <Button
           variant="ghost"
