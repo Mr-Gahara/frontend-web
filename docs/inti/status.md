@@ -221,9 +221,9 @@ A dibangkitkan ulang RG9a. Ketiganya selesai 10 November 2026: TP2b
     (perangkat dan asal penutupan sesi kasir), 177 (logout akun tidak
     mencabut sesi pengguna), 178 (penyimpanan penjualan bersamaan;
     diuji ulang 10 November 2026 sesudah P-03 dan masih terjadi: stok
-    turun 6 untuk satu penjualan tersimpan), dan 179 (lokasi
-    kerja pengaju, B284), dan 182 (tipe lokasi kerja tidak terbaca tanpa
-  `read-location`, LK3a). Butir 180 (omzet per metode pembayaran, OM1a)
+    turun 6 untuk satu penjualan tersimpan), 179 (lokasi kerja
+    pengaju, B284), dan 182 (tipe lokasi kerja tidak terbaca tanpa
+    `read-location`, LK3a). Butir 180 (omzet per metode pembayaran, OM1a)
     sudah dicatat langsung di `docs/pengembangan/klien.md` backend
     `dd6bc98` atas perintah pemilik proyek, dan butir 181 (stok keluar
     per penjualan tidak tertelusur, VD2a) di `aeb6a52`; keduanya cukup
@@ -288,6 +288,15 @@ RAM, build memuncak sekitar 2 GB.
 
 ### Utang kecil dari kerapian repo
 
+- Repo frontend dibuat ulang sebagai repo baru dengan pemilik proyek
+  sebagai satu-satunya kontributor, setelah seluruh pekerjaan selesai dan
+  masuk produksi (pemilik proyek, 25 Oktober 2026). Seluruh commit yang
+  terjangkau per tanggal itu ditulis `Mr-Gahara` tanpa atribusi lain,
+  dan remote hanya punya `main` tanpa ref pull request, tetapi daftar
+  kontributor GitHub masih menampilkan Claude.
+  Per 31 Oktober 2026 API contributors hanya memuat `Mr-Gahara`; yang
+  tertinggal panel Contributors halaman repo dan commit `68cd7da` yang
+  diganti `8b5ad0f` (`inti/cara-kerja.md`, Atribusi commit).
 - Folder `tests/` (225 berkas) masih ikut di repo publik GitHub, termasuk
   kredensial uji. Rencananya (pemilik proyek, 7 November 2026, dicatat
   sebagai utang): isi `tests/` dipindah ke repo privat terpisah, misalnya
@@ -377,15 +386,6 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
   (AR6a). Angkanya melebihi isi tab bila ada pengembalian yang disetujui
   dan menunggu surat jalan outlet; perlu hitungan per arah dari backend
   atau kartu tersendiri.
-- Repo frontend dibuat ulang sebagai repo baru dengan pemilik proyek
-  sebagai satu-satunya kontributor, setelah seluruh pekerjaan selesai dan
-  masuk produksi (pemilik proyek, 25 Oktober 2026). Seluruh commit yang
-  terjangkau per tanggal itu ditulis `Mr-Gahara` tanpa atribusi lain,
-  dan remote hanya punya `main` tanpa ref pull request, tetapi daftar
-  kontributor GitHub masih menampilkan Claude.
-  Per 31 Oktober 2026 API contributors hanya memuat `Mr-Gahara`; yang
-  tertinggal panel Contributors halaman repo dan commit `68cd7da` yang
-  diganti `8b5ad0f` (`inti/cara-kerja.md`, Atribusi commit).
 
 ### Utang kecil dari penyesuaian backend `ridho` `7d28135`
 

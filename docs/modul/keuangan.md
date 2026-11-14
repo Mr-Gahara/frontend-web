@@ -803,7 +803,11 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   (`referensi/utang-pengujian.md`, akun kas uji menumpuk).
 - Tab Keuangan memakai `focus-visible:ring-0`, sehingga tab tidak punya
   penanda fokus saat dipakai dengan keyboard. Dipertahankan di
-  `b3f8698` karena tidak ada di pratinjau yang disetujui.
+  `b3f8698` karena tidak ada di pratinjau yang disetujui. Gugur di
+  `7b90716`: bar tab Keuangan dibuang (SK2a). Kelas yang sama masih
+  dipakai tab navigasi Inventaris dan Reservasi
+  (`inventaris-nav-tabs.tsx`, `reservasi-nav-tabs.tsx`; terlihat
+  14 November 2026).
 - Keadaan memuat, gagal dimuat, sesi lintas tengah malam, Muat hari
   sebelumnya, serta posisi panel di HP dan desktop tidak lagi teruji e2e
   sejak spec pratinjau dihapus di `b74f30a` (daftar periksa nomor 6);

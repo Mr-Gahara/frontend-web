@@ -496,10 +496,14 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
   (`features/pajak/tab-pajak-produk.tsx`) belum ditinjau terhadap aturan
   tabel yang baru.
 - Dashboard gudang (`app/dashboard/gudang/page.tsx`) masih placeholder.
+  Selesai di `06581f3` dan `50dca2f` (`modul/gudang.md`): halamannya kini
+  memasang `HalamanDashboardGudang`.
 - Layout dan tampilan panel admin masih menunggu fase ini (Utang kecil
   dari modul panel admin).
 - Lonceng notifikasi nonaktif sampai ada sumber datanya (DB4a), dan status
-  alpha staf ditunda (DB3a).
+  alpha staf ditunda (DB3a). Lonceng aktif sejak 12 November 2026 sebagai
+  pusat pemberitahuan pengingat masa langganan (`modul/setup-akun.md`,
+  TP8a); status alpha staf tetap ditunda.
 - Sisa 68 warna heksadesimal belum menjadi token: konstanta palet lokal di
   tiga halaman reservasi dan tarif (termasuk `#FFFAF399` yang memakai
   akhiran alfa), warna grafik di `features/laporan/grafik-laporan.tsx`,

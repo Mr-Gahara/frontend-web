@@ -560,12 +560,15 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
   (`kontrak/payload.md`).
 - Nama toko dan email akun belum dapat ditampilkan di login pengguna,
   karena token akun tidak memuatnya dan `GET /tenant/:id` menolak token
-  akun (`kontrak/temuan.md` butir 167, diserahkan ke Yoga).
+  akun (`kontrak/temuan.md` butir 167, diserahkan ke Yoga). Selesai lewat
+  `GET /akun/me` (B240): panel login pengguna menampilkan keduanya sejak
+  `19498b7` (TP2b).
 - Tautan "Daftar" dan "Lupa password?" di login akun dipasang setelah N3,
   N4, dan Y1 tersedia; sampai itu `/daftar`, `/daftar/verifikasi`,
   `/lupa-password`, dan `/setup` hanya dapat dibuka langsung.
   "Lupa password?" terpasang di `67ec690`; "Daftar" menunggu wizard
-  tersambung, karena daftar berakhir di `/setup`.
+  tersambung, karena daftar berakhir di `/setup`. "Daftar" terpasang di
+  `4322dba` setelah wizard tersambung.
 - Tombol "Buka aplikasi" di halaman setup selesai belum ada, karena
   aplikasi kasir belum rilis. Wajib ada saat aplikasi rilis: tombol
   membuka aplikasi lewat deep link, dan bila aplikasi belum terpasang
