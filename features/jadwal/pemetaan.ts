@@ -73,3 +73,13 @@ export function petakanJadwalKaryawan(
   }
   return [...baris.values()];
 }
+/**
+ * True bila karyawan punya jadwal kerja di lokasi lain dalam data itu: ada
+ * di semua tetapi tidak di jadwal lokasi ruang, dan bukan libur (aturan
+ * lainMap di petakanJadwalKaryawan). Menjadikan hari itu libur dari ruang
+ * ini menghapus jadwal lokasi lain (B165), sehingga Libur dinonaktifkan.
+ */
+export function adaJadwalLokasiLain(penggunaId: string, jadwal: JadwalItem[], semua: JadwalItem[]): boolean {
+  const lokal = new Set(jadwal.map((j) => j.id));
+  return semua.some((j) => j.karyawan?.id === penggunaId && !lokal.has(j.id) && !j.isLibur);
+}

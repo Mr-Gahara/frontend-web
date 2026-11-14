@@ -537,9 +537,13 @@ function IsiFormRole({
               }
               className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm px-6"
             >
-              {simpanRoleMutation.isPending
-                ? "Menyimpan Perubahan..."
-                : "Simpan Perubahan"}
+              {modeEdit
+                ? simpanRoleMutation.isPending
+                  ? "Menyimpan Perubahan..."
+                  : "Simpan Perubahan"
+                : simpanRoleMutation.isPending
+                  ? "Membuat Posisi..."
+                  : "Buat Posisi"}
             </Button>
           </div>
         </form>

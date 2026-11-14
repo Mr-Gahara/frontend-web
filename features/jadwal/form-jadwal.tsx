@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -18,10 +18,21 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { CalendarPlus, X, Briefcase, Coffee, Plus, Trash2 } from "lucide-react";
 import { PilihTanggal } from "@/components/pilih-tanggal";
 import { keTanggalLokal } from "@/lib/waktu";
 import { buatSkemaJadwalManual, type NilaiFormJadwal } from "./schema";
+import { useJadwalLokasiLainPada } from "./hooks";
 import type { PayloadJadwalManual } from "./tipe";
 import type { KaryawanJadwal, ShiftItem } from "@/types/jadwal";
 import type { ShiftItem as MasterShift } from "@/types/shift";
@@ -39,6 +50,13 @@ interface FormJadwalDialogProps {
   /** Tidak diisi bila pengguna tidak memegang delete-jadwal-shift; tombol hapus disembunyikan. */
   onHapus?: (id: string) => Promise<void>;
   isPending?: boolean;
+  /**
+   * Sel yang dibuka juga berisi jadwal karyawan di lokasi lain. Libur
+   * dinonaktifkan, karena backend menghapus jadwal lain hari itu (B165).
+   */
+  adaJadwalLokasiLain?: boolean;
+  /** Lokasi ruang kalender; dipakai Tambah Manual untuk membaca jadwal lokasi lain (B165). */
+  lokasiId?: string | null;
 }
 
 interface IsiFormJadwalProps {
@@ -53,6 +71,8 @@ interface IsiFormJadwalProps {
   onHapus?: (id: string) => Promise<void>;
   onSelesai: () => void;
   isPending: boolean;
+  adaJadwalLokasiLain: boolean;
+  lokasiId: string | null;
 }
 
 /**
@@ -76,7 +96,10 @@ function IsiFormJadwal({
   onHapus,
   onSelesai,
   isPending,
+  adaJadwalLokasiLain,
+  lokasiId,
 }: IsiFormJadwalProps) {
+  const [konfirmasiHapus, setKonfirmasiHapus] = useState(false);
   const shiftAktif = useMemo(() => shiftList.filter((s) => s.status === "Aktif"), [shiftList]);
   const skema = useMemo(
     () => buatSkemaJadwalManual(new Set(shiftAktif.map((s) => s.id))),
@@ -108,6 +131,16 @@ function IsiFormJadwal({
     control,
     name: ["status", "shiftIds", "penggunaId", "tanggal"],
   });
+  // Sel yang diklik membawa penandanya sendiri; Tambah Manual membacanya
+  // untuk karyawan dan tanggal yang dipilih di form (B165).
+  const manual = !isEditMode && !penggunaId;
+  const cekManual = useJadwalLokasiLainPada(
+    manual ? (penggunaTerpilih ?? "") : "",
+    manual && tanggalTerpilih ? keTanggalLokal(tanggalTerpilih) : "",
+    lokasiId,
+  );
+  const lokasiLain = adaJadwalLokasiLain || cekManual.ada;
+  const liburTerkunci = lokasiLain || cekManual.memuat;
   const pesanGalat =
     errors.penggunaId?.message ??
     errors.tanggal?.message ??
@@ -235,8 +268,10 @@ function IsiFormJadwal({
           <button
             type="button"
             aria-pressed={status === "libur"}
+            aria-describedby={lokasiLain ? "keterangan-libur-lokasi-lain" : undefined}
+            disabled={liburTerkunci}
             onClick={() => setValue("status", "libur")}
-            className={`flex flex-col items-center justify-center py-4 px-2 rounded-xl border transition-all cursor-pointer ${status === "libur" ? "bg-navy border-navy text-gading shadow-md" : "bg-gading border-navy/15 text-navy hover:border-navy/40"}`}
+            className={`flex flex-col items-center justify-center py-4 px-2 rounded-xl border transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${status === "libur" ? "bg-navy border-navy text-gading shadow-md" : "bg-gading border-navy/15 text-navy hover:border-navy/40"}`}
           >
             <Coffee
               className={`h-6 w-6 mb-2 ${status === "libur" ? "stroke-[2.5px]" : "stroke-[2px]"}`}
@@ -244,6 +279,11 @@ function IsiFormJadwal({
             <span className="text-sm font-bold">Libur / Off</span>
           </button>
         </div>
+        {lokasiLain && (
+          <p id="keterangan-libur-lokasi-lain" className="text-xs font-medium text-navy/70">
+            Karyawan ini juga berjadwal di lokasi lain pada tanggal ini; atur liburnya dari kalender lokasi itu atau hapus jadwalnya lebih dulu.
+          </p>
+        )}
       </div>
 
       {status === "kerja" && (
@@ -320,11 +360,7 @@ function IsiFormJadwal({
           <Button
             type="button"
             disabled={isPending}
-            onClick={() => {
-              if (confirm("Apakah Anda yakin ingin menghapus jadwal ini?")) {
-                void hapus(targetJadwalId);
-              }
-            }}
+            onClick={() => setKonfirmasiHapus(true)}
             className="h-14 px-5 rounded-xl font-bold shadow-md bg-rose-800 hover:bg-red-900 flex items-center justify-center gap-2"
           >
             <Trash2 className="h-5 w-5" />
@@ -338,7 +374,8 @@ function IsiFormJadwal({
             isPending ||
             (!isEditMode && !penggunaTerpilih) ||
             (!isEditMode && !tanggalTerpilih) ||
-            (status === "kerja" && !shiftIds[0])
+            (status === "kerja" && !shiftIds[0]) ||
+            (status === "libur" && liburTerkunci)
           }
           className="flex-1 h-14 rounded-xl bg-navy text-gading hover:bg-navy/90 text-base font-bold shadow-md"
         >
@@ -349,6 +386,30 @@ function IsiFormJadwal({
               : "Simpan Jadwal"}
         </Button>
       </div>
+
+      <AlertDialog open={konfirmasiHapus} onOpenChange={setKonfirmasiHapus}>
+        <AlertDialogContent className="bg-gading border-navy/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-navy">Hapus jadwal?</AlertDialogTitle>
+            <AlertDialogDescription className="text-navy/70">
+              Jadwal karyawan ini pada tanggal tersebut akan dihapus.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 bg-transparent font-bold">
+              Batal
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (targetJadwalId) void hapus(targetJadwalId);
+              }}
+              className="cursor-pointer bg-red-600 text-white hover:bg-red-700 font-bold"
+            >
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </form>
   );
 }
@@ -365,6 +426,8 @@ export function FormJadwalDialog({
   onSimpan,
   onHapus,
   isPending = false,
+  adaJadwalLokasiLain = false,
+  lokasiId = null,
 }: FormJadwalDialogProps) {
   const isEditMode =
     existingShifts.length > 0 && existingShifts[0].id !== "off";
@@ -417,6 +480,8 @@ export function FormJadwalDialog({
           onHapus={onHapus}
           onSelesai={() => onOpenChange(false)}
           isPending={isPending}
+          adaJadwalLokasiLain={adaJadwalLokasiLain}
+          lokasiId={lokasiId}
         />
       </DialogContent>
     </Dialog>

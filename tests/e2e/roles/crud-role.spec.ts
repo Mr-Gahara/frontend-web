@@ -93,7 +93,8 @@ test.describe("E2E - Role (CRUD)", () => {
       await page.getByLabel(/nama posisi|nama role/i).fill(nama);
       await page.getByLabel(/level/i).fill("1");
 
-      await page.getByRole("button", { name: /simpan/i }).click();
+      // Mode buat bertombol "Buat Posisi", mode ubah "Simpan Perubahan".
+      await page.getByRole("button", { name: "Buat Posisi", exact: true }).click();
       // Halaman form berada di bawah path daftar, sehingga kembalinya
       // diperiksa lewat URL yang berakhir tepat di daftar.
       await expect(page).toHaveURL(new RegExp(`${DAFTAR}$`), { timeout: 15_000 });
@@ -224,7 +225,7 @@ test.describe("E2E - Role (CRUD)", () => {
     await page.goto(`${BASE}${DAFTAR}/buatRole/kostum`);
     const nama = page.getByLabel(/nama posisi|nama role/i);
     const level = page.getByLabel(/level/i);
-    const simpan = page.getByRole("button", { name: /simpan/i });
+    const simpan = page.getByRole("button", { name: "Buat Posisi", exact: true });
     await expect(page.getByRole("checkbox").first()).toBeVisible({ timeout: 15_000 });
 
     await nama.fill("ab");
@@ -259,7 +260,7 @@ test.describe("E2E - Role (CRUD)", () => {
     await page.getByLabel(/nama posisi|nama role/i).fill(nama);
     await deskripsi.fill("Deskripsi uji");
     await page.getByLabel(/level/i).fill("1");
-    await simpan.click();
+    await page.getByRole("button", { name: "Buat Posisi", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`${DAFTAR}$`), { timeout: 15_000 });
 
     try {

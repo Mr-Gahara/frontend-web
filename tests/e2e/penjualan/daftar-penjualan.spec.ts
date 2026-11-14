@@ -115,6 +115,36 @@ test.describe("E2E — Daftar penjualan per halaman", () => {
     await expect(page.locator("tbody tr")).toHaveCount(r20.data.length);
   });
 
+  test("filter tanggal dapat dikosongkan satu per satu lewat tombol Kosongkan di kalender", async ({ page }) => {
+    const awal = await bukaDaftar(page);
+    await page.getByRole("button", { name: "Filter", exact: true }).click();
+    const dari = page.getByRole("button", { name: /^Dari Tanggal,/ });
+    await expect(dari).toHaveAccessibleName("Dari Tanggal, Semua tanggal");
+
+    await dari.click();
+    await expect(page.getByRole("button", { name: "Kosongkan" }), "tanpa tanggal tidak ada Kosongkan").toHaveCount(0);
+    await page.getByRole("grid").getByText("1", { exact: true }).first().click();
+    await expect(dari).not.toHaveAccessibleName("Dari Tanggal, Semua tanggal");
+
+    const tDengan = page.waitForResponse(
+      (r) => r.request().method() === "GET" && POLA_DAFTAR.test(r.url()) && new URL(r.url()).searchParams.has("startDate"),
+    );
+    await page.getByRole("button", { name: "Terapkan Pencarian" }).click();
+    await tDengan;
+
+    // Terapkan Pencarian menutup panel filter; buka lagi untuk mengosongkan.
+    await page.getByRole("button", { name: "Filter", exact: true }).click();
+    await expect(dari).toHaveAccessibleName(/^Dari Tanggal, \d{2} /);
+    await dari.click();
+    await page.getByRole("button", { name: "Kosongkan" }).click();
+    await expect(dari).toHaveAccessibleName("Dari Tanggal, Semua tanggal");
+    // Tanpa tanggal, kunci query sama dengan daftar awal yang masih segar di
+    // cache, sehingga tidak ada permintaan baru; dibuktikan dari tampilan.
+    await page.getByRole("button", { name: "Terapkan Pencarian" }).click();
+    await expect(page.getByText(`${awal.pagination.total} total data`, { exact: true })).toBeVisible();
+    await expect(page.locator("tbody tr").first()).toContainText(awal.data[0].noReferensi);
+  });
+
   test("terkunci: daftar disaring server lewat locationID outlet tenant (RG4a)", async ({ page }) => {
     await masukTanpaIzinLintas(page);
     type ResponsLokasi = { data: { locationID: string | null }[]; pagination: ResponsDaftar["pagination"] };

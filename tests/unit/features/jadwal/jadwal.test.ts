@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { entriBulkJadwal, pesanMasalahSimulasi, simulasiGenerate } from "@/features/jadwal/generate";
 import { gabungHasil, hasilDariPenolakanSeluruh, pesanDitolak } from "@/features/jadwal/hasil";
 import { ApiError } from "@/lib/api/error";
-import { itemJadwal, keKaryawanRuang, petakanJadwalKaryawan } from "@/features/jadwal/pemetaan";
+import { adaJadwalLokasiLain, itemJadwal, keKaryawanRuang, petakanJadwalKaryawan } from "@/features/jadwal/pemetaan";
 import { rencanaSimpanJadwal } from "@/features/jadwal/rencana";
 import { daftarTanggal, rentangBulan } from "@/features/jadwal/rentang";
 import { buatSkemaJadwalManual, skemaGenerate } from "@/features/jadwal/schema";
@@ -244,5 +244,16 @@ describe("hasilDariPenolakanSeluruh (B147)", () => {
     expect(hasilDariPenolakanSeluruh(new ApiError(400, "x", [], undefined, [DITOLAK]))).toBeNull();
     expect(hasilDariPenolakanSeluruh(new ApiError(409, "Nomor kembar"))).toBeNull();
     expect(hasilDariPenolakanSeluruh(new Error("jaringan"))).toBeNull();
+  });
+});
+
+describe("adaJadwalLokasiLain (B165)", () => {
+  const lokal = [JADWAL("j1", "p1", "2026-11-10")];
+  it("jadwal kerja yang hanya ada di daftar seluruh lokasi adalah jadwal lokasi lain", () => {
+    expect(adaJadwalLokasiLain("p1", lokal, [...lokal, JADWAL("j2", "p1", "2026-11-10")])).toBe(true);
+  });
+  it("jadwal lokal, libur, dan jadwal karyawan lain tidak dihitung", () => {
+    const semua = [...lokal, JADWAL("j3", "p1", "2026-11-10", { isLibur: true }), JADWAL("j4", "p2", "2026-11-10")];
+    expect(adaJadwalLokasiLain("p1", lokal, semua)).toBe(false);
   });
 });

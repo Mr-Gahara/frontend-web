@@ -184,12 +184,60 @@ test("hapus jadwal lewat dialog ubah setelah konfirmasi", async ({ page }) => {
     await itemSel(page, hari).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toContainText("Ubah Jadwal");
-    page.once("dialog", (d) => d.accept());
-    const tunggu = page.waitForResponse(cocok("DELETE", new RegExp(`/api/jadwalshift/${id}$`, "i")));
     await dialog.getByRole("button", { name: "Hapus" }).click();
+    // Konfirmasi lewat dialog proyek, bukan confirm() bawaan browser.
+    const konfirmasi = page.getByRole("alertdialog");
+    await expect(konfirmasi).toContainText("Hapus jadwal?");
+    await expect(konfirmasi).toContainText("Jadwal karyawan ini pada tanggal tersebut akan dihapus.");
+    const tunggu = page.waitForResponse(cocok("DELETE", new RegExp(`/api/jadwalshift/${id}$`, "i")));
+    await konfirmasi.getByRole("button", { name: "Hapus" }).click();
     expect((await tunggu).status()).toBe(200);
     await expect(page.getByText("Jadwal Dihapus")).toBeVisible();
     expect(await jadwalRentang(page, auth, fx, tgl, tgl)).toEqual([]);
+  } finally {
+    await bersihkanHari(page, auth, fx, tgl, tgl);
+  }
+});
+
+test("berjadwal di lokasi lain: Libur dinonaktifkan dengan keterangan, lewat sel dan Tambah Manual (B165)", async ({ page }) => {
+  const auth = await bukaDenganAuth(page, URL_JADWAL_OUTLET);
+  const fx = await siapkanFixtureJadwal(page, auth);
+  const fxGudang = await siapkanFixtureJadwal(page, auth, "gudang");
+  // Shift gudang yang tidak bertumpuk dengan shift pagi outlet, agar keduanya tersimpan.
+  const malamGudang = await pastikanShiftMalam(page, auth, "gudang");
+  const b = bulanUji();
+  const hari = 27;
+  const tgl = tanggalUji(b, hari);
+  await bersihkanHari(page, auth, fx, tgl, tgl);
+  try {
+    await buatJadwalApi(page, auth, fx, tgl, fx.shiftPagi);
+    await buatJadwalApi(page, auth, fxGudang, tgl, malamGudang);
+    await keBulanUji(page, b);
+    await expect(selHari(page, hari)).toContainText("Lokasi lain", { timeout: 15_000 });
+    await itemSel(page, hari).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Ubah Jadwal");
+    const libur = dialog.getByRole("button", { name: /Libur \/ Off/ });
+    await expect(libur).toBeDisabled();
+    await expect(dialog).toContainText(
+      "Karyawan ini juga berjadwal di lokasi lain pada tanggal ini; atur liburnya dari kalender lokasi itu atau hapus jadwalnya lebih dulu.",
+    );
+    await expect(dialog.getByRole("button", { name: /Shift Kerja/ })).toBeEnabled();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+
+    // Tambah Manual: aturan yang sama begitu karyawan dan tanggalnya dipilih.
+    await page.getByRole("button", { name: "Tambah Manual" }).click();
+    await expect(dialog).toContainText("Kelola Jadwal");
+    await expect(dialog.getByRole("button", { name: /Libur \/ Off/ })).toBeEnabled();
+    await dialog.getByText("Pilih karyawan...").click();
+    await page.getByRole("option", { name: NAMA_PENGGUNA, exact: true }).click();
+    await dialog.getByRole("button", { name: "Pilih tanggal..." }).click();
+    await pilihTanggalKalender(page, b.selisih, hari);
+    await expect(dialog.getByRole("button", { name: /Libur \/ Off/ })).toBeDisabled({ timeout: 15_000 });
+    await expect(dialog).toContainText("Karyawan ini juga berjadwal di lokasi lain pada tanggal ini");
+    await page.keyboard.press("Escape");
+    expect((await jadwalRentang(page, auth, fx, tgl, tgl)).length, "kedua jadwal tetap ada").toBe(2);
   } finally {
     await bersihkanHari(page, auth, fx, tgl, tgl);
   }

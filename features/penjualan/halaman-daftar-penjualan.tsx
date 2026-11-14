@@ -1,5 +1,6 @@
 "use client";
 
+import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { PilihTanggal } from "@/components/pilih-tanggal";
 import { dariTanggalLokal, keTanggalLokal } from "@/lib/waktu";
 
@@ -212,15 +213,17 @@ export default function HalamanDaftarPenjualan({
       },
       {
         accessorKey: "dataPelanggan",
+        meta: { lebarBungkus: 180 },
         header: () => (
           <span className="text-xs font-bold text-navy/60 hidden md:inline">
             Pelanggan
           </span>
         ),
         cell: ({ row }) => (
-          <span className="hidden md:inline text-sm font-medium text-navy/80 capitalize">
-            {row.original.dataPelanggan?.namaPelanggan ?? "-"}
-          </span>
+          <TeksDuaBaris
+            teks={row.original.dataPelanggan?.namaPelanggan ?? "-"}
+            className="max-md:hidden text-sm font-medium text-navy/80 capitalize"
+          />
         ),
       },
       {
@@ -462,6 +465,7 @@ export default function HalamanDaftarPenjualan({
                   placeholder="Semua tanggal"
                   value={dariTanggalLokal(filters.startDate)}
                   onChange={(tanggal) => setFilters({ ...filters, startDate: keTanggalLokal(tanggal) })}
+                  onKosongkan={() => setFilters({ ...filters, startDate: "" })}
                   className="h-10"
                 />
               </div>
@@ -475,6 +479,7 @@ export default function HalamanDaftarPenjualan({
                   placeholder="Semua tanggal"
                   value={dariTanggalLokal(filters.endDate)}
                   onChange={(tanggal) => setFilters({ ...filters, endDate: keTanggalLokal(tanggal) })}
+                  onKosongkan={() => setFilters({ ...filters, endDate: "" })}
                   className="h-10"
                 />
               </div>

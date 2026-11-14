@@ -10,6 +10,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { jadwalApi } from "./api";
 import { gabungHasil } from "./hasil";
+import { adaJadwalLokasiLain } from "./pemetaan";
 import type { LangkahJadwal } from "./rencana";
 import type { EntriBulkJadwal, FilterDaftarJadwal, HasilJadwal } from "./tipe";
 import { pesanError } from "@/lib/api/error";
@@ -26,6 +27,22 @@ export function useDaftarJadwal(filter: FilterDaftarJadwal, { aktif = true }: { 
     queryFn: () => jadwalApi.daftar(filter),
     enabled: aktif,
   });
+}
+
+/**
+ * Tambah Manual: apakah karyawan terpilih berjadwal di lokasi lain pada
+ * tanggal terpilih (YYYY-MM-DD), dibaca dari daftar lokasi ruang dan daftar
+ * seluruh lokasi untuk tanggal itu, karena tanggalnya bisa di luar bulan
+ * yang sedang tampil (B165). memuat true selama salah satunya belum termuat.
+ */
+export function useJadwalLokasiLainPada(penggunaId: string, tanggal: string, lokasiId: string | null) {
+  const aktif = Boolean(penggunaId && tanggal && lokasiId);
+  const rentang = { startDate: tanggal, endDate: tanggal };
+  const lokal = useDaftarJadwal({ ...rentang, locationID: lokasiId ?? "" }, { aktif });
+  const semua = useDaftarJadwal(rentang, { aktif });
+  if (!aktif) return { ada: false, memuat: false };
+  if (!lokal.data || !semua.data) return { ada: false, memuat: true };
+  return { ada: adaJadwalLokasiLain(penggunaId, lokal.data, semua.data), memuat: false };
 }
 
 function useInvalidasiJadwal() {

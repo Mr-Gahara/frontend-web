@@ -51,6 +51,7 @@ export function HalamanJadwalRuang({ ruang }: { ruang: RuangJadwal }) {
   return (
     <JadwalUtama
       tipeRuang={ruang}
+      lokasiId={lokasi.lokasiId}
       dataKaryawan={baris}
       shiftList={shift.data}
       isLoading={karyawan.isLoading || lokasi.memuat || jadwal.isLoading || jadwalSemua.isLoading || shift.memuat}

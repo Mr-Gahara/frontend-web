@@ -25,6 +25,8 @@ interface JadwalUtamaProps {
   onSimpan: (payload: PayloadJadwalManual, ada: ShiftItem[]) => Promise<void>;
   onHapus: (id: string) => Promise<void>;
   isSaving: boolean;
+  /** Lokasi ruang kalender, untuk pemeriksaan jadwal lokasi lain di Tambah Manual (B165). */
+  lokasiId: string | null;
 }
 
 export default function JadwalUtama({
@@ -41,6 +43,7 @@ export default function JadwalUtama({
   onSimpan,
   onHapus,
   isSaving,
+  lokasiId,
 }: JadwalUtamaProps) {
   // ✅ Injeksi Next.js Router
   const router = useRouter();
@@ -55,6 +58,8 @@ export default function JadwalUtama({
   const [selectedExistingShifts, setSelectedExistingShifts] = React.useState<
     ShiftItem[]
   >([]);
+  // Sel yang dibuka juga berisi jadwal di lokasi lain (B165).
+  const [adaLokasiLain, setAdaLokasiLain] = React.useState(false);
 
   // Perhitungan Tanggal
   const year = currentDate.getFullYear();
@@ -80,6 +85,7 @@ export default function JadwalUtama({
         setSelectedKaryawan({ id: emp.id, nama: emp.nama });
         setSelectedDate(new Date(year, month, day));
         setSelectedExistingShifts(shifts);
+        setAdaLokasiLain((emp.lainMap[day]?.length ?? 0) > 0);
         setIsManualOpen(true);
       }
     },
@@ -91,6 +97,7 @@ export default function JadwalUtama({
     setSelectedKaryawan(null);
     setSelectedDate(null);
     setSelectedExistingShifts([]);
+    setAdaLokasiLain(false);
     setIsManualOpen(true);
   }, []);
 
@@ -137,6 +144,8 @@ export default function JadwalUtama({
         isPending={isSaving}
         onSimpan={(payload) => onSimpan(payload, selectedExistingShifts)}
         onHapus={aksi.hapus ? onHapus : undefined}
+        adaJadwalLokasiLain={adaLokasiLain}
+        lokasiId={lokasiId}
       />
     </div>
   );

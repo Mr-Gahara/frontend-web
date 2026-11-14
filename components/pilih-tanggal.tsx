@@ -22,6 +22,11 @@ interface PropsPilihTanggal {
   tanggalNonaktif?: Matcher | Matcher[];
   invalid?: boolean;
   className?: string;
+  /**
+   * Bila diisi, kalender menampilkan tombol "Kosongkan" di bawahnya selama
+   * tanggal terisi. Untuk isian opsional seperti filter daftar.
+   */
+  onKosongkan?: () => void;
 }
 
 /**
@@ -39,6 +44,7 @@ export function PilihTanggal({
   tanggalNonaktif,
   invalid,
   className,
+  onKosongkan,
 }: PropsPilihTanggal) {
   const [buka, setBuka] = useState(false);
   const teks = value ? format(value, "dd MMMM yyyy", { locale: localeID }) : placeholder;
@@ -74,6 +80,21 @@ export function PilihTanggal({
             setBuka(false);
           }}
         />
+        {onKosongkan && value && (
+          <div className="border-t border-navy/10 p-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                onKosongkan();
+                setBuka(false);
+              }}
+              className="w-full cursor-pointer font-bold text-navy hover:bg-navy/5"
+            >
+              Kosongkan
+            </Button>
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );

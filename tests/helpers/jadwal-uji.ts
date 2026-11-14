@@ -231,14 +231,15 @@ export const JAM_SIANG = { masuk: "12:00", pulang: "20:00" };
 export const NAMA_SHIFT_MALAM = "E2E Jadwal Malam";
 export const JAM_MALAM = { masuk: "18:00", pulang: "22:00" };
 
-/** Shift uji outlet bernama tetap; dibuat bila belum ada. */
+/** Shift uji bernama tetap di lokasi ruang (bawaan outlet); dibuat bila belum ada. */
 async function pastikanShiftUji(
   page: Page,
   auth: Auth,
   nama: string,
   jam: { masuk: string; pulang: string },
+  ruang: Ruang = "outlet",
 ): Promise<string> {
-  const lokasiId = await idLokasiRuang(page, auth);
+  const lokasiId = await idLokasiRuang(page, auth, ruang);
   const res = await api<unknown>(page, auth, "GET", `/shift?status=Aktif&locationID=${lokasiId}`);
   expect(res.status, `GET /shift: ${res.pesan}`).toBe(200);
   const ada = daftar(res.data).find((s) => s.namaShift === nama);
@@ -260,4 +261,5 @@ async function pastikanShiftUji(
 export const pastikanShiftSiang = (page: Page, auth: Auth) => pastikanShiftUji(page, auth, NAMA_SHIFT_SIANG, JAM_SIANG);
 
 /** Shift uji yang tidak bertumpuk dengan shift pagi uji, untuk split shift. */
-export const pastikanShiftMalam = (page: Page, auth: Auth) => pastikanShiftUji(page, auth, NAMA_SHIFT_MALAM, JAM_MALAM);
+export const pastikanShiftMalam = (page: Page, auth: Auth, ruang: Ruang = "outlet") =>
+  pastikanShiftUji(page, auth, NAMA_SHIFT_MALAM, JAM_MALAM, ruang);
