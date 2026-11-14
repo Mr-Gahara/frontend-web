@@ -286,7 +286,10 @@ sampel tampilan dan pengukuran DOM. Perbaikan di `883a79b`.
   membulat) menggantikan `focus-visible:ring-0`. Tab memakai
   `transition-all`, sehingga cincin baru penuh setelah transisi; spec
   menunggunya lewat `expect.poll`. Diterapkan juga di
-  `inventaris-nav-tabs.tsx` sesuai opsi, tetapi komponen itu kode mati.
+  `inventaris-nav-tabs.tsx` sesuai opsi, tetapi komponen itu kode mati dan
+  kemudian dihapus (CV19a).
+- **CV19a: `inventaris-nav-tabs.tsx` dihapus**, karena tidak diimpor di
+  mana pun; folder `components` di rute inventaris outlet ikut hilang.
 
 ## Catatan
 
@@ -546,10 +549,9 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
   Aksi riwayat Pindah Dana yang masih tombol Batalkan dan tab Manajemen
   Booking yang tidak menandai tab mana pun di Buat Reservasi selesai di
   `883a79b` (CV17a, CV18a).
-- `app/dashboard/outlet/inventaris/components/inventaris-nav-tabs.tsx`
-  tidak dipasang di halaman mana pun (kode mati; ditemukan 14 November
-  2026 saat menerapkan CV18a). Penghapusannya menunggu keputusan pemilik
-  proyek.
+- `inventaris-nav-tabs.tsx` di rute inventaris outlet tidak dipasang di halaman mana pun (kode mati; ditemukan 14 November
+  2026 saat menerapkan CV18a). Dihapus 14 November 2026 atas keputusan
+  pemilik proyek (CV19a).
 - Bayangan kartu baris memakai `filter` pada elemen `tr`. Di browser yang
   tidak mendukungnya, kartu tampil dengan bingkai saja.
 - Suite e2e penuh dijalankan ulang pada 16 Oktober 2026 terhadap backend

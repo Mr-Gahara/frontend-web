@@ -495,8 +495,10 @@ Yang masih berlaku:
 - `components/calendar.tsx` (240 baris) adalah kalender kostum standar
   sejak `e43e000` (keputusan rancangan butir 22) dan dipakai lewat
   `PilihTanggal`; kedua `any`-nya dibereskan di `4f19e77`.
-- `app/dashboard/outlet/inventaris/components/` berisi
-  `inventaris-nav-tabs.tsx`; `BahanBakuCombobox` pindah ke
+- Folder `components` di rute inventaris outlet sempat berisi
+  `inventaris-nav-tabs.tsx`, yang tidak dipasang di halaman mana pun; berkas
+  dan foldernya dihapus 14 November 2026 atas keputusan pemilik proyek.
+  `BahanBakuCombobox` pindah ke
   `features/bahan-baku/bahan-baku-combobox.tsx` di `152088b`.
 - Tambah barang di inventaris gudang hanya menawarkan master bahan baku.
   Barang inventory non-bahan (`barangInventoryID`, `/baranginventory`)

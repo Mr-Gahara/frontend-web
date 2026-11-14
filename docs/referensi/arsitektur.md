@@ -49,9 +49,9 @@ dan urutan migrasi satu modul.
 Selain `components/ui/` (shadcn), ada komponen khusus modul yang dipakai
 halaman: `components/pengguna/`,
 dan lainnya. Ada juga komponen di dalam folder rute, misalnya
-`app/dashboard/outlet/inventaris/components/`, `keuangan/components/`, dan
-`reservasi/components/`. Saat memigrasikan sebuah modul, periksa juga
-komponennya, karena pola `any` dan `_id` sering bersembunyi di sana.
+`app/dashboard/outlet/keuangan/components/` dan `reservasi/components/`.
+Saat memigrasikan sebuah modul, periksa juga komponennya, karena pola
+`any` dan `_id` sering bersembunyi di sana.
 
 ### Autentikasi
 

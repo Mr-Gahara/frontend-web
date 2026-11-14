@@ -29,8 +29,6 @@ test("Buat Reservasi: tab Dasbor Timeline menyala", async ({ page }) => {
   await expect(nav.getByRole("link", { name: "Aset (Meja/Unit)" })).not.toHaveClass(AKTIF);
 });
 
-// Tab Inventaris (inventaris-nav-tabs.tsx) tidak dipasang di halaman mana pun,
-// sehingga hanya tab Reservasi yang dapat diuji.
 test("Reservasi: tab yang difokuskan keyboard bercincin di dalam tab", async ({ page }) => {
   await page.goto("/dashboard/outlet/reservasi");
   const link = page
