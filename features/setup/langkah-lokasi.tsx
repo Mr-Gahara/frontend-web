@@ -134,10 +134,10 @@ export function LangkahLokasi({
           className="flex flex-col gap-3.5 rounded-2xl border border-input p-[18px]"
         >
           <div className="flex flex-col gap-1">
-            <h2 id={id("koordinat")} className="text-base font-bold">
+            <h2 id={id("koordinat")} className="text-subjudul font-bold">
               Koordinat untuk absensi
             </h2>
-            <p className="text-sm leading-normal text-muted-foreground">
+            <p className="text-isi leading-normal text-muted-foreground">
               {teks.penghuni[0].toUpperCase() + teks.penghuni.slice(1)} hanya bisa absen bila berada di sekitar
               koordinat ini. Lokasi tanpa koordinat tidak bisa dipakai untuk absen.
             </p>
@@ -156,19 +156,19 @@ export function LangkahLokasi({
             {deteksi === "mencari" ? "Mencari lokasi..." : "Ambil koordinat dari perangkat ini"}
           </button>
           {deteksi === "berhasil" && (
-            <p role="status" className="text-sm">
+            <p role="status" className="text-isi">
               Koordinat terisi dari perangkat ini. Pastikan Anda memang sedang berada di {teks.tempat}.
             </p>
           )}
           {deteksi === "gagal" && (
-            <p role="alert" className="text-sm font-medium text-destructive">
+            <p role="alert" className="text-isi font-medium text-destructive">
               Lokasi perangkat tidak bisa dibaca. Izinkan akses lokasi di browser, atau isi koordinat secara
               manual.
             </p>
           )}
           <div className="flex flex-wrap gap-3">
             <div className="flex flex-[1_1_160px] flex-col gap-1.5">
-              <label htmlFor={id("lat")} className="text-[13px] font-semibold">
+              <label htmlFor={id("lat")} className="text-isi font-semibold">
                 Latitude
               </label>
               <input
@@ -181,7 +181,7 @@ export function LangkahLokasi({
               <PesanIsian pesan={errors.latitude?.message} />
             </div>
             <div className="flex flex-[1_1_160px] flex-col gap-1.5">
-              <label htmlFor={id("lng")} className="text-[13px] font-semibold">
+              <label htmlFor={id("lng")} className="text-isi font-semibold">
                 Longitude
               </label>
               <input
@@ -195,7 +195,7 @@ export function LangkahLokasi({
             </div>
           </div>
           <div data-panduan="lokasi-radius" className="flex flex-col gap-1.5">
-            <label htmlFor={id("radius")} className="text-[13px] font-semibold">
+            <label htmlFor={id("radius")} className="text-isi font-semibold">
               Radius absen (meter)
             </label>
             <input
@@ -213,7 +213,7 @@ export function LangkahLokasi({
           </div>
         </section>
 
-        {teks.catatanAkhir && <p className="text-sm leading-normal text-muted-foreground">{teks.catatanAkhir}</p>}
+        {teks.catatanAkhir && <p className="text-isi leading-normal text-muted-foreground">{teks.catatanAkhir}</p>}
         <PesanGalat pesan={galat} />
         <NavigasiLangkah onKembali={onKembali} onLewati={onLewati} teksLanjut={teksLanjut} sibuk={sibuk} />
       </form>
@@ -226,22 +226,22 @@ export function LangkahLokasi({
       >
         <AlertDialogContent className="gap-4 rounded-[20px] p-7 text-navy">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[22px] font-bold">Yakin Anda sedang di {teks.tempat}?</AlertDialogTitle>
+            <AlertDialogTitle className="text-judul font-bold">Yakin Anda sedang di {teks.tempat}?</AlertDialogTitle>
             <AlertDialogDescription>
               Koordinat ini menjadi titik absen <strong>{konfirmasi?.nama}</strong>. Bila Anda tidak sedang berada
               di {teks.tempat} itu, batalkan dan ambil ulang saat sudah di sana.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <p className="rounded-xl bg-krem px-3.5 py-3 text-sm tabular-nums">
+          <p className="rounded-xl bg-krem px-3.5 py-3 text-isi tabular-nums">
             {konfirmasi?.latitude}, {konfirmasi?.longitude}
           </p>
           <div className="flex flex-wrap justify-end gap-2.5">
-            <AlertDialogCancel className="h-12 rounded-xl border-input px-5 text-[15px] font-semibold text-navy">
+            <AlertDialogCancel className="h-12 rounded-xl border-input px-5 text-besar font-semibold text-navy">
               Batal
             </AlertDialogCancel>
             <button
               type="button"
-              className="inline-flex h-12 cursor-pointer items-center justify-center rounded-xl bg-navy px-5 text-[15px] font-semibold text-gading hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
+              className="inline-flex h-12 cursor-pointer items-center justify-center rounded-xl bg-navy px-5 text-besar font-semibold text-gading hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
               onClick={() => {
                 const nilai = konfirmasi;
                 setKonfirmasi(null);

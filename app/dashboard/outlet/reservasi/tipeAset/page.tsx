@@ -135,10 +135,10 @@ export default function TipeAsetPage() {
             <Layers className="w-7 h-7 text-karamel" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
               Kategori Aset
             </h1>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-isi font-medium text-navy/60">
               Kelompokkan aset Anda berdasarkan tipe untuk mempermudah
               pengaturan tarif.
             </p>
@@ -172,7 +172,7 @@ export default function TipeAsetPage() {
       {isError ? (
         <p
           role="alert"
-          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
         >
           Gagal memuat data tipe aset.
         </p>

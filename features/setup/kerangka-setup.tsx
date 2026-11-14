@@ -33,15 +33,15 @@ export function KerangkaSetup({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <TandaTachyon ukuran={34} />
-            <span className="text-lg font-bold">Tachyon POS</span>
+            <span className="text-subjudul font-bold">Tachyon POS</span>
           </div>
         </div>
         <div className="flex flex-col gap-1.5">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-navy/70">
+          <p className="text-kecil font-semibold uppercase tracking-[0.14em] text-navy/70">
             {selesai ? "Setup selesai" : "Siapkan toko"}
           </p>
-          <p className="text-[22px] font-bold">{namaToko || "Toko baru"}</p>
-          <p className="text-sm text-muted-foreground">Plan {namaPlan(plan)}</p>
+          <p className="text-judul font-bold">{namaToko || "Toko baru"}</p>
+          <p className="text-isi text-muted-foreground">Plan {namaPlan(plan)}</p>
         </div>
         <ol aria-label="Langkah setup toko" className="flex flex-col gap-0.5">
           {langkah.map((l, i) => {
@@ -52,13 +52,13 @@ export function KerangkaSetup({
                 key={l.kunci}
                 aria-current={kini ? "step" : undefined}
                 className={
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] " +
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-besar " +
                   (kini ? "bg-permukaan font-semibold" : lewat ? "" : "text-muted-foreground")
                 }
               >
                 <span
                   className={
-                    "flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full text-[13px] font-semibold " +
+                    "flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full text-isi font-semibold " +
                     (lewat ? "bg-navy text-gading" : kini ? "border-2 border-navy" : "border-2 border-input")
                   }
                 >

@@ -32,12 +32,12 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
 
   if (booking.isError) {
     return (
-      <li role="alert" className="text-sm font-medium text-red-600">
+      <li role="alert" className="text-isi font-medium text-red-600">
         {pesanError(booking.error, "Gagal memuat sesi booking.")}
       </li>
     );
   }
-  if (!booking.data) return <li className="text-sm font-medium text-navy/60">Memuat sesi booking...</li>;
+  if (!booking.data) return <li className="text-isi font-medium text-navy/60">Memuat sesi booking...</li>;
 
   const b = booking.data;
   const nama = b.dataAset?.namaAset ?? "Aset tidak dikenal";
@@ -47,7 +47,7 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
     <li className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p className="font-bold text-navy">{nama}</p>
-        <p className="text-xs font-medium text-navy/60">
+        <p className="text-kecil font-medium text-navy/60">
           {formatTanggal(b.waktuMulai)}
           {sampai} · {LABEL_STATUS[b.status] ?? b.status}
         </p>
@@ -80,7 +80,7 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
             </AlertDialogDescription>
           </AlertDialogHeader>
           {galat && (
-            <p role="alert" className="rounded-md border border-red-500/20 bg-red-500/10 p-3 text-sm font-bold text-red-600">
+            <p role="alert" className="rounded-md border border-red-500/20 bg-red-500/10 p-3 text-isi font-bold text-red-600">
               {galat}
             </p>
           )}
@@ -130,7 +130,7 @@ export function BookingPenjualan({ idBooking }: { idBooking: string[] }) {
     >
       <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
         <CalendarClock className="h-5 w-5 text-karamel" />
-        <h2 className="font-bold text-navy">Sesi Booking</h2>
+        <h2 className="text-subjudul font-bold text-navy">Sesi Booking</h2>
       </div>
       <ul className="flex flex-col gap-4">
         {idBooking.map((id) => (

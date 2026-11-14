@@ -167,7 +167,7 @@ export default function StokInventoryPage() {
             <span className="font-bold text-navy">
               {row.original.item?.nama || "Item Tidak Dikenal"}
             </span>
-            <span className="text-xs font-medium text-navy/50">
+            <span className="text-kecil font-medium text-navy/50">
               {row.original.item?.tipeItem === "BAHAN_BAKU" ? "Bahan Baku" : "Barang Inventory"}
             </span>
           </div>
@@ -187,15 +187,15 @@ export default function StokInventoryPage() {
           <div className="flex flex-col items-start gap-1">
             <span
               className={cn(
-                "text-base font-mono font-bold",
+                "text-besar font-mono font-bold",
                 row.original.isStokKritis ? "text-rose-600" : "text-navy",
               )}
             >
               {row.original.stok}{" "}
-              <span className="text-xs font-sans">{row.original.item?.satuan || "pcs"}</span>
+              <span className="text-kecil font-sans">{row.original.item?.satuan || "pcs"}</span>
             </span>
             {row.original.isStokKritis && (
-              <Badge variant="outline" className="text-[10px] bg-rose-50 text-rose-600 border-rose-200">
+              <Badge variant="outline" className="text-mikro bg-rose-50 text-rose-600 border-rose-200">
                 Kritis
               </Badge>
             )}
@@ -232,10 +232,10 @@ export default function StokInventoryPage() {
       {/* HEADER & FILTERS */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Stok & Inventory
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             Pantau dan kelola ketersediaan stok fisik secara real-time.
           </p>
         </div>
@@ -325,7 +325,7 @@ export default function StokInventoryPage() {
       {gagalMemuatStok ? (
         <p
           role="alert"
-          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
         >
           Gagal memuat stok. Periksa koneksi, lalu muat ulang halaman.
         </p>
@@ -358,7 +358,7 @@ export default function StokInventoryPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-2">
-            <label className="text-sm font-bold text-navy">
+            <label className="text-isi font-bold text-navy">
               Stok Minimum ({minStockModal.data?.item?.satuan || "pcs"})
             </label>
             <Input
@@ -417,19 +417,19 @@ export default function StokInventoryPage() {
 
           <div className="flex flex-col gap-4 py-4">
             <div className="bg-navy/5 p-3 rounded-lg border border-navy/10 flex justify-between items-center">
-              <span className="text-sm font-bold text-navy/70">
+              <span className="text-isi font-bold text-navy/70">
                 Stok Tercatat di Sistem:
               </span>
-              <span className="font-mono font-bold text-navy text-lg">
+              <span className="font-mono font-bold text-navy text-subjudul">
                 {opnameModal.data?.stok}{" "}
-                <span className="text-sm font-sans">
+                <span className="text-isi font-sans">
                   {opnameModal.data?.item?.satuan}
                 </span>
               </span>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-navy">
+              <label className="text-isi font-bold text-navy">
                 Stok Fisik Sebenarnya <span className="text-rose-500">*</span>
               </label>
               <Input
@@ -447,7 +447,7 @@ export default function StokInventoryPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-navy">
+              <label className="text-isi font-bold text-navy">
                 Alasan / Catatan Penyesuaian{" "}
                 <span className="text-rose-500">*</span>
               </label>

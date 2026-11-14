@@ -63,12 +63,12 @@ function AngkaRingkas({
 }) {
   return (
     <div className="bg-gading rounded-xl sm:rounded-2xl px-2 py-2 sm:px-4 sm:py-3 border border-navy/5 min-w-0">
-      <p className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-medium text-navy/70 min-w-0">
+      <p className="flex items-center gap-1 sm:gap-1.5 text-mikro sm:text-kecil font-medium text-navy/70 min-w-0">
         <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${titik}`} aria-hidden="true" />
         <span className="hidden sm:inline truncate">{label}</span>
         <span className="sm:hidden truncate">{labelPendek ?? label}</span>
       </p>
-      <p className="text-lg sm:text-2xl font-black tracking-tight">{jumlah}</p>
+      <p className="text-subjudul sm:text-judul font-black tracking-tight">{jumlah}</p>
     </div>
   );
 }
@@ -114,9 +114,9 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
       className="bg-krem border border-navy/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-navy shadow-sm flex flex-col gap-3 sm:gap-4"
     >
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-sm sm:text-lg font-bold tracking-wide">Status Staf</h2>
+        <h2 className="text-subjudul font-bold tracking-wide">Status Staf</h2>
         {!memuat && !pesanGalat && baris.length > 0 && (
-          <span className="text-xs font-medium text-navy/70">
+          <span className="text-kecil font-medium text-navy/70">
             {sudahAbsen} dari {baris.length} sudah absen
           </span>
         )}
@@ -124,9 +124,9 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
       {memuat ? (
         <Skeleton className="h-40 w-full bg-navy/5 rounded-xl" />
       ) : pesanGalat ? (
-        <p className="text-sm font-medium text-rose-600">{pesanGalat}</p>
+        <p className="text-isi font-medium text-rose-600">{pesanGalat}</p>
       ) : baris.length === 0 ? (
-        <p className="text-sm text-navy/60">Belum ada staf di ruang outlet.</p>
+        <p className="text-isi text-navy/60">Belum ada staf di ruang outlet.</p>
       ) : (
         <>
           <div className="grid grid-cols-4 gap-1.5 sm:gap-3">
@@ -155,14 +155,14 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
                     <TableCell>
                       <span className="flex items-center gap-3 min-w-0">
                         <span
-                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-navy text-gading flex items-center justify-center text-[11px] sm:text-xs font-bold shrink-0"
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-navy text-gading flex items-center justify-center text-mikro sm:text-kecil font-bold shrink-0"
                           aria-hidden="true"
                         >
                           {inisialNama(b.nama)}
                         </span>
                         <span className="flex flex-col min-w-0">
                           <span className="font-semibold truncate">{b.nama}</span>
-                          <span className="sm:hidden text-[11px] text-navy/60 truncate">
+                          <span className="sm:hidden text-mikro text-navy/60 truncate">
                             {peran.get(b.penggunaID) ?? "-"}
                           </span>
                         </span>
@@ -171,7 +171,7 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
                     <TableCell className="hidden sm:table-cell text-navy/70">{peran.get(b.penggunaID) ?? "-"}</TableCell>
                     <TableCell className="text-right">
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-bold ${WARNA_STATUS_STAF[b.status].lencana}`}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2 sm:px-2.5 py-0.5 sm:py-1 text-mikro sm:text-kecil font-bold ${WARNA_STATUS_STAF[b.status].lencana}`}
                       >
                         <span
                           className={`inline-block w-2 h-2 rounded-full ${WARNA_STATUS_STAF[b.status].titik}`}
@@ -180,7 +180,7 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
                         {LABEL_STATUS_STAF[b.status]}
                       </span>
                       {b.keterangan && (
-                        <span className="block mt-1 text-[11px] font-medium text-navy/60">{b.keterangan}</span>
+                        <span className="block mt-1 text-mikro font-medium text-navy/60">{b.keterangan}</span>
                       )}
                     </TableCell>
                   </TableRow>
@@ -191,7 +191,7 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
               <button
                 type="button"
                 onClick={() => setTampilSemua(true)}
-                className="sm:hidden w-full border-t border-navy/10 py-2.5 text-xs font-bold text-navy"
+                className="sm:hidden w-full border-t border-navy/10 py-2.5 text-kecil font-bold text-navy"
               >
                 Tampilkan semua ({baris.length})
               </button>

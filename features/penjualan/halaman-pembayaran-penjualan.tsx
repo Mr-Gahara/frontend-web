@@ -119,7 +119,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-navy border-t-transparent"></div>
-        <p className="text-sm font-bold text-navy/60">
+        <p className="text-isi font-bold text-navy/60">
           Memuat data tagihan...
         </p>
       </div>
@@ -129,7 +129,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
     // (sejalan dengan detail penjualan).
     return (
       <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-16 text-center">
-        <p role="alert" className="text-sm font-bold text-navy/70">
+        <p role="alert" className="text-isi font-bold text-navy/70">
           {!errorPenjualan || isNotFound(errorPenjualan)
             ? "Penjualan tidak ditemukan."
             : pesanError(errorPenjualan, "Gagal memuat data tagihan.")}
@@ -145,7 +145,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
     // DRAFT belum dapat dibayar dan VOID tidak dapat dibayar lagi (backend 465b438).
     return (
       <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-16 text-center">
-        <p role="alert" className="text-sm font-bold text-navy/70">
+        <p role="alert" className="text-isi font-bold text-navy/70">
           {penjualan.statusPenjualan === "DRAFT"
             ? "Penjualan masih Draft. Simpan penjualan lewat Finalisasi Invoice di halaman detail sebelum menerima pembayaran."
             : "Penjualan sudah dibatalkan dan tidak dapat dibayar."}
@@ -172,10 +172,10 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
         </Button>
         <div className="flex justify-between items-end">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
               Terima Pembayaran
             </h1>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-isi font-medium text-navy/60">
               Catat penerimaan pembayaran untuk No. Referensi:{" "}
               <span className="font-bold font-mono text-navy">
                 {penjualan.noReferensi}
@@ -183,8 +183,8 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
             </p>
           </div>
           <div className="text-right hidden sm:block">
-            <p className="text-xs font-bold text-navy/60">Tanggal Transaksi</p>
-            <p className="font-bold text-sm text-navy">
+            <p className="text-kecil font-bold text-navy/60">Tanggal Transaksi</p>
+            <p className="font-bold text-isi text-navy">
               {format(new Date(penjualan.tanggalTransaksi), "dd MMM yyyy", {
                 locale: localeID,
               })}
@@ -202,7 +202,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
           >
             <div className="flex items-center gap-2 border-b border-navy/10 pb-3 mb-2">
               <Wallet className="h-5 w-5 text-karamel" />
-              <h2 className="font-bold text-navy">
+              <h2 className="text-subjudul font-bold text-navy">
                 Detail Penerimaan Pembayaran
               </h2>
             </div>
@@ -210,7 +210,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Pilihan Metode Pembayaran */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Metode Pembayaran <span className="text-red-500">*</span>
                 </label>
                 <Select
@@ -239,14 +239,14 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
 
               {/* Akun kas tujuan ditentukan backend dari metode (backend 465b438) */}
               <div className="space-y-2">
-                <p className="text-sm font-bold text-navy">Akun Kas Tujuan</p>
+                <p className="text-isi font-bold text-navy">Akun Kas Tujuan</p>
                 <p
                   aria-label="Akun Kas Tujuan"
-                  className="flex h-9 items-center rounded-md border border-navy/10 bg-gading/60 px-3 text-sm font-medium text-navy"
+                  className="flex h-9 items-center rounded-md border border-navy/10 bg-gading/60 px-3 text-isi font-medium text-navy"
                 >
                   {teksAkunTujuan(metodeTerpilih)}
                 </p>
-                <p className="text-xs font-medium text-navy/50">
+                <p className="text-kecil font-medium text-navy/50">
                   Mengikuti akun kas metode pembayaran yang dipilih.
                 </p>
               </div>
@@ -256,7 +256,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
 
             {/* Input Nominal */}
             <div className="space-y-2 pt-2">
-              <label className="text-sm font-bold text-navy" htmlFor="jumlahBayar">
+              <label className="text-isi font-bold text-navy" htmlFor="jumlahBayar">
                 Jumlah Diterima (Rp) <span className="text-red-500">*</span>
               </label>
               <div className="flex flex-col sm:flex-row gap-3">
@@ -264,7 +264,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
                   id="jumlahBayar"
                   type="text"
                   inputMode="numeric"
-                  className="text-lg font-bold h-12 bg-gading border-navy/20 text-navy"
+                  className="text-subjudul font-bold h-12 bg-gading border-navy/20 text-navy"
                   placeholder="0"
                   value={jumlahBayarStr}
                   onChange={(e) => {
@@ -286,7 +286,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
                   Bayar Uang Pas
                 </Button>
               </div>
-              <p className="text-xs font-medium text-navy/50 mt-1">
+              <p className="text-kecil font-medium text-navy/50 mt-1">
                 Masukkan nominal angka. Maksimal setara dengan total sisa
                 tagihan.
               </p>
@@ -294,7 +294,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
 
             {/* Catatan */}
             <div className="space-y-2 pt-2 border-t border-navy/10 mt-2">
-              <label className="text-sm font-bold text-navy" htmlFor="catatanBayar">
+              <label className="text-isi font-bold text-navy" htmlFor="catatanBayar">
                 Catatan Pembayaran <span className="text-navy/50 font-medium">(Opsional)</span>
               </label>
               <Input
@@ -307,7 +307,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
             </div>
 
             {formError && (
-              <p className="text-sm font-bold text-red-600 bg-red-50 p-3 rounded-xl border border-red-100">
+              <p className="text-isi font-bold text-red-600 bg-red-50 p-3 rounded-xl border border-red-100">
                 {formError}
               </p>
             )}
@@ -315,7 +315,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
             <div className="pt-6 border-t border-navy/10">
               <Button
                 type="submit"
-                className="w-full h-14 text-base cursor-pointer bg-sage text-gading hover:bg-sage/90 font-bold shadow-sm"
+                className="w-full h-14 text-besar cursor-pointer bg-sage text-gading hover:bg-sage/90 font-bold shadow-sm"
                 disabled={penjualan.sisaTagihan <= 0}
               >
                 {penjualan.sisaTagihan <= 0
@@ -331,12 +331,12 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
           <div className="rounded-2xl border border-navy/10 bg-navy text-gading p-6 sm:p-8 shadow-md space-y-5">
             <div className="flex items-center gap-2 border-b border-gading/20 pb-3 uppercase tracking-widest text-karamel">
               <ReceiptText className="h-4 w-4" />
-              <h2 className="font-bold text-sm">
+              <h2 className="font-bold text-subjudul">
                 Ringkasan Tagihan
               </h2>
             </div>
 
-            <div className="space-y-3 text-sm">
+            <div className="space-y-3 text-isi">
               <div className="flex justify-between text-gading/80 font-medium">
                 <span>Total Tagihan Awal</span>
                 <span className="font-mono text-gading">
@@ -349,10 +349,10 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
               </div>
 
               <div className="border-t border-gading/20 pt-4 flex justify-between items-center">
-                <span className="text-base font-bold text-rose-300">
+                <span className="text-besar font-bold text-rose-300">
                   Sisa Tagihan
                 </span>
-                <span className="text-xl font-black text-rose-300 font-mono">
+                <span className="text-subjudul font-black text-rose-300 font-mono">
                   {formatRupiah(penjualan.sisaTagihan)}
                 </span>
               </div>
@@ -361,19 +361,19 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
             {/* Simulasi Setelah Pembayaran Ini */}
             {nominalInput > 0 && (
               <div className="bg-gading/10 p-5 rounded-xl space-y-3 mt-6 border border-gading/5">
-                <p className="text-[10px] font-bold text-gading/50 uppercase tracking-widest mb-2">
+                <p className="text-mikro font-bold text-gading/50 uppercase tracking-widest mb-2">
                   Simulasi Setelah Pembayaran
                 </p>
-                <div className="flex justify-between text-sm font-medium text-gading/80">
+                <div className="flex justify-between text-isi font-medium text-gading/80">
                   <span>Akan Dibayar</span>
                   <span className="font-mono text-gading">
                     {formatRupiah(nominalInput)}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm font-bold border-t border-gading/20 pt-3">
+                <div className="flex justify-between text-isi font-bold border-t border-gading/20 pt-3">
                   <span>Sisa Hutang Baru</span>
                   <span
-                    className={`font-mono text-lg ${
+                    className={`font-mono text-subjudul ${
                       sisaSetelahBayar === 0
                         ? "text-sage" // Sage Green
                         : "text-rose-300"
@@ -390,7 +390,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
             <div className="p-2 bg-karamel/10 rounded-lg shrink-0">
               <Banknote className="h-5 w-5 text-karamel" />
             </div>
-            <div className="text-sm text-navy/70">
+            <div className="text-isi text-navy/70">
               <p className="font-bold text-navy mb-1">Peringatan Audit Kasir</p>
               <p className="font-medium leading-relaxed">
                 Pastikan nominal yang diketik sesuai dengan uang fisik atau
@@ -409,7 +409,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
             <AlertDialogTitle className="text-navy">Konfirmasi Pembayaran</AlertDialogTitle>
             <AlertDialogDescription className="text-navy/70 font-medium">
               Anda akan mencatat pembayaran sebesar{" "}
-              <strong className="text-navy font-mono text-base">
+              <strong className="text-navy font-mono text-besar">
                 {formatRupiah(nominalInput)}
               </strong>{" "}
               ke dalam sistem. Lanjutkan?

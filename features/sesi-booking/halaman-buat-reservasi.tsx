@@ -161,8 +161,8 @@ export default function HalamanBuatReservasi() {
           Kembali
         </Button>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">Buat Sesi Booking (Reservasi)</h1>
-          <p className="text-sm font-medium text-navy/60">
+          <h1 className="text-judul font-bold tracking-tight text-navy">Buat Sesi Booking (Reservasi)</h1>
+          <p className="text-isi font-medium text-navy/60">
             Sistem akan mencatat jadwal dan secara otomatis membuat Invoice tagihan untuk pelanggan.
           </p>
         </div>
@@ -175,10 +175,10 @@ export default function HalamanBuatReservasi() {
           <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm">
             <div className="flex items-center gap-2 border-b border-navy/10 pb-3 mb-5">
               <User className="h-5 w-5 text-karamel" />
-              <h3 className="text-base font-bold text-navy">Data Pelanggan</h3>
+              <h3 className="text-besar font-bold text-navy">Data Pelanggan</h3>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-navy">
+              <label className="text-isi font-bold text-navy">
                 Pilih Pelanggan Penyewa <span className="text-rose-500">*</span>
               </label>
               <Controller
@@ -208,7 +208,7 @@ export default function HalamanBuatReservasi() {
                       <Command className="bg-gading">
                         <CommandInput placeholder="Cari nama pelanggan..." className="text-navy" />
                         <CommandList>
-                          <CommandEmpty className="py-6 text-center text-sm text-navy/60 font-medium">
+                          <CommandEmpty className="py-6 text-center text-isi text-navy/60 font-medium">
                             Pelanggan tidak ditemukan.
                           </CommandEmpty>
                           <CommandGroup>
@@ -230,7 +230,7 @@ export default function HalamanBuatReservasi() {
                                 />
                                 {pel.namaPelanggan}
                                 {pel.nomorHp ? (
-                                  <span className="ml-2 text-xs font-medium text-navy/60">
+                                  <span className="ml-2 text-kecil font-medium text-navy/60">
                                     {pel.nomorHp}
                                   </span>
                                 ) : null}
@@ -244,7 +244,7 @@ export default function HalamanBuatReservasi() {
                 )}
               />
               {errors.dataPelanggan && (
-                <p className="text-xs font-bold text-rose-500">{errors.dataPelanggan.message}</p>
+                <p className="text-kecil font-bold text-rose-500">{errors.dataPelanggan.message}</p>
               )}
             </div>
           </div>
@@ -254,9 +254,9 @@ export default function HalamanBuatReservasi() {
             <div className="p-6 border-b border-navy/10 bg-krem">
               <div className="flex items-center gap-2">
                 <CalendarDays className="h-5 w-5 text-sage" />
-                <h3 className="text-base font-bold text-navy">Daftar Fasilitas & Jadwal Sewa</h3>
+                <h3 className="text-besar font-bold text-navy">Daftar Fasilitas & Jadwal Sewa</h3>
               </div>
-              <p className="text-xs font-medium text-navy/60 mt-1">
+              <p className="text-kecil font-medium text-navy/60 mt-1">
                 Atur aset/ruangan mana saja yang akan dibooking. Anda dapat menyewa banyak fasilitas sekaligus.
               </p>
             </div>

@@ -68,7 +68,7 @@ export function DialogBatalTransfer({
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2">
-          <label htmlFor="alasan-batal-transfer" className="text-sm font-bold text-navy">
+          <label htmlFor="alasan-batal-transfer" className="text-isi font-bold text-navy">
             Alasan pembatalan{" "}
             <span className="text-navy/50 font-medium">(Opsional)</span>
           </label>
@@ -83,7 +83,7 @@ export function DialogBatalTransfer({
         {galat && (
           <p
             role="alert"
-            className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+            className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive"
           >
             {galat}
           </p>

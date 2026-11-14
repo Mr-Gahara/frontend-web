@@ -93,10 +93,10 @@ export default function EditTipeAsetPage() {
     return (
       <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4 text-center px-4">
         <AlertTriangle className="h-12 w-12 text-rose-500" />
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           ID Tipe Aset Tidak Valid
         </h2>
-        <p className="text-sm font-medium text-navy/80">
+        <p className="text-isi font-medium text-navy/80">
           Sistem mendeteksi bahwa ID pada URL ini rusak. Silakan kembali ke
           halaman sebelumnya.
         </p>
@@ -114,7 +114,7 @@ export default function EditTipeAsetPage() {
     return (
       <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-navy/60" />
-        <p className="text-sm font-bold text-navy/80">
+        <p className="text-isi font-bold text-navy/80">
           Memuat data tipe aset...
         </p>
       </div>
@@ -125,10 +125,10 @@ export default function EditTipeAsetPage() {
     return (
       <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4 text-center px-4">
         <AlertTriangle className="h-12 w-12 text-rose-500" />
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           Data Tidak Ditemukan
         </h2>
-        <p className="text-sm font-medium text-navy/80">
+        <p className="text-isi font-medium text-navy/80">
           Gagal mengambil data tipe aset. Data mungkin sudah dihapus atau server
           sedang bermasalah.
         </p>
@@ -158,10 +158,10 @@ export default function EditTipeAsetPage() {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Edit Tipe Aset
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             Perbarui informasi kategori atau tipe aset untuk menyesuaikan dengan
             kebutuhan operasional.
           </p>
@@ -173,13 +173,13 @@ export default function EditTipeAsetPage() {
         <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm flex flex-col gap-6">
           <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
             <Edit3 className="h-5 w-5 text-karamel" />
-            <h3 className="text-base font-bold text-navy">
+            <h3 className="text-besar font-bold text-navy">
               Detail Informasi Tipe
             </h3>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-navy">
+            <label className="text-isi font-bold text-navy">
               Nama Tipe Aset <span className="text-rose-500">*</span>
             </label>
             <Input
@@ -193,11 +193,11 @@ export default function EditTipeAsetPage() {
             />
             <div className="min-h-4">
               {errors.namaTipeAset ? (
-                <span className="text-xs font-bold text-rose-500">
+                <span className="text-kecil font-bold text-rose-500">
                   {errors.namaTipeAset.message}
                 </span>
               ) : (
-                <p className="text-[10px] font-medium text-navy/50">
+                <p className="text-mikro font-medium text-navy/50">
                   Nama ini akan muncul pada menu pembuatan aset dan penyewaan.
                 </p>
               )}
@@ -205,7 +205,7 @@ export default function EditTipeAsetPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-navy flex items-center gap-1.5">
+            <label className="text-isi font-bold text-navy flex items-center gap-1.5">
               <FileText className="w-4 h-4 text-navy/50" />
               Deskripsi{" "}
               <span className="text-navy/50 font-medium">(Opsional)</span>
@@ -216,7 +216,7 @@ export default function EditTipeAsetPage() {
               rows={4}
               className="bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy resize-none"
             />
-            <p className="text-[10px] font-medium text-navy/50">
+            <p className="text-mikro font-medium text-navy/50">
               Gunakan untuk menyimpan spesifikasi khusus tipe ini agar staf
               mengetahui perbedaannya.
             </p>

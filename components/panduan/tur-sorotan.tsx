@@ -50,7 +50,7 @@ function cariElemen(target: string): HTMLElement | null {
 }
 
 const KELAS_TOMBOL_KECIL =
-  "inline-flex h-10 cursor-pointer items-center justify-center rounded-xl px-4 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel";
+  "inline-flex h-10 cursor-pointer items-center justify-center rounded-xl px-4 text-isi font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel";
 
 /**
  * Tur sorotan gaya B (kanvas "Panduan Wizard Setup", pemilik proyek,
@@ -181,7 +181,7 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
         >
           <PopoverPrimitive.Arrow width={18} height={9} className="fill-permukaan" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">
+            <span className="text-kecil font-semibold text-muted-foreground">
               Panduan {indeks + 1} dari {titik.length}
             </span>
             <button
@@ -193,11 +193,11 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
               <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
-          <p id={idJudul} className="text-[17px] font-bold leading-snug">
+          <p id={idJudul} className="text-subjudul font-bold leading-snug">
             {aktif.judul}
           </p>
           {aktif.isi && (
-            <p id={idIsi} className="text-sm leading-normal text-muted-foreground">
+            <p id={idIsi} className="text-isi leading-normal text-muted-foreground">
               {aktif.isi}
             </p>
           )}
@@ -205,7 +205,7 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
             <button
               type="button"
               onClick={onTutup}
-              className="cursor-pointer rounded-sm text-[13px] font-semibold underline decoration-karamel underline-offset-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"
+              className="cursor-pointer rounded-sm text-isi font-semibold underline decoration-karamel underline-offset-[3px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"
             >
               Lewati panduan
             </button>

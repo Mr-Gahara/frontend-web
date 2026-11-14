@@ -137,9 +137,9 @@ export default function HalamanDaftarStockOpname({
       {
         accessorKey: "nomorOpname",
         meta: { label: "No. Opname" },
-        header: () => <span className="text-xs font-bold text-navy/60">No. Opname</span>,
+        header: () => <span className="text-kecil font-bold text-navy/60">No. Opname</span>,
         cell: ({ row }) => (
-          <span className="font-bold font-mono text-navy text-xs sm:text-sm">
+          <span className="font-bold font-mono text-navy text-kecil sm:text-isi">
             {row.original.nomorOpname}
           </span>
         ),
@@ -147,10 +147,10 @@ export default function HalamanDaftarStockOpname({
       {
         accessorKey: "tanggal",
         header: () => (
-          <span className="text-xs font-bold text-navy/60 hidden sm:inline">Tanggal Dibuat</span>
+          <span className="text-kecil font-bold text-navy/60 hidden sm:inline">Tanggal Dibuat</span>
         ),
         cell: ({ row }) => (
-          <span className="text-xs sm:text-sm font-medium text-navy/70 hidden sm:inline">
+          <span className="text-kecil sm:text-isi font-medium text-navy/70 hidden sm:inline">
             {formatTanggal(row.original.tanggal || row.original.createdAt)}
           </span>
         ),
@@ -158,12 +158,12 @@ export default function HalamanDaftarStockOpname({
       {
         accessorKey: "lokasi",
         header: () => (
-          <span className="text-xs font-bold text-navy/60 hidden md:inline">
+          <span className="text-kecil font-bold text-navy/60 hidden md:inline">
             Lokasi
           </span>
         ),
         cell: ({ row }) => (
-          <span className="hidden md:inline text-xs sm:text-sm font-medium text-navy/80">
+          <span className="hidden md:inline text-kecil sm:text-isi font-medium text-navy/80">
             {row.original.lokasi?.nama || "Lokasi Tidak Diketahui"}
           </span>
         ),
@@ -172,14 +172,14 @@ export default function HalamanDaftarStockOpname({
         accessorKey: "status",
         meta: { label: "Status" },
         header: () => (
-          <span className="text-xs font-bold text-navy/60">Status</span>
+          <span className="text-kecil font-bold text-navy/60">Status</span>
         ),
         cell: ({ row }) => badgeStatusOpname(row.original.status),
       },
       {
         id: "aksi",
         header: () => (
-          <div className="text-right text-xs font-bold text-navy/60">
+          <div className="text-right text-kecil font-bold text-navy/60">
             Aksi
           </div>
         ),
@@ -210,10 +210,10 @@ export default function HalamanDaftarStockOpname({
             <ClipboardCheck className="w-6 h-6 text-navy" />
           </div>
           <div className="space-y-0.5 min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-navy truncate">
+            <h1 className="text-judul font-bold tracking-tight text-navy truncate">
               {teks.judul}
             </h1>
-            <p className="text-xs sm:text-sm font-medium text-navy/60 hidden sm:block">
+            <p className="text-kecil sm:text-isi font-medium text-navy/60 hidden sm:block">
               {teks.deskripsi}
             </p>
           </div>
@@ -238,7 +238,7 @@ export default function HalamanDaftarStockOpname({
       <div className="rounded-2xl border border-navy/10 bg-krem p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row gap-4 items-end">
         {pemilihLokasi}
         <div className="space-y-1.5 w-full sm:w-64">
-          <label className="text-xs font-bold text-navy">
+          <label className="text-kecil font-bold text-navy">
             Filter Status
           </label>
           <Select
@@ -292,7 +292,7 @@ export default function HalamanDaftarStockOpname({
         </div>
 
         <div className="space-y-1.5 w-full sm:w-64">
-          <label htmlFor={`cari-opname-${ruang}`} className="text-xs font-bold text-navy">
+          <label htmlFor={`cari-opname-${ruang}`} className="text-kecil font-bold text-navy">
             Cari No. Opname
           </label>
           <div className="relative">

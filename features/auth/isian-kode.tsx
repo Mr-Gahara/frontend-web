@@ -51,7 +51,7 @@ export function IsianKode({
 
   return (
     <fieldset className="m-0 flex flex-col border-0 p-0">
-      <legend className="mb-2.5 p-0 text-sm font-semibold">{label}</legend>
+      <legend className="mb-2.5 p-0 text-isi font-semibold">{label}</legend>
       <div className="flex gap-2">
         {nilai.map((d, i) => (
           <input
@@ -68,7 +68,7 @@ export function IsianKode({
             onChange={(e) => ubah(i, e.target.value)}
             onKeyDown={(e) => tekan(i, e)}
             onPaste={(e) => tempel(i, e)}
-            className="h-[60px] w-full min-w-0 rounded-xl border border-input bg-permukaan text-center text-[26px] font-semibold text-navy focus-visible:border-2 focus-visible:border-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
+            className="h-[60px] w-full min-w-0 rounded-xl border border-input bg-permukaan text-center text-judul font-semibold text-navy focus-visible:border-2 focus-visible:border-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
           />
         ))}
       </div>
@@ -79,7 +79,7 @@ export function IsianKode({
 /** "Belum menerima kode?" dengan tombol kirim ulang yang menunggu hitung mundur. */
 export function KirimUlangKode({ sisa, onKirim }: { sisa: number; onKirim: () => void }) {
   return (
-    <p className="text-[15px] text-muted-foreground">
+    <p className="text-isi text-muted-foreground">
       Belum menerima kode?{" "}
       <button
         type="button"

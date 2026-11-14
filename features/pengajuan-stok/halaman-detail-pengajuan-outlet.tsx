@@ -47,37 +47,37 @@ function badgeTahap(tahap: TahapPengajuan) {
   switch (tahap) {
     case "DRAFT":
       return (
-        <Badge className="bg-slate-200 text-slate-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-slate-200 text-slate-700 border-none font-bold text-isi px-4 py-1">
           {LABEL_TAHAP_PENGAJUAN.outlet.DRAFT}
         </Badge>
       );
     case "SUBMITTED":
       return (
-        <Badge className="bg-amber-100 text-amber-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-amber-100 text-amber-700 border-none font-bold text-isi px-4 py-1">
           <Clock className="w-4 h-4 mr-1.5" /> {LABEL_TAHAP_PENGAJUAN.outlet.SUBMITTED}
         </Badge>
       );
     case "PERLU_SURAT_JALAN":
       return (
-        <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-isi px-4 py-1">
           <CheckCircle2 className="w-4 h-4 mr-1.5" /> {LABEL_TAHAP_PENGAJUAN.outlet.PERLU_SURAT_JALAN}
         </Badge>
       );
     case "SURAT_JALAN_DIBUAT":
       return (
-        <Badge className="bg-indigo-100 text-indigo-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-indigo-100 text-indigo-700 border-none font-bold text-isi px-4 py-1">
           {LABEL_TAHAP_PENGAJUAN.outlet.SURAT_JALAN_DIBUAT}
         </Badge>
       );
     case "COMPLETED":
       return (
-        <Badge className="bg-blue-100 text-blue-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-blue-100 text-blue-700 border-none font-bold text-isi px-4 py-1">
           {LABEL_TAHAP_PENGAJUAN.outlet.COMPLETED}
         </Badge>
       );
     case "REJECTED":
       return (
-        <Badge className="bg-rose-100 text-rose-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-rose-100 text-rose-700 border-none font-bold text-isi px-4 py-1">
           <XCircle className="w-4 h-4 mr-1.5" /> {LABEL_TAHAP_PENGAJUAN.outlet.REJECTED}
         </Badge>
       );
@@ -119,7 +119,7 @@ export default function HalamanDetailPengajuanOutlet() {
   if (error || !detail) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           {!error || isNotFound(error)
             ? "Data tidak ditemukan"
             : "Gagal memuat pengajuan. Coba muat ulang halaman."}
@@ -156,10 +156,10 @@ export default function HalamanDetailPengajuanOutlet() {
             Kembali ke Daftar Pengajuan
           </Button>
           <div className="space-y-1.5">
-            <h1 className="text-3xl font-black font-mono tracking-tight text-navy">
+            <h1 className="text-judul font-bold font-mono tracking-tight text-navy">
               {detail.nomorPengajuan}
             </h1>
-            <div className="flex items-center gap-3 text-sm font-medium text-navy/60">
+            <div className="flex items-center gap-3 text-isi font-medium text-navy/60">
               <span className="flex items-center gap-1">
                 <FileText className="w-4 h-4" /> {arah ? LABEL_ARAH_PENGAJUAN[arah] : "-"}
               </span>
@@ -176,10 +176,10 @@ export default function HalamanDetailPengajuanOutlet() {
       {/* JIKA REJECTED: Tampilkan Alasan */}
       {detail.status === "REJECTED" && detail.catatanPenolakan && (
         <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex flex-col gap-1">
-          <span className="text-sm font-bold text-rose-700 flex items-center gap-2">
+          <span className="text-isi font-bold text-rose-700 flex items-center gap-2">
             <XCircle className="w-4 h-4" /> Alasan Penolakan:
           </span>
-          <p className="text-sm font-medium text-rose-600 pl-6">{detail.catatanPenolakan}</p>
+          <p className="text-isi font-medium text-rose-600 pl-6">{detail.catatanPenolakan}</p>
         </div>
       )}
 
@@ -188,7 +188,7 @@ export default function HalamanDetailPengajuanOutlet() {
         <div className="lg:col-span-2 space-y-6">
           {/* Tabel rincian berkartu baris, tanpa panel berlatar (CV22a). */}
           <section aria-label={pengembalian ? "Barang yang Dikembalikan" : "Daftar Barang yang Diminta"} className="flex flex-col gap-3">
-            <h2 className="text-base font-bold text-navy flex items-center gap-2">
+            <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
               <Package className="w-5 h-5 text-karamel" /> {pengembalian ? "Barang yang Dikembalikan" : "Daftar Barang yang Diminta"}
             </h2>
             <DataTable rincian columns={KOLOM_BARANG_PENGAJUAN_OUTLET} data={detail.items} emptyMessage="Tidak ada barang." />
@@ -197,8 +197,8 @@ export default function HalamanDetailPengajuanOutlet() {
           {/* Catatan Tambahan */}
           {detail.catatan && (
             <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-2">
-              <h3 className="font-bold text-navy text-sm">Catatan Pengajuan:</h3>
-              <p className="text-sm font-medium text-navy/70 italic bg-gading p-4 rounded-xl border border-navy/5">
+              <h3 className="font-bold text-navy text-isi">Catatan Pengajuan:</h3>
+              <p className="text-isi font-medium text-navy/70 italic bg-gading p-4 rounded-xl border border-navy/5">
                 &quot;{detail.catatan}&quot;
               </p>
             </div>
@@ -208,7 +208,7 @@ export default function HalamanDetailPengajuanOutlet() {
         {/* KOLOM KANAN: INFO RUTE & TIMELINE */}
         <div className="lg:col-span-1 space-y-6">
           <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-5">
-            <h2 className="font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
+            <h2 className="text-subjudul font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
               <MapPin className="w-4 h-4 text-karamel" /> Rute Pengiriman
             </h2>
 
@@ -216,18 +216,18 @@ export default function HalamanDetailPengajuanOutlet() {
               <div className="flex flex-col gap-1 relative pl-6">
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-navy" />
                 <div className="absolute left-1.5 top-4 -bottom-4 w-0.5 bg-navy/10" />
-                <span className="text-xs font-bold text-navy/50 uppercase">{pengembalian ? "Outlet Asal Barang" : "Gudang Asal"}</span>
+                <span className="text-kecil font-bold text-navy/50 uppercase">{pengembalian ? "Outlet Asal Barang" : "Gudang Asal"}</span>
                 <span className="font-bold text-navy">{detail.dariLokasi?.nama || "-"}</span>
               </div>
               <div className="flex flex-col gap-1 relative pl-6">
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-karamel" />
-                <span className="text-xs font-bold text-navy/50 uppercase">{pengembalian ? "Gudang Tujuan" : "Outlet Peminta"}</span>
+                <span className="text-kecil font-bold text-navy/50 uppercase">{pengembalian ? "Gudang Tujuan" : "Outlet Peminta"}</span>
                 <span className="font-bold text-navy">{detail.keLokasi?.nama || "-"}</span>
               </div>
             </div>
 
             <div className="border-t border-navy/10 pt-4 mt-2 space-y-3">
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-isi">
                 <span className="font-bold text-navy/60 flex items-center gap-1.5">
                   <CalendarClock className="w-4 h-4" /> Batas Waktu
                 </span>
@@ -235,7 +235,7 @@ export default function HalamanDetailPengajuanOutlet() {
                   {detail.tanggalKebutuhan ? formatTanggalPengajuan(detail.tanggalKebutuhan) : "Fleksibel"}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-isi">
                 <span className="font-bold text-navy/60">Pembuat Draft</span>
                 <span className="font-bold text-navy capitalize">
                   {detail.dimintaOleh?.nama || "-"}
@@ -247,7 +247,7 @@ export default function HalamanDetailPengajuanOutlet() {
           {/* ACTION BUTTONS: DRAFT dan pemegang update-pengajuan-stok */}
           {bisaDiubah && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm flex flex-col gap-3">
-              <h3 className="text-sm font-bold text-amber-800 text-center mb-1">Tindakan Dokumen</h3>
+              <h3 className="text-isi font-bold text-amber-800 text-center mb-1">Tindakan Dokumen</h3>
               <Button
                 variant="outline"
                 onClick={() => router.push(`${URL_DAFTAR}/${id}/edit`)}
@@ -270,7 +270,7 @@ export default function HalamanDetailPengajuanOutlet() {
           {/* Pengembalian yang sudah punya surat jalan */}
           {outletPengirim && detail.transferStokID && (
             <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm flex flex-col gap-3">
-              <h3 className="text-sm font-bold text-navy text-center mb-1">Dokumen Terkait</h3>
+              <h3 className="text-isi font-bold text-navy text-center mb-1">Dokumen Terkait</h3>
               <Button
                 variant="outline"
                 onClick={() => router.push(`${urlSuratJalanOutlet}/${detail.transferStokID}`)}

@@ -47,7 +47,7 @@ export function PesanLuarLokasiKerja() {
   return (
     <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-2 text-center text-navy">
       <p className="font-bold">Ruang ini di luar lokasi kerja Anda.</p>
-      <p className="text-sm font-medium text-navy/60">
+      <p className="text-isi font-medium text-navy/60">
         Hubungi pemilik toko bila Anda perlu bekerja di lokasi lain.
       </p>
     </div>

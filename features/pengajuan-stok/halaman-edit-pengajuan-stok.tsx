@@ -35,7 +35,7 @@ export default function HalamanEditPengajuanStok() {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <AlertTriangle className="w-12 h-12 text-rose-500/50" />
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           {!error || isNotFound(error)
             ? "Data tidak ditemukan"
             : "Gagal memuat pengajuan. Coba muat ulang halaman."}
@@ -51,8 +51,8 @@ export default function HalamanEditPengajuanStok() {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <AlertTriangle className="w-12 h-12 text-amber-500/80" />
-        <h2 className="text-xl font-bold text-navy">Akses Ditolak</h2>
-        <p className="text-sm font-medium text-navy/60">
+        <h2 className="text-subjudul font-bold text-navy">Akses Ditolak</h2>
+        <p className="text-isi font-medium text-navy/60">
           Dokumen ini sudah berstatus {pengajuan.status} dan tidak dapat direvisi lagi.
         </p>
         <Button

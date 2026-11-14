@@ -84,7 +84,7 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-navy border-t-transparent"></div>
-        <p className="text-sm font-bold text-navy/60">Memuat pembelian...</p>
+        <p className="text-isi font-bold text-navy/60">Memuat pembelian...</p>
       </div>
     );
   }
@@ -148,8 +148,8 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
             <ShoppingCart className="w-6 h-6 text-karamel" />
           </div>
           <div className="min-w-0 space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">Pembelian dari {pembelian.supplier}</h1>
-            <p className="text-sm font-medium text-navy/60">
+            <h1 className="text-judul font-bold tracking-tight text-navy">Pembelian dari {pembelian.supplier}</h1>
+            <p className="text-isi font-medium text-navy/60">
               No. Faktur:{" "}
               <span className="font-bold font-mono text-navy break-all">{pembelian.nomorFaktur || "-"}</span>
             </p>
@@ -158,12 +158,12 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             {pembelian.stokDitambahkan ? (
-              <Badge className="bg-sage text-gading px-3 py-1 font-bold border-none shadow-sm text-xs">
+              <Badge className="bg-sage text-gading px-3 py-1 font-bold border-none shadow-sm text-kecil">
                 <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
                 Stok masuk ke {namaLokasi}
               </Badge>
             ) : (
-              <Badge variant="outline" className="border-navy/20 text-navy/70 px-3 py-1 font-bold text-xs">
+              <Badge variant="outline" className="border-navy/20 text-navy/70 px-3 py-1 font-bold text-kecil">
                 Dicatat sebelum stok bertambah otomatis
               </Badge>
             )}
@@ -198,13 +198,13 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
       </div>
 
       <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm">
-        <div className="grid grid-cols-1 gap-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 text-isi sm:grid-cols-2 lg:grid-cols-3">
           <BarisInfo label="Tanggal pembelian">{formatTanggal(pembelian.tanggal)}</BarisInfo>
           <BarisInfo label="Supplier">{pembelian.supplier}</BarisInfo>
           <BarisInfo label="Dibayar dari">
             {namaAkunPembelian(pembelian)}
             {pembelian.akunKasID?.nomorAkun && (
-              <span className="block font-mono text-xs font-medium text-navy/60">
+              <span className="block font-mono text-kecil font-medium text-navy/60">
                 {pembelian.akunKasID.nomorAkun}
               </span>
             )}
@@ -229,15 +229,15 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
       )}
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-base font-bold text-navy">Barang yang dibeli</h2>
+        <h2 className="text-subjudul font-bold text-navy">Barang yang dibeli</h2>
         <DataTable columns={KOLOM_BARANG} data={barang} emptyMessage="Tidak ada barang." />
         <div className="flex items-center justify-between gap-3 rounded-2xl bg-navy px-5 py-4 text-gading shadow-md">
-          <span className="text-sm font-bold">Total pembelian</span>
-          <span className="text-xl font-black tracking-tight">{formatRupiah(pembelian.totalBiaya)}</span>
+          <span className="text-isi font-bold">Total pembelian</span>
+          <span className="text-subjudul font-black tracking-tight">{formatRupiah(pembelian.totalBiaya)}</span>
         </div>
       </div>
 
-      <p className="flex items-start gap-2 text-xs font-medium text-navy/60">
+      <p className="flex items-start gap-2 text-kecil font-medium text-navy/60">
         <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
         {catatanKunci}
       </p>
@@ -260,7 +260,7 @@ export default function HalamanDetailPembelianStok({ ruang }: Props) {
 function BarisInfo({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
-      <p className="mb-1 text-xs font-bold text-navy/60">{label}</p>
+      <p className="mb-1 text-kecil font-bold text-navy/60">{label}</p>
       <div className="font-semibold text-navy">{children}</div>
     </div>
   );

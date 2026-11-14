@@ -59,7 +59,7 @@ function IsiDialogVoid({
         </AlertDialogDescription>
       </AlertDialogHeader>
       <div className="space-y-2">
-        <label htmlFor="alasanVoidPenjualan" className="text-sm font-bold text-navy">
+        <label htmlFor="alasanVoidPenjualan" className="text-isi font-bold text-navy">
           Alasan <span className="text-navy/50 font-medium">(Opsional)</span>
         </label>
         <Input

@@ -84,9 +84,9 @@ export default function HalamanDaftarStockAdjustment({
       {
         accessorKey: "nomorAdjustment",
         meta: { label: "No. Jurnal" },
-        header: () => <div className="text-xs font-bold text-navy/60">No. Jurnal</div>,
+        header: () => <div className="text-kecil font-bold text-navy/60">No. Jurnal</div>,
         cell: ({ row }) => (
-          <span className="font-bold font-mono text-navy text-sm">
+          <span className="font-bold font-mono text-navy text-isi">
             {row.original.nomorAdjustment}
           </span>
         ),
@@ -94,9 +94,9 @@ export default function HalamanDaftarStockAdjustment({
       {
         accessorKey: "tanggal",
         meta: { label: "Tanggal Eksekusi" },
-        header: () => <div className="text-xs font-bold text-navy/60">Tanggal Eksekusi</div>,
+        header: () => <div className="text-kecil font-bold text-navy/60">Tanggal Eksekusi</div>,
         cell: ({ row }) => (
-          <span className="text-sm font-medium text-navy/70">
+          <span className="text-isi font-medium text-navy/70">
             {formatTanggalAdjustment(row.original.tanggal)}
           </span>
         ),
@@ -105,19 +105,19 @@ export default function HalamanDaftarStockAdjustment({
         id: "sumber",
         meta: { label: "Sumber" },
         header: () => (
-          <div className="text-xs font-bold text-navy/60">Sumber</div>
+          <div className="text-kecil font-bold text-navy/60">Sumber</div>
         ),
         cell: ({ row }) => (
           <TautanSumber
             adjustment={row.original}
-            className="text-sm font-bold text-navy"
+            className="text-isi font-bold text-navy"
           />
         ),
       },
       {
         id: "aksi",
         header: () => (
-          <div className="text-right text-xs font-bold text-navy/60">Aksi</div>
+          <div className="text-right text-kecil font-bold text-navy/60">Aksi</div>
         ),
         cell: ({ row }) => (
           <div className="flex justify-end">
@@ -145,10 +145,10 @@ export default function HalamanDaftarStockAdjustment({
           <Scale className="w-6 h-6 text-navy" />
         </div>
         <div className="space-y-0.5">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             {teks.judul}
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             {teks.deskripsi}
           </p>
         </div>

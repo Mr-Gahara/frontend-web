@@ -19,7 +19,7 @@ export function PesanGalat({ pesan }: { pesan: string }) {
   return (
     <div
       role="alert"
-      className="flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+      className="flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive"
     >
       <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
       <span>{pesan}</span>
@@ -29,7 +29,7 @@ export function PesanGalat({ pesan }: { pesan: string }) {
 
 /** "Tahap n dari 2" di atas judul dialog. */
 export function LabelTahap({ ke }: { ke: 1 | 2 }) {
-  return <p className="text-xs font-semibold text-muted-foreground">Tahap {ke} dari 2</p>;
+  return <p className="text-kecil font-semibold text-muted-foreground">Tahap {ke} dari 2</p>;
 }
 
 /**
@@ -87,13 +87,13 @@ export function TahapKode({
       }}
       className="flex min-w-0 flex-col gap-3"
     >
-      <p className="text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
+      <p className="text-isi leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
         {keterangan}
         Kode dikirim ke <strong className="text-foreground">{terkirim.email}</strong>, berlaku {menit} menit.
       </p>
       <div className="flex flex-col gap-1.5">
         <IsianKode nilai={kode} onUbah={onUbahKode} invalid={kurang} />
-        {kurang && <p className="text-xs font-medium text-destructive">Masukkan 6 digit kode verifikasi.</p>}
+        {kurang && <p className="text-kecil font-medium text-destructive">Masukkan 6 digit kode verifikasi.</p>}
         <KirimUlangKode
           sisa={sisa}
           onKirim={() => {
@@ -109,13 +109,13 @@ export function TahapKode({
           }}
         />
         {status && (
-          <p role="status" className="text-sm">
+          <p role="status" className="text-isi">
             {status}
           </p>
         )}
       </div>
       {isianTambahan}
-      {catatan && <p className="text-xs leading-relaxed text-muted-foreground">{catatan}</p>}
+      {catatan && <p className="text-kecil leading-relaxed text-muted-foreground">{catatan}</p>}
       <PesanGalat pesan={galat} />
       <DialogFooter className="sm:justify-between">
         <Button type="button" variant="outline" className="min-h-11 sm:min-h-9" onClick={onKembali} disabled={menyimpan}>

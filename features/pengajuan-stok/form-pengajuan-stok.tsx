@@ -118,7 +118,7 @@ export function FormPengajuanStok({ pengajuan }: Props) {
 
   if (sedangMemuat || (!lintasOutlet && aktif.isLoading)) {
     return (
-      <div className="py-20 text-center text-sm font-medium text-navy/60">
+      <div className="py-20 text-center text-isi font-medium text-navy/60">
         Memuat lokasi outlet...
       </div>
     );
@@ -135,7 +135,7 @@ export function FormPengajuanStok({ pengajuan }: Props) {
     if (pesan) {
       return (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <p className="text-sm font-bold text-navy">{pesan}</p>
+          <p className="text-isi font-bold text-navy">{pesan}</p>
           <Button variant="outline" onClick={() => router.push(URL_DAFTAR)}>
             Kembali
           </Button>
@@ -221,12 +221,12 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
           {teks.kembali}
         </Button>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             {pengajuan
               ? `Revisi Draft Pengajuan: ${pengajuan.nomorPengajuan}`
               : "Buat Draft Pengajuan Stok"}
           </h1>
-          <p className="text-sm font-medium text-navy/60">{teks.deskripsi}</p>
+          <p className="text-isi font-medium text-navy/60">{teks.deskripsi}</p>
         </div>
       </div>
 
@@ -234,10 +234,10 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
       <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-4">
         <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
           <ArrowRightLeft className="h-5 w-5 text-karamel" />
-          <h2 className="font-bold text-navy">Arah Pengajuan</h2>
+          <h2 className="text-subjudul font-bold text-navy">Arah Pengajuan</h2>
         </div>
         {pengajuan ? (
-          <p className="text-sm font-bold text-navy">{LABEL_ARAH_PENGAJUAN[arah]}</p>
+          <p className="text-isi font-bold text-navy">{LABEL_ARAH_PENGAJUAN[arah]}</p>
         ) : (
           <Controller
             control={control}
@@ -257,8 +257,8 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
                         : "bg-gading border-navy/20 text-navy hover:bg-navy/5",
                     )}
                   >
-                    <span className="text-[15px] font-bold">{pilihan.judul}</span>
-                    <span className="text-[13px] font-medium opacity-85">{pilihan.keterangan}</span>
+                    <span className="text-besar font-bold">{pilihan.judul}</span>
+                    <span className="text-isi font-medium opacity-85">{pilihan.keterangan}</span>
                   </button>
                 ))}
               </div>
@@ -271,9 +271,9 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
       <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-4">
         <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
           <MapPin className="h-5 w-5 text-karamel" />
-          <h2 className="font-bold text-navy">Rute Logistik</h2>
+          <h2 className="text-subjudul font-bold text-navy">Rute Logistik</h2>
         </div>
-        <div className="flex flex-wrap items-center gap-3 rounded-xl bg-krem px-4 py-3 text-sm font-semibold text-navy">
+        <div className="flex flex-wrap items-center gap-3 rounded-xl bg-krem px-4 py-3 text-isi font-semibold text-navy">
           <span className="font-medium text-navy/70">Barang bergerak dari</span>
           <span>{pengembalian ? namaOutlet : namaGudang}</span>
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -282,7 +282,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
           <div className="space-y-2">
-            <label htmlFor="pengajuan-outlet" className="text-sm font-bold text-navy">
+            <label htmlFor="pengajuan-outlet" className="text-isi font-bold text-navy">
               {pengembalian ? "Outlet Asal Barang" : "Outlet Peminta"} <span className="text-rose-500">*</span>
             </label>
             <Controller
@@ -309,7 +309,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="pengajuan-gudang" className="text-sm font-bold text-navy">
+            <label htmlFor="pengajuan-gudang" className="text-isi font-bold text-navy">
               {pengembalian ? "Gudang Tujuan" : "Gudang Asal Barang"} <span className="text-rose-500">*</span>
             </label>
             <Controller
@@ -342,7 +342,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-navy/10 pb-3">
           <div className="flex items-center gap-2">
             <Package className="h-5 w-5 text-karamel" />
-            <h2 className="font-bold text-navy">{pengembalian ? "Barang yang Dikembalikan" : "Daftar Kebutuhan Barang"}</h2>
+            <h2 className="text-subjudul font-bold text-navy">{pengembalian ? "Barang yang Dikembalikan" : "Daftar Kebutuhan Barang"}</h2>
           </div>
           <Button
             type="button"
@@ -362,7 +362,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
               className="flex flex-col sm:flex-row items-start sm:items-end gap-3 bg-white p-3 rounded-xl border border-navy/10"
             >
               <div className="w-full sm:flex-1 space-y-1.5">
-                <label htmlFor={`pengajuan-bahan-${index}`} className="text-xs font-bold text-navy/70">
+                <label htmlFor={`pengajuan-bahan-${index}`} className="text-kecil font-bold text-navy/70">
                   Pilih Barang <span className="text-rose-500">*</span>
                 </label>
                 <Controller
@@ -397,7 +397,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
               </div>
 
               <div className="w-full sm:w-32 space-y-1.5">
-                <label htmlFor={`pengajuan-jumlah-${index}`} className="text-xs font-bold text-navy/70">
+                <label htmlFor={`pengajuan-jumlah-${index}`} className="text-kecil font-bold text-navy/70">
                   Jumlah <span className="text-rose-500">*</span>
                 </label>
                 <Input
@@ -410,7 +410,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
               </div>
 
               <div className="w-full sm:w-32 space-y-1.5">
-                <label htmlFor={`pengajuan-satuan-${index}`} className="text-xs font-bold text-navy/70">
+                <label htmlFor={`pengajuan-satuan-${index}`} className="text-kecil font-bold text-navy/70">
                   Satuan
                 </label>
                 <Input
@@ -443,12 +443,12 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
       <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-4">
         <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
           <CalendarClock className="h-5 w-5 text-karamel" />
-          <h2 className="font-bold text-navy">Informasi Pengiriman</h2>
+          <h2 className="text-subjudul font-bold text-navy">Informasi Pengiriman</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
           <div className="space-y-2">
-            <label htmlFor="pengajuan-tanggal" className="text-sm font-bold text-navy">
+            <label htmlFor="pengajuan-tanggal" className="text-isi font-bold text-navy">
               Tanggal Kebutuhan (Opsional)
             </label>
             <Controller
@@ -484,13 +484,13 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
                 </Popover>
               )}
             />
-            <p className="text-[10px] text-navy/50 font-medium">
+            <p className="text-mikro text-navy/50 font-medium">
               Batas waktu maksimal barang harus tiba di Outlet.
             </p>
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="pengajuan-catatan" className="text-sm font-bold text-navy">
+            <label htmlFor="pengajuan-catatan" className="text-isi font-bold text-navy">
               Catatan / Pesan ke Gudang
             </label>
             <Textarea

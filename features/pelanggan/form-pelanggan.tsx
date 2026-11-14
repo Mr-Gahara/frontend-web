@@ -52,15 +52,15 @@ const KELAS_INPUT =
 
 /** Tampilan isian yang berbeda antara panel tambah dan dialog ubah. */
 const RAGAM = {
-  tambah: { bungkus: "space-y-1.5", label: "text-xs font-medium text-navy" },
-  ubah: { bungkus: "space-y-2", label: "text-sm font-medium text-navy" },
+  tambah: { bungkus: "space-y-1.5", label: "text-kecil font-medium text-navy" },
+  ubah: { bungkus: "space-y-2", label: "text-isi font-medium text-navy" },
 } as const;
 
 type Ragam = keyof typeof RAGAM;
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-xs font-medium text-red-600">{pesan}</p>;
+  return <p className="text-kecil font-medium text-red-600">{pesan}</p>;
 }
 
 function Opsional() {
@@ -98,7 +98,7 @@ function IsianPelanggan({ register, control, errors, idAwalan, ragam, hanyaNama 
       </div>
 
       {hanyaNama ? (
-        <p className="text-xs text-navy/60">
+        <p className="text-kecil text-navy/60">
           Pelanggan bawaan toko dipakai untuk transaksi tanpa data pelanggan, sehingga hanya namanya
           yang dapat diubah.
         </p>
@@ -336,7 +336,7 @@ function IsiFormUbah({ pelanggan, onTutup }: { pelanggan: Pelanggan; onTutup: ()
       />
 
       {galat && (
-        <p className="text-sm text-red-600 font-medium bg-red-500/10 px-3 py-2 rounded-md border border-red-500/20">
+        <p className="text-isi text-red-600 font-medium bg-red-500/10 px-3 py-2 rounded-md border border-red-500/20">
           {galat}
         </p>
       )}

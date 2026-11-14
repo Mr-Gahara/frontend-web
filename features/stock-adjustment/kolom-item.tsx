@@ -12,7 +12,7 @@ export const KOLOM_ITEM_ADJUSTMENT: ColumnDef<BarisItemAdjustment>[] = [
     cell: ({ row }) => (
       <div>
         <p className="font-bold text-navy">{row.original.nama}</p>
-        <p className="text-xs text-navy/50 font-medium">Satuan: {row.original.satuan}</p>
+        <p className="text-kecil text-navy/50 font-medium">Satuan: {row.original.satuan}</p>
       </div>
     ),
   },
@@ -24,7 +24,7 @@ export const KOLOM_ITEM_ADJUSTMENT: ColumnDef<BarisItemAdjustment>[] = [
       <div className="sm:text-center font-bold text-navy/60 font-mono">
         {row.original.qtySistem}
         {row.original.qtySaatDraf !== null && (
-          <p className="text-[10px] font-medium text-navy/50 font-sans">Saat draf: {row.original.qtySaatDraf}</p>
+          <p className="text-mikro font-medium text-navy/50 font-sans">Saat draf: {row.original.qtySaatDraf}</p>
         )}
       </div>
     ),

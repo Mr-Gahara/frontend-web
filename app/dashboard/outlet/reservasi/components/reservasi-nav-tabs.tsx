@@ -53,7 +53,7 @@ export function ReservasiNavTabs() {
               key={href}
               href={href}
               className={cn(
-                "flex flex-1 items-center justify-center gap-2 py-3 px-4 text-sm font-bold whitespace-nowrap transition-all border-b-4 rounded-none bg-transparent cursor-pointer -mb-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-navy/50 focus-visible:rounded-t-md",
+                "flex flex-1 items-center justify-center gap-2 py-3 px-4 text-isi font-bold whitespace-nowrap transition-all border-b-4 rounded-none bg-transparent cursor-pointer -mb-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-navy/50 focus-visible:rounded-t-md",
                 isActive
                   ? "border-navy text-navy shadow-none"
                   : "border-transparent text-navy/50 hover:text-navy/80 hover:bg-transparent hover:border-navy/20"

@@ -39,7 +39,7 @@ import {
 } from "./payload";
 import { skemaUbahBeban, type IsianUbahBeban } from "./schema";
 
-const KELAS_LABEL = "text-xs font-semibold text-navy/60";
+const KELAS_LABEL = "text-kecil font-semibold text-navy/60";
 const KELAS_ISIAN =
   "bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy";
 
@@ -47,7 +47,7 @@ function PesanGalat({ pesan }: { pesan: string }) {
   return (
     <p
       role="alert"
-      className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+      className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive"
     >
       {pesan}
     </p>
@@ -58,7 +58,7 @@ function BarisRincian({ label, nilai }: { label: string; nilai: string }) {
   return (
     <div className="flex items-start justify-between gap-4 px-4 py-2.5">
       <dt className={`${KELAS_LABEL} shrink-0`}>{label}</dt>
-      <dd className="text-sm font-medium text-navy text-right break-words min-w-0">{nilai}</dd>
+      <dd className="text-isi font-medium text-navy text-right break-words min-w-0">{nilai}</dd>
     </div>
   );
 }
@@ -95,7 +95,7 @@ export function DialogRincianBeban({
           <p className={KELAS_LABEL}>Jumlah</p>
           <p
             className={cn(
-              "font-mono text-2xl sm:text-3xl font-bold",
+              "font-mono text-judul sm:text-tampilan font-bold",
               dibatalkan ? "text-navy/50 line-through" : "text-red-800",
             )}
           >
@@ -117,7 +117,7 @@ export function DialogRincianBeban({
 
         <div className="flex flex-col gap-1.5">
           <p className={KELAS_LABEL}>Keterangan</p>
-          <p className="rounded-xl border border-navy/10 bg-permukaan px-4 py-3 text-sm font-medium text-navy break-words">
+          <p className="rounded-xl border border-navy/10 bg-permukaan px-4 py-3 text-isi font-medium text-navy break-words">
             {beban.keterangan || "-"}
           </p>
         </div>
@@ -125,7 +125,7 @@ export function DialogRincianBeban({
         {dibatalkan && (
           <div className="flex flex-col gap-1.5">
             <p className={KELAS_LABEL}>Alasan pembatalan</p>
-            <p className="rounded-xl border border-navy/10 bg-permukaan px-4 py-3 text-sm font-medium text-navy break-words">
+            <p className="rounded-xl border border-navy/10 bg-permukaan px-4 py-3 text-isi font-medium text-navy break-words">
               {beban.alasanVoid || "-"}
             </p>
           </div>
@@ -209,7 +209,7 @@ export function DialogUbahBeban({
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2">
-            <label htmlFor="ubah-kategori-beban" className="text-sm font-bold text-navy">
+            <label htmlFor="ubah-kategori-beban" className="text-isi font-bold text-navy">
               Kategori
             </label>
             <Controller
@@ -238,11 +238,11 @@ export function DialogUbahBeban({
               )}
             />
             {errors.kategoriBebanID && (
-              <span className="text-xs font-bold text-rose-500">{errors.kategoriBebanID.message}</span>
+              <span className="text-kecil font-bold text-rose-500">{errors.kategoriBebanID.message}</span>
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="ubah-keterangan-beban" className="text-sm font-bold text-navy">
+            <label htmlFor="ubah-keterangan-beban" className="text-isi font-bold text-navy">
               Keterangan
             </label>
             <Input
@@ -252,7 +252,7 @@ export function DialogUbahBeban({
               className={cn(KELAS_ISIAN, errors.keterangan && "border-rose-500")}
             />
             {errors.keterangan && (
-              <span className="text-xs font-bold text-rose-500">{errors.keterangan.message}</span>
+              <span className="text-kecil font-bold text-rose-500">{errors.keterangan.message}</span>
             )}
           </div>
           {galat && <PesanGalat pesan={galat} />}
@@ -324,7 +324,7 @@ export function DialogBatalBeban({
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2">
-          <label htmlFor="alasan-batal-beban" className="text-sm font-bold text-navy">
+          <label htmlFor="alasan-batal-beban" className="text-isi font-bold text-navy">
             Alasan pembatalan
           </label>
           <Input
@@ -334,7 +334,7 @@ export function DialogBatalBeban({
             readOnly={memuat}
             className={cn(KELAS_ISIAN, galatAlasan && "border-rose-500")}
           />
-          {galatAlasan && <span className="text-xs font-bold text-rose-500">{galatAlasan}</span>}
+          {galatAlasan && <span className="text-kecil font-bold text-rose-500">{galatAlasan}</span>}
         </div>
         {galat && <PesanGalat pesan={galat} />}
         <DialogFooter>

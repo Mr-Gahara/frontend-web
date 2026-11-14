@@ -41,7 +41,7 @@ export function KartuPelanggan({
 
   return (
     <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-4">
-      <h2 className="text-base font-bold text-navy flex items-center gap-2">
+      <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
         <Users className="w-5 h-5 text-karamel" /> Pelanggan
       </h2>
       <div className="space-y-2">
@@ -78,7 +78,7 @@ export function KartuPelanggan({
                 className="text-navy"
               />
               <CommandList>
-                <CommandEmpty className="py-4 text-center text-xs font-medium text-navy/60">
+                <CommandEmpty className="py-4 text-center text-kecil font-medium text-navy/60">
                   Pelanggan tidak ditemukan.
                 </CommandEmpty>
                 <CommandGroup>
@@ -104,11 +104,11 @@ export function KartuPelanggan({
                         />
                         <span>{p.namaPelanggan}</span>
                         {p.nomorHp ? (
-                          <span className="ml-2 text-xs font-medium text-navy/60">
+                          <span className="ml-2 text-kecil font-medium text-navy/60">
                             {p.nomorHp}
                           </span>
                         ) : null}
-                        <span className="ml-auto text-xs font-bold text-navy/50 capitalize">
+                        <span className="ml-auto text-kecil font-bold text-navy/50 capitalize">
                           {p.tipePelanggan}
                         </span>
                       </CommandItem>

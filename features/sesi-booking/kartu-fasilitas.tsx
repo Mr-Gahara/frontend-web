@@ -66,7 +66,7 @@ export function KartuFasilitas({
     <div className="rounded-xl border border-navy/10 p-4 sm:p-5 bg-white shadow-sm flex flex-col gap-5">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-navy/5 pb-3">
-        <span className="text-xs font-bold px-2.5 py-1 bg-navy/5 text-navy/80 rounded-md">
+        <span className="text-kecil font-bold px-2.5 py-1 bg-navy/5 text-navy/80 rounded-md">
           Fasilitas #{nomor}
         </span>
         {bisaDihapus && (
@@ -83,7 +83,7 @@ export function KartuFasilitas({
 
       {/* Pilih Aset */}
       <div className="space-y-2">
-        <label className="text-xs font-bold text-navy flex items-center gap-1.5">
+        <label className="text-kecil font-bold text-navy flex items-center gap-1.5">
           <Box className="w-3.5 h-3.5 text-karamel" /> Pilih Aset / Meja / Ruangan
         </label>
         <Controller
@@ -103,7 +103,7 @@ export function KartuFasilitas({
                 {asetList.map((aset) => (
                   <SelectItem key={aset.id} value={aset.id} className="cursor-pointer font-bold hover:bg-navy/5">
                     {aset.namaAset}{" "}
-                    <span className="text-xs font-medium text-navy/50 ml-1">
+                    <span className="text-kecil font-medium text-navy/50 ml-1">
                       ({aset.dataAset?.namaTipeAset ?? "Tipe Umum"})
                     </span>
                   </SelectItem>
@@ -113,7 +113,7 @@ export function KartuFasilitas({
           )}
         />
         {galatItem?.dataAset && (
-          <p className="text-[10px] font-bold text-rose-500">{galatItem.dataAset.message}</p>
+          <p className="text-mikro font-bold text-rose-500">{galatItem.dataAset.message}</p>
         )}
       </div>
 
@@ -122,7 +122,7 @@ export function KartuFasilitas({
         <div className="space-y-2">
           <label
             htmlFor={`tanggal-fasilitas-${nomor}`}
-            className="text-xs font-bold text-navy flex items-center gap-1.5"
+            className="text-kecil font-bold text-navy flex items-center gap-1.5"
           >
             <CalendarIcon className="w-3.5 h-3.5 text-karamel" /> Tanggal
           </label>
@@ -138,7 +138,7 @@ export function KartuFasilitas({
         <div className="space-y-2">
           <label
             htmlFor={`jam-fasilitas-${nomor}`}
-            className="text-xs font-bold text-navy flex items-center gap-1.5"
+            className="text-kecil font-bold text-navy flex items-center gap-1.5"
           >
             <Clock className="w-3.5 h-3.5 text-sage" /> Jam Mulai
           </label>
@@ -155,7 +155,7 @@ export function KartuFasilitas({
 
       {/* PILIH DURASI */}
       <div className="space-y-2">
-        <label className="text-xs font-bold text-navy flex items-center gap-1.5">
+        <label className="text-kecil font-bold text-navy flex items-center gap-1.5">
           <Timer className="w-3.5 h-3.5 text-karamel" /> Durasi Sewa
         </label>
         <div className="flex flex-wrap gap-2">
@@ -165,7 +165,7 @@ export function KartuFasilitas({
               type="button"
               onClick={() => onUbahWaktu({ durasi: d })}
               className={cn(
-                "h-10 px-4 rounded-lg text-sm font-bold border transition-all cursor-pointer",
+                "h-10 px-4 rounded-lg text-isi font-bold border transition-all cursor-pointer",
                 waktu.durasi === d
                   ? "bg-navy text-gading border-navy shadow-sm"
                   : "bg-gading text-navy/70 border-navy/20 hover:border-navy/50 hover:text-navy",
@@ -180,7 +180,7 @@ export function KartuFasilitas({
       {/* DISKON ITEM */}
       <div className="space-y-2 pt-2 border-t border-navy/5 mt-2">
         <div className="flex justify-between items-center">
-          <label className="text-xs font-bold flex items-center gap-1.5 text-navy">
+          <label className="text-kecil font-bold flex items-center gap-1.5 text-navy">
             <Tag className="h-3.5 w-3.5 text-karamel" /> Tambah Diskon (Opsional)
           </label>
           <Popover open={bukaDiskon} onOpenChange={setBukaDiskon}>
@@ -188,7 +188,7 @@ export function KartuFasilitas({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 text-xs cursor-pointer font-bold border-navy/20 text-navy hover:bg-navy/5"
+                className="h-7 text-kecil cursor-pointer font-bold border-navy/20 text-navy hover:bg-navy/5"
               >
                 Pilih Diskon
               </Button>
@@ -197,7 +197,7 @@ export function KartuFasilitas({
               <Command className="bg-gading">
                 <CommandInput placeholder="Cari diskon fasilitas..." className="text-navy" />
                 <CommandList>
-                  <CommandEmpty className="py-4 text-center text-xs font-medium text-navy/60">
+                  <CommandEmpty className="py-4 text-center text-kecil font-medium text-navy/60">
                     Belum ada diskon aktif.
                   </CommandEmpty>
                   <CommandGroup>
@@ -238,7 +238,7 @@ export function KartuFasilitas({
               return (
                 <div
                   key={d.id}
-                  className="px-2 py-1 rounded-md bg-karamel text-navy text-[10px] font-bold shadow-sm"
+                  className="px-2 py-1 rounded-md bg-karamel text-navy text-mikro font-bold shadow-sm"
                 >
                   {d.namaDiskon} ({d.tipe === "persen" ? `${d.nilai}%` : `Rp ${d.nilai.toLocaleString("id-ID")}`})
                 </div>
@@ -252,7 +252,7 @@ export function KartuFasilitas({
       {bentrok && (
         <div className="bg-rose-50 border border-rose-200 p-3 rounded-lg flex gap-2.5 items-start mt-2 shadow-sm animate-in fade-in slide-in-from-top-1 duration-300">
           <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-          <div className="text-xs text-rose-700 font-medium leading-relaxed">
+          <div className="text-kecil text-rose-700 font-medium leading-relaxed">
             Aset ini sedang dipesan dari{" "}
             <span className="font-bold underline decoration-rose-300 underline-offset-2">
               {format(new Date(bentrok.waktuMulai), "HH:mm", { locale: localeID })}
@@ -275,7 +275,7 @@ export function KartuFasilitas({
           className="bg-amber-50 border border-amber-200 p-3 rounded-lg flex gap-2.5 items-start mt-2 shadow-sm"
         >
           <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-          <div className="text-xs text-amber-800 font-medium leading-relaxed">
+          <div className="text-kecil text-amber-800 font-medium leading-relaxed">
             Ada booking belum dibayar di aset ini dari{" "}
             <span className="font-bold">
               {format(new Date(belumDibayar.waktuMulai), "HH:mm", { locale: localeID })}
@@ -299,18 +299,18 @@ export function KartuFasilitas({
         )}
       >
         <Clock className={cn("w-4 h-4 shrink-0", bentrok ? "text-rose-400" : "text-karamel")} />
-        <div className="flex flex-wrap items-center gap-2 text-sm font-bold text-navy">
+        <div className="flex flex-wrap items-center gap-2 text-isi font-bold text-navy">
           <span className="font-mono">{teksRentang(rentang?.mulai ?? waktu.tanggal, rentang?.mulai ?? null)}</span>
           <span className="text-navy/40 font-normal">→</span>
           <span className="font-mono">
             {teksRentang(rentang?.selesai ?? waktu.tanggal, rentang?.selesai ?? null)}
           </span>
-          <span className="px-2 py-0.5 rounded-md bg-sage/15 text-sage text-xs">{waktu.durasi} jam</span>
+          <span className="px-2 py-0.5 rounded-md bg-sage/15 text-sage text-kecil">{waktu.durasi} jam</span>
         </div>
       </div>
 
       {(galatItem?.waktuMulai || galatItem?.waktuSelesai) && (
-        <p className="text-[10px] font-bold text-rose-500">
+        <p className="text-mikro font-bold text-rose-500">
           {galatItem?.waktuMulai?.message ?? galatItem?.waktuSelesai?.message}
         </p>
       )}

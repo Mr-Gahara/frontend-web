@@ -218,6 +218,26 @@ input.no-spinner[type="number"] {
   --color-rose-terang: var(--rose-terang);
   --color-abu-teks: var(--abu-teks);
   --color-rose-lama: var(--rose-lama);
+  /* Skala tipografi tujuh tingkat (pemilik proyek, 14 November 2026, CV24a).
+     Tinggi baris sama dengan ukuran Tailwind setara. Judul dan subjudul tanpa
+     ketebalan bawaan; h1 dan h2 menulis font-bold sendiri (CV26a). Ketebalan
+     bawaan tampilan dan mikro dapat ditimpa kelas font-*. Teks mikro mewarisi
+     tinggi baris induknya. */
+  --text-tampilan: 1.875rem;
+  --text-tampilan--line-height: calc(2.25 / 1.875);
+  --text-tampilan--font-weight: 900;
+  --text-judul: 1.5rem;
+  --text-judul--line-height: calc(2 / 1.5);
+  --text-subjudul: 1.125rem;
+  --text-subjudul--line-height: calc(1.75 / 1.125);
+  --text-besar: 1rem;
+  --text-besar--line-height: calc(1.5 / 1);
+  --text-isi: 0.875rem;
+  --text-isi--line-height: calc(1.25 / 0.875);
+  --text-kecil: 0.75rem;
+  --text-kecil--line-height: calc(1 / 0.75);
+  --text-mikro: 0.6875rem;
+  --text-mikro--font-weight: 600;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

@@ -27,7 +27,7 @@ const KELAS_TAUTAN =
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-xs font-medium text-destructive">{pesan}</p>;
+  return <p className="text-kecil font-medium text-destructive">{pesan}</p>;
 }
 
 export function HalamanLoginPengguna() {
@@ -110,12 +110,12 @@ export function HalamanLoginPengguna() {
         <div className="flex min-w-0 items-center gap-3">
           <TandaTachyon ukuran={34} />
           <div className="min-w-0">
-            <p className="truncate text-lg font-bold">{identitas.judul}</p>
-            {identitas.email && <p className="truncate text-sm text-gading/75">{identitas.email}</p>}
+            <p className="truncate text-subjudul font-bold">{identitas.judul}</p>
+            {identitas.email && <p className="truncate text-isi text-gading/75">{identitas.email}</p>}
           </div>
         </div>
         <JamKunci />
-        <p className="max-w-[420px] text-base leading-relaxed text-gading/75">
+        <p className="max-w-[420px] text-besar leading-relaxed text-gading/75">
           Kasir terkunci. Masukkan nama dan PIN Anda untuk membuka shift.
         </p>
       </aside>
@@ -129,10 +129,10 @@ export function HalamanLoginPengguna() {
           className="flex w-full max-w-[380px] flex-col gap-6"
           suppressHydrationWarning
         >
-          <h1 className="text-3xl font-bold tracking-tight">Siapa yang bertugas?</h1>
+          <h1 className="text-judul font-bold tracking-tight">Siapa yang bertugas?</h1>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="nama" className="text-sm font-semibold">
+            <label htmlFor="nama" className="text-isi font-semibold">
               Nama pengguna
             </label>
             <input
@@ -142,7 +142,7 @@ export function HalamanLoginPengguna() {
               suppressHydrationWarning
               {...register("nama")}
               placeholder="Contoh: Ridho"
-              className={KELAS_ISIAN + " h-12 text-base"}
+              className={KELAS_ISIAN + " h-12 text-besar"}
               aria-invalid={errors.nama ? true : undefined}
               disabled={memuat}
             />
@@ -151,7 +151,7 @@ export function HalamanLoginPengguna() {
 
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between gap-3">
-              <label htmlFor="pin" className="text-sm font-semibold">
+              <label htmlFor="pin" className="text-isi font-semibold">
                 PIN
               </label>
               <button
@@ -159,7 +159,7 @@ export function HalamanLoginPengguna() {
                 onClick={() => setLupaPin((v) => !v)}
                 aria-expanded={lupaPin}
                 aria-controls="bantuan-lupa-pin"
-                className={KELAS_TAUTAN + " text-sm"}
+                className={KELAS_TAUTAN + " text-isi"}
               >
                 Lupa PIN?
               </button>
@@ -177,15 +177,15 @@ export function HalamanLoginPengguna() {
               }}
               maxLength={6}
               aria-describedby="pin-bantu"
-              className={KELAS_ISIAN + " h-16 text-center text-[28px] tracking-[0.6em]"}
+              className={KELAS_ISIAN + " h-16 text-center text-judul tracking-[0.6em]"}
               aria-invalid={errors.pin ? true : undefined}
               disabled={memuat}
             />
-            <p id="pin-bantu" className="text-[13px] text-muted-foreground">
+            <p id="pin-bantu" className="text-kecil text-muted-foreground">
               6 digit angka.
             </p>
             <PesanIsian pesan={errors.pin?.message} />
-            <div id="bantuan-lupa-pin" hidden={!lupaPin} className="rounded-lg bg-krem p-4 text-sm leading-relaxed">
+            <div id="bantuan-lupa-pin" hidden={!lupaPin} className="rounded-lg bg-krem p-4 text-isi leading-relaxed">
               <ul className="list-disc space-y-1.5 pl-5">
                 <li>
                   <span className="font-semibold">Karyawan:</span> minta Owner mengatur ulang PIN Anda.
@@ -201,7 +201,7 @@ export function HalamanLoginPengguna() {
           </div>
 
           {galat && (
-            <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-xs font-medium text-destructive border border-destructive/20">
+            <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-kecil font-medium text-destructive border border-destructive/20">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{galat}</span>
             </div>
@@ -210,7 +210,7 @@ export function HalamanLoginPengguna() {
           <button
             type="submit"
             disabled={memuat}
-            className="inline-flex h-[54px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-navy text-base font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:pointer-events-none disabled:opacity-60"
+            className="inline-flex h-[54px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-navy text-besar font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:pointer-events-none disabled:opacity-60"
           >
             {memuat ? (
               <>
@@ -226,7 +226,7 @@ export function HalamanLoginPengguna() {
             type="button"
             onClick={gantiAkun}
             disabled={keluarAkun.isPending}
-            className={KELAS_TAUTAN + " h-11 self-start text-[15px]"}
+            className={KELAS_TAUTAN + " h-11 self-start text-besar"}
           >
             Keluar dari akun toko
           </button>

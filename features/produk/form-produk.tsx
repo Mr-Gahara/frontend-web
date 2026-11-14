@@ -252,10 +252,10 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             {teks.judul}
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             {produk ? (
               <>Perbarui informasi produk &quot;{produk.namaProduk}&quot;.</>
             ) : (
@@ -272,14 +272,14 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
           <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm flex flex-col gap-5">
             <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
               <PackagePlus className="h-5 w-5 text-karamel" />
-              <h3 className="text-base font-bold text-navy">
+              <h3 className="text-besar font-bold text-navy">
                 Informasi Utama
               </h3>
             </div>
 
             <div className="space-y-2">
               <label
-                className="text-sm font-bold text-navy"
+                className="text-isi font-bold text-navy"
                 htmlFor="namaProduk"
               >
                 Nama Produk <span className="text-red-500">*</span>
@@ -292,7 +292,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
               />
               <div className="min-h-4">
                 {errors.namaProduk && (
-                  <span className="text-xs font-bold text-rose-500">
+                  <span className="text-kecil font-bold text-rose-500">
                     {errors.namaProduk.message}
                   </span>
                 )}
@@ -300,7 +300,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
             </div>
 
             <div className="space-y-2 flex flex-col">
-              <label className="text-sm font-bold text-navy">
+              <label className="text-isi font-bold text-navy">
                 Kategori <span className="text-red-500">*</span>
               </label>
               <Controller
@@ -344,7 +344,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                           className="text-navy"
                         />
                         <CommandList>
-                          <CommandEmpty className="py-6 text-center text-sm text-navy/60 font-medium">
+                          <CommandEmpty className="py-6 text-center text-isi text-navy/60 font-medium">
                             Kategori tidak ditemukan.
                           </CommandEmpty>
                           <CommandGroup>
@@ -381,7 +381,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
               />
               <div className="min-h-4">
                 {errors.kategoriID && (
-                  <span className="text-xs font-bold text-rose-500">
+                  <span className="text-kecil font-bold text-rose-500">
                     {errors.kategoriID.message}
                   </span>
                 )}
@@ -390,7 +390,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
 
             <div className="space-y-2">
               <label
-                className="text-sm font-bold text-navy"
+                className="text-isi font-bold text-navy"
                 htmlFor="gambarProduk"
               >
                 Link Gambar Produk{" "}
@@ -408,7 +408,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
 
             <div className="space-y-2">
               <label
-                className="text-sm font-bold text-navy"
+                className="text-isi font-bold text-navy"
                 htmlFor="keteranganProduk"
               >
                 Keterangan{" "}
@@ -429,17 +429,17 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
           <div className="flex flex-col gap-6">
             <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm flex flex-col gap-5">
               <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
-                <span className="h-5 w-5 rounded-full bg-karamel text-white flex items-center justify-center font-bold text-xs">
+                <span className="h-5 w-5 rounded-full bg-karamel text-white flex items-center justify-center font-bold text-kecil">
                   $
                 </span>
-                <h3 className="text-base font-bold text-navy">
+                <h3 className="text-besar font-bold text-navy">
                   Manajemen Harga
                 </h3>
               </div>
 
               <div className="space-y-2">
                 <label
-                  className="text-sm font-bold text-navy"
+                  className="text-isi font-bold text-navy"
                   htmlFor="hargaDasar"
                 >
                   Harga Dasar (Rp) <span className="text-red-500">*</span>
@@ -473,11 +473,11 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                 />
                 <div className="min-h-4 flex flex-col justify-start">
                   {errors.hargaDasar ? (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.hargaDasar.message}
                     </span>
                   ) : (
-                    <p className="text-xs font-medium text-navy/50">
+                    <p className="text-kecil font-medium text-navy/50">
                       Modal produksi per item.
                     </p>
                   )}
@@ -486,7 +486,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
 
               <div className="space-y-2">
                 <label
-                  className="text-sm font-bold text-navy"
+                  className="text-isi font-bold text-navy"
                   htmlFor="hargaJual"
                 >
                   Harga Jual (Rp) <span className="text-red-500">*</span>
@@ -520,11 +520,11 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                 />
                 <div className="min-h-4 flex flex-col justify-start">
                   {errors.hargaJual ? (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.hargaJual.message}
                     </span>
                   ) : (
-                    <p className="text-xs font-medium text-navy/50">
+                    <p className="text-kecil font-medium text-navy/50">
                       Harga yang ditawarkan ke pelanggan.
                     </p>
                   )}
@@ -536,7 +536,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
               <div className="flex items-center justify-between border-b border-navy/10 pb-3">
                 <div className="flex items-center gap-2">
                   <PackagePlus className="h-5 w-5 text-karamel" />
-                  <h3 id="judulStok" className="text-base font-bold text-navy">
+                  <h3 id="judulStok" className="text-besar font-bold text-navy">
                     {teks.judulStok}
                   </h3>
                 </div>
@@ -561,11 +561,11 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                   <div className="space-y-1 leading-none">
                     <label
                       htmlFor="unlimited"
-                      className="text-sm font-bold text-navy cursor-pointer"
+                      className="text-isi font-bold text-navy cursor-pointer"
                     >
                       Produk Tanpa Stok (Unlimited)
                     </label>
-                    <p className="text-[10px] font-medium text-navy/50">
+                    <p className="text-mikro font-medium text-navy/50">
                       Aktifkan jika produk ini berupa layanan (jasa) atau stok
                       tidak terbatas.
                     </p>
@@ -585,11 +585,11 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                   <Info className="w-4 h-4 text-navy/50 shrink-0 mt-0.5" />
                   <div className="flex flex-col gap-1 min-h-4">
                     {errors.stok ? (
-                      <span className="text-xs font-bold text-rose-500">
+                      <span className="text-kecil font-bold text-rose-500">
                         {errors.stok.message}
                       </span>
                     ) : (
-                      <p className="text-xs font-medium text-navy/60 leading-relaxed">
+                      <p className="text-kecil font-medium text-navy/60 leading-relaxed">
                         {hasResep
                           ? teks.petunjukStokResep
                           : isUnlimitedStok
@@ -604,7 +604,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
 
                 {/* Stok minimal (B237): 0 berarti tidak dipantau; hanya produk berstok langsung. */}
                 <div className="flex flex-col gap-1.5 mt-4">
-                  <label htmlFor="stokMinimum" className="text-sm font-bold text-navy">
+                  <label htmlFor="stokMinimum" className="text-isi font-bold text-navy">
                     Stok minimal
                   </label>
                   <Input
@@ -616,9 +616,9 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                     disabled={hasResep || isUnlimitedStok}
                   />
                   {errors.stokMinimum ? (
-                    <span className="text-xs font-bold text-rose-500">{errors.stokMinimum.message}</span>
+                    <span className="text-kecil font-bold text-rose-500">{errors.stokMinimum.message}</span>
                   ) : (
-                    <p className="text-xs font-medium text-navy/60 leading-relaxed">
+                    <p className="text-kecil font-medium text-navy/60 leading-relaxed">
                       {hasResep || isUnlimitedStok
                         ? "Hanya untuk produk berstok langsung; produk beresep dipantau lewat stok bahan bakunya."
                         : "Produk ditandai kritis bila stoknya mencapai angka ini. Isi 0 bila tidak perlu dipantau."}

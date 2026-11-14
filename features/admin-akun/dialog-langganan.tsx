@@ -176,7 +176,7 @@ function IsiDialog({
         <div className="space-y-4">
           {(jenis === "perpanjang" || jenis === "ubahPlan") && (
             <div className="space-y-2">
-              <label htmlFor="plan-langganan" className="text-sm font-medium">
+              <label htmlFor="plan-langganan" className="text-isi font-medium">
                 {jenis === "ubahPlan" ? "Plan baru" : "Plan"}
               </label>
               <Select value={plan} onValueChange={(v) => setPlan(v as KunciPlan)} disabled={memuat}>
@@ -196,7 +196,7 @@ function IsiDialog({
 
           {(jenis === "aktifkan" || jenis === "perpanjang") && (
             <div className="space-y-2">
-              <label htmlFor="durasi-langganan" className="text-sm font-medium">
+              <label htmlFor="durasi-langganan" className="text-isi font-medium">
                 Durasi
               </label>
               <Select value={durasi} onValueChange={setDurasi} disabled={memuat}>
@@ -220,7 +220,7 @@ function IsiDialog({
           )}
 
           <div className="space-y-2">
-            <label htmlFor="alasan-langganan" className="text-sm font-medium">
+            <label htmlFor="alasan-langganan" className="text-isi font-medium">
               Alasan (opsional)
             </label>
             <Textarea
@@ -234,7 +234,7 @@ function IsiDialog({
           </div>
 
           {galat && (
-            <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">
+            <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive">
               {galat}
             </p>
           )}

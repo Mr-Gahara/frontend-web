@@ -92,21 +92,21 @@ export function DialogUbahPassword({
           <form noValidate onSubmit={form.handleSubmit(kirimKode)} className="flex min-w-0 flex-col gap-3">
             {ISIAN.map((isian) => (
               <div key={isian.nama} className="flex flex-col gap-1.5">
-                <label htmlFor={`akun-${isian.nama}`} className="text-sm font-medium">{isian.label}</label>
+                <label htmlFor={`akun-${isian.nama}`} className="text-isi font-medium">{isian.label}</label>
                 <Input
                   id={`akun-${isian.nama}`}
                   type="password"
                   autoComplete={isian.autoComplete}
                   {...form.register(isian.nama)}
                   aria-invalid={galatIsian[isian.nama] ? true : undefined}
-                  className="h-11 text-base sm:text-sm"
+                  className="h-11 text-besar sm:text-isi"
                 />
                 {galatIsian[isian.nama] && (
-                  <p className="text-xs font-medium text-destructive">{galatIsian[isian.nama]?.message}</p>
+                  <p className="text-kecil font-medium text-destructive">{galatIsian[isian.nama]?.message}</p>
                 )}
               </div>
             ))}
-            <p className="text-xs leading-relaxed text-muted-foreground">
+            <p className="text-kecil leading-relaxed text-muted-foreground">
               Minimal 8 karakter, dengan huruf kapital dan angka. Lanjut mengirim kode ke email akun toko.
             </p>
             <PesanGalat pesan={galatKirim} />

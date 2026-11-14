@@ -56,16 +56,16 @@ import { skemaPindahDana, type IsianPindahDana } from "./schema";
 const SEMUA = "semua";
 const KELAS_ISIAN =
   "bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy";
-const KELAS_LABEL = "text-sm font-bold text-navy";
-const KELAS_GALAT = "text-xs font-bold text-rose-500";
-const KELAS_LABEL_FILTER = "text-xs font-bold text-navy/70";
+const KELAS_LABEL = "text-isi font-bold text-navy";
+const KELAS_GALAT = "text-kecil font-bold text-rose-500";
+const KELAS_LABEL_FILTER = "text-kecil font-bold text-navy/70";
 const KELAS_PEMICU_FILTER = "w-52 bg-gading border-navy/20 text-navy";
 
 function Keadaan({ judul, isi }: { judul: string; isi: string }) {
   return (
     <div className="rounded-2xl border border-dashed border-navy/20 bg-krem p-12 text-center">
-      <p className="text-base font-bold text-navy mb-1">{judul}</p>
-      <p className="text-sm font-medium text-navy/60 max-w-md mx-auto">{isi}</p>
+      <p className="text-besar font-bold text-navy mb-1">{judul}</p>
+      <p className="text-isi font-medium text-navy/60 max-w-md mx-auto">{isi}</p>
     </div>
   );
 }
@@ -85,14 +85,14 @@ export function HalamanPindahDana() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:py-8">
       <Link
         href={URL_DAFTAR_AKUN_KAS}
-        className="inline-flex w-fit items-center text-sm font-semibold text-navy/60 hover:text-navy"
+        className="inline-flex w-fit items-center text-isi font-semibold text-navy/60 hover:text-navy"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Kembali ke Daftar Akun Kas
       </Link>
       <div className="space-y-0.5">
-        <h1 className="text-2xl font-bold tracking-tight text-navy">Pindah Dana</h1>
-        <p className="text-sm font-medium text-navy/60">
+        <h1 className="text-judul font-bold tracking-tight text-navy">Pindah Dana</h1>
+        <p className="text-isi font-medium text-navy/60">
           Pindahkan saldo antar akun kas toko. Transfer tidak dapat diubah; koreksinya dibatalkan
           lalu dicatat ulang.
         </p>
@@ -206,7 +206,7 @@ function FormPindahDana({ akunAktif }: { akunAktif: AkunKas[] }) {
               )}
             />
             {sumber && (
-              <p className="text-xs font-medium text-navy/60">
+              <p className="text-kecil font-medium text-navy/60">
                 Saldo tersedia {formatRupiah(sumber.saldo)}
               </p>
             )}
@@ -319,7 +319,7 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="font-medium text-navy">{formatTanggal(row.original.tanggal)}</span>
-            <span className="text-xs text-navy/60">oleh {row.original.dicatatOleh?.nama || "-"}</span>
+            <span className="text-kecil text-navy/60">oleh {row.original.dicatatOleh?.nama || "-"}</span>
           </div>
         ),
       },
@@ -353,7 +353,7 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
           <div>
             <TeksDuaBaris teks={row.original.keterangan} />
             {row.original.status === "VOID" && row.original.catatan && (
-              <TeksDuaBaris teks={`Alasan batal: ${row.original.catatan}`} className="text-xs text-navy/60" />
+              <TeksDuaBaris teks={`Alasan batal: ${row.original.catatan}`} className="text-kecil text-navy/60" />
             )}
           </div>
         ),
@@ -364,7 +364,7 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
         cell: ({ row }) => (
           <span
             className={cn(
-              "text-xs font-bold",
+              "text-kecil font-bold",
               row.original.status === "AKTIF" ? "text-emerald-700" : "text-red-600",
             )}
           >
@@ -413,10 +413,10 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
       className="flex flex-col gap-6 w-full"
     >
       <div>
-        <h2 className="text-base sm:text-lg font-bold tracking-wide text-navy">
+        <h2 className="text-subjudul font-bold tracking-wide text-navy">
           Riwayat Transfer
         </h2>
-        <p className="text-sm font-medium text-navy/60 mt-1">
+        <p className="text-isi font-medium text-navy/60 mt-1">
           Transfer antar akun kas, terbaru lebih dulu.
         </p>
       </div>
@@ -496,7 +496,7 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
           role="alert"
           className="flex flex-col items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-8 text-center"
         >
-          <p className="text-sm font-medium text-red-600">
+          <p className="text-isi font-medium text-red-600">
             {pesanError(daftar.error, "Gagal memuat riwayat transfer.")}
           </p>
           <Button

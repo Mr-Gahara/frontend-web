@@ -40,10 +40,10 @@ export function PolaDeleteDialog({
           </div>
 
           <div className="flex flex-col gap-1.5 mt-2 sm:mt-0">
-            <AlertDialogTitle className="text-xl font-bold text-navy">
+            <AlertDialogTitle className="text-subjudul font-bold text-navy">
               Hapus Pola Roster?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm font-semibold leading-relaxed text-navy/70">
+            <AlertDialogDescription className="text-isi font-semibold leading-relaxed text-navy/70">
               Pola <strong>{targetPola.namaPola}</strong> akan dihapus
               permanen dan tidak dapat dikembalikan.
               <br />

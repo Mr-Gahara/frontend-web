@@ -77,10 +77,10 @@ function IsiDialogMesinKasir({
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="text-[22px] font-bold text-navy">
+        <DialogTitle className="text-judul font-bold text-navy">
           {ubah ? "Ubah mesin kasir" : "Tambah mesin kasir"}
         </DialogTitle>
-        <DialogDescription className="text-[15px] text-navy/70">
+        <DialogDescription className="text-isi text-navy/70">
           {ubah
             ? (ubah.namaAlat ?? ubah.mesin.namaPerangkat)
             : "Pilih HP atau tablet yang dipakai berjualan, lalu tentukan laci uangnya."}
@@ -96,15 +96,15 @@ function IsiDialogMesinKasir({
       >
         {!ubah && (
           <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 text-[15px] font-bold">Perangkat</legend>
+            <legend className="mb-1 text-besar font-bold">Perangkat</legend>
             {perangkat.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-navy/25 px-4 py-3.5 text-[15px] text-navy/70">
+              <div className="rounded-xl border border-dashed border-navy/25 px-4 py-3.5 text-isi text-navy/70">
                 Belum ada perangkat yang bisa dipilih. Minta karyawan login sekali lewat aplikasi di HP atau tablet
                 itu, lalu setujui perangkatnya di Karyawan dan Staff.
               </div>
             ) : (
               <>
-                <span className="mb-1 text-sm text-navy/70">
+                <span className="mb-1 text-isi text-navy/70">
                   Perangkat yang sudah disetujui dan pernah dipakai login di toko ini.
                 </span>
                 {perangkat.map((p) => {
@@ -132,12 +132,12 @@ function IsiDialogMesinKasir({
                       />
                       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                         <span className="break-words font-bold">{p.nama}</span>
-                        <span className="text-sm text-navy/70">{teksPerangkat(p, sekarang)}</span>
+                        <span className="text-isi text-navy/70">{teksPerangkat(p, sekarang)}</span>
                       </span>
                     </label>
                   );
                 })}
-                <span className="text-sm text-navy/70">
+                <span className="text-isi text-navy/70">
                   Perangkat yang belum muncul: minta karyawan login sekali di perangkat itu, lalu setujui di
                   Karyawan dan Staff.
                 </span>
@@ -146,23 +146,23 @@ function IsiDialogMesinKasir({
           </fieldset>
         )}
 
-        <label className="flex flex-col gap-1.5 text-[15px] font-bold">
+        <label className="flex flex-col gap-1.5 text-besar font-bold">
           Nama mesin kasir
           <Input
             value={nama}
             onChange={(e) => setNama(e.target.value)}
             placeholder="Contoh: Kasir Depan"
-            className="h-12 border-navy/20 bg-white text-base font-normal text-navy"
+            className="h-12 border-navy/20 bg-white text-besar font-normal text-navy"
           />
-          <span className="text-sm font-normal text-navy/70">
+          <span className="text-isi font-normal text-navy/70">
             Contoh: letaknya di toko, seperti Kasir Depan atau Kasir Bar.
           </span>
         </label>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-[15px] font-bold">Laci uang</span>
+          <span className="text-besar font-bold">Laci uang</span>
           {laci.length === 0 || (!ubah && laciBebas.length === 0) ? (
-            <div className="rounded-xl border border-dashed border-navy/25 px-4 py-3.5 text-[15px] text-navy/70">
+            <div className="rounded-xl border border-dashed border-navy/25 px-4 py-3.5 text-isi text-navy/70">
               Semua laci Kas Fisik sudah dipakai mesin lain.{" "}
               <Link href={hrefBuatAkunKas} className="font-semibold text-navy underline underline-offset-4">
                 Buat akun Kas Fisik baru
@@ -174,7 +174,7 @@ function IsiDialogMesinKasir({
               <Select value={akunKasID} onValueChange={setAkunKasID} disabled={laciTerkunci}>
                 <SelectTrigger
                   aria-label="Laci uang"
-                  className="h-12 w-full border-navy/20 bg-white text-base text-navy data-[size=default]:h-12"
+                  className="h-12 w-full border-navy/20 bg-white text-besar text-navy data-[size=default]:h-12"
                 >
                   <SelectValue placeholder="Pilih laci" />
                 </SelectTrigger>
@@ -186,7 +186,7 @@ function IsiDialogMesinKasir({
                   ))}
                 </SelectContent>
               </Select>
-              <span className="text-sm text-navy/70">
+              <span className="text-isi text-navy/70">
                 {laciTerkunci
                   ? "Laci tidak bisa diganti selama kasir di mesin ini masih buka."
                   : "Satu laci hanya untuk satu mesin kasir. Uang tunai dari mesin ini masuk ke laci yang dipilih."}
@@ -200,14 +200,14 @@ function IsiDialogMesinKasir({
             type="button"
             variant="outline"
             onClick={() => onBukaChange(false)}
-            className="h-12 border-navy/20 text-base font-bold text-navy"
+            className="h-12 border-navy/20 text-besar font-bold text-navy"
           >
             Batal
           </Button>
           <Button
             type="submit"
             disabled={!valid || menyimpan}
-            className="h-12 bg-navy text-base font-bold text-gading hover:bg-navy/90"
+            className="h-12 bg-navy text-besar font-bold text-gading hover:bg-navy/90"
           >
             {menyimpan ? "Menyimpan..." : "Simpan"}
           </Button>

@@ -64,7 +64,7 @@ export function LoncengPemberitahuan() {
         aria-label="Pemberitahuan"
         className="w-[calc(100vw-2rem)] max-w-85 gap-3 rounded-2xl border border-navy/10 bg-permukaan p-4 text-navy shadow-[0_12px_32px_rgba(10,41,71,0.18)] ring-0 duration-200 data-open:zoom-in-90"
       >
-        <p className="text-sm font-bold">Pemberitahuan</p>
+        <p className="text-isi font-bold">Pemberitahuan</p>
         {pengingat ? (
           <div className={cn("flex flex-col gap-2.5 rounded-xl p-3.5", tenggang ? "bg-rose-50" : "bg-krem")}>
             <div className="flex items-start gap-2.5">
@@ -81,8 +81,8 @@ export function LoncengPemberitahuan() {
                 )}
               </span>
               <div>
-                <p className="text-sm font-bold">{pengingat.judul}</p>
-                <p className="mt-0.5 text-[13px] text-navy/80">{pengingat.isi}</p>
+                <p className="text-isi font-bold">{pengingat.judul}</p>
+                <p className="mt-0.5 text-kecil text-navy/80">{pengingat.isi}</p>
               </div>
             </div>
             {pengingat.persen !== null && (
@@ -96,14 +96,14 @@ export function LoncengPemberitahuan() {
             {bacaLangganan && (
               <Link
                 href={URL_LANGGANAN}
-                className="self-start inline-flex h-9 items-center rounded-lg bg-navy px-3.5 text-[13px] font-semibold text-gading hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"
+                className="self-start inline-flex h-9 items-center rounded-lg bg-navy px-3.5 text-isi font-semibold text-gading hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"
               >
                 Lihat langganan
               </Link>
             )}
           </div>
         ) : (
-          <p className="text-[13px] text-navy/70">Belum ada pemberitahuan.</p>
+          <p className="text-kecil text-navy/70">Belum ada pemberitahuan.</p>
         )}
       </PopoverContent>
     </Popover>

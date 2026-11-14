@@ -67,7 +67,7 @@ export function KartuItemPenjualan({
         className="rounded-xl border border-navy/10 p-5 space-y-4 bg-gading shadow-inner"
       >
         <div className="flex items-center justify-between border-b border-navy/5 pb-3">
-          <span className="text-xs font-bold text-navy/50 uppercase tracking-widest">
+          <span className="text-kecil font-bold text-navy/50 uppercase tracking-widest">
             Item #{index + 1}
           </span>
           {jumlahItem > 1 && (
@@ -84,7 +84,7 @@ export function KartuItemPenjualan({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-bold text-navy">
+          <label className="text-isi font-bold text-navy">
             Produk
           </label>
           <Popover
@@ -123,7 +123,7 @@ export function KartuItemPenjualan({
                   className="text-navy"
                 />
                 <CommandList>
-                  <CommandEmpty className="py-6 text-center text-sm font-medium text-navy/60">
+                  <CommandEmpty className="py-6 text-center text-isi font-medium text-navy/60">
                     Produk tidak ditemukan.
                   </CommandEmpty>
                   <CommandGroup>
@@ -146,7 +146,7 @@ export function KartuItemPenjualan({
                         <span className="flex-1">
                           {p.namaProduk}
                         </span>
-                        <span className="ml-2 text-xs font-bold text-navy/50">
+                        <span className="ml-2 text-kecil font-bold text-navy/50">
                           {formatRupiah(p.hargaJual)}
                         </span>
                       </CommandItem>
@@ -160,7 +160,7 @@ export function KartuItemPenjualan({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-bold text-navy" htmlFor={`jumlah-${index}`}>
+            <label className="text-isi font-bold text-navy" htmlFor={`jumlah-${index}`}>
               Jumlah
             </label>
             <Input
@@ -176,10 +176,10 @@ export function KartuItemPenjualan({
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-bold text-navy">
+            <label className="text-isi font-bold text-navy">
               Harga Satuan
             </label>
-            <div className="flex h-10 items-center rounded-md border border-navy/10 bg-navy/5 px-3 text-sm font-bold text-navy/70 font-mono">
+            <div className="flex h-10 items-center rounded-md border border-navy/10 bg-navy/5 px-3 text-isi font-bold text-navy/70 font-mono">
               {selectedProduk
                 ? formatRupiah(selectedProduk.hargaJual)
                 : "-"}
@@ -191,7 +191,7 @@ export function KartuItemPenjualan({
         {selectedProduk && (
           <div className="space-y-2 pt-2">
             <div className="flex justify-between items-center">
-              <label className="text-xs font-bold flex items-center gap-1.5 text-navy">
+              <label className="text-kecil font-bold flex items-center gap-1.5 text-navy">
                 <Tag className="h-3.5 w-3.5 text-karamel" />{" "}
                 Diskon Produk
               </label>
@@ -205,7 +205,7 @@ export function KartuItemPenjualan({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-7 text-xs cursor-pointer font-bold border-navy/20 text-navy hover:bg-navy/5"
+                    className="h-7 text-kecil cursor-pointer font-bold border-navy/20 text-navy hover:bg-navy/5"
                   >
                     Pilih Diskon
                   </Button>
@@ -220,7 +220,7 @@ export function KartuItemPenjualan({
                       className="text-navy"
                     />
                     <CommandList>
-                      <CommandEmpty className="py-4 text-center text-xs font-medium text-navy/60">
+                      <CommandEmpty className="py-4 text-center text-kecil font-medium text-navy/60">
                         Belum ada diskon aktif.
                       </CommandEmpty>
                       <CommandGroup>
@@ -255,7 +255,7 @@ export function KartuItemPenjualan({
                                 </div>
                                 <span className="flex flex-col"><span>{d.namaDiskon}</span><SyaratDiskon diskon={d} /></span>
                               </div>
-                              <Badge className="text-[10px] bg-karamel text-navy hover:bg-karamel border-none font-bold">
+                              <Badge className="text-mikro bg-karamel text-navy hover:bg-karamel border-none font-bold">
                                 {d.tipe === "persen"
                                   ? `${d.nilai}%`
                                   : "Rp"}
@@ -280,7 +280,7 @@ export function KartuItemPenjualan({
                   return (
                     <Badge
                       key={d.id || `badge-item-${idx}`}
-                      className="bg-karamel text-navy border-none hover:bg-karamel text-[10px] font-bold shadow-sm"
+                      className="bg-karamel text-navy border-none hover:bg-karamel text-mikro font-bold shadow-sm"
                     >
                       {d.namaDiskon} (
                       {d.tipe === "persen"
@@ -298,11 +298,11 @@ export function KartuItemPenjualan({
         {selectedProduk && (
           <div className="flex flex-col items-end gap-1 pt-3 border-t border-navy/5 mt-2">
             {itemCalc.totalDiskonItem > 0 && (
-              <span className="text-xs text-rose-500 line-through font-mono">
+              <span className="text-kecil text-rose-500 line-through font-mono">
                 {formatRupiah(itemCalc.subTotal)}
               </span>
             )}
-            <span className="text-sm font-bold text-navy font-mono">
+            <span className="text-isi font-bold text-navy font-mono">
               {formatRupiah(itemCalc.totalHarga)}
             </span>
           </div>

@@ -60,10 +60,10 @@ export default function HalamanPengiriman() {
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy flex items-center gap-2">
+          <h1 className="text-judul font-bold tracking-tight text-navy flex items-center gap-2">
             <Truck className="w-6 h-6 text-amber-500" /> Radar Pengiriman
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             Pantau armada logistik yang sedang dalam perjalanan menuju Outlet.
           </p>
         </div>
@@ -85,10 +85,10 @@ export default function HalamanPengiriman() {
             <Truck className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-bold text-amber-800/70 uppercase tracking-wider">
+            <p className="text-kecil font-bold text-amber-800/70 uppercase tracking-wider">
               Truk di Jalan
             </p>
-            <h3 className="text-2xl font-black text-amber-900">
+            <h3 className="text-judul font-black text-amber-900">
               {daftarPengiriman.length}
             </h3>
           </div>
@@ -98,10 +98,10 @@ export default function HalamanPengiriman() {
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-bold text-navy/70 uppercase tracking-wider">
+            <p className="text-kecil font-bold text-navy/70 uppercase tracking-wider">
               Informasi Radar
             </p>
-            <p className="text-sm font-medium text-navy">
+            <p className="text-isi font-medium text-navy">
               Layar ini akan otomatis memperbarui data ketika Outlet
               mengonfirmasi penerimaan barang. Dokumen yang telah selesai akan
               otomatis berpindah ke arsip Transfer Stok.
@@ -122,10 +122,10 @@ export default function HalamanPengiriman() {
         ) : filteredData.length === 0 ? (
           <div className="col-span-full py-16 text-center bg-white border border-navy/10 rounded-2xl">
             <PackageCheck className="w-16 h-16 mx-auto mb-4 text-navy/20" />
-            <h3 className="text-lg font-bold text-navy">
+            <h3 className="text-subjudul font-bold text-navy">
               Semua Pengiriman Tuntas
             </h3>
-            <p className="text-sm font-medium text-navy/50 mt-1">
+            <p className="text-isi font-medium text-navy/50 mt-1">
               Tidak ada armada truk yang sedang berada di jalan saat ini.
             </p>
           </div>
@@ -136,10 +136,10 @@ export default function HalamanPengiriman() {
               className="bg-white border border-navy/10 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col"
             >
               <div className="bg-krem px-5 py-3 border-b border-navy/5 flex justify-between items-center">
-                <span className="font-mono font-bold text-navy text-sm">
+                <span className="font-mono font-bold text-navy text-isi">
                   {item.nomorTransfer}
                 </span>
-                <Badge className="bg-amber-100 text-amber-700 border-none text-[10px] font-bold px-2 py-0.5 animate-pulse">
+                <Badge className="bg-amber-100 text-amber-700 border-none text-mikro font-bold px-2 py-0.5 animate-pulse">
                   Dalam Perjalanan
                 </Badge>
               </div>
@@ -154,12 +154,12 @@ export default function HalamanPengiriman() {
                   </div>
                   <div className="flex flex-col justify-between h-11.5 flex-1">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-bold text-navy truncate">
+                      <span className="text-isi font-bold text-navy truncate">
                         {item.dariLokasi?.nama || "Gudang"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-bold text-amber-700 truncate">
+                      <span className="text-isi font-bold text-amber-700 truncate">
                         {item.keLokasi?.nama || "Outlet"}
                       </span>
                     </div>
@@ -168,24 +168,24 @@ export default function HalamanPengiriman() {
 
                 <div className="grid grid-cols-2 gap-4 bg-gading p-3 rounded-xl border border-navy/5 mt-2">
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-navy/50 uppercase">
+                    <span className="text-mikro font-bold text-navy/50 uppercase">
                       Berangkat
                     </span>
-                    <span className="text-xs font-bold text-navy">
+                    <span className="text-kecil font-bold text-navy">
                       {formatTanggal(item.tanggalKirim)}
                     </span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-navy/50 uppercase">
+                    <span className="text-mikro font-bold text-navy/50 uppercase">
                       Lama Perjalanan
                     </span>
-                    <span className="text-xs font-bold text-amber-600">
+                    <span className="text-kecil font-bold text-amber-600">
                       {getLamaPerjalanan(item.tanggalKirim)}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-sm font-bold text-navy/70">
+                <div className="flex items-center gap-2 text-isi font-bold text-navy/70">
                   <Package className="w-4 h-4 text-karamel" />
                   Membawa {item.items?.length || 0} Macam Barang
                 </div>

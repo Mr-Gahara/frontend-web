@@ -20,7 +20,7 @@ interface Props {
 export default function PemilihLokasiOutlet({ lokasiOutlet, nilai, onUbah }: Props) {
   return (
     <div className="space-y-1.5 w-full sm:w-64">
-      <label htmlFor="pemilih-lokasi-outlet" className="text-xs font-bold text-navy">
+      <label htmlFor="pemilih-lokasi-outlet" className="text-kecil font-bold text-navy">
         Filter Lokasi
       </label>
       <Select value={nilai} onValueChange={onUbah}>

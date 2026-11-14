@@ -81,7 +81,7 @@ export function DialogStatusAkun({
         {galat && (
           <p
             role="alert"
-            className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+            className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive"
           >
             {galat}
           </p>

@@ -143,7 +143,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-navy border-t-transparent"></div>
-        <p className="text-sm font-bold text-navy/60">
+        <p className="text-isi font-bold text-navy/60">
           Memuat detail transaksi...
         </p>
       </div>
@@ -155,7 +155,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
     // (sejalan dengan detail stock opname).
     return (
       <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-16 text-center">
-        <p role="alert" className="text-sm font-bold text-navy/70">
+        <p role="alert" className="text-isi font-bold text-navy/70">
           {!errorPenjualan || isNotFound(errorPenjualan)
             ? "Penjualan tidak ditemukan."
             : pesanError(errorPenjualan, "Gagal memuat detail penjualan.")}
@@ -184,10 +184,10 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
             <ArrowLeft className="mr-2 h-4 w-4" /> Kembali ke Daftar
           </Button>
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
               Detail Transaksi
             </h1>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-isi font-medium text-navy/60">
               No. Ref:{" "}
               <span className="font-bold font-mono text-navy">
                 {penjualan.noReferensi}
@@ -202,7 +202,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
               {badgeStatus(penjualan.statusPenjualan)}
             </div>
             {penjualan.statusPenjualan === "VOID" && penjualan.alasanVoid && (
-              <p className="text-xs font-medium text-navy/60">Alasan void: {penjualan.alasanVoid}</p>
+              <p className="text-kecil font-medium text-navy/60">Alasan void: {penjualan.alasanVoid}</p>
             )}
           </div>
 
@@ -256,11 +256,11 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
         <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm space-y-4">
           <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
             <Receipt className="h-5 w-5 text-karamel" />
-            <h2 className="font-bold text-navy">Informasi Transaksi</h2>
+            <h2 className="text-subjudul font-bold text-navy">Informasi Transaksi</h2>
           </div>
-          <div className="grid grid-cols-2 gap-y-5 text-sm">
+          <div className="grid grid-cols-2 gap-y-5 text-isi">
             <div>
-              <p className="text-navy/60 font-bold text-xs mb-1">
+              <p className="text-navy/60 font-bold text-kecil mb-1">
                 Tanggal & Waktu
               </p>
               <p className="font-semibold text-navy">
@@ -268,7 +268,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
               </p>
             </div>
             <div>
-              <p className="text-navy/60 font-bold text-xs mb-1">
+              <p className="text-navy/60 font-bold text-kecil mb-1">
                 Jenis Transaksi
               </p>
               <p className="font-semibold text-navy uppercase">
@@ -276,7 +276,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
               </p>
             </div>
             <div>
-              <p className="text-navy/60 font-bold text-xs mb-1">
+              <p className="text-navy/60 font-bold text-kecil mb-1">
                 Tipe Pesanan
               </p>
               <p className="font-semibold text-navy capitalize">
@@ -284,7 +284,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
               </p>
             </div>
             <div>
-              <p className="text-navy/60 font-bold text-xs mb-1">
+              <p className="text-navy/60 font-bold text-kecil mb-1">
                 Kasir / Operator
               </p>
               <p className="font-semibold text-navy">
@@ -297,18 +297,18 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
         <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm space-y-4">
           <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
             <User className="h-5 w-5 text-karamel" />
-            <h2 className="font-bold text-navy">Informasi Pelanggan</h2>
+            <h2 className="text-subjudul font-bold text-navy">Informasi Pelanggan</h2>
           </div>
-          <div className="space-y-4 text-sm">
+          <div className="space-y-4 text-isi">
             <div className="flex justify-between items-start">
               <div>
-                <p className="font-bold text-lg text-navy">
+                <p className="font-bold text-subjudul text-navy">
                   {penjualan.dataPelanggan?.namaPelanggan || "Umum"}
                 </p>
                 {penjualan.dataPelanggan && (
                   <Badge
                     variant="secondary"
-                    className="mt-2 capitalize text-[10px] bg-karamel text-navy border-none font-bold shadow-sm"
+                    className="mt-2 capitalize text-mikro bg-karamel text-navy border-none font-bold shadow-sm"
                   >
                     {penjualan.dataPelanggan?.tipePelanggan || "Umum"}
                   </Badge>
@@ -335,7 +335,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
 
       {/* DAFTAR ITEM PRODUK: tabel rincian berkartu baris (CV22a). */}
       <section aria-label="Rincian Item" className="flex flex-col gap-3">
-        <h2 className="text-base font-bold text-navy flex items-center gap-2">
+        <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
           <ShoppingCart className="h-5 w-5 text-karamel" /> Rincian Item
         </h2>
         <DataTable rincian columns={KOLOM_ITEM_PENJUALAN} data={penjualan.itemPenjualan ?? []} emptyMessage="Tidak ada item." />
@@ -349,18 +349,18 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
         <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm h-full">
           <div className="flex items-center gap-2 border-b border-navy/10 pb-3 mb-4">
             <FileText className="h-5 w-5 text-karamel" />
-            <h2 className="font-bold text-navy">Catatan Transaksi</h2>
+            <h2 className="text-subjudul font-bold text-navy">Catatan Transaksi</h2>
           </div>
-          <p className="text-sm font-medium text-navy/70 whitespace-pre-wrap leading-relaxed">
+          <p className="text-isi font-medium text-navy/70 whitespace-pre-wrap leading-relaxed">
             {penjualan.keterangan || "Tidak ada catatan."}
           </p>
         </div>
 
         <div className="rounded-2xl border border-navy/10 bg-navy text-gading p-6 sm:p-8 shadow-md space-y-4">
-          <h2 className="text-sm font-bold border-b border-gading/20 pb-3 flex items-center gap-2 uppercase tracking-widest text-karamel">
+          <h2 className="text-subjudul font-bold border-b border-gading/20 pb-3 flex items-center gap-2 uppercase tracking-widest text-karamel">
             <Calculator className="w-4 h-4" /> Ringkasan Tagihan
           </h2>
-          <div className="space-y-3 text-sm">
+          <div className="space-y-3 text-isi">
             <div className="flex justify-between text-gading/80 font-medium">
               <span>Subtotal Produk</span>
               <span className="font-mono text-gading">
@@ -384,10 +384,10 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
               </div>
             )}
             <div className="border-t border-gading/20 pt-4 mt-2 flex justify-between items-center">
-              <span className="text-sm font-bold text-gading">
+              <span className="text-isi font-bold text-gading">
                 Total Tagihan
               </span>
-              <span className="text-2xl font-black text-sage leading-none font-mono">
+              <span className="text-judul font-black text-sage leading-none font-mono">
                 {formatRupiah(penjualan.totalTagihan)}
               </span>
             </div>
@@ -400,7 +400,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
             {penjualan.sisaTagihan > 0 && (
               <div className="flex justify-between items-center text-rose-300 mt-2 bg-rose-500/20 p-3 rounded-xl border border-rose-500/30">
                 <span className="font-bold">Sisa Tagihan</span>
-                <span className="font-black font-mono text-lg">
+                <span className="font-black font-mono text-subjudul">
                   {formatRupiah(penjualan.sisaTagihan)}
                 </span>
               </div>
@@ -412,7 +412,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
       {/* RIWAYAT PEMBAYARAN: tabel rincian berkartu baris (CV22a). */}
       {riwayatPembayaran.length > 0 && (
         <section aria-label="Riwayat Pembayaran" className="flex flex-col gap-3 mt-2">
-          <h2 className="text-base font-bold text-navy flex items-center gap-2">
+          <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
             <History className="h-5 w-5 text-karamel" /> Riwayat Pembayaran
           </h2>
           <DataTable
@@ -443,7 +443,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-2">
-            <label htmlFor="alasanBatal" className="text-sm font-bold text-navy">
+            <label htmlFor="alasanBatal" className="text-isi font-bold text-navy">
               Alasan <span className="text-navy/50 font-medium">(Opsional)</span>
             </label>
             <Input

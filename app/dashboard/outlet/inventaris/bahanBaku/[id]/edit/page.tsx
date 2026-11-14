@@ -82,7 +82,7 @@ export default function EditBahanBakuPage() {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-navy/60" />
-        <p className="text-sm font-bold text-navy/60">Memuat data bahan baku...</p>
+        <p className="text-isi font-bold text-navy/60">Memuat data bahan baku...</p>
       </div>
     );
   }
@@ -115,10 +115,10 @@ export default function EditBahanBakuPage() {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Edit Master Bahan Baku
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             Perbarui informasi identitas master data bahan baku.
           </p>
         </div>
@@ -132,7 +132,7 @@ export default function EditBahanBakuPage() {
         >
           <div className="flex items-center gap-2 mb-2 border-b border-navy/10 pb-4">
             <PackageCheck className="h-5 w-5 text-karamel" />
-            <h3 className="text-base font-bold text-navy">
+            <h3 className="text-besar font-bold text-navy">
               Informasi Dasar
             </h3>
           </div>
@@ -140,7 +140,7 @@ export default function EditBahanBakuPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Nama Bahan Baku */}
             <div className="space-y-2 sm:col-span-2">
-              <label htmlFor="namaBahan" className="text-sm font-bold text-navy">
+              <label htmlFor="namaBahan" className="text-isi font-bold text-navy">
                 Nama Bahan Baku <span className="text-red-500">*</span>
               </label>
               <Input
@@ -151,7 +151,7 @@ export default function EditBahanBakuPage() {
               />
               <div className="min-h-4">
                 {errors.namaBahan && (
-                  <span className="text-xs font-bold text-rose-500">
+                  <span className="text-kecil font-bold text-rose-500">
                     {errors.namaBahan.message}
                   </span>
                 )}
@@ -160,7 +160,7 @@ export default function EditBahanBakuPage() {
             
             {/* Satuan */}
             <div className="space-y-2 sm:col-span-2">
-              <label className="text-sm font-bold text-navy">
+              <label className="text-isi font-bold text-navy">
                 Satuan <span className="text-red-500">*</span>
               </label>
               <Controller
@@ -190,7 +190,7 @@ export default function EditBahanBakuPage() {
               />
               <div className="min-h-4">
                 {errors.satuan && (
-                  <span className="text-xs font-bold text-rose-500">
+                  <span className="text-kecil font-bold text-rose-500">
                     {errors.satuan.message}
                   </span>
                 )}

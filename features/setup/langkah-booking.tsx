@@ -77,11 +77,11 @@ export function LangkahBooking({
       />
       <div data-panduan="booking-aset" className="flex flex-col gap-[22px]">
         <section aria-label="Tipe aset" className="flex flex-col gap-3 rounded-2xl border border-input p-[18px]">
-          <h2 className="text-base font-bold">1. Tipe aset</h2>
+          <h2 className="text-subjudul font-bold">1. Tipe aset</h2>
           {isian("namaTipeAset", "Nama tipe aset")}
         </section>
         <section aria-label="Aset" className="flex flex-col gap-3 rounded-2xl border border-input p-[18px]">
-          <h2 className="text-base font-bold">2. Aset</h2>
+          <h2 className="text-subjudul font-bold">2. Aset</h2>
           {isian("namaAset", "Nama aset")}
         </section>
       </div>
@@ -90,7 +90,7 @@ export function LangkahBooking({
         data-panduan="booking-tarif"
         className="flex flex-col gap-3.5 rounded-2xl border border-input p-[18px]"
       >
-        <h2 className="text-base font-bold">3. Tarif</h2>
+        <h2 className="text-subjudul font-bold">3. Tarif</h2>
         {isian("namaTarif", "Nama tarif")}
         <PilihanTombol
           id="setup-booking-basis"

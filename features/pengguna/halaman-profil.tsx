@@ -36,20 +36,20 @@ import {
   type NilaiFormProfil,
 } from "./schema-profil";
 
-const KELAS_LABEL_BACA = "text-xs font-medium text-muted-foreground flex items-center gap-1.5";
-const KELAS_LABEL = "text-xs font-medium text-foreground flex items-center gap-1.5";
+const KELAS_LABEL_BACA = "text-kecil font-medium text-muted-foreground flex items-center gap-1.5";
+const KELAS_LABEL = "text-kecil font-medium text-foreground flex items-center gap-1.5";
 const KELAS_KOTAK_BACA =
-  "w-full rounded-md border border-input bg-muted/50 p-2.5 flex items-center justify-between text-sm select-none";
+  "w-full rounded-md border border-input bg-muted/50 p-2.5 flex items-center justify-between text-isi select-none";
 const KELAS_ISIAN_BACA =
-  "flex h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed select-none";
+  "flex h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-isi text-muted-foreground cursor-not-allowed select-none";
 const KELAS_ISIAN =
-  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
+  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-isi text-foreground ring-offset-background file:border-0 file:bg-transparent file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
 const KELAS_PIN =
-  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors font-mono tracking-widest";
+  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-isi text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors font-mono tracking-widest";
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-xs font-medium text-destructive">{pesan}</p>;
+  return <p className="text-kecil font-medium text-destructive">{pesan}</p>;
 }
 
 /**
@@ -130,16 +130,16 @@ function KartuProfil({
     <div className="rounded-xl border border-border bg-card text-card-foreground shadow-sm p-6 space-y-6">
       <div className="flex flex-col sm:flex-row items-center gap-4 border-b border-border pb-6">
         <Avatar className="h-20 w-20 border border-border">
-          <AvatarFallback className="text-xl font-semibold bg-secondary text-foreground">
+          <AvatarFallback className="text-subjudul font-semibold bg-secondary text-foreground">
             {inisialNama(pengguna.nama)}
           </AvatarFallback>
         </Avatar>
 
         <div className="text-center sm:text-left space-y-1">
-          <h2 className="text-base font-semibold text-foreground">
+          <h2 className="text-subjudul font-semibold text-foreground">
             {pengguna.nama || "Nama Pengguna"}
           </h2>
-          <p className="text-xs text-muted-foreground flex items-center justify-center sm:justify-start gap-1">
+          <p className="text-kecil text-muted-foreground flex items-center justify-center sm:justify-start gap-1">
             <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
             Sesi Aktif: {peran} @ {namaToko}
           </p>
@@ -155,7 +155,7 @@ function KartuProfil({
             <div className={KELAS_KOTAK_BACA}>
               <span className="text-foreground capitalize">{pengguna.status}</span>
               <span
-                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                className={`text-mikro font-semibold px-2 py-0.5 rounded-full border ${
                   pengguna.status === "aktif"
                     ? "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400"
                     : "bg-muted border-border text-muted-foreground"
@@ -175,13 +175,13 @@ function KartuProfil({
                 {pengguna.aksesType.map((type) => (
                   <span
                     key={type}
-                    className="text-[10px] font-mono uppercase bg-background border border-border text-foreground px-1.5 py-0.5 rounded"
+                    className="text-mikro font-mono uppercase bg-background border border-border text-foreground px-1.5 py-0.5 rounded"
                   >
                     {type}
                   </span>
                 ))}
               </div>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-muted border-border text-muted-foreground">
+              <span className="text-mikro font-semibold px-2 py-0.5 rounded-full border bg-muted border-border text-muted-foreground">
                 Read Only
               </span>
             </div>
@@ -288,7 +288,7 @@ function KartuProfil({
             />
             <PesanIsian pesan={errors.pinBaru?.message} />
           </div>
-          <p className="text-[11px] text-muted-foreground sm:col-span-2">
+          <p className="text-mikro text-muted-foreground sm:col-span-2">
             *Kosongkan kedua kolom di atas jika Anda tidak berniat mengubah
             PIN.
           </p>
@@ -298,7 +298,7 @@ function KartuProfil({
           <button
             type="submit"
             disabled={perbarui.isPending || !isDirty}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 px-4 cursor-pointer gap-2"
+            className="inline-flex items-center justify-center rounded-md text-isi font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 px-4 cursor-pointer gap-2"
           >
             {perbarui.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -333,23 +333,23 @@ export function HalamanProfil() {
   return (
     <div className="space-y-6 p-6 max-w-2xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+        <h1 className="text-judul font-bold tracking-tight text-foreground">
           Profil Pengguna
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-isi text-muted-foreground">
           Kelola informasi identitas akun Anda di dalam sistem outlet.
         </p>
       </div>
 
       {profil.isError ? (
         <div className="rounded-xl border border-border bg-card text-card-foreground shadow-sm p-6 space-y-3 text-center">
-          <p className="text-sm font-medium text-destructive">
+          <p className="text-isi font-medium text-destructive">
             {pesanError(profil.error, "Gagal memuat profil.")}
           </p>
           <button
             type="button"
             onClick={() => profil.refetch()}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 px-4 cursor-pointer"
+            className="inline-flex items-center justify-center rounded-md text-isi font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 px-4 cursor-pointer"
           >
             Coba Lagi
           </button>

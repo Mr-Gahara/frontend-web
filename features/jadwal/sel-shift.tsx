@@ -46,11 +46,11 @@ export function ShiftCell({ namaKaryawan, day, isSunday, shifts, lain = [], onCl
           >
             {shift.type !== "off" ? (
               <>
-                <span className="text-[10px] md:text-xs font-bold truncate text-center">
+                <span className="text-mikro md:text-kecil font-bold truncate text-center">
                   {shift.shiftNonaktif ? `${shift.name} (nonaktif)` : shift.name}
                 </span>
                 <span
-                  className={`text-[8px] md:text-[9px] font-semibold text-center truncate ${
+                  className={`text-mikro font-semibold text-center truncate ${
                     shift.type === "malam" ? "text-gading/70" : "opacity-70"
                   }`}
                 >
@@ -58,7 +58,7 @@ export function ShiftCell({ namaKaryawan, day, isSunday, shifts, lain = [], onCl
                 </span>
               </>
             ) : (
-              <span className="text-[10px] md:text-xs font-bold text-center">
+              <span className="text-mikro md:text-kecil font-bold text-center">
                 {shift.id === "off" ? "—" : shift.name}
               </span>
             )}
@@ -71,11 +71,11 @@ export function ShiftCell({ namaKaryawan, day, isSunday, shifts, lain = [], onCl
             title="Jadwal di lokasi lain; ubah dari ruang lokasi itu."
             className="flex flex-col justify-center p-1.5 md:p-2 rounded-lg min-h-11 md:min-h-13 border border-dashed border-navy/20 text-navy/50"
           >
-            <span className="text-[9px] md:text-[10px] font-semibold uppercase tracking-wide text-center">
+            <span className="text-mikro font-semibold uppercase tracking-wide text-center">
               Lokasi lain
             </span>
-            <span className="text-[10px] md:text-xs font-bold truncate text-center">{shift.name}</span>
-            <span className="text-[8px] md:text-[9px] font-semibold text-center truncate opacity-70">
+            <span className="text-mikro md:text-kecil font-bold truncate text-center">{shift.name}</span>
+            <span className="text-mikro font-semibold text-center truncate opacity-70">
               {shift.label}
             </span>
           </div>

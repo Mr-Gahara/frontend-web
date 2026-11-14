@@ -40,7 +40,7 @@ function PeriodeToggle({
   return (
     <button
       onClick={() => onClick(value)}
-      className={`px-1 sm:px-4 py-1.5 text-[10px] min-[375px]:text-xs sm:text-sm font-bold rounded-md transition-colors cursor-pointer w-full sm:w-auto sm:flex-auto flex items-center justify-center text-center overflow-hidden ${
+      className={`px-1 sm:px-4 py-1.5 text-mikro min-[375px]:text-kecil sm:text-isi font-bold rounded-md transition-colors cursor-pointer w-full sm:w-auto sm:flex-auto flex items-center justify-center text-center overflow-hidden ${
         isActive
           ? "bg-sage text-gading shadow-sm"
           : "text-navy/60 hover:text-navy"
@@ -99,10 +99,10 @@ export default function RingkasanLabaRugiPage() {
               <LineChartIcon className="w-5 h-5 text-gading" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold tracking-wide text-navy">
+              <h2 className="text-subjudul font-bold tracking-wide text-navy">
                 Arus Kas &amp; Laba Bersih
               </h2>
-              <p className="text-xs text-navy/70 font-medium">
+              <p className="text-kecil text-navy/70 font-medium">
                 {labelPeriode}
               </p>
             </div>
@@ -144,22 +144,22 @@ export default function RingkasanLabaRugiPage() {
           <>
             {/* Total nilai */}
             <div>
-              <p className="text-2xl sm:text-3xl font-black tracking-tight text-navy">
+              <p className="text-judul sm:text-tampilan font-black tracking-tight text-navy">
                 {formatRupiah(totalNilai)}
               </p>
               <div className="flex items-center gap-1 mt-1">
                 <span
                   className={
                     pertumbuhan === null || pertumbuhan === 0
-                      ? "text-xs text-navy/60 font-bold"
+                      ? "text-kecil text-navy/60 font-bold"
                       : pertumbuhan > 0
-                        ? "text-xs text-sage font-bold"
-                        : "text-xs text-rose-500 font-bold"
+                        ? "text-kecil text-sage font-bold"
+                        : "text-kecil text-rose-500 font-bold"
                   }
                 >
                   {persentaseNaikTurun}
                 </span>
-                <span className="text-xs text-navy/60 font-medium">
+                <span className="text-kecil text-navy/60 font-medium">
                   vs periode sebelumnya
                 </span>
               </div>

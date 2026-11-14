@@ -119,10 +119,10 @@ export default function RolesPage() {
         {/* PERBAIKAN RESPONSIVE HEADER: flex-col di mobile, flex-row di desktop */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
               Posisi & Hak Akses
             </h1>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-isi font-medium text-navy/60">
               Kelola jabatan karyawan dan batasan wewenang mereka di sistem.
             </p>
           </div>
@@ -139,13 +139,13 @@ export default function RolesPage() {
       {isLoading && (
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-navy/60 mb-4" />
-          <p className="text-sm font-bold text-navy/60">Memuat data posisi...</p>
+          <p className="text-isi font-bold text-navy/60">Memuat data posisi...</p>
         </div>
       )}
 
       {!isLoading && roles.length === 0 && (
         <div className="text-center py-12 border border-navy/10 rounded-2xl bg-krem shadow-sm">
-          <p className="text-sm font-bold text-navy/60">
+          <p className="text-isi font-bold text-navy/60">
             Belum ada posisi karyawan yang dibuat.
           </p>
         </div>
@@ -200,22 +200,22 @@ export default function RolesPage() {
                   {/* Bagian Judul dan Deskripsi */}
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-bold text-lg text-navy capitalize">
+                      <p className="font-bold text-subjudul text-navy capitalize">
                         {role.namaRole}
                       </p>
                       {role.level !== undefined && (
                         // Menggunakan warna Mustard untuk Badge Level
-                        <span className="px-2.5 py-0.5 rounded-full bg-karamel text-white text-xs font-bold shadow-sm">
+                        <span className="px-2.5 py-0.5 rounded-full bg-karamel text-white text-kecil font-bold shadow-sm">
                           Level {role.level}
                         </span>
                       )}
                     </div>
                     {role.deskripsi ? (
-                      <p className="text-sm text-navy/70 font-medium leading-relaxed">
+                      <p className="text-isi text-navy/70 font-medium leading-relaxed">
                         {role.deskripsi}
                       </p>
                     ) : (
-                      <p className="text-sm text-navy/50 italic font-medium">
+                      <p className="text-isi text-navy/50 italic font-medium">
                         Tidak ada deskripsi pekerjaan.
                       </p>
                     )}
@@ -224,7 +224,7 @@ export default function RolesPage() {
                   {/* Bagian Aksi (Jumlah Akses, Edit, Hapus) */}
                   {/* flex-wrap membiarkan elemen turun ke bawah jika layar sempit */}
                   <div className="flex flex-wrap items-center gap-3 shrink-0">
-                    <span className="text-xs text-navy bg-gading border border-navy/10 px-3 py-1.5 rounded-lg font-bold shadow-sm">
+                    <span className="text-kecil text-navy bg-gading border border-navy/10 px-3 py-1.5 rounded-lg font-bold shadow-sm">
                       {safeRolePerms.length} / {allowedPermissionsMaster.length}{" "}
                       Akses
                     </span>
@@ -235,14 +235,14 @@ export default function RolesPage() {
                         )
                       }
                       disabled={!canManage}
-                      className="text-sm font-bold text-navy hover:underline cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
+                      className="text-isi font-bold text-navy hover:underline cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => setDeleteTarget(role)}
                       disabled={!canManage}
-                      className="text-sm font-bold text-red-600/60 hover:underline cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
+                      className="text-isi font-bold text-red-600/60 hover:underline cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
                     >
                       Hapus
                     </button>
@@ -251,11 +251,11 @@ export default function RolesPage() {
 
                 {/* Garis Besar Wewenang (Area Khusus) */}
                 <div className="mt-5 p-4 bg-gading rounded-xl border border-navy/5 shadow-inner">
-                  <p className="text-xs font-bold text-navy/50 mb-3 uppercase tracking-wider">
+                  <p className="text-kecil font-bold text-navy/50 mb-3 uppercase tracking-wider">
                     Garis Besar Wewenang
                   </p>
                   {summaries.length === 0 ? (
-                    <p className="text-sm text-navy/50 italic font-medium">
+                    <p className="text-isi text-navy/50 italic font-medium">
                       Tidak memiliki hak akses apa pun.
                     </p>
                   ) : (
@@ -263,7 +263,7 @@ export default function RolesPage() {
                       {summaries.map((s, idx) => (
                         <span
                           key={s.grup || idx}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-kecil font-bold shadow-sm ${
                             s.isFullAccess
                               // Sage Green untuk Akses Penuh
                               ? "bg-sage text-gading"
@@ -290,7 +290,7 @@ export default function RolesPage() {
                   <div className="mt-4">
                     <button
                       onClick={() => toggleExpand(roleIdentifier)}
-                      className="text-xs font-bold text-navy/60 hover:text-navy hover:underline cursor-pointer transition-colors"
+                      className="text-kecil font-bold text-navy/60 hover:text-navy hover:underline cursor-pointer transition-colors"
                     >
                       {isExpanded
                         ? "Sembunyikan Detail Wewenang"
@@ -309,7 +309,7 @@ export default function RolesPage() {
                           return (
                             <span
                               key={permKey || `fallback-perm-${pIndex}`}
-                              className="text-xs px-2.5 py-1.5 rounded-lg bg-gading border border-navy/10 text-navy font-semibold shadow-sm"
+                              className="text-kecil px-2.5 py-1.5 rounded-lg bg-gading border border-navy/10 text-navy font-semibold shadow-sm"
                             >
                               {masterData?.deskripsi || permName}
                             </span>

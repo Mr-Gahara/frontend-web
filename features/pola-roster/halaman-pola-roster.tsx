@@ -86,7 +86,7 @@ export default function PolaUtama({
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy/5 text-navy">
               <CalendarRange className="h-4 w-4" />
             </div>
-            <span className="font-bold text-navy text-base">{row.original.namaPola}</span>
+            <span className="font-bold text-navy text-besar">{row.original.namaPola}</span>
           </div>
         ),
       },
@@ -96,7 +96,7 @@ export default function PolaUtama({
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <RefreshCw className="h-3.5 w-3.5 text-navy/50" />
-            <span className="font-bold text-navy/80 font-mono text-sm">{row.original.siklusHari} Hari</span>
+            <span className="font-bold text-navy/80 font-mono text-isi">{row.original.siklusHari} Hari</span>
           </div>
         ),
       },
@@ -109,7 +109,7 @@ export default function PolaUtama({
               <div
                 key={idx}
                 title={`Hari ke-${detail.hariKe}`}
-                className={`flex items-center justify-center px-2 py-1 rounded text-[10px] font-bold shadow-sm border ${
+                className={`flex items-center justify-center px-2 py-1 rounded text-mikro font-bold shadow-sm border ${
                   detail.isLibur ? "bg-red-50 text-red-600 border-red-200" : "bg-gading text-navy border-navy/20"
                 }`}
               >
@@ -174,10 +174,10 @@ export default function PolaUtama({
       {/* 1. HEADER & TOOLBAR */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Pola Roster {tipeRuang === "outlet" ? "Outlet" : "Gudang"}
           </h1>
-          <p className="text-sm text-navy/60 font-medium">
+          <p className="text-isi text-navy/60 font-medium">
             Kelola template siklus kerja untuk auto-generate jadwal.
           </p>
         </div>
@@ -213,7 +213,7 @@ export default function PolaUtama({
       {isError ? (
         <p
           role="alert"
-          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
         >
           Gagal memuat data pola roster atau master shift. Muat ulang halaman untuk mencoba lagi.
         </p>

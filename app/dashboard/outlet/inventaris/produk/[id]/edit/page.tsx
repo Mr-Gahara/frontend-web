@@ -29,7 +29,7 @@ export default function EditProdukPage() {
       {gagal ? null : (
         <Loader2 className="h-8 w-8 animate-spin text-navy/60" />
       )}
-      <p className="text-sm font-bold text-navy/60">
+      <p className="text-isi font-bold text-navy/60">
         {gagal
           ? pesanError(error, "Produk tidak ditemukan.")
           : "Memuat detail produk..."}

@@ -20,13 +20,13 @@ import {
   teksJumlahMutasi,
 } from "./mutasi";
 
-const KELAS_LABEL = "text-xs font-semibold text-navy/60";
+const KELAS_LABEL = "text-kecil font-semibold text-navy/60";
 
 function BarisRincian({ label, nilai }: { label: string; nilai: string }) {
   return (
     <div className="flex items-start justify-between gap-4 px-4 py-2.5">
       <dt className={`${KELAS_LABEL} shrink-0`}>{label}</dt>
-      <dd className="text-sm font-medium text-navy text-right break-words min-w-0">{nilai}</dd>
+      <dd className="text-isi font-medium text-navy text-right break-words min-w-0">{nilai}</dd>
     </div>
   );
 }
@@ -56,7 +56,7 @@ function IsiRincian({ mutasi, namaAkun }: { mutasi: MutasiKas; namaAkun: string 
       <div>
         <p className={KELAS_LABEL}>Jumlah</p>
         <p
-          className={`font-mono text-2xl sm:text-3xl font-bold ${
+          className={`font-mono text-judul sm:text-tampilan font-bold ${
             masuk ? "text-emerald-700" : "text-red-800"
           }`}
         >
@@ -67,12 +67,12 @@ function IsiRincian({ mutasi, namaAkun }: { mutasi: MutasiKas; namaAkun: string 
       <div className="flex items-center justify-between gap-3 rounded-xl bg-krem px-4 py-3">
         <div className="min-w-0">
           <p className={KELAS_LABEL}>Saldo sebelum</p>
-          <p className="font-mono text-sm font-bold text-navy">{formatRupiah(mutasi.saldoSebelum)}</p>
+          <p className="font-mono text-isi font-bold text-navy">{formatRupiah(mutasi.saldoSebelum)}</p>
         </div>
         <ArrowRight className="h-4 w-4 shrink-0 text-karamel" aria-hidden="true" />
         <div className="min-w-0 text-right">
           <p className={KELAS_LABEL}>Saldo sesudah</p>
-          <p className="font-mono text-sm font-bold text-navy">{formatRupiah(mutasi.saldoSesudah)}</p>
+          <p className="font-mono text-isi font-bold text-navy">{formatRupiah(mutasi.saldoSesudah)}</p>
         </div>
       </div>
 
@@ -87,7 +87,7 @@ function IsiRincian({ mutasi, namaAkun }: { mutasi: MutasiKas; namaAkun: string 
 
       <div className="flex flex-col gap-1.5">
         <p className={KELAS_LABEL}>Keterangan</p>
-        <p className="rounded-xl border border-navy/10 bg-permukaan px-4 py-3 text-sm font-medium text-navy break-words">
+        <p className="rounded-xl border border-navy/10 bg-permukaan px-4 py-3 text-isi font-medium text-navy break-words">
           {mutasi.keterangan || "-"}
         </p>
       </div>
@@ -97,7 +97,7 @@ function IsiRincian({ mutasi, namaAkun }: { mutasi: MutasiKas; namaAkun: string 
           <p className={KELAS_LABEL}>Penjualan terkait</p>
           <Link
             href={tautan.url}
-            className="flex items-center justify-between gap-3 rounded-xl bg-navy px-4 py-3 text-sm font-bold text-gading hover:bg-navy/90"
+            className="flex items-center justify-between gap-3 rounded-xl bg-navy px-4 py-3 text-isi font-bold text-gading hover:bg-navy/90"
           >
             <span className="min-w-0 truncate">{tautan.teks}</span>
             <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />

@@ -60,31 +60,31 @@ function badgeTahap(tahap: TahapPengajuan, label: string) {
   switch (tahap) {
     case "SUBMITTED":
       return (
-        <Badge className="bg-amber-100 text-amber-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-amber-100 text-amber-700 border-none font-bold text-isi px-4 py-1">
           <Clock className="w-4 h-4 mr-1.5" /> {label}
         </Badge>
       );
     case "PERLU_SURAT_JALAN":
       return (
-        <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-isi px-4 py-1">
           <CheckCircle2 className="w-4 h-4 mr-1.5" /> {label}
         </Badge>
       );
     case "SURAT_JALAN_DIBUAT":
       return (
-        <Badge className="bg-indigo-100 text-indigo-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-indigo-100 text-indigo-700 border-none font-bold text-isi px-4 py-1">
           {label}
         </Badge>
       );
     case "COMPLETED":
       return (
-        <Badge className="bg-blue-100 text-blue-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-blue-100 text-blue-700 border-none font-bold text-isi px-4 py-1">
           {label}
         </Badge>
       );
     case "REJECTED":
       return (
-        <Badge className="bg-rose-100 text-rose-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-rose-100 text-rose-700 border-none font-bold text-isi px-4 py-1">
           <XCircle className="w-4 h-4 mr-1.5" /> {label}
         </Badge>
       );
@@ -147,7 +147,7 @@ export default function HalamanDetailPengajuanGudang() {
   if (error || !detail) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           {!error || isNotFound(error)
             ? "Data tidak ditemukan"
             : "Gagal memuat pengajuan. Coba muat ulang halaman."}
@@ -191,10 +191,10 @@ export default function HalamanDetailPengajuanGudang() {
             Kembali ke Inbox Permintaan
           </Button>
           <div className="space-y-1.5">
-            <h1 className="text-3xl font-black font-mono tracking-tight text-navy">
+            <h1 className="text-judul font-bold font-mono tracking-tight text-navy">
               {detail.nomorPengajuan}
             </h1>
-            <div className="flex items-center gap-3 text-sm font-medium text-navy/60">
+            <div className="flex items-center gap-3 text-isi font-medium text-navy/60">
               <span className="flex items-center gap-1">
                 <FileText className="w-4 h-4" /> {arah ? LABEL_ARAH_PENGAJUAN[arah] : "-"}
               </span>
@@ -211,10 +211,10 @@ export default function HalamanDetailPengajuanGudang() {
       {/* JIKA REJECTED: Tampilkan Alasan */}
       {detail.status === "REJECTED" && detail.catatanPenolakan && (
         <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex flex-col gap-1">
-          <span className="text-sm font-bold text-rose-700 flex items-center gap-2">
+          <span className="text-isi font-bold text-rose-700 flex items-center gap-2">
             <XCircle className="w-4 h-4" /> Alasan Penolakan:
           </span>
-          <p className="text-sm font-medium text-rose-600 pl-6">{detail.catatanPenolakan}</p>
+          <p className="text-isi font-medium text-rose-600 pl-6">{detail.catatanPenolakan}</p>
         </div>
       )}
 
@@ -223,7 +223,7 @@ export default function HalamanDetailPengajuanGudang() {
         <div className="lg:col-span-2 space-y-6">
           {/* Tabel rincian berkartu baris, tanpa panel berlatar (CV22a). */}
           <section aria-label={pengembalian ? "Barang yang Dikembalikan" : "Rincian Kebutuhan Outlet"} className="flex flex-col gap-3">
-            <h2 className="text-base font-bold text-navy flex items-center gap-2">
+            <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
               <Package className="w-5 h-5 text-karamel" /> {pengembalian ? "Barang yang Dikembalikan" : "Rincian Kebutuhan Outlet"}
             </h2>
             <DataTable rincian columns={kolomBarangPengajuanGudang(pengembalian)} data={detail.items} emptyMessage="Tidak ada barang." />
@@ -232,8 +232,8 @@ export default function HalamanDetailPengajuanGudang() {
           {/* Catatan Tambahan */}
           {detail.catatan && (
             <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-2">
-              <h3 className="font-bold text-navy text-sm">Pesan Khusus dari Outlet:</h3>
-              <p className="text-sm font-medium text-navy/70 italic bg-gading p-4 rounded-xl border border-navy/5">
+              <h3 className="font-bold text-navy text-isi">Pesan Khusus dari Outlet:</h3>
+              <p className="text-isi font-medium text-navy/70 italic bg-gading p-4 rounded-xl border border-navy/5">
                 &quot;{detail.catatan}&quot;
               </p>
             </div>
@@ -243,7 +243,7 @@ export default function HalamanDetailPengajuanGudang() {
         {/* KOLOM KANAN: INFO RUTE & TIMELINE */}
         <div className="lg:col-span-1 space-y-6">
           <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-5">
-            <h2 className="font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
+            <h2 className="text-subjudul font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
               <MapPin className="w-4 h-4 text-karamel" /> Informasi Logistik
             </h2>
 
@@ -251,20 +251,20 @@ export default function HalamanDetailPengajuanGudang() {
               <div className="flex flex-col gap-1 relative pl-6">
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-navy" />
                 <div className="absolute left-1.5 top-4 -bottom-4 w-0.5 bg-navy/10" />
-                <span className="text-xs font-bold text-navy/50 uppercase">
+                <span className="text-kecil font-bold text-navy/50 uppercase">
                   {pengembalian ? "Outlet Asal Barang" : "Gudang Asal (Lokasi Kita)"}
                 </span>
                 <span className="font-bold text-navy">{detail.dariLokasi?.nama || "-"}</span>
               </div>
               <div className="flex flex-col gap-1 relative pl-6">
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-karamel" />
-                <span className="text-xs font-bold text-navy/50 uppercase">{pengembalian ? "Gudang Tujuan (Lokasi Kita)" : "Outlet Peminta"}</span>
+                <span className="text-kecil font-bold text-navy/50 uppercase">{pengembalian ? "Gudang Tujuan (Lokasi Kita)" : "Outlet Peminta"}</span>
                 <span className="font-bold text-navy">{detail.keLokasi?.nama || "-"}</span>
               </div>
             </div>
 
             <div className="border-t border-navy/10 pt-4 mt-2 space-y-3">
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-isi">
                 <span className="font-bold text-navy/60 flex items-center gap-1.5">
                   <CalendarClock className="w-4 h-4" /> Batas Waktu Tiba
                 </span>
@@ -272,7 +272,7 @@ export default function HalamanDetailPengajuanGudang() {
                   {detail.tanggalKebutuhan ? formatTanggalPengajuan(detail.tanggalKebutuhan) : "Fleksibel"}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-isi">
                 <span className="font-bold text-navy/60">PIC Outlet</span>
                 <span className="font-bold text-navy capitalize text-right">
                   {detail.dimintaOleh?.nama || "-"}
@@ -281,7 +281,7 @@ export default function HalamanDetailPengajuanGudang() {
 
               {/* Tampilkan PIC Gudang jika sudah diproses */}
               {!isSubmitted && (detail.disetujuiOleh || detail.ditolakOleh) && (
-                <div className="flex justify-between items-center text-sm border-t border-navy/5 pt-2">
+                <div className="flex justify-between items-center text-isi border-t border-navy/5 pt-2">
                   <span className="font-bold text-navy/60">Diproses Oleh</span>
                   <span className="font-bold text-navy capitalize text-right">
                     {detail.disetujuiOleh?.nama || detail.ditolakOleh?.nama || "-"}
@@ -294,7 +294,7 @@ export default function HalamanDetailPengajuanGudang() {
           {!arahValid && (isSubmitted || perluSuratJalan) && (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 flex items-start gap-2">
               <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-              <p className="text-xs font-medium text-rose-700 leading-snug">
+              <p className="text-kecil font-medium text-rose-700 leading-snug">
                 Pasangan lokasi pengajuan ini tidak sah: pengajuan hanya berlaku antara Gudang dan Outlet.
                 Persetujuan dan surat jalan dikunci agar stok tidak bergerak ke lokasi yang salah.
                 Perbaiki data pengajuan ini lebih dulu.
@@ -305,14 +305,14 @@ export default function HalamanDetailPengajuanGudang() {
           {/* ACTION BUTTONS: SUBMITTED, masing-masing tombol mengikuti izinnya */}
           {panelTinjau && (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm flex flex-col gap-3">
-              <h3 className="text-sm font-bold text-emerald-900 text-center mb-1">
+              <h3 className="text-isi font-bold text-emerald-900 text-center mb-1">
                 Tindakan Validasi Gudang
               </h3>
 
               {bolehSetujui && isStockInsufficient && (
                 <div className="bg-rose-50 border border-rose-200 p-3 rounded-xl mb-2 flex items-start gap-2">
                   <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-                  <p className="text-xs font-medium text-rose-700 leading-snug">
+                  <p className="text-kecil font-medium text-rose-700 leading-snug">
                     Persetujuan dikunci karena stok {pengembalian ? "outlet" : "gudang"} tidak mencukupi. Silakan tolak pengajuan
                     atau lakukan opname stok terlebih dahulu.
                   </p>
@@ -349,7 +349,7 @@ export default function HalamanDetailPengajuanGudang() {
           {perluSuratJalan && arahValid && !gudangPengirim && (
             <div className="rounded-2xl border border-navy/10 bg-krem p-4 flex items-start gap-2">
               <Truck className="w-5 h-5 text-navy shrink-0 mt-0.5" />
-              <p className="text-xs font-medium text-navy leading-snug">
+              <p className="text-kecil font-medium text-navy leading-snug">
                 Pengembalian ini sudah disetujui. Outlet yang membuat dan mengirim surat jalannya, lalu
                 gudang menerima barangnya di menu Penerimaan Stok.
               </p>
@@ -362,7 +362,7 @@ export default function HalamanDetailPengajuanGudang() {
           {/* ACTION BUTTONS (JIKA SUDAH ADA SJ) */}
           {hasSuratJalan && (
             <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm flex flex-col gap-3">
-              <h3 className="text-sm font-bold text-navy text-center mb-1">Dokumen Terkait</h3>
+              <h3 className="text-isi font-bold text-navy text-center mb-1">Dokumen Terkait</h3>
               <Button
                 variant="outline"
                 onClick={() => router.push(`${URL_TRANSFER}/${detail.transferStokID}`)}

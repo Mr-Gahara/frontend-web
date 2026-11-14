@@ -18,7 +18,7 @@ const jumlah = (judul: string): ColumnDef<PengajuanItem> => ({
   cell: ({ row }) => (
     <div className="sm:text-center">
       <span className="font-mono font-bold text-navy bg-navy/5 px-3 py-1 rounded-md">
-        {row.original.jumlah} <span className="text-xs font-sans font-medium text-navy/60">{row.original.satuan}</span>
+        {row.original.jumlah} <span className="text-kecil font-sans font-medium text-navy/60">{row.original.satuan}</span>
       </span>
     </div>
   ),
@@ -54,7 +54,7 @@ export function kolomBarangPengajuanGudang(pengembalian: boolean): ColumnDef<Pen
             >
               {isKurang && <AlertTriangle className="w-3.5 h-3.5" />}
               {stokTersedia}{" "}
-              <span className={cn("text-xs font-sans font-medium", isKurang ? "text-rose-600/70" : "text-emerald-700/70")}>
+              <span className={cn("text-kecil font-sans font-medium", isKurang ? "text-rose-600/70" : "text-emerald-700/70")}>
                 {row.original.satuan}
               </span>
             </span>

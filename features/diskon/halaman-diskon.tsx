@@ -38,7 +38,7 @@ import {
   type FilterDiskon,
 } from "./tampilan";
 
-const KELAS_KEPALA = "text-xs font-semibold text-navy/60";
+const KELAS_KEPALA = "text-kecil font-semibold text-navy/60";
 const KELAS_PEMICU_FILTER =
   "w-44 h-11 bg-gading text-navy border-navy/15 focus:ring-navy/50 font-medium rounded-xl";
 const KELAS_ISI_FILTER = "bg-krem border-navy/10 text-navy font-medium rounded-xl";
@@ -72,7 +72,7 @@ export function HalamanDiskon() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-0 text-xs font-semibold text-navy/60 hover:text-navy hover:bg-transparent"
+          className="h-auto p-0 text-kecil font-semibold text-navy/60 hover:text-navy hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Nama Diskon
@@ -89,7 +89,7 @@ export function HalamanDiskon() {
       header: () => <span className={KELAS_KEPALA}>Cakupan</span>,
       cell: ({ row }) => (
         <span
-          className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+          className={`rounded-full px-2.5 py-0.5 text-kecil font-bold ${
             row.original.cakupan === "Global"
               ? "bg-sky-100 text-sky-700"
               : "bg-amber-100 text-amber-700"
@@ -104,7 +104,7 @@ export function HalamanDiskon() {
       meta: { label: "Tipe" },
       header: () => <span className={KELAS_KEPALA}>Tipe</span>,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-navy/70">
+        <span className="text-isi font-medium text-navy/70">
           {row.original.tipe === "persen" ? "Persen" : "Nominal"}
         </span>
       ),
@@ -122,7 +122,7 @@ export function HalamanDiskon() {
       meta: { label: "Digabung" },
       header: () => <span className={KELAS_KEPALA}>Digabung</span>,
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-navy/70">
+        <span className="text-isi font-medium text-navy/70">
           {row.original.bisaDigabung ? "Ya" : "Tidak"}
         </span>
       ),
@@ -134,13 +134,13 @@ export function HalamanDiskon() {
       cell: ({ row }) => {
         const aturan = ringkasAturan(row.original);
         if (aturan.length === 0) {
-          return <span className="text-sm font-medium text-navy/40">-</span>;
+          return <span className="text-isi font-medium text-navy/40">-</span>;
         }
         return (
           <ul className="space-y-0.5">
             {aturan.map((teks) => (
               <li key={teks}>
-                <TeksDuaBaris teks={teks} className="text-xs font-medium text-navy/70" />
+                <TeksDuaBaris teks={teks} className="text-kecil font-medium text-navy/70" />
               </li>
             ))}
           </ul>
@@ -154,7 +154,7 @@ export function HalamanDiskon() {
       cell: ({ row }) => (
         <div className="flex flex-col items-start gap-1">
           <span
-            className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+            className={`rounded-full px-2.5 py-0.5 text-kecil font-bold ${
               row.original.status === "Aktif"
                 ? "bg-green-100 text-green-700"
                 : "bg-navy/10 text-navy/60"
@@ -163,14 +163,14 @@ export function HalamanDiskon() {
             {row.original.status}
           </span>
           {aktifTetapiTidakBerlaku(row.original) && (
-            <span className="text-[10px] font-semibold text-amber-700">Tidak sedang berlaku</span>
+            <span className="text-mikro font-semibold text-amber-700">Tidak sedang berlaku</span>
           )}
         </div>
       ),
     },
     {
       id: "aksi",
-      header: () => <div className="text-right text-xs text-navy/60">Aksi</div>,
+      header: () => <div className="text-right text-kecil text-navy/60">Aksi</div>,
       cell: ({ row }) => {
         if (!aksi.ubah) return null;
         const item = row.original;
@@ -219,8 +219,8 @@ export function HalamanDiskon() {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">Kelola Diskon</h1>
-          <p className="text-sm text-navy/60">
+          <h1 className="text-judul font-bold tracking-tight text-navy">Kelola Diskon</h1>
+          <p className="text-isi text-navy/60">
             Kelola seluruh data diskon dan promosi toko.
           </p>
         </div>
@@ -236,7 +236,7 @@ export function HalamanDiskon() {
       </div>
 
       {!dalamBatas && (
-        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-800">
+        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-isi font-medium text-amber-800">
           Toko ini sudah punya {BATAS_DISKON_AKTIF} diskon aktif (batas maksimal). Diskon baru hanya
           dapat disimpan Non-Aktif; nonaktifkan diskon yang tidak dipakai untuk mengaktifkan diskon lain.
         </p>
@@ -299,7 +299,7 @@ export function HalamanDiskon() {
       <div className="flex flex-col gap-4 mt-2">
         {daftar.isError ? (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-8 text-center">
-            <p className="text-sm font-medium text-red-600">
+            <p className="text-isi font-medium text-red-600">
               Gagal memuat data diskon. Periksa koneksi Anda, lalu coba lagi.
             </p>
             <Button variant="outline" onClick={() => daftar.refetch()} disabled={daftar.isFetching}>

@@ -84,7 +84,7 @@ function IsiDialogHapus({ akun, onTutup }: { akun: AkunAdmin; onTutup: () => voi
           }}
         >
           <div className="space-y-2">
-            <label htmlFor="password-admin" className="text-sm font-medium">
+            <label htmlFor="password-admin" className="text-isi font-medium">
               Password admin
             </label>
             <Input
@@ -95,13 +95,13 @@ function IsiDialogHapus({ akun, onTutup }: { akun: AkunAdmin; onTutup: () => voi
               onChange={(e) => setPassword(e.target.value)}
               disabled={memuat}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-kecil text-muted-foreground">
               Masukkan password akun admin Anda untuk memastikan penghapusan.
             </p>
           </div>
 
           {galat && (
-            <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">
+            <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive">
               {galat}
             </p>
           )}

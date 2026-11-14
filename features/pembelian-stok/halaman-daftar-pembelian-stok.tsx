@@ -42,7 +42,7 @@ import { namaAkunPembelian, ringkasBarang } from "./tampilan";
 
 const PILIHAN_UKURAN = [10, 20, 50] as const;
 const SEMUA = "SEMUA";
-const KELAS_LABEL_FILTER = "text-xs font-bold text-navy/70";
+const KELAS_LABEL_FILTER = "text-kecil font-bold text-navy/70";
 const KELAS_PEMICU_FILTER =
   "h-10 w-full sm:w-48 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm";
 
@@ -125,7 +125,7 @@ export default function HalamanDaftarPembelianStok({
             >
               {row.original.supplier}
             </Link>
-            <span className="text-xs font-medium text-navy/60">
+            <span className="text-kecil font-medium text-navy/60">
               {formatTanggalPendek(row.original.tanggal)} ·{" "}
               <span className="font-mono break-all">{row.original.nomorFaktur || "-"}</span>
             </span>
@@ -141,7 +141,7 @@ export default function HalamanDaftarPembelianStok({
             <div className="flex flex-col gap-0.5">
               <span className="font-semibold text-navy">{ringkas.utama}</span>
               {ringkas.lainnya && (
-                <span className="text-xs font-medium text-navy/60">{ringkas.lainnya}</span>
+                <span className="text-kecil font-medium text-navy/60">{ringkas.lainnya}</span>
               )}
             </div>
           );
@@ -204,8 +204,8 @@ export default function HalamanDaftarPembelianStok({
             <ShoppingCart className="w-6 h-6 text-karamel" />
           </div>
           <div className="space-y-0.5">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">Pembelian Stok</h1>
-            <p className="text-sm font-medium text-navy/60">{deskripsi}</p>
+            <h1 className="text-judul font-bold tracking-tight text-navy">Pembelian Stok</h1>
+            <p className="text-isi font-medium text-navy/60">{deskripsi}</p>
           </div>
         </div>
         {aksi.buat && (
@@ -288,7 +288,7 @@ export default function HalamanDaftarPembelianStok({
         (isError ? (
           <p
             role="alert"
-            className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+            className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
           >
             Gagal memuat pembelian stok. Coba muat ulang halaman.
           </p>

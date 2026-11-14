@@ -122,7 +122,7 @@ export default function AsetPage() {
         id: "tipe",
         header: "Kategori / Tipe",
         cell: ({ row }) => (
-          <span className="font-bold text-navy/80 bg-navy/5 px-2.5 py-1 rounded-md text-xs">
+          <span className="font-bold text-navy/80 bg-navy/5 px-2.5 py-1 rounded-md text-kecil">
             {namaTipeAset(row.original)}
           </span>
         ),
@@ -158,10 +158,10 @@ export default function AsetPage() {
             <Box className="w-7 h-7 text-karamel" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
               Manajemen Aset
             </h1>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-isi font-medium text-navy/60">
               Kelola meja, lapangan, ruangan, atau fasilitas yang dapat disewa.
             </p>
           </div>
@@ -194,7 +194,7 @@ export default function AsetPage() {
       {isError ? (
         <p
           role="alert"
-          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
         >
           Gagal memuat data aset.
         </p>

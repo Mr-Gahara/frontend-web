@@ -39,14 +39,14 @@ import { buatSkemaCatatBeban, type IsianCatatBeban } from "./schema";
 const URL_KATEGORI_BEBAN = "/dashboard/outlet/pengaturan/kategoriBeban";
 const KELAS_ISIAN =
   "bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy";
-const KELAS_LABEL = "text-sm font-bold text-navy";
-const KELAS_GALAT = "text-xs font-bold text-rose-500";
+const KELAS_LABEL = "text-isi font-bold text-navy";
+const KELAS_GALAT = "text-kecil font-bold text-rose-500";
 
 function Keadaan({ judul, isi, aksi }: { judul: string; isi: string; aksi?: ReactNode }) {
   return (
     <div className="rounded-2xl border border-dashed border-navy/20 bg-krem p-12 text-center">
-      <p className="text-base font-bold text-navy mb-1">{judul}</p>
-      <p className="text-sm font-medium text-navy/60 max-w-md mx-auto">{isi}</p>
+      <p className="text-besar font-bold text-navy mb-1">{judul}</p>
+      <p className="text-isi font-medium text-navy/60 max-w-md mx-auto">{isi}</p>
       {aksi && <div className="mt-4 flex justify-center">{aksi}</div>}
     </div>
   );
@@ -114,7 +114,7 @@ export function HalamanCatatBeban() {
       <div className="flex flex-col gap-4">
         <Link
           href={URL_PENGELUARAN}
-          className="inline-flex w-fit items-center text-sm font-semibold text-navy/60 hover:text-navy"
+          className="inline-flex w-fit items-center text-isi font-semibold text-navy/60 hover:text-navy"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali ke Pengeluaran
@@ -124,8 +124,8 @@ export function HalamanCatatBeban() {
             <Receipt className="w-6 h-6 text-karamel" />
           </div>
           <div className="space-y-0.5">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">Catat Beban</h1>
-            <p className="text-sm font-medium text-navy/60">
+            <h1 className="text-judul font-bold tracking-tight text-navy">Catat Beban</h1>
+            <p className="text-isi font-medium text-navy/60">
               Pengeluaran toko di luar pembelian stok. Saldo akun kas langsung berkurang.
             </p>
           </div>
@@ -220,7 +220,7 @@ function FormCatatBeban({
               )}
             />
             {akun && (
-              <p className="text-xs font-medium text-navy/60">Saldo tersedia {formatRupiah(akun.saldo)}</p>
+              <p className="text-kecil font-medium text-navy/60">Saldo tersedia {formatRupiah(akun.saldo)}</p>
             )}
             {errors.akunKasID && <span className={KELAS_GALAT}>{errors.akunKasID.message}</span>}
           </div>
@@ -289,14 +289,14 @@ function FormCatatBeban({
                 )}
               />
             ) : (
-              <p className="rounded-md border border-navy/20 bg-gading px-3 py-2 text-sm font-medium text-navy">
+              <p className="rounded-md border border-navy/20 bg-gading px-3 py-2 text-isi font-medium text-navy">
                 Hari ini, {formatTanggalPendek((dariTanggalLokal(hariIni) as Date).toISOString())}
               </p>
             )}
             {owner ? (
               errors.tanggal && <span className={KELAS_GALAT}>{errors.tanggal.message}</span>
             ) : (
-              <p className="text-xs font-medium text-navy/60">
+              <p className="text-kecil font-medium text-navy/60">
                 Hanya Owner yang dapat mencatat beban bertanggal lampau.
               </p>
             )}

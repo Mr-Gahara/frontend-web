@@ -24,13 +24,13 @@ export function BannerSetupFitur() {
       role="status"
       className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-karamel/30 bg-krem px-4 py-3 text-navy sm:px-5"
     >
-      <p className="flex items-center gap-2.5 text-sm">
+      <p className="flex items-center gap-2.5 text-isi">
         <Wrench className="h-4 w-4 flex-none" aria-hidden="true" />
         Setup {fitur.map((f) => NAMA_FITUR[f]).join(" dan ")} belum selesai, sehingga fiturnya masih terkunci.
       </p>
       <Link
         href="/setup"
-        className="inline-flex h-10 items-center rounded-lg bg-navy px-4 text-sm font-semibold text-gading hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
+        className="inline-flex h-10 items-center rounded-lg bg-navy px-4 text-isi font-semibold text-gading hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
       >
         Lengkapi setup
       </Link>

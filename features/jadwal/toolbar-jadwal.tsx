@@ -32,10 +32,10 @@ export function JadwalToolbar({
       {/* HEADER & BUTTONS */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Jadwal Shift {tipeRuang === "outlet" ? "Outlet" : "Gudang"}
           </h1>
-          <p className="text-sm text-navy/60 font-medium">
+          <p className="text-isi text-navy/60 font-medium">
             Kelola dan pantau jadwal kerja karyawan bulanan.
           </p>
         </div>

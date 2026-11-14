@@ -32,7 +32,7 @@ const DashboardPage = () => {
   return (
     <div className="flex h-[80vh] w-full items-center justify-center">
       <div className="flex flex-col items-center gap-2">
-        <span className="animate-pulse text-sm font-medium text-slate-500">
+        <span className="animate-pulse text-isi font-medium text-slate-500">
           Memuat ruang kerja Anda...
         </span>
       </div>

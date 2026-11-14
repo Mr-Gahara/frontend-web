@@ -63,14 +63,14 @@ export function JadwalGrid({
   return (
     <div className="rounded-2xl border border-navy/10 bg-krem p-4 sm:p-6 shadow-sm mt-6">
       <div className="overflow-x-auto rounded-xl border border-navy/15 bg-gading shadow-inner max-h-[65vh] relative custom-scrollbar">
-        <table className="w-full border-collapse text-left text-sm whitespace-nowrap">
+        <table className="w-full border-collapse text-left text-isi whitespace-nowrap">
           {/* HEADER TANGGAL */}
           <thead className="sticky top-0 z-20 bg-krem-muda shadow-sm">
             <tr>
               {/* Lebar Staf dikunci 112 px di HP dan 220 px mulai md, agar tabel tidak
                   membagi sisa ruang ke kolom ini (CV16a). */}
               <th className="sticky left-0 z-30 bg-krem-muda border-b border-r border-navy/10 p-3 md:p-4 w-28 min-w-28 max-w-28 md:w-55 md:min-w-55 md:max-w-55">
-                <span className="font-bold text-navy/70 uppercase tracking-wider text-[10px] md:text-xs">
+                <span className="font-bold text-navy/70 uppercase tracking-wider text-mikro md:text-kecil">
                   Staf / Karyawan
                 </span>
               </th>
@@ -83,14 +83,14 @@ export function JadwalGrid({
                   >
                     <div className="flex flex-col items-center">
                       <span
-                        className={`text-[10px] font-bold uppercase ${isSunday ? "text-red-500" : "text-navy/50"}`}
+                        className={`text-mikro font-bold uppercase ${isSunday ? "text-red-500" : "text-navy/50"}`}
                       >
                         {new Date(year, month, day).toLocaleString("id-ID", {
                           weekday: "short",
                         })}
                       </span>
                       <span
-                        className={`text-base font-black ${isSunday ? "text-red-600" : "text-navy"}`}
+                        className={`text-besar font-bold ${isSunday ? "text-red-600" : "text-navy"}`}
                       >
                         {day}
                       </span>
@@ -111,7 +111,7 @@ export function JadwalGrid({
                 >
                   <div className="flex flex-col items-center justify-center text-navy/50">
                     <Loader2 className="h-6 w-6 animate-spin mb-2" />
-                    <span className="text-sm font-bold">
+                    <span className="text-isi font-bold">
                       Memuat Data Jadwal...
                     </span>
                   </div>
@@ -122,7 +122,7 @@ export function JadwalGrid({
                 <td
                   colSpan={daysInMonth + 1}
                   role="alert"
-                  className="h-32 text-center align-middle text-red-600 text-sm font-bold"
+                  className="h-32 text-center align-middle text-red-600 text-isi font-bold"
                 >
                   <span className="block">Gagal Memuat Data</span>
                   <span className="block font-medium">
@@ -134,7 +134,7 @@ export function JadwalGrid({
               <tr>
                 <td
                   colSpan={daysInMonth + 1}
-                  className="h-32 text-center align-middle text-navy/50 text-sm font-bold"
+                  className="h-32 text-center align-middle text-navy/50 text-isi font-bold"
                 >
                   Tidak ada data karyawan / jadwal di bulan ini.
                 </td>
@@ -149,15 +149,15 @@ export function JadwalGrid({
                   <td className="sticky left-0 z-10 bg-gading group-hover:bg-krem-hover border-b border-r border-navy/10 p-3 md:p-4 align-top w-28 min-w-28 max-w-28 md:w-55 md:min-w-55 md:max-w-55">
                     <div className="flex items-start md:items-center gap-2 md:gap-3">
                       <Avatar className="hidden sm:flex h-8 w-8 md:h-9 md:w-9 border border-navy/10 shrink-0">
-                        <AvatarFallback className="bg-navy/10 text-navy font-bold text-[10px] md:text-xs">
+                        <AvatarFallback className="bg-navy/10 text-navy font-bold text-mikro md:text-kecil">
                           {emp.nama.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col min-w-0">
-                        <span title={emp.nama} className="font-bold text-navy text-xs md:text-sm truncate">
+                        <span title={emp.nama} className="font-bold text-navy text-kecil md:text-isi truncate">
                           {emp.nama}
                         </span>
-                        <span className="text-[9px] md:text-[10px] font-semibold text-navy/50 uppercase tracking-wider truncate">
+                        <span className="text-mikro font-semibold text-navy/50 uppercase tracking-wider truncate">
                           {emp.role}
                         </span>
                       </div>

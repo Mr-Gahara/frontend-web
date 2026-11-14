@@ -62,7 +62,7 @@ const WARNA_ALASAN_LAIN = "bg-slate-50 text-slate-700 border-slate-200";
 /** Pilihan baris per halaman (pemilik proyek 17 Oktober 2026); yang pertama menjadi ukuran awal. */
 const PILIHAN_UKURAN = [10, 20, 50] as const;
 
-const KELAS_LABEL_FILTER = "text-xs font-bold text-navy/70";
+const KELAS_LABEL_FILTER = "text-kecil font-bold text-navy/70";
 
 interface Props {
   ruang: keyof typeof TEKS;
@@ -150,7 +150,7 @@ export default function HalamanJurnalStok({
             >
               {row.original.bahanBakuID?.namaBahan || "Master Data Terhapus"}
             </span>
-            <span className="flex items-center gap-1 text-xs font-medium text-navy/60">
+            <span className="flex items-center gap-1 text-kecil font-medium text-navy/60">
               <MapPin className="h-3 w-3 text-karamel" aria-hidden="true" />
               {row.original.locationID?.nama || "Lokasi Tidak Diketahui"}
             </span>
@@ -165,7 +165,7 @@ export default function HalamanJurnalStok({
           return (
             <div>
               <p className="font-medium text-navy">{waktu.tanggal}</p>
-              <p className="text-xs text-navy/60">Pukul {waktu.jam}</p>
+              <p className="text-kecil text-navy/60">Pukul {waktu.jam}</p>
             </div>
           );
         },
@@ -177,7 +177,7 @@ export default function HalamanJurnalStok({
           <Badge
             variant="outline"
             className={cn(
-              "text-[10px] uppercase font-black tracking-wider border",
+              "text-mikro uppercase font-bold tracking-wider border",
               WARNA_ALASAN[row.original.alasan] ?? WARNA_ALASAN_LAIN,
             )}
           >
@@ -237,11 +237,11 @@ export default function HalamanJurnalStok({
       {/* HEADER & FILTERS */}
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between border-b border-navy/10 pb-6">
         <div className="space-y-1.5">
-          <h1 className="text-3xl font-black tracking-tight text-navy flex items-center gap-2">
+          <h1 className="text-judul font-bold tracking-tight text-navy flex items-center gap-2">
             <BookOpen className="w-8 h-8 text-karamel" />
             Buku Jurnal Stok
           </h1>
-          <p className="text-sm font-medium text-navy/60">{deskripsi}</p>
+          <p className="text-isi font-medium text-navy/60">{deskripsi}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 w-full sm:flex sm:flex-wrap sm:items-end md:w-auto">
@@ -350,7 +350,7 @@ export default function HalamanJurnalStok({
         (isError ? (
           <p
             role="alert"
-            className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+            className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
           >
             Gagal memuat jurnal stok. Coba muat ulang halaman.
           </p>

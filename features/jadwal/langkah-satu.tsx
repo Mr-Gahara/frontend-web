@@ -107,10 +107,10 @@ export function StepSatuForm({
   return (
     <div className="bg-gading border border-navy/10 rounded-2xl shadow-sm p-6 sm:p-8 w-full max-w-5xl mx-auto">
       <div className="mb-8 border-b border-navy/10 pb-6">
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           Langkah 1: Parameter Jadwal
         </h2>
-        <p className="text-sm font-semibold text-navy/60 mt-1">
+        <p className="text-isi font-semibold text-navy/60 mt-1">
           Pilih template pola kerja, rentang waktu, dan karyawan yang akan
           diterapkan.
         </p>
@@ -119,7 +119,7 @@ export function StepSatuForm({
       {pesanGalat && (
         <div
           role="alert"
-          className="bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-200 text-sm font-bold flex items-center gap-2 mb-6"
+          className="bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-200 text-isi font-bold flex items-center gap-2 mb-6"
         >
           <Info className="h-4 w-4 shrink-0" />
           <p>{pesanGalat}</p>
@@ -135,7 +135,7 @@ export function StepSatuForm({
           <div className="space-y-3 bg-krem p-5 rounded-xl border border-navy/10">
             <span
               id="label-pola-generate"
-              className="flex items-center gap-2 text-sm font-bold text-navy"
+              className="flex items-center gap-2 text-isi font-bold text-navy"
             >
               <CalendarRange className="h-5 w-5 text-navy/70" />
               Template Pola Roster
@@ -169,7 +169,7 @@ export function StepSatuForm({
                     className="text-navy"
                   />
                   <CommandList>
-                    <CommandEmpty className="py-4 text-center text-sm font-medium text-navy/60">
+                    <CommandEmpty className="py-4 text-center text-isi font-medium text-navy/60">
                       Pola roster tidak ditemukan.
                     </CommandEmpty>
                     <CommandGroup>
@@ -190,7 +190,7 @@ export function StepSatuForm({
                             )}
                           />
                           <span className="flex-1">{pola.namaPola}</span>
-                          <span className="text-xs font-bold text-navy/50">
+                          <span className="text-kecil font-bold text-navy/50">
                             ({pola.siklusHari} Hari)
                           </span>
                         </CommandItem>
@@ -204,7 +204,7 @@ export function StepSatuForm({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-krem p-5 rounded-xl border border-navy/10">
             <div className="space-y-3">
-              <label htmlFor="mulai-generate" className="text-sm font-bold text-navy">
+              <label htmlFor="mulai-generate" className="text-isi font-bold text-navy">
                 Mulai Tanggal
               </label>
               <Controller
@@ -222,7 +222,7 @@ export function StepSatuForm({
             </div>
 
             <div className="space-y-3">
-              <label htmlFor="sampai-generate" className="text-sm font-bold text-navy">
+              <label htmlFor="sampai-generate" className="text-isi font-bold text-navy">
                 Sampai Tanggal
               </label>
               <Controller
@@ -243,8 +243,8 @@ export function StepSatuForm({
           <div className="flex items-start gap-3 bg-sky-50 border border-sky-200 text-sky-800 p-4 rounded-xl">
             <Info className="h-5 w-5 shrink-0 mt-0.5" />
             <div className="flex flex-col gap-1">
-              <h4 className="text-sm font-bold">Informasi Simulasi</h4>
-              <p className="text-xs font-semibold leading-relaxed">
+              <h4 className="text-isi font-bold">Informasi Simulasi</h4>
+              <p className="text-kecil font-semibold leading-relaxed">
                 Di langkah selanjutnya, Anda dapat melihat pratinjau jadwal
                 sebelum disimpan. Sistem akan mendeteksi karyawan yang sedang
                 Cuti/Sakit secara otomatis.
@@ -257,11 +257,11 @@ export function StepSatuForm({
         <div className="lg:col-span-5 flex flex-col h-full min-h-100">
           <div className="flex flex-col flex-1 border border-navy/15 bg-krem rounded-xl overflow-hidden shadow-sm">
             <div className="flex items-center justify-between p-4 border-b border-navy/10 bg-gading">
-              <span className="flex items-center gap-2 text-sm font-bold text-navy">
+              <span className="flex items-center gap-2 text-isi font-bold text-navy">
                 <Users className="h-5 w-5 text-navy/70" />
                 Target Karyawan
               </span>
-              <span className="text-xs font-black text-gading bg-navy px-2.5 py-1 rounded-md shadow-sm">
+              <span className="text-kecil font-bold text-gading bg-navy px-2.5 py-1 rounded-md shadow-sm">
                 {karyawanIds.length} Dipilih
               </span>
             </div>
@@ -275,7 +275,7 @@ export function StepSatuForm({
               />
               <label
                 htmlFor="pilih-semua-karyawan"
-                className="text-sm font-bold text-navy cursor-pointer select-none"
+                className="text-isi font-bold text-navy cursor-pointer select-none"
               >
                 Pilih Semua Karyawan
               </label>
@@ -283,7 +283,7 @@ export function StepSatuForm({
 
             <div className="flex flex-col flex-1 overflow-y-auto custom-scrollbar p-2 gap-1 max-h-87.5">
               {karyawanList.length === 0 && (
-                <div className="p-4 text-center text-sm font-bold text-navy/50">
+                <div className="p-4 text-center text-isi font-bold text-navy/50">
                   Tidak ada karyawan tersedia.
                 </div>
               )}
@@ -301,10 +301,10 @@ export function StepSatuForm({
                       className="rounded-md border-navy/30 data-[state=checked]:bg-navy data-[state=checked]:border-navy data-[state=checked]:text-gading"
                     />
                     <label htmlFor={idKotak} className="flex flex-col cursor-pointer">
-                      <span className="text-sm font-bold text-navy leading-none">
+                      <span className="text-isi font-bold text-navy leading-none">
                         {emp.nama}
                       </span>
-                      <span className="text-xs font-semibold text-navy/60 mt-1.5">
+                      <span className="text-kecil font-semibold text-navy/60 mt-1.5">
                         {emp.role}
                       </span>
                     </label>

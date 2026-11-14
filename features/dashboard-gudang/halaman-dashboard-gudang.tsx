@@ -37,8 +37,8 @@ export function HalamanDashboardGudang() {
   return (
     <div className="p-4 sm:p-6 flex flex-col gap-[22px] sm:gap-7 w-full text-navy">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl sm:text-[28px] font-bold tracking-tight">Dashboard Gudang</h1>
-        <p className="text-[13px] sm:text-sm text-navy/60">
+        <h1 className="text-judul font-bold tracking-tight">Dashboard Gudang</h1>
+        <p className="text-kecil sm:text-isi text-navy/60">
           {permissions.includes(IZIN.location) && <NamaGudang />}
           {formatHari(hari)}
         </p>
@@ -46,8 +46,8 @@ export function HalamanDashboardGudang() {
 
       {!adaAlur && !adaBawah && (
         <div className="bg-krem rounded-3xl px-6 py-7 flex flex-col gap-1.5 max-w-2xl">
-          <span className="text-base font-semibold">Belum ada ringkasan untuk akun Anda</span>
-          <span className="text-sm text-navy/75 leading-relaxed">
+          <span className="text-besar font-semibold">Belum ada ringkasan untuk akun Anda</span>
+          <span className="text-isi text-navy/75 leading-relaxed">
             Akun Anda belum diberi akses ke pengajuan, pengiriman, stok, maupun jurnal gudang. Hubungi
             pemilik toko bila Anda memerlukannya.
           </span>

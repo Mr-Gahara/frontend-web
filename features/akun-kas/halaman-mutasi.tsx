@@ -41,14 +41,14 @@ import {
 } from "./mutasi";
 
 const SEMUA = "semua";
-const KELAS_LABEL = "text-xs font-bold text-navy/70";
+const KELAS_LABEL = "text-kecil font-bold text-navy/70";
 const KELAS_PEMICU = "w-52 bg-permukaan border-navy/20 text-navy";
 
 function KartuRingkasan({ judul, nilai }: { judul: string; nilai: number }) {
   return (
     <div className="rounded-2xl border border-navy/10 bg-permukaan p-4">
-      <p className="text-xs font-bold text-navy/60">{judul}</p>
-      <p className="mt-1 text-lg font-black tracking-tight text-navy">{formatRupiah(nilai)}</p>
+      <p className="text-kecil font-bold text-navy/60">{judul}</p>
+      <p className="mt-1 text-subjudul font-black tracking-tight text-navy">{formatRupiah(nilai)}</p>
     </div>
   );
 }
@@ -59,11 +59,11 @@ function RingkasanAkun({ filter, namaAkun }: { filter: FilterMutasi; namaAkun: s
   return (
     <section aria-label={`Ringkasan ${namaAkun}`} className="flex flex-col gap-3">
       {ringkasan.isError ? (
-        <p role="alert" className="text-sm font-medium text-red-600">
+        <p role="alert" className="text-isi font-medium text-red-600">
           {pesanError(ringkasan.error, "Gagal memuat ringkasan akun kas.")}
         </p>
       ) : !ringkasan.data ? (
-        <p className="text-sm font-medium text-navy/60">Memuat ringkasan...</p>
+        <p className="text-isi font-medium text-navy/60">Memuat ringkasan...</p>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <KartuRingkasan judul="Saldo awal periode" nilai={ringkasan.data.saldoAwalPeriode} />
@@ -103,7 +103,7 @@ export function HalamanMutasi() {
           <div>
             <p className="font-medium text-navy">{formatTanggal(row.original.createdAt)}</p>
             {tanggalTransaksiBerbeda(row.original) && (
-              <p className="text-xs text-navy/60">
+              <p className="text-kecil text-navy/60">
                 Tanggal transaksi {formatTanggalPendek(row.original.tanggal)}
               </p>
             )}
@@ -123,7 +123,7 @@ export function HalamanMutasi() {
         cell: ({ row }) => (
           <div className="max-w-[16rem] lg:max-w-md xl:max-w-xl">
             <p className="font-bold text-navy">{LABEL_JENIS[row.original.jenis]}</p>
-            <TeksDuaBaris teks={row.original.keterangan || "-"} className="text-xs text-navy/70" />
+            <TeksDuaBaris teks={row.original.keterangan || "-"} className="text-kecil text-navy/70" />
           </div>
         ),
       },
@@ -182,10 +182,10 @@ export function HalamanMutasi() {
       />
       <div className="flex flex-col gap-6 w-full">
         <div>
-          <h2 className="text-base sm:text-lg font-bold tracking-wide text-navy">
+          <h2 className="text-subjudul font-bold tracking-wide text-navy">
             Laporan Mutasi Kas
           </h2>
-          <p className="text-sm font-medium text-navy/60 mt-1">
+          <p className="text-isi font-medium text-navy/60 mt-1">
             Setiap perubahan saldo akun kas, terbaru dicatat lebih dulu.
           </p>
         </div>
@@ -289,7 +289,7 @@ export function HalamanMutasi() {
             role="alert"
             className="flex flex-col items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-8 text-center"
           >
-            <p className="text-sm font-medium text-red-600">
+            <p className="text-isi font-medium text-red-600">
               {pesanError(daftar.error, "Gagal memuat mutasi arus kas.")}
             </p>
             <Button type="button" variant="outline" onClick={() => daftar.refetch()} disabled={daftar.isFetching}>

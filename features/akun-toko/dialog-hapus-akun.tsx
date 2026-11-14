@@ -16,7 +16,7 @@ import { PesanGalat, TahapKode, kodeKosong } from "./tahap-kode";
 
 function LabelLangkah({ ke, teks }: { ke: 1 | 2; teks: string }) {
   return (
-    <p className="text-xs font-semibold text-destructive">
+    <p className="text-kecil font-semibold text-destructive">
       Langkah {ke} dari 2 · {teks}
     </p>
   );
@@ -103,13 +103,13 @@ export function DialogHapusAkun({
             }}
             className="flex min-w-0 flex-col gap-3"
           >
-            <ul className="list-disc space-y-1 pl-5 text-[13px] leading-relaxed text-muted-foreground">
+            <ul className="list-disc space-y-1 pl-5 text-kecil leading-relaxed text-muted-foreground">
               <li>Produk, stok, penjualan, keuangan, pengguna, dan riwayat toko ikut terhapus.</li>
               <li>Semua pengguna toko langsung keluar dari web dan aplikasi.</li>
               <li>Tidak dapat dibatalkan.</li>
             </ul>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="hapus-nama-toko" className="text-sm font-medium">
+              <label htmlFor="hapus-nama-toko" className="text-isi font-medium">
                 Ketik nama toko: <span className="text-destructive [overflow-wrap:anywhere]">{namaToko}</span>
               </label>
               <Input
@@ -117,10 +117,10 @@ export function DialogHapusAkun({
                 autoComplete="off"
                 value={diketik}
                 onChange={(e) => setDiketik(e.target.value)}
-                className="h-11 text-base sm:text-sm"
+                className="h-11 text-besar sm:text-isi"
               />
             </div>
-            <p className="text-xs text-muted-foreground">Lanjut mengirim kode ke email akun toko.</p>
+            <p className="text-kecil text-muted-foreground">Lanjut mengirim kode ke email akun toko.</p>
             <PesanGalat pesan={galatKirim} />
             <DialogFooter>
               <Button type="button" variant="outline" className="min-h-11 sm:min-h-9" onClick={() => tutup(false)}>
@@ -151,7 +151,7 @@ export function DialogHapusAkun({
               isianTambahan={
                 <>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="hapus-pin" className="text-sm font-medium">
+                    <label htmlFor="hapus-pin" className="text-isi font-medium">
                       PIN Owner
                     </label>
                     <Input
@@ -163,12 +163,12 @@ export function DialogHapusAkun({
                       value={pin}
                       onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
                       aria-invalid={galatIsian.pin ? true : undefined}
-                      className="h-11 text-base tracking-[0.3em] sm:text-sm"
+                      className="h-11 text-besar tracking-[0.3em] sm:text-isi"
                     />
-                    {galatIsian.pin && <p className="text-xs font-medium text-destructive">{galatIsian.pin}</p>}
+                    {galatIsian.pin && <p className="text-kecil font-medium text-destructive">{galatIsian.pin}</p>}
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="hapus-password" className="text-sm font-medium">
+                    <label htmlFor="hapus-password" className="text-isi font-medium">
                       Password akun
                     </label>
                     <Input
@@ -178,10 +178,10 @@ export function DialogHapusAkun({
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       aria-invalid={galatIsian.password ? true : undefined}
-                      className="h-11 text-base sm:text-sm"
+                      className="h-11 text-besar sm:text-isi"
                     />
                     {galatIsian.password && (
-                      <p className="text-xs font-medium text-destructive">{galatIsian.password}</p>
+                      <p className="text-kecil font-medium text-destructive">{galatIsian.password}</p>
                     )}
                   </div>
                 </>

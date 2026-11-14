@@ -48,6 +48,17 @@ const eslintConfig = defineConfig([
           message:
             "Input tanggal dan waktu bawaan browser dilarang. Pakai PilihTanggal atau InputWaktu.",
         },
+        // Skala tipografi tujuh tingkat (CV24a): ukuran huruf hanya lewat
+        // text-tampilan, text-judul, text-subjudul, text-besar, text-isi,
+        // text-kecil, dan text-mikro.
+        {
+          selector: "Literal[value=/(^|[\\s:])text-(xs|sm|base|lg|xl|[2-9]xl|\\[[0-9.]+(px|rem)\\])($|\\s)/]",
+          message: "Ukuran huruf di luar skala. Pakai text-tampilan/judul/subjudul/besar/isi/kecil/mikro.",
+        },
+        {
+          selector: "TemplateElement[value.raw=/(^|[\\s:])text-(xs|sm|base|lg|xl|[2-9]xl|\\[[0-9.]+(px|rem)\\])($|\\s)/]",
+          message: "Ukuran huruf di luar skala. Pakai text-tampilan/judul/subjudul/besar/isi/kecil/mikro.",
+        },
       ],
     },
   },

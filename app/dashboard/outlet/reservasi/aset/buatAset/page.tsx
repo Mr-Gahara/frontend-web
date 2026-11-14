@@ -86,10 +86,10 @@ export default function BuatAsetPage() {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Tambah Aset Baru
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             Daftarkan meja, ruangan, atau fasilitas baru yang siap untuk
             disewakan kepada pelanggan.
           </p>
@@ -101,13 +101,13 @@ export default function BuatAsetPage() {
         <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm flex flex-col gap-6">
           <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
             <Box className="h-5 w-5 text-karamel" />
-            <h3 className="text-base font-bold text-navy">
+            <h3 className="text-besar font-bold text-navy">
               Informasi Detail Aset
             </h3>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-navy">
+            <label className="text-isi font-bold text-navy">
               Nama Aset / Nomor Meja <span className="text-rose-500">*</span>
             </label>
             <Input
@@ -121,11 +121,11 @@ export default function BuatAsetPage() {
             />
             <div className="min-h-4">
               {errors.namaAset ? (
-                <span className="text-xs font-bold text-rose-500">
+                <span className="text-kecil font-bold text-rose-500">
                   {errors.namaAset.message}
                 </span>
               ) : (
-                <p className="text-[10px] font-medium text-navy/50">
+                <p className="text-mikro font-medium text-navy/50">
                   Identitas unik aset ini agar mudah dikenali oleh kasir dan
                   pelanggan.
                 </p>
@@ -134,7 +134,7 @@ export default function BuatAsetPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-navy flex items-center gap-1.5">
+            <label className="text-isi font-bold text-navy flex items-center gap-1.5">
               <Layers className="w-4 h-4 text-navy/60" />
               Tipe / Kategori Aset <span className="text-rose-500">*</span>
             </label>
@@ -164,7 +164,7 @@ export default function BuatAsetPage() {
                   </SelectTrigger>
                   <SelectContent className="bg-gading border-navy/10 text-navy">
                     {tipeAsetList.length === 0 && !isLoadingTipeAset ? (
-                      <div className="p-3 text-sm text-center font-medium text-navy/60">
+                      <div className="p-3 text-isi text-center font-medium text-navy/60">
                         Belum ada tipe aset. <br /> Buat tipe aset terlebih
                         dahulu.
                       </div>
@@ -188,11 +188,11 @@ export default function BuatAsetPage() {
             />
             <div className="min-h-4">
               {errors.tipeAsetID ? (
-                <span className="text-xs font-bold text-rose-500">
+                <span className="text-kecil font-bold text-rose-500">
                   {errors.tipeAsetID.message}
                 </span>
               ) : (
-                <p className="text-[10px] font-medium text-navy/50">
+                <p className="text-mikro font-medium text-navy/50">
                   Tipe aset menentukan harga/tarif sewa yang akan diberlakukan
                   pada aset ini.
                 </p>
@@ -201,7 +201,7 @@ export default function BuatAsetPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-navy">
+            <label className="text-isi font-bold text-navy">
               Status Awal
             </label>
             <Controller
@@ -234,7 +234,7 @@ export default function BuatAsetPage() {
                 </Select>
               )}
             />
-            <p className="text-[10px] font-medium text-navy/50 pt-1">
+            <p className="text-mikro font-medium text-navy/50 pt-1">
               Catatan: Status &quot;Digunakan&quot; akan diatur secara otomatis oleh
               sistem saat transaksi berjalan.
             </p>

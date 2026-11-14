@@ -194,7 +194,7 @@ function IsiFormJadwal({
       {pesanGalat && (
         <div
           role="alert"
-          className="bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-200 text-sm font-bold"
+          className="bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-200 text-isi font-bold"
         >
           {pesanGalat}
         </div>
@@ -203,7 +203,7 @@ function IsiFormJadwal({
       {!isEditMode && !penggunaId && (
         <div className="grid grid-cols-1 gap-4">
           <div className="space-y-2">
-            <label htmlFor="karyawan-jadwal" className="text-sm font-bold text-navy">
+            <label htmlFor="karyawan-jadwal" className="text-isi font-bold text-navy">
               Pilih Karyawan
             </label>
             <Controller
@@ -213,7 +213,7 @@ function IsiFormJadwal({
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger
                     id="karyawan-jadwal"
-                    className="w-full bg-gading text-navy text-sm border-navy/15 font-bold h-12 rounded-xl px-4"
+                    className="w-full bg-gading text-navy text-isi border-navy/15 font-bold h-12 rounded-xl px-4"
                   >
                     <SelectValue placeholder="Pilih karyawan..." />
                   </SelectTrigger>
@@ -229,7 +229,7 @@ function IsiFormJadwal({
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="tanggal-jadwal" className="text-sm font-bold text-navy">
+            <label htmlFor="tanggal-jadwal" className="text-isi font-bold text-navy">
               Pilih Tanggal
             </label>
             <Controller
@@ -250,7 +250,7 @@ function IsiFormJadwal({
       )}
 
       <div className="space-y-2.5">
-        <span id="label-status-jadwal" className="text-sm font-bold text-navy">
+        <span id="label-status-jadwal" className="text-isi font-bold text-navy">
           Status Kehadiran
         </span>
         <div role="group" aria-labelledby="label-status-jadwal" className="grid grid-cols-2 gap-3">
@@ -263,7 +263,7 @@ function IsiFormJadwal({
             <Briefcase
               className={`h-6 w-6 mb-2 ${status === "kerja" ? "stroke-[2.5px]" : "stroke-[2px]"}`}
             />
-            <span className="text-sm font-bold">Shift Kerja</span>
+            <span className="text-isi font-bold">Shift Kerja</span>
           </button>
           <button
             type="button"
@@ -276,11 +276,11 @@ function IsiFormJadwal({
             <Coffee
               className={`h-6 w-6 mb-2 ${status === "libur" ? "stroke-[2.5px]" : "stroke-[2px]"}`}
             />
-            <span className="text-sm font-bold">Libur / Off</span>
+            <span className="text-isi font-bold">Libur / Off</span>
           </button>
         </div>
         {lokasiLain && (
-          <p id="keterangan-libur-lokasi-lain" className="text-xs font-medium text-navy/70">
+          <p id="keterangan-libur-lokasi-lain" className="text-kecil font-medium text-navy/70">
             Karyawan ini juga berjadwal di lokasi lain pada tanggal ini; atur liburnya dari kalender lokasi itu atau hapus jadwalnya lebih dulu.
           </p>
         )}
@@ -288,7 +288,7 @@ function IsiFormJadwal({
 
       {status === "kerja" && (
         <div className="space-y-3 p-4 bg-navy/3 border border-navy/10 rounded-xl">
-          <span className="text-sm font-bold text-navy">Pilih Master Shift</span>
+          <span className="text-isi font-bold text-navy">Pilih Master Shift</span>
           {shiftIds.map((nilai, index) => {
             const nonaktif = nilai !== "" && !shiftAktif.some((s) => s.id === nilai);
             return (
@@ -296,7 +296,7 @@ function IsiFormJadwal({
                 <Select value={nilai} onValueChange={(val) => ubahShift(index, val)}>
                   <SelectTrigger
                     aria-label={`Shift ${index + 1}`}
-                    className="flex-1 bg-gading text-navy text-sm border-navy/15 font-bold h-12 rounded-xl px-4"
+                    className="flex-1 bg-gading text-navy text-isi border-navy/15 font-bold h-12 rounded-xl px-4"
                   >
                     <SelectValue placeholder="Pilih shift..." />
                   </SelectTrigger>
@@ -341,7 +341,7 @@ function IsiFormJadwal({
       )}
 
       <div className="space-y-2">
-        <label htmlFor="catatan-jadwal" className="text-sm font-bold text-navy">
+        <label htmlFor="catatan-jadwal" className="text-isi font-bold text-navy">
           Catatan Khusus{" "}
           <span className="text-navy/50 font-semibold">
             (Opsional)
@@ -377,7 +377,7 @@ function IsiFormJadwal({
             (status === "kerja" && !shiftIds[0]) ||
             (status === "libur" && liburTerkunci)
           }
-          className="flex-1 h-14 rounded-xl bg-navy text-gading hover:bg-navy/90 text-base font-bold shadow-md"
+          className="flex-1 h-14 rounded-xl bg-navy text-gading hover:bg-navy/90 text-besar font-bold shadow-md"
         >
           {isPending
             ? "Memproses..."
@@ -450,10 +450,10 @@ export function FormJadwalDialog({
               <CalendarPlus className="h-6 w-6" />
             </div>
             <div className="flex flex-col">
-              <DialogTitle className="text-2xl font-bold text-navy">
+              <DialogTitle className="text-judul font-bold text-navy">
                 {isEditMode ? "Ubah Jadwal" : "Kelola Jadwal"}
               </DialogTitle>
-              <DialogDescription className="text-sm font-semibold text-navy/60 mt-0.5">
+              <DialogDescription className="text-isi font-semibold text-navy/60 mt-0.5">
                 {isEditMode
                   ? `${namaKaryawan} • ${formatTanggal}`
                   : "Tambahkan jadwal shift baru untuk karyawan."}

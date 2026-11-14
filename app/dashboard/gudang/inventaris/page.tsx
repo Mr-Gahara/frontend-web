@@ -185,15 +185,15 @@ export default function GudangInventoryPage() {
           <div className="flex flex-col items-start gap-1">
             <span
               className={cn(
-                "text-base font-mono font-bold px-2 py-0.5 rounded-md",
+                "text-besar font-mono font-bold px-2 py-0.5 rounded-md",
                 row.original.isStokKritis ? "bg-rose-50 text-rose-600" : "bg-navy/5 text-navy",
               )}
             >
               {row.original.stok}{" "}
-              <span className="text-xs font-sans font-bold opacity-70">{row.original.item?.satuan || ""}</span>
+              <span className="text-kecil font-sans font-bold opacity-70">{row.original.item?.satuan || ""}</span>
             </span>
             {row.original.isStokKritis && (
-              <Badge variant="outline" className="text-[10px] bg-rose-100 text-rose-700 border-none shadow-sm px-1.5 py-0">
+              <Badge variant="outline" className="text-mikro bg-rose-100 text-rose-700 border-none shadow-sm px-1.5 py-0">
                 Stok Kritis
               </Badge>
             )}
@@ -231,7 +231,7 @@ export default function GudangInventoryPage() {
       <div className="flex h-[70vh] w-full items-center justify-center">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-emerald-700" />
-          <span className="text-sm font-medium text-slate-500">
+          <span className="text-isi font-medium text-slate-500">
             Memverifikasi Otoritas Gudang...
           </span>
         </div>
@@ -244,11 +244,11 @@ export default function GudangInventoryPage() {
       {/* HEADER & FILTERS */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy flex items-center gap-2">
+          <h1 className="text-judul font-bold tracking-tight text-navy flex items-center gap-2">
             <Warehouse className="h-6 w-6 text-emerald-700" />
             Barang Gudang & Inventaris Pusat
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             Pantau dan kelola ketersediaan stok fisik khusus di area Gudang secara real-time.
           </p>
         </div>
@@ -305,7 +305,7 @@ export default function GudangInventoryPage() {
       {gagalMemuatStok ? (
         <p
           role="alert"
-          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
         >
           Gagal memuat stok gudang. Periksa koneksi, lalu muat ulang halaman.
         </p>
@@ -334,7 +334,7 @@ export default function GudangInventoryPage() {
 
           <div className="flex flex-col gap-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-navy">Pilih Barang Master <span className="text-rose-500">*</span></label>
+              <label className="text-isi font-bold text-navy">Pilih Barang Master <span className="text-rose-500">*</span></label>
               <Select 
                 value={newItem.bahanBakuID} 
                 onValueChange={(val) => setNewItem((prev) => ({ ...prev, bahanBakuID: val }))}
@@ -345,13 +345,13 @@ export default function GudangInventoryPage() {
                 </SelectTrigger>
                 <SelectContent className="bg-white border-navy/10">
                   {availableBahanBaku.length === 0 ? (
-                    <div className="p-3 text-sm font-medium text-rose-500 text-center">
+                    <div className="p-3 text-isi font-medium text-rose-500 text-center">
                       Semua master data sudah ada di gudang.
                     </div>
                   ) : (
                     availableBahanBaku.map((bb) => (
                       <SelectItem key={bb.id} value={bb.id} className="font-bold cursor-pointer hover:bg-emerald-50">
-                        {bb.namaBahan} <span className="text-xs text-navy/50 font-normal">({bb.satuan})</span>
+                        {bb.namaBahan} <span className="text-kecil text-navy/50 font-normal">({bb.satuan})</span>
                       </SelectItem>
                     ))
                   )}
@@ -361,7 +361,7 @@ export default function GudangInventoryPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy">Stok Awal</label>
+                <label className="text-isi font-bold text-navy">Stok Awal</label>
                 <Input
                   type="number"
                   placeholder="0"
@@ -371,7 +371,7 @@ export default function GudangInventoryPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy">Batas Minimum</label>
+                <label className="text-isi font-bold text-navy">Batas Minimum</label>
                 <Input
                   type="number"
                   placeholder="0"
@@ -409,7 +409,7 @@ export default function GudangInventoryPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-2">
-            <label className="text-sm font-bold text-navy">Stok Minimum ({minStockModal.data?.item?.satuan || "pcs"})</label>
+            <label className="text-isi font-bold text-navy">Stok Minimum ({minStockModal.data?.item?.satuan || "pcs"})</label>
             <Input
               type="number"
               value={minStockModal.inputValue}
@@ -437,11 +437,11 @@ export default function GudangInventoryPage() {
           </DialogHeader>
           <div className="flex flex-col gap-4 py-4">
             <div className="bg-navy/5 p-3 rounded-lg border border-navy/10 flex justify-between items-center">
-              <span className="text-sm font-bold text-navy/70">Tercatat di Sistem:</span>
-              <span className="font-mono font-bold text-navy text-lg">{opnameModal.data?.stok} <span className="text-sm font-sans">{opnameModal.data?.item?.satuan}</span></span>
+              <span className="text-isi font-bold text-navy/70">Tercatat di Sistem:</span>
+              <span className="font-mono font-bold text-navy text-subjudul">{opnameModal.data?.stok} <span className="text-isi font-sans">{opnameModal.data?.item?.satuan}</span></span>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-navy">Stok Fisik Sebenarnya <span className="text-rose-500">*</span></label>
+              <label className="text-isi font-bold text-navy">Stok Fisik Sebenarnya <span className="text-rose-500">*</span></label>
               <Input
                 type="number"
                 value={opnameModal.fisikAktual}
@@ -451,7 +451,7 @@ export default function GudangInventoryPage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-navy">Alasan Penyesuaian <span className="text-rose-500">*</span></label>
+              <label className="text-isi font-bold text-navy">Alasan Penyesuaian <span className="text-rose-500">*</span></label>
               <Input
                 value={opnameModal.catatan}
                 onChange={(e) => setOpnameModal((prev) => ({ ...prev, catatan: e.target.value }))}

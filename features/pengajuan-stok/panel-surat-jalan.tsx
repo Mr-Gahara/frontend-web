@@ -36,7 +36,7 @@ export function PanelBuatSuratJalan({ pengajuanID, urlSuratJalan, dikunci = fals
 
   return (
     <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6 shadow-sm flex flex-col gap-3">
-      <h3 className="text-sm font-bold text-blue-900 text-center mb-1">
+      <h3 className="text-isi font-bold text-blue-900 text-center mb-1">
         Tindakan Eksekusi Logistik
       </h3>
       <Button
@@ -52,7 +52,7 @@ export function PanelBuatSuratJalan({ pengajuanID, urlSuratJalan, dikunci = fals
         <Truck className="w-4 h-4 mr-2" />
         {mutation.isPending ? "Memproses..." : "Buat Surat Jalan"}
       </Button>
-      <p className="text-[10px] font-medium text-blue-800/60 text-center">
+      <p className="text-mikro font-medium text-blue-800/60 text-center">
         Sistem otomatis menarik data item untuk divalidasi ke dalam Surat Jalan (Draft).
       </p>
     </div>

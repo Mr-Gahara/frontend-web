@@ -19,17 +19,17 @@ import {
 import { TandaTachyon } from "./tanda-tachyon";
 
 const KELAS_ISIAN =
-  "flex h-12 w-full rounded-lg border border-input bg-permukaan px-3.5 text-[15px] text-navy placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
+  "flex h-12 w-full rounded-lg border border-input bg-permukaan px-3.5 text-isi text-navy placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
 
 const KELAS_TOMBOL =
-  "disabled:cursor-not-allowed disabled:opacity-60 inline-flex h-[52px] w-full cursor-pointer items-center justify-center rounded-[10px] bg-navy text-base font-bold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading";
+  "disabled:cursor-not-allowed disabled:opacity-60 inline-flex h-[52px] w-full cursor-pointer items-center justify-center rounded-[10px] bg-navy text-besar font-bold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading";
 
 const KELAS_TAUTAN =
   "cursor-pointer rounded-sm font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel";
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-xs font-medium text-destructive">{pesan}</p>;
+  return <p className="text-kecil font-medium text-destructive">{pesan}</p>;
 }
 
 function PesanGalat({ pesan }: { pesan: string }) {
@@ -37,7 +37,7 @@ function PesanGalat({ pesan }: { pesan: string }) {
   return (
     <div
       role="alert"
-      className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+      className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive"
     >
       <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
       <span>{pesan}</span>
@@ -74,13 +74,13 @@ function FormEmail({ awal, onKirim }: { awal: string; onKirim: (email: string) =
       className="flex flex-col gap-6"
     >
       <div className="flex flex-col gap-2">
-        <h2 className="text-[28px] font-bold">Lupa password</h2>
-        <p className="text-[15px] leading-normal text-muted-foreground">
+        <h2 className="text-subjudul font-bold">Lupa password</h2>
+        <p className="text-isi leading-normal text-muted-foreground">
           Masukkan email akun toko. Kami kirim kode 6 digit untuk membuat password baru.
         </p>
       </div>
       <div className="flex flex-col gap-2">
-        <label htmlFor="lupa-email" className="text-sm font-semibold">
+        <label htmlFor="lupa-email" className="text-isi font-semibold">
           Email
         </label>
         <input
@@ -99,7 +99,7 @@ function FormEmail({ awal, onKirim }: { awal: string; onKirim: (email: string) =
         {minta.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
         Kirim kode
       </button>
-      <p className="text-center text-[15px]">
+      <p className="text-center text-besar">
         <Link href="/login" className={KELAS_TAUTAN}>
           Kembali ke halaman masuk
         </Link>
@@ -148,8 +148,8 @@ function FormPasswordBaru({
       className="flex flex-col gap-[22px]"
     >
       <div className="flex flex-col gap-2">
-        <h2 className="text-[28px] font-bold">Buat password baru</h2>
-        <p className="text-[15px] leading-normal text-muted-foreground">
+        <h2 className="text-subjudul font-bold">Buat password baru</h2>
+        <p className="text-isi leading-normal text-muted-foreground">
           Kode dikirim ke <strong className="text-navy">{email}</strong>.{" "}
           <button type="button" onClick={onGantiEmail} className={KELAS_TAUTAN}>
             Ganti email
@@ -167,7 +167,7 @@ function FormPasswordBaru({
         <PesanIsian pesan={errors.kode?.message ?? errors.kode?.root?.message} />
       </div>
       <div className="flex flex-col gap-2">
-        <label htmlFor="lupa-password-baru" className="text-sm font-semibold">
+        <label htmlFor="lupa-password-baru" className="text-isi font-semibold">
           Password baru
         </label>
         <input
@@ -179,13 +179,13 @@ function FormPasswordBaru({
           aria-invalid={errors.password ? true : undefined}
           className={KELAS_ISIAN}
         />
-        <p id="lupa-password-aturan" className="text-[13px] text-muted-foreground">
+        <p id="lupa-password-aturan" className="text-kecil text-muted-foreground">
           Minimal 8 karakter, dengan huruf kapital dan angka.
         </p>
         <PesanIsian pesan={errors.password?.message} />
       </div>
       <div className="flex flex-col gap-2">
-        <label htmlFor="lupa-password-ulang" className="text-sm font-semibold">
+        <label htmlFor="lupa-password-ulang" className="text-isi font-semibold">
           Ulangi password baru
         </label>
         <input
@@ -218,7 +218,7 @@ function FormPasswordBaru({
           }}
         />
         {status && (
-          <p role="status" className="text-sm">
+          <p role="status" className="text-isi">
             {status}
           </p>
         )}
@@ -242,18 +242,19 @@ export function HalamanLupaPassword() {
       <section className="flex min-w-0 flex-[1_1_480px] flex-col justify-between gap-12 bg-navy px-6 py-10 text-gading sm:px-12 sm:py-14">
         <div className="flex items-center gap-3">
           <TandaTachyon />
-          <span className="text-lg font-bold">Tachyon POS</span>
+          <span className="text-subjudul font-bold">Tachyon POS</span>
         </div>
         <div className="flex max-w-[460px] flex-col gap-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-karamel">Akun toko</p>
+          <p className="text-kecil font-semibold uppercase tracking-[0.14em] text-karamel">Akun toko</p>
+          {/* eslint-disable-next-line no-restricted-syntax -- teks hero di luar skala tipografi (CV25a) */}
           <h1 className="text-4xl font-extrabold leading-[1.08] text-balance sm:text-[46px]">
             Atur ulang password akun toko.
           </h1>
-          <p className="text-[17px] leading-relaxed text-gading/80">
+          <p className="text-subjudul leading-relaxed text-gading/80">
             Kode dikirim ke email akun. PIN karyawan tidak berubah.
           </p>
         </div>
-        <p className="text-sm text-gading/80">
+        <p className="text-isi text-gading/80">
           Lupa PIN, bukan password? Gunakan &quot;Lupa PIN?&quot; di layar masuk kasir.
         </p>
       </section>
@@ -281,10 +282,10 @@ export function HalamanLupaPassword() {
               <span className="flex h-14 w-14 items-center justify-center rounded-full bg-sage/15">
                 <Check className="h-7 w-7 text-sage" aria-hidden="true" />
               </span>
-              <h2 id="lupa-selesai" className="text-[28px] font-bold">
+              <h2 id="lupa-selesai" className="text-subjudul font-bold">
                 Password diganti
               </h2>
-              <p role="status" className="text-[15px] leading-normal text-muted-foreground">
+              <p role="status" className="text-isi leading-normal text-muted-foreground">
                 Masuk lagi dengan password baru.
               </p>
               <Link href="/login" className={KELAS_TOMBOL}>

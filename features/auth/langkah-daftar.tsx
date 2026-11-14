@@ -32,13 +32,13 @@ export function LangkahDaftar({ aktif, tegak = false }: { aktif: 1 | 2 | 3 | 4; 
             <li
               aria-current={kini ? "step" : undefined}
               className={
-                "flex items-center gap-2.5 text-[15px] " +
+                "flex items-center gap-2.5 text-besar " +
                 (kini ? "font-semibold text-navy" : selesai ? "text-navy" : "text-muted-foreground")
               }
             >
               <span
                 className={
-                  "flex h-[30px] w-[30px] items-center justify-center rounded-full text-sm font-semibold " +
+                  "flex h-[30px] w-[30px] items-center justify-center rounded-full text-isi font-semibold " +
                   (kini || selesai ? "bg-navy text-gading" : "border-2 border-input")
                 }
               >

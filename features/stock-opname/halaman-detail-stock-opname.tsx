@@ -67,7 +67,7 @@ const badgeStatusOpname = (status: StatusOpname) => {
 
   const className = map[status] || "bg-navy/5 text-navy/60";
   return (
-    <Badge className={`${className} px-3 py-1 font-bold border-none shadow-sm text-xs`}>
+    <Badge className={`${className} px-3 py-1 font-bold border-none shadow-sm text-kecil`}>
       {labels[status] || status}
     </Badge>
   );
@@ -254,7 +254,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-navy border-t-transparent"></div>
-        <p className="text-sm font-bold text-navy/60">Memuat rincian opname...</p>
+        <p className="text-isi font-bold text-navy/60">Memuat rincian opname...</p>
       </div>
     );
   }
@@ -316,10 +316,10 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
             Kembali ke Daftar Opname
           </Button>
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
               {teks.judul}
             </h1>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-isi font-medium text-navy/60">
               No. Ref:{" "}
               <span className="font-bold font-mono text-navy">
                 {opname.nomorOpname}
@@ -350,13 +350,13 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
         <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
             <ClipboardCheck className="h-5 w-5 text-karamel" />
-            <h2 className="font-bold text-navy">
+            <h2 className="text-subjudul font-bold text-navy">
               Informasi Sesi
             </h2>
           </div>
-          <div className="grid grid-cols-2 gap-y-5 text-sm">
+          <div className="grid grid-cols-2 gap-y-5 text-isi">
             <div>
-              <p className="text-navy/60 font-bold text-xs mb-1 flex items-center gap-1">
+              <p className="text-navy/60 font-bold text-kecil mb-1 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" /> Tanggal Mulai
               </p>
               <p className="font-semibold text-navy">
@@ -364,7 +364,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
               </p>
             </div>
             <div>
-              <p className="text-navy/60 font-bold text-xs mb-1 flex items-center gap-1">
+              <p className="text-navy/60 font-bold text-kecil mb-1 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5" /> Lokasi / Gudang
               </p>
               {/* FIX: Ambil dari relasi lokasi */}
@@ -373,7 +373,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
               </p>
             </div>
             <div>
-              <p className="text-navy/60 font-bold text-xs mb-1 flex items-center gap-1">
+              <p className="text-navy/60 font-bold text-kecil mb-1 flex items-center gap-1">
                 <User className="w-3.5 h-3.5" /> PIC / Staf
               </p>
               {/* FIX: Ambil dari relasi pic */}
@@ -387,21 +387,21 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
         <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-4 flex flex-col">
           <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
             <MessageSquare className="h-5 w-5 text-karamel" />
-            <h2 className="font-bold text-navy">
+            <h2 className="text-subjudul font-bold text-navy">
               Catatan & Ulasan
             </h2>
           </div>
           <div className="flex-1 space-y-3">
             <div>
-              <span className="text-xs font-bold text-navy/60 block mb-0.5">Catatan Pembuatan:</span>
-              <p className="text-sm font-medium text-navy/80 italic">
+              <span className="text-kecil font-bold text-navy/60 block mb-0.5">Catatan Pembuatan:</span>
+              <p className="text-isi font-medium text-navy/80 italic">
                 {opname.catatan || "Tidak ada catatan saat pembuatan draft."}
               </p>
             </div>
             {opname.catatanReview && (
               <div className="p-3 bg-white/50 rounded-xl border border-navy/10">
-                <span className="text-xs font-bold text-navy/60 block mb-1">Pesan dari Manajer/Reviewer:</span>
-                <p className="text-sm font-bold text-navy">
+                <span className="text-kecil font-bold text-navy/60 block mb-1">Pesan dari Manajer/Reviewer:</span>
+                <p className="text-isi font-bold text-navy">
                   &ldquo;{opname.catatanReview}&rdquo;
                 </p>
               </div>
@@ -413,7 +413,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
       {/* TABEL ITEM OPNAME: tabel rincian berkartu baris, tanpa panel berlatar (CV22a). */}
       <section aria-label="Daftar Item & Hasil Perhitungan" className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-bold text-navy">Daftar Item &amp; Hasil Perhitungan</h2>
+          <h2 className="text-subjudul font-bold text-navy">Daftar Item &amp; Hasil Perhitungan</h2>
 
           {/* Tombol Simpan Draft khusus Staf (Jika DRAFT/REJECTED) */}
           {isEditable && (
@@ -443,7 +443,7 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
               cell: ({ row }) => (
                 <div>
                   <TeksDuaBaris teks={row.original.namaSnapshot} className="font-bold text-navy" />
-                  <p className="text-xs text-navy/50 font-medium">Satuan: {row.original.satuanSnapshot}</p>
+                  <p className="text-kecil text-navy/50 font-medium">Satuan: {row.original.satuanSnapshot}</p>
                 </div>
               ),
             },
@@ -519,12 +519,12 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
                     value={localData?.catatanItem ?? ""}
                     onChange={(e) => handleItemChange(item.itemId, "catatanItem", e.target.value)}
                     placeholder="Jika ada selisih, beri alasan..."
-                    className={`w-full text-sm bg-white border-navy/20 focus-visible:ring-navy ${
+                    className={`w-full text-isi bg-white border-navy/20 focus-visible:ring-navy ${
                       berbeda && !(localData?.catatanItem) ? "border-rose-300 bg-rose-50 placeholder:text-rose-300" : ""
                     }`}
                   />
                 ) : (
-                  <p className="text-sm font-medium text-navy/70 italic line-clamp-2">{item.catatanItem || "-"}</p>
+                  <p className="text-isi font-medium text-navy/70 italic line-clamp-2">{item.catatanItem || "-"}</p>
                 );
               },
             },
@@ -538,8 +538,8 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
       {isEditable && (
         <div className="rounded-2xl border border-navy/10 bg-navy p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
           <div className="text-gading">
-            <h3 className="font-bold text-sm">Selesai Menghitung?</h3>
-            <p className="text-xs text-gading/70">Pastikan semua stok fisik sudah diisi. Setelah diajukan, data akan dikunci untuk direview Manajer.</p>
+            <h3 className="font-bold text-isi">Selesai Menghitung?</h3>
+            <p className="text-kecil text-gading/70">Pastikan semua stok fisik sudah diisi. Setelah diajukan, data akan dikunci untuk direview Manajer.</p>
           </div>
           <Button
             onClick={() => setShowSubmitModal(true)}
@@ -567,8 +567,8 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
       {isReviewable && (
         <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6 shadow-sm flex flex-col gap-4 mt-2">
           <div>
-            <h3 className="font-bold text-blue-900 text-base">Tindakan Reviewer (Manajer)</h3>
-            <p className="text-sm text-blue-700/80 font-medium">Periksa selisih yang diajukan. Menyetujui dokumen ini akan merubah stok real-time saat ini.</p>
+            <h3 className="font-bold text-blue-900 text-besar">Tindakan Reviewer (Manajer)</h3>
+            <p className="text-isi text-blue-700/80 font-medium">Periksa selisih yang diajukan. Menyetujui dokumen ini akan merubah stok real-time saat ini.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Button

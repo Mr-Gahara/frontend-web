@@ -170,7 +170,7 @@ export function LangkahBahanBaku({
           />
         </>
       ) : (
-        <p role="status" className="rounded-xl border border-input bg-gading px-4 py-3.5 text-sm leading-normal">
+        <p role="status" className="rounded-xl border border-input bg-gading px-4 py-3.5 text-isi leading-normal">
           Langkah ini dilewati. Di langkah produk, pertanyaan resep tidak ditampilkan. Bahan baku tetap bisa
           ditambahkan nanti dari menu Inventaris.
         </p>

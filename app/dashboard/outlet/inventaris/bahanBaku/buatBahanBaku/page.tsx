@@ -92,10 +92,10 @@ export default function BuatBahanBakuPage() {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Tambah Bahan Baku
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             Masukkan detail persediaan bahan mentah baru ke dalam sistem.
           </p>
         </div>
@@ -110,7 +110,7 @@ export default function BuatBahanBakuPage() {
           <div className="flex items-center justify-between mb-2 border-b border-navy/10 pb-4">
             <div className="flex items-center gap-2">
               <PackagePlus className="h-5 w-5 text-karamel" />
-              <h3 className="text-base font-bold text-navy">
+              <h3 className="text-besar font-bold text-navy">
                 Informasi Dasar
               </h3>
             </div>
@@ -118,7 +118,7 @@ export default function BuatBahanBakuPage() {
             {/* Visual Indicator: Lokasi Injeksi Inventory */}
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-navy/5 rounded-lg border border-navy/10">
               <MapPin className="w-3.5 h-3.5 text-karamel" />
-              <span className="text-xs font-bold text-navy/70">
+              <span className="text-kecil font-bold text-navy/70">
                 Lokasi Stok: {locationName}
               </span>
             </div>
@@ -127,7 +127,7 @@ export default function BuatBahanBakuPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Nama Bahan Baku */}
             <div className="space-y-2 sm:col-span-2">
-              <label className="text-sm font-bold text-navy" htmlFor="namaBahan">
+              <label className="text-isi font-bold text-navy" htmlFor="namaBahan">
                 Nama Bahan Baku <span className="text-red-500">*</span>
               </label>
               <Input
@@ -138,7 +138,7 @@ export default function BuatBahanBakuPage() {
               />
               <div className="min-h-4">
                 {errors.namaBahan && (
-                  <span className="text-xs font-bold text-rose-500">
+                  <span className="text-kecil font-bold text-rose-500">
                     {errors.namaBahan.message}
                   </span>
                 )}
@@ -147,7 +147,7 @@ export default function BuatBahanBakuPage() {
             
             {/* Satuan */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-navy">
+              <label className="text-isi font-bold text-navy">
                 Satuan <span className="text-red-500">*</span>
               </label>
               <Controller
@@ -177,7 +177,7 @@ export default function BuatBahanBakuPage() {
               />
               <div className="min-h-4">
                 {errors.satuan && (
-                  <span className="text-xs font-bold text-rose-500">
+                  <span className="text-kecil font-bold text-rose-500">
                     {errors.satuan.message}
                   </span>
                 )}
@@ -188,7 +188,7 @@ export default function BuatBahanBakuPage() {
             
             {/* Stok Awal */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-navy" htmlFor="stok">
+              <label className="text-isi font-bold text-navy" htmlFor="stok">
                 Stok Awal{" "}
                 <span className="text-navy/50 font-medium">
                   (Opsional)
@@ -202,13 +202,13 @@ export default function BuatBahanBakuPage() {
                   placeholder="0"
                   className="bg-gading border-navy/20 text-navy font-mono font-bold h-12 pr-16 focus-visible:ring-1 focus-visible:ring-navy [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-navy/40 pointer-events-none">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-kecil font-bold text-navy/40 pointer-events-none">
                   {currentSatuan}
                 </div>
               </div>
               <div className="min-h-4">
                 {errors.stok && (
-                  <span className="text-xs font-bold text-rose-500">
+                  <span className="text-kecil font-bold text-rose-500">
                     {errors.stok.message}
                   </span>
                 )}
@@ -217,7 +217,7 @@ export default function BuatBahanBakuPage() {
             
             {/* Batas Stok Minimum */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-navy" htmlFor="stokMinimum">
+              <label className="text-isi font-bold text-navy" htmlFor="stokMinimum">
                 Batas Stok Minimum{" "}
                 <span className="text-navy/50 font-medium">
                   (Opsional)
@@ -231,13 +231,13 @@ export default function BuatBahanBakuPage() {
                   placeholder="0"
                   className="bg-gading border-navy/20 text-navy font-mono font-bold h-12 pr-16 focus-visible:ring-1 focus-visible:ring-navy [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-navy/40 pointer-events-none">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-kecil font-bold text-navy/40 pointer-events-none">
                   {currentSatuan}
                 </div>
               </div>
               <div className="min-h-4">
                 {errors.stokMinimum && (
-                  <span className="text-xs font-bold text-rose-500">
+                  <span className="text-kecil font-bold text-rose-500">
                     {errors.stokMinimum.message}
                   </span>
                 )}
@@ -248,7 +248,7 @@ export default function BuatBahanBakuPage() {
           {/* Helper Text / Tooltip Batas Stok */}
           <div className="flex items-start gap-2 bg-navy/5 p-4 rounded-xl border border-navy/10 mt-2">
             <Info className="w-5 h-5 text-karamel shrink-0 mt-0.5" />
-            <p className="text-xs font-medium text-navy/70 leading-relaxed">
+            <p className="text-kecil font-medium text-navy/70 leading-relaxed">
               <strong className="font-bold text-navy">
                 Integrasi Inventory Otomatis:
               </strong>{" "}

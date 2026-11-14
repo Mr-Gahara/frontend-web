@@ -46,7 +46,7 @@ const KOLOM: ColumnDef<AkunAdmin>[] = [
         >
           {row.original.email}
         </Link>
-        <p className="text-xs text-muted-foreground">{row.original.username ?? "Tanpa username"}</p>
+        <p className="text-kecil text-muted-foreground">{row.original.username ?? "Tanpa username"}</p>
       </div>
     ),
   },
@@ -91,8 +91,8 @@ export function HalamanDaftarAkun() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Akun Klien</h1>
-          <p className="text-sm text-muted-foreground">Kelola akun klien dan langganannya.</p>
+          <h1 className="text-judul font-bold tracking-tight">Akun Klien</h1>
+          <p className="text-isi text-muted-foreground">Kelola akun klien dan langganannya.</p>
         </div>
         <Link href={URL_BUAT_AKUN}>
           <Button type="button">
@@ -104,7 +104,7 @@ export function HalamanDaftarAkun() {
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="space-y-1">
-          <label htmlFor="cari-akun" className="text-xs font-medium">
+          <label htmlFor="cari-akun" className="text-kecil font-medium">
             Cari akun
           </label>
           <Input
@@ -117,7 +117,7 @@ export function HalamanDaftarAkun() {
           />
         </div>
         <div className="space-y-1">
-          <label htmlFor="filter-status" className="text-xs font-medium">
+          <label htmlFor="filter-status" className="text-kecil font-medium">
             Status
           </label>
           <Select value={status} onValueChange={(v) => setStatus(v as FilterStatusAkun)}>
@@ -138,7 +138,7 @@ export function HalamanDaftarAkun() {
           role="alert"
           className="flex flex-col items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-6"
         >
-          <p className="text-sm font-medium text-destructive">
+          <p className="text-isi font-medium text-destructive">
             {pesanError(daftar.error, "Gagal memuat daftar akun.")}
           </p>
           <Button

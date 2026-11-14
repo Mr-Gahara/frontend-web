@@ -7,7 +7,7 @@ export function PesanGagal({ pesan, ulangi }: { pesan: string; ulangi: () => voi
       role="alert"
       className="bg-white rounded-2xl px-5 py-4 flex flex-wrap items-center justify-between gap-3 shadow-sm"
     >
-      <span className="text-sm font-medium text-red-700">{pesan}</span>
+      <span className="text-isi font-medium text-red-700">{pesan}</span>
       <Button
         type="button"
         variant="outline"

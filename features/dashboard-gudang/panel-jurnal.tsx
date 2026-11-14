@@ -21,11 +21,11 @@ export function PanelJurnal() {
   return (
     <section aria-labelledby={idJudul} className="flex flex-col gap-3 sm:gap-3.5 min-w-0">
       <div className="flex flex-wrap justify-between items-baseline gap-2">
-        <h2 id={idJudul} className="text-[17px] sm:text-lg font-semibold">
+        <h2 id={idJudul} className="text-subjudul font-semibold">
           Jurnal terbaru
         </h2>
         {href && (
-          <Link href={href} className="text-[13px] font-medium underline-offset-4 hover:underline">
+          <Link href={href} className="text-isi font-medium underline-offset-4 hover:underline">
             Lihat jurnal stok
           </Link>
         )}
@@ -46,7 +46,7 @@ export function PanelJurnal() {
           ))}
         </div>
       ) : data.length === 0 ? (
-        <div className="bg-white rounded-2xl px-5 py-6 shadow-sm text-sm text-navy/60">
+        <div className="bg-white rounded-2xl px-5 py-6 shadow-sm text-isi text-navy/60">
           Belum ada jurnal stok di gudang.
         </div>
       ) : (
@@ -63,13 +63,13 @@ export function PanelJurnal() {
                 </div>
                 <div className="flex-1 min-w-0 pb-4 sm:pb-[18px] flex justify-between gap-3">
                   <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="text-sm font-medium truncate">{j.bahanBakuID?.namaBahan ?? "-"}</span>
-                    <span className="text-xs text-navy/60">
+                    <span className="text-isi font-medium truncate">{j.bahanBakuID?.namaBahan ?? "-"}</span>
+                    <span className="text-kecil text-navy/60">
                       {formatWaktuSingkat(j.tanggal)} · {j.alasan}
                     </span>
                   </div>
                   <span
-                    className={`text-sm font-semibold whitespace-nowrap ${masuk ? "text-emerald-700" : "text-red-800"}`}
+                    className={`text-isi font-semibold whitespace-nowrap ${masuk ? "text-emerald-700" : "text-red-800"}`}
                   >
                     <span className="sr-only">{masuk ? "Masuk " : "Keluar "}</span>
                     {teksJumlahRingkas(j)}

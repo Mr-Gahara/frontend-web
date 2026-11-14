@@ -43,7 +43,7 @@ export function KartuDiskonGlobal({
     <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-5">
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-navy flex items-center gap-2">
+          <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
             <Tag className="h-4 w-4 text-karamel" /> Diskon Global
           </h2>
           <Popover
@@ -54,7 +54,7 @@ export function KartuDiskonGlobal({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 text-xs cursor-pointer font-bold border-navy/20 text-navy hover:bg-navy/5"
+                className="h-7 text-kecil cursor-pointer font-bold border-navy/20 text-navy hover:bg-navy/5"
               >
                 Pilih Diskon
               </Button>
@@ -69,7 +69,7 @@ export function KartuDiskonGlobal({
                   className="text-navy"
                 />
                 <CommandList>
-                  <CommandEmpty className="py-4 text-center text-xs font-medium text-navy/60">
+                  <CommandEmpty className="py-4 text-center text-kecil font-medium text-navy/60">
                     Belum ada diskon aktif.
                   </CommandEmpty>
                   <CommandGroup>
@@ -103,7 +103,7 @@ export function KartuDiskonGlobal({
                             </div>
                             <span className="flex flex-col"><span>{d.namaDiskon}</span><SyaratDiskon diskon={d} /></span>
                           </div>
-                          <Badge className="text-[10px] bg-karamel text-navy hover:bg-karamel border-none font-bold">
+                          <Badge className="text-mikro bg-karamel text-navy hover:bg-karamel border-none font-bold">
                             {d.tipe === "persen" ? `${d.nilai}%` : "Rp"}
                           </Badge>
                         </CommandItem>
@@ -126,7 +126,7 @@ export function KartuDiskonGlobal({
               return (
                 <Badge
                   key={d.id || `badge-global-${idx}`}
-                  className="bg-karamel text-navy border-none hover:bg-karamel text-[11px] px-2.5 py-1 font-bold shadow-sm"
+                  className="bg-karamel text-navy border-none hover:bg-karamel text-mikro px-2.5 py-1 font-bold shadow-sm"
                 >
                   {d.namaDiskon} (
                   {d.tipe === "persen"
@@ -141,7 +141,7 @@ export function KartuDiskonGlobal({
       </div>
 
       <div className="space-y-2 border-t border-navy/10 pt-4">
-        <label className="text-sm font-bold text-navy" htmlFor="keterangan">
+        <label className="text-isi font-bold text-navy" htmlFor="keterangan">
           Keterangan{" "}
           <span className="font-medium text-navy/50">
             (Opsional)
@@ -152,7 +152,7 @@ export function KartuDiskonGlobal({
           value={keterangan}
           onChange={(e) => onKeterangan(e.target.value)}
           placeholder="Catatan transaksi..."
-          className="text-sm bg-gading border-navy/20 text-navy placeholder:text-navy/30"
+          className="text-isi bg-gading border-navy/20 text-navy placeholder:text-navy/30"
         />
       </div>
     </div>

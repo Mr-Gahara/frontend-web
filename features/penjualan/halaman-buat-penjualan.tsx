@@ -243,10 +243,10 @@ export default function HalamanBuatPenjualan() {
           Kembali ke Daftar Penjualan
         </Button>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Buat Penjualan
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             Isi detail transaksi untuk membuat struk/invoice penjualan baru.
           </p>
         </div>
@@ -264,12 +264,12 @@ export default function HalamanBuatPenjualan() {
         <div className="lg:col-span-8 flex flex-col gap-6">
           {/* INFO TRANSAKSI */}
           <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm space-y-5">
-            <h2 className="text-base font-bold text-navy flex items-center gap-2">
+            <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
               <Receipt className="w-5 h-5 text-karamel" />
               Informasi Transaksi
             </h2>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-navy">
+              <label className="text-isi font-bold text-navy">
                 Jenis Penjualan
               </label>
               <Select
@@ -304,7 +304,7 @@ export default function HalamanBuatPenjualan() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label htmlFor="tanggal-transaksi" className="text-sm font-bold text-navy">
+                <label htmlFor="tanggal-transaksi" className="text-isi font-bold text-navy">
                   Tanggal Transaksi
                 </label>
                 <PilihTanggal
@@ -315,7 +315,7 @@ export default function HalamanBuatPenjualan() {
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="jam-transaksi" className="text-sm font-bold text-navy">
+                <label htmlFor="jam-transaksi" className="text-isi font-bold text-navy">
                   Jam Transaksi
                 </label>
                 <InputWaktu
@@ -332,7 +332,7 @@ export default function HalamanBuatPenjualan() {
           {/* ITEM PENJUALAN */}
           <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-navy flex items-center gap-2">
+              <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5 text-karamel" />
                 Item Penjualan
               </h2>
@@ -402,7 +402,7 @@ export default function HalamanBuatPenjualan() {
         {/* ================= AKSI & SUBMIT ================= */}
         <div className="flex flex-col gap-3">
           {formError && (
-            <p className="text-sm font-bold text-red-600 bg-red-50 p-3 rounded-xl border border-red-100">
+            <p className="text-isi font-bold text-red-600 bg-red-50 p-3 rounded-xl border border-red-100">
               {formError}
             </p>
           )}

@@ -58,8 +58,8 @@ function IsiDialogTutupKasir({ namaMesin, laci, onBukaChange, menutup, pesan, on
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="text-[22px] font-bold text-navy">Tutup kasir {namaMesin}?</DialogTitle>
-        <DialogDescription className="text-[15px] text-navy/70">
+        <DialogTitle className="text-judul font-bold text-navy">Tutup kasir {namaMesin}?</DialogTitle>
+        <DialogDescription className="text-isi text-navy/70">
           Hitung dulu uang di laci {laci}, lalu isi jumlahnya. Mesin kasir ini tidak bisa dipakai berjualan sampai
           kasirnya dibuka lagi.
         </DialogDescription>
@@ -74,7 +74,7 @@ function IsiDialogTutupKasir({ namaMesin, laci, onBukaChange, menutup, pesan, on
           onTutup(teks ? { nominal, catatan: teks } : { nominal });
         }}
       >
-        <label className="flex flex-col gap-1.5 text-[15px] font-bold">
+        <label className="flex flex-col gap-1.5 text-besar font-bold">
           Uang yang dihitung di laci
           <span className="flex h-12 items-center gap-2 rounded-[10px] border border-navy/20 bg-white px-3.5 focus-within:border-2 focus-within:border-navy">
             <span className="font-semibold text-navy/70">Rp</span>
@@ -83,18 +83,18 @@ function IsiDialogTutupKasir({ namaMesin, laci, onBukaChange, menutup, pesan, on
               autoComplete="off"
               value={teksRibuan(nominal)}
               onChange={(e) => setNominal(angkaDariTeks(e.target.value))}
-              className="min-w-0 flex-1 bg-transparent text-lg font-bold text-navy outline-none"
+              className="min-w-0 flex-1 bg-transparent text-subjudul font-bold text-navy outline-none"
             />
           </span>
         </label>
 
         {pesan && (
-          <div role="alert" className="rounded-[10px] bg-karamel/25 px-3.5 py-3 text-[15px] text-navy">
+          <div role="alert" className="rounded-[10px] bg-karamel/25 px-3.5 py-3 text-besar text-navy">
             {pesan}
           </div>
         )}
 
-        <label className="flex flex-col gap-1.5 text-[15px] font-bold">
+        <label className="flex flex-col gap-1.5 text-besar font-bold">
           <span>
             Catatan{" "}
             <span className="font-normal text-navy/70">(wajib bila uang tidak sama dengan catatan sistem)</span>
@@ -106,13 +106,13 @@ function IsiDialogTutupKasir({ namaMesin, laci, onBukaChange, menutup, pesan, on
             onChange={(e) => setCatatan(e.target.value)}
             placeholder="Contoh: ditutup dari web karena kasir lupa menutup"
             className={cn(
-              "resize-y bg-white text-[15px] font-normal text-navy",
+              "resize-y bg-white text-besar font-normal text-navy",
               pesan ? "border-2 border-navy" : "border-navy/20",
             )}
           />
         </label>
 
-        <p className="rounded-[10px] bg-krem px-3.5 py-3 text-sm text-navy/70">
+        <p className="rounded-[10px] bg-krem px-3.5 py-3 text-isi text-navy/70">
           Selisih dengan catatan sistem baru tampil setelah kasir ditutup, agar hitungan tidak terpengaruh.
         </p>
 
@@ -121,14 +121,14 @@ function IsiDialogTutupKasir({ namaMesin, laci, onBukaChange, menutup, pesan, on
             type="button"
             variant="outline"
             onClick={() => onBukaChange(false)}
-            className="h-12 border-navy/20 text-base font-bold text-navy"
+            className="h-12 border-navy/20 text-besar font-bold text-navy"
           >
             Batal
           </Button>
           <Button
             type="submit"
             disabled={nominal === null || menutup}
-            className="h-12 bg-navy text-base font-bold text-gading hover:bg-navy/90"
+            className="h-12 bg-navy text-besar font-bold text-gading hover:bg-navy/90"
           >
             {menutup ? "Menutup..." : "Tutup kasir"}
           </Button>

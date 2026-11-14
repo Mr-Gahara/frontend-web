@@ -126,7 +126,7 @@ export function LangkahProduk({
         aria-labelledby="setup-produk-judul"
         className="flex flex-col gap-[18px] rounded-2xl border border-input p-5"
       >
-        <h2 id="setup-produk-judul" className="text-[17px] font-bold">
+        <h2 id="setup-produk-judul" className="text-subjudul font-bold">
           Tambah produk
         </h2>
         <div data-panduan="produk-isian" className="flex flex-col gap-[18px]">
@@ -232,7 +232,7 @@ export function LangkahProduk({
               />
               <p
                 id="setup-produk-stok-min-bantu"
-                className="text-[13px] text-muted-foreground"
+                className="text-kecil text-muted-foreground"
               >
                 Peringatan muncul bila stok di bawah angka ini.
               </p>
@@ -333,7 +333,7 @@ export function LangkahProduk({
                     <button
                       type="button"
                       onClick={() => remove(i)}
-                      className="h-12 cursor-pointer rounded-xl px-3 text-sm font-semibold underline decoration-karamel decoration-2 underline-offset-[3px]"
+                      className="h-12 cursor-pointer rounded-xl px-3 text-isi font-semibold underline decoration-karamel decoration-2 underline-offset-[3px]"
                     >
                       Hapus bahan {i + 1}
                     </button>

@@ -53,25 +53,25 @@ const getStatusBadge = (status: StatusTransfer) => {
   switch (status) {
     case "PENDING":
       return (
-        <Badge className="bg-slate-200 text-slate-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-slate-200 text-slate-700 border-none font-bold text-isi px-4 py-1">
           <Clock className="w-4 h-4 mr-1.5" /> {LABEL_STATUS_TRANSFER.PENDING}
         </Badge>
       );
     case "DIKIRIM":
       return (
-        <Badge className="bg-amber-100 text-amber-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-amber-100 text-amber-700 border-none font-bold text-isi px-4 py-1">
           <Send className="w-4 h-4 mr-1.5" /> {LABEL_STATUS_TRANSFER.DIKIRIM}
         </Badge>
       );
     case "DITERIMA":
       return (
-        <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-emerald-100 text-emerald-700 border-none font-bold text-isi px-4 py-1">
           <CheckCircle2 className="w-4 h-4 mr-1.5" /> {LABEL_STATUS_TRANSFER.DITERIMA}
         </Badge>
       );
     case "BATAL":
       return (
-        <Badge className="bg-rose-100 text-rose-700 border-none font-bold text-sm px-4 py-1">
+        <Badge className="bg-rose-100 text-rose-700 border-none font-bold text-isi px-4 py-1">
           <XCircle className="w-4 h-4 mr-1.5" /> {LABEL_STATUS_TRANSFER.BATAL}
         </Badge>
       );
@@ -137,7 +137,7 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
   if (!detail) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           Data tidak ditemukan
         </h2>
         <Button variant="link" onClick={() => router.back()} className="mt-4">
@@ -169,10 +169,10 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
             Kembali ke Daftar Surat Jalan
           </Button>
           <div className="space-y-1.5">
-            <h1 className="text-3xl font-black font-mono tracking-tight text-navy flex items-center gap-3">
+            <h1 className="text-judul font-bold font-mono tracking-tight text-navy flex items-center gap-3">
               {detail.nomorTransfer}
             </h1>
-            <div className="flex items-center gap-3 text-sm font-medium text-navy/60">
+            <div className="flex items-center gap-3 text-isi font-medium text-navy/60">
               <span className="flex items-center gap-1">
                 <Truck className="w-4 h-4" /> Transfer Logistik
               </span>
@@ -192,10 +192,10 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
           {/* Tabel rincian berkartu baris, tanpa panel berlatar (CV22a). */}
           <section aria-label="Muatan Pengiriman" className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-base font-bold text-navy flex items-center gap-2">
+              <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
                 <Package className="w-5 h-5 text-karamel" /> Muatan Pengiriman
               </h2>
-              <span className="text-xs font-bold text-navy/60">Total {detail.items.length} Macam Barang</span>
+              <span className="text-kecil font-bold text-navy/60">Total {detail.items.length} Macam Barang</span>
             </div>
             <DataTable rincian columns={kolomMuatan(detail.status === "DITERIMA")} data={detail.items} emptyMessage="Tidak ada barang." />
           </section>
@@ -204,7 +204,7 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
         {/* KOLOM KANAN: INFO RUTE & ACTION BUTTONS */}
         <div className="lg:col-span-1 space-y-6">
           <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-5">
-            <h2 className="font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
+            <h2 className="text-subjudul font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
               <MapPin className="w-4 h-4 text-karamel" /> Rute Pengiriman
             </h2>
 
@@ -212,7 +212,7 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
               <div className="flex flex-col gap-1 relative pl-6">
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-navy" />
                 <div className="absolute left-1.5 top-4 -bottom-4 w-0.5 bg-navy/10" />
-                <span className="text-xs font-bold text-navy/50 uppercase">
+                <span className="text-kecil font-bold text-navy/50 uppercase">
                   Asal ({detail.dariLokasi?.tipe ?? "-"})
                 </span>
                 <span className="font-bold text-navy">
@@ -221,7 +221,7 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
               </div>
               <div className="flex flex-col gap-1 relative pl-6">
                 <div className="absolute left-0.75 top-1.5 w-2 h-2 rounded-full bg-karamel" />
-                <span className="text-xs font-bold text-navy/50 uppercase">
+                <span className="text-kecil font-bold text-navy/50 uppercase">
                   Tujuan ({detail.keLokasi?.tipe ?? "-"})
                 </span>
                 <span className="font-bold text-navy">
@@ -231,7 +231,7 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
             </div>
 
             <div className="border-t border-navy/10 pt-4 mt-2 space-y-3">
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-isi">
                 <span className="font-bold text-navy/60">
                   Pengirim ({detail.dariLokasi?.tipe ?? "-"})
                 </span>
@@ -242,7 +242,7 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
 
               {/* Tampilkan Penerima jika sudah sampai */}
               {detail.penerima && (
-                <div className="flex justify-between items-center text-sm border-t border-navy/5 pt-2">
+                <div className="flex justify-between items-center text-isi border-t border-navy/5 pt-2">
                   <span className="font-bold text-navy/60">
                     Penerima ({detail.keLokasi?.tipe ?? "-"})
                   </span>
@@ -257,7 +257,7 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
           {/* DOKUMEN TERKAIT (Pengajuan Stok) */}
           {detail.pengajuanStokID && (
             <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm flex flex-col gap-3">
-              <h3 className="text-sm font-bold text-navy text-center mb-1">
+              <h3 className="text-isi font-bold text-navy text-center mb-1">
                 Dokumen Referensi
               </h3>
               <Button
@@ -278,7 +278,7 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
           {/* ACTION BUTTONS (HANYA MUNCUL JIKA PENDING) */}
           {(aksi.kirim || aksi.revisi || aksi.batal) && (
             <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6 shadow-sm flex flex-col gap-3">
-              <h3 className="text-sm font-bold text-blue-900 text-center mb-1">
+              <h3 className="text-isi font-bold text-blue-900 text-center mb-1">
                 Eksekusi Keberangkatan
               </h3>
               {aksi.kirim && (
@@ -317,10 +317,10 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
           {isDikirim && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm text-center space-y-2">
               <Truck className="w-8 h-8 text-amber-500 mx-auto" />
-              <h3 className="text-sm font-bold text-amber-800">
+              <h3 className="text-isi font-bold text-amber-800">
                 Menunggu {detail.keLokasi?.tipe ?? "Penerima"}
               </h3>
-              <p className="text-xs font-medium text-amber-700/80">
+              <p className="text-kecil font-medium text-amber-700/80">
                 Barang sudah dipotong dari stok {detail.dariLokasi?.tipe ?? "asal"} dan sedang dalam
                 perjalanan. Menunggu {detail.keLokasi?.tipe ?? "penerima"} melakukan konfirmasi
                 penerimaan, lewat web atau aplikasi.

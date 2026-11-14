@@ -53,7 +53,7 @@ export default function HalamanRevisiTransfer({ id, ruang }: { id: string; ruang
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <AlertTriangle className="w-12 h-12 text-rose-500/50" />
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           Data tidak ditemukan
         </h2>
         <Button variant="outline" onClick={() => router.back()}>
@@ -74,8 +74,8 @@ export default function HalamanRevisiTransfer({ id, ruang }: { id: string; ruang
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <AlertTriangle className="w-12 h-12 text-amber-500/80" />
-        <h2 className="text-xl font-bold text-navy">Akses Ditolak</h2>
-        <p className="text-sm font-medium text-navy/60">{alasanTolak}</p>
+        <h2 className="text-subjudul font-bold text-navy">Akses Ditolak</h2>
+        <p className="text-isi font-medium text-navy/60">{alasanTolak}</p>
         <Button
           variant="default"
           className="bg-navy"
@@ -154,11 +154,11 @@ function FormRevisiTransfer({ detail, urlSuratJalan }: { detail: TransferStok; u
           Batal Revisi
         </Button>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy flex items-center gap-2">
+          <h1 className="text-judul font-bold tracking-tight text-navy flex items-center gap-2">
             <FileEdit className="w-6 h-6 text-karamel" /> Revisi Kuantitas
             Pengiriman
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             Surat Jalan:{" "}
             <strong className="font-mono">{detail.nomorTransfer}</strong>
           </p>
@@ -167,7 +167,7 @@ function FormRevisiTransfer({ detail, urlSuratJalan }: { detail: TransferStok; u
 
       {/* DAFTAR BARANG: tabel rincian berkartu baris (CV22a). */}
       <section aria-label="Sesuaikan Jumlah yang Akan Dikirim" className="flex flex-col gap-3">
-        <h2 className="text-base font-bold text-navy flex items-center gap-2">
+        <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
           <Package className="w-5 h-5 text-karamel" /> Sesuaikan Jumlah yang Akan Dikirim
         </h2>
         <DataTable
@@ -193,7 +193,7 @@ function FormRevisiTransfer({ detail, urlSuratJalan }: { detail: TransferStok; u
                     onChange={(e) => handleQtyChange(row.original.id_lokal, e.target.value)}
                     className="w-24 bg-white border-navy/20 text-navy font-mono font-bold text-right no-spinner"
                   />
-                  <span className="text-xs font-bold text-navy/50 w-8">{row.original.satuan}</span>
+                  <span className="text-kecil font-bold text-navy/50 w-8">{row.original.satuan}</span>
                 </div>
               ),
             },
@@ -203,7 +203,7 @@ function FormRevisiTransfer({ detail, urlSuratJalan }: { detail: TransferStok; u
 
       {/* INFO & ACTIONS */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50 border border-blue-100 p-4 rounded-xl">
-        <p className="text-xs font-medium text-blue-800">
+        <p className="text-kecil font-medium text-blue-800">
           <strong>Penting:</strong> Pastikan kuantitas yang Anda masukkan sesuai
           dengan stok fisik di gudang. Angka ini akan menjadi patokan saat Anda
           mengeksekusi pengiriman.

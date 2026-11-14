@@ -169,9 +169,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <GalleryVerticalEnd className="size-4" />
                     </div>
                   )}
-                  <div className="grid flex-1 text-left text-sm leading-tight text-slate-50 hover:text-slate-900 transition-colors">
+                  <div className="grid flex-1 text-left text-isi leading-tight text-slate-50 hover:text-slate-900 transition-colors">
                     <span className="truncate font-semibold">{namaToko}</span>
-                    <span className="truncate text-xs text-slate-50/70 group-hover:text-slate-500">
+                    <span className="truncate text-kecil text-slate-50/70 group-hover:text-slate-500">
                       {currentWorkspaceName}
                     </span>
                   </div>
@@ -185,7 +185,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 side="bottom"
                 sideOffset={4}
               >
-                <DropdownMenuLabel className="text-xs text-muted-foreground">
+                <DropdownMenuLabel className="text-kecil text-muted-foreground">
                   Pilih Ruang Kerja
                 </DropdownMenuLabel>
 
@@ -197,7 +197,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <Building2 className="mr-2 size-4 text-emerald-600" />
                     <div className="flex flex-col">
                       <span className="font-medium">Ruang Outlet</span>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-mikro text-muted-foreground">
                         Dasbor Kasir & Penjualan
                       </span>
                     </div>
@@ -212,7 +212,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <Warehouse className="mr-2 size-4 text-emerald-600" />
                     <div className="flex flex-col">
                       <span className="font-medium">Ruang Gudang</span>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-mikro text-muted-foreground">
                         WMS & Inventaris Pusat
                       </span>
                     </div>
@@ -249,7 +249,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           return (
             <SidebarGroup key={gi}>
               {group.grup && (
-                <SidebarGroupLabel className="text-slate-50/50 uppercase tracking-wider text-[10px] mt-2">
+                <SidebarGroupLabel className="text-slate-50/50 uppercase tracking-wider text-mikro mt-2">
                   {group.grup}
                 </SidebarGroupLabel>
               )}

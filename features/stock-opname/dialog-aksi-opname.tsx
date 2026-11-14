@@ -65,7 +65,7 @@ export function DialogAksiOpname({ ajukan, setujui, tolak, batal }: Props) {
               Menyetujui dokumen ini akan langsung memicu {setujui.namaJurnal}. Saldo persediaan di sistem akan diubah mengikuti angka fisik yang diinput.
             </AlertDialogDescription>
             <div className="pt-4">
-              <label className="text-xs font-bold text-navy mb-1.5 block">Catatan Persetujuan (Opsional)</label>
+              <label className="text-kecil font-bold text-navy mb-1.5 block">Catatan Persetujuan (Opsional)</label>
               <Textarea
                 placeholder="Misal: Selisih disetujui, sesuai dengan laporan kehilangan."
                 value={setujui.alasan}
@@ -94,7 +94,7 @@ export function DialogAksiOpname({ ajukan, setujui, tolak, batal }: Props) {
               Status opname akan kembali menjadi <strong>REJECTED</strong>. Staf dapat mengedit ulang angka fisik berdasarkan instruksi Anda.
             </AlertDialogDescription>
             <div className="pt-4">
-              <label className="text-xs font-bold text-rose-700 mb-1.5 block">Alasan Penolakan <span className="text-rose-500">*</span></label>
+              <label className="text-kecil font-bold text-rose-700 mb-1.5 block">Alasan Penolakan <span className="text-rose-500">*</span></label>
               <Textarea
                 placeholder="Misal: Harap hitung ulang bagian rak belakang."
                 value={tolak.catatan}

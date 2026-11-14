@@ -33,7 +33,7 @@ export default function Topbar() {
           className="bg-navy text-white hover:bg-navy/80 hover:text-white cursor-pointer transition-colors" 
         />
         
-        <span className="text-base font-semibold text-gray-800">
+        <span className="text-besar font-semibold text-gray-800">
           {currentDate}
         </span>
       </div>

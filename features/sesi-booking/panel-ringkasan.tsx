@@ -42,22 +42,22 @@ export function PanelRingkasan({
       <div className="rounded-2xl border border-navy/10 bg-navy text-gading p-6 sm:p-8 shadow-md flex flex-col gap-6">
         <div className="flex items-center gap-2 border-b border-gading/20 pb-4">
           <Receipt className="h-5 w-5 text-karamel" />
-          <h2 className="font-bold text-lg tracking-wide uppercase">Ringkasan Reservasi</h2>
+          <h2 className="font-bold text-subjudul tracking-wide uppercase">Ringkasan Reservasi</h2>
         </div>
         <div className="space-y-4">
           <div className="space-y-1.5 bg-gading/5 p-3 rounded-xl border border-gading/10">
-            <p className="text-xs font-bold text-gading/60 uppercase tracking-wider">Penyewa</p>
-            <p className="font-bold text-karamel text-base truncate">{namaPelanggan}</p>
+            <p className="text-kecil font-bold text-gading/60 uppercase tracking-wider">Penyewa</p>
+            <p className="font-bold text-karamel text-besar truncate">{namaPelanggan}</p>
           </div>
           <div className="space-y-1.5 bg-gading/5 p-3 rounded-xl border border-gading/10">
-            <p className="text-xs font-bold text-gading/60 uppercase tracking-wider">Total Fasilitas</p>
-            <p className="font-bold text-gading text-base">{jumlahFasilitas} Aset</p>
+            <p className="text-kecil font-bold text-gading/60 uppercase tracking-wider">Total Fasilitas</p>
+            <p className="font-bold text-gading text-besar">{jumlahFasilitas} Aset</p>
           </div>
 
           {/* DISKON GLOBAL PANEL KANAN */}
           <div className="space-y-1.5 pt-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-bold text-gading/60 uppercase tracking-wider flex items-center gap-1.5">
+              <p className="text-kecil font-bold text-gading/60 uppercase tracking-wider flex items-center gap-1.5">
                 <Tag className="w-3.5 h-3.5 text-karamel" /> Diskon Global Transaksi
               </p>
               <Popover open={bukaDiskon} onOpenChange={setBukaDiskon}>
@@ -65,7 +65,7 @@ export function PanelRingkasan({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 px-2 text-[10px] cursor-pointer font-bold bg-gading/10 text-gading hover:bg-gading/20 hover:text-gading"
+                    className="h-6 px-2 text-mikro cursor-pointer font-bold bg-gading/10 text-gading hover:bg-gading/20 hover:text-gading"
                   >
                     Pilih Diskon
                   </Button>
@@ -74,7 +74,7 @@ export function PanelRingkasan({
                   <Command className="bg-gading">
                     <CommandInput placeholder="Cari diskon transaksi..." className="text-navy" />
                     <CommandList>
-                      <CommandEmpty className="py-4 text-center text-xs font-medium text-navy/60">
+                      <CommandEmpty className="py-4 text-center text-kecil font-medium text-navy/60">
                         Belum ada diskon aktif.
                       </CommandEmpty>
                       <CommandGroup>
@@ -114,7 +114,7 @@ export function PanelRingkasan({
                   return (
                     <div
                       key={d.id}
-                      className="px-2 py-1 rounded-md bg-karamel text-navy text-[10px] font-bold shadow-sm"
+                      className="px-2 py-1 rounded-md bg-karamel text-navy text-mikro font-bold shadow-sm"
                     >
                       {d.namaDiskon} ({d.tipe === "persen" ? `${d.nilai}%` : `Rp ${d.nilai.toLocaleString("id-ID")}`})
                     </div>
@@ -129,7 +129,7 @@ export function PanelRingkasan({
               {waktuItems.map((s, i) => (
                 <div
                   key={i}
-                  className="flex justify-between items-center text-xs text-gading/70 font-medium px-1"
+                  className="flex justify-between items-center text-kecil text-gading/70 font-medium px-1"
                 >
                   <span>Fasilitas #{i + 1}</span>
                   <span className="font-mono font-bold text-gading/90">
@@ -143,8 +143,8 @@ export function PanelRingkasan({
         <div className="bg-sage/20 border border-sage/30 p-4 rounded-xl flex gap-3 items-start">
           <Sparkles className="w-5 h-5 text-sage shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <p className="text-xs font-bold text-gading">Sistem Otomatis (Smart Calc)</p>
-            <p className="text-[11px] font-medium text-gading/70 leading-relaxed">
+            <p className="text-kecil font-bold text-gading">Sistem Otomatis (Smart Calc)</p>
+            <p className="text-mikro font-medium text-gading/70 leading-relaxed">
               Total tagihan (setelah diskon), tarif terbaik, dan pajak akan di-generate otomatis oleh server setelah
               data disimpan.
             </p>
@@ -155,7 +155,7 @@ export function PanelRingkasan({
             type="submit"
             disabled={menyimpan || adaBentrok}
             className={cn(
-              "w-full text-gading shadow-lg font-bold h-14 text-base transition-colors",
+              "w-full text-gading shadow-lg font-bold h-14 text-besar transition-colors",
               adaBentrok
                 ? "bg-rose-500/50 cursor-not-allowed opacity-80"
                 : "bg-sage hover:bg-sage/90 cursor-pointer",

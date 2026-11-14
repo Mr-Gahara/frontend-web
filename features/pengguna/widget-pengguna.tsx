@@ -60,7 +60,7 @@ export function WidgetActiveUsers({
           <div className="p-2 bg-gading rounded-lg shadow-sm border border-navy/5">
             <UserCheck className="h-4 w-4 text-sage" />
           </div>
-          <span className="text-xs font-bold uppercase tracking-wider text-navy/60">
+          <span className="text-kecil font-bold uppercase tracking-wider text-navy/60">
             Aktif Bekerja
           </span>
         </div>
@@ -68,16 +68,17 @@ export function WidgetActiveUsers({
           {monitoring.isLoading ? (
             <Loader2 className="h-10 w-10 text-navy animate-spin mb-1" />
           ) : (
+            // eslint-disable-next-line no-restricted-syntax -- teks hero di luar skala tipografi (CV25a)
             <span className="text-6xl font-black text-navy leading-none">
               {pesanGalat ? "-" : sedangBekerja.length}
             </span>
           )}
-          <span className="text-sm text-navy/60 font-medium mb-1.5">
+          <span className="text-isi text-navy/60 font-medium mb-1.5">
             sedang bekerja
           </span>
         </div>
         {!monitoring.isLoading && !pesanGalat && (
-          <p className="text-xs font-semibold text-navy/50 mt-2">
+          <p className="text-kecil font-semibold text-navy/50 mt-2">
             {sudahAbsen} staf sudah absen hari ini
           </p>
         )}
@@ -86,15 +87,15 @@ export function WidgetActiveUsers({
       {/* Daftar Karyawan dari Backend */}
       <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-3 scrollbar-thin scrollbar-thumb-navy/20">
         {monitoring.isLoading ? (
-          <div className="text-sm font-medium text-navy/50 text-center mt-4">
+          <div className="text-isi font-medium text-navy/50 text-center mt-4">
             Memuat data absensi...
           </div>
         ) : pesanGalat ? (
-          <div role="alert" className="text-sm font-medium text-red-600 text-center mt-4">
+          <div role="alert" className="text-isi font-medium text-red-600 text-center mt-4">
             {pesanGalat}
           </div>
         ) : sedangBekerja.length === 0 ? (
-          <div className="text-sm font-medium text-navy/50 text-center mt-4">
+          <div className="text-isi font-medium text-navy/50 text-center mt-4">
             {sudahAbsen === 0
               ? "Belum ada karyawan yang absen hari ini."
               : "Tidak ada karyawan yang sedang bekerja saat ini."}
@@ -108,15 +109,15 @@ export function WidgetActiveUsers({
                 className="flex flex-col gap-1.5 rounded-lg border border-navy/10 bg-gading p-3 hover:border-navy/30 transition-colors shadow-sm"
               >
                 <div className="flex justify-between items-start">
-                  <p className="text-sm font-bold text-navy truncate pr-2">
+                  <p className="text-isi font-bold text-navy truncate pr-2">
                     {staf.nama}
                   </p>
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-white bg-sage px-2 py-0.5 rounded-full shrink-0">
+                  <div className="flex items-center gap-1 text-mikro font-bold text-white bg-sage px-2 py-0.5 rounded-full shrink-0">
                     <Clock className="h-3 w-3" />
                     {jamWIB(staf.sesiTerakhir?.waktuMasuk)}
                   </div>
                 </div>
-                <p className="text-xs font-semibold capitalize text-navy/60">
+                <p className="text-kecil font-semibold capitalize text-navy/60">
                   {pengguna ? namaPeran(pengguna, roleList) : "-"}
                 </p>
               </div>
@@ -126,7 +127,7 @@ export function WidgetActiveUsers({
       </div>
 
       {/* Footer Notes */}
-      <div className="text-center text-[10px] font-medium text-navy/40 mt-4 pt-4 border-t border-navy/10">
+      <div className="text-center text-mikro font-medium text-navy/40 mt-4 pt-4 border-t border-navy/10">
         Disinkronisasi secara real-time
       </div>
     </div>
@@ -148,20 +149,21 @@ export function WidgetTotalUsers({
             <div className="p-2 bg-karamel/20 rounded-lg">
               <Users className="h-4 w-4 text-karamel" />
             </div>
-            <h3 className="text-sm font-bold uppercase tracking-wider">
+            <h3 className="text-isi font-bold uppercase tracking-wider">
               Total Pengguna
             </h3>
           </div>
-          <p className="text-sm text-gading/70 font-medium leading-relaxed max-w-[85%]">
+          <p className="text-isi text-gading/70 font-medium leading-relaxed max-w-[85%]">
             Meringkas seluruh entitas akun yang memiliki hak akses ke dalam
             sistem.
           </p>
         </div>
         <div className="flex items-end gap-3">
+          {/* eslint-disable-next-line no-restricted-syntax -- teks hero di luar skala tipografi (CV25a) */}
           <span className="text-6xl lg:text-7xl font-black tracking-tighter leading-none">
             {penggunaList.length}
           </span>
-          <span className="text-base text-gading/70 mb-1.5 font-bold">
+          <span className="text-besar text-gading/70 mb-1.5 font-bold">
             Akun Terdaftar
           </span>
         </div>
@@ -189,25 +191,27 @@ export function WidgetAccess({
         <div className="p-2 bg-gading rounded-lg shadow-sm border border-navy/5">
           <MonitorSmartphone className="h-4 w-4 text-karamel" />
         </div>
-        <span className="text-xs font-bold uppercase tracking-wider">
+        <span className="text-kecil font-bold uppercase tracking-wider">
           Akses Platform
         </span>
       </div>
       <div className="flex items-center justify-around mt-auto pt-2">
         <div className="text-center">
+          {/* eslint-disable-next-line no-restricted-syntax -- teks hero di luar skala tipografi (CV25a) */}
           <div className="text-4xl font-black text-navy">
             {appAksesCount}
           </div>
-          <div className="text-xs font-bold text-navy/60 mt-2 uppercase tracking-widest">
+          <div className="text-kecil font-bold text-navy/60 mt-2 uppercase tracking-widest">
             Aplikasi
           </div>
         </div>
         <div className="w-px h-12 bg-navy/10"></div>
         <div className="text-center">
+          {/* eslint-disable-next-line no-restricted-syntax -- teks hero di luar skala tipografi (CV25a) */}
           <div className="text-4xl font-black text-navy">
             {webAksesCount}
           </div>
-          <div className="text-xs font-bold text-navy/60 mt-2 uppercase tracking-widest">
+          <div className="text-kecil font-bold text-navy/60 mt-2 uppercase tracking-widest">
             Web
           </div>
         </div>

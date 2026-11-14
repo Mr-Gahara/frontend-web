@@ -35,7 +35,7 @@ import { BATAS_METODE_AKTIF, jumlahMetodeAktif, labelKategori, masihDalamBatas, 
 import { PesanMetode, URL_DAFTAR_METODE } from "./form-metode-pembayaran";
 
 const URL_BUAT = URL_DAFTAR_METODE + "/buatMetodePembayaran";
-const kelasKepalaKolom = "text-xs font-bold text-navy/60";
+const kelasKepalaKolom = "text-kecil font-bold text-navy/60";
 
 /**
  * Daftar kelola metode pembayaran: seluruh metode termasuk yang nonaktif
@@ -76,7 +76,7 @@ export function HalamanDaftarMetodePembayaran() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-xs font-bold text-navy/60 hover:bg-transparent hover:text-navy"
+            className="h-auto p-0 text-kecil font-bold text-navy/60 hover:bg-transparent hover:text-navy"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Nama Pembayaran <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -89,7 +89,7 @@ export function HalamanDaftarMetodePembayaran() {
         meta: { label: "Kategori" },
         header: () => <span className={kelasKepalaKolom}>Kategori</span>,
         cell: ({ row }) => (
-          <span className="text-sm capitalize font-medium text-navy/80">{labelKategori(row.original.kategori)}</span>
+          <span className="text-isi capitalize font-medium text-navy/80">{labelKategori(row.original.kategori)}</span>
         ),
       },
       {
@@ -98,11 +98,11 @@ export function HalamanDaftarMetodePembayaran() {
         header: () => <span className={kelasKepalaKolom}>Akun Tujuan</span>,
         cell: ({ row }) => {
           const akun = row.original.akunKas;
-          if (!akun?.namaAkun) return <span className="text-xs font-medium text-navy/50">-</span>;
+          if (!akun?.namaAkun) return <span className="text-kecil font-medium text-navy/50">-</span>;
           return (
             <div className="flex flex-col">
               <span className="font-semibold text-navy">{akun.namaAkun}</span>
-              <span className="text-xs font-medium text-navy/60 font-mono">{akun.nomorAkun}</span>
+              <span className="text-kecil font-medium text-navy/60 font-mono">{akun.nomorAkun}</span>
             </div>
           );
         },
@@ -115,7 +115,7 @@ export function HalamanDaftarMetodePembayaran() {
           const aktif = row.original.isActive;
           return (
             <span
-              className={`rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${aktif ? "bg-sage text-gading" : "bg-navy/10 text-navy/60"}`}
+              className={`rounded-full px-2.5 py-1 text-kecil font-bold shadow-sm ${aktif ? "bg-sage text-gading" : "bg-navy/10 text-navy/60"}`}
             >
               {aktif ? "Aktif" : "Non-Aktif"}
             </span>
@@ -196,8 +196,8 @@ export function HalamanDaftarMetodePembayaran() {
               <Wallet className="w-6 h-6 text-navy" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-navy">Metode Pembayaran</h1>
-              <p className="text-sm font-medium text-navy/60">Kelola saluran pembayaran yang terhubung ke Akun Kas Anda.</p>
+              <h1 className="text-judul font-bold tracking-tight text-navy">Metode Pembayaran</h1>
+              <p className="text-isi font-medium text-navy/60">Kelola saluran pembayaran yang terhubung ke Akun Kas Anda.</p>
             </div>
           </div>
           {aksi.buat && (
@@ -209,13 +209,13 @@ export function HalamanDaftarMetodePembayaran() {
           )}
         </div>
         {!dalamBatas && (
-          <p className="text-sm font-medium text-navy/70">
+          <p className="text-isi font-medium text-navy/70">
             Toko sudah punya {BATAS_METODE_AKTIF} metode aktif (batas maksimal). Metode baru hanya dapat disimpan nonaktif;
             nonaktifkan metode yang tidak dipakai untuk mengaktifkan metode lain.
           </p>
         )}
         {daftar.data && jumlahMetodeAktif(data) === 1 && (
-          <p className="text-sm font-medium text-navy/70">
+          <p className="text-isi font-medium text-navy/70">
             Hanya satu metode yang aktif, sehingga metode itu tidak dapat dinonaktifkan. Aktifkan atau buat metode lain lebih dulu.
           </p>
         )}

@@ -14,7 +14,7 @@ import { skemaDaftarAkun, type NilaiDaftarAkun } from "./schema";
 import { TandaTachyon } from "./tanda-tachyon";
 
 const KELAS_ISIAN =
-  "flex h-12 w-full rounded-xl border border-input bg-permukaan px-4 text-base text-navy placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-permukaan disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
+  "flex h-12 w-full rounded-xl border border-input bg-permukaan px-4 text-besar text-navy placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-permukaan disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
 
 const KELAS_TAUTAN =
   "cursor-pointer rounded-sm font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-permukaan";
@@ -64,7 +64,7 @@ const PLAN = [
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-xs font-medium text-destructive">{pesan}</p>;
+  return <p className="text-kecil font-medium text-destructive">{pesan}</p>;
 }
 
 function PilihanPlan() {
@@ -85,17 +85,17 @@ function PilihanPlan() {
     >
       <div aria-live="polite" className="flex min-h-[330px] flex-col gap-[18px] rounded-[18px] bg-permukaan p-7">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="text-2xl font-bold">Plan {plan.nama}</h2>
+          <h2 className="text-subjudul font-bold">Plan {plan.nama}</h2>
           <span
             className={
-              "rounded-full px-3 py-1 text-[13px] font-semibold " +
+              "rounded-full px-3 py-1 text-isi font-semibold " +
               (plan.gratis ? "bg-sage/15 text-sage" : "bg-karamel/20 text-navy")
             }
           >
             {plan.lencana}
           </span>
         </div>
-        <ul className="flex flex-col gap-3 text-[15px]">
+        <ul className="flex flex-col gap-3 text-besar">
           {fitur.map((f) => (
             <li
               key={f.teks}
@@ -110,7 +110,7 @@ function PilihanPlan() {
             </li>
           ))}
         </ul>
-        <p className="mt-auto border-t border-input pt-4 text-sm leading-normal text-muted-foreground">
+        <p className="mt-auto border-t border-input pt-4 text-isi leading-normal text-muted-foreground">
           {plan.catatan}
         </p>
       </div>
@@ -191,7 +191,7 @@ export function HalamanDaftar() {
       <aside className="flex min-w-0 flex-[1_1_560px] flex-col justify-between gap-8 rounded-[28px] bg-krem p-6 sm:p-10">
         <div className="flex items-center gap-3">
           <TandaTachyon ukuran={34} />
-          <span className="text-lg font-bold">Tachyon POS</span>
+          <span className="text-subjudul font-bold">Tachyon POS</span>
         </div>
         <PilihanPlan />
         <LangkahDaftar aktif={1} />
@@ -208,14 +208,14 @@ export function HalamanDaftar() {
             suppressHydrationWarning
           >
             <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-bold tracking-tight">Buat akun toko</h1>
-              <p className="text-[15px] leading-normal text-muted-foreground">
+              <h1 className="text-judul font-bold tracking-tight">Buat akun toko</h1>
+              <p className="text-isi leading-normal text-muted-foreground">
                 Akun baru mulai di plan Basic, gratis 14 hari.
               </p>
             </div>
 
             <div className="flex flex-col gap-2">
-              <label htmlFor="email" className="text-sm font-semibold">
+              <label htmlFor="email" className="text-isi font-semibold">
                 Email
               </label>
               <input
@@ -233,7 +233,7 @@ export function HalamanDaftar() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label htmlFor="password" className="text-sm font-semibold">
+              <label htmlFor="password" className="text-isi font-semibold">
                 Password
               </label>
               <input
@@ -247,14 +247,14 @@ export function HalamanDaftar() {
                 aria-invalid={errors.password ? true : undefined}
                 disabled={memuat}
               />
-              <p id="password-aturan" className="text-[13px] text-muted-foreground">
+              <p id="password-aturan" className="text-kecil text-muted-foreground">
                 Minimal 8 karakter, dengan huruf kapital dan angka.
               </p>
               <PesanIsian pesan={errors.password?.message} />
             </div>
 
             <div className="flex flex-col gap-2">
-              <label htmlFor="ulangiPassword" className="text-sm font-semibold">
+              <label htmlFor="ulangiPassword" className="text-isi font-semibold">
                 Ulangi password
               </label>
               <input
@@ -271,7 +271,7 @@ export function HalamanDaftar() {
             </div>
 
             {galat && (
-              <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-xs font-medium text-destructive border border-destructive/20">
+              <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-kecil font-medium text-destructive border border-destructive/20">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{galat}</span>
               </div>
@@ -280,7 +280,7 @@ export function HalamanDaftar() {
             <button
               type="submit"
               disabled={memuat}
-              className="inline-flex h-[54px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-navy text-base font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-permukaan disabled:pointer-events-none disabled:opacity-60"
+              className="inline-flex h-[54px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-navy text-besar font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-permukaan disabled:pointer-events-none disabled:opacity-60"
             >
               {memuat ? (
                 <>
@@ -292,7 +292,7 @@ export function HalamanDaftar() {
               )}
             </button>
 
-            <p className="text-[15px] text-muted-foreground">
+            <p className="text-isi text-muted-foreground">
               Sudah punya akun?{" "}
               <Link href="/login" className={KELAS_TAUTAN}>
                 Masuk

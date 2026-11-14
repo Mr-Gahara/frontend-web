@@ -36,10 +36,10 @@ export function LangkahSelesai({ ringkasan, plan }: { ringkasan: RingkasanSetup;
         <Check className="h-8 w-8 text-sage" aria-hidden="true" />
       </span>
       <div className="flex flex-col gap-2">
-        <h1 id="setup-selesai-judul" className="text-[32px] font-bold tracking-tight">
+        <h1 id="setup-selesai-judul" className="text-judul font-bold tracking-tight">
           Toko siap dipakai
         </h1>
-        <p className="text-[15px] leading-normal text-muted-foreground">
+        <p className="text-isi leading-normal text-muted-foreground">
           {lengkap
             ? `Semua langkah setup plan ${namaPlan(plan)} sudah selesai. Web dan aplikasi kasir sudah siap dipakai.`
             : `Setup inti selesai, sehingga web dan aplikasi kasir sudah siap dipakai. Setup ${ringkasan.dilewati.join(
@@ -47,7 +47,7 @@ export function LangkahSelesai({ ringkasan, plan }: { ringkasan: RingkasanSetup;
               )} dilewati; fiturnya terkunci sampai dilengkapi dari halaman setup.`}
         </p>
       </div>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-2.5 rounded-2xl border border-input px-5 py-4 text-[15px]">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-2.5 rounded-2xl border border-input px-5 py-4 text-besar">
         {baris
           .filter((b): b is [string, string] => Boolean(b[1]))
           .map(([label, nilai]) => (
@@ -57,10 +57,10 @@ export function LangkahSelesai({ ringkasan, plan }: { ringkasan: RingkasanSetup;
             </div>
           ))}
       </dl>
-      <div className="flex items-start gap-3.5 rounded-2xl bg-sage/15 px-5 py-4 text-sm leading-normal">
+      <div className="flex items-start gap-3.5 rounded-2xl bg-sage/15 px-5 py-4 text-isi leading-normal">
         <Smartphone className="mt-0.5 h-5 w-5 flex-none text-sage" aria-hidden="true" />
         <div className="flex flex-col gap-1">
-          <p className="text-[15px] font-semibold">Aplikasi kasir juga sudah siap dipakai</p>
+          <p className="text-besar font-semibold">Aplikasi kasir juga sudah siap dipakai</p>
           <p>
             Masuk di aplikasi dengan email akun toko, lalu nama dan PIN. Perangkat terikat ke pengguna yang masuk
             di perangkat itu, jadi tambahkan karyawan dari menu Pengguna sebelum mereka memakai aplikasi.

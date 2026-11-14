@@ -91,11 +91,11 @@ export default function PengaturanPage() {
           <div className="p-2 bg-krem rounded-lg shrink-0 border border-navy/10 shadow-sm">
             <Settings className="w-6 h-6 text-navy" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-navy wrap-break-words">
+          <h1 className="text-judul font-bold tracking-tight text-navy wrap-break-words">
             Pengaturan Outlet
           </h1>
         </div>
-        <p className="text-sm font-medium text-navy/60 ml-11 md:pr-12 wrap-break-words">
+        <p className="text-isi font-medium text-navy/60 ml-11 md:pr-12 wrap-break-words">
           Pilih modul di bawah ini untuk mengonfigurasi preferensi operasional dan sistem Anda.
         </p>
       </div>
@@ -120,10 +120,10 @@ export default function PengaturanPage() {
                   <ArrowRight className="w-5 h-5 text-navy/20 group-hover:text-navy transition-colors shrink-0 mt-1" />
                 </div>
                 
-                <h3 className="text-xl font-bold tracking-tight text-navy wrap-break-words pr-2">
+                <h3 className="text-subjudul font-bold tracking-tight text-navy wrap-break-words pr-2">
                   {modul.title}
                 </h3>
-                <p className="text-sm font-medium text-navy/60 mt-2 leading-relaxed wrap-break-words line-clamp-3">
+                <p className="text-isi font-medium text-navy/60 mt-2 leading-relaxed wrap-break-words line-clamp-3">
                   {modul.description}
                 </p>
               </div>

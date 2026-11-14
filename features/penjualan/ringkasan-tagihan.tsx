@@ -6,10 +6,10 @@ import type { HasilSimulasi } from "./simulasi";
 export function RingkasanTagihan({ calc }: { calc: HasilSimulasi }) {
   return (
     <div className="rounded-2xl border border-navy/10 bg-navy text-gading p-6 shadow-md space-y-4">
-      <h2 className="text-sm font-bold border-b border-gading/20 pb-3 flex items-center gap-2 uppercase tracking-widest text-karamel">
+      <h2 className="text-subjudul font-bold border-b border-gading/20 pb-3 flex items-center gap-2 uppercase tracking-widest text-karamel">
         <Calculator className="w-4 h-4" /> Ringkasan
       </h2>
-      <div className="space-y-3 text-sm">
+      <div className="space-y-3 text-isi">
         <div className="flex justify-between text-gading/80 font-medium">
           <span>Subtotal Produk</span>
           <span className="font-mono text-gading">
@@ -31,7 +31,7 @@ export function RingkasanTagihan({ calc }: { calc: HasilSimulasi }) {
             {calc.rincianPajak.map((p, idx) => (
               <div
                 key={idx}
-                className="flex justify-between text-gading/60 text-xs font-medium"
+                className="flex justify-between text-gading/60 text-kecil font-medium"
               >
                 <span>Pajak: {p.namaPajak}</span>
                 <span className="font-mono">
@@ -50,10 +50,10 @@ export function RingkasanTagihan({ calc }: { calc: HasilSimulasi }) {
         )}
 
         <div className="border-t border-gading/20 pt-4 mt-2 flex justify-between items-end">
-          <span className="text-sm font-bold text-gading">
+          <span className="text-isi font-bold text-gading">
             Total Estimasi
           </span>
-          <span className="text-2xl font-black text-sage leading-none font-mono">
+          <span className="text-judul font-black text-sage leading-none font-mono">
             {formatRupiah(calc.grandTotal)}
           </span>
         </div>

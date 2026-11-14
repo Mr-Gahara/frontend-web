@@ -41,7 +41,7 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-navy border-t-transparent"></div>
-        <p className="text-sm font-bold text-navy/60">
+        <p className="text-isi font-bold text-navy/60">
           Memuat audit trail...
         </p>
       </div>
@@ -104,10 +104,10 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
             Kembali ke Daftar Jurnal
           </Button>
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
               Detail Jurnal Penyesuaian
             </h1>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-isi font-medium text-navy/60">
               No. Ref:{" "}
               <span className="font-bold font-mono text-navy">
                 {adjustment.nomorAdjustment}
@@ -117,7 +117,7 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
         </div>
 
         <div className="flex shrink-0">
-          <Badge className="bg-sage text-gading px-3 py-1 font-bold border-none shadow-sm text-xs">
+          <Badge className="bg-sage text-gading px-3 py-1 font-bold border-none shadow-sm text-kecil">
             Selesai
           </Badge>
         </div>
@@ -128,12 +128,12 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
         <div className="flex-1 space-y-5">
           <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
             <ArchiveRestore className="h-5 w-5 text-karamel" />
-            <h2 className="font-bold text-navy">Audit Trail Informasi</h2>
+            <h2 className="text-subjudul font-bold text-navy">Audit Trail Informasi</h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-y-5 text-sm">
+          <div className="grid grid-cols-2 gap-y-5 text-isi">
             <div>
-              <p className="text-navy/60 font-bold text-xs mb-1 flex items-center gap-1">
+              <p className="text-navy/60 font-bold text-kecil mb-1 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" /> Tanggal Eksekusi
               </p>
               <p className="font-semibold text-navy">
@@ -141,7 +141,7 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
               </p>
             </div>
             <div>
-              <p className="text-navy/60 font-bold text-xs mb-1 flex items-center gap-1">
+              <p className="text-navy/60 font-bold text-kecil mb-1 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5" /> Lokasi / Gudang
               </p>
               <p className="font-semibold text-navy">
@@ -149,7 +149,7 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
               </p>
             </div>
             <div>
-              <p className="text-navy/60 font-bold text-xs mb-1 flex items-center gap-1">
+              <p className="text-navy/60 font-bold text-kecil mb-1 flex items-center gap-1">
                 <User className="w-3.5 h-3.5" /> Dieksekusi Oleh
               </p>
               <p className="font-semibold text-navy">
@@ -163,10 +163,10 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
         <div className="flex-1 flex flex-col gap-3 md:border-l border-navy/10 md:pl-8">
           <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
             <FileText className="h-5 w-5 text-karamel" />
-            <h2 className="font-bold text-navy">Alasan Penyesuaian</h2>
+            <h2 className="text-subjudul font-bold text-navy">Alasan Penyesuaian</h2>
           </div>
           <div className="flex-1 p-4 bg-white/60 rounded-xl border border-navy/5 min-h-25">
-            <p className="text-sm font-bold text-navy/40 italic leading-relaxed">
+            <p className="text-isi font-bold text-navy/40 italic leading-relaxed">
               {adjustment.alasan ? (
                 <>&quot;{adjustment.alasan}&quot;</>
               ) : (
@@ -174,7 +174,7 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
               )}
             </p>
           </div>
-          <p className="text-sm font-medium text-navy/70">
+          <p className="text-isi font-medium text-navy/70">
             Sumber Dokumen:{" "}
             <TautanSumber adjustment={adjustment} className="font-bold text-navy" />
           </p>
@@ -183,7 +183,7 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
 
       {/* TABEL ITEM MUTASI: tabel rincian berkartu baris (CV22a). */}
       <section aria-label="Rekapitulasi Perubahan Saldo Fisik" className="flex flex-col gap-3">
-        <h2 className="text-base font-bold text-navy">Rekapitulasi Perubahan Saldo Fisik</h2>
+        <h2 className="text-subjudul font-bold text-navy">Rekapitulasi Perubahan Saldo Fisik</h2>
         <DataTable
           rincian
           columns={KOLOM_ITEM_ADJUSTMENT}

@@ -82,24 +82,24 @@ export function DialogUbahEmail({
         {tahap === 1 ? (
           <form noValidate onSubmit={form.handleSubmit(kirimKode)} className="flex min-w-0 flex-col gap-3">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="email-saat-ini" className="text-sm font-medium">Email saat ini</label>
-              <Input id="email-saat-ini" value={emailSaatIni} readOnly className="h-11 bg-muted text-base text-muted-foreground sm:text-sm" />
+              <label htmlFor="email-saat-ini" className="text-isi font-medium">Email saat ini</label>
+              <Input id="email-saat-ini" value={emailSaatIni} readOnly className="h-11 bg-muted text-besar text-muted-foreground sm:text-isi" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="email-baru" className="text-sm font-medium">Email baru</label>
+              <label htmlFor="email-baru" className="text-isi font-medium">Email baru</label>
               <Input
                 id="email-baru"
                 type="email"
                 autoComplete="email"
                 {...form.register("email")}
                 aria-invalid={form.formState.errors.email ? true : undefined}
-                className="h-11 text-base sm:text-sm"
+                className="h-11 text-besar sm:text-isi"
               />
               {form.formState.errors.email && (
-                <p className="text-xs font-medium text-destructive">{form.formState.errors.email.message}</p>
+                <p className="text-kecil font-medium text-destructive">{form.formState.errors.email.message}</p>
               )}
             </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
+            <p className="text-kecil leading-relaxed text-muted-foreground">
               Kode dikirim ke email saat ini, bukan ke email baru, untuk membuktikan Anda pemilik akun.
             </p>
             <PesanGalat pesan={galatKirim} />

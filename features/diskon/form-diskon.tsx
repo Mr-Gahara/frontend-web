@@ -32,14 +32,14 @@ import {
 import { IsianAturanDiskon } from "./aturan-diskon";
 import { skemaDiskon, type NilaiFormDiskon } from "./schema";
 
-const KELAS_LABEL = "text-sm font-bold text-navy";
+const KELAS_LABEL = "text-isi font-bold text-navy";
 const KELAS_PEMICU =
-  "w-full bg-gading text-navy text-sm border-navy/15 focus:ring-navy/50 font-medium h-12 rounded-xl px-4";
+  "w-full bg-gading text-navy text-isi border-navy/15 focus:ring-navy/50 font-medium h-12 rounded-xl px-4";
 const KELAS_ISI_PILIHAN = "bg-krem border-navy/10 text-navy font-medium";
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-xs font-medium text-red-600">{pesan}</p>;
+  return <p className="text-kecil font-medium text-red-600">{pesan}</p>;
 }
 
 interface IsiProps {
@@ -116,7 +116,7 @@ function IsiFormDiskon({ diskon, batasTercapai, onTutup }: IsiProps) {
           id="diskon-nama"
           {...register("namaDiskon")}
           placeholder="Contoh: Diskon Kemerdekaan"
-          className="bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-medium h-12 rounded-xl px-4"
+          className="bg-gading text-navy text-isi border-navy/15 focus-visible:ring-navy/50 font-medium h-12 rounded-xl px-4"
         />
         <PesanIsian pesan={errors.namaDiskon?.message} />
       </div>
@@ -171,7 +171,7 @@ function IsiFormDiskon({ diskon, batasTercapai, onTutup }: IsiProps) {
             id="diskon-nilai"
             {...register("nilai")}
             inputMode="decimal"
-            className={`no-spinner bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl ${tipe === "nominal" ? "pl-11" : "px-4"}`}
+            className={`no-spinner bg-gading text-navy text-isi border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl ${tipe === "nominal" ? "pl-11" : "px-4"}`}
             placeholder="0"
           />
           {tipe === "persen" && (
@@ -200,7 +200,7 @@ function IsiFormDiskon({ diskon, batasTercapai, onTutup }: IsiProps) {
             )}
           />
           {aktifTerkunci && (
-            <p className="text-xs font-medium text-navy/60">
+            <p className="text-kecil font-medium text-navy/60">
               Batas diskon aktif tercapai; diskon ini hanya dapat disimpan Non-Aktif.
             </p>
           )}
@@ -232,7 +232,7 @@ function IsiFormDiskon({ diskon, batasTercapai, onTutup }: IsiProps) {
       <IsianAturanDiskon register={register} control={control} errors={errors} diskon={diskon} />
 
       {galat && (
-        <p className="text-sm text-red-600 font-bold bg-red-500/10 px-4 py-3 rounded-xl border border-red-500/20 mt-1">
+        <p className="text-isi text-red-600 font-bold bg-red-500/10 px-4 py-3 rounded-xl border border-red-500/20 mt-1">
           {galat}
         </p>
       )}
@@ -240,7 +240,7 @@ function IsiFormDiskon({ diskon, batasTercapai, onTutup }: IsiProps) {
       <Button
         type="submit"
         disabled={memproses}
-        className="w-full h-14 mt-2 rounded-xl cursor-pointer bg-navy text-gading hover:bg-navy/90 text-base font-bold shadow-md transition-all active:scale-[0.98]"
+        className="w-full h-14 mt-2 rounded-xl cursor-pointer bg-navy text-gading hover:bg-navy/90 text-besar font-bold shadow-md transition-all active:scale-[0.98]"
       >
         {memproses ? "Menyimpan Data..." : "Simpan Konfigurasi"}
       </Button>
@@ -268,10 +268,10 @@ export function DialogFormDiskon({
               <Tag className="h-6 w-6" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold text-navy">
+              <DialogTitle className="text-judul font-bold text-navy">
                 {diskon ? "Edit Diskon" : "Tambah Diskon"}
               </DialogTitle>
-              <DialogDescription className="text-sm font-semibold text-navy/60 mt-0.5">
+              <DialogDescription className="text-isi font-semibold text-navy/60 mt-0.5">
                 {diskon
                   ? "Perbarui konfigurasi diskon."
                   : "Buat konfigurasi diskon atau promosi baru."}

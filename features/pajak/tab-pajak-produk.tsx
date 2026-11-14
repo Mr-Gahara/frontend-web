@@ -24,7 +24,7 @@ import { useLepasPajak, usePasangPajak, useRelasiPajakProduk } from "./hooks";
 import { PesanPajak } from "./pesan-pajak";
 import { labelModelRelasi, pajakTerpasang, pilihanPajakProduk, relasiNonaktif } from "./tampilan";
 
-const kelasLabel = "text-sm font-bold text-navy";
+const kelasLabel = "text-isi font-bold text-navy";
 const kelasPemicu = "border-navy/20 bg-gading text-navy";
 const kelasIsiPilihan = "bg-gading border-navy/10 text-navy";
 const kelasPilihan = "cursor-pointer hover:bg-navy/5";
@@ -126,7 +126,7 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
           <label htmlFor="pajak-pasang" className={kelasLabel}>
             Assign Pajak
           </label>
-          <p className="text-xs font-medium text-navy/60">
+          <p className="text-kecil font-medium text-navy/60">
             Satu produk hanya dapat memiliki satu pajak per produk. Memasang pajak lain menggantikan pajak yang
             terpasang.
           </p>
@@ -195,7 +195,7 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
                     {relasiNonaktif(terpasang) && (
                       <>
                         <span className="ml-1 font-medium text-navy/60">(nonaktif)</span>
-                        <p className="text-xs font-medium text-navy/60">
+                        <p className="text-kecil font-medium text-navy/60">
                           Pajak ini nonaktif dan tidak dikenakan saat penjualan.
                         </p>
                       </>
@@ -240,7 +240,7 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
               memiliki satu pajak per produk.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {galatGanti && <p className="text-sm font-bold text-red-600">{galatGanti}</p>}
+          {galatGanti && <p className="text-isi font-bold text-red-600">{galatGanti}</p>}
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={pasang.isPending}

@@ -10,11 +10,11 @@ import { payloadUbahPajak } from "./payload";
 import { skemaPajak, type NilaiPajak } from "./schema";
 import { pajakTransaksiTerdampak } from "./tampilan";
 
-const kelasLabel = "text-sm font-bold text-navy";
+const kelasLabel = "text-isi font-bold text-navy";
 const kelasIsian = "bg-white border-navy/20 text-navy";
 const kelasIsiPilihan = "bg-gading border-navy/10 text-navy";
 const kelasPilihan = "cursor-pointer hover:bg-navy/5";
-const kelasGalat = "text-xs font-bold text-red-600";
+const kelasGalat = "text-kecil font-bold text-red-600";
 
 type PropsForm = {
   nilaiAwal: NilaiPajak;
@@ -180,13 +180,13 @@ export function FormPajak({ nilaiAwal, asal, daftar, sedangMenyimpan, galat, onS
       </div>
 
       {terdampak.length > 0 && (
-        <p className="rounded-lg border border-karamel/40 bg-karamel/10 p-3 text-sm font-medium text-navy">
+        <p className="rounded-lg border border-karamel/40 bg-karamel/10 p-3 text-isi font-medium text-navy">
           Menyimpan pajak per transaksi yang aktif akan menonaktifkan {terdampak.map((p) => p.namaPajak).join(", ")}.
           Hanya satu pajak per transaksi yang aktif dalam satu waktu.
         </p>
       )}
 
-      {galat && <p className="text-sm font-bold text-red-600">{galat}</p>}
+      {galat && <p className="text-isi font-bold text-red-600">{galat}</p>}
 
       <div className="flex justify-end gap-2 pt-2">
         <Button

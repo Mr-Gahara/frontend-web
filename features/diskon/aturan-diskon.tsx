@@ -32,11 +32,11 @@ import type { Diskon } from "@/types/diskon";
 import type { NilaiFormDiskon } from "./schema";
 import { ringkasAturan } from "./tampilan";
 
-const KELAS_LABEL = "text-sm font-bold text-navy";
-const KELAS_KETERANGAN = "text-xs font-medium text-navy/60";
+const KELAS_LABEL = "text-isi font-bold text-navy";
+const KELAS_KETERANGAN = "text-kecil font-medium text-navy/60";
 const KELAS_INPUT =
-  "bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-medium h-12 rounded-xl px-4";
-const KELAS_HAPUS = "text-xs font-semibold text-navy/60 underline hover:text-navy cursor-pointer";
+  "bg-gading text-navy text-isi border-navy/15 focus-visible:ring-navy/50 font-medium h-12 rounded-xl px-4";
+const KELAS_HAPUS = "text-kecil font-semibold text-navy/60 underline hover:text-navy cursor-pointer";
 
 /** Urutan tampil Senin sampai Minggu; nilainya mengikuti backend (0 Minggu). */
 const HARI = [
@@ -55,7 +55,7 @@ const keTeksJam = (waktu: NilaiWaktu) =>
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-xs font-medium text-red-600">{pesan}</p>;
+  return <p className="text-kecil font-medium text-red-600">{pesan}</p>;
 }
 
 /**
@@ -84,7 +84,7 @@ function PilihanProduk({
     );
   }
   if (produk.isError) {
-    return <p className="text-xs font-medium text-red-600">Gagal memuat daftar produk.</p>;
+    return <p className="text-kecil font-medium text-red-600">Gagal memuat daftar produk.</p>;
   }
 
   const kata = cari.trim().toLowerCase();
@@ -117,7 +117,7 @@ function PilihanProduk({
             />
             <label
               htmlFor={`diskon-produk-${p.id}`}
-              className="text-sm font-medium text-navy cursor-pointer"
+              className="text-isi font-medium text-navy cursor-pointer"
             >
               {p.namaProduk}
             </label>
@@ -166,7 +166,7 @@ export function IsianAturanDiskon({ register, control, errors, diskon }: Props) 
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className="flex w-full items-center justify-between rounded-xl border border-navy/15 bg-gading px-4 py-3 text-sm font-bold text-navy cursor-pointer"
+          className="flex w-full items-center justify-between rounded-xl border border-navy/15 bg-gading px-4 py-3 text-isi font-bold text-navy cursor-pointer"
         >
           Aturan tambahan
           <ChevronDown className={`h-4 w-4 transition-transform ${terbuka ? "rotate-180" : ""}`} />
@@ -280,7 +280,7 @@ export function IsianAturanDiskon({ register, control, errors, diskon }: Props) 
                     />
                     <label
                       htmlFor={`diskon-hari-${hari.nilai}`}
-                      className="text-sm font-medium text-navy cursor-pointer"
+                      className="text-isi font-medium text-navy cursor-pointer"
                     >
                       {hari.label}
                     </label>
@@ -361,7 +361,7 @@ export function IsianAturanDiskon({ register, control, errors, diskon }: Props) 
                 />
                 <label
                   htmlFor="diskon-per-barang"
-                  className="text-sm font-medium text-navy cursor-pointer"
+                  className="text-isi font-medium text-navy cursor-pointer"
                 >
                   Hitung per barang
                   <span className={`block ${KELAS_KETERANGAN}`}>
@@ -374,7 +374,7 @@ export function IsianAturanDiskon({ register, control, errors, diskon }: Props) 
         )}
 
         {diskon?.khususMember && (
-          <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs font-medium text-amber-800">
+          <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-kecil font-medium text-amber-800">
             Diskon ini ditandai khusus member. Tanda itu tidak dapat diubah dari sini, dan diskon
             hanya dapat dipakai pelanggan dengan membership aktif.
           </p>

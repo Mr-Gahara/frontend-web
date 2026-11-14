@@ -47,17 +47,17 @@ import { buatSkemaCatatPembelian, type IsianCatatPembelian } from "./schema";
 
 const KELAS_ISIAN =
   "bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy";
-const KELAS_LABEL = "text-sm font-bold text-navy";
-const KELAS_LABEL_BARIS = "text-xs font-bold text-navy/70";
-const KELAS_GALAT = "text-xs font-bold text-rose-500";
+const KELAS_LABEL = "text-isi font-bold text-navy";
+const KELAS_LABEL_BARIS = "text-kecil font-bold text-navy/70";
+const KELAS_GALAT = "text-kecil font-bold text-rose-500";
 
 const TIPE_RUANG: Record<RuangPembelian, TipeLokasi> = { outlet: "Outlet", gudang: "Gudang" };
 
 function Keadaan({ judul, isi }: { judul: string; isi: string }) {
   return (
     <div className="rounded-2xl border border-dashed border-navy/20 bg-krem p-12 text-center">
-      <p className="text-base font-bold text-navy mb-1">{judul}</p>
-      <p className="text-sm font-medium text-navy/60 max-w-md mx-auto">{isi}</p>
+      <p className="text-besar font-bold text-navy mb-1">{judul}</p>
+      <p className="text-isi font-medium text-navy/60 max-w-md mx-auto">{isi}</p>
     </div>
   );
 }
@@ -137,7 +137,7 @@ export default function HalamanCatatPembelianStok({ ruang }: Props) {
       <div className="flex flex-col gap-4">
         <Link
           href={urlDaftar}
-          className="inline-flex w-fit items-center text-sm font-semibold text-navy/60 hover:text-navy"
+          className="inline-flex w-fit items-center text-isi font-semibold text-navy/60 hover:text-navy"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali ke Pembelian Stok
@@ -147,8 +147,8 @@ export default function HalamanCatatPembelianStok({ ruang }: Props) {
             <ShoppingCart className="w-6 h-6 text-karamel" />
           </div>
           <div className="space-y-0.5">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">Catat Pembelian</h1>
-            <p className="text-sm font-medium text-navy/60">
+            <h1 className="text-judul font-bold tracking-tight text-navy">Catat Pembelian</h1>
+            <p className="text-isi font-medium text-navy/60">
               Barang yang dicatat langsung menambah stok {lokasi.lokasi?.nama ?? "lokasi ruang ini"}.
             </p>
           </div>
@@ -248,7 +248,7 @@ function FormCatatPembelian({
               placeholder="Kosongkan untuk nomor otomatis"
               className={cn(KELAS_ISIAN, "font-mono")}
             />
-            <p className="text-xs font-medium text-navy/60">
+            <p className="text-kecil font-medium text-navy/60">
               Nomor dari nota supplier. Tidak boleh sama dengan pembelian lain.
             </p>
           </div>
@@ -279,7 +279,7 @@ function FormCatatPembelian({
               )}
             />
             {akun && (
-              <p className="text-xs font-medium text-navy/60">Saldo tercatat {formatRupiah(akun.saldo)}</p>
+              <p className="text-kecil font-medium text-navy/60">Saldo tercatat {formatRupiah(akun.saldo)}</p>
             )}
             {saldoKurang && <span className={KELAS_GALAT}>Saldo akun kas tidak mencukupi</span>}
             {errors.akunKasID && <span className={KELAS_GALAT}>{errors.akunKasID.message}</span>}
@@ -303,14 +303,14 @@ function FormCatatPembelian({
                 )}
               />
             ) : (
-              <p className="rounded-md border border-navy/20 bg-gading px-3 py-2 text-sm font-medium text-navy">
+              <p className="rounded-md border border-navy/20 bg-gading px-3 py-2 text-isi font-medium text-navy">
                 Hari ini, {formatTanggalPendek((dariTanggalLokal(hariIni) as Date).toISOString())}
               </p>
             )}
             {owner ? (
               errors.tanggal && <span className={KELAS_GALAT}>{errors.tanggal.message}</span>
             ) : (
-              <p className="text-xs font-medium text-navy/60">
+              <p className="text-kecil font-medium text-navy/60">
                 Hanya Owner yang dapat mencatat pembelian bertanggal lampau.
               </p>
             )}
@@ -318,11 +318,11 @@ function FormCatatPembelian({
 
           <div className="space-y-2">
             <span className={KELAS_LABEL}>Lokasi Penerima</span>
-            <p className="flex items-center gap-2 rounded-md border border-navy/20 bg-gading px-3 py-2 text-sm font-bold text-navy">
+            <p className="flex items-center gap-2 rounded-md border border-navy/20 bg-gading px-3 py-2 text-isi font-bold text-navy">
               <MapPin className="h-4 w-4 text-karamel" aria-hidden="true" />
               {lokasi.nama}
             </p>
-            <p className="text-xs font-medium text-navy/60">Mengikuti ruang tempat pembelian dicatat.</p>
+            <p className="text-kecil font-medium text-navy/60">Mengikuti ruang tempat pembelian dicatat.</p>
           </div>
 
           <div className="space-y-2">
@@ -344,7 +344,7 @@ function FormCatatPembelian({
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-navy/10 pb-3">
             <div className="flex items-center gap-2">
               <Package className="h-5 w-5 text-karamel" />
-              <h2 className="font-bold text-navy">Barang yang Dibeli</h2>
+              <h2 className="text-subjudul font-bold text-navy">Barang yang Dibeli</h2>
             </div>
             <Button
               type="button"
@@ -357,7 +357,7 @@ function FormCatatPembelian({
               <Plus className="w-4 h-4 mr-1" /> Tambah Barang
             </Button>
           </div>
-          <p className="text-xs font-medium text-navy/60">Jumlah dalam satuan bahan di master, minimal 1.</p>
+          <p className="text-kecil font-medium text-navy/60">Jumlah dalam satuan bahan di master, minimal 1.</p>
 
           <div className="space-y-3">
             {fields.map((baris, index) => {
@@ -466,13 +466,13 @@ function FormCatatPembelian({
 
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-navy px-5 py-4 text-gading shadow-md">
           <div className="flex flex-col">
-            <span className="text-sm font-bold">Total pembelian</span>
-            <span className="text-xs font-medium text-gading/80">{items.length} barang</span>
+            <span className="text-isi font-bold">Total pembelian</span>
+            <span className="text-kecil font-medium text-gading/80">{items.length} barang</span>
           </div>
-          <span className="text-2xl font-black tracking-tight">{formatRupiah(totalIsian(items))}</span>
+          <span className="text-judul font-black tracking-tight">{formatRupiah(totalIsian(items))}</span>
         </div>
 
-        <p className="flex items-start gap-2 text-xs font-medium text-navy/60">
+        <p className="flex items-start gap-2 text-kecil font-medium text-navy/60">
           <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           Setelah dicatat, barang, lokasi penerima, dan akun kas tidak dapat diubah. Bila ada yang keliru, hapus
           pembelian lalu catat ulang.

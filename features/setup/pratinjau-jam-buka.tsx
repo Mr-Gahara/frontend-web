@@ -79,7 +79,7 @@ export function PratinjauJamBuka() {
     <div className="bg-permukaan">
       <div className="px-4 pt-4 sm:px-5 sm:pt-5">
         <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-karamel bg-white/70 p-4">
-          <p className="text-sm font-semibold text-navy">
+          <p className="text-isi font-semibold text-navy">
             Pratinjau development langkah jam buka. Tidak ada yang tersimpan, dan halaman ini tidak ada di produksi.
           </p>
           <div role="group" aria-label="Keadaan pratinjau" className="flex flex-wrap gap-2">
@@ -93,7 +93,7 @@ export function PratinjauJamBuka() {
                   setCatatan("");
                 }}
                 className={cn(
-                  "h-10 cursor-pointer rounded-full border border-navy/15 px-3.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel",
+                  "h-10 cursor-pointer rounded-full border border-navy/15 px-3.5 text-isi font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel",
                   keadaan === k.kunci ? "bg-navy text-gading" : "bg-white text-navy",
                 )}
               >
@@ -102,7 +102,7 @@ export function PratinjauJamBuka() {
             ))}
           </div>
           {catatan && (
-            <p role="status" className="text-sm text-navy">
+            <p role="status" className="text-isi text-navy">
               {catatan}
             </p>
           )}

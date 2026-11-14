@@ -103,18 +103,18 @@ export default function DaftarTarifPage() {
         meta: { lebarBungkus: 200 },
         cell: ({ row }) => (
           <div className="flex flex-col gap-1.5">
-            <TeksDuaBaris teks={row.original.namaTarif} className="font-bold text-[15px] tracking-tight text-navy" />
+            <TeksDuaBaris teks={row.original.namaTarif} className="font-bold text-besar tracking-tight text-navy" />
             <div className="flex items-center gap-2">
               {row.original.isActive ? (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-sage/20 text-sage">
+                <span className="inline-flex items-center gap-1 text-mikro font-bold px-2 py-0.5 rounded bg-sage/20 text-sage">
                   <CheckCircle2 className="w-3 h-3" /> Aktif
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/15 text-rose-500">
+                <span className="inline-flex items-center gap-1 text-mikro font-bold px-2 py-0.5 rounded bg-rose-500/15 text-rose-500">
                   <XCircle className="w-3 h-3" /> Nonaktif
                 </span>
               )}
-              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-karamel/20 text-navy/80">
+              <span className="text-mikro font-bold uppercase px-2 py-0.5 rounded bg-karamel/20 text-navy/80">
                 Prioritas: {row.original.prioritas}
               </span>
             </div>
@@ -126,7 +126,7 @@ export default function DaftarTarifPage() {
         meta: { label: "Harga Sewa" },
         header: () => <div className="text-right">Harga Sewa</div>,
         cell: ({ row }) => (
-          <div className="text-right font-bold text-[15px] text-navy">{formatRupiah(row.original.harga)}</div>
+          <div className="text-right font-bold text-besar text-navy">{formatRupiah(row.original.harga)}</div>
         ),
       },
       {
@@ -134,12 +134,12 @@ export default function DaftarTarifPage() {
         header: "Basis / Durasi Min.",
         cell: ({ row }) => (
           <div className="flex flex-col gap-1">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase px-2.5 py-1 rounded-lg w-fit bg-navy/5 text-navy">
+            <span className="inline-flex items-center gap-1.5 text-kecil font-bold uppercase px-2.5 py-1 rounded-lg w-fit bg-navy/5 text-navy">
               <Clock className="w-3.5 h-3.5 text-karamel" />
               {row.original.basisPerhitungan}
             </span>
             {row.original.durasiMinimum && (
-              <span className="text-[11px] font-medium ml-1 text-navy/70">
+              <span className="text-mikro font-medium ml-1 text-navy/70">
                 Min. {row.original.durasiMinimum}{" "}
                 {row.original.basisPerhitungan === "per jam" ? "Jam" : "Sesi"}
               </span>
@@ -153,11 +153,11 @@ export default function DaftarTarifPage() {
         meta: { lebarBungkus: 160 },
         cell: ({ row }) => (
           <div className="flex flex-col gap-1">
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-navy/80">
+            <span className="flex items-center gap-1.5 text-kecil font-semibold text-navy/80">
               <CalendarDays className="w-3.5 h-3.5 shrink-0" />
               <TeksDuaBaris teks={formatHariAktif(row.original.hariAktif)} />
             </span>
-            <span className="text-[11px] font-medium ml-5 text-navy/60">
+            <span className="text-mikro font-medium ml-5 text-navy/60">
               {row.original.jamMulai && row.original.jamSelesai
                 ? `${row.original.jamMulai} - ${row.original.jamSelesai}`
                 : "24 Jam Penuh"}
@@ -175,13 +175,13 @@ export default function DaftarTarifPage() {
               row.original.dataAset.map((aset, i) => (
                 <span
                   key={aset.id || i}
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full border border-navy/20 text-navy/80"
+                  className="text-mikro font-semibold px-2 py-0.5 rounded-full border border-navy/20 text-navy/80"
                 >
                   {aset.namaTipeAset}
                 </span>
               ))
             ) : (
-              <span className="text-[11px] font-medium italic text-navy/50">Semua Aset</span>
+              <span className="text-mikro font-medium italic text-navy/50">Semua Aset</span>
             )}
           </div>
         ),
@@ -228,7 +228,7 @@ export default function DaftarTarifPage() {
       {isError ? (
         <p
           role="alert"
-          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
         >
           Gagal memuat data tarif. Pastikan server terhubung.
         </p>

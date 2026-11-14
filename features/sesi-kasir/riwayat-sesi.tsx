@@ -14,7 +14,7 @@ import { kelompokkanPerHari, labelSelisih, namaMesin, orangSesi, rentangJam } fr
 
 export { SEMUA_MESIN, type NilaiFilterRiwayat } from "./filter";
 
-const KELAS_LABEL = "text-sm font-semibold text-navy";
+const KELAS_LABEL = "text-isi font-semibold text-navy";
 
 /**
  * Filter riwayat: mesin kasir dan dua PilihTanggal seperti halaman Pindah
@@ -125,14 +125,14 @@ export function RiwayatSesi({
   return (
     <section aria-labelledby="judul-riwayat" className="@container flex flex-col gap-4">
       <div className="flex flex-col gap-3 @[40rem]:flex-row @[40rem]:flex-wrap @[40rem]:items-end @[40rem]:justify-between">
-        <h2 id="judul-riwayat" className="text-xl font-bold text-navy sm:text-[22px]">
+        <h2 id="judul-riwayat" className="text-subjudul font-bold text-navy">
           Riwayat buka-tutup kasir
         </h2>
         {!pemakaianPertama && filter}
       </div>
 
       {pemakaianPertama && (
-        <div className="rounded-[14px] border border-navy/10 bg-white px-5 py-7 text-center text-[15px] text-navy/70">
+        <div className="rounded-[14px] border border-navy/10 bg-white px-5 py-7 text-center text-isi text-navy/70">
           Riwayat tampil di sini setelah kasir pertama ditutup.
         </div>
       )}
@@ -154,8 +154,8 @@ export function RiwayatSesi({
           role="alert"
           className="flex flex-col items-center gap-2.5 rounded-2xl border border-navy/10 bg-white px-6 py-10 text-center"
         >
-          <span className="text-[17px] font-bold text-navy">Riwayat gagal dimuat</span>
-          <span className="text-[15px] text-navy/70">Periksa koneksi, lalu coba lagi.</span>
+          <span className="text-subjudul font-bold text-navy">Riwayat gagal dimuat</span>
+          <span className="text-isi text-navy/70">Periksa koneksi, lalu coba lagi.</span>
           <Button onClick={onCobaLagi} className="h-11 bg-navy px-5 font-semibold text-gading hover:bg-navy/90">
             Coba lagi
           </Button>
@@ -164,8 +164,8 @@ export function RiwayatSesi({
 
       {!pemakaianPertama && status === "siap" && sesi.length === 0 && (
         <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-navy/10 bg-white px-6 py-10 text-center">
-          <span className="text-[17px] font-bold text-navy">Belum ada kasir yang ditutup pada {teksRentang}</span>
-          <span className="text-[15px] text-navy/70">Coba pilih rentang tanggal lain.</span>
+          <span className="text-subjudul font-bold text-navy">Belum ada kasir yang ditutup pada {teksRentang}</span>
+          <span className="text-isi text-navy/70">Coba pilih rentang tanggal lain.</span>
           <Button variant="outline" onClick={onResetFilter} className="h-11 border-navy/20 px-5 font-semibold text-navy">
             Reset Filter
           </Button>
@@ -174,7 +174,7 @@ export function RiwayatSesi({
 
       {!pemakaianPertama && status === "siap" && sesi.length > 0 && (
         <>
-          <div aria-hidden="true" className={`hidden px-[18px] text-[13px] font-semibold text-navy/70 ${KOLOM_DESKTOP}`}>
+          <div aria-hidden="true" className={`hidden px-[18px] text-kecil font-semibold text-navy/70 ${KOLOM_DESKTOP}`}>
             <span>Mesin kasir</span>
             <span>Jam buka sampai tutup</span>
             <span className="text-right">Uang akhir</span>
@@ -182,7 +182,7 @@ export function RiwayatSesi({
           </div>
           {kelompok.map((hari) => (
             <div key={hari.kunci} className="flex flex-col gap-2">
-              <h3 className="px-1 text-[15px] font-bold text-navy">
+              <h3 className="px-1 text-besar font-bold text-navy">
                 <span className="@[40rem]:hidden">{hari.judulPendek}</span>
                 <span className="hidden @[40rem]:inline">{hari.judul}</span>
               </h3>
@@ -202,19 +202,19 @@ export function RiwayatSesi({
                             <span className="min-w-0 break-words font-bold">{nama}</span>
                             <ChipSelisih selisih={selisih} className="shrink-0" />
                           </div>
-                          <span className="text-sm text-navy/70">
+                          <span className="text-isi text-navy/70">
                             {rentangJam(s)}, {orangSesi(s)}
                           </span>
-                          <span className="text-sm">
+                          <span className="text-isi">
                             Uang akhir <strong>{akhir}</strong>
                           </span>
                         </div>
                         <div className={`hidden ${KOLOM_DESKTOP}`}>
                           <span className="flex min-w-0 flex-col">
                             <span className="break-words font-bold">{nama}</span>
-                            <span className="text-sm text-navy/70">{orangSesi(s)}</span>
+                            <span className="text-isi text-navy/70">{orangSesi(s)}</span>
                           </span>
-                          <span className="text-[15px]">{rentangJam(s)}</span>
+                          <span className="text-besar">{rentangJam(s)}</span>
                           <span className="text-right font-bold">{akhir}</span>
                           <span className="flex justify-end">
                             <ChipSelisih selisih={selisih} />

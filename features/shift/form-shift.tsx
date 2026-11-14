@@ -69,7 +69,7 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
       {pesanGalat && (
         <div
           role="alert"
-          className="bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-200 text-sm font-bold flex items-center gap-2"
+          className="bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-200 text-isi font-bold flex items-center gap-2"
         >
           <Info className="h-4 w-4 shrink-0" />
           <p>{pesanGalat}</p>
@@ -78,14 +78,14 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
 
       {/* 1. NAMA SHIFT */}
       <div className="space-y-2">
-        <label htmlFor="nama-shift" className="text-sm font-bold text-navy">
+        <label htmlFor="nama-shift" className="text-isi font-bold text-navy">
           Nama Shift
         </label>
         <Input
           id="nama-shift"
           {...register("namaShift")}
           placeholder="Contoh: Shift Pagi"
-          className="bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl px-4"
+          className="bg-gading text-navy text-isi border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl px-4"
           required
         />
       </div>
@@ -93,7 +93,7 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
       {/* 2. JAM MASUK & PULANG (InputWaktu, keputusan rancangan butir 22) */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="jam-masuk-shift" className="text-sm font-bold text-navy">
+          <label htmlFor="jam-masuk-shift" className="text-isi font-bold text-navy">
             Jam Masuk
           </label>
           <Controller
@@ -112,7 +112,7 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="jam-pulang-shift" className="text-sm font-bold text-navy">
+          <label htmlFor="jam-pulang-shift" className="text-isi font-bold text-navy">
             Jam Pulang
           </label>
           <Controller
@@ -143,12 +143,12 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
         <div className="flex flex-col">
           <label
             htmlFor="lintas-hari"
-            className="text-sm font-bold cursor-default text-navy flex items-center gap-1.5"
+            className="text-isi font-bold cursor-default text-navy flex items-center gap-1.5"
           >
             Shift Malam (Lintas Hari){" "}
             <MoonStar className="h-4 w-4 text-navy/70" />
           </label>
-          <p id="keterangan-lintas-hari" className="text-xs text-navy/50 font-semibold mt-0.5">
+          <p id="keterangan-lintas-hari" className="text-kecil text-navy/50 font-semibold mt-0.5">
             Terisi otomatis bila jam pulang tidak lebih besar dari jam masuk
             (pulang keesokan harinya).
           </p>
@@ -157,7 +157,7 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
 
       {/* 4. TOLERANSI TERLAMBAT (No-spinner, string kosong untuk default) */}
       <div className="space-y-2">
-        <label htmlFor="toleransi-shift" className="text-sm font-bold text-navy">
+        <label htmlFor="toleransi-shift" className="text-isi font-bold text-navy">
           Toleransi Keterlambatan
         </label>
         <div className="relative">
@@ -167,9 +167,9 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
             min="0"
             {...register("toleransi")}
             placeholder="0"
-            className="bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl pl-4 pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="bg-gading text-navy text-isi border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl pl-4 pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-navy/50">
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-isi font-bold text-navy/50">
             Menit
           </span>
         </div>
@@ -178,7 +178,7 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
       {/* 5. STATUS SHIFT (Muncul saat edit mode saja) */}
       {editTarget && (
         <div className="space-y-2">
-          <label htmlFor="status-shift" className="text-sm font-bold text-navy">
+          <label htmlFor="status-shift" className="text-isi font-bold text-navy">
             Status Master Shift
           </label>
           <Controller
@@ -191,7 +191,7 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
               >
                 <SelectTrigger
                   id="status-shift"
-                  className="w-full bg-gading text-navy text-sm border-navy/15 focus:ring-navy/50 font-bold h-12 rounded-xl px-4"
+                  className="w-full bg-gading text-navy text-isi border-navy/15 focus:ring-navy/50 font-bold h-12 rounded-xl px-4"
                 >
                   <SelectValue placeholder="Pilih status" />
                 </SelectTrigger>
@@ -216,7 +216,7 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
       <Button
         type="submit"
         disabled={isPending}
-        className="w-full h-14 mt-2 rounded-xl cursor-pointer bg-navy text-gading hover:bg-navy/90 text-base font-bold shadow-md transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-14 mt-2 rounded-xl cursor-pointer bg-navy text-gading hover:bg-navy/90 text-besar font-bold shadow-md transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isPending ? "Menyimpan..." : "Simpan Master Shift"}
       </Button>
@@ -241,10 +241,10 @@ export function ShiftFormDialog({
               <Clock className="h-6 w-6" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold text-navy">
+              <DialogTitle className="text-judul font-bold text-navy">
                 {editTarget ? "Edit Master Shift" : "Tambah Shift Baru"}
               </DialogTitle>
-              <DialogDescription className="text-sm font-semibold text-navy/60 mt-0.5">
+              <DialogDescription className="text-isi font-semibold text-navy/60 mt-0.5">
                 Atur jam kerja operasional karyawan.
               </DialogDescription>
             </div>

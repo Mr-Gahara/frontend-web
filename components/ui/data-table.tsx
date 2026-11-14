@@ -40,7 +40,7 @@ import { cn } from "@/lib/utils";
 const KELAS_BARIS_HP =
   "max-sm:relative max-sm:mb-2 max-sm:flex max-sm:flex-col max-sm:gap-1.5 max-sm:rounded-2xl max-sm:border max-sm:border-navy/10 max-sm:bg-[var(--warna-baris,var(--permukaan))] max-sm:p-3";
 const KELAS_SEL_HP =
-  "max-sm:block max-sm:border-0 max-sm:bg-transparent max-sm:p-0 max-sm:whitespace-normal max-sm:first:border-l-0 max-sm:first:rounded-none max-sm:first:pr-10 max-sm:first:text-base max-sm:first:font-bold max-sm:last:border-r-0 max-sm:last:rounded-none";
+  "max-sm:block max-sm:border-0 max-sm:bg-transparent max-sm:p-0 max-sm:whitespace-normal max-sm:first:border-l-0 max-sm:first:rounded-none max-sm:first:pr-10 max-sm:first:text-besar max-sm:first:font-bold max-sm:last:border-r-0 max-sm:last:rounded-none";
 const KELAS_AKSI_HP = "max-sm:absolute max-sm:right-2 max-sm:top-2";
 
 /** Label kecil sel di HP: meta.label kolom, atau header bila berupa teks. */
@@ -175,7 +175,7 @@ export function DataTable<TData, TValue>({
             suppressHydrationWarning
             value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
             onChange={(e) => table.getColumn(searchKey)?.setFilterValue(e.target.value)}
-            className="max-w-sm text-sm bg-permukaan text-navy border-navy/15 focus-visible:ring-navy/50 h-11 rounded-xl px-4 font-medium"
+            className="max-w-sm text-isi bg-permukaan text-navy border-navy/15 focus-visible:ring-navy/50 h-11 rounded-xl px-4 font-medium"
           />
         </div>
       )}
@@ -198,13 +198,13 @@ export function DataTable<TData, TValue>({
         <TableBody className="max-sm:block">
           {loading ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-32 text-center text-sm text-navy/60">
+              <TableCell colSpan={columns.length} className="h-32 text-center text-isi text-navy/60">
                 Memuat data...
               </TableCell>
             </TableRow>
           ) : table.getRowModel().rows.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-32 text-center text-sm text-navy/60">
+              <TableCell colSpan={columns.length} className="h-32 text-center text-isi text-navy/60">
                 {emptyMessage}
               </TableCell>
             </TableRow>
@@ -219,14 +219,14 @@ export function DataTable<TData, TValue>({
                       key={cell.id}
                       style={bungkus}
                       className={cn(
-                        "text-sm",
+                        "text-isi",
                         KELAS_SEL_HP,
                         cell.column.id === "aksi" && KELAS_AKSI_HP,
                         bungkus && KELAS_BUNGKUS,
                       )}
                     >
                       {label && (
-                        <span className="sm:hidden block text-[11px] font-semibold text-navy/60">
+                        <span className="sm:hidden block text-mikro font-semibold text-navy/60">
                           {label}
                         </span>
                       )}
@@ -243,17 +243,17 @@ export function DataTable<TData, TValue>({
       {/* Kaki tabel: kontrol polos tanpa latar maupun kotak (TB3a); klien, atau angka dan aksi dari server. */}
       {!rincian && (
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-1">
-        <p className="text-xs font-semibold text-navy/60">
+        <p className="text-kecil font-semibold text-navy/60">
           {totalData} total data
         </p>
         <div className="flex items-center gap-1 sm:gap-2">
           {pilihanUkuran && gantiUkuran && (
             <div className="flex items-center gap-1">
-              <span className="text-xs font-semibold text-navy/60">Tampilkan</span>
+              <span className="text-kecil font-semibold text-navy/60">Tampilkan</span>
               <Select value={String(ukuranKini)} onValueChange={(nilai) => gantiUkuran(Number(nilai))}>
                 <SelectTrigger
                   aria-label="Jumlah baris per halaman"
-                  className="h-8 w-auto cursor-pointer gap-1 border-0 bg-transparent px-1 text-xs font-bold text-navy shadow-none focus-visible:ring-1 focus-visible:ring-navy/40"
+                  className="h-8 w-auto cursor-pointer gap-1 border-0 bg-transparent px-1 text-kecil font-bold text-navy shadow-none focus-visible:ring-1 focus-visible:ring-navy/40"
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -277,7 +277,7 @@ export function DataTable<TData, TValue>({
           >
             <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <span className="text-xs font-semibold text-navy/60">
+          <span className="text-kecil font-semibold text-navy/60">
             Halaman {halamanKini} dari {jumlahHalaman}
           </span>
           <Button

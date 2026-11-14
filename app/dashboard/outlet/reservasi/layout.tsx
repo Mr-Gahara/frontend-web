@@ -12,10 +12,10 @@ export default function ReservasiLayout({ children }: { children: React.ReactNod
       {/* HEADER UTAMA */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Manajemen Booking
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             Kelola jadwal, sewa aset, dan pemantauan sesi aktif secara real-time.
           </p>
         </div>

@@ -23,7 +23,7 @@ export function TombolPanduanLangkah({ kunci, titik }: PanduanLangkah) {
       <button
         type="button"
         onClick={mulai}
-        className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm text-sm font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+        className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm text-isi font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
       >
         <CircleHelp className="h-4 w-4 flex-none text-karamel" aria-hidden="true" />
         Lihat panduan

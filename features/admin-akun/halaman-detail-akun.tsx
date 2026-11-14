@@ -28,8 +28,8 @@ import { aksiKelolaAkun } from "./ubah";
 function Butir({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="space-y-1">
-      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-medium">{children}</dd>
+      <dt className="text-kecil font-medium text-muted-foreground">{label}</dt>
+      <dd className="text-isi font-medium">{children}</dd>
     </div>
   );
 }
@@ -70,14 +70,14 @@ export function HalamanDetailAkun() {
   let isi: ReactNode;
   if (detail.isError && akunTidakAda(detail.error)) {
     isi = (
-      <p role="alert" className="rounded-lg border border-border p-6 text-sm font-medium">
+      <p role="alert" className="rounded-lg border border-border p-6 text-isi font-medium">
         Akun tidak ditemukan. Akun ini mungkin sudah dihapus.
       </p>
     );
   } else if (detail.isError) {
     isi = (
       <div role="alert" className="flex flex-col items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-6">
-        <p className="text-sm font-medium text-destructive">
+        <p className="text-isi font-medium text-destructive">
           {pesanError(detail.error, "Gagal memuat data akun.")}
         </p>
         <Button type="button" variant="outline" onClick={() => detail.refetch()} disabled={detail.isFetching}>
@@ -86,7 +86,7 @@ export function HalamanDetailAkun() {
       </div>
     );
   } else if (!akun) {
-    isi = <p className="text-sm text-muted-foreground">Memuat data akun...</p>;
+    isi = <p className="text-isi text-muted-foreground">Memuat data akun...</p>;
   } else {
     const aksi = aksiLangganan(akun);
     const kelola = aksiKelolaAkun(akun);
@@ -94,7 +94,7 @@ export function HalamanDetailAkun() {
       <>
         <RingkasanAkun akun={akun} />
         {akun.role === "admin" ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-isi text-muted-foreground">
             Akun admin tidak berlangganan dan tidak dapat dibekukan.
           </p>
         ) : (
@@ -139,7 +139,7 @@ export function HalamanDetailAkun() {
               )}
             </div>
             {kelola.hapusTampil && !kelola.hapusAktif && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-kecil text-muted-foreground">
                 Akun aktif tidak dapat dihapus. Bekukan akun lebih dulu.
               </p>
             )}
@@ -157,12 +157,12 @@ export function HalamanDetailAkun() {
       <div className="flex flex-col gap-4">
         <Link
           href={URL_DAFTAR_AKUN}
-          className="inline-flex w-fit items-center text-sm font-medium text-muted-foreground hover:text-foreground"
+          className="inline-flex w-fit items-center text-isi font-medium text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali ke Daftar Akun
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight">Detail Akun</h1>
+        <h1 className="text-judul font-bold tracking-tight">Detail Akun</h1>
       </div>
       {isi}
     </div>

@@ -98,13 +98,13 @@ export default function BuatTarifPage() {
           </Button>
           <div className="space-y-1">
             <h2
-              className="text-xl font-bold tracking-tight"
+              className="text-subjudul font-bold tracking-tight"
               style={{ color: COLORS.navy }}
             >
               Buat Tarif Baru
             </h2>
             <p
-              className="text-sm font-medium"
+              className="text-isi font-medium"
               style={{ color: denganAlfa(COLORS.navy, "80") }}
             >
               Konfigurasi harga, durasi, dan jadwal berlakunya tarif.
@@ -135,7 +135,7 @@ export default function BuatTarifPage() {
             >
               <Tags className="w-5 h-5" style={{ color: COLORS.gold }} />
               <h3
-                className="font-bold text-base"
+                className="font-bold text-besar"
                 style={{ color: COLORS.navy }}
               >
                 Informasi Dasar
@@ -145,7 +145,7 @@ export default function BuatTarifPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label
-                  className="text-sm font-bold"
+                  className="text-isi font-bold"
                   style={{ color: COLORS.navy }}
                 >
                   Nama Tarif <span className="text-rose-500">*</span>
@@ -157,7 +157,7 @@ export default function BuatTarifPage() {
                 />
                 <div className="min-h-4">
                   {errors.namaTarif && (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.namaTarif.message}
                     </span>
                   )}
@@ -166,7 +166,7 @@ export default function BuatTarifPage() {
 
               <div className="space-y-2">
                 <label
-                  className="text-sm font-bold"
+                  className="text-isi font-bold"
                   style={{ color: COLORS.navy }}
                 >
                   Prioritas (Order)
@@ -178,12 +178,12 @@ export default function BuatTarifPage() {
                 />
                 <div className="min-h-4 flex flex-col justify-start">
                   {errors.prioritas ? (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.prioritas.message}
                     </span>
                   ) : (
                     <p
-                      className="text-[11px] font-medium"
+                      className="text-mikro font-medium"
                       style={{ color: denganAlfa(COLORS.navy, "70") }}
                     >
                       Semakin tinggi angka, semakin diprioritaskan jika bentrok.
@@ -212,13 +212,13 @@ export default function BuatTarifPage() {
                 />
                 <div className="space-y-0.5">
                   <label
-                    className="text-sm font-bold"
+                    className="text-isi font-bold"
                     style={{ color: COLORS.navy }}
                   >
                     Aktifkan Tarif Ini
                   </label>
                   <p
-                    className="text-xs font-medium"
+                    className="text-kecil font-medium"
                     style={{ color: denganAlfa(COLORS.navy, "80") }}
                   >
                     Tarif dapat langsung digunakan untuk transaksi booking.
@@ -242,7 +242,7 @@ export default function BuatTarifPage() {
             >
               <Clock className="w-5 h-5" style={{ color: COLORS.gold }} />
               <h3
-                className="font-bold text-base"
+                className="font-bold text-besar"
                 style={{ color: COLORS.navy }}
               >
                 Aturan Harga & Durasi
@@ -252,14 +252,14 @@ export default function BuatTarifPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label
-                  className="text-sm font-bold"
+                  className="text-isi font-bold"
                   style={{ color: COLORS.navy }}
                 >
                   Basis Perhitungan <span className="text-rose-500">*</span>
                 </label>
                 <select
                   {...register("basisPerhitungan")}
-                  className="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-1 focus:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-isi ring-offset-white focus:outline-none focus:ring-1 focus:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50"
                   style={{ color: COLORS.navy }}
                 >
                   <option value="per jam">Per Jam</option>
@@ -267,7 +267,7 @@ export default function BuatTarifPage() {
                 </select>
                 <div className="min-h-4">
                   {errors.basisPerhitungan && (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.basisPerhitungan.message}
                     </span>
                   )}
@@ -276,14 +276,14 @@ export default function BuatTarifPage() {
 
               <div className="space-y-2">
                 <label
-                  className="text-sm font-bold"
+                  className="text-isi font-bold"
                   style={{ color: COLORS.navy }}
                 >
                   Harga <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <span
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-isi font-bold"
                     style={{ color: denganAlfa(COLORS.navy, "60") }}
                   >
                     Rp
@@ -297,7 +297,7 @@ export default function BuatTarifPage() {
                 </div>
                 <div className="min-h-4">
                   {errors.harga && (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.harga.message}
                     </span>
                   )}
@@ -306,7 +306,7 @@ export default function BuatTarifPage() {
 
               <div className="space-y-2">
                 <label
-                  className="text-sm font-bold"
+                  className="text-isi font-bold"
                   style={{ color: COLORS.navy }}
                 >
                   Durasi Minimum <span className="text-rose-500">*</span>
@@ -318,7 +318,7 @@ export default function BuatTarifPage() {
                     className="bg-white border-gray-200 focus-visible:ring-1 pr-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <span
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-kecil font-bold"
                     style={{ color: denganAlfa(COLORS.navy, "60") }}
                   >
                     menit
@@ -326,7 +326,7 @@ export default function BuatTarifPage() {
                 </div>
                 <div className="min-h-4">
                   {errors.durasiMinimum && (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.durasiMinimum.message}
                     </span>
                   )}
@@ -352,7 +352,7 @@ export default function BuatTarifPage() {
                 style={{ color: COLORS.gold }}
               />
               <h3
-                className="font-bold text-base"
+                className="font-bold text-besar"
                 style={{ color: COLORS.navy }}
               >
                 Jadwal Berlaku
@@ -362,7 +362,7 @@ export default function BuatTarifPage() {
             <div className="flex flex-col gap-6">
               <div className="space-y-3">
                 <label
-                  className="text-sm font-bold"
+                  className="text-isi font-bold"
                   style={{ color: COLORS.navy }}
                 >
                   Hari Aktif
@@ -395,7 +395,7 @@ export default function BuatTarifPage() {
                                 className="data-[state=checked]:bg-navy data-[state=checked]:border-navy data-[state=checked]:text-gading"
                               />
                               <span
-                                className="text-sm font-semibold"
+                                className="text-isi font-semibold"
                                 style={{ color: COLORS.navy }}
                               >
                                 {hari.label}
@@ -408,7 +408,7 @@ export default function BuatTarifPage() {
                   />
                 </div>
                 {errors.hariAktif && (
-                  <span className="text-xs font-bold text-rose-500 block">
+                  <span className="text-kecil font-bold text-rose-500 block">
                     {errors.hariAktif.message}
                   </span>
                 )}
@@ -417,7 +417,7 @@ export default function BuatTarifPage() {
               {/* FIX UI JAM: Menggunakan text input kustom format 24 jam dengan controller untuk merakit string HH:mm */}
               <div className="space-y-3">
                 <label
-                  className="text-sm font-bold"
+                  className="text-isi font-bold"
                   style={{ color: COLORS.navy }}
                 >
                   Rentang Waktu Berlaku
@@ -438,7 +438,7 @@ export default function BuatTarifPage() {
                   />
 
                   <span
-                    className="text-sm font-bold hidden sm:block shrink-0"
+                    className="text-isi font-bold hidden sm:block shrink-0"
                     style={{ color: denganAlfa(COLORS.navy, "50") }}
                   >
                     s/d
@@ -463,12 +463,12 @@ export default function BuatTarifPage() {
                 {(errors.jamMulai || errors.jamSelesai) && (
                   <div className="flex flex-col gap-1 min-h-4 pt-1">
                     {errors.jamMulai && (
-                      <span className="text-xs font-bold text-rose-500">
+                      <span className="text-kecil font-bold text-rose-500">
                         Mulai: {errors.jamMulai.message}
                       </span>
                     )}
                     {errors.jamSelesai && (
-                      <span className="text-xs font-bold text-rose-500">
+                      <span className="text-kecil font-bold text-rose-500">
                         Selesai: {errors.jamSelesai.message}
                       </span>
                     )}
@@ -492,7 +492,7 @@ export default function BuatTarifPage() {
             >
               <AlertCircle className="w-5 h-5" style={{ color: COLORS.gold }} />
               <h3
-                className="font-bold text-base"
+                className="font-bold text-besar"
                 style={{ color: COLORS.navy }}
               >
                 Tipe Aset Terkait (Opsional)
@@ -501,7 +501,7 @@ export default function BuatTarifPage() {
 
             <div className="space-y-3">
               <p
-                className="text-sm font-medium"
+                className="text-isi font-medium"
                 style={{ color: denganAlfa(COLORS.navy, "80") }}
               >
                 Pilih tipe aset mana saja yang menggunakan tarif ini. Kosongkan
@@ -510,14 +510,14 @@ export default function BuatTarifPage() {
 
               {isLoadingAset ? (
                 <div
-                  className="text-sm font-bold italic"
+                  className="text-isi font-bold italic"
                   style={{ color: denganAlfa(COLORS.navy, "60") }}
                 >
                   Memuat daftar aset...
                 </div>
               ) : tipeAsetList.length === 0 ? (
                 <div
-                  className="text-sm font-bold italic"
+                  className="text-isi font-bold italic"
                   style={{ color: denganAlfa(COLORS.navy, "60") }}
                 >
                   Belum ada data tipe aset di sistem.
@@ -557,7 +557,7 @@ export default function BuatTarifPage() {
                               />
                               <div className="flex flex-col">
                                 <span
-                                  className="text-sm font-bold"
+                                  className="text-isi font-bold"
                                   style={{ color: COLORS.navy }}
                                 >
                                   {aset.namaTipeAset}

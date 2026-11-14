@@ -101,7 +101,7 @@ export function LangkahOwner({ nomor, total, teksLanjut, awal, onLanjut, onKemba
             }}
             aria-describedby="setup-owner-pin-bantu"
             aria-invalid={errors.pin ? true : undefined}
-            className={KELAS_ISIAN + " text-xl tracking-[0.4em]"}
+            className={KELAS_ISIAN + " text-subjudul tracking-[0.4em]"}
           />
           <p id="setup-owner-pin-bantu" className={KELAS_BANTU}>
             6 digit angka.
@@ -123,7 +123,7 @@ export function LangkahOwner({ nomor, total, teksLanjut, awal, onLanjut, onKemba
               return isianUlang.onChange(e);
             }}
             aria-invalid={errors.ulangiPin ? true : undefined}
-            className={KELAS_ISIAN + " text-xl tracking-[0.4em]"}
+            className={KELAS_ISIAN + " text-subjudul tracking-[0.4em]"}
           />
           <PesanIsian pesan={errors.ulangiPin?.message} />
         </div>

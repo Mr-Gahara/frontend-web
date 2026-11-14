@@ -21,7 +21,7 @@ export function ChipSelisih({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-sm text-navy",
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-isi text-navy",
         LATAR_SELISIH[selisih.nada],
         className,
       )}
@@ -37,7 +37,7 @@ export function ChipStatusKasir({ buka }: { buka: boolean }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-[13px] font-semibold text-navy",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-isi font-semibold text-navy",
         buka ? "bg-sage/20" : "bg-navy/5",
       )}
     >

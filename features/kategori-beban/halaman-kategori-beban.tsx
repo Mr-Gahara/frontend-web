@@ -58,7 +58,7 @@ function PesanGalat({ pesan }: { pesan: string }) {
   return (
     <p
       role="alert"
-      className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+      className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive"
     >
       {pesan}
     </p>
@@ -125,8 +125,8 @@ export function HalamanKategoriBeban() {
               <Tags className="w-6 h-6 text-navy" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-navy">Kategori Beban</h1>
-              <p className="text-sm font-medium text-navy/60">
+              <h1 className="text-judul font-bold tracking-tight text-navy">Kategori Beban</h1>
+              <p className="text-isi font-medium text-navy/60">
                 Kelompokkan pengeluaran operasional toko. Kategori yang pernah dipakai tidak dapat dihapus.
               </p>
             </div>
@@ -148,7 +148,7 @@ export function HalamanKategoriBeban() {
           role="alert"
           className="flex flex-col items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-8 text-center"
         >
-          <p className="text-sm font-medium text-red-600">
+          <p className="text-isi font-medium text-red-600">
             {pesanError(daftar.error, "Gagal memuat kategori beban.")}
           </p>
           <Button
@@ -291,7 +291,7 @@ function DialogFormKategori({
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2">
-            <label htmlFor="nama-kategori-beban" className="text-sm font-bold text-navy">
+            <label htmlFor="nama-kategori-beban" className="text-isi font-bold text-navy">
               Nama Kategori
             </label>
             <Input
@@ -301,7 +301,7 @@ function DialogFormKategori({
               className={cn(KELAS_ISIAN, errors.namaKategori && "border-rose-500")}
             />
             {errors.namaKategori && (
-              <span className="text-xs font-bold text-rose-500">{errors.namaKategori.message}</span>
+              <span className="text-kecil font-bold text-rose-500">{errors.namaKategori.message}</span>
             )}
           </div>
           {galat && <PesanGalat pesan={galat} />}

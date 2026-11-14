@@ -198,7 +198,7 @@ export default function HalamanDaftarPenjualan({
         meta: { label: "No. Referensi" },
         header: ({ column }) => <KepalaUrut column={column} judul="No. Referensi" />,
         cell: ({ row }) => (
-          <span className="font-bold font-mono text-navy text-xs sm:text-sm">
+          <span className="font-bold font-mono text-navy text-kecil sm:text-isi">
             {row.original.noReferensi}
           </span>
         ),
@@ -207,7 +207,7 @@ export default function HalamanDaftarPenjualan({
         accessorKey: "tanggalTransaksi",
         header: ({ column }) => <KepalaUrut column={column} judul="Tanggal" className="hidden sm:inline-flex" />,
         cell: ({ row }) => (
-          <span className="text-xs sm:text-sm font-medium text-navy/70 hidden sm:inline">
+          <span className="text-kecil sm:text-isi font-medium text-navy/70 hidden sm:inline">
             {formatTanggal(row.original.tanggalTransaksi)}
           </span>
         ),
@@ -216,14 +216,14 @@ export default function HalamanDaftarPenjualan({
         accessorKey: "dataPelanggan",
         meta: { lebarBungkus: 180 },
         header: () => (
-          <span className="text-xs font-bold text-navy/60 hidden md:inline">
+          <span className="text-kecil font-bold text-navy/60 hidden md:inline">
             Pelanggan
           </span>
         ),
         cell: ({ row }) => (
           <TeksDuaBaris
             teks={row.original.dataPelanggan?.namaPelanggan ?? "-"}
-            className="max-md:hidden text-sm font-medium text-navy/80 capitalize"
+            className="max-md:hidden text-isi font-medium text-navy/80 capitalize"
           />
         ),
       },
@@ -232,7 +232,7 @@ export default function HalamanDaftarPenjualan({
         meta: { label: "Total" },
         header: ({ column }) => <KepalaUrut column={column} judul="Total" />,
         cell: ({ row }) => (
-          <span className="font-bold text-navy text-xs sm:text-sm font-mono">
+          <span className="font-bold text-navy text-kecil sm:text-isi font-mono">
             {formatRupiah(row.original.totalTagihan)}
           </span>
         ),
@@ -241,7 +241,7 @@ export default function HalamanDaftarPenjualan({
         accessorKey: "statusPenjualan",
         meta: { label: "Status" },
         header: () => (
-          <span className="text-xs font-bold text-navy/60">
+          <span className="text-kecil font-bold text-navy/60">
             Status
           </span>
         ),
@@ -249,7 +249,7 @@ export default function HalamanDaftarPenjualan({
       },
       {
         id: "aksi",
-        header: () => <div className="text-right text-xs font-bold text-navy/60">Aksi</div>,
+        header: () => <div className="text-right text-kecil font-bold text-navy/60">Aksi</div>,
         cell: ({ row }) => {
           const aksi = aksiPenjualan(row.original, permissions);
           const targetId = row.original.id;
@@ -332,10 +332,10 @@ export default function HalamanDaftarPenjualan({
             <ReceiptText className="w-6 h-6 text-navy" />
           </div>
           <div className="space-y-0.5 sm:space-y-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-navy truncate">
+            <h1 className="text-judul font-bold tracking-tight text-navy truncate">
               Data Penjualan
             </h1>
-            <p className="text-xs sm:text-sm font-medium text-navy/60 hidden sm:block">
+            <p className="text-kecil sm:text-isi font-medium text-navy/60 hidden sm:block">
               Kelola invoice penjualan dan pantau status pembayaran.
             </p>
           </div>
@@ -369,7 +369,7 @@ export default function HalamanDaftarPenjualan({
           <div className="flex flex-col gap-4">
             {/* Baris 1: Search full width */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-navy">Cari Nomor Invoice</label>
+              <label className="text-kecil font-bold text-navy">Cari Nomor Invoice</label>
               <Input
                 placeholder="Masukkan no. referensi..."
                 value={filters.noReferensi ?? ""}
@@ -382,7 +382,7 @@ export default function HalamanDaftarPenjualan({
 
             {/* Baris 2: Status */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-navy">Status</label>
+              <label className="text-kecil font-bold text-navy">Status</label>
               <Select
                 value={filters.statusPenjualan ?? "ALL"}
                 onValueChange={(val) =>
@@ -409,7 +409,7 @@ export default function HalamanDaftarPenjualan({
             {/* Baris 3: 2 kolom Jenis */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-navy">Tipe Transaksi</label>
+                <label className="text-kecil font-bold text-navy">Tipe Transaksi</label>
                 <Select
                   value={filters.jenisTransaksi ?? "ALL"}
                   onValueChange={(val) =>
@@ -432,7 +432,7 @@ export default function HalamanDaftarPenjualan({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-navy">Metode Penjualan</label>
+                <label className="text-kecil font-bold text-navy">Metode Penjualan</label>
                 <Select
                   value={filters.jenisPenjualan ?? "ALL"}
                   onValueChange={(val) =>
@@ -459,7 +459,7 @@ export default function HalamanDaftarPenjualan({
             {/* Baris 4: 2 kolom tanggal */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label htmlFor="filter-dari-tanggal" className="text-xs font-bold text-navy">
+                <label htmlFor="filter-dari-tanggal" className="text-kecil font-bold text-navy">
                   Dari Tanggal
                 </label>
                 <PilihTanggal
@@ -473,7 +473,7 @@ export default function HalamanDaftarPenjualan({
                 />
               </div>
               <div className="space-y-1.5">
-                <label htmlFor="filter-sampai-tanggal" className="text-xs font-bold text-navy">
+                <label htmlFor="filter-sampai-tanggal" className="text-kecil font-bold text-navy">
                   Sampai Tanggal
                 </label>
                 <PilihTanggal
@@ -515,7 +515,7 @@ export default function HalamanDaftarPenjualan({
         {penghalang ? (
           penghalang
         ) : daftar.isError ? (
-          <p role="alert" className="py-10 text-center text-sm font-medium text-red-700">
+          <p role="alert" className="py-10 text-center text-isi font-medium text-red-700">
             {pesanError(daftar.error, "Gagal memuat data penjualan.")}
           </p>
         ) : (

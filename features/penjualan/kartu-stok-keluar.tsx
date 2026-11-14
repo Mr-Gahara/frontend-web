@@ -33,13 +33,13 @@ export function KartuStokKeluar({
     >
       <div className="flex flex-col gap-3 px-4 pt-5 pb-4 sm:px-6">
         <div>
-          <h2 id="judul-stok-keluar" className="font-bold text-navy">Stok Keluar</h2>
-          <p className="mt-1 text-sm text-navy/70">
+          <h2 id="judul-stok-keluar" className="text-subjudul font-bold text-navy">Stok Keluar</h2>
+          <p className="mt-1 text-isi text-navy/70">
             {kosong ? kalimatStokKosong(penjualan.statusPenjualan) : kalimatLokasiStok(penjualan.rincianStok, outlet)}
           </p>
         </div>
         {!kosong && penjualan.statusPenjualan === "VOID" && (
-          <p className="flex items-start gap-2 text-sm font-semibold text-navy">
+          <p className="flex items-start gap-2 text-isi font-semibold text-navy">
             <Info aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
             <span className="underline decoration-navy/40 decoration-1 underline-offset-4">{PESAN_VOID_STOK}</span>
           </p>
@@ -47,10 +47,10 @@ export function KartuStokKeluar({
       </div>
 
       {!kosong && (
-        <div className="bg-gading text-sm">
+        <div className="bg-gading text-isi">
           <div
             aria-hidden="true"
-            className={`hidden border-b border-navy/10 px-6 py-3 text-xs font-semibold text-navy/60 ${GRID}`}
+            className={`hidden border-b border-navy/10 px-6 py-3 text-kecil font-semibold text-navy/60 ${GRID}`}
           >
             <span>Barang</span>
             <span>Jenis</span>
@@ -58,7 +58,7 @@ export function KartuStokKeluar({
           </div>
           {kelompok.map((k) => (
             <div key={k.produkID} className="border-b border-navy/10">
-              <h3 className="border-t border-navy/5 bg-krem px-4 py-2.5 text-[13px] font-bold text-navy sm:px-6">
+              <h3 className="border-t border-navy/5 bg-krem px-4 py-2.5 text-isi font-bold text-navy sm:px-6">
                 {k.judul}
               </h3>
               <ul>
@@ -70,12 +70,12 @@ export function KartuStokKeluar({
                     <div className="min-w-0 sm:contents">
                       <p className="font-semibold text-navy">{b.nama}</p>
                       <span
-                        className={`mt-1 inline-block justify-self-start rounded-full px-2.5 py-0.5 text-xs font-semibold sm:mt-0 ${KELAS_JENIS[b.jenis]}`}
+                        className={`mt-1 inline-block justify-self-start rounded-full px-2.5 py-0.5 text-kecil font-semibold sm:mt-0 ${KELAS_JENIS[b.jenis]}`}
                       >
                         {b.jenis}
                       </span>
                     </div>
-                    <span className="shrink-0 whitespace-nowrap text-right font-mono text-[15px] font-bold text-red-800">
+                    <span className="shrink-0 whitespace-nowrap text-right font-mono text-besar font-bold text-red-800">
                       {b.jumlah}
                     </span>
                   </li>
@@ -84,7 +84,7 @@ export function KartuStokKeluar({
             </div>
           ))}
           {tanpaPotong.length > 0 && (
-            <p className="px-4 pt-3 pb-4 text-xs text-navy/60 sm:px-6">
+            <p className="px-4 pt-3 pb-4 text-kecil text-navy/60 sm:px-6">
               {tanpaPotong.join(", ")} tidak memotong stok.
             </p>
           )}

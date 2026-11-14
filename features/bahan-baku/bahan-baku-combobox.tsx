@@ -64,7 +64,7 @@ export function BahanBakuCombobox({
             className="text-navy"
           />
           <CommandList>
-            <CommandEmpty className="py-4 text-center text-sm text-navy/60 font-medium">
+            <CommandEmpty className="py-4 text-center text-isi text-navy/60 font-medium">
               Bahan tidak ditemukan.
             </CommandEmpty>
             <CommandGroup>
@@ -89,7 +89,7 @@ export function BahanBakuCombobox({
                       )}
                     />
                     {bb.namaBahan}
-                    <span className="ml-1 text-xs text-navy/50 font-normal">
+                    <span className="ml-1 text-kecil text-navy/50 font-normal">
                       ({bb.satuan})
                     </span>
                   </CommandItem>

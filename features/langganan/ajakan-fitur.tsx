@@ -18,7 +18,7 @@ import { namaPlan } from "./data";
 export const URL_LANGGANAN = "/dashboard/outlet/pengaturan/langganan";
 
 const KELAS_TOMBOL =
-  "inline-flex h-11 items-center justify-center rounded-lg bg-navy px-5 text-sm font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2";
+  "inline-flex h-11 items-center justify-center rounded-lg bg-navy px-5 text-isi font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2";
 
 function Bingkai({ ikon, judul, children }: { ikon: React.ReactNode; judul: string; children: React.ReactNode }) {
   return (
@@ -27,7 +27,7 @@ function Bingkai({ ikon, judul, children }: { ikon: React.ReactNode; judul: stri
       className="flex min-h-[40vh] w-full flex-col items-center justify-center gap-3 px-4 py-10 text-center text-navy"
     >
       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-krem">{ikon}</span>
-      <p className="text-lg font-bold">{judul}</p>
+      <p className="text-subjudul font-bold">{judul}</p>
       {children}
     </div>
   );
@@ -43,7 +43,7 @@ export function AjakanNaikPlan({ fitur }: { fitur: FiturPlan }) {
   const bolehLangganan = permissions.includes(IZIN.langganan);
   return (
     <Bingkai ikon={<Lock className="h-5 w-5" aria-hidden="true" />} judul={`${NAMA_FITUR[fitur]} belum termasuk plan Anda`}>
-      <p className="max-w-md text-sm text-navy/70">
+      <p className="max-w-md text-isi text-navy/70">
         Fitur {NAMA_FITUR[fitur]} tersedia mulai plan {namaPlan(PLAN_MINIMAL[fitur])}. Toko Anda memakai plan{" "}
         {namaPlan(plan)}.
       </p>
@@ -52,7 +52,7 @@ export function AjakanNaikPlan({ fitur }: { fitur: FiturPlan }) {
           Lihat Langganan
         </Link>
       ) : (
-        <p className="text-sm font-medium text-navy/60">Hubungi pemilik toko untuk naik plan.</p>
+        <p className="text-isi font-medium text-navy/60">Hubungi pemilik toko untuk naik plan.</p>
       )}
     </Bingkai>
   );
@@ -62,7 +62,7 @@ export function AjakanNaikPlan({ fitur }: { fitur: FiturPlan }) {
 export function AjakanLengkapiSetup({ fitur }: { fitur: FiturPlan }) {
   return (
     <Bingkai ikon={<Wrench className="h-5 w-5" aria-hidden="true" />} judul={`Setup ${NAMA_FITUR[fitur]} belum selesai`}>
-      <p className="max-w-md text-sm text-navy/70">
+      <p className="max-w-md text-isi text-navy/70">
         {fitur === "sesi-booking"
           ? "Tambahkan tipe aset, aset, dan tarif lebih dulu agar sesi booking dapat dipakai."
           : "Tambahkan gudang lebih dulu agar alur gudang dapat dipakai."}

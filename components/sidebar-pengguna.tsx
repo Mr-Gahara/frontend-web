@@ -52,15 +52,15 @@ export function SidebarPengguna({ onNavigasi }: { onNavigasi: (href: string) => 
               className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! text-slate-50! hover:text-slate-900! data-[state=open]:text-slate-900! cursor-pointer transition-colors"
             >
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-neutral-600 text-xs font-bold text-white">
+                <AvatarFallback className="bg-neutral-600 text-kecil font-bold text-white">
                   {inisialNama(nama)}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-isi leading-tight">
                 <span className="truncate font-semibold group-data-[state=open]:text-slate-900">
                   {nama || "Nama Pengguna"}
                 </span>
-                <span className="truncate text-xs text-slate-50/70 group-data-[state=open]:text-slate-500">
+                <span className="truncate text-kecil text-slate-50/70 group-data-[state=open]:text-slate-500">
                   {peran || "Position"}
                 </span>
               </div>
@@ -75,8 +75,8 @@ export function SidebarPengguna({ onNavigasi }: { onNavigasi: (href: string) => 
           >
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{nama}</p>
-                <p className="text-xs leading-none text-muted-foreground">{peran}</p>
+                <p className="text-isi font-medium leading-none">{nama}</p>
+                <p className="text-kecil leading-none text-muted-foreground">{peran}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

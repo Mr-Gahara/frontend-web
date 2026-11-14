@@ -46,7 +46,7 @@ const OPSI_STATUS: readonly { nilai: StatusHari; label: string }[] = [
 ];
 
 const KELAS_STATUS =
-  "inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl text-sm font-semibold text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel";
+  "inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl text-isi font-semibold text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel";
 
 const TANDA_BILAH = ["00", "06", "12", "18", "24"] as const;
 
@@ -122,8 +122,8 @@ function KartuHari({
       )}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <h2 className="text-[17px] font-bold leading-snug">{nama}</h2>
-        <span className="text-[15px] font-semibold">{ringkasHari(hari)}</span>
+        <h2 className="text-subjudul font-bold leading-snug">{nama}</h2>
+        <span className="text-besar font-semibold">{ringkasHari(hari)}</span>
       </div>
       <div aria-hidden="true" className="flex flex-col gap-1">
         <div className="relative h-3 overflow-hidden rounded-full bg-krem">
@@ -132,14 +132,14 @@ function KartuHari({
             style={{ left: `${segmen.kiri}%`, width: `${segmen.lebar}%` }}
           />
         </div>
-        <div className="flex justify-between text-xs text-muted-foreground">
+        <div className="flex justify-between text-kecil text-muted-foreground">
           {TANDA_BILAH.map((t) => (
             <span key={t}>{t}</span>
           ))}
         </div>
       </div>
       {tutup?.jenis === "besok" && (
-        <p className="flex items-start gap-2.5 rounded-xl border border-karamel/60 bg-karamel/15 px-3.5 py-2.5 text-sm leading-normal">
+        <p className="flex items-start gap-2.5 rounded-xl border border-karamel/60 bg-karamel/15 px-3.5 py-2.5 text-isi leading-normal">
           <Moon className="mt-0.5 h-[18px] w-[18px] flex-none" aria-hidden="true" />
           <strong className="font-semibold">{tutup.teks}</strong>
         </p>
@@ -184,9 +184,9 @@ function KartuHari({
         </div>
       )}
       {hari.status === "24jam" && (
-        <p className="text-sm text-muted-foreground">Buka sepanjang hari, tanpa jam tutup</p>
+        <p className="text-isi text-muted-foreground">Buka sepanjang hari, tanpa jam tutup</p>
       )}
-      {hari.status === "libur" && <p className="text-sm text-muted-foreground">Toko tutup seharian</p>}
+      {hari.status === "libur" && <p className="text-isi text-muted-foreground">Toko tutup seharian</p>}
       {tutup?.jenis === "sama" && <p className={KELAS_BANTU}>{tutup.teks}</p>}
       <PesanIsian pesan={masalah ?? undefined} />
     </li>

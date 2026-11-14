@@ -80,7 +80,7 @@ export default function HalamanDetailPenerimaan({ id, ruang }: { id: string; rua
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <AlertTriangle className="w-12 h-12 text-rose-500/50" />
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           Surat Jalan Tidak Ditemukan
         </h2>
         <Button
@@ -101,10 +101,10 @@ export default function HalamanDetailPenerimaan({ id, ruang }: { id: string; rua
         <div className="p-4 bg-blue-50 rounded-full border border-blue-100">
           <ClipboardCheck className="w-12 h-12 text-blue-600" />
         </div>
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           Pengiriman Sudah Selesai
         </h2>
-        <p className="text-sm font-medium text-navy/60">
+        <p className="text-isi font-medium text-navy/60">
           Surat Jalan ini berstatus{" "}
           <strong className="text-navy">{detail.status}</strong> dan barang
           sudah dieksekusi masuk ke dalam stok kasir Anda.
@@ -209,10 +209,10 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
           Batal & Kembali
         </Button>
         <div className="space-y-1">
-          <h1 className="text-3xl font-black font-mono tracking-tight text-navy">
+          <h1 className="text-judul font-bold font-mono tracking-tight text-navy">
             {detail.nomorTransfer}
           </h1>
-          <p className="text-sm font-medium text-navy/60 flex items-center gap-2">
+          <p className="text-isi font-medium text-navy/60 flex items-center gap-2">
             <Truck className="w-4 h-4 text-emerald-600" />
             Pengiriman Logistik dari {detail.dariLokasi?.nama || "-"}
           </p>
@@ -224,11 +224,11 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
         <div className="lg:col-span-2 space-y-6">
           <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden flex flex-col">
             <div className="bg-krem px-6 py-4 border-b border-navy/10 flex flex-col gap-1">
-              <h2 className="font-bold text-navy flex items-center gap-2">
+              <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
                 <PackageCheck className="w-5 h-5 text-emerald-700" />
                 Daftar Periksa Fisik Barang
               </h2>
-              <p className="text-[11px] font-medium text-navy/60 pl-7">
+              <p className="text-mikro font-medium text-navy/60 pl-7">
                 Hitung fisik barang dan sesuaikan jumlah yang diterima. Jika ada
                 selisih, wajib mengisi alasan.
               </p>
@@ -250,14 +250,14 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       {/* Info Barang */}
                       <div className="flex-1">
-                        <span className="text-[10px] font-bold text-navy/40 uppercase tracking-wider block mb-0.5">
+                        <span className="text-mikro font-bold text-navy/40 uppercase tracking-wider block mb-0.5">
                           Item #{index + 1}
                         </span>
-                        <h3 className="font-bold text-navy text-base leading-tight">
+                        <h3 className="font-bold text-navy text-besar leading-tight">
                           {item.bahanBaku?.namaBahan ||
                             "Master Data Terhapus"}
                         </h3>
-                        <p className="text-xs font-medium text-navy/50 mt-1">
+                        <p className="text-kecil font-medium text-navy/50 mt-1">
                           Dikirim {detail.dariLokasi?.tipe ?? "Asal"}:{" "}
                           <strong className="text-navy">
                             {item.qtyKirim} {item.bahanBaku?.satuan}
@@ -268,7 +268,7 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
                       {/* Input Qty Terima */}
                       <div className="flex items-center gap-3 w-full md:w-auto">
                         <div className="flex flex-col">
-                          <label htmlFor={`terima-jumlah-${item.kunci}`} className="text-[10px] font-bold text-emerald-700 uppercase block mb-1 text-right">
+                          <label htmlFor={`terima-jumlah-${item.kunci}`} className="text-mikro font-bold text-emerald-700 uppercase block mb-1 text-right">
                             Fisik Diterima
                           </label>
                           <div className="flex items-center gap-2">
@@ -286,13 +286,13 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
                                 handleQtyChange(item.kunci, e.target.value)
                               }
                               className={cn(
-                                "w-24 text-center font-mono font-bold text-lg h-10 no-spinner focus-visible:ring-1",
+                                "w-24 text-center font-mono font-bold text-subjudul h-10 no-spinner focus-visible:ring-1",
                                 isSelisih
                                   ? "border-rose-300 bg-rose-50 text-rose-700 focus-visible:ring-rose-500"
                                   : "border-emerald-200 bg-emerald-50 text-emerald-700 focus-visible:ring-emerald-600",
                               )}
                             />
-                            <span className="text-sm font-bold text-navy/50 shrink-0 w-8">
+                            <span className="text-isi font-bold text-navy/50 shrink-0 w-8">
                               {item.bahanBaku?.satuan}
                             </span>
                           </div>
@@ -303,7 +303,7 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
                     {/* Input Alasan (Hanya muncul jika ada selisih) */}
                     {isSelisih && (
                       <div className="pt-3 border-t border-rose-100 mt-1">
-                        <label htmlFor={`terima-alasan-${item.kunci}`} className="text-[11px] font-bold text-rose-600 uppercase flex items-center gap-1 mb-1.5">
+                        <label htmlFor={`terima-alasan-${item.kunci}`} className="text-mikro font-bold text-rose-600 uppercase flex items-center gap-1 mb-1.5">
                           <MessageSquareWarning className="w-3.5 h-3.5" />{" "}
                           Alasan Selisih Barang{" "}
                           <span className="text-rose-500">*</span>
@@ -323,7 +323,7 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
                           )}
                         />
                         {item.catatanItem.trim() === "" && (
-                          <p className="text-[10px] text-rose-500 mt-1.5 font-bold">
+                          <p className="text-mikro text-rose-500 mt-1.5 font-bold">
                             Wajib diisi karena jumlah terima kurang dari yang
                             dikirim.
                           </p>
@@ -340,13 +340,13 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
         {/* KOLOM KANAN: RINGKASAN & EKSEKUSI */}
         <div className="lg:col-span-1 space-y-6">
           <div className="rounded-2xl border border-navy/10 bg-white p-6 shadow-sm space-y-5">
-            <h2 className="font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
+            <h2 className="text-subjudul font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
               <MapPin className="w-4 h-4 text-karamel" /> Info Logistik
             </h2>
 
             <div className="space-y-3 pt-1">
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-navy/50 uppercase">
+                <span className="text-mikro font-bold text-navy/50 uppercase">
                   Asal Barang
                 </span>
                 <span className="font-bold text-navy">
@@ -354,7 +354,7 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-navy/50 uppercase">
+                <span className="text-mikro font-bold text-navy/50 uppercase">
                   Tujuan
                 </span>
                 <span className="font-bold text-navy">
@@ -362,7 +362,7 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-navy/50 uppercase">
+                <span className="text-mikro font-bold text-navy/50 uppercase">
                   Waktu Berangkat
                 </span>
                 <span className="font-bold text-navy flex items-center gap-1.5">
@@ -371,7 +371,7 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-navy/50 uppercase">
+                <span className="text-mikro font-bold text-navy/50 uppercase">
                   PIC Pengirim
                 </span>
                 <span className="font-bold text-navy capitalize">
@@ -382,14 +382,14 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
           </div>
 
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm flex flex-col gap-3">
-            <h3 className="text-sm font-bold text-emerald-900 text-center mb-1">
+            <h3 className="text-isi font-bold text-emerald-900 text-center mb-1">
               Finalisasi Kedatangan
             </h3>
 
             {!isFormValid && (
               <div className="bg-rose-50 border border-rose-200 p-3 rounded-xl mb-2 flex items-start gap-2">
                 <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-                <p className="text-xs font-medium text-rose-700 leading-snug">
+                <p className="text-kecil font-medium text-rose-700 leading-snug">
                   Mohon isi alasan untuk semua barang yang jumlah diterimanya
                   tidak utuh.
                 </p>
@@ -401,7 +401,7 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
               onClick={() => setShowConfirmModal(true)}
               disabled={!isFormValid || terimaMutation.isPending}
               className={cn(
-                "w-full h-12 text-base font-bold shadow-md cursor-pointer transition-colors",
+                "w-full h-12 text-besar font-bold shadow-md cursor-pointer transition-colors",
                 !isFormValid
                   ? "bg-slate-300 text-slate-500 cursor-not-allowed hover:bg-slate-300"
                   : "bg-emerald-600 text-white hover:bg-emerald-700",
@@ -410,7 +410,7 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
               <Check className="w-5 h-5 mr-2" /> Konfirmasi Terima Barang
             </Button>
             )}
-            <p className="text-[10px] font-medium text-emerald-800/60 text-center mt-1 leading-tight">
+            <p className="text-mikro font-medium text-emerald-800/60 text-center mt-1 leading-tight">
               Aksi ini akan menyuntikkan fisik barang secara otomatis ke dalam
               stok POS/Toko Anda.
             </p>

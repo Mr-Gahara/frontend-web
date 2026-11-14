@@ -41,10 +41,10 @@ export function ShiftDeleteDialog({
           </div>
           
           <div className="flex flex-col gap-1.5 mt-2 sm:mt-0">
-            <AlertDialogTitle className="text-xl font-bold text-navy">
+            <AlertDialogTitle className="text-subjudul font-bold text-navy">
               Non-Aktifkan Shift?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm font-semibold leading-relaxed text-navy/70">
+            <AlertDialogDescription className="text-isi font-semibold leading-relaxed text-navy/70">
               Anda yakin ingin menonaktifkan <strong>{targetShift.namaShift}</strong>?
               <br />
               <br />

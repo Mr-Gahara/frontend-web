@@ -28,7 +28,7 @@ export const ISI_GALAT: Record<KodeGalat, { judul: string; isi: string }> = {
 };
 
 const KELAS_TOMBOL =
-  "inline-flex h-[54px] w-full cursor-pointer items-center justify-center rounded-xl bg-navy text-base font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2";
+  "inline-flex h-[54px] w-full cursor-pointer items-center justify-center rounded-xl bg-navy text-besar font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2";
 const KELAS_TAUTAN =
   "cursor-pointer rounded-sm font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel";
 
@@ -39,7 +39,7 @@ function TautanKembali() {
     <button
       type="button"
       onClick={() => (window.history.length > 1 ? router.back() : router.push("/dashboard"))}
-      className={cn(KELAS_TAUTAN, "self-start text-[15px]")}
+      className={cn(KELAS_TAUTAN, "self-start text-besar")}
     >
       Kembali ke halaman sebelumnya
     </button>
@@ -85,15 +85,16 @@ export function HalamanGalat({
       >
         <div className="flex items-center gap-3">
           <TandaTachyon ukuran={34} />
-          <span className="text-lg font-bold">Tachyon POS</span>
+          <span className="text-subjudul font-bold">Tachyon POS</span>
         </div>
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-navy/75">Kode galat</p>
+          <p className="text-kecil font-semibold uppercase tracking-[0.14em] text-navy/75">Kode galat</p>
+          {/* eslint-disable-next-line no-restricted-syntax -- teks hero di luar skala tipografi (CV25a) */}
           <p aria-hidden="true" className="text-[88px] sm:text-[120px] font-black leading-none tracking-tighter">
             {kode}
           </p>
         </div>
-        <p className="max-w-100 text-[15px] text-abu-teks">
+        <p className="max-w-100 text-besar text-abu-teks">
           Data toko Anda aman. Halaman ini hanya tidak dapat ditampilkan.
         </p>
       </aside>
@@ -101,8 +102,8 @@ export function HalamanGalat({
       <Isi className="flex min-w-0 flex-[1_1_100%] sm:flex-[1_1_380px] items-center justify-center px-2 py-4 sm:py-10">
         <div className="flex w-full max-w-100 flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold leading-tight tracking-tight">{judul}</h1>
-            <p className="text-[15px] text-muted-foreground">{isi}</p>
+            <h1 className="text-judul font-bold leading-tight tracking-tight">{judul}</h1>
+            <p className="text-isi text-muted-foreground">{isi}</p>
           </div>
           {onCobaLagi ? (
             <button type="button" onClick={onCobaLagi} className={KELAS_TOMBOL}>
@@ -114,14 +115,14 @@ export function HalamanGalat({
             </Link>
           )}
           {onCobaLagi ? (
-            <Link href="/dashboard" className={cn(KELAS_TAUTAN, "self-start text-[15px]")}>
+            <Link href="/dashboard" className={cn(KELAS_TAUTAN, "self-start text-besar")}>
               Ke dashboard
             </Link>
           ) : (
             kode !== 403 && <TautanKembali />
           )}
           {kodeGalat && (
-            <p className="text-xs text-navy/60">
+            <p className="text-kecil text-navy/60">
               Kode galat: <span className="font-mono">{kodeGalat}</span>
             </p>
           )}

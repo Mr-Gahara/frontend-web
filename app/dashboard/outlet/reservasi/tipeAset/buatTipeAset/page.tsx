@@ -78,10 +78,10 @@ export default function BuatTipeAsetPage() {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Tambah Kategori Aset Baru
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             Buat kategori atau tipe baru untuk mengelompokkan aset/fasilitas yang Anda sewakan.
           </p>
         </div>
@@ -92,13 +92,13 @@ export default function BuatTipeAsetPage() {
         <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm flex flex-col gap-6">
           <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
             <Layers className="h-5 w-5 text-karamel" />
-            <h3 className="text-base font-bold text-navy">
+            <h3 className="text-besar font-bold text-navy">
               Detail Informasi Kategori Aset
             </h3>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-navy">
+            <label className="text-isi font-bold text-navy">
               Nama Kategori Aset <span className="text-rose-500">*</span>
             </label>
             <Input
@@ -111,11 +111,11 @@ export default function BuatTipeAsetPage() {
             />
             <div className="min-h-4">
               {errors.namaTipeAset ? (
-                <span className="text-xs font-bold text-rose-500">
+                <span className="text-kecil font-bold text-rose-500">
                   {errors.namaTipeAset.message}
                 </span>
               ) : (
-                <p className="text-[10px] font-medium text-navy/50">
+                <p className="text-mikro font-medium text-navy/50">
                   Nama ini akan muncul pada menu pembuatan aset dan penyewaan.
                 </p>
               )}
@@ -123,7 +123,7 @@ export default function BuatTipeAsetPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-navy flex items-center gap-1.5">
+            <label className="text-isi font-bold text-navy flex items-center gap-1.5">
               <FileText className="w-4 h-4 text-navy/50" />
               Deskripsi <span className="text-navy/50 font-medium">(Opsional)</span>
             </label>
@@ -133,7 +133,7 @@ export default function BuatTipeAsetPage() {
               rows={4}
               className="bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy resize-none"
             />
-            <p className="text-[10px] font-medium text-navy/50">
+            <p className="text-mikro font-medium text-navy/50">
               Gunakan untuk menyimpan spesifikasi khusus kategori ini agar staf mengetahui perbedaannya.
             </p>
           </div>

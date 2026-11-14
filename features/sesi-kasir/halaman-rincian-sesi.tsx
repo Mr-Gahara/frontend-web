@@ -32,7 +32,7 @@ export function HalamanRincianSesi({ id }: { id: string }) {
     // Tidak ditemukan dibedakan dari gagal memuat, seperti detail penjualan.
     return (
       <div className="flex w-full flex-col items-center gap-4 px-4 py-16 text-center">
-        <p role="alert" className="text-sm font-bold text-navy/70">
+        <p role="alert" className="text-isi font-bold text-navy/70">
           {!detail.error || isNotFound(detail.error)
             ? "Sesi kasir tidak ditemukan."
             : pesanError(detail.error, "Gagal memuat rincian sesi kasir.")}

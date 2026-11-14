@@ -102,7 +102,7 @@ export default function DaftarBahanBakuPage() {
       cell: ({ row }) => (
         <div>
           <p className="font-bold text-navy">{row.original.item?.nama || "Item Tidak Dikenal"}</p>
-          <p className="text-xs font-medium text-navy/50 mt-0.5">
+          <p className="text-kecil font-medium text-navy/50 mt-0.5">
             ID: {(row.original.item?.id ?? "").substring(0, 8)}
           </p>
         </div>
@@ -190,10 +190,10 @@ export default function DaftarBahanBakuPage() {
             <Package className="w-7 h-7 text-karamel" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
               Bahan Baku
             </h1>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-isi font-medium text-navy/60">
               Kelola persediaan bahan mentah di outlet ini untuk keperluan produksi.
             </p>
           </div>
@@ -224,7 +224,7 @@ export default function DaftarBahanBakuPage() {
       {isError ? (
         <p
           role="alert"
-          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
         >
           Gagal memuat data inventaris outlet. Silakan muat ulang halaman.
         </p>

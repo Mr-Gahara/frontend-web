@@ -41,9 +41,9 @@ import { LABEL_MODEL } from "./tampilan";
 type Tab = "pajak" | "relasi";
 type ModeDialog = { mode: "buat" } | { mode: "ubah"; pajak: Pajak };
 
-const kelasKepalaKolom = "text-xs font-bold text-navy/60";
+const kelasKepalaKolom = "text-kecil font-bold text-navy/60";
 const kelasTab =
-  "cursor-pointer rounded-none border-0 border-b-2 border-transparent bg-transparent px-5 py-2 text-sm font-semibold text-navy/50 hover:text-navy data-[state=active]:border-b-navy data-[state=active]:bg-transparent data-[state=active]:font-bold data-[state=active]:text-navy data-[state=active]:shadow-none";
+  "cursor-pointer rounded-none border-0 border-b-2 border-transparent bg-transparent px-5 py-2 text-isi font-semibold text-navy/50 hover:text-navy data-[state=active]:border-b-navy data-[state=active]:bg-transparent data-[state=active]:font-bold data-[state=active]:text-navy data-[state=active]:shadow-none";
 
 /**
  * Halaman pengaturan pajak (submodul 2 modul Pengaturan outlet). Tampilan
@@ -117,7 +117,7 @@ function IsiHalamanPajak() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-xs font-bold text-navy/60 hover:bg-transparent hover:text-navy"
+            className="h-auto p-0 text-kecil font-bold text-navy/60 hover:bg-transparent hover:text-navy"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Nama Pajak
@@ -152,7 +152,7 @@ function IsiHalamanPajak() {
         header: () => <span className={kelasKepalaKolom}>Status</span>,
         cell: ({ row }) => (
           <span
-            className={`rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${row.original.statusPajak ? "bg-sage text-gading" : "bg-navy/10 text-navy/60"}`}
+            className={`rounded-full px-2.5 py-1 text-kecil font-bold shadow-sm ${row.original.statusPajak ? "bg-sage text-gading" : "bg-navy/10 text-navy/60"}`}
           >
             {row.original.statusPajak ? "Aktif" : "Non-Aktif"}
           </span>
@@ -161,7 +161,7 @@ function IsiHalamanPajak() {
       {
         id: "aksi",
         header: () =>
-          adaAksiBaris ? <div className="text-right text-xs font-bold text-navy/60">Aksi</div> : null,
+          adaAksiBaris ? <div className="text-right text-kecil font-bold text-navy/60">Aksi</div> : null,
         cell: ({ row }) =>
           !adaAksiBaris ? null : (
           <div className="flex justify-end">
@@ -224,8 +224,8 @@ function IsiHalamanPajak() {
 
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">Pengaturan Pajak</h1>
-            <p className="text-sm font-medium text-navy/60">Kelola pajak dan relasi produk.</p>
+            <h1 className="text-judul font-bold tracking-tight text-navy">Pengaturan Pajak</h1>
+            <p className="text-isi font-medium text-navy/60">Kelola pajak dan relasi produk.</p>
           </div>
 
           {tab === "pajak" && aksi.buat && (
@@ -316,7 +316,7 @@ function IsiHalamanPajak() {
               tidak lagi dikenakan pada penjualan berikutnya.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {galatHapus && <p className="text-sm font-bold text-red-600">{galatHapus}</p>}
+          {galatHapus && <p className="text-isi font-bold text-red-600">{galatHapus}</p>}
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={hapus.isPending}

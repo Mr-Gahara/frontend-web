@@ -84,7 +84,7 @@ export function HalamanGenerateRuang({ ruang }: { ruang: RuangJadwal }) {
       <button
         type="button"
         onClick={() => router.push(urlKalender)}
-        className="flex items-center gap-2 text-navy/60 hover:text-navy font-bold text-sm mb-6 transition-colors"
+        className="flex items-center gap-2 text-navy/60 hover:text-navy font-bold text-isi mb-6 transition-colors"
       >
         <ChevronLeft className="h-4 w-4" />
         Kembali ke Kalender Jadwal
@@ -93,7 +93,7 @@ export function HalamanGenerateRuang({ ruang }: { ruang: RuangJadwal }) {
       {pesanSimpan && langkah === 2 && (
         <div
           role="alert"
-          className="bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-200 text-sm font-bold flex items-center gap-2 mb-6 max-w-6xl mx-auto"
+          className="bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-200 text-isi font-bold flex items-center gap-2 mb-6 max-w-6xl mx-auto"
         >
           <AlertCircle className="h-5 w-5 shrink-0" />
           <p>{pesanSimpan}</p>

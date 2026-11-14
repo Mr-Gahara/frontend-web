@@ -10,7 +10,7 @@ import type { Tenant } from "@/types/tenant";
 import { useHapusLogo, useLogoToko, useUnggahLogo } from "./hooks";
 import { TERIMA_LOGO, periksaBerkasLogo } from "./logo";
 
-const KELAS_LABEL = "text-xs font-bold text-navy/75";
+const KELAS_LABEL = "text-kecil font-bold text-navy/75";
 
 /** Logo toko dari logoUrl, atau ikon kosong. Dipakai kartu ini dan pratinjau struk. */
 function GambarLogo({ url, ukuran, alt }: { url: string | null; ukuran: string; alt: string }) {
@@ -82,14 +82,14 @@ export function KartuLogoToko({ tenant, bolehUbah }: { tenant: Tenant; bolehUbah
             {urlLogo ? (
               <GambarLogo url={urlLogo} ukuran="h-18 w-18" alt="Logo toko saat ini" />
             ) : adaLogo && logo.isError ? (
-              <span className="px-1 text-[11px] font-medium text-rose-700">Logo gagal dimuat</span>
+              <span className="px-1 text-mikro font-medium text-rose-700">Logo gagal dimuat</span>
             ) : (
               <ImageIcon className="h-9 w-9 text-navy/45" role="img" aria-label="Belum ada logo" />
             )}
           </div>
           {bolehUbah ? (
             <>
-              <p className="text-sm font-semibold">
+              <p className="text-isi font-semibold">
                 {adaLogo ? "Seret gambar baru ke sini, atau" : "Seret gambar ke sini, atau"}
               </p>
               <input
@@ -113,16 +113,16 @@ export function KartuLogoToko({ tenant, bolehUbah }: { tenant: Tenant; bolehUbah
                 {unggah.isPending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
                 Pilih berkas
               </Button>
-              <p className="text-xs text-navy/75">JPEG, PNG, atau WebP, maksimal 2 MB</p>
+              <p className="text-kecil text-navy/75">JPEG, PNG, atau WebP, maksimal 2 MB</p>
             </>
           ) : (
-            <p className="text-xs font-medium text-navy/75">
+            <p className="text-kecil font-medium text-navy/75">
               Mengubah logo membutuhkan izin mengubah toko.
             </p>
           )}
         </div>
         {galat && (
-          <p role="alert" className="text-xs font-medium text-rose-700">
+          <p role="alert" className="text-kecil font-medium text-rose-700">
             {galat}
           </p>
         )}
@@ -131,7 +131,7 @@ export function KartuLogoToko({ tenant, bolehUbah }: { tenant: Tenant; bolehUbah
             type="button"
             disabled={memproses}
             onClick={() => hapus.mutate(tenant.id)}
-            className="h-6 self-start text-sm font-semibold text-rose-700 underline decoration-2 underline-offset-[3px] cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-6 self-start text-isi font-semibold text-rose-700 underline decoration-2 underline-offset-[3px] cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
           >
             Hapus logo
           </button>
@@ -142,10 +142,10 @@ export function KartuLogoToko({ tenant, bolehUbah }: { tenant: Tenant; bolehUbah
         <figcaption className={KELAS_LABEL}>Pratinjau struk</figcaption>
         <div
           data-testid="pratinjau-struk"
-          className="flex flex-1 min-h-75 flex-col items-center justify-center gap-1 rounded border border-border bg-permukaan px-4.5 py-5 font-mono text-xs text-neutral-900 shadow-[0_4px_14px_rgba(10,41,71,0.08)]"
+          className="flex flex-1 min-h-75 flex-col items-center justify-center gap-1 rounded border border-border bg-permukaan px-4.5 py-5 font-mono text-kecil text-neutral-900 shadow-[0_4px_14px_rgba(10,41,71,0.08)]"
         >
           {urlLogo && <GambarLogo url={urlLogo} ukuran="mb-1.5 h-14 w-14" alt="Logo di struk" />}
-          <p className="text-[13px] font-bold uppercase">{tenant.namaToko}</p>
+          <p className="text-isi font-bold uppercase">{tenant.namaToko}</p>
           {alamat && <p className="text-center text-neutral-600">{alamat}</p>}
           <div className="my-2 self-stretch border-t border-dashed border-neutral-400" />
           <div className="flex self-stretch justify-between">
@@ -165,7 +165,7 @@ export function KartuLogoToko({ tenant, bolehUbah }: { tenant: Tenant; bolehUbah
             <p className="mt-2.5 whitespace-pre-line text-center text-neutral-600">{tenant.footerStruk}</p>
           )}
         </div>
-        <p className="flex min-h-6 items-center text-xs text-navy/75">
+        <p className="flex min-h-6 items-center text-kecil text-navy/75">
           {adaLogo
             ? "Contoh tampilan; struk asli dicetak aplikasi kasir."
             : "Tanpa logo, struk dimulai dari nama toko."}

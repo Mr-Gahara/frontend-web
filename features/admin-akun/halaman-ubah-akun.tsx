@@ -21,9 +21,9 @@ import {
   type NilaiUbahAkun,
 } from "./ubah";
 
-const KELAS_LABEL = "text-sm font-medium";
-const KELAS_GALAT = "text-xs font-medium text-destructive";
-const KELAS_KETERANGAN = "text-xs text-muted-foreground";
+const KELAS_LABEL = "text-isi font-medium";
+const KELAS_GALAT = "text-kecil font-medium text-destructive";
+const KELAS_KETERANGAN = "text-kecil text-muted-foreground";
 
 function FormUbahAkun({ akun }: { akun: AkunAdmin }) {
   const router = useRouter();
@@ -107,7 +107,7 @@ function FormUbahAkun({ akun }: { akun: AkunAdmin }) {
       </div>
 
       {galat && (
-        <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">
+        <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive">
           {galat}
         </p>
       )}
@@ -145,14 +145,14 @@ export function HalamanUbahAkun() {
   let isi: ReactNode;
   if (detail.isError && akunTidakAda(detail.error)) {
     isi = (
-      <p role="alert" className="rounded-lg border border-border p-6 text-sm font-medium">
+      <p role="alert" className="rounded-lg border border-border p-6 text-isi font-medium">
         Akun tidak ditemukan. Akun ini mungkin sudah dihapus.
       </p>
     );
   } else if (detail.isError) {
     isi = (
       <div role="alert" className="flex flex-col items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-6">
-        <p className="text-sm font-medium text-destructive">
+        <p className="text-isi font-medium text-destructive">
           {pesanError(detail.error, "Gagal memuat data akun.")}
         </p>
         <Button type="button" variant="outline" onClick={() => detail.refetch()} disabled={detail.isFetching}>
@@ -161,10 +161,10 @@ export function HalamanUbahAkun() {
       </div>
     );
   } else if (!akun) {
-    isi = <p className="text-sm text-muted-foreground">Memuat data akun...</p>;
+    isi = <p className="text-isi text-muted-foreground">Memuat data akun...</p>;
   } else if (!aksiKelolaAkun(akun).ubah) {
     isi = (
-      <p role="alert" className="rounded-lg border border-border p-6 text-sm font-medium">
+      <p role="alert" className="rounded-lg border border-border p-6 text-isi font-medium">
         Akun admin tidak dapat diubah dari panel ini.
       </p>
     );
@@ -177,12 +177,12 @@ export function HalamanUbahAkun() {
       <div className="flex flex-col gap-4">
         <Link
           href={id ? urlDetailAkun(id) : URL_DAFTAR_AKUN}
-          className="inline-flex w-fit items-center text-sm font-medium text-muted-foreground hover:text-foreground"
+          className="inline-flex w-fit items-center text-isi font-medium text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali ke Detail Akun
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight">Ubah Akun</h1>
+        <h1 className="text-judul font-bold tracking-tight">Ubah Akun</h1>
       </div>
       {isi}
     </div>

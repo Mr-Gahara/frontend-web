@@ -18,13 +18,13 @@ export function DaftarRiwayatLangganan({ akunId }: { akunId: string }) {
 
   return (
     <section aria-labelledby="judul-riwayat" className="space-y-3">
-      <h2 id="judul-riwayat" className="text-lg font-semibold">
+      <h2 id="judul-riwayat" className="text-subjudul font-semibold">
         Riwayat Langganan
       </h2>
 
       {riwayat.isError ? (
         <div role="alert" className="flex flex-col items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-4">
-          <p className="text-sm font-medium text-destructive">
+          <p className="text-isi font-medium text-destructive">
             {pesanError(riwayat.error, "Gagal memuat riwayat langganan.")}
           </p>
           <Button type="button" variant="outline" onClick={() => riwayat.refetch()} disabled={riwayat.isFetching}>
@@ -32,12 +32,12 @@ export function DaftarRiwayatLangganan({ akunId }: { akunId: string }) {
           </Button>
         </div>
       ) : riwayat.isLoading ? (
-        <p className="text-sm text-muted-foreground">Memuat riwayat...</p>
+        <p className="text-isi text-muted-foreground">Memuat riwayat...</p>
       ) : catatan.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Belum ada riwayat langganan.</p>
+        <p className="text-isi text-muted-foreground">Belum ada riwayat langganan.</p>
       ) : (
         <>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-isi text-muted-foreground">
             Menampilkan {catatan.length} dari {total} catatan
           </p>
           <ul className="divide-y divide-border rounded-lg border border-border">
@@ -45,13 +45,13 @@ export function DaftarRiwayatLangganan({ akunId }: { akunId: string }) {
               const perubahan = teksPerubahanMasa(c);
               const plan = teksPerubahanPlan(c);
               return (
-                <li key={c.id} className="space-y-1 p-4 text-sm">
+                <li key={c.id} className="space-y-1 p-4 text-isi">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <p className="font-medium">
                       {LABEL_AKSI[c.aksi]}
                       {c.durasiBulan ? ` ${c.durasiBulan} bulan` : ""}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-kecil text-muted-foreground">
                       {formatTanggal(c.createdAt)} oleh {pelakuRiwayat(c)}
                     </p>
                   </div>

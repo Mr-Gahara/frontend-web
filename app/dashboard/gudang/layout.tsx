@@ -82,7 +82,7 @@ export default function GudangLayout({ children }: { children: React.ReactNode }
   return (
     <div className="flex h-screen w-full items-center justify-center">
       <div className="flex flex-col items-center gap-2">
-        <span className="animate-pulse text-sm font-medium text-slate-500">
+        <span className="animate-pulse text-isi font-medium text-slate-500">
           Memverifikasi data Gudang...
         </span>
       </div>

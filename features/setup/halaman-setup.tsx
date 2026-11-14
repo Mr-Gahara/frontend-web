@@ -55,10 +55,10 @@ export function HalamanSetup() {
   if (status.isError) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-permukaan p-6 text-navy">
-        <p role="alert" className="text-sm font-medium text-destructive">
+        <p role="alert" className="text-isi font-medium text-destructive">
           {pesanError(status.error, "Gagal memuat status setup toko.")}
         </p>
-        <button type="button" onClick={() => status.refetch()} className="text-sm font-semibold underline">
+        <button type="button" onClick={() => status.refetch()} className="text-isi font-semibold underline">
           Coba lagi
         </button>
       </div>
@@ -66,7 +66,7 @@ export function HalamanSetup() {
   }
   if (!data || tujuan) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-permukaan text-sm text-muted-foreground">
+      <div className="flex min-h-screen items-center justify-center bg-permukaan text-isi text-muted-foreground">
         Memuat setup toko...
       </div>
     );

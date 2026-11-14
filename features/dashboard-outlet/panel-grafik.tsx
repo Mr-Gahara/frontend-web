@@ -55,7 +55,7 @@ export function PanelGrafik({ hari }: { hari: Date }) {
         <div className="p-2 bg-karamel rounded-xl shadow-sm shrink-0">
           <IkonGrafik className="w-5 h-5 text-gading" aria-hidden="true" />
         </div>
-        <h2 className="text-sm sm:text-lg font-bold tracking-wide">Pendapatan Bulan Ini</h2>
+        <h2 className="text-subjudul font-bold tracking-wide">Pendapatan Bulan Ini</h2>
       </div>
       {kini.isLoading ? (
         <div className="flex flex-col gap-4">
@@ -70,11 +70,11 @@ export function PanelGrafik({ hari }: { hari: Date }) {
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <p className="text-xl sm:text-3xl font-black tracking-tight">{formatRupiah(total)}</p>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${lencana}`}>
+            <p className="text-subjudul sm:text-tampilan font-black tracking-tight">{formatRupiah(total)}</p>
+            <span className={`px-2 py-0.5 rounded-full text-kecil font-bold ${lencana}`}>
               {teksPertumbuhan(pertumbuhan)}
             </span>
-            <span className="text-xs text-navy/60 font-medium">vs periode sebelumnya</span>
+            <span className="text-kecil text-navy/60 font-medium">vs periode sebelumnya</span>
           </div>
           <div className="w-full h-44 sm:h-80">
             <GrafikLaporan data={titikOmzet(kini.data ?? [])} interval={4} />

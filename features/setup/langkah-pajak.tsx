@@ -162,7 +162,7 @@ export function LangkahPajak({
         nilai={model}
         onUbah={(n) => setValue("modelPerhitungan", n)}
       />
-      <p className="text-sm leading-normal text-muted-foreground">
+      <p className="text-isi leading-normal text-muted-foreground">
         Hanya satu pajak seluruh transaksi yang bisa aktif. Pajak lain bisa
         ditambahkan nanti dari Pengaturan.
       </p>

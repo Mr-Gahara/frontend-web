@@ -5,7 +5,7 @@ import { TombolPanduanLangkah, type PanduanLangkah } from "./panduan-langkah";
 
 export function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-xs font-medium text-destructive">{pesan}</p>;
+  return <p className="text-kecil font-medium text-destructive">{pesan}</p>;
 }
 
 export function JudulLangkah({
@@ -27,14 +27,14 @@ export function JudulLangkah({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-semibold text-navy/70">
+        <p className="text-isi font-semibold text-navy/70">
           Langkah {nomor} dari {total}
           {catatan ? ", " + catatan : ""}
         </p>
         {panduan && <TombolPanduanLangkah {...panduan} />}
       </div>
-      <h1 className="text-3xl font-bold tracking-tight">{judul}</h1>
-      <p className="text-[15px] leading-normal text-muted-foreground">
+      <h1 className="text-judul font-bold tracking-tight">{judul}</h1>
+      <p className="text-isi leading-normal text-muted-foreground">
         {keterangan}
       </p>
     </div>
@@ -43,7 +43,7 @@ export function JudulLangkah({
 
 export function KotakInfo({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-input bg-gading px-4 py-3.5 text-sm leading-normal">
+    <div className="flex items-start gap-3 rounded-xl border border-input bg-gading px-4 py-3.5 text-isi leading-normal">
       <Info className="mt-0.5 h-5 w-5 flex-none" aria-hidden="true" />
       <div>{children}</div>
     </div>
@@ -54,7 +54,7 @@ export function KotakPeringatan({ children }: { children: ReactNode }) {
   return (
     <div
       role="note"
-      className="flex items-start gap-3 rounded-xl border border-karamel/60 bg-karamel/15 px-4 py-3.5 text-sm leading-normal"
+      className="flex items-start gap-3 rounded-xl border border-karamel/60 bg-karamel/15 px-4 py-3.5 text-isi leading-normal"
     >
       <AlertTriangle className="mt-0.5 h-5 w-5 flex-none" aria-hidden="true" />
       <div>{children}</div>
@@ -122,7 +122,7 @@ export function NavigasiLangkah({
 /** Penanda isian yang belum ditambahkan, di bawah tombol tambahnya (penanda, 7 November 2026). */
 export function PenandaBelumTersimpan({ teksTombol }: { teksTombol: string }) {
   return (
-    <p className="inline-flex items-center gap-2 self-start rounded-full bg-karamel/20 py-1.5 pl-2.5 pr-3.5 text-[13px] font-semibold">
+    <p className="inline-flex items-center gap-2 self-start rounded-full bg-karamel/20 py-1.5 pl-2.5 pr-3.5 text-isi font-semibold">
       <ArrowUp className="h-[15px] w-[15px] flex-none" aria-hidden="true" />
       Belum tersimpan. Tekan {teksTombol}.
     </p>
@@ -133,7 +133,7 @@ export function PenandaBelumTersimpan({ teksTombol }: { teksTombol: string }) {
 export function PesanGalat({ pesan }: { pesan: string }) {
   if (!pesan) return null;
   return (
-    <p role="alert" className="text-sm font-medium text-destructive">
+    <p role="alert" className="text-isi font-medium text-destructive">
       {pesan}
     </p>
   );
@@ -165,7 +165,7 @@ export function PilihanTombol<T extends string>({
 }) {
   return (
     <div data-panduan={panduan} className="flex flex-col gap-2.5">
-      <p id={id} className="text-[15px] font-semibold">
+      <p id={id} className="text-besar font-semibold">
         {pertanyaan}
       </p>
       <div role="group" aria-labelledby={id} className="flex flex-wrap gap-2.5">
@@ -184,9 +184,9 @@ export function PilihanTombol<T extends string>({
                   : "border border-input bg-permukaan")
               }
             >
-              <span className="text-[15px] font-semibold">{o.label}</span>
+              <span className="text-besar font-semibold">{o.label}</span>
               {o.keterangan && (
-                <span className="text-[13px] text-muted-foreground">
+                <span className="text-kecil text-muted-foreground">
                   {o.keterangan}
                 </span>
               )}
@@ -212,7 +212,7 @@ export function DaftarTambahan({
   if (butir.length === 0) return null;
   return (
     <section aria-label={judul} className="flex flex-col gap-2.5">
-      <h2 className="text-sm font-semibold">
+      <h2 className="text-subjudul font-semibold">
         {judul} ({butir.length})
       </h2>
       <ul className="flex flex-col gap-2">
@@ -222,9 +222,9 @@ export function DaftarTambahan({
             className="flex items-center justify-between gap-3 rounded-xl border border-input bg-gading py-2 pl-4 pr-2"
           >
             <span className="flex min-w-0 flex-col">
-              <span className="text-[15px] font-semibold">{b.label}</span>
+              <span className="text-besar font-semibold">{b.label}</span>
               {b.keterangan && (
-                <span className="text-[13px] text-muted-foreground">
+                <span className="text-kecil text-muted-foreground">
                   {b.keterangan}
                 </span>
               )}

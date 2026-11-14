@@ -233,7 +233,7 @@ export default function HalamanPengguna({
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-0 text-xs font-bold text-navy/60 hover:text-navy hover:bg-transparent"
+          className="h-auto p-0 text-kecil font-bold text-navy/60 hover:text-navy hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <span>Nama Pengguna</span> <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -250,14 +250,14 @@ export default function HalamanPengguna({
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-0 text-xs font-bold text-navy/60 hover:text-navy hover:bg-transparent"
+          className="h-auto p-0 text-kecil font-bold text-navy/60 hover:text-navy hover:bg-transparent"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           <span>Nomor HP</span> <ArrowUpDown className="ml-1 h-3 w-3" />
         </Button>
       ),
       cell: ({ row }) => (
-        <span className="font-mono text-xs font-medium text-navy/70">
+        <span className="font-mono text-kecil font-medium text-navy/70">
           {row.getValue("nomorHp") || "-"}
         </span>
       ),
@@ -266,11 +266,11 @@ export default function HalamanPengguna({
       id: "role",
       meta: { label: "Role" },
       header: () => (
-        <span className="text-xs font-bold text-navy/60">Role</span>
+        <span className="text-kecil font-bold text-navy/60">Role</span>
       ),
       accessorFn: (row) => namaPeran(row, roleList),
       cell: ({ row }) => (
-        <span className="text-sm font-semibold capitalize text-navy">
+        <span className="text-isi font-semibold capitalize text-navy">
           {row.getValue("role") as string}
         </span>
       ),
@@ -279,14 +279,14 @@ export default function HalamanPengguna({
       accessorKey: "statusPengguna",
       meta: { label: "Status" },
       header: () => (
-        <div className="text-xs font-bold text-navy/60">Status</div>
+        <div className="text-kecil font-bold text-navy/60">Status</div>
       ),
       cell: ({ row }) => {
         const isActive = row.original.status === "aktif";
         return (
           // PALET WARNA: Menggunakan Sage Green untuk status Aktif
           <span
-            className={`rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${isActive ? "bg-sage text-gading" : "bg-navy/10 text-navy/60"}`}
+            className={`rounded-full px-2.5 py-1 text-kecil font-bold shadow-sm ${isActive ? "bg-sage text-gading" : "bg-navy/10 text-navy/60"}`}
           >
             {isActive ? "Aktif" : "Non-Aktif"}
           </span>
@@ -296,7 +296,7 @@ export default function HalamanPengguna({
     {
       id: "aksi",
       header: () => (
-        <div className="text-right text-xs font-bold text-navy/60">
+        <div className="text-right text-kecil font-bold text-navy/60">
           Aksi
         </div>
       ),
@@ -368,10 +368,10 @@ export default function HalamanPengguna({
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Kelola Pengguna
           </h1>
-          <p className="text-sm text-navy/60 font-medium">
+          <p className="text-isi text-navy/60 font-medium">
             Kelola seluruh entitas akun dan hak akses platform.
           </p>
         </div>
@@ -404,7 +404,7 @@ export default function HalamanPengguna({
         {/* TABEL DATA */}
         <div className="col-span-1 md:col-span-12 xl:col-span-9 flex flex-col h-full min-h-112.5">
           <div className="flex flex-col gap-4 grow h-full">
-            <h2 className="text-lg font-bold text-navy mb-1">
+            <h2 className="text-subjudul font-bold text-navy mb-1">
               Daftar Pengguna Sistem
             </h2>
             <DataTable

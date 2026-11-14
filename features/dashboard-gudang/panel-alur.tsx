@@ -25,8 +25,8 @@ interface Kartu {
 }
 
 const DASAR_KARTU = "flex-1 min-w-0 rounded-2xl p-3 sm:p-4 flex flex-col gap-1 sm:gap-1.5";
-const ANGKA = "text-[28px] sm:text-4xl font-bold leading-none";
-const LABEL = "text-[13px] sm:text-sm font-medium";
+const ANGKA = "text-judul sm:text-tampilan font-bold leading-none";
+const LABEL = "text-isi font-medium";
 
 function KartuAngka({ kartu, memuat }: { kartu: Kartu; memuat: boolean }) {
   if (memuat) {
@@ -43,7 +43,7 @@ function KartuAngka({ kartu, memuat }: { kartu: Kartu; memuat: boolean }) {
       <div className={`${DASAR_KARTU} bg-white/60`}>
         <span className={`${ANGKA} text-navy/60`}>0</span>{" "}
         <span className={LABEL}>{kartu.label}</span>
-        <span className="text-xs sm:text-[13px] text-navy/60">{kartu.kosong}</span>
+        <span className="text-kecil text-navy/60">{kartu.kosong}</span>
       </div>
     );
   }
@@ -52,7 +52,7 @@ function KartuAngka({ kartu, memuat }: { kartu: Kartu; memuat: boolean }) {
       <span className={ANGKA}>{formatAngka(kartu.angka)}</span>{" "}
       <span className={LABEL}>{kartu.label}</span>
       {kartu.href && (
-        <span className="text-xs sm:text-[13px] font-semibold text-amber-800">
+        <span className="text-kecil sm:text-isi font-semibold text-amber-800">
           {kartu.aksi} <span aria-hidden="true">→</span>
         </span>
       )}
@@ -104,10 +104,10 @@ function GrupAlur({
           <Ikon className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
         </span>
         <div className="flex flex-col gap-0.5 min-w-0">
-          <h2 id={idJudul} className="text-[15px] sm:text-base font-semibold">
+          <h2 id={idJudul} className="text-subjudul font-semibold">
             {judul}
           </h2>
-          <p className="text-xs sm:text-[13px] text-navy/75">{penjelasan}</p>
+          <p className="text-kecil text-navy/75">{penjelasan}</p>
         </div>
       </div>
       {gagal ? (

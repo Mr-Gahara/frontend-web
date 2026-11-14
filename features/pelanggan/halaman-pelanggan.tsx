@@ -20,7 +20,7 @@ import { useDaftarPelanggan } from "./hooks";
 import { aksiPelanggan, bolehHapusPelanggan } from "./izin";
 
 const KELAS_KEPALA =
-  "h-auto p-0 text-xs font-semibold text-navy/60 hover:text-navy hover:bg-transparent";
+  "h-auto p-0 text-kecil font-semibold text-navy/60 hover:text-navy hover:bg-transparent";
 
 function KartuStatistik({
   ikon,
@@ -39,8 +39,8 @@ function KartuStatistik({
         {ikon}
       </div>
       <div>
-        <p className="text-sm font-bold text-cokelat">{judul}</p>
-        <h3 className="text-2xl font-bold text-cokelat">{nilai}</h3>
+        <p className="text-isi font-bold text-cokelat">{judul}</p>
+        <h3 className="text-judul font-bold text-cokelat">{nilai}</h3>
       </div>
     </div>
   );
@@ -92,14 +92,14 @@ export function HalamanPelanggan() {
             {row.original.isBawaan && (
               <span
                 title="Pelanggan bawaan toko untuk transaksi tanpa data pelanggan"
-                className="ml-2 rounded-full bg-navy/10 px-2 py-0.5 text-[11px] font-semibold text-navy/70"
+                className="ml-2 rounded-full bg-navy/10 px-2 py-0.5 text-mikro font-semibold text-navy/70"
               >
                 Bawaan
               </span>
             )}
           </span>
           {row.original.alamat && (
-            <span className="text-xs text-navy/60 line-clamp-1 mt-0.5">
+            <span className="text-kecil text-navy/60 line-clamp-1 mt-0.5">
               {row.original.alamat}
             </span>
           )}
@@ -109,11 +109,11 @@ export function HalamanPelanggan() {
     {
       accessorKey: "nomorHp",
       meta: { label: "Kontak" },
-      header: () => <span className="text-xs font-semibold text-navy/60">Kontak</span>,
+      header: () => <span className="text-kecil font-semibold text-navy/60">Kontak</span>,
       cell: ({ row }) => (
         <div className="flex flex-col space-y-1">
-          <span className="text-xs text-navy">{row.original.nomorHp || "-"}</span>
-          {row.original.email && <span className="text-xs text-navy/60">{row.original.email}</span>}
+          <span className="text-kecil text-navy">{row.original.nomorHp || "-"}</span>
+          {row.original.email && <span className="text-kecil text-navy/60">{row.original.email}</span>}
         </div>
       ),
     },
@@ -141,7 +141,7 @@ export function HalamanPelanggan() {
               : "bg-navy/10 text-navy font-bold";
 
         return (
-          <span className={`rounded-full px-2.5 py-0.5 text-xs capitalize ${colorClass}`}>
+          <span className={`rounded-full px-2.5 py-0.5 text-kecil capitalize ${colorClass}`}>
             {tipe}
           </span>
         );
@@ -162,12 +162,12 @@ export function HalamanPelanggan() {
         </Button>
       ),
       cell: ({ row }) => (
-        <span className="font-mono text-sm font-medium text-navy">{row.original.poinLoyalitas}</span>
+        <span className="font-mono text-isi font-medium text-navy">{row.original.poinLoyalitas}</span>
       ),
     },
     {
       id: "aksi",
-      header: () => <div className="text-right text-xs text-navy/60">Aksi</div>,
+      header: () => <div className="text-right text-kecil text-navy/60">Aksi</div>,
       cell: ({ row }) => {
         const hapus = bolehHapusPelanggan(aksi.hapus, row.original);
         if (!aksi.ubah && !hapus) return null;
@@ -206,8 +206,8 @@ export function HalamanPelanggan() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-navy">Manajemen Pelanggan</h1>
-        <p className="text-sm font-medium text-cokelat/60">
+        <h1 className="text-judul font-bold tracking-tight text-navy">Manajemen Pelanggan</h1>
+        <p className="text-isi font-medium text-cokelat/60">
           Kelola data pelanggan, keanggotaan, dan informasi kontak.
         </p>
       </div>
@@ -239,10 +239,10 @@ export function HalamanPelanggan() {
             aksi.buat ? "lg:col-span-8" : "lg:col-span-12"
           }`}
         >
-          <h2 className="text-sm font-semibold text-navy">Daftar Pelanggan</h2>
+          <h2 className="text-subjudul font-semibold text-navy">Daftar Pelanggan</h2>
           {daftar.isError ? (
             <div className="flex flex-col items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-8 text-center">
-              <p className="text-sm font-medium text-red-600">
+              <p className="text-isi font-medium text-red-600">
                 Gagal memuat data pelanggan. Periksa koneksi Anda, lalu coba lagi.
               </p>
               <Button variant="outline" onClick={() => daftar.refetch()} disabled={daftar.isFetching}>
@@ -264,8 +264,8 @@ export function HalamanPelanggan() {
         {aksi.buat && (
           <div className="rounded-xl border border-navy/10 bg-krem p-6 shadow-sm lg:col-span-4 lg:sticky lg:top-6">
             <div className="mb-4">
-              <h2 className="text-sm font-semibold text-navy">Tambah Pelanggan Cepat</h2>
-              <p className="text-xs text-navy/60 mt-1">
+              <h2 className="text-subjudul font-semibold text-navy">Tambah Pelanggan Cepat</h2>
+              <p className="text-kecil text-navy/60 mt-1">
                 Tambahkan data pelanggan baru langsung dari panel ini.
               </p>
             </div>

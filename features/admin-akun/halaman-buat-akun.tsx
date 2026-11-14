@@ -29,9 +29,9 @@ import {
 } from "./schema";
 import { URL_DAFTAR_AKUN } from "./tampilan";
 
-const KELAS_LABEL = "text-sm font-medium";
-const KELAS_GALAT = "text-xs font-medium text-destructive";
-const KELAS_KETERANGAN = "text-xs text-muted-foreground";
+const KELAS_LABEL = "text-isi font-medium";
+const KELAS_GALAT = "text-kecil font-medium text-destructive";
+const KELAS_KETERANGAN = "text-kecil text-muted-foreground";
 
 /**
  * Halaman buat akun klien (keputusan PA8b). Form berskema dengan
@@ -79,14 +79,14 @@ export function HalamanBuatAkun() {
       <div className="flex flex-col gap-4">
         <Link
           href={URL_DAFTAR_AKUN}
-          className="inline-flex w-fit items-center text-sm font-medium text-muted-foreground hover:text-foreground"
+          className="inline-flex w-fit items-center text-isi font-medium text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali ke Daftar Akun
         </Link>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Buat Akun Klien</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-judul font-bold tracking-tight">Buat Akun Klien</h1>
+          <p className="text-isi text-muted-foreground">
             Akun baru belum punya toko; klien men-setup tokonya sendiri lewat aplikasi.
           </p>
         </div>
@@ -195,7 +195,7 @@ export function HalamanBuatAkun() {
         </div>
 
         {galat && (
-          <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">
+          <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive">
             {galat}
           </p>
         )}

@@ -120,7 +120,7 @@ function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="font-bold font-mono text-navy">{row.original.nomorTransfer}</span>
-            <span className="text-xs font-medium text-navy/50 mt-1">
+            <span className="text-kecil font-medium text-navy/50 mt-1">
               {formatTanggal(row.original.createdAt)}
             </span>
           </div>
@@ -134,7 +134,7 @@ function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
             <span className="font-bold text-navy">
               {row.original.keLokasi?.nama || "-"}
             </span>
-            <span className="text-xs font-medium text-navy/50 mt-1 capitalize">
+            <span className="text-kecil font-medium text-navy/50 mt-1 capitalize">
               Terkait: {row.original.pengajuanStokID ? "Pengajuan Stok" : "Transfer Manual"}
             </span>
           </div>
@@ -191,11 +191,11 @@ function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy flex items-center gap-2">
+          <h1 className="text-judul font-bold tracking-tight text-navy flex items-center gap-2">
             <Truck className="w-6 h-6 text-karamel" /> Surat Jalan (Transfer
             Stok)
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             {ruang === "gudang"
               ? "Pantau dan kelola pengiriman fisik barang dari gudang ke outlet."
               : "Pantau dan kelola pengembalian barang dari outlet ke gudang."}
@@ -214,7 +214,7 @@ function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
                 size="sm"
                 aria-pressed={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
-                className={`rounded-full px-4 font-bold transition-all text-xs ${
+                className={`rounded-full px-4 font-bold transition-all text-kecil ${
                   activeTab === tab
                     ? "bg-navy text-white hover:bg-navy/90"
                     : "text-navy/60 hover:text-navy hover:bg-navy/5"
@@ -244,7 +244,7 @@ function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
       ) : isError ? (
         <p
           role="alert"
-          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
         >
           Gagal memuat surat jalan. Periksa koneksi, lalu muat ulang halaman.
         </p>

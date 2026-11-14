@@ -38,12 +38,12 @@ const ISIAN_TOKO: { nama: keyof NilaiFormTenant; label: string; contoh: string }
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-xs font-medium text-rose-600">{pesan}</p>;
+  return <p className="text-kecil font-medium text-rose-600">{pesan}</p>;
 }
 
 function Memuat({ teks }: { teks: string }) {
   return (
-    <p className="animate-pulse text-center text-sm font-medium text-slate-500">{teks}</p>
+    <p className="animate-pulse text-center text-isi font-medium text-slate-500">{teks}</p>
   );
 }
 
@@ -100,7 +100,7 @@ function FormProfilToko({ tenant, bolehUbah }: { tenant: Tenant; bolehUbah: bool
   return (
     <form onSubmit={handleSubmit(kirim)} noValidate className="space-y-5">
       <div className="space-y-2">
-        <label htmlFor="profil-toko-namaToko" className="text-sm font-medium text-foreground">
+        <label htmlFor="profil-toko-namaToko" className="text-isi font-medium text-foreground">
           Nama Toko
         </label>
         <Input
@@ -117,7 +117,7 @@ function FormProfilToko({ tenant, bolehUbah }: { tenant: Tenant; bolehUbah: bool
           <div key={isian.nama} className="space-y-2">
             <label
               htmlFor={`profil-toko-${isian.nama}`}
-              className="text-sm font-medium text-foreground"
+              className="text-isi font-medium text-foreground"
             >
               {isian.label}
             </label>
@@ -133,7 +133,7 @@ function FormProfilToko({ tenant, bolehUbah }: { tenant: Tenant; bolehUbah: bool
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="profil-toko-footerStruk" className="text-sm font-medium text-foreground">
+        <label htmlFor="profil-toko-footerStruk" className="text-isi font-medium text-foreground">
           Catatan Kaki Struk
         </label>
         <Textarea
@@ -153,7 +153,7 @@ function FormProfilToko({ tenant, bolehUbah }: { tenant: Tenant; bolehUbah: bool
           nonaktif={perbarui.isPending || !isDirty}
         />
       ) : (
-        <p className="text-xs font-medium text-muted-foreground">
+        <p className="text-kecil font-medium text-muted-foreground">
           Anda hanya dapat melihat profil toko. Mengubahnya membutuhkan izin mengubah toko.
         </p>
       )}
@@ -210,7 +210,7 @@ function FormLokasiOutlet({ outlet, bolehUbah }: { outlet: Lokasi; bolehUbah: bo
           nonaktif={perbarui.isPending || !isDirty}
         />
       ) : (
-        <p className="text-xs font-medium text-muted-foreground">
+        <p className="text-kecil font-medium text-muted-foreground">
           Anda hanya dapat melihat lokasi outlet. Mengubahnya membutuhkan izin mengubah lokasi.
         </p>
       )}
@@ -236,8 +236,8 @@ function Kartu({
           {ikon}
         </div>
         <div>
-          <h2 className="text-lg font-bold tracking-tight text-foreground">{judul}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{keterangan}</p>
+          <h2 className="text-subjudul font-bold tracking-tight text-foreground">{judul}</h2>
+          <p className="mt-1 text-isi text-muted-foreground">{keterangan}</p>
         </div>
       </div>
       {children}
@@ -292,7 +292,7 @@ export function HalamanProfilToko() {
   let isiLokasi: React.ReactNode;
   if (!bacaLokasi) {
     isiLokasi = (
-      <p className="text-sm font-medium text-muted-foreground">
+      <p className="text-isi font-medium text-muted-foreground">
         Anda tidak memiliki izin melihat lokasi outlet.
       </p>
     );
@@ -332,8 +332,8 @@ export function HalamanProfilToko() {
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Profil Toko</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="text-judul font-bold tracking-tight text-foreground">Profil Toko</h1>
+        <p className="mt-1 text-isi text-muted-foreground">
           Informasi dasar toko dan lokasi outlet Anda.
         </p>
       </div>

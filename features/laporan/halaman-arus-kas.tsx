@@ -39,7 +39,7 @@ import {
 import { useArusKas } from "./hooks";
 
 const SEMUA = "semua";
-const KELAS_LABEL = "text-xs font-bold text-navy/70";
+const KELAS_LABEL = "text-kecil font-bold text-navy/70";
 const KELAS_PEMICU = "h-10 bg-permukaan border-navy/20 text-navy";
 
 /** Angka bertanda: "+Rp 1.000", "−Rp 1.000", atau "Rp 0". */
@@ -69,13 +69,13 @@ function KartuSaldo({
   return (
     <div className="bg-navy text-gading rounded-2xl sm:rounded-3xl border-t-4 border-karamel p-4 sm:p-5 flex flex-col justify-between gap-3 shadow-sm min-w-0 sm:min-h-34">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-krem/85 truncate min-w-0">{judul}</p>
+        <p className="text-isi font-semibold text-krem/85 truncate min-w-0">{judul}</p>
         <span className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-karamel/20 text-karamel shrink-0">
           <Wallet className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
         </span>
       </div>
-      <p className="text-xl sm:text-2xl font-black tracking-tight truncate">{nilai}</p>
-      <p className="flex items-center gap-2 text-xs">
+      <p className="text-subjudul sm:text-judul font-black tracking-tight truncate">{nilai}</p>
+      <p className="flex items-center gap-2 text-kecil">
         <span className={cn("px-2 py-0.5 rounded-full font-bold", kelasLencana)}>{lencana}</span>
         <span className="font-medium text-krem/75">{catatan}</span>
       </p>
@@ -91,18 +91,18 @@ function Panel({ panel }: { panel: PanelRincian }) {
       className="bg-krem border border-navy/10 rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-navy flex flex-col gap-4 min-w-0"
     >
       <div className="flex items-baseline justify-between gap-3">
-        <h3 className="text-base font-bold">{panel.judul}</h3>
-        <span className="text-lg sm:text-xl font-black tracking-tight">{formatRupiah(panel.total)}</span>
+        <h3 className="text-besar font-bold">{panel.judul}</h3>
+        <span className="text-subjudul font-black tracking-tight">{formatRupiah(panel.total)}</span>
       </div>
       <ul className="flex flex-col gap-3.5">
         {panel.baris.map((b) => (
           <li key={`${b.label}-${b.pembatalan}`} className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between gap-3 text-sm">
+            <div className="flex items-center justify-between gap-3 text-isi">
               <span className="flex items-center gap-2 font-semibold min-w-0">
                 {/* Boleh dua baris: di HP 390 px label dan badge Pembatalan tidak muat satu baris. */}
                 <span className="leading-snug">{b.label}</span>
                 {b.pembatalan && (
-                  <span className="shrink-0 px-2 py-px rounded-full bg-karamel/25 text-karamel-tua text-[11px] font-bold">
+                  <span className="shrink-0 px-2 py-px rounded-full bg-karamel/25 text-karamel-tua text-mikro font-bold">
                     Pembatalan
                   </span>
                 )}
@@ -174,8 +174,8 @@ export function HalamanArusKas() {
     <div className="flex flex-col gap-5 w-full text-navy">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-base sm:text-lg font-bold tracking-wide">Laporan Arus Kas</h2>
-          <p className="text-sm font-medium text-navy/70 mt-1">Uang masuk dan keluar dari buku mutasi akun kas.</p>
+          <h2 className="text-subjudul font-bold tracking-wide">Laporan Arus Kas</h2>
+          <p className="text-isi font-medium text-navy/70 mt-1">Uang masuk dan keluar dari buku mutasi akun kas.</p>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -260,7 +260,7 @@ export function HalamanArusKas() {
               aria-pressed={filter.kelompok === k}
               onClick={() => setFilter({ ...filter, kelompok: k })}
               className={cn(
-                "h-8 px-3.5 text-sm font-bold rounded-md transition-colors cursor-pointer",
+                "h-8 px-3.5 text-isi font-bold rounded-md transition-colors cursor-pointer",
                 filter.kelompok === k ? "bg-sage text-gading shadow-sm" : "text-navy/70 hover:text-navy",
               )}
             >
@@ -319,14 +319,14 @@ export function HalamanArusKas() {
             ))}
           </div>
           {!filter.akunKasID && (
-            <p className="-mt-1 text-xs font-medium text-navy/70">
+            <p className="-mt-1 text-kecil font-medium text-navy/70">
               Transfer antar akun tidak dihitung untuk Semua akun, karena hanya memindah uang. Pilih satu akun kas
               untuk melihatnya.
             </p>
           )}
 
           <section aria-labelledby="arus-kas-periode" className="flex flex-col gap-2">
-            <h3 id="arus-kas-periode" className="text-base font-bold">
+            <h3 id="arus-kas-periode" className="text-besar font-bold">
               {JUDUL_KELOMPOK[filter.kelompok]}
             </h3>
             <ul className="flex flex-col gap-2">
@@ -335,11 +335,11 @@ export function HalamanArusKas() {
                   key={b.kunci}
                   className="border border-navy/[0.12] rounded-2xl px-4 py-3 flex flex-col gap-1"
                 >
-                  <div className="flex justify-between gap-3 text-sm font-bold">
+                  <div className="flex justify-between gap-3 text-isi font-bold">
                     <span>{b.label}</span>
                     <span className={warnaBersih(b.bersih)}>{rupiahBertanda(b.bersih)}</span>
                   </div>
-                  <div className="flex justify-between gap-3 text-[13px] text-navy/75">
+                  <div className="flex justify-between gap-3 text-kecil text-navy/75">
                     <span>Masuk {formatRupiah(b.masuk)}</span>
                     <span>Keluar {formatRupiah(b.keluar)}</span>
                   </div>

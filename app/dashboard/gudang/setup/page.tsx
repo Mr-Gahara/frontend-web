@@ -65,8 +65,8 @@ export default function GudangSetupPage() {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
             <Building2 className="h-8 w-8" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Inisiasi Gudang Pusat</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <h1 className="text-judul font-bold tracking-tight text-foreground">Inisiasi Gudang Pusat</h1>
+          <p className="mt-2 text-isi text-muted-foreground">
             Anda belum memiliki Gudang di sistem. Silakan tentukan lokasi operasional WMS Anda untuk memulai.
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function GudangSetupPage() {
             <button
               type="submit"
               disabled={createGudangMutation.isPending}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-isi font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
             >
               {createGudangMutation.isPending ? (
                 <Loader2 className="h-5 w-5 animate-spin" />

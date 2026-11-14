@@ -32,7 +32,7 @@ type PropsTooltip = {
 function TooltipGrafik({ active, payload, label }: PropsTooltip) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-gading border border-navy/10 rounded-lg px-3 py-2 text-navy text-xs shadow-lg">
+    <div className="bg-gading border border-navy/10 rounded-lg px-3 py-2 text-navy text-kecil shadow-lg">
       <p className="text-navy/70 font-medium mb-1">{label}</p>
       <p className="font-bold text-sage">
         {formatRupiah(Number(payload[0].value) || 0)}

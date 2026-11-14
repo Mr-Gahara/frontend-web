@@ -130,7 +130,7 @@ export default function ShiftUtama({
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy/5 text-navy">
               <Clock className="h-4 w-4" />
             </div>
-            <span className="font-bold text-navy text-base">{row.original.namaShift}</span>
+            <span className="font-bold text-navy text-besar">{row.original.namaShift}</span>
           </div>
         ),
       },
@@ -139,11 +139,11 @@ export default function ShiftUtama({
         header: "Jam Kerja",
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
-            <span className="font-bold text-navy/80 font-mono tracking-tight text-sm">
+            <span className="font-bold text-navy/80 font-mono tracking-tight text-isi">
               {row.original.jamMasuk} - {row.original.jamPulang}
             </span>
             {row.original.isLintasHari && (
-              <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
+              <span className="flex items-center gap-1 bg-amber-100 text-amber-700 text-mikro font-bold px-2 py-0.5 rounded-md">
                 <MoonStar className="h-3 w-3" /> Lintas Hari
               </span>
             )}
@@ -168,7 +168,7 @@ export default function ShiftUtama({
         header: "Status",
         cell: ({ row }) => (
           <span
-            className={`inline-flex items-center justify-center rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${
+            className={`inline-flex items-center justify-center rounded-full px-2.5 py-1 text-kecil font-bold shadow-sm ${
               row.original.status === "Aktif" ? "bg-sage text-gading" : "bg-navy/10 text-navy/60"
             }`}
           >
@@ -237,10 +237,10 @@ export default function ShiftUtama({
       {/* 1. HEADER & TOOLBAR */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Master Shift {tipeRuang === "outlet" ? "Outlet" : "Gudang"}
           </h1>
-          <p className="text-sm text-navy/60 font-medium">
+          <p className="text-isi text-navy/60 font-medium">
             Kelola jam operasional, toleransi keterlambatan, dan status shift.
           </p>
         </div>
@@ -277,7 +277,7 @@ export default function ShiftUtama({
           >
             <SelectTrigger
               aria-label="Filter status shift"
-              className="w-full bg-permukaan text-navy text-sm border-navy/15 focus:ring-navy/50 font-bold h-11 rounded-xl px-4"
+              className="w-full bg-permukaan text-navy text-isi border-navy/15 focus:ring-navy/50 font-bold h-11 rounded-xl px-4"
             >
               <SelectValue placeholder="Semua Status" />
             </SelectTrigger>
@@ -303,7 +303,7 @@ export default function ShiftUtama({
       {isError ? (
         <p
           role="alert"
-          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
         >
           Gagal memuat data shift. Muat ulang halaman untuk mencoba lagi.
         </p>

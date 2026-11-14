@@ -170,7 +170,7 @@ export default function KategoriPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-xs font-bold text-navy/60 hover:bg-transparent hover:text-navy cursor-pointer"
+            className="h-auto p-0 text-kecil font-bold text-navy/60 hover:bg-transparent hover:text-navy cursor-pointer"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Nama Kategori <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -186,10 +186,10 @@ export default function KategoriPage() {
         accessorKey: "kodeKategori",
         meta: { label: "Kode" },
         header: () => (
-          <span className="text-xs font-bold text-navy/60">Kode</span>
+          <span className="text-kecil font-bold text-navy/60">Kode</span>
         ),
         cell: ({ row }) => (
-          <span className="font-mono text-xs font-bold text-navy/70">
+          <span className="font-mono text-kecil font-bold text-navy/70">
             {row.original.kodeKategori}
           </span>
         ),
@@ -198,12 +198,12 @@ export default function KategoriPage() {
         accessorKey: "keterangan",
         meta: { label: "Keterangan" },
         header: () => (
-          <span className="text-xs font-bold text-navy/60">
+          <span className="text-kecil font-bold text-navy/60">
             Keterangan
           </span>
         ),
         cell: ({ row }) => (
-          <span className="text-sm font-medium text-navy/70">
+          <span className="text-isi font-medium text-navy/70">
             {row.original.keterangan || "-"}
           </span>
         ),
@@ -211,7 +211,7 @@ export default function KategoriPage() {
       {
         id: "aksi",
         header: () => (
-          <div className="text-right text-xs font-bold text-navy/60">
+          <div className="text-right text-kecil font-bold text-navy/60">
             Aksi
           </div>
         ),
@@ -265,10 +265,10 @@ export default function KategoriPage() {
             <Tag className="w-6 h-6 text-navy" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-navy">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
               Kelola Kategori
             </h1>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-isi font-medium text-navy/60">
               Kelola seluruh data kategori produk.
             </p>
           </div>
@@ -310,7 +310,7 @@ export default function KategoriPage() {
           </DialogHeader>
           <form onSubmit={handleSubmit(simpan)} className="mt-4 flex flex-col gap-4">
             <div className="space-y-2">
-              <label htmlFor="namaKategori" className="text-sm font-bold text-navy">
+              <label htmlFor="namaKategori" className="text-isi font-bold text-navy">
                 Nama Kategori
               </label>
               <Input
@@ -321,11 +321,11 @@ export default function KategoriPage() {
                 className="bg-white border-navy/20"
               />
               {errors.namaKategori && (
-                <p className="text-sm font-bold text-red-600">{errors.namaKategori.message}</p>
+                <p className="text-isi font-bold text-red-600">{errors.namaKategori.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <label htmlFor="kodeKategori" className="text-sm font-bold text-navy">
+              <label htmlFor="kodeKategori" className="text-isi font-bold text-navy">
                 Kode Kategori
               </label>
               <Input
@@ -336,11 +336,11 @@ export default function KategoriPage() {
                 className="bg-white border-navy/20"
               />
               {errors.kodeKategori && (
-                <p className="text-sm font-bold text-red-600">{errors.kodeKategori.message}</p>
+                <p className="text-isi font-bold text-red-600">{errors.kodeKategori.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <label htmlFor="keteranganKategori" className="text-sm font-bold text-navy">
+              <label htmlFor="keteranganKategori" className="text-isi font-bold text-navy">
                 Keterangan
               </label>
               <Input
@@ -351,7 +351,7 @@ export default function KategoriPage() {
               />
             </div>
             {formError && (
-              <p className="text-sm font-bold text-red-600">{formError}</p>
+              <p className="text-isi font-bold text-red-600">{formError}</p>
             )}
             <div className="flex justify-end gap-2 pt-2">
               <Button

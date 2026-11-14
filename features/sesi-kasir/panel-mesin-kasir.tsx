@@ -52,10 +52,10 @@ export function PanelMesinKasir({
       className="flex flex-col gap-3 rounded-[18px] bg-krem p-4 sm:rounded-[20px] sm:p-[22px]"
     >
       <div className="flex items-baseline justify-between gap-2">
-        <h2 id="judul-mesin-kasir" className="text-lg font-bold text-navy">
+        <h2 id="judul-mesin-kasir" className="text-subjudul font-bold text-navy">
           Mesin kasir
         </h2>
-        {status === "siap" && <span className="text-sm text-navy/70">{mesin.length} terpasang</span>}
+        {status === "siap" && <span className="text-isi text-navy/70">{mesin.length} terpasang</span>}
       </div>
 
       {status === "memuat" &&
@@ -81,8 +81,8 @@ export function PanelMesinKasir({
                     <span className="break-words font-bold text-navy">{m.namaPerangkat}</span>
                     <ChipStatusKasir buka={buka} />
                   </div>
-                  <span className="text-sm text-navy/70">Laci {labelLaci(m, akunKas)}</span>
-                  <span className="text-sm text-navy/70">
+                  <span className="text-isi text-navy/70">Laci {labelLaci(m, akunKas)}</span>
+                  <span className="text-isi text-navy/70">
                     {teksTerakhirDipakai(sesiTerakhir[m.installationId] ?? null, sekarang)}
                   </span>
                 </div>
@@ -99,19 +99,19 @@ export function PanelMesinKasir({
                   <DropdownMenuContent align="end" className="w-72 border-navy/10 bg-white p-1.5">
                     <DropdownMenuItem
                       onSelect={() => onUbah(m)}
-                      className="h-11 cursor-pointer text-[15px] font-semibold text-navy"
+                      className="h-11 cursor-pointer text-besar font-semibold text-navy"
                     >
                       Ubah nama dan laci
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       disabled={buka}
                       onSelect={() => onBerhenti(m)}
-                      className="h-11 cursor-pointer text-[15px] text-navy"
+                      className="h-11 cursor-pointer text-besar text-navy"
                     >
                       Berhenti jadi mesin kasir
                     </DropdownMenuItem>
                     {buka && (
-                      <p className="px-3 pb-2 pt-1 text-[13px] text-navy/70">
+                      <p className="px-3 pb-2 pt-1 text-kecil text-navy/70">
                         Kasir di mesin ini masih buka. Tutup kasirnya dulu untuk mengganti laci atau berhenti.
                       </p>
                     )}
@@ -127,7 +127,7 @@ export function PanelMesinKasir({
         <Button
           variant="outline"
           onClick={onTambah}
-          className="h-11 border-navy/25 bg-white text-[15px] font-bold text-navy"
+          className="h-11 border-navy/25 bg-white text-besar font-bold text-navy"
         >
           <Plus className="size-[18px]" aria-hidden="true" />
           Tambah mesin kasir
@@ -141,16 +141,16 @@ export function PanelMesinKasir({
 export function MulaiMesinKasir({ onTambah }: { onTambah: () => void }) {
   return (
     <section aria-labelledby="judul-mulai" className="flex max-w-2xl flex-col gap-3 rounded-[20px] bg-krem p-5">
-      <h2 id="judul-mulai" className="text-xl font-bold text-navy">
+      <h2 id="judul-mulai" className="text-subjudul font-bold text-navy">
         Belum ada mesin kasir
       </h2>
-      <p className="text-[15px] text-navy/70">
+      <p className="text-isi text-navy/70">
         Tambahkan HP atau tablet yang dipakai berjualan, lalu pilih laci uangnya. Tanpa mesin kasir, kasir tidak
         bisa dibuka dari aplikasi.
       </p>
       <Button
         onClick={onTambah}
-        className="h-12 bg-navy text-base font-bold text-gading hover:bg-navy/90 sm:self-start sm:px-6"
+        className="h-12 bg-navy text-besar font-bold text-gading hover:bg-navy/90 sm:self-start sm:px-6"
       >
         <Plus className="size-[18px]" aria-hidden="true" />
         Tambah mesin kasir

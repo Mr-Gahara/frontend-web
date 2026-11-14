@@ -17,8 +17,8 @@ function BarisAkun({ label, nilai, tombol, onUbah }: { label: string; nilai: str
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4">
       <div className="min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="mt-0.5 text-[15px] font-medium [overflow-wrap:anywhere]">{nilai}</p>
+        <p className="text-kecil text-muted-foreground">{label}</p>
+        <p className="mt-0.5 text-besar font-medium [overflow-wrap:anywhere]">{nilai}</p>
       </div>
       <Button type="button" variant="outline" className="min-h-11 sm:min-h-10" onClick={onUbah}>
         {tombol}
@@ -44,8 +44,8 @@ export function HalamanAkunToko() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 sm:p-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Akun Toko</h1>
-        <p className="text-sm text-muted-foreground">Email, password, dan penghapusan akun toko. Hanya untuk Owner.</p>
+        <h1 className="text-judul font-bold tracking-tight text-foreground">Akun Toko</h1>
+        <p className="text-isi text-muted-foreground">Email, password, dan penghapusan akun toko. Hanya untuk Owner.</p>
       </div>
 
       {akun.isPending ? (
@@ -54,7 +54,7 @@ export function HalamanAkunToko() {
         </div>
       ) : akun.isError || !akun.data?.id ? (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card p-6 text-center shadow-sm">
-          <p className="text-sm font-medium text-destructive">{pesanError(akun.error, "Gagal memuat akun toko.")}</p>
+          <p className="text-isi font-medium text-destructive">{pesanError(akun.error, "Gagal memuat akun toko.")}</p>
           <Button type="button" onClick={() => akun.refetch()}>
             Coba Lagi
           </Button>
@@ -62,10 +62,10 @@ export function HalamanAkunToko() {
       ) : (
         <section aria-labelledby="judul-email-password" className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm sm:p-6">
           <div>
-            <h2 id="judul-email-password" className="text-base font-semibold">
+            <h2 id="judul-email-password" className="text-subjudul font-semibold">
               Email dan Password
             </h2>
-            <p className="mt-1 text-[13px] text-muted-foreground">
+            <p className="mt-1 text-kecil text-muted-foreground">
               Setiap perubahan memakai kode yang dikirim ke email akun saat ini.
             </p>
           </div>
@@ -90,13 +90,13 @@ export function HalamanAkunToko() {
           aria-labelledby="judul-zona-bahaya"
           className="flex flex-col gap-3 rounded-xl border border-destructive/50 bg-destructive/5 p-4 sm:p-6"
         >
-          <h2 id="judul-zona-bahaya" className="text-sm font-semibold text-destructive">
+          <h2 id="judul-zona-bahaya" className="text-subjudul font-semibold text-destructive">
             Zona Bahaya
           </h2>
           <div className="flex flex-col items-start gap-3 border-t border-destructive/20 pt-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">Hapus akun dan toko</p>
-              <p className="max-w-md text-[13px] leading-relaxed text-muted-foreground">
+              <p className="text-isi font-medium text-foreground">Hapus akun dan toko</p>
+              <p className="max-w-md text-kecil leading-relaxed text-muted-foreground">
                 Menghapus akun toko beserta seluruh datanya. Semua pengguna toko langsung keluar. Tidak dapat
                 dibatalkan.
               </p>

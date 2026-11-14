@@ -29,11 +29,11 @@ const PESAN_KODE_BARU = {
 };
 
 const KELAS_ISIAN =
-  "flex h-12 w-full rounded-xl border border-input bg-permukaan px-4 text-base text-navy placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-permukaan transition-colors";
+  "flex h-12 w-full rounded-xl border border-input bg-permukaan px-4 text-besar text-navy placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-permukaan transition-colors";
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-xs font-medium text-destructive">{pesan}</p>;
+  return <p className="text-kecil font-medium text-destructive">{pesan}</p>;
 }
 
 /**
@@ -130,12 +130,12 @@ export function HalamanVerifikasiEmail() {
       <aside className="flex min-w-0 flex-[1_1_480px] flex-col justify-between gap-8 rounded-[28px] bg-krem p-6 sm:p-10">
         <div className="flex items-center gap-3">
           <TandaTachyon ukuran={34} />
-          <span className="text-lg font-bold">Tachyon POS</span>
+          <span className="text-subjudul font-bold">Tachyon POS</span>
         </div>
         <div className="flex max-w-[440px] flex-col gap-3.5">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-navy/70">Akun dibuat</p>
-          <h2 className="text-3xl font-bold leading-tight sm:text-[34px]">Satu langkah lagi sebelum menyiapkan toko.</h2>
-          <p className="text-base leading-relaxed text-muted-foreground">
+          <p className="text-kecil font-semibold uppercase tracking-[0.14em] text-navy/70">Akun dibuat</p>
+          <h2 className="text-subjudul font-bold leading-tight">Satu langkah lagi sebelum menyiapkan toko.</h2>
+          <p className="text-besar leading-relaxed text-muted-foreground">
             Verifikasi memastikan kode lupa password dan pemberitahuan langganan sampai ke email yang benar.
           </p>
         </div>
@@ -149,8 +149,8 @@ export function HalamanVerifikasiEmail() {
           className="flex w-full max-w-[400px] flex-col gap-6"
         >
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight">Cek email Anda</h1>
-            <p className="text-[15px] leading-normal text-muted-foreground">
+            <h1 className="text-judul font-bold tracking-tight">Cek email Anda</h1>
+            <p className="text-isi leading-normal text-muted-foreground">
               Kode 6 digit dikirim ke <strong className="text-navy">{email || "email yang Anda daftarkan"}</strong>.
               Periksa juga folder spam.
             </p>
@@ -164,7 +164,7 @@ export function HalamanVerifikasiEmail() {
               )}
             />
             {(errors.kode?.message ?? errors.kode?.root?.message) && (
-              <p className="text-xs font-medium text-destructive">
+              <p className="text-kecil font-medium text-destructive">
                 {errors.kode?.message ?? errors.kode?.root?.message}
               </p>
             )}
@@ -172,7 +172,7 @@ export function HalamanVerifikasiEmail() {
           {perluPassword && (
             <>
               <div className="flex flex-col gap-2">
-                <label htmlFor="verifikasi-password" className="text-sm font-semibold">
+                <label htmlFor="verifikasi-password" className="text-isi font-semibold">
                   Password akun
                 </label>
                 <input
@@ -185,13 +185,13 @@ export function HalamanVerifikasiEmail() {
                   aria-invalid={errors.password ? true : undefined}
                   className={KELAS_ISIAN}
                 />
-                <p id="verifikasi-password-aturan" className="text-[13px] text-muted-foreground">
+                <p id="verifikasi-password-aturan" className="text-kecil text-muted-foreground">
                   Dipakai untuk masuk ke akun toko. Minimal 8 karakter, dengan huruf kapital dan angka.
                 </p>
                 <PesanIsian pesan={errors.password?.message} />
               </div>
               <div className="flex flex-col gap-2">
-                <label htmlFor="verifikasi-ulangi-password" className="text-sm font-semibold">
+                <label htmlFor="verifikasi-ulangi-password" className="text-isi font-semibold">
                   Ulangi password
                 </label>
                 <input
@@ -208,14 +208,14 @@ export function HalamanVerifikasiEmail() {
             </>
           )}
           {galat && (
-            <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+            <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-isi font-medium text-destructive">
               {galat}
             </p>
           )}
           <button
             type="submit"
             disabled={memuat}
-            className="disabled:cursor-not-allowed disabled:opacity-60 inline-flex h-[54px] w-full cursor-pointer items-center justify-center rounded-xl bg-navy text-base font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
+            className="disabled:cursor-not-allowed disabled:opacity-60 inline-flex h-[54px] w-full cursor-pointer items-center justify-center rounded-xl bg-navy text-besar font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
           >
             {memuat && <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden="true" />}
             Verifikasi dan masuk
@@ -226,11 +226,11 @@ export function HalamanVerifikasiEmail() {
               onKirim={kirimKodeBaru}
             />
             {status && (
-              <p role="status" className="text-sm">
+              <p role="status" className="text-isi">
                 {status}
               </p>
             )}
-            <p className="text-[15px]">
+            <p className="text-besar">
               <Link
                 href="/login"
                 className="rounded-sm font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"

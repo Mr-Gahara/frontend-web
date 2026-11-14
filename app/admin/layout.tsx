@@ -41,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="flex items-center justify-between border-b border-border px-6 py-4">
-        <p className="text-lg font-semibold">Panel Admin Tachyon POS</p>
+        <p className="text-subjudul font-semibold">Panel Admin Tachyon POS</p>
         <Button variant="outline" size="sm" onClick={logout} disabled={keluar.isPending}>
           <LogOut className="mr-2 h-4 w-4" />
           Keluar

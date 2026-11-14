@@ -94,7 +94,7 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
       {pesanGalat && (
         <div
           role="alert"
-          className="bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-200 text-sm font-bold flex items-center gap-2 mb-4 shrink-0"
+          className="bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-200 text-isi font-bold flex items-center gap-2 mb-4 shrink-0"
         >
           <Info className="h-4 w-4 shrink-0" />
           <p>{pesanGalat}</p>
@@ -108,17 +108,17 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
       >
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
           <div className="sm:col-span-8 space-y-2">
-            <label htmlFor="nama-pola" className="text-sm font-bold text-navy">Nama Pola Roster</label>
+            <label htmlFor="nama-pola" className="text-isi font-bold text-navy">Nama Pola Roster</label>
             <Input
               id="nama-pola"
               {...register("namaPola")}
               placeholder="Misal: Reguler 5-2"
-              className="bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl px-4"
+              className="bg-gading text-navy text-isi border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl px-4"
               required
             />
           </div>
           <div className="sm:col-span-4 space-y-2">
-            <label htmlFor="siklus-pola" className="text-sm font-bold text-navy">Siklus (Hari)</label>
+            <label htmlFor="siklus-pola" className="text-isi font-bold text-navy">Siklus (Hari)</label>
             <Controller
               control={control}
               name="siklus"
@@ -137,7 +137,7 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
                     }
                   }}
                   onBlur={field.onBlur}
-                  className="bg-gading text-navy text-sm border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="bg-gading text-navy text-isi border-navy/15 focus-visible:ring-navy/50 font-bold h-12 rounded-xl text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   required
                 />
               )}
@@ -147,8 +147,8 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
 
         <div className="space-y-3 pt-2 border-t border-navy/10">
           <div className="flex items-center justify-between">
-            <span id="label-rincian-siklus" className="text-sm font-bold text-navy">Rincian Siklus</span>
-            <span className="text-xs font-bold text-navy/50 bg-navy/5 px-2 py-1 rounded-md">
+            <span id="label-rincian-siklus" className="text-isi font-bold text-navy">Rincian Siklus</span>
+            <span className="text-kecil font-bold text-navy/50 bg-navy/5 px-2 py-1 rounded-md">
               {rincian.length} Hari Terdeteksi
             </span>
           </div>
@@ -159,8 +159,8 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
               return (
                 <div key={row.hariKe} className="flex items-center gap-3 bg-gading p-2 rounded-xl border border-navy/10 shadow-sm transition-all hover:border-navy/30">
                   <div className="flex h-10 w-20 shrink-0 flex-col items-center justify-center rounded-lg bg-navy/5 border border-navy/5 text-navy">
-                    <span className="text-[10px] font-bold uppercase tracking-wider opacity-60 leading-none">Hari</span>
-                    <span className="text-sm font-black leading-tight">{row.hariKe}</span>
+                    <span className="text-mikro font-bold uppercase tracking-wider opacity-60 leading-none">Hari</span>
+                    <span className="text-isi font-bold leading-tight">{row.hariKe}</span>
                   </div>
 
                   <Select
@@ -214,7 +214,7 @@ function IsiFormPolaRoster({ editTarget, shiftList, onSubmit, isPending }: IsiFo
           type="submit"
           form="pola-form"
           disabled={isPending || rincian.length === 0}
-          className="w-full h-14 rounded-xl cursor-pointer bg-navy text-gading hover:bg-navy/90 text-base font-bold shadow-md transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full h-14 rounded-xl cursor-pointer bg-navy text-gading hover:bg-navy/90 text-besar font-bold shadow-md transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPending ? "Menyimpan..." : "Simpan Pola Roster"}
         </Button>
@@ -241,10 +241,10 @@ export function PolaFormDialog({
               <CalendarDays className="h-6 w-6" />
             </div>
             <div>
-              <DialogTitle className="text-2xl font-bold text-navy">
+              <DialogTitle className="text-judul font-bold text-navy">
                 {editTarget ? "Edit Pola Roster" : "Buat Pola Roster"}
               </DialogTitle>
-              <DialogDescription className="text-sm font-semibold text-navy/60 mt-0.5">
+              <DialogDescription className="text-isi font-semibold text-navy/60 mt-0.5">
                 Rancang template siklus hari kerja karyawan.
               </DialogDescription>
             </div>

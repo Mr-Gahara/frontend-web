@@ -76,7 +76,7 @@ const lokasiBertipe = (daftar: Lokasi[] | undefined, tipe: TipeLokasi) =>
   daftar?.find((l) => l.tipe === tipe);
 
 function Memuat() {
-  return <p className="text-sm text-muted-foreground">Memuat data toko...</p>;
+  return <p className="text-isi text-muted-foreground">Memuat data toko...</p>;
 }
 
 /** Outlet dan gudang: satu lokasi per tipe, sehingga lokasi yang sudah ada tidak dibuat lagi. */

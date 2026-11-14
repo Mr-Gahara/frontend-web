@@ -44,7 +44,7 @@ function KartuRingkas({
       className="bg-navy text-gading rounded-2xl sm:rounded-3xl border-t-4 border-karamel p-3 sm:p-5 flex flex-col justify-between gap-2 sm:gap-3 shadow-sm min-w-0 sm:min-h-36"
     >
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs sm:text-sm font-semibold text-krem/80 line-clamp-2 leading-snug min-w-0">{judul}</p>
+        <p className="text-kecil sm:text-isi font-semibold text-krem/80 line-clamp-2 leading-snug min-w-0">{judul}</p>
         <span className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-karamel/20 text-karamel shrink-0">
           <Ikon className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
         </span>
@@ -52,12 +52,12 @@ function KartuRingkas({
       {memuat ? (
         <Skeleton className="h-6 sm:h-8 w-24 sm:w-32 bg-gading/15 rounded-md" />
       ) : (
-        <p className="text-base sm:text-2xl font-black tracking-tight truncate">{nilai ?? "-"}</p>
+        <p className="text-besar sm:text-judul font-black tracking-tight truncate">{nilai ?? "-"}</p>
       )}
       {!memuat && nilai === null ? (
-        <p className="text-xs font-medium text-rose-300">Gagal memuat data</p>
+        <p className="text-kecil font-medium text-rose-300">Gagal memuat data</p>
       ) : (
-        <p className="flex items-center gap-2 text-[11px] sm:text-xs">
+        <p className="flex items-center gap-2 text-mikro sm:text-kecil">
           <span className={`px-2 py-0.5 rounded-full font-bold ${lencana}`}>
             {teksPertumbuhan(pertumbuhan)}
           </span>

@@ -95,10 +95,10 @@ export default function BuatAkunKasPage() {
             <TipeIcon className="w-6 h-6 text-karamel" />
           </div>
           <div className="space-y-0.5">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
               Tambah Akun Kas
             </h1>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-isi font-medium text-navy/60">
               Daftarkan rekening bank atau kas fisik baru ke sistem.
             </p>
           </div>
@@ -114,12 +114,12 @@ export default function BuatAkunKasPage() {
         >
           {/* Informasi Akun */}
           <div className="space-y-4">
-            <h2 className="text-base font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
+            <h2 className="text-subjudul font-bold text-navy flex items-center gap-2 border-b border-navy/10 pb-3">
               <Banknote className="h-4 w-4 text-karamel" /> Informasi Akun
             </h2>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-navy">
+              <label className="text-isi font-bold text-navy">
                 Tipe Akun <span className="text-red-500">*</span>
               </label>
               <Controller
@@ -160,7 +160,7 @@ export default function BuatAkunKasPage() {
               />
               <div className="min-h-4">
                 {errors.tipeAkun && (
-                  <span className="text-xs font-bold text-rose-500">
+                  <span className="text-kecil font-bold text-rose-500">
                     {errors.tipeAkun.message}
                   </span>
                 )}
@@ -169,7 +169,7 @@ export default function BuatAkunKasPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Nama Akun <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -186,7 +186,7 @@ export default function BuatAkunKasPage() {
                 />
                 <div className="min-h-4">
                   {errors.namaAkun && (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.namaAkun.message}
                     </span>
                   )}
@@ -194,7 +194,7 @@ export default function BuatAkunKasPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Nomor Akun <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -211,7 +211,7 @@ export default function BuatAkunKasPage() {
                 />
                 <div className="min-h-4">
                   {errors.nomorAkun && (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.nomorAkun.message}
                     </span>
                   )}
@@ -220,7 +220,7 @@ export default function BuatAkunKasPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-navy">
+              <label className="text-isi font-bold text-navy">
                 Keterangan{" "}
                 <span className="text-navy/50 font-medium">
                   (Opsional)
@@ -238,20 +238,20 @@ export default function BuatAkunKasPage() {
 
           {/* Saldo & Status */}
           <div className="space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-navy/50">
+            <h2 className="text-subjudul font-bold uppercase tracking-widest text-navy/50">
               Saldo & Status Operasional
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Saldo Awal{" "}
-                  <span className="text-navy/50 text-xs font-medium">
+                  <span className="text-navy/50 text-kecil font-medium">
                     (Opsional, Default 0)
                   </span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-navy/50">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-isi font-bold text-navy/50">
                     Rp
                   </span>
                   <Controller
@@ -288,11 +288,11 @@ export default function BuatAkunKasPage() {
                 </div>
                 <div className="min-h-4 flex flex-col justify-start">
                   {errors.saldo ? (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.saldo.message}
                     </span>
                   ) : (
-                    <p className="text-xs font-medium text-navy/50">
+                    <p className="text-kecil font-medium text-navy/50">
                       Saldo awal saat akun ini pertama kali didaftarkan.
                     </p>
                   )}
@@ -300,7 +300,7 @@ export default function BuatAkunKasPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Status Operasional
                 </label>
                 <Controller

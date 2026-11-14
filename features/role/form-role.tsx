@@ -78,15 +78,15 @@ export default function FormRole(props: PropsFormRole) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-3 text-center">
         <AlertTriangle className="h-8 w-8 text-red-600" />
-        <p className="text-sm font-bold text-navy">
+        <p className="text-isi font-bold text-navy">
           Posisi tidak dapat dimuat.
         </p>
-        <p className="text-sm font-medium text-navy/60">
+        <p className="text-isi font-medium text-navy/60">
           {pesanError(detailError, "Data posisi tidak ditemukan.")}
         </p>
         <Link
           href={urlKembali}
-          className="text-sm font-bold text-navy underline"
+          className="text-isi font-bold text-navy underline"
         >
           {labelKembali}
         </Link>
@@ -98,7 +98,7 @@ export default function FormRole(props: PropsFormRole) {
     return (
       <div className="flex h-[50vh] w-full flex-col items-center justify-center gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-navy/60" />
-        <p className="text-sm font-bold text-navy/60">
+        <p className="text-isi font-bold text-navy/60">
           Memuat rincian posisi...
         </p>
       </div>
@@ -334,10 +334,10 @@ function IsiFormRole({
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             {judul}
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             {deskripsiHalaman}
           </p>
         </div>
@@ -347,7 +347,7 @@ function IsiFormRole({
       <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm">
         <form onSubmit={tanganiSubmit(kirim)} noValidate className="flex flex-col gap-7">
           <div className="space-y-2">
-            <label htmlFor="namaRole" className="text-sm font-bold text-navy">Nama Posisi / Jabatan</label>
+            <label htmlFor="namaRole" className="text-isi font-bold text-navy">Nama Posisi / Jabatan</label>
             <Input
               className="bg-gading border-navy/20 text-navy placeholder:text-navy/30"
               id="namaRole"
@@ -356,12 +356,12 @@ function IsiFormRole({
               placeholder="Contoh: Manajer Toko, Kasir Depan, Barista"
             />
             {errors.namaRole && (
-              <p className="text-xs font-bold text-red-600">{errors.namaRole.message}</p>
+              <p className="text-kecil font-bold text-red-600">{errors.namaRole.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="deskripsiRole" className="text-sm font-bold text-navy">
+            <label htmlFor="deskripsiRole" className="text-isi font-bold text-navy">
               Deskripsi Pekerjaan{" "}
               <span className="text-navy/50 font-medium">
                 (opsional)
@@ -375,12 +375,12 @@ function IsiFormRole({
               placeholder="Contoh: Bertanggung jawab atas transaksi penjualan dan laporan kas harian"
             />
             {errors.deskripsi && (
-              <p className="text-xs font-bold text-red-600">{errors.deskripsi.message}</p>
+              <p className="text-kecil font-bold text-red-600">{errors.deskripsi.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="levelRole" className="text-sm font-bold text-navy">Level Otoritas</label>
+            <label htmlFor="levelRole" className="text-isi font-bold text-navy">Level Otoritas</label>
             <Input
               type="number"
               className="no-spinner bg-gading border-navy/20 text-navy placeholder:text-navy/30"
@@ -390,10 +390,10 @@ function IsiFormRole({
               placeholder="Contoh: 100"
             />
             {errors.level && (
-              <p className="text-xs font-bold text-red-600">{errors.level.message}</p>
+              <p className="text-kecil font-bold text-red-600">{errors.level.message}</p>
             )}
             {currentUserLevel > 0 && (
-              <p className="text-xs font-medium text-navy/60 mt-1">
+              <p className="text-kecil font-medium text-navy/60 mt-1">
                 Level harus antara 1 hingga {currentUserLevel - 1}. Semakin
                 tinggi angka, semakin tinggi otoritas jabatan.
               </p>
@@ -404,10 +404,10 @@ function IsiFormRole({
           <div className="flex flex-col gap-4 pt-4 border-t border-navy/10 mt-2">
             <div className="flex items-center justify-between">
               <div>
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Wewenang Menu Sistem
                 </label>
-                <p className="text-xs font-medium text-navy/60 mt-1">
+                <p className="text-kecil font-medium text-navy/60 mt-1">
                   {selectedPermissions.length} dari {allowedPermissions.length}{" "}
                   pilihan aktif.
                 </p>
@@ -417,7 +417,7 @@ function IsiFormRole({
                 variant="outline"
                 size="sm"
                 onClick={handleSelectAllGlobal}
-                className="h-8 text-xs font-bold cursor-pointer transition-colors border-navy/20 text-navy hover:bg-navy/5 shadow-sm"
+                className="h-8 text-kecil font-bold cursor-pointer transition-colors border-navy/20 text-navy hover:bg-navy/5 shadow-sm"
                 disabled={permissionsLoading}
               >
                 {selectedPermissions.length === allowedPermissions.length &&
@@ -430,7 +430,7 @@ function IsiFormRole({
             {permissionsLoading ? (
               <div className="flex h-32 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-navy/20 bg-gading">
                 <Loader2 className="h-6 w-6 animate-spin text-navy/40" />
-                <p className="text-sm font-bold text-navy/60">
+                <p className="text-isi font-bold text-navy/60">
                   Memuat daftar wewenang...
                 </p>
               </div>
@@ -452,7 +452,7 @@ function IsiFormRole({
                       }`}
                     >
                       <div className="flex items-center justify-between mb-5 border-b border-navy/5 pb-2">
-                        <p className="text-xs font-bold text-navy/50 uppercase tracking-wider">
+                        <p className="text-kecil font-bold text-navy/50 uppercase tracking-wider">
                           {grup}
                         </p>
                         <Button
@@ -460,7 +460,7 @@ function IsiFormRole({
                           variant="ghost"
                           size="sm"
                           onClick={() => handleSelectGroup(items)}
-                          className={`h-7 px-3 text-[11px] font-bold rounded-md transition-colors cursor-pointer ${
+                          className={`h-7 px-3 text-mikro font-bold rounded-md transition-colors cursor-pointer ${
                             isGroupAllSelected
                               ? "text-karamel hover:bg-karamel/10" 
                               : "text-sage hover:bg-sage/10" 
@@ -491,11 +491,11 @@ function IsiFormRole({
                             <div className="grid gap-1 leading-none">
                               <label
                                 htmlFor={`edit-${permission.id}`}
-                                className="text-sm font-bold cursor-pointer text-navy"
+                                className="text-isi font-bold cursor-pointer text-navy"
                               >
                                 {permission.deskripsi || permission.nama}
                               </label>
-                              <p className="text-xs font-medium text-navy/50 font-mono">
+                              <p className="text-kecil font-medium text-navy/50 font-mono">
                                 {permission.nama}
                               </p>
                             </div>
@@ -510,11 +510,11 @@ function IsiFormRole({
           </div>
 
           {errors.izin && (
-            <p className="text-sm font-bold text-red-600 px-2">{errors.izin.message}</p>
+            <p className="text-isi font-bold text-red-600 px-2">{errors.izin.message}</p>
           )}
 
           {formError && (
-            <p className="text-sm font-bold text-red-600 px-2">{formError}</p>
+            <p className="text-isi font-bold text-red-600 px-2">{formError}</p>
           )}
 
           {/* Tombol Simpan Bawah */}
@@ -562,7 +562,7 @@ function IsiFormRole({
               <AlertTriangle className="h-5 w-5 text-karamel" />
               Peringatan Hak Akses Vital
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm font-medium text-navy/70 leading-relaxed pt-2">
+            <AlertDialogDescription className="text-isi font-medium text-navy/70 leading-relaxed pt-2">
               Anda mencoba menonaktifkan hak akses dasar{" "}
               <strong className="text-navy">{warningDialog?.nama}</strong>.
               <br />

@@ -55,10 +55,10 @@ export function StepDuaPreview({
     <div className="bg-gading border border-navy/10 rounded-2xl shadow-sm p-4 sm:p-6 lg:p-8 w-full max-w-6xl mx-auto flex flex-col h-full min-h-[75vh]">
       {/* HEADER */}
       <div className="mb-6 border-b border-navy/10 pb-6">
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           Langkah 2: Pratinjau Jadwal
         </h2>
-        <p className="text-sm font-semibold text-navy/60 mt-1">
+        <p className="text-isi font-semibold text-navy/60 mt-1">
           Periksa kembali simulasi jadwal sebelum disimpan secara permanen.
         </p>
       </div>
@@ -68,19 +68,19 @@ export function StepDuaPreview({
         <div className="flex items-center gap-3 pr-4 border-r border-navy/15">
           <CalendarDays className="h-5 w-5 text-navy/70" />
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-navy/50 uppercase">
+            <span className="text-mikro font-bold text-navy/50 uppercase">
               Pola Terpilih
             </span>
-            <span className="text-sm font-bold text-navy">
+            <span className="text-isi font-bold text-navy">
               {selectedPola?.namaPola || "-"}
             </span>
           </div>
         </div>
         <div className="flex flex-col pr-4 border-r border-navy/15">
-          <span className="text-[10px] font-bold text-navy/50 uppercase">
+          <span className="text-mikro font-bold text-navy/50 uppercase">
             Rentang Tanggal
           </span>
-          <span className="text-sm font-bold text-navy">
+          <span className="text-isi font-bold text-navy">
             {uraiTanggalLokal(params.startDate).toLocaleDateString("id-ID", {
               day: "2-digit",
               month: "short",
@@ -94,10 +94,10 @@ export function StepDuaPreview({
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-[10px] font-bold text-navy/50 uppercase">
+          <span className="text-mikro font-bold text-navy/50 uppercase">
             Total Karyawan
           </span>
-          <span className="text-sm font-bold text-navy">
+          <span className="text-isi font-bold text-navy">
             {params.karyawanIds.length} Orang
           </span>
         </div>
@@ -106,7 +106,7 @@ export function StepDuaPreview({
       {pesanMasalah && (
         <div
           role="alert"
-          className="flex items-center gap-2 bg-red-50 text-red-600 p-3 rounded-xl border border-red-200 mb-6 text-sm font-bold"
+          className="flex items-center gap-2 bg-red-50 text-red-600 p-3 rounded-xl border border-red-200 mb-6 text-isi font-bold"
         >
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <p>{pesanMasalah}</p>
@@ -115,7 +115,7 @@ export function StepDuaPreview({
 
       {/* WARNING LONG RANGE */}
       {dateHeaders.length > 31 && (
-        <div className="flex items-center gap-2 bg-amber-50 text-amber-700 p-3 rounded-xl border border-amber-200 mb-6 text-sm font-bold">
+        <div className="flex items-center gap-2 bg-amber-50 text-amber-700 p-3 rounded-xl border border-amber-200 mb-6 text-isi font-bold">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <p>Anda men-generate jadwal untuk lebih dari 31 hari. Proses penyimpanan mungkin memakan waktu sedikit lebih lama.</p>
         </div>
@@ -124,12 +124,12 @@ export function StepDuaPreview({
       {/* 🚀 TABLE PREVIEW (PREMIUM UI ALIAS JADWAL GRID) */}
       <div className="flex-1 rounded-2xl border border-navy/15 bg-krem p-3 sm:p-5 shadow-sm overflow-hidden flex flex-col">
         <div className="overflow-x-auto overflow-y-auto custom-scrollbar flex-1 max-h-[55vh] rounded-xl border border-navy/10 bg-gading">
-          <table className="w-full text-left text-sm whitespace-nowrap border-collapse">
+          <table className="w-full text-left text-isi whitespace-nowrap border-collapse">
             
             {/* HEADER TANGGAL */}
             <thead className="bg-krem-muda sticky top-0 z-20 shadow-sm">
               <tr>
-                <th className="p-3 md:p-4 font-bold text-navy/70 uppercase tracking-wider text-[10px] md:text-xs border-b border-r border-navy/10 min-w-[200px] sticky left-0 bg-krem-muda z-30">
+                <th className="p-3 md:p-4 font-bold text-navy/70 uppercase tracking-wider text-mikro md:text-kecil border-b border-r border-navy/10 min-w-[200px] sticky left-0 bg-krem-muda z-30">
                   Staf / Karyawan
                 </th>
                 {dateHeaders.map((date, idx) => {
@@ -144,10 +144,10 @@ export function StepDuaPreview({
                       )}
                     >
                       <div className="flex flex-col items-center">
-                        <span className={cn("text-[10px] font-bold uppercase", isSunday ? "text-red-500" : "text-navy/50")}>
+                        <span className={cn("text-mikro font-bold uppercase", isSunday ? "text-red-500" : "text-navy/50")}>
                           {date.toLocaleDateString("id-ID", { weekday: "short" })}
                         </span>
-                        <span className={cn("text-base font-black", isSunday ? "text-red-600" : "text-navy")}>
+                        <span className={cn("text-besar font-bold", isSunday ? "text-red-600" : "text-navy")}>
                           {date.getDate()}
                         </span>
                       </div>
@@ -166,15 +166,15 @@ export function StepDuaPreview({
                   <td className="sticky left-0 z-10 bg-gading group-hover:bg-krem-hover border-r border-navy/10 p-3 md:p-4 align-top shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                     <div className="flex items-start md:items-center gap-2 md:gap-3">
                       <Avatar className="hidden sm:flex h-8 w-8 md:h-9 md:w-9 border border-navy/10 shrink-0">
-                        <AvatarFallback className="bg-navy/10 text-navy font-bold text-[10px] md:text-xs">
+                        <AvatarFallback className="bg-navy/10 text-navy font-bold text-mikro md:text-kecil">
                           {row.karyawan.nama.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col min-w-0">
-                        <span className="font-bold text-navy text-xs md:text-sm truncate">
+                        <span className="font-bold text-navy text-kecil md:text-isi truncate">
                           {row.karyawan.nama}
                         </span>
-                        <span className="text-[9px] md:text-[10px] font-semibold text-navy/50 uppercase tracking-wider truncate">
+                        <span className="text-mikro font-semibold text-navy/50 uppercase tracking-wider truncate">
                           {row.karyawan.role}
                         </span>
                       </div>
@@ -195,7 +195,7 @@ export function StepDuaPreview({
                       >
                         {cell.isLibur ? (
                           // ✅ FIX 3: Desain OFF cell yang lebih proporsional
-                          <div className="mx-auto flex min-h-[48px] w-full max-w-[85px] items-center justify-center rounded-xl bg-red-50/80 text-[11px] font-bold text-red-600 border border-red-100 shadow-sm">
+                          <div className="mx-auto flex min-h-[48px] w-full max-w-[85px] items-center justify-center rounded-xl bg-red-50/80 text-mikro font-bold text-red-600 border border-red-100 shadow-sm">
                             OFF
                           </div>
                         ) : cell.masalah ? (
@@ -203,15 +203,15 @@ export function StepDuaPreview({
                             title={cell.masalah === "nonaktif" ? "Shift sudah nonaktif" : "Shift tidak ditemukan"}
                             className="mx-auto flex flex-col min-h-[48px] w-full max-w-[90px] items-center justify-center rounded-xl bg-amber-50 text-amber-800 border border-amber-300 shadow-sm px-1 py-1.5"
                           >
-                            <span className="text-[11px] font-bold leading-tight">{cell.label}</span>
-                            <span className="text-[10px] font-semibold tracking-tight mt-0.5">
+                            <span className="text-mikro font-bold leading-tight">{cell.label}</span>
+                            <span className="text-mikro font-semibold tracking-tight mt-0.5">
                               {cell.masalah === "nonaktif" ? "(nonaktif)" : "(tidak ditemukan)"}
                             </span>
                           </div>
                         ) : (
                           <div className="mx-auto flex flex-col min-h-[48px] w-full max-w-[90px] items-center justify-center rounded-xl bg-gading text-navy border border-navy/20 shadow-sm transition-all hover:border-navy/40 hover:bg-navy/5 px-1 py-1.5">
-                            <span className="text-[11px] font-bold leading-tight">{cell.label}</span>
-                            <span className="text-[10px] font-semibold opacity-60 font-mono tracking-tight mt-0.5">{cell.jam || "Shift"}</span>
+                            <span className="text-mikro font-bold leading-tight">{cell.label}</span>
+                            <span className="text-mikro font-semibold opacity-60 font-mono tracking-tight mt-0.5">{cell.jam || "Shift"}</span>
                           </div>
                         )}
                       </td>

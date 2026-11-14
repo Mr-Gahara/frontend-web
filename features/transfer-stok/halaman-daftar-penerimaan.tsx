@@ -114,10 +114,10 @@ export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJa
             <PackageOpen className="w-7 h-7" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
               Penerimaan Barang (Inbound)
             </h1>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-isi font-medium text-navy/60">
               {ruang === "outlet"
                 ? "Pantau dan konfirmasi fisik barang yang sedang dikirim dari gudang."
                 : "Pantau dan konfirmasi fisik barang pengembalian yang sedang dikirim dari outlet."}
@@ -153,8 +153,8 @@ export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJa
                 <CheckCircle2 className="w-16 h-16" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-xl font-bold text-navy">Tidak Ada Kiriman Tertunda</h3>
-                <p className="text-sm font-medium text-navy/50 max-w-md mx-auto">
+                <h3 className="text-subjudul font-bold text-navy">Tidak Ada Kiriman Tertunda</h3>
+                <p className="text-isi font-medium text-navy/50 max-w-md mx-auto">
                   Belum ada armada logistik yang sedang dalam perjalanan menuju {konfig.tipe} ini. Sistem akan otomatis memunculkan data jika Gudang memproses Surat Jalan baru.
                 </p>
               </div>
@@ -168,14 +168,14 @@ export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJa
               
               <div className="pl-5 pr-4 py-4 border-b border-navy/5 flex justify-between items-start">
                 <div className="flex flex-col gap-1">
-                  <span className="font-mono font-bold text-navy text-lg leading-none">
+                  <span className="font-mono font-bold text-navy text-subjudul leading-none">
                     {item.nomorTransfer}
                   </span>
-                  <span className="text-xs font-bold text-navy/50 capitalize">
+                  <span className="text-kecil font-bold text-navy/50 capitalize">
                     Pengirim: {item.pengirim?.nama || "-"}
                   </span>
                 </div>
-                <Badge className="bg-amber-100 text-amber-700 border-none text-[10px] font-bold px-2 py-0.5 animate-pulse shrink-0">
+                <Badge className="bg-amber-100 text-amber-700 border-none text-mikro font-bold px-2 py-0.5 animate-pulse shrink-0">
                   <Truck className="w-3 h-3 mr-1" /> Menuju Toko
                 </Badge>
               </div>
@@ -190,30 +190,30 @@ export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJa
                   </div>
                   <div className="flex flex-col justify-between h-11.5 flex-1">
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-navy/40 uppercase">Dari {konfig.lawan}</span>
-                      <span className="text-sm font-bold text-navy truncate leading-tight">{item.dariLokasi?.nama || "Gudang"}</span>
+                      <span className="text-mikro font-bold text-navy/40 uppercase">Dari {konfig.lawan}</span>
+                      <span className="text-isi font-bold text-navy truncate leading-tight">{item.dariLokasi?.nama || "Gudang"}</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-emerald-600/70 uppercase">Tujuan</span>
-                      <span className="text-sm font-bold text-emerald-700 truncate leading-tight">Lokasi Anda</span>
+                      <span className="text-mikro font-bold text-emerald-600/70 uppercase">Tujuan</span>
+                      <span className="text-isi font-bold text-emerald-700 truncate leading-tight">Lokasi Anda</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 bg-gading p-3 rounded-xl border border-navy/5 mt-2">
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-navy/50 uppercase">Diberangkatkan</span>
-                    <span className="text-xs font-bold text-navy">{formatTanggal(item.tanggalKirim)}</span>
+                    <span className="text-mikro font-bold text-navy/50 uppercase">Diberangkatkan</span>
+                    <span className="text-kecil font-bold text-navy">{formatTanggal(item.tanggalKirim)}</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-navy/50 uppercase">Estimasi Waktu</span>
-                    <span className="text-xs font-bold text-amber-600">{getLamaPerjalanan(item.tanggalKirim)}</span>
+                    <span className="text-mikro font-bold text-navy/50 uppercase">Estimasi Waktu</span>
+                    <span className="text-kecil font-bold text-amber-600">{getLamaPerjalanan(item.tanggalKirim)}</span>
                   </div>
                 </div>
               </div>
 
               <div className="px-5 py-3 bg-blue-50/50 border-t border-blue-100 flex items-center justify-between mt-auto">
-                 <div className="flex items-center gap-1.5 text-xs font-bold text-blue-800">
+                 <div className="flex items-center gap-1.5 text-kecil font-bold text-blue-800">
                   <Package className="w-4 h-4" />
                   {item.items?.length || 0} Macam Barang
                 </div>

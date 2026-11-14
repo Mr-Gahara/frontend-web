@@ -19,7 +19,7 @@ import {
 import { useLanggananToko, useRiwayatLanggananToko } from "./hooks";
 
 const KELAS_TOMBOL_WA =
-  "inline-flex h-[54px] items-center justify-center gap-2 rounded-xl bg-navy px-6 text-base font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2";
+  "inline-flex h-[54px] items-center justify-center gap-2 rounded-xl bg-navy px-6 text-besar font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2";
 
 const berlakuSampai = (r: RiwayatLanggananToko) =>
   r.berakhirSesudah ? formatTanggal(new Date(r.berakhirSesudah)) : "Tanpa batas";
@@ -37,7 +37,7 @@ export function HalamanLangganan() {
 
   if (langganan.isPending || riwayat.isPending) {
     return (
-      <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+      <p role="status" className="flex items-center gap-2 text-isi text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
         Memuat langganan...
       </p>
@@ -45,7 +45,7 @@ export function HalamanLangganan() {
   }
   if (langganan.isError || riwayat.isError) {
     return (
-      <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+      <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-isi font-medium text-destructive">
         {pesanError(langganan.error ?? riwayat.error, "Langganan gagal dimuat.")}
       </p>
     );
@@ -59,8 +59,8 @@ export function HalamanLangganan() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-7 text-navy">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Langganan</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Plan toko, masa berlaku, dan cara naik plan.</p>
+        <h1 className="text-judul font-bold tracking-tight">Langganan</h1>
+        <p className="mt-1 text-isi text-muted-foreground">Plan toko, masa berlaku, dan cara naik plan.</p>
       </div>
 
       <section
@@ -69,26 +69,26 @@ export function HalamanLangganan() {
       >
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-3.5">
           <div className="flex flex-wrap items-center gap-3">
-            <h2 id="langganan-aktif" className="text-2xl font-bold">
+            <h2 id="langganan-aktif" className="text-subjudul font-bold">
               Plan {plan.nama}
             </h2>
             {data.percobaan && (
-              <span className="rounded-full bg-sage/15 px-3 py-1 text-[13px] font-semibold text-sage">
+              <span className="rounded-full bg-sage/15 px-3 py-1 text-isi font-semibold text-sage">
                 Masa percobaan
               </span>
             )}
           </div>
           {data.berakhir === null ? (
-            <p className="text-[15px] text-muted-foreground">Masa berlaku tidak dibatasi.</p>
+            <p className="text-isi text-muted-foreground">Masa berlaku tidak dibatasi.</p>
           ) : data.lewat ? (
-            <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-[15px] font-medium text-destructive">
+            <p role="alert" className="rounded-lg bg-destructive/10 px-4 py-3 text-besar font-medium text-destructive">
               Masa berlaku habis {formatTanggal(data.berakhir)}.
               {data.tenggangSampai && <> Toko masih dapat dipakai sampai {formatTanggal(data.tenggangSampai)}.</>}{" "}
               Hubungi admin untuk perpanjang.
             </p>
           ) : (
             <>
-              <p className="text-[15px] text-muted-foreground">
+              <p className="text-isi text-muted-foreground">
                 Berakhir {formatTanggal(data.berakhir)},{" "}
                 <strong className="whitespace-nowrap text-navy">{sisaHari(data.berakhir, kini)} hari lagi</strong>.
               </p>
@@ -107,7 +107,7 @@ export function HalamanLangganan() {
                   />
                 </div>
               )}
-              <p className="text-sm text-muted-foreground">
+              <p className="text-isi text-muted-foreground">
                 Perpanjang sebelum masa berlaku habis agar toko tetap bisa dipakai.
               </p>
             </>
@@ -120,11 +120,11 @@ export function HalamanLangganan() {
               Hubungi admin
             </a>
           ) : (
-            <p className="rounded-xl bg-krem px-4 py-3 text-center text-sm font-semibold">
+            <p className="rounded-xl bg-krem px-4 py-3 text-center text-isi font-semibold">
               Hubungi admin Tachyon untuk naik plan atau perpanjang.
             </p>
           )}
-          <p className="text-center text-[13px] text-muted-foreground">
+          <p className="text-center text-kecil text-muted-foreground">
             Naik plan dan perpanjangan diproses admin lewat invoice.
           </p>
         </div>
@@ -132,10 +132,10 @@ export function HalamanLangganan() {
 
       <section aria-labelledby="langganan-banding" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 id="langganan-banding" className="text-xl font-bold">
+          <h2 id="langganan-banding" className="text-subjudul font-bold">
             Bandingkan plan
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-isi text-muted-foreground">
             Durasi 1, 3, 6, 12, atau 24 bulan. Harga mengikuti penawaran admin.
           </p>
         </div>
@@ -152,10 +152,10 @@ export function HalamanLangganan() {
                 }
               >
                 <div className="flex items-baseline justify-between gap-2">
-                  <h3 className="text-xl font-bold">{p.nama}</h3>
-                  {aktif && <span className="text-[13px] font-semibold text-sage">Plan Anda</span>}
+                  <h3 className="text-subjudul font-bold">{p.nama}</h3>
+                  {aktif && <span className="text-isi font-semibold text-sage">Plan Anda</span>}
                 </div>
-                <ul className="flex flex-col gap-2.5 text-sm">
+                <ul className="flex flex-col gap-2.5 text-isi">
                   {p.fitur.map((f) => (
                     <li key={f.teks} className={"flex gap-2 " + (f.ada ? "" : "text-muted-foreground")}>
                       {f.ada ? (
@@ -167,7 +167,7 @@ export function HalamanLangganan() {
                     </li>
                   ))}
                 </ul>
-                {p.catatan && <p className="mt-auto text-[13px] text-muted-foreground">{p.catatan}</p>}
+                {p.catatan && <p className="mt-auto text-kecil text-muted-foreground">{p.catatan}</p>}
               </article>
             );
           })}
@@ -175,7 +175,7 @@ export function HalamanLangganan() {
       </section>
 
       <section aria-labelledby="langganan-riwayat" className="flex flex-col gap-3">
-        <h2 id="langganan-riwayat" className="text-xl font-bold">
+        <h2 id="langganan-riwayat" className="text-subjudul font-bold">
           Riwayat
         </h2>
         {/* Tabel rincian berkartu baris; di HP kartu berlabel (CV22a). */}
@@ -194,7 +194,7 @@ export function HalamanLangganan() {
             type="button"
             onClick={() => riwayat.fetchNextPage()}
             disabled={riwayat.isFetchingNextPage}
-            className="self-start rounded-lg border border-navy/15 px-4 py-2 text-sm font-semibold hover:bg-krem disabled:opacity-60"
+            className="self-start rounded-lg border border-navy/15 px-4 py-2 text-isi font-semibold hover:bg-krem disabled:opacity-60"
           >
             {riwayat.isFetchingNextPage ? "Memuat..." : "Muat riwayat lainnya"}
           </button>

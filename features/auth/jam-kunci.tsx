@@ -34,7 +34,7 @@ export function JamKunci() {
       >
         {jamMenit(kini)}
       </time>
-      <p className="text-xl text-gading/75">
+      <p className="text-subjudul text-gading/75">
         {kini.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
       </p>
     </div>

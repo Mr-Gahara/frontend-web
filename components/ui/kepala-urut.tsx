@@ -28,7 +28,7 @@ export function KepalaUrut<TData, TValue>({
       size="sm"
       onClick={() => column.toggleSorting(arah === "asc")}
       className={cn(
-        "-ml-3 h-8 cursor-pointer gap-1 text-xs font-bold text-navy/60 hover:bg-navy/5",
+        "-ml-3 h-8 cursor-pointer gap-1 text-kecil font-bold text-navy/60 hover:bg-navy/5",
         className,
       )}
     >

@@ -57,10 +57,10 @@ export default function AkunKasPage() {
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 sm:gap-4">
         <div className="w-full sm:w-auto">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-navy">
+          <h2 className="text-subjudul font-bold tracking-tight text-navy">
             Daftar Akun Kas & Bank
           </h2>
-          <p className="text-sm font-medium text-navy/60 mt-1">
+          <p className="text-isi font-medium text-navy/60 mt-1">
             Kelola rekening dan kas fisik yang terhubung ke sistem POS.
           </p>
         </div>
@@ -78,7 +78,7 @@ export default function AkunKasPage() {
                 className="w-full max-sm:h-12 border-navy/20 text-navy px-2 sm:px-4 cursor-pointer"
               >
                 <ArrowLeftRight className="w-4 h-4 mr-1.5 shrink-0" />
-                <span className="truncate text-sm max-sm:text-base">
+                <span className="truncate text-isi max-sm:text-besar">
                   Pindah Dana
                 </span>
               </Button>
@@ -91,7 +91,7 @@ export default function AkunKasPage() {
               className="w-full sm:w-auto max-sm:h-12 border-navy/20 text-navy px-2 sm:px-4"
             >
               <ArrowLeftRight className="w-4 h-4 mr-1.5 shrink-0" />
-              <span className="truncate text-sm max-sm:text-base">
+              <span className="truncate text-isi max-sm:text-besar">
                 Pindah Dana
               </span>
             </Button>
@@ -105,7 +105,7 @@ export default function AkunKasPage() {
             >
               <Button className="w-full max-sm:h-12 bg-navy text-gading hover:bg-navy/90 border-none font-bold shadow-sm cursor-pointer px-2 sm:px-4">
                 <Plus className="w-4 h-4 mr-1.5 shrink-0" />
-                <span className="truncate text-sm max-sm:text-base">
+                <span className="truncate text-isi max-sm:text-besar">
                   Tambah Akun
                 </span>
               </Button>
@@ -125,20 +125,20 @@ export default function AkunKasPage() {
           </>
         ) : isError ? (
           <div className="col-span-full rounded-2xl border border-dashed border-rose-300 bg-krem p-12 sm:p-16 text-center">
-            <p className="text-base font-bold text-rose-600 mb-1">
+            <p className="text-besar font-bold text-rose-600 mb-1">
               Gagal memuat daftar akun kas
             </p>
-            <p className="text-sm font-medium text-navy/60 max-w-md mx-auto">
+            <p className="text-isi font-medium text-navy/60 max-w-md mx-auto">
               Periksa koneksi lalu muat ulang halaman.
             </p>
           </div>
         ) : akunKasList.length === 0 ? (
           <div className="col-span-full rounded-2xl border border-dashed border-navy/20 bg-krem p-12 sm:p-16 text-center shadow-sm">
             <Wallet className="w-10 h-10 text-karamel mx-auto mb-4" />
-            <p className="text-base font-bold text-navy mb-1">
+            <p className="text-besar font-bold text-navy mb-1">
               Belum ada Akun Kas
             </p>
-            <p className="text-sm font-medium text-navy/60 mb-6 max-w-md mx-auto">
+            <p className="text-isi font-medium text-navy/60 mb-6 max-w-md mx-auto">
               Tambahkan rekening bank atau kas fisik pertama Anda untuk mulai
               mencatat arus keuangan.
             </p>
@@ -146,10 +146,10 @@ export default function AkunKasPage() {
         ) : akunAktif.length === 0 ? (
           <div className="col-span-full rounded-2xl border border-dashed border-navy/20 bg-krem p-12 sm:p-16 text-center shadow-sm">
             <Wallet className="w-10 h-10 text-karamel mx-auto mb-4" />
-            <p className="text-base font-bold text-navy mb-1">
+            <p className="text-besar font-bold text-navy mb-1">
               Belum ada akun kas aktif
             </p>
-            <p className="text-sm font-medium text-navy/60 max-w-md mx-auto">
+            <p className="text-isi font-medium text-navy/60 max-w-md mx-auto">
               Seluruh akun kas berstatus non-aktif. Tambahkan akun baru untuk
               mulai mencatat arus keuangan.
             </p>
@@ -179,7 +179,7 @@ export default function AkunKasPage() {
                         <Link
                           href={urlUbahAkunKas(akun.id)}
                           aria-label={`Ubah ${akun.namaAkun}`}
-                          className="inline-flex items-center gap-1 rounded-md border border-navy/20 bg-gading px-2 py-1 text-xs font-bold text-navy hover:bg-navy/5"
+                          className="inline-flex items-center gap-1 rounded-md border border-navy/20 bg-gading px-2 py-1 text-kecil font-bold text-navy hover:bg-navy/5"
                         >
                           <Pencil className="w-3 h-3" />
                           Ubah
@@ -187,24 +187,24 @@ export default function AkunKasPage() {
                       )}
                     </div>
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold tracking-tight text-navy">
+                  <h3 className="text-subjudul font-bold tracking-tight text-navy">
                     {akun.namaAkun}
                   </h3>
-                  <p className="text-sm font-medium text-navy/70 mt-1">
+                  <p className="text-isi font-medium text-navy/70 mt-1">
                     {akun.nomorAkun || "-"}
                   </p>
                   {akun.keterangan && (
-                    <p className="text-xs font-medium text-navy/50 mt-1.5 line-clamp-2">
+                    <p className="text-kecil font-medium text-navy/50 mt-1.5 line-clamp-2">
                       {akun.keterangan}
                     </p>
                   )}
                 </div>
                 <div>
                   <div className="h-px w-full bg-navy/10 my-4" />
-                  <p className="text-[11px] font-bold text-karamel mb-1 tracking-wider uppercase">
+                  <p className="text-mikro font-bold text-karamel mb-1 tracking-wider uppercase">
                     Saldo Saat Ini
                   </p>
-                  <p className="text-2xl sm:text-3xl font-black tracking-tight text-navy">
+                  <p className="text-judul sm:text-tampilan font-black tracking-tight text-navy">
                     {formatRupiah(akun.saldo ?? 0)}
                   </p>
                 </div>
@@ -221,7 +221,7 @@ export default function AkunKasPage() {
             onClick={() => setBukaNonAktif((buka) => !buka)}
             aria-expanded={bukaNonAktif}
             aria-controls="daftar-akun-non-aktif"
-            className="flex w-full items-center justify-between rounded-xl border border-navy/10 bg-krem px-4 py-3 text-sm font-bold text-navy cursor-pointer hover:border-navy/30 transition-colors"
+            className="flex w-full items-center justify-between rounded-xl border border-navy/10 bg-krem px-4 py-3 text-isi font-bold text-navy cursor-pointer hover:border-navy/30 transition-colors"
           >
             <span>Akun non-aktif ({akunNonAktif.length})</span>
             <ChevronDown
@@ -236,11 +236,11 @@ export default function AkunKasPage() {
               {akunNonAktif.map((akun) => (
                 <li
                   key={akun.id}
-                  className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3 text-sm"
+                  className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3 text-isi"
                 >
                   <div className="min-w-0">
                     <p className="font-bold text-navy/80 truncate">{akun.namaAkun}</p>
-                    <p className="text-xs font-medium text-navy/50">
+                    <p className="text-kecil font-medium text-navy/50">
                       {akun.tipeAkun}, {akun.nomorAkun || "-"}
                     </p>
                   </div>
@@ -253,7 +253,7 @@ export default function AkunKasPage() {
                         <Link
                           href={urlUbahAkunKas(akun.id)}
                           aria-label={`Ubah ${akun.namaAkun}`}
-                          className="inline-flex items-center gap-1 rounded-md border border-navy/20 bg-krem px-2 py-1 text-xs font-bold text-navy hover:bg-navy/5"
+                          className="inline-flex items-center gap-1 rounded-md border border-navy/20 bg-krem px-2 py-1 text-kecil font-bold text-navy hover:bg-navy/5"
                         >
                           <Pencil className="w-3 h-3" />
                           Ubah
@@ -264,7 +264,7 @@ export default function AkunKasPage() {
                           variant="outline"
                           aria-label={`Aktifkan kembali ${akun.namaAkun}`}
                           onClick={() => setAkunDiaktifkan(akun)}
-                          className="border-navy/20 text-navy text-xs font-bold"
+                          className="border-navy/20 text-navy text-kecil font-bold"
                         >
                           Aktifkan kembali
                         </Button>

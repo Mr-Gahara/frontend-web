@@ -15,11 +15,11 @@ import { skemaLoginAkun, type NilaiLoginAkun } from "./schema";
 import { TandaTachyon } from "./tanda-tachyon";
 
 const KELAS_ISIAN =
-  "flex h-12 w-full rounded-lg border border-input bg-permukaan px-3.5 text-[15px] text-navy placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
+  "flex h-12 w-full rounded-lg border border-input bg-permukaan px-3.5 text-isi text-navy placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-xs font-medium text-destructive">{pesan}</p>;
+  return <p className="text-kecil font-medium text-destructive">{pesan}</p>;
 }
 
 export function HalamanLoginAkun() {
@@ -83,21 +83,22 @@ export function HalamanLoginAkun() {
       <section className="flex min-w-0 flex-[1_1_480px] flex-col justify-between gap-12 bg-navy px-6 py-10 text-gading sm:px-12 sm:py-14">
         <div className="flex items-center gap-3">
           <TandaTachyon />
-          <span className="text-lg font-bold">Tachyon POS</span>
+          <span className="text-subjudul font-bold">Tachyon POS</span>
         </div>
         <div className="flex max-w-[460px] flex-col gap-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-karamel">
+          <p className="text-kecil font-semibold uppercase tracking-[0.14em] text-karamel">
             Akun toko
           </p>
+          {/* eslint-disable-next-line no-restricted-syntax -- teks hero di luar skala tipografi (CV25a) */}
           <h1 className="text-4xl font-extrabold leading-[1.05] text-balance sm:text-[52px]">
             Buka toko, mulai shift.
           </h1>
-          <p className="text-[17px] leading-relaxed text-gading/80">
+          <p className="text-subjudul leading-relaxed text-gading/80">
             Masuk dengan email toko Anda. Sesudah itu, setiap karyawan masuk dengan nama dan PIN
             masing-masing.
           </p>
         </div>
-        <ul className="flex flex-wrap gap-x-7 gap-y-3 text-sm text-gading/80">
+        <ul className="flex flex-wrap gap-x-7 gap-y-3 text-isi text-gading/80">
           <li>Kasir dan pembayaran</li>
           <li>Stok dan bahan baku</li>
           <li>Jadwal shift</li>
@@ -114,14 +115,14 @@ export function HalamanLoginAkun() {
           suppressHydrationWarning
         >
           <div className="flex flex-col gap-2">
-            <h2 className="text-[28px] font-bold">Masuk ke akun toko</h2>
-            <p className="text-[15px] leading-normal text-muted-foreground">
+            <h2 className="text-subjudul font-bold">Masuk ke akun toko</h2>
+            <p className="text-isi leading-normal text-muted-foreground">
               Gunakan email yang didaftarkan untuk toko ini.
             </p>
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="email" className="text-sm font-semibold">
+            <label htmlFor="email" className="text-isi font-semibold">
               Email
             </label>
             <input
@@ -138,7 +139,7 @@ export function HalamanLoginAkun() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="password" className="text-sm font-semibold">
+            <label htmlFor="password" className="text-isi font-semibold">
               Password
             </label>
             <div className="relative">
@@ -157,7 +158,7 @@ export function HalamanLoginAkun() {
                 aria-pressed={sandiTampil}
                 aria-controls="password"
                 disabled={memuat}
-                className="absolute right-1.5 top-1.5 h-9 cursor-pointer rounded-md bg-krem px-3 text-[13px] font-semibold text-navy transition-colors hover:bg-krem/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel disabled:opacity-50"
+                className="absolute right-1.5 top-1.5 h-9 cursor-pointer rounded-md bg-krem px-3 text-isi font-semibold text-navy transition-colors hover:bg-krem/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel disabled:opacity-50"
               >
                 {sandiTampil ? "Sembunyikan" : "Tampilkan"}
               </button>
@@ -166,14 +167,14 @@ export function HalamanLoginAkun() {
             {/* Sesudah isian, agar Tab dari email langsung ke password. */}
             <Link
               href="/lupa-password"
-              className="self-end rounded-sm text-sm font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
+              className="self-end rounded-sm text-isi font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
             >
               Lupa password?
             </Link>
           </div>
 
           {galat && (
-            <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive">
+            <div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{galat}</span>
             </div>
@@ -182,7 +183,7 @@ export function HalamanLoginAkun() {
           <button
             type="submit"
             disabled={memuat}
-            className="inline-flex h-[52px] w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-navy text-base font-bold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:pointer-events-none disabled:opacity-60"
+            className="inline-flex h-[52px] w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-navy text-besar font-bold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:pointer-events-none disabled:opacity-60"
           >
             {memuat ? (
               <>
@@ -194,7 +195,7 @@ export function HalamanLoginAkun() {
             )}
           </button>
           {/* Ditautkan setelah wizard setup tersambung (TP4a). */}
-          <p className="text-center text-[15px] text-muted-foreground">
+          <p className="text-center text-isi text-muted-foreground">
             Belum punya akun?{" "}
             <Link
               href="/daftar"

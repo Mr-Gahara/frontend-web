@@ -16,7 +16,7 @@ export function kolomMuatan(diterima: boolean): ColumnDef<TransferItem>[] {
         <div className="flex flex-col">
           <span className="font-bold text-navy">{row.original.bahanBaku?.namaBahan || "Item Tidak Dikenal"}</span>
           {row.original.catatanItem && (
-            <span className="text-xs text-rose-600 font-medium italic mt-1">Catatan: {row.original.catatanItem}</span>
+            <span className="text-kecil text-rose-600 font-medium italic mt-1">Catatan: {row.original.catatanItem}</span>
           )}
         </div>
       ),
@@ -29,7 +29,7 @@ export function kolomMuatan(diterima: boolean): ColumnDef<TransferItem>[] {
         <div className="sm:text-center">
           <span className="font-mono font-bold text-navy bg-navy/5 px-3 py-1 rounded-md border border-navy/10">
             {row.original.qtyKirim}{" "}
-            <span className="text-xs font-sans font-medium text-navy/60">{row.original.bahanBaku?.satuan}</span>
+            <span className="text-kecil font-sans font-medium text-navy/60">{row.original.bahanBaku?.satuan}</span>
           </span>
         </div>
       ),

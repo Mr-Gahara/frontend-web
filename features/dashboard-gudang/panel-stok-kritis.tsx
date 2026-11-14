@@ -12,7 +12,7 @@ import { PesanGagal } from "./pesan-gagal";
 import { TAUTAN_DASHBOARD_GUDANG } from "./ringkasan";
 import { formatAngka, lebarBatang } from "./tampilan";
 
-const TAUTAN = "text-[13px] font-medium underline-offset-4 hover:underline";
+const TAUTAN = "text-isi font-medium underline-offset-4 hover:underline";
 
 /** Barang di gudang yang stoknya sudah di batas minimum atau di bawahnya. */
 export function PanelStokKritis() {
@@ -26,11 +26,11 @@ export function PanelStokKritis() {
     <section aria-labelledby={idJudul} className="flex flex-col gap-3 sm:gap-3.5 min-w-0">
       <div className="flex flex-wrap justify-between items-baseline gap-2">
         <div className="flex flex-col gap-0.5">
-          <h2 id={idJudul} className="text-[17px] sm:text-lg font-semibold">
+          <h2 id={idJudul} className="text-subjudul font-semibold">
             {ada ? `Stok kritis · ${formatAngka(data.total)} barang` : "Stok kritis"}
           </h2>
           {ada && (
-            <p className="text-xs sm:text-[13px] text-navy/60">
+            <p className="text-kecil text-navy/60">
               Batang penuh berarti stok sama dengan batas minimum
             </p>
           )}
@@ -65,8 +65,8 @@ export function PanelStokKritis() {
             <Check className="w-[22px] h-[22px]" />
           </span>
           <div className="flex flex-col gap-0.5">
-            <span className="text-[15px] font-semibold">Tidak ada stok kritis di gudang</span>
-            <span className="text-[13px] text-navy/60">
+            <span className="text-besar font-semibold">Tidak ada stok kritis di gudang</span>
+            <span className="text-kecil text-navy/60">
               Semua barang yang dipantau masih di atas batas minimumnya.
             </span>
           </div>
@@ -80,14 +80,14 @@ export function PanelStokKritis() {
             >
               <div className="flex justify-between items-start sm:items-center gap-2">
                 <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
-                  <span className="text-sm font-medium">{b.nama}</span>
+                  <span className="text-isi font-medium">{b.nama}</span>
                   {b.habis && (
-                    <span className="text-[11px] font-bold text-white bg-red-800 px-2 py-0.5 rounded-full">
+                    <span className="text-mikro font-bold text-white bg-red-800 px-2 py-0.5 rounded-full">
                       Habis
                     </span>
                   )}
                 </div>
-                <span className="text-xs sm:text-[13px] text-navy/60 whitespace-nowrap">
+                <span className="text-kecil text-navy/60 whitespace-nowrap">
                   <strong className="text-red-800 font-semibold">{formatAngka(b.stok)}</strong>
                   <span className="hidden sm:inline"> dari </span>
                   <span className="sm:hidden"> / </span>

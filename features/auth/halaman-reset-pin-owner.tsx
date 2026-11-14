@@ -22,20 +22,20 @@ import { kodeKosong, skemaResetPinOwner, type NilaiResetPinOwner } from "./schem
 import { TandaTachyon } from "./tanda-tachyon";
 
 const KELAS_ISIAN =
-  "flex h-12 w-full rounded-lg border border-input bg-permukaan px-3.5 text-base text-navy placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
+  "flex h-12 w-full rounded-lg border border-input bg-permukaan px-3.5 text-besar text-navy placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
 
 const KELAS_TOMBOL =
-  "inline-flex h-[54px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-navy text-base font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex h-[54px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-navy text-besar font-semibold text-gading transition-colors hover:bg-navy/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading disabled:pointer-events-none disabled:opacity-60";
 
 const KELAS_TAUTAN =
-  "inline-flex min-h-11 cursor-pointer items-center self-start rounded-sm text-[15px] font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading";
+  "inline-flex min-h-11 cursor-pointer items-center self-start rounded-sm text-besar font-semibold text-navy underline decoration-karamel decoration-2 underline-offset-[3px] hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2 focus-visible:ring-offset-gading";
 
 /** Jeda kirim ulang OTP bawaan backend (OTP_JEDA_KIRIM_DETIK, B178). */
 const JEDA_KIRIM_ULANG = 60;
 
 function PesanIsian({ pesan }: { pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-xs font-medium text-destructive">{pesan}</p>;
+  return <p className="text-kecil font-medium text-destructive">{pesan}</p>;
 }
 
 function PesanGalat({ pesan }: { pesan: string }) {
@@ -43,7 +43,7 @@ function PesanGalat({ pesan }: { pesan: string }) {
   return (
     <div
       role="alert"
-      className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+      className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive"
     >
       <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
       <span>{pesan}</span>
@@ -57,8 +57,8 @@ function Identitas({ identitas, tambahan }: { identitas: IdentitasPanel; tambaha
     <div className="flex min-w-0 items-center gap-3">
       <TandaTachyon ukuran={34} />
       <div className="min-w-0">
-        <p className="truncate text-lg font-bold">{identitas.judul}</p>
-        {baris && <p className="truncate text-sm text-gading/75">{baris}</p>}
+        <p className="truncate text-subjudul font-bold">{identitas.judul}</p>
+        {baris && <p className="truncate text-isi text-gading/75">{baris}</p>}
       </div>
     </div>
   );
@@ -77,7 +77,7 @@ function PanelKunci({ identitas, keterangan, ringkas }: { identitas: IdentitasPa
       >
         <Identitas identitas={identitas} />
         <JamKunci />
-        <p className="max-w-[420px] text-base leading-relaxed text-gading/75">{keterangan}</p>
+        <p className="max-w-[420px] text-besar leading-relaxed text-gading/75">{keterangan}</p>
       </aside>
       {ringkas && (
         <aside className="flex w-full min-w-0 rounded-[28px] bg-navy px-8 py-6 text-gading sm:hidden">
@@ -102,13 +102,13 @@ function TahapKirim({
   const [galat, setGalat] = useState("");
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-[13px] font-semibold text-muted-foreground">Tahap 1 dari 2</p>
-      <h1 className="text-3xl font-bold tracking-tight">Atur ulang PIN Owner</h1>
-      <p className="text-[15px] leading-relaxed text-muted-foreground">
+      <p className="text-kecil font-semibold text-muted-foreground">Tahap 1 dari 2</p>
+      <h1 className="text-judul font-bold tracking-tight">Atur ulang PIN Owner</h1>
+      <p className="text-isi leading-relaxed text-muted-foreground">
         Kami kirim kode 6 digit ke email akun toko. Jalur ini hanya untuk Owner; karyawan meminta Owner
         mengatur ulang PIN-nya.
       </p>
-      <p className="rounded-xl bg-krem px-4 py-3.5 text-[15px] leading-normal [overflow-wrap:anywhere]">
+      <p className="rounded-xl bg-krem px-4 py-3.5 text-besar leading-normal [overflow-wrap:anywhere]">
         Kode dikirim ke <strong>{email ?? "email akun toko"}</strong>
       </p>
       <PesanGalat pesan={galat} />
@@ -186,9 +186,9 @@ function TahapKode({
       noValidate
       className="flex flex-col gap-4"
     >
-      <p className="text-[13px] font-semibold text-muted-foreground">Tahap 2 dari 2</p>
-      <h1 className="text-3xl font-bold tracking-tight">Kode dan PIN baru</h1>
-      <p className="text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
+      <p className="text-kecil font-semibold text-muted-foreground">Tahap 2 dari 2</p>
+      <h1 className="text-judul font-bold tracking-tight">Kode dan PIN baru</h1>
+      <p className="text-isi leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
         Kode dikirim ke <strong className="text-navy">{terkirim.email}</strong>, berlaku {menit} menit.
       </p>
       <div className="flex flex-col gap-2">
@@ -215,13 +215,13 @@ function TahapKode({
           }}
         />
         {status && (
-          <p role="status" className="text-sm">
+          <p role="status" className="text-isi">
             {status}
           </p>
         )}
       </div>
       <div className="flex flex-col gap-2">
-        <label htmlFor="reset-pin-password" className="text-sm font-semibold">
+        <label htmlFor="reset-pin-password" className="text-isi font-semibold">
           Password akun toko
         </label>
         <input
@@ -235,7 +235,7 @@ function TahapKode({
         <PesanIsian pesan={errors.password?.message} />
       </div>
       <div className="flex flex-col gap-2">
-        <label htmlFor="reset-pin-baru" className="text-sm font-semibold">
+        <label htmlFor="reset-pin-baru" className="text-isi font-semibold">
           PIN baru
         </label>
         <input
@@ -252,7 +252,7 @@ function TahapKode({
         <PesanIsian pesan={errors.pinBaru?.message} />
       </div>
       <div className="flex flex-col gap-2">
-        <label htmlFor="reset-pin-ulang" className="text-sm font-semibold">
+        <label htmlFor="reset-pin-ulang" className="text-isi font-semibold">
           Ulangi PIN baru
         </label>
         <input
@@ -266,7 +266,7 @@ function TahapKode({
           className={KELAS_ISIAN + " tracking-[0.4em]"}
         />
         <PesanIsian pesan={errors.ulangiPin?.message} />
-        <p id="reset-pin-aturan" className="text-[13px] text-muted-foreground">
+        <p id="reset-pin-aturan" className="text-kecil text-muted-foreground">
           PIN 6 digit angka.
         </p>
       </div>

@@ -76,7 +76,7 @@ export function kolomRiwayatPembayaran(
       id: "catatan",
       header: "Catatan",
       cell: ({ row }) => (
-        <div className="font-medium text-navy/60 text-xs">
+        <div className="font-medium text-navy/60 text-kecil">
           <span className="line-clamp-1">{row.original.catatan || "-"}</span>
           {row.original.status === "VOID" && row.original.alasanVoid && (
             <span className="block line-clamp-1 text-red-700">Alasan batal: {row.original.alasanVoid}</span>

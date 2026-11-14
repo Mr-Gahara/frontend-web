@@ -55,11 +55,11 @@ export function BagianResepProduk({
         <div>
           <div className="flex items-center gap-2">
             <ChefHat className="h-5 w-5 text-karamel" />
-            <h3 className="text-base font-bold text-navy">
+            <h3 className="text-besar font-bold text-navy">
               Resep & Komposisi (BOM)
             </h3>
           </div>
-          <p className="text-xs font-medium text-navy/60 mt-1">
+          <p className="text-kecil font-medium text-navy/60 mt-1">
             {teks.deskripsiResep}
           </p>
         </div>
@@ -78,17 +78,17 @@ export function BagianResepProduk({
         {fields.length === 0 ? (
           <div className="text-center py-8 px-4 border-2 border-dashed border-navy/10 rounded-xl bg-white/50">
             <ChefHat className="w-8 h-8 text-navy/20 mx-auto mb-2" />
-            <p className="text-sm font-bold text-navy/50">
+            <p className="text-isi font-bold text-navy/50">
               Tidak ada resep yang ditambahkan.
             </p>
-            <p className="text-xs font-medium text-navy/40 mt-1">
+            <p className="text-kecil font-medium text-navy/40 mt-1">
               {teks.resepKosong}
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             {/* Header Tabel (Desktop) */}
-            <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-2 text-xs font-bold text-navy/60 uppercase tracking-wider">
+            <div className="hidden sm:grid sm:grid-cols-12 gap-4 px-2 text-kecil font-bold text-navy/60 uppercase tracking-wider">
               <div className="col-span-5">Pilih Bahan Baku</div>
               <div className="col-span-3 text-center">Jumlah</div>
               <div className="col-span-3 text-center">Satuan</div>
@@ -102,7 +102,7 @@ export function BagianResepProduk({
               >
                 {/* Pilih Bahan Baku */}
                 <div className="col-span-1 sm:col-span-5">
-                  <label className="text-xs font-bold text-navy mb-1.5 block sm:hidden">
+                  <label className="text-kecil font-bold text-navy mb-1.5 block sm:hidden">
                     Bahan Baku
                   </label>
                   <Controller
@@ -125,7 +125,7 @@ export function BagianResepProduk({
                     )}
                   />
                   {errors.resep?.[index]?.bahanBakuID && (
-                    <span className="text-[10px] font-bold text-rose-500 mt-1 block">
+                    <span className="text-mikro font-bold text-rose-500 mt-1 block">
                       {errors.resep[index]?.bahanBakuID?.message}
                     </span>
                   )}
@@ -133,7 +133,7 @@ export function BagianResepProduk({
 
                 {/* Jumlah */}
                 <div className="col-span-1 sm:col-span-3">
-                  <label className="text-xs font-bold text-navy mb-1.5 block sm:hidden">
+                  <label className="text-kecil font-bold text-navy mb-1.5 block sm:hidden">
                     Jumlah
                   </label>
                   <Input
@@ -147,7 +147,7 @@ export function BagianResepProduk({
                     step="any"
                   />
                   {errors.resep?.[index]?.jumlah && (
-                    <span className="text-[10px] font-bold text-rose-500 mt-1 block text-center sm:text-left">
+                    <span className="text-mikro font-bold text-rose-500 mt-1 block text-center sm:text-left">
                       {errors.resep[index]?.jumlah?.message}
                     </span>
                   )}
@@ -155,7 +155,7 @@ export function BagianResepProduk({
 
                 {/* Satuan */}
                 <div className="col-span-1 sm:col-span-3">
-                  <label className="text-xs font-bold text-navy mb-1.5 block sm:hidden">
+                  <label className="text-kecil font-bold text-navy mb-1.5 block sm:hidden">
                     Satuan
                   </label>
                   <Controller
@@ -192,7 +192,7 @@ export function BagianResepProduk({
                     )}
                   />
                   {errors.resep?.[index]?.satuan && (
-                    <span className="text-[10px] font-bold text-rose-500 mt-1 block">
+                    <span className="text-mikro font-bold text-rose-500 mt-1 block">
                       {errors.resep[index]?.satuan?.message}
                     </span>
                   )}

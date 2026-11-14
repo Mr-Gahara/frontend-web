@@ -80,7 +80,7 @@ function EmptyState({ message }: { message: string }) {
       style={{ color: denganAlfa(COLORS.navy, "66") }}
     >
       <Calendar className="w-8 h-8" />
-      <p className="text-sm font-medium">{message}</p>
+      <p className="text-isi font-medium">{message}</p>
     </div>
   );
 }
@@ -94,7 +94,7 @@ function ErrorState({ message }: { message: string }) {
       style={{ color: COLORS.rose }}
     >
       <AlertCircle className="w-8 h-8" />
-      <p className="text-sm font-medium">{message}</p>
+      <p className="text-isi font-medium">{message}</p>
     </div>
   );
 }
@@ -184,13 +184,13 @@ export default function DasborTimelinePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <h2
-            className="text-xl font-bold tracking-tight"
+            className="text-subjudul font-bold tracking-tight"
             style={{ color: COLORS.navy }}
           >
             Peta Ketersediaan Aset
           </h2>
           <p
-            className="text-sm font-medium"
+            className="text-isi font-medium"
             style={{ color: denganAlfa(COLORS.navy, "99") }}
           >
             Pantau penggunaan aset dalam 6 jam ke depan.
@@ -214,7 +214,7 @@ export default function DasborTimelinePage() {
           </button>
 
           <div
-            className="px-4 py-2.5 flex items-center gap-2.5 text-sm font-bold tracking-wide min-w-44 justify-center border-x"
+            className="px-4 py-2.5 flex items-center gap-2.5 text-isi font-bold tracking-wide min-w-44 justify-center border-x"
             style={{
               color: COLORS.cream,
               borderColor: "rgba(255,255,255,0.08)",
@@ -252,7 +252,7 @@ export default function DasborTimelinePage() {
           {Object.entries(STATUS_STYLES).map(([key, s]) => (
             <span
               key={key}
-              className="flex items-center gap-1.5 text-xs font-bold"
+              className="flex items-center gap-1.5 text-kecil font-bold"
               style={{ color: denganAlfa(COLORS.navy, "B3") }}
             >
               <span
@@ -264,7 +264,7 @@ export default function DasborTimelinePage() {
           ))}
           {isLoading && (
             <span
-              className="flex items-center gap-1.5 text-xs font-medium"
+              className="flex items-center gap-1.5 text-kecil font-medium"
               style={{ color: denganAlfa(COLORS.navy, "66") }}
             >
               <Loader2 className="w-3 h-3 animate-spin" />
@@ -272,7 +272,7 @@ export default function DasborTimelinePage() {
             </span>
           )}
           <span
-            className="flex items-center gap-1.5 text-xs font-bold ml-auto"
+            className="flex items-center gap-1.5 text-kecil font-bold ml-auto"
             style={{ color: denganAlfa(COLORS.navy, "B3") }}
           >
             <span
@@ -291,7 +291,7 @@ export default function DasborTimelinePage() {
           <div className="min-w-200">
             {/* HEADER KOLOM WAKTU */}
             <div
-              className="flex text-sm font-bold relative z-20"
+              className="flex text-isi font-bold relative z-20"
               style={{ background: COLORS.navy, color: COLORS.cream }}
             >
               <div
@@ -422,7 +422,7 @@ export default function DasborTimelinePage() {
                         </div>
                         <div className="flex flex-col overflow-hidden">
                           <span
-                            className="text-sm font-bold truncate tracking-wide"
+                            className="text-isi font-bold truncate tracking-wide"
                             style={{ color: COLORS.cream }}
                           >
                             {aset.namaAset}
@@ -436,7 +436,7 @@ export default function DasborTimelinePage() {
                               }}
                             />
                             <span
-                              className="text-[11px] font-medium truncate tracking-wide uppercase"
+                              className="text-mikro font-medium truncate tracking-wide uppercase"
                               style={{ color: "rgba(255,250,243,0.7)" }}
                             >
                               {statusStyle.label}
@@ -526,11 +526,11 @@ export default function DasborTimelinePage() {
                                       }
                                 }
                               >
-                                <span className="text-sm font-bold truncate tracking-tight w-full">
+                                <span className="text-isi font-bold truncate tracking-tight w-full">
                                   {namaPelanggan}
                                 </span>
                                 <span
-                                  className="text-[11px] font-semibold truncate mt-0.5 tabular-nums tracking-wide w-full"
+                                  className="text-mikro font-semibold truncate mt-0.5 tabular-nums tracking-wide w-full"
                                   style={{
                                     color: isMember
                                       ? "rgba(255,250,243,0.8)"

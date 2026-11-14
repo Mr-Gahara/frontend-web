@@ -114,8 +114,8 @@ export default function BuatRolePage() {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">Tambah Posisi</h1>
-          <p className="text-sm font-medium text-navy/60">
+          <h1 className="text-judul font-bold tracking-tight text-navy">Tambah Posisi</h1>
+          <p className="text-isi font-medium text-navy/60">
             Pilih salah satu template posisi yang sudah disiapkan, atau buat
             posisi kustom dengan wewenang Anda sendiri.
           </p>
@@ -127,8 +127,8 @@ export default function BuatRolePage() {
       <div className="rounded-2xl border border-navy/10 bg-krem p-5 sm:p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <p className="text-base font-bold text-navy">Buat Posisi Kustom</p>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-besar font-bold text-navy">Buat Posisi Kustom</p>
+            <p className="text-isi font-medium text-navy/60">
               Tentukan sendiri nama, level, dan wewenang yang dimiliki posisi ini dari nol.
             </p>
           </div>
@@ -148,7 +148,7 @@ export default function BuatRolePage() {
       {/* Divider */}
       <div className="flex items-center gap-4 py-2">
         <div className="h-px flex-1 bg-navy/10" />
-        <p className="text-xs font-bold text-navy/40 uppercase tracking-widest">atau gunakan template</p>
+        <p className="text-kecil font-bold text-navy/40 uppercase tracking-widest">atau gunakan template</p>
         <div className="h-px flex-1 bg-navy/10" />
       </div>
 
@@ -156,7 +156,7 @@ export default function BuatRolePage() {
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2 text-navy/70">
           <ShieldCheck className="h-5 w-5 text-navy" />
-          <p className="text-sm font-bold text-navy">Rekomendasi Template Sistem</p>
+          <p className="text-isi font-bold text-navy">Rekomendasi Template Sistem</p>
           {permissionsLoading && (
             <Loader2 className="h-4 w-4 animate-spin text-navy/60 ml-2" />
           )}
@@ -186,36 +186,36 @@ export default function BuatRolePage() {
 
                 <div className="flex flex-col gap-3">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-base font-bold leading-tight text-navy">
+                    <p className="text-besar font-bold leading-tight text-navy">
                       {template.namaRole}
                     </p>
                     {/* Badge Level: Menggunakan Mustard sebagai aksen kecil yang cakep */}
                     <Badge
                       variant="secondary"
-                      className="shrink-0 text-[10px] font-bold bg-navy text-krem border-none shadow-sm"
+                      className="shrink-0 text-mikro font-bold bg-navy text-krem border-none shadow-sm"
                     >
                       Lvl {template.level}
                     </Badge>
                   </div>
 
-                  <p className="text-xs font-medium leading-relaxed text-navy/70 line-clamp-3">
+                  <p className="text-kecil font-medium leading-relaxed text-navy/70 line-clamp-3">
                     {template.deskripsi}
                   </p>
                 </div>
 
                 <div className="flex items-end justify-between pt-4 mt-auto">
-                  <p className="text-[11px] font-bold text-karamel bg-gading px-2 py-1 rounded-md border border-navy/5">
+                  <p className="text-mikro font-bold text-karamel bg-gading px-2 py-1 rounded-md border border-navy/5">
                     {template.permissions.length} Wewenang
                   </p>
 
                   {reason ? (
-                    <p className="text-[10px] font-bold text-navy/50 text-right max-w-30leading-snug">
+                    <p className="text-mikro font-bold text-navy/50 text-right max-w-30leading-snug">
                       {reason}
                     </p>
                   ) : (
                     <Button
                       size="sm"
-                      className="h-8 cursor-pointer gap-1.5 text-xs font-bold bg-sage text-gading hover:bg-sage/90 border-none shadow-sm transition-colors"
+                      className="h-8 cursor-pointer gap-1.5 text-kecil font-bold bg-sage text-gading hover:bg-sage/90 border-none shadow-sm transition-colors"
                       disabled={disabled || !!loadingTemplateId}
                       onClick={() => handleUseTemplate(template)}
                     >

@@ -37,16 +37,16 @@ import { isianAwalUbah, payloadUbahPembelian } from "./payload";
 import { buatSkemaUbahPembelian, type IsianUbahPembelian } from "./schema";
 import { namaAkunPembelian, namaBahanItem, saldoTerpotong, teksJumlahItem } from "./tampilan";
 
-const KELAS_LABEL = "text-sm font-bold text-navy";
+const KELAS_LABEL = "text-isi font-bold text-navy";
 const KELAS_ISIAN =
   "bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy";
-const KELAS_GALAT = "text-xs font-bold text-rose-500";
+const KELAS_GALAT = "text-kecil font-bold text-rose-500";
 
 function PesanGalat({ pesan }: { pesan: string }) {
   return (
     <p
       role="alert"
-      className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm font-medium text-destructive"
+      className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive"
     >
       {pesan}
     </p>
@@ -171,14 +171,14 @@ export function DialogUbahPembelian({
                 )}
               />
             ) : (
-              <p className="rounded-md border border-navy/20 bg-white px-3 py-2 text-sm font-medium text-navy">
+              <p className="rounded-md border border-navy/20 bg-white px-3 py-2 text-isi font-medium text-navy">
                 {formatTanggal(pembelian.tanggal)}
               </p>
             )}
             {owner ? (
               errors.tanggal && <span className={KELAS_GALAT}>{errors.tanggal.message}</span>
             ) : (
-              <p className="text-xs font-medium text-navy/60">Hanya Owner yang dapat mengubah tanggal pembelian.</p>
+              <p className="text-kecil font-medium text-navy/60">Hanya Owner yang dapat mengubah tanggal pembelian.</p>
             )}
           </div>
           <div className="flex flex-col gap-2">
@@ -265,7 +265,7 @@ export function DialogHapusPembelian({
         {pembelian.stokDitambahkan && (
           <ul className="flex flex-col gap-2 rounded-xl bg-gading px-4 py-3">
             {pembelian.items.map((item, i) => (
-              <li key={i} className="flex justify-between gap-3 text-sm">
+              <li key={i} className="flex justify-between gap-3 text-isi">
                 <span className="font-semibold text-navy">{namaBahanItem(item)}</span>
                 <span className="font-mono font-bold text-navy">{teksJumlahItem(item)}</span>
               </li>

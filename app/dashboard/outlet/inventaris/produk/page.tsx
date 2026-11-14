@@ -92,7 +92,7 @@ export default function ProdukPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-xs font-bold text-navy/60 hover:bg-transparent hover:text-navy cursor-pointer"
+            className="h-auto p-0 text-kecil font-bold text-navy/60 hover:bg-transparent hover:text-navy cursor-pointer"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Nama Produk
@@ -107,7 +107,7 @@ export default function ProdukPage() {
         accessorKey: "kategori",
         meta: { label: "Kategori" },
         header: () => (
-          <span className="text-xs font-bold text-navy/60">
+          <span className="text-kecil font-bold text-navy/60">
             Kategori
           </span>
         ),
@@ -120,7 +120,7 @@ export default function ProdukPage() {
         accessorKey: "hargaDasar",
         meta: { label: "Harga Dasar" },
         header: () => (
-          <span className="text-xs font-bold text-navy/60">
+          <span className="text-kecil font-bold text-navy/60">
             Harga Dasar
           </span>
         ),
@@ -130,7 +130,7 @@ export default function ProdukPage() {
         accessorKey: "hargaJual",
         meta: { label: "Harga Jual" },
         header: () => (
-          <span className="text-xs font-bold text-navy/60">
+          <span className="text-kecil font-bold text-navy/60">
             Harga Jual
           </span>
         ),
@@ -140,7 +140,7 @@ export default function ProdukPage() {
         accessorKey: "stok",
         meta: { label: "Stok" },
         header: () => (
-          <span className="text-xs font-bold text-navy/60">
+          <span className="text-kecil font-bold text-navy/60">
             Stok
           </span>
         ),
@@ -152,7 +152,7 @@ export default function ProdukPage() {
           // --- LOGIKA BARU UNTUK UNLIMITED STOK ---
           if (isUnlimited) {
             return (
-              <span className="inline-flex items-center gap-1 rounded-md bg-karamel/10 px-2 py-0.5 text-xs font-bold text-karamel shadow-sm border border-karamel/20">
+              <span className="inline-flex items-center gap-1 rounded-md bg-karamel/10 px-2 py-0.5 text-kecil font-bold text-karamel shadow-sm border border-karamel/20">
                 <Infinity className="w-3.5 h-3.5" /> Unlimited
               </span>
             );
@@ -164,7 +164,7 @@ export default function ProdukPage() {
           return (
             <div className="flex flex-col items-start gap-1">
               <span
-                className={`rounded-md px-2 py-0.5 text-xs font-bold shadow-sm ${
+                className={`rounded-md px-2 py-0.5 text-kecil font-bold shadow-sm ${
                   isHabis || kritis
                     ? "bg-red-100 text-red-700 border border-red-200"
                     : "bg-navy/5 text-navy border border-navy/10"
@@ -173,7 +173,7 @@ export default function ProdukPage() {
                 {stok} item
               </span>
               {kritis && (
-                <span className="rounded-md border border-rose-200 bg-rose-50 px-1.5 text-[10px] font-semibold text-rose-600">
+                <span className="rounded-md border border-rose-200 bg-rose-50 px-1.5 text-mikro font-semibold text-rose-600">
                   Kritis
                 </span>
               )}
@@ -183,7 +183,7 @@ export default function ProdukPage() {
       },
       {
         id: "aksi",
-        header: () => <div className="text-right text-xs font-bold text-navy/60">Aksi</div>,
+        header: () => <div className="text-right text-kecil font-bold text-navy/60">Aksi</div>,
         cell: ({ row }) => (
           <div className="flex justify-end">
             <DropdownMenu>
@@ -230,8 +230,8 @@ export default function ProdukPage() {
             <Package className="w-6 h-6 text-karamel" /> 
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-navy">Data Produk</h1>
-            <p className="text-sm font-medium text-navy/60">
+            <h1 className="text-judul font-bold tracking-tight text-navy">Data Produk</h1>
+            <p className="text-isi font-medium text-navy/60">
               Kelola daftar produk, harga, dan stok toko Anda.
             </p>
           </div>

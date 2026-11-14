@@ -200,10 +200,10 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
             <ClipboardList className="w-6 h-6 text-karamel" />
           </div>
           <div className="space-y-0.5">
-            <h1 className="text-2xl font-bold tracking-tight text-navy">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
               {teks.judul}
             </h1>
-            <p className="text-sm font-medium text-navy/60">
+            <p className="text-isi font-medium text-navy/60">
               {teks.deskripsi}
             </p>
           </div>
@@ -215,10 +215,10 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
         <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 shadow-sm flex flex-col items-center text-center gap-4">
           <AlertTriangle className="w-10 h-10 text-rose-500" />
           <div>
-            <h2 className="text-lg font-bold text-rose-700">
+            <h2 className="text-subjudul font-bold text-rose-700">
               {teks.judulKosong}
             </h2>
-            <p className="text-sm font-medium text-rose-600/80 mt-1 max-w-md">
+            <p className="text-isi font-medium text-rose-600/80 mt-1 max-w-md">
               {teks.isiKosong}
             </p>
           </div>
@@ -241,7 +241,7 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
             <div className="space-y-5">
               {/* Read-Only Lokasi (Auto-detect Tenant) */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy flex items-center gap-2">
+                <label className="text-isi font-bold text-navy flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-karamel" />
                   Lokasi Audit / Gudang
                 </label>
@@ -272,11 +272,11 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
                 )}
                 <div className="min-h-4">
                   {errors.locationID ? (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {teks.pesanLokasi}
                     </span>
                   ) : (
-                    <p className="text-xs font-medium text-navy/50 mt-1">
+                    <p className="text-kecil font-medium text-navy/50 mt-1">
                       {keteranganLokasi(sumberLokasi)}
                     </p>
                   )}
@@ -285,7 +285,7 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
 
               {/* Read-Only PIC */}
               <div className="space-y-2 pt-2 border-t border-navy/10 mt-2">
-                <label className="text-sm font-bold text-navy flex items-center gap-2">
+                <label className="text-isi font-bold text-navy flex items-center gap-2">
                   <User className="h-4 w-4 text-karamel" />
                   Penanggung Jawab (PIC)
                 </label>
@@ -294,11 +294,11 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
                 </div>
                 <div className="min-h-4">
                   {errors.picID ? (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.picID.message}
                     </span>
                   ) : (
-                    <p className="text-xs font-medium text-navy/50 mt-1">
+                    <p className="text-kecil font-medium text-navy/50 mt-1">
                       Sistem otomatis mencatat Anda sebagai PIC sesi opname
                       ini.
                     </p>
@@ -308,7 +308,7 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
 
               {/* Input Catatan */}
               <div className="space-y-2 pt-2 border-t border-navy/10 mt-2">
-                <label className="text-sm font-bold text-navy flex items-center gap-2">
+                <label className="text-isi font-bold text-navy flex items-center gap-2">
                   <FileText className="h-4 w-4 text-karamel" />
                   Catatan Opname{" "}
                   <span className="text-navy/50 font-medium">

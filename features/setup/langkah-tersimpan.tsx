@@ -30,7 +30,7 @@ export function LangkahTersimpan({
   return (
     <div className="flex flex-col gap-6">
       <JudulLangkah nomor={nomor} total={total} judul={judul} keterangan="Langkah ini sudah tersimpan." />
-      <dl className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-2.5 rounded-2xl border border-input px-5 py-4 text-[15px]">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-2.5 rounded-2xl border border-input px-5 py-4 text-besar">
         {baris.map((b) => (
           <div key={b.label} className="contents">
             <dt className="text-muted-foreground">{b.label}</dt>
@@ -38,7 +38,7 @@ export function LangkahTersimpan({
           </div>
         ))}
       </dl>
-      <p className="text-sm leading-normal text-muted-foreground">{catatan}</p>
+      <p className="text-isi leading-normal text-muted-foreground">{catatan}</p>
       <NavigasiLangkah
         onKembali={onKembali}
         onLanjut={onLanjut}

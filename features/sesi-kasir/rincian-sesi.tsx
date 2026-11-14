@@ -54,8 +54,8 @@ function Hitungan({
 }) {
   return (
     <section className="flex flex-col gap-4 rounded-[20px] bg-krem p-5 sm:p-6">
-      <h2 className="text-xl font-bold text-navy">{judul}</h2>
-      <p className="text-[15px] text-navy/70">
+      <h2 className="text-subjudul font-bold text-navy">{judul}</h2>
+      <p className="text-isi text-navy/70">
         {waktu}, oleh {oleh}
       </p>
       <dl className="flex flex-col rounded-[14px] bg-gading">
@@ -64,8 +64,8 @@ function Hitungan({
         <Baris label="Selisih" tebal isi={<ChipSelisih selisih={labelSelisih(selisih)} />} />
       </dl>
       <div className="flex flex-col gap-1">
-        <span className="text-sm font-bold text-navy">Catatan kasir</span>
-        <span className="text-[15px] text-navy/70">{catatan || "Tidak ada catatan."}</span>
+        <span className="text-isi font-bold text-navy">Catatan kasir</span>
+        <span className="text-isi text-navy/70">{catatan || "Tidak ada catatan."}</span>
       </div>
     </section>
   );
@@ -92,7 +92,7 @@ export function RincianSesi({
     <div className="flex flex-col gap-7">
       <Link
         href={hrefKembali}
-        className="flex h-11 items-center gap-2 self-start text-[15px] font-bold text-navy no-underline"
+        className="flex h-11 items-center gap-2 self-start text-besar font-bold text-navy no-underline"
       >
         <ChevronLeft className="size-[18px]" aria-hidden="true" />
         Kembali ke Mesin Kasir
@@ -101,17 +101,17 @@ export function RincianSesi({
       <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-col gap-2">
           <span
-            className={`self-start rounded-full px-3 py-1 text-sm font-bold text-navy ${buka ? "bg-sage/20" : "bg-navy/5"}`}
+            className={`self-start rounded-full px-3 py-1 text-isi font-bold text-navy ${buka ? "bg-sage/20" : "bg-navy/5"}`}
           >
             {buka ? "Kasir buka" : "Kasir tutup"}
           </span>
-          <h1 className="break-words text-2xl font-bold tracking-tight text-navy sm:text-[32px]">
+          <h1 className="break-words text-judul font-bold tracking-tight text-navy">
             {namaMesin}, {judulHari(sesi.dibukaPada)}
           </h1>
-          <p className="text-base text-navy/70">Mesin kasir dengan laci {laci}</p>
+          <p className="text-besar text-navy/70">Mesin kasir dengan laci {laci}</p>
         </div>
         {buka && bolehTutup && (
-          <Button onClick={onTutup} className="h-12 bg-navy px-6 text-base font-bold text-gading hover:bg-navy/90">
+          <Button onClick={onTutup} className="h-12 bg-navy px-6 text-besar font-bold text-gading hover:bg-navy/90">
             Tutup kasir dari web
           </Button>
         )}
@@ -129,10 +129,10 @@ export function RincianSesi({
         />
         {buka || !sesi.ditutupPada ? (
           <section className="flex flex-col gap-4 rounded-[20px] bg-krem p-5 sm:p-6">
-            <h2 className="text-xl font-bold text-navy">Saat kasir ditutup</h2>
+            <h2 className="text-subjudul font-bold text-navy">Saat kasir ditutup</h2>
             <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-[14px] border border-dashed border-navy/25 p-8 text-center">
-              <span className="text-[17px] font-extrabold text-navy">Kasir belum ditutup</span>
-              <span className="max-w-sm text-[15px] text-navy/70">
+              <span className="text-subjudul font-bold text-navy">Kasir belum ditutup</span>
+              <span className="max-w-sm text-isi text-navy/70">
                 Uang akhir dan selisihnya tampil di sini setelah kasir ditutup dari mesin kasir atau dari web.
               </span>
             </div>

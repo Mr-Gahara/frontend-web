@@ -39,8 +39,8 @@ const KELAS_ISIAN =
 function Keadaan({ judul, isi }: { judul: string; isi: string }) {
   return (
     <div className="rounded-2xl border border-dashed border-navy/20 bg-krem p-12 text-center">
-      <p className="text-base font-bold text-navy mb-1">{judul}</p>
-      <p className="text-sm font-medium text-navy/60 max-w-md mx-auto">{isi}</p>
+      <p className="text-besar font-bold text-navy mb-1">{judul}</p>
+      <p className="text-isi font-medium text-navy/60 max-w-md mx-auto">{isi}</p>
     </div>
   );
 }
@@ -60,7 +60,7 @@ export function HalamanUbahAkunKas() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:py-8">
       <Link
         href={URL_DAFTAR_AKUN_KAS}
-        className="inline-flex w-fit items-center text-sm font-semibold text-navy/60 hover:text-navy"
+        className="inline-flex w-fit items-center text-isi font-semibold text-navy/60 hover:text-navy"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Kembali ke Daftar Akun Kas
@@ -132,8 +132,8 @@ function FormUbah({ akun }: { akun: AkunKas }) {
   return (
     <>
       <div className="space-y-0.5">
-        <h1 className="text-2xl font-bold tracking-tight text-navy">Ubah Akun Kas</h1>
-        <p className="text-sm font-medium text-navy/60">{akun.namaAkun}</p>
+        <h1 className="text-judul font-bold tracking-tight text-navy">Ubah Akun Kas</h1>
+        <p className="text-isi font-medium text-navy/60">{akun.namaAkun}</p>
       </div>
 
       <div className="rounded-2xl border border-navy/10 bg-krem shadow-sm">
@@ -143,7 +143,7 @@ function FormUbah({ akun }: { akun: AkunKas }) {
           className="flex flex-col gap-6 p-5 sm:p-8"
         >
           <div className="space-y-2">
-            <label htmlFor="tipe-akun" className="text-sm font-bold text-navy">
+            <label htmlFor="tipe-akun" className="text-isi font-bold text-navy">
               Tipe Akun
             </label>
             <Controller
@@ -165,13 +165,13 @@ function FormUbah({ akun }: { akun: AkunKas }) {
               )}
             />
             {errors.tipeAkun && (
-              <span className="text-xs font-bold text-rose-500">{errors.tipeAkun.message}</span>
+              <span className="text-kecil font-bold text-rose-500">{errors.tipeAkun.message}</span>
             )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label htmlFor="nama-akun" className="text-sm font-bold text-navy">
+              <label htmlFor="nama-akun" className="text-isi font-bold text-navy">
                 Nama Akun
               </label>
               <Input
@@ -181,11 +181,11 @@ function FormUbah({ akun }: { akun: AkunKas }) {
                 className={cn(KELAS_ISIAN, errors.namaAkun && "border-rose-500")}
               />
               {errors.namaAkun && (
-                <span className="text-xs font-bold text-rose-500">{errors.namaAkun.message}</span>
+                <span className="text-kecil font-bold text-rose-500">{errors.namaAkun.message}</span>
               )}
             </div>
             <div className="space-y-2">
-              <label htmlFor="nomor-akun" className="text-sm font-bold text-navy">
+              <label htmlFor="nomor-akun" className="text-isi font-bold text-navy">
                 Nomor Akun
               </label>
               <Input
@@ -195,13 +195,13 @@ function FormUbah({ akun }: { akun: AkunKas }) {
                 className={cn(KELAS_ISIAN, errors.nomorAkun && "border-rose-500")}
               />
               {errors.nomorAkun && (
-                <span className="text-xs font-bold text-rose-500">{errors.nomorAkun.message}</span>
+                <span className="text-kecil font-bold text-rose-500">{errors.nomorAkun.message}</span>
               )}
             </div>
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="keterangan-akun" className="text-sm font-bold text-navy">
+            <label htmlFor="keterangan-akun" className="text-isi font-bold text-navy">
               Keterangan{" "}
               <span className="text-navy/50 font-medium">(Opsional)</span>
             </label>
@@ -212,16 +212,16 @@ function FormUbah({ akun }: { akun: AkunKas }) {
               className={cn(KELAS_ISIAN, errors.keterangan && "border-rose-500")}
             />
             {errors.keterangan && (
-              <span className="text-xs font-bold text-rose-500">{errors.keterangan.message}</span>
+              <span className="text-kecil font-bold text-rose-500">{errors.keterangan.message}</span>
             )}
           </div>
 
           <div className="space-y-1">
-            <p className="text-sm font-bold text-navy">Saldo Saat Ini</p>
-            <p className="font-mono text-lg font-bold text-navy">
+            <p className="text-isi font-bold text-navy">Saldo Saat Ini</p>
+            <p className="font-mono text-subjudul font-bold text-navy">
               {formatRupiah(akun.saldo ?? 0)}
             </p>
-            <p className="text-xs font-medium text-navy/50">
+            <p className="text-kecil font-medium text-navy/50">
               Saldo tidak dapat diubah di sini; saldo hanya berubah lewat transaksi.
             </p>
           </div>
@@ -256,10 +256,10 @@ function FormUbah({ akun }: { akun: AkunKas }) {
 
       <section className="flex flex-col gap-3 rounded-2xl border border-navy/10 bg-krem p-5 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div>
-          <h2 className="text-base font-bold text-navy">
+          <h2 className="text-subjudul font-bold text-navy">
             Status: {aktif ? "Aktif" : "Non-aktif"}
           </h2>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             {aktif
               ? "Akun hanya dapat dinonaktifkan bila saldonya 0 dan tidak dipakai metode pembayaran."
               : "Akun non-aktif dapat diaktifkan kembali selama akun aktif belum mencapai 10."}

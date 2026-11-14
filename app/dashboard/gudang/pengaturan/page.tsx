@@ -73,7 +73,7 @@ function FormProfilGudang({ gudang, bolehUbah }: FormProfilGudangProps) {
           <button
             type="submit"
             disabled={perbarui.isPending || !isDirty}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-isi font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
           >
             {perbarui.isPending ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -84,7 +84,7 @@ function FormProfilGudang({ gudang, bolehUbah }: FormProfilGudangProps) {
           </button>
         </div>
       ) : (
-        <p className="text-xs font-medium text-muted-foreground">
+        <p className="text-kecil font-medium text-muted-foreground">
           Anda hanya dapat melihat profil gudang. Mengubahnya membutuhkan izin mengubah lokasi.
         </p>
       )}
@@ -123,7 +123,7 @@ export default function PengaturanGudangPage() {
     );
   } else if (lokasi.isLoading) {
     isi = (
-      <p className="animate-pulse text-center text-sm font-medium text-slate-500">
+      <p className="animate-pulse text-center text-isi font-medium text-slate-500">
         Memuat profil gudang...
       </p>
     );
@@ -151,8 +151,8 @@ export default function PengaturanGudangPage() {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
             <Building2 className="h-8 w-8" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Profil Gudang</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <h1 className="text-judul font-bold tracking-tight text-foreground">Profil Gudang</h1>
+          <p className="mt-2 text-isi text-muted-foreground">
             {bolehUbah
               ? "Perbarui nama, alamat, koordinat, dan radius absen gudang Anda."
               : "Nama, alamat, koordinat, dan radius absen gudang Anda."}

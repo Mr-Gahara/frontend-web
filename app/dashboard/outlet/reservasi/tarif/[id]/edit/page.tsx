@@ -99,10 +99,10 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
           Kembali ke Daftar Tarif
         </Button>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy">
+          <h1 className="text-judul font-bold tracking-tight text-navy">
             Edit Tarif
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             Perbarui konfigurasi harga, durasi, dan jadwal berlakunya tarif.
           </p>
         </div>
@@ -114,14 +114,14 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
           <div className="rounded-xl border border-navy/10 bg-gading p-6 shadow-sm flex flex-col gap-5">
             <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
               <Tags className="w-5 h-5 text-karamel" />
-              <h3 className="font-bold text-base text-navy">
+              <h3 className="font-bold text-besar text-navy">
                 Informasi Dasar
               </h3>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Nama Tarif <span className="text-rose-500">*</span>
                 </label>
                 <Input
@@ -134,7 +134,7 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                 />
                 <div className="min-h-4">
                   {errors.namaTarif && (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.namaTarif.message}
                     </span>
                   )}
@@ -142,7 +142,7 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Prioritas (Order)
                 </label>
                 <Input
@@ -155,11 +155,11 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                 />
                 <div className="min-h-4 flex flex-col justify-start">
                   {errors.prioritas ? (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.prioritas.message}
                     </span>
                   ) : (
-                    <p className="text-[11px] font-medium text-navy/60">
+                    <p className="text-mikro font-medium text-navy/60">
                       Semakin tinggi angka, semakin diprioritaskan jika bentrok.
                     </p>
                   )}
@@ -180,14 +180,14 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                 />
                 <div className="space-y-0.5">
                   <label
-                    className="text-sm font-bold text-navy cursor-pointer"
+                    className="text-isi font-bold text-navy cursor-pointer"
                     onClick={() =>
                       setValue("isActive", !control._formValues.isActive)
                     }
                   >
                     Aktifkan Tarif Ini
                   </label>
-                  <p className="text-xs font-medium text-navy/70">
+                  <p className="text-kecil font-medium text-navy/70">
                     Tarif dapat langsung digunakan untuk transaksi booking.
                   </p>
                 </div>
@@ -199,14 +199,14 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
           <div className="rounded-xl border border-navy/10 bg-gading p-6 shadow-sm flex flex-col gap-5">
             <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
               <Clock className="w-5 h-5 text-karamel" />
-              <h3 className="font-bold text-base text-navy">
+              <h3 className="font-bold text-besar text-navy">
                 Aturan Harga & Durasi
               </h3>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Basis Perhitungan <span className="text-rose-500">*</span>
                 </label>
                 <Controller
@@ -237,7 +237,7 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Harga (Rp) <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
@@ -267,13 +267,13 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                       );
                     }}
                   />
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-navy/60 pointer-events-none">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-isi font-bold text-navy/60 pointer-events-none">
                     Rp
                   </span>
                 </div>
                 <div className="min-h-4">
                   {errors.harga && (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.harga.message}
                     </span>
                   )}
@@ -281,7 +281,7 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Durasi Minimum <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
@@ -293,13 +293,13 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                       errors.durasiMinimum && "border-rose-500",
                     )}
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-navy/60 pointer-events-none">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-kecil font-bold text-navy/60 pointer-events-none">
                     menit
                   </span>
                 </div>
                 <div className="min-h-4">
                   {errors.durasiMinimum && (
-                    <span className="text-xs font-bold text-rose-500">
+                    <span className="text-kecil font-bold text-rose-500">
                       {errors.durasiMinimum.message}
                     </span>
                   )}
@@ -312,14 +312,14 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
           <div className="rounded-xl border border-navy/10 bg-gading p-6 shadow-sm flex flex-col gap-5">
             <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
               <CalendarDays className="w-5 h-5 text-karamel" />
-              <h3 className="font-bold text-base text-navy">
+              <h3 className="font-bold text-besar text-navy">
                 Jadwal Berlaku
               </h3>
             </div>
 
             <div className="flex flex-col gap-6">
               <div className="space-y-3">
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Hari Aktif
                 </label>
                 <div className="flex flex-wrap gap-4">
@@ -349,7 +349,7 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                                 }}
                                 className="data-[state=checked]:bg-sage data-[state=checked]:border-sage data-[state=checked]:text-gading border-navy/30"
                               />
-                              <span className="text-sm font-bold text-navy">
+                              <span className="text-isi font-bold text-navy">
                                 {hari.label}
                               </span>
                             </label>
@@ -360,14 +360,14 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                   />
                 </div>
                 {errors.hariAktif && (
-                  <span className="text-xs font-bold text-rose-500 block">
+                  <span className="text-kecil font-bold text-rose-500 block">
                     {errors.hariAktif.message}
                   </span>
                 )}
               </div>
 
               <div className="space-y-3">
-                <label className="text-sm font-bold text-navy">
+                <label className="text-isi font-bold text-navy">
                   Rentang Waktu Berlaku
                 </label>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full">
@@ -383,7 +383,7 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                       />
                     )}
                   />
-                  <span className="text-sm font-bold hidden sm:block shrink-0 text-navy/50">
+                  <span className="text-isi font-bold hidden sm:block shrink-0 text-navy/50">
                     s/d
                   </span>
                   <Controller
@@ -402,12 +402,12 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                 {(errors.jamMulai || errors.jamSelesai) && (
                   <div className="flex flex-col gap-1 min-h-4 pt-1">
                     {errors.jamMulai && (
-                      <span className="text-xs font-bold text-rose-500">
+                      <span className="text-kecil font-bold text-rose-500">
                         Mulai: {errors.jamMulai.message}
                       </span>
                     )}
                     {errors.jamSelesai && (
-                      <span className="text-xs font-bold text-rose-500">
+                      <span className="text-kecil font-bold text-rose-500">
                         Selesai: {errors.jamSelesai.message}
                       </span>
                     )}
@@ -421,21 +421,21 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
           <div className="rounded-xl border border-navy/10 bg-gading p-6 shadow-sm flex flex-col gap-5">
             <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
               <AlertCircle className="w-5 h-5 text-karamel" />
-              <h3 className="font-bold text-base text-navy">
+              <h3 className="font-bold text-besar text-navy">
                 Tipe Aset Terkait (Opsional)
               </h3>
             </div>
             <div className="space-y-3">
-              <p className="text-sm font-medium text-navy/80">
+              <p className="text-isi font-medium text-navy/80">
                 Pilih tipe aset mana saja yang menggunakan tarif ini. Kosongkan
                 jika tarif ini berlaku untuk <b>Semua Aset</b>.
               </p>
               {isLoadingAset ? (
-                <div className="text-sm font-bold italic text-navy/60">
+                <div className="text-isi font-bold italic text-navy/60">
                   Memuat daftar aset...
                 </div>
               ) : tipeAsetList.length === 0 ? (
-                <div className="text-sm font-bold italic text-navy/60">
+                <div className="text-isi font-bold italic text-navy/60">
                   Belum ada data tipe aset di sistem.
                 </div>
               ) : (
@@ -483,7 +483,7 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                                   className="mt-0.5 data-[state=checked]:bg-navy data-[state=checked]:border-navy data-[state=checked]:text-gading"
                                 />
                                 <div className="flex flex-col">
-                                  <span className="text-sm font-bold text-navy">
+                                  <span className="text-isi font-bold text-navy">
                                     {aset.namaTipeAset}
                                   </span>
                                 </div>
@@ -497,7 +497,7 @@ function FormEditTarif({ tarif }: { tarif: Tarif }) {
                 </div>
               )}
               {errors.tipeAsetID && (
-                <p className="text-xs font-bold text-rose-500 pt-2">
+                <p className="text-kecil font-bold text-rose-500 pt-2">
                   Data tipe aset tidak valid.
                 </p>
               )}
@@ -553,10 +553,10 @@ export default function EditTarifPage() {
     return (
       <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4 text-center px-4">
         <AlertTriangle className="h-12 w-12 text-rose-500" />
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           ID Tarif Tidak Valid
         </h2>
-        <p className="text-sm font-medium text-navy/80">
+        <p className="text-isi font-medium text-navy/80">
           Sistem mendeteksi bahwa ID tarif pada URL ini rusak atau &quot;undefined&quot;.
         </p>
         <Button
@@ -573,7 +573,7 @@ export default function EditTarifPage() {
     return (
       <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-navy" />
-        <p className="text-sm font-bold text-navy/80">
+        <p className="text-isi font-bold text-navy/80">
           Memuat data tarif...
         </p>
       </div>
@@ -584,10 +584,10 @@ export default function EditTarifPage() {
     return (
       <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4 text-center px-4">
         <AlertTriangle className="h-12 w-12 text-rose-500" />
-        <h2 className="text-xl font-bold text-navy">
+        <h2 className="text-subjudul font-bold text-navy">
           Data Tidak Ditemukan
         </h2>
-        <p className="text-sm font-medium text-navy/80">
+        <p className="text-isi font-medium text-navy/80">
           Gagal mengambil data tarif. Data mungkin sudah dihapus atau server
           sedang bermasalah.
         </p>

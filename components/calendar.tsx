@@ -87,7 +87,7 @@ function Calendar({
           defaultClassNames.month_caption,
         ),
         dropdowns: cn(
-          "flex h-8 w-full items-center justify-center gap-2 text-sm font-bold text-navy",
+          "flex h-8 w-full items-center justify-center gap-2 text-isi font-bold text-navy",
           defaultClassNames.dropdowns,
         ),
         dropdown_root: cn(
@@ -97,14 +97,14 @@ function Calendar({
         caption_label: cn(
           "font-bold select-none text-navy",
           captionLayout === "label"
-            ? "text-base"
-            : "flex items-center gap-1 rounded-lg text-base [&>svg]:size-4 [&>svg]:text-navy/60",
+            ? "text-besar"
+            : "flex items-center gap-1 rounded-lg text-besar [&>svg]:size-4 [&>svg]:text-navy/60",
           defaultClassNames.caption_label,
         ),
         month_grid: "w-full border-collapse mt-2",
         weekdays: cn("flex mb-2", defaultClassNames.weekdays),
         weekday: cn(
-          "flex-1 rounded-lg text-xs font-bold text-navy/50 select-none",
+          "flex-1 rounded-lg text-kecil font-bold text-navy/50 select-none",
           defaultClassNames.weekday,
         ),
         week: cn("mt-1.5 flex w-full", defaultClassNames.week),
@@ -167,7 +167,7 @@ function Calendar({
 
           return (
             <Select value={value?.toString()} onValueChange={handleChange}>
-              <SelectTrigger className="h-8 w-fit gap-1.5 border-none bg-transparent p-1 focus:ring-0 hover:bg-navy/5 font-bold text-base text-navy shadow-none">
+              <SelectTrigger className="h-8 w-fit gap-1.5 border-none bg-transparent p-1 focus:ring-0 hover:bg-navy/5 font-bold text-besar text-navy shadow-none">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent

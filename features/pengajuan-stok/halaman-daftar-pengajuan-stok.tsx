@@ -199,7 +199,7 @@ function IsiDaftarPengajuanStok({
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="font-bold font-mono text-navy">{row.original.nomorPengajuan}</span>
-            <span className="text-xs font-medium text-navy/50 mt-1">
+            <span className="text-kecil font-medium text-navy/50 mt-1">
               {formatTanggal(row.original.createdAt)}
             </span>
           </div>
@@ -235,7 +235,7 @@ function IsiDaftarPengajuanStok({
               className="font-medium text-navy/80"
             />
             {ruang === "gudang" && (
-              <span className="text-xs font-medium text-navy/50 capitalize mt-1">
+              <span className="text-kecil font-medium text-navy/50 capitalize mt-1">
                 Pembuat: {row.original.dimintaOleh?.nama || "-"}
               </span>
             )}
@@ -303,11 +303,11 @@ function IsiDaftarPengajuanStok({
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-navy flex items-center gap-2">
+          <h1 className="text-judul font-bold tracking-tight text-navy flex items-center gap-2">
             {ruang === "gudang" && <Inbox className="w-6 h-6 text-karamel" />}
             {teks.judul}
           </h1>
-          <p className="text-sm font-medium text-navy/60">
+          <p className="text-isi font-medium text-navy/60">
             {teks.deskripsi}
           </p>
         </div>
@@ -334,7 +334,7 @@ function IsiDaftarPengajuanStok({
               size="sm"
               aria-pressed={activeTab === tab}
               onClick={() => setActiveTab(tab)}
-              className={`rounded-full px-4 font-bold transition-all text-xs ${
+              className={`rounded-full px-4 font-bold transition-all text-kecil ${
                 activeTab === tab
                   ? "bg-navy text-white hover:bg-navy/90"
                   : "text-navy/60 hover:text-navy hover:bg-navy/5"
@@ -376,7 +376,7 @@ function IsiDaftarPengajuanStok({
       ) : isError ? (
         <p
           role="alert"
-          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+          className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
         >
           Gagal memuat pengajuan stok. Periksa koneksi, lalu muat ulang halaman.
         </p>

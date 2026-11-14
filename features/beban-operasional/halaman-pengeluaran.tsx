@@ -44,7 +44,7 @@ import {
 } from "./payload";
 
 const SEMUA = "semua";
-const KELAS_LABEL_FILTER = "text-xs font-bold text-navy/70";
+const KELAS_LABEL_FILTER = "text-kecil font-bold text-navy/70";
 const KELAS_PEMICU_FILTER = "w-52 bg-gading border-navy/20 text-navy";
 
 type JenisDialog = "rincian" | "ubah" | "batal";
@@ -100,7 +100,7 @@ export function HalamanPengeluaran() {
             >
               {row.original.keterangan || "-"}
             </p>
-            <p className="text-xs font-medium text-navy/60">{namaKategoriBeban(row.original.kategori)}</p>
+            <p className="text-kecil font-medium text-navy/60">{namaKategoriBeban(row.original.kategori)}</p>
           </div>
         ),
       },
@@ -124,7 +124,7 @@ export function HalamanPengeluaran() {
         cell: ({ row }) => (
           <span
             className={cn(
-              "text-xs font-bold",
+              "text-kecil font-bold",
               row.original.status === "AKTIF" ? "text-emerald-700" : "text-red-600",
             )}
           >
@@ -155,8 +155,8 @@ export function HalamanPengeluaran() {
             <Receipt className="w-6 h-6 text-karamel" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-navy">Pengeluaran</h1>
-            <p className="text-sm font-medium text-navy/60">
+            <h1 className="text-judul font-bold tracking-tight text-navy">Pengeluaran</h1>
+            <p className="text-isi font-medium text-navy/60">
               Beban operasional toko di luar pembelian stok, dibayar dari akun kas. Beban yang salah
               dibatalkan, lalu dicatat ulang.
             </p>
@@ -240,7 +240,7 @@ export function HalamanPengeluaran() {
           role="alert"
           className="flex flex-col items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-8 text-center"
         >
-          <p className="text-sm font-medium text-red-600">
+          <p className="text-isi font-medium text-red-600">
             {pesanError(daftar.error, "Gagal memuat daftar pengeluaran.")}
           </p>
           <Button

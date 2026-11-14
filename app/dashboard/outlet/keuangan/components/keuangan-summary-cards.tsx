@@ -49,7 +49,7 @@ function SummaryCardItem({ card, nilai }: { card: SummaryCard; nilai: number | n
     <div className="bg-krem p-3.5 sm:p-5 rounded-2xl text-navy flex flex-col justify-between shadow-sm sm:min-h-27.5 border border-navy/10 min-w-0">
       <div className="flex justify-between items-center mb-1.5 sm:mb-4">
         {/* Teks title dengan sedikit transparansi */}
-        <p className="text-[13px] sm:text-sm font-medium text-navy/70">
+        <p className="text-kecil sm:text-isi font-medium text-navy/70">
           <span className="sm:hidden">{card.judulPendek}</span>
           <span className="hidden sm:inline">{card.title}</span>
         </p>
@@ -57,16 +57,16 @@ function SummaryCardItem({ card, nilai }: { card: SummaryCard; nilai: number | n
         {/* Badge menggunakan aksen Sage Green agar serasi dengan card Cream */}
         <div className="hidden sm:flex items-center gap-1 bg-sage/10 px-2 py-1 rounded-md">
           <TrendingUp className="w-3 h-3 text-sage" />
-          <span className="text-xs text-sage font-bold">—</span>
+          <span className="text-kecil text-sage font-bold">—</span>
         </div>
       </div>
 
       {/* Angka dengan warna Navy pekat untuk kontras di atas Cream */}
-      <h3 className="text-[17px] sm:text-2xl font-black tracking-tight text-navy">
+      <h3 className="text-subjudul sm:text-judul font-black tracking-tight text-navy">
         {nilai === null ? "-" : nilai === 0 ? "Rp 0" : formatRupiah(nilai)}
       </h3>
       {nilai === null && (
-        <p className="text-xs font-medium text-rose-600 mt-1">Gagal memuat data</p>
+        <p className="text-kecil font-medium text-rose-600 mt-1">Gagal memuat data</p>
       )}
     </div>
   );

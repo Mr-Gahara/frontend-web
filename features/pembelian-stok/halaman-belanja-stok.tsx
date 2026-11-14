@@ -48,7 +48,7 @@ import { lokasiPembelian, namaAkunPembelian, ringkasBarang, saldoTerpotong } fro
 
 const SEMUA = "SEMUA";
 const PILIHAN_UKURAN = [10, 20, 50] as const;
-const KELAS_LABEL_FILTER = "text-xs font-bold text-navy/70";
+const KELAS_LABEL_FILTER = "text-kecil font-bold text-navy/70";
 const KELAS_PEMICU_FILTER =
   "h-10 w-full sm:w-48 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm";
 const WARNA_BAGIAN = ["bg-navy", "bg-karamel", "bg-sage", "bg-navy/40", "bg-karamel/50"] as const;
@@ -60,7 +60,7 @@ function Kartu({ judul, children }: { judul: string; children: ReactNode }) {
       aria-label={judul}
       className="flex flex-col gap-3 rounded-2xl border border-navy/10 bg-krem p-5 shadow-sm"
     >
-      <p className="text-sm font-medium text-navy/70">{judul}</p>
+      <p className="text-isi font-medium text-navy/70">{judul}</p>
       {children}
     </section>
   );
@@ -72,7 +72,7 @@ function KartuBagian({ judul, baris }: { judul: string; baris: readonly BarisRin
   return (
     <Kartu judul={judul}>
       {bagian.length === 0 ? (
-        <p className="text-sm font-medium text-navy/60">Belum ada pembelian.</p>
+        <p className="text-isi font-medium text-navy/60">Belum ada pembelian.</p>
       ) : (
         <>
           <div
@@ -90,7 +90,7 @@ function KartuBagian({ judul, baris }: { judul: string; baris: readonly BarisRin
           </div>
           <ul className="flex flex-col gap-2">
             {bagian.map((b, i) => (
-              <li key={b.kunci} className="flex items-center justify-between gap-2 text-sm">
+              <li key={b.kunci} className="flex items-center justify-between gap-2 text-isi">
                 <span className="flex min-w-0 items-center gap-2 font-semibold text-navy">
                   <span
                     aria-hidden="true"
@@ -116,16 +116,16 @@ function PeringkatSupplier({ baris }: { baris: readonly BarisRingkasan[] }) {
       className="flex flex-col gap-3 rounded-2xl border border-navy/10 bg-krem p-5"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="text-base font-bold text-navy">Supplier dengan belanja terbesar</h3>
-        <p className="text-xs font-medium text-navy/60">Dalam periode terpilih</p>
+        <h3 className="text-besar font-bold text-navy">Supplier dengan belanja terbesar</h3>
+        <p className="text-kecil font-medium text-navy/60">Dalam periode terpilih</p>
       </div>
       {baris.length === 0 ? (
-        <p className="text-sm font-medium text-navy/60">Belum ada pembelian.</p>
+        <p className="text-isi font-medium text-navy/60">Belum ada pembelian.</p>
       ) : (
         <ol className="flex flex-col gap-3">
           {baris.map((s) => (
             <li key={s.kunci} className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <p className="min-w-0 flex-[1_1_180px] text-sm font-semibold text-navy">
+              <p className="min-w-0 flex-[1_1_180px] text-isi font-semibold text-navy">
                 {s.nama} <span className="font-medium text-navy/60">· {s.jumlah} pembelian</span>
               </p>
               <div aria-hidden="true" className="h-2 flex-[3_1_200px] overflow-hidden rounded-full bg-navy/10">
@@ -134,7 +134,7 @@ function PeringkatSupplier({ baris }: { baris: readonly BarisRingkasan[] }) {
                   style={{ width: `${terbesar > 0 ? (s.total / terbesar) * 100 : 0}%` }}
                 />
               </div>
-              <p className="flex-[0_0_120px] text-right text-sm font-bold tabular-nums text-navy">
+              <p className="flex-[0_0_120px] text-right text-isi font-bold tabular-nums text-navy">
                 {formatRupiah(s.total)}
               </p>
             </li>
@@ -160,7 +160,7 @@ function RingkasanBelanjaStok({ filter, periode }: { filter: Record<string, stri
         role="alert"
         className="flex flex-col items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-6 text-center"
       >
-        <p className="text-sm font-bold text-rose-600">
+        <p className="text-isi font-bold text-rose-600">
           {pesanError(ringkasan.error, "Gagal memuat ringkasan belanja stok.")}
         </p>
         <Button
@@ -175,15 +175,15 @@ function RingkasanBelanjaStok({ filter, periode }: { filter: Record<string, stri
     );
   }
   if (!hasil) {
-    return <p className="text-sm font-medium text-navy/60">Menghitung ringkasan...</p>;
+    return <p className="text-isi font-medium text-navy/60">Menghitung ringkasan...</p>;
   }
 
   return (
     <section aria-label="Ringkasan belanja stok" aria-busy={ringkasan.isFetching} className="flex flex-col gap-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         <Kartu judul="Total belanja stok">
-          <p className="text-2xl font-black tracking-tight tabular-nums text-navy">{formatRupiah(hasil.total)}</p>
-          <p className="text-xs font-medium text-navy/60">
+          <p className="text-judul font-black tracking-tight tabular-nums text-navy">{formatRupiah(hasil.total)}</p>
+          <p className="text-kecil font-medium text-navy/60">
             {hasil.jumlahPembelian} pembelian, {periode}
           </p>
         </Kartu>
@@ -254,7 +254,7 @@ export function HalamanBelanjaStok() {
           return (
             <div className="flex min-w-0 flex-col gap-0.5">
               <span className="font-bold text-navy">{row.original.supplier}</span>
-              <span className="text-xs font-medium text-navy/60">
+              <span className="text-kecil font-medium text-navy/60">
                 {formatTanggalPendek(row.original.tanggal)} · {ringkas.utama}
                 {ringkas.lainnya ? `, ${ringkas.lainnya}` : ""}
               </span>
@@ -271,7 +271,7 @@ export function HalamanBelanjaStok() {
           return (
             <span
               className={cn(
-                "inline-flex whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-bold text-navy",
+                "inline-flex whitespace-nowrap rounded-full px-2.5 py-0.5 text-kecil font-bold text-navy",
                 (l && LATAR_LOKASI[String(l.tipe)]) || "bg-navy/5",
               )}
             >
@@ -289,7 +289,7 @@ export function HalamanBelanjaStok() {
           <div className="flex flex-col">
             <span className="font-medium text-navy">{namaAkunPembelian(row.original)}</span>
             {!saldoTerpotong(row.original) && (
-              <span className="text-xs font-medium text-navy/60">Saldo tidak terpotong</span>
+              <span className="text-kecil font-medium text-navy/60">Saldo tidak terpotong</span>
             )}
           </div>
         ),
@@ -332,8 +332,8 @@ export function HalamanBelanjaStok() {
       <div className="flex flex-col gap-6 w-full">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-base sm:text-lg font-bold tracking-wide text-navy">Belanja Stok</h2>
-            <p className="text-sm font-medium text-navy/60 mt-1">
+            <h2 className="text-subjudul font-bold tracking-wide text-navy">Belanja Stok</h2>
+            <p className="text-isi font-medium text-navy/60 mt-1">
               Pembelian stok seluruh outlet dan gudang dalam satu pandangan.
             </p>
           </div>
@@ -433,16 +433,16 @@ export function HalamanBelanjaStok() {
           periode={teksPeriode(filter.dari, filter.sampai)}
         />
 
-        <p className="text-sm font-medium leading-relaxed text-navy/60">
+        <p className="text-isi font-medium leading-relaxed text-navy/60">
           Pembelian stok dicatat sebagai persediaan, bukan beban, sehingga tidak masuk ringkasan laba rugi.
         </p>
 
         <section aria-label="Seluruh pembelian" className="flex flex-col gap-3">
-          <h3 className="text-base font-bold text-navy">Seluruh pembelian</h3>
+          <h3 className="text-besar font-bold text-navy">Seluruh pembelian</h3>
           {daftar.isError ? (
             <p
               role="alert"
-              className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-sm font-bold text-rose-600"
+              className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
             >
               Gagal memuat pembelian stok. Coba muat ulang halaman.
             </p>
@@ -467,7 +467,7 @@ export function HalamanBelanjaStok() {
               }}
             />
           )}
-          <p className="text-sm font-medium text-navy/60">Ubah dan hapus dilakukan di ruang asal pembelian.</p>
+          <p className="text-isi font-medium text-navy/60">Ubah dan hapus dilakukan di ruang asal pembelian.</p>
         </section>
       </div>
     </div>
