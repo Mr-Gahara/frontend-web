@@ -138,6 +138,18 @@ dengan alur kanvas desain seperti butir di bawah:
    menunggu izin pemilik proyek. Temuan baru: luberan tabel di 768 px dan
    kode mati pesan lokasi jurnal stok gudang (`modul/ui-ux.md`).
 
+### Menunggu pemilik proyek, dicatat 14 November 2026
+
+Dilanjutkan nanti atas perintah pemilik proyek, tidak sekarang:
+
+1. **Suite e2e penuh**, harapan 653 (`inti/pengujian.md`, Baseline):
+   label kartu HP, tabel rincian, dan tipografi belum dijalankan e2e.
+2. **Luberan tabel daftar di 768 px** (hampir 20 tabel): pilih batas
+   kartu `DataTable` atau kolom per tabel (`modul/ui-ux.md`, Utang
+   terbuka).
+3. **Kode mati pesan lokasi jurnal stok gudang**: hapus atau biarkan
+   (`modul/ui-ux.md`, Utang terbuka).
+
 ### Menunggu desain pemilik proyek
 
 Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
