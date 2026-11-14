@@ -339,7 +339,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
 
       {/* SECTION 2: DAFTAR BARANG YANG DIMINTA */}
       <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-navy/10 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-navy/10 pb-3">
           <div className="flex items-center gap-2">
             <Package className="h-5 w-5 text-karamel" />
             <h2 className="font-bold text-navy">{pengembalian ? "Barang yang Dikembalikan" : "Daftar Kebutuhan Barang"}</h2>

@@ -276,7 +276,7 @@ export default function HalamanJurnalStok({
           >
             <SelectTrigger
               aria-label="Filter arah"
-              className="w-full sm:w-[140px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
+              className="col-span-2 sm:col-span-1 w-full sm:w-[190px] h-10 *:data-[slot=select-value]:flex-1 *:data-[slot=select-value]:text-left bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
             >
               <Filter className="w-3.5 h-3.5 mr-2 text-navy/50" />
               <SelectValue placeholder="Semua Arah" />
@@ -295,7 +295,7 @@ export default function HalamanJurnalStok({
           >
             <SelectTrigger
               aria-label="Filter alasan"
-              className="w-full sm:w-[160px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
+              className="col-span-2 sm:col-span-1 w-full sm:w-[200px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
             >
               <SelectValue placeholder="Semua Alasan" />
             </SelectTrigger>

@@ -40,13 +40,13 @@ function PeriodeToggle({
   return (
     <button
       onClick={() => onClick(value)}
-      className={`px-1 sm:px-4 py-1.5 text-[10px] min-[375px]:text-xs sm:text-sm font-bold rounded-md transition-colors cursor-pointer w-full flex items-center justify-center text-center overflow-hidden ${
+      className={`px-1 sm:px-4 py-1.5 text-[10px] min-[375px]:text-xs sm:text-sm font-bold rounded-md transition-colors cursor-pointer w-full sm:w-auto sm:flex-auto flex items-center justify-center text-center overflow-hidden ${
         isActive
           ? "bg-sage text-gading shadow-sm"
           : "text-navy/60 hover:text-navy"
       }`}
     >
-      <span className="truncate w-full">{children}</span>
+      <span className="truncate w-full sm:w-auto">{children}</span>
     </button>
   );
 }

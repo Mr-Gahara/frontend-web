@@ -10,7 +10,7 @@ import { bolehMenurutPlan, planMencakup } from "@/lib/auth/fitur-plan";
 import { useLogoToko, useTenant } from "@/features/tenant/hooks";
 import { useUrlObjek } from "@/hooks/use-url-objek";
 import { SidebarPengguna } from "@/components/sidebar-pengguna";
-import { bolehLihatMenu, gudangMenus, outletMenus, type MenuItem } from "@/components/sidebar-menu";
+import { bolehLihatMenu, gudangMenus, hrefMenuAktif, outletMenus, type MenuItem } from "@/components/sidebar-menu";
 import { targetMenu } from "@/components/panduan/titik-dashboard";
 
 // Impor Ikon (Tambahan ikon Archive untuk Data Barang)
@@ -107,6 +107,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const isGudangWorkspace = pathname.startsWith("/dashboard/gudang");
   const activeMenus = isGudangWorkspace ? gudangMenus : outletMenus;
+  // Satu menu menyala, termasuk di halaman turunan menu tunggal (hrefMenuAktif).
+  const hrefAktif = hrefMenuAktif(
+    pathname,
+    activeMenus.flatMap((g) =>
+      g.items.filter(bolehLihatItem).flatMap((item) => [
+        item.href,
+        ...(item.subItems?.filter((sub) => bolehHref(sub.href)).map((sub) => sub.href) ?? []),
+      ]),
+    ),
+  );
   const currentWorkspaceName = isGudangWorkspace
     ? "Gudang Ops."
     : "Outlet Ops.";
@@ -251,14 +261,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   const hasSubItems =
                     visibleSubItems && visibleSubItems.length > 0;
 
-                  // FIX: Gunakan exact match atau URL children (startsWith) agar tidak salah deteksi irisan URL
                   const isParentActive =
-                    pathname === item.href ||
-                    visibleSubItems?.some(
-                      (sub) =>
-                        pathname === sub.href ||
-                        pathname.startsWith(`${sub.href}/`),
-                    );
+                    item.href === hrefAktif ||
+                    (visibleSubItems?.some((sub) => sub.href === hrefAktif) ?? false);
 
                   if (hasSubItems) {
                     return (
@@ -284,10 +289,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <CollapsibleContent>
                             <SidebarMenuSub>
                               {visibleSubItems.map((subItem) => {
-                                // FIX: Menjaga menu tetap aktif saat berada di halaman detail (misal: /pengajuanStok/[id])
-                                const isSubActive =
-                                  pathname === subItem.href ||
-                                  pathname.startsWith(`${subItem.href}/`);
+                                const isSubActive = subItem.href === hrefAktif;
                                 return (
                                   <SidebarMenuSubItem key={subItem.href}>
                                     <SidebarMenuSubButton
@@ -320,7 +322,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton
                         tooltip={item.label}
-                        isActive={pathname === item.href}
+                        isActive={item.href === hrefAktif}
                         data-panduan={targetMenu(item.href)}
                         onClick={() => handleNavigation(item.href)}
                         className="text-slate-50/90! bg-transparent! hover:bg-slate-50/40! hover:text-slate-50! data-[active=true]:text-slate-50! data-[active=true]:bg-slate-50/40! cursor-pointer"

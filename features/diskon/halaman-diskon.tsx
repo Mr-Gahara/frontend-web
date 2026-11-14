@@ -1,5 +1,6 @@
 "use client";
 
+import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal, Plus } from "lucide-react";
@@ -39,7 +40,7 @@ import {
 
 const KELAS_KEPALA = "text-xs font-semibold text-navy/60";
 const KELAS_PEMICU_FILTER =
-  "w-40 h-11 bg-gading text-navy border-navy/15 focus:ring-navy/50 font-medium rounded-xl";
+  "w-44 h-11 bg-gading text-navy border-navy/15 focus:ring-navy/50 font-medium rounded-xl";
 const KELAS_ISI_FILTER = "bg-krem border-navy/10 text-navy font-medium rounded-xl";
 
 /**
@@ -66,6 +67,7 @@ export function HalamanDiskon() {
   const columns: ColumnDef<Diskon>[] = [
     {
       accessorKey: "namaDiskon",
+      meta: { lebarBungkus: 200 },
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -78,7 +80,7 @@ export function HalamanDiskon() {
         </Button>
       ),
       cell: ({ row }) => (
-        <span className="font-bold text-navy">{row.original.namaDiskon}</span>
+        <TeksDuaBaris teks={row.original.namaDiskon} className="font-bold text-navy" />
       ),
     },
     {
@@ -123,6 +125,7 @@ export function HalamanDiskon() {
     },
     {
       id: "aturan",
+      meta: { lebarBungkus: 180 },
       header: () => <span className={KELAS_KEPALA}>Aturan</span>,
       cell: ({ row }) => {
         const aturan = ringkasAturan(row.original);
@@ -132,8 +135,8 @@ export function HalamanDiskon() {
         return (
           <ul className="space-y-0.5">
             {aturan.map((teks) => (
-              <li key={teks} className="text-xs font-medium text-navy/70">
-                {teks}
+              <li key={teks}>
+                <TeksDuaBaris teks={teks} className="text-xs font-medium text-navy/70" />
               </li>
             ))}
           </ul>

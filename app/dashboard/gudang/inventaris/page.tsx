@@ -273,7 +273,7 @@ export default function GudangInventoryPage() {
       </div>
 
       {/* QUICK TABS */}
-      <div className="flex items-center gap-2 border-b border-navy/10 pb-4">
+      <div className="flex flex-wrap items-center gap-2 border-b border-navy/10 pb-4">
         <Button
           variant="ghost"
           onClick={() => setFilterTab("ALL")}

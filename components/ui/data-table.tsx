@@ -50,6 +50,19 @@ function labelKolom(kolom: { meta?: unknown; header?: unknown }): string | null 
   return typeof kolom.header === "string" ? kolom.header : null;
 }
 
+/**
+ * meta.lebarBungkus kolom (px): mulai lebar sm, isi sel boleh turun baris
+ * dengan lebar paling banyak sekian, agar tabel tidak lebih lebar dari
+ * wadahnya di laptop 1280 px (pemilik proyek, 14 November 2026). Kartu HP
+ * tidak terpengaruh.
+ */
+function gayaBungkus(kolom: { meta?: unknown }): React.CSSProperties | undefined {
+  const lebar = (kolom.meta as { lebarBungkus?: unknown } | undefined)?.lebarBungkus;
+  return typeof lebar === "number" ? ({ "--lebar-bungkus": `${lebar}px` } as React.CSSProperties) : undefined;
+}
+
+const KELAS_BUNGKUS = "sm:whitespace-normal sm:max-w-(--lebar-bungkus) sm:[&_*]:whitespace-normal";
+
 /** Paginasi dari server: angka dan aksi footer datang dari pemakai tabel. */
 export interface PaginasiServerTabel {
   halaman: number;
@@ -193,10 +206,17 @@ export function DataTable<TData, TValue>({
               <TableRow key={row.id} className={KELAS_BARIS_HP}>
                 {row.getVisibleCells().map((cell) => {
                   const label = labelKolom(cell.column.columnDef);
+                  const bungkus = gayaBungkus(cell.column.columnDef);
                   return (
                     <TableCell
                       key={cell.id}
-                      className={cn("text-sm", KELAS_SEL_HP, cell.column.id === "aksi" && KELAS_AKSI_HP)}
+                      style={bungkus}
+                      className={cn(
+                        "text-sm",
+                        KELAS_SEL_HP,
+                        cell.column.id === "aksi" && KELAS_AKSI_HP,
+                        bungkus && KELAS_BUNGKUS,
+                      )}
                     >
                       {label && (
                         <span className="sm:hidden block text-[11px] font-semibold text-navy/60">

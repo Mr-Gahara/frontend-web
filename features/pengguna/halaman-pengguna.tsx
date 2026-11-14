@@ -1,5 +1,6 @@
 "use client";
 
+import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { useSession } from "@/lib/auth/useSession";
 import { useEffect, useState } from "react";
 import { PenggunaItem, PenggunaRequest } from "@/types/pengguna";
@@ -227,6 +228,7 @@ export default function HalamanPengguna({
   const columns: ColumnDef<PenggunaItem>[] = [
     {
       accessorKey: "nama",
+      meta: { lebarBungkus: 200 },
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -238,7 +240,7 @@ export default function HalamanPengguna({
         </Button>
       ),
       cell: ({ row }) => (
-        <span className="font-bold text-navy">{row.getValue("nama")}</span>
+        <TeksDuaBaris teks={String(row.getValue("nama") ?? "")} className="font-bold text-navy" />
       ),
     },
     {

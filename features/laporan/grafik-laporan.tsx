@@ -53,7 +53,9 @@ export function GrafikLaporan({
   interval: number;
 }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    // initialDimension bawaan recharts 3 adalah -1 x -1, sehingga render
+    // pertama sebelum wadah terukur memicu peringatan ukuran di konsol.
+    <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 1, height: 1 }}>
       <AreaChart
         data={data}
         margin={{ top: 10, right: 10, left: 10, bottom: 20 }}

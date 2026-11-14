@@ -44,7 +44,7 @@ function KartuRingkas({
       className="bg-navy text-gading rounded-2xl sm:rounded-3xl border-t-4 border-karamel p-3 sm:p-5 flex flex-col justify-between gap-2 sm:gap-3 shadow-sm min-w-0 sm:min-h-36"
     >
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs sm:text-sm font-semibold text-krem/80 truncate min-w-0">{judul}</p>
+        <p className="text-xs sm:text-sm font-semibold text-krem/80 line-clamp-2 leading-snug min-w-0">{judul}</p>
         <span className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-karamel/20 text-karamel shrink-0">
           <Ikon className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
         </span>

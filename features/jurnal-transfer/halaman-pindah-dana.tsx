@@ -1,5 +1,6 @@
 "use client";
 
+import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -307,12 +308,27 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
       {
         accessorKey: "tanggal",
         header: "Tanggal",
+        // Pencatat menjadi baris kedua tanggal, bukan kolom sendiri, agar tabel
+        // muat di laptop 1280 px (pemilik proyek, 14 November 2026).
         cell: ({ row }) => (
-          <span className="font-medium text-navy">{formatTanggal(row.original.tanggal)}</span>
+          <div className="flex flex-col">
+            <span className="font-medium text-navy">{formatTanggal(row.original.tanggal)}</span>
+            <span className="text-xs text-navy/60">oleh {row.original.dicatatOleh?.nama || "-"}</span>
+          </div>
         ),
       },
-      { id: "sumber", header: "Dari", cell: ({ row }) => namaAkunTransfer(row.original.kasSumber) },
-      { id: "tujuan", header: "Ke", cell: ({ row }) => namaAkunTransfer(row.original.kasTujuan) },
+      {
+        id: "sumber",
+        header: "Dari",
+        meta: { lebarBungkus: 160 },
+        cell: ({ row }) => <TeksDuaBaris teks={namaAkunTransfer(row.original.kasSumber)} />,
+      },
+      {
+        id: "tujuan",
+        header: "Ke",
+        meta: { lebarBungkus: 160 },
+        cell: ({ row }) => <TeksDuaBaris teks={namaAkunTransfer(row.original.kasTujuan)} />,
+      },
       {
         id: "jumlah",
         header: () => <div className="text-right">Jumlah</div>,
@@ -325,19 +341,15 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
       {
         accessorKey: "keterangan",
         header: "Keterangan",
+        meta: { lebarBungkus: 180 },
         cell: ({ row }) => (
           <div>
-            <p>{row.original.keterangan}</p>
+            <TeksDuaBaris teks={row.original.keterangan} />
             {row.original.status === "VOID" && row.original.catatan && (
-              <p className="text-xs text-navy/60">Alasan batal: {row.original.catatan}</p>
+              <TeksDuaBaris teks={`Alasan batal: ${row.original.catatan}`} className="text-xs text-navy/60" />
             )}
           </div>
         ),
-      },
-      {
-        id: "pencatat",
-        header: "Dicatat oleh",
-        cell: ({ row }) => row.original.dicatatOleh?.nama || "-",
       },
       {
         id: "status",

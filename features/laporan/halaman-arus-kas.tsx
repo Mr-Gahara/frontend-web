@@ -99,7 +99,8 @@ function Panel({ panel }: { panel: PanelRincian }) {
           <li key={`${b.label}-${b.pembatalan}`} className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between gap-3 text-sm">
               <span className="flex items-center gap-2 font-semibold min-w-0">
-                <span className="truncate">{b.label}</span>
+                {/* Boleh dua baris: di HP 390 px label dan badge Pembatalan tidak muat satu baris. */}
+                <span className="leading-snug">{b.label}</span>
                 {b.pembatalan && (
                   <span className="shrink-0 px-2 py-px rounded-full bg-karamel/25 text-[#7A5226] text-[11px] font-bold">
                     Pembatalan

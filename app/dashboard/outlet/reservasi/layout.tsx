@@ -19,7 +19,7 @@ export default function ReservasiLayout({ children }: { children: React.ReactNod
             Kelola jadwal, sewa aset, dan pemantauan sesi aktif secara real-time.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             variant="outline"
             className="cursor-pointer border-navy/20 bg-gading text-navy hover:bg-navy/5 font-bold shadow-sm h-11 px-4"

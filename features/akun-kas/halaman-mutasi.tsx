@@ -1,5 +1,6 @@
 "use client";
 
+import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
@@ -112,17 +113,17 @@ export function HalamanMutasi() {
       {
         id: "akun",
         header: "Akun Kas",
-        cell: ({ row }) => namaAkunBaris(row.original, akunKas.data),
+        meta: { lebarBungkus: 180 },
+        cell: ({ row }) => <TeksDuaBaris teks={namaAkunBaris(row.original, akunKas.data)} />,
       },
       {
         accessorKey: "keterangan",
         header: "Keterangan",
+        meta: { lebarBungkus: 260 },
         cell: ({ row }) => (
           <div className="max-w-[16rem] lg:max-w-md xl:max-w-xl">
             <p className="font-bold text-navy">{LABEL_JENIS[row.original.jenis]}</p>
-            <p className="truncate text-xs text-navy/70" title={row.original.keterangan || undefined}>
-              {row.original.keterangan || "-"}
-            </p>
+            <TeksDuaBaris teks={row.original.keterangan || "-"} className="text-xs text-navy/70" />
           </div>
         ),
       },

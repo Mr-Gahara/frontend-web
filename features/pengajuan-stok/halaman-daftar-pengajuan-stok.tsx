@@ -1,5 +1,6 @@
 "use client";
 
+import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { Suspense, useMemo, useState, type ReactNode } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
@@ -226,11 +227,13 @@ function IsiDaftarPengajuanStok({
       {
         id: "lokasi",
         header: teks.kolomLokasi,
+        meta: { lebarBungkus: 200 },
         cell: ({ row }) => (
           <div className="flex flex-col">
-            <span className="font-medium text-navy/80">
-              {row.original.dariLokasi?.nama || "-"} ke {row.original.keLokasi?.nama || "-"}
-            </span>
+            <TeksDuaBaris
+              teks={`${row.original.dariLokasi?.nama || "-"} ke ${row.original.keLokasi?.nama || "-"}`}
+              className="font-medium text-navy/80"
+            />
             {ruang === "gudang" && (
               <span className="text-xs font-medium text-navy/50 capitalize mt-1">
                 Pembuat: {row.original.dimintaOleh?.nama || "-"}
@@ -321,7 +324,8 @@ function IsiDaftarPengajuanStok({
       {penghalang}
 
       {/* FILTER & TABS */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-navy/10 pb-4">
+      {/* Tab status dan filter dua baris: berdampingan, tab terjepit sampai 128 px di 1280 px. */}
+      <div className="flex flex-col items-start gap-4 border-b border-navy/10 pb-4">
         <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 hide-scrollbar">
           {tabTampil.map((tab) => (
             <Button

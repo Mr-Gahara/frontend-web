@@ -1,4 +1,5 @@
 "use client";
+import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
@@ -98,9 +99,10 @@ export default function DaftarTarifPage() {
       {
         id: "nama",
         header: "Nama & Status Tarif",
+        meta: { lebarBungkus: 200 },
         cell: ({ row }) => (
           <div className="flex flex-col gap-1.5">
-            <p className="font-bold text-[15px] tracking-tight text-navy">{row.original.namaTarif}</p>
+            <TeksDuaBaris teks={row.original.namaTarif} className="font-bold text-[15px] tracking-tight text-navy" />
             <div className="flex items-center gap-2">
               {row.original.isActive ? (
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-sage/20 text-sage">
@@ -146,11 +148,12 @@ export default function DaftarTarifPage() {
       {
         id: "jadwal",
         header: "Jadwal Berlaku",
+        meta: { lebarBungkus: 160 },
         cell: ({ row }) => (
           <div className="flex flex-col gap-1">
             <span className="flex items-center gap-1.5 text-xs font-semibold text-navy/80">
-              <CalendarDays className="w-3.5 h-3.5" />
-              {formatHariAktif(row.original.hariAktif)}
+              <CalendarDays className="w-3.5 h-3.5 shrink-0" />
+              <TeksDuaBaris teks={formatHariAktif(row.original.hariAktif)} />
             </span>
             <span className="text-[11px] font-medium ml-5 text-navy/60">
               {row.original.jamMulai && row.original.jamSelesai
@@ -163,6 +166,7 @@ export default function DaftarTarifPage() {
       {
         id: "tipe",
         header: "Kategori Aset",
+        meta: { lebarBungkus: 150 },
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1 max-w-45">
             {row.original.dataAset && row.original.dataAset.length > 0 ? (

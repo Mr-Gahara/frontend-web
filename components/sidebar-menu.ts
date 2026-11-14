@@ -47,6 +47,23 @@ export type MenuGroup = {
 };
 
 /**
+ * Href menu yang menyala untuk pathname: yang sama persis, atau menu terdekat
+ * dari halaman turunannya (/pembelianStok/catatPembelian menyalakan Pembelian
+ * Stok), berlaku sama untuk menu tunggal dan sub-menu. Href yang menjadi
+ * awalan href menu lain (dashboard ruang, induk Keuangan) hanya menyala bila
+ * sama persis, agar halaman tanpa menu seperti profil tidak menyalakannya.
+ */
+export function hrefMenuAktif(pathname: string, hrefs: readonly string[]): string | null {
+  const induk = (h: string) => hrefs.some((lain) => lain.startsWith(`${h}/`));
+  let terpilih: string | null = null;
+  for (const h of hrefs) {
+    const cocok = pathname === h || (pathname.startsWith(`${h}/`) && !induk(h));
+    if (cocok && (terpilih === null || h.length > terpilih.length)) terpilih = h;
+  }
+  return terpilih;
+}
+
+/**
  * Menu tampil di sidebar: menu berinduk bila salah satu anaknya (yang
  * termasuk plan) boleh dibuka, menu tunggal bila halamannya termasuk plan
  * dan boleh dibuka. Dipakai sidebar dan tur dashboard, agar keduanya
