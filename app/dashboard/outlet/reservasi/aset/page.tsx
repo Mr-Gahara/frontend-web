@@ -55,7 +55,7 @@ function lencanaStatus(status: StatusAset) {
       );
     case "perbaikan":
       return (
-        <Badge className="bg-[#af8861] text-gading font-bold border-none shadow-sm px-2.5 py-1">
+        <Badge className="bg-karamel-redup text-gading font-bold border-none shadow-sm px-2.5 py-1">
           <Wrench className="w-3 h-3 mr-1.5" /> Perbaikan
         </Badge>
       );

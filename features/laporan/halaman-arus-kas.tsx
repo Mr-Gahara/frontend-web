@@ -50,7 +50,7 @@ function rupiahBertanda(n: number): string {
 }
 
 function warnaBersih(n: number): string {
-  return n > 0 ? "text-[#4F5E3A]" : n < 0 ? "text-rose-700" : "text-navy";
+  return n > 0 ? "text-sage-tua" : n < 0 ? "text-rose-700" : "text-navy";
 }
 
 function KartuSaldo({
@@ -102,7 +102,7 @@ function Panel({ panel }: { panel: PanelRincian }) {
                 {/* Boleh dua baris: di HP 390 px label dan badge Pembatalan tidak muat satu baris. */}
                 <span className="leading-snug">{b.label}</span>
                 {b.pembatalan && (
-                  <span className="shrink-0 px-2 py-px rounded-full bg-karamel/25 text-[#7A5226] text-[11px] font-bold">
+                  <span className="shrink-0 px-2 py-px rounded-full bg-karamel/25 text-karamel-tua text-[11px] font-bold">
                     Pembatalan
                   </span>
                 )}
@@ -168,7 +168,7 @@ export function HalamanArusKas() {
   const ringkasan = tampilan?.ringkasan;
   const arah = arahBersih(ringkasan?.arusKasBersih ?? 0);
   const kelasLencanaArah =
-    arah === "naik" ? "bg-sage/35 text-[#e3ecd3]" : arah === "turun" ? "bg-rose-500/30 text-rose-100" : "bg-gading/10 text-gading";
+    arah === "naik" ? "bg-sage/35 text-sage-pucat" : arah === "turun" ? "bg-rose-500/30 text-rose-100" : "bg-gading/10 text-gading";
 
   return (
     <div className="flex flex-col gap-5 w-full text-navy">
@@ -251,7 +251,7 @@ export function HalamanArusKas() {
         <div
           role="group"
           aria-label="Kelompokkan per"
-          className="flex bg-[#675a41]/20 rounded-lg p-1 border border-navy/10 shadow-inner gap-0.5"
+          className="flex bg-cokelat-zaitun/20 rounded-lg p-1 border border-navy/10 shadow-inner gap-0.5"
         >
           {(Object.keys(LABEL_KELOMPOK) as KelompokArusKas[]).map((k) => (
             <button

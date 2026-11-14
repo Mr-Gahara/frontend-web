@@ -1,4 +1,5 @@
 "use client";
+import { denganAlfa, WARNA } from "@/lib/warna";
 import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -34,9 +35,9 @@ import { formatRupiah } from "@/lib/format";
 
 // Warna sisa untuk dialog hapus; tabel dan baris filter memakai token (TB23a).
 const COLORS = {
-  navy: "#0A2947",
-  cream: "#FFFAF3",
-  rose: "#F43F5E",
+  navy: WARNA.navy,
+  cream: WARNA.gading,
+  rose: WARNA.roseLama,
 };
 
 const HARI_MAP = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
@@ -256,7 +257,7 @@ export default function DaftarTarifPage() {
             </AlertDialogTitle>
             <AlertDialogDescription
               className="font-medium"
-              style={{ color: `${COLORS.navy}80` }}
+              style={{ color: denganAlfa(COLORS.navy, "80") }}
             >
               Tarif yang dihapus tidak dapat dikembalikan dan aset yang
               menggunakan tarif default ini mungkin perlu disetel ulang.

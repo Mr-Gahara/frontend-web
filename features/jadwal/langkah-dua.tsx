@@ -127,9 +127,9 @@ export function StepDuaPreview({
           <table className="w-full text-left text-sm whitespace-nowrap border-collapse">
             
             {/* HEADER TANGGAL */}
-            <thead className="bg-[#F8F3EB] sticky top-0 z-20 shadow-sm">
+            <thead className="bg-krem-muda sticky top-0 z-20 shadow-sm">
               <tr>
-                <th className="p-3 md:p-4 font-bold text-navy/70 uppercase tracking-wider text-[10px] md:text-xs border-b border-r border-navy/10 min-w-[200px] sticky left-0 bg-[#F8F3EB] z-30">
+                <th className="p-3 md:p-4 font-bold text-navy/70 uppercase tracking-wider text-[10px] md:text-xs border-b border-r border-navy/10 min-w-[200px] sticky left-0 bg-krem-muda z-30">
                   Staf / Karyawan
                 </th>
                 {dateHeaders.map((date, idx) => {
@@ -163,7 +163,7 @@ export function StepDuaPreview({
                 <tr key={row.karyawan.id} className="hover:bg-navy/[0.02] group transition-colors">
                   
                   {/* Sticky Column Kiri (Avatar) */}
-                  <td className="sticky left-0 z-10 bg-gading group-hover:bg-[#FDF9F2] border-r border-navy/10 p-3 md:p-4 align-top shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                  <td className="sticky left-0 z-10 bg-gading group-hover:bg-krem-hover border-r border-navy/10 p-3 md:p-4 align-top shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
                     <div className="flex items-start md:items-center gap-2 md:gap-3">
                       <Avatar className="hidden sm:flex h-8 w-8 md:h-9 md:w-9 border border-navy/10 shrink-0">
                         <AvatarFallback className="bg-navy/10 text-navy font-bold text-[10px] md:text-xs">

@@ -93,7 +93,7 @@ export function HalamanGalat({
             {kode}
           </p>
         </div>
-        <p className="max-w-100 text-[15px] text-[#5f5f5f]">
+        <p className="max-w-100 text-[15px] text-abu-teks">
           Data toko Anda aman. Halaman ini hanya tidak dapat ditampilkan.
         </p>
       </aside>

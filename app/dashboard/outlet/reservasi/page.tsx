@@ -1,4 +1,5 @@
 "use client";
+import { denganAlfa, WARNA } from "@/lib/warna";
 import { useState, useMemo, useEffect } from "react";
 import { useSudahHidrasi } from "@/hooks/use-sudah-hidrasi";
 import { format, addHours, setMinutes, setSeconds, isSameDay } from "date-fns";
@@ -22,13 +23,13 @@ import { TautanPenjualanBooking } from "@/features/sesi-booking/tautan-penjualan
 // ─── Design Tokens ──────────────────────────────────────────────────────────
 
 const COLORS = {
-  navy: "#0A2947",
-  navyLight: "#0D365E",
-  cream: "#FFFAF3",
-  darkCream: "#F2EAE2",
-  gold: "#D4A373",
-  sage: "#7c9b4bff",
-  rose: "#f9536eff",
+  navy: WARNA.navy,
+  navyLight: WARNA.navyTerang,
+  cream: WARNA.gading,
+  darkCream: WARNA.krem,
+  gold: WARNA.karamel,
+  sage: WARNA.sageTerang,
+  rose: WARNA.roseTerang,
 };
 
 const TOTAL_TIMELINE_HOURS = 6;
@@ -76,7 +77,7 @@ function EmptyState({ message }: { message: string }) {
   return (
     <div
       className="flex flex-col items-center justify-center py-16 gap-3"
-      style={{ color: `${COLORS.navy}66` }}
+      style={{ color: denganAlfa(COLORS.navy, "66") }}
     >
       <Calendar className="w-8 h-8" />
       <p className="text-sm font-medium">{message}</p>
@@ -190,7 +191,7 @@ export default function DasborTimelinePage() {
           </h2>
           <p
             className="text-sm font-medium"
-            style={{ color: `${COLORS.navy}99` }}
+            style={{ color: denganAlfa(COLORS.navy, "99") }}
           >
             Pantau penggunaan aset dalam 6 jam ke depan.
           </p>
@@ -202,7 +203,7 @@ export default function DasborTimelinePage() {
         >
           <button
             aria-label="Tanggal sebelumnya"
-            className="p-2.5 px-3.5 transition-colors cursor-pointer text-[#FFFAF399] hover:text-karamel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
+            className="p-2.5 px-3.5 transition-colors cursor-pointer text-gading/60 hover:text-karamel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
             onClick={() =>
               setSelectedDate(
                 (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1),
@@ -226,7 +227,7 @@ export default function DasborTimelinePage() {
 
           <button
             aria-label="Tanggal berikutnya"
-            className="p-2.5 px-3.5 transition-colors cursor-pointer text-[#FFFAF399] hover:text-karamel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
+            className="p-2.5 px-3.5 transition-colors cursor-pointer text-gading/60 hover:text-karamel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel focus-visible:ring-offset-2"
             onClick={() =>
               setSelectedDate(
                 (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1),
@@ -243,7 +244,7 @@ export default function DasborTimelinePage() {
         className="w-full rounded-2xl shadow-sm p-4 sm:p-5 flex flex-col gap-4 border"
         style={{
           background: COLORS.darkCream,
-          borderColor: `${COLORS.navy}15`,
+          borderColor: denganAlfa(COLORS.navy, "15"),
         }}
       >
         {/* LEGENDA */}
@@ -252,7 +253,7 @@ export default function DasborTimelinePage() {
             <span
               key={key}
               className="flex items-center gap-1.5 text-xs font-bold"
-              style={{ color: `${COLORS.navy}B3` }}
+              style={{ color: denganAlfa(COLORS.navy, "B3") }}
             >
               <span
                 className="w-2 h-2 rounded-full"
@@ -264,7 +265,7 @@ export default function DasborTimelinePage() {
           {isLoading && (
             <span
               className="flex items-center gap-1.5 text-xs font-medium"
-              style={{ color: `${COLORS.navy}66` }}
+              style={{ color: denganAlfa(COLORS.navy, "66") }}
             >
               <Loader2 className="w-3 h-3 animate-spin" />
               Memuat data...
@@ -272,7 +273,7 @@ export default function DasborTimelinePage() {
           )}
           <span
             className="flex items-center gap-1.5 text-xs font-bold ml-auto"
-            style={{ color: `${COLORS.navy}B3` }}
+            style={{ color: denganAlfa(COLORS.navy, "B3") }}
           >
             <span
               className="w-2 h-0.5 rounded-full"
@@ -285,7 +286,7 @@ export default function DasborTimelinePage() {
         {/* CONTAINER TABEL */}
         <div
           className="overflow-x-auto rounded-xl border shadow-sm"
-          style={{ background: COLORS.cream, borderColor: `${COLORS.navy}15` }}
+          style={{ background: COLORS.cream, borderColor: denganAlfa(COLORS.navy, "15") }}
         >
           <div className="min-w-200">
             {/* HEADER KOLOM WAKTU */}
@@ -318,7 +319,7 @@ export default function DasborTimelinePage() {
             {/* BODY */}
             <div
               className="flex flex-col divide-y"
-              style={{ borderColor: `${COLORS.navy}10` }}
+              style={{ borderColor: denganAlfa(COLORS.navy, "10") }}
             >
               {ajakanFitur ? (
                 ajakanFitur
@@ -461,7 +462,7 @@ export default function DasborTimelinePage() {
                             <div
                               key={idx}
                               className="flex-1 border-l"
-                              style={{ borderColor: `${COLORS.navy}10` }}
+                              style={{ borderColor: denganAlfa(COLORS.navy, "10") }}
                             />
                           ))}
                         </div>
@@ -533,7 +534,7 @@ export default function DasborTimelinePage() {
                                   style={{
                                     color: isMember
                                       ? "rgba(255,250,243,0.8)"
-                                      : `${COLORS.navy}99`,
+                                      : denganAlfa(COLORS.navy, "99"),
                                   }}
                                 >
                                   {tipePelanggan && `${tipePelanggan} • `}

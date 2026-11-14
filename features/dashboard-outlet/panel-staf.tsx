@@ -29,12 +29,12 @@ export const LABEL_STATUS_STAF: Record<StatusStafDashboard, string> = {
 };
 
 const WARNA_STATUS_STAF: Record<StatusStafDashboard, { lencana: string; titik: string }> = {
-  sedang_bekerja: { lencana: "bg-sage/15 text-[#4F5E3A]", titik: "bg-sage" },
+  sedang_bekerja: { lencana: "bg-sage/15 text-sage-tua", titik: "bg-sage" },
   sudah_pulang: { lencana: "bg-navy/10 text-navy", titik: "bg-navy" },
   belum_absen: { lencana: "bg-navy/5 text-navy/70", titik: "bg-navy/30" },
   sakit: { lencana: "bg-rose-100 text-rose-700", titik: "bg-rose-500" },
-  izin: { lencana: "bg-karamel/25 text-[#7A5226]", titik: "bg-karamel" },
-  cuti: { lencana: "bg-karamel/25 text-[#7A5226]", titik: "bg-karamel" },
+  izin: { lencana: "bg-karamel/25 text-karamel-tua", titik: "bg-karamel" },
+  cuti: { lencana: "bg-karamel/25 text-karamel-tua", titik: "bg-karamel" },
 };
 
 /** Urutan baris: yang hadir lebih dulu, lalu izin, sakit, dan cuti, lalu yang belum absen. */

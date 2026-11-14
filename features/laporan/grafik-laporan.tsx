@@ -11,6 +11,7 @@ import {
 } from "recharts";
 
 import { formatRupiah } from "@/lib/format";
+import { WARNA } from "@/lib/warna";
 
 /** Satu titik grafik laporan: label sumbu X dan nilainya dalam rupiah. */
 export type TitikGrafik = {
@@ -62,20 +63,20 @@ export function GrafikLaporan({
       >
         <defs>
           <linearGradient id="gradienSage" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#718355" stopOpacity={0.4} />
-            <stop offset="95%" stopColor="#718355" stopOpacity={0} />
+            <stop offset="5%" stopColor={WARNA.sage} stopOpacity={0.4} />
+            <stop offset="95%" stopColor={WARNA.sage} stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid
           strokeDasharray="3 3"
-          stroke="#0A2947"
+          stroke={WARNA.navy}
           strokeOpacity={0.15}
           vertical={false}
         />
         <XAxis
           dataKey="label"
           tick={{
-            fill: "#0A2947",
+            fill: WARNA.navy,
             opacity: 0.6,
             fontSize: 10,
             fontWeight: 600,
@@ -90,11 +91,11 @@ export function GrafikLaporan({
         <Area
           type="monotone"
           dataKey="nilai"
-          stroke="#718355"
+          stroke={WARNA.sage}
           strokeWidth={3}
           fill="url(#gradienSage)"
           dot={false}
-          activeDot={{ r: 5, fill: "#718355", strokeWidth: 0 }}
+          activeDot={{ r: 5, fill: WARNA.sage, strokeWidth: 0 }}
         />
       </AreaChart>
     </ResponsiveContainer>

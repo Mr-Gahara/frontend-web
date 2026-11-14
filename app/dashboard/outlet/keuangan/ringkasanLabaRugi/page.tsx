@@ -108,7 +108,7 @@ export default function RingkasanLabaRugiPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 sm:flex w-full md:w-auto bg-[#675a41]/20 rounded-lg p-1 border border-navy/10 shadow-inner gap-0.5 sm:gap-0">
+          <div className="grid grid-cols-3 sm:flex w-full md:w-auto bg-cokelat-zaitun/20 rounded-lg p-1 border border-navy/10 shadow-inner gap-0.5 sm:gap-0">
             <PeriodeToggle active={periode} value="harian" onClick={setPeriode}>
               Harian
             </PeriodeToggle>

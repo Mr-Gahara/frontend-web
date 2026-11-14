@@ -122,6 +122,29 @@ input.no-spinner[type="number"] {
   --gading: #FFFAF3;
   --karamel: #D4A373;
   --sage: #718355;
+  /* Warna turunan di luar lima warna utama (pemilik proyek, 14 November
+     2026, CV21a): menggantikan heksadesimal di kelas dan konstanta tanpa
+     mengubah tampilan. */
+  --sage-tua: #4F5E3A;
+  --sage-muda: #A3B18A;
+  --sage-pucat: #E3ECD3;
+  --sage-terang: #7C9B4B;
+  --karamel-tua: #7A5226;
+  --karamel-redup: #AF8861;
+  --cokelat: #6C5D4C;
+  --cokelat-tua: #67543D;
+  --cokelat-zaitun: #675A41;
+  --cokelat-abu: #8D8377;
+  --pasir: #CBB193;
+  --krem-muda: #F8F3EB;
+  --krem-hover: #FDF9F2;
+  --navy-terang: #0D365E;
+  --emas: #FFBF00;
+  --tembaga: #A55F30;
+  --merah-tingkat: #F62440;
+  --rose-terang: #F9536E;
+  --abu-teks: #5F5F5F;
+  --rose-lama: #F43F5E;
   /* PALET DASAR */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -175,6 +198,26 @@ input.no-spinner[type="number"] {
   --color-gading: var(--gading);
   --color-karamel: var(--karamel);
   --color-sage: var(--sage);
+  --color-sage-tua: var(--sage-tua);
+  --color-sage-muda: var(--sage-muda);
+  --color-sage-pucat: var(--sage-pucat);
+  --color-sage-terang: var(--sage-terang);
+  --color-karamel-tua: var(--karamel-tua);
+  --color-karamel-redup: var(--karamel-redup);
+  --color-cokelat: var(--cokelat);
+  --color-cokelat-tua: var(--cokelat-tua);
+  --color-cokelat-zaitun: var(--cokelat-zaitun);
+  --color-cokelat-abu: var(--cokelat-abu);
+  --color-pasir: var(--pasir);
+  --color-krem-muda: var(--krem-muda);
+  --color-krem-hover: var(--krem-hover);
+  --color-navy-terang: var(--navy-terang);
+  --color-emas: var(--emas);
+  --color-tembaga: var(--tembaga);
+  --color-merah-tingkat: var(--merah-tingkat);
+  --color-rose-terang: var(--rose-terang);
+  --color-abu-teks: var(--abu-teks);
+  --color-rose-lama: var(--rose-lama);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

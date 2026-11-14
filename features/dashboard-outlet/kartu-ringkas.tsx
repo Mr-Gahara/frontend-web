@@ -36,7 +36,7 @@ function KartuRingkas({
 }) {
   const lencana =
     pertumbuhan !== null && pertumbuhan > 0
-      ? "bg-[#A3B18A]/20 text-[#A3B18A]"
+      ? "bg-sage-muda/20 text-sage-muda"
       : "bg-krem/10 text-krem";
   return (
     <section

@@ -56,7 +56,7 @@ function Petak({ petak, ringkas }: { petak: PetakVenue; ringkas: boolean }) {
       <span className="font-black text-navy line-clamp-2 break-words">{petak.nama}</span>
       <span
         className={`flex items-center gap-1.5 font-medium ${
-          perbaikan ? "text-orange-700" : "text-[#4F5E3A]"
+          perbaikan ? "text-orange-700" : "text-sage-tua"
         }`}
       >
         <Titik warna={perbaikan ? "bg-orange-500" : "bg-sage"} />

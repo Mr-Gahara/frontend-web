@@ -43,7 +43,7 @@ export function PanelGrafik({ hari }: { hari: Date }) {
     pertumbuhan === null || pertumbuhan === 0
       ? "bg-navy/10 text-navy/70"
       : pertumbuhan > 0
-        ? "bg-sage/15 text-[#4F5E3A]"
+        ? "bg-sage/15 text-sage-tua"
         : "bg-rose-100 text-rose-700";
 
   return (

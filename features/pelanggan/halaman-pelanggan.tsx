@@ -39,8 +39,8 @@ function KartuStatistik({
         {ikon}
       </div>
       <div>
-        <p className="text-sm font-bold text-[#6c5d4c]">{judul}</p>
-        <h3 className="text-2xl font-bold text-[#6c5d4c]">{nilai}</h3>
+        <p className="text-sm font-bold text-cokelat">{judul}</p>
+        <h3 className="text-2xl font-bold text-cokelat">{nilai}</h3>
       </div>
     </div>
   );
@@ -182,7 +182,7 @@ export function HalamanPelanggan() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-krem border-navy/10">
                 {aksi.ubah && (
-                  <DropdownMenuItem className="cursor-pointer font-bold text-navy/80 focus:bg-[#8d8377]/20" onClick={() => setDiubah(row.original)}>
+                  <DropdownMenuItem className="cursor-pointer font-bold text-navy/80 focus:bg-cokelat-abu/20" onClick={() => setDiubah(row.original)}>
                     Edit
                   </DropdownMenuItem>
                 )}
@@ -207,7 +207,7 @@ export function HalamanPelanggan() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight text-navy">Manajemen Pelanggan</h1>
-        <p className="text-sm font-medium text-[#6c5d4c]/60">
+        <p className="text-sm font-medium text-cokelat/60">
           Kelola data pelanggan, keanggotaan, dan informasi kontak.
         </p>
       </div>
@@ -216,19 +216,19 @@ export function HalamanPelanggan() {
         <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           <KartuStatistik
             ikon={<Users className="h-6 w-6" />}
-            kelasIkon="bg-[#cbb193] text-[#67543d]"
+            kelasIkon="bg-pasir text-cokelat-tua"
             judul="Total Pelanggan"
             nilai={statistik.total}
           />
           <KartuStatistik
             ikon={<Crown className="h-6 w-6" />}
-            kelasIkon="bg-[#FFBF00]/70 text-[#a55f30]"
+            kelasIkon="bg-emas/70 text-tembaga"
             judul="Pelanggan Member"
             nilai={statistik.member}
           />
           <KartuStatistik
             ikon={<MapPin className="h-6 w-6" />}
-            kelasIkon="bg-[#F62440]/70 text-white"
+            kelasIkon="bg-merah-tingkat/70 text-white"
             judul="Klien Korporat"
             nilai={statistik.korporat}
           />

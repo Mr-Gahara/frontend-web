@@ -1,5 +1,6 @@
 "use client";
 
+import { denganAlfa, WARNA } from "@/lib/warna";
 import { useRouter } from "next/navigation";
 import { useDaftarTipeAset } from "@/features/tipe-aset/hooks";
 import { useSimpanTarif } from "@/features/tarif/hooks";
@@ -27,12 +28,12 @@ import {
 
 // --- COLORS (Design Tokens) ---
 const COLORS = {
-  navy: "#0A2947",
-  cream: "#FFFAF3",
-  darkCream: "#F2EAE2",
-  gold: "#D4A373",
-  sage: "#718355",
-  rose: "#F43F5E",
+  navy: WARNA.navy,
+  cream: WARNA.gading,
+  darkCream: WARNA.krem,
+  gold: WARNA.karamel,
+  sage: WARNA.sage,
+  rose: WARNA.roseLama,
 };
 
 const HARI_MAP = [
@@ -104,7 +105,7 @@ export default function BuatTarifPage() {
             </h2>
             <p
               className="text-sm font-medium"
-              style={{ color: `${COLORS.navy}80` }}
+              style={{ color: denganAlfa(COLORS.navy, "80") }}
             >
               Konfigurasi harga, durasi, dan jadwal berlakunya tarif.
             </p>
@@ -117,7 +118,7 @@ export default function BuatTarifPage() {
           className="rounded-2xl p-5 sm:p-8 border shadow-sm flex flex-col gap-8"
           style={{
             background: COLORS.darkCream,
-            borderColor: `${COLORS.navy}15`,
+            borderColor: denganAlfa(COLORS.navy, "15"),
           }}
         >
           {/* SECTION 1: INFO DASAR */}
@@ -125,12 +126,12 @@ export default function BuatTarifPage() {
             className="rounded-xl p-6 border shadow-sm flex flex-col gap-5"
             style={{
               background: COLORS.cream,
-              borderColor: `${COLORS.navy}10`,
+              borderColor: denganAlfa(COLORS.navy, "10"),
             }}
           >
             <div
               className="flex items-center gap-2 border-b pb-3"
-              style={{ borderColor: `${COLORS.navy}10` }}
+              style={{ borderColor: denganAlfa(COLORS.navy, "10") }}
             >
               <Tags className="w-5 h-5" style={{ color: COLORS.gold }} />
               <h3
@@ -183,7 +184,7 @@ export default function BuatTarifPage() {
                   ) : (
                     <p
                       className="text-[11px] font-medium"
-                      style={{ color: `${COLORS.navy}70` }}
+                      style={{ color: denganAlfa(COLORS.navy, "70") }}
                     >
                       Semakin tinggi angka, semakin diprioritaskan jika bentrok.
                     </p>
@@ -194,8 +195,8 @@ export default function BuatTarifPage() {
               <div
                 className="sm:col-span-2 flex items-center gap-3 p-3 rounded-lg border"
                 style={{
-                  background: `${COLORS.sage}10`,
-                  borderColor: `${COLORS.sage}30`,
+                  background: denganAlfa(COLORS.sage, "10"),
+                  borderColor: denganAlfa(COLORS.sage, "30"),
                 }}
               >
                 <Controller
@@ -218,7 +219,7 @@ export default function BuatTarifPage() {
                   </label>
                   <p
                     className="text-xs font-medium"
-                    style={{ color: `${COLORS.navy}80` }}
+                    style={{ color: denganAlfa(COLORS.navy, "80") }}
                   >
                     Tarif dapat langsung digunakan untuk transaksi booking.
                   </p>
@@ -232,12 +233,12 @@ export default function BuatTarifPage() {
             className="rounded-xl p-6 border shadow-sm flex flex-col gap-5"
             style={{
               background: COLORS.cream,
-              borderColor: `${COLORS.navy}10`,
+              borderColor: denganAlfa(COLORS.navy, "10"),
             }}
           >
             <div
               className="flex items-center gap-2 border-b pb-3"
-              style={{ borderColor: `${COLORS.navy}10` }}
+              style={{ borderColor: denganAlfa(COLORS.navy, "10") }}
             >
               <Clock className="w-5 h-5" style={{ color: COLORS.gold }} />
               <h3
@@ -283,7 +284,7 @@ export default function BuatTarifPage() {
                 <div className="relative">
                   <span
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold"
-                    style={{ color: `${COLORS.navy}60` }}
+                    style={{ color: denganAlfa(COLORS.navy, "60") }}
                   >
                     Rp
                   </span>
@@ -318,7 +319,7 @@ export default function BuatTarifPage() {
                   />
                   <span
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold"
-                    style={{ color: `${COLORS.navy}60` }}
+                    style={{ color: denganAlfa(COLORS.navy, "60") }}
                   >
                     menit
                   </span>
@@ -339,12 +340,12 @@ export default function BuatTarifPage() {
             className="rounded-xl p-6 border shadow-sm flex flex-col gap-5"
             style={{
               background: COLORS.cream,
-              borderColor: `${COLORS.navy}10`,
+              borderColor: denganAlfa(COLORS.navy, "10"),
             }}
           >
             <div
               className="flex items-center gap-2 border-b pb-3"
-              style={{ borderColor: `${COLORS.navy}10` }}
+              style={{ borderColor: denganAlfa(COLORS.navy, "10") }}
             >
               <CalendarDays
                 className="w-5 h-5"
@@ -438,7 +439,7 @@ export default function BuatTarifPage() {
 
                   <span
                     className="text-sm font-bold hidden sm:block shrink-0"
-                    style={{ color: `${COLORS.navy}50` }}
+                    style={{ color: denganAlfa(COLORS.navy, "50") }}
                   >
                     s/d
                   </span>
@@ -482,12 +483,12 @@ export default function BuatTarifPage() {
             className="rounded-xl p-6 border shadow-sm flex flex-col gap-5"
             style={{
               background: COLORS.cream,
-              borderColor: `${COLORS.navy}10`,
+              borderColor: denganAlfa(COLORS.navy, "10"),
             }}
           >
             <div
               className="flex items-center gap-2 border-b pb-3"
-              style={{ borderColor: `${COLORS.navy}10` }}
+              style={{ borderColor: denganAlfa(COLORS.navy, "10") }}
             >
               <AlertCircle className="w-5 h-5" style={{ color: COLORS.gold }} />
               <h3
@@ -501,7 +502,7 @@ export default function BuatTarifPage() {
             <div className="space-y-3">
               <p
                 className="text-sm font-medium"
-                style={{ color: `${COLORS.navy}80` }}
+                style={{ color: denganAlfa(COLORS.navy, "80") }}
               >
                 Pilih tipe aset mana saja yang menggunakan tarif ini. Kosongkan
                 jika tarif ini berlaku untuk <b>Semua Aset</b>.
@@ -510,14 +511,14 @@ export default function BuatTarifPage() {
               {isLoadingAset ? (
                 <div
                   className="text-sm font-bold italic"
-                  style={{ color: `${COLORS.navy}60` }}
+                  style={{ color: denganAlfa(COLORS.navy, "60") }}
                 >
                   Memuat daftar aset...
                 </div>
               ) : tipeAsetList.length === 0 ? (
                 <div
                   className="text-sm font-bold italic"
-                  style={{ color: `${COLORS.navy}60` }}
+                  style={{ color: denganAlfa(COLORS.navy, "60") }}
                 >
                   Belum ada data tipe aset di sistem.
                 </div>
@@ -538,7 +539,7 @@ export default function BuatTarifPage() {
                               style={{
                                 borderColor: isChecked
                                   ? COLORS.navy
-                                  : `${COLORS.navy}15`,
+                                  : denganAlfa(COLORS.navy, "15"),
                               }}
                             >
                               <Checkbox

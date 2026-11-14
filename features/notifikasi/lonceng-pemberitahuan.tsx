@@ -71,7 +71,7 @@ export function LoncengPemberitahuan() {
               <span
                 className={cn(
                   "flex h-8 w-8 flex-none items-center justify-center rounded-full",
-                  tenggang ? "bg-rose-100 text-rose-800" : "bg-karamel/30 text-[#7A5226]",
+                  tenggang ? "bg-rose-100 text-rose-800" : "bg-karamel/30 text-karamel-tua",
                 )}
               >
                 {tenggang ? (
