@@ -127,8 +127,8 @@ dengan alur kanvas desain seperti butir di bawah:
    Posisi. "Akun non-aktif" ternyata seluruhnya sisa uji E2E. Temuan
    tampilan tersisa (label filter jurnal, kolom Staf jadwal, menu Pindah
    Dana, tab Booking, cincin fokus) selesai lewat kanvas desain di
-   `883a79b` (CV15a sampai CV18a). Suite e2e penuh menunggu izin pemilik
-   proyek.
+   `883a79b` (CV15a sampai CV18a). Suite e2e penuh 14 November 2026:
+   643 lolos dari 643 (`inti/pengujian.md`).
 
 ### Menunggu desain pemilik proyek
 
@@ -139,7 +139,7 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
    12 November 2026 (opsi A, `modul/setup-akun.md` TP6a). Tanpa password
    titipan, halaman menampilkan Password akun dan Ulangi password, yang
    tidak dikosongkan saat kode salah; tanpa email di alamat tetap pesan
-   galat. Spec e2e-nya menunggu suite penuh di akhir putaran.
+   galat. Spec e2e-nya lolos di suite penuh 14 November 2026.
 2. **Belum dijadwalkan, perlu desain**: logo toko selesai 12 November
    2026 (`modul/pengaturan-outlet.md`, PO17a dan PO18a); jam operasional
    B206 menyusul penyambungan langkah jam buka, di atas. Pengingat masa
@@ -147,7 +147,7 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
    (`modul/setup-akun.md`, TP8a). OTP reset PIN Owner, ubah email atau
    password akun, dan hapus akun oleh Owner (B178 sampai B181): selesai
    13 November 2026 (`modul/setup-akun.md`, OA1a sampai OA12a); spec
-   ber-OTP-nya menunggu suite penuh akhir putaran.
+   ber-OTP-nya lolos di suite penuh 14 November 2026.
 3. **Halaman arus kas** (B291, LR2a): selesai 12 November 2026, tab
    Keuangan "Arus Kas" dengan desain D pemilik proyek (`modul/keuangan.md`,
    LR3a sampai LR6a).

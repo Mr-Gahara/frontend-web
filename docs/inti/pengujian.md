@@ -12,6 +12,16 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per cacat tampilan 14 November 2026** (web `a5fa419`,
+backend `ridho` lokal `d6709a1`, 14 November 2026, pukul 11.45 sampai
+12.24 WIB, reporter `line,json`, atas izin pemilik proyek): e2e 643 lolos
+dari 643, tanpa kegagalan dan tanpa skip; skip bersyarat status staf tidak
+terjadi. Termasuk spec ber-OTP (verifikasi email, reset PIN Owner, dan
+Akun Toko). Harapan 642 di baseline sebelumnya salah hitung: 637 adalah
+jumlah lolos, dan totalnya 638 dengan skip status staf, sehingga ditambah
+kelima skenario baru menjadi 643. Vitest 1091 lolos. Harapan suite penuh
+berikutnya 643, termasuk skip status staf bila datanya kosong (hitungan).
+
 **Baseline per perbaikan cacat tampilan** (web `0df0ca5`, backend `ridho`
 lokal `d6709a1`, 14 November 2026): vitest 1091 lolos (9 unit test baru:
 `hrefMenuAktif` 4, `PilihTanggal` 3, dan `adaJadwalLokasiLain` 2). Spec e2e
@@ -35,9 +45,8 @@ Sesudahnya `883a79b` (CV15a sampai CV18a): spec terdampak 31 lolos
 (lihat-jurnal-stok, lihat-jadwal, pindah-dana, tutup-akun-bersaldo, dan spec
 baru `reservasi/navigasi/tab-navigasi.spec.ts` dengan 2 skenario); asersi
 lebar Staf dan kedua skenario tab terbukti gagal terhadap kode lama.
-Harapan suite penuh 642: 637 ditambah skenario Kosongkan, B165, lebar
-Staf, dan dua skenario tab (hitungan); suite penuh menunggu izin pemilik
-proyek.
+Harapan suite penuh sempat ditulis 642 (salah hitung; lihat suite penuh
+14 November 2026 di atas).
 
 **Suite penuh per OTP aksi Owner** (web `8c3c1ea`, backend `ridho` lokal
 `d6709a1`, 13 November 2026, pukul 11.47 sampai 12.24 WIB, reporter
