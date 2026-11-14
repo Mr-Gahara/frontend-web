@@ -158,6 +158,8 @@ describe("simulasiGenerate (keputusan GN2a)", () => {
   const POLA: PolaRosterItem = {
     id: "pola",
     namaPola: "Pola",
+    keterangan: null,
+    dibuatPada: null,
     siklusHari: 2,
     detailSiklus: [
       { hariKe: 1, isLibur: false, shiftID: "s1" },

@@ -1,13 +1,11 @@
 "use client";
 
-import { SyaratDiskon } from "@/features/diskon/syarat-diskon";
 import { useState, useCallback, useMemo, useRef } from "react";
 import { useSession } from "@/lib/auth/useSession";
 import { useRouter } from "next/navigation";
 import { pesanError } from "@/lib/api/error";
 import { useLokasiAktif } from "@/features/inventaris/hooks";
 import { useDaftarPelanggan } from "@/features/pelanggan/hooks";
-import { cocokCariPelanggan, labelPelangganTerpilih } from "@/features/pelanggan/tampilan";
 import { useDaftarDiskon } from "@/features/diskon/hooks";
 import { diskonAktif } from "@/features/diskon/filter";
 import { useDaftarPajak } from "@/features/pajak/hooks";
@@ -16,6 +14,9 @@ import { useBuatPenjualan } from "./hooks";
 import { emptyItem, hitungSimulasi, type ItemState } from "./simulasi";
 import { KartuItemPenjualan } from "./kartu-item-penjualan";
 import { RingkasanTagihan } from "./ringkasan-tagihan";
+import { KartuPelanggan } from "./kartu-pelanggan";
+import { KartuDiskonGlobal } from "./kartu-diskon-global";
+import { toggleDiskonSelection } from "./pilihan-diskon";
 import { DialogKonfirmasiPenjualan } from "./dialog-konfirmasi-penjualan";
 import { susunPayloadPenjualan, validasiPenjualan, waktuTransaksi, type WaktuTransaksi } from "./payload";
 import { InputWaktu } from "@/components/input-waktu";
@@ -23,31 +24,12 @@ import { PilihTanggal } from "@/components/pilih-tanggal";
 import { waktuLengkap, type NilaiWaktu } from "@/lib/waktu";
 import { bolehCakupanPenjualan } from "./izin";
 import { JenisPenjualan, PenjualanRequest } from "@/types/penjualan";
-import type { Diskon } from "@/types/diskon";
 import { useDaftarProduk } from "@/features/produk/hooks";
-import { useDebounce } from "@/hooks/use-debounce";
 import { useJamBerjalan } from "@/hooks/use-jam-berjalan";
-import { formatRupiah } from "@/lib/format";
 
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -55,16 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ArrowLeft,
-  Check,
-  ChevronsUpDown,
-  Plus,
-  Tag,
-  Receipt,
-  Users,
-  ShoppingCart,
-} from "lucide-react";
+import { ArrowLeft, Plus, Receipt, ShoppingCart } from "lucide-react";
 
 export default function HalamanBuatPenjualan() {
   const router = useRouter();
@@ -105,11 +78,8 @@ export default function HalamanBuatPenjualan() {
   );
 
   // COMBOBOX & POPOVER STATE
-  const [openPelanggan, setOpenPelanggan] = useState(false);
-  const [pelangganSearch, setPelangganSearch] = useState("");
   const [openProduk, setOpenProduk] = useState<number | null>(null);
   const [openDiskonItem, setOpenDiskonItem] = useState<number | null>(null);
-  const [openDiskonGlobal, setOpenDiskonGlobal] = useState(false);
 
   // --- QUERY FETCHING ---
   const { data: pelangganList = [] } = useDaftarPelanggan();
@@ -134,40 +104,6 @@ export default function HalamanBuatPenjualan() {
     [pajakList],
   );
 
-  // DEBOUNCE SEARCH PELANGGAN
-  const debouncedPelangganSearch = useDebounce(pelangganSearch, 300);
-  const filteredPelanggan = useMemo(() => {
-    if (!debouncedPelangganSearch) return pelangganList;
-    return pelangganList.filter((p) =>
-      cocokCariPelanggan(p, debouncedPelangganSearch),
-    );
-  }, [pelangganList, debouncedPelangganSearch]);
-
-  // --- HELPER LOGIKA "BISA DIGABUNG" ---
-  const toggleDiskonSelection = (
-    currentIds: string[],
-    newId: string,
-    availableList: Diskon[],
-  ) => {
-    const target = availableList.find((d) => (d.id) === newId);
-    if (!target) return currentIds;
-
-    // Toggle (Unselect)
-    if (currentIds.includes(newId))
-      return currentIds.filter((id) => id !== newId);
-
-    // Jika diskon baru BUKAN tipe yang bisa digabung, reset seluruhnya ke dia saja
-    if (!target.bisaDigabung) return [newId];
-
-    // Cek apakah diskon yang *sudah terpilih* ada yang tidak bisa digabung
-    const currentSelected = availableList.filter((d) =>
-      currentIds.includes(d.id),
-    );
-    const hasNonGabung = currentSelected.some((d) => !d.bisaDigabung);
-    if (hasNonGabung) return [newId]; // Paksa ganti
-
-    return [...currentIds, newId];
-  };
 
   // --- ITEM HANDLERS ---
   const addItem = () => setItems((prev) => [...prev, emptyItem()]);
@@ -447,212 +383,16 @@ export default function HalamanBuatPenjualan() {
 
         {/* ================= KOLOM KANAN (SIDEBAR) ================= */}
         <div className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-6">
-          {/* PELANGGAN */}
-          <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-4">
-            <h2 className="text-base font-bold text-navy flex items-center gap-2">
-              <Users className="w-5 h-5 text-karamel" /> Pelanggan
-            </h2>
-            <div className="space-y-2">
-              <Popover open={openPelanggan} onOpenChange={setOpenPelanggan}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openPelanggan}
-                    className="w-full justify-between font-bold cursor-pointer bg-gading border-navy/20 text-navy"
-                  >
-                    <span
-                      className={
-                        pelangganID ? "" : "text-navy/50 font-medium"
-                      }
-                    >
-                      {pelangganID
-                        ? (labelPelangganTerpilih(pelangganList, pelangganID) ??
-                          "Pelanggan tidak ditemukan")
-                        : "Pilih pelanggan..."}
-                    </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-[--radix-popover-trigger-width] p-0 border-navy/10"
-                  align="start"
-                >
-                  <Command shouldFilter={false} className="bg-gading">
-                    <CommandInput
-                      placeholder="Cari pelanggan..."
-                      value={pelangganSearch}
-                      onValueChange={setPelangganSearch}
-                      className="text-navy"
-                    />
-                    <CommandList>
-                      <CommandEmpty className="py-4 text-center text-xs font-medium text-navy/60">
-                        Pelanggan tidak ditemukan.
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {filteredPelanggan.map((p) => {
-                          const idPelanggan = p.id;
-                          return (
-                            <CommandItem
-                              key={idPelanggan}
-                              onSelect={() => {
-                                setPelangganID(idPelanggan);
-                                setOpenPelanggan(false);
-                                setPelangganSearch("");
-                              }}
-                              className="cursor-pointer text-navy hover:bg-navy/5 font-medium"
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4 text-sage",
-                                  pelangganID === idPelanggan
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              <span>{p.namaPelanggan}</span>
-                              {p.nomorHp ? (
-                                <span className="ml-2 text-xs font-medium text-navy/60">
-                                  {p.nomorHp}
-                                </span>
-                              ) : null}
-                              <span className="ml-auto text-xs font-bold text-navy/50 capitalize">
-                                {p.tipePelanggan}
-                              </span>
-                            </CommandItem>
-                          );
-                        })}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
+          <KartuPelanggan pelangganList={pelangganList} pelangganID={pelangganID} onPilih={setPelangganID} />
 
-          {/* DISKON GLOBAL & KETERANGAN */}
-          <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-5">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-navy flex items-center gap-2">
-                  <Tag className="h-4 w-4 text-karamel" /> Diskon Global
-                </h2>
-                <Popover
-                  open={openDiskonGlobal}
-                  onOpenChange={setOpenDiskonGlobal}
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs cursor-pointer font-bold border-navy/20 text-navy hover:bg-navy/5"
-                    >
-                      Pilih Diskon
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    align="end"
-                    className="w-64 p-0 border-navy/10"
-                  >
-                    <Command className="bg-gading">
-                      <CommandInput
-                        placeholder="Cari diskon transaksi..."
-                        className="text-navy"
-                      />
-                      <CommandList>
-                        <CommandEmpty className="py-4 text-center text-xs font-medium text-navy/60">
-                          Belum ada diskon aktif.
-                        </CommandEmpty>
-                        <CommandGroup>
-                          {activeDiskonGlobal.map((d, index) => {
-                            const targetId = d.id;
-                            const isSelected =
-                              diskonGlobalIDs.includes(targetId);
-                            const safeKey =
-                              targetId || `global-diskon-${index}`;
-                            return (
-                              <CommandItem
-                                key={safeKey}
-                                onSelect={() =>
-                                  setDiskonGlobalIDs((prev) =>
-                                    toggleDiskonSelection(
-                                      prev,
-                                      targetId,
-                                      activeDiskonGlobal,
-                                    ),
-                                  )
-                                }
-                                className="cursor-pointer text-navy hover:bg-navy/5 font-medium"
-                              >
-                                <div className="flex flex-1 items-center gap-2">
-                                  {/* Checkbox Custom */}
-                                  <div
-                                    className={cn(
-                                      "flex h-4 w-4 items-center justify-center rounded-sm border",
-                                      isSelected
-                                        ? "bg-navy border-navy"
-                                        : "border-navy/30",
-                                    )}
-                                  >
-                                    {isSelected && (
-                                      <Check className="h-3 w-3 text-gading" />
-                                    )}
-                                  </div>
-                                  <span className="flex flex-col"><span>{d.namaDiskon}</span><SyaratDiskon diskon={d} /></span>
-                                </div>
-                                <Badge className="text-[10px] bg-karamel text-navy hover:bg-karamel border-none font-bold">
-                                  {d.tipe === "persen" ? `${d.nilai}%` : "Rp"}
-                                </Badge>
-                              </CommandItem>
-                            );
-                          })}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
 
-              {diskonGlobalIDs.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {diskonGlobalIDs.map((id, idx) => {
-                    const d = activeDiskonGlobal.find(
-                      (x) => (x.id) === id,
-                    );
-                    if (!d) return null;
-                    return (
-                      <Badge
-                        key={d.id || `badge-global-${idx}`}
-                        className="bg-karamel text-navy border-none hover:bg-karamel text-[11px] px-2.5 py-1 font-bold shadow-sm"
-                      >
-                        {d.namaDiskon} (
-                        {d.tipe === "persen"
-                          ? `${d.nilai}%`
-                          : formatRupiah(d.nilai)}
-                        )
-                      </Badge>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2 border-t border-navy/10 pt-4">
-              <label className="text-sm font-bold text-navy" htmlFor="keterangan">
-                Keterangan{" "}
-                <span className="font-medium text-navy/50">
-                  (Opsional)
-                </span>
-              </label>
-              <Input
-                id="keterangan"
-                value={keterangan}
-                onChange={(e) => setKeterangan(e.target.value)}
-                placeholder="Catatan transaksi..."
-                className="text-sm bg-gading border-navy/20 text-navy placeholder:text-navy/30"
-              />
-            </div>
-          </div>
+          <KartuDiskonGlobal
+            diskonList={activeDiskonGlobal}
+            terpilih={diskonGlobalIDs}
+            onUbah={setDiskonGlobalIDs}
+            keterangan={keterangan}
+            onKeterangan={setKeterangan}
+          />
 
           {/* RINGKASAN TAGIHAN */}
           <RingkasanTagihan calc={calc} />

@@ -78,6 +78,8 @@ describe("nilaiAwalPolaRoster", () => {
     const pola: PolaRosterItem = {
       id: "p1",
       namaPola: "Reguler",
+      keterangan: null,
+      dibuatPada: null,
       siklusHari: 1,
       detailSiklus: [{ hariKe: 1, isLibur: false, shiftID: null, shift: { id: "aktif-1" } }],
     };

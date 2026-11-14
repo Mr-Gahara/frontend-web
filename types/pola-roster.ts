@@ -16,18 +16,17 @@ export interface DetailSiklusItem {
 
 /**
  * Pola roster dari GET /polaroster, sesuai mappers/polaRosterMapper.js
- * backend 00b9957. Backend tidak punya field status (keputusan Fase 0).
- * keterangan dan dibuatPada opsional hanya agar pemetaan halaman generate
- * lama tetap berlaku; dijadikan wajib saat generate dimigrasikan
- * (submodul 4).
+ * backend (ridho lokal d6709a1): keterangan dan dibuatPada selalu dikirim,
+ * berisi null bila kosong. Backend tidak punya field status (keputusan
+ * Fase 0).
  */
 export interface PolaRosterItem {
   id: string;
   namaPola: string;
   siklusHari: number;
   detailSiklus: DetailSiklusItem[];
-  keterangan?: string | null;
-  dibuatPada?: string | null;
+  keterangan: string | null;
+  dibuatPada: string | null;
 }
 
 /** Payload POST dan PUT /polaroster: shiftID hanya untuk hari kerja. */
