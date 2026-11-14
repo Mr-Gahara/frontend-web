@@ -119,6 +119,20 @@ for (const ruang of ["outlet", "gudang"] as const) {
 // ============================================================
 // MIGRASI features/jadwal (keputusan J1a dan JD5a)
 // ============================================================
+test("kolom Staf dikunci 220 px di desktop dan 112 px di HP (CV16a)", async ({ page }) => {
+  await bukaDenganAuth(page, URL_JADWAL_OUTLET);
+  const kepala = page.getByRole("columnheader", { name: /Staf \/ Karyawan/i });
+  for (const [lebar, harapan] of [
+    [1280, 220],
+    [390, 112],
+  ] as const) {
+    await page.setViewportSize({ width: lebar, height: 800 });
+    await expect
+      .poll(async () => Math.round((await kepala.boundingBox())?.width ?? 0), { message: `lebar Staf di ${lebar} px` })
+      .toBe(harapan);
+  }
+});
+
 test("rentang bulan memakai tanggal lokal (keputusan J1a)", async ({ page }) => {
   const tunggu = page.waitForResponse(cocok("GET", POLA_DAFTAR_JADWAL));
   await bukaDenganAuth(page, URL_JADWAL_OUTLET);

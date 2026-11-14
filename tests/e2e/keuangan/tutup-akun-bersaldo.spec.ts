@@ -86,7 +86,8 @@ test.describe("tutup akun kas bersaldo", () => {
         const keteranganBatal = "E2E tutup dibatalkan " + tanda;
         await pindahkanSatuRupiah(page, akunSumber.namaAkun, nama, keteranganBatal);
         const baris = page.getByRole("row").filter({ hasText: keteranganBatal });
-        await baris.getByRole("button", { name: "Batalkan" }).click();
+        await baris.getByRole("button", { name: "Aksi transfer" }).click();
+        await page.getByRole("menuitem", { name: "Batalkan transfer" }).click();
         const dialog = page.getByRole("dialog");
         const tungguBatal = page.waitForResponse(
           (r) => POLA_TRANSFER_ID.test(r.url()) && r.request().method() === "PUT",

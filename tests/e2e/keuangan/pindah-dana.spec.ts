@@ -79,7 +79,9 @@ test.describe("pindah dana", () => {
       await expect(baris).toContainText("Aktif");
       await expect(page.getByLabel("Jumlah (Rp)"), "form dikosongkan setelah berhasil").toHaveValue("");
 
-      await baris.getByRole("button", { name: "Batalkan" }).click();
+      // Aksi baris di menu titik tiga (CV17a).
+      await baris.getByRole("button", { name: "Aksi transfer" }).click();
+      await page.getByRole("menuitem", { name: "Batalkan transfer" }).click();
       const dialog = page.getByRole("dialog");
       await expect(dialog).toContainText(namaTujuan);
       await dialog.getByLabel(/Alasan pembatalan/).fill(alasan);
@@ -95,7 +97,7 @@ test.describe("pindah dana", () => {
 
       await expect(baris).toContainText("Dibatalkan");
       await expect(baris).toContainText("Alasan batal: " + alasan);
-      await expect(baris.getByRole("button", { name: "Batalkan" })).toHaveCount(0);
+      await expect(baris.getByRole("button", { name: "Aksi transfer" })).toHaveCount(0);
 
       expect(await saldoAkun(page, auth, idTujuan), "saldo tujuan pulih").toBe(0);
       expect(await saldoAkun(page, auth, akunSumber.id), "saldo sumber pulih").toBe(saldoSumberAwal);
@@ -219,6 +221,6 @@ test.describe("pindah dana: pengguna baca-saja", () => {
     if ((isi.data ?? []).some((t) => t.status === "AKTIF")) {
       await expect(page.getByRole("cell", { name: "Aktif", exact: true }).first()).toBeVisible();
     }
-    await expect(page.getByRole("button", { name: "Batalkan" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Aksi transfer" })).toHaveCount(0);
   });
 });

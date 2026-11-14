@@ -41,9 +41,11 @@ export function ReservasiNavTabs() {
           // Logika Penting:
           // Karena base path "/dashboard/reservasi" akan selalu match dengan `startsWith` 
           // untuk sub-rute lainnya, kita pakai strict match (===) khusus untuk tab utama.
+          // Buat Reservasi bukan turunan tab mana pun; reservasi barunya tampil
+          // di timeline, sehingga tab Dasbor Timeline yang menyala (CV18a).
           const isActive =
             href === "/dashboard/outlet/reservasi"
-              ? pathname === href
+              ? pathname === href || pathname === "/dashboard/outlet/reservasi/buatReservasi"
               : pathname.startsWith(href);
 
           return (
@@ -51,7 +53,7 @@ export function ReservasiNavTabs() {
               key={href}
               href={href}
               className={cn(
-                "flex flex-1 items-center justify-center gap-2 py-3 px-4 text-sm font-bold whitespace-nowrap transition-all border-b-4 rounded-none bg-transparent cursor-pointer -mb-px focus-visible:ring-0 focus-visible:outline-none",
+                "flex flex-1 items-center justify-center gap-2 py-3 px-4 text-sm font-bold whitespace-nowrap transition-all border-b-4 rounded-none bg-transparent cursor-pointer -mb-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-navy/50 focus-visible:rounded-t-md",
                 isActive
                   ? "border-navy text-navy shadow-none"
                   : "border-transparent text-navy/50 hover:text-navy/80 hover:bg-transparent hover:border-navy/20"

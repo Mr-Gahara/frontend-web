@@ -67,7 +67,9 @@ export function JadwalGrid({
           {/* HEADER TANGGAL */}
           <thead className="sticky top-0 z-20 bg-[#F8F3EB] shadow-sm">
             <tr>
-              <th className="sticky left-0 z-30 bg-[#F8F3EB] border-b border-r border-navy/10 p-3 md:p-4 min-w-35 md:min-w-55">
+              {/* Lebar Staf dikunci 112 px di HP dan 220 px mulai md, agar tabel tidak
+                  membagi sisa ruang ke kolom ini (CV16a). */}
+              <th className="sticky left-0 z-30 bg-[#F8F3EB] border-b border-r border-navy/10 p-3 md:p-4 w-28 min-w-28 max-w-28 md:w-55 md:min-w-55 md:max-w-55">
                 <span className="font-bold text-navy/70 uppercase tracking-wider text-[10px] md:text-xs">
                   Staf / Karyawan
                 </span>
@@ -144,7 +146,7 @@ export function JadwalGrid({
                   className="hover:bg-navy/2 group transition-colors"
                 >
                   {/* IDENTITAS KARYAWAN */}
-                  <td className="sticky left-0 z-10 bg-gading group-hover:bg-[#FDF9F2] border-b border-r border-navy/10 p-3 md:p-4 align-top">
+                  <td className="sticky left-0 z-10 bg-gading group-hover:bg-[#FDF9F2] border-b border-r border-navy/10 p-3 md:p-4 align-top w-28 min-w-28 max-w-28 md:w-55 md:min-w-55 md:max-w-55">
                     <div className="flex items-start md:items-center gap-2 md:gap-3">
                       <Avatar className="hidden sm:flex h-8 w-8 md:h-9 md:w-9 border border-navy/10 shrink-0">
                         <AvatarFallback className="bg-navy/10 text-navy font-bold text-[10px] md:text-xs">
@@ -152,7 +154,7 @@ export function JadwalGrid({
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col min-w-0">
-                        <span className="font-bold text-navy text-xs md:text-sm truncate">
+                        <span title={emp.nama} className="font-bold text-navy text-xs md:text-sm truncate">
                           {emp.nama}
                         </span>
                         <span className="text-[9px] md:text-[10px] font-semibold text-navy/50 uppercase tracking-wider truncate">

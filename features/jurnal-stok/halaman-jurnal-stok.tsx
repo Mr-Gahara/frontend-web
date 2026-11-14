@@ -29,7 +29,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BookOpen, MapPin, Filter, MoreHorizontal } from "lucide-react";
+import { BookOpen, MapPin, MoreHorizontal } from "lucide-react";
 
 const TEKS = {
   outlet: {
@@ -269,16 +269,18 @@ export default function HalamanJurnalStok({
             />
           </div>
 
+          {/* Berlabel seperti isian filter lain, tanpa ikon corong (CV15a). */}
+          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
+          <span id={`label-arah-${ruang}`} className={KELAS_LABEL_FILTER}>Arah</span>
           <Select
             value={arah}
             onValueChange={(nilai) => ubahFilter(() => setArah(nilai as FilterArah))}
             disabled={nonaktif}
           >
             <SelectTrigger
-              aria-label="Filter arah"
-              className="col-span-2 sm:col-span-1 w-full sm:w-[190px] h-10 *:data-[slot=select-value]:flex-1 *:data-[slot=select-value]:text-left bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
+              aria-labelledby={`label-arah-${ruang}`}
+              className="w-full sm:w-[190px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
             >
-              <Filter className="w-3.5 h-3.5 mr-2 text-navy/50" />
               <SelectValue placeholder="Semua Arah" />
             </SelectTrigger>
             <SelectContent className="bg-white border-navy/10 text-navy">
@@ -287,15 +289,18 @@ export default function HalamanJurnalStok({
               <SelectItem value="Keluar" className="font-bold text-rose-600">Barang Keluar</SelectItem>
             </SelectContent>
           </Select>
+          </div>
 
+          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
+          <span id={`label-alasan-${ruang}`} className={KELAS_LABEL_FILTER}>Alasan</span>
           <Select
             value={alasan}
             onValueChange={(nilai) => ubahFilter(() => setAlasan(nilai as FilterAlasan))}
             disabled={nonaktif}
           >
             <SelectTrigger
-              aria-label="Filter alasan"
-              className="col-span-2 sm:col-span-1 w-full sm:w-[200px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
+              aria-labelledby={`label-alasan-${ruang}`}
+              className="w-full sm:w-[200px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
             >
               <SelectValue placeholder="Semua Alasan" />
             </SelectTrigger>
@@ -309,6 +314,7 @@ export default function HalamanJurnalStok({
               <SelectItem value="Lainnya" className="font-medium">Lainnya</SelectItem>
             </SelectContent>
           </Select>
+          </div>
 
           <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
             <label htmlFor={`cari-jurnal-${ruang}`} className={KELAS_LABEL_FILTER}>

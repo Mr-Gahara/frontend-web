@@ -142,7 +142,11 @@ test.describe("Jurnal stok", () => {
   test("outlet: filter arah dikirim sebagai tipeKoreksi dan kembali ke halaman 1", async ({ page }) => {
     await bukaJurnal(page, URL_OUTLET);
     const tKeluar = tungguJurnal(page, (q) => q.get("tipeKoreksi") === "Keluar" && q.get("page") === "1");
-    await page.getByText("Semua Arah", { exact: true }).click();
+    // Pemicu berlabel "Arah", tanpa ikon corong (CV15a).
+    const pemicuArah = page.getByRole("combobox", { name: "Arah", exact: true });
+    await expect(pemicuArah).toHaveText("Semua Arah");
+    await expect(pemicuArah.locator("svg.lucide-funnel, svg.lucide-filter")).toHaveCount(0);
+    await pemicuArah.click();
     await page.getByRole("option", { name: "Barang Keluar" }).click();
 
     const halaman = await bacaHalaman(await tKeluar);
@@ -165,7 +169,7 @@ test.describe("Jurnal stok", () => {
     await bukaJurnal(page, URL_OUTLET);
     for (const alasan of ["Pembelian", "Penjualan"]) {
       const t = tungguJurnal(page, (q) => q.get("alasan") === alasan && q.get("page") === "1");
-      await page.getByRole("combobox", { name: "Filter alasan" }).click();
+      await page.getByRole("combobox", { name: "Alasan", exact: true }).click();
       await page.getByRole("option", { name: alasan, exact: true }).click();
       const halaman = await bacaHalaman(await t);
       expect(halaman.data.every((j) => j.alasan === alasan), `seluruh baris beralasan ${alasan}`).toBe(true);

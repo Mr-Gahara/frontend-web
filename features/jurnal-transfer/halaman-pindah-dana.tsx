@@ -4,7 +4,7 @@ import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowLeftRight } from "lucide-react";
+import { ArrowLeft, ArrowLeftRight, MoreHorizontal } from "lucide-react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -12,6 +12,12 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { PilihTanggal } from "@/components/pilih-tanggal";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -368,16 +374,32 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
       {
         id: "aksi",
         header: () => <span className="sr-only">Aksi</span>,
+        // Aksi baris di menu titik tiga seperti tabel lain (TB, CV17a).
         cell: ({ row }) =>
           bolehBatal && row.original.status === "AKTIF" ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setDibatalkan(row.original)}
-            >
-              Batalkan
-            </Button>
+            <div className="flex justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Aksi transfer"
+                    className="h-8 w-8 cursor-pointer text-navy/70 hover:text-navy hover:bg-navy/5"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 bg-gading border-navy/10">
+                  <DropdownMenuItem
+                    onClick={() => setDibatalkan(row.original)}
+                    className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10 font-bold"
+                  >
+                    Batalkan transfer
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           ) : null,
       },
     ],
