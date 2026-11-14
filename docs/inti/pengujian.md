@@ -31,8 +31,13 @@ ulang atas izin pemilik proyek: 147 lolos, tanpa OTP. Kedua run itu
 bukan suite penuh dan tidak memakai kuota OTP (0 berkas OTP), tetapi run
 pertama mencakup lebih dari separuh suite; sesudahnya tidak ada run e2e
 sampai suite penuh atas izin pemilik proyek.
-Harapan suite penuh 639: 637 ditambah kedua skenario itu (hitungan); suite penuh
-menunggu izin pemilik proyek.
+Sesudahnya `883a79b` (CV15a sampai CV18a): spec terdampak 31 lolos
+(lihat-jurnal-stok, lihat-jadwal, pindah-dana, tutup-akun-bersaldo, dan spec
+baru `reservasi/navigasi/tab-navigasi.spec.ts` dengan 2 skenario); asersi
+lebar Staf dan kedua skenario tab terbukti gagal terhadap kode lama.
+Harapan suite penuh 642: 637 ditambah skenario Kosongkan, B165, lebar
+Staf, dan dua skenario tab (hitungan); suite penuh menunggu izin pemilik
+proyek.
 
 **Suite penuh per OTP aksi Owner** (web `8c3c1ea`, backend `ridho` lokal
 `d6709a1`, 13 November 2026, pukul 11.47 sampai 12.24 WIB, reporter

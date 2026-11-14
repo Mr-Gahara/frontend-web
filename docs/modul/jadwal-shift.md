@@ -309,4 +309,7 @@ modul ini yang memakai `apiClient`.
   sel dan Tambah Manual (`modul/ui-ux.md`, CV3a dan CV10a).
 - Kolom Staf / Karyawan kalender jadwal selebar sekitar 460 px di 1280 px,
   sehingga hanya tiga hari yang terlihat tanpa gulir (terlihat 14
-  November 2026); kalender menunggu pratinjau tersendiri (TB4a).
+  November 2026); kalender menunggu pratinjau tersendiri (TB4a). Diukur
+  462 px di 1280 px dan 362 px di HP, sehingga di HP tidak ada hari yang
+  terlihat. Selesai di `883a79b`: dikunci 220 px mulai `md` dan 112 px di HP
+  (`modul/ui-ux.md`, CV16a); tabel kalender lainnya tetap menunggu TB4a.

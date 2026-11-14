@@ -259,6 +259,35 @@ Perbaikan di `609b36a` (tampilan) dan `0df0ca5` (perilaku).
   modul.** Aturan yang sempat ditambahkan ke butir 26 tanpa ditanyakan
   dicabut; caranya cukup tercatat di CV1a untuk ketujuh tabel itu.
 
+### Temuan tampilan tersisa 14 November 2026
+
+Diputuskan pemilik proyek pada 14 November 2026 dari kanvas desain
+"Temuan Tampilan Tersisa" (sekarang dan usulan per temuan), setelah
+sampel tampilan dan pengukuran DOM. Perbaikan di `883a79b`.
+
+- **CV15a: filter Arah dan Alasan jurnal stok berlabel** (desain A): label
+  "Arah" dan "Alasan" bergaya label filter yang sama dan menjadi nama
+  aksesibel pemicunya (`aria-labelledby`); ikon corong di pemicu Arah
+  dibuang. Berlaku di ruang outlet dan gudang.
+- **CV16a: kolom Staf kalender jadwal dikunci** (desain A): 220 px mulai
+  `md` dan 112 px di HP, lewat lebar, lebar minimum, dan lebar maksimum
+  yang sama pada kepala dan sel. Sebelumnya hanya lebar minimum, sehingga
+  tabel membagi sisa ruang ke kolom ini (462 px di 1280 px, 362 px di HP,
+  dan di HP kolom yang menempel kiri menutup seluruh hari). Nama panjang
+  terpotong dengan nama lengkap di tooltip; avatar tetap tersembunyi di
+  HP. Teks kepala "Staf / Karyawan" tidak diubah.
+- **CV17a: aksi riwayat Pindah Dana di menu titik tiga** ("Aksi
+  transfer"), berisi satu item merah "Batalkan transfer" yang membuka
+  dialog Batalkan yang sudah ada; tampil hanya bila transfer Aktif dan
+  pengguna boleh membatalkan.
+- **CV18a: Dasbor Timeline menyala di Buat Reservasi, dan tab bercincin
+  saat fokus keyboard** (desain 4A dan 5A). Cincin 2 px navy 50% di dalam
+  tab (`focus-visible:ring-2 ring-inset ring-navy/50`, sudut atas
+  membulat) menggantikan `focus-visible:ring-0`. Tab memakai
+  `transition-all`, sehingga cincin baru penuh setelah transisi; spec
+  menunggunya lewat `expect.poll`. Diterapkan juga di
+  `inventaris-nav-tabs.tsx` sesuai opsi, tetapi komponen itu kode mati.
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E
@@ -514,9 +543,13 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
 - Temuan pemindaian 14 November 2026 yang dibiarkan karena dirancang:
   kalender jadwal dan deretan tab bergulir ke samping; keterangan Mutasi
   Kas di kartu HP dan nama aset di timeline reservasi dipotong "...".
-  Belum ditinjau: aksi riwayat Pindah Dana masih tombol Batalkan, bukan
-  menu titik tiga (TB); tab Manajemen Booking tidak menandai tab mana pun
-  di Buat Reservasi.
+  Aksi riwayat Pindah Dana yang masih tombol Batalkan dan tab Manajemen
+  Booking yang tidak menandai tab mana pun di Buat Reservasi selesai di
+  `883a79b` (CV17a, CV18a).
+- `app/dashboard/outlet/inventaris/components/inventaris-nav-tabs.tsx`
+  tidak dipasang di halaman mana pun (kode mati; ditemukan 14 November
+  2026 saat menerapkan CV18a). Penghapusannya menunggu keputusan pemilik
+  proyek.
 - Bayangan kartu baris memakai `filter` pada elemen `tr`. Di browser yang
   tidak mendukungnya, kartu tampil dengan bingkai saja.
 - Suite e2e penuh dijalankan ulang pada 16 Oktober 2026 terhadap backend

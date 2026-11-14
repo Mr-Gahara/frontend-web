@@ -804,10 +804,9 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
 - Tab Keuangan memakai `focus-visible:ring-0`, sehingga tab tidak punya
   penanda fokus saat dipakai dengan keyboard. Dipertahankan di
   `b3f8698` karena tidak ada di pratinjau yang disetujui. Gugur di
-  `7b90716`: bar tab Keuangan dibuang (SK2a). Kelas yang sama masih
-  dipakai tab navigasi Inventaris dan Reservasi
-  (`inventaris-nav-tabs.tsx`, `reservasi-nav-tabs.tsx`; terlihat
-  14 November 2026).
+  `7b90716`: bar tab Keuangan dibuang (SK2a). Kelas yang sama di tab
+  navigasi Inventaris dan Reservasi diganti cincin fokus di `883a79b`
+  (`modul/ui-ux.md`, CV18a).
 - Keadaan memuat, gagal dimuat, sesi lintas tengah malam, Muat hari
   sebelumnya, serta posisi panel di HP dan desktop tidak lagi teruji e2e
   sejak spec pratinjau dihapus di `b74f30a` (daftar periksa nomor 6);

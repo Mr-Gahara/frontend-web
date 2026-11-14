@@ -124,8 +124,11 @@ dengan alur kanvas desain seperti butir di bawah:
    pemindaian seluruh rute dashboard di 1280 dan 390 px, lalu perbaikan
    teks terpotong, luberan HP, tabel 1280, menu aktif sidebar, peringatan
    grafik, Libur B165, dialog hapus jadwal, Kosongkan tanggal, dan Buat
-   Posisi. "Akun non-aktif" ternyata seluruhnya sisa uji E2E. Suite e2e
-   penuh menunggu izin pemilik proyek.
+   Posisi. "Akun non-aktif" ternyata seluruhnya sisa uji E2E. Temuan
+   tampilan tersisa (label filter jurnal, kolom Staf jadwal, menu Pindah
+   Dana, tab Booking, cincin fokus) selesai lewat kanvas desain di
+   `883a79b` (CV15a sampai CV18a). Suite e2e penuh menunggu izin pemilik
+   proyek.
 
 ### Menunggu desain pemilik proyek
 

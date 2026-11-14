@@ -681,7 +681,9 @@ Yang masih berlaku:
   `609b36a`: pemicu Arah dan Alasan 190 dan 200 px, di HP selebar penuh
   (`modul/ui-ux.md`, CV2b).
 - Pemicu Arah dan Alasan jurnal stok tidak berlabel, berbeda dengan isian
-  filter lain di baris yang sama (terlihat 14 November 2026).
+  filter lain di baris yang sama (terlihat 14 November 2026). Selesai di
+  `883a79b`: label "Arah" dan "Alasan", tanpa ikon corong (`modul/ui-ux.md`,
+  CV15a).
 
 ### Utang kecil dari pembelian stok
 
