@@ -1,5 +1,7 @@
 "use client";
 
+import { kolomMuatan } from "./kolom-muatan";
+import { DataTable } from "@/components/ui/data-table";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -187,78 +189,16 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* KOLOM KIRI: DETAIL ITEM */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
-            <div className="bg-krem px-6 py-4 border-b border-navy/10 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Package className="w-5 h-5 text-karamel" />
-                <h2 className="font-bold text-navy">Muatan Pengiriman</h2>
-              </div>
-              <span className="text-xs font-bold bg-white px-3 py-1 rounded-full text-navy/60 shadow-sm border border-navy/10">
-                Total {detail.items.length} Macam Barang
-              </span>
+          {/* Tabel rincian berkartu baris, tanpa panel berlatar (CV22a). */}
+          <section aria-label="Muatan Pengiriman" className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-base font-bold text-navy flex items-center gap-2">
+                <Package className="w-5 h-5 text-karamel" /> Muatan Pengiriman
+              </h2>
+              <span className="text-xs font-bold text-navy/60">Total {detail.items.length} Macam Barang</span>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-gading text-xs uppercase font-bold text-navy/50 border-b border-navy/5">
-                  <tr>
-                    <th className="px-6 py-4">Nama Barang</th>
-                    <th className="px-6 py-4 text-center">Dikirim</th>
-                    {/* Tampilkan kolom diterima & selisih hanya jika status DITERIMA */}
-                    {detail.status === "DITERIMA" && (
-                      <>
-                        <th className="px-6 py-4 text-center">Diterima</th>
-                        <th className="px-6 py-4 text-center">Selisih</th>
-                      </>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-navy/5">
-                  {detail.items.map((item, index) => (
-                    <tr key={index} className="hover:bg-gading/50">
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-navy">
-                            {item.bahanBaku?.namaBahan || "Item Tidak Dikenal"}
-                          </span>
-                          {item.catatanItem && (
-                            <span className="text-xs text-rose-600 font-medium italic mt-1">
-                              Catatan: {item.catatanItem}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="font-mono font-bold text-navy bg-navy/5 px-3 py-1 rounded-md border border-navy/10">
-                          {item.qtyKirim}{" "}
-                          <span className="text-xs font-sans font-medium text-navy/60">
-                            {item.bahanBaku?.satuan}
-                          </span>
-                        </span>
-                      </td>
-                      {detail.status === "DITERIMA" && (
-                        <>
-                          <td className="px-6 py-4 text-center font-mono font-bold text-navy">
-                            {item.qtyTerima}
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <span
-                              className={`font-mono font-bold px-2 py-1 rounded-md ${
-                                item.selisih === 0
-                                  ? "text-emerald-600 bg-emerald-50"
-                                  : "text-rose-600 bg-rose-50"
-                              }`}
-                            >
-                              {item.selisih === 0 ? "Pas" : item.selisih}
-                            </span>
-                          </td>
-                        </>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+            <DataTable rincian columns={kolomMuatan(detail.status === "DITERIMA")} data={detail.items} emptyMessage="Tidak ada barang." />
+          </section>
         </div>
 
         {/* KOLOM KANAN: INFO RUTE & ACTION BUTTONS */}

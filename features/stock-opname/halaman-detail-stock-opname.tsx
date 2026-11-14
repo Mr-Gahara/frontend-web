@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { StockOpname, StatusOpname } from "@/types/stockOpname";
+import { StockOpname, StatusOpname, type StockOpnameItem } from "@/types/stockOpname";
+import type { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
+import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { toast } from "sonner";
 import { isNotFound, pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
@@ -226,6 +229,21 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
     }));
   };
 
+  // Selisih baris saat ini: dari isian lokal selama dapat diubah, selain itu
+  // dari angka fisik tersimpan (aturan sama dengan tabel lama).
+  const selisihBaris = (item: StockOpnameItem): { selisih: number | string; berbeda: boolean } => {
+    const localData = editedItems[item.itemId];
+    if (isEditable && localData?.qtyPhysical !== "") {
+      const selisih = Number(localData?.qtyPhysical || 0) - item.qtySystemSnapshot;
+      return { selisih, berbeda: selisih !== 0 };
+    }
+    if (!isEditable && item.qtyPhysical !== null && item.qtyPhysical !== undefined) {
+      const selisih = item.qtyPhysical - item.qtySystemSnapshot;
+      return { selisih, berbeda: selisih !== 0 };
+    }
+    return { selisih: "-", berbeda: false };
+  };
+
   const handleInputPhysical = (itemId: string, value: string) => {
     const raw = value.replace(/[^0-9]/g, ""); // Hanya angka
     handleItemChange(itemId, "qtyPhysical", raw);
@@ -392,11 +410,11 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
         </div>
       </div>
 
-      {/* TABEL ITEM OPNAME */}
-      <div className="rounded-2xl border border-navy/10 bg-krem shadow-sm overflow-hidden flex flex-col">
-        <div className="p-5 border-b border-navy/5 flex items-center justify-between bg-gading">
-          <h2 className="font-bold text-navy">Daftar Item & Hasil Perhitungan</h2>
-          
+      {/* TABEL ITEM OPNAME: tabel rincian berkartu baris, tanpa panel berlatar (CV22a). */}
+      <section aria-label="Daftar Item & Hasil Perhitungan" className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-base font-bold text-navy">Daftar Item &amp; Hasil Perhitungan</h2>
+
           {/* Tombol Simpan Draft khusus Staf (Jika DRAFT/REJECTED) */}
           {isEditable && (
             <Button
@@ -412,115 +430,107 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
             </Button>
           )}
         </div>
-        
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gading text-navy/60 border-b border-navy/5 uppercase tracking-wider text-[10px]">
-              <tr>
-                <th className="px-5 py-4 font-bold">Nama Item</th>
-                <th className="px-5 py-4 font-bold text-center">Stok Sistem</th>
-                <th className="px-5 py-4 font-bold text-center w-36">Stok Fisik <span className="text-red-500">*</span></th>
-                <th className="px-5 py-4 font-bold text-center">Selisih</th>
-                <th className="px-5 py-4 font-bold min-w-50">Catatan / Alasan Selisih</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/5 bg-gading">
-              {/* FIX: Tambahkan optional chaining pada opname.items */}
-              {opname.items?.map((item) => {
-                // Menentukan display value untuk stok fisik
+
+        <DataTable
+          rincian
+          data={opname.items ?? []}
+          emptyMessage="Tidak ada data item dalam dokumen opname ini."
+          columns={[
+            {
+              id: "nama",
+              header: "Nama Item",
+              meta: { lebarBungkus: 220 },
+              cell: ({ row }) => (
+                <div>
+                  <TeksDuaBaris teks={row.original.namaSnapshot} className="font-bold text-navy" />
+                  <p className="text-xs text-navy/50 font-medium">Satuan: {row.original.satuanSnapshot}</p>
+                </div>
+              ),
+            },
+            {
+              id: "sistem",
+              header: () => <div className="text-center">Stok Sistem</div>,
+              meta: { label: "Stok Sistem" },
+              cell: ({ row }) => (
+                <div className="sm:text-center font-bold text-navy font-mono">{row.original.qtySystemSnapshot}</div>
+              ),
+            },
+            {
+              id: "fisik",
+              header: () => (
+                <div className="text-center w-36">
+                  Stok Fisik <span className="text-red-500">*</span>
+                </div>
+              ),
+              meta: { label: "Stok Fisik" },
+              cell: ({ row }) => {
+                const item = row.original;
                 const localData = editedItems[item.itemId];
-                const displayQtyPhys = isEditable ? (localData?.qtyPhysical ?? "") : (item.qtyPhysical ?? "-");
-                
-                // Menghitung selisih real-time saat edit
-                let diffDisplay: number | string = "-";
-                let isMismatch = false;
-
-                if (isEditable && localData?.qtyPhysical !== "") {
-                  const phys = Number(localData?.qtyPhysical || 0);
-                  diffDisplay = phys - item.qtySystemSnapshot;
-                  isMismatch = diffDisplay !== 0;
-                } else if (!isEditable && item.qtyPhysical !== null && item.qtyPhysical !== undefined) {
-                  diffDisplay = item.qtyPhysical - item.qtySystemSnapshot;
-                  isMismatch = diffDisplay !== 0;
-                }
-
-                return (
-                  <tr key={item.itemId} className="hover:bg-navy/5 transition-colors">
-                    <td className="px-5 py-4">
-                      <p className="font-bold text-navy">{item.namaSnapshot}</p>
-                      <p className="text-xs text-navy/50 font-medium">Satuan: {item.satuanSnapshot}</p>
-                    </td>
-                    
-                    <td className="px-5 py-4 text-center font-bold text-navy font-mono bg-navy/5">
-                      {item.qtySystemSnapshot}
-                    </td>
-                    
-                    <td className="px-5 py-4">
-                      {isEditable ? (
-                        <Input
-                          type="text"
-                          inputMode="numeric"
-                          placeholder="0"
-                          value={localData?.qtyPhysical ?? ""}
-                          onChange={(e) => handleInputPhysical(item.itemId, e.target.value)}
-                          className="w-full text-center font-bold font-mono bg-white border-navy/20 focus-visible:ring-navy"
-                        />
-                      ) : (
-                        <div className="text-center font-bold text-navy font-mono">
-                          {displayQtyPhys}
-                        </div>
-                      )}
-                    </td>
-                    
-                    <td className="px-5 py-4 text-center">
-                      <Badge
-                        variant="outline"
-                        className={`border-none font-bold font-mono px-2 py-0.5 ${
-                          diffDisplay === "-"
-                            ? "bg-transparent text-navy/30"
-                            : Number(diffDisplay) > 0
-                            ? "bg-emerald-100 text-emerald-700"
-                            : Number(diffDisplay) < 0
-                            ? "bg-rose-100 text-rose-700"
-                            : "bg-navy/10 text-navy"
-                        }`}
-                      >
-                        {Number(diffDisplay) > 0 ? `+${diffDisplay}` : diffDisplay}
-                      </Badge>
-                    </td>
-
-                    <td className="px-5 py-3">
-                      {isEditable ? (
-                        <Input
-                          value={localData?.catatanItem ?? ""}
-                          onChange={(e) => handleItemChange(item.itemId, "catatanItem", e.target.value)}
-                          placeholder="Jika ada selisih, beri alasan..."
-                          className={`w-full text-sm bg-white border-navy/20 focus-visible:ring-navy ${
-                            isMismatch && !(localData?.catatanItem) ? "border-rose-300 bg-rose-50 placeholder:text-rose-300" : ""
-                          }`}
-                        />
-                      ) : (
-                        <p className="text-sm font-medium text-navy/70 italic line-clamp-2">
-                          {item.catatanItem || "-"}
-                        </p>
-                      )}
-                    </td>
-                  </tr>
+                return isEditable ? (
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="0"
+                    value={localData?.qtyPhysical ?? ""}
+                    onChange={(e) => handleInputPhysical(item.itemId, e.target.value)}
+                    className="w-full sm:text-center font-bold font-mono bg-white border-navy/20 focus-visible:ring-navy"
+                  />
+                ) : (
+                  <div className="sm:text-center font-bold text-navy font-mono">{item.qtyPhysical ?? "-"}</div>
                 );
-              })}
-              
-              {/* Fallback Jika tidak ada item */}
-              {(!opname.items || opname.items.length === 0) && (
-                 <tr>
-                   <td colSpan={5} className="text-center py-6 text-navy/50 font-medium">
-                      Tidak ada data item dalam dokumen opname ini.
-                   </td>
-                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              },
+            },
+            {
+              id: "selisih",
+              header: () => <div className="text-center">Selisih</div>,
+              meta: { label: "Selisih" },
+              cell: ({ row }) => {
+                const { selisih } = selisihBaris(row.original);
+                return (
+                  <div className="sm:text-center">
+                    <Badge
+                      variant="outline"
+                      className={`border-none font-bold font-mono px-2 py-0.5 ${
+                        selisih === "-"
+                          ? "bg-transparent text-navy/30"
+                          : Number(selisih) > 0
+                          ? "bg-emerald-100 text-emerald-700"
+                          : Number(selisih) < 0
+                          ? "bg-rose-100 text-rose-700"
+                          : "bg-navy/10 text-navy"
+                      }`}
+                    >
+                      {Number(selisih) > 0 ? `+${selisih}` : selisih}
+                    </Badge>
+                  </div>
+                );
+              },
+            },
+            {
+              id: "catatan",
+              header: () => <div className="min-w-50">Catatan / Alasan Selisih</div>,
+              meta: { label: "Catatan / Alasan Selisih" },
+              cell: ({ row }) => {
+                const item = row.original;
+                const localData = editedItems[item.itemId];
+                const { berbeda } = selisihBaris(item);
+                return isEditable ? (
+                  <Input
+                    value={localData?.catatanItem ?? ""}
+                    onChange={(e) => handleItemChange(item.itemId, "catatanItem", e.target.value)}
+                    placeholder="Jika ada selisih, beri alasan..."
+                    className={`w-full text-sm bg-white border-navy/20 focus-visible:ring-navy ${
+                      berbeda && !(localData?.catatanItem) ? "border-rose-300 bg-rose-50 placeholder:text-rose-300" : ""
+                    }`}
+                  />
+                ) : (
+                  <p className="text-sm font-medium text-navy/70 italic line-clamp-2">{item.catatanItem || "-"}</p>
+                );
+              },
+            },
+          ] satisfies ColumnDef<StockOpnameItem>[]}
+        />
+      </section>
 
       {/* PANEL AKSI FOOTER (Dinamis berdasarkan status) */}
       

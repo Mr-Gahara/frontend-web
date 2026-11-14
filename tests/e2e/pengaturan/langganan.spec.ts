@@ -85,12 +85,13 @@ test.describe("Langganan", () => {
     await expect(page.locator('a[href^="https://wa.me"]')).toHaveCount(0);
   });
 
-  test("di layar HP halaman tidak melebar; riwayat tampil sebagai daftar, bukan tabel", async ({ page }) => {
+  test("di layar HP halaman tidak melebar; riwayat tampil sebagai kartu berlabel (CV22a)", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     const { riwayat } = await bukaLangsung(page);
     await expect(page.getByRole("heading", { level: 2, name: "Riwayat" })).toBeVisible();
-    await expect(page.getByRole("table")).toBeHidden();
-    await expect(page.getByRole("listitem").filter({ hasText: "berlaku sampai" })).toHaveCount(riwayat);
+    const kartu = page.locator("table tbody tr");
+    await expect(kartu).toHaveCount(riwayat);
+    await expect(kartu.first().getByText("Berlaku sampai", { exact: true })).toBeVisible();
     const lebar = await page.evaluate(() => document.documentElement.scrollWidth);
     expect(lebar).toBeLessThanOrEqual(390);
   });

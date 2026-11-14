@@ -5,7 +5,6 @@ import { isNotFound } from "@/lib/api/error";
 import { TIPE_LOKASI_RUANG, URL_DAFTAR_ADJUSTMENT, type RuangAdjustment } from "./ruang";
 import { useStockAdjustment } from "@/features/stock-adjustment/hooks";
 import {
-  formatKoreksi,
   formatTanggalAdjustment,
   susunBarisItem,
 } from "@/features/stock-adjustment/tampilan";
@@ -13,6 +12,8 @@ import { TautanSumber } from "@/features/stock-adjustment/tautan-sumber";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DataTable } from "@/components/ui/data-table";
+import { KOLOM_ITEM_ADJUSTMENT } from "./kolom-item";
 import {
   ArrowLeft,
   Calendar,
@@ -180,89 +181,16 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
         </div>
       </div>
 
-      {/* TABEL ITEM MUTASI */}
-      <div className="rounded-2xl border border-navy/10 bg-gading shadow-sm overflow-hidden flex flex-col">
-        <div className="p-5 border-b border-navy/5 flex items-center justify-between bg-gading">
-          <h2 className="font-bold text-navy">
-            Rekapitulasi Perubahan Saldo Fisik
-          </h2>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-krem text-navy/60 border-b border-navy/10 uppercase tracking-wider text-[10px]">
-              <tr>
-                <th className="px-5 py-4 font-bold">Nama Item</th>
-                <th className="px-5 py-4 font-bold text-center">
-                  Saldo Sistem (Saat Disetujui)
-                </th>
-                <th className="px-5 py-4 font-bold text-center">Fisik Riil</th>
-                <th className="px-5 py-4 font-bold text-center">
-                  Koreksi (Delta)
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/5">
-              {adjustment.items?.map((item) => {
-                const baris = susunBarisItem(item);
-                const warnaKoreksi =
-                  baris.arah === "tambah"
-                    ? "bg-emerald-100 text-emerald-700"
-                    : baris.arah === "kurang"
-                      ? "bg-rose-100 text-rose-700"
-                      : "bg-navy/10 text-navy";
-
-                return (
-                  <tr
-                    key={baris.itemId}
-                    className="hover:bg-navy/5 transition-colors"
-                  >
-                    <td className="px-5 py-4">
-                      <p className="font-bold text-navy">{baris.nama}</p>
-                      <p className="text-xs text-navy/50 font-medium">
-                        Satuan: {baris.satuan}
-                      </p>
-                    </td>
-
-                    <td className="px-5 py-4 text-center font-bold text-navy/60 font-mono">
-                      {baris.qtySistem}
-                      {baris.qtySaatDraf !== null && (
-                        <p className="text-[10px] font-medium text-navy/50 font-sans">
-                          Saat draf: {baris.qtySaatDraf}
-                        </p>
-                      )}
-                    </td>
-
-                    <td className="px-5 py-4 text-center font-bold text-navy font-mono bg-navy/5">
-                      {baris.qtyFisik}
-                    </td>
-
-                    <td className="px-5 py-4 text-center">
-                      <Badge
-                        variant="outline"
-                        className={`border-none font-bold font-mono px-2 py-0.5 ${warnaKoreksi}`}
-                      >
-                        {formatKoreksi(baris.qtyKoreksi)}
-                      </Badge>
-                    </td>
-                  </tr>
-                );
-              })}
-
-              {(!adjustment.items || adjustment.items.length === 0) && (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="text-center py-8 text-navy/50 font-medium"
-                  >
-                    Tidak ada detail item yang direkam dalam jurnal ini.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* TABEL ITEM MUTASI: tabel rincian berkartu baris (CV22a). */}
+      <section aria-label="Rekapitulasi Perubahan Saldo Fisik" className="flex flex-col gap-3">
+        <h2 className="text-base font-bold text-navy">Rekapitulasi Perubahan Saldo Fisik</h2>
+        <DataTable
+          rincian
+          columns={KOLOM_ITEM_ADJUSTMENT}
+          data={(adjustment.items ?? []).map(susunBarisItem)}
+          emptyMessage="Tidak ada detail item yang direkam dalam jurnal ini."
+        />
+      </section>
     </div>
   );
 }

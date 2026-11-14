@@ -1,5 +1,7 @@
 "use client";
 
+import { kolomBarangPengajuanGudang } from "./kolom-barang";
+import { DataTable } from "@/components/ui/data-table";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -219,64 +221,13 @@ export default function HalamanDetailPengajuanGudang() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* KOLOM KIRI: DETAIL ITEM */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
-            <div className="bg-krem px-6 py-4 border-b border-navy/10 flex items-center gap-2">
-              <Package className="w-5 h-5 text-karamel" />
-              <h2 className="font-bold text-navy">{pengembalian ? "Barang yang Dikembalikan" : "Rincian Kebutuhan Outlet"}</h2>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-gading text-xs uppercase font-bold text-navy/50 border-b border-navy/5">
-                  <tr>
-                    <th className="px-6 py-4">Nama Barang</th>
-                    <th className="px-6 py-4 text-center">Permintaan</th>
-                    <th className="px-6 py-4 text-center">{pengembalian ? "Stok Outlet" : "Stok Gudang"}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-navy/5">
-                  {detail.items.map((item, index) => {
-                    const stokTersedia = item.stokGudangSaatIni || 0;
-                    const isKurang = item.jumlah > stokTersedia;
-
-                    return (
-                      <tr key={index} className="hover:bg-gading/50">
-                        <td className="px-6 py-4 font-bold text-navy">
-                          {item.bahanBaku?.namaBahan || "Item Tidak Dikenal"}
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <span className="font-mono font-bold text-navy bg-navy/5 px-3 py-1 rounded-md">
-                            {item.jumlah}{" "}
-                            <span className="text-xs font-sans font-medium text-navy/60">
-                              {item.satuan}
-                            </span>
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <span
-                            className={cn(
-                              "font-mono font-bold px-3 py-1 rounded-md flex items-center justify-center gap-1.5 w-fit mx-auto",
-                              isKurang ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-700",
-                            )}
-                          >
-                            {isKurang && <AlertTriangle className="w-3.5 h-3.5" />}
-                            {stokTersedia}{" "}
-                            <span
-                              className={cn(
-                                "text-xs font-sans font-medium",
-                                isKurang ? "text-rose-600/70" : "text-emerald-700/70",
-                              )}
-                            >
-                              {item.satuan}
-                            </span>
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          {/* Tabel rincian berkartu baris, tanpa panel berlatar (CV22a). */}
+          <section aria-label={pengembalian ? "Barang yang Dikembalikan" : "Rincian Kebutuhan Outlet"} className="flex flex-col gap-3">
+            <h2 className="text-base font-bold text-navy flex items-center gap-2">
+              <Package className="w-5 h-5 text-karamel" /> {pengembalian ? "Barang yang Dikembalikan" : "Rincian Kebutuhan Outlet"}
+            </h2>
+            <DataTable rincian columns={kolomBarangPengajuanGudang(pengembalian)} data={detail.items} emptyMessage="Tidak ada barang." />
+          </section>
 
           {/* Catatan Tambahan */}
           {detail.catatan && (

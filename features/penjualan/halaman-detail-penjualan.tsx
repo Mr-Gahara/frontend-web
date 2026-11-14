@@ -12,6 +12,8 @@ import { lokasiFinalisasi } from "./payload";
 import { aksiPenjualan, bolehBatalkanPembayaran, bolehCakupanPenjualan } from "./izin";
 import { DialogVoidPenjualan } from "./dialog-void-penjualan";
 import { KartuStokKeluar } from "./kartu-stok-keluar";
+import { KOLOM_ITEM_PENJUALAN, kolomRiwayatPembayaran } from "./kolom-detail";
+import { DataTable } from "@/components/ui/data-table";
 import { BookingPenjualan } from "@/features/sesi-booking/booking-penjualan";
 import { planMencakup } from "@/lib/auth/fitur-plan";
 import { PESAN_BATAL_PEMBAYARAN, TAMPILAN_STATUS_PENJUALAN } from "./tampilan";
@@ -331,52 +333,13 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
         </div>
       </div>
 
-      {/* DAFTAR ITEM PRODUK */}
-      <div className="rounded-2xl border border-navy/10 bg-krem shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-navy/5 flex items-center gap-2">
-          <ShoppingCart className="h-5 w-5 text-karamel" />
-          <h2 className="font-bold text-navy">Rincian Item</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gading text-navy/60 border-b border-navy/5">
-              <tr>
-                <th className="px-6 py-4 font-bold">Produk</th>
-                <th className="px-6 py-4 font-bold text-right">Harga</th>
-                <th className="px-6 py-4 font-bold text-center">Qty</th>
-                <th className="px-6 py-4 font-bold text-right">Diskon Item</th>
-                <th className="px-6 py-4 font-bold text-right">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/5 bg-gading">
-              {penjualan.itemPenjualan?.map((item, idx) => (
-                <tr
-                  key={idx}
-                  className="hover:bg-navy/5 transition-colors"
-                >
-                  <td className="px-6 py-4 font-bold text-navy">
-                    {item.namaProduk}
-                  </td>
-                  <td className="px-6 py-4 text-right font-semibold text-navy">
-                    {formatRupiah(item.hargaJual)}
-                  </td>
-                  <td className="px-6 py-4 text-center font-bold text-navy">
-                    {item.jumlah}
-                  </td>
-                  <td className="px-6 py-4 text-right font-semibold text-rose-500 font-mono">
-                    {item.jumlahDiskon > 0
-                      ? `-${formatRupiah(item.jumlahDiskon)}`
-                      : "-"}
-                  </td>
-                  <td className="px-6 py-4 text-right font-bold text-navy font-mono">
-                    {formatRupiah(item.totalharga)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* DAFTAR ITEM PRODUK: tabel rincian berkartu baris (CV22a). */}
+      <section aria-label="Rincian Item" className="flex flex-col gap-3">
+        <h2 className="text-base font-bold text-navy flex items-center gap-2">
+          <ShoppingCart className="h-5 w-5 text-karamel" /> Rincian Item
+        </h2>
+        <DataTable rincian columns={KOLOM_ITEM_PENJUALAN} data={penjualan.itemPenjualan ?? []} emptyMessage="Tidak ada item." />
+      </section>
 
       {/* Nama outlet hanya terbaca pemegang read-location (outletTenant di atas). */}
       <KartuStokKeluar penjualan={penjualan} outlet={outletTenant.lokasi} />
@@ -446,80 +409,18 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
         </div>
       </div>
 
-      {/* RIWAYAT PEMBAYARAN */}
+      {/* RIWAYAT PEMBAYARAN: tabel rincian berkartu baris (CV22a). */}
       {riwayatPembayaran.length > 0 && (
-        <div className="rounded-2xl border border-navy/10 bg-krem shadow-sm overflow-hidden mt-2">
-          <div className="p-6 border-b border-navy/5 flex items-center gap-2">
-            <History className="h-5 w-5 text-karamel" />
-            <h2 className="font-bold text-navy">Riwayat Pembayaran</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-gading text-navy/60 border-b border-navy/5">
-                <tr>
-                  <th className="px-6 py-4 font-bold">Tanggal Bayar</th>
-                  <th className="px-6 py-4 font-bold">Metode</th>
-                  <th className="px-6 py-4 font-bold">Catatan</th>
-                  <th className="px-6 py-4 font-bold text-right">Jumlah</th>
-                  <th className="px-6 py-4 font-bold text-center">Status</th>
-                  <th className="px-6 py-4 font-bold text-right">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-navy/5 bg-gading">
-                {riwayatPembayaran.map((pay) => {
-                  const validId = pay.id;
-                  return (
-                    <tr
-                      key={validId}
-                      className="hover:bg-navy/5 transition-colors"
-                    >
-                      <td className="px-6 py-4 font-semibold text-navy">
-                        {pay.tanggalBayar
-                          ? format(
-                              new Date(pay.tanggalBayar),
-                              "dd MMM yyyy, HH:mm",
-                            )
-                          : "-"}
-                      </td>
-                      <td className="px-6 py-4 font-bold text-navy">
-                        {pay.namaMetodePembayaran || "-"}
-                      </td>
-                      <td className="px-6 py-4 font-medium text-navy/60 text-xs">
-                        <span className="line-clamp-1">{pay.catatan || "-"}</span>
-                        {pay.status === "VOID" && pay.alasanVoid && (
-                          <span className="block line-clamp-1 text-red-700">Alasan batal: {pay.alasanVoid}</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-right font-bold text-navy font-mono">
-                        {formatRupiah(pay.jumlahBayar)}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <Badge
-                          variant="outline"
-                          className={`font-bold border-none shadow-sm px-2.5 py-0.5 ${pay.status === "PAID" ? "bg-sage text-gading" : pay.status === "VOID" ? "bg-navy/10 text-navy/60" : "bg-karamel text-navy"}`}
-                        >
-                          {pay.status === "PAID" ? "Sukses" : pay.status === "VOID" ? "Batal" : pay.status}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        {bolehBatalkanPembayaran(pay, permissions) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setBatalTarget(pay)}
-                            className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-500/10 font-bold"
-                          >
-                            Batalkan
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <section aria-label="Riwayat Pembayaran" className="flex flex-col gap-3 mt-2">
+          <h2 className="text-base font-bold text-navy flex items-center gap-2">
+            <History className="h-5 w-5 text-karamel" /> Riwayat Pembayaran
+          </h2>
+          <DataTable
+            rincian
+            columns={kolomRiwayatPembayaran((pay) => bolehBatalkanPembayaran(pay, permissions), setBatalTarget)}
+            data={riwayatPembayaran}
+          />
+        </section>
       )}
 
       {/* DIALOG BATALKAN PEMBAYARAN */}

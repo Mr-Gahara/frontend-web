@@ -4,6 +4,8 @@ import { Check, Loader2, MessageCircle, Minus } from "lucide-react";
 import { useTenant } from "@/features/tenant/hooks";
 import { pesanError } from "@/lib/api/error";
 import type { RiwayatLanggananToko } from "@/types/langganan";
+import type { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
 import {
   DAFTAR_PLAN,
   NOMOR_WA_ADMIN,
@@ -176,43 +178,17 @@ export function HalamanLangganan() {
         <h2 id="langganan-riwayat" className="text-xl font-bold">
           Riwayat
         </h2>
-        <ul className="flex flex-col divide-y divide-navy/10 rounded-2xl border border-navy/10 bg-permukaan sm:hidden">
-          {daftarRiwayat.map((r) => (
-            <li key={r.id} className="flex flex-col gap-1 px-4 py-3 text-sm">
-              <span className="font-semibold">{teksRiwayat(r)}</span>
-              <span className="text-muted-foreground">
-                {formatTanggal(new Date(r.createdAt))}, berlaku sampai {berlakuSampai(r)}
-              </span>
-            </li>
-          ))}
-        </ul>
-        <div className="hidden overflow-x-auto rounded-2xl border border-navy/10 bg-permukaan sm:block">
-          <table className="w-full min-w-[520px] text-sm">
-            <thead>
-              <tr className="text-left text-muted-foreground">
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Tanggal
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Perubahan
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Berlaku sampai
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {daftarRiwayat.map((r) => (
-                <tr key={r.id} className="border-t border-navy/10">
-                  <td className="px-4 py-3">{formatTanggal(new Date(r.createdAt))}</td>
-                  <td className="px-4 py-3">{teksRiwayat(r)}</td>
-                  <td className="px-4 py-3">{berlakuSampai(r)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {daftarRiwayat.length === 0 && <p className="text-sm text-muted-foreground">Belum ada riwayat.</p>}
+        {/* Tabel rincian berkartu baris; di HP kartu berlabel (CV22a). */}
+        <DataTable
+          rincian
+          data={daftarRiwayat}
+          emptyMessage="Belum ada riwayat."
+          columns={[
+            { id: "tanggal", header: "Tanggal", cell: ({ row }) => formatTanggal(new Date(row.original.createdAt)) },
+            { id: "perubahan", header: "Perubahan", cell: ({ row }) => teksRiwayat(row.original) },
+            { id: "berlaku", header: "Berlaku sampai", cell: ({ row }) => berlakuSampai(row.original) },
+          ] satisfies ColumnDef<RiwayatLanggananToko>[]}
+        />
         {riwayat.hasNextPage && (
           <button
             type="button"

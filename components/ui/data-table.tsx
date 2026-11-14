@@ -107,6 +107,12 @@ interface DataTableProps<TData, TValue> {
    * halaman 1.
    */
   pilihanUkuranKlien?: readonly number[];
+  /**
+   * Tabel rincian di halaman detail dan form: seluruh baris tampil tanpa
+   * kaki tabel (jumlah data dan paginasi), dengan kartu baris dan kartu HP
+   * yang sama dengan tabel daftar (pemilik proyek, 14 November 2026; CV22a).
+   */
+  rincian?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -119,6 +125,7 @@ export function DataTable<TData, TValue>({
   paginasiServer,
   urutanServer,
   pilihanUkuranKlien,
+  rincian = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -140,7 +147,7 @@ export function DataTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     state: { sorting: urutanServer ? urutanServer.urutan : sorting, columnFilters, columnVisibility },
-    initialState: { pagination: { pageSize: pilihanUkuranKlien?.[0] ?? 10 } },
+    initialState: { pagination: { pageSize: rincian ? Number.MAX_SAFE_INTEGER : (pilihanUkuranKlien?.[0] ?? 10) } },
   });
 
   const server = paginasiServer;
@@ -234,6 +241,7 @@ export function DataTable<TData, TValue>({
       </Table>
 
       {/* Kaki tabel: kontrol polos tanpa latar maupun kotak (TB3a); klien, atau angka dan aksi dari server. */}
+      {!rincian && (
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-1">
         <p className="text-xs font-semibold text-navy/60">
           {totalData} total data
@@ -284,7 +292,7 @@ export function DataTable<TData, TValue>({
           </Button>
         </div>
       </div>
-
+      )}
     </div>
   );
 }

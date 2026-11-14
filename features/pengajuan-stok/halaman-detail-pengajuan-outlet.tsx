@@ -1,5 +1,7 @@
 "use client";
 
+import { KOLOM_BARANG_PENGAJUAN_OUTLET } from "./kolom-barang";
+import { DataTable } from "@/components/ui/data-table";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -184,39 +186,13 @@ export default function HalamanDetailPengajuanOutlet() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* KOLOM KIRI: DETAIL ITEM */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
-            <div className="bg-krem px-6 py-4 border-b border-navy/10 flex items-center gap-2">
-              <Package className="w-5 h-5 text-karamel" />
-              <h2 className="font-bold text-navy">{pengembalian ? "Barang yang Dikembalikan" : "Daftar Barang yang Diminta"}</h2>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-gading text-xs uppercase font-bold text-navy/50 border-b border-navy/5">
-                  <tr>
-                    <th className="px-6 py-4">Nama Barang</th>
-                    <th className="px-6 py-4 text-center">Jumlah Diajukan</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-navy/5">
-                  {detail.items.map((item, index) => (
-                    <tr key={index} className="hover:bg-gading/50">
-                      <td className="px-6 py-4 font-bold text-navy">
-                        {item.bahanBaku?.namaBahan || "Item Tidak Dikenal"}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="font-mono font-bold text-navy bg-navy/5 px-3 py-1 rounded-md">
-                          {item.jumlah}{" "}
-                          <span className="text-xs font-sans font-medium text-navy/60">
-                            {item.satuan}
-                          </span>
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          {/* Tabel rincian berkartu baris, tanpa panel berlatar (CV22a). */}
+          <section aria-label={pengembalian ? "Barang yang Dikembalikan" : "Daftar Barang yang Diminta"} className="flex flex-col gap-3">
+            <h2 className="text-base font-bold text-navy flex items-center gap-2">
+              <Package className="w-5 h-5 text-karamel" /> {pengembalian ? "Barang yang Dikembalikan" : "Daftar Barang yang Diminta"}
+            </h2>
+            <DataTable rincian columns={KOLOM_BARANG_PENGAJUAN_OUTLET} data={detail.items} emptyMessage="Tidak ada barang." />
+          </section>
 
           {/* Catatan Tambahan */}
           {detail.catatan && (

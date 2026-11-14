@@ -11,6 +11,8 @@ import { susunPayloadRevisi } from "./payload";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DataTable } from "@/components/ui/data-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft,
@@ -163,54 +165,41 @@ function FormRevisiTransfer({ detail, urlSuratJalan }: { detail: TransferStok; u
         </div>
       </div>
 
-      {/* DAFTAR BARANG */}
-      <div className="rounded-2xl border border-navy/10 bg-white shadow-sm overflow-hidden">
-        <div className="bg-krem px-6 py-4 border-b border-navy/10 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Package className="w-5 h-5 text-karamel" />
-            <h2 className="font-bold text-navy">
-              Sesuaikan Jumlah yang Akan Dikirim
-            </h2>
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gading text-xs uppercase font-bold text-navy/50 border-b border-navy/5">
-              <tr>
-                <th className="px-6 py-4">Nama Barang</th>
-                <th className="px-6 py-4 w-48 text-right">
-                  Kuantitas Dikirim (Fisik)
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/5">
-              {items.map((item) => (
-                <tr key={item.id_lokal} className="hover:bg-gading/50">
-                  <td className="px-6 py-4 font-bold text-navy">
-                    {item.namaBahan}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      <Input
-                        type="number"
-                        min={1}
-                        value={item.qtyKirim}
-                        onChange={(e) =>
-                          handleQtyChange(item.id_lokal, e.target.value)
-                        }
-                        className="w-24 bg-white border-navy/20 text-navy font-mono font-bold text-right no-spinner"
-                      />
-                      <span className="text-xs font-bold text-navy/50 w-8">
-                        {item.satuan}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* DAFTAR BARANG: tabel rincian berkartu baris (CV22a). */}
+      <section aria-label="Sesuaikan Jumlah yang Akan Dikirim" className="flex flex-col gap-3">
+        <h2 className="text-base font-bold text-navy flex items-center gap-2">
+          <Package className="w-5 h-5 text-karamel" /> Sesuaikan Jumlah yang Akan Dikirim
+        </h2>
+        <DataTable
+          rincian
+          data={items}
+          emptyMessage="Tidak ada barang."
+          columns={[
+            {
+              id: "barang",
+              header: "Nama Barang",
+              cell: ({ row }) => <span className="font-bold text-navy">{row.original.namaBahan}</span>,
+            },
+            {
+              id: "qty",
+              header: () => <div className="text-right">Kuantitas Dikirim (Fisik)</div>,
+              meta: { label: "Kuantitas Dikirim (Fisik)" },
+              cell: ({ row }) => (
+                <div className="flex items-center justify-end gap-2">
+                  <Input
+                    type="number"
+                    min={1}
+                    value={row.original.qtyKirim}
+                    onChange={(e) => handleQtyChange(row.original.id_lokal, e.target.value)}
+                    className="w-24 bg-white border-navy/20 text-navy font-mono font-bold text-right no-spinner"
+                  />
+                  <span className="text-xs font-bold text-navy/50 w-8">{row.original.satuan}</span>
+                </div>
+              ),
+            },
+          ] satisfies ColumnDef<EditItem>[]}
+        />
+      </section>
 
       {/* INFO & ACTIONS */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50 border border-blue-100 p-4 rounded-xl">
