@@ -28,7 +28,7 @@ export interface LangkahSetup {
  * 2026), tersambung ke jamOperasional tenant sejak backend 4a19be8 (P81,
  * B331; JB8a).
  */
-export const LANGKAH_JAM_BUKA: LangkahSetup = { kunci: "jamBuka", judul: "Jam buka toko" };
+const LANGKAH_JAM_BUKA: LangkahSetup = { kunci: "jamBuka", judul: "Jam buka toko" };
 
 const LANGKAH_INTI: readonly LangkahSetup[] = [
   { kunci: "toko", judul: "Nama toko" },
