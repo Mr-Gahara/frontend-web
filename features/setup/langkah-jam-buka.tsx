@@ -194,20 +194,71 @@ function KartuHari({
 }
 
 /**
- * Langkah jam buka toko (modul/setup-akun.md, keputusan 7 November 2026).
- * Belum tersambung ke backend: B206 hanya menyimpan satu pasang jam untuk
- * semua hari, sehingga langkah ini baru dipakai rute pratinjau (keputusan
- * rancangan butir 30) dan onLanjut menerima nilai per hari apa adanya.
+ * Isian jam buka: pilihan mode, kartu per hari, Samakan, dan peringatan
+ * semua libur. Dipakai langkah wizard dan kartu Jam Buka di Profil Toko
+ * (JB8a, pemilik proyek 16 November 2026), dengan teks lanjutan peringatan
+ * semua libur yang menyebut tempat mengubahnya.
+ */
+export function IsianJamBuka({
+  nilai,
+  onUbah,
+  cek,
+  lanjutanLibur,
+}: {
+  nilai: NilaiJamBuka;
+  onUbah: (ubah: (n: NilaiJamBuka) => NilaiJamBuka) => void;
+  cek: boolean;
+  lanjutanLibur: string;
+}) {
+  const sumber = sumberSamakan(nilai.hari);
+  const ubahHari = (i: number, hari: JamHari) =>
+    onUbah((n) => ({ ...n, hari: n.hari.map((h, k) => (k === i ? hari : h)) }));
+  return (
+    <>
+      <PilihanTombol
+        id="setup-jam-mode"
+        pertanyaan="Toko buka kapan?"
+        opsi={OPSI_MODE}
+        nilai={nilai.mode}
+        onUbah={(mode) => onUbah((n) => ({ ...n, mode }))}
+      />
+      {nilai.mode === "tertentu" && (
+        <>
+          <ol aria-label="Jam buka per hari" className="flex flex-col gap-3">
+            {nilai.hari.map((h, i) => (
+              <KartuHari key={HARI[i]} indeks={i} hari={h} cek={cek} onUbah={(baru) => ubahHari(i, baru)} />
+            ))}
+          </ol>
+          {bolehSamakan(nilai.hari) && (
+            <button
+              type="button"
+              onClick={() => onUbah((n) => ({ ...n, hari: samakanSemua(n.hari) }))}
+              className={KELAS_TOMBOL_GARIS + " self-start"}
+            >
+              Samakan semua hari dengan {HARI[sumber]}
+            </button>
+          )}
+          {semuaLibur(nilai) && (
+            <KotakPeringatan>
+              <strong className="font-semibold">Semua hari libur.</strong> {lanjutanLibur}
+            </KotakPeringatan>
+          )}
+        </>
+      )}
+    </>
+  );
+}
+
+/**
+ * Langkah jam buka toko (modul/setup-akun.md, JB1a sampai JB8a), sesudah
+ * Lokasi outlet. Disimpan ke jamOperasional tenant oleh pemanggilnya
+ * (LangkahJamBukaTersambung, P81, B331).
  */
 export function LangkahJamBuka({ nomor, total, teksLanjut, awal, onLanjut, onKembali }: PropsLangkah<NilaiJamBuka>) {
   const [nilai, setNilai] = useState(awal);
   const [cek, setCek] = useState(false);
   const { kirim, sibuk, galat } = useKirim(onLanjut, "Gagal menyimpan jam buka.");
   const masalah = cek ? masalahJamBuka(nilai) : null;
-  const sumber = sumberSamakan(nilai.hari);
-
-  const ubahHari = (i: number, hari: JamHari) =>
-    setNilai((n) => ({ ...n, hari: n.hari.map((h, k) => (k === i ? hari : h)) }));
   const simpan = () => {
     setCek(true);
     if (masalahJamBuka(nilai) === null) void kirim(nilai);
@@ -221,37 +272,12 @@ export function LangkahJamBuka({ nomor, total, teksLanjut, awal, onLanjut, onKem
         judul="Jam buka toko"
         keterangan="Kapan toko melayani pembeli. Jam ini dipakai untuk menyusun shift karyawan."
       />
-      <PilihanTombol
-        id="setup-jam-mode"
-        pertanyaan="Toko buka kapan?"
-        opsi={OPSI_MODE}
-        nilai={nilai.mode}
-        onUbah={(mode) => setNilai((n) => ({ ...n, mode }))}
+      <IsianJamBuka
+        nilai={nilai}
+        onUbah={setNilai}
+        cek={cek}
+        lanjutanLibur="Toko tercatat tutup setiap hari sampai jam bukanya diubah dari Pengaturan, Profil Toko."
       />
-      {nilai.mode === "tertentu" && (
-        <>
-          <ol aria-label="Jam buka per hari" className="flex flex-col gap-3">
-            {nilai.hari.map((h, i) => (
-              <KartuHari key={HARI[i]} indeks={i} hari={h} cek={cek} onUbah={(baru) => ubahHari(i, baru)} />
-            ))}
-          </ol>
-          {bolehSamakan(nilai.hari) && (
-            <button
-              type="button"
-              onClick={() => setNilai((n) => ({ ...n, hari: samakanSemua(n.hari) }))}
-              className={KELAS_TOMBOL_GARIS + " self-start"}
-            >
-              Samakan semua hari dengan {HARI[sumber]}
-            </button>
-          )}
-          {semuaLibur(nilai) && (
-            <KotakPeringatan>
-              <strong className="font-semibold">Semua hari libur.</strong> Toko tercatat tutup setiap hari sampai
-              jam bukanya diubah dari Pengaturan, Profil Toko.
-            </KotakPeringatan>
-          )}
-        </>
-      )}
       <PesanGalat pesan={galat || masalah || ""} />
       <NavigasiLangkah onKembali={onKembali} onLanjut={simpan} teksLanjut={teksLanjut} sibuk={sibuk} />
     </div>

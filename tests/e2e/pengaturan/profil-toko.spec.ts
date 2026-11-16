@@ -28,6 +28,7 @@ type TenantMentah = {
   emailBisnis: string | null;
   idNPWP: string | null;
   footerStruk: string | null;
+  jamOperasional: unknown;
 };
 
 type OutletMentah = { id: string; tenantID: string; nama: string; alamat: string };
@@ -209,6 +210,47 @@ test.describe("Profil Toko", () => {
         const r = await api(page, auth, "PUT", "/location/" + outlet.id, { alamat: outlet.alamat });
         expect.soft(r.status, "alamat outlet dikembalikan: " + r.pesan).toBe(200);
       }
+    }
+  });
+});
+
+test.describe("Profil Toko: jam buka (JB8a, P81, B331)", () => {
+  test("jam buka diatur lewat kartu Jam Buka, tersimpan utuh di jamOperasional, lalu dikembalikan", async ({ page }) => {
+    await login(page);
+    const { auth, tenant } = await bukaProfil(page);
+    const asal = tenant.jamOperasional ?? null;
+    const simpanJam = page.getByRole("button", { name: "Simpan Jam Buka" });
+    try {
+      // Mulai dari belum diatur agar isian awal pasti tanpa pilihan.
+      const kosong = await api(page, auth, "PUT", "/tenant/" + tenant.id, { jamOperasional: null });
+      expect(kosong.status, "jamOperasional dikosongkan: " + kosong.pesan).toBe(200);
+      await page.reload();
+      await expect(simpanJam).toBeVisible({ timeout: 15_000 });
+
+      await page.getByRole("group", { name: "Toko buka kapan?" }).getByRole("button", { name: /^Jam tertentu/ }).click();
+      const senin = page
+        .getByRole("list", { name: "Jam buka per hari" })
+        .getByRole("listitem", { name: "Senin", exact: true });
+      await senin.getByLabel("Jam buka Senin (jam)").fill("07");
+      await senin.getByLabel("Jam buka Senin (menit)").fill("00");
+      await senin.getByLabel("Jam tutup Senin (jam)").fill("01");
+      await senin.getByLabel("Jam tutup Senin (menit)").fill("00");
+      await page.getByRole("button", { name: "Samakan semua hari dengan Senin" }).click();
+      const tPut = tungguPut(page, POLA_TENANT);
+      await simpanJam.click();
+      const res = await tPut;
+      expect(res.status(), "PUT /tenant/:id").toBe(200);
+      const hari = Array.from({ length: 7 }, () => ({ status: "buka", jamBuka: "07:00", jamTutup: "01:00" }));
+      expect(res.request().postDataJSON()).toEqual({ jamOperasional: { mode: "tertentu", hari } });
+      expect((await bacaTenant(page, auth, tenant.id)).jamOperasional).toEqual({ mode: "tertentu", hari });
+
+      // Setelah dipasang ulang, isian menampilkan nilai tersimpan dan simpan nonaktif.
+      await expect(senin.getByLabel("Jam tutup Senin (jam)")).toHaveValue("01", { timeout: 15_000 });
+      await expect(senin.getByText("Tutup keesokan harinya, Selasa pukul 01.00")).toBeVisible();
+      await expect(simpanJam).toBeDisabled();
+    } finally {
+      const r = await api(page, auth, "PUT", "/tenant/" + tenant.id, { jamOperasional: asal });
+      expect.soft(r.status, "jamOperasional dikembalikan: " + r.pesan).toBe(200);
     }
   });
 });

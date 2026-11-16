@@ -45,3 +45,18 @@ export async function isiTokoDanOwner(page: Page) {
   await expect(langkahAktif(page)).toContainText("Lokasi outlet");
 }
 
+const POLA_TENANT_ID = /\/api\/tenant\/[0-9a-f]{24}$/;
+
+/**
+ * Langkah jam buka (JB8a, B331): Buka 24 jam, lalu Simpan dan lanjut, yang
+ * mengirim PUT /tenant/:id { jamOperasional: { mode: "24jam", hari: null } }.
+ */
+export async function isiJamBuka24(page: Page) {
+  await expect(langkahAktif(page)).toContainText("Jam buka toko", { timeout: 15_000 });
+  await page.getByRole("group", { name: "Toko buka kapan?" }).getByRole("button", { name: /^Buka 24 jam/ }).click();
+  const tSimpan = tunggu(page, "PUT", POLA_TENANT_ID);
+  await lanjut(page).click();
+  const jawab = await tSimpan;
+  expect(jawab.status(), "PUT /tenant jamOperasional").toBe(200);
+  expect(jawab.request().postDataJSON()).toEqual({ jamOperasional: { mode: "24jam", hari: null } });
+}

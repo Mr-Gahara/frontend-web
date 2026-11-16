@@ -11,6 +11,7 @@ import {
   PIN_OWNER,
   akunBaru,
   daftarLangkah,
+  isiJamBuka24,
   isiTokoDanOwner,
   langkahAktif,
   lanjut,
@@ -55,6 +56,7 @@ async function tambahKategori(page: Page) {
 async function isiIntiCepat(page: Page) {
   await isiTokoDanOwner(page);
   await isiLokasi(page, "outlet", "Outlet E2E");
+  await isiJamBuka24(page);
   await tambahKategori(page);
   await lanjut(page).click();
   await page.getByRole("button", { name: "Tidak, lewati langkah ini" }).click();
@@ -95,7 +97,7 @@ test.describe("Wizard setup", () => {
   test("plan Basic: alur nyata sampai selesai, dilanjutkan setelah dimuat ulang tanpa PIN", async ({ page }) => {
     const { id } = await akunBaru(page, "basic");
     try {
-      await expect(daftarLangkah(page).getByRole("listitem")).toHaveCount(7);
+      await expect(daftarLangkah(page).getByRole("listitem")).toHaveCount(8);
       await isiTokoDanOwner(page);
 
       await test.step("muat ulang setelah Owner: tetap di wizard, langkah lokasi, tanpa PIN", async () => {
@@ -106,6 +108,30 @@ test.describe("Wizard setup", () => {
       });
 
       await isiLokasi(page, "outlet", "Kopi Senja Pontianak Kota");
+
+      await test.step("jam buka per hari tersimpan ke jamOperasional (JB8a, B331)", async () => {
+        await expect(langkahAktif(page)).toContainText("Jam buka toko", { timeout: 15_000 });
+        await page.getByRole("group", { name: "Toko buka kapan?" }).getByRole("button", { name: /^Jam tertentu/ }).click();
+        const hari = (nama: string) =>
+          page.getByRole("list", { name: "Jam buka per hari" }).getByRole("listitem", { name: nama, exact: true });
+        await hari("Senin").getByLabel("Jam buka Senin (jam)").fill("08");
+        await hari("Senin").getByLabel("Jam buka Senin (menit)").fill("00");
+        await hari("Senin").getByLabel("Jam tutup Senin (jam)").fill("22");
+        await hari("Senin").getByLabel("Jam tutup Senin (menit)").fill("00");
+        await hari("Minggu").getByRole("group", { name: "Status Minggu" }).getByRole("button", { name: "Libur", exact: true }).click();
+        await page.getByRole("button", { name: "Samakan semua hari dengan Senin" }).click();
+        const tSimpan = tunggu(page, "PUT", /\/api\/tenant\/[0-9a-f]{24}$/);
+        await lanjut(page).click();
+        const jawab = await tSimpan;
+        expect(jawab.status(), "PUT /tenant jamOperasional").toBe(200);
+        const kirim = jawab.request().postDataJSON().jamOperasional;
+        expect(kirim.mode).toBe("tertentu");
+        expect(kirim.hari[0]).toEqual({ status: "buka", jamBuka: "08:00", jamTutup: "22:00" });
+        expect(kirim.hari[5]).toEqual({ status: "buka", jamBuka: "08:00", jamTutup: "22:00" });
+        expect(kirim.hari[6]).toEqual({ status: "libur", jamBuka: null, jamTutup: null });
+        expect((await jawab.json()).data.jamOperasional).toEqual(kirim);
+      });
+
       await tambahKategori(page);
 
       await test.step("muat ulang setelah kategori: lanjut di bahan baku, kategori tersimpan", async () => {
@@ -114,11 +140,16 @@ test.describe("Wizard setup", () => {
         await page.getByRole("button", { name: "Kembali" }).click();
         await expect(page.getByRole("region", { name: "Kategori ditambahkan" })).toContainText("Kopi");
         await page.getByRole("button", { name: "Kembali" }).click();
+        // Jam buka tersimpan tampil sebagai ringkasan tanpa tautan (WS6a, JB8a).
+        await expect(page.getByText("Jam buka dapat diubah nanti dari Profil Toko.")).toBeVisible();
+        await expect(page.getByRole("main").getByText("08.00 sampai 22.00").first()).toBeVisible();
+        await page.getByRole("button", { name: "Kembali" }).click();
         await expect(page.getByText("Kopi Senja Pontianak Kota")).toBeVisible();
         // Ringkasan hanya menyebut tempat mengubahnya, tanpa tautan yang
         // membawa keluar dari wizard (WS6a, kontrak/temuan.md butir 175).
         await expect(page.getByText("Lokasi dan titik absen dapat diubah nanti dari Profil Toko.")).toBeVisible();
         await expect(page.getByRole("main").getByRole("link")).toHaveCount(0);
+        await page.getByRole("button", { name: "Lanjut", exact: true }).click();
         await page.getByRole("button", { name: "Lanjut", exact: true }).click();
         await lanjut(page).click();
       });
@@ -182,9 +213,9 @@ test.describe("Wizard setup", () => {
     const { id } = await akunBaru(page, "pro", { plan: "pro", durasiBulan: 1 });
     try {
       const langkah = daftarLangkah(page).getByRole("listitem");
-      await expect(langkah).toHaveCount(9);
-      await expect(langkah.nth(7)).toContainText("Sesi booking");
-      await expect(langkah.nth(8)).toContainText("Gudang");
+      await expect(langkah).toHaveCount(10);
+      await expect(langkah.nth(8)).toContainText("Sesi booking");
+      await expect(langkah.nth(9)).toContainText("Gudang");
       await isiIntiCepat(page);
 
       await test.step("lewati sesi booking dan gudang", async () => {
@@ -352,15 +383,16 @@ test.describe("Wizard setup", () => {
     }
   });
 
-  test("plan Advanced: delapan langkah tanpa gudang, dan kategori wajib minimal satu", async ({ page }) => {
+  test("plan Advanced: sembilan langkah tanpa gudang, dan kategori wajib minimal satu", async ({ page }) => {
     const { id } = await akunBaru(page, "advanced", { plan: "advanced", durasiBulan: 1 });
     try {
       const langkah = daftarLangkah(page).getByRole("listitem");
-      await expect(langkah).toHaveCount(8);
+      await expect(langkah).toHaveCount(9);
       await expect(langkah.last()).toContainText("Sesi booking");
       await expect(daftarLangkah(page).getByText("Gudang")).toHaveCount(0);
       await isiTokoDanOwner(page);
       await isiLokasi(page, "outlet", "Outlet E2E");
+      await isiJamBuka24(page);
       await lanjut(page).click();
       await expect(page.getByText("Tambahkan minimal satu kategori.")).toBeVisible();
       await expect(langkahAktif(page)).toContainText("Kategori");
@@ -383,6 +415,7 @@ test.describe("Wizard setup", () => {
     try {
       await isiTokoDanOwner(page);
       await isiLokasi(page, "outlet", "Outlet E2E");
+      await isiJamBuka24(page);
 
       await test.step("kategori", async () => {
         const penanda = page.getByText("Belum tersimpan. Tekan Tambah kategori.");

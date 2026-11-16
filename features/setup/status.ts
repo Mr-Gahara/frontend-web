@@ -6,6 +6,7 @@ export type KunciLangkahServer =
   | "namaToko"
   | "owner"
   | "outlet"
+  | "jamBuka"
   | "kategoriProduk"
   | "produk"
   | "bahanBaku"
@@ -46,9 +47,8 @@ const PETA_LANGKAH: Record<KunciLangkah, KunciLangkahServer[]> = {
   toko: ["namaToko"],
   owner: ["owner"],
   lokasi: ["outlet"],
-  // Belum ada padanan di GET /api/setup/status; langkahnya belum masuk
-  // daftarLangkah sampai penyambungan, sehingga nilai ini belum dibaca.
-  jamBuka: [],
+  // Kriteria jam buka setup inti sejak backend 4a19be8 (P81, B331).
+  jamBuka: ["jamBuka"],
   kategori: ["kategoriProduk"],
   bahanBaku: ["bahanBaku"],
   produk: ["produk"],

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { HARI, HARI_KOSONG, NILAI_AWAL_JAM_BUKA, type JamHari, type NilaiJamBuka } from "./jam-buka";
 import { KerangkaSetup } from "./kerangka-setup";
 import { LangkahJamBuka } from "./langkah-jam-buka";
-import { daftarLangkah, LANGKAH_JAM_BUKA, type KunciLangkah, type LangkahSetup } from "./langkah";
+import { daftarLangkah, type KunciLangkah, type LangkahSetup } from "./langkah";
 
 /**
  * Pratinjau development langkah jam buka di dalam kerangka wizard (pemilik
@@ -53,9 +53,7 @@ const KEADAAN: readonly { kunci: Keadaan; label: string; nilai: NilaiJamBuka }[]
 ];
 
 /** Setup inti Basic dengan jam buka sesudah lokasi outlet; tiga langkah pertama selesai. */
-const LANGKAH: readonly LangkahSetup[] = daftarLangkah("basic").flatMap((l) =>
-  l.kunci === "lokasi" ? [l, LANGKAH_JAM_BUKA] : [l],
-);
+const LANGKAH: readonly LangkahSetup[] = daftarLangkah("basic");
 const INDEKS = LANGKAH.findIndex((l) => l.kunci === "jamBuka");
 const SELESAI: Record<KunciLangkah, boolean> = {
   toko: true,

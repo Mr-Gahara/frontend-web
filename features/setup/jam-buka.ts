@@ -1,15 +1,13 @@
-import { keTeksWaktu, waktuLengkap, WAKTU_KOSONG, type NilaiWaktu } from "@/lib/waktu";
+import { dariTeksWaktu, keTeksWaktu, waktuLengkap, WAKTU_KOSONG, type NilaiWaktu } from "@/lib/waktu";
+import type { JamOperasional } from "@/types/tenant";
 
 /**
- * Jam buka toko di wizard setup (keputusan pemilik proyek, 7 November 2026):
- * wajib memilih buka 24 jam atau jam tertentu; jam tertentu diatur per hari
- * Senin sampai Minggu dengan status Buka, 24 jam, atau Libur. Jam tutup yang
- * lebih kecil dari jam buka berarti tutup keesokan harinya, sama dengan
- * aturan jamBuka dan jamTutup tenant di backend (B206).
- *
- * Backend B206 baru menyimpan satu pasang jam untuk semua hari, tanpa status
- * per hari dan tanpa penanda 24 jam; logika ini ditulis untuk kontrak yang
- * diminta, dan penyambungannya menunggu backend.
+ * Jam buka toko di wizard setup dan Profil Toko (keputusan pemilik proyek,
+ * 7 November 2026; JB8a, 16 November 2026): wajib memilih buka 24 jam atau
+ * jam tertentu; jam tertentu diatur per hari Senin sampai Minggu dengan
+ * status Buka, 24 jam, atau Libur. Jam tutup yang lebih kecil dari jam buka
+ * berarti tutup keesokan harinya, sama dengan jamOperasional tenant di
+ * backend (P81, B331).
  */
 
 export const HARI = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"] as const;
@@ -118,4 +116,38 @@ export function samakanSemua(hari: readonly JamHari[]): JamHari[] {
 /** Jam tertentu dengan ketujuh hari Libur: tetap boleh disimpan, dengan peringatan. */
 export function semuaLibur(n: NilaiJamBuka): boolean {
   return n.mode === "tertentu" && n.hari.every((h) => h.status === "libur");
+}
+
+/** Payload jamOperasional PUT /tenant/:id dari isian yang sah (masalahJamBuka null). */
+export function keJamOperasional(n: NilaiJamBuka): JamOperasional {
+  if (n.mode !== "tertentu") return { mode: "24jam", hari: null };
+  return {
+    mode: "tertentu",
+    hari: n.hari.map((h) =>
+      h.status === "buka"
+        ? { status: "buka", jamBuka: keTeksWaktu(h.buka), jamTutup: keTeksWaktu(h.tutup) }
+        : { status: h.status, jamBuka: null, jamTutup: null },
+    ),
+  };
+}
+
+/** Isian dari jamOperasional tersimpan; null (belum diatur) menjadi isian awal tanpa pilihan. */
+export function dariJamOperasional(j: JamOperasional | null | undefined): NilaiJamBuka {
+  if (!j) return NILAI_AWAL_JAM_BUKA;
+  if (j.mode === "24jam") return { ...NILAI_AWAL_JAM_BUKA, mode: "24jam" };
+  return {
+    mode: "tertentu",
+    hari: HARI.map((_, i) => {
+      const h = j.hari[i];
+      if (!h) return HARI_KOSONG;
+      if (h.status !== "buka") return { ...HARI_KOSONG, status: h.status };
+      return { status: "buka", buka: dariTeksWaktu(h.jamBuka), tutup: dariTeksWaktu(h.jamTutup) };
+    }),
+  };
+}
+
+/** Ringkasan jam tersimpan untuk langkah tersimpan wizard: satu baris per hari, atau Buka 24 jam. */
+export function barisJamOperasional(j: JamOperasional): { label: string; nilai: string }[] {
+  if (j.mode === "24jam") return [{ label: "Jam buka", nilai: "Buka 24 jam setiap hari" }];
+  return dariJamOperasional(j).hari.map((h, i) => ({ label: HARI[i], nilai: ringkasHari(h) }));
 }

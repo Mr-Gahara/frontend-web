@@ -11,6 +11,7 @@ import { LangkahNamaToko, LangkahOwner } from "./langkah-akun";
 import {
   LangkahBahanTersambung,
   LangkahBookingTersambung,
+  LangkahJamBukaTersambung,
   LangkahKategoriTersambung,
   LangkahLokasiTersambung,
   LangkahPajakTersambung,
@@ -155,6 +156,9 @@ function WizardSetup({ status, onBertindak }: { status: StatusSetup; onBertindak
       break;
     case "lokasi":
       isi = <LangkahLokasiTersambung key="outlet" jenis="outlet" {...umum} />;
+      break;
+    case "jamBuka":
+      isi = <LangkahJamBukaTersambung {...umum} />;
       break;
     case "kategori":
       isi = <LangkahKategoriTersambung {...umum} />;

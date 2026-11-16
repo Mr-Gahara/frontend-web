@@ -24,6 +24,7 @@ import {
   useSimpanProduk,
 } from "@/features/produk/hooks";
 import { useDaftarTarif, useSimpanTarif } from "@/features/tarif/hooks";
+import { usePerbaruiTenant, useTenant } from "@/features/tenant/hooks";
 import {
   useDaftarTipeAset,
   useSimpanTipeAset,
@@ -31,6 +32,8 @@ import {
 import type { KunciPlan } from "@/types/langganan";
 import type { Lokasi, TipeLokasi } from "@/types/location";
 import { useSegarkanSetup } from "./hooks";
+import { barisJamOperasional, keJamOperasional, NILAI_AWAL_JAM_BUKA } from "./jam-buka";
+import { LangkahJamBuka } from "./langkah-jam-buka";
 import { LangkahBahanBaku } from "./langkah-bahan";
 import { LangkahBooking } from "./langkah-booking";
 import { LangkahKategori } from "./langkah-kategori";
@@ -77,6 +80,41 @@ const lokasiBertipe = (daftar: Lokasi[] | undefined, tipe: TipeLokasi) =>
 
 function Memuat() {
   return <p className="text-isi text-muted-foreground">Memuat data toko...</p>;
+}
+
+/**
+ * Jam buka toko (JB8a, P81, B331): disimpan ke jamOperasional tenant lewat
+ * PUT /tenant/:id. Jam yang sudah tersimpan tampil sebagai ringkasan tanpa
+ * tautan (WS6a) dan diubah dari Profil Toko.
+ */
+export function LangkahJamBukaTersambung(umum: PropsTersambung) {
+  const tenant = useTenant();
+  const perbarui = usePerbaruiTenant();
+  const segarkan = useSegarkanSetup();
+  if (!tenant.data) return <Memuat />;
+  const tersimpan = tenant.data.jamOperasional;
+  if (tersimpan) {
+    return (
+      <LangkahTersimpan
+        {...umum}
+        judul="Jam buka toko"
+        baris={barisJamOperasional(tersimpan)}
+        catatan="Jam buka dapat diubah nanti dari Profil Toko."
+      />
+    );
+  }
+  const id = tenant.data.id;
+  return (
+    <LangkahJamBuka
+      {...umum}
+      awal={NILAI_AWAL_JAM_BUKA}
+      onLanjut={async (nilai) => {
+        await perbarui.mutateAsync({ id, payload: { jamOperasional: keJamOperasional(nilai) } });
+        await segarkan();
+        umum.onLanjut();
+      }}
+    />
+  );
 }
 
 /** Outlet dan gudang: satu lokasi per tipe, sehingga lokasi yang sudah ada tidak dibuat lagi. */

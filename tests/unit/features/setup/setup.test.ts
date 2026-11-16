@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { daftarLangkah } from "@/features/setup/langkah";
 import { masalahAngka, skemaOwner, skemaProdukSetup } from "@/features/setup/schema";
 
-const INTI = ["toko", "owner", "lokasi", "kategori", "bahanBaku", "produk", "pajak"];
+const INTI = ["toko", "owner", "lokasi", "jamBuka", "kategori", "bahanBaku", "produk", "pajak"];
 
 describe("daftarLangkah", () => {
-  it("Basic memuat tujuh langkah inti berurutan", () => {
+  it("Basic memuat delapan langkah inti berurutan, jam buka sesudah lokasi (JB8a)", () => {
     expect(daftarLangkah("basic").map((l) => l.kunci)).toEqual(INTI);
   });
   it("Advanced menambah sesi booking di akhir", () => {

@@ -1,5 +1,17 @@
 export type TenantStatus = "aktif" | "non-aktif";
 
+/** Satu hari jam operasional (utils/jamOperasional.js backend, P81, B331). */
+export type JamHariTenant =
+  | { status: "buka"; jamBuka: string; jamTutup: string }
+  | { status: "24jam" | "libur"; jamBuka: null; jamTutup: null };
+
+/**
+ * Jam operasional toko per hari (P81, B331): buka 24 jam, atau tujuh hari
+ * Senin sampai Minggu. Jam HH:mm WIB; tutup lebih kecil dari buka berarti
+ * keesokan harinya. null di tenant berarti belum diatur.
+ */
+export type JamOperasional = { mode: "24jam"; hari: null } | { mode: "tertentu"; hari: JamHariTenant[] };
+
 /**
  * Bentuk GET /tenant/:id (mappers/tenantMapper.js backend). persenPajak dan
  * tipePajak dibuang backend di a949910 (B266); pajak toko hanya lewat /pajak.
@@ -18,6 +30,7 @@ export interface Tenant {
   idNPWP: string | null;
   isSetupComplete: boolean;
   absensiLokasiAktif: boolean;
+  jamOperasional: JamOperasional | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,4 +49,6 @@ export interface PerbaruiTenantPayload {
   emailBisnis?: string;
   footerStruk?: string;
   idNPWP?: string;
+  /** Diganti utuh; null menghapusnya (belum diatur). */
+  jamOperasional?: JamOperasional | null;
 }

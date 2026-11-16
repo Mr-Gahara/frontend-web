@@ -17,6 +17,7 @@ const tenant: Tenant = {
   idNPWP: null,
   isSetupComplete: true,
   absensiLokasiAktif: false,
+  jamOperasional: null,
   createdAt: "2026-09-01T00:00:00.000Z",
   updatedAt: "2026-09-01T00:00:00.000Z",
 };

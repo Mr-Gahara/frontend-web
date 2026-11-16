@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  barisJamOperasional,
   bolehSamakan,
+  dariJamOperasional,
+  keJamOperasional,
   HARI,
   HARI_KOSONG,
   masalahHari,
@@ -155,5 +158,41 @@ describe("samakan semua hari", () => {
     expect(bolehSamakan([jam("09:00", "21:00"), HARI_KOSONG, LIBUR])).toBe(true);
     expect(bolehSamakan([jam("09:00", "21:00"), LIBUR, DUA_EMPAT])).toBe(false);
     expect(bolehSamakan([HARI_KOSONG, HARI_KOSONG])).toBe(false);
+  });
+});
+
+describe("jamOperasional tenant (P81, B331, JB8a)", () => {
+  it("buka 24 jam dikirim tanpa hari", () => {
+    expect(keJamOperasional({ ...NILAI_AWAL_JAM_BUKA, mode: "24jam" })).toEqual({ mode: "24jam", hari: null });
+  });
+
+  it("jam tertentu: hari Buka berjam HH:mm, 24 jam dan Libur berjam null", () => {
+    const hasil = keJamOperasional(tertentu(HARI.map((_, i) => (i === 5 ? DUA_EMPAT : i === 6 ? LIBUR : jam("8:5", "22:00")))));
+    expect(hasil).toEqual({
+      mode: "tertentu",
+      hari: [
+        ...Array.from({ length: 5 }, () => ({ status: "buka", jamBuka: "08:05", jamTutup: "22:00" })),
+        { status: "24jam", jamBuka: null, jamTutup: null },
+        { status: "libur", jamBuka: null, jamTutup: null },
+      ],
+    });
+  });
+
+  it("isian dari jam tersimpan, dan null menjadi isian awal tanpa pilihan", () => {
+    expect(dariJamOperasional(null)).toEqual(NILAI_AWAL_JAM_BUKA);
+    expect(dariJamOperasional({ mode: "24jam", hari: null }).mode).toBe("24jam");
+    const simpan = keJamOperasional(tertentu(HARI.map((_, i) => (i === 0 ? LIBUR : jam("10:00", "02:00")))));
+    expect(keJamOperasional(dariJamOperasional(simpan))).toEqual(simpan);
+  });
+
+  it("ringkasan langkah tersimpan", () => {
+    expect(barisJamOperasional({ mode: "24jam", hari: null })).toEqual([
+      { label: "Jam buka", nilai: "Buka 24 jam setiap hari" },
+    ]);
+    const baris = barisJamOperasional(
+      keJamOperasional(tertentu(HARI.map((_, i) => (i === 6 ? LIBUR : jam("08:00", "22:00"))))),
+    );
+    expect(baris[0]).toEqual({ label: "Senin", nilai: "08.00 sampai 22.00" });
+    expect(baris[6]).toEqual({ label: "Minggu", nilai: "Libur" });
   });
 });

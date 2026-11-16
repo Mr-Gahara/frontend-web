@@ -23,10 +23,18 @@ export interface LangkahSetup {
   judul: string;
 }
 
+/**
+ * Jam buka toko, sesudah lokasi outlet (keputusan pemilik proyek, 7 November
+ * 2026), tersambung ke jamOperasional tenant sejak backend 4a19be8 (P81,
+ * B331; JB8a).
+ */
+export const LANGKAH_JAM_BUKA: LangkahSetup = { kunci: "jamBuka", judul: "Jam buka toko" };
+
 const LANGKAH_INTI: readonly LangkahSetup[] = [
   { kunci: "toko", judul: "Nama toko" },
   { kunci: "owner", judul: "Owner" },
   { kunci: "lokasi", judul: "Lokasi outlet" },
+  LANGKAH_JAM_BUKA,
   { kunci: "kategori", judul: "Kategori" },
   { kunci: "bahanBaku", judul: "Bahan baku, bila ada resep" },
   { kunci: "produk", judul: "Produk" },
@@ -35,13 +43,6 @@ const LANGKAH_INTI: readonly LangkahSetup[] = [
 
 const LANGKAH_BOOKING: LangkahSetup = { kunci: "booking", judul: "Sesi booking" };
 const LANGKAH_GUDANG: LangkahSetup = { kunci: "gudang", judul: "Gudang" };
-
-/**
- * Jam buka toko, sesudah lokasi outlet (keputusan pemilik proyek, 7 November
- * 2026). Belum masuk daftarLangkah: status setup backend belum mengenalnya,
- * sehingga baru dipakai rute pratinjau sampai penyambungan.
- */
-export const LANGKAH_JAM_BUKA: LangkahSetup = { kunci: "jamBuka", judul: "Jam buka toko" };
 
 export function daftarLangkah(plan: KunciPlan): readonly LangkahSetup[] {
   if (plan === "pro") return [...LANGKAH_INTI, LANGKAH_BOOKING, LANGKAH_GUDANG];

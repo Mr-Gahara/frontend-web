@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { ImageIcon, Loader2, MapPin, Save, Store } from "lucide-react";
+import { Clock, ImageIcon, Loader2, MapPin, Save, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,6 +22,7 @@ import {
 import type { Lokasi } from "@/types/location";
 import type { Tenant } from "@/types/tenant";
 import { usePerbaruiTenant, useTenant } from "./hooks";
+import { FormJamBuka } from "./form-jam-buka";
 import { KartuLogoToko } from "./kartu-logo-toko";
 import { nilaiAwalTenant, payloadPerbaruiTenant } from "./payload";
 import { skemaTenant, type NilaiFormTenant } from "./schema";
@@ -246,7 +247,7 @@ function Kartu({
 }
 
 /**
- * Profil Toko (keputusan PO12a sampai PO14a): dua kartu dengan simpan
+ * Profil Toko (keputusan PO12a sampai PO14a; Jam Buka JB8a): kartu dengan simpan
  * masing-masing. Profil tenant dibaca setiap pengguna lewat GET /tenant/:id
  * dan diubah pemegang update-tenant; lokasi Outlet dimuat bagi pemegang
  * read-location dan diubah pemegang update-location. Entri IZIN_HALAMAN-nya
@@ -353,6 +354,19 @@ export function HalamanProfilToko() {
       >
         {isiToko}
       </Kartu>
+      {tenant.data && (
+        <Kartu
+          ikon={<Clock className="h-5 w-5" />}
+          judul="Jam Buka"
+          keterangan="Kapan toko melayani pembeli, per hari."
+        >
+          <FormJamBuka
+            key={`${tenant.data.id}-${tenant.data.updatedAt}`}
+            tenant={tenant.data}
+            bolehUbah={bolehUbahToko}
+          />
+        </Kartu>
+      )}
       <Kartu
         ikon={<MapPin className="h-5 w-5" />}
         judul="Lokasi Outlet"

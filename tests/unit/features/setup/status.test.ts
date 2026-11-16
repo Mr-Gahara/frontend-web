@@ -10,7 +10,7 @@ import {
 } from "@/features/setup/status";
 
 const URUTAN: KunciLangkahServer[] = [
-  "namaToko", "owner", "outlet", "kategoriProduk", "produk", "bahanBaku", "pajak", "tipeAset", "aset", "tarif", "gudang",
+  "namaToko", "owner", "outlet", "jamBuka", "kategoriProduk", "produk", "bahanBaku", "pajak", "tipeAset", "aset", "tarif", "gudang",
 ];
 
 /** Status dengan langkah selesai yang disebut; bahan baku wajib bila ada resep. */
@@ -43,22 +43,29 @@ describe("status setup", () => {
     expect(indeksAwal(status([]))).toBe(0);
   });
 
+  it("jam buka sesudah lokasi outlet mengikuti kriteria server (P81, B331)", () => {
+    const s = status(["namaToko", "owner", "outlet"]);
+    expect(selesaiPerLangkah(s).jamBuka).toBe(false);
+    expect(langkahDariStatus(s)[indeksAwal(s)].kunci).toBe("jamBuka");
+    expect(selesaiPerLangkah(status(["namaToko", "owner", "outlet", "jamBuka"])).jamBuka).toBe(true);
+  });
+
   it("bahan baku tanpa resep tetap disinggahi sampai produk selesai", () => {
-    const s = status(["namaToko", "owner", "outlet", "kategoriProduk"]);
+    const s = status(["namaToko", "owner", "outlet", "jamBuka", "kategoriProduk"]);
     expect(selesaiPerLangkah(s).bahanBaku).toBe(false);
     expect(langkahDariStatus(s)[indeksAwal(s)].kunci).toBe("bahanBaku");
-    const sesudahProduk = status(["namaToko", "owner", "outlet", "kategoriProduk", "produk"]);
+    const sesudahProduk = status(["namaToko", "owner", "outlet", "jamBuka", "kategoriProduk", "produk"]);
     expect(selesaiPerLangkah(sesudahProduk).bahanBaku).toBe(true);
     expect(langkahDariStatus(sesudahProduk)[indeksAwal(sesudahProduk)].kunci).toBe("pajak");
   });
 
   it("bahan baku wajib (ada resep) mengikuti status server", () => {
-    const s = status(["namaToko", "owner", "outlet", "kategoriProduk", "produk"], { bahanWajib: true });
+    const s = status(["namaToko", "owner", "outlet", "jamBuka", "kategoriProduk", "produk"], { bahanWajib: true });
     expect(langkahDariStatus(s)[indeksAwal(s)].kunci).toBe("bahanBaku");
   });
 
   it("booking selesai hanya bila tipe aset, aset, dan tarif selesai", () => {
-    const inti: KunciLangkahServer[] = ["namaToko", "owner", "outlet", "kategoriProduk", "produk", "pajak"];
+    const inti: KunciLangkahServer[] = ["namaToko", "owner", "outlet", "jamBuka", "kategoriProduk", "produk", "pajak"];
     const pro = { plan: "pro" as const };
     expect(selesaiPerLangkah(status([...inti, "tipeAset", "aset"], pro)).booking).toBe(false);
     const s = status([...inti, "tipeAset", "aset", "tarif"], pro);
