@@ -827,6 +827,11 @@ yang disalurkan ke `tail -3` mencetak kode 0 padahal alat itu keluar 1.
   November 2026). Ganti teks persis lewat Edit atau pasangan
   `old`/`new` yang dicek `count == 1`, lalu periksa `git diff --stat`
   sebelum commit.
+- **Menyisipkan impor lewat jangkar `import {` mengenai impor pertama
+  berkas**, yang di unit test adalah `import { describe, expect, it }
+  from "vitest"`: dua kali nama baru masuk ke impor vitest (16 November
+  2026). Jangkarkan ke baris yang menyebut modulnya, misalnya
+  `import {\n  lingkupOutlet,`, atau sisipkan sebelum `} from "<modul>"`.
 
 ## Catatan form (React Hook Form dan Zod)
 

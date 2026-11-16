@@ -461,7 +461,9 @@ Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-bac
   bersama pencarian (`cari`), tab Stok Kritis (`stokKritis`), dan untuk
   stok outlet `tipeLokasi=Outlet` (B342), dengan tombol urut kolom
   dibuang (`e41fe76`). Pilihan Tambah Barang gudang dibaca dari seluruh
-  inventory gudang yang dimuat selama dialog terbuka.
+  inventory gudang yang dimuat selama dialog terbuka, dan nonaktif sampai
+  termuat; tidak lagi ikut tersaring pencarian tabel (disetujui pemilik
+  proyek sesudah diterapkan).
 
 ## Catatan
 

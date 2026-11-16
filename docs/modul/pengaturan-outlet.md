@@ -154,8 +154,12 @@ Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-bac
 
 - **Kartu Jam Buka di Profil Toko** (JB8a, `modul/setup-akun.md`):
   isian yang sama dengan langkah wizard, disimpan utuh ke
-  `jamOperasional` (B331) dengan tombol Simpan Jam Buka sendiri; tanpa
-  `update-tenant` hanya ringkasan per hari yang tampil (`46d90e1`).
+  `jamOperasional` (B331) dengan tombol Simpan Jam Buka sendiri yang
+  aktif hanya bila ada perubahan, subjudul "Kapan toko melayani pembeli,
+  per hari.", dan peringatan semua libur "...diubah lagi di sini."; tanpa
+  `update-tenant` hanya ringkasan per hari, atau "Jam buka belum
+  diatur." (`46d90e1`). Rincian ini disetujui pemilik proyek sesudah
+  diterapkan.
 
 ## Catatan
 

@@ -166,9 +166,11 @@ Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-bac
   pembayaran** (K-10, B325, MK17a): bagi pemegang
   `kelola-perangkat-kasir`, yang dapat membaca daftar mesin kasir,
   metode tunai yang akun kasnya dipetakan ke mesin kasir tidak dapat
-  dipilih dan diberi keterangan "Laci mesin kasir: terima tunai lewat
-  kasir di perangkatnya"; yang lain menerima pesan 409 backend lewat
-  toast gagal yang sudah ada (`metodeLaciMesinKasir`, `46ebfc3`).
+  dipilih dan diberi keterangan "Laci mesin kasir. Buka kasir di
+  perangkatnya lalu terima tunai di sana, atau pilih metode lain." (inti
+  pesan 409 backend, dipilih pemilik proyek); yang lain menerima pesan
+  409 backend lewat toast gagal yang sudah ada (`metodeLaciMesinKasir`,
+  `46ebfc3`; teks diganti di commit sesudahnya).
 
 ## Catatan
 

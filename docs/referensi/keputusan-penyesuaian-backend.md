@@ -969,7 +969,17 @@ backend beserta K-18 dan K-19 (P80 sampai P82, B330 sampai B344).
     (`modul/keuangan.md`).
   - **PB15a**: metode tunai berlaci mesin kasir dinonaktifkan di form
     pembayaran bagi pemegang `kelola-perangkat-kasir`; lainnya menerima
-    409 lewat toast (`modul/penjualan.md`).
+    409 lewat toast (`modul/penjualan.md`). Teks keterangannya sempat
+    ditulis sendiri, lalu diajukan dan diganti inti pesan 409 backend atas
+    pilihan pemilik proyek.
+  - **Rincian di luar teks opsi, diajukan sesudah diterapkan lalu
+    disetujui pemilik proyek** (16 November 2026): kartu Jam Buka Profil
+    Toko dengan subjudul, tombol Simpan Jam Buka sendiri, peringatan
+    semua libur "...diubah lagi di sini.", dan ringkasan baca-saja
+    tanpa `update-tenant` (JB8a); serta pilihan Tambah Barang gudang dari
+    seluruh isi gudang selama dialog terbuka (PV1a). Kejadian ini
+    melanggar urutan "Opsi terpilih diterapkan persis"
+    (`inti/cara-kerja.md`): rincian seperti ini diajukan sebelum ditulis.
   - **LB1a**: laporan untuk tim backend yang ditunda tidak disusun,
     karena seluruh butirnya sudah dicatat dan ditutup backend; status
     diselaraskan di `kontrak/temuan.md` (`inti/status.md`).
@@ -984,6 +994,12 @@ backend beserta K-18 dan K-19 (P80 sampai P82, B330 sampai B344).
   (OM1a menunggu desain), B332, B337 (web sudah menyaring `trusted`),
   B344, dan butir 169. Payload tenant tidak memuat `jamBuka` maupun
   `jamTutup` lama, sehingga B331 tidak memutus Profil Toko.
+- **Dibuktikan dari kode** (baca saja, 16 November 2026): butir 85 dan
+  107 (B50, B51) yang `Menunggu verifikasi` di backend. Metode dan
+  diskon yang dibuat nonaktif tidak dihitung, dan batas hanya menghitung
+  yang aktif (`metodePembayaranService.js` baris 251 sampai 258 dan 369
+  sampai 371; `diskonService.js` baris 219 sampai 224 dan 258 sampai
+  260).
 - **Dibuktikan dari respons nyata** lewat spec per berkas 16 November
   2026 (`inti/pengujian.md`, Baseline): B331, B333 sampai B336, B338
   sampai B343, dan B327 (query); butir 168 hanya tidak langsung, lewat

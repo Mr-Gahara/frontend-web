@@ -13,6 +13,12 @@ npx vitest run 2>&1 | tail -5
 npx playwright test tests/e2e/<modul> --reporter=json > /tmp/p.json 2>/dev/null; node ~/.cache/frontend-web/alat/ringkas-e2e.js
 ```
 
+Setelah rute `app/` dihapus, `tsc` dapat gagal di `.next/types/validator.ts`
+karena tipe rute bangkitan dev server masih menyebut rute itu; jalankan
+`npx next typegen` lalu ulangi `tsc` (16 November 2026, `1171f33`).
+Jumlah skenario suite penuh untuk harapan baseline: `npx playwright test
+--list 2>/dev/null | tail -1`.
+
 Mencari cacat tampilan di seluruh rute statis dashboard (teks terpotong
 ber-ellipsis dan luberan samping di 1280 dan 390 px), dengan tangkapan
 layar halaman bermasalah ke `~/Downloads/sampel-visual/`: helper
