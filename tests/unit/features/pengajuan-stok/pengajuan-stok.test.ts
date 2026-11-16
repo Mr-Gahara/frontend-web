@@ -8,6 +8,7 @@ import {
   bolehSetujuiPengajuan,
   bolehTolakPengajuan,
   bolehUbahPengajuan,
+  rekanSelokasiPengaju,
   tabTerlihat,
   type TabPengajuan,
 } from "@/features/pengajuan-stok/izin";
@@ -388,5 +389,20 @@ describe("labelTahapPengajuan", () => {
     const minta = pengajuan("REQ-031", "APPROVED", "Outlet Kota", "Gudang", "Outlet");
     expect(labelTahapPengajuan("gudang", minta)).toBe("Perlu Surat Jalan");
     expect(labelTahapPengajuan("outlet", minta)).toBe("Disetujui");
+  });
+});
+
+describe("rekanSelokasiPengaju (PG2a, P66, B338)", () => {
+  it("penyetuju berlokasi kerja sama dengan pengaju tidak dapat menyetujui", () => {
+    expect(rekanSelokasiPengaju("g1", false, "g1")).toBe(true);
+  });
+
+  it("lokasi berbeda, lintas outlet, atau salah satu tanpa lokasi kerja tidak dibatasi", () => {
+    expect(rekanSelokasiPengaju("g1", false, "o1")).toBe(false);
+    expect(rekanSelokasiPengaju("g1", true, "g1")).toBe(false);
+    expect(rekanSelokasiPengaju(null, false, "g1")).toBe(false);
+    expect(rekanSelokasiPengaju(undefined, false, "g1")).toBe(false);
+    expect(rekanSelokasiPengaju("g1", false, null)).toBe(false);
+    expect(rekanSelokasiPengaju("g1", false, undefined)).toBe(false);
   });
 });

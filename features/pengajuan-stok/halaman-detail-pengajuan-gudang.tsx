@@ -8,11 +8,19 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { isNotFound, pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
+import { bolehLintasOutlet } from "@/lib/auth/permissions";
+import { usePenggunaSaya } from "@/features/pengguna/hooks-profil";
 import { tahapPengajuan, type TahapPengajuan } from "./tahap";
 import { PanelBuatSuratJalan } from "./panel-surat-jalan";
 import { usePengajuanStok, useSetujuiPengajuan, useTolakPengajuan } from "./hooks";
 import { arahLokasi, arahPengajuanValid, peranRuang } from "./arah";
-import { bolehBuatSuratJalan, bolehSetujuiPengajuan, bolehTolakPengajuan } from "./izin";
+import {
+  PESAN_REKAN_SELOKASI,
+  bolehBuatSuratJalan,
+  bolehSetujuiPengajuan,
+  bolehTolakPengajuan,
+  rekanSelokasiPengaju,
+} from "./izin";
 import { LABEL_ARAH_PENGAJUAN, formatTanggalPengajuan, labelTahapPengajuan } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
@@ -101,6 +109,7 @@ export default function HalamanDetailPengajuanGudang() {
   const bolehSetujui = bolehSetujuiPengajuan(izin);
   const bolehTolak = bolehTolakPengajuan(izin);
   const bolehSuratJalan = bolehBuatSuratJalan(izin);
+  const saya = usePenggunaSaya();
 
   const [showConfirmApprove, setShowConfirmApprove] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -172,6 +181,13 @@ export default function HalamanDetailPengajuanGudang() {
   const isStockInsufficient = detail.items.some(
     (item) => item.jumlah > (item.stokGudangSaatIni || 0),
   );
+  // PG2a: rekan selokasi pengaju tidak dapat menyetujui (P66, B338).
+  const selokasi = rekanSelokasiPengaju(
+    saya.data?.locationID,
+    bolehLintasOutlet(izin),
+    detail.dimintaOleh?.locationID,
+  );
+  const tampilSetujui = bolehSetujui && !selokasi;
   // Status menentukan tahap; izin menentukan siapa yang boleh bertindak (butir 14).
   const panelTinjau = isSubmitted && (bolehSetujui || bolehTolak);
   const panelSuratJalan = perluSuratJalan && bolehSuratJalan && gudangPengirim;
@@ -309,7 +325,13 @@ export default function HalamanDetailPengajuanGudang() {
                 Tindakan Validasi Gudang
               </h3>
 
-              {bolehSetujui && isStockInsufficient && (
+              {bolehSetujui && selokasi && (
+                <p className="text-kecil font-medium text-navy/70 text-center leading-snug">
+                  {PESAN_REKAN_SELOKASI}
+                </p>
+              )}
+
+              {tampilSetujui && isStockInsufficient && (
                 <div className="bg-rose-50 border border-rose-200 p-3 rounded-xl mb-2 flex items-start gap-2">
                   <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                   <p className="text-kecil font-medium text-rose-700 leading-snug">
@@ -319,7 +341,7 @@ export default function HalamanDetailPengajuanGudang() {
                 </div>
               )}
 
-              {bolehSetujui && (
+              {tampilSetujui && (
                 <Button
                   onClick={() => setShowConfirmApprove(true)}
                   disabled={!arahValid || isStockInsufficient || approveMutation.isPending}

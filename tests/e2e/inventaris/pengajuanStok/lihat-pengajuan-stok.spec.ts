@@ -93,6 +93,10 @@ test.describe("Daftar pengajuan stok outlet", () => {
     const h = await buka(page, URL_OUTLET, { status: null });
     await expect(page.getByRole("heading", { name: "Pengajuan Stok Barang" })).toBeVisible();
     await periksaHalaman(page, h, KOSONG);
+    // B338: pengaju membawa lokasi kerjanya (id atau null), dipakai PG2a.
+    for (const p of h.data as { dimintaOleh?: Record<string, unknown> | null }[]) {
+      if (p.dimintaOleh) expect(p.dimintaOleh, "dimintaOleh.locationID").toHaveProperty("locationID");
+    }
   });
 
   test("tab status mengirim status ke server dan kembali ke halaman 1", async ({ page }) => {

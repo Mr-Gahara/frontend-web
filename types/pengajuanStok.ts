@@ -35,7 +35,8 @@ export interface PengajuanStok {
   dariLokasi: LokasiRelasi | null;
   keLokasi: LokasiRelasi | null;
   
-  dimintaOleh: PenggunaRelasi | null;
+  /** Pengaju beserta lokasi kerjanya (id atau null; B338). */
+  dimintaOleh: (PenggunaRelasi & { locationID?: string | null }) | null;
   disetujuiOleh: PenggunaRelasi | null;
   ditolakOleh: PenggunaRelasi | null;
   

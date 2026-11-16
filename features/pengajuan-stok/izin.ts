@@ -60,6 +60,26 @@ export function bolehSetujuiPengajuan(permissions: readonly string[]): boolean {
   return permissions.includes(IZIN.setujuiPengajuanStok);
 }
 
+/**
+ * Penyetuju adalah rekan selokasi pengaju, yang pasti ditolak 403 backend
+ * (P66, B284): penyetuju berlokasi kerja tanpa akses-lintas-outlet, dan
+ * lokasi kerja pengaju sama. Owner, pemegang akses-lintas-outlet, dan
+ * pengguna tanpa lokasi kerja tidak dibatasi. Lokasi pengaju dibaca dari
+ * dimintaOleh.locationID (B338). Tombol Setujui disembunyikan dan diganti
+ * keterangan (PG2a, pemilik proyek 16 November 2026, mengganti PG1a).
+ */
+export function rekanSelokasiPengaju(
+  lokasiKerjaSaya: string | null | undefined,
+  lintasOutlet: boolean,
+  lokasiKerjaPengaju: string | null | undefined,
+): boolean {
+  if (lintasOutlet || !lokasiKerjaSaya || !lokasiKerjaPengaju) return false;
+  return lokasiKerjaSaya === lokasiKerjaPengaju;
+}
+
+export const PESAN_REKAN_SELOKASI =
+  "Pengajuan dari lokasi kerja Anda harus disetujui pengguna lokasi lain atau Owner.";
+
 export function bolehTolakPengajuan(permissions: readonly string[]): boolean {
   return permissions.includes(IZIN.tolakPengajuanStok);
 }
