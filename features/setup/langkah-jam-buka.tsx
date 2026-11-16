@@ -32,6 +32,7 @@ import {
   type StatusHari,
 } from "./jam-buka";
 import { useKirim } from "./kirim";
+import { titikJamBuka } from "./titik-panduan";
 import type { PropsLangkah } from "./langkah";
 
 const OPSI_MODE: readonly OpsiPilihan<ModeJamBuka>[] = [
@@ -221,10 +222,11 @@ export function IsianJamBuka({
         opsi={OPSI_MODE}
         nilai={nilai.mode}
         onUbah={(mode) => onUbah((n) => ({ ...n, mode }))}
+        panduan="jam-mode"
       />
       {nilai.mode === "tertentu" && (
         <>
-          <ol aria-label="Jam buka per hari" className="flex flex-col gap-3">
+          <ol aria-label="Jam buka per hari" data-panduan="jam-hari" className="flex flex-col gap-3">
             {nilai.hari.map((h, i) => (
               <KartuHari key={HARI[i]} indeks={i} hari={h} cek={cek} onUbah={(baru) => ubahHari(i, baru)} />
             ))}
@@ -232,6 +234,7 @@ export function IsianJamBuka({
           {bolehSamakan(nilai.hari) && (
             <button
               type="button"
+              data-panduan="jam-samakan"
               onClick={() => onUbah((n) => ({ ...n, hari: samakanSemua(n.hari) }))}
               className={KELAS_TOMBOL_GARIS + " self-start"}
             >
@@ -271,6 +274,7 @@ export function LangkahJamBuka({ nomor, total, teksLanjut, awal, onLanjut, onKem
         total={total}
         judul="Jam buka toko"
         keterangan="Kapan toko melayani pembeli. Jam ini dipakai untuk menyusun shift karyawan."
+        panduan={{ kunci: "jamBuka", titik: titikJamBuka(teksLanjut) }}
       />
       <IsianJamBuka
         nilai={nilai}

@@ -69,6 +69,32 @@ export function titikLokasi(jenis: "outlet" | "gudang", teksLanjut: string, bole
   ];
 }
 
+/**
+ * Tur langkah jam buka (JB9a, pemilik proyek 16 November 2026). Daftar hari
+ * dan tombol Samakan hanya tampil pada jam tertentu, sehingga mesin tur
+ * melewatinya bila elemennya tidak ada.
+ */
+export function titikJamBuka(teksLanjut: string): TitikPanduan[] {
+  return [
+    {
+      target: "jam-mode",
+      judul: "Pilih kapan toko buka",
+      isi: "Buka 24 jam bila toko tidak pernah tutup. Jam tertentu untuk mengatur jam buka dan tutup tiap hari.",
+    },
+    {
+      target: "jam-hari",
+      judul: "Atur tiap hari",
+      isi: "Pilih Buka, 24 jam, atau Libur. Jam tutup lebih kecil dari jam buka berarti tutup keesokan harinya.",
+    },
+    {
+      target: "jam-samakan",
+      judul: "Samakan semua hari",
+      isi: "Isi satu hari dulu, lalu salin jamnya ke hari Buka lain.",
+    },
+    lanjut(teksLanjut, "Jam buka langsung tersimpan, lalu Anda lanjut ke langkah Kategori."),
+  ];
+}
+
 export function titikKategori(teksLanjut: string): TitikPanduan[] {
   return [
     {

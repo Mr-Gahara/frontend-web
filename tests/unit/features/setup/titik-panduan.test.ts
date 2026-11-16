@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   titikBahan,
   titikBooking,
+  titikJamBuka,
   titikKategori,
   titikLokasi,
   titikNamaToko,
@@ -18,6 +19,7 @@ describe("titik tur wizard setup", () => {
       titikNamaToko("Simpan dan lanjut"),
       titikOwner("Simpan dan lanjut"),
       titikLokasi("outlet", "Simpan dan lanjut", false),
+      titikJamBuka("Simpan dan lanjut"),
       titikKategori("Simpan dan lanjut"),
       titikBahan("Simpan dan lanjut", true),
       titikProduk("Simpan dan lanjut"),
@@ -30,6 +32,12 @@ describe("titik tur wizard setup", () => {
       expect(new Set(target(t)).size, "target tidak berulang dalam satu langkah").toBe(t.length);
     }
     expect(titikPajak("Simpan dan selesaikan", false).at(-1)?.judul).toBe("Tekan Simpan dan selesaikan");
+  });
+
+  it("jam buka: mode, daftar hari, Samakan, lalu lanjut ke Kategori (JB9a)", () => {
+    const t = titikJamBuka("Simpan dan lanjut");
+    expect(target(t)).toEqual(["jam-mode", "jam-hari", "jam-samakan", "lanjut"]);
+    expect(t.at(-1)?.isi).toBe("Jam buka langsung tersimpan, lalu Anda lanjut ke langkah Kategori.");
   });
 
   it("titik tombol tambah bahan baku hanya ada bila ada resep", () => {
