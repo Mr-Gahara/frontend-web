@@ -121,6 +121,18 @@ const PERAN_TANPA_LOKASI: PeranUji = {
   izin: (n) => n.startsWith("read-") && n !== IZIN.location,
 };
 
+/**
+ * Staf berlokasi kerja Gudang tanpa read-location (LK3a, B339): tipe lokasi
+ * kerjanya dibaca dari detail diri sendiri, sehingga ruangnya tetap dibatasi.
+ */
+const PERAN_LOKASI_GUDANG_TANPA_LOKASI: PeranUji = {
+  nama: "E2E Lokasi Gudang Tanpa Lokasi",
+  pin: "864221",
+  deskripsi: "Peran uji e2e: izin baca Owner tanpa read-location, berlokasi kerja Gudang",
+  izin: (n) => n !== IZIN_LINTAS_OUTLET && n.startsWith("read-") && n !== IZIN.location,
+  lokasiKerja: "Gudang",
+};
+
 /** Izin baca Owner tanpa izin baca shift, pola roster, dan jadwal (B139, B140). */
 const PERAN_TANPA_SDM: PeranUji = {
   nama: "E2E Tanpa SDM",
@@ -232,3 +244,4 @@ export const masukAkunBukanOwner = (page: Page) => masukSebagai(page, PERAN_AKUN
 export const masukPencatatBeban = (page: Page) => masukSebagai(page, PERAN_PENCATAT_BEBAN);
 export const masukTanpaLokasi = (page: Page) => masukSebagai(page, PERAN_TANPA_LOKASI);
 export const masukTanpaSdm = (page: Page) => masukSebagai(page, PERAN_TANPA_SDM);
+export const masukLokasiGudangTanpaLokasi = (page: Page) => masukSebagai(page, PERAN_LOKASI_GUDANG_TANPA_LOKASI);

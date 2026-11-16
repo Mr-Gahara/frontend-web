@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { masukLokasiGudang } from "../../helpers/terkunci-uji";
+import { masukLokasiGudang, masukLokasiGudangTanpaLokasi } from "../../helpers/terkunci-uji";
 import { BASIS, login } from "../../helpers/transfer-uji";
 
 /*
@@ -40,5 +40,20 @@ test.describe("Ruang mengikuti lokasi kerja", () => {
     await page.goto(BASIS + "/dashboard/gudang/inventaris");
     await expect(page.getByText("Gudang Ops.")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(PESAN_LUAR)).toHaveCount(0);
+  });
+});
+
+test.describe("Ruang mengikuti lokasi kerja tanpa read-location (B339)", () => {
+  test("tipe lokasi kerja dibaca dari detail diri, sehingga ruang outlet tetap ditolak", async ({ page }) => {
+    await login(page);
+    await masukLokasiGudangTanpaLokasi(page);
+    const tDetail = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/pengguna\/[0-9a-f]{24}$/i.test(r.url()),
+    );
+    await page.goto(BASIS + "/dashboard/outlet", { waitUntil: "commit" });
+    const detail = await tDetail;
+    expect(detail.status()).toBe(200);
+    expect((await detail.json()).data.lokasiKerja?.tipe, "lokasiKerja terbaca tanpa read-location").toBe("Gudang");
+    await expect(page.getByText(PESAN_LUAR)).toBeVisible({ timeout: 15_000 });
   });
 });

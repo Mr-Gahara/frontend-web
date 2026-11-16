@@ -1,6 +1,7 @@
 
 import { Entitas, Timestamps } from "./api";
 import { Role } from "./role";
+import type { TipeLokasi } from "./location";
 
 export interface PenggunaRole extends Entitas {
   namaRole: string;
@@ -66,6 +67,12 @@ export interface PenggunaDetail extends Entitas {
   role: string | null;
   /** Lokasi kerja (B269); null berarti tidak dibatasi. Dibaca LK3a untuk ruang. */
   locationID?: string | null;
+  /**
+   * Nama dan tipe lokasi kerja, hanya di GET /pengguna/:id, termasuk saat
+   * membaca diri sendiri tanpa read-location (B339); null bila tanpa lokasi
+   * kerja.
+   */
+  lokasiKerja?: { id: string; nama: string; tipe: TipeLokasi } | null;
 }
 
 /**

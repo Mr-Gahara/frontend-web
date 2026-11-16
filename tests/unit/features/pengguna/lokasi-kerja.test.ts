@@ -50,20 +50,15 @@ describe("lokasi kerja pengguna (B269)", () => {
 });
 
 describe("ruang mengikuti lokasi kerja (LK3a)", () => {
-  const daftar = [lokasi("o1", "Outlet Kota", "Outlet"), lokasi("g1", "Gudang A", "Gudang")];
-
   it("staf berlokasi kerja hanya punya ruang lokasinya", () => {
-    expect(ruangLokasiKerja("o1", false, daftar)).toBe("outlet");
-    expect(ruangLokasiKerja("g1", false, daftar)).toBe("gudang");
+    expect(ruangLokasiKerja({ tipe: "Outlet" }, false)).toBe("outlet");
+    expect(ruangLokasiKerja({ tipe: "Gudang" }, false)).toBe("gudang");
   });
 
-  it("tidak dibatasi bila lintas outlet, tanpa lokasi kerja, atau tipe tidak dapat dibaca", () => {
-    expect(ruangLokasiKerja("g1", true, daftar)).toBeNull();
-    expect(ruangLokasiKerja(null, false, daftar)).toBeNull();
-    expect(ruangLokasiKerja(undefined, false, daftar)).toBeNull();
-    // Tanpa read-location daftar tidak dimuat (butir 182).
-    expect(ruangLokasiKerja("g1", false, undefined)).toBeNull();
-    expect(ruangLokasiKerja("terhapus", false, daftar)).toBeNull();
+  it("tidak dibatasi bila lintas outlet atau tanpa lokasi kerja", () => {
+    expect(ruangLokasiKerja({ tipe: "Gudang" }, true)).toBeNull();
+    expect(ruangLokasiKerja(null, false)).toBeNull();
+    expect(ruangLokasiKerja(undefined, false)).toBeNull();
   });
 
   it("ruang dibaca dari awalan path dashboard", () => {

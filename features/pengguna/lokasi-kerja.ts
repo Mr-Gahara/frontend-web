@@ -53,10 +53,9 @@ export function lokasiKerjaDikirim(pilihan: string | null, tersimpan: string | n
  * Ruang mengikuti lokasi kerja (LK3a; pemilik proyek, 10 November 2026).
  * Staf berlokasi kerja tanpa akses-lintas-outlet hanya membuka ruang
  * lokasinya; ruang lain ditolak seluruhnya, termasuk halaman tingkat toko.
- * Tipe lokasi dibaca dari GET /location (read-location), karena detail
- * pengguna hanya mengirim id-nya. Bila tipe tidak dapat dibaca, ruang tidak
- * dibatasi dan pesan 403 backend tetap tampil seperti sebelumnya
- * (kontrak/temuan.md butir 182).
+ * Tipe lokasi dibaca dari lokasiKerja di detail diri sendiri (B339), yang
+ * terbaca juga tanpa read-location, sehingga staf tanpa izin itu ikut
+ * dibatasi sejak backend 4a19be8 (kontrak/temuan.md butir 182).
  */
 
 export type RuangKerja = "outlet" | "gudang";
@@ -65,13 +64,11 @@ const RUANG_DARI_TIPE: Record<Lokasi["tipe"], RuangKerja> = { Outlet: "outlet", 
 
 /** Ruang satu-satunya bagi pengguna, atau null bila tidak dibatasi. */
 export function ruangLokasiKerja(
-  lokasiKerjaId: string | null | undefined,
+  lokasiKerja: Pick<Lokasi, "tipe"> | null | undefined,
   lintasOutlet: boolean,
-  lokasi: readonly Lokasi[] | undefined,
 ): RuangKerja | null {
-  if (lintasOutlet || !lokasiKerjaId) return null;
-  const tipe = lokasi?.find((l) => l.id === lokasiKerjaId)?.tipe;
-  return tipe ? RUANG_DARI_TIPE[tipe] : null;
+  if (lintasOutlet || !lokasiKerja) return null;
+  return RUANG_DARI_TIPE[lokasiKerja.tipe] ?? null;
 }
 
 /** Ruang sebuah path dashboard, atau null untuk path di luar kedua ruang (misalnya profil). */

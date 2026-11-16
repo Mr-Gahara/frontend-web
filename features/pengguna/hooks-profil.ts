@@ -10,9 +10,8 @@ import {
   type UseMutationOptions,
 } from "@tanstack/react-query";
 import { useSession } from "@/lib/auth/useSession";
-import { bolehLintasOutlet, IZIN } from "@/lib/auth/permissions";
+import { bolehLintasOutlet } from "@/lib/auth/permissions";
 import { queryKeys } from "@/lib/queryKeys";
-import { useDaftarLokasi } from "@/features/inventaris/hooks";
 import { penggunaApi } from "./api";
 import { ruangLokasiKerja, type RuangKerja } from "./lokasi-kerja";
 import type { PerbaruiProfilPayload } from "@/types/pengguna";
@@ -41,19 +40,16 @@ export function usePenggunaSaya() {
 
 /**
  * Ruang lokasi kerja pengguna sesi (LK3a): null bila tidak dibatasi.
- * `siap` false selama detail diri atau daftar lokasi masih dimuat, agar
- * gerbang dan pengalihan tidak memutuskan dari data yang belum ada. Tanpa
- * read-location daftar lokasi tidak diminta, sehingga ruang tidak dibatasi.
+ * `siap` false selama detail diri masih dimuat, agar gerbang dan pengalihan
+ * tidak memutuskan dari data yang belum ada. Tipe lokasinya ikut di detail
+ * diri (B339), sehingga daftar lokasi tidak diminta.
  */
 export function useRuangLokasiKerja(): { ruang: RuangKerja | null; siap: boolean } {
   const { permissions } = useSession();
   const lintas = bolehLintasOutlet(permissions);
   const saya = usePenggunaSaya();
-  const lokasiKerjaId = saya.data?.locationID ?? null;
-  const bacaLokasi = !lintas && lokasiKerjaId !== null && permissions.includes(IZIN.location);
-  const lokasi = useDaftarLokasi({ aktif: bacaLokasi });
-  const siap = lintas || (!saya.isPending && (!bacaLokasi || !lokasi.isPending));
-  return { ruang: ruangLokasiKerja(lokasiKerjaId, lintas, lokasi.data), siap };
+  const siap = lintas || !saya.isPending;
+  return { ruang: ruangLokasiKerja(saya.data?.lokasiKerja, lintas), siap };
 }
 
 export interface PerbaruiProfilVars {
