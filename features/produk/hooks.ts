@@ -9,10 +9,24 @@
  * baru selesai setelah daftar termuat ulang.
  */
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { produkApi } from "./api";
 import { queryKeys } from "@/lib/queryKeys";
 import type { ProdukRequest } from "@/types/produk";
+
+/**
+ * Satu halaman daftar produk dari server (P79, B340), untuk halaman daftar
+ * produk. Halaman sebelumnya tetap tampil selama halaman berikutnya dimuat.
+ * Pemakai lain (form, kasir, diskon, pajak) tetap memuat daftar utuh lewat
+ * useDaftarProduk.
+ */
+export function useHalamanProduk(params: Record<string, string>) {
+  return useQuery({
+    queryKey: queryKeys.produk.daftar(params),
+    queryFn: () => produkApi.halaman(params),
+    placeholderData: keepPreviousData,
+  });
+}
 
 export function useDaftarProduk(opsi: { enabled?: boolean } = {}) {
   return useQuery({

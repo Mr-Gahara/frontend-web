@@ -172,10 +172,20 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
     expect(res.request().postDataJSON()).toMatchObject({ stok: 3, stokMinimum: 5, isUnlimitedStok: false });
     await page.waitForURL("**/inventaris/produk");
     try {
+      // PV1a, B340: pencarian dan tab Stok Kritis disaring server bersama paginasinya.
+      const tCari = page.waitForRequest(
+        (r) => r.method() === "GET" && /\/api\/produk\?/.test(r.url()) && new URL(r.url()).searchParams.get("cari") === namaProduk,
+      );
       await page.getByPlaceholder(/cari nama produk/i).fill(namaProduk);
+      const qCari = new URL((await tCari).url()).searchParams;
+      expect([qCari.get("page"), qCari.get("limit")]).toEqual(["1", "10"]);
       const baris = page.getByRole("row", { name: new RegExp(namaProduk, "i") });
       await expect(baris).toContainText("Kritis", { timeout: 15_000 });
+      const tKritis = page.waitForRequest(
+        (r) => r.method() === "GET" && /\/api\/produk\?/.test(r.url()) && new URL(r.url()).searchParams.get("stokKritis") === "true",
+      );
       await page.getByRole("button", { name: "Stok Kritis" }).click();
+      expect(new URL((await tKritis).url()).searchParams.get("cari")).toBe(namaProduk);
       await expect(baris).toBeVisible();
       await page.getByRole("button", { name: "Semua Produk" }).click();
     } finally {

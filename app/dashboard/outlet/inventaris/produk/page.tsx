@@ -2,7 +2,11 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useDaftarProduk, useHapusProduk } from "@/features/produk/hooks";
+import { useHalamanProduk, useHapusProduk } from "@/features/produk/hooks";
+import { PILIHAN_UKURAN_PRODUK, paramHalamanProduk } from "@/features/produk/filter";
+import { PANJANG_CARI_SERVER } from "@/features/inventaris/cakupan";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Input } from "@/components/ui/input";
 import { pesanError } from "@/lib/api/error";
 import type { Produk } from "@/types/produk";
 import { ColumnDef } from "@tanstack/react-table";
@@ -28,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatRupiah } from "@/lib/format";
-import { AlertTriangle, ArrowUpDown, MoreHorizontal, Plus, Package, Infinity } from "lucide-react";
+import { AlertTriangle, MoreHorizontal, Plus, Package, Infinity, Search } from "lucide-react";
 
 export default function ProdukPage() {
   // 1. PROTEKSI HALAMAN
@@ -37,15 +41,33 @@ export default function ProdukPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<Produk | null>(null);
   const [tabKritis, setTabKritis] = useState(false);
+  const [cari, setCari] = useState("");
+  const cariTertunda = useDebounce(cari, 400);
+  const [halaman, setHalaman] = useState(1);
+  const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN_PRODUK[0]);
+
+  // Mengganti tab atau pencarian kembali ke halaman 1, disesuaikan saat
+  // render agar halaman lama tidak sempat diminta.
+  const kunciKriteria = JSON.stringify([tabKritis, cariTertunda]);
+  const [kunciSebelumnya, setKunciSebelumnya] = useState(kunciKriteria);
+  if (kunciSebelumnya !== kunciKriteria) {
+    setKunciSebelumnya(kunciKriteria);
+    setHalaman(1);
+  }
 
   // =========================
   // QUERY PRODUK
   // =========================
+  // Pencarian nama dan tab stok kritis disaring server bersama paginasinya
+  // (P79, B340; keputusan rancangan butir 27, PV1a). Urutan mengikuti
+  // backend (nama); mengurutkan di klien hanya mengurutkan satu halaman.
   const {
-    data: produkList = [],
+    data,
     isLoading: produkLoading,
+    isFetching: produkMemuat,
     error: produkError,
-  } = useDaftarProduk();
+  } = useHalamanProduk(paramHalamanProduk(cariTertunda, tabKritis, halaman, ukuran));
+  const produkList = data?.data ?? [];
 
   // =========================
   // ERROR TOAST
@@ -88,17 +110,7 @@ export default function ProdukPage() {
       {
         accessorKey: "namaProduk",
         meta: { label: "Nama Produk" },
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto p-0 text-kecil font-bold text-navy/60 hover:bg-transparent hover:text-navy cursor-pointer"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Nama Produk
-            <ArrowUpDown className="ml-1 h-3 w-3" />
-          </Button>
-        ),
+        header: () => <span className="text-kecil font-bold text-navy/60">Nama Produk</span>,
         cell: ({ row }) => (
           <span className="font-bold text-navy">{row.original.namaProduk}</span>
         ),
@@ -268,15 +280,48 @@ export default function ProdukPage() {
         </Button>
       </div>
 
+      <div className="relative w-full sm:w-80">
+        <label htmlFor="cari-produk" className="sr-only">
+          Cari nama produk
+        </label>
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy/40" />
+        <Input
+          id="cari-produk"
+          type="search"
+          placeholder="Cari nama produk..."
+          value={cari}
+          onChange={(e) => setCari(e.target.value)}
+          maxLength={PANJANG_CARI_SERVER}
+          className="h-10 pl-9 bg-gading border-navy/20 text-navy"
+        />
+      </div>
+
       {/* Tabel Wrapper (Card Cream Gelap) */}
       <div className="flex flex-col gap-4 w-full">
         <DataTable
           columns={columns}
-          data={tabKritis ? produkList.filter((p) => p.isStokKritis) : produkList}
+          data={produkList}
           loading={produkLoading}
-          emptyMessage={tabKritis ? "Tidak ada produk dengan stok kritis." : "Belum ada produk. Silakan tambah produk baru."}
-          searchKey="namaProduk"
-          searchPlaceholder="Cari nama produk..."
+          emptyMessage={
+            cariTertunda.trim()
+              ? "Tidak ada produk yang cocok dengan pencarian."
+              : tabKritis
+                ? "Tidak ada produk dengan stok kritis."
+                : "Belum ada produk. Silakan tambah produk baru."
+          }
+          paginasiServer={{
+            halaman,
+            jumlahHalaman: data?.pagination?.totalPages ?? 1,
+            total: data?.pagination?.total ?? 0,
+            ukuran,
+            pilihanUkuran: PILIHAN_UKURAN_PRODUK,
+            sibuk: produkMemuat,
+            onGantiHalaman: setHalaman,
+            onGantiUkuran: (berikut) => {
+              setUkuran(berikut);
+              setHalaman(1);
+            },
+          }}
         />
       </div>
 

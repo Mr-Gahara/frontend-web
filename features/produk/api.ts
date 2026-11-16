@@ -9,11 +9,20 @@
  * terpisah di field kategori.
  */
 
-import { apiData } from "@/lib/api/client";
+import { api, apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
+import type { Paginasi } from "@/lib/api/normalize";
 import type { Produk, ProdukRequest } from "@/types/produk";
 
+/** Satu halaman produk (P79): dengan page atau limit, server mengirim pagination. */
+export type HalamanProduk = { data: Produk[]; pagination: Paginasi | null };
+
 export const produkApi = {
+  /** params disusun paramHalamanProduk (filter.ts). */
+  halaman: async (params: Record<string, string>): Promise<HalamanProduk> => {
+    const hasil = await api.get<Produk[]>(EP.produk.list, params);
+    return { data: hasil.data, pagination: hasil.pagination ?? null };
+  },
   daftar: () => apiData.get<Produk[]>(EP.produk.list),
   detail: (id: string) => apiData.get<Produk>(EP.produk.detail(id)),
   buat: (payload: ProdukRequest) =>
