@@ -168,7 +168,13 @@ penyambungannya menunggu backend (`kontrak/temuan.md` butir 176).
   tautan, dan Profil Toko memakai isian yang sama (`IsianJamBuka`).
   Pratinjau dihapus setelah spec alur nyata lolos (`46d90e1`,
   `1171f33`). Tur sorotan dan pemakaian jam di shift dan jadwal menjadi
-  utang.
+  utang, lalu diputuskan hari yang sama: JB9a di bawah, dan JO1a serta
+  JO2a (`modul/jadwal-shift.md`).
+- **JB9a: tur sorotan langkah jam buka** (pemilik proyek, 16 November
+  2026): "Pilih kapan toko buka", "Atur tiap hari", "Samakan semua
+  hari", lalu tombol lanjut dengan isi "Jam buka langsung tersimpan,
+  lalu Anda lanjut ke langkah Kategori."; daftar hari dan Samakan
+  dilewati bila tidak tampil (`0c4cc7e`).
 
 ### Penanda dan panduan wizard
 
@@ -621,7 +627,6 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
   (Petugas Gudang, Pengaturan Gudang), sehingga titik dan teksnya
   diajukan ke pemilik proyek lebih dulu.
 - Langkah jam buka belum punya tur, karena teksnya belum diusulkan.
-  Langkahnya tersambung sejak `46d90e1`; teks tur diajukan ke pemilik
-  proyek lebih dulu (`inti/status.md`, Langkah jam buka).
+  Selesai di `0c4cc7e` (JB9a).
 - Pemakaian jam buka di shift dan jadwal belum diputuskan pemilik proyek
-  (JB8a, 16 November 2026).
+  (JB8a, 16 November 2026). Selesai di `fddb3c6` (JO1a, JO2a).

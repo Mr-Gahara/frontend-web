@@ -216,6 +216,34 @@ Diputuskan pemilik proyek pada 8 November 2026
   "Luar jadwal" dari `sesiTerakhir` monitoring; Tepat Waktu tanpa label.
   Widget absensi halaman pengguna tidak berubah.
 
+### Jam buka toko di shift dan jadwal
+
+Diputuskan pemilik proyek pada 16 November 2026 dari kanvas desain "Jam
+Buka di Shift dan Jadwal" (desain A dari tiga, desktop 1280 dan HP 390
+px). Hanya ruang outlet, karena jam buka adalah jam toko melayani
+pembeli; ruang gudang tidak berubah. Backend hanya memakai
+`jamOperasional` untuk booking (P81), sehingga keduanya aturan web.
+Fungsinya murni di `features/tenant/jam-operasional.ts`.
+
+- **JO1a: peringatan di form shift.** Shift dibandingkan dengan setiap
+  hari Buka; hari 24 jam dan Libur tidak dihitung, dan toko 24 jam atau
+  jam belum diatur tidak diberi peringatan. Rentang yang lewat tengah
+  malam dibaca menyambung. Judulnya "Shift ini melewati jam tutup toko",
+  "Shift ini mulai sebelum toko buka", atau "Shift ini di luar jam buka
+  toko"; isinya satu kalimat per kelompok hari berjam sama, misalnya
+  "Toko tutup pukul 22.00 pada Senin sampai Sabtu, sedangkan shift
+  pulang 23.00.", ditutup "Shift tetap bisa disimpan.". Kotak karamel di
+  bawah isian jam, dan isian yang melanggar bergaris karamel; simpan
+  tidak ditahan (`fddb3c6`).
+- **JO2a: kalender dan generate.** Kalender mengarsir kolom hari Libur
+  toko (`arsir-libur`, dari token krem) dengan label "Toko libur";
+  jadwal yang sudah ada tetap tampil. Generate tidak membuat entri di
+  tanggal libur toko, sehingga jadwal lama di tanggal itu tidak
+  disentuh; urutan pola tetap mengikuti tanggal (hari yang dilewati
+  memakan satu hari siklus); ringkasan menambah "Hari Dilewati" (misalnya
+  "2 hari, toko libur (Minggu 22 dan 29 Nov)"), dan sel pratinjaunya
+  berarsir "Dilewati" (`fddb3c6`).
+
 ## Catatan
 
 ### Catatan dari modul jadwal dan shift

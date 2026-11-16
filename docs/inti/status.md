@@ -77,13 +77,10 @@ form pembayaran (PB15a, `46ebfc3`).
 Tersambung 16 November 2026 (JB8a, `46d90e1`; backend P81, B331): wizard
 sesudah Lokasi outlet dan kartu Jam Buka di Profil Toko memakai isian
 yang sama, dan pratinjaunya dihapus setelah spec alur nyata lolos
-(`1171f33`). Sisa, diputuskan pemilik proyek nanti
-(`modul/setup-akun.md`, Utang terbuka):
-
-1. Pemakaian jam buka di shift dan jadwal.
-2. Tur sorotan langkah jam buka: teksnya diajukan ke pemilik proyek,
-   lalu titiknya ditambah di `features/setup/titik-panduan.ts`
-   (keputusan rancangan butir 32; PN2a dan PN3a).
+(`1171f33`). Pada hari yang sama tur sorotannya ditambah (JB9a,
+`0c4cc7e`), dan jam buka dipakai di form shift, kalender, dan generate
+ruang outlet lewat kanvas desain (JO1a dan JO2a, `fddb3c6`;
+`modul/jadwal-shift.md`).
 
 ### Pekerjaan UI berikutnya
 
@@ -130,9 +127,12 @@ dengan alur kanvas desain seperti butir di bawah:
 
 Dilanjutkan nanti atas perintah pemilik proyek, tidak sekarang:
 
-1. **Suite e2e penuh**, harapan 649 (`inti/pengujian.md`, Baseline):
-   label kartu HP, tabel rincian, dan tipografi belum dijalankan e2e;
-   spec terdampak penyesuaian backend `4a19be8` sudah lolos per berkas.
+1. **Suite e2e penuh**: dijalankan 16 November 2026, 646 lolos, 4 gagal,
+   dan 2 dilewati dari 652 (`inti/pengujian.md`, Baseline). Satu gagal
+   karena laptop tidur dan lolos saat diulang; tiga gagal sungguhan
+   (`akses/jalur-bukan-owner` dan dua skenario
+   `lihat-stock-adjustment`) ditelusuri di putaran berikutnya, lalu
+   dibuktikan lewat spec terdampak saja.
 2. **Luberan tabel daftar di 768 px** (hampir 20 tabel): pilih batas
    kartu `DataTable` atau kolom per tabel (`modul/ui-ux.md`, Utang
    terbuka).

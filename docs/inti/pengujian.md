@@ -12,6 +12,35 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per jam buka di shift dan jadwal** (web `0c4cc7e`, backend
+`ridho` lokal `4a19be8`, 16 November 2026, pukul 20.57 sampai 21.54 WIB,
+reporter `line,json`, atas izin pemilik proyek): e2e 646 lolos, 4 gagal,
+dan 2 dilewati dari 652, sesuai harapan hitungan (649 ditambah tiga
+skenario `jadwal/jam-buka-jadwal`). Yang dilewati skip bersyarat data:
+status staf dashboard outlet (tidak ada staf ruang outlet di monitoring)
+dan dialog batal surat jalan (tidak ada surat jalan Belum Dikirim).
+Termasuk spec ber-OTP. Laptop ditangguhkan karena baterai lemah pukul
+21.23 sampai 21.36 (13 menit 10 detik), walau suite diawali
+`systemd-inhibit --what=idle:sleep`. Kegagalannya:
+
+- `keuangan/belanja-stok` (menu Ke outlet dan Ke gudang): karena laptop
+  tidur. Gagal 21.36.49, 18 detik setelah bangun, batas 30 detiknya
+  terpotong masa tidur; dijalankan ulang sendirian lolos 1.
+- `akses/jalur-bukan-owner` (tanpa izin baca shift, pola roster, dan
+  jadwal: "Akses ditolak" tidak tampil), 20.59: gagal sungguhan, sebelum
+  laptop tidur. Lolos saat spec terdampak per berkas siang harinya,
+  sehingga dugaan pertama urutan spec atau perubahan jadwal `fddb3c6`;
+  belum ditelusuri.
+- `inventaris/stockAdjustment/lihat-stock-adjustment` (kolom sumber dan
+  detail), 21.12: gagal sungguhan. Teks sel terbaca "SumberStock Opname
+  ..." dan "Fisik Riil90", yaitu label kartu HP tabel rincian (CV22a,
+  CV23a, `eb64c70`) ikut terbaca `toHaveText`; dugaan spec yang perlu
+  membaca nilai saja. Belum ditelusuri.
+
+Vitest 1128 lolos. Penelusuran ketiga kegagalan dan pembuktiannya lewat
+spec terdampak saja dilanjutkan di putaran berikutnya (pemilik proyek,
+16 November 2026).
+
 **Baseline per penyesuaian backend `4a19be8`** (web `6ab81aa`, backend
 `ridho` lokal `4a19be8`, 16 November 2026, sesudah migrasi
 `jamOperasionalToko.js` diterapkan): vitest 1115 lolos (unit baru
@@ -235,6 +264,7 @@ Pola kegagalan yang berulang:
 | Tangkapan atau ukuran gaya tidak berubah sesudah token tema baru, atau kelas token tidak berpengaruh | Dev server melayani CSS basi setelah `git stash` bolak-balik atau perubahan `@theme`; `touch app/globals.css` tidak selalu cukup. Periksa `getComputedStyle` atau aturan di `document.styleSheets` lebih dulu; bila kosong, hentikan dev server, hapus `.next/dev`, lalu jalankan ulang (14 November 2026, tipografi CV24a) |
 | Klik tanggal kalender kena dua elemen (`strict mode violation`) untuk hari 22 sampai 31 | Grid kalender juga menampilkan tanggal bulan sebelumnya; pilih lewat `button[data-day="M/D/YYYY"]`, seperti `pilihTanggalKalender` di `tests/helpers/jadwal-uji.ts` (`2bcb1ce`) |
 | Skenario `skipped` padahal data ujinya ada, sejak daftarnya berhalaman di server | Spec mencari data uji di respons pertama daftar, yang kini hanya satu halaman. Cari lewat query server (isi kotak cari lalu tunggu respons ber-`cari`), dan baca harapan dari `pagination.total` (skenario P18 bahan baku, 16 November 2026, `6ab81aa`) |
+| Gagal beberapa detik setelah jeda panjang di tengah suite, waktu habis menunggu URL atau elemen | Laptop ditangguhkan karena baterai lemah; `systemd-inhibit --what=idle:sleep` tidak menahannya. Cocokkan waktu `error-context.md` (`date -r`) dengan `journalctl -b \| grep -E "suspend\|resum"`; jalankan suite dengan charger tersambung (16 November 2026) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

@@ -465,3 +465,7 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Booking lintas tengah malam di timeline (TL1a) belum teruji e2e**:
   spec reservasi hanya memeriksa query `tampilan=timeline`, karena butuh
   booking yang melewati 00.00 dari hari sebelumnya (16 November 2026).
+- **Tur sorotan langkah jam buka (JB9a) hanya teruji di unit test**
+  (`titikJamBuka`), karena spec tur wizard berhenti di langkah lokasi;
+  mencapai langkah jam buka butuh mengisi lokasi berkoordinat lebih dulu
+  (16 November 2026).
