@@ -55,7 +55,9 @@ test.describe("Kaki sidebar", () => {
     await page.waitForURL(/\/login$/);
   });
 
-  test("logout pengguna yang gagal tetap memutus sesi akun dan kembali ke login", async ({ page }) => {
+  test("logout pengguna yang gagal tetap memutus sesi akun dan pengguna, dan sesi tidak dapat dipulihkan", async ({
+    page,
+  }) => {
     await login(page);
     const pemicu = page.getByRole("button", { name: /Ridho/ });
     await expect(pemicu).toBeVisible({ timeout: 15_000 });
@@ -70,10 +72,11 @@ test.describe("Kaki sidebar", () => {
     expect((await tAkun).status(), "logout akun tetap dikirim").toBeLessThan(400);
     await page.waitForURL(/\/login$/);
     await page.unroute(POLA_LOGOUT_PENGGUNA);
-    // Tidak diperiksa bahwa sesi tak dapat dipulihkan: pin-logout yang gagal
-    // membiarkan cookie refresh pengguna berlaku di backend, sehingga membuka
-    // /dashboard lagi memulihkan sesi (suite penuh 7 November 2026; dicatat
-    // di modul/profil-login.md untuk diputuskan pemilik proyek).
+    // Sejak backend 4a19be8 (P82, B343) logout akun ikut memutus sesi pengguna
+    // web di browser yang sama, sehingga sesi tidak pulih walau pin-logout
+    // gagal (kontrak/temuan.md butir 177).
+    await page.goto(BASIS + "/dashboard");
+    await page.waitForURL(/\/login$/);
   });
 
   test("nama di sidebar ikut berubah setelah profil disimpan", async ({ page, browser }) => {
