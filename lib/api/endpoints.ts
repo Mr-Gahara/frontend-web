@@ -103,9 +103,9 @@ export const EP = {
     tutup: (id: string) => `/sesikasir/${id}/tutup`,
     perangkat: "/sesikasir/perangkat",
     perangkatById: (id: string) => `/sesikasir/perangkat/${id}`,
+    /** Perangkat trusted se-toko (B334, kelola-perangkat-kasir). */
+    perangkatToko: "/sesikasir/perangkat-toko",
   },
-  /** Perangkat login satu pengguna (deviceRoute.js, read-pengguna). */
-  devicePengguna: (userId: string) => `/device/${userId}`,
   jurnalTransfer: "/jurnaltransfer",
   jurnalTransferById: (id: string) => `/jurnaltransfer/${id}`,
   bebanOperasional: {

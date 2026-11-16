@@ -61,7 +61,6 @@ export function SusunanMesinKasir({
   onBerhenti,
   onTutup,
 }: PropsSusunanMesinKasir) {
-  const daftarMesin = bolehKelola && mesin.status === "siap" ? mesin.daftar : undefined;
   const pemakaianPertama = bolehKelola && mesin.status === "siap" && mesin.daftar.length === 0;
 
   return (
@@ -72,7 +71,6 @@ export function SusunanMesinKasir({
         <BagianKasirBuka
           sesiBuka={kasirBuka.sesi}
           status={kasirBuka.status}
-          daftarMesin={daftarMesin}
           sekarang={sekarang}
           bolehTutup={bolehKelola}
           onTutup={onTutup}
@@ -85,7 +83,6 @@ export function SusunanMesinKasir({
         <div className="min-w-0 flex-[999_1_480px]">
           <RiwayatSesi
             {...riwayat}
-            daftarMesin={daftarMesin}
             hrefRincian={hrefRincian}
             pemakaianPertama={pemakaianPertama && belumPernahAdaSesi}
           />

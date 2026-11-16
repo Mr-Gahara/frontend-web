@@ -154,7 +154,7 @@ export function HalamanMesinKasir() {
             buka={modeMesin !== null}
             onBukaChange={(b) => !b && setModeMesin(null)}
             mode={modeMesin ?? { jenis: "tambah" }}
-            perangkat={pilihanPerangkat(perangkat.daftar, mesinSiap)}
+            perangkat={pilihanPerangkat(perangkat.daftar)}
             laci={pilihanLaci(akunKas.data ?? [], mesinSiap, mesinUbah?.installationId)}
             sekarang={sekarang}
             menyimpan={simpan.isPending}
@@ -172,7 +172,7 @@ export function HalamanMesinKasir() {
           />
 
           <DialogTutupKasir
-            namaMesin={dialogTutup.sesi ? namaMesin(dialogTutup.sesi.installationId, daftarMesin) : ""}
+            namaMesin={dialogTutup.sesi ? namaMesin(dialogTutup.sesi) : ""}
             laci={dialogTutup.sesi?.akunKas?.namaAkun ?? ""}
             buka={dialogTutup.sesi !== null}
             onBukaChange={(b) => !b && dialogTutup.batal()}

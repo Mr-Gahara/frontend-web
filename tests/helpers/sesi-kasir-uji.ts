@@ -21,12 +21,15 @@ export const NAMA_LACI_UJI = "E2E Laci Mesin Kasir";
 export type MesinKasirMentah = { id: string; installationId: string; namaPerangkat: string; akunKasID: string | null };
 export type SesiKasirMentah = {
   id: string;
-  installationId: string;
+  /** null bagi yang tidak memegang kelola-perangkat-kasir (B335). */
+  installationId: string | null;
+  namaPerangkat: string | null;
   akunKasID: string | null;
   status: "BUKA" | "TUTUP";
   nominalTutup: number | null;
   selisihTutup: number | null;
   catatanTutup: string | null;
+  ditutupDari: "app" | "web" | null;
 };
 
 /** Laci uji aktif; dibuat lewat API bila belum ada. */
@@ -60,7 +63,7 @@ export async function detailSesi(page: Page, auth: Auth, id: string): Promise<Se
  * spec, sehingga pemeriksaannya lunak.
  */
 export async function bersihkanMesinUji(page: Page, auth: Auth, laciID: string) {
-  const kena = (x: { installationId: string; akunKasID?: string | null }) =>
+  const kena = (x: { installationId: string | null; akunKasID?: string | null }) =>
     x.installationId === PERANGKAT_UJI.installationId || x.akunKasID === laciID;
   for (const sesi of (await sesiBuka(page, auth)).filter(kena)) {
     const saldo = (await daftarAkun(page, auth)).find((a) => a.id === sesi.akunKasID)?.saldo;

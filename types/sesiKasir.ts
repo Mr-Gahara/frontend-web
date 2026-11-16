@@ -1,12 +1,15 @@
 /**
  * Tipe sesi kasir dan Mesin Kasir (backend /api/sesikasir, B225 sampai B228,
- * B247, B250) serta perangkat login pengguna (/api/device). Bentuknya
- * mengikuti mappers/sesiKasirMapper.js dan mappers/deviceMapper.js setelah
+ * B247, B250, B334 sampai B336). Bentuknya mengikuti
+ * mappers/sesiKasirMapper.js dan services/sesiKasirService.js setelah
  * normalisasi lib/api/client.ts (_id menjadi id).
  */
 
 /** STATUS_SESI_KASIR di models/sesiKasirModel.js. */
 export type StatusSesiKasir = "BUKA" | "TUTUP";
+
+/** Asal penutupan sesi kasir (B336). */
+export type AsalPenutupanSesi = "app" | "web";
 
 /** Pengguna hasil populate (_pengguna di mapper). */
 export interface PenggunaSesiKasir {
@@ -31,7 +34,13 @@ export interface RingkasanSesiKasir {
 export interface SesiKasir {
   id: string;
   tenantID: string | null;
-  installationId: string;
+  /**
+   * null bagi yang tidak memegang kelola-perangkat-kasir (K-19, B335);
+   * mesin dikenali lewat namaPerangkat.
+   */
+  installationId: string | null;
+  /** Nama mesin kasir saat ini dari pemetaan; null bila mesinnya dilepas (B335). */
+  namaPerangkat: string | null;
   akunKasID: string | null;
   akunKas: AkunKasSesiKasir | null;
   locationID: string | null;
@@ -40,6 +49,8 @@ export interface SesiKasir {
   dibukaPada: string;
   ditutupOleh: PenggunaSesiKasir | null;
   ditutupPada: string | null;
+  /** Asal penutupan (B336); null selama masih buka atau ditutup sebelum 16 November 2026. */
+  ditutupDari: AsalPenutupanSesi | null;
   saldoSistemBuka: number;
   nominalBuka: number;
   selisihBuka: number;
@@ -69,18 +80,16 @@ export interface PerangkatKasir {
   updatedAt: string;
 }
 
-/** DEVICE_STATUS di config/constants.js. */
-export type StatusPerangkat = "pending" | "trusted" | "revoked" | "expired";
-
-/** Perangkat login satu pengguna (mapDeviceResponse, GET /device/:userId). */
-export interface PerangkatPengguna {
-  id: string;
-  penggunaID: string | null;
-  pengguna: { id: string; nama: string; status: string } | null;
+/**
+ * Perangkat trusted se-toko untuk pilihan mesin kasir (GET
+ * /sesikasir/perangkat-toko, B334, kelola-perangkat-kasir): satu baris per
+ * installationId. terakhirDipakai berasal dari updatedAt perangkat.
+ */
+export interface PerangkatToko {
   installationId: string;
-  status: StatusPerangkat;
   deviceName: string | null;
-  isPrimary: boolean;
   platform: string | null;
-  lastSeenAt: string | null;
+  terakhirDipakai: string | null;
+  pengguna: { id: string; nama: string }[];
+  mesinKasir: { id: string; namaPerangkat: string } | null;
 }

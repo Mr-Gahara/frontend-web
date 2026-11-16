@@ -1,7 +1,7 @@
 import { api, apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
 import type { Paginasi } from "@/lib/api/normalize";
-import type { PerangkatKasir, PerangkatPengguna, SesiKasir } from "@/types/sesiKasir";
+import type { PerangkatKasir, PerangkatToko, SesiKasir } from "@/types/sesiKasir";
 import type { PayloadMesinKasir } from "./dialog-mesin-kasir";
 import type { PayloadTutupKasir } from "./dialog-tutup-kasir";
 
@@ -32,11 +32,6 @@ export const sesiKasirApi = {
     apiData.post<PerangkatKasir>(EP.sesiKasir.perangkat, payload),
   hapusPerangkat: (id: string) => apiData.delete<unknown>(EP.sesiKasir.perangkatById(id)),
 
-  /**
-   * Perangkat login satu pengguna. Ditolak 403 bila level role peminta tidak
-   * di atas level pengguna itu (deviceService.getDevices), kecuali milik
-   * sendiri.
-   */
-  perangkatPengguna: (userId: string) =>
-    apiData.get<PerangkatPengguna[]>(EP.devicePengguna(userId)),
+  /** Perangkat trusted se-toko untuk pilihan mesin kasir (B334). */
+  perangkatToko: () => apiData.get<PerangkatToko[]>(EP.sesiKasir.perangkatToko),
 };

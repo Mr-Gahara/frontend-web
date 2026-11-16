@@ -144,11 +144,7 @@ export const queryKeys = {
     daftar: (params?: Filter) => ["sesiKasir", "daftar", params] as const,
     detail: (id: string) => ["sesiKasir", "detail", id] as const,
     perangkat: () => ["sesiKasir", "perangkat"] as const,
-  },
-  /** Perangkat login per pengguna (GET /device/:userId). */
-  devicePengguna: {
-    semua: kunci(["devicePengguna"] as const),
-    daftar: (userId: string) => ["devicePengguna", userId] as const,
+    perangkatToko: () => ["sesiKasir", "perangkatToko"] as const,
   },
   bebanOperasional: {
     semua: kunci(["bebanOperasional"] as const),

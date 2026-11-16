@@ -7,9 +7,8 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useDaftarPengguna } from "@/features/pengguna/hooks";
 import { queryKeys } from "@/lib/queryKeys";
-import type { PerangkatKasir, PerangkatPengguna, SesiKasir } from "@/types/sesiKasir";
+import type { PerangkatKasir, SesiKasir } from "@/types/sesiKasir";
 import { sesiKasirApi } from "./api";
 import type { PayloadMesinKasir } from "./dialog-mesin-kasir";
 import type { PayloadTutupKasir } from "./dialog-tutup-kasir";
@@ -111,35 +110,16 @@ export function useSesiTerakhir(mesin: readonly PerangkatKasir[] | undefined) {
 }
 
 /**
- * Perangkat login seluruh karyawan outlet untuk pilihan perangkat mesin
- * kasir (MK3a): backend belum punya daftar perangkat se-toko
- * (kontrak/temuan.md butir 172). Respons perangkat tidak membawa nama
- * pemiliknya, sehingga nama diambil dari daftar pengguna. Pengguna yang
- * perangkatnya ditolak (level role tidak di bawah peminta) dilewati.
- * Dimuat hanya saat form mesin kasir dibuka.
+ * Perangkat trusted se-toko untuk pilihan perangkat mesin kasir (B334,
+ * MK3b), dimuat bagi pemegang izin kelola mesin kasir.
  */
 export function usePerangkatToko(enabled: boolean) {
-  const pengguna = useDaftarPengguna("outlet", { enabled });
-  const daftarPengguna = pengguna.data ?? [];
-  const perangkat = useQueries({
-    queries: daftarPengguna.map((p) => ({
-      queryKey: queryKeys.devicePengguna.daftar(p.id),
-      queryFn: () => sesiKasirApi.perangkatPengguna(p.id),
-      enabled,
-      retry: false,
-    })),
-    combine: (hasil) => ({
-      memuat: hasil.some((h) => h.isPending && h.fetchStatus !== "idle"),
-      daftar: hasil.flatMap((h, i): PerangkatPengguna[] => {
-        const pemilik = daftarPengguna[i];
-        return (h.data ?? []).map((d) => ({
-          ...d,
-          pengguna: d.pengguna ?? { id: pemilik.id, nama: pemilik.nama, status: pemilik.status },
-        }));
-      }),
-    }),
+  const kueri = useQuery({
+    queryKey: queryKeys.sesiKasir.perangkatToko(),
+    queryFn: sesiKasirApi.perangkatToko,
+    enabled,
   });
-  return { memuat: pengguna.isLoading || perangkat.memuat, daftar: perangkat.daftar };
+  return { memuat: kueri.isLoading, daftar: kueri.data ?? [] };
 }
 
 function useInvalidasiSesiKasir() {

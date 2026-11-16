@@ -14,13 +14,13 @@ import {
 } from "@/features/sesi-kasir/pesan";
 import { ApiError } from "@/lib/api/error";
 
-describe("bolehKelolaMesinKasir (keputusan pemilik proyek, 7 November 2026)", () => {
-  const KETIGA = ["kelola-perangkat-kasir", "read-pengguna", "read-akunkas"];
+describe("bolehKelolaMesinKasir (7 November 2026; MK3b, 16 November 2026)", () => {
+  const KEDUA = ["kelola-perangkat-kasir", "read-akunkas"];
 
-  it("true hanya bila ketiga izin dipegang", () => {
-    expect(bolehKelolaMesinKasir(KETIGA)).toBe(true);
-    for (const kurang of KETIGA) {
-      expect(bolehKelolaMesinKasir(KETIGA.filter((p) => p !== kurang))).toBe(false);
+  it("true hanya bila kedua izin dipegang, tanpa read-pengguna", () => {
+    expect(bolehKelolaMesinKasir(KEDUA)).toBe(true);
+    for (const kurang of KEDUA) {
+      expect(bolehKelolaMesinKasir(KEDUA.filter((p) => p !== kurang))).toBe(false);
     }
   });
 

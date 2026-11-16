@@ -9,7 +9,7 @@ import { isNotFound, pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
 import { DialogTutupKasir } from "./dialog-tutup-kasir";
 import { URL_MESIN_KASIR, useDialogTutupKasir } from "./halaman-mesin-kasir";
-import { useDaftarMesinKasir, useDetailSesi } from "./hooks";
+import { useDetailSesi } from "./hooks";
 import { bolehKelolaMesinKasir } from "./izin";
 import { RincianSesi } from "./rincian-sesi";
 import { labelLaci, namaMesin } from "./tampilan";
@@ -19,7 +19,6 @@ export function HalamanRincianSesi({ id }: { id: string }) {
   const { permissions } = useSession();
   const bolehKelola = bolehKelolaMesinKasir(permissions);
   const detail = useDetailSesi(id);
-  const mesin = useDaftarMesinKasir(bolehKelola);
   const akunKas = useDaftarAkunKas({ enabled: bolehKelola });
   const dialogTutup = useDialogTutupKasir();
 
@@ -46,8 +45,7 @@ export function HalamanRincianSesi({ id }: { id: string }) {
     );
   }
 
-  const daftarMesin = bolehKelola ? mesin.data : undefined;
-  const nama = namaMesin(sesi.installationId, daftarMesin);
+  const nama = namaMesin(sesi);
   // Laci milik sesi itu sendiri, bukan laci mesin sekarang yang mungkin sudah diubah.
   const laci = labelLaci(sesi, akunKas.data);
 

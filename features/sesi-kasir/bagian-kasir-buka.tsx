@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRupiah } from "@/lib/format";
-import type { PerangkatKasir, SesiKasir } from "@/types/sesiKasir";
+import type { SesiKasir } from "@/types/sesiKasir";
 import { jamLokal, lamaBuka, namaMesin } from "./tampilan";
 
 export type StatusMuat = "memuat" | "gagal" | "siap";
@@ -12,8 +12,6 @@ export type StatusMuat = "memuat" | "gagal" | "siap";
 interface PropsBagianKasirBuka {
   sesiBuka: SesiKasir[];
   status: StatusMuat;
-  /** Daftar mesin kasir; undefined bila pengguna tidak memegang kelola-perangkat-kasir. */
-  daftarMesin: PerangkatKasir[] | undefined;
   sekarang: Date;
   /** Tutup dari web menuntut kelola-perangkat-kasir (POST /sesikasir/:id/tutup). */
   bolehTutup: boolean;
@@ -29,7 +27,6 @@ interface PropsBagianKasirBuka {
 export function BagianKasirBuka({
   sesiBuka,
   status,
-  daftarMesin,
   sekarang,
   bolehTutup,
   onTutup,
@@ -70,7 +67,7 @@ export function BagianKasirBuka({
 
       {status === "siap" &&
         sesiBuka.map((sesi) => {
-          const nama = namaMesin(sesi.installationId, daftarMesin);
+          const nama = namaMesin(sesi);
           return (
             <article
               key={sesi.id}

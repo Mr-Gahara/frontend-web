@@ -5,7 +5,7 @@
  */
 
 import type { AkunKas } from "@/types/akunKas";
-import type { PerangkatKasir, PerangkatPengguna, SesiKasir } from "@/types/sesiKasir";
+import type { PerangkatKasir, PerangkatToko, SesiKasir } from "@/types/sesiKasir";
 import { formatRupiah } from "@/lib/format";
 import { keTanggalLokal } from "@/lib/waktu";
 
@@ -102,32 +102,32 @@ export function gabungNama(nama: readonly string[]): string {
 
 /**
  * Orang di sebuah sesi: pembuka saja bila penutupnya sama atau belum ada,
- * "Sari, ditutup Ridho" bila berbeda. Respons tidak membawa asal penutupan
- * (web atau aplikasi), sehingga tidak ditulis (keputusan pemilik proyek,
- * 6 November 2026).
+ * "Sari, ditutup Ridho" bila berbeda. Penutupan dari web (ditutupDari, B336)
+ * ditulis "Sari, ditutup Ridho dari web", dan "Ridho, ditutup dari web" bila
+ * penutupnya orang yang sama; dari aplikasi atau sesi lama tanpa asal tidak
+ * ditulis asalnya (MK5b, pemilik proyek 16 November 2026).
  */
-export function orangSesi(sesi: Pick<SesiKasir, "dibukaOleh" | "ditutupOleh">): string {
+export function orangSesi(
+  sesi: Pick<SesiKasir, "dibukaOleh" | "ditutupOleh" | "ditutupDari">,
+): string {
   const pembuka = sesi.dibukaOleh?.nama ?? "-";
   const penutup = sesi.ditutupOleh;
-  if (!penutup || penutup.id === sesi.dibukaOleh?.id) return pembuka;
-  return `${pembuka}, ditutup ${penutup.nama}`;
+  const dariWeb = sesi.ditutupDari === "web";
+  if (!penutup || penutup.id === sesi.dibukaOleh?.id) {
+    return dariWeb ? `${pembuka}, ditutup dari web` : pembuka;
+  }
+  return `${pembuka}, ditutup ${penutup.nama}${dariWeb ? " dari web" : ""}`;
 }
 
-export const NAMA_MESIN_TANPA_DAFTAR = "Mesin kasir";
 export const NAMA_MESIN_DILEPAS = "Mesin kasir yang sudah dilepas";
 
 /**
- * Nama mesin kasir untuk sebuah installationId. Daftar sesi tidak membawa
- * namaPerangkat, sehingga nama diambil dari daftar mesin kasir, yang hanya
- * terbaca pemegang kelola-perangkat-kasir; tanpa daftar itu (undefined) yang
- * tampil "Mesin kasir".
+ * Nama mesin kasir sebuah sesi, dari namaPerangkat respons (B335), yang
+ * terbaca setiap pemegang read-sesi-kasir; null berarti pemetaan mesinnya
+ * sudah dilepas.
  */
-export function namaMesin(
-  installationId: string,
-  daftar: readonly PerangkatKasir[] | undefined,
-): string {
-  if (!daftar) return NAMA_MESIN_TANPA_DAFTAR;
-  return daftar.find((m) => m.installationId === installationId)?.namaPerangkat ?? NAMA_MESIN_DILEPAS;
+export function namaMesin(sesi: Pick<SesiKasir, "namaPerangkat">): string {
+  return sesi.namaPerangkat ?? NAMA_MESIN_DILEPAS;
 }
 
 export interface KelompokHari<T> {
@@ -229,52 +229,32 @@ export interface PilihanPerangkat {
   installationId: string;
   nama: string;
   pemakai: string[];
-  terakhirAktif: string | null;
+  terakhirDipakai: string | null;
   /** Nama mesin kasir bila perangkat ini sudah menjadi mesin kasir. */
   sudahMesin: string | null;
 }
 
 /**
- * Daftar perangkat untuk form tambah mesin kasir, digabung dari perangkat
- * setiap karyawan (keputusan pemilik proyek, 6 November 2026: backend belum
- * punya daftar perangkat se-toko). Satu baris per installationId, hanya yang
- * berstatus trusted (K-18: backend menerima perangkat berstatus apa pun),
- * diurutkan dari yang terakhir aktif.
+ * Daftar perangkat untuk form tambah mesin kasir, dari perangkat trusted
+ * se-toko (B334; MK3b, pemilik proyek 16 November 2026), diurutkan dari yang
+ * terakhir dipakai.
  */
-export function pilihanPerangkat(
-  perangkat: readonly PerangkatPengguna[],
-  mesin: readonly PerangkatKasir[],
-): PilihanPerangkat[] {
-  const peta = new Map<string, PilihanPerangkat>();
-  for (const p of perangkat) {
-    if (p.status !== "trusted") continue;
-    const namaPemakai = p.pengguna?.nama;
-    const ada = peta.get(p.installationId);
-    if (!ada) {
-      peta.set(p.installationId, {
-        installationId: p.installationId,
-        nama: p.deviceName?.trim() || NAMA_PERANGKAT_KOSONG,
-        pemakai: namaPemakai ? [namaPemakai] : [],
-        terakhirAktif: p.lastSeenAt,
-        sudahMesin: mesin.find((m) => m.installationId === p.installationId)?.namaPerangkat ?? null,
-      });
-      continue;
-    }
-    if (namaPemakai && !ada.pemakai.includes(namaPemakai)) ada.pemakai.push(namaPemakai);
-    if (ada.nama === NAMA_PERANGKAT_KOSONG && p.deviceName?.trim()) ada.nama = p.deviceName.trim();
-    if (p.lastSeenAt && (!ada.terakhirAktif || p.lastSeenAt > ada.terakhirAktif)) {
-      ada.terakhirAktif = p.lastSeenAt;
-    }
-  }
-  return [...peta.values()].sort((a, b) =>
-    (b.terakhirAktif ?? "").localeCompare(a.terakhirAktif ?? ""),
-  );
+export function pilihanPerangkat(perangkat: readonly PerangkatToko[]): PilihanPerangkat[] {
+  return perangkat
+    .map((p) => ({
+      installationId: p.installationId,
+      nama: p.deviceName?.trim() || NAMA_PERANGKAT_KOSONG,
+      pemakai: [...new Set(p.pengguna.map((u) => u.nama))],
+      terakhirDipakai: p.terakhirDipakai,
+      sudahMesin: p.mesinKasir?.namaPerangkat ?? null,
+    }))
+    .sort((a, b) => (b.terakhirDipakai ?? "").localeCompare(a.terakhirDipakai ?? ""));
 }
 
 /** Keterangan perangkat di form tambah mesin kasir. */
 export function teksPerangkat(p: PilihanPerangkat, sekarang: Date): string {
   if (p.sudahMesin) return `Sudah jadi mesin kasir: ${p.sudahMesin}`;
   const oleh = p.pemakai.length ? `, oleh ${gabungNama(p.pemakai)}` : "";
-  if (!p.terakhirAktif) return `Belum pernah aktif${oleh}`;
-  return `Terakhir aktif ${waktuRelatif(p.terakhirAktif, sekarang)}${oleh}`;
+  if (!p.terakhirDipakai) return `Belum pernah dipakai${oleh}`;
+  return `Terakhir dipakai ${waktuRelatif(p.terakhirDipakai, sekarang)}${oleh}`;
 }

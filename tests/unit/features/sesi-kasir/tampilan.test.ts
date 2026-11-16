@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   NAMA_MESIN_DILEPAS,
-  NAMA_MESIN_TANPA_DAFTAR,
   NAMA_PERANGKAT_KOSONG,
   gabungNama,
   kelompokkanPerHari,
@@ -19,7 +18,7 @@ import {
 } from "@/features/sesi-kasir/tampilan";
 import { formatRupiah } from "@/lib/format";
 import type { AkunKas } from "@/types/akunKas";
-import type { PerangkatKasir, PerangkatPengguna } from "@/types/sesiKasir";
+import type { PerangkatKasir, PerangkatToko } from "@/types/sesiKasir";
 
 /** Waktu lokal sebagai ISO, agar test tidak bergantung zona waktu mesin. */
 const lokal = (bulan: number, tanggal: number, jam: number, menit: number) =>
@@ -36,19 +35,18 @@ const akun = (id: string, namaAkun: string, nomorAkun: string, tipeAkun = "Kas F
 
 const perangkat = (
   installationId: string,
-  pengguna: { id: string; nama: string },
-  status: PerangkatPengguna["status"],
-  lastSeenAt: string | null,
+  pengguna: { id: string; nama: string }[],
+  terakhirDipakai: string | null,
   deviceName: string | null = "Galaxy Tab A9",
-) =>
-  ({
-    id: "d-" + installationId + pengguna.id,
-    installationId,
-    pengguna: { ...pengguna, status: "aktif" },
-    status,
-    lastSeenAt,
-    deviceName,
-  }) as PerangkatPengguna;
+  mesinKasir: string | null = null,
+): PerangkatToko => ({
+  installationId,
+  deviceName,
+  platform: "android",
+  terakhirDipakai,
+  pengguna,
+  mesinKasir: mesinKasir ? { id: "m-" + installationId, namaPerangkat: mesinKasir } : null,
+});
 
 describe("labelSelisih", () => {
   it("pas, lebih, kurang, dan belum ada hitungan", () => {
@@ -120,16 +118,24 @@ describe("nama dan orang", () => {
   });
 
   it("orang sesi: penutup ditulis hanya bila berbeda dari pembuka", () => {
-    expect(orangSesi({ dibukaOleh: SARI, ditutupOleh: SARI })).toBe("Sari");
-    expect(orangSesi({ dibukaOleh: SARI, ditutupOleh: null })).toBe("Sari");
-    expect(orangSesi({ dibukaOleh: SARI, ditutupOleh: RIDHO })).toBe("Sari, ditutup Ridho");
+    expect(orangSesi({ dibukaOleh: SARI, ditutupOleh: SARI, ditutupDari: "app" })).toBe("Sari");
+    expect(orangSesi({ dibukaOleh: SARI, ditutupOleh: null, ditutupDari: null })).toBe("Sari");
+    expect(orangSesi({ dibukaOleh: SARI, ditutupOleh: RIDHO, ditutupDari: "app" })).toBe("Sari, ditutup Ridho");
+    expect(orangSesi({ dibukaOleh: SARI, ditutupOleh: RIDHO, ditutupDari: null })).toBe("Sari, ditutup Ridho");
   });
 
-  it("nama mesin: terdaftar, sudah dilepas, dan tanpa daftar mesin", () => {
-    const daftar = [mesin("i1", "Kasir Depan", "k1")];
-    expect(namaMesin("i1", daftar)).toBe("Kasir Depan");
-    expect(namaMesin("i9", daftar)).toBe(NAMA_MESIN_DILEPAS);
-    expect(namaMesin("i1", undefined)).toBe(NAMA_MESIN_TANPA_DAFTAR);
+  it("orang sesi: penutupan dari web ditulis asalnya, juga bila penutupnya sama (MK5b, B336)", () => {
+    expect(orangSesi({ dibukaOleh: SARI, ditutupOleh: RIDHO, ditutupDari: "web" })).toBe(
+      "Sari, ditutup Ridho dari web",
+    );
+    expect(orangSesi({ dibukaOleh: RIDHO, ditutupOleh: RIDHO, ditutupDari: "web" })).toBe(
+      "Ridho, ditutup dari web",
+    );
+  });
+
+  it("nama mesin dari namaPerangkat sesi; null berarti sudah dilepas (B335)", () => {
+    expect(namaMesin({ namaPerangkat: "Kasir Depan" })).toBe("Kasir Depan");
+    expect(namaMesin({ namaPerangkat: null })).toBe(NAMA_MESIN_DILEPAS);
   });
 
   it("terakhir dipakai dari sesi terbaru", () => {
@@ -188,36 +194,26 @@ describe("laci", () => {
 describe("pilihanPerangkat", () => {
   const sekarang = new Date(2026, 10, 6, 14, 0);
 
-  it("digabung per installationId, hanya trusted, terbaru di atas, dan menandai mesin kasir", () => {
-    const hasil = pilihanPerangkat(
-      [
-        perangkat("tab", SARI, "trusted", lokal(11, 6, 8, 10)),
-        perangkat("tab", RIDHO, "trusted", lokal(11, 5, 21, 0)),
-        perangkat("redmi", SARI, "trusted", lokal(11, 2, 9, 0), null),
-        perangkat("oppo", SARI, "pending", lokal(11, 6, 9, 0)),
-        perangkat("vivo", RIDHO, "revoked", lokal(10, 20, 9, 0)),
-        perangkat("bar", RIDHO, "trusted", lokal(11, 5, 22, 0), "Oppo A58"),
-      ],
-      [mesin("bar", "Kasir Bar", "k2")],
-    );
+  it("dari perangkat se-toko (B334), terbaru di atas, dan menandai mesin kasir", () => {
+    const hasil = pilihanPerangkat([
+      perangkat("redmi", [SARI], lokal(11, 2, 9, 0), null),
+      perangkat("tab", [SARI, RIDHO], lokal(11, 6, 8, 10)),
+      perangkat("bar", [RIDHO], lokal(11, 5, 22, 0), "Oppo A58", "Kasir Bar"),
+    ]);
     expect(hasil.map((p) => p.installationId)).toEqual(["tab", "bar", "redmi"]);
     expect(hasil[0]).toMatchObject({ nama: "Galaxy Tab A9", pemakai: ["Sari", "Ridho"], sudahMesin: null });
     expect(hasil[1].sudahMesin).toBe("Kasir Bar");
     expect(hasil[2].nama).toBe(NAMA_PERANGKAT_KOSONG);
   });
 
-  it("keterangan perangkat untuk form tambah mesin kasir", () => {
-    const [tab, bar, redmi] = pilihanPerangkat(
-      [
-        perangkat("tab", SARI, "trusted", lokal(11, 6, 8, 10)),
-        perangkat("tab", RIDHO, "trusted", lokal(11, 5, 21, 0)),
-        perangkat("bar", RIDHO, "trusted", lokal(11, 5, 22, 0)),
-        perangkat("redmi", SARI, "trusted", null),
-      ],
-      [mesin("bar", "Kasir Bar", "k2")],
-    );
-    expect(teksPerangkat(tab, sekarang)).toBe("Terakhir aktif hari ini 08.10, oleh Sari dan Ridho");
+  it("keterangan perangkat untuk form tambah mesin kasir (MK6b: terakhir dipakai)", () => {
+    const [tab, bar, redmi] = pilihanPerangkat([
+      perangkat("tab", [SARI, RIDHO], lokal(11, 6, 8, 10)),
+      perangkat("bar", [RIDHO], lokal(11, 5, 22, 0), "Oppo A58", "Kasir Bar"),
+      perangkat("redmi", [SARI], null),
+    ]);
+    expect(teksPerangkat(tab, sekarang)).toBe("Terakhir dipakai hari ini 08.10, oleh Sari dan Ridho");
     expect(teksPerangkat(bar, sekarang)).toBe("Sudah jadi mesin kasir: Kasir Bar");
-    expect(teksPerangkat(redmi, sekarang)).toBe("Belum pernah aktif, oleh Sari");
+    expect(teksPerangkat(redmi, sekarang)).toBe("Belum pernah dipakai, oleh Sari");
   });
 });

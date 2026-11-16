@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRupiah } from "@/lib/format";
-import type { PerangkatKasir, SesiKasir } from "@/types/sesiKasir";
+import type { SesiKasir } from "@/types/sesiKasir";
 import type { StatusMuat } from "./bagian-kasir-buka";
 import { SEMUA_MESIN, type NilaiFilterRiwayat } from "./filter";
 import { ChipSelisih } from "./label";
@@ -83,7 +83,6 @@ interface PropsRiwayatSesi {
   status: StatusMuat;
   /** Sesi yang sudah ditutup, terbaru di atas; sesi yang masih buka tampil di bagian atas halaman. */
   sesi: SesiKasir[];
-  daftarMesin: PerangkatKasir[] | undefined;
   filter: React.ReactNode;
   /** Rentang tanggal terpilih, untuk pesan riwayat kosong. */
   teksRentang: string;
@@ -109,7 +108,6 @@ const KOLOM_DESKTOP =
 export function RiwayatSesi({
   status,
   sesi,
-  daftarMesin,
   filter,
   teksRentang,
   onResetFilter,
@@ -188,7 +186,7 @@ export function RiwayatSesi({
               </h3>
               <ul className="flex flex-col rounded-2xl border border-navy/10 bg-white">
                 {hari.sesi.map((s) => {
-                  const nama = namaMesin(s.installationId, daftarMesin);
+                  const nama = namaMesin(s);
                   const selisih = labelSelisih(s.selisihTutup);
                   const akhir = s.nominalTutup === null ? "-" : formatRupiah(s.nominalTutup);
                   return (

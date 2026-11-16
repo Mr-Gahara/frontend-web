@@ -114,6 +114,12 @@ test.describe("Mesin Kasir", () => {
       expect(tertutup.status).toBe("TUTUP");
       expect(tertutup.selisihTutup).toBe(SELISIH);
       expect(tertutup.catatanTutup).toBe("E2E selisih uji");
+      // B336 dan MK5b: asal penutupan tercatat dan ditulis di riwayat.
+      expect(tertutup.ditutupDari).toBe("web");
+      expect(tertutup.namaPerangkat).toBe(namaUbah);
+      await expect(
+        page.getByRole("link", { name: new RegExp(namaUbah) }).first().getByText(/ditutup (.+ )?dari web/).first(),
+      ).toBeVisible({ timeout: 20_000 });
       expect(await saldoAkun(page, auth, laci.id)).toBe(saldoAwal + SELISIH);
 
       // Riwayat memuat sesi itu, dan rinciannya terbuka di rute final.
@@ -179,16 +185,22 @@ test.describe("Mesin Kasir: pengguna baca-saja", () => {
     await masukBacaSaja(page);
     let mintaMesin = 0;
     page.on("request", (r) => {
-      if (r.method() === "GET" && /\/api\/sesikasir\/perangkat(\?|$)/i.test(r.url())) mintaMesin += 1;
+      if (r.method() === "GET" && /\/api\/sesikasir\/perangkat(-toko)?(\?|$)/i.test(r.url())) mintaMesin += 1;
     });
     const tKasirBuka = page.waitForResponse(
       (r) => r.request().method() === "GET" && /\/api\/sesikasir\?/i.test(r.url()),
     );
     await page.goto(URL, { waitUntil: "commit" });
-    expect((await tKasirBuka).status(), "sesi kasir dibaca pemegang read-sesi-kasir").toBe(200);
+    const kasirBuka = await tKasirBuka;
+    expect(kasirBuka.status(), "sesi kasir dibaca pemegang read-sesi-kasir").toBe(200);
+    // K-19 dan B335: tanpa kelola-perangkat-kasir installationId null, nama mesin tetap terbaca.
+    for (const s of ((await kasirBuka.json()).data ?? []) as Record<string, unknown>[]) {
+      expect(s.installationId, "installationId disembunyikan").toBeNull();
+      expect(s, "namaPerangkat dikirim").toHaveProperty("namaPerangkat");
+    }
     await expect(page.getByRole("link", { name: "Mesin Kasir", exact: true })).toHaveAttribute("aria-current", "page");
     await expect(page.getByRole("button", { name: "Tambah mesin kasir" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /^Aksi / })).toHaveCount(0);
-    expect(mintaMesin, "GET /sesikasir/perangkat tidak dikirim tanpa izin kelola").toBe(0);
+    expect(mintaMesin, "GET /sesikasir/perangkat dan perangkat-toko tidak dikirim tanpa izin kelola").toBe(0);
   });
 });
