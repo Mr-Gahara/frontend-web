@@ -52,7 +52,7 @@ export function HalamanLangganan() {
   }
 
   const kini = new Date();
-  const data = ringkasLangganan(langganan.data, daftarRiwayat, kini);
+  const data = ringkasLangganan(langganan.data, kini);
   const plan = DAFTAR_PLAN.find((p) => p.kunci === data.plan) ?? DAFTAR_PLAN[0];
   const tautan = tautanWhatsapp(NOMOR_WA_ADMIN, tenant.data?.namaToko ?? "", plan.nama);
 

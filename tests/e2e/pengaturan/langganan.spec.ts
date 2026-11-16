@@ -16,6 +16,8 @@ const kartuPlan = (page: Page, nama: string) => page.getByRole("article", { name
 interface Langganan {
   plan: string;
   aksesBerakhirPada: string | null;
+  masaPercobaan: boolean;
+  aksesMulaiPada: string | null;
 }
 
 /** Membuka halaman dan mengembalikan data langganan serta jumlah riwayat dari respons nyata. */
@@ -59,7 +61,11 @@ test.describe("Langganan", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Langganan" })).toBeVisible();
     await expect(page.getByText("Pratinjau tampilan")).toHaveCount(0);
     await expect(page.getByRole("heading", { level: 2, name: `Plan ${NAMA_PLAN[data.plan]}` })).toBeVisible();
+    // B333: penanda masa percobaan dan awal masa berlaku dari backend (LG4a).
+    expect(typeof data.masaPercobaan, "masaPercobaan").toBe("boolean");
+    expect(data, "aksesMulaiPada").toHaveProperty("aksesMulaiPada");
     if (data.aksesBerakhirPada === null) {
+      expect(data.aksesMulaiPada).toBeNull();
       await expect(page.getByText("Masa berlaku tidak dibatasi.")).toBeVisible();
       await expect(page.getByRole("progressbar")).toHaveCount(0);
     }

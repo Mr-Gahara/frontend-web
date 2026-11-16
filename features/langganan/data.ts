@@ -88,40 +88,29 @@ export interface RingkasanLangganan {
   percobaan: boolean;
   /** null berarti masa akses tidak dibatasi. */
   berakhir: Date | null;
-  /** Awal masa berlaku sekarang, dari catatan riwayat yang menetapkannya; null bila tidak diketahui. */
+  /** Awal masa berlaku sekarang (aksesMulaiPada); null bila tidak diketahui. */
   mulai: Date | null;
   /** Masa akses sudah lewat tetapi akun masih dalam masa tenggang. */
   lewat: boolean;
   tenggangSampai: Date | null;
 }
 
-const samaWaktu = (a: string | null, b: Date) => a !== null && new Date(a).getTime() === b.getTime();
-
 /**
- * Backend tidak mengirim penanda masa percobaan maupun tanggal mulai, jadi
- * keduanya dibaca dari riwayat yang sudah dimuat: percobaan berarti Basic
- * berbatas waktu tanpa satu pun catatan berdurasi, dan mulai adalah waktu
- * catatan terbaru yang menetapkan tanggal berakhir sekarang. Bila catatan
- * itu belum dimuat (riwayat panjang), bilah masa berlaku tidak ditampilkan.
+ * Ringkasan langganan dari respons GET /akun/langganan. Penanda masa
+ * percobaan dan awal masa berlaku dibaca dari masaPercobaan dan
+ * aksesMulaiPada (B333; LG4a, pemilik proyek 16 November 2026), yang
+ * dihitung backend dari seluruh riwayat. Bila aksesMulaiPada null, bilah
+ * masa berlaku tidak ditampilkan.
  */
-export function ringkasLangganan(
-  langganan: LanggananToko,
-  riwayat: readonly RiwayatLanggananToko[],
-  kini: Date,
-): RingkasanLangganan {
+export function ringkasLangganan(langganan: LanggananToko, kini: Date): RingkasanLangganan {
   const berakhir = langganan.aksesBerakhirPada ? new Date(langganan.aksesBerakhirPada) : null;
-  const penetap = berakhir ? riwayat.find((r) => samaWaktu(r.berakhirSesudah, berakhir)) : undefined;
   const lewat = berakhir !== null && berakhir.getTime() <= kini.getTime();
   const tenggang = langganan.masaTenggangHari ?? 0;
   return {
     plan: langganan.plan,
-    percobaan:
-      langganan.plan === "basic" &&
-      berakhir !== null &&
-      riwayat.some((r) => r.aksi === "buat" && !r.durasiBulan) &&
-      !riwayat.some((r) => (r.durasiBulan ?? 0) > 0),
+    percobaan: langganan.masaPercobaan,
     berakhir,
-    mulai: penetap ? new Date(penetap.createdAt) : null,
+    mulai: langganan.aksesMulaiPada ? new Date(langganan.aksesMulaiPada) : null,
     lewat,
     tenggangSampai: lewat && berakhir ? new Date(berakhir.getTime() + tenggang * SEHARI) : null,
   };

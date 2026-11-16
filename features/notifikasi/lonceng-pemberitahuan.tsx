@@ -8,7 +8,7 @@ import { IZIN } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/useSession";
 import { cn } from "@/lib/utils";
 import { ringkasLangganan } from "@/features/langganan/data";
-import { useLanggananToko, useRiwayatLanggananToko } from "@/features/langganan/hooks";
+import { useLanggananToko } from "@/features/langganan/hooks";
 import { pengingatLangganan } from "@/features/langganan/pengingat";
 
 const URL_LANGGANAN = "/dashboard/outlet/pengaturan/langganan";
@@ -27,13 +27,8 @@ export function LoncengPemberitahuan() {
   const bacaLangganan = permissions.includes(IZIN.langganan);
   const kini = useJamBerjalan(60_000);
   const langganan = useLanggananToko(bacaLangganan);
-  const awal = langganan.data ? pengingatLangganan(langganan.data, kini) : null;
-  // Riwayat hanya dimuat saat ada pengingat hampir habis, untuk bilah masa berlaku.
-  const riwayat = useRiwayatLanggananToko(awal?.jenis === "hampir-habis");
-  const mulai =
-    langganan.data && riwayat.data
-      ? ringkasLangganan(langganan.data, riwayat.data.pages.flatMap((h) => h.data), kini).mulai
-      : null;
+  // Bilah masa berlaku memakai aksesMulaiPada (B333), tanpa memuat riwayat.
+  const mulai = langganan.data ? ringkasLangganan(langganan.data, kini).mulai : null;
   const pengingat = langganan.data ? pengingatLangganan(langganan.data, kini, mulai) : null;
   const tenggang = pengingat?.jenis === "tenggang";
 

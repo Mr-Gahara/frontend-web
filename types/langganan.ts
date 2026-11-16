@@ -10,6 +10,13 @@ export interface LanggananToko {
   status: "aktif" | "non-aktif";
   aksesBerakhirPada: string | null;
   masaTenggangHari: number | null;
+  /** Basic berbatas waktu yang belum pernah dibayar (B333). */
+  masaPercobaan: boolean;
+  /**
+   * Waktu catatan riwayat terbaru yang menetapkan aksesBerakhirPada
+   * sekarang; null bila tanpa batas atau catatannya tidak ada (B333).
+   */
+  aksesMulaiPada: string | null;
 }
 
 /** Item GET /akun/langganan/riwayat: tanpa identitas admin dan alasan (B229). */

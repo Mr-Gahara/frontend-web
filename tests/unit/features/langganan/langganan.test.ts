@@ -62,17 +62,18 @@ const toko = (ubah: Partial<LanggananToko>): LanggananToko => ({
   status: "aktif",
   aksesBerakhirPada: null,
   masaTenggangHari: 7,
+  masaPercobaan: false,
+  aksesMulaiPada: null,
   ...ubah,
 });
 
-describe("ringkasLangganan", () => {
+describe("ringkasLangganan (B333, LG4a)", () => {
   const mulai = new Date(kini.getTime() - 2 * HARI);
   const berakhir = new Date(mulai.getTime() + 14 * HARI);
 
-  it("masa percobaan Basic: mulai dari catatan buat yang menetapkan tanggal berakhir", () => {
+  it("masa percobaan dan awal masa berlaku dibaca dari respons", () => {
     const r = ringkasLangganan(
-      toko({ aksesBerakhirPada: iso(berakhir) }),
-      [catatan({ berakhirSesudah: iso(berakhir), createdAt: iso(mulai) })],
+      toko({ aksesBerakhirPada: iso(berakhir), masaPercobaan: true, aksesMulaiPada: iso(mulai) }),
       kini,
     );
     expect(r).toMatchObject({ plan: "basic", percobaan: true, lewat: false, tenggangSampai: null });
@@ -80,23 +81,18 @@ describe("ringkasLangganan", () => {
     expect(r.berakhir).toEqual(berakhir);
   });
 
-  it("bukan percobaan setelah ada catatan berdurasi, juga untuk plan lain", () => {
-    const riwayat = [
-      catatan({ id: "r2", aksi: "perpanjang", durasiBulan: 3, berakhirSesudah: iso(berakhir) }),
-      catatan({ berakhirSesudah: iso(mulai), createdAt: iso(mulai) }),
-    ];
-    expect(ringkasLangganan(toko({ aksesBerakhirPada: iso(berakhir) }), riwayat, kini).percobaan).toBe(false);
-    expect(ringkasLangganan(toko({ plan: "pro", aksesBerakhirPada: iso(berakhir) }), [catatan({})], kini).percobaan).toBe(false);
+  it("bukan percobaan bila backend tidak menandainya", () => {
+    expect(ringkasLangganan(toko({ aksesBerakhirPada: iso(berakhir) }), kini).percobaan).toBe(false);
   });
 
   it("tanpa batas waktu: berakhir dan mulai null, bukan percobaan", () => {
-    const r = ringkasLangganan(toko({ plan: "pro" }), [catatan({ aksi: "ubah-plan", planSesudah: "pro" })], kini);
+    const r = ringkasLangganan(toko({ plan: "pro" }), kini);
     expect(r).toMatchObject({ berakhir: null, mulai: null, percobaan: false, lewat: false });
   });
 
   it("masa akses lewat: tenggang dihitung dari tanggal berakhir", () => {
     const lalu = new Date(kini.getTime() - HARI);
-    const r = ringkasLangganan(toko({ aksesBerakhirPada: iso(lalu), masaTenggangHari: 7 }), [], kini);
+    const r = ringkasLangganan(toko({ aksesBerakhirPada: iso(lalu), masaTenggangHari: 7 }), kini);
     expect(r.lewat).toBe(true);
     expect(r.tenggangSampai).toEqual(new Date(lalu.getTime() + 7 * HARI));
     expect(r.mulai).toBeNull();

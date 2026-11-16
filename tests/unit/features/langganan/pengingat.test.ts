@@ -8,6 +8,8 @@ const langganan = (aksesBerakhirPada: string | null, ubah: Partial<LanggananToko
   status: "aktif",
   aksesBerakhirPada,
   masaTenggangHari: 7,
+  masaPercobaan: false,
+  aksesMulaiPada: null,
   ...ubah,
 });
 
