@@ -89,4 +89,6 @@ export function metodeLaciMesinKasir(
   return metode.kategori === "tunai" && !!akunKasID && mesin.some((m) => m.akunKasID === akunKasID);
 }
 
-export const KETERANGAN_METODE_LACI = "Laci mesin kasir: terima tunai lewat kasir di perangkatnya";
+/** Inti pesan 409 backend (K-10), dipilih pemilik proyek 16 November 2026 (PB15a). */
+export const KETERANGAN_METODE_LACI =
+  "Laci mesin kasir. Buka kasir di perangkatnya lalu terima tunai di sana, atau pilih metode lain.";
