@@ -197,6 +197,8 @@ export const queryKeys = {
   sesiBooking: {
     semua: kunci(["sesiBooking"] as const),
     daftar: (tanggal?: string) => ["sesiBooking", "daftar", tanggal] as const,
+    /** Booking yang tumpang tindih dengan hari itu (tampilan=timeline, B327). */
+    timeline: (tanggal: string) => ["sesiBooking", "timeline", tanggal] as const,
     banyakTanggal: (tanggal: string[]) => ["sesiBooking", "banyakTanggal", tanggal] as const,
     detail: (id: string) => ["sesiBooking", "detail", id] as const,
   },

@@ -128,7 +128,7 @@ export default function DasborTimelinePage() {
     isLoading: bookingLoading,
     isError: bookingError,
     error: galatBooking,
-  } = useDaftarSesiBooking(tanggalParam);
+  } = useDaftarSesiBooking(tanggalParam, { timeline: true });
 
   // ── Timeline ──
 

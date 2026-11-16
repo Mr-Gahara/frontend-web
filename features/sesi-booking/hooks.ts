@@ -3,9 +3,11 @@
 /**
  * Hook data sesi booking.
  *
- * useDaftarSesiBooking memakai kunci sesiBooking.daftar(tanggal), yang hanya
- * diisi halaman daftar reservasi; buat reservasi lama memakai kunci
- * banyakTanggal (keputusan rancangan butir 12). Perilaku muat ulang sama
+ * useDaftarSesiBooking memakai kunci sesiBooking.daftar(tanggal) (booking
+ * yang mulai hari itu, panel venue dashboard), dan dengan opsi timeline
+ * kunci sesiBooking.timeline(tanggal) (timeline reservasi, TL1a); buat
+ * reservasi memakai kunci banyakTanggal (keputusan rancangan butir 12).
+ * Perilaku muat ulang sama
  * dengan halaman lama: segar 1 menit, dimuat ulang saat halaman dibuka dan
  * saat jendela kembali difokus.
  * Catatan backend: void penjualan tidak membersihkan cache daftar per tanggal
@@ -17,10 +19,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { sesiBookingApi } from "./api";
 import { queryKeys } from "@/lib/queryKeys";
 
-export function useDaftarSesiBooking(tanggal: string) {
+export function useDaftarSesiBooking(tanggal: string, opsi: { timeline?: boolean } = {}) {
   return useQuery({
-    queryKey: queryKeys.sesiBooking.daftar(tanggal),
-    queryFn: () => sesiBookingApi.daftar(tanggal),
+    queryKey: opsi.timeline ? queryKeys.sesiBooking.timeline(tanggal) : queryKeys.sesiBooking.daftar(tanggal),
+    queryFn: () => (opsi.timeline ? sesiBookingApi.timeline(tanggal) : sesiBookingApi.daftar(tanggal)),
     staleTime: 60 * 1000,
     refetchOnMount: "always",
     refetchOnWindowFocus: true,
@@ -29,13 +31,18 @@ export function useDaftarSesiBooking(tanggal: string) {
 
 /**
  * Booking beberapa tanggal sekaligus, untuk mendeteksi bentrok di form buat
- * reservasi. Kunci banyakTanggal berbeda dari daftar(tanggal) milik timeline,
- * dan dimuat ulang tiap menit, sama dengan halaman lama.
+ * reservasi. Memakai tampilan=timeline (B327, TL1a), sehingga booking yang
+ * mulai sehari sebelumnya dan melewati tengah malam ikut terbaca; booking yang
+ * terbaca di dua tanggal disatukan per id. Kunci banyakTanggal berbeda dari
+ * kunci timeline, dan dimuat ulang tiap menit, sama dengan halaman lama.
  */
 export function useBookingBanyakTanggal(tanggal: string[]) {
   return useQuery({
     queryKey: queryKeys.sesiBooking.banyakTanggal(tanggal),
-    queryFn: async () => (await Promise.all(tanggal.map((t) => sesiBookingApi.daftar(t)))).flat(),
+    queryFn: async () => {
+      const semua = (await Promise.all(tanggal.map((t) => sesiBookingApi.timeline(t)))).flat();
+      return [...new Map(semua.map((b) => [b.id, b])).values()];
+    },
     enabled: tanggal.length > 0,
     refetchInterval: 60_000,
   });

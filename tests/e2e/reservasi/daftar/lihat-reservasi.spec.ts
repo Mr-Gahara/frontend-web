@@ -120,7 +120,8 @@ test.describe("E2E — Reservasi › Daftar (timeline aset)", () => {
       (r) => r.method() === "GET" && POLA_SESI.test(r.url()) && r.url().includes("tanggal=" + tanggalLokal(besok)),
     );
     await page.getByRole("button", { name: "Tanggal berikutnya" }).click();
-    await tMinta;
+    // TL1a, B327: timeline meminta booking yang tumpang tindih dengan hari itu.
+    expect(new URL((await tMinta).url()).searchParams.get("tampilan")).toBe("timeline");
     await expect(page.getByText(/^Hari ini, /)).toHaveCount(0);
     await page.getByRole("button", { name: "Tanggal sebelumnya" }).click();
     await expect(page.getByText(/^Hari ini, /)).toBeVisible();

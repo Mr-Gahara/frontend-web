@@ -14,9 +14,15 @@ import type {
 } from "@/types/sesiBooking";
 
 export const sesiBookingApi = {
-  /** Booking yang dimulai pada tanggal lokal YYYY-MM-DD; backend hanya membaca query tanggal. */
+  /** Booking yang dimulai pada tanggal lokal YYYY-MM-DD. */
   daftar: (tanggal: string) =>
     apiData.get<SesiBookingResponse[]>(EP.sesiBooking.list, { tanggal }),
+  /**
+   * Booking yang tumpang tindih dengan tanggal lokal itu, termasuk yang mulai
+   * kemarin dan masih berjalan lewat tengah malam (tampilan=timeline, B327).
+   */
+  timeline: (tanggal: string) =>
+    apiData.get<SesiBookingResponse[]>(EP.sesiBooking.list, { tanggal, tampilan: "timeline" }),
   /** Buat booking lewat jalur batch; backend membuat penjualan booking tersimpan UNPAID (backend 465b438). */
   buat: (payload: SesiBookingBatchPayload) =>
     apiData.post<SesiBookingBatchResponse>(EP.sesiBooking.list, payload),
