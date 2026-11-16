@@ -127,11 +127,16 @@ test.describe("E2E - Bahan Baku (CRUD)", () => {
 
     await page.reload();
     const tDaftar = page.waitForResponse(
-      (r) => r.request().method() === "GET" && /\/api\/inventory\?/i.test(r.url()) && r.url().includes("search="),
+      (r) => r.request().method() === "GET" && /\/api\/inventory\?/i.test(r.url()) && r.url().includes("cari="),
     );
     await cari(page, nama);
-    const daftar = (await (await tDaftar).json()) as { data?: unknown[] };
+    const jawab = await tDaftar;
+    // PV1a, PV2a: daftar bahan outlet berhalaman di server bersama pencariannya (B342).
+    const kueri = new URL(jawab.url()).searchParams;
+    expect([kueri.get("page"), kueri.get("limit"), kueri.get("cari")]).toEqual(["1", "10", nama]);
+    const daftar = (await jawab.json()) as { data?: unknown[]; pagination?: { total: number } };
     expect(daftar.data ?? [], "entri stok bahan ikut terhapus").toHaveLength(0);
+    expect(daftar.pagination?.total).toBe(0);
     await expect(barisBahan(page, nama)).toHaveCount(0);
   });
 

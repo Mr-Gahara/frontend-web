@@ -46,17 +46,22 @@ test.describe("Hapus bahan baku", () => {
     // Bahan fixture permanen "E2E Bahan Pak" sudah punya riwayat jurnal stok
     // dari spec pembelian dan Belanja Stok, sehingga backend menolaknya
     // (RUJUKAN_BAHAN di bahanBakuService); tidak ada data yang berubah.
-    const tunggu = page.waitForResponse(
-      (r) => r.request().method() === "GET" && /\/api\/inventory(\?|$)/.test(r.url()),
-    );
+    // Daftar berhalaman di server (PV1a, PV2a): fixture dicari lewat server,
+    // bukan dari halaman pertama.
     await page.goto(URL_BAHAN_BAKU);
+    const tunggu = page.waitForResponse(
+      (r) =>
+        r.request().method() === "GET" &&
+        /\/api\/inventory\?/.test(r.url()) &&
+        new URL(r.url()).searchParams.get("cari") === BAHAN_FIXTURE,
+    );
+    await page.getByPlaceholder(/cari/i).first().fill(BAHAN_FIXTURE);
     const daftar = (await (await tunggu).json()).data as { item?: { nama?: string | null } | null }[];
     test.skip(
       !daftar.some((d) => d.item?.nama === BAHAN_FIXTURE),
       `Bahan fixture ${BAHAN_FIXTURE} belum ada di outlet (dibuat spec produk)`,
     );
 
-    await page.getByPlaceholder(/cari/i).first().fill(BAHAN_FIXTURE);
     const baris = page.locator("tbody tr").filter({ hasText: BAHAN_FIXTURE });
     await expect(baris).toHaveCount(1);
     await baris.getByRole("button", { name: "Buka menu" }).click();

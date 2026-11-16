@@ -3,7 +3,8 @@
 import { useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useHapusBahanBaku } from "@/features/bahan-baku/hooks";
-import { useDaftarInventory, useLokasiBertipe } from "@/features/inventaris/hooks";
+import { useHalamanInventory, useLokasiBertipe } from "@/features/inventaris/hooks";
+import { PANJANG_CARI_SERVER, PILIHAN_UKURAN_STOK, paramHalamanInventory } from "@/features/inventaris/cakupan";
 import { pesanError } from "@/lib/api/error";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -46,15 +47,32 @@ export default function DaftarBahanBakuPage() {
   const debouncedSearch = useDebounce(searchQuery, 500);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedBahanId, setSelectedBahanId] = useState<string | null>(null);
+  const [halaman, setHalaman] = useState(1);
+  const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN_STOK[0]);
+
+  // Mengganti pencarian kembali ke halaman 1, disesuaikan saat render agar
+  // halaman lama tidak sempat diminta.
+  const [cariSebelumnya, setCariSebelumnya] = useState(debouncedSearch);
+  if (cariSebelumnya !== debouncedSearch) {
+    setCariSebelumnya(debouncedSearch);
+    setHalaman(1);
+  }
 
   // Halaman ini menampilkan stok bahan baku pada satu lokasi outlet.
   const { lokasiId: outletId, isLoading: isLoadingLokasi } = useLokasiBertipe("Outlet");
 
+  // Satu halaman inventory outlet; pencarian disaring server bersama
+  // paginasinya (P79, B342; keputusan rancangan butir 27, PV1a, PV2a).
   const {
-    data: inventoryList = [],
+    data: halamanBahan,
     isLoading: isLoadingInventory,
+    isFetching: memuatBahan,
     isError,
-  } = useDaftarInventory(outletId ? { locationID: outletId, search: debouncedSearch } : null);
+  } = useHalamanInventory(
+    outletId
+      ? paramHalamanInventory({ locationID: outletId, cari: debouncedSearch, kritis: false, halaman, ukuran })
+      : null,
+  );
 
   // Menghapus bahan baku juga menghapus entri inventorinya di backend;
   // invalidasi keduanya ditangani hook.
@@ -87,11 +105,11 @@ export default function DaftarBahanBakuPage() {
     if (selectedBahanId) hapusBahanBaku(selectedBahanId);
   };
 
-  // --- FILTERING (Client-side fallback) ---
-  // Baris tanpa data master tidak dapat diedit atau dihapus, jadi tidak ditampilkan.
-  const filteredList = inventoryList.filter(
-    (inv) => !!inv.item?.id && (inv.item?.nama || "").toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  // Baris tanpa data master tidak lagi disaring di klien (PV2a, pemilik proyek
+  // 16 November 2026): backend menghapus inventory bersama bahannya dalam satu
+  // transaksi, dan data development tidak memuat satu pun. Bila kelak ada,
+  // barisnya tampil bernama "-" tanpa menu Edit dan Hapus.
+  const filteredList = halamanBahan?.data ?? [];
 
   const isLoading = isLoadingLokasi || isLoadingInventory;
 
@@ -101,7 +119,7 @@ export default function DaftarBahanBakuPage() {
       header: "Nama Bahan Baku",
       cell: ({ row }) => (
         <div>
-          <p className="font-bold text-navy">{row.original.item?.nama || "Item Tidak Dikenal"}</p>
+          <p className="font-bold text-navy">{row.original.item?.nama || "-"}</p>
           <p className="text-kecil font-medium text-navy/50 mt-0.5">
             ID: {(row.original.item?.id ?? "").substring(0, 8)}
           </p>
@@ -209,13 +227,14 @@ export default function DaftarBahanBakuPage() {
         </Button>
       </div>
 
-      {/* PENCARIAN: dijalankan server lewat useDaftarInventory */}
+      {/* PENCARIAN: dijalankan server lewat useHalamanInventory */}
       <div className="relative w-full sm:max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
         <Input
           placeholder="Cari nama bahan baku di outlet ini..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          maxLength={PANJANG_CARI_SERVER}
           className="pl-10 bg-permukaan border-navy/15 text-navy placeholder:text-navy/40 font-medium h-11 rounded-xl"
         />
       </div>
@@ -238,6 +257,19 @@ export default function DaftarBahanBakuPage() {
               ? "Tidak ada bahan baku yang cocok dengan pencarian."
               : "Belum ada data stok bahan baku di outlet ini."
           }
+          paginasiServer={{
+            halaman,
+            jumlahHalaman: halamanBahan?.pagination?.totalPages ?? 1,
+            total: halamanBahan?.pagination?.total ?? 0,
+            ukuran,
+            pilihanUkuran: PILIHAN_UKURAN_STOK,
+            sibuk: memuatBahan,
+            onGantiHalaman: setHalaman,
+            onGantiUkuran: (berikut) => {
+              setUkuran(berikut);
+              setHalaman(1);
+            },
+          }}
         />
       )}
 
