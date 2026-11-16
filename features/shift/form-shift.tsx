@@ -22,6 +22,8 @@ import { InputWaktu } from "@/components/input-waktu";
 import { gabungTeksWaktu, pisahTeksWaktu } from "@/lib/waktu";
 import { Clock, X, Info, MoonStar } from "lucide-react";
 import type { ShiftItem, StatusShift } from "@/types/shift";
+import type { JamOperasional } from "@/types/tenant";
+import { PENUTUP_PERINGATAN_SHIFT, peringatanShiftJamBuka } from "@/features/tenant/jam-operasional";
 import { skemaShift, type NilaiFormShift } from "./schema";
 import { hitungLintasHari, nilaiAwalShift } from "./payload";
 
@@ -31,12 +33,15 @@ interface ShiftFormDialogProps {
   editTarget: ShiftItem | null;
   onSubmit: (nilai: NilaiFormShift) => void;
   isPending?: boolean;
+  /** Jam buka toko untuk peringatan shift (JO1a); hanya ruang outlet yang mengirimnya. */
+  jamOperasional?: JamOperasional | null;
 }
 
 interface IsiFormShiftProps {
   editTarget: ShiftItem | null;
   onSubmit: (nilai: NilaiFormShift) => void;
   isPending: boolean;
+  jamOperasional?: JamOperasional | null;
 }
 
 /**
@@ -46,7 +51,7 @@ interface IsiFormShiftProps {
  * butir 8). Lintas hari dihitung dari jam dan tidak dapat diubah
  * (keputusan SH2a). Atribut required dan min dipertahankan dari form lama.
  */
-function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
+function IsiFormShift({ editTarget, onSubmit, isPending, jamOperasional }: IsiFormShiftProps) {
   const {
     register,
     control,
@@ -58,6 +63,8 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
   });
   const [jamMasuk, jamPulang] = useWatch({ control, name: ["jamMasuk", "jamPulang"] });
   const isLintasHari = hitungLintasHari(jamMasuk, jamPulang);
+  // JO1a: shift di luar jam buka toko diberi peringatan karamel, tanpa menahan simpan.
+  const peringatan = peringatanShiftJamBuka(jamOperasional, jamMasuk, jamPulang);
   const pesanGalat =
     errors.namaShift?.message ??
     errors.jamMasuk?.message ??
@@ -106,6 +113,7 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
                 value={pisahTeksWaktu(field.value)}
                 onChange={(waktu) => field.onChange(gabungTeksWaktu(waktu))}
                 invalid={!!fieldState.error}
+                className={!fieldState.error && peringatan?.masukMelanggar ? "border-2 border-karamel" : undefined}
               />
             )}
           />
@@ -125,11 +133,27 @@ function IsiFormShift({ editTarget, onSubmit, isPending }: IsiFormShiftProps) {
                 value={pisahTeksWaktu(field.value)}
                 onChange={(waktu) => field.onChange(gabungTeksWaktu(waktu))}
                 invalid={!!fieldState.error}
+                className={!fieldState.error && peringatan?.pulangMelanggar ? "border-2 border-karamel" : undefined}
               />
             )}
           />
         </div>
       </div>
+
+      {peringatan && (
+        <div role="status" className="flex items-start gap-3 rounded-xl border border-karamel bg-krem-muda px-4 py-3">
+          <Clock className="mt-0.5 h-4.5 w-4.5 shrink-0 text-karamel-tua" aria-hidden="true" />
+          <div className="flex flex-col gap-1">
+            <p className="text-isi font-bold text-karamel-tua">{peringatan.judul}</p>
+            {peringatan.kalimat.map((k) => (
+              <p key={k} className="text-isi text-cokelat-tua">
+                {k}
+              </p>
+            ))}
+            <p className="text-isi text-cokelat-tua">{PENUTUP_PERINGATAN_SHIFT}</p>
+          </div>
+        </div>
+      )}
 
       {/* 3. LINTAS HARI, dihitung dari jam (keputusan SH2a) */}
       <div className="flex items-center space-x-3 p-4 border border-navy/15 bg-gading rounded-xl shadow-sm">
@@ -230,6 +254,7 @@ export function ShiftFormDialog({
   editTarget,
   onSubmit,
   isPending = false,
+  jamOperasional,
 }: ShiftFormDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -263,6 +288,7 @@ export function ShiftFormDialog({
           editTarget={editTarget}
           onSubmit={onSubmit}
           isPending={isPending}
+          jamOperasional={jamOperasional}
         />
       </DialogContent>
     </Dialog>

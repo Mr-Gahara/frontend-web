@@ -4,6 +4,7 @@ import React from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
 import { KaryawanJadwal, ShiftItem } from "@/types/jadwal";
+import { indeksHari } from "@/features/tenant/jam-operasional";
 import { ShiftCell } from "./sel-shift";
 
 interface JadwalGridProps {
@@ -15,6 +16,8 @@ interface JadwalGridProps {
   daysArray: number[];
   daysInMonth: number;
   onCellClick: (penggunaId: string, day: number, shifts: ShiftItem[]) => void;
+  /** Indeks hari (Senin 0 sampai Minggu 6) yang Libur di jam buka toko; ruang outlet saja (JO2a). */
+  hariLiburToko?: ReadonlySet<number>;
 }
 
 const ShiftCellMemo = React.memo(function ShiftCellMemo({
@@ -25,9 +28,11 @@ const ShiftCellMemo = React.memo(function ShiftCellMemo({
   empId,
   namaKaryawan,
   onCellClick,
+  tokoLibur,
 }: {
   day: number;
   isSunday: boolean;
+  tokoLibur: boolean;
   shifts: ShiftItem[];
   lain: ShiftItem[] | undefined;
   empId: string;
@@ -46,6 +51,7 @@ const ShiftCellMemo = React.memo(function ShiftCellMemo({
       shifts={shifts}
       lain={lain}
       onClick={handleClick}
+      tokoLibur={tokoLibur}
     />
   );
 });
@@ -59,7 +65,9 @@ export function JadwalGrid({
   daysArray,
   daysInMonth,
   onCellClick,
+  hariLiburToko,
 }: JadwalGridProps) {
+  const liburToko = (day: number) => !!hariLiburToko?.has(indeksHari(new Date(year, month, day)));
   return (
     <div className="rounded-2xl border border-navy/10 bg-krem p-4 sm:p-6 shadow-sm mt-6">
       <div className="overflow-x-auto rounded-xl border border-navy/15 bg-gading shadow-inner max-h-[65vh] relative custom-scrollbar">
@@ -76,10 +84,13 @@ export function JadwalGrid({
               </th>
               {daysArray.map((day) => {
                 const isSunday = new Date(year, month, day).getDay() === 0;
+                const tokoLibur = liburToko(day);
                 return (
                   <th
                     key={day}
-                    className={`border-b border-navy/10 p-3 min-w-30 text-center ${isSunday ? "bg-red-50/50" : ""}`}
+                    className={`border-b border-navy/10 p-3 min-w-30 text-center ${
+                      tokoLibur ? "arsir-libur" : isSunday ? "bg-red-50/50" : ""
+                    }`}
                   >
                     <div className="flex flex-col items-center">
                       <span
@@ -94,6 +105,11 @@ export function JadwalGrid({
                       >
                         {day}
                       </span>
+                      {tokoLibur && (
+                        <span className="mt-1 rounded-full bg-karamel-tua px-2 py-0.5 text-mikro text-gading whitespace-nowrap">
+                          Toko libur
+                        </span>
+                      )}
                     </div>
                   </th>
                 );
@@ -184,6 +200,7 @@ export function JadwalGrid({
                         empId={emp.id}
                         namaKaryawan={emp.nama}
                         onCellClick={onCellClick}
+                        tokoLibur={liburToko(day)}
                       />
                     );
                   })}

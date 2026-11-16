@@ -27,6 +27,8 @@ interface JadwalUtamaProps {
   isSaving: boolean;
   /** Lokasi ruang kalender, untuk pemeriksaan jadwal lokasi lain di Tambah Manual (B165). */
   lokasiId: string | null;
+  /** Hari Libur di jam buka toko untuk arsir kalender; ruang outlet saja (JO2a). */
+  hariLiburToko?: ReadonlySet<number>;
 }
 
 export default function JadwalUtama({
@@ -44,6 +46,7 @@ export default function JadwalUtama({
   onHapus,
   isSaving,
   lokasiId,
+  hariLiburToko,
 }: JadwalUtamaProps) {
   // ✅ Injeksi Next.js Router
   const router = useRouter();
@@ -128,6 +131,7 @@ export default function JadwalUtama({
         daysArray={daysArray}
         daysInMonth={daysInMonth}
         onCellClick={handleCellClick}
+        hariLiburToko={hariLiburToko}
       />
 
       {/* Komponen FormGenerateDialog telah DIBUNUH dari sini! */}

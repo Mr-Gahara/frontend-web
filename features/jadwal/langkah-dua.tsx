@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Check, CalendarDays, AlertTriangle } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { GenerateParams } from "./langkah-satu";
-import { entriBulkJadwal, pesanMasalahSimulasi, simulasiGenerate } from "./generate";
+import { entriBulkJadwal, pesanMasalahSimulasi, ringkasanHariDilewati, simulasiGenerate } from "./generate";
 import { daftarTanggal, uraiTanggalLokal } from "./rentang";
 import type { EntriBulkJadwal, KaryawanRuang } from "./tipe";
 import type { PolaRosterItem } from "@/types/pola-roster";
@@ -20,6 +20,8 @@ interface StepDuaPreviewProps {
   onBack: () => void;
   onSubmit: (entri: EntriBulkJadwal[]) => void;
   isPending?: boolean;
+  /** Hari Libur di jam buka toko yang dilewati generate; ruang outlet saja (JO2a). */
+  hariLiburToko?: ReadonlySet<number>;
 }
 
 export function StepDuaPreview({
@@ -30,21 +32,23 @@ export function StepDuaPreview({
   onBack,
   onSubmit,
   isPending = false,
+  hariLiburToko,
 }: StepDuaPreviewProps) {
   // Simulasi jadwal dari features/jadwal/generate.ts. Hari yang shift-nya
   // nonaktif atau tidak ditemukan ditandai dan menahan simpan (GN2a).
-  const { simulatedData, dateHeaders, selectedPola, pesanMasalah } = useMemo(() => {
+  const { simulatedData, dateHeaders, selectedPola, pesanMasalah, hariDilewati } = useMemo(() => {
     const pola = polaRosterList.find((p) => p.id === params.polaId);
     const tanggal = daftarTanggal(params.startDate, params.endDate);
     const target = karyawanList.filter((k) => params.karyawanIds.includes(k.id));
-    const baris = simulasiGenerate(tanggal, pola, shiftList, target);
+    const baris = simulasiGenerate(tanggal, pola, shiftList, target, hariLiburToko);
     return {
       simulatedData: baris,
+      hariDilewati: ringkasanHariDilewati(baris),
       dateHeaders: tanggal.map(uraiTanggalLokal),
       selectedPola: pola,
       pesanMasalah: pesanMasalahSimulasi(baris),
     };
-  }, [params, polaRosterList, shiftList, karyawanList]);
+  }, [params, polaRosterList, shiftList, karyawanList, hariLiburToko]);
 
   const handleFinalSubmit = () => {
     if (pesanMasalah) return;
@@ -101,6 +105,12 @@ export function StepDuaPreview({
             {params.karyawanIds.length} Orang
           </span>
         </div>
+        {hariDilewati && (
+          <div className="flex flex-col pl-4 border-l border-navy/15">
+            <span className="text-mikro font-bold text-karamel-tua uppercase">Hari Dilewati</span>
+            <span className="text-isi font-bold text-karamel-tua">{hariDilewati}</span>
+          </div>
+        )}
       </div>
 
       {pesanMasalah && (
@@ -134,13 +144,14 @@ export function StepDuaPreview({
                 </th>
                 {dateHeaders.map((date, idx) => {
                   const isSunday = date.getDay() === 0;
+                  const dilewati = simulatedData[0]?.jadwal[idx]?.dilewati ?? false;
                   return (
                     <th
                       key={idx}
                       className={cn(
                         // ✅ FIX 1: Lebarkan kolom dari min-w-[70px] menjadi min-w-[100px]
                         "p-3 border-b border-r border-navy/10 min-w-[100px] text-center",
-                        isSunday && "bg-red-50/50"
+                        dilewati ? "arsir-libur" : isSunday && "bg-red-50/50"
                       )}
                     >
                       <div className="flex flex-col items-center">
@@ -190,10 +201,12 @@ export function StepDuaPreview({
                         className={cn(
                           // ✅ FIX 2: Perbesar padding sel secara umum
                           "p-2.5 text-center border-r border-navy/5 align-middle",
-                          isSunday && "bg-red-50/20"
+                          cell.dilewati ? "arsir-libur" : isSunday && "bg-red-50/20"
                         )}
                       >
-                        {cell.isLibur ? (
+                        {cell.dilewati ? (
+                          <span className="text-kecil font-semibold text-karamel-tua">Dilewati</span>
+                        ) : cell.isLibur ? (
                           // ✅ FIX 3: Desain OFF cell yang lebih proporsional
                           <div className="mx-auto flex min-h-[48px] w-full max-w-[85px] items-center justify-center rounded-xl bg-red-50/80 text-mikro font-bold text-red-600 border border-red-100 shadow-sm">
                             OFF

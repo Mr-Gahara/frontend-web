@@ -352,3 +352,11 @@ input.no-spinner[type="number"] {
   --sidebar-border: transparent;
   --sidebar-ring: oklch(0.556 0 0);
 }
+
+/*
+ * Arsir hari libur toko di kalender dan pratinjau generate jadwal (JO2a,
+ * desain A kanvas "Jam Buka di Shift dan Jadwal"), dari token krem.
+ */
+@utility arsir-libur {
+  background-image: repeating-linear-gradient(135deg, var(--krem) 0 6px, var(--krem-muda) 6px 12px);
+}

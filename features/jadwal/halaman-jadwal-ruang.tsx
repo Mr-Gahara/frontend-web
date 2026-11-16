@@ -21,12 +21,18 @@ import { useLokasiRuang } from "@/features/inventaris/hooks";
 import { useDaftarPengguna } from "@/features/pengguna/hooks";
 import { useDaftarShift } from "@/features/shift/hooks";
 import { pesanError } from "@/lib/api/error";
+import { useTenant } from "@/features/tenant/hooks";
+import { hariLiburToko } from "@/features/tenant/jam-operasional";
 
 export function HalamanJadwalRuang({ ruang }: { ruang: RuangJadwal }) {
   const [bulan, setBulan] = useState(() => new Date());
   const [cari, setCari] = useState("");
   const rentang = useMemo(() => rentangBulan(bulan), [bulan]);
   const karyawan = useDaftarPengguna(ruang);
+  // Jam buka toko hanya berlaku di ruang outlet (JO2a).
+  const tenant = useTenant();
+  const jamToko = ruang === "outlet" ? tenant.data?.jamOperasional : null;
+  const liburToko = useMemo(() => hariLiburToko(jamToko), [jamToko]);
   const lokasi = useLokasiRuang(ruang);
   const jadwal = useDaftarJadwal(
     { ...rentang, locationID: lokasi.lokasiId ?? "" },
@@ -52,6 +58,7 @@ export function HalamanJadwalRuang({ ruang }: { ruang: RuangJadwal }) {
     <JadwalUtama
       tipeRuang={ruang}
       lokasiId={lokasi.lokasiId}
+      hariLiburToko={liburToko}
       dataKaryawan={baris}
       shiftList={shift.data}
       isLoading={karyawan.isLoading || lokasi.memuat || jadwal.isLoading || jadwalSemua.isLoading || shift.memuat}

@@ -7,7 +7,7 @@
  * backend ditampilkan dan halaman tetap di langkah 2 (J2a); bila tidak ada
  * yang ditolak, halaman kembali ke kalender ruang itu.
  */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Loader2, AlertCircle } from "lucide-react";
 import { StepSatuForm, type GenerateParams } from "./langkah-satu";
@@ -18,6 +18,8 @@ import { keKaryawanRuang } from "./pemetaan";
 import type { EntriBulkJadwal, RuangJadwal } from "./tipe";
 import { useDaftarPengguna } from "@/features/pengguna/hooks";
 import { useDaftarPolaRoster } from "@/features/pola-roster/hooks";
+import { useTenant } from "@/features/tenant/hooks";
+import { hariLiburToko } from "@/features/tenant/jam-operasional";
 import { useDaftarShift } from "@/features/shift/hooks";
 import { pesanError } from "@/lib/api/error";
 
@@ -30,6 +32,10 @@ export function HalamanGenerateRuang({ ruang }: { ruang: RuangJadwal }) {
   const karyawan = useDaftarPengguna(ruang);
   const pola = useDaftarPolaRoster(ruang);
   const shift = useDaftarShift(ruang);
+  // Jam buka toko hanya berlaku di ruang outlet (JO2a).
+  const tenant = useTenant();
+  const jamToko = ruang === "outlet" ? tenant.data?.jamOperasional : null;
+  const liburToko = useMemo(() => hariLiburToko(jamToko), [jamToko]);
   const generate = useGenerateJadwal();
   const karyawanList = keKaryawanRuang(karyawan.data ?? []);
 
@@ -124,6 +130,7 @@ export function HalamanGenerateRuang({ ruang }: { ruang: RuangJadwal }) {
           }}
           onSubmit={(entri) => void simpan(entri)}
           isPending={generate.isPending}
+          hariLiburToko={liburToko}
         />
       )}
     </div>

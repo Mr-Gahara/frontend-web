@@ -4,6 +4,8 @@ import React from "react";
 import { ShiftItem } from "@/types/jadwal";
 
 interface ShiftCellProps {
+  /** Hari Libur di jam buka toko: sel berarsir, jadwal yang ada tetap tampil (JO2a). */
+  tokoLibur?: boolean;
   namaKaryawan: string;
   day: number;
   isSunday: boolean;
@@ -13,7 +15,7 @@ interface ShiftCellProps {
   onClick: () => void;
 }
 
-export function ShiftCell({ namaKaryawan, day, isSunday, shifts, lain = [], onClick }: ShiftCellProps) {
+export function ShiftCell({ namaKaryawan, day, isSunday, shifts, lain = [], onClick, tokoLibur = false }: ShiftCellProps) {
   const labelSel = (shift: ShiftItem) => {
     const isi =
       shift.id === "off"
@@ -26,7 +28,7 @@ export function ShiftCell({ namaKaryawan, day, isSunday, shifts, lain = [], onCl
   return (
     <td
       className={`border-b border-r border-navy/5 p-1.5 md:p-2 align-top ${
-        isSunday ? "bg-red-50/20" : ""
+        tokoLibur ? "arsir-libur" : isSunday ? "bg-red-50/20" : ""
       }`}
     >
       <div className="flex flex-col gap-1.5 min-w-22.5 md:min-w-27.5">

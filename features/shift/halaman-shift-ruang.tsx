@@ -10,6 +10,7 @@
 import { toast } from "sonner";
 import HalamanShift from "./halaman-shift";
 import { useDaftarShift, useNonaktifkanShift, useSimpanShift } from "./hooks";
+import { useTenant } from "@/features/tenant/hooks";
 import type { RuangShift } from "./ruang";
 import { pesanError } from "@/lib/api/error";
 
@@ -17,10 +18,14 @@ export function HalamanShiftRuang({ ruang }: { ruang: RuangShift }) {
   const daftar = useDaftarShift(ruang);
   const simpan = useSimpanShift(ruang);
   const nonaktifkan = useNonaktifkanShift();
+  // Jam buka toko hanya dibandingkan di ruang outlet (JO1a).
+  const tenant = useTenant();
+  const jamOperasional = ruang === "outlet" ? tenant.data?.jamOperasional : null;
 
   return (
     <HalamanShift
       tipeRuang={ruang}
+      jamOperasional={jamOperasional}
       dataShift={daftar.data}
       isLoading={daftar.memuat}
       isError={daftar.gagal}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { entriBulkJadwal, pesanMasalahSimulasi, simulasiGenerate } from "@/features/jadwal/generate";
+import { entriBulkJadwal, pesanMasalahSimulasi, ringkasanHariDilewati, simulasiGenerate } from "@/features/jadwal/generate";
 import { gabungHasil, hasilDariPenolakanSeluruh, pesanDitolak } from "@/features/jadwal/hasil";
 import { ApiError } from "@/lib/api/error";
 import { adaJadwalLokasiLain, itemJadwal, keKaryawanRuang, petakanJadwalKaryawan } from "@/features/jadwal/pemetaan";
@@ -186,6 +186,34 @@ describe("simulasiGenerate (keputusan GN2a)", () => {
     expect(pesanMasalahSimulasi(baris)).toBe(
       'Shift "Pagi Lama" pada pola ini sudah nonaktif. Perbaiki pola roster sebelum menyimpan jadwal.',
     );
+  });
+
+  it("tanggal libur toko dilewati tanpa entri, dan tetap memakan satu hari siklus (JO2a)", () => {
+    // 2026-11-22 hari Minggu (indeks 6).
+    const baris = simulasiGenerate(
+      ["2026-11-21", "2026-11-22", "2026-11-23"],
+      POLA,
+      [SHIFT("s1", "Pagi Uji", "Aktif")],
+      KARYAWAN,
+      new Set([6]),
+    );
+    expect(baris[0].jadwal.map((j) => (j.dilewati ? "LEWAT" : j.label))).toEqual(["PAGI", "LEWAT", "PAGI"]);
+    expect(entriBulkJadwal(baris).map((e) => e.tanggalKerja)).toEqual(["2026-11-21", "2026-11-23"]);
+    expect(ringkasanHariDilewati(baris)).toBe("1 hari, toko libur (Minggu 22 Nov)");
+  });
+
+  it("shift bermasalah di tanggal yang dilewati tidak menahan simpan", () => {
+    const baris = simulasiGenerate(["2026-11-22"], POLA, [SHIFT("s1", "Pagi Lama", "Non-Aktif")], KARYAWAN, new Set([6]));
+    expect(pesanMasalahSimulasi(baris)).toBeNull();
+  });
+
+  it("ringkasan dikelompokkan per nama hari dan bulan, seperti kanvas", () => {
+    const tanggal = daftarTanggal("2026-11-16", "2026-12-06");
+    const baris = simulasiGenerate(tanggal, POLA, [SHIFT("s1", "Pagi Uji", "Aktif")], KARYAWAN, new Set([5, 6]));
+    expect(ringkasanHariDilewati(baris)).toBe(
+      "6 hari, toko libur (Sabtu 21 dan 28 Nov, 5 Des; Minggu 22 dan 29 Nov, 6 Des)",
+    );
+    expect(ringkasanHariDilewati(simulasiGenerate(tanggal, POLA, [], KARYAWAN))).toBeNull();
   });
 });
 

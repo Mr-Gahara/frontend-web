@@ -35,6 +35,7 @@ import { aksiShift } from "./izin";
 import type { RuangShift } from "./ruang";
 import { useSession } from "@/lib/auth/useSession";
 import type { NilaiFormShift } from "./schema";
+import type { JamOperasional } from "@/types/tenant";
 import { DataTable } from "@/components/ui/data-table";
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -50,6 +51,8 @@ interface ShiftUtamaProps {
   onDelete: (id: string) => Promise<void>;
   isSaving?: boolean;
   isDeleting?: boolean;
+  /** Jam buka toko untuk peringatan form shift (JO1a); hanya ruang outlet. */
+  jamOperasional?: JamOperasional | null;
 }
 
 export default function ShiftUtama({
@@ -61,6 +64,7 @@ export default function ShiftUtama({
   onDelete,
   isSaving = false,
   isDeleting = false,
+  jamOperasional,
 }: ShiftUtamaProps) {
   const { permissions } = useSession();
   const aksi = aksiShift(permissions);
@@ -328,6 +332,7 @@ export default function ShiftUtama({
         editTarget={selectedShift}
         onSubmit={handleFormSubmit}
         isPending={isSaving}
+        jamOperasional={jamOperasional}
       />
 
       <ShiftDeleteDialog
