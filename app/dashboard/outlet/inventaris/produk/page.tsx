@@ -302,13 +302,7 @@ export default function ProdukPage() {
           columns={columns}
           data={produkList}
           loading={produkLoading}
-          emptyMessage={
-            cariTertunda.trim()
-              ? "Tidak ada produk yang cocok dengan pencarian."
-              : tabKritis
-                ? "Tidak ada produk dengan stok kritis."
-                : "Belum ada produk. Silakan tambah produk baru."
-          }
+          emptyMessage={tabKritis ? "Tidak ada produk dengan stok kritis." : "Belum ada produk. Silakan tambah produk baru."}
           paginasiServer={{
             halaman,
             jumlahHalaman: data?.pagination?.totalPages ?? 1,
