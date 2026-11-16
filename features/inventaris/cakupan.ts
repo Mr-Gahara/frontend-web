@@ -110,3 +110,30 @@ export function lokasiSatuOutlet(cakupan: CakupanLokasiOutlet, pilihan: string):
     ? { lokasiID: cakupan.lokasiOutlet[0].id }
     : { pilihSatuOutlet: true };
 }
+
+/** Pilihan baris per halaman daftar stok dan inventaris gudang (TB11a). */
+export const PILIHAN_UKURAN_STOK = [10, 20, 50] as const;
+
+/**
+ * Query satu halaman GET /inventory (P79, B342): lokasi atau tipe lokasi,
+ * pencarian nama, dan tab Stok Kritis disaring server bersama paginasinya
+ * (keputusan rancangan butir 27, PV1a). locationID kosong berarti seluruh
+ * lokasi bertipe itu.
+ */
+export function paramHalamanInventory(kriteria: {
+  locationID?: string;
+  tipeLokasi?: "Outlet" | "Gudang";
+  cari: string;
+  kritis: boolean;
+  halaman: number;
+  ukuran: number;
+}): Record<string, string> {
+  return {
+    page: String(kriteria.halaman),
+    limit: String(kriteria.ukuran),
+    ...(kriteria.locationID ? { locationID: kriteria.locationID } : {}),
+    ...(kriteria.tipeLokasi ? { tipeLokasi: kriteria.tipeLokasi } : {}),
+    ...queryCari(kriteria.cari),
+    ...(kriteria.kritis ? { stokKritis: "true" } : {}),
+  };
+}

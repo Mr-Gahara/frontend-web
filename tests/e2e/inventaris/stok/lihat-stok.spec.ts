@@ -54,8 +54,20 @@ function tunggu<T>(page: Page, syarat: (r: Response) => boolean): Promise<T> {
   });
 }
 
-function diOutlet(daftar: InventoryMentah[]) {
-  return daftar.filter((i) => i.lokasi?.tipe === "Outlet");
+type HalamanMentah = { data: InventoryMentah[]; total: number; kueri: URLSearchParams };
+
+/**
+ * Satu halaman inventory (P79, B342; PV1a): lokasi, tipe lokasi, pencarian,
+ * dan stok kritis disaring server, sehingga harapan dibaca dari
+ * pagination.total, bukan dihitung ulang dari isi halaman.
+ */
+function tungguHalaman(page: Page, syarat: (r: Response) => boolean): Promise<HalamanMentah> {
+  return page.waitForResponse(syarat).then(async (r) => {
+    expect(r.status()).toBe(200);
+    const body = (await r.json()) as { data: InventoryMentah[]; pagination?: { total: number } };
+    expect(body.pagination, "daftar berhalaman memuat pagination").toBeTruthy();
+    return { data: body.data, total: body.pagination!.total, kueri: new URL(r.url()).searchParams };
+  });
 }
 
 /** Pola angka yang menerima pemisah ribuan titik, misalnya 35000 atau 35.000. */
@@ -97,24 +109,23 @@ async function bukaOutlet(page: Page) {
   // terkunci membuka halamannya sendiri lewat masukTanpaIzinLintas.
   await page.goto(URL_OUTLET, { waitUntil: "commit" });
   const pLokasi = tunggu<LokasiMentah[]>(page, getLokasi);
-  const pInventory = tunggu<InventoryMentah[]>(
+  const pInventory = tungguHalaman(
     page,
     getInventory((u) => !u.searchParams.has("locationID")),
   );
-  const [lokasi, inventory] = await Promise.all([pLokasi, pInventory]);
+  const [lokasi, halaman] = await Promise.all([pLokasi, pInventory]);
   await expect(page.getByRole("columnheader", { name: "Nama Barang" })).toBeVisible();
-  return { lokasi, inventory: diOutlet(inventory) };
+  return { lokasi, inventory: halaman.data, total: halaman.total, kueri: halaman.kueri };
 }
 
 async function bukaGudang(page: Page) {
   await page.goto(URL_GUDANG, { waitUntil: "commit" });
-  const pInventory = tunggu<InventoryMentah[]>(
+  const halaman = await tungguHalaman(
     page,
     getInventory((u) => u.searchParams.has("locationID")),
   );
-  const inventory = await pInventory;
   await expect(page.getByRole("columnheader", { name: "Nama Barang" })).toBeVisible();
-  return inventory;
+  return halaman;
 }
 
 // ============================================================
@@ -183,8 +194,10 @@ test.describe("Stok outlet", () => {
   });
 
   test("lintas outlet: semua lokasi hanya stok di lokasi bertipe outlet", async ({ page }) => {
-    const { inventory } = await bukaOutlet(page);
-    await periksaBaris(page, inventory.length, KOSONG_OUTLET);
+    const { inventory, total, kueri } = await bukaOutlet(page);
+    expect([kueri.get("tipeLokasi"), kueri.get("page"), kueri.get("limit")]).toEqual(["Outlet", "1", String(UKURAN_AWAL)]);
+    expect(inventory.every((i) => i.lokasi?.tipe === "Outlet"), "hanya lokasi Outlet").toBe(true);
+    await periksaBaris(page, total, KOSONG_OUTLET);
   });
 
   test("tanpa izin lintas outlet: stok outlet tenant tanpa pemilih lokasi", async ({ page }) => {
@@ -203,9 +216,13 @@ test.describe("Stok outlet", () => {
   });
 
   test("tab stok kritis menyaring stok di bawah batas minimum", async ({ page }) => {
-    const { inventory } = await bukaOutlet(page);
+    await bukaOutlet(page);
+    const pKritis = tungguHalaman(page, getInventory((u) => u.searchParams.get("stokKritis") === "true"));
     await page.getByText("Stok Kritis").first().click();
-    await periksaBaris(page, inventory.filter((i) => i.isStokKritis).length, KOSONG_OUTLET);
+    const kritis = await pKritis;
+    expect(kritis.kueri.get("tipeLokasi")).toBe("Outlet");
+    expect(kritis.data.every((i) => i.isStokKritis), "hanya stok kritis").toBe(true);
+    await periksaBaris(page, kritis.total, KOSONG_OUTLET);
   });
 
   test("pencarian mengirim kata kunci ke server dan menampilkan hasilnya", async ({ page }) => {
@@ -213,14 +230,14 @@ test.describe("Stok outlet", () => {
     const nama = inventory.find((i) => i.item?.nama)?.item?.nama;
     test.skip(!nama, "Belum ada stok outlet bernama barang");
 
-    const pCari = tunggu<InventoryMentah[]>(
+    const pCari = tungguHalaman(
       page,
-      getInventory((u) => u.searchParams.get("search") === nama),
+      getInventory((u) => u.searchParams.get("cari") === nama),
     );
     await page.getByPlaceholder("Cari nama barang...").fill(nama!);
-    const hasil = diOutlet(await pCari);
+    const hasil = await pCari;
 
-    await periksaBaris(page, hasil.length, KOSONG_OUTLET);
+    await periksaBaris(page, hasil.total, KOSONG_OUTLET);
   });
 
   test("lintas outlet: pilih lokasi mengirim locationID dan menampilkan stok lokasi itu", async ({ page }) => {
@@ -229,15 +246,15 @@ test.describe("Stok outlet", () => {
     test.skip(!outlet, "Belum ada lokasi bertipe outlet");
     const idOutlet = outlet!.id ?? outlet!._id;
 
-    const pLokasi = tunggu<InventoryMentah[]>(
+    const pLokasi = tungguHalaman(
       page,
       getInventory((u) => u.searchParams.get("locationID") === idOutlet),
     );
     await page.getByText("Semua Lokasi", { exact: true }).click();
     await page.getByRole("option", { name: outlet!.nama }).click();
-    const hasil = diOutlet(await pLokasi);
+    const hasil = await pLokasi;
 
-    await periksaBaris(page, hasil.length, KOSONG_OUTLET);
+    await periksaBaris(page, hasil.total, KOSONG_OUTLET);
   });
 
   test("ubah batas minimum lalu kembalikan ke nilai semula", async ({ page }) => {
@@ -293,29 +310,37 @@ test.describe("Inventaris gudang", () => {
   });
 
   test("menampilkan stok gudang yang dikirim server", async ({ page }) => {
-    const inventory = await bukaGudang(page);
-    test.skip(inventory.length === 0, "Belum ada stok di gudang");
-    await periksaBaris(page, inventory.length);
+    const { total, kueri } = await bukaGudang(page);
+    test.skip(total === 0, "Belum ada stok di gudang");
+    expect([kueri.get("page"), kueri.get("limit")]).toEqual(["1", String(UKURAN_AWAL)]);
+    await periksaBaris(page, total);
   });
 
   test("tab stok kritis menyaring stok di bawah batas minimum", async ({ page }) => {
-    let inventory = await bukaGudang(page);
+    const bukaKritis = async () => {
+      const pKritis = tungguHalaman(page, getInventory((u) => u.searchParams.get("stokKritis") === "true"));
+      await page.getByText("Stok Kritis").first().click();
+      return pKritis;
+    };
+    const { data } = await bukaGudang(page);
+    let kritis = await bukaKritis();
     // Bila data uji tidak punya stok kritis, satu bahan dijadikan kritis lewat
     // dialog batas minimum (stokMinimum > 0 dan stok <= stokMinimum, aturan
     // isStokKritis backend), lalu dikembalikan di finally.
     let semula: InventoryMentah | null = null;
-    if (!inventory.some((i) => i.isStokKritis)) {
-      const inv = inventory.slice(0, UKURAN_AWAL).find((i) => i.item?.nama);
+    if (kritis.total === 0) {
+      const inv = data.find((i) => i.item?.nama);
       test.skip(!inv, "Belum ada stok gudang yang bisa diuji");
       semula = inv!;
+      await bukaGudang(page);
       await ubahStokMinimum(page, baris(page).filter({ hasText: inv!.item!.nama! }).first(), Math.floor(inv!.stok) + 1, KOLOM_GUDANG);
-      inventory = await bukaGudang(page);
+      await bukaGudang(page);
+      kritis = await bukaKritis();
     }
     try {
-      const kritis = inventory.filter((i) => i.isStokKritis).length;
-      expect(kritis, "stok kritis gudang setelah disiapkan").toBeGreaterThan(0);
-      await page.getByText("Stok Kritis").first().click();
-      await periksaBaris(page, kritis);
+      expect(kritis.total, "stok kritis gudang setelah disiapkan").toBeGreaterThan(0);
+      expect(kritis.data.every((i) => i.isStokKritis), "hanya stok kritis").toBe(true);
+      await periksaBaris(page, kritis.total);
     } finally {
       if (semula) {
         await bukaGudang(page);
@@ -325,23 +350,23 @@ test.describe("Inventaris gudang", () => {
   });
 
   test("pencarian mengirim kata kunci ke server dan menampilkan hasilnya", async ({ page }) => {
-    const inventory = await bukaGudang(page);
+    const { data: inventory } = await bukaGudang(page);
     const nama = inventory.find((i) => i.item?.nama)?.item?.nama;
     test.skip(!nama, "Belum ada stok gudang bernama barang");
 
-    const pCari = tunggu<InventoryMentah[]>(
+    const pCari = tungguHalaman(
       page,
-      getInventory((u) => u.searchParams.get("search") === nama),
+      getInventory((u) => u.searchParams.get("cari") === nama),
     );
     await page.getByPlaceholder("Cari barang di gudang...").fill(nama!);
     const hasil = await pCari;
 
-    test.skip(hasil.length === 0, "Pencarian gudang tidak mengembalikan data");
-    await periksaBaris(page, hasil.length);
+    test.skip(hasil.total === 0, "Pencarian gudang tidak mengembalikan data");
+    await periksaBaris(page, hasil.total);
   });
 
   test("ubah batas minimum lalu kembalikan ke nilai semula", async ({ page }) => {
-    const inventory = await bukaGudang(page);
+    const { data: inventory } = await bukaGudang(page);
     const inv = inventory.slice(0, UKURAN_AWAL).find((i) => i.item?.nama);
     test.skip(!inv, "Belum ada stok gudang yang bisa diuji");
 
@@ -351,7 +376,7 @@ test.describe("Inventaris gudang", () => {
   });
 
   test("opname tanpa selisih mengirim fisik aktual dan menutup dialog", async ({ page }) => {
-    const inventory = await bukaGudang(page);
+    const { data: inventory } = await bukaGudang(page);
     const inv = inventory.slice(0, UKURAN_AWAL).find((i) => i.item?.nama);
     test.skip(!inv, "Belum ada stok gudang yang bisa diuji");
 

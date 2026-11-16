@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Lokasi } from "@/types/location";
 import {
   lingkupOutlet,
+  paramHalamanInventory,
   lokasiSatuOutlet,
   SEMUA_OUTLET,
   tentukanCakupan,
@@ -93,5 +94,21 @@ describe("lokasiSatuOutlet", () => {
     expect(lokasiSatuOutlet({ status: "lintas", lokasiOutlet: [outletA, outletB] }, SEMUA_OUTLET)).toEqual({
       pilihSatuOutlet: true,
     });
+  });
+});
+
+describe("paramHalamanInventory (PV1a, P79, B342)", () => {
+  it("stok outlet seluruh lokasi: tipeLokasi Outlet tanpa locationID", () => {
+    expect(paramHalamanInventory({ tipeLokasi: "Outlet", cari: "", kritis: false, halaman: 1, ukuran: 10 })).toEqual({
+      page: "1",
+      limit: "10",
+      tipeLokasi: "Outlet",
+    });
+  });
+
+  it("satu lokasi, pencarian dipangkas, dan tab kritis", () => {
+    expect(
+      paramHalamanInventory({ locationID: "g1", cari: " gula ", kritis: true, halaman: 3, ukuran: 20 }),
+    ).toEqual({ page: "3", limit: "20", locationID: "g1", cari: "gula", stokKritis: "true" });
   });
 });

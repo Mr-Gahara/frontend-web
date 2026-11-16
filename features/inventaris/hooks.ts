@@ -5,6 +5,7 @@
  */
 
 import {
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
@@ -59,6 +60,20 @@ export function useLokasiBertipe(tipe: TipeLokasi) {
  * diketahui), sehingga tidak ada permintaan; filter tanpa locationID berarti
  * seluruh lokasi.
  */
+/**
+ * Satu halaman inventory dari server (P79, B342) untuk daftar stok outlet dan
+ * inventaris gudang. params null berarti cakupan lokasi belum siap, sehingga
+ * tidak ada permintaan. Halaman sebelumnya tetap tampil selama memuat.
+ */
+export function useHalamanInventory(params: Record<string, string> | null) {
+  return useQuery({
+    queryKey: queryKeys.inventory.daftar(params ?? undefined),
+    queryFn: () => inventoryApi.halaman(params ?? {}),
+    enabled: params !== null,
+    placeholderData: keepPreviousData,
+  });
+}
+
 export function useDaftarInventory(filter: FilterInventory | null) {
   return useQuery({
     queryKey: queryKeys.inventory.daftar(filter ?? undefined),

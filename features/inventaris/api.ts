@@ -5,8 +5,9 @@
  * sehingga ditempatkan terpisah dari features/bahan-baku.
  */
 
-import { apiData } from "@/lib/api/client";
+import { api, apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
+import type { Paginasi } from "@/lib/api/normalize";
 import type {
   Inventory,
   QuickOpnamePayload,
@@ -21,7 +22,15 @@ export interface FilterInventory {
   search?: string;
 }
 
+/** Satu halaman inventory (P79): dengan page atau limit, server mengirim pagination. */
+export type HalamanInventory = { data: Inventory[]; pagination: Paginasi | null };
+
 export const inventoryApi = {
+  /** params disusun paramHalamanInventory (cakupan.ts). */
+  halaman: async (params: Record<string, string>): Promise<HalamanInventory> => {
+    const hasil = await api.get<Inventory[]>(EP.inventory.list, params);
+    return { data: hasil.data, pagination: hasil.pagination ?? null };
+  },
   daftar: (filter: FilterInventory) =>
     apiData.get<Inventory[]>(EP.inventory.list, {
       ...(filter.locationID ? { locationID: filter.locationID } : {}),

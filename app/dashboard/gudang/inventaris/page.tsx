@@ -3,9 +3,11 @@
 import { useState, useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
+import { PILIHAN_UKURAN_STOK, paramHalamanInventory } from "@/features/inventaris/cakupan";
 import { pesanError } from "@/lib/api/error";
 import {
   useDaftarInventory,
+  useHalamanInventory,
   useLokasiBertipe,
   useOpnameInventory,
   useTambahInventory,
@@ -47,15 +49,23 @@ import {
   Save
 } from "lucide-react";
 
-/** Pilihan baris per halaman (DataTable opt-in, keputusan TB11a). */
-const PILIHAN_UKURAN = [10, 20, 50] as const;
-
 export default function GudangInventoryPage() {
 
   // --- Filter States ---
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
   const [filterTab, setFilterTab] = useState<"ALL" | "CRITICAL">("ALL");
+  const [halaman, setHalaman] = useState(1);
+  const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN_STOK[0]);
+
+  // Mengganti tab atau pencarian kembali ke halaman 1, disesuaikan saat render
+  // agar halaman lama tidak sempat diminta.
+  const kunciKriteria = JSON.stringify([filterTab, debouncedSearch]);
+  const [kunciSebelumnya, setKunciSebelumnya] = useState(kunciKriteria);
+  if (kunciSebelumnya !== kunciKriteria) {
+    setKunciSebelumnya(kunciKriteria);
+    setHalaman(1);
+  }
 
   // --- Modal States ---
   const [minStockModal, setMinStockModal] = useState<{
@@ -84,26 +94,40 @@ export default function GudangInventoryPage() {
   // 1. Ambil ID Gudang terlebih dahulu
   const { lokasiId: gudangId, isLoading: isLoadingLokasi } = useLokasiBertipe("Gudang");
 
-  // 2. Fetch Inventory Gudang
+  // 2. Satu halaman inventory gudang: pencarian dan tab Stok Kritis disaring
+  // server bersama paginasinya (P79, B342; keputusan rancangan butir 27, PV1a).
   const {
-    data: inventoryData = [],
+    data: halamanStok,
     isLoading: isLoadingInventory,
+    isFetching: memuatStok,
     isError: gagalMemuatStok,
-  } = useDaftarInventory(
-    gudangId ? { locationID: gudangId, search: debouncedSearch || undefined } : null,
+  } = useHalamanInventory(
+    gudangId
+      ? paramHalamanInventory({
+          locationID: gudangId,
+          cari: debouncedSearch,
+          kritis: filterTab === "CRITICAL",
+          halaman,
+          ukuran,
+        })
+      : null,
+  );
+  const filteredInventory = halamanStok?.data ?? [];
+
+  // Seluruh inventory gudang, hanya selama dialog tambah barang terbuka: master
+  // yang sudah ada di gudang tidak ditawarkan lagi, walau di halaman lain.
+  const { data: inventoryData, isLoading: memuatIsiGudang } = useDaftarInventory(
+    addItemModal && gudangId ? { locationID: gudangId } : null,
   );
 
   // 3. Fetch Master Bahan Baku (Untuk Dropdown Tambah Barang)
   const { data: masterBahanBaku = [], isLoading: isLoadingMaster } = useDaftarBahanBaku();
 
-  // --- Derived Data (Client-side filtering) ---
-  const filteredInventory = useMemo(() => {
-    if (filterTab === "CRITICAL") return inventoryData.filter((inv) => inv.isStokKritis);
-    return inventoryData;
-  }, [inventoryData, filterTab]);
-
   // FILTER CERDAS: Hanya tampilkan master data yang BELUM ada di Gudang
   const availableBahanBaku = useMemo(() => {
+    // Sebelum isi gudang termuat tidak ada yang ditawarkan, agar master yang
+    // sudah ada tidak sempat dipilih.
+    if (!inventoryData) return [];
     return masterBahanBaku.filter((bb) => {
       const masterId = bb.id;
       // Cek apakah ID Master ini sudah ada di tabel inventory Gudang
@@ -315,7 +339,19 @@ export default function GudangInventoryPage() {
           data={filteredInventory}
           loading={isLoadingInventory}
           emptyMessage={'Gudang masih kosong. Klik tombol "Masukkan Master Data" di atas untuk mendaftarkan barang.'}
-          pilihanUkuranKlien={PILIHAN_UKURAN}
+          paginasiServer={{
+            halaman,
+            jumlahHalaman: halamanStok?.pagination?.totalPages ?? 1,
+            total: halamanStok?.pagination?.total ?? 0,
+            ukuran,
+            pilihanUkuran: PILIHAN_UKURAN_STOK,
+            sibuk: memuatStok,
+            onGantiHalaman: setHalaman,
+            onGantiUkuran: (berikut) => {
+              setUkuran(berikut);
+              setHalaman(1);
+            },
+          }}
         />
       )}
 
@@ -338,10 +374,10 @@ export default function GudangInventoryPage() {
               <Select 
                 value={newItem.bahanBakuID} 
                 onValueChange={(val) => setNewItem((prev) => ({ ...prev, bahanBakuID: val }))}
-                disabled={isLoadingMaster}
+                disabled={isLoadingMaster || memuatIsiGudang}
               >
                 <SelectTrigger className="w-full bg-white border-navy/20 text-navy font-bold focus:ring-emerald-700">
-                  <SelectValue placeholder={isLoadingMaster ? "Memuat master data..." : "Pilih bahan baku..."} />
+                  <SelectValue placeholder={isLoadingMaster || memuatIsiGudang ? "Memuat master data..." : "Pilih bahan baku..."} />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-navy/10">
                   {availableBahanBaku.length === 0 ? (

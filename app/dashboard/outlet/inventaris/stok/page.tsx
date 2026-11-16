@@ -3,10 +3,11 @@
 import { useState, useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
+import { PILIHAN_UKURAN_STOK, paramHalamanInventory } from "@/features/inventaris/cakupan";
 import { pesanError } from "@/lib/api/error";
 import {
   useCakupanLokasiOutlet,
-  useDaftarInventory,
+  useHalamanInventory,
   useOpnameInventory,
   useUbahStokMinimum,
 } from "@/features/inventaris/hooks";
@@ -43,9 +44,6 @@ import {
   Loader2,
 } from "lucide-react";
 
-/** Pilihan baris per halaman (DataTable opt-in, keputusan TB11a). */
-const PILIHAN_UKURAN = [10, 20, 50] as const;
-
 export default function StokInventoryPage() {
 
   // --- Filter States ---
@@ -53,6 +51,17 @@ export default function StokInventoryPage() {
   const debouncedSearch = useDebounce(searchTerm, 500);
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
   const [filterTab, setFilterTab] = useState<"ALL" | "CRITICAL">("ALL");
+  const [halaman, setHalaman] = useState(1);
+  const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN_STOK[0]);
+
+  // Mengganti lokasi, tab, atau pencarian kembali ke halaman 1, disesuaikan
+  // saat render agar halaman lama tidak sempat diminta.
+  const kunciKriteria = JSON.stringify([selectedLocation, filterTab, debouncedSearch]);
+  const [kunciSebelumnya, setKunciSebelumnya] = useState(kunciKriteria);
+  if (kunciSebelumnya !== kunciKriteria) {
+    setKunciSebelumnya(kunciKriteria);
+    setHalaman(1);
+  }
 
   // --- Modal States ---
   const [minStockModal, setMinStockModal] = useState<{
@@ -81,28 +90,28 @@ export default function StokInventoryPage() {
         ? { locationID: cakupan.lokasiId }
         : null;
 
-  // Fetch Inventory List (null berarti belum siap: tidak ada permintaan)
+  // Satu halaman stok dari server (null berarti belum siap: tidak ada
+  // permintaan). Hanya lokasi bertipe Outlet (stok outlet dan gudang tidak
+  // tercampur), pencarian, dan tab Stok Kritis disaring server bersama
+  // paginasinya (P79, B342; keputusan rancangan butir 27, PV1a).
   const {
-    data: inventoryData = [],
+    data: halamanStok,
     isLoading: isLoadingInventory,
+    isFetching: memuatStok,
     isError: gagalMemuatStok,
-  } = useDaftarInventory(
-    filterLokasi ? { ...filterLokasi, search: debouncedSearch || undefined } : null,
+  } = useHalamanInventory(
+    filterLokasi
+      ? paramHalamanInventory({
+          locationID: filterLokasi.locationID,
+          tipeLokasi: "Outlet",
+          cari: debouncedSearch,
+          kritis: filterTab === "CRITICAL",
+          halaman,
+          ukuran,
+        })
+      : null,
   );
-
-  const filteredInventory = useMemo(() => {
-    let result = inventoryData;
-
-    // 1. Pastikan hanya data Outlet yang boleh masuk ke tabel ini
-    result = result.filter((inv) => inv.lokasi?.tipe === "Outlet");
-
-    // 2. Filter Tab Kritis
-    if (filterTab === "CRITICAL") {
-      result = result.filter((inv) => inv.isStokKritis);
-    }
-
-    return result;
-  }, [inventoryData, filterTab]);
+  const filteredInventory = halamanStok?.data ?? [];
 
   // --- Mutations ---
   const updateMinStockMutation = useUbahStokMinimum({
@@ -335,7 +344,19 @@ export default function StokInventoryPage() {
           data={filteredInventory}
           loading={isLoadingLokasi || isLoadingInventory}
           emptyMessage="Tidak ada data stok yang ditemukan."
-          pilihanUkuranKlien={PILIHAN_UKURAN}
+          paginasiServer={{
+            halaman,
+            jumlahHalaman: halamanStok?.pagination?.totalPages ?? 1,
+            total: halamanStok?.pagination?.total ?? 0,
+            ukuran,
+            pilihanUkuran: PILIHAN_UKURAN_STOK,
+            sibuk: memuatStok,
+            onGantiHalaman: setHalaman,
+            onGantiUkuran: (berikut) => {
+              setUkuran(berikut);
+              setHalaman(1);
+            },
+          }}
         />
       )}
 
