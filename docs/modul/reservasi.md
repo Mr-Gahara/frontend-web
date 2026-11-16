@@ -80,6 +80,15 @@ keputusan rancangan butir 17 dan 21.
   keempat berkas ditulis utuh dari halaman lama yang dibaca penuh, dengan
   `className` disalin, dan spec pembanding `652d669` menjadi penjaganya.
 
+### Penyesuaian backend `ridho` lokal `4a19be8`
+
+Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-backend.md`).
+
+- **TL1a: timeline dan pemeriksaan bentrok memakai `tampilan=timeline`**
+  (B327): booking yang mulai kemarin dan masih berjalan lewat tengah
+  malam ikut tampil di timeline dan terbaca terpakai di form buat
+  reservasi. Panel venue dashboard tetap per tanggal mulai (`7ce618e`).
+
 ## Catatan
 
 ### Catatan dari modul reservasi

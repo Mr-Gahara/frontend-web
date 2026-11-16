@@ -446,6 +446,23 @@ Diputuskan pemilik proyek pada 22 Oktober 2026, dari pratinjau
   lainnya), agar tautan dashboard gudang dan tautan tersimpan tetap
   berlaku.
 
+### Penyesuaian backend `ridho` lokal `4a19be8`
+
+Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-backend.md`).
+
+- **PG2a: Setujui disembunyikan bagi rekan selokasi pengaju**,
+  menggantikan PG1a. Mengikuti aturan P66: bila penyetuju punya lokasi
+  kerja tanpa `akses-lintas-outlet` dan lokasi kerja pengaju
+  (`dimintaOleh.locationID`, B338) sama, tombol Setujui diganti
+  keterangan "Pengajuan dari lokasi kerja Anda harus disetujui pengguna
+  lokasi lain atau Owner."; Tolak tetap tersedia
+  (`rekanSelokasiPengaju`, `ef307ad`).
+- **PV1a: stok outlet dan inventaris gudang berhalaman di server**
+  bersama pencarian (`cari`), tab Stok Kritis (`stokKritis`), dan untuk
+  stok outlet `tipeLokasi=Outlet` (B342), dengan tombol urut kolom
+  dibuang (`e41fe76`). Pilihan Tambah Barang gudang dibaca dari seluruh
+  inventory gudang yang dimuat selama dialog terbuka.
+
 ## Catatan
 
 ### Catatan dari modul inventaris

@@ -925,3 +925,73 @@ tanpa gabungan dan tanpa di-push. `nizar` dan `ridho` remote tidak maju.
   maupun `limit` ke `/produk`, `/inventory`, dan `/bahanbaku`, sehingga
   daftar tetap utuh), dan potong stok sekaligus (P78 butir 3; temuan 178
   belum diuji ulang).
+
+## Penyesuaian backend `ridho` lokal `4a19be8`
+
+Diminta pemilik proyek pada 16 November 2026: `ridho` remote maju 29
+commit di atas `d6709a1` ke `4a19be8`, dan `ridho` lokal sudah sama
+dengannya. Nizar menerapkan keputusan Mesin Kasir K-08 sampai K-10
+(MK15a sampai MK17a; B324 sampai B326), timeline booking lintas tengah
+malam (B327), tanggal ISO ketat (B328), dan uang diterima per metode
+(B329). Ridho, yang sejak hari itu mengambil alih seluruh backend,
+membaca repo web `70d2648` lalu menutup butir 168 sampai 184 yang milik
+backend beserta K-18 dan K-19 (P80 sampai P82, B330 sampai B344).
+`yoga` tidak maju; `nizar` `a79c087` hanya dokumen dan tidak digabung.
+
+- **Langkah sesudah tarik**: seed dan indeks tidak berubah. Migrasi
+  `jamOperasionalToko.js` (P81) dijalankan pemilik proyek lewat perintah
+  `!`: laporan 7 toko tanpa jam, `--terapkan` membersihkan 7 dan
+  memindah 0. Backend dan migrasi dijalankan pemilik proyek, karena
+  akses backend sesi itu baca saja.
+- **Keputusan pemilik proyek**:
+  - **JB8a**: langkah jam buka tersambung di wizard sesudah Lokasi
+    outlet, dan Profil Toko memakai isian yang sama; tur sorotan dan
+    pemakaian jam di shift dan jadwal menjadi utang
+    (`modul/setup-akun.md`). Wajib sekarang, karena `jamBuka` kriteria
+    setup inti: tanpa langkah ini akun baru tidak dapat menuntaskan
+    setup lewat web; toko yang setup intinya sudah selesai tidak
+    terdampak.
+  - **PG2a** (mengganti PG1a): Setujui disembunyikan bagi rekan
+    selokasi pengaju, mengikuti aturan P66 (`modul/inventaris.md`).
+  - **LG4a**: masa percobaan dan awal masa berlaku dari backend (B333),
+    walau aturannya berbeda dari penyimpulan web untuk catatan
+    `ubah-plan` (`modul/setup-akun.md`).
+  - **TL1a**: timeline reservasi dan pemeriksaan bentrok memakai
+    `tampilan=timeline` (B327); panel venue dashboard tidak berubah
+    (`modul/reservasi.md`).
+  - **PV1a** dan **PV2a**: produk, stok outlet, inventaris gudang, dan
+    bahan baku outlet berhalaman di server bersama filternya; saringan
+    baris inventory tanpa master dibuang setelah dibuktikan tidak ada
+    datanya (`modul/produk-kategori.md` dan `modul/inventaris.md`).
+  - **MK3b**, **MK5b**, dan **MK6b** (mengganti MK3a, MK5a, dan MK6a):
+    perangkat se-toko dari B334 dengan label "Terakhir dipakai", dan
+    asal penutupan "dari web" termasuk bila penutupnya sama
+    (`modul/keuangan.md`).
+  - **PB15a**: metode tunai berlaci mesin kasir dinonaktifkan di form
+    pembayaran bagi pemegang `kelola-perangkat-kasir`; lainnya menerima
+    409 lewat toast (`modul/penjualan.md`).
+  - **LB1a**: laporan untuk tim backend yang ditunda tidak disusun,
+    karena seluruh butirnya sudah dicatat dan ditutup backend; status
+    diselaraskan di `kontrak/temuan.md` (`inti/status.md`).
+- **Diubah di web** (`e1ea235` sampai `6ab81aa`): nama mesin dari
+  `namaPerangkat` (B335, perlu karena `installationId` kini null bagi
+  yang tidak memegang izin kelola), `lokasiKerja` detail diri untuk ruang
+  (B339), spec logout gagal membuktikan B343, dan tipe `Tenant`,
+  `SesiKasir`, `PerangkatToko`, `LanggananToko`, serta `dimintaOleh`.
+- **Tidak mengubah web**: B324 (aplikasi), B326 dan B330 (field baru
+  pembayaran tidak dibaca, dan web tidak pernah mengirim `dicatatOleh`),
+  B328 (web hanya mengirim `YYYY-MM-DD` atau `toISOString()`), B329
+  (OM1a menunggu desain), B332, B337 (web sudah menyaring `trusted`),
+  B344, dan butir 169. Payload tenant tidak memuat `jamBuka` maupun
+  `jamTutup` lama, sehingga B331 tidak memutus Profil Toko.
+- **Dibuktikan dari respons nyata** lewat spec per berkas 16 November
+  2026 (`inti/pengujian.md`, Baseline): B331, B333 sampai B336, B338
+  sampai B343, dan B327 (query); butir 168 hanya tidak langsung, lewat
+  muat ulang setelah Owner di spec setup.
+- **Pelajaran**: teks pesan kosong produk sempat diubah saat paginasi
+  dipindah, padahal tidak termasuk PV1a, dan dua skenario gagal karenanya
+  (`bf5212c`); perubahan tampilan yang tidak disebut opsi tidak ditulis
+  (`inti/cara-kerja.md`, Opsi terpilih diterapkan persis). Spec yang
+  mencari data uji di respons pertama daftar ikut keliru begitu daftar
+  berhalaman (skenario P18 bahan baku dilewati); carilah lewat query
+  server.

@@ -12,6 +12,29 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per penyesuaian backend `4a19be8`** (web `6ab81aa`, backend
+`ridho` lokal `4a19be8`, 16 November 2026, sesudah migrasi
+`jamOperasionalToko.js` diterapkan): vitest 1115 lolos (unit baru
+`orangSesi` asal web, `namaMesin`, `pilihanPerangkat`,
+`rekanSelokasiPengaju`, `ringkasLangganan`, `metodeLaciMesinKasir`,
+konverter `jamOperasional`, kriteria `jamBuka`, `paramHalamanProduk`, dan
+`paramHalamanInventory`). Spec terdampak dijalankan per berkas, tanpa OTP
+dan tanpa suite penuh: `keuangan/mesin-kasir`, `auth/ruang-lokasi-kerja`
+(skenario baru B339), `inventaris/pengajuanStok/lihat-pengajuan-stok`,
+`pengaturan/langganan`, `dashboard/lonceng-pemberitahuan`, dan
+`auth/sidebar-pengguna` 36 lolos; `reservasi/daftar/lihat-reservasi`,
+`setup/setup`, `setup/pratinjau-jam-buka`, `pengaturan/profil-toko`
+(skenario baru Jam Buka), `inventaris/produk/crud-produk`, dan
+`inventaris/stok` 66 lolos dan 2 gagal (pesan kosong produk yang
+terlanjur diubah, dikembalikan di `bf5212c`, lalu 2 lolos);
+`reservasi/buat`, `penjualan/alur-penjualan`, `gudang/ruang-gudang`, dan
+`akses` 38 lolos; folder `inventaris/bahanBaku` 6 lolos (skenario P18
+tidak lagi dilewati); `setup/panduan`, `setup/plan-fitur`,
+`penjualan/buat-penjualan`, dan `dashboard/dashboard-gudang` 12 lolos.
+Spec pratinjau jam buka (6 skenario) dihapus sesudah itu (`1171f33`).
+Harapan suite penuh 649 (`npx playwright test --list`): 653 dikurangi 6
+pratinjau ditambah 2 skenario baru; menunggu izin pemilik proyek.
+
 **Baseline per rapian UI dan utang pengujian** (web `2bcb1ce`, backend
 `ridho` lokal `d6709a1`, 14 November 2026): vitest 1100 lolos (5 unit test
 `toggleDiskonSelection`, 1 `denganAlfa`, 3 integrasi `DataTable`). Spec

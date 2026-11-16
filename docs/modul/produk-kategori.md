@@ -34,6 +34,21 @@ produk (`152088b`). Labelnya PR:
   `onClick`; dan jalur gagalnya diuji lewat `page.route` pada `DELETE`
   saja, setelah dibuktikan gagal terhadap halaman lama.
 
+### Penyesuaian backend `ridho` lokal `4a19be8`
+
+Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-backend.md`).
+
+- **PV1a: daftar produk berhalaman di server** bersama pencarian
+  (`cari`) dan tab Stok Kritis (`stokKritis`) (B340), tanpa tombol urut
+  kolom; pesan kosong tidak berubah (`624761a`, `bf5212c`). Pemakai
+  daftar utuh lain tetap `useDaftarProduk`.
+- **PV2a: daftar Bahan Baku outlet berhalaman di server** dengan
+  `locationID` outlet dan `cari` (B342). Saringan klien baris tanpa data
+  master dibuang: data development tidak memuat satu pun, dan backend
+  menghapus inventory bersama bahannya dalam satu transaksi. Baris
+  seperti itu, bila kelak ada, tampil bernama "-" tanpa menu Edit dan
+  Hapus (`6ab81aa`).
+
 ## Catatan
 
 ### Catatan dari utang kecil modul produk dan pemformat rupiah

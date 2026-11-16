@@ -453,3 +453,15 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   berperan Owner. Pembatasan 403 bagi staf berlokasi kerja (B270 sampai
   B274) tidak diuji web: pengguna uji tidak diberi lokasi kerja, dan
   ruang tidak disesuaikan.
+- **Setujui yang disembunyikan bagi rekan selokasi pengaju (PG2a) hanya
+  teruji di unit test** (`rekanSelokasiPengaju`), karena butuh pengajuan
+  dari pengaju berlokasi kerja dan penyetuju berlokasi kerja sama; spec
+  daftar pengajuan hanya membuktikan `dimintaOleh.locationID` dari
+  respons nyata (16 November 2026).
+- **Metode tunai berlaci mesin kasir yang dinonaktifkan (PB15a) hanya
+  teruji di unit test** (`metodeLaciMesinKasir`), karena butuh metode
+  tunai yang akun kasnya laci uji yang sedang dipetakan, sedangkan spec
+  mesin kasir melepas pemetaannya di akhir (16 November 2026).
+- **Booking lintas tengah malam di timeline (TL1a) belum teruji e2e**:
+  spec reservasi hanya memeriksa query `tampilan=timeline`, karena butuh
+  booking yang melewati 00.00 dari hari sebelumnya (16 November 2026).

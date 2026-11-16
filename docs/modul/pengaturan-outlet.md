@@ -148,6 +148,15 @@ dan diterapkan di `fcf2dd2` bersama PO15a; PO16a diterapkan di `ca6eb3d`.
   kartu indeks pengaturan, karena tidak punya field; dan tipe `Tenant`
   dipindah ke `id` (keputusan rancangan butir 1).
 
+### Penyesuaian backend `ridho` lokal `4a19be8`
+
+Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-backend.md`).
+
+- **Kartu Jam Buka di Profil Toko** (JB8a, `modul/setup-akun.md`):
+  isian yang sama dengan langkah wizard, disimpan utuh ke
+  `jamOperasional` (B331) dengan tombol Simpan Jam Buka sendiri; tanpa
+  `update-tenant` hanya ringkasan per hari yang tampil (`46d90e1`).
+
 ## Catatan
 
 ### Catatan dari submodul profil outlet

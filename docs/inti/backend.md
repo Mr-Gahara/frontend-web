@@ -273,6 +273,22 @@ Seed dan skrip migrasi tidak berubah. Index baru jurnal stok
 oleh `npm run db:indeks` (skrip itu hanya menyelaraskan pelanggan, posisi,
 kontrak kompensasi, perangkat, dan pemakaian diskon); keberadaannya
 diperiksa lewat `getIndexes()` (`referensi/keputusan-penyesuaian-backend.md`).
+Pada 16 November 2026 `ridho` remote maju 29 commit di atas `d6709a1` ke
+`4a19be8` (Nizar K-08 sampai K-10 dan B324 sampai B329; Ridho P80 sampai
+P82 dan B330 sampai B344), dan `ridho` lokal sudah sama dengannya;
+`yoga` tidak maju, dan `nizar` `a79c087` (satu commit dokumen di
+`docs/pengembangan/status.md`) belum masuk `ridho` dan tidak digabung,
+karena akses backend sesi itu baca saja. Seed tidak berubah. Migrasi
+baru `jamOperasionalToko.js` (P81, wajib sejak `2d2fb90`) dijalankan
+pemilik proyek: mode laporan 7 toko tanpa jam, lalu `--terapkan`
+membersihkan field lama ketujuhnya tanpa ada yang dipindah
+(`referensi/keputusan-penyesuaian-backend.md`).
+
+Sejak 16 November 2026 Ridho, sebagai pemimpin tim backend, mengambil
+alih seluruh pekerjaan backend di modul siapa pun sampai backend siap
+produksi (`~/Documents/backend-js/docs/pemilik.md`). Tabel pemilik di bawah tetap
+rujukan modul; perubahan Ridho di modul Yoga atau Nizar dicatat sebagai
+pemberitahuan di `docs/pengembangan/status.md` backend.
 
 Gabungan tanpa konflik belum tentu lengkap. Pada `92d4f27`, gabung
 otomatis membuang lima bagian milik Nizar dari

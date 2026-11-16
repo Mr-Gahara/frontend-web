@@ -29,13 +29,17 @@ setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
 
 ## Pekerjaan berikutnya
 
-Keadaan per 12 November 2026: backend lokal `ridho` `d6709a1`,
-di-fast-forward ke `yoga` (6 commit di atas `f110c04`: P78 dan P79,
-B319 sampai B323) tanpa di-push. Penyesuaiannya filter dan badge alasan
-jurnal Pembelian dan Penjualan (JS1a), tautan rincian jurnal ke
-penjualan (JS2a), serta helper spec jurnal penjualan lewat
-`?penjualanID=`; VD3a menjadi pekerjaan UI berikutnya dan paginasi
-server menunggu backend (`referensi/keputusan-penyesuaian-backend.md`).
+Keadaan per 16 November 2026: backend lokal `ridho` `4a19be8`, sama
+dengan remote, 29 commit di atas `d6709a1` (Nizar K-08 sampai K-10,
+B324 sampai B329; Ridho P80 sampai P82, B330 sampai B344). Ridho
+menutup seluruh butir web yang menunggu backend (168 sampai 184, K-18,
+dan K-19). Web menyesuaikan diri dalam 13 commit, `e1ea235` sampai
+`6ab81aa`: sesi kasir (MK3b, MK5b, MK6b), lokasi kerja tanpa
+`read-location`, Setujui rekan selokasi (PG2a), langganan (LG4a),
+timeline reservasi (TL1a), metode tunai berlaci (PB15a), langkah jam
+buka (JB8a), dan paginasi server empat daftar (PV1a, PV2a)
+(`referensi/keputusan-penyesuaian-backend.md`). `nizar` `a79c087`
+(dokumen) belum masuk `ridho`.
 
 Keadaan per 7 sampai 10 November 2026 dipindah ke
 `arsip/catatan-putaran.md` (Keadaan pekerjaan 7 sampai 10 November 2026)
@@ -61,42 +65,25 @@ BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho niza
 ### Mesin Kasir, sisi backend
 
 Penyambungan selesai di `b74f30a` (`modul/keuangan.md`, MK10a sampai
-MK13a; daftar periksanya di `arsip/catatan-putaran.md`, Catatan dari
-penyambungan Mesin Kasir). Yang masih terbuka di sisi backend:
-`kontrak/temuan.md` butir 172 sampai 174; keputusan bisnis nomor 1
-sampai 3 di audit backend 5 November 2026 (K-08 sampai K-10), yang
-diputuskan pemilik proyek 10 November 2026 sebagai MK15a sampai MK17a
-(`modul/keuangan.md`) dan menunggu diterapkan backend; serta K-18 (pemetaan menerima
-perangkat berstatus apa pun) dan K-19 (`installationId` seluruh HP
-keluar di laporan sesi). Di web, K-18 ditangani dengan menyaring
-perangkat `trusted`, dan K-19 dengan tidak menampilkan `installationId`.
+MK13a). Sisi backend tuntas di `4a19be8`: K-08 sampai K-10 diterapkan
+Nizar (MK15a sampai MK17a; B324 sampai B326), dan butir 172 sampai 174,
+K-18, serta K-19 ditutup Ridho (B334 sampai B337). Web memakai daftar
+perangkat se-toko, nama mesin dari sesi, dan asal penutupan (MK3b,
+MK5b, MK6b, `e1ea235`), serta menonaktifkan metode tunai berlaci di
+form pembayaran (PB15a, `46ebfc3`).
 
-### Penyambungan langkah jam buka
+### Langkah jam buka
 
-Tampilan langkah jam buka selesai tanpa API (`b48cfdb`, `1386a30`;
-`modul/setup-akun.md`, JB1a sampai JB7a) dan dipratinjau di
-`/setup/pratinjauJamBuka`. Penyambungannya menunggu backend
-(`kontrak/temuan.md` butir 176), yang kebutuhannya diserahkan ke Ridho,
-Yoga, dan Nizar pada 7 November 2026. Daftar periksa:
+Tersambung 16 November 2026 (JB8a, `46d90e1`; backend P81, B331): wizard
+sesudah Lokasi outlet dan kartu Jam Buka di Profil Toko memakai isian
+yang sama, dan pratinjaunya dihapus setelah spec alur nyata lolos
+(`1171f33`). Sisa, diputuskan pemilik proyek nanti
+(`modul/setup-akun.md`, Utang terbuka):
 
-1. Kontrak backend jam per hari: status Buka, 24 jam, atau Libur beserta
-   jam buka dan tutup per hari, penanda 24 jam yang berbeda dari belum
-   diatur, dan kriteria jam buka di `GET /api/setup/status`.
-2. `LANGKAH_JAM_BUKA` masuk `daftarLangkah` sesudah lokasi,
-   `PETA_LANGKAH.jamBuka` diisi kunci server, dan langkah tersambung
-   menyimpan lewat `features/tenant` dengan nilai awal dari data tenant.
-3. Langkah yang sudah tersimpan tampil sebagai ringkasan tanpa tautan,
-   seperti ringkasan langkah lain sejak `daf9e3a` (WS6a).
-4. Spec alur nyata di `tests/e2e/setup/setup.spec.ts` (jumlah langkah per
-   plan bertambah satu), lalu hapus `features/setup/pratinjau-jam-buka.tsx`,
-   `app/setup/pratinjauJamBuka`, dan
-   `tests/e2e/setup/pratinjau-jam-buka.spec.ts`.
-5. Jam buka di Profil Toko memakai komponen yang sama; pemakaiannya di
-   shift dan jadwal diputuskan pemilik proyek saat penyambungan.
-6. Tur sorotan langkah jam buka: teksnya diajukan ke pemilik proyek,
-   lalu titiknya ditambah di `features/setup/titik-panduan.ts` dan
-   langkahnya memberi prop `panduan` ke `JudulLangkah` (keputusan
-   rancangan butir 32; `modul/setup-akun.md`, PN2a dan PN3a).
+1. Pemakaian jam buka di shift dan jadwal.
+2. Tur sorotan langkah jam buka: teksnya diajukan ke pemilik proyek,
+   lalu titiknya ditambah di `features/setup/titik-panduan.ts`
+   (keputusan rancangan butir 32; PN2a dan PN3a).
 
 ### Pekerjaan UI berikutnya
 
@@ -116,9 +103,10 @@ dengan alur kanvas desain seperti butir di bawah:
    (`referensi/keputusan-penyesuaian-backend.md`).
 5. **Stok keluar di detail penjualan (VD3a)**: selesai 12 November 2026,
    desain A kanvas (`modul/penjualan.md`, VD4a sampai VD10a).
-6. **Paginasi server produk, bahan baku, dan inventory**: menunggu
-   padanan filter dari backend (`kontrak/temuan.md` butir 184), lalu
-   dipindah per daftar bersama filternya.
+6. **Paginasi server produk, bahan baku, dan inventory**: selesai
+   16 November 2026 setelah backend B340 sampai B342 (PV1a dan PV2a,
+   `624761a`, `e41fe76`, `6ab81aa`; `modul/inventaris.md` dan
+   `modul/produk-kategori.md`).
 7. **Bug dan cacat tampilan**: selesai 14 November 2026 (`609b36a`,
    `0df0ca5`; `modul/ui-ux.md`, CV1a sampai CV14a). Sampel tampilan dan
    pemindaian seluruh rute dashboard di 1280 dan 390 px, lalu perbaikan
@@ -142,8 +130,9 @@ dengan alur kanvas desain seperti butir di bawah:
 
 Dilanjutkan nanti atas perintah pemilik proyek, tidak sekarang:
 
-1. **Suite e2e penuh**, harapan 653 (`inti/pengujian.md`, Baseline):
-   label kartu HP, tabel rincian, dan tipografi belum dijalankan e2e.
+1. **Suite e2e penuh**, harapan 649 (`inti/pengujian.md`, Baseline):
+   label kartu HP, tabel rincian, dan tipografi belum dijalankan e2e;
+   spec terdampak penyesuaian backend `4a19be8` sudah lolos per berkas.
 2. **Luberan tabel daftar di 768 px** (hampir 20 tabel): pilih batas
    kartu `DataTable` atau kolom per tabel (`modul/ui-ux.md`, Utang
    terbuka).
@@ -171,9 +160,10 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 3. **Halaman arus kas** (B291, LR2a): selesai 12 November 2026, tab
    Keuangan "Arus Kas" dengan desain D pemilik proyek (`modul/keuangan.md`,
    LR3a sampai LR6a).
-4. **Omzet per metode pembayaran di laporan** (OM1a): menunggu endpoint
-   backend lebih dulu (`kontrak/temuan.md` butir 180), lalu didesain
-   pemilik proyek.
+4. **Omzet per metode pembayaran di laporan** (OM1a): endpoint tersedia
+   sejak backend `4a19be8` (B329, `ringkasan.pembayaranPerMetode` di laba
+   rugi, berarti uang diterima per metode, bukan omzet); menunggu desain
+   pemilik proyek (`kontrak/temuan.md` butir 180).
 5. **Stok keluar di detail penjualan, termasuk yang VOID** (VD3a):
    selesai 12 November 2026 (`modul/penjualan.md`, VD4a sampai VD10a).
 6. **Modul membership web** (paket dan pendaftaran member), syarat
@@ -183,8 +173,6 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 
 - Nomor WhatsApp admin untuk halaman Langganan (LG1a, `NOMOR_WA_ADMIN`
   masih kosong).
-- Laporan untuk tim backend, yang ditunda sampai pekerjaan backend dari
-  audit selesai (utang kecil, di bawah).
 
 Diputuskan 10 November 2026: keputusan bisnis Mesin Kasir MK15a sampai
 MK17a (`modul/keuangan.md`, menunggu backend), ruang mengikuti lokasi
@@ -200,46 +188,18 @@ A dibangkitkan ulang RG9a. Ketiganya selesai 10 November 2026: TP2b
   menetap di basis data development setelah akun ujinya dihapus, karena
   hapus akun tidak menghapus tokonya; setiap run spec setup menambah enam
   toko.
-- Laporan untuk tim backend belum disusun (`inti/backend.md`, Bila
-  menemukan bug backend). Bahannya ditinjau ulang terhadap backend
-  `ridho` lokal `0bbd261` dan `docs/pengembangan/klien.md` backend pada
-  10 November 2026. Penomoran di sana bergeser satu mulai butir web
-  167 (tercatat 166), sehingga butir dicocokkan menurut isinya.
-  - **Temuan baru, masih berlaku di `0bbd261`**: `kontrak/temuan.md`
-    butir 168 (cookie refresh `POST /tenant`), 169 (`db:data-bawaan`
-    mencocokkan nama), 170 (penanda masa percobaan), 172 sampai 174
-    (perangkat dan asal penutupan sesi kasir), 177 (logout akun tidak
-    mencabut sesi pengguna), 178 (penyimpanan penjualan bersamaan;
-    diuji ulang 10 November 2026 sesudah P-03 dan masih terjadi: stok
-    turun 6 untuk satu penjualan tersimpan), 179 (lokasi kerja
-    pengaju, B284), dan 182 (tipe lokasi kerja tidak terbaca tanpa
-    `read-location`, LK3a). Butir 180 (omzet per metode pembayaran, OM1a)
-    sudah dicatat langsung di `docs/pengembangan/klien.md` backend
-    `dd6bc98` atas perintah pemilik proyek, dan butir 181 (stok keluar
-    per penjualan tidak tertelusur, VD2a) di `aeb6a52`; keduanya cukup
-    dirujuk.
-  - **Pembuktian, satu baris per butir**: butir 12 (hapus kategori yang
-    dipakai, P19) dan 52 (hapus aset ber-booking), P18 hapus bahan,
-    butir 14 (kembar 409, B304; spec `crud-kategori` lolos di suite
-    penuh 10 November 2026), butir 13 (`kategoriID` produk diperiksa
-    keberadaannya) dan 16 (cache produk dibuang saat kategori berubah)
-    dari respons nyata 10 November 2026; B215, B217, B229 sampai B232, B251
-    (`a207fae`), dan B248 (`efb05db`) dari web; B252 dan B259 sampai
-    B261 (penyesuaian `1584222`) serta B266 (`d267f03`) dari respons
-    nyata; B250 dan B255 terbukti e2e 7 November 2026 (`778eb2d`); B269,
-    B279, B281, dan B282 (`916e7df`) serta B290 dan B291 (`e9112a8`)
-    dari respons nyata.
-  - **Belum dibuktikan**: butir 85 dan 107 (B50, B51), B169, dan B170
-    yang menunggu web sejak AR31 (VK1a).
-  - **Dikeluarkan karena basi**: butir 167 (selesai lewat B240,
-    `GET /akun/me`; web belum memakainya, TP2a), 141, 155, 156, 158,
-    160, 162, dan 164 beserta B112, B114, B115, dan B116 (ditutup
-    `Selesai` oleh backend AR31 dengan bukti web), 165 (ditutup backend
-    dengan catatan staf tanpa lokasi kerja; tambahan web tetap), 94
-    (tertutup sejak `1584222`), dan 176 (dilaporkan 7 November 2026).
-  Laporannya ditunda sampai pekerjaan backend dari audit
-  selesai, agar diserahkan sekali jalan (pemilik proyek, 6 November
-  2026).
+- Laporan untuk tim backend yang ditunda sejak 6 November 2026 tidak
+  disusun (LB1a, pemilik proyek 16 November 2026): Ridho membaca repo web
+  `70d2648` pada 16 November 2026, mencatat butir 168 sampai 170, 172
+  sampai 174, 176 sampai 179, 182, dan 184 beserta K-18 dan K-19 di
+  `docs/pengembangan/klien.md` backend (180 dan 181 sudah tercatat
+  sebelumnya), dan menutup seluruhnya di `4a19be8`. Status setiap
+  butir diselaraskan di `kontrak/temuan.md`, dicocokkan menurut isinya
+  karena nomor di `docs/pengembangan/klien.md` backend pernah bergeser,
+  dan pembuktiannya dicatat di sana.
+  Laporan baru hanya bila ada temuan baru. Yang belum dibuktikan web:
+  butir 85 dan 107 (B50, B51, `Menunggu verifikasi`), 169 dan 178 (tanpa
+  perubahan kontrak), serta B169 dan B170.
 - Akun uji `toko@gmail.com` dinaikkan ke Pro lewat API admin, karena
   akun lama dibaca Basic (B212) dan Basic menolak sesi booking (B216).
   Riwayat langganannya kini berisi satu catatan `ubah-plan`.
@@ -351,9 +311,9 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 
 ### Utang kecil dari penyesuaian backend `ridho` lokal `916e7df`
 
-- Ruang mengikuti lokasi kerja sejak LK3a (10 November 2026), kecuali
-  bagi staf berlokasi kerja tanpa `read-location` (`kontrak/temuan.md`
-  butir 182). Sebelumnya staf berlokasi
+- Ruang mengikuti lokasi kerja sejak LK3a (10 November 2026), dan sejak
+  `8901b20` (B339) juga bagi staf berlokasi kerja tanpa `read-location`
+  (`kontrak/temuan.md` butir 182). Sebelumnya staf berlokasi
   kerja yang membuka ruang lain melihat pesan 403 backend di setiap
   halaman stok, dan sejak backend `e9112a8` juga di pembelian stok,
   penjualan, pembayaran, sesi kasir, panel Status Staf, dan laba rugi

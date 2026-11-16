@@ -161,6 +161,15 @@ penyambungannya menunggu backend (`kontrak/temuan.md` butir 176).
   tanpa padanan status server akan membuka wizard yang sudah tuntas di
   langkah itu.
 
+- **JB8a: tersambung ke `jamOperasional` tenant** (backend P81, B331;
+  pemilik proyek 16 November 2026): langkah masuk `daftarLangkah`
+  sesudah Lokasi outlet, `PETA_LANGKAH.jamBuka` membaca kunci server
+  `jamBuka`, jam yang sudah tersimpan tampil sebagai ringkasan tanpa
+  tautan, dan Profil Toko memakai isian yang sama (`IsianJamBuka`).
+  Pratinjau dihapus setelah spec alur nyata lolos (`46d90e1`,
+  `1171f33`). Tur sorotan dan pemakaian jam di shift dan jadwal menjadi
+  utang.
+
 ### Penanda dan panduan wizard
 
 Diputuskan pemilik proyek pada 7 November 2026 dari kanvas desain
@@ -276,6 +285,15 @@ bagian reset PIN Owner di TP2a.
   (`titipPesanLogin`, seperti PF7a): toast hijau di kanan atas halaman
   login, bukan kotak di dalam form seperti di kanvas. Reset PIN kembali ke
   login pengguna dengan toast "PIN Owner diubah".
+
+### Penyesuaian backend `ridho` lokal `4a19be8`
+
+- **LG4a: masa percobaan dan awal masa berlaku dari backend**
+  (`masaPercobaan` dan `aksesMulaiPada`, B333; pemilik proyek
+  16 November 2026), menggantikan penyimpulan dari riwayat di LG3a.
+  Catatan `ubah-plan` yang menyalin tanggal berakhir yang sama tidak lagi
+  dianggap awal masa berlaku; lonceng tidak lagi memuat riwayat
+  (`d35af42`).
 
 ## Kriteria setup
 
@@ -594,13 +612,16 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
   `475bf0b` dan `468a3bd`.
 - Langkah jam buka (JB1a sampai JB7a) belum tersambung: tampilannya hanya
   di rute pratinjau `/setup/pratinjauJamBuka`, menunggu kontrak jam per
-  hari dari backend (`kontrak/temuan.md` butir 176). Daftar periksa
-  penyambungannya di `inti/status.md`.
+  hari dari backend (`kontrak/temuan.md` butir 176). Selesai di
+  `46d90e1` (JB8a), dan pratinjaunya dihapus di `1171f33`.
 - WS6a belum diterapkan: ringkasan tersimpan lokasi outlet, sesi booking,
   dan gudang masih bertautan (`kontrak/temuan.md` butir 175). Selesai di
   `daf9e3a`.
 - Ruang gudang belum punya tur (PN4a). Menunya berbeda dari ruang outlet
   (Petugas Gudang, Pengaturan Gudang), sehingga titik dan teksnya
   diajukan ke pemilik proyek lebih dulu.
-- Langkah jam buka belum punya tur, karena teksnya belum diusulkan; ikut
-  penyambungannya (`inti/status.md`, Penyambungan langkah jam buka).
+- Langkah jam buka belum punya tur, karena teksnya belum diusulkan.
+  Langkahnya tersambung sejak `46d90e1`; teks tur diajukan ke pemilik
+  proyek lebih dulu (`inti/status.md`, Langkah jam buka).
+- Pemakaian jam buka di shift dan jadwal belum diputuskan pemilik proyek
+  (JB8a, 16 November 2026).

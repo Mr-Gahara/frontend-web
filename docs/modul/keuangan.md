@@ -468,6 +468,27 @@ sebagai jalan masuk; rutenya tidak berubah.
   disembunyikan sidebar seperti tab sebelumnya (`kontrak/temuan.md` butir
   163).
 
+### Penyesuaian backend `ridho` lokal `4a19be8`
+
+Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-backend.md`).
+
+- **MK3b: pilihan perangkat dari daftar perangkat se-toko** (`GET
+  /sesikasir/perangkat-toko`, B334), menggantikan MK3a. Satu baris per
+  `installationId`, hanya `trusted`, dengan pemakai dan mesin kasir yang
+  sudah memakainya; `bolehKelolaMesinKasir` tidak lagi menuntut
+  `read-pengguna` (`e1ea235`).
+- **MK5b: asal penutupan ditulis bila dari web** (B336), menggantikan
+  MK5a: "Sari, ditutup Ridho dari web", dan "Ridho, ditutup dari web"
+  bila penutupnya sama. Dari aplikasi atau sesi lama tanpa asal tidak
+  ditulis.
+- **MK6b: waktu perangkat diberi label "Terakhir dipakai"**,
+  menggantikan MK6a, karena `terakhirDipakai` B334 berasal dari
+  `updatedAt` perangkat, bukan `lastSeenAt`.
+- Nama mesin di riwayat, kartu kasir buka, dan rincian dibaca dari
+  `namaPerangkat` sesi (B335); `NAMA_MESIN_TANPA_DAFTAR` dibuang, karena
+  `installationId` kini null bagi yang tidak memegang
+  `kelola-perangkat-kasir` (K-19).
+
 ## Catatan
 
 ### Catatan dari sub-menu Keuangan dan Laporan
@@ -814,4 +835,6 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   (`referensi/utang-pengujian.md`).
 - `kontrak/temuan.md` butir 172 sampai 174, K-18, dan K-19 tetap
   terbuka di backend; web menanganinya seperti sebelum penyambungan
-  (MK3a, MK5a, dan `NAMA_MESIN_TANPA_DAFTAR`).
+  (MK3a, MK5a, dan `NAMA_MESIN_TANPA_DAFTAR`). Selesai di backend
+  `4a19be8` (B334 sampai B337), dan web memakainya di `e1ea235` (MK3b,
+  MK5b, MK6b).

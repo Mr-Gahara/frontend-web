@@ -158,6 +158,18 @@ Diputuskan pemilik proyek pada 18 Oktober 2026, saat RG4a diterapkan
   tidak memuat `useLokasiAktif` sendiri; lingkup dikirim lewat argumen
   `paramLokasi` di `useDaftarPenjualan`; dan K11b tidak berubah.
 
+### Penyesuaian backend `ridho` lokal `4a19be8`
+
+Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-backend.md`).
+
+- **PB15a: metode tunai berlaci mesin kasir dinonaktifkan di form
+  pembayaran** (K-10, B325, MK17a): bagi pemegang
+  `kelola-perangkat-kasir`, yang dapat membaca daftar mesin kasir,
+  metode tunai yang akun kasnya dipetakan ke mesin kasir tidak dapat
+  dipilih dan diberi keterangan "Laci mesin kasir: terima tunai lewat
+  kasir di perangkatnya"; yang lain menerima pesan 409 backend lewat
+  toast gagal yang sudah ada (`metodeLaciMesinKasir`, `46ebfc3`).
+
 ## Catatan
 
 ### Catatan dari cakupan daftar penjualan

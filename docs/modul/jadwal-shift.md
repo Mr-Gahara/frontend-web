@@ -205,7 +205,12 @@ Diputuskan pemilik proyek pada 8 November 2026
   pajak, dan pengguna, sehingga staf yang mengurus master toko diberi
   `akses-lintas-outlet` atau tanpa lokasi kerja. Penolakannya pesan di
   tempat "Ruang ini di luar lokasi kerja Anda." dari `GerbangRute`, dan
-  isi dashboard ditahan sampai lokasi kerja diketahui.
+  isi dashboard ditahan sampai lokasi kerja diketahui. Sejak backend
+  `4a19be8` (B339) tipe lokasi kerja dibaca dari `lokasiKerja` di detail
+  diri, yang terbaca juga tanpa `read-location`, sehingga syarat
+  keputusan lanjutan pertama hilang dan staf tanpa izin itu ikut
+  dibatasi; daftar lokasi tidak lagi diminta (`8901b20`, pengguna uji
+  "E2E Lokasi Gudang Tanpa Lokasi").
 - **AB6a: label kedatangan di Status Staf** (`69f2b18`, B276, B278).
   Staf yang sudah absen mendapat label kecil "Terlambat N menit" atau
   "Luar jadwal" dari `sesiTerakhir` monitoring; Tepat Waktu tanpa label.
