@@ -1,5 +1,6 @@
 import type { PembatalanPembayaranRequest, PembayaranRequest } from "@/types/pembayaran";
 import type { MetodePembayaran } from "@/types/metodePembayaran";
+import type { PerangkatKasir } from "@/types/sesiKasir";
 
 /** Nominal dari isian berformat rupiah; null bila tidak ada angka. */
 export function nominalDariTeks(teks: string): number | null {
@@ -72,3 +73,20 @@ export function susunPayloadPembayaran(isian: IsianPembayaran, sekarang: Date): 
     ...(catatan ? { catatan } : {}),
   };
 }
+
+/**
+ * Metode tunai yang akun kasnya laci mesin kasir. Tunai ke laci itu hanya
+ * diterima lewat sesi kasirnya yang terbuka, sehingga dari web ditolak 409
+ * (K-10, B325). Hanya dapat dikenali pemegang kelola-perangkat-kasir, yang
+ * dapat membaca daftar mesin kasir; selain itu pesan 409 tampil lewat toast
+ * (PB15a, pemilik proyek 16 November 2026).
+ */
+export function metodeLaciMesinKasir(
+  metode: Pick<MetodePembayaran, "kategori" | "akunKas">,
+  mesin: readonly Pick<PerangkatKasir, "akunKasID">[],
+): boolean {
+  const akunKasID = metode.akunKas?.id;
+  return metode.kategori === "tunai" && !!akunKasID && mesin.some((m) => m.akunKasID === akunKasID);
+}
+
+export const KETERANGAN_METODE_LACI = "Laci mesin kasir: terima tunai lewat kasir di perangkatnya";

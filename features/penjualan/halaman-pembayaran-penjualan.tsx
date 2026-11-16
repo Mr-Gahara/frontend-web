@@ -7,12 +7,17 @@ import { useDaftarMetodePembayaran } from "@/features/metode-pembayaran/hooks";
 import { metodeAktif } from "@/features/metode-pembayaran/filter";
 import { useBuatPembayaran } from "@/features/pembayaran/hooks";
 import {
+  KETERANGAN_METODE_LACI,
+  metodeLaciMesinKasir,
   nominalDariTeks,
   teksAkunTujuan,
   susunPayloadPembayaran,
   validasiPembayaran,
 } from "@/features/pembayaran/payload";
 import { usePenjualan } from "./hooks";
+import { useDaftarMesinKasir } from "@/features/sesi-kasir/hooks";
+import { IZIN } from "@/lib/auth/permissions";
+import { useSession } from "@/lib/auth/useSession";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
@@ -67,6 +72,11 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
   const daftarMetode = useDaftarMetodePembayaran();
   const metodeList = useMemo(() => metodeAktif(daftarMetode.data ?? []), [daftarMetode.data]);
   const metodeTerpilih = metodeList.find((m) => m.id === metodePembayaranID);
+  // PB15a: metode tunai berlaci mesin kasir dinonaktifkan bagi yang dapat
+  // membaca daftar mesin kasir; yang lain menerima 409 lewat toast (B325).
+  const { permissions } = useSession();
+  const mesinKasir = useDaftarMesinKasir(permissions.includes(IZIN.kelolaPerangkatKasir));
+  const mesinList = mesinKasir.data ?? [];
 
   // Dialog konfirmasi hanya tertutup saat berhasil; saat gagal tetap terbuka
   // beserta pesannya (keputusan Fase 0). Kedua tombolnya nonaktif selama
@@ -223,13 +233,20 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
                   <SelectContent className="bg-gading border-navy/10 text-navy">
                     {metodeList.map((metode) => {
                       const validId = metode.id;
+                      const laci = metodeLaciMesinKasir(metode, mesinList);
                       return (
                         <SelectItem
                           key={validId}
                           value={validId}
+                          disabled={laci}
                           className="cursor-pointer hover:bg-navy/5 font-medium"
                         >
-                          {metode.namaPembayaran}
+                          <span className="flex flex-col items-start">
+                            {metode.namaPembayaran}
+                            {laci && (
+                              <span className="text-kecil font-normal text-navy/60">{KETERANGAN_METODE_LACI}</span>
+                            )}
+                          </span>
                         </SelectItem>
                       );
                     })}

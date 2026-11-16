@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  metodeLaciMesinKasir,
   nominalDariTeks,
   susunPayloadBatalPembayaran,
   susunPayloadPembayaran,
@@ -131,5 +132,24 @@ describe("penyaring referensi pembayaran", () => {
 
   it("metodeAktif membuang metode nonaktif", () => {
     expect(metodeAktif([metode("1", true), metode("2", false)]).map((m) => m.id)).toEqual(["1"]);
+  });
+});
+
+describe("metodeLaciMesinKasir (PB15a, K-10, B325)", () => {
+  const mesin = [{ akunKasID: "laci1" }];
+  const metode = (kategori: "tunai" | "non-tunai", akunKasID: string | null) => ({
+    kategori,
+    akunKas: akunKasID ? { id: akunKasID, namaAkun: "Laci", nomorAkun: null } : null,
+  });
+
+  it("tunai ke akun kas yang dipetakan ke mesin kasir", () => {
+    expect(metodeLaciMesinKasir(metode("tunai", "laci1"), mesin)).toBe(true);
+  });
+
+  it("non-tunai, akun kas lain, tanpa akun kas, atau tanpa daftar mesin bukan laci", () => {
+    expect(metodeLaciMesinKasir(metode("non-tunai", "laci1"), mesin)).toBe(false);
+    expect(metodeLaciMesinKasir(metode("tunai", "kas2"), mesin)).toBe(false);
+    expect(metodeLaciMesinKasir(metode("tunai", null), mesin)).toBe(false);
+    expect(metodeLaciMesinKasir(metode("tunai", "laci1"), [])).toBe(false);
   });
 });
