@@ -23,6 +23,24 @@ export function bolehKembaliTabel(lebarAlamiTerakhir: number | null, lebarWadah:
 }
 
 /**
+ * Kunci ukur ulang: jumlah baris, id baris pertama dan terakhir (id data,
+ * atau id baris tabel bila data tanpa id), halaman, ukuran, status muat, dan
+ * jumlah kolom. Id baris ikut agar pencarian yang tetap memberi jumlah baris
+ * sama tetap mengukur ulang; isi di tengah halaman yang berubah tanpa
+ * mengubah ujungnya tidak terdeteksi, dan itu diterima.
+ */
+export function kunciUkurUlang(m: {
+  idBaris: readonly unknown[];
+  halaman: number;
+  ukuran: number;
+  memuat: boolean;
+  kolom: number;
+}): string {
+  const ujung = m.idBaris.length ? `${String(m.idBaris[0])}~${String(m.idBaris[m.idBaris.length - 1])}` : "-";
+  return `${m.idBaris.length}:${ujung}:${m.halaman}:${m.ukuran}:${m.memuat}:${m.kolom}`;
+}
+
+/**
  * `pemicu` adalah kunci sederhana isi tabel (jumlah baris, halaman, status
  * muat), bukan array data: array baru di setiap render akan memutar ukur
  * ulang tanpa henti. Saat kunci berubah, tabel diukur ulang dalam mode tabel

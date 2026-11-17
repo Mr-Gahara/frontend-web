@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bolehKembaliTabel, tabelMeluber } from "@/components/ui/use-kartu-bila-tak-muat";
+import { bolehKembaliTabel, kunciUkurUlang, tabelMeluber } from "@/components/ui/use-kartu-bila-tak-muat";
 
 /**
  * LT1a: DataTable tampil sebagai kartu bila lebar alami tabelnya melebihi
@@ -29,5 +29,25 @@ describe("bolehKembaliTabel", () => {
 
   it("tanpa lebar alami terukur tetap kartu", () => {
     expect(bolehKembaliTabel(null, 2000)).toBe(false);
+  });
+});
+
+describe("kunciUkurUlang", () => {
+  const dasar = { halaman: 1, ukuran: 10, memuat: false, kolom: 5 };
+
+  it("pencarian dengan jumlah baris sama tetapi baris berbeda mengubah kunci", () => {
+    const sebelum = kunciUkurUlang({ ...dasar, idBaris: ["a", "b", "c"] });
+    const sesudah = kunciUkurUlang({ ...dasar, idBaris: ["x", "y", "z"] });
+    expect(sesudah).not.toBe(sebelum);
+  });
+
+  it("baris yang sama memberi kunci yang sama, sehingga tidak mengukur ulang tanpa henti", () => {
+    expect(kunciUkurUlang({ ...dasar, idBaris: ["a", "b"] })).toBe(kunciUkurUlang({ ...dasar, idBaris: ["a", "b"] }));
+  });
+
+  it("daftar kosong, halaman, dan status muat ikut membedakan kunci", () => {
+    expect(kunciUkurUlang({ ...dasar, idBaris: [] })).toBe("0:-:1:10:false:5");
+    expect(kunciUkurUlang({ ...dasar, idBaris: ["a"], halaman: 2 })).not.toBe(kunciUkurUlang({ ...dasar, idBaris: ["a"] }));
+    expect(kunciUkurUlang({ ...dasar, idBaris: ["a"], memuat: true })).not.toBe(kunciUkurUlang({ ...dasar, idBaris: ["a"] }));
   });
 });

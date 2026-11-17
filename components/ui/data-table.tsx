@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useKartuBilaTakMuat } from "@/components/ui/use-kartu-bila-tak-muat";
+import { kunciUkurUlang, useKartuBilaTakMuat } from "@/components/ui/use-kartu-bila-tak-muat";
 
 /**
  * Di HP tiap baris menjadi satu kartu dan selnya tersusun ke bawah
@@ -174,7 +174,13 @@ export function DataTable<TData, TValue>({
     ? server.onGantiUkuran
     : (ukuran: number) => table.setPagination({ pageIndex: 0, pageSize: ukuran });
   const { ref: refTabel, kartu } = useKartuBilaTakMuat(
-    `${table.getRowModel().rows.length}:${halamanKini}:${ukuranKini}:${loading}:${columns.length}`,
+    kunciUkurUlang({
+      idBaris: table.getRowModel().rows.map((r) => (r.original as { id?: unknown }).id ?? r.id),
+      halaman: halamanKini,
+      ukuran: ukuranKini,
+      memuat: loading,
+      kolom: columns.length,
+    }),
   );
 
   return (
