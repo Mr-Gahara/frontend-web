@@ -179,6 +179,15 @@ diperluas sendiri ke pajak. Dikembalikan di `493f49c`: pajak dapat
 ditambah, dan ketiga langkah lain menjadi ringkasan bertautan atas
 keputusan baru pemilik proyek.
 
+Kejadian kedua (17 November 2026, luberan tabel 768 px): opsi "Kartu bila
+tak muat" menyebut label yang sama dengan kartu HP, tetapi penerapannya
+juga menyembunyikan empat kolom yang kosong di kartu HP dari kartu lebar
+meja, dan kerangka muat Arus Kas ikut diubah. Keduanya tidak ada di
+rencana tujuh butir yang dicocokkan dengan opsi. Diakui sesudah commit,
+lalu diputuskan pemilik proyek (LT6a dan LT5a, `modul/ui-ux.md`).
+Pelajarannya: perubahan yang muncul saat menerapkan, misalnya
+"agar konsisten", dicocokkan ulang dengan rencana sebelum ditulis.
+
 ## Keputusan berdasar bukti
 
 Setiap keputusan harus bersandar pada kode atau output yang benar-benar

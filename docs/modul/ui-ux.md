@@ -351,10 +351,9 @@ yang muat di 1280 px ada yang lebih sempit (rincian Pengajuan dan Transfer
   `app/globals.css` menggantikan `max-sm:` dan `sm:` di DataTable,
   sehingga kartu HP di bawah 640 px tidak berubah. Berlaku untuk daftar
   dan rincian. Ukur ulang dipicu kunci sederhana (jumlah baris, halaman,
-  ukuran, status muat, jumlah kolom), bukan array data. Keempat kolom
-  yang sengaja kosong di kartu HP (CV20a) ikut kosong di kartu lebar meja
-  (`tabel:` dan `kartu:`). Hasil: 29 tabel menjadi kartu di 768 px, tidak
-  ada tabel meluber di 768, 1024, dan 1280 px.
+  ukuran, status muat, jumlah kolom), bukan array data. Hasil: 29 tabel
+  menjadi kartu di 768 px, tidak ada tabel meluber di 768, 1024, dan
+  1280 px.
 - **LT2a: kolom nama Pelanggan dibungkus 180 px**, agar tetap tabel di
   1024 dan 1280 px (sebelumnya 590 px di wadah 584 px).
 - **LT3a: baris filter Pengajuan Stok outlet boleh turun baris** mulai
@@ -362,8 +361,19 @@ yang muat di 1280 px ada yang lebih sempit (rincian Pengajuan dan Transfer
 - **LT4a: baris cari dan Masukkan Master Data Barang Gudang boleh turun
   baris** mulai 640 px (sebelumnya halaman +18 px).
 - **LT5a: kartu saldo Arus Kas satu kolom di bawah 1024 px**, tiga kolom
-  mulai 1024 px (kartu dan kerangka muatnya), sehingga label dan rupiah
-  tidak terpotong di 768 px.
+  mulai 1024 px, sehingga label dan rupiah tidak terpotong di 768 px.
+  Kerangka muatnya ikut satu kolom: diterapkan di luar teks opsi, lalu
+  dipertahankan pemilik proyek setelah ditanyakan.
+- **LT6a: empat kolom kosong kartu HP tampil berlabel di kartu lebar
+  meja.** Tanggal dan Pelanggan daftar penjualan serta Tanggal Dibuat dan
+  Lokasi stock opname diberi `meta.label` dan `meta.sembunyiHp`: selnya
+  tersembunyi di bawah 640 px seperti CV20a (`max-sm:hidden!`, karena
+  `kartu:block` menimpanya tanpa penanda penting), dan tampil berlabel di
+  kartu 640 px ke atas. Di mode tabel Pelanggan dan Lokasi tetap
+  tersembunyi di bawah 768 px. Penerapan pertama menyembunyikan keempatnya
+  juga di kartu lebar meja tanpa bertanya, sehingga tanggal penjualan
+  hilang di tablet; pemilik proyek memilih arah ini setelah penyimpangan
+  itu diakui.
 
 ## Catatan
 
@@ -635,6 +645,11 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
   dengan `git stash`): tabel Pembelian Stok outlet lebih lebar 10 px dari
   wadahnya (276 dan 266), halaman Produk +22 px, dan Buat Reservasi +18 px.
   Belum ditelusuri.
+- Mode kartu LT1a lengket saat isi berubah tanpa mengubah kunci ukur
+  ulang (jumlah baris, halaman, ukuran, status muat, kolom): misalnya
+  pencarian di daftar berhalaman server yang tetap memberi 10 baris di
+  halaman 1 tetap kartu sampai wadah berubah lebar. Perbaikan murah
+  kelak: id baris pertama dan terakhir ikut di kunci.
 - Pesan "Gagal Memuat Lokasi Gudang" dan "Gudang Belum Didaftarkan" di
   `app/dashboard/gudang/jurnalStok/page.tsx` tidak pernah tampil, karena
   layout ruang gudang menghadang lebih dulu (kode mati; penghapusannya
