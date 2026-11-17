@@ -161,6 +161,11 @@ export const outletMenus: MenuGroup[] = [
             label: "Arus Kas",
             href: "/dashboard/outlet/keuangan/arusKas",
           },
+          {
+            // Uang diterima per metode pembayaran (B329, desain B, OM2a).
+            label: "Pembayaran per Metode",
+            href: "/dashboard/outlet/keuangan/pembayaranMetode",
+          },
         ],
       },
     ],

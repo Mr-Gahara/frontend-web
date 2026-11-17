@@ -172,6 +172,7 @@ export const queryKeys = {
     semua: kunci(["laporan"] as const),
     labaRugi: (filter?: Filter) => ["laporan", "labaRugi", filter] as const,
     arusKas: (filter?: Filter) => ["laporan", "arusKas", filter] as const,
+    pembayaranPerMetode: (filter?: Filter) => ["laporan", "pembayaranPerMetode", filter] as const,
   },
   pelanggan: {
     semua: kunci(["pelanggan"] as const),

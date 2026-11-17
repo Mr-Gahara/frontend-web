@@ -52,3 +52,17 @@ export interface LaporanArusKas {
   baris: BarisArusKas[];
   ringkasan: RingkasanArusKas;
 }
+
+/**
+ * Uang diterima per metode pembayaran pada rentang laporan
+ * (`ringkasan.pembayaranPerMetode` di GET /laporan/laba-rugi, B329): dari
+ * pembayaran PAID menurut tanggal bayar, termasuk pajak. Bukan pembagian
+ * omzet, karena satu penjualan dapat dibayar beberapa metode. Hanya metode
+ * yang menerima pembayaran pada rentang itu, terurut dari jumlah terbesar.
+ */
+export interface PembayaranPerMetode {
+  metodePembayaranID: string | null;
+  namaMetode: string | null;
+  jumlah: number;
+  jumlahPembayaran: number;
+}

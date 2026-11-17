@@ -20,7 +20,7 @@ const anakTerlihat = (label: string, permissions: string[]) =>
     .map((s) => s.label);
 
 describe("sub-menu Keuangan dan Laporan", () => {
-  it("susunannya: Keuangan enam anak, Laporan dua anak", () => {
+  it("susunannya: Keuangan enam anak, Laporan tiga anak (Pembayaran per Metode sejak OM2a)", () => {
     expect(menu("Keuangan").subItems?.map((s) => s.label)).toEqual([
       "Penjualan",
       "Pengeluaran",
@@ -29,7 +29,7 @@ describe("sub-menu Keuangan dan Laporan", () => {
       "Belanja Stok",
       "Mesin Kasir",
     ]);
-    expect(menu("Laporan").subItems?.map((s) => s.label)).toEqual(["Ringkasan Laba/Rugi", "Arus Kas"]);
+    expect(menu("Laporan").subItems?.map((s) => s.label)).toEqual(["Ringkasan Laba/Rugi", "Arus Kas", "Pembayaran per Metode"]);
   });
 
   it("href induk Laporan tidak sama dengan anak mana pun", () => {
@@ -46,7 +46,7 @@ describe("sub-menu Keuangan dan Laporan", () => {
   it("Belanja Stok tampil dengan izin pembelian per ruang, laporan dengan read-laporan", () => {
     const izin = ["read-akunkas", "read-location", "read-pembelian-stok-gudang", "read-laporan"];
     expect(anakTerlihat("Keuangan", izin)).toEqual(["Akun Kas & Bank", "Mutasi Kas", "Belanja Stok"]);
-    expect(anakTerlihat("Laporan", izin)).toEqual(["Ringkasan Laba/Rugi", "Arus Kas"]);
+    expect(anakTerlihat("Laporan", izin)).toEqual(["Ringkasan Laba/Rugi", "Arus Kas", "Pembayaran per Metode"]);
   });
 
   it("Mesin Kasir tampil dengan read-sesi-kasir saja", () => {

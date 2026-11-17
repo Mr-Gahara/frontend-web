@@ -23,3 +23,12 @@ export function useArusKas(params: Record<string, string>) {
     queryFn: () => laporanApi.arusKas(params),
   });
 }
+
+/** Uang diterima per metode pembayaran untuk satu rentang; null berarti rentang belum sah. */
+export function usePembayaranPerMetode(rentang: RentangLaporan | null) {
+  return useQuery({
+    queryKey: queryKeys.laporan.pembayaranPerMetode(rentang ?? undefined),
+    queryFn: () => laporanApi.pembayaranPerMetode(rentang as RentangLaporan),
+    enabled: rentang !== null,
+  });
+}

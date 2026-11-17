@@ -2,7 +2,7 @@ import { apiClient } from "@/lib/apiClient";
 import { apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
 import { normalizeId } from "@/lib/api/normalize";
-import type { BarisArusKas, LaporanArusKas, LaporanLabaRugiData, RingkasanArusKas } from "@/types/laporan";
+import type { BarisArusKas, LaporanArusKas, LaporanLabaRugiData, PembayaranPerMetode, RingkasanArusKas } from "@/types/laporan";
 import type { RentangLaporan } from "./periode";
 
 export const laporanApi = {
@@ -17,6 +17,16 @@ export const laporanApi = {
       "pengguna",
     );
     return { baris: normalizeId(res.data ?? []), ringkasan: normalizeId(res.ringkasan as RingkasanArusKas) };
+  },
+
+  /** Uang diterima per metode (B329) dari ringkasan laba rugi; barisnya tidak dipakai. */
+  pembayaranPerMetode: async (rentang: RentangLaporan): Promise<PembayaranPerMetode[]> => {
+    const res = await apiClient.get<{ ringkasan?: { pembayaranPerMetode?: PembayaranPerMetode[] } }>(
+      EP.laporan.labaRugi,
+      { ...rentang },
+      "pengguna",
+    );
+    return res.ringkasan?.pembayaranPerMetode ?? [];
   },
 
   unduhArusKas: (params: Record<string, string>) =>

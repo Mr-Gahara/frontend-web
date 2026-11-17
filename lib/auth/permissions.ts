@@ -221,6 +221,7 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/keuangan/mutasiArusKas": [IZIN.akunKas],
   "/dashboard/outlet/keuangan/ringkasanLabaRugi": [IZIN.laporan],
   "/dashboard/outlet/keuangan/arusKas": [IZIN.laporan],
+  "/dashboard/outlet/keuangan/pembayaranMetode": [IZIN.laporan],
   // Mesin Kasir: kasir yang buka dan riwayat butuh read-sesi-kasir; panel
   // mesin kasir dan tutup dari web tambahan bagi pemegang kelola (keputusan
   // pemilik proyek, 7 November 2026; features/sesi-kasir/izin.ts).
