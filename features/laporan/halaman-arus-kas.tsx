@@ -280,7 +280,7 @@ export function HalamanArusKas() {
         </div>
       ) : !tampilan || !ringkasan ? (
         <div className="flex flex-col gap-4" aria-label="Memuat laporan arus kas">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {[0, 1, 2].map((i) => (
               <Skeleton key={i} className="h-34 rounded-3xl bg-navy/10" />
             ))}
@@ -289,7 +289,7 @@ export function HalamanArusKas() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
             <KartuSaldo
               judul="Saldo awal periode"
               nilai={formatRupiah(ringkasan.saldoAwalPeriode)}

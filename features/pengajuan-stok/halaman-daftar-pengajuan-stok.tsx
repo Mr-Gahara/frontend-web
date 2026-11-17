@@ -326,7 +326,7 @@ function IsiDaftarPengajuanStok({
       {/* FILTER & TABS */}
       {/* Tab status dan filter dua baris: berdampingan, tab terjepit sampai 128 px di 1280 px. */}
       <div className="flex flex-col items-start gap-4 border-b border-navy/10 pb-4">
-        <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 hide-scrollbar">
+        <div className="flex items-center gap-1 overflow-x-auto w-full pb-2 sm:pb-0 hide-scrollbar">
           {tabTampil.map((tab) => (
             <Button
               key={tab}
@@ -345,7 +345,7 @@ function IsiDaftarPengajuanStok({
           ))}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:items-end">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 w-full sm:w-auto sm:items-end">
         {pemilihLokasi}
         <Select value={filterArah} onValueChange={(v) => setFilterArah(v as FilterArah)}>
           <SelectTrigger aria-label="Filter arah" className="w-full sm:w-44 bg-white border-navy/20 text-navy focus:ring-navy">
