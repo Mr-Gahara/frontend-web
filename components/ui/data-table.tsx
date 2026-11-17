@@ -211,13 +211,13 @@ export function DataTable<TData, TValue>({
         <TableBody className="kartu:block">
           {loading ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-32 text-center text-isi text-navy/60">
+              <TableCell colSpan={columns.length} className="h-32 text-center text-isi text-navy/60 whitespace-normal">
                 Memuat data...
               </TableCell>
             </TableRow>
           ) : table.getRowModel().rows.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-32 text-center text-isi text-navy/60">
+              <TableCell colSpan={columns.length} className="h-32 text-center text-isi text-navy/60 whitespace-normal">
                 {emptyMessage}
               </TableCell>
             </TableRow>

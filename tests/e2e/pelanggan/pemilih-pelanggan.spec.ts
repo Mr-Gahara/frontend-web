@@ -113,7 +113,7 @@ test.describe("Pemilih pelanggan menampilkan nomor HP", () => {
       await bukaDenganAuth(page, URL_RESERVASI);
       await page
         .getByRole("combobox")
-        .filter({ hasText: "Ketik untuk mencari pelanggan..." })
+        .filter({ hasText: "Cari pelanggan..." })
         .click();
       await page.getByPlaceholder("Cari nama pelanggan...").fill(uji.nomorHp);
       const pilihan = page.getByRole("option").filter({ hasText: uji.namaPelanggan });

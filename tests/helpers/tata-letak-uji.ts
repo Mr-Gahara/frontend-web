@@ -20,3 +20,21 @@ export async function tanpaGulirDiSemuaLebar(page: Page, konteks: string) {
     await tanpaGulirSamping(page, `${konteks} (${l.nama} ${l.width} px)`);
   }
 }
+
+/**
+ * Wadah gulir dashboard (app/dashboard/layout.tsx) dan setiap wadah tabel
+ * tidak lebih lebar dari isinya. tanpaGulirSamping tidak menangkapnya,
+ * karena luberan di dalam wadah gulir dashboard tidak melebarkan dokumen
+ * (luberan HP 390 px, 17 November 2026).
+ */
+export async function tanpaLuberWadah(page: Page, konteks: string) {
+  const wadah = await page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>('div.flex-1.overflow-y-auto, [data-slot="table-container"]')]
+      .filter((e) => e.offsetParent !== null)
+      .map((e) => ({ nama: e.dataset.slot ?? "wadah gulir dashboard", isi: e.scrollWidth, lebar: e.clientWidth })),
+  );
+  expect(wadah.length, `${konteks}: wadah gulir dashboard terbaca`).toBeGreaterThan(0);
+  for (const w of wadah) {
+    expect(w.isi, `${konteks}: ${w.nama} tidak lebih lebar dari wadahnya`).toBeLessThanOrEqual(w.lebar + 1);
+  }
+}

@@ -97,7 +97,7 @@ export function KartuFasilitas({
                   galatItem?.dataAset && "border-rose-500",
                 )}
               >
-                <SelectValue placeholder={memuatAset ? "Memuat aset..." : "Pilih aset yang tersedia"} />
+                <SelectValue placeholder={memuatAset ? "Memuat aset..." : "Pilih aset"} />
               </SelectTrigger>
               <SelectContent className="bg-gading border-navy/10 text-navy">
                 {asetList.map((aset) => (

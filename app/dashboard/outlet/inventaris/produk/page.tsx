@@ -258,7 +258,7 @@ export default function ProdukPage() {
       </div>
 
       {/* Tab cepat, sama dengan halaman Stok Saat Ini (B237) */}
-      <div className="flex items-center gap-2 border-b border-navy/10 pb-4">
+      <div className="flex flex-wrap items-center gap-2 border-b border-navy/10 pb-4">
         <Button
           variant="ghost"
           onClick={() => setTabKritis(false)}

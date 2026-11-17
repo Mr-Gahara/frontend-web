@@ -1,6 +1,7 @@
 import { test, expect, Page } from "@playwright/test";
 import { bukaDenganAuth } from "../../../helpers/transfer-uji";
 import { masuk } from "../../../helpers/masuk-uji";
+import { tanpaLuberWadah } from "../../../helpers/tata-letak-uji";
 
 // ============================================================
 // HELPER: Login
@@ -124,6 +125,16 @@ async function hapusProduk(page: Page, nama: string) {
 // ============================================================
 test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
   test.setTimeout(120000);
+
+  test("HP 390 px: tab Semua Produk dan Stok Kritis tidak keluar dari layar (LT9a)", async ({ page }) => {
+    await login(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await bukaHalamanProduk(page);
+    const tab = page.getByRole("button", { name: "Stok Kritis" });
+    await expect(tab).toBeVisible();
+    expect((await tab.boundingBox())!.x + (await tab.boundingBox())!.width).toBeLessThanOrEqual(390);
+    await tanpaLuberWadah(page, "data produk 390 px");
+  });
 
   // ----------------------------------------------------------
   // [1] HAPPY PATH: Tambah produk sederhana (tanpa resep)

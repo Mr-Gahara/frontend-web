@@ -196,11 +196,13 @@ export default function HalamanBuatReservasi() {
                           errors.dataPelanggan && "border-rose-500",
                         )}
                       >
-                        {field.value
-                          ? (labelPelangganTerpilih(pelangganList, field.value) ?? "—")
-                          : memuatPelanggan
-                            ? "Memuat..."
-                            : "Ketik untuk mencari pelanggan..."}
+                        <span className="min-w-0 truncate">
+                          {field.value
+                            ? (labelPelangganTerpilih(pelangganList, field.value) ?? "—")
+                            : memuatPelanggan
+                              ? "Memuat..."
+                              : "Cari pelanggan..."}
+                        </span>
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>

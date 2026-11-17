@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import { JAWAB_GAGAL, bukaDenganAuth, login } from "../../../helpers/transfer-uji";
+import { tanpaLuberWadah } from "../../../helpers/tata-letak-uji";
 import {
   NAMA_ASET_BOOKING,
   NAMA_ASET_PERBAIKAN,
@@ -54,13 +55,13 @@ async function bukaBuat(page: Page) {
 }
 
 async function pilihPelanggan(page: Page) {
-  await page.getByRole("combobox").filter({ hasText: "Ketik untuk mencari pelanggan..." }).click();
+  await page.getByRole("combobox").filter({ hasText: "Cari pelanggan..." }).click();
   await page.getByPlaceholder("Cari nama pelanggan...").fill(NAMA_PELANGGAN_BOOKING);
   await page.getByRole("option", { name: NAMA_PELANGGAN_BOOKING }).click();
 }
 
 async function bukaPilihanAset(page: Page) {
-  await page.getByRole("combobox").filter({ hasText: "Pilih aset yang tersedia" }).click();
+  await page.getByRole("combobox").filter({ hasText: "Pilih aset" }).click();
 }
 
 async function pilihAsetUji(page: Page) {
@@ -95,6 +96,20 @@ async function pilihDiskon(page: Page, urutanTombol: number, cari: string, nama:
 test.describe("E2E — Reservasi › Buat reservasi", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
+  });
+
+  test("HP 390 px: pemilih pelanggan dan aset tidak meluber dan teksnya utuh (LT10a)", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await bukaBuat(page);
+    for (const teks of ["Cari pelanggan...", "Pilih aset"]) {
+      const pemicu = page.getByRole("combobox").filter({ hasText: teks });
+      await expect(pemicu).toBeVisible();
+      const utuh = await pemicu.evaluate((el) =>
+        [el, ...el.querySelectorAll("*")].every((e) => e.scrollWidth <= e.clientWidth + 1 || e.clientWidth === 0),
+      );
+      expect(utuh, `teks "${teks}" tidak terpotong`).toBe(true);
+    }
+    await tanpaLuberWadah(page, "buat reservasi 390 px");
   });
 
   test("validasi: tanpa pelanggan dan aset, pesan tampil tanpa mengirim permintaan", async ({ page }) => {

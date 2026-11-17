@@ -328,7 +328,7 @@ function FilterAkun({
 }) {
   const akun = useDaftarAkunKas();
   return (
-    <div className="flex flex-col gap-1">
+    <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
       <label htmlFor="filter-akun-pembelian" className={KELAS_LABEL_FILTER}>
         Akun kas
       </label>
@@ -362,7 +362,7 @@ function FilterBahan({
 }) {
   const bahan = useDaftarBahanBaku();
   return (
-    <div className="flex flex-col gap-1">
+    <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
       <label htmlFor="filter-bahan-pembelian" className={KELAS_LABEL_FILTER}>
         Bahan baku
       </label>

@@ -1,5 +1,6 @@
 import { test, expect, type Page, type Request, type Response } from "@playwright/test";
 import { BASIS, login } from "../../../helpers/transfer-uji";
+import { tanpaLuberWadah } from "../../../helpers/tata-letak-uji";
 
 const URL_OUTLET = `${BASIS}/dashboard/outlet/inventaris/pembelianStok`;
 const URL_GUDANG = `${BASIS}/dashboard/gudang/pembelianStok`;
@@ -50,6 +51,21 @@ async function cocokkanTabel(page: Page, respons: Response) {
 test.describe("Pembelian stok: daftar dan detail", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
+  });
+
+  test("HP 390 px: filter Akun kas dan Bahan baku selebar baris, dan tabel kosong tidak meluber (LT7a, LT8a)", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(URL_OUTLET);
+    const cari = page.getByLabel("Cari supplier");
+    await expect(cari).toBeVisible({ timeout: 15_000 });
+    const lebarCari = (await cari.boundingBox())!.width;
+    for (const id of ["#filter-akun-pembelian", "#filter-bahan-pembelian"]) {
+      const kotak = (await page.locator(id).boundingBox())!;
+      expect(Math.abs(kotak.width - lebarCari), `${id} selebar kotak cari`).toBeLessThanOrEqual(2);
+    }
+    await cari.fill(`tidak-ada-${Date.now()}`);
+    await expect(page.getByText("Belum ada pembelian pada filter ini.")).toBeVisible({ timeout: 15_000 });
+    await tanpaLuberWadah(page, "pembelian stok kosong 390 px");
   });
 
   test("outlet: daftar meminta lokasi outlet, periode bulan berjalan, halaman 1 dan 10 baris", async ({ page }) => {
