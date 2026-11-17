@@ -375,6 +375,32 @@ yang muat di 1280 px ada yang lebih sempit (rincian Pengajuan dan Transfer
   hilang di tablet; pemilik proyek memilih arah ini setelah penyimpangan
   itu diakui.
 
+### Luberan HP 390 px
+
+Diputuskan pemilik proyek pada 17 November 2026 dari papan "Luberan di HP
+390 px" di kanvas yang sama (render nyata sekarang dan usulan). Dengan
+keempatnya, pindaian seluruh rute 390 px tidak menyisakan luberan; yang
+tersisa pemotongan yang dirancang (kolom Staf kalender jadwal, nama aset
+timeline) dan salah deteksi input tersembunyi Profil Toko.
+
+- **LT7a: sel pesan kosong dan Memuat data di DataTable boleh turun
+  baris** (`whitespace-normal`); tabel kosong Pembelian Stok sebelumnya
+  10 px lebih lebar dari wadahnya.
+- **LT8a: filter Akun kas dan Bahan baku daftar Pembelian Stok selebar
+  baris di bawah 640 px** (`col-span-2 sm:col-span-1`); sebelumnya berbagi
+  satu baris dan terpotong ("Semua a").
+- **LT9a: tab Semua Produk dan Stok Kritis Data Produk boleh turun
+  baris** (`flex-wrap`); sebelumnya Stok Kritis keluar 38 px dan halaman
+  melebar 22 px.
+- **LT10a: pemilih Buat Reservasi.** Pelanggan: teks kosong "Cari
+  pelanggan..." dan nama terpilih dipotong rapi (`truncate`); sebelumnya
+  meluber dari kartunya (halaman +18 px). Aset: teks kosong "Pilih aset",
+  karena labelnya sudah "Pilih Aset / Meja / Ruangan".
+
+Helper `tanpaLuberWadah` (`tests/helpers/tata-letak-uji.ts`) memeriksa
+wadah gulir dashboard dan wadah tabel, karena `tanpaGulirSamping` hanya
+mengukur dokumen dan tidak menangkap luberan di dalam wadah gulir.
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E
@@ -644,7 +670,7 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
 - Pemindaian 390 px (17 November 2026, sudah ada sebelum LT1a, dibuktikan
   dengan `git stash`): tabel Pembelian Stok outlet lebih lebar 10 px dari
   wadahnya (276 dan 266), halaman Produk +22 px, dan Buat Reservasi +18 px.
-  Belum ditelusuri.
+  Selesai 17 November 2026 (LT7a sampai LT10a, Luberan HP 390 px).
 - Mode kartu LT1a lengket saat isi berubah tanpa mengubah kunci ukur
   ulang (jumlah baris, halaman, ukuran, status muat, kolom): misalnya
   pencarian di daftar berhalaman server yang tetap memberi 10 baris di

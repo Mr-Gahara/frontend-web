@@ -12,6 +12,17 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per luberan HP 390 px** (17 November 2026, backend `ridho`
+lokal `4a19be8`): vitest 1132 lolos. Tiga skenario baru 390 px dengan
+helper `tanpaLuberWadah`: `lihat-pembelian-stok` (filter selebar baris dan
+tabel kosong), `crud-produk` (tab Stok Kritis), dan `buat-reservasi`
+(pemilih pelanggan dan aset); ketiganya terbukti gagal terhadap kode lama.
+Selektor teks pemilih di `buat-reservasi` dan `pemilih-pelanggan`
+mengikuti teks baru. Folder `inventaris/pembelianStok`, `crud-produk`,
+`buat-reservasi`, dan `pemilih-pelanggan` 44 lolos per berkas, tanpa OTP,
+setelah dev server dimulai ulang dengan `.next/dev` dibersihkan. Harapan
+suite penuh 656: 653 ditambah ketiga skenario itu.
+
 **Baseline per luberan tabel 768 px** (17 November 2026, backend `ridho`
 lokal `4a19be8`): vitest 1132 lolos (4 unit test baru
 `tests/unit/components/kartu-bila-tak-muat.test.ts`; dua asersi nama kelas

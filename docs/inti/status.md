@@ -137,8 +137,8 @@ Dilanjutkan nanti atas perintah pemilik proyek, tidak sekarang:
    (`inti/pengujian.md`, Baseline).
 2. **Luberan tabel daftar di 768 px**: selesai 17 November 2026 lewat
    kanvas desain, kartu bila tabel tidak muat (`modul/ui-ux.md`, LT1a
-   sampai LT5a). Temuan baru di 390 px (Pembelian Stok, Produk, Buat
-   Reservasi) dicatat di Utang terbuka modul itu.
+   sampai LT5a). Temuan lanjutan di 390 px (Pembelian Stok, Produk,
+   Buat Reservasi) selesai pada hari yang sama (LT7a sampai LT10a).
 3. **Kode mati pesan lokasi jurnal stok gudang**: hapus atau biarkan
    (`modul/ui-ux.md`, Utang terbuka).
 
