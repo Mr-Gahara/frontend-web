@@ -12,6 +12,17 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per tur ruang gudang** (17 November 2026, TG1a dan TG2a):
+vitest 1137 lolos (2 unit test titik gudang). `panduan-dashboard`
+diperbarui: langkah gudang kini memeriksa tur gudang tampil sendiri
+sekali dengan enam titik dan kunci terpisah dari outlet, dan skenario
+baru Setup Gudang tanpa tombol dan tanpa tur (satu `// simulasi:`:
+respons nyata `GET /location` disaring dari Gudang, karena akun uji sudah
+punya Gudang); skenario itu terbukti gagal tanpa penjaga setup.
+`panduan-dashboard`, `dashboard-gudang`, folder `gudang`, dan
+`lonceng-pemberitahuan` 23 lolos per berkas, tanpa OTP. Harapan suite
+penuh 657: 656 ditambah skenario Setup Gudang.
+
 **Suite penuh per luberan tabel dan kode mati gudang** (web `f1835d1`,
 backend `ridho` lokal `4a19be8`, 17 November 2026, pukul 10.37 sampai
 11.14 WIB, reporter `line,json`, charger tersambung, atas izin pemilik

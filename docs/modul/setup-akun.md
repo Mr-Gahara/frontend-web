@@ -221,7 +221,22 @@ Mesinnya mengikuti keputusan rancangan butir 32.
   pertama kali membuka ruang outlet di perangkat itu (kunci per id
   pengguna). Di HP sidebar dibuka untuk titik menu dan ditutup lagi saat
   tur selesai. Ruang gudang belum punya tur, sehingga tombolnya tidak
-  tampil di sana.
+  tampil di sana (sampai TG1a).
+- **TG1a: tur dashboard ruang gudang** (pemilik proyek, 17 November
+  2026): tombol "Lihat panduan dashboard" yang sama di topbar ruang
+  gudang, tur tampil sendiri saat pertama kali membuka ruang gudang di
+  perangkat itu dengan kunci `dashboard-gudang.<id pengguna>`, terpisah
+  dari outlet. Enam titik: tombol menu (teks sama dengan outlet), Barang
+  Gudang "Kelola barang gudang", Pengajuan Stok "Tinjau pengajuan
+  outlet", Transfer Stok "Kirim barang ke outlet", Petugas Gudang
+  "Tambahkan petugas gudang", dan Pengaturan Gudang "Pengaturan gudang"
+  (`components/panduan/titik-dashboard.ts`). Titik menu yang tidak tampil
+  menurut izin tidak dimasukkan, dan di HP sidebar dibuka untuk titik
+  menu. Pengiriman, Penerimaan, dan jadwal sengaja tidak masuk tur.
+- **TG2a: tur gudang tidak tampil di Setup Gudang**: di
+  `/dashboard/gudang/setup` tombol dan tur otomatis tidak tampil, karena
+  menu gudang mengalihkan kembali ke setup selama Gudang belum
+  terdaftar; tur pertama kali tampil setelah Gudang terdaftar.
 
 ### OTP aksi Owner
 
@@ -625,7 +640,8 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
   `daf9e3a`.
 - Ruang gudang belum punya tur (PN4a). Menunya berbeda dari ruang outlet
   (Petugas Gudang, Pengaturan Gudang), sehingga titik dan teksnya
-  diajukan ke pemilik proyek lebih dulu.
+  diajukan ke pemilik proyek lebih dulu. Selesai 17 November 2026 (TG1a,
+  TG2a).
 - Langkah jam buka belum punya tur, karena teksnya belum diusulkan.
   Selesai di `0c4cc7e` (JB9a).
 - Pemakaian jam buka di shift dan jadwal belum diputuskan pemilik proyek

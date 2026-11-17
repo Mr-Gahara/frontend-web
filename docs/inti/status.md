@@ -277,7 +277,8 @@ Penanda dan tur sorotan wizard serta dashboard selesai di `58d7eb9`,
 tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 
 - Ruang gudang dan langkah jam buka belum punya tur
-  (`modul/setup-akun.md`, Utang terbuka).
+  (`modul/setup-akun.md`, Utang terbuka). Keduanya selesai: jam buka
+  16 November 2026 (JB9a), ruang gudang 17 November 2026 (TG1a, TG2a).
 
 ### Utang kecil dari perbaikan HP Keuangan
 

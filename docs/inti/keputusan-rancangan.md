@@ -346,7 +346,8 @@ sama (submodul pengajuan stok, di bawah).
     `request.newContext()` di dalam test; hanya spec tur yang
     mengosongkannya. Contoh: tur wizard setup dan dashboard outlet
     (pemilik proyek, 7 November 2026, `aa3c1c6`, `c8a2e83`,
-    `5c3da45`).
+    `5c3da45`), dan dashboard ruang gudang dengan kunci sendiri
+    (`modul/setup-akun.md`, TG1a).
 33. **Data di klien milik satu akun dan satu pengguna.** Logout hanya
     berpindah halaman, sehingga apa pun yang disimpan di memori tab
     (cache React Query, state modul, provider) bertahan sampai identitas
