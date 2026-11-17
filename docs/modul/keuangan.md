@@ -401,6 +401,33 @@ Diputuskan pemilik proyek pada 8 November 2026
 - **LR2a: halaman arus kas menunggu desain pemilik proyek** (B291,
   `inti/status.md`).
 
+### Laman Pembayaran per Metode
+
+Diputuskan pemilik proyek pada 17 November 2026, dari tiga desain kanvas
+"Pembayaran per Metode" (A seperti Arus Kas, B seperti kartu grafik
+Laba/Rugi, C dibanding periode lalu), dengan data nyata 1 sampai
+17 November 2026. Menutup OM1a; datanya `ringkasan.pembayaranPerMetode`
+di `GET /laporan/laba-rugi` (B329): uang diterima per metode, termasuk
+pajak, bukan pembagian omzet.
+
+- **OM2a: desain B** di `/dashboard/outlet/keuangan/pembayaranMetode`
+  (`features/laporan/halaman-pembayaran-metode.tsx`), menu "Pembayaran
+  per Metode" di bawah Laporan setelah Arus Kas, izin `read-laporan`.
+  Kartu krem berikon karamel dengan pilihan Hari Ini, Minggu Ini, Bulan
+  Ini (bawaan), dan Pilih tanggal; total besar dan jumlah pembayaran;
+  cincin porsi dengan legenda; lalu "Rincian metode" berupa `DataTable`
+  rincian dan catatan bukan pembagian omzet.
+- **OM3a: rincian penerapan** (disetujui sebagai satu paket): periode
+  sama dengan Ringkasan Laba/Rugi (Minggu Ini sejak Senin, Bulan Ini
+  sejak tanggal 1); Pilih tanggal menampilkan Dari dan Sampai yang terisi
+  awal bulan sampai hari ini, paling panjang 366 hari (batas backend);
+  warna cincin berurutan sage, navy, karamel, pasir, sage-muda,
+  cokelat-abu lalu berulang; metode tanpa nama tampil "Metode tanpa
+  nama"; tanpa pembayaran tampil Rp 0 dan "Belum ada pembayaran pada
+  periode ini." tanpa cincin dan tabel; di HP pilihan periode dua kolom,
+  cincin di atas legenda, dan tabel menjadi kartu berlabel; memuat dan
+  gagal sama dengan kartu Laba/Rugi.
+
 ### Halaman arus kas
 
 Diputuskan pemilik proyek pada 12 November 2026, dari lima desain kanvas

@@ -166,10 +166,10 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 3. **Halaman arus kas** (B291, LR2a): selesai 12 November 2026, tab
    Keuangan "Arus Kas" dengan desain D pemilik proyek (`modul/keuangan.md`,
    LR3a sampai LR6a).
-4. **Omzet per metode pembayaran di laporan** (OM1a): endpoint tersedia
-   sejak backend `4a19be8` (B329, `ringkasan.pembayaranPerMetode` di laba
-   rugi, berarti uang diterima per metode, bukan omzet); menunggu desain
-   pemilik proyek (`kontrak/temuan.md` butir 180).
+4. **Omzet per metode pembayaran di laporan** (OM1a): selesai
+   17 November 2026 sebagai laman Pembayaran per Metode, desain B dari
+   tiga desain kanvas (`modul/keuangan.md`, OM2a dan OM3a; uang diterima
+   per metode dari B329, bukan omzet).
 5. **Stok keluar di detail penjualan, termasuk yang VOID** (VD3a):
    selesai 12 November 2026 (`modul/penjualan.md`, VD4a sampai VD10a).
 6. **Modul membership web** (paket dan pendaftaran member), syarat
