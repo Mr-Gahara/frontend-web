@@ -31,17 +31,19 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useKartuBilaTakMuat } from "@/components/ui/use-kartu-bila-tak-muat";
 
 /**
  * Di HP tiap baris menjadi satu kartu dan selnya tersusun ke bawah
- * (keputusan TB1a). Kelas ber-first dan ber-last menimpa bingkai kartu
+ * (keputusan TB1a); di lebar meja juga bila tabel tidak muat di wadahnya
+ * (LT1a, varian kartu: dan tabel: di app/globals.css). Kelas ber-first dan ber-last menimpa bingkai kartu
  * per sel milik TableCell, yang hanya berlaku di lebar meja.
  */
 const KELAS_BARIS_HP =
-  "max-sm:relative max-sm:mb-2 max-sm:flex max-sm:flex-col max-sm:gap-1.5 max-sm:rounded-2xl max-sm:border max-sm:border-navy/10 max-sm:bg-[var(--warna-baris,var(--permukaan))] max-sm:p-3";
+  "kartu:relative kartu:mb-2 kartu:flex kartu:flex-col kartu:gap-1.5 kartu:rounded-2xl kartu:border kartu:border-navy/10 kartu:bg-[var(--warna-baris,var(--permukaan))] kartu:p-3";
 const KELAS_SEL_HP =
-  "max-sm:block max-sm:border-0 max-sm:bg-transparent max-sm:p-0 max-sm:whitespace-normal max-sm:first:border-l-0 max-sm:first:rounded-none max-sm:first:pr-10 max-sm:first:text-besar max-sm:first:font-bold max-sm:last:border-r-0 max-sm:last:rounded-none";
-const KELAS_AKSI_HP = "max-sm:absolute max-sm:right-2 max-sm:top-2";
+  "kartu:block kartu:border-0 kartu:bg-transparent kartu:p-0 kartu:whitespace-normal kartu:first:border-l-0 kartu:first:rounded-none kartu:first:pr-10 kartu:first:text-besar kartu:first:font-bold kartu:last:border-r-0 kartu:last:rounded-none";
+const KELAS_AKSI_HP = "kartu:absolute kartu:right-2 kartu:top-2";
 
 /** Label kecil sel di HP: meta.label kolom, atau header bila berupa teks. */
 function labelKolom(kolom: { meta?: unknown; header?: unknown }): string | null {
@@ -61,7 +63,7 @@ function gayaBungkus(kolom: { meta?: unknown }): React.CSSProperties | undefined
   return typeof lebar === "number" ? ({ "--lebar-bungkus": `${lebar}px` } as React.CSSProperties) : undefined;
 }
 
-const KELAS_BUNGKUS = "sm:whitespace-normal sm:max-w-(--lebar-bungkus) sm:[&_*]:whitespace-normal";
+const KELAS_BUNGKUS = "tabel:whitespace-normal tabel:max-w-(--lebar-bungkus) tabel:[&_*]:whitespace-normal";
 
 /** Paginasi dari server: angka dan aksi footer datang dari pemakai tabel. */
 export interface PaginasiServerTabel {
@@ -163,9 +165,12 @@ export function DataTable<TData, TValue>({
   const gantiUkuran = server
     ? server.onGantiUkuran
     : (ukuran: number) => table.setPagination({ pageIndex: 0, pageSize: ukuran });
+  const { ref: refTabel, kartu } = useKartuBilaTakMuat(
+    `${table.getRowModel().rows.length}:${halamanKini}:${ukuranKini}:${loading}:${columns.length}`,
+  );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div ref={refTabel} data-kartu={kartu ? "" : undefined} className="flex flex-col gap-4">
 
       {/* Toolbar */}
       {searchKey && (
@@ -181,8 +186,8 @@ export function DataTable<TData, TValue>({
       )}
 
       {/* Tiap baris adalah kartu terpisah (TB1a); di HP kepala kolom disembunyikan dan sel tersusun ke bawah. */}
-      <Table className="max-sm:block">
-        <TableHeader className="max-sm:hidden">
+      <Table className="kartu:block">
+        <TableHeader className="kartu:hidden">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
@@ -195,7 +200,7 @@ export function DataTable<TData, TValue>({
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody className="max-sm:block">
+        <TableBody className="kartu:block">
           {loading ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-32 text-center text-isi text-navy/60">
@@ -226,7 +231,7 @@ export function DataTable<TData, TValue>({
                       )}
                     >
                       {label && (
-                        <span className="sm:hidden block text-mikro font-semibold text-navy/60">
+                        <span className="tabel:hidden block text-mikro font-semibold text-navy/60">
                           {label}
                         </span>
                       )}

@@ -207,7 +207,7 @@ export default function HalamanDaftarPenjualan({
         accessorKey: "tanggalTransaksi",
         header: ({ column }) => <KepalaUrut column={column} judul="Tanggal" className="hidden sm:inline-flex" />,
         cell: ({ row }) => (
-          <span className="text-kecil sm:text-isi font-medium text-navy/70 hidden sm:inline">
+          <span className="text-kecil sm:text-isi font-medium text-navy/70 hidden tabel:inline">
             {formatTanggal(row.original.tanggalTransaksi)}
           </span>
         ),
@@ -223,7 +223,7 @@ export default function HalamanDaftarPenjualan({
         cell: ({ row }) => (
           <TeksDuaBaris
             teks={row.original.dataPelanggan?.namaPelanggan ?? "-"}
-            className="max-md:hidden text-isi font-medium text-navy/80 capitalize"
+            className="max-md:hidden kartu:hidden text-isi font-medium text-navy/80 capitalize"
           />
         ),
       },

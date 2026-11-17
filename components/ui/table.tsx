@@ -57,7 +57,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "[&:has(>td)]:[filter:drop-shadow(0_1px_1px_color-mix(in_srgb,var(--navy)_14%,transparent))] sm:[&:hover>td]:bg-krem [&[data-state=selected]>td]:bg-krem",
+        "[&:has(>td)]:[filter:drop-shadow(0_1px_1px_color-mix(in_srgb,var(--navy)_14%,transparent))] tabel:[&:hover>td]:bg-krem [&[data-state=selected]>td]:bg-krem",
         className
       )}
       {...props}

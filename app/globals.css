@@ -103,6 +103,27 @@ a {
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Tampilan kartu DataTable (LT1a): di HP (di bawah 640 px), atau di dalam
+ * [data-kartu] yang dipasang DataTable saat tabelnya lebih lebar dari
+ * wadah. `tabel:` adalah kebalikannya: lebar meja dan tidak dalam mode kartu.
+ */
+@custom-variant kartu {
+  @media (width < 40rem) {
+    @slot;
+  }
+  &:where([data-kartu] *) {
+    @slot;
+  }
+}
+@custom-variant tabel {
+  @media (width >= 40rem) {
+    &:not(:where([data-kartu] *)) {
+      @slot;
+    }
+  }
+}
+
 /* Chrome, Safari, Edge, Opera */
 input.no-spinner::-webkit-outer-spin-button,
 input.no-spinner::-webkit-inner-spin-button {

@@ -73,7 +73,7 @@ export function HalamanPelanggan() {
   const columns: ColumnDef<Pelanggan>[] = [
     {
       accessorKey: "namaPelanggan",
-      meta: { label: "Nama Pelanggan" },
+      meta: { label: "Nama Pelanggan", lebarBungkus: 180 },
       header: ({ column }) => (
         <Button
           variant="ghost"

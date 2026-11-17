@@ -81,16 +81,16 @@ describe("DataTable, kartu HP dan tabel rincian", () => {
   it("label kartu HP dari header teks dan meta.label, tidak untuk header komponen tanpa meta", () => {
     render(<DataTable columns={kolomItem} data={items.slice(0, 1)} />);
     const sel = within(barisTubuh()[0]).getAllByRole("cell");
-    expect(sel[0].querySelector("span.sm\\:hidden")).toHaveTextContent("Nama");
-    expect(sel[1].querySelector("span.sm\\:hidden")).toHaveTextContent("Jumlah");
-    expect(sel[2].querySelector("span.sm\\:hidden")).toBeNull();
+    expect(sel[0].querySelector("span.tabel\\:hidden")).toHaveTextContent("Nama");
+    expect(sel[1].querySelector("span.tabel\\:hidden")).toHaveTextContent("Jumlah");
+    expect(sel[2].querySelector("span.tabel\\:hidden")).toBeNull();
   });
 
   it("meta.lebarBungkus memasang lebar maksimum dan kelas bungkus pada selnya saja", () => {
     render(<DataTable columns={kolomItem} data={items.slice(0, 1)} />);
     const sel = within(barisTubuh()[0]).getAllByRole("cell");
     expect(sel[1].style.getPropertyValue("--lebar-bungkus")).toBe("120px");
-    expect(sel[1].className).toContain("sm:whitespace-normal");
+    expect(sel[1].className).toContain("tabel:whitespace-normal");
     expect(sel[0].style.getPropertyValue("--lebar-bungkus")).toBe("");
   });
 
