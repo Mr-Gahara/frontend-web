@@ -173,7 +173,9 @@ Butir yang butuh UI baru tidak dikerjakan dulu (pemilik proyek, 5 dan
 5. **Stok keluar di detail penjualan, termasuk yang VOID** (VD3a):
    selesai 12 November 2026 (`modul/penjualan.md`, VD4a sampai VD10a).
 6. **Modul membership web** (paket dan pendaftaran member), syarat
-   menawarkan diskon khusus member (NZ6a, `modul/pelanggan-diskon.md`).
+   menawarkan diskon khusus member (NZ6a): selesai 17 November 2026,
+   desain B kanvas "Modul Membership" (`modul/pelanggan-diskon.md`, MB1a
+   sampai MB3a); khusus member ditawarkan lagi di form diskon.
 
 ### Menunggu keputusan pemilik proyek
 
@@ -371,7 +373,7 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
   7 November 2026 tidak memuat satu pun status Batal, sehingga timeline
   tidak dapat menampilkannya (`kontrak/temuan.md` butir 141).
 - Khusus member belum ditawarkan di form diskon (NZ6a); ditinjau bersama
-  modul membership.
+  modul membership. Selesai 17 November 2026 (MB1a).
 - Mutasi transfer di buku mutasi tidak bertaut ke riwayat Pindah Dana,
   karena riwayat itu tidak punya halaman per transfer.
 

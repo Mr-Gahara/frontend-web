@@ -94,6 +94,10 @@ data disilang dengan seed lebih dulu, lalu diselaraskan dengan urutan ini
    karena koneksi hanya dibuka bila berkasnya dijalankan langsung),
    bukan dari pola teks: sebagian entri ditulis satu baris, dan pola
    `nama:` di awal baris pernah melewatkan 28 nama (21 Oktober 2026).
+   Role Owner dicari dengan nama persis (`/^owner$/i`): peran uji
+   bernama "E2E … Bukan Owner" ikut cocok dengan pola `/owner/i` dan
+   pernah membuat izin membership Owner tampak belum ada (17 November
+   2026).
 2. Nama yang dikeluarkan dari seed dilepas dari role (`$pull`) lalu
    dihapus, hanya bila daftar di luar seed sama dengan nama yang
    diharapkan, agar permission kustom tidak ikut terhapus. Sejak backend

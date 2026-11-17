@@ -12,6 +12,18 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per modul membership** (17 November 2026, MB1a sampai MB3a):
+vitest 1159 lolos (12 unit test membership, 2 unit test diskon khusus
+member). Spec baru `pelanggan/membership.spec.ts` (5 skenario: paket
+tambah, ubah, nonaktifkan, dan hapus lewat dialog; daftarkan dari
+penjualan nyata, ubah tanggal mulai, lencana laman Pelanggan, dan hapus;
+centang khusus member; HP 390 px; pengguna baca-saja) lolos 10 dari 10
+dengan `--repeat-each 2`, tanpa OTP. Data uji dibuat lewat UI dan
+dibersihkan di akhir, sehingga penjualan yang dipakai kembali tersedia.
+Folder `pelanggan`, `diskon`, `auth/gerbang-rute`, dan
+`auth/sidebar-pengguna` lolos per berkas. Harapan suite penuh 666: 661
+ditambah kelima skenario itu.
+
 **Baseline per laman Pembayaran per Metode** (17 November 2026, OM2a dan
 OM3a): vitest 1145 lolos (8 unit test `pembayaran-metode`; dua harapan
 sub-menu Laporan di `sidebar-menu-keuangan` menjadi tiga anak). Spec baru

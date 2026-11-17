@@ -54,7 +54,8 @@ rancangan butir 17, 21, dan 23. PD1a dan PD5a diterapkan di `d9365d3`
   Dipertahankan setelah izin membership masuk seed (NZ6a), dan sekali
   lagi pada 10 November 2026 walau backend sudah memperbaiki butir 108:
   khusus member ditawarkan setelah web punya modul membership, yang
-  menunggu desain pemilik proyek (`inti/status.md`).
+  menunggu desain pemilik proyek (`inti/status.md`). Dibuka 17 November
+  2026 bersama modul membership (MB1a).
 - **PD9a: aturan berada di bagian Aturan tambahan yang dapat dibuka dan
   ditutup**, terbuka sendiri bila diskon sudah punya aturan atau ada
   isian aturan yang ditolak. Enam isian dasar tetap seperti semula.
@@ -79,6 +80,39 @@ rancangan butir 17, 21, dan 23. PD1a dan PD5a diterapkan di `d9365d3`
   dan update (butir 14); isian jam diberi keterangan WIB (butir 109);
   syarat yang bergantung pada transaksi tampil di bawah nama diskon pada
   pilihan kasir; dan tampilan serta teks lama dipertahankan.
+
+### Modul membership
+
+Diputuskan pemilik proyek pada 17 November 2026, dari kanvas desain
+"Modul Membership" (tiga desain lengkap dengan alur desktop, HP 390 px,
+dan tablet 768 px). Backend: `/api/membership` (Nizar) dan
+`/api/paketmembership` (Ridho) di `4a19be8`; membership tidak dibatasi
+plan.
+
+- **MB1a: laman Membership desain B** di `/dashboard/outlet/membership`
+  (`features/membership/`), menu "Membership" di Manajemen & Relasi
+  setelah Pelanggan, tab Member dan Paket. Alur daftar memilih penjualan
+  yang sudah ada, karena backend mewajibkan satu penjualan per membership
+  (milik pelanggan yang sama, bukan VOID) dan tidak menautkan paket ke
+  produk maupun harga. Aksi lewat dialog (lembar layar penuh di HP);
+  tabel member bersaringan Semua, Aktif, Kadaluarsa; paket berupa kartu
+  dengan kartu "Tambah Paket" bergaris putus; toko tanpa paket melihat
+  ajakan membuat paket. Diskon khusus member ditawarkan lagi di form
+  diskon, membuka PD8a.
+- **MB2a: rincian penerapan** (disetujui sebagai satu paket): izin per
+  tab dan per tombol (`features/membership/izin.ts`; daftarkan juga
+  menuntut baca pelanggan, paket, dan penjualan); daftar member dimuat
+  utuh, cari dan saringan di klien; dialog Daftarkan tanpa pelanggan
+  bawaan, 50 penjualan terbaru per muatan dengan "Muat lebih banyak", VOID
+  dan yang sudah dipakai disembunyikan; dialog Ubah mengunci pelanggan dan
+  penjualan, karena backend hanya menerima paket dan tanggal mulai; menu
+  member Ubah dan Hapus; menu paket Ubah, Nonaktifkan atau Aktifkan, dan
+  Hapus (409 backend ditampilkan apa adanya).
+- **MB3a: status membership di laman Pelanggan**: lencana "Member s.d.
+  <tanggal>" di bawah tipe bagi pelanggan dengan membership Aktif, hanya
+  bagi pemegang `read-membership`. Field tipe yang diisi manual dan kartu
+  "Pelanggan Member" tidak berubah. Kolom Tipe dibungkus 150 px dan nama
+  140 px agar tabel tetap muat di 1280 px (LT1a).
 
 ## Catatan
 

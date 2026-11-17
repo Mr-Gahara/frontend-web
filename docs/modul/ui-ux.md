@@ -355,7 +355,8 @@ yang muat di 1280 px ada yang lebih sempit (rincian Pengajuan dan Transfer
   menjadi kartu di 768 px, tidak ada tabel meluber di 768, 1024, dan
   1280 px.
 - **LT2a: kolom nama Pelanggan dibungkus 180 px**, agar tetap tabel di
-  1024 dan 1280 px (sebelumnya 590 px di wadah 584 px).
+  1024 dan 1280 px (sebelumnya 590 px di wadah 584 px). Sejak MB3a nama
+  140 px dan Tipe 150 px, karena lencana membership ikut di kolom Tipe.
 - **LT3a: baris filter Pengajuan Stok outlet boleh turun baris** mulai
   640 px, dan deretan tab selebar wadah lalu digeser di dalamnya.
 - **LT4a: baris cari dan Masukkan Master Data Barang Gudang boleh turun
