@@ -103,10 +103,11 @@ test.describe("Jurnal stok", () => {
   });
 
   test("gudang: lokasi yang gagal dimuat ditangani layout ruang gudang sebelum halaman jurnal", async ({ page }) => {
-    // Pesan "Gagal Memuat Lokasi Gudang" dan "Gudang Belum Didaftarkan" di
-    // app/dashboard/gudang/jurnalStok/page.tsx tidak pernah tampil: layout
-    // ruang gudang memuat daftar lokasi yang sama dan menghadang lebih dulu
-    // (temuan 14 November 2026).
+    // Halaman jurnal stok dan pembelian stok gudang tidak lagi punya pesan
+    // lokasi sendiri ("Gagal Memuat Lokasi Gudang", "Gudang Belum
+    // Didaftarkan"), karena layout ruang gudang memuat daftar lokasi yang
+    // sama dan menghadang lebih dulu (temuan 14 November 2026, dihapus
+    // 17 November 2026, KM1a).
     const polaLokasi = /\/api\/location(\?|$)/i;
     await page.route(polaLokasi, (route) =>
       route.request().method() === "GET"
