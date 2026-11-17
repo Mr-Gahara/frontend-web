@@ -130,9 +130,11 @@ Dilanjutkan nanti atas perintah pemilik proyek, tidak sekarang:
 1. **Suite e2e penuh**: dijalankan 16 November 2026, 646 lolos, 4 gagal,
    dan 2 dilewati dari 652 (`inti/pengujian.md`, Baseline). Satu gagal
    karena laptop tidur dan lolos saat diulang; tiga gagal sungguhan
-   (`akses/jalur-bukan-owner` dan dua skenario
-   `lihat-stock-adjustment`) ditelusuri di putaran berikutnya, lalu
-   dibuktikan lewat spec terdampak saja.
+   selesai ditelusuri 17 November 2026 dan dibuktikan lewat spec
+   terdampak saja: label kartu HP ikut terbaca di
+   `lihat-stock-adjustment` (`25b969c`), dan perpindahan halaman di
+   tengah `pin-refresh` di `akses/jalur-bukan-owner` (`f80bd16`)
+   (`inti/pengujian.md`, Baseline).
 2. **Luberan tabel daftar di 768 px** (hampir 20 tabel): pilih batas
    kartu `DataTable` atau kolom per tabel (`modul/ui-ux.md`, Utang
    terbuka).

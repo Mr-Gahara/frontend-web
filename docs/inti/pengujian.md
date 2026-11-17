@@ -28,18 +28,25 @@ Termasuk spec ber-OTP. Laptop ditangguhkan karena baterai lemah pukul
   terpotong masa tidur; dijalankan ulang sendirian lolos 1.
 - `akses/jalur-bukan-owner` (tanpa izin baca shift, pola roster, dan
   jadwal: "Akses ditolak" tidak tampil), 20.59: gagal sungguhan, sebelum
-  laptop tidur. Lolos saat spec terdampak per berkas siang harinya,
-  sehingga dugaan pertama urutan spec atau perubahan jadwal `fddb3c6`;
-  belum ditelusuri.
+  laptop tidur, dan bukan karena urutan spec atau `fddb3c6`. Halaman
+  berakhir di login pengguna: spec berpindah halaman selagi
+  `pin-refresh` dokumen sebelumnya berjalan, karena "Dashboard" di
+  sidebar tampil sebelum sesi pulih sehingga pemeriksaan ketiadaan menu
+  lolos tanpa bukti. Backend sudah memutar `tokenVersion`, cookie
+  barunya tidak tersimpan, dan dokumen berikutnya ditolak "Sesi tidak
+  valid." Dibuktikan 17 November 2026 dengan repro deterministik (spec
+  sementara, 3 dari 3) dan diperbaiki lewat jangkar positif di
+  `f80bd16`; berkas spec `--repeat-each 10` 40 lolos.
 - `inventaris/stockAdjustment/lihat-stock-adjustment` (kolom sumber dan
   detail), 21.12: gagal sungguhan. Teks sel terbaca "SumberStock Opname
-  ..." dan "Fisik Riil90", yaitu label kartu HP tabel rincian (CV22a,
-  CV23a, `eb64c70`) ikut terbaca `toHaveText`; dugaan spec yang perlu
-  membaca nilai saja. Belum ditelusuri.
+  ..." dan "Fisik Riil90": label kartu HP `DataTable` (`sm:hidden`)
+  ikut terbaca, karena `toHaveText` membaca `textContent`. Diperbaiki
+  17 November 2026 dengan `useInnerText` di `25b969c`; spec terdampak
+  tereproduksi 2 gagal, sesudahnya kedua skenario lolos.
 
-Vitest 1128 lolos. Penelusuran ketiga kegagalan dan pembuktiannya lewat
-spec terdampak saja dilanjutkan di putaran berikutnya (pemilik proyek,
-16 November 2026).
+Vitest 1128 lolos. Ketiga kegagalan ditelusuri dan dibuktikan lewat spec
+terdampak saja pada 17 November 2026, tanpa suite penuh dan tanpa OTP.
+Harapan suite penuh berikutnya tetap 652.
 
 **Baseline per penyesuaian backend `4a19be8`** (web `6ab81aa`, backend
 `ridho` lokal `4a19be8`, 16 November 2026, sesudah migrasi
@@ -265,6 +272,7 @@ Pola kegagalan yang berulang:
 | Klik tanggal kalender kena dua elemen (`strict mode violation`) untuk hari 22 sampai 31 | Grid kalender juga menampilkan tanggal bulan sebelumnya; pilih lewat `button[data-day="M/D/YYYY"]`, seperti `pilihTanggalKalender` di `tests/helpers/jadwal-uji.ts` (`2bcb1ce`) |
 | Skenario `skipped` padahal data ujinya ada, sejak daftarnya berhalaman di server | Spec mencari data uji di respons pertama daftar, yang kini hanya satu halaman. Cari lewat query server (isi kotak cari lalu tunggu respons ber-`cari`), dan baca harapan dari `pagination.total` (skenario P18 bahan baku, 16 November 2026, `6ab81aa`) |
 | Gagal beberapa detik setelah jeda panjang di tengah suite, waktu habis menunggu URL atau elemen | Laptop ditangguhkan karena baterai lemah; `systemd-inhibit --what=idle:sleep` tidak menahannya. Cocokkan waktu `error-context.md` (`date -r`) dengan `journalctl -b \| grep -E "suspend\|resum"`; jalankan suite dengan charger tersambung (16 November 2026) |
+| Pengguna uji berakhir di "Siapa yang bertugas?" sesekali, dan backend mencatat `pin-refresh` 401 "Sesi tidak valid." tanpa rotasi lain di log | Spec berpindah halaman selagi `pin-refresh` dokumen sebelumnya berjalan: backend sudah memutar `tokenVersion`, tetapi cookie barunya tidak tersimpan. Pemicunya pemeriksaan ketiadaan (`toHaveCount(0)`) yang lolos sebelum izin terbaca, karena layout dan "Dashboard" di sidebar tampil sebelum sesi pulih. Dahului setiap `goto` dengan jangkar positif berizin. Logger PERF backend hanya mencatat pada `finish`, sehingga permintaan yang terpotong tidak tampak. Repro: `route.fetch`, kembalikan cookie lama, `route.abort`, lalu `goto` (`f80bd16`) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena
