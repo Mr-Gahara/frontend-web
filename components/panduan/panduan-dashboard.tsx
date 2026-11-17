@@ -5,8 +5,9 @@ import { CircleHelp } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { bolehLihatMenu, gudangMenus, outletMenus } from "@/components/sidebar-menu";
 import { useSession } from "@/lib/auth/useSession";
+import { useAksesGudang } from "@/features/inventaris/use-akses-gudang";
 import { TurSorotan, usePanduan } from "./tur-sorotan";
-import { TARGET_MENU_UTAMA, titikDashboard } from "./titik-dashboard";
+import { kunciPanduanDashboard, TARGET_MENU_UTAMA, titikDashboard } from "./titik-dashboard";
 
 const MENU_RUANG = {
   outlet: outletMenus.flatMap((g) => g.items),
@@ -27,11 +28,18 @@ export function TombolPanduanDashboard() {
   const { pengguna, plan, permissions } = useSession();
   const { isMobile, setOpenMobile } = useSidebar();
   const ruang = pathname.startsWith("/dashboard/gudang") ? "gudang" : "outlet";
-  const kunci = ruang === "gudang" ? "dashboard-gudang." : "dashboard.";
   // Di Setup Gudang menu gudang mengalihkan kembali ke setup, sehingga tur
   // tidak tampil di sana dan baru tampil setelah Gudang terdaftar (TG2a).
   const diSetupGudang = pathname.startsWith("/dashboard/gudang/setup");
-  const { buka, mulai, tutup } = usePanduan(pengguna && !diSetupGudang ? kunci + pengguna.id : null);
+  const { akses: aksesGudang } = useAksesGudang(pathname, ruang === "gudang");
+  const { buka, mulai, tutup } = usePanduan(
+    kunciPanduanDashboard({
+      penggunaId: pengguna?.id ?? null,
+      ruang,
+      diSetupGudang,
+      gudangDiizinkan: aksesGudang === "izinkan",
+    }),
+  );
   const titik = titikDashboard(
     (href) => {
       const menu = MENU_RUANG[ruang].find((m) => m.href === href);

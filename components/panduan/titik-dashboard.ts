@@ -99,3 +99,21 @@ export function titikDashboard(
     ),
   ];
 }
+/**
+ * Kunci tur dashboard, atau null bila tur belum boleh berjalan. Ruang gudang
+ * menunggu penjaganya mengizinkan ruang dibuka: selagi lokasi dimuat topbar
+ * sudah terpasang, dan tur yang terbuka di balik pemuat lalu dilepas oleh
+ * pengalihan ke Setup Gudang tercatat sudah dilihat sebelum Gudang terdaftar
+ * (TG2a; suite penuh 17 November 2026). Di Setup Gudang tur tidak tampil.
+ */
+export function kunciPanduanDashboard(m: {
+  penggunaId: string | null;
+  ruang: RuangPanduan;
+  diSetupGudang: boolean;
+  gudangDiizinkan: boolean;
+}): string | null {
+  if (!m.penggunaId) return null;
+  if (m.ruang === "outlet") return "dashboard." + m.penggunaId;
+  if (m.diSetupGudang || !m.gudangDiizinkan) return null;
+  return "dashboard-gudang." + m.penggunaId;
+}

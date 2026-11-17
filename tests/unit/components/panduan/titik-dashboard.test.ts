@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { HREF_TITIK_MENU, HREF_TITIK_MENU_GUDANG, TARGET_MENU_UTAMA, targetMenu, titikDashboard } from "@/components/panduan/titik-dashboard";
+import {
+  HREF_TITIK_MENU,
+  HREF_TITIK_MENU_GUDANG,
+  kunciPanduanDashboard,
+  TARGET_MENU_UTAMA,
+  targetMenu,
+  titikDashboard,
+} from "@/components/panduan/titik-dashboard";
 
 const semua = () => true;
 
@@ -52,5 +59,22 @@ describe("titik tur dashboard ruang gudang (TG1a)", () => {
     expect(t.map((x) => x.target)).not.toContain(targetMenu("/dashboard/gudang/pengguna"));
     expect(t.some((x) => x.target.includes("/dashboard/outlet/"))).toBe(false);
     expect(t).toHaveLength(5);
+  });
+});
+
+describe("kunci tur dashboard", () => {
+  const dasar = { penggunaId: "p1", diSetupGudang: false, gudangDiizinkan: false };
+
+  it("ruang outlet tidak menunggu penjaga gudang; tanpa pengguna tidak ada tur", () => {
+    expect(kunciPanduanDashboard({ ...dasar, ruang: "outlet" })).toBe("dashboard.p1");
+    expect(kunciPanduanDashboard({ ...dasar, penggunaId: null, ruang: "outlet" })).toBeNull();
+  });
+
+  it("ruang gudang menunggu penjaga mengizinkan, dan tidak tampil di Setup Gudang (TG2a)", () => {
+    expect(kunciPanduanDashboard({ ...dasar, ruang: "gudang" })).toBeNull();
+    expect(kunciPanduanDashboard({ ...dasar, ruang: "gudang", gudangDiizinkan: true })).toBe("dashboard-gudang.p1");
+    expect(
+      kunciPanduanDashboard({ ...dasar, ruang: "gudang", gudangDiizinkan: true, diSetupGudang: true }),
+    ).toBeNull();
   });
 });
