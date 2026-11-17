@@ -144,8 +144,9 @@ interface Props {
 /**
  * Bagian Aturan tambahan form diskon (keputusan PD3a dan PD9a): dapat
  * dibuka dan ditutup, terbuka sendiri bila diskon sudah punya aturan atau
- * ada isian aturan yang ditolak. Khusus member tidak ditawarkan (PD8a);
- * diskon yang sudah ditandai hanya diberi keterangan.
+ * ada isian aturan yang ditolak. Khusus member ditawarkan lagi sejak modul
+ * membership (MB1a, membuka PD8a); backend menolaknya untuk pelanggan tanpa
+ * membership berlaku.
  */
 export function IsianAturanDiskon({ register, control, errors, diskon }: Props) {
   const cakupan = useWatch({ control, name: "cakupan" });
@@ -373,12 +374,25 @@ export function IsianAturanDiskon({ register, control, errors, diskon }: Props) 
           />
         )}
 
-        {diskon?.khususMember && (
-          <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-kecil font-medium text-amber-800">
-            Diskon ini ditandai khusus member. Tanda itu tidak dapat diubah dari sini, dan diskon
-            hanya dapat dipakai pelanggan dengan membership aktif.
-          </p>
-        )}
+        <Controller
+          control={control}
+          name="khususMember"
+          render={({ field }) => (
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="diskon-khusus-member"
+                checked={field.value}
+                onCheckedChange={(centang) => field.onChange(centang === true)}
+              />
+              <label htmlFor="diskon-khusus-member" className="text-isi font-medium text-navy cursor-pointer">
+                Khusus member
+                <span className={`block ${KELAS_KETERANGAN}`}>
+                  Hanya untuk pelanggan dengan membership yang masih berlaku.
+                </span>
+              </label>
+            </div>
+          )}
+        />
       </CollapsibleContent>
     </Collapsible>
   );

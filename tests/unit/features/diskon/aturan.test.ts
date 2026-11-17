@@ -194,3 +194,17 @@ describe("payloadPerbaruiDiskon: aturan tambahan", () => {
     });
   });
 });
+describe("khusus member (MB1a, membuka PD8a)", () => {
+  it("buat mengirim khususMember hanya bila dicentang", () => {
+    expect(payloadBuatDiskon(isian({ khususMember: true })).khususMember).toBe(true);
+    expect("khususMember" in payloadBuatDiskon(isian())).toBe(false);
+  });
+
+  it("ubah mengirim khususMember hanya bila berbeda dari data server, termasuk melepasnya", () => {
+    const biasa = diskon();
+    expect(payloadPerbaruiDiskon(isian({ khususMember: true }, biasa), biasa)).toEqual({ khususMember: true });
+    const member = { ...biasa, khususMember: true };
+    expect(payloadPerbaruiDiskon(isian({}, member), member)).toEqual({});
+    expect(payloadPerbaruiDiskon(isian({ khususMember: false }, member), member)).toEqual({ khususMember: false });
+  });
+});

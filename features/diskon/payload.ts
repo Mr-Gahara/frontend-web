@@ -19,6 +19,7 @@ export const NILAI_AWAL_DISKON: NilaiFormDiskon = {
   kuotaPerPelanggan: "",
   produkIDs: [],
   hitungPerBarang: false,
+  khususMember: false,
 };
 
 const teksTanggal = (iso: string | null) => (iso ? keTanggalLokal(new Date(iso)) : "");
@@ -65,6 +66,7 @@ export function nilaiAwalDiskon(diskon: Diskon): NilaiFormDiskon {
     kuotaPerPelanggan: teksAngka(diskon.kuotaPerPelanggan),
     produkIDs: [...diskon.produkIDs],
     hitungPerBarang: diskon.hitungPerBarang,
+    khususMember: diskon.khususMember,
   };
 }
 
@@ -99,6 +101,7 @@ export function payloadBuatDiskon(nilai: NilaiFormDiskon): BuatDiskonPayload {
   const produk = produkEfektif(nilai);
   if (produk.length > 0) payload.produkIDs = produk;
   if (perBarangEfektif(nilai)) payload.hitungPerBarang = true;
+  if (nilai.khususMember) payload.khususMember = true;
   return payload;
 }
 
@@ -149,6 +152,7 @@ export function payloadPerbaruiDiskon(
   if (!samaIsi(produk, [...tersimpan.produkIDs].sort())) payload.produkIDs = produk;
   const perBarang = perBarangEfektif(nilai);
   if (perBarang !== tersimpan.hitungPerBarang) payload.hitungPerBarang = perBarang;
+  if (nilai.khususMember !== tersimpan.khususMember) payload.khususMember = nilai.khususMember;
 
   return payload;
 }

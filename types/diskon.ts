@@ -40,7 +40,8 @@ export interface Diskon {
 
 /**
  * Field aturan diskon yang dikelola form web (keputusan PD3a). khususMember
- * tidak termasuk (PD8a). Saat membuat, hanya aturan yang diisi yang dikirim.
+ * ditawarkan lagi sejak modul membership (MB1a, membuka PD8a). Saat membuat,
+ * hanya aturan yang diisi yang dikirim.
  * null menghapus batasnya di backend.
  */
 export interface AturanDiskonPayload {
@@ -48,6 +49,7 @@ export interface AturanDiskonPayload {
   tanggalMulai?: string | null;
   tanggalBerakhir?: string | null;
   hitungPerBarang?: boolean;
+  khususMember?: boolean;
   minimalBelanja?: number;
   kuota?: number | null;
   kuotaPerPelanggan?: number | null;

@@ -33,6 +33,8 @@ export const skemaDiskon = z
     kuotaPerPelanggan: z.string().trim(),
     produkIDs: z.array(z.string()),
     hitungPerBarang: z.boolean(),
+    /** Khusus pelanggan dengan membership berlaku; ditawarkan lagi sejak modul membership (MB1a, membuka PD8a). */
+    khususMember: z.boolean(),
   })
   .superRefine((nilai, ctx) => {
     const angka = Number(nilai.nilai);
