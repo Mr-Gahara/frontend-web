@@ -1,7 +1,7 @@
 import type { TitikPanduan } from "@/lib/panduan";
 
 /**
- * Teks tur dashboard ruang outlet (disetujui pemilik proyek, 7 November
+ * Teks tur dashboard ruang outlet dan gudang. Ruang outlet (disetujui pemilik proyek, 7 November
  * 2026; titik Karyawan dari kanvas "Panduan Wizard Setup"). Titik menu
  * ditandai dengan href menunya (targetMenu) di components/app-sidebar.tsx,
  * dan hanya dimasukkan bila menu itu tampil bagi pengguna (izin dan plan).
@@ -36,14 +36,55 @@ const TITIK_MENU = [
   },
 ] as const;
 
+/**
+ * Teks tur dashboard ruang gudang (pemilik proyek, 17 November 2026; TG1a):
+ * alur barang keluar diperkenalkan, menu lain ditemukan dari sidebar.
+ */
+const TITIK_MENU_GUDANG = [
+  {
+    href: "/dashboard/gudang/inventaris",
+    judul: "Kelola barang gudang",
+    isi: "Gudang baru mulai kosong. Masukkan barang dari master data toko di sini, lalu pantau stok gudang.",
+  },
+  {
+    href: "/dashboard/gudang/pengajuanStok",
+    judul: "Tinjau pengajuan outlet",
+    isi: "Permintaan barang dan pengembalian dari outlet masuk ke sini untuk disetujui atau ditolak.",
+  },
+  {
+    href: "/dashboard/gudang/transferStok",
+    judul: "Kirim barang ke outlet",
+    isi: "Permintaan yang disetujui dikirim lewat surat jalan yang dibuat di sini.",
+  },
+  {
+    href: "/dashboard/gudang/pengguna",
+    judul: "Tambahkan petugas gudang",
+    isi: "Setiap petugas masuk dengan nama dan PIN sendiri. Tambahkan petugas di sini.",
+  },
+  {
+    href: "/dashboard/gudang/pengaturan",
+    judul: "Pengaturan gudang",
+    isi: "Nama, alamat, koordinat, dan radius absen gudang diubah di sini.",
+  },
+] as const;
+
+export type RuangPanduan = "outlet" | "gudang";
+
+const TITIK_MENU_RUANG = { outlet: TITIK_MENU, gudang: TITIK_MENU_GUDANG } as const;
+
 /** Href menu yang punya titik tur, berurutan. */
 export const HREF_TITIK_MENU: readonly string[] = TITIK_MENU.map((t) => t.href);
+export const HREF_TITIK_MENU_GUDANG: readonly string[] = TITIK_MENU_GUDANG.map((t) => t.href);
 
 /**
  * Titik tur dashboard. Di HP menu berada di sidebar yang dibuka untuk titik
  * menu, sehingga balon diletakkan di bawah menu, bukan di sampingnya.
  */
-export function titikDashboard(terlihat: (href: string) => boolean, hp: boolean): TitikPanduan[] {
+export function titikDashboard(
+  terlihat: (href: string) => boolean,
+  hp: boolean,
+  ruang: RuangPanduan = "outlet",
+): TitikPanduan[] {
   return [
     {
       target: TARGET_MENU_UTAMA,
@@ -53,7 +94,7 @@ export function titikDashboard(terlihat: (href: string) => boolean, hp: boolean)
         : "Tekan tombol ini untuk menyempitkan atau melebarkan menu. Semua halaman toko ada di menu itu.",
       sisi: "bottom",
     },
-    ...TITIK_MENU.filter((t) => terlihat(t.href)).map(
+    ...TITIK_MENU_RUANG[ruang].filter((t) => terlihat(t.href)).map(
       (t): TitikPanduan => ({ target: targetMenu(t.href), judul: t.judul, isi: t.isi, sisi: hp ? "bottom" : "right" }),
     ),
   ];

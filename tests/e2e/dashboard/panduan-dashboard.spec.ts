@@ -3,7 +3,8 @@ import { masuk } from "../../helpers/masuk-uji";
 import { balonPanduan as balon, jalaniTur } from "../../helpers/panduan-uji";
 
 /*
- * Tur dashboard ruang outlet (keputusan pemilik proyek, 7 November 2026).
+ * Tur dashboard ruang outlet (keputusan pemilik proyek, 7 November 2026)
+ * dan ruang gudang (TG1a dan TG2a, 17 November 2026).
  * playwright.config.ts mematikan tur otomatis lewat storageState; spec ini
  * mengosongkannya. Akun uji masuk sebagai Owner, sehingga kelima titik
  * tampil; penyaringan titik menurut izin diuji di unit test
@@ -20,6 +21,15 @@ const TARGET = [
   "menu:/dashboard/outlet/pengaturan",
 ];
 
+const TARGET_GUDANG = [
+  "menu-utama",
+  "menu:/dashboard/gudang/inventaris",
+  "menu:/dashboard/gudang/pengajuanStok",
+  "menu:/dashboard/gudang/transferStok",
+  "menu:/dashboard/gudang/pengguna",
+  "menu:/dashboard/gudang/pengaturan",
+];
+
 const tombolPanduan = (page: Page) => page.getByRole("button", { name: "Lihat panduan dashboard" });
 
 async function masukKeOutlet(page: Page) {
@@ -28,7 +38,7 @@ async function masukKeOutlet(page: Page) {
 }
 
 test.describe("Panduan dashboard", () => {
-  test("tur tampil sendiri sekali di ruang outlet, dibuka ulang dari topbar, dan tidak ada di ruang gudang", async ({
+  test("tur tampil sendiri sekali di ruang outlet, dibuka ulang dari topbar, lalu ruang gudang punya turnya sendiri", async ({
     page,
   }) => {
     await masukKeOutlet(page);
@@ -52,13 +62,52 @@ test.describe("Panduan dashboard", () => {
       await expect(balon(page)).toHaveCount(0);
     });
 
-    await test.step("ruang gudang tidak punya tombol panduan dashboard", async () => {
+    await test.step("ruang gudang: tur sendiri tampil sekali dan menyorot keenam titik gudang", async () => {
       await page.goto("/dashboard/gudang");
-      // Lonceng menandai topbar sudah termuat (aktif sejak desain C, 12 November 2026).
-      await expect(page.getByRole("button", { name: /^Pemberitahuan/ })).toBeVisible({ timeout: 15_000 });
-      await expect(tombolPanduan(page)).toHaveCount(0);
+      await expect(balon(page)).toContainText("Panduan 1 dari 6", { timeout: 15_000 });
+      await jalaniTur(page, TARGET_GUDANG);
+    });
+
+    await test.step("ruang gudang dimuat ulang dan ruang outlet dibuka lagi: tidak ada yang tampil sendiri", async () => {
+      await page.reload();
+      await expect(tombolPanduan(page)).toBeVisible({ timeout: 15_000 });
+      await page.waitForTimeout(1_500);
+      await expect(balon(page)).toHaveCount(0);
+      await tombolPanduan(page).click();
+      await expect(balon(page)).toContainText("Panduan 1 dari 6");
+      await page.keyboard.press("Escape");
+      await page.goto("/dashboard/outlet");
+      await expect(tombolPanduan(page)).toBeVisible({ timeout: 15_000 });
+      await page.waitForTimeout(1_500);
       await expect(balon(page)).toHaveCount(0);
     });
+  });
+
+  test("Setup Gudang tanpa tombol panduan dan tanpa tur, sehingga tur gudang menunggu sampai Gudang terdaftar (TG2a)", async ({
+    page,
+  }) => {
+    await masukKeOutlet(page);
+    const polaLokasi = /\/api\/location(\?|$)/i;
+    await page.route(polaLokasi, async (route) => {
+      if (route.request().method() !== "GET") return route.continue();
+      const asli = await route.fetch();
+      const body = await asli.json();
+      body.data = (body.data ?? []).filter((l: { tipe?: string }) => l.tipe !== "Gudang");
+      // simulasi: akun uji sudah punya Gudang, sehingga keadaan belum ada Gudang dibuat dengan menyaring lokasi Gudang dari respons nyata, tanpa menulis data
+      await route.fulfill({ response: asli, json: body });
+    });
+    try {
+      await page.goto("/dashboard/gudang");
+      await page.waitForURL("**/dashboard/gudang/setup", { timeout: 15_000 });
+      await expect(page.getByRole("button", { name: /^Pemberitahuan/ })).toBeVisible({ timeout: 15_000 });
+      await page.waitForTimeout(1_500);
+      await expect(tombolPanduan(page)).toHaveCount(0);
+      await expect(balon(page)).toHaveCount(0);
+    } finally {
+      await page.unroute(polaLokasi);
+    }
+    await page.goto("/dashboard/gudang");
+    await expect(balon(page)).toContainText("Panduan 1 dari 6", { timeout: 15_000 });
   });
 
   test.describe("di HP", () => {
