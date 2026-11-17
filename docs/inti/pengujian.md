@@ -12,6 +12,19 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per luberan tabel 768 px** (17 November 2026, backend `ridho`
+lokal `4a19be8`): vitest 1132 lolos (4 unit test baru
+`tests/unit/components/kartu-bila-tak-muat.test.ts`; dua asersi nama kelas
+di integrasi `DataTable` diganti ke `tabel:`). Spec terdampak dijalankan
+per berkas, tanpa OTP dan tanpa suite penuh: kedua spec pelanggan,
+`daftar-penjualan`, `stok-keluar`, `lihat-stok-opname`,
+`lihat-pengajuan-stok`, `ruang-gudang`, `arus-kas`, `tampilan-hp`,
+`langganan`, dan `lihat-stock-adjustment` 87 lolos. Run pertama gagal 2 di
+`lihat-stock-adjustment` karena CSS basi setelah `git stash`; lolos
+setelah dev server dimulai ulang dengan `.next/dev` dibersihkan. Pindai
+visual 390, 768, 1024, dan 1280 px tanpa tabel meluber di lebar meja.
+Harapan suite penuh tetap 652.
+
 **Suite penuh per jam buka di shift dan jadwal** (web `0c4cc7e`, backend
 `ridho` lokal `4a19be8`, 16 November 2026, pukul 20.57 sampai 21.54 WIB,
 reporter `line,json`, atas izin pemilik proyek): e2e 646 lolos, 4 gagal,

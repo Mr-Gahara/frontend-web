@@ -264,7 +264,11 @@ sama (submodul pengajuan stok, di bawah).
     `DataTable` (pemilik proyek, 6 November 2026; `modul/keuangan.md`,
     MK2), dan kartu Stok Keluar detail penjualan berupa daftar bergrid
     dengan judul kelompok produk, bukan `Table` (pemilik proyek,
-    12 November 2026; `modul/penjualan.md`, VD4a).
+    12 November 2026; `modul/penjualan.md`, VD4a). `DataTable` tampil
+    sebagai kartu di HP dan di lebar mana pun bila tabelnya tidak muat di
+    wadah; kelas tampilan kartu di sel memakai varian `kartu:` dan
+    `tabel:`, bukan `max-sm:` dan `sm:` (pemilik proyek, 17 November 2026;
+    `modul/ui-ux.md`, LT1a).
 27. **Daftar dipindah ke paginasi server hanya bersama seluruh
     filternya, termasuk pencarian.** Filter tanpa padanan di server
     tidak disaring di klien atas halaman yang sedang tampil, karena

@@ -333,6 +333,38 @@ Diputuskan pemilik proyek pada 14 November 2026.
 - **CV27b: spasi tetap skala Tailwind dengan aturan tertulis** (arah B):
   keputusan rancangan butir 35; halaman diseragamkan saat disentuh.
 
+### Luberan tabel 768 px
+
+Diputuskan pemilik proyek pada 17 November 2026 dari kanvas desain
+"Luberan Tabel 768 px" (arah A dari tiga, render nyata 768 px), setelah
+pengukuran wadah dan lebar alami seluruh tabel daftar dan rincian di 768,
+1024, dan 1280 px. Tidak ada satu batas lebar wadah yang memisahkan dengan
+bersih: tabel yang meluber di 768 px berwadah 568 sampai 664 px, sedangkan
+yang muat di 1280 px ada yang lebih sempit (rincian Pengajuan dan Transfer
+563 sampai 584 px, Pengguna 661 px).
+
+- **LT1a: kartu bila tabel tidak muat.** `useKartuBilaTakMuat`
+  (`components/ui/use-kartu-bila-tak-muat.ts`) mengukur wadah tabel lewat
+  ResizeObserver; bila lebar alami melebihi wadah, DataTable memasang
+  `data-kartu` dan baris tampil sebagai kartu berlabel yang sama dengan
+  kartu HP, di lebar layar mana pun. Varian `kartu:` dan `tabel:` di
+  `app/globals.css` menggantikan `max-sm:` dan `sm:` di DataTable,
+  sehingga kartu HP di bawah 640 px tidak berubah. Berlaku untuk daftar
+  dan rincian. Ukur ulang dipicu kunci sederhana (jumlah baris, halaman,
+  ukuran, status muat, jumlah kolom), bukan array data. Keempat kolom
+  yang sengaja kosong di kartu HP (CV20a) ikut kosong di kartu lebar meja
+  (`tabel:` dan `kartu:`). Hasil: 29 tabel menjadi kartu di 768 px, tidak
+  ada tabel meluber di 768, 1024, dan 1280 px.
+- **LT2a: kolom nama Pelanggan dibungkus 180 px**, agar tetap tabel di
+  1024 dan 1280 px (sebelumnya 590 px di wadah 584 px).
+- **LT3a: baris filter Pengajuan Stok outlet boleh turun baris** mulai
+  640 px, dan deretan tab selebar wadah lalu digeser di dalamnya.
+- **LT4a: baris cari dan Masukkan Master Data Barang Gudang boleh turun
+  baris** mulai 640 px (sebelumnya halaman +18 px).
+- **LT5a: kartu saldo Arus Kas satu kolom di bawah 1024 px**, tiga kolom
+  mulai 1024 px (kartu dan kerangka muatnya), sehingga label dan rupiah
+  tidak terpotong di 768 px.
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E
@@ -597,7 +629,12 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
   bawah 640 px sedangkan wadah tabel dengan sidebar sekitar 600 px; luberan
   halaman di Barang Gudang (+18) dan Pengajuan Stok outlet (+48); dan
   label kartu Arus Kas terpotong. Perbaikannya keputusan desain (batas
-  kartu DataTable atau kolom per tabel).
+  kartu DataTable atau kolom per tabel). Selesai 17 November 2026 (LT1a
+  sampai LT5a, Luberan tabel 768 px).
+- Pemindaian 390 px (17 November 2026, sudah ada sebelum LT1a, dibuktikan
+  dengan `git stash`): tabel Pembelian Stok outlet lebih lebar 10 px dari
+  wadahnya (276 dan 266), halaman Produk +22 px, dan Buat Reservasi +18 px.
+  Belum ditelusuri.
 - Pesan "Gagal Memuat Lokasi Gudang" dan "Gudang Belum Didaftarkan" di
   `app/dashboard/gudang/jurnalStok/page.tsx` tidak pernah tampil, karena
   layout ruang gudang menghadang lebih dulu (kode mati; penghapusannya
