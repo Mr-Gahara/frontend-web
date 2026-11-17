@@ -199,7 +199,9 @@ A dibangkitkan ulang RG9a. Ketiganya selesai 10 November 2026: TP2b
   butir diselaraskan di `kontrak/temuan.md`, dicocokkan menurut isinya
   karena nomor di `docs/pengembangan/klien.md` backend pernah bergeser,
   dan pembuktiannya dicatat di sana.
-  Laporan baru hanya bila ada temuan baru. Butir 85 dan 107 (B50, B51)
+  Laporan baru hanya bila ada temuan baru: butir 185 (rotasi
+  `pin-refresh` tanpa masa tenggang) dilaporkan 17 November 2026 atas
+  keputusan pemilik proyek. Butir 85 dan 107 (B50, B51)
   dibuktikan dari kode 16 November 2026; yang belum dibuktikan web: 169
   dan 178 (tanpa perubahan kontrak), serta B169 dan B170.
 - Akun uji `toko@gmail.com` dinaikkan ke Pro lewat API admin, karena
