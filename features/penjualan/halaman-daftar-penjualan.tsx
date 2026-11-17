@@ -205,16 +205,17 @@ export default function HalamanDaftarPenjualan({
       },
       {
         accessorKey: "tanggalTransaksi",
+        meta: { label: "Tanggal", sembunyiHp: true },
         header: ({ column }) => <KepalaUrut column={column} judul="Tanggal" className="hidden sm:inline-flex" />,
         cell: ({ row }) => (
-          <span className="text-kecil sm:text-isi font-medium text-navy/70 hidden tabel:inline">
+          <span className="text-kecil sm:text-isi font-medium text-navy/70">
             {formatTanggal(row.original.tanggalTransaksi)}
           </span>
         ),
       },
       {
         accessorKey: "dataPelanggan",
-        meta: { lebarBungkus: 180 },
+        meta: { label: "Pelanggan", lebarBungkus: 180, sembunyiHp: true },
         header: () => (
           <span className="text-kecil font-bold text-navy/60 hidden md:inline">
             Pelanggan
@@ -223,7 +224,7 @@ export default function HalamanDaftarPenjualan({
         cell: ({ row }) => (
           <TeksDuaBaris
             teks={row.original.dataPelanggan?.namaPelanggan ?? "-"}
-            className="max-md:hidden kartu:hidden text-isi font-medium text-navy/80 capitalize"
+            className="max-md:tabel:hidden text-isi font-medium text-navy/80 capitalize"
           />
         ),
       },

@@ -146,24 +146,26 @@ export default function HalamanDaftarStockOpname({
       },
       {
         accessorKey: "tanggal",
+        meta: { label: "Tanggal Dibuat", sembunyiHp: true },
         header: () => (
           <span className="text-kecil font-bold text-navy/60 hidden sm:inline">Tanggal Dibuat</span>
         ),
         cell: ({ row }) => (
-          <span className="text-kecil sm:text-isi font-medium text-navy/70 hidden tabel:inline">
+          <span className="text-kecil sm:text-isi font-medium text-navy/70">
             {formatTanggal(row.original.tanggal || row.original.createdAt)}
           </span>
         ),
       },
       {
         accessorKey: "lokasi",
+        meta: { label: "Lokasi", sembunyiHp: true },
         header: () => (
           <span className="text-kecil font-bold text-navy/60 hidden md:inline">
             Lokasi
           </span>
         ),
         cell: ({ row }) => (
-          <span className="hidden md:tabel:inline text-kecil sm:text-isi font-medium text-navy/80">
+          <span className="max-md:tabel:hidden text-kecil sm:text-isi font-medium text-navy/80">
             {row.original.lokasi?.nama || "Lokasi Tidak Diketahui"}
           </span>
         ),

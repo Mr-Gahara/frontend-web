@@ -232,6 +232,38 @@ test.describe("Stock adjustment outlet", () => {
     await expect(sel.nth(2)).toHaveText(susunSumber(a).label, { useInnerText: true });
   });
 
+  test("768 px: tabel yang tidak muat tampil sebagai kartu berlabel, dan kembali tabel di 1280 px (LT1a)", async ({
+    page,
+  }) => {
+    const daftar = await bukaDaftar(page);
+    test.skip(daftar.length === 0, "Belum ada stock adjustment di database");
+    const a = daftar[0];
+    const pembungkus = page.locator("[data-kartu]");
+    const kepala = page.getByRole("columnheader", { name: /^sumber$/i });
+    const selSumber = barisBerisi(page, a.nomorAdjustment).getByRole("cell").nth(2);
+
+    // 1280 px: tabel muat di wadahnya, tanpa mode kartu dan tanpa label sel.
+    await expect(kepala).toBeVisible();
+    await expect(pembungkus).toHaveCount(0);
+    await expect(selSumber).toHaveText(susunSumber(a).label, { useInnerText: true });
+
+    // 768 px: lebar alami tabel melebihi wadah, baris menjadi kartu berlabel.
+    await page.setViewportSize({ width: 768, height: 900 });
+    await expect(pembungkus).toHaveCount(1);
+    await expect(kepala).toBeHidden();
+    await expect(selSumber.getByText("Sumber", { exact: true })).toBeVisible();
+    await expect(selSumber).toContainText(susunSumber(a).label);
+
+    // Kembali ke 1280 px: wadah selebar lebar alami terakhir, tabel kembali.
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await expect(pembungkus).toHaveCount(0);
+    await expect(kepala).toBeVisible();
+
+    // Ke 768 px lagi: kartu lagi.
+    await page.setViewportSize({ width: 768, height: 900 });
+    await expect(pembungkus).toHaveCount(1);
+  });
+
   test("detail: saldo, koreksi, alasan, dan sumber mengikuti respons server", async ({
     page,
   }) => {

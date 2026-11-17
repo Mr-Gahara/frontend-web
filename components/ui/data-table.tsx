@@ -45,6 +45,14 @@ const KELAS_SEL_HP =
   "kartu:block kartu:border-0 kartu:bg-transparent kartu:p-0 kartu:whitespace-normal kartu:first:border-l-0 kartu:first:rounded-none kartu:first:pr-10 kartu:first:text-besar kartu:first:font-bold kartu:last:border-r-0 kartu:last:rounded-none";
 const KELAS_AKSI_HP = "kartu:absolute kartu:right-2 kartu:top-2";
 
+/**
+ * meta.sembunyiHp: sel tidak tampil di kartu HP (di bawah 640 px, CV20a),
+ * tetapi tampil berlabel di kartu lebar meja (pemilik proyek,
+ * 17 November 2026; LT6a).
+ */
+const sembunyiHp = (kolom: { meta?: unknown }) =>
+  (kolom.meta as { sembunyiHp?: unknown } | undefined)?.sembunyiHp === true;
+
 /** Label kecil sel di HP: meta.label kolom, atau header bila berupa teks. */
 function labelKolom(kolom: { meta?: unknown; header?: unknown }): string | null {
   const label = (kolom.meta as { label?: unknown } | undefined)?.label;
@@ -227,6 +235,7 @@ export function DataTable<TData, TValue>({
                         "text-isi",
                         KELAS_SEL_HP,
                         cell.column.id === "aksi" && KELAS_AKSI_HP,
+                        sembunyiHp(cell.column.columnDef) && "max-sm:hidden!",
                         bungkus && KELAS_BUNGKUS,
                       )}
                     >
