@@ -674,8 +674,10 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
 - Mode kartu LT1a lengket saat isi berubah tanpa mengubah kunci ukur
   ulang (jumlah baris, halaman, ukuran, status muat, kolom): misalnya
   pencarian di daftar berhalaman server yang tetap memberi 10 baris di
-  halaman 1 tetap kartu sampai wadah berubah lebar. Perbaikan murah
-  kelak: id baris pertama dan terakhir ikut di kunci.
+  halaman 1 tetap kartu sampai wadah berubah lebar. Selesai 17 November
+  2026: id baris pertama dan terakhir ikut di kunci (`kunciUkurUlang`);
+  isi di tengah halaman yang berubah tanpa mengubah kedua ujungnya tetap
+  tidak terdeteksi, dan itu diterima.
 - Pesan "Gagal Memuat Lokasi Gudang" dan "Gudang Belum Didaftarkan" di
   `app/dashboard/gudang/jurnalStok/page.tsx` tidak pernah tampil, karena
   layout ruang gudang menghadang lebih dulu (kode mati). Dihapus

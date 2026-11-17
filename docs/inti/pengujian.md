@@ -12,6 +12,11 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per kunci ukur ulang mode kartu** (17 November 2026): vitest
+1135 lolos (3 unit test baru `kunciUkurUlang`); `lihat-stock-adjustment`,
+`daftar-penjualan`, `lihat-pembelian-stok`, dan `kelola-pelanggan` 41
+lolos per berkas, tanpa OTP. Harapan suite penuh tetap 656.
+
 **Baseline per kode mati pesan lokasi gudang** (17 November 2026, KM1a):
 vitest 1132 lolos; folder `inventaris/jurnalStok`,
 `lihat-pembelian-stok`, dan `ruang-gudang` 29 lolos per berkas, tanpa
