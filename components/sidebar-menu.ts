@@ -26,6 +26,7 @@ import {
   CalendarRange,
   Clock,
   ShoppingCart,
+  Crown,
 } from "lucide-react";
 
 // --- TIPE DATA ---
@@ -266,6 +267,12 @@ export const outletMenus: MenuGroup[] = [
         label: "Pelanggan",
         href: "/dashboard/outlet/pelanggan",
         icon: UserCircle,
+      },
+      {
+        // Paket dan member (MB1a, desain B kanvas "Modul Membership").
+        label: "Membership",
+        href: "/dashboard/outlet/membership",
+        icon: Crown,
       },
       {
         label: "Karyawan & Staff",

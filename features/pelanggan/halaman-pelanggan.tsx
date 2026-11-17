@@ -13,6 +13,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "@/lib/auth/useSession";
+import { IZIN } from "@/lib/auth/permissions";
+import { useDaftarMembership } from "@/features/membership/hooks";
+import { membershipBerlakuPerPelanggan, teksLencanaMember } from "@/features/membership/tampilan";
 import type { Pelanggan } from "@/types/pelanggan";
 import { DialogHapusPelanggan } from "./dialog-hapus-pelanggan";
 import { DialogUbahPelanggan, FormTambahPelanggan } from "./form-pelanggan";
@@ -57,6 +60,10 @@ export function HalamanPelanggan() {
   const aksi = aksiPelanggan(permissions);
   const daftar = useDaftarPelanggan();
   const pelangganList = useMemo(() => daftar.data ?? [], [daftar.data]);
+  // Status membership berasal dari modul membership, terpisah dari tipe yang
+  // diisi manual (MB3a); hanya bagi pemegang read-membership.
+  const membership = useDaftarMembership(permissions.includes(IZIN.membership));
+  const memberBerlaku = useMemo(() => membershipBerlakuPerPelanggan(membership.data ?? []), [membership.data]);
 
   const [diubah, setDiubah] = useState<Pelanggan | null>(null);
   const [dihapus, setDihapus] = useState<Pelanggan | null>(null);
@@ -73,7 +80,7 @@ export function HalamanPelanggan() {
   const columns: ColumnDef<Pelanggan>[] = [
     {
       accessorKey: "namaPelanggan",
-      meta: { label: "Nama Pelanggan", lebarBungkus: 180 },
+      meta: { label: "Nama Pelanggan", lebarBungkus: 140 },
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -119,7 +126,8 @@ export function HalamanPelanggan() {
     },
     {
       accessorKey: "tipePelanggan",
-      meta: { label: "Tipe" },
+      // Lencana membership boleh turun baris agar tabel tetap muat di 1280 px (MB3a, LT2a).
+      meta: { label: "Tipe", lebarBungkus: 150 },
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -140,9 +148,17 @@ export function HalamanPelanggan() {
               ? "bg-sky-100 text-sky-700 font-bold dark:bg-sky-900/30 dark:text-sky-400"
               : "bg-navy/10 text-navy font-bold";
 
+        const berlaku = memberBerlaku.get(row.original.id);
         return (
-          <span className={`rounded-full px-2.5 py-0.5 text-kecil capitalize ${colorClass}`}>
-            {tipe}
+          <span className="flex flex-col items-start gap-1">
+            <span className={`rounded-full px-2.5 py-0.5 text-kecil capitalize ${colorClass}`}>
+              {tipe}
+            </span>
+            {berlaku && (
+              <span className="rounded-lg bg-sage-pucat px-2.5 py-0.5 text-kecil font-bold text-sage-tua">
+                {teksLencanaMember(berlaku)}
+              </span>
+            )}
           </span>
         );
       },

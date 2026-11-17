@@ -178,6 +178,12 @@ export const queryKeys = {
     semua: kunci(["pelanggan"] as const),
     daftar: (filter?: Filter) => ["pelanggan", "daftar", filter] as const,
   },
+  membership: {
+    semua: kunci(["membership"] as const),
+    daftar: () => ["membership", "daftar"] as const,
+    paket: () => ["membership", "paket"] as const,
+    penjualan: (pelangganID: string) => ["membership", "penjualan", pelangganID] as const,
+  },
 
   // --- Reservasi ---
   aset: {

@@ -124,6 +124,14 @@ export const EP = {
     list: "/pelanggan",
     detail: (id: string) => `/pelanggan/${id}`,
   },
+  membership: {
+    list: "/membership",
+    detail: (id: string) => `/membership/${id}`,
+  },
+  paketMembership: {
+    list: "/paketmembership",
+    detail: (id: string) => `/paketmembership/${id}`,
+  },
 
   aset: {
     list: "/aset",
