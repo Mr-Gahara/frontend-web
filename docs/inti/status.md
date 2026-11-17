@@ -134,7 +134,9 @@ Dilanjutkan nanti atas perintah pemilik proyek, tidak sekarang:
    terdampak saja: label kartu HP ikut terbaca di
    `lihat-stock-adjustment` (`25b969c`), dan perpindahan halaman di
    tengah `pin-refresh` di `akses/jalur-bukan-owner` (`f80bd16`)
-   (`inti/pengujian.md`, Baseline).
+   (`inti/pengujian.md`, Baseline). Suite penuh 17 November 2026 atas
+   izin pemilik proyek: 654 lolos dan 2 dilewati dari 656, tanpa
+   kegagalan.
 2. **Luberan tabel daftar di 768 px**: selesai 17 November 2026 lewat
    kanvas desain, kartu bila tabel tidak muat (`modul/ui-ux.md`, LT1a
    sampai LT5a). Temuan lanjutan di 390 px (Pembelian Stok, Produk,

@@ -12,6 +12,19 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh per luberan tabel dan kode mati gudang** (web `f1835d1`,
+backend `ridho` lokal `4a19be8`, 17 November 2026, pukul 10.37 sampai
+11.14 WIB, reporter `line,json`, charger tersambung, atas izin pemilik
+proyek): e2e 654 lolos dan 2 dilewati dari 656, tanpa kegagalan dan
+tanpa flaky, sesuai harapan hitungan. Yang dilewati skip bersyarat data:
+status staf dashboard outlet (tidak ada staf ruang outlet di monitoring)
+dan dialog batal surat jalan (tidak ada surat jalan Belum Dikirim).
+Termasuk spec ber-OTP. Membuktikan seluruh perubahan sejak suite
+16 November 2026: perbaikan `lihat-stock-adjustment` dan
+`jalur-bukan-owner`, kartu bila tabel tidak muat (LT1a sampai LT6a),
+luberan HP 390 px (LT7a sampai LT10a), KM1a, dan kunci ukur ulang.
+Vitest 1135 lolos. Harapan suite penuh berikutnya 656.
+
 **Baseline per kunci ukur ulang mode kartu** (17 November 2026): vitest
 1135 lolos (3 unit test baru `kunciUkurUlang`); `lihat-stock-adjustment`,
 `daftar-penjualan`, `lihat-pembelian-stok`, dan `kelola-pelanggan` 41
