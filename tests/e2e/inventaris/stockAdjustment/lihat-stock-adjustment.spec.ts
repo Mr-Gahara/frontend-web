@@ -228,7 +228,8 @@ test.describe("Stock adjustment outlet", () => {
 
     await expect(page.getByRole("columnheader", { name: /^sumber$/i })).toBeVisible();
     const sel = barisBerisi(page, a.nomorAdjustment).getByRole("cell");
-    await expect(sel.nth(2)).toHaveText(susunSumber(a).label);
+    // innerText: label kartu HP (sm:hidden) tersembunyi di desktop tetapi ada di textContent.
+    await expect(sel.nth(2)).toHaveText(susunSumber(a).label, { useInnerText: true });
   });
 
   test("detail: saldo, koreksi, alasan, dan sumber mengikuti respons server", async ({
@@ -260,8 +261,8 @@ test.describe("Stock adjustment outlet", () => {
     if (item!.qtySnapshot !== item!.qtyCurrent) {
       await expect(sel.nth(1)).toContainText(`Saat draf: ${item!.qtySnapshot}`);
     }
-    await expect(sel.nth(2)).toHaveText(String(item!.qtyPhysical));
-    await expect(sel.nth(3)).toHaveText(formatKoreksi(item!.qtyDifference));
+    await expect(sel.nth(2)).toHaveText(String(item!.qtyPhysical), { useInnerText: true });
+    await expect(sel.nth(3)).toHaveText(formatKoreksi(item!.qtyDifference), { useInnerText: true });
   });
 });
 test.describe("Stock adjustment gudang", () => {
