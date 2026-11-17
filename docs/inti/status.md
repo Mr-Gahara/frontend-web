@@ -139,8 +139,9 @@ Dilanjutkan nanti atas perintah pemilik proyek, tidak sekarang:
    kanvas desain, kartu bila tabel tidak muat (`modul/ui-ux.md`, LT1a
    sampai LT5a). Temuan lanjutan di 390 px (Pembelian Stok, Produk,
    Buat Reservasi) selesai pada hari yang sama (LT7a sampai LT10a).
-3. **Kode mati pesan lokasi jurnal stok gudang**: hapus atau biarkan
-   (`modul/ui-ux.md`, Utang terbuka).
+3. **Kode mati pesan lokasi jurnal stok gudang**: dihapus 17 November
+   2026, bersama pola yang sama di Pembelian Stok gudang (`modul/ui-ux.md`,
+   KM1a).
 
 ### Menunggu desain pemilik proyek
 

@@ -12,6 +12,11 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per kode mati pesan lokasi gudang** (17 November 2026, KM1a):
+vitest 1132 lolos; folder `inventaris/jurnalStok`,
+`lihat-pembelian-stok`, dan `ruang-gudang` 29 lolos per berkas, tanpa
+OTP. Harapan suite penuh tetap 656.
+
 **Baseline per luberan HP 390 px** (17 November 2026, backend `ridho`
 lokal `4a19be8`): vitest 1132 lolos. Tiga skenario baru 390 px dengan
 helper `tanpaLuberWadah`: `lihat-pembelian-stok` (filter selebar baris dan

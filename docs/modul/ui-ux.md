@@ -678,8 +678,12 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
   kelak: id baris pertama dan terakhir ikut di kunci.
 - Pesan "Gagal Memuat Lokasi Gudang" dan "Gudang Belum Didaftarkan" di
   `app/dashboard/gudang/jurnalStok/page.tsx` tidak pernah tampil, karena
-  layout ruang gudang menghadang lebih dulu (kode mati; penghapusannya
-  menunggu keputusan pemilik proyek).
+  layout ruang gudang menghadang lebih dulu (kode mati). Dihapus
+  17 November 2026 bersama pola yang sama di Pembelian Stok gudang (KM1a,
+  pemilik proyek): kedua halaman memakai kunci query lokasi yang sama
+  dengan layout, yang memeriksa galat dan gudang yang belum ada lebih
+  dulu, termasuk saat muat ulang gagal dengan data lama. Tampilan tidak
+  berubah; spec `lihat-jurnal-stok` tetap memeriksa pesan layout.
 - Temuan pemindaian 14 November 2026 yang dibiarkan karena dirancang:
   kalender jadwal dan deretan tab bergulir ke samping; keterangan Mutasi
   Kas di kartu HP dan nama aset di timeline reservasi dipotong "...".
