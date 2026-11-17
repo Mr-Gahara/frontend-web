@@ -27,7 +27,10 @@ test.beforeEach(async ({ page }) => {
 test("pemegang update-akun yang bukan Owner tidak melihat kartu Akun Toko dan ditolak di halamannya", async ({ page }) => {
   await masukAkunBukanOwner(page);
   await page.goto("/dashboard/outlet/pengaturan");
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 15_000 });
+  // Jangkar positif: kartu berizin tampil setelah sesi pengguna pulih. Tanpa
+  // itu ketiadaan kartu lolos sebelum izin terbaca, dan goto berikutnya
+  // memotong pin-refresh yang sudah diputar backend (lihat SDM di bawah).
+  await expect(page.getByRole("link", { name: /Profil Toko/ })).toBeVisible({ timeout: 15_000 });
   await expect(page.getByRole("link", { name: /Akun Toko/ })).toHaveCount(0);
   await page.goto("/dashboard/outlet/pengaturan/akun");
   await ditolak(page);
@@ -109,7 +112,12 @@ test("tanpa izin baca shift, pola roster, dan jadwal: menunya tidak tampil dan h
   await masukTanpaSdm(page);
   await page.goto("/dashboard/outlet");
   const sidebar = page.locator("[data-sidebar=sidebar]").first();
-  await expect(sidebar.getByText("Dashboard", { exact: true })).toBeVisible({ timeout: 15_000 });
+  // Jangkar positif: menu berizin baru tampil setelah pin-refresh selesai dan
+  // izin terbaca. "Dashboard" tampil sebelum sesi pulih, sehingga ketiadaan
+  // menu SDM lolos tanpa bukti dan goto berikutnya memotong pin-refresh yang
+  // sudah memutar tokenVersion; dokumen baru membawa cookie basi dan
+  // terlempar ke login pengguna (suite penuh 16 November 2026).
+  await expect(sidebar.getByText("Pelanggan", { exact: true })).toBeVisible({ timeout: 15_000 });
   for (const menu of ["Kalender Jadwal", "Pola Roster", "Master Shift"]) {
     await expect(sidebar.getByText(menu, { exact: true }), menu).toHaveCount(0);
   }
