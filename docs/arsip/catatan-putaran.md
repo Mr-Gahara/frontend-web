@@ -955,3 +955,46 @@ beserta urutan yang disetujui 4 November 2026) dipindah ke
 `arsip/catatan-putaran.md` (Catatan dari penyesuaian backend `4759208`
 sampai `c031bde`); rujukan "butir 4 (wizard)", "butir 6 (sesi kasir)",
 dan "butir 7" di dokumen lain merujuk daftar di sana.
+
+## Pekerjaan UI 12 sampai 16 November 2026
+
+Dipindah dari `inti/status.md` (Pekerjaan UI berikutnya) pada 17 November 2026.
+
+Dicatat pemilik proyek 12 November 2026, dikerjakan sesudah putaran ini
+dengan alur kanvas desain seperti butir di bawah:
+
+1. **Laman Keuangan pindah ke sub-sidebar Keuangan**: selesai 12 November
+   2026. Keuangan dan Laporan menjadi dua menu lipat, bar tab dibuang,
+   judul dan kartu ringkasan tetap (`modul/keuangan.md`, SK1a dan SK2a).
+2. **Perbaikan bug visual di laman buat penjualan**: selesai 12 November
+   2026. Kolom kanan sticky menutupi tombol Buat Penjualan saat digulir;
+   kini berhenti di atas baris aksi (`modul/penjualan.md`, BP1a).
+3. **Belanja Stok untuk plan Basic**: selesai 12 November 2026, tombol
+   Catat pembelian dan Pembelian Stok sebagai menu tunggal
+   (`modul/keuangan.md`, BS4a dan BS5a).
+4. **Penyesuaian backend `yoga` `d6709a1`**: selesai 12 November 2026
+   (`referensi/keputusan-penyesuaian-backend.md`).
+5. **Stok keluar di detail penjualan (VD3a)**: selesai 12 November 2026,
+   desain A kanvas (`modul/penjualan.md`, VD4a sampai VD10a).
+6. **Paginasi server produk, bahan baku, dan inventory**: selesai
+   16 November 2026 setelah backend B340 sampai B342 (PV1a dan PV2a,
+   `624761a`, `e41fe76`, `6ab81aa`; `modul/inventaris.md` dan
+   `modul/produk-kategori.md`).
+7. **Bug dan cacat tampilan**: selesai 14 November 2026 (`609b36a`,
+   `0df0ca5`; `modul/ui-ux.md`, CV1a sampai CV14a). Sampel tampilan dan
+   pemindaian seluruh rute dashboard di 1280 dan 390 px, lalu perbaikan
+   teks terpotong, luberan HP, tabel 1280, menu aktif sidebar, peringatan
+   grafik, Libur B165, dialog hapus jadwal, Kosongkan tanggal, dan Buat
+   Posisi. "Akun non-aktif" ternyata seluruhnya sisa uji E2E. Temuan
+   tampilan tersisa (label filter jurnal, kolom Staf jadwal, menu Pindah
+   Dana, tab Booking, cincin fokus) selesai lewat kanvas desain di
+   `883a79b` (CV15a sampai CV18a). Suite e2e penuh 14 November 2026:
+   643 lolos dari 643 (`arsip/riwayat-pengujian.md`).
+8. **Fitur, rapian kode, dan utang pengujian**: selesai 14 November 2026.
+   Pemecahan buat penjualan dan `PolaRosterItem` wajib (`7c004c2`), label
+   kartu HP (`ceb8c95`), token warna (`c437d68`), tabel rincian
+   (`eb64c70`), tipografi tujuh tingkat (`5e597c2`), aturan spasi
+   (keputusan rancangan butir 35), dan utang pengujian bukan-Owner,
+   keadaan gagal, dan B165 (`2bcb1ce`). Suite e2e penuh berikutnya
+   menunggu izin pemilik proyek. Temuan baru: luberan tabel di 768 px dan
+   kode mati pesan lokasi jurnal stok gudang (`modul/ui-ux.md`).

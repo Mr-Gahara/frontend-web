@@ -38,8 +38,18 @@ dan K-19). Web menyesuaikan diri dalam 13 commit, `e1ea235` sampai
 `read-location`, Setujui rekan selokasi (PG2a), langganan (LG4a),
 timeline reservasi (TL1a), metode tunai berlaci (PB15a), langkah jam
 buka (JB8a), dan paginasi server empat daftar (PV1a, PV2a)
-(`referensi/keputusan-penyesuaian-backend.md`). `nizar` `a79c087`
-(dokumen) belum masuk `ridho`.
+(`referensi/keputusan-penyesuaian-backend.md`).
+
+Keadaan per 17 November 2026: backend lokal `ridho` `3570bd4`, sama
+dengan remote, lima commit di atas `4a19be8`, termasuk gabungan `nizar`
+`a79c087`. Ridho menutup butir 185 (masa tenggang rotasi refresh, P83,
+B345) dan menyaring perangkat toko menurut lokasi kerja (AR36, B346).
+Web tidak berubah kodenya; B345 dibuktikan lewat spec baru
+`auth/tenggang-pin-refresh`, dan B346 belum dibuktikan web
+(`referensi/keputusan-penyesuaian-backend.md`). Suite penuh sesudahnya
+665 lolos, 1 gagal, dan 1 dilewati dari 667; kegagalannya bug tur gudang
+(TG2a) yang diperbaiki dan dibuktikan lewat spec terdampak
+(`inti/pengujian.md`, Baseline).
 
 Keadaan per 7 sampai 10 November 2026 dipindah ke
 `arsip/catatan-putaran.md` (Keadaan pekerjaan 7 sampai 10 November 2026)
@@ -84,44 +94,11 @@ ruang outlet lewat kanvas desain (JO1a dan JO2a, `fddb3c6`;
 
 ### Pekerjaan UI berikutnya
 
-Dicatat pemilik proyek 12 November 2026, dikerjakan sesudah putaran ini
-dengan alur kanvas desain seperti butir di bawah:
-
-1. **Laman Keuangan pindah ke sub-sidebar Keuangan**: selesai 12 November
-   2026. Keuangan dan Laporan menjadi dua menu lipat, bar tab dibuang,
-   judul dan kartu ringkasan tetap (`modul/keuangan.md`, SK1a dan SK2a).
-2. **Perbaikan bug visual di laman buat penjualan**: selesai 12 November
-   2026. Kolom kanan sticky menutupi tombol Buat Penjualan saat digulir;
-   kini berhenti di atas baris aksi (`modul/penjualan.md`, BP1a).
-3. **Belanja Stok untuk plan Basic**: selesai 12 November 2026, tombol
-   Catat pembelian dan Pembelian Stok sebagai menu tunggal
-   (`modul/keuangan.md`, BS4a dan BS5a).
-4. **Penyesuaian backend `yoga` `d6709a1`**: selesai 12 November 2026
-   (`referensi/keputusan-penyesuaian-backend.md`).
-5. **Stok keluar di detail penjualan (VD3a)**: selesai 12 November 2026,
-   desain A kanvas (`modul/penjualan.md`, VD4a sampai VD10a).
-6. **Paginasi server produk, bahan baku, dan inventory**: selesai
-   16 November 2026 setelah backend B340 sampai B342 (PV1a dan PV2a,
-   `624761a`, `e41fe76`, `6ab81aa`; `modul/inventaris.md` dan
-   `modul/produk-kategori.md`).
-7. **Bug dan cacat tampilan**: selesai 14 November 2026 (`609b36a`,
-   `0df0ca5`; `modul/ui-ux.md`, CV1a sampai CV14a). Sampel tampilan dan
-   pemindaian seluruh rute dashboard di 1280 dan 390 px, lalu perbaikan
-   teks terpotong, luberan HP, tabel 1280, menu aktif sidebar, peringatan
-   grafik, Libur B165, dialog hapus jadwal, Kosongkan tanggal, dan Buat
-   Posisi. "Akun non-aktif" ternyata seluruhnya sisa uji E2E. Temuan
-   tampilan tersisa (label filter jurnal, kolom Staf jadwal, menu Pindah
-   Dana, tab Booking, cincin fokus) selesai lewat kanvas desain di
-   `883a79b` (CV15a sampai CV18a). Suite e2e penuh 14 November 2026:
-   643 lolos dari 643 (`inti/pengujian.md`).
-8. **Fitur, rapian kode, dan utang pengujian**: selesai 14 November 2026.
-   Pemecahan buat penjualan dan `PolaRosterItem` wajib (`7c004c2`), label
-   kartu HP (`ceb8c95`), token warna (`c437d68`), tabel rincian
-   (`eb64c70`), tipografi tujuh tingkat (`5e597c2`), aturan spasi
-   (keputusan rancangan butir 35), dan utang pengujian bukan-Owner,
-   keadaan gagal, dan B165 (`2bcb1ce`). Suite e2e penuh berikutnya
-   menunggu izin pemilik proyek. Temuan baru: luberan tabel di 768 px dan
-   kode mati pesan lokasi jurnal stok gudang (`modul/ui-ux.md`).
+Kedelapan butir yang dicatat pemilik proyek 12 November 2026 selesai
+12 sampai 16 November 2026, dan daftarnya dipindah ke
+`arsip/catatan-putaran.md` (Pekerjaan UI 12 sampai 16 November 2026)
+pada 17 November 2026; rujukan "Pekerjaan UI berikutnya butir N" di
+dokumen lain merujuk daftar di sana.
 
 ### Menunggu pemilik proyek, dicatat 14 November 2026
 
@@ -207,9 +184,11 @@ A dibangkitkan ulang RG9a. Ketiganya selesai 10 November 2026: TP2b
   dan pembuktiannya dicatat di sana.
   Laporan baru hanya bila ada temuan baru: butir 185 (rotasi
   `pin-refresh` tanpa masa tenggang) dilaporkan 17 November 2026 atas
-  keputusan pemilik proyek. Butir 85 dan 107 (B50, B51)
-  dibuktikan dari kode 16 November 2026; yang belum dibuktikan web: 169
-  dan 178 (tanpa perubahan kontrak), serta B169 dan B170.
+  keputusan pemilik proyek, ditutup Ridho pada hari yang sama (B345,
+  `3570bd4`), dan dibuktikan web lewat `auth/tenggang-pin-refresh`.
+  Butir 85 dan 107 (B50, B51) dibuktikan dari kode 16 November 2026;
+  yang belum dibuktikan web: 169 dan 178 (tanpa perubahan kontrak),
+  B169, B170, dan B346.
 - Akun uji `toko@gmail.com` dinaikkan ke Pro lewat API admin, karena
   akun lama dibaca Basic (B212) dan Basic menolak sesi booking (B216).
   Riwayat langganannya kini berisi satu catatan `ubah-plan`.

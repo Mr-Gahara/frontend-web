@@ -237,6 +237,14 @@ Mesinnya mengikuti keputusan rancangan butir 32.
   `/dashboard/gudang/setup` tombol dan tur otomatis tidak tampil, karena
   menu gudang mengalihkan kembali ke setup selama Gudang belum
   terdaftar; tur pertama kali tampil setelah Gudang terdaftar.
+  Diperbaiki 17 November 2026 setelah suite penuh: topbar terpasang
+  selagi penjaga ruang gudang memuat lokasi, sehingga bila `/location`
+  lebih lambat dari jeda 400 ms tur terbuka di balik pemuat dan
+  pengalihan ke Setup Gudang mencatatnya sudah dilihat. Kini tur gudang
+  menunggu penjaga mengizinkan ruang dibuka (`useAksesGudang` di
+  `features/inventaris/use-akses-gudang.ts`, dipakai layout gudang dan
+  `kunciPanduanDashboard`); repro dengan respons lokasi ditunda 1,5 detik
+  gagal 2 dari 2 sebelum perbaikan dan lolos 2 dari 2 sesudahnya.
 
 ### OTP aksi Owner
 

@@ -1011,3 +1011,35 @@ backend beserta K-18 dan K-19 (P80 sampai P82, B330 sampai B344).
   mencari data uji di respons pertama daftar ikut keliru begitu daftar
   berhalaman (skenario P18 bahan baku dilewati); carilah lewat query
   server.
+
+## Penyesuaian backend `ridho` lokal `3570bd4`
+
+Diminta pemilik proyek pada 17 November 2026: `ridho` remote maju lima
+commit di atas `4a19be8` ke `3570bd4`, dan `ridho` lokal sudah sama
+dengannya. Ridho menggabung `nizar` `a79c087` (dokumen tinjauan Nizar),
+menutup butir 185 lewat masa tenggang rotasi refresh 30 detik (P83,
+B345, `5afa051`), dan menyaring perangkat toko menurut lokasi kerja
+(AR36, B346, `b73440f`) atas temuan tinjauan Nizar. `yoga` tidak maju.
+
+- **Langkah sesudah tarik**: seed, indeks, dan skrip migrasi tidak
+  berubah. Field `rotasiRefresh` di model akun dan pengguna tanpa indeks
+  dan tanpa pengisian data lama; backend cukup dinyalakan ulang dengan
+  env layanan uji.
+- **Keputusan pemilik proyek**: tidak ada; kedua perubahan tanpa
+  perubahan bentuk respons.
+- **Diubah di web**: tidak ada kode. Jangkar positif `f80bd16` di
+  `akses/jalur-bukan-owner` tetap, karena pemeriksaan ketiadaan menu
+  tanpa jangkar tetap lolos tanpa bukti walau sesi tidak lagi putus.
+- **Tidak mengubah web**: B346. Daftar perangkat Mesin Kasir (MK3b)
+  membaca respons apa adanya; bagi staf berlokasi kerja yang memegang
+  `kelola-perangkat-kasir` pilihannya kini lebih sedikit. Belum
+  dibuktikan web, karena pengguna uji berlokasi kerja
+  (`tests/helpers/terkunci-uji.ts`) hanya memegang izin baca, tanpa
+  `kelola-perangkat-kasir`.
+- **Dibuktikan dari respons nyata**: B345 lewat spec baru
+  `auth/tenggang-pin-refresh` (repro butir 185: `route.fetch` memutar
+  token, cookie lama dikembalikan, permintaan dibatalkan, lalu halaman
+  lain dibuka), lolos 3 dari 3 dengan `--repeat-each 3`. Varian sementara
+  yang menunggu 31 detik sebelum membuka halaman lain gagal dengan
+  `pin-refresh` 401, sehingga spec itu memang menguji masa tenggang
+  (`kontrak/temuan.md` butir 185).

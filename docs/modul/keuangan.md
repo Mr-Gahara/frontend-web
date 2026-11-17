@@ -478,7 +478,7 @@ setelah backend menerapkannya.
 
 ### Sub-menu Keuangan dan Laporan
 
-Diputuskan pemilik proyek pada 12 November 2026 (`inti/status.md`,
+Diputuskan pemilik proyek pada 12 November 2026 (`arsip/catatan-putaran.md`,
 Pekerjaan UI berikutnya butir 1), karena tab Keuangan sudah terlalu
 banyak. Menggantikan tab LR4a dan tab Belanja Stok serta Mesin Kasir
 sebagai jalan masuk; rutenya tidak berubah.

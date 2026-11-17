@@ -15,6 +15,108 @@ Rujukan bagian di dalamnya, seperti "di bawah" dan "(Utang pengujian)",
 ditulis menurut letak lamanya di `referensi/playwright.md` dan
 `inti/pengujian.md`.
 
+Dipindah dari `inti/pengujian.md` pada 17 November 2026: baseline 13
+dan 14 November 2026, terbaru lebih dulu.
+
+**Baseline per rapian UI dan utang pengujian** (web `2bcb1ce`, backend
+`ridho` lokal `d6709a1`, 14 November 2026): vitest 1100 lolos (5 unit test
+`toggleDiskonSelection`, 1 `denganAlfa`, 3 integrasi `DataTable`). Spec
+ditulis atau diubah dan dijalankan per berkas, tanpa OTP: `akses/jalur-bukan-owner`
+4, `kelola-jadwal` 3, `kelola-pelanggan` 3, `crud-role` 1,
+`lihat-jurnal-stok` 1, `daftar-surat-jalan` 1 lolos dan 1 skipped (tidak
+ada surat jalan Belum Dikirim), catat pembelian bukan-Owner 1, dan
+`generate-jadwal` 4. Perubahan tampilan sesudah suite penuh 14 November
+2026 (label kartu HP, tabel rincian, tipografi) belum dijalankan e2e dan
+masuk suite penuh berikutnya. Harapan suite penuh 653: 643 ditambah
+empat skenario bukan-Owner, satu B165, dua email pelanggan, satu jurnal
+gudang, dan dua surat jalan (hitungan), dengan skip bersyarat dialog
+batal surat jalan bila datanya kosong; menunggu izin pemilik proyek.
+
+**Suite penuh per cacat tampilan 14 November 2026** (web `a5fa419`,
+backend `ridho` lokal `d6709a1`, 14 November 2026, pukul 11.45 sampai
+12.24 WIB, reporter `line,json`, atas izin pemilik proyek): e2e 643 lolos
+dari 643, tanpa kegagalan dan tanpa skip; skip bersyarat status staf tidak
+terjadi. Termasuk spec ber-OTP (verifikasi email, reset PIN Owner, dan
+Akun Toko). Harapan 642 di baseline sebelumnya salah hitung: 637 adalah
+jumlah lolos, dan totalnya 638 dengan skip status staf, sehingga ditambah
+kelima skenario baru menjadi 643. Vitest 1091 lolos. Harapan suite penuh
+berikutnya 643, termasuk skip status staf bila datanya kosong (hitungan).
+
+**Baseline per perbaikan cacat tampilan** (web `0df0ca5`, backend `ridho`
+lokal `d6709a1`, 14 November 2026): vitest 1091 lolos (9 unit test baru:
+`hrefMenuAktif` 4, `PilihTanggal` 3, dan `adaJadwalLokasiLain` 2). Spec e2e
+terdampak (dashboard, jurnal stok, pembelian stok, pengajuan stok, stok,
+kategori, produk, keuangan, reservasi, diskon, pengguna, jadwal, roles,
+daftar penjualan, kategori beban, gudang, dan pratinjau jam buka) 378 lolos,
+1 gagal, dan 1 skipped (skip bersyarat status staf), tanpa spec ber-OTP.
+Kegagalannya skenario baru Kosongkan di `penjualan/daftar-penjualan.spec.ts`
+(salah spec): Terapkan Pencarian menutup panel filter, dan filter tanpa
+tanggal sama dengan kunci query awal yang masih segar sehingga tidak ada
+permintaan baru. Setelah diperbaiki, spec itu lolos 6/6, dan skenarionya
+3/3 dengan `--repeat-each 3`. Skenario baru lain: Libur nonaktif B165 di
+`jadwal/jadwal/kelola-jadwal.spec.ts` (sel dan Tambah Manual). Sesudah
+batas dua baris (CV12a), spec tabel terdampak (daftar penjualan,
+pengajuan stok, diskon, pengguna, tarif, dan folder keuangan) dijalankan
+ulang atas izin pemilik proyek: 147 lolos, tanpa OTP. Kedua run itu
+bukan suite penuh dan tidak memakai kuota OTP (0 berkas OTP), tetapi run
+pertama mencakup lebih dari separuh suite; sesudahnya tidak ada run e2e
+sampai suite penuh atas izin pemilik proyek.
+Sesudahnya `883a79b` (CV15a sampai CV18a): spec terdampak 31 lolos
+(lihat-jurnal-stok, lihat-jadwal, pindah-dana, tutup-akun-bersaldo, dan spec
+baru `reservasi/navigasi/tab-navigasi.spec.ts` dengan 2 skenario); asersi
+lebar Staf dan kedua skenario tab terbukti gagal terhadap kode lama.
+Harapan suite penuh sempat ditulis 642 (salah hitung; lihat suite penuh
+14 November 2026 di atas).
+
+**Suite penuh per OTP aksi Owner** (web `8c3c1ea`, backend `ridho` lokal
+`d6709a1`, 13 November 2026, pukul 11.47 sampai 12.24 WIB, reporter
+`line,json`): e2e 636 lolos, 1 gagal, dan 1 skipped dari 638, sesuai
+harapan hitungan 638. Yang dilewati skip bersyarat status staf. Ketiga
+skenario ber-OTP Akun Toko (ubah email, ubah password dengan password lama
+salah lebih dulu, dan hapus akun) lolos pada run pertamanya.
+Kegagalannya `auth/reset-pin-owner.spec.ts`: PIN tersimpan dan login
+dengan PIN baru berhasil, tetapi Owner mendarat di dashboard, bukan
+kembali ke wizard, karena `/lupa-pin` tidak meneruskan `?kembali=/setup`
+(bug web, bukan spec). Diperbaiki lewat `denganKembali`
+(`lib/auth/tujuan.ts`) dan dibuktikan tanpa OTP: skenario Lupa PIN? di
+`auth/tampilan-login-pengguna.spec.ts` kini memeriksa `kembali` bertahan
+dua arah, dan bersama skenario wizard Owner tanpa sesi 3 lolos. Vitest
+1082 lolos. Atas izin pemilik proyek, spec ber-OTP reset PIN diulang
+sendirian: ulangan pertama berhenti sebelum kode diminta, karena penunggu
+`**/lupa-pin` tidak mencocokkan `?kembali=%2Fsetup` (0 kode terpakai);
+setelah penunggunya diperbaiki, ulangan kedua lolos (1 kirim dan 1
+periksa kode). Harapan suite penuh berikutnya 637 lolos, ditambah skip
+status staf bila datanya kosong (hitungan).
+
+**Baseline per hapus akun** (13 November 2026): vitest 1081 lolos (3 unit
+test baru di `tests/unit/features/akun-toko/akun-toko.test.ts`). Spec
+terdampak `pengaturan/akun-toko.spec.ts` dan `tests/e2e/profil` 13 lolos:
+langkah 1 hapus akun (tombol aktif hanya bila nama toko cocok, tanpa
+mengirim kode, tanpa meluber), dan profil tanpa Zona Bahaya. Skenario baru
+ber-OTP hapus akun di `pengaturan/akun-toko-otp.spec.ts` (akun klien
+sekali pakai) menunggu suite penuh akhir putaran. Harapan suite penuh 638:
+637 ditambah skenario itu (hitungan).
+
+**Baseline per halaman Akun Toko** (13 November 2026): vitest 1078 lolos (6
+unit test baru `tests/unit/features/akun-toko/akun-toko.test.ts`). Spec
+terdampak `tests/e2e/pengaturan` dan `auth/gerbang-rute` 52 lolos, termasuk
+spec baru `pengaturan/akun-toko.spec.ts` (2 skenario: Owner membuka dari
+kartu Pengaturan dan memeriksa tahap 1 kedua dialog tanpa mengirim kode di
+390, 768, dan 1280 px; pengguna baca-saja tanpa kartu dan ditolak 403).
+Spec baru ber-OTP `pengaturan/akun-toko-otp.spec.ts` (1 skenario, akun
+klien sekali pakai) belum dijalankan dan menunggu suite penuh akhir
+putaran. Harapan suite penuh 637: 634 ditambah ketiga skenario itu
+(hitungan).
+
+**Baseline per reset PIN Owner** (13 November 2026): vitest 1072 lolos (4
+unit test baru `tests/unit/features/auth/reset-pin-owner.test.ts`). Spec
+terdampak `auth/tampilan-login-pengguna.spec.ts` 5 lolos, termasuk
+skenario baru tahap 1 `/lupa-pin` tanpa meluber di 390, 768, dan 1280 px
+tanpa mengirim kode. Spec baru ber-OTP `auth/reset-pin-owner.spec.ts` (1
+skenario, akun klien sekali pakai) belum dijalankan dan menunggu suite
+penuh akhir putaran. Harapan suite penuh 634: 632 ditambah kedua skenario
+itu (hitungan).
+
 Dipindah dari `inti/pengujian.md` pada 14 November 2026: baseline 21
 Oktober sampai 12 November 2026, terbaru lebih dulu.
 

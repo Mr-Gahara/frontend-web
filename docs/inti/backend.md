@@ -287,6 +287,15 @@ baru `jamOperasionalToko.js` (P81, wajib sejak `2d2fb90`) dijalankan
 pemilik proyek: mode laporan 7 toko tanpa jam, lalu `--terapkan`
 membersihkan field lama ketujuhnya tanpa ada yang dipindah
 (`referensi/keputusan-penyesuaian-backend.md`).
+Pada 17 November 2026 `ridho` remote maju lima commit di atas `4a19be8`
+ke `3570bd4`, termasuk gabungan `nizar` `a79c087` (`782ccde`): masa
+tenggang rotasi refresh (P83, B345, butir 185) dan perangkat toko per
+lokasi kerja (AR36, B346). `ridho` lokal sudah sama dengannya, dan
+`nizar` serta `yoga` tidak punya commit di luarnya. Seed, indeks, dan
+skrip migrasi tidak berubah; field baru `rotasiRefresh` di model akun
+dan pengguna tanpa indeks, sehingga tidak ada langkah sesudah tarik
+selain menyalakan ulang backend
+(`referensi/keputusan-penyesuaian-backend.md`).
 
 Sejak 16 November 2026 Ridho, sebagai pemimpin tim backend, mengambil
 alih seluruh pekerjaan backend di modul siapa pun sampai backend siap
