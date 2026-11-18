@@ -832,6 +832,17 @@ yang disalurkan ke `tail -3` mencetak kode 0 padahal alat itu keluar 1.
   from "vitest"`: dua kali nama baru masuk ke impor vitest (16 November
   2026). Jangkarkan ke baris yang menyebut modulnya, misalnya
   `import {\n  lingkupOutlet,`, atau sisipkan sebelum `} from "<modul>"`.
+- **zsh tidak memecah variabel menjadi beberapa argumen.** `F=$(grep -rl
+  ...); npx playwright test $F` mengirim seluruh daftar sebagai satu
+  argumen, dan Playwright menjawab "No tests found" dengan kode keluar 0,
+  sehingga run tampak berhasil (18 November 2026). Pakai
+  `grep -rl ... | xargs npx playwright test`, atau `${=F}`.
+- **Keluaran `mongosh` dari stdin diawali prompt.** `docker exec -i
+  tachyon-mongo mongosh db_produk --quiet < skrip.js` menulis baris
+  pertama setelah `rs0 [direct: primary] db_produk> ...`, sehingga
+  `grep -v "^rs0"` ikut membuang baris hasil. Bersihkan dengan
+  `sed 's/^rs0 \[direct: primary\] db_produk> [. ]*//'`, atau pakai
+  `--eval` untuk skrip pendek (18 November 2026).
 
 ## Catatan form (React Hook Form dan Zod)
 

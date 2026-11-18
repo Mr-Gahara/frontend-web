@@ -49,6 +49,20 @@ Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-bac
   seperti itu, bila kelak ada, tampil bernama "-" tanpa menu Edit dan
   Hapus (`6ab81aa`).
 
+### Pembuktian B169 dan B170
+
+Diputuskan pemilik proyek 18 November 2026
+(`referensi/keputusan-penyesuaian-backend.md`, Pembuktian web 18 November
+2026).
+
+- **SR1a: isian stok produk beresep di form ubah menampilkan stok
+  terhitung** dari respons detail (B169), bukan 0 yang dipaksa form
+  selama ada resep. Isiannya tetap terkunci dan payload tetap mengirim
+  stok 0 untuk produk beresep (`features/produk/payload.ts`); Unlimited
+  tetap 0, dan resep lama yang dihapus seluruhnya tetap mengosongkan stok
+  agar diisi ulang. Produk baru beresep tampil 0 (`4dc08e2`). Opsi
+  lainnya: dibiarkan 0.
+
 ## Catatan
 
 ### Catatan dari utang kecil modul produk dan pemformat rupiah

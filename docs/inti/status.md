@@ -11,21 +11,23 @@ memperbarui dokumentasi).
 ## Metrik sisa pekerjaan
 
 Angka awal sebelum Fase 2, sebagian sudah berkurang seiring migrasi modul.
-Diukur ulang per penyesuaian `nizar` (`729c16a`), tidak berubah dari `597a163`.
-Baris warna diukur ulang per `9cd22e1` (11 Oktober 2026); keempat angka
-lain tidak berubah sampai commit itu:
+Diukur ulang 18 November 2026 per `4dc08e2` dengan perintah di
+`docs/README.md`; heksadesimal dihitung dengan
+`grep -rEo "#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b" app components features lib`.
 
-| Hal | Awal | Per `729c16a` | Catatan |
+| Hal | Awal | Per `4dc08e2` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 0 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), 4 setelah halaman profil, login, dan sidebar (`57a7084`), dan 0 setelah error ESLint warisan (`4f19e77`) |
-| Kemunculan `_id` | - | 8 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna |
+| Kemunculan `_id` | - | 7 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna. Per 18 November 2026 ketujuhnya komentar normalisasi (`id`, bukan `_id`), tidak ada di kode |
 | `useAuthGuard()` berulang di halaman | 49 | 2 | Dihitung di `app/` saja. Yang tersisa `app/dashboard/layout.tsx`, satu-satunya pemanggil, dan berkas hook-nya sendiri; ke-24 pemanggilan berulang di `app/` dan ke-13 di `features/` dibuang di `628f52e` (26 sebelum itu). Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, halaman diskon, dan halaman profil) |
-| Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | 68 (per `9cd22e1`) | Lima warna utama menjadi token di `app/globals.css` (`584a2d8`, `ba28f25`; keputusan WR1a sampai WR4a). Tepat sebelum penggantian terukur 3.764 di `app`, `components`, `features`, dan `lib`. Yang tersisa: warna utama di luar kelas (konstanta palet lokal halaman reservasi dan tarif, serta warna grafik) dan warna lain yang belum punya token |
+| Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | 41 | Lima warna utama menjadi token di `app/globals.css` (`584a2d8`, `ba28f25`; keputusan WR1a sampai WR4a). Tepat sebelum penggantian terukur 3.764 di `app`, `components`, `features`, dan `lib`. Per `9cd22e1` tersisa 68. Sejak `c437d68` (CV21a) tidak ada lagi pemakaian di halaman: ke-41 itu 36 definisi token di `app/globals.css` dan 5 selektor bawaan shadcn di `components/ui/chart.tsx` |
 | Berkas di atas 700 baris | 7 | 1 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.087 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702). Per `9195472` menjadi 4: `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700 (714 baris) karena penjaga ruang (`eb0181f`), dan buat penjualan menjadi 1.087 baris setelah kode mati dibuang (`6b5e1cc`). Per `b887278` form produk menjadi 809 baris (pemeriksaan satuan resep). Per `628f52e` tetap 4; detail stock opname menjadi 712 baris setelah pemanggilan guard dibuang. Per `7d4c234` form produk 835 baris (isian stok minimal, B237). Per `5b8cbd9` tetap 4: buat penjualan 1.098 baris (`waktuTransaksi` dan jam berjalan, `7a08b63`), form produk 809, detail stock opname 702, dan `components/ui/sidebar.tsx` 702. Per `a611b59` menjadi 3: dialog aksi detail stock opname dipisah, sehingga halamannya 612 baris. Per `11ed2d4` menjadi 1: buat penjualan dipecah menjadi 693 baris (`584d6ae`) dan form produk 673 baris; tersisa `components/ui/sidebar.tsx` (702, berkas shadcn) |
 
 Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
-setiap commit tetap fokus. Warna utama sudah menjadi token pada fase UI/UX
-11 Oktober 2026; tipografi dan spasi belum.
+setiap commit tetap fokus. Warna utama menjadi token pada fase UI/UX
+11 Oktober 2026, seluruh warna dan tipografi 14 November 2026 (CV21a,
+CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
+(keputusan rancangan butir 35, SP1a).
 
 ## Pekerjaan berikutnya
 
@@ -50,6 +52,17 @@ Web tidak berubah kodenya; B345 dibuktikan lewat spec baru
 665 lolos, 1 gagal, dan 1 dilewati dari 667; kegagalannya bug tur gudang
 (TG2a) yang diperbaiki dan dibuktikan lewat spec terdampak
 (`inti/pengujian.md`, Baseline).
+
+Keadaan per 18 November 2026: backend lokal `ridho` `2790fc7`, satu
+commit dokumen di atas `3570bd4` (checkpoint `status/ridho.md`, butir 3
+mencatat B169, B170, dan B346 menunggu web). Seluruh kontrak yang belum
+dibuktikan web ditutup: B169, B170, dan B346 lewat e2e (`5f57454`), butir
+178 dan 169 lewat skrip, dan butir 77 diuji ulang 570 kali tanpa
+tereproduksi (`referensi/keputusan-penyesuaian-backend.md`, Pembuktian web
+18 November 2026). Sesudahnya form ubah produk beresep menampilkan stok
+terhitung (SR1a), seluruh pembungkus halaman diseragamkan dengan 16 px di
+HP (SP1a, SP2a), metrik diukur ulang, dan data uji yang menumpuk
+dibersihkan (Utang kecil dari penyesuaian backend `4759208`).
 
 Keadaan per 7 sampai 10 November 2026 dipindah ke
 `arsip/catatan-putaran.md` (Keadaan pekerjaan 7 sampai 10 November 2026)
@@ -169,10 +182,22 @@ A dibangkitkan ulang RG9a. Ketiganya selesai 10 November 2026: TP2b
 
 ### Utang kecil dari penyesuaian backend `4759208`
 
-- Data toko uji wizard (lokasi, kategori, produk, pajak, dan seterusnya)
-  menetap di basis data development setelah akun ujinya dihapus, karena
-  hapus akun tidak menghapus tokonya; setiap run spec setup menambah enam
-  toko.
+- Data toko uji wizard sempat menetap: 5 toko "Kopi Senja E2E" dan 10
+  akun `e2e.*` per 18 November 2026. Penyebabnya akun uji yang tidak
+  terhapus karena run yang gagal, bukan hapus akun: backend menghapus
+  seluruh data toko bersama akunnya (`akunService.deleteUserByAdmin`
+  memanggil `tenantService.wipeTenantData`). Kesepuluh akun dihapus lewat
+  API admin 18 November 2026, dan kelima toko ikut terhapus tanpa dokumen
+  yatim.
+- Data uji yang menumpuk di toko uji dibersihkan 18 November 2026 (pemilik
+  proyek): skrip mongosh sekali pakai dengan mode tinjau, setelah basis
+  data dicadangkan ke
+  `~/Documents/cadangan-db/db_produk-sebelum-bersih-2026-11-18.gz`.
+  Dihapus 579 akun kas E2E nonaktif, 91 metode E2E nonaktif, 370 diskon
+  E2E nonaktif, 576 shift uji nonaktif, dan 541 pelanggan terhapus lunak.
+  Yang dirujuk dokumen lain tetap, yaitu 148 akun kas yang dirujuk jurnal
+  transfer; penjualan, booking, opname, transfer, dan jurnal tidak
+  disentuh. Spec terdampak 177 lolos sesudahnya.
 - Laporan untuk tim backend yang ditunda sejak 6 November 2026 tidak
   disusun (LB1a, pemilik proyek 16 November 2026): Ridho membaca repo web
   `70d2648` pada 16 November 2026, mencatat butir 168 sampai 170, 172
@@ -186,9 +211,11 @@ A dibangkitkan ulang RG9a. Ketiganya selesai 10 November 2026: TP2b
   `pin-refresh` tanpa masa tenggang) dilaporkan 17 November 2026 atas
   keputusan pemilik proyek, ditutup Ridho pada hari yang sama (B345,
   `3570bd4`), dan dibuktikan web lewat `auth/tenggang-pin-refresh`.
-  Butir 85 dan 107 (B50, B51) dibuktikan dari kode 16 November 2026;
-  yang belum dibuktikan web: 169 dan 178 (tanpa perubahan kontrak),
-  B169, B170, dan B346.
+  Butir 85 dan 107 (B50, B51) dibuktikan dari kode 16 November 2026, dan
+  B169, B170, B346, butir 178, serta butir 169 (sebagian) pada
+  18 November 2026 (`referensi/keputusan-penyesuaian-backend.md`,
+  Pembuktian web 18 November 2026). Tidak ada lagi kontrak yang menunggu
+  pembuktian web.
 - Akun uji `toko@gmail.com` dinaikkan ke Pro lewat API admin, karena
   akun lama dibaca Basic (B212) dan Basic menolak sesi booking (B216).
   Riwayat langganannya kini berisi satu catatan `ubah-plan`.
@@ -264,10 +291,11 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
 ### Utang kecil dari perbaikan HP Keuangan
 
 - Padding area gulir dashboard di HP turun dari 24 px menjadi 16 px
-  untuk seluruh halaman (`b3f8698`, `modul/keuangan.md` KH2b). Spec yang
-  punya skenario lebar HP lolos (Keuangan, dashboard outlet, dan
-  langganan), tetapi halaman lain belum dilihat langsung di HP. Suite
-  e2e penuh 7 November 2026 lolos untuk seluruh spec lama.
+  untuk seluruh halaman (`b3f8698`, `modul/keuangan.md` KH2b). Seluruh
+  rute statis dipindai di 390 px 18 November 2026: hanya 12 dari 78 yang
+  16 px, karena pembungkus halaman menambah padding sendiri. Selesai
+  18 November 2026 lewat SP1a dan SP2a (`modul/ui-ux.md`, Padding HP dan
+  pembungkus halaman): 69 dari 78, sisanya rute yang dikecualikan.
 
 ### Utang kecil dari penyesuaian backend `ridho` `0024eb9`
 

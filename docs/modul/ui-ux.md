@@ -332,6 +332,8 @@ Diputuskan pemilik proyek pada 14 November 2026.
   18 px tidak ikut tebal; h1 dan h2 menulis `font-bold` sendiri.
 - **CV27b: spasi tetap skala Tailwind dengan aturan tertulis** (arah B):
   keputusan rancangan butir 35; halaman diseragamkan saat disentuh.
+  Seluruh pembungkus diseragamkan sekaligus 18 November 2026 (SP1a, Padding
+  HP dan pembungkus halaman).
 
 ### Luberan tabel 768 px
 
@@ -401,6 +403,48 @@ timeline) dan salah deteksi input tersembunyi Profil Toko.
 Helper `tanpaLuberWadah` (`tests/helpers/tata-letak-uji.ts`) memeriksa
 wadah gulir dashboard dan wadah tabel, karena `tanpaGulirSamping` hanya
 mengukur dokumen dan tidak menangkap luberan di dalam wadah gulir.
+
+### Padding HP dan pembungkus halaman
+
+Diputuskan pemilik proyek pada 18 November 2026, dari pindaian 390 px
+(jarak tepi isi dari tepi layar) dan pindaian kelas pembungkus di 1280 px
+seluruh rute statis `app/dashboard`. Sebelumnya hanya 12 dari 78 rute
+berjarak 16 px di HP (KH2b); 32 rute 32 px karena pembungkus `px-4`
+ditumpuk di atas padding dashboard, sisanya 24 atau 40 px, dan halaman
+Inventaris serta Reservasi sekitar 60 px karena layout dan halamannya
+sama-sama memberi `px-4 py-8`. Pembungkus yang sesuai butir 35 hanya 40
+dari 78, dengan 18 variasi lain.
+
+- **SP1a: 16 px di HP untuk seluruh halaman** (opsi pertama dari tiga;
+  lainnya kartu ikut diseragamkan, atau butir 35 apa adanya dengan 32 px
+  di HP). Seluruh pembungkus halaman dan layout menjadi `mx-auto flex
+  w-full max-w-{3xl|6xl|7xl} flex-col gap-6 sm:px-4 sm:py-8` (keputusan
+  rancangan butir 35), di 76 berkas (`1072484`): mulai `sm` sama dengan butir 35
+  sebelumnya, di HP tanpa padding tambahan. Lebar yang menyimpang dipilih
+  dari tiga lebar butir 35: form `4xl` dan `5xl` (Produk, Catat Pembelian
+  Stok, form dan revisi Pengajuan dan Transfer, Tarif) menjadi `3xl`;
+  daftar dan detail `4xl`, `5xl`, atau tanpa lebar (Role, Buat Role,
+  Kategori, detail penjualan, transfer, penerimaan, dan pengajuan,
+  Langganan, Stock Adjustment, Stock Opname, Shift, Pola Roster) menjadi
+  `6xl`; `max-w-2xl` (Akun Toko, Profil) menjadi `3xl`; `max-w-350`
+  (Pengguna) menjadi `7xl`. Layout Keuangan dan halaman di dalamnya
+  (`sm:p-6`, `p-4 sm:p-6`, `gap-8`) ikut aturan yang sama. Dikecualikan:
+  dashboard ruang outlet dan gudang, serta kalender jadwal dan generate.
+  Kartu tidak disentuh. Padding ganda layout dan halaman di lebar meja
+  (Inventaris, Reservasi, Keuangan) tetap, karena mulai `sm` sengaja
+  tidak berubah.
+- **SP2a: kartu tengah Setup Gudang dan Pengaturan Gudang hanya membuang
+  padding HP** (`p-4` menjadi `sm:p-4`); kartunya tetap di tengah layar
+  (opsi pertama dari tiga; lainnya pembungkus standar rata atas, atau
+  dibiarkan).
+
+Sesudahnya 69 dari 78 rute berjarak 16 px di HP; sisanya rute yang
+dikecualikan, dan Setup Gudang yang di toko uji dialihkan ke dashboard
+gudang. Pindai memakai `~/.cache/frontend-web/alat/pindai-visual`
+ditambah dua spec sementara (padding dan pembungkus) yang tidak di-commit.
+Pindaian jarak tepi mengambil kotak terkiri di halaman, sehingga padding
+bersarang di bawah judul layout (Keuangan) tidak terbaca; kelas
+pembungkus dibaca dari kode.
 
 ## Catatan
 
@@ -659,7 +703,11 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
   angka 68 belum diukur ulang. Selesai di `c437d68` (CV21a): tidak ada
   heksadesimal tersisa di `app`, `components`, `features`, dan `lib` selain
   `lib/warna.ts`. Tipografi selesai di `5e597c2` (CV24a sampai CV26a);
-  spasi dicatat sebagai aturan (keputusan rancangan butir 35, CV27b).
+  spasi dicatat sebagai aturan (keputusan rancangan butir 35, CV27b), dan
+  seluruh pembungkus halaman diseragamkan 18 November 2026 (SP1a). Diukur
+  ulang 18 November 2026: 41 kemunculan, yaitu 36 definisi token di
+  `app/globals.css` dan 5 selektor bawaan shadcn di
+  `components/ui/chart.tsx`.
 - Pemindaian 768 px (14 November 2026): hampir 20 tabel daftar lebih lebar
   dari wadahnya di lebar tablet (misalnya Produk +167, Stock Adjustment
   +245, Penjualan +179, Tarif +184 px), karena kartu HP baru aktif di

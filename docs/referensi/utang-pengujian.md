@@ -116,7 +116,13 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (PB13a, `kontrak/temuan.md` butir 81). Payload bersaldo hanya diperiksa
   lewat `POST` yang dijawab gagal. Per 14 November 2026 tenant uji punya 663 akun
   non-aktif, seluruhnya berawalan "E2E", dan halaman Akun Kas menampilkan
-  "Akun non-aktif (663)".
+  "Akun non-aktif (663)". Dibersihkan 18 November 2026 lewat skrip mongosh
+  (`inti/status.md`, Utang kecil dari penyesuaian backend `4759208`): yang
+  tidak dirujuk dokumen lain dihapus, dan 148 yang dirujuk jurnal transfer
+  tetap; sesudah spec terdampak dijalankan ulang tinggal 157. Metode,
+  diskon, dan shift uji nonaktif serta pelanggan terhapus lunak
+  dibersihkan bersamanya dan kembali tumbuh per run seperti tercatat di
+  butirnya masing-masing.
 - **`hapusLewatApi` menerima 404 sebagai sudah terhapus**, padahal route
   yang dihapus backend juga menjawab 404. Route hapus yang hilang tidak
   terdeteksi helper ini; yang menangkapnya adalah audit endpoint
@@ -432,6 +438,17 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   `tests/e2e/keuangan/mesin-kasir.spec.ts` (alur tambah, buka dari
   aplikasi, tutup dengan catatan, ubah, lepas, dan HP tanpa gulir ke
   samping) serta unit test `tampilan.ts`, `filter.ts`, dan `pesan.ts`.
+- **Peran dan pengguna uji "E2E Kasir Outlet" beserta perangkat
+  aplikasinya menetap** (`5f57454`, B346): dibuat sekali lewat API dan
+  dipakai ulang, sehingga tidak menumpuk. Perangkat
+  `E2E-KASIR-OUTLET-DEVICE-001` menjadi TRUSTED sebagai perangkat pertama
+  pengguna itu dan tidak dicabut, karena perangkat yang dicabut kembali
+  PENDING saat login berikutnya. Pengguna itu ikut tampil di daftar
+  pengguna dan pilihan login PIN.
+- **B170 toko lain memakai akun klien sekali pakai** per run
+  (`stok-produk-beresep`), dihapus lewat API admin di akhir; backend
+  menghapus tokonya bersama akun, sehingga tidak menumpuk selama
+  penghapusannya berhasil.
 - **Jalur Mesin Kasir tanpa izin kelola teruji e2e sejak `cbfa23b`**
   lewat pengguna baca-saja (tanpa tambah, ubah, dan lepas, dan tanpa
   `GET /sesikasir/perangkat`). Yang masih hanya teruji di unit test:

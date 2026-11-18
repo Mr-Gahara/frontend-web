@@ -292,7 +292,11 @@ Diputuskan pemilik proyek pada 6 November 2026, dari pratinjau Revisi 1
   di bawah `sm` (dari `p-6`), dan layout Keuangan serta halaman di
   dalamnya tidak menambah padding sendiri di bawah `sm`. Isi tab di HP
   menjadi sekitar 330 px dari lebar 390 px, sebelumnya sekitar 234 px.
-  Opsi lainnya: hanya layout Keuangan, atau dibiarkan.
+  Opsi lainnya: hanya layout Keuangan, atau dibiarkan. Diperluas ke
+  seluruh halaman 18 November 2026 (`modul/ui-ux.md`, SP1a): layout
+  Keuangan dan halaman di dalamnya memakai pembungkus butir 35
+  (`sm:px-4 sm:py-8`); Belanja Stok dan Mutasi yang masih memberi `p-4`
+  di HP ikut dibersihkan.
 - **KH3a: halaman Ringkasan Laba/Rugi ikut dibersihkan** dari padding
   sendirinya di HP, sama dengan Akun Kas.
 

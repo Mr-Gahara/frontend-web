@@ -372,8 +372,15 @@ sama (submodul pengajuan stok, di bawah).
     proyek, 14 November 2026, `5e597c2`; `modul/ui-ux.md`, CV24a sampai
     CV26a).
 35. **Spasi memakai skala Tailwind dengan aturan tertulis.** Pembungkus
-    halaman `px-4 py-8 gap-6` dengan tiga lebar: `max-w-3xl` untuk form,
-    `max-w-6xl` untuk daftar, dan `max-w-7xl` untuk halaman lebar. Kartu
-    `p-4 sm:p-6 rounded-2xl`. Halaman yang masih berbeda diseragamkan saat
-    disentuh, bukan sekaligus (pemilik proyek, 14 November 2026;
-    `modul/ui-ux.md`, CV27b).
+    halaman `mx-auto flex w-full max-w-* flex-col gap-6 sm:px-4 sm:py-8`
+    dengan tiga lebar: `max-w-3xl` untuk form, `max-w-6xl` untuk daftar dan
+    detail, dan `max-w-7xl` untuk halaman lebar. Di HP pembungkus tidak
+    menambah padding, sehingga isi berjarak 16 px dari tepi, sama dengan
+    padding area gulir dashboard (KH2b); layout yang membungkus halaman
+    (Inventaris, Reservasi, Keuangan) memakai kelas yang sama. Kartu
+    `p-4 sm:p-6 rounded-2xl`. Dikecualikan: dashboard ruang outlet dan
+    gudang, kalender jadwal dan generate, serta kartu tengah Setup Gudang
+    dan Pengaturan Gudang yang hanya membuang padding HP (`sm:p-4`).
+    Seluruh pembungkus diseragamkan 18 November 2026; aturan "saat
+    disentuh" dari 14 November 2026 berakhir (pemilik proyek, 14 dan
+    18 November 2026; `modul/ui-ux.md`, CV27b, SP1a, dan SP2a).

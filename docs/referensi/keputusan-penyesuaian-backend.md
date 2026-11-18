@@ -1043,3 +1043,53 @@ B345, `5afa051`), dan menyaring perangkat toko menurut lokasi kerja
   yang menunggu 31 detik sebelum membuka halaman lain gagal dengan
   `pin-refresh` 401, sehingga spec itu memang menguji masa tenggang
   (`kontrak/temuan.md` butir 185).
+
+## Pembuktian web 18 November 2026
+
+Diminta pemilik proyek pada 18 November 2026: menutup kontrak backend yang
+masih `Menunggu verifikasi` atau belum dibuktikan web (`inti/status.md`).
+Backend `ridho` lokal `2790fc7`, satu commit dokumen di atas `3570bd4`
+(checkpoint `status/ridho.md` butir 3 mencatat B169, B170, dan B346 menunggu
+web); `nizar` dan `yoga` tidak punya commit di luarnya. Seed, indeks, dan
+skrip migrasi tidak berubah.
+
+- **Keputusan pemilik proyek**:
+  - Toko lain untuk B170 dibuat sekali pakai lewat API admin dan wizard,
+    lalu akunnya dihapus.
+  - B346 memakai peran dan pengguna uji baru "E2E Kasir Outlet" (izin
+    baca Owner tanpa lintas outlet, `kelola-perangkat-kasir`, lokasi kerja
+    Outlet, akses web dan app) dengan perangkat aplikasi tetap yang
+    menetap.
+  - Butir 178 dibuktikan lewat skrip API seperti 10 November 2026, dan
+    169 lewat hitungan sebelum dan sesudah `db:data-bawaan` (skrip itu
+    tidak punya mode laporan, sehingga opsi mode laporan diganti).
+  - SR1a: form ubah produk beresep menampilkan stok terhitung
+    (`modul/produk-kategori.md`).
+- **Dibuktikan e2e** (`5f57454`): B169 lewat
+  `inventaris/produk/stok-produk-beresep` (stok bahan diubah lewat opname
+  inventory tanpa menyimpan ulang produk; `updatedAt` tetap, detail
+  ter-cache, daftar ber-`cari`, baris daftar produk, dan sejak SR1a isian
+  form ubah menampilkan stok terhitung; `locationID` rusak 400). B170 di
+  berkas yang sama: id rusak di halaman ubah 404 dengan pesan "Produk
+  tidak ditemukan.", dan produk toko uji yang masih di cache dibuka dari
+  toko lain 404. B346 di `keuangan/mesin-kasir` (skenario staf berlokasi
+  kerja): respons `perangkat-toko` staf sama dengan daftar Owner yang
+  disaring menurut lokasi kerja pemakai, lebih sedikit dari daftar Owner,
+  tanpa perangkat Owner, dan pilihan radio form tambah mesin sama.
+- **Dibuktikan lewat skrip**: butir 178 (B344) dengan login aplikasi di
+  perangkat trusted Ridho: 3 draft berbeda di-finalize bersamaan
+  seluruhnya 200 dan UNPAID, stok bahan 100 menjadi 94 dengan 3 jurnal;
+  satu draft di-finalize 3 kali bersamaan dijawab 409, 200, 409, stok
+  turun 2 dengan 1 jurnal. Diulang dengan 10: 10 tersimpan, stok 100
+  menjadi 80, dan satu draft 10 kali hanya memotong sekali. Penjualan uji
+  di-void dan stok bahan uji dikembalikan ke 10. Butir 169:
+  `db:data-bawaan` membuat 0 pelanggan, 0 akun kas, dan 0 metode, dan
+  hitungan per toko tidak berubah. Pembuktiannya sebagian: tidak ada toko
+  yang punya metode tunai bernama lain tanpa metode bernama persis
+  "Tunai", sehingga kode lama pun tidak akan menyalin.
+- **Butir 77** (tipe aset dan tarif tertahan): spec tipe aset dan tarif
+  dijalankan 10 kali berulang, 570 lolos dalam 29,8 menit, tanpa baris
+  `[LAMBAT]` di log backend; tetap tidak tereproduksi.
+- **Ditemukan saat pembersihan data uji**: menghapus akun klien lewat API
+  admin kini ikut menghapus tokonya. Kelima toko wizard "Kopi Senja E2E"
+  hilang bersama akunnya, tanpa dokumen ber-`tenantID` yatim.

@@ -12,6 +12,30 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per pembuktian kontrak dan rapian 18 November 2026** (web
+`1072484`, backend `ridho` lokal `2790fc7`): vitest 1161 lolos. Tanpa
+suite penuh dan tanpa OTP; spec dijalankan per berkas:
+
+- Spec baru `inventaris/produk/stok-produk-beresep` (3 skenario: B169,
+  B170 id rusak, dan B170 toko lain dengan akun sekali pakai) lolos 6
+  dari 6 dengan `--repeat-each 2`, dan folder `inventaris/produk` 24
+  lolos sesudah SR1a.
+- Skenario baru B346 di `keuangan/mesin-kasir` (staf berlokasi kerja
+  Outlet) dan berkasnya lolos 8 dari 8 dengan `--repeat-each 2`.
+- 19 spec pemakai `tests/helpers/terkunci-uji.ts` (helper menerima
+  `aksesType`) 129 lolos.
+- Butir 77: `reservasi/tipeAset` dan `reservasi/tarif` dengan
+  `--repeat-each 10` 570 lolos.
+- Sesudah pembersihan data uji: `diskon`, `pelanggan`, `jadwal`,
+  `keuangan`, kedua spec metode pembayaran, `buat-penjualan`, dan
+  `reservasi/buat` 177 lolos.
+- Sesudah SP1a dan SP2a: 38 spec tata letak dan halaman yang lebarnya
+  berubah 253 lolos dan 1 dilewati bersyarat data.
+
+Harapan suite penuh berikutnya 671 (`npx playwright test --list`): 667
+ditambah tiga skenario `stok-produk-beresep` dan satu skenario B346;
+menunggu izin pemilik proyek.
+
 **Suite penuh per penyesuaian backend `3570bd4`** (web `0dbfaba`
 ditambah spec `auth/tenggang-pin-refresh`, backend `ridho` lokal
 `3570bd4`, 17 November 2026, pukul 13.51 sampai 14.29 WIB, reporter
