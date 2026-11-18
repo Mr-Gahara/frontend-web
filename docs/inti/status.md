@@ -126,6 +126,26 @@ dokumen lain merujuk daftar di sana.
    dihapus (KM1a).
 3. **Nomor WhatsApp admin** halaman Langganan (LG1a), di bawah.
 
+Dicatat pemilik proyek 18 November 2026, dikerjakan nanti atas perintahnya,
+tidak sekarang:
+
+4. **Laman utama (laman pengenalan website)**: halaman yang pertama tampil
+   saat website dibuka, bukan laman login. Sekarang `app/page.tsx`
+   langsung merender `LoginPage`, sehingga `/` sama dengan `/login`.
+   Isi, desain, dan tujuan tombolnya (masuk, daftar) perlu keputusan dan
+   desain pemilik proyek; periksa juga pengalihan yang mengandalkan `/`
+   sebagai halaman login (`lib/auth/tujuan.ts`, gerbang rute, dan spec
+   `auth`), serta tur dan tautan yang menunjuk `/`.
+5. **Penyelarasan ukuran tombol buat, tambah, dan catat**: ukurannya kini
+   berbeda-beda antarhalaman, ada yang besar dan ada yang kecil. Pemetaan
+   awal 18 November 2026: teks tombol "Tambah", "Buat", atau "Catat"
+   muncul di 59 berkas, dengan sedikitnya enam ukuran di dekatnya (`h-11`
+   8 kali, `h-12` 5, `size="sm"` 4, `h-8` 2, `h-9` dan `h-10` masing-masing
+   1). Langkah pertama: daftar seluruh tombolnya beserta kelas ukurannya
+   (`grep -rnE -B5 '(Tambah|Buat|Catat) [A-Z]' app features`), lalu ajukan
+   satu ukuran baku (misalnya varian `Button` sendiri) sebagai keputusan
+   pemilik proyek.
+
 ### Menunggu pemilik proyek, dicatat 14 November 2026
 
 Dilanjutkan nanti atas perintah pemilik proyek, tidak sekarang:
