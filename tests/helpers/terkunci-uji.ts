@@ -24,6 +24,8 @@ interface PeranUji {
   izin: (nama: string) => boolean;
   /** Tipe lokasi kerja pengguna uji (LK3a); tanpa ini tidak dibatasi. */
   lokasiKerja?: "Outlet" | "Gudang";
+  /** Platform login pengguna uji; tanpa ini hanya web. */
+  aksesType?: ("web" | "app")[];
 }
 
 const LEVEL_UJI = 90;
@@ -141,8 +143,28 @@ const PERAN_TANPA_SDM: PeranUji = {
   izin: (n) => n.startsWith("read-") && !([IZIN.shift, IZIN.polaRoster, IZIN.jadwalShift] as string[]).includes(n),
 };
 
+/**
+ * Staf berlokasi kerja Outlet yang memegang kelola-perangkat-kasir (B346,
+ * AR36; pemilik proyek, 18 November 2026): seluruh izin baca Owner tanpa
+ * izin lintas outlet, ditambah izin kelola mesin kasir, dan boleh login
+ * aplikasi agar punya perangkat sendiri (PERANGKAT_KASIR_OUTLET).
+ */
+const PERAN_KASIR_OUTLET: PeranUji = {
+  nama: "E2E Kasir Outlet",
+  pin: "864222",
+  deskripsi: "Peran uji e2e: izin baca Owner dan kelola mesin kasir, berlokasi kerja Outlet",
+  izin: (n) => n !== IZIN_LINTAS_OUTLET && (n.startsWith("read-") || n === IZIN.kelolaPerangkatKasir),
+  lokasiKerja: "Outlet",
+  aksesType: ["web", "app"],
+};
+
 type PeranMentah = Mentah & { namaRole?: string; level?: number; permissions?: (Mentah & { nama?: string })[] };
-type PenggunaMentah = Mentah & { nama?: string; roleID?: unknown; locationID?: string | null };
+type PenggunaMentah = Mentah & {
+  nama?: string;
+  roleID?: unknown;
+  locationID?: string | null;
+  aksesType?: string[];
+};
 type LokasiMentah = Mentah & { tipe?: string };
 
 const idMilik = (x: Mentah | undefined) => String(x?.id ?? x?._id ?? "");
@@ -191,6 +213,7 @@ async function pastikanPengguna(page: Page, auth: () => string, peranUji: PeranU
     return (daftar.data ?? []).find((p) => p.nama === peranUji.nama);
   };
   const lokasiKerja = peranUji.lokasiKerja ? await idLokasiBertipe(page, auth, peranUji.lokasiKerja) : undefined;
+  const aksesType = peranUji.aksesType ?? ["web"];
   const ada = await cari();
   if (ada) {
     // Lokasi kerja diselaraskan ulang, seperti izin peran.
@@ -198,13 +221,17 @@ async function pastikanPengguna(page: Page, auth: () => string, peranUji: PeranU
       const ubah = await api(page, auth, "PUT", "/pengguna/" + idMilik(ada), { locationID: lokasiKerja });
       expect(ubah.status, `selaraskan lokasi kerja ${peranUji.nama}: ${ubah.pesan}`).toBe(200);
     }
+    if (peranUji.aksesType && [...aksesType].sort().join() !== [...(ada.aksesType ?? [])].sort().join()) {
+      const ubah = await api(page, auth, "PUT", "/pengguna/" + idMilik(ada), { aksesType });
+      expect(ubah.status, `selaraskan akses ${peranUji.nama}: ${ubah.pesan}`).toBe(200);
+    }
     return;
   }
   const buat = await api(page, auth, "POST", "/pengguna/register-pengguna", {
     nama: peranUji.nama,
     pin: peranUji.pin,
     roleID: idPeran,
-    aksesType: ["web"],
+    aksesType,
     ...(lokasiKerja ? { locationID: lokasiKerja } : {}),
   });
   expect(buat.status, `buat pengguna uji ${peranUji.nama}: ${buat.pesan}`).toBeLessThan(300);
@@ -233,6 +260,19 @@ async function masukSebagai(page: Page, peranUji: PeranUji) {
   await page.waitForURL((u) => u.pathname !== "/dashboard");
 }
 
+/**
+ * Dari halaman yang sudah login sebagai Ridho: memastikan peran dan pengguna
+ * uji Kasir Outlet tanpa berpindah pengguna, agar perangkat aplikasinya dapat
+ * disiapkan dan daftar Owner dibaca lebih dulu.
+ */
+export async function siapkanKasirOutlet(page: Page) {
+  const auth = await bukaDenganAuth(page, BASIS + "/dashboard");
+  const idPeran = await pastikanPeran(page, auth, PERAN_KASIR_OUTLET);
+  await pastikanPengguna(page, auth, PERAN_KASIR_OUTLET, idPeran);
+}
+
+export const PENGGUNA_KASIR_OUTLET = { nama: PERAN_KASIR_OUTLET.nama, pin: PERAN_KASIR_OUTLET.pin } as const;
+
 export const NAMA_TERKUNCI = PERAN_TERKUNCI.nama;
 export const NAMA_BACA_SAJA = PERAN_BACA_SAJA.nama;
 
@@ -243,5 +283,6 @@ export const masukLokasiGudang = (page: Page) => masukSebagai(page, PERAN_LOKASI
 export const masukAkunBukanOwner = (page: Page) => masukSebagai(page, PERAN_AKUN_BUKAN_OWNER);
 export const masukPencatatBeban = (page: Page) => masukSebagai(page, PERAN_PENCATAT_BEBAN);
 export const masukTanpaLokasi = (page: Page) => masukSebagai(page, PERAN_TANPA_LOKASI);
+export const masukKasirOutlet = (page: Page) => masukSebagai(page, PERAN_KASIR_OUTLET);
 export const masukTanpaSdm = (page: Page) => masukSebagai(page, PERAN_TANPA_SDM);
 export const masukLokasiGudangTanpaLokasi = (page: Page) => masukSebagai(page, PERAN_LOKASI_GUDANG_TANPA_LOKASI);

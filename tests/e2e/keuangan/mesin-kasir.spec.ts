@@ -1,17 +1,19 @@
 import { expect, test, type Page } from "@playwright/test";
 import { saldoAkun } from "../../helpers/akun-kas-uji";
 import { unik } from "../../helpers/reservasi-uji";
-import { masukBacaSaja } from "../../helpers/terkunci-uji";
+import { PENGGUNA_KASIR_OUTLET, masukBacaSaja, masukKasirOutlet, siapkanKasirOutlet } from "../../helpers/terkunci-uji";
 import {
   NAMA_LACI_UJI,
+  PERANGKAT_KASIR_OUTLET,
   PERANGKAT_UJI,
   bersihkanMesinUji,
   bukaKasirLewatAplikasi,
   daftarMesin,
   detailSesi,
+  loginAplikasi,
   siapkanLaciUji,
 } from "../../helpers/sesi-kasir-uji";
-import { bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
+import { api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
 
 /*
  * Alur nyata Mesin Kasir (inti/status.md, daftar periksa penyambungan nomor
@@ -202,5 +204,59 @@ test.describe("Mesin Kasir: pengguna baca-saja", () => {
     await expect(page.getByRole("button", { name: "Tambah mesin kasir" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /^Aksi / })).toHaveCount(0);
     expect(mintaMesin, "GET /sesikasir/perangkat dan perangkat-toko tidak dikirim tanpa izin kelola").toBe(0);
+  });
+});
+
+type PerangkatTokoMentah = { installationId: string; deviceName: string | null; pengguna: { id: string; nama: string }[] };
+type PenggunaLokasi = { id?: string; _id?: string; locationID?: string | null };
+
+test.describe("Mesin Kasir: staf berlokasi kerja", () => {
+  test("B346: pilihan perangkat staf berlokasi kerja Outlet hanya perangkat yang dipakai pengguna di outlet itu", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await login(page);
+    await siapkanKasirOutlet(page);
+    // Perangkat pertama staf uji otomatis TRUSTED saat login aplikasi, lalu menetap.
+    await loginAplikasi(PENGGUNA_KASIR_OUTLET, PERANGKAT_KASIR_OUTLET);
+
+    // Harapan dihitung dari daftar Owner (tanpa saringan) dan lokasi kerja pemakainya.
+    const auth: Auth = await bukaDenganAuth(page, URL);
+    const semua = await api<PerangkatTokoMentah[]>(page, auth, "GET", "/sesikasir/perangkat-toko");
+    expect(semua.status, "perangkat toko Owner: " + semua.pesan).toBe(200);
+    const outlet = await api<{ id?: string; _id?: string } | null>(page, auth, "GET", "/location/current");
+    const idOutlet = String(outlet.data?.id ?? outlet.data?._id ?? "");
+    expect(idOutlet, "outlet tenant uji").not.toBe("");
+    const pengguna = await api<PenggunaLokasi[]>(page, auth, "GET", "/pengguna");
+    expect(pengguna.status, "daftar pengguna: " + pengguna.pesan).toBe(200);
+    const diOutlet = new Set(
+      (pengguna.data ?? []).filter((p) => String(p.locationID ?? "") === idOutlet).map((p) => String(p.id ?? p._id)),
+    );
+    const harapan = semua.data
+      .filter((d) => d.pengguna.some((u) => diOutlet.has(String(u.id))))
+      .map((d) => d.installationId)
+      .sort();
+    expect(harapan, "perangkat staf uji termasuk").toContain(PERANGKAT_KASIR_OUTLET.installationId);
+    expect(harapan, "perangkat Owner tanpa lokasi kerja tidak termasuk").not.toContain(PERANGKAT_UJI.installationId);
+    expect(semua.data.length, "daftar Owner lebih banyak, sehingga saringan terbukti").toBeGreaterThan(harapan.length);
+
+    await masukKasirOutlet(page);
+    const tPerangkat = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/sesikasir\/perangkat-toko(\?|$)/i.test(r.url()),
+    );
+    await page.goto(URL, { waitUntil: "commit" });
+    await expect(page.getByRole("link", { name: "Mesin Kasir", exact: true })).toHaveAttribute("aria-current", "page", {
+      timeout: 20_000,
+    });
+    await page.getByRole("button", { name: "Tambah mesin kasir" }).first().click();
+    const jawab = await tPerangkat;
+    expect(jawab.status(), "perangkat toko staf berlokasi").toBe(200);
+    const milikStaf = ((await jawab.json()).data as PerangkatTokoMentah[]).map((d) => d.installationId).sort();
+    expect(milikStaf, "B346: disaring menurut lokasi kerja").toEqual(harapan);
+
+    const tambah = page.getByRole("dialog", { name: "Tambah mesin kasir" });
+    await expect(tambah.getByRole("radio")).toHaveCount(harapan.length);
+    await expect(tambah.getByRole("radio", { name: new RegExp(PERANGKAT_KASIR_OUTLET.nama) })).toHaveCount(1);
+    await expect(tambah.getByRole("radio", { name: new RegExp(PERANGKAT_UJI.nama) })).toHaveCount(0);
   });
 });

@@ -15,6 +15,35 @@ import { api, BASIS, type Auth } from "./transfer-uji";
 /** Perangkat trusted milik Ridho di tenant uji, dipakai sebagai mesin kasir uji. */
 export const PERANGKAT_UJI = { installationId: "OWNER-DEVICE-UUID-001", nama: "iPad Pro 11" } as const;
 
+/**
+ * Perangkat aplikasi milik pengguna uji "E2E Kasir Outlet" (B346). Perangkat
+ * pertama pengguna otomatis TRUSTED saat login aplikasi, lalu menetap dan
+ * tidak dicabut, karena perangkat yang dicabut kembali PENDING saat login
+ * berikutnya.
+ */
+export const PERANGKAT_KASIR_OUTLET = { installationId: "E2E-KASIR-OUTLET-DEVICE-001", nama: "E2E HP Kasir Outlet" } as const;
+
+/** Login aplikasi sebagai pengguna toko uji di perangkat itu (data milik modul lain). */
+export async function loginAplikasi(
+  pengguna: { nama: string; pin: string },
+  perangkat: { installationId: string; nama: string },
+): Promise<void> {
+  const ctx = await request.newContext({ baseURL: BASIS });
+  try {
+    const akun = await ctx.post("/api/akun/auth/login", { data: AKUN_UJI });
+    const isiAkun = await akun.json().catch(() => ({}));
+    expect(akun.status(), `login akun: ${isiAkun.message ?? ""}`).toBe(200);
+    const masuk = await ctx.post("/api/pengguna/pin-login", {
+      data: { ...pengguna, loginType: "app", installationId: perangkat.installationId, deviceName: perangkat.nama },
+      headers: { Authorization: "Bearer " + isiAkun.accessToken },
+    });
+    const isiMasuk = await masuk.json().catch(() => ({}));
+    expect(masuk.status(), `login app ${pengguna.nama}: ${isiMasuk.message ?? ""}`).toBe(200);
+  } finally {
+    await ctx.dispose();
+  }
+}
+
 /** Laci uji tetap: akun kas tidak dapat dihapus, sehingga dibuat sekali lalu dipakai ulang. */
 export const NAMA_LACI_UJI = "E2E Laci Mesin Kasir";
 

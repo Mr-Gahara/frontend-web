@@ -128,12 +128,12 @@ async function simpanProduk(
 /**
  * Menyetel produk.stok lewat stok bahan uji di outlet tenant: stok outlet
  * diopname ke nilai itu, lalu resep produk disimpan ulang dengan locationID
- * outlet, sehingga backend menghitung produk.stok dari inventory outlet
- * (backend yoga 5eb72e5). produk.stok tetap potret saat produk disimpan:
- * opname, transfer, dan penerimaan sesudahnya tidak mengubahnya
- * (kontrak/temuan.md butir 37), tetapi ia ikut diperiksa saat finalisasi.
- * Stok outlet berakhir di nilai yang sama; ubah lewat setelStokOutlet
- * sesudahnya bila skenario butuh kedua angka berbeda.
+ * outlet. Sejak backend B169 (ridho 4a19be8) stok produk beresep dihitung
+ * saat dibaca dari inventory outlet, sehingga menyimpan ulang tidak lagi
+ * diperlukan untuk angkanya (dibuktikan stok-produk-beresep.spec.ts); ia
+ * dipertahankan agar resep fixture tetap sesuai TAKARAN. Stok outlet
+ * berakhir di nilai yang sama; ubah lewat setelStokOutlet sesudahnya bila
+ * skenario butuh angka lain.
  */
 export async function setelStokProduk(page: Page, auth: Auth, fx: Fixture, stok: number) {
   await setelStokOutlet(page, auth, fx, stok);
