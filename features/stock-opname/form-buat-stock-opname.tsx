@@ -183,7 +183,7 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
     (sumberLokasi.jenis === "tetap" ? !sumberLokasi.lokasi : sumberLokasi.pilihan.length === 0);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER SECTION */}
       <div className="flex flex-col gap-4">
         <Button

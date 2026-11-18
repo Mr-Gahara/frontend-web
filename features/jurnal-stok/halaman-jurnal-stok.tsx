@@ -233,7 +233,7 @@ export default function HalamanJurnalStok({
   );
 
   return (
-    <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-7xl mx-auto">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER & FILTERS */}
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between border-b border-navy/10 pb-6">
         <div className="space-y-1.5">

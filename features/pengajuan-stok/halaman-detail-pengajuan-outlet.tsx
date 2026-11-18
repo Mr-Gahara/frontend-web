@@ -109,7 +109,7 @@ export default function HalamanDetailPengajuanOutlet() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-5xl mx-auto">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
         <Skeleton className="h-8 w-64 bg-navy/10" />
         <Skeleton className="h-64 w-full bg-navy/10 rounded-2xl" />
       </div>
@@ -142,7 +142,7 @@ export default function HalamanDetailPengajuanOutlet() {
   const urlSuratJalanOutlet = RUANG_SURAT_JALAN.outlet.urlSuratJalan;
 
   return (
-    <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-5xl mx-auto">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER & STATUS */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-navy/10 pb-6">
         <div className="flex flex-col gap-4">

@@ -82,7 +82,7 @@ export function HalamanPindahDana() {
   const akunKas = useDaftarAkunKas();
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:py-8">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
       <Link
         href={URL_DAFTAR_AKUN_KAS}
         className="inline-flex w-fit items-center text-isi font-semibold text-navy/60 hover:text-navy"

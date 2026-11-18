@@ -174,7 +174,7 @@ export function HalamanMutasi() {
   );
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
       <DialogRincianMutasi
         mutasi={dirinci}
         namaAkun={dirinci ? namaAkunBaris(dirinci, akunKas.data) : ""}

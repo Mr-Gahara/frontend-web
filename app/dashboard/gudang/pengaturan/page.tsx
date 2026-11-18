@@ -145,7 +145,7 @@ export default function PengaturanGudangPage() {
   }
 
   return (
-    <div className="flex min-h-[80vh] w-full items-center justify-center p-4">
+    <div className="flex min-h-[80vh] w-full items-center justify-center sm:p-4">
       <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-xl sm:p-8">
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">

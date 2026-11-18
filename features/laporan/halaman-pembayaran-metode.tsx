@@ -77,7 +77,7 @@ export function HalamanPembayaranMetode() {
   const teksPorsi = ringkas.baris.map((b) => `${b.nama} ${formatPersen(b.persen)}`).join(", ");
 
   return (
-    <div className="sm:p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
       <section
         aria-labelledby="judul-pembayaran-metode"
         className="bg-krem border border-navy/10 rounded-2xl p-4 sm:p-6 text-navy shadow-sm flex flex-col w-full gap-6 overflow-hidden"

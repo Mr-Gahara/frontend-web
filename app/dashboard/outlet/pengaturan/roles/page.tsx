@@ -102,7 +102,7 @@ export default function RolesPage() {
   const isLoading = rolesLoading || permissionsLoading;
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 flex flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       
       {/* HEADER DENGAN TOMBOL BACK */}
       <div className="flex flex-col gap-4 mb-2">

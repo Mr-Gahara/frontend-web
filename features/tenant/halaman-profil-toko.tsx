@@ -331,7 +331,7 @@ export function HalamanProfilToko() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8">
       <div>
         <h1 className="text-judul font-bold tracking-tight text-foreground">Profil Toko</h1>
         <p className="mt-1 text-isi text-muted-foreground">

@@ -57,7 +57,7 @@ export default function GudangSetupPage() {
   };
 
   return (
-    <div className="flex min-h-[80vh] w-full items-center justify-center p-4">
+    <div className="flex min-h-[80vh] w-full items-center justify-center sm:p-4">
       <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-xl sm:p-8">
 
         {/* HEADER FORM */}

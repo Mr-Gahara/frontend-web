@@ -83,7 +83,7 @@ export default function PengaturanPage() {
     (modul) => bolehBukaHalaman(modul.href, permissions) && (modul.href !== HREF_AKUN_TOKO || owner),
   );
   return (
-    <div className="p-6 max-w-7xl mx-auto flex flex-col gap-8 w-full overflow-x-hidden">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8 overflow-x-hidden">
       
       {/* Header Utama */}
       <div className="flex flex-col gap-1.5 w-full border-b border-navy/10 pb-6">

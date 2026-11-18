@@ -16,7 +16,7 @@ import { FormMetodePembayaran, KepalaFormMetode, MemuatMetode, PesanMetode, URL_
 import { NILAI_AWAL_METODE, nilaiAwalMetode, payloadBuatMetode, payloadUbahMetode } from "./payload";
 import { masihDalamBatas, metodeAktifTerakhir } from "./tampilan";
 
-const KELAS_HALAMAN = "mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8";
+const KELAS_HALAMAN = "mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8";
 
 /**
  * Halaman buat. Form dipasang setelah akun kas dan daftar metode termuat,

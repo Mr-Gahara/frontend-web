@@ -154,7 +154,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
     // Tidak ditemukan dibedakan dari gagal memuat, tanpa pengalihan otomatis
     // (sejalan dengan detail stock opname).
     return (
-      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-16 text-center">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-4 sm:px-4 py-16 text-center">
         <p role="alert" className="text-isi font-bold text-navy/70">
           {!errorPenjualan || isNotFound(errorPenjualan)
             ? "Penjualan tidak ditemukan."
@@ -171,7 +171,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
   const riwayatPembayaran = penjualan.pembayaran ?? [];
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER & ACTIONS */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="flex flex-col gap-3">

@@ -42,7 +42,7 @@ export default function HalamanRevisiTransfer({ id, ruang }: { id: string; ruang
 
   if (isLoading || !isFetchedAfterMount) {
     return (
-      <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-4xl mx-auto">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8">
         <Skeleton className="h-8 w-64 bg-navy/10" />
         <Skeleton className="h-100 w-full bg-navy/10 rounded-2xl" />
       </div>
@@ -141,7 +141,7 @@ function FormRevisiTransfer({ detail, urlSuratJalan }: { detail: TransferStok; u
   };
 
   return (
-    <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-4xl mx-auto">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER */}
       <div className="flex flex-col gap-4">
         <Button

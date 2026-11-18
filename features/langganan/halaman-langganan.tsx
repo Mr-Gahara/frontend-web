@@ -57,7 +57,7 @@ export function HalamanLangganan() {
   const tautan = tautanWhatsapp(NOMOR_WA_ADMIN, tenant.data?.namaToko ?? "", plan.nama);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-7 text-navy">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8 text-navy">
       <div>
         <h1 className="text-judul font-bold tracking-tight">Langganan</h1>
         <p className="mt-1 text-isi text-muted-foreground">Plan toko, masa berlaku, dan cara naik plan.</p>

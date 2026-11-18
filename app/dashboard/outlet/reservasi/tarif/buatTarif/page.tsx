@@ -83,7 +83,7 @@ export default function BuatTarifPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* HEADER CONTROLS */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">

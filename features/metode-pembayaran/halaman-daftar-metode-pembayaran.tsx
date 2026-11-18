@@ -179,7 +179,7 @@ export function HalamanDaftarMetodePembayaran() {
   const menonaktifkan = target?.isActive === true;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       <div className="flex flex-col gap-3">
         <Button
           variant="ghost"

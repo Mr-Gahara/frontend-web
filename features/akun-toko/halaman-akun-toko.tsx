@@ -42,7 +42,7 @@ export function HalamanAkunToko() {
   if (!boleh) return <HalamanGalat kode={403} tertanam />;
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 sm:p-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8">
       <div>
         <h1 className="text-judul font-bold tracking-tight text-foreground">Akun Toko</h1>
         <p className="text-isi text-muted-foreground">Email, password, dan penghapusan akun toko. Hanya untuk Owner.</p>

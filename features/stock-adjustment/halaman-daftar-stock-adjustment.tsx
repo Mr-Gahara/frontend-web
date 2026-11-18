@@ -138,7 +138,7 @@ export default function HalamanDaftarStockAdjustment({
   );
 
   return (
-    <div className="mx-auto flex w-full flex-col gap-6 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER SECTION */}
       <div className="flex items-center gap-3">
         <div className="p-2 bg-gading border border-navy/10 rounded-lg shadow-sm hidden sm:block">

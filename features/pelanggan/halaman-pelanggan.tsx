@@ -220,7 +220,7 @@ export function HalamanPelanggan() {
   ];
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
       <div className="space-y-1">
         <h1 className="text-judul font-bold tracking-tight text-navy">Manajemen Pelanggan</h1>
         <p className="text-isi font-medium text-cokelat/60">

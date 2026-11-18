@@ -216,7 +216,7 @@ export function HalamanDiskon() {
   ];
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h1 className="text-judul font-bold tracking-tight text-navy">Kelola Diskon</h1>

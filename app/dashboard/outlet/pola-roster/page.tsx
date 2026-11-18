@@ -4,7 +4,7 @@ import { HalamanPolaRosterRuang } from "@/features/pola-roster/halaman-pola-rost
 
 export default function PolaRosterOutletPage() {
   return (
-    <div className="py-6 px-2 sm:px-6 w-full">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       <HalamanPolaRosterRuang ruang="outlet" />
     </div>
   );

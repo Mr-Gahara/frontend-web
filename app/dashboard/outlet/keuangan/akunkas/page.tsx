@@ -53,7 +53,7 @@ export default function AkunKasPage() {
   const [akunDiaktifkan, setAkunDiaktifkan] = useState<AkunKas | null>(null);
 
   return (
-    <div className="sm:p-6 max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8 w-full">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 sm:gap-4">
         <div className="w-full sm:w-auto">

@@ -138,7 +138,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
     // Tidak ditemukan dibedakan dari gagal memuat, tanpa pengalihan otomatis
     // (sejalan dengan detail penjualan).
     return (
-      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-16 text-center">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-4 sm:px-4 py-16 text-center">
         <p role="alert" className="text-isi font-bold text-navy/70">
           {!errorPenjualan || isNotFound(errorPenjualan)
             ? "Penjualan tidak ditemukan."
@@ -154,7 +154,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
   if (penjualan.statusPenjualan === "DRAFT" || penjualan.statusPenjualan === "VOID") {
     // DRAFT belum dapat dibayar dan VOID tidak dapat dibayar lagi (backend 465b438).
     return (
-      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-16 text-center">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-4 sm:px-4 py-16 text-center">
         <p role="alert" className="text-isi font-bold text-navy/70">
           {penjualan.statusPenjualan === "DRAFT"
             ? "Penjualan masih Draft. Simpan penjualan lewat Finalisasi Invoice di halaman detail sebelum menerima pembayaran."
@@ -168,7 +168,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER */}
       <div className="flex flex-col gap-4">
         <Button

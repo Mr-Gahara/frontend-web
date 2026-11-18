@@ -56,7 +56,7 @@ export default function HalamanPengiriman() {
   const filteredData = saringTransfer(daftarPengiriman, kriteria);
 
   return (
-    <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-7xl mx-auto">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER SECTION */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="space-y-1">

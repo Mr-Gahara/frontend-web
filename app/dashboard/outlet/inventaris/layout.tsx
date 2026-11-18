@@ -1,7 +1,7 @@
 
 export default function InventarisLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* Header Utama Modul */}
       <div className="space-y-1">
         <h1 className="text-judul font-bold tracking-tight">Modul Inventaris</h1>

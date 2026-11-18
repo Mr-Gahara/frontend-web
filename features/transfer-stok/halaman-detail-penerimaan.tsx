@@ -66,7 +66,7 @@ export default function HalamanDetailPenerimaan({ id, ruang }: { id: string; rua
 
   if (isLoading || !isFetchedAfterMount) {
     return (
-      <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-5xl mx-auto">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
         <Skeleton className="h-8 w-64 bg-navy/10" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Skeleton className="h-96 w-full lg:col-span-2 bg-navy/10 rounded-2xl" />
@@ -196,7 +196,7 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
   });
 
   return (
-    <div className="flex flex-col gap-6 px-4 py-8 w-full max-w-6xl mx-auto">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER SECTION */}
       <div className="flex flex-col gap-4">
         <Button

@@ -4,7 +4,7 @@ import { HalamanShiftRuang } from "@/features/shift/halaman-shift-ruang";
 
 export default function MasterShiftGudangPage() {
   return (
-    <div className="py-6 px-2 sm:px-6 w-full">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       <HalamanShiftRuang ruang="gudang" />
     </div>
   );

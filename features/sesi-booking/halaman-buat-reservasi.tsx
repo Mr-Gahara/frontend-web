@@ -140,14 +140,14 @@ export default function HalamanBuatReservasi() {
 
   if (!sudahTerpasang) {
     return (
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 opacity-0">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8 opacity-0">
         Memuat antarmuka reservasi...
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 animate-in fade-in duration-500">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8 animate-in fade-in duration-500">
       {/* HEADER */}
       <div className="flex flex-col gap-4 mb-2">
         <Button

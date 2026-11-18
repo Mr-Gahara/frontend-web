@@ -77,7 +77,7 @@ export default function BuatAkunKasPage() {
 
   return (
     // Padding luar diubah menjadi px-4 py-6 untuk seluler
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:py-8">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* Header & Tombol Back */}
       <div className="flex flex-col gap-4">
         <Button
