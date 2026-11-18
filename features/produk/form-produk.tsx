@@ -174,15 +174,27 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
   // a66980c), sehingga pengguna diminta mengisinya sebelum menyimpan.
   const resepAkanDihapus = resepAwalAda && !hasResep;
 
-  // Efek samping: Manajemen Paksa Stok
+  // Stok produk beresep dihitung backend saat dibaca dari stok bahan (B169).
+  // Isian terkunci menampilkannya hanya sebagai keterangan: payload selalu
+  // mengirim 0 untuk produk beresep (payload.ts). Produk baru belum punya
+  // angka terhitung.
+  const stokTerhitung = resepAwalAda ? (produk?.stok ?? 0) : 0;
+
+  // Efek samping: Manajemen Paksa Stok. Hanya berjalan saat resep, Unlimited,
+  // atau penghapusan resep berubah, sehingga isian yang diketik tidak ditimpa.
   useEffect(() => {
-    if (hasResep || isUnlimitedStok) {
+    if (isUnlimitedStok) {
+      setValue("stok", 0);
+    } else if (hasResep) {
+      setValue("stok", stokTerhitung);
+    } else if (resepAkanDihapus) {
+      // Resep lama dihapus seluruhnya: stok diisi ulang pengguna (petunjuk di bawah).
       setValue("stok", 0);
     }
     if (hasResep && isUnlimitedStok) {
       setValue("isUnlimitedStok", false);
     }
-  }, [hasResep, isUnlimitedStok, setValue]);
+  }, [hasResep, isUnlimitedStok, resepAkanDihapus, stokTerhitung, setValue]);
 
   const {
     data: kategoriList = [],

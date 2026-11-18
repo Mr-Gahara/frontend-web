@@ -79,9 +79,8 @@ test.describe("Stok produk beresep dan detail produk (B169, B170)", () => {
       const baris = page.getByRole("row", { name: new RegExp(NAMA_PRODUK, "i") }).first();
       await expect(baris).toContainText(`${harapan} item`);
 
-      // Detail yang diminta halaman ubah membawa angka terkini. Isiannya sendiri
-      // tidak dibandingkan: form memaksa stok 0 selama produk punya resep
-      // (form-produk.tsx, Manajemen Paksa Stok), sehingga tidak menampilkan stok.
+      // Detail yang diminta halaman ubah membawa angka terkini, dan isian stok
+      // terkunci menampilkannya (pemilik proyek, 18 November 2026).
       const tDetail = page.waitForResponse(
         (r) => r.request().method() === "GET" && r.url().endsWith("/api/produk/" + fx.produkId),
       );
@@ -89,7 +88,9 @@ test.describe("Stok produk beresep dan detail produk (B169, B170)", () => {
       const detail = await tDetail;
       expect(detail.status(), "GET /produk/:id halaman ubah").toBe(200);
       expect((await detail.json()).data?.stok, "stok di detail halaman ubah").toBe(harapan);
-      await expect(page.locator("#stok")).toBeDisabled({ timeout: 15_000 });
+      const isianStok = page.locator("#stok");
+      await expect(isianStok).toBeDisabled({ timeout: 15_000 });
+      await expect(isianStok).toHaveValue(String(harapan));
     } finally {
       await setelStokOutlet(page, auth, fx, STOK_AWAL);
     }
