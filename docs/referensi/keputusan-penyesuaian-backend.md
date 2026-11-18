@@ -1035,7 +1035,8 @@ B345, `5afa051`), dan menyaring perangkat toko menurut lokasi kerja
   `kelola-perangkat-kasir` pilihannya kini lebih sedikit. Belum
   dibuktikan web, karena pengguna uji berlokasi kerja
   (`tests/helpers/terkunci-uji.ts`) hanya memegang izin baca, tanpa
-  `kelola-perangkat-kasir`.
+  `kelola-perangkat-kasir`. Dibuktikan 18 November 2026 lewat pengguna uji
+  "E2E Kasir Outlet" (Pembuktian web 18 November 2026, di bawah).
 - **Dibuktikan dari respons nyata**: B345 lewat spec baru
   `auth/tenggang-pin-refresh` (repro butir 185: `route.fetch` memutar
   token, cookie lama dikembalikan, permintaan dibatalkan, lalu halaman

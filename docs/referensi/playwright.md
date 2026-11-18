@@ -721,7 +721,11 @@ bersyarat).
   item. Peran dan pengguna dibuat sekali oleh Ridho lewat API, izinnya
   diselaraskan ulang setiap run karena izin Owner bertambah setiap seed
   berubah, dan levelnya 90 agar dapat diubah Owner (B186). Sesudahnya
-  `loginSebagai` login ulang di halaman yang sama.
+  `loginSebagai` login ulang di halaman yang sama. Sejak `5f57454` peran
+  uji dapat membawa `aksesType` (web dan app), dan `siapkanKasirOutlet`
+  menyiapkan peran dan pengguna tanpa berpindah pengguna, agar perangkat
+  aplikasinya dibuat lebih dulu lewat `loginAplikasi`
+  (`tests/helpers/sesi-kasir-uji.ts`).
 - `tests/helpers/izin-cuti-uji.ts` (`96a7b40`): fixture yang tidak dapat
   dihapus (web tanpa halaman izin cuti, backend tanpa `DELETE`) dibuat
   lewat API, dicari menurut keterangannya lebih dulu agar run berulang
@@ -739,7 +743,8 @@ bersyarat).
   dengan fixture tetap (`tests/helpers/penjualan-uji.ts`). Bahan baku dan
   produk uji dibuat sekali, lalu stok outlet dan `produk.stok` disetel
   ulang di awal setiap test (sejak `65edf8c`, `produk.stok` lewat stok
-  outlet dan simpan ulang resep), sehingga pemotongan stok dibuktikan
+  outlet dan simpan ulang resep; sejak B169 angkanya dihitung saat dibaca,
+  dan simpan ulang hanya menjaga resep fixture), sehingga pemotongan stok dibuktikan
   dengan angka pasti. Kedua gerbang stok finalisasi diuji terpisah dengan
   menyetel satu angka saja. Payload diperiksa dari permintaan nyata
   (`postDataJSON`, header `x-idempotency-key`), dialog yang harus bertahan

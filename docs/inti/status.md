@@ -113,6 +113,19 @@ Kedelapan butir yang dicatat pemilik proyek 12 November 2026 selesai
 pada 17 November 2026; rujukan "Pekerjaan UI berikutnya butir N" di
 dokumen lain merujuk daftar di sana.
 
+### Berikutnya, dicatat 18 November 2026
+
+1. **Suite e2e penuh** sesudah pembuktian kontrak, SR1a, SP1a, dan SP2a:
+   harapan 671 (`inti/pengujian.md`, Baseline); menunggu izin pemilik
+   proyek.
+2. **Utang pengujian yang basi atau murah ditutup**
+   (`referensi/utang-pengujian.md`), ditawarkan 18 November 2026 dan
+   menunggu perintah: misalnya pembatasan staf berlokasi kerja (LK1a) yang
+   kini punya pengguna uji, keterangan khusus member yang sudah dapat
+   ditandai sejak MB1a, dan pesan jurnal stok gudang yang kodenya sudah
+   dihapus (KM1a).
+3. **Nomor WhatsApp admin** halaman Langganan (LG1a), di bawah.
+
 ### Menunggu pemilik proyek, dicatat 14 November 2026
 
 Dilanjutkan nanti atas perintah pemilik proyek, tidak sekarang:
@@ -193,6 +206,8 @@ A dibangkitkan ulang RG9a. Ketiganya selesai 10 November 2026: TP2b
   proyek): skrip mongosh sekali pakai dengan mode tinjau, setelah basis
   data dicadangkan ke
   `~/Documents/cadangan-db/db_produk-sebelum-bersih-2026-11-18.gz`.
+  Cadangan itu dibuat sesudah akun dan toko wizard di atas terhapus,
+  sehingga hanya memulihkan pembersihan di toko uji.
   Dihapus 579 akun kas E2E nonaktif, 91 metode E2E nonaktif, 370 diskon
   E2E nonaktif, 576 shift uji nonaktif, dan 541 pelanggan terhapus lunak.
   Yang dirujuk dokumen lain tetap, yaitu 148 akun kas yang dirujuk jurnal
