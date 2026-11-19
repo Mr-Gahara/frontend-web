@@ -1,3 +1,4 @@
+import { labelPilPeriode, type PilFilter } from "@/lib/filter";
 import { keTanggalLokal } from "@/lib/waktu";
 import type { AkunKas } from "@/types/akunKas";
 import type {
@@ -86,4 +87,28 @@ export const LABEL_STATUS_TRANSFER: Record<StatusTransfer, string> = {
 /** Nama akun dari salinan di respons; akun tanpa nama tampil sebagai tanda hubung. */
 export function namaAkunTransfer(akun: AkunTransfer | null): string {
   return akun?.namaAkun || "-";
+}
+/** Jumlah filter aktif untuk lencana (FL1a); periode dihitung satu. */
+export function jumlahFilterTransfer(filter: FilterTransfer): number {
+  return [filter.akunKasID, filter.status].filter(Boolean).length + (filter.dari || filter.sampai ? 1 : 0);
+}
+
+/** Pil filter aktif riwayat transfer (FL4a). */
+export function pilFilterTransfer(
+  filter: FilterTransfer,
+  daftarAkun: { id: string; namaAkun: string }[],
+  hariIni: Date,
+  terapkan: (baru: FilterTransfer) => void,
+): PilFilter[] {
+  const pil: PilFilter[] = [];
+  if (filter.akunKasID) {
+    const nama = daftarAkun.find((a) => a.id === filter.akunKasID)?.namaAkun ?? "terpilih";
+    pil.push({ kunci: "akun", label: `Akun: ${nama}`, onHapus: () => terapkan({ ...filter, akunKasID: "" }) });
+  }
+  if (filter.status) {
+    pil.push({ kunci: "status", label: `Status: ${LABEL_STATUS_TRANSFER[filter.status]}`, onHapus: () => terapkan({ ...filter, status: "" }) });
+  }
+  const periode = labelPilPeriode({ dari: filter.dari, sampai: filter.sampai }, hariIni);
+  if (periode) pil.push({ kunci: "periode", label: periode, onHapus: () => terapkan({ ...filter, dari: undefined, sampai: undefined }) });
+  return pil;
 }

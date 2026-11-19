@@ -3,6 +3,7 @@ import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { unik } from "../../helpers/reservasi-uji";
 import { daftarAkun, pilihAkun, saldoAkun, type AkunKasUji } from "../../helpers/akun-kas-uji";
 import { KATEGORI_FIXTURE, pastikanKategoriFixture } from "../../helpers/beban-uji";
+import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../helpers/filter-uji";
 
 /*
  * Spec pengeluaran (keputusan BO3a sampai BO7a), tanpa respons sukses palsu.
@@ -234,5 +235,40 @@ test.describe("pengeluaran", () => {
     });
     await expect(utama.locator("table")).toHaveCount(0);
     await page.unroute(POLA_DAFTAR);
+  });
+
+  test("panel filter: kategori dari Select di dalam panel, status, dan periode terkirim lewat Terapkan; pil dihapus satu per satu (FL1a, FL10a)", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_PENGELUARAN);
+    const kategoriID = await pastikanKategoriFixture(page, auth);
+    let panel = await bukaPanelFilter(page);
+    await pilihAkun(page, "Kategori", KATEGORI_FIXTURE);
+    await expect(panel, "panel tetap terbuka setelah memilih dari Select").toBeVisible();
+    await pilihanPanel(panel, "Status", "Dibatalkan").click();
+    await pilihanPanel(panel, "Periode cepat", "Bulan ini").click();
+    const tTerapan = page.waitForResponse((r) => {
+      if (r.request().method() !== "GET" || !POLA_DAFTAR.test(r.url())) return false;
+      const q = new URL(r.url()).searchParams;
+      return q.get("kategoriBebanID") === kategoriID && q.get("status") === "VOID" && q.has("dari") && q.has("sampai");
+    });
+    await terapkanPanelFilter(panel);
+    expect((await tTerapan).status()).toBe(200);
+    const pil = page.getByRole("group", { name: "Filter aktif" });
+    await expect(pil.getByRole("button", { name: `Hapus filter Kategori: ${KATEGORI_FIXTURE}` })).toBeVisible();
+    await expect(pil.getByRole("button", { name: "Hapus filter Status: Dibatalkan" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Filter lainnya, 3 aktif" })).toBeVisible();
+
+    const tTanpaKategori = page.waitForResponse((r) => {
+      if (r.request().method() !== "GET" || !POLA_DAFTAR.test(r.url())) return false;
+      const q = new URL(r.url()).searchParams;
+      return !q.has("kategoriBebanID") && q.get("status") === "VOID";
+    });
+    await pil.getByRole("button", { name: `Hapus filter Kategori: ${KATEGORI_FIXTURE}` }).click();
+    await tTanpaKategori;
+    panel = await bukaPanelFilter(page);
+    await expect(page.getByRole("combobox", { name: "Kategori" })).toHaveText("Semua kategori");
+    await panel.getByRole("button", { name: "Atur ulang" }).click();
+    await expect(pilihanPanel(panel, "Status", "Semua")).toHaveAttribute("aria-pressed", "true");
+    await terapkanPanelFilter(panel);
+    await expect(pil).toBeHidden();
   });
 });

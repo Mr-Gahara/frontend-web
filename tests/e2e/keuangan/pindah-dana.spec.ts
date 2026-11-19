@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { unik } from "../../helpers/reservasi-uji";
 import { masukBacaSaja } from "../../helpers/terkunci-uji";
+import { bukaPanelFilter, terapkanPanelFilter } from "../../helpers/filter-uji";
 import { daftarAkun, saldoAkun, buatAkunUji, tutupAkunUji, pilihAkun, type AkunKasUji } from "../../helpers/akun-kas-uji";
 
 /*
@@ -110,7 +111,7 @@ test.describe("pindah dana", () => {
     }
   });
 
-  test("riwayat: periode dikirim sebagai tanggal YYYY-MM-DD, dan Reset Filter mengosongkannya (NZ3a)", async ({ page }) => {
+  test("riwayat: periode dari panel dikirim sebagai tanggal YYYY-MM-DD, dan Atur ulang semua mengosongkannya (NZ3a, FL1a)", async ({ page }) => {
     const daftarTransfer = (syarat: (q: URLSearchParams) => boolean) =>
       page.waitForResponse(
         (r) => r.request().method() === "GET" && POLA_TRANSFER.test(r.url()) && syarat(new URL(r.url()).searchParams),
@@ -126,30 +127,30 @@ test.describe("pindah dana", () => {
     const awal = await daftarTransfer((q) => !q.has("dari") && !q.has("sampai"));
     expect(awal.status()).toBe(200);
     const totalAwal = await total(awal);
-    const reset = page.getByRole("button", { name: "Reset Filter" });
-    await expect(reset).toBeDisabled();
+    const pil = page.getByRole("group", { name: "Filter aktif" });
+    await expect(pil, "tanpa filter tidak ada pil aktif").toBeHidden();
 
     const kini = new Date();
     const awalan = `${kini.getFullYear()}-${String(kini.getMonth() + 1).padStart(2, "0")}-`;
-    const tDari = daftarTransfer((q) => q.get("dari") === awalan + "15" && !q.has("sampai"));
-    await page.getByRole("button", { name: /^Transfer dari, / }).click();
-    await page.getByRole("grid").getByText("15", { exact: true }).click();
-    await expect(page.getByRole("grid")).toHaveCount(0);
-    expect((await tDari).status()).toBe(200);
-
-    const tSampai = daftarTransfer((q) => q.get("dari") === awalan + "15" && q.get("sampai") === awalan + "20");
-    await page.getByRole("button", { name: /^Transfer sampai, / }).click();
+    // "Sampai" diisi lebih dulu, karena "dari" tidak boleh melewati "sampai".
+    const panel = await bukaPanelFilter(page);
+    await panel.getByRole("button", { name: /^Transfer sampai, / }).click();
     await page.getByRole("grid").getByText("20", { exact: true }).click();
     await expect(page.getByRole("grid")).toHaveCount(0);
-    const resSampai = await tSampai;
-    expect(resSampai.status()).toBe(200);
-    const totalPeriode = await total(resSampai);
+    await panel.getByRole("button", { name: /^Transfer dari, / }).click();
+    await page.getByRole("grid").getByText("15", { exact: true }).click();
+    await expect(page.getByRole("grid")).toHaveCount(0);
+    const tPeriode = daftarTransfer((q) => q.get("dari") === awalan + "15" && q.get("sampai") === awalan + "20");
+    await terapkanPanelFilter(panel);
+    const resPeriode = await tPeriode;
+    expect(resPeriode.status()).toBe(200);
+    const totalPeriode = await total(resPeriode);
     expect(totalPeriode).toBeLessThanOrEqual(totalAwal);
     await tampilTotal(totalPeriode);
-    await expect(reset).toBeEnabled();
+    await expect(pil.getByRole("button", { name: /^Hapus filter 15 – 20 / })).toBeVisible();
 
-    await reset.click();
-    await expect(reset).toBeDisabled();
+    await pil.getByRole("button", { name: "Atur ulang semua" }).click();
+    await expect(pil).toBeHidden();
     await tampilTotal(totalAwal);
   });
 
@@ -215,7 +216,7 @@ test.describe("pindah dana: pengguna baca-saja", () => {
     expect(riwayat.status(), "riwayat dibaca pemegang izin baca").toBe(200);
     const isi = (await riwayat.json()) as { data?: { status?: string }[] };
     await expect(page.getByRole("heading", { name: "Pindah Dana", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Reset Filter" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Filter lainnya", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Pindahkan Dana" })).toHaveCount(0);
     // Batalkan hanya untuk baris AKTIF; tanpa baris AKTIF pemeriksaan ini tidak membedakan.
     if ((isi.data ?? []).some((t) => t.status === "AKTIF")) {

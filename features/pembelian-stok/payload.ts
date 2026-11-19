@@ -1,3 +1,4 @@
+import { labelPilPeriode, rentangSama, type PilFilter } from "@/lib/filter";
 import { keTanggalLokal } from "@/lib/waktu";
 import type {
   PayloadBuatPembelianStok,
@@ -175,4 +176,48 @@ export function paramDaftarPembelian(
 
 export function adaFilterPembelian(filter: FilterPembelian): boolean {
   return Object.keys(filterServerPembelian(filter, null)).length > 0;
+}
+/**
+ * Isian panel filter pembelian (FL1a): akun kas, bahan (daftar per ruang),
+ * lokasi penerima (Belanja Stok), dan periode. Supplier kotak cari di bilah.
+ */
+export type FilterPanelPembelian = {
+  akunKasID: string;
+  bahanBakuID: string;
+  lokasiID: string;
+  dari?: Date;
+  sampai?: Date;
+};
+
+function periodePembelianDiubah(f: FilterPanelPembelian, bawaan: FilterPanelPembelian): boolean {
+  return !rentangSama({ dari: f.dari, sampai: f.sampai }, { dari: bawaan.dari, sampai: bawaan.sampai });
+}
+
+/** Jumlah filter aktif; periode bawaan bulan ini tidak dihitung (FL11a). */
+export function jumlahFilterPembelian(f: FilterPanelPembelian, bawaan: FilterPanelPembelian): number {
+  return [f.akunKasID, f.bahanBakuID, f.lokasiID].filter(Boolean).length + (periodePembelianDiubah(f, bawaan) ? 1 : 0);
+}
+
+export function pilFilterPembelian(
+  f: FilterPanelPembelian,
+  bawaan: FilterPanelPembelian,
+  nama: { akun: (id: string) => string | undefined; bahan: (id: string) => string | undefined; lokasi: (id: string) => string | undefined },
+  hariIni: Date,
+  terapkan: (baru: FilterPanelPembelian) => void,
+): PilFilter[] {
+  const pil: PilFilter[] = [];
+  if (f.lokasiID) {
+    pil.push({ kunci: "lokasi", label: `Lokasi: ${nama.lokasi(f.lokasiID) ?? "terpilih"}`, onHapus: () => terapkan({ ...f, lokasiID: "" }) });
+  }
+  if (f.akunKasID) {
+    pil.push({ kunci: "akun", label: `Akun: ${nama.akun(f.akunKasID) ?? "terpilih"}`, onHapus: () => terapkan({ ...f, akunKasID: "" }) });
+  }
+  if (f.bahanBakuID) {
+    pil.push({ kunci: "bahan", label: `Bahan: ${nama.bahan(f.bahanBakuID) ?? "terpilih"}`, onHapus: () => terapkan({ ...f, bahanBakuID: "" }) });
+  }
+  if (periodePembelianDiubah(f, bawaan)) {
+    const label = labelPilPeriode({ dari: f.dari, sampai: f.sampai }, hariIni) ?? "Semua tanggal";
+    pil.push({ kunci: "periode", label, onHapus: () => terapkan({ ...f, dari: bawaan.dari, sampai: bawaan.sampai }) });
+  }
+  return pil;
 }

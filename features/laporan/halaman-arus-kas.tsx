@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { AlertTriangle, Download, Loader2, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import { PilihTanggal } from "@/components/pilih-tanggal";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,9 +10,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
+import { PilFilterAktif, TombolFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihDaftar, PilihanPeriode } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { pesanError } from "@/lib/api/error";
 import { IZIN } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/useSession";
@@ -28,7 +30,9 @@ import {
   arahBersih,
   barisPeriode,
   filterAwalArusKas,
+  jumlahFilterArusKas,
   parameterArusKas,
+  pilFilterArusKas,
   rincianArusKas,
   tanggalPendek,
   type FilterArusKas,
@@ -38,9 +42,6 @@ import {
 } from "./arus-kas";
 import { useArusKas } from "./hooks";
 
-const SEMUA = "semua";
-const KELAS_LABEL = "text-kecil font-bold text-navy/70";
-const KELAS_PEMICU = "h-10 bg-permukaan border-navy/20 text-navy";
 
 /** Angka bertanda: "+Rp 1.000", "−Rp 1.000", atau "Rp 0". */
 function rupiahBertanda(n: number): string {
@@ -130,6 +131,10 @@ function Panel({ panel }: { panel: PanelRincian }) {
  */
 export function HalamanArusKas() {
   const [filter, setFilter] = useState<FilterArusKas>(() => filterAwalArusKas());
+  // Periode bawaan bulan ini mengikuti hari ini (butir 28) dan tidak dihitung (FL11a).
+  const hariIni = useTanggalHariIni();
+  const bawaan = useMemo(() => filterAwalArusKas(hariIni), [hariIni]);
+  const panel = usePanelFilter({ terapan: filter, bawaan, onTerapkan: setFilter });
   const [mengunduh, setMengunduh] = useState<FormatUnduhan | null>(null);
   const { permissions } = useSession();
   // Daftar akun kas menuntut read-akunkas; tanpa itu laporan tetap seluruh akun.
@@ -206,72 +211,72 @@ export function HalamanArusKas() {
         </DropdownMenu>
       </div>
 
-      <div className="flex flex-wrap items-end gap-3 p-4 rounded-2xl bg-navy/5 border border-navy/5">
-        {bolehPilihAkun && (
-          <div className="flex flex-col gap-1 flex-[1_1_180px] sm:max-w-56">
-            <label htmlFor="arus-kas-akun" className={KELAS_LABEL}>
-              Akun kas
-            </label>
-            <Select
-              value={filter.akunKasID || SEMUA}
-              onValueChange={(v) => setFilter({ ...filter, akunKasID: v === SEMUA ? "" : v })}
-            >
-              <SelectTrigger id="arus-kas-akun" className={cn(KELAS_PEMICU, "w-full")}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={SEMUA}>Semua akun</SelectItem>
-                {(akunKas.data ?? []).map((akun) => (
-                  <SelectItem key={akun.id} value={akun.id}>
-                    {akun.namaAkun}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <div
+            role="group"
+            aria-label="Kelompokkan per"
+            className="flex bg-cokelat-zaitun/20 rounded-lg p-1 border border-navy/10 shadow-inner gap-0.5"
+          >
+            {(Object.keys(LABEL_KELOMPOK) as KelompokArusKas[]).map((k) => (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={filter.kelompok === k}
+                onClick={() => setFilter({ ...filter, kelompok: k })}
+                className={cn(
+                  "h-8 px-3.5 text-isi font-bold rounded-md transition-colors cursor-pointer",
+                  filter.kelompok === k ? "bg-sage text-gading shadow-sm" : "text-navy/70 hover:text-navy",
+                )}
+              >
+                {LABEL_KELOMPOK[k]}
+              </button>
+            ))}
           </div>
-        )}
-        <div className="flex flex-col gap-1">
-          <span className={KELAS_LABEL}>Dari</span>
-          <PilihTanggal
-            label="Dari"
-            value={filter.dari}
-            onChange={(dari) => setFilter({ ...filter, dari })}
-            tanggalNonaktif={{ after: filter.sampai }}
+          <TombolFilter
+            jumlahAktif={jumlahFilterArusKas(filter, bawaan)}
+            onBuka={panel.buka}
+            terbuka={panel.terbuka}
           />
         </div>
-        <div className="flex flex-col gap-1">
-          <span className={KELAS_LABEL}>Sampai</span>
-          <PilihTanggal
-            label="Sampai"
-            value={filter.sampai}
-            onChange={(sampai) => setFilter({ ...filter, sampai })}
-            tanggalNonaktif={{ before: filter.dari }}
-          />
-        </div>
-        <div
-          role="group"
-          aria-label="Kelompokkan per"
-          className="flex bg-cokelat-zaitun/20 rounded-lg p-1 border border-navy/10 shadow-inner gap-0.5"
-        >
-          {(Object.keys(LABEL_KELOMPOK) as KelompokArusKas[]).map((k) => (
-            <button
-              key={k}
-              type="button"
-              aria-pressed={filter.kelompok === k}
-              onClick={() => setFilter({ ...filter, kelompok: k })}
-              className={cn(
-                "h-8 px-3.5 text-isi font-bold rounded-md transition-colors cursor-pointer",
-                filter.kelompok === k ? "bg-sage text-gading shadow-sm" : "text-navy/70 hover:text-navy",
-              )}
-            >
-              {LABEL_KELOMPOK[k]}
-            </button>
-          ))}
-        </div>
-        <Button type="button" variant="outline" onClick={() => setFilter(filterAwalArusKas())}>
-          Reset Filter
-        </Button>
+        <PilFilterAktif
+          pil={pilFilterArusKas(filter, bawaan, akunKas.data, hariIni, setFilter)}
+          onAturUlangSemua={() => setFilter({ ...bawaan, kelompok: filter.kelompok })}
+        />
       </div>
+      <PanelFilter
+        terbuka={panel.terbuka}
+        onTerbukaBerubah={panel.ubahTerbuka}
+        jumlahAktif={jumlahFilterArusKas(panel.draf, bawaan)}
+        onTerapkan={panel.terapkan}
+        onAturUlang={() => panel.setDraf({ ...bawaan, kelompok: panel.draf.kelompok })}
+      >
+        {bolehPilihAkun && (
+          <KelompokFilter judul="Akun kas" htmlFor="arus-kas-akun">
+            <PilihDaftar
+              id="arus-kas-akun"
+              nilai={panel.draf.akunKasID}
+              onUbah={(akunKasID) => panel.setDraf({ ...panel.draf, akunKasID })}
+              labelSemua="Semua akun"
+              opsi={(akunKas.data ?? []).map((a) => ({ id: a.id, nama: a.namaAkun }))}
+            />
+          </KelompokFilter>
+        )}
+        <KelompokFilter judul="Periode">
+          <PilihanPeriode
+            idAwalan="arus-kas"
+            hariIni={hariIni}
+            labelDari="Dari"
+            labelSampai="Sampai"
+            batasiUrutan
+            wajib
+            rentang={{ dari: panel.draf.dari, sampai: panel.draf.sampai }}
+            onUbah={({ dari, sampai }) =>
+              panel.setDraf({ ...panel.draf, dari: dari ?? panel.draf.dari, sampai: sampai ?? panel.draf.sampai })
+            }
+          />
+        </KelompokFilter>
+      </PanelFilter>
 
       {laporan.isError ? (
         <div role="alert" className="flex flex-col items-center justify-center py-10 gap-3 text-navy/70 text-center">

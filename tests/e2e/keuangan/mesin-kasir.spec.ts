@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { saldoAkun } from "../../helpers/akun-kas-uji";
 import { unik } from "../../helpers/reservasi-uji";
+import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../helpers/filter-uji";
 import { PENGGUNA_KASIR_OUTLET, masukBacaSaja, masukKasirOutlet, siapkanKasirOutlet } from "../../helpers/terkunci-uji";
 import {
   NAMA_LACI_UJI,
@@ -176,6 +177,29 @@ test.describe("Mesin Kasir", () => {
     await baris.click();
     await expect(page.getByRole("link", { name: "Kembali ke Mesin Kasir" })).toBeVisible({ timeout: 20_000 });
     await tanpaGulir("rincian sesi");
+  });
+
+  test("riwayat: periode dari panel filter dikirim lewat Terapkan, bawaan tujuh hari tidak dihitung, dan Atur ulang semua kembali (FL1a, FL11a)", async ({ page }) => {
+    await login(page);
+    const kini = new Date();
+    const hari = `${kini.getFullYear()}-${String(kini.getMonth() + 1).padStart(2, "0")}-${String(kini.getDate()).padStart(2, "0")}`;
+    await page.goto(URL);
+    await expect(page.getByRole("button", { name: "Filter lainnya", exact: true })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("group", { name: "Filter aktif" })).toBeHidden();
+    const panel = await bukaPanelFilter(page);
+    await expect(pilihanPanel(panel, "Periode cepat", "7 hari"), "bawaan tujuh hari").toHaveAttribute("aria-pressed", "true");
+    await pilihanPanel(panel, "Periode cepat", "Hari ini").click();
+    const tHariIni = page.waitForResponse((r) => {
+      if (r.request().method() !== "GET" || !/\/api\/sesikasir\?/i.test(r.url())) return false;
+      const q = new globalThis.URL(r.url()).searchParams;
+      return q.get("status") === "TUTUP" && q.get("dari") === hari && q.get("sampai") === hari;
+    });
+    await terapkanPanelFilter(panel);
+    expect((await tHariIni).status()).toBe(200);
+    const pil = page.getByRole("group", { name: "Filter aktif" });
+    await expect(pil.getByRole("button", { name: /^Hapus filter Hari ini · / })).toBeVisible();
+    await pil.getByRole("button", { name: "Atur ulang semua" }).click();
+    await expect(pil).toBeHidden();
   });
 });
 

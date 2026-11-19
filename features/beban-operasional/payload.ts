@@ -1,3 +1,4 @@
+import { labelPilPeriode, type PilFilter } from "@/lib/filter";
 import { keTanggalLokal } from "@/lib/waktu";
 import type { AkunKas } from "@/types/akunKas";
 import type {
@@ -132,4 +133,34 @@ export function namaAkunBeban(akun: AkunKasBeban | null): string {
 
 export function namaKategoriBeban(kategori: KategoriDiBeban | null): string {
   return kategori?.namaKategori || "-";
+}
+/** Jumlah filter aktif untuk lencana (FL1a); periode dihitung satu. */
+export function jumlahFilterBeban(filter: FilterBeban): number {
+  return [filter.akunKasID, filter.kategoriBebanID, filter.status].filter(Boolean).length + (filter.dari || filter.sampai ? 1 : 0);
+}
+
+/** Pil filter aktif (FL4a); nama akun dan kategori dari daftar yang sudah dimuat halaman. */
+export function pilFilterBeban(
+  filter: FilterBeban,
+  nama: { akun: (id: string) => string | undefined; kategori: (id: string) => string | undefined },
+  hariIni: Date,
+  terapkan: (baru: FilterBeban) => void,
+): PilFilter[] {
+  const pil: PilFilter[] = [];
+  if (filter.akunKasID) {
+    pil.push({ kunci: "akun", label: `Akun: ${nama.akun(filter.akunKasID) ?? "terpilih"}`, onHapus: () => terapkan({ ...filter, akunKasID: "" }) });
+  }
+  if (filter.kategoriBebanID) {
+    pil.push({
+      kunci: "kategori",
+      label: `Kategori: ${nama.kategori(filter.kategoriBebanID) ?? "terpilih"}`,
+      onHapus: () => terapkan({ ...filter, kategoriBebanID: "" }),
+    });
+  }
+  if (filter.status) {
+    pil.push({ kunci: "status", label: `Status: ${LABEL_STATUS_BEBAN[filter.status]}`, onHapus: () => terapkan({ ...filter, status: "" }) });
+  }
+  const periode = labelPilPeriode({ dari: filter.dari, sampai: filter.sampai }, hariIni);
+  if (periode) pil.push({ kunci: "periode", label: periode, onHapus: () => terapkan({ ...filter, dari: undefined, sampai: undefined }) });
+  return pil;
 }

@@ -9,7 +9,6 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ColumnDef } from "@tanstack/react-table";
 
-import { PilihTanggal } from "@/components/pilih-tanggal";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -31,21 +30,26 @@ import { akunKasAktif } from "@/features/akun-kas/filter";
 import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
 import { PILIHAN_UKURAN_MUTASI, UKURAN_MUTASI_BAWAAN } from "@/features/akun-kas/mutasi";
 import { URL_DAFTAR_AKUN_KAS } from "@/features/akun-kas/ubah";
+import { BilahFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihDaftar, PilihanPeriode, PilihanSegmen } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
 import { formatRupiah, formatTanggal } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { AkunKas } from "@/types/akunKas";
-import type { JurnalTransfer, StatusTransfer } from "@/types/jurnalTransfer";
+import type { JurnalTransfer } from "@/types/jurnalTransfer";
 import { DialogBatalTransfer } from "./dialog-batal-transfer";
 import { useBuatTransfer, useDaftarTransfer } from "./hooks";
 import { aksiTransfer } from "./izin";
 import {
   FILTER_AWAL_TRANSFER,
-  adaFilterTransfer,
   ISIAN_AWAL_PINDAH_DANA,
   LABEL_STATUS_TRANSFER,
+  jumlahFilterTransfer,
   namaAkunTransfer,
+  pilFilterTransfer,
   payloadBuatTransfer,
   pesanSaldoKurang,
   pilihanTujuan,
@@ -53,13 +57,10 @@ import {
 } from "./payload";
 import { skemaPindahDana, type IsianPindahDana } from "./schema";
 
-const SEMUA = "semua";
 const KELAS_ISIAN =
   "bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy";
 const KELAS_LABEL = "text-isi font-bold text-navy";
 const KELAS_GALAT = "text-kecil font-bold text-rose-500";
-const KELAS_LABEL_FILTER = "text-kecil font-bold text-navy/70";
-const KELAS_PEMICU_FILTER = "w-52 bg-gading border-navy/20 text-navy";
 
 function Keadaan({ judul, isi }: { judul: string; isi: string }) {
   return (
@@ -308,6 +309,8 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
     setFilter(baru);
     setHalaman(1);
   };
+  const hariIni = useTanggalHariIni();
+  const panel = usePanelFilter({ terapan: filter, bawaan: FILTER_AWAL_TRANSFER, onTerapkan: ubahFilter });
 
   const kolom = useMemo<ColumnDef<JurnalTransfer>[]>(
     () => [
@@ -421,75 +424,49 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
         </p>
       </div>
 
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="filter-akun-transfer" className={KELAS_LABEL_FILTER}>
-            Akun kas
-          </label>
-          <Select
-            value={filter.akunKasID || SEMUA}
-            onValueChange={(v) => ubahFilter({ ...filter, akunKasID: v === SEMUA ? "" : v })}
-          >
-            <SelectTrigger id="filter-akun-transfer" className={KELAS_PEMICU_FILTER}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={SEMUA}>Semua akun</SelectItem>
-              {akun.map((a) => (
-                <SelectItem key={a.id} value={a.id}>
-                  {a.namaAkun}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label htmlFor="filter-status-transfer" className={KELAS_LABEL_FILTER}>
-            Status
-          </label>
-          <Select
-            value={filter.status || SEMUA}
-            onValueChange={(v) =>
-              ubahFilter({ ...filter, status: v === SEMUA ? "" : (v as StatusTransfer) })
-            }
-          >
-            <SelectTrigger id="filter-status-transfer" className={KELAS_PEMICU_FILTER}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={SEMUA}>Semua status</SelectItem>
-              <SelectItem value="AKTIF">{LABEL_STATUS_TRANSFER.AKTIF}</SelectItem>
-              <SelectItem value="VOID">{LABEL_STATUS_TRANSFER.VOID}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <span className={KELAS_LABEL_FILTER}>Transfer dari</span>
-          <PilihTanggal
-            label="Transfer dari"
-            value={filter.dari}
-            onChange={(dari) => ubahFilter({ ...filter, dari })}
-            tanggalNonaktif={filter.sampai ? { after: filter.sampai } : undefined}
+      <BilahFilter
+        jumlahAktif={jumlahFilterTransfer(filter)}
+        onBukaFilter={panel.buka}
+        filterTerbuka={panel.terbuka}
+        pil={pilFilterTransfer(filter, akun, hariIni, ubahFilter)}
+        onAturUlangSemua={() => ubahFilter(FILTER_AWAL_TRANSFER)}
+      />
+      <PanelFilter
+        terbuka={panel.terbuka}
+        onTerbukaBerubah={panel.ubahTerbuka}
+        jumlahAktif={jumlahFilterTransfer(panel.draf)}
+        onTerapkan={panel.terapkan}
+        onAturUlang={panel.aturUlang}
+      >
+        <KelompokFilter judul="Akun kas" htmlFor="filter-akun-transfer">
+          <PilihDaftar
+            id="filter-akun-transfer"
+            nilai={panel.draf.akunKasID}
+            onUbah={(akunKasID) => panel.setDraf({ ...panel.draf, akunKasID })}
+            labelSemua="Semua akun"
+            opsi={akun.map((a) => ({ id: a.id, nama: a.namaAkun }))}
           />
-        </div>
-        <div className="flex flex-col gap-1">
-          <span className={KELAS_LABEL_FILTER}>Transfer sampai</span>
-          <PilihTanggal
-            label="Transfer sampai"
-            value={filter.sampai}
-            onChange={(sampai) => ubahFilter({ ...filter, sampai })}
-            tanggalNonaktif={filter.dari ? { before: filter.dari } : undefined}
+        </KelompokFilter>
+        <KelompokFilter judul="Status">
+          <PilihanSegmen
+            label="Status"
+            nilai={panel.draf.status || undefined}
+            opsi={(["AKTIF", "VOID"] as const).map((v) => ({ nilai: v, label: LABEL_STATUS_TRANSFER[v] }))}
+            onUbah={(status) => panel.setDraf({ ...panel.draf, status: status ?? "" })}
           />
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={!adaFilterTransfer(filter)}
-          onClick={() => ubahFilter(FILTER_AWAL_TRANSFER)}
-        >
-          Reset Filter
-        </Button>
-      </div>
+        </KelompokFilter>
+        <KelompokFilter judul="Periode">
+          <PilihanPeriode
+            idAwalan="filter-transfer"
+            hariIni={hariIni}
+            labelDari="Transfer dari"
+            labelSampai="Transfer sampai"
+            batasiUrutan
+            rentang={{ dari: panel.draf.dari, sampai: panel.draf.sampai }}
+            onUbah={({ dari, sampai }) => panel.setDraf({ ...panel.draf, dari, sampai })}
+          />
+        </KelompokFilter>
+      </PanelFilter>
 
       {daftar.isError ? (
         <div

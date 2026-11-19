@@ -4,6 +4,7 @@
  * rancangan butir 27).
  */
 
+import { labelPilPeriode, rentangSama, type PilFilter } from "@/lib/filter";
 import { keTanggalLokal } from "@/lib/waktu";
 
 /** Nilai pilihan "Semua mesin kasir" di filter riwayat. */
@@ -58,4 +59,31 @@ export function teksRentangRiwayat(nilai: NilaiFilterRiwayat): string {
     return `${FORMAT_TANGGAL.format(nilai.dari)} sampai ${FORMAT_TANGGAL.format(nilai.sampai)}`;
   }
   return "rentang ini";
+}
+
+function periodeRiwayatDiubah(nilai: NilaiFilterRiwayat, bawaan: NilaiFilterRiwayat): boolean {
+  return !rentangSama({ dari: nilai.dari, sampai: nilai.sampai }, { dari: bawaan.dari, sampai: bawaan.sampai });
+}
+
+/** Jumlah filter aktif; periode bawaan tujuh hari tidak dihitung (FL11a). */
+export function jumlahFilterRiwayat(nilai: NilaiFilterRiwayat, bawaan: NilaiFilterRiwayat): number {
+  return (nilai.mesin !== SEMUA_MESIN ? 1 : 0) + (periodeRiwayatDiubah(nilai, bawaan) ? 1 : 0);
+}
+
+export function pilFilterRiwayat(
+  nilai: NilaiFilterRiwayat,
+  bawaan: NilaiFilterRiwayat,
+  namaMesin: (installationId: string) => string | undefined,
+  hariIni: Date,
+  terapkan: (baru: NilaiFilterRiwayat) => void,
+): PilFilter[] {
+  const pil: PilFilter[] = [];
+  if (nilai.mesin !== SEMUA_MESIN) {
+    pil.push({ kunci: "mesin", label: `Mesin: ${namaMesin(nilai.mesin) ?? "terpilih"}`, onHapus: () => terapkan({ ...nilai, mesin: SEMUA_MESIN }) });
+  }
+  if (periodeRiwayatDiubah(nilai, bawaan)) {
+    const label = labelPilPeriode({ dari: nilai.dari, sampai: nilai.sampai }, hariIni) ?? "Semua tanggal";
+    pil.push({ kunci: "periode", label, onHapus: () => terapkan({ ...nilai, dari: bawaan.dari, sampai: bawaan.sampai }) });
+  }
+  return pil;
 }

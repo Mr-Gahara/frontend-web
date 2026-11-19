@@ -5,7 +5,10 @@ import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, Plus, Receipt } from "lucide-react";
 
-import { PilihTanggal } from "@/components/pilih-tanggal";
+import { BilahFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihDaftar, PilihanPeriode, PilihanSegmen } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -15,13 +18,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
 import { PILIHAN_UKURAN_MUTASI, UKURAN_MUTASI_BAWAAN } from "@/features/akun-kas/mutasi";
 import { useDaftarKategoriBeban } from "@/features/kategori-beban/hooks";
@@ -30,7 +26,7 @@ import { IZIN, bolehBukaHalaman } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/useSession";
 import { formatRupiah, formatTanggalPendek } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import type { BebanOperasional, StatusBeban } from "@/types/bebanOperasional";
+import type { BebanOperasional } from "@/types/bebanOperasional";
 import { DialogBatalBeban, DialogRincianBeban, DialogUbahBeban } from "./dialog-beban";
 import { useDaftarBeban } from "./hooks";
 import { aksiBeban } from "./izin";
@@ -38,14 +34,11 @@ import {
   FILTER_AWAL_BEBAN,
   LABEL_STATUS_BEBAN,
   URL_CATAT_BEBAN,
-  adaFilterBeban,
+  jumlahFilterBeban,
   namaKategoriBeban,
+  pilFilterBeban,
   type FilterBeban,
 } from "./payload";
-
-const SEMUA = "semua";
-const KELAS_LABEL_FILTER = "text-kecil font-bold text-navy/70";
-const KELAS_PEMICU_FILTER = "w-52 bg-gading border-navy/20 text-navy";
 
 type JenisDialog = "rincian" | "ubah" | "batal";
 type DialogTerbuka = { jenis: JenisDialog; beban: BebanOperasional } | null;
@@ -71,10 +64,18 @@ export function HalamanPengeluaran() {
   const daftar = useDaftarBeban(filter, halaman, ukuran);
   const data = useMemo(() => daftar.data?.data ?? [], [daftar.data]);
 
+  const hariIni = useTanggalHariIni();
+  const akun = useDaftarAkunKas({ enabled: bolehAkun });
+  const kategori = useDaftarKategoriBeban(bolehKategori);
+  const namaFilter = {
+    akun: (id: string) => akun.data?.find((a) => a.id === id)?.namaAkun,
+    kategori: (id: string) => kategori.data?.find((k) => k.id === id)?.namaKategori,
+  };
   const ubahFilter = (baru: FilterBeban) => {
     setFilter(baru);
     setHalaman(1);
   };
+  const panel = usePanelFilter({ terapan: filter, bawaan: FILTER_AWAL_BEBAN, onTerapkan: ubahFilter });
 
   const kolom = useMemo<ColumnDef<BebanOperasional>[]>(
     () => [
@@ -175,66 +176,62 @@ export function HalamanPengeluaran() {
         )}
       </div>
 
-      <div className="flex flex-wrap items-end gap-3 border-b border-navy/10 pb-4">
+      <BilahFilter
+        jumlahAktif={jumlahFilterBeban(filter)}
+        onBukaFilter={panel.buka}
+        filterTerbuka={panel.terbuka}
+        pil={pilFilterBeban(filter, namaFilter, hariIni, ubahFilter)}
+        onAturUlangSemua={() => ubahFilter(FILTER_AWAL_BEBAN)}
+      />
+      <PanelFilter
+        terbuka={panel.terbuka}
+        onTerbukaBerubah={panel.ubahTerbuka}
+        jumlahAktif={jumlahFilterBeban(panel.draf)}
+        onTerapkan={panel.terapkan}
+        onAturUlang={panel.aturUlang}
+      >
         {bolehAkun && (
-          <FilterAkun
-            nilai={filter.akunKasID}
-            onUbah={(akunKasID) => ubahFilter({ ...filter, akunKasID })}
-          />
+          <KelompokFilter judul="Akun kas" htmlFor="filter-akun-beban">
+            <PilihDaftar
+              id="filter-akun-beban"
+              nilai={panel.draf.akunKasID}
+              onUbah={(akunKasID) => panel.setDraf({ ...panel.draf, akunKasID })}
+              labelSemua="Semua akun"
+              opsi={(akun.data ?? []).map((a) => ({ id: a.id, nama: a.namaAkun }))}
+            />
+          </KelompokFilter>
         )}
         {bolehKategori && (
-          <FilterKategori
-            nilai={filter.kategoriBebanID}
-            onUbah={(kategoriBebanID) => ubahFilter({ ...filter, kategoriBebanID })}
-          />
+          <KelompokFilter judul="Kategori" htmlFor="filter-kategori-beban">
+            <PilihDaftar
+              id="filter-kategori-beban"
+              nilai={panel.draf.kategoriBebanID}
+              onUbah={(kategoriBebanID) => panel.setDraf({ ...panel.draf, kategoriBebanID })}
+              labelSemua="Semua kategori"
+              opsi={(kategori.data ?? []).map((k) => ({ id: k.id, nama: k.namaKategori }))}
+            />
+          </KelompokFilter>
         )}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="filter-status-beban" className={KELAS_LABEL_FILTER}>
-            Status
-          </label>
-          <Select
-            value={filter.status || SEMUA}
-            onValueChange={(v) =>
-              ubahFilter({ ...filter, status: v === SEMUA ? "" : (v as StatusBeban) })
-            }
-          >
-            <SelectTrigger id="filter-status-beban" className={KELAS_PEMICU_FILTER}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={SEMUA}>Semua status</SelectItem>
-              <SelectItem value="AKTIF">{LABEL_STATUS_BEBAN.AKTIF}</SelectItem>
-              <SelectItem value="VOID">{LABEL_STATUS_BEBAN.VOID}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <span className={KELAS_LABEL_FILTER}>Beban dari</span>
-          <PilihTanggal
-            label="Beban dari"
-            value={filter.dari}
-            onChange={(dari) => ubahFilter({ ...filter, dari })}
-            tanggalNonaktif={filter.sampai ? { after: filter.sampai } : undefined}
+        <KelompokFilter judul="Status">
+          <PilihanSegmen
+            label="Status"
+            nilai={panel.draf.status || undefined}
+            opsi={(["AKTIF", "VOID"] as const).map((v) => ({ nilai: v, label: LABEL_STATUS_BEBAN[v] }))}
+            onUbah={(status) => panel.setDraf({ ...panel.draf, status: status ?? "" })}
           />
-        </div>
-        <div className="flex flex-col gap-1">
-          <span className={KELAS_LABEL_FILTER}>Beban sampai</span>
-          <PilihTanggal
-            label="Beban sampai"
-            value={filter.sampai}
-            onChange={(sampai) => ubahFilter({ ...filter, sampai })}
-            tanggalNonaktif={filter.dari ? { before: filter.dari } : undefined}
+        </KelompokFilter>
+        <KelompokFilter judul="Periode">
+          <PilihanPeriode
+            idAwalan="filter-beban"
+            hariIni={hariIni}
+            labelDari="Beban dari"
+            labelSampai="Beban sampai"
+            batasiUrutan
+            rentang={{ dari: panel.draf.dari, sampai: panel.draf.sampai }}
+            onUbah={({ dari, sampai }) => panel.setDraf({ ...panel.draf, dari, sampai })}
           />
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={!adaFilterBeban(filter)}
-          onClick={() => ubahFilter(FILTER_AWAL_BEBAN)}
-        >
-          Reset Filter
-        </Button>
-      </div>
+        </KelompokFilter>
+      </PanelFilter>
 
       {daftar.isError ? (
         <div
@@ -288,54 +285,6 @@ export function HalamanPengeluaran() {
       {terbuka?.jenis === "batal" && (
         <DialogBatalBeban beban={terbuka.beban} onTutup={() => setTerbuka(null)} />
       )}
-    </div>
-  );
-}
-
-function FilterAkun({ nilai, onUbah }: { nilai: string; onUbah: (id: string) => void }) {
-  const akun = useDaftarAkunKas();
-  return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor="filter-akun-beban" className={KELAS_LABEL_FILTER}>
-        Akun kas
-      </label>
-      <Select value={nilai || SEMUA} onValueChange={(v) => onUbah(v === SEMUA ? "" : v)}>
-        <SelectTrigger id="filter-akun-beban" className={KELAS_PEMICU_FILTER}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={SEMUA}>Semua akun</SelectItem>
-          {(akun.data ?? []).map((a) => (
-            <SelectItem key={a.id} value={a.id}>
-              {a.namaAkun}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
-
-function FilterKategori({ nilai, onUbah }: { nilai: string; onUbah: (id: string) => void }) {
-  const kategori = useDaftarKategoriBeban();
-  return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor="filter-kategori-beban" className={KELAS_LABEL_FILTER}>
-        Kategori
-      </label>
-      <Select value={nilai || SEMUA} onValueChange={(v) => onUbah(v === SEMUA ? "" : v)}>
-        <SelectTrigger id="filter-kategori-beban" className={KELAS_PEMICU_FILTER}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={SEMUA}>Semua kategori</SelectItem>
-          {(kategori.data ?? []).map((k) => (
-            <SelectItem key={k.id} value={k.id}>
-              {k.namaKategori}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
     </div>
   );
 }

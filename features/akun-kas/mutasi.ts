@@ -1,4 +1,5 @@
 import { formatRupiah } from "@/lib/format";
+import { labelPilPeriode, rentangSama, type PilFilter } from "@/lib/filter";
 import { keTanggalLokal } from "@/lib/waktu";
 import type { AkunKas, ArahMutasi, JenisMutasi, MutasiKas } from "@/types/akunKas";
 
@@ -134,4 +135,41 @@ export function teksJumlahMutasi(mutasi: Pick<MutasiKas, "arah" | "jumlah">): st
 /** Tanggal transaksi boleh diisi mundur atau maju, sehingga dapat berbeda hari dari waktu dicatat. */
 export function tanggalTransaksiBerbeda(mutasi: Pick<MutasiKas, "tanggal" | "createdAt">): boolean {
   return keTanggalLokal(new Date(mutasi.tanggal)) !== keTanggalLokal(new Date(mutasi.createdAt));
+}
+/** Periode bawaan (bulan ini) tidak dihitung di lencana dan tidak menjadi pil (FL11a). */
+function periodeDiubah(filter: FilterMutasi, bawaan: FilterMutasi): boolean {
+  return !rentangSama({ dari: filter.dari, sampai: filter.sampai }, { dari: bawaan.dari, sampai: bawaan.sampai });
+}
+
+export function jumlahFilterMutasi(filter: FilterMutasi, bawaan: FilterMutasi): number {
+  return [filter.akunKasID, filter.arah, filter.jenis].filter(Boolean).length + (periodeDiubah(filter, bawaan) ? 1 : 0);
+}
+
+/** Pil filter aktif (FL4a); menghapus pil periode kembali ke periode bawaan. */
+export function pilFilterMutasi(
+  filter: FilterMutasi,
+  bawaan: FilterMutasi,
+  daftarAkun: AkunKas[] | undefined,
+  hariIni: Date,
+  terapkan: (baru: FilterMutasi) => void,
+): PilFilter[] {
+  const pil: PilFilter[] = [];
+  if (filter.akunKasID) {
+    pil.push({
+      kunci: "akun",
+      label: `Akun: ${namaAkunMutasi(filter.akunKasID, daftarAkun)}`,
+      onHapus: () => terapkan({ ...filter, akunKasID: "" }),
+    });
+  }
+  if (filter.arah) {
+    pil.push({ kunci: "arah", label: `Arah: ${LABEL_ARAH[filter.arah]}`, onHapus: () => terapkan({ ...filter, arah: "" }) });
+  }
+  if (filter.jenis) {
+    pil.push({ kunci: "jenis", label: `Jenis: ${LABEL_JENIS[filter.jenis]}`, onHapus: () => terapkan({ ...filter, jenis: "" }) });
+  }
+  if (periodeDiubah(filter, bawaan)) {
+    const label = labelPilPeriode({ dari: filter.dari, sampai: filter.sampai }, hariIni) ?? "Semua tanggal";
+    pil.push({ kunci: "periode", label, onHapus: () => terapkan({ ...filter, dari: bawaan.dari, sampai: bawaan.sampai }) });
+  }
+  return pil;
 }

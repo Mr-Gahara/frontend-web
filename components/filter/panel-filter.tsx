@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { ChevronLeft, X } from "lucide-react";
 import { PilihTanggal } from "@/components/pilih-tanggal";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { PERIODE_CEPAT, periodeCepatTerpilih, rentangPeriodeCepat, type RentangTanggal } from "@/lib/filter";
 import { cn } from "@/lib/utils";
@@ -190,6 +191,10 @@ interface PropsPilihanPeriode {
   hariIni: Date;
   labelDari?: string;
   labelSampai?: string;
+  /** Dari tidak boleh setelah Sampai, bagi halaman yang sudah membatasinya. */
+  batasiUrutan?: boolean;
+  /** Tanggal tidak boleh kosong (laporan); tombol Kosongkan tidak ditawarkan. */
+  wajib?: boolean;
 }
 
 /** Periode: pil cepat di atas dua isian tanggal (FL2a, FL12a). */
@@ -200,6 +205,8 @@ export function PilihanPeriode({
   hariIni,
   labelDari = "Dari tanggal",
   labelSampai = "Sampai tanggal",
+  batasiUrutan = false,
+  wajib = false,
 }: PropsPilihanPeriode) {
   const cepat = periodeCepatTerpilih(rentang, hariIni);
   return (
@@ -234,7 +241,8 @@ export function PilihanPeriode({
             placeholder="Semua tanggal"
             value={rentang.dari}
             onChange={(dari) => onUbah({ ...rentang, dari })}
-            onKosongkan={() => onUbah({ ...rentang, dari: undefined })}
+            onKosongkan={wajib ? undefined : () => onUbah({ ...rentang, dari: undefined })}
+            tanggalNonaktif={batasiUrutan && rentang.sampai ? { after: rentang.sampai } : undefined}
             className="h-10 w-full sm:h-11"
           />
         </div>
@@ -248,7 +256,8 @@ export function PilihanPeriode({
             placeholder="Semua tanggal"
             value={rentang.sampai}
             onChange={(sampai) => onUbah({ ...rentang, sampai })}
-            onKosongkan={() => onUbah({ ...rentang, sampai: undefined })}
+            onKosongkan={wajib ? undefined : () => onUbah({ ...rentang, sampai: undefined })}
+            tanggalNonaktif={batasiUrutan && rentang.dari ? { before: rentang.dari } : undefined}
             className="h-10 w-full sm:h-11"
           />
         </div>
@@ -259,3 +268,41 @@ export function PilihanPeriode({
 
 /** Kelas pemicu Select di dalam panel, agar setinggi isian lain. */
 export const KELAS_PEMICU_PANEL = "h-10 w-full cursor-pointer border-navy/20 bg-permukaan text-navy sm:h-11";
+
+const SEMUA = "__semua";
+
+/**
+ * Daftar dari data (akun kas, kategori, bahan, mesin kasir) sebagai Select
+ * di dalam panel (FL10a). Nilai kosong berarti Semua.
+ */
+export function PilihDaftar({
+  id,
+  nilai,
+  onUbah,
+  labelSemua,
+  opsi,
+  disabled,
+}: {
+  id: string;
+  nilai: string;
+  onUbah: (nilai: string) => void;
+  labelSemua: string;
+  opsi: { id: string; nama: string }[];
+  disabled?: boolean;
+}) {
+  return (
+    <Select value={nilai || SEMUA} onValueChange={(v) => onUbah(v === SEMUA ? "" : v)} disabled={disabled}>
+      <SelectTrigger id={id} className={KELAS_PEMICU_PANEL}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={SEMUA}>{labelSemua}</SelectItem>
+        {opsi.map((o) => (
+          <SelectItem key={o.id} value={o.id}>
+            {o.nama}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}

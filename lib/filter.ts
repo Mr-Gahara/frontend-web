@@ -72,3 +72,9 @@ export interface PilFilter {
   label: string;
   onHapus: () => void;
 }
+
+/** Dua rentang sama per hari; dipakai untuk periode bawaan yang tidak dihitung (FL11a). */
+export function rentangSama(a: RentangTanggal, b: RentangTanggal): boolean {
+  const sama = (x?: Date, y?: Date) => (x && y ? isSameDay(x, y) : !x && !y);
+  return sama(a.dari, b.dari) && sama(a.sampai, b.sampai);
+}

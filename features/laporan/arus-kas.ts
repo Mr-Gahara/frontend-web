@@ -1,3 +1,4 @@
+import { labelPilPeriode, rentangSama, type PilFilter } from "@/lib/filter";
 import { keTanggalLokal } from "@/lib/waktu";
 import type { AngkaArusKas, BarisArusKas } from "@/types/laporan";
 
@@ -198,3 +199,32 @@ export const LENCANA_ARAH: Record<Arah, { label: string; catatan: string }> = {
   turun: { label: "Turun", catatan: "keluar lebih besar dari masuk" },
   tetap: { label: "Tetap", catatan: "masuk sama dengan keluar" },
 };
+
+/** Periode bawaan bulan ini tidak dihitung dan tidak menjadi pil (FL11a). */
+function periodeArusKasDiubah(filter: FilterArusKas, bawaan: FilterArusKas): boolean {
+  return !rentangSama({ dari: filter.dari, sampai: filter.sampai }, { dari: bawaan.dari, sampai: bawaan.sampai });
+}
+
+/** Jumlah filter aktif; "Kelompokkan per" pilihan tampilan, bukan filter (FL8a). */
+export function jumlahFilterArusKas(filter: FilterArusKas, bawaan: FilterArusKas): number {
+  return (filter.akunKasID ? 1 : 0) + (periodeArusKasDiubah(filter, bawaan) ? 1 : 0);
+}
+
+export function pilFilterArusKas(
+  filter: FilterArusKas,
+  bawaan: FilterArusKas,
+  daftarAkun: { id: string; namaAkun: string }[] | undefined,
+  hariIni: Date,
+  terapkan: (baru: FilterArusKas) => void,
+): PilFilter[] {
+  const pil: PilFilter[] = [];
+  if (filter.akunKasID) {
+    const nama = daftarAkun?.find((a) => a.id === filter.akunKasID)?.namaAkun ?? "terpilih";
+    pil.push({ kunci: "akun", label: `Akun: ${nama}`, onHapus: () => terapkan({ ...filter, akunKasID: "" }) });
+  }
+  if (periodeArusKasDiubah(filter, bawaan)) {
+    const label = labelPilPeriode({ dari: filter.dari, sampai: filter.sampai }, hariIni) ?? "";
+    pil.push({ kunci: "periode", label, onHapus: () => terapkan({ ...filter, dari: bawaan.dari, sampai: bawaan.sampai }) });
+  }
+  return pil;
+}

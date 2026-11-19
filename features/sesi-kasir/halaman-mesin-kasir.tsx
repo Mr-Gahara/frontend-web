@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { toast } from "sonner";
 import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
 import { useJamBerjalan } from "@/hooks/use-jam-berjalan";
@@ -83,6 +84,9 @@ export function HalamanMesinKasir() {
   const adaSesi = useAdaSesiKasir(tanpaMesin);
 
   const [filter, setFilter] = useState<NilaiFilterRiwayat>(() => filterAwalRiwayat(new Date()));
+  // Bawaan tujuh hari mengikuti hari ini, tidak dihitung di lencana (FL11a).
+  const hariIni = useTanggalHariIni();
+  const bawaanFilter = useMemo(() => filterAwalRiwayat(hariIni), [hariIni]);
   const riwayat = useRiwayatSesi(filter);
   const sesiRiwayat = useMemo(() => riwayat.data?.pages.flatMap((h) => h.data) ?? [], [riwayat.data]);
 
@@ -126,7 +130,15 @@ export function HalamanMesinKasir() {
         riwayat={{
           status: statusMuat(riwayat),
           sesi: sesiRiwayat,
-          filter: <FilterRiwayat nilai={filter} onUbah={setFilter} pilihanMesin={pilihanMesinFilter} />,
+          filter: (
+            <FilterRiwayat
+              nilai={filter}
+              onUbah={setFilter}
+              pilihanMesin={pilihanMesinFilter}
+              bawaan={bawaanFilter}
+              hariIni={hariIni}
+            />
+          ),
           teksRentang: teksRentangRiwayat(filter),
           onResetFilter: () => setFilter(filterAwalRiwayat(new Date())),
           onCobaLagi: () => riwayat.refetch(),

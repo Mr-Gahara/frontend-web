@@ -3,6 +3,7 @@ import { BASIS, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { unik } from "../../helpers/reservasi-uji";
 import { daftarAkun } from "../../helpers/akun-kas-uji";
 import { masukBacaSaja } from "../../helpers/terkunci-uji";
+import { bukaPanelFilter, terapkanPanelFilter } from "../../helpers/filter-uji";
 import {
   buatPembelianUji,
   hapusPembelianUji,
@@ -107,7 +108,7 @@ test.describe("Keuangan: Belanja Stok", () => {
           POLA_RINGKASAN.test(r.url()) &&
           query(r.url()).get("supplier") === supplier,
       );
-      await page.getByLabel("Cari supplier").fill(supplier);
+      await page.getByRole("searchbox", { name: "Cari supplier" }).fill(supplier);
       expect((await tCari).status(), "ringkasan dengan supplier").toBe(200);
 
       const ringkasan = page.getByRole("region", { name: "Ringkasan belanja stok" });
@@ -142,9 +143,12 @@ test.describe("Keuangan: Belanja Stok", () => {
           POLA_RINGKASAN.test(r.url()) &&
           query(r.url()).get("locationID") === gudang.id,
       );
+      const panel = await bukaPanelFilter(page);
       await page.getByRole("combobox", { name: "Lokasi penerima" }).click();
       await page.getByRole("option", { name: gudang.nama, exact: true }).click();
+      await terapkanPanelFilter(panel);
       await tLokasi;
+      await expect(page.getByRole("button", { name: `Hapus filter Lokasi: ${gudang.nama}` })).toBeVisible();
       await expect(baris).toHaveCount(1);
       await expect(total).toContainText(rupiah(7500));
       await expect(total).toContainText("1 pembelian");
@@ -218,7 +222,7 @@ test.describe("Keuangan: Belanja Stok, pengguna baca-saja", () => {
 
       await masukBacaSaja(page);
       await page.goto(URL_BELANJA);
-      await page.getByLabel("Cari supplier").fill(supplier);
+      await page.getByRole("searchbox", { name: "Cari supplier" }).fill(supplier);
       const baris = page.getByRole("row").filter({ hasText: supplier });
       await expect(baris).toHaveCount(1);
       // Tanpa izin buat pembelian, tombol Catat pembelian tidak tampil.

@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
+import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../helpers/filter-uji";
 import { BASIS, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import {
   batalkanPenjualanUji,
@@ -114,7 +115,7 @@ test.describe("Mutasi arus kas", () => {
     await expect(rincian).toContainText(rupiah(pertama.saldoSesudah));
   });
 
-  test("periode diubah lewat PilihTanggal dikirim sebagai awal dan akhir hari lokal, lalu Reset Filter kembali ke bulan berjalan", async ({
+  test("periode diubah lewat panel dikirim sebagai awal dan akhir hari lokal, lalu Atur ulang semua kembali ke bulan berjalan (FL11a)", async ({
     page,
   }) => {
     await bukaMutasi(page);
@@ -123,32 +124,39 @@ test.describe("Mutasi arus kas", () => {
     const awalBulan = tanggal(1).toISOString();
     const akhir20 = new Date(kini.getFullYear(), kini.getMonth(), 20, 23, 59, 59, 999).toISOString();
 
+    // Periode bawaan tidak dihitung dan tidak menjadi pil (FL11a).
+    await expect(page.getByRole("button", { name: "Filter lainnya", exact: true })).toBeVisible();
+    await expect(page.getByRole("group", { name: "Filter aktif" })).toBeHidden();
+
     // Tanggal 15 dan 20 tidak pernah tampil sebagai hari bulan lain di kalender.
     // "Sampai" diisi lebih dulu, karena "dari" tidak boleh melewati "sampai".
-    const tSampai = page.waitForResponse(
-      responsMutasi((q) => q.get("dari") === awalBulan && q.get("sampai") === akhir20),
-    );
-    await page.getByRole("button", { name: /^Dicatat sampai, / }).click();
+    let panel = await bukaPanelFilter(page);
+    await panel.getByRole("button", { name: /^Dicatat sampai, / }).click();
     await page.getByRole("grid").getByText("20", { exact: true }).click();
     await expect(page.getByRole("grid")).toHaveCount(0);
-    expect((await tSampai).status()).toBe(200);
-
-    const tDari = page.waitForResponse(
-      responsMutasi((q) => q.get("dari") === tanggal(15).toISOString() && q.get("sampai") === akhir20 && q.get("page") === "1"),
-    );
-    await page.getByRole("button", { name: /^Dicatat dari, / }).click();
+    await panel.getByRole("button", { name: /^Dicatat dari, / }).click();
     await page.getByRole("grid").getByText("15", { exact: true }).click();
     await expect(page.getByRole("grid")).toHaveCount(0);
-    expect((await tDari).status()).toBe(200);
+    const tPeriode = page.waitForResponse(
+      responsMutasi((q) => q.get("dari") === tanggal(15).toISOString() && q.get("sampai") === akhir20 && q.get("page") === "1"),
+    );
+    await terapkanPanelFilter(panel);
+    expect((await tPeriode).status()).toBe(200);
+    expect(awalBulan, "periode bawaan dari awal bulan").toBe(tanggal(1).toISOString());
+    const pil = page.getByRole("group", { name: "Filter aktif" });
+    await expect(pil.getByRole("button", { name: /^Hapus filter 15 – 20 / })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Filter lainnya, 1 aktif" })).toBeVisible();
 
-    // Kunci periode bawaan sudah pernah dimuat (staleTime), sehingga reset
-    // dibuktikan dari tampilan tanggal, bukan dari permintaan baru.
-    await page.getByRole("button", { name: "Reset Filter" }).click();
+    // Kunci periode bawaan sudah pernah dimuat (staleTime), sehingga atur
+    // ulang dibuktikan dari tampilan tanggal, bukan dari permintaan baru.
+    await pil.getByRole("button", { name: "Atur ulang semua" }).click();
+    await expect(pil).toBeHidden();
     // Format tombol PilihTanggal: "dd MMMM yyyy" berbahasa Indonesia.
     const teks = (d: Date) =>
       `${String(d.getDate()).padStart(2, "0")} ${new Intl.DateTimeFormat("id-ID", { month: "long" }).format(d)} ${d.getFullYear()}`;
-    await expect(page.getByRole("button", { name: `Dicatat dari, ${teks(tanggal(1))}`, exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: `Dicatat sampai, ${teks(kini)}`, exact: true })).toBeVisible();
+    panel = await bukaPanelFilter(page);
+    await expect(panel.getByRole("button", { name: `Dicatat dari, ${teks(tanggal(1))}`, exact: true })).toBeVisible();
+    await expect(panel.getByRole("button", { name: `Dicatat sampai, ${teks(kini)}`, exact: true })).toBeVisible();
   });
 
   test("pindah halaman meminta page berikutnya dan menampilkan barisnya", async ({ page }) => {
@@ -166,22 +174,20 @@ test.describe("Mutasi arus kas", () => {
     await expect(barisTabel(page).first()).toContainText(kedua.data[0].keterangan);
   });
 
-  test("filter arah dan jenis dikirim ke server, dan pilihan jenis mengikuti arah", async ({ page }) => {
+  test("filter arah dan jenis dikirim ke server lewat panel, dan pilihan jenis mengikuti arah", async ({ page }) => {
     await bukaMutasi(page);
 
-    const tArah = page.waitForResponse(responsMutasi((q) => q.get("arah") === "KELUAR"));
-    await pemilih(page, "Arah").click();
-    await page.getByRole("option", { name: "Uang keluar" }).click();
-    const arah = await tArah;
-    expect(arah.status()).toBe(200);
-    expect(new URL(arah.url()).searchParams.get("page"), "filter mengembalikan ke halaman 1").toBe("1");
-
-    await pemilih(page, "Jenis").click();
-    await expect(page.getByRole("option", { name: "Pembayaran", exact: true })).toHaveCount(0);
-    const tJenis = page.waitForResponse(responsMutasi((q) => q.get("jenis") === "VOID_PEMBAYARAN"));
-    await page.getByRole("option", { name: "Pembatalan pembayaran", exact: true }).click();
+    const panel = await bukaPanelFilter(page);
+    await pilihanPanel(panel, "Arah", "Uang keluar").click();
+    await expect(pilihanPanel(panel, "Jenis", "Pembayaran"), "jenis masuk tidak ditawarkan").toHaveCount(0);
+    await pilihanPanel(panel, "Jenis", "Pembatalan pembayaran").click();
+    const tJenis = page.waitForResponse(
+      responsMutasi((q) => q.get("arah") === "KELUAR" && q.get("jenis") === "VOID_PEMBAYARAN"),
+    );
+    await terapkanPanelFilter(panel);
     const jenis = await tJenis;
     expect(jenis.status()).toBe(200);
+    expect(new URL(jenis.url()).searchParams.get("page"), "filter mengembalikan ke halaman 1").toBe("1");
     const isi = (await jenis.json()) as ResponsMutasi;
 
     expect(isi.data.every((b) => b.jenis === "VOID_PEMBAYARAN")).toBe(true);
@@ -197,12 +203,12 @@ test.describe("Mutasi arus kas", () => {
       ["Uang keluar", "Selisih kas kurang", "SELISIH_KAS_KELUAR", "Selisih kas lebih"],
     ] as const) {
       await test.step(`${arah}: ${label}`, async () => {
-        await pemilih(page, "Arah").click();
-        await page.getByRole("option", { name: arah, exact: true }).click();
-        await pemilih(page, "Jenis").click();
-        await expect(page.getByRole("option", { name: lawan, exact: true })).toHaveCount(0);
+        const panel = await bukaPanelFilter(page);
+        await pilihanPanel(panel, "Arah", arah).click();
+        await expect(pilihanPanel(panel, "Jenis", lawan)).toHaveCount(0);
+        await pilihanPanel(panel, "Jenis", label).click();
         const tJenis = page.waitForResponse(responsMutasi((q) => q.get("jenis") === jenis));
-        await page.getByRole("option", { name: label, exact: true }).click();
+        await terapkanPanelFilter(panel);
         const respons = await tJenis;
         expect(respons.status(), `jenis ${jenis} diterima server`).toBe(200);
         const isi = (await respons.json()) as ResponsMutasi;
@@ -239,8 +245,10 @@ test.describe("Mutasi arus kas", () => {
     const tRingkasan = page.waitForResponse(
       (r) => r.request().method() === "GET" && POLA_RINGKASAN.test(r.url()),
     );
+    const panel = await bukaPanelFilter(page);
     await pemilih(page, "Akun kas").click();
     await page.getByRole("option", { name: dipilih.namaAkun, exact: true }).click();
+    await terapkanPanelFilter(panel);
     expect((await tMutasi).status()).toBe(200);
     const respons = await tRingkasan;
     expect(respons.status()).toBe(200);

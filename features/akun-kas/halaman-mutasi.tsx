@@ -4,7 +4,6 @@ import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
-import { PilihTanggal } from "@/components/pilih-tanggal";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -13,16 +12,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { BilahFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihDaftar, PilihanPeriode, PilihanPil, PilihanSegmen } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { pesanError } from "@/lib/api/error";
 import { formatRupiah, formatTanggal, formatTanggalPendek } from "@/lib/format";
-import type { ArahMutasi, JenisMutasi, MutasiKas } from "@/types/akunKas";
+import type { MutasiKas } from "@/types/akunKas";
 import { DialogRincianMutasi } from "./dialog-rincian-mutasi";
 import { useDaftarAkunKas, useDaftarMutasi, useRingkasanMutasi } from "./hooks";
 import {
@@ -32,17 +28,16 @@ import {
   UKURAN_MUTASI_BAWAAN,
   filterAwalMutasi,
   gantiArah,
+  jumlahFilterMutasi,
   namaAkunBaris,
   namaAkunMutasi,
+  pilFilterMutasi,
   pilihanJenis,
   tanggalTransaksiBerbeda,
   teksJumlahMutasi,
   type FilterMutasi,
 } from "./mutasi";
 
-const SEMUA = "semua";
-const KELAS_LABEL = "text-kecil font-bold text-navy/70";
-const KELAS_PEMICU = "w-52 bg-permukaan border-navy/20 text-navy";
 
 function KartuRingkasan({ judul, nilai }: { judul: string; nilai: number }) {
   return (
@@ -93,6 +88,11 @@ export function HalamanMutasi() {
     setFilter(baru);
     setHalaman(1);
   };
+  // Periode bawaan bulan ini mengikuti hari ini (butir 28), tidak dihitung
+  // di lencana, dan menjadi tujuan Atur ulang (FL11a).
+  const hariIni = useTanggalHariIni();
+  const bawaan = useMemo(() => filterAwalMutasi(hariIni), [hariIni]);
+  const panel = usePanelFilter({ terapan: filter, bawaan, onTerapkan: ubahFilter });
 
   const kolom = useMemo<ColumnDef<MutasiKas>[]>(
     () => [
@@ -190,94 +190,57 @@ export function HalamanMutasi() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="filter-akun" className={KELAS_LABEL}>
-              Akun kas
-            </label>
-            <Select
-              value={filter.akunKasID || SEMUA}
-              onValueChange={(v) => ubahFilter({ ...filter, akunKasID: v === SEMUA ? "" : v })}
-            >
-              <SelectTrigger id="filter-akun" className={KELAS_PEMICU}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={SEMUA}>Semua akun</SelectItem>
-                {(akunKas.data ?? []).map((akun) => (
-                  <SelectItem key={akun.id} value={akun.id}>
-                    {akun.namaAkun}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <span className={KELAS_LABEL}>Dicatat dari</span>
-            <PilihTanggal
-              label="Dicatat dari"
-              value={filter.dari}
-              onChange={(dari) => ubahFilter({ ...filter, dari })}
-              tanggalNonaktif={filter.sampai ? { after: filter.sampai } : undefined}
+        <BilahFilter
+          jumlahAktif={jumlahFilterMutasi(filter, bawaan)}
+          onBukaFilter={panel.buka}
+          filterTerbuka={panel.terbuka}
+          pil={pilFilterMutasi(filter, bawaan, akunKas.data, hariIni, ubahFilter)}
+          onAturUlangSemua={() => ubahFilter(bawaan)}
+        />
+        <PanelFilter
+          terbuka={panel.terbuka}
+          onTerbukaBerubah={panel.ubahTerbuka}
+          jumlahAktif={jumlahFilterMutasi(panel.draf, bawaan)}
+          onTerapkan={panel.terapkan}
+          onAturUlang={panel.aturUlang}
+        >
+          <KelompokFilter judul="Akun kas" htmlFor="filter-akun">
+            <PilihDaftar
+              id="filter-akun"
+              nilai={panel.draf.akunKasID}
+              onUbah={(akunKasID) => panel.setDraf({ ...panel.draf, akunKasID })}
+              labelSemua="Semua akun"
+              opsi={(akunKas.data ?? []).map((a) => ({ id: a.id, nama: a.namaAkun }))}
             />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <span className={KELAS_LABEL}>Dicatat sampai</span>
-            <PilihTanggal
-              label="Dicatat sampai"
-              value={filter.sampai}
-              onChange={(sampai) => ubahFilter({ ...filter, sampai })}
-              tanggalNonaktif={filter.dari ? { before: filter.dari } : undefined}
+          </KelompokFilter>
+          <KelompokFilter judul="Arah">
+            <PilihanSegmen
+              label="Arah"
+              nilai={panel.draf.arah || undefined}
+              opsi={(["MASUK", "KELUAR"] as const).map((v) => ({ nilai: v, label: LABEL_ARAH[v] }))}
+              onUbah={(arah) => panel.setDraf(gantiArah(panel.draf, arah ?? ""))}
             />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label htmlFor="filter-arah" className={KELAS_LABEL}>
-              Arah
-            </label>
-            <Select
-              value={filter.arah || SEMUA}
-              onValueChange={(v) => ubahFilter(gantiArah(filter, v === SEMUA ? "" : (v as ArahMutasi)))}
-            >
-              <SelectTrigger id="filter-arah" className={KELAS_PEMICU}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={SEMUA}>Semua arah</SelectItem>
-                <SelectItem value="MASUK">{LABEL_ARAH.MASUK}</SelectItem>
-                <SelectItem value="KELUAR">{LABEL_ARAH.KELUAR}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label htmlFor="filter-jenis" className={KELAS_LABEL}>
-              Jenis
-            </label>
-            <Select
-              value={filter.jenis || SEMUA}
-              onValueChange={(v) => ubahFilter({ ...filter, jenis: v === SEMUA ? "" : (v as JenisMutasi) })}
-            >
-              <SelectTrigger id="filter-jenis" className={KELAS_PEMICU}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={SEMUA}>Semua jenis</SelectItem>
-                {pilihanJenis(filter.arah).map((jenis) => (
-                  <SelectItem key={jenis} value={jenis}>
-                    {LABEL_JENIS[jenis]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button type="button" variant="outline" onClick={() => ubahFilter(filterAwalMutasi())}>
-            Reset Filter
-          </Button>
-        </div>
+          </KelompokFilter>
+          <KelompokFilter judul="Jenis">
+            <PilihanPil
+              label="Jenis"
+              nilai={panel.draf.jenis || undefined}
+              opsi={pilihanJenis(panel.draf.arah).map((j) => ({ nilai: j, label: LABEL_JENIS[j] }))}
+              onUbah={(jenis) => panel.setDraf({ ...panel.draf, jenis: jenis ?? "" })}
+            />
+          </KelompokFilter>
+          <KelompokFilter judul="Periode dicatat">
+            <PilihanPeriode
+              idAwalan="filter-mutasi"
+              hariIni={hariIni}
+              labelDari="Dicatat dari"
+              labelSampai="Dicatat sampai"
+              batasiUrutan
+              rentang={{ dari: panel.draf.dari, sampai: panel.draf.sampai }}
+              onUbah={({ dari, sampai }) => panel.setDraf({ ...panel.draf, dari, sampai })}
+            />
+          </KelompokFilter>
+        </PanelFilter>
 
         <RingkasanAkun
           filter={filter}

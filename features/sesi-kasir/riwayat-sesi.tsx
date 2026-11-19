@@ -1,80 +1,77 @@
 "use client";
 
 import Link from "next/link";
-import { PilihTanggal } from "@/components/pilih-tanggal";
+import { PilFilterAktif, TombolFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihDaftar, PilihanPeriode } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRupiah } from "@/lib/format";
 import type { SesiKasir } from "@/types/sesiKasir";
 import type { StatusMuat } from "./bagian-kasir-buka";
-import { SEMUA_MESIN, type NilaiFilterRiwayat } from "./filter";
+import { SEMUA_MESIN, jumlahFilterRiwayat, pilFilterRiwayat, type NilaiFilterRiwayat } from "./filter";
 import { ChipSelisih } from "./label";
 import { kelompokkanPerHari, labelSelisih, namaMesin, orangSesi, rentangJam } from "./tampilan";
 
 export { SEMUA_MESIN, type NilaiFilterRiwayat } from "./filter";
 
-const KELAS_LABEL = "text-isi font-semibold text-navy";
 
 /**
- * Filter riwayat: mesin kasir dan dua PilihTanggal seperti halaman Pindah
- * Dana (keputusan rancangan butir 22; pemilik proyek, 6 November 2026).
- * Pilihan mesin tidak tampil tanpa daftar mesin kasir.
+ * Filter riwayat dalam pola filter seragam (FL1a): tombol Filter lainnya
+ * berlencana, pil aktif, dan panel samping berisi mesin kasir serta periode
+ * dibuka. Pilihan mesin tidak tampil tanpa daftar mesin kasir.
  */
 export function FilterRiwayat({
   nilai,
   onUbah,
   pilihanMesin,
+  bawaan,
+  hariIni,
 }: {
   nilai: NilaiFilterRiwayat;
   onUbah: (nilai: NilaiFilterRiwayat) => void;
   pilihanMesin: { installationId: string; nama: string }[] | undefined;
+  bawaan: NilaiFilterRiwayat;
+  hariIni: Date;
 }) {
+  const panel = usePanelFilter({ terapan: nilai, bawaan, onTerapkan: onUbah });
+  const namaMesin = (id: string) => pilihanMesin?.find((m) => m.installationId === id)?.nama;
   return (
-    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-end sm:gap-3">
-      {pilihanMesin && (
-        <div className="col-span-2 flex flex-col gap-1 sm:w-52">
-          <span className={KELAS_LABEL}>Mesin kasir</span>
-          <Select value={nilai.mesin} onValueChange={(mesin) => onUbah({ ...nilai, mesin })}>
-            <SelectTrigger
-              aria-label="Mesin kasir"
-              className="h-11 w-full border-navy/20 bg-white text-navy data-[size=default]:h-11"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="border-navy/10 bg-gading text-navy">
-              <SelectItem value={SEMUA_MESIN} className="cursor-pointer">
-                Semua mesin kasir
-              </SelectItem>
-              {pilihanMesin.map((m) => (
-                <SelectItem key={m.installationId} value={m.installationId} className="cursor-pointer">
-                  {m.nama}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-      <div className="col-span-2 flex min-w-0 flex-col gap-1 sm:col-span-1">
-        <span className={KELAS_LABEL}>Dibuka dari</span>
-        <PilihTanggal
-          label="Dibuka dari"
-          value={nilai.dari}
-          onChange={(dari) => onUbah({ ...nilai, dari })}
-          tanggalNonaktif={nilai.sampai ? { after: nilai.sampai } : undefined}
-          className="w-full"
-        />
+    <div className="flex flex-col gap-3">
+      <div className="flex justify-end">
+        <TombolFilter jumlahAktif={jumlahFilterRiwayat(nilai, bawaan)} onBuka={panel.buka} terbuka={panel.terbuka} />
       </div>
-      <div className="col-span-2 flex min-w-0 flex-col gap-1 sm:col-span-1">
-        <span className={KELAS_LABEL}>Dibuka sampai</span>
-        <PilihTanggal
-          label="Dibuka sampai"
-          value={nilai.sampai}
-          onChange={(sampai) => onUbah({ ...nilai, sampai })}
-          tanggalNonaktif={nilai.dari ? { before: nilai.dari } : undefined}
-          className="w-full"
-        />
-      </div>
+      <PilFilterAktif pil={pilFilterRiwayat(nilai, bawaan, namaMesin, hariIni, onUbah)} onAturUlangSemua={() => onUbah(bawaan)} />
+      <PanelFilter
+        terbuka={panel.terbuka}
+        onTerbukaBerubah={panel.ubahTerbuka}
+        jumlahAktif={jumlahFilterRiwayat(panel.draf, bawaan)}
+        onTerapkan={panel.terapkan}
+        onAturUlang={panel.aturUlang}
+      >
+        {pilihanMesin && (
+          <KelompokFilter judul="Mesin kasir" htmlFor="filter-mesin-riwayat">
+            <PilihDaftar
+              id="filter-mesin-riwayat"
+              nilai={panel.draf.mesin === SEMUA_MESIN ? "" : panel.draf.mesin}
+              onUbah={(mesin) => panel.setDraf({ ...panel.draf, mesin: mesin || SEMUA_MESIN })}
+              labelSemua="Semua mesin kasir"
+              opsi={pilihanMesin.map((m) => ({ id: m.installationId, nama: m.nama }))}
+            />
+          </KelompokFilter>
+        )}
+        <KelompokFilter judul="Periode dibuka">
+          <PilihanPeriode
+            idAwalan="filter-riwayat"
+            hariIni={hariIni}
+            labelDari="Dibuka dari"
+            labelSampai="Dibuka sampai"
+            batasiUrutan
+            rentang={{ dari: panel.draf.dari, sampai: panel.draf.sampai }}
+            onUbah={({ dari, sampai }) => panel.setDraf({ ...panel.draf, dari, sampai })}
+          />
+        </KelompokFilter>
+      </PanelFilter>
     </div>
   );
 }

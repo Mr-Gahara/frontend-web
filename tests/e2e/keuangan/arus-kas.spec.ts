@@ -1,5 +1,6 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
 import { JAWAB_GAGAL, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { bukaPanelFilter, terapkanPanelFilter } from "../../helpers/filter-uji";
 import { rincianArusKas } from "../../../features/laporan/arus-kas";
 import { formatRupiah } from "../../../lib/format";
 import { keTanggalLokal } from "../../../lib/waktu";
@@ -65,7 +66,7 @@ test.describe("Arus kas", () => {
     await expect(daftar).toHaveCount(isi.data.length);
   });
 
-  test("kelompok Minggu dan satu akun kas dikirim ke backend, lalu Reset Filter mengembalikannya", async ({ page }) => {
+  test("kelompok Minggu dan satu akun kas dari panel dikirim ke backend, lalu Atur ulang semua mengembalikan akun tanpa mengubah kelompok (FL8a)", async ({ page }) => {
     const awal = tungguArusKas(page);
     await bukaDenganAuth(page, URL_ARUS_KAS);
     await awal;
@@ -78,20 +79,23 @@ test.describe("Arus kas", () => {
     const isiMinggu = (await resMinggu.json()) as ResponsArusKas;
     await expect(page.getByRole("region", { name: "Per minggu" }).getByRole("listitem")).toHaveCount(isiMinggu.data.length);
 
-    await page.getByLabel("Akun kas").click();
+    const panel = await bukaPanelFilter(page);
+    await page.getByRole("combobox", { name: "Akun kas" }).click();
     const pilihan = page.getByRole("option");
     await expect(pilihan.first()).toBeVisible();
     test.skip((await pilihan.count()) < 2, "Tenant uji tidak punya akun kas untuk dipilih");
-    const satuAkun = tungguArusKas(page, (q) => Boolean(q.get("akunKasID")));
     await pilihan.nth(1).click();
+    const satuAkun = tungguArusKas(page, (q) => Boolean(q.get("akunKasID")));
+    await terapkanPanelFilter(panel);
     const resAkun = await satuAkun;
     expect(resAkun.status()).toBe(200);
     expect(query(resAkun).get("kelompok"), "kelompok tetap minggu").toBe("minggu");
     await expect(page.getByText("Transfer antar akun tidak dihitung untuk Semua akun", { exact: false })).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Reset Filter" }).click();
-    await expect(page.getByRole("heading", { name: "Per hari" })).toBeVisible();
+    await page.getByRole("group", { name: "Filter aktif" }).getByRole("button", { name: "Atur ulang semua" }).click();
     await expect(page.getByText("Transfer antar akun tidak dihitung untuk Semua akun", { exact: false })).toBeVisible();
+    // Kelompokkan per pilihan tampilan, bukan filter (FL8a): tetap per minggu.
+    await expect(page.getByRole("heading", { name: "Per minggu" })).toBeVisible();
   });
 
   test("Unduh laporan: menu PDF, Excel, dan CSV mengunduh berkas backend dengan filter yang sama", async ({ page }) => {
