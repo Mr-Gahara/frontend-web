@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../helpers/filter-uji";
 import {
   ALASAN_TANPA_ADMIN,
   bukaDaftarAkun,
@@ -78,8 +79,9 @@ test.describe("Akun klien di panel admin", () => {
       page,
       (q) => q.get("status") === "non-aktif" && q.get("page") === "1" && !q.has("cari"),
     );
-    await page.getByRole("combobox", { name: "Status" }).click();
-    await page.getByRole("option", { name: "Non-aktif" }).click();
+    const panel = await bukaPanelFilter(page);
+    await pilihanPanel(panel, "Status", "Non-aktif").click();
+    await terapkanPanelFilter(panel);
     const respons = await tStatus;
     expect(await periksaTotalDaftar(page, respons)).toBe(nonAktif);
     const isi = (await respons.json()) as { data: AkunRespons[] };

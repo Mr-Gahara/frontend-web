@@ -1,3 +1,4 @@
+import type { PilFilter } from "@/lib/filter";
 import type { Diskon, DiskonCakupan, DiskonStatus, DiskonTipe } from "@/types/diskon";
 
 /**
@@ -114,4 +115,36 @@ export function syaratPemakaian(diskon: Diskon): string[] {
   }
   if (diskon.khususMember) syarat.push("Khusus member");
   return syarat;
+}
+
+/** Opsi panel filter diskon (FL10a: masing-masing dua pilihan, berupa segmen). */
+export const OPSI_FILTER_DISKON = {
+  status: [
+    { nilai: "Aktif", label: "Aktif" },
+    { nilai: "Non-Aktif", label: "Non-Aktif" },
+  ],
+  cakupan: [
+    { nilai: "Global", label: "Global" },
+    { nilai: "Item", label: "Item" },
+  ],
+  tipe: [
+    { nilai: "persen", label: "Persen" },
+    { nilai: "nominal", label: "Nominal" },
+  ],
+} as const satisfies Record<keyof FilterDiskon, readonly { nilai: string; label: string }[]>;
+
+export function jumlahFilterDiskon(filter: FilterDiskon): number {
+  return [filter.status, filter.cakupan, filter.tipe].filter((v) => v !== "all").length;
+}
+
+/** Pil filter aktif diskon (FL4a). */
+export function pilFilterDiskon(filter: FilterDiskon, terapkan: (baru: FilterDiskon) => void): PilFilter[] {
+  const judul: Record<keyof FilterDiskon, string> = { status: "Status", cakupan: "Cakupan", tipe: "Tipe" };
+  return (Object.keys(judul) as (keyof FilterDiskon)[])
+    .filter((k) => filter[k] !== "all")
+    .map((k) => ({
+      kunci: k,
+      label: `${judul[k]}: ${OPSI_FILTER_DISKON[k].find((o) => o.nilai === filter[k])?.label ?? filter[k]}`,
+      onHapus: () => terapkan({ ...filter, [k]: "all" }),
+    }));
 }

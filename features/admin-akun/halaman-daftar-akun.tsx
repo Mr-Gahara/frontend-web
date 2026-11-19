@@ -1,19 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { BilahFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihanSegmen } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
 import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useDebounce } from "@/hooks/use-debounce";
 import { pesanError } from "@/lib/api/error";
 import { formatTanggalPendek } from "@/lib/format";
@@ -67,10 +62,16 @@ const KOLOM: ColumnDef<AkunAdmin>[] = [
  * dengan penanda peran. Pencarian, filter status, dan halaman disaring
  * server (B177; keputusan rancangan butir 27). Urutan mengikuti backend.
  */
+const LABEL_STATUS_AKUN: Record<Exclude<FilterStatusAkun, "semua">, string> = {
+  aktif: "Aktif",
+  "non-aktif": "Non-aktif",
+};
+
 export function HalamanDaftarAkun() {
   const [kata, setKata] = useState("");
   const kataTertunda = useDebounce(kata, 400);
   const [status, setStatus] = useState<FilterStatusAkun>("semua");
+  const panel = usePanelFilter<FilterStatusAkun>({ terapan: status, bawaan: "semua", onTerapkan: setStatus });
   const [halaman, setHalaman] = useState(1);
   const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN[0]);
 
@@ -102,36 +103,40 @@ export function HalamanDaftarAkun() {
         </Link>
       </div>
 
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="space-y-1">
-          <label htmlFor="cari-akun" className="text-kecil font-medium">
-            Cari akun
-          </label>
-          <Input
-            id="cari-akun"
-            value={kata}
-            onChange={(e) => setKata(e.target.value)}
-            maxLength={PANJANG_CARI_AKUN}
-            placeholder="Email, username, atau nama toko"
-            className="w-72"
+      <BilahFilter
+        cari={{
+          id: "cari-akun",
+          label: "Cari akun",
+          placeholder: "Email, username, atau nama toko",
+          value: kata,
+          onChange: (v) => setKata(v.slice(0, PANJANG_CARI_AKUN)),
+        }}
+        jumlahAktif={status === "semua" ? 0 : 1}
+        onBukaFilter={panel.buka}
+        filterTerbuka={panel.terbuka}
+        pil={
+          status === "semua"
+            ? []
+            : [{ kunci: "status", label: `Status: ${LABEL_STATUS_AKUN[status]}`, onHapus: () => setStatus("semua") }]
+        }
+        onAturUlangSemua={() => setStatus("semua")}
+      />
+      <PanelFilter
+        terbuka={panel.terbuka}
+        onTerbukaBerubah={panel.ubahTerbuka}
+        jumlahAktif={panel.draf === "semua" ? 0 : 1}
+        onTerapkan={panel.terapkan}
+        onAturUlang={panel.aturUlang}
+      >
+        <KelompokFilter judul="Status">
+          <PilihanSegmen
+            label="Status"
+            nilai={panel.draf === "semua" ? undefined : panel.draf}
+            opsi={(["aktif", "non-aktif"] as const).map((v) => ({ nilai: v, label: LABEL_STATUS_AKUN[v] }))}
+            onUbah={(v) => panel.setDraf(v ?? "semua")}
           />
-        </div>
-        <div className="space-y-1">
-          <label htmlFor="filter-status" className="text-kecil font-medium">
-            Status
-          </label>
-          <Select value={status} onValueChange={(v) => setStatus(v as FilterStatusAkun)}>
-            <SelectTrigger id="filter-status" className="w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="semua">Semua status</SelectItem>
-              <SelectItem value="aktif">Aktif</SelectItem>
-              <SelectItem value="non-aktif">Non-aktif</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+        </KelompokFilter>
+      </PanelFilter>
 
       {daftar.isError ? (
         <div

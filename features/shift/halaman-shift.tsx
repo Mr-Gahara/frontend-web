@@ -1,15 +1,10 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { BilahFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihanSegmen } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Search,
   Plus,
   MoreHorizontal,
   Edit,
@@ -77,6 +71,7 @@ export default function ShiftUtama({
   >("Semua");
 
   // State Dialog
+  const panel = usePanelFilter<"Semua" | "Aktif" | "Non-Aktif">({ terapan: filterStatus, bawaan: "Semua", onTerapkan: setFilterStatus });
   const [formOpen, setFormOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedShift, setSelectedShift] = useState<ShiftItem | null>(null);
@@ -260,49 +255,44 @@ export default function ShiftUtama({
         )}
       </div>
 
-      {/* 2. FILTER & SEARCH */}
-      <div className="flex flex-col sm:flex-row items-center gap-4 border-b border-navy/10 pb-4">
-        {/* Search */}
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama shift..."
-            aria-label="Cari nama shift"
-            className="pl-9 h-11 bg-permukaan border-navy/15 text-navy focus-visible:ring-navy/50 rounded-xl font-medium"
+      {/* 2. FILTER & SEARCH (FL1a): cari di bilah, status di panel */}
+      <BilahFilter
+        cari={{
+          id: `cari-shift-${tipeRuang}`,
+          label: "Cari nama shift",
+          placeholder: "Cari nama shift...",
+          value: searchQuery,
+          onChange: setSearchQuery,
+        }}
+        jumlahAktif={filterStatus === "Semua" ? 0 : 1}
+        onBukaFilter={panel.buka}
+        filterTerbuka={panel.terbuka}
+        pil={
+          filterStatus === "Semua"
+            ? []
+            : [{ kunci: "status", label: `Status: ${filterStatus}`, onHapus: () => setFilterStatus("Semua") }]
+        }
+        onAturUlangSemua={() => setFilterStatus("Semua")}
+      />
+      <PanelFilter
+        terbuka={panel.terbuka}
+        onTerbukaBerubah={panel.ubahTerbuka}
+        jumlahAktif={panel.draf === "Semua" ? 0 : 1}
+        onTerapkan={panel.terapkan}
+        onAturUlang={panel.aturUlang}
+      >
+        <KelompokFilter judul="Status">
+          <PilihanSegmen
+            label="Status"
+            nilai={panel.draf === "Semua" ? undefined : panel.draf}
+            opsi={[
+              { nilai: "Aktif", label: "Aktif" },
+              { nilai: "Non-Aktif", label: "Non-Aktif" },
+            ]}
+            onUbah={(status) => panel.setDraf(status ?? "Semua")}
           />
-        </div>
-
-        {/* Filter Status */}
-        <div className="w-full sm:w-48">
-          <Select
-            value={filterStatus}
-            onValueChange={(val) => setFilterStatus(val as "Semua" | "Aktif" | "Non-Aktif")}
-          >
-            <SelectTrigger
-              aria-label="Filter status shift"
-              className="w-full bg-permukaan text-navy text-isi border-navy/15 focus:ring-navy/50 font-bold h-11 rounded-xl px-4"
-            >
-              <SelectValue placeholder="Semua Status" />
-            </SelectTrigger>
-            <SelectContent className="bg-gading border-navy/10 text-navy font-medium rounded-xl">
-              <SelectItem value="Semua" className="cursor-pointer font-bold">
-                Semua Status
-              </SelectItem>
-              <SelectItem value="Aktif" className="cursor-pointer font-bold">
-                Aktif
-              </SelectItem>
-              <SelectItem
-                value="Non-Aktif"
-                className="cursor-pointer font-bold text-red-600 focus:text-red-700"
-              >
-                Non-Aktif
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+        </KelompokFilter>
+      </PanelFilter>
 
       {/* 3. TABEL DATA: DataTable, kartu per baris (TB1a sampai TB7a); galat menggantikan tabel (TB15a) */}
       {isError ? (

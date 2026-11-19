@@ -2,6 +2,14 @@ import { test, expect, type Page } from "@playwright/test";
 import { JAWAB_GAGAL } from "../../../helpers/transfer-uji";
 import { cocok, pantauPermintaan } from "../../../helpers/reservasi-uji";
 import { masuk } from "../../../helpers/masuk-uji";
+import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../../helpers/filter-uji";
+
+/** Status shift lewat panel filter seragam (FL1a): segmen Semua, Aktif, Non-Aktif. */
+async function saringStatusShift(page: Page, nama: "Semua" | "Aktif" | "Non-Aktif") {
+  const panel = await bukaPanelFilter(page);
+  await pilihanPanel(panel, "Status", nama).click();
+  await terapkanPanelFilter(panel);
+}
 
 // ============================================================
 // CONFIG & CONSTANTS
@@ -193,8 +201,7 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     });
 
     await test.step("Verifikasi Soft Delete di Tab Non-Aktif", async () => {
-      await page.getByRole("combobox", { name: /filter status shift/i }).click();
-      await page.getByRole("option", { name: /^non-aktif$/i }).click();
+      await saringStatusShift(page, "Non-Aktif");
 
       const inactiveRow = getShiftRow(page, namaEdit);
       await expect(inactiveRow).toBeVisible({ timeout: 10_000 });
@@ -367,9 +374,8 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
   // ----------------------------------------------------------
   test("filter: memilah data berdasarkan status shift", async ({ page }) => {
     await test.step("Filter Aktif", async () => {
-      // Disebut namanya: pemilih jumlah baris DataTable juga sebuah combobox.
-      await page.getByRole("combobox", { name: /filter status shift/i }).click();
-      await page.getByRole("option", { name: /^aktif$/i }).click();
+      await saringStatusShift(page, "Aktif");
+      await expect(page.getByRole("button", { name: "Hapus filter Status: Aktif" })).toBeVisible();
 
       // Seluruh row yang memiliki data harus memiliki teks "Aktif"
       const rows = page.locator("tbody tr");
@@ -388,10 +394,9 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     });
 
     await test.step("Kembali ke filter Semua Status", async () => {
-      const select = page.getByRole("combobox", { name: /filter status shift/i });
-      await select.click();
-      await page.getByRole("option", { name: /semua status/i }).click();
-      await expect(select).toContainText("Semua Status");
+      await saringStatusShift(page, "Semua");
+      await expect(page.getByRole("group", { name: "Filter aktif" })).toBeHidden();
+      await expect(page.getByRole("button", { name: "Filter lainnya", exact: true })).toBeVisible();
     });
   });
 
@@ -540,8 +545,7 @@ test.describe("E2E - Manajemen Master Shift (CRUD)", () => {
     // klik di luar dialog modal yang masih terbuka hanya menutupnya.
     await expect(dialog).toBeHidden({ timeout: 10_000 });
     // 3. Verifikasi pindah ke tab non-aktif
-    await page.getByRole("combobox", { name: /filter status shift/i }).click(); // Dropdown filter di luar
-    await page.getByRole("option", { name: /^non-aktif$/i }).click();
+    await saringStatusShift(page, "Non-Aktif");
 
     const inactiveRow = getShiftRow(page, namaShift);
     await expect(inactiveRow).toBeVisible({ timeout: 10_000 });

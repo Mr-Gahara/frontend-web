@@ -1,6 +1,9 @@
 "use client";
 
 import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
+import { BilahFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihanSegmen } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal, Plus } from "lucide-react";
@@ -13,13 +16,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useSession } from "@/lib/auth/useSession";
 import type { Diskon } from "@/types/diskon";
 import { DialogStatusDiskon } from "./dialog-status-diskon";
@@ -29,8 +25,10 @@ import { aksiDiskon } from "./izin";
 import {
   BATAS_DISKON_AKTIF,
   FILTER_DISKON_AWAL,
+  OPSI_FILTER_DISKON,
+  jumlahFilterDiskon,
+  pilFilterDiskon,
   aktifTetapiTidakBerlaku,
-  filterDiskonAktif,
   masihDalamBatas,
   ringkasAturan,
   saringDiskon,
@@ -39,9 +37,6 @@ import {
 } from "./tampilan";
 
 const KELAS_KEPALA = "text-kecil font-semibold text-navy/60";
-const KELAS_PEMICU_FILTER =
-  "w-44 h-11 bg-gading text-navy border-navy/15 focus:ring-navy/50 font-medium rounded-xl";
-const KELAS_ISI_FILTER = "bg-krem border-navy/10 text-navy font-medium rounded-xl";
 
 /**
  * Halaman diskon (keputusan PD2a dan PD3a). Daftar disaring di klien dari
@@ -58,6 +53,7 @@ export function HalamanDiskon() {
   const semua = useMemo(() => daftar.data ?? [], [daftar.data]);
 
   const [filter, setFilter] = useState<FilterDiskon>(FILTER_DISKON_AWAL);
+  const panel = usePanelFilter({ terapan: filter, bawaan: FILTER_DISKON_AWAL, onTerapkan: setFilter });
   const [form, setForm] = useState<{ diskon: Diskon | null } | null>(null);
   const [statusDiubah, setStatusDiubah] = useState<Diskon | null>(null);
 
@@ -243,59 +239,45 @@ export function HalamanDiskon() {
         </p>
       )}
 
-      <div className="flex flex-wrap gap-3">
-        <Select
-          value={filter.status}
-          onValueChange={(nilai) => setFilter({ ...filter, status: nilai as FilterDiskon["status"] })}
-        >
-          <SelectTrigger className={KELAS_PEMICU_FILTER}>
-            <SelectValue placeholder="Semua Status" />
-          </SelectTrigger>
-          <SelectContent className={KELAS_ISI_FILTER}>
-            <SelectItem value="all" className="cursor-pointer">Semua Status</SelectItem>
-            <SelectItem value="Aktif" className="cursor-pointer">Aktif</SelectItem>
-            <SelectItem value="Non-Aktif" className="cursor-pointer">Non-Aktif</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={filter.cakupan}
-          onValueChange={(nilai) => setFilter({ ...filter, cakupan: nilai as FilterDiskon["cakupan"] })}
-        >
-          <SelectTrigger className={KELAS_PEMICU_FILTER}>
-            <SelectValue placeholder="Semua Cakupan" />
-          </SelectTrigger>
-          <SelectContent className={KELAS_ISI_FILTER}>
-            <SelectItem value="all" className="cursor-pointer">Semua Cakupan</SelectItem>
-            <SelectItem value="Global" className="cursor-pointer">Global</SelectItem>
-            <SelectItem value="Item" className="cursor-pointer">Item</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={filter.tipe}
-          onValueChange={(nilai) => setFilter({ ...filter, tipe: nilai as FilterDiskon["tipe"] })}
-        >
-          <SelectTrigger className={KELAS_PEMICU_FILTER}>
-            <SelectValue placeholder="Semua Tipe" />
-          </SelectTrigger>
-          <SelectContent className={KELAS_ISI_FILTER}>
-            <SelectItem value="all" className="cursor-pointer">Semua Tipe</SelectItem>
-            <SelectItem value="persen" className="cursor-pointer">Persen</SelectItem>
-            <SelectItem value="nominal" className="cursor-pointer">Nominal</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {filterDiskonAktif(filter) && (
-          <Button
-            variant="outline"
-            onClick={() => setFilter(FILTER_DISKON_AWAL)}
-            className="cursor-pointer h-11 border-navy/20 text-navy hover:bg-navy/5 bg-transparent font-semibold rounded-xl"
-          >
-            Reset Filter
-          </Button>
-        )}
-      </div>
+      <BilahFilter
+        jumlahAktif={jumlahFilterDiskon(filter)}
+        onBukaFilter={panel.buka}
+        filterTerbuka={panel.terbuka}
+        pil={pilFilterDiskon(filter, setFilter)}
+        onAturUlangSemua={() => setFilter(FILTER_DISKON_AWAL)}
+      />
+      <PanelFilter
+        terbuka={panel.terbuka}
+        onTerbukaBerubah={panel.ubahTerbuka}
+        jumlahAktif={jumlahFilterDiskon(panel.draf)}
+        onTerapkan={panel.terapkan}
+        onAturUlang={panel.aturUlang}
+      >
+        <KelompokFilter judul="Status">
+          <PilihanSegmen
+            label="Status"
+            nilai={panel.draf.status === "all" ? undefined : panel.draf.status}
+            opsi={[...OPSI_FILTER_DISKON.status]}
+            onUbah={(status) => panel.setDraf({ ...panel.draf, status: status ?? "all" })}
+          />
+        </KelompokFilter>
+        <KelompokFilter judul="Cakupan">
+          <PilihanSegmen
+            label="Cakupan"
+            nilai={panel.draf.cakupan === "all" ? undefined : panel.draf.cakupan}
+            opsi={[...OPSI_FILTER_DISKON.cakupan]}
+            onUbah={(cakupan) => panel.setDraf({ ...panel.draf, cakupan: cakupan ?? "all" })}
+          />
+        </KelompokFilter>
+        <KelompokFilter judul="Tipe">
+          <PilihanSegmen
+            label="Tipe"
+            nilai={panel.draf.tipe === "all" ? undefined : panel.draf.tipe}
+            opsi={[...OPSI_FILTER_DISKON.tipe]}
+            onUbah={(tipe) => panel.setDraf({ ...panel.draf, tipe: tipe ?? "all" })}
+          />
+        </KelompokFilter>
+      </PanelFilter>
 
       <div className="flex flex-col gap-4 mt-2">
         {daftar.isError ? (

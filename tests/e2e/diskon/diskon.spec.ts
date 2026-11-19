@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { BASIS, api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
 import { unik } from "../../helpers/reservasi-uji";
+import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../helpers/filter-uji";
 
 /*
  * Spec pembanding halaman diskon, ditulis terhadap kode sebelum migrasi
@@ -70,16 +71,18 @@ test.describe("Diskon", () => {
     await expect(page.getByText(`${daftar.length} total data`)).toBeVisible({ timeout: 15_000 });
   });
 
-  test("filter status menyaring daftar, dan reset mengembalikannya", async ({ page }) => {
+  test("filter status dari panel menyaring daftar, dan Atur ulang semua mengembalikannya (FL1a)", async ({ page }) => {
     const auth = await bukaDiskon(page);
     const daftar = await daftarDiskon(page, auth);
     const nonAktif = daftar.filter((d) => d.status === "Non-Aktif").length;
     test.skip(nonAktif === daftar.length, "Seluruh diskon Non-Aktif; filter tidak dapat dibedakan");
     await expect(page.getByText(`${daftar.length} total data`)).toBeVisible({ timeout: 15_000 });
-    await page.getByRole("combobox").filter({ hasText: "Semua Status" }).click();
-    await page.getByRole("option", { name: "Non-Aktif" }).click();
+    const panel = await bukaPanelFilter(page);
+    await pilihanPanel(panel, "Status", "Non-Aktif").click();
+    await terapkanPanelFilter(panel);
     await expect(page.getByText(`${nonAktif} total data`)).toBeVisible({ timeout: 15_000 });
-    await page.getByRole("button", { name: "Reset Filter" }).click();
+    await expect(page.getByRole("button", { name: "Filter lainnya, 1 aktif" })).toBeVisible();
+    await page.getByRole("button", { name: "Atur ulang semua" }).click();
     await expect(page.getByText(`${daftar.length} total data`)).toBeVisible({ timeout: 15_000 });
   });
 
