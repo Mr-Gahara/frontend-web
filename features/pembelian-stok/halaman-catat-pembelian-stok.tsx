@@ -349,12 +349,12 @@ function FormCatatPembelian({
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              size="aksi"
               onClick={() => append(barisBarangKosong())}
               disabled={memuat}
-              className="border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm h-8 cursor-pointer"
+              className="border-navy/20 text-navy hover:bg-navy/5 shadow-sm cursor-pointer w-full sm:w-auto"
             >
-              <Plus className="w-4 h-4 mr-1" /> Tambah Barang
+              <Plus className="h-4 w-4" /> Tambah Barang
             </Button>
           </div>
           <p className="text-kecil font-medium text-navy/60">Jumlah dalam satuan bahan di master, minimal 1.</p>

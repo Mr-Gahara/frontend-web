@@ -331,7 +331,7 @@ export default function HalamanBuatPenjualan() {
 
           {/* ITEM PENJUALAN */}
           <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5 text-karamel" />
                 Item Penjualan
@@ -339,11 +339,11 @@ export default function HalamanBuatPenjualan() {
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                size="aksi"
                 onClick={addItem}
-                className="cursor-pointer border-navy/20 bg-gading text-navy font-bold hover:bg-navy/5 shadow-sm"
+                className="cursor-pointer border-navy/20 bg-gading text-navy hover:bg-navy/5 shadow-sm w-full sm:w-auto"
               >
-                <Plus className="mr-1 h-3.5 w-3.5" /> Tambah Item
+                <Plus className="h-4 w-4" /> Tambah Item
               </Button>
             </div>
 
@@ -406,20 +406,22 @@ export default function HalamanBuatPenjualan() {
               {formError}
             </p>
           )}
-          <div className="flex items-center justify-between gap-3 rounded-2xl border border-navy/10 bg-krem p-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-navy/10 bg-krem p-4 shadow-sm">
             <Button
               type="button"
               variant="outline"
+              size="aksi"
               onClick={() => router.push("/dashboard/outlet/penjualan")}
               disabled={createMutation.isPending}
-              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 w-full sm:w-auto"
             >
               Batal
             </Button>
             <Button
               type="submit"
               disabled={createMutation.isPending}
-              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold px-8 shadow-sm"
+              size="aksi"
+              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
             >
               {createMutation.isPending ? "Memproses..." : "Buat Penjualan"}
             </Button>

@@ -133,7 +133,8 @@ export default function BuatRolePage() {
             </p>
           </div>
           <Button
-            className="cursor-pointer gap-2 shrink-0 bg-navy text-gading hover:bg-navy/90 shadow-sm font-bold w-full sm:w-auto"
+            size="aksi"
+            className="cursor-pointer shrink-0 bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
             onClick={() =>
               router.push("/dashboard/outlet/pengaturan/roles/buatRole/kostum")
             }

@@ -56,12 +56,15 @@ test.describe("tampilan laman Keuangan", () => {
       expect(kSaldo.x, "kartu kedua di kanan kartu pertama").toBeGreaterThan(kLaba.x + kLaba.width);
     });
 
-    await test.step("Tambah Akun di atas Pindah Dana, keduanya penuh, setinggi sentuhan, dan labelnya utuh", async () => {
+    // Sejak TK4a (19 November 2026, menggantikan susunan bertumpuk KH1a):
+    // kedua tombol sebaris, berbagi lebar isi sama rata, setinggi 32 px.
+    await test.step("Pindah Dana dan Tambah Akun sebaris, berbagi lebar isi, 32 px, dan labelnya utuh", async () => {
       const tambah = page.getByRole("button", { name: "Tambah Akun" });
       const pindah = page.getByRole("button", { name: "Pindah Dana" });
       const kTambah = await kotak(tambah);
       const kPindah = await kotak(pindah);
-      expect(kTambah.y + kTambah.height, "Tambah Akun di atas Pindah Dana").toBeLessThanOrEqual(kPindah.y);
+      expect(Math.abs(kTambah.y - kPindah.y), "kedua tombol sebaris").toBeLessThan(2);
+      expect(kTambah.x, "Tambah Akun di kanan Pindah Dana").toBeGreaterThan(kPindah.x + kPindah.width);
       // Lebar isi halaman diukur dari judul di atasnya, bukan dari lebar layar,
       // karena kerangka dashboard punya padding sendiri.
       const kJudul = await kotak(page.getByRole("heading", { name: "Daftar Akun Kas & Bank" }));
@@ -70,10 +73,14 @@ test.describe("tampilan laman Keuangan", () => {
         ["Tambah Akun", kTambah],
         ["Pindah Dana", kPindah],
       ] as const) {
-        expect(k.height, `${nama} setinggi sentuhan`).toBeGreaterThanOrEqual(44);
-        expect(Math.abs(k.width - kJudul.width), `${nama} ${k.width}px selebar isi ${kJudul.width}px`).toBeLessThan(2);
-        expect(Math.abs(k.x - kJudul.x), `${nama} rata kiri dengan judul`).toBeLessThan(2);
+        expect(Math.round(k.height), `${nama} setinggi ukuran HP tombol aksi`).toBe(32);
       }
+      expect(Math.abs(kTambah.width - kPindah.width), "lebar kedua tombol sama").toBeLessThan(2);
+      expect(Math.abs(kPindah.x - kJudul.x), "Pindah Dana rata kiri dengan judul").toBeLessThan(2);
+      expect(
+        Math.abs(kTambah.x + kTambah.width - (kJudul.x + kJudul.width)),
+        "Tambah Akun rata kanan dengan isi",
+      ).toBeLessThan(2);
       expect(await tidakTerpotong(tambah.locator("span")), "label Tambah Akun utuh").toBe(true);
       expect(await tidakTerpotong(pindah.locator("span")), "label Pindah Dana utuh").toBe(true);
     });

@@ -32,6 +32,9 @@ const buttonVariants = cva(
         "icon-sm":
           "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
         "icon-lg": "size-9",
+        // Tombol Buat, Tambah, dan Catat beserta tetangga sebarisnya: 32 px di
+        // HP, 44 px mulai 640 px (pemilik proyek, 19 November 2026).
+        aksi: "h-8 gap-2 rounded-lg px-2.5 font-bold sm:h-11 sm:px-6 [&_svg:not([class*='size-'])]:size-4",
       },
     },
     defaultVariants: {

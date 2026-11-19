@@ -347,11 +347,11 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            size="aksi"
             onClick={() => append({ ...BARIS_KOSONG })}
-            className="border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm h-8 cursor-pointer"
+            className="border-navy/20 text-navy hover:bg-navy/5 shadow-sm cursor-pointer w-full sm:w-auto"
           >
-            <Plus className="w-4 h-4 mr-1" /> Tambah Baris
+            <Plus className="h-4 w-4" /> Tambah Baris
           </Button>
         </div>
 

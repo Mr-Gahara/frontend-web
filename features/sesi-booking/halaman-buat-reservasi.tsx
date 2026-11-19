@@ -291,9 +291,10 @@ export default function HalamanBuatReservasi() {
                 type="button"
                 onClick={tambahFasilitas}
                 variant="outline"
-                className="w-full border-dashed border-2 border-navy/20 text-navy/70 hover:text-navy hover:bg-navy/5 hover:border-navy/40 h-12 font-bold cursor-pointer transition-all"
+                size="aksi"
+                className="w-full border-dashed border-2 border-navy/20 text-navy/70 hover:text-navy hover:bg-navy/5 hover:border-navy/40 cursor-pointer transition-all"
               >
-                <Plus className="w-4 h-4 mr-2" /> Tambah Fasilitas Lain
+                <Plus className="h-4 w-4" /> Tambah Fasilitas Lain
               </Button>
             </div>
           </div>

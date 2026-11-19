@@ -89,14 +89,14 @@ export function HalamanDaftarAkun() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-judul font-bold tracking-tight">Akun Klien</h1>
           <p className="text-isi text-muted-foreground">Kelola akun klien dan langganannya.</p>
         </div>
-        <Link href={URL_BUAT_AKUN}>
-          <Button type="button">
-            <Plus className="mr-2 h-4 w-4" />
+        <Link href={URL_BUAT_AKUN} className="w-full sm:w-auto">
+          <Button type="button" size="aksi" className="w-full">
+            <Plus className="h-4 w-4" />
             Buat Akun Klien
           </Button>
         </Link>

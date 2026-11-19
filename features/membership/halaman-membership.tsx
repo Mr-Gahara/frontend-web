@@ -106,8 +106,8 @@ export function HalamanMembership() {
           <p className="text-isi font-medium text-navy/60">Kelola paket langganan dan pelanggan yang menjadi member.</p>
         </div>
         {tombolKepala && (
-          <Button type="button" onClick={tombolKepala.aksi} className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto font-bold">
-            <Plus className="mr-2 h-4 w-4" /> {tombolKepala.teks}
+          <Button type="button" onClick={tombolKepala.aksi} size="aksi" className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto">
+            <Plus className="h-4 w-4" /> {tombolKepala.teks}
           </Button>
         )}
       </div>
@@ -265,8 +265,8 @@ function TabMember({
           Member didaftarkan dengan memilih paket. Buat paket pertama dulu, misalnya Member Bulanan 30 hari.
         </p>
         {aksi.buatPaket && (
-          <Button type="button" onClick={onTambahPaket} className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold">
-            <Plus className="mr-2 h-4 w-4" /> Tambah Paket
+          <Button type="button" onClick={onTambahPaket} size="aksi" className="cursor-pointer bg-navy text-gading hover:bg-navy/90 w-full sm:w-auto">
+            <Plus className="h-4 w-4" /> Tambah Paket
           </Button>
         )}
       </div>
@@ -377,14 +377,16 @@ function TabPaket({
           );
         })}
         {aksi.buatPaket && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="aksi"
             onClick={onTambah}
-            className="flex min-h-40 cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-navy/25 text-besar font-bold text-navy/70 hover:border-navy/40 hover:text-navy"
+            title="nama, harga, durasi hari, deskripsi"
+            className="w-full self-start cursor-pointer border-2 border-dashed border-navy/25 text-navy/70 hover:border-navy/40 hover:bg-transparent hover:text-navy"
           >
-            <Plus className="h-5 w-5" /> Tambah Paket
-            <span className="text-kecil font-medium">nama, harga, durasi hari, deskripsi</span>
-          </button>
+            <Plus className="h-4 w-4" /> Tambah Paket
+          </Button>
         )}
       </div>
       {urut.length === 0 && !aksi.buatPaket && <p className="text-isi text-navy/70">Belum ada paket membership.</p>}

@@ -55,7 +55,7 @@ export default function AkunKasPage() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 sm:gap-4">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div className="w-full sm:w-auto">
           <h2 className="text-subjudul font-bold tracking-tight text-navy">
             Daftar Akun Kas & Bank
@@ -66,19 +66,20 @@ export default function AkunKasPage() {
         </div>
 
         {/* 
-          Tombol aksi:
-          Di HP kedua tombol bertumpuk penuh selebar layar, Tambah Akun di atas, agar labelnya tidak terpotong.
-          Di layar sm (tablet/desktop), kembali ke `flex` agar ukurannya menyesuaikan konten (auto).
+          Tombol aksi: di HP baris tombol selebar penuh dan kedua tombol
+          berbagi lebar sama rata; mulai sm lebarnya mengikuti teks (pemilik
+          proyek, 19 November 2026).
         */}
-        <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+        <div className="flex w-full items-center gap-2 sm:w-auto sm:gap-3">
           {aksiTransfer(permissions).buat || aksiTransfer(permissions).baca ? (
-            <Link href={URL_PINDAH_DANA} className="block w-full sm:w-auto">
+            <Link href={URL_PINDAH_DANA} className="block min-w-0 flex-1 sm:flex-none">
               <Button
                 variant="outline"
-                className="w-full max-sm:h-12 border-navy/20 text-navy px-2 sm:px-4 cursor-pointer"
+                size="aksi"
+                className="w-full border-navy/20 text-navy cursor-pointer"
               >
-                <ArrowLeftRight className="w-4 h-4 mr-1.5 shrink-0" />
-                <span className="truncate text-isi max-sm:text-besar">
+                <ArrowLeftRight className="h-4 w-4" />
+                <span className="truncate">
                   Pindah Dana
                 </span>
               </Button>
@@ -88,10 +89,11 @@ export default function AkunKasPage() {
               variant="outline"
               disabled
               title="Anda tidak memiliki izin Pindah Dana"
-              className="w-full sm:w-auto max-sm:h-12 border-navy/20 text-navy px-2 sm:px-4"
+              size="aksi"
+              className="min-w-0 flex-1 sm:flex-none border-navy/20 text-navy"
             >
-              <ArrowLeftRight className="w-4 h-4 mr-1.5 shrink-0" />
-              <span className="truncate text-isi max-sm:text-besar">
+              <ArrowLeftRight className="h-4 w-4" />
+              <span className="truncate">
                 Pindah Dana
               </span>
             </Button>
@@ -101,11 +103,11 @@ export default function AkunKasPage() {
           {aksi.buat && (
             <Link
               href="/dashboard/outlet/keuangan/akunkas/buatAkunKas"
-              className="block w-full sm:w-auto"
+              className="block min-w-0 flex-1 sm:flex-none"
             >
-              <Button className="w-full max-sm:h-12 bg-navy text-gading hover:bg-navy/90 border-none font-bold shadow-sm cursor-pointer px-2 sm:px-4">
-                <Plus className="w-4 h-4 mr-1.5 shrink-0" />
-                <span className="truncate text-isi max-sm:text-besar">
+              <Button size="aksi" className="w-full bg-navy text-gading hover:bg-navy/90 border-none shadow-sm cursor-pointer">
+                <Plus className="h-4 w-4" />
+                <span className="truncate">
                   Tambah Akun
                 </span>
               </Button>

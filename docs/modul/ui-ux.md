@@ -446,6 +446,62 @@ Pindaian jarak tepi mengambil kotak terkiri di halaman, sehingga padding
 bersarang di bawah judul layout (Keuangan) tidak terbaca; kelas
 pembungkus dibaca dari kode.
 
+### Ukuran tombol Buat, Tambah, dan Catat
+
+Diputuskan pemilik proyek pada 19 November 2026 (`inti/status.md`,
+Berikutnya butir 5), dari pengukuran DOM seluruh rute statis
+`app/dashboard` di 1280, 768, dan 390 px. Sebelumnya ada empat tinggi:
+44 px (`h-11`: Bahan Baku, Aset, Tarif, Tipe Aset, Buat Reservasi Baru,
+Master Shift, Pola Roster, Tambah Manual), 48 px (Mesin Kasir; Akun Kas
+di HP), 32 px (bawaan `h-8`, mayoritas), dan 28 px (`size="sm"`: Buat
+Penjualan dan Buat Opname); sudut 8, 10, atau 14 px; padding samping 10,
+20, atau 24 px; di HP 17 halaman selebar penuh dan sekitar 10 tidak.
+
+- **TK1a: `size="aksi"` di `Button`**: 32 px dengan padding 10 px di
+  bawah 640 px, 44 px dengan padding 24 px mulai `sm`; sudut 10 px, ikon
+  16 px, tebal bold. Warna dan variant setiap tombol tidak diubah, dan
+  kelas `h-`, `px-`, `rounded-`, serta jarak ikon milik halaman dibuang.
+- **TK2a: tata letak kepala halaman**: mulai 640 px tombol di kanan
+  sebaris judul (`sm:flex-row sm:items-center`), di HP turun ke bawah
+  judul dan selebar penuh. Teks lengkap di semua lebar ("Buat" Penjualan
+  di HP menjadi "Buat Penjualan"). Tombol di tengah isi (kartu kosong
+  Membership dan Mesin Kasir, panel Mesin Kasir) ikut ukuran dan lebar
+  ini dengan posisi tetap.
+- **TK3a: cakupan semua tombol berteks Buat, Tambah, dan Catat**,
+  termasuk tombol tambah baris di form (Tambah Barang, Baris, Bahan,
+  Item, Fasilitas Lain, Split Shift) dan tombol kirim (Buat Penjualan,
+  Buat Draft & Mulai Opname, Buat Posisi). Posisinya di form tetap; di
+  HP selebar penuh, mulai 640 px lebar mengikuti teks kecuali yang memang
+  selebar penuh (Tambah Fasilitas Lain, Tambah Split Shift). Batal di
+  samping tombol kirim ikut ukurannya, dan di HP keduanya selebar penuh
+  bertumpuk.
+- **TK4a: tetangga sebaris ikut ukuran**: Pindah Dana (Akun Kas),
+  Auto-Generate (Jadwal), Filter Aset (layout Reservasi), Filter
+  (Penjualan), dan kotak cari Inventaris Gudang. Di HP baris tombolnya
+  selebar penuh dan dibagi sama rata (Filter Penjualan yang hanya ikon
+  tetap selebar ikon; kotak cari Gudang di baris sendiri). Untuk Akun
+  Kas ini menggantikan susunan bertumpuk 48 px KH1a (`modul/keuangan.md`):
+  label keduanya utuh di 390 px (159 px per tombol), dan
+  `keuangan/tampilan-hp` kini memeriksa sebaris, lebar sama, dan 32 px.
+- **TK5a: kasus khusus yang ikut**: kartu Tambah Paket Membership menjadi
+  tombol garis putus-putus berukuran baku dengan teks kecilnya pindah ke
+  tooltip (`title`), Buat Surat Jalan, Masukkan Master Data, dan
+  Daftarkan Member. Wizard setup tidak disentuh, dan tombol "Proses &
+  Buat Tagihan" Buat Reservasi tidak termasuk karena teksnya diawali
+  "Proses".
+- **TK6a: tailwind-merge mengenal token ukuran huruf.** `cn()` membuang
+  `text-isi` dan `text-kecil` bila ada kelas warna teks (`text-gading`,
+  `text-navy`), karena token proyek tidak dikenalnya, sehingga hampir
+  semua `Button` tampil 16 px. Ketujuh token butir 34 didaftarkan lewat
+  `extendTailwindMerge` di `lib/utils.ts`; huruf tombol di seluruh
+  aplikasi kembali ke ukuran varian (14 px, `sm` dan `xs` 12 px).
+
+Sesudahnya seluruh tombol dalam cakupan terukur 44 px di 1280 dan 768 px
+dan 32 px di 390 px, dengan padding, sudut, dan huruf yang sama. Ukur dan
+pratinjau memakai dua spec sementara di folder sampel sementara
+`tests` (tidak di-commit); tangkapan per lebar dibagikan sebagai pratinjau ke pemilik
+proyek.
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E

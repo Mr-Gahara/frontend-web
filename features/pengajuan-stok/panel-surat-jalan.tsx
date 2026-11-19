@@ -47,9 +47,10 @@ export function PanelBuatSuratJalan({ pengajuanID, urlSuratJalan, dikunci = fals
           })
         }
         disabled={dikunci || mutation.isPending}
-        className="w-full bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-md cursor-pointer"
+        size="aksi"
+        className="w-full bg-blue-600 text-white hover:bg-blue-700 shadow-md cursor-pointer"
       >
-        <Truck className="w-4 h-4 mr-2" />
+        <Truck className="h-4 w-4" />
         {mutation.isPending ? "Memproses..." : "Buat Surat Jalan"}
       </Button>
       <p className="text-mikro font-medium text-blue-800/60 text-center">

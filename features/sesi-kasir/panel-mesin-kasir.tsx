@@ -127,9 +127,10 @@ export function PanelMesinKasir({
         <Button
           variant="outline"
           onClick={onTambah}
-          className="h-11 border-navy/25 bg-white text-besar font-bold text-navy"
+          size="aksi"
+          className="w-full border-navy/25 bg-white text-navy"
         >
-          <Plus className="size-[18px]" aria-hidden="true" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
           Tambah mesin kasir
         </Button>
       )}
@@ -150,9 +151,10 @@ export function MulaiMesinKasir({ onTambah }: { onTambah: () => void }) {
       </p>
       <Button
         onClick={onTambah}
-        className="h-12 bg-navy text-besar font-bold text-gading hover:bg-navy/90 sm:self-start sm:px-6"
+        size="aksi"
+        className="bg-navy text-gading hover:bg-navy/90 sm:self-start"
       >
-        <Plus className="size-[18px]" aria-hidden="true" />
+        <Plus className="h-4 w-4" aria-hidden="true" />
         Tambah mesin kasir
       </Button>
     </section>

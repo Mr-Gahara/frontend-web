@@ -301,7 +301,7 @@ function IsiDaftarPengajuanStok({
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER SECTION */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-judul font-bold tracking-tight text-navy flex items-center gap-2">
             {ruang === "gudang" && <Inbox className="w-6 h-6 text-karamel" />}
@@ -314,9 +314,10 @@ function IsiDaftarPengajuanStok({
         {urlBuat && (
           <Button
             onClick={() => router.push(urlBuat)}
-            className="bg-karamel text-navy hover:bg-karamel/90 font-bold shadow-sm"
+            size="aksi"
+            className="bg-karamel text-navy hover:bg-karamel/90 shadow-sm w-full sm:w-auto"
           >
-            <PlusCircle className="w-4 h-4 mr-2" /> Buat Pengajuan Baru
+            <PlusCircle className="h-4 w-4" /> Buat Pengajuan Baru
           </Button>
         )}
       </div>

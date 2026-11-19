@@ -12,7 +12,7 @@ import {
 import type { RuangPembelian } from "./izin";
 import { urlCatatPembelian } from "./ruang";
 
-const KELAS_TOMBOL = "cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto font-bold";
+const KELAS_TOMBOL = "cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto";
 
 const LABEL_RUANG: Record<RuangPembelian, string> = { outlet: "Ke outlet", gudang: "Ke gudang" };
 
@@ -27,9 +27,9 @@ export function TombolCatatBelanja({ ruang }: { ruang: RuangPembelian[] }) {
 
   if (ruang.length === 1) {
     return (
-      <Button asChild className={KELAS_TOMBOL}>
+      <Button asChild size="aksi" className={KELAS_TOMBOL}>
         <Link href={urlCatatPembelian(ruang[0])}>
-          <Plus className="mr-2 h-4 w-4" /> Catat pembelian
+          <Plus className="h-4 w-4" /> Catat pembelian
         </Link>
       </Button>
     );
@@ -38,9 +38,9 @@ export function TombolCatatBelanja({ ruang }: { ruang: RuangPembelian[] }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className={KELAS_TOMBOL}>
-          <Plus className="mr-2 h-4 w-4" /> Catat pembelian
-          <ChevronDown className="ml-2 h-4 w-4" aria-hidden="true" />
+        <Button size="aksi" className={KELAS_TOMBOL}>
+          <Plus className="h-4 w-4" /> Catat pembelian
+          <ChevronDown className="h-4 w-4" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-gading border-navy/10">

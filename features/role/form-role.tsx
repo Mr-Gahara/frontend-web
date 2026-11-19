@@ -518,13 +518,14 @@ function IsiFormRole({
           )}
 
           {/* Tombol Simpan Bawah */}
-          <div className="flex justify-end gap-3 border-t border-navy/10 pt-6 mt-2">
+          <div className="flex flex-col sm:flex-row sm:justify-end gap-3 border-t border-navy/10 pt-6 mt-2">
             <Button
               type="button"
               variant="outline"
+              size="aksi"
               onClick={() => router.push(urlKembali)}
               disabled={simpanRoleMutation.isPending}
-              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
+              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 w-full sm:w-auto"
             >
               Batal
             </Button>
@@ -535,7 +536,8 @@ function IsiFormRole({
                 permissionsLoading ||
                 tanpaPerubahan
               }
-              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm px-6"
+              size="aksi"
+              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
             >
               {modeEdit
                 ? simpanRoleMutation.isPending

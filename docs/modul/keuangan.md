@@ -287,7 +287,8 @@ Diputuskan pemilik proyek pada 6 November 2026, dari pratinjau Revisi 1
   berikutnya tanpa ikon (tab aktif navy, `aria-current`), kartu ringkasan
   dua kolom dengan judul pendek tanpa badge tren, dan kedua tombol header
   Akun Kas bertumpuk penuh setinggi 48 px dengan Tambah Akun di atas.
-  Sejak `sm` tampilan tidak berubah.
+  Sejak `sm` tampilan tidak berubah. Susunan kedua tombol diganti
+  19 November 2026: sebaris berbagi lebar, 32 px (`modul/ui-ux.md`, TK4a).
 - **KH2b: padding HP hanya dari dashboard**: area gulir dashboard `p-4`
   di bawah `sm` (dari `p-6`), dan layout Keuangan serta halaman di
   dalamnya tidak menambah padding sendiri di bawah `sm`. Isi tab di HP

@@ -144,7 +144,10 @@ tidak sekarang:
    1). Langkah pertama: daftar seluruh tombolnya beserta kelas ukurannya
    (`grep -rnE -B5 '(Tambah|Buat|Catat) [A-Z]' app features`), lalu ajukan
    satu ukuran baku (misalnya varian `Button` sendiri) sebagai keputusan
-   pemilik proyek.
+   pemilik proyek. Selesai 19 November 2026: `size="aksi"`, 44 px mulai
+   640 px dan 32 px di HP, selebar penuh di HP, termasuk tombol form dan
+   tetangga sebaris; sekaligus tailwind-merge mengenal token ukuran huruf
+   (`modul/ui-ux.md`, TK1a sampai TK6a).
 
 ### Menunggu pemilik proyek, dicatat 14 November 2026
 

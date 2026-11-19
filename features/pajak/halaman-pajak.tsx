@@ -222,7 +222,7 @@ function IsiHalamanPajak() {
           Kembali ke Laman Pengaturan
         </Button>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-judul font-bold tracking-tight text-navy">Pengaturan Pajak</h1>
             <p className="text-isi font-medium text-navy/60">Kelola pajak dan relasi produk.</p>
@@ -231,9 +231,10 @@ function IsiHalamanPajak() {
           {tab === "pajak" && aksi.buat && (
             <Button
               onClick={() => bukaDialog({ mode: "buat" })}
-              className="cursor-pointer font-bold bg-navy text-gading hover:bg-navy/90 shadow-sm"
+              size="aksi"
+              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="h-4 w-4" />
               Tambah Pajak
             </Button>
           )}

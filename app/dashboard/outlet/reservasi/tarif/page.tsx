@@ -218,9 +218,10 @@ export default function DaftarTarifPage() {
         </div>
         <Button
           onClick={() => router.push("/dashboard/outlet/reservasi/tarif/buatTarif")}
-          className="w-full sm:w-auto font-bold h-11 px-6 shadow-sm bg-navy text-gading hover:bg-navy/90"
+          size="aksi"
+          className="w-full sm:w-auto shadow-sm bg-navy text-gading hover:bg-navy/90"
         >
-          <Plus className="w-4 h-4 mr-2 text-karamel" /> Tambah Tarif
+          <Plus className="h-4 w-4 text-karamel" /> Tambah Tarif
         </Button>
       </div>
 

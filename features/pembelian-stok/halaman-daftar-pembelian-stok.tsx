@@ -211,10 +211,11 @@ export default function HalamanDaftarPembelianStok({
         {aksi.buat && (
           <Button
             asChild
-            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto font-bold"
+            size="aksi"
+            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
           >
             <Link href={urlCatatPembelian(ruang)}>
-              <Plus className="mr-2 h-4 w-4" /> Catat Pembelian
+              <Plus className="h-4 w-4" /> Catat Pembelian
             </Link>
           </Button>
         )}

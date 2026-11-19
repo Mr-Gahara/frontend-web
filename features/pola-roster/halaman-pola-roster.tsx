@@ -172,7 +172,7 @@ export default function PolaUtama({
   return (
     <div className="flex flex-col gap-6 w-full max-w-[95vw] mx-auto">
       {/* 1. HEADER & TOOLBAR */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div className="space-y-1">
           <h1 className="text-judul font-bold tracking-tight text-navy">
             Pola Roster {tipeRuang === "outlet" ? "Outlet" : "Gudang"}
@@ -188,9 +188,10 @@ export default function PolaUtama({
               setSelectedPola(null);
               setFormOpen(true);
             }}
-            className="h-11 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
+            size="aksi"
+            className="w-full sm:w-auto bg-navy text-gading hover:bg-navy/90 shadow-md transition-all active:scale-[0.98]"
           >
-            <Plus className="mr-2 h-4 w-4" /> Buat Pola Roster
+            <Plus className="h-4 w-4" /> Buat Pola Roster
           </Button>
         )}
       </div>

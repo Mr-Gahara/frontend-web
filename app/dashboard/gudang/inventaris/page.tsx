@@ -266,7 +266,7 @@ export default function GudangInventoryPage() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER & FILTERS */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <h1 className="text-judul font-bold tracking-tight text-navy flex items-center gap-2">
             <Warehouse className="h-6 w-6 text-emerald-700" />
@@ -277,21 +277,22 @@ export default function GudangInventoryPage() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-end gap-3">
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
             <Input
               placeholder="Cari barang di gudang..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 bg-gading border-navy/20 text-navy focus-visible:ring-emerald-700 w-full"
+              className="h-8 sm:h-11 pl-9 bg-gading border-navy/20 text-navy focus-visible:ring-emerald-700 w-full"
             />
           </div>
           <Button
             onClick={() => setAddItemModal(true)}
-            className="bg-emerald-700 text-white hover:bg-emerald-800 font-bold shadow-sm cursor-pointer whitespace-nowrap"
+            size="aksi"
+            className="bg-emerald-700 text-white hover:bg-emerald-800 shadow-sm cursor-pointer whitespace-nowrap w-full sm:w-auto"
           >
-            <Plus className="w-4 h-4 mr-2" /> Masukkan Master Data
+            <Plus className="h-4 w-4" /> Masukkan Master Data
           </Button>
         </div>
       </div>

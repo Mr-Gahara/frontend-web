@@ -220,15 +220,15 @@ export default function HalamanDaftarStockOpname({
             </p>
           </div>
         </div>
-        <div className="flex shrink-0">
+        <div className="flex w-full shrink-0 sm:w-auto">
           <Button
             onClick={() =>
               router.push(`${teks.urlDaftar}/buatStockOpname`)
             }
-            size="sm"
-            className="cursor-pointer gap-1.5 bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm w-full sm:w-auto"
+            size="aksi"
+            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-4 w-4" />
             <span>{teks.tombolBuat}</span>
           </Button>
         </div>

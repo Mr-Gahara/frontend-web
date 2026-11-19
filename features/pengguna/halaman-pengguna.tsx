@@ -366,7 +366,7 @@ export default function HalamanPengguna({
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-judul font-bold tracking-tight text-navy">
             Kelola Pengguna
@@ -377,9 +377,10 @@ export default function HalamanPengguna({
         </div>
         <Button
           onClick={openCreate}
-          className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm font-bold"
+          size="aksi"
+          className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
         >
-          <Plus className="mr-2 h-4 w-4" /> Tambah Pengguna
+          <Plus className="h-4 w-4" /> Tambah Pengguna
         </Button>
       </div>
 

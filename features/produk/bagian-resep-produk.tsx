@@ -68,9 +68,10 @@ export function BagianResepProduk({
           onClick={() =>
             append({ bahanBakuID: "", jumlah: 0, satuan: "gram" })
           }
-          className="cursor-pointer bg-karamel text-navy hover:bg-karamel/90 font-bold shadow-sm h-9"
+          size="aksi"
+          className="cursor-pointer bg-karamel text-navy hover:bg-karamel/90 shadow-sm w-full sm:w-auto"
         >
-          <Plus className="w-4 h-4 mr-2" /> Tambah Bahan
+          <Plus className="h-4 w-4" /> Tambah Bahan
         </Button>
       </div>
 

@@ -30,7 +30,7 @@ export function JadwalToolbar({
   return (
     <div className="flex flex-col gap-4">
       {/* HEADER & BUTTONS */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div className="space-y-1">
           <h1 className="text-judul font-bold tracking-tight text-navy">
             Jadwal Shift {tipeRuang === "outlet" ? "Outlet" : "Gudang"}
@@ -40,22 +40,24 @@ export function JadwalToolbar({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex w-full items-center gap-3 sm:w-auto">
           {onAddManual && (
             <Button
               variant="outline"
+              size="aksi"
               onClick={onAddManual}
-              className="h-11 border-navy/20 text-navy hover:bg-navy/5 bg-transparent font-bold rounded-xl"
+              className="min-w-0 flex-1 border-navy/20 text-navy hover:bg-navy/5 bg-transparent sm:flex-none"
             >
-              <Plus className="mr-2 h-4 w-4" /> Tambah Manual
+              <Plus className="h-4 w-4" /> Tambah Manual
             </Button>
           )}
           {onAutoGenerate && (
             <Button
               onClick={onAutoGenerate}
-              className="h-11 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
+              size="aksi"
+              className="min-w-0 flex-1 bg-navy text-gading hover:bg-navy/90 shadow-md transition-all active:scale-[0.98] sm:flex-none"
             >
-              <Wand2 className="mr-2 h-4 w-4" /> Auto-Generate
+              <Wand2 className="h-4 w-4" /> Auto-Generate
             </Button>
           )}
         </div>

@@ -129,7 +129,7 @@ export default function TipeAsetPage() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER SECTION */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-krem border border-navy/10 rounded-xl shrink-0 shadow-sm">
             <Layers className="w-7 h-7 text-karamel" />
@@ -149,9 +149,10 @@ export default function TipeAsetPage() {
           onClick={() =>
             router.push("/dashboard/outlet/reservasi/tipeAset/buatTipeAset")
           }
-          className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm h-11 px-6 w-full sm:w-auto"
+          size="aksi"
+          className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
         >
-          <Plus className="w-4 h-4 mr-2 text-karamel" /> Tambah Kategori
+          <Plus className="h-4 w-4 text-karamel" /> Tambah Kategori
         </Button>
       </div>
 

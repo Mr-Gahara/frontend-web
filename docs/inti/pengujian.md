@@ -12,6 +12,16 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per ukuran tombol aksi** (19 November 2026, TK1a sampai
+TK6a, backend `ridho` lokal `2790fc7`): vitest 1161 lolos. Tanpa suite
+penuh dan tanpa OTP; 50 berkas spec terdampak (tombol dan teks yang
+berubah, tata letak HP, admin) dijalankan bersama: 345 lolos dan 2 gagal
+dari 347. `keuangan/tampilan-hp` gagal karena masih memeriksa susunan
+KH1a; spec disesuaikan dengan TK4a. `jadwal/kelola-jadwal` gagal di
+`GET /shift` lewat API sebelum menyentuh UI ("Sesi tidak valid", pola
+rotasi `pin-refresh` di tabel Urutan debug). Kedua berkas dijalankan ulang
+dan lolos 14 dari 14. Harapan suite penuh tetap 671.
+
 **Baseline per pembuktian kontrak dan rapian 18 November 2026** (web
 `1072484`, backend `ridho` lokal `2790fc7`): vitest 1161 lolos. Tanpa
 suite penuh dan tanpa OTP; spec dijalankan per berkas:

@@ -128,9 +128,10 @@ export default function RolesPage() {
           </div>
           <Button
             onClick={() => router.push("/dashboard/outlet/pengaturan/roles/buatRole")}
-            className="cursor-pointer bg-navy font-bold text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
+            size="aksi"
+            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-4 w-4" />
             Tambah Posisi
           </Button>
         </div>

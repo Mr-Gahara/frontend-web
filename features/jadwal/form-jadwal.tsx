@@ -332,10 +332,11 @@ function IsiFormJadwal({
           <Button
             type="button"
             variant="ghost"
+            size="aksi"
             onClick={tambahBaris}
-            className="w-full mt-1 border border-dashed border-navy/20 text-navy/70 font-bold h-10 rounded-xl hover:bg-navy/5"
+            className="w-full mt-1 border border-dashed border-navy/20 text-navy/70 hover:bg-navy/5"
           >
-            <Plus className="mr-2 h-4 w-4" /> Tambah Split Shift
+            <Plus className="h-4 w-4" /> Tambah Split Shift
           </Button>
         </div>
       )}

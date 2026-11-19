@@ -217,7 +217,7 @@ export function HalamanDiskon() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-judul font-bold tracking-tight text-navy">Kelola Diskon</h1>
           <p className="text-isi text-navy/60">
@@ -227,9 +227,10 @@ export function HalamanDiskon() {
         {aksi.buat && (
           <Button
             onClick={() => setForm({ diskon: null })}
-            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-semibold rounded-xl"
+            size="aksi"
+            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 w-full sm:w-auto"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-4 w-4" />
             Tambah Diskon
           </Button>
         )}

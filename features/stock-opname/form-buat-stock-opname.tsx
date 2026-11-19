@@ -324,13 +324,14 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-6 border-t border-navy/10 mt-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 pt-6 border-t border-navy/10 mt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.push(teks.urlDaftar)}
                 disabled={createMutation.isPending}
-                className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold h-11 px-6"
+                size="aksi"
+                className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 w-full sm:w-auto"
               >
                 Batal
               </Button>
@@ -343,13 +344,14 @@ export default function FormBuatStockOpname({ ruang, sumberLokasi }: Props) {
                   !watchPicID ||
                   isLoadingLokasi
                 }
-                className="cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold h-11 px-6 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                size="aksi"
+                className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
               >
                 {createMutation.isPending ? (
                   "Memproses Draft..."
                 ) : (
                   <>
-                    <Save className="mr-2 h-4 w-4 text-karamel" />
+                    <Save className="h-4 w-4 text-karamel" />
                     Buat Draft & Mulai Opname
                   </>
                 )}
