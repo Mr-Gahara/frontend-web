@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { aksiBeban } from "@/features/beban-operasional/izin";
 import {
   FILTER_AWAL_BEBAN,
-  adaFilterBeban,
   filterServerBeban,
   isianAwalCatat,
   isianAwalUbah,
@@ -149,7 +148,6 @@ describe("pembatalan beban", () => {
 describe("filterServerBeban", () => {
   it("filter awal tanpa query", () => {
     expect(filterServerBeban(FILTER_AWAL_BEBAN)).toEqual({});
-    expect(adaFilterBeban(FILTER_AWAL_BEBAN)).toBe(false);
   });
 
   it("filter terisi dikirim, dengan periode sebagai tanggal lokal", () => {
@@ -167,7 +165,6 @@ describe("filterServerBeban", () => {
       dari: "2026-10-01",
       sampai: "2026-10-18",
     });
-    expect(adaFilterBeban(filter)).toBe(true);
   });
 });
 

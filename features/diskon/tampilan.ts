@@ -38,10 +38,6 @@ export interface FilterDiskon {
 
 export const FILTER_DISKON_AWAL: FilterDiskon = { status: "all", cakupan: "all", tipe: "all" };
 
-export function filterDiskonAktif(filter: FilterDiskon): boolean {
-  return filter.status !== "all" || filter.cakupan !== "all" || filter.tipe !== "all";
-}
-
 /**
  * Penyaringan daftar di klien, dari satu cache daftar diskon. cari nama
  * diskon tanpa peka huruf besar, sama dengan pencarian DataTable sebelumnya;

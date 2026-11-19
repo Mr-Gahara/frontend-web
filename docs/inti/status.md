@@ -296,13 +296,6 @@ Arsitektur `deploy/RUNBOOK.md` yang masih mencatat frontend di Vercel.
 Ukuran pada 7 November 2026: server produksi sekitar 112 sampai 165 MB
 RAM, build memuncak sekitar 2 GB.
 
-### Utang kecil dari filter seragam
-
-- `adaFilterBeban`, `adaFilterTransfer`, dan `filterDiskonAktif` kini hanya
-  dipakai unit test, karena tombol Reset Filter yang memakainya diganti pil
-  aktif (FL4a). Dibuang bersama unit test-nya hanya atas persetujuan pemilik
-  proyek.
-
 ### Utang kecil dari kerapian repo
 
 - Repo frontend dibuat ulang sebagai repo baru dengan pemilik proyek

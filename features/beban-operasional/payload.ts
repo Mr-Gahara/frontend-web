@@ -118,10 +118,6 @@ export function filterServerBeban(filter: FilterBeban): Record<string, string> {
   return params;
 }
 
-export function adaFilterBeban(filter: FilterBeban): boolean {
-  return Object.keys(filterServerBeban(filter)).length > 0;
-}
-
 export const LABEL_STATUS_BEBAN: Record<StatusBeban, string> = {
   AKTIF: "Aktif",
   VOID: "Dibatalkan",

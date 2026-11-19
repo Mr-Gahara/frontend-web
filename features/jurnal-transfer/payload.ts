@@ -74,11 +74,6 @@ export function filterServerTransfer(filter: FilterTransfer): Record<string, str
   return params;
 }
 
-/** Ada filter riwayat yang diisi; menentukan hidupnya tombol Reset Filter (NZ3a). */
-export function adaFilterTransfer(filter: FilterTransfer): boolean {
-  return Object.keys(filterServerTransfer(filter)).length > 0;
-}
-
 export const LABEL_STATUS_TRANSFER: Record<StatusTransfer, string> = {
   AKTIF: "Aktif",
   VOID: "Dibatalkan",

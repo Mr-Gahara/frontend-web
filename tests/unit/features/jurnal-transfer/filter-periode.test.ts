@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FILTER_AWAL_TRANSFER, adaFilterTransfer, filterServerTransfer } from "@/features/jurnal-transfer/payload";
+import { FILTER_AWAL_TRANSFER, filterServerTransfer } from "@/features/jurnal-transfer/payload";
 
 describe("filter periode riwayat transfer (NZ3a)", () => {
   it("periode dikirim sebagai tanggal lokal YYYY-MM-DD, hanya bila diisi", () => {
@@ -15,11 +15,5 @@ describe("filter periode riwayat transfer (NZ3a)", () => {
       dari: "2026-01-05",
     });
     expect(filterServerTransfer(FILTER_AWAL_TRANSFER)).toEqual({});
-  });
-
-  it("adaFilterTransfer benar bila salah satu filter diisi", () => {
-    expect(adaFilterTransfer(FILTER_AWAL_TRANSFER)).toBe(false);
-    expect(adaFilterTransfer({ ...FILTER_AWAL_TRANSFER, status: "VOID" })).toBe(true);
-    expect(adaFilterTransfer({ ...FILTER_AWAL_TRANSFER, sampai: new Date(2026, 9, 7) })).toBe(true);
   });
 });
