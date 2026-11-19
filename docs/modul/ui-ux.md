@@ -604,6 +604,51 @@ Filter Aset dihapus dari layout Reservasi (FL9a), sehingga Buat Reservasi
 Baru sendirian di kepala layout dan selebar penuh di HP (TK2a); bagian
 Reservasi dari TK4a berakhir.
 
+### Laman utama
+
+Dikerjakan 19 November 2026 dari kanvas desain "Laman Utama Tachyon POS"
+(desain G, kustom pemilik proyek dari desain F, C, B, A, dan E). `/` kini
+laman pengenalan, bukan `LoginPage`; kodenya di `features/laman-utama/`.
+Keputusan pemilik proyek sebelumnya: laman pengenalan lengkap, paket tanpa
+harga, Coba gratis tanpa jumlah hari, dan pengunjung yang sudah masuk tetap
+di laman.
+
+- **LU1a: desain G.** Navbar dan hero desain F berlatar navy dengan pola
+  titik ("Toko Anda, terbaca dalam satu layar.", penekanan sage pucat
+  bergaris bawah), ruang outlet dan gudang desain C, tiga paket desain B,
+  tahapan mulai dan banner desain A, lalu tanya jawab desain E dan kaki
+  laman krem. Tanpa tombol di hero, karena sudah ada di navbar. Tombol
+  Coba gratis di banner gading bertulisan navy, bukan karamel.
+- **LU2a: ilustrasi dasbor sebagai komponen tiruan**
+  (`ilustrasi-dasbor.tsx`), bukan gambar tangkapan. Ditulis pada ukuran
+  layar asli (1440 × 900 desktop, 390 × 760 HP) lalu diperkecil, dengan
+  menu sidebar dari `outletMenus` yang sama dengan sidebar aplikasi dan
+  ikon lucide yang sama dengan dasbor. Kartunya dibaringkan ke belakang
+  (poros di tepi bawah, 22° desktop dan 18° HP) tanpa garis tepi dan
+  bayangan, agar menyatu dengan latar navy. Data contoh, dengan keterangan
+  di bawahnya.
+- **LU3a: pengunjung yang sudah masuk melihat satu tombol Buka
+  dashboard** di navbar dan banner, menggantikan Masuk dan Coba gratis;
+  tujuannya `/dashboard`, atau `/admin` bagi admin platform
+  (`tujuanBukaDashboard` di `lib/auth/tujuan.ts`). Akun toko yang belum
+  masuk PIN dan sesi yang masih dipulihkan tetap tamu. Kaki laman tetap
+  menautkan Masuk, Coba gratis, dan Lupa password.
+- **LU4a: gerak halus.** Saat dibuka atau di-refresh, teks hero naik
+  bergantian dan kartu dasbor merebah dari tegak (`laman-naik`,
+  `laman-rebah`). Saat digulir, setiap bagian naik dari arah datangnya,
+  dari bawah saat menggulir ke bawah dan dari atas saat menggulir ke atas,
+  lalu tersembunyi lagi setelah keluar layar (`Muncul`, `laman-muncul`).
+  Tanya jawab membuka satu jawaban pada satu waktu dengan tinggi yang
+  bergerak dan ikon + menjadi −. Semua 0,4 sampai 0,7 detik dan mati bila
+  gerak dikurangi.
+- **LU5a: judul besar laman utama ikut pengecualian CV25a**: judul hero
+  (44, 64, 80 px), judul bagian (28 sampai 40 px), Tanya jawab (32 dan
+  52 px), banner (30 dan 44 px), dan angka langkah (40 dan 56 px),
+  masing-masing dengan komentar `eslint-disable` beralasan. Teks lain
+  memakai skala tujuh tingkat, sehingga ukuran kanvas yang tidak ada di
+  skala dibulatkan ke token terdekat (misalnya 15 dan 17 px menjadi
+  besar, 20 px menjadi subjudul).
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E

@@ -42,6 +42,14 @@ penuh berikutnya 676 (`npx playwright test --list`): 671 ditambah lima
 skenario baru (tiga Penjualan, satu Pengeluaran, satu Mesin Kasir);
 skenario lain ditulis ulang ke alur panel tanpa mengubah jumlah.
 
+**Baseline per laman utama** (19 November 2026, LU1a sampai LU5a):
+vitest 1190 lolos (empat tes `tujuanBukaDashboard` baru). Tanpa suite
+penuh dan tanpa OTP: spec baru `tests/e2e/laman-utama/laman-utama.spec.ts`
+4 lolos (tombol tamu, tanya jawab, muncul saat digulir dua arah, dan Buka
+dashboard sesudah masuk). Harapan suite penuh berikutnya 680: 676 ditambah
+empat skenario laman utama. Suite penuh dicatat sebagai utang
+(`referensi/utang-pengujian.md`).
+
 **Baseline per ukuran tombol aksi** (19 November 2026, TK1a sampai
 TK6a, backend `ridho` lokal `2790fc7`): vitest 1161 lolos. Tanpa suite
 penuh dan tanpa OTP; 50 berkas spec terdampak (tombol dan teks yang

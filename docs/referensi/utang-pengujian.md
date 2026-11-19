@@ -10,6 +10,13 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 
 ## Utang pengujian
 
+- **Suite e2e penuh belum dijalankan sejak 17 November 2026** (654 lolos
+  dan 2 dilewati dari 656). Sesudahnya ukuran tombol aksi (TK1a sampai
+  TK6a), filter seragam (FL1a sampai FL19a), dan laman utama (LU1a sampai
+  LU5a) hanya dibuktikan lewat spec terdampak per berkas. Harapan suite
+  penuh berikutnya 680 (`inti/pengujian.md`, Baseline). Dicatat
+  19 November 2026 atas perintah pemilik proyek; dijalankan hanya setelah
+  pemilik proyek mengizinkan.
 - **Pemilih outlet di jurnal stok dan pembelian stok hanya berisi satu
   pilihan** di MVP satu outlet, sehingga memilih outlet tidak memicu
   permintaan baru. Kedua jalur cakupan lokasi teruji e2e sejak

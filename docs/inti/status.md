@@ -129,7 +129,11 @@ dokumen lain merujuk daftar di sana.
 Dicatat pemilik proyek 18 November 2026, dikerjakan nanti atas perintahnya,
 tidak sekarang:
 
-4. **Laman utama (laman pengenalan website)**: halaman yang pertama tampil
+4. **Laman utama (laman pengenalan website)**: selesai 19 November 2026
+   dari kanvas desain "Laman Utama Tachyon POS", desain G
+   (`modul/ui-ux.md`, LU1a sampai LU5a); tidak ada pengalihan, tautan,
+   atau spec yang ternyata bergantung pada `/` sebagai laman login.
+   Catatan awal: halaman yang pertama tampil
    saat website dibuka, bukan laman login. Sekarang `app/page.tsx`
    langsung merender `LoginPage`, sehingga `/` sama dengan `/login`.
    Isi, desain, dan tujuan tombolnya (masuk, daftar) perlu keputusan dan
@@ -153,7 +157,10 @@ tidak sekarang:
    lainnya berlencana, pil aktif, dan panel samping beranimasi di 16 laman
    berfilter; kotak cari seragam di halaman hanya-cari; Filter Aset
    Reservasi dihapus (`modul/ui-ux.md`, FL1a sampai FL15a). Suite e2e
-   penuh sesudahnya harapan 676, menunggu izin pemilik proyek.
+   penuh sesudahnya kini harapan 680 (ditambah empat skenario laman
+   utama), dicatat sebagai utang pengujian 19 November 2026 dan tidak
+   dikerjakan sekarang atas perintah pemilik proyek
+   (`referensi/utang-pengujian.md`).
 
 ### Menunggu pemilik proyek, dicatat 14 November 2026
 
