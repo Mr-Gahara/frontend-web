@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import type { TipeAset } from "@/types/tipeAset";
@@ -10,7 +11,6 @@ import { toast } from "sonner";
 
 // --- Components ---
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import MenuEditHapus from "@/components/menu-edit-hapus";
@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Plus,
-  Search,
   AlertTriangle,
   Layers,
   Tags,
@@ -158,15 +157,13 @@ export default function TipeAsetPage() {
 
       {/* FILTER & PENCARIAN: baris tanpa panel; total ada di kaki tabel (TB22a) */}
       <div className="flex flex-col sm:flex-row gap-4 items-center border-b border-navy/10 pb-4">
-        <div className="relative w-full sm:max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
-          <Input
-            placeholder="Cari kategori..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-permukaan border-navy/20 text-navy placeholder:text-navy/40 font-medium h-11"
-          />
-        </div>
+        <KotakCari
+          id="cari-tipe-aset"
+          label="Cari kategori aset"
+          placeholder="Cari kategori..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
       </div>
 
       {/* TABEL DATA: DataTable (TB1a sampai TB7a); galat menggantikan tabel (TB15a) */}

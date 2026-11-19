@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
 import { PILIHAN_UKURAN_STOK, paramHalamanInventory } from "@/features/inventaris/cakupan";
@@ -40,13 +41,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import {
-  Search,
   AlertTriangle,
   Loader2,
   Warehouse,
   Plus,
   PackagePlus,
-  Save
+  Save,
 } from "lucide-react";
 
 export default function GudangInventoryPage() {
@@ -278,15 +278,13 @@ export default function GudangInventoryPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row sm:flex-wrap sm:justify-end gap-3">
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
-            <Input
-              placeholder="Cari barang di gudang..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-8 sm:h-11 pl-9 bg-gading border-navy/20 text-navy focus-visible:ring-emerald-700 w-full"
-            />
-          </div>
+          <KotakCari
+            id="cari-inventaris-gudang"
+            label="Cari barang di gudang"
+            placeholder="Cari barang di gudang..."
+            value={searchTerm}
+            onChange={setSearchTerm}
+          />
           <Button
             onClick={() => setAddItemModal(true)}
             size="aksi"

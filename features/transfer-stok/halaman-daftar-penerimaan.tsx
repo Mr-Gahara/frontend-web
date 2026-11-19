@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/use-debounce";
 import { format, formatDistanceToNow } from "date-fns";
@@ -14,16 +15,14 @@ import { filterServerTransfer, saringTransfer, type LingkupSisi } from "./filter
 import { RUANG_SURAT_JALAN, type RuangSuratJalan } from "./ruang";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Search,
   Truck,
   ArrowRight,
   PackageOpen,
   Package,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
 import { ajakanGalatFitur } from "@/features/langganan/ajakan-fitur";
 
@@ -128,15 +127,13 @@ export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJa
         {ruang === "outlet" && cakupan.status === "lintas" && (
           <PemilihLokasiOutlet lokasiOutlet={cakupan.lokasiOutlet} nilai={pilihanLokasi} onUbah={setPilihanLokasi} />
         )}
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
-          <Input
-            placeholder={`Cari SJ / Nama ${konfig.lawan} Asal...`}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 bg-white border-navy/20 text-navy focus-visible:ring-navy h-11"
-          />
-        </div>
+        <KotakCari
+          id="cari-penerimaan"
+          label="Cari penerimaan"
+          placeholder={`Cari SJ / Nama ${konfig.lawan} Asal...`}
+          value={searchTerm}
+          onChange={setSearchTerm}
+        />
       </div>
 
       {/* GRID KARTU KEDATANGAN */}

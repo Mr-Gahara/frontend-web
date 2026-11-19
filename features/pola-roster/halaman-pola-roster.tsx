@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Search,
   Plus,
   MoreHorizontal,
   Edit,
@@ -198,16 +197,13 @@ export default function PolaUtama({
 
       {/* 2. FILTER & SEARCH */}
       <div className="flex flex-col sm:flex-row items-center gap-4 border-b border-navy/10 pb-4">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama pola..."
-            aria-label="Cari nama pola"
-            className="pl-9 h-11 bg-permukaan border-navy/15 text-navy focus-visible:ring-navy/50 rounded-xl font-medium"
-          />
-        </div>
+        <KotakCari
+          id="cari-pola-roster"
+          label="Cari nama pola"
+          placeholder="Cari nama pola..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
       </div>
 
       {/* 3. TABEL DATA: DataTable, kartu per baris (TB1a sampai TB7a); galat menggantikan tabel (TB15a) */}

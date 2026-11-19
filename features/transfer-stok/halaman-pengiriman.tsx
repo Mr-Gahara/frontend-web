@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import { useRouter } from "next/navigation";
 import { format, formatDistanceToNow } from "date-fns";
 import { id as localeID } from "date-fns/locale";
@@ -8,11 +9,9 @@ import { useDaftarTransferStok } from "./hooks";
 import { filterServerTransfer, saringTransfer } from "./filter";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Search,
   Truck,
   Clock,
   ArrowRight,
@@ -67,15 +66,13 @@ export default function HalamanPengiriman() {
             Pantau armada logistik yang sedang dalam perjalanan menuju Outlet.
           </p>
         </div>
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
-          <Input
-            placeholder="Cari SJ / Outlet Tujuan..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 bg-white border-navy/20 text-navy focus-visible:ring-navy"
-          />
-        </div>
+        <KotakCari
+          id="cari-pengiriman"
+          label="Cari surat jalan"
+          placeholder="Cari SJ / Outlet Tujuan..."
+          value={searchTerm}
+          onChange={setSearchTerm}
+        />
       </div>
 
       {/* STATISTIK CEPAT */}

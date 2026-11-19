@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import { useRouter } from "next/navigation";
 import { useHalamanProduk, useHapusProduk } from "@/features/produk/hooks";
 import { PILIHAN_UKURAN_PRODUK, paramHalamanProduk } from "@/features/produk/filter";
 import { PANJANG_CARI_SERVER } from "@/features/inventaris/cakupan";
 import { useDebounce } from "@/hooks/use-debounce";
-import { Input } from "@/components/ui/input";
 import { pesanError } from "@/lib/api/error";
 import type { Produk } from "@/types/produk";
 import { ColumnDef } from "@tanstack/react-table";
@@ -32,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatRupiah } from "@/lib/format";
-import { AlertTriangle, MoreHorizontal, Plus, Package, Infinity, Search } from "lucide-react";
+import { AlertTriangle, MoreHorizontal, Plus, Package, Infinity } from "lucide-react";
 
 export default function ProdukPage() {
   // 1. PROTEKSI HALAMAN
@@ -281,21 +281,14 @@ export default function ProdukPage() {
         </Button>
       </div>
 
-      <div className="relative w-full sm:w-80">
-        <label htmlFor="cari-produk" className="sr-only">
-          Cari nama produk
-        </label>
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy/40" />
-        <Input
-          id="cari-produk"
-          type="search"
-          placeholder="Cari nama produk..."
-          value={cari}
-          onChange={(e) => setCari(e.target.value)}
-          maxLength={PANJANG_CARI_SERVER}
-          className="h-10 pl-9 bg-gading border-navy/20 text-navy"
-        />
-      </div>
+      <KotakCari
+        id="cari-produk"
+        label="Cari nama produk"
+        placeholder="Cari nama produk..."
+        value={cari}
+        onChange={setCari}
+        maxLength={PANJANG_CARI_SERVER}
+      />
 
       {/* Tabel Wrapper (Card Cream Gelap) */}
       <div className="flex flex-col gap-4 w-full">

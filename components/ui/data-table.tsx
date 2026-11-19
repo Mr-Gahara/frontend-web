@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -27,7 +28,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -187,16 +187,15 @@ export function DataTable<TData, TValue>({
     <div ref={refTabel} data-kartu={kartu ? "" : undefined} className="flex flex-col gap-4">
 
       {/* Toolbar */}
+      {/* Kotak cari seragam (FL6a): 32 px di HP, 44 px mulai 640 px, ikon cari. */}
       {searchKey && (
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder={searchPlaceholder}
-            suppressHydrationWarning
-            value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-            onChange={(e) => table.getColumn(searchKey)?.setFilterValue(e.target.value)}
-            className="max-w-sm text-isi bg-permukaan text-navy border-navy/15 focus-visible:ring-navy/50 h-11 rounded-xl px-4 font-medium"
-          />
-        </div>
+        <KotakCari
+          id={`cari-tabel-${searchKey}`}
+          label={(searchPlaceholder ?? "Cari").replace(/\.+$/, "")}
+          placeholder={searchPlaceholder ?? "Cari..."}
+          value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
+          onChange={(nilai) => table.getColumn(searchKey)?.setFilterValue(nilai)}
+        />
       )}
 
       {/* Tiap baris adalah kartu terpisah (TB1a); di HP kepala kolom disembunyikan dan sel tersusun ke bawah. */}

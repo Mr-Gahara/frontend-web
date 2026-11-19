@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Filter, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { ReservasiNavTabs } from "./components/reservasi-nav-tabs";
 import { useRouter } from "next/navigation"; // ✅ bukan "next/router"
 
@@ -19,18 +19,11 @@ export default function ReservasiLayout({ children }: { children: React.ReactNod
             Kelola jadwal, sewa aset, dan pemantauan sesi aktif secara real-time.
           </p>
         </div>
+        {/* Filter Aset dihapus: tidak pernah berfungsi (FL9a). */}
         <div className="flex w-full items-center gap-3 sm:w-auto">
           <Button
-            variant="outline"
             size="aksi"
-            className="min-w-0 flex-1 cursor-pointer border-navy/20 bg-gading text-navy hover:bg-navy/5 shadow-sm sm:flex-none"
-            onClick={() => {}}
-          >
-            <Filter className="h-4 w-4 text-karamel" /> Filter Aset
-          </Button>
-          <Button
-            size="aksi"
-            className="min-w-0 flex-1 cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm sm:flex-none"
+            className="w-full cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm sm:w-auto"
             onClick={() => {
               router.push("/dashboard/outlet/reservasi/buatReservasi") // ✅ leading slash, tanpa "app/"
             }}

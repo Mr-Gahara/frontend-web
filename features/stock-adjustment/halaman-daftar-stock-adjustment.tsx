@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import { useRouter } from "next/navigation";
 import type { StockAdjustment } from "@/types/stockOpname";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -14,8 +15,7 @@ import { URL_DAFTAR_ADJUSTMENT, type RuangAdjustment } from "./ruang";
 
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Scale, Eye, Search } from "lucide-react";
+import { Scale, Eye } from "lucide-react";
 
 const PILIHAN_UKURAN = [10, 20, 50] as const;
 
@@ -159,18 +159,14 @@ export default function HalamanDaftarStockAdjustment({
       {/* DATA TABLE SECTION */}
       {penghalang ?? (
         <div className="flex w-full flex-col gap-3">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy/40" />
-            <Input
-              type="search"
-              aria-label="Cari nomor jurnal"
-              placeholder="Cari nomor jurnal..."
-              value={cari}
-              onChange={(e) => setCari(e.target.value)}
-              maxLength={PANJANG_CARI_ADJUSTMENT}
-              className="h-10 pl-9 bg-white border-navy/20 text-navy"
-            />
-          </div>
+          <KotakCari
+            id="cari-adjustment"
+            label="Cari nomor jurnal"
+            placeholder="Cari nomor jurnal..."
+            value={cari}
+            onChange={setCari}
+            maxLength={PANJANG_CARI_ADJUSTMENT}
+          />
           <DataTable
             columns={columns}
             data={adjustmentList}

@@ -23,10 +23,12 @@ interface PropsKotakCari {
   onChange: (nilai: string) => void;
   className?: string;
   disabled?: boolean;
+  /** Batas panjang pencarian server (PANJANG_CARI_SERVER dan sejenisnya). */
+  maxLength?: number;
 }
 
 /** Kotak cari seragam: 32 px di HP, 44 px mulai 640 px, ikon cari di kiri. */
-export function KotakCari({ id, label, placeholder, value, onChange, className, disabled }: PropsKotakCari) {
+export function KotakCari({ id, label, placeholder, value, onChange, className, disabled, maxLength }: PropsKotakCari) {
   return (
     <div className={cn("relative w-full min-w-0 sm:w-80", className)}>
       <Search
@@ -41,6 +43,7 @@ export function KotakCari({ id, label, placeholder, value, onChange, className, 
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
+        maxLength={maxLength}
         className="h-8 rounded-lg border-navy/20 bg-permukaan pl-9 text-navy placeholder:text-navy/40 sm:h-11"
       />
     </div>

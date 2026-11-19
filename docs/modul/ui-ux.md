@@ -575,6 +575,23 @@ kotak cari berdiri sendiri, dan Atur ulang semua hanya mengembalikan isian
 panel. Di Arus Kas, Atur ulang semua tidak mengubah Kelompokkan per,
 sedangkan Reset Filter lama ikut mengembalikannya ke Hari (FL8a).
 
+- **FL14a: kotak cari Diskon pindah ke bilah.** Koreksi fakta: Diskon
+  ternyata punya pencarian nama lewat `searchKey` DataTable, sehingga
+  terlewat di FL7a. Pencariannya kini kotak cari bilah, dan `saringDiskon`
+  menyaring nama di klien seperti sebelumnya (tanpa peka huruf besar).
+- **FL15a: kotak cari DataTable diseragamkan di komponennya.** `searchKey`
+  memasang `KotakCari`, sehingga Kategori, Metode Pembayaran, Pengguna,
+  Kategori Beban, Pajak, dan Pelanggan ikut tanpa berpindah letak. Halaman
+  hanya-cari yang menulis kotak cari sendiri (Produk, Bahan Baku, Stok,
+  Aset, Tarif, Tipe Aset, Inventaris Gudang, Kirim Barang, daftar surat
+  jalan, Penerimaan, Pola Roster, Stock Adjustment, Jadwal, Membership)
+  memakai `KotakCari` di tempatnya. Segmen Saringan status Membership
+  diperlakukan seperti tab dan tidak diubah (FL6a).
+
+Filter Aset dihapus dari layout Reservasi (FL9a), sehingga Buat Reservasi
+Baru sendirian di kepala layout dan selebar penuh di HP (TK2a); bagian
+Reservasi dari TK4a berakhir.
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E

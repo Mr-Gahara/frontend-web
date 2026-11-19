@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
 import { PILIHAN_UKURAN_STOK, paramHalamanInventory } from "@/features/inventaris/cakupan";
@@ -38,7 +39,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import {
-  Search,
   MapPin,
   AlertTriangle,
   Loader2,
@@ -250,15 +250,13 @@ export default function StokInventoryPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-navy/40" />
-            <Input
-              placeholder="Cari nama barang..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 bg-gading border-navy/20 text-navy focus-visible:ring-navy"
-            />
-          </div>
+          <KotakCari
+            id="cari-stok"
+            label="Cari nama barang"
+            placeholder="Cari nama barang..."
+            value={searchTerm}
+            onChange={setSearchTerm}
+          />
 
           {cakupan.status === "lintas" && (
           <Select value={selectedLocation} onValueChange={setSelectedLocation}>

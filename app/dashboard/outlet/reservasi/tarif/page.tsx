@@ -1,5 +1,6 @@
 "use client";
 import { denganAlfa, WARNA } from "@/lib/warna";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -8,7 +9,6 @@ import { useDaftarTarif, useHapusTarif } from "@/features/tarif/hooks";
 import { pesanError } from "@/lib/api/error";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/data-table";
 import MenuEditHapus from "@/components/menu-edit-hapus";
 import type { Tarif } from "@/types/tarif";
@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Plus,
-  Search,
   AlertTriangle,
   Clock,
   CalendarDays,
@@ -207,15 +206,13 @@ export default function DaftarTarifPage() {
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* FILTER & TOMBOL TAMBAH: baris tanpa panel, warna dari token (TB22a, TB23a) */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between border-b border-navy/10 pb-4">
-        <div className="relative w-full sm:max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/50" />
-          <Input
-            placeholder="Cari nama tarif..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-11 bg-permukaan border-navy/20 text-navy font-medium"
-          />
-        </div>
+        <KotakCari
+          id="cari-tarif"
+          label="Cari nama tarif"
+          placeholder="Cari nama tarif..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
         <Button
           onClick={() => router.push("/dashboard/outlet/reservasi/tarif/buatTarif")}
           size="aksi"

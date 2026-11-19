@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, Plus, Wand2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Wand2, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface JadwalToolbarProps {
   tipeRuang: "outlet" | "gudang";
@@ -65,16 +65,13 @@ export function JadwalToolbar({
 
       {/* FILTER & NAVIGASI WAKTU */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="relative w-full md:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Cari nama karyawan..."
-            aria-label="Cari nama karyawan"
-            className="pl-9 h-11 bg-gading border-navy/15 text-navy focus-visible:ring-navy/50 rounded-xl font-medium"
-          />
-        </div>
+        <KotakCari
+          id="cari-jadwal"
+          label="Cari nama karyawan"
+          placeholder="Cari nama karyawan..."
+          value={searchQuery}
+          onChange={onSearchChange}
+        />
 
         <div className="flex items-center gap-2 bg-gading border border-navy/15 rounded-xl p-1 shadow-sm">
           <Button variant="ghost" size="icon" onClick={onPrevMonth} aria-label="Bulan sebelumnya" className="h-9 w-9 rounded-lg text-navy hover:bg-navy/10">

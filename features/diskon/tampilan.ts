@@ -42,13 +42,19 @@ export function filterDiskonAktif(filter: FilterDiskon): boolean {
   return filter.status !== "all" || filter.cakupan !== "all" || filter.tipe !== "all";
 }
 
-/** Penyaringan daftar di klien, dari satu cache daftar diskon. */
-export function saringDiskon(daftar: Diskon[], filter: FilterDiskon): Diskon[] {
+/**
+ * Penyaringan daftar di klien, dari satu cache daftar diskon. cari nama
+ * diskon tanpa peka huruf besar, sama dengan pencarian DataTable sebelumnya;
+ * kotak carinya kini di bilah filter (FL1a).
+ */
+export function saringDiskon(daftar: Diskon[], filter: FilterDiskon, cari = ""): Diskon[] {
+  const kata = cari.trim().toLowerCase();
   return daftar.filter(
     (d) =>
       (filter.status === "all" || d.status === filter.status) &&
       (filter.cakupan === "all" || d.cakupan === filter.cakupan) &&
-      (filter.tipe === "all" || d.tipe === filter.tipe),
+      (filter.tipe === "all" || d.tipe === filter.tipe) &&
+      (!kata || d.namaDiskon.toLowerCase().includes(kata)),
   );
 }
 

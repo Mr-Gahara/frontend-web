@@ -57,7 +57,8 @@ export function HalamanDiskon() {
   const [form, setForm] = useState<{ diskon: Diskon | null } | null>(null);
   const [statusDiubah, setStatusDiubah] = useState<Diskon | null>(null);
 
-  const tampil = useMemo(() => saringDiskon(semua, filter), [semua, filter]);
+  const [cari, setCari] = useState("");
+  const tampil = useMemo(() => saringDiskon(semua, filter, cari), [semua, filter, cari]);
   const dalamBatas = masihDalamBatas(semua);
 
   const columns: ColumnDef<Diskon>[] = [
@@ -240,6 +241,7 @@ export function HalamanDiskon() {
       )}
 
       <BilahFilter
+        cari={{ id: "cari-diskon", label: "Cari nama diskon", placeholder: "Cari nama diskon...", value: cari, onChange: setCari }}
         jumlahAktif={jumlahFilterDiskon(filter)}
         onBukaFilter={panel.buka}
         filterTerbuka={panel.terbuka}
@@ -295,8 +297,6 @@ export function HalamanDiskon() {
             data={tampil}
             loading={daftar.isLoading}
             emptyMessage="Belum ada data diskon."
-            searchKey="namaDiskon"
-            searchPlaceholder="Cari nama diskon..."
           />
         )}
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useMemo, useState } from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -15,7 +16,6 @@ import { RUANG_SURAT_JALAN, type RuangSuratJalan } from "./ruang";
 import { LABEL_STATUS_TRANSFER, LABEL_TAB_TRANSFER, SLUG_TAB_TRANSFER, TAB_TRANSFER } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -25,7 +25,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Search,
   Clock,
   CheckCircle2,
   XCircle,
@@ -226,16 +225,14 @@ function IsiDaftarTransfer({ ruang }: { ruang: RuangSuratJalan }) {
           )}
         </div>
 
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
-          <Input
-            placeholder={`Cari No. Transfer / ${konfig.lawan} Tujuan...`}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            maxLength={PANJANG_CARI_SERVER}
-            className="pl-9 bg-white border-navy/20 text-navy focus-visible:ring-navy"
-          />
-        </div>
+        <KotakCari
+          id="cari-transfer"
+          label="Cari surat jalan"
+          placeholder={`Cari No. Transfer / ${konfig.lawan} Tujuan...`}
+          value={searchTerm}
+          onChange={setSearchTerm}
+          maxLength={PANJANG_CARI_SERVER}
+        />
       </div>
 
       {/* TABEL: DataTable, kartu per baris (TB1a sampai TB7a) */}

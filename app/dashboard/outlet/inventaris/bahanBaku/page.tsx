@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useHapusBahanBaku } from "@/features/bahan-baku/hooks";
 import { useHalamanInventory, useLokasiBertipe } from "@/features/inventaris/hooks";
@@ -11,7 +12,6 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -33,7 +33,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Plus,
-  Search,
   AlertTriangle,
   CheckCircle2,
   MoreHorizontal,
@@ -229,16 +228,14 @@ export default function DaftarBahanBakuPage() {
       </div>
 
       {/* PENCARIAN: dijalankan server lewat useHalamanInventory */}
-      <div className="relative w-full sm:max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
-        <Input
-          placeholder="Cari nama bahan baku di outlet ini..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          maxLength={PANJANG_CARI_SERVER}
-          className="pl-10 bg-permukaan border-navy/15 text-navy placeholder:text-navy/40 font-medium h-11 rounded-xl"
-        />
-      </div>
+      <KotakCari
+        id="cari-bahan-baku"
+        label="Cari nama bahan baku"
+        placeholder="Cari nama bahan baku di outlet ini..."
+        value={searchQuery}
+        onChange={setSearchQuery}
+        maxLength={PANJANG_CARI_SERVER}
+      />
 
       {/* TABEL DATA */}
       {isError ? (

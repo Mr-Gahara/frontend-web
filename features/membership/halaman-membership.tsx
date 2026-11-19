@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { KotakCari } from "@/components/filter/bilah-filter";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { Edit, MoreHorizontal, Plus, Power, Trash2 } from "lucide-react";
@@ -13,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
@@ -275,12 +275,12 @@ function TabMember({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row gap-3">
-        <Input
-          aria-label="Cari nama pelanggan"
+        <KotakCari
+          id="cari-member"
+          label="Cari nama pelanggan"
           placeholder="Cari nama pelanggan..."
           value={cari}
-          onChange={(e) => setCari(e.target.value)}
-          className="sm:max-w-sm h-11 bg-white border-navy/15 text-navy rounded-xl px-4"
+          onChange={setCari}
         />
         <div role="group" aria-label="Saringan status" className="grid grid-cols-3 gap-1 rounded-lg bg-krem p-1">
           {SARINGAN.map((s) => (
