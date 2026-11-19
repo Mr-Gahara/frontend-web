@@ -502,6 +502,68 @@ pratinjau memakai dua spec sementara di folder sampel sementara
 `tests` (tidak di-commit); tangkapan per lebar dibagikan sebagai pratinjau ke pemilik
 proyek.
 
+### Filter seragam
+
+Diputuskan pemilik proyek pada 19 November 2026 dari kanvas desain
+"Popup Filter" (papan Sekarang, desain A, B, dan C, lalu gabungan), setelah
+pindaian seluruh rute statis 1280 px dan pemetaan isian dari kode.
+Sebelumnya hanya Penjualan dan Reservasi yang punya tombol Filter:
+Penjualan membuka panel di dalam halaman, dan Filter Aset Reservasi tidak
+berfungsi (`onClick` kosong). Halaman lain menampilkan isian langsung
+dengan susunan, label, dan tinggi berbeda (40 sampai 48 px), serta tiga
+gaya Reset Filter.
+
+- **FL1a: gabungan tiga desain.** Bilah dari desain C: kotak cari selalu
+  tampil (Penjualan: nomor referensi) dan tombol "Filter lainnya" dengan
+  lencana jumlah filter aktif; di HP tombolnya ikon dan lencana. Tanda
+  aktif dari desain A: deretan pil "Label: nilai ×" dan "Atur ulang
+  semua" di bawah bilah, tidak tampil bila tidak ada filter aktif. Panel
+  dari desain B: panel samping dari kanan berkelompok, layar penuh di HP.
+- **FL2a: periode hanya di panel**, dengan pil cepat di atas dua isian
+  tanggal (FL12a).
+- **FL3a: pilihan berlaku lewat Terapkan.** Menutup panel tanpa Terapkan
+  membuang pilihan yang belum diterapkan; Atur ulang mengosongkan isian
+  panel.
+- **FL4a: pil aktif dengan Atur ulang semua**; × menghapus satu filter.
+- **FL5a: animasi panel**: masuk geser dari kanan sekitar 260 ms dengan
+  latar meredup, keluar sekitar 200 ms; tanpa animasi bila perangkat
+  meminta gerak dikurangi.
+- **FL6a: cakupan semua halaman yang punya pilihan.** Panel di Penjualan,
+  Diskon, riwayat Pindah Dana, Arus Kas, Pengeluaran, Belanja Stok, Mutasi
+  Kas, Pembelian Stok, Jurnal Stok, Master Shift, Stock Opname, dan
+  Pengajuan Stok (outlet dan gudang bila ada), riwayat Mesin Kasir, dan
+  Akun Klien admin. Halaman yang hanya punya kotak cari tidak mendapat
+  tombol Filter, tetapi kotak carinya diseragamkan (44 px mulai 640 px,
+  32 px di HP, ikon cari). Tab dan pilihan jumlah baris per halaman tetap.
+- **FL7a: halaman tanpa kotak cari** (Mutasi Kas, Pengeluaran, riwayat
+  Pindah Dana, Diskon, riwayat Mesin Kasir, Arus Kas) hanya mendapat
+  tombol Filter lainnya rata kanan; tidak ada pencarian baru (butir 27).
+- **FL8a: Arus Kas ikut tanpa "Kelompokkan per"**, yang tetap di halaman
+  sebagai pilihan tampilan.
+- **FL9a: Filter Aset di layout Reservasi dihapus.**
+- **FL10a: bentuk isian di panel**: pilihan tetap 2 sampai 4 berupa
+  segmen, 5 ke atas berupa pil, daftar dari data (akun kas, kategori,
+  bahan, mesin kasir) berupa Select di dalam panel; tanggal `PilihTanggal`.
+- **FL11a: periode bawaan tidak dihitung** di lencana dan tidak menjadi
+  pil sampai diubah; Atur ulang kembali ke bawaan halaman (butir 28).
+- **FL12a: pil periode cepat** (Hari ini, 7 hari, Bulan ini) di setiap
+  panel bertanggal, dihitung lewat `useHariIni`. Pembayaran per Metode
+  tidak disentuh (OM2a).
+- **FL13a: pemilih outlet tetap di halaman**, di luar panel, tanpa
+  lencana dan pil (LP1a); termasuk pilihan Lokasi di Stok, sehingga Stok
+  menjadi halaman hanya-cari.
+
+Penerapan: komponen bersama `components/filter/bilah-filter.tsx`
+(`KotakCari`, `TombolFilter`, `BilahFilter`, `PilFilterAktif`) dan
+`components/filter/panel-filter.tsx` (`PanelFilter` dari Dialog Radix,
+`KelompokFilter`, `PilihanPil`, `PilihanSegmen`, `PilihanPeriode`), draf
+lewat `hooks/use-panel-filter.ts`, label pil dan periode cepat sebagai fungsi
+murni di `lib/filter.ts`, animasi `panel-filter-gerak` dan
+`latar-filter-gerak` di `app/globals.css`. Percontohan Penjualan: tombol
+Filter keluar dari kepala halaman ke bilah, sehingga Buat Penjualan sendirian
+di kepala (bagian Penjualan dari TK4a berakhir), dan nomor referensi berlaku
+sendiri setelah jeda 400 ms tanpa Terapkan. Helper uji `tests/helpers/filter-uji.ts`.
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E

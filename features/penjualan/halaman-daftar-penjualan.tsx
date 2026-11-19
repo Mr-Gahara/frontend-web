@@ -1,7 +1,11 @@
 "use client";
 
 import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
-import { PilihTanggal } from "@/components/pilih-tanggal";
+import { BilahFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihanPeriode, PilihanPil, PilihanSegmen } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { dariTanggalLokal, keTanggalLokal } from "@/lib/waktu";
 
 import { useState, useMemo, type ReactNode } from "react";
@@ -18,14 +22,16 @@ import {
 import { aksiPenjualan } from "./izin";
 import { DialogVoidPenjualan } from "./dialog-void-penjualan";
 import { TAMPILAN_STATUS_PENJUALAN, URUTAN_STATUS_PENJUALAN } from "./tampilan";
-import { useSession } from "@/lib/auth/useSession";
 import {
-  Penjualan,
-  PenjualanFilterParams,
-  StatusPenjualan,
-  JenisTransaksi,
-  JenisPenjualan,
-} from "@/types/penjualan";
+  FILTER_KOSONG,
+  OPSI_METODE_PENJUALAN,
+  OPSI_TIPE_TRANSAKSI,
+  jumlahFilterAktif,
+  pilFilterPenjualan,
+  type FilterPanelPenjualan,
+} from "./filter-panel";
+import { useSession } from "@/lib/auth/useSession";
+import { Penjualan, StatusPenjualan } from "@/types/penjualan";
 import { ColumnDef, type SortingState } from "@tanstack/react-table";
 import { KepalaUrut } from "@/components/ui/kepala-urut";
 import { toast } from "sonner";
@@ -42,7 +48,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,19 +55,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
   MoreHorizontal,
   Plus,
-  RotateCcw,
-  SlidersHorizontal,
   ReceiptText,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
@@ -86,15 +82,6 @@ const badgeStatus = (status: StatusPenjualan) => {
   );
 };
 
-const emptyFilter: PenjualanFilterParams = {
-  statusPenjualan: undefined,
-  jenisTransaksi: undefined,
-  jenisPenjualan: undefined,
-  pelangganID: "",
-  startDate: "",
-  endDate: "",
-  noReferensi: "",
-};
 
 interface PropsHalamanDaftarPenjualan {
   /** Lingkup outlet dari halaman; null berarti sesi atau lokasi belum siap. */
@@ -113,13 +100,14 @@ export default function HalamanDaftarPenjualan({
   const router = useRouter();
   const { permissions } = useSession();
 
-  const [filters, setFilters] = useState<PenjualanFilterParams>(emptyFilter);
-  const [appliedFilters, setAppliedFilters] = useState<PenjualanFilterParams>(emptyFilter);
+  const hariIni = useTanggalHariIni();
+  const [appliedFilters, setAppliedFilters] = useState<FilterPanelPenjualan>(FILTER_KOSONG);
+  const [cari, setCari] = useState("");
+  const cariTertunda = useDebounce(cari, 400);
   const [halaman, setHalaman] = useState(1);
   const [ukuranHalaman, setUkuranHalaman] = useState<UkuranHalaman>(UKURAN_HALAMAN_BAWAAN);
   // Urutan per kolom diterapkan server (keputusan PB14a, backend yoga).
   const [urutan, setUrutan] = useState<SortingState>([]);
-  const [showFilter, setShowFilter] = useState(false);
   // Mengganti outlet kembali ke halaman 1, seperti mengganti jumlah baris dan
   // urutan; filter dan urutan dipertahankan (keputusan LP1a). Disesuaikan saat
   // render, bukan lewat effect, agar halaman lama tidak sempat diminta untuk
@@ -130,12 +118,19 @@ export default function HalamanDaftarPenjualan({
     setLingkupTerakhir(kunciLingkup);
     setHalaman(1);
   }
+  // Pencarian nomor referensi berlaku sendiri setelah jeda, di luar panel
+  // (FL1a), dan kembali ke halaman 1 seperti filter lain.
+  const [cariTerakhir, setCariTerakhir] = useState(cariTertunda);
+  if (cariTerakhir !== cariTertunda) {
+    setCariTerakhir(cariTertunda);
+    setHalaman(1);
+  }
 
   const [deleteTarget, setDeleteTarget] = useState<Penjualan | null>(null);
   const [voidTarget, setVoidTarget] = useState<Penjualan | null>(null);
 
   const daftar = useDaftarPenjualan(
-    appliedFilters,
+    { ...appliedFilters, noReferensi: cariTertunda.trim() },
     halaman,
     ukuranHalaman,
     lingkup !== null && !penghalang,
@@ -179,17 +174,12 @@ export default function HalamanDaftarPenjualan({
     },
   });
 
-  const handleApplyFilter = () => {
-    setAppliedFilters({ ...filters });
-    setHalaman(1);
-    setShowFilter(false);
-  };
-
-  const handleResetFilter = () => {
-    setFilters(emptyFilter);
-    setAppliedFilters(emptyFilter);
+  const terapkanFilter = (nilai: FilterPanelPenjualan) => {
+    setAppliedFilters(nilai);
     setHalaman(1);
   };
+  const panel = usePanelFilter({ terapan: appliedFilters, bawaan: FILTER_KOSONG, onTerapkan: terapkanFilter });
+  const pilAktif = pilFilterPenjualan(appliedFilters, hariIni, terapkanFilter);
 
   const columns = useMemo<ColumnDef<Penjualan>[]>(
     () => [
@@ -341,174 +331,77 @@ export default function HalamanDaftarPenjualan({
             </p>
           </div>
         </div>
-        <div className="flex w-full items-center gap-2 shrink-0 sm:w-auto">
-          <Button
-            variant="outline"
-            size="aksi"
-            onClick={() => setShowFilter(!showFilter)}
-            className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5"
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            <span className="hidden sm:inline">Filter</span>
-          </Button>
-          <Button
-            onClick={() => router.push("/dashboard/outlet/penjualan/buatPenjualan")}
-            size="aksi"
-            className="min-w-0 flex-1 cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm sm:flex-none"
-          >
-            <Plus className="h-4 w-4" />
-            Buat Penjualan
-          </Button>
-        </div>
+        <Button
+          onClick={() => router.push("/dashboard/outlet/penjualan/buatPenjualan")}
+          size="aksi"
+          className="w-full cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm sm:w-auto"
+        >
+          <Plus className="h-4 w-4" />
+          Buat Penjualan
+        </Button>
       </div>
 
       {pemilihLokasi}
-      {/* Filter Bar (DIKEMBALIKAN UTUH 100%) */}
-      {showFilter && (
-        <div className="rounded-2xl border border-navy/10 bg-krem p-4 sm:p-5 shadow-sm">
-          <div className="flex flex-col gap-4">
-            {/* Baris 1: Search full width */}
-            <div className="space-y-1.5">
-              <label className="text-kecil font-bold text-navy">Cari Nomor Invoice</label>
-              <Input
-                placeholder="Masukkan no. referensi..."
-                value={filters.noReferensi ?? ""}
-                onChange={(e) =>
-                  setFilters({ ...filters, noReferensi: e.target.value })
-                }
-                className="bg-gading border-navy/20 text-navy placeholder:text-navy/40"
-              />
-            </div>
-
-            {/* Baris 2: Status */}
-            <div className="space-y-1.5">
-              <label className="text-kecil font-bold text-navy">Status</label>
-              <Select
-                value={filters.statusPenjualan ?? "ALL"}
-                onValueChange={(val) =>
-                  setFilters({
-                    ...filters,
-                    statusPenjualan: val === "ALL" ? undefined : (val as StatusPenjualan),
-                  })
-                }
-              >
-                <SelectTrigger className="cursor-pointer w-full bg-gading border-navy/20 text-navy">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent className="bg-gading border-navy/10 text-navy">
-                  <SelectItem value="ALL" className="cursor-pointer font-medium hover:bg-navy/5">Semua Status</SelectItem>
-                  {URUTAN_STATUS_PENJUALAN.map((status) => (
-                    <SelectItem key={status} value={status} className="cursor-pointer font-medium hover:bg-navy/5">
-                      {TAMPILAN_STATUS_PENJUALAN[status].label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Baris 3: 2 kolom Jenis */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-kecil font-bold text-navy">Tipe Transaksi</label>
-                <Select
-                  value={filters.jenisTransaksi ?? "ALL"}
-                  onValueChange={(val) =>
-                    setFilters({
-                      ...filters,
-                      jenisTransaksi:
-                        val === "ALL" ? undefined : (val as JenisTransaksi),
-                    })
-                  }
-                >
-                  <SelectTrigger className="cursor-pointer w-full bg-gading border-navy/20 text-navy">
-                    <SelectValue placeholder="Jenis transaksi" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gading border-navy/10 text-navy">
-                    <SelectItem value="ALL" className="cursor-pointer font-medium hover:bg-navy/5">Semua Transaksi</SelectItem>
-                    <SelectItem value="POS" className="cursor-pointer font-medium hover:bg-navy/5">POS Kasir</SelectItem>
-                    <SelectItem value="INVOICE" className="cursor-pointer font-medium hover:bg-navy/5">Invoice Online</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-kecil font-bold text-navy">Metode Penjualan</label>
-                <Select
-                  value={filters.jenisPenjualan ?? "ALL"}
-                  onValueChange={(val) =>
-                    setFilters({
-                      ...filters,
-                      jenisPenjualan:
-                        val === "ALL" ? undefined : (val as JenisPenjualan),
-                    })
-                  }
-                >
-                  <SelectTrigger className="cursor-pointer w-full bg-gading border-navy/20 text-navy">
-                    <SelectValue placeholder="Jenis penjualan" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gading border-navy/10 text-navy">
-                    <SelectItem value="ALL" className="cursor-pointer font-medium hover:bg-navy/5">Semua Jenis</SelectItem>
-                    <SelectItem value="dine-in" className="cursor-pointer font-medium hover:bg-navy/5">Dine-in</SelectItem>
-                    <SelectItem value="takeaway" className="cursor-pointer font-medium hover:bg-navy/5">Takeaway</SelectItem>
-                    <SelectItem value="booking" className="cursor-pointer font-medium hover:bg-navy/5">Booking</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Baris 4: 2 kolom tanggal */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label htmlFor="filter-dari-tanggal" className="text-kecil font-bold text-navy">
-                  Dari Tanggal
-                </label>
-                <PilihTanggal
-                  id="filter-dari-tanggal"
-                  label="Dari Tanggal"
-                  placeholder="Semua tanggal"
-                  value={dariTanggalLokal(filters.startDate)}
-                  onChange={(tanggal) => setFilters({ ...filters, startDate: keTanggalLokal(tanggal) })}
-                  onKosongkan={() => setFilters({ ...filters, startDate: "" })}
-                  className="h-10"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label htmlFor="filter-sampai-tanggal" className="text-kecil font-bold text-navy">
-                  Sampai Tanggal
-                </label>
-                <PilihTanggal
-                  id="filter-sampai-tanggal"
-                  label="Sampai Tanggal"
-                  placeholder="Semua tanggal"
-                  value={dariTanggalLokal(filters.endDate)}
-                  onChange={(tanggal) => setFilters({ ...filters, endDate: keTanggalLokal(tanggal) })}
-                  onKosongkan={() => setFilters({ ...filters, endDate: "" })}
-                  className="h-10"
-                />
-              </div>
-            </div>
-
-            {/* Baris 5: Tombol Aksi */}
-            <div className="flex gap-3 pt-2">
-              <Button
-                onClick={handleApplyFilter}
-                className="flex-1 cursor-pointer bg-navy text-gading hover:bg-navy/90 font-bold shadow-sm"
-              >
-                Terapkan Pencarian
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleResetFilter}
-                className="cursor-pointer shrink-0 border-navy/20 text-navy hover:bg-navy/5"
-                title="Reset filter"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <BilahFilter
+        cari={{
+          id: "cari-penjualan",
+          label: "Cari nomor referensi",
+          placeholder: "Cari nomor referensi...",
+          value: cari,
+          onChange: setCari,
+        }}
+        jumlahAktif={jumlahFilterAktif(appliedFilters)}
+        onBukaFilter={panel.buka}
+        filterTerbuka={panel.terbuka}
+        pil={pilAktif}
+        onAturUlangSemua={() => terapkanFilter(FILTER_KOSONG)}
+      />
+      <PanelFilter
+        terbuka={panel.terbuka}
+        onTerbukaBerubah={panel.ubahTerbuka}
+        jumlahAktif={jumlahFilterAktif(panel.draf)}
+        onTerapkan={panel.terapkan}
+        onAturUlang={panel.aturUlang}
+      >
+        <KelompokFilter judul="Status">
+          <PilihanPil
+            label="Status"
+            nilai={panel.draf.statusPenjualan}
+            opsi={URUTAN_STATUS_PENJUALAN.map((s) => ({ nilai: s, label: TAMPILAN_STATUS_PENJUALAN[s].label }))}
+            onUbah={(statusPenjualan) => panel.setDraf({ ...panel.draf, statusPenjualan })}
+          />
+        </KelompokFilter>
+        <KelompokFilter judul="Tipe transaksi">
+          <PilihanSegmen
+            label="Tipe transaksi"
+            nilai={panel.draf.jenisTransaksi}
+            opsi={OPSI_TIPE_TRANSAKSI}
+            onUbah={(jenisTransaksi) => panel.setDraf({ ...panel.draf, jenisTransaksi })}
+          />
+        </KelompokFilter>
+        <KelompokFilter judul="Metode penjualan">
+          <PilihanSegmen
+            label="Metode penjualan"
+            nilai={panel.draf.jenisPenjualan}
+            opsi={OPSI_METODE_PENJUALAN}
+            onUbah={(jenisPenjualan) => panel.setDraf({ ...panel.draf, jenisPenjualan })}
+          />
+        </KelompokFilter>
+        <KelompokFilter judul="Periode">
+          <PilihanPeriode
+            idAwalan="filter-penjualan"
+            hariIni={hariIni}
+            rentang={{ dari: dariTanggalLokal(panel.draf.startDate), sampai: dariTanggalLokal(panel.draf.endDate) }}
+            onUbah={({ dari, sampai }) =>
+              panel.setDraf({
+                ...panel.draf,
+                startDate: dari ? keTanggalLokal(dari) : "",
+                endDate: sampai ? keTanggalLokal(sampai) : "",
+              })
+            }
+          />
+        </KelompokFilter>
+      </PanelFilter>
 
       {/* Tabel */}
       <div className="w-full">

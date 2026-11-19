@@ -381,3 +381,35 @@ input.no-spinner[type="number"] {
 @utility arsir-libur {
   background-image: repeating-linear-gradient(135deg, var(--krem) 0 6px, var(--krem-muda) 6px 12px);
 }
+
+/*
+ * Panel filter samping (FL5a, kanvas "Popup Filter"): masuk geser dari
+ * kanan 260 ms dengan latar meredup, keluar 200 ms. Radix menunggu animasi
+ * keluar sebelum melepas panel. Tanpa animasi bila gerak dikurangi.
+ */
+@keyframes panel-filter-masuk {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes panel-filter-keluar {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+@keyframes latar-filter-masuk {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes latar-filter-keluar {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@utility panel-filter-gerak {
+  &[data-state="open"] { animation: panel-filter-masuk 260ms cubic-bezier(0.32, 0.72, 0, 1) both; }
+  &[data-state="closed"] { animation: panel-filter-keluar 200ms cubic-bezier(0.4, 0, 1, 1) both; }
+  @media (prefers-reduced-motion: reduce) { animation: none !important; }
+}
+@utility latar-filter-gerak {
+  &[data-state="open"] { animation: latar-filter-masuk 260ms ease-out both; }
+  &[data-state="closed"] { animation: latar-filter-keluar 200ms ease-in both; }
+  @media (prefers-reduced-motion: reduce) { animation: none !important; }
+}

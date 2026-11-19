@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { login } from "../../helpers/transfer-uji";
 import { masukTanpaIzinLintas } from "../../helpers/terkunci-uji";
+import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../helpers/filter-uji";
 
 /*
  * Daftar penjualan per halaman (keputusan PB6a). Backend 465b438 menjawab
@@ -117,30 +118,30 @@ test.describe("E2E — Daftar penjualan per halaman", () => {
 
   test("filter tanggal dapat dikosongkan satu per satu lewat tombol Kosongkan di kalender", async ({ page }) => {
     const awal = await bukaDaftar(page);
-    await page.getByRole("button", { name: "Filter", exact: true }).click();
-    const dari = page.getByRole("button", { name: /^Dari Tanggal,/ });
-    await expect(dari).toHaveAccessibleName("Dari Tanggal, Semua tanggal");
+    let panel = await bukaPanelFilter(page);
+    const dari = panel.getByRole("button", { name: /^Dari tanggal,/ });
+    await expect(dari).toHaveAccessibleName("Dari tanggal, Semua tanggal");
 
     await dari.click();
     await expect(page.getByRole("button", { name: "Kosongkan" }), "tanpa tanggal tidak ada Kosongkan").toHaveCount(0);
     await page.getByRole("grid").getByText("1", { exact: true }).first().click();
-    await expect(dari).not.toHaveAccessibleName("Dari Tanggal, Semua tanggal");
+    await expect(dari).not.toHaveAccessibleName("Dari tanggal, Semua tanggal");
 
     const tDengan = page.waitForResponse(
       (r) => r.request().method() === "GET" && POLA_DAFTAR.test(r.url()) && new URL(r.url()).searchParams.has("startDate"),
     );
-    await page.getByRole("button", { name: "Terapkan Pencarian" }).click();
+    await terapkanPanelFilter(panel);
     await tDengan;
 
-    // Terapkan Pencarian menutup panel filter; buka lagi untuk mengosongkan.
-    await page.getByRole("button", { name: "Filter", exact: true }).click();
-    await expect(dari).toHaveAccessibleName(/^Dari Tanggal, \d{2} /);
+    // Terapkan menutup panel (FL3a); buka lagi untuk mengosongkan.
+    panel = await bukaPanelFilter(page);
+    await expect(dari).toHaveAccessibleName(/^Dari tanggal, \d{2} /);
     await dari.click();
     await page.getByRole("button", { name: "Kosongkan" }).click();
-    await expect(dari).toHaveAccessibleName("Dari Tanggal, Semua tanggal");
+    await expect(dari).toHaveAccessibleName("Dari tanggal, Semua tanggal");
     // Tanpa tanggal, kunci query sama dengan daftar awal yang masih segar di
     // cache, sehingga tidak ada permintaan baru; dibuktikan dari tampilan.
-    await page.getByRole("button", { name: "Terapkan Pencarian" }).click();
+    await terapkanPanelFilter(panel);
     await expect(page.getByText(`${awal.pagination.total} total data`, { exact: true })).toBeVisible();
     await expect(page.locator("tbody tr").first()).toContainText(awal.data[0].noReferensi);
   });
@@ -191,5 +192,77 @@ test.describe("E2E — Daftar penjualan per halaman", () => {
     const hasil = (await (await tOutlet).json()) as ResponsDaftar;
     await expect(page.getByText(teksHalaman(hasil, 1), { exact: true })).toBeVisible();
     await expect(page.getByText(`${hasil.pagination.total} total data`, { exact: true })).toBeVisible();
+  });
+
+  test("panel filter: Terapkan mengirim pilihan, tutup tanpa Terapkan membuang draf, dan pil aktif dihapus satu per satu (FL1a sampai FL4a)", async ({ page }) => {
+    await bukaDaftar(page);
+    let panel = await bukaPanelFilter(page);
+    await pilihanPanel(panel, "Status", "Lunas").click();
+    await pilihanPanel(panel, "Tipe transaksi", "POS Kasir").click();
+    await pilihanPanel(panel, "Periode cepat", "Bulan ini").click();
+    await expect(panel.getByText("3 filter aktif")).toBeVisible();
+    const tTerapan = page.waitForResponse((r) => {
+      if (r.request().method() !== "GET" || !POLA_DAFTAR.test(r.url())) return false;
+      const q = new URL(r.url()).searchParams;
+      return q.get("statusPenjualan") === "PAID" && q.get("jenisTransaksi") === "POS" && q.has("startDate") && q.get("page") === "1";
+    });
+    await terapkanPanelFilter(panel);
+    await tTerapan;
+    await expect(page.getByRole("button", { name: "Filter lainnya, 3 aktif" })).toBeVisible();
+    const pil = page.getByRole("group", { name: "Filter aktif" });
+    await expect(pil.getByRole("button", { name: /^Hapus filter / })).toHaveCount(3);
+    await expect(pil.getByRole("button", { name: /^Hapus filter Bulan ini · / })).toBeVisible();
+
+    // Menutup tanpa Terapkan membuang pilihan di panel.
+    panel = await bukaPanelFilter(page);
+    await pilihanPanel(panel, "Status", "Draft").click();
+    await page.keyboard.press("Escape");
+    await expect(panel).toBeHidden();
+    await expect(pil.getByRole("button", { name: "Hapus filter Status: Lunas" })).toBeVisible();
+    panel = await bukaPanelFilter(page);
+    await expect(pilihanPanel(panel, "Status", "Lunas")).toHaveAttribute("aria-pressed", "true");
+    await page.keyboard.press("Escape");
+
+    const tTanpaStatus = page.waitForResponse((r) => {
+      if (r.request().method() !== "GET" || !POLA_DAFTAR.test(r.url())) return false;
+      const q = new URL(r.url()).searchParams;
+      return !q.has("statusPenjualan") && q.get("jenisTransaksi") === "POS";
+    });
+    await pil.getByRole("button", { name: "Hapus filter Status: Lunas" }).click();
+    await tTanpaStatus;
+    await expect(page.getByRole("button", { name: "Filter lainnya, 2 aktif" })).toBeVisible();
+    await pil.getByRole("button", { name: "Atur ulang semua" }).click();
+    await expect(pil).toBeHidden();
+    await expect(page.getByRole("button", { name: "Filter lainnya", exact: true })).toBeVisible();
+  });
+
+  test("kotak cari nomor referensi berlaku tanpa panel dan kembali ke halaman 1 (FL1a)", async ({ page }) => {
+    const awal = await bukaDaftar(page);
+    expect(awal.pagination.total, "data uji perlu lebih dari 10 penjualan").toBeGreaterThan(10);
+    const tHalaman2 = tungguDaftar(page, 2, 10);
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await tHalaman2;
+    const kata = awal.data[0].noReferensi.slice(0, 6);
+    const tCari = page.waitForResponse((r) => {
+      if (r.request().method() !== "GET" || !POLA_DAFTAR.test(r.url())) return false;
+      const q = new URL(r.url()).searchParams;
+      return q.get("noReferensi") === kata && q.get("page") === "1";
+    });
+    await page.getByRole("searchbox", { name: "Cari nomor referensi" }).fill(kata);
+    await tCari;
+  });
+
+  test("HP 390 px: panel filter layar penuh dan tombol Filter berupa ikon berlencana (FL1a)", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await bukaDaftar(page);
+    const tombol = page.getByRole("button", { name: /^Filter lainnya/ });
+    await expect(tombol.getByText("Filter lainnya", { exact: true })).toBeHidden();
+    const panel = await bukaPanelFilter(page);
+    await page.waitForTimeout(300); // animasi masuk 260 ms (FL5a)
+    const k = await panel.boundingBox();
+    expect(k, "panel tampil").not.toBeNull();
+    expect(Math.round(k!.x), "panel dari tepi kiri layar").toBe(0);
+    expect(Math.round(k!.width), "panel selebar layar").toBe(390);
+    await expect(panel.getByRole("button", { name: "Terapkan" })).toBeInViewport();
   });
 });
