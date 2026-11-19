@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { akhiriSesi, bacaSesi, setTokenAkun } from "@/lib/auth/session";
 import {
+  tujuanBukaDashboard,
   tujuanGuardAdmin,
   tujuanGuardDashboard,
   tujuanGuardSetup,
@@ -139,5 +140,24 @@ describe("denganKembali (OA1a)", () => {
     expect(denganKembali("/login/pengguna", "/setup")).toBe("/login/pengguna?kembali=%2Fsetup");
     expect(denganKembali("/lupa-pin", null)).toBe("/lupa-pin");
     expect(denganKembali("/lupa-pin", "https://contoh.id")).toBe("/lupa-pin");
+  });
+});
+
+describe("tujuanBukaDashboard (LU3a)", () => {
+  it("tamu dan sesi yang masih dipulihkan tidak punya tujuan", () => {
+    expect(tujuanBukaDashboard({ status: "keluar", adaTokenAkun: false, adalahAdmin: false })).toBeNull();
+    expect(tujuanBukaDashboard({ status: "memuat", adaTokenAkun: false, adalahAdmin: false })).toBeNull();
+  });
+
+  it("akun toko yang belum masuk PIN tetap tamu", () => {
+    expect(tujuanBukaDashboard({ status: "keluar", adaTokenAkun: true, adalahAdmin: false })).toBeNull();
+  });
+
+  it("pengguna yang sudah masuk ke dashboard", () => {
+    expect(tujuanBukaDashboard({ status: "masuk", adaTokenAkun: true, adalahAdmin: false })).toBe("/dashboard");
+  });
+
+  it("admin platform ke panel admin", () => {
+    expect(tujuanBukaDashboard({ status: "keluar", adaTokenAkun: true, adalahAdmin: true })).toBe("/admin");
   });
 });

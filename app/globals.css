@@ -413,3 +413,41 @@ input.no-spinner[type="number"] {
   &[data-state="closed"] { animation: latar-filter-keluar 200ms ease-in both; }
   @media (prefers-reduced-motion: reduce) { animation: none !important; }
 }
+
+/*
+ * Laman utama (desain G, LU4a, gerak halus). Saat dibuka atau di-refresh,
+ * teks hero naik bergantian (jeda lewat --tunda) dan kartu dasbor merebah
+ * dari tegak ke kemiringannya (--miring). Saat digulir, bagian yang masuk
+ * layar naik dari arah datangnya: dari bawah saat menggulir ke bawah, dari
+ * atas saat menggulir ke atas (data-muncul diatur Muncul). Tanpa gerak bila
+ * gerak dikurangi.
+ */
+@keyframes laman-naik {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes laman-rebah {
+  from { opacity: 0; transform: translateY(56px) rotateX(0deg); }
+  to { opacity: 1; transform: rotateX(var(--miring)); }
+}
+@utility laman-naik {
+  animation: laman-naik 600ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--tunda, 0ms) both;
+  @media (prefers-reduced-motion: reduce) { animation: none !important; }
+}
+@utility laman-rebah {
+  transform: rotateX(var(--miring));
+  transform-origin: 50% 100%;
+  animation: laman-rebah 700ms cubic-bezier(0.2, 0.7, 0.2, 1) 350ms both;
+  @media (prefers-reduced-motion: reduce) { animation: none !important; }
+}
+@utility laman-muncul {
+  transition: opacity 600ms ease, transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--tunda, 0ms);
+  &[data-muncul="bawah"] { opacity: 0; transform: translateY(32px); }
+  &[data-muncul="atas"] { opacity: 0; transform: translateY(-32px); }
+  @media (prefers-reduced-motion: reduce) {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

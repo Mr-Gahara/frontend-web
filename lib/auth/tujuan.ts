@@ -68,3 +68,13 @@ export function tujuanGuardSetup(k: KeadaanSesi, setup: KeadaanSetup | null): st
   if (setup.ownerTerdaftar && k.status !== "masuk") return URL_LOGIN_OWNER_SETUP;
   return null;
 }
+
+/**
+ * Tujuan tombol Buka dashboard di laman utama (LU3a); null berarti
+ * pengunjung belum masuk, sehingga Masuk dan Coba gratis yang tampil.
+ * Admin platform tidak berstatus "masuk" dan dikenali dari role akunnya.
+ */
+export function tujuanBukaDashboard(k: KeadaanSesi): string | null {
+  if (k.adaTokenAkun && k.adalahAdmin) return "/admin";
+  return k.status === "masuk" ? "/dashboard" : null;
+}
