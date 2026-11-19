@@ -22,10 +22,11 @@ interface PropsKotakCari {
   value: string;
   onChange: (nilai: string) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 /** Kotak cari seragam: 32 px di HP, 44 px mulai 640 px, ikon cari di kiri. */
-export function KotakCari({ id, label, placeholder, value, onChange, className }: PropsKotakCari) {
+export function KotakCari({ id, label, placeholder, value, onChange, className, disabled }: PropsKotakCari) {
   return (
     <div className={cn("relative w-full min-w-0 sm:w-80", className)}>
       <Search
@@ -39,6 +40,7 @@ export function KotakCari({ id, label, placeholder, value, onChange, className }
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
         className="h-8 rounded-lg border-navy/20 bg-permukaan pl-9 text-navy placeholder:text-navy/40 sm:h-11"
       />
     </div>
@@ -49,10 +51,11 @@ interface PropsTombolFilter {
   jumlahAktif: number;
   onBuka: () => void;
   terbuka?: boolean;
+  disabled?: boolean;
 }
 
 /** Tombol "Filter lainnya" dengan lencana jumlah filter aktif; di HP ikon dan lencana saja. */
-export function TombolFilter({ jumlahAktif, onBuka, terbuka }: PropsTombolFilter) {
+export function TombolFilter({ jumlahAktif, onBuka, terbuka, disabled }: PropsTombolFilter) {
   const aktif = jumlahAktif > 0;
   return (
     <Button
@@ -60,6 +63,7 @@ export function TombolFilter({ jumlahAktif, onBuka, terbuka }: PropsTombolFilter
       variant="outline"
       size="aksi"
       onClick={onBuka}
+      disabled={disabled}
       aria-haspopup="dialog"
       aria-expanded={terbuka ?? false}
       aria-label={aktif ? `Filter lainnya, ${jumlahAktif} aktif` : "Filter lainnya"}
@@ -90,14 +94,20 @@ interface PropsBilahFilter {
   filterTerbuka?: boolean;
   pil: PilFilter[];
   onAturUlangSemua: () => void;
+  /** Halaman dengan penghalang (lokasi gagal dimuat): cari dan Filter mati. */
+  nonaktif?: boolean;
 }
 
-export function BilahFilter({ cari, jumlahAktif, onBukaFilter, filterTerbuka, pil, onAturUlangSemua }: PropsBilahFilter) {
+export function BilahFilter({ cari, jumlahAktif, onBukaFilter, filterTerbuka, pil, onAturUlangSemua, nonaktif }: PropsBilahFilter) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2 sm:gap-3">
-        {cari ? <KotakCari {...cari} className={cn("flex-1 sm:flex-none", cari.className)} /> : <span />}
-        <TombolFilter jumlahAktif={jumlahAktif} onBuka={onBukaFilter} terbuka={filterTerbuka} />
+        {cari ? (
+          <KotakCari {...cari} disabled={nonaktif || cari.disabled} className={cn("flex-1 sm:flex-none", cari.className)} />
+        ) : (
+          <span />
+        )}
+        <TombolFilter jumlahAktif={jumlahAktif} onBuka={onBukaFilter} terbuka={filterTerbuka} disabled={nonaktif} />
       </div>
       <PilFilterAktif pil={pil} onAturUlangSemua={onAturUlangSemua} />
     </div>

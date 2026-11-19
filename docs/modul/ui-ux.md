@@ -564,6 +564,17 @@ Filter keluar dari kepala halaman ke bilah, sehingga Buat Penjualan sendirian
 di kepala (bagian Penjualan dari TK4a berakhir), dan nomor referensi berlaku
 sendiri setelah jeda 400 ms tanpa Terapkan. Helper uji `tests/helpers/filter-uji.ts`.
 
+Keputusan lama yang berakhir karena isiannya pindah ke panel: CV2b butir 1
+(lebar pemicu Arah dan Alasan jurnal stok) dan CV15a (label Arah dan
+Alasan, kini segmen dan pil berlabel kelompok), LT3a (baris filter
+Pengajuan Stok), dan LT8a (Akun kas dan Bahan baku Pembelian Stok selebar
+baris di HP, kini selebar isi panel; skenario 390 px-nya diganti pemeriksaan
+panel). Halaman yang menonaktifkan filter selama ada penghalang memakai prop
+`nonaktif` di `BilahFilter`. Pencarian tidak lagi dikosongkan Reset Filter:
+kotak cari berdiri sendiri, dan Atur ulang semua hanya mengembalikan isian
+panel. Di Arus Kas, Atur ulang semua tidak mengubah Kelompokkan per,
+sedangkan Reset Filter lama ikut mengembalikannya ke Hari (FL8a).
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E

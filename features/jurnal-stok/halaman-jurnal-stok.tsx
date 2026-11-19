@@ -7,21 +7,23 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { PANJANG_CARI_SERVER } from "@/features/inventaris/cakupan";
 import type { JurnalStok } from "@/types/jurnalStok";
 import { useHalamanJurnalStok } from "./hooks";
-import { periodeAwalJurnal, type FilterAlasan, type FilterArah } from "./filter";
+import {
+  LABEL_ARAH_JURNAL,
+  jumlahFilterJurnal,
+  opsiAlasanJurnal,
+  periodeAwalJurnal,
+  pilFilterJurnal,
+  type FilterPanelJurnal,
+} from "./filter";
+import { BilahFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihanPeriode, PilihanPil, PilihanSegmen } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { formatWaktuJurnal, teksJumlahJurnal } from "./tampilan";
 import { DialogRincianJurnal } from "./dialog-rincian-jurnal";
 
-import { PilihTanggal } from "@/components/pilih-tanggal";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/data-table";
 import {
   DropdownMenu,
@@ -62,7 +64,6 @@ const WARNA_ALASAN_LAIN = "bg-slate-50 text-slate-700 border-slate-200";
 /** Pilihan baris per halaman (pemilik proyek 17 Oktober 2026); yang pertama menjadi ukuran awal. */
 const PILIHAN_UKURAN = [10, 20, 50] as const;
 
-const KELAS_LABEL_FILTER = "text-kecil font-bold text-navy/70";
 
 interface Props {
   ruang: keyof typeof TEKS;
@@ -90,9 +91,12 @@ export default function HalamanJurnalStok({
   pemilihLokasi,
 }: Props) {
   const teks = TEKS[ruang];
-  const [periode, setPeriode] = useState(() => periodeAwalJurnal());
-  const [arah, setArah] = useState<FilterArah>("ALL");
-  const [alasan, setAlasan] = useState<FilterAlasan>("ALL");
+  const hariIni = useTanggalHariIni();
+  // Periode bawaan bulan ini mengikuti hari ini dan tidak dihitung (FL11a).
+  const bawaan = useMemo<FilterPanelJurnal>(() => ({ arah: "ALL", alasan: "ALL", ...periodeAwalJurnal(hariIni) }), [hariIni]);
+  const [filter, setFilter] = useState<FilterPanelJurnal>(() => ({ arah: "ALL", alasan: "ALL", ...periodeAwalJurnal() }));
+  const { arah, alasan } = filter;
+  const periode = { dari: filter.dari, sampai: filter.sampai };
   const [cari, setCari] = useState("");
   const cariTertunda = useDebounce(cari, 400);
   const [halaman, setHalaman] = useState(1);
@@ -118,17 +122,11 @@ export default function HalamanJurnalStok({
   const daftar = useMemo(() => data?.data ?? [], [data]);
 
   /** Setiap perubahan filter kembali ke halaman 1. */
-  const ubahFilter = (ubah: () => void) => {
-    ubah();
+  const terapkanFilter = (baru: FilterPanelJurnal) => {
+    setFilter(baru);
     setHalaman(1);
   };
-  const resetFilter = () =>
-    ubahFilter(() => {
-      setPeriode(periodeAwalJurnal());
-      setArah("ALL");
-      setAlasan("ALL");
-      setCari("");
-    });
+  const panel = usePanelFilter({ terapan: filter, bawaan, onTerapkan: terapkanFilter });
 
   const memuat = isLoading || memuatLingkup;
   const nonaktif = Boolean(penghalang);
@@ -234,115 +232,67 @@ export default function HalamanJurnalStok({
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
-      {/* HEADER & FILTERS */}
-      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between border-b border-navy/10 pb-6">
-        <div className="space-y-1.5">
-          <h1 className="text-judul font-bold tracking-tight text-navy flex items-center gap-2">
-            <BookOpen className="w-8 h-8 text-karamel" />
-            Buku Jurnal Stok
-          </h1>
-          <p className="text-isi font-medium text-navy/60">{deskripsi}</p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 w-full sm:flex sm:flex-wrap sm:items-end md:w-auto">
-          {pemilihLokasi && <div className="col-span-2 sm:col-span-1">{pemilihLokasi}</div>}
-          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-            <span className={KELAS_LABEL_FILTER}>Dari tanggal</span>
-            <PilihTanggal
-              label="Dari tanggal"
-              value={periode.dari}
-              onChange={(dari) => ubahFilter(() => setPeriode((p) => ({ ...p, dari })))}
-              tanggalNonaktif={{ after: periode.sampai }}
-              disabled={nonaktif}
-              className="h-10 w-full sm:w-52"
-            />
-          </div>
-          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-            <span className={KELAS_LABEL_FILTER}>Sampai tanggal</span>
-            <PilihTanggal
-              label="Sampai tanggal"
-              value={periode.sampai}
-              onChange={(sampai) => ubahFilter(() => setPeriode((p) => ({ ...p, sampai })))}
-              tanggalNonaktif={{ before: periode.dari }}
-              disabled={nonaktif}
-              className="h-10 w-full sm:w-52"
-            />
-          </div>
-
-          {/* Berlabel seperti isian filter lain, tanpa ikon corong (CV15a). */}
-          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-          <span id={`label-arah-${ruang}`} className={KELAS_LABEL_FILTER}>Arah</span>
-          <Select
-            value={arah}
-            onValueChange={(nilai) => ubahFilter(() => setArah(nilai as FilterArah))}
-            disabled={nonaktif}
-          >
-            <SelectTrigger
-              aria-labelledby={`label-arah-${ruang}`}
-              className="w-full sm:w-[190px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
-            >
-              <SelectValue placeholder="Semua Arah" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border-navy/10 text-navy">
-              <SelectItem value="ALL" className="font-bold">Semua Arah</SelectItem>
-              <SelectItem value="Masuk" className="font-bold text-emerald-600">Barang Masuk</SelectItem>
-              <SelectItem value="Keluar" className="font-bold text-rose-600">Barang Keluar</SelectItem>
-            </SelectContent>
-          </Select>
-          </div>
-
-          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-          <span id={`label-alasan-${ruang}`} className={KELAS_LABEL_FILTER}>Alasan</span>
-          <Select
-            value={alasan}
-            onValueChange={(nilai) => ubahFilter(() => setAlasan(nilai as FilterAlasan))}
-            disabled={nonaktif}
-          >
-            <SelectTrigger
-              aria-labelledby={`label-alasan-${ruang}`}
-              className="w-full sm:w-[200px] h-10 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm"
-            >
-              <SelectValue placeholder="Semua Alasan" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border-navy/10 text-navy">
-              <SelectItem value="ALL" className="font-bold">Semua Alasan</SelectItem>
-              <SelectItem value="Transfer Gudang" className="font-medium">{teks.labelTransfer}</SelectItem>
-              <SelectItem value="Stok Opname" className="font-medium">Stok Opname</SelectItem>
-              <SelectItem value="Rusak/Hilang" className="font-medium">Rusak / Hilang</SelectItem>
-              <SelectItem value="Pembelian" className="font-medium">Pembelian</SelectItem>
-              <SelectItem value="Penjualan" className="font-medium">Penjualan</SelectItem>
-              <SelectItem value="Lainnya" className="font-medium">Lainnya</SelectItem>
-            </SelectContent>
-          </Select>
-          </div>
-
-          <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-            <label htmlFor={`cari-jurnal-${ruang}`} className={KELAS_LABEL_FILTER}>
-              Cari bahan
-            </label>
-            <Input
-              id={`cari-jurnal-${ruang}`}
-              type="search"
-              placeholder="Cari nama bahan..."
-              value={cari}
-              onChange={(e) => setCari(e.target.value)}
-              maxLength={PANJANG_CARI_SERVER}
-              disabled={nonaktif}
-              className="h-10 w-full sm:w-48 bg-white border-navy/20 text-navy"
-            />
-          </div>
-
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={resetFilter}
-            disabled={nonaktif}
-            className="col-span-2 h-10 justify-self-end font-bold text-amber-800 hover:bg-navy/5 hover:text-amber-900 sm:col-span-1"
-          >
-            Reset Filter
-          </Button>
-        </div>
+      {/* HEADER */}
+      <div className="space-y-1.5">
+        <h1 className="text-judul font-bold tracking-tight text-navy flex items-center gap-2">
+          <BookOpen className="w-8 h-8 text-karamel" />
+          Buku Jurnal Stok
+        </h1>
+        <p className="text-isi font-medium text-navy/60">{deskripsi}</p>
       </div>
+
+      {pemilihLokasi}
+      <BilahFilter
+        cari={{
+          id: `cari-jurnal-${ruang}`,
+          label: "Cari bahan",
+          placeholder: "Cari nama bahan...",
+          value: cari,
+          onChange: (v) => setCari(v.slice(0, PANJANG_CARI_SERVER)),
+        }}
+        nonaktif={nonaktif}
+        jumlahAktif={jumlahFilterJurnal(filter, bawaan)}
+        onBukaFilter={panel.buka}
+        filterTerbuka={panel.terbuka}
+        pil={pilFilterJurnal(filter, bawaan, teks.labelTransfer, hariIni, terapkanFilter)}
+        onAturUlangSemua={() => terapkanFilter(bawaan)}
+      />
+      <PanelFilter
+        terbuka={panel.terbuka}
+        onTerbukaBerubah={panel.ubahTerbuka}
+        jumlahAktif={jumlahFilterJurnal(panel.draf, bawaan)}
+        onTerapkan={panel.terapkan}
+        onAturUlang={panel.aturUlang}
+      >
+        <KelompokFilter judul="Arah">
+          <PilihanSegmen
+            label="Arah"
+            nilai={panel.draf.arah === "ALL" ? undefined : panel.draf.arah}
+            opsi={(["Masuk", "Keluar"] as const).map((v) => ({ nilai: v, label: LABEL_ARAH_JURNAL[v] }))}
+            onUbah={(arah) => panel.setDraf({ ...panel.draf, arah: arah ?? "ALL" })}
+          />
+        </KelompokFilter>
+        <KelompokFilter judul="Alasan">
+          <PilihanPil
+            label="Alasan"
+            nilai={panel.draf.alasan === "ALL" ? undefined : panel.draf.alasan}
+            opsi={opsiAlasanJurnal(teks.labelTransfer)}
+            onUbah={(alasan) => panel.setDraf({ ...panel.draf, alasan: alasan ?? "ALL" })}
+          />
+        </KelompokFilter>
+        <KelompokFilter judul="Periode">
+          <PilihanPeriode
+            idAwalan={`filter-jurnal-${ruang}`}
+            hariIni={hariIni}
+            batasiUrutan
+            wajib
+            rentang={{ dari: panel.draf.dari, sampai: panel.draf.sampai }}
+            onUbah={({ dari, sampai }) =>
+              panel.setDraf({ ...panel.draf, dari: dari ?? panel.draf.dari, sampai: sampai ?? panel.draf.sampai })
+            }
+          />
+        </KelompokFilter>
+      </PanelFilter>
 
       <DialogRincianJurnal jurnal={dirinci} onTutup={() => setDirinci(null)} />
 

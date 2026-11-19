@@ -1,6 +1,9 @@
 "use client";
 
 import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
+import { BilahFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihanSegmen } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
 import { Suspense, useMemo, useState, type ReactNode } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
@@ -17,14 +20,6 @@ import { tahapPengajuan, type TahapPengajuan } from "./tahap";
 import { LABEL_ARAH_PENGAJUAN, SLUG_TAB_PENGAJUAN, labelTabPengajuan, labelTahapPengajuan } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -34,7 +29,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Search,
   PlusCircle,
   Clock,
   CheckCircle2,
@@ -146,6 +140,7 @@ function IsiDaftarPengajuanStok({
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
   const [filterArah, setFilterArah] = useState<FilterArah>("SEMUA");
+  const panel = usePanelFilter<FilterArah>({ terapan: filterArah, bawaan: "SEMUA", onTerapkan: setFilterArah });
   // Tab dari ?tab= (lib/tab-url.ts); tab yang disembunyikan izin tidak dapat dibuka lewat URL.
   const [activeTab, setActiveTab] = useTabUrl(SLUG_TAB_PENGAJUAN[ruang], tabTampil, teks.tabBawaan);
 
@@ -346,29 +341,43 @@ function IsiDaftarPengajuanStok({
           ))}
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 w-full sm:w-auto sm:items-end">
         {pemilihLokasi}
-        <Select value={filterArah} onValueChange={(v) => setFilterArah(v as FilterArah)}>
-          <SelectTrigger aria-label="Filter arah" className="w-full sm:w-44 bg-white border-navy/20 text-navy focus:ring-navy">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="SEMUA">Semua arah</SelectItem>
-            <SelectItem value="GUDANG_KE_OUTLET">{LABEL_ARAH_PENGAJUAN.GUDANG_KE_OUTLET}</SelectItem>
-            <SelectItem value="OUTLET_KE_GUDANG">{LABEL_ARAH_PENGAJUAN.OUTLET_KE_GUDANG}</SelectItem>
-          </SelectContent>
-        </Select>
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-navy/40" />
-          <Input
-            placeholder={teks.placeholderCari}
-            maxLength={PANJANG_CARI_SERVER}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 bg-white border-navy/20 text-navy focus-visible:ring-navy"
+        <div className="w-full">
+          <BilahFilter
+            cari={{
+              id: `cari-pengajuan-${ruang}`,
+              label: "Cari pengajuan",
+              placeholder: teks.placeholderCari,
+              value: searchTerm,
+              onChange: (v) => setSearchTerm(v.slice(0, PANJANG_CARI_SERVER)),
+            }}
+            jumlahAktif={filterArah === "SEMUA" ? 0 : 1}
+            onBukaFilter={panel.buka}
+            filterTerbuka={panel.terbuka}
+            pil={
+              filterArah === "SEMUA"
+                ? []
+                : [{ kunci: "arah", label: `Arah: ${LABEL_ARAH_PENGAJUAN[filterArah]}`, onHapus: () => setFilterArah("SEMUA") }]
+            }
+            onAturUlangSemua={() => setFilterArah("SEMUA")}
           />
         </div>
-        </div>
+        <PanelFilter
+          terbuka={panel.terbuka}
+          onTerbukaBerubah={panel.ubahTerbuka}
+          jumlahAktif={panel.draf === "SEMUA" ? 0 : 1}
+          onTerapkan={panel.terapkan}
+          onAturUlang={panel.aturUlang}
+        >
+          <KelompokFilter judul="Arah">
+            <PilihanSegmen
+              label="Arah"
+              nilai={panel.draf === "SEMUA" ? undefined : panel.draf}
+              opsi={(["GUDANG_KE_OUTLET", "OUTLET_KE_GUDANG"] as const).map((v) => ({ nilai: v, label: LABEL_ARAH_PENGAJUAN[v] }))}
+              onUbah={(arah) => panel.setDraf(arah ?? "SEMUA")}
+            />
+          </KelompokFilter>
+        </PanelFilter>
       </div>
 
       {/* TABEL: DataTable, kartu per baris (TB1a sampai TB7a) */}

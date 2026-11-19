@@ -1,4 +1,5 @@
 import { test, expect, Page, Response } from "@playwright/test";
+import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../../helpers/filter-uji";
 import { masukTanpaIzinLintas } from "../../../helpers/terkunci-uji";
 import { LABEL_ARAH_PENGAJUAN } from "../../../../features/pengajuan-stok/tampilan";
 import { masuk } from "../../../helpers/masuk-uji";
@@ -133,8 +134,9 @@ test.describe("Daftar pengajuan stok outlet", () => {
   test("filter arah pengembalian dikirim sebagai dariTipeLokasi Outlet (B109)", async ({ page }) => {
     await buka(page, URL_OUTLET, { status: null });
     const tunggu = page.waitForResponse(daftarPengajuan({ dariTipeLokasi: "Outlet", page: "1" }));
-    await page.getByRole("combobox", { name: "Filter arah" }).click();
-    await page.getByRole("option", { name: LABEL_ARAH_PENGAJUAN.OUTLET_KE_GUDANG, exact: true }).click();
+    const panel = await bukaPanelFilter(page);
+    await pilihanPanel(panel, "Arah", LABEL_ARAH_PENGAJUAN.OUTLET_KE_GUDANG).click();
+    await terapkanPanelFilter(panel);
     const h = await isiRespons(await tunggu);
     expect(h.data.every(pengembalian)).toBe(true);
     await periksaHalaman(page, h, KOSONG);

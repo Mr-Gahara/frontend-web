@@ -1,5 +1,6 @@
 import { test, expect, Page, Response } from "@playwright/test";
 import { masuk } from "../../../helpers/masuk-uji";
+import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../../helpers/filter-uji";
 
 const URL_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/stockOpname";
 const URL_GUDANG = "http://localhost:3000/dashboard/gudang/stockOpname";
@@ -77,8 +78,10 @@ async function pilihStatus(page: Page, label: string, nilai: string) {
     page,
     getOpname((u) => u.searchParams.get("status") === nilai && u.searchParams.get("page") === "1"),
   );
-  await page.getByText("Semua Status", { exact: true }).click();
-  await page.getByRole("option", { name: label, exact: true }).click();
+  const panel = await bukaPanelFilter(page);
+  await pilihanPanel(panel, "Status", label).click();
+  await terapkanPanelFilter(panel);
+  await expect(page.getByRole("button", { name: `Hapus filter Status: ${label}` })).toBeVisible();
   return pHasil;
 }
 

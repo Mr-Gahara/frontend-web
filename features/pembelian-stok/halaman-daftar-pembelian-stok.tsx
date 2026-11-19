@@ -1,11 +1,14 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
+import { BilahFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihDaftar, PilihanPeriode } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, Plus, ShoppingCart } from "lucide-react";
 
-import { PilihTanggal } from "@/components/pilih-tanggal";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -14,14 +17,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
 import { useDaftarBahanBaku } from "@/features/bahan-baku/hooks";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -34,6 +29,9 @@ import { aksiPembelianStok, type RuangPembelian } from "./izin";
 import {
   PANJANG_CARI_SUPPLIER,
   filterAwalDaftarPembelian,
+  jumlahFilterPembelian,
+  pilFilterPembelian,
+  type FilterPanelPembelian,
   paramDaftarPembelian,
   type FilterPembelian,
 } from "./payload";
@@ -41,10 +39,6 @@ import { urlCatatPembelian, urlDetailPembelian } from "./ruang";
 import { namaAkunPembelian, ringkasBarang } from "./tampilan";
 
 const PILIHAN_UKURAN = [10, 20, 50] as const;
-const SEMUA = "SEMUA";
-const KELAS_LABEL_FILTER = "text-kecil font-bold text-navy/70";
-const KELAS_PEMICU_FILTER =
-  "h-10 w-full sm:w-48 bg-white border-navy/20 text-navy font-bold focus:ring-navy shadow-sm";
 
 interface Props {
   ruang: RuangPembelian;
@@ -103,9 +97,28 @@ export default function HalamanDaftarPembelianStok({
   const { data, isLoading, isFetching, isError } = useDaftarPembelianStok(params);
   const daftar = useMemo(() => data?.data ?? [], [data]);
 
-  const resetFilter = () => {
-    setFilter(filterAwalDaftarPembelian());
-    setCari("");
+  // Panel filter (FL1a): akun, bahan, dan periode; supplier kotak cari di bilah.
+  const hariIni = useTanggalHariIni();
+  const akun = useDaftarAkunKas({ enabled: bolehAkun });
+  const bahan = useDaftarBahanBaku(bolehBahan);
+  const bawaanPanel = useMemo<FilterPanelPembelian>(() => {
+    const awal = filterAwalDaftarPembelian(hariIni);
+    return { akunKasID: "", bahanBakuID: "", lokasiID: "", dari: awal.dari, sampai: awal.sampai };
+  }, [hariIni]);
+  const isianPanel: FilterPanelPembelian = {
+    akunKasID: filter.akunKasID,
+    bahanBakuID: filter.bahanBakuID,
+    lokasiID: "",
+    dari: filter.dari,
+    sampai: filter.sampai,
+  };
+  const terapkanPanel = (baru: FilterPanelPembelian) =>
+    setFilter((f) => ({ ...f, akunKasID: baru.akunKasID, bahanBakuID: baru.bahanBakuID, dari: baru.dari, sampai: baru.sampai }));
+  const panel = usePanelFilter({ terapan: isianPanel, bawaan: bawaanPanel, onTerapkan: terapkanPanel });
+  const namaFilter = {
+    akun: (id: string) => akun.data?.find((a) => a.id === id)?.namaAkun,
+    bahan: (id: string) => bahan.data?.find((b) => b.id === id)?.namaBahan,
+    lokasi: () => undefined,
   };
 
   const memuat = isLoading || memuatLingkup;
@@ -221,69 +234,63 @@ export default function HalamanDaftarPembelianStok({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 border-b border-navy/10 pb-4 sm:flex sm:flex-wrap sm:items-end">
-        {pemilihLokasi && <div className="col-span-2 sm:col-span-1">{pemilihLokasi}</div>}
-        <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-          <label htmlFor="cari-supplier-pembelian" className={KELAS_LABEL_FILTER}>
-            Cari supplier
-          </label>
-          <Input
-            id="cari-supplier-pembelian"
-            type="search"
-            value={cari}
-            onChange={(e) => setCari(e.target.value)}
-            maxLength={PANJANG_CARI_SUPPLIER}
-            placeholder="Nama supplier"
-            disabled={nonaktif}
-            className="h-10 w-full sm:w-56 bg-white border-navy/20 text-navy"
-          />
-        </div>
+      {pemilihLokasi}
+      <BilahFilter
+        cari={{
+          id: "cari-supplier-pembelian",
+          label: "Cari supplier",
+          placeholder: "Cari nama supplier...",
+          value: cari,
+          onChange: (v) => setCari(v.slice(0, PANJANG_CARI_SUPPLIER)),
+        }}
+        nonaktif={nonaktif}
+        jumlahAktif={jumlahFilterPembelian(isianPanel, bawaanPanel)}
+        onBukaFilter={panel.buka}
+        filterTerbuka={panel.terbuka}
+        pil={pilFilterPembelian(isianPanel, bawaanPanel, namaFilter, hariIni, terapkanPanel)}
+        onAturUlangSemua={() => terapkanPanel(bawaanPanel)}
+      />
+      <PanelFilter
+        terbuka={panel.terbuka}
+        onTerbukaBerubah={panel.ubahTerbuka}
+        jumlahAktif={jumlahFilterPembelian(panel.draf, bawaanPanel)}
+        onTerapkan={panel.terapkan}
+        onAturUlang={panel.aturUlang}
+      >
         {bolehAkun && (
-          <FilterAkun
-            nilai={filter.akunKasID}
-            onUbah={(akunKasID) => setFilter((f) => ({ ...f, akunKasID }))}
-            nonaktif={nonaktif}
-          />
+          <KelompokFilter judul="Akun kas" htmlFor="filter-akun-pembelian">
+            <PilihDaftar
+              id="filter-akun-pembelian"
+              nilai={panel.draf.akunKasID}
+              onUbah={(akunKasID) => panel.setDraf({ ...panel.draf, akunKasID })}
+              labelSemua="Semua akun kas"
+              opsi={(akun.data ?? []).map((a) => ({ id: a.id, nama: a.namaAkun }))}
+            />
+          </KelompokFilter>
         )}
         {bolehBahan && (
-          <FilterBahan
-            nilai={filter.bahanBakuID}
-            onUbah={(bahanBakuID) => setFilter((f) => ({ ...f, bahanBakuID }))}
-            nonaktif={nonaktif}
-          />
+          <KelompokFilter judul="Bahan baku" htmlFor="filter-bahan-pembelian">
+            <PilihDaftar
+              id="filter-bahan-pembelian"
+              nilai={panel.draf.bahanBakuID}
+              onUbah={(bahanBakuID) => panel.setDraf({ ...panel.draf, bahanBakuID })}
+              labelSemua="Semua bahan"
+              opsi={(bahan.data ?? []).map((b) => ({ id: b.id, nama: b.namaBahan }))}
+            />
+          </KelompokFilter>
         )}
-        <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-          <span className={KELAS_LABEL_FILTER}>Pembelian dari</span>
-          <PilihTanggal
-            label="Pembelian dari"
-            value={filter.dari}
-            onChange={(dari) => setFilter((f) => ({ ...f, dari }))}
-            tanggalNonaktif={filter.sampai ? { after: filter.sampai } : undefined}
-            disabled={nonaktif}
-            className="h-10 w-full sm:w-52"
+        <KelompokFilter judul="Periode">
+          <PilihanPeriode
+            idAwalan="filter-pembelian"
+            hariIni={hariIni}
+            labelDari="Pembelian dari"
+            labelSampai="Pembelian sampai"
+            batasiUrutan
+            rentang={{ dari: panel.draf.dari, sampai: panel.draf.sampai }}
+            onUbah={({ dari, sampai }) => panel.setDraf({ ...panel.draf, dari, sampai })}
           />
-        </div>
-        <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-          <span className={KELAS_LABEL_FILTER}>Pembelian sampai</span>
-          <PilihTanggal
-            label="Pembelian sampai"
-            value={filter.sampai}
-            onChange={(sampai) => setFilter((f) => ({ ...f, sampai }))}
-            tanggalNonaktif={filter.dari ? { before: filter.dari } : undefined}
-            disabled={nonaktif}
-            className="h-10 w-full sm:w-52"
-          />
-        </div>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={resetFilter}
-          disabled={nonaktif}
-          className="col-span-2 h-10 justify-self-end font-bold text-amber-800 hover:bg-navy/5 hover:text-amber-900 sm:col-span-1"
-        >
-          Reset Filter
-        </Button>
-      </div>
+        </KelompokFilter>
+      </PanelFilter>
 
       {penghalang ??
         (isError ? (
@@ -318,70 +325,3 @@ export default function HalamanDaftarPembelianStok({
   );
 }
 
-function FilterAkun({
-  nilai,
-  onUbah,
-  nonaktif,
-}: {
-  nilai: string;
-  onUbah: (nilai: string) => void;
-  nonaktif: boolean;
-}) {
-  const akun = useDaftarAkunKas();
-  return (
-    <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-      <label htmlFor="filter-akun-pembelian" className={KELAS_LABEL_FILTER}>
-        Akun kas
-      </label>
-      <Select value={nilai || SEMUA} onValueChange={(v) => onUbah(v === SEMUA ? "" : v)} disabled={nonaktif}>
-        <SelectTrigger id="filter-akun-pembelian" className={KELAS_PEMICU_FILTER}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="bg-gading border-navy/10 text-navy">
-          <SelectItem value={SEMUA} className="font-bold">
-            Semua akun kas
-          </SelectItem>
-          {(akun.data ?? []).map((a) => (
-            <SelectItem key={a.id} value={a.id}>
-              {a.namaAkun}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}
-
-function FilterBahan({
-  nilai,
-  onUbah,
-  nonaktif,
-}: {
-  nilai: string;
-  onUbah: (nilai: string) => void;
-  nonaktif: boolean;
-}) {
-  const bahan = useDaftarBahanBaku();
-  return (
-    <div className="col-span-2 flex flex-col gap-1 sm:col-span-1">
-      <label htmlFor="filter-bahan-pembelian" className={KELAS_LABEL_FILTER}>
-        Bahan baku
-      </label>
-      <Select value={nilai || SEMUA} onValueChange={(v) => onUbah(v === SEMUA ? "" : v)} disabled={nonaktif}>
-        <SelectTrigger id="filter-bahan-pembelian" className={KELAS_PEMICU_FILTER}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="bg-gading border-navy/10 text-navy">
-          <SelectItem value={SEMUA} className="font-bold">
-            Semua bahan
-          </SelectItem>
-          {(bahan.data ?? []).map((b) => (
-            <SelectItem key={b.id} value={b.id}>
-              {b.namaBahan}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-}

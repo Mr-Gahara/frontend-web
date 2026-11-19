@@ -13,10 +13,12 @@ import { bahanBakuApi } from "./api";
 import { queryKeys } from "@/lib/queryKeys";
 import type { BahanBakuRequest } from "@/types/bahanBaku";
 
-export function useDaftarBahanBaku() {
+/** aktif false tidak meminta apa pun, bagi pengguna tanpa izin baca bahan. */
+export function useDaftarBahanBaku(aktif = true) {
   return useQuery({
     queryKey: queryKeys.bahanBaku.daftar(),
     queryFn: bahanBakuApi.daftar,
+    enabled: aktif,
   });
 }
 

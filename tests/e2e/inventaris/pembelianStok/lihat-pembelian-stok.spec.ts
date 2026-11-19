@@ -1,4 +1,5 @@
 import { test, expect, type Page, type Request, type Response } from "@playwright/test";
+import { bukaPanelFilter } from "../../../helpers/filter-uji";
 import { BASIS, login } from "../../../helpers/transfer-uji";
 import { tanpaLuberWadah } from "../../../helpers/tata-letak-uji";
 
@@ -53,16 +54,22 @@ test.describe("Pembelian stok: daftar dan detail", () => {
     await login(page);
   });
 
-  test("HP 390 px: filter Akun kas dan Bahan baku selebar baris, dan tabel kosong tidak meluber (LT7a, LT8a)", async ({ page }) => {
+  test("HP 390 px: Akun kas dan Bahan baku selebar isi panel filter, dan tabel kosong tidak meluber (LT7a, FL1a)", async ({ page }) => {
+    // Menggantikan pemeriksaan baris filter LT8a: isiannya kini di panel samping.
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(URL_OUTLET);
     const cari = page.getByLabel("Cari supplier");
     await expect(cari).toBeVisible({ timeout: 15_000 });
-    const lebarCari = (await cari.boundingBox())!.width;
+    const panel = await bukaPanelFilter(page);
+    await page.waitForTimeout(300); // animasi masuk 260 ms (FL5a)
+    const lebarPeriode = (await panel.getByRole("group", { name: "Periode cepat" }).boundingBox())!.width;
     for (const id of ["#filter-akun-pembelian", "#filter-bahan-pembelian"]) {
       const kotak = (await page.locator(id).boundingBox())!;
-      expect(Math.abs(kotak.width - lebarCari), `${id} selebar kotak cari`).toBeLessThanOrEqual(2);
+      expect(Math.abs(kotak.width - lebarPeriode), `${id} selebar isi panel`).toBeLessThanOrEqual(2);
+      expect(kotak.x >= 0 && kotak.x + kotak.width <= 390, `${id} di dalam layar 390 px`).toBe(true);
     }
+    await page.keyboard.press("Escape");
+    await expect(panel).toBeHidden();
     await cari.fill(`tidak-ada-${Date.now()}`);
     await expect(page.getByText("Belum ada pembelian pada filter ini.")).toBeVisible({ timeout: 15_000 });
     await tanpaLuberWadah(page, "pembelian stok kosong 390 px");

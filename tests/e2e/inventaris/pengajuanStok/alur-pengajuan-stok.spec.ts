@@ -1,4 +1,5 @@
 import { test, expect, Page, Response } from "@playwright/test";
+import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../../helpers/filter-uji";
 import { bukaDenganAuth, pengajuanUjiDisetujui, type Auth } from "../../../helpers/transfer-uji";
 import { masuk } from "../../../helpers/masuk-uji";
 
@@ -232,8 +233,9 @@ test.describe("Alur tulis pengajuan stok", () => {
 
     await test.step("inbox gudang: tampil sebagai pengembalian", async () => {
       await page.goto(URL_GUDANG);
-      await page.getByRole("combobox", { name: "Filter arah" }).click();
-      await page.getByRole("option", { name: "Pengembalian" }).click();
+      const panel = await bukaPanelFilter(page);
+      await pilihanPanel(panel, "Arah", "Pengembalian").click();
+      await terapkanPanelFilter(panel);
       const baris = page.getByRole("row").filter({ hasText: nomor });
       await expect(baris).toBeVisible();
       await expect(baris.getByText("Pengembalian", { exact: true })).toBeVisible();

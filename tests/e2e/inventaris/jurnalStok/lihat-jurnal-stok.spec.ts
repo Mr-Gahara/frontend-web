@@ -1,5 +1,6 @@
 import { test, expect, Page, Response } from "@playwright/test";
 import { masuk } from "../../../helpers/masuk-uji";
+import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../../helpers/filter-uji";
 
 const URL_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/jurnalStok";
 const URL_GUDANG = "http://localhost:3000/dashboard/gudang/jurnalStok";
@@ -160,15 +161,15 @@ test.describe("Jurnal stok", () => {
     await periksaHalaman(page, await bacaHalaman(jurnal.filter(tersaring).at(-1)!));
   });
 
-  test("outlet: filter arah dikirim sebagai tipeKoreksi dan kembali ke halaman 1", async ({ page }) => {
+  test("outlet: filter arah dari panel dikirim sebagai tipeKoreksi dan kembali ke halaman 1", async ({ page }) => {
     await bukaJurnal(page, URL_OUTLET);
     const tKeluar = tungguJurnal(page, (q) => q.get("tipeKoreksi") === "Keluar" && q.get("page") === "1");
-    // Pemicu berlabel "Arah", tanpa ikon corong (CV15a).
-    const pemicuArah = page.getByRole("combobox", { name: "Arah", exact: true });
-    await expect(pemicuArah).toHaveText("Semua Arah");
-    await expect(pemicuArah.locator("svg.lucide-funnel, svg.lucide-filter")).toHaveCount(0);
-    await pemicuArah.click();
-    await page.getByRole("option", { name: "Barang Keluar" }).click();
+    // Arah kini segmen berlabel di panel (FL10a, menggantikan pemicu CV15a).
+    const panel = await bukaPanelFilter(page);
+    await expect(pilihanPanel(panel, "Arah", "Semua")).toHaveAttribute("aria-pressed", "true");
+    await pilihanPanel(panel, "Arah", "Barang Keluar").click();
+    await terapkanPanelFilter(panel);
+    await expect(page.getByRole("button", { name: "Hapus filter Arah: Barang Keluar" })).toBeVisible();
 
     const halaman = await bacaHalaman(await tKeluar);
     expect(halaman.data.every((j) => j.tipeKoreksi === "Keluar")).toBe(true);
@@ -178,8 +179,9 @@ test.describe("Jurnal stok", () => {
   test("outlet: filter alasan dikirim ke server", async ({ page }) => {
     await bukaJurnal(page, URL_OUTLET);
     const tAlasan = tungguJurnal(page, (q) => q.get("alasan") === "Stok Opname" && q.get("page") === "1");
-    await page.getByText("Semua Alasan", { exact: true }).click();
-    await page.getByRole("option", { name: "Stok Opname" }).click();
+    const panel = await bukaPanelFilter(page);
+    await pilihanPanel(panel, "Alasan", "Stok Opname").click();
+    await terapkanPanelFilter(panel);
 
     const halaman = await bacaHalaman(await tAlasan);
     expect(halaman.data.every((j) => j.alasan === "Stok Opname")).toBe(true);
@@ -190,15 +192,16 @@ test.describe("Jurnal stok", () => {
     await bukaJurnal(page, URL_OUTLET);
     for (const alasan of ["Pembelian", "Penjualan"]) {
       const t = tungguJurnal(page, (q) => q.get("alasan") === alasan && q.get("page") === "1");
-      await page.getByRole("combobox", { name: "Alasan", exact: true }).click();
-      await page.getByRole("option", { name: alasan, exact: true }).click();
+      const panel = await bukaPanelFilter(page);
+      await pilihanPanel(panel, "Alasan", alasan).click();
+      await terapkanPanelFilter(panel);
       const halaman = await bacaHalaman(await t);
       expect(halaman.data.every((j) => j.alasan === alasan), `seluruh baris beralasan ${alasan}`).toBe(true);
       await periksaHalaman(page, halaman);
     }
   });
 
-  test("outlet: pencarian nama bahan dikirim ke server dan dikosongkan Reset Filter (B108)", async ({ page }) => {
+  test("outlet: pencarian nama bahan di bilah dikirim ke server, dan mengosongkannya kembali ke daftar awal (B108, FL1a)", async ({ page }) => {
     const awal = await bukaJurnal(page, URL_OUTLET);
     const kata = awal.data.map(namaBahan).find(Boolean);
     test.skip(!kata, "Belum ada jurnal outlet bulan ini dengan bahan yang masih ada");
@@ -210,29 +213,32 @@ test.describe("Jurnal stok", () => {
     expect(hasil.data.every((j) => namaBahan(j).toLowerCase().includes(kata!.toLowerCase()))).toBe(true);
     await periksaHalaman(page, hasil);
 
-    await page.getByRole("button", { name: "Reset Filter" }).click();
-    await expect(page.getByLabel("Cari bahan")).toHaveValue("");
+    await page.getByLabel("Cari bahan").fill("");
     await expect(page.getByText(awal.pagination.total + " total data", { exact: true })).toBeVisible();
   });
 
-  test("outlet: periode dikirim sebagai tanggal YYYY-MM-DD, dan Reset Filter mengembalikan bulan berjalan", async ({ page }) => {
+  test("outlet: periode dari panel dikirim sebagai tanggal YYYY-MM-DD, dan Atur ulang semua mengembalikan bulan berjalan (FL11a)", async ({ page }) => {
     const hari = Math.min(kini.getDate(), 15);
     test.skip(hari < 8, "Awal bulan: tanggal uji 8 sampai 15 belum lewat");
     const awal = await bukaJurnal(page, URL_OUTLET);
     const dari = awalanBulan + String(hari).padStart(2, "0");
 
+    await expect(page.getByRole("group", { name: "Filter aktif" }), "periode bawaan tanpa pil").toBeHidden();
     const tDari = tungguJurnal(page, (q) => q.get("dari") === dari && q.get("sampai") === HARI_INI);
-    await page.getByRole("button", { name: /^Dari tanggal, / }).click();
+    let panel = await bukaPanelFilter(page);
+    await panel.getByRole("button", { name: /^Dari tanggal, / }).click();
     await page.getByRole("grid").getByText(String(hari), { exact: true }).click();
     await expect(page.getByRole("grid")).toHaveCount(0);
+    await terapkanPanelFilter(panel);
     const periode = await bacaHalaman(await tDari);
     expect(periode.query.get("page")).toBe("1");
     expect(periode.pagination.total).toBeLessThanOrEqual(awal.pagination.total);
     await periksaHalaman(page, periode);
 
-    await page.getByRole("button", { name: "Reset Filter" }).click();
-    await expect(page.getByRole("button", { name: /^Dari tanggal, 01 / })).toBeVisible();
+    await page.getByRole("button", { name: "Atur ulang semua" }).click();
     await expect(page.getByText(`${awal.pagination.total} total data`, { exact: true })).toBeVisible();
+    panel = await bukaPanelFilter(page);
+    await expect(panel.getByRole("button", { name: /^Dari tanggal, 01 / })).toBeVisible();
   });
 
   test("outlet: menu titik tiga membuka rincian jurnal beserta pencatatnya (J-A)", async ({ page }) => {

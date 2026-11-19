@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useMemo, type ReactNode } from "react";
+import { BilahFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihanPil } from "@/components/filter/panel-filter";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
 import { useRouter } from "next/navigation";
 import { StockOpname, StatusOpname } from "@/types/stockOpname";
 import type { LingkupLokasi } from "@/features/inventaris/cakupan";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useHalamanStockOpname } from "./hooks";
-import { PANJANG_CARI_OPNAME, paramHalamanOpname } from "./filter";
+import { OPSI_STATUS_OPNAME, PANJANG_CARI_OPNAME, paramHalamanOpname, pilFilterOpname } from "./filter";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
@@ -14,20 +17,10 @@ import { id as localeID } from "date-fns/locale";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   ClipboardCheck,
   Plus,
   Eye,
-  RotateCcw,
-  Search,
 } from "lucide-react";
 
 const PILIHAN_UKURAN = [10, 20, 50] as const;
@@ -126,10 +119,7 @@ export default function HalamanDaftarStockOpname({
   const opnameList = useMemo(() => data?.data ?? [], [data]);
   const isLoading = memuatOpname || memuatLingkup;
 
-  const handleResetFilter = () => {
-    setStatusFilter("ALL");
-    setCari("");
-  };
+  const panel = usePanelFilter<StatusOpname | "ALL">({ terapan: statusFilter, bawaan: "ALL", onTerapkan: setStatusFilter });
 
   // --- COLUMNS DEFINITION ---
   const columns = useMemo<ColumnDef<StockOpname>[]>(
@@ -236,90 +226,37 @@ export default function HalamanDaftarStockOpname({
 
       {penghalang}
 
-      {/* FILTER SECTION */}
-      <div className="rounded-2xl border border-navy/10 bg-krem p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row gap-4 items-end">
-        {pemilihLokasi}
-        <div className="space-y-1.5 w-full sm:w-64">
-          <label className="text-kecil font-bold text-navy">
-            Filter Status
-          </label>
-          <Select
-            value={statusFilter}
-            onValueChange={(val) =>
-              setStatusFilter(val as StatusOpname | "ALL")
-            }
-          >
-            <SelectTrigger className="cursor-pointer w-full bg-gading border-navy/20 text-navy font-bold">
-              <SelectValue placeholder="Semua Status" />
-            </SelectTrigger>
-            <SelectContent className="bg-gading border-navy/10 text-navy">
-              <SelectItem
-                value="ALL"
-                className="cursor-pointer font-bold hover:bg-navy/5"
-              >
-                Semua Status
-              </SelectItem>
-              <SelectItem
-                value="DRAFT"
-                className="cursor-pointer font-bold hover:bg-navy/5"
-              >
-                Draft
-              </SelectItem>
-              <SelectItem
-                value="SUBMITTED"
-                className="cursor-pointer font-bold hover:bg-navy/5"
-              >
-                Menunggu Review
-              </SelectItem>
-              <SelectItem
-                value="APPROVED"
-                className="cursor-pointer font-bold hover:bg-navy/5"
-              >
-                Disetujui
-              </SelectItem>
-              <SelectItem
-                value="REJECTED"
-                className="cursor-pointer font-bold hover:bg-navy/5"
-              >
-                Ditolak
-              </SelectItem>
-              <SelectItem
-                value="CANCELLED"
-                className="cursor-pointer font-bold hover:bg-navy/5"
-              >
-                Dibatalkan
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5 w-full sm:w-64">
-          <label htmlFor={`cari-opname-${ruang}`} className="text-kecil font-bold text-navy">
-            Cari No. Opname
-          </label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-navy/40" />
-            <Input
-              id={`cari-opname-${ruang}`}
-              type="search"
-              placeholder="Cari no. opname..."
-              value={cari}
-              onChange={(e) => setCari(e.target.value)}
-              maxLength={PANJANG_CARI_OPNAME}
-              className="h-10 pl-9 bg-gading border-navy/20 text-navy"
-            />
-          </div>
-        </div>
-
-        <Button
-          variant="outline"
-          onClick={handleResetFilter}
-          className="cursor-pointer shrink-0 border-navy/20 text-navy hover:bg-navy/5 font-bold shadow-sm h-10 w-full sm:w-auto"
-        >
-          <RotateCcw className="h-4 w-4 mr-2 sm:mr-0" />
-          <span className="sm:hidden">Reset Filter</span>
-        </Button>
-      </div>
+      {pemilihLokasi}
+      <BilahFilter
+        cari={{
+          id: `cari-opname-${ruang}`,
+          label: "Cari No. Opname",
+          placeholder: "Cari no. opname...",
+          value: cari,
+          onChange: (v) => setCari(v.slice(0, PANJANG_CARI_OPNAME)),
+        }}
+        jumlahAktif={statusFilter === "ALL" ? 0 : 1}
+        onBukaFilter={panel.buka}
+        filterTerbuka={panel.terbuka}
+        pil={pilFilterOpname(statusFilter, setStatusFilter)}
+        onAturUlangSemua={() => setStatusFilter("ALL")}
+      />
+      <PanelFilter
+        terbuka={panel.terbuka}
+        onTerbukaBerubah={panel.ubahTerbuka}
+        jumlahAktif={panel.draf === "ALL" ? 0 : 1}
+        onTerapkan={panel.terapkan}
+        onAturUlang={panel.aturUlang}
+      >
+        <KelompokFilter judul="Status">
+          <PilihanPil
+            label="Status"
+            nilai={panel.draf === "ALL" ? undefined : panel.draf}
+            opsi={OPSI_STATUS_OPNAME}
+            onUbah={(status) => panel.setDraf(status ?? "ALL")}
+          />
+        </KelompokFilter>
+      </PanelFilter>
 
       {/* DATA TABLE SECTION */}
       <div className="w-full">
