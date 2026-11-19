@@ -570,10 +570,22 @@ Alasan, kini segmen dan pil berlabel kelompok), LT3a (baris filter
 Pengajuan Stok), dan LT8a (Akun kas dan Bahan baku Pembelian Stok selebar
 baris di HP, kini selebar isi panel; skenario 390 px-nya diganti pemeriksaan
 panel). Halaman yang menonaktifkan filter selama ada penghalang memakai prop
-`nonaktif` di `BilahFilter`. Pencarian tidak lagi dikosongkan Reset Filter:
-kotak cari berdiri sendiri, dan Atur ulang semua hanya mengembalikan isian
-panel. Di Arus Kas, Atur ulang semua tidak mengubah Kelompokkan per,
-sedangkan Reset Filter lama ikut mengembalikannya ke Hari (FL8a).
+`nonaktif` di `BilahFilter`.
+
+Empat perilaku berikut diterapkan lebih dulu tanpa disebut opsi, diakui di
+laporan, lalu diputuskan pemilik proyek pada hari yang sama:
+
+- **FL16a: Atur ulang semua tidak mengosongkan kotak cari.** Kotak cari
+  berdiri sendiri di bilah; Reset Filter lama di Jurnal Stok, Pembelian
+  Stok, Belanja Stok, dan Stock Opname ikut mengosongkannya. Nomor
+  referensi Penjualan berlaku sendiri 400 ms setelah diketik.
+- **FL17a: Atur ulang semua Arus Kas tidak mengubah Kelompokkan per**
+  (sebelumnya ikut kembali ke Hari).
+- **FL18a: Saringan status Membership tetap segmen di halaman** seperti
+  tab, dan Lokasi penerima Belanja Stok tetap Select di panel, karena
+  bukan pemilih outlet lintas izin (FL13a).
+- **FL19a: tombol Reset Filter di pesan riwayat kosong Mesin Kasir
+  dibiarkan** (kembali ke tujuh hari terakhir).
 
 - **FL14a: kotak cari Diskon pindah ke bilah.** Koreksi fakta: Diskon
   ternyata punya pencarian nama lewat `searchKey` DataTable, sehingga
@@ -586,7 +598,7 @@ sedangkan Reset Filter lama ikut mengembalikannya ke Hari (FL8a).
   Aset, Tarif, Tipe Aset, Inventaris Gudang, Kirim Barang, daftar surat
   jalan, Penerimaan, Pola Roster, Stock Adjustment, Jadwal, Membership)
   memakai `KotakCari` di tempatnya. Segmen Saringan status Membership
-  diperlakukan seperti tab dan tidak diubah (FL6a).
+  diperlakukan seperti tab dan tidak diubah (FL18a).
 
 Filter Aset dihapus dari layout Reservasi (FL9a), sehingga Buat Reservasi
 Baru sendirian di kepala layout dan selebar penuh di HP (TK2a); bagian

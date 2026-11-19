@@ -31,6 +31,10 @@ tanpa OTP; spec dijalankan per kelompok:
   pengaturan: 42 berkas, 343 lolos dan 1 dilewati dari 344 (skip bersyarat
   dialog batal surat jalan).
 
+Satu run vitest sesudah percontohan Penjualan gagal 3 dari 1169 tepat
+setelah Playwright, lalu dua run berikutnya tanpa perubahan kode lolos
+seluruhnya; nama test yang gagal tidak tercatat, sehingga penyebabnya belum
+diketahui (pola "Gagal tepat setelah perubahan kode, lalu hilang").
 Helper `tests/helpers/filter-uji.ts` (`bukaPanelFilter`,
 `terapkanPanelFilter`, `pilihanPanel`). Spec yang memakai `URL` sebagai
 konstanta halaman memanggil `new globalThis.URL` (mesin-kasir). Harapan suite
