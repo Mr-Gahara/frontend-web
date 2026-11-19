@@ -162,6 +162,19 @@ tidak sekarang:
    dikerjakan sekarang atas perintah pemilik proyek
    (`referensi/utang-pengujian.md`).
 
+### Berikutnya, dicatat 19 November 2026
+
+Dicatat pemilik proyek sesudah laman utama (LU1a sampai LU5a), dikerjakan
+pada sesi berikutnya:
+
+1. **Revisi tata letak dan UI laman profil pengguna**
+   (`/dashboard/profil`, `features/pengguna/halaman-profil.tsx`). Arah
+   revisinya perlu keputusan dan desain pemilik proyek.
+2. **Revisi UI menu popup profil pengguna di kaki sidebar**: menu yang
+   terbuka saat menekan profil pengguna di bagian paling bawah sidebar
+   (`components/sidebar-pengguna.tsx`). Arah revisinya perlu keputusan
+   dan desain pemilik proyek.
+
 ### Menunggu pemilik proyek, dicatat 14 November 2026
 
 Dilanjutkan nanti atas perintah pemilik proyek, tidak sekarang:
