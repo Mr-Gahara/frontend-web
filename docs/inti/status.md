@@ -148,6 +148,12 @@ tidak sekarang:
    640 px dan 32 px di HP, selebar penuh di HP, termasuk tombol form dan
    tetangga sebaris; sekaligus tailwind-merge mengenal token ukuran huruf
    (`modul/ui-ux.md`, TK1a sampai TK6a).
+6. **Filter seragam**: selesai 19 November 2026 dari kanvas desain "Popup
+   Filter" (gabungan desain A, B, dan C): bilah kotak cari dan Filter
+   lainnya berlencana, pil aktif, dan panel samping beranimasi di 16 laman
+   berfilter; kotak cari seragam di halaman hanya-cari; Filter Aset
+   Reservasi dihapus (`modul/ui-ux.md`, FL1a sampai FL15a). Suite e2e
+   penuh sesudahnya harapan 676, menunggu izin pemilik proyek.
 
 ### Menunggu pemilik proyek, dicatat 14 November 2026
 

@@ -12,6 +12,32 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per filter seragam** (19 November 2026, FL1a sampai FL15a,
+backend `ridho` lokal `2790fc7`): vitest 1187 lolos (26 unit test baru:
+`lib/filter.ts` dan pil serta lencana per modul). Tanpa suite penuh dan
+tanpa OTP; spec dijalankan per kelompok:
+
+- Penjualan: `daftar-penjualan` 9 lolos, dengan `--repeat-each 2` 18
+  lolos (tiga skenario baru: panel, draf dibuang tanpa Terapkan, pil;
+  kotak cari; panel layar penuh 390 px).
+- Keuangan: pengeluaran (skenario baru Select di dalam panel), mutasi kas,
+  pindah dana, arus kas, belanja stok, mesin kasir (skenario baru riwayat),
+  tampilan HP, dan daftar penjualan 43 lolos bersama.
+- Inventaris: folder pembelian stok, jurnal stok, pengajuan stok,
+  `lihat-stok-opname`, dan gudang 73 lolos bersama; skenario LT8a 390 px
+  diganti pemeriksaan Select selebar isi panel.
+- Diskon 12, Master Shift 15, dan admin 22 lolos.
+- Halaman hanya-cari, Reservasi, jadwal, pelanggan, pengguna, dan
+  pengaturan: 42 berkas, 343 lolos dan 1 dilewati dari 344 (skip bersyarat
+  dialog batal surat jalan).
+
+Helper `tests/helpers/filter-uji.ts` (`bukaPanelFilter`,
+`terapkanPanelFilter`, `pilihanPanel`). Spec yang memakai `URL` sebagai
+konstanta halaman memanggil `new globalThis.URL` (mesin-kasir). Harapan suite
+penuh berikutnya 676 (`npx playwright test --list`): 671 ditambah lima
+skenario baru (tiga Penjualan, satu Pengeluaran, satu Mesin Kasir);
+skenario lain ditulis ulang ke alur panel tanpa mengubah jumlah.
+
 **Baseline per ukuran tombol aksi** (19 November 2026, TK1a sampai
 TK6a, backend `ridho` lokal `2790fc7`): vitest 1161 lolos. Tanpa suite
 penuh dan tanpa OTP; 50 berkas spec terdampak (tombol dan teks yang
