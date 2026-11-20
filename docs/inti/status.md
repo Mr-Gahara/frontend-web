@@ -76,6 +76,10 @@ e2e penuh ditunda sampai seluruh pekerjaan selesai** (pemilik proyek,
 
 Laporan backend 186 sampai 188 (`kontrak/temuan.md`) sudah diberikan ke
 pemilik proyek; pembuktian web menyusul bila backend memperbaikinya.
+Butir 189 (satuan kemasan seperti pak tidak dapat dipakai sebagian di
+resep; temuan pemilik proyek 20 November 2026) dicatat dan laporannya
+disusun hari yang sama; solusinya menunggu keputusan pemilik proyek
+bersama tim backend (`modul/produk-kategori.md`).
 
 Keadaan per 16 November 2026: backend lokal `ridho` `4a19be8`, sama
 dengan remote, 29 commit di atas `d6709a1` (Nizar K-08 sampai K-10,

@@ -63,6 +63,21 @@ Diputuskan pemilik proyek 18 November 2026
   agar diisi ulang. Produk baru beresep tampil 0 (`4dc08e2`). Opsi
   lainnya: dibiarkan 0.
 
+### Temuan satuan kemasan di resep (butir 189)
+
+Dicatat 20 November 2026 atas temuan pemilik proyek, belum diputuskan
+solusinya. Contoh: susu kental manis dibeli per pak berisi 12 kaleng,
+dan bahan baku dicatat bersatuan pak. Resep produk yang hanya memakai
+beberapa ml atau gram dari satu kaleng tidak dapat ditulis wajar, karena
+satuan resep bahan pak hanya pak (`availableUnits`, tanpa konversi untuk
+pcs, pak, dan unit). Satu-satunya jalan saat ini pecahan pak (sekitar
+0,009 pak untuk 40 g dari 12 kaleng 370 g), yang juga membuat stok
+terhitung produk dan pemotongan stok penjualan berupa pecahan pak.
+Solusinya menyangkut model data bahan baku, resep, pembelian, dan stok di
+backend, sehingga dilaporkan ke backend (`kontrak/temuan.md` butir 189)
+dan diputuskan pemilik proyek bersama tim backend; web menyesuaikan form
+bahan baku, resep, dan pembelian setelah arahnya ditetapkan.
+
 ## Catatan
 
 ### Catatan dari utang kecil modul produk dan pemformat rupiah

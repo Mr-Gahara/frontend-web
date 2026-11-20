@@ -323,6 +323,16 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   tanpa menahan toko lama untuk Yoga, booking yang membaca jam per hari
   untuk Nizar, serta pemakaian jam buka di shift dan jadwal sebagai
   keputusan yang ditunggu.
+- Laporan 20 November 2026, disusun atas perintah pemilik proyek untuk
+  Ridho dan diberikan ke pemilik proyek: sesi booking di detail
+  penjualan (`kontrak/temuan.md` butir 186), staf izin tanpa lokasi kerja
+  di monitoring absensi (butir 187), dan pembangkit daftar route backend
+  (butir 188).
+- Laporan satuan kemasan di resep, disusun 20 November 2026 atas temuan
+  pemilik proyek untuk Ridho dan diberikan ke pemilik proyek
+  (`kontrak/temuan.md` butir 189): bahan yang
+  dibeli per pak atau dus tidak dapat dipakai sebagian di resep, beserta
+  tiga arah solusi untuk diputuskan bersama.
 
 Cakupan laporan Fase 2: `pin-refresh` 500 tanpa body, `GET /shift`
 500, validator pola roster, hapus pengguna, field yang dipakai service tetapi
