@@ -23,6 +23,15 @@ export function useDaftarTransfer(filter: FilterTransfer, halaman: number, ukura
   });
 }
 
+/** Satu transfer untuk dialog rincian; tidak dimuat selama id null. */
+export function useDetailTransfer(id: string | null) {
+  return useQuery({
+    queryKey: queryKeys.jurnalTransfer.detail(id ?? ""),
+    queryFn: () => jurnalTransferApi.detail(id as string),
+    enabled: id !== null,
+  });
+}
+
 /**
  * Transfer mengubah saldo kedua akun dan menulis dua baris buku mutasi,
  * sehingga akar akunKas ikut diinvalidasi bersama akar jurnalTransfer

@@ -1,6 +1,7 @@
 import { formatRupiah } from "@/lib/format";
 import { labelPilPeriode, rentangSama, type PilFilter } from "@/lib/filter";
 import { keTanggalLokal } from "@/lib/waktu";
+import { urlRincianTransfer } from "@/features/jurnal-transfer/payload";
 import type { AkunKas, ArahMutasi, JenisMutasi, MutasiKas } from "@/types/akunKas";
 
 /** Filter halaman mutasi. Teks kosong berarti tidak disaring. */
@@ -126,6 +127,22 @@ export function tautanPenjualanMutasi(mutasi: Pick<MutasiKas, "referensi">): { u
   const id = mutasi.referensi.penjualanID;
   if (!id) return null;
   return { url: `/dashboard/outlet/penjualan/${id}`, teks: mutasi.referensi.noReferensi || "Lihat penjualan" };
+}
+
+/**
+ * Tautan ke rincian transfer di Pindah Dana untuk mutasi transfer dan
+ * pembatalannya: keempat jenis itu membawa referensi JurnalTransfer dengan
+ * id transfernya (jurnalTransferService backend). Null bila pengguna tidak
+ * memegang read-jurnal-transfer, karena rinciannya dibaca lewat
+ * GET /jurnaltransfer/:id.
+ */
+export function tautanTransferMutasi(
+  mutasi: Pick<MutasiKas, "referensi">,
+  bolehBacaTransfer: boolean,
+): { url: string; teks: string } | null {
+  const { tipe, id } = mutasi.referensi;
+  if (!bolehBacaTransfer || tipe !== "JurnalTransfer" || !id) return null;
+  return { url: urlRincianTransfer(id), teks: "Lihat transfer" };
 }
 
 export function teksJumlahMutasi(mutasi: Pick<MutasiKas, "arah" | "jumlah">): string {

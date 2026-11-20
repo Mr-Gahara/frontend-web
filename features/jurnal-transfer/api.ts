@@ -15,6 +15,7 @@ export const jurnalTransferApi = {
     const hasil = await api.get<JurnalTransfer[]>(EP.jurnalTransfer, params);
     return { data: hasil.data, pagination: hasil.pagination ?? null };
   },
+  detail: (id: string) => apiData.get<JurnalTransfer>(EP.jurnalTransferById(id)),
   buat: (payload: PayloadBuatTransfer) =>
     apiData.post<JurnalTransfer>(EP.jurnalTransfer, payload),
   /** Tidak ada DELETE: transfer dibatalkan lewat PUT berstatus VOID. */

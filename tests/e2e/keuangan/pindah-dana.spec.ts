@@ -19,6 +19,8 @@ const URL_AKUN = "/dashboard/outlet/keuangan/akunkas";
 const URL_PINDAH = URL_AKUN + "/pindahDana";
 const POLA_TRANSFER = /\/api\/jurnaltransfer(\?|$)/i;
 const POLA_TRANSFER_ID = /\/api\/jurnaltransfer\/[a-f0-9]{24}(\?|$)/i;
+const URL_MUTASI = "/dashboard/outlet/keuangan/mutasiArusKas";
+const POLA_MUTASI = /\/api\/akunkas\/mutasi(\?|$)/i;
 
 test.describe("pindah dana", () => {
   test.beforeEach(async ({ page }) => {
@@ -102,6 +104,41 @@ test.describe("pindah dana", () => {
 
       expect(await saldoAkun(page, auth, idTujuan), "saldo tujuan pulih").toBe(0);
       expect(await saldoAkun(page, auth, akunSumber.id), "saldo sumber pulih").toBe(saldoSumberAwal);
+
+      // Rincian mutasi transfer bertaut ke rincian transfernya di Pindah Dana
+      // (pemilik proyek, 20 November 2026). Mutasi terbaru di halaman pertama.
+      const tMutasi = page.waitForResponse(
+        (r) => r.request().method() === "GET" && POLA_MUTASI.test(r.url()) && new URL(r.url()).searchParams.get("page") === "1",
+      );
+      await page.goto(URL_MUTASI);
+      const mutasi = (await (await tMutasi).json()) as {
+        data: { jenis: string; referensi: { tipe: string | null; id: string | null } }[];
+      };
+      const i = mutasi.data.findIndex((m) => m.jenis === "VOID_TRANSFER_MASUK" && m.referensi.id === idTransfer);
+      expect(i, "mutasi pembatalan transfer uji ada di halaman pertama").toBeGreaterThanOrEqual(0);
+      await expect(page.locator("tbody tr")).toHaveCount(mutasi.data.length, { timeout: 15_000 });
+      await page.locator("tbody tr").nth(i).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: "Lihat detail" }).click();
+      const rincianMutasi = page.getByRole("dialog");
+      await expect(rincianMutasi).toContainText("Transfer terkait");
+      const tDetail = page.waitForResponse(
+        (r) => r.request().method() === "GET" && POLA_TRANSFER_ID.test(r.url()),
+      );
+      await rincianMutasi.getByRole("link", { name: "Lihat transfer" }).click();
+      await page.waitForURL(new RegExp(`/pindahDana\\?transfer=${idTransfer}$`));
+      const detail = await tDetail;
+      expect(detail.status(), "GET /jurnaltransfer/:id").toBe(200);
+      expect(new URL(detail.url()).pathname).toBe(`/api/jurnaltransfer/${idTransfer}`);
+      const rincian = page.getByRole("dialog");
+      await expect(rincian.getByRole("heading", { name: "Rincian Transfer" })).toBeVisible();
+      await expect(rincian).toContainText(akunSumber.namaAkun);
+      await expect(rincian).toContainText(namaTujuan);
+      await expect(rincian).toContainText(keterangan);
+      await expect(rincian).toContainText("Dibatalkan");
+      await expect(rincian).toContainText(alasan);
+      await page.keyboard.press("Escape");
+      await expect(rincian).toBeHidden();
+      await expect(page).toHaveURL(new RegExp(`${URL_PINDAH}$`));
     } finally {
       if (idTransfer && !dibatalkan) {
         const void_ = await api(page, auth, "PUT", "/jurnaltransfer/" + idTransfer, { status: "VOID" });

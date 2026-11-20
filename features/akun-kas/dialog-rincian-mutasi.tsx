@@ -10,6 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { aksiTransfer } from "@/features/jurnal-transfer/izin";
+import { useSession } from "@/lib/auth/useSession";
 import { formatRupiah, formatTanggal, formatTanggalPendek } from "@/lib/format";
 import type { MutasiKas } from "@/types/akunKas";
 import {
@@ -17,6 +19,7 @@ import {
   namaPencatat,
   tanggalTransaksiBerbeda,
   tautanPenjualanMutasi,
+  tautanTransferMutasi,
   teksJumlahMutasi,
 } from "./mutasi";
 
@@ -34,7 +37,14 @@ function BarisRincian({ label, nilai }: { label: string; nilai: string }) {
 function IsiRincian({ mutasi, namaAkun }: { mutasi: MutasiKas; namaAkun: string }) {
   const masuk = mutasi.arah === "MASUK";
   const Ikon = masuk ? ArrowDownLeft : ArrowUpRight;
-  const tautan = tautanPenjualanMutasi(mutasi);
+  const { permissions } = useSession();
+  const tautanJual = tautanPenjualanMutasi(mutasi);
+  const tautanTransfer = tautanTransferMutasi(mutasi, aksiTransfer(permissions).baca);
+  const tautan = tautanJual
+    ? { ...tautanJual, judul: "Penjualan terkait" }
+    : tautanTransfer
+      ? { ...tautanTransfer, judul: "Transfer terkait" }
+      : null;
   return (
     <>
       <DialogHeader className="flex-row items-center gap-3 pr-8 text-left">
@@ -94,7 +104,7 @@ function IsiRincian({ mutasi, namaAkun }: { mutasi: MutasiKas; namaAkun: string 
 
       {tautan && (
         <div className="flex flex-col gap-1.5">
-          <p className={KELAS_LABEL}>Penjualan terkait</p>
+          <p className={KELAS_LABEL}>{tautan.judul}</p>
           <Link
             href={tautan.url}
             className="flex items-center justify-between gap-3 rounded-xl bg-navy px-4 py-3 text-isi font-bold text-gading hover:bg-navy/90"
@@ -111,7 +121,7 @@ function IsiRincian({ mutasi, namaAkun }: { mutasi: MutasiKas; namaAkun: string 
 /**
  * Rincian satu baris mutasi, dibuka dari menu titik tiga di tabel. Kolom
  * yang tidak muat di tabel (saldo, pencatat, keterangan utuh, dan tautan
- * penjualan, keputusan NZ2a) ditampilkan di sini, agar tabel tidak digeser
+ * penjualan atau transfer, keputusan NZ2a) ditampilkan di sini, agar tabel tidak digeser
  * ke samping. mutasi null berarti dialog tertutup.
  */
 export function DialogRincianMutasi({

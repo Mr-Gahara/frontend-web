@@ -122,29 +122,34 @@ test.describe("Mutasi arus kas", () => {
     const kini = new Date();
     const tanggal = (hari: number) => new Date(kini.getFullYear(), kini.getMonth(), hari);
     const awalBulan = tanggal(1).toISOString();
-    const akhir20 = new Date(kini.getFullYear(), kini.getMonth(), 20, 23, 59, 59, 999).toISOString();
+    // Hari yang dipilih tidak boleh hari ini: "sampai" bawaannya hari ini, dan
+    // mengeklik tanggal terpilih membatalkan pilihan sehingga kalender tetap
+    // terbuka (gagal pada 20 November 2026). Keduanya juga tidak pernah tampil
+    // sebagai hari bulan lain di kalender (16 ke atas, 21 ke bawah).
+    const hariDari = kini.getDate() === 15 ? 16 : 15;
+    const hariSampai = kini.getDate() === 20 ? 21 : 20;
+    const akhirSampai = new Date(kini.getFullYear(), kini.getMonth(), hariSampai, 23, 59, 59, 999).toISOString();
 
     // Periode bawaan tidak dihitung dan tidak menjadi pil (FL11a).
     await expect(page.getByRole("button", { name: "Filter lainnya", exact: true })).toBeVisible();
     await expect(page.getByRole("group", { name: "Filter aktif" })).toBeHidden();
 
-    // Tanggal 15 dan 20 tidak pernah tampil sebagai hari bulan lain di kalender.
     // "Sampai" diisi lebih dulu, karena "dari" tidak boleh melewati "sampai".
     let panel = await bukaPanelFilter(page);
     await panel.getByRole("button", { name: /^Dicatat sampai, / }).click();
-    await page.getByRole("grid").getByText("20", { exact: true }).click();
+    await page.getByRole("grid").getByText(String(hariSampai), { exact: true }).click();
     await expect(page.getByRole("grid")).toHaveCount(0);
     await panel.getByRole("button", { name: /^Dicatat dari, / }).click();
-    await page.getByRole("grid").getByText("15", { exact: true }).click();
+    await page.getByRole("grid").getByText(String(hariDari), { exact: true }).click();
     await expect(page.getByRole("grid")).toHaveCount(0);
     const tPeriode = page.waitForResponse(
-      responsMutasi((q) => q.get("dari") === tanggal(15).toISOString() && q.get("sampai") === akhir20 && q.get("page") === "1"),
+      responsMutasi((q) => q.get("dari") === tanggal(hariDari).toISOString() && q.get("sampai") === akhirSampai && q.get("page") === "1"),
     );
     await terapkanPanelFilter(panel);
     expect((await tPeriode).status()).toBe(200);
     expect(awalBulan, "periode bawaan dari awal bulan").toBe(tanggal(1).toISOString());
     const pil = page.getByRole("group", { name: "Filter aktif" });
-    await expect(pil.getByRole("button", { name: /^Hapus filter 15 – 20 / })).toBeVisible();
+    await expect(pil.getByRole("button", { name: new RegExp(`^Hapus filter ${hariDari} – ${hariSampai} `) })).toBeVisible();
     await expect(page.getByRole("button", { name: "Filter lainnya, 1 aktif" })).toBeVisible();
 
     // Kunci periode bawaan sudah pernah dimuat (staleTime), sehingga atur

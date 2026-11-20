@@ -11,6 +11,13 @@ import type { IsianPindahDana } from "./schema";
 
 export const URL_PINDAH_DANA = "/dashboard/outlet/keuangan/akunkas/pindahDana";
 
+/** Parameter alamat Pindah Dana yang membuka rincian satu transfer. */
+export const PARAM_TRANSFER = "transfer";
+
+/** Alamat Pindah Dana yang langsung membuka rincian transfer itu. */
+export const urlRincianTransfer = (id: string) =>
+  `${URL_PINDAH_DANA}?${PARAM_TRANSFER}=${encodeURIComponent(id)}`;
+
 export const ISIAN_AWAL_PINDAH_DANA: IsianPindahDana = {
   kasSumberID: "",
   kasTujuanID: "",

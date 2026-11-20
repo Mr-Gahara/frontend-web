@@ -1,8 +1,9 @@
 "use client";
 
 import { TeksDuaBaris } from "@/components/ui/teks-dua-baris";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowLeftRight, MoreHorizontal } from "lucide-react";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -41,12 +42,14 @@ import { cn } from "@/lib/utils";
 import type { AkunKas } from "@/types/akunKas";
 import type { JurnalTransfer } from "@/types/jurnalTransfer";
 import { DialogBatalTransfer } from "./dialog-batal-transfer";
+import { DialogRincianTransfer } from "./dialog-rincian-transfer";
 import { useBuatTransfer, useDaftarTransfer } from "./hooks";
 import { aksiTransfer } from "./izin";
 import {
   FILTER_AWAL_TRANSFER,
   ISIAN_AWAL_PINDAH_DANA,
   LABEL_STATUS_TRANSFER,
+  PARAM_TRANSFER,
   jumlahFilterTransfer,
   namaAkunTransfer,
   pilFilterTransfer,
@@ -78,6 +81,15 @@ function Keadaan({ judul, isi }: { judul: string; isi: string }) {
  * read-jurnal-transfer, dan Batalkan bagi update-jurnal-transfer.
  */
 export function HalamanPindahDana() {
+  return (
+    <Suspense fallback={null}>
+      <IsiPindahDana />
+    </Suspense>
+  );
+}
+
+/** useSearchParams (?transfer=) membutuhkan batas Suspense agar halaman tetap dapat dirender statis. */
+function IsiPindahDana() {
   const { permissions } = useSession();
   const aksi = aksiTransfer(permissions);
   const akunKas = useDaftarAkunKas();
@@ -304,6 +316,9 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
   const [ukuran, setUkuran] = useState<number>(UKURAN_MUTASI_BAWAAN);
   const [dibatalkan, setDibatalkan] = useState<JurnalTransfer | null>(null);
   const daftar = useDaftarTransfer(filter, halaman, ukuran);
+  const router = useRouter();
+  const pathname = usePathname();
+  const dirinci = useSearchParams().get(PARAM_TRANSFER);
 
   const ubahFilter = (baru: FilterTransfer) => {
     setFilter(baru);
@@ -507,6 +522,10 @@ function RiwayatTransfer({ akun, bolehBatal }: { akun: AkunKas[]; bolehBatal: bo
         />
       )}
 
+      <DialogRincianTransfer
+        id={dirinci}
+        onTutup={() => router.replace(pathname, { scroll: false })}
+      />
       {dibatalkan && (
         <DialogBatalTransfer transfer={dibatalkan} onTutup={() => setDibatalkan(null)} />
       )}

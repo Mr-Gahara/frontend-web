@@ -137,6 +137,7 @@ export const queryKeys = {
   jurnalTransfer: {
     semua: kunci(["jurnalTransfer"] as const),
     daftar: (params?: Filter) => ["jurnalTransfer", "daftar", params] as const,
+    detail: (id: string) => ["jurnalTransfer", "detail", id] as const,
   },
   sesiKasir: {
     semua: kunci(["sesiKasir"] as const),
