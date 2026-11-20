@@ -304,6 +304,16 @@ Diputuskan pemilik proyek pada 25 Oktober 2026, dari pratinjau desain
   403 backend tampil lewat toast yang sudah ada. Permintaannya ke Yoga
   di `kontrak/temuan.md` butir 179.
 
+- **PI1a: nama peninjau di daftar pengajuan** (pemilik proyek,
+  20 November 2026, opsi A kanvas "Penyetuju dan Sesi Booking", `680c330`).
+  "oleh <nama>" di bawah lencana kolom Status, dari `disetujuiOleh` atau
+  `ditolakOleh` (`namaPeninjau`, butir 145); tanpa baris bila belum
+  ditinjau dan tanpa kolom baru, agar Rute tidak terpotong di 1280 px.
+  Atas permintaan pemilik proyek pada hari yang sama, kartu HP daftar ini
+  memakai `kartuLega` `DataTable` (jarak antar-field 12 px, padding 16 px,
+  label berjarak dari nilai), dan di kartu HP peninjau sebaris di samping
+  lencana agar tidak berdempet.
+
 ### Submodul transfer, pengiriman, dan penerimaan
 
 Diputuskan pemilik proyek pada 21 September 2026, dengan satu prinsip yang

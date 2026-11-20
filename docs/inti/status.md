@@ -143,7 +143,13 @@ perintahnya:
    Basic, Advanced, dan Pro). Isinya dicocokkan dengan pembatasan plan
    yang berlaku (`features/langganan/data.ts`, `modul/setup-akun.md`
    PL6a) dan diputuskan pemilik proyek.
-3. **Unduh PDF, Excel, atau CSV untuk laporan dan data penting**
+3. **Kerapian spacing dan alignment seluruh laman** (pemilik proyek,
+   20 November 2026): setiap laman rapi di HP, HP mendatar, tablet, dan
+   desktop, horizontal maupun vertikal, tanpa elemen berdempet. Dimulai
+   dari daftar pengajuan stok (`kartuLega`, PI1a); pemindaian seluruh
+   rute berikutnya, dan pola bersama (misalnya `kartuLega` sebagai
+   standar semua daftar) diajukan lewat kanvas.
+4. **Unduh PDF, Excel, atau CSV untuk laporan dan data penting**
    (dicatat pemilik proyek 20 November 2026). Pemilik proyek menambahkan
    ekspor yang belum ada di backend; daftar di bawah dicocokkan dengan
    backend `2790fc7` pada 20 November 2026. Daftar mana yang dianggap
@@ -261,7 +267,8 @@ RAM, build memuncak sekitar 2 GB.
   butir 165); panel Status Staf menambah karyawan ruang menurut peran
   yang izin hari itu sampai backend memperbaikinya. Backend `916e7df`
   (B278) memuat staf yang izin hanya bila lokasi kerjanya lokasi itu,
-  sehingga tambahan web tetap untuk staf tanpa lokasi kerja.
+  sehingga tambahan web tetap untuk staf tanpa lokasi kerja. Laporan
+  lanjutan untuk tim backend disusun 20 November 2026 (butir 187).
 - Jurnal stok tetap mengirim satu `locationID` untuk Semua Outlet,
   walau backend menerima `tipeLokasi` (B109); berpengaruh hanya bila
   tenant punya lebih dari satu outlet (`kontrak/temuan.md` butir 151).
@@ -303,14 +310,19 @@ RAM, build memuncak sekitar 2 GB.
 ### Utang kecil dari penyesuaian backend `ridho` `2dd57aa`
 
 - Nama penyetuju di daftar pengajuan stok terisi sejak `7d28135` (butir
-  145); belum dipakai web.
+  145); belum dipakai web. Selesai 20 November 2026 (`modul/inventaris.md`,
+  PI1a).
 
 ### Utang kecil dari penyesuaian backend `nizar`
 
 - Booking milik sebuah penjualan belum disertakan di respons detail
-  penjualan; permintaannya ditunda (NZ9a).
+  penjualan; permintaannya ditunda (NZ9a). Laporan untuk tim backend
+  disusun 20 November 2026 atas perintah pemilik proyek (butir 186), dan
+  web memuat setiap booking lewat `GET /sesibooking/:id` sampai backend
+  menyertakannya.
 - Bagian Sesi Booking di detail penjualan memakai tata letak sederhana di
-  atas grid informasi; penempatannya menunggu fase UI/UX.
+  atas grid informasi; penempatannya menunggu fase UI/UX. Selesai
+  20 November 2026 (`modul/penjualan.md`, SB1a).
 
 ### Utang kecil dari penyesuaian backend `fc29433`
 

@@ -131,6 +131,21 @@ tiga revisi warna. Menutup VD3a.
   `tests/e2e/penjualan/tampilan-buat-penjualan.spec.ts` di 1024 dan
   1280 px, yang gagal terhadap kode lama.
 
+### Sesi Booking dan tombol detail penjualan
+
+- **SB1a: Sesi Booking bergrid di bawah Informasi** (pemilik proyek,
+  20 November 2026, opsi B kanvas "Penyetuju dan Sesi Booking",
+  `680c330`). Daftar bergrid gaya kartu Stok Keluar (Aset, Waktu, Status
+  berlencana, Aksi Tandai Selesai), sesudah Informasi Transaksi dan
+  Pelanggan, sebelum Rincian Item; di HP baris bertumpuk tanpa judul
+  kolom. Mengakhiri utang tata letak sederhana sejak penyesuaian backend
+  `nizar`.
+- **Tombol aksi detail penjualan bertumpuk di HP** (`2876fee`, ditemukan
+  saat memotret kanvas): Terima Pembayaran dan Void Penjualan sama-sama
+  selebar penuh dalam baris yang tidak turun, sehingga Void terdorong
+  keluar layar 390 px. Wadahnya kini `flex-col sm:flex-row`; diuji
+  `stok-keluar.spec.ts` sesudah finalisasi.
+
 ### Cakupan daftar penjualan
 
 Diputuskan pemilik proyek pada 18 Oktober 2026, saat RG4a diterapkan

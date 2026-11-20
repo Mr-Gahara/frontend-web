@@ -357,7 +357,9 @@ memakai halaman, jumlah halaman, dan total dari server, beserta pilihan
 "Tampilkan" bila `pilihanUkuran` diisi (`b63cf08`, daftar penjualan).
 Kaki itu komponen sendiri sejak 20 November 2026, `KakiPaginasi`
 (`components/ui/kaki-paginasi.tsx`), yang juga dipakai daftar kartu
-Penerimaan dan Pengiriman (TS2a).
+Penerimaan dan Pengiriman (TS2a). Prop `kartuLega` melonggarkan kartu
+HP (jarak antar-field 12 px, padding 16 px, jarak antarkartu 12 px, label
+berjarak dari nilai); dipakai daftar pengajuan stok (PI1a).
 Tabel semacam itu juga mengisi `urutanServer` (`UrutanServerTabel`) bila
 backend menerima urutan: pengurutan klien dimatikan (`manualSorting`), dan
 pergantian urutan diteruskan ke pemakai tabel, yang mengirimnya ke server
