@@ -10,13 +10,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 
 ## Utang pengujian
 
-- **Suite e2e penuh belum dijalankan sejak 17 November 2026** (654 lolos
-  dan 2 dilewati dari 656). Sesudahnya ukuran tombol aksi (TK1a sampai
-  TK6a), filter seragam (FL1a sampai FL19a), dan laman utama (LU1a sampai
-  LU5a) hanya dibuktikan lewat spec terdampak per berkas. Harapan suite
-  penuh berikutnya 680 (`inti/pengujian.md`, Baseline). Dicatat
-  19 November 2026 atas perintah pemilik proyek; dijalankan hanya setelah
-  pemilik proyek mengizinkan.
 - **Pemilih outlet di jurnal stok dan pembelian stok hanya berisi satu
   pilihan** di MVP satu outlet, sehingga memilih outlet tidak memicu
   permintaan baru. Kedua jalur cakupan lokasi teruji e2e sejak
@@ -197,8 +190,11 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   aktifkan yang terkunci saat batas tercapai belum teruji. Pilihan Aktif
   di form buat teruji e2e sejak `a80d2fa` (NZ5a).
 - **Keterangan khusus member dan pemilih produk tanpa izin baca produk
-  belum teruji**: web tidak dapat menandai khusus member (PD8a), dan
-  satu-satunya akun uji berperan Owner. `aksiDiskon` hanya teruji di unit
+  belum teruji**: sejak MB1a (17 November 2026) web dapat menandai khusus
+  member dan centangnya teruji di `pelanggan/membership.spec.ts`, tetapi
+  keterangan "Khusus member" di daftar dan pilihan diskon belum
+  dibuktikan e2e; pemilih produk tanpa izin baca produk tetap belum,
+  karena satu-satunya akun uji berperan Owner. `aksiDiskon` hanya teruji di unit
   test, dengan alasan yang sama.
 - **Pilihan diskon kasir hanya teruji e2e di buat reservasi**; buat
   penjualan memakai `diskonAktif` yang sama dan teruji di unit test.
@@ -319,9 +315,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (`tests/unit/features/sesi-booking/izin.test.ts`), dan bagian Sesi
   Booking tanpa `read-booking` belum teruji. Setiap run meninggalkan
   satu penjualan booking VOID.
-- **Tautan penjualan di buku mutasi bergantung pada data**: skenarionya
-  dilewati bila halaman pertama bulan berjalan tidak memuat mutasi
-  pembayaran. Baris tanpa pencatat hanya teruji di unit test.
 - **Filter periode riwayat Pindah Dana diuji dengan tanggal 15 sampai 20
   bulan berjalan**, yang hampir selalu memberi daftar kosong; isi daftar
   dalam periode tidak dibandingkan per baris.
@@ -350,10 +343,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Semua Outlet dengan beberapa outlet di jurnal stok** (meminta
   memilih satu outlet) hanya teruji di unit test (`lokasiSatuOutlet`),
   karena tenant uji punya satu outlet.
-- **Pesan lokasi gudang gagal dimuat atau belum didaftarkan di jurnal
-  stok gudang** tidak dapat diuji: layout ruang gudang menghadang lebih
-  dulu, sehingga kedua pesan itu kode mati (`modul/ui-ux.md`). Penghadangan
-  layout teruji di `lihat-jurnal-stok.spec.ts` sejak `2bcb1ce`.
 - **Kartu pengajuan dashboard gudang hanya teruji cabang tanpa
   pengajuan siap surat jalan** pada data uji sekarang; cabang klik kartu
   ke tab Perlu Surat Jalan berjalan bila ada pengajuan APPROVED atau
@@ -361,10 +350,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Template role hanya teruji pemetaan namanya** (skenario e2e template
   dan `tests/unit/lib/roleTemplates.test.ts`); role dari template belum
   dipakai untuk membuka halaman stock opname, adjustment, atau absensi.
-- **Kartu siap surat jalan dashboard gudang belum diuji dengan
-  pengembalian yang disetujui** (AR6a): kartu menghitung kedua arah,
-  sedangkan tab hanya permintaan; skenario dashboard gudang gagal dengan
-  jujur bila data uji memuat pengembalian seperti itu.
 - **Spec alur pengembalian memindahkan satu satuan stok outlet ke gudang
   per run** (`a505783`), karena surat jalan DIKIRIM tidak dapat
   dibatalkan (P12). Bila berhenti setelah disetujui dan sebelum surat
@@ -476,7 +461,12 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (`tests/unit/features/pengguna/lokasi-kerja.test.ts`), karena akun uji
   berperan Owner. Pembatasan 403 bagi staf berlokasi kerja (B270 sampai
   B274) tidak diuji web: pengguna uji tidak diberi lokasi kerja, dan
-  ruang tidak disesuaikan.
+  ruang tidak disesuaikan. Sebagian basi per 20 November 2026: staf
+  berlokasi kerja Gudang teruji e2e di `auth/ruang-lokasi-kerja.spec.ts`
+  (ruang mengikuti lokasi kerja, B339), dan staf berlokasi kerja Outlet di
+  `keuangan/mesin-kasir.spec.ts` (B346); 403 halaman stok bagi lokasi lain
+  (B270 sampai B274) tetap tidak diuji, karena ruang kini menolak lebih
+  dulu.
 - **Setujui yang disembunyikan bagi rekan selokasi pengaju (PG2a) hanya
   teruji di unit test** (`rekanSelokasiPengaju`), karena butuh pengajuan
   dari pengaju berlokasi kerja dan penyetuju berlokasi kerja sama; spec

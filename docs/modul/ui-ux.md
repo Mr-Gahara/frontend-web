@@ -604,6 +604,24 @@ Filter Aset dihapus dari layout Reservasi (FL9a), sehingga Buat Reservasi
 Baru sendirian di kepala layout dan selebar penuh di HP (TK2a); bagian
 Reservasi dari TK4a berakhir.
 
+Diputuskan pemilik proyek pada 20 November 2026 dari kanvas desain
+"Tanggal Panel Filter" (render nyata Belanja Stok di 390 dan 1280 px, jam
+dipatok 30 September 2026; papan Sekarang dan opsi A, B, C), setelah suite
+penuh menemukan isian tanggal panel meluber lewat spec `tanggal-filter`
+yang tertinggal dari FL1a. Bulan panjang ("01 September 2026", 182 sampai
+184 px) tidak muat di tombol setengah lebar panel: 171 px di HP dan 178 px
+di desktop.
+
+- **FL20a: tanggal di panel filter berbulan singkat** (opsi B, `99ecd4c`).
+  Dari dan Sampai tetap dua kolom; tombol `PilihTanggal` di `PilihanPeriode`
+  memakai `formatTeks="pendek"` ("01 Sep 2026", "15 Agt 2026", pola
+  `dd MMM yyyy` id-ID), dan nama aksesibelnya ikut pendek (pilihan pemilik
+  proyek atas pertanyaan susulan). Tombol tanggal di form lain dan pil
+  filter aktif tetap bulan panjang. Opsi lain di kanvas: A bertumpuk satu
+  kolom (muat lega, panel bertambah satu baris) dan C tombol dirapatkan
+  (padding 6 px, muat tanpa sisa di HP; padding 8 px masih luber 5 sampai
+  7 px).
+
 ### Laman utama
 
 Dikerjakan 19 November 2026 dari kanvas desain "Laman Utama Tachyon POS"

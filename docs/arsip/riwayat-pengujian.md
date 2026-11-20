@@ -15,6 +15,174 @@ Rujukan bagian di dalamnya, seperti "di bawah" dan "(Utang pengujian)",
 ditulis menurut letak lamanya di `referensi/playwright.md` dan
 `inti/pengujian.md`.
 
+Dipindah dari `inti/pengujian.md` pada 20 November 2026: baseline 16
+dan 17 November 2026, terbaru lebih dulu.
+
+**Suite penuh per penyesuaian backend `3570bd4`** (web `0dbfaba`
+ditambah spec `auth/tenggang-pin-refresh`, backend `ridho` lokal
+`3570bd4`, 17 November 2026, pukul 13.51 sampai 14.29 WIB, reporter
+`line,json`, atas perintah pemilik proyek; charger tersambung sejak
+13.54): e2e 665 lolos, 1 gagal, dan 1 dilewati dari 667, sesuai harapan
+hitungan (666 ditambah skenario masa tenggang). Yang dilewati skip
+bersyarat dialog batal surat jalan (tidak ada surat jalan Belum
+Dikirim); skip status staf tidak terjadi. Termasuk spec ber-OTP.
+Kegagalannya `dashboard/panduan-dashboard` (Setup Gudang, TG2a): tur
+gudang tidak tampil setelah Gudang kembali terbaca. Bug web, bukan spec:
+topbar memulai tur di `/dashboard/gudang` selagi penjaga ruang memuat
+lokasi, lalu pengalihan ke Setup Gudang mencatatnya sudah dilihat.
+Tereproduksi 2 dari 2 dengan respons `/location` ditunda 1,5 detik
+(spec sementara, tidak di-commit), dan lolos 2 dari 2 sesudah
+perbaikan (`modul/setup-akun.md`, TG2a). Dibuktikan lewat spec
+terdampak saja, tanpa suite penuh dan tanpa OTP: `panduan-dashboard`,
+`dashboard-gudang`, dan folder `gudang` 21 lolos. Vitest 1161 lolos (2
+unit test `kunciPanduanDashboard`). B345 dibuktikan spec baru
+`auth/tenggang-pin-refresh` (3 dari 3 dengan `--repeat-each 3`; varian
+sementara yang menunggu 31 detik gagal 401). Harapan suite penuh
+berikutnya 667.
+
+**Baseline per modul membership** (17 November 2026, MB1a sampai MB3a):
+vitest 1159 lolos (12 unit test membership, 2 unit test diskon khusus
+member). Spec baru `pelanggan/membership.spec.ts` (5 skenario: paket
+tambah, ubah, nonaktifkan, dan hapus lewat dialog; daftarkan dari
+penjualan nyata, ubah tanggal mulai, lencana laman Pelanggan, dan hapus;
+centang khusus member; HP 390 px; pengguna baca-saja) lolos 10 dari 10
+dengan `--repeat-each 2`, tanpa OTP. Data uji dibuat lewat UI dan
+dibersihkan di akhir, sehingga penjualan yang dipakai kembali tersedia.
+Folder `pelanggan`, `diskon`, `auth/gerbang-rute`, dan
+`auth/sidebar-pengguna` lolos per berkas. Harapan suite penuh 666: 661
+ditambah kelima skenario itu.
+
+**Baseline per laman Pembayaran per Metode** (17 November 2026, OM2a dan
+OM3a): vitest 1145 lolos (8 unit test `pembayaran-metode`; dua harapan
+sub-menu Laporan di `sidebar-menu-keuangan` menjadi tiga anak). Spec baru
+`keuangan/pembayaran-metode.spec.ts` (4 skenario: Bulan Ini bawaan dengan
+angka dari respons nyata, rentang Hari Ini, Minggu Ini, dan Pilih tanggal,
+gagal memuat, dan HP 390 px) lolos 12 dari 12 dengan `--repeat-each 3`,
+tanpa OTP. Bukti angka dibaca ulang lewat API dengan token sesi yang sama,
+karena isi respons halaman sesekali sudah dibuang browser saat dibaca.
+Harapan suite penuh 661: 657 ditambah keempat skenario itu.
+
+**Baseline per tur ruang gudang** (17 November 2026, TG1a dan TG2a):
+vitest 1137 lolos (2 unit test titik gudang). `panduan-dashboard`
+diperbarui: langkah gudang kini memeriksa tur gudang tampil sendiri
+sekali dengan enam titik dan kunci terpisah dari outlet, dan skenario
+baru Setup Gudang tanpa tombol dan tanpa tur (satu `// simulasi:`:
+respons nyata `GET /location` disaring dari Gudang, karena akun uji sudah
+punya Gudang); skenario itu terbukti gagal tanpa penjaga setup.
+`panduan-dashboard`, `dashboard-gudang`, folder `gudang`, dan
+`lonceng-pemberitahuan` 23 lolos per berkas, tanpa OTP. Harapan suite
+penuh 657: 656 ditambah skenario Setup Gudang.
+
+**Suite penuh per luberan tabel dan kode mati gudang** (web `f1835d1`,
+backend `ridho` lokal `4a19be8`, 17 November 2026, pukul 10.37 sampai
+11.14 WIB, reporter `line,json`, charger tersambung, atas izin pemilik
+proyek): e2e 654 lolos dan 2 dilewati dari 656, tanpa kegagalan dan
+tanpa flaky, sesuai harapan hitungan. Yang dilewati skip bersyarat data:
+status staf dashboard outlet (tidak ada staf ruang outlet di monitoring)
+dan dialog batal surat jalan (tidak ada surat jalan Belum Dikirim).
+Termasuk spec ber-OTP. Membuktikan seluruh perubahan sejak suite
+16 November 2026: perbaikan `lihat-stock-adjustment` dan
+`jalur-bukan-owner`, kartu bila tabel tidak muat (LT1a sampai LT6a),
+luberan HP 390 px (LT7a sampai LT10a), KM1a, dan kunci ukur ulang.
+Vitest 1135 lolos. Harapan suite penuh berikutnya 656.
+
+**Baseline per kunci ukur ulang mode kartu** (17 November 2026): vitest
+1135 lolos (3 unit test baru `kunciUkurUlang`); `lihat-stock-adjustment`,
+`daftar-penjualan`, `lihat-pembelian-stok`, dan `kelola-pelanggan` 41
+lolos per berkas, tanpa OTP. Harapan suite penuh tetap 656.
+
+**Baseline per kode mati pesan lokasi gudang** (17 November 2026, KM1a):
+vitest 1132 lolos; folder `inventaris/jurnalStok`,
+`lihat-pembelian-stok`, dan `ruang-gudang` 29 lolos per berkas, tanpa
+OTP. Harapan suite penuh tetap 656.
+
+**Baseline per luberan HP 390 px** (17 November 2026, backend `ridho`
+lokal `4a19be8`): vitest 1132 lolos. Tiga skenario baru 390 px dengan
+helper `tanpaLuberWadah`: `lihat-pembelian-stok` (filter selebar baris dan
+tabel kosong), `crud-produk` (tab Stok Kritis), dan `buat-reservasi`
+(pemilih pelanggan dan aset); ketiganya terbukti gagal terhadap kode lama.
+Selektor teks pemilih di `buat-reservasi` dan `pemilih-pelanggan`
+mengikuti teks baru. Folder `inventaris/pembelianStok`, `crud-produk`,
+`buat-reservasi`, dan `pemilih-pelanggan` 44 lolos per berkas, tanpa OTP,
+setelah dev server dimulai ulang dengan `.next/dev` dibersihkan. Harapan
+suite penuh 656: 653 ditambah ketiga skenario itu.
+
+**Baseline per luberan tabel 768 px** (17 November 2026, backend `ridho`
+lokal `4a19be8`): vitest 1132 lolos (4 unit test baru
+`tests/unit/components/kartu-bila-tak-muat.test.ts`; dua asersi nama kelas
+di integrasi `DataTable` diganti ke `tabel:`). Spec terdampak dijalankan
+per berkas, tanpa OTP dan tanpa suite penuh: kedua spec pelanggan,
+`daftar-penjualan`, `stok-keluar`, `lihat-stok-opname`,
+`lihat-pengajuan-stok`, `ruang-gudang`, `arus-kas`, `tampilan-hp`,
+`langganan`, dan `lihat-stock-adjustment` 87 lolos. Run pertama gagal 2 di
+`lihat-stock-adjustment` karena CSS basi setelah `git stash`; lolos
+setelah dev server dimulai ulang dengan `.next/dev` dibersihkan. Pindai
+visual 390, 768, 1024, dan 1280 px tanpa tabel meluber di lebar meja.
+Sesudah LT6a: skenario baru `lihat-stock-adjustment` (kartu di 768 px,
+kembali tabel di 1280 px, lalu kartu lagi) lolos 3 dari 3 dengan
+`--repeat-each 3`; `daftar-penjualan`, `lihat-stok-opname`,
+`lihat-stock-adjustment`, dan `tampilan-hp` 35 lolos; vitest 1132 lolos.
+Harapan suite penuh 653: 652 ditambah skenario itu.
+
+**Suite penuh per jam buka di shift dan jadwal** (web `0c4cc7e`, backend
+`ridho` lokal `4a19be8`, 16 November 2026, pukul 20.57 sampai 21.54 WIB,
+reporter `line,json`, atas izin pemilik proyek): e2e 646 lolos, 4 gagal,
+dan 2 dilewati dari 652, sesuai harapan hitungan (649 ditambah tiga
+skenario `jadwal/jam-buka-jadwal`). Yang dilewati skip bersyarat data:
+status staf dashboard outlet (tidak ada staf ruang outlet di monitoring)
+dan dialog batal surat jalan (tidak ada surat jalan Belum Dikirim).
+Termasuk spec ber-OTP. Laptop ditangguhkan karena baterai lemah pukul
+21.23 sampai 21.36 (13 menit 10 detik), walau suite diawali
+`systemd-inhibit --what=idle:sleep`. Kegagalannya:
+
+- `keuangan/belanja-stok` (menu Ke outlet dan Ke gudang): karena laptop
+  tidur. Gagal 21.36.49, 18 detik setelah bangun, batas 30 detiknya
+  terpotong masa tidur; dijalankan ulang sendirian lolos 1.
+- `akses/jalur-bukan-owner` (tanpa izin baca shift, pola roster, dan
+  jadwal: "Akses ditolak" tidak tampil), 20.59: gagal sungguhan, sebelum
+  laptop tidur, dan bukan karena urutan spec atau `fddb3c6`. Halaman
+  berakhir di login pengguna: spec berpindah halaman selagi
+  `pin-refresh` dokumen sebelumnya berjalan, karena "Dashboard" di
+  sidebar tampil sebelum sesi pulih sehingga pemeriksaan ketiadaan menu
+  lolos tanpa bukti. Backend sudah memutar `tokenVersion`, cookie
+  barunya tidak tersimpan, dan dokumen berikutnya ditolak "Sesi tidak
+  valid." Dibuktikan 17 November 2026 dengan repro deterministik (spec
+  sementara, 3 dari 3) dan diperbaiki lewat jangkar positif di
+  `f80bd16`; berkas spec `--repeat-each 10` 40 lolos.
+- `inventaris/stockAdjustment/lihat-stock-adjustment` (kolom sumber dan
+  detail), 21.12: gagal sungguhan. Teks sel terbaca "SumberStock Opname
+  ..." dan "Fisik Riil90": label kartu HP `DataTable` (`sm:hidden`)
+  ikut terbaca, karena `toHaveText` membaca `textContent`. Diperbaiki
+  17 November 2026 dengan `useInnerText` di `25b969c`; spec terdampak
+  tereproduksi 2 gagal, sesudahnya kedua skenario lolos.
+
+Vitest 1128 lolos. Ketiga kegagalan ditelusuri dan dibuktikan lewat spec
+terdampak saja pada 17 November 2026, tanpa suite penuh dan tanpa OTP.
+Harapan suite penuh berikutnya tetap 652.
+
+**Baseline per penyesuaian backend `4a19be8`** (web `6ab81aa`, backend
+`ridho` lokal `4a19be8`, 16 November 2026, sesudah migrasi
+`jamOperasionalToko.js` diterapkan): vitest 1115 lolos (unit baru
+`orangSesi` asal web, `namaMesin`, `pilihanPerangkat`,
+`rekanSelokasiPengaju`, `ringkasLangganan`, `metodeLaciMesinKasir`,
+konverter `jamOperasional`, kriteria `jamBuka`, `paramHalamanProduk`, dan
+`paramHalamanInventory`). Spec terdampak dijalankan per berkas, tanpa OTP
+dan tanpa suite penuh: `keuangan/mesin-kasir`, `auth/ruang-lokasi-kerja`
+(skenario baru B339), `inventaris/pengajuanStok/lihat-pengajuan-stok`,
+`pengaturan/langganan`, `dashboard/lonceng-pemberitahuan`, dan
+`auth/sidebar-pengguna` 36 lolos; `reservasi/daftar/lihat-reservasi`,
+`setup/setup`, `setup/pratinjau-jam-buka`, `pengaturan/profil-toko`
+(skenario baru Jam Buka), `inventaris/produk/crud-produk`, dan
+`inventaris/stok` 66 lolos dan 2 gagal (pesan kosong produk yang
+terlanjur diubah, dikembalikan di `bf5212c`, lalu 2 lolos);
+`reservasi/buat`, `penjualan/alur-penjualan`, `gudang/ruang-gudang`, dan
+`akses` 38 lolos; folder `inventaris/bahanBaku` 6 lolos (skenario P18
+tidak lagi dilewati); `setup/panduan`, `setup/plan-fitur`,
+`penjualan/buat-penjualan`, dan `dashboard/dashboard-gudang` 12 lolos.
+Spec pratinjau jam buka (6 skenario) dihapus sesudah itu (`1171f33`).
+Harapan suite penuh 649 (`npx playwright test --list`): 653 dikurangi 6
+pratinjau ditambah 2 skenario baru; menunggu izin pemilik proyek.
+
 Dipindah dari `inti/pengujian.md` pada 17 November 2026: baseline 13
 dan 14 November 2026, terbaru lebih dulu.
 
@@ -1278,6 +1446,30 @@ Dipindah dari `referensi/utang-pengujian.md` pada 6 November 2026.
   detail tanpa kedua tombol (`belanja-stok.spec.ts`), dan pengguna "E2E
   Pembelian Outlet" mencatat dan menghapus lewat UI di ruang outlet lalu
   ditolak gerbang di ruang gudang (`catat-pembelian-stok.spec.ts`).
+
+Lunas atau basi, dipindah dari `referensi/utang-pengujian.md` pada
+20 November 2026 tanpa perubahan teks: tautan penjualan di buku mutasi
+kini menyiapkan penjualan lunasnya sendiri lewat helper penjualan, tanpa
+skip (`mutasi-kas.spec.ts`); kedua pesan lokasi jurnal stok gudang
+dihapus bersama kodenya (KM1a, 17 November 2026); dan kartu siap surat
+jalan dashboard gudang hanya menghitung permintaan sejak `f865254`
+(B111, 28 Oktober 2026), sehingga sama dengan isi tab.
+
+- **Tautan penjualan di buku mutasi bergantung pada data**: skenarionya
+  dilewati bila halaman pertama bulan berjalan tidak memuat mutasi
+  pembayaran. Baris tanpa pencatat hanya teruji di unit test.
+- **Pesan lokasi gudang gagal dimuat atau belum didaftarkan di jurnal
+  stok gudang** tidak dapat diuji: layout ruang gudang menghadang lebih
+  dulu, sehingga kedua pesan itu kode mati (`modul/ui-ux.md`). Penghadangan
+  layout teruji di `lihat-jurnal-stok.spec.ts` sejak `2bcb1ce`.
+- **Kartu siap surat jalan dashboard gudang belum diuji dengan
+  pengembalian yang disetujui** (AR6a): kartu menghitung kedua arah,
+  sedangkan tab hanya permintaan; skenario dashboard gudang gagal dengan
+  jujur bila data uji memuat pengembalian seperti itu.
+
+Lunas 20 November 2026: suite e2e penuh yang tertunda sejak 17 November
+2026 dijalankan (676 lolos, 3 gagal, 1 dilewati dari 680; `inti/pengujian.md`,
+Baseline), dan butirnya dikeluarkan dari `referensi/utang-pengujian.md`.
 
 ## Kejadian sesekali yang tidak berulang
 

@@ -223,6 +223,8 @@ sama (submodul pengajuan stok, di bawah).
     masih menulis input jam sendiri (form shift dan jadwal) diganti saat
     modulnya dimigrasikan; buat reservasi sudah memakai kedua komponen
     sejak `477f258` (pemilik proyek, 28 September 2026, `e43e000`).
+    Per 20 November 2026 tidak ada lagi input jam buatan sendiri: form
+    shift memakai `InputWaktu`, dan modul jadwal tidak punya isian jam.
 23. **Spec e2e menjalankan setiap operasi yang diuji lewat UI.** Data yang
     menjadi bahan uji dibuat, diubah, dan dihapus lewat halaman yang diuji,
     agar tombol dan fungsi yang rusak ikut terlihat; tidak ada data yang

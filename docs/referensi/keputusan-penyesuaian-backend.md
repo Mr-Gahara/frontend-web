@@ -1001,7 +1001,7 @@ backend beserta K-18 dan K-19 (P80 sampai P82, B330 sampai B344).
   sampai 371; `diskonService.js` baris 219 sampai 224 dan 258 sampai
   260).
 - **Dibuktikan dari respons nyata** lewat spec per berkas 16 November
-  2026 (`inti/pengujian.md`, Baseline): B331, B333 sampai B336, B338
+  2026 (`arsip/riwayat-pengujian.md`, Riwayat baseline): B331, B333 sampai B336, B338
   sampai B343, dan B327 (query); butir 168 hanya tidak langsung, lewat
   muat ulang setelah Owner di spec setup.
 - **Pelajaran**: teks pesan kosong produk sempat diubah saat paginasi

@@ -118,6 +118,15 @@ Pelanggan dan diskon:
   waktu dicatat.
 - **DN4a: ketiga izin jurnal transfer masuk template Manajer dan General
   Manajer**, sebagai commit tersendiri (`e053a67`), seperti PO11a.
+- **DN5a: rincian mutasi transfer bertaut ke rincian transfernya**
+  (pemilik proyek, 20 November 2026, opsi "Dialog rincian", `86f2a0b`).
+  Dialog rincian mutasi keempat jenis transfer menampilkan "Transfer
+  terkait" bertautan "Lihat transfer" ke `pindahDana?transfer=<id>`, dan
+  Pindah Dana membuka dialog rincian transfer itu (dari, ke, jumlah,
+  tanggal, status, keterangan, pencatat, dan alasan batal) dari
+  `GET /jurnaltransfer/:id`, tanpa rute baru. Diterapkan tanpa
+  ditanyakan: tautan hanya bagi pemegang `read-jurnal-transfer`, dan
+  menutup dialog membuang `?transfer` dari alamat.
 - **Pekerjaan setelah ini adalah pengeluaran (beban operasional)**
   (4 Oktober 2026); ditunda pada hari yang sama (BO1a di bawah).
 - Diterapkan tanpa ditanyakan (`e53c016`): halaman tanpa entri
