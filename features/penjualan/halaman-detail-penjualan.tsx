@@ -206,7 +206,9 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
             )}
           </div>
 
-          <div className="flex gap-2 w-full sm:w-auto">
+          {/* Bertumpuk selebar penuh di HP, sebaris mulai sm: dua tombol selebar
+              penuh dalam satu baris mendorong Void keluar layar 390 px. */}
+          <div className="flex flex-col gap-2 w-full sm:flex-row sm:w-auto">
             {/* Tombol Finalisasi Khusus Invoice Draft */}
             {aksi.finalisasi && (
               <Button

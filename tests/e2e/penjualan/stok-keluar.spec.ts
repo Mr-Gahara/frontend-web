@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { BASIS, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { tanpaLuberWadah } from "../../helpers/tata-letak-uji";
 import {
   NAMA_BAHAN,
   NAMA_PRODUK,
@@ -57,6 +58,21 @@ test.describe("Stok keluar di detail penjualan", () => {
         // Nama outlet tenant terbaca Owner (read-location).
         await expect(k).toContainText(/Dipotong dari .+ saat penjualan disimpan\./);
         await expect(k).not.toContainText("di-VOID");
+      });
+
+      await test.step("HP 390 px: tombol Terima Pembayaran dan Void Penjualan tidak keluar layar", async () => {
+        // Kedua tombol selebar penuh di HP dalam baris yang tidak turun
+        // mendorong Void keluar layar (ditemukan 20 November 2026).
+        await page.setViewportSize({ width: 390, height: 844 });
+        for (const nama of [/terima pembayaran/i, /void penjualan/i]) {
+          const tombol = page.getByRole("button", { name: nama });
+          await expect(tombol).toBeVisible();
+          const kotak = await tombol.boundingBox();
+          expect(kotak, `${nama}: punya ukuran`).not.toBeNull();
+          expect(kotak!.x + kotak!.width, `${nama}: di dalam layar`).toBeLessThanOrEqual(390);
+        }
+        await tanpaLuberWadah(page, "detail penjualan 390 px");
+        await page.setViewportSize({ width: 1280, height: 900 });
       });
 
       await test.step("VOID: rincian tetap, dengan catatan stok tidak dikembalikan", async () => {
