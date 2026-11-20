@@ -231,6 +231,31 @@ perintahnya:
    - Reservasi: `GET /sesibooking` (per tanggal)
    - Absensi: `GET /absensi/monitoring` (per hari)
 
+### Berikutnya: utang pengujian kelompok 1 yang tersisa (dicatat 20 November 2026)
+
+Dicatat pemilik proyek 20 November 2026 sebagai pekerjaan berikutnya.
+Jalur yang aturannya sudah teruji unit, tetapi belum dibuktikan e2e karena
+akun uji berperan Owner. Setiap butir menambah peran dan pengguna uji
+menetap lewat `tests/helpers/terkunci-uji.ts`, seperti bagian C
+20 November 2026 (`referensi/utang-pengujian.md` memuat rinciannya):
+
+1. **Template role membuka halamannya**: role dari template (stock opname,
+   adjustment, absensi, pembelian) dipakai login dan membuka halaman yang
+   dijanjikan templatnya; kini hanya pemetaan nama yang teruji.
+2. **Mesin Kasir MK11a**: pemegang `kelola-perangkat-kasir` tanpa
+   `read-pengguna` atau tanpa `read-akunkas`, dan pemilihan perangkat yang
+   melewati pengguna berlevel sama atau lebih tinggi (403
+   `GET /device/:userId`).
+3. **Titik tur dashboard menurut izin dan plan**: tur bagi pengguna yang
+   tidak memegang izin sebagian menu (`bolehLihatMenu`).
+4. **Batas level role (RL3a)**: batas atas level, level pengguna yang
+   tidak diketahui, dan perubahan level atau wewenang di payload ubah,
+   dari pengguna bukan Owner.
+5. **Pemilih produk tanpa izin baca produk** di form diskon, beserta
+   `aksiDiskon`.
+6. **Lokasi kerja (LK1a) di dialog pengguna** bagi pemegang
+   `update-pengguna` tanpa `read-location`, dan untuk role Owner.
+
 ### Menunggu keputusan pemilik proyek
 
 - Nomor WhatsApp admin untuk halaman Langganan (LG1a, `NOMOR_WA_ADMIN`
@@ -242,6 +267,24 @@ perintahnya:
   dan laporan backend yang ditunda (LB1a) selesai; catatannya dipindah ke
   arsip yang sama. Cadangan sebelum pembersihan:
   `~/Documents/cadangan-db/db_produk-sebelum-bersih-2026-11-18.gz`.
+- Data uji yang menumpuk dibersihkan lagi 20 November 2026 (pemilik
+  proyek), setelah basis data dicadangkan ke
+  `~/Documents/cadangan-db/db_produk-sebelum-bersih-2026-11-20.gz`, lewat
+  skrip bermode tinjau `bersih-akunkas.js` dan `bersih-data-uji.js` di
+  `~/.cache/frontend-web/alat/` (bawaan tinjau, `--hapus` untuk
+  menerapkan). Kriterianya hanya data uji di toko uji yang tidak dirujuk
+  dokumen lain, kecuali akun kas: atas keputusan pemilik proyek, 192 akun
+  E2E non-aktif dihapus bersama 316 jurnal transfer Rp1 yang melibatkannya
+  dan 956 baris mutasinya di kedua sisi. Saldo akun lawan dikoreksi sebesar
+  efek transfer yang dihapus; efek bersihnya nol, sehingga saldo dan saldo
+  berjalan "kasir outlet" dan "Kas Kecil (Laci)" tidak berubah. Rantai saldo
+  berjalan "kasir outlet" sudah tidak konsisten sebelum pembersihan dan
+  dibiarkan apa adanya. Dihapus juga 539 shift uji Aktif dan Non-Aktif, 4
+  metode, 28 diskon, dan 39 pelanggan terhapus lunak. Data bukti temuan
+  tidak disentuh: transfer Rp1,5 butir 126 beserta akun E2E-nya, tipe aset
+  butir 77, bahan uji butir 143, surat jalan rusak, dan data butir 142.
+  Riwayat pengujian yang menghasilkan data itu tetap tercatat di
+  `referensi/utang-pengujian.md`, `inti/pengujian.md`, dan arsip.
 - Akun uji `toko@gmail.com` dinaikkan ke Pro lewat API admin, karena
   akun lama dibaca Basic (B212) dan Basic menolak sesi booking (B216).
   Riwayat langganannya kini berisi satu catatan `ubah-plan`.

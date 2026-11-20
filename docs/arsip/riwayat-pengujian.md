@@ -1523,6 +1523,17 @@ Outlet" di `akses/jalur-bukan-owner.spec.ts`. Halaman ber-`[id]` dipindai
 
 ## Kejadian sesekali yang tidak berulang
 
+- **Master Shift tampil sebagai kartu di 1280 px, sekali** (20 November
+  2026, spec terdampak sesudah pembersihan data uji, 127 lolos dan 1 gagal
+  dari 128): `crud-shift` "read: elemen antarmuka" tidak menemukan kepala
+  kolom "Nama Shift", karena `DataTable` sedang dalam mode kartu (LT1a).
+  Diulang sendirian 2 kali, bersama skenario happy path 5 kali, dan satu
+  folder `jadwal/shift` sekali: seluruhnya lolos. Penyebab tidak
+  terbukti; dugaan terdekat ukur ulang mode kartu yang lengket saat isi
+  daftar berubah tanpa mengubah kunci ukur ulang (`modul/ui-ux.md`,
+  Utang terbuka). Ditelusuri lewat trace bila suite penuh menggagalkannya
+  lagi.
+
 Dipindah dari `inti/pengujian.md` (Utang pengujian) pada 25 Oktober 2026.
 
 - **Suite penuh 1 November 2026 (14.24 sampai 14.51 WIB) gagal di tiga

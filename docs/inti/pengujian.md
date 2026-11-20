@@ -28,6 +28,12 @@ penuh di bawah keliru: `HEAD` sebelum perubahan ini menghitung 1193
   (`akses/jalur-bukan-owner` 8, `diskon/pilihan-kasir`, `gudang/ruang-gudang`,
   `stok/lihat-stok`, dan tiga spec baru jalur berhasil).
 
+Sesudah pembersihan data uji 20 November 2026 (`inti/status.md`, Utang
+kecil dari penyesuaian backend `4759208`): folder `keuangan`, `diskon`,
+`pelanggan`, `jadwal/shift`, dan spec metode pembayaran 127 lolos dan 1
+gagal dari 128; kegagalannya sekali dan tidak terulang
+(`arsip/riwayat-pengujian.md`, Kejadian sesekali yang tidak berulang).
+
 Harapan suite penuh berikutnya 689 (`npx playwright test --list`, 111
 berkas): 680 ditambah sembilan skenario baru, yaitu `setujui-stok-opname`,
 `setujui-kirim-berhasil`, `tambah-barang-gudang`, setup gudang berhasil,

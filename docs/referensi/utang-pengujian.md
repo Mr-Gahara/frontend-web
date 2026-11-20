@@ -41,7 +41,12 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   Arsip Generate ..." nonaktif (spec pola roster dan generate jadwal), di
   samping shift uji lama spec shift. Fixture "E2E Jadwal Siang" dibuat
   sekali lalu dipakai ulang. Pola roster uji dihapus di akhir setiap
-  skenario baru.
+  skenario baru. Shift uji yang masih Aktif juga tertinggal ("Shift Batal
+  Hapus ...", "Shift Prefill ...", "Shift Ganda ...", "Shift Ruang ...").
+  Dibersihkan 20 November 2026: 539 shift uji Aktif dan Non-Aktif yang
+  tidak dirujuk jadwal maupun pola roster dihapus; fixture "E2E Jadwal
+  ..." dan shift asli toko tetap (`inti/status.md`, Utang kecil dari
+  penyesuaian backend `4759208`).
 - **Status aset "Digunakan"** belum teruji (penghapusan aset yang punya
   booking teruji di `reservasi/aset/crud-aset.spec.ts` sejak `66ea7a4`).
   Spec daftar reservasi kini membuat booking sungguhan yang
@@ -92,7 +97,14 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   tetap; sesudah spec terdampak dijalankan ulang tinggal 157. Metode,
   diskon, dan shift uji nonaktif serta pelanggan terhapus lunak
   dibersihkan bersamanya dan kembali tumbuh per run seperti tercatat di
-  butirnya masing-masing.
+  butirnya masing-masing. Dibersihkan lagi 20 November 2026 atas
+  keputusan pemilik proyek (opsi hapus beserta transfernya): 192 akun E2E
+  non-aktif dihapus bersama 316 jurnal transfer Rp1 yang melibatkannya dan
+  956 baris mutasinya di kedua sisi. Efek bersih transfer itu di akun
+  lawan ("kasir outlet" dan "Kas Kecil (Laci)") nol, sehingga saldo dan
+  saldo berjalannya tidak berubah. Satu akun E2E tetap, karena dirujuk
+  transfer Rp1,5 bukti butir 126; tenant uji kini punya lima akun kas
+  E2E (`inti/status.md`, Utang kecil dari penyesuaian backend `4759208`).
 - **`hapusLewatApi` menerima 404 sebagai sudah terhapus**, padahal route
   yang dihapus backend juga menjawab 404. Route hapus yang hilang tidak
   terdeteksi helper ini; yang menangkapnya adalah audit endpoint
@@ -121,6 +133,8 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   Peringatan itu diganti penahanan di `3b4f35b` (NZ4a), yang teruji e2e.
 - **Metode uji menumpuk sebagai nonaktif**, satu per run spec kelola
   metode pembayaran, karena metode tidak dapat dihapus (PO10a).
+  Dibersihkan 20 November 2026: 4 metode E2E nonaktif yang tidak dirujuk
+  pembayaran.
 - **Form metode pembayaran tanpa `read-akunkas` belum teruji e2e.** Tombol
   yang disembunyikan menurut izin (`aksiMetodePembayaran`) teruji e2e
   sejak `cbfa23b` lewat pengguna baca-saja.
@@ -146,7 +160,9 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   setelah run pertama.
 - **Pelanggan uji dihapus lunak**, sehingga setiap run spec pelanggan
   menambah dokumen ber-`isDeleted` di basis data development; daftar dan
-  indeks unik backend mengabaikannya.
+  indeks unik backend mengabaikannya. Dibersihkan 20 November 2026: 39
+  pelanggan terhapus lunak yang tidak dirujuk penjualan, membership,
+  booking, maupun pemakaian diskon.
 - **Spec pemilih pelanggan menambah dua pelanggan terhapus lunak per
   run**, dan skenario nomor HP kembar satu.
 - **Bahan uji "E2E Bahan Pak" permanen** di basis data development,
@@ -157,7 +173,9 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Diskon uji menumpuk sebagai Non-Aktif**, lima per run suite penuh
   (satu dari spec pembanding, dua dari kelola, satu dari aturan, dan satu
   dari pilihan kasir), karena backend tidak punya `DELETE /diskon`. Diskon
-  Non-Aktif tidak dihitung batas 50 diskon aktif.
+  Non-Aktif tidak dihitung batas 50 diskon aktif. Dibersihkan
+  20 November 2026: 28 diskon E2E Non-Aktif yang tidak dirujuk penjualan
+  maupun pemakaian diskon.
 - **Batas 50 diskon aktif hanya teruji lewat simulasi** respons daftar
   yang ditandai `// simulasi:`, dan hanya untuk tombol tambah; menu
   aktifkan yang terkunci saat batas tercapai belum teruji. Pilihan Aktif
@@ -225,7 +243,9 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   VOID per run spec Pindah Dana, serta dua AKTIF dan satu VOID per run
   spec tutup akun bersaldo (`f7805ca`), masing-masing Rp1. Skenario
   utama kedua spec dilewati bila tidak ada akun kas aktif bersaldo di
-  luar akun uji.
+  luar akun uji. Transfer uji yang terkumpul sampai 20 November 2026
+  dihapus bersama akun kas uji (butir akun kas di atas); riwayat
+  pengujiannya tetap tercatat di dokumen ini dan di baseline.
 - **Penolakan backend atas Pindah Dana belum teruji e2e**: saldo sumber
   tidak cukup (ditahan form lebih dulu), akun nonaktif, dan pembatalan
   yang ditolak karena saldo akun tujuan tidak cukup. Statusnya (400)
