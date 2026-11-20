@@ -122,6 +122,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Web mengirim hasil `payloadBuatAkunKlien` (`features/admin-akun/payload.ts`): email dan password, serta username dan `durasiBulan` hanya bila diisi
 - Respons 201 dengan `data` berbentuk item `GET /akun/admin/all`, dengan `daftarTenant` kosong
 - Diisi server: role, status, `tenantID`, dan `aksesBerakhirPada`
+- Sejak N1 allowlist juga memuat `plan` (`basic`, `advanced`, atau `pro`; `config/constants.js` `PLAN`), opsional saat membuat akun klien (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)
 
 #### `POST /akun/admin/users/:id/freeze`
 
@@ -138,6 +139,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Web mengirim hasil `payloadPerpanjang`: `durasiBulan`, serta `alasan` bila diisi
 - Respons 200 dengan `data` akun; `message` menyebut bila akun ikut diaktifkan
 - Wajib dari klien: `durasiBulan`
+- Sejak N1 validatePerpanjang menerima `plan` opsional (`basic`, `advanced`, atau `pro`) untuk naik atau turun plan sekaligus; allowlist `durasiBulan`, `plan`, dan `alasan` (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)
 
 #### `POST /akun/admin/users/:id/unfreeze`
 
@@ -162,6 +164,54 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Field lain yang dikenali: `username`, `email`, `password`, `role`, `status`, `tokenVersion`, `aksesBerakhirPada`, `alasanNonAktif`, `dibekukanPada`, `masaTenggangHari`
 - Diisi server: -
 
+#### `POST /akun/auth/lupa-password`
+
+- Aturan: validateLupaPassword (validators/akunValidator.js). Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Field: `email`
+- Web mengirim `{ email }` (`features/auth/api.ts`); selalu 200 dengan pesan yang sama (B217)
+- Diisi server: -
+
+#### `POST /akun/auth/refreshtoken`
+
+- Aturan: tanpa validator; refresh token dibaca dari cookie httpOnly. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Web memanggilnya lewat `fetch` langsung di `lib/apiClient.ts` dan `components/providers/session-provider.tsx`, tanpa body
+- Diisi server: -
+
+#### `POST /akun/auth/register`
+
+- Aturan: validateRegister (validators/akunValidator.js), lewat `validateRegisterRequest` di route; body diteruskan utuh ke controller. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Field: `email`, `password`, dan `username`
+- Web mengirim hasil form daftar (`features/auth/api.ts`); pembatas `registerLimiter` 10 per 15 menit per IP kecuali `REGISTER_LIMIT_MAX` (B230)
+- Diisi server: role client, status, dan masa percobaan
+
+#### `POST /akun/auth/reset-password`
+
+- Aturan: validateResetPassword (validators/akunValidator.js); body diteruskan utuh. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Wajib dari klien: `otp`; field lain `email` dan `passwordBaru`
+- Web mengirim `{ email, otp, passwordBaru }` (`features/auth/api.ts`); OTP salah dan email tak terdaftar dijawab 400 yang sama, dan seluruh sesi akun diputus (B217)
+- Diisi server: -
+
+#### `POST /akun/auth/verifikasi-email`
+
+- Aturan: validateVerifikasiEmail (validators/akunValidator.js); body diteruskan utuh. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Wajib dari klien: `otp`; field lain `email` dan `password`
+- Web mengirim `{ email, otp }`, ditambah `password` saat tanpa password titipan (`modul/setup-akun.md` TP6a, B248)
+- Diisi server: -
+
+#### `POST /akun/auth/verifikasi-email/kirim`
+
+- Aturan: validateLupaPassword (validators/akunValidator.js). Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Field: `email`
+- Web mengirim `{ email }`; selalu 200 (B232)
+- Diisi server: -
+
+#### `POST /akun/profil/otp`
+
+- Aturan: validateKirimOtpAkun (validators/akunValidator.js). Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Wajib dari klien: `tujuan`, salah satu dari `ubah-profil` dan `hapus-akun` (`TUJUAN_OTP_AKUN`)
+- Web mengirim `{ tujuan }` (`features/akun-toko/api.ts`; `modul/setup-akun.md` OA1a sampai OA12a)
+- Diisi server: -
+
 #### `POST /akunkas`
 
 - Aturan: validateAkunKasPayload (validators/akunKasValidator.js). Dikoreksi 28 September 2026 terhadap validator: `tipeAkun` wajib saat create, dan `saldo` bila dikirim wajib bertipe number dan tidak negatif
@@ -172,6 +222,20 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Sejak backend `465b438`, setiap tenant dibatasi 10 akun kas aktif, dan buat ditolak 409 bila sudah penuh (`akunKasService` baris 141 sampai 144); saldo awal lebih dari 0 dicatat sebagai mutasi `SALDO_AWAL`. Akun bersaldo tidak dapat ditutup, dan `DELETE /akunkas/:id` tidak ada lagi (`temuan.md` butir 81), sehingga spec web tidak membuat akun uji bersaldo (`inti/pengujian.md`)
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
+
+#### `PUT /akun/admin/users/:id/plan`
+
+- Aturan: validateUbahPlan (validators/akunValidator.js), setelah `authAkun` dan `adminOnly`. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Allowlist: `plan` dan `alasan`
+- Web mengirim `{ plan, alasan? }` (`features/admin-akun/api.ts`)
+- Diisi server: riwayat `ubah-plan`
+
+#### `PUT /akun/profil/update/:id`
+
+- Aturan: validateUpdateProfile (validators/akunValidator.js), lewat `validateUpdateProfileRequest`. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Allowlist: `username`, `email`, `password`, `oldPassword`, dan `otp`; wajib `otp`
+- Web mengirim email atau password baru beserta `oldPassword` dan `otp` (`features/akun-toko/api.ts`); id dari akun pemilik sesi
+- Diisi server: -
 
 #### `PUT /akunkas/:id`
 
@@ -318,6 +382,14 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Dibaca controller dari body: seluruh body, dengan `tenantID` ditimpa dari sesi
 - Diisi server: `tenantID`
 
+#### `POST /membership`
+
+- Aturan: validateMembershipPayload (validators/membershipValidator.js) mode buat, lewat `validateData(false)` di route. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Allowlist: `tenantID`, `pelangganID`, `paketMembershipID`, `penjualanID`, dan `tanggalMulai`; `tanggalKadaluarsa` dan `status` diatur server dan ditolak bila dikirim
+- Wajib dari klien: `pelangganID`, `paketMembershipID`, dan `penjualanID` (id sah); `tenantID` diisi route dari sesi sebelum validasi; `tanggalMulai` opsional dan harus tanggal sah
+- Web mengirim `BuatMembershipPayload` (`types/membership.ts`): `tanggalMulai` YYYY-MM-DD hari WIB, kosong berarti hari ini (`modul/pelanggan-diskon.md` MB1a)
+- Diisi server: `tenantID`, `tanggalKadaluarsa`, dan `status`
+
 #### `POST /metodepembayaran`
 
 - Aturan: validateMetodePembayaranPayload (validators/metodePembayaranValidator.js). Dikoreksi 30 September 2026 terhadap backend `465b438`: allowlist `FIELD_DIIZINKAN` berisi `namaPembayaran`, `akunKasID`, `kategori`, dan `isActive`; field lain ditolak 400, dan `tenantID` ditolak sebagai field terlarang (`FIELD_DILARANG`)
@@ -339,6 +411,14 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Dibaca controller dari body: seluruh body, dengan `tenantID` ditimpa dari sesi
 - Diisi server: `tenantID`
 
+#### `POST /paketmembership`
+
+- Aturan: validatePaketMembershipPayload (validators/paketMembershipValidator.js) mode buat. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Allowlist: `namaPaket`, `harga`, `durasiHari`, `deskripsi`, dan `status` (`Aktif` atau `Non-Aktif`); `tenantID` dari klien ditolak (P6)
+- Wajib dari klien: `namaPaket`, `harga` (angka, tidak negatif), dan `durasiHari`; `deskripsi` teks atau null
+- Web mengirim hasil `payloadBuatPaket` (`features/membership/schema.ts`)
+- Diisi server: `tenantID`
+
 #### `POST /pelanggan`
 
 - Aturan: validatePelangganPayload (validators/pelangganValidator.js) di route, setelah `checkPermission("create-pelanggan")`. Dikoreksi 2 Oktober 2026 terhadap backend `yoga` `50eede7`
@@ -356,12 +436,12 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 
 - Aturan: validatePembayaranPayload (validators/pembayaranValidator.js)
 - Wajib dari klien: `penjualanID`, `metodePembayaranID`, dan `jumlahBayar` (angka lebih dari 0); `tanggalBayar` wajib bila status akhirnya PAID dan tidak boleh mendahului tanggal transaksi penjualan (`pembayaranService`, dikoreksi 26 September 2026)
-- Field lain yang dikenali: `tanggalBayar`, `catatan`, dan `uangDiterima` (opsional; bila dikirim wajib angka). Sejak backend `465b438`, field yang diatur server (`FIELD_SERVER`), antara lain `akunKasID`, ditolak 400 "Field diatur server dan tidak boleh dikirim": akun kas tujuan diambil dari metode pembayaran, dan `kembalian` dihitung server. Web tidak mengirim `status` (keputusan K2a); cabang gateway `metode.isAutomated` masih ada di service tetapi tidak pernah berjalan (`temuan.md` butir 45 dan 78)
+- Field lain yang dikenali: `tanggalBayar`, `catatan`, dan `uangDiterima` (opsional; bila dikirim wajib angka). Sejak backend `465b438`, field yang diatur server (`FIELD_SERVER`), antara lain `akunKasID`, ditolak 400 "Field diatur server dan tidak boleh dikirim": akun kas tujuan diambil dari metode pembayaran, dan `kembalian` dihitung server. Web tidak mengirim `status` (keputusan K2a); cabang gateway `metode.isAutomated` masih ada di service tetapi tidak pernah berjalan (`temuan.md` butir 45 dan 78) Sejak backend `14f1d5e` `dicatatOleh` ikut `FIELD_SERVER` dan ditolak bila dikirim (dicatat 20 November 2026, KT1a)
 - Web menolak membayar penjualan DRAFT dan VOID sejak `b85c2bd`: pembayaran baru dibuka setelah finalisasi, untuk penjualan UNPAID atau PARTIAL
 - Nilai sah: `VALID_STATUS`: PAID, PENDING, EXPIRED, FAILED, VOID
 - Aturan service: penjualan VOID, penjualan yang sudah lunas, dan `jumlahBayar` di atas `sisaTagihan` ditolak 400 (belum diperiksa ulang terhadap backend `465b438`); `sisaTagihan` dikurangi secara atomik sebelum dokumen dibuat. Tanpa idempotensi (`temuan.md` butir 44). Galat validator dibalas mentah `{ errors }` dari route (butir 42)
 - Dibaca controller dari body: `-`
-- Diisi server: `tenantID`
+- Diisi server: `tenantID` dan `dicatatOleh` (pengguna sesi)
 - Header: `x-idempotency-key` (opsional, paling panjang 100 karakter; lebih dari itu 400) sejak `nizar` `3c9c19f`. Kunci disimpan di dokumen pembayaran, unik per toko; kiriman ulang berkunci sama dijawab 201 dengan pembayaran pertama tanpa menambah saldo lagi (dari kode `2dd57aa`, `temuan.md` butir 44). Web mengirim satu kunci per pengisian form sejak `26093b0` (keputusan RH1a), terbukti lewat e2e: percobaan ulang setelah gagal memakai kunci yang sama
 
 #### `POST /pembelianstok`
@@ -403,6 +483,19 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Dibaca controller dari body: `installationId`
 - Diisi server: -
 
+#### `POST /pengguna/pin-refresh`
+
+- Aturan: validatePenggunaSesi (validators/penggunaValidator.js), lewat `validateSesiRequest` di route sebelum `router.use(authPengguna)`; body opsional, `refreshToken` dan `installationId` bila dikirim harus teks. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Web memanggilnya lewat `fetch` langsung dengan body kosong; refresh token dari cookie (`lib/apiClient.ts`, `components/providers/session-provider.tsx`). Cookie lama diterima 30 detik sejak backend `3570bd4` (B345)
+- Diisi server: -
+
+#### `POST /pengguna/register-owner`
+
+- Aturan: validateRegisterOwnerPayload (validators/penggunaValidator.js), lewat `validateRegisterOwnerRequest` dengan token akun. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Wajib dari klien: `nama` (minimal 3 karakter) dan `pin`; `nama`, `pin`, dan `installationId` bila dikirim harus teks. Controller juga membaca `aksesType`, `installationId`, `deviceName`, `appVersion`, dan `osVersion` (milik aplikasi)
+- Web mengirim `{ nama, pin }` lewat `apiMentah` (`features/setup/api.ts`)
+- Diisi server: role Owner dan `tenantID` dari token akun
+
 #### `POST /pengguna/register-pengguna`
 
 - Aturan: validatePenggunaPayload (validators/penggunaValidator.js)
@@ -411,6 +504,20 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Nilai sah: `validTypes`: web, app
 - Dibaca controller dari body: `nama`, `pin`, `roleID`, `aksesType`, `nomorHp`, `status`
 - Diisi server: -
+- `locationID` (lokasi kerja, P46): null berarti tanpa batasan, selain itu harus ObjectId; diisi lewat dialog pengguna (`modul/jadwal-shift.md` LK1a) (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)
+
+#### `POST /pengguna/reset-pin-owner`
+
+- Aturan: validateResetPinOwnerPayload (validators/penggunaValidator.js), lewat `validateResetPinOwnerRequest` dengan token akun dan `resetPinOwnerLimiter`. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Wajib dari klien: `password` akun, `pinBaru` (tepat 6 digit angka), dan `otp` dari email akun (AR23)
+- Web mengirim `{ password, pinBaru, otp }` (`features/auth/api.ts`; `modul/setup-akun.md` OA1a)
+- Diisi server: -
+
+#### `POST /pengguna/reset-pin-owner/otp`
+
+- Aturan: tanpa validator; token akun dan `resetPinOwnerLimiter`. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Web mengirim body kosong (`features/auth/api.ts`)
+- Diisi server: tujuan email dari akun
 
 #### `POST /penjualan`
 
@@ -446,6 +553,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - `kategoriID` hanya diperiksa formatnya, bukan keberadaannya (`temuan.md` butir 13)
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
+- `stokMinimum` (Y4, P51) opsional, angka 0 atau lebih, diperiksa juga saat ubah (B237) (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)
 
 #### `POST /produkpajak`
 
@@ -477,6 +585,20 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`, `dataPengguna`
 
+#### `POST /sesikasir/:id/tutup`
+
+- Aturan: validateHitunganKasir (validators/sesiKasirValidator.js). Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Wajib dari klien: `nominal`; field lain `catatan`, wajib bila hitungan selisih (400)
+- Web mengirim `{ nominal, catatan? }` (`features/sesi-kasir/api.ts`); hitung buta, respons tanpa angka
+- Diisi server: penutup dan asal penutupan web (MK6b)
+
+#### `POST /sesikasir/perangkat`
+
+- Aturan: validatePerangkatKasir (validators/sesiKasirValidator.js). Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Wajib dari klien: `installationId`, `akunKasID`, dan `namaPerangkat`
+- Web mengirim ketiganya (`features/sesi-kasir/api.ts`); upsert per `installationId`, 404 perangkat bukan milik toko, 409 selama sesi terbuka
+- Diisi server: `tenantID`
+
 #### `POST /shift`
 
 - Aturan: validateShiftPayload (validators/shiftValidator.js)
@@ -504,6 +626,14 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Field lain yang dikenali: `hariAktif`, `jamMulai`, `jamSelesai`, `tipeAsetID`; `isActive` dan `prioritas` diteruskan service tanpa aturan, dan model berbawaan `isActive: false`
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
+- `isDefault` opsional, boolean (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)
+
+#### `POST /tenant`
+
+- Aturan: validateTenantPayload (validators/tenantValidator.js), lewat `validateTenantRequest`; body diteruskan utuh. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Wajib dari klien: `namaToko`; allowlist `TENANT_FIELDS` (`namaToko`, `alamat`, `kota`, `kodePos`, `nomorTelepon`, `emailBisnis`, `footerStruk`, `idNPWP`, dan `jamOperasional`)
+- Web mengirim `{ namaToko }` dengan token akun (`features/setup/api.ts`)
+- Diisi server: role Owner berizin penuh, akun kas `CASH-001`, dan metode Tunai (`tenantService.createWithOwner`)
 
 #### `POST /tipeaset`
 
@@ -513,6 +643,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Nama tipe aset kembar dalam toko ditolak 409 "Nama tipe aset sudah digunakan di toko ini" (`tipeAsetService` baris 149 dan 186, juga saat `PUT`), dan hapus tipe aset yang masih dipakai aset ditolak 409 (baris 206), sejak backend `465b438`
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
+- `jamBuka` dan `jamTutup` dikirim berpasangan (`HH:mm`, tidak boleh sama, atau keduanya null); `buka24Jam` boolean dan tidak boleh bersama jam yang terisi (AR19) (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)
 
 #### `POST /transferstok`
 
@@ -636,6 +767,13 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Wajib dari klien: -
 - Diisi server: -
 
+#### `PUT /membership/:id`
+
+- Aturan: validateMembershipPayload mode ubah, lewat `validateData(true)`. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Allowlist: `paketMembershipID` dan `tanggalMulai`; `tenantID`, `pelangganID`, dan `penjualanID` tidak bisa diubah (400); body kosong ditolak
+- Web mengirim `UbahMembershipPayload` (`types/membership.ts`)
+- Diisi server: `tanggalKadaluarsa` dihitung ulang
+
 #### `PUT /metodepembayaran/:id`
 
 - Aturan: validateMetodePembayaranPayload mode update (validators/metodePembayaranValidator.js) di route. Dikoreksi 1 Oktober 2026 terhadap backend `465b438`: allowlist dan field terlarang sama dengan `POST`; seluruh field opsional, tetapi minimal satu harus dikirim ("Tidak ada data yang diperbarui"); `isActive` wajib boolean asli, dan `akunKasID` atau `kategori` berupa string kosong atau `null` ditolak 400
@@ -656,6 +794,13 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan service: pajak milik tenant lain dijawab 404; bila keadaan akhirnya per transaksi dan aktif, pajak per transaksi lain dinonaktifkan sebelum pembaruan (butir 90); cache produk tidak dibersihkan (butir 94)
 - Web mengirim hanya field yang berubah lewat `payloadUbahPajak` (`features/pajak/payload.ts`); sampai `50e6485` `tipePajak` selalu ikut dikirim
 - Respons 200 dengan `data` dokumen hasil pembaruan dan `message` "Pajak diperbarui"
+- Diisi server: -
+
+#### `PUT /paketmembership/:id`
+
+- Aturan: validatePaketMembershipPayload mode ubah. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Allowlist sama dengan buat; tidak ada field wajib
+- Web mengirim hanya field yang berubah lewat `payloadUbahPaket` (`features/membership/schema.ts`; keputusan rancangan butir 15)
 - Diisi server: -
 
 #### `PUT /pelanggan/:id`
@@ -705,6 +850,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Web mengubah profil sendiri lewat `payloadPerbaruiProfil` (`features/pengguna/schema-profil.ts`, `091be4e`): hanya field yang berubah, `nomorHp` null untuk nomor yang dikosongkan, dan pasangan `pinLama` serta `pinBaru`
 - Respons 200 dengan `data` berbentuk `GET /pengguna/:id` dan `message` "Data pengguna berhasil diperbarui."
 - Diisi server: -
+- `locationID` (lokasi kerja, P46): null berarti tanpa batasan, selain itu harus ObjectId (LK1a) (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)
 
 #### `PUT /penjualan/:id`
 
@@ -724,6 +870,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Dulu selalu gagal selama `detailSiklus` ikut dikirim: validator model memakai `this.siklusHari` di dalam `findOneAndUpdate`, dan di sana `this` adalah query; web selalu mengirimnya. Diperbaiki backend (B128), dan skenario ubah pola roster lolos sejak `ea2e752`. Sejak B127 `tenantID` di body diabaikan, dan sejak B174 field asing serta `tenantID` ditolak 400. Sebelum B127 service menjalankan `$set` atas seluruh body, sehingga `tenantID` yang dikirim ikut disimpan bila berupa ObjectId yang sah (`temuan.md` butir 72); web tidak mengirimnya. Dikoreksi 29 September 2026
 - Dibaca controller dari body: `-`
 - Diisi server: - (`tenantID` hanya diisi saat create)
+- `locationID` (B168) opsional saat ubah tetapi harus ObjectId bila dikirim; saat buat wajib (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)
 
 #### `PUT /produk/:id`
 
@@ -736,6 +883,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - `kategoriID` hanya diperiksa formatnya, bukan keberadaannya (`temuan.md` butir 13)
 - Dibaca controller dari body: `-`
 - Diisi server: `tenantID`
+- `stokMinimum` (Y4, P51) opsional, angka 0 atau lebih (B237) (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)
 
 #### `PUT /role/:id`
 
@@ -765,6 +913,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Sebelum B127 service menjalankan `findOneAndUpdate` dengan `$set` atas seluruh body. `tenantID` yang dikirim ikut disimpan bila berupa ObjectId yang sah, sehingga shift dapat dipindah ke tenant lain (`temuan.md` butir 71); web tidak mengirimnya. Sejak B127 `tenantID` diabaikan, dan sejak B174 field asing serta `tenantID` ditolak 400. Dikoreksi 29 September 2026
 - Dibaca controller dari body: `-`
 - Diisi server: - (`tenantID` hanya diisi saat create)
+- `locationID` (B168) ikut allowlist; wajib dan sah saat buat, opsional saat ubah (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)
 
 #### `PUT /tarif/:id`
 
@@ -773,17 +922,25 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Field lain yang dikenali: `namaTarif`, `basisPerhitungan`, `harga`, `durasiMinimum`, `hariAktif`, `jamMulai`, `jamSelesai`, `tipeAsetID`; `isActive` dan `prioritas` diteruskan service tanpa aturan
 - `tipeAsetID` digabung ke tipe aset lama lewat `$addToSet`, sehingga tipe aset tidak dapat dilepas maupun diganti (`temuan.md` butir 54)
 - Diisi server: - (`tenantID` hanya disuntikkan saat create, sehingga cache tipe aset dibersihkan dengan `tenantID` undefined, `temuan.md` butir 55)
+- `isDefault` opsional, boolean (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)
 
 #### `PUT /tenant/:id`
 
 - Aturan: validateTenantPayload mode update (validators/tenantValidator.js) di route, sebelum `checkPermission("update-tenant")` (`temuan.md` butir 103), lalu dijalankan lagi di `tenantService.update`. Ditambahkan 2 Oktober 2026 terhadap backend `yoga` `50eede7`
-- Allowlist (`TENANT_FIELDS`): `namaToko`, `alamat`, `kota`, `kodePos`, `nomorTelepon`, `emailBisnis`, `logoUrl`, `footerStruk`, `idNPWP`, dan `isSetupComplete`. `persenPajak` dan `tipePajak` keluar dari allowlist sejak `ridho` `a949910` (B266) dan kini ditolak sebagai field asing. Field lain ditolak 400, dan `absensiLokasiAktif` ditolak karena diatur server
+- Allowlist (`TENANT_FIELDS`, backend `2790fc7`): `namaToko`, `alamat`, `kota`, `kodePos`, `nomorTelepon`, `emailBisnis`, `footerStruk`, `idNPWP`, dan `jamOperasional` (P81, menggantikan `jamBuka` dan `jamTutup` sejak `2d2fb90`, yang kini ditolak sebagai field asing). `logoUrl` dan `isSetupComplete` keluar dari allowlist: logo lewat `PUT /tenant/:id/logo` (AR21), dan `isSetupComplete` tidak dapat diubah klien (butir 101). `persenPajak` dan `tipePajak` keluar sejak `ridho` `a949910` (B266). `absensiLokasiAktif` ditolak karena diatur server. Dikoreksi 20 November 2026 (KT1a); sebelumnya mencatat allowlist lama dengan `logoUrl` dan `isSetupComplete`
 - Aturan nilai: `namaToko` tidak boleh dikosongkan dan minimal 3 karakter, dihitung sebelum dipangkas (butir 99); field teks wajib bertipe teks atau null; `emailBisnis` berformat email bila tidak kosong; `isSetupComplete` boolean (butir 101). Teks kosong diterima untuk field opsional
 - Aturan service: hanya field allowlist yang diteruskan ke `$set` dengan `runValidators`; body tanpa field allowlist ditolak 400 "Tidak ada data tenant yang dapat diperbarui."; controller menolak tenant lain dengan 403; cache daftar dan detail tenant dibersihkan
-- Web mengirim hanya field yang berubah dari delapan field profil lewat `payloadPerbaruiTenant` (`features/tenant/payload.ts`, `fcf2dd2`), tanpa `persenPajak`, `tipePajak`, `logoUrl`, dan `isSetupComplete` (keputusan PO13a)
+- Web mengirim hanya field yang berubah dari delapan field profil lewat `payloadPerbaruiTenant` (`features/tenant/payload.ts`, `fcf2dd2`), tanpa `persenPajak`, `tipePajak`, `logoUrl`, dan `isSetupComplete` (keputusan PO13a). Jam operasional per hari dikirim tersendiri sebagai `{ jamOperasional }` dari kartu Jam Buka Profil Toko dan langkah jam buka wizard (`keJamOperasional`, `features/tenant/jam-operasional.ts`; JB8a), null menghapusnya (dicatat 20 November 2026, KT1a)
 - Respons 200 dengan `data` berbentuk `GET /tenant/:id` dan `message` "Data toko berhasil diperbarui."
 - Wajib dari klien: - (minimal satu field)
 - Diisi server: -
+
+#### `PUT /tenant/:id/logo`
+
+- Aturan: tanpa validator payload; `uploadLogo` (multer) menerima satu berkas di field `logo`, izin `update-tenant`. Ditambahkan 20 November 2026 terhadap backend `2790fc7` (KT1a)
+- Web mengirim `FormData` lewat `apiClient.unggah` (`features/tenant/api.ts`; `modul/pengaturan-outlet.md` PO17a)
+- Respons memuat tenant dengan `logoUrl` baru
+- Diisi server: `logoUrl`
 
 #### `PUT /tipeaset/:id`
 
@@ -791,6 +948,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Wajib dari klien: - (`namaTipeAset` yang dikirim tidak boleh kosong dan minimal 2 karakter)
 - Field lain yang dikenali: `deskripsi`, tanpa aturan; payload diteruskan utuh ke `findOneAndUpdate`, sehingga string kosong menghapus deskripsi (dikirim frontend sejak `a2adc70`)
 - Diisi server: - (`tenantID` hanya disuntikkan saat create, dan dibuang service saat update)
+- `jamBuka`, `jamTutup`, dan `buka24Jam` dengan aturan yang sama seperti buat (AR19) (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)
 
 #### `PUT /transferstok/:id`
 

@@ -351,6 +351,13 @@ maju sembilan commit dan `origin/nizar` satu commit di atas `ridho`
   `kontrak/endpoint.md` dan `kontrak/payload.md` tetap dikoreksi
   tertarget; pembangkitan ulang penuh menunggu backend stabil menjelang
   rilis.
+- **KT1a: kontrak dibangkitkan lalu digabung terhadap backend `2790fc7`**
+  (pemilik proyek, 20 November 2026, opsi "Bangkitkan lalu gabung",
+  mengganti penundaan di RG9a). Hasil pembangkit dibandingkan dengan
+  `endpoint.md`, `payload.md`, `izin-halaman.md`, dan Lampiran A, lalu
+  perbedaannya diterapkan dan koreksi manual yang masih benar
+  dipertahankan. Ringkasan yang sudah benar dan yang dikoreksi ada di
+  `kontrak/README.md` (Verifikasi 20 November 2026).
 
 ## Penyesuaian backend `fc29433`
 

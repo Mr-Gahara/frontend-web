@@ -2,9 +2,9 @@
 
 Sifat perubahan: **Tetap**: dibangkitkan ulang hanya atas perintah pemilik proyek.
 
-Dibangkitkan ulang 10 November 2026 terhadap backend `ridho` `aeb6a52` atas perintah pemilik proyek (RG9a), dari pembangkit daftar route milik repo backend (bangkit.cjs), yang dijalankan dari salinan tanpa menulis ke repo backend. Kolom "Dipakai frontend" dihitung dari pemanggilan `.get`, `.post`, `.put`, `.patch`, dan `.delete` dengan `EP` di kode web, termasuk bentuk template literal, dicocokkan per method dan path. Beberapa izin dalam satu baris berarti salah satunya cukup (`checkPermission` memakai `some`). Kolom Permission kosong berarti route tidak memanggil `checkPermission`; dua baris `GET /kategori` dikoreksi manual karena memakai middleware sendiri sejak P76. Auth `authAkun (admin)` berarti hanya akun admin platform. Tidak diubah tangan selain koreksi yang ditandai.
+Dibangkitkan ulang 20 November 2026 terhadap backend `ridho` `2790fc7` atas perintah pemilik proyek (KT1a; sebelumnya 10 November 2026 terhadap `aeb6a52`, RG9a), dari pembangkit daftar route milik repo backend (bangkit.cjs), yang dijalankan dari salinan tanpa menulis ke repo backend. Kolom "Dipakai frontend" dihitung dari pemanggilan `.get`, `.post`, `.put`, `.patch`, dan `.delete` dengan `EP` di kode web, termasuk bentuk template literal, dicocokkan per method dan path. Beberapa izin dalam satu baris berarti salah satunya cukup (`checkPermission` memakai `some`). Kolom Permission kosong berarti route tidak memanggil `checkPermission`; dua baris `GET /kategori` dikoreksi manual karena memakai middleware sendiri sejak P76. Auth `authAkun (admin)` berarti hanya akun admin platform. Pembangkit membaca `router.use(auth…)` sebagai berlaku untuk seluruh berkas, tanpa memperhitungkan urutan; route yang dideklarasikan sebelumnya dikoreksi manual (20 November 2026). Tidak diubah tangan selain koreksi yang ditandai.
 
-Jumlah: 269 route, 174 dipakai frontend.
+Jumlah: 270 route, 194 dipakai frontend.
 
 ## Lampiran A. Seluruh route backend
 
@@ -29,7 +29,7 @@ Jumlah: 269 route, 174 dipakai frontend.
 | POST | `/akun/auth/reset-password` | - | - | ya | `akunRoute.js` |
 | POST | `/akun/auth/verifikasi-email/kirim` | - | - | ya | `akunRoute.js` |
 | POST | `/akun/auth/verifikasi-email` | - | - | ya | `akunRoute.js` |
-| POST | `/akun/auth/refreshtoken` | - | - | - | `akunRoute.js` |
+| POST | `/akun/auth/refreshtoken` | - | - | ya | `akunRoute.js` |
 | POST | `/akun/auth/logout` | - | - | ya | `akunRoute.js` |
 | GET | `/akun/admin/all` | authAkun, authAkun (admin) | - | ya | `akunRoute.js` |
 | GET | `/akun/admin/users/:id` | authAkun, authAkun (admin) | - | ya | `akunRoute.js` |
@@ -43,11 +43,11 @@ Jumlah: 269 route, 174 dipakai frontend.
 | GET | `/akun/admin/users/:id/langganan` | authAkun, authAkun (admin) | - | ya | `akunRoute.js` |
 | GET | `/akun/me` | authAkun | - | ya | `akunRoute.js` |
 | GET | `/akun/profil` | authPengguna | `read-akun` | - | `akunRoute.js` |
-| PUT | `/akun/profil/update/:id` | authPengguna | `update-akun` | - | `akunRoute.js` |
+| PUT | `/akun/profil/update/:id` | authPengguna | `update-akun` | ya | `akunRoute.js` |
 | GET | `/akun/langganan` | authPengguna | `read-langganan` | ya | `akunRoute.js` |
 | GET | `/akun/langganan/riwayat` | authPengguna | `read-langganan` | ya | `akunRoute.js` |
-| POST | `/akun/profil/otp` | authPengguna | `update-akun` | - | `akunRoute.js` |
-| DELETE | `/akun/profil` | authPengguna | `update-akun` | - | `akunRoute.js` |
+| POST | `/akun/profil/otp` | authPengguna | `update-akun` | ya | `akunRoute.js` |
+| DELETE | `/akun/profil` | authPengguna | `update-akun` | ya | `akunRoute.js` |
 | GET | `/aset` | authPengguna | - | ya | `asetRoute.js` |
 | POST | `/aset` | authPengguna | `create-aset` | ya | `asetRoute.js` |
 | GET | `/aset/:id` | authPengguna | - | ya | `asetRoute.js` |
@@ -70,7 +70,7 @@ Jumlah: 269 route, 174 dipakai frontend.
 | GET | `/dashboard/gudang` | authPengguna | `read-dashboard-gudang` | ya | `dashboardRoute.js` |
 | GET | `/dashboard/outlet` | authPengguna | `read-dashboard-outlet` | - | `dashboardRoute.js` |
 | GET | `/device/events` | authPengguna | - | - | `deviceRoute.js` |
-| GET | `/device/:userId` | authPengguna | `read-pengguna` | ya | `deviceRoute.js` |
+| GET | `/device/:userId` | authPengguna | `read-pengguna` | - | `deviceRoute.js` |
 | POST | `/device/approve` | authPengguna | `update-pengguna` | - | `deviceRoute.js` |
 | POST | `/device/revoke` | authPengguna | `update-pengguna` | - | `deviceRoute.js` |
 | POST | `/device/self-approve/otp` | authPengguna | - | - | `deviceRoute.js` |
@@ -111,7 +111,7 @@ Jumlah: 269 route, 174 dipakai frontend.
 | PATCH | `/jurnalstok/wms/opname` | authPengguna | `create-jurnal-stok`, `update-jurnal-stok` | - | `jurnalStokRoute.js` |
 | GET | `/jurnaltransfer` | authPengguna | `read-jurnal-transfer` | ya | `jurnalTransferRoute.js` |
 | POST | `/jurnaltransfer` | authPengguna | `create-jurnal-transfer` | ya | `jurnalTransferRoute.js` |
-| GET | `/jurnaltransfer/:id` | authPengguna | `read-jurnal-transfer` | - | `jurnalTransferRoute.js` |
+| GET | `/jurnaltransfer/:id` | authPengguna | `read-jurnal-transfer` | ya | `jurnalTransferRoute.js` |
 | PUT | `/jurnaltransfer/:id` | authPengguna | `update-jurnal-transfer` | ya | `jurnalTransferRoute.js` |
 | POST | `/kategoribeban` | authPengguna | `create-kategori-beban` | ya | `kategoriBebanRoute.js` |
 | GET | `/kategoribeban` | authPengguna | `read-kategori-beban` | ya | `kategoriBebanRoute.js` |
@@ -129,18 +129,18 @@ Jumlah: 269 route, 174 dipakai frontend.
 | PUT | `/kontrakkompensasi/:id` | authPengguna | `update-kontrak-kompensasi` | - | `kontrakKompensasiRoute.js` |
 | DELETE | `/kontrakkompensasi/:id` | authPengguna | `delete-kontrak-kompensasi` | - | `kontrakKompensasiRoute.js` |
 | GET | `/laporan/laba-rugi` | authPengguna | `read-laporan` | ya | `laporanRoute.js` |
-| GET | `/laporan/arus-kas` | authPengguna | `read-laporan` | - | `laporanRoute.js` |
+| GET | `/laporan/arus-kas` | authPengguna | `read-laporan` | ya | `laporanRoute.js` |
 | POST | `/location` | authPengguna | `create-location` | ya | `locationRoute.js` |
 | GET | `/location` | authPengguna | `read-location` | ya | `locationRoute.js` |
 | GET | `/location/current` | authPengguna | `read-location` | ya | `locationRoute.js` |
 | GET | `/location/:id` | authPengguna | `read-location` | - | `locationRoute.js` |
 | PUT | `/location/:id` | authPengguna | `update-location` | ya | `locationRoute.js` |
 | DELETE | `/location/:id` | authPengguna | `delete-location` | - | `locationRoute.js` |
-| GET | `/membership` | authPengguna | `read-membership` | - | `membershipRoute.js` |
-| POST | `/membership` | authPengguna | `create-membership` | - | `membershipRoute.js` |
+| GET | `/membership` | authPengguna | `read-membership` | ya | `membershipRoute.js` |
+| POST | `/membership` | authPengguna | `create-membership` | ya | `membershipRoute.js` |
 | GET | `/membership/:id` | authPengguna | `read-membership` | - | `membershipRoute.js` |
-| PUT | `/membership/:id` | authPengguna | `update-membership` | - | `membershipRoute.js` |
-| DELETE | `/membership/:id` | authPengguna | `delete-membership` | - | `membershipRoute.js` |
+| PUT | `/membership/:id` | authPengguna | `update-membership` | ya | `membershipRoute.js` |
+| DELETE | `/membership/:id` | authPengguna | `delete-membership` | ya | `membershipRoute.js` |
 | GET | `/metodepembayaran` | authPengguna | - | ya | `metodePembayaranRoute.js` |
 | POST | `/metodepembayaran` | authPengguna | `create-metode-pembayaran` | ya | `metodePembayaranRoute.js` |
 | GET | `/metodepembayaran/:id` | authPengguna | - | ya | `metodePembayaranRoute.js` |
@@ -148,15 +148,15 @@ Jumlah: 269 route, 174 dipakai frontend.
 | POST | `/pajak` | authPengguna | `create-pajak` | ya | `pajakRoute.js` |
 | POST | `/pajak/simulasi-produk` | authPengguna | - | - | `pajakRoute.js` |
 | POST | `/pajak/simulasi-transaksi` | authPengguna | - | - | `pajakRoute.js` |
-| GET | `/pajak` | authPengguna | - | ya | `pajakRoute.js` |
-| GET | `/pajak/:id` | authPengguna | - | - | `pajakRoute.js` |
+| GET | `/pajak` | authPengguna | `read-pajak` atau `akses-pos` (dikoreksi manual: izin di konstanta `BACA`) | ya | `pajakRoute.js` |
+| GET | `/pajak/:id` | authPengguna | `read-pajak` atau `akses-pos` (dikoreksi manual: izin di konstanta `BACA`) | - | `pajakRoute.js` |
 | PUT | `/pajak/:id` | authPengguna | `update-pajak` | ya | `pajakRoute.js` |
 | DELETE | `/pajak/:id` | authPengguna | `delete-pajak` | ya | `pajakRoute.js` |
-| GET | `/paketmembership` | authPengguna | `read-paket-membership` | - | `paketMembershipRoute.js` |
-| POST | `/paketmembership` | authPengguna | `create-paket-membership` | - | `paketMembershipRoute.js` |
+| GET | `/paketmembership` | authPengguna | `read-paket-membership` | ya | `paketMembershipRoute.js` |
+| POST | `/paketmembership` | authPengguna | `create-paket-membership` | ya | `paketMembershipRoute.js` |
 | GET | `/paketmembership/:id` | authPengguna | `read-paket-membership` | - | `paketMembershipRoute.js` |
-| PUT | `/paketmembership/:id` | authPengguna | `update-paket-membership` | - | `paketMembershipRoute.js` |
-| DELETE | `/paketmembership/:id` | authPengguna | `delete-paket-membership` | - | `paketMembershipRoute.js` |
+| PUT | `/paketmembership/:id` | authPengguna | `update-paket-membership` | ya | `paketMembershipRoute.js` |
+| DELETE | `/paketmembership/:id` | authPengguna | `delete-paket-membership` | ya | `paketMembershipRoute.js` |
 | GET | `/pelanggan` | authPengguna | `read-pelanggan` | ya | `pelangganRoute.js` |
 | POST | `/pelanggan` | authPengguna | `create-pelanggan` | ya | `pelangganRoute.js` |
 | GET | `/pelanggan/:id` | authPengguna | `read-pelanggan` | - | `pelangganRoute.js` |
@@ -179,12 +179,12 @@ Jumlah: 269 route, 174 dipakai frontend.
 | PATCH | `/pengajuanstok/:id/submit` | authPengguna | `update-pengajuan-stok` | ya | `pengajuanStokRoute.js` |
 | PATCH | `/pengajuanstok/:id/approve` | authPengguna | `approve-pengajuan-stok` | ya | `pengajuanStokRoute.js` |
 | PATCH | `/pengajuanstok/:id/reject` | authPengguna | `reject-pengajuan-stok` | ya | `pengajuanStokRoute.js` |
-| POST | `/pengguna/pin-refresh` | authPengguna | - | - | `penggunaRoute.js` |
-| POST | `/pengguna/register-owner` | authPengguna, authAkun | - | ya | `penggunaRoute.js` |
-| POST | `/pengguna/pin-login` | authPengguna, authAkun | - | ya | `penggunaRoute.js` |
-| GET | `/pengguna/check-owner` | authPengguna, authAkun | - | - | `penggunaRoute.js` |
-| POST | `/pengguna/reset-pin-owner/otp` | authPengguna, authAkun | - | - | `penggunaRoute.js` |
-| POST | `/pengguna/reset-pin-owner` | authPengguna, authAkun | - | - | `penggunaRoute.js` |
+| POST | `/pengguna/pin-refresh` | - (cookie refresh, `validateSesiRequest`) (dikoreksi manual: `router.use(authPengguna)` baru dipasang sesudah route ini) | - | ya | `penggunaRoute.js` |
+| POST | `/pengguna/register-owner` | authAkun (dikoreksi manual: `router.use(authPengguna)` baru dipasang sesudah route ini) | - | ya | `penggunaRoute.js` |
+| POST | `/pengguna/pin-login` | authAkun (dikoreksi manual: `router.use(authPengguna)` baru dipasang sesudah route ini) | - | ya | `penggunaRoute.js` |
+| GET | `/pengguna/check-owner` | authAkun (dikoreksi manual: `router.use(authPengguna)` baru dipasang sesudah route ini) | - | - | `penggunaRoute.js` |
+| POST | `/pengguna/reset-pin-owner/otp` | authAkun (dikoreksi manual: `router.use(authPengguna)` baru dipasang sesudah route ini) | - | ya | `penggunaRoute.js` |
+| POST | `/pengguna/reset-pin-owner` | authAkun (dikoreksi manual: `router.use(authPengguna)` baru dipasang sesudah route ini) | - | ya | `penggunaRoute.js` |
 | POST | `/pengguna/pin-logout` | authPengguna | - | ya | `penggunaRoute.js` |
 | POST | `/pengguna/register-pengguna` | authPengguna | `create-pengguna` | ya | `penggunaRoute.js` |
 | GET | `/pengguna` | authPengguna | `read-pengguna` | ya | `penggunaRoute.js` |
@@ -230,6 +230,7 @@ Jumlah: 269 route, 174 dipakai frontend.
 | PUT | `/sesibooking/:id` | authPengguna | `update-booking` | ya | `sesiBookingRoute.js` |
 | GET | `/sesikasir/perangkat` | authPengguna | `kelola-perangkat-kasir` | ya | `sesiKasirRoute.js` |
 | POST | `/sesikasir/perangkat` | authPengguna | `kelola-perangkat-kasir` | ya | `sesiKasirRoute.js` |
+| GET | `/sesikasir/perangkat-toko` | authPengguna | `kelola-perangkat-kasir` | ya | `sesiKasirRoute.js` |
 | DELETE | `/sesikasir/perangkat/:id` | authPengguna | `kelola-perangkat-kasir` | ya | `sesiKasirRoute.js` |
 | GET | `/sesikasir/aktif` | authPengguna | `buka-tutup-kasir` | - | `sesiKasirRoute.js` |
 | POST | `/sesikasir/buka` | authPengguna | `buka-tutup-kasir` | - | `sesiKasirRoute.js` |
@@ -262,9 +263,9 @@ Jumlah: 269 route, 174 dipakai frontend.
 | POST | `/tenant` | authAkun | - | ya | `tenantRoute.js` |
 | GET | `/tenant/:id` | authPengguna | - | ya | `tenantRoute.js` |
 | PUT | `/tenant/:id` | authPengguna | `update-tenant` | ya | `tenantRoute.js` |
-| PUT | `/tenant/:id/logo` | authPengguna | `update-tenant` | - | `tenantRoute.js` |
-| DELETE | `/tenant/:id/logo` | authPengguna | `update-tenant` | - | `tenantRoute.js` |
-| GET | `/tenant/:id/logo/:namaFile` | authPengguna | - | - | `tenantRoute.js` |
+| PUT | `/tenant/:id/logo` | authPengguna | `update-tenant` | ya | `tenantRoute.js` |
+| DELETE | `/tenant/:id/logo` | authPengguna | `update-tenant` | ya | `tenantRoute.js` |
+| GET | `/tenant/:id/logo/:namaFile` | authPengguna | - | ya (dari `logoUrl` respons tenant, dikoreksi manual) | `tenantRoute.js` |
 | DELETE | `/tenant/:id` | authPengguna | `delete-tenant` | - | `tenantRoute.js` |
 | GET | `/tipeaset` | authPengguna | - | ya | `tipeAsetRoute.js` |
 | POST | `/tipeaset` | authPengguna | `create-tipe-aset` | ya | `tipeAsetRoute.js` |

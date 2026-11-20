@@ -143,6 +143,17 @@ perintahnya:
    Basic, Advanced, dan Pro). Isinya dicocokkan dengan pembatasan plan
    yang berlaku (`features/langganan/data.ts`, `modul/setup-akun.md`
    PL6a) dan diputuskan pemilik proyek.
+3. **Unduh PDF, Excel, atau CSV untuk laporan dan data penting.**
+   Keadaan 20 November 2026: backend sudah mengekspor `csv`, `xlsx`, dan
+   `pdf` lewat query `format` di `GET /laporan/laba-rugi` dan
+   `GET /laporan/arus-kas` (`controllers/laporanController.js`,
+   `services/laporan/laporanEkspor.js`), dan web baru memakainya di Arus
+   Kas (`laporanApi.unduhArusKas`, tiga tombol unduh). Ringkasan Laba/Rugi
+   dan Pembayaran per Metode bisa memakai ekspor laba rugi yang sudah ada;
+   daftar lain (penjualan, mutasi kas, stok, jurnal stok, pembelian stok,
+   dan lainnya) belum punya ekspor di backend. Daftar laporan dan data yang
+   dianggap penting, formatnya, serta pembagian kerja dengan backend perlu
+   keputusan pemilik proyek.
 
 ### Menunggu keputusan pemilik proyek
 

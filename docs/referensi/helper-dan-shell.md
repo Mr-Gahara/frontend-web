@@ -541,7 +541,7 @@ EOF
   menutup surat jalan uji yang tertinggal DIKIRIM, karena batal dari
   DIKIRIM ditolak backend (keputusan PB10a). Login PIN-nya mengambil alih
   sesi web Ridho.
-- `audit-endpoint.js`: dijalankan dari akar repo frontend-web. Memetakan
+- `audit-endpoint.js`: dijalankan dari akar repo frontend-web. Sejak 20 November 2026 juga mengenali `apiClient.unggah` (PUT multipart) dan `apiClient.unduh` (GET berkas); cadangan versi sebelumnya `audit-endpoint.js.bak-20261120`. Memetakan
   setiap panggilan frontend (`apiData`, `apiMentah`, `api`, dan `apiClient`
   dengan `EP`,
   path tertulis, atau template, serta `fetch` ke backend) ke method dan
@@ -805,6 +805,14 @@ yang disalurkan ke `tail -3` mencetak kode 0 padahal alat itu keluar 1.
   `ps -eo pid,args | grep '[p]laywright test'`, lalu `kill <pid>`.
   Untuk suite yang dijalankan di latar belakang, hentikan lewat
   tugasnya (TaskStop).
+- **Pembangkit route backend (`bangkit.cjs`) punya dua titik buta.** Izin
+  yang disimpan di konstanta (`const BACA = checkPermission(...)`, route
+  kategori dan pajak) tidak terbaca, dan `router.use(authPengguna)`
+  dianggap berlaku untuk seluruh berkas, padahal route yang dideklarasikan
+  sebelumnya (enam route awal `penggunaRoute.js`) tidak memakainya.
+  Setelah membangkitkan Lampiran A, grep `const [A-Z_]* = checkPermission`
+  dan baris route sebelum `router.use(auth` di `routes/`, lalu koreksi
+  manual barisnya (20 November 2026, KT1a).
 - **Skrip milik repo backend tidak dijalankan di tempatnya, termasuk
   yang tampak hanya membaca.** `node scripts/dokumen/bangkit.cjs
   --periksa` mengabaikan `--periksa` dan menulis ulang

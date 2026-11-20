@@ -20,7 +20,64 @@ data, atau izin harus diturunkan dari sini, bukan dari dugaan.
 | Field payload operasi tulis, yang wajib dan yang diisi server | `payload.md` (bagian 4) |
 | Izin yang dibutuhkan sebuah halaman | `izin-halaman.md` (bagian 5) |
 | Ketidakselarasan yang sudah tercatat beserta pemiliknya | `temuan.md` (bagian 6) |
-| Seluruh 269 route backend, termasuk yang belum dipakai | `route-backend.md` (Lampiran A, dibangkitkan ulang terhadap `aeb6a52`, RG9a) |
+| Seluruh 270 route backend, termasuk yang belum dipakai | `route-backend.md` (Lampiran A, dibangkitkan ulang terhadap `2790fc7`, KT1a) |
+
+## Verifikasi 20 November 2026 (KT1a)
+
+Dibangkitkan lalu digabung terhadap backend `ridho` `2790fc7` dan web
+`99ecd4c` atas perintah pemilik proyek (opsi "Bangkitkan lalu gabung"):
+hasil pembangkit dibandingkan dengan dokumen, perbedaannya diterapkan,
+dan koreksi manual yang masih benar dipertahankan. Sumbernya kode
+`routes/`, `validators/`, dan `models/` backend, `lib/api/endpoints.ts`
+serta `features/*/api.ts` web, `IZIN_HALAMAN`, dan respons GET nyata dari
+backend lokal.
+
+**Sudah benar, dibiarkan:**
+
+- Auth dan permission seluruh baris `endpoint.md` sama dengan route
+  backend, kecuali yang dikoreksi di bawah.
+- Bentuk item 16 GET tanpa parameter di bagian 3.3 sama dengan respons
+  nyata, antara lain absensi, akun kas, bahan baku, diskon, inventory,
+  lokasi, metode pembayaran, pajak, role, dan transfer stok. GET
+  berparameter (`/:id`) tidak diambil ulang sampelnya.
+- 66 dari 80 bagian `payload.md` untuk operasi yang masih dipanggil:
+  setiap field dan field wajib validator disebut di bagiannya. Dua bagian
+  lain (`/bahan-baku`) jejak operasi yang sudah dibuang.
+- 91 dari 104 rute `IZIN_HALAMAN` di `izin-halaman.md`.
+- `temuan.md`: statusnya diselaraskan butir per butir 16 sampai
+  18 November 2026 dengan `docs/pengembangan/klien.md` backend, dan
+  backend tidak maju sejak itu.
+
+**Belum benar, dikoreksi:**
+
+- Lampiran A: satu route baru (`GET /sesikasir/perangkat-toko`), kolom
+  "Dipakai frontend" 22 route (membership, paket, Akun Toko, reset PIN
+  Owner, arus kas, logo, rincian transfer, dan penyegaran sesi), `GET
+  /device/:userId` tidak dipakai lagi, `GET /pajak` yang izinnya di
+  konstanta `BACA`, dan auth enam route `/pengguna` yang dideklarasikan
+  sebelum `router.use(authPengguna)`. Dua cacat pembangkit yang sudah ada
+  sejak RG9a: izin yang disimpan di konstanta tidak terbaca, dan
+  `router.use` dianggap berlaku untuk seluruh berkas.
+- `endpoint.md`: 18 endpoint yang dipanggil web belum tercatat, termasuk
+  bagian baru `/membership` dan `/paketmembership`; `GET /device/:userId`
+  ditandai tidak dipanggil lagi; izin `/kategori` (`akses-pos`, P76) dan
+  `/pembelianstok` (varian per ruang, B116) tertinggal; `GET /shift`
+  tanpa query tidak lagi 500; 19 baris bagian 3.3 mendapat kunci baru dari
+  respons nyata, dan delapan GET mendapat baris.
+- `payload.md`: 21 operasi tulis yang dipanggil web belum punya bagian, dan
+  14 bagian tertinggal dari validator: `PUT /tenant/:id` (allowlist kini
+  `jamOperasional`, tanpa `logoUrl` dan `isSetupComplete`), `POST
+  /pembayaran` (`dicatatOleh` diatur server), `plan` di buat akun klien
+  dan perpanjang langganan, `locationID` di pengguna, shift, dan pola
+  roster, `stokMinimum` produk, `isDefault` tarif, serta jam buka tipe
+  aset.
+- `izin-halaman.md`: gate pembelian stok (varian per ruang), empat grup
+  menu yang kini mengikuti `bolehBukaGrup`, dan enam rute yang belum
+  tercatat.
+- Helper `audit-endpoint.js` belum mengenali `apiClient.unggah` (PUT) dan
+  `apiClient.unduh` (GET); kini mengenali keduanya.
+
+Paragraf di bawah adalah riwayat koreksi sebelum verifikasi ini.
 
 Kontrak terikat pada commit backend `4310d1c` (18 September 2026). Bagian
 inventory dan stock opname di `endpoint.md`, `payload.md`, `izin-halaman.md`,
