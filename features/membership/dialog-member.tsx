@@ -169,7 +169,7 @@ export function DialogMember({
                   aria-labelledby="label-pelanggan-member"
                   disabled={pelanggan.isPending}
                   className={cn(
-                    "w-full min-w-0 justify-between h-11 bg-white border-navy/20 text-navy font-bold",
+                    "w-full min-w-0 justify-between h-[42px] bg-white border-navy/20 text-navy font-bold",
                     dicoba && kurang.pelanggan && "border-rose-500",
                   )}
                 >

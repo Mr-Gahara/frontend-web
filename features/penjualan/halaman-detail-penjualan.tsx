@@ -253,7 +253,7 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
             <Receipt className="h-5 w-5 text-karamel" />
             <h2 className="text-subjudul font-bold text-navy">Informasi Transaksi</h2>
           </div>
-          <div className="grid grid-cols-2 gap-y-5 text-isi">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-5 text-isi">
             <div>
               <p className="text-navy/60 font-bold text-kecil mb-1">
                 Tanggal & Waktu

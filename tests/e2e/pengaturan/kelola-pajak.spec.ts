@@ -235,7 +235,7 @@ test.describe("E2E — Kelola pajak", () => {
       const tPasang = page.waitForResponse(cocok("POST", POLA_PASANG));
       await page.getByRole("button", { name: "Assign" }).click();
       expect((await tPasang).status()).toBe(201);
-      const baris = page.getByRole("row").filter({ has: page.getByRole("button", { name: "Lepas" }) });
+      const baris = page.getByRole("row").filter({ has: page.getByRole("button", { name: "Aksi pajak produk" }) });
       await expect(baris).toContainText(namaA);
       await expect(baris).toContainText("5%");
       await expect(baris).toContainText("Add-on (Eksklusif)");
@@ -257,8 +257,10 @@ test.describe("E2E — Kelola pajak", () => {
       await expect(baris).toContainText("Inklusif");
       expect((await relasiProduk(page, auth, produk.id)).map((r) => r.pajak.id)).toEqual([id.b]);
 
+      // PP1a: Lepas di menu titik tiga baris.
+      await page.getByRole("button", { name: "Aksi pajak produk" }).click();
       const tLepas = page.waitForResponse(cocok("DELETE", POLA_RELASI));
-      await page.getByRole("button", { name: "Lepas" }).click();
+      await page.getByRole("menuitem", { name: "Lepas" }).click();
       expect((await tLepas).status()).toBe(200);
       await expect(page.getByText("Belum ada pajak untuk produk ini.")).toBeVisible();
       expect(await relasiProduk(page, auth, produk.id)).toEqual([]);
@@ -279,7 +281,7 @@ test.describe("E2E — Kelola pajak", () => {
     const namaB = "E2E PJK M " + akhiran;
     const id: { a?: string; b?: string } = {};
     const opsi = (nama: string, tarif: number) => page.getByRole("option", { name: `${nama} (${tarif}%)`, exact: true });
-    const baris = page.getByRole("row").filter({ has: page.getByRole("button", { name: "Lepas" }) });
+    const baris = page.getByRole("row").filter({ has: page.getByRole("button", { name: "Aksi pajak produk" }) });
     const bukaProdukUji = async () => {
       await page.getByRole("tab", { name: "Pajak per Produk" }).click();
       await pemicu(page, "Pilih produk").click();
@@ -341,8 +343,10 @@ test.describe("E2E — Kelola pajak", () => {
       await expect(baris).not.toContainText("(nonaktif)");
       expect((await relasiProduk(page, auth, produk.id)).map((r) => r.pajak.id)).toEqual([id.b]);
 
+      // PP1a: Lepas di menu titik tiga baris.
+      await page.getByRole("button", { name: "Aksi pajak produk" }).click();
       const tLepas = page.waitForResponse(cocok("DELETE", POLA_RELASI));
-      await page.getByRole("button", { name: "Lepas" }).click();
+      await page.getByRole("menuitem", { name: "Lepas" }).click();
       expect((await tLepas).status()).toBe(200);
       await expect(page.getByText("Belum ada pajak untuk produk ini.")).toBeVisible();
     } finally {

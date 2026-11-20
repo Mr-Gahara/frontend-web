@@ -505,13 +505,13 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
       </div>
 
       {/* FOOTER ACTIONS */}
-      <div className="flex justify-end gap-3 pt-2">
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
         {!pengajuan && (
           <Button
             type="button"
             variant="ghost"
             onClick={() => router.back()}
-            className="font-bold text-navy/60 hover:text-navy cursor-pointer"
+            className="w-full sm:w-auto font-bold text-navy/60 hover:text-navy cursor-pointer"
           >
             Batal
           </Button>
@@ -520,7 +520,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
           type="button"
           onClick={simpan}
           disabled={menyimpan || (!pengajuan && (!outletID || !gudangID))}
-          className="bg-navy text-gading hover:bg-navy/90 font-bold shadow-md cursor-pointer"
+          className="w-full sm:w-auto bg-navy text-gading hover:bg-navy/90 font-bold shadow-md cursor-pointer"
         >
           <Save className="w-4 h-4 mr-2" />
           {menyimpan ? "Menyimpan..." : teks.simpan}

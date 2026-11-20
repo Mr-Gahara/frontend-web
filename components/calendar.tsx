@@ -167,7 +167,7 @@ function Calendar({
 
           return (
             <Select value={value?.toString()} onValueChange={handleChange}>
-              <SelectTrigger className="h-8 w-fit gap-1.5 border-none bg-transparent p-1 focus:ring-0 hover:bg-navy/5 font-bold text-besar text-navy shadow-none">
+              <SelectTrigger className="h-auto! py-1! w-fit gap-1.5 border-none bg-transparent p-1 focus:ring-0 hover:bg-navy/5 font-bold text-besar text-navy shadow-none">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent

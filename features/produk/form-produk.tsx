@@ -325,13 +325,13 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
                         variant="outline"
                         role="combobox"
                         aria-expanded={openCombobox}
-                        className="w-full justify-between cursor-pointer bg-gading border-navy/20 text-navy hover:bg-navy/5 focus:ring-1 focus:ring-navy"
+                        className="w-full justify-between cursor-pointer bg-gading border-navy/20 text-navy hover:bg-navy/5 focus:ring-1 focus:ring-navy h-[42px]"
                       >
                         <span
                           className={
                             field.value
-                              ? "font-bold"
-                              : "font-normal text-navy/50"
+                              ? "min-w-0 truncate font-bold"
+                              : "min-w-0 truncate font-normal text-navy/50"
                           }
                         >
                           {field.value

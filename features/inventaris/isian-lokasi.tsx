@@ -121,8 +121,8 @@ export default function IsianLokasi({
 
       {/* SECTION GEOLOKASI */}
       <div className="space-y-4 rounded-xl border border-border bg-muted/30 p-4">
-        <div className="flex items-center justify-between">
-          <span className="text-isi font-medium text-foreground flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <span className="text-isi font-medium text-foreground flex items-center gap-2 whitespace-nowrap">
             <MapPin className="h-4 w-4 text-emerald-600" /> Koordinat Lokasi
           </span>
           {!bacaSaja && (
@@ -130,7 +130,7 @@ export default function IsianLokasi({
               type="button"
               onClick={handleGetLocation}
               disabled={isLocating}
-              className="inline-flex items-center gap-1.5 text-kecil font-semibold text-emerald-600 hover:text-emerald-700 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap text-kecil font-semibold text-emerald-600 hover:text-emerald-700 transition-colors cursor-pointer"
             >
               {isLocating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Navigation className="h-3 w-3" />}
               Deteksi Otomatis

@@ -149,14 +149,16 @@ export function StepSatuForm({
                   aria-expanded={openPola}
                   aria-labelledby="label-pola-generate"
                   className={cn(
-                    "w-full justify-between font-bold cursor-pointer bg-gading border-navy/15 h-12 rounded-xl px-4 hover:bg-navy/5 text-navy",
+                    "w-full justify-between font-bold cursor-pointer bg-gading border-navy/15 h-[42px] rounded-xl px-4 hover:bg-navy/5 text-navy",
                     !polaId && "text-navy/50 font-medium",
                   )}
                 >
-                  {polaId
-                    ? polaRosterList.find((p) => p.id === polaId)?.namaPola
-                    : "Pilih pola yang sudah dibuat..."}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                  <span className="truncate">
+                    {polaId
+                      ? polaRosterList.find((p) => p.id === polaId)?.namaPola
+                      : "Pilih pola yang sudah dibuat..."}
+                  </span>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent
@@ -316,18 +318,18 @@ export function StepSatuForm({
         </div>
 
         {/* FOOTER ACTIONS */}
-        <div className="lg:col-span-12 flex items-center justify-end gap-3 mt-4 pt-6 border-t border-navy/10">
+        <div className="lg:col-span-12 flex flex-col-reverse sm:flex-row items-center justify-end gap-3 mt-4 pt-6 border-t border-navy/10">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
-            className="h-12 px-6 border-navy/20 text-navy hover:bg-navy/5 font-bold rounded-xl cursor-pointer"
+            className="w-full sm:w-auto h-12 px-6 border-navy/20 text-navy hover:bg-navy/5 font-bold rounded-xl cursor-pointer"
           >
             Batal
           </Button>
           <Button
             type="submit"
-            className="h-12 px-8 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer group"
+            className="w-full sm:w-auto h-12 px-8 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer group"
           >
             Lanjut Pratinjau
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

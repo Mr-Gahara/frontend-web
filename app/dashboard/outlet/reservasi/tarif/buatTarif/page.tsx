@@ -576,12 +576,12 @@ export default function BuatTarifPage() {
         </div>
 
         {/* FOOTER ACTIONS */}
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push("/dashboard/outlet/reservasi/tarif")}
-            className="font-bold border-gray-300 hover:bg-gray-100"
+            className="w-full sm:w-auto font-bold border-gray-300 hover:bg-gray-100"
             disabled={createMutation.isPending}
             style={{ color: COLORS.navy }}
           >
@@ -589,7 +589,7 @@ export default function BuatTarifPage() {
           </Button>
           <Button
             type="submit"
-            className="font-bold shadow-md hover:-translate-y-0.5 transition-transform"
+            className="w-full sm:w-auto font-bold shadow-md hover:-translate-y-0.5 transition-transform"
             disabled={createMutation.isPending}
             style={{ background: COLORS.navy, color: COLORS.cream }}
           >

@@ -33,7 +33,8 @@ export default function ReservasiLayout({ children }: { children: React.ReactNod
         </div>
       </div>
       <ReservasiNavTabs />
-      <div className="w-full">{children}</div>
+      {/* TH1a: halaman di dalam layout modul tidak menambah padding pembungkus sendiri, agar tepinya segaris dengan judul modul. */}
+      <div className="w-full sm:*:px-0! sm:*:py-0!">{children}</div>
     </div>
   );
 }

@@ -238,13 +238,13 @@ export function StepDuaPreview({
       </div>
 
       {/* FOOTER ACTIONS */}
-      <div className="flex items-center justify-between mt-6 pt-6 border-t border-navy/10">
+      <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 mt-6 pt-6 border-t border-navy/10">
         <Button
           type="button"
           variant="outline"
           onClick={onBack}
           disabled={isPending}
-          className="h-12 px-6 border-navy/20 text-navy hover:bg-navy/5 font-bold rounded-xl cursor-pointer"
+          className="w-full sm:w-auto h-12 px-6 border-navy/20 text-navy hover:bg-navy/5 font-bold rounded-xl cursor-pointer"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Edit Parameter
@@ -252,7 +252,7 @@ export function StepDuaPreview({
         <Button
           onClick={handleFinalSubmit}
           disabled={isPending || pesanMasalah !== null}
-          className="h-12 px-8 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer"
+          className="w-full sm:w-auto h-12 px-8 bg-navy text-gading hover:bg-navy/90 font-bold rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer"
         >
           {isPending ? "Menyimpan ke Server..." : "Simpan & Terapkan Jadwal"}
           {!isPending && <Check className="ml-2 h-4 w-4" />}

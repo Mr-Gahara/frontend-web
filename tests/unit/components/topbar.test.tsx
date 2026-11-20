@@ -30,4 +30,17 @@ describe("Topbar (keputusan rancangan butir 28)", () => {
     expect(screen.getByText(teks(new Date(2026, 10, 1)))).toBeTruthy();
     expect(screen.queryByText(teks(new Date(2026, 9, 31)))).toBeNull();
   });
+
+  it("bentuk singkat hanya di bawah 640 px, panjang di 640 px ke atas (TT1a)", () => {
+    vi.setSystemTime(new Date(2026, 10, 20, 10, 0, 0));
+    render(<Topbar />);
+    const singkat = new Date(2026, 10, 20).toLocaleDateString("id-ID", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+    expect(screen.getByText(singkat).className).toBe("sm:hidden");
+    expect(screen.getByText(teks(new Date(2026, 10, 20))).className).toBe("hidden sm:inline");
+  });
 });

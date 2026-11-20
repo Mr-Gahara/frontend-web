@@ -265,13 +265,13 @@ export function FormMetodePembayaran({
           <div className="rounded-md bg-red-500/10 p-3 text-isi font-bold text-red-600 border border-red-500/20">{galat}</div>
         )}
 
-        <div className="flex justify-end gap-3 pt-6 border-t border-navy/10 mt-2">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-6 border-t border-navy/10 mt-2">
           <Link href={URL_DAFTAR_METODE}>
             <Button
               type="button"
               variant="outline"
               disabled={sedangMenyimpan}
-              className="cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
+              className="w-full sm:w-auto cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
             >
               Batal
             </Button>
@@ -279,7 +279,7 @@ export function FormMetodePembayaran({
           <Button
             type="submit"
             disabled={sedangMenyimpan || !adaPerubahan}
-            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm font-bold px-6 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm font-bold px-6 disabled:cursor-not-allowed"
           >
             {sedangMenyimpan ? (
               "Menyimpan..."

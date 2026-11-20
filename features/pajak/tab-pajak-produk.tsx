@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth/useSession";
 import { aksiPajak } from "./izin";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useDaftarProduk } from "@/features/produk/hooks";
 import { pesanError } from "@/lib/api/error";
-import type { Pajak } from "@/types/pajak";
+import type { Pajak, RelasiPajakProduk } from "@/types/pajak";
 import { useLepasPajak, usePasangPajak, useRelasiPajakProduk } from "./hooks";
 import { PesanPajak } from "./pesan-pajak";
 import { labelModelRelasi, pajakTerpasang, pilihanPajakProduk, relasiNonaktif } from "./tampilan";
@@ -28,8 +36,6 @@ const kelasLabel = "text-isi font-bold text-navy";
 const kelasPemicu = "border-navy/20 bg-gading text-navy";
 const kelasIsiPilihan = "bg-gading border-navy/10 text-navy";
 const kelasPilihan = "cursor-pointer hover:bg-navy/5";
-const kelasKepala = "font-bold text-navy/60";
-const kelasSelKosong = "text-center text-navy/60 font-medium py-6";
 
 /**
  * Tab pajak per produk (keputusan PO6a). Backend menyimpan relasi lewat
@@ -86,6 +92,72 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
     }
     kirimPasang();
   };
+
+  const kolom = useMemo<ColumnDef<RelasiPajakProduk>[]>(
+    () => [
+      {
+        id: "nama",
+        header: "Nama Pajak",
+        cell: ({ row }) => (
+          <div className="font-bold text-navy whitespace-normal">
+            {row.original.pajak.nama}
+            {relasiNonaktif(row.original) && (
+              <>
+                <span className="ml-1 font-medium text-navy/60">(nonaktif)</span>
+                <p className="text-kecil font-medium text-navy/60">
+                  Pajak ini nonaktif dan tidak dikenakan saat penjualan.
+                </p>
+              </>
+            )}
+          </div>
+        ),
+      },
+      {
+        id: "tarif",
+        header: "Tarif",
+        cell: ({ row }) => <span className="font-semibold text-navy">{row.original.pajak.tarif}%</span>,
+      },
+      {
+        id: "model",
+        header: "Model",
+        cell: ({ row }) => (
+          <span className="font-medium text-navy/80">{labelModelRelasi(row.original.pajak.model)}</span>
+        ),
+      },
+      {
+        id: "aksi",
+        header: () => <span className="sr-only">Aksi</span>,
+        cell: ({ row }) =>
+          bolehPasang ? (
+            <div className="flex justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Aksi pajak produk"
+                    className="h-8 w-8 cursor-pointer text-navy/70 hover:text-navy hover:bg-navy/5"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 bg-gading border-navy/10">
+                  <DropdownMenuItem
+                    disabled={lepas.isPending}
+                    onClick={() => lepas.mutate(row.original.id)}
+                    className="cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-500/10 font-bold"
+                  >
+                    Lepas
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : null,
+      },
+    ],
+    [bolehPasang, lepas],
+  );
 
   return (
     <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-6">
@@ -154,74 +226,23 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
         </div>
       )}
 
-      {produkId && (
-        <div className="rounded-xl border border-navy/10 bg-gading overflow-hidden mt-4">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b border-navy/10 hover:bg-transparent">
-                <TableHead className={kelasKepala}>Nama Pajak</TableHead>
-                <TableHead className={kelasKepala}>Tarif</TableHead>
-                <TableHead className={kelasKepala}>Model</TableHead>
-                <TableHead className={`text-right ${kelasKepala}`}>Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {relasi.isLoading ? (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={4} className={kelasSelKosong}>
-                    Memuat...
-                  </TableCell>
-                </TableRow>
-              ) : relasi.isError ? (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={4} className="p-4">
-                    <PesanPajak
-                      judul="Gagal memuat pajak produk"
-                      pesan={pesanError(relasi.error, "Terjadi kesalahan saat memuat pajak produk.")}
-                      onCobaLagi={() => void relasi.refetch()}
-                    />
-                  </TableCell>
-                </TableRow>
-              ) : !terpasang ? (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={4} className={kelasSelKosong}>
-                    Belum ada pajak untuk produk ini.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                <TableRow className="border-b border-navy/5 hover:bg-navy/5 transition-colors">
-                  <TableCell className="font-bold text-navy">
-                    {terpasang.pajak.nama}
-                    {relasiNonaktif(terpasang) && (
-                      <>
-                        <span className="ml-1 font-medium text-navy/60">(nonaktif)</span>
-                        <p className="text-kecil font-medium text-navy/60">
-                          Pajak ini nonaktif dan tidak dikenakan saat penjualan.
-                        </p>
-                      </>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-semibold text-navy">{terpasang.pajak.tarif}%</TableCell>
-                  <TableCell className="font-medium text-navy/80">{labelModelRelasi(terpasang.pajak.model)}</TableCell>
-                  <TableCell className="text-right">
-                    {bolehPasang && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={lepas.isPending}
-                      onClick={() => lepas.mutate(terpasang.id)}
-                      className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-500/10 font-bold"
-                    >
-                      Lepas
-                    </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      {/* PP1a: DataTable rincian tanpa panel berlatar, aksi Lepas di menu titik tiga (keputusan rancangan butir 26). */}
+      {produkId &&
+        (relasi.isError ? (
+          <PesanPajak
+            judul="Gagal memuat pajak produk"
+            pesan={pesanError(relasi.error, "Terjadi kesalahan saat memuat pajak produk.")}
+            onCobaLagi={() => void relasi.refetch()}
+          />
+        ) : (
+          <DataTable
+            columns={kolom}
+            data={terpasang ? [terpasang] : []}
+            loading={relasi.isLoading}
+            emptyMessage="Belum ada pajak untuk produk ini."
+            rincian
+          />
+        ))}
 
       <AlertDialog
         open={konfirmasi}

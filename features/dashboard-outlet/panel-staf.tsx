@@ -129,16 +129,19 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
         <p className="text-isi text-navy/60">Belum ada staf di ruang outlet.</p>
       ) : (
         <>
-          <div className="grid grid-cols-4 gap-1.5 sm:gap-3">
-            <AngkaRingkas label="Masuk" jumlah={jumlah("sedang_bekerja")} titik="bg-sage" />
-            <AngkaRingkas label="Pulang" jumlah={jumlah("sudah_pulang")} titik="bg-navy" />
-            <AngkaRingkas
-              label="Izin, sakit, cuti"
-              labelPendek="Izin"
-              jumlah={jumlah("izin", "sakit", "cuti")}
-              titik="bg-karamel"
-            />
-            <AngkaRingkas label="Belum absen" labelPendek="Belum" jumlah={jumlah("belum_absen")} titik="bg-navy/30" />
+          {/* Empat kolom hanya bila label tidak terpotong; di HP sempit 2 x 2 (pindaian kerapian 20 November 2026). */}
+          <div className="@container">
+            <div className="grid grid-cols-2 @[18rem]:grid-cols-4 gap-1.5 sm:gap-3">
+              <AngkaRingkas label="Masuk" jumlah={jumlah("sedang_bekerja")} titik="bg-sage" />
+              <AngkaRingkas label="Pulang" jumlah={jumlah("sudah_pulang")} titik="bg-navy" />
+              <AngkaRingkas
+                label="Izin, sakit, cuti"
+                labelPendek="Izin"
+                jumlah={jumlah("izin", "sakit", "cuti")}
+                titik="bg-karamel"
+              />
+              <AngkaRingkas label="Belum absen" labelPendek="Belum" jumlah={jumlah("belum_absen")} titik="bg-navy/30" />
+            </div>
           </div>
           <div className="sm:max-h-96 sm:overflow-y-auto">
             <Table>
@@ -152,7 +155,8 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
               <TableBody>
                 {baris.map((b, indeks) => (
                   <TableRow key={b.penggunaID} className={kelasBaris(indeks)}>
-                    <TableCell>
+                    {/* max-w-0 w-full di HP: nama terpotong di dalam sel, bukan mendorong lencana keluar kartu. */}
+                    <TableCell className="max-sm:w-full max-sm:max-w-0">
                       <span className="flex items-center gap-3 min-w-0">
                         <span
                           className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-navy text-gading flex items-center justify-center text-mikro sm:text-kecil font-bold shrink-0"

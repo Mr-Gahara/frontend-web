@@ -42,8 +42,8 @@ export function KartuDiskonGlobal({
   return (
     <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-5">
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-subjudul font-bold text-navy flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <h2 className="text-subjudul font-bold text-navy flex items-center gap-2 whitespace-nowrap">
             <Tag className="h-4 w-4 text-karamel" /> Diskon Global
           </h2>
           <Popover

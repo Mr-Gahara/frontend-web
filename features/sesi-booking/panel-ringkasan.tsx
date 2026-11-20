@@ -56,7 +56,7 @@ export function PanelRingkasan({
 
           {/* DISKON GLOBAL PANEL KANAN */}
           <div className="space-y-1.5 pt-2">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
               <p className="text-kecil font-bold text-gading/60 uppercase tracking-wider flex items-center gap-1.5">
                 <Tag className="w-3.5 h-3.5 text-karamel" /> Diskon Global Transaksi
               </p>

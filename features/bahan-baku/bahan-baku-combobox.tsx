@@ -39,7 +39,7 @@ export function BahanBakuCombobox({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between bg-white border-navy/20 text-navy h-10 focus:ring-1 focus:ring-navy",
+            "w-full justify-between bg-white border-navy/20 text-navy h-[42px] focus:ring-1 focus:ring-navy",
             hasError && "border-rose-500",
             selected ? "font-bold" : "font-normal",
           )}

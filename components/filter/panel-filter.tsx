@@ -274,7 +274,8 @@ export function PilihanPeriode({
 }
 
 /** Kelas pemicu Select di dalam panel, agar setinggi isian lain. */
-export const KELAS_PEMICU_PANEL = "h-10 w-full cursor-pointer border-navy/20 bg-permukaan text-navy sm:h-11";
+// Tinggi pemicu panel tetap seperti sebelum TI1a (h-auto dengan py-3, 46 px).
+export const KELAS_PEMICU_PANEL = "h-auto! py-3! w-full cursor-pointer border-navy/20 bg-permukaan text-navy";
 
 const SEMUA = "__semua";
 

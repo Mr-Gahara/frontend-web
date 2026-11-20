@@ -51,11 +51,11 @@ export function KartuPelanggan({
               variant="outline"
               role="combobox"
               aria-expanded={openPelanggan}
-              className="w-full justify-between font-bold cursor-pointer bg-gading border-navy/20 text-navy"
+              className="w-full justify-between font-bold cursor-pointer bg-gading border-navy/20 text-navy h-[42px]"
             >
               <span
                 className={
-                  pelangganID ? "" : "text-navy/50 font-medium"
+                  pelangganID ? "min-w-0 truncate" : "min-w-0 truncate text-navy/50 font-medium"
                 }
               >
                 {pelangganID
@@ -63,7 +63,7 @@ export function KartuPelanggan({
                     "Pelanggan tidak ditemukan")
                   : "Pilih pelanggan..."}
               </span>
-              <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
           <PopoverContent

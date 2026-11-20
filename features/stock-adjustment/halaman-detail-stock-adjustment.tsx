@@ -131,7 +131,7 @@ export default function HalamanDetailStockAdjustment({ ruang }: Props) {
             <h2 className="text-subjudul font-bold text-navy">Audit Trail Informasi</h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-y-5 text-isi">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-5 text-isi">
             <div>
               <p className="text-navy/60 font-bold text-kecil mb-1 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" /> Tanggal Eksekusi

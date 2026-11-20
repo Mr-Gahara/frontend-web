@@ -192,7 +192,7 @@ export default function HalamanBuatReservasi() {
                         role="combobox"
                         disabled={memuatPelanggan}
                         className={cn(
-                          "w-full justify-between cursor-pointer bg-gading border-navy/20 text-navy font-bold h-12",
+                          "w-full justify-between cursor-pointer bg-gading border-navy/20 text-navy font-bold h-[42px]",
                           errors.dataPelanggan && "border-rose-500",
                         )}
                       >
