@@ -17,7 +17,7 @@ import { paramHalamanPengajuan, type FilterArah } from "./filter";
 import { arahLokasi } from "./arah";
 import { statusTerlihat, tabTerlihat, type TabPengajuan } from "./izin";
 import { tahapPengajuan, type TahapPengajuan } from "./tahap";
-import { LABEL_ARAH_PENGAJUAN, SLUG_TAB_PENGAJUAN, labelTabPengajuan, labelTahapPengajuan } from "./tampilan";
+import { LABEL_ARAH_PENGAJUAN, SLUG_TAB_PENGAJUAN, labelTabPengajuan, labelTahapPengajuan, namaPeninjau } from "./tampilan";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -250,7 +250,14 @@ function IsiDaftarPengajuanStok({
         id: "status",
         header: "Status",
         cell: ({ row }) => {
-          return getStatusBadge(tahapPengajuan(row.original), labelTahapPengajuan(ruang, row.original));
+          const nama = namaPeninjau(row.original);
+          // Di kartu HP peninjau sebaris di samping lencana agar tidak berdempet (20 November 2026).
+          return (
+            <div className="flex flex-col items-start gap-1 kartu:flex-row kartu:flex-wrap kartu:items-center kartu:gap-x-2">
+              {getStatusBadge(tahapPengajuan(row.original), labelTahapPengajuan(ruang, row.original))}
+              {nama && <span className="text-kecil font-medium text-navy/60">oleh {nama}</span>}
+            </div>
+          );
         },
       },
       {
@@ -395,6 +402,7 @@ function IsiDaftarPengajuanStok({
           columns={kolom}
           data={filteredData}
           loading={isLoading}
+          kartuLega
           emptyMessage={teks.kosong}
           paginasiServer={{
             halaman,

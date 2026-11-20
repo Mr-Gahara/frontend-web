@@ -279,6 +279,18 @@ test.describe("Daftar pengajuan stok gudang", () => {
     const h = await bukaSemua(page);
     expect(h.data.every((p) => p.status !== "DRAFT")).toBe(true);
     await periksaHalaman(page, h, KOSONG);
+ 
+    // Peninjau di baris kedua kolom Status (opsi A, 20 November 2026; butir 145):
+    // penyetuju atau penolak dari respons halaman itu, tanpa baris bila belum ditinjau.
+    const baris = page.locator("table tbody tr");
+    for (const [i, p] of (h.data as (PengajuanMentah & {
+      disetujuiOleh?: { nama?: string | null } | null;
+      ditolakOleh?: { nama?: string | null } | null;
+    })[]).entries()) {
+      const nama = p.disetujuiOleh?.nama || p.ditolakOleh?.nama;
+      if (nama) await expect(baris.nth(i), `${p.nomorPengajuan}: peninjau`).toContainText(`oleh ${nama}`);
+      else await expect(baris.nth(i), `${p.nomorPengajuan}: belum ditinjau`).not.toContainText(/\boleh \S/);
+    }
   });
 
   test("tab Perlu Surat Jalan: permintaan disetujui yang belum punya surat jalan, disaring server (B110, AR6a)", async ({ page }) => {

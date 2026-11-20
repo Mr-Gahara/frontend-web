@@ -406,3 +406,13 @@ describe("rekanSelokasiPengaju (PG2a, P66, B338)", () => {
     expect(rekanSelokasiPengaju("g1", false, undefined)).toBe(false);
   });
 });
+
+describe("namaPeninjau (baris kedua kolom Status)", () => {
+  it("penyetuju bila disetujui, penolak bila ditolak, null bila belum ditinjau", async () => {
+    const { namaPeninjau } = await import("@/features/pengajuan-stok/tampilan");
+    expect(namaPeninjau({ disetujuiOleh: { id: "u1", nama: "Ridho" }, ditolakOleh: null })).toBe("Ridho");
+    expect(namaPeninjau({ disetujuiOleh: null, ditolakOleh: { id: "u2", nama: "Sari" } })).toBe("Sari");
+    expect(namaPeninjau({ disetujuiOleh: null, ditolakOleh: null })).toBeNull();
+    expect(namaPeninjau({ disetujuiOleh: { id: "u1", nama: "" }, ditolakOleh: null })).toBeNull();
+  });
+});

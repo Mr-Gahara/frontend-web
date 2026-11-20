@@ -50,6 +50,13 @@ test.describe("tandai selesai booking", () => {
       const bagian = page.getByRole("region", { name: "Sesi booking" });
       await expect(bagian).toContainText(NAMA_ASET_BOOKING, { timeout: 15_000 });
       await expect(bagian).toContainText("Aktif");
+      // Opsi B (20 November 2026): sesudah Informasi Transaksi, sebelum Rincian Item.
+      const atas = async (l: import("@playwright/test").Locator) => (await l.boundingBox())!.y;
+      const yInfo = await atas(page.getByRole("heading", { name: "Informasi Transaksi" }));
+      const yBooking = await atas(bagian);
+      const yItem = await atas(page.getByRole("region", { name: "Rincian Item" }));
+      expect(yBooking, "Sesi Booking di bawah Informasi Transaksi").toBeGreaterThan(yInfo);
+      expect(yBooking, "Sesi Booking di atas Rincian Item").toBeLessThan(yItem);
 
       await bagian.getByRole("button", { name: "Tandai Selesai" }).click();
       const dialog = page.getByRole("alertdialog");

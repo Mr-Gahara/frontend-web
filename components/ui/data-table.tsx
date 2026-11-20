@@ -36,6 +36,8 @@ const KELAS_BARIS_HP =
 const KELAS_SEL_HP =
   "kartu:block kartu:border-0 kartu:bg-transparent kartu:p-0 kartu:whitespace-normal kartu:first:border-l-0 kartu:first:rounded-none kartu:first:pr-10 kartu:first:text-besar kartu:first:font-bold kartu:last:border-r-0 kartu:last:rounded-none";
 const KELAS_AKSI_HP = "kartu:absolute kartu:right-2 kartu:top-2";
+/** kartuLega: jarak antar-field, padding, dan jarak antarkartu lebih longgar (20 November 2026). */
+const KELAS_BARIS_HP_LEGA = "kartu:mb-3 kartu:gap-3 kartu:p-4";
 
 /**
  * meta.sembunyiHp: sel tidak tampil di kartu HP (di bawah 640 px, CV20a),
@@ -115,6 +117,12 @@ interface DataTableProps<TData, TValue> {
    * yang sama dengan tabel daftar (pemilik proyek, 14 November 2026; CV22a).
    */
   rincian?: boolean;
+  /**
+   * Kartu baris yang lebih longgar: jarak antar-field 12 px, padding 16 px,
+   * dan label berjarak dari nilainya, untuk daftar yang kartunya padat
+   * (daftar pengajuan stok, pemilik proyek 20 November 2026).
+   */
+  kartuLega?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -128,6 +136,7 @@ export function DataTable<TData, TValue>({
   urutanServer,
   pilihanUkuranKlien,
   rincian = false,
+  kartuLega = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -220,7 +229,7 @@ export function DataTable<TData, TValue>({
             </TableRow>
           ) : (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className={KELAS_BARIS_HP}>
+              <TableRow key={row.id} className={cn(KELAS_BARIS_HP, kartuLega && KELAS_BARIS_HP_LEGA)}>
                 {row.getVisibleCells().map((cell) => {
                   const label = labelKolom(cell.column.columnDef);
                   const bungkus = gayaBungkus(cell.column.columnDef);
@@ -237,7 +246,7 @@ export function DataTable<TData, TValue>({
                       )}
                     >
                       {label && (
-                        <span className="tabel:hidden block text-mikro font-semibold text-navy/60">
+                        <span className={cn("tabel:hidden block text-mikro font-semibold text-navy/60", kartuLega && "mb-1")}>
                           {label}
                         </span>
                       )}

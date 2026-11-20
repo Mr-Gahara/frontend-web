@@ -23,6 +23,17 @@ import { bolehBacaBooking, bolehTandaiSelesai } from "./izin";
 
 const LABEL_STATUS: Record<string, string> = { Aktif: "Aktif", Selesai: "Selesai", VOID: "Dibatalkan" };
 
+const KELAS_STATUS: Record<string, string> = {
+  Aktif: "bg-sage/15 text-navy",
+  VOID: "bg-red-500/10 text-red-800",
+};
+
+/**
+ * Kolom desktop Aset, Waktu, Status, Aksi seperti kartu Stok Keluar (VD4a);
+ * di bawah sm baris bertumpuk (pemilik proyek, 20 November 2026, opsi B).
+ */
+const GRID = "sm:grid sm:grid-cols-[minmax(0,1fr)_220px_120px_150px] sm:gap-4";
+
 /** Satu booking milik penjualan: aset, waktu, status, dan Tandai Selesai (keputusan NZ7a). */
 function BarisBooking({ id, permissions }: { id: string; permissions: readonly string[] }) {
   const booking = useSesiBooking(id);
@@ -44,14 +55,16 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
   const sampai = b.waktuSelesai ? ` – ${format(new Date(b.waktuSelesai), "HH:mm")}` : "";
 
   return (
-    <li className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <p className="font-bold text-navy">{nama}</p>
-        <p className="text-kecil font-medium text-navy/60">
-          {formatTanggal(b.waktuMulai)}
-          {sampai} · {LABEL_STATUS[b.status] ?? b.status}
-        </p>
-      </div>
+    <li className={`flex flex-wrap items-center justify-between gap-3 border-b border-navy/10 px-4 py-3 sm:px-6 ${GRID}`}>
+      <p className="font-semibold text-navy">{nama}</p>
+      <p className="text-isi font-medium text-navy/80">
+        {formatTanggal(b.waktuMulai)}
+        {sampai}
+      </p>
+      <span className={`inline-block justify-self-start rounded-full px-2.5 py-0.5 text-kecil font-semibold ${KELAS_STATUS[b.status] ?? "bg-navy/8 text-navy"}`}>
+        {LABEL_STATUS[b.status] ?? b.status}
+      </span>
+      <div className="sm:justify-self-end">
       {bolehTandaiSelesai(b, permissions) && (
         <Button
           type="button"
@@ -110,6 +123,7 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </li>
   );
 }
@@ -126,13 +140,19 @@ export function BookingPenjualan({ idBooking }: { idBooking: string[] }) {
   return (
     <section
       aria-label="Sesi booking"
-      className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm space-y-4"
+      className="overflow-hidden rounded-2xl border border-navy/10 bg-krem shadow-sm"
     >
-      <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
+      <div className="flex items-center gap-2 px-4 pt-5 pb-4 sm:px-6">
         <CalendarClock className="h-5 w-5 text-karamel" />
         <h2 className="text-subjudul font-bold text-navy">Sesi Booking</h2>
       </div>
-      <ul className="flex flex-col gap-4">
+      <div aria-hidden="true" className={`hidden border-y border-navy/10 bg-gading px-6 py-3 text-kecil font-semibold text-navy/60 ${GRID}`}>
+        <span>Aset</span>
+        <span>Waktu</span>
+        <span>Status</span>
+        <span className="text-right">Aksi</span>
+      </div>
+      <ul className="bg-gading text-isi">
         {idBooking.map((id) => (
           <BarisBooking key={id} id={id} permissions={permissions} />
         ))}

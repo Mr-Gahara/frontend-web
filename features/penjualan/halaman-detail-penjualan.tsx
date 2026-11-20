@@ -246,13 +246,6 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
         </div>
       </div>
 
-      {/* Toko yang turun dari plan bersesi booking tidak dapat membaca sesinya (403, butir 5). */}
-      {penjualan.jenisPenjualan === "booking" && planMencakup(plan, "sesi-booking") && (
-        <BookingPenjualan
-          idBooking={(penjualan.itemPenjualan ?? []).flatMap((i) => (i.sesiBookingID ? [i.sesiBookingID] : []))}
-        />
-      )}
-
       {/* INFORMASI UMUM (GRID) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="rounded-2xl border border-navy/10 bg-krem p-6 sm:p-8 shadow-sm space-y-4">
@@ -334,6 +327,15 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
           </div>
         </div>
       </div>
+
+      {/* Sesi Booking sesudah Informasi, sebelum Rincian Item (pemilik proyek,
+          20 November 2026, opsi B kanvas "Penyetuju dan Sesi Booking").
+          Toko yang turun dari plan bersesi booking tidak dapat membaca sesinya (403, butir 5). */}
+      {penjualan.jenisPenjualan === "booking" && planMencakup(plan, "sesi-booking") && (
+        <BookingPenjualan
+          idBooking={(penjualan.itemPenjualan ?? []).flatMap((i) => (i.sesiBookingID ? [i.sesiBookingID] : []))}
+        />
+      )}
 
       {/* DAFTAR ITEM PRODUK: tabel rincian berkartu baris (CV22a). */}
       <section aria-label="Rincian Item" className="flex flex-col gap-3">

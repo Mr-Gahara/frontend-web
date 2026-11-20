@@ -87,3 +87,13 @@ export function labelTahapPengajuan(
   }
   return LABEL_TAHAP_PENGAJUAN[ruang][tahap];
 }
+
+/**
+ * Nama peninjau untuk baris kedua kolom Status daftar: penyetuju bila
+ * disetujui, penolak bila ditolak, null bila belum ditinjau. Daftar mengirim
+ * namanya sejak backend 7d28135 (butir 145; pemilik proyek, 20 November
+ * 2026, opsi A kanvas "Penyetuju dan Sesi Booking").
+ */
+export function namaPeninjau(p: Pick<PengajuanStok, "disetujuiOleh" | "ditolakOleh">): string | null {
+  return p.disetujuiOleh?.nama || p.ditolakOleh?.nama || null;
+}
