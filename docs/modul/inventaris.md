@@ -364,6 +364,19 @@ bug backend dilaporkan dan tidak diakali agar test lolos.
   tujuan, dan status tidak lagi disaring di klien. Lingkup per tipe
   lokasi dan pencarian tetap disaring di klien, karena tidak punya
   padanan di server.
+- **TS2a: Penerimaan dan Pengiriman berhalaman di server** (pemilik
+  proyek, 20 November 2026, opsi "Paginasi server", `e056daa`). Status
+  DIKIRIM, lokasi atau tipe lokasi asal dan tujuan (`dariLocationID`,
+  `keLocationID`, `dariTipeLokasi`, `keTipeLokasi`, B109), pencarian, dan
+  halaman dikirim lewat `paramHalamanPemantauan`; pencarian mencocokkan
+  nomor serta nama lokasi asal maupun tujuan, sama dengan daftar surat
+  jalan. Polling 30 detik tetap pada halaman yang dibuka, dengan kontrol
+  10/20/50 di bawah daftar kartu (`KakiPaginasi`, kaki `DataTable` yang
+  dipisah). `saringTransfer`, `filterServerTransfer`, dan
+  `useDaftarTransferStok` dibuang, sehingga bagian TS1a tentang
+  penyaringan klien berakhir. Diterapkan tanpa ditanyakan: mengganti cari,
+  pilihan outlet, atau ukuran kembali ke halaman 1, dan halaman yang
+  hilang karena polling dimundurkan ke halaman terakhir.
 
 ### Submodul pembelian stok
 
@@ -601,7 +614,8 @@ Yang masih berlaku:
 - `029413d`: rute jurnal gudang dan panel jurnal dashboard menuntut
   `read-location`.
 - Pemetaan paginasi kelima daftar: hanya jurnal stok yang pindah ke
-  server. Empat daftar lain mencari di klien (`saringTransfer`,
+  server. Empat daftar lain mencari di klien (`saringTransfer`, dibuang
+  di TS2a,
   `saringPengajuan`, dan `searchKey` `DataTable` di stock opname serta
   stock adjustment), sedangkan backend tidak membaca query pencarian.
 

@@ -143,17 +143,44 @@ perintahnya:
    Basic, Advanced, dan Pro). Isinya dicocokkan dengan pembatasan plan
    yang berlaku (`features/langganan/data.ts`, `modul/setup-akun.md`
    PL6a) dan diputuskan pemilik proyek.
-3. **Unduh PDF, Excel, atau CSV untuk laporan dan data penting.**
-   Keadaan 20 November 2026: backend sudah mengekspor `csv`, `xlsx`, dan
-   `pdf` lewat query `format` di `GET /laporan/laba-rugi` dan
-   `GET /laporan/arus-kas` (`controllers/laporanController.js`,
-   `services/laporan/laporanEkspor.js`), dan web baru memakainya di Arus
-   Kas (`laporanApi.unduhArusKas`, tiga tombol unduh). Ringkasan Laba/Rugi
-   dan Pembayaran per Metode bisa memakai ekspor laba rugi yang sudah ada;
-   daftar lain (penjualan, mutasi kas, stok, jurnal stok, pembelian stok,
-   dan lainnya) belum punya ekspor di backend. Daftar laporan dan data yang
-   dianggap penting, formatnya, serta pembagian kerja dengan backend perlu
-   keputusan pemilik proyek.
+3. **Unduh PDF, Excel, atau CSV untuk laporan dan data penting**
+   (dicatat pemilik proyek 20 November 2026). Pemilik proyek menambahkan
+   ekspor yang belum ada di backend; daftar di bawah dicocokkan dengan
+   backend `2790fc7` pada 20 November 2026. Daftar mana yang dianggap
+   penting dan formatnya tetap keputusan pemilik proyek.
+
+   **Sudah didukung backend** (query `format` = `csv`, `xlsx`, atau
+   `pdf`; `controllers/laporanController.js`, tabel satu baris judul,
+   baris per periode, lalu TOTAL lewat `services/laporan/laporanEkspor.js`):
+
+   - Arus Kas: `GET /laporan/arus-kas`; web sudah punya tiga tombol
+     unduh (`laporanApi.unduhArusKas`)
+   - Ringkasan Laba/Rugi: `GET /laporan/laba-rugi`; web belum punya
+     tombol unduh, tinggal disambung
+
+   **Belum didukung backend** (endpoint hanya JSON; ekspor perlu
+   ditambahkan di backend, atau web menyusun berkas sendiri dari data
+   yang sudah dimuat, yang perlu keputusan):
+
+   - Pembayaran per Metode: `ringkasan.pembayaranPerMetode` di
+     `GET /laporan/laba-rugi`; ekspor laba rugi hanya baris per periode,
+     tanpa rincian per metode
+   - Daftar penjualan: `GET /penjualan` (berhalaman dan berfilter)
+   - Mutasi kas: `GET /akunkas/mutasi` (berhalaman dan berfilter)
+   - Riwayat Pindah Dana: `GET /jurnaltransfer` (berhalaman)
+   - Pengeluaran (beban): `GET /bebanoperasional` (berhalaman)
+   - Belanja dan pembelian stok: `GET /pembelianstok` (berhalaman)
+   - Riwayat Mesin Kasir: `GET /sesikasir` (berhalaman)
+   - Stok saat ini: `GET /inventory` (berhalaman)
+   - Jurnal stok: `GET /jurnalstok` (berhalaman)
+   - Stock opname dan stock adjustment: `GET /stockopname` dan
+     `GET /stockopname/adjustments` (berhalaman)
+   - Pengajuan stok dan surat jalan: `GET /pengajuanstok` dan
+     `GET /transferstok` (berhalaman)
+   - Produk dan bahan baku: `GET /produk`, `GET /bahanbaku` (berhalaman)
+   - Pelanggan dan membership: `GET /pelanggan`, `GET /membership`
+   - Reservasi: `GET /sesibooking` (per tanggal)
+   - Absensi: `GET /absensi/monitoring` (per hari)
 
 ### Menunggu keputusan pemilik proyek
 
@@ -249,7 +276,9 @@ RAM, build memuncak sekitar 2 GB.
   Owner dan B115 hanya formatnya (`kontrak/temuan.md` butir 155 dan
   164).
 - Penerimaan (outlet) dan pengiriman (gudang) tetap daftar kartu mode
-  klien dengan polling; tidak termasuk butir 150.
+  klien dengan polling; tidak termasuk butir 150. Selesai 20 November
+  2026: keduanya berhalaman di server (`modul/inventaris.md`, TS2a,
+  `e056daa`).
 
 ### Utang kecil dari penyesuaian backend `ridho` lokal `916e7df`
 

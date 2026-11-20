@@ -422,7 +422,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
-| GET | `/transferstok` | authPengguna | `read-transfer-stok` | `{ count, data, success }` | `id` | `features/transfer-stok/api.ts` (query `status` dan `keLocationID` dikirim web sejak `03c4eb3` dan disaring server; server juga membaca `dariLocationID` dan `locationID`, `temuan.md` butir 33) |
+| GET | `/transferstok` | authPengguna | `read-transfer-stok` | `{ count, data, pagination, success }` bila query `page` (`totalPages` 0 bila kosong; respons nyata 20 November 2026), tanpa `page` `{ count, data, success }` | `id` | `features/transfer-stok/api.ts` (selalu berhalaman: daftar surat jalan dengan `status`, `dariTipeLokasi`, dan `cari`; Penerimaan dan Pengiriman sejak TS2a dengan `status=DIKIRIM`, `dariLocationID` atau `dariTipeLokasi`, `keLocationID` atau `keTipeLokasi`, dan `cari`; B105, B108, B109, `temuan.md` butir 33; dicatat 20 November 2026) |
 | POST | `/transferstok` | authPengguna | `create-transfer-stok` | - | - | `features/transfer-stok/api.ts` |
 | GET | `/transferstok/:id` | authPengguna | `read-transfer-stok` | `{ data, success }` | `id` | `features/transfer-stok/api.ts` |
 | PUT | `/transferstok/:id` | authPengguna | `create-transfer-stok` | - | - | `features/transfer-stok/api.ts` |

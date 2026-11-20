@@ -265,7 +265,7 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   teruji dari data**: seluruh surat jalan uji menuju outlet tenant,
   sehingga keduanya memberi hasil yang sama; bedanya terbukti dari kode
   (`kontrak/temuan.md` butir 33). Lingkup satu lokasi tujuan hanya teruji
-  di unit test (`filterServerTransfer`).
+  di unit test (`paramHalamanPemantauan` sejak TS2a).
 - **Data development memuat transfer berjumlah pecahan** di akun "kasir
   outlet" (bukti `kontrak/temuan.md` butir 126, FR2a), sehingga total
   masuk dan total keluar akun itu berpecahan sepanjang Oktober 2026.
