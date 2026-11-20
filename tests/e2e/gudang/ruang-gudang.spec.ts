@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { BASIS, JAWAB_GAGAL, login } from "../../helpers/transfer-uji";
+import { BASIS, JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { cocok, pantauPermintaan, tunda } from "../../helpers/reservasi-uji";
 
 /*
@@ -31,6 +31,26 @@ async function simulasikanTanpaGudang(page: Page) {
       return;
     }
     if (method !== "GET") {
+      await route.continue();
+      return;
+    }
+    const asli = await route.fetch();
+    const body = await asli.json();
+    const data = Array.isArray(body.data)
+      ? body.data.filter((l: { tipe?: string }) => l.tipe !== "Gudang")
+      : body.data;
+    // simulasi: tenant tanpa gudang hanya ada bila gudang tenant uji dihapus, padahal gudang itu menyimpan stok
+    await route.fulfill({ status: asli.status(), json: { ...body, data } });
+  });
+}
+
+/**
+ * Daftar lokasi tanpa gudang seperti simulasikanTanpaGudang, tetapi POST
+ * diteruskan ke backend: jalur berhasil (pemilik proyek, 20 November 2026).
+ */
+async function simulasikanTanpaGudangPostAsli(page: Page) {
+  await page.route(POLA_LOKASI, async (route) => {
+    if (route.request().method() !== "GET") {
       await route.continue();
       return;
     }
@@ -127,6 +147,38 @@ test.describe("Ruang gudang", () => {
     await expect(page).toHaveURL(URL_SETUP);
     await expect(page.getByPlaceholder("Contoh: Gudang Utama A")).toHaveValue(NAMA);
     await page.unroute(POLA_LOKASI);
+  });
+
+  test("setup yang berhasil membuat gudang, membuka ruang gudang, lalu gudang uji dihapus", async ({ page }) => {
+    // Utang "setup gudang yang berhasil" (pemilik proyek, 20 November 2026).
+    // Gudang kedua tenant uji dihapus lagi di akhir lewat API, karena belum
+    // dirujuk dokumen apa pun.
+    test.setTimeout(60_000);
+    await simulasikanTanpaGudangPostAsli(page);
+    await bukaSetup(page);
+    const nama = `${NAMA} ${Date.now()}`;
+    await isiSetup(page, "20");
+    await page.getByPlaceholder("Contoh: Gudang Utama A").fill(nama);
+    const tPost = page.waitForResponse((r) => r.request().method() === "POST" && POLA_LOKASI.test(r.url()));
+    let idBaru = "";
+    try {
+      await page.unroute(POLA_LOKASI);
+      await tombolSimpan(page).click();
+      const res = await tPost;
+      expect(res.status()).toBe(201);
+      const data = ((await res.json()) as { data: { id?: string; _id?: string } }).data;
+      idBaru = String(data.id ?? data._id ?? "");
+      expect(idBaru).toBeTruthy();
+      await expect(page.getByText("Gudang Berhasil Dibuat")).toBeVisible();
+      await page.waitForURL(URL_GUDANG);
+      await expect(page.getByRole("menuitem", { name: /setup gudang baru/i })).toHaveCount(0);
+    } finally {
+      if (idBaru) {
+        const auth = await bukaDenganAuth(page, URL_GUDANG);
+        const hapus = await api(page, auth, "DELETE", `/location/${idBaru}`);
+        expect.soft(hapus.status, `hapus gudang uji ${idBaru}: ${hapus.pesan}`).toBe(200);
+      }
+    }
   });
 
   test("setup memulai koordinat kosong dengan label yang terhubung ke isiannya", async ({ page }) => {

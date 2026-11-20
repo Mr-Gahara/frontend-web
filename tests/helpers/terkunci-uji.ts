@@ -144,6 +144,44 @@ const PERAN_TANPA_SDM: PeranUji = {
 };
 
 /**
+ * Izin baca Owner tanpa read-pajak, read-jurnal-transfer, dan read-langganan
+ * (utang pengujian kartu Pajak, riwayat Pindah Dana, dan Langganan yang
+ * hanya teruji unit; pemilik proyek, 20 November 2026).
+ */
+const PERAN_TANPA_BACA_SEBAGIAN: PeranUji = {
+  nama: "E2E Tanpa Baca Sebagian",
+  pin: "864223",
+  deskripsi: "Peran uji e2e: izin baca Owner tanpa pajak, jurnal transfer, dan langganan",
+  izin: (n) =>
+    n.startsWith("read-") && !([IZIN.pajak, IZIN.bacaJurnalTransfer, IZIN.langganan] as string[]).includes(n),
+};
+
+/**
+ * Izin per ruang stock adjustment (RH3a): izin baca Owner tanpa
+ * read-stock-adjustment umum dan tanpa read-stock-adjustment-gudang, sehingga
+ * hanya daftar adjustment ruang outlet yang terbuka.
+ */
+const PERAN_ADJUSTMENT_OUTLET: PeranUji = {
+  nama: "E2E Adjustment Outlet",
+  pin: "864225",
+  deskripsi: "Peran uji e2e: izin baca Owner, stock adjustment hanya ruang outlet",
+  izin: (n) =>
+    n.startsWith("read-") && !([IZIN.stockAdjustment, IZIN.stockAdjustmentGudang] as string[]).includes(n),
+};
+
+/**
+ * Petugas transfer: izin baca Owner ditambah create-transfer-stok, tanpa
+ * approve-pengajuan-stok, sehingga tab pengajuan yang tidak dapat ia tangani
+ * disembunyikan (statusTerlihat; utang pengujian yang hanya teruji unit).
+ */
+const PERAN_PETUGAS_TRANSFER: PeranUji = {
+  nama: "E2E Petugas Transfer",
+  pin: "864224",
+  deskripsi: "Peran uji e2e: izin baca Owner ditambah buat surat jalan, tanpa setujui pengajuan",
+  izin: (n) => n.startsWith("read-") || n === IZIN.buatTransferStok,
+};
+
+/**
  * Staf berlokasi kerja Outlet yang memegang kelola-perangkat-kasir (B346,
  * AR36; pemilik proyek, 18 November 2026): seluruh izin baca Owner tanpa
  * izin lintas outlet, ditambah izin kelola mesin kasir, dan boleh login
@@ -286,3 +324,6 @@ export const masukTanpaLokasi = (page: Page) => masukSebagai(page, PERAN_TANPA_L
 export const masukKasirOutlet = (page: Page) => masukSebagai(page, PERAN_KASIR_OUTLET);
 export const masukTanpaSdm = (page: Page) => masukSebagai(page, PERAN_TANPA_SDM);
 export const masukLokasiGudangTanpaLokasi = (page: Page) => masukSebagai(page, PERAN_LOKASI_GUDANG_TANPA_LOKASI);
+export const masukTanpaBacaSebagian = (page: Page) => masukSebagai(page, PERAN_TANPA_BACA_SEBAGIAN);
+export const masukPetugasTransfer = (page: Page) => masukSebagai(page, PERAN_PETUGAS_TRANSFER);
+export const masukAdjustmentOutlet = (page: Page) => masukSebagai(page, PERAN_ADJUSTMENT_OUTLET);

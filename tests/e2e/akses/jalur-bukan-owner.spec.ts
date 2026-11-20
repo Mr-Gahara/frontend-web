@@ -3,8 +3,11 @@ import { bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { daftarAkun, pilihAkun, type AkunKasUji } from "../../helpers/akun-kas-uji";
 import { KATEGORI_FIXTURE, pastikanKategoriFixture } from "../../helpers/beban-uji";
 import {
+  masukAdjustmentOutlet,
   masukAkunBukanOwner,
   masukPencatatBeban,
+  masukPetugasTransfer,
+  masukTanpaBacaSebagian,
   masukTanpaLokasi,
   masukTanpaSdm,
 } from "../../helpers/terkunci-uji";
@@ -125,4 +128,62 @@ test("tanpa izin baca shift, pola roster, dan jadwal: menunya tidak tampil dan h
     await page.goto(rute);
     await ditolak(page);
   }
+});
+
+test("tanpa read-pajak, read-jurnal-transfer, dan read-langganan: kartu, riwayat, dan halaman tertutup", async ({ page }) => {
+  await masukTanpaBacaSebagian(page);
+  await page.goto("/dashboard/outlet/pengaturan");
+  await expect(page.getByRole("link", { name: /Profil Toko/ })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("link", { name: /Pajak & Biaya Layanan/ })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Langganan/ })).toHaveCount(0);
+  await page.goto("/dashboard/outlet/pengaturan/pajak");
+  await ditolak(page);
+  await page.goto("/dashboard/outlet/pengaturan/langganan");
+  await ditolak(page);
+  // Pindah Dana tanpa izin baca maupun buat: halaman terbuka (entri IZIN_HALAMAN kosong),
+  // keadaan tanpa izin tampil, dan riwayat tidak dipasang.
+  await page.goto("/dashboard/outlet/keuangan/akunkas/pindahDana");
+  await expect(page.getByText("Tidak ada izin Pindah Dana")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("region", { name: "Riwayat transfer" })).toHaveCount(0);
+});
+
+test("petugas transfer tanpa izin setujui hanya melihat tab yang dapat ia tangani", async ({ page }) => {
+  await masukPetugasTransfer(page);
+  await page.goto("/dashboard/outlet/inventaris/pengajuanStok");
+  await expect(page.getByRole("button", { name: "Menunggu Persetujuan", exact: true })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("button", { name: "Disetujui", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Draft", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Ditolak", exact: true })).toHaveCount(0);
+});
+
+test("tanpa read-location: kartu Lokasi Outlet Profil Toko menampilkan keterangan izin tanpa memuat lokasi", async ({ page }) => {
+  await masukTanpaLokasi(page);
+  let mintaLokasi = false;
+  page.on("request", (r) => {
+    if (r.method() === "GET" && /\/api\/location\/current(\?|$)/.test(r.url())) mintaLokasi = true;
+  });
+  await page.goto("/dashboard/outlet/pengaturan/toko");
+  await expect(page.getByText("Informasi Toko")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText("Anda tidak memiliki izin melihat lokasi outlet.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Simpan Lokasi Outlet" })).toHaveCount(0);
+  expect(mintaLokasi, "GET /location/current tidak diminta halaman").toBe(false);
+});
+
+test("gate stock adjustment: tanpa read-location ruang outlet ditolak; izin per ruang hanya membuka ruangnya (RH3a)", async ({ page }) => {
+  await masukTanpaLokasi(page);
+  await page.goto("/dashboard/outlet/pengaturan");
+  await expect(page.getByRole("link", { name: /Profil Toko/ })).toBeVisible({ timeout: 15_000 });
+  await page.goto("/dashboard/outlet/inventaris/stockAdjustment");
+  await ditolak(page);
+
+  // Peran uji dibuat dan diselaraskan dengan sesi Owner, bukan sesi peran sebelumnya.
+  await login(page);
+  await masukAdjustmentOutlet(page);
+  await page.goto("/dashboard/outlet/inventaris/stockAdjustment");
+  await expect(page.getByRole("heading", { name: "Akses ditolak" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Jurnal Penyesuaian Stok", exact: true })).toBeVisible({
+    timeout: 15_000,
+  });
+  await page.goto("/dashboard/gudang/stockAdjustment");
+  await ditolak(page);
 });

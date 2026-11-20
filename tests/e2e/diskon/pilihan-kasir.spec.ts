@@ -113,4 +113,43 @@ test.describe("Pilihan diskon kasir", () => {
       }
     }
   });
+
+  test("diskon khusus member bertanda di daftar dan di pilihan diskon buat reservasi (MB1a)", async ({ page }) => {
+    const auth = await bukaDiskon(page);
+    const nama = "E2E Diskon Member " + unik();
+    let id: string | undefined;
+    try {
+      await test.step("buat diskon Aktif khusus member", async () => {
+        await page.getByRole("button", { name: "Tambah Diskon" }).click();
+        const dialog = page.getByRole("dialog");
+        await dialog.getByLabel("Nama Diskon").fill(nama);
+        await dialog.getByLabel("Nilai Potongan").fill("5");
+        await dialog.getByRole("button", { name: "Aturan tambahan" }).click();
+        await dialog.getByRole("checkbox", { name: /Khusus member/ }).click();
+        const tPost = tunggu(page, "POST", POLA_DISKON);
+        await dialog.getByRole("button", { name: "Simpan Konfigurasi" }).click();
+        const res = await tPost;
+        expect(res.status(), "POST /diskon").toBe(201);
+        expect(res.request().postDataJSON()).toMatchObject({ khususMember: true });
+        await expect(dialog).toBeHidden({ timeout: 15_000 });
+        id = (await daftarDiskon(page, auth)).find((d) => d.namaDiskon === nama)?.id;
+        await pencarian(page).fill(nama);
+        await expect(baris(page, nama)).toContainText("Khusus member", { timeout: 15_000 });
+      });
+
+      await test.step("pilihan diskon buat reservasi menyebut syarat Khusus member", async () => {
+        await page.goto(URL_BUAT_RESERVASI);
+        await page.getByRole("button", { name: "Pilih Diskon" }).nth(1).click();
+        const opsi = page.getByRole("option").filter({ hasText: nama });
+        await expect(opsi).toHaveCount(1, { timeout: 15_000 });
+        await expect(opsi).toContainText("Khusus member");
+        await page.keyboard.press("Escape");
+      });
+    } finally {
+      if (id) {
+        const r = await api(page, auth, "PUT", "/diskon/" + id, { status: "Non-Aktif" });
+        expect.soft(r.status, "diskon uji dinonaktifkan: " + r.pesan).toBe(200);
+      }
+    }
+  });
 });
