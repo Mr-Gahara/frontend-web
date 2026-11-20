@@ -312,7 +312,10 @@ Diputuskan pemilik proyek pada 25 Oktober 2026, dari pratinjau desain
   Atas permintaan pemilik proyek pada hari yang sama, kartu HP daftar ini
   memakai `kartuLega` `DataTable` (jarak antar-field 12 px, padding 16 px,
   label berjarak dari nilai), dan di kartu HP peninjau sebaris di samping
-  lencana agar tidak berdempet.
+  lencana agar tidak berdempet. Sejak KL1b (20 November 2026,
+  `modul/ui-ux.md`, Kerapian seluruh laman) kartu lega menjadi bawaan
+  semua `DataTable`, sehingga prop `kartuLega` di daftar ini tidak lagi
+  mengubah apa pun.
 
 ### Submodul transfer, pengiriman, dan penerimaan
 

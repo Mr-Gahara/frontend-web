@@ -12,6 +12,28 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per kerapian seluruh laman dan utang pengujian** (20 November
+2026 sore, backend `ridho` lokal `2790fc7`): vitest 1194 lolos dari 141
+berkas, termasuk satu unit baru TT1a di
+`tests/unit/components/topbar.test.tsx`. Angka 1195 di baseline suite
+penuh di bawah keliru: `HEAD` sebelum perubahan ini menghitung 1193
+(diukur ulang dengan `git stash -u`). Tanpa suite penuh dan tanpa OTP
+(suite penuh ditunda sampai seluruh pekerjaan selesai, pemilik proyek):
+
+- Spec terdampak kerapian (KL1b, TH1a, TI1a, KF1a, TT1a, PP1a, dan
+  perbaikan teknis), dipilih lewat label dan teks yang berubah, bukan
+  nama folder: 85 lolos dari 85, termasuk `pengaturan/pajak` dan
+  `pengaturan/kelola-pajak` yang kini membuka menu "Aksi pajak produk".
+- Spec bagian C, baru atau berubah, dijalankan bersama: 39 lolos dari 39
+  (`akses/jalur-bukan-owner` 8, `diskon/pilihan-kasir`, `gudang/ruang-gudang`,
+  `stok/lihat-stok`, dan tiga spec baru jalur berhasil).
+
+Harapan suite penuh berikutnya 689 (`npx playwright test --list`, 111
+berkas): 680 ditambah sembilan skenario baru, yaitu `setujui-stok-opname`,
+`setujui-kirim-berhasil`, `tambah-barang-gudang`, setup gudang berhasil,
+empat skenario `jalur-bukan-owner`, dan skenario khusus member
+`pilihan-kasir`.
+
 **Suite penuh 20 November 2026** (web `86f2a0b`, backend `ridho` lokal
 `2790fc7`, pukul 11.10 sampai 11.49 WIB, reporter `line,json`, charger
 tersambung, `systemd-inhibit`, atas perintah pemilik proyek): e2e 676
@@ -222,6 +244,7 @@ Pola kegagalan yang berulang:
 | Tur sorotan tidak tampil sendiri hanya di suite penuh, lolos sendirian | Komponen global (topbar) memulai tur selagi penjaga layout masih memuat, lalu pengalihan melepasnya dan mencatatnya sudah dilihat. Buktikan dengan menunda respons yang ditunggu penjaga (`route.fetch` lalu jeda 1,5 detik); kunci tur menunggu keputusan penjaga, seperti `kunciPanduanDashboard` (17 November 2026, TG2a) |
 | Spec yang tidak disentuh berbulan-bulan gagal mencari isian yang tampak masih ada | Isian pindah tempat oleh perubahan komponen bersama (FL1a memindah isian filter ke panel), dan spec itu tidak ikut putaran yang mengubahnya. Saat mengubah komponen bersama, grep spec menurut label isiannya (`grep -rn "Pembelian dari\|Akun kas" tests/e2e`), bukan menurut nama folder modul (suite penuh 20 November 2026) |
 | Ukuran atau letak elemen panel filter melebihi layar, padahal tampilannya benar | Panel bergeser masuk (`panel-filter-gerak`); `toBeVisible` lolos sebelum animasi selesai. Tunggu `el.getAnimations({ subtree: true })` selesai sebelum `boundingBox` (`tanggal-filter`, 20 November 2026) |
+| `buat peran uji ...` gagal 403 "Akses ditolak" di skenario yang masuk sebagai dua peran uji berturut-turut | `masukSebagai` (`tests/helpers/terkunci-uji.ts`) membuat dan menyelaraskan peran memakai sesi yang sedang aktif; sesudah peran pertama, sesi itu milik peran terbatas. Panggil `login(page)` (Owner) sebelum peran kedua (`jalur-bukan-owner`, 20 November 2026) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

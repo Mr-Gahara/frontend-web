@@ -161,6 +161,21 @@ Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-bac
   diatur." (`46d90e1`). Rincian ini disetujui pemilik proyek sesudah
   diterapkan.
 
+### Kerapian seluruh laman, 20 November 2026
+
+- **PP1a: tab Pajak per Produk mengikuti keputusan rancangan butir 26**
+  (pemilik proyek, 20 November 2026; utang lama "belum ditinjau terhadap
+  aturan tabel" di `modul/ui-ux.md`). Pajak terpasang tampil sebagai
+  `DataTable rincian` tanpa panel berlatar pembungkus, dan Lepas pindah ke
+  menu titik tiga baris ("Aksi pajak produk"), hanya bagi pemegang izin
+  pasang (`update-produk`) seperti sebelumnya. Isi kolom, pesan memuat,
+  galat (kini di luar tabel, dengan tombol coba lagi), dan kosong, serta
+  perilaku Lepas tidak berubah. Kartu form pemilih produk dan Assign tetap.
+  Spec `pengaturan/pajak` dan `pengaturan/kelola-pajak` membuka menu itu
+  lebih dulu.
+- Form tambah dan ubah pajak tetap di dialog, sehingga tidak termasuk kaki
+  tombol bertumpuk KF1a (`modul/ui-ux.md`, Kerapian seluruh laman).
+
 ## Catatan
 
 ### Catatan dari submodul profil outlet

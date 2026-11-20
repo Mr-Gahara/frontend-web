@@ -270,7 +270,9 @@ sama (submodul pengajuan stok, di bawah).
     sebagai kartu di HP dan di lebar mana pun bila tabelnya tidak muat di
     wadah; kelas tampilan kartu di sel memakai varian `kartu:` dan
     `tabel:`, bukan `max-sm:` dan `sm:` (pemilik proyek, 17 November 2026;
-    `modul/ui-ux.md`, LT1a).
+    `modul/ui-ux.md`, LT1a). Kartu itu lega dan satu kolom secara bawaan:
+    jarak antar-field 12 px, padding 16 px, dan label berjarak dari nilai
+    (pemilik proyek, 20 November 2026; `modul/ui-ux.md`, KL1b).
 27. **Daftar dipindah ke paginasi server hanya bersama seluruh
     filternya, termasuk pencarian.** Filter tanpa padanan di server
     tidak disaring di klien atas halaman yang sedang tampil, karena
@@ -386,3 +388,19 @@ sama (submodul pengajuan stok, di bawah).
     Seluruh pembungkus diseragamkan 18 November 2026; aturan "saat
     disentuh" dari 14 November 2026 berakhir (pemilik proyek, 14 dan
     18 November 2026; `modul/ui-ux.md`, CV27b, SP1a, dan SP2a).
+    Halaman di dalam layout modul (Inventaris, Keuangan, Reservasi) tetap
+    menulis pembungkus yang sama, tetapi padding-nya dinetralkan wadah
+    konten layout (`sm:*:px-0! sm:*:py-0!`), sehingga tepinya segaris
+    dengan judul modul; komponen halaman yang dipakai bersama ruang Gudang
+    tetap berpadding di sana (pemilik proyek, 20 November 2026;
+    `modul/ui-ux.md`, TH1a). Topbar memakai padding samping yang sama
+    dengan area gulir dashboard (`px-4 sm:px-6 md:px-8`).
+36. **Isian form setinggi 42 px, dan kaki tombol form halaman bertumpuk
+    di HP.** Input, `SelectTrigger` ukuran default, dan combobox pemicu
+    popover sama-sama 42 px; tinggi lain hanya untuk Select ukuran sm,
+    pemicu panel filter, dan pemilih bulan kalender, yang dikunci dengan
+    kelas ber-`!`. Kaki tombol form halaman (bukan dialog) di bawah
+    640 px bertumpuk selebar penuh dengan aksi utama di atas
+    (`flex-col-reverse sm:flex-row`, tombol `w-full sm:w-auto`), dan
+    sebaris di kanan mulai 640 px (pemilik proyek, 20 November 2026;
+    `modul/ui-ux.md`, TI1a dan KF1a).

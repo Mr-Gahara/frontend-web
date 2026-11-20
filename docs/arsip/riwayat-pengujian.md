@@ -1471,6 +1471,56 @@ Lunas 20 November 2026: suite e2e penuh yang tertunda sejak 17 November
 2026 dijalankan (676 lolos, 3 gagal, 1 dilewati dari 680; `inti/pengujian.md`,
 Baseline), dan butirnya dikeluarkan dari `referensi/utang-pengujian.md`.
 
+Lunas 20 November 2026 (bagian C daftar sisa pekerjaan, atas perintah
+pemilik proyek) dan dipindah dari `referensi/utang-pengujian.md` tanpa
+perubahan teks. Jalur berhasil yang meninggalkan data permanen diuji
+sungguhan atas keputusan pemilik proyek: `setujui-stok-opname`,
+`setujui-kirim-berhasil`, `tambah-barang-gudang`, dan skenario setup
+berhasil di `gudang/ruang-gudang`. Jalur izin lewat pengguna uji baru
+"E2E Tanpa Baca Sebagian", "E2E Petugas Transfer", dan "E2E Adjustment
+Outlet" di `akses/jalur-bukan-owner.spec.ts`. Halaman ber-`[id]` dipindai
+20 November 2026: 22 rute dengan id nyata di 390, 844, 768, dan 1280 px
+(`modul/ui-ux.md`, Kerapian seluruh laman).
+
+- **Tab pengajuan stok yang disembunyikan menurut izin** hanya teruji di
+  unit test (`tests/unit/features/pengajuan-stok/pengajuan-stok.test.ts`),
+  dengan alasan yang sama: aturannya hanya berlaku bagi petugas transfer
+  tanpa izin setujui.
+- **Approve stock opname yang berhasil** tidak diuji e2e, karena mengubah
+  stok sungguhan. Yang diuji hanya jalur gagalnya.
+- **Setujui pengajuan dan buat surat jalan yang berhasil** tidak diuji e2e,
+  karena keduanya meninggalkan dokumen permanen (pengajuan dan transfer
+  tidak dapat dihapus). Yang diuji hanya jalur gagalnya.
+- **Tambah barang gudang yang berhasil** tidak diuji e2e, karena UI tidak
+  punya cara menghapus entri inventory yang terbentuk.
+- **Kirim surat jalan yang berhasil lewat UI** tidak diuji e2e, karena
+  memotong stok gudang. Kirim dijalankan lewat API di persiapan spec dan
+  ditutup lewat terima penuh di akhir, karena batal dari DIKIRIM ditolak
+  backend `465b438` (PB10a); dari UI hanya jalur gagalnya yang diuji.
+- **Gate halaman yang menolak pengguna tanpa sebagian izin** hanya teruji
+  di unit test (`tests/unit/lib/auth/gate-stock-adjustment.test.ts`, kedua
+  ruang),
+  dengan alasan yang sama.
+  Izin per ruang (RH3a) juga hanya teruji di unit test.
+- **Setup gudang yang berhasil tidak diuji e2e** (keputusan GD6a). Tenant
+  uji sudah punya gudang yang menyimpan stok, sehingga setup hanya dapat
+  dibuka dengan daftar lokasi tanpa gudang yang disimulasikan, dan
+  `POST /location` dijawab gagal agar tidak ada gudang kedua yang
+  tersimpan. Payload dan penolakan radius teruji; pengalihan setelah
+  setup berhasil dan pembaruan menu sidebar sesudahnya belum.
+- **Kartu Pajak yang disembunyikan tanpa `read-pajak` hanya teruji di
+  unit test** (`tests/unit/features/pajak/izin.test.ts`). Tombol Tambah
+  Pajak dan menu aksi yang disembunyikan, serta kartu indeks bagi pemegang
+  izin baca, teruji e2e sejak `cbfa23b` lewat pengguna baca-saja. Pesan
+  tanpa izin baca kini milik gerbang rute (`bc388c6`).
+- **Jalur tanpa `read-langganan` hanya teruji di unit test** (gerbang
+  rute, `c868870`), karena pengguna uji yang ada memegang seluruh izin
+  `read-`. Penolakannya lewat gerbang rute yang sama dengan halaman lain.
+- **Halaman ber-`[id]` selain tabel rincian belum dipindai visual.** Rute
+  statis di 768 px dipindai 14 November 2026 dan menemukan luberan tabel
+  di lebar tablet (`modul/ui-ux.md`, Utang terbuka); tabel rincian halaman
+  detail diukur di 1280 dan 390 px (CV22a).
+
 ## Kejadian sesekali yang tidak berulang
 
 Dipindah dari `inti/pengujian.md` (Utang pengujian) pada 25 Oktober 2026.

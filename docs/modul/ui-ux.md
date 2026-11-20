@@ -667,6 +667,90 @@ di laman.
   skala dibulatkan ke token terdekat (misalnya 15 dan 17 px menjadi
   besar, 20 px menjadi subjudul).
 
+### Kerapian seluruh laman
+
+Dikerjakan 20 November 2026 atas perintah pemilik proyek (butir 3 daftar
+20 November 2026 di `inti/status.md`). Seluruh rute dipindai di HP 390 px,
+HP mendatar 844 px, tablet 768 dan 1024 px, serta desktop 1280 dan
+1440 px: 78 rute statis `app/dashboard`, 22 rute ber-`[id]` dengan id
+nyata (390, 844, 768, dan 1280 px), dan lima laman publik. Pemindai
+`rapi.spec.ts` di `~/.cache/frontend-web/alat/pindai-visual/`
+(`referensi/helper-dan-shell.md`) menambah deteksi elemen bertumpuk,
+berdempet, teks mepet tepi kotak, dan elemen yang keluar dari kartunya
+pada pemindai 14 November 2026. Panel admin tidak dipindai, karena
+ikut rombak UI/UX admin (butir 1 daftar yang sama).
+
+Perbaikan teknis, diterapkan langsung:
+
+- Status Staf dashboard di HP: label kotak ringkasan terpotong ("Mas…",
+  "Pula…"), dan lencana status terdorong keluar kartu baris. Kotak
+  ringkasan 2 × 2 bila wadahnya di bawah 288 px (`@container`, keputusan
+  rancangan butir 31), dan nama di kartu baris terpotong di dalam selnya.
+- Judul Koordinat Lokasi dan tombol Deteksi Otomatis (Profil Toko,
+  Pengaturan Gudang, Setup Gudang) berdempet dua baris di HP; kini
+  berjarak dan turun baris utuh.
+- Generate jadwal: ikon panah pemilih template keluar dari kotaknya, dan
+  tombol Batal menonjol keluar kartu ke kiri di HP. Langkah 1 dan 2
+  memakai kaki tombol bertumpuk seperti form lain.
+- Combobox Pelanggan, Produk penjualan, dan Kategori produk: nama panjang
+  dipotong rapi, tidak lagi mendorong ikon keluar.
+- Judul Diskon Global (Buat Penjualan) dan Diskon Global Transaksi (Buat
+  Reservasi) terjepit dua baris di samping tombolnya di 1024 px; kini
+  turun baris utuh.
+- Label tanggal pertama sumbu grafik laba (dashboard dan Ringkasan Laba
+  Rugi) terpotong; tepi grafik 28 px.
+- Grid Informasi detail penjualan, stock opname, dan stock adjustment
+  tanpa jarak kolom ("13:36POS"); kini `gap-x-4`.
+- Judul layout Keuangan memakai `font-semibold text-zinc-900` dan judul
+  Inventaris tanpa warna token; keduanya kini `font-bold text-navy`
+  seperti Reservasi (keputusan rancangan butir 25 dan 34).
+- Topbar memakai padding 32 px di HP sementara isi 16 px, sehingga tombol
+  sidebar tidak segaris dengan tepi isi; padding topbar kini sama dengan
+  area gulir (`px-4 sm:px-6 md:px-8`).
+
+Keputusan pemilik proyek dari kanvas "Kerapian Seluruh Laman" (render
+nyata, lima papan):
+
+- **KL1b: `kartuLega` menjadi bawaan semua `DataTable`, satu kolom.**
+  Kartu rapat sebelumnya berdempet; di daftar surat jalan label "Jumlah
+  Item" bertumpuk 3 px dengan nilainya. Prop `kartuLega` tetap ada
+  (bawaan `true`); `false` mengembalikan kartu rapat. Opsi lain: A
+  dibiarkan, C kartu berkolom 2 dan 3 di HP mendatar dan tablet.
+- **TH1a: tepi halaman di dalam layout modul segaris dengan judul
+  modul.** Layout Inventaris, Keuangan, dan Reservasi sudah memakai
+  pembungkus SP1a, lalu halaman di dalamnya menambah pembungkus yang sama,
+  sehingga di 640 px ke atas isinya menjorok 16 px dan berjarak atas
+  32 px tambahan. Atas pilihan susulan pemilik proyek, padding itu
+  dinetralkan di layout (`sm:*:px-0! sm:*:py-0!` pada wadah konten), bukan
+  dibuang per halaman, karena 11 komponen halaman dipakai bersama ruang
+  Gudang yang tidak punya layout modul. Diperiksa di 46 rute ketiga modul:
+  tidak ada pembungkus yang masih berpadding dan tidak ada kartu yang ikut
+  kehilangan padding. Melengkapi keputusan rancangan butir 35.
+- **TI1a: isian form setinggi 42 px.** Sebelumnya Input 42 px, Select
+  46 px (varian `data-[size=default]:h-auto` menimpa tinggi yang ditulis
+  halaman), dan combobox 32 px. `SelectTrigger` ukuran default kini 42 px
+  (`data-[size=default]:h-[42px] py-0`), dan ketujuh combobox (Kategori
+  produk, Pelanggan, Produk penjualan, bahan baku, reservasi, membership,
+  pola roster generate) `h-[42px]`. Select ukuran sm, pemicu panel filter
+  (`KELAS_PEMICU_PANEL`, tetap 46 px), dan pemilih bulan kalender dikunci
+  dengan kelas ber-`!` agar tidak berubah.
+- **KF1a: kaki tombol form di HP bertumpuk selebar penuh**, aksi utama di
+  atas (`flex-col-reverse sm:flex-row`, tombol `w-full sm:w-auto`), sama
+  dengan form Produk. Diterapkan di Buat Tarif, Metode Pembayaran, dan
+  Pengajuan Stok; Aset, Tipe Aset, Ubah Tarif, dan Revisi surat jalan sudah
+  bertumpuk. Form Pelanggan, Pajak, dan Kategori ada di dalam dialog,
+  sehingga tidak termasuk ("bukan dialog" di teks opsi).
+- **TT1a: tanggal topbar singkat di bawah 640 px** ("Jum, 20 Nov 2026");
+  di 640 px ke atas tetap "Jumat, 20 November 2026". Diuji di
+  `tests/unit/components/topbar.test.tsx`.
+- **PP1a: tab Pajak per Produk mengikuti keputusan rancangan butir 26**
+  (`modul/pengaturan-outlet.md`).
+
+Yang dibiarkan karena dirancang, sama dengan pemindaian 14 November 2026:
+deretan tab dan kalender jadwal bergulir ke samping, nama aset timeline
+dan nama karyawan kalender dipotong "…", serta kontrol segmen periode
+(Harian, Mingguan, Bulanan) yang tombolnya berimpit.
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E
@@ -905,7 +989,8 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
   langkah 2 generate jadwal (CV23a), keduanya menunggu pratinjau TB4a.
 - Daftar akun admin dan tab pajak per produk
   (`features/pajak/tab-pajak-produk.tsx`) belum ditinjau terhadap aturan
-  tabel yang baru.
+  tabel yang baru. Tab pajak per produk selesai 20 November 2026 (PP1a);
+  daftar akun admin ikut rombak UI/UX laman admin (`inti/status.md`).
 - Dashboard gudang (`app/dashboard/gudang/page.tsx`) masih placeholder.
   Selesai di `06581f3` dan `50dca2f` (`modul/gudang.md`): halamannya kini
   memasang `HalamanDashboardGudang`.

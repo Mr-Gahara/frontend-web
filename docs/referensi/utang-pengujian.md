@@ -14,32 +14,12 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   pilihan** di MVP satu outlet, sehingga memilih outlet tidak memicu
   permintaan baru. Kedua jalur cakupan lokasi teruji e2e sejak
   `1cd8211` (`arsip/riwayat-pengujian.md`).
-- **Tab pengajuan stok yang disembunyikan menurut izin** hanya teruji di
-  unit test (`tests/unit/features/pengajuan-stok/pengajuan-stok.test.ts`),
-  dengan alasan yang sama: aturannya hanya berlaku bagi petugas transfer
-  tanpa izin setujui.
-- **Approve stock opname yang berhasil** tidak diuji e2e, karena mengubah
-  stok sungguhan. Yang diuji hanya jalur gagalnya.
-- **Setujui pengajuan dan buat surat jalan yang berhasil** tidak diuji e2e,
-  karena keduanya meninggalkan dokumen permanen (pengajuan dan transfer
-  tidak dapat dihapus). Yang diuji hanya jalur gagalnya.
-- **Tambah barang gudang yang berhasil** tidak diuji e2e, karena UI tidak
-  punya cara menghapus entri inventory yang terbentuk.
 - **Terima penerimaan yang berhasil** diuji sungguhan lewat UI sejak
   `6e314ae` (keputusan PB12a), termasuk jumlah 0. Setiap run menambah stok
   outlet secara permanen, dan surat jalan DITERIMA tidak dapat dibatalkan.
 - **Item tanpa master bahan baku pada penerimaan** hanya teruji di unit
   test (`tests/unit/features/transfer-stok/payload.test.ts`), karena
   membuat datanya berarti menghapus master bahan baku.
-- **Kirim surat jalan yang berhasil lewat UI** tidak diuji e2e, karena
-  memotong stok gudang. Kirim dijalankan lewat API di persiapan spec dan
-  ditutup lewat terima penuh di akhir, karena batal dari DIKIRIM ditolak
-  backend `465b438` (PB10a); dari UI hanya jalur gagalnya yang diuji.
-- **Gate halaman yang menolak pengguna tanpa sebagian izin** hanya teruji
-  di unit test (`tests/unit/lib/auth/gate-stock-adjustment.test.ts`, kedua
-  ruang),
-  dengan alasan yang sama.
-  Izin per ruang (RH3a) juga hanya teruji di unit test.
 
 - **Cakupan per lokasi di daftar penjualan hanya teruji pada satu
   outlet** (`20c026b`): `locationID` yang terkirim sama dengan
@@ -93,21 +73,11 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   login sukses tidak menguranginya. Spec login gagal lebih awal bila sisa
   kuota di header `RateLimit` di bawah 3; menjalankan spec auth berulang
   (`--repeat-each`) dalam 15 menit dapat mengunci login seluruh suite.
-- **Setup gudang yang berhasil tidak diuji e2e** (keputusan GD6a). Tenant
-  uji sudah punya gudang yang menyimpan stok, sehingga setup hanya dapat
-  dibuka dengan daftar lokasi tanpa gudang yang disimulasikan, dan
-  `POST /location` dijawab gagal agar tidak ada gudang kedua yang
-  tersimpan. Payload dan penolakan radius teruji; pengalihan setelah
-  setup berhasil dan pembaruan menu sidebar sesudahnya belum.
 - **Jalur layout gudang selain Owner hanya teruji di unit test**
   (`tests/unit/features/inventaris/gudang.test.ts`): pengguna tanpa
   `read-location`, tanpa `create-location`, dan tenant tanpa gudang,
   karena satu-satunya akun uji berperan Owner dan tenant uji sudah punya
   gudang.
-- **Halaman ber-`[id]` selain tabel rincian belum dipindai visual.** Rute
-  statis di 768 px dipindai 14 November 2026 dan menemukan luberan tabel
-  di lebar tablet (`modul/ui-ux.md`, Utang terbuka); tabel rincian halaman
-  detail diukur di 1280 dan 390 px (CV22a).
 - **Akun kas uji menumpuk sebagai non-aktif**, satu per run spec
   keuangan, lima per run spec ubah akun kas (`1bc76f4`), dua per run
   spec Pindah Dana (`e53c016`), dan satu per run spec tutup akun
@@ -164,7 +134,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   disesuaikan saat spec itu disentuh.
 - **Kartu lokasi Profil Toko tanpa `read-location` belum teruji**, karena
   pengguna uji terbatas memegang izin itu; tenant tanpa outlet juga belum
-  teruji, karena tenant uji punya outlet. Kartu profil tanpa
+  teruji, karena tenant uji punya outlet. Tanpa `read-location` teruji e2e
+  sejak 20 November 2026 lewat "E2E Tanpa Lokasi" (keterangan izin tampil
+  dan `GET /location/current` tidak diminta); tenant tanpa outlet tetap
+  belum. Kartu profil tanpa
   `update-tenant` dan kartu lokasi tanpa `update-location` teruji e2e
   sejak `cbfa23b` lewat pengguna baca-saja.
 - **Spec profil toko mengubah nama toko tenant uji untuk sementara**,
@@ -191,11 +164,12 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   di form buat teruji e2e sejak `a80d2fa` (NZ5a).
 - **Keterangan khusus member dan pemilih produk tanpa izin baca produk
   belum teruji**: sejak MB1a (17 November 2026) web dapat menandai khusus
-  member dan centangnya teruji di `pelanggan/membership.spec.ts`, tetapi
-  keterangan "Khusus member" di daftar dan pilihan diskon belum
-  dibuktikan e2e; pemilih produk tanpa izin baca produk tetap belum,
-  karena satu-satunya akun uji berperan Owner. `aksiDiskon` hanya teruji di unit
-  test, dengan alasan yang sama.
+  member dan centangnya teruji di `pelanggan/membership.spec.ts`, dan
+  keterangan "Khusus member" di daftar dan pilihan diskon teruji e2e
+  sejak 20 November 2026 (`diskon/pilihan-kasir.spec.ts`). Pemilih produk
+  tanpa izin baca produk tetap belum, karena satu-satunya akun uji
+  berperan Owner. `aksiDiskon` hanya teruji di unit test, dengan alasan
+  yang sama.
 - **Pilihan diskon kasir hanya teruji e2e di buat reservasi**; buat
   penjualan memakai `diskonAktif` yang sama dan teruji di unit test.
   `sedangBerlaku` dapat tertinggal sampai lima menit di cache, dan itu
@@ -259,7 +233,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (`kontrak/temuan.md` butir 128).
 - **Riwayat Pindah Dana tanpa izin baca hanya teruji di unit test**
   (`aksiTransfer`). Form tanpa izin buat dan tombol Batalkan tanpa izin
-  ubah teruji e2e sejak `cbfa23b` lewat pengguna baca-saja. Filter riwayat
+  ubah teruji e2e sejak `cbfa23b` lewat pengguna baca-saja. Riwayat tanpa
+  izin baca (bersama form tanpa izin buat) teruji e2e sejak 20 November
+  2026 lewat pengguna "E2E Tanpa Baca Sebagian" di
+  `akses/jalur-bukan-owner.spec.ts`. Filter riwayat
   dan keadaan kurang dari dua akun aktif juga belum teruji e2e.
 - **Beda `keLocationID` dan `locationID` di daftar surat jalan tidak
   teruji dari data**: seluruh surat jalan uji menuju outlet tenant,
@@ -283,11 +260,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   itu belum punya dokumen. Nama PIC yang gagal dimuat (teks cadangan)
   belum teruji e2e.
 
-- **Kartu Pajak yang disembunyikan tanpa `read-pajak` hanya teruji di
-  unit test** (`tests/unit/features/pajak/izin.test.ts`). Tombol Tambah
-  Pajak dan menu aksi yang disembunyikan, serta kartu indeks bagi pemegang
-  izin baca, teruji e2e sejak `cbfa23b` lewat pengguna baca-saja. Pesan
-  tanpa izin baca kini milik gerbang rute (`bc388c6`).
 - **Sisi tertolak gerbang rute hanya teruji e2e untuk rute yang ditolak
   peran pengguna uji profil**: daftar pengguna, serta ubah posisi dan
   ubah produk bila peran itu tidak memegang izinnya. Rute lain teruji di
@@ -420,9 +392,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   percobaan, bilah masa berlaku, masa akses lewat dan masa tenggang, serta
   Muat riwayat lainnya. Akun uji Pro tanpa batas waktu dengan satu catatan
   riwayat, sehingga e2e hanya membuktikan keadaan tanpa batas.
-- **Jalur tanpa `read-langganan` hanya teruji di unit test** (gerbang
-  rute, `c868870`), karena pengguna uji yang ada memegang seluruh izin
-  `read-`. Penolakannya lewat gerbang rute yang sama dengan halaman lain.
 - **Keadaan Mesin Kasir di luar alur utama tidak teruji e2e** sejak
   spec pratinjau dihapus (`b74f30a`): memuat, gagal dimuat, sesi lintas
   tengah malam, Muat hari sebelumnya, form tambah tanpa perangkat atau
@@ -483,3 +452,20 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (`titikJamBuka`), karena spec tur wizard berhenti di langkah lokasi;
   mencapai langkah jam buka butuh mengisi lokasi berkoordinat lebih dulu
   (16 November 2026).
+- **Jalur berhasil yang meninggalkan data permanen diuji sejak 20 November
+  2026** (pemilik proyek: diuji sungguhan dan data yang menumpuk
+  diterima). Per run: satu opname outlet APPROVED berhitungan sama dengan
+  stok sistem (`stockOpname/setujui-stok-opname.spec.ts`); satu pengajuan
+  APPROVED dan satu surat jalan DITERIMA, dengan satu satuan bahan pindah
+  dari gudang ke outlet (`transferStok/setujui-kirim-berhasil.spec.ts`);
+  satu bahan master "E2E Tarik Gudang ..." beserta entri inventory
+  gudangnya (`stok/tambah-barang-gudang.spec.ts`). Setup gudang yang
+  berhasil (`gudang/ruang-gudang.spec.ts`) membuat gudang kedua lalu
+  menghapusnya lewat API, sehingga tidak menumpuk selama penghapusannya
+  berhasil.
+- **Diskon uji "E2E Diskon Member ..." menumpuk sebagai Non-Aktif**, satu
+  per run skenario khusus member di `diskon/pilihan-kasir.spec.ts`.
+- **Peran dan pengguna uji "E2E Tanpa Baca Sebagian", "E2E Petugas
+  Transfer", dan "E2E Adjustment Outlet" menetap** (20 November 2026),
+  dibuat sekali lewat `tests/helpers/terkunci-uji.ts` dan dipakai ulang.
+  Ketiganya ikut tampil di daftar pengguna dan pilihan login PIN.

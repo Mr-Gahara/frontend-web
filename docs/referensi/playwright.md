@@ -27,7 +27,18 @@ Spec helper itu disalin ke folder sementara di bawah `tests/` dan tidak
 di-commit. Pemicu Select Radix memotong lewat `line-clamp`, bukan
 ellipsis, sehingga tetap lihat tangkapannya; uji coba perbaikan tabel
 (membungkus kolom di browser lalu mengukur luberan) lebih cepat daripada
-mengubah kode lalu memotret ulang (14 November 2026).
+mengubah kode lalu memotret ulang (14 November 2026). Sejak 20 November
+2026 folder itu juga memuat `rapi.spec.ts`: enam ukuran layar (HP tegak
+dan mendatar, dua tablet, dua desktop), dan deteksi elemen bertumpuk,
+berdempet, teks mepet tepi kotak, serta elemen yang keluar dari kartunya.
+Luberan ke kiri tidak menaikkan `scrollWidth`, sehingga pemeriksaan lebar
+halaman saja tidak menangkapnya (tombol Batal generate jadwal). Memotret
+setiap rute setinggi isinya (`SEMUA=1`) butuh sekitar 70 menit untuk 468
+tangkapan; untuk pindaian berikutnya, potret hanya rute bertemuan, lalu
+tinjau satu rute wakil per pola (daftar berfilter, form, detail,
+dashboard) di 390, 768, dan 1280 px. Uji coba pola bersama untuk kanvas
+lebih cepat lewat CSS yang disuntik ke halaman nyata (`addStyleTag`)
+daripada mengubah kode.
 
 Menjalankan satu test saja, dan memeriksa ketahanannya terhadap flakiness:
 

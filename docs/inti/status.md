@@ -33,27 +33,46 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (sesi berikutnya, dicatat 20 November 2026)
+### Mulai di sini (sesi berikutnya, dicatat 20 November 2026 malam)
 
-Keadaan akhir sesi 20 November 2026: web `02a398b` sudah di-push, pohon
-kerja bersih, backend lokal `ridho` `2790fc7`. Urutan kerja yang disepakati
-pemilik proyek:
+Keadaan akhir sesi 20 November 2026 malam: web di-commit dalam tiga commit
+(kerapian seluruh laman `421dbed`, utang pengujian `932e0e5`, dan
+dokumentasi sesudahnya), push dijalankan pemilik proyek; backend lokal `ridho`
+`2790fc7`, tidak maju (`nizar` dan `yoga` hanya tertinggal). Yang selesai
+di sesi itu:
 
 1. **Kerapian spacing dan alignment seluruh laman** (butir 3 daftar
-   20 November 2026, di bawah): pindai seluruh rute di HP 390 px, HP
-   mendatar sekitar 844 px, tablet 768 dan 1024 px, serta desktop 1280 dan
-   1440 px (alat `pindai-visual`, `referensi/helper-dan-shell.md`). Yang
-   jelas teknis langsung diperbaiki; pola bersama, misalnya `kartuLega`
-   menjadi standar semua `DataTable`, diajukan lewat kanvas render nyata.
-2. Butir lain daftar 20 November 2026 dan 18 November 2026 di bawah, atas
-   perintah pemilik proyek: rombak UI/UX laman admin, deskripsi paket
-   laman pengenalan, ekspor PDF/Excel/CSV (menunggu backend untuk data
-   yang belum didukung), utang pengujian yang basi atau murah, dan nomor
-   WhatsApp admin (LG1a).
-3. **Suite e2e penuh ditunda sampai seluruh pekerjaan di atas selesai**
-   (pemilik proyek, 20 November 2026); sementara itu hanya spec terdampak
-   per perubahan. Suite terakhir: 20 November 2026, 676 lolos, 3 gagal yang
-   sudah diperbaiki, 1 dilewati dari 680 (`inti/pengujian.md`, Baseline).
+   20 November 2026): pemindaian enam ukuran layar, perbaikan teknis, dan
+   keputusan KL1b, TH1a, TI1a, KF1a, TT1a dari kanvas "Kerapian Seluruh
+   Laman" (`modul/ui-ux.md`, Kerapian seluruh laman), serta PP1a tab Pajak
+   per Produk (`modul/pengaturan-outlet.md`).
+2. **Bagian B sisa pekerjaan yang dapat dibetulkan frontend**: PP1a.
+   Sisanya bukan ranah frontend atau menunggu: laporan backend 186 sampai
+   188, flake "Batalkan kembali ke daftar" buat reservasi dan flake vitest
+   sekali (hanya dapat ditelusuri saat muncul lagi di suite penuh), daftar
+   akun admin (ikut rombak admin), grid kalender jadwal dan langkah 2
+   generate (menunggu pratinjau TB4a), dan status alpha staf (DB3a,
+   ditunda pemilik proyek).
+3. **Bagian C utang pengujian, tanpa suite penuh**: jalur berhasil yang
+   meninggalkan data permanen diuji sungguhan atas keputusan pemilik
+   proyek, jalur izin lewat tiga pengguna uji baru, keterangan khusus
+   member, kartu lokasi Profil Toko tanpa `read-location`, dan pembuktian
+   kontrak butir 68, 69, 71, dan 72 (`inti/pengujian.md`, Baseline;
+   `arsip/riwayat-pengujian.md`, Utang pengujian yang lunas). Utang yang
+   tersisa di `referensi/utang-pengujian.md` butuh data yang tidak dapat
+   disiapkan web secara deterministik (absen aplikasi, booking lewat
+   tengah malam atau di masa lalu, akun kedaluwarsa, lebih dari 20 riwayat
+   langganan), peran uji dengan izin tulis yang lebih rumit (template
+   role, MK11a, titik tur, RL3a, pemilih produk tanpa baca produk, lokasi
+   kerja di dialog pengguna), atau penahanan di backend yang tidak terlihat
+   dari web.
+
+Urutan kerja berikutnya, atas perintah pemilik proyek: butir lain daftar
+20 November 2026 dan 19 November 2026 di bawah (rombak UI/UX laman admin,
+deskripsi paket laman pengenalan, ekspor PDF/Excel/CSV, revisi laman
+profil dan menu popup profil), dan nomor WhatsApp admin (LG1a). **Suite
+e2e penuh ditunda sampai seluruh pekerjaan selesai** (pemilik proyek,
+20 November 2026); harapannya 689 (`inti/pengujian.md`, Baseline).
 
 Laporan backend 186 sampai 188 (`kontrak/temuan.md`) sudah diberikan ke
 pemilik proyek; pembuktian web menyusul bila backend memperbaikinya.
@@ -129,11 +148,10 @@ berikutnya butir N" di dokumen lain merujuk daftar di arsip itu.
    seluruhnya dibuktikan lewat spec terdampak (`inti/pengujian.md`,
    Baseline).
 2. **Utang pengujian yang basi atau murah ditutup**
-   (`referensi/utang-pengujian.md`), ditawarkan 18 November 2026 dan
-   menunggu perintah: misalnya pembatasan staf berlokasi kerja (LK1a) yang
-   kini punya pengguna uji, keterangan khusus member yang sudah dapat
-   ditandai sejak MB1a, dan pesan jurnal stok gudang yang kodenya sudah
-   dihapus (KM1a).
+   (`referensi/utang-pengujian.md`), ditawarkan 18 November 2026: selesai
+   20 November 2026 sebagai bagian C (Mulai di sini, di atas). LK1a sudah
+   dicatat basi sebagian di butirnya, keterangan khusus member teruji e2e,
+   dan pesan jurnal stok gudang KM1a sudah diarsipkan 17 November 2026.
 3. **Nomor WhatsApp admin** halaman Langganan (LG1a), di bawah.
 
 Laman utama, ukuran tombol aksi, dan filter seragam, yang dicatat
@@ -170,10 +188,10 @@ perintahnya:
    PL6a) dan diputuskan pemilik proyek.
 3. **Kerapian spacing dan alignment seluruh laman** (pemilik proyek,
    20 November 2026): setiap laman rapi di HP, HP mendatar, tablet, dan
-   desktop, horizontal maupun vertikal, tanpa elemen berdempet. Dimulai
-   dari daftar pengajuan stok (`kartuLega`, PI1a); pemindaian seluruh
-   rute berikutnya, dan pola bersama (misalnya `kartuLega` sebagai
-   standar semua daftar) diajukan lewat kanvas.
+   desktop, horizontal maupun vertikal, tanpa elemen berdempet. Selesai
+   20 November 2026 (`modul/ui-ux.md`, Kerapian seluruh laman): kartu lega
+   menjadi bawaan semua `DataTable` (KL1b), dan pola bersama lain
+   diputuskan lewat kanvas (TH1a, TI1a, KF1a, TT1a).
 4. **Unduh PDF, Excel, atau CSV untuk laporan dan data penting**
    (dicatat pemilik proyek 20 November 2026). Pemilik proyek menambahkan
    ekspor yang belum ada di backend; daftar di bawah dicocokkan dengan
