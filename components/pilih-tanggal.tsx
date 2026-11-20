@@ -27,7 +27,15 @@ interface PropsPilihTanggal {
    * tanggal terisi. Untuk isian opsional seperti filter daftar.
    */
   onKosongkan?: () => void;
+  /**
+   * "pendek" memakai bulan singkat ("01 Sep 2026") untuk teks dan nama
+   * aksesibel; dipakai isian periode panel filter yang dua kolom (FL20a).
+   */
+  formatTeks?: "panjang" | "pendek";
 }
+
+/** Pola teks tombol: "dd MMMM yyyy" bawaan, "dd MMM yyyy" untuk ruang sempit. */
+export const POLA_TEKS_TANGGAL = { panjang: "dd MMMM yyyy", pendek: "dd MMM yyyy" } as const;
 
 /**
  * Pemilih tanggal standar seluruh frontend (keputusan K-TW1): tombol pemicu
@@ -45,9 +53,10 @@ export function PilihTanggal({
   invalid,
   className,
   onKosongkan,
+  formatTeks = "panjang",
 }: PropsPilihTanggal) {
   const [buka, setBuka] = useState(false);
-  const teks = value ? format(value, "dd MMMM yyyy", { locale: localeID }) : placeholder;
+  const teks = value ? format(value, POLA_TEKS_TANGGAL[formatTeks], { locale: localeID }) : placeholder;
   return (
     <Popover open={buka} onOpenChange={setBuka}>
       <PopoverTrigger asChild>

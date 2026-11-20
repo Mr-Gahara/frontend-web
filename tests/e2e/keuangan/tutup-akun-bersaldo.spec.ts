@@ -2,6 +2,7 @@ import { expect, test, type Page, type Response } from "@playwright/test";
 import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { cocok, unik } from "../../helpers/reservasi-uji";
 import { buatAkunUji, daftarAkun, pilihAkun, saldoAkun, tutupAkunUji, type AkunKasUji } from "../../helpers/akun-kas-uji";
+import { bukaPanelFilter, terapkanPanelFilter } from "../../helpers/filter-uji";
 import { LABEL_JENIS, teksJumlahMutasi } from "../../../features/akun-kas/mutasi";
 import { formatRupiah } from "../../../lib/format";
 
@@ -143,8 +144,11 @@ test.describe("tutup akun kas bersaldo", () => {
         const tRingkasan = page.waitForResponse(
           (r) => r.request().method() === "GET" && POLA_RINGKASAN.test(r.url()) && r.url().includes(idAkun),
         );
+        // Pilihan akun ada di panel filter sejak FL1a (19 November 2026).
+        const panel = await bukaPanelFilter(page);
         await page.getByRole("combobox", { name: "Akun kas", exact: true }).click();
         await page.getByRole("option", { name: nama, exact: true }).click();
+        await terapkanPanelFilter(panel);
         const resMutasi = await tMutasi;
         expect(resMutasi.status()).toBe(200);
         const mutasi = ((await resMutasi.json()) as { data: BarisMutasi[] }).data;

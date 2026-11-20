@@ -33,3 +33,20 @@ describe("PilihTanggal onKosongkan", () => {
     expect(screen.queryByRole("button", { name: "Kosongkan" })).toBeNull();
   });
 });
+
+describe("PilihTanggal formatTeks (FL20a)", () => {
+  it("bawaan bulan panjang untuk teks dan nama aksesibel", () => {
+    render(<PilihTanggal label="Tanggal" value={new Date(2026, 8, 1)} onChange={() => {}} />);
+    expect(screen.getByRole("button", { name: "Tanggal, 01 September 2026" }).textContent).toBe("01 September 2026");
+  });
+
+  it("pendek: bulan singkat id-ID untuk teks dan nama aksesibel", () => {
+    render(<PilihTanggal label="Dari" value={new Date(2026, 7, 15)} onChange={() => {}} formatTeks="pendek" />);
+    expect(screen.getByRole("button", { name: "Dari, 15 Agt 2026" }).textContent).toBe("15 Agt 2026");
+  });
+
+  it("pendek tanpa tanggal tetap menampilkan placeholder", () => {
+    render(<PilihTanggal label="Dari" value={undefined} onChange={() => {}} formatTeks="pendek" placeholder="Semua tanggal" />);
+    expect(screen.getByRole("button", { name: "Dari, Semua tanggal" })).toBeTruthy();
+  });
+});

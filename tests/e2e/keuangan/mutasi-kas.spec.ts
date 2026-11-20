@@ -11,6 +11,8 @@ import {
   simpanLewatApi,
 } from "../../helpers/penjualan-uji";
 import { formatRupiah } from "../../../lib/format";
+import { format } from "date-fns";
+import { id as localeID } from "date-fns/locale";
 
 /*
  * Halaman mutasi arus kas (keputusan MK1a sampai MK3a): buku gabungan dari
@@ -156,9 +158,8 @@ test.describe("Mutasi arus kas", () => {
     // ulang dibuktikan dari tampilan tanggal, bukan dari permintaan baru.
     await pil.getByRole("button", { name: "Atur ulang semua" }).click();
     await expect(pil).toBeHidden();
-    // Format tombol PilihTanggal: "dd MMMM yyyy" berbahasa Indonesia.
-    const teks = (d: Date) =>
-      `${String(d.getDate()).padStart(2, "0")} ${new Intl.DateTimeFormat("id-ID", { month: "long" }).format(d)} ${d.getFullYear()}`;
+    // Tombol tanggal di panel berbulan singkat, "dd MMM yyyy" id-ID (FL20a).
+    const teks = (d: Date) => format(d, "dd MMM yyyy", { locale: localeID });
     panel = await bukaPanelFilter(page);
     await expect(panel.getByRole("button", { name: `Dicatat dari, ${teks(tanggal(1))}`, exact: true })).toBeVisible();
     await expect(panel.getByRole("button", { name: `Dicatat sampai, ${teks(kini)}`, exact: true })).toBeVisible();

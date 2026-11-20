@@ -197,7 +197,12 @@ interface PropsPilihanPeriode {
   wajib?: boolean;
 }
 
-/** Periode: pil cepat di atas dua isian tanggal (FL2a, FL12a). */
+/**
+ * Periode: pil cepat di atas dua isian tanggal (FL2a, FL12a). Kedua isian
+ * berdampingan, sehingga tanggalnya berbulan singkat ("01 Sep 2026"): bulan
+ * panjang meluber dari tombol setengah lebar panel (pemilik proyek,
+ * 20 November 2026, FL20a).
+ */
 export function PilihanPeriode({
   idAwalan,
   rentang,
@@ -244,6 +249,7 @@ export function PilihanPeriode({
             onKosongkan={wajib ? undefined : () => onUbah({ ...rentang, dari: undefined })}
             tanggalNonaktif={batasiUrutan && rentang.sampai ? { after: rentang.sampai } : undefined}
             className="h-10 w-full sm:h-11"
+            formatTeks="pendek"
           />
         </div>
         <div className="flex min-w-0 flex-col gap-1.5">
@@ -259,6 +265,7 @@ export function PilihanPeriode({
             onKosongkan={wajib ? undefined : () => onUbah({ ...rentang, sampai: undefined })}
             tanggalNonaktif={batasiUrutan && rentang.dari ? { before: rentang.dari } : undefined}
             className="h-10 w-full sm:h-11"
+            formatTeks="pendek"
           />
         </div>
       </div>

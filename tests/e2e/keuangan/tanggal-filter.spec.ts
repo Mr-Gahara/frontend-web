@@ -1,13 +1,16 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { login } from "../../helpers/transfer-uji";
+import { bukaPanelFilter } from "../../helpers/filter-uji";
 
 /*
- * Isian tanggal filter tidak meluber (pemilik proyek, 12 November 2026):
- * di HP "Dari" dan "Sampai" masing-masing selebar layar dan bertumpuk seperti
- * Arus Kas, dan sejak sm tombolnya 208 px (sm:w-52) agar bulan terpanjang
- * muat dengan padding utuh. Jam browser dipatok 30 September 2026, sehingga
- * filter bawaan berisi tanggal September sampai "30 September 2026", nama
- * bulan terpanjang.
+ * Isian tanggal filter tidak meluber (pemilik proyek, 12 November 2026,
+ * BS6a). Sejak filter seragam (FL1a, 19 November 2026) isian periode berada
+ * di panel samping "Filter lainnya", sebagai dua kolom sebaris di HP maupun
+ * desktop (PilihanPeriode di components/filter/panel-filter.tsx); spec ini
+ * tertinggal dan disesuaikan 20 November 2026. Bulan panjang meluber dari
+ * tombol setengah lebar panel, sehingga tanggalnya berbulan singkat
+ * ("30 Sep 2026", FL20a). Jam browser dipatok 30 September 2026, bulan
+ * terpanjang, sehingga filter bawaan berisi tanggal September.
  */
 
 const JAM_PATOKAN = new Date("2026-09-30T10:00:00+07:00");
@@ -49,32 +52,37 @@ for (const [nama, ukuran] of [
 
     for (const h of HALAMAN) {
       await page.goto(h.url);
+      await expect(page.getByRole("button", { name: /^Filter lainnya/ }), `${h.url}: tombol filter`).toBeVisible({
+        timeout: 20_000,
+      });
+      const panel = await bukaPanelFilter(page);
+      // Panel bergeser masuk (panel-filter-gerak); ukur setelah animasinya selesai.
+      await panel.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)));
       const dari = tombolTanggal(page, h.dari);
       const sampai = tombolTanggal(page, h.sampai);
-      await expect(dari, `${h.url}: isian ${h.dari}`).toBeVisible({ timeout: 20_000 });
+      await expect(dari, `${h.url}: isian ${h.dari}`).toBeVisible();
       // Bawaan bulan berjalan dimulai tanggal 1; riwayat Mesin Kasir tujuh hari
       // terakhir (24 September). Keduanya sepanjang "30 September 2026".
-      await expect(dari).toHaveAccessibleName(new RegExp(`^${h.dari}, \\d{2} September 2026$`));
-      await expect(sampai).toHaveAccessibleName(`${h.sampai}, 30 September 2026`);
+      await expect(dari).toHaveAccessibleName(new RegExp(`^${h.dari}, \\d{2} Sep 2026$`));
+      await expect(sampai).toHaveAccessibleName(`${h.sampai}, 30 Sep 2026`);
 
       await tidakLuber(dari, `${h.url} ${h.dari}`, ukuran.width);
       await tidakLuber(sampai, `${h.url} ${h.sampai}`, ukuran.width);
 
+      // Dua kolom sebaris di dalam panel: keduanya di dalam lebar panel.
       const kDari = await kotak(dari);
       const kSampai = await kotak(sampai);
-      // Desktop cukup tidak meluber: di ruang gudang lima filter memang
-      // turun ke baris kedua sejak sebelum tombol dilebarkan.
-      if (nama === "HP") {
-        const wadah = dari.locator("xpath=ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' grid ')][1]");
-        const kWadah = await kotak(wadah);
-        expect(kSampai.y, `${h.url}: Sampai di bawah Dari`).toBeGreaterThanOrEqual(kDari.y + kDari.height);
-        for (const [n, k] of [
-          ["Dari", kDari],
-          ["Sampai", kSampai],
-        ] as const) {
-          expect(Math.abs(k.width - kWadah.width), `${h.url}: ${n} ${k.width}px selebar filter ${kWadah.width}px`).toBeLessThan(2);
-        }
+      const kPanel = await kotak(panel);
+      expect(Math.abs(kSampai.y - kDari.y), `${h.url}: Dari dan Sampai sebaris`).toBeLessThan(2);
+      for (const [n, k] of [
+        ["Dari", kDari],
+        ["Sampai", kSampai],
+      ] as const) {
+        expect(k.x, `${h.url}: ${n} di dalam panel`).toBeGreaterThanOrEqual(kPanel.x);
+        expect(k.x + k.width, `${h.url}: ${n} di dalam panel`).toBeLessThanOrEqual(kPanel.x + kPanel.width + 1);
       }
+      await page.keyboard.press("Escape");
+      await expect(panel).toBeHidden();
     }
   });
 }
