@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterServerTransfer, saringTransfer } from "@/features/transfer-stok/filter";
+import { paramHalamanPemantauan } from "@/features/transfer-stok/filter";
 import { RUANG_SURAT_JALAN, ruangPenerima, ruangPengirim } from "@/features/transfer-stok/ruang";
 import { aksiSuratJalan } from "@/features/transfer-stok/izin";
 import { susunPayloadRevisi } from "@/features/transfer-stok/payload";
@@ -32,55 +32,24 @@ const daftar = [
   transfer("SJ-4", "BATAL", "Outlet B"),
 ];
 
-const nomor = (hasil: TransferStok[]) => hasil.map((t) => t.nomorTransfer);
+describe("paramHalamanPemantauan", () => {
+  const dasar = { cari: "", halaman: 1, ukuran: 10 };
 
-describe("saringTransfer", () => {
-  it("tidak menyaring status, karena status disaring server (butir 33)", () => {
-    expect(nomor(saringTransfer(daftar, { status: "DIKIRIM" }))).toEqual(["SJ-1", "SJ-2", "SJ-3", "SJ-4"]);
-    expect(nomor(saringTransfer(daftar, { status: "ALL" }))).toEqual(["SJ-1", "SJ-2", "SJ-3", "SJ-4"]);
+  it("selalu DIKIRIM dan berhalaman", () => {
+    expect(paramHalamanPemantauan(dasar)).toEqual({ page: "1", limit: "10", status: "DIKIRIM" });
+    expect(paramHalamanPemantauan({ ...dasar, halaman: 3, ukuran: 50 })).toMatchObject({ page: "3", limit: "50" });
   });
 
-  it("menyaring lokasi tujuan per lokasi atau per tipe", () => {
-    expect(nomor(saringTransfer(daftar, { tujuan: { lokasiID: "o2" } }))).toEqual(["SJ-3", "SJ-4"]);
-    expect(nomor(saringTransfer(daftar, { tujuan: { tipeLokasi: "Outlet" } }))).toEqual(["SJ-1", "SJ-2", "SJ-3", "SJ-4"]);
-    expect(nomor(saringTransfer(daftar, { tujuan: { tipeLokasi: "Gudang" } }))).toEqual([]);
+  it("lingkup satu lokasi menjadi dariLocationID atau keLocationID, tipe lokasi menjadi dariTipeLokasi atau keTipeLokasi", () => {
+    expect(paramHalamanPemantauan({ ...dasar, tujuan: { lokasiID: "o1" } })).toMatchObject({ keLocationID: "o1" });
+    expect(paramHalamanPemantauan({ ...dasar, tujuan: { tipeLokasi: "Outlet" } })).toMatchObject({ keTipeLokasi: "Outlet" });
+    expect(paramHalamanPemantauan({ ...dasar, asal: { tipeLokasi: "Gudang" } })).toMatchObject({ dariTipeLokasi: "Gudang" });
+    expect(paramHalamanPemantauan({ ...dasar, asal: { lokasiID: "g1" } })).toMatchObject({ dariLocationID: "g1" });
   });
 
-  it("menyaring lokasi asal per lokasi atau per tipe (P8)", () => {
-    const kembali = {
-      ...transfer("SJ-5", "DIKIRIM", "Outlet A"),
-      dariLokasi: lokasi("o1", "Outlet A", "Outlet"),
-      keLokasi: lokasi("g1", "Gudang A", "Gudang"),
-    };
-    const semua = [...daftar, kembali];
-    expect(nomor(saringTransfer(semua, { asal: { tipeLokasi: "Gudang" } }))).toEqual(["SJ-1", "SJ-2", "SJ-3", "SJ-4"]);
-    expect(nomor(saringTransfer(semua, { asal: { tipeLokasi: "Outlet" } }))).toEqual(["SJ-5"]);
-    expect(nomor(saringTransfer(semua, { asal: { lokasiID: "o1" } }))).toEqual(["SJ-5"]);
-  });
-
-  it("mencari nomor dan nama lokasi tujuan, atau asal bila diminta", () => {
-    expect(nomor(saringTransfer(daftar, { cari: "outlet b" }))).toEqual(["SJ-3", "SJ-4"]);
-    expect(nomor(saringTransfer(daftar, { cari: "timur", cariPada: "asal" }))).toEqual(["SJ-3"]);
-    expect(nomor(saringTransfer(daftar, { cari: " sj-2 " }))).toEqual(["SJ-2"]);
-  });
-});
-
-describe("filterServerTransfer", () => {
-  it("mengirim status dan lokasi tujuan tunggal, bukan ALL maupun tipe lokasi", () => {
-    expect(filterServerTransfer({ status: "ALL" })).toEqual({});
-    expect(filterServerTransfer({ status: "DIKIRIM", tujuan: { lokasiID: "o1" } })).toEqual({
-      status: "DIKIRIM",
-      keLocationID: "o1",
-    });
-    expect(filterServerTransfer({ tujuan: { tipeLokasi: "Outlet" } })).toEqual({});
-  });
-
-  it("mengirim lokasi asal tunggal sebagai dariLocationID, bukan tipe lokasi", () => {
-    expect(filterServerTransfer({ status: "PENDING", asal: { lokasiID: "o1" } })).toEqual({
-      status: "PENDING",
-      dariLocationID: "o1",
-    });
-    expect(filterServerTransfer({ asal: { tipeLokasi: "Gudang" } })).toEqual({});
+  it("pencarian dipangkas dan dikirim ke server, kosong tidak dikirim", () => {
+    expect(paramHalamanPemantauan({ ...dasar, cari: "  SJ-1 " })).toMatchObject({ cari: "SJ-1" });
+    expect(paramHalamanPemantauan({ ...dasar, cari: "   " })).not.toHaveProperty("cari");
   });
 });
 

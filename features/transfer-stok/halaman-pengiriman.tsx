@@ -5,8 +5,9 @@ import { KotakCari } from "@/components/filter/bilah-filter";
 import { useRouter } from "next/navigation";
 import { format, formatDistanceToNow } from "date-fns";
 import { id as localeID } from "date-fns/locale";
-import { useDaftarTransferStok } from "./hooks";
-import { filterServerTransfer, saringTransfer } from "./filter";
+import { useHalamanSuratJalan } from "./hooks";
+import { PILIHAN_UKURAN_PEMANTAUAN, paramHalamanPemantauan } from "./filter";
+import { KakiPaginasi } from "@/components/ui/kaki-paginasi";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,17 +43,22 @@ export default function HalamanPengiriman() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
+  const [halaman, setHalaman] = useState(1);
+  const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN_PEMANTAUAN[0]);
 
   // --- Queries ---
-  // Hanya surat jalan DIKIRIM, disaring server lewat query status
-  // (kontrak/temuan.md butir 33); pencarian disaring di klien. Polling
-  // 30 detik memantau penerimaan oleh outlet.
-  // Hanya pengiriman gudang; pengembalian dari outlet dipantau di ruang outlet (AR2a).
-  const kriteria = { status: "DIKIRIM" as const, asal: { tipeLokasi: "Gudang" }, cari: debouncedSearch };
-  const { data: daftarPengiriman = [], isLoading } = useDaftarTransferStok(filterServerTransfer(kriteria), {
-    refetchInterval: 30000,
-  });
-  const filteredData = saringTransfer(daftarPengiriman, kriteria);
+  // Surat jalan DIKIRIM dari gudang, berhalaman di server bersama pencarian
+  // (paramHalamanPemantauan, 20 November 2026). Polling 30 detik memantau
+  // penerimaan oleh outlet. Pengembalian dari outlet dipantau di ruang outlet (AR2a).
+  const { data, isLoading, isFetching } = useHalamanSuratJalan(
+    paramHalamanPemantauan({ asal: { tipeLokasi: "Gudang" }, cari: debouncedSearch, halaman, ukuran }),
+    { refetchInterval: 30000 },
+  );
+  const filteredData = data?.data ?? [];
+  const paginasi = data?.pagination ?? null;
+  // Polling dapat menyusutkan jumlah halaman (surat jalan diterima); halaman
+  // yang tidak ada lagi dimundurkan ke halaman terakhir.
+  if (paginasi && paginasi.totalPages > 0 && halaman > paginasi.totalPages) setHalaman(paginasi.totalPages);
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
@@ -71,7 +77,10 @@ export default function HalamanPengiriman() {
           label="Cari surat jalan"
           placeholder="Cari SJ / Outlet Tujuan..."
           value={searchTerm}
-          onChange={setSearchTerm}
+          onChange={(nilai) => {
+            setSearchTerm(nilai);
+            setHalaman(1);
+          }}
         />
       </div>
 
@@ -86,7 +95,7 @@ export default function HalamanPengiriman() {
               Truk di Jalan
             </p>
             <h3 className="text-judul font-black text-amber-900">
-              {daftarPengiriman.length}
+              {paginasi?.total ?? filteredData.length}
             </h3>
           </div>
         </div>
@@ -108,6 +117,7 @@ export default function HalamanPengiriman() {
       </div>
 
       {/* GRID KARTU PENGIRIMAN (Bukan Tabel, agar terasa seperti Dashboard Tracking) */}
+      <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
@@ -203,6 +213,24 @@ export default function HalamanPengiriman() {
             </div>
           ))
         )}
+      </div>
+      {!isLoading && (
+        <KakiPaginasi
+          total={paginasi?.total ?? filteredData.length}
+          halaman={halaman}
+          jumlahHalaman={Math.max(1, paginasi?.totalPages ?? 1)}
+          bisaSebelumnya={!isFetching && halaman > 1}
+          bisaBerikutnya={!isFetching && halaman < (paginasi?.totalPages ?? 1)}
+          onSebelumnya={() => setHalaman(halaman - 1)}
+          onBerikutnya={() => setHalaman(halaman + 1)}
+          ukuran={ukuran}
+          pilihanUkuran={PILIHAN_UKURAN_PEMANTAUAN}
+          onGantiUkuran={(baru) => {
+            setUkuran(baru);
+            setHalaman(1);
+          }}
+        />
+      )}
       </div>
     </div>
   );

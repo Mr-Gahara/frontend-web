@@ -3,7 +3,6 @@ import { isNotFound } from "@/lib/api/error";
 import { queryKeys } from "@/lib/queryKeys";
 import {
   transferStokApi,
-  type FilterTransferStok,
   type PayloadRevisi,
   type TransferDariPengajuan,
   type TransferDibuat,
@@ -28,30 +27,17 @@ export function useBuatSuratJalan(opsi: OpsiMutasi<TransferDibuat, TransferDariP
 
 /**
  * Satu halaman daftar surat jalan dari server (B105, B108, B109); params
- * disusun paramHalamanSuratJalan (filter.ts). Halaman sebelumnya tetap tampil
- * selama halaman berikutnya dimuat.
+ * disusun paramHalamanSuratJalan atau paramHalamanPemantauan (filter.ts).
+ * Halaman sebelumnya tetap tampil selama halaman berikutnya dimuat. params
+ * null berarti belum siap (misalnya cakupan lokasi masih dimuat); polling
+ * dipakai pemantauan Penerimaan dan Pengiriman.
  */
-export function useHalamanSuratJalan(params: Record<string, string>) {
+export function useHalamanSuratJalan(params: Record<string, string> | null, opsi: { refetchInterval?: number } = {}) {
   return useQuery({
-    queryKey: queryKeys.transferStok.daftar(params),
-    queryFn: () => transferStokApi.halaman(params),
+    queryKey: queryKeys.transferStok.daftar(params ?? undefined),
+    queryFn: () => transferStokApi.halaman(params ?? {}),
+    enabled: params !== null,
     placeholderData: keepPreviousData,
-  });
-}
-
-/**
- * Surat jalan tanpa paginasi, untuk pemantauan penerimaan dan pengiriman
- * (daftar kartu berstatus DIKIRIM). Argumen null berarti belum siap
- * (misalnya cakupan lokasi masih dimuat). Status dan lokasi tujuan disaring
- * server; lingkup per tipe lokasi dan pencarian disaring halaman lewat
- * saringTransfer (filter.ts). Data filter sebelumnya tidak dipertahankan,
- * sehingga berganti filter tidak menampilkan baris milik filter lama.
- */
-export function useDaftarTransferStok(filter: FilterTransferStok | null, opsi: { refetchInterval?: number } = {}) {
-  return useQuery({
-    queryKey: queryKeys.transferStok.daftar(filter ?? undefined),
-    queryFn: () => transferStokApi.daftar(filter ?? {}),
-    enabled: filter !== null,
     refetchInterval: opsi.refetchInterval,
   });
 }

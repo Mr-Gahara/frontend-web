@@ -10,8 +10,9 @@ import { useCakupanLokasiOutlet } from "@/features/inventaris/hooks";
 import { lingkupOutlet, SEMUA_OUTLET } from "@/features/inventaris/cakupan";
 import PemilihLokasiOutlet from "@/features/inventaris/pemilih-lokasi-outlet";
 import PesanLokasi from "@/features/inventaris/pesan-lokasi";
-import { useDaftarTransferStok } from "./hooks";
-import { filterServerTransfer, saringTransfer, type LingkupSisi } from "./filter";
+import { useHalamanSuratJalan } from "./hooks";
+import { PILIHAN_UKURAN_PEMANTAUAN, paramHalamanPemantauan, type LingkupSisi } from "./filter";
+import { KakiPaginasi } from "@/components/ui/kaki-paginasi";
 import { RUANG_SURAT_JALAN, type RuangSuratJalan } from "./ruang";
 
 import { Button } from "@/components/ui/button";
@@ -41,9 +42,11 @@ const getLamaPerjalanan = (tanggalKirim: string | null) => {
  * Daftar penerimaan barang di ruang outlet: surat jalan DIKIRIM menuju cakupan
  * outlet pengguna. Pemegang izin lintas outlet melihat seluruh outlet dengan
  * pemilih, pengguna lain hanya lokasi aktif, yaitu outlet milik tenant
- * (useCakupanLokasiOutlet; keputusan pemilik proyek 21 dan 22 September 2026). Backend
- * menyaring status dan lokasi tujuan tunggal (kontrak/temuan.md butir 33);
- * lingkup per tipe lokasi dan pencarian disaring di klien.
+ * (useCakupanLokasiOutlet; keputusan pemilik proyek 21 dan 22 September 2026).
+ * Berhalaman di server sejak 20 November 2026: status, lokasi atau tipe
+ * lokasi tujuan, dan pencarian nomor atau nama lokasi asal maupun tujuan
+ * disaring backend (paramHalamanPemantauan); polling 30 detik pada halaman
+ * yang sedang dibuka.
  */
 export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJalan }) {
   const konfig = RUANG_SURAT_JALAN[ruang];
@@ -54,6 +57,8 @@ export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJa
   const debouncedSearch = useDebounce(searchTerm, 500);
   const cakupan = useCakupanLokasiOutlet();
   const [pilihanLokasi, setPilihanLokasi] = useState<string>(SEMUA_OUTLET);
+  const [halaman, setHalaman] = useState(1);
+  const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN_PEMANTAUAN[0]);
 
   // --- Queries ---
   // Outlet mengikuti cakupan outlet; gudang menerima di seluruh gudang tenant (Model bisnis MVP).
@@ -67,14 +72,21 @@ export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJa
           ? { lokasiID: lingkup.locationID }
           : { tipeLokasi: lingkup.tipeLokasi ?? "Outlet" }
         : undefined;
-  const kriteria = { status: "DIKIRIM" as const, tujuan, cari: debouncedSearch, cariPada: "asal" as const };
   const {
-    data: semuaTransfer = [],
+    data,
     isLoading: isLoadingTransfers,
+    isFetching,
     isError,
     error,
-  } = useDaftarTransferStok(siap ? filterServerTransfer(kriteria) : null, { refetchInterval: 30000 });
-  const filteredData = saringTransfer(semuaTransfer, kriteria);
+  } = useHalamanSuratJalan(
+    siap ? paramHalamanPemantauan({ tujuan, cari: debouncedSearch, halaman, ukuran }) : null,
+    { refetchInterval: 30000 },
+  );
+  const filteredData = data?.data ?? [];
+  const paginasi = data?.pagination ?? null;
+  // Polling dapat menyusutkan jumlah halaman (surat jalan diterima); halaman
+  // yang tidak ada lagi dimundurkan ke halaman terakhir.
+  if (paginasi && paginasi.totalPages > 0 && halaman > paginasi.totalPages) setHalaman(paginasi.totalPages);
   const isLoading = (ruang === "outlet" && cakupan.status === "memuat") || isLoadingTransfers;
 
   let penghalang: ReactNode = null;
@@ -125,19 +137,30 @@ export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJa
         </div>
 
         {ruang === "outlet" && cakupan.status === "lintas" && (
-          <PemilihLokasiOutlet lokasiOutlet={cakupan.lokasiOutlet} nilai={pilihanLokasi} onUbah={setPilihanLokasi} />
+          <PemilihLokasiOutlet
+            lokasiOutlet={cakupan.lokasiOutlet}
+            nilai={pilihanLokasi}
+            onUbah={(nilai) => {
+              setPilihanLokasi(nilai);
+              setHalaman(1);
+            }}
+          />
         )}
         <KotakCari
           id="cari-penerimaan"
           label="Cari penerimaan"
           placeholder={`Cari SJ / Nama ${konfig.lawan} Asal...`}
           value={searchTerm}
-          onChange={setSearchTerm}
+          onChange={(nilai) => {
+            setSearchTerm(nilai);
+            setHalaman(1);
+          }}
         />
       </div>
 
       {/* GRID KARTU KEDATANGAN */}
       {penghalang ?? (
+      <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
@@ -225,6 +248,24 @@ export default function HalamanDaftarPenerimaan({ ruang }: { ruang: RuangSuratJa
             </div>
           ))
         )}
+      </div>
+      {!isLoading && (
+        <KakiPaginasi
+          total={paginasi?.total ?? filteredData.length}
+          halaman={halaman}
+          jumlahHalaman={Math.max(1, paginasi?.totalPages ?? 1)}
+          bisaSebelumnya={!isFetching && halaman > 1}
+          bisaBerikutnya={!isFetching && halaman < (paginasi?.totalPages ?? 1)}
+          onSebelumnya={() => setHalaman(halaman - 1)}
+          onBerikutnya={() => setHalaman(halaman + 1)}
+          ukuran={ukuran}
+          pilihanUkuran={PILIHAN_UKURAN_PEMANTAUAN}
+          onGantiUkuran={(baru) => {
+            setUkuran(baru);
+            setHalaman(1);
+          }}
+        />
+      )}
       </div>
       )}
     </div>

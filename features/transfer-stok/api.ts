@@ -1,20 +1,8 @@
 import { api, apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
 import type { Paginasi } from "@/lib/api/normalize";
-import type { StatusTransfer, TransferStok } from "@/types/transferStok";
+import type { TransferStok } from "@/types/transferStok";
 import type { ItemPayloadTerima } from "./payload";
-
-export interface FilterTransferStok {
-  status?: StatusTransfer;
-  /** Lokasi asal surat jalan (P8): ruang pengirim. */
-  dariLocationID?: string;
-  /**
-   * Lokasi tujuan surat jalan. Server juga menerima locationID (asal atau
-   * tujuan); web memakai asal dan tujuan secara terpisah (kontrak/temuan.md
-   * butir 33).
-   */
-  keLocationID?: string;
-}
 
 /** Satu halaman surat jalan (B105): dengan page atau limit, server mengirim pagination. */
 export type HalamanSuratJalan = { data: TransferStok[]; pagination: Paginasi | null };
@@ -41,14 +29,7 @@ export const transferStokApi = {
   /** Backend menyalin item dan arah lokasi dari pengajuan (transferStokService baris 143 dan 144). */
   buatDariPengajuan: (payload: TransferDariPengajuan) =>
     apiData.post<TransferDibuat>(EP.transferStok.list, payload),
-  daftar: (filter: FilterTransferStok) => {
-    const params: Record<string, string> = {};
-    if (filter.status) params.status = filter.status;
-    if (filter.dariLocationID) params.dariLocationID = filter.dariLocationID;
-    if (filter.keLocationID) params.keLocationID = filter.keLocationID;
-    return apiData.get<TransferStok[]>(EP.transferStok.list, params);
-  },
-  /** params disusun paramHalamanSuratJalan (filter.ts). */
+  /** params disusun paramHalamanSuratJalan atau paramHalamanPemantauan (filter.ts). */
   halaman: async (params: Record<string, string>): Promise<HalamanSuratJalan> => {
     const hasil = await api.get<TransferStok[]>(EP.transferStok.list, params);
     return { data: hasil.data, pagination: hasil.pagination ?? null };

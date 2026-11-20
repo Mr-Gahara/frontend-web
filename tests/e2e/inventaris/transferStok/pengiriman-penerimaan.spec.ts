@@ -17,7 +17,8 @@ import { masukBacaSaja } from "../../../helpers/terkunci-uji";
  * dikirim lewat API, lalu ditutup lewat terima penuh di akhir, karena sejak
  * backend 465b438 surat jalan DIKIRIM tidak dapat dibatalkan (kontrak P12).
  * Setiap run memindahkan satu unit bahan uji dari gudang ke outlet secara
- * permanen. Harapan jumlah kartu dihitung dari seluruh surat jalan yang
+ * permanen. Sejak 20 November 2026 kedua halaman berhalaman di server
+ * (query diperiksa, kartu paling banyak satu halaman). Harapan jumlah dihitung dari seluruh surat jalan yang
  * berstatus DIKIRIM, karena backend dahulu mengabaikan query status
  * (kontrak/temuan.md butir 33), lalu disaring menurut arah yang
  * ditampilkan halamannya: pengiriman hanya asal Gudang, dan penerimaan
@@ -45,28 +46,51 @@ test.describe("Daftar surat jalan DIKIRIM", () => {
       const dariGudang = dikirim.filter((t) => t.dariLokasi?.tipe === "Gudang");
       const keOutlet = dikirim.filter((t) => t.keLokasi?.tipe === "Outlet");
 
+      // Berhalaman di server sejak 20 November 2026 (paramHalamanPemantauan):
+      // status, tipe lokasi, dan halaman ikut query; kartu paling banyak satu
+      // halaman, dan "total data" sama dengan hitungan seluruh surat jalan.
+      const responsHalaman = (syarat: (q: URLSearchParams) => boolean) =>
+        page.waitForResponse((r) => {
+          if (r.request().method() !== "GET" || !/\/api\/transferstok(\?|$)/.test(r.url())) return false;
+          return syarat(new URL(r.url()).searchParams);
+        });
+
       await test.step("pengiriman gudang", async () => {
-        await page.goto(URL_PENGIRIMAN);
+        const tHalaman = responsHalaman((q) => q.get("dariTipeLokasi") === "Gudang" && q.get("page") === "1");
+        await page.goto(URL_PENGIRIMAN, { waitUntil: "commit" });
+        const q = new URL((await tHalaman).url()).searchParams;
+        expect(Object.fromEntries(q)).toEqual({ page: "1", limit: "10", status: "DIKIRIM", dariTipeLokasi: "Gudang" });
+        await expect(
+          page.getByRole("button", { name: /cek detail muatan/i }),
+          "kartu satu halaman dari surat jalan DIKIRIM dari gudang",
+        ).toHaveCount(Math.min(10, dariGudang.length));
+        await expect(page.getByText(`${dariGudang.length} total data`, { exact: true })).toBeVisible();
+
+        const tCari = responsHalaman((q) => q.get("cari") === transfer.nomorTransfer);
+        await page.getByLabel("Cari surat jalan").fill(transfer.nomorTransfer);
+        expect((await tCari).status()).toBe(200);
         await expect(page.getByText(transfer.nomorTransfer).first()).toBeVisible();
-        await expect
-          .soft(
-            page.getByRole("button", { name: /cek detail muatan/i }),
-            "hanya surat jalan DIKIRIM dari gudang yang tampil",
-          )
-          .toHaveCount(dariGudang.length);
+        await expect(page.getByRole("button", { name: /cek detail muatan/i })).toHaveCount(1);
+        await expect(page.getByText("1 total data", { exact: true })).toBeVisible();
       });
 
       await test.step("penerimaan outlet: surat jalan DIKIRIM ke outlet tenant", async () => {
-        await page.goto(URL_PENERIMAAN);
-        await expect
-          .soft(page.getByText(transfer.nomorTransfer).first(), "surat jalan DIKIRIM ke outlet tenant tampil")
-          .toBeVisible();
-        await expect
-          .soft(
-            page.getByRole("button", { name: /proses terima/i }),
-            "seluruh surat jalan DIKIRIM ke outlet tampil, karena di MVP semuanya menuju satu-satunya outlet tenant",
-          )
-          .toHaveCount(keOutlet.length);
+        const tHalaman = responsHalaman((q) => q.get("status") === "DIKIRIM" && q.get("page") === "1" && !q.get("cari"));
+        await page.goto(URL_PENERIMAAN, { waitUntil: "commit" });
+        const q = new URL((await tHalaman).url()).searchParams;
+        expect(q.get("limit")).toBe("10");
+        expect(q.get("keLocationID") ?? q.get("keTipeLokasi"), "lingkup tujuan outlet dikirim ke server").toBeTruthy();
+        await expect(
+          page.getByRole("button", { name: /proses terima/i }),
+          "kartu satu halaman; di MVP seluruh surat jalan DIKIRIM ke outlet menuju satu-satunya outlet tenant",
+        ).toHaveCount(Math.min(10, keOutlet.length));
+        await expect(page.getByText(`${keOutlet.length} total data`, { exact: true })).toBeVisible();
+
+        const tCari = responsHalaman((q) => q.get("cari") === transfer.nomorTransfer);
+        await page.getByLabel("Cari penerimaan").fill(transfer.nomorTransfer);
+        expect((await tCari).status()).toBe(200);
+        await expect(page.getByText(transfer.nomorTransfer).first()).toBeVisible();
+        await expect(page.getByRole("button", { name: /proses terima/i })).toHaveCount(1);
       });
     } finally {
       await tutupSuratJalanUji(page, auth, transfer.id);
