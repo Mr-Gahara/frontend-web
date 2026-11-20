@@ -33,6 +33,31 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
+### Mulai di sini (sesi berikutnya, dicatat 20 November 2026)
+
+Keadaan akhir sesi 20 November 2026: web `02a398b` sudah di-push, pohon
+kerja bersih, backend lokal `ridho` `2790fc7`. Urutan kerja yang disepakati
+pemilik proyek:
+
+1. **Kerapian spacing dan alignment seluruh laman** (butir 3 daftar
+   20 November 2026, di bawah): pindai seluruh rute di HP 390 px, HP
+   mendatar sekitar 844 px, tablet 768 dan 1024 px, serta desktop 1280 dan
+   1440 px (alat `pindai-visual`, `referensi/helper-dan-shell.md`). Yang
+   jelas teknis langsung diperbaiki; pola bersama, misalnya `kartuLega`
+   menjadi standar semua `DataTable`, diajukan lewat kanvas render nyata.
+2. Butir lain daftar 20 November 2026 dan 18 November 2026 di bawah, atas
+   perintah pemilik proyek: rombak UI/UX laman admin, deskripsi paket
+   laman pengenalan, ekspor PDF/Excel/CSV (menunggu backend untuk data
+   yang belum didukung), utang pengujian yang basi atau murah, dan nomor
+   WhatsApp admin (LG1a).
+3. **Suite e2e penuh ditunda sampai seluruh pekerjaan di atas selesai**
+   (pemilik proyek, 20 November 2026); sementara itu hanya spec terdampak
+   per perubahan. Suite terakhir: 20 November 2026, 676 lolos, 3 gagal yang
+   sudah diperbaiki, 1 dilewati dari 680 (`inti/pengujian.md`, Baseline).
+
+Laporan backend 186 sampai 188 (`kontrak/temuan.md`) sudah diberikan ke
+pemilik proyek; pembuktian web menyusul bila backend memperbaikinya.
+
 Keadaan per 16 November 2026: backend lokal `ridho` `4a19be8`, sama
 dengan remote, 29 commit di atas `d6709a1` (Nizar K-08 sampai K-10,
 B324 sampai B329; Ridho P80 sampai P82, B330 sampai B344). Ridho
