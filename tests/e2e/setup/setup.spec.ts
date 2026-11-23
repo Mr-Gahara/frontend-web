@@ -249,7 +249,7 @@ test.describe("Wizard setup", () => {
         await expect(page.getByLabel("Nama pajak")).toHaveValue("");
         await lanjut(page).click();
         await expect(langkahAktif(page)).toContainText("Sesi booking");
-        await page.getByLabel("Nama tipe aset").fill("Meja biliar");
+        await page.getByLabel("Nama kategori aset").fill("Meja biliar");
         await page.getByLabel("Nama aset").fill("Meja 1");
         await page.getByLabel("Nama tarif").fill("Reguler");
         await page.getByLabel("Harga").fill("30000");

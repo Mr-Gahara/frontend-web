@@ -19,7 +19,7 @@ export interface InfoPlan {
   catatan?: string;
 }
 
-const BOOKING = "Sesi booking: aset, tipe aset, dan tarif";
+const BOOKING = "Sesi booking: aset, kategori aset, dan tarif";
 const GUDANG = "Gudang dan WMS: pengajuan dan transfer stok";
 const DASAR: FiturPlan[] = [
   "Kasir, pembayaran, dan pelanggan",

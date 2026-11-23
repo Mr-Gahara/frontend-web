@@ -91,7 +91,7 @@ export default function HalamanDetailPenerimaan({ id, ruang }: { id: string; rua
         </h2>
         <Button
           variant="outline"
-          onClick={() => router.back()}
+          onClick={() => router.push(konfig.urlPenerimaan)}
           className="cursor-pointer"
         >
           Kembali
@@ -234,7 +234,7 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
           variant="ghost"
           size="sm"
           className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
-          onClick={() => router.back()}
+          onClick={() => router.push(konfig.urlPenerimaan)}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Batal & Kembali

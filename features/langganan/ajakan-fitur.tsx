@@ -64,7 +64,7 @@ export function AjakanLengkapiSetup({ fitur }: { fitur: FiturPlan }) {
     <Bingkai ikon={<Wrench className="h-5 w-5" aria-hidden="true" />} judul={`Setup ${NAMA_FITUR[fitur]} belum selesai`}>
       <p className="max-w-md text-isi text-navy/70">
         {fitur === "sesi-booking"
-          ? "Tambahkan tipe aset, aset, dan tarif lebih dulu agar sesi booking dapat dipakai."
+          ? "Tambahkan kategori aset, aset, dan tarif lebih dulu agar sesi booking dapat dipakai."
           : "Tambahkan gudang lebih dulu agar alur gudang dapat dipakai."}
       </p>
       <Link href="/setup" className={KELAS_TOMBOL}>

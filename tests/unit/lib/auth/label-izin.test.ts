@@ -11,6 +11,8 @@ describe("pesan 403 yang menyebut izin (23 November 2026)", () => {
     expect(rapikanNamaIzin("create-metode-pembayaran")).toBe("Buat metode pembayaran");
     expect(rapikanNamaIzin("akses-lintas-outlet")).toBe("Akses lintas outlet");
     expect(rapikanNamaIzin("tidak-dikenal")).toBe("tidak dikenal");
+    // Sebutan tampilan "kategori aset" (KA1a); nama izin backend tetap tipe-aset.
+    expect(rapikanNamaIzin("create-tipe-aset")).toBe("Buat kategori aset");
   });
 
   it("izin alternatif ditulis sebagai salah satu", () => {

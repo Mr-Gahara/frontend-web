@@ -76,9 +76,9 @@ export function LangkahBooking({
         panduan={{ kunci: "booking", titik: titikBooking(teksLanjut, Boolean(onLewati)) }}
       />
       <div data-panduan="booking-aset" className="flex flex-col gap-[22px]">
-        <section aria-label="Tipe aset" className="flex flex-col gap-3 rounded-2xl border border-input p-[18px]">
-          <h2 className="text-subjudul font-bold">1. Tipe aset</h2>
-          {isian("namaTipeAset", "Nama tipe aset")}
+        <section aria-label="Kategori aset" className="flex flex-col gap-3 rounded-2xl border border-input p-[18px]">
+          <h2 className="text-subjudul font-bold">1. Kategori aset</h2>
+          {isian("namaTipeAset", "Nama kategori aset")}
         </section>
         <section aria-label="Aset" className="flex flex-col gap-3 rounded-2xl border border-input p-[18px]">
           <h2 className="text-subjudul font-bold">2. Aset</h2>

@@ -306,7 +306,7 @@ export function LangkahBookingTersambung({
         judul="Sesi booking"
         baris={[
           {
-            label: "Tipe aset",
+            label: "Kategori aset",
             nilai: (tipe.data ?? []).map((t) => t.namaTipeAset).join(", "),
           },
           {

@@ -40,6 +40,14 @@ function pesanGagalSimpan(galat: unknown): string {
  * waktuMulai dan waktuSelesai form diisi dari sana. Bentrok hanya menghitung
  * booking Aktif (R6a), dan pilihan diskon mengikuti pilihDiskon (R7b).
  */
+/**
+ * Tujuan Kembali dan Batalkan: selalu daftar reservasi, bukan router.back(),
+ * yang bergantung riwayat browser (laman dibuka langsung tidak kembali ke
+ * daftar; penyebab gagal sesekali spec "Batalkan kembali ke daftar",
+ * 23 November 2026).
+ */
+const URL_DAFTAR_RESERVASI = "/dashboard/outlet/reservasi";
+
 export default function HalamanBuatReservasi() {
   const router = useRouter();
   // Form baru dirender setelah hidrasi, karena waktu awalnya diambil dari
@@ -155,7 +163,7 @@ export default function HalamanBuatReservasi() {
           variant="ghost"
           size="sm"
           className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold"
-          onClick={() => router.back()}
+          onClick={() => router.push(URL_DAFTAR_RESERVASI)}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali
@@ -310,7 +318,7 @@ export default function HalamanBuatReservasi() {
           waktuItems={waktuItems}
           menyimpan={buatBooking.isPending}
           adaBentrok={adaBentrok}
-          onBatal={() => router.back()}
+          onBatal={() => router.push(URL_DAFTAR_RESERVASI)}
         />
       </form>
     </div>

@@ -113,8 +113,8 @@ export const skemaBookingSetup = z.object({
   namaTipeAset: z
     .string()
     .trim()
-    .min(1, "Nama tipe aset wajib diisi")
-    .min(2, "Nama tipe aset minimal 2 karakter"),
+    .min(1, "Nama kategori aset wajib diisi")
+    .min(2, "Nama kategori aset minimal 2 karakter"),
   namaAset: z.string().trim().min(1, "Nama aset wajib diisi"),
   namaTarif: z.string().trim().min(1, "Nama tarif wajib diisi"),
   basisPerhitungan: z.enum(["per jam", "per sesi"]),

@@ -180,8 +180,8 @@ export function titikBooking(teksLanjut: string, bolehLewati: boolean): TitikPan
   return [
     {
       target: "booking-aset",
-      judul: "Tipe aset dan aset",
-      isi: "Tipe aset adalah jenisnya, misalnya Meja biliar. Aset adalah unitnya, misalnya Meja 1.",
+      judul: "Kategori aset dan aset",
+      isi: "Kategori aset adalah jenisnya, misalnya Meja biliar. Aset adalah unitnya, misalnya Meja 1.",
     },
     {
       target: "booking-tarif",

@@ -63,7 +63,7 @@ export default function HalamanRevisiTransfer({ id, ruang }: { id: string; ruang
         <h2 className="text-subjudul font-bold text-navy">
           Data tidak ditemukan
         </h2>
-        <Button variant="outline" onClick={() => router.back()}>
+        <Button variant="outline" onClick={() => router.push(konfig.urlSuratJalan)}>
           Kembali
         </Button>
       </div>
@@ -162,7 +162,7 @@ function FormRevisiTransfer({ detail, urlSuratJalan }: { detail: TransferStok; u
           variant="ghost"
           size="sm"
           className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
-          onClick={() => router.back()}
+          onClick={() => router.push(`${urlSuratJalan}/${id}`)}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Batal Revisi

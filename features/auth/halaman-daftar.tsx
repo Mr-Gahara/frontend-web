@@ -27,7 +27,7 @@ const FITUR_DASAR = [
   "Stok, bahan baku, dan pembelian",
   "Keuangan dan jadwal shift",
 ];
-const FITUR_BOOKING = "Sesi booking: aset, tipe aset, dan tarif";
+const FITUR_BOOKING = "Sesi booking: aset, kategori aset, dan tarif";
 const FITUR_GUDANG = "Gudang dan WMS: pengajuan dan transfer stok";
 const DURASI = " Durasi 1, 3, 6, 12, atau 24 bulan.";
 

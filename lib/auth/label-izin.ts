@@ -30,8 +30,10 @@ export function rapikanNamaIzin(nama: string): string {
   const [kerja, ...sisa] = nama.split("-");
   const objek = sisa.map((k) => KATA[k] ?? k).join(" ");
   const awal = KATA_KERJA[kerja];
-  if (!awal) return nama.replace(/-/g, " ");
-  return objek ? `${awal} ${objek}` : awal;
+  if (!awal) return nama.replace(/-/g, " ").replace("tipe aset", "kategori aset");
+  // Sebutan tampilan "kategori aset" (KA1a); nama izin backend tetap tipe-aset.
+  const teks = objek.replace("tipe aset", "kategori aset");
+  return teks ? `${awal} ${teks}` : awal;
 }
 
 export function labelIzin(nama: string, deskripsi?: ReadonlyMap<string, string>): string {

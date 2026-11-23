@@ -140,7 +140,7 @@ export default function HalamanDetailTransfer({ id, ruang }: { id: string; ruang
         <h2 className="text-subjudul font-bold text-navy">
           Data tidak ditemukan
         </h2>
-        <Button variant="link" onClick={() => router.back()} className="mt-4">
+        <Button variant="link" onClick={() => router.push(konfig.urlSuratJalan)} className="mt-4">
           Kembali
         </Button>
       </div>

@@ -175,7 +175,7 @@ export default function HalamanPembayaranPenjualan({ id: penjualanID }: PropsHal
           variant="ghost"
           size="sm"
           className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
-          onClick={() => router.back()}
+          onClick={() => router.push(`/dashboard/outlet/penjualan/${penjualanID}`)}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali

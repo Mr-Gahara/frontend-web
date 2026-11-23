@@ -156,6 +156,9 @@ interface PropsIsi extends Props {
 function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
   const router = useRouter();
   const teks = pengajuan ? TEKS.edit : TEKS.buat;
+  // Tujuan pasti, bukan router.back() yang bergantung riwayat browser
+  // (pemilik proyek, 23 November 2026): revisi ke detailnya, buat ke daftar.
+  const urlKembali = pengajuan ? `${URL_DAFTAR}/${pengajuan.id}` : URL_DAFTAR;
 
   const { data: lokasiList = [], isLoading: memuatLokasi } = useDaftarLokasi();
   const outletList = outletTerkunci ? [outletTerkunci] : lokasiList.filter((l) => l.tipe === "Outlet");
@@ -216,7 +219,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
           variant="ghost"
           size="sm"
           className="w-fit cursor-pointer px-0 text-navy/60 hover:bg-transparent hover:text-navy font-semibold transition-colors"
-          onClick={() => router.back()}
+          onClick={() => router.push(urlKembali)}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           {teks.kembali}
@@ -517,7 +520,7 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => router.back()}
+            onClick={() => router.push(urlKembali)}
             className="w-full sm:w-auto font-bold text-navy/60 hover:text-navy cursor-pointer"
           >
             Batal
