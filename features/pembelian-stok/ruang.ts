@@ -14,6 +14,14 @@ export function urlDetailPembelian(ruang: RuangPembelian, id: string): string {
   return `${URL_PEMBELIAN[ruang]}/${id}`;
 }
 
+/**
+ * Ruang detail sebuah pembelian menurut tipe lokasi penerimanya; pembelian
+ * lama tanpa lokasi dibuka di ruang outlet (PS10a, 23 November 2026).
+ */
+export function ruangDariPembelian(pembelian: { locationID: { tipe?: string | null } | null }): RuangPembelian {
+  return pembelian.locationID?.tipe === TIPE_LOKASI_PEMBELIAN.gudang ? "gudang" : "outlet";
+}
+
 export function urlCatatPembelian(ruang: RuangPembelian): string {
   return `${URL_PEMBELIAN[ruang]}/catatPembelian`;
 }

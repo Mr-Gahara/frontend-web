@@ -96,7 +96,12 @@ type PropsForm = {
   nilaiAwal: NilaiMetodePembayaran;
   /** Data server saat mengubah; tanpa ini form dalam mode buat. */
   asal?: MetodePembayaran;
-  akunKas: AkunKas[];
+  /**
+   * Daftar akun kas untuk pilihan akun tujuan; null bagi pengguna tanpa
+   * read-akunkas di halaman ubah: akun tujuan tampil sebagai teks dan tidak
+   * dapat diganti (pemilik proyek, 23 November 2026).
+   */
+  akunKas: AkunKas[] | null;
   /** false bila toko sudah punya 10 metode aktif dan metode ini belum aktif (PO3a). */
   bolehAktif: boolean;
   /** False untuk metode aktif terakhir: backend menolak penonaktifannya (NZ4a). */
@@ -123,14 +128,17 @@ export function FormMetodePembayaran({
   galat,
   onSimpan,
 }: PropsForm) {
-  const pilihan = useMemo(() => pilihanAkun(akunKas, asal?.akunKas?.id), [akunKas, asal]);
+  const pilihan = useMemo(() => (akunKas ? pilihanAkun(akunKas, asal?.akunKas?.id) : []), [akunKas, asal]);
+  const akunTetap = akunKas === null;
   const skema = useMemo(
     () =>
       buatSkemaMetodePembayaran(
-        pilihan.filter((p) => p.aktif).map((p) => p.id),
+        // Tanpa daftar akun, akun tersimpan diterima apa adanya; payload ubah
+        // tidak mengirimnya karena tidak berubah.
+        akunTetap ? [asal?.akunKas?.id ?? ""] : pilihan.filter((p) => p.aktif).map((p) => p.id),
         asal ? { akunKasID: asal.akunKas?.id ?? "", isActive: asal.isActive } : undefined,
       ),
-    [pilihan, asal],
+    [pilihan, asal, akunTetap],
   );
   const {
     register,
@@ -201,6 +209,15 @@ export function FormMetodePembayaran({
           <label htmlFor="metode-akun" className={kelasLabel}>
             Penyaluran Dana (Akun Tujuan) <span className="text-red-500">*</span>
           </label>
+          {akunTetap ? (
+            <p
+              id="metode-akun"
+              className={`${kelasIsian} flex w-full items-center bg-navy/5 font-bold text-navy`}
+            >
+              {asal?.akunKas?.namaAkun ?? "Akun kas tidak diketahui"}
+              {asal?.akunKas?.nomorAkun ? ` (${asal.akunKas.nomorAkun})` : ""}
+            </p>
+          ) : (
           <Controller
             control={control}
             name="akunKasID"
@@ -223,9 +240,12 @@ export function FormMetodePembayaran({
               </Select>
             )}
           />
+          )}
           {errors.akunKasID && <p className={kelasGalat}>{errors.akunKasID.message}</p>}
           <p className="text-kecil font-medium text-navy/60">
-            Semua uang yang masuk melalui metode ini akan bermuara ke Akun Kas di atas.
+            {akunTetap
+              ? "Akun tujuan hanya dapat diganti pengguna yang boleh melihat akun kas."
+              : "Semua uang yang masuk melalui metode ini akan bermuara ke Akun Kas di atas."}
           </p>
         </div>
 

@@ -438,6 +438,18 @@ export function bolehBukaRute(pathname: string, dimiliki: string[]): boolean {
 }
 
 /**
+ * Syarat rute yang belum dipenuhi, untuk pesan 403 yang menyebut izin yang
+ * kurang (pemilik proyek, 23 November 2026). Setiap butir berisi satu izin,
+ * atau beberapa izin alternatif yang salah satunya cukup.
+ */
+export function syaratKurangRute(pathname: string, dimiliki: readonly string[]): (readonly string[])[] {
+  const butuh = syaratRute(pathname) ?? [];
+  return butuh
+    .map((s) => (typeof s === "string" ? [s] : s))
+    .filter((pilihan) => !pilihan.some((izin) => dimiliki.includes(izin)));
+}
+
+/**
  * Menentukan apakah sebuah grup menu boleh ditampilkan.
  *
  * Grup tidak punya halaman sendiri, sehingga terlihat bila pengguna berhak

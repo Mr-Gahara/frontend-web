@@ -1,7 +1,7 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
 import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { cocok, unik } from "../../helpers/reservasi-uji";
-import { buatAkunUji, daftarAkun, pilihAkun, saldoAkun, tutupAkunUji, type AkunKasUji } from "../../helpers/akun-kas-uji";
+import { akunUjiTetap, daftarAkun, pilihAkun, saldoAkun, tutupAkunUji, type AkunKasUji } from "../../helpers/akun-kas-uji";
 import { bukaPanelFilter, terapkanPanelFilter } from "../../helpers/filter-uji";
 import { LABEL_JENIS, teksJumlahMutasi } from "../../../features/akun-kas/mutasi";
 import { formatRupiah } from "../../../lib/format";
@@ -28,6 +28,7 @@ const POLA_MUTASI = /\/api\/akunkas\/mutasi(\?|$)/i;
 const POLA_RINGKASAN = /\/api\/akunkas\/[0-9a-f]{24}\/ringkasan(\?|$)/i;
 
 type BarisMutasi = Parameters<typeof teksJumlahMutasi>[0] & {
+  createdAt: string;
   jenis: keyof typeof LABEL_JENIS;
   saldoSesudah: number;
 };
@@ -73,13 +74,15 @@ test.describe("tutup akun kas bersaldo", () => {
     test.skip(!sumber, "tidak ada akun kas aktif bersaldo untuk meminjamkan saldo");
     const akunSumber = sumber as AkunKasUji;
     const saldoSumberAwal = Number(akunSumber.saldo);
-    const nama = "E2E Tutup Bersaldo " + unik();
+    const nama = "E2E Tutup Bersaldo Tetap";
+    // Mutasi akun uji tetap menumpuk antar-run; yang diperiksa hanya baris run ini.
+    const mulaiUji = Date.now() - 5_000;
     const tanda = unik();
     let id: string | undefined;
     let ditutup = false;
 
     try {
-      id = (await buatAkunUji(page, auth, nama, "E2E tutup akun bersaldo")).id;
+      id = (await akunUjiTetap(page, auth, nama, { keterangan: "E2E tutup akun bersaldo" })).id;
       const idAkun = id;
 
       await test.step("pindah Rp1 ke akun uji lalu batalkan, kemudian pindah Rp1 lagi", async () => {
@@ -151,7 +154,9 @@ test.describe("tutup akun kas bersaldo", () => {
         await terapkanPanelFilter(panel);
         const resMutasi = await tMutasi;
         expect(resMutasi.status()).toBe(200);
-        const mutasi = ((await resMutasi.json()) as { data: BarisMutasi[] }).data;
+        const semuaMutasi = ((await resMutasi.json()) as { data: BarisMutasi[] }).data;
+        // Daftar terbaru dulu; baris run ini berada paling atas.
+        const mutasi = semuaMutasi.filter((m) => new Date(m.createdAt).getTime() >= mulaiUji);
         const resRingkasan = await tRingkasan;
         expect(resRingkasan.status()).toBe(200);
         const ringkasan = ((await resRingkasan.json()) as {
@@ -168,7 +173,7 @@ test.describe("tutup akun kas bersaldo", () => {
         expect(mutasi[0].saldoSesudah, "saldo sesudah mutasi terakhir").toBe(0);
 
         const baris = page.locator("tbody tr");
-        await expect(baris).toHaveCount(mutasi.length);
+        await expect(baris).toHaveCount(Math.min(semuaMutasi.length, 20));
         for (const [i, m] of mutasi.entries()) {
           await expect(baris.nth(i), `baris ${i + 1}: label jenis`).toContainText(LABEL_JENIS[m.jenis]);
           await expect(baris.nth(i), `baris ${i + 1}: jumlah`).toContainText(teksJumlahMutasi(m));

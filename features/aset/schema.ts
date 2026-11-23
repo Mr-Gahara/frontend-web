@@ -7,7 +7,7 @@ import { z } from "zod";
  */
 export const skemaAset = z.object({
   namaAset: z.string().trim().min(1, "Nama aset wajib diisi"),
-  tipeAsetID: z.string().min(1, "Kategori / Tipe aset wajib dipilih"),
+  tipeAsetID: z.string().min(1, "Kategori aset wajib dipilih"),
   status: z.enum(["tersedia", "perbaikan", "digunakan"]),
 });
 

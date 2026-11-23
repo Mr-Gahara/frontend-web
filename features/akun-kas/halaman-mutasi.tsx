@@ -13,6 +13,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BilahFilter } from "@/components/filter/bilah-filter";
+import { useSession } from "@/lib/auth/useSession";
+import { useBukaPembelian } from "@/features/pembelian-stok/hooks";
+import { bolehBacaPembelianStok } from "@/features/pembelian-stok/izin";
 import { DialogUnduhBulan } from "@/components/unduh/dialog-unduh-bulan";
 import { EP } from "@/lib/api/endpoints";
 import { labelFilterEkspor, paramEkspor, unduhDaftar } from "@/lib/unduh";
@@ -36,6 +39,7 @@ import {
   namaAkunBaris,
   namaAkunMutasi,
   pilFilterMutasi,
+  idPembelianMutasi,
   pilihanJenis,
   tanggalTransaksiBerbeda,
   teksJumlahMutasi,
@@ -87,6 +91,10 @@ export function HalamanMutasi() {
   const akunKas = useDaftarAkunKas();
   const daftar = useDaftarMutasi(filter, halaman, ukuran);
   const [dirinci, setDirinci] = useState<MutasiKas | null>(null);
+  // Mutasi PEMBELIAN bertaut ke detail pembeliannya (PS10a).
+  const { permissions } = useSession();
+  const bacaPembelian = bolehBacaPembelianStok(permissions);
+  const pembelian = useBukaPembelian();
 
   const ubahFilter = (baru: FilterMutasi) => {
     setFilter(baru);
@@ -168,13 +176,23 @@ export function HalamanMutasi() {
                 >
                   Lihat detail
                 </DropdownMenuItem>
+                {idPembelianMutasi(row.original, bacaPembelian) && (
+                  <DropdownMenuItem
+                    className="cursor-pointer font-bold text-navy/80"
+                    disabled={pembelian.memuat}
+                    onClick={() => pembelian.buka(row.original.referensi.id!)}
+                  >
+                    Lihat pembelian
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         ),
       },
     ],
-    [akunKas.data],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pembelian.buka stabil cukup lewat memuat
+    [akunKas.data, bacaPembelian, pembelian.memuat],
   );
 
   return (

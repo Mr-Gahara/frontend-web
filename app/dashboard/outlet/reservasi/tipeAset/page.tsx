@@ -60,7 +60,7 @@ export default function TipeAsetPage() {
     deleteMutation.mutate(selectedTipeAset.id, {
       onSuccess: () => {
         toast.success("Dihapus", {
-          description: "Data Tipe Aset berhasil dihapus.",
+          description: "Data Kategori Aset berhasil dihapus.",
         });
         setIsDeleteModalOpen(false);
         setSelectedTipeAset(null);
@@ -172,7 +172,7 @@ export default function TipeAsetPage() {
           role="alert"
           className="rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-8 text-center text-isi font-bold text-rose-600"
         >
-          Gagal memuat data tipe aset.
+          Gagal memuat data kategori aset.
         </p>
       ) : (
         <DataTable
@@ -181,8 +181,8 @@ export default function TipeAsetPage() {
           loading={isLoading}
           emptyMessage={
             searchQuery
-              ? "Tidak ada tipe aset yang cocok dengan pencarian."
-              : "Belum ada master data tipe aset."
+              ? "Tidak ada kategori aset yang cocok dengan pencarian."
+              : "Belum ada master data kategori aset."
           }
           pilihanUkuranKlien={PILIHAN_UKURAN}
         />
@@ -193,10 +193,10 @@ export default function TipeAsetPage() {
         <AlertDialogContent className="bg-gading border-navy/10">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-rose-600 flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5" /> Hapus Tipe Aset?
+              <AlertTriangle className="w-5 h-5" /> Hapus Kategori Aset?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-navy/70 font-medium">
-              Tipe <b>{selectedTipeAset?.namaTipeAset}</b> akan dihapus secara
+              Kategori <b>{selectedTipeAset?.namaTipeAset}</b> akan dihapus secara
               permanen. Sistem secara otomatis akan melepas (<i>unassign</i>)
               tipe ini dari daftar Tarif yang terhubung. Apakah Anda yakin?
             </AlertDialogDescription>
@@ -213,7 +213,7 @@ export default function TipeAsetPage() {
               disabled={deleteMutation.isPending}
               className="bg-rose-600 text-gading hover:bg-rose-700 font-bold cursor-pointer border-none shadow-sm"
             >
-              {deleteMutation.isPending ? "Menghapus..." : "Ya, Hapus Tipe"}
+              {deleteMutation.isPending ? "Menghapus..." : "Ya, Hapus Kategori"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

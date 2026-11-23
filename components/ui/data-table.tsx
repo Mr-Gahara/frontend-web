@@ -32,9 +32,9 @@ import { kunciUkurUlang, useKartuBilaTakMuat } from "@/components/ui/use-kartu-b
  * per sel milik TableCell, yang hanya berlaku di lebar meja.
  */
 const KELAS_BARIS_HP =
-  "kartu:relative kartu:mb-2 kartu:flex kartu:flex-col kartu:gap-1.5 kartu:rounded-2xl kartu:border kartu:border-navy/10 kartu:bg-[var(--warna-baris,var(--permukaan))] kartu:p-3";
+  "kartu:relative kartu:mb-2 kartu:flex kartu:flex-col kartu:gap-1.5 kartu:rounded-2xl kartu:border kartu:border-navy/10 kartu:bg-[var(--warna-baris,var(--permukaan))] kartu:p-3 kartu:shadow-[0_1px_1px_color-mix(in_srgb,var(--navy)_14%,transparent)]";
 const KELAS_SEL_HP =
-  "kartu:block kartu:border-0 kartu:bg-transparent kartu:p-0 kartu:whitespace-normal kartu:first:border-l-0 kartu:first:rounded-none kartu:first:pr-10 kartu:first:text-besar kartu:first:font-bold kartu:last:border-r-0 kartu:last:rounded-none";
+  "kartu:block kartu:border-0 kartu:shadow-none kartu:bg-transparent kartu:p-0 kartu:whitespace-normal kartu:first:border-l-0 kartu:first:rounded-none kartu:first:pr-10 kartu:first:text-besar kartu:first:font-bold kartu:last:border-r-0 kartu:last:rounded-none";
 const KELAS_AKSI_HP = "kartu:absolute kartu:right-2 kartu:top-2";
 /** kartuLega: jarak antar-field, padding, dan jarak antarkartu lebih longgar; bawaan sejak KL1b (20 November 2026). */
 const KELAS_BARIS_HP_LEGA = "kartu:mb-3 kartu:gap-3 kartu:p-4";

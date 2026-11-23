@@ -202,7 +202,7 @@ test.describe("E2E — Aset › Halaman Buat", () => {
     await page.goto(URL_BUAT);
     await page.getByRole("button", { name: /simpan aset baru/i }).click();
     await expect(page.getByText("Nama aset wajib diisi")).toBeVisible();
-    await expect(page.getByText("Kategori / Tipe aset wajib dipilih")).toBeVisible();
+    await expect(page.getByText("Kategori aset wajib dipilih")).toBeVisible();
     expect(permintaan.jumlah(), "validasi gagal tidak mengirim POST").toBe(0);
     permintaan.lepas();
   });
@@ -218,7 +218,7 @@ test.describe("E2E — Aset › Halaman Buat", () => {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
       await page.goto(URL_BUAT);
       await page.getByPlaceholder(/meja billiard 01/i).fill(nama);
-      await page.getByRole("combobox").filter({ hasText: "Pilih kategori tipe aset" }).click();
+      await page.getByRole("combobox").filter({ hasText: "Pilih kategori aset" }).click();
       await page.getByRole("option", { name: tipe.namaTipeAset }).click();
       await page
         .getByRole("combobox")
@@ -478,7 +478,7 @@ test.describe("E2E — Aset › Buat: navigasi, memuat, dan gagal", () => {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
       await page.goto(URL_BUAT);
       await page.getByPlaceholder(/meja billiard 01/i).fill(nama);
-      await page.getByRole("combobox").filter({ hasText: "Pilih kategori tipe aset" }).click();
+      await page.getByRole("combobox").filter({ hasText: "Pilih kategori aset" }).click();
       await page.getByRole("option", { name: tipe.namaTipeAset }).click();
       await tahanLaluTeruskan(page, "POST", POLA_DAFTAR);
       const tKirim = page.waitForResponse(cocok("POST", POLA_DAFTAR));
@@ -508,7 +508,7 @@ test.describe("E2E — Aset › Buat: navigasi, memuat, dan gagal", () => {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
       await page.goto(URL_BUAT);
       await page.getByPlaceholder(/meja billiard 01/i).fill(nama);
-      await page.getByRole("combobox").filter({ hasText: "Pilih kategori tipe aset" }).click();
+      await page.getByRole("combobox").filter({ hasText: "Pilih kategori aset" }).click();
       await page.getByRole("option", { name: tipe.namaTipeAset }).click();
       await page.route(POLA_DAFTAR, (route) =>
         route.request().method() === "POST" ? route.fulfill(JAWAB_GAGAL) : route.continue(),

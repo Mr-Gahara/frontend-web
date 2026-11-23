@@ -4,6 +4,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { akunKasApi, type PayloadUbahAkunKas } from "./api";
 import { filterServerMutasi, paramPeriodeMutasi, type FilterMutasi } from "./mutasi";
 import { queryKeys } from "@/lib/queryKeys";
+import { isNotFound } from "@/lib/api/error";
 
 /**
  * Daftar akun kas tenant, dipakai halaman keuangan, kartu ringkasan,
@@ -15,6 +16,20 @@ export function useDaftarAkunKas(opsi: { enabled?: boolean } = {}) {
     queryKey: queryKeys.akunKas.daftar(),
     queryFn: akunKasApi.daftar,
     enabled: opsi.enabled ?? true,
+  });
+}
+
+/**
+ * Detail satu akun kas untuk halaman ubah; dimuat ulang setiap halaman
+ * dibuka (keputusan rancangan butir 8) dan tidak diulang bila 404.
+ */
+export function useAkunKas(id: string) {
+  return useQuery({
+    queryKey: queryKeys.akunKas.detail(id),
+    queryFn: () => akunKasApi.detail(id),
+    enabled: id !== "",
+    refetchOnMount: "always",
+    retry: (jumlah, galat) => !isNotFound(galat) && jumlah < 3,
   });
 }
 

@@ -119,7 +119,7 @@ export default function AsetPage() {
       },
       {
         id: "tipe",
-        header: "Kategori / Tipe",
+        header: "Kategori Aset",
         cell: ({ row }) => (
           <span className="font-bold text-navy/80 bg-navy/5 px-2.5 py-1 rounded-md text-kecil">
             {namaTipeAset(row.original)}

@@ -116,3 +116,19 @@ describe("filterAwalDaftarPembelian", () => {
     });
   });
 });
+describe("tautan mutasi PEMBELIAN (PS10a)", () => {
+  it("ruang detail menurut tipe lokasi penerima; tanpa lokasi ke outlet", async () => {
+    const { ruangDariPembelian } = await import("@/features/pembelian-stok/ruang");
+    expect(ruangDariPembelian({ locationID: { tipe: "Gudang" } })).toBe("gudang");
+    expect(ruangDariPembelian({ locationID: { tipe: "Outlet" } })).toBe("outlet");
+    expect(ruangDariPembelian({ locationID: null })).toBe("outlet");
+  });
+
+  it("hanya mutasi PEMBELIAN bagi pemegang izin baca pembelian", async () => {
+    const { idPembelianMutasi } = await import("@/features/akun-kas/mutasi");
+    const beli = { jenis: "PEMBELIAN" as const, referensi: { tipe: "PembelianStok", id: "p1" } };
+    expect(idPembelianMutasi(beli, true)).toBe("p1");
+    expect(idPembelianMutasi(beli, false)).toBeNull();
+    expect(idPembelianMutasi({ ...beli, jenis: "PEMBALIK_PEMBELIAN" as const }, true)).toBeNull();
+  });
+});

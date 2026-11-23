@@ -136,7 +136,7 @@ export default function BuatAsetPage() {
           <div className="space-y-2">
             <label className="text-isi font-bold text-navy flex items-center gap-1.5">
               <Layers className="w-4 h-4 text-navy/60" />
-              Tipe / Kategori Aset <span className="text-rose-500">*</span>
+              Kategori Aset <span className="text-rose-500">*</span>
             </label>
             <Controller
               name="tipeAsetID"
@@ -157,15 +157,15 @@ export default function BuatAsetPage() {
                     <SelectValue
                       placeholder={
                         isLoadingTipeAset
-                          ? "Memuat tipe aset..."
-                          : "Pilih kategori tipe aset"
+                          ? "Memuat kategori aset..."
+                          : "Pilih kategori aset"
                       }
                     />
                   </SelectTrigger>
                   <SelectContent className="bg-gading border-navy/10 text-navy">
                     {tipeAsetList.length === 0 && !isLoadingTipeAset ? (
                       <div className="p-3 text-isi text-center font-medium text-navy/60">
-                        Belum ada tipe aset. <br /> Buat tipe aset terlebih
+                        Belum ada kategori aset. <br /> Buat kategori aset terlebih
                         dahulu.
                       </div>
                     ) : (
@@ -193,7 +193,7 @@ export default function BuatAsetPage() {
                 </span>
               ) : (
                 <p className="text-mikro font-medium text-navy/50">
-                  Tipe aset menentukan harga/tarif sewa yang akan diberlakukan
+                  Kategori aset menentukan harga/tarif sewa yang akan diberlakukan
                   pada aset ini.
                 </p>
               )}

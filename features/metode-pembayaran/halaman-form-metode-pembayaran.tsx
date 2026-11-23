@@ -6,6 +6,8 @@ import { toast } from "sonner";
 
 import { isNotFound, pesanError } from "@/lib/api/error";
 import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
+import { useSession } from "@/lib/auth/useSession";
+import { IZIN } from "@/lib/auth/permissions";
 import {
   useBuatMetodePembayaran,
   useDaftarMetodePembayaran,
@@ -89,7 +91,11 @@ export function HalamanUbahMetodePembayaran() {
   const id = params?.id;
   const [galat, setGalat] = useState("");
   const detail = useMetodePembayaran(id);
-  const akun = useDaftarAkunKas();
+  // Tanpa read-akunkas daftar akun tidak dimuat; form tetap dapat dipakai
+  // dengan akun tujuan tetap (pemilik proyek, 23 November 2026).
+  const { permissions } = useSession();
+  const bacaAkun = permissions.includes(IZIN.akunKas);
+  const akun = useDaftarAkunKas({ enabled: bacaAkun });
   const daftar = useDaftarMetodePembayaran({ semua: true });
   const perbarui = usePerbaruiMetodePembayaran({
     onSuccess: () => {
@@ -103,7 +109,7 @@ export function HalamanUbahMetodePembayaran() {
   let isi: ReactNode;
   if (isNotFound(detail.error)) {
     isi = <PesanMetode judul="Metode pembayaran tidak ditemukan" pesan="Metode ini tidak ada atau bukan milik toko Anda." />;
-  } else if (detail.isError || akun.isError || daftar.isError) {
+  } else if (detail.isError || (bacaAkun && akun.isError) || daftar.isError) {
     isi = (
       <PesanMetode
         judul="Gagal memuat data"
@@ -115,7 +121,7 @@ export function HalamanUbahMetodePembayaran() {
         }}
       />
     );
-  } else if (!m || !detail.isFetchedAfterMount || !akun.data || !daftar.data) {
+  } else if (!m || !detail.isFetchedAfterMount || (bacaAkun && !akun.data) || !daftar.data) {
     isi = <MemuatMetode teks="Memuat detail metode pembayaran..." />;
   } else {
     isi = (
@@ -123,7 +129,7 @@ export function HalamanUbahMetodePembayaran() {
         key={`${m.id}-${m.updatedAt}`}
         nilaiAwal={nilaiAwalMetode(m)}
         asal={m}
-        akunKas={akun.data}
+        akunKas={bacaAkun ? (akun.data ?? []) : null}
         bolehAktif={m.isActive || masihDalamBatas(daftar.data)}
         bolehNonaktif={!metodeAktifTerakhir(daftar.data, m)}
         sedangMenyimpan={perbarui.isPending}

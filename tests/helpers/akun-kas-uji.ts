@@ -58,3 +58,47 @@ export async function pilihAkun(page: Page, label: string, nama: string) {
   await page.getByRole("combobox", { name: label }).click();
   await page.getByRole("option", { name: nama, exact: true }).click();
 }
+/**
+ * Akun uji tetap untuk spec yang tidak menguji pembuatan akun (pemilik
+ * proyek, 23 November 2026): dicari menurut nama pasti, atau menurut nama
+ * sisa run yang gagal di tengah (`namaSisa`), lalu dipulihkan: nama,
+ * keterangan, dan status aktif, dan saldonya dikosongkan ke akun aktif
+ * bukan uji lewat Pindah Dana API. Dibuat sekali bila belum ada. Akun kas
+ * tidak dapat dihapus, sehingga cara ini menghentikan penumpukan akun uji
+ * non-aktif per run.
+ */
+export async function akunUjiTetap(
+  page: Page,
+  auth: Auth,
+  nama: string,
+  { keterangan = "E2E akun kas uji", namaSisa = [] as string[] } = {},
+): Promise<AkunKasUji> {
+  const semua = await daftarAkun(page, auth);
+  const ada = semua.find((a) => a.namaAkun === nama) ?? semua.find((a) => namaSisa.includes(a.namaAkun));
+  if (!ada) return buatAkunUji(page, auth, nama, keterangan);
+
+  const ubah: Record<string, unknown> = {};
+  if (ada.namaAkun !== nama) ubah.namaAkun = nama;
+  if ((ada.keterangan ?? "") !== keterangan) ubah.keterangan = keterangan;
+  if (ada.status !== "aktif") ubah.status = "aktif";
+  if (ada.tipeAkun !== "Kas Fisik") ubah.tipeAkun = "Kas Fisik";
+  if (Object.keys(ubah).length > 0) {
+    const pulih = await api(page, auth, "PUT", "/akunkas/" + ada.id, ubah);
+    expect(pulih.status, `pulihkan akun uji tetap ${nama}: ${pulih.pesan}`).toBe(200);
+  }
+  const saldo = Number(ada.saldo ?? 0);
+  if (saldo > 0) {
+    const tujuan = semua.find((a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E") && a.id !== ada.id);
+    expect(tujuan, "akun aktif bukan uji untuk menampung sisa saldo akun uji tetap").toBeTruthy();
+    const kosong = await api(page, auth, "POST", "/jurnaltransfer", {
+      kasSumberID: ada.id,
+      kasTujuanID: (tujuan as AkunKasUji).id,
+      jumlah: saldo,
+      keterangan: "E2E pengosongan akun uji tetap " + nama,
+    });
+    expect(kosong.status, `kosongkan saldo akun uji tetap ${nama}: ${kosong.pesan}`).toBe(201);
+  }
+  const akhir = (await daftarAkun(page, auth)).find((a) => a.id === ada.id);
+  expect(akhir?.saldo, `saldo akun uji tetap ${nama} kosong`).toBe(0);
+  return akhir as AkunKasUji;
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import type * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TandaTachyon } from "@/features/auth/tanda-tachyon";
@@ -59,6 +60,8 @@ export function HalamanGalat({
   tertanam = false,
   onCobaLagi,
   kodeGalat,
+  penjelasan,
+  rincian,
 }: {
   kode: KodeGalat;
   tertanam?: boolean;
@@ -66,8 +69,13 @@ export function HalamanGalat({
   onCobaLagi?: () => void;
   /** 500: identitas galat server (digest) untuk dilaporkan ke admin. */
   kodeGalat?: string;
+  /** Pengganti penjelasan bawaan, misalnya 403 yang menyebut halamannya. */
+  penjelasan?: string;
+  /** Isi tambahan di bawah penjelasan, misalnya daftar izin yang dibutuhkan (403). */
+  rincian?: React.ReactNode;
 }) {
-  const { judul, isi } = ISI_GALAT[kode];
+  const { judul, isi: isiBawaan } = ISI_GALAT[kode];
+  const isi = penjelasan ?? isiBawaan;
   // Di dalam dashboard sudah ada <main>; landmark kedua tidak dipasang.
   const Isi = tertanam ? "div" : "main";
   return (
@@ -105,6 +113,7 @@ export function HalamanGalat({
             <h1 className="text-judul font-bold leading-tight tracking-tight">{judul}</h1>
             <p className="text-isi text-muted-foreground">{isi}</p>
           </div>
+          {rincian}
           {onCobaLagi ? (
             <button type="button" onClick={onCobaLagi} className={KELAS_TOMBOL}>
               Coba lagi

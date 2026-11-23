@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useBukaPembelian } from "@/features/pembelian-stok/hooks";
+import { bolehBacaPembelianStok } from "@/features/pembelian-stok/izin";
 import { ArrowDownLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 
 import {
@@ -18,6 +20,7 @@ import {
   LABEL_JENIS,
   namaPencatat,
   tanggalTransaksiBerbeda,
+  idPembelianMutasi,
   tautanPenjualanMutasi,
   tautanTransferMutasi,
   teksJumlahMutasi,
@@ -40,6 +43,9 @@ function IsiRincian({ mutasi, namaAkun }: { mutasi: MutasiKas; namaAkun: string 
   const { permissions } = useSession();
   const tautanJual = tautanPenjualanMutasi(mutasi);
   const tautanTransfer = tautanTransferMutasi(mutasi, aksiTransfer(permissions).baca);
+  // Mutasi PEMBELIAN: detail dimuat dulu untuk mengetahui ruangnya (PS10a).
+  const idPembelian = idPembelianMutasi(mutasi, bolehBacaPembelianStok(permissions));
+  const pembelian = useBukaPembelian();
   const tautan = tautanJual
     ? { ...tautanJual, judul: "Penjualan terkait" }
     : tautanTransfer
@@ -101,6 +107,21 @@ function IsiRincian({ mutasi, namaAkun }: { mutasi: MutasiKas; namaAkun: string 
           {mutasi.keterangan || "-"}
         </p>
       </div>
+
+      {idPembelian && (
+        <div className="flex flex-col gap-1.5">
+          <p className={KELAS_LABEL}>Pembelian terkait</p>
+          <button
+            type="button"
+            onClick={() => pembelian.buka(idPembelian)}
+            disabled={pembelian.memuat}
+            className="flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-navy px-4 py-3 text-left text-isi font-bold text-gading hover:bg-navy/90 disabled:opacity-70"
+          >
+            <span className="min-w-0 truncate">{pembelian.memuat ? "Membuka pembelian..." : "Lihat pembelian"}</span>
+            <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+          </button>
+        </div>
+      )}
 
       {tautan && (
         <div className="flex flex-col gap-1.5">

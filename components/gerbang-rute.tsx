@@ -13,7 +13,10 @@
 
 import { usePathname } from "next/navigation";
 import { useSession } from "@/lib/auth/useSession";
-import { bolehBukaRute } from "@/lib/auth/permissions";
+import { bolehBukaRute, syaratKurangRute } from "@/lib/auth/permissions";
+import { labelSyarat } from "@/lib/auth/label-izin";
+import { labelMenuRute } from "@/components/sidebar-menu";
+import { useDaftarPermission } from "@/features/role/hooks";
 import { fiturRute, planMencakup } from "@/lib/auth/fitur-plan";
 import { AjakanNaikPlan } from "@/features/langganan/ajakan-fitur";
 import { useRuangLokasiKerja } from "@/features/pengguna/hooks-profil";
@@ -39,7 +42,7 @@ export function GerbangRute({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  return <PesanTanpaIzin />;
+  return <PesanTanpaIzin pathname={pathname} permissions={permissions} />;
 }
 
 /** Pesan di tempat untuk ruang di luar lokasi kerja pengguna (LK3a). */
@@ -57,8 +60,32 @@ export function PesanLuarLokasiKerja() {
 /**
  * 403 di area isi dashboard (desain A tertanam, pemilik proyek 12 November
  * 2026): sidebar dan topbar tetap ada. Dipakai juga halaman berpengecualian
- * role (Langganan).
+ * role (Langganan), yang tidak menyebut izin. Dari gerbang rute pesannya
+ * menyebut nama halaman dari menu dan izin yang dibutuhkan dengan deskripsi
+ * backend yang mudah dipahami (pemilik proyek, 23 November 2026).
  */
-export function PesanTanpaIzin() {
-  return <HalamanGalat kode={403} tertanam />;
+export function PesanTanpaIzin({ pathname, permissions }: { pathname?: string; permissions?: readonly string[] }) {
+  const kurang = pathname && permissions ? syaratKurangRute(pathname, permissions) : [];
+  const halaman = pathname ? labelMenuRute(pathname) : null;
+  // GET /permission terbuka bagi setiap pengguna yang masuk (authEither).
+  const daftar = useDaftarPermission({ aktif: kurang.length > 0 });
+  const deskripsi = new Map((daftar.data ?? []).map((p) => [p.nama, p.deskripsi ?? ""]));
+  if (kurang.length === 0) return <HalamanGalat kode={403} tertanam />;
+  return (
+    <HalamanGalat
+      kode={403}
+      tertanam
+      penjelasan={`Anda tidak memiliki izin membuka ${halaman ? `halaman ${halaman}` : "halaman ini"}. Minta Owner menambahkan izin berikut ke peran Anda.`}
+      rincian={
+        <section aria-label="Izin yang dibutuhkan" className="rounded-xl bg-krem px-4 py-3 text-navy">
+          <p className="text-kecil font-bold text-navy/75">Izin yang dibutuhkan</p>
+          <ul className="mt-1.5 flex list-disc flex-col gap-1 pl-5 text-isi font-medium">
+            {kurang.map((pilihan) => (
+              <li key={pilihan.join("|")}>{labelSyarat(pilihan, deskripsi)}</li>
+            ))}
+          </ul>
+        </section>
+      }
+    />
+  );
 }

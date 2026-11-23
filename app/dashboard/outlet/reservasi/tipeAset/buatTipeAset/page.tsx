@@ -129,7 +129,7 @@ export default function BuatTipeAsetPage() {
             </label>
             <Textarea
               {...register("deskripsi")}
-              placeholder="Catatan atau keterangan mengenai tipe aset ini..."
+              placeholder="Catatan atau keterangan mengenai kategori aset ini..."
               rows={4}
               className="bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy resize-none"
             />

@@ -198,6 +198,19 @@ const PERAN_KASIR_OUTLET: PeranUji = {
   aksesType: ["web", "app"],
 };
 
+/**
+ * Izin baca Owner tanpa read-akunkas, ditambah buat dan ubah metode
+ * pembayaran (pemilik proyek, 23 November 2026): halaman buat metode
+ * ditolak gerbang rute, halaman ubah tetap terbuka dengan akun tujuan tetap.
+ */
+const PERAN_METODE_TANPA_AKUN: PeranUji = {
+  nama: "E2E Metode Tanpa Akun",
+  pin: "864226",
+  deskripsi: "Peran uji e2e: izin baca Owner tanpa akun kas, ditambah buat dan ubah metode pembayaran",
+  izin: (n) =>
+    (n.startsWith("read-") && n !== IZIN.akunKas) || n === IZIN.buatMetodePembayaran || n === IZIN.ubahMetodePembayaran,
+};
+
 type PeranMentah = Mentah & { namaRole?: string; level?: number; permissions?: (Mentah & { nama?: string })[] };
 type PenggunaMentah = Mentah & {
   nama?: string;
@@ -329,3 +342,4 @@ export const masukLokasiGudangTanpaLokasi = (page: Page) => masukSebagai(page, P
 export const masukTanpaBacaSebagian = (page: Page) => masukSebagai(page, PERAN_TANPA_BACA_SEBAGIAN);
 export const masukPetugasTransfer = (page: Page) => masukSebagai(page, PERAN_PETUGAS_TRANSFER);
 export const masukAdjustmentOutlet = (page: Page) => masukSebagai(page, PERAN_ADJUSTMENT_OUTLET);
+export const masukMetodeTanpaAkun = (page: Page) => masukSebagai(page, PERAN_METODE_TANPA_AKUN);

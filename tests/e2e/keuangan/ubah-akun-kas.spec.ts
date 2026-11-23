@@ -2,8 +2,8 @@ import { expect, test, type Page } from "@playwright/test";
 import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { masukBacaSaja } from "../../helpers/terkunci-uji";
 import { NAMA_LACI_UJI, PERANGKAT_UJI, bersihkanMesinUji, siapkanLaciUji } from "../../helpers/sesi-kasir-uji";
-import { ID_TIDAK_ADA, cocok, pantauPermintaan, unik } from "../../helpers/reservasi-uji";
-import { daftarAkun, buatAkunUji, tutupAkunUji, type AkunKasUji } from "../../helpers/akun-kas-uji";
+import { ID_TIDAK_ADA, cocok, pantauPermintaan } from "../../helpers/reservasi-uji";
+import { daftarAkun, akunUjiTetap, tutupAkunUji, type AkunKasUji } from "../../helpers/akun-kas-uji";
 
 /*
  * Spec ubah, nonaktifkan, dan aktifkan kembali akun kas lewat PUT
@@ -32,11 +32,12 @@ test.describe("ubah akun kas", () => {
 
   test("ubah dari kartu: payload hanya field yang berubah, tersimpan, kembali ke daftar (UA1a, UA4a)", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_AKUN);
-    const nama = "E2E Ubah Akun " + unik();
+    // Akun uji tetap (pemilik proyek, 23 November 2026); nama ubahan run yang gagal dipulihkan helper.
+    const nama = "E2E Ubah Akun Tetap";
     const namaBaru = nama + " Baru";
     let id: string | undefined;
     try {
-      const akun = await buatAkunUji(page, auth, nama);
+      const akun = await akunUjiTetap(page, auth, nama, { namaSisa: [namaBaru] });
       id = akun.id;
       await page.reload();
       await page.getByRole("link", { name: `Ubah ${nama}`, exact: true }).click();
@@ -69,10 +70,10 @@ test.describe("ubah akun kas", () => {
 
   test("spasi di tepi bukan perubahan, dan nama kosong menampilkan pesan tanpa mengirim PUT", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_AKUN);
-    const nama = "E2E Ubah Akun " + unik();
+    const nama = "E2E Ubah Spasi Tetap";
     let id: string | undefined;
     try {
-      id = (await buatAkunUji(page, auth, nama)).id;
+      id = (await akunUjiTetap(page, auth, nama)).id;
       await page.goto(urlUbah(id));
       const simpan = page.getByRole("button", { name: "Simpan Perubahan" });
       await expect(page.getByLabel("Nama Akun")).toHaveValue(nama);
@@ -94,13 +95,13 @@ test.describe("ubah akun kas", () => {
 
   test("nama kembar ditolak 409: pesan backend tampil, halaman tetap, data tidak berubah", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_AKUN);
-    const namaA = "E2E Ubah Kembar A " + unik();
-    const namaB = "E2E Ubah Kembar B " + unik();
+    const namaA = "E2E Ubah Kembar A Tetap";
+    const namaB = "E2E Ubah Kembar B Tetap";
     let idA: string | undefined;
     let idB: string | undefined;
     try {
-      idA = (await buatAkunUji(page, auth, namaA)).id;
-      idB = (await buatAkunUji(page, auth, namaB)).id;
+      idA = (await akunUjiTetap(page, auth, namaA)).id;
+      idB = (await akunUjiTetap(page, auth, namaB)).id;
       await page.goto(urlUbah(idB));
       await expect(page.getByLabel("Nama Akun")).toHaveValue(namaB);
       await page.getByLabel("Nama Akun").fill(namaA);
@@ -161,10 +162,10 @@ test.describe("ubah akun kas", () => {
 
   test("nonaktifkan dari halaman ubah, lalu aktifkan kembali dari bagian lipat (UA2a, UA3a)", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_AKUN);
-    const nama = "E2E Ubah Status " + unik();
+    const nama = "E2E Ubah Status Tetap";
     let id: string | undefined;
     try {
-      id = (await buatAkunUji(page, auth, nama)).id;
+      id = (await akunUjiTetap(page, auth, nama)).id;
       await page.goto(urlUbah(id));
       await page.getByRole("button", { name: "Nonaktifkan Akun" }).click();
       const dialog = page.getByRole("dialog");
@@ -250,7 +251,35 @@ test.describe("akun kas: pengguna baca-saja", () => {
     await expect(page.getByRole("button", { name: /^Aktifkan kembali / })).toHaveCount(0);
 
     await page.goto(urlUbah(aktif!.id));
-    await expect(page.getByRole("main").getByText("Anda tidak memiliki izin membuka halaman ini.")).toBeVisible();
+    await expect(page.getByRole("main").getByText(/Anda tidak memiliki izin membuka (halaman [^.]+|halaman ini)\./)).toBeVisible();
     await expect(page.getByRole("button", { name: "Simpan Perubahan" })).toHaveCount(0);
+  });
+
+  test("halaman ubah membaca GET /akunkas/:id saat dibuka, dan id yang tidak ada menampilkan tidak ditemukan", async ({
+    page,
+  }) => {
+    await login(page);
+    const auth = await bukaDenganAuth(page, URL_AKUN);
+    const akun = await akunUjiTetap(page, auth, "E2E Ubah Detail Tetap");
+    try {
+      const tDetail = page.waitForResponse((r) => r.request().method() === "GET" && POLA_AKUN_ID.test(r.url()));
+      await page.goto(urlUbah(akun.id));
+      const res = await tDetail;
+      expect(res.status(), "detail akun dibaca dari server, bukan dari cache daftar").toBe(200);
+      expect(res.url()).toContain(akun.id);
+      await expect(page.getByLabel("Nama Akun")).toHaveValue(akun.namaAkun);
+
+      // Perubahan dari luar halaman tampil saat halaman dibuka lagi.
+      const ubah = await api(page, auth, "PUT", "/akunkas/" + akun.id, { keterangan: "E2E diubah di luar" });
+      expect(ubah.status).toBe(200);
+      await page.goto(URL_AKUN);
+      await page.goto(urlUbah(akun.id));
+      await expect(page.getByLabel(/Keterangan/)).toHaveValue("E2E diubah di luar");
+
+      await page.goto(urlUbah(ID_TIDAK_ADA));
+      await expect(page.getByText("Akun kas tidak ditemukan")).toBeVisible({ timeout: 15_000 });
+    } finally {
+      await tutupAkunUji(page, auth, akun.id);
+    }
   });
 });

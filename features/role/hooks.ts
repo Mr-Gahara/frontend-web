@@ -26,11 +26,13 @@ export function useRole(id: string) {
   });
 }
 
-export function useDaftarPermission() {
+/** aktif false tidak meminta apa pun; pesan 403 memakainya hanya bila ada izin yang kurang. */
+export function useDaftarPermission({ aktif = true }: { aktif?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.permissions.daftar(),
     queryFn: permissionApi.daftar,
     staleTime: 30 * 60 * 1000,
+    enabled: aktif,
   });
 }
 

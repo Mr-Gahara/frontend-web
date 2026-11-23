@@ -398,3 +398,16 @@ export const gudangMenus: MenuGroup[] = [
     ],
   },
 ];
+
+/**
+ * Label menu untuk sebuah rute, dari menu outlet atau gudang (halaman
+ * turunan memakai menu terdekatnya); null bila rute tidak punya menu. Dipakai
+ * pesan 403 agar menyebut halaman yang ditolak.
+ */
+export function labelMenuRute(pathname: string): string | null {
+  const semua = [...outletMenus, ...gudangMenus].flatMap((g) =>
+    g.items.flatMap((i) => (i.subItems?.length ? i.subItems.map((s) => ({ href: s.href, label: s.label })) : [{ href: i.href, label: i.label }])),
+  );
+  const href = hrefMenuAktif(pathname, semua.map((m) => m.href));
+  return href ? (semua.find((m) => m.href === href)?.label ?? null) : null;
+}

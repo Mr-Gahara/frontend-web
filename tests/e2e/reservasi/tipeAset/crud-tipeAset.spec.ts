@@ -81,7 +81,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
       route.request().method() === "GET" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
     );
     await page.goto(URL_DAFTAR);
-    await expect(page.getByText("Gagal memuat data tipe aset.")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Gagal memuat data kategori aset.")).toBeVisible({ timeout: 20_000 });
     await page.unroute(POLA_DAFTAR);
   });
 
@@ -99,7 +99,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
     await expect(page.getByText("Memuat data...")).toHaveCount(0);
     await expect(page.getByText("0 total data", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Buka menu" })).toHaveCount(0);
-    await expect(page.getByText("Tidak ada tipe aset yang cocok dengan pencarian.")).toHaveCount(0);
+    await expect(page.getByText("Tidak ada kategori aset yang cocok dengan pencarian.")).toHaveCount(0);
     await page.unroute(POLA_DAFTAR);
   });
 
@@ -153,7 +153,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
       });
       await test.step("tanpa hasil", async () => {
         await cari.fill("tidak-ada-" + unik());
-        await expect(page.getByText("Tidak ada tipe aset yang cocok dengan pencarian.")).toBeVisible();
+        await expect(page.getByText("Tidak ada kategori aset yang cocok dengan pencarian.")).toBeVisible();
         await expect(page.getByText("0 total data", { exact: true })).toBeVisible();
       });
       expect(permintaan.jumlah(), "pencarian tidak memanggil backend").toBe(0);
@@ -195,7 +195,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
       await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
       await page.getByRole("menuitem", { name: /^hapus$/i }).click();
       const dialog = page.getByRole("alertdialog");
-      await expect(dialog).toContainText("Hapus Tipe Aset?");
+      await expect(dialog).toContainText("Hapus Kategori Aset?");
       await expect(dialog).toContainText(nama);
       await dialog.getByRole("button", { name: "Batal", exact: true }).click();
       await expect(dialog).toBeHidden();
@@ -223,7 +223,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
       await page.getByRole("menuitem", { name: /^hapus$/i }).click();
       const dialog = page.getByRole("alertdialog");
       const tHapus = page.waitForResponse(cocok("DELETE", POLA_SATU));
-      await dialog.getByRole("button", { name: /ya, hapus tipe/i }).click();
+      await dialog.getByRole("button", { name: /ya, hapus kategori/i }).click();
       const menunggu = dialog.getByRole("button", { name: /menghapus/i });
       await expect(menunggu).toBeVisible();
       await expect(menunggu).toBeDisabled();
@@ -251,7 +251,7 @@ test.describe("E2E — Tipe Aset › Halaman Daftar", () => {
       await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
       await page.getByRole("menuitem", { name: /^hapus$/i }).click();
       const dialog = page.getByRole("alertdialog");
-      await dialog.getByRole("button", { name: /ya, hapus tipe/i }).click();
+      await dialog.getByRole("button", { name: /ya, hapus kategori/i }).click();
       await expect(page.getByText("Gagal", { exact: true })).toBeVisible();
       await expect(dialog).toBeVisible();
       await page.unroute(POLA_SATU);
@@ -395,7 +395,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
     page,
   }) => {
     await page.goto(URL_DAFTAR + "/undefined/edit");
-    await expect(page.getByText("ID Tipe Aset Tidak Valid")).toBeVisible();
+    await expect(page.getByText("ID Kategori Aset Tidak Valid")).toBeVisible();
     await page.getByRole("button", { name: /kembali/i }).click();
     await page.waitForURL("**/reservasi/tipeAset");
   });
@@ -409,7 +409,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
       t = await buatTipeAset(page, auth, nama, deskripsi);
       await tahanLaluTeruskan(page, "GET", POLA_SATU);
       await page.goto(urlEdit(t.id));
-      await expect(page.getByText("Memuat data tipe aset...")).toBeVisible();
+      await expect(page.getByText("Memuat data kategori aset...")).toBeVisible();
       await expect(page.getByPlaceholder(/meja billiard vip/i)).toHaveValue(nama, { timeout: 10_000 });
       await expect(page.getByPlaceholder(/catatan atau keterangan/i)).toHaveValue(deskripsi);
       await page.unroute(POLA_SATU);
@@ -429,7 +429,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
     await page.waitForURL("**/reservasi/tipeAset");
   });
 
-  test("tombol Kembali ke Daftar Tipe Aset dan Batal kembali ke daftar tanpa menyimpan", async ({
+  test("tombol Kembali ke Daftar Kategori Aset dan Batal kembali ke daftar tanpa menyimpan", async ({
     page,
   }) => {
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
@@ -440,7 +440,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
       const permintaan = pantauPermintaan(page, "PUT", POLA_SATU);
       await page.goto(urlEdit(t.id));
       await expect(page.getByPlaceholder(/meja billiard vip/i)).toHaveValue(nama);
-      await page.getByRole("button", { name: /kembali ke daftar tipe aset/i }).click();
+      await page.getByRole("button", { name: /kembali ke daftar kategori aset/i }).click();
       await page.waitForURL("**/reservasi/tipeAset");
       await page.goto(urlEdit(t.id));
       await expect(page.getByPlaceholder(/meja billiard vip/i)).toHaveValue(nama);
@@ -465,7 +465,7 @@ test.describe("E2E — Tipe Aset › Halaman Edit", () => {
       await expect(input).toHaveValue(nama);
       await input.fill("");
       await page.getByRole("button", { name: /simpan perubahan/i }).click();
-      await expect(page.getByText("Nama Tipe Aset wajib diisi")).toBeVisible();
+      await expect(page.getByText("Nama Kategori Aset wajib diisi")).toBeVisible();
       expect(permintaan.jumlah(), "validasi gagal tidak mengirim PUT").toBe(0);
       permintaan.lepas();
     } finally {

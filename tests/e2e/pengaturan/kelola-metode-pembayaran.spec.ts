@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { JAWAB_GAGAL, api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
 import { ID_TIDAK_ADA, cocok, unik } from "../../helpers/reservasi-uji";
+import { masukMetodeTanpaAkun } from "../../helpers/terkunci-uji";
 
 /*
  * Spec migrasi metode pembayaran (submodul 1 modul Pengaturan outlet),
@@ -271,5 +272,46 @@ test.describe("E2E — Kelola metode pembayaran", () => {
     await expect(page.getByRole("main").getByText("uji", { exact: true })).toBeVisible();
     await expect(page.getByText("Runtime ApiError")).toHaveCount(0);
     expect(galat).toEqual([]);
+  });
+
+  test("tanpa read-akunkas: buat ditolak dengan izin yang dibutuhkan, ubah tetap dapat disimpan dengan akun tujuan tetap", async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    let auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const fixture = await pastikanFixture(page, auth);
+    const namaBaru = NAMA_FIXTURE + " Ubah";
+    try {
+      await masukMetodeTanpaAkun(page);
+      // Buat: gerbang rute menuntut read-akunkas, dengan deskripsi izin dari backend.
+      await page.goto(URL_BUAT);
+      await expect(page.getByRole("heading", { name: "Akses ditolak" })).toBeVisible({ timeout: 20_000 });
+      const kotak = page.getByRole("region", { name: "Izin yang dibutuhkan" });
+      await expect(kotak.getByRole("listitem")).toHaveCount(1);
+      await expect(kotak).toContainText(/akun kas/i);
+
+      // Ubah: daftar akun kas tidak diminta; akun tujuan tampil sebagai teks.
+      let mintaAkun = 0;
+      page.on("request", (r) => {
+        if (r.method() === "GET" && /\/api\/akunkas(\?|$)/i.test(r.url())) mintaAkun++;
+      });
+      await page.goto(URL_DAFTAR + "/" + fixture.id);
+      await expect(page.getByPlaceholder(PLACEHOLDER_NAMA)).toHaveValue(NAMA_FIXTURE, { timeout: 20_000 });
+      await expect(page.locator("#metode-akun")).toContainText(fixture.akunKas?.namaAkun ?? "");
+      await expect(page.getByText("Akun tujuan hanya dapat diganti pengguna yang boleh melihat akun kas.")).toBeVisible();
+      await expect(page.getByText("Gagal memuat data")).toHaveCount(0);
+      await page.getByPlaceholder(PLACEHOLDER_NAMA).fill(namaBaru);
+      const tKirim = page.waitForResponse(cocok("PUT", /\/api\/metodepembayaran\/[a-f0-9]{24}(\?|$)/i));
+      await page.getByRole("button", { name: /simpan/i }).click();
+      const res = await tKirim;
+      expect(res.status()).toBe(200);
+      expect(res.request().postDataJSON(), "hanya nama yang berubah; akun tidak dikirim").toEqual({ namaPembayaran: namaBaru });
+      expect(mintaAkun, "GET /akunkas tidak diminta tanpa read-akunkas").toBe(0);
+    } finally {
+      await login(page);
+      auth = await bukaDenganAuth(page, URL_DAFTAR);
+      const balik = await api(page, auth, "PUT", "/metodepembayaran/" + fixture.id, { namaPembayaran: NAMA_FIXTURE });
+      expect.soft(balik.status, "kembalikan nama metode fixture: " + balik.pesan).toBe(200);
+    }
   });
 });

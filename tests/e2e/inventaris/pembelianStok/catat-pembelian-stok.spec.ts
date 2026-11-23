@@ -303,7 +303,7 @@ test.describe("Pembelian stok: pemegang izin ruang outlet saja (B116, butir 158)
       terhapus = true;
 
       await page.goto(BASIS + RUANG[1].url);
-      await expect(page.getByRole("main").getByText("Anda tidak memiliki izin membuka halaman ini.")).toBeVisible();
+      await expect(page.getByRole("main").getByText(/Anda tidak memiliki izin membuka (halaman [^.]+|halaman ini)\./)).toBeVisible();
     } finally {
       if (idPembelian && !terhapus) {
         await login(page);

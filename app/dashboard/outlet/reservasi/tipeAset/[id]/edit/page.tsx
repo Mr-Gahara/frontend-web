@@ -75,7 +75,7 @@ export default function EditTipeAsetPage() {
       {
         onSuccess: () => {
           toast.success("Berhasil Diperbarui", {
-            description: "Perubahan Tipe Aset telah tersimpan di sistem.",
+            description: "Perubahan Kategori Aset telah tersimpan di sistem.",
           });
           router.push("/dashboard/outlet/reservasi/tipeAset");
         },
@@ -94,7 +94,7 @@ export default function EditTipeAsetPage() {
       <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4 text-center px-4">
         <AlertTriangle className="h-12 w-12 text-rose-500" />
         <h2 className="text-subjudul font-bold text-navy">
-          ID Tipe Aset Tidak Valid
+          ID Kategori Aset Tidak Valid
         </h2>
         <p className="text-isi font-medium text-navy/80">
           Sistem mendeteksi bahwa ID pada URL ini rusak. Silakan kembali ke
@@ -104,7 +104,7 @@ export default function EditTipeAsetPage() {
           onClick={() => router.push("/dashboard/outlet/reservasi/tipeAset")}
           className="mt-4 bg-navy text-gading hover:bg-navy/90 font-bold"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Daftar Tipe Aset
+          <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Daftar Kategori Aset
         </Button>
       </div>
     );
@@ -115,7 +115,7 @@ export default function EditTipeAsetPage() {
       <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-navy/60" />
         <p className="text-isi font-bold text-navy/80">
-          Memuat data tipe aset...
+          Memuat data kategori aset...
         </p>
       </div>
     );
@@ -129,7 +129,7 @@ export default function EditTipeAsetPage() {
           Data Tidak Ditemukan
         </h2>
         <p className="text-isi font-medium text-navy/80">
-          Gagal mengambil data tipe aset. Data mungkin sudah dihapus atau server
+          Gagal mengambil data kategori aset. Data mungkin sudah dihapus atau server
           sedang bermasalah.
         </p>
         <Button
@@ -154,15 +154,15 @@ export default function EditTipeAsetPage() {
           onClick={() => router.push("/dashboard/outlet/reservasi/tipeAset")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Kembali ke Daftar Tipe Aset
+          Kembali ke Daftar Kategori Aset
         </Button>
 
         <div className="space-y-1">
           <h1 className="text-judul font-bold tracking-tight text-navy">
-            Edit Tipe Aset
+            Edit Kategori Aset
           </h1>
           <p className="text-isi font-medium text-navy/60">
-            Perbarui informasi kategori atau tipe aset untuk menyesuaikan dengan
+            Perbarui informasi kategori aset untuk menyesuaikan dengan
             kebutuhan operasional.
           </p>
         </div>
@@ -174,13 +174,13 @@ export default function EditTipeAsetPage() {
           <div className="flex items-center gap-2 border-b border-navy/10 pb-3">
             <Edit3 className="h-5 w-5 text-karamel" />
             <h3 className="text-besar font-bold text-navy">
-              Detail Informasi Tipe
+              Detail Informasi Kategori Aset
             </h3>
           </div>
 
           <div className="space-y-2">
             <label className="text-isi font-bold text-navy">
-              Nama Tipe Aset <span className="text-rose-500">*</span>
+              Nama Kategori Aset <span className="text-rose-500">*</span>
             </label>
             <Input
               {...register("namaTipeAset")}
@@ -212,7 +212,7 @@ export default function EditTipeAsetPage() {
             </label>
             <Textarea
               {...register("deskripsi")}
-              placeholder="Catatan atau keterangan mengenai tipe aset ini..."
+              placeholder="Catatan atau keterangan mengenai kategori aset ini..."
               rows={4}
               className="bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy resize-none"
             />

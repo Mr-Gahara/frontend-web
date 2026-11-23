@@ -15,6 +15,7 @@ export type PayloadUbahAkunKas = Partial<
 
 export const akunKasApi = {
   daftar: () => apiData.get<AkunKas[]>(EP.akunKas),
+  detail: (id: string) => apiData.get<AkunKas>(EP.akunKasById(id)),
   buat: (payload: AkunKasRequest) => apiData.post<AkunKas>(EP.akunKas, payload),
   ubah: (id: string, payload: PayloadUbahAkunKas) =>
     apiData.put<AkunKas>(EP.akunKasById(id), payload),

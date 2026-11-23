@@ -8,7 +8,12 @@ import type {
   PayloadUbahPembelianStok,
   PembelianStokTersimpan,
 } from "@/types/pembelianStok";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import { pesanError } from "@/lib/api/error";
 import { pembelianStokApi } from "./api";
+import { ruangDariPembelian, urlDetailPembelian } from "./ruang";
 import { BATAS_SUPPLIER_TERATAS } from "./ringkasan";
 
 /** Callback halaman untuk toast, dialog, dan navigasi (keputusan rancangan butir 13). */
@@ -122,4 +127,32 @@ export function useHapusPembelianStok(opsi: Callback = {}) {
     },
     onError: (err) => opsi.onError?.(err),
   });
+}
+/**
+ * Membuka detail pembelian dari tempat yang hanya tahu id-nya, misalnya
+ * mutasi kas PEMBELIAN (PS10a): detail dimuat lebih dulu untuk mengetahui
+ * ruang lokasi penerimanya, lalu halaman detail di ruang itu dibuka.
+ */
+export function useBukaPembelian() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const [memuat, setMemuat] = useState(false);
+  const buka = async (id: string) => {
+    setMemuat(true);
+    try {
+      const pembelian = await queryClient.fetchQuery({
+        queryKey: queryKeys.pembelianStok.detail(id),
+        queryFn: () => pembelianStokApi.detail(id),
+        staleTime: 0,
+      });
+      router.push(urlDetailPembelian(ruangDariPembelian(pembelian), id));
+    } catch (e) {
+      toast.error("Pembelian tidak dapat dibuka", {
+        description: isNotFound(e) ? "Pembelian ini sudah dihapus." : pesanError(e, "Gagal memuat pembelian."),
+      });
+    } finally {
+      setMemuat(false);
+    }
+  };
+  return { buka, memuat };
 }

@@ -7,7 +7,9 @@ import {
   loginSebagai,
   siapkanPenggunaProfil,
 } from "../../helpers/profil-uji";
-import { IZIN, bolehBukaRute } from "../../../lib/auth/permissions";
+import { IZIN, bolehBukaRute, syaratKurangRute } from "../../../lib/auth/permissions";
+import { labelSyarat } from "../../../lib/auth/label-izin";
+import { labelMenuRute } from "../../../components/sidebar-menu";
 import type { Page } from "@playwright/test";
 
 /*
@@ -18,7 +20,8 @@ import type { Page } from "@playwright/test";
  * yang sama dengan gerbang. Tidak ada data yang ditulis selain pemulihan
  * pengguna uji oleh helper profil.
  */
-const PESAN = "Anda tidak memiliki izin membuka halaman ini.";
+/** Pesan 403 menyebut halaman dari menu, atau "halaman ini" (23 November 2026). */
+const PESAN = /Anda tidak memiliki izin membuka (halaman [^.]+|halaman ini)\./;
 const ID_TIDAK_ADA = "000000000000000000000000";
 const OUTLET = "/dashboard/outlet";
 
@@ -73,6 +76,8 @@ test.describe("Gerbang rute dashboard", () => {
       "Peran pengguna uji profil tidak memegang read-dashboard-outlet, sehingga layout outlet mengalihkannya sebelum gerbang rute",
     );
     const ditolak = CALON.filter((c) => !bolehBukaRute(c.path, izin));
+    const daftarIzin = await api<{ nama: string; deskripsi?: string }[]>(page, auth, "GET", "/permission");
+    const deskripsiIzin = new Map((daftarIzin.data ?? []).map((p) => [p.nama, p.deskripsi ?? ""]));
     expect(
       ditolak.map((c) => c.nama),
       "peran pengguna uji profil tidak memegang read-pengguna",
@@ -91,6 +96,19 @@ test.describe("Gerbang rute dashboard", () => {
           hal.on("request", catat);
           await hal.goto(BASIS + c.path);
           await expect(hal.getByRole("main").getByText(PESAN)).toBeVisible({ timeout: 20_000 });
+          // Halaman disebut dari label menu, dan izin yang kurang ditulis
+          // dengan deskripsi backend yang mudah dipahami.
+          const halaman = labelMenuRute(c.path);
+          await expect(hal.getByRole("main")).toContainText(
+            `Anda tidak memiliki izin membuka ${halaman ? `halaman ${halaman}` : "halaman ini"}.`,
+          );
+          const kotak = hal.getByRole("region", { name: "Izin yang dibutuhkan" });
+          const kurang = syaratKurangRute(c.path, izin);
+          await expect(kotak.getByRole("listitem")).toHaveCount(kurang.length);
+          for (const pilihan of kurang) await expect(kotak).toContainText(labelSyarat(pilihan, deskripsiIzin));
+          await expect(kotak, "nama teknis tidak ditampilkan bila backend punya deskripsinya").not.toContainText(
+            /\bread-[a-z-]+/,
+          );
           await expect(hal).toHaveURL(BASIS + c.path);
           // Beri waktu bagi permintaan yang keliru terkirim, bila isi halaman
           // ternyata dipasang.

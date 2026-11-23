@@ -22,7 +22,8 @@ import { pesanError } from "@/lib/api/error";
 import { cn } from "@/lib/utils";
 import type { AkunKas } from "@/types/akunKas";
 import { DialogStatusAkun } from "./dialog-status-akun";
-import { useDaftarAkunKas, useUbahAkunKas } from "./hooks";
+import { useAkunKas, useUbahAkunKas } from "./hooks";
+import { isNotFound } from "@/lib/api/error";
 import {
   URL_DAFTAR_AKUN_KAS,
   adaPerubahanAkunKas,
@@ -46,15 +47,16 @@ function Keadaan({ judul, isi }: { judul: string; isi: string }) {
 }
 
 /**
- * Halaman ubah akun kas (keputusan UA1a). Akun diambil dari daftar yang sudah
- * dimuat halaman keuangan, sehingga tidak ada permintaan detail tersendiri.
+ * Halaman ubah akun kas (keputusan UA1a). Akun dibaca dari GET /akunkas/:id
+ * yang dimuat ulang saat halaman dibuka (23 November 2026), bukan dari cache
+ * daftar, agar perubahan pengguna lain tidak tertimpa dari data lama.
  * Rute ini hanya dipasang bagi pemegang read-akunkas dan update-akunkas
  * (gerbang rute, keputusan GR5a).
  */
 export function HalamanUbahAkunKas() {
   const { id } = useParams<{ id: string }>();
-  const { data: daftar, isLoading, isError } = useDaftarAkunKas();
-  const akun = daftar?.find((a) => a.id === id);
+  const { data: akun, isLoading, isFetchedAfterMount, isError, error } = useAkunKas(id);
+  const tidakAda = isError && isNotFound(error);
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8">
@@ -65,9 +67,9 @@ export function HalamanUbahAkunKas() {
         <ArrowLeft className="mr-2 h-4 w-4" />
         Kembali ke Daftar Akun Kas
       </Link>
-      {isLoading ? (
+      {isLoading || (!isFetchedAfterMount && !isError) ? (
         <Skeleton className="h-96 w-full rounded-2xl bg-navy/10" />
-      ) : isError ? (
+      ) : isError && !tidakAda ? (
         <Keadaan
           judul="Gagal memuat akun kas"
           isi="Periksa koneksi lalu muat ulang halaman."

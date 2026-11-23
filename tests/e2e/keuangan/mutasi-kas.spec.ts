@@ -11,6 +11,9 @@ import {
   simpanLewatApi,
 } from "../../helpers/penjualan-uji";
 import { formatRupiah } from "../../../lib/format";
+import { daftarAkun } from "../../helpers/akun-kas-uji";
+import { buatPembelianUji, hapusPembelianUji, idBahanFixture, lokasiBertipe } from "../../helpers/pembelian-uji";
+import { unik } from "../../helpers/reservasi-uji";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 
@@ -325,5 +328,71 @@ test.describe("Mutasi arus kas", () => {
     await pesan.getByRole("button", { name: "Coba Lagi" }).click();
     expect((await tunggu).status()).toBe(200);
     await expect(pesan).toHaveCount(0, { timeout: 15_000 });
+  });
+
+  test("mutasi PEMBELIAN bertaut ke detail pembelian di ruang lokasinya; pembelian terhapus memberi pesan (PS10a)", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await login(page);
+    const auth = await bukaDenganAuth(page, BASIS + URL_MUTASI);
+    const akun = (await daftarAkun(page, auth)).find(
+      (a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E") && a.saldo >= 2,
+    ) as AkunKasUji | undefined;
+    test.skip(!akun, "tidak ada akun kas aktif bersaldo minimal Rp2");
+    const bahanID = await idBahanFixture(page, auth);
+    const ids: string[] = [];
+    try {
+      for (const [tipe, ruangUrl] of [
+        ["Outlet", "/dashboard/outlet/inventaris/pembelianStok/"],
+        ["Gudang", "/dashboard/gudang/pembelianStok/"],
+      ] as const) {
+        const lokasi = await lokasiBertipe(page, auth, tipe);
+        const id = await buatPembelianUji(page, auth, {
+          akunKasID: akun!.id,
+          supplier: "E2E Tautan Mutasi " + unik(),
+          locationID: lokasi.id,
+          bahanBakuID: bahanID,
+          jumlah: 1,
+          hargaBeli: 1,
+        });
+        ids.push(id);
+        const tMutasi = page.waitForResponse((r) => r.request().method() === "GET" && POLA_MUTASI.test(r.url()));
+        await page.goto(URL_MUTASI);
+        const data = ((await (await tMutasi).json()) as { data: { jenis: string; referensi: { id?: string } }[] }).data;
+        const indeks = data.findIndex((m) => m.jenis === "PEMBELIAN" && m.referensi.id === id);
+        expect(indeks, `mutasi PEMBELIAN ${tipe} ada di halaman pertama`).toBeGreaterThanOrEqual(0);
+        const baris = page.locator("tbody tr").nth(indeks);
+        await baris.getByRole("button", { name: "Buka menu" }).click();
+        await page.getByRole("menuitem", { name: "Lihat pembelian" }).click();
+        await page.waitForURL("**" + ruangUrl + id, { timeout: 15_000 });
+
+        // Dari dialog rincian juga.
+        await page.goto(URL_MUTASI);
+        await page.locator("tbody tr").nth(indeks).getByRole("button", { name: "Buka menu" }).click();
+        await page.getByRole("menuitem", { name: "Lihat detail" }).click();
+        await page.getByRole("dialog").getByRole("button", { name: "Lihat pembelian" }).click();
+        await page.waitForURL("**" + ruangUrl + id, { timeout: 15_000 });
+      }
+
+      // Pembelian yang dihapus: mutasi PEMBELIAN lamanya memberi pesan, dan pembaliknya tanpa tautan.
+      const terhapus = ids.shift()!;
+      await hapusPembelianUji(page, auth, terhapus);
+      const tMutasi = page.waitForResponse((r) => r.request().method() === "GET" && POLA_MUTASI.test(r.url()));
+      await page.goto(URL_MUTASI);
+      const data = ((await (await tMutasi).json()) as { data: { jenis: string; referensi: { id?: string } }[] }).data;
+      const iBeli = data.findIndex((m) => m.jenis === "PEMBELIAN" && m.referensi.id === terhapus);
+      const iBalik = data.findIndex((m) => m.jenis === "PEMBALIK_PEMBELIAN" && m.referensi.id === terhapus);
+      expect(iBalik, "mutasi pembalik tercatat").toBeGreaterThanOrEqual(0);
+      await page.locator("tbody tr").nth(iBalik).getByRole("button", { name: "Buka menu" }).click();
+      await expect(page.getByRole("menuitem", { name: "Lihat pembelian" })).toHaveCount(0);
+      await page.keyboard.press("Escape");
+      await page.locator("tbody tr").nth(iBeli).getByRole("button", { name: "Buka menu" }).click();
+      await page.getByRole("menuitem", { name: "Lihat pembelian" }).click();
+      await expect(page.getByText("Pembelian ini sudah dihapus.")).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(URL_MUTASI + "$"));
+    } finally {
+      for (const id of ids) await hapusPembelianUji(page, auth, id);
+    }
   });
 });

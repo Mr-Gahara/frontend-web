@@ -52,12 +52,18 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
+/*
+ * Bayangan kartu baris dipasang per sel (box-shadow bawah), bukan filter
+ * pada tr, karena tidak semua browser menerapkan filter pada baris tabel
+ * (pemilik proyek, 23 November 2026). Mode kartu DataTable memindahkannya ke
+ * baris yang menjadi kartu (data-table.tsx).
+ */
 function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
     <tr
       data-slot="table-row"
       className={cn(
-        "[&:has(>td)]:[filter:drop-shadow(0_1px_1px_color-mix(in_srgb,var(--navy)_14%,transparent))] tabel:[&:hover>td]:bg-krem [&[data-state=selected]>td]:bg-krem",
+        "tabel:[&:hover>td]:bg-krem [&[data-state=selected]>td]:bg-krem",
         className
       )}
       {...props}
@@ -83,7 +89,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        "px-4 py-3 align-middle whitespace-nowrap text-navy font-medium bg-[var(--warna-baris,var(--permukaan))] border-y border-navy/10 first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl transition-colors [&:has([role=checkbox])]:pr-0",
+        "px-4 py-3 align-middle whitespace-nowrap text-navy font-medium bg-[var(--warna-baris,var(--permukaan))] shadow-[0_1px_0_color-mix(in_srgb,var(--navy)_14%,transparent)] border-y border-navy/10 first:border-l first:rounded-l-2xl last:border-r last:rounded-r-2xl transition-colors [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}

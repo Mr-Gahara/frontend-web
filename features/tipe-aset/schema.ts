@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 /*
- * Satu skema untuk buat dan edit. Sebutan di pesan sengaja dipertahankan
- * seperti halaman lama: halaman buat menyebutnya "Kategori Aset", halaman
- * edit "Tipe Aset". Penyeragaman sebutan menunggu keputusan produk.
+ * Satu skema untuk buat dan edit. Sebutan di laman reservasi diseragamkan
+ * menjadi "Kategori Aset" (pemilik proyek, 23 November 2026); nama kode
+ * dan rute tetap tipe aset.
  */
 function skemaDengan(sebutan: string) {
   return z.object({
@@ -16,7 +16,8 @@ function skemaDengan(sebutan: string) {
   });
 }
 
-export const skemaBuatTipeAset = skemaDengan("Kategori Aset");
-export const skemaUbahTipeAset = skemaDengan("Tipe Aset");
+export const skemaTipeAset = skemaDengan("Kategori Aset");
+export const skemaBuatTipeAset = skemaTipeAset;
+export const skemaUbahTipeAset = skemaTipeAset;
 
 export type NilaiFormTipeAset = z.infer<typeof skemaBuatTipeAset>;

@@ -53,3 +53,8 @@ export function aksiPembelianStok(permissions: readonly string[], ruang: RuangPe
     permissions.includes(IZIN_PEMBELIAN_STOK[aksi]) || permissions.includes(ruangnya[aksi]);
   return { baca: boleh("baca"), buat: boleh("buat"), ubah: boleh("ubah"), hapus: boleh("hapus") };
 }
+
+/** Izin baca pembelian di ruang mana pun: umum, outlet, atau gudang (tautan mutasi PEMBELIAN, PS10a). */
+export function bolehBacaPembelianStok(permissions: readonly string[]): boolean {
+  return aksiPembelianStok(permissions, "outlet").baca || aksiPembelianStok(permissions, "gudang").baca;
+}

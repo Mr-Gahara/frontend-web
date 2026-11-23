@@ -145,6 +145,18 @@ export function tautanTransferMutasi(
   return { url: urlRincianTransfer(id), teks: "Lihat transfer" };
 }
 
+/**
+ * Id pembelian stok untuk tautan "Lihat pembelian" mutasi PEMBELIAN (PS10a;
+ * pemilik proyek, 23 November 2026). Null untuk jenis lain dan bagi pengguna
+ * tanpa izin baca pembelian; pembalik pembelian tidak bertaut karena
+ * pembeliannya sudah dihapus.
+ */
+export function idPembelianMutasi(mutasi: Pick<MutasiKas, "jenis" | "referensi">, bolehBacaPembelian: boolean): string | null {
+  const { tipe, id } = mutasi.referensi;
+  if (!bolehBacaPembelian || mutasi.jenis !== "PEMBELIAN" || tipe !== "PembelianStok" || !id) return null;
+  return id;
+}
+
 export function teksJumlahMutasi(mutasi: Pick<MutasiKas, "arah" | "jumlah">): string {
   return `${mutasi.arah === "MASUK" ? "+" : "-"} ${formatRupiah(mutasi.jumlah)}`;
 }

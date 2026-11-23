@@ -281,7 +281,7 @@ test.describe("E2E — Tarif › Halaman Buat", () => {
     const permintaan = pantauPermintaan(page, "POST", POLA_DAFTAR);
     await page.goto(URL_BUAT);
     await page.locator('input[name="namaTarif"]').fill(namaTarifUji("Jam Terbalik"));
-    await page.locator('input[name="harga"]').fill("100000");
+    await page.getByLabel("Harga (Rp)").fill("100000");
     await page.locator('input[name="durasiMinimum"]').fill("1");
     await page.getByRole("textbox", { name: "Jam Mulai (jam)" }).fill("20");
     await page.getByRole("textbox", { name: "Jam Mulai (menit)" }).fill("00");
@@ -305,8 +305,13 @@ test.describe("E2E — Tarif › Halaman Buat", () => {
       await page.goto(URL_BUAT);
       await page.locator('input[name="namaTarif"]').fill(nama);
       await page.locator('input[name="prioritas"]').fill("5");
-      await page.locator('select[name="basisPerhitungan"]').selectOption("per sesi");
-      await page.locator('input[name="harga"]').fill("250000");
+      // Form buat dan ubah satu komponen (T1a ditutup 23 November 2026): basis
+      // memakai Select Radix dan harga berformat ribuan seperti halaman ubah.
+      await expect(page.getByRole("heading", { name: "Buat Tarif Baru" })).toBeVisible();
+      await page.getByRole("combobox", { name: "Basis Perhitungan" }).click();
+      await page.getByRole("option", { name: "Per Sesi", exact: true }).click();
+      await page.getByLabel("Harga (Rp)").fill("250000");
+      await expect(page.getByLabel("Harga (Rp)")).toHaveValue("250.000");
       await page.locator('input[name="durasiMinimum"]').fill("2");
       for (const hari of ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"]) {
         await page.getByText(hari, { exact: true }).click();
@@ -354,6 +359,37 @@ test.describe("E2E — Tarif › Halaman Edit", () => {
     await login(page);
   });
 
+  test("harga dikosongkan di halaman ubah ditolak tanpa mengirim PUT (T3b, form bersama TF1a)", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    let t: TarifMentah | undefined;
+    try {
+      t = await buatTarif(page, auth, {
+        namaTarif: namaTarifUji("Kosongkan Harga"),
+        basisPerhitungan: "per jam",
+        harga: 120000,
+        durasiMinimum: 1,
+        isActive: true,
+        hariAktif: [1],
+        jamMulai: "08:00",
+        jamSelesai: "17:00",
+        prioritas: 1,
+        tipeAsetID: [],
+      });
+      await page.goto(urlEdit(t.id));
+      const harga = page.getByLabel("Harga (Rp)");
+      await expect(harga).toHaveValue("120.000", { timeout: 10_000 });
+      const permintaan = pantauPermintaan(page, "PUT", POLA_SATU);
+      await harga.fill("");
+      await page.getByRole("button", { name: /simpan perubahan/i }).click();
+      await expect(page.getByText("Harga wajib diisi")).toBeVisible();
+      expect(permintaan.jumlah(), "harga kosong tidak menyimpan tarif Rp0").toBe(0);
+      permintaan.lepas();
+      expect((await bacaTarif(page, auth, t.id)).data.harga).toBe(120000);
+    } finally {
+      await hapusLewatApi(page, auth, "/tarif", t?.id);
+    }
+  });
+
   test("id 'undefined' menampilkan halaman ID tidak valid tanpa crash", async ({ page }) => {
     await page.goto(URL_DAFTAR + "/undefined/edit");
     await expect(page.getByText("ID Tarif Tidak Valid")).toBeVisible();
@@ -382,12 +418,11 @@ test.describe("E2E — Tarif › Halaman Edit", () => {
       await page.goto(urlEdit(t.id));
       const inputNama = page.locator('input[name="namaTarif"]');
       await expect(inputNama).toHaveValue(nama, { timeout: 10_000 });
-      // Harga di halaman edit dirender lewat Controller tanpa atribut name.
-      const inputHarga = page.locator('input[inputmode="numeric"][placeholder="0"]');
+      const inputHarga = page.getByLabel("Harga (Rp)");
       await expect(inputHarga).toHaveValue(/150\.?000/);
       await expect(page.locator('input[name="durasiMinimum"]')).toHaveValue("2");
       await expect(page.locator('input[name="prioritas"]')).toHaveValue("3");
-      await expect(page.getByRole("combobox").filter({ hasText: "Per Jam" })).toBeVisible();
+      await expect(page.getByRole("combobox", { name: "Basis Perhitungan" })).toHaveText(/Per Jam/);
       await expect(page.getByRole("checkbox", { name: "Senin" })).toBeChecked();
       await expect(page.getByRole("checkbox", { name: "Minggu" })).not.toBeChecked();
       await expect(page.getByRole("textbox", { name: "Jam Mulai (jam)" })).toHaveValue("08");
@@ -639,7 +674,7 @@ test.describe("E2E — Tarif › Buat: batal, memuat, gagal, dan validasi", () =
     try {
       await page.goto(URL_BUAT);
       await page.locator('input[name="namaTarif"]').fill(nama);
-      await page.locator('input[name="harga"]').fill("100000");
+      await page.getByLabel("Harga (Rp)").fill("100000");
       await page.locator('input[name="durasiMinimum"]').fill("1");
       await tahanLaluTeruskan(page, "POST", POLA_DAFTAR);
       const tKirim = page.waitForResponse(cocok("POST", POLA_DAFTAR));
@@ -664,7 +699,7 @@ test.describe("E2E — Tarif › Buat: batal, memuat, gagal, dan validasi", () =
     const nama = namaTarifUji("Buat Gagal");
     await page.goto(URL_BUAT);
     await page.locator('input[name="namaTarif"]').fill(nama);
-    await page.locator('input[name="harga"]').fill("100000");
+    await page.getByLabel("Harga (Rp)").fill("100000");
     await page.locator('input[name="durasiMinimum"]').fill("1");
     await page.route(POLA_DAFTAR, (route) =>
       route.request().method() === "POST" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
@@ -680,7 +715,7 @@ test.describe("E2E — Tarif › Buat: batal, memuat, gagal, dan validasi", () =
   test("validasi: nama kosong ditolak tanpa mengirim permintaan", async ({ page }) => {
     const permintaan = pantauPermintaan(page, "POST", POLA_DAFTAR);
     await page.goto(URL_BUAT);
-    await page.locator('input[name="harga"]').fill("100000");
+    await page.getByLabel("Harga (Rp)").fill("100000");
     await page.locator('input[name="durasiMinimum"]').fill("1");
     await page.getByRole("button", { name: /simpan tarif/i }).click();
     await expect(page.getByText("Nama tarif wajib diisi")).toBeVisible();
@@ -693,7 +728,7 @@ test.describe("E2E — Tarif › Buat: batal, memuat, gagal, dan validasi", () =
     await page.goto(URL_BUAT);
     await page.locator('input[name="namaTarif"]').fill(namaTarifUji("Harga Kosong"));
     await page.locator('input[name="durasiMinimum"]').fill("1");
-    await expect(page.locator('input[name="harga"]')).toHaveValue("");
+    await expect(page.getByLabel("Harga (Rp)")).toHaveValue("");
     await page.getByRole("button", { name: /simpan tarif/i }).click();
     await expect(page.getByText("Harga wajib diisi")).toBeVisible();
     expect(permintaan.jumlah(), "harga kosong tidak mengirim POST").toBe(0);
@@ -704,7 +739,7 @@ test.describe("E2E — Tarif › Buat: batal, memuat, gagal, dan validasi", () =
     const permintaan = pantauPermintaan(page, "POST", POLA_DAFTAR);
     await page.goto(URL_BUAT);
     await page.locator('input[name="namaTarif"]').fill("   ");
-    await page.locator('input[name="harga"]').fill("100000");
+    await page.getByLabel("Harga (Rp)").fill("100000");
     await page.locator('input[name="durasiMinimum"]').fill("1");
     await page.getByRole("button", { name: /simpan tarif/i }).click();
     await expect(page.getByText("Nama tarif wajib diisi")).toBeVisible();
@@ -721,7 +756,8 @@ test.describe("E2E — Tarif › Buat: batal, memuat, gagal, dan validasi", () =
     try {
       await page.goto(URL_BUAT);
       await page.locator('input[name="namaTarif"]').fill("  " + nama + "  ");
-      await page.locator('input[name="harga"]').fill("0");
+      await page.getByLabel("Harga (Rp)").fill("0");
+      await expect(page.getByLabel("Harga (Rp)"), "0 yang diketik tetap tampil 0").toHaveValue("0");
       await page.locator('input[name="durasiMinimum"]').fill("1");
       const tKirim = page.waitForResponse(cocok("POST", POLA_DAFTAR));
       await page.getByRole("button", { name: /simpan tarif/i }).click();

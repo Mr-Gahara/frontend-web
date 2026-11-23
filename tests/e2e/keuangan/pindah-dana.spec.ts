@@ -3,7 +3,7 @@ import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { unik } from "../../helpers/reservasi-uji";
 import { masukBacaSaja } from "../../helpers/terkunci-uji";
 import { bukaPanelFilter, terapkanPanelFilter } from "../../helpers/filter-uji";
-import { daftarAkun, saldoAkun, buatAkunUji, tutupAkunUji, pilihAkun, type AkunKasUji } from "../../helpers/akun-kas-uji";
+import { daftarAkun, saldoAkun, akunUjiTetap, tutupAkunUji, pilihAkun, type AkunKasUji } from "../../helpers/akun-kas-uji";
 
 /*
  * Spec Pindah Dana antar akun kas (keputusan DN1a sampai DN3a), tanpa respons
@@ -35,7 +35,7 @@ test.describe("pindah dana", () => {
     test.skip(!sumber, "tidak ada akun kas aktif bersaldo untuk menjadi sumber");
     const akunSumber = sumber as AkunKasUji;
     const saldoSumberAwal = akunSumber.saldo;
-    const namaTujuan = "E2E Pindah Tujuan " + unik();
+    const namaTujuan = "E2E Pindah Tujuan Tetap";
     const keterangan = "E2E pindah dana " + unik();
     const alasan = "E2E batal " + unik();
     let idTujuan: string | undefined;
@@ -43,7 +43,7 @@ test.describe("pindah dana", () => {
     let dibatalkan = false;
 
     try {
-      idTujuan = (await buatAkunUji(page, auth, namaTujuan)).id;
+      idTujuan = (await akunUjiTetap(page, auth, namaTujuan)).id;
       auth = await bukaDenganAuth(page, URL_AKUN);
 
       await page.getByRole("link", { name: "Pindah Dana" }).click();
@@ -198,7 +198,7 @@ test.describe("pindah dana", () => {
     );
     test.skip(!tujuan, "tidak ada akun kas aktif lain untuk menjadi tujuan");
     const akunTujuan = tujuan as AkunKasUji;
-    const namaSumber = "E2E Pindah Sumber " + unik();
+    const namaSumber = "E2E Pindah Sumber Tetap";
     let idSumber: string | undefined;
     let terkirim = 0;
     const hitung = (req: { url(): string; method(): string }) => {
@@ -206,7 +206,7 @@ test.describe("pindah dana", () => {
     };
 
     try {
-      idSumber = (await buatAkunUji(page, auth, namaSumber)).id;
+      idSumber = (await akunUjiTetap(page, auth, namaSumber)).id;
       auth = await bukaDenganAuth(page, URL_PINDAH);
       await expect(page.getByRole("heading", { name: "Pindah Dana", exact: true })).toBeVisible();
       page.on("request", hitung);

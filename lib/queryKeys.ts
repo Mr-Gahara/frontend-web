@@ -131,6 +131,7 @@ export const queryKeys = {
   akunKas: {
     semua: kunci(["akunKas"] as const),
     daftar: () => ["akunKas", "daftar"] as const,
+    detail: (id: string) => ["akunKas", "detail", id] as const,
     mutasi: (params?: Filter) => ["akunKas", "mutasi", params] as const,
     ringkasan: (id: string, periode?: Filter) => ["akunKas", "ringkasan", id, periode] as const,
   },
