@@ -24,6 +24,8 @@ export const PESAN_TANPA_MASTER =
 export interface IsianTerima {
   qtyTerima: number;
   catatanItem: string;
+  /** Satuan qtyTerima (B365); kosong berarti satuan dasar. qtyKirim tetap satuan dasar. */
+  satuan?: string;
 }
 
 export interface ItemPayloadTerima {
@@ -32,6 +34,7 @@ export interface ItemPayloadTerima {
   qtyKirim: number;
   qtyTerima: number;
   catatanItem: string | null;
+  satuan?: string;
 }
 
 export type HasilPayloadTerima =
@@ -58,11 +61,13 @@ export function susunPayloadTerima(
     payload: {
       items: items.map((item, indeks) => {
         const catatan = isian[indeks]?.catatanItem.trim() ?? "";
+        const satuan = isian[indeks]?.satuan;
         return {
           ...(item.id ? { itemId: item.id } : { bahanBakuID: item.bahanBaku!.id }),
           qtyKirim: item.qtyKirim,
           qtyTerima: isian[indeks]?.qtyTerima ?? item.qtyKirim,
           catatanItem: catatan === "" ? null : catatan,
+          ...(satuan ? { satuan } : {}),
         };
       }),
     },
@@ -73,10 +78,12 @@ export interface IsianRevisi {
   bahanBakuID: string;
   /** Teks isian, agar isian kosong tetap tampil kosong. */
   qtyKirim: string;
+  /** Satuan qtyKirim (B365); kosong berarti satuan item pengajuan (satuan dasar). */
+  satuan?: string;
 }
 
 export type HasilPayloadRevisi =
-  | { ok: true; payload: { items: { bahanBakuID: string; qtyKirim: number }[] } }
+  | { ok: true; payload: { items: { bahanBakuID: string; qtyKirim: number; satuan?: string }[] } }
   | { ok: false; pesan: string };
 
 export const PESAN_REVISI_KOSONG = "Minimal harus ada 1 barang dengan jumlah kirim lebih dari 0.";
@@ -91,7 +98,7 @@ export const PESAN_REVISI_KOSONG = "Minimal harus ada 1 barang dengan jumlah kir
  */
 export function susunPayloadRevisi(isian: IsianRevisi[]): HasilPayloadRevisi {
   const items = isian
-    .map((i) => ({ bahanBakuID: i.bahanBakuID, qtyKirim: Number(i.qtyKirim) }))
+    .map((i) => ({ bahanBakuID: i.bahanBakuID, qtyKirim: Number(i.qtyKirim), ...(i.satuan ? { satuan: i.satuan } : {}) }))
     .filter((i) => i.bahanBakuID !== "" && Number.isFinite(i.qtyKirim) && i.qtyKirim > 0);
   if (items.length === 0) return { ok: false, pesan: PESAN_REVISI_KOSONG };
   return { ok: true, payload: { items } };

@@ -330,10 +330,12 @@ export default function HalamanDetailPenjualan({ id: idPenjualan }: PropsHalaman
 
       {/* Sesi Booking sesudah Informasi, sebelum Rincian Item (pemilik proyek,
           20 November 2026, opsi B kanvas "Penyetuju dan Sesi Booking").
-          Toko yang turun dari plan bersesi booking tidak dapat membaca sesinya (403, butir 5). */}
-      {penjualan.jenisPenjualan === "booking" && planMencakup(plan, "sesi-booking") && (
+          Dari sesiBooking[] detail (B347); toko yang turun dari plan bersesi
+          booking melihatnya sebagai riwayat tanpa Tandai Selesai. */}
+      {penjualan.jenisPenjualan === "booking" && (
         <BookingPenjualan
-          idBooking={(penjualan.itemPenjualan ?? []).flatMap((i) => (i.sesiBookingID ? [i.sesiBookingID] : []))}
+          sesiBooking={penjualan.sesiBooking ?? []}
+          bolehUbah={planMencakup(plan, "sesi-booking")}
         />
       )}
 

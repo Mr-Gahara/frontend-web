@@ -33,9 +33,14 @@ export interface PencatatPembelian {
  */
 export interface ItemPembelianStok {
   bahanBakuID: BahanDiPembelian | null;
+  /** Dalam satuan masukan bila satuan terisi, selain itu satuan dasar (B361). */
   jumlah: number;
   hargaBeli: number;
   subtotal: number;
+  /** Satuan masukan (dasar, turunan, atau kemasan); null untuk pembelian lama. */
+  satuan?: string | null;
+  /** Jumlah dalam satuan dasar yang menambah stok, diisi server; null untuk pembelian lama. */
+  jumlahDasar?: number | null;
 }
 
 /** Lokasi penerima ter-populate di daftar, detail, dan respons tulis (B112). */
@@ -99,6 +104,8 @@ export interface ItemPayloadPembelian {
   bahanBakuID: string;
   jumlah: number;
   hargaBeli: number;
+  /** Satuan masukan (B361); jumlahDasar dihitung server dan tidak boleh dikirim. */
+  satuan?: string;
 }
 
 /**

@@ -22,11 +22,16 @@ export function useDaftarBahanBaku(aktif = true) {
   });
 }
 
+/**
+ * Detail satu bahan untuk form ubah; dimuat ulang setiap halaman dibuka
+ * (keputusan rancangan butir 8), karena form memakai defaultValues.
+ */
 export function useBahanBaku(id: string) {
   return useQuery({
     queryKey: queryKeys.bahanBaku.detail(id),
     queryFn: () => bahanBakuApi.detail(id),
     enabled: !!id,
+    refetchOnMount: "always",
   });
 }
 

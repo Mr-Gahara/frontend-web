@@ -67,20 +67,11 @@ export function useBuatBooking() {
   });
 }
 
-/** Detail satu booking (NZ7a). Selalu dimuat ulang saat dibuka, karena statusnya berubah lewat pembayaran dan jam. */
-export function useSesiBooking(id: string) {
-  return useQuery({
-    queryKey: queryKeys.sesiBooking.detail(id),
-    queryFn: () => sesiBookingApi.detail(id),
-    enabled: id !== "",
-    staleTime: 0,
-  });
-}
-
 /**
- * Menandai booking Selesai lebih awal (keputusan NZ7a). Akar sesiBooking dan
- * aset diinvalidasi dan ditunggu: jadwalnya terbuka untuk booking lain, dan
- * status aset dihitung dari booking Aktif.
+ * Menandai booking Selesai lebih awal (keputusan NZ7a). Akar sesiBooking,
+ * aset, dan penjualan diinvalidasi dan ditunggu: jadwalnya terbuka untuk
+ * booking lain, status aset dihitung dari booking Aktif, dan detail
+ * penjualan memuat statusnya lewat sesiBooking[] (B347).
  */
 export function useTandaiSelesaiBooking() {
   const queryClient = useQueryClient();
@@ -90,6 +81,7 @@ export function useTandaiSelesaiBooking() {
       Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.sesiBooking.semua }),
         queryClient.invalidateQueries({ queryKey: queryKeys.aset.semua }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.penjualan.semua }),
       ]),
   });
 }

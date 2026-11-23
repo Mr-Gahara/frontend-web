@@ -18,14 +18,20 @@ export function ringkasBarang(items: readonly ItemPembelianStok[]): {
 }
 
 /**
- * Jumlah beserta satuan bahan di master, misalnya "1,5 kg". Batas pecahan
+ * Jumlah beserta satuannya, misalnya "1,5 kg". Pembelian bersatuan kemasan
+ * (B361) menyebut jumlah dasarnya: "22 kaleng (6.380 ml)". Batas pecahan
  * ditulis eksplisit agar teksnya sama di server, test, dan browser
  * (keputusan rancangan butir 24).
  */
 export function teksJumlahItem(item: ItemPembelianStok): string {
   const angka = item.jumlah.toLocaleString("id-ID", { maximumFractionDigits: 3 });
-  const satuan = item.bahanBakuID?.satuan;
-  return satuan ? `${angka} ${satuan}` : angka;
+  const dasar = item.bahanBakuID?.satuan;
+  const satuan = item.satuan || dasar;
+  const teks = satuan ? `${angka} ${satuan}` : angka;
+  if (item.satuan && dasar && item.satuan !== dasar && typeof item.jumlahDasar === "number") {
+    return `${teks} (${item.jumlahDasar.toLocaleString("id-ID", { maximumFractionDigits: 3 })} ${dasar})`;
+  }
+  return teks;
 }
 
 export function namaAkunPembelian(pembelian: PembelianStok): string {

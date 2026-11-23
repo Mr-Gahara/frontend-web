@@ -21,10 +21,8 @@ export function keAngka(nilai: unknown): number {
 const skemaResep = z.object({
   bahanBakuID: z.string().min(1, "Bahan baku harus dipilih"),
   jumlah: z.number().min(0.01, "Jumlah harus lebih dari 0"),
-  satuan: z.enum(SATUAN_RESEP, {
-    error:
-      "Satuan tidak didukung untuk resep. Gunakan gram, ml, pcs, kg, liter, pak, atau unit.",
-  }),
+  /** Satuan bawaan atau kemasan bahan (B360); diperiksa terhadap bahannya di buatSkemaProduk. */
+  satuan: z.string().trim().min(1, "Satuan wajib dipilih"),
 });
 
 export const skemaProduk = z.object({
@@ -43,7 +41,7 @@ export const skemaProduk = z.object({
 
 export type NilaiFormProduk = z.infer<typeof skemaProduk>;
 
-type BahanResep = Pick<BahanBaku, "id" | "namaBahan" | "satuan" | "availableUnits">;
+type BahanResep = Pick<BahanBaku, "id" | "namaBahan" | "satuan" | "availableUnits" | "konversi">;
 
 /**
  * Satuan resep yang sah untuk sebuah bahan: availableUnits dari backend
@@ -55,13 +53,18 @@ type BahanResep = Pick<BahanBaku, "id" | "namaBahan" | "satuan" | "availableUnit
  * pak dan unit sah untuk bahan bersatuan itu (kontrak/temuan.md butir 15),
  * dan backend menolak satuan di luar availableUnits saat produk disimpan.
  * Hasil kosong hanya terjadi bila satuan bahan tidak dikenal web.
+ * Sejak backend P87 (B360) kemasan bahan (konversi, misalnya kaleng) ikut
+ * ditawarkan sesudah satuan bawaan, sehingga resep tidak lagi perlu pecahan
+ * kemasan; backend mengonversinya ke satuan dasar.
  */
-export function satuanResepUntukBahan(bahan?: BahanResep | null): SatuanResep[] {
+export function satuanResepUntukBahan(bahan?: BahanResep | null): string[] {
   if (!bahan) return [...SATUAN_RESEP];
   const ditawarkan: readonly string[] = bahan.availableUnits?.length
     ? bahan.availableUnits
     : [bahan.satuan];
-  return SATUAN_RESEP.filter((satuan) => ditawarkan.includes(satuan));
+  const kemasan = (bahan.konversi ?? []).map((k) => k.satuan).filter((satuan) => ditawarkan.includes(satuan));
+  const bawaan = SATUAN_RESEP.filter((satuan) => ditawarkan.includes(satuan) && !kemasan.includes(satuan));
+  return [...bawaan, ...kemasan];
 }
 
 /**

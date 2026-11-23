@@ -1,15 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, Download, Loader2, Wallet } from "lucide-react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { AlertTriangle, Wallet } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
 import { PilFilterAktif, TombolFilter } from "@/components/filter/bilah-filter";
@@ -22,11 +14,11 @@ import { useSession } from "@/lib/auth/useSession";
 import { formatRupiah } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { laporanApi } from "./api";
+import { TombolUnduhLaporan } from "@/components/unduh/tombol-unduh-laporan";
 import {
   JUDUL_KELOMPOK,
   LABEL_KELOMPOK,
   LENCANA_ARAH,
-  PILIHAN_UNDUHAN,
   arahBersih,
   barisPeriode,
   filterAwalArusKas,
@@ -36,7 +28,6 @@ import {
   rincianArusKas,
   tanggalPendek,
   type FilterArusKas,
-  type FormatUnduhan,
   type KelompokArusKas,
   type PanelRincian,
 } from "./arus-kas";
@@ -135,7 +126,6 @@ export function HalamanArusKas() {
   const hariIni = useTanggalHariIni();
   const bawaan = useMemo(() => filterAwalArusKas(hariIni), [hariIni]);
   const panel = usePanelFilter({ terapan: filter, bawaan, onTerapkan: setFilter });
-  const [mengunduh, setMengunduh] = useState<FormatUnduhan | null>(null);
   const { permissions } = useSession();
   // Daftar akun kas menuntut read-akunkas; tanpa itu laporan tetap seluruh akun.
   const bolehPilihAkun = permissions.includes(IZIN.akunKas);
@@ -153,22 +143,6 @@ export function HalamanArusKas() {
     };
   }, [laporan.data, filter]);
 
-  const unduh = async (format: FormatUnduhan) => {
-    setMengunduh(format);
-    try {
-      const { berkas, nama } = await laporanApi.unduhArusKas(parameterArusKas(filter, format));
-      const url = URL.createObjectURL(berkas);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = nama;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      toast.error(pesanError(e, "Laporan gagal diunduh."));
-    } finally {
-      setMengunduh(null);
-    }
-  };
 
   const ringkasan = tampilan?.ringkasan;
   const arah = arahBersih(ringkasan?.arusKasBersih ?? 0);
@@ -182,33 +156,7 @@ export function HalamanArusKas() {
           <h2 className="text-subjudul font-bold tracking-wide">Laporan Arus Kas</h2>
           <p className="text-isi font-medium text-navy/70 mt-1">Uang masuk dan keluar dari buku mutasi akun kas.</p>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              disabled={mengunduh !== null}
-              className="h-10 bg-navy text-gading hover:bg-navy/90 font-bold cursor-pointer"
-            >
-              {mengunduh ? (
-                <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-              ) : (
-                <Download className="w-4 h-4" aria-hidden="true" />
-              )}
-              Unduh laporan
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-gading border-navy/10">
-            {PILIHAN_UNDUHAN.map(({ format, label }) => (
-              <DropdownMenuItem
-                key={format}
-                className="cursor-pointer font-bold text-navy/80"
-                onClick={() => unduh(format)}
-              >
-                {label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <TombolUnduhLaporan unduh={(format) => laporanApi.unduhArusKas(parameterArusKas(filter, format))} />
       </div>
 
       <div className="flex flex-col gap-3">

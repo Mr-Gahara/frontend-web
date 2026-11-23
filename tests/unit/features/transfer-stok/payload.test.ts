@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   PESAN_TANPA_MASTER,
+  susunPayloadRevisi,
   susunPayloadTerima,
 } from "@/features/transfer-stok/payload";
+import { faktorKeDasar } from "@/features/bahan-baku/satuan";
 import type { TransferItem } from "@/types/transferStok";
 
 const item = (id: string | null, qtyKirim: number): TransferItem => ({
@@ -71,5 +73,39 @@ describe("susunPayloadTerima", () => {
       ok: true,
       payload: { items: [{ bahanBakuID: "a", qtyKirim: 10, qtyTerima: 0, catatanItem: "hilang" }] },
     });
+  });
+});
+describe("satuan masukan surat jalan (B365)", () => {
+  it("terima per kemasan mengirim satuan, qtyKirim tetap satuan dasar", () => {
+    const hasil = susunPayloadTerima([item("a", 580)], [{ qtyTerima: 2, catatanItem: "", satuan: "kaleng" }]);
+    expect(hasil).toEqual({
+      ok: true,
+      payload: { items: [{ bahanBakuID: "a", qtyKirim: 580, qtyTerima: 2, catatanItem: null, satuan: "kaleng" }] },
+    });
+  });
+
+  it("revisi per kemasan mengirim satuan hanya bila dipilih", () => {
+    expect(
+      susunPayloadRevisi([
+        { bahanBakuID: "a", qtyKirim: "2", satuan: "kaleng" },
+        { bahanBakuID: "b", qtyKirim: "5" },
+      ]),
+    ).toEqual({
+      ok: true,
+      payload: {
+        items: [
+          { bahanBakuID: "a", qtyKirim: 2, satuan: "kaleng" },
+          { bahanBakuID: "b", qtyKirim: 5 },
+        ],
+      },
+    });
+  });
+
+  it("faktor ke satuan dasar: dasar, turunan bawaan, kemasan, tidak dikenal", () => {
+    const skm = { satuan: "ml", konversi: [{ satuan: "kaleng", isi: 290 }] };
+    expect(faktorKeDasar(skm, "")).toBe(1);
+    expect(faktorKeDasar(skm, "kaleng")).toBe(290);
+    expect(faktorKeDasar({ satuan: "kg" }, "gram")).toBe(0.001);
+    expect(faktorKeDasar(skm, "dus")).toBeNull();
   });
 });

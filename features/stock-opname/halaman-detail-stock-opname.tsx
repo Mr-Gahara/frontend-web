@@ -17,7 +17,18 @@ import {
   useStockOpname,
   useTolakOpname,
 } from "./hooks";
-import { isiAwalHitungan, petakanNilaiServer, susunPayloadHitungan } from "./payload";
+import {
+  isiAwalHitungan,
+  petakanNilaiServer,
+  susunPayloadHitungan,
+  totalIsianDasar,
+  type IsianItem,
+  type RincianIsian,
+} from "./payload";
+import { useDaftarBahanBaku } from "@/features/bahan-baku/hooks";
+import { faktorKeDasar } from "@/features/bahan-baku/satuan";
+import { IZIN } from "@/lib/auth/permissions";
+import { SelHitungFisik } from "./sel-hitung-fisik";
 import { bolehHitungOpname, bolehTinjauOpname } from "./izin";
 import { TIPE_LOKASI_RUANG } from "@/features/stock-adjustment/ruang";
 import { format } from "date-fns";
@@ -39,7 +50,7 @@ import {
   XCircle,
   Ban,
   MessageSquare,
-  Scale
+  Scale,
 } from "lucide-react";
 
 // --- HELPERS ---
@@ -127,9 +138,11 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
   const bolehTinjau = bolehTinjauOpname(permissions ?? []);
 
   // --- LOCAL STATE (EDITABLE ITEMS) ---
-  const [editedItems, setEditedItems] = useState<
-    Record<string, { qtyPhysical: string; catatanItem: string }>
-  >({});
+  const [editedItems, setEditedItems] = useState<Record<string, IsianItem>>({});
+  // Kemasan bahan untuk hitung per satuan (B366); tanpa read-bahan hanya satuan dasar.
+  const bahanList = useDaftarBahanBaku(permissions.includes(IZIN.bahan)).data ?? [];
+  const bahanItem = (item: StockOpnameItem) =>
+    bahanList.find((b) => b.id === item.bahanBakuID) ?? { satuan: item.satuanSnapshot };
 
   // --- MODALS STATE ---
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -169,7 +182,11 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
   });
 
   const simpanHitungan = () => {
-    const payload = susunPayloadHitungan(editedItems, petakanNilaiServer(opname?.items ?? []));
+    const payload = susunPayloadHitungan(
+      editedItems,
+      petakanNilaiServer(opname?.items ?? []),
+      Object.fromEntries((opname?.items ?? []).map((i) => [i.itemId, i.satuanSnapshot])),
+    );
     if (payload.items.length === 0) {
       toast.info("Tidak ada perubahan", {
         description: "Tidak ada perubahan untuk disimpan.",
@@ -233,8 +250,9 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
   // dari angka fisik tersimpan (aturan sama dengan tabel lama).
   const selisihBaris = (item: StockOpnameItem): { selisih: number | string; berbeda: boolean } => {
     const localData = editedItems[item.itemId];
-    if (isEditable && localData?.qtyPhysical !== "") {
-      const selisih = Number(localData?.qtyPhysical || 0) - item.qtySystemSnapshot;
+    const totalLokal = totalIsianDasar(localData, item.satuanSnapshot, (satuan) => faktorKeDasar(bahanItem(item), satuan));
+    if (isEditable && totalLokal !== null) {
+      const selisih = Math.round((totalLokal - item.qtySystemSnapshot) * 1000) / 1000;
       return { selisih, berbeda: selisih !== 0 };
     }
     if (!isEditable && item.qtyPhysical !== null && item.qtyPhysical !== undefined) {
@@ -247,6 +265,14 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
   const handleInputPhysical = (itemId: string, value: string) => {
     const raw = value.replace(/[^0-9]/g, ""); // Hanya angka
     handleItemChange(itemId, "qtyPhysical", raw);
+  };
+
+  // Hitung per satuan (B366).
+  const ubahRincian = (item: StockOpnameItem, rincian: RincianIsian[]) => {
+    setEditedItems((prev) => ({
+      ...prev,
+      [item.itemId]: { ...(prev[item.itemId] ?? { qtyPhysical: "", catatanItem: "" }), rincian },
+    }));
   };
 
   // --- RENDER CONDITIONS ---
@@ -463,22 +489,16 @@ export default function HalamanDetailStockOpname({ ruang }: Props) {
                 </div>
               ),
               meta: { label: "Stok Fisik" },
-              cell: ({ row }) => {
-                const item = row.original;
-                const localData = editedItems[item.itemId];
-                return isEditable ? (
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="0"
-                    value={localData?.qtyPhysical ?? ""}
-                    onChange={(e) => handleInputPhysical(item.itemId, e.target.value)}
-                    className="w-full sm:text-center font-bold font-mono bg-white border-navy/20 focus-visible:ring-navy"
-                  />
-                ) : (
-                  <div className="sm:text-center font-bold text-navy font-mono">{item.qtyPhysical ?? "-"}</div>
-                );
-              },
+              cell: ({ row }) => (
+                <SelHitungFisik
+                  item={row.original}
+                  isian={editedItems[row.original.itemId]}
+                  dapatDiubah={isEditable}
+                  bahan={bahanItem(row.original)}
+                  onUbahQty={(nilai) => handleInputPhysical(row.original.itemId, nilai)}
+                  onUbahRincian={(rincian) => ubahRincian(row.original, rincian)}
+                />
+              ),
             },
             {
               id: "selisih",

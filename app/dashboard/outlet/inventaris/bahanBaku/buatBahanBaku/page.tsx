@@ -6,6 +6,7 @@ import { BahanBakuRequest, SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
 import { useBuatBahanBaku } from "@/features/bahan-baku/hooks";
 import { useLokasiAktif } from "@/features/inventaris/hooks";
 import { bahanBakuSchema, type BahanBakuForm } from "@/features/bahan-baku/schema";
+import { IsianKemasan } from "@/features/bahan-baku/isian-kemasan";
 import { pesanError } from "@/lib/api/error";
 
 import { useForm, Controller, useWatch } from "react-hook-form";
@@ -46,6 +47,7 @@ export default function BuatBahanBakuPage() {
       satuan: "gram",
       stok: 0,
       stokMinimum: 0,
+      konversi: [],
     },
   });
 
@@ -244,6 +246,15 @@ export default function BuatBahanBakuPage() {
               </div>
             </div>
           </div>
+
+          {/* Kemasan bahan (B359; pemilik proyek, 23 November 2026). */}
+          <IsianKemasan
+            control={control}
+            register={register}
+            errors={errors}
+            satuanDasar={currentSatuan}
+            nonaktif={createMutation.isPending}
+          />
 
           {/* Helper Text / Tooltip Batas Stok */}
           <div className="flex items-start gap-2 bg-navy/5 p-4 rounded-xl border border-navy/10 mt-2">

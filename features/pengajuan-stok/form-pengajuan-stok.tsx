@@ -36,6 +36,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/calendar";
+import { PilihSatuan } from "@/features/bahan-baku/pilih-satuan";
 import {
   ArrowLeft,
   ArrowRight,
@@ -409,17 +410,23 @@ function IsiFormPengajuanStok({ pengajuan, outletTerkunci }: PropsIsi) {
                 />
               </div>
 
-              <div className="w-full sm:w-32 space-y-1.5">
+              <div className="w-full sm:w-40 space-y-1.5">
                 <label htmlFor={`pengajuan-satuan-${index}`} className="text-kecil font-bold text-navy/70">
                   Satuan
                 </label>
-                <Input
-                  id={`pengajuan-satuan-${index}`}
-                  type="text"
-                  readOnly
-                  value={items?.[index]?.satuan || "-"}
-                  className="bg-navy/5 border-transparent font-medium text-navy/50 cursor-not-allowed"
-                  tabIndex={-1}
+                {/* Satuan dasar, turunan, atau kemasan bahan (B364; pemilik proyek, 23 November 2026). */}
+                <Controller
+                  control={control}
+                  name={`items.${index}.satuan`}
+                  render={({ field }) => (
+                    <PilihSatuan
+                      id={`pengajuan-satuan-${index}`}
+                      bahan={bahanBakuList.find((b) => b.id === items?.[index]?.bahanBakuID)}
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={memuatBahan}
+                    />
+                  )}
                 />
               </div>
 

@@ -40,3 +40,10 @@ export const formatTanggalPendek = (iso: string): string => {
     year: "numeric",
   }).format(date);
 };
+/**
+ * Angka jumlah barang dengan pemisah ribuan Indonesia dan paling banyak tiga
+ * angka pecahan, misalnya 6.115 atau 0,025 (batas pecahan eksplisit seperti
+ * formatRupiah, keputusan rancangan butir 24).
+ */
+const ANGKA_JUMLAH = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 3 });
+export const formatAngka = (angka: number): string => ANGKA_JUMLAH.format(angka);

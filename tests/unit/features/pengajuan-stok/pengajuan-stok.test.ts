@@ -60,7 +60,7 @@ describe("arahPengajuanValid", () => {
 });
 
 describe("susunPayloadPengajuan", () => {
-  it("mengirim baris valid saja, satuan bawaan pcs, dan tanggal sebagai ISO", () => {
+  it("mengirim baris valid saja dengan satuan pilihannya, tanpa cadangan pcs (B364), dan tanggal sebagai ISO", () => {
     const payload = susunPayloadPengajuan({
       arah: "GUDANG_KE_OUTLET",
       outletID: "o1",
@@ -71,7 +71,7 @@ describe("susunPayloadPengajuan", () => {
         { bahanBakuID: "b1", jumlah: "2", satuan: "kg" },
         { bahanBakuID: "", jumlah: "5", satuan: "" },
         { bahanBakuID: "b2", jumlah: "0", satuan: "ml" },
-        { bahanBakuID: "b3", jumlah: "1", satuan: "" },
+        { bahanBakuID: "b3", jumlah: "1", satuan: "kaleng" },
       ],
     });
     expect(payload).toEqual({
@@ -81,7 +81,7 @@ describe("susunPayloadPengajuan", () => {
       tanggalKebutuhan: "2026-09-25T00:00:00.000Z",
       items: [
         { bahanBakuID: "b1", jumlah: 2, satuan: "kg" },
-        { bahanBakuID: "b3", jumlah: 1, satuan: "pcs" },
+        { bahanBakuID: "b3", jumlah: 1, satuan: "kaleng" },
       ],
     });
   });
@@ -127,6 +127,22 @@ describe("nilaiAwalPengajuan", () => {
       catatan: "segera",
       items: [{ bahanBakuID: "b1", jumlah: "900", satuan: "ml" }],
     });
+  });
+
+  it("edit memakai masukan pengaju bila ada, bukan jumlah satuan dasar (B364)", () => {
+    const dokumen = {
+      ...DATA[1],
+      items: [
+        {
+          bahanBaku: { id: "b1", namaBahan: "Susu", satuan: "ml" },
+          jumlah: 580,
+          satuan: "ml",
+          satuanMasukan: "kaleng",
+          jumlahMasukan: 2,
+        },
+      ],
+    };
+    expect(nilaiAwalPengajuan(dokumen).items).toEqual([{ bahanBakuID: "b1", jumlah: "2", satuan: "kaleng" }]);
   });
 
   it("revisi pengembalian membaca outlet dari asal dan gudang dari tujuan", () => {

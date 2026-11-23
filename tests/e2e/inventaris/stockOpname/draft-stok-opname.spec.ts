@@ -104,6 +104,38 @@ test.describe("Draft stock opname outlet", () => {
       await expect(baris.getByPlaceholder("0")).toHaveValue("");
     });
 
+    await test.step("hitung per kemasan: 1 kaleng + 10 ml dikirim sebagai rincianFisik (B366)", async () => {
+      // Bahan fixture "E2E Bahan Kaleng" (ml, kaleng = 290) dari spec konversi satuan.
+      const kaleng = detail.items.find((i) => i.namaSnapshot === "E2E Bahan Kaleng");
+      test.skip(!kaleng, "Bahan fixture E2E Bahan Kaleng belum ada di lokasi aktif");
+      const baris = page.locator("table tbody tr").filter({ hasText: "E2E Bahan Kaleng" });
+      await baris.getByLabel("Jumlah 1 stok fisik E2E Bahan Kaleng").fill("1");
+      await baris.getByLabel("Satuan 1 stok fisik E2E Bahan Kaleng").click();
+      await page.getByRole("option", { name: "kaleng (290 ml)" }).click();
+      await baris.getByRole("button", { name: "+ Tambah satuan" }).click();
+      await baris.getByLabel("Jumlah 2 stok fisik E2E Bahan Kaleng").fill("10");
+      await expect(baris).toContainText("= 300 ml");
+      const tSimpan = page.waitForResponse(patchAksi("items"));
+      await page.getByRole("button", { name: "Simpan Angka Sementara" }).click();
+      const res = await tSimpan;
+      expect(res.status()).toBe(200);
+      expect(res.request().postDataJSON()).toEqual({
+        items: [
+          {
+            itemId: kaleng!.itemId,
+            rincianFisik: [
+              { satuan: "kaleng", jumlah: 1 },
+              { satuan: "ml", jumlah: 10 },
+            ],
+          },
+        ],
+      });
+      const item = ((await res.json()) as { data: { items: (ItemMentah & { rincianFisik?: unknown[] })[] } }).data.items.find(
+        (i) => i.itemId === kaleng!.itemId,
+      );
+      expect(item?.qtyPhysical, "dijumlah server ke satuan dasar").toBe(300);
+    });
+
     await test.step("batalkan dari DRAFT", async () => {
       await page.getByRole("button", { name: "Batalkan Sesi Opname" }).click();
       const dialog = page.getByRole("alertdialog");

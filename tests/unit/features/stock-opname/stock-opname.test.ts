@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isiAwalHitungan, petakanNilaiServer, susunPayloadHitungan } from "@/features/stock-opname/payload";
+import { isiAwalHitungan, petakanNilaiServer, totalIsianDasar, susunPayloadHitungan } from "@/features/stock-opname/payload";
 import { bolehHitungOpname, bolehTinjauOpname } from "@/features/stock-opname/izin";
 
 describe("susunPayloadHitungan", () => {
@@ -53,6 +53,38 @@ describe("susunPayloadHitungan", () => {
 
   it("tidak mengirim apa pun bila tidak ada perubahan", () => {
     expect(susunPayloadHitungan({ a: { qtyPhysical: " ", catatanItem: "" } }, server)).toEqual({ items: [] });
+  });
+});
+
+describe("hitung fisik per satuan (B366)", () => {
+  const dasar = { x: "ml" };
+  const faktor = (satuan: string) => ({ ml: 1, kaleng: 290 })[satuan as "ml" | "kaleng"] ?? null;
+
+  it("mengirim rincianFisik bila memakai kemasan, tanpa qtyPhysical", () => {
+    const isian = { x: { qtyPhysical: "", catatanItem: "", rincian: [{ satuan: "kaleng", jumlah: "21" }, { satuan: "ml", jumlah: "170" }] } };
+    expect(susunPayloadHitungan(isian, { x: { qtyPhysical: null, catatanItem: null } }, dasar)).toEqual({
+      items: [{ itemId: "x", rincianFisik: [{ satuan: "kaleng", jumlah: 21 }, { satuan: "ml", jumlah: 170 }] }],
+    });
+    expect(totalIsianDasar(isian.x, "ml", faktor)).toBe(6260);
+  });
+
+  it("rincian yang sama dengan tersimpan tidak dikirim ulang", () => {
+    const rincianFisik = [{ satuan: "kaleng", jumlah: 21 }];
+    const isian = { x: { qtyPhysical: "6090", catatanItem: "", rincian: [{ satuan: "kaleng", jumlah: "21" }] } };
+    expect(susunPayloadHitungan(isian, { x: { qtyPhysical: 6090, catatanItem: null, rincianFisik } }, dasar)).toEqual({ items: [] });
+  });
+
+  it("satu baris satuan dasar tetap qtyPhysical seperti sebelumnya", () => {
+    const isian = { x: { qtyPhysical: "", catatanItem: "", rincian: [{ satuan: "ml", jumlah: "500" }] } };
+    expect(susunPayloadHitungan(isian, { x: { qtyPhysical: null, catatanItem: null } }, dasar)).toEqual({
+      items: [{ itemId: "x", qtyPhysical: 500 }],
+    });
+  });
+
+  it("isian awal membuka rincian tersimpan", () => {
+    expect(
+      isiAwalHitungan([{ itemId: "x", qtyPhysical: 6260, catatanItem: null, rincianFisik: [{ satuan: "kaleng", jumlah: 21 }] }]),
+    ).toEqual({ x: { qtyPhysical: "6260", catatanItem: "", rincian: [{ satuan: "kaleng", jumlah: "21" }] } });
   });
 });
 

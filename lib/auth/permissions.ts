@@ -332,6 +332,9 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   ],
   "/dashboard/outlet/pola-roster": [IZIN.location, IZIN.polaRoster, IZIN.shift],
   "/dashboard/outlet/shift": [IZIN.location, IZIN.shift],
+  // Rekap absensi per lokasi ruang (B358): locationID dari lokasi ruang,
+  // seperti monitoring (keputusan rancangan butir 29).
+  "/dashboard/outlet/rekap-absensi": [IZIN.location, IZIN.absensi],
 
   // Gudang
   "/dashboard/gudang": [],

@@ -19,10 +19,14 @@ export interface TransferItem {
     namaBahan: string | null;
     satuan: string | null;
   } | null;
+  /** Dalam satuan dasar bahan (B365). */
   qtyKirim: number;
   qtyTerima: number;
   selisih: number;
   catatanItem: string | null;
+  /** Masukan qtyKirim sebelum dikonversi, misalnya 2 kaleng; null sebelum AR42. */
+  satuanMasukan?: string | null;
+  qtyKirimMasukan?: number | null;
 }
 
 export interface TransferStok {

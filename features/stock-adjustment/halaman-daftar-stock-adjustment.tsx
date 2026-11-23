@@ -1,7 +1,14 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { KotakCari } from "@/components/filter/bilah-filter";
+import { BilahFilter } from "@/components/filter/bilah-filter";
+import { KelompokFilter, PanelFilter, PilihanPeriode } from "@/components/filter/panel-filter";
+import { DialogUnduhBulan } from "@/components/unduh/dialog-unduh-bulan";
+import { usePanelFilter } from "@/hooks/use-panel-filter";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
+import { EP } from "@/lib/api/endpoints";
+import { labelFilterEkspor, paramEkspor, unduhDaftar } from "@/lib/unduh";
+import { pilPeriodeDaftar, type PeriodeDaftar } from "@/features/stock-opname/filter";
 import { useRouter } from "next/navigation";
 import type { StockAdjustment } from "@/types/stockOpname";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -62,7 +69,12 @@ export default function HalamanDaftarStockAdjustment({
 
   // Mengganti lingkup atau pencarian kembali ke halaman 1, disesuaikan saat
   // render seperti Belanja Stok, agar halaman lama tidak sempat diminta.
-  const kunciKriteria = JSON.stringify([lingkup, cariTertunda]);
+  // Periode dibuat (B356; pemilik proyek, 23 November 2026): kosong berarti seluruhnya.
+  const [periode, setPeriode] = useState<PeriodeDaftar>({});
+  const hariIni = useTanggalHariIni();
+  const panel = usePanelFilter<PeriodeDaftar>({ terapan: periode, bawaan: {}, onTerapkan: setPeriode });
+  const pilAktif = pilPeriodeDaftar(periode, hariIni, () => setPeriode({}));
+  const kunciKriteria = JSON.stringify([lingkup, cariTertunda, periode]);
   const [kunciSebelumnya, setKunciSebelumnya] = useState(kunciKriteria);
   if (kunciSebelumnya !== kunciKriteria) {
     setKunciSebelumnya(kunciKriteria);
@@ -74,7 +86,7 @@ export default function HalamanDaftarStockAdjustment({
   // outlet dan gudang tidak dicampur (keputusan pemilik proyek, 22 September
   // 2026). Urutan mengikuti backend, terbaru dulu: mengurutkan di klien hanya
   // mengurutkan satu halaman.
-  const params = lingkup ? paramHalamanAdjustment(lingkup, cariTertunda, halaman, ukuran) : null;
+  const params = lingkup ? paramHalamanAdjustment(lingkup, cariTertunda, halaman, ukuran, periode) : null;
   const { data, isLoading, isError, isFetching } = useHalamanStockAdjustment(params);
   const adjustmentList = useMemo(() => data?.data ?? [], [data]);
 
@@ -140,18 +152,34 @@ export default function HalamanDaftarStockAdjustment({
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER SECTION */}
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-gading border border-navy/10 rounded-lg shadow-sm hidden sm:block">
-          <Scale className="w-6 h-6 text-navy" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gading border border-navy/10 rounded-lg shadow-sm hidden sm:block">
+            <Scale className="w-6 h-6 text-navy" />
+          </div>
+          <div className="space-y-0.5">
+            <h1 className="text-judul font-bold tracking-tight text-navy">
+              {teks.judul}
+            </h1>
+            <p className="text-isi font-medium text-navy/60">
+              {teks.deskripsi}
+            </p>
+          </div>
         </div>
-        <div className="space-y-0.5">
-          <h1 className="text-judul font-bold tracking-tight text-navy">
-            {teks.judul}
-          </h1>
-          <p className="text-isi font-medium text-navy/60">
-            {teks.deskripsi}
-          </p>
-        </div>
+        {/* Ekspor satu baris per bahan, per bulan (B357, P85). */}
+        {lingkup && !penghalang && (
+          <DialogUnduhBulan
+            namaData="stock adjustment"
+            filterAktif={labelFilterEkspor(pilAktif, { label: "Nomor jurnal", nilai: cariTertunda })}
+            unduh={({ format, bulan }) =>
+              unduhDaftar(
+                EP.stockOpname.adjustments,
+                { ...paramEkspor(paramHalamanAdjustment(lingkup, cariTertunda, 1, 1)), format, bulan: bulan! },
+                `stock-adjustment_${bulan}.${format}`,
+              )
+            }
+          />
+        )}
       </div>
 
       {pemilihLokasi}
@@ -159,14 +187,40 @@ export default function HalamanDaftarStockAdjustment({
       {/* DATA TABLE SECTION */}
       {penghalang ?? (
         <div className="flex w-full flex-col gap-3">
-          <KotakCari
-            id="cari-adjustment"
-            label="Cari nomor jurnal"
-            placeholder="Cari nomor jurnal..."
-            value={cari}
-            onChange={setCari}
-            maxLength={PANJANG_CARI_ADJUSTMENT}
+          <BilahFilter
+            cari={{
+              id: "cari-adjustment",
+              label: "Cari nomor jurnal",
+              placeholder: "Cari nomor jurnal...",
+              value: cari,
+              onChange: setCari,
+              maxLength: PANJANG_CARI_ADJUSTMENT,
+            }}
+            jumlahAktif={periode.dari || periode.sampai ? 1 : 0}
+            onBukaFilter={panel.buka}
+            filterTerbuka={panel.terbuka}
+            pil={pilAktif}
+            onAturUlangSemua={() => setPeriode({})}
           />
+          <PanelFilter
+            terbuka={panel.terbuka}
+            onTerbukaBerubah={panel.ubahTerbuka}
+            jumlahAktif={panel.draf.dari || panel.draf.sampai ? 1 : 0}
+            onTerapkan={panel.terapkan}
+            onAturUlang={panel.aturUlang}
+          >
+            <KelompokFilter judul="Periode">
+              <PilihanPeriode
+                idAwalan={`filter-adjustment-${ruang}`}
+                hariIni={hariIni}
+                labelDari="Dibuat dari"
+                labelSampai="Dibuat sampai"
+                batasiUrutan
+                rentang={{ dari: panel.draf.dari, sampai: panel.draf.sampai }}
+                onUbah={({ dari, sampai }) => panel.setDraf({ dari, sampai })}
+              />
+            </KelompokFilter>
+          </PanelFilter>
           <DataTable
             columns={columns}
             data={adjustmentList}

@@ -1,3 +1,4 @@
+import type { FormatLaporan } from "@/lib/unduh";
 import { labelPilPeriode, rentangSama, type PilFilter } from "@/lib/filter";
 import { keTanggalLokal } from "@/lib/waktu";
 import type { AngkaArusKas, BarisArusKas } from "@/types/laporan";
@@ -8,7 +9,7 @@ import type { AngkaArusKas, BarisArusKas } from "@/types/laporan";
  */
 
 export type KelompokArusKas = "hari" | "minggu" | "bulan";
-export type FormatUnduhan = "pdf" | "xlsx" | "csv";
+export type FormatUnduhan = FormatLaporan;
 
 export interface FilterArusKas {
   /** Kosong berarti seluruh akun kas; transfer antar akun tidak dihitung. */
@@ -24,12 +25,6 @@ export const JUDUL_KELOMPOK: Record<KelompokArusKas, string> = {
   minggu: "Per minggu",
   bulan: "Per bulan",
 };
-export const PILIHAN_UNDUHAN: { format: FormatUnduhan; label: string }[] = [
-  { format: "pdf", label: "PDF" },
-  { format: "xlsx", label: "Excel" },
-  { format: "csv", label: "CSV" },
-];
-
 /** Saat halaman dibuka: tanggal 1 bulan berjalan sampai hari ini, seluruh akun, per hari (pemilik proyek). */
 export function filterAwalArusKas(sekarang: Date = new Date()): FilterArusKas {
   return {

@@ -11,6 +11,10 @@ import { useSession } from "@/lib/auth/useSession";
 import { pesanError } from "@/lib/api/error";
 import { useTerimaSuratJalan, useTransferStok } from "./hooks";
 import { susunPayloadTerima } from "./payload";
+import { useDaftarBahanBaku } from "@/features/bahan-baku/hooks";
+import { PilihSatuan } from "@/features/bahan-baku/pilih-satuan";
+import { faktorKeDasar } from "@/features/bahan-baku/satuan";
+import { IZIN } from "@/lib/auth/permissions";
 import { bolehTerimaSuratJalan } from "./izin";
 import { RUANG_SURAT_JALAN, ruangPenerima, type RuangSuratJalan } from "./ruang";
 
@@ -52,6 +56,8 @@ type FormItem = {
   qtyKirim: number;
   qtyTerima: number;
   catatanItem: string;
+  /** Satuan qtyTerima (B365); kosong berarti satuan dasar. */
+  satuan: string;
 };
 
 /**
@@ -142,8 +148,18 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
       qtyKirim: item.qtyKirim,
       qtyTerima: item.qtyKirim, // Default: Anggap semua barang utuh
       catatanItem: item.catatanItem || "",
+      satuan: "",
     })),
   );
+
+  // Kemasan bahan untuk pilihan satuan terima (B365); tanpa read-bahan hanya
+  // satuan dasar yang ditawarkan.
+  const bahanList = useDaftarBahanBaku(permissions.includes(IZIN.bahan)).data ?? [];
+  const bahanItem = (item: FormItem) =>
+    bahanList.find((b) => b.id === item.bahanBaku?.id) ??
+    (item.bahanBaku?.satuan ? { satuan: item.bahanBaku.satuan } : null);
+  /** qtyTerima dalam satuan dasar, untuk dibandingkan dengan qtyKirim. */
+  const terimaDasar = (item: FormItem) => item.qtyTerima * (faktorKeDasar(bahanItem(item), item.satuan) ?? 1);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // --- Handlers ---
@@ -153,7 +169,9 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
         if (i.kunci === itemId) {
           let val = Number(value);
           if (val < 0) val = 0;
-          if (val > i.qtyKirim) val = i.qtyKirim; // Tidak boleh terima lebih dari yang dikirim
+          // Tidak boleh terima lebih dari yang dikirim, dibandingkan dalam satuan dasar.
+          const faktor = faktorKeDasar(bahanItem(i), i.satuan) ?? 1;
+          if (val * faktor > i.qtyKirim) val = i.qtyKirim / faktor;
           return { ...i, qtyTerima: val };
         }
         return i;
@@ -171,14 +189,27 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
   // Memastikan bahwa setiap barang yang jumlah diterimanya KURANG, wajib diisi catatannya.
   const isFormValid = useMemo(() => {
     for (const item of items) {
-      if (item.qtyTerima < item.qtyKirim && item.catatanItem.trim() === "") {
+      if (terimaDasar(item) < item.qtyKirim && item.catatanItem.trim() === "") {
         return false;
       }
     }
     return true;
-  }, [items]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- terimaDasar bergantung pada bahanList yang ikut didaftarkan
+  }, [items, bahanList]);
 
-  const hasSelisih = items.some((i) => i.qtyTerima < i.qtyKirim);
+  const hasSelisih = items.some((i) => terimaDasar(i) < i.qtyKirim);
+
+  /** Ganti satuan: jumlah ikut dikonversi agar tetap sama secara fisik. */
+  const handleSatuanChange = (itemId: string, satuan: string) => {
+    setItems((prev) =>
+      prev.map((i) => {
+        if (i.kunci !== itemId) return i;
+        const lama = faktorKeDasar(bahanItem(i), i.satuan) ?? 1;
+        const baru = faktorKeDasar(bahanItem(i), satuan) ?? 1;
+        return { ...i, satuan, qtyTerima: Math.round(((i.qtyTerima * lama) / baru) * 1000) / 1000 };
+      }),
+    );
+  };
 
   // --- Mutations ---
   // Invalidasi ada di hook (akar transfer, stok, jurnal, dan pengajuan).
@@ -236,7 +267,7 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
 
             <div className="p-6 flex flex-col gap-5">
               {items.map((item, index) => {
-                const isSelisih = item.qtyTerima < item.qtyKirim;
+                const isSelisih = terimaDasar(item) < item.qtyKirim;
                 return (
                   <div
                     key={item.kunci}
@@ -292,9 +323,14 @@ function FormPenerimaan({ detail, ruang }: { detail: TransferStok; ruang: RuangS
                                   : "border-emerald-200 bg-emerald-50 text-emerald-700 focus-visible:ring-emerald-600",
                               )}
                             />
-                            <span className="text-isi font-bold text-navy/50 shrink-0 w-8">
-                              {item.bahanBaku?.satuan}
-                            </span>
+                            <PilihSatuan
+                              id={`terima-satuan-${item.kunci}`}
+                              label={`Satuan diterima ${item.bahanBaku?.namaBahan ?? ""}`.trim()}
+                              bahan={bahanItem(item)}
+                              value={item.satuan}
+                              onChange={(satuan) => handleSatuanChange(item.kunci, satuan)}
+                              className="h-10 w-36"
+                            />
                           </div>
                         </div>
                       </div>

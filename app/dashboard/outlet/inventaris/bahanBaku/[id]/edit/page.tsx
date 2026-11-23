@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
-import { SATUAN_BAHAN_OPTIONS } from "@/types/bahanBaku";
+import { SATUAN_BAHAN_OPTIONS, type BahanBaku } from "@/types/bahanBaku";
 import { useBahanBaku, usePerbaruiBahanBaku } from "@/features/bahan-baku/hooks";
 import { bahanBakuSchema, type BahanBakuForm } from "@/features/bahan-baku/schema";
+import { IsianKemasan } from "@/features/bahan-baku/isian-kemasan";
 import { pesanError } from "@/lib/api/error";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
@@ -27,55 +27,17 @@ export default function EditBahanBakuPage() {
   const params = useParams();
   const bahanId = params.id as string;
 
-  // Fetch, mutation, dan invalidasi cache ditangani features/bahan-baku.
+  // Fetch, mutation, dan invalidasi cache ditangani features/bahan-baku. Form
+  // dipasang setelah detail dimuat ulang, dengan nilai awal lewat
+  // defaultValues (keputusan rancangan butir 8): reset di effect sebelumnya
+  // membuat Select satuan kosong ("Pilih Satuan...").
   const {
     data: detailBahan,
-    isLoading: isLoadingDetail,
+    isLoading,
+    isFetchedAfterMount,
     isError: isErrorDetail,
   } = useBahanBaku(bahanId);
-
-  // --- REACT HOOK FORM ---
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    formState: { errors, isDirty },
-  } = useForm<BahanBakuForm>({
-    resolver: zodResolver(bahanBakuSchema),
-    defaultValues: {
-      namaBahan: "",
-      satuan: "gram",
-    },
-  });
-
-  // Sinkronisasi data ke form saat selesai fetch
-  useEffect(() => {
-    if (detailBahan) {
-      reset({
-        namaBahan: detailBahan.namaBahan,
-        satuan: detailBahan.satuan,
-      });
-    }
-  }, [detailBahan, reset]);
-
-  const updateMutation = usePerbaruiBahanBaku(bahanId);
-
-  const onSubmit = (data: BahanBakuForm) => {
-    updateMutation.mutate(data, {
-      onSuccess: () => {
-        toast.success("Berhasil Diperbarui", {
-          description: "Perubahan master data bahan baku telah disimpan.",
-        });
-        router.push("/dashboard/outlet/inventaris/bahanBaku");
-      },
-      onError: (err) => {
-        toast.error("Gagal Memperbarui", {
-          description: pesanError(err, "Terjadi kesalahan saat menyimpan data."),
-        });
-      },
-    });
-  };
+  const isLoadingDetail = isLoading || (!isFetchedAfterMount && !isErrorDetail);
 
   // --- RENDER CONDITIONS ---
   if (isLoadingDetail) {
@@ -99,6 +61,47 @@ export default function EditBahanBakuPage() {
     );
   }
 
+  return <FormUbahBahanBaku detailBahan={detailBahan} />;
+}
+
+function FormUbahBahanBaku({ detailBahan }: { detailBahan: BahanBaku }) {
+  const router = useRouter();
+  const bahanId = detailBahan.id;
+
+  // --- REACT HOOK FORM ---
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isDirty },
+  } = useForm<BahanBakuForm>({
+    resolver: zodResolver(bahanBakuSchema),
+    defaultValues: {
+      namaBahan: detailBahan.namaBahan,
+      satuan: detailBahan.satuan,
+      konversi: detailBahan.konversi ?? [],
+    },
+  });
+  const satuanDasar = useWatch({ control, name: "satuan" });
+
+  const updateMutation = usePerbaruiBahanBaku(bahanId);
+
+  const onSubmit = (data: BahanBakuForm) => {
+    updateMutation.mutate(data, {
+      onSuccess: () => {
+        toast.success("Berhasil Diperbarui", {
+          description: "Perubahan master data bahan baku telah disimpan.",
+        });
+        router.push("/dashboard/outlet/inventaris/bahanBaku");
+      },
+      onError: (err) => {
+        toast.error("Gagal Memperbarui", {
+          description: pesanError(err, "Terjadi kesalahan saat menyimpan data."),
+        });
+      },
+    });
+  };
+
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER SECTION */}
@@ -119,7 +122,7 @@ export default function EditBahanBakuPage() {
             Edit Master Bahan Baku
           </h1>
           <p className="text-isi font-medium text-navy/60">
-            Perbarui informasi identitas master data bahan baku.
+            Perbarui identitas dan kemasan master data bahan baku.
           </p>
         </div>
       </div>
@@ -197,6 +200,16 @@ export default function EditBahanBakuPage() {
               </div>
             </div>
           </div>
+
+          {/* Kemasan bahan (B359): PUT mengganti seluruh daftar; kemasan yang
+              dipakai resep tidak dapat dibuang (409, pesan backend ditampilkan). */}
+          <IsianKemasan
+            control={control}
+            register={register}
+            errors={errors}
+            satuanDasar={satuanDasar}
+            nonaktif={updateMutation.isPending}
+          />
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-6 border-t border-navy/10 mt-4">

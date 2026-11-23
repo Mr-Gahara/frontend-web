@@ -1,5 +1,6 @@
 
 import type { StatusPembayaran } from "./pembayaran";
+import type { StatusBooking } from "./sesiBooking";
 
 // ENUMS / KONSTANTA
 export type StatusBayar = "UNPAID" | "PAID" | "PARTIAL";
@@ -82,6 +83,17 @@ export interface PembayaranPenjualan {
  * (bahanBakuID, satuan, dan locationID null); BAHAN per item per bahan
  * resep, dalam satuan bahan. Produk Stok Tak Terbatas tidak muncul.
  */
+/** Satu sesi booking di detail penjualan (backend B347). */
+export interface SesiBookingPenjualan {
+  id: string;
+  dataAset: { id: string; namaAset: string | null } | null;
+  waktuMulai: string;
+  waktuSelesai: string | null;
+  durasiMenit: number | null;
+  status: StatusBooking;
+  sudahDibayar: boolean;
+}
+
 export interface RincianStokPenjualan {
   jenis: "PRODUK" | "BAHAN";
   produkID: string;
@@ -126,6 +138,12 @@ export interface Penjualan {
   pembayaran?: PembayaranPenjualan[];
   /** Stok yang dipotong saat disimpan, tetap ada setelah VOID; [] untuk DRAFT dan penjualan lama (backend P78, B320). */
   rincianStok?: RincianStokPenjualan[];
+  /**
+   * Hanya di detail: sesi booking milik penjualan ini, urut waktuMulai, dibaca
+   * di luar cache detail sehingga status selalu terbaru; cukup read-penjualan.
+   * Penjualan non-booking []. Aset terhapus: namaAset null (backend B347).
+   */
+  sesiBooking?: SesiBookingPenjualan[];
   keterangan: string;
   createdAt: string;
   updatedAt: string;

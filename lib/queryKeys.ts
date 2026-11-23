@@ -228,6 +228,7 @@ export const queryKeys = {
   absensi: {
     semua: kunci(["absensi"] as const),
     monitoring: (tanggal: string, lokasiId: string) => ["absensi", "monitoring", tanggal, lokasiId] as const,
+    rekap: (bulan: string, lokasiId: string) => ["absensi", "rekap", bulan, lokasiId] as const,
   },
   izinCuti: {
     semua: kunci(["izinCuti"] as const),

@@ -2,6 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { KotakCari } from "@/components/filter/bilah-filter";
+import { DialogUnduhBulan } from "@/components/unduh/dialog-unduh-bulan";
+import { EP } from "@/lib/api/endpoints";
+import { paramEkspor, unduhDaftar } from "@/lib/unduh";
+import { rincianKemasan, teksStokDasar } from "@/features/inventaris/stok-terbaca";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
 import { PILIHAN_UKURAN_STOK, paramHalamanInventory } from "@/features/inventaris/cakupan";
@@ -200,9 +204,19 @@ export default function StokInventoryPage() {
                 row.original.isStokKritis ? "text-rose-600" : "text-navy",
               )}
             >
-              {row.original.stok}{" "}
-              <span className="text-kecil font-sans">{row.original.item?.satuan || "pcs"}</span>
+              {rincianKemasan(row.original.stokTerbaca, row.original.item?.satuan) ?? (
+                <>
+                  {row.original.stok}{" "}
+                  <span className="text-kecil font-sans">{row.original.item?.satuan || "pcs"}</span>
+                </>
+              )}
             </span>
+            {/* Bahan berkemasan: angka satuan dasar di bawah rincian (B362). */}
+            {rincianKemasan(row.original.stokTerbaca, row.original.item?.satuan) && (
+              <span className="text-kecil font-medium text-navy/60">
+                {teksStokDasar(row.original.stok, row.original.item?.satuan)}
+              </span>
+            )}
             {row.original.isStokKritis && (
               <Badge variant="outline" className="text-mikro bg-rose-50 text-rose-600 border-rose-200">
                 Kritis
@@ -249,7 +263,7 @@ export default function StokInventoryPage() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
           <KotakCari
             id="cari-stok"
             label="Cari nama barang"
@@ -282,6 +296,39 @@ export default function StokInventoryPage() {
               })}
             </SelectContent>
           </Select>
+          )}
+          {/* Ekspor stok saat ini sebagai potret, tanpa bulan (B354, P85). */}
+          {filterLokasi && (
+            <DialogUnduhBulan
+              namaData="stok saat ini"
+              tanpaBulan
+              filterAktif={[
+                ...(debouncedSearch.trim() ? [`Nama barang: ${debouncedSearch.trim()}`] : []),
+                ...(filterTab === "CRITICAL" ? ["Hanya stok kritis"] : []),
+                ...(cakupan.status === "lintas" && selectedLocation !== "all"
+                  ? [`Lokasi: ${lokasiOutlet.find((l) => l.id === selectedLocation)?.nama ?? "-"}`]
+                  : []),
+              ]}
+              unduh={({ format }) =>
+                unduhDaftar(
+                  EP.inventory.list,
+                  {
+                    ...paramEkspor(
+                      paramHalamanInventory({
+                        locationID: filterLokasi.locationID,
+                        tipeLokasi: "Outlet",
+                        cari: debouncedSearch,
+                        kritis: filterTab === "CRITICAL",
+                        halaman,
+                        ukuran,
+                      }),
+                    ),
+                    format,
+                  },
+                  `stok-outlet.${format}`,
+                )
+              }
+            />
           )}
         </div>
       </div>

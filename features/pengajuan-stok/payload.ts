@@ -36,7 +36,9 @@ export function susunPayloadPengajuan(nilai: NilaiFormPengajuan): PayloadPengaju
     items: nilai.items.filter(itemValid).map((item) => ({
       bahanBakuID: item.bahanBakuID,
       jumlah: Number(item.jumlah),
-      satuan: item.satuan || "pcs",
+      // Wajib salah satu availableUnits bahan (B364); diisi satuan dasar saat
+      // bahan dipilih, sehingga tidak ada cadangan "pcs" yang ditolak 400.
+      satuan: item.satuan,
     })),
   };
 }
@@ -46,10 +48,12 @@ export function nilaiAwalPengajuan(pengajuan?: PengajuanStok): NilaiFormPengajua
   if (!pengajuan) {
     return { arah: "GUDANG_KE_OUTLET", outletID: "", gudangID: "", tanggalKebutuhan: undefined, catatan: "", items: [{ ...BARIS_KOSONG }] };
   }
+  // Edit memakai masukan pengaju (misalnya 2 kaleng) bila ada, agar tidak
+  // berubah menjadi jumlah satuan dasar (AR42, B364).
   const items = pengajuan.items.map((item) => ({
     bahanBakuID: item.bahanBaku?.id ?? "",
-    jumlah: String(item.jumlah),
-    satuan: item.satuan ?? "",
+    jumlah: String(item.satuanMasukan && item.jumlahMasukan != null ? item.jumlahMasukan : item.jumlah),
+    satuan: item.satuanMasukan ?? item.satuan ?? item.bahanBaku?.satuan ?? "",
   }));
   // Dokumen berarah tidak sah memakai pemetaan permintaan; backend menolaknya saat disimpan.
   const sisi = sisiMenurutDokumen(pengajuan) ?? {

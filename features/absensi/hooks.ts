@@ -37,3 +37,25 @@ export function useMonitoringAbsensi(
     error: kueri.error,
   };
 }
+
+/**
+ * Rekap absensi satu bulan di lokasi ruang (B358), seperti monitoring:
+ * locationID dari useLokasiRuang (keputusan rancangan butir 29), sehingga
+ * laman menuntut read-location.
+ */
+export function useRekapAbsensi(bulan: string, ruang: "outlet" | "gudang") {
+  const lokasi = useLokasiRuang(ruang);
+  const kueri = useQuery({
+    queryKey: queryKeys.absensi.rekap(bulan, lokasi.lokasiId ?? ""),
+    queryFn: () => absensiApi.rekap(bulan, lokasi.lokasiId!),
+    enabled: lokasi.lokasiId !== null,
+    retry: (percobaan, galat) => !isForbidden(galat) && percobaan < 3,
+  });
+  return {
+    data: kueri.data,
+    lokasiId: lokasi.lokasiId,
+    isLoading: lokasi.memuat || kueri.isLoading,
+    isError: lokasi.gagal || kueri.isError,
+    error: kueri.error,
+  };
+}

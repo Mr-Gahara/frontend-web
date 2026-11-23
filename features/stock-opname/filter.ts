@@ -1,5 +1,6 @@
 import { PANJANG_CARI_SERVER, queryCari, queryLingkup, type LingkupLokasi } from "@/features/inventaris/cakupan";
-import type { PilFilter } from "@/lib/filter";
+import { labelPilPeriode, type PilFilter } from "@/lib/filter";
+import { keTanggalLokal } from "@/lib/waktu";
 import type { StatusOpname } from "@/types/stockOpname";
 
 /** Panjang cari terpanjang yang diterima backend (B108). */
@@ -8,8 +9,9 @@ export const PANJANG_CARI_OPNAME = PANJANG_CARI_SERVER;
 /**
  * Query satu halaman GET /stockopname (paginasi B106, B108, B109): lokasi
  * atau tipe lokasi lingkup, status bila bukan Semua Status, dan pencarian
- * nomorOpname. Seluruhnya disaring server, sehingga pagination.total benar
- * (keputusan rancangan butir 27).
+ * nomorOpname, serta periode dibuat dari/sampai hari WIB (B356). Seluruhnya
+ * disaring server, sehingga pagination.total benar (keputusan rancangan
+ * butir 27).
  */
 export function paramHalamanOpname(
   lingkup: LingkupLokasi,
@@ -17,6 +19,7 @@ export function paramHalamanOpname(
   cari: string,
   halaman: number,
   ukuran: number,
+  periode: PeriodeDaftar = {},
 ): Record<string, string> {
   return {
     page: String(halaman),
@@ -24,7 +27,28 @@ export function paramHalamanOpname(
     ...queryLingkup(lingkup),
     ...(status !== "ALL" ? { status } : {}),
     ...queryCari(cari),
+    ...queryPeriode(periode),
   };
+}
+
+/** Periode opsional daftar opname dan adjustment (B356); kosong berarti seluruhnya. */
+export interface PeriodeDaftar {
+  dari?: Date;
+  sampai?: Date;
+}
+
+/** ?dari=&sampai= hari lokal YYYY-MM-DD, dibaca backend sebagai hari WIB (B356). */
+export function queryPeriode(periode: PeriodeDaftar): Record<string, string> {
+  return {
+    ...(periode.dari ? { dari: keTanggalLokal(periode.dari) } : {}),
+    ...(periode.sampai ? { sampai: keTanggalLokal(periode.sampai) } : {}),
+  };
+}
+
+/** Pil periode aktif (FL4a), dipakai daftar opname dan adjustment. */
+export function pilPeriodeDaftar(periode: PeriodeDaftar, hariIni: Date, hapus: () => void): PilFilter[] {
+  const label = labelPilPeriode({ dari: periode.dari, sampai: periode.sampai }, hariIni);
+  return label ? [{ kunci: "periode", label, onHapus: hapus }] : [];
 }
 /** Pilihan status di panel filter (FL10a: 5 pilihan berupa pil). */
 export const OPSI_STATUS_OPNAME: { nilai: StatusOpname; label: string }[] = [

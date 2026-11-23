@@ -18,8 +18,9 @@ import { Button } from "@/components/ui/button";
 import { pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
 import { formatTanggal } from "@/lib/format";
-import { useSesiBooking, useTandaiSelesaiBooking } from "./hooks";
-import { bolehBacaBooking, bolehTandaiSelesai } from "./izin";
+import type { SesiBookingPenjualan } from "@/types/penjualan";
+import { useTandaiSelesaiBooking } from "./hooks";
+import { bolehTandaiSelesai } from "./izin";
 
 const LABEL_STATUS: Record<string, string> = { Aktif: "Aktif", Selesai: "Selesai", VOID: "Dibatalkan" };
 
@@ -35,22 +36,19 @@ const KELAS_STATUS: Record<string, string> = {
 const GRID = "sm:grid sm:grid-cols-[minmax(0,1fr)_220px_120px_150px] sm:gap-4";
 
 /** Satu booking milik penjualan: aset, waktu, status, dan Tandai Selesai (keputusan NZ7a). */
-function BarisBooking({ id, permissions }: { id: string; permissions: readonly string[] }) {
-  const booking = useSesiBooking(id);
+function BarisBooking({
+  booking: b,
+  permissions,
+  bolehUbah,
+}: {
+  booking: SesiBookingPenjualan;
+  permissions: readonly string[];
+  bolehUbah: boolean;
+}) {
   const tandai = useTandaiSelesaiBooking();
   const [konfirmasi, setKonfirmasi] = useState(false);
   const [galat, setGalat] = useState("");
-
-  if (booking.isError) {
-    return (
-      <li role="alert" className="text-isi font-medium text-red-600">
-        {pesanError(booking.error, "Gagal memuat sesi booking.")}
-      </li>
-    );
-  }
-  if (!booking.data) return <li className="text-isi font-medium text-navy/60">Memuat sesi booking...</li>;
-
-  const b = booking.data;
+  const id = b.id;
   const nama = b.dataAset?.namaAset ?? "Aset tidak dikenal";
   const sampai = b.waktuSelesai ? ` – ${format(new Date(b.waktuSelesai), "HH:mm")}` : "";
 
@@ -65,7 +63,7 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
         {LABEL_STATUS[b.status] ?? b.status}
       </span>
       <div className="sm:justify-self-end">
-      {bolehTandaiSelesai(b, permissions) && (
+      {bolehUbah && bolehTandaiSelesai(b, permissions) && (
         <Button
           type="button"
           variant="outline"
@@ -130,13 +128,14 @@ function BarisBooking({ id, permissions }: { id: string; permissions: readonly s
 
 /**
  * Booking milik satu penjualan, dipasang halaman detail penjualan berjenis
- * booking (keputusan NZ7a). Id booking berasal dari itemPenjualan[].sesiBookingID.
- * Tidak dipasang tanpa read-booking, karena GET /sesibooking/:id memeriksanya,
- * sedangkan rute detail penjualan hanya menuntut read-penjualan.
+ * booking (keputusan NZ7a). Daftarnya dari sesiBooking[] detail penjualan
+ * (backend B347), sehingga cukup read-penjualan. Toko yang turun dari plan
+ * bersesi booking tetap melihatnya sebagai riwayat tanpa Tandai Selesai
+ * (pemilik proyek, 23 November 2026).
  */
-export function BookingPenjualan({ idBooking }: { idBooking: string[] }) {
+export function BookingPenjualan({ sesiBooking, bolehUbah }: { sesiBooking: SesiBookingPenjualan[]; bolehUbah: boolean }) {
   const { permissions } = useSession();
-  if (idBooking.length === 0 || !bolehBacaBooking(permissions)) return null;
+  if (sesiBooking.length === 0) return null;
   return (
     <section
       aria-label="Sesi booking"
@@ -153,8 +152,8 @@ export function BookingPenjualan({ idBooking }: { idBooking: string[] }) {
         <span className="text-right">Aksi</span>
       </div>
       <ul className="bg-gading text-isi">
-        {idBooking.map((id) => (
-          <BarisBooking key={id} id={id} permissions={permissions} />
+        {sesiBooking.map((b) => (
+          <BarisBooking key={b.id} booking={b} permissions={permissions} bolehUbah={bolehUbah} />
         ))}
       </ul>
     </section>

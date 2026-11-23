@@ -146,14 +146,16 @@ const PERAN_TANPA_SDM: PeranUji = {
 /**
  * Izin baca Owner tanpa read-pajak, read-jurnal-transfer, dan read-langganan
  * (utang pengujian kartu Pajak, riwayat Pindah Dana, dan Langganan yang
- * hanya teruji unit; pemilik proyek, 20 November 2026).
+ * hanya teruji unit; pemilik proyek, 20 November 2026), dan tanpa
+ * read-booking: Sesi Booking detail penjualan cukup read-penjualan (B347).
  */
 const PERAN_TANPA_BACA_SEBAGIAN: PeranUji = {
   nama: "E2E Tanpa Baca Sebagian",
   pin: "864223",
-  deskripsi: "Peran uji e2e: izin baca Owner tanpa pajak, jurnal transfer, dan langganan",
+  deskripsi: "Peran uji e2e: izin baca Owner tanpa pajak, jurnal transfer, langganan, dan booking",
   izin: (n) =>
-    n.startsWith("read-") && !([IZIN.pajak, IZIN.bacaJurnalTransfer, IZIN.langganan] as string[]).includes(n),
+    n.startsWith("read-") &&
+    !([IZIN.pajak, IZIN.bacaJurnalTransfer, IZIN.langganan, IZIN.booking] as string[]).includes(n),
 };
 
 /**

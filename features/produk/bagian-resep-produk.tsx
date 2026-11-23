@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BahanBakuCombobox } from "@/features/bahan-baku/bahan-baku-combobox";
 import { cn } from "@/lib/utils";
 import type { BahanBaku } from "@/types/bahanBaku";
-import { keAngka, satuanResepUntukBahan, type NilaiFormProduk, type SatuanResep } from "./schema";
+import { keAngka, satuanResepUntukBahan, type NilaiFormProduk } from "./schema";
 
 /**
  * Bagian resep dan komposisi (BOM) form produk: daftar bahan, jumlah, dan
@@ -114,10 +114,7 @@ export function BagianResepProduk({
                         value={selectField.value ?? field.bahanBakuID ?? ""}
                         onChange={selectField.onChange}
                         onSatuanChange={(satuan) =>
-                          setValue(
-                            `resep.${index}.satuan`,
-                            satuan as SatuanResep,
-                          )
+                          setValue(`resep.${index}.satuan`, satuan)
                         }
                         bahanBakuList={bahanBakuList}
                         isLoading={isLoadingBahanBaku}

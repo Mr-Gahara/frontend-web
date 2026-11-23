@@ -6,8 +6,8 @@ import {
   type NilaiFormProduk,
 } from "@/features/produk/schema";
 
-const bahan = (id: string, satuan: string, availableUnits?: string[]) =>
-  ({ id, namaBahan: "Bahan " + id, satuan, availableUnits }) as Parameters<typeof satuanResepUntukBahan>[0] & {
+const bahan = (id: string, satuan: string, availableUnits?: string[], konversi?: { satuan: string; isi: number }[]) =>
+  ({ id, namaBahan: "Bahan " + id, satuan, availableUnits, konversi }) as Parameters<typeof satuanResepUntukBahan>[0] & {
     id: string;
   };
 
@@ -42,6 +42,15 @@ describe("satuanResepUntukBahan", () => {
   it("bahan bersatuan pak atau unit memakai satuannya sendiri", () => {
     expect(satuanResepUntukBahan(bahan("e", "pak", ["pak"]))).toEqual(["pak"]);
     expect(satuanResepUntukBahan(bahan("f", "unit"))).toEqual(["unit"]);
+  });
+
+  it("kemasan bahan ditawarkan sesudah satuan bawaan (B360)", () => {
+    const skm = bahan("skm", "ml", ["ml", "kaleng", "pak"], [
+      { satuan: "kaleng", isi: 290 },
+      { satuan: "pak", isi: 3480 },
+    ]);
+    expect(satuanResepUntukBahan(skm)).toEqual(["ml", "kaleng", "pak"]);
+    expect(buatSkemaProduk([skm]).safeParse(nilai([{ bahanBakuID: "skm", jumlah: 0.5, satuan: "kaleng" }])).success).toBe(true);
   });
 
   it("satuan yang tidak dikenal web menghasilkan daftar kosong", () => {

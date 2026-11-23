@@ -20,8 +20,12 @@ export interface PengajuanItem {
     namaBahan: string | null;
     satuan: string | null;
   } | null;
+  /** Dalam satuan dasar bahan sejak AR42 (B364). */
   jumlah: number;
   satuan: string | null;
+  /** Masukan pengaju sebelum dikonversi, misalnya 2 kaleng; null sebelum AR42. */
+  satuanMasukan?: string | null;
+  jumlahMasukan?: number | null;
   stokGudangSaatIni?: number;
 }
 

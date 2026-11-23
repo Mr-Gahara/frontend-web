@@ -17,7 +17,7 @@ import {
 export const PANJANG_CARI_SUPPLIER = 100;
 
 export function barisBarangKosong(): IsianBarangPembelian {
-  return { bahanBakuID: "", jumlah: "", hargaBeli: "" };
+  return { bahanBakuID: "", jumlah: "", hargaBeli: "", satuan: "" };
 }
 
 export function isianAwalCatat(hariIni: string): IsianCatatPembelian {
@@ -71,10 +71,13 @@ export function payloadBuatPembelian(
     supplier: isian.supplier.trim(),
     keterangan: isian.keterangan.trim(),
     locationID,
+    // satuan hanya dikirim bila dipilih; jumlah dan harga dalam satuan itu,
+    // dan server mengisi jumlahDasar yang menambah stok (B361).
     items: isian.items.map((item) => ({
       bahanBakuID: item.bahanBakuID,
       jumlah: angkaDariTeks(item.jumlah),
       hargaBeli: hargaDariTeks(item.hargaBeli),
+      ...(item.satuan ? { satuan: item.satuan } : {}),
     })),
   };
   const nomorFaktur = isian.nomorFaktur.trim();

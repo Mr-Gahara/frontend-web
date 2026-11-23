@@ -11,10 +11,15 @@ import { dariTanggalLokal, keTanggalLokal } from "@/lib/waktu";
 import { useState, useMemo, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { pesanError } from "@/lib/api/error";
+import { DialogUnduhBulan } from "@/components/unduh/dialog-unduh-bulan";
+import { EP } from "@/lib/api/endpoints";
+import { labelFilterEkspor, paramEkspor, unduhDaftar } from "@/lib/unduh";
 import { useDaftarPenjualan, useHapusPenjualan, useVoidPenjualan } from "./hooks";
 import {
   PILIHAN_UKURAN_HALAMAN,
+  filterServerPenjualan,
   paramLingkupPenjualan,
+  paramUrutanPenjualan,
   UKURAN_HALAMAN_BAWAAN,
   type LingkupPenjualan,
   type UkuranHalaman,
@@ -331,14 +336,41 @@ export default function HalamanDaftarPenjualan({
             </p>
           </div>
         </div>
-        <Button
-          onClick={() => router.push("/dashboard/outlet/penjualan/buatPenjualan")}
-          size="aksi"
-          className="w-full cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm sm:w-auto"
-        >
-          <Plus className="h-4 w-4" />
-          Buat Penjualan
-        </Button>
+        <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row">
+          {/* Ekspor per bulan dengan filter yang sama (B349, P85; pemilik proyek, 23 November 2026). */}
+          {lingkup !== null && !penghalang && (
+            <DialogUnduhBulan
+              namaData="daftar penjualan"
+              filterAktif={labelFilterEkspor(pilAktif, { label: "Nomor referensi", nilai: cariTertunda })}
+              unduh={({ format, bulan }) =>
+                unduhDaftar(
+                  EP.penjualan.list,
+                  {
+                    ...paramEkspor(
+                      {
+                        ...filterServerPenjualan({ ...appliedFilters, noReferensi: cariTertunda.trim() }),
+                        ...paramUrutanPenjualan(urutan),
+                        ...paramLingkupPenjualan(lingkup),
+                      },
+                      ["startDate", "endDate"],
+                    ),
+                    format,
+                    bulan: bulan!,
+                  },
+                  `penjualan_${bulan}.${format}`,
+                )
+              }
+            />
+          )}
+          <Button
+            onClick={() => router.push("/dashboard/outlet/penjualan/buatPenjualan")}
+            size="aksi"
+            className="w-full cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm sm:w-auto"
+          >
+            <Plus className="h-4 w-4" />
+            Buat Penjualan
+          </Button>
+        </div>
       </div>
 
       {pemilihLokasi}

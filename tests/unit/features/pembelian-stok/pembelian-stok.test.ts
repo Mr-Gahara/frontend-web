@@ -33,8 +33,8 @@ const isian = {
   tanggal: HARI_INI,
   keterangan: "  Belanja mingguan  ",
   items: [
-    { bahanBakuID: "gula", jumlah: "10", hargaBeli: "15000" },
-    { bahanBakuID: "susu", jumlah: "1,5", hargaBeli: "0" },
+    { bahanBakuID: "gula", jumlah: "10", hargaBeli: "15000", satuan: "" },
+    { bahanBakuID: "susu", jumlah: "1,5", hargaBeli: "0", satuan: "" },
   ],
 };
 
@@ -100,7 +100,7 @@ describe("buatSkemaCatatPembelian", () => {
   });
 
   it("menerima harga 0 dan menolak harga pecahan, negatif, atau kosong", () => {
-    expect(skema.safeParse(denganBarang({ hargaBeli: "0" })).success).toBe(true);
+    expect(skema.safeParse(denganBarang({ hargaBeli: "0", satuan: "" })).success).toBe(true);
     for (const hargaBeli of ["1500.5", "1,5", "-1", ""]) {
       expect(skema.safeParse(denganBarang({ hargaBeli })).success, hargaBeli).toBe(false);
     }
@@ -154,7 +154,7 @@ describe("isianAwalCatat, subtotalBaris, dan totalIsian", () => {
 
   it("menghitung subtotal baris sah, dan null selama belum sah", () => {
     expect(subtotalBaris(isian.items[0])).toBe(150000);
-    expect(subtotalBaris({ bahanBakuID: "x", jumlah: "1,5", hargaBeli: "20000" })).toBe(30000);
+    expect(subtotalBaris({ bahanBakuID: "x", jumlah: "1,5", hargaBeli: "20000", satuan: "" })).toBe(30000);
     expect(subtotalBaris(barisBarangKosong())).toBeNull();
   });
 
@@ -182,6 +182,13 @@ describe("payloadBuatPembelian", () => {
     expect(payloadBuatPembelian(lampau, "lok", true, HARI_INI).tanggal).toBe("2026-10-20");
     expect(payloadBuatPembelian(lampau, "lok", false, HARI_INI)).not.toHaveProperty("tanggal");
     expect(payloadBuatPembelian(isian, "lok", true, HARI_INI)).not.toHaveProperty("tanggal");
+  });
+
+  it("satuan kemasan hanya dikirim bila dipilih; jumlahDasar tidak dikirim (B361)", () => {
+    const kaleng = { ...isian, items: [{ bahanBakuID: "skm", jumlah: "22", hargaBeli: "12000", satuan: "kaleng" }] };
+    expect(payloadBuatPembelian(kaleng, "lok", false, HARI_INI).items).toEqual([
+      { bahanBakuID: "skm", jumlah: 22, hargaBeli: 12000, satuan: "kaleng" },
+    ]);
   });
 
   it("nomor faktur yang diisi dikirim terpangkas", () => {

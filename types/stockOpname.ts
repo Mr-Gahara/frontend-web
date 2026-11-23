@@ -32,6 +32,8 @@ export interface StockOpnameItem {
   varianceSnapshot: number | null;
   adaSelisih: boolean;
   catatanItem: string | null;
+  /** Hitungan fisik per satuan yang dijumlah server ke qtyPhysical (B366); [] bila qtyPhysical dikirim langsung. */
+  rincianFisik?: { satuan: string; jumlah: number }[];
 }
 
 export interface StockOpname {

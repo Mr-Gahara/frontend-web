@@ -8,6 +8,10 @@ import type { TransferStok } from "@/types/transferStok";
 import { pesanError } from "@/lib/api/error";
 import { useRevisiSuratJalan, useTransferStok } from "./hooks";
 import { susunPayloadRevisi } from "./payload";
+import { useDaftarBahanBaku } from "@/features/bahan-baku/hooks";
+import { PilihSatuan } from "@/features/bahan-baku/pilih-satuan";
+import { IZIN } from "@/lib/auth/permissions";
+import { useSession } from "@/lib/auth/useSession";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,8 +30,11 @@ type EditItem = {
   id_lokal: string;
   bahanBakuID: string;
   namaBahan: string;
+  /** Satuan dasar bahan. */
   satuan: string;
   qtyKirim: string;
+  /** Satuan qtyKirim yang dipilih (B365); satuan dasar tidak dikirim. */
+  satuanKirim: string;
 };
 
 /**
@@ -104,9 +111,14 @@ function FormRevisiTransfer({ detail, urlSuratJalan }: { detail: TransferStok; u
       bahanBakuID: item.bahanBaku?.id || "",
       namaBahan: item.bahanBaku?.namaBahan || "Item Tidak Dikenal",
       satuan: item.bahanBaku?.satuan || "",
-      qtyKirim: String(item.qtyKirim),
+      // Masukan pengirim (misalnya 2 kaleng) bila ada, bukan jumlah satuan dasar.
+      qtyKirim: String(item.satuanMasukan && item.qtyKirimMasukan != null ? item.qtyKirimMasukan : item.qtyKirim),
+      satuanKirim: item.satuanMasukan ?? item.bahanBaku?.satuan ?? "",
     })),
   );
+  // Kemasan bahan untuk pilihan satuan kirim (B365); tanpa read-bahan hanya satuan dasar.
+  const { permissions } = useSession();
+  const bahanList = useDaftarBahanBaku(permissions.includes(IZIN.bahan)).data ?? [];
 
   // --- Mutations ---
   // Invalidasi ada di hook (akar transfer).
@@ -123,7 +135,9 @@ function FormRevisiTransfer({ detail, urlSuratJalan }: { detail: TransferStok; u
   });
 
   const simpan = () => {
-    const hasil = susunPayloadRevisi(items);
+    const hasil = susunPayloadRevisi(
+      items.map((i) => ({ ...i, satuan: i.satuanKirim && i.satuanKirim !== i.satuan ? i.satuanKirim : undefined })),
+    );
     if (!hasil.ok) {
       toast.error("Gagal Memperbarui", { description: hasil.pesan });
       return;
@@ -193,7 +207,16 @@ function FormRevisiTransfer({ detail, urlSuratJalan }: { detail: TransferStok; u
                     onChange={(e) => handleQtyChange(row.original.id_lokal, e.target.value)}
                     className="w-24 bg-white border-navy/20 text-navy font-mono font-bold text-right no-spinner"
                   />
-                  <span className="text-kecil font-bold text-navy/50 w-8">{row.original.satuan}</span>
+                  <PilihSatuan
+                    id={`revisi-satuan-${row.original.id_lokal}`}
+                    label={`Satuan kirim ${row.original.namaBahan}`}
+                    bahan={bahanList.find((b) => b.id === row.original.bahanBakuID) ?? (row.original.satuan ? { satuan: row.original.satuan } : null)}
+                    value={row.original.satuanKirim}
+                    onChange={(satuan) =>
+                      setItems((prev) => prev.map((i) => (i.id_lokal === row.original.id_lokal ? { ...i, satuanKirim: satuan } : i)))
+                    }
+                    className="w-36"
+                  />
                 </div>
               ),
             },

@@ -2,6 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { KotakCari } from "@/components/filter/bilah-filter";
+import { DialogUnduhBulan } from "@/components/unduh/dialog-unduh-bulan";
+import { EP } from "@/lib/api/endpoints";
+import { paramEkspor, unduhDaftar } from "@/lib/unduh";
+import { rincianKemasan, teksStokDasar } from "@/features/inventaris/stok-terbaca";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
 import { PILIHAN_UKURAN_STOK, paramHalamanInventory } from "@/features/inventaris/cakupan";
@@ -213,9 +217,19 @@ export default function GudangInventoryPage() {
                 row.original.isStokKritis ? "bg-rose-50 text-rose-600" : "bg-navy/5 text-navy",
               )}
             >
-              {row.original.stok}{" "}
-              <span className="text-kecil font-sans font-bold opacity-70">{row.original.item?.satuan || ""}</span>
+              {rincianKemasan(row.original.stokTerbaca, row.original.item?.satuan) ?? (
+                <>
+                  {row.original.stok}{" "}
+                  <span className="text-kecil font-sans font-bold opacity-70">{row.original.item?.satuan || ""}</span>
+                </>
+              )}
             </span>
+            {/* Bahan berkemasan: angka satuan dasar di bawah rincian (B362). */}
+            {rincianKemasan(row.original.stokTerbaca, row.original.item?.satuan) && (
+              <span className="text-kecil font-medium text-navy/60">
+                {teksStokDasar(row.original.stok, row.original.item?.satuan)}
+              </span>
+            )}
             {row.original.isStokKritis && (
               <Badge variant="outline" className="text-mikro bg-rose-100 text-rose-700 border-none shadow-sm px-1.5 py-0">
                 Stok Kritis
@@ -292,6 +306,35 @@ export default function GudangInventoryPage() {
           >
             <Plus className="h-4 w-4" /> Masukkan Master Data
           </Button>
+          {/* Ekspor stok gudang saat ini sebagai potret, tanpa bulan (B354, P85). */}
+          {gudangId && (
+            <DialogUnduhBulan
+              namaData="stok gudang saat ini"
+              tanpaBulan
+              filterAktif={[
+                ...(debouncedSearch.trim() ? [`Nama barang: ${debouncedSearch.trim()}`] : []),
+                ...(filterTab === "CRITICAL" ? ["Hanya stok kritis"] : []),
+              ]}
+              unduh={({ format }) =>
+                unduhDaftar(
+                  EP.inventory.list,
+                  {
+                    ...paramEkspor(
+                      paramHalamanInventory({
+                        locationID: gudangId,
+                        cari: debouncedSearch,
+                        kritis: filterTab === "CRITICAL",
+                        halaman,
+                        ukuran,
+                      }),
+                    ),
+                    format,
+                  },
+                  `stok-gudang.${format}`,
+                )
+              }
+            />
+          )}
         </div>
       </div>
 

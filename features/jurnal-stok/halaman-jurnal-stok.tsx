@@ -12,10 +12,14 @@ import {
   jumlahFilterJurnal,
   opsiAlasanJurnal,
   periodeAwalJurnal,
+  paramHalamanJurnal,
   pilFilterJurnal,
   type FilterPanelJurnal,
 } from "./filter";
 import { BilahFilter } from "@/components/filter/bilah-filter";
+import { DialogUnduhBulan } from "@/components/unduh/dialog-unduh-bulan";
+import { EP } from "@/lib/api/endpoints";
+import { labelFilterEkspor, paramEkspor, unduhDaftar } from "@/lib/unduh";
 import { KelompokFilter, PanelFilter, PilihanPeriode, PilihanPil, PilihanSegmen } from "@/components/filter/panel-filter";
 import { usePanelFilter } from "@/hooks/use-panel-filter";
 import { useTanggalHariIni } from "@/hooks/use-hari-ini";
@@ -233,12 +237,37 @@ export default function HalamanJurnalStok({
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:px-4 sm:py-8">
       {/* HEADER */}
-      <div className="space-y-1.5">
-        <h1 className="text-judul font-bold tracking-tight text-navy flex items-center gap-2">
-          <BookOpen className="w-8 h-8 text-karamel" />
-          Buku Jurnal Stok
-        </h1>
-        <p className="text-isi font-medium text-navy/60">{deskripsi}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <h1 className="text-judul font-bold tracking-tight text-navy flex items-center gap-2">
+            <BookOpen className="w-8 h-8 text-karamel" />
+            Buku Jurnal Stok
+          </h1>
+          <p className="text-isi font-medium text-navy/60">{deskripsi}</p>
+        </div>
+        {/* Ekspor jurnal stok satu bulan dengan filter yang sama (B355, P85). */}
+        {lokasiID && (
+          <DialogUnduhBulan
+            namaData="jurnal stok"
+            filterAktif={labelFilterEkspor(pilFilterJurnal(filter, bawaan, teks.labelTransfer, hariIni, terapkanFilter), {
+              label: "Nama bahan",
+              nilai: cariTertunda,
+            })}
+            unduh={({ format, bulan }) =>
+              unduhDaftar(
+                EP.jurnalStok,
+                {
+                  ...paramEkspor(
+                    paramHalamanJurnal({ lokasiID, arah, alasan, dari: periode.dari, sampai: periode.sampai, cari: cariTertunda }, 1, 1),
+                  ),
+                  format,
+                  bulan: bulan!,
+                },
+                `jurnal-stok_${bulan}.${format}`,
+              )
+            }
+          />
+        )}
       </div>
 
       {pemilihLokasi}

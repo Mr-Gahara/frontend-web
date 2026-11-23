@@ -45,6 +45,8 @@ export const skemaBarangPembelian = z.object({
     (v): boolean => Number.isFinite(hargaDariTeks(v)),
     "Harga beli harus bilangan bulat, boleh 0.",
   ),
+  /** Satuan masukan (B361): kosong berarti satuan dasar bahan; harga per satuan ini. */
+  satuan: z.string(),
 });
 
 export type IsianBarangPembelian = z.infer<typeof skemaBarangPembelian>;

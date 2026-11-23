@@ -4,6 +4,7 @@ import { AlertTriangle } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import type { PengajuanItem } from "@/types/pengajuanStok";
+import { teksJumlahBersatuan } from "@/features/bahan-baku/satuan";
 
 const kolomNama: ColumnDef<PengajuanItem> = {
   id: "barang",
@@ -15,13 +16,19 @@ const jumlah = (judul: string): ColumnDef<PengajuanItem> => ({
   id: "jumlah",
   header: () => <div className="text-center">{judul}</div>,
   meta: { label: judul },
-  cell: ({ row }) => (
-    <div className="sm:text-center">
-      <span className="font-mono font-bold text-navy bg-navy/5 px-3 py-1 rounded-md">
-        {row.original.jumlah} <span className="text-kecil font-sans font-medium text-navy/60">{row.original.satuan}</span>
-      </span>
-    </div>
-  ),
+  cell: ({ row }) => {
+    // Masukan pengaju (2 kaleng) di atas, jumlah satuan dasar di bawahnya (B364).
+    const teks = teksJumlahBersatuan(row.original.jumlah, row.original.satuan, {
+      jumlah: row.original.jumlahMasukan,
+      satuan: row.original.satuanMasukan,
+    });
+    return (
+      <div className="flex flex-col items-start gap-1 sm:items-center">
+        <span className="font-mono font-bold text-navy bg-navy/5 px-3 py-1 rounded-md">{teks.utama}</span>
+        {teks.dasar && <span className="text-kecil font-medium text-navy/60">{teks.dasar}</span>}
+      </div>
+    );
+  },
 });
 
 /**

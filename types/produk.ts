@@ -1,7 +1,8 @@
 export interface ResepItem {
   bahanBakuID: string;
   jumlah: number;
-  satuan: "gram" | "ml" | "pcs" | "kg" | "liter" | "pak" | "unit";
+  /** Satuan bawaan atau kemasan bahan, misalnya "kaleng" (backend P87, B360). */
+  satuan: string;
 }
 
 /** Pajak yang melekat pada produk, hasil lookup di produkService. */

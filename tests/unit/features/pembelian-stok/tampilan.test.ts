@@ -61,6 +61,9 @@ describe("nama dan ringkasan barang", () => {
   it("jumlah memakai koma desimal dan satuan bahan, tanpa satuan bila bahan terhapus", () => {
     expect(teksJumlahItem(gula)).toBe("1,5 kg");
     expect(teksJumlahItem({ ...gula, jumlah: 10 })).toBe("10 kg");
+    // Pembelian per kemasan menyebut jumlah dasarnya (B361); pembelian lama satuan null.
+    expect(teksJumlahItem({ ...gula, jumlah: 2, satuan: "sak", jumlahDasar: 50 })).toBe("2 sak (50 kg)");
+    expect(teksJumlahItem({ ...gula, satuan: null, jumlahDasar: null })).toBe("1,5 kg");
     expect(teksJumlahItem(terhapus)).toBe("2");
   });
 });

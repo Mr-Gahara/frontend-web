@@ -6,6 +6,9 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, Plus, Receipt } from "lucide-react";
 
 import { BilahFilter } from "@/components/filter/bilah-filter";
+import { DialogUnduhBulan } from "@/components/unduh/dialog-unduh-bulan";
+import { EP } from "@/lib/api/endpoints";
+import { labelFilterEkspor, paramEkspor, unduhDaftar } from "@/lib/unduh";
 import { KelompokFilter, PanelFilter, PilihDaftar, PilihanPeriode, PilihanSegmen } from "@/components/filter/panel-filter";
 import { usePanelFilter } from "@/hooks/use-panel-filter";
 import { useTanggalHariIni } from "@/hooks/use-hari-ini";
@@ -36,6 +39,7 @@ import {
   URL_CATAT_BEBAN,
   jumlahFilterBeban,
   namaKategoriBeban,
+  filterServerBeban,
   pilFilterBeban,
   type FilterBeban,
 } from "./payload";
@@ -163,17 +167,31 @@ export function HalamanPengeluaran() {
             </p>
           </div>
         </div>
-        {bolehCatat && (
-          <Button
-            asChild
-            size="aksi"
-            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
-          >
-            <Link href={URL_CATAT_BEBAN}>
-              <Plus className="h-4 w-4" /> Catat Beban
-            </Link>
-          </Button>
-        )}
+        <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row">
+          {/* Ekspor pengeluaran per bulan, TOTAL tanpa VOID (B351, P85). */}
+          <DialogUnduhBulan
+            namaData="pengeluaran"
+            filterAktif={labelFilterEkspor(pilFilterBeban(filter, namaFilter, hariIni, ubahFilter))}
+            unduh={({ format, bulan }) =>
+              unduhDaftar(
+                EP.bebanOperasional.list,
+                { ...paramEkspor(filterServerBeban(filter)), format, bulan: bulan! },
+                `pengeluaran_${bulan}.${format}`,
+              )
+            }
+          />
+          {bolehCatat && (
+            <Button
+              asChild
+              size="aksi"
+              className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
+            >
+              <Link href={URL_CATAT_BEBAN}>
+                <Plus className="h-4 w-4" /> Catat Beban
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       <BilahFilter

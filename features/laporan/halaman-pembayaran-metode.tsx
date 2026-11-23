@@ -9,6 +9,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { formatRupiah } from "@/lib/format";
 import { usePembayaranPerMetode } from "./hooks";
+import { laporanApi } from "./api";
+import type { RentangLaporan } from "./periode";
+import { TombolUnduhLaporan } from "@/components/unduh/tombol-unduh-laporan";
 import {
   LABEL_PILIHAN_PERIODE,
   busurCincin,
@@ -55,8 +58,10 @@ const KOLOM: ColumnDef<BarisMetode>[] = [
 
 /**
  * Laman Pembayaran per Metode (desain B, OM2a; pemilik proyek, 17 November
- * 2026): uang diterima per metode pembayaran dari ringkasan laba rugi (B329),
- * termasuk pajak; bukan pembagian omzet.
+ * 2026): uang diterima per metode pembayaran dari GET
+ * /laporan/pembayaran-per-metode (B353; sebelumnya ringkasan laba rugi,
+ * B329), termasuk pajak; bukan pembagian omzet. Dapat diunduh PDF, Excel,
+ * atau CSV untuk rentang yang tampil (pemilik proyek, 23 November 2026).
  */
 export function HalamanPembayaranMetode() {
   const hariIni = useTanggalHariIni();
@@ -82,7 +87,7 @@ export function HalamanPembayaranMetode() {
         aria-labelledby="judul-pembayaran-metode"
         className="bg-krem border border-navy/10 rounded-2xl p-4 sm:p-6 text-navy shadow-sm flex flex-col w-full gap-6 overflow-hidden"
       >
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col md:flex-row md:flex-wrap justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-karamel rounded-lg shadow-sm shrink-0">
               <CreditCard className="w-5 h-5 text-gading" aria-hidden="true" />
@@ -113,6 +118,10 @@ export function HalamanPembayaranMetode() {
               </button>
             ))}
           </div>
+          <TombolUnduhLaporan
+            disabled={!rentang}
+            unduh={(format) => laporanApi.unduhPembayaranPerMetode(rentang as RentangLaporan, format)}
+          />
         </div>
 
         {pilihan === "tanggal" && (

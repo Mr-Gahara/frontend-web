@@ -9,6 +9,8 @@ import {
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLabaRugi } from "@/features/laporan/hooks";
+import { laporanApi } from "@/features/laporan/api";
+import { TombolUnduhLaporan } from "@/components/unduh/tombol-unduh-laporan";
 import {
   jumlahkan,
   persentasePertumbuhan,
@@ -93,7 +95,7 @@ export default function RingkasanLabaRugiPage() {
       {/* Chart card */}
       <div className="bg-krem border border-navy/10 rounded-2xl p-5 sm:p-6 text-navy shadow-sm flex flex-col w-full gap-6 overflow-hidden">
         {/* Toolbar chart */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col md:flex-row md:flex-wrap justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-karamel rounded-lg shadow-sm shrink-0">
               <LineChartIcon className="w-5 h-5 text-gading" />
@@ -127,6 +129,8 @@ export default function RingkasanLabaRugiPage() {
               Bulanan
             </PeriodeToggle>
           </div>
+          {/* Unduh laba rugi periode yang tampil (P85; pemilik proyek, 23 November 2026). */}
+          <TombolUnduhLaporan unduh={(format) => laporanApi.unduhLabaRugi(rentang, format)} />
         </div>
 
         {/* LOADING & ERROR STATES */}

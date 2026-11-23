@@ -13,6 +13,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { BilahFilter } from "@/components/filter/bilah-filter";
+import { DialogUnduhBulan } from "@/components/unduh/dialog-unduh-bulan";
+import { EP } from "@/lib/api/endpoints";
+import { labelFilterEkspor, paramEkspor, unduhDaftar } from "@/lib/unduh";
 import { KelompokFilter, PanelFilter, PilihDaftar, PilihanPeriode, PilihanPil, PilihanSegmen } from "@/components/filter/panel-filter";
 import { usePanelFilter } from "@/hooks/use-panel-filter";
 import { useTanggalHariIni } from "@/hooks/use-hari-ini";
@@ -27,6 +30,7 @@ import {
   PILIHAN_UKURAN_MUTASI,
   UKURAN_MUTASI_BAWAAN,
   filterAwalMutasi,
+  filterServerMutasi,
   gantiArah,
   jumlahFilterMutasi,
   namaAkunBaris,
@@ -181,13 +185,23 @@ export function HalamanMutasi() {
         onTutup={() => setDirinci(null)}
       />
       <div className="flex flex-col gap-6 w-full">
-        <div>
-          <h2 className="text-subjudul font-bold tracking-wide text-navy">
-            Laporan Mutasi Kas
-          </h2>
-          <p className="text-isi font-medium text-navy/60 mt-1">
-            Setiap perubahan saldo akun kas, terbaru dicatat lebih dulu.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-subjudul font-bold tracking-wide text-navy">
+              Laporan Mutasi Kas
+            </h2>
+            <p className="text-isi font-medium text-navy/60 mt-1">
+              Setiap perubahan saldo akun kas, terbaru dicatat lebih dulu.
+            </p>
+          </div>
+          {/* Ekspor buku gabungan per bulan, Masuk dan Keluar terpisah (B350, P85). */}
+          <DialogUnduhBulan
+            namaData="mutasi kas"
+            filterAktif={labelFilterEkspor(pilFilterMutasi(filter, bawaan, akunKas.data, hariIni, ubahFilter))}
+            unduh={({ format, bulan }) =>
+              unduhDaftar(EP.akunKasMutasi, { ...paramEkspor(filterServerMutasi(filter)), format, bulan: bulan! }, `mutasi-kas_${bulan}.${format}`)
+            }
+          />
         </div>
 
         <BilahFilter

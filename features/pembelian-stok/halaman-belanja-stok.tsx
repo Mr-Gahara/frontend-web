@@ -2,6 +2,9 @@
 
 import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { DialogUnduhBulan } from "@/components/unduh/dialog-unduh-bulan";
+import { EP } from "@/lib/api/endpoints";
+import { labelFilterEkspor, paramEkspor, unduhDaftar } from "@/lib/unduh";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpRight } from "lucide-react";
 
@@ -349,7 +352,24 @@ export function HalamanBelanjaStok() {
               Pembelian stok seluruh outlet dan gudang dalam satu pandangan.
             </p>
           </div>
-          <TombolCatatBelanja ruang={ruangCatat} />
+          <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row">
+            {/* Ekspor per bulan, satu baris per item bahan (B352, P85). */}
+            <DialogUnduhBulan
+              namaData="belanja stok"
+              filterAktif={labelFilterEkspor(pilFilterPembelian(isianPanel, bawaanPanel, namaFilter, hariIni, terapkanPanel), {
+                label: "Supplier",
+                nilai: cariTertunda,
+              })}
+              unduh={({ format, bulan }) =>
+                unduhDaftar(
+                  EP.pembelianStok.list,
+                  { ...paramEkspor(filterServer), format, bulan: bulan! },
+                  `belanja-stok_${bulan}.${format}`,
+                )
+              }
+            />
+            <TombolCatatBelanja ruang={ruangCatat} />
+          </div>
         </div>
 
         <BilahFilter

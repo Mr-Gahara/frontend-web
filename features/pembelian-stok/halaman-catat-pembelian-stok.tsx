@@ -44,6 +44,7 @@ import {
 } from "./payload";
 import { URL_PEMBELIAN, urlDetailPembelian } from "./ruang";
 import { buatSkemaCatatPembelian, type IsianCatatPembelian } from "./schema";
+import { PilihSatuan } from "@/features/bahan-baku/pilih-satuan";
 
 const KELAS_ISIAN =
   "bg-gading border-navy/20 text-navy placeholder:text-navy/30 focus-visible:ring-1 focus-visible:ring-navy";
@@ -357,12 +358,15 @@ function FormCatatPembelian({
               <Plus className="h-4 w-4" /> Tambah Barang
             </Button>
           </div>
-          <p className="text-kecil font-medium text-navy/60">Jumlah dalam satuan bahan di master, minimal 1.</p>
+          <p className="text-kecil font-medium text-navy/60">
+            Jumlah dalam satuan yang dipilih, minimal 1; harga per satuan itu. Stok bertambah dalam satuan dasar bahan.
+          </p>
 
           <div className="space-y-3">
             {fields.map((baris, index) => {
               const isianBaris = items[index] ?? barisBarangKosong();
-              const satuan = bahanList.find((b) => b.id === isianBaris.bahanBakuID)?.satuan;
+              const bahanBaris = bahanList.find((b) => b.id === isianBaris.bahanBakuID);
+              const satuan = isianBaris.satuan || bahanBaris?.satuan;
               const subtotal = subtotalBaris(isianBaris);
               const galat = errors.items?.[index];
               const nomor = index + 1;
@@ -379,7 +383,15 @@ function FormCatatPembelian({
                       control={control}
                       name={`items.${index}.bahanBakuID`}
                       render={({ field }) => (
-                        <Select value={field.value} onValueChange={field.onChange} disabled={memuat}>
+                        <Select
+                          value={field.value}
+                          onValueChange={(v) => {
+                            field.onChange(v);
+                            // Satuan kembali ke satuan dasar bahan baru (B361).
+                            setValue(`items.${index}.satuan`, "");
+                          }}
+                          disabled={memuat}
+                        >
                           <SelectTrigger
                             id={`pembelian-bahan-${index}`}
                             className={cn(
@@ -422,8 +434,27 @@ function FormCatatPembelian({
                   </div>
 
                   <div className="w-full sm:w-40 space-y-1.5">
+                    <label htmlFor={`pembelian-satuan-${index}`} className={KELAS_LABEL_BARIS}>
+                      Satuan<span className="sr-only"> baris {nomor}</span>
+                    </label>
+                    <Controller
+                      control={control}
+                      name={`items.${index}.satuan`}
+                      render={({ field }) => (
+                        <PilihSatuan
+                          id={`pembelian-satuan-${index}`}
+                          bahan={bahanBaris}
+                          value={field.value}
+                          onChange={field.onChange}
+                          disabled={memuat}
+                        />
+                      )}
+                    />
+                  </div>
+
+                  <div className="w-full sm:w-40 space-y-1.5">
                     <label htmlFor={`pembelian-harga-${index}`} className={KELAS_LABEL_BARIS}>
-                      Harga per satuan (Rp)<span className="sr-only"> baris {nomor}</span>
+                      Harga per {satuan ?? "satuan"} (Rp)<span className="sr-only"> baris {nomor}</span>
                     </label>
                     <Input
                       id={`pembelian-harga-${index}`}

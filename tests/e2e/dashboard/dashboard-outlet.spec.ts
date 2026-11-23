@@ -33,36 +33,25 @@ const panel = (page: Page, nama: string) => page.getByRole("region", { name: nam
 
 type StafMonitoring = { penggunaID: string };
 
-/** Membuka dashboard dan mengembalikan staf ruang outlet menurut kedua respons halaman. */
 /**
  * Membuka dashboard dan mengembalikan jumlah baris staf yang diharapkan:
  * staf monitoring, yang disaring server menurut lokasi outlet (B183,
- * locationID harus lokasi aktif), ditambah karyawan ruang outlet yang izin
- * hari ini tetapi tidak dimuat monitoring.
+ * locationID harus lokasi aktif), termasuk staf tanpa lokasi kerja yang
+ * izin hari ini (B348); web tidak lagi menambah baris sendiri.
  */
 async function bukaDanBacaStaf(page: Page): Promise<number> {
   await page.goto(URL_DASHBOARD, { waitUntil: "commit" });
-  const [rMonitoring, rLokasi, rIzin, rPengguna] = await Promise.all([
+  const [rMonitoring, rLokasi] = await Promise.all([
     page.waitForResponse((r) => get(r, /\/api\/absensi\/monitoring$/i)),
     page.waitForResponse((r) => get(r, /\/api\/location\/current$/i)),
-    page.waitForResponse((r) => get(r, /\/api\/izincuti$/i)),
-    page.waitForResponse((r) => get(r, /\/api\/pengguna$/i)),
   ]);
   expect(rMonitoring.status(), "monitoring absensi").toBe(200);
-  expect(rIzin.status(), "izin cuti").toBe(200);
-  expect(rPengguna.status(), "daftar pengguna").toBe(200);
   const lokasi = await isi<{ id?: string; _id?: string }>(rLokasi);
   expect(param(rMonitoring, "locationID"), "monitoring per lokasi outlet (B183)").toBe(
     String(lokasi.id ?? lokasi._id),
   );
   const monitoring = await isi<{ daftar: StafMonitoring[] }>(rMonitoring);
-  const dimuat = new Set(monitoring.daftar.map((m) => String(m.penggunaID)));
-  const ruang = new Set((await isi<{ id: string }[]>(rPengguna)).map((p) => String(p.id)));
-  const izin = await isi<{ pengguna: { id: string } | null }[]>(rIzin);
-  const tambahan = new Set(
-    izin.map((i) => String(i.pengguna?.id ?? "")).filter((id) => ruang.has(id) && !dimuat.has(id)),
-  );
-  return monitoring.daftar.length + tambahan.size;
+  return monitoring.daftar.length;
 }
 
 test.describe("Dashboard outlet", () => {
@@ -188,11 +177,13 @@ test.describe("Dashboard outlet", () => {
       expect(keTanggalLokal(new Date(izin.tanggalSelesai)) >= hari).toBe(true);
     }
 
-    // Backend menjadikan jadwal staf yang izin sebagai libur tanpa shift,
-    // sehingga monitoring per lokasi (B183) tidak memuatnya; baris Izin
-    // datang dari karyawan ruang outlet menurut peran.
+    // Staf uji tanpa lokasi kerja yang perannya memegang read-dashboard-outlet:
+    // monitoring per lokasi memuatnya sebagai belum absen (B348, butir 187),
+    // dan web menampilkannya sebagai Izin dari izin cuti hari itu.
     const monitoring = await isi<{ daftar: StafMonitoring[] }>(rMonitoring);
-    expect(monitoring.daftar.map((m) => String(m.penggunaID))).not.toContain(fx.idStaf);
+    expect(monitoring.daftar.map((m) => String(m.penggunaID)), "staf izin dimuat monitoring (B348)").toContain(
+      fx.idStaf,
+    );
     const baris = panel(page, "Status Staf").getByRole("row").filter({ hasText: NAMA_STAF_IZIN });
     await expect(baris).toContainText("Izin", { timeout: 15_000 });
   });

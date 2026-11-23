@@ -7,8 +7,6 @@ export const IZIN_BOOKING = {
   ubah: IZIN.ubahBooking,
 } as const;
 
-export const bolehBacaBooking = (permissions: readonly string[]) => permissions.includes(IZIN_BOOKING.baca);
-
 /**
  * Booking boleh ditandai Selesai lebih awal (keputusan NZ7a): hanya booking
  * Aktif yang sudah dibayar dan jamnya belum lewat, bagi pemegang

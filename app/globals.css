@@ -166,6 +166,8 @@ input.no-spinner[type="number"] {
   --rose-terang: #F9536E;
   --abu-teks: #5F5F5F;
   --rose-lama: #F43F5E;
+  /* Merah redup angka Tidak hadir Rekap Absensi (pemilik proyek, 23 November 2026, desain D). */
+  --rose-redup: #B4475A;
   /* PALET DASAR */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -239,6 +241,7 @@ input.no-spinner[type="number"] {
   --color-rose-terang: var(--rose-terang);
   --color-abu-teks: var(--abu-teks);
   --color-rose-lama: var(--rose-lama);
+  --color-rose-redup: var(--rose-redup);
   /* Skala tipografi tujuh tingkat (pemilik proyek, 14 November 2026, CV24a).
      Tinggi baris sama dengan ukuran Tailwind setara. Judul dan subjudul tanpa
      ketebalan bawaan; h1 dan h2 menulis font-bold sendiri (CV26a). Ketebalan

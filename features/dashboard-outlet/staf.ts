@@ -37,26 +37,16 @@ const STATUS_DARI_TIPE: Record<TipeIzinCuti, StatusStafDashboard> = {
 };
 
 /**
- * Satu baris per staf monitoring, ditambah staf ruang yang izin hari itu.
- * izinCuti sudah disaring server: disetujui dan berlaku pada hari itu
- * (B160, useIzinCutiHari). Kehadiran nyata menang: izin atau cuti hanya
- * menggantikan status belum absen.
+ * Satu baris per staf monitoring. izinCuti sudah disaring server: disetujui
+ * dan berlaku pada hari itu (B160, useIzinCutiHari). Kehadiran nyata menang:
+ * izin atau cuti hanya menggantikan status belum absen.
  *
- * Monitoring per lokasi (B183) hanya memuat staf yang jadwalnya ber-shift
- * di lokasi itu, sedangkan backend menjadikan jadwal staf yang izin
- * disetujui sebagai libur tanpa shift. Karena itu staf yang izin dan
- * termasuk karyawan ruang menurut peran (karyawanRuang, id ke nama)
- * ditambahkan sebagai baris tersendiri (pemilik proyek, 31 Oktober 2026).
- * Sejak backend 916e7df (B278, butir 165) monitoring juga memuat staf yang
- * lokasi kerjanya lokasi itu, termasuk yang izin, sebagai belum absen;
- * tambahan ini tetap dibutuhkan bagi staf tanpa lokasi kerja, dan staf
- * yang sudah termuat tidak ditambahkan dua kali.
+ * Sejak backend B348 (P84, butir 187) monitoring per lokasi juga memuat
+ * staf tanpa lokasi kerja yang izin atau cuti hari itu, bila perannya
+ * memegang izin dashboard ruang itu, sebagai belum absen. Tambahan web dari
+ * karyawan ruang menurut peran (31 Oktober 2026, butir 165) dibuang.
  */
-export function gabungStatusStaf(
-  daftar: MonitoringStaf[],
-  izinCuti: IzinCuti[],
-  karyawanRuang: ReadonlyMap<string, string>,
-): BarisStaf[] {
+export function gabungStatusStaf(daftar: MonitoringStaf[], izinCuti: IzinCuti[]): BarisStaf[] {
   const izinPerStaf = new Map<string, StatusStafDashboard>();
   for (const izin of izinCuti) {
     const id = izin.pengguna?.id;
@@ -64,7 +54,7 @@ export function gabungStatusStaf(
     if (!id || !status || izinPerStaf.has(id)) continue;
     izinPerStaf.set(id, status);
   }
-  const baris: BarisStaf[] = daftar.map((staf) => ({
+  return daftar.map((staf) => ({
     penggunaID: staf.penggunaID,
     nama: staf.nama,
     status:
@@ -73,10 +63,4 @@ export function gabungStatusStaf(
         : staf.status,
     keterangan: staf.status === "belum_absen" ? null : keteranganKedatangan(staf.sesiTerakhir),
   }));
-  const dimuat = new Set(daftar.map((staf) => String(staf.penggunaID)));
-  for (const [id, status] of izinPerStaf) {
-    const nama = karyawanRuang.get(id);
-    if (nama !== undefined && !dimuat.has(id)) baris.push({ penggunaID: id, nama, status, keterangan: null });
-  }
-  return baris;
 }

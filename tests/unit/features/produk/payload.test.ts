@@ -78,13 +78,13 @@ describe("susunPayloadProduk: locationID (backend yoga)", () => {
 });
 
 describe("skemaProduk", () => {
-  it("menolak satuan resep yang tidak diterima backend", () => {
+  it("menolak satuan resep kosong; kecocokan satuan dengan bahannya diperiksa buatSkemaProduk (B360)", () => {
     const hasil = skemaProduk.safeParse({
       ...dasar,
-      resep: [{ bahanBakuID: "b1", jumlah: 1, satuan: "lusin" }],
+      resep: [{ bahanBakuID: "b1", jumlah: 1, satuan: " " }],
     });
     expect(hasil.success).toBe(false);
-    expect(hasil.error?.issues[0]?.message).toMatch(/satuan tidak didukung/i);
+    expect(hasil.error?.issues[0]?.message).toMatch(/satuan wajib dipilih/i);
   });
 
   it("menerima satuan resep yang didukung", () => {

@@ -23,6 +23,7 @@ import {
   Scale,
   Archive,
   CalendarDays,
+  CalendarCheck2,
   CalendarRange,
   Clock,
   ShoppingCart,
@@ -257,6 +258,12 @@ export const outletMenus: MenuGroup[] = [
         label: "Master Shift",
         href: "/dashboard/outlet/shift",
         icon: Clock,
+      },
+      {
+        // Rekap bulanan per staf (B358; pemilik proyek, 23 November 2026, desain D).
+        label: "Rekap Absensi",
+        href: "/dashboard/outlet/rekap-absensi",
+        icon: CalendarCheck2,
       },
     ],
   },

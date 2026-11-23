@@ -215,6 +215,7 @@ export const EP = {
   },
   absensi: {
     monitoring: "/absensi/monitoring",
+    rekap: "/absensi/rekap",
   },
 
   izinCuti: {
@@ -224,5 +225,6 @@ export const EP = {
   laporan: {
     labaRugi: "/laporan/laba-rugi",
     arusKas: "/laporan/arus-kas",
+    pembayaranPerMetode: "/laporan/pembayaran-per-metode",
   },
 } as const;

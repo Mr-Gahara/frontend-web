@@ -14,8 +14,19 @@ export interface BahanBaku extends Entitas, Timestamps {
   tenantID: string;
   namaBahan: string;
   satuan: SatuanBahan;
-  /** Daftar satuan yang dapat dipakai pada resep, dihitung backend. */
+  /** Kemasan bahan: isi dalam satuan dasar (backend P87, B359). */
+  konversi?: KonversiSatuan[];
+  /**
+   * Satuan yang dapat dipakai resep dan masukan bersatuan: satuan dasar,
+   * turunan bawaannya (kg ke gram, liter ke ml), lalu konversi bahan.
+   */
   availableUnits?: string[];
+}
+
+/** Satu kemasan bahan, misalnya { satuan: "kaleng", isi: 290 } untuk bahan ml. */
+export interface KonversiSatuan {
+  satuan: string;
+  isi: number;
 }
 
 /**
@@ -39,6 +50,8 @@ export interface BahanBakuRequest {
    * default tenant, sehingga stok bisa mendarat di lokasi yang keliru.
    */
   locationID?: string;
+  /** Kemasan bahan (B359); PUT mengganti seluruh daftar, konversi yang dipakai resep ditolak 409. */
+  konversi?: KonversiSatuan[];
 }
 
 export interface BahanBakuComboboxProps {

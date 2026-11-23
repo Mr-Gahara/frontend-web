@@ -2,14 +2,25 @@
 
 import { useState, useMemo, type ReactNode } from "react";
 import { BilahFilter } from "@/components/filter/bilah-filter";
-import { KelompokFilter, PanelFilter, PilihanPil } from "@/components/filter/panel-filter";
+import { KelompokFilter, PanelFilter, PilihanPeriode, PilihanPil } from "@/components/filter/panel-filter";
+import { DialogUnduhBulan } from "@/components/unduh/dialog-unduh-bulan";
+import { useTanggalHariIni } from "@/hooks/use-hari-ini";
+import { EP } from "@/lib/api/endpoints";
+import { labelFilterEkspor, paramEkspor, unduhDaftar } from "@/lib/unduh";
 import { usePanelFilter } from "@/hooks/use-panel-filter";
 import { useRouter } from "next/navigation";
 import { StockOpname, StatusOpname } from "@/types/stockOpname";
 import type { LingkupLokasi } from "@/features/inventaris/cakupan";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useHalamanStockOpname } from "./hooks";
-import { OPSI_STATUS_OPNAME, PANJANG_CARI_OPNAME, paramHalamanOpname, pilFilterOpname } from "./filter";
+import {
+  OPSI_STATUS_OPNAME,
+  PANJANG_CARI_OPNAME,
+  paramHalamanOpname,
+  pilFilterOpname,
+  pilPeriodeDaftar,
+  type PeriodeDaftar,
+} from "./filter";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
@@ -95,6 +106,9 @@ export default function HalamanDaftarStockOpname({
 
   // --- STATE FILTER ---
   const [statusFilter, setStatusFilter] = useState<StatusOpname | "ALL">("ALL");
+  // Periode dibuat (B356; pemilik proyek, 23 November 2026): kosong berarti seluruhnya.
+  const [periode, setPeriode] = useState<PeriodeDaftar>({});
+  const hariIni = useTanggalHariIni();
   const [cari, setCari] = useState("");
   const cariTertunda = useDebounce(cari, 400);
   const [halaman, setHalaman] = useState(1);
@@ -102,7 +116,7 @@ export default function HalamanDaftarStockOpname({
 
   // Mengganti lingkup, status, atau pencarian kembali ke halaman 1, disesuaikan
   // saat render seperti Belanja Stok, agar halaman lama tidak sempat diminta.
-  const kunciKriteria = JSON.stringify([lingkup, statusFilter, cariTertunda]);
+  const kunciKriteria = JSON.stringify([lingkup, statusFilter, cariTertunda, periode]);
   const [kunciSebelumnya, setKunciSebelumnya] = useState(kunciKriteria);
   if (kunciSebelumnya !== kunciKriteria) {
     setKunciSebelumnya(kunciKriteria);
@@ -114,12 +128,26 @@ export default function HalamanDaftarStockOpname({
   // halaman dan total tetap benar (B106, B108, B109; keputusan rancangan butir 27).
   // Urutan mengikuti backend, terbaru dulu: mengurutkan di klien hanya
   // mengurutkan satu halaman.
-  const params = lingkup ? paramHalamanOpname(lingkup, statusFilter, cariTertunda, halaman, ukuran) : null;
+  const params = lingkup ? paramHalamanOpname(lingkup, statusFilter, cariTertunda, halaman, ukuran, periode) : null;
   const { data, isLoading: memuatOpname, isError, isFetching } = useHalamanStockOpname(params);
   const opnameList = useMemo(() => data?.data ?? [], [data]);
   const isLoading = memuatOpname || memuatLingkup;
 
-  const panel = usePanelFilter<StatusOpname | "ALL">({ terapan: statusFilter, bawaan: "ALL", onTerapkan: setStatusFilter });
+  type FilterPanelOpname = { status: StatusOpname | "ALL" } & PeriodeDaftar;
+  const terapkanPanel = (f: FilterPanelOpname) => {
+    setStatusFilter(f.status);
+    setPeriode({ dari: f.dari, sampai: f.sampai });
+  };
+  const panel = usePanelFilter<FilterPanelOpname>({
+    terapan: { status: statusFilter, ...periode },
+    bawaan: { status: "ALL" },
+    onTerapkan: terapkanPanel,
+  });
+  const jumlahAktif = (f: FilterPanelOpname) => (f.status === "ALL" ? 0 : 1) + (f.dari || f.sampai ? 1 : 0);
+  const pilAktif = [
+    ...pilFilterOpname(statusFilter, setStatusFilter),
+    ...pilPeriodeDaftar(periode, hariIni, () => setPeriode({})),
+  ];
 
   // --- COLUMNS DEFINITION ---
   const columns = useMemo<ColumnDef<StockOpname>[]>(
@@ -210,7 +238,21 @@ export default function HalamanDaftarStockOpname({
             </p>
           </div>
         </div>
-        <div className="flex w-full shrink-0 sm:w-auto">
+        <div className="flex w-full shrink-0 flex-col-reverse gap-2 sm:w-auto sm:flex-row">
+          {/* Ekspor satu baris per bahan beserta selisihnya, per bulan (B357, P85). */}
+          {lingkup && (
+            <DialogUnduhBulan
+              namaData="stock opname"
+              filterAktif={labelFilterEkspor(pilAktif, { label: "No. opname", nilai: cariTertunda })}
+              unduh={({ format, bulan }) =>
+                unduhDaftar(
+                  EP.stockOpname.list,
+                  { ...paramEkspor(paramHalamanOpname(lingkup, statusFilter, cariTertunda, 1, 1)), format, bulan: bulan! },
+                  `stock-opname_${bulan}.${format}`,
+                )
+              }
+            />
+          )}
           <Button
             onClick={() =>
               router.push(`${teks.urlDaftar}/buatStockOpname`)
@@ -235,25 +277,36 @@ export default function HalamanDaftarStockOpname({
           value: cari,
           onChange: (v) => setCari(v.slice(0, PANJANG_CARI_OPNAME)),
         }}
-        jumlahAktif={statusFilter === "ALL" ? 0 : 1}
+        jumlahAktif={jumlahAktif({ status: statusFilter, ...periode })}
         onBukaFilter={panel.buka}
         filterTerbuka={panel.terbuka}
-        pil={pilFilterOpname(statusFilter, setStatusFilter)}
-        onAturUlangSemua={() => setStatusFilter("ALL")}
+        pil={pilAktif}
+        onAturUlangSemua={() => terapkanPanel({ status: "ALL" })}
       />
       <PanelFilter
         terbuka={panel.terbuka}
         onTerbukaBerubah={panel.ubahTerbuka}
-        jumlahAktif={panel.draf === "ALL" ? 0 : 1}
+        jumlahAktif={jumlahAktif(panel.draf)}
         onTerapkan={panel.terapkan}
         onAturUlang={panel.aturUlang}
       >
         <KelompokFilter judul="Status">
           <PilihanPil
             label="Status"
-            nilai={panel.draf === "ALL" ? undefined : panel.draf}
+            nilai={panel.draf.status === "ALL" ? undefined : panel.draf.status}
             opsi={OPSI_STATUS_OPNAME}
-            onUbah={(status) => panel.setDraf(status ?? "ALL")}
+            onUbah={(status) => panel.setDraf({ ...panel.draf, status: status ?? "ALL" })}
+          />
+        </KelompokFilter>
+        <KelompokFilter judul="Periode">
+          <PilihanPeriode
+            idAwalan={`filter-opname-${ruang}`}
+            hariIni={hariIni}
+            labelDari="Dibuat dari"
+            labelSampai="Dibuat sampai"
+            batasiUrutan
+            rentang={{ dari: panel.draf.dari, sampai: panel.draf.sampai }}
+            onUbah={({ dari, sampai }) => panel.setDraf({ ...panel.draf, dari, sampai })}
           />
         </KelompokFilter>
       </PanelFilter>
