@@ -753,6 +753,17 @@ deretan tab dan kalender jadwal bergulir ke samping, nama aset timeline
 dan nama karyawan kalender dipotong "…", serta kontrol segmen periode
 (Harian, Mingguan, Bulanan) yang tombolnya berimpit.
 
+### Bug dan temuan frontend 23 November 2026
+
+Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend yang tersisa.
+
+- **BB1a: bayangan kartu baris per sel**: `box-shadow` bawah di setiap sel
+  tabel (`components/ui/table.tsx`), bukan filter pada `tr`, agar tampil
+  di semua browser; mode kartu DataTable memasang bayangan di kartunya dan
+  sel tanpa bayangan. Pembuktian di WebKit (Safari) tidak dapat dijalankan
+  di mesin ini karena pustaka sistemnya tidak ada, sehingga pemilik proyek
+  memilih mengganti tanpa menunggu bukti.
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E
@@ -1053,7 +1064,8 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
   2026 saat menerapkan CV18a). Dihapus 14 November 2026 atas keputusan
   pemilik proyek (CV19a).
 - Bayangan kartu baris memakai `filter` pada elemen `tr`. Di browser yang
-  tidak mendukungnya, kartu tampil dengan bingkai saja.
+  tidak mendukungnya, kartu tampil dengan bingkai saja. Selesai
+  23 November 2026 (BB1a).
 - Suite e2e penuh dijalankan ulang pada 16 Oktober 2026 terhadap backend
   `ridho` `7d28135` (Catatan dari penyesuaian backend `ridho` `7d28135`);
   harapan sesudahnya 456 lolos dan 13 skipped. Suite penuh terakhir

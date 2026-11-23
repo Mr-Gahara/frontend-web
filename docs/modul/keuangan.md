@@ -550,6 +550,26 @@ Diputuskan pemilik proyek 23 November 2026 (`referensi/keputusan-penyesuaian-bac
   Pembayaran per Metode mendapat Unduh laporan PDF, Excel, CSV seperti
   Arus Kas (`TombolUnduhLaporan`), dengan periode yang tampil.
 
+### Bug dan temuan frontend 23 November 2026
+
+Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend yang tersisa.
+
+- **TM1a: mutasi PEMBELIAN bertaut ke detail pembeliannya**: "Lihat
+  pembelian" di menu baris dan dialog rincian mutasi; saat diklik web
+  memuat `GET /pembelianstok/:id`, lalu membuka detail di ruang lokasi
+  penerimanya (`useBukaPembelian`, `ruangDariPembelian`). Hanya bagi
+  pemegang izin baca pembelian (umum atau ruang mana pun); pembelian yang
+  sudah dihapus memberi toast "Pembelian ini sudah dihapus.", dan mutasi
+  pembaliknya tanpa tautan.
+- **AU1a: akun kas uji tidak lagi menumpuk**: spec ubah akun, Pindah Dana,
+  dan tutup bersaldo memakai akun uji tetap bernama akhiran " Tetap"
+  (`akunUjiTetap` di `tests/helpers/akun-kas-uji.ts`) yang dipulihkan
+  setiap run; hanya skenario Buat Akun yang membuat akun baru. Skrip
+  `bersih-akunkas.js` dijalankan sesudah suite penuh dan mengecualikan akun
+  " Tetap".
+- Halaman ubah akun kas membaca `GET /akunkas/:id` yang dimuat ulang saat
+  dibuka, bukan cache daftar (tanpa keputusan baru).
+
 ## Catatan
 
 ### Catatan dari sub-menu Keuangan dan Laporan
@@ -859,7 +879,9 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   menerima `akunKasID`.
 - Tampilan halaman akun kas dan halaman ubah bagi pengguna tanpa
   `update-akunkas` belum teruji e2e (`inti/pengujian.md`), dan halaman ubah
-  membaca akun dari cache daftar tanpa `GET /akunkas/:id`.
+  membaca akun dari cache daftar tanpa `GET /akunkas/:id`. Halaman ubah
+  membaca `GET /akunkas/:id` sejak 23 November 2026, teruji
+  `keuangan/ubah-akun-kas`.
 - Label jenis mutasi saldo awal dan beban belum pernah tampil dengan data
   nyata. Tampilan mutasi transfer dan pembatalan transfer masuk teruji
   e2e sejak `f7805ca`; pembatalan transfer keluar hanya teruji di unit
@@ -883,6 +905,7 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   Ubah Status 73, Pindah Tujuan dan Pindah Sumber masing-masing 68, Tutup
   Bersaldo 64, dan seterusnya). Bukan bug tampilan; tetap utang pengujian
   (`referensi/utang-pengujian.md`, akun kas uji menumpuk).
+  Penumpukan dihentikan 23 November 2026 lewat akun uji tetap (AU1a).
 - Tab Keuangan memakai `focus-visible:ring-0`, sehingga tab tidak punya
   penanda fokus saat dipakai dengan keyboard. Dipertahankan di
   `b3f8698` karena tidak ada di pratinjau yang disetujui. Gugur di

@@ -35,25 +35,29 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (sesi berikutnya, dicatat 23 November 2026)
+### Mulai di sini (sesi berikutnya, dicatat 23 November 2026 sore)
 
-Keadaan akhir sesi 23 November 2026: backend `ridho` maju 21 commit ke
-`1718030` (22 November 2026, AR37 sampai AR44; `nizar` dan `yoga`
-tertinggal), dan web menyesuaikan seluruhnya
-(`referensi/keputusan-penyesuaian-backend.md`, Penyesuaian backend `ridho`
-`1718030`): sesi booking di detail penjualan (B347), staf izin di
-monitoring (B348), ekspor per bulan dan unduh laporan (UD1a sampai UD3a),
-kemasan bahan dan satuan masukan (KN1a sampai KN3a), dan laman Rekap
-Absensi (RK1a). Form ubah bahan baku dibetulkan (Select satuan kosong).
-Baseline di `inti/pengujian.md`; laporan pembuktian untuk tim backend
-(AR31) disampaikan di percakapan.
+Keadaan akhir sesi 23 November 2026: backend `ridho` `1718030` (tidak maju
+sejak 22 November). Dua putaran selesai hari itu:
+
+1. **Penyesuaian backend `1718030`** (`referensi/keputusan-penyesuaian-backend.md`):
+   B347, B348, ekspor dan unduh laporan (UD1a sampai UD3a), kemasan dan
+   satuan (KN1a sampai KN3a), dan Rekap Absensi (RK1a).
+2. **Bug dan temuan frontend**: tautan mutasi PEMBELIAN (TM1a), akun kas
+   uji tetap (AU1a), metode pembayaran tanpa `read-akunkas` (MP1a),
+   sebutan Kategori Aset (KA1a), satu form tarif (TF1a, beserta regresi
+   harga kosong yang dibetulkan), pesan 403 yang menyebut halaman dan izin
+   (GR9a), bayangan baris per sel (BB1a), dan halaman ubah akun kas dari
+   `GET /akunkas/:id`. Catatan logout `pin-logout` ternyata sudah selesai
+   di backend B343.
 
 Urutan kerja berikutnya, atas perintah pemilik proyek: butir daftar
 20 November 2026 dan 19 November 2026 di bawah yang belum selesai (rombak
 UI/UX laman admin, deskripsi paket laman pengenalan, revisi laman profil
 dan menu popup profil), nomor WhatsApp admin (LG1a), dan utang pengujian
 kelompok 1. **Suite e2e penuh ditunda sampai seluruh pekerjaan selesai**
-(pemilik proyek, 20 November 2026); harapannya 716.
+(pemilik proyek, 20 November 2026); harapannya 722, dan sesudahnya skrip
+`bersih-akunkas.js` (AU1a).
 
 ### Keadaan sebelum 23 November 2026
 

@@ -12,6 +12,23 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per bug dan temuan frontend** (23 November 2026 sore, backend
+`ridho` lokal `1718030`): vitest 1224 lolos dari 145 berkas (unit baru
+`lib/auth/label-izin.ts`, `syaratKurangRute`, `labelMenuRute`, tautan
+mutasi PEMBELIAN). Tanpa suite penuh dan tanpa OTP: `auth/gerbang-rute`,
+`auth/guard-dashboard`, folder `akses`, `keuangan`, `reservasi`,
+`inventaris/pembelianStok`, dan `tampilan`, spec `pengaturan` tanpa OTP,
+dan `penjualan/daftar-penjualan` dijalankan bersama: 244 lolos dan 11
+gagal dari 255. Penyebabnya: dua skenario baru tanpa login (blok
+`describe`-nya tidak login di `beforeEach`), tiga spec tarif yang masih
+mencari `input[name="harga"]` dan sekaligus menemukan regresi nyata
+(harga kosong tersimpan Rp0, `modul/reservasi.md` TF1a), lima spec tipe
+aset dengan teks lama sebelum KA1a, dan pembaca warna bayangan di spec
+baru. Sesudah perbaikan, folder `reservasi/tipeAset`, `reservasi/tarif`,
+`tampilan`, serta spec `keuangan/mutasi-kas` dan `keuangan/ubah-akun-kas`
+lolos 78. Harapan suite penuh berikutnya 722 (`npx playwright test
+--list`, 115 berkas).
+
 **Baseline per penyesuaian backend `ridho` `1718030`** (23 November 2026,
 backend `ridho` lokal `1718030`): vitest 1218 lolos dari 144 berkas
 (unit baru: `lib/unduh.ts`, `features/bahan-baku/satuan.ts`,
@@ -270,6 +287,8 @@ Pola kegagalan yang berulang:
 | `buat peran uji ...` gagal 403 "Akses ditolak" di skenario yang masuk sebagai dua peran uji berturut-turut | `masukSebagai` (`tests/helpers/terkunci-uji.ts`) membuat dan menyelaraskan peran memakai sesi yang sedang aktif; sesudah peran pertama, sesi itu milik peran terbatas. Panggil `login(page)` (Owner) sebelum peran kedua (`jalur-bukan-owner`, 20 November 2026) |
 | Select di form ubah tampil placeholder ("Pilih Satuan...") padahal respons detail membawa nilainya | Form diisi lewat `reset` di effect; Select Radix kehilangan nilainya. Pasang form setelah detail dimuat ulang dengan `defaultValues` (keputusan rancangan butir 8), seperti halaman ubah bahan baku (23 November 2026) |
 | Bagian berbasis container query tidak berganti tampilan di lebar yang diharapkan | Lebar isi lebih kecil dari lebar layar karena sidebar, padding area gulir, dan padding pembungkus; di 1280 px isi halaman daftar sekitar 888 px. Ukur lebar wadah lebih dulu sebelum memilih ambang `@[..rem]` (Rekap Absensi, 23 November 2026) |
+| `bukaDenganAuth` habis waktu menunggu `pin-refresh` di skenario baru | Blok `describe` tempat skenario ditambahkan tidak login di `beforeEach`; skenario lain di blok itu memanggil `login(page)` sendiri. Baca `beforeEach` blok tujuan sebelum menambah skenario (23 November 2026) |
+| `getComputedStyle(...).boxShadow` sel bertanda `shadow-none` bukan `none`, atau warnanya tidak terbaca pola `rgba` | Tailwind v4 menulis bayangan sebagai beberapa lapisan variabel; `shadow-none` menjadi lapisan `rgba(0, 0, 0, 0)`, dan warna `color-mix` terhitung `color(srgb … / a)`. Periksa alfa setiap lapisan (`adaBayanganTerlihat` di `tampilan/bayangan-baris`) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

@@ -188,6 +188,18 @@ lalu diputuskan pemilik proyek (LT6a dan LT5a, `modul/ui-ux.md`).
 Pelajarannya: perubahan yang muncul saat menerapkan, misalnya
 "agar konsisten", dicocokkan ulang dengan rencana sebelum ditulis.
 
+## Tujuan pengujian
+
+Ditetapkan pemilik proyek pada 23 November 2026. Pengujian bukan untuk
+membuat kode yang dibuat lolos, tetapi untuk menilai apakah kode itu layak
+lolos dan layak pakai. Spec dan unit test ditulis dari perilaku yang benar
+menurut keputusan dan kontrak, termasuk jalur gagal, izin yang kurang,
+data kosong, dan tata letak di HP, tablet, dan desktop, dengan respons
+nyata (keputusan rancangan butir 21). Saat spec gagal, kodenya ditelusuri
+lebih dulu; harapan spec hanya diubah bila terbukti keliru dari kode,
+kontrak, atau keputusan, dan perubahannya disebut di laporan beserta
+buktinya.
+
 ## Keputusan berdasar bukti
 
 Setiap keputusan harus bersandar pada kode atau output yang benar-benar

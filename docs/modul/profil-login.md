@@ -124,7 +124,10 @@ empat commit, dengan suite e2e penuh dijalankan sekali di akhir modul
   pengguna, dan status akun aktif (`_assertAkunAktif`, baris 32), tidak
   sesi akun. Cookie itu httpOnly dan tidak dapat dihapus web. Pemilik
   proyek memutuskan melaporkannya ke backend (7 November 2026,
-  `kontrak/temuan.md` butir 177).
+  `kontrak/temuan.md` butir 177). Selesai di backend `ridho` `4a19be8`
+  (B343, P82): logout akun ikut memutus sesi pengguna web; dibuktikan
+  `auth/sidebar-pengguna.spec.ts` 16 November 2026 (dicatat ulang
+  23 November 2026).
 
 - Tombol hapus akun di halaman profil tampil nonaktif (PF2a) sampai
   backend punya jalur hapus akun sendiri bagi Owner (`kontrak/temuan.md`

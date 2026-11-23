@@ -143,6 +143,19 @@ Diputuskan pemilik proyek pada 21 Oktober 2026 (`ffd3994`, `4088d9e`):
   ditambahkan agar saldo akun kas tidak terbuka baginya. Manajer dan
   General Manajer memegang keempat izin, setara beban operasional.
 
+### Bug dan temuan frontend 23 November 2026
+
+Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend yang tersisa.
+
+- **GR9a: pesan 403 menyebut halaman dan izin yang dibutuhkan**: judul
+  tetap "Akses ditolak"; penjelasan menyebut nama halaman dari label menu
+  (`labelMenuRute`), dan kotak "Izin yang dibutuhkan" memuat izin yang
+  kurang (`syaratKurangRute`) dengan deskripsi dari backend
+  (`GET /permission`, terbuka bagi setiap pengguna yang masuk), cadangannya
+  nama yang dirapikan (`lib/auth/label-izin.ts`); izin alternatif ditulis
+  "Salah satu: A, atau B". Atas permintaan pemilik proyek, nama izin tidak
+  ditampilkan teknis.
+
 ## Catatan
 
 ### Catatan dari form role
@@ -271,6 +284,6 @@ backend `yoga` `fc29433`; `origin/yoga` tidak maju sejak itu.
 ### Utang kecil dari gerbang rute
 
 - Pesan gerbang bersifat umum dan tidak menyebut halaman maupun izin yang
-  kurang.
+  kurang. Selesai 23 November 2026 (GR9a).
 - Syarat 44 entri baru diturunkan dari nama hook dan kontrak, bukan dari
   trace per halaman (`referensi/utang-pengujian.md`).

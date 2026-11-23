@@ -176,6 +176,16 @@ Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-bac
 - Form tambah dan ubah pajak tetap di dialog, sehingga tidak termasuk kaki
   tombol bertumpuk KF1a (`modul/ui-ux.md`, Kerapian seluruh laman).
 
+### Bug dan temuan frontend 23 November 2026
+
+Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend yang tersisa.
+
+- **MP1a: metode pembayaran tanpa `read-akunkas`**: halaman buat tetap
+  menuntut `read-akunkas` di gerbang rute (sudah sejak sebelumnya), dan
+  halaman ubah terbuka tanpa izin itu: akun tujuan tampil sebagai teks
+  nama akun dari data metode dan tidak dapat diganti, isian lain tetap
+  dapat disimpan, dan `GET /akunkas` tidak diminta.
+
 ## Catatan
 
 ### Catatan dari submodul profil outlet
@@ -277,7 +287,7 @@ nonaktifkan (keputusan PO2a).
   untuk pilihan akun tujuan, walau backend hanya mewajibkan izin create
   atau update metode; tanpa izin itu form menampilkan pesan gagal memuat.
   Diputuskan bila ada role yang membutuhkannya
-  (`kontrak/izin-halaman.md`).
+  (`kontrak/izin-halaman.md`). Diputuskan 23 November 2026 (MP1a).
 - Enam tipe aset uji tertinggal sebagai bukti butir 77
   (`kontrak/temuan.md`), dan dihapus lewat API setelah laporan backend
   diterima.

@@ -763,7 +763,8 @@ Yang masih berlaku:
 
 - Mutasi `PEMBELIAN` di buku mutasi kas belum bertaut ke detail
   pembelian, karena referensinya hanya membawa id, sedangkan rute detail
-  bergantung pada ruang lokasi penerimanya (PS10a).
+  bergantung pada ruang lokasi penerimanya (PS10a). Selesai 23 November
+  2026 (`modul/keuangan.md`, TM1a).
 - Izin per ruang menunggu backend (PS9a, `kontrak/temuan.md` butir 158).
 - Filter periode bawaan tidak ikut bergeser saat hari berganti
   (keputusan pemilik proyek, 26 Oktober 2026); tanggalnya terlihat dan

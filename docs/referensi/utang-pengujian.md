@@ -105,6 +105,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   saldo berjalannya tidak berubah. Satu akun E2E tetap, karena dirujuk
   transfer Rp1,5 bukti butir 126; tenant uji kini punya lima akun kas
   E2E (`inti/status.md`, Utang kecil dari penyesuaian backend `4759208`).
+  Sejak 23 November 2026 spec ubah akun, Pindah Dana, dan tutup bersaldo
+  memakai akun uji tetap (nama berakhiran " Tetap", `akunUjiTetap`), dan
+  hanya Buat Akun yang menambah satu akun per run; `bersih-akunkas.js`
+  sesudah suite penuh mengecualikan akun tetap (AU1a, `modul/keuangan.md`).
 - **`hapusLewatApi` menerima 404 sebagai sudah terhapus**, padahal route
   yang dihapus backend juga menjawab 404. Route hapus yang hilang tidak
   terdeteksi helper ini; yang menangkapnya adalah audit endpoint

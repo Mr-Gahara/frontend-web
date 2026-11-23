@@ -89,6 +89,24 @@ Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-bac
   malam ikut tampil di timeline dan terbaca terpakai di form buat
   reservasi. Panel venue dashboard tetap per tanggal mulai (`7ce618e`).
 
+### Bug dan temuan frontend 23 November 2026
+
+Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend yang tersisa.
+
+- **KA1a: sebutan "Kategori Aset" di seluruh laman reservasi**: halaman
+  tipe aset (daftar, buat, ubah, dialog hapus), form aset, kolom daftar
+  aset, dan form tarif; nama rute dan kode tetap tipe aset. Teks "tipe
+  aset" di luar laman reservasi (wizard setup, halaman daftar akun, dan
+  Langganan) tidak termasuk keputusan ini.
+- **TF1a: satu form tarif bersama** (`features/tarif/form-tarif.tsx`,
+  menutup T1a): halaman buat dan ubah memakai tampilan halaman ubah (Select
+  Radix untuk basis, harga berformat ribuan), dengan label yang terhubung
+  ke isiannya; galat basis kini tampil di keduanya. Isian harga menyimpan
+  teks angka mentah, sehingga harga kosong tetap ditolak dan 0 yang
+  diketik tetap 0 (T3b): isian ribuan halaman ubah lama mengubah kosong
+  menjadi 0 dan menyimpan tarif Rp0, ditemukan spec `reservasi/tarif`
+  23 November 2026.
+
 ## Catatan
 
 ### Catatan dari modul reservasi
@@ -142,7 +160,8 @@ aset (`d3ae182`), tarif (`365553f`), daftar reservasi (`27749fe`,
 - Sebutan di pesan form tipe aset berbeda: "Kategori Aset" di halaman
   buat dan "Tipe Aset" di halaman edit. Dipertahankan di `074e98c` karena
   teks yang dilihat pengguna; penyeragamannya menunggu keputusan pemilik
-  proyek.
+  proyek. Selesai 23 November 2026: "Kategori Aset" (KA1a).
 - Halaman buat dan edit tarif masih berbeda tampilan: `<select>` bawaan
   dan harga polos di buat, Radix Select dan harga berformat ribuan di
-  edit. Penyatuan ke satu form ditunda (keputusan T1a).
+  edit. Penyatuan ke satu form ditunda (keputusan T1a). Selesai
+  23 November 2026 (TF1a).
