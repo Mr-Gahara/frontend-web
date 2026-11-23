@@ -15,14 +15,16 @@ Diukur ulang 18 November 2026 per `4dc08e2` dengan perintah di
 `docs/README.md`; heksadesimal dihitung dengan
 `grep -rEo "#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b" app components features lib`.
 Diukur ulang 20 November 2026 per `86f2a0b`: kelima angka sama dengan
-per `4dc08e2`.
+per `4dc08e2`. Diukur ulang 23 November 2026 sesudah penyesuaian backend
+`1718030`: warna heksadesimal 42 karena token baru `--rose-redup`
+(RK1a), empat angka lain sama.
 
 | Hal | Awal | Per `4dc08e2` | Catatan |
 |---|---|---|---|
 | Pemakaian `any` | 302 | 0 | Dihitung di `app`, `components`, `lib`, dan `features` (perintah di `docs/README.md`). Berkurang tiap modul yang dimigrasikan; dari 25 per `845c2cf` menjadi 16, lewat penyesuaian `465b438` dan halaman metode pembayaran, lalu 12 setelah halaman pajak (`e0aaeca`), 9 setelah halaman pelanggan (`d9365d3`), 7 setelah halaman diskon (`1e05df6`), 4 setelah halaman profil, login, dan sidebar (`57a7084`), dan 0 setelah error ESLint warisan (`4f19e77`) |
 | Kemunculan `_id` | - | 7 | Dihitung di `app`, `components`, dan `features` (perintah di `docs/README.md`), tidak termasuk `types/`. Tersisa di modul yang belum dimigrasikan; angka awal 90 dihitung khusus pola `id \|\| _id`. Perintahnya ikut menghitung komentar: naik 1 di `eef371a` dari komentar normalisasi di `features/sesi-booking/api.ts`. Turun 13 di `45187b6`: 12 dari data tiruan mutasi arus kas dan 1 dari daftar akun kas. Turun 3 di `f99b7cf`: 4 dari halaman dan tabel shift, dikurangi 1 dari komentar normalisasi di `features/shift/api.ts`. Turun 7 di `dcc22e0` dari halaman, tabel, dan form pola roster. Turun 7 di `19227f8` dari halaman jadwal outlet, jadwal gudang, dan generate. Turun 9 lagi sampai `3359497`, dari penyesuaian `465b438` dan halaman metode pembayaran. Turun 7 di `e0aaeca` dari halaman pajak. Turun 2 di `d9365d3` dari halaman pelanggan. Turun 2 di `1e05df6` dari halaman diskon. Turun 1 di `091be4e` dari komentar halaman profil. Naik 1 di `10c7efb` dari komentar normalisasi di `features/admin-akun/api.ts`. Turun 1 di `4f19e77` dari cadangan `_id` di dialog pengguna. Per 18 November 2026 ketujuhnya komentar normalisasi (`id`, bukan `_id`), tidak ada di kode |
 | `useAuthGuard()` berulang di halaman | 49 | 2 | Dihitung di `app/` saja. Yang tersisa `app/dashboard/layout.tsx`, satu-satunya pemanggil, dan berkas hook-nya sendiri; ke-24 pemanggilan berulang di `app/` dan ke-13 di `features/` dibuang di `628f52e` (26 sebelum itu). Turun saat halaman menjadi tipis atau pemanggilannya dibuang (stock opname, penerimaan barang, stock adjustment, keempat halaman penjualan, buat reservasi, shift outlet, pola roster outlet, ketiga halaman metode pembayaran, halaman pelanggan, halaman diskon, dan halaman profil) |
-| Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | 41 | Lima warna utama menjadi token di `app/globals.css` (`584a2d8`, `ba28f25`; keputusan WR1a sampai WR4a). Tepat sebelum penggantian terukur 3.764 di `app`, `components`, `features`, dan `lib`. Per `9cd22e1` tersisa 68. Sejak `c437d68` (CV21a) tidak ada lagi pemakaian di halaman: ke-41 itu 36 definisi token di `app/globals.css` dan 5 selektor bawaan shadcn di `components/ui/chart.tsx` |
+| Warna heksadesimal hardcoded | 4.544 (28 nilai unik) | 42 | Lima warna utama menjadi token di `app/globals.css` (`584a2d8`, `ba28f25`; keputusan WR1a sampai WR4a). Tepat sebelum penggantian terukur 3.764 di `app`, `components`, `features`, dan `lib`. Per `9cd22e1` tersisa 68. Sejak `c437d68` (CV21a) tidak ada lagi pemakaian di halaman: ke-41 itu 36 definisi token di `app/globals.css` dan 5 selektor bawaan shadcn di `components/ui/chart.tsx`. Menjadi 42 pada 23 November 2026 karena token `--rose-redup` (RK1a) |
 | Berkas di atas 700 baris | 7 | 1 | `components/app-sidebar.tsx` melewati 700 (701 baris) karena menu stock adjustment gudang. Daftar penjualan (701) kini tipis, sedangkan buat penjualan pindah ke `features/penjualan/halaman-buat-penjualan.tsx` dengan 1.127 baris saat itu, kini 1.087 (Utang kecil dari modul penjualan dan pembayaran). Buat dan edit tarif (774 dan 807 baris) turun di bawah 700 setelah skema dan logikanya pindah ke `features/tarif` (`365553f`). Berkurang saat modulnya dimigrasikan atau dipecah. Buat reservasi (1.165 baris) dipecah menjadi tiga berkas di `477f258` (keputusan R9b). Per `e0aaeca`, sama dengan `3359497`: buat penjualan (1.089), `features/produk/form-produk.tsx` (794), `components/app-sidebar.tsx` (704), dan `components/ui/sidebar.tsx` (702). Per `a4304ce` jumlahnya tetap 4; `features/produk/form-produk.tsx` menjadi 803 baris karena lokasi aktif dan petunjuk resep. Per `fcf2dd2` jumlahnya tetap 4; `components/app-sidebar.tsx` menjadi 713 baris. Per `52c550e` tetap 4; buat penjualan 1.090 baris. Per `57a7084` menjadi 3: `components/app-sidebar.tsx` dipecah menjadi 325 baris (keputusan PF4a), dan tersisa buat penjualan (1.090), `features/produk/form-produk.tsx` (803), serta `components/ui/sidebar.tsx` (702). Per `9195472` menjadi 4: `features/stock-opname/halaman-detail-stock-opname.tsx` melewati 700 (714 baris) karena penjaga ruang (`eb0181f`), dan buat penjualan menjadi 1.087 baris setelah kode mati dibuang (`6b5e1cc`). Per `b887278` form produk menjadi 809 baris (pemeriksaan satuan resep). Per `628f52e` tetap 4; detail stock opname menjadi 712 baris setelah pemanggilan guard dibuang. Per `7d4c234` form produk 835 baris (isian stok minimal, B237). Per `5b8cbd9` tetap 4: buat penjualan 1.098 baris (`waktuTransaksi` dan jam berjalan, `7a08b63`), form produk 809, detail stock opname 702, dan `components/ui/sidebar.tsx` 702. Per `a611b59` menjadi 3: dialog aksi detail stock opname dipisah, sehingga halamannya 612 baris. Per `11ed2d4` menjadi 1: buat penjualan dipecah menjadi 693 baris (`584d6ae`) dan form produk 673 baris; tersisa `components/ui/sidebar.tsx` (702, berkas shadcn) |
 
 Tahap desain token sengaja tidak dicampur dengan refactor arsitektur, agar
@@ -33,53 +35,40 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (sesi berikutnya, dicatat 20 November 2026 malam)
+### Mulai di sini (sesi berikutnya, dicatat 23 November 2026)
 
-Keadaan akhir sesi 20 November 2026 malam: web di-commit dalam tiga commit
-(kerapian seluruh laman `421dbed`, utang pengujian `932e0e5`, dan
-dokumentasi sesudahnya), push dijalankan pemilik proyek; backend lokal `ridho`
-`2790fc7`, tidak maju (`nizar` dan `yoga` hanya tertinggal). Yang selesai
-di sesi itu:
+Keadaan akhir sesi 23 November 2026: backend `ridho` maju 21 commit ke
+`1718030` (22 November 2026, AR37 sampai AR44; `nizar` dan `yoga`
+tertinggal), dan web menyesuaikan seluruhnya
+(`referensi/keputusan-penyesuaian-backend.md`, Penyesuaian backend `ridho`
+`1718030`): sesi booking di detail penjualan (B347), staf izin di
+monitoring (B348), ekspor per bulan dan unduh laporan (UD1a sampai UD3a),
+kemasan bahan dan satuan masukan (KN1a sampai KN3a), dan laman Rekap
+Absensi (RK1a). Form ubah bahan baku dibetulkan (Select satuan kosong).
+Baseline di `inti/pengujian.md`; laporan pembuktian untuk tim backend
+(AR31) disampaikan di percakapan.
 
-1. **Kerapian spacing dan alignment seluruh laman** (butir 3 daftar
-   20 November 2026): pemindaian enam ukuran layar, perbaikan teknis, dan
-   keputusan KL1b, TH1a, TI1a, KF1a, TT1a dari kanvas "Kerapian Seluruh
-   Laman" (`modul/ui-ux.md`, Kerapian seluruh laman), serta PP1a tab Pajak
-   per Produk (`modul/pengaturan-outlet.md`).
-2. **Bagian B sisa pekerjaan yang dapat dibetulkan frontend**: PP1a.
-   Sisanya bukan ranah frontend atau menunggu: laporan backend 186 sampai
-   188, flake "Batalkan kembali ke daftar" buat reservasi dan flake vitest
-   sekali (hanya dapat ditelusuri saat muncul lagi di suite penuh), daftar
-   akun admin (ikut rombak admin), grid kalender jadwal dan langkah 2
-   generate (menunggu pratinjau TB4a), dan status alpha staf (DB3a,
-   ditunda pemilik proyek).
-3. **Bagian C utang pengujian, tanpa suite penuh**: jalur berhasil yang
-   meninggalkan data permanen diuji sungguhan atas keputusan pemilik
-   proyek, jalur izin lewat tiga pengguna uji baru, keterangan khusus
-   member, kartu lokasi Profil Toko tanpa `read-location`, dan pembuktian
-   kontrak butir 68, 69, 71, dan 72 (`inti/pengujian.md`, Baseline;
-   `arsip/riwayat-pengujian.md`, Utang pengujian yang lunas). Utang yang
-   tersisa di `referensi/utang-pengujian.md` butuh data yang tidak dapat
-   disiapkan web secara deterministik (absen aplikasi, booking lewat
-   tengah malam atau di masa lalu, akun kedaluwarsa, lebih dari 20 riwayat
-   langganan), peran uji dengan izin tulis yang lebih rumit (template
-   role, MK11a, titik tur, RL3a, pemilih produk tanpa baca produk, lokasi
-   kerja di dialog pengguna), atau penahanan di backend yang tidak terlihat
-   dari web.
+Urutan kerja berikutnya, atas perintah pemilik proyek: butir daftar
+20 November 2026 dan 19 November 2026 di bawah yang belum selesai (rombak
+UI/UX laman admin, deskripsi paket laman pengenalan, revisi laman profil
+dan menu popup profil), nomor WhatsApp admin (LG1a), dan utang pengujian
+kelompok 1. **Suite e2e penuh ditunda sampai seluruh pekerjaan selesai**
+(pemilik proyek, 20 November 2026); harapannya 716.
 
-Urutan kerja berikutnya, atas perintah pemilik proyek: butir lain daftar
-20 November 2026 dan 19 November 2026 di bawah (rombak UI/UX laman admin,
-deskripsi paket laman pengenalan, ekspor PDF/Excel/CSV, revisi laman
-profil dan menu popup profil), dan nomor WhatsApp admin (LG1a). **Suite
-e2e penuh ditunda sampai seluruh pekerjaan selesai** (pemilik proyek,
-20 November 2026); harapannya 689 (`inti/pengujian.md`, Baseline).
+### Keadaan sebelum 23 November 2026
+
+Sesi 20 November 2026 malam: kerapian seluruh laman (KL1b, TH1a, TI1a,
+KF1a, TT1a, PP1a), utang pengujian bagian C, dan pembuktian kontrak 68
+sampai 72 (`modul/ui-ux.md`, `inti/pengujian.md`); backend lokal `ridho`
+`2790fc7`.
 
 Laporan backend 186 sampai 188 (`kontrak/temuan.md`) sudah diberikan ke
-pemilik proyek; pembuktian web menyusul bila backend memperbaikinya.
+pemilik proyek; ketiganya diperbaiki backend 22 November 2026 dan
+dibuktikan web 23 November 2026.
 Butir 189 (satuan kemasan seperti pak tidak dapat dipakai sebagian di
-resep; temuan pemilik proyek 20 November 2026) dicatat dan laporannya
-disusun hari yang sama; solusinya menunggu keputusan pemilik proyek
-bersama tim backend (`modul/produk-kategori.md`).
+resep; temuan pemilik proyek 20 November 2026) diputuskan backend
+22 November 2026 (P87) dan disesuaikan web 23 November 2026
+(`modul/produk-kategori.md`, KN1a sampai KN3a).
 
 Keadaan per 16 November 2026: backend lokal `ridho` `4a19be8`, sama
 dengan remote, 29 commit di atas `d6709a1` (Nizar K-08 sampai K-10,
@@ -197,43 +186,14 @@ perintahnya:
    menjadi bawaan semua `DataTable` (KL1b), dan pola bersama lain
    diputuskan lewat kanvas (TH1a, TI1a, KF1a, TT1a).
 4. **Unduh PDF, Excel, atau CSV untuk laporan dan data penting**
-   (dicatat pemilik proyek 20 November 2026). Pemilik proyek menambahkan
-   ekspor yang belum ada di backend; daftar di bawah dicocokkan dengan
-   backend `2790fc7` pada 20 November 2026. Daftar mana yang dianggap
-   penting dan formatnya tetap keputusan pemilik proyek.
-
-   **Sudah didukung backend** (query `format` = `csv`, `xlsx`, atau
-   `pdf`; `controllers/laporanController.js`, tabel satu baris judul,
-   baris per periode, lalu TOTAL lewat `services/laporan/laporanEkspor.js`):
-
-   - Arus Kas: `GET /laporan/arus-kas`; web sudah punya tiga tombol
-     unduh (`laporanApi.unduhArusKas`)
-   - Ringkasan Laba/Rugi: `GET /laporan/laba-rugi`; web belum punya
-     tombol unduh, tinggal disambung
-
-   **Belum didukung backend** (endpoint hanya JSON; ekspor perlu
-   ditambahkan di backend, atau web menyusun berkas sendiri dari data
-   yang sudah dimuat, yang perlu keputusan):
-
-   - Pembayaran per Metode: `ringkasan.pembayaranPerMetode` di
-     `GET /laporan/laba-rugi`; ekspor laba rugi hanya baris per periode,
-     tanpa rincian per metode
-   - Daftar penjualan: `GET /penjualan` (berhalaman dan berfilter)
-   - Mutasi kas: `GET /akunkas/mutasi` (berhalaman dan berfilter)
-   - Riwayat Pindah Dana: `GET /jurnaltransfer` (berhalaman)
-   - Pengeluaran (beban): `GET /bebanoperasional` (berhalaman)
-   - Belanja dan pembelian stok: `GET /pembelianstok` (berhalaman)
-   - Riwayat Mesin Kasir: `GET /sesikasir` (berhalaman)
-   - Stok saat ini: `GET /inventory` (berhalaman)
-   - Jurnal stok: `GET /jurnalstok` (berhalaman)
-   - Stock opname dan stock adjustment: `GET /stockopname` dan
-     `GET /stockopname/adjustments` (berhalaman)
-   - Pengajuan stok dan surat jalan: `GET /pengajuanstok` dan
-     `GET /transferstok` (berhalaman)
-   - Produk dan bahan baku: `GET /produk`, `GET /bahanbaku` (berhalaman)
-   - Pelanggan dan membership: `GET /pelanggan`, `GET /membership`
-   - Reservasi: `GET /sesibooking` (per tanggal)
-   - Absensi: `GET /absensi/monitoring` (per hari)
+   (dicatat pemilik proyek 20 November 2026). Selesai 23 November 2026
+   sesudah backend menambah ekspor (P85, B349 sampai B358): Unduh per
+   bulan di daftar penjualan, mutasi kas, pengeluaran, belanja stok, stok
+   saat ini, jurnal stok, stock opname, dan adjustment (UD1a), Unduh
+   laporan di Ringkasan Laba/Rugi dan Pembayaran per Metode (UD2a), dan
+   laman Rekap Absensi (RK1a). Ditunda backend (P85 butir 1): pindah dana,
+   mesin kasir, pengajuan dan surat jalan, produk dan bahan baku,
+   pelanggan, membership, dan reservasi.
 
 ### Berikutnya: utang pengujian kelompok 1 yang tersisa (dicatat 20 November 2026)
 
@@ -359,6 +319,8 @@ RAM, build memuncak sekitar 2 GB.
   (B278) memuat staf yang izin hanya bila lokasi kerjanya lokasi itu,
   sehingga tambahan web tetap untuk staf tanpa lokasi kerja. Laporan
   lanjutan untuk tim backend disusun 20 November 2026 (butir 187).
+  Selesai 23 November 2026: backend B348 memuat staf tanpa lokasi kerja
+  yang izin, dan tambahan web dibuang.
 - Jurnal stok tetap mengirim satu `locationID` untuk Semua Outlet,
   walau backend menerima `tipeLokasi` (B109); berpengaruh hanya bila
   tenant punya lebih dari satu outlet (`kontrak/temuan.md` butir 151).
@@ -409,7 +371,8 @@ RAM, build memuncak sekitar 2 GB.
   penjualan; permintaannya ditunda (NZ9a). Laporan untuk tim backend
   disusun 20 November 2026 atas perintah pemilik proyek (butir 186), dan
   web memuat setiap booking lewat `GET /sesibooking/:id` sampai backend
-  menyertakannya.
+  menyertakannya. Selesai 23 November 2026: web membaca `sesiBooking[]`
+  detail penjualan (B347).
 - Bagian Sesi Booking di detail penjualan memakai tata letak sederhana di
   atas grid informasi; penempatannya menunggu fase UI/UX. Selesai
   20 November 2026 (`modul/penjualan.md`, SB1a).

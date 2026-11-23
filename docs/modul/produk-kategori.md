@@ -76,7 +76,31 @@ terhitung produk dan pemotongan stok penjualan berupa pecahan pak.
 Solusinya menyangkut model data bahan baku, resep, pembelian, dan stok di
 backend, sehingga dilaporkan ke backend (`kontrak/temuan.md` butir 189)
 dan diputuskan pemilik proyek bersama tim backend; web menyesuaikan form
-bahan baku, resep, dan pembelian setelah arahnya ditetapkan.
+bahan baku, resep, dan pembelian setelah arahnya ditetapkan. Diputuskan
+backend 22 November 2026 (P87): satuan dasar tetap satu-satunya satuan
+stok, dan kemasan per bahan menjadi konversi (`kaleng` = 290 ml). Web
+menyesuaikan diri 23 November 2026 (KN1a sampai KN3a di bawah dan
+`modul/inventaris.md`).
+
+### Penyesuaian backend `ridho` `1718030`
+
+Diputuskan pemilik proyek 23 November 2026 (`referensi/keputusan-penyesuaian-backend.md`).
+
+- **KN1a: bagian Kemasan di form buat dan ubah bahan baku** (B359): baris
+  Nama kemasan + Isi dalam satuan dasar, Tambah Kemasan, hapus per baris,
+  paling banyak 10, dengan teks bantu "1 kaleng = 290 ml"
+  (`features/bahan-baku/isian-kemasan.tsx`). Validasi mengikuti backend:
+  huruf kecil 1-20 karakter, bukan satuan dasar maupun kg, gram, liter,
+  ml, tidak ganda, isi lebih dari 0; galat 409 kemasan yang dipakai resep
+  ditampilkan apa adanya.
+- **Resep menawarkan kemasan** (B360): `satuanResepUntukBahan` mengembalikan
+  satuan bawaan lalu kemasan bahan, dan skema resep menerima teks satuan
+  apa pun yang diperiksa terhadap bahannya (`buatSkemaProduk`); `SATUAN_RESEP`
+  tetap untuk wizard setup.
+- **Form ubah bahan baku dipasang setelah detail termuat** dengan
+  `defaultValues` (keputusan rancangan butir 8), karena `reset` di effect
+  membuat Select satuan tampil "Pilih Satuan..." dan satuan dasar kemasan
+  kosong (ditemukan spec `inventaris/bahanBaku/konversi-satuan`).
 
 ## Catatan
 

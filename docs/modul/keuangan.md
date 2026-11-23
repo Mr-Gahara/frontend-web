@@ -422,7 +422,8 @@ Diputuskan pemilik proyek pada 17 November 2026, dari tiga desain kanvas
 Laba/Rugi, C dibanding periode lalu), dengan data nyata 1 sampai
 17 November 2026. Menutup OM1a; datanya `ringkasan.pembayaranPerMetode`
 di `GET /laporan/laba-rugi` (B329): uang diterima per metode, termasuk
-pajak, bukan pembagian omzet.
+pajak, bukan pembagian omzet. Sejak 23 November 2026 dibaca dari
+`GET /laporan/pembayaran-per-metode` (B353, UD2a).
 
 - **OM2a: desain B** di `/dashboard/outlet/keuangan/pembayaranMetode`
   (`features/laporan/halaman-pembayaran-metode.tsx`), menu "Pembayaran
@@ -529,6 +530,25 @@ Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-bac
   `namaPerangkat` sesi (B335); `NAMA_MESIN_TANPA_DAFTAR` dibuang, karena
   `installationId` kini null bagi yang tidak memegang
   `kelola-perangkat-kasir` (K-19).
+
+### Penyesuaian backend `ridho` `1718030`
+
+Diputuskan pemilik proyek 23 November 2026 (`referensi/keputusan-penyesuaian-backend.md`).
+
+- **UD1a: Unduh per bulan lewat dialog** (P85, B349 sampai B357): tombol
+  Unduh di kepala daftar penjualan, mutasi kas, pengeluaran, belanja
+  stok, stok saat ini, jurnal stok, stock opname, dan adjustment membuka
+  dialog berisi pemilih bulan (bawaan bulan berjalan, bulan yang belum
+  datang tidak dapat dipilih), format Excel atau CSV, dan daftar filter
+  aktif yang ikut diterapkan (`components/unduh/dialog-unduh-bulan.tsx`).
+  Query ekspor sama dengan daftar tanpa `page`, `limit`, dan batas
+  tanggal (`paramEkspor`, `lib/unduh.ts`), karena backend menolaknya
+  bersama `format`. Stok saat ini tanpa bulan.
+- **UD2a: Pembayaran per Metode membaca endpoint sendiri dan dapat
+  diunduh** (B353): `GET /laporan/pembayaran-per-metode` menggantikan
+  `ringkasan.pembayaranPerMetode` laba rugi; Ringkasan Laba/Rugi dan
+  Pembayaran per Metode mendapat Unduh laporan PDF, Excel, CSV seperti
+  Arus Kas (`TombolUnduhLaporan`), dengan periode yang tampil.
 
 ## Catatan
 

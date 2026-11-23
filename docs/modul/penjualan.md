@@ -187,6 +187,20 @@ Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-bac
   409 backend lewat toast gagal yang sudah ada (`metodeLaciMesinKasir`,
   `46ebfc3`; teks diganti di commit sesudahnya).
 
+### Penyesuaian backend `ridho` `1718030`
+
+Diputuskan pemilik proyek 23 November 2026 (`referensi/keputusan-penyesuaian-backend.md`).
+
+- Sesi Booking detail penjualan dibaca dari `sesiBooking[]` respons
+  detail (B347, butir 186), tanpa `GET /sesibooking/:id` per item, sehingga
+  tampil bagi pemegang `read-penjualan` tanpa `read-booking`; Tandai
+  Selesai tetap menuntut `update-booking` dan membuang cache penjualan.
+- **BH1a: toko yang turun dari plan bersesi booking melihat Sesi Booking
+  sebagai riwayat**, tanpa Tandai Selesai (sebelumnya bagian disembunyikan
+  karena `GET /sesibooking/:id` ditolak plan).
+- **UD1a**: Unduh per bulan di daftar penjualan (B349); `bulan`
+  menggantikan `startDate` dan `endDate` (`modul/keuangan.md`, UD1a).
+
 ## Catatan
 
 ### Catatan dari cakupan daftar penjualan

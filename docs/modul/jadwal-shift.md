@@ -244,6 +244,27 @@ Fungsinya murni di `features/tenant/jam-operasional.ts`.
   "2 hari, toko libur (Minggu 22 dan 29 Nov)"), dan sel pratinjaunya
   berarsir "Dilewati" (`fddb3c6`).
 
+### Penyesuaian backend `ridho` `1718030`
+
+Diputuskan pemilik proyek 23 November 2026 (`referensi/keputusan-penyesuaian-backend.md`).
+
+- Panel Status Staf tidak lagi menambah karyawan ruang yang izin
+  (`gabungStatusStaf` tanpa `karyawanRuang`), karena monitoring per lokasi
+  memuat staf tanpa lokasi kerja yang izin bila perannya memegang izin
+  dashboard ruang (B348, P84, butir 187).
+- **RK1a: laman Rekap Absensi ruang outlet** (B358, P86), desain D kanvas
+  "Rekap Absensi" (pemilik proyek, 23 November 2026, dari tiga desain
+  dan satu gabungan): desktop memakai desain A, yaitu empat kartu
+  ringkasan dan tabel tujuh kolom gabungan (Kehadiran, Ketepatan, Pulang
+  awal, Jam kerja, Izin dan cuti, Tidak hadir) dengan baris TOTAL;
+  tablet dan HP memakai kartu ringkasan A dan daftar per staf desain C
+  yang barisnya dibuka untuk rincian empat kelompok. Angka Tidak hadir di
+  kartu memakai merah redup `rose-redup` (`#B4475A`) atas permintaan
+  pemilik proyek. Pemilih bulan dan Unduh Excel atau CSV di kepala. Menu
+  "Rekap Absensi" di grup Manajemen Shift, gerbang `read-location` dan
+  `read-absensi`. Tidak hadir dihitung per shift (P86); status alpha
+  harian tetap ditunda (DB3a).
+
 ## Catatan
 
 ### Catatan dari modul jadwal dan shift
@@ -288,7 +309,8 @@ modul ini yang memakai `apiClient`.
 - `44a81d0`: `useMonitoringAbsensi(tanggal, ruang)`; `stafRuang` dibuang,
   dan `gabungStatusStaf` menerima karyawan ruang. Backend menjadikan
   jadwal staf yang izin disetujui libur, juga pada buat manual
-  ("Otomatis Libur: Karyawan sedang Cuti Disetujui.").
+  ("Otomatis Libur: Karyawan sedang Cuti Disetujui."). Karyawan ruang
+  dilepas lagi dari `gabungStatusStaf` 23 November 2026 (B348).
 - `b5a2578`: `useDaftarJadwal(filter, { aktif })`, `lainMap` di
   `KaryawanJadwal`, dan penanda di `ShiftCell`.
 

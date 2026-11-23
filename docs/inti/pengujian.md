@@ -12,6 +12,23 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per penyesuaian backend `ridho` `1718030`** (23 November 2026,
+backend `ridho` lokal `1718030`): vitest 1218 lolos dari 144 berkas
+(unit baru: `lib/unduh.ts`, `features/bahan-baku/satuan.ts`,
+`features/absensi/rekap.ts`, rincian hitung opname, satuan pembelian,
+pengajuan, surat jalan, dan resep berkemasan).
+Tanpa suite penuh dan tanpa OTP: folder `inventaris`, `keuangan`, `unduh`,
+`jadwal`, `dashboard`, `penjualan`, `gudang`, dan `akses`, ditambah
+`reservasi/daftar/tandai-selesai`, `auth/guard-dashboard`, dan
+`setup/plan-fitur`, dijalankan bersama: 377 lolos dan 1 dilewati dari 378
+(skip bersyarat dialog batal surat jalan), pukul 09.10 sampai 09.33 WIB.
+Spec baru: `unduh/ekspor-daftar` (15), `jadwal/rekap-absensi` (7), dan
+`inventaris/bahanBaku/konversi-satuan` (3); skenario baru B347 di
+`tandai-selesai`, unduhan di `keuangan/pembayaran-metode`, dan langkah
+rincian per kemasan di `draft-stok-opname`. Harapan suite penuh berikutnya
+716 (`npx playwright test --list`, 114 berkas): 689 ditambah 27 skenario
+baru.
+
 **Baseline per kerapian seluruh laman dan utang pengujian** (20 November
 2026 sore, backend `ridho` lokal `2790fc7`): vitest 1194 lolos dari 141
 berkas, termasuk satu unit baru TT1a di
@@ -251,6 +268,8 @@ Pola kegagalan yang berulang:
 | Spec yang tidak disentuh berbulan-bulan gagal mencari isian yang tampak masih ada | Isian pindah tempat oleh perubahan komponen bersama (FL1a memindah isian filter ke panel), dan spec itu tidak ikut putaran yang mengubahnya. Saat mengubah komponen bersama, grep spec menurut label isiannya (`grep -rn "Pembelian dari\|Akun kas" tests/e2e`), bukan menurut nama folder modul (suite penuh 20 November 2026) |
 | Ukuran atau letak elemen panel filter melebihi layar, padahal tampilannya benar | Panel bergeser masuk (`panel-filter-gerak`); `toBeVisible` lolos sebelum animasi selesai. Tunggu `el.getAnimations({ subtree: true })` selesai sebelum `boundingBox` (`tanggal-filter`, 20 November 2026) |
 | `buat peran uji ...` gagal 403 "Akses ditolak" di skenario yang masuk sebagai dua peran uji berturut-turut | `masukSebagai` (`tests/helpers/terkunci-uji.ts`) membuat dan menyelaraskan peran memakai sesi yang sedang aktif; sesudah peran pertama, sesi itu milik peran terbatas. Panggil `login(page)` (Owner) sebelum peran kedua (`jalur-bukan-owner`, 20 November 2026) |
+| Select di form ubah tampil placeholder ("Pilih Satuan...") padahal respons detail membawa nilainya | Form diisi lewat `reset` di effect; Select Radix kehilangan nilainya. Pasang form setelah detail dimuat ulang dengan `defaultValues` (keputusan rancangan butir 8), seperti halaman ubah bahan baku (23 November 2026) |
+| Bagian berbasis container query tidak berganti tampilan di lebar yang diharapkan | Lebar isi lebih kecil dari lebar layar karena sidebar, padding area gulir, dan padding pembungkus; di 1280 px isi halaman daftar sekitar 888 px. Ukur lebar wadah lebih dulu sebelum memilih ambang `@[..rem]` (Rekap Absensi, 23 November 2026) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

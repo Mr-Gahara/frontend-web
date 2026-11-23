@@ -404,3 +404,21 @@ sama (submodul pengajuan stok, di bawah).
     (`flex-col-reverse sm:flex-row`, tombol `w-full sm:w-auto`), dan
     sebaris di kanan mulai 640 px (pemilik proyek, 20 November 2026;
     `modul/ui-ux.md`, TI1a dan KF1a).
+37. **Berkas ekspor dibangun backend, bukan web.** Daftar dan laporan
+    diunduh lewat `?format=` pada endpoint yang sama (backend P85), dengan
+    token pengguna (`apiClient.unduh`) lalu `simpanBerkas`
+    (`lib/unduh.ts`). Query ekspor daftar adalah query daftar yang sedang
+    tampil tanpa `page`, `limit`, dan batas tanggal (`paramEkspor`), ditambah
+    `bulan` dari dialog, karena backend menolak ketiganya bersama `format`.
+    Web tidak menyusun berkas dari halaman yang dimuatnya (pemilik proyek,
+    23 November 2026; `modul/keuangan.md`, UD1a dan UD2a).
+38. **Jumlah bersatuan tersimpan dalam satuan dasar bahan; web hanya
+    memilih satuan masukan.** Pilihan satuan dibaca dari `availableUnits`
+    dan `konversi` bahan (`pilihanSatuan`, `PilihSatuan` di
+    `features/bahan-baku`), `satuan` dikirim hanya bila berbeda dari bawaan
+    endpoint, dan server yang mengonversi. Pembandingan dengan jumlah
+    tersimpan, misalnya selisih terima, memakai `faktorKeDasar`; tampilan
+    dokumen menulis masukan lebih dulu lalu jumlah dasar
+    (`teksJumlahBersatuan`). Bahan tanpa kemasan tetap satu isian satuan
+    dasar (pemilik proyek, 23 November 2026; backend P87;
+    `modul/inventaris.md`, KN3a).

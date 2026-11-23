@@ -1107,3 +1107,9 @@ bersyarat).
   layar (`periksaLetak`), dan di HP keadaan sidebar diperiksa per titik
   lewat `jalaniTur(page, target, periksa)`. Ketiadaan tur sesudah dimuat
   ulang dibuktikan dengan menunggu lebih lama dari jeda buka otomatis.
+- `tests/e2e/unduh/ekspor-daftar.spec.ts` (23 November 2026): unduhan
+  dibuktikan dari respons nyata (`waitForResponse` ber-`format`, status,
+  dan tipe konten) bersama `page.waitForEvent("download")`, karena berkas
+  disimpan lewat Blob dan tautan sementara. Satu tabel `DAFTAR` menjalankan
+  skenario yang sama untuk delapan halaman beserta kunci tanggal yang
+  harus absen dari query ekspor.

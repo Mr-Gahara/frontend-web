@@ -491,6 +491,32 @@ Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-bac
   termuat; tidak lagi ikut tersaring pencarian tabel (disetujui pemilik
   proyek sesudah diterapkan).
 
+### Penyesuaian backend `ridho` `1718030`
+
+Diputuskan pemilik proyek 23 November 2026 (`referensi/keputusan-penyesuaian-backend.md`).
+
+- **KN2a: stok terbaca di daftar stok outlet dan gudang** (B362): teks
+  utama rincian "1 pak 9 kaleng 25 ml", angka satuan dasar kecil di
+  bawahnya; bahan tanpa kemasan tetap satu baris
+  (`features/inventaris/stok-terbaca.ts`).
+- **KN3a: pilihan satuan per baris di semua form masukan** (B361, B364
+  sampai B366): pembelian stok (harga per satuan pilihan; detail menulis
+  "22 kaleng (6.380 ml)"), pengajuan stok (satuan wajib dari
+  `availableUnits`, cadangan `"pcs"` dibuang; detail menulis masukan dan
+  jumlah dasar), surat jalan revisi dan terima (selisih dibandingkan dalam
+  satuan dasar lewat `faktorKeDasar`), dan hitung fisik stock opname yang
+  boleh beberapa baris satuan, misalnya 21 kaleng + 170 ml, dikirim sebagai
+  `rincianFisik` (`sel-hitung-fisik.tsx`). Bawaan setiap pilihan satuan
+  dasar. Tanpa `read-bahan` hanya satuan dasar yang ditawarkan di surat
+  jalan dan opname. Jurnal stok manual (B367) tidak dipakai web.
+- **UD1a: Unduh per bulan di daftar** (B354 sampai B357): jurnal stok,
+  stock opname, dan adjustment memakai dialog pilih bulan dan format
+  Excel atau CSV dengan filter aktif; stok saat ini outlet dan gudang
+  tanpa pilihan bulan (potret). Rincian di `modul/keuangan.md`, UD1a.
+- **UD3a: filter Periode dibuat di daftar stock opname dan adjustment**
+  (B356), di panel Filter lainnya dengan pil cepat, ruang outlet dan
+  gudang; daftar adjustment kini memakai bilah filter.
+
 ## Catatan
 
 ### Catatan dari modul inventaris

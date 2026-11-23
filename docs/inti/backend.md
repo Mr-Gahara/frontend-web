@@ -296,6 +296,13 @@ skrip migrasi tidak berubah; field baru `rotasiRefresh` di model akun
 dan pengguna tanpa indeks, sehingga tidak ada langkah sesudah tarik
 selain menyalakan ulang backend
 (`referensi/keputusan-penyesuaian-backend.md`).
+Pada 22 November 2026 `ridho` remote maju 21 commit di atas `2790fc7` ke
+`1718030` (AR37 sampai AR44, B347 sampai B368), dan `ridho` lokal sudah
+sama dengannya; `nizar` dan `yoga` tidak punya commit di luarnya. Seed
+tidak mengubah daftar nama izin, model hanya menambah field opsional, dan
+tidak ada skrip migrasi wajib, sehingga cukup menyalakan ulang backend.
+Web menyesuaikan diri 23 November 2026
+(`referensi/keputusan-penyesuaian-backend.md`).
 
 Sejak 16 November 2026 Ridho, sebagai pemimpin tim backend, mengambil
 alih seluruh pekerjaan backend di modul siapa pun sampai backend siap

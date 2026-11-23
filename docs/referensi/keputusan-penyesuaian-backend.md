@@ -1101,3 +1101,49 @@ skrip migrasi tidak berubah.
 - **Ditemukan saat pembersihan data uji**: menghapus akun klien lewat API
   admin kini ikut menghapus tokonya. Kelima toko wizard "Kopi Senja E2E"
   hilang bersama akunnya, tanpa dokumen ber-`tenantID` yatim.
+
+## Penyesuaian backend `ridho` `1718030`
+
+Dikerjakan 23 November 2026 atas perintah pemilik proyek. Backend `ridho`
+maju 21 commit di atas `2790fc7` ke `1718030` (22 November 2026, AR37
+sampai AR44); `nizar` dan `yoga` tidak punya commit di luarnya. Seed
+permission tidak menambah atau membuang nama (`akunKasPermission.js` hanya
+mengenali Owner dari level), seed pelanggan dibuang, model menambah field
+opsional (konversi bahan dan masukan bersatuan), dan tidak ada skrip
+migrasi yang wajib dijalankan di basis data development. Backend
+menyatakan seluruh pekerjaan di luar produksi selesai dan menunggu
+pembuktian web (AR31).
+
+- **Keputusan pemilik proyek** (dialog 23 November 2026):
+  - KN1a, KN2a, KN3a: kemasan di form bahan baku, stok terbaca, dan
+    pilihan satuan di semua form masukan termasuk rincian hitung opname
+    (`modul/produk-kategori.md` dan `modul/inventaris.md`).
+  - UD1a dan UD2a: dialog pilih bulan untuk ekspor daftar, dan laporan
+    Pembayaran per Metode dari endpoint baru beserta Unduh laporan
+    (`modul/keuangan.md`). UD3a: filter Periode daftar opname dan
+    adjustment (`modul/inventaris.md`).
+  - RK1a: laman Rekap Absensi desain D, dipilih dari kanvas tiga desain
+    dan satu gabungan, dengan merah redup untuk angka Tidak hadir
+    (`modul/jadwal-shift.md`).
+  - BH1a: Sesi Booking detail penjualan tetap tampil sebagai riwayat bagi
+    toko yang turun plan (`modul/penjualan.md`).
+- **Diterapkan tanpa keputusan baru**: B347 (booking dari detail
+  penjualan, butir 186), B348 (staf izin di monitoring, butir 187),
+  cadangan satuan `"pcs"` pengajuan dibuang (B364 menolak satuan di luar
+  `availableUnits`), dan form ubah bahan baku dipindah ke pola
+  `defaultValues` (keputusan rancangan butir 8) setelah spec menemukan
+  Select satuan kosong.
+- **Tidak dipakai web**: jurnal stok manual bersatuan (B367), karena web
+  tidak mencatat jurnal manual; audit IDOR (B363) tanpa perubahan bagi web.
+- **Dibuktikan e2e** (23 November 2026, tanpa suite penuh): B347 di
+  `reservasi/daftar/tandai-selesai` (Owner dan peran uji tanpa
+  `read-booking`, tanpa `GET /sesibooking/:id`); B348 di
+  `dashboard/dashboard-outlet` (staf uji yang izin dimuat monitoring);
+  B349 sampai B357 di `unduh/ekspor-daftar` (delapan daftar, bulan
+  berjalan dan bulan lalu, format, tanpa `page`, `limit`, dan batas
+  tanggal); B353 di `keuangan/pembayaran-metode`; B358 di
+  `jadwal/rekap-absensi`; B359 sampai B362 dan B364 di
+  `inventaris/bahanBaku/konversi-satuan`; B366 di
+  `inventaris/stockOpname/draft-stok-opname`; B368 lewat pengajuan baru
+  yang dibuat 201. B365 (surat jalan per kemasan) hanya teruji di unit
+  test (`referensi/utang-pengujian.md`).

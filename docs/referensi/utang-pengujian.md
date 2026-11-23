@@ -489,3 +489,26 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   Transfer", dan "E2E Adjustment Outlet" menetap** (20 November 2026),
   dibuat sekali lewat `tests/helpers/terkunci-uji.ts` dan dipakai ulang.
   Ketiganya ikut tampil di daftar pengguna dan pilihan login PIN.
+  Sejak 23 November 2026 "E2E Tanpa Baca Sebagian" juga tidak memegang
+  `read-booking`, untuk membuktikan Sesi Booking detail penjualan cukup
+  `read-penjualan` (B347); `pastikanPeran` menyelaraskan izinnya.
+- **Surat jalan per kemasan (B365) hanya teruji di unit test**: revisi
+  dan terima mengirim `satuan` (`susunPayloadRevisi`,
+  `susunPayloadTerima`) dan selisih terima dibandingkan dalam satuan dasar
+  (`faktorKeDasar`), tetapi alur revisi dan terima lewat UI dengan bahan
+  berkemasan belum dibuat e2e, karena butuh surat jalan berisi bahan
+  fixture "E2E Bahan Kaleng" dari pengajuan yang disetujui.
+- **Bahan uji "E2E Bahan Kaleng" permanen** di basis data development
+  (ml, kemasan kaleng = 290), dibuat sekali oleh
+  `inventaris/bahanBaku/konversi-satuan.spec.ts`; pengajuan uji per run
+  diajukan lalu ditolak, sehingga pengajuan Ditolak bertambah satu per run.
+- **Isi berkas ekspor hanya diperiksa tipe kontennya**: spec
+  `unduh/ekspor-daftar` membuktikan query, status 200, tipe konten, dan
+  unduhan terjadi, tetapi tidak membaca kolom dan baris TOTAL di dalam
+  berkas; isinya dijamin test backend (AR38 sampai AR40). Batas 10.000
+  baris (400) tidak dapat dibuat deterministik dari web.
+- **Rekap Absensi tanpa izin, gagal dimuat, dan bulan kosong** hanya
+  teruji dari kode (pesan dan keadaan kosong); spec
+  `jadwal/rekap-absensi` berjalan dengan data bulan berjalan.
+- **Stok terbaca di inventaris gudang** hanya teruji di unit test
+  (`rincianKemasan`); e2e membuktikannya di daftar stok outlet.

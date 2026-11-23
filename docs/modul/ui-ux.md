@@ -45,7 +45,9 @@ DB (dashboard outlet), WR (warna), dan TB (tabel).
   menang atas izin, dan status alpha ditunda (`3812763`). Sejak `96a7b40`
   izin hari ini disaring server (B160), dan sejak `44a81d0` staf berasal
   dari monitoring per lokasi outlet ditambah karyawan ruang yang izin
-  hari itu (B183, `modul/jadwal-shift.md`).
+  hari itu (B183, `modul/jadwal-shift.md`). Sejak 23 November 2026
+  monitoring sendiri memuat staf yang izin, dan tambahan web dibuang
+  (B348).
 - **DB4a: lonceng notifikasi dipasang nonaktif** dengan keterangan belum
   tersedia, karena belum ada sumber datanya (`0c5822b`).
 - **DB5a: grafik dashboard memplot omzet (`totalOmzet`) per tanggal bulan
