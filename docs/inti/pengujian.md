@@ -12,6 +12,18 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per tuntasnya bug dan temuan frontend** (23 November 2026
+malam, backend `ridho` lokal `1718030`): vitest 1224 lolos. Kejadian
+vitest gagal 3 test sekali (19 November 2026) tidak tereproduksi: vitest
+penuh lima kali berturut-turut dan sekali tepat sesudah Playwright,
+semuanya 1224 lolos dan 0 gagal, dengan reporter JSON yang mencatat nama
+test yang gagal. Bila muncul lagi, jalankan
+`npx vitest run --reporter=json --outputFile=<berkas>` agar nama testnya
+tercatat. E2E tanpa suite penuh: folder `tampilan` (bayangan baris dan
+spec baru `tombol-kembali`, 5 skenario) dan `setup/setup` 15 lolos.
+Harapan suite penuh berikutnya 727 (`npx playwright test --list`, 116
+berkas).
+
 **Baseline per bug dan temuan frontend** (23 November 2026 sore, backend
 `ridho` lokal `1718030`): vitest 1224 lolos dari 145 berkas (unit baru
 `lib/auth/label-izin.ts`, `syaratKurangRute`, `labelMenuRute`, tautan
@@ -289,6 +301,7 @@ Pola kegagalan yang berulang:
 | Bagian berbasis container query tidak berganti tampilan di lebar yang diharapkan | Lebar isi lebih kecil dari lebar layar karena sidebar, padding area gulir, dan padding pembungkus; di 1280 px isi halaman daftar sekitar 888 px. Ukur lebar wadah lebih dulu sebelum memilih ambang `@[..rem]` (Rekap Absensi, 23 November 2026) |
 | `bukaDenganAuth` habis waktu menunggu `pin-refresh` di skenario baru | Blok `describe` tempat skenario ditambahkan tidak login di `beforeEach`; skenario lain di blok itu memanggil `login(page)` sendiri. Baca `beforeEach` blok tujuan sebelum menambah skenario (23 November 2026) |
 | `getComputedStyle(...).boxShadow` sel bertanda `shadow-none` bukan `none`, atau warnanya tidak terbaca pola `rgba` | Tailwind v4 menulis bayangan sebagai beberapa lapisan variabel; `shadow-none` menjadi lapisan `rgba(0, 0, 0, 0)`, dan warna `color-mix` terhitung `color(srgb … / a)`. Periksa alfa setiap lapisan (`adaBayanganTerlihat` di `tampilan/bayangan-baris`) |
+| Skenario navigasi kembali gagal hanya di suite penuh, lolos sendirian | Tombol memakai `router.back()`, sehingga tujuannya bergantung riwayat tab yang berbeda antara run sendiri dan suite penuh. Buka laman di tab baru (`context().newPage()`) untuk membuktikannya secara pasti, dan pakai tujuan pasti (KB1a) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

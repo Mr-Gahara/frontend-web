@@ -763,6 +763,16 @@ Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend 
   sel tanpa bayangan. Pembuktian di WebKit (Safari) tidak dapat dijalankan
   di mesin ini karena pustaka sistemnya tidak ada, sehingga pemilik proyek
   memilih mengganti tanpa menunggu bukti.
+- **KB1a: tombol Kembali, Batal, dan Batalkan bertujuan pasti**, bukan
+  `router.back()` yang bergantung riwayat browser: Buat Reservasi ke daftar
+  reservasi, Buat Pengajuan ke daftar pengajuan dan revisinya ke detail
+  pengajuan, Batal Revisi surat jalan ke detail surat jalannya, surat jalan
+  dan penerimaan yang tidak ditemukan ke daftarnya, dan pembayaran
+  penjualan ke detail penjualannya. `router.back()` hanya tersisa di
+  halaman galat yang berlabel "Kembali ke halaman sebelumnya". Penyebab
+  gagal sesekali "Batalkan kembali ke daftar" di suite penuh; dibuktikan
+  `tampilan/tombol-kembali` dengan membuka setiap laman di tab baru, dan
+  spec itu gagal terhadap kode lama.
 
 ## Catatan
 

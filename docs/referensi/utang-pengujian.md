@@ -412,6 +412,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   saat suite penuh berikutnya menggagalkannya lagi, tanpa run tambahan
   untuk memancingnya. Suite terhadap backend `4759208` (4 November 2026)
   meloloskannya.
+  Penyebabnya ditemukan 23 November 2026 dari kode, tanpa run tambahan:
+  tombol memakai `router.back()`, sehingga tujuannya bergantung riwayat
+  tab. Diganti tujuan pasti (KB1a, `modul/ui-ux.md`) dan dibuktikan
+  `tampilan/tombol-kembali`. Lunas.
 - **Keadaan masa berlaku Langganan hanya teruji di unit test**: masa
   percobaan, bilah masa berlaku, masa akses lewat dan masa tenggang, serta
   Muat riwayat lainnya. Akun uji Pro tanpa batas waktu dengan satu catatan

@@ -50,13 +50,17 @@ sejak 22 November). Dua putaran selesai hari itu:
    (GR9a), bayangan baris per sel (BB1a), dan halaman ubah akun kas dari
    `GET /akunkas/:id`. Catatan logout `pin-logout` ternyata sudah selesai
    di backend B343.
+3. **Bug dan temuan frontend tuntas**: sebutan "kategori aset" di seluruh
+   aplikasi (KA2a), tombol kembali bertujuan pasti di enam laman (KB1a,
+   penyebab gagal sesekali "Batalkan kembali ke daftar"), dan kejadian
+   vitest gagal sekali tidak tereproduksi dalam enam run.
 
 Urutan kerja berikutnya, atas perintah pemilik proyek: butir daftar
 20 November 2026 dan 19 November 2026 di bawah yang belum selesai (rombak
 UI/UX laman admin, deskripsi paket laman pengenalan, revisi laman profil
 dan menu popup profil), nomor WhatsApp admin (LG1a), dan utang pengujian
 kelompok 1. **Suite e2e penuh ditunda sampai seluruh pekerjaan selesai**
-(pemilik proyek, 20 November 2026); harapannya 722, dan sesudahnya skrip
+(pemilik proyek, 20 November 2026); harapannya 727, dan sesudahnya skrip
 `bersih-akunkas.js` (AU1a).
 
 ### Keadaan sebelum 23 November 2026

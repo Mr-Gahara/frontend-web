@@ -98,6 +98,14 @@ Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend 
   aset, dan form tarif; nama rute dan kode tetap tipe aset. Teks "tipe
   aset" di luar laman reservasi (wizard setup, halaman daftar akun, dan
   Langganan) tidak termasuk keputusan ini.
+- **KA2a: "kategori aset" di seluruh aplikasi** (pemilik proyek,
+  23 November 2026, memperluas KA1a): wizard setup (isian, pesan
+  validasi, ringkasan langkah, dan tur), daftar fitur halaman daftar akun
+  dan Langganan, ajakan fitur, dan nama izin di pesan 403. Nama kode,
+  rute, dan nama izin backend tetap tipe aset. Sebutan ini keputusan
+  pemilik proyek, bukan temuan.
+- **KB1a (Buat Reservasi)**: Kembali dan Batalkan selalu membuka daftar
+  reservasi (`modul/ui-ux.md`, KB1a).
 - **TF1a: satu form tarif bersama** (`features/tarif/form-tarif.tsx`,
   menutup T1a): halaman buat dan ubah memakai tampilan halaman ubah (Select
   Radix untuk basis, harga berformat ribuan), dengan label yang terhubung
