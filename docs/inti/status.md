@@ -100,7 +100,8 @@ backend `1718030`: modal awal sudah ada sebagai `nominalBuka` tetapi
 wajib diisi, dan penjualan serta pembayaran non-tunai belum terhubung ke
 sesi kasir, sehingga nominal per metode, jumlah transaksi, dan produk
 terjual per sesi belum dapat disajikan. Rencana lengkap, peta data per
-isi struk, dan delapan keputusan terbuka di
+isi struk, dan sembilan keputusan terbuka (termasuk arti modal kosong,
+karena nominal buka sekarang memicu mutasi selisih laci) di
 `referensi/rencana-struk-tutup-kasir.md`. Web menunggu endpoint laporan
 dari backend.
 

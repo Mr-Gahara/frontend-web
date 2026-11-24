@@ -102,6 +102,16 @@ saat buka, bilangan bulat minimal 0), tetapi **wajib diisi**:
 `nominal` saat buka menjadi opsional dengan bawaan 0. Ini satu-satunya
 isian baru dari sisi pengguna.
 
+**Jebakan yang harus diputuskan lebih dulu** (keputusan terbuka nomor
+9): `nominalBuka` sekarang adalah hitungan uang laci, bukan modal
+terpisah. Saat buka, backend menghitung `selisih = nominal − saldo akun
+laci`; bila tidak 0, catatan wajib diisi dan saldo akun laci dikoreksi
+lewat mutasi `SELISIH_KAS_MASUK` atau `SELISIH_KAS_KELUAR`
+(`services/sesiKasirService.js` baris 102 sampai 135). Akun laci membawa
+saldo dari sesi sebelumnya, sehingga isian kosong yang disimpan 0 pada
+laci berisi Rp1.050.000 tercatat sebagai selisih kas keluar Rp1.050.000
+dan saldo laci menjadi 0, padahal uangnya masih ada.
+
 ## Peta data struk (diperiksa 24 November 2026, backend `1718030`)
 
 | Data di struk | Sumber sekarang | Keadaan |
@@ -111,7 +121,7 @@ isian baru dari sisi pengguna.
 | Telepon toko | Tidak ada field telepon di tenant | Belum ada; perlu diputuskan apakah ikut |
 | Nama kasir | `sesiKasir.dibukaOleh` dan `ditutupOleh` (nama ter-populate) | Ada; kasir lain yang melayani di tengah sesi belum terbaca (lihat Keputusan terbuka) |
 | Waktu buka dan tutup | `sesiKasir.dibukaPada`, `ditutupPada` | Ada |
-| Modal awal | `sesiKasir.nominalBuka` | Ada, tetapi wajib diisi (lihat Modal awal) |
+| Modal awal | `sesiKasir.nominalBuka` | Ada, tetapi wajib diisi, dan nilainya sekaligus hitungan laci yang memicu mutasi selisih (lihat Modal awal) |
 | Nominal per metode pembayaran | Pembayaran tunai ke laci membawa `sesiKasirID`; pembayaran non-tunai menyimpan `sesiKasirID` null (`models/pembayaranModel.js` baris 21) | **Belum ada** untuk non-tunai |
 | Total penerimaan kasir | Jumlah nominal per metode | **Belum ada** (bergantung baris di atas); detail sesi baru punya `ringkasan.tunaiMasuk` |
 | Saldo akhir | `sesiKasir.saldoSistemTutup` atau `nominalTutup` | Ada; maknanya perlu diputuskan |
@@ -211,6 +221,10 @@ Tidak ada pekerjaan web sebelum backend menyediakan endpoint laporan.
    atau termasuk yang belum terbayar?
 8. Peran web nomor 2 dan 3 (cetak dari browser, unduh) ikut MVP atau
    tidak.
+9. **Arti modal awal kosong**: "laci memang kosong" (selisih terhadap
+   saldo laci dicatat, seperti sekarang), atau "tidak dihitung" (modal
+   dicatat 0 tanpa menyentuh saldo laci dan tanpa mutasi selisih)? Bila
+   yang kedua, modal awal perlu dipisah dari hitungan laci saat buka.
 
 ## Kriteria selesai MVP (usulan)
 
