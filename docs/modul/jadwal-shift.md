@@ -264,6 +264,15 @@ Diputuskan pemilik proyek 23 November 2026 (`referensi/keputusan-penyesuaian-bac
   "Rekap Absensi" di grup Manajemen Shift, gerbang `read-location` dan
   `read-absensi`. Tidak hadir dihitung per shift (P86); status alpha
   harian tetap ditunda (DB3a).
+- **RK2a: teks keadaan kosong Rekap Absensi menyebut lokasi kerja**
+  (pemilik proyek, 24 November 2026). Backend memuat staf yang berlokasi
+  kerja di outlet itu setiap bulan walau tanpa kegiatan (AR40), sehingga
+  teksnya menjadi "Staf tampil di sini bila berlokasi kerja di outlet
+  ini, atau punya jadwal kerja, absen, atau izin cuti pada bulan yang
+  dipilih." Keadaan kosong diuji lewat simulasi bertanda, karena data uji
+  selalu punya staf berlokasi kerja. Perilaku backend tetap dicatat
+  sebagai temuan yang harus diperbaiki backend (`kontrak/temuan.md`
+  butir 194; `2090dd8`).
 
 ## Catatan
 

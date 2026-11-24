@@ -40,12 +40,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   tidak dirujuk jadwal maupun pola roster dihapus; fixture "E2E Jadwal
   ..." dan shift asli toko tetap (`inti/status.md`, Utang kecil dari
   penyesuaian backend `4759208`).
-- **Status aset "Digunakan"** belum teruji (penghapusan aset yang punya
-  booking teruji di `reservasi/aset/crud-aset.spec.ts` sejak `66ea7a4`).
-  Spec daftar reservasi kini membuat booking sungguhan yang
-  mencakup waktu sekarang, tetapi label status aset uji hanya dibandingkan
-  dengan respons `GET /aset`, karena daftar aset di-cache backend 60 detik
-  dan belum terbukti dibersihkan saat booking dibuat.
 - **Booking uji dibersihkan lewat API**: pembayaran PAID-nya dibatalkan,
   lalu penjualannya di-void (PB8a), walau web kini punya jalur void untuk
   penjualan booking yang belum dibayar (PB2a). Setiap run spec daftar
@@ -213,12 +207,11 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   `// simulasi:`. Penolakan 409 backend atasnya dibuktikan lewat skrip
   sekali pakai (7 Oktober 2026), karena web kini menahannya. Batas 10
   metode aktif teruji dengan data nyata sejak 24 November 2026.
-- **Tandai Selesai hanya teruji untuk satu booking yang dibayar Rp1.**
-  Tombol yang tidak tampil (belum dibayar, jam sudah lewat, tanpa
-  `update-booking`) hanya teruji di unit test
-  (`tests/unit/features/sesi-booking/izin.test.ts`), dan bagian Sesi
-  Booking tanpa `read-booking` belum teruji. Setiap run meninggalkan
-  satu penjualan booking VOID.
+- **Status booking lewat jam di detail penjualan menunggu backend**
+  (butir 193): skenario Tandai Selesai varian di
+  `reservasi/daftar/tandai-selesai` merah pada label status, sedangkan
+  tombolnya sudah teruji tersembunyi. Setiap run spec itu meninggalkan
+  tiga penjualan booking VOID.
 
 - **Hapus bahan baku yang berhasil tidak teruji e2e** sejak `43f09af`:
   skenarionya `test.fixme` menunggu backend (`kontrak/temuan.md` butir
@@ -325,11 +318,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (`stok-produk-beresep`), dihapus lewat API admin di akhir; backend
   menghapus tokonya bersama akun, sehingga tidak menumpuk selama
   penghapusannya berhasil.
-- **Penyaringan titik tur dashboard menurut plan hanya teruji di unit
-  test** (`titik-dashboard.test.ts`, `kunciPanduanDashboard`): titik tur
-  ruang outlet tidak bergantung plan, dan tur ruang gudang tidak ada bagi
-  plan tanpa gudang. Penyaringan menurut izin teruji e2e sejak 24 November
-  2026 (`dashboard/panduan-dashboard`, pengguna tanpa `read-pengguna`).
 - **Label kedatangan Status Staf (AB6a) hanya teruji di unit test**
   (`tests/unit/features/dashboard-outlet/dashboard-outlet.test.ts`),
   karena absen dibuat aplikasi dengan foto dan koordinat, sehingga data
@@ -339,13 +327,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   sampai B274) tidak diuji web**, karena ruang kini menolak lebih dulu
   (LK3a). Isian lokasi kerja tanpa `read-location` dan untuk role Owner
   teruji e2e sejak 24 November 2026 (`pengguna/crud-pengguna`).
-- **Metode tunai berlaci mesin kasir yang dinonaktifkan (PB15a) hanya
-  teruji di unit test** (`metodeLaciMesinKasir`), karena butuh metode
-  tunai yang akun kasnya laci uji yang sedang dipetakan, sedangkan spec
-  mesin kasir melepas pemetaannya di akhir (16 November 2026).
-- **Booking lintas tengah malam di timeline (TL1a) belum teruji e2e**:
-  spec reservasi hanya memeriksa query `tampilan=timeline`, karena butuh
-  booking yang melewati 00.00 dari hari sebelumnya (16 November 2026).
 - **Jalur berhasil yang meninggalkan data permanen diuji sejak 20 November
   2026** (pemilik proyek: diuji sungguhan dan data yang menumpuk
   diterima). Per run: satu opname outlet APPROVED berhitungan sama dengan
@@ -378,9 +359,9 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   tidak dapat dibuat deterministik dari web. Isi CSV setiap daftar teruji
   sejak 24 November 2026 (`unduh/ekspor-daftar`): judul kolom, lebar setiap
   baris, dan baris TOTAL, termasuk TOTAL yang menghitung baris.
-- **Rekap Absensi tanpa izin, gagal dimuat, dan bulan kosong** hanya
-  teruji dari kode (pesan dan keadaan kosong); spec
-  `jadwal/rekap-absensi` berjalan dengan data bulan berjalan.
+- **Keadaan kosong Rekap Absensi hanya teruji lewat simulasi**
+  bertanda, karena backend memuat staf berlokasi kerja setiap bulan
+  (butir 194, RK2a).
 - **Ganti pengguna dari popup profil teruji di tab yang sama**; muat
   ulang sesudahnya menunggu backend butir 190.
 - **Peran dan pengguna uji kelompok 1 menetap** (24 November 2026),
@@ -424,3 +405,11 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   uji yang dihapus dari `produk/crud-produk`. Entri inventory gudang
   "E2E Bahan Kaleng" dan pengguna uji "E2E Pengaju Gudang" serta "E2E
   Penyetuju Gudang" (berlokasi kerja Gudang) menetap.
+- **Data per run spec kelompok reservasi, jadwal, dan tampilan**
+  (24 November 2026): dua penjualan booking VOID dari
+  `reservasi/daftar/lihat-reservasi` (Digunakan dan TL1a, termasuk satu
+  pembayaran Rp1 yang dibatalkan), satu penjualan booking VOID dari
+  PB15a beserta satu perangkat mesin kasir uji yang dilepas, dan satu
+  akun klien Basic sekali pakai dari tur dashboard yang dihapus lewat API
+  admin. Metode "E2E Metode Laci Tetap" menetap non-aktif dan dipakai
+  ulang.

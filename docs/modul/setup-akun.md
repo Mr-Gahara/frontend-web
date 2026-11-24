@@ -256,6 +256,14 @@ Mesinnya mengikuti keputusan rancangan butir 32.
   `features/inventaris/use-akses-gudang.ts`, dipakai layout gudang dan
   `kunciPanduanDashboard`); repro dengan respons lokasi ditunda 1,5 detik
   gagal 2 dari 2 sebelum perbaikan dan lolos 2 dari 2 sesudahnya.
+- **TG3a: tombol panduan tidak dipasang di ruang gudang di luar plan**
+  (pemilik proyek, 24 November 2026). Ditemukan spec tur dashboard akun
+  Basic: tur gudang tidak tampil sendiri, tetapi tombol Lihat panduan
+  dashboard tetap ada dan membuka tur satu titik di halaman "Gudang belum
+  termasuk plan Anda". Kini tombol tidak dipasang di ruang gudang bila
+  gudang di luar plan atau akses gudang ditolak
+  (`tombolPanduanGudangTampil` di `components/panduan/titik-dashboard.ts`,
+  `2090dd8`); ruang outlet tidak berubah.
 
 ### OTP aksi Owner
 

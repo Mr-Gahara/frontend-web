@@ -1729,6 +1729,43 @@ HP1a) dan revisi per kemasan di backend (`kontrak/temuan.md` butir 192).
 - **Stok terbaca di inventaris gudang** hanya teruji di unit test
   (`rincianKemasan`); e2e membuktikannya di daftar stok outlet.
 
+Dilunasi 24 November 2026 (utang pengujian kelompok reservasi, jadwal,
+dan tampilan, `2090dd8`) dan dipindah dari `referensi/utang-pengujian.md`
+tanpa perubahan teks; dua butir (Tandai Selesai, Rekap Absensi)
+dipersempit ke sisanya di sana. Skenario baru di
+`reservasi/daftar/lihat-reservasi`, `reservasi/daftar/tandai-selesai`,
+`jadwal/rekap-absensi`, `keuangan/mesin-kasir`, dan
+`dashboard/panduan-dashboard`. Temuan: RK2a dan TG3a (diperbaiki), serta
+butir 193 dan 194 untuk backend.
+
+- **Status aset "Digunakan"** belum teruji (penghapusan aset yang punya
+  booking teruji di `reservasi/aset/crud-aset.spec.ts` sejak `66ea7a4`).
+  Spec daftar reservasi kini membuat booking sungguhan yang
+  mencakup waktu sekarang, tetapi label status aset uji hanya dibandingkan
+  dengan respons `GET /aset`, karena daftar aset di-cache backend 60 detik
+  dan belum terbukti dibersihkan saat booking dibuat.
+- **Tandai Selesai hanya teruji untuk satu booking yang dibayar Rp1.**
+  Tombol yang tidak tampil (belum dibayar, jam sudah lewat, tanpa
+  `update-booking`) hanya teruji di unit test
+  (`tests/unit/features/sesi-booking/izin.test.ts`), dan bagian Sesi
+  Booking tanpa `read-booking` belum teruji. Setiap run meninggalkan
+  satu penjualan booking VOID.
+- **Metode tunai berlaci mesin kasir yang dinonaktifkan (PB15a) hanya
+  teruji di unit test** (`metodeLaciMesinKasir`), karena butuh metode
+  tunai yang akun kasnya laci uji yang sedang dipetakan, sedangkan spec
+  mesin kasir melepas pemetaannya di akhir (16 November 2026).
+- **Booking lintas tengah malam di timeline (TL1a) belum teruji e2e**:
+  spec reservasi hanya memeriksa query `tampilan=timeline`, karena butuh
+  booking yang melewati 00.00 dari hari sebelumnya (16 November 2026).
+- **Penyaringan titik tur dashboard menurut plan hanya teruji di unit
+  test** (`titik-dashboard.test.ts`, `kunciPanduanDashboard`): titik tur
+  ruang outlet tidak bergantung plan, dan tur ruang gudang tidak ada bagi
+  plan tanpa gudang. Penyaringan menurut izin teruji e2e sejak 24 November
+  2026 (`dashboard/panduan-dashboard`, pengguna tanpa `read-pengguna`).
+- **Rekap Absensi tanpa izin, gagal dimuat, dan bulan kosong** hanya
+  teruji dari kode (pesan dan keadaan kosong); spec
+  `jadwal/rekap-absensi` berjalan dengan data bulan berjalan.
+
 ## Kejadian sesekali yang tidak berulang
 
 - **Master Shift tampil sebagai kartu di 1280 px, sekali** (20 November

@@ -12,6 +12,22 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per utang pengujian kelompok reservasi, jadwal, dan tampilan**
+(24 November 2026, `2090dd8`, backend `ridho` lokal `1718030`): vitest
+1246 lolos dari 147 berkas (unit baru `tombolPanduanGudangTampil`).
+Tanpa suite penuh dan tanpa OTP: folder `reservasi` dan `jadwal` serta
+`keuangan/mesin-kasir` dijalankan bersama: 185 lolos, 2 gagal, dan 1
+dilewati dari 188. Yang gagal skenario bulan kosong Rekap Absensi
+(sebelum RK2a; ditulis ulang menjadi simulasi) dan label status booking
+lewat jam (butir 193, merah atas keputusan pemilik proyek); yang
+dilewati Muat hari sebelumnya Mesin Kasir. Sesudah RK2a dan TG3a dan
+dev server dinyalakan ulang, `jadwal/rekap-absensi` dan
+`dashboard/panduan-dashboard` 16 lolos; keduanya gagal pada kode lama
+(dibuktikan lewat `git stash`). Harapan suite penuh berikutnya 813 (`npx
+playwright test --list`, 124 berkas), dengan tiga skenario merah yang
+disengaja: General Manajer (191), revisi per kemasan (192), dan status
+booking lewat jam (193).
+
 **Baseline per utang pengujian kelompok inventaris dan gudang** (24
 November 2026, `826f0ab`, backend `ridho` lokal `1718030`): vitest 1244
 lolos dari 147 berkas (unit baru `produkSudahTerhapus`). Tanpa suite
