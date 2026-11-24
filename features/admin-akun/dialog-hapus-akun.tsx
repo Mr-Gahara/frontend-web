@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { pesanError } from "@/lib/api/error";
 import type { AkunAdmin } from "@/types/adminAkun";
 import { useHapusAkun } from "./hooks";
-import { URL_DAFTAR_AKUN, namaToko } from "./tampilan";
+import { KELAS_DIALOG_ADMIN, URL_DAFTAR_AKUN, namaToko } from "./tampilan";
 
 /**
  * Konfirmasi hapus akun klien dengan password admin, yang diverifikasi
@@ -66,7 +66,7 @@ function IsiDialogHapus({ akun, onTutup }: { akun: AkunAdmin; onTutup: () => voi
         if (!buka && !memuat) onTutup();
       }}
     >
-      <DialogContent>
+      <DialogContent className={KELAS_DIALOG_ADMIN}>
         <DialogHeader>
           <DialogTitle>Hapus akun {akun.email}</DialogTitle>
           <DialogDescription>

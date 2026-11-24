@@ -38,6 +38,8 @@ const EMAIL_TOKO = "toko@gmail.com";
 
 const dialog = (page: Page) => page.getByRole("dialog");
 const riwayat = (page: Page) => page.getByRole("region", { name: "Riwayat Langganan" });
+/** Pilihan durasi di dialog langganan, berupa tombol pilihan sejak rombak panel admin (24 November 2026). */
+const durasiDialog = (page: Page) => dialog(page).getByRole("radiogroup", { name: "Durasi" });
 const tungguPos = (page: Page, pola: RegExp): Promise<Response> =>
   page.waitForResponse((r) => pola.test(r.url()) && r.request().method() === "POST");
 
@@ -114,7 +116,10 @@ test.describe("Langganan akun klien", () => {
         expect(respons.status()).toBe(200);
         expect(respons.request().postDataJSON()).toEqual({ alasan: "uji pembekuan e2e" });
         await expect(dialog(page)).toBeHidden({ timeout: 15_000 });
-        await expect(page.getByText("Non-aktif (dibekukan admin)")).toBeVisible();
+        // Lencana gaya A: Non-aktif dengan alasan di bawahnya (rombak panel admin, 24 November 2026).
+        const profil = page.getByRole("region", { name: "Profil akun" });
+        await expect(profil.getByText("Non-aktif", { exact: true })).toBeVisible();
+        await expect(profil.getByText("Dibekukan admin", { exact: true })).toBeVisible();
         await expect(page.getByRole("button", { name: "Bekukan Akun" })).toHaveCount(0);
         await expect(riwayat(page).getByRole("listitem").first()).toContainText("Dibekukan");
         await expect(riwayat(page).getByRole("listitem").first()).toContainText("uji pembekuan e2e");
@@ -122,9 +127,7 @@ test.describe("Langganan akun klien", () => {
 
       await test.step("aktifkan tanpa perpanjangan selama masa akses masih berjalan", async () => {
         await page.getByRole("button", { name: "Aktifkan Akun" }).click();
-        await expect(dialog(page).getByRole("combobox", { name: "Durasi" })).toContainText(
-          "Tanpa perpanjangan",
-        );
+        await expect(durasiDialog(page).getByRole("radio", { checked: true })).toHaveText("Tanpa perpanjangan");
         const tunggu = tungguPos(page, POLA_AKTIFKAN);
         await dialog(page).getByRole("button", { name: "Aktifkan", exact: true }).click();
         const respons = await tunggu;
@@ -148,8 +151,7 @@ test.describe("Langganan akun klien", () => {
         page.off("request", catat);
         expect(terkirim, "tanpa durasi tidak ada permintaan").toBe(0);
 
-        await dialog(page).getByRole("combobox", { name: "Durasi" }).click();
-        await page.getByRole("option", { name: "6 bulan" }).click();
+        await durasiDialog(page).getByRole("radio", { name: "6 bulan" }).click();
         const tunggu = tungguPos(page, POLA_LANGGANAN);
         await dialog(page).getByRole("button", { name: "Perpanjang", exact: true }).click();
         const respons = await tunggu;
@@ -192,8 +194,7 @@ test.describe("Langganan akun klien", () => {
         await page.waitForURL("**/admin/akun/buat");
         await page.getByLabel("Email", { exact: true }).fill(email);
         await page.getByLabel("Password awal").fill("UjiKlien123");
-        await page.getByRole("combobox", { name: "Plan" }).click();
-        await page.getByRole("option", { name: "Pro" }).click();
+        await page.getByRole("radiogroup", { name: "Plan" }).getByRole("radio", { name: "Pro" }).click();
 
         let terkirim = 0;
         const catat = (r: { url(): string; method(): string }) => {
@@ -205,9 +206,9 @@ test.describe("Langganan akun klien", () => {
         page.off("request", catat);
         expect(terkirim, "tanpa durasi tidak ada permintaan").toBe(0);
 
-        await page.getByRole("combobox", { name: "Langganan" }).click();
-        await expect(page.getByRole("option", { name: "Masa percobaan" })).toHaveCount(0);
-        await page.getByRole("option", { name: "24 bulan" }).click();
+        const durasi = page.getByRole("radiogroup", { name: "Durasi" });
+        await expect(durasi.getByRole("radio", { name: "Masa percobaan" })).toHaveCount(0);
+        await durasi.getByRole("radio", { name: "24 bulan" }).click();
         const tunggu = tungguPos(page, POLA_BUAT);
         await page.getByRole("button", { name: "Simpan Akun" }).click();
         const respons = await tunggu;
@@ -240,9 +241,9 @@ test.describe("Langganan akun klien", () => {
       await test.step("ubah plan: plan sekarang tidak ditawarkan, Pro menjadi Advanced", async () => {
         await page.getByRole("button", { name: "Ubah Plan" }).click();
         await expect(dialog(page)).toContainText("Plan sekarang Pro. Masa akses tidak berubah.");
-        await dialog(page).getByRole("combobox", { name: "Plan baru" }).click();
-        await expect(page.getByRole("option", { name: /^Pro/ })).toHaveCount(0);
-        await page.getByRole("option", { name: "Advanced" }).click();
+        const planBaru = dialog(page).getByRole("radiogroup", { name: "Plan baru" });
+        await expect(planBaru.getByRole("radio", { name: "Pro" })).toHaveCount(0);
+        await planBaru.getByRole("radio", { name: "Advanced" }).click();
         const tunggu = page.waitForResponse((r) => POLA_PLAN.test(r.url()) && r.request().method() === "PUT");
         await dialog(page).getByRole("button", { name: "Ubah Plan", exact: true }).click();
         const respons = await tunggu;
@@ -262,11 +263,11 @@ test.describe("Langganan akun klien", () => {
 
       await test.step("perpanjang 1 bulan sekaligus kembali ke Pro", async () => {
         await page.getByRole("button", { name: "Perpanjang Langganan" }).click();
-        await expect(dialog(page).getByRole("combobox", { name: "Plan" })).toContainText("Advanced (sekarang)");
-        await dialog(page).getByRole("combobox", { name: "Durasi" }).click();
-        await page.getByRole("option", { name: "1 bulan", exact: true }).click();
-        await dialog(page).getByRole("combobox", { name: "Plan" }).click();
-        await page.getByRole("option", { name: "Pro" }).click();
+        const plan = dialog(page).getByRole("radiogroup", { name: "Plan" });
+        await expect(plan.getByRole("radio", { checked: true })).toHaveText("Advanced");
+        await expect(dialog(page)).toContainText("Plan sekarang Advanced.");
+        await durasiDialog(page).getByRole("radio", { name: "1 bulan", exact: true }).click();
+        await plan.getByRole("radio", { name: "Pro" }).click();
         const tunggu = tungguPos(page, POLA_LANGGANAN);
         await dialog(page).getByRole("button", { name: "Perpanjang", exact: true }).click();
         const respons = await tunggu;
@@ -317,9 +318,7 @@ test.describe("Langganan akun klien", () => {
 
       await page.getByRole("button", { name: "Aktifkan Akun" }).click();
       await expect(dialog(page)).toContainText("tanpa batas masa akses");
-      await expect(dialog(page).getByRole("combobox", { name: "Durasi" })).toContainText(
-        "Tetap tidak dibatasi",
-      );
+      await expect(durasiDialog(page).getByRole("radio", { checked: true })).toHaveText("Tetap tidak dibatasi");
       const tAktif = tungguPos(page, POLA_AKTIFKAN);
       await dialog(page).getByRole("button", { name: "Aktifkan", exact: true }).click();
       const respons = await tAktif;
@@ -392,8 +391,7 @@ test.describe("Langganan akun klien", () => {
       });
       try {
         await page.getByRole("button", { name: "Perpanjang Langganan" }).click();
-        await dialog(page).getByRole("combobox", { name: "Durasi" }).click();
-        await page.getByRole("option", { name: "1 bulan" }).click();
+        await durasiDialog(page).getByRole("radio", { name: "1 bulan", exact: true }).click();
         const tRiwayat = page.waitForResponse(
           (r) => POLA_LANGGANAN.test(r.url()) && r.request().method() === "GET",
         );
@@ -419,7 +417,7 @@ test.describe("Langganan akun klien", () => {
     await bukaDaftar(page);
     const barisAdmin = page
       .getByRole("row")
-      .filter({ has: page.getByRole("cell", { name: "Admin", exact: true }) })
+      .filter({ has: page.getByRole("cell").getByText("Admin", { exact: true }) })
       .first();
     await barisAdmin.getByRole("link").click();
     await page.waitForURL(/\/admin\/akun\/[0-9a-f]{24}$/);

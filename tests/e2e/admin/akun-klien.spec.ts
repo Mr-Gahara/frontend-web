@@ -49,7 +49,8 @@ test.describe("Akun klien di panel admin", () => {
   test("daftar menampilkan akun dari respons, dengan penanda peran dan toko", async ({ page }) => {
     const daftar = await bukaDaftar(page);
 
-    await expect(page.getByRole("cell", { name: "Admin", exact: true }).first()).toBeVisible();
+    // Penanda peran berupa lencana Admin di sel Akun (rombak panel admin, 24 November 2026).
+    await expect(page.getByRole("cell").getByText("Admin", { exact: true }).first()).toBeVisible();
 
     const bertoko = daftar.find((a) => a.role === "client" && a.daftarTenant.length > 0);
     test.skip(!bertoko, "Tidak ada akun klien yang sudah punya toko di data uji");
@@ -59,7 +60,8 @@ test.describe("Akun klien di panel admin", () => {
     await kolomCari(page).fill(bertoko.email);
     await periksaTotalDaftar(page, await tCari);
     await expect(barisAkun(page, bertoko.email)).toContainText(bertoko.daftarTenant[0].namaToko);
-    await expect(barisAkun(page, bertoko.email)).toContainText("Klien");
+    // Tabel desain A tanpa kolom Peran: akun klien tidak berlencana Admin (24 November 2026).
+    await expect(barisAkun(page, bertoko.email).getByText("Admin", { exact: true })).toHaveCount(0);
   });
 
   test("pencarian tanpa hasil dan filter status disaring server (B177)", async ({ page }) => {
@@ -171,8 +173,7 @@ test.describe("Akun klien di panel admin", () => {
       await page.getByLabel("Email", { exact: true }).fill(email);
       await page.getByLabel("Username").fill(username);
       await page.getByLabel("Password awal").fill("UjiKlien123");
-      await page.getByRole("combobox", { name: "Langganan" }).click();
-      await page.getByRole("option", { name: "3 bulan" }).click();
+      await page.getByRole("radiogroup", { name: "Durasi" }).getByRole("radio", { name: "3 bulan" }).click();
 
       const tunggu = page.waitForResponse(
         (r) => POLA_BUAT.test(r.url()) && r.request().method() === "POST",

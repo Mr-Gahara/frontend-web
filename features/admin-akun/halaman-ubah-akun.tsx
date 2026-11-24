@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { pesanError } from "@/lib/api/error";
 import type { AkunAdmin } from "@/types/adminAkun";
 import { useAkun, usePerbaruiAkun } from "./hooks";
-import { akunTidakAda, urlDetailAkun, URL_DAFTAR_AKUN } from "./tampilan";
+import { akunTidakAda, KELAS_TINGGI_TOMBOL, KELAS_TOMBOL_UTAMA, urlDetailAkun, URL_DAFTAR_AKUN } from "./tampilan";
 import {
   aksiKelolaAkun,
   nilaiAwalUbahAkun,
@@ -56,7 +56,8 @@ function FormUbahAkun({ akun }: { akun: AkunAdmin }) {
   };
 
   return (
-    <form onSubmit={handleSubmit(kirim)} noValidate className="space-y-5">
+    <form onSubmit={handleSubmit(kirim)} noValidate className="flex flex-col gap-6">
+      <section aria-label="Data masuk" className="flex flex-col gap-5 rounded-2xl border border-navy/10 bg-permukaan p-4 sm:p-6">
       <div className="space-y-2">
         <label htmlFor="email" className={KELAS_LABEL}>
           Email
@@ -106,24 +107,26 @@ function FormUbahAkun({ akun }: { akun: AkunAdmin }) {
         {errors.password && <p className={KELAS_GALAT}>{errors.password.message}</p>}
       </div>
 
+      </section>
+
       {galat && (
         <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-isi font-medium text-destructive">
           {galat}
         </p>
       )}
 
-      <div className="flex justify-end gap-2">
-        <Link href={urlDetailAkun(akun.id)}>
-          <Button type="button" variant="outline" disabled={memuat}>
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Link href={urlDetailAkun(akun.id)} className="w-full sm:w-auto">
+          <Button type="button" variant="outline" className={`w-full ${KELAS_TINGGI_TOMBOL} sm:px-6`} disabled={memuat}>
             Batal
           </Button>
         </Link>
-        <Button type="submit" disabled={memuat}>
-          {memuat ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="mr-2 h-4 w-4" />
-          )}
+        <Button
+          type="submit"
+          className={`w-full sm:w-auto sm:px-6 ${KELAS_TINGGI_TOMBOL} ${KELAS_TOMBOL_UTAMA}`}
+          disabled={memuat}
+        >
+          {memuat ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Simpan Perubahan
         </Button>
       </div>
@@ -145,13 +148,13 @@ export function HalamanUbahAkun() {
   let isi: ReactNode;
   if (detail.isError && akunTidakAda(detail.error)) {
     isi = (
-      <p role="alert" className="rounded-lg border border-border p-6 text-isi font-medium">
+      <p role="alert" className="rounded-2xl border border-navy/10 bg-permukaan p-4 text-isi font-medium sm:p-6">
         Akun tidak ditemukan. Akun ini mungkin sudah dihapus.
       </p>
     );
   } else if (detail.isError) {
     isi = (
-      <div role="alert" className="flex flex-col items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-6">
+      <div role="alert" className="flex flex-col items-start gap-3 rounded-2xl border border-destructive/20 bg-destructive/10 p-4 sm:p-6">
         <p className="text-isi font-medium text-destructive">
           {pesanError(detail.error, "Gagal memuat data akun.")}
         </p>
@@ -164,7 +167,7 @@ export function HalamanUbahAkun() {
     isi = <p className="text-isi text-muted-foreground">Memuat data akun...</p>;
   } else if (!aksiKelolaAkun(akun).ubah) {
     isi = (
-      <p role="alert" className="rounded-lg border border-border p-6 text-isi font-medium">
+      <p role="alert" className="rounded-2xl border border-navy/10 bg-permukaan p-4 text-isi font-medium sm:p-6">
         Akun admin tidak dapat diubah dari panel ini.
       </p>
     );
@@ -173,7 +176,7 @@ export function HalamanUbahAkun() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8">
       <div className="flex flex-col gap-4">
         <Link
           href={id ? urlDetailAkun(id) : URL_DAFTAR_AKUN}

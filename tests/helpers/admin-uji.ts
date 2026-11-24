@@ -184,7 +184,9 @@ export async function periksaTotalDaftar(page: Page, respons: Response): Promise
 export async function bukaDaftarAkun<T = AkunUji>(page: Page): Promise<T[]> {
   await loginAdmin(page, wajibAdmin());
   await page.reload({ waitUntil: "commit" });
-  const respons = await tungguDaftarAkun(page);
+  // Kartu ringkas ikut meminta daftar berukuran 1 (rombak panel admin,
+  // 24 November 2026); yang ditunggu permintaan tabel berukuran 10.
+  const respons = await tungguDaftarAkun(page, (q) => q.get("limit") !== "1");
   const q = new URL(respons.url()).searchParams;
   expect([q.get("page"), q.get("limit")]).toEqual(["1", "10"]);
   const total = await periksaTotalDaftar(page, respons);

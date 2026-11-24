@@ -3,7 +3,12 @@ import { payloadBuatAkunKlien } from "@/features/admin-akun/payload";
 import { PESAN_PERCOBAAN_BASIC, skemaBuatAkunKlien, type NilaiBuatAkunKlien } from "@/features/admin-akun/schema";
 import {
   akunTidakAda,
+  BATAS_KOLOM_RINGKAS,
+  inisialAkun,
+  kolomRingkas,
   namaToko,
+  paramJumlahAkun,
+  statusLencana,
   PANJANG_CARI_AKUN,
   paramDaftarAkun,
   teksMasaAkses,
@@ -183,5 +188,43 @@ describe("akunTidakAda (B176)", () => {
     expect(akunTidakAda(new ApiError(500, "Server error"))).toBe(false);
     expect(akunTidakAda(new ApiError(403, "Forbidden"))).toBe(false);
     expect(akunTidakAda(new Error("jaringan"))).toBe(false);
+  });
+});
+
+describe("tampilan rombak panel admin (24 November 2026)", () => {
+  it("lencana status gaya A: Aktif, atau Non-aktif dengan alasannya", () => {
+    expect(statusLencana(akun())).toEqual({ label: "Aktif", keterangan: null, nada: "aktif" });
+    const langganan = akun().langganan;
+    expect(
+      statusLencana(akun({ status: "non-aktif", langganan: { ...langganan, alasanNonAktif: "kedaluwarsa" } })),
+    ).toEqual({ label: "Non-aktif", keterangan: "Kedaluwarsa", nada: "kedaluwarsa" });
+    expect(
+      statusLencana(akun({ status: "non-aktif", langganan: { ...langganan, alasanNonAktif: "manual" } })),
+    ).toEqual({ label: "Non-aktif", keterangan: "Dibekukan admin", nada: "beku" });
+    expect(statusLencana(akun({ status: "non-aktif" }))).toEqual({ label: "Non-aktif", keterangan: null, nada: "beku" });
+  });
+
+  it("inisial dari dua kata username atau email, huruf besar", () => {
+    expect(inisialAkun({ email: "x@contoh.id", username: "kopi_senja" })).toBe("KS");
+    expect(inisialAkun({ email: "warung.bu.sri@gmail.com", username: null })).toBe("WB");
+    expect(inisialAkun({ email: "toko@gmail.com", username: null })).toBe("TO");
+    expect(inisialAkun({ email: "@contoh.id", username: null })).toBe("?");
+  });
+
+  it("susunan kolom ringkas hanya di lebar tablet, penuh bila belum terukur", () => {
+    const { bawah, atas } = BATAS_KOLOM_RINGKAS;
+    expect(kolomRingkas(null)).toBe(false);
+    expect(kolomRingkas(bawah - 1)).toBe(false);
+    expect(kolomRingkas(bawah)).toBe(true);
+    expect(kolomRingkas(688)).toBe(true);
+    expect(kolomRingkas(atas - 1)).toBe(true);
+    expect(kolomRingkas(atas)).toBe(false);
+    expect(kolomRingkas(1120)).toBe(false);
+  });
+
+  it("hitungan kartu ringkas: halaman 1 berukuran 1 tanpa pencarian", () => {
+    expect(paramJumlahAkun("semua")).toEqual({ page: "1", limit: "1" });
+    expect(paramJumlahAkun("aktif")).toEqual({ page: "1", limit: "1", status: "aktif" });
+    expect(paramJumlahAkun("non-aktif")).toEqual({ page: "1", limit: "1", status: "non-aktif" });
   });
 });

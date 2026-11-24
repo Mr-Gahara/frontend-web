@@ -20,7 +20,7 @@ import type {
   UbahPlanPayload,
 } from "@/types/adminAkun";
 import { adminAkunApi } from "./api";
-import { akunTidakAda } from "./tampilan";
+import { akunTidakAda, paramJumlahAkun, type FilterStatusAkun } from "./tampilan";
 
 /** Callback halaman (toast, pengalihan). Invalidasi diurus hook. */
 type OpsiMutasi<H, V> = Pick<UseMutationOptions<H, Error, V>, "onSuccess" | "onError">;
@@ -35,6 +35,20 @@ export function useHalamanAkun(params: Record<string, string>) {
     queryKey: queryKeys.adminAkun.daftar(params),
     queryFn: () => adminAkunApi.halaman(params),
     placeholderData: keepPreviousData,
+  });
+}
+
+/**
+ * Jumlah akun per status untuk kartu ringkas (pemilik proyek, 24 November
+ * 2026): pagination.total dari halaman berukuran 1, tanpa pencarian, karena
+ * backend tidak punya endpoint ringkasan. Kuncinya di bawah akar adminAkun,
+ * sehingga ikut dimuat ulang setiap aksi akun.
+ */
+export function useJumlahAkun(status: FilterStatusAkun) {
+  return useQuery({
+    queryKey: queryKeys.adminAkun.daftar(paramJumlahAkun(status)),
+    queryFn: () => adminAkunApi.halaman(paramJumlahAkun(status)),
+    select: (halaman) => halaman.pagination?.total ?? null,
   });
 }
 

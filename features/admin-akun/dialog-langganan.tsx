@@ -11,13 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { pesanError } from "@/lib/api/error";
 import { namaPlan } from "@/features/langganan/data";
@@ -35,6 +28,8 @@ import {
   payloadPerpanjang,
   payloadUbahPlan,
 } from "./langganan";
+import { PilihanTombol } from "./pilihan-tombol";
+import { KELAS_DIALOG_ADMIN, KELAS_TOMBOL_UTAMA } from "./tampilan";
 
 export type JenisAksi = "bekukan" | "aktifkan" | "perpanjang" | "ubahPlan";
 
@@ -165,7 +160,7 @@ function IsiDialog({
         if (!buka && !memuat) onTutup();
       }}
     >
-      <DialogContent>
+      <DialogContent className={KELAS_DIALOG_ADMIN}>
         <DialogHeader>
           <DialogTitle>
             {TEKS[jenis].judul} {akun.email}
@@ -175,48 +170,39 @@ function IsiDialog({
 
         <div className="space-y-4">
           {(jenis === "perpanjang" || jenis === "ubahPlan") && (
-            <div className="space-y-2">
-              <label htmlFor="plan-langganan" className="text-isi font-medium">
-                {jenis === "ubahPlan" ? "Plan baru" : "Plan"}
-              </label>
-              <Select value={plan} onValueChange={(v) => setPlan(v as KunciPlan)} disabled={memuat}>
-                <SelectTrigger id="plan-langganan" className="w-full">
-                  <SelectValue placeholder="Pilih plan" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PILIHAN_PLAN.filter((p) => jenis !== "ubahPlan" || p !== akun.plan).map((p) => (
-                    <SelectItem key={p} value={p}>
-                      {p === akun.plan ? `${namaPlan(p)} (sekarang)` : namaPlan(p)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <PilihanTombol
+              label={jenis === "ubahPlan" ? "Plan baru" : "Plan"}
+              bentuk="grid"
+              nilai={plan}
+              onUbah={setPlan}
+              disabled={memuat}
+              opsi={PILIHAN_PLAN.filter((p) => jenis !== "ubahPlan" || p !== akun.plan).map((p) => ({
+                nilai: p,
+                label: namaPlan(p),
+              }))}
+              keterangan={jenis === "perpanjang" ? `Plan sekarang ${namaPlan(akun.plan)}.` : undefined}
+            />
           )}
 
           {(jenis === "aktifkan" || jenis === "perpanjang") && (
-            <div className="space-y-2">
-              <label htmlFor="durasi-langganan" className="text-isi font-medium">
-                Durasi
-              </label>
-              <Select value={durasi} onValueChange={setDurasi} disabled={memuat}>
-                <SelectTrigger id="durasi-langganan" className="w-full">
-                  <SelectValue placeholder="Pilih durasi" />
-                </SelectTrigger>
-                <SelectContent>
-                  {!durasiWajib && (
-                    <SelectItem value={TANPA_DURASI}>
-                      {akun.langganan.aksesBerakhirPada === null ? "Tetap tidak dibatasi" : "Tanpa perpanjangan"}
-                    </SelectItem>
-                  )}
-                  {PILIHAN_DURASI_BULAN.map((bulan) => (
-                    <SelectItem key={bulan} value={String(bulan)}>
-                      {bulan} bulan
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <PilihanTombol
+              label="Durasi"
+              bentuk="chip"
+              nilai={durasi}
+              onUbah={setDurasi}
+              disabled={memuat}
+              opsi={[
+                ...(durasiWajib
+                  ? []
+                  : [
+                      {
+                        nilai: TANPA_DURASI,
+                        label: akun.langganan.aksesBerakhirPada === null ? "Tetap tidak dibatasi" : "Tanpa perpanjangan",
+                      },
+                    ]),
+                ...PILIHAN_DURASI_BULAN.map((bulan) => ({ nilai: String(bulan), label: `${bulan} bulan` })),
+              ]}
+            />
           )}
 
           <div className="space-y-2">
@@ -247,6 +233,7 @@ function IsiDialog({
           <Button
             type="button"
             variant={jenis === "bekukan" ? "destructive" : "default"}
+            className={jenis === "bekukan" ? undefined : KELAS_TOMBOL_UTAMA}
             onClick={kirim}
             disabled={memuat}
           >
