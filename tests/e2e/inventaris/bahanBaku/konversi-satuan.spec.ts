@@ -308,16 +308,27 @@ test.describe("konversi satuan bahan (P87)", () => {
       });
       expect(beli.status, "pembelian kaleng gudang: " + beli.pesan).toBe(201);
     }
-    const ajuan = await api<Berid>(page, auth, "POST", "/pengajuanstok", {
-      dariLocationID: gudang.id,
-      keLocationID: outlet.id,
-      items: [{ bahanBakuID: bahanID, jumlah: kaleng, satuan: "kaleng" }],
-      catatan: "E2E surat jalan per kemasan",
-    });
-    expect(ajuan.status, "pengajuan kaleng: " + ajuan.pesan).toBe(201);
-    const idAjuan = idDari(ajuan.data);
-    expect((await api(page, auth, "PATCH", `/pengajuanstok/${idAjuan}/submit`, {})).status).toBe(200);
-    expect((await api(page, auth, "PATCH", `/pengajuanstok/${idAjuan}/approve`, {})).status).toBe(200);
+    // Pengajuan yang kembali PENDING setelah surat jalannya dibatalkan
+    // (skenario revisi) dipakai ulang bila jumlahnya sama, agar tidak menumpuk.
+    const CATATAN_KALENG = "E2E surat jalan per kemasan";
+    type AjuanMentah = Berid & { catatan?: string; transferStokID?: unknown; items: { jumlah: number; satuan?: string }[] };
+    const sisa = await api<AjuanMentah[]>(page, auth, "GET", "/pengajuanstok?status=PENDING");
+    const lama = (sisa.data ?? []).find(
+      (p) => p.catatan === CATATAN_KALENG && !p.transferStokID && p.items[0]?.jumlah === kaleng && p.items[0]?.satuan === "kaleng",
+    );
+    let idAjuan = lama ? idDari(lama) : "";
+    if (!idAjuan) {
+      const ajuan = await api<Berid>(page, auth, "POST", "/pengajuanstok", {
+        dariLocationID: gudang.id,
+        keLocationID: outlet.id,
+        items: [{ bahanBakuID: bahanID, jumlah: kaleng, satuan: "kaleng" }],
+        catatan: CATATAN_KALENG,
+      });
+      expect(ajuan.status, "pengajuan kaleng: " + ajuan.pesan).toBe(201);
+      idAjuan = idDari(ajuan.data);
+      expect((await api(page, auth, "PATCH", `/pengajuanstok/${idAjuan}/submit`, {})).status).toBe(200);
+      expect((await api(page, auth, "PATCH", `/pengajuanstok/${idAjuan}/approve`, {})).status).toBe(200);
+    }
     const sj = await api<Berid>(page, auth, "POST", "/transferstok", {
       pengajuanStokID: idAjuan,
       tanggalKirim: new Date().toISOString(),

@@ -10,7 +10,6 @@
  */
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { produkSudahTerhapus } from "./hapus";
 import { produkApi } from "./api";
 import { queryKeys } from "@/lib/queryKeys";
 import type { ProdukRequest } from "@/types/produk";
@@ -54,7 +53,8 @@ export function useProduk(
   });
 }
 
-function useInvalidasiProduk() {
+/** Diekspor untuk halaman produk: hapus yang dijawab 404 memuat ulang daftar (HP1a). */
+export function useInvalidasiProduk() {
   const queryClient = useQueryClient();
   return () => queryClient.invalidateQueries({ queryKey: queryKeys.produk.semua });
 }
@@ -64,11 +64,6 @@ export function useHapusProduk() {
   return useMutation({
     mutationFn: produkApi.hapus,
     onSuccess: invalidasi,
-    // 404: produk sudah dihapus di tempat lain, daftar dimuat ulang agar
-    // barisnya hilang (produkSudahTerhapus).
-    onError: (err) => {
-      if (produkSudahTerhapus(err)) invalidasi();
-    },
   });
 }
 
