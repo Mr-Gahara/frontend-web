@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { api, BASIS, bukaDenganAuth, login } from "../../../helpers/transfer-uji";
+import { api, BASIS, bukaDenganAuth, login, tutupSuratJalanUji } from "../../../helpers/transfer-uji";
 import { unik } from "../../../helpers/reservasi-uji";
 import { daftarAkun, pilihAkun, type AkunKasUji } from "../../../helpers/akun-kas-uji";
 import { idDari, lokasiBertipe, type Berid } from "../../../helpers/pembelian-uji";
@@ -208,6 +208,196 @@ test.describe("konversi satuan bahan (P87)", () => {
         const tolak = await api(page, auth, "PATCH", `/pengajuanstok/${idPengajuan}/reject`, { alasan: "Pembersihan e2e kemasan" });
         expect.soft(tolak.status, "tolak pengajuan uji: " + tolak.pesan).toBe(200);
       }
+    }
+  });
+
+  test("gudang: pembelian per kaleng, lalu stok terbaca tampil di inventaris gudang (B362)", async ({ page }) => {
+    test.setTimeout(90_000);
+    const urlInventaris = "/dashboard/gudang/inventaris";
+    const auth = await bukaDenganAuth(page, BASIS + urlInventaris);
+    const bahanID = await pastikanFixture(page, auth);
+    const gudang = await lokasiBertipe(page, auth, "Gudang");
+    type Entri = { item: Berid | null; stok: number; stokTerbaca: { satuan: string; jumlah: number }[] };
+    const bacaEntri = async () => {
+      const inv = await api<Entri[]>(page, auth, "GET", `/inventory?locationID=${gudang.id}&cari=${encodeURIComponent(FIXTURE)}`);
+      expect(inv.status, "inventory gudang: " + inv.pesan).toBe(200);
+      return (inv.data ?? []).find((x) => idDari(x.item) === bahanID);
+    };
+
+    if (!(await bacaEntri())) {
+      // Sekali saja: fixture ditarik ke gudang lewat halaman inventaris gudang
+      // dan entrinya menetap, karena UI tidak punya hapus entri inventory.
+      await page.reload();
+      await page.getByRole("button", { name: /masukkan master data/i }).click();
+      const dialog = page.getByRole("dialog");
+      await dialog.getByText("Pilih bahan baku...").click();
+      await page.getByRole("option", { name: new RegExp(FIXTURE) }).click();
+      await dialog.getByPlaceholder("0").nth(0).fill("0");
+      await dialog.getByPlaceholder("0").nth(1).fill("0");
+      const tPost = page.waitForResponse((r) => r.request().method() === "POST" && /\/api\/inventory(\?|$)/.test(r.url()));
+      await dialog.getByRole("button", { name: "Simpan ke Gudang" }).click();
+      expect((await tPost).status()).toBeLessThan(300);
+    }
+
+    const akun = (await daftarAkun(page, auth)).find((a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E")) as
+      | AkunKasUji
+      | undefined;
+    test.skip(!akun, "tidak ada akun kas aktif");
+    let idPembelian = "";
+    try {
+      await page.goto(BASIS + "/dashboard/gudang/pembelianStok/catatPembelian");
+      await page.getByLabel("Supplier", { exact: true }).fill("E2E Supplier Kaleng Gudang " + unik());
+      await pilihAkun(page, "Dibayar dari akun kas", (akun as AkunKasUji).namaAkun);
+      await page.getByLabel("Keterangan", { exact: true }).fill("E2E pembelian gudang per kemasan");
+      await pilihAkun(page, "Bahan baku baris 1", FIXTURE);
+      await page.locator("#pembelian-jumlah-0").fill("1");
+      await page.locator("#pembelian-satuan-0").click();
+      await page.getByRole("option", { name: "kaleng (290 ml)" }).click();
+      await page.locator("#pembelian-harga-0").fill("0");
+      const tBuat = page.waitForResponse((r) => r.request().method() === "POST" && /\/api\/pembelianstok(\?|$)/i.test(r.url()));
+      await page.getByRole("button", { name: "Simpan Pembelian" }).click();
+      const buat = await tBuat;
+      expect(buat.status()).toBe(201);
+      idPembelian = idDari(((await buat.json()) as { data: Berid }).data);
+
+      const entri = (await bacaEntri())!;
+      expect(entri.stokTerbaca.some((r) => r.satuan === "kaleng"), "stok terbaca gudang memuat kaleng").toBe(true);
+      await page.goto(BASIS + urlInventaris);
+      await page.getByPlaceholder("Cari barang di gudang...").fill(FIXTURE);
+      const baris = page.getByRole("row").filter({ hasText: FIXTURE });
+      const teks = entri.stokTerbaca.map((r) => `${r.jumlah.toLocaleString("id-ID")} ${r.satuan}`).join(" ");
+      await expect(baris).toContainText(teks, { timeout: 15_000 });
+      await expect(baris).toContainText(`${entri.stok.toLocaleString("id-ID")} ml`);
+      await tanpaLuberWadah(page, "inventaris gudang berkemasan");
+    } finally {
+      if (idPembelian) {
+        const hapus = await api(page, auth, "DELETE", "/pembelianstok/" + idPembelian);
+        expect.soft(hapus.status, "hapus pembelian uji kemasan gudang: " + hapus.pesan).toBe(200);
+      }
+    }
+  });
+
+  /**
+   * Surat jalan gudang ke outlet berisi fixture kaleng (modul pengajuan dan
+   * pembelian disiapkan lewat API). Stok gudang ditambah dua kaleng lewat
+   * pembelian Rp0 bila kurang dari yang diminta; sisanya dipakai run
+   * berikutnya.
+   */
+  async function suratJalanKaleng(page: Page, auth: Auth, kaleng: number) {
+    const bahanID = await pastikanFixture(page, auth);
+    const gudang = await lokasiBertipe(page, auth, "Gudang");
+    const outlet = await lokasiBertipe(page, auth, "Outlet");
+    const stokDi = async (lokasiID: string) => {
+      const inv = await api<{ item: Berid | null; stok: number }[]>(
+        page, auth, "GET", `/inventory?locationID=${lokasiID}&cari=${encodeURIComponent(FIXTURE)}`,
+      );
+      expect(inv.status, "inventory: " + inv.pesan).toBe(200);
+      return (inv.data ?? []).find((x) => idDari(x.item) === bahanID)?.stok ?? null;
+    };
+    const stokGudang = await stokDi(gudang.id);
+    test.skip(stokGudang === null, "fixture kaleng belum ditarik ke gudang (skenario gudang di atas menariknya)");
+    if ((stokGudang ?? 0) < kaleng * 290) {
+      const akun = (await daftarAkun(page, auth)).find((a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E"));
+      test.skip(!akun, "tidak ada akun kas aktif");
+      const beli = await api<Berid>(page, auth, "POST", "/pembelianstok", {
+        akunKasID: idDari(akun as Berid),
+        supplier: "E2E Supplier Kaleng Surat Jalan",
+        keterangan: "E2E stok kaleng untuk surat jalan per kemasan",
+        locationID: gudang.id,
+        items: [{ bahanBakuID: bahanID, jumlah: 2, hargaBeli: 0, satuan: "kaleng" }],
+      });
+      expect(beli.status, "pembelian kaleng gudang: " + beli.pesan).toBe(201);
+    }
+    const ajuan = await api<Berid>(page, auth, "POST", "/pengajuanstok", {
+      dariLocationID: gudang.id,
+      keLocationID: outlet.id,
+      items: [{ bahanBakuID: bahanID, jumlah: kaleng, satuan: "kaleng" }],
+      catatan: "E2E surat jalan per kemasan",
+    });
+    expect(ajuan.status, "pengajuan kaleng: " + ajuan.pesan).toBe(201);
+    const idAjuan = idDari(ajuan.data);
+    expect((await api(page, auth, "PATCH", `/pengajuanstok/${idAjuan}/submit`, {})).status).toBe(200);
+    expect((await api(page, auth, "PATCH", `/pengajuanstok/${idAjuan}/approve`, {})).status).toBe(200);
+    const sj = await api<Berid>(page, auth, "POST", "/transferstok", {
+      pengajuanStokID: idAjuan,
+      tanggalKirim: new Date().toISOString(),
+    });
+    expect(sj.status, "surat jalan kaleng: " + sj.pesan).toBe(201);
+    const id = idDari(sj.data);
+    const detail = async () =>
+      (await api<{ status: string; items: { qtyKirim: number; qtyTerima?: number }[] }>(page, auth, "GET", `/transferstok/${id}`))
+        .data;
+    expect((await detail()).items[0].qtyKirim, "surat jalan menyimpan kaleng dalam ml").toBe(kaleng * 290);
+    return { id, bahanID, outlet, detail, stokDi };
+  }
+
+  test("surat jalan per kemasan: revisi 1 kaleng tersimpan 290 ml (B365)", async ({ page }) => {
+    test.setTimeout(120_000);
+    const urlGudang = BASIS + "/dashboard/gudang/transferStok";
+    const auth = await bukaDenganAuth(page, urlGudang);
+    const { id, bahanID, detail } = await suratJalanKaleng(page, auth, 2);
+    try {
+      await page.goto(`${urlGudang}/${id}/edit`);
+      const isian = page.locator("tbody input").first();
+      await expect(isian).toBeVisible({ timeout: 15_000 });
+      await page.getByRole("combobox", { name: `Satuan kirim ${FIXTURE}` }).click();
+      await page.getByRole("option", { name: "kaleng (290 ml)" }).click();
+      await isian.fill("1");
+      const tSimpan = page.waitForResponse(
+        (r) => r.request().method() === "PUT" && new RegExp(`/api/transferstok/${id}(\\?|$)`).test(r.url()),
+      );
+      await page.getByRole("button", { name: /simpan revisi/i }).click();
+      const res = await tSimpan;
+      expect(res.status()).toBe(200);
+      expect(res.request().postDataJSON().items).toEqual([{ bahanBakuID: bahanID, qtyKirim: 1, satuan: "kaleng" }]);
+      // Bukti temuan backend: validator PUT draf membuang satuan, sehingga
+      // 1 kaleng tersimpan sebagai 1 ml (kontrak/temuan.md, B365).
+      expect((await detail()).items[0].qtyKirim, "server mengonversi 1 kaleng ke 290 ml").toBe(290);
+    } finally {
+      await tutupSuratJalanUji(page, auth, id);
+    }
+  });
+
+  test("surat jalan per kemasan: terima dalam kaleng tanpa selisih, dalam ml berselisih dan menuntut alasan (B365)", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const auth = await bukaDenganAuth(page, BASIS + "/dashboard/gudang/transferStok");
+    const { id, outlet, detail, stokDi } = await suratJalanKaleng(page, auth, 1);
+    let diterima = false;
+    try {
+      const kirim = await api(page, auth, "PATCH", `/transferstok/${id}/kirim`, {});
+      expect(kirim.status, "kirim: " + kirim.pesan).toBe(200);
+      const outletSebelum = (await stokDi(outlet.id)) ?? 0;
+
+      await page.goto(`${BASIS}/dashboard/outlet/inventaris/penerimaanBarang/${id}`);
+      const jumlah = page.locator('input[id^="terima-jumlah-"]').first();
+      await expect(jumlah).toBeVisible({ timeout: 15_000 });
+      const satuan = page.getByRole("combobox", { name: `Satuan diterima ${FIXTURE}` });
+      const alasan = page.getByPlaceholder("Misal: 1 bungkus pecah, 2 pcs hilang di jalan...");
+      await satuan.click();
+      await page.getByRole("option", { name: "kaleng (290 ml)" }).click();
+      await jumlah.fill("1");
+      await expect(alasan, "1 kaleng = 290 ml, sama dengan yang dikirim").toHaveCount(0);
+
+      await satuan.click();
+      await page.getByRole("option", { name: "ml", exact: true }).click();
+      await jumlah.fill("200");
+      await expect(alasan, "200 ml kurang dari 290 ml").toBeVisible();
+      await alasan.fill("E2E 90 ml tumpah");
+      await page.getByRole("button", { name: /konfirmasi terima barang/i }).click();
+      const tTerima = page.waitForResponse((r) => r.request().method() === "PATCH" && /\/terima(\?|$)/i.test(r.url()));
+      await page.getByRole("alertdialog").getByRole("button", { name: /^ya,/i }).click();
+      const res = await tTerima;
+      expect(res.status()).toBe(200);
+      diterima = true;
+      expect(res.request().postDataJSON().items[0]).toMatchObject({ qtyKirim: 290, qtyTerima: 200 });
+      const akhir = await detail();
+      expect(akhir.status).toBe("DITERIMA");
+      expect(akhir.items[0].qtyTerima).toBe(200);
+      expect(await stokDi(outlet.id), "stok outlet bertambah 200 ml").toBe(outletSebelum + 200);
+    } finally {
+      if (!diterima) await tutupSuratJalanUji(page, auth, id);
     }
   });
 });

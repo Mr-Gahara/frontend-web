@@ -1,5 +1,5 @@
 import { test, expect, type Page, type Response } from "@playwright/test";
-import { BASIS, login } from "../../helpers/transfer-uji";
+import { BASIS, bukaDenganAuth, login, pengajuanUjiDisetujui } from "../../helpers/transfer-uji";
 
 /*
  * Dashboard gudang (desain B). Setiap angka dibandingkan dengan respons
@@ -110,6 +110,31 @@ test.describe("Dashboard gudang", () => {
     );
     await page.getByRole("button", { name: "Perlu Disetujui", exact: true }).click();
     expect(await totalHalaman(await tTinjauan), "perlu tinjauan").toBe(menungguApproval);
+  });
+
+  test("kartu pengajuan siap surat jalan menuju tab Perlu Surat Jalan dengan jumlah yang sama", async ({ page }) => {
+    // Pengajuan uji transfer APPROVED tanpa surat jalan dipakai ulang, atau
+    // dibuat bila belum ada, agar cabang kartu bertaut selalu teruji.
+    const auth = await bukaDenganAuth(page, URL_DASHBOARD);
+    await pengajuanUjiDisetujui(page, auth);
+
+    const { ringkasan } = await bukaDashboard(page);
+    const siap = ringkasan.pengajuan.siapDibuatSuratJalanPerArah.permintaan;
+    expect(siap, "ada pengajuan permintaan siap surat jalan").toBeGreaterThan(0);
+    const grup = page.getByRole("region", { name: "Pengajuan dari outlet" });
+
+    const tDaftar = page.waitForResponse(
+      (r) => dapatGet(POLA_PENGAJUAN)(r) && new URL(r.url()).searchParams.get("suratJalan") === "belum",
+    );
+    await grup.getByRole("link", { name: /surat jalannya belum dibuat/ }).click();
+    await expect(page).toHaveURL(BASIS + "/dashboard/gudang/pengajuanStok?tab=perlu-surat-jalan");
+    await expect(page.getByRole("button", { name: "Perlu Surat Jalan", exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(await totalHalaman(await tDaftar)).toBe(siap);
+    await expect(page.getByText(`${siap} total data`, { exact: true })).toBeVisible();
+    await expect(page.locator("table tbody tr").first()).toBeVisible();
   });
 
   test("angka pengiriman dari ringkasan dan tautan Kirim sekarang ke tab Belum Dikirim", async ({ page }) => {

@@ -956,6 +956,45 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
     }
   });
 
+  test("dialog hapus: produk yang sudah dihapus pengguna lain ditolak backend sungguhan (404): dialog tertutup dan daftar dimuat ulang", async ({
+    page,
+  }) => {
+    const namaProduk = `Produk E2E Hapus Ganda ${Date.now()}`;
+    const polaHapus = /\/api\/produk\/[a-f0-9]{24}$/i;
+
+    await login(page);
+    await bukaHalamanProduk(page);
+    await tambahProdukBaru(page, namaProduk);
+
+    await page.getByPlaceholder(/cari nama produk/i).fill(namaProduk);
+    const row = page.getByRole("row", { name: new RegExp(namaProduk, "i") }).first();
+    await klikTombolAksiProduk(row);
+    await page.getByRole("menuitem", { name: /hapus produk/i }).click();
+    const dialog = page.getByRole("alertdialog");
+    await expect(dialog).toBeVisible();
+
+    // Pengguna lain di tab kedua menghapus produk yang sama lebih dulu.
+    const lain = await page.context().newPage();
+    await bukaHalamanProduk(lain);
+    await hapusProduk(lain, namaProduk);
+    await lain.close();
+
+    // Tab kedua memutar sesi, sehingga DELETE pertama dapat dijawab 401 lalu
+    // diulang apiClient sesudah pin-refresh; yang dinilai jawaban akhirnya.
+    const tHapus = page.waitForResponse(
+      (r) => r.request().method() === "DELETE" && polaHapus.test(r.url()) && r.status() !== 401,
+    );
+    await dialog.getByRole("button", { name: /^hapus$/i }).click();
+    const res = await tHapus;
+    expect(res.status(), "backend menolak produk yang sudah tidak ada").toBe(404);
+    // Keputusan pemilik proyek (24 November 2026): 404 menutup dialog dan
+    // memuat ulang daftar, karena produknya sudah tidak ada.
+    await expect(page.getByText("Produk sudah dihapus.", { exact: true })).toBeVisible();
+    await expect(dialog).toBeHidden();
+    await expect(page.getByRole("row", { name: new RegExp(namaProduk, "i") })).toHaveCount(0);
+    await expect(page.getByText(/produk berhasil dihapus/i)).toHaveCount(0);
+  });
+
   // ----------------------------------------------------------
   // [10] READ: Pencarian produk yang tidak ada → pesan kosong
   // ----------------------------------------------------------

@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { KotakCari } from "@/components/filter/bilah-filter";
 import { useRouter } from "next/navigation";
 import { useHalamanProduk, useHapusProduk } from "@/features/produk/hooks";
+import { PESAN_PRODUK_SUDAH_TERHAPUS, produkSudahTerhapus } from "@/features/produk/hapus";
 import { PILIHAN_UKURAN_PRODUK, paramHalamanProduk } from "@/features/produk/filter";
 import { PANJANG_CARI_SERVER } from "@/features/inventaris/cakupan";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -86,7 +87,9 @@ export default function ProdukPage() {
   const deleteMutation = useHapusProduk();
 
   // Dialog hapus bertahan selama mutation berjalan dan hanya tertutup bila
-  // berhasil (keputusan Fase 0); saat gagal, dialog tetap terbuka.
+  // berhasil (keputusan Fase 0); saat gagal, dialog tetap terbuka, kecuali
+  // produk yang sudah dihapus di tempat lain (404): dialog ditutup dan daftar
+  // dimuat ulang oleh useHapusProduk.
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
@@ -96,6 +99,11 @@ export default function ProdukPage() {
       });
       setDeleteTarget(null);
     } catch (err) {
+      if (produkSudahTerhapus(err)) {
+        toast.info(PESAN_PRODUK_SUDAH_TERHAPUS);
+        setDeleteTarget(null);
+        return;
+      }
       toast.error("Gagal", {
         description: pesanError(err, "Gagal menghapus produk."),
       });

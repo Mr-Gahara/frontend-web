@@ -74,4 +74,24 @@ test.describe("Stock opname: penjaga ruang dan PIC", () => {
     await expect(main.getByText(nama, { exact: true })).toBeVisible({ timeout: 15_000 });
     await expect(main.getByText("Anda (Pengguna Saat Ini)")).toHaveCount(0);
   });
+
+  test("form buat: nama PIC gagal dimuat menampilkan teks cadangan, dan tombol buat tetap aktif", async ({ page }) => {
+    const polaPengguna = /\/api\/pengguna\/[^/?]+$/i;
+    await page.goto(URL_OUTLET, { waitUntil: "commit" });
+    await page.route(polaPengguna, (route) =>
+      route.request().method() === "GET"
+        ? route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ status: "error", message: "uji" }) })
+        : route.continue(),
+    );
+    await page.goto(`${URL_OUTLET}/buatStockOpname`, { waitUntil: "commit" });
+
+    const main = page.getByRole("main");
+    await expect(main.getByText("Penanggung Jawab (PIC)")).toBeVisible({ timeout: 15_000 });
+    // Teks cadangan, bukan "Memuat data Anda..." yang menetap.
+    await expect(main.getByText("Anda (Pengguna Saat Ini)", { exact: true })).toBeVisible({ timeout: 20_000 });
+    // picID diambil dari sesi, bukan dari nama, sehingga tidak ada galat PIC
+    // dan tombol buat tidak terkunci olehnya.
+    await expect(main.getByText("Sistem otomatis mencatat Anda sebagai PIC sesi opname ini.")).toBeVisible();
+    await expect(main.getByRole("button", { name: "Buat Draft & Mulai Opname" })).toBeEnabled();
+  });
 });

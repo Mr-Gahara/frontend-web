@@ -10,6 +10,7 @@
  */
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { produkSudahTerhapus } from "./hapus";
 import { produkApi } from "./api";
 import { queryKeys } from "@/lib/queryKeys";
 import type { ProdukRequest } from "@/types/produk";
@@ -63,6 +64,11 @@ export function useHapusProduk() {
   return useMutation({
     mutationFn: produkApi.hapus,
     onSuccess: invalidasi,
+    // 404: produk sudah dihapus di tempat lain, daftar dimuat ulang agar
+    // barisnya hilang (produkSudahTerhapus).
+    onError: (err) => {
+      if (produkSudahTerhapus(err)) invalidasi();
+    },
   });
 }
 

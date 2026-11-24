@@ -1,6 +1,6 @@
 import { test, expect, Page, Response } from "@playwright/test";
 import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../../helpers/filter-uji";
-import { bukaDenganAuth, pengajuanUjiDisetujui, type Auth } from "../../../helpers/transfer-uji";
+import { api, bukaDenganAuth, pengajuanUjiDisetujui, type Auth } from "../../../helpers/transfer-uji";
 import { masuk } from "../../../helpers/masuk-uji";
 import { IZIN } from "../../../../lib/auth/permissions";
 import { masukSebagai } from "../../../helpers/terkunci-uji";
@@ -234,6 +234,83 @@ test.describe("Alur tulis pengajuan stok", () => {
     await dialog.getByRole("button", { name: "Tolak Permintaan" }).click();
     expect((await tTolak).status(), "pengaju boleh menolak pengajuannya sendiri").toBe(200);
     expect(approve, "approve tidak dikirim").toBe(0);
+  });
+
+  test("rekan selokasi pengaju: Setujui diganti keterangan, backend menolak approve, dan Tolak tetap tersedia (PG2a)", async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+    // LK3a membuat keadaan ini tidak tercapai lewat web: pengaju di ruang
+    // outlet dan penyetuju di ruang gudang tidak dapat berlokasi kerja sama.
+    // Ia datang dari aplikasi, tempat staf gudang mengajukan permintaan dari
+    // gudangnya (P46). Pengajuan karena itu dibuat lewat API sebagai staf
+    // gudang, lalu penyetuju gudang lain menilainya di web.
+    const izinBaca = (n: string) => n.startsWith("read-") && n !== "akses-lintas-outlet";
+    await masukSebagai(page, {
+      nama: "E2E Pengaju Gudang",
+      pin: "864251",
+      deskripsi: "Peran uji e2e: izin baca tanpa lintas outlet, ditambah buat dan ubah pengajuan stok, berlokasi kerja Gudang",
+      izin: (n) => izinBaca(n) || n === IZIN.buatPengajuanStok || n === IZIN.ubahPengajuanStok,
+      lokasiKerja: "Gudang",
+    });
+    const authPengaju = await bukaDenganAuth(page, URL_GUDANG);
+    const lokasi = await api<{ id: string; tipe?: string }[]>(page, authPengaju, "GET", "/location");
+    const gudang = (lokasi.data ?? []).find((l) => l.tipe === "Gudang")!;
+    const outlet = (lokasi.data ?? []).find((l) => l.tipe === "Outlet")!;
+    const inv = await api<{ stok: number; item: { id: string; satuan?: string } | null }[]>(
+      page,
+      authPengaju,
+      "GET",
+      `/inventory?locationID=${gudang.id}`,
+    );
+    const bahan = (inv.data ?? []).find((i) => i.stok >= 1 && i.item?.satuan);
+    expect(bahan, "gudang uji punya bahan berstok").toBeTruthy();
+    const buat = await api<{ id: string }>(page, authPengaju, "POST", "/pengajuanstok", {
+      dariLocationID: gudang.id,
+      keLocationID: outlet.id,
+      items: [{ bahanBakuID: bahan!.item!.id, jumlah: 1, satuan: bahan!.item!.satuan }],
+      catatan: "E2E pengajuan rekan selokasi",
+    });
+    expect(buat.status, `buat pengajuan staf gudang: ${buat.pesan}`).toBe(201);
+    const id = buat.data!.id;
+    const ajukan = await api(page, authPengaju, "PATCH", `/pengajuanstok/${id}/submit`, {});
+    expect(ajukan.status, `submit: ${ajukan.pesan}`).toBe(200);
+
+    // Peran kedua dibuat dari sesi Owner (pola masukSebagai berturut-turut).
+    await login(page);
+    await masukSebagai(page, {
+      nama: "E2E Penyetuju Gudang",
+      pin: "864252",
+      deskripsi: "Peran uji e2e: izin baca tanpa lintas outlet, ditambah setujui dan tolak pengajuan stok, berlokasi kerja Gudang",
+      izin: (n) => izinBaca(n) || n === IZIN.setujuiPengajuanStok || n === IZIN.tolakPengajuanStok,
+      lokasiKerja: "Gudang",
+    });
+    let approve = 0;
+    page.on("request", (r) => {
+      if (r.method() === "PATCH" && /\/api\/pengajuanstok\/[^/]+\/approve(\?|$)/i.test(r.url())) approve += 1;
+    });
+    const tDetail = page.waitForResponse(getDetail(id));
+    const authPenyetuju = await bukaDenganAuth(page, `${URL_GUDANG}/${id}`);
+    const detail = ((await (await tDetail).json()) as { data: PengajuanMentah & { dimintaOleh?: { locationID?: unknown } } })
+      .data;
+    expect(detail.status).toBe("SUBMITTED");
+    expect(String(detail.dimintaOleh?.locationID), "pengaju berlokasi kerja gudang").toBe(gudang.id);
+    await expect(
+      page.getByText("Pengajuan dari lokasi kerja Anda harus disetujui pengguna lokasi lain atau Owner."),
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("button", { name: /setujui permintaan/i })).toHaveCount(0);
+    expect(approve, "approve tidak dikirim").toBe(0);
+
+    // Aturan yang sama dijaga backend (P66, B338): approve langsung ditolak.
+    const tolakBackend = await api(page, authPenyetuju, "PATCH", `/pengajuanstok/${id}/approve`, {});
+    expect(tolakBackend.status, `approve rekan selokasi: ${tolakBackend.pesan}`).toBe(403);
+
+    await page.getByRole("button", { name: "Tolak Permintaan" }).first().click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByPlaceholder("Ketik alasan penolakan di sini...").fill(ALASAN);
+    const tTolak = page.waitForResponse(patchAksi("reject"));
+    await dialog.getByRole("button", { name: "Tolak Permintaan" }).click();
+    expect((await tTolak).status(), "rekan selokasi boleh menolak").toBe(200);
   });
 
   test("pengembalian: buat dari outlet, ajukan, tampil di inbox gudang, lalu tolak", async ({ page }) => {

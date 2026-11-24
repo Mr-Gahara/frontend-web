@@ -1,5 +1,13 @@
 import { test, expect, type Page, type Response } from "@playwright/test";
-import { BASIS, login } from "../../../helpers/transfer-uji";
+import {
+  BASIS,
+  api,
+  bukaDenganAuth,
+  login,
+  siapkanSuratJalan,
+  tutupSuratJalanUji,
+  type TransferMentah,
+} from "../../../helpers/transfer-uji";
 import { LABEL_STATUS_TRANSFER } from "../../../../features/transfer-stok/tampilan";
 import { LABEL_TAHAP_PENGAJUAN } from "../../../../features/pengajuan-stok/tampilan";
 import type { StatusTransfer } from "../../../../types/transferStok";
@@ -52,26 +60,42 @@ test.describe("Daftar surat jalan gudang", () => {
     }
   });
 
-  test("dialog batal surat jalan Belum Dikirim menjelaskan akibatnya, dan Tutup tidak mengirim", async ({ page }) => {
-    await buka(page);
-    const tPending = page.waitForResponse(daftarSuratJalan((q) => q.get("status") === "PENDING" && q.get("page") === "1"));
-    await page.getByRole("button", { name: "Belum Dikirim", exact: true }).click();
-    const pending = ((await (await tPending).json()) as { data: SuratJalanMentah[] }).data;
-    test.skip(pending.length === 0, "tidak ada surat jalan Belum Dikirim untuk membuka dialog batal");
-    const sj = pending[0];
-    let terkirim = 0;
-    page.on("request", (r) => {
-      if (r.method() === "PUT" && /\/api\/transferstok\/[a-f0-9]{24}/i.test(r.url())) terkirim++;
-    });
-    await page.goto(`${URL_GUDANG}/${sj.id}`);
-    await expect(page.getByText(LABEL_STATUS_TRANSFER.PENDING).first(), "badge detail").toBeVisible({ timeout: 15_000 });
-    await page.getByRole("button", { name: "Batalkan Pengiriman" }).click();
-    const dialog = page.getByRole("alertdialog");
-    await expect(dialog.getByText("Batalkan Surat Jalan?")).toBeVisible();
-    await expect(dialog).toContainText(`kembali menjadi "${LABEL_TAHAP_PENGAJUAN.gudang.PERLU_SURAT_JALAN}"`);
-    await dialog.getByRole("button", { name: "Tutup" }).click();
-    await expect(dialog).toBeHidden();
-    expect(terkirim, "Tutup tidak membatalkan").toBe(0);
+  test("dialog batal surat jalan Belum Dikirim menjelaskan akibatnya, Tutup tidak mengirim, dan Ya, Batalkan membatalkan", async ({
+    page,
+  }) => {
+    // Surat jalan PENDING disiapkan dari pengajuan uji transfer (keputusan
+    // R8), sehingga skenario ini tidak lagi bergantung pada data yang ada.
+    const auth = await bukaDenganAuth(page, URL_GUDANG);
+    const sj = await siapkanSuratJalan(page, auth, { kirim: false });
+    const id = String(sj.id);
+    try {
+      let terkirim = 0;
+      page.on("request", (r) => {
+        if (r.method() === "PATCH" && /\/api\/transferstok\/[a-f0-9]{24}\/batal/i.test(r.url())) terkirim++;
+      });
+      await page.goto(`${URL_GUDANG}/${id}`);
+      await expect(page.getByText(LABEL_STATUS_TRANSFER.PENDING).first(), "badge detail").toBeVisible({ timeout: 15_000 });
+      await page.getByRole("button", { name: "Batalkan Pengiriman" }).click();
+      const dialog = page.getByRole("alertdialog");
+      await expect(dialog.getByText("Batalkan Surat Jalan?")).toBeVisible();
+      await expect(dialog).toContainText(`kembali menjadi "${LABEL_TAHAP_PENGAJUAN.gudang.PERLU_SURAT_JALAN}"`);
+      await dialog.getByRole("button", { name: "Tutup" }).click();
+      await expect(dialog).toBeHidden();
+      expect(terkirim, "Tutup tidak membatalkan").toBe(0);
+
+      await page.getByRole("button", { name: "Batalkan Pengiriman" }).click();
+      const tBatal = page.waitForResponse(
+        (r) => r.request().method() === "PATCH" && new RegExp(`/api/transferstok/${id}/batal`, "i").test(r.url()),
+      );
+      await dialog.getByRole("button", { name: "Ya, Batalkan" }).click();
+      expect((await tBatal).status()).toBe(200);
+      await expect(page.getByText("Surat Jalan Dibatalkan")).toBeVisible();
+      await expect(dialog).toBeHidden();
+      const detail = await api<TransferMentah>(page, auth, "GET", `/transferstok/${id}`);
+      expect(detail.data?.status, "status dibaca ulang dari server").toBe("BATAL");
+    } finally {
+      await tutupSuratJalanUji(page, auth, id);
+    }
   });
 
   test("tab mengirim status ke server dan kembali ke halaman 1", async ({ page }) => {
