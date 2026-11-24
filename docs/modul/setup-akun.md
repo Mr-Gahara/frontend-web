@@ -175,6 +175,17 @@ penyambungannya menunggu backend (`kontrak/temuan.md` butir 176).
   hari", lalu tombol lanjut dengan isi "Jam buka langsung tersimpan,
   lalu Anda lanjut ke langkah Kategori."; daftar hari dan Samakan
   dilewati bila tidak tampil (`0c4cc7e`).
+- **JB10a: balon tur di dalam layar untuk target setinggi lebih dari
+  layar** (pemilik proyek, 24 November 2026, dua dialog). Ditemukan spec
+  tur jam buka: daftar tujuh hari setinggi 2081 px di layar 720 px
+  digulir ke tengah, dan balon berlabuh ke tepi atasnya di y=-1540.
+  Diputuskan "Potong ke layar": sorotan dipotong ke bagian target yang
+  tampil, menyisakan 3 px untuk cincin (`potongKeLayar`). Karena bagian
+  yang tampil memenuhi layar dan balon tetap tanpa ruang, diputuskan
+  lanjutan "Balon di dalam sorotan": bila sorotan lebih tinggi dari ruang
+  layar, jangkar balon menjadi garis tepi atas bagian yang tampil, dan
+  balon tampil di bawahnya (`jangkarBalon`). Keduanya di mesin bersama
+  (`lib/panduan.ts`, `components/panduan/tur-sorotan.tsx`, `c1f683b`).
 
 ### Penanda dan panduan wizard
 

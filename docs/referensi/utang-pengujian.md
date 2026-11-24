@@ -151,30 +151,17 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Pengguna uji "E2E Profil" permanen** di basis data development,
   dibuat sekali dengan peran tanpa izin pengguna. Nama, PIN, dan nomor
   HP-nya dipulihkan Ridho di awal setiap test (PF5a).
-- **Profil Owner hanya teruji dibuka**, tidak diubah, karena nama dan PIN
-  Ridho dipakai login seluruh suite.
 - **Pesan titipan setelah PIN berubah hilang bila halaman dimuat ulang**,
   karena hanya hidup di memori; itu tidak diuji.
 
 - **Spec panel admin bergantung pada `.env.e2e`**: tanpa kredensial admin
   uji, 16 dari 17 skenarionya dilewati (PA5a), sehingga mesin tanpa berkas
   itu tidak menguji panel admin sama sekali.
-- **Pengulangan `DELETE` setelah password admin salah tidak diukur.**
-  Respons 401 dan pesannya teruji; penyegaran token dan permintaan kedua
-  hanya dibaca dari `lib/apiClient.ts` (`kontrak/temuan.md` butir 114).
 - **Aktifkan dengan durasi wajib dan perpanjangan yang membuka akun
-  kedaluwarsa hanya teruji di unit test**
-  (`tests/unit/features/admin-akun/langganan.test.ts`), karena akun
+  kedaluwarsa teruji e2e lewat simulasi** respons detail bertanda
+  `// simulasi:` (`admin/langganan-akun`, 24 November 2026), karena akun
   bermasa akses lewat atau beku karena kedaluwarsa tidak dapat dibuat
-  lewat UI.
-- **Tombol muat berikutnya riwayat langganan belum teruji e2e**, karena
-  butuh lebih dari 20 catatan pada satu akun.
-- **Bekukan dan hapus sungguhan hanya diuji pada akun uji tanpa toko.**
-  Pemutusan sesi pengguna toko saat akun dibekukan dan penghapusan data
-  toko saat akun dihapus tidak diuji.
-- **Daftar akun yang gagal dimuat, domain email disposable, dan akun
-  klien tanpa sesi pengguna yang membuka `/admin`** belum teruji e2e;
-  yang terakhir teruji di `tests/unit/lib/auth/tujuan.test.ts`.
+  lewat UI maupun API.
 
 - **Spec mutasi arus kas bergantung pada data bulan berjalan**: empat
   skenarionya dilewati bersyarat bila belum ada mutasi, belum sampai dua
@@ -329,10 +316,12 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   tombol memakai `router.back()`, sehingga tujuannya bergantung riwayat
   tab. Diganti tujuan pasti (KB1a, `modul/ui-ux.md`) dan dibuktikan
   `tampilan/tombol-kembali`. Lunas.
-- **Keadaan masa berlaku Langganan hanya teruji di unit test**: masa
-  percobaan, bilah masa berlaku, masa akses lewat dan masa tenggang, serta
-  Muat riwayat lainnya. Akun uji Pro tanpa batas waktu dengan satu catatan
-  riwayat, sehingga e2e hanya membuktikan keadaan tanpa batas.
+- **Keadaan masa berlaku Langganan teruji e2e lewat simulasi** respons
+  bertanda `// simulasi:` (`pengaturan/langganan`, 24 November 2026): masa
+  percobaan beserta bilahnya, dan masa akses lewat beserta masa tenggang.
+  Akun uji Pro tanpa batas waktu dengan satu catatan riwayat, sehingga
+  Muat riwayat lainnya halaman Langganan hanya teruji di unit test
+  (Muat Berikutnya panel admin teruji e2e).
 - **Muat hari sebelumnya riwayat Mesin Kasir dilewati bersyarat** bila
   riwayat tujuh hari terakhir belum lebih dari satu halaman (20 sesi);
   sesi lintas tengah malam tidak teruji e2e. Memuat, gagal dimuat, form
@@ -375,10 +364,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Booking lintas tengah malam di timeline (TL1a) belum teruji e2e**:
   spec reservasi hanya memeriksa query `tampilan=timeline`, karena butuh
   booking yang melewati 00.00 dari hari sebelumnya (16 November 2026).
-- **Tur sorotan langkah jam buka (JB9a) hanya teruji di unit test**
-  (`titikJamBuka`), karena spec tur wizard berhenti di langkah lokasi;
-  mencapai langkah jam buka butuh mengisi lokasi berkoordinat lebih dulu
-  (16 November 2026).
 - **Jalur berhasil yang meninggalkan data permanen diuji sejak 20 November
   2026** (pemilik proyek: diuji sungguhan dan data yang menumpuk
   diterima). Per run: satu opname outlet APPROVED berhitungan sama dengan
@@ -418,23 +403,8 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   `jadwal/rekap-absensi` berjalan dengan data bulan berjalan.
 - **Stok terbaca di inventaris gudang** hanya teruji di unit test
   (`rincianKemasan`); e2e membuktikannya di daftar stok outlet.
-- **Rombak panel admin (24 November 2026) teruji di 390, 768, dan 1280
-  px saja**: susunan empat kolom (wadah 600 sampai 960 px) di 1024 px dan
-  kartu di 640 px tidak punya skenario. Panel bawah dialog di HP hanya
-  diuji untuk Perpanjang; Ubah Plan, Aktifkan, Bekukan, dan Hapus memakai
-  kelas yang sama. Keluar lewat menu avatar HP hanya diperiksa tampil,
-  tidak diklik, karena logout memutar `tokenVersion` admin uji.
-- **Topbar admin saat `GET /akun/me` gagal** (email tidak tampil, Keluar
-  tetap ada) hanya terbaca dari kode.
-- **Revisi profil (24 November 2026) teruji di 390 dan 1280 px untuk
-  popup, dan 390, 768, serta 1280 px untuk laman**: popup di tablet 768 px
-  dan sidebar mode ikon di desktop tidak punya skenario. Ganti pengguna
-  teruji di tab yang sama; muat ulang sesudahnya menunggu backend butir
-  190.
-- **Batal terkunci selama menyimpan (BT2a) teruji e2e hanya di ubah
-  metode pembayaran** (`pengaturan/kelola-metode-pembayaran`, PUT ditahan
-  lalu diteruskan). Batal di buat dan ubah akun admin memakai pola yang
-  sama dan hanya terbaca dari kode.
+- **Ganti pengguna dari popup profil teruji di tab yang sama**; muat
+  ulang sesudahnya menunggu backend butir 190.
 - **Peran dan pengguna uji kelompok 1 menetap** (24 November 2026),
   dibuat sekali lewat `tests/helpers/terkunci-uji.ts` dan dipakai ulang:
   E2E Template Supervisor, Manajer, dan Kasir; E2E Kelola Kasir Tanpa
@@ -457,3 +427,8 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   Akun pengisi "E2E Batas Akun Tetap 1" sampai 10, "E2E Batas Akun
   Cadangan Tetap", dan metode "E2E Batas Metode Tetap 1" sampai 10 menetap
   non-aktif dan dipakai ulang.
+- **Spec kelompok admin dan profil tidak meninggalkan data menetap**
+  (24 November 2026): akun klien bertoko (bekukan dan hapus), akun
+  berriwayat lebih dari 20 catatan (11 kali bekukan dan buka lewat API),
+  dan akun dialog HP dibuat sekali pakai lalu dihapus lewat API admin;
+  nama Owner dipulihkan di akhir skenario.

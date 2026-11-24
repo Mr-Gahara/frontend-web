@@ -12,6 +12,20 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per utang pengujian kelompok admin dan profil** (24 November
+2026, `c1f683b`, backend `ridho` lokal `1718030`): vitest 1243 lolos dari
+146 berkas (unit baru `potongKeLayar` dan `jangkarBalon`). Tanpa suite
+penuh dan tanpa OTP: folder `admin` dan `profil`, spec
+`auth/sidebar-pengguna`, `pengaturan/langganan`, `setup/panduan`, dan
+`dashboard/panduan-dashboard` dijalankan bersama sesudah dev server
+dinyalakan ulang: 72 lolos dari 72. Spec tur jam buka menemukan balon di
+luar layar untuk target setinggi lebih dari layar; diperbaiki (JB10a) dan
+gagal pada mesin tur lama (dibuktikan lewat `git stash`). Harapan spec
+tur yang keliru disesuaikan dengan bukti: Samakan dilewati selama belum
+ada hari berjam lengkap (keputusan JB9a), dan elemen yang lebih besar
+dari layar tidak dituntut tampil utuh. Harapan suite penuh berikutnya
+791 (`npx playwright test --list`, 122 berkas).
+
 **Baseline per utang pengujian kelompok keuangan** (24 November 2026,
 backend `ridho` lokal `1718030`): vitest 1237 lolos dari 146 berkas (unit
 baru `kelasPertumbuhan`, warna badge laba rugi yang dipindah dari JSX ke

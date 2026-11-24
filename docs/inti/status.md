@@ -49,9 +49,12 @@ BT1a dan BT2a) dan keterangan Plan sekarang (`modul/panel-admin.md`,
 RP6a). Utang pengujian kelompok 1 selesai hari yang sama (AP1a, AP2a,
 PG3a, TR1a; temuan backend butir 191). Atas perintah pemilik proyek
 seluruh utang pengujian yang dapat dibuktikan dikerjakan per kelompok
-(akses dan peran, lalu keuangan, selesai; berikutnya admin dan profil,
+(akses dan peran, keuangan, lalu admin dan profil, selesai; berikutnya
 inventaris dan gudang, reservasi dan jadwal, tampilan), lalu suite e2e
-penuh (harapan 775 per kelompok keuangan) dan `bersih-akunkas.js`.
+penuh (harapan 791 per kelompok admin dan profil) dan
+`bersih-akunkas.js`. Kelompok admin dan profil menemukan balon tur di
+luar layar pada langkah jam buka, diperbaiki atas keputusan pemilik
+proyek (`modul/setup-akun.md`, JB10a).
 Nomor WhatsApp admin (LG1a) tetap menunggu pemilik proyek.
 
 ### Keadaan 23 November 2026 sore

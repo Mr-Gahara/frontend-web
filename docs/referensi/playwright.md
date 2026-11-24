@@ -606,6 +606,14 @@ bersyarat).
   titiknya, misalnya "Isi nama toko", yang ikut cocok dengan
   `getByLabel("Nama toko")`; isian di belakang balon dicari dengan
   `exact: true` (`c8a2e83`).
+- Tombol Next.js Dev Tools (hanya di dev server) melayang di sudut kiri
+  bawah dan menutupi pemicu kaki sidebar mode ikon di desktop, sehingga
+  klik pada pemicu itu mengenai tombol dev tools. Buka pemicu lewat
+  keyboard: `focus()` lalu `Enter` (`auth/sidebar-pengguna`, `c1f683b`).
+- `periksaLetak` (`tests/helpers/panduan-uji.ts`) menuntut elemen yang
+  disorot tampil utuh hanya bila muat di layar; elemen yang lebih besar
+  dari layar, seperti daftar tujuh hari jam buka, cukup bersinggungan
+  dengan layar. Balonnya tetap harus seluruhnya di dalam layar (JB10a).
 
 ## Spec rujukan
 

@@ -1629,6 +1629,60 @@ dari `referensi/utang-pengujian.md` tanpa perubahan teks: spec baru
   pola yang sama di catat beban (e2e `6d07b8d`), tanpa skenario
   `page.clock` tersendiri.
 
+Dilunasi 24 November 2026 (utang pengujian kelompok admin dan profil,
+`c1f683b`) dan dipindah dari `referensi/utang-pengujian.md` tanpa
+perubahan teks; tiga butir (aktifkan akun kedaluwarsa, masa berlaku
+Langganan, revisi profil) dipersempit ke sisanya di sana. Skenario baru di
+`admin/akun-klien`, `admin/kelola-akun`, `admin/langganan-akun`,
+`admin/sesi-admin`, `admin/tampilan-admin`, `auth/sidebar-pengguna`,
+`pengaturan/langganan`, `profil/profil`, dan `setup/panduan`. Spec tur jam
+buka menemukan balon di luar layar untuk target setinggi lebih dari layar,
+diperbaiki di commit yang sama (`modul/setup-akun.md`, JB10a).
+
+- **Profil Owner hanya teruji dibuka**, tidak diubah, karena nama dan PIN
+  Ridho dipakai login seluruh suite.
+- **Pengulangan `DELETE` setelah password admin salah tidak diukur.**
+  Respons 401 dan pesannya teruji; penyegaran token dan permintaan kedua
+  hanya dibaca dari `lib/apiClient.ts` (`kontrak/temuan.md` butir 114).
+- **Aktifkan dengan durasi wajib dan perpanjangan yang membuka akun
+  kedaluwarsa hanya teruji di unit test**
+  (`tests/unit/features/admin-akun/langganan.test.ts`), karena akun
+  bermasa akses lewat atau beku karena kedaluwarsa tidak dapat dibuat
+  lewat UI.
+- **Tombol muat berikutnya riwayat langganan belum teruji e2e**, karena
+  butuh lebih dari 20 catatan pada satu akun.
+- **Bekukan dan hapus sungguhan hanya diuji pada akun uji tanpa toko.**
+  Pemutusan sesi pengguna toko saat akun dibekukan dan penghapusan data
+  toko saat akun dihapus tidak diuji.
+- **Daftar akun yang gagal dimuat, domain email disposable, dan akun
+  klien tanpa sesi pengguna yang membuka `/admin`** belum teruji e2e;
+  yang terakhir teruji di `tests/unit/lib/auth/tujuan.test.ts`.
+- **Keadaan masa berlaku Langganan hanya teruji di unit test**: masa
+  percobaan, bilah masa berlaku, masa akses lewat dan masa tenggang, serta
+  Muat riwayat lainnya. Akun uji Pro tanpa batas waktu dengan satu catatan
+  riwayat, sehingga e2e hanya membuktikan keadaan tanpa batas.
+- **Tur sorotan langkah jam buka (JB9a) hanya teruji di unit test**
+  (`titikJamBuka`), karena spec tur wizard berhenti di langkah lokasi;
+  mencapai langkah jam buka butuh mengisi lokasi berkoordinat lebih dulu
+  (16 November 2026).
+- **Rombak panel admin (24 November 2026) teruji di 390, 768, dan 1280
+  px saja**: susunan empat kolom (wadah 600 sampai 960 px) di 1024 px dan
+  kartu di 640 px tidak punya skenario. Panel bawah dialog di HP hanya
+  diuji untuk Perpanjang; Ubah Plan, Aktifkan, Bekukan, dan Hapus memakai
+  kelas yang sama. Keluar lewat menu avatar HP hanya diperiksa tampil,
+  tidak diklik, karena logout memutar `tokenVersion` admin uji.
+- **Topbar admin saat `GET /akun/me` gagal** (email tidak tampil, Keluar
+  tetap ada) hanya terbaca dari kode.
+- **Revisi profil (24 November 2026) teruji di 390 dan 1280 px untuk
+  popup, dan 390, 768, serta 1280 px untuk laman**: popup di tablet 768 px
+  dan sidebar mode ikon di desktop tidak punya skenario. Ganti pengguna
+  teruji di tab yang sama; muat ulang sesudahnya menunggu backend butir
+  190.
+- **Batal terkunci selama menyimpan (BT2a) teruji e2e hanya di ubah
+  metode pembayaran** (`pengaturan/kelola-metode-pembayaran`, PUT ditahan
+  lalu diteruskan). Batal di buat dan ubah akun admin memakai pola yang
+  sama dan hanya terbaca dari kode.
+
 ## Kejadian sesekali yang tidak berulang
 
 - **Master Shift tampil sebagai kartu di 1280 px, sekali** (20 November
