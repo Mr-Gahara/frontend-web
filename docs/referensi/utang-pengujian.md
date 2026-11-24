@@ -520,3 +520,11 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   `jadwal/rekap-absensi` berjalan dengan data bulan berjalan.
 - **Stok terbaca di inventaris gudang** hanya teruji di unit test
   (`rincianKemasan`); e2e membuktikannya di daftar stok outlet.
+- **Rombak panel admin (24 November 2026) teruji di 390, 768, dan 1280
+  px saja**: susunan empat kolom (wadah 600 sampai 960 px) di 1024 px dan
+  kartu di 640 px tidak punya skenario. Panel bawah dialog di HP hanya
+  diuji untuk Perpanjang; Ubah Plan, Aktifkan, Bekukan, dan Hapus memakai
+  kelas yang sama. Keluar lewat menu avatar HP hanya diperiksa tampil,
+  tidak diklik, karena logout memutar `tokenVersion` admin uji.
+- **Topbar admin saat `GET /akun/me` gagal** (email tidak tampil, Keluar
+  tetap ada) hanya terbaca dari kode.

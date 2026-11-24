@@ -35,7 +35,18 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (sesi berikutnya, dicatat 23 November 2026 sore)
+### Mulai di sini (sesi berikutnya, dicatat 24 November 2026)
+
+Rombak UI/UX laman admin platform selesai 24 November 2026
+(`modul/panel-admin.md`, RP1a sampai RP5a): kerangka desain B, tabel dan
+filter desain A, detail B dengan riwayat A, form dan dialog B. Backend
+`ridho` `1718030`, tidak maju. Urutan berikutnya tetap seperti di bawah,
+tanpa butir rombak admin: deskripsi paket laman pengenalan, revisi laman
+profil dan menu popup profil, nomor WhatsApp admin (LG1a), utang
+pengujian kelompok 1, lalu suite e2e penuh (harapan 731) dan
+`bersih-akunkas.js`.
+
+### Keadaan 23 November 2026 sore
 
 Keadaan akhir sesi 23 November 2026: backend `ridho` `1718030` (tidak maju
 sejak 22 November). Dua putaran selesai hari itu:
@@ -180,8 +191,8 @@ perintahnya:
 
 1. **Rombak UI/UX laman admin platform** (`app/admin`,
    `features/admin-akun`: daftar, buat, detail, dan ubah akun klien,
-   langganan, serta riwayatnya). Arah rombakannya perlu keputusan dan
-   desain pemilik proyek.
+   langganan, serta riwayatnya). Selesai 24 November 2026 dari kanvas tiga
+   arah (`modul/panel-admin.md`, RP1a sampai RP5a).
 2. **Perbaikan deskripsi paket di laman pengenalan** (`/`, `PAKET` di
    `features/laman-utama/konten.ts`: kalimat "untuk" dan daftar fitur
    Basic, Advanced, dan Pro). Isinya dicocokkan dengan pembatasan plan

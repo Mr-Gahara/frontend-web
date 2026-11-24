@@ -98,7 +98,59 @@ Diputuskan pemilik proyek pada 31 Oktober 2026
   `useAkun`, dengan id rusak (400) dan akun tidak ada (404) sebagai
   "Akun tidak ditemukan" (`akunTidakAda`).
 
+### Rombak UI/UX panel admin
+
+Diputuskan pemilik proyek pada 24 November 2026 dari kanvas desain
+"Rombak Panel Admin Tachyon POS" (tiga arah, masing-masing daftar 1280,
+768, dan 390 px, detail 1280 dan 390 px, form buat, dan dialog di HP).
+
+- **RP1a: kerangka desain B.** Topbar navy selebar layar: merek dan
+  penanda Panel Admin di kiri, avatar, email admin, dan Keluar di kanan.
+  Email dibaca dari `GET /akun/me` (B240); di bawah 768 px identitas dan
+  Keluar pindah ke menu avatar. Isi berlatar gading dengan pembungkus
+  keputusan rancangan butir 35.
+- **RP2a: daftar memakai tabel dan filter desain A.** Kolom Akun (email,
+  lencana Admin, username), Toko, Plan, Status, Masa Akses, dan Dibuat;
+  kolom Peran dibuang, akun admin ditandai lencana. Di wadah 600 sampai
+  960 px empat kolom: toko turun di bawah email, Dibuat tidak tampil. Di
+  HP kartu lega satu kolom (KL1b). Filter tetap BilahFilter dan
+  PanelFilter (FL1a).
+- **RP3a: kartu ringkas B hanya ringkasan.** Semua akun, Aktif, dan
+  Non-aktif dari `pagination.total` berukuran 1, tanpa pencarian, dan
+  tidak dapat diklik. Opsi lain: kartu menyaring (dua jalan untuk satu
+  filter) dan tanpa kartu.
+- **RP4a: detail desain B dengan riwayat desain A.** Kartu profil
+  (avatar, email, username, lencana, rincian berbaris) dan Kelola Akun di
+  kolom kiri 400 px, riwayat garis waktu di kanan; bertumpuk di bawah
+  1024 px. Lencana status gaya A di daftar dan detail: Aktif, atau
+  Non-aktif dengan Kedaluwarsa atau Dibekukan admin di bawahnya.
+- **RP5a: form dan dialog ikut B.** Form buat dalam dua kartu (Data
+  masuk, Langganan), form ubah dalam satu kartu; Plan tiga tombol pilihan
+  dan durasi berupa chip (radiogroup), kaki tombol bertumpuk di HP
+  (butir 36). Dialog langganan dan hapus menjadi panel dari bawah di
+  bawah 640 px. Tombol utama navy seperti kanvas.
+- Diterapkan tanpa ditanyakan: `useJumlahAkun` di bawah akar `adminAkun`
+  agar ikut dimuat ulang setiap aksi; susunan kolom dipilih dari lebar
+  wadah (`useLebarElemen`, butir 31), bukan lebar layar; label "(sekarang)"
+  di pilihan Plan perpanjang diganti keterangan "Plan sekarang ...".
+
 ## Catatan
+
+### Catatan dari rombak UI/UX panel admin
+
+- Temuan lama yang dibetulkan di putaran ini: padding isi 24 px di HP
+  (kini 16 px, sama dengan dashboard), pembungkus detail `max-w-4xl` dan
+  form `max-w-xl` (kini `max-w-6xl` dan `max-w-3xl`), kaki form ubah yang
+  tidak bertumpuk di HP, dan topbar tanpa identitas admin.
+- Temuan saat menerapkan, langsung dibetulkan: baris admin di susunan
+  tablet tertulis "- · admin" (kini username saja), tombol utama hitam
+  dari `primary` bawaan (kini navy seperti kanvas), dan tombol kaki form
+  HP 32 px (kini 40 px).
+- Kanvas: bingkai papan sempat lebih pendek dari isinya (B detail
+  desktop, B form, A dan B daftar HP), sehingga terpotong; tinggi bingkai
+  kini diambil dari `$preview` setiap papan.
+- `tungguDaftarAkun` tanpa syarat ikut menangkap permintaan kartu
+  ringkas; `bukaDaftarAkun` kini menunggu permintaan berukuran selain 1.
 
 ### Catatan dari modul panel admin
 
@@ -190,6 +242,7 @@ dengan suite e2e penuh dijalankan sekali di akhir modul (keputusan PF6a):
 - Kepala panel admin tidak menampilkan identitas admin yang sedang masuk,
   karena token akun tidak membawa email, dan tampilannya masih sederhana
   dengan token tema; layout dan UI/UX-nya menunggu keputusan pemilik proyek.
+  Selesai 24 November 2026: email dari `GET /akun/me` di topbar (RP1a).
 ### Utang kecil dari penyesuaian backend `ridho` `0024eb9`
 
 - Perpindahan halaman daftar akun belum teruji e2e: skenarionya

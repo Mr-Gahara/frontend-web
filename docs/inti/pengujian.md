@@ -12,6 +12,16 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per rombak panel admin** (24 November 2026, backend `ridho`
+lokal `1718030`): vitest 1228 lolos dari 145 berkas (empat unit baru:
+`statusLencana`, `inisialAkun`, `kolomRingkas`, `paramJumlahAkun`). Tanpa
+suite penuh dan tanpa OTP: folder `tests/e2e/admin` 26 lolos, 0 dilewati
+(spec baru `admin/tampilan-admin`, 4 skenario: laptop, tablet, HP beserta
+panel bawah dialog, dan kartu ringkas gagal dimuat). Spec lama disesuaikan
+dari combobox ke tombol pilihan (radiogroup) dan dari kolom Peran ke
+lencana Admin. Harapan suite penuh berikutnya 731 (`npx playwright test
+--list`, 117 berkas).
+
 **Baseline per tuntasnya bug dan temuan frontend** (23 November 2026
 malam, backend `ridho` lokal `1718030`): vitest 1224 lolos. Kejadian
 vitest gagal 3 test sekali (19 November 2026) tidak tereproduksi: vitest
@@ -302,6 +312,7 @@ Pola kegagalan yang berulang:
 | `bukaDenganAuth` habis waktu menunggu `pin-refresh` di skenario baru | Blok `describe` tempat skenario ditambahkan tidak login di `beforeEach`; skenario lain di blok itu memanggil `login(page)` sendiri. Baca `beforeEach` blok tujuan sebelum menambah skenario (23 November 2026) |
 | `getComputedStyle(...).boxShadow` sel bertanda `shadow-none` bukan `none`, atau warnanya tidak terbaca pola `rgba` | Tailwind v4 menulis bayangan sebagai beberapa lapisan variabel; `shadow-none` menjadi lapisan `rgba(0, 0, 0, 0)`, dan warna `color-mix` terhitung `color(srgb … / a)`. Periksa alfa setiap lapisan (`adaBayanganTerlihat` di `tampilan/bayangan-baris`) |
 | Skenario navigasi kembali gagal hanya di suite penuh, lolos sendirian | Tombol memakai `router.back()`, sehingga tujuannya bergantung riwayat tab yang berbeda antara run sendiri dan suite penuh. Buka laman di tab baru (`context().newPage()`) untuk membuktikannya secara pasti, dan pakai tujuan pasti (KB1a) |
+| Helper penunggu daftar menerima respons dengan query yang tidak diharapkan sesudah halaman diberi komponen baru | Penunggu tanpa syarat ikut menangkap permintaan endpoint yang sama dari komponen baru di halaman itu (kartu ringkas admin meminta `limit=1`). Saat menambah permintaan ke endpoint daftar, beri penunggu helper syarat query (`bukaDaftarAkun`, 24 November 2026) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

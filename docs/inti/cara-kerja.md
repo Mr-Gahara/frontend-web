@@ -200,6 +200,19 @@ lebih dulu; harapan spec hanya diubah bila terbukti keliru dari kode,
 kontrak, atau keputusan, dan perubahannya disebut di laporan beserta
 buktinya.
 
+## Kanvas desain
+
+Dicatat 24 November 2026 (rombak panel admin):
+
+- Tinggi bingkai papan di indeks kanvas diambil dari `$preview` papannya
+  sendiri, bukan dari perkiraan awal. Bingkai yang lebih pendek dari isi
+  memotong papan diam-diam; empat papan sempat terpotong sebelum pemilik
+  proyek memilih.
+- Sesudah menerapkan desain, potret halaman nyata di 390, 768, dan 1280
+  px lalu bandingkan dengan papan terpilih sebelum menjalankan spec.
+  Perbandingan ini menemukan tombol utama hitam (`primary` bawaan),
+  padahal kanvas navy, dan baris admin bertuliskan "- · admin".
+
 ## Keputusan berdasar bukti
 
 Setiap keputusan harus bersandar pada kode atau output yang benar-benar
