@@ -12,6 +12,14 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per deskripsi paket laman pengenalan** (24 November 2026,
+LU6a): vitest 1228 lolos, tanpa unit baru (isi paket data statis). Tanpa
+suite penuh: folder `tests/e2e/laman-utama` 5 lolos, termasuk skenario
+baru penanda paket di 390, 768, dan 1280 px, yang gagal pada kode lama
+(dibuktikan lewat `git stash`, lalu dijalankan ulang sesudah dipulihkan).
+Harapan suite penuh berikutnya 732 (`npx playwright test --list`, 117
+berkas).
+
 **Baseline per rombak panel admin** (24 November 2026, backend `ridho`
 lokal `1718030`): vitest 1228 lolos dari 145 berkas (empat unit baru:
 `statusLencana`, `inisialAkun`, `kolomRingkas`, `paramJumlahAkun`). Tanpa

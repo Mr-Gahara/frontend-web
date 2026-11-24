@@ -668,6 +668,17 @@ di laman.
   memakai skala tujuh tingkat, sehingga ukuran kanvas yang tidak ada di
   skala dibulatkan ke token terdekat (misalnya 15 dan 17 px menjadi
   besar, 20 px menjadi subjudul).
+- **LU6a: deskripsi paket gaya A di kartu B** (pemilik proyek,
+  24 November 2026, kanvas yang sama). Kartu, latar krem, judul "Pilih
+  sesuai toko Anda", pengantar, kalimat untuk siapa, dan font sans laman
+  tetap; tanpa tombol tambahan. Setiap fitur menjadi baris bergaris tipis:
+  teks di kiri, "termasuk" atau tanda pisah di kanan (pembaca layar
+  "tidak termasuk"), fitur yang tidak termasuk diredupkan tanpa coretan.
+  Teks versi lengkap tabel A, sesuai `FITUR_PER_PLAN`: "Sesi booking:
+  aset, tipe aset, dan tarif" mulai Advanced, "Gudang dan WMS: pengajuan
+  dan transfer stok" hanya Pro. Diterapkan tanpa ditanyakan: teks baris
+  tetap 14 px sampai 1024 px, karena di tablet 768 px kolom kartu sempit
+  dan teks 16 px turun sampai tiga baris.
 
 ### Kerapian seluruh laman
 

@@ -40,8 +40,8 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 Rombak UI/UX laman admin platform selesai 24 November 2026
 (`modul/panel-admin.md`, RP1a sampai RP5a): kerangka desain B, tabel dan
 filter desain A, detail B dengan riwayat A, form dan dialog B. Backend
-`ridho` `1718030`, tidak maju. Urutan berikutnya tetap seperti di bawah,
-tanpa butir rombak admin: deskripsi paket laman pengenalan, revisi laman
+`ridho` `1718030`, tidak maju. Deskripsi paket laman pengenalan selesai
+hari yang sama (`modul/ui-ux.md`, LU6a). Urutan berikutnya: revisi laman
 profil dan menu popup profil, nomor WhatsApp admin (LG1a), utang
 pengujian kelompok 1, lalu suite e2e penuh (harapan 731) dan
 `bersih-akunkas.js`.
@@ -197,7 +197,8 @@ perintahnya:
    `features/laman-utama/konten.ts`: kalimat "untuk" dan daftar fitur
    Basic, Advanced, dan Pro). Isinya dicocokkan dengan pembatasan plan
    yang berlaku (`features/langganan/data.ts`, `modul/setup-akun.md`
-   PL6a) dan diputuskan pemilik proyek.
+   PL6a) dan diputuskan pemilik proyek. Selesai 24 November 2026
+   (`modul/ui-ux.md`, LU6a).
 3. **Kerapian spacing dan alignment seluruh laman** (pemilik proyek,
    20 November 2026): setiap laman rapi di HP, HP mendatar, tablet, dan
    desktop, horizontal maupun vertikal, tanpa elemen berdempet. Selesai
