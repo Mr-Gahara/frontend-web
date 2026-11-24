@@ -126,11 +126,26 @@ function Paket() {
             <Muncul key={p.nama} tunda={i * 120} className={cn("flex flex-col gap-2 border-t-4 pt-4 md:gap-3 md:pt-5", p.garis)}>
               <h3 className="text-judul font-black md:text-tampilan">{p.nama}</h3>
               <p className="text-isi text-navy/75 md:text-besar">{p.untuk}</p>
-              <ul className="mt-1 flex flex-col gap-1.5 text-isi md:mt-2 md:gap-2 md:text-besar">
+              {/* Deskripsi gaya A di kartu B (pemilik proyek, 24 November 2026): fitur di kiri,
+                  penanda termasuk atau tanda pisah di kanan, bergaris tipis antarbaris. */}
+              <ul className="mt-1 flex flex-col border-b border-navy/15 text-isi md:mt-2 lg:text-besar">
                 {p.fitur.map((f) => (
-                  <li key={f.teks} className={f.ada ? "text-navy" : "text-navy/70 line-through"}>
-                    {f.ada ? null : <span className="sr-only">Tidak termasuk: </span>}
-                    {f.teks}
+                  <li
+                    key={f.teks}
+                    className={cn(
+                      "flex items-baseline justify-between gap-3 border-t border-navy/15 py-2.5 lg:py-3",
+                      f.ada ? "text-navy" : "text-navy/70",
+                    )}
+                  >
+                    <span className="min-w-0">{f.teks}</span>
+                    {f.ada ? (
+                      <span className="shrink-0 text-kecil font-semibold lg:text-isi">termasuk</span>
+                    ) : (
+                      <span className="shrink-0 text-kecil font-semibold lg:text-isi">
+                        <span aria-hidden="true">—</span>
+                        <span className="sr-only">tidak termasuk</span>
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

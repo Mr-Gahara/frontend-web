@@ -44,11 +44,18 @@ export interface FiturPaket {
   ada: boolean;
 }
 
+/**
+ * Teks baris fitur versi lengkap dari tabel paket desain A laman utama
+ * (pemilik proyek, 24 November 2026), sesuai FITUR_PER_PLAN
+ * (`lib/auth/fitur-plan.ts`): Sesi booking mulai Advanced, Gudang mulai Pro.
+ */
 const fiturDasar: FiturPaket[] = [
-  { teks: "Kasir, pembayaran, pelanggan", ada: true },
-  { teks: "Stok, bahan baku, pembelian", ada: true },
+  { teks: "Kasir, pembayaran, dan pelanggan", ada: true },
+  { teks: "Stok, bahan baku, dan pembelian", ada: true },
   { teks: "Keuangan dan jadwal shift", ada: true },
 ];
+const SESI_BOOKING = "Sesi booking: aset, tipe aset, dan tarif";
+const GUDANG = "Gudang dan WMS: pengajuan dan transfer stok";
 
 /** Paket tanpa harga (keputusan pemilik proyek); garis atas navy, karamel, sage. */
 export const PAKET = [
@@ -56,19 +63,19 @@ export const PAKET = [
     nama: "Basic",
     untuk: "Satu outlet yang berjualan langsung.",
     garis: "border-navy",
-    fitur: [...fiturDasar, { teks: "Sesi booking", ada: false }, { teks: "Gudang dan WMS", ada: false }],
+    fitur: [...fiturDasar, { teks: SESI_BOOKING, ada: false }, { teks: GUDANG, ada: false }],
   },
   {
     nama: "Advanced",
     untuk: "Ditambah meja, ruang, atau lapangan yang disewa per sesi.",
     garis: "border-karamel",
-    fitur: [...fiturDasar, { teks: "Sesi booking", ada: true }, { teks: "Gudang dan WMS", ada: false }],
+    fitur: [...fiturDasar, { teks: SESI_BOOKING, ada: true }, { teks: GUDANG, ada: false }],
   },
   {
     nama: "Pro",
     untuk: "Ditambah gudang yang memasok outlet.",
     garis: "border-sage",
-    fitur: [...fiturDasar, { teks: "Sesi booking", ada: true }, { teks: "Gudang dan WMS", ada: true }],
+    fitur: [...fiturDasar, { teks: SESI_BOOKING, ada: true }, { teks: GUDANG, ada: true }],
   },
 ] as const;
 

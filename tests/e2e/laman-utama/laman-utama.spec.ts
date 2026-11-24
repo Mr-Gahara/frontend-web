@@ -45,6 +45,37 @@ test.describe("Laman utama (tamu)", () => {
 });
 
 test.describe("Laman utama (sudah masuk)", () => {
+  test("paket: setiap fitur berpenanda sesuai plan, tanpa gulir samping di tiga lebar", async ({ page }) => {
+    // Deskripsi gaya A di kartu B (pemilik proyek, 24 November 2026); aturan plan
+    // dari lib/auth/fitur-plan.ts: Sesi booking mulai Advanced, Gudang mulai Pro.
+    const harapan: Record<string, string[]> = {
+      Basic: ["termasuk", "termasuk", "termasuk", "tidak termasuk", "tidak termasuk"],
+      Advanced: ["termasuk", "termasuk", "termasuk", "termasuk", "tidak termasuk"],
+      Pro: ["termasuk", "termasuk", "termasuk", "termasuk", "termasuk"],
+    };
+    for (const lebar of [390, 768, 1280]) {
+      await page.setViewportSize({ width: lebar, height: 900 });
+      await page.goto("/");
+      const paket = page.locator("#paket");
+      await paket.scrollIntoViewIfNeeded();
+      for (const [nama, tanda] of Object.entries(harapan)) {
+        const kartu = paket.locator("[data-muncul]").filter({ has: page.getByRole("heading", { name: nama, exact: true }) });
+        const baris = kartu.getByRole("listitem");
+        await expect(baris).toHaveCount(5);
+        await expect(baris.nth(3)).toContainText("Sesi booking: aset, tipe aset, dan tarif");
+        await expect(baris.nth(4)).toContainText("Gudang dan WMS: pengajuan dan transfer stok");
+        for (let i = 0; i < tanda.length; i++) {
+          const teks = (await baris.nth(i).innerText()).replace(/\s+/g, " ");
+          if (tanda[i] === "termasuk") expect(teks, `${nama} baris ${i + 1} di ${lebar} px`).toMatch(/ termasuk$/);
+          else await expect(baris.nth(i).locator(".sr-only")).toHaveText("tidak termasuk");
+        }
+        await expect(kartu.locator("li.line-through")).toHaveCount(0);
+      }
+      const isi = await page.evaluate(() => document.documentElement.scrollWidth);
+      expect(isi, `tanpa gulir samping di ${lebar} px`).toBeLessThanOrEqual(lebar);
+    }
+  });
+
   test("LU3a: pengguna yang sudah masuk hanya melihat Buka dashboard", async ({ page }) => {
     await masuk(page);
     await page.goto("/");
