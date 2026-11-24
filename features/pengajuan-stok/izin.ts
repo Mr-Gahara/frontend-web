@@ -80,6 +80,23 @@ export function rekanSelokasiPengaju(
 export const PESAN_REKAN_SELOKASI =
   "Pengajuan dari lokasi kerja Anda harus disetujui pengguna lokasi lain atau Owner.";
 
+/**
+ * Pengguna aktif adalah pengaju dan bukan Owner, yang pasti ditolak 403
+ * backend saat menyetujui (P20, pengajuanStokService.approve); Owner boleh
+ * menyetujui pengajuannya sendiri (RH5a). Setujui diganti keterangan seperti
+ * PG2a (pemilik proyek, 24 November 2026).
+ */
+export function pengajuSendiri(
+  idSaya: string | null | undefined,
+  owner: boolean,
+  idPengaju: string | null | undefined,
+): boolean {
+  if (owner || !idSaya || !idPengaju) return false;
+  return idSaya === idPengaju;
+}
+
+export const PESAN_PENGAJU_SENDIRI = "Pengajuan Anda sendiri harus disetujui pengguna lain atau Owner.";
+
 export function bolehTolakPengajuan(permissions: readonly string[]): boolean {
   return permissions.includes(IZIN.tolakPengajuanStok);
 }

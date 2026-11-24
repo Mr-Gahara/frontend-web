@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { daftarAkun, pilihAkun, type AkunKasUji } from "../../helpers/akun-kas-uji";
 import { KATEGORI_FIXTURE, pastikanKategoriFixture } from "../../helpers/beban-uji";
 import {
@@ -186,4 +186,35 @@ test("gate stock adjustment: tanpa read-location ruang outlet ditolak; izin per 
   });
   await page.goto("/dashboard/gudang/stockAdjustment");
   await ditolak(page);
+});
+
+test("penyaringan stock adjustment per ruang di server: izin ruang outlet hanya membaca adjustment outlet (temuan 40)", async ({
+  page,
+}) => {
+  // Bentuk respons mapper adjustment: lokasi { id, nama, tipe }.
+  type Adj = { id: string; lokasi?: { tipe?: string } | null };
+  const idDari = (a: Adj) => a.id;
+  const tipeDari = (a: Adj) => a.lokasi?.tipe;
+
+  // Owner: satu adjustment Gudang sebagai sasaran yang harus ditolak.
+  const owner = await bukaDenganAuth(page, "/dashboard");
+  const gudang = await api<Adj[]>(page, owner, "GET", "/stockopname/adjustments?tipeLokasi=Gudang&page=1&limit=1");
+  expect(gudang.status, gudang.pesan).toBe(200);
+  const sasaran = gudang.data?.[0];
+  test.skip(!sasaran, "tenant uji belum punya stock adjustment Gudang");
+
+  await masukAdjustmentOutlet(page);
+  const staf = await bukaDenganAuth(page, "/dashboard/outlet/inventaris/stockAdjustment");
+  const daftar = await api<Adj[]>(page, staf, "GET", "/stockopname/adjustments?page=1&limit=50");
+  expect(daftar.status, daftar.pesan).toBe(200);
+  expect(daftar.data.length, "ada adjustment outlet yang terbaca").toBeGreaterThan(0);
+  expect(
+    daftar.data.filter((a) => tipeDari(a) !== "Outlet").map(idDari),
+    "daftar tanpa adjustment di luar ruang outlet",
+  ).toEqual([]);
+  const minta = await api<Adj[]>(page, staf, "GET", "/stockopname/adjustments?tipeLokasi=Gudang&page=1&limit=5");
+  expect([200, 403], minta.pesan).toContain(minta.status);
+  if (minta.status === 200) expect(minta.data, "filter Gudang tidak membuka ruang gudang").toEqual([]);
+  const detail = await api(page, staf, "GET", "/stockopname/adjustments/" + idDari(sasaran as Adj));
+  expect(detail.status, `detail adjustment Gudang: ${detail.pesan}`).toBe(403);
 });

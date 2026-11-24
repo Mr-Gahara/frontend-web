@@ -12,6 +12,7 @@ import {
 import { useDaftarRole, useLevelPenggunaAktif } from "@/features/role/hooks";
 import { namaPeran } from "./peran";
 import { lokasiKerjaDikirim, pilihanLokasiKerja, roleOwner, tampilkanLokasiKerja } from "./lokasi-kerja";
+import { aksiPengguna, tawarkanEdit } from "./izin";
 import { useDaftarLokasi } from "@/features/inventaris/hooks";
 import { IZIN } from "@/lib/auth/permissions";
 import { pesanError } from "@/lib/api/error";
@@ -95,6 +96,7 @@ export default function HalamanPengguna({
   // Pilihan lokasi kerja dibaca dari GET /location (read-location), yang
   // tidak dituntut halaman ini; tanpa izin itu isiannya disembunyikan.
   const bolehBacaLokasi = permissions.includes(IZIN.location);
+  const aksi = aksiPengguna(permissions);
   const daftarLokasi = useDaftarLokasi({ aktif: bolehBacaLokasi });
   const tampilLokasiKerja = tampilkanLokasiKerja(bolehBacaLokasi, roleOwner(roleList, form.roleID));
 
@@ -320,6 +322,11 @@ export default function HalamanPengguna({
         const isSelfRow = targetId === currentUserId;
         const canEdit = isSelfRow || targetLevel < currentUserLevel;
         const canDelete = !isSelfRow && targetLevel < currentUserLevel;
+        // Aksi yang izinnya tidak dipegang disembunyikan (butir 14); baris tanpa
+        // aksi tidak punya tombol menu, seperti daftar diskon.
+        const tampilEdit = tawarkanEdit(aksi, isSelfRow);
+        const tampilHapus = aksi.hapus;
+        if (!tampilEdit && !tampilHapus) return null;
 
         return (
           <div className="flex justify-end">
@@ -338,23 +345,27 @@ export default function HalamanPengguna({
                 align="end"
                 className="bg-gading border-navy/10"
               >
-                <DropdownMenuItem
-                  className="cursor-pointer font-bold text-navy hover:bg-navy/5"
-                  onClick={() => openEdit(row.original)}
-                  disabled={!canEdit}
-                >
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-navy/10" />
-                <DropdownMenuItem
-                  className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10"
-                  onClick={() => {
-                    if (canDelete) setDeleteTarget(row.original);
-                  }}
-                  disabled={!canDelete}
-                >
-                  Hapus
-                </DropdownMenuItem>
+                {tampilEdit && (
+                  <DropdownMenuItem
+                    className="cursor-pointer font-bold text-navy hover:bg-navy/5"
+                    onClick={() => openEdit(row.original)}
+                    disabled={!canEdit}
+                  >
+                    Edit
+                  </DropdownMenuItem>
+                )}
+                {tampilEdit && tampilHapus && <DropdownMenuSeparator className="bg-navy/10" />}
+                {tampilHapus && (
+                  <DropdownMenuItem
+                    className="cursor-pointer font-bold text-red-600 focus:text-red-700 focus:bg-red-500/10"
+                    onClick={() => {
+                      if (canDelete) setDeleteTarget(row.original);
+                    }}
+                    disabled={!canDelete}
+                  >
+                    Hapus
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -375,13 +386,15 @@ export default function HalamanPengguna({
             Kelola seluruh entitas akun dan hak akses platform.
           </p>
         </div>
-        <Button
-          onClick={openCreate}
-          size="aksi"
-          className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
-        >
-          <Plus className="h-4 w-4" /> Tambah Pengguna
-        </Button>
+        {aksi.buat && (
+          <Button
+            onClick={openCreate}
+            size="aksi"
+            className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto"
+          >
+            <Plus className="h-4 w-4" /> Tambah Pengguna
+          </Button>
+        )}
       </div>
 
       {/* MASTER BENTO GRID */}

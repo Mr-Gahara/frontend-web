@@ -2,6 +2,8 @@ import { test, expect, Page, Response } from "@playwright/test";
 import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../../helpers/filter-uji";
 import { bukaDenganAuth, pengajuanUjiDisetujui, type Auth } from "../../../helpers/transfer-uji";
 import { masuk } from "../../../helpers/masuk-uji";
+import { IZIN } from "../../../../lib/auth/permissions";
+import { masukSebagai } from "../../../helpers/terkunci-uji";
 
 /*
  * Spec pembanding alur tulis pengajuan stok (keputusan pemilik proyek,
@@ -175,6 +177,63 @@ test.describe("Alur tulis pengajuan stok", () => {
       await expect(dialog).toBeHidden();
       await expect(page.getByRole("button", { name: /setujui permintaan/i })).toHaveCount(0);
     });
+  });
+
+  test("pengaju bukan Owner: Setujui diganti keterangan pada pengajuannya sendiri, approve tidak dikirim, dan Tolak tetap tersedia (P20)", async ({
+    page,
+  }) => {
+    test.setTimeout(150_000);
+    await masukSebagai(page, {
+      nama: "E2E Pengelola Pengajuan",
+      pin: "864243",
+      deskripsi: "Peran uji e2e: izin baca Owner ditambah buat, ubah, setujui, dan tolak pengajuan stok",
+      izin: (n) =>
+        n.startsWith("read-") ||
+        ([IZIN.buatPengajuanStok, IZIN.ubahPengajuanStok, IZIN.setujuiPengajuanStok, IZIN.tolakPengajuanStok] as string[]).includes(n),
+    });
+    let id = "";
+    await page.goto(URL_OUTLET + "/buatPengajuan");
+    // Tanpa akses-lintas-outlet, outlet peminta terkunci pada outlet tenant.
+    await expect(page.getByRole("combobox", { name: "Outlet Peminta *" })).toBeDisabled({ timeout: 20_000 });
+    await page.getByText("Pilih Gudang...", { exact: true }).click();
+    await page.getByRole("option").first().click();
+    if ((await page.getByText("Pilih...", { exact: true }).count()) === 0) {
+      await page.getByRole("button", { name: /tambah baris/i }).click();
+    }
+    await page.getByText("Pilih...", { exact: true }).first().click();
+    await page.getByRole("option").first().click();
+    await page.getByPlaceholder("0").first().fill("1");
+    const tPost = page.waitForResponse((r) => r.request().method() === "POST" && POLA_POST.test(r.url()));
+    await page.getByRole("button", { name: "Simpan sebagai Draft" }).click();
+    const buat = await tPost;
+    expect(buat.status()).toBe(201);
+    id = ((await buat.json()) as { data: PengajuanMentah }).data.id;
+    await page.waitForURL(/\/pengajuanStok$/);
+
+    await page.goto(`${URL_OUTLET}/${id}`);
+    await page.getByRole("button", { name: /ajukan ke gudang/i }).click();
+    const ajukan = page.waitForResponse(patchAksi("submit"));
+    await page.getByRole("alertdialog").getByRole("button", { name: "Ya, Ajukan Sekarang" }).click();
+    expect((await ajukan).status()).toBe(200);
+
+    let approve = 0;
+    page.on("request", (r) => {
+      if (r.method() === "PATCH" && /\/api\/pengajuanstok\/[^/]+\/approve(\?|$)/i.test(r.url())) approve += 1;
+    });
+    await page.goto(`${URL_GUDANG}/${id}`, { waitUntil: "commit" });
+    const tDetail = page.waitForResponse(getDetail(id));
+    expect(((await (await tDetail).json()) as { data: PengajuanMentah }).data.status).toBe("SUBMITTED");
+    await expect(page.getByText("Pengajuan Anda sendiri harus disetujui pengguna lain atau Owner.")).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.getByRole("button", { name: /setujui permintaan/i })).toHaveCount(0);
+    await page.getByRole("button", { name: "Tolak Permintaan" }).first().click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByPlaceholder("Ketik alasan penolakan di sini...").fill(ALASAN);
+    const tTolak = page.waitForResponse(patchAksi("reject"));
+    await dialog.getByRole("button", { name: "Tolak Permintaan" }).click();
+    expect((await tTolak).status(), "pengaju boleh menolak pengajuannya sendiri").toBe(200);
+    expect(approve, "approve tidak dikirim").toBe(0);
   });
 
   test("pengembalian: buat dari outlet, ajukan, tampil di inbox gudang, lalu tolak", async ({ page }) => {

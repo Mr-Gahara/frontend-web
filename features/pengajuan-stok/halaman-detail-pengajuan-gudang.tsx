@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { isNotFound, pesanError } from "@/lib/api/error";
 import { useSession } from "@/lib/auth/useSession";
+import { useLevelPenggunaAktif } from "@/features/role/hooks";
 import { bolehLintasOutlet } from "@/lib/auth/permissions";
 import { usePenggunaSaya } from "@/features/pengguna/hooks-profil";
 import { tahapPengajuan, type TahapPengajuan } from "./tahap";
@@ -15,7 +16,9 @@ import { PanelBuatSuratJalan } from "./panel-surat-jalan";
 import { usePengajuanStok, useSetujuiPengajuan, useTolakPengajuan } from "./hooks";
 import { arahLokasi, arahPengajuanValid, peranRuang } from "./arah";
 import {
+  PESAN_PENGAJU_SENDIRI,
   PESAN_REKAN_SELOKASI,
+  pengajuSendiri,
   bolehBuatSuratJalan,
   bolehSetujuiPengajuan,
   bolehTolakPengajuan,
@@ -104,8 +107,9 @@ function badgeTahap(tahap: TahapPengajuan, label: string) {
 export default function HalamanDetailPengajuanGudang() {
   const router = useRouter();
   const id = useParams().id as string;
-  const { permissions } = useSession();
+  const { pengguna, permissions } = useSession();
   const izin = permissions ?? [];
+  const owner = useLevelPenggunaAktif() === 100;
   const bolehSetujui = bolehSetujuiPengajuan(izin);
   const bolehTolak = bolehTolakPengajuan(izin);
   const bolehSuratJalan = bolehBuatSuratJalan(izin);
@@ -187,7 +191,9 @@ export default function HalamanDetailPengajuanGudang() {
     bolehLintasOutlet(izin),
     detail.dimintaOleh?.locationID,
   );
-  const tampilSetujui = bolehSetujui && !selokasi;
+  // Pengaju bukan Owner tidak dapat menyetujui pengajuannya sendiri (P20).
+  const sendiri = pengajuSendiri(pengguna?.id, owner, detail.dimintaOleh?.id);
+  const tampilSetujui = bolehSetujui && !selokasi && !sendiri;
   // Status menentukan tahap; izin menentukan siapa yang boleh bertindak (butir 14).
   const panelTinjau = isSubmitted && (bolehSetujui || bolehTolak);
   const panelSuratJalan = perluSuratJalan && bolehSuratJalan && gudangPengirim;
@@ -325,9 +331,9 @@ export default function HalamanDetailPengajuanGudang() {
                 Tindakan Validasi Gudang
               </h3>
 
-              {bolehSetujui && selokasi && (
+              {bolehSetujui && (sendiri || selokasi) && (
                 <p className="text-kecil font-medium text-navy/70 text-center leading-snug">
-                  {PESAN_REKAN_SELOKASI}
+                  {sendiri ? PESAN_PENGAJU_SENDIRI : PESAN_REKAN_SELOKASI}
                 </p>
               )}
 

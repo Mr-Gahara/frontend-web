@@ -15,7 +15,7 @@ import { api, BASIS, bukaDenganAuth } from "./transfer-uji";
  * mengubah role yang levelnya setara peminta (B186).
  */
 
-interface PeranUji {
+export interface PeranUji {
   /** Nama peran sekaligus nama pengguna uji. */
   nama: string;
   pin: string;
@@ -26,6 +26,8 @@ interface PeranUji {
   lokasiKerja?: "Outlet" | "Gudang";
   /** Platform login pengguna uji; tanpa ini hanya web. */
   aksesType?: ("web" | "app")[];
+  /** Level peran; tanpa ini LEVEL_UJI. */
+  level?: number;
 }
 
 const LEVEL_UJI = 90;
@@ -236,7 +238,7 @@ async function pastikanPeran(page: Page, auth: () => string, peranUji: PeranUji)
     const buat = await api<PeranMentah>(page, auth, "POST", "/role", {
       namaRole: peranUji.nama,
       deskripsi: peranUji.deskripsi,
-      level: LEVEL_UJI,
+      level: peranUji.level ?? LEVEL_UJI,
       permissions: izin,
     });
     expect(buat.status, `buat peran uji ${peranUji.nama}: ${buat.pesan}`).toBeLessThan(300);
@@ -295,7 +297,7 @@ async function pastikanPengguna(page: Page, auth: () => string, peranUji: PeranU
  * Dari halaman yang sudah login sebagai Ridho: memastikan peran dan pengguna
  * uji, lalu login ulang sebagai pengguna itu di halaman yang sama.
  */
-async function masukSebagai(page: Page, peranUji: PeranUji) {
+export async function masukSebagai(page: Page, peranUji: PeranUji) {
   const auth = await bukaDenganAuth(page, BASIS + "/dashboard");
   const idPeran = await pastikanPeran(page, auth, peranUji);
   await pastikanPengguna(page, auth, peranUji, idPeran);
@@ -311,6 +313,12 @@ async function masukSebagai(page: Page, peranUji: PeranUji) {
   // /dashboard mengalihkan sendiri menurut izin (app/dashboard/page.tsx); tanpa
   // menunggu, pengalihan ke /dashboard/profil dapat menyalip goto spec berikutnya.
   await page.waitForURL((u) => u.pathname !== "/dashboard");
+}
+
+/** Dari halaman yang sudah login sebagai Ridho: memastikan peran uji saja, tanpa pengguna. */
+export async function siapkanPeran(page: Page, peranUji: PeranUji): Promise<string> {
+  const auth = await bukaDenganAuth(page, BASIS + "/dashboard");
+  return pastikanPeran(page, auth, peranUji);
 }
 
 /**

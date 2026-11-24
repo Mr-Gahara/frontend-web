@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { BASIS, JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { cocok, pantauPermintaan, tunda } from "../../helpers/reservasi-uji";
+import { masukSebagai, masukTanpaLokasi } from "../../helpers/terkunci-uji";
 
 /*
  * Spec pembanding ruang gudang terhadap kode lama (modul Gudang, langkah 1):
@@ -239,4 +240,50 @@ test.describe("Ruang gudang", () => {
       await page.unroute(POLA_LOKASI);
     });
   }
+});
+/*
+ * Jalur layout gudang selain Owner (utang pengujian, sebelumnya hanya unit
+ * tentukanAksesGudang): pengguna uji berperan level 90.
+ */
+test.describe("Ruang gudang bagi pengguna bukan Owner", () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+  });
+
+  test("tanpa read-location: ruang gudang terbuka tanpa memuat lokasi, dan setup menampilkan pesan izin", async ({
+    page,
+  }) => {
+    await masukTanpaLokasi(page);
+    let mintaLokasi = 0;
+    page.on("request", (r) => {
+      if (r.method() === "GET" && POLA_LOKASI.test(r.url())) mintaLokasi += 1;
+    });
+    await page.goto(URL_GUDANG + "/stockOpname");
+    await expect(page.getByRole("heading", { level: 1, name: "Stok Opname Gudang" })).toBeVisible({ timeout: 20_000 });
+    await page.goto(URL_SETUP);
+    await expect(page.getByText("Izin Lokasi Dibutuhkan")).toBeVisible({ timeout: 20_000 });
+    expect(mintaLokasi, "GET /location tidak diminta tanpa read-location").toBe(0);
+  });
+
+  test("tanpa create-location dan tenant tanpa gudang: pesan Gudang Belum Didaftarkan, tanpa dialihkan ke setup", async ({
+    page,
+  }) => {
+    await masukSebagai(page, {
+      nama: "E2E Gudang Tanpa Buat Lokasi",
+      pin: "864242",
+      deskripsi: "Peran uji e2e: izin baca Owner tanpa create-location",
+      izin: (n) => n.startsWith("read-"),
+    });
+    await simulasikanTanpaGudang(page);
+    try {
+      await page.goto(URL_GUDANG);
+      await expect(page.getByText("Gudang Belum Didaftarkan")).toBeVisible({ timeout: 20_000 });
+      await expect(page).toHaveURL(URL_GUDANG);
+      await page.goto(URL_SETUP);
+      await expect(page.getByText("Gudang Belum Didaftarkan")).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByRole("button", { name: /simpan|daftarkan/i })).toHaveCount(0);
+    } finally {
+      await page.unroute(POLA_LOKASI);
+    }
+  });
 });

@@ -1,5 +1,8 @@
 import { test, expect, Page } from "@playwright/test";
-import { AKUN_UJI, isiLoginAkun, isiLoginPengguna, masuk } from "../../helpers/masuk-uji";
+import { AKUN_UJI, PENGGUNA_UJI, isiLoginAkun, isiLoginPengguna, masuk } from "../../helpers/masuk-uji";
+import { IZIN } from "../../../lib/auth/permissions";
+import { masukBacaSaja, masukSebagai, siapkanPeran } from "../../helpers/terkunci-uji";
+import { api, bukaDenganAuth } from "../../helpers/transfer-uji";
 
 // ============================================================
 // HELPER: Login
@@ -294,6 +297,133 @@ test.describe("E2E - Siklus Hidup Pengguna (CRUD)", () => {
     } finally {
       await bersihkanPengguna(page, namaAkhir);
     }
+  });
+
+  test("lokasi kerja tanpa read-location: isian tersembunyi, lokasi tidak diminta, dan lokasi tersimpan tidak berubah (LK1a)", async ({
+    page,
+  }) => {
+    const ts = Date.now();
+    test.setTimeout(180_000);
+    const nama = `Karyawan Tanpa Lokasi ${ts}`;
+    const namaUbah = `${nama} Ubah`;
+    let namaAkhir = nama;
+    const POLA_UBAH = /\/api\/pengguna\/[a-f0-9]{24}$/;
+    const isian = page.getByRole("combobox", { name: "Lokasi Kerja" });
+
+    await login(page);
+    // Staf berperan level 10, di bawah pengelola uji (level 90): pengguna
+    // berlevel setara atau lebih tinggi tidak dapat diubah (canEdit).
+    const PERAN_STAF = "E2E Staf Level Rendah";
+    await siapkanPeran(page, {
+      nama: PERAN_STAF,
+      pin: "000000",
+      deskripsi: "Peran uji e2e: staf level 10 untuk diubah pengelola bukan Owner",
+      // read-dashboard-outlet: daftar ruang outlet hanya memuat pengguna yang
+      // memegangnya (getByWorkspace backend).
+      izin: (n) => n === "read-akun" || n === "read-dashboard-outlet",
+      level: 10,
+    });
+    await bukaHalamanPengguna(page);
+    let idPengguna = "";
+    let lokasiGudang = "";
+    try {
+      // Owner membuat staf berlokasi kerja Gudang lewat halaman.
+      await bukaTambahPengguna(page);
+      await isiFormPengguna(page, { nama, nomorHp: `0813${ts.toString().slice(-8)}`, pin: "777888", akses: "web" });
+      await page.getByRole("combobox").first().click();
+      await page.getByRole("option", { name: PERAN_STAF, exact: true }).click();
+      await isian.click();
+      await page.getByRole("option", { name: /\(Gudang\)$/ }).first().click();
+      const tBuat = page.waitForResponse(
+        (r) => r.request().method() === "POST" && /\/api\/pengguna\/register-pengguna$/.test(r.url()),
+      );
+      await page.getByRole("button", { name: /simpan/i }).click();
+      const buat = await tBuat;
+      expect(buat.status()).toBe(201);
+      const data = (await buat.json()).data as { id?: string; _id?: string; locationID: string };
+      idPengguna = String(data.id ?? data._id);
+      lokasiGudang = String(data.locationID);
+      await expect(page.getByRole("dialog")).not.toBeVisible();
+
+      await masukSebagai(page, {
+        nama: "E2E Kelola Pengguna Tanpa Lokasi",
+        pin: "864241",
+        deskripsi: "Peran uji e2e: izin baca Owner tanpa read-location, ditambah ubah pengguna",
+        izin: (n) => (n.startsWith("read-") && n !== IZIN.location) || n === "update-pengguna",
+      });
+      let mintaLokasi = 0;
+      page.on("request", (r) => {
+        if (r.method() === "GET" && /\/api\/location(\?|$)/i.test(r.url())) mintaLokasi += 1;
+      });
+      await bukaHalamanPengguna(page);
+      await cariPengguna(page, nama);
+      await page.getByRole("row", { name: new RegExp(nama, "i") }).first().getByRole("button", { name: /buka menu/i }).click();
+      await page.getByRole("menuitem", { name: /^edit$/i }).click();
+      await expect(page.getByLabel(/nama lengkap/i)).toHaveValue(nama, { timeout: 15_000 });
+      await expect(isian, "isian lokasi kerja tersembunyi").toHaveCount(0);
+      await page.getByLabel(/nama lengkap/i).fill(namaUbah);
+      const tUbah = page.waitForResponse((r) => r.request().method() === "PUT" && POLA_UBAH.test(r.url()));
+      await page.getByRole("button", { name: /simpan/i }).click();
+      const ubah = await tUbah;
+      expect(ubah.status(), "PUT ubah nama").toBe(200);
+      namaAkhir = namaUbah;
+      expect(ubah.request().postDataJSON(), "locationID tidak dikirim").not.toHaveProperty("locationID");
+      expect(mintaLokasi, "GET /location tidak diminta tanpa read-location").toBe(0);
+    } finally {
+      await page.goto("about:blank");
+      await page.context().clearCookies();
+      await login(page);
+      if (idPengguna) {
+        const auth = await bukaDenganAuth(page, "/dashboard/outlet/pengguna");
+        const detail = await api<{ locationID?: string | null }>(page, auth, "GET", "/pengguna/" + idPengguna);
+        expect.soft(String(detail.data?.locationID), "lokasi kerja Gudang tetap").toBe(lokasiGudang);
+      }
+      await bukaHalamanPengguna(page);
+      await bersihkanPengguna(page, namaAkhir);
+    }
+  });
+
+  test("baca-saja: tanpa Tambah Pengguna, dan Edit serta Hapus tidak tersedia (keputusan rancangan butir 14)", async ({
+    page,
+  }) => {
+    await login(page);
+    await masukBacaSaja(page);
+    await bukaHalamanPengguna(page);
+    // Jangkar positif: baris staf berlevel rendah (staff 1) termuat.
+    const baris = page.getByRole("row").filter({ hasText: "staff 1" }).first();
+    await expect(baris).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("button", { name: /tambah pengguna/i }), "tanpa create-pengguna").toHaveCount(0);
+    // Baris pengguna lain tanpa aksi apa pun: tombol menu tidak tampil.
+    await expect(baris.getByRole("button", { name: /buka menu/i }), "tanpa update- dan delete-pengguna").toHaveCount(0);
+    // Baris diri sendiri tetap dapat diubah (checkPermissionOrSelf), tanpa Hapus.
+    await cariPengguna(page, "E2E Baca Saja");
+    await page.getByRole("row", { name: /E2E Baca Saja/ }).first().getByRole("button", { name: /buka menu/i }).click();
+    await expect(page.getByRole("menuitem", { name: /^edit$/i })).toBeEnabled();
+    await expect(page.getByRole("menuitem", { name: /^hapus$/i })).toHaveCount(0);
+    await page.keyboard.press("Escape");
+  });
+
+  test("lokasi kerja tidak ditawarkan untuk pengguna berperan Owner (LK1a)", async ({ page }) => {
+    await login(page);
+    await bukaHalamanPengguna(page);
+    const isian = page.getByRole("combobox", { name: "Lokasi Kerja" });
+    // Jangkar: staf bukan Owner menampilkan isiannya.
+    await bukaTambahPengguna(page);
+    await isiFormPengguna(page, { pilihRole: true });
+    await expect(isian, "staf bukan Owner").toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+
+    await cariPengguna(page, PENGGUNA_UJI.nama);
+    await page
+      .getByRole("row", { name: new RegExp(PENGGUNA_UJI.nama, "i") })
+      .first()
+      .getByRole("button", { name: /buka menu/i })
+      .click();
+    await page.getByRole("menuitem", { name: /^edit$/i }).click();
+    await expect(page.getByLabel(/nama lengkap/i)).toHaveValue(PENGGUNA_UJI.nama, { timeout: 15_000 });
+    await expect(isian, "pengguna berperan Owner").toHaveCount(0);
+    await page.keyboard.press("Escape");
   });
 
   test("pengguna non-aktif ditolak 403 saat login PIN dan tidak mendapat sesi (B202)", async ({ page, browser }) => {

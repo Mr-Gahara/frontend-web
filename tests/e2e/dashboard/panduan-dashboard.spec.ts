@@ -1,13 +1,16 @@
 import { test, expect, type Page } from "@playwright/test";
 import { masuk } from "../../helpers/masuk-uji";
 import { balonPanduan as balon, jalaniTur } from "../../helpers/panduan-uji";
+import { IZIN } from "../../../lib/auth/permissions";
+import { masukSebagai } from "../../helpers/terkunci-uji";
 
 /*
  * Tur dashboard ruang outlet (keputusan pemilik proyek, 7 November 2026)
  * dan ruang gudang (TG1a dan TG2a, 17 November 2026).
  * playwright.config.ts mematikan tur otomatis lewat storageState; spec ini
  * mengosongkannya. Akun uji masuk sebagai Owner, sehingga kelima titik
- * tampil; penyaringan titik menurut izin diuji di unit test
+ * tampil; penyaringan titik menurut izin juga diuji lewat pengguna uji tanpa
+ * read-pengguna, dan aturannya di unit test
  * (tests/unit/components/panduan/titik-dashboard.test.ts).
  */
 test.use({ storageState: { cookies: [], origins: [] } });
@@ -108,6 +111,30 @@ test.describe("Panduan dashboard", () => {
     }
     await page.goto("/dashboard/gudang");
     await expect(balon(page)).toContainText("Panduan 1 dari 6", { timeout: 15_000 });
+  });
+
+  test("pengguna tanpa read-pengguna: tur hanya menyorot menu yang tampil baginya, di ruang outlet dan gudang", async ({
+    page,
+  }) => {
+    await masuk(page);
+    await masukSebagai(page, {
+      nama: "E2E Tur Tanpa Pengguna",
+      pin: "864237",
+      deskripsi: "Peran uji e2e: izin baca Owner tanpa read-pengguna, untuk titik tur menurut izin",
+      izin: (n) => n.startsWith("read-") && n !== IZIN.pengguna,
+    });
+    await page.waitForURL("**/dashboard/outlet", { timeout: 15_000 });
+    // Karyawan dan Jadwal menuntut read-pengguna (IZIN_HALAMAN), sehingga
+    // menunya tidak tampil dan titiknya tidak ada.
+    await expect(page.locator('[data-panduan="menu:/dashboard/outlet/pengaturan"]')).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('[data-panduan="menu:/dashboard/outlet/pengguna"]')).toHaveCount(0);
+    await expect(page.locator('[data-panduan="menu:/dashboard/outlet/jadwal"]')).toHaveCount(0);
+    await expect(balon(page)).toContainText("Panduan 1 dari 3", { timeout: 15_000 });
+    await jalaniTur(page, ["menu-utama", "menu:/dashboard/outlet/inventaris-data", "menu:/dashboard/outlet/pengaturan"]);
+
+    await page.goto("/dashboard/gudang");
+    await expect(balon(page)).toContainText("Panduan 1 dari 5", { timeout: 15_000 });
+    await jalaniTur(page, TARGET_GUDANG.filter((t) => t !== "menu:/dashboard/gudang/pengguna"));
   });
 
   test.describe("di HP", () => {

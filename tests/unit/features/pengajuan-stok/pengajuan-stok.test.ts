@@ -8,6 +8,7 @@ import {
   bolehSetujuiPengajuan,
   bolehTolakPengajuan,
   bolehUbahPengajuan,
+  pengajuSendiri,
   rekanSelokasiPengaju,
   tabTerlihat,
   type TabPengajuan,
@@ -430,5 +431,21 @@ describe("namaPeninjau (baris kedua kolom Status)", () => {
     expect(namaPeninjau({ disetujuiOleh: null, ditolakOleh: { id: "u2", nama: "Sari" } })).toBe("Sari");
     expect(namaPeninjau({ disetujuiOleh: null, ditolakOleh: null })).toBeNull();
     expect(namaPeninjau({ disetujuiOleh: { id: "u1", nama: "" }, ditolakOleh: null })).toBeNull();
+  });
+});
+
+describe("pengajuSendiri (P20, keputusan 24 November 2026)", () => {
+  it("pengaju bukan Owner adalah pengaju sendiri", () => {
+    expect(pengajuSendiri("a", false, "a")).toBe(true);
+  });
+
+  it("Owner boleh menyetujui pengajuannya sendiri (RH5a)", () => {
+    expect(pengajuSendiri("a", true, "a")).toBe(false);
+  });
+
+  it("pengguna lain, atau id yang tidak diketahui, bukan pengaju sendiri", () => {
+    expect(pengajuSendiri("a", false, "b")).toBe(false);
+    expect(pengajuSendiri(null, false, "a")).toBe(false);
+    expect(pengajuSendiri("a", false, undefined)).toBe(false);
   });
 });

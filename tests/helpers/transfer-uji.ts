@@ -96,21 +96,17 @@ async function pengajuanUjiSiap(page: Page, auth: Auth): Promise<string> {
 
 /**
  * Pengajuan uji transfer berstatus APPROVED tanpa surat jalan, untuk skenario
- * yang hanya menguji jalur gagal buat surat jalan. Yang masih PENDING (setelah
- * surat jalannya dibatalkan) diajukan lalu disetujui; bila tidak ada, dibuat
- * baru, lalu dipakai ulang spec transfer.
+ * yang hanya menguji jalur gagal buat surat jalan dan revisi pengajuan
+ * APPROVED. Yang PENDING (setelah surat jalannya dibatalkan) tidak dipakai:
+ * backend hanya menerima submit dari DRAFT (pengajuanStokService.submit),
+ * sehingga PENDING tidak dapat kembali APPROVED; bila tidak ada yang APPROVED,
+ * dibuat baru.
  */
 export async function pengajuanUjiDisetujui(page: Page, auth: Auth): Promise<string> {
-  const id = await pengajuanUjiSiap(page, auth);
-  const detail = await api<{ status?: string }>(page, auth, "GET", `/pengajuanstok/${id}`);
-  expect(detail.status, `GET pengajuan uji: ${detail.pesan}`).toBe(200);
-  if (detail.data?.status === "PENDING") {
-    const ajukan = await api(page, auth, "PATCH", `/pengajuanstok/${id}/submit`, {});
-    expect(ajukan.status, `submit pengajuan uji: ${ajukan.pesan}`).toBeLessThan(300);
-    const setuju = await api(page, auth, "PATCH", `/pengajuanstok/${id}/approve`, {});
-    expect(setuju.status, `approve pengajuan uji: ${setuju.pesan}`).toBe(200);
-  }
-  return id;
+  const daftar = await api<PengajuanMentah[]>(page, auth, "GET", "/pengajuanstok?status=APPROVED");
+  expect(daftar.status, `GET pengajuan APPROVED: ${daftar.pesan}`).toBe(200);
+  const milikUji = (daftar.data ?? []).find((p) => !p.transferStokID && p.catatan === CATATAN_PENGAJUAN_UJI);
+  return milikUji ? idDari(milikUji) : buatPengajuanUji(page, auth);
 }
 
 const buatSuratJalan = (page: Page, auth: Auth, pengajuanStokID: string) =>

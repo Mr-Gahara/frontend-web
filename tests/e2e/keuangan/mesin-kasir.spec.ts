@@ -2,7 +2,14 @@ import { expect, test, type Page } from "@playwright/test";
 import { saldoAkun } from "../../helpers/akun-kas-uji";
 import { unik } from "../../helpers/reservasi-uji";
 import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../helpers/filter-uji";
-import { PENGGUNA_KASIR_OUTLET, masukBacaSaja, masukKasirOutlet, siapkanKasirOutlet } from "../../helpers/terkunci-uji";
+import { IZIN } from "../../../lib/auth/permissions";
+import {
+  PENGGUNA_KASIR_OUTLET,
+  masukBacaSaja,
+  masukKasirOutlet,
+  masukSebagai,
+  siapkanKasirOutlet,
+} from "../../helpers/terkunci-uji";
 import {
   NAMA_LACI_UJI,
   PERANGKAT_KASIR_OUTLET,
@@ -228,6 +235,59 @@ test.describe("Mesin Kasir: pengguna baca-saja", () => {
     await expect(page.getByRole("button", { name: "Tambah mesin kasir" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /^Aksi / })).toHaveCount(0);
     expect(mintaMesin, "GET /sesikasir/perangkat dan perangkat-toko tidak dikirim tanpa izin kelola").toBe(0);
+  });
+});
+
+test.describe("Mesin Kasir: kelola tanpa sebagian izin baca (MK11a)", () => {
+  test("kelola-perangkat-kasir tanpa read-akunkas: halaman tampil seperti tanpa izin kelola", async ({ page }) => {
+    await login(page);
+    await masukSebagai(page, {
+      nama: "E2E Kelola Kasir Tanpa Akun",
+      pin: "864235",
+      deskripsi: "Peran uji e2e: izin baca Owner tanpa akun kas, ditambah kelola mesin kasir",
+      izin: (n) => (n.startsWith("read-") && n !== IZIN.akunKas) || n === IZIN.kelolaPerangkatKasir,
+    });
+    let mintaMesin = 0;
+    page.on("request", (r) => {
+      if (r.method() === "GET" && /\/api\/sesikasir\/perangkat(-toko)?(\?|$)/i.test(r.url())) mintaMesin += 1;
+    });
+    const tKasirBuka = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/sesikasir\?/i.test(r.url()),
+    );
+    await page.goto(URL, { waitUntil: "commit" });
+    expect((await tKasirBuka).status(), "sesi kasir tetap dibaca").toBe(200);
+    // Jangkar positif sebelum memeriksa ketiadaan (pengguna uji berpindah halaman).
+    await expect(page.getByRole("link", { name: "Mesin Kasir", exact: true })).toHaveAttribute("aria-current", "page", {
+      timeout: 20_000,
+    });
+    await expect(page.locator("#judul-kasir-buka")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("button", { name: "Tambah mesin kasir" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Aksi / })).toHaveCount(0);
+    expect(mintaMesin, "daftar mesin dan perangkat tidak diminta tanpa read-akunkas").toBe(0);
+  });
+
+  test("kelola-perangkat-kasir dan read-akunkas tanpa read-pengguna: daftar mesin dan pilihan perangkat tetap terbuka (MK3b)", async ({
+    page,
+  }) => {
+    await login(page);
+    await masukSebagai(page, {
+      nama: "E2E Kelola Kasir Tanpa Pengguna",
+      pin: "864236",
+      deskripsi: "Peran uji e2e: izin baca Owner tanpa pengguna, ditambah kelola mesin kasir",
+      izin: (n) => (n.startsWith("read-") && n !== IZIN.pengguna) || n === IZIN.kelolaPerangkatKasir,
+    });
+    const tMesin = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/sesikasir\/perangkat(\?|$)/i.test(r.url()),
+    );
+    await page.goto(URL, { waitUntil: "commit" });
+    expect((await tMesin).status(), "daftar mesin kasir").toBe(200);
+    const tPerangkat = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/sesikasir\/perangkat-toko(\?|$)/i.test(r.url()),
+    );
+    await page.getByRole("button", { name: "Tambah mesin kasir" }).first().click();
+    expect((await tPerangkat).status(), "perangkat se-toko tanpa read-pengguna").toBe(200);
+    await expect(page.getByRole("dialog", { name: "Tambah mesin kasir" })).toBeVisible();
+    await page.keyboard.press("Escape");
   });
 });
 
