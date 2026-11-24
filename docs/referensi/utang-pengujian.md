@@ -528,3 +528,8 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   tidak diklik, karena logout memutar `tokenVersion` admin uji.
 - **Topbar admin saat `GET /akun/me` gagal** (email tidak tampil, Keluar
   tetap ada) hanya terbaca dari kode.
+- **Revisi profil (24 November 2026) teruji di 390 dan 1280 px untuk
+  popup, dan 390, 768, serta 1280 px untuk laman**: popup di tablet 768 px
+  dan sidebar mode ikon di desktop tidak punya skenario. Ganti pengguna
+  teruji di tab yang sama; muat ulang sesudahnya menunggu backend butir
+  190.

@@ -67,7 +67,57 @@ rancangan butir 17, 21, dan 23.
   dengan halaman profil (butir 12); dan `tenantName` dibuang dari
   `PenggunaSesi`.
 
+### Revisi laman profil dan menu popup profil
+
+Diputuskan pemilik proyek pada 24 November 2026 dari kanvas desain
+"Revisi Profil Pengguna Tachyon POS" (tiga arah, masing-masing laman
+profil di 1280, 768, dan 390 px serta popup terbuka di desktop dan HP).
+
+- **PU1a: laman profil desain C.** Kepala berisi avatar inisial navy,
+  nama sebagai h1, dan peran serta toko. Di bawahnya tab Data Diri dan
+  Keamanan PIN di `?tab=` (`keamanan-pin`; Data Diri bawaan). Data Diri
+  memuat ringkasan baca-saja (Toko, Lokasi kerja dari B339, Akses, Status)
+  lalu nama dan nomor HP dengan tombol Simpan Data Diri. Keamanan PIN
+  adalah form sendiri dengan tombol Ganti PIN, sehingga kedua isian wajib;
+  setelah berhasil pengguna masuk ulang (PF7a). Judul "Profil Pengguna",
+  label Inggris (Locked, Read Only), dan isian nonaktif untuk data
+  baca-saja dibuang.
+- **PU2a: popup profil desain C tanpa jalan pintas Pengaturan.** Isinya
+  identitas (avatar, nama, peran, toko), Profil Saya, Ganti pengguna, dan
+  Keluar dari toko (logout akun). Akun Toko dan Langganan dibuang dari
+  popup atas permintaan pemilik proyek, karena sudah ada di Pengaturan
+  Outlet. Ganti pengguna memanggil `pin-logout` lalu kembali ke "Siapa
+  yang bertugas?" dengan akun toko tetap masuk; bila gagal, pesan tampil
+  dan halaman tidak berpindah. Avatar pemicu dan kepala popup berlatar
+  karamel dengan teks putih; kontrasnya sekitar 2,2:1 dan diterima pemilik
+  proyek setelah diberi tahu (opsi lain: karamel tua dengan teks putih,
+  atau karamel dengan teks navy).
+- **PU3a: Ganti pengguna dirilis walau backend ikut menghapus cookie
+  akun.** `POST /pengguna/pin-logout` jalur web menghapus cookie refresh
+  akun juga (`kontrak/temuan.md` butir 190), sehingga muat ulang atau tab
+  baru sebelum pengguna berikutnya masuk meminta login email lagi.
+  Dicatat untuk backend (cakupan Ridho, auth dan sesi); opsi lain:
+  menyembunyikan menu sampai backend beres, atau menerimanya tanpa
+  laporan.
+- Diterapkan tanpa ditanyakan: pesan PIN baru kosong menjadi "PIN baru
+  wajib diisi", karena form PIN kini berdiri sendiri.
+
 ## Catatan
+
+### Catatan dari revisi laman profil dan menu popup profil
+
+- Cacat lama yang dibetulkan: popup profil dan pemilih ruang di kepala
+  sidebar selebar 224 px, bukan selebar pemicunya (240 sampai 367 px),
+  karena kelas `w-[--radix-dropdown-menu-trigger-width]` bergaya
+  Tailwind v3; kini `w-(--radix-dropdown-menu-trigger-width)`. Teks kedua
+  pemicu berubah hampir hitam di atas navy saat disorot atau terbuka
+  (`hover:text-slate-900` di atas `bg-sidebar-accent`); kini tetap gading
+  di atas `gading/14`.
+- Saat menerapkan: varian `data-horizontal:flex-col` milik `Tabs` dan
+  `data-active:` milik `TabsTrigger` tidak berlaku di proyek ini, sehingga
+  daftar tab dan isinya bersisian dan tab aktif tidak berbeda. Laman profil
+  menulis `flex-col` dan `data-[state=active]:` sendiri, seperti laman
+  pajak.
 
 ### Catatan dari modul Profil, login, dan sidebar
 
@@ -136,6 +186,9 @@ empat commit, dengan suite e2e penuh dijalankan sekali di akhir modul
   di halaman Akun Toko (`modul/setup-akun.md`).
 - Unggah foto profil belum ada; avatar memakai inisial (PF9a). Bukan
   kebutuhan MVP, dan ditinjau setelah rilis.
+- Ganti pengguna (PU2a): sampai backend butir 190 diperbaiki, muat ulang
+  atau tab baru sebelum pengguna berikutnya masuk meminta login email lagi
+  (PU3a).
 - Halaman ringkasan laba rugi memicu peringatan ukuran grafik di konsol
   (lebar dan tinggi -1 saat render pertama). Penyebabnya belum ditelusuri
   dari kode, dan grafiknya tetap tampil. Sejak `0c5822b` komponen grafik

@@ -12,6 +12,21 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per revisi laman profil dan popup profil** (24 November 2026,
+PU1a sampai PU3a, backend `ridho` lokal `1718030`): vitest 1230 lolos
+(unit profil ditulis ulang untuk `skemaDataDiri`, `skemaPin`, payload
+terpisah, teks ringkasan, dan slug tab). Tanpa suite penuh dan tanpa OTP:
+`auth/sidebar-pengguna`, `auth/cache-ganti-pengguna`, dan folder `profil`
+20 lolos sesudah dev server dinyalakan ulang. Skenario baru: popup desain C
+di 1280 dan 390 px (isi, lebar sama dengan pemicu, warna teks pemicu),
+Ganti pengguna berhasil dan gagal, dan tata letak profil di 390, 768, dan
+1280 px; skenario popup gagal pada kode lama. Spec lama disesuaikan:
+"Simpan Perubahan" menjadi "Simpan Data Diri" atau "Ganti PIN" di tab
+Keamanan PIN, menu "Profil" dan "Logout" menjadi "Profil Saya" dan
+"Keluar dari toko", judul h1 kini nama pengguna, dan status tampil
+"Aktif". Harapan suite penuh berikutnya 736 (`npx playwright test
+--list`, 117 berkas).
+
 **Baseline per deskripsi paket laman pengenalan** (24 November 2026,
 LU6a): vitest 1228 lolos, tanpa unit baru (isi paket data statis). Tanpa
 suite penuh: folder `tests/e2e/laman-utama` 5 lolos, termasuk skenario
@@ -321,6 +336,7 @@ Pola kegagalan yang berulang:
 | `getComputedStyle(...).boxShadow` sel bertanda `shadow-none` bukan `none`, atau warnanya tidak terbaca pola `rgba` | Tailwind v4 menulis bayangan sebagai beberapa lapisan variabel; `shadow-none` menjadi lapisan `rgba(0, 0, 0, 0)`, dan warna `color-mix` terhitung `color(srgb … / a)`. Periksa alfa setiap lapisan (`adaBayanganTerlihat` di `tampilan/bayangan-baris`) |
 | Skenario navigasi kembali gagal hanya di suite penuh, lolos sendirian | Tombol memakai `router.back()`, sehingga tujuannya bergantung riwayat tab yang berbeda antara run sendiri dan suite penuh. Buka laman di tab baru (`context().newPage()`) untuk membuktikannya secara pasti, dan pakai tujuan pasti (KB1a) |
 | Helper penunggu daftar menerima respons dengan query yang tidak diharapkan sesudah halaman diberi komponen baru | Penunggu tanpa syarat ikut menangkap permintaan endpoint yang sama dari komponen baru di halaman itu (kartu ringkas admin meminta `limit=1`). Saat menambah permintaan ke endpoint daftar, beri penunggu helper syarat query (`bukaDaftarAkun`, 24 November 2026) |
+| Daftar tab dan isinya bersisian, atau tab aktif tidak berbeda, padahal memakai `Tabs` shadcn | Varian `data-horizontal:` dan `data-active:` di `components/ui/tabs.tsx` tidak cocok dengan atribut Radix proyek ini (`data-orientation`, `data-state`). Tulis `flex-col` di `Tabs` dan `data-[state=active]:` di `TabsTrigger`, seperti laman pajak dan profil (PU1a, 24 November 2026) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

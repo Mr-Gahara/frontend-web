@@ -41,8 +41,9 @@ Rombak UI/UX laman admin platform selesai 24 November 2026
 (`modul/panel-admin.md`, RP1a sampai RP5a): kerangka desain B, tabel dan
 filter desain A, detail B dengan riwayat A, form dan dialog B. Backend
 `ridho` `1718030`, tidak maju. Deskripsi paket laman pengenalan selesai
-hari yang sama (`modul/ui-ux.md`, LU6a). Urutan berikutnya: revisi laman
-profil dan menu popup profil, nomor WhatsApp admin (LG1a), utang
+hari yang sama (`modul/ui-ux.md`, LU6a), lalu revisi laman profil dan
+menu popup profil (`modul/profil-login.md`, PU1a sampai PU3a; temuan
+backend butir 190). Urutan berikutnya: nomor WhatsApp admin (LG1a), utang
 pengujian kelompok 1, lalu suite e2e penuh (harapan 731) dan
 `bersih-akunkas.js`.
 
@@ -177,12 +178,12 @@ Dicatat pemilik proyek sesudah laman utama (LU1a sampai LU5a), dikerjakan
 pada sesi berikutnya:
 
 1. **Revisi tata letak dan UI laman profil pengguna**
-   (`/dashboard/profil`, `features/pengguna/halaman-profil.tsx`). Arah
-   revisinya perlu keputusan dan desain pemilik proyek.
+   (`/dashboard/profil`, `features/pengguna/halaman-profil.tsx`). Selesai
+   24 November 2026 (`modul/profil-login.md`, PU1a).
 2. **Revisi UI menu popup profil pengguna di kaki sidebar**: menu yang
    terbuka saat menekan profil pengguna di bagian paling bawah sidebar
-   (`components/sidebar-pengguna.tsx`). Arah revisinya perlu keputusan
-   dan desain pemilik proyek.
+   (`components/sidebar-pengguna.tsx`). Selesai 24 November 2026
+   (`modul/profil-login.md`, PU2a dan PU3a).
 
 ### Berikutnya, dicatat 20 November 2026
 
