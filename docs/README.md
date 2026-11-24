@@ -112,6 +112,7 @@ Semua dokumen modul berlabel **Jarang**: bertambah saat modulnya dikerjakan.
 | `referensi/playwright.md` | Perintah verifikasi, catatan Playwright, dan spec rujukan | **Jarang**: bertambah saat ada pelajaran atau spec rujukan baru |
 | `referensi/utang-pengujian.md` | Utang pengujian yang masih terbuka, per modul | **Sering**: bertambah saat modul dikerjakan; butir yang lunas dipindah ke arsip |
 | `referensi/keputusan-penyesuaian-backend.md` | Keputusan yang diambil saat menyesuaikan diri dengan backend, per commit acuan | **Jarang**: bertambah saat penyesuaian backend menghasilkan keputusan |
+| `referensi/laporan-untuk-backend.md` | Laporan lengkap temuan backend yang masih terbuka: bukti, penyebab, kenapa penting, saran, penanganan sementara, dan prioritas | **Sering**: bertambah setiap ada temuan backend; yang dibuktikan diperbaiki dipindah ke arsip |
 | `referensi/rencana-struk-tutup-kasir.md` | Rencana struk laporan tutup kasir (wajib MVP): susunan struk, modal awal, peta data, serta bagian backend, mobile, dan web | **Jarang**: bagian backend dan mobile dipindah ke backend lalu dihapus |
 | `referensi/rencana-struk-dapur.md` | Rencana fitur struk dapur pasca-MVP: tujuan, alur, data, serta bagian backend, mobile, dan web | **Jarang**: bagian backend dan mobile dipindah ke backend lalu dihapus |
 

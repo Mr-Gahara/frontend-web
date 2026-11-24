@@ -133,9 +133,12 @@ Urutannya:
 4. **Bila perilaku tidak dapat diakali**, tandai skenario ujinya `test.fixme`
    dengan keterangan apa yang ditunggu, lalu catat di
    `inti/pengujian.md` (Test yang ditandai fixme dan skip bersyarat).
-5. **Setelah commit bersih**, tulis laporan untuk tim backend sebagai teks siap
-   salin di percakapan. Berkasnya di `~/Documents/catatan-backend/` dibuat
-   sendiri oleh pemilik proyek, bukan lewat terminal.
+5. **Setelah commit bersih**, tulis laporan untuk tim backend lengkap di
+   `referensi/laporan-untuk-backend.md`, bukan sebagai teks siap salin di
+   percakapan (pemilik proyek, 24 November 2026): pemilik proyek membaca
+   seluruh dokumentasi frontend saat bekerja di backend. Sampai 24 November
+   2026 laporan ditulis siap salin di percakapan, dan berkasnya di
+   `~/Documents/catatan-backend/` dibuat sendiri oleh pemilik proyek.
 
 Bentuk tiap temuan dalam laporan:
 

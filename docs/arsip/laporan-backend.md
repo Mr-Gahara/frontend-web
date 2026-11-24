@@ -333,9 +333,10 @@ Berkasnya disimpan pemilik proyek di `~/Documents/catatan-backend/`:
   (`kontrak/temuan.md` butir 189): bahan yang
   dibeli per pak atau dus tidak dapat dipakai sebagian di resep, beserta
   tiga arah solusi untuk diputuskan bersama.
-- Laporan utang pengujian, disusun 24 November 2026 dan diberikan ke
-  pemilik proyek sebagai teks siap salin (`kontrak/temuan.md` butir 190
-  sampai 194): revisi surat jalan per kemasan tersimpan dalam satuan
+- Laporan utang pengujian, disusun 24 November 2026, diberikan ke
+  pemilik proyek sebagai teks siap salin, lalu atas permintaannya ditulis
+  lengkap di `referensi/laporan-untuk-backend.md` (`kontrak/temuan.md`
+  butir 190 sampai 194): revisi surat jalan per kemasan tersimpan dalam satuan
   dasar yang salah (192), status booking mentah di detail penjualan
   (193), rekap absensi memuat staf berlokasi kerja tanpa kegiatan (194),
   template General Manajer melewati batas 120 izin (191), dan logout
