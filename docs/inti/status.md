@@ -49,12 +49,15 @@ BT1a dan BT2a) dan keterangan Plan sekarang (`modul/panel-admin.md`,
 RP6a). Utang pengujian kelompok 1 selesai hari yang sama (AP1a, AP2a,
 PG3a, TR1a; temuan backend butir 191). Atas perintah pemilik proyek
 seluruh utang pengujian yang dapat dibuktikan dikerjakan per kelompok
-(akses dan peran, keuangan, lalu admin dan profil, selesai; berikutnya
-inventaris dan gudang, reservasi dan jadwal, tampilan), lalu suite e2e
-penuh (harapan 791 per kelompok admin dan profil) dan
-`bersih-akunkas.js`. Kelompok admin dan profil menemukan balon tur di
-luar layar pada langkah jam buka, diperbaiki atas keputusan pemilik
-proyek (`modul/setup-akun.md`, JB10a).
+(akses dan peran, keuangan, admin dan profil, lalu inventaris dan
+gudang, selesai; berikutnya reservasi dan jadwal, lalu tampilan), lalu
+suite e2e penuh (harapan 804 per kelompok inventaris dan gudang) dan
+`bersih-akunkas.js`. Kelompok inventaris dan gudang menemukan hapus
+produk 404 (HP1a, diperbaiki) dan revisi per kemasan di backend (butir
+192, spec merah, laporan untuk tim backend menyusul). Kelompok admin
+dan profil menemukan balon tur di luar layar pada langkah jam buka,
+diperbaiki atas keputusan pemilik proyek (`modul/setup-akun.md`,
+JB10a).
 Nomor WhatsApp admin (LG1a) tetap menunggu pemilik proyek.
 
 ### Keadaan 23 November 2026 sore

@@ -102,6 +102,16 @@ Diputuskan pemilik proyek 23 November 2026 (`referensi/keputusan-penyesuaian-bac
   membuat Select satuan tampil "Pilih Satuan..." dan satuan dasar kemasan
   kosong (ditemukan spec `inventaris/bahanBaku/konversi-satuan`).
 
+### Hapus produk yang sudah terhapus
+
+- **HP1a: 404 menutup dialog dan memuat ulang daftar** (pemilik proyek,
+  24 November 2026). Ditemukan spec `inventaris/produk/crud-produk`: hapus
+  produk yang sudah dihapus pengguna lain dijawab 404, tetapi dialog tetap
+  terbuka dan barisnya tetap di tabel. Khusus 404, dialog ditutup, daftar
+  dimuat ulang (`useHapusProduk`), dan pesan info "Produk sudah dihapus."
+  tampil; galat lain tetap menahan dialog agar dapat diulang
+  (`produkSudahTerhapus` di `features/produk/hapus.ts`, `826f0ab`).
+
 ## Catatan
 
 ### Catatan dari utang kecil modul produk dan pemformat rupiah

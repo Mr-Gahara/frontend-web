@@ -12,6 +12,21 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per utang pengujian kelompok inventaris dan gudang** (24
+November 2026, `826f0ab`, backend `ridho` lokal `1718030`): vitest 1244
+lolos dari 147 berkas (unit baru `produkSudahTerhapus`). Tanpa suite
+penuh dan tanpa OTP: folder `inventaris` dan `gudang` serta
+`dashboard/dashboard-gudang` dijalankan bersama: 190 lolos, 1 gagal, dan
+1 dilewati dari 192. Yang gagal skenario revisi surat jalan per kemasan,
+bukti temuan backend butir 192 (dibiarkan merah atas keputusan pemilik
+proyek); yang dilewati halaman berikutnya stock adjustment (data 10 atau
+kurang). Sesudah HP1a folder `inventaris/produk` 25 lolos; skenario hapus
+404 gagal pada kode lama (dibuktikan lewat `git stash`). Harapan spec
+lama yang diubah dengan bukti: dialog batal surat jalan menghitung
+`PATCH`, bukan `PUT`, dan Penerimaan Stok menahan selisih tanpa alasan
+lewat tombol yang terkunci. Harapan suite penuh berikutnya 804 (`npx
+playwright test --list`, 124 berkas).
+
 **Baseline per utang pengujian kelompok admin dan profil** (24 November
 2026, `c1f683b`, backend `ridho` lokal `1718030`): vitest 1243 lolos dari
 146 berkas (unit baru `potongKeLayar` dan `jangkarBalon`). Tanpa suite

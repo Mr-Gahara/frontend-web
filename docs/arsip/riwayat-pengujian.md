@@ -1683,6 +1683,52 @@ diperbaiki di commit yang sama (`modul/setup-akun.md`, JB10a).
   lalu diteruskan). Batal di buat dan ubah akun admin memakai pola yang
   sama dan hanya terbaca dari kode.
 
+Dilunasi 24 November 2026 (utang pengujian kelompok inventaris dan
+gudang, `826f0ab`) dan dipindah dari `referensi/utang-pengujian.md` tanpa
+perubahan teks; tiga butir (penjaga ruang stock opname, halaman
+berikutnya, surat jalan per kemasan) dipersempit ke sisanya di sana.
+Skenario baru di `inventaris/halaman-berikutnya`, `produk/crud-produk`,
+`stockOpname/ruang-dan-pic`, `dashboard/dashboard-gudang`,
+`transferStok/daftar-surat-jalan`, `pengajuanStok/alur-pengajuan-stok`,
+`pengajuanStok/pengembalian-jalur-gagal`, dan
+`bahanBaku/konversi-satuan`. Temuan: hapus produk 404 (`modul/produk-kategori.md`,
+HP1a) dan revisi per kemasan di backend (`kontrak/temuan.md` butir 192).
+
+- **Jalur gagal dialog hapus produk hanya diuji dengan jawaban 500
+  tiruan**; penolakan hapus dari backend sungguhan belum teruji.
+- **Penjaga ruang detail stock opname hanya teruji untuk dokumen yang
+  tipe lokasinya diketahui**, dan kedua skenarionya dilewati bila ruang
+  itu belum punya dokumen. Nama PIC yang gagal dimuat (teks cadangan)
+  belum teruji e2e.
+- **Kartu pengajuan dashboard gudang hanya teruji cabang tanpa
+  pengajuan siap surat jalan** pada data uji sekarang; cabang klik kartu
+  ke tab Perlu Surat Jalan berjalan bila ada pengajuan APPROVED atau
+  PENDING tanpa surat jalan.
+- **Kirim Barang dan Penerimaan Stok hanya teruji lewat alur penuh**:
+  jalur gagal kirim, revisi, dan batal surat jalan pengembalian, serta
+  terima sebagian di gudang, belum punya skenario.
+- **Teks dialog batal surat jalan hanya teruji bila ada surat jalan
+  Belum Dikirim**: badge daftar teruji e2e sejak `2bcb1ce`, sedangkan
+  skenario dialog batal dilewati bersyarat bila tidak ada surat jalan
+  PENDING (data uji 14 November 2026 tidak punya).
+- **Navigasi halaman berikutnya pada daftar berhalaman server** hanya
+  teruji di jurnal stok. Stock adjustment, stock opname, surat jalan, dan
+  pengajuan stok menguji halaman pertama, parameter query, dan total dari
+  `pagination` (`98054b8` sampai `ebf782b`).
+- **Setujui yang disembunyikan bagi rekan selokasi pengaju (PG2a) hanya
+  teruji di unit test** (`rekanSelokasiPengaju`), karena butuh pengajuan
+  dari pengaju berlokasi kerja dan penyetuju berlokasi kerja sama; spec
+  daftar pengajuan hanya membuktikan `dimintaOleh.locationID` dari
+  respons nyata (16 November 2026).
+- **Surat jalan per kemasan (B365) hanya teruji di unit test**: revisi
+  dan terima mengirim `satuan` (`susunPayloadRevisi`,
+  `susunPayloadTerima`) dan selisih terima dibandingkan dalam satuan dasar
+  (`faktorKeDasar`), tetapi alur revisi dan terima lewat UI dengan bahan
+  berkemasan belum dibuat e2e, karena butuh surat jalan berisi bahan
+  fixture "E2E Bahan Kaleng" dari pengajuan yang disetujui.
+- **Stok terbaca di inventaris gudang** hanya teruji di unit test
+  (`rincianKemasan`); e2e membuktikannya di daftar stok outlet.
+
 ## Kejadian sesekali yang tidak berulang
 
 - **Master Shift tampil sebagai kartu di 1280 px, sekali** (20 November
