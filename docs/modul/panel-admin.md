@@ -131,8 +131,14 @@ Diputuskan pemilik proyek pada 24 November 2026 dari kanvas desain
   bawah 640 px. Tombol utama navy seperti kanvas.
 - Diterapkan tanpa ditanyakan: `useJumlahAkun` di bawah akar `adminAkun`
   agar ikut dimuat ulang setiap aksi; susunan kolom dipilih dari lebar
-  wadah (`useLebarElemen`, butir 31), bukan lebar layar; label "(sekarang)"
-  di pilihan Plan perpanjang diganti keterangan "Plan sekarang ...".
+  wadah (`useLebarElemen`, butir 31), bukan lebar layar.
+- Menyimpang dari kanvas tanpa ditanyakan: penanda "(sekarang)" di pilihan
+  Plan perpanjang diganti keterangan "Plan sekarang ..." (diajukan ke
+  pemilik proyek, `inti/status.md`); keterangan kartu Semua akun "Akun
+  klien dan admin", karena backend tidak memberi jumlah admin; tombol Buat
+  Akun Klien 32 px di HP mengikuti ukuran `aksi`; kaki paginasi memakai
+  teks `KakiPaginasi` bersama; detail bertumpuk di bawah 1024 px, karena
+  kanvas tidak punya papan detail tablet.
 
 ## Catatan
 
