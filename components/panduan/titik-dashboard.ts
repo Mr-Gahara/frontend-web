@@ -117,3 +117,14 @@ export function kunciPanduanDashboard(m: {
   if (m.diSetupGudang || !m.gudangDiizinkan) return null;
   return "dashboard-gudang." + m.penggunaId;
 }
+
+/**
+ * Tombol Lihat panduan dashboard di ruang gudang tidak dipasang selama tur
+ * gudang tidak berlaku: gudang di luar plan, atau akses gudang ditolak
+ * (pemilik proyek, 24 November 2026). Sebelumnya tombol itu membuka tur satu
+ * titik di halaman "Gudang belum termasuk plan Anda". Ruang outlet tidak
+ * berubah.
+ */
+export function tombolPanduanGudangTampil(m: { planMencakupGudang: boolean; aksesGudang: string }): boolean {
+  return m.planMencakupGudang && m.aksesGudang !== "ditolak";
+}

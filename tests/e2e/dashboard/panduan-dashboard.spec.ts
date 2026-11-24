@@ -3,6 +3,8 @@ import { masuk } from "../../helpers/masuk-uji";
 import { balonPanduan as balon, jalaniTur } from "../../helpers/panduan-uji";
 import { IZIN } from "../../../lib/auth/permissions";
 import { masukSebagai } from "../../helpers/terkunci-uji";
+import { ALASAN_TANPA_ADMIN, hapusAkunKlienUji, kredensialAdmin, wajibAdmin } from "../../helpers/admin-uji";
+import { akunBaru, isiTokoDanOwner } from "../../helpers/setup-uji";
 
 /*
  * Tur dashboard ruang outlet (keputusan pemilik proyek, 7 November 2026)
@@ -151,5 +153,43 @@ test.describe("Panduan dashboard", () => {
       });
       await expect(sidebar, "tur selesai: sidebar ditutup lagi").toBeHidden();
     });
+  });
+});
+
+test.describe("Panduan dashboard menurut plan", () => {
+  test.skip(!kredensialAdmin(), ALASAN_TANPA_ADMIN);
+
+  test("Basic: tur ruang outlet tetap lima titik; ruang gudang tanpa tur dan tanpa tombol panduan", async ({ page }) => {
+    // Tur wizard dimatikan selama setup lewat saklar uji, lalu saklarnya
+    // dikosongkan agar tur dashboard tampil sendiri.
+    await page.goto("/login");
+    await page.evaluate(() => localStorage.setItem("tachyon.panduan.otomatis", "mati"));
+    const { id } = await akunBaru(page, "panduan-basic");
+    try {
+      await isiTokoDanOwner(page);
+      await page.goto("/dashboard/outlet");
+      await expect(tombolPanduan(page)).toBeVisible({ timeout: 15_000 });
+      await page.evaluate(() => localStorage.removeItem("tachyon.panduan.otomatis"));
+      await page.reload();
+      // Titik ruang outlet tidak bergantung plan (titik-dashboard.test.ts).
+      await expect(balon(page)).toContainText("Panduan 1 dari 5", { timeout: 15_000 });
+      await jalaniTur(page, TARGET);
+
+      // Gudang di luar plan Basic: ajakan naik plan, tur gudang tidak tampil
+      // sendiri, dan tombol panduan tidak dipasang (pemilik proyek, 24 November 2026).
+      await page.goto("/dashboard/gudang");
+      await expect(page.getByText("Gudang belum termasuk plan Anda")).toBeVisible({ timeout: 15_000 });
+      await page.waitForTimeout(1_500);
+      await expect(balon(page)).toHaveCount(0);
+      await expect(tombolPanduan(page)).toHaveCount(0);
+      expect(
+        await page.evaluate(() =>
+          Object.keys(localStorage).filter((k) => k.startsWith("tachyon.panduan.v1.dashboard-gudang")),
+        ),
+        "tur gudang tidak dicatat dilihat",
+      ).toEqual([]);
+    } finally {
+      await hapusAkunKlienUji(id, wajibAdmin());
+    }
   });
 });

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { normalizeId } from "@/lib/api/normalize";
 import { api, bukaDenganAuth, login } from "../../../helpers/transfer-uji";
 import { masukTanpaBacaSebagian } from "../../../helpers/terkunci-uji";
 import {
@@ -113,6 +114,60 @@ test.describe("tandai selesai booking", () => {
       await login(page);
       auth = await bukaDenganAuth(page, "/dashboard/outlet/reservasi");
       await batalkanBooking(page, auth, penjualanId);
+    }
+  });
+
+  test("Tandai Selesai tidak tampil untuk booking yang belum dibayar, maupun yang jamnya sudah lewat", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, "/dashboard/outlet/reservasi");
+    const fx = await siapkanFixtureBooking(page, auth);
+    await bersihkanSisaBooking(page, auth, fx);
+    const jam = 60 * 60 * 1000;
+    const nanti = new Date(Date.now() + 7 * jam);
+    nanti.setSeconds(0, 0);
+    const lalu = new Date(Date.now() - 3 * jam);
+    lalu.setSeconds(0, 0);
+    const penjualan: (string | undefined)[] = [];
+    try {
+      const belumBayar = await buatBooking(page, auth, fx, nanti, new Date(nanti.getTime() + jam));
+      penjualan.push(belumBayar.dataPenjualan?.id);
+      await page.goto("/dashboard/outlet/penjualan/" + belumBayar.dataPenjualan?.id);
+      let bagian = page.getByRole("region", { name: "Sesi booking" });
+      await expect(bagian).toContainText(NAMA_ASET_BOOKING, { timeout: 15_000 });
+      await expect(bagian).toContainText("Aktif");
+      await expect(bagian.getByRole("button", { name: "Tandai Selesai" }), "belum dibayar").toHaveCount(0);
+
+      // Jam selesai sudah lewat: backend membacanya Selesai (statusEfektif), meski dibayar.
+      const lewat = await api<unknown>(page, auth, "POST", "/sesibooking", {
+        dataPelanggan: fx.pelangganId,
+        items: [{ dataAset: fx.asetId, waktuMulai: lalu.toISOString(), waktuSelesai: new Date(lalu.getTime() + jam).toISOString() }],
+      });
+      expect(lewat.status, "buat booking lampau: " + lewat.pesan).toBeLessThan(300);
+      const daftar = await api<{ id: string; waktuMulai: string; dataAset?: { id: string }; dataPenjualan?: { id: string } }[]>(
+        page, auth, "GET", "/sesibooking",
+      );
+      type Ringkas = { id: string; waktuMulai: string; dataAset?: { id: string }; dataPenjualan?: { id: string } };
+      const lampau = (normalizeId(daftar.data ?? []) as unknown as Ringkas[]).find(
+        (b) => b.dataAset?.id === fx.asetId && new Date(b.waktuMulai).getTime() === lalu.getTime(),
+      );
+      expect(lampau, "booking lampau terbaca").toBeTruthy();
+      penjualan.push(lampau!.dataPenjualan?.id);
+      const metode = await api<{ id: string }[]>(page, auth, "GET", "/metodepembayaran");
+      const bayar = await api(page, auth, "POST", "/pembayaran", {
+        penjualanID: lampau!.dataPenjualan?.id,
+        metodePembayaranID: metode.data?.[0]?.id,
+        jumlahBayar: 1,
+        tanggalBayar: new Date().toISOString(),
+      });
+      expect(bayar.status, "bayar booking lampau: " + bayar.pesan).toBeLessThan(300);
+      await page.goto("/dashboard/outlet/penjualan/" + lampau!.dataPenjualan?.id);
+      bagian = page.getByRole("region", { name: "Sesi booking" });
+      await expect(bagian).toContainText(NAMA_ASET_BOOKING, { timeout: 15_000 });
+      await expect(bagian.getByRole("button", { name: "Tandai Selesai" }), "jam sudah lewat").toHaveCount(0);
+      // Bukti temuan backend: sesiBooking[] detail penjualan (B347) membawa
+      // status mentah, tanpa statusEfektif seperti GET /sesibooking.
+      await expect(bagian, "booking lewat jam terbaca Selesai").toContainText("Selesai");
+    } finally {
+      for (const id of penjualan) await batalkanBooking(page, auth, id);
     }
   });
 });

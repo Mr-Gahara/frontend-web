@@ -1,6 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 import { saldoAkun } from "../../helpers/akun-kas-uji";
-import { unik } from "../../helpers/reservasi-uji";
+import {
+  batalkanBooking,
+  bersihkanSisaBooking,
+  buatBooking,
+  siapkanFixtureBooking,
+  unik,
+} from "../../helpers/reservasi-uji";
 import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../helpers/filter-uji";
 import { IZIN } from "../../../lib/auth/permissions";
 import {
@@ -486,5 +492,67 @@ test.describe("Mesin Kasir: riwayat berhalaman", () => {
     const isiKedua = (await kedua.json()) as { data: { id: string }[] };
     expect(isiKedua.data.length).toBeGreaterThan(0);
     await expect(page.locator(`a[href$="/${isiKedua.data[0].id}"]`).first(), "baris halaman kedua tampil").toBeVisible();
+  });
+
+  test("metode tunai yang akun kasnya laci mesin kasir dinonaktifkan di form pembayaran web, beserta keterangannya (PB15a)", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await login(page);
+    const auth: Auth = await bukaDenganAuth(page, URL);
+    const laci = await siapkanLaciUji(page, auth);
+    await bersihkanMesinUji(page, auth, laci.id);
+    const NAMA_METODE = "E2E Metode Laci Tetap";
+    type Metode = { id: string; namaPembayaran: string; isActive: boolean };
+    let metodeId = "";
+    let penjualanId: string | undefined;
+    try {
+      // Mesin kasir (modul ini) dan metode tunai berakun laci (modul metode
+      // pembayaran) disiapkan lewat API; yang diuji form pembayaran.
+      const mesin = await api(page, auth, "POST", "/sesikasir/perangkat", {
+        installationId: PERANGKAT_UJI.installationId,
+        akunKasID: laci.id,
+        namaPerangkat: `E2E Kasir Laci ${unik()}`,
+      });
+      expect(mesin.status, "petakan mesin kasir uji: " + mesin.pesan).toBeLessThan(300);
+      const semua = await api<Metode[]>(page, auth, "GET", "/metodepembayaran?showAll=true");
+      const ada = (semua.data ?? []).find((m) => m.namaPembayaran === NAMA_METODE);
+      const siap = ada
+        ? await api<Metode>(page, auth, "PUT", "/metodepembayaran/" + ada.id, { isActive: true })
+        : await api<Metode>(page, auth, "POST", "/metodepembayaran", {
+            namaPembayaran: NAMA_METODE,
+            kategori: "tunai",
+            akunKasID: laci.id,
+            isActive: true,
+          });
+      expect(siap.status, "aktifkan metode laci uji: " + siap.pesan).toBeLessThan(300);
+      metodeId = ada?.id ?? siap.data.id;
+
+      // Penjualan belum dibayar dari booking uji (alur reservasi).
+      const fx = await siapkanFixtureBooking(page, auth);
+      await bersihkanSisaBooking(page, auth, fx);
+      const mulai = new Date(Date.now() + 9 * 60 * 60 * 1000);
+      mulai.setSeconds(0, 0);
+      const b = await buatBooking(page, auth, fx, mulai, new Date(mulai.getTime() + 60 * 60 * 1000));
+      penjualanId = b.dataPenjualan?.id;
+
+      await page.goto(`/dashboard/outlet/penjualan/${penjualanId}/pembayaran`);
+      await page.getByRole("combobox").filter({ hasText: "Pilih metode..." }).click({ timeout: 20_000 });
+      const opsiLaci = page.getByRole("option", { name: new RegExp(NAMA_METODE) });
+      await expect(opsiLaci).toHaveAttribute("aria-disabled", "true");
+      await expect(opsiLaci).toContainText(
+        "Laci mesin kasir. Buka kasir di perangkatnya lalu terima tunai di sana, atau pilih metode lain.",
+      );
+      // Metode tunai lain (laci bukan mesin kasir) tetap dapat dipilih.
+      await expect(page.getByRole("option", { name: /^Tunai/ }).first()).not.toHaveAttribute("aria-disabled", "true");
+      await page.keyboard.press("Escape");
+    } finally {
+      await batalkanBooking(page, auth, penjualanId);
+      if (metodeId) {
+        const off = await api(page, auth, "PUT", "/metodepembayaran/" + metodeId, { isActive: false });
+        expect.soft(off.status, "nonaktifkan metode laci uji: " + off.pesan).toBe(200);
+      }
+      await bersihkanMesinUji(page, auth, laci.id);
+    }
   });
 });

@@ -63,6 +63,57 @@ test.describe("Rekap Absensi", () => {
     await expect(page.getByRole("list", { name: "Rekap per staf" })).toBeHidden();
   });
 
+  for (const [status, harap] of [
+    [403, "Anda tidak memiliki izin melihat rekap absensi."],
+    [500, "Rekap uji gagal dimuat"],
+  ] as const) {
+    test(`rekap dijawab ${status}: pesan tampil, bukan ringkasan maupun keadaan kosong`, async ({ page }) => {
+      await page.goto(BASIS + URL_HALAMAN, { waitUntil: "commit" });
+      await page.route(POLA, (route) =>
+        route.fulfill({
+          status,
+          contentType: "application/json",
+          body: JSON.stringify({ status: "error", message: status === 403 ? "Akses ditolak" : "Rekap uji gagal dimuat" }),
+        }),
+      );
+      await page.reload({ waitUntil: "commit" });
+      const pesan = page.getByRole("alert").filter({ hasText: harap });
+      await expect(pesan).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByRole("region", { name: "Ringkasan rekap" })).toHaveCount(0);
+      await expect(page.getByText("Belum ada data bulan ini")).toHaveCount(0);
+    });
+  }
+
+  test("staf berlokasi kerja di outlet tampil walau bulan itu tanpa jadwal, absen, maupun izin (AR40)", async ({ page }) => {
+    const t0 = tungguRekap(page, keBulan(new Date()));
+    const auth = await bukaDenganAuth(page, URL_HALAMAN);
+    const locationID = query(await t0).get("locationID")!;
+    // Bulan jauh sebelum toko uji punya jadwal: hanya staf berlokasi kerja
+    // outlet ini yang dimuat backend, seluruhnya tanpa kegiatan.
+    const rekap = await bacaRekap(page, auth, "2019-01", locationID);
+    expect(rekap.data.length, "staf berlokasi kerja outlet dimuat").toBeGreaterThan(0);
+    expect(rekap.data.every((s) => s.shiftDijadwalkan === 0 && s.hariHadir === 0)).toBe(true);
+  });
+
+  test("bulan tanpa staf menampilkan keadaan kosong beserta syarat staf tampil", async ({ page }) => {
+    await page.goto(BASIS + URL_HALAMAN, { waitUntil: "commit" });
+    await page.route(POLA, async (route) => {
+      if (new URL(route.request().url()).searchParams.has("format")) return route.continue();
+      const asli = await route.fetch();
+      const body = (await asli.json()) as { data: RekapAbsensiResponse };
+      // simulasi: data uji selalu punya staf berlokasi kerja outlet (E2E Kasir Outlet), yang dimuat backend setiap bulan (AR40), sehingga bulan tanpa staf tidak dapat dibuat; ringkasan asli dipertahankan, daftar staf dikosongkan
+      await route.fulfill({ response: asli, json: { ...body, data: { ...body.data, data: [] } } });
+    });
+    await page.reload({ waitUntil: "commit" });
+    await expect(page.getByText("Belum ada data bulan ini")).toBeVisible({ timeout: 20_000 });
+    await expect(
+      page.getByText(
+        "Staf tampil di sini bila berlokasi kerja di outlet ini, atau punya jadwal kerja, absen, atau izin cuti pada bulan yang dipilih.",
+      ),
+    ).toBeVisible();
+    await expect(page.getByRole("table")).toHaveCount(0);
+  });
+
   test("bulan sebelumnya mengirim bulan itu", async ({ page }) => {
     const t0 = tungguRekap(page, keBulan(new Date()));
     await bukaDenganAuth(page, URL_HALAMAN);

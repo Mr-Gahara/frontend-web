@@ -3,6 +3,7 @@ import {
   HREF_TITIK_MENU,
   HREF_TITIK_MENU_GUDANG,
   kunciPanduanDashboard,
+  tombolPanduanGudangTampil,
   TARGET_MENU_UTAMA,
   targetMenu,
   titikDashboard,
@@ -76,5 +77,17 @@ describe("kunci tur dashboard", () => {
     expect(
       kunciPanduanDashboard({ ...dasar, ruang: "gudang", gudangDiizinkan: true, diSetupGudang: true }),
     ).toBeNull();
+  });
+});
+
+describe("tombolPanduanGudangTampil", () => {
+  it("tidak dipasang bila gudang di luar plan atau akses gudang ditolak", () => {
+    expect(tombolPanduanGudangTampil({ planMencakupGudang: false, aksesGudang: "setup" })).toBe(false);
+    expect(tombolPanduanGudangTampil({ planMencakupGudang: true, aksesGudang: "ditolak" })).toBe(false);
+  });
+
+  it("tetap dipasang dalam plan selain akses ditolak, termasuk selagi memuat", () => {
+    expect(tombolPanduanGudangTampil({ planMencakupGudang: true, aksesGudang: "izinkan" })).toBe(true);
+    expect(tombolPanduanGudangTampil({ planMencakupGudang: true, aksesGudang: "memuat" })).toBe(true);
   });
 });

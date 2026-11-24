@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { format } from "date-fns";
 import { normalizeId } from "@/lib/api/normalize";
-import { JAWAB_GAGAL, bukaDenganAuth, login } from "../../../helpers/transfer-uji";
+import { JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../../helpers/transfer-uji";
 import {
   NAMA_ASET_BOOKING,
   NAMA_PELANGGAN_BOOKING,
@@ -104,6 +104,67 @@ test.describe("E2E — Reservasi › Daftar (timeline aset)", () => {
       await expect(blok).toContainText(NAMA_PELANGGAN_BOOKING);
       await expect(blok).toHaveCSS("opacity", "1");
       await expect(blok).not.toContainText("Selesai");
+    } finally {
+      await batalkanBooking(page, auth, penjualanId);
+    }
+  });
+
+  test("booking yang dibayar dan sedang berjalan membuat aset Digunakan; yang belum dibayar tidak", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const fx = await siapkanFixtureBooking(page, auth);
+    await bersihkanSisaBooking(page, auth, fx);
+    const { mulai, selesai } = rentangSekarang(60);
+    let penjualanId: string | undefined;
+    try {
+      const b = await buatBooking(page, auth, fx, mulai, selesai);
+      penjualanId = b.dataPenjualan?.id;
+      // Belum dibayar: jadwal belum dikunci, aset tetap Tersedia.
+      let { aset } = await buka(page);
+      expect(aset.find((a) => a.namaAset === NAMA_ASET_BOOKING)?.status).toBe("tersedia");
+      await expect(barisAsetUji(page)).toContainText("Tersedia");
+
+      // Dibayar Rp1 (modul pembayaran, keputusan rancangan butir 23).
+      const metode = await api<{ id: string }[]>(page, auth, "GET", "/metodepembayaran");
+      const bayar = await api(page, auth, "POST", "/pembayaran", {
+        penjualanID: penjualanId,
+        metodePembayaranID: metode.data?.[0]?.id,
+        jumlahBayar: 1,
+        tanggalBayar: new Date().toISOString(),
+      });
+      expect(bayar.status, "bayar booking uji: " + bayar.pesan).toBeLessThan(300);
+      ({ aset } = await buka(page));
+      expect(aset.find((a) => a.namaAset === NAMA_ASET_BOOKING)?.status, "status dihitung ulang setiap dibaca").toBe(
+        "digunakan",
+      );
+      await expect(barisAsetUji(page)).toContainText("Digunakan");
+    } finally {
+      await batalkanBooking(page, auth, penjualanId);
+    }
+  });
+
+  test("booking yang mulai kemarin dan masih berjalan lewat tengah malam tampil di timeline hari ini (TL1a)", async ({
+    page,
+  }) => {
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const fx = await siapkanFixtureBooking(page, auth);
+    await bersihkanSisaBooking(page, auth, fx);
+    const mulai = new Date();
+    mulai.setDate(mulai.getDate() - 1);
+    mulai.setHours(23, 0, 0, 0);
+    const selesai = new Date(Date.now() + 60 * 60_000);
+    selesai.setSeconds(0, 0);
+    let penjualanId: string | undefined;
+    try {
+      const b = await buatBooking(page, auth, fx, mulai, selesai);
+      penjualanId = b.dataPenjualan?.id;
+      const { sesi } = await buka(page);
+      const q = sesi.find((x) => x.id === b.id);
+      expect(q, "timeline hari ini memuat booking yang mulai kemarin (B327)").toBeTruthy();
+      const blok = blokBooking(page, mulai, selesai);
+      await expect(blok).toHaveCount(1);
+      await expect(blok).toContainText(NAMA_PELANGGAN_BOOKING);
+      // Bagian sebelum awal hari dipotong: blok mulai di tepi kiri timeline.
+      expect(await blok.evaluate((el) => (el as HTMLElement).style.left)).toBe("0%");
     } finally {
       await batalkanBooking(page, auth, penjualanId);
     }

@@ -87,7 +87,8 @@ export function HalamanRekapAbsensi() {
             <div className="rounded-2xl border border-dashed border-navy/20 bg-krem p-12 text-center">
               <p className="text-besar font-bold text-navy">Belum ada data bulan ini</p>
               <p className="mx-auto max-w-md text-isi font-medium text-navy/60">
-                Staf tampil di sini bila punya jadwal kerja, absen, atau izin cuti pada bulan yang dipilih.
+                Staf tampil di sini bila berlokasi kerja di outlet ini, atau punya jadwal kerja, absen, atau izin cuti pada
+                bulan yang dipilih.
               </p>
             </div>
           ) : (

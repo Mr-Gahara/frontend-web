@@ -7,7 +7,8 @@ import { bolehLihatMenu, gudangMenus, outletMenus } from "@/components/sidebar-m
 import { useSession } from "@/lib/auth/useSession";
 import { useAksesGudang } from "@/features/inventaris/use-akses-gudang";
 import { TurSorotan, usePanduan } from "./tur-sorotan";
-import { kunciPanduanDashboard, TARGET_MENU_UTAMA, titikDashboard } from "./titik-dashboard";
+import { kunciPanduanDashboard, TARGET_MENU_UTAMA, titikDashboard, tombolPanduanGudangTampil } from "./titik-dashboard";
+import { planMencakup } from "@/lib/auth/fitur-plan";
 
 const MENU_RUANG = {
   outlet: outletMenus.flatMap((g) => g.items),
@@ -50,6 +51,9 @@ export function TombolPanduanDashboard() {
   );
 
   if (diSetupGudang) return null;
+  if (ruang === "gudang" && !tombolPanduanGudangTampil({ planMencakupGudang: planMencakup(plan, "wms"), aksesGudang })) {
+    return null;
+  }
   return (
     <>
       <button
