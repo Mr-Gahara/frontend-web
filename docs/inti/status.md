@@ -46,8 +46,13 @@ menu popup profil (`modul/profil-login.md`, PU1a sampai PU3a; temuan
 backend butir 190). Sesudahnya kedua butir Menunggu keputusan dari rombak
 panel admin diputuskan dan diterapkan: tombol bertaut (`modul/ui-ux.md`,
 BT1a dan BT2a) dan keterangan Plan sekarang (`modul/panel-admin.md`,
-RP6a). Urutan berikutnya: nomor WhatsApp admin (LG1a), utang pengujian
-kelompok 1, lalu suite e2e penuh (harapan 736) dan `bersih-akunkas.js`.
+RP6a). Utang pengujian kelompok 1 selesai hari yang sama (AP1a, AP2a,
+PG3a, TR1a; temuan backend butir 191). Atas perintah pemilik proyek
+seluruh utang pengujian yang dapat dibuktikan dikerjakan per kelompok
+(akses dan peran selesai; berikutnya keuangan, admin dan profil,
+inventaris dan gudang, reservasi dan jadwal, tampilan), lalu suite e2e
+penuh (harapan 757) dan `bersih-akunkas.js`. Nomor WhatsApp admin
+(LG1a) tetap menunggu pemilik proyek.
 
 ### Keadaan 23 November 2026 sore
 
@@ -219,6 +224,12 @@ perintahnya:
    pelanggan, membership, dan reservasi.
 
 ### Berikutnya: utang pengujian kelompok 1 yang tersisa (dicatat 20 November 2026)
+
+Selesai 24 November 2026 (`inti/pengujian.md`, Baseline per utang pengujian
+kelompok 1), kecuali template General Manajer yang menunggu backend
+(butir 191). Bagian MK11a tentang `read-pengguna` dan `GET /device/:userId`
+sudah basi sejak MK3b; yang dibuktikan jalur tanpa `read-akunkas` dan
+tanpa `read-pengguna`.
 
 Dicatat pemilik proyek 20 November 2026 sebagai pekerjaan berikutnya.
 Jalur yang aturannya sudah teruji unit, tetapi belum dibuktikan e2e karena

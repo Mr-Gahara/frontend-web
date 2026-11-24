@@ -78,11 +78,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   login sukses tidak menguranginya. Spec login gagal lebih awal bila sisa
   kuota di header `RateLimit` di bawah 3; menjalankan spec auth berulang
   (`--repeat-each`) dalam 15 menit dapat mengunci login seluruh suite.
-- **Jalur layout gudang selain Owner hanya teruji di unit test**
-  (`tests/unit/features/inventaris/gudang.test.ts`): pengguna tanpa
-  `read-location`, tanpa `create-location`, dan tenant tanpa gudang,
-  karena satu-satunya akun uji berperan Owner dan tenant uji sudah punya
-  gudang.
 - **Akun kas uji menumpuk sebagai non-aktif**, satu per run spec
   keuangan, lima per run spec ubah akun kas (`1bc76f4`), dua per run
   spec Pindah Dana (`e53c016`), dan satu per run spec tutup akun
@@ -113,12 +108,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   yang dihapus backend juga menjawab 404. Route hapus yang hilang tidak
   terdeteksi helper ini; yang menangkapnya adalah audit endpoint
   (`referensi/helper-dan-shell.md`, Helper penggantian).
-- **Persetujuan pengajuan uji memakai pengguna penyetuju uji** "E2E
-  Penyetuju", karena backend melarang pengaju menyetujui pengajuannya
-  sendiri (`kontrak/temuan.md` butir 76, PB11a). Jalur Owner menyetujui
-  pengajuannya sendiri belum teruji.
-  Sejak `a8aec53` pengajuan uji disetujui Ridho sendiri (RH5a), sehingga
-  jalur Owner teruji; penolakan bagi peran lain belum teruji dari web.
 - **`DataTable` mode server hanya dipakai dan teruji di daftar
   penjualan** (`tests/e2e/penjualan/daftar-penjualan.spec.ts`). Mode
   klien kesembilan tabel lain tidak berubah di `b63cf08`, dan tidak diuji
@@ -184,14 +173,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   yang ditandai `// simulasi:`, dan hanya untuk tombol tambah; menu
   aktifkan yang terkunci saat batas tercapai belum teruji. Pilihan Aktif
   di form buat teruji e2e sejak `a80d2fa` (NZ5a).
-- **Keterangan khusus member dan pemilih produk tanpa izin baca produk
-  belum teruji**: sejak MB1a (17 November 2026) web dapat menandai khusus
-  member dan centangnya teruji di `pelanggan/membership.spec.ts`, dan
-  keterangan "Khusus member" di daftar dan pilihan diskon teruji e2e
-  sejak 20 November 2026 (`diskon/pilihan-kasir.spec.ts`). Pemilih produk
-  tanpa izin baca produk tetap belum, karena satu-satunya akun uji
-  berperan Owner. `aksiDiskon` hanya teruji di unit test, dengan alasan
-  yang sama.
 - **Pilihan diskon kasir hanya teruji e2e di buat reservasi**; buat
   penjualan memakai `diskonAktif` yang sama dan teruji di unit test.
   `sedangBerlaku` dapat tertinggal sampai lima menit di cache, dan itu
@@ -274,21 +255,16 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Jalur gagal dialog hapus produk hanya diuji dengan jawaban 500
   tiruan**; penolakan hapus dari backend sungguhan belum teruji.
 
-- **Batas atas level, level pengguna yang tidak diketahui (RL3a), dan
-  perubahan level atau wewenang di payload ubah hanya teruji di unit
-  test** (`tests/unit/features/role/form-role.test.ts`), karena akun uji
-  berperan Owner. Penolakan backend saat simpan teruji e2e sejak `2bcb1ce`.
-
 - **Penjaga ruang detail stock opname hanya teruji untuk dokumen yang
   tipe lokasinya diketahui**, dan kedua skenarionya dilewati bila ruang
   itu belum punya dokumen. Nama PIC yang gagal dimuat (teks cadangan)
   belum teruji e2e.
 
-- **Sisi tertolak gerbang rute hanya teruji e2e untuk rute yang ditolak
-  peran pengguna uji profil**: daftar pengguna, serta ubah posisi dan
-  ubah produk bila peran itu tidak memegang izinnya. Rute lain teruji di
-  `tests/unit/lib/auth/gerbang-rute.test.ts`. Skenarionya dilewati bila
-  peran itu tidak memegang `read-dashboard-outlet`.
+- **Sisi tertolak gerbang rute ber-`[id]` hanya teruji di unit test**
+  (`gerbang-rute.test.ts`). Seluruh rute statis `IZIN_HALAMAN` teruji e2e
+  sejak 24 November 2026 lewat pengguna baca-saja
+  (`akses/gerbang-baca-saja`): yang syaratnya tidak terpenuhi ditolak, dan
+  yang terpenuhi terbuka.
 - **Syarat 44 entri baru `IZIN_HALAMAN` diturunkan dari nama hook dan
   kontrak, bukan dari trace per halaman.** Yang terbukti: pemilik seluruh
   izin membuka setiap rute terpetakan (unit), dan spec terdampak lolos.
@@ -324,8 +300,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   bukti.
   Sejak `cfaaa92` `test.fixme`-nya dilepas, setelah butir 143 tertutup
   (`arsip/riwayat-pengujian.md`, Riwayat pelepasan fixme).
-- **Penyaringan stock adjustment per ruang di server tidak teruji dari
-  web**, karena akun uji berperan Owner.
 - **Penahanan pembayaran kembar di backend tidak diuji dari web**; yang
   teruji kunci yang sama saat permintaan diulang.
 
@@ -343,9 +317,11 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   pengajuan siap surat jalan** pada data uji sekarang; cabang klik kartu
   ke tab Perlu Surat Jalan berjalan bila ada pengajuan APPROVED atau
   PENDING tanpa surat jalan.
-- **Template role hanya teruji pemetaan namanya** (skenario e2e template
-  dan `tests/unit/lib/roleTemplates.test.ts`); role dari template belum
-  dipakai untuk membuka halaman stock opname, adjustment, atau absensi.
+- **Role dari template General Manajer belum dapat dibuat** (butir 191,
+  TR1a): spec `akses/template-role` membuktikan Supervisor dan Manajer
+  membuka stock opname, adjustment, pembelian stok, dan rekap absensi,
+  serta Kasir ditolak; skenario General Manajer merah sampai backend
+  menaikkan batas 120 izin per role.
 - **Spec alur pengembalian memindahkan satu satuan stok outlet ke gudang
   per run** (`a505783`), karena surat jalan DIKIRIM tidak dapat
   dibatalkan (P12). Bila berhenti setelah disetujui dan sebelum surat
@@ -369,8 +345,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   Keuangan, serta catat pembelian** hanya teruji lewat hook (unit) dan
   pola yang sama di catat beban (e2e `6d07b8d`), tanpa skenario
   `page.clock` tersendiri.
-- **Template role pembelian hanya teruji pemetaan namanya**; role dari
-  template belum dipakai membuka halaman pembelian.
 - **Spec Belanja Stok menyiapkan dua pembelian lewat API** (keputusan
   rancangan butir 23 mengizinkannya, karena halaman itu hanya membaca);
   setiap run menambah lalu mengurangi stok bahan fixture di outlet dan
@@ -438,32 +412,20 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (`stok-produk-beresep`), dihapus lewat API admin di akhir; backend
   menghapus tokonya bersama akun, sehingga tidak menumpuk selama
   penghapusannya berhasil.
-- **Jalur Mesin Kasir tanpa izin kelola teruji e2e sejak `cbfa23b`**
-  lewat pengguna baca-saja (tanpa tambah, ubah, dan lepas, dan tanpa
-  `GET /sesikasir/perangkat`). Yang masih hanya teruji di unit test:
-  pemegang `kelola-perangkat-kasir` tanpa `read-pengguna`
-  atau `read-akunkas` (MK11a), dan pemilihan perangkat yang melewati
-  pengguna berlevel sama atau lebih tinggi (403 `GET /device/:userId`).
-- **Penyaringan titik tur dashboard menurut izin dan plan hanya teruji
-  di unit test** (`tests/unit/components/panduan/titik-dashboard.test.ts`),
-  karena akun uji e2e berperan Owner sehingga kelima titik selalu
-  tampil. Aturannya `bolehLihatMenu`, yang dipakai bersama sidebar.
+- **Penyaringan titik tur dashboard menurut plan hanya teruji di unit
+  test** (`titik-dashboard.test.ts`, `kunciPanduanDashboard`): titik tur
+  ruang outlet tidak bergantung plan, dan tur ruang gudang tidak ada bagi
+  plan tanpa gudang. Penyaringan menurut izin teruji e2e sejak 24 November
+  2026 (`dashboard/panduan-dashboard`, pengguna tanpa `read-pengguna`).
 - **Label kedatangan Status Staf (AB6a) hanya teruji di unit test**
   (`tests/unit/features/dashboard-outlet/dashboard-outlet.test.ts`),
   karena absen dibuat aplikasi dengan foto dan koordinat, sehingga data
   Terlambat dan Luar Jadwal tidak dapat disiapkan web secara
   deterministik.
-- **Lokasi kerja (LK1a) tanpa `read-location` dan untuk role Owner
-  hanya teruji di unit dan integration test**
-  (`tests/unit/features/pengguna/lokasi-kerja.test.ts`), karena akun uji
-  berperan Owner. Pembatasan 403 bagi staf berlokasi kerja (B270 sampai
-  B274) tidak diuji web: pengguna uji tidak diberi lokasi kerja, dan
-  ruang tidak disesuaikan. Sebagian basi per 20 November 2026: staf
-  berlokasi kerja Gudang teruji e2e di `auth/ruang-lokasi-kerja.spec.ts`
-  (ruang mengikuti lokasi kerja, B339), dan staf berlokasi kerja Outlet di
-  `keuangan/mesin-kasir.spec.ts` (B346); 403 halaman stok bagi lokasi lain
-  (B270 sampai B274) tetap tidak diuji, karena ruang kini menolak lebih
-  dulu.
+- **Pembatasan 403 halaman stok bagi staf di luar lokasi kerjanya (B270
+  sampai B274) tidak diuji web**, karena ruang kini menolak lebih dulu
+  (LK3a). Isian lokasi kerja tanpa `read-location` dan untuk role Owner
+  teruji e2e sejak 24 November 2026 (`pengguna/crud-pengguna`).
 - **Setujui yang disembunyikan bagi rekan selokasi pengaju (PG2a) hanya
   teruji di unit test** (`rekanSelokasiPengaju`), karena butuh pengajuan
   dari pengaju berlokasi kerja dan penyetuju berlokasi kerja sama; spec
@@ -537,3 +499,16 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   metode pembayaran** (`pengaturan/kelola-metode-pembayaran`, PUT ditahan
   lalu diteruskan). Batal di buat dan ubah akun admin memakai pola yang
   sama dan hanya terbaca dari kode.
+- **Peran dan pengguna uji kelompok 1 menetap** (24 November 2026),
+  dibuat sekali lewat `tests/helpers/terkunci-uji.ts` dan dipakai ulang:
+  E2E Template Supervisor, Manajer, dan Kasir; E2E Kelola Kasir Tanpa
+  Akun dan Tanpa Pengguna; E2E Tur Tanpa Pengguna; E2E Pengelola Posisi;
+  E2E Diskon Tanpa Produk dan Buat Saja; E2E Kelola Pengguna Tanpa
+  Lokasi; E2E Gudang Tanpa Buat Lokasi; E2E Pengelola Pengajuan; dan
+  peran tanpa pengguna E2E Staf Level Rendah. Mereka ikut tampil di
+  daftar pengguna dan pilihan login PIN.
+- **Data per run spec kelompok 1**: satu diskon Non-Aktif "E2E Diskon
+  Tanpa Produk ..." (`diskon/izin-diskon`) dan satu pengajuan Ditolak
+  (`alur-pengajuan-stok`, P20). Posisi dan staf uji yang dibuat dihapus di
+  akhir skenario; staf "Karyawan Tanpa Lokasi ..." dari run yang gagal di
+  tengah tertinggal.

@@ -483,6 +483,11 @@ Diputuskan pemilik proyek 16 November 2026 (`referensi/keputusan-penyesuaian-bac
   keterangan "Pengajuan dari lokasi kerja Anda harus disetujui pengguna
   lokasi lain atau Owner."; Tolak tetap tersedia
   (`rekanSelokasiPengaju`, `ef307ad`).
+- **PG3a: Setujui disembunyikan bagi pengaju bukan Owner pada
+  pengajuannya sendiri** (pemilik proyek, 24 November 2026; P20). Tombol
+  diganti keterangan "Pengajuan Anda sendiri harus disetujui pengguna lain
+  atau Owner.", dan Tolak tetap tersedia (`pengajuSendiri`). Pengaju
+  dikenali dari `dimintaOleh.id`, dan Owner dari `useLevelPenggunaAktif`.
 - **PV1a: stok outlet dan inventaris gudang berhalaman di server**
   bersama pencarian (`cari`), tab Stok Kritis (`stokKritis`), dan untuk
   stok outlet `tipeLokasi=Outlet` (B342), dengan tombol urut kolom

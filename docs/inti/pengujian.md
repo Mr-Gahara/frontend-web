@@ -12,6 +12,23 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per utang pengujian kelompok 1** (24 November 2026, backend
+`ridho` lokal `1718030`): vitest 1236 lolos dari 146 berkas (unit baru
+`aksiPengguna` dan `pengajuSendiri`). Tanpa suite penuh dan tanpa OTP:
+folder `akses`, `roles`, `diskon`, `pengguna`, `inventaris/pengajuanStok`,
+dan `inventaris/transferStok`, serta `gudang/ruang-gudang`,
+`dashboard/panduan-dashboard`, dan `keuangan/mesin-kasir` dijalankan
+bersama: 121 lolos, 1 gagal, dan 1 dilewati bersyarat dari 123. Yang
+gagal skenario template General Manajer, yang menunggu backend
+(`kontrak/temuan.md` butir 191, TR1a). Spec baru `akses/template-role`,
+`akses/gerbang-baca-saja`, `roles/level-bukan-owner`, dan
+`diskon/izin-diskon`. Skenario AP1a dan PG3a gagal pada kode lama
+(dibuktikan lewat `git stash`), dan skenario tanpa `read-akunkas` serta
+LK1a gagal saat aturannya dibuang sementara. Helper
+`pengajuanUjiDisetujui` tidak lagi men-submit pengajuan PENDING, karena
+backend hanya menerima submit dari DRAFT. Harapan suite penuh berikutnya
+757 (`npx playwright test --list`, 121 berkas).
+
 **Baseline per tombol bertaut** (24 November 2026, BT1a, BT2a, RP6a,
 backend `ridho` lokal `1718030`): vitest 1230 lolos, tanpa unit baru.
 ESLint menolak kesembilan tempat pada kode lama. Tanpa suite penuh dan
@@ -352,6 +369,9 @@ Pola kegagalan yang berulang:
 | Daftar tab dan isinya bersisian, atau tab aktif tidak berbeda, padahal memakai `Tabs` shadcn | Varian `data-horizontal:` dan `data-active:` di `components/ui/tabs.tsx` tidak cocok dengan atribut Radix proyek ini (`data-orientation`, `data-state`). Tulis `flex-col` di `Tabs` dan `data-[state=active]:` di `TabsTrigger`, seperti laman pajak dan profil (PU1a, 24 November 2026) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
 | Spec masih mencari tombol yang sudah menjadi tautan, padahal grep nama tombol sudah dijalankan | Spec menulis nama sebagai regex (`/tambah metode/i`), bukan teks. Saat mengubah peran elemen, grep nama dengan dan tanpa garis miring, tanpa membedakan huruf besar (BT1a) |
+| Pengguna uji yang baru dibuat Owner tidak ada di daftar Kelola Pengguna milik pengguna lain | Daftar ruang (`GET /pengguna?workspace=outlet`) hanya memuat pengguna yang perannya memegang `read-dashboard-outlet` (`getByWorkspace` backend). Beri peran staf uji izin dashboard ruangnya (24 November 2026) |
+| Menu Edit dan Hapus pengguna nonaktif bagi pengelola uji | Pengguna berlevel setara atau lebih tinggi tidak dapat diubah (`canEdit`); peran uji berlevel 90, sehingga staf yang diubahnya butuh peran berlevel rendah (`siapkanPeran`, E2E Staf Level Rendah) |
+| Helper pengajuan uji dijawab 409 "sudah di-submit" | Pengajuan PENDING (sesudah surat jalannya batal) tidak dapat di-submit; backend hanya menerima submit dari DRAFT. Pakai yang APPROVED atau buat baru (`pengajuanUjiDisetujui`, 24 November 2026) |
 | Dua tombol berdampingan `flex-1` berbeda lebar 2 px sesudah tautan menjadi item flex | Basis flex 0 tidak dapat lebih kecil dari border, sehingga tautan berborder 1 px melebar dari tautan `border-none`. Beri border yang sama, berwarna latar (`border-navy`, BT1a) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

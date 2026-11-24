@@ -143,6 +143,24 @@ Diputuskan pemilik proyek pada 21 Oktober 2026 (`ffd3994`, `4088d9e`):
   ditambahkan agar saldo akun kas tidak terbuka baginya. Manajer dan
   General Manajer memegang keempat izin, setara beban operasional.
 
+- **TR1a: batas 120 izin per role dinaikkan di backend** (pemilik
+  proyek, 24 November 2026; `kontrak/temuan.md` butir 191). Template
+  General Manajer (133 izin) tetap utuh, dan spec `akses/template-role`
+  untuk General Manajer tetap merah sampai backend berubah.
+
+### Utang pengujian akses 24 November 2026
+
+Diputuskan pemilik proyek 24 November 2026, dari temuan spec utang
+pengujian kelompok 1.
+
+- **AP1a: aksi Kelola Pengguna mengikuti izin endpoint-nya** (keputusan
+  rancangan butir 14, `aksiPengguna` di `features/pengguna/izin.ts`):
+  Tambah Pengguna dengan `create-pengguna`, Edit dengan `update-pengguna`
+  atau pada baris diri sendiri (`checkPermissionOrSelf` backend), dan
+  Hapus dengan `delete-pengguna`. Aturan level tetap berlaku.
+- **AP2a: baris tanpa aksi tidak punya tombol menu**, seperti daftar
+  diskon bagi pengguna baca-saja.
+
 ### Bug dan temuan frontend 23 November 2026
 
 Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend yang tersisa.

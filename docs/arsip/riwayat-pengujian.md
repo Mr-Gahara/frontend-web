@@ -1521,6 +1521,47 @@ Outlet" di `akses/jalur-bukan-owner.spec.ts`. Halaman ber-`[id]` dipindai
   di lebar tablet (`modul/ui-ux.md`, Utang terbuka); tabel rincian halaman
   detail diukur di 1280 dan 390 px (CV22a).
 
+Dilunasi 24 November 2026 (utang pengujian kelompok 1) dan dipindah dari
+`referensi/utang-pengujian.md` tanpa perubahan teks: spec baru
+`akses/template-role`, `akses/gerbang-baca-saja`,
+`roles/level-bukan-owner`, dan `diskon/izin-diskon`, serta skenario baru
+di `keuangan/mesin-kasir`, `akses/jalur-bukan-owner`,
+`gudang/ruang-gudang`, dan `inventaris/pengajuanStok/alur-pengajuan-stok`.
+
+- **Template role pembelian hanya teruji pemetaan namanya**; role dari
+  template belum dipakai membuka halaman pembelian.
+- **Jalur Mesin Kasir tanpa izin kelola teruji e2e sejak `cbfa23b`**
+  lewat pengguna baca-saja (tanpa tambah, ubah, dan lepas, dan tanpa
+  `GET /sesikasir/perangkat`). Yang masih hanya teruji di unit test:
+  pemegang `kelola-perangkat-kasir` tanpa `read-pengguna`
+  atau `read-akunkas` (MK11a), dan pemilihan perangkat yang melewati
+  pengguna berlevel sama atau lebih tinggi (403 `GET /device/:userId`).
+- **Batas atas level, level pengguna yang tidak diketahui (RL3a), dan
+  perubahan level atau wewenang di payload ubah hanya teruji di unit
+  test** (`tests/unit/features/role/form-role.test.ts`), karena akun uji
+  berperan Owner. Penolakan backend saat simpan teruji e2e sejak `2bcb1ce`.
+- **Keterangan khusus member dan pemilih produk tanpa izin baca produk
+  belum teruji**: sejak MB1a (17 November 2026) web dapat menandai khusus
+  member dan centangnya teruji di `pelanggan/membership.spec.ts`, dan
+  keterangan "Khusus member" di daftar dan pilihan diskon teruji e2e
+  sejak 20 November 2026 (`diskon/pilihan-kasir.spec.ts`). Pemilih produk
+  tanpa izin baca produk tetap belum, karena satu-satunya akun uji
+  berperan Owner. `aksiDiskon` hanya teruji di unit test, dengan alasan
+  yang sama.
+- **Penyaringan stock adjustment per ruang di server tidak teruji dari
+  web**, karena akun uji berperan Owner.
+- **Jalur layout gudang selain Owner hanya teruji di unit test**
+  (`tests/unit/features/inventaris/gudang.test.ts`): pengguna tanpa
+  `read-location`, tanpa `create-location`, dan tenant tanpa gudang,
+  karena satu-satunya akun uji berperan Owner dan tenant uji sudah punya
+  gudang.
+- **Persetujuan pengajuan uji memakai pengguna penyetuju uji** "E2E
+  Penyetuju", karena backend melarang pengaju menyetujui pengajuannya
+  sendiri (`kontrak/temuan.md` butir 76, PB11a). Jalur Owner menyetujui
+  pengajuannya sendiri belum teruji.
+  Sejak `a8aec53` pengajuan uji disetujui Ridho sendiri (RH5a), sehingga
+  jalur Owner teruji; penolakan bagi peran lain belum teruji dari web.
+
 ## Kejadian sesekali yang tidak berulang
 
 - **Master Shift tampil sebagai kartu di 1280 px, sekali** (20 November
