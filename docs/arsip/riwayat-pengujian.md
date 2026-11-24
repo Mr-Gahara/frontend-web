@@ -1562,6 +1562,73 @@ di `keuangan/mesin-kasir`, `akses/jalur-bukan-owner`,
   Sejak `a8aec53` pengajuan uji disetujui Ridho sendiri (RH5a), sehingga
   jalur Owner teruji; penolakan bagi peran lain belum teruji dari web.
 
+Dilunasi 24 November 2026 (utang pengujian kelompok keuangan) dan dipindah
+dari `referensi/utang-pengujian.md` tanpa perubahan teks: spec baru
+`tampilan/pergantian-hari`, dan skenario baru di `keuangan/pengeluaran`,
+`keuangan/keuangan`, `keuangan/mutasi-kas`, `keuangan/pindah-dana`,
+`penjualan/alur-penjualan` (idempotensi backend), dan
+`pengaturan/kelola-metode-pembayaran` (batas 10 metode dengan data nyata).
+
+- **Penolakan backend saat mencatat beban** (saldo kurang atau akun
+  nonaktif, 409) tidak punya skenario e2e: form menahan jumlah di atas
+  saldo sebelum permintaan dikirim.
+- **Idempotensi hanya teruji dari sisi klien**: kunci terkirim dan sama saat
+  permintaan diulang. Penahanan permintaan kembar di backend tidak diuji
+  dari web.
+  Berlaku juga untuk buat pembayaran sejak `26093b0` (RH1a).
+- **Total laba rugi periode Bulanan di halaman ringkasan tidak dicocokkan
+  dengan respons**, karena kartu ringkasan di layout meminta periode yang
+  sama pada saat yang sama, sehingga respons milik halaman tidak dapat
+  dibedakan. Periode Harian dan Mingguan dicocokkan penuh, dan kartu laba
+  bulanan dicocokkan di halaman akun kas (`0cfb3bd`).
+- **Arah badge pertumbuhan laba hanya pasti teruji di unit test.**
+  Skenario KU5a membandingkan badge dengan `teksPertumbuhan` dari dua
+  respons nyata, sehingga jalur yang teruji e2e bergantung pada data laba
+  dua hari terakhir. Panah naik dan turun teruji di
+  `tests/unit/features/laporan/periode.test.ts`, sedangkan warna badge
+  belum teruji.
+- **Batas 10 metode aktif hanya teruji lewat simulasi** respons daftar
+  yang ditandai `// simulasi:`, karena sepuluh metode aktif tidak dapat
+  dibuat di data uji tanpa menumpuk metode permanen. Peringatan metode
+  aktif terakhir, akun nonaktif bertanda di form ubah, dan penolakan akun
+  nonaktif saat mengaktifkan kembali hanya teruji di unit test
+  (`tests/unit/features/metode-pembayaran/`).
+  Peringatan itu diganti penahanan di `3b4f35b` (NZ4a), yang teruji e2e.
+- **Form metode pembayaran tanpa `read-akunkas` belum teruji e2e.** Tombol
+  yang disembunyikan menurut izin (`aksiMetodePembayaran`) teruji e2e
+  sejak `cbfa23b` lewat pengguna baca-saja.
+- **Jenis mutasi saldo awal, beban, dan pembatalan transfer keluar belum
+  teruji e2e** di halaman mutasi. Transfer masuk, transfer keluar, dan
+  pembatalan transfer masuk teruji sejak `f7805ca`
+  (`tutup-akun-bersaldo.spec.ts`). Label dan arah kesembilan jenis
+  teruji di
+  `tests/unit/features/akun-kas/mutasi.test.ts`.
+- **Keadaan seluruh akun kas non-aktif belum teruji e2e**, karena tenant
+  uji selalu punya akun aktif.
+- **Penolakan 409 karena batas 10 akun kas aktif belum teruji e2e.**
+  Skenario nonaktifkan yang ditolak memakai akun aktif bersaldo yang
+  sudah ada dan dilewati bila tidak ada; penolakannya dapat berasal dari
+  penjaga metode pembayaran, yang diperiksa backend lebih dulu, dan spec
+  hanya memeriksa status 409 beserta pesan yang tampil. Penolakan yang
+  pasti karena saldo teruji di alur tutup akun bersaldo (`f7805ca`), yang
+  memakai akun uji tanpa metode pembayaran.
+- **Riwayat Pindah Dana tanpa izin baca hanya teruji di unit test**
+  (`aksiTransfer`). Form tanpa izin buat dan tombol Batalkan tanpa izin
+  ubah teruji e2e sejak `cbfa23b` lewat pengguna baca-saja. Riwayat tanpa
+  izin baca (bersama form tanpa izin buat) teruji e2e sejak 20 November
+  2026 lewat pengguna "E2E Tanpa Baca Sebagian" di
+  `akses/jalur-bukan-owner.spec.ts`. Filter riwayat
+  dan keadaan kurang dari dua akun aktif juga belum teruji e2e.
+- **Filter periode riwayat Pindah Dana diuji dengan tanggal 15 sampai 20
+  bulan berjalan**, yang hampir selalu memberi daftar kosong; isi daftar
+  dalam periode tidak dibandingkan per baris.
+- **Penahanan pembayaran kembar di backend tidak diuji dari web**; yang
+  teruji kunci yang sama saat permintaan diulang.
+- **Perpindahan hari di dashboard outlet dan gudang, kartu ringkasan
+  Keuangan, serta catat pembelian** hanya teruji lewat hook (unit) dan
+  pola yang sama di catat beban (e2e `6d07b8d`), tanpa skenario
+  `page.clock` tersendiri.
+
 ## Kejadian sesekali yang tidak berulang
 
 - **Master Shift tampil sebagai kartu di 1280 px, sekali** (20 November

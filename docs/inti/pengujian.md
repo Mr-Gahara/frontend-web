@@ -12,6 +12,22 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per utang pengujian kelompok keuangan** (24 November 2026,
+backend `ridho` lokal `1718030`): vitest 1237 lolos dari 146 berkas (unit
+baru `kelasPertumbuhan`, warna badge laba rugi yang dipindah dari JSX ke
+`features/laporan/periode.ts` tanpa perubahan perilaku). Tanpa suite penuh
+dan tanpa OTP: folder `keuangan`, `diskon`, dan `unduh`, spec kelola pajak
+dan kedua spec metode pembayaran, `penjualan/alur-penjualan`, dan
+`tampilan/pergantian-hari` dijalankan bersama: 151 lolos, 1 gagal, dan 1
+dilewati bersyarat dari 153. Yang gagal skenario lama PS10a di
+`mutasi-kas` (penunggu respons sebelum `goto` pada halaman yang sudah
+terbuka); diperbaiki lalu lolos bersama dua skenario baru (seluruh akun
+non-aktif, saldo sumber Pindah Dana berkurang). Yang dilewati Muat hari
+sebelumnya Mesin Kasir, karena riwayat belum dua halaman. Idempotensi
+penjualan dan pembayaran kini membuktikan backend mengembalikan dokumen
+yang sama untuk kunci yang sama. Harapan suite penuh berikutnya dihitung
+ulang di akhir seluruh kelompok.
+
 **Baseline per utang pengujian kelompok 1** (24 November 2026, backend
 `ridho` lokal `1718030`): vitest 1236 lolos dari 146 berkas (unit baru
 `aksiPengguna` dan `pengajuSendiri`). Tanpa suite penuh dan tanpa OTP:
@@ -372,6 +388,8 @@ Pola kegagalan yang berulang:
 | Pengguna uji yang baru dibuat Owner tidak ada di daftar Kelola Pengguna milik pengguna lain | Daftar ruang (`GET /pengguna?workspace=outlet`) hanya memuat pengguna yang perannya memegang `read-dashboard-outlet` (`getByWorkspace` backend). Beri peran staf uji izin dashboard ruangnya (24 November 2026) |
 | Menu Edit dan Hapus pengguna nonaktif bagi pengelola uji | Pengguna berlevel setara atau lebih tinggi tidak dapat diubah (`canEdit`); peran uji berlevel 90, sehingga staf yang diubahnya butuh peran berlevel rendah (`siapkanPeran`, E2E Staf Level Rendah) |
 | Helper pengajuan uji dijawab 409 "sudah di-submit" | Pengajuan PENDING (sesudah surat jalannya batal) tidak dapat di-submit; backend hanya menerima submit dari DRAFT. Pakai yang APPROVED atau buat baru (`pengajuanUjiDisetujui`, 24 November 2026) |
+| Opsi baru tidak ada di Select panel filter padahal data sudah dibuat lewat API | Daftar pilihan dimuat saat halaman dibuka dan masih segar di cache (`staleTime` 5 menit). Muat ulang halaman sesudah menyiapkan data, lalu buka panel (`mutasi-kas`, 24 November 2026) |
+| Baris tabel tidak ditemukan sesudah dialog gagal | Dialog modal membuat isi halaman tidak terjangkau peran; tutup dialog lebih dulu, lalu periksa baris (`pindah-dana`, 24 November 2026) |
 | Dua tombol berdampingan `flex-1` berbeda lebar 2 px sesudah tautan menjadi item flex | Basis flex 0 tidak dapat lebih kecil dari border, sehingga tautan berborder 1 px melebar dari tautan `border-none`. Beri border yang sama, berwarna latar (`border-navy`, BT1a) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

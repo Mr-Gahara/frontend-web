@@ -28,13 +28,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   Jalur lintas outlet (LP2a) berjalan sejak `2eb668a` dan jalur terkunci
   sejak `1cd8211`; aturan lingkup diuji di
   `tests/unit/features/penjualan/filter.test.ts`.
-- **Penolakan backend saat mencatat beban** (saldo kurang atau akun
-  nonaktif, 409) tidak punya skenario e2e: form menahan jumlah di atas
-  saldo sebelum permintaan dikirim.
-- **Idempotensi hanya teruji dari sisi klien**: kunci terkirim dan sama saat
-  permintaan diulang. Penahanan permintaan kembar di backend tidak diuji
-  dari web.
-  Berlaku juga untuk buat pembayaran sejak `26093b0` (RH1a).
 - **Spec shift dan pola roster meninggalkan shift uji**: shift hanya
   dapat dinonaktifkan, tidak dihapus, sehingga setiap run menambah shift
   "Shift Ganda ..." (spec shift), serta "Shift Arsip ..." dan "Shift
@@ -63,17 +56,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 - **Bentrok yang tidak menghitung booking Selesai** (keputusan R6a) hanya
   teruji di unit test `bookingBentrok`, karena membuat booking Selesai di
   e2e berarti membuat booking di masa lalu.
-- **Total laba rugi periode Bulanan di halaman ringkasan tidak dicocokkan
-  dengan respons**, karena kartu ringkasan di layout meminta periode yang
-  sama pada saat yang sama, sehingga respons milik halaman tidak dapat
-  dibedakan. Periode Harian dan Mingguan dicocokkan penuh, dan kartu laba
-  bulanan dicocokkan di halaman akun kas (`0cfb3bd`).
-- **Arah badge pertumbuhan laba hanya pasti teruji di unit test.**
-  Skenario KU5a membandingkan badge dengan `teksPertumbuhan` dari dua
-  respons nyata, sehingga jalur yang teruji e2e bergantung pada data laba
-  dua hari terakhir. Panah naik dan turun teruji di
-  `tests/unit/features/laporan/periode.test.ts`, sedangkan warna badge
-  belum teruji.
 - **Password salah pada akun uji menambah hitungan pembatas login**, dan
   login sukses tidak menguranginya. Spec login gagal lebih awal bila sisa
   kuota di header `RateLimit` di bawah 3; menjalankan spec auth berulang
@@ -117,24 +99,14 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   `lebarBungkus`, dan prop `rincian` punya test integrasi sejak `2bcb1ce`
   (`tests/integration/components/data-table/data-table.test.tsx`); susunan
   HP dilihat lewat tangkapan, bukan spec.
-- **Batas 10 metode aktif hanya teruji lewat simulasi** respons daftar
-  yang ditandai `// simulasi:`, karena sepuluh metode aktif tidak dapat
-  dibuat di data uji tanpa menumpuk metode permanen. Peringatan metode
-  aktif terakhir, akun nonaktif bertanda di form ubah, dan penolakan akun
-  nonaktif saat mengaktifkan kembali hanya teruji di unit test
-  (`tests/unit/features/metode-pembayaran/`).
-  Peringatan itu diganti penahanan di `3b4f35b` (NZ4a), yang teruji e2e.
 - **Metode uji menumpuk sebagai nonaktif**, satu per run spec kelola
   metode pembayaran, karena metode tidak dapat dihapus (PO10a).
   Dibersihkan 20 November 2026: 4 metode E2E nonaktif yang tidak dirujuk
   pembayaran.
-- **Form metode pembayaran tanpa `read-akunkas` belum teruji e2e.** Tombol
-  yang disembunyikan menurut izin (`aksiMetodePembayaran`) teruji e2e
-  sejak `cbfa23b` lewat pengguna baca-saja.
-- **Pajak per transaksi hanya diuji jalur gagalnya** (PO10a): membuat atau
-  mengaktifkannya menonaktifkan `PPN` tenant uji. Penonaktifan otomatis
-  yang tidak atomik (`kontrak/temuan.md` butir 90) terbukti dari kode
-  saja.
+- **Penonaktifan otomatis pajak per transaksi yang tidak atomik**
+  (`kontrak/temuan.md` butir 90) terbukti dari kode saja. Jalur berhasil
+  membuat pajak per transaksi aktif teruji e2e sejak 24 November 2026
+  (`pengaturan/kelola-pajak`), lalu PPN dipulihkan di akhir skenario.
 - **Spec yang ditulis sebelum keputusan rancangan butir 23 masih
   menyiapkan sebagian data uji lewat API**, misalnya fixture metode
   pembayaran di spec kelola dan booking uji di spec reservasi;
@@ -170,13 +142,12 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   20 November 2026: 28 diskon E2E Non-Aktif yang tidak dirujuk penjualan
   maupun pemakaian diskon.
 - **Batas 50 diskon aktif hanya teruji lewat simulasi** respons daftar
-  yang ditandai `// simulasi:`, dan hanya untuk tombol tambah; menu
-  aktifkan yang terkunci saat batas tercapai belum teruji. Pilihan Aktif
-  di form buat teruji e2e sejak `a80d2fa` (NZ5a).
-- **Pilihan diskon kasir hanya teruji e2e di buat reservasi**; buat
-  penjualan memakai `diskonAktif` yang sama dan teruji di unit test.
-  `sedangBerlaku` dapat tertinggal sampai lima menit di cache, dan itu
-  tidak diuji.
+  yang ditandai `// simulasi:`, untuk tombol tambah dan menu Aktifkan
+  (sejak 24 November 2026), karena lima puluh diskon aktif tidak dibuat di
+  data uji. Pilihan Aktif di form buat teruji e2e sejak `a80d2fa` (NZ5a).
+- **`sedangBerlaku` pilihan diskon kasir dapat tertinggal sampai lima menit
+  di cache**, dan itu tidak diuji. Pilihan diskon di buat reservasi dan
+  buat penjualan teruji e2e (`diskon/pilihan-kasir`, 24 November 2026).
 - **Pengguna uji "E2E Profil" permanen** di basis data development,
   dibuat sekali dengan peran tanpa izin pengguna. Nama, PIN, dan nomor
   HP-nya dipulihkan Ridho di awal setiap test (PF5a).
@@ -209,21 +180,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   skenarionya dilewati bersyarat bila belum ada mutasi, belum sampai dua
   halaman, atau belum ada pembatalan pembayaran pada bulan itu, sehingga
   di awal bulan jumlah skipped dapat naik.
-- **Jenis mutasi saldo awal, beban, dan pembatalan transfer keluar belum
-  teruji e2e** di halaman mutasi. Transfer masuk, transfer keluar, dan
-  pembatalan transfer masuk teruji sejak `f7805ca`
-  (`tutup-akun-bersaldo.spec.ts`). Label dan arah kesembilan jenis
-  teruji di
-  `tests/unit/features/akun-kas/mutasi.test.ts`.
-- **Keadaan seluruh akun kas non-aktif belum teruji e2e**, karena tenant
-  uji selalu punya akun aktif.
-- **Penolakan 409 karena batas 10 akun kas aktif belum teruji e2e.**
-  Skenario nonaktifkan yang ditolak memakai akun aktif bersaldo yang
-  sudah ada dan dilewati bila tidak ada; penolakannya dapat berasal dari
-  penjaga metode pembayaran, yang diperiksa backend lebih dulu, dan spec
-  hanya memeriksa status 409 beserta pesan yang tampil. Penolakan yang
-  pasti karena saldo teruji di alur tutup akun bersaldo (`f7805ca`), yang
-  memakai akun uji tanpa metode pembayaran.
 - **Transfer uji menumpuk**, karena transfer tidak dapat dihapus: satu
   VOID per run spec Pindah Dana, serta dua AKTIF dan satu VOID per run
   spec tutup akun bersaldo (`f7805ca`), masing-masing Rp1. Skenario
@@ -231,18 +187,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   luar akun uji. Transfer uji yang terkumpul sampai 20 November 2026
   dihapus bersama akun kas uji (butir akun kas di atas); riwayat
   pengujiannya tetap tercatat di dokumen ini dan di baseline.
-- **Penolakan backend atas Pindah Dana belum teruji e2e**: saldo sumber
-  tidak cukup (ditahan form lebih dulu), akun nonaktif, dan pembatalan
-  yang ditolak karena saldo akun tujuan tidak cukup. Statusnya (400)
-  dibuktikan lewat skrip sekali pakai pada 4 Oktober 2026
-  (`kontrak/temuan.md` butir 128).
-- **Riwayat Pindah Dana tanpa izin baca hanya teruji di unit test**
-  (`aksiTransfer`). Form tanpa izin buat dan tombol Batalkan tanpa izin
-  ubah teruji e2e sejak `cbfa23b` lewat pengguna baca-saja. Riwayat tanpa
-  izin baca (bersama form tanpa izin buat) teruji e2e sejak 20 November
-  2026 lewat pengguna "E2E Tanpa Baca Sebagian" di
-  `akses/jalur-bukan-owner.spec.ts`. Filter riwayat
-  dan keadaan kurang dari dua akun aktif juga belum teruji e2e.
+- **Penolakan backend atas Pindah Dana teruji e2e sejak 24 November 2026**
+  (`keuangan/pindah-dana`): saldo sumber berkurang dan akun tujuan
+  dinonaktifkan sesudah form dibuka, dan pembatalan yang menguras saldo
+  tujuan. Setiap run menambah lima transfer Rp1 di akun uji tetap.
 - **Beda `keLocationID` dan `locationID` di daftar surat jalan tidak
   teruji dari data**: seluruh surat jalan uji menuju outlet tenant,
   sehingga keduanya memberi hasil yang sama; bedanya terbukti dari kode
@@ -277,19 +225,16 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   Angka terukur terakhir ada di
   `inti/pengujian.md` (Baseline).
 
-- **Batas 10 metode aktif dan metode aktif terakhir hanya teruji lewat
-  simulasi** bertanda `// simulasi:`. Penolakan 409 backend atas metode
-  aktif terakhir dibuktikan lewat skrip sekali pakai (7 Oktober 2026),
-  bukan lewat e2e, karena web kini menahannya.
+- **Metode aktif terakhir hanya teruji lewat simulasi** bertanda
+  `// simulasi:`. Penolakan 409 backend atasnya dibuktikan lewat skrip
+  sekali pakai (7 Oktober 2026), karena web kini menahannya. Batas 10
+  metode aktif teruji dengan data nyata sejak 24 November 2026.
 - **Tandai Selesai hanya teruji untuk satu booking yang dibayar Rp1.**
   Tombol yang tidak tampil (belum dibayar, jam sudah lewat, tanpa
   `update-booking`) hanya teruji di unit test
   (`tests/unit/features/sesi-booking/izin.test.ts`), dan bagian Sesi
   Booking tanpa `read-booking` belum teruji. Setiap run meninggalkan
   satu penjualan booking VOID.
-- **Filter periode riwayat Pindah Dana diuji dengan tanggal 15 sampai 20
-  bulan berjalan**, yang hampir selalu memberi daftar kosong; isi daftar
-  dalam periode tidak dibandingkan per baris.
 
 - **Hapus bahan baku yang berhasil tidak teruji e2e** sejak `43f09af`:
   skenarionya `test.fixme` menunggu backend (`kontrak/temuan.md` butir
@@ -300,8 +245,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   bukti.
   Sejak `cfaaa92` `test.fixme`-nya dilepas, setelah butir 143 tertutup
   (`arsip/riwayat-pengujian.md`, Riwayat pelepasan fixme).
-- **Penahanan pembayaran kembar di backend tidak diuji dari web**; yang
-  teruji kunci yang sama saat permintaan diulang.
 
 - **Periode jurnal stok diuji lewat tanggal 8 sampai 15 bulan
   berjalan**, agar tanggal itu tidak kembar dengan tanggal bulan lain di
@@ -341,10 +284,6 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   00.00 sampai 07.00 WIB teruji lewat suite penuh 26 Oktober 2026 pukul
   00.11 dan 00.53, dan 28 Oktober 2026 pukul 00.17; B113 dan B118
   dibuktikan lewat permintaan nyata pukul 00.57.
-- **Perpindahan hari di dashboard outlet dan gudang, kartu ringkasan
-  Keuangan, serta catat pembelian** hanya teruji lewat hook (unit) dan
-  pola yang sama di catat beban (e2e `6d07b8d`), tanpa skenario
-  `page.clock` tersendiri.
 - **Spec Belanja Stok menyiapkan dua pembelian lewat API** (keputusan
   rancangan butir 23 mengizinkannya, karena halaman itu hanya membaca);
   setiap run menambah lalu mengurangi stok bahan fixture di outlet dan
@@ -394,13 +333,11 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   percobaan, bilah masa berlaku, masa akses lewat dan masa tenggang, serta
   Muat riwayat lainnya. Akun uji Pro tanpa batas waktu dengan satu catatan
   riwayat, sehingga e2e hanya membuktikan keadaan tanpa batas.
-- **Keadaan Mesin Kasir di luar alur utama tidak teruji e2e** sejak
-  spec pratinjau dihapus (`b74f30a`): memuat, gagal dimuat, sesi lintas
-  tengah malam, Muat hari sebelumnya, form tambah tanpa perangkat atau
-  tanpa laci, dan posisi panel di HP dan desktop. Yang tersisa
-  `tests/e2e/keuangan/mesin-kasir.spec.ts` (alur tambah, buka dari
-  aplikasi, tutup dengan catatan, ubah, lepas, dan HP tanpa gulir ke
-  samping) serta unit test `tampilan.ts`, `filter.ts`, dan `pesan.ts`.
+- **Muat hari sebelumnya riwayat Mesin Kasir dilewati bersyarat** bila
+  riwayat tujuh hari terakhir belum lebih dari satu halaman (20 sesi);
+  sesi lintas tengah malam tidak teruji e2e. Memuat, gagal dimuat, form
+  tanpa perangkat atau tanpa laci, dan susunan panel di HP dan desktop
+  teruji e2e sejak 24 November 2026 (`keuangan/mesin-kasir`).
 - **Peran dan pengguna uji "E2E Kasir Outlet" beserta perangkat
   aplikasinya menetap** (`5f57454`, B346): dibuat sekali lewat API dan
   dipakai ulang, sehingga tidak menumpuk. Perangkat
@@ -472,11 +409,10 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (ml, kemasan kaleng = 290), dibuat sekali oleh
   `inventaris/bahanBaku/konversi-satuan.spec.ts`; pengajuan uji per run
   diajukan lalu ditolak, sehingga pengajuan Ditolak bertambah satu per run.
-- **Isi berkas ekspor hanya diperiksa tipe kontennya**: spec
-  `unduh/ekspor-daftar` membuktikan query, status 200, tipe konten, dan
-  unduhan terjadi, tetapi tidak membaca kolom dan baris TOTAL di dalam
-  berkas; isinya dijamin test backend (AR38 sampai AR40). Batas 10.000
-  baris (400) tidak dapat dibuat deterministik dari web.
+- **Isi berkas Excel ekspor tidak dibaca**, dan batas 10.000 baris (400)
+  tidak dapat dibuat deterministik dari web. Isi CSV setiap daftar teruji
+  sejak 24 November 2026 (`unduh/ekspor-daftar`): judul kolom, lebar setiap
+  baris, dan baris TOTAL, termasuk TOTAL yang menghitung baris.
 - **Rekap Absensi tanpa izin, gagal dimuat, dan bulan kosong** hanya
   teruji dari kode (pesan dan keadaan kosong); spec
   `jadwal/rekap-absensi` berjalan dengan data bulan berjalan.
@@ -512,3 +448,12 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   (`alur-pengajuan-stok`, P20). Posisi dan staf uji yang dibuat dihapus di
   akhir skenario; staf "Karyawan Tanpa Lokasi ..." dari run yang gagal di
   tengah tertinggal.
+- **Data per run spec kelompok keuangan** (24 November 2026): satu akun
+  kas "E2E Mutasi Jenis ..." non-aktif bersama satu beban VOID dan satu
+  transfer VOID (`mutasi-kas`), satu transfer Rp1 "E2E riwayat periode"
+  (`pindah-dana`), empat transfer Rp1 di akun "E2E Beban Ditolak Tetap"
+  (`pengeluaran`), dan penjualan serta pembayaran uji skenario idempotensi
+  yang dibersihkan seperti skenario penjualan lain (`alur-penjualan`).
+  Akun pengisi "E2E Batas Akun Tetap 1" sampai 10, "E2E Batas Akun
+  Cadangan Tetap", dan metode "E2E Batas Metode Tetap 1" sampai 10 menetap
+  non-aktif dan dipakai ulang.
