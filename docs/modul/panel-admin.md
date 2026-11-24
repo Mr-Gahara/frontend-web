@@ -132,9 +132,12 @@ Diputuskan pemilik proyek pada 24 November 2026 dari kanvas desain
 - Diterapkan tanpa ditanyakan: `useJumlahAkun` di bawah akar `adminAkun`
   agar ikut dimuat ulang setiap aksi; susunan kolom dipilih dari lebar
   wadah (`useLebarElemen`, butir 31), bukan lebar layar.
+- **RP6a: keterangan "Plan sekarang ..." dipertahankan** (pemilik
+  proyek, 24 November 2026). Penanda "(sekarang)" di label tidak muat di
+  tombol Plan sekitar 110 px di HP 390 px.
 - Menyimpang dari kanvas tanpa ditanyakan: penanda "(sekarang)" di pilihan
-  Plan perpanjang diganti keterangan "Plan sekarang ..." (diajukan ke
-  pemilik proyek, `inti/status.md`); keterangan kartu Semua akun "Akun
+  Plan perpanjang diganti keterangan "Plan sekarang ..." (diputuskan
+  pemilik proyek, RP6a); keterangan kartu Semua akun "Akun
   klien dan admin", karena backend tidak memberi jumlah admin; tombol Buat
   Akun Klien 32 px di HP mengikuti ukuran `aksi`; kaki paginasi memakai
   teks `KakiPaginasi` bersama; detail bertumpuk di bawah 1024 px, karena

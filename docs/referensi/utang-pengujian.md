@@ -533,3 +533,7 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   dan sidebar mode ikon di desktop tidak punya skenario. Ganti pengguna
   teruji di tab yang sama; muat ulang sesudahnya menunggu backend butir
   190.
+- **Batal terkunci selama menyimpan (BT2a) teruji e2e hanya di ubah
+  metode pembayaran** (`pengaturan/kelola-metode-pembayaran`, PUT ditahan
+  lalu diteruskan). Batal di buat dan ubah akun admin memakai pola yang
+  sama dan hanya terbaca dari kode.

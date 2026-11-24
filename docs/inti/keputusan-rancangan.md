@@ -422,3 +422,11 @@ sama (submodul pengajuan stok, di bawah).
     (`teksJumlahBersatuan`). Bahan tanpa kemasan tetap satu isian satuan
     dasar (pemilik proyek, 23 November 2026; backend P87;
     `modul/inventaris.md`, KN3a).
+39. **Tombol bertaut ditulis `<Button asChild>` berisi `<Link>`, bukan
+    `<Link>` membungkus `<Button>`.** Tombol di dalam tautan tidak sah di
+    HTML dan memberi dua titik Tab; ESLint menolak pola itu. Perannya
+    tautan, sehingga spec mencarinya dengan `getByRole("link")`. Tautan
+    yang dikunci selama menyimpan memakai `aria-disabled`, `tabIndex={-1}`,
+    dan kelas `aria-disabled:pointer-events-none aria-disabled:opacity-50`,
+    karena `disabled` tidak berlaku pada `<a>` (pemilik proyek,
+    24 November 2026; `modul/ui-ux.md`, BT1a dan BT2a).

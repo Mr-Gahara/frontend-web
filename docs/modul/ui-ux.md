@@ -785,6 +785,25 @@ Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend 
   `tampilan/tombol-kembali` dengan membuka setiap laman di tab baru, dan
   spec itu gagal terhadap kode lama.
 
+### Tombol bertaut 24 November 2026 (`3494bdd`)
+
+Diputuskan pemilik proyek 24 November 2026, dari temuan rombak panel admin.
+Hitungan lewat AST 9 tempat di 7 berkas, bukan sekitar 21 berkas seperti
+catatan awal.
+
+- **BT1a: `<Button asChild>` berisi `<Link>` di kesembilan tempat**, dengan
+  aturan ESLint `no-restricted-syntax` yang menolak Link membungkus Button
+  (keputusan rancangan butir 39): Pindah Dana dan Tambah Akun di Akun Kas,
+  Tambah Metode, Kembali ke Daftar, dan Batal di metode pembayaran, serta
+  Buat Akun Klien, Ubah Akun, dan kedua Batal di panel admin. Kelas tata
+  letak Link digabung ke Button. Tambah Akun memakai `border-navy`, bukan
+  `border-none`: sebagai item flex berbasis 0, tautan berborder 1 px
+  (Pindah Dana) melebar 2 px dari tautan tanpa border.
+- **BT2a: Batal terkunci selama menyimpan** di buat dan ubah akun admin
+  serta form metode pembayaran: redup, tidak dapat diklik, dan tidak
+  dijangkau Tab. Sebelumnya hanya klik yang tertahan; Tab ke tautan lalu
+  Enter tetap berpindah halaman.
+
 ## Catatan
 
 ### Catatan dari tabel seragam K-E

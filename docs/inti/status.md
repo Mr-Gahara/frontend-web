@@ -43,9 +43,11 @@ filter desain A, detail B dengan riwayat A, form dan dialog B. Backend
 `ridho` `1718030`, tidak maju. Deskripsi paket laman pengenalan selesai
 hari yang sama (`modul/ui-ux.md`, LU6a), lalu revisi laman profil dan
 menu popup profil (`modul/profil-login.md`, PU1a sampai PU3a; temuan
-backend butir 190). Urutan berikutnya: nomor WhatsApp admin (LG1a), utang
-pengujian kelompok 1, lalu suite e2e penuh (harapan 731) dan
-`bersih-akunkas.js`.
+backend butir 190). Sesudahnya kedua butir Menunggu keputusan dari rombak
+panel admin diputuskan dan diterapkan: tombol bertaut (`modul/ui-ux.md`,
+BT1a dan BT2a) dan keterangan Plan sekarang (`modul/panel-admin.md`,
+RP6a). Urutan berikutnya: nomor WhatsApp admin (LG1a), utang pengujian
+kelompok 1, lalu suite e2e penuh (harapan 736) dan `bersih-akunkas.js`.
 
 ### Keadaan 23 November 2026 sore
 
@@ -245,17 +247,9 @@ menetap lewat `tests/helpers/terkunci-uji.ts`, seperti bagian C
 
 - Nomor WhatsApp admin untuk halaman Langganan (LG1a, `NOMOR_WA_ADMIN`
   masih kosong).
-- Tombol bertaut ditulis `<Link>` membungkus `<Button>` (temuan rombak
-  panel admin, 24 November 2026): tombol di dalam tautan tidak sah di
-  HTML dan memberi dua titik Tab. Pola ini ada di sekitar 21 berkas
-  `features`, `app`, dan `components`, termasuk Buat Akun Klien, Ubah Akun,
-  dan Batal di panel admin. Memperbaikinya (`Button asChild`) mengubah
-  peran elemen dari tombol menjadi tautan, sehingga spec yang mencarinya
-  sebagai tombol ikut berubah; cakupannya menunggu keputusan pemilik
-  proyek.
-- Penanda "(sekarang)" pada pilihan Plan dialog perpanjang diganti
-  keterangan "Plan sekarang ..." saat rombak panel admin tanpa ditanyakan
-  (RP5a); dipertahankan atau dikembalikan menunggu pemilik proyek.
+
+Tombol bertaut dan penanda "(sekarang)" diputuskan 24 November 2026
+(BT1a, BT2a, RP6a).
 
 ### Utang kecil dari penyesuaian backend `4759208`
 

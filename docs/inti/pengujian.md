@@ -12,6 +12,19 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Baseline per tombol bertaut** (24 November 2026, BT1a, BT2a, RP6a,
+backend `ridho` lokal `1718030`): vitest 1230 lolos, tanpa unit baru.
+ESLint menolak kesembilan tempat pada kode lama. Tanpa suite penuh dan
+tanpa OTP: folder `admin`, `keuangan/tampilan-hp`, `keuangan/pindah-dana`,
+`keuangan/ubah-akun-kas`, kedua spec metode pembayaran, dan
+`akses/jalur-bukan-owner` 67 lolos. Spec mencari tautan, bukan tombol,
+untuk Pindah Dana, Tambah Akun, Tambah Metode, Kembali ke Daftar, Buat
+Akun Klien, dan Ubah Akun (termasuk `toHaveCount(0)` Ubah Akun, yang
+akan lolos kosong bila tetap mencari tombol). Skenario ubah metode
+pembayaran menahan PUT dan memeriksa Batal terkunci; gagal pada kode
+lama (dibuktikan lewat `git stash`). Harapan suite penuh berikutnya tetap
+736 (`npx playwright test --list`, 117 berkas).
+
 **Baseline per revisi laman profil dan popup profil** (24 November 2026,
 PU1a sampai PU3a, backend `ridho` lokal `1718030`): vitest 1230 lolos
 (unit profil ditulis ulang untuk `skemaDataDiri`, `skemaPin`, payload
@@ -338,6 +351,8 @@ Pola kegagalan yang berulang:
 | Helper penunggu daftar menerima respons dengan query yang tidak diharapkan sesudah halaman diberi komponen baru | Penunggu tanpa syarat ikut menangkap permintaan endpoint yang sama dari komponen baru di halaman itu (kartu ringkas admin meminta `limit=1`). Saat menambah permintaan ke endpoint daftar, beri penunggu helper syarat query (`bukaDaftarAkun`, 24 November 2026) |
 | Daftar tab dan isinya bersisian, atau tab aktif tidak berbeda, padahal memakai `Tabs` shadcn | Varian `data-horizontal:` dan `data-active:` di `components/ui/tabs.tsx` tidak cocok dengan atribut Radix proyek ini (`data-orientation`, `data-state`). Tulis `flex-col` di `Tabs` dan `data-[state=active]:` di `TabsTrigger`, seperti laman pajak dan profil (PU1a, 24 November 2026) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |
+| Spec masih mencari tombol yang sudah menjadi tautan, padahal grep nama tombol sudah dijalankan | Spec menulis nama sebagai regex (`/tambah metode/i`), bukan teks. Saat mengubah peran elemen, grep nama dengan dan tanpa garis miring, tanpa membedakan huruf besar (BT1a) |
+| Dua tombol berdampingan `flex-1` berbeda lebar 2 px sesudah tautan menjadi item flex | Basis flex 0 tidak dapat lebih kecil dari border, sehingga tautan berborder 1 px melebar dari tautan `border-none`. Beri border yang sama, berwarna latar (`border-navy`, BT1a) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena
 tombol hapus sempat disabled sampai daftar role selesai dimuat (level
