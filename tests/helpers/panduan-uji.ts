@@ -17,8 +17,15 @@ export async function periksaLetak(page: Page, target: string) {
   await expect
     .poll(async () => di(await balonPanduan(page).boundingBox()), { message: `balon titik ${target} di dalam layar` })
     .toBe(true);
+  // Elemen yang lebih besar dari layar (daftar tujuh hari jam buka, JB9a)
+  // tidak mungkin tampil utuh; cukup bersinggungan dengan layar.
+  const tampil = (k: { x: number; y: number; width: number; height: number } | null) => {
+    if (!k) return false;
+    if (k.width <= layar.width && k.height <= layar.height) return di(k);
+    return k.x < layar.width && k.y < layar.height && k.x + k.width > 0 && k.y + k.height > 0;
+  };
   await expect
-    .poll(async () => di(await page.locator(`[data-panduan="${target}"]`).boundingBox()), {
+    .poll(async () => tampil(await page.locator(`[data-panduan="${target}"]`).boundingBox()), {
       message: `elemen ${target} tergulir ke layar`,
     })
     .toBe(true);

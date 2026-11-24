@@ -102,3 +102,56 @@ test.describe("Langganan", () => {
     expect(lebar).toBeLessThanOrEqual(390);
   });
 });
+
+test.describe("Langganan: keadaan masa berlaku", () => {
+  test.beforeEach(async ({ page }) => {
+    await masuk(page);
+  });
+
+  /** Respons /akun/langganan nyata dengan bidang masa berlaku diganti. */
+  async function simulasikanMasa(page: Page, ubah: Record<string, unknown>) {
+    await page.route(/\/api\/akun\/langganan$/, async (route) => {
+      const asli = await route.fetch();
+      const body = await asli.json();
+      // simulasi: akun uji Pro tanpa batas waktu; masa percobaan dan masa akses lewat tidak dapat dibuat pada akun uji yang dipakai seluruh suite
+      await route.fulfill({ response: asli, json: { ...body, data: { ...body.data, ...ubah } } });
+    });
+  }
+
+  test("masa percobaan: penanda, tanggal berakhir, sisa hari, dan bilah terpakai", async ({ page }) => {
+    const HARI = 86_400_000;
+    const mulai = new Date(Date.now() - 4 * HARI);
+    const berakhir = new Date(Date.now() + 10 * HARI);
+    await simulasikanMasa(page, {
+      plan: "basic",
+      masaPercobaan: true,
+      aksesMulaiPada: mulai.toISOString(),
+      aksesBerakhirPada: berakhir.toISOString(),
+    });
+    await page.goto(URL_LANGGANAN);
+    const aktif = page.locator('[aria-labelledby="langganan-aktif"]');
+    await expect(aktif.getByText("Masa percobaan")).toBeVisible({ timeout: 15_000 });
+    await expect(aktif).toContainText(/Berakhir .*, 10 hari lagi\./);
+    const bilah = aktif.getByRole("progressbar", { name: "Masa berlaku terpakai" });
+    const nilai = Number(await bilah.getAttribute("aria-valuenow"));
+    expect(nilai, "sekitar 4 dari 14 hari terpakai").toBeGreaterThanOrEqual(28);
+    expect(nilai).toBeLessThanOrEqual(30);
+  });
+
+  test("masa akses lewat: tanggal habis dan batas masa tenggang, tanpa bilah", async ({ page }) => {
+    const HARI = 86_400_000;
+    const berakhir = new Date(Date.now() - 2 * HARI);
+    await simulasikanMasa(page, {
+      masaPercobaan: false,
+      aksesMulaiPada: new Date(berakhir.getTime() - 30 * HARI).toISOString(),
+      aksesBerakhirPada: berakhir.toISOString(),
+      masaTenggangHari: 7,
+    });
+    await page.goto(URL_LANGGANAN);
+    const aktif = page.locator('[aria-labelledby="langganan-aktif"]');
+    await expect(aktif).toContainText("Masa berlaku habis", { timeout: 15_000 });
+    await expect(aktif).toContainText("Toko masih dapat dipakai sampai");
+    await expect(aktif.getByRole("progressbar")).toHaveCount(0);
+    await expect(aktif.getByText("Masa percobaan")).toHaveCount(0);
+  });
+});

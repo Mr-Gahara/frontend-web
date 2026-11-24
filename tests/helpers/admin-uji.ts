@@ -264,7 +264,7 @@ export async function hapusAkunDariDetail(page: Page, email: string, admin: Kred
  * dengan hapusAkunKlienUji, login ini memutar tokenVersion admin, jadi
  * dipanggil saat halaman tidak sedang memakai sesi admin.
  */
-async function denganAdmin<T>(
+export async function denganAdmin<T>(
   admin: KredensialAdmin,
   fn: (ctx: Awaited<ReturnType<typeof request.newContext>>, kepala: Record<string, string>) => Promise<T>,
 ): Promise<T> {

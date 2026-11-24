@@ -81,6 +81,41 @@ export function kotakSorotan(r: Kotak, jarak = 6): Kotak {
   return { top: r.top - jarak, left: r.left - jarak, width: r.width + jarak * 2, height: r.height + jarak * 2 };
 }
 
+/**
+ * Kotak sorotan dipotong ke bagian yang tampil di layar (JB9a, pemilik
+ * proyek 24 November 2026). Target yang lebih tinggi dari layar, misalnya
+ * daftar tujuh hari jam buka, digulir ke tengah sehingga tepi atasnya jauh
+ * di atas layar; tanpa pemotongan, balon yang berlabuh ke tepi itu ikut
+ * keluar layar. `tepi` menyisakan ruang untuk cincin sorotan (3 px) agar
+ * tetap terlihat di tepi layar. Kotak yang tidak bersinggungan dengan layar
+ * (sebelum gulir selesai) dikembalikan apa adanya.
+ */
+export function potongKeLayar(k: Kotak, lebar: number, tinggi: number, tepi = 3): Kotak {
+  const atas = Math.max(k.top, tepi);
+  const kiri = Math.max(k.left, tepi);
+  const bawah = Math.min(k.top + k.height, tinggi - tepi);
+  const kanan = Math.min(k.left + k.width, lebar - tepi);
+  if (bawah <= atas || kanan <= kiri) return k;
+  return { top: atas, left: kiri, width: kanan - kiri, height: bawah - atas };
+}
+
+/**
+ * Jangkar balon. Bila sorotan lebih tinggi dari ruang layar, bagian yang
+ * tampil memenuhi layar sehingga balon tidak punya ruang di atas maupun di
+ * bawahnya; jangkarnya menjadi garis tepi atas bagian yang tampil, dan balon
+ * tampil di bawah garis itu, di dalam sorotan (JB9a lanjutan, pemilik
+ * proyek 24 November 2026). Selain itu jangkar sama dengan sorotan.
+ */
+export function jangkarBalon(
+  asli: Kotak,
+  terpotong: Kotak,
+  tinggi: number,
+  tepi = 3,
+): { kotak: Kotak; diDalam: boolean } {
+  if (asli.height <= tinggi - tepi * 2) return { kotak: terpotong, diDalam: false };
+  return { kotak: { ...terpotong, height: 0 }, diDalam: true };
+}
+
 export function kotakSama(a: Kotak | null, b: Kotak | null): boolean {
   if (!a || !b) return a === b;
   return (

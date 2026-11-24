@@ -8,6 +8,7 @@ import {
   hapusAkunDariDetail,
   hapusAkunKlienUji,
   kredensialAdmin,
+  loginAdmin,
   siapkanAkunLebihSatuHalaman,
   wajibAdmin,
 } from "../../helpers/admin-uji";
@@ -155,6 +156,44 @@ test.describe("Akun klien di panel admin", () => {
     const pesan = ((await respons.json()) as { message: string }).message;
     await expect(page.getByRole("alert").filter({ hasText: pesan })).toBeVisible();
     await expect(page).toHaveURL(/\/admin\/akun\/buat$/);
+  });
+
+  test("email dari layanan disposable ditolak backend, dan Batal terkunci selama menyimpan (BT2a)", async ({ page }) => {
+    await bukaDaftar(page);
+    await bukaFormBuat(page);
+    await page.getByLabel("Email", { exact: true }).fill(`e2e.${Date.now().toString(36)}@mailinator.com`);
+    await page.getByLabel("Password awal").fill("UjiKlien123");
+    const batal = page.getByRole("link", { name: "Batal", exact: true });
+    await expect(batal).not.toHaveAttribute("aria-disabled", "true");
+    let lepas = () => {};
+    const ditahan = new Promise<void>((r) => (lepas = r));
+    await page.route(POLA_BUAT, async (route) => {
+      if (route.request().method() === "POST") await ditahan;
+      await route.continue();
+    });
+    const tunggu = page.waitForResponse((r) => POLA_BUAT.test(r.url()) && r.request().method() === "POST");
+    await page.getByRole("button", { name: "Simpan Akun" }).click();
+    await expect(batal, "Batal terkunci selama POST").toHaveAttribute("aria-disabled", "true");
+    await expect(batal).toHaveAttribute("tabindex", "-1");
+    lepas();
+    const respons = await tunggu;
+    await page.unroute(POLA_BUAT);
+    expect(respons.status()).toBe(400);
+    await expect(page.getByRole("alert").filter({ hasText: "Email dari layanan disposable tidak diizinkan." })).toBeVisible();
+    await expect(page).toHaveURL(/\/admin\/akun\/buat$/);
+    await expect(batal, "Batal terbuka lagi sesudah gagal").not.toHaveAttribute("aria-disabled", "true");
+  });
+
+  test("daftar akun yang gagal dimuat menampilkan pesan, bukan tabel kosong", async ({ page }) => {
+    await page.route(/\/api\/akun\/admin\/all(\?|$)/i, (route) =>
+      route.request().method() === "GET"
+        ? route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ message: "E2E daftar gagal" }) })
+        : route.continue(),
+    );
+    await loginAdmin(page, wajibAdmin());
+    await expect(page.getByText("E2E daftar gagal").first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("Tidak ada akun yang cocok dengan pencarian.")).toHaveCount(0);
+    await page.unroute(/\/api\/akun\/admin\/all(\?|$)/i);
   });
 
   test("buat akun klien berlangganan 3 bulan, lalu tampil di daftar", async ({ page }) => {

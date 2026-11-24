@@ -2,6 +2,8 @@ import { test, expect, type Page } from "@playwright/test";
 import {
   ALASAN_TANPA_ADMIN,
   bukaDaftarAkun,
+  buatAkunKlienUji,
+  hapusAkunKlienUji,
   kredensialAdmin,
   wajibAdmin,
 } from "../../helpers/admin-uji";
@@ -105,6 +107,69 @@ test.describe("Tampilan panel admin", () => {
     await expect(dialog.getByRole("radiogroup", { name: "Durasi" }).getByRole("radio")).toHaveCount(5);
     await dialog.getByRole("button", { name: "Batal" }).click();
     await expect(dialog).toBeHidden();
+  });
+
+  test("laptop kecil 1024: empat kolom, tanpa gulir samping", async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await bukaDaftarAkun<AkunRespons>(page);
+    await expect(kepalaKolom(page)).toHaveText(["Akun dan toko", "Plan", "Status", "Masa Akses"]);
+    await tanpaGulirSamping(page, "daftar akun 1024");
+  });
+
+  test("640: kartu per akun tanpa kepala kolom, tanpa gulir samping", async ({ page }) => {
+    await page.setViewportSize({ width: 640, height: 900 });
+    await bukaDaftarAkun<AkunRespons>(page);
+    await expect(kepalaKolom(page).first()).toBeHidden();
+    await expect(page.locator("[data-kartu]").first()).toBeVisible();
+    await tanpaGulirSamping(page, "daftar akun 640");
+  });
+
+  test("HP 390: dialog Ubah Plan, Aktifkan, Bekukan, dan Hapus juga panel bawah selebar layar", async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.setViewportSize({ width: 390, height: 844 });
+    const admin = wajibAdmin();
+    // Akun klien sekali pakai: dibekukan lewat UI agar Aktifkan dan Hapus
+    // tersedia, lalu dihapus lewat API di akhir.
+    const email = `e2e.panel.${Date.now().toString(36)}@tachyon-uji.com`;
+    const id = await buatAkunKlienUji(email, admin);
+    try {
+      await bukaDaftarAkun<AkunRespons>(page);
+      await page.goto(`/admin/akun/${id}`);
+      await expect(page.getByRole("region", { name: "Profil akun" })).toContainText(email, { timeout: 15_000 });
+      const periksa = async (tombol: string) => {
+        await page.getByRole("button", { name: tombol }).click();
+        const dialog = page.getByRole("dialog").or(page.getByRole("alertdialog"));
+        await expect(dialog).toBeVisible();
+        await dialog.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)));
+        const kotak = (await dialog.boundingBox())!;
+        expect(Math.round(kotak.width), `${tombol}: selebar layar`).toBe(390);
+        expect(Math.round(kotak.y + kotak.height), `${tombol}: menempel di bawah`).toBe(844);
+        return dialog;
+      };
+      await periksa("Ubah Plan");
+      await page.keyboard.press("Escape");
+      const bekukan = await periksa("Bekukan Akun");
+      await bekukan.getByRole("button", { name: "Bekukan", exact: true }).click();
+      await expect(bekukan).toBeHidden({ timeout: 15_000 });
+      await periksa("Aktifkan Akun");
+      await page.keyboard.press("Escape");
+      await periksa("Hapus Akun");
+      await page.keyboard.press("Escape");
+    } finally {
+      await hapusAkunKlienUji(id, admin);
+    }
+  });
+
+  test("HP 390: Keluar dari menu avatar mengakhiri sesi admin", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await bukaDaftarAkun<AkunRespons>(page);
+    await page.getByRole("button", { name: "Menu akun admin" }).click();
+    const tKeluar = page.waitForResponse((r) => /\/api\/akun\/auth\/logout(\?|$)/i.test(r.url()));
+    await page.getByRole("menu").getByRole("menuitem", { name: "Keluar" }).click();
+    expect((await tKeluar).status()).toBe(200);
+    await page.waitForURL("**/login", { timeout: 15_000 });
+    await page.goto("/admin");
+    await page.waitForURL(/\/login/, { timeout: 15_000 });
   });
 
   test("kartu ringkas yang gagal dimuat menampilkan tanda hubung, tabel tetap tampil", async ({ page }) => {

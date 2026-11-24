@@ -7,7 +7,9 @@ import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import {
   bolehTampilSendiri,
   kotakSama,
+  jangkarBalon,
   kotakSorotan,
+  potongKeLayar,
   penyimpananLokal,
   tandaiDilihat,
   type Kotak,
@@ -80,8 +82,11 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
   // Kotak sorotan terakhir beserta titik pemiliknya. Saat pindah titik,
   // sorotan lama tetap tampil sampai elemen titik baru ditemukan, sedangkan
   // balon baru dipasang setelah itu (lihat milik di bawah).
-  const [kotak, setKotak] = useState<{ kotak: Kotak; milik: number } | null>(null);
-  const kotakRef = useRef<{ kotak: Kotak; milik: number } | null>(null);
+  // Jangkar balon dipisah dari sorotan untuk target yang lebih tinggi dari
+  // layar (jangkarBalon di lib/panduan.ts).
+  type Posisi = { kotak: Kotak; jangkar: Kotak; diDalam: boolean; milik: number };
+  const [kotak, setKotak] = useState<Posisi | null>(null);
+  const kotakRef = useRef<Posisi | null>(null);
   // Penangan dan daftar titik disimpan di ref agar fungsi atau array baru
   // dari induk (yang dibuat ulang setiap ketikan) tidak memulai ulang
   // pelacakan posisi di bawah; pelacakan hanya bergantung pada target titik.
@@ -115,10 +120,17 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
         digulir = true;
       }
       if (el) {
-        const baru = kotakSorotan(el.getBoundingClientRect());
+        const asli = kotakSorotan(el.getBoundingClientRect());
+        const baru = potongKeLayar(asli, window.innerWidth, window.innerHeight);
+        const { kotak: jangkar, diDalam } = jangkarBalon(asli, baru, window.innerHeight);
         const lama = kotakRef.current;
-        if (!lama || lama.milik !== indeks || !kotakSama(baru, lama.kotak)) {
-          kotakRef.current = { kotak: baru, milik: indeks };
+        if (
+          !lama ||
+          lama.milik !== indeks ||
+          !kotakSama(baru, lama.kotak) ||
+          !kotakSama(jangkar, lama.jangkar)
+        ) {
+          kotakRef.current = { kotak: baru, jangkar, diDalam, milik: indeks };
           setKotak(kotakRef.current);
         }
       }
@@ -139,6 +151,7 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
 
   if (!aktif || !kotak) return null;
   const k = kotak.kotak;
+  const j = kotak.jangkar;
   // Balon dipasang ulang di setiap titik, sesudah elemennya ditemukan. Dengan
   // begitu balon selalu menjadi lapisan Radix teratas, termasuk di atas
   // sidebar HP yang baru dibuka untuk titik itu, sehingga tetap dapat diklik
@@ -159,12 +172,13 @@ function IsiTur({ titik, onTutup, onPindah }: PropsTur) {
         <div
           aria-hidden="true"
           className="pointer-events-none fixed"
-          style={{ top: k.top, left: k.left, width: k.width, height: k.height }}
+          style={{ top: j.top, left: j.left, width: j.width, height: j.height }}
         />
       </PopoverAnchor>
       {balonSiap && (
         <PopoverContent
-          side={aktif.sisi ?? "bottom"}
+          // Balon di dalam sorotan selalu di bawah garis jangkarnya.
+          side={kotak.diDalam ? "bottom" : (aktif.sisi ?? "bottom")}
           align="start"
           sideOffset={12}
           updatePositionStrategy="always"

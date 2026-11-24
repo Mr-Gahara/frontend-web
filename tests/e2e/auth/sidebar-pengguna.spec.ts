@@ -83,7 +83,7 @@ test.describe("Kaki sidebar", () => {
   test("popup desain C: identitas, selebar pemicunya, tiga pilihan, dan teks pemicu tetap terang (PU2a)", async ({
     page,
   }) => {
-    for (const lebar of [1280, 390]) {
+    for (const lebar of [1280, 768, 390]) {
       await page.setViewportSize({ width: lebar, height: 844 });
       await login(page);
       if (lebar < 1025) await page.locator('[data-sidebar="trigger"]').first().click();
@@ -108,6 +108,29 @@ test.describe("Kaki sidebar", () => {
       expect(ukuran.warna, `warna nama pemicu di ${lebar} px`).toBe("rgb(255, 250, 243)");
       await page.keyboard.press("Escape");
     }
+  });
+
+  test("sidebar mode ikon di desktop: popup tetap selebar minimal 224 px dan seluruhnya di dalam layar (PU2a)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await login(page);
+    await page.locator('[data-sidebar="trigger"]').first().click();
+    await expect(page.locator('[data-sidebar="sidebar"]').first().locator("xpath=ancestor::*[@data-state][1]")).toHaveAttribute(
+      "data-state",
+      "collapsed",
+    );
+    // Tombol Next.js Dev Tools (hanya di dev server) menutupi pemicu di sudut
+    // kiri bawah pada mode ikon; pemicu dibuka lewat keyboard.
+    await page.locator('[data-sidebar="footer"] button').first().focus();
+    await page.keyboard.press("Enter");
+    const menu = page.getByRole("menu");
+    await expect(menu.getByRole("menuitem", { name: "Profil Saya" })).toBeVisible();
+    const kotak = (await menu.boundingBox())!;
+    expect(kotak.width, "lebar minimal popup").toBeGreaterThanOrEqual(224);
+    expect(kotak.x >= 0 && kotak.y >= 0, "popup di dalam layar (kiri atas)").toBe(true);
+    expect(kotak.x + kotak.width <= 1280 && kotak.y + kotak.height <= 800, "popup di dalam layar (kanan bawah)").toBe(true);
+    await page.keyboard.press("Escape");
   });
 
   test("ganti pengguna: hanya sesi PIN yang berakhir, akun toko tetap masuk (PU2a)", async ({ page }) => {

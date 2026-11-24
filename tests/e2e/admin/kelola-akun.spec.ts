@@ -5,12 +5,14 @@ import {
   buatAkunKlienLewatUi,
   bukaDaftarAkun,
   bukaDetailAkun,
+  denganAdmin,
   hapusAkunDariDetail,
   hapusAkunKlienUji,
   kredensialAdmin,
   wajibAdmin,
   type AkunUji,
 } from "../../helpers/admin-uji";
+import { akunBaru, isiTokoDanOwner } from "../../helpers/setup-uji";
 
 /*
  * Ubah dan hapus akun klien (keputusan PA12a sampai PA14a). Akun uji dibuat,
@@ -82,9 +84,24 @@ test.describe("Kelola akun klien", () => {
         expect(terkirim).toBe(0);
       });
 
-      await test.step("username diisi: payload hanya username", async () => {
+      await test.step("username diisi: payload hanya username, Batal terkunci selama menyimpan (BT2a)", async () => {
         await page.getByLabel("Username").fill(username);
-        const respons = await simpanUbah(page);
+        const batal = page.getByRole("link", { name: "Batal", exact: true });
+        await expect(batal).not.toHaveAttribute("aria-disabled", "true");
+        let lepas = () => {};
+        const ditahan = new Promise<void>((r) => (lepas = r));
+        await page.route(POLA_SATU_AKUN, async (route) => {
+          if (route.request().method() === "PUT") await ditahan;
+          await route.continue();
+        });
+        const tunggu = tungguAkun(page, "PUT");
+        await page.getByRole("button", { name: "Simpan Perubahan" }).click();
+        await expect(batal, "Batal terkunci selama PUT").toHaveAttribute("aria-disabled", "true");
+        await expect(batal).toHaveAttribute("tabindex", "-1");
+        await expect(batal).toHaveCSS("pointer-events", "none");
+        lepas();
+        const respons = await tunggu;
+        await page.unroute(POLA_SATU_AKUN);
         expect(respons.status()).toBe(200);
         expect(respons.request().postDataJSON()).toEqual({ username });
         await page.waitForURL("**/admin/akun/" + uji.id);
@@ -178,6 +195,15 @@ test.describe("Kelola akun klien", () => {
       expect(terkirim, "tanpa password tidak ada permintaan").toBe(0);
 
       await kotak(page).getByLabel("Password admin").fill("BukanPasswordAdmin9");
+      // Password salah tidak memicu penyegaran token maupun pengulangan DELETE
+      // (kontrak/temuan.md butir 114): tepat satu permintaan.
+      let hapus = 0;
+      let segar = 0;
+      const pantau = (r: { url(): string; method(): string }) => {
+        if (POLA_SATU_AKUN.test(r.url()) && r.method() === "DELETE") hapus += 1;
+        if (/\/api\/akun\/auth\/refreshtoken/i.test(r.url())) segar += 1;
+      };
+      page.on("request", pantau);
       const tungguSalah = tungguAkun(page, "DELETE");
       await kotak(page).getByRole("button", { name: "Hapus Permanen" }).click();
       const salah = await tungguSalah;
@@ -185,6 +211,9 @@ test.describe("Kelola akun klien", () => {
       expect(salah.status()).toBe(400);
       const pesan = ((await salah.json()) as { message: string }).message;
       await expect(kotak(page).getByRole("alert")).toContainText(pesan, { timeout: 15_000 });
+      await page.waitForTimeout(1_500);
+      page.off("request", pantau);
+      expect([hapus, segar], "satu DELETE tanpa penyegaran token").toEqual([1, 0]);
       await expect(kotak(page)).toBeVisible();
       await kotak(page).getByRole("button", { name: "Batal" }).click();
       await expect(kotak(page)).toBeHidden();
@@ -215,5 +244,55 @@ test.describe("Kelola akun klien", () => {
       page.getByRole("alert").filter({ hasText: "Akun admin tidak dapat diubah dari panel ini." }),
     ).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole("button", { name: "Simpan Perubahan" })).toHaveCount(0);
+  });
+});
+
+test.describe("Bekukan dan hapus akun yang sudah punya toko", () => {
+  test.skip(!kredensialAdmin(), ALASAN_TANPA_ADMIN);
+
+  test("bekukan memutus sesi toko yang sedang terbuka, dan hapus menghapus akun beserta tokonya (B138)", async ({
+    page,
+    browser,
+  }) => {
+    test.setTimeout(180_000);
+    const admin = wajibAdmin();
+    // Toko klien dibuat lewat wizard di konteks kedua (setup-uji), lalu sesinya
+    // dibiarkan terbuka selama admin membekukan akun.
+    const konteksToko = await browser.newContext();
+    const toko = await konteksToko.newPage();
+    const { id, email } = await akunBaru(toko, "beku");
+    let terhapus = false;
+    try {
+      await isiTokoDanOwner(toko);
+      const detail = await denganAdmin(admin, async (ctx, kepala) =>
+        (await (await ctx.get(`/api/akun/admin/users/${id}`, { headers: kepala })).json()) as {
+          data: { daftarTenant: { id?: string; namaToko: string }[] };
+        },
+      );
+      expect(detail.data.daftarTenant.length, "akun punya toko").toBe(1);
+
+      await bukaDaftarAkun(page);
+      await page.goto(`/admin/akun/${id}`);
+      await page.getByRole("button", { name: "Bekukan Akun" }).click();
+      const tBeku = page.waitForResponse((r) => /\/freeze$/.test(r.url()) && r.request().method() === "POST");
+      await kotak(page).getByRole("button", { name: "Bekukan", exact: true }).click();
+      expect((await tBeku).status()).toBe(200);
+
+      // Sesi toko yang terbuka tidak dapat dipakai lagi: muat ulang berakhir di login.
+      await toko.reload();
+      await toko.waitForURL(/\/login(\?|$)/, { timeout: 20_000 });
+
+      await hapusAkunDariDetail(page, email, admin);
+      terhapus = true;
+      const sesudah = await denganAdmin(admin, async (ctx, kepala) =>
+        (await ctx.get(`/api/akun/admin/users/${id}`, { headers: kepala })).status(),
+      );
+      expect(sesudah, "akun terhapus").toBe(404);
+      const masuk = await statusLogin(email, PASSWORD_AKUN_UJI);
+      expect([400, 401], "akun terhapus tidak dapat login").toContain(masuk);
+    } finally {
+      await konteksToko.close();
+      if (!terhapus) await hapusAkunKlienUji(id, admin);
+    }
   });
 });

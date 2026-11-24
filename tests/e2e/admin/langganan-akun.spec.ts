@@ -3,7 +3,9 @@ import {
   aktifkanAkunKlienUji,
   ALASAN_TANPA_ADMIN,
   buatAkunKlienLewatUi,
+  buatAkunKlienUji,
   bukaDaftarAkun,
+  denganAdmin,
   hapusAkunDariDetail,
   hapusAkunKlienUji,
   kredensialAdmin,
@@ -449,4 +451,101 @@ test.describe("Langganan akun klien", () => {
       await expect(page.getByRole("link", { name: "Kembali ke Daftar Akun" })).toBeVisible();
     });
   }
+});
+
+test.describe("Riwayat langganan berhalaman", () => {
+  test.skip(!kredensialAdmin(), ALASAN_TANPA_ADMIN);
+
+  test("lebih dari satu halaman: Muat Berikutnya meminta cursor dan menambah catatan sampai habis", async ({ page }) => {
+    test.setTimeout(150_000);
+    const admin = wajibAdmin();
+    const email = `e2e.riwayat.${Date.now().toString(36)}@tachyon-uji.com`;
+    const id = await buatAkunKlienUji(email, admin);
+    try {
+      // Sebelas pasang bekukan dan aktifkan lewat API menambah 22 catatan.
+      await denganAdmin(admin, async (ctx, kepala) => {
+        for (let i = 0; i < 11; i++) {
+          const beku = await ctx.post(`/api/akun/admin/users/${id}/freeze`, { headers: kepala, data: {} });
+          expect(beku.status(), "bekukan").toBeLessThan(300);
+          const buka = await ctx.post(`/api/akun/admin/users/${id}/unfreeze`, { headers: kepala, data: {} });
+          expect(buka.status(), "aktifkan").toBeLessThan(300);
+        }
+      });
+      await bukaDaftarAkun(page);
+      const POLA = new RegExp(`/api/akun/admin/users/${id}/langganan`, "i");
+      const tPertama = page.waitForResponse((r) => POLA.test(r.url()) && r.request().method() === "GET");
+      await page.goto(`/admin/akun/${id}`);
+      const pertama = (await (await tPertama).json()) as { data: unknown[]; cursorBerikutnya: string | null };
+      expect(pertama.cursorBerikutnya, "ada halaman berikutnya").toBeTruthy();
+      const riwayat = page.getByRole("region", { name: "Riwayat Langganan" });
+      await expect(riwayat.getByRole("listitem")).toHaveCount(pertama.data.length, { timeout: 15_000 });
+      const tKedua = page.waitForResponse(
+        (r) => POLA.test(r.url()) && new URL(r.url()).searchParams.get("cursor") === pertama.cursorBerikutnya,
+      );
+      await riwayat.getByRole("button", { name: "Muat Berikutnya" }).click();
+      const kedua = (await (await tKedua).json()) as { data: unknown[]; cursorBerikutnya: string | null };
+      await expect(riwayat.getByRole("listitem")).toHaveCount(pertama.data.length + kedua.data.length);
+      if (!kedua.cursorBerikutnya) await expect(riwayat.getByRole("button", { name: "Muat Berikutnya" })).toHaveCount(0);
+    } finally {
+      await hapusAkunKlienUji(id, admin);
+    }
+  });
+});
+
+test.describe("Aktifkan dan perpanjang akun kedaluwarsa", () => {
+  test.skip(!kredensialAdmin(), ALASAN_TANPA_ADMIN);
+
+  test("masa akses lewat: Aktifkan menuntut durasi, dan Perpanjang menyebut akun aktif kembali (B154)", async ({ page }) => {
+    test.setTimeout(120_000);
+    const admin = wajibAdmin();
+    const email = `e2e.kedaluwarsa.${Date.now().toString(36)}@tachyon-uji.com`;
+    const id = await buatAkunKlienUji(email, admin);
+    try {
+      await denganAdmin(admin, async (ctx, kepala) => {
+        const beku = await ctx.post(`/api/akun/admin/users/${id}/freeze`, { headers: kepala, data: {} });
+        expect(beku.status(), "bekukan").toBeLessThan(300);
+      });
+      const POLA_DETAIL = new RegExp(`/api/akun/admin/users/${id}(\\\\?|$)`, "i");
+      await page.route(POLA_DETAIL, async (route) => {
+        if (route.request().method() !== "GET") return route.continue();
+        const asli = await route.fetch();
+        const body = await asli.json();
+        const lewat = new Date(Date.now() - 2 * 86_400_000).toISOString();
+        // simulasi: akun bermasa akses lewat tidak dapat dibuat lewat UI maupun API; masa akses dan alasan non-aktif akun nyata diubah di respons
+        body.data.langganan = { ...body.data.langganan, aksesBerakhirPada: lewat, alasanNonAktif: "kedaluwarsa" };
+        await route.fulfill({ response: asli, json: body });
+      });
+      await bukaDaftarAkun(page);
+      await page.goto(`/admin/akun/${id}`);
+      await expect(page.getByRole("region", { name: "Profil akun" })).toContainText(email, { timeout: 15_000 });
+
+      await page.getByRole("button", { name: "Perpanjang Langganan" }).click();
+      const perpanjang = page.getByRole("dialog");
+      await expect(perpanjang).toContainText("Akun ini non-aktif karena kedaluwarsa dan akan aktif kembali setelah diperpanjang.");
+      await page.keyboard.press("Escape");
+      await expect(perpanjang).toBeHidden();
+
+      let terkirim = 0;
+      page.on("request", (r) => {
+        if (r.method() === "POST" && /\/unfreeze$/.test(r.url())) terkirim += 1;
+      });
+      await page.getByRole("button", { name: "Aktifkan Akun" }).click();
+      const dialog = page.getByRole("dialog");
+      await expect(dialog).toContainText("Masa akses akun ini sudah berakhir, sehingga durasi langganan wajib dipilih.");
+      const durasi = dialog.getByRole("radiogroup", { name: "Durasi" });
+      await expect(durasi.getByRole("radio", { name: /Tanpa perpanjangan|Tetap tidak dibatasi/ })).toHaveCount(0);
+      await dialog.getByRole("button", { name: /^Aktifkan/ }).last().click();
+      await expect(dialog.getByText("Pilih durasi langganan.")).toBeVisible();
+      expect(terkirim, "tanpa durasi tidak dikirim").toBe(0);
+      await durasi.getByRole("radio", { name: "1 bulan" }).click();
+      const tAktif = page.waitForResponse((r) => r.request().method() === "POST" && /\/unfreeze$/.test(r.url()));
+      await dialog.getByRole("button", { name: /^Aktifkan/ }).last().click();
+      const aktif = await tAktif;
+      expect(aktif.status(), "aktifkan dengan durasi").toBe(200);
+      expect(aktif.request().postDataJSON()).toMatchObject({ durasiBulan: 1 });
+    } finally {
+      await page.unrouteAll({ behavior: "ignoreErrors" });
+      await hapusAkunKlienUji(id, admin);
+    }
+  });
 });

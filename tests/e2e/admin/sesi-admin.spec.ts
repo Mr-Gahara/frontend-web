@@ -6,6 +6,7 @@ import {
   type KredensialAdmin,
 } from "../../helpers/admin-uji";
 import { login } from "../../helpers/transfer-uji";
+import { AKUN_UJI, isiLoginAkun } from "../../helpers/masuk-uji";
 
 /*
  * Sesi akun admin platform (keputusan PA1a): login akun menuju panel admin
@@ -134,5 +135,31 @@ test.describe("Panel admin bagi akun klien", () => {
     await page.goto("/admin");
     await page.waitForURL(/\/dashboard/);
     await expect(judulPanel(page)).toHaveCount(0);
+  });
+});
+test.describe("Panel admin: keadaan tepi sesi", () => {
+  test("akun klien tanpa sesi pengguna yang membuka panel admin dialihkan ke login pengguna", async ({ page }) => {
+    await page.goto("/login");
+    const tLogin = page.waitForResponse((r) => POLA_LOGIN_AKUN.test(r.url()) && r.request().method() === "POST");
+    await isiLoginAkun(page, AKUN_UJI.email, AKUN_UJI.password);
+    expect((await tLogin).status()).toBe(200);
+    await page.waitForURL("**/login/pengguna");
+    await page.goto("/admin");
+    await page.waitForURL("**/login/pengguna", { timeout: 15_000 });
+    await expect(judulPanel(page)).toHaveCount(0);
+  });
+
+  test("GET /akun/me gagal: email admin tidak tampil, Keluar tetap tersedia", async ({ page }) => {
+    test.skip(!admin, ALASAN_TANPA_ADMIN);
+    await page.route(/\/api\/akun\/me(\?|$)/i, (route) =>
+      route.request().method() === "GET"
+        ? route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ message: "uji" }) })
+        : route.continue(),
+    );
+    await loginAdmin(page, wajibAdmin());
+    await expect(judulPanel(page)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(wajibAdmin().email, { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Keluar/ }).first()).toBeVisible();
+    await page.unroute(/\/api\/akun\/me(\?|$)/i);
   });
 });

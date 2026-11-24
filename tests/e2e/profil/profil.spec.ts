@@ -162,3 +162,37 @@ test.describe("Profil pengguna", () => {
     }
   });
 });
+test.describe("Profil Owner", () => {
+  test("Owner mengubah namanya sendiri lewat UI, nama di sidebar ikut berubah, lalu dikembalikan", async ({ page }) => {
+    test.setTimeout(120_000);
+    const { login, bukaDenganAuth, api } = await import("../../helpers/transfer-uji");
+    await login(page);
+    const auth = await bukaDenganAuth(page, "/dashboard/profil");
+    const NAMA = "Ridho";
+    const UBAH = "Ridho E2E Ubah";
+    const daftar = await api<{ id: string; nama: string }[]>(page, auth, "GET", "/pengguna");
+    const owner = (daftar.data ?? []).find((p) => p.nama === NAMA);
+    expect(owner, "Owner uji bernama Ridho").toBeTruthy();
+    try {
+      await expect(isianNama(page)).toHaveValue(NAMA, { timeout: 20_000 });
+      await isianNama(page).fill(UBAH);
+      const ubah = await simpan(page);
+      expect(ubah.status()).toBe(200);
+      expect(ubah.request().postDataJSON()).toEqual({ nama: UBAH });
+      await expect(page.getByRole("heading", { level: 1, name: UBAH })).toBeVisible();
+      await expect(page.locator('[data-sidebar="footer"]')).toContainText(UBAH);
+
+      await isianNama(page).fill(NAMA);
+      const kembali = await simpan(page);
+      expect(kembali.status()).toBe(200);
+      await expect(page.locator('[data-sidebar="footer"]')).toContainText(NAMA);
+    } finally {
+      // Nama Owner dipakai login seluruh suite; pulihkan bila test berhenti di tengah.
+      const kini = await api<{ nama: string }>(page, auth, "GET", "/pengguna/" + owner!.id);
+      if (kini.data?.nama !== NAMA) {
+        const pulih = await api(page, auth, "PUT", "/pengguna/" + owner!.id, { nama: NAMA });
+        expect.soft(pulih.status, `pulihkan nama Owner: ${pulih.pesan}`).toBe(200);
+      }
+    }
+  });
+});

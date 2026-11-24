@@ -3,8 +3,10 @@ import {
   AWALAN_KUNCI,
   SAKLAR_OTOMATIS,
   bolehTampilSendiri,
+  jangkarBalon,
   kotakSama,
   kotakSorotan,
+  potongKeLayar,
   sudahDilihat,
   tandaiDilihat,
   type Penyimpanan,
@@ -66,5 +68,55 @@ describe("kotak sorotan", () => {
     expect(kotakSama(a, { ...a, top: 11 })).toBe(false);
     expect(kotakSama(null, null)).toBe(true);
     expect(kotakSama(a, null)).toBe(false);
+  });
+});
+
+describe("kotak sorotan dipotong ke layar (JB9a)", () => {
+  it("tidak berubah bila seluruhnya tampil", () => {
+    const k = { top: 100, left: 20, width: 200, height: 60 };
+    expect(potongKeLayar(k, 1280, 720)).toEqual(k);
+  });
+
+  it("dipotong di atas dan bawah bila lebih tinggi dari layar, menyisakan tepi cincin", () => {
+    expect(potongKeLayar({ top: -686, left: 300, width: 600, height: 2093 }, 1280, 720)).toEqual({
+      top: 3,
+      left: 300,
+      width: 600,
+      height: 714,
+    });
+  });
+
+  it("dipotong sebagian di atas, di bawah, dan di samping", () => {
+    expect(potongKeLayar({ top: -40, left: 0, width: 100, height: 100 }, 1280, 720)).toEqual({ top: 3, left: 3, width: 97, height: 57 });
+    expect(potongKeLayar({ top: 680, left: 1200, width: 200, height: 100 }, 1280, 720, 0)).toEqual({
+      top: 680,
+      left: 1200,
+      width: 80,
+      height: 40,
+    });
+  });
+
+  it("dikembalikan apa adanya bila belum bersinggungan dengan layar", () => {
+    const k = { top: 900, left: 20, width: 200, height: 60 };
+    expect(potongKeLayar(k, 1280, 720)).toEqual(k);
+    expect(potongKeLayar({ top: -200, left: 20, width: 200, height: 100 }, 1280, 720)).toEqual({ top: -200, left: 20, width: 200, height: 100 });
+  });
+});
+
+describe("jangkar balon (JB9a)", () => {
+  it("sama dengan sorotan bila target muat di layar", () => {
+    const k = { top: 100, left: 20, width: 200, height: 60 };
+    expect(jangkarBalon(k, k, 720)).toEqual({ kotak: k, diDalam: false });
+    const pas = { top: 3, left: 20, width: 200, height: 714 };
+    expect(jangkarBalon(pas, pas, 720)).toEqual({ kotak: pas, diDalam: false });
+  });
+
+  it("menjadi garis tepi atas bagian yang tampil bila target lebih tinggi dari ruang layar", () => {
+    const asli = { top: -686, left: 300, width: 600, height: 2093 };
+    const terpotong = potongKeLayar(asli, 1280, 720);
+    expect(jangkarBalon(asli, terpotong, 720)).toEqual({
+      kotak: { top: 3, left: 300, width: 600, height: 0 },
+      diDalam: true,
+    });
   });
 });
