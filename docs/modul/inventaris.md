@@ -753,24 +753,8 @@ Yang masih berlaku:
 
 ## Utang terbuka
 
-### Utang kecil dari penyesuaian backend `d6709a1`
-
-- Pemicu filter arah jurnal stok terpotong menjadi "Semua ." di 1280 px
-  (terlihat 12 November 2026, sudah ada sebelum JS1a). Selesai di
-  `609b36a`: pemicu Arah dan Alasan 190 dan 200 px, di HP selebar penuh
-  (`modul/ui-ux.md`, CV2b).
-- Pemicu Arah dan Alasan jurnal stok tidak berlabel, berbeda dengan isian
-  filter lain di baris yang sama (terlihat 14 November 2026). Selesai di
-  `883a79b`: label "Arah" dan "Alasan", tanpa ikon corong (`modul/ui-ux.md`,
-  CV15a).
-
 ### Utang kecil dari pembelian stok
 
-- Mutasi `PEMBELIAN` di buku mutasi kas belum bertaut ke detail
-  pembelian, karena referensinya hanya membawa id, sedangkan rute detail
-  bergantung pada ruang lokasi penerimanya (PS10a). Selesai 23 November
-  2026 (`modul/keuangan.md`, TM1a).
-- Izin per ruang menunggu backend (PS9a, `kontrak/temuan.md` butir 158).
 - Filter periode bawaan tidak ikut bergeser saat hari berganti
   (keputusan pemilik proyek, 26 Oktober 2026); tanggalnya terlihat dan
   Reset Filter tersedia.

@@ -174,10 +174,6 @@ Geist (`cdc8c47`), dan tab di `?tab=` (`a68a75f`).
 
 ### Utang kecil dari modul Gudang
 
-- Dashboard gudang selesai di `06581f3` dan `50dca2f`. Setelah backend
-  memperbaiki butir 149, kartu pengajuan dapat kembali memakai angka
-  `GET /dashboard/gudang`, sehingga daftar pengajuan tidak perlu diambil
-  utuh hanya untuk menghitung. Selesai di `74b6af4`.
 - Dashboard outlet selesai di `0c5822b` (keputusan DB1a sampai DB6a).
   `GET /dashboard/outlet` tetap tidak dipakai web: isinya hitungan
   pengajuan, surat jalan, dan lima jurnal terbaru, bukan isi dashboard

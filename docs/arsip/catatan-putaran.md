@@ -1243,3 +1243,716 @@ tautan (WS6a) di `daf9e3a` (`modul/setup-akun.md`, PN1a sampai PN4a).
   karena riwayat itu tidak punya halaman per transfer. Selesai
   20 November 2026 lewat dialog rincian transfer di Pindah Dana
   (`modul/keuangan.md`, DN5a, `86f2a0b`).
+
+## Status yang selesai, dipindah 24 November 2026
+
+Dipindah dari `inti/status.md` tanpa perubahan teks pada bersih-bersih
+dokumentasi 24 November 2026: keadaan 23 November 2026 dan sebelumnya,
+daftar "Berikutnya" 18 sampai 20 November 2026, utang pengujian kelompok
+1, butir Menunggu keputusan yang sudah diputuskan, dan butir utang kecil
+yang sudah selesai.
+
+### Keadaan 23 November 2026 sore
+
+Keadaan akhir sesi 23 November 2026: backend `ridho` `1718030` (tidak maju
+sejak 22 November). Dua putaran selesai hari itu:
+
+1. **Penyesuaian backend `1718030`** (`referensi/keputusan-penyesuaian-backend.md`):
+   B347, B348, ekspor dan unduh laporan (UD1a sampai UD3a), kemasan dan
+   satuan (KN1a sampai KN3a), dan Rekap Absensi (RK1a).
+2. **Bug dan temuan frontend**: tautan mutasi PEMBELIAN (TM1a), akun kas
+   uji tetap (AU1a), metode pembayaran tanpa `read-akunkas` (MP1a),
+   sebutan Kategori Aset (KA1a), satu form tarif (TF1a, beserta regresi
+   harga kosong yang dibetulkan), pesan 403 yang menyebut halaman dan izin
+   (GR9a), bayangan baris per sel (BB1a), dan halaman ubah akun kas dari
+   `GET /akunkas/:id`. Catatan logout `pin-logout` ternyata sudah selesai
+   di backend B343.
+3. **Bug dan temuan frontend tuntas**: sebutan "kategori aset" di seluruh
+   aplikasi (KA2a), tombol kembali bertujuan pasti di enam laman (KB1a,
+   penyebab gagal sesekali "Batalkan kembali ke daftar"), dan kejadian
+   vitest gagal sekali tidak tereproduksi dalam enam run.
+
+Urutan kerja berikutnya, atas perintah pemilik proyek: butir daftar
+20 November 2026 dan 19 November 2026 di bawah yang belum selesai (rombak
+UI/UX laman admin, deskripsi paket laman pengenalan, revisi laman profil
+dan menu popup profil), nomor WhatsApp admin (LG1a), dan utang pengujian
+kelompok 1. **Suite e2e penuh ditunda sampai seluruh pekerjaan selesai**
+(pemilik proyek, 20 November 2026); harapannya 727, dan sesudahnya skrip
+`bersih-akunkas.js` (AU1a).
+
+### Keadaan sebelum 23 November 2026
+
+Sesi 20 November 2026 malam: kerapian seluruh laman (KL1b, TH1a, TI1a,
+KF1a, TT1a, PP1a), utang pengujian bagian C, dan pembuktian kontrak 68
+sampai 72 (`modul/ui-ux.md`, `inti/pengujian.md`); backend lokal `ridho`
+`2790fc7`.
+
+Laporan backend 186 sampai 188 (`kontrak/temuan.md`) sudah diberikan ke
+pemilik proyek; ketiganya diperbaiki backend 22 November 2026 dan
+dibuktikan web 23 November 2026.
+Butir 189 (satuan kemasan seperti pak tidak dapat dipakai sebagian di
+resep; temuan pemilik proyek 20 November 2026) diputuskan backend
+22 November 2026 (P87) dan disesuaikan web 23 November 2026
+(`modul/produk-kategori.md`, KN1a sampai KN3a).
+
+Keadaan per 16 November 2026: backend lokal `ridho` `4a19be8`, sama
+dengan remote, 29 commit di atas `d6709a1` (Nizar K-08 sampai K-10,
+B324 sampai B329; Ridho P80 sampai P82, B330 sampai B344). Ridho
+menutup seluruh butir web yang menunggu backend (168 sampai 184, K-18,
+dan K-19). Web menyesuaikan diri dalam 13 commit, `e1ea235` sampai
+`6ab81aa`: sesi kasir (MK3b, MK5b, MK6b), lokasi kerja tanpa
+`read-location`, Setujui rekan selokasi (PG2a), langganan (LG4a),
+timeline reservasi (TL1a), metode tunai berlaci (PB15a), langkah jam
+buka (JB8a), dan paginasi server empat daftar (PV1a, PV2a)
+(`referensi/keputusan-penyesuaian-backend.md`).
+
+Keadaan per 17 November 2026: backend lokal `ridho` `3570bd4`, sama
+dengan remote, lima commit di atas `4a19be8`, termasuk gabungan `nizar`
+`a79c087`. Ridho menutup butir 185 (masa tenggang rotasi refresh, P83,
+B345) dan menyaring perangkat toko menurut lokasi kerja (AR36, B346).
+Web tidak berubah kodenya; B345 dibuktikan lewat spec baru
+`auth/tenggang-pin-refresh`, dan B346 belum dibuktikan web
+(`referensi/keputusan-penyesuaian-backend.md`). Suite penuh sesudahnya
+665 lolos, 1 gagal, dan 1 dilewati dari 667; kegagalannya bug tur gudang
+(TG2a) yang diperbaiki dan dibuktikan lewat spec terdampak
+(`arsip/riwayat-pengujian.md`, Riwayat baseline).
+
+Keadaan per 18 November 2026: backend lokal `ridho` `2790fc7`, satu
+commit dokumen di atas `3570bd4` (checkpoint `status/ridho.md`, butir 3
+mencatat B169, B170, dan B346 menunggu web). Seluruh kontrak yang belum
+dibuktikan web ditutup: B169, B170, dan B346 lewat e2e (`5f57454`), butir
+178 dan 169 lewat skrip, dan butir 77 diuji ulang 570 kali tanpa
+tereproduksi (`referensi/keputusan-penyesuaian-backend.md`, Pembuktian web
+18 November 2026). Sesudahnya form ubah produk beresep menampilkan stok
+terhitung (SR1a), seluruh pembungkus halaman diseragamkan dengan 16 px di
+HP (SP1a, SP2a), metrik diukur ulang, dan data uji yang menumpuk
+dibersihkan (Utang kecil dari penyesuaian backend `4759208`).
+
+Keadaan per 20 November 2026: backend lokal `ridho` `2790fc7`, tidak
+maju sejak 18 November. Mutasi transfer bertaut ke rincian transfernya
+(DN5a, `86f2a0b`), suite penuh dijalankan, tanggal panel filter
+berbulan singkat (FL20a, `99ecd4c`), dan butir status yang basi
+diverifikasi terhadap kode lalu dipindah ke arsip.
+
+Keadaan per 7 sampai 10 November 2026 dipindah ke
+`arsip/catatan-putaran.md` (Keadaan pekerjaan 7 sampai 10 November 2026)
+pada 14 November 2026, termasuk keterangan rujukan "butir 4 (wizard)",
+"butir 6 (sesi kasir)", dan "butir 7" di dokumen lain.
+
+Backend dijalankan dengan env inline agar `.env` backend tidak diubah
+(`inti/pengujian.md`, Menjalankan layanan uji). Kode backend tidak
+diubah dari sisi frontend. Langkah pertama setiap sesi memeriksa apakah
+cabang backend maju:
+
+```bash
+BE=~/Documents/backend-js; git -C "$BE" fetch --all --quiet; for r in ridho nizar yoga; do echo "origin/$r mundur-maju:$(git -C "$BE" rev-list --left-right --count HEAD...origin/$r | tr '\t' ' ')"; done
+```
+
+### Yang selesai sebelum 18 November 2026
+
+Mesin Kasir sisi backend, langkah jam buka, Pekerjaan UI berikutnya
+12 sampai 16 November 2026, butir Menunggu pemilik proyek 14 November
+2026, dan seluruh butir Menunggu desain pemilik proyek selesai, dan
+catatannya dipindah ke `arsip/catatan-putaran.md` (Status yang selesai,
+dipindah 20 November 2026) pada 20 November 2026; rujukan "Pekerjaan UI
+berikutnya butir N" di dokumen lain merujuk daftar di arsip itu.
+
+### Berikutnya, dicatat 18 November 2026
+
+1. **Suite e2e penuh**: dijalankan 20 November 2026 atas perintah
+   pemilik proyek, 676 lolos, 3 gagal, dan 1 dilewati dari 680. Ketiganya
+   spec yang tertinggal dari filter seragam; salah satunya menemukan
+   tanggal panel filter meluber, diperbaiki lewat FL20a (`99ecd4c`), dan
+   seluruhnya dibuktikan lewat spec terdampak (`inti/pengujian.md`,
+   Baseline).
+2. **Utang pengujian yang basi atau murah ditutup**
+   (`referensi/utang-pengujian.md`), ditawarkan 18 November 2026: selesai
+   20 November 2026 sebagai bagian C (Mulai di sini, di atas). LK1a sudah
+   dicatat basi sebagian di butirnya, keterangan khusus member teruji e2e,
+   dan pesan jurnal stok gudang KM1a sudah diarsipkan 17 November 2026.
+3. **Nomor WhatsApp admin** halaman Langganan (LG1a), di bawah.
+
+Laman utama, ukuran tombol aksi, dan filter seragam, yang dicatat
+pemilik proyek pada hari yang sama, selesai 19 November 2026
+(`modul/ui-ux.md`, LU1a sampai LU5a, TK1a sampai TK6a, dan FL1a sampai
+FL19a); catatannya dipindah ke arsip yang sama.
+
+### Berikutnya, dicatat 19 November 2026
+
+Dicatat pemilik proyek sesudah laman utama (LU1a sampai LU5a), dikerjakan
+pada sesi berikutnya:
+
+1. **Revisi tata letak dan UI laman profil pengguna**
+   (`/dashboard/profil`, `features/pengguna/halaman-profil.tsx`). Selesai
+   24 November 2026 (`modul/profil-login.md`, PU1a).
+2. **Revisi UI menu popup profil pengguna di kaki sidebar**: menu yang
+   terbuka saat menekan profil pengguna di bagian paling bawah sidebar
+   (`components/sidebar-pengguna.tsx`). Selesai 24 November 2026
+   (`modul/profil-login.md`, PU2a dan PU3a).
+
+### Berikutnya, dicatat 20 November 2026
+
+Dicatat pemilik proyek 20 November 2026, dikerjakan nanti atas
+perintahnya:
+
+1. **Rombak UI/UX laman admin platform** (`app/admin`,
+   `features/admin-akun`: daftar, buat, detail, dan ubah akun klien,
+   langganan, serta riwayatnya). Selesai 24 November 2026 dari kanvas tiga
+   arah (`modul/panel-admin.md`, RP1a sampai RP5a).
+2. **Perbaikan deskripsi paket di laman pengenalan** (`/`, `PAKET` di
+   `features/laman-utama/konten.ts`: kalimat "untuk" dan daftar fitur
+   Basic, Advanced, dan Pro). Isinya dicocokkan dengan pembatasan plan
+   yang berlaku (`features/langganan/data.ts`, `modul/setup-akun.md`
+   PL6a) dan diputuskan pemilik proyek. Selesai 24 November 2026
+   (`modul/ui-ux.md`, LU6a).
+3. **Kerapian spacing dan alignment seluruh laman** (pemilik proyek,
+   20 November 2026): setiap laman rapi di HP, HP mendatar, tablet, dan
+   desktop, horizontal maupun vertikal, tanpa elemen berdempet. Selesai
+   20 November 2026 (`modul/ui-ux.md`, Kerapian seluruh laman): kartu lega
+   menjadi bawaan semua `DataTable` (KL1b), dan pola bersama lain
+   diputuskan lewat kanvas (TH1a, TI1a, KF1a, TT1a).
+4. **Unduh PDF, Excel, atau CSV untuk laporan dan data penting**
+   (dicatat pemilik proyek 20 November 2026). Selesai 23 November 2026
+   sesudah backend menambah ekspor (P85, B349 sampai B358): Unduh per
+   bulan di daftar penjualan, mutasi kas, pengeluaran, belanja stok, stok
+   saat ini, jurnal stok, stock opname, dan adjustment (UD1a), Unduh
+   laporan di Ringkasan Laba/Rugi dan Pembayaran per Metode (UD2a), dan
+   laman Rekap Absensi (RK1a). Ditunda backend (P85 butir 1): pindah dana,
+   mesin kasir, pengajuan dan surat jalan, produk dan bahan baku,
+   pelanggan, membership, dan reservasi.
+
+### Berikutnya: utang pengujian kelompok 1 yang tersisa (dicatat 20 November 2026)
+
+Selesai 24 November 2026 (`inti/pengujian.md`, Baseline per utang pengujian
+kelompok 1), kecuali template General Manajer yang menunggu backend
+(butir 191). Bagian MK11a tentang `read-pengguna` dan `GET /device/:userId`
+sudah basi sejak MK3b; yang dibuktikan jalur tanpa `read-akunkas` dan
+tanpa `read-pengguna`.
+
+Dicatat pemilik proyek 20 November 2026 sebagai pekerjaan berikutnya.
+Jalur yang aturannya sudah teruji unit, tetapi belum dibuktikan e2e karena
+akun uji berperan Owner. Setiap butir menambah peran dan pengguna uji
+menetap lewat `tests/helpers/terkunci-uji.ts`, seperti bagian C
+20 November 2026 (`referensi/utang-pengujian.md` memuat rinciannya):
+
+1. **Template role membuka halamannya**: role dari template (stock opname,
+   adjustment, absensi, pembelian) dipakai login dan membuka halaman yang
+   dijanjikan templatnya; kini hanya pemetaan nama yang teruji.
+2. **Mesin Kasir MK11a**: pemegang `kelola-perangkat-kasir` tanpa
+   `read-pengguna` atau tanpa `read-akunkas`, dan pemilihan perangkat yang
+   melewati pengguna berlevel sama atau lebih tinggi (403
+   `GET /device/:userId`).
+3. **Titik tur dashboard menurut izin dan plan**: tur bagi pengguna yang
+   tidak memegang izin sebagian menu (`bolehLihatMenu`).
+4. **Batas level role (RL3a)**: batas atas level, level pengguna yang
+   tidak diketahui, dan perubahan level atau wewenang di payload ubah,
+   dari pengguna bukan Owner.
+5. **Pemilih produk tanpa izin baca produk** di form diskon, beserta
+   `aksiDiskon`.
+6. **Lokasi kerja (LK1a) di dialog pengguna** bagi pemegang
+   `update-pengguna` tanpa `read-location`, dan untuk role Owner.
+
+### Menunggu keputusan pemilik proyek
+
+- Nomor WhatsApp admin untuk halaman Langganan (LG1a, `NOMOR_WA_ADMIN`
+  masih kosong).
+
+Tombol bertaut dan penanda "(sekarang)" diputuskan 24 November 2026
+(BT1a, BT2a, RP6a).
+
+### Utang kecil dari penyesuaian backend `4759208`
+
+- Data uji wizard yang menetap, pembersihan data uji 18 November 2026,
+  dan laporan backend yang ditunda (LB1a) selesai; catatannya dipindah ke
+  arsip yang sama. Cadangan sebelum pembersihan:
+  `~/Documents/cadangan-db/db_produk-sebelum-bersih-2026-11-18.gz`.
+- Data uji yang menumpuk dibersihkan lagi 20 November 2026 (pemilik
+  proyek), setelah basis data dicadangkan ke
+  `~/Documents/cadangan-db/db_produk-sebelum-bersih-2026-11-20.gz`, lewat
+  skrip bermode tinjau `bersih-akunkas.js` dan `bersih-data-uji.js` di
+  `~/.cache/frontend-web/alat/` (bawaan tinjau, `--hapus` untuk
+  menerapkan). Kriterianya hanya data uji di toko uji yang tidak dirujuk
+  dokumen lain, kecuali akun kas: atas keputusan pemilik proyek, 192 akun
+  E2E non-aktif dihapus bersama 316 jurnal transfer Rp1 yang melibatkannya
+  dan 956 baris mutasinya di kedua sisi. Saldo akun lawan dikoreksi sebesar
+  efek transfer yang dihapus; efek bersihnya nol, sehingga saldo dan saldo
+  berjalan "kasir outlet" dan "Kas Kecil (Laci)" tidak berubah. Rantai saldo
+  berjalan "kasir outlet" sudah tidak konsisten sebelum pembersihan dan
+  dibiarkan apa adanya. Dihapus juga 539 shift uji Aktif dan Non-Aktif, 4
+  metode, 28 diskon, dan 39 pelanggan terhapus lunak. Data bukti temuan
+  tidak disentuh: transfer Rp1,5 butir 126 beserta akun E2E-nya, tipe aset
+  butir 77, bahan uji butir 143, surat jalan rusak, dan data butir 142.
+  Riwayat pengujian yang menghasilkan data itu tetap tercatat di
+  `referensi/utang-pengujian.md`, `inti/pengujian.md`, dan arsip.
+- Akun uji `toko@gmail.com` dinaikkan ke Pro lewat API admin, karena
+  akun lama dibaca Basic (B212) dan Basic menolak sesi booking (B216).
+  Riwayat langganannya kini berisi satu catatan `ubah-plan`.
+- `db:setup-toko-lama` menandai empat toko yang ada saat itu selesai
+  setup inti. Jangan dijalankan ulang di basis data lokal setelah spec
+  membuat akun pendaftar, karena akun itu ikut ditandai selesai.
+
+### Utang kecil dari penyesuaian backend `ridho` `2dd57aa`
+
+- Nama penyetuju di daftar pengajuan stok terisi sejak `7d28135` (butir
+  145); belum dipakai web. Selesai 20 November 2026 (`modul/inventaris.md`,
+  PI1a).
+
+### Utang kecil dari penyesuaian backend `nizar`
+
+- Booking milik sebuah penjualan belum disertakan di respons detail
+  penjualan; permintaannya ditunda (NZ9a). Laporan untuk tim backend
+  disusun 20 November 2026 atas perintah pemilik proyek (butir 186), dan
+  web memuat setiap booking lewat `GET /sesibooking/:id` sampai backend
+  menyertakannya. Selesai 23 November 2026: web membaca `sesiBooking[]`
+  detail penjualan (B347).
+- Bagian Sesi Booking di detail penjualan memakai tata letak sederhana di
+  atas grid informasi; penempatannya menunggu fase UI/UX. Selesai
+  20 November 2026 (`modul/penjualan.md`, SB1a).
+
+### Butir utang kecil yang selesai
+
+- Monitoring per lokasi tidak memuat staf yang izin (`kontrak/temuan.md`
+  butir 165); panel Status Staf menambah karyawan ruang menurut peran
+  yang izin hari itu sampai backend memperbaikinya. Backend `916e7df`
+  (B278) memuat staf yang izin hanya bila lokasi kerjanya lokasi itu,
+  sehingga tambahan web tetap untuk staf tanpa lokasi kerja. Laporan
+  lanjutan untuk tim backend disusun 20 November 2026 (butir 187).
+  Selesai 23 November 2026: backend B348 memuat staf tanpa lokasi kerja
+  yang izin, dan tambahan web dibuang.
+- Penerimaan (outlet) dan pengiriman (gudang) tetap daftar kartu mode
+  klien dengan polling; tidak termasuk butir 150. Selesai 20 November
+  2026: keduanya berhalaman di server (`modul/inventaris.md`, TS2a,
+  `e056daa`).
+
+## Utang modul yang selesai, dipindah 24 November 2026
+
+Dipindah dari bagian Utang terbuka dokumen modul tanpa perubahan teks,
+per dokumen dan subjudul asalnya: butir yang bertanda selesai, lunas,
+gugur, tertutup, atau dihapus, serta butir yang diverifikasi basi
+terhadap kode dan dokumen lain (izin per ruang PS9a, akun non-aktif 518,
+akun kas tanpa `update-akunkas`, label mutasi, keadaan Mesin Kasir,
+perpindahan halaman daftar akun admin dan Belanja Stok yang pindah ke
+`referensi/utang-pengujian.md`, password admin salah, metode tanpa
+`read-akunkas`, monitoring izin, jalur tanpa SDM, pratinjau setup, tautan
+Daftar, kuota pendaftaran, panel admin, lonceng, dan suite Oktober).
+
+### `akses`
+
+#### Utang kecil dari gerbang rute
+
+- Pesan gerbang bersifat umum dan tidak menyebut halaman maupun izin yang
+  kurang. Selesai 23 November 2026 (GR9a).
+
+### `gudang`
+
+#### Utang kecil dari modul Gudang
+
+- Dashboard gudang selesai di `06581f3` dan `50dca2f`. Setelah backend
+  memperbaiki butir 149, kartu pengajuan dapat kembali memakai angka
+  `GET /dashboard/gudang`, sehingga daftar pengajuan tidak perlu diambil
+  utuh hanya untuk menghitung. Selesai di `74b6af4`.
+
+### `inventaris`
+
+#### Utang kecil dari penyesuaian backend `d6709a1`
+
+- Pemicu filter arah jurnal stok terpotong menjadi "Semua ." di 1280 px
+  (terlihat 12 November 2026, sudah ada sebelum JS1a). Selesai di
+  `609b36a`: pemicu Arah dan Alasan 190 dan 200 px, di HP selebar penuh
+  (`modul/ui-ux.md`, CV2b).
+- Pemicu Arah dan Alasan jurnal stok tidak berlabel, berbeda dengan isian
+  filter lain di baris yang sama (terlihat 14 November 2026). Selesai di
+  `883a79b`: label "Arah" dan "Alasan", tanpa ikon corong (`modul/ui-ux.md`,
+  CV15a).
+#### Utang kecil dari pembelian stok
+
+- Mutasi `PEMBELIAN` di buku mutasi kas belum bertaut ke detail
+  pembelian, karena referensinya hanya membawa id, sedangkan rute detail
+  bergantung pada ruang lokasi penerimanya (PS10a). Selesai 23 November
+  2026 (`modul/keuangan.md`, TM1a).
+- Izin per ruang menunggu backend (PS9a, `kontrak/temuan.md` butir 158).
+
+### `jadwal-shift`
+
+#### Utang kecil dari modul jadwal dan shift
+
+- Hapus jadwal masih memakai `confirm` bawaan browser, berbeda dengan
+  dialog konfirmasi di modul lain; spec kelola jadwal bergantung padanya
+  (`page.once("dialog")`). Diseragamkan bila pemilik proyek memutuskan.
+  Selesai di `0df0ca5`: dialog "Hapus jadwal?" (`modul/ui-ux.md`, CV4a).
+- Shift outlet dan gudang masih memakai daftar tenant yang sama sampai
+  backend memisahkan shift per lokasi (`KUNCI_LOKASI_SHIFT`, keputusan
+  SH1b, `kontrak/temuan.md` butir 70). Selesai di `8b5ad0f` (B168).
+- Query `?workspace=` pada `GET /shift` hanya penanganan sementara,
+  karena backend menjawab 500 tanpa query apa pun (`kontrak/temuan.md`
+  butir 8). Dibuang begitu backend diperbaiki (`features/shift/ruang.ts`).
+  Sejak `8b5ad0f` web mengirim `locationID`; cabang `workspace` tinggal
+  untuk konstanta null, dan dibuang di `7f6d623`.
+- Pola roster outlet dan gudang masih memakai daftar tenant yang sama
+  sampai backend memisahkannya per lokasi (`KUNCI_LOKASI_POLA_ROSTER`,
+  keputusan PL5, `kontrak/temuan.md` butir 70). Selesai di `8b5ad0f`
+  (B168).
+- Ubah pola roster tetap gagal karena validator model backend
+  (`test.fixme` di `inti/pengujian.md`); tombol ubah tetap ditampilkan dan
+  galatnya diteruskan ke pengguna. Selesai di backend (B128); fixme
+  dilepas di `ea2e752`.
+- `keterangan` dan `dibuatPada` di `PolaRosterItem` masih opsional, walau
+  halaman generate lama yang memetakan pola sendiri sudah tidak ada
+  (`19227f8`); dijadikan wajib bersama perapian tipe berikutnya. Selesai
+  di `7c004c2`: mapper backend selalu mengirim keduanya (null bila kosong).
+#### Utang kecil dari penyesuaian backend `ridho` `0024eb9`
+
+- Monitoring per lokasi tidak memuat staf yang izin (`kontrak/temuan.md`
+  butir 165); baris izin di panel Status Staf disusun web dari karyawan
+  ruang menurut peran sampai backend memuat libur karyawan lokasi itu.
+  Sejak backend `916e7df` (B278) monitoring memuat staf yang izin bila
+  lokasi kerjanya lokasi itu; tambahan web tetap untuk staf tanpa lokasi
+  kerja.
+- Widget absensi dan panel Status Staf memuat lokasi ruang, sehingga
+  menuntut `read-location`, sedangkan gerbang panel dan halaman pengguna
+  belum memeriksanya. Selesai di `b69d39a`: panel dipasang hanya dengan
+  `read-location`, dan widget menampilkan pesan izin lokasi; jalur itu
+  hanya teruji di unit test.
+- Jalur role tanpa izin SDM baru (B139, B140) hanya teruji di unit test,
+  karena akun uji berperan Owner. Teruji e2e sejak `2bcb1ce` lewat
+  pengguna uji "E2E Tanpa SDM".
+- Hapus jadwal masih `confirm` bawaan browser (utang di atas), dan sel
+  yang berisi jadwal lokal sekaligus penanda lokasi lain tetap dapat
+  dijadikan libur, yang menghapus jadwal lokasi lain (B165). Keduanya
+  selesai di `0df0ca5`: Libur dinonaktifkan dengan keterangan, lewat klik
+  sel dan Tambah Manual (`modul/ui-ux.md`, CV3a dan CV10a).
+- Kolom Staf / Karyawan kalender jadwal selebar sekitar 460 px di 1280 px,
+  sehingga hanya tiga hari yang terlihat tanpa gulir (terlihat 14
+  November 2026); kalender menunggu pratinjau tersendiri (TB4a). Diukur
+  462 px di 1280 px dan 362 px di HP, sehingga di HP tidak ada hari yang
+  terlihat. Selesai di `883a79b`: dikunci 220 px mulai `md` dan 112 px di HP
+  (`modul/ui-ux.md`, CV16a); tabel kalender lainnya tetap menunggu TB4a.
+
+### `keuangan`
+
+#### Utang kecil dari tombol Catat pembelian
+
+- Isian tanggal filter Belanja Stok yang meluber di HP lunas 12 November
+  2026 (BS6a, di bawah).
+- Menu tunggal Pembelian Stok hanya aktif di sidebar pada daftarnya, tidak
+  di detail dan form catat, seperti menu tunggal lain (`isActive` cocok
+  persis). Selesai di `609b36a` untuk seluruh menu tunggal
+  (`hrefMenuAktif`, `modul/ui-ux.md` CV2b).
+#### Utang kecil dari modul keuangan
+
+- Halaman pengeluaran menampilkan keterangan belum tersedia sejak
+  `7fce871`, dan gate-nya masih `read-pembayaran`. Halamannya dibangun
+  begitu backend memperbaiki izin beban dan menetapkan kontraknya
+  (`kontrak/temuan.md` butir 130 sampai 132). Izinnya sudah diperbaiki
+  (`yoga` `55328f1`); yang ditunggu tinggal butir 131 sampai 134 (NZ11a).
+  Keempatnya diperbaiki di `7d28135` (RG6a), dan halamannya dijadwalkan
+  setelah RG4a.
+  Halamannya selesai di `1d7fa7b`, dengan gate `read-beban-operasional`.
+- Tampilan halaman akun kas dan halaman ubah bagi pengguna tanpa
+  `update-akunkas` belum teruji e2e (`inti/pengujian.md`), dan halaman ubah
+  membaca akun dari cache daftar tanpa `GET /akunkas/:id`. Halaman ubah
+  membaca `GET /akunkas/:id` sejak 23 November 2026, teruji
+  `keuangan/ubah-akun-kas`.
+- Label jenis mutasi saldo awal dan beban belum pernah tampil dengan data
+  nyata. Tampilan mutasi transfer dan pembatalan transfer masuk teruji
+  e2e sejak `f7805ca`; pembatalan transfer keluar hanya teruji di unit
+  test. Selisih kas lebih dan kurang (B228, `d696354`) juga belum pernah
+  tampil dengan data nyata, karena sesi kasir dibuka dari aplikasi; filter
+  kedua jenis teruji e2e terhadap server.
+- Tab Keuangan tampil bagi pengguna tanpa izin halamannya dan baru
+  ditolak saat dibuka (`kontrak/temuan.md` butir 163). Selesai di
+  `e051906`.
+- Ringkasan Belanja Stok lebih dari satu halaman hanya teruji di unit
+  test (`referensi/utang-pengujian.md`).
+#### Utang kecil dari Mesin Kasir dan perbaikan HP Keuangan
+
+- Halaman Akun Kas tenant uji menampilkan "Akun non-aktif (518)"
+  (tangkapan layar pemilik proyek, 6 November 2026). Asalnya belum
+  ditelusuri; dugaan awal, akun uji spec Keuangan yang dinonaktifkan
+  karena `DELETE /akunkas/:id` tidak ada lagi (`kontrak/temuan.md`
+  butir 81). Ditelusuri 14 November 2026 lewat kueri baca-saja: kini 663,
+  seluruhnya akun bernama awalan "E2E" (Ubah Kembar 146, Keuangan Akun 97,
+  Ubah Status 73, Pindah Tujuan dan Pindah Sumber masing-masing 68, Tutup
+  Bersaldo 64, dan seterusnya). Bukan bug tampilan; tetap utang pengujian
+  (`referensi/utang-pengujian.md`, akun kas uji menumpuk).
+  Penumpukan dihentikan 23 November 2026 lewat akun uji tetap (AU1a).
+- Tab Keuangan memakai `focus-visible:ring-0`, sehingga tab tidak punya
+  penanda fokus saat dipakai dengan keyboard. Dipertahankan di
+  `b3f8698` karena tidak ada di pratinjau yang disetujui. Gugur di
+  `7b90716`: bar tab Keuangan dibuang (SK2a). Kelas yang sama di tab
+  navigasi Inventaris dan Reservasi diganti cincin fokus di `883a79b`
+  (`modul/ui-ux.md`, CV18a).
+- Keadaan memuat, gagal dimuat, sesi lintas tengah malam, Muat hari
+  sebelumnya, serta posisi panel di HP dan desktop tidak lagi teruji e2e
+  sejak spec pratinjau dihapus di `b74f30a` (daftar periksa nomor 6);
+  spec alur nyata hanya memeriksa tanpa gulir ke samping di HP
+  (`referensi/utang-pengujian.md`).
+- `kontrak/temuan.md` butir 172 sampai 174, K-18, dan K-19 tetap
+  terbuka di backend; web menanganinya seperti sebelum penyambungan
+  (MK3a, MK5a, dan `NAMA_MESIN_TANPA_DAFTAR`). Selesai di backend
+  `4a19be8` (B334 sampai B337), dan web memakainya di `e1ea235` (MK3b,
+  MK5b, MK6b).
+
+### `panel-admin`
+
+#### Utang kecil dari modul panel admin
+
+- Daftar akun dimuat seluruhnya tanpa paginasi, dan halaman detail serta
+  halaman ubah membaca akun dari cache daftar, karena backend tidak punya
+  endpoint detail maupun daftar yang dapat dipotong (`kontrak/temuan.md`
+  butir 119). Diganti begitu endpoint-nya ada. Selesai di `25aa498` dan
+  `1ccf0ef` (B176, B177).
+- Dialog aktifkan mewajibkan durasi untuk akun tanpa masa akses, mengikuti
+  backend (`durasiWajibSaatAktifkan`, `kontrak/temuan.md` butir 115);
+  disesuaikan begitu makna masa akses kosong diputuskan. Selesai di
+  `482ac79` (B154).
+- Password admin yang salah saat hapus dijawab 401, sehingga klien
+  menyegarkan token lalu mengulang `DELETE` (butir 114); web menampilkan
+  pesannya tanpa penanganan sementara. Sejak B150 dijawab 400.
+- Kepala panel admin tidak menampilkan identitas admin yang sedang masuk,
+  karena token akun tidak membawa email, dan tampilannya masih sederhana
+  dengan token tema; layout dan UI/UX-nya menunggu keputusan pemilik proyek.
+  Selesai 24 November 2026: email dari `GET /akun/me` di topbar (RP1a).
+#### Utang kecil dari penyesuaian backend `ridho` `0024eb9`
+
+- Perpindahan halaman daftar akun belum teruji e2e: skenarionya
+  dilewati selama data uji berisi tidak lebih dari 10 akun.
+
+### `pengaturan-outlet`
+
+#### Utang kecil dari modul Pengaturan outlet
+
+- Form buat dan ubah metode pembayaran bergantung pada `read-akunkas`
+  untuk pilihan akun tujuan, walau backend hanya mewajibkan izin create
+  atau update metode; tanpa izin itu form menampilkan pesan gagal memuat.
+  Diputuskan bila ada role yang membutuhkannya
+  (`kontrak/izin-halaman.md`). Diputuskan 23 November 2026 (MP1a).
+- Tab pajak per produk tidak dapat menampilkan relasi ke pajak nonaktif,
+  karena backend tidak mengirimnya (`kontrak/temuan.md` butir 93), sehingga
+  produk itu tampak tanpa pajak dan konfirmasi ganti tidak muncul.
+  Tertutup di `ed4bfd3`: relasi itu tampil bertanda (RH4a).
+- Wewenang yang namanya tidak punya padanan id di daftar permission
+  dibuang diam-diam saat form role menyusun payload (`payloadBuatRole`),
+  dan teks tombol simpan form role tetap "Simpan Perubahan" saat membuat
+  posisi baru; keduanya dipertahankan dari form lama (`597a163`).
+  Keduanya ditutup 14 November 2026: tombol mode buat "Buat Posisi" di
+  `0df0ca5` (CV6a), dan pembuangan wewenang dinilai bukan bug, karena
+  daftar centang dan wewenang tersembunyi berasal dari daftar permission
+  utuh (CV7a; `modul/ui-ux.md`).
+
+### `penjualan`
+
+#### Utang kecil dari modul penjualan dan pembayaran
+
+- Tipe berakhiran `Lama` (`inti/keputusan-rancangan.md` butir 19) habis sejak `1e05df6`:
+  `PelangganLama` dihapus di `d9365d3` dan `DiskonLama` di `1e05df6`.
+  Riwayatnya: tipe itu dipakai halaman lama lewat alias impor, dan masing-masing
+  dihapus di commit migrasi modul pemiliknya. Sisanya dihitung dengan
+  `grep -rhoE 'export interface [A-Za-z]+Lama\b' types | wc -l` (2 per
+  `e0aaeca`, yang menghapus `PajakLama`, `ProdukPajakRelasiLama`, dan
+  `PajakDariProdukLama`; 5 per `3359497`, yang menghapus `AkunKasLama`,
+  `AkunKasRefLama`, dan `MetodePembayaranLama`, dan pesan commit itu
+  keliru menyebut enam). Per `d9365d3` tersisa 1, dan per `1e05df6` 0.
+- `features/penjualan/halaman-buat-penjualan.tsx` 698 baris per BP1a (dipecah di `584d6ae`; 1.098 per `7a08b63`):
+  migrasi memindahkan lapisan data dan membuang `any`, tetapi tidak memecah
+  komponennya. Pisahkan pemilih pelanggan, pemilih diskon, dan pratinjau
+  total saat halaman itu disentuh lagi. Selesai di `7c004c2`: kartu
+  Pelanggan, kartu Diskon Global dan Keterangan, dan `pilihan-diskon.ts`
+  dipisah; halaman 438 baris (ringkasan tagihan sudah terpisah).
+- Dua `test.fixme` di spec alur penjualan menunggu backend, keduanya
+  untuk cache daftar jurnal (`kontrak/temuan.md` butir 46). Yang ketiga
+  (butir 37) dilepas di `a17d584` setelah backend `fc29433`.
+  Keduanya dilepas di `936f073`.
+- Filter tanggal daftar penjualan tidak dapat dikosongkan langsung,
+  karena `PilihTanggal` tidak punya tombol kosongkan; filter dikosongkan
+  lewat reset filter. Selesai di `0df0ca5`: tombol Kosongkan di kalender
+  (`modul/ui-ux.md`, CV5a).
+
+### `profil-login`
+
+#### Utang kecil dari modul Profil, login, dan sidebar
+
+- Bila `POST /pengguna/pin-logout` gagal, logout tetap mengakhiri sesi
+  lokal dan memutus sesi akun, tetapi cookie refresh pengguna tetap
+  berlaku di backend, sehingga membuka `/dashboard` lagi di browser yang
+  sama memulihkan sesi pengguna itu (suite penuh 7 November 2026, skenario
+  logout gagal di `auth/sidebar-pengguna.spec.ts`). Jalur refresh web
+  `penggunaDeviceService.refreshToken` backend `ridho` `1584222` (baris
+  683 sampai 707) hanya memeriksa JWT refresh pengguna, `tokenVersion`
+  pengguna, dan status akun aktif (`_assertAkunAktif`, baris 32), tidak
+  sesi akun. Cookie itu httpOnly dan tidak dapat dihapus web. Pemilik
+  proyek memutuskan melaporkannya ke backend (7 November 2026,
+  `kontrak/temuan.md` butir 177). Selesai di backend `ridho` `4a19be8`
+  (B343, P82): logout akun ikut memutus sesi pengguna web; dibuktikan
+  `auth/sidebar-pengguna.spec.ts` 16 November 2026 (dicatat ulang
+  23 November 2026).
+- Tombol hapus akun di halaman profil tampil nonaktif (PF2a) sampai
+  backend punya jalur hapus akun sendiri bagi Owner (`kontrak/temuan.md`
+  butir 112). Backend menyediakannya di B181; selesai 13 November 2026
+  lewat OA5a dan OA8a: Zona Bahaya profil dibuang, dan hapus akun berada
+  di halaman Akun Toko (`modul/setup-akun.md`).
+- Halaman ringkasan laba rugi memicu peringatan ukuran grafik di konsol
+  (lebar dan tinggi -1 saat render pertama). Penyebabnya belum ditelusuri
+  dari kode, dan grafiknya tetap tampil. Sejak `0c5822b` komponen grafik
+  yang sama (`GrafikLaporan`) juga dipakai dashboard outlet. Selesai di
+  `609b36a`: `ResponsiveContainer` recharts 3.8 memulai ukuran dari
+  `initialDimension` -1 x -1; kini 1 x 1 (`modul/ui-ux.md`, CV2b).
+
+### `reservasi`
+
+#### Utang kecil dari modul reservasi
+
+- Sebutan di pesan form tipe aset berbeda: "Kategori Aset" di halaman
+  buat dan "Tipe Aset" di halaman edit. Dipertahankan di `074e98c` karena
+  teks yang dilihat pengguna; penyeragamannya menunggu keputusan pemilik
+  proyek. Selesai 23 November 2026: "Kategori Aset" (KA1a).
+- Halaman buat dan edit tarif masih berbeda tampilan: `<select>` bawaan
+  dan harga polos di buat, Radix Select dan harga berformat ribuan di
+  edit. Penyatuan ke satu form ditunda (keputusan T1a). Selesai
+  23 November 2026 (TF1a).
+
+### `setup-akun`
+
+- Wizard: isian kategori, bahan baku, atau produk yang belum disimpan
+  dengan tombol "Tambah ..." atau "Simpan produk" tidak ikut terkirim
+  oleh "Simpan dan lanjut", dan galatnya hanya menyebut daftar kosong
+  (ditemukan pemilik proyek, 5 November 2026). Diantrikan di
+  `inti/status.md` (Pekerjaan berikutnya, Menunggu desain pemilik
+  proyek): penanda tombol yang harus ditekan lebih dulu, dan pemandu UI
+  setelah wizard selesai. Selesai di `58d7eb9` (penanda, PN1a) serta
+  `c8a2e83` dan `5c3da45` (tur wizard dan dashboard, PN2a sampai PN4a).
+- Nama toko dan email akun belum dapat ditampilkan di login pengguna,
+  karena token akun tidak memuatnya dan `GET /tenant/:id` menolak token
+  akun (`kontrak/temuan.md` butir 167, diserahkan ke Yoga). Selesai lewat
+  `GET /akun/me` (B240): panel login pengguna menampilkan keduanya sejak
+  `19498b7` (TP2b).
+- Tautan "Daftar" dan "Lupa password?" di login akun dipasang setelah N3,
+  N4, dan Y1 tersedia; sampai itu `/daftar`, `/daftar/verifikasi`,
+  `/lupa-password`, dan `/setup` hanya dapat dibuka langsung.
+  "Lupa password?" terpasang di `67ec690`; "Daftar" menunggu wizard
+  tersambung, karena daftar berakhir di `/setup`. "Daftar" terpasang di
+  `4322dba` setelah wizard tersambung.
+- Permission langganan belum ada di backend (LG2a). Usulan: permission
+  baca langganan yang dimiliki Owner, diserahkan bersama N1; sampai itu
+  web membatasi lewat role.
+  Selesai di `c868870`: backend menyediakan `read-langganan` (B229), dan
+  halaman serta kartunya bergerbang izin itu.
+- Kuota `registerLimiter` di backend development (Fakta backend) membuat
+  spec daftar dilewati bila spec auth diulang dalam 15 menit (`d94a48c`).
+  Usulan: batasnya dapat dilonggarkan lewat env di backend non-produksi,
+  seperti batas OTP di N5. Tersedia sebagai `REGISTER_LIMIT_MAX` (B230)
+  dan disetel di perintah layanan uji (`inti/pengujian.md`).
+- Halaman pratinjau disambungkan ke backend di chat berikutnya
+  (`inti/status.md`, Pekerjaan berikutnya): data contoh dan spanduk
+  pratinjau dibuang halaman demi halaman begitu endpoint-nya tersedia.
+  Daftar, verifikasi email, dan lupa password tersambung di `67ec690`,
+  dan Langganan di `c868870`; wizard masih pratinjau.
+- Panel admin belum mengenal plan (B213), dan riwayat langganannya
+  menampilkan aksi `ubah-plan` tanpa label (`inti/status.md`). Selesai di
+  `475bf0b` dan `468a3bd`.
+- Langkah jam buka (JB1a sampai JB7a) belum tersambung: tampilannya hanya
+  di rute pratinjau `/setup/pratinjauJamBuka`, menunggu kontrak jam per
+  hari dari backend (`kontrak/temuan.md` butir 176). Selesai di
+  `46d90e1` (JB8a), dan pratinjaunya dihapus di `1171f33`.
+- WS6a belum diterapkan: ringkasan tersimpan lokasi outlet, sesi booking,
+  dan gudang masih bertautan (`kontrak/temuan.md` butir 175). Selesai di
+  `daf9e3a`.
+- Ruang gudang belum punya tur (PN4a). Menunya berbeda dari ruang outlet
+  (Petugas Gudang, Pengaturan Gudang), sehingga titik dan teksnya
+  diajukan ke pemilik proyek lebih dulu. Selesai 17 November 2026 (TG1a,
+  TG2a).
+- Langkah jam buka belum punya tur, karena teksnya belum diusulkan.
+  Selesai di `0c4cc7e` (JB9a).
+- Pemakaian jam buka di shift dan jadwal belum diputuskan pemilik proyek
+  (JB8a, 16 November 2026). Selesai di `fddb3c6` (JO1a, JO2a).
+
+### `ui-ux`
+
+#### Utang kecil dari fase UI/UX 11 Oktober 2026
+
+- Label sel di HP hanya tampil bila kolom punya `meta.label` atau `header`
+  berupa teks. Sebagian besar halaman menulis `header` sebagai komponen,
+  sehingga kartu baris di HP menampilkan nilai tanpa label. Dilengkapi
+  saat tiap halaman dirapikan. Selesai di `ceb8c95` (CV20a): 43 kolom di
+  13 halaman diberi `meta.label`.
+- 9 berkas masih memakai `<table>` yang ditulis sendiri (19 sebelum K-A,
+  per `eb81a1f`; seluruh tabel daftar selesai di K-A sampai K-E): tabel
+  rincian di halaman detail dan form (delapan berkas, termasuk
+  `features/jadwal/langkah-dua.tsx`), dan kalender jadwal
+  (`features/jadwal/grid-jadwal.tsx`), yang perlu pratinjau tersendiri
+  (keputusan TB4a). Sampai 16 Oktober 2026 daftar aset, tarif, tipe aset,
+  dan pola roster tersirat masuk tabel rincian, padahal keempatnya tabel
+  daftar (RG3a). Tabel rincian selesai di `eb64c70` (CV22a): delapan
+  berkas memakai `DataTable rincian`. Tersisa grid kalender jadwal dan grid
+  langkah 2 generate jadwal (CV23a), keduanya menunggu pratinjau TB4a.
+- Daftar akun admin dan tab pajak per produk
+  (`features/pajak/tab-pajak-produk.tsx`) belum ditinjau terhadap aturan
+  tabel yang baru. Tab pajak per produk selesai 20 November 2026 (PP1a);
+  daftar akun admin ikut rombak UI/UX laman admin (`inti/status.md`).
+- Dashboard gudang (`app/dashboard/gudang/page.tsx`) masih placeholder.
+  Selesai di `06581f3` dan `50dca2f` (`modul/gudang.md`): halamannya kini
+  memasang `HalamanDashboardGudang`.
+- Layout dan tampilan panel admin masih menunggu fase ini (Utang kecil
+  dari modul panel admin).
+- Lonceng notifikasi nonaktif sampai ada sumber datanya (DB4a), dan status
+  alpha staf ditunda (DB3a). Lonceng aktif sejak 12 November 2026 sebagai
+  pusat pemberitahuan pengingat masa langganan (`modul/setup-akun.md`,
+  TP8a); status alpha staf tetap ditunda.
+- Sisa 68 warna heksadesimal belum menjadi token: konstanta palet lokal di
+  tiga halaman reservasi dan tarif (termasuk `#FFFAF399` yang memakai
+  akhiran alfa), warna grafik di `features/laporan/grafik-laporan.tsx`,
+  dan warna di luar lima warna utama. Tipografi dan spasi juga belum.
+  Sejak `eb81a1f` tabel dan baris filter tarif memakai token, dan
+  `COLORS` di daftar tarif tinggal tiga warna untuk dialog hapus (TB23a);
+  angka 68 belum diukur ulang. Selesai di `c437d68` (CV21a): tidak ada
+  heksadesimal tersisa di `app`, `components`, `features`, dan `lib` selain
+  `lib/warna.ts`. Tipografi selesai di `5e597c2` (CV24a sampai CV26a);
+  spasi dicatat sebagai aturan (keputusan rancangan butir 35, CV27b), dan
+  seluruh pembungkus halaman diseragamkan 18 November 2026 (SP1a). Diukur
+  ulang 18 November 2026: 41 kemunculan, yaitu 36 definisi token di
+  `app/globals.css` dan 5 selektor bawaan shadcn di
+  `components/ui/chart.tsx`.
+- Pemindaian 768 px (14 November 2026): hampir 20 tabel daftar lebih lebar
+  dari wadahnya di lebar tablet (misalnya Produk +167, Stock Adjustment
+  +245, Penjualan +179, Tarif +184 px), karena kartu HP baru aktif di
+  bawah 640 px sedangkan wadah tabel dengan sidebar sekitar 600 px; luberan
+  halaman di Barang Gudang (+18) dan Pengajuan Stok outlet (+48); dan
+  label kartu Arus Kas terpotong. Perbaikannya keputusan desain (batas
+  kartu DataTable atau kolom per tabel). Selesai 17 November 2026 (LT1a
+  sampai LT5a, Luberan tabel 768 px).
+- Pemindaian 390 px (17 November 2026, sudah ada sebelum LT1a, dibuktikan
+  dengan `git stash`): tabel Pembelian Stok outlet lebih lebar 10 px dari
+  wadahnya (276 dan 266), halaman Produk +22 px, dan Buat Reservasi +18 px.
+  Selesai 17 November 2026 (LT7a sampai LT10a, Luberan HP 390 px).
+- Mode kartu LT1a lengket saat isi berubah tanpa mengubah kunci ukur
+  ulang (jumlah baris, halaman, ukuran, status muat, kolom): misalnya
+  pencarian di daftar berhalaman server yang tetap memberi 10 baris di
+  halaman 1 tetap kartu sampai wadah berubah lebar. Selesai 17 November
+  2026: id baris pertama dan terakhir ikut di kunci (`kunciUkurUlang`);
+  isi di tengah halaman yang berubah tanpa mengubah kedua ujungnya tetap
+  tidak terdeteksi, dan itu diterima.
+- Pesan "Gagal Memuat Lokasi Gudang" dan "Gudang Belum Didaftarkan" di
+  `app/dashboard/gudang/jurnalStok/page.tsx` tidak pernah tampil, karena
+  layout ruang gudang menghadang lebih dulu (kode mati). Dihapus
+  17 November 2026 bersama pola yang sama di Pembelian Stok gudang (KM1a,
+  pemilik proyek): kedua halaman memakai kunci query lokasi yang sama
+  dengan layout, yang memeriksa galat dan gudang yang belum ada lebih
+  dulu, termasuk saat muat ulang gagal dengan data lama. Tampilan tidak
+  berubah; spec `lihat-jurnal-stok` tetap memeriksa pesan layout.
+- Temuan pemindaian 14 November 2026 yang dibiarkan karena dirancang:
+  kalender jadwal dan deretan tab bergulir ke samping; keterangan Mutasi
+  Kas di kartu HP dan nama aset di timeline reservasi dipotong "...".
+  Aksi riwayat Pindah Dana yang masih tombol Batalkan dan tab Manajemen
+  Booking yang tidak menandai tab mana pun di Buat Reservasi selesai di
+  `883a79b` (CV17a, CV18a).
+- `inventaris-nav-tabs.tsx` di rute inventaris outlet tidak dipasang di halaman mana pun (kode mati; ditemukan 14 November
+  2026 saat menerapkan CV18a). Dihapus 14 November 2026 atas keputusan
+  pemilik proyek (CV19a).
+- Bayangan kartu baris memakai `filter` pada elemen `tr`. Di browser yang
+  tidak mendukungnya, kartu tampil dengan bingkai saja. Selesai
+  23 November 2026 (BB1a).
+- Suite e2e penuh dijalankan ulang pada 16 Oktober 2026 terhadap backend
+  `ridho` `7d28135` (Catatan dari penyesuaian backend `ridho` `7d28135`);
+  harapan sesudahnya 456 lolos dan 13 skipped. Suite penuh terakhir
+  18 Oktober 2026 (`eb81a1f`): 461 lolos dan 13 skipped; harapan
+  sesudah `20c026b` 462 lolos dan 14 skipped.

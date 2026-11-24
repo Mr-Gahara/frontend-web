@@ -609,14 +609,6 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
 
 ## Utang terbuka
 
-- Wizard: isian kategori, bahan baku, atau produk yang belum disimpan
-  dengan tombol "Tambah ..." atau "Simpan produk" tidak ikut terkirim
-  oleh "Simpan dan lanjut", dan galatnya hanya menyebut daftar kosong
-  (ditemukan pemilik proyek, 5 November 2026). Diantrikan di
-  `inti/status.md` (Pekerjaan berikutnya, Menunggu desain pemilik
-  proyek): penanda tombol yang harus ditekan lebih dulu, dan pemandu UI
-  setelah wizard selesai. Selesai di `58d7eb9` (penanda, PN1a) serta
-  `c8a2e83` dan `5c3da45` (tur wizard dan dashboard, PN2a sampai PN4a).
 - Nomor WhatsApp admin belum ditetapkan (LG1a); `NOMOR_WA_ADMIN` di
   `features/langganan/data.ts` masih kosong.
 - Ajis diminta mendaftar layar aplikasi yang menyentuh pembuatan toko,
@@ -624,52 +616,8 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
 - Domain alamat uji ber-OTP perlu dicocokkan dengan validator email
   `register`, karena buat akun klien oleh admin menolak domain disposable
   (`kontrak/payload.md`).
-- Nama toko dan email akun belum dapat ditampilkan di login pengguna,
-  karena token akun tidak memuatnya dan `GET /tenant/:id` menolak token
-  akun (`kontrak/temuan.md` butir 167, diserahkan ke Yoga). Selesai lewat
-  `GET /akun/me` (B240): panel login pengguna menampilkan keduanya sejak
-  `19498b7` (TP2b).
-- Tautan "Daftar" dan "Lupa password?" di login akun dipasang setelah N3,
-  N4, dan Y1 tersedia; sampai itu `/daftar`, `/daftar/verifikasi`,
-  `/lupa-password`, dan `/setup` hanya dapat dibuka langsung.
-  "Lupa password?" terpasang di `67ec690`; "Daftar" menunggu wizard
-  tersambung, karena daftar berakhir di `/setup`. "Daftar" terpasang di
-  `4322dba` setelah wizard tersambung.
 - Tombol "Buka aplikasi" di halaman setup selesai belum ada, karena
   aplikasi kasir belum rilis. Wajib ada saat aplikasi rilis: tombol
   membuka aplikasi lewat deep link, dan bila aplikasi belum terpasang
   mengarah ke halaman Play Store. Yang dibutuhkan dari Ajis: skema deep
   link atau Android App Links, serta nama paket atau tautan Play Store.
-- Permission langganan belum ada di backend (LG2a). Usulan: permission
-  baca langganan yang dimiliki Owner, diserahkan bersama N1; sampai itu
-  web membatasi lewat role.
-  Selesai di `c868870`: backend menyediakan `read-langganan` (B229), dan
-  halaman serta kartunya bergerbang izin itu.
-- Kuota `registerLimiter` di backend development (Fakta backend) membuat
-  spec daftar dilewati bila spec auth diulang dalam 15 menit (`d94a48c`).
-  Usulan: batasnya dapat dilonggarkan lewat env di backend non-produksi,
-  seperti batas OTP di N5. Tersedia sebagai `REGISTER_LIMIT_MAX` (B230)
-  dan disetel di perintah layanan uji (`inti/pengujian.md`).
-- Halaman pratinjau disambungkan ke backend di chat berikutnya
-  (`inti/status.md`, Pekerjaan berikutnya): data contoh dan spanduk
-  pratinjau dibuang halaman demi halaman begitu endpoint-nya tersedia.
-  Daftar, verifikasi email, dan lupa password tersambung di `67ec690`,
-  dan Langganan di `c868870`; wizard masih pratinjau.
-- Panel admin belum mengenal plan (B213), dan riwayat langganannya
-  menampilkan aksi `ubah-plan` tanpa label (`inti/status.md`). Selesai di
-  `475bf0b` dan `468a3bd`.
-- Langkah jam buka (JB1a sampai JB7a) belum tersambung: tampilannya hanya
-  di rute pratinjau `/setup/pratinjauJamBuka`, menunggu kontrak jam per
-  hari dari backend (`kontrak/temuan.md` butir 176). Selesai di
-  `46d90e1` (JB8a), dan pratinjaunya dihapus di `1171f33`.
-- WS6a belum diterapkan: ringkasan tersimpan lokasi outlet, sesi booking,
-  dan gudang masih bertautan (`kontrak/temuan.md` butir 175). Selesai di
-  `daf9e3a`.
-- Ruang gudang belum punya tur (PN4a). Menunya berbeda dari ruang outlet
-  (Petugas Gudang, Pengaturan Gudang), sehingga titik dan teksnya
-  diajukan ke pemilik proyek lebih dulu. Selesai 17 November 2026 (TG1a,
-  TG2a).
-- Langkah jam buka belum punya tur, karena teksnya belum diusulkan.
-  Selesai di `0c4cc7e` (JB9a).
-- Pemakaian jam buka di shift dan jadwal belum diputuskan pemilik proyek
-  (JB8a, 16 November 2026). Selesai di `fddb3c6` (JO1a, JO2a).

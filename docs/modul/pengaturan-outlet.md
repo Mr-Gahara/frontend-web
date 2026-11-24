@@ -283,29 +283,12 @@ nonaktifkan (keputusan PO2a).
 
 ### Utang kecil dari modul Pengaturan outlet
 
-- Form buat dan ubah metode pembayaran bergantung pada `read-akunkas`
-  untuk pilihan akun tujuan, walau backend hanya mewajibkan izin create
-  atau update metode; tanpa izin itu form menampilkan pesan gagal memuat.
-  Diputuskan bila ada role yang membutuhkannya
-  (`kontrak/izin-halaman.md`). Diputuskan 23 November 2026 (MP1a).
 - Enam tipe aset uji tertinggal sebagai bukti butir 77
   (`kontrak/temuan.md`), dan dihapus lewat API setelah laporan backend
   diterima.
-- Tab pajak per produk tidak dapat menampilkan relasi ke pajak nonaktif,
-  karena backend tidak mengirimnya (`kontrak/temuan.md` butir 93), sehingga
-  produk itu tampak tanpa pajak dan konfirmasi ganti tidak muncul.
-  Tertutup di `ed4bfd3`: relasi itu tampil bertanda (RH4a).
 - Pajak per aset (`assetID` di `POST /produkpajak`) belum dipakai web;
   ditinjau bersama modul reservasi bila dibutuhkan.
 - `pajakList` di tipe `Produk` tetap ada tetapi tidak dipakai tampilan,
   karena tidak mencerminkan relasi pajak (`kontrak/temuan.md` butir 88).
   Sejak backend `yoga` `e9bd1ae` dibaca dari relasi; tab tetap memakai
   `GET /produkpajak` (RH4a).
-- Wewenang yang namanya tidak punya padanan id di daftar permission
-  dibuang diam-diam saat form role menyusun payload (`payloadBuatRole`),
-  dan teks tombol simpan form role tetap "Simpan Perubahan" saat membuat
-  posisi baru; keduanya dipertahankan dari form lama (`597a163`).
-  Keduanya ditutup 14 November 2026: tombol mode buat "Buat Posisi" di
-  `0df0ca5` (CV6a), dan pembuangan wewenang dinilai bukan bug, karena
-  daftar centang dan wewenang tersembunyi berasal dari daftar permission
-  utuh (CV7a; `modul/ui-ux.md`).

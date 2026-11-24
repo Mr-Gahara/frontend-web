@@ -164,34 +164,8 @@ empat commit, dengan suite e2e penuh dijalankan sekali di akhir modul
 
 ### Utang kecil dari modul Profil, login, dan sidebar
 
-- Bila `POST /pengguna/pin-logout` gagal, logout tetap mengakhiri sesi
-  lokal dan memutus sesi akun, tetapi cookie refresh pengguna tetap
-  berlaku di backend, sehingga membuka `/dashboard` lagi di browser yang
-  sama memulihkan sesi pengguna itu (suite penuh 7 November 2026, skenario
-  logout gagal di `auth/sidebar-pengguna.spec.ts`). Jalur refresh web
-  `penggunaDeviceService.refreshToken` backend `ridho` `1584222` (baris
-  683 sampai 707) hanya memeriksa JWT refresh pengguna, `tokenVersion`
-  pengguna, dan status akun aktif (`_assertAkunAktif`, baris 32), tidak
-  sesi akun. Cookie itu httpOnly dan tidak dapat dihapus web. Pemilik
-  proyek memutuskan melaporkannya ke backend (7 November 2026,
-  `kontrak/temuan.md` butir 177). Selesai di backend `ridho` `4a19be8`
-  (B343, P82): logout akun ikut memutus sesi pengguna web; dibuktikan
-  `auth/sidebar-pengguna.spec.ts` 16 November 2026 (dicatat ulang
-  23 November 2026).
-
-- Tombol hapus akun di halaman profil tampil nonaktif (PF2a) sampai
-  backend punya jalur hapus akun sendiri bagi Owner (`kontrak/temuan.md`
-  butir 112). Backend menyediakannya di B181; selesai 13 November 2026
-  lewat OA5a dan OA8a: Zona Bahaya profil dibuang, dan hapus akun berada
-  di halaman Akun Toko (`modul/setup-akun.md`).
 - Unggah foto profil belum ada; avatar memakai inisial (PF9a). Bukan
   kebutuhan MVP, dan ditinjau setelah rilis.
 - Ganti pengguna (PU2a): sampai backend butir 190 diperbaiki, muat ulang
   atau tab baru sebelum pengguna berikutnya masuk meminta login email lagi
   (PU3a).
-- Halaman ringkasan laba rugi memicu peringatan ukuran grafik di konsol
-  (lebar dan tinggi -1 saat render pertama). Penyebabnya belum ditelusuri
-  dari kode, dan grafiknya tetap tampil. Sejak `0c5822b` komponen grafik
-  yang sama (`GrafikLaporan`) juga dipakai dashboard outlet. Selesai di
-  `609b36a`: `ResponsiveContainer` recharts 3.8 memulai ukuran dari
-  `initialDimension` -1 x -1; kini 1 x 1 (`modul/ui-ux.md`, CV2b).

@@ -1022,92 +1022,11 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
 
 ### Utang kecil dari fase UI/UX 11 Oktober 2026
 
+- Dua berkas masih memakai `<table>` yang ditulis sendiri, keduanya
+  kalender jadwal: `features/jadwal/grid-jadwal.tsx` dan
+  `features/jadwal/langkah-dua.tsx` (diperiksa 24 November 2026). Seluruh
+  tabel daftar sudah memakai `DataTable`. Diseragamkan atau dibiarkan
+  karena bentuknya kalender menunggu keputusan pemilik proyek.
 - `DataTable` punya test integrasi untuk pemilih ukuran klien sejak
   `4677447`. Teks kaki lainnya, nama tombol halaman, dan label sel di HP
   masih hanya terbukti lewat spec e2e halaman pemakainya.
-- Label sel di HP hanya tampil bila kolom punya `meta.label` atau `header`
-  berupa teks. Sebagian besar halaman menulis `header` sebagai komponen,
-  sehingga kartu baris di HP menampilkan nilai tanpa label. Dilengkapi
-  saat tiap halaman dirapikan. Selesai di `ceb8c95` (CV20a): 43 kolom di
-  13 halaman diberi `meta.label`.
-- 9 berkas masih memakai `<table>` yang ditulis sendiri (19 sebelum K-A,
-  per `eb81a1f`; seluruh tabel daftar selesai di K-A sampai K-E): tabel
-  rincian di halaman detail dan form (delapan berkas, termasuk
-  `features/jadwal/langkah-dua.tsx`), dan kalender jadwal
-  (`features/jadwal/grid-jadwal.tsx`), yang perlu pratinjau tersendiri
-  (keputusan TB4a). Sampai 16 Oktober 2026 daftar aset, tarif, tipe aset,
-  dan pola roster tersirat masuk tabel rincian, padahal keempatnya tabel
-  daftar (RG3a). Tabel rincian selesai di `eb64c70` (CV22a): delapan
-  berkas memakai `DataTable rincian`. Tersisa grid kalender jadwal dan grid
-  langkah 2 generate jadwal (CV23a), keduanya menunggu pratinjau TB4a.
-- Daftar akun admin dan tab pajak per produk
-  (`features/pajak/tab-pajak-produk.tsx`) belum ditinjau terhadap aturan
-  tabel yang baru. Tab pajak per produk selesai 20 November 2026 (PP1a);
-  daftar akun admin ikut rombak UI/UX laman admin (`inti/status.md`).
-- Dashboard gudang (`app/dashboard/gudang/page.tsx`) masih placeholder.
-  Selesai di `06581f3` dan `50dca2f` (`modul/gudang.md`): halamannya kini
-  memasang `HalamanDashboardGudang`.
-- Layout dan tampilan panel admin masih menunggu fase ini (Utang kecil
-  dari modul panel admin).
-- Lonceng notifikasi nonaktif sampai ada sumber datanya (DB4a), dan status
-  alpha staf ditunda (DB3a). Lonceng aktif sejak 12 November 2026 sebagai
-  pusat pemberitahuan pengingat masa langganan (`modul/setup-akun.md`,
-  TP8a); status alpha staf tetap ditunda.
-- Sisa 68 warna heksadesimal belum menjadi token: konstanta palet lokal di
-  tiga halaman reservasi dan tarif (termasuk `#FFFAF399` yang memakai
-  akhiran alfa), warna grafik di `features/laporan/grafik-laporan.tsx`,
-  dan warna di luar lima warna utama. Tipografi dan spasi juga belum.
-  Sejak `eb81a1f` tabel dan baris filter tarif memakai token, dan
-  `COLORS` di daftar tarif tinggal tiga warna untuk dialog hapus (TB23a);
-  angka 68 belum diukur ulang. Selesai di `c437d68` (CV21a): tidak ada
-  heksadesimal tersisa di `app`, `components`, `features`, dan `lib` selain
-  `lib/warna.ts`. Tipografi selesai di `5e597c2` (CV24a sampai CV26a);
-  spasi dicatat sebagai aturan (keputusan rancangan butir 35, CV27b), dan
-  seluruh pembungkus halaman diseragamkan 18 November 2026 (SP1a). Diukur
-  ulang 18 November 2026: 41 kemunculan, yaitu 36 definisi token di
-  `app/globals.css` dan 5 selektor bawaan shadcn di
-  `components/ui/chart.tsx`.
-- Pemindaian 768 px (14 November 2026): hampir 20 tabel daftar lebih lebar
-  dari wadahnya di lebar tablet (misalnya Produk +167, Stock Adjustment
-  +245, Penjualan +179, Tarif +184 px), karena kartu HP baru aktif di
-  bawah 640 px sedangkan wadah tabel dengan sidebar sekitar 600 px; luberan
-  halaman di Barang Gudang (+18) dan Pengajuan Stok outlet (+48); dan
-  label kartu Arus Kas terpotong. Perbaikannya keputusan desain (batas
-  kartu DataTable atau kolom per tabel). Selesai 17 November 2026 (LT1a
-  sampai LT5a, Luberan tabel 768 px).
-- Pemindaian 390 px (17 November 2026, sudah ada sebelum LT1a, dibuktikan
-  dengan `git stash`): tabel Pembelian Stok outlet lebih lebar 10 px dari
-  wadahnya (276 dan 266), halaman Produk +22 px, dan Buat Reservasi +18 px.
-  Selesai 17 November 2026 (LT7a sampai LT10a, Luberan HP 390 px).
-- Mode kartu LT1a lengket saat isi berubah tanpa mengubah kunci ukur
-  ulang (jumlah baris, halaman, ukuran, status muat, kolom): misalnya
-  pencarian di daftar berhalaman server yang tetap memberi 10 baris di
-  halaman 1 tetap kartu sampai wadah berubah lebar. Selesai 17 November
-  2026: id baris pertama dan terakhir ikut di kunci (`kunciUkurUlang`);
-  isi di tengah halaman yang berubah tanpa mengubah kedua ujungnya tetap
-  tidak terdeteksi, dan itu diterima.
-- Pesan "Gagal Memuat Lokasi Gudang" dan "Gudang Belum Didaftarkan" di
-  `app/dashboard/gudang/jurnalStok/page.tsx` tidak pernah tampil, karena
-  layout ruang gudang menghadang lebih dulu (kode mati). Dihapus
-  17 November 2026 bersama pola yang sama di Pembelian Stok gudang (KM1a,
-  pemilik proyek): kedua halaman memakai kunci query lokasi yang sama
-  dengan layout, yang memeriksa galat dan gudang yang belum ada lebih
-  dulu, termasuk saat muat ulang gagal dengan data lama. Tampilan tidak
-  berubah; spec `lihat-jurnal-stok` tetap memeriksa pesan layout.
-- Temuan pemindaian 14 November 2026 yang dibiarkan karena dirancang:
-  kalender jadwal dan deretan tab bergulir ke samping; keterangan Mutasi
-  Kas di kartu HP dan nama aset di timeline reservasi dipotong "...".
-  Aksi riwayat Pindah Dana yang masih tombol Batalkan dan tab Manajemen
-  Booking yang tidak menandai tab mana pun di Buat Reservasi selesai di
-  `883a79b` (CV17a, CV18a).
-- `inventaris-nav-tabs.tsx` di rute inventaris outlet tidak dipasang di halaman mana pun (kode mati; ditemukan 14 November
-  2026 saat menerapkan CV18a). Dihapus 14 November 2026 atas keputusan
-  pemilik proyek (CV19a).
-- Bayangan kartu baris memakai `filter` pada elemen `tr`. Di browser yang
-  tidak mendukungnya, kartu tampil dengan bingkai saja. Selesai
-  23 November 2026 (BB1a).
-- Suite e2e penuh dijalankan ulang pada 16 Oktober 2026 terhadap backend
-  `ridho` `7d28135` (Catatan dari penyesuaian backend `ridho` `7d28135`);
-  harapan sesudahnya 456 lolos dan 13 skipped. Suite penuh terakhir
-  18 Oktober 2026 (`eb81a1f`): 461 lolos dan 13 skipped; harapan
-  sesudah `20c026b` 462 lolos dan 14 skipped.

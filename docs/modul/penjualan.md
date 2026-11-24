@@ -238,21 +238,6 @@ dan `3efd05b`), dan cabang lain tidak maju.
 
 ### Utang kecil dari modul penjualan dan pembayaran
 
-- Tipe berakhiran `Lama` (`inti/keputusan-rancangan.md` butir 19) habis sejak `1e05df6`:
-  `PelangganLama` dihapus di `d9365d3` dan `DiskonLama` di `1e05df6`.
-  Riwayatnya: tipe itu dipakai halaman lama lewat alias impor, dan masing-masing
-  dihapus di commit migrasi modul pemiliknya. Sisanya dihitung dengan
-  `grep -rhoE 'export interface [A-Za-z]+Lama\b' types | wc -l` (2 per
-  `e0aaeca`, yang menghapus `PajakLama`, `ProdukPajakRelasiLama`, dan
-  `PajakDariProdukLama`; 5 per `3359497`, yang menghapus `AkunKasLama`,
-  `AkunKasRefLama`, dan `MetodePembayaranLama`, dan pesan commit itu
-  keliru menyebut enam). Per `d9365d3` tersisa 1, dan per `1e05df6` 0.
-- `features/penjualan/halaman-buat-penjualan.tsx` 698 baris per BP1a (dipecah di `584d6ae`; 1.098 per `7a08b63`):
-  migrasi memindahkan lapisan data dan membuang `any`, tetapi tidak memecah
-  komponennya. Pisahkan pemilih pelanggan, pemilih diskon, dan pratinjau
-  total saat halaman itu disentuh lagi. Selesai di `7c004c2`: kartu
-  Pelanggan, kartu Diskon Global dan Keterangan, dan `pilihan-diskon.ts`
-  dipisah; halaman 438 baris (ringkasan tagihan sudah terpisah).
 - Cakupan outlet daftar penjualan (K11b) dan `locationID` buat penjualan
   (K13a) hanya berlaku bagi pemegang `read-location`; pengguna lain melihat
   seluruh penjualan tenant dan tidak mengirim lokasi. Halaman buat belum
@@ -261,11 +246,3 @@ dan `3efd05b`), dan cabang lain tidak maju.
   Filter `?locationID=` backend belum dapat dipakai (butir 144, RH2b).
   Daftar memakainya sejak `20c026b` (RG4a); jalur tanpa `read-location`
   dan pemilih outlet di halaman buat tetap terbuka.
-- Dua `test.fixme` di spec alur penjualan menunggu backend, keduanya
-  untuk cache daftar jurnal (`kontrak/temuan.md` butir 46). Yang ketiga
-  (butir 37) dilepas di `a17d584` setelah backend `fc29433`.
-  Keduanya dilepas di `936f073`.
-- Filter tanggal daftar penjualan tidak dapat dikosongkan langsung,
-  karena `PilihTanggal` tidak punya tombol kosongkan; filter dikosongkan
-  lewat reset filter. Selesai di `0df0ca5`: tombol Kosongkan di kalender
-  (`modul/ui-ux.md`, CV5a).

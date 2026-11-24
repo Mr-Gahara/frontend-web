@@ -15,17 +15,18 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 **Suite penuh 24 November 2026** (web `13a3e93`, backend `ridho` lokal
 `1718030`, pukul 22.37 sampai 23.24 WIB, reporter `line,json`, charger
 tersambung, `systemd-inhibit`, sesudah seluruh kelompok utang
-pengujian): e2e 807 lolos, 4 gagal, dan 2 dilewati dari 813, sesuai
-harapan hitungan. Termasuk spec ber-OTP. Tiga yang gagal adalah merah
-yang disengaja: template General Manajer (butir 191), revisi surat jalan
-per kemasan (butir 192), dan status booking lewat jam di detail
-penjualan (butir 193). Yang dilewati: halaman berikutnya stock
-adjustment (data 10 atau kurang) dan Muat hari sebelumnya Mesin Kasir
-(riwayat belum dua halaman). Kegagalan keempat, kartu pengajuan
-dashboard gudang, berasal dari skenario baru yang membuka dashboard dua
-kali, sehingga penunggu menangkap respons halaman yang sudah dibuang;
-diperbaiki di `7b779f5` dan lolos 10 dari 10 dengan `--repeat-each 2`.
-Sesudahnya `bersih-akunkas.js` diterapkan (AU1a; cadangan
+pengujian): vitest 1246 lolos dari 147 berkas, dan e2e 807 lolos, 4
+gagal, dan 2 dilewati dari 813, sesuai harapan hitungan. Termasuk spec
+ber-OTP. Tiga yang gagal adalah merah yang disengaja: template General
+Manajer (butir 191), revisi surat jalan per kemasan (butir 192), dan
+status booking lewat jam di detail penjualan (butir 193). Yang dilewati:
+halaman berikutnya stock adjustment (data 10 atau kurang) dan Muat hari
+sebelumnya Mesin Kasir (riwayat belum dua halaman). Kegagalan keempat,
+kartu pengajuan dashboard gudang, berasal dari skenario baru yang
+membuka dashboard dua kali, sehingga penunggu menangkap respons halaman
+yang sudah dibuang; diperbaiki di `7b779f5` dan lolos 10 dari 10 dengan
+`--repeat-each 2`. Sesudahnya `bersih-akunkas.js` diterapkan (AU1a;
+cadangan
 `~/Documents/cadangan-db/db_produk-sebelum-bersih-2026-11-24.gz`): 27
 akun kas E2E non-aktif, 14 jurnal transfer Rp1, dan 42 baris mutasinya
 dihapus; saldo "Kas Kecil (Laci)" bergeser sebesar efek transfer uji
@@ -33,311 +34,14 @@ dihapus; saldo "Kas Kecil (Laci)" bergeser sebesar efek transfer uji
 konsisten, dan bukti butir 126 tidak disentuh. Harapan suite penuh
 berikutnya 813.
 
-**Baseline per utang pengujian kelompok reservasi, jadwal, dan tampilan**
-(24 November 2026, `2090dd8`, backend `ridho` lokal `1718030`): vitest
-1246 lolos dari 147 berkas (unit baru `tombolPanduanGudangTampil`).
-Tanpa suite penuh dan tanpa OTP: folder `reservasi` dan `jadwal` serta
-`keuangan/mesin-kasir` dijalankan bersama: 185 lolos, 2 gagal, dan 1
-dilewati dari 188. Yang gagal skenario bulan kosong Rekap Absensi
-(sebelum RK2a; ditulis ulang menjadi simulasi) dan label status booking
-lewat jam (butir 193, merah atas keputusan pemilik proyek); yang
-dilewati Muat hari sebelumnya Mesin Kasir. Sesudah RK2a dan TG3a dan
-dev server dinyalakan ulang, `jadwal/rekap-absensi` dan
-`dashboard/panduan-dashboard` 16 lolos; keduanya gagal pada kode lama
-(dibuktikan lewat `git stash`). Harapan suite penuh berikutnya 813 (`npx
-playwright test --list`, 124 berkas), dengan tiga skenario merah yang
-disengaja: General Manajer (191), revisi per kemasan (192), dan status
-booking lewat jam (193).
-
-**Baseline per utang pengujian kelompok inventaris dan gudang** (24
-November 2026, `826f0ab`, backend `ridho` lokal `1718030`): vitest 1244
-lolos dari 147 berkas (unit baru `produkSudahTerhapus`). Tanpa suite
-penuh dan tanpa OTP: folder `inventaris` dan `gudang` serta
-`dashboard/dashboard-gudang` dijalankan bersama: 190 lolos, 1 gagal, dan
-1 dilewati dari 192. Yang gagal skenario revisi surat jalan per kemasan,
-bukti temuan backend butir 192 (dibiarkan merah atas keputusan pemilik
-proyek); yang dilewati halaman berikutnya stock adjustment (data 10 atau
-kurang). Sesudah HP1a folder `inventaris/produk` 25 lolos; skenario hapus
-404 gagal pada kode lama (dibuktikan lewat `git stash`). Harapan spec
-lama yang diubah dengan bukti: dialog batal surat jalan menghitung
-`PATCH`, bukan `PUT`, dan Penerimaan Stok menahan selisih tanpa alasan
-lewat tombol yang terkunci. Harapan suite penuh berikutnya 804 (`npx
-playwright test --list`, 124 berkas).
-
-**Baseline per utang pengujian kelompok admin dan profil** (24 November
-2026, `c1f683b`, backend `ridho` lokal `1718030`): vitest 1243 lolos dari
-146 berkas (unit baru `potongKeLayar` dan `jangkarBalon`). Tanpa suite
-penuh dan tanpa OTP: folder `admin` dan `profil`, spec
-`auth/sidebar-pengguna`, `pengaturan/langganan`, `setup/panduan`, dan
-`dashboard/panduan-dashboard` dijalankan bersama sesudah dev server
-dinyalakan ulang: 72 lolos dari 72. Spec tur jam buka menemukan balon di
-luar layar untuk target setinggi lebih dari layar; diperbaiki (JB10a) dan
-gagal pada mesin tur lama (dibuktikan lewat `git stash`). Harapan spec
-tur yang keliru disesuaikan dengan bukti: Samakan dilewati selama belum
-ada hari berjam lengkap (keputusan JB9a), dan elemen yang lebih besar
-dari layar tidak dituntut tampil utuh. Harapan suite penuh berikutnya
-791 (`npx playwright test --list`, 122 berkas).
-
-**Baseline per utang pengujian kelompok keuangan** (24 November 2026,
-backend `ridho` lokal `1718030`): vitest 1237 lolos dari 146 berkas (unit
-baru `kelasPertumbuhan`, warna badge laba rugi yang dipindah dari JSX ke
-`features/laporan/periode.ts` tanpa perubahan perilaku). Tanpa suite penuh
-dan tanpa OTP: folder `keuangan`, `diskon`, dan `unduh`, spec kelola pajak
-dan kedua spec metode pembayaran, `penjualan/alur-penjualan`, dan
-`tampilan/pergantian-hari` dijalankan bersama: 151 lolos, 1 gagal, dan 1
-dilewati bersyarat dari 153. Yang gagal skenario lama PS10a di
-`mutasi-kas` (penunggu respons sebelum `goto` pada halaman yang sudah
-terbuka); diperbaiki lalu lolos bersama dua skenario baru (seluruh akun
-non-aktif, saldo sumber Pindah Dana berkurang). Yang dilewati Muat hari
-sebelumnya Mesin Kasir, karena riwayat belum dua halaman. Idempotensi
-penjualan dan pembayaran kini membuktikan backend mengembalikan dokumen
-yang sama untuk kunci yang sama. Harapan suite penuh berikutnya dihitung
-ulang di akhir seluruh kelompok.
-
-**Baseline per utang pengujian kelompok 1** (24 November 2026, backend
-`ridho` lokal `1718030`): vitest 1236 lolos dari 146 berkas (unit baru
-`aksiPengguna` dan `pengajuSendiri`). Tanpa suite penuh dan tanpa OTP:
-folder `akses`, `roles`, `diskon`, `pengguna`, `inventaris/pengajuanStok`,
-dan `inventaris/transferStok`, serta `gudang/ruang-gudang`,
-`dashboard/panduan-dashboard`, dan `keuangan/mesin-kasir` dijalankan
-bersama: 121 lolos, 1 gagal, dan 1 dilewati bersyarat dari 123. Yang
-gagal skenario template General Manajer, yang menunggu backend
-(`kontrak/temuan.md` butir 191, TR1a). Spec baru `akses/template-role`,
-`akses/gerbang-baca-saja`, `roles/level-bukan-owner`, dan
-`diskon/izin-diskon`. Skenario AP1a dan PG3a gagal pada kode lama
-(dibuktikan lewat `git stash`), dan skenario tanpa `read-akunkas` serta
-LK1a gagal saat aturannya dibuang sementara. Helper
-`pengajuanUjiDisetujui` tidak lagi men-submit pengajuan PENDING, karena
-backend hanya menerima submit dari DRAFT. Harapan suite penuh berikutnya
-757 (`npx playwright test --list`, 121 berkas).
-
-**Baseline per tombol bertaut** (24 November 2026, BT1a, BT2a, RP6a,
-backend `ridho` lokal `1718030`): vitest 1230 lolos, tanpa unit baru.
-ESLint menolak kesembilan tempat pada kode lama. Tanpa suite penuh dan
-tanpa OTP: folder `admin`, `keuangan/tampilan-hp`, `keuangan/pindah-dana`,
-`keuangan/ubah-akun-kas`, kedua spec metode pembayaran, dan
-`akses/jalur-bukan-owner` 67 lolos. Spec mencari tautan, bukan tombol,
-untuk Pindah Dana, Tambah Akun, Tambah Metode, Kembali ke Daftar, Buat
-Akun Klien, dan Ubah Akun (termasuk `toHaveCount(0)` Ubah Akun, yang
-akan lolos kosong bila tetap mencari tombol). Skenario ubah metode
-pembayaran menahan PUT dan memeriksa Batal terkunci; gagal pada kode
-lama (dibuktikan lewat `git stash`). Harapan suite penuh berikutnya tetap
-736 (`npx playwright test --list`, 117 berkas).
-
-**Baseline per revisi laman profil dan popup profil** (24 November 2026,
-PU1a sampai PU3a, backend `ridho` lokal `1718030`): vitest 1230 lolos
-(unit profil ditulis ulang untuk `skemaDataDiri`, `skemaPin`, payload
-terpisah, teks ringkasan, dan slug tab). Tanpa suite penuh dan tanpa OTP:
-`auth/sidebar-pengguna`, `auth/cache-ganti-pengguna`, dan folder `profil`
-20 lolos sesudah dev server dinyalakan ulang. Skenario baru: popup desain C
-di 1280 dan 390 px (isi, lebar sama dengan pemicu, warna teks pemicu),
-Ganti pengguna berhasil dan gagal, dan tata letak profil di 390, 768, dan
-1280 px; skenario popup gagal pada kode lama. Spec lama disesuaikan:
-"Simpan Perubahan" menjadi "Simpan Data Diri" atau "Ganti PIN" di tab
-Keamanan PIN, menu "Profil" dan "Logout" menjadi "Profil Saya" dan
-"Keluar dari toko", judul h1 kini nama pengguna, dan status tampil
-"Aktif". Harapan suite penuh berikutnya 736 (`npx playwright test
---list`, 117 berkas).
-
-**Baseline per deskripsi paket laman pengenalan** (24 November 2026,
-LU6a): vitest 1228 lolos, tanpa unit baru (isi paket data statis). Tanpa
-suite penuh: folder `tests/e2e/laman-utama` 5 lolos, termasuk skenario
-baru penanda paket di 390, 768, dan 1280 px, yang gagal pada kode lama
-(dibuktikan lewat `git stash`, lalu dijalankan ulang sesudah dipulihkan).
-Harapan suite penuh berikutnya 732 (`npx playwright test --list`, 117
-berkas).
-
-**Baseline per rombak panel admin** (24 November 2026, backend `ridho`
-lokal `1718030`): vitest 1228 lolos dari 145 berkas (empat unit baru:
-`statusLencana`, `inisialAkun`, `kolomRingkas`, `paramJumlahAkun`). Tanpa
-suite penuh dan tanpa OTP: folder `tests/e2e/admin` 26 lolos, 0 dilewati
-(spec baru `admin/tampilan-admin`, 4 skenario: laptop, tablet, HP beserta
-panel bawah dialog, dan kartu ringkas gagal dimuat). Spec lama disesuaikan
-dari combobox ke tombol pilihan (radiogroup) dan dari kolom Peran ke
-lencana Admin. Harapan suite penuh berikutnya 731 (`npx playwright test
---list`, 117 berkas).
-
-**Baseline per tuntasnya bug dan temuan frontend** (23 November 2026
-malam, backend `ridho` lokal `1718030`): vitest 1224 lolos. Kejadian
-vitest gagal 3 test sekali (19 November 2026) tidak tereproduksi: vitest
-penuh lima kali berturut-turut dan sekali tepat sesudah Playwright,
-semuanya 1224 lolos dan 0 gagal, dengan reporter JSON yang mencatat nama
-test yang gagal. Bila muncul lagi, jalankan
-`npx vitest run --reporter=json --outputFile=<berkas>` agar nama testnya
-tercatat. E2E tanpa suite penuh: folder `tampilan` (bayangan baris dan
-spec baru `tombol-kembali`, 5 skenario) dan `setup/setup` 15 lolos.
-Harapan suite penuh berikutnya 727 (`npx playwright test --list`, 116
-berkas).
-
-**Baseline per bug dan temuan frontend** (23 November 2026 sore, backend
-`ridho` lokal `1718030`): vitest 1224 lolos dari 145 berkas (unit baru
-`lib/auth/label-izin.ts`, `syaratKurangRute`, `labelMenuRute`, tautan
-mutasi PEMBELIAN). Tanpa suite penuh dan tanpa OTP: `auth/gerbang-rute`,
-`auth/guard-dashboard`, folder `akses`, `keuangan`, `reservasi`,
-`inventaris/pembelianStok`, dan `tampilan`, spec `pengaturan` tanpa OTP,
-dan `penjualan/daftar-penjualan` dijalankan bersama: 244 lolos dan 11
-gagal dari 255. Penyebabnya: dua skenario baru tanpa login (blok
-`describe`-nya tidak login di `beforeEach`), tiga spec tarif yang masih
-mencari `input[name="harga"]` dan sekaligus menemukan regresi nyata
-(harga kosong tersimpan Rp0, `modul/reservasi.md` TF1a), lima spec tipe
-aset dengan teks lama sebelum KA1a, dan pembaca warna bayangan di spec
-baru. Sesudah perbaikan, folder `reservasi/tipeAset`, `reservasi/tarif`,
-`tampilan`, serta spec `keuangan/mutasi-kas` dan `keuangan/ubah-akun-kas`
-lolos 78. Harapan suite penuh berikutnya 722 (`npx playwright test
---list`, 115 berkas).
-
-**Baseline per penyesuaian backend `ridho` `1718030`** (23 November 2026,
-backend `ridho` lokal `1718030`): vitest 1218 lolos dari 144 berkas
-(unit baru: `lib/unduh.ts`, `features/bahan-baku/satuan.ts`,
-`features/absensi/rekap.ts`, rincian hitung opname, satuan pembelian,
-pengajuan, surat jalan, dan resep berkemasan).
-Tanpa suite penuh dan tanpa OTP: folder `inventaris`, `keuangan`, `unduh`,
-`jadwal`, `dashboard`, `penjualan`, `gudang`, dan `akses`, ditambah
-`reservasi/daftar/tandai-selesai`, `auth/guard-dashboard`, dan
-`setup/plan-fitur`, dijalankan bersama: 377 lolos dan 1 dilewati dari 378
-(skip bersyarat dialog batal surat jalan), pukul 09.10 sampai 09.33 WIB.
-Spec baru: `unduh/ekspor-daftar` (15), `jadwal/rekap-absensi` (7), dan
-`inventaris/bahanBaku/konversi-satuan` (3); skenario baru B347 di
-`tandai-selesai`, unduhan di `keuangan/pembayaran-metode`, dan langkah
-rincian per kemasan di `draft-stok-opname`. Harapan suite penuh berikutnya
-716 (`npx playwright test --list`, 114 berkas): 689 ditambah 27 skenario
-baru.
-
-**Baseline per kerapian seluruh laman dan utang pengujian** (20 November
-2026 sore, backend `ridho` lokal `2790fc7`): vitest 1194 lolos dari 141
-berkas, termasuk satu unit baru TT1a di
-`tests/unit/components/topbar.test.tsx`. Angka 1195 di baseline suite
-penuh di bawah keliru: `HEAD` sebelum perubahan ini menghitung 1193
-(diukur ulang dengan `git stash -u`). Tanpa suite penuh dan tanpa OTP
-(suite penuh ditunda sampai seluruh pekerjaan selesai, pemilik proyek):
-
-- Spec terdampak kerapian (KL1b, TH1a, TI1a, KF1a, TT1a, PP1a, dan
-  perbaikan teknis), dipilih lewat label dan teks yang berubah, bukan
-  nama folder: 85 lolos dari 85, termasuk `pengaturan/pajak` dan
-  `pengaturan/kelola-pajak` yang kini membuka menu "Aksi pajak produk".
-- Spec bagian C, baru atau berubah, dijalankan bersama: 39 lolos dari 39
-  (`akses/jalur-bukan-owner` 8, `diskon/pilihan-kasir`, `gudang/ruang-gudang`,
-  `stok/lihat-stok`, dan tiga spec baru jalur berhasil).
-
-Sesudah pembersihan data uji 20 November 2026 (`inti/status.md`, Utang
-kecil dari penyesuaian backend `4759208`): folder `keuangan`, `diskon`,
-`pelanggan`, `jadwal/shift`, dan spec metode pembayaran 127 lolos dan 1
-gagal dari 128; kegagalannya sekali dan tidak terulang
-(`arsip/riwayat-pengujian.md`, Kejadian sesekali yang tidak berulang).
-
-Harapan suite penuh berikutnya 689 (`npx playwright test --list`, 111
-berkas): 680 ditambah sembilan skenario baru, yaitu `setujui-stok-opname`,
-`setujui-kirim-berhasil`, `tambah-barang-gudang`, setup gudang berhasil,
-empat skenario `jalur-bukan-owner`, dan skenario khusus member
-`pilihan-kasir`.
-
-**Suite penuh 20 November 2026** (web `86f2a0b`, backend `ridho` lokal
-`2790fc7`, pukul 11.10 sampai 11.49 WIB, reporter `line,json`, charger
-tersambung, `systemd-inhibit`, atas perintah pemilik proyek): e2e 676
-lolos, 3 gagal, dan 1 dilewati dari 680, sesuai harapan hitungan. Yang
-dilewati skip bersyarat dialog batal surat jalan (tidak ada surat jalan
-Belum Dikirim). Termasuk spec ber-OTP. Membuktikan seluruh perubahan sejak
-suite 17 November 2026: pembuktian kontrak, SR1a, SP1a, SP2a, TK1a sampai
-TK6a, FL1a sampai FL19a, LU1a sampai LU5a, dan DN5a. Ketiga kegagalan
-berasal dari spec yang tertinggal dari filter seragam, karena tidak ikut
-dijalankan di putaran FL1a:
-
-- `keuangan/tanggal-filter` (HP dan desktop): masih mencari isian tanggal
-  di halaman, padahal sejak FL1a isian itu di panel. Setelah disesuaikan,
-  spec menemukan bug sungguhan: tanggal berbulan panjang meluber dari
-  tombol panel (isi 182 px di tombol 171 px di HP dan 178 px di desktop).
-  Diperbaiki lewat FL20a (`99ecd4c`, `modul/ui-ux.md`); spec menunggu
-  animasi geser panel sebelum mengukur, dan lolos 4 dari 4 dengan
-  `--repeat-each 2`.
-- `keuangan/tutup-akun-bersaldo`: memilih akun kas lewat combobox di
-  halaman, padahal sejak FL1a pilihan itu di panel; lolos setelah membuka
-  panel.
-
-Sesudah perbaikan, tanpa suite penuh ulang dan tanpa OTP: folder
-`keuangan`, `inventaris/jurnalStok`, `inventaris/pembelianStok`, dan
-`daftar-penjualan` 92 lolos. Vitest 1195 lolos (2 unit
-`tautanTransferMutasi`, 3 unit `formatTeks`). Spec `mutasi-kas` memilih
-tanggal yang bukan hari ini, karena memilih tanggal bawaan membatalkan
-pilihan (gagal pada tanggal 20). Harapan suite penuh berikutnya 680.
-
-**Baseline per filter seragam** (19 November 2026, FL1a sampai FL15a,
-backend `ridho` lokal `2790fc7`): vitest 1187 lolos (26 unit test baru:
-`lib/filter.ts` dan pil serta lencana per modul). Tanpa suite penuh dan
-tanpa OTP; spec dijalankan per kelompok:
-
-- Penjualan: `daftar-penjualan` 9 lolos, dengan `--repeat-each 2` 18
-  lolos (tiga skenario baru: panel, draf dibuang tanpa Terapkan, pil;
-  kotak cari; panel layar penuh 390 px).
-- Keuangan: pengeluaran (skenario baru Select di dalam panel), mutasi kas,
-  pindah dana, arus kas, belanja stok, mesin kasir (skenario baru riwayat),
-  tampilan HP, dan daftar penjualan 43 lolos bersama.
-- Inventaris: folder pembelian stok, jurnal stok, pengajuan stok,
-  `lihat-stok-opname`, dan gudang 73 lolos bersama; skenario LT8a 390 px
-  diganti pemeriksaan Select selebar isi panel.
-- Diskon 12, Master Shift 15, dan admin 22 lolos.
-- Halaman hanya-cari, Reservasi, jadwal, pelanggan, pengguna, dan
-  pengaturan: 42 berkas, 343 lolos dan 1 dilewati dari 344 (skip bersyarat
-  dialog batal surat jalan).
-
-Satu run vitest sesudah percontohan Penjualan gagal 3 dari 1169 tepat
-setelah Playwright, lalu dua run berikutnya tanpa perubahan kode lolos
-seluruhnya; nama test yang gagal tidak tercatat, sehingga penyebabnya belum
-diketahui (pola "Gagal tepat setelah perubahan kode, lalu hilang").
-Helper `tests/helpers/filter-uji.ts` (`bukaPanelFilter`,
-`terapkanPanelFilter`, `pilihanPanel`). Spec yang memakai `URL` sebagai
-konstanta halaman memanggil `new globalThis.URL` (mesin-kasir). Harapan suite
-penuh berikutnya 676 (`npx playwright test --list`): 671 ditambah lima
-skenario baru (tiga Penjualan, satu Pengeluaran, satu Mesin Kasir);
-skenario lain ditulis ulang ke alur panel tanpa mengubah jumlah.
-
-**Baseline per laman utama** (19 November 2026, LU1a sampai LU5a):
-vitest 1190 lolos (empat tes `tujuanBukaDashboard` baru). Tanpa suite
-penuh dan tanpa OTP: spec baru `tests/e2e/laman-utama/laman-utama.spec.ts`
-4 lolos (tombol tamu, tanya jawab, muncul saat digulir dua arah, dan Buka
-dashboard sesudah masuk). Harapan suite penuh berikutnya 680: 676 ditambah
-empat skenario laman utama. Suite penuh dicatat sebagai utang
-(`referensi/utang-pengujian.md`).
-
-**Baseline per ukuran tombol aksi** (19 November 2026, TK1a sampai
-TK6a, backend `ridho` lokal `2790fc7`): vitest 1161 lolos. Tanpa suite
-penuh dan tanpa OTP; 50 berkas spec terdampak (tombol dan teks yang
-berubah, tata letak HP, admin) dijalankan bersama: 345 lolos dan 2 gagal
-dari 347. `keuangan/tampilan-hp` gagal karena masih memeriksa susunan
-KH1a; spec disesuaikan dengan TK4a. `jadwal/kelola-jadwal` gagal di
-`GET /shift` lewat API sebelum menyentuh UI ("Sesi tidak valid", pola
-rotasi `pin-refresh` di tabel Urutan debug). Kedua berkas dijalankan ulang
-dan lolos 14 dari 14. Harapan suite penuh tetap 671.
-
-**Baseline per pembuktian kontrak dan rapian 18 November 2026** (web
-`1072484`, backend `ridho` lokal `2790fc7`): vitest 1161 lolos. Tanpa
-suite penuh dan tanpa OTP; spec dijalankan per berkas:
-
-- Spec baru `inventaris/produk/stok-produk-beresep` (3 skenario: B169,
-  B170 id rusak, dan B170 toko lain dengan akun sekali pakai) lolos 6
-  dari 6 dengan `--repeat-each 2`, dan folder `inventaris/produk` 24
-  lolos sesudah SR1a.
-- Skenario baru B346 di `keuangan/mesin-kasir` (staf berlokasi kerja
-  Outlet) dan berkasnya lolos 8 dari 8 dengan `--repeat-each 2`.
-- 19 spec pemakai `tests/helpers/terkunci-uji.ts` (helper menerima
-  `aksesType`) 129 lolos.
-- Butir 77: `reservasi/tipeAset` dan `reservasi/tarif` dengan
-  `--repeat-each 10` 570 lolos.
-- Sesudah pembersihan data uji: `diskon`, `pelanggan`, `jadwal`,
-  `keuangan`, kedua spec metode pembayaran, `buat-penjualan`, dan
-  `reservasi/buat` 177 lolos.
-- Sesudah SP1a dan SP2a: 38 spec tata letak dan halaman yang lebarnya
-  berubah 253 lolos dan 1 dilewati bersyarat data.
-
-Harapan suite penuh berikutnya 671 (`npx playwright test --list`): 667
-ditambah tiga skenario `stok-produk-beresep` dan satu skenario B346;
-menunggu izin pemilik proyek.
-
 Baseline 16 dan 17 November 2026, dari penyesuaian backend `4a19be8`
 sampai suite penuh per penyesuaian backend `3570bd4`, dan baseline
 sebelumnya mulai rapian UI dan utang pengujian (14 November 2026) sampai
 penyesuaian backend `ridho` `b5b367a` (21 Oktober 2026), dipindah ke
 `arsip/riwayat-pengujian.md` (Riwayat baseline) pada 14, 17, dan
-20 November 2026.
+20 November 2026. Baseline 18 sampai 24 November 2026, dari pembuktian
+kontrak sampai utang pengujian per kelompok, dipindah ke arsip yang sama
+pada 24 November 2026; yang tersisa di atas hanya suite penuh terbaru.
 
 ## Kredensial uji
 
@@ -478,6 +182,16 @@ konstanta lokasi; syaratnya dibuang di `7f6d623`. Sembilan
 `2eb668a` dibuang syaratnya pada 7 November 2026, bersama
 `lintas-outlet.ts` di `tests/helpers`; jumlah skenario tidak berubah.
 
+Sejak 24 November 2026 tiga skenario dibiarkan **merah tanpa
+`test.fixme`** sebagai bukti temuan backend, atas keputusan pemilik
+proyek ("lapor saja, spec merah"), sehingga suite penuh mengharapkan tiga
+kegagalan itu: template General Manajer di `akses/template-role`
+(butir 191), revisi surat jalan per kemasan di
+`inventaris/bahanBaku/konversi-satuan` (butir 192), dan label status
+booking lewat jam di `reservasi/daftar/tandai-selesai` (butir 193).
+Begitu backend memperbaikinya, skenario itu harus lolos tanpa diubah
+(`referensi/laporan-untuk-backend.md`).
+
 Cara membuktikan sebuah fixme: lepas sementara, jalankan dua kali,
 kembalikan berkasnya dengan `git checkout`, lalu lepas dan commit per test
 yang lolos. Fixme berbadan kosong, fixme yang bersyarat konstanta frontend,
@@ -504,6 +218,11 @@ tidak memuat staf ruang outlet; terjadi di spec terdampak 7 November
 2026. Skenario HP di `keuangan/mesin-kasir.spec.ts` dilewati bila
 riwayat tujuh hari terakhir kosong; skenario alur di berkas yang sama,
 yang berjalan lebih dulu, selalu meninggalkan satu sesi tertutup.
+Skenario halaman berikutnya stock adjustment di
+`inventaris/halaman-berikutnya.spec.ts` dilewati selama data kedua ruang
+10 atau kurang, dan Muat hari sebelumnya di `keuangan/mesin-kasir.spec.ts`
+selama riwayat tujuh hari terakhir belum dua halaman; keduanya terjadi di
+suite penuh 24 November 2026.
 
 Tiga skenario pendaftaran di `auth/daftar.spec.ts` dilewati bila backend
 menjawab 429 (`ALASAN_KUOTA`, `d94a48c`): batas `registerLimiter` 10 per

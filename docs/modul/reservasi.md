@@ -163,13 +163,5 @@ aset (`d3ae182`), tarif (`365553f`), daftar reservasi (`27749fe`,
 
 ## Utang terbuka
 
-### Utang kecil dari modul reservasi
-
-- Sebutan di pesan form tipe aset berbeda: "Kategori Aset" di halaman
-  buat dan "Tipe Aset" di halaman edit. Dipertahankan di `074e98c` karena
-  teks yang dilihat pengguna; penyeragamannya menunggu keputusan pemilik
-  proyek. Selesai 23 November 2026: "Kategori Aset" (KA1a).
-- Halaman buat dan edit tarif masih berbeda tampilan: `<select>` bawaan
-  dan harga polos di buat, Radix Select dan harga berformat ribuan di
-  edit. Penyatuan ke satu form ditunda (keputusan T1a). Selesai
-  23 November 2026 (TF1a).
+Tidak ada utang terbuka per 24 November 2026; utang yang selesai dipindah ke
+`arsip/catatan-putaran.md` (Utang modul yang selesai, dipindah 24 November 2026).

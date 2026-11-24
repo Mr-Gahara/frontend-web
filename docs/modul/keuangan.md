@@ -846,25 +846,8 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
 
 ## Utang terbuka
 
-### Utang kecil dari tombol Catat pembelian
-
-- Isian tanggal filter Belanja Stok yang meluber di HP lunas 12 November
-  2026 (BS6a, di bawah).
-- Menu tunggal Pembelian Stok hanya aktif di sidebar pada daftarnya, tidak
-  di detail dan form catat, seperti menu tunggal lain (`isActive` cocok
-  persis). Selesai di `609b36a` untuk seluruh menu tunggal
-  (`hrefMenuAktif`, `modul/ui-ux.md` CV2b).
-
 ### Utang kecil dari modul keuangan
 
-- Halaman pengeluaran menampilkan keterangan belum tersedia sejak
-  `7fce871`, dan gate-nya masih `read-pembayaran`. Halamannya dibangun
-  begitu backend memperbaiki izin beban dan menetapkan kontraknya
-  (`kontrak/temuan.md` butir 130 sampai 132). Izinnya sudah diperbaiki
-  (`yoga` `55328f1`); yang ditunggu tinggal butir 131 sampai 134 (NZ11a).
-  Keempatnya diperbaiki di `7d28135` (RG6a), dan halamannya dijadwalkan
-  setelah RG4a.
-  Halamannya selesai di `1d7fa7b`, dengan gate `read-beban-operasional`.
 - `DELETE /akunkas/:id` tidak ada lagi sejak backend `465b438`, dan akun
   bersaldo tidak dapat ditutup (`kontrak/temuan.md` butir 81). Ubah,
   nonaktifkan, dan aktifkan kembali tersedia sejak `1bc76f4`, dan Pindah
@@ -877,48 +860,3 @@ dan migrasi (`45187b6`). Tidak ada lagi halaman keuangan yang memakai
   ringkasan gabungan sejak `d23844a` (NZ1a dan NZ2a).
   `GET /akunkas/:id/mutasi` tidak dipakai web, karena buku gabungan
   menerima `akunKasID`.
-- Tampilan halaman akun kas dan halaman ubah bagi pengguna tanpa
-  `update-akunkas` belum teruji e2e (`inti/pengujian.md`), dan halaman ubah
-  membaca akun dari cache daftar tanpa `GET /akunkas/:id`. Halaman ubah
-  membaca `GET /akunkas/:id` sejak 23 November 2026, teruji
-  `keuangan/ubah-akun-kas`.
-- Label jenis mutasi saldo awal dan beban belum pernah tampil dengan data
-  nyata. Tampilan mutasi transfer dan pembatalan transfer masuk teruji
-  e2e sejak `f7805ca`; pembatalan transfer keluar hanya teruji di unit
-  test. Selisih kas lebih dan kurang (B228, `d696354`) juga belum pernah
-  tampil dengan data nyata, karena sesi kasir dibuka dari aplikasi; filter
-  kedua jenis teruji e2e terhadap server.
-- Tab Keuangan tampil bagi pengguna tanpa izin halamannya dan baru
-  ditolak saat dibuka (`kontrak/temuan.md` butir 163). Selesai di
-  `e051906`.
-- Ringkasan Belanja Stok lebih dari satu halaman hanya teruji di unit
-  test (`referensi/utang-pengujian.md`).
-
-### Utang kecil dari Mesin Kasir dan perbaikan HP Keuangan
-
-- Halaman Akun Kas tenant uji menampilkan "Akun non-aktif (518)"
-  (tangkapan layar pemilik proyek, 6 November 2026). Asalnya belum
-  ditelusuri; dugaan awal, akun uji spec Keuangan yang dinonaktifkan
-  karena `DELETE /akunkas/:id` tidak ada lagi (`kontrak/temuan.md`
-  butir 81). Ditelusuri 14 November 2026 lewat kueri baca-saja: kini 663,
-  seluruhnya akun bernama awalan "E2E" (Ubah Kembar 146, Keuangan Akun 97,
-  Ubah Status 73, Pindah Tujuan dan Pindah Sumber masing-masing 68, Tutup
-  Bersaldo 64, dan seterusnya). Bukan bug tampilan; tetap utang pengujian
-  (`referensi/utang-pengujian.md`, akun kas uji menumpuk).
-  Penumpukan dihentikan 23 November 2026 lewat akun uji tetap (AU1a).
-- Tab Keuangan memakai `focus-visible:ring-0`, sehingga tab tidak punya
-  penanda fokus saat dipakai dengan keyboard. Dipertahankan di
-  `b3f8698` karena tidak ada di pratinjau yang disetujui. Gugur di
-  `7b90716`: bar tab Keuangan dibuang (SK2a). Kelas yang sama di tab
-  navigasi Inventaris dan Reservasi diganti cincin fokus di `883a79b`
-  (`modul/ui-ux.md`, CV18a).
-- Keadaan memuat, gagal dimuat, sesi lintas tengah malam, Muat hari
-  sebelumnya, serta posisi panel di HP dan desktop tidak lagi teruji e2e
-  sejak spec pratinjau dihapus di `b74f30a` (daftar periksa nomor 6);
-  spec alur nyata hanya memeriksa tanpa gulir ke samping di HP
-  (`referensi/utang-pengujian.md`).
-- `kontrak/temuan.md` butir 172 sampai 174, K-18, dan K-19 tetap
-  terbuka di backend; web menanganinya seperti sebelum penyambungan
-  (MK3a, MK5a, dan `NAMA_MESIN_TANPA_DAFTAR`). Selesai di backend
-  `4a19be8` (B334 sampai B337), dan web memakainya di `e1ea235` (MK3b,
-  MK5b, MK6b).

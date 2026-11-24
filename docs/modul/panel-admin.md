@@ -232,27 +232,7 @@ dengan suite e2e penuh dijalankan sekali di akhir modul (keputusan PF6a):
 
 ### Utang kecil dari modul panel admin
 
-- Daftar akun dimuat seluruhnya tanpa paginasi, dan halaman detail serta
-  halaman ubah membaca akun dari cache daftar, karena backend tidak punya
-  endpoint detail maupun daftar yang dapat dipotong (`kontrak/temuan.md`
-  butir 119). Diganti begitu endpoint-nya ada. Selesai di `25aa498` dan
-  `1ccf0ef` (B176, B177).
 - Akun admin baca-saja di panel (PA13a): tidak ada jalur web untuk
   mengubah atau mengganti password akun admin, termasuk miliknya sendiri.
 - Daftar toko (`GET /tenant`) dan kelola permission platform di luar
   cakupan putaran ini (PA2a).
-- Dialog aktifkan mewajibkan durasi untuk akun tanpa masa akses, mengikuti
-  backend (`durasiWajibSaatAktifkan`, `kontrak/temuan.md` butir 115);
-  disesuaikan begitu makna masa akses kosong diputuskan. Selesai di
-  `482ac79` (B154).
-- Password admin yang salah saat hapus dijawab 401, sehingga klien
-  menyegarkan token lalu mengulang `DELETE` (butir 114); web menampilkan
-  pesannya tanpa penanganan sementara. Sejak B150 dijawab 400.
-- Kepala panel admin tidak menampilkan identitas admin yang sedang masuk,
-  karena token akun tidak membawa email, dan tampilannya masih sederhana
-  dengan token tema; layout dan UI/UX-nya menunggu keputusan pemilik proyek.
-  Selesai 24 November 2026: email dari `GET /akun/me` di topbar (RP1a).
-### Utang kecil dari penyesuaian backend `ridho` `0024eb9`
-
-- Perpindahan halaman daftar akun belum teruji e2e: skenarionya
-  dilewati selama data uji berisi tidak lebih dari 10 akun.

@@ -325,57 +325,5 @@ modul ini yang memakai `apiClient`.
 
 ## Utang terbuka
 
-### Utang kecil dari modul jadwal dan shift
-
-- Hapus jadwal masih memakai `confirm` bawaan browser, berbeda dengan
-  dialog konfirmasi di modul lain; spec kelola jadwal bergantung padanya
-  (`page.once("dialog")`). Diseragamkan bila pemilik proyek memutuskan.
-  Selesai di `0df0ca5`: dialog "Hapus jadwal?" (`modul/ui-ux.md`, CV4a).
-- Shift outlet dan gudang masih memakai daftar tenant yang sama sampai
-  backend memisahkan shift per lokasi (`KUNCI_LOKASI_SHIFT`, keputusan
-  SH1b, `kontrak/temuan.md` butir 70). Selesai di `8b5ad0f` (B168).
-- Query `?workspace=` pada `GET /shift` hanya penanganan sementara,
-  karena backend menjawab 500 tanpa query apa pun (`kontrak/temuan.md`
-  butir 8). Dibuang begitu backend diperbaiki (`features/shift/ruang.ts`).
-  Sejak `8b5ad0f` web mengirim `locationID`; cabang `workspace` tinggal
-  untuk konstanta null, dan dibuang di `7f6d623`.
-- Pola roster outlet dan gudang masih memakai daftar tenant yang sama
-  sampai backend memisahkannya per lokasi (`KUNCI_LOKASI_POLA_ROSTER`,
-  keputusan PL5, `kontrak/temuan.md` butir 70). Selesai di `8b5ad0f`
-  (B168).
-- Ubah pola roster tetap gagal karena validator model backend
-  (`test.fixme` di `inti/pengujian.md`); tombol ubah tetap ditampilkan dan
-  galatnya diteruskan ke pengguna. Selesai di backend (B128); fixme
-  dilepas di `ea2e752`.
-- `keterangan` dan `dibuatPada` di `PolaRosterItem` masih opsional, walau
-  halaman generate lama yang memetakan pola sendiri sudah tidak ada
-  (`19227f8`); dijadikan wajib bersama perapian tipe berikutnya. Selesai
-  di `7c004c2`: mapper backend selalu mengirim keduanya (null bila kosong).
-
-### Utang kecil dari penyesuaian backend `ridho` `0024eb9`
-
-- Monitoring per lokasi tidak memuat staf yang izin (`kontrak/temuan.md`
-  butir 165); baris izin di panel Status Staf disusun web dari karyawan
-  ruang menurut peran sampai backend memuat libur karyawan lokasi itu.
-  Sejak backend `916e7df` (B278) monitoring memuat staf yang izin bila
-  lokasi kerjanya lokasi itu; tambahan web tetap untuk staf tanpa lokasi
-  kerja.
-- Widget absensi dan panel Status Staf memuat lokasi ruang, sehingga
-  menuntut `read-location`, sedangkan gerbang panel dan halaman pengguna
-  belum memeriksanya. Selesai di `b69d39a`: panel dipasang hanya dengan
-  `read-location`, dan widget menampilkan pesan izin lokasi; jalur itu
-  hanya teruji di unit test.
-- Jalur role tanpa izin SDM baru (B139, B140) hanya teruji di unit test,
-  karena akun uji berperan Owner. Teruji e2e sejak `2bcb1ce` lewat
-  pengguna uji "E2E Tanpa SDM".
-- Hapus jadwal masih `confirm` bawaan browser (utang di atas), dan sel
-  yang berisi jadwal lokal sekaligus penanda lokasi lain tetap dapat
-  dijadikan libur, yang menghapus jadwal lokasi lain (B165). Keduanya
-  selesai di `0df0ca5`: Libur dinonaktifkan dengan keterangan, lewat klik
-  sel dan Tambah Manual (`modul/ui-ux.md`, CV3a dan CV10a).
-- Kolom Staf / Karyawan kalender jadwal selebar sekitar 460 px di 1280 px,
-  sehingga hanya tiga hari yang terlihat tanpa gulir (terlihat 14
-  November 2026); kalender menunggu pratinjau tersendiri (TB4a). Diukur
-  462 px di 1280 px dan 362 px di HP, sehingga di HP tidak ada hari yang
-  terlihat. Selesai di `883a79b`: dikunci 220 px mulai `md` dan 112 px di HP
-  (`modul/ui-ux.md`, CV16a); tabel kalender lainnya tetap menunggu TB4a.
+Tidak ada utang terbuka per 24 November 2026; utang yang selesai dipindah ke
+`arsip/catatan-putaran.md` (Utang modul yang selesai, dipindah 24 November 2026).

@@ -301,7 +301,5 @@ backend `yoga` `fc29433`; `origin/yoga` tidak maju sejak itu.
 
 ### Utang kecil dari gerbang rute
 
-- Pesan gerbang bersifat umum dan tidak menyebut halaman maupun izin yang
-  kurang. Selesai 23 November 2026 (GR9a).
 - Syarat 44 entri baru diturunkan dari nama hook dan kontrak, bukan dari
   trace per halaman (`referensi/utang-pengujian.md`).
