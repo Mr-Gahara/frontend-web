@@ -72,18 +72,19 @@ export default function AkunKasPage() {
         */}
         <div className="flex w-full items-center gap-2 sm:w-auto sm:gap-3">
           {aksiTransfer(permissions).buat || aksiTransfer(permissions).baca ? (
-            <Link href={URL_PINDAH_DANA} className="block min-w-0 flex-1 sm:flex-none">
-              <Button
-                variant="outline"
-                size="aksi"
-                className="w-full border-navy/20 text-navy cursor-pointer"
-              >
+            <Button
+              asChild
+              variant="outline"
+              size="aksi"
+              className="min-w-0 flex-1 sm:flex-none w-full border-navy/20 text-navy cursor-pointer"
+            >
+              <Link href={URL_PINDAH_DANA}>
                 <ArrowLeftRight className="h-4 w-4" />
                 <span className="truncate">
                   Pindah Dana
                 </span>
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           ) : (
             <Button
               variant="outline"
@@ -99,19 +100,19 @@ export default function AkunKasPage() {
             </Button>
           )}
 
-          {/* Menambahkan class `block w-full` pada Link agar mengisi penuh sel Grid-nya */}
           {aksi.buat && (
-            <Link
-              href="/dashboard/outlet/keuangan/akunkas/buatAkunKas"
-              className="block min-w-0 flex-1 sm:flex-none"
+            <Button
+              asChild
+              size="aksi"
+              className="min-w-0 flex-1 sm:flex-none w-full bg-navy text-gading hover:bg-navy/90 border-navy shadow-sm cursor-pointer"
             >
-              <Button size="aksi" className="w-full bg-navy text-gading hover:bg-navy/90 border-none shadow-sm cursor-pointer">
+              <Link href="/dashboard/outlet/keuangan/akunkas/buatAkunKas">
                 <Plus className="h-4 w-4" />
                 <span className="truncate">
                   Tambah Akun
                 </span>
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )}
         </div>
       </div>

@@ -186,11 +186,16 @@ export function HalamanBuatAkun() {
         )}
 
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Link href={URL_DAFTAR_AKUN} className="w-full sm:w-auto">
-            <Button type="button" variant="outline" className={`w-full ${KELAS_TINGGI_TOMBOL} sm:px-6`} disabled={memuat}>
+          {/* Tautan terkunci selama menyimpan: `disabled` tidak berlaku pada <a>. */}
+          <Button
+            asChild
+            variant="outline"
+            className={`w-full sm:w-auto ${KELAS_TINGGI_TOMBOL} sm:px-6 aria-disabled:pointer-events-none aria-disabled:opacity-50`}
+          >
+            <Link href={URL_DAFTAR_AKUN} aria-disabled={memuat} tabIndex={memuat ? -1 : undefined}>
               Batal
-            </Button>
-          </Link>
+            </Link>
+          </Button>
           <Button
           type="submit"
           className={`w-full sm:w-auto sm:px-6 ${KELAS_TINGGI_TOMBOL} ${KELAS_TOMBOL_UTAMA}`}

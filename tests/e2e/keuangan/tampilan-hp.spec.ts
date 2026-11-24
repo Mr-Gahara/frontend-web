@@ -59,8 +59,8 @@ test.describe("tampilan laman Keuangan", () => {
     // Sejak TK4a (19 November 2026, menggantikan susunan bertumpuk KH1a):
     // kedua tombol sebaris, berbagi lebar isi sama rata, setinggi 32 px.
     await test.step("Pindah Dana dan Tambah Akun sebaris, berbagi lebar isi, 32 px, dan labelnya utuh", async () => {
-      const tambah = page.getByRole("button", { name: "Tambah Akun" });
-      const pindah = page.getByRole("button", { name: "Pindah Dana" });
+      const tambah = page.getByRole("link", { name: "Tambah Akun" });
+      const pindah = page.getByRole("link", { name: "Pindah Dana" });
       const kTambah = await kotak(tambah);
       const kPindah = await kotak(pindah);
       expect(Math.abs(kTambah.y - kPindah.y), "kedua tombol sebaris").toBeLessThan(2);
@@ -131,8 +131,8 @@ test.describe("tampilan laman Keuangan", () => {
       "page",
     );
 
-    const kPindah = await kotak(page.getByRole("button", { name: "Pindah Dana" }));
-    const kTambah = await kotak(page.getByRole("button", { name: "Tambah Akun" }));
+    const kPindah = await kotak(page.getByRole("link", { name: "Pindah Dana" }));
+    const kTambah = await kotak(page.getByRole("link", { name: "Tambah Akun" }));
     expect(Math.abs(kPindah.y - kTambah.y), "kedua tombol sebaris").toBeLessThan(2);
     expect(kTambah.x, "Tambah Akun di kanan Pindah Dana").toBeGreaterThan(kPindah.x);
   });

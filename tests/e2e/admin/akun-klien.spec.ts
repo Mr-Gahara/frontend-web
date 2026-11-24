@@ -38,7 +38,7 @@ const barisAkun = (page: Page, email: string) => page.getByRole("row").filter({ 
 const bukaDaftar = (page: Page) => bukaDaftarAkun<AkunRespons>(page);
 
 async function bukaFormBuat(page: Page) {
-  await page.getByRole("button", { name: "Buat Akun Klien" }).click();
+  await page.getByRole("link", { name: "Buat Akun Klien" }).click();
   await page.waitForURL("**/admin/akun/buat");
   await expect(page.getByRole("heading", { name: "Buat Akun Klien" })).toBeVisible();
 }

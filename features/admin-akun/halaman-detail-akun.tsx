@@ -134,11 +134,9 @@ function KelolaAkun({
           </Button>
         )}
         {kelola.ubah && (
-          <Link href={urlUbahAkun(akun.id)} className="min-w-0">
-            <Button type="button" variant="outline" className={KELAS_TOMBOL_SEKUNDER}>
-              Ubah Akun
-            </Button>
-          </Link>
+          <Button asChild variant="outline" className={KELAS_TOMBOL_SEKUNDER}>
+            <Link href={urlUbahAkun(akun.id)}>Ubah Akun</Link>
+          </Button>
         )}
         {kelola.hapusTampil && (
           <Button

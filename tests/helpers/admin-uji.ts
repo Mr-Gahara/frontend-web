@@ -210,7 +210,7 @@ export async function bukaDetailAkun(page: Page, akun: Pick<AkunUji, "id" | "ema
 
 /** Dari halaman daftar: buat akun klien uji bermasa percobaan lewat form, sampai kembali ke daftar. */
 export async function buatAkunKlienLewatUi(page: Page, email: string): Promise<AkunUji> {
-  await page.getByRole("button", { name: "Buat Akun Klien" }).click();
+  await page.getByRole("link", { name: "Buat Akun Klien" }).click();
   await page.waitForURL("**/admin/akun/buat");
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password awal").fill(PASSWORD_AKUN_UJI);

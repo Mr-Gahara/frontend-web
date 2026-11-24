@@ -156,12 +156,12 @@ export function HalamanDaftarAkun() {
           <h1 className="text-judul font-bold tracking-tight">Akun Klien</h1>
           <p className="text-isi text-muted-foreground">Kelola akun klien dan langganannya.</p>
         </div>
-        <Link href={URL_BUAT_AKUN} className="w-full sm:w-auto">
-          <Button type="button" size="aksi" className={`w-full ${KELAS_TOMBOL_UTAMA}`}>
+        <Button asChild size="aksi" className={`w-full sm:w-auto ${KELAS_TOMBOL_UTAMA}`}>
+          <Link href={URL_BUAT_AKUN}>
             <Plus className="h-4 w-4" />
             Buat Akun Klien
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       <RingkasanAkun />

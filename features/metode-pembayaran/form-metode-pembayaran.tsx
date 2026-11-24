@@ -81,11 +81,9 @@ export function PesanMetode({
           </Button>
         )}
         {kembali && (
-          <Link href={URL_DAFTAR_METODE}>
-            <Button type="button" variant="outline" className="cursor-pointer font-bold">
-              Kembali ke Daftar
-            </Button>
-          </Link>
+          <Button asChild variant="outline" className="cursor-pointer font-bold">
+            <Link href={URL_DAFTAR_METODE}>Kembali ke Daftar</Link>
+          </Button>
         )}
       </div>
     </div>
@@ -286,16 +284,20 @@ export function FormMetodePembayaran({
         )}
 
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-6 border-t border-navy/10 mt-2">
-          <Link href={URL_DAFTAR_METODE}>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={sedangMenyimpan}
-              className="w-full sm:w-auto cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold"
+          {/* Tautan terkunci selama menyimpan: `disabled` tidak berlaku pada <a>. */}
+          <Button
+            asChild
+            variant="outline"
+            className="w-full sm:w-auto cursor-pointer border-navy/20 text-navy hover:bg-navy/5 font-bold aria-disabled:pointer-events-none aria-disabled:opacity-50"
+          >
+            <Link
+              href={URL_DAFTAR_METODE}
+              aria-disabled={sedangMenyimpan}
+              tabIndex={sedangMenyimpan ? -1 : undefined}
             >
               Batal
-            </Button>
-          </Link>
+            </Link>
+          </Button>
           <Button
             type="submit"
             disabled={sedangMenyimpan || !adaPerubahan}

@@ -66,7 +66,7 @@ test.describe("Langganan akun klien", () => {
     try {
       await test.step("buat akun uji dengan masa percobaan lewat UI", async () => {
         await bukaDaftar(page);
-        await page.getByRole("button", { name: "Buat Akun Klien" }).click();
+        await page.getByRole("link", { name: "Buat Akun Klien" }).click();
         await page.waitForURL("**/admin/akun/buat");
         await page.getByLabel("Email", { exact: true }).fill(email);
         await page.getByLabel("Password awal").fill("UjiKlien123");
@@ -190,7 +190,7 @@ test.describe("Langganan akun klien", () => {
     try {
       await test.step("buat akun Pro: masa percobaan tidak ditawarkan, durasi wajib, lalu 24 bulan", async () => {
         await bukaDaftar(page);
-        await page.getByRole("button", { name: "Buat Akun Klien" }).click();
+        await page.getByRole("link", { name: "Buat Akun Klien" }).click();
         await page.waitForURL("**/admin/akun/buat");
         await page.getByLabel("Email", { exact: true }).fill(email);
         await page.getByLabel("Password awal").fill("UjiKlien123");

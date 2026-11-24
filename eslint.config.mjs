@@ -59,6 +59,13 @@ const eslintConfig = defineConfig([
           selector: "TemplateElement[value.raw=/(^|[\\s:])text-(xs|sm|base|lg|xl|[2-9]xl|\\[[0-9.]+(px|rem)\\])($|\\s)/]",
           message: "Ukuran huruf di luar skala. Pakai text-tampilan/judul/subjudul/besar/isi/kecil/mikro.",
         },
+        // Tombol di dalam tautan tidak sah di HTML dan memberi dua titik Tab
+        // (pemilik proyek, 24 November 2026).
+        {
+          selector:
+            "JSXElement[openingElement.name.name='Link'] > JSXElement[openingElement.name.name=/^(Button|button)$/]",
+          message: "Link tidak boleh membungkus Button. Tulis <Button asChild><Link …>…</Link></Button>.",
+        },
       ],
     },
   },

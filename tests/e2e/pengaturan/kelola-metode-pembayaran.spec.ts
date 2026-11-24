@@ -150,10 +150,25 @@ test.describe("E2E — Kelola metode pembayaran", () => {
       const isian = page.getByPlaceholder(PLACEHOLDER_NAMA);
       await expect(isian).toHaveValue(NAMA_FIXTURE);
       await isian.fill(namaBaru);
+      // Batal adalah tautan (Link membungkus Button dilarang, 24 November 2026) yang
+      // terkunci selama PUT berjalan; PUT ditahan lalu diteruskan, bukan dipalsukan.
+      const batal = page.getByRole("link", { name: "Batal", exact: true });
+      await expect(batal).toHaveAttribute("href", URL_DAFTAR);
+      await expect(batal).not.toHaveAttribute("aria-disabled", "true");
+      let lepas = () => {};
+      const ditahan = new Promise<void>((r) => (lepas = r));
+      await page.route(POLA_DETAIL, async (route) => {
+        if (route.request().method() === "PUT") await ditahan;
+        await route.continue();
+      });
       const tKirim = page.waitForRequest((r) => r.method() === "PUT" && POLA_DETAIL.test(r.url()));
       const tJawab = page.waitForResponse(cocok("PUT", POLA_DETAIL));
       await page.getByRole("button", { name: /simpan perubahan/i }).click();
       expect((await tKirim).postDataJSON()).toEqual({ namaPembayaran: namaBaru });
+      await expect(batal, "Batal terkunci selama menyimpan").toHaveAttribute("aria-disabled", "true");
+      await expect(batal).toHaveAttribute("tabindex", "-1");
+      await expect(batal).toHaveCSS("pointer-events", "none");
+      lepas();
       expect((await tJawab).status()).toBe(200);
       await expect(page).toHaveURL(new RegExp(URL_DAFTAR + "$"));
       await cari(page, namaBaru);
@@ -209,7 +224,7 @@ test.describe("E2E — Kelola metode pembayaran", () => {
     await page.getByRole("button", { name: `Aksi ${NAMA_FIXTURE}` }).click();
     await expect(page.getByRole("menuitem", { name: "Aktifkan" })).toBeDisabled();
     await page.keyboard.press("Escape");
-    await page.getByRole("button", { name: /tambah metode/i }).click();
+    await page.getByRole("link", { name: /tambah metode/i }).click();
     await expect(page).toHaveURL(new RegExp(URL_BUAT + "$"));
     await expect(page.getByText(/hanya dapat disimpan nonaktif/)).toBeVisible();
     await pemicu(page, "Non-Aktif").click();
@@ -244,7 +259,7 @@ test.describe("E2E — Kelola metode pembayaran", () => {
   test("detail yang tidak ditemukan menampilkan pesan, bukan memuat tanpa akhir", async ({ page }) => {
     await page.goto(`${URL_DAFTAR}/${ID_TIDAK_ADA}`);
     await expect(page.getByText("Metode pembayaran tidak ditemukan")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Kembali ke Daftar" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Kembali ke Daftar" })).toBeVisible();
   });
 
   test("daftar yang gagal dimuat menampilkan pesan, bukan daftar kosong", async ({ page }) => {

@@ -201,11 +201,11 @@ export function HalamanDaftarMetodePembayaran() {
             </div>
           </div>
           {aksi.buat && (
-            <Link href={URL_BUAT} className="w-full sm:w-auto">
-              <Button size="aksi" className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full">
+            <Button asChild size="aksi" className="cursor-pointer bg-navy text-gading hover:bg-navy/90 shadow-sm w-full sm:w-auto">
+              <Link href={URL_BUAT}>
                 <Plus className="h-4 w-4" /> Tambah Metode
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )}
         </div>
         {!dalamBatas && (

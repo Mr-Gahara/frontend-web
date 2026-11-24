@@ -27,7 +27,7 @@ const tungguAkun = (page: Page, method: "PUT" | "DELETE"): Promise<Response> =>
   page.waitForResponse((r) => POLA_SATU_AKUN.test(r.url()) && r.request().method() === method);
 
 async function bukaFormUbah(page: Page, akun: Pick<AkunUji, "id">) {
-  await page.getByRole("button", { name: "Ubah Akun" }).click();
+  await page.getByRole("link", { name: "Ubah Akun" }).click();
   await page.waitForURL("**/admin/akun/" + akun.id + "/ubah");
   await expect(page.getByRole("heading", { name: "Ubah Akun" })).toBeVisible();
 }
@@ -207,7 +207,7 @@ test.describe("Kelola akun klien", () => {
     await expect(
       page.getByText("Akun admin tidak berlangganan dan tidak dapat dibekukan."),
     ).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByRole("button", { name: "Ubah Akun" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Ubah Akun" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Hapus Akun" })).toHaveCount(0);
 
     await page.goto("/admin/akun/" + akunAdmin.id + "/ubah");
