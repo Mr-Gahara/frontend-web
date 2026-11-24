@@ -87,6 +87,15 @@ inventaris dan gudang, dan diputuskan lewat dialog; belum dikerjakan:
    pemberitahuan lain juga, bukan hanya produk; daftar sumbernya belum
    diputuskan.
 
+### Pasca-MVP: struk dapur (dicatat 24 November 2026)
+
+Fitur pengembangan versi berikutnya, bukan rilis MVP (pemilik proyek,
+24 November 2026): struk dapur untuk orderan POS aplikasi, berisi menu
+dan catatan opsional per menu. Rencana lengkapnya, termasuk bagian
+backend dan mobile yang kelak dipindah ke backend, ada di
+`referensi/rencana-struk-dapur.md`. Di web tidak ada pekerjaan sebelum
+backend menerima catatan per item.
+
 ### Keadaan 23 November 2026 sore
 
 Keadaan akhir sesi 23 November 2026: backend `ridho` `1718030` (tidak maju
