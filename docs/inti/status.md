@@ -90,6 +90,20 @@ inventaris dan gudang, dan diputuskan lewat dialog; belum dikerjakan:
    pemberitahuan lain juga, bukan hanya produk; daftar sumbernya belum
    diputuskan.
 
+### MVP: struk laporan tutup kasir (dicatat 24 November 2026)
+
+Wajib rilis di MVP (pemilik proyek, 24 November 2026): struk laporan
+tutup kasir per sesi kasir, untuk toko bershift maupun tanpa shift,
+dengan sembilan section yang sudah diputuskan, dan modal awal saat buka
+kasir yang boleh kosong (disimpan 0, bukan null). Diperiksa terhadap
+backend `1718030`: modal awal sudah ada sebagai `nominalBuka` tetapi
+wajib diisi, dan penjualan serta pembayaran non-tunai belum terhubung ke
+sesi kasir, sehingga nominal per metode, jumlah transaksi, dan produk
+terjual per sesi belum dapat disajikan. Rencana lengkap, peta data per
+isi struk, dan delapan keputusan terbuka di
+`referensi/rencana-struk-tutup-kasir.md`. Web menunggu endpoint laporan
+dari backend.
+
 ### Pasca-MVP: struk dapur (dicatat 24 November 2026)
 
 Fitur pengembangan versi berikutnya, bukan rilis MVP (pemilik proyek,
