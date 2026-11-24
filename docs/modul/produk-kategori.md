@@ -108,9 +108,13 @@ Diputuskan pemilik proyek 23 November 2026 (`referensi/keputusan-penyesuaian-bac
   24 November 2026). Ditemukan spec `inventaris/produk/crud-produk`: hapus
   produk yang sudah dihapus pengguna lain dijawab 404, tetapi dialog tetap
   terbuka dan barisnya tetap di tabel. Khusus 404, dialog ditutup, daftar
-  dimuat ulang (`useHapusProduk`), dan pesan info "Produk sudah dihapus."
-  tampil; galat lain tetap menahan dialog agar dapat diulang
-  (`produkSudahTerhapus` di `features/produk/hapus.ts`, `826f0ab`).
+  dimuat ulang, dan pesan info "Produk sudah dihapus." tampil; galat lain
+  tetap menahan dialog agar dapat diulang (`produkSudahTerhapus` di
+  `features/produk/hapus.ts`, `826f0ab`). Penerapan pertama memasang muat
+  ulang di hook bersama `useHapusProduk`, yang juga dipakai wizard setup,
+  tanpa ditanyakan; atas keputusan pemilik proyek ("Kembalikan ke opsi")
+  muat ulang dipanggil dari halaman produk saja lewat
+  `useInvalidasiProduk`, dan wizard tidak berubah (`946ce02`).
 
 ## Catatan
 

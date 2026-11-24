@@ -60,6 +60,31 @@ diperbaiki atas keputusan pemilik proyek (`modul/setup-akun.md`,
 JB10a).
 Nomor WhatsApp admin (LG1a) tetap menunggu pemilik proyek.
 
+### Berikutnya: pemberitahuan stok dan lonceng (dicatat 24 November 2026)
+
+Diminta pemilik proyek 24 November 2026 saat utang pengujian kelompok
+inventaris dan gudang, dan diputuskan lewat dialog; belum dikerjakan:
+
+1. **Pemicu**: peringatan bila toko tidak punya produk sama sekali, atau
+   tidak ada satu pun produk yang dapat dijual (setiap produk berstok
+   yang bukan unlimited stoknya 0, termasuk produk beresep yang stok
+   terhitungnya 0). Ditambah pemberitahuan tingkat sedang untuk produk
+   yang stoknya mencapai batas minimum.
+2. **Isi**: menurut jenis produk (tanpa produk: Buat Produk; berstok
+   langsung: isi stok lewat Ubah Produk; beresep: Pembelian Stok, dan
+   Pengajuan ke Gudang bila plan punya gudang), dengan tautan hanya bagi
+   pemegang izinnya. Harus pintar dan dinamis, karena web tidak dapat
+   menentukan cara pengguna mengisi ulang stok.
+3. **Bentuk**: pemberitahuan di lonceng topbar, dan panel lonceng terbuka
+   sendiri setiap halaman dashboard toko dibuka atau dimuat ulang selama
+   kondisinya berlaku; ditambah banner di dashboard outlet dan pesan di
+   Buat Penjualan, pajak per produk, dan diskon per produk. Toko yang
+   setupnya selesai tidak dikembalikan ke wizard (backend menyimpan
+   tanggal setup inti selesai).
+4. **Lingkup lonceng**: diberdayakan dengan baik dan benar untuk
+   pemberitahuan lain juga, bukan hanya produk; daftar sumbernya belum
+   diputuskan.
+
 ### Keadaan 23 November 2026 sore
 
 Keadaan akhir sesi 23 November 2026: backend `ridho` `1718030` (tidak maju

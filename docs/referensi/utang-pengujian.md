@@ -418,7 +418,9 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
   dari stok outlet dan satu di antaranya ke gudang; satu pengajuan
   Ditolak dari PG2a (`alur-pengajuan-stok`); dua surat jalan kaleng
   (BATAL dan DITERIMA 200 ml) dari `konversi-satuan`, dengan pembelian
-  Rp0 dua kaleng di gudang setiap kali stoknya kurang; dan satu produk
+  Rp0 dua kaleng di gudang setiap kali stoknya kurang (pengajuan kaleng
+  yang kembali PENDING dipakai ulang; empat dari run sebelum `946ce02`
+  tertinggal); dan satu produk
   uji yang dihapus dari `produk/crud-produk`. Entri inventory gudang
   "E2E Bahan Kaleng" dan pengguna uji "E2E Pengaju Gudang" serta "E2E
   Penyetuju Gudang" (berlokasi kerja Gudang) menetap.
