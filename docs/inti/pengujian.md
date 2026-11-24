@@ -12,6 +12,27 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
+**Suite penuh 24 November 2026** (web `13a3e93`, backend `ridho` lokal
+`1718030`, pukul 22.37 sampai 23.24 WIB, reporter `line,json`, charger
+tersambung, `systemd-inhibit`, sesudah seluruh kelompok utang
+pengujian): e2e 807 lolos, 4 gagal, dan 2 dilewati dari 813, sesuai
+harapan hitungan. Termasuk spec ber-OTP. Tiga yang gagal adalah merah
+yang disengaja: template General Manajer (butir 191), revisi surat jalan
+per kemasan (butir 192), dan status booking lewat jam di detail
+penjualan (butir 193). Yang dilewati: halaman berikutnya stock
+adjustment (data 10 atau kurang) dan Muat hari sebelumnya Mesin Kasir
+(riwayat belum dua halaman). Kegagalan keempat, kartu pengajuan
+dashboard gudang, berasal dari skenario baru yang membuka dashboard dua
+kali, sehingga penunggu menangkap respons halaman yang sudah dibuang;
+diperbaiki di `7b779f5` dan lolos 10 dari 10 dengan `--repeat-each 2`.
+Sesudahnya `bersih-akunkas.js` diterapkan (AU1a; cadangan
+`~/Documents/cadangan-db/db_produk-sebelum-bersih-2026-11-24.gz`): 27
+akun kas E2E non-aktif, 14 jurnal transfer Rp1, dan 42 baris mutasinya
+dihapus; saldo "Kas Kecil (Laci)" bergeser sebesar efek transfer uji
+(Rp1.056.005 menjadi Rp1.055.999) dengan rantai saldo berjalan
+konsisten, dan bukti butir 126 tidak disentuh. Harapan suite penuh
+berikutnya 813.
+
 **Baseline per utang pengujian kelompok reservasi, jadwal, dan tampilan**
 (24 November 2026, `2090dd8`, backend `ridho` lokal `1718030`): vitest
 1246 lolos dari 147 berkas (unit baru `tombolPanduanGudangTampil`).
@@ -426,6 +447,7 @@ Pola kegagalan yang berulang:
 | `bukaDenganAuth` habis waktu menunggu `pin-refresh` di skenario baru | Blok `describe` tempat skenario ditambahkan tidak login di `beforeEach`; skenario lain di blok itu memanggil `login(page)` sendiri. Baca `beforeEach` blok tujuan sebelum menambah skenario (23 November 2026) |
 | `getComputedStyle(...).boxShadow` sel bertanda `shadow-none` bukan `none`, atau warnanya tidak terbaca pola `rgba` | Tailwind v4 menulis bayangan sebagai beberapa lapisan variabel; `shadow-none` menjadi lapisan `rgba(0, 0, 0, 0)`, dan warna `color-mix` terhitung `color(srgb … / a)`. Periksa alfa setiap lapisan (`adaBayanganTerlihat` di `tampilan/bayangan-baris`) |
 | Skenario navigasi kembali gagal hanya di suite penuh, lolos sendirian | Tombol memakai `router.back()`, sehingga tujuannya bergantung riwayat tab yang berbeda antara run sendiri dan suite penuh. Buka laman di tab baru (`context().newPage()`) untuk membuktikannya secara pasti, dan pakai tujuan pasti (KB1a) |
+| `response.json` gagal `No resource with given identifier found` di skenario yang membuka halaman yang sama dua kali (helper sesi lalu helper pembuka halaman) | Pemuatan pertama masih meminta data saat pemuatan kedua memasang penunggu. Ambil sesi (`bukaDenganAuth`) dari halaman lain (`dashboard-gudang`, suite penuh 24 November 2026) |
 | Helper penunggu daftar menerima respons dengan query yang tidak diharapkan sesudah halaman diberi komponen baru | Penunggu tanpa syarat ikut menangkap permintaan endpoint yang sama dari komponen baru di halaman itu (kartu ringkas admin meminta `limit=1`). Saat menambah permintaan ke endpoint daftar, beri penunggu helper syarat query (`bukaDaftarAkun`, 24 November 2026) |
 | Daftar tab dan isinya bersisian, atau tab aktif tidak berbeda, padahal memakai `Tabs` shadcn | Varian `data-horizontal:` dan `data-active:` di `components/ui/tabs.tsx` tidak cocok dengan atribut Radix proyek ini (`data-orientation`, `data-state`). Tulis `flex-col` di `Tabs` dan `data-[state=active]:` di `TabsTrigger`, seperti laman pajak dan profil (PU1a, 24 November 2026) |
 | `strict mode violation` saat mengklik tombol yang hanya satu di halaman | Nama dicari sebagian dan tidak peka huruf besar: tombol paginasi "Next" ikut cocok dengan "Open Next.js Dev Tools" milik dev server. Pakai `exact: true` (`b03c276`) |

@@ -50,16 +50,19 @@ RP6a). Utang pengujian kelompok 1 selesai hari yang sama (AP1a, AP2a,
 PG3a, TR1a; temuan backend butir 191). Atas perintah pemilik proyek
 seluruh utang pengujian yang dapat dibuktikan dikerjakan per kelompok
 (akses dan peran, keuangan, admin dan profil, inventaris dan gudang,
-lalu reservasi, jadwal, dan tampilan, seluruhnya selesai), lalu suite
-e2e penuh (harapan 813, tiga merah disengaja: butir 191, 192, dan 193)
-dan `bersih-akunkas.js`. Kelompok terakhir menemukan teks Rekap Absensi
-kosong (RK2a) dan tombol panduan gudang di luar plan (TG3a), keduanya
-diperbaiki, serta butir 193 dan 194 untuk backend. Kelompok inventaris
-dan gudang menemukan hapus produk 404 (HP1a, diperbaiki) dan revisi per
-kemasan di backend (butir 192, spec merah). Kelompok admin dan profil
-menemukan balon tur di luar layar pada langkah jam buka,
-diperbaiki atas keputusan pemilik proyek (`modul/setup-akun.md`,
-JB10a).
+lalu reservasi, jadwal, dan tampilan, seluruhnya selesai). Suite e2e
+penuh 24 November 2026 malam 807 lolos dari 813, dengan tiga merah
+disengaja (butir 191, 192, dan 193) dan satu kegagalan spec baru yang
+diperbaiki (`inti/pengujian.md`, Baseline), lalu `bersih-akunkas.js`
+diterapkan. Berikutnya fitur pemberitahuan stok dan lonceng (di bawah),
+sambil menunggu backend untuk butir 191 sampai 194. Kelompok terakhir
+menemukan teks Rekap Absensi kosong (RK2a) dan tombol panduan gudang di
+luar plan (TG3a), keduanya diperbaiki, serta butir 193 dan 194 untuk
+backend. Kelompok inventaris dan gudang menemukan hapus produk 404
+(HP1a, diperbaiki) dan revisi per kemasan di backend (butir 192, spec
+merah). Kelompok admin dan profil menemukan balon tur di luar layar
+pada langkah jam buka, diperbaiki atas keputusan pemilik proyek
+(`modul/setup-akun.md`, JB10a).
 Nomor WhatsApp admin (LG1a) tetap menunggu pemilik proyek.
 
 ### Berikutnya: pemberitahuan stok dan lonceng (dicatat 24 November 2026)
