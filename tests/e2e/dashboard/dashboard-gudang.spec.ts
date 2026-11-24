@@ -115,7 +115,10 @@ test.describe("Dashboard gudang", () => {
   test("kartu pengajuan siap surat jalan menuju tab Perlu Surat Jalan dengan jumlah yang sama", async ({ page }) => {
     // Pengajuan uji transfer APPROVED tanpa surat jalan dipakai ulang, atau
     // dibuat bila belum ada, agar cabang kartu bertaut selalu teruji.
-    const auth = await bukaDenganAuth(page, URL_DASHBOARD);
+    // Sesi diambil dari halaman lain: bila dari dashboard, respons ringkasan
+    // pemuatan pertama dapat tertangkap penunggu bukaDashboard sesudah
+    // halamannya dibuang (suite penuh 24 November 2026).
+    const auth = await bukaDenganAuth(page, BASIS + "/dashboard/gudang/pengajuanStok");
     await pengajuanUjiDisetujui(page, auth);
 
     const { ringkasan } = await bukaDashboard(page);
