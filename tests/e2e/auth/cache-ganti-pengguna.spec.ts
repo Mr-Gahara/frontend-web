@@ -37,7 +37,7 @@ async function bukaAkunKasLewatSidebar(page: Page): Promise<number> {
 
 async function logoutLewatSidebar(page: Page, nama: string) {
   await page.getByRole("button", { name: new RegExp(nama) }).click();
-  await page.getByRole("menuitem", { name: "Logout" }).click();
+  await page.getByRole("menuitem", { name: "Keluar dari toko" }).click();
   await page.waitForURL("**/login");
 }
 

@@ -154,7 +154,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="bg-transparent! hover:bg-sidebar-accent! data-[state=open]:bg-sidebar-accent! cursor-pointer"
+                  className="bg-transparent! hover:bg-gading/14! data-[state=open]:bg-gading/14! cursor-pointer"
                 >
                   {urlLogo ? (
                     // Blob lokal dari URL objek; next/image tidak menangani blob: URL.
@@ -169,18 +169,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <GalleryVerticalEnd className="size-4" />
                     </div>
                   )}
-                  <div className="grid flex-1 text-left text-isi leading-tight text-slate-50 hover:text-slate-900 transition-colors">
+                  <div className="grid flex-1 text-left text-isi leading-tight text-gading">
                     <span className="truncate font-semibold">{namaToko}</span>
-                    <span className="truncate text-kecil text-slate-50/70 group-hover:text-slate-500">
+                    <span className="truncate text-kecil text-gading/75">
                       {currentWorkspaceName}
                     </span>
                   </div>
-                  <ChevronsUpDown className="ml-auto size-4 text-slate-50/70 group-hover:text-slate-500" />
+                  <ChevronsUpDown className="ml-auto size-4 text-gading/75" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
                 align="start"
                 side="bottom"
                 sideOffset={4}

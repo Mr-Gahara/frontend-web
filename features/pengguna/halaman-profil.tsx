@@ -1,23 +1,15 @@
 "use client";
 
-import type { ChangeEvent } from "react";
+import { Suspense, type ChangeEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import {
-  Activity,
-  Loader2,
-  Lock,
-  Phone,
-  Save,
-  Shield,
-  Store,
-  Terminal,
-  User,
-} from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTabUrl } from "@/hooks/use-tab-url";
 import { pesanError } from "@/lib/api/error";
 import { titipPesanLogin } from "@/lib/auth/pesan-login";
 import { tandaiKeluar } from "@/lib/auth/session";
@@ -29,27 +21,39 @@ import {
   hanyaAngka,
   inisialNama,
   kunciFormProfil,
-  nilaiAwalProfil,
-  payloadPerbaruiProfil,
+  NILAI_AWAL_PIN,
+  nilaiAwalDataDiri,
+  payloadDataDiri,
+  payloadGantiPin,
   saringNomorHp,
-  skemaProfil,
-  type NilaiFormProfil,
+  skemaDataDiri,
+  skemaPin,
+  type NilaiDataDiri,
+  type NilaiPin,
 } from "./schema-profil";
+import {
+  SLUG_TAB_PROFIL,
+  TAB_PROFIL,
+  teksAkses,
+  teksLokasiKerja,
+  teksPeranToko,
+  teksStatusPengguna,
+  type TabProfil,
+} from "./tampilan-profil";
 
-const KELAS_LABEL_BACA = "text-kecil font-medium text-muted-foreground flex items-center gap-1.5";
-const KELAS_LABEL = "text-kecil font-medium text-foreground flex items-center gap-1.5";
-const KELAS_KOTAK_BACA =
-  "w-full rounded-md border border-input bg-muted/50 p-2.5 flex items-center justify-between text-isi select-none";
-const KELAS_ISIAN_BACA =
-  "flex h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-isi text-muted-foreground cursor-not-allowed select-none";
-const KELAS_ISIAN =
-  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-isi text-foreground ring-offset-background file:border-0 file:bg-transparent file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors";
-const KELAS_PIN =
-  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-isi text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors font-mono tracking-widest";
+const KELAS_KARTU = "flex flex-col gap-5 rounded-2xl border border-navy/10 bg-permukaan p-4 sm:p-6";
+const KELAS_LABEL = "text-isi font-semibold";
+const KELAS_TOMBOL = "h-10 w-full bg-navy px-6 font-bold text-gading hover:bg-navy-terang sm:h-11 sm:w-auto";
+const KELAS_TRIGGER =
+  "h-10 rounded-lg text-isi font-semibold text-cokelat data-[state=active]:bg-permukaan data-[state=active]:font-bold data-[state=active]:text-navy data-[state=active]:shadow-sm sm:h-9 after:hidden";
 
-function PesanIsian({ pesan }: { pesan?: string }) {
+function PesanIsian({ id, pesan }: { id: string; pesan?: string }) {
   if (!pesan) return null;
-  return <p className="text-kecil font-medium text-destructive">{pesan}</p>;
+  return (
+    <p id={id} className="text-kecil font-medium text-destructive">
+      {pesan}
+    </p>
+  );
 }
 
 /**
@@ -66,59 +70,47 @@ function saring(isian: UseFormRegisterReturn, bersihkan: (teks: string) => strin
   };
 }
 
+function Ringkasan({ pengguna, namaToko }: { pengguna: PenggunaDetail; namaToko: string }) {
+  const butir: [string, ReactNode][] = [
+    ["Toko", namaToko || "-"],
+    ["Lokasi kerja", teksLokasiKerja(pengguna.lokasiKerja)],
+    ["Akses", teksAkses(pengguna.aksesType)],
+    ["Status", teksStatusPengguna(pengguna.status)],
+  ];
+  return (
+    <dl aria-label="Ringkasan akun" className="grid gap-x-6 gap-y-0 rounded-xl bg-krem-muda px-3 py-1 sm:grid-cols-2 sm:gap-y-4 sm:p-4">
+      {butir.map(([label, nilai]) => (
+        <div key={label} className="flex min-w-0 justify-between gap-3 py-2 sm:flex-col sm:justify-start sm:gap-0.5 sm:py-0">
+          <dt className="w-24 shrink-0 text-isi text-cokelat sm:w-auto sm:text-kecil">{label}</dt>
+          <dd className="min-w-0 text-right text-isi font-semibold [overflow-wrap:anywhere] sm:text-left">{nilai}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 /**
- * Kartu profil beserta form-nya. Nilai awal dibaca dari data tersimpan
+ * Tab Data Diri (PU1a): nama dan nomor HP. Nilai awal dari data tersimpan
  * lewat defaultValues (keputusan rancangan butir 8); halaman memasangnya
- * ulang lewat kunciFormProfil, sehingga setelah simpan berhasil form
- * menampilkan nilai tersimpan dan tombol simpan kembali nonaktif. Hanya
- * field yang berubah yang dikirim (butir 15).
+ * ulang lewat kunciFormProfil setelah simpan. Hanya field yang berubah yang
+ * dikirim (butir 15).
  */
-function KartuProfil({
-  pengguna,
-  peran,
-  namaToko,
-}: {
-  pengguna: PenggunaDetail;
-  peran: string;
-  namaToko: string;
-}) {
-  const router = useRouter();
+function FormDataDiri({ pengguna, namaToko }: { pengguna: PenggunaDetail; namaToko: string }) {
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty },
-  } = useForm<NilaiFormProfil>({
-    resolver: zodResolver(skemaProfil),
-    defaultValues: nilaiAwalProfil(pengguna),
+  } = useForm<NilaiDataDiri>({
+    resolver: zodResolver(skemaDataDiri),
+    defaultValues: nilaiAwalDataDiri(pengguna),
   });
-
   const perbarui = usePerbaruiProfil({
-    onSuccess: (_data, vars) => {
-      if (vars.payload.pinBaru !== undefined) {
-        // Backend memutus sesi setiap PIN berubah (keputusan PF7a): sesi
-        // pengguna diakhiri di sini, token akun dipertahankan, dan pengguna
-        // cukup login PIN ulang.
-        titipPesanLogin({
-          judul: "PIN Berhasil Diubah",
-          deskripsi: "Silakan login kembali dengan PIN baru Anda.",
-        });
-        tandaiKeluar();
-        router.replace("/login/pengguna");
-        return;
-      }
-      toast.success("Berhasil", {
-        description: "Profil Anda berhasil diperbarui.",
-      });
-    },
-    onError: (err) => {
-      toast.error("Gagal", {
-        description: pesanError(err, "Gagal memperbarui profil."),
-      });
-    },
+    onSuccess: () => toast.success("Berhasil", { description: "Data diri Anda berhasil diperbarui." }),
+    onError: (err) => toast.error("Gagal", { description: pesanError(err, "Gagal memperbarui data diri.") }),
   });
 
-  const kirim = (nilai: NilaiFormProfil) => {
-    const payload = payloadPerbaruiProfil(nilai, pengguna);
+  const kirim = (nilai: NilaiDataDiri) => {
+    const payload = payloadDataDiri(nilai, pengguna);
     if (Object.keys(payload).length === 0) {
       toast.info("Tidak ada perubahan untuk disimpan");
       return;
@@ -127,193 +119,139 @@ function KartuProfil({
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card text-card-foreground shadow-sm p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row items-center gap-4 border-b border-border pb-6">
-        <Avatar className="h-20 w-20 border border-border">
-          <AvatarFallback className="text-subjudul font-semibold bg-secondary text-foreground">
-            {inisialNama(pengguna.nama)}
-          </AvatarFallback>
-        </Avatar>
-
-        <div className="text-center sm:text-left space-y-1">
-          <h2 className="text-subjudul font-semibold text-foreground">
-            {pengguna.nama || "Nama Pengguna"}
-          </h2>
-          <p className="text-kecil text-muted-foreground flex items-center justify-center sm:justify-start gap-1">
-            <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            Sesi Aktif: {peran} @ {namaToko}
-          </p>
+    <form onSubmit={handleSubmit(kirim)} noValidate aria-label="Data Diri" className={KELAS_KARTU}>
+      <Ringkasan pengguna={pengguna} namaToko={namaToko} />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex min-w-0 flex-col gap-2">
+          <label htmlFor="nama" className={KELAS_LABEL}>
+            Nama Lengkap
+          </label>
+          <Input
+            id="nama"
+            {...register("nama")}
+            readOnly={perbarui.isPending}
+            placeholder="Masukkan nama lengkap"
+            aria-invalid={errors.nama ? true : undefined}
+            aria-describedby={errors.nama ? "galat-nama" : undefined}
+          />
+          <PesanIsian id="galat-nama" pesan={errors.nama?.message} />
+        </div>
+        <div className="flex min-w-0 flex-col gap-2">
+          <label htmlFor="nomorHp" className={KELAS_LABEL}>
+            Nomor WhatsApp / HP
+          </label>
+          <Input
+            id="nomorHp"
+            type="text"
+            inputMode="tel"
+            {...saring(register("nomorHp"), saringNomorHp)}
+            readOnly={perbarui.isPending}
+            placeholder="Contoh: 08123456789"
+            aria-invalid={errors.nomorHp ? true : undefined}
+            aria-describedby={errors.nomorHp ? "galat-nomorHp" : undefined}
+          />
+          <PesanIsian id="galat-nomorHp" pesan={errors.nomorHp?.message} />
         </div>
       </div>
-
-      <form onSubmit={handleSubmit(kirim)} noValidate className="space-y-4">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <p className={KELAS_LABEL_BACA}>
-              <Activity className="h-3.5 w-3.5" /> Status Pengguna
-            </p>
-            <div className={KELAS_KOTAK_BACA}>
-              <span className="text-foreground capitalize">{pengguna.status}</span>
-              <span
-                className={`text-mikro font-semibold px-2 py-0.5 rounded-full border ${
-                  pengguna.status === "aktif"
-                    ? "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400"
-                    : "bg-muted border-border text-muted-foreground"
-                }`}
-              >
-                Locked
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className={KELAS_LABEL_BACA}>
-              <Terminal className="h-3.5 w-3.5" /> Otorisasi Platform
-            </p>
-            <div className={KELAS_KOTAK_BACA}>
-              <div className="flex gap-1">
-                {pengguna.aksesType.map((type) => (
-                  <span
-                    key={type}
-                    className="text-mikro font-mono uppercase bg-background border border-border text-foreground px-1.5 py-0.5 rounded"
-                  >
-                    {type}
-                  </span>
-                ))}
-              </div>
-              <span className="text-mikro font-semibold px-2 py-0.5 rounded-full border bg-muted border-border text-muted-foreground">
-                Read Only
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label htmlFor="tokoProfil" className={KELAS_LABEL_BACA}>
-              <Store className="h-3.5 w-3.5" /> Nama Toko / Tenant
-            </label>
-            <Input
-              id="tokoProfil"
-              type="text"
-              value={namaToko}
-              disabled
-              readOnly
-              className={KELAS_ISIAN_BACA}
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="peranProfil" className={KELAS_LABEL_BACA}>
-              <Shield className="h-3.5 w-3.5" /> Hak Akses / Role
-            </label>
-            <Input
-              id="peranProfil"
-              type="text"
-              value={peran}
-              disabled
-              readOnly
-              className={KELAS_ISIAN_BACA}
-            />
-          </div>
-        </div>
-
-        <hr className="border-border my-2" />
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label htmlFor="nama" className={KELAS_LABEL}>
-              <User className="h-3.5 w-3.5" /> Nama Lengkap
-            </label>
-            <Input
-              id="nama"
-              {...register("nama")}
-              readOnly={perbarui.isPending}
-              placeholder="Masukkan nama lengkap"
-              aria-invalid={errors.nama ? true : undefined}
-              className={KELAS_ISIAN}
-            />
-            <PesanIsian pesan={errors.nama?.message} />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="nomorHp" className={KELAS_LABEL}>
-              <Phone className="h-3.5 w-3.5" /> Nomor WhatsApp / HP
-            </label>
-            <Input
-              id="nomorHp"
-              type="text"
-              inputMode="tel"
-              {...saring(register("nomorHp"), saringNomorHp)}
-              readOnly={perbarui.isPending}
-              placeholder="Contoh: 08123456789"
-              aria-invalid={errors.nomorHp ? true : undefined}
-              className={KELAS_ISIAN}
-            />
-            <PesanIsian pesan={errors.nomorHp?.message} />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 bg-muted/20 p-4 rounded-lg border border-border">
-          <div className="space-y-2">
-            <label htmlFor="pinLama" className={KELAS_LABEL}>
-              <Lock className="h-3.5 w-3.5" /> PIN Lama
-            </label>
-            <Input
-              id="pinLama"
-              type="password"
-              inputMode="numeric"
-              {...saring(register("pinLama"), hanyaAngka)}
-              placeholder="Masukkan PIN saat ini"
-              className={KELAS_PIN}
-              maxLength={6}
-              disabled={perbarui.isPending}
-              aria-invalid={errors.pinLama ? true : undefined}
-            />
-            <PesanIsian pesan={errors.pinLama?.message} />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="pinBaru" className={KELAS_LABEL}>
-              <Lock className="h-3.5 w-3.5 text-primary" /> PIN Baru
-            </label>
-            <Input
-              id="pinBaru"
-              type="password"
-              inputMode="numeric"
-              {...saring(register("pinBaru"), hanyaAngka)}
-              placeholder="Masukkan PIN baru"
-              className={KELAS_PIN}
-              maxLength={6}
-              disabled={perbarui.isPending}
-              aria-invalid={errors.pinBaru ? true : undefined}
-            />
-            <PesanIsian pesan={errors.pinBaru?.message} />
-          </div>
-          <p className="text-mikro text-muted-foreground sm:col-span-2">
-            *Kosongkan kedua kolom di atas jika Anda tidak berniat mengubah
-            PIN.
-          </p>
-        </div>
-
-        <div className="flex justify-end pt-4">
-          <button
-            type="submit"
-            disabled={perbarui.isPending || !isDirty}
-            className="inline-flex items-center justify-center rounded-md text-isi font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 px-4 cursor-pointer gap-2"
-          >
-            {perbarui.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            Simpan Perubahan
-          </button>
-        </div>
-      </form>
-    </div>
+      <div className="flex justify-end">
+        <Button type="submit" disabled={perbarui.isPending || !isDirty} className={KELAS_TOMBOL}>
+          {perbarui.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+          Simpan Data Diri
+        </Button>
+      </div>
+    </form>
   );
 }
 
-export function HalamanProfil() {
+/**
+ * Tab Keamanan PIN (PU1a): form sendiri. Backend memutus sesi setiap PIN
+ * berubah (keputusan PF7a): sesi pengguna diakhiri, token akun
+ * dipertahankan, dan pengguna cukup login PIN ulang.
+ */
+function FormPin({ pengguna }: { pengguna: PenggunaDetail }) {
+  const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<NilaiPin>({ resolver: zodResolver(skemaPin), defaultValues: NILAI_AWAL_PIN });
+  const perbarui = usePerbaruiProfil({
+    onSuccess: () => {
+      titipPesanLogin({
+        judul: "PIN Berhasil Diubah",
+        deskripsi: "Silakan login kembali dengan PIN baru Anda.",
+      });
+      tandaiKeluar();
+      router.replace("/login/pengguna");
+    },
+    onError: (err) => toast.error("Gagal", { description: pesanError(err, "Gagal mengganti PIN.") }),
+  });
+
+  return (
+    <form
+      onSubmit={handleSubmit((nilai) => perbarui.mutate({ id: pengguna.id, payload: payloadGantiPin(nilai) }))}
+      noValidate
+      aria-label="Keamanan PIN"
+      className={KELAS_KARTU}
+    >
+      <p className="rounded-xl bg-krem px-4 py-3 text-isi text-karamel-tua">
+        PIN dipakai untuk masuk di web dan aplikasi. Setelah PIN diganti, Anda keluar dan masuk lagi dengan PIN
+        baru.
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex min-w-0 flex-col gap-2">
+          <label htmlFor="pinLama" className={KELAS_LABEL}>
+            PIN Lama
+          </label>
+          <Input
+            id="pinLama"
+            type="password"
+            inputMode="numeric"
+            autoComplete="current-password"
+            {...saring(register("pinLama"), hanyaAngka)}
+            placeholder="PIN saat ini"
+            maxLength={6}
+            disabled={perbarui.isPending}
+            aria-invalid={errors.pinLama ? true : undefined}
+            aria-describedby={errors.pinLama ? "galat-pinLama" : undefined}
+          />
+          <PesanIsian id="galat-pinLama" pesan={errors.pinLama?.message} />
+        </div>
+        <div className="flex min-w-0 flex-col gap-2">
+          <label htmlFor="pinBaru" className={KELAS_LABEL}>
+            PIN Baru
+          </label>
+          <Input
+            id="pinBaru"
+            type="password"
+            inputMode="numeric"
+            autoComplete="new-password"
+            {...saring(register("pinBaru"), hanyaAngka)}
+            placeholder="6 digit angka"
+            maxLength={6}
+            disabled={perbarui.isPending}
+            aria-invalid={errors.pinBaru ? true : undefined}
+            aria-describedby={errors.pinBaru ? "galat-pinBaru" : undefined}
+          />
+          <PesanIsian id="galat-pinBaru" pesan={errors.pinBaru?.message} />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <Button type="submit" disabled={perbarui.isPending} className={KELAS_TOMBOL}>
+          {perbarui.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+          Ganti PIN
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+/**
+ * Laman profil desain C (pemilik proyek, 24 November 2026; PU1a): kepala
+ * berisi avatar, nama, peran, dan toko, lalu tab Data Diri dan Keamanan PIN
+ * yang tersimpan di ?tab=.
+ */
+function IsiHalamanProfil() {
   const { pengguna: sesi } = useSession();
   const profil = usePenggunaSaya();
   // Nama toko dibaca dari GET /tenant/:id, bukan dari tenantName token, yang
@@ -321,48 +259,72 @@ export function HalamanProfil() {
   const tenant = useTenant();
   const namaToko = tenant.data?.namaToko ?? (tenant.isError ? "Toko" : "");
   const peran = sesi?.role || "Staf";
+  const [tab, pilihTab] = useTabUrl<TabProfil>(SLUG_TAB_PROFIL, TAB_PROFIL, "data-diri");
 
   if (profil.isPending) {
     return (
-      <div className="flex h-[70vh] w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div role="status" className="flex h-[70vh] w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-navy" />
+        <span className="sr-only">Memuat profil</span>
       </div>
     );
   }
 
+  if (profil.isError) {
+    return (
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8">
+        <h1 className="text-judul font-bold tracking-tight">Profil Pengguna</h1>
+        <div role="alert" className="flex flex-col items-start gap-3 rounded-2xl border border-destructive/20 bg-destructive/10 p-4 sm:p-6">
+          <p className="text-isi font-medium text-destructive">{pesanError(profil.error, "Gagal memuat profil.")}</p>
+          <Button type="button" variant="outline" onClick={() => profil.refetch()} disabled={profil.isFetching}>
+            Coba Lagi
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const pengguna = profil.data;
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 sm:px-4 sm:py-8">
-      <div>
-        <h1 className="text-judul font-bold tracking-tight text-foreground">
-          Profil Pengguna
-        </h1>
-        <p className="text-isi text-muted-foreground">
-          Kelola informasi identitas akun Anda di dalam sistem outlet.
-        </p>
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 sm:gap-6 sm:px-4 sm:py-8">
+      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+        <span
+          aria-hidden="true"
+          className="flex size-14 shrink-0 items-center justify-center rounded-full bg-navy text-subjudul font-bold text-gading sm:size-16"
+        >
+          {inisialNama(pengguna.nama)}
+        </span>
+        <div className="min-w-0">
+          <h1 className="text-judul font-bold tracking-tight [overflow-wrap:anywhere]">{pengguna.nama}</h1>
+          <p className="text-isi text-muted-foreground [overflow-wrap:anywhere]">{teksPeranToko(peran, namaToko)}</p>
+        </div>
       </div>
 
-      {profil.isError ? (
-        <div className="rounded-xl border border-border bg-card text-card-foreground shadow-sm p-6 space-y-3 text-center">
-          <p className="text-isi font-medium text-destructive">
-            {pesanError(profil.error, "Gagal memuat profil.")}
-          </p>
-          <button
-            type="button"
-            onClick={() => profil.refetch()}
-            className="inline-flex items-center justify-center rounded-md text-isi font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 px-4 cursor-pointer"
-          >
-            Coba Lagi
-          </button>
-        </div>
-      ) : (
-        <KartuProfil
-          key={kunciFormProfil(profil.data)}
-          pengguna={profil.data}
-          peran={peran}
-          namaToko={namaToko}
-        />
-      )}
-
+      <Tabs value={tab} onValueChange={(v) => pilihTab(v as TabProfil)} className="flex w-full flex-col gap-5 sm:gap-6">
+        <TabsList aria-label="Profil" className="grid h-auto! w-full grid-cols-2 gap-1 rounded-xl bg-krem p-1 sm:max-w-90">
+          <TabsTrigger value="data-diri" className={KELAS_TRIGGER}>
+            Data Diri
+          </TabsTrigger>
+          <TabsTrigger value="pin" className={KELAS_TRIGGER}>
+            Keamanan PIN
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="data-diri">
+          <FormDataDiri key={kunciFormProfil(pengguna)} pengguna={pengguna} namaToko={namaToko} />
+        </TabsContent>
+        <TabsContent value="pin">
+          <FormPin pengguna={pengguna} />
+        </TabsContent>
+      </Tabs>
     </div>
+  );
+}
+
+/** useSearchParams (tab di URL) membutuhkan batas Suspense. */
+export function HalamanProfil() {
+  return (
+    <Suspense fallback={null}>
+      <IsiHalamanProfil />
+    </Suspense>
   );
 }

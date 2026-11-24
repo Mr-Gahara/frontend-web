@@ -3,11 +3,22 @@ import {
   hanyaAngka,
   inisialNama,
   kunciFormProfil,
-  nilaiAwalProfil,
-  payloadPerbaruiProfil,
+  NILAI_AWAL_PIN,
+  nilaiAwalDataDiri,
+  payloadDataDiri,
+  payloadGantiPin,
   saringNomorHp,
-  skemaProfil,
+  skemaDataDiri,
+  skemaPin,
 } from "@/features/pengguna/schema-profil";
+import {
+  SLUG_TAB_PROFIL,
+  teksAkses,
+  teksLokasiKerja,
+  teksPeranToko,
+  teksStatusPengguna,
+} from "@/features/pengguna/tampilan-profil";
+import { tabDariUrl } from "@/lib/tab-url";
 import type { PenggunaDetail } from "@/types/pengguna";
 
 const pengguna = (ubah: Partial<PenggunaDetail> = {}): PenggunaDetail => ({
@@ -25,21 +36,19 @@ const pengguna = (ubah: Partial<PenggunaDetail> = {}): PenggunaDetail => ({
 const isian = (ubah: Record<string, string> = {}) => ({
   nama: "Budi Santoso",
   nomorHp: "081234567890",
-  pinLama: "",
-  pinBaru: "",
   ...ubah,
 });
 
-const pesan = (nilai: Record<string, string>) => {
-  const hasil = skemaProfil.safeParse(nilai);
-  return hasil.success ? [] : hasil.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
-};
+const daftarGalat = (hasil: { success: boolean; error?: { issues: { path: PropertyKey[]; message: string }[] } }) =>
+  hasil.success || !hasil.error ? [] : hasil.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
+const pesan = (nilai: Record<string, string>) => daftarGalat(skemaDataDiri.safeParse(nilai));
+const pesanPin = (pinLama: string, pinBaru: string) => daftarGalat(skemaPin.safeParse({ pinLama, pinBaru }));
 
-describe("skemaProfil", () => {
-  it("menerima nama dan nomor HP tanpa PIN, dan memangkas isian", () => {
-    const hasil = skemaProfil.safeParse(isian({ nama: "  Budi Santoso  ", nomorHp: "08 12" }));
+describe("skemaDataDiri (PU1a)", () => {
+  it("menerima nama dan nomor HP, dan memangkas isian", () => {
+    const hasil = skemaDataDiri.safeParse(isian({ nama: "  Budi Santoso  ", nomorHp: "08 12" }));
     expect(hasil.success).toBe(false);
-    const rapi = skemaProfil.safeParse(isian({ nama: "  Budi Santoso  " }));
+    const rapi = skemaDataDiri.safeParse(isian({ nama: "  Budi Santoso  " }));
     expect(rapi.success && rapi.data.nama).toBe("Budi Santoso");
   });
 
@@ -53,58 +62,81 @@ describe("skemaProfil", () => {
   it("nomor HP boleh kosong atau berawalan +, tetapi tidak boleh berisi huruf", () => {
     expect(pesan(isian({ nomorHp: "" }))).toEqual([]);
     expect(pesan(isian({ nomorHp: "+6281234567890" }))).toEqual([]);
-    expect(pesan(isian({ nomorHp: "0812abc" }))).toContain(
-      "nomorHp: Nomor HP hanya boleh berisi angka",
-    );
-  });
-
-  it("PIN baru harus tepat 6 digit angka", () => {
-    const galat = "pinBaru: PIN baru harus tepat 6 digit angka";
-    expect(pesan(isian({ pinLama: "123456", pinBaru: "1234" }))).toContain(galat);
-    expect(pesan(isian({ pinLama: "123456", pinBaru: "1234567" }))).toContain(galat);
-    expect(pesan(isian({ pinLama: "123456", pinBaru: "12a456" }))).toContain(galat);
-    expect(pesan(isian({ pinLama: "123456", pinBaru: "654321" }))).toEqual([]);
-  });
-
-  it("PIN baru tanpa PIN lama ditolak", () => {
-    expect(pesan(isian({ pinBaru: "654321" }))).toEqual([
-      "pinLama: Masukkan PIN lama untuk mengonfirmasi perubahan",
-    ]);
-  });
-
-  it("PIN lama tanpa PIN baru ditolak", () => {
-    expect(pesan(isian({ pinLama: "123456" }))).toEqual([
-      "pinBaru: Isi PIN baru, atau kosongkan PIN lama bila tidak mengubah PIN",
-    ]);
+    expect(pesan(isian({ nomorHp: "0812abc" }))).toEqual(["nomorHp: Nomor HP hanya boleh berisi angka"]);
   });
 });
 
-describe("payloadPerbaruiProfil", () => {
-  it("tanpa perubahan menghasilkan payload kosong", () => {
-    expect(payloadPerbaruiProfil(nilaiAwalProfil(pengguna()), pengguna())).toEqual({});
+describe("skemaPin (PU1a)", () => {
+  it("kedua isian kosong ditolak, karena form PIN berdiri sendiri", () => {
+    expect(pesanPin("", "")).toEqual([
+      "pinLama: Masukkan PIN lama untuk mengonfirmasi perubahan",
+      "pinBaru: PIN baru wajib diisi",
+    ]);
   });
 
-  it("hanya mengirim field yang berubah", () => {
-    expect(payloadPerbaruiProfil(isian({ nama: "Budi S" }), pengguna())).toEqual({ nama: "Budi S" });
-    expect(payloadPerbaruiProfil(isian({ nomorHp: "081300000000" }), pengguna())).toEqual({
-      nomorHp: "081300000000",
-    });
+  it("PIN baru harus tepat 6 digit angka", () => {
+    const galat = ["pinBaru: PIN baru harus tepat 6 digit angka"];
+    expect(pesanPin("123456", "1234")).toEqual(galat);
+    expect(pesanPin("123456", "1234567")).toEqual(galat);
+    expect(pesanPin("123456", "12a456")).toEqual(galat);
+    expect(pesanPin("123456", "654321")).toEqual([]);
+  });
+
+  it("PIN baru tanpa PIN lama, dan PIN lama tanpa PIN baru, ditolak", () => {
+    expect(pesanPin("", "654321")).toEqual(["pinLama: Masukkan PIN lama untuk mengonfirmasi perubahan"]);
+    expect(pesanPin("123456", "")).toEqual(["pinBaru: PIN baru wajib diisi"]);
+  });
+});
+
+describe("payload profil (butir 15)", () => {
+  it("Data Diri tanpa perubahan menghasilkan payload kosong", () => {
+    expect(payloadDataDiri(nilaiAwalDataDiri(pengguna()), pengguna())).toEqual({});
+  });
+
+  it("Data Diri hanya mengirim field yang berubah, tanpa PIN", () => {
+    expect(payloadDataDiri(isian({ nama: "Budi S" }), pengguna())).toEqual({ nama: "Budi S" });
+    expect(payloadDataDiri(isian({ nomorHp: "081300000000" }), pengguna())).toEqual({ nomorHp: "081300000000" });
   });
 
   it("nomor HP yang dikosongkan dikirim sebagai null", () => {
-    expect(payloadPerbaruiProfil(isian({ nomorHp: "" }), pengguna())).toEqual({ nomorHp: null });
+    expect(payloadDataDiri(isian({ nomorHp: "" }), pengguna())).toEqual({ nomorHp: null });
   });
 
   it("nomor HP tersimpan null dan isian kosong tidak dikirim", () => {
     const tanpaHp = pengguna({ nomorHp: null });
-    expect(nilaiAwalProfil(tanpaHp).nomorHp).toBe("");
-    expect(payloadPerbaruiProfil(isian({ nomorHp: "" }), tanpaHp)).toEqual({});
+    expect(nilaiAwalDataDiri(tanpaHp).nomorHp).toBe("");
+    expect(payloadDataDiri(isian({ nomorHp: "" }), tanpaHp)).toEqual({});
   });
 
-  it("PIN dikirim sebagai pasangan pinLama dan pinBaru, tanpa field lain", () => {
-    expect(
-      payloadPerbaruiProfil(isian({ pinLama: "123456", pinBaru: "654321" }), pengguna()),
-    ).toEqual({ pinLama: "123456", pinBaru: "654321" });
+  it("ganti PIN mengirim pasangan pinLama dan pinBaru saja", () => {
+    expect(NILAI_AWAL_PIN).toEqual({ pinLama: "", pinBaru: "" });
+    expect(payloadGantiPin({ pinLama: "123456", pinBaru: "654321" })).toEqual({
+      pinLama: "123456",
+      pinBaru: "654321",
+    });
+  });
+});
+
+describe("tampilan profil (PU1a)", () => {
+  it("akses, lokasi kerja, status, serta peran dan toko", () => {
+    expect(teksAkses(["web", "app"])).toBe("Web dan Aplikasi");
+    expect(teksAkses(["app"])).toBe("Aplikasi");
+    expect(teksAkses(["web"])).toBe("Web");
+    expect(teksAkses([])).toBe("-");
+    expect(teksLokasiKerja(null)).toBe("Tidak dibatasi");
+    expect(teksLokasiKerja(undefined)).toBe("Tidak dibatasi");
+    expect(teksLokasiKerja({ id: "l1", nama: "Outlet Kemang", tipe: "Outlet" })).toBe("Outlet Kemang");
+    expect(teksStatusPengguna("aktif")).toBe("Aktif");
+    expect(teksStatusPengguna("non-aktif")).toBe("Non-aktif");
+    expect(teksPeranToko("Owner", "Toko3")).toBe("Owner · Toko3");
+    expect(teksPeranToko("Owner", "")).toBe("Owner");
+  });
+
+  it("tab Keamanan PIN dibaca dari ?tab=keamanan-pin, selain itu Data Diri", () => {
+    const tab = (nilai: string | null) => tabDariUrl(nilai, SLUG_TAB_PROFIL, ["data-diri", "pin"] as const, "data-diri");
+    expect(tab("keamanan-pin")).toBe("pin");
+    expect(tab(null)).toBe("data-diri");
+    expect(tab("acak")).toBe("data-diri");
   });
 });
 

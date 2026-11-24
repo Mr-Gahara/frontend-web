@@ -29,13 +29,17 @@ const isianHp = (hal: Page) => hal.getByLabel(/Nomor WhatsApp/);
 const isianPinLama = (hal: Page) => hal.getByLabel("PIN Lama", { exact: true });
 const isianPinBaru = (hal: Page) => hal.getByLabel("PIN Baru", { exact: true });
 
-async function simpan(hal: Page) {
+// Laman profil desain C (PU1a): Data Diri dan Keamanan PIN disimpan lewat tombol masing-masing.
+async function simpanLewat(hal: Page, tombol: string) {
   const tunggu = hal.waitForResponse(
     (r) => r.request().method() === "PUT" && POLA_PENGGUNA.test(r.url()),
   );
-  await hal.getByRole("button", { name: "Simpan Perubahan" }).click();
+  await hal.getByRole("button", { name: tombol }).click();
   return tunggu;
 }
+const simpan = (hal: Page) => simpanLewat(hal, "Simpan Data Diri");
+const gantiPin = (hal: Page) => simpanLewat(hal, "Ganti PIN");
+const bukaTabPin = (hal: Page) => hal.getByRole("tab", { name: "Keamanan PIN" }).click();
 
 test.describe("Profil pengguna", () => {
   test.setTimeout(120_000);
@@ -48,13 +52,13 @@ test.describe("Profil pengguna", () => {
     const { ctx, hal } = await bukaProfil(browser);
     try {
       const data = await bacaPenggunaProfil(page, auth, id);
-      await expect(hal.getByRole("heading", { name: "Profil Pengguna" })).toBeVisible();
+      await expect(hal.getByRole("heading", { level: 1 })).toHaveText(String(data.nama));
       await expect(isianNama(hal)).toHaveValue(String(data.nama));
       // Nomor HP tidak ada di token, sehingga nilainya hanya dapat berasal
       // dari GET /pengguna/:id milik pengguna itu sendiri.
       await expect(isianHp(hal)).toHaveValue(HP_PROFIL);
       expect(data.nomorHp).toBe(HP_PROFIL);
-      await expect(hal.getByRole("main").getByText(String(data.status), { exact: true })).toBeVisible();
+      await expect(hal.getByRole("main").getByText(data.status === "aktif" ? "Aktif" : "Non-aktif", { exact: true })).toBeVisible();
     } finally {
       await ctx.close();
     }
@@ -112,9 +116,10 @@ test.describe("Profil pengguna", () => {
     await siapkanPenggunaProfil(page);
     const { ctx, hal } = await bukaProfil(browser);
     try {
+      await bukaTabPin(hal);
       await isianPinLama(hal).fill("000000");
       await isianPinBaru(hal).fill(PIN_PROFIL_BARU);
-      const tolak = await simpan(hal);
+      const tolak = await gantiPin(hal);
       // B150: 400, bukan 401 yang dibaca apiClient sebagai sesi berakhir.
       expect(tolak.status()).toBe(400);
       const isi = await tolak.json();
@@ -131,9 +136,10 @@ test.describe("Profil pengguna", () => {
     try {
       const pertama = await bukaProfil(browser);
       try {
+        await bukaTabPin(pertama.hal);
         await isianPinLama(pertama.hal).fill(PIN_PROFIL);
         await isianPinBaru(pertama.hal).fill(PIN_PROFIL_BARU);
-        expect((await simpan(pertama.hal)).status()).toBe(200);
+        expect((await gantiPin(pertama.hal)).status()).toBe(200);
       } finally {
         await pertama.ctx.close();
       }
@@ -141,9 +147,10 @@ test.describe("Profil pengguna", () => {
       // Login lewat UI dengan PIN baru membuktikan perubahan benar-benar berlaku.
       const kedua = await bukaProfil(browser, NAMA_PROFIL, PIN_PROFIL_BARU);
       try {
+        await bukaTabPin(kedua.hal);
         await isianPinLama(kedua.hal).fill(PIN_PROFIL_BARU);
         await isianPinBaru(kedua.hal).fill(PIN_PROFIL);
-        expect((await simpan(kedua.hal)).status()).toBe(200);
+        expect((await gantiPin(kedua.hal)).status()).toBe(200);
       } finally {
         await kedua.ctx.close();
       }

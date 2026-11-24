@@ -12,6 +12,7 @@ import {
   siapkanPenggunaProfil,
 } from "../../helpers/profil-uji";
 import { isiLoginPengguna } from "../../helpers/masuk-uji";
+import { tanpaGulirSamping, tanpaLuberWadah } from "../../helpers/tata-letak-uji";
 
 /*
  * Spec migrasi halaman profil (keputusan PF2a, PF7a, PF8a, dan PF9a).
@@ -24,7 +25,10 @@ import { isiLoginPengguna } from "../../helpers/masuk-uji";
 const isianHp = (hal: Page) => hal.getByLabel(/Nomor WhatsApp/);
 const isianPinLama = (hal: Page) => hal.getByLabel("PIN Lama", { exact: true });
 const isianPinBaru = (hal: Page) => hal.getByLabel("PIN Baru", { exact: true });
-const tombolSimpan = (hal: Page) => hal.getByRole("button", { name: "Simpan Perubahan" });
+// Laman profil desain C (PU1a): tombol Data Diri dan Ganti PIN di tab masing-masing.
+const tombolSimpan = (hal: Page) => hal.getByRole("button", { name: "Simpan Data Diri" });
+const tombolGantiPin = (hal: Page) => hal.getByRole("button", { name: "Ganti PIN" });
+const bukaTabPin = (hal: Page) => hal.getByRole("tab", { name: "Keamanan PIN" }).click();
 const adalahPut = (method: string, url: string) => method === "PUT" && POLA_PENGGUNA.test(url);
 
 async function simpan(hal: Page) {
@@ -52,8 +56,44 @@ test.describe("Kelola profil pengguna", () => {
       await isianHp(hal).fill("");
       await isianHp(hal).pressSequentially("+62 8ab12");
       await expect(isianHp(hal)).toHaveValue("+62812");
+      await bukaTabPin(hal);
+      await expect(hal).toHaveURL(/[?&]tab=keamanan-pin/);
       await isianPinBaru(hal).pressSequentially("12a3");
       await expect(isianPinBaru(hal)).toHaveValue("123");
+    } finally {
+      await ctx.close();
+    }
+  });
+
+  test("tata letak desain C di HP, tablet, dan laptop: tab, ringkasan, dan tanpa luber (PU1a)", async ({
+    page,
+    browser,
+  }) => {
+    await siapkanPenggunaProfil(page);
+    const { ctx, hal } = await bukaProfil(browser);
+    try {
+      const url = hal.url().split("?")[0];
+      for (const [lebar, tinggi] of [[390, 844], [768, 1024], [1280, 800]] as const) {
+        await hal.setViewportSize({ width: lebar, height: tinggi });
+        await hal.goto(url);
+        await expect(hal.getByRole("heading", { level: 1 })).toHaveText(NAMA_PROFIL, { timeout: 20_000 });
+        await expect(hal.getByRole("tab", { name: "Data Diri" })).toHaveAttribute("aria-selected", "true");
+        const ringkasan = hal.getByRole("definition");
+        await expect(ringkasan).toHaveCount(4);
+        await expect(hal.getByText("Tidak dibatasi", { exact: true })).toBeVisible();
+        const tab = await hal.getByRole("tablist").boundingBox();
+        const isi = await hal.getByRole("tabpanel").boundingBox();
+        expect(tab && isi && isi.y >= tab.y + tab.height, `tab di atas isi pada ${lebar} px`).toBe(true);
+        await tanpaGulirSamping(hal, `profil ${lebar} px`);
+        await tanpaLuberWadah(hal, `profil ${lebar} px`);
+
+        await hal.goto(url + "?tab=keamanan-pin");
+        await expect(hal.getByRole("tab", { name: "Keamanan PIN" })).toHaveAttribute("aria-selected", "true", {
+          timeout: 20_000,
+        });
+        await expect(isianPinLama(hal)).toBeVisible();
+        await tanpaGulirSamping(hal, `profil tab PIN ${lebar} px`);
+      }
     } finally {
       await ctx.close();
     }
@@ -68,13 +108,16 @@ test.describe("Kelola profil pengguna", () => {
     };
     hal.on("request", hitung);
     try {
+      await bukaTabPin(hal);
+      await tombolGantiPin(hal).click();
+      await expect(hal.getByText("PIN baru wajib diisi")).toBeVisible();
       await isianPinLama(hal).fill(PIN_PROFIL);
       await isianPinBaru(hal).fill("1234");
-      await tombolSimpan(hal).click();
+      await tombolGantiPin(hal).click();
       await expect(hal.getByText("PIN baru harus tepat 6 digit angka")).toBeVisible();
       await isianPinLama(hal).fill("");
       await isianPinBaru(hal).fill(PIN_PROFIL_BARU);
-      await tombolSimpan(hal).click();
+      await tombolGantiPin(hal).click();
       await expect(
         hal.getByText("Masukkan PIN lama untuk mengonfirmasi perubahan"),
       ).toBeVisible();
@@ -143,9 +186,12 @@ test.describe("Kelola profil pengguna", () => {
     const { auth, id } = await siapkanPenggunaProfil(page);
     const { ctx, hal } = await bukaProfil(browser);
     try {
+      await bukaTabPin(hal);
       await isianPinLama(hal).fill(PIN_PROFIL);
       await isianPinBaru(hal).fill(PIN_PROFIL_BARU);
-      const ubah = await simpan(hal);
+      const tunggu = hal.waitForResponse((r) => adalahPut(r.request().method(), r.url()));
+      await tombolGantiPin(hal).click();
+      const ubah = await tunggu;
       expect(ubah.status()).toBe(200);
       expect(ubah.request().postDataJSON()).toEqual({
         pinLama: PIN_PROFIL,

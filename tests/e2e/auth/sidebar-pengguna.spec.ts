@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { BASIS, JAWAB_GAGAL, login } from "../../helpers/transfer-uji";
+import { PENGGUNA_UJI, isiLoginPengguna } from "../../helpers/masuk-uji";
 import {
   NAMA_PROFIL,
   NAMA_PROFIL_UBAH,
@@ -30,7 +31,7 @@ test.describe("Kaki sidebar", () => {
     await expect(page.locator('img[src*="github.com"]')).toHaveCount(0);
 
     await pemicu.click();
-    await page.getByRole("menuitem", { name: "Profil" }).click();
+    await page.getByRole("menuitem", { name: "Profil Saya" }).click();
     await page.waitForURL("**/dashboard/profil");
     await expect(page.getByLabel(/Nama Lengkap/)).toHaveValue("Ridho", { timeout: 20_000 });
   });
@@ -45,7 +46,7 @@ test.describe("Kaki sidebar", () => {
 
     const tPengguna = page.waitForResponse((r) => POLA_LOGOUT_PENGGUNA.test(r.url()));
     const tAkun = page.waitForResponse((r) => POLA_LOGOUT_AKUN.test(r.url()));
-    await page.getByRole("menuitem", { name: "Logout" }).click();
+    await page.getByRole("menuitem", { name: "Keluar dari toko" }).click();
     expect((await tPengguna).status(), "pin-logout").toBeLessThan(400);
     expect((await tAkun).status(), "logout akun").toBeLessThan(400);
     await page.waitForURL(/\/login$/);
@@ -67,7 +68,7 @@ test.describe("Kaki sidebar", () => {
 
     const tPengguna = page.waitForResponse((r) => POLA_LOGOUT_PENGGUNA.test(r.url()));
     const tAkun = page.waitForResponse((r) => POLA_LOGOUT_AKUN.test(r.url()));
-    await page.getByRole("menuitem", { name: "Logout" }).click();
+    await page.getByRole("menuitem", { name: "Keluar dari toko" }).click();
     expect((await tPengguna).status(), "pin-logout").toBe(500);
     expect((await tAkun).status(), "logout akun tetap dikirim").toBeLessThan(400);
     await page.waitForURL(/\/login$/);
@@ -79,6 +80,74 @@ test.describe("Kaki sidebar", () => {
     await page.waitForURL(/\/login$/);
   });
 
+  test("popup desain C: identitas, selebar pemicunya, tiga pilihan, dan teks pemicu tetap terang (PU2a)", async ({
+    page,
+  }) => {
+    for (const lebar of [1280, 390]) {
+      await page.setViewportSize({ width: lebar, height: 844 });
+      await login(page);
+      if (lebar < 1025) await page.locator('[data-sidebar="trigger"]').first().click();
+      const pemicu = page.getByRole("button", { name: /Ridho/ });
+      await expect(pemicu).toBeVisible({ timeout: 15_000 });
+      await pemicu.click();
+      const menu = page.getByRole("menu");
+      await expect(menu.getByRole("menuitem")).toHaveText([
+        "Profil Saya",
+        "Ganti penggunaKembali ke Siapa yang bertugas?",
+        "Keluar dari toko",
+      ]);
+      await expect(menu.getByRole("menuitem", { name: /Akun Toko|Langganan/ })).toHaveCount(0);
+      const ukuran = await page.evaluate(() => {
+        const t = document.querySelector<HTMLElement>('[data-sidebar="footer"] button')!;
+        const m = document.querySelector<HTMLElement>('[role="menu"]')!;
+        const nama = t.querySelector<HTMLElement>("span.truncate")!;
+        return { pemicu: t.getBoundingClientRect().width, menu: m.getBoundingClientRect().width, warna: getComputedStyle(nama).color };
+      });
+      expect(Math.round(ukuran.menu), `lebar popup di ${lebar} px`).toBe(Math.round(ukuran.pemicu));
+      // Teks pemicu tetap gading saat menu terbuka, bukan gelap di atas navy.
+      expect(ukuran.warna, `warna nama pemicu di ${lebar} px`).toBe("rgb(255, 250, 243)");
+      await page.keyboard.press("Escape");
+    }
+  });
+
+  test("ganti pengguna: hanya sesi PIN yang berakhir, akun toko tetap masuk (PU2a)", async ({ page }) => {
+    await login(page);
+    const pemicu = page.getByRole("button", { name: /Ridho/ });
+    await expect(pemicu).toBeVisible({ timeout: 15_000 });
+    await pemicu.click();
+    let logoutAkun = 0;
+    page.on("request", (r) => {
+      if (POLA_LOGOUT_AKUN.test(r.url())) logoutAkun++;
+    });
+    const tPengguna = page.waitForResponse((r) => POLA_LOGOUT_PENGGUNA.test(r.url()));
+    await page.getByRole("menuitem", { name: /Ganti pengguna/ }).click();
+    expect((await tPengguna).status(), "pin-logout").toBeLessThan(400);
+    await page.waitForURL("**/login/pengguna");
+    await expect(page.getByRole("heading", { name: "Siapa yang bertugas?" })).toBeVisible();
+    expect(logoutAkun, "akun toko tidak dikeluarkan").toBe(0);
+    // Pengguna berikutnya masuk di tab yang sama tanpa login akun ulang.
+    await isiLoginPengguna(page, PENGGUNA_UJI.nama, PENGGUNA_UJI.pin);
+    await page.waitForURL("**/dashboard");
+  });
+
+  test("ganti pengguna yang gagal: pesan tampil dan tetap di halaman (PU2a)", async ({ page }) => {
+    await login(page);
+    const pemicu = page.getByRole("button", { name: /Ridho/ });
+    await expect(pemicu).toBeVisible({ timeout: 15_000 });
+    // Jalur gagal yang tidak dapat dibuat backend secara deterministik (keputusan rancangan butir 21).
+    await page.route(POLA_LOGOUT_PENGGUNA, (route) => route.fulfill(JAWAB_GAGAL));
+    try {
+      await pemicu.click();
+      const tPengguna = page.waitForResponse((r) => POLA_LOGOUT_PENGGUNA.test(r.url()));
+      await page.getByRole("menuitem", { name: /Ganti pengguna/ }).click();
+      expect((await tPengguna).status()).toBe(500);
+      await expect(page.getByText("Gagal ganti pengguna")).toBeVisible();
+      await expect(page).toHaveURL(/\/dashboard/);
+    } finally {
+      await page.unroute(POLA_LOGOUT_PENGGUNA);
+    }
+  });
+
   test("nama di sidebar ikut berubah setelah profil disimpan", async ({ page, browser }) => {
     const { auth, id } = await siapkanPenggunaProfil(page);
     const { ctx, hal } = await bukaProfil(browser);
@@ -88,7 +157,7 @@ test.describe("Kaki sidebar", () => {
       const tunggu = hal.waitForResponse(
         (r) => r.request().method() === "PUT" && POLA_PENGGUNA.test(r.url()),
       );
-      await hal.getByRole("button", { name: "Simpan Perubahan" }).click();
+      await hal.getByRole("button", { name: "Simpan Data Diri" }).click();
       expect((await tunggu).status()).toBe(200);
       await expect(hal.getByRole("button", { name: new RegExp(NAMA_PROFIL_UBAH) })).toBeVisible({
         timeout: 15_000,

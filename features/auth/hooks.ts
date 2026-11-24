@@ -68,6 +68,16 @@ export function useLogoutAkun() {
  * walau logout pengguna gagal, agar cookie refresh akun tidak tertinggal
  * berlaku. Pengakhiran sesi lokal dan pengalihan diurus pemanggilnya.
  */
+/**
+ * Ganti pengguna (keputusan PU2a): hanya sesi pengguna yang diakhiri lewat
+ * pin-logout, akun toko tetap masuk. Bila permintaannya gagal, halaman tidak
+ * berpindah, karena cookie refresh pengguna masih berlaku di backend
+ * (utang modul profil-login).
+ */
+export function useGantiPengguna() {
+  return useMutation({ mutationFn: () => authApi.logoutPengguna() });
+}
+
 export function useKeluar() {
   return useMutation({
     mutationFn: async () => {
