@@ -13,6 +13,7 @@ import { NAMA_DISKON_GLOBAL, unik } from "../../helpers/reservasi-uji";
  */
 
 const URL_DISKON = BASIS + "/dashboard/outlet/diskon";
+const URL_BUAT_PENJUALAN = "/dashboard/outlet/penjualan/buatPenjualan";
 const URL_BUAT_RESERVASI = BASIS + "/dashboard/outlet/reservasi/buatReservasi";
 const POLA_DISKON = /\/api\/diskon(\?|$)/i;
 const POLA_SATU = /\/api\/diskon\/[0-9a-f]{24}$/i;
@@ -86,6 +87,17 @@ test.describe("Pilihan diskon kasir", () => {
       await test.step("buat reservasi tidak menawarkannya", async () => {
         await page.goto(URL_BUAT_RESERVASI);
         await page.getByRole("button", { name: "Pilih Diskon" }).nth(1).click();
+        await expect(page.getByRole("option").filter({ hasText: NAMA_DISKON_GLOBAL })).toHaveCount(1, {
+          timeout: 15_000,
+        });
+        await expect(page.getByRole("option").filter({ hasText: nama })).toHaveCount(0);
+        await page.keyboard.press("Escape");
+      });
+
+      await test.step("buat penjualan juga tidak menawarkannya (diskonAktif bersama)", async () => {
+        await page.goto(URL_BUAT_PENJUALAN);
+        const kartu = page.locator("div").filter({ has: page.getByRole("heading", { name: "Diskon Global" }) }).last();
+        await kartu.getByRole("button", { name: "Pilih Diskon" }).click();
         await expect(page.getByRole("option").filter({ hasText: NAMA_DISKON_GLOBAL })).toHaveCount(1, {
           timeout: 15_000,
         });

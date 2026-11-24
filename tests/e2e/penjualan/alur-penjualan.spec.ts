@@ -296,7 +296,7 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     },
   );
 
-  test("dialog konfirmasi pembayaran bertahan saat pembayaran gagal, dan kunci idempotensi dipakai ulang saat diulang", async ({ page }) => {
+  test("dialog konfirmasi pembayaran bertahan saat gagal, kunci dipakai ulang, dan backend tidak mencatat pembayaran kedua", async ({ page }) => {
     const auth = await bukaDenganAuth(page, DAFTAR);
     const fx = await siapkanFixture(page, auth, 20);
     const penjualan = await buatDraftLewatUi(page, 1);
@@ -314,9 +314,13 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       await catatan.press("Enter");
       await expect(page.getByRole("alertdialog")).toBeVisible();
       let kunciGagal = "";
-      await page.route(pola, (route) => {
+      let idPertama = "";
+      // Pembayaran pertama tersimpan di backend, tetapi jawabannya hilang di jalan.
+      await page.route(pola, async (route) => {
         if (route.request().method() !== "POST") return route.continue();
         kunciGagal = route.request().headers()["x-idempotency-key"] ?? "";
+        const asli = await route.fetch();
+        idPertama = normalizeId(((await asli.json()).data ?? {}) as { id?: string }).id ?? "";
         return route.fulfill(JAWAB_GAGAL);
       });
       await page.getByRole("button", { name: /ya, catat/i }).click();
@@ -330,6 +334,11 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
       const res = await tunggu;
       expect(res.status(), "POST /pembayaran saat diulang").toBe(201);
       expect(res.request().headers()["x-idempotency-key"], "kunci sama saat diulang (RH1a)").toBe(kunciGagal);
+      const idUlang = normalizeId(((await res.json()).data ?? {}) as { id?: string }).id ?? "";
+      expect(idPertama, "pembayaran pertama tersimpan di backend").toMatch(/^[a-f0-9]{24}$/);
+      expect(idUlang, "backend mengembalikan pembayaran yang sama").toBe(idPertama);
+      const detail = (await detailPenjualan(page, auth, penjualan.id)) as { pembayaran?: { id?: string }[] };
+      expect((detail.pembayaran ?? []).length, "satu pembayaran saja").toBe(1);
     } finally {
       await page.unroute(pola);
       await batalkanPenjualanUji(page, auth, penjualan.id);
@@ -356,15 +365,21 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     }
   });
 
-  test("dialog buat penjualan bertahan saat gagal, dan kunci idempotensi dipakai ulang saat diulang", async ({ page }) => {
+  test("dialog buat penjualan bertahan saat gagal, kunci dipakai ulang, dan backend tidak membuat penjualan kedua", async ({ page }) => {
     const auth = await bukaDenganAuth(page, DAFTAR);
     await siapkanFixture(page, auth, 20);
     await isiFormPenjualan(page, 1);
     const pola = /\/api\/penjualan(\?|$)/i;
     let kunciGagal = "";
-    await page.route(pola, (route) => {
+    let idPertama = "";
+    // Percobaan pertama sampai ke backend dan tersimpan, tetapi jawabannya
+    // hilang di jalan (galat jaringan); pengulangan dengan kunci yang sama
+    // harus mengembalikan penjualan itu, bukan membuat yang kedua.
+    await page.route(pola, async (route) => {
       if (route.request().method() !== "POST") return route.continue();
       kunciGagal = route.request().headers()["x-idempotency-key"] ?? "";
+      const asli = await route.fetch();
+      idPertama = normalizeId(((await asli.json()).data ?? {}) as { id?: string }).id ?? "";
       return route.fulfill(JAWAB_GAGAL);
     });
     await page.getByRole("button", { name: /ya, lanjutkan/i }).click();
@@ -381,8 +396,11 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     try {
       expect(res.status(), `POST /penjualan: ${JSON.stringify(body).slice(0, 200)}`).toBe(201);
       expect(res.request().headers()["x-idempotency-key"], "kunci sama saat diulang (K3a)").toBe(kunciGagal);
+      expect(idPertama, "percobaan pertama tersimpan di backend").toMatch(/^[a-f0-9]{24}$/);
+      expect(id, "backend mengembalikan penjualan yang sama, bukan yang kedua").toBe(idPertama);
     } finally {
       if (id) await hapusDraft(page, auth, id);
+      if (idPertama && idPertama !== id) await hapusDraft(page, auth, idPertama);
     }
   });
 

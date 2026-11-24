@@ -202,33 +202,66 @@ test.describe("E2E — Kelola metode pembayaran", () => {
     }
   });
 
-  test("batas 10 metode aktif: aktifkan ditahan, tambah hanya dapat menyimpan nonaktif (PO3a, NZ5a)", async ({ page }) => {
+  test("batas 10 metode aktif: aktifkan ditahan, tambah hanya dapat menyimpan nonaktif, dan backend menolak 409 (PO3a, NZ5a)", async ({
+    page,
+  }) => {
+    test.setTimeout(150_000);
     const auth = await bukaDenganAuth(page, URL_DAFTAR);
-    await pastikanFixture(page, auth);
-    await page.route(POLA_DAFTAR, async (route) => {
-      if (route.request().method() !== "GET") return route.continue();
-      const res = await route.fetch();
-      const body = (await res.json()) as { data: MetodeMentah[] };
-      const aktif = body.data.filter((m) => m.isActive);
-      const tambahan = Array.from({ length: Math.max(0, 10 - aktif.length) }, (_, i) => ({
-        ...aktif[0],
-        id: ID_TIDAK_ADA.slice(0, -2) + String(i).padStart(2, "0"),
-        namaPembayaran: "E2E Simulasi Aktif " + i,
-      }));
-      // simulasi: sepuluh metode aktif tidak dapat dibuat di data uji, karena metode tidak dapat dihapus
-      await route.fulfill({ response: res, json: { ...body, data: [...tambahan, ...body.data] } });
-    });
-    await page.goto(URL_DAFTAR);
-    await expect(page.getByText(/batas maksimal/)).toBeVisible();
-    await cari(page, NAMA_FIXTURE);
-    await page.getByRole("button", { name: `Aksi ${NAMA_FIXTURE}` }).click();
-    await expect(page.getByRole("menuitem", { name: "Aktifkan" })).toBeDisabled();
-    await page.keyboard.press("Escape");
-    await page.getByRole("link", { name: /tambah metode/i }).click();
-    await expect(page).toHaveURL(new RegExp(URL_BUAT + "$"));
-    await expect(page.getByText(/hanya dapat disimpan nonaktif/)).toBeVisible();
-    await pemicu(page, "Non-Aktif").click();
-    await expect(page.getByRole("option", { name: "Aktif", exact: true })).toBeDisabled();
+    const fixture = await pastikanFixture(page, auth);
+    const acuan = await metodeTunaiAktif(page, auth);
+    const PESAN =
+      "Toko ini sudah punya 10 metode pembayaran aktif (batas maksimal). Nonaktifkan metode yang tidak dipakai terlebih dahulu.";
+    // Sepuluh metode aktif disusun dari metode pengisi bernama tetap (metode
+    // tidak dapat dihapus), lalu pengisi dinonaktifkan lagi di akhir.
+    const pengisi = Array.from({ length: 10 }, (_, i) => `E2E Batas Metode Tetap ${i + 1}`);
+    const daftar = async () => (await api<MetodeMentah[]>(page, auth, "GET", "/metodepembayaran?showAll=true")).data ?? [];
+    try {
+      let semua = await daftar();
+      for (const nama of pengisi) {
+        if (semua.filter((m) => m.isActive).length >= 10) break;
+        const ada = semua.find((m) => m.namaPembayaran === nama);
+        if (ada?.isActive) continue;
+        const r = ada
+          ? await api(page, auth, "PUT", "/metodepembayaran/" + ada.id, { isActive: true })
+          : await api(page, auth, "POST", "/metodepembayaran", {
+              namaPembayaran: nama,
+              kategori: "non-tunai",
+              akunKasID: acuan.akunKas!.id,
+              isActive: true,
+            });
+        expect(r.status, `aktifkan pengisi ${nama}: ${r.pesan}`).toBeLessThan(300);
+        semua = await daftar();
+      }
+      expect(semua.filter((m) => m.isActive).length, "toko punya 10 metode aktif").toBe(10);
+
+      await page.goto(URL_DAFTAR);
+      await expect(page.getByText(/batas maksimal/)).toBeVisible({ timeout: 15_000 });
+      await cari(page, NAMA_FIXTURE);
+      await page.getByRole("button", { name: `Aksi ${NAMA_FIXTURE}` }).click();
+      await expect(page.getByRole("menuitem", { name: "Aktifkan" })).toBeDisabled();
+      await page.keyboard.press("Escape");
+      await page.getByRole("link", { name: /tambah metode/i }).click();
+      await expect(page).toHaveURL(new RegExp(URL_BUAT + "$"));
+      await expect(page.getByText(/hanya dapat disimpan nonaktif/)).toBeVisible();
+      await pemicu(page, "Non-Aktif").click();
+      await expect(page.getByRole("option", { name: "Aktif", exact: true })).toBeDisabled();
+      await page.keyboard.press("Escape");
+
+      // Penahanan web didukung backend: jalur langsung juga ditolak 409.
+      const aktifkan = await api(page, auth, "PUT", "/metodepembayaran/" + fixture.id, { isActive: true });
+      expect([aktifkan.status, aktifkan.pesan]).toEqual([409, PESAN]);
+      const buat = await api(page, auth, "POST", "/metodepembayaran", {
+        namaPembayaran: "E2E Batas Metode Ditolak " + unik(),
+        kategori: "non-tunai",
+        akunKasID: acuan.akunKas!.id,
+        isActive: true,
+      });
+      expect([buat.status, buat.pesan]).toEqual([409, PESAN]);
+    } finally {
+      for (const m of await daftar()) {
+        if (pengisi.includes(m.namaPembayaran) && m.isActive) await nonaktifkanLewatApi(page, auth, m.id);
+      }
+    }
   });
 
   test("metode aktif terakhir tidak dapat dinonaktifkan dari daftar maupun form ubah (NZ4a)", async ({ page }) => {

@@ -13,6 +13,7 @@ import { laporanApi } from "@/features/laporan/api";
 import { TombolUnduhLaporan } from "@/components/unduh/tombol-unduh-laporan";
 import {
   jumlahkan,
+  kelasPertumbuhan,
   persentasePertumbuhan,
   rentangPeriode,
   rentangPeriodeSebelumnya,
@@ -152,15 +153,7 @@ export default function RingkasanLabaRugiPage() {
                 {formatRupiah(totalNilai)}
               </p>
               <div className="flex items-center gap-1 mt-1">
-                <span
-                  className={
-                    pertumbuhan === null || pertumbuhan === 0
-                      ? "text-kecil text-navy/60 font-bold"
-                      : pertumbuhan > 0
-                        ? "text-kecil text-sage font-bold"
-                        : "text-kecil text-rose-500 font-bold"
-                  }
-                >
+                <span className={kelasPertumbuhan(pertumbuhan)}>
                   {persentaseNaikTurun}
                 </span>
                 <span className="text-kecil text-navy/60 font-medium">

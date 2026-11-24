@@ -344,3 +344,147 @@ test.describe("Mesin Kasir: staf berlokasi kerja", () => {
     await expect(tambah.getByRole("radio", { name: new RegExp(PERANGKAT_UJI.nama) })).toHaveCount(0);
   });
 });
+
+/*
+ * Keadaan Mesin Kasir di luar alur utama (utang pengujian sejak spec
+ * pratinjau dihapus, b74f30a). Galat dijawab route.fulfill gagal; keadaan
+ * kosong yang tidak dapat dibuat di data uji disimulasikan dari respons nyata.
+ */
+test.describe("Mesin Kasir: keadaan memuat, gagal, dan kosong", () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+  });
+
+  test("gagal dimuat di ketiga bagian menampilkan pesan, lalu Coba lagi memuatnya", async ({ page }) => {
+    const POLA = /\/api\/sesikasir(\/perangkat)?(\?|$)/i;
+    await page.route(POLA, (route) =>
+      route.request().method() === "GET"
+        ? route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ message: "uji" }) })
+        : route.continue(),
+    );
+    await page.goto(URL);
+    await expect(page.getByText("Kasir yang buka gagal dimuat")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Riwayat gagal dimuat")).toBeVisible();
+    await expect(page.getByText("Daftar mesin kasir gagal dimuat")).toBeVisible();
+    await page.unroute(POLA);
+    for (const judul of ["Kasir yang buka gagal dimuat", "Riwayat gagal dimuat"]) {
+      await page.getByRole("alert").filter({ hasText: judul }).getByRole("button", { name: "Coba lagi" }).click();
+      await expect(page.getByText(judul)).toHaveCount(0, { timeout: 15_000 });
+    }
+    await page.getByText("Daftar mesin kasir gagal dimuat").locator("..").getByRole("button").click();
+    await expect(page.getByText("Daftar mesin kasir gagal dimuat")).toHaveCount(0, { timeout: 15_000 });
+  });
+
+  test("memuat: kerangka tampil selama riwayat ditahan, lalu berganti isi", async ({ page }) => {
+    let lepas = () => {};
+    const ditahan = new Promise<void>((r) => (lepas = r));
+    const POLA = /\/api\/sesikasir\?/i;
+    await page.route(POLA, async (route) => {
+      if (route.request().method() === "GET") await ditahan;
+      await route.continue();
+    });
+    await page.goto(URL);
+    await expect(page.locator('[data-slot="skeleton"]').first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Riwayat gagal dimuat")).toHaveCount(0);
+    lepas();
+    await expect(page.locator("#judul-kasir-buka")).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('[data-slot="skeleton"]')).toHaveCount(0, { timeout: 20_000 });
+    await page.unroute(POLA);
+  });
+
+  test("form tambah tanpa perangkat dan tanpa laci bebas menampilkan keterangan, bukan pilihan kosong", async ({ page }) => {
+    await page.route(/\/api\/sesikasir\/perangkat-toko(\?|$)/i, async (route) => {
+      const asli = await route.fetch();
+      const body = await asli.json();
+      // simulasi: toko uji selalu punya perangkat login aplikasi, sehingga daftar perangkat kosong disusun dari respons nyata
+      await route.fulfill({ response: asli, json: { ...body, data: [] } });
+    });
+    await page.route(/\/api\/akunkas(\?|$)/i, async (route) => {
+      if (route.request().method() !== "GET") return route.continue();
+      const asli = await route.fetch();
+      const body = await asli.json();
+      // simulasi: akun Kas Fisik tidak dapat dihapus, sehingga keadaan tanpa laci disusun dengan membuang akun Kas Fisik dari respons nyata
+      const data = (body.data ?? []).filter((a: { tipeAkun?: string }) => a.tipeAkun !== "Kas Fisik");
+      await route.fulfill({ response: asli, json: { ...body, data } });
+    });
+    await page.goto(URL);
+    await page.getByRole("button", { name: "Tambah mesin kasir" }).first().click({ timeout: 20_000 });
+    const dialog = page.getByRole("dialog", { name: "Tambah mesin kasir" });
+    await expect(dialog.getByText(/Belum ada perangkat yang bisa dipilih/)).toBeVisible({ timeout: 15_000 });
+    await expect(dialog.getByRole("radio")).toHaveCount(0);
+    await expect(dialog.getByText(/Semua laci Kas Fisik sudah dipakai mesin lain/)).toBeVisible();
+    await expect(dialog.getByRole("link", { name: "Buat akun Kas Fisik baru" })).toHaveAttribute(
+      "href",
+      "/dashboard/outlet/keuangan/akunkas/buatAkunKas",
+    );
+  });
+
+  for (const [nama, lebar, sejajar] of [
+    ["desktop 1280 px: panel mesin kasir di samping riwayat", 1280, true],
+    ["HP 390 px: panel mesin kasir di bawah riwayat", 390, false],
+  ] as const) {
+    test(`susunan ${nama}`, async ({ page }) => {
+      await page.setViewportSize({ width: lebar, height: 900 });
+      // Panel samping hanya tampil bila toko punya mesin kasir, sedangkan mesin
+      // uji dilepas di akhir spec alur; daftar mesin diisi satu mesin contoh.
+      await page.route(/\/api\/sesikasir\/perangkat(\?|$)/i, async (route) => {
+        if (route.request().method() !== "GET") return route.continue();
+        const asli = await route.fetch();
+        const body = await asli.json();
+        const contoh = {
+          id: "0".repeat(23) + "1",
+          tenantID: null,
+          installationId: "E2E-SUSUNAN-DEVICE",
+          namaPerangkat: "E2E Mesin Susunan",
+          akunKasID: null,
+          akunKas: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        // simulasi: tata letak panel diuji dengan satu mesin contoh, tanpa aksi yang menulis data
+        await route.fulfill({ response: asli, json: { ...body, data: (body.data ?? []).length ? body.data : [contoh] } });
+      });
+      await page.goto(URL);
+      const panel = page.locator('section[aria-labelledby="judul-mesin-kasir"]');
+      const riwayat = page.locator('section[aria-labelledby="judul-riwayat"]');
+      await expect(panel).toBeVisible({ timeout: 20_000 });
+      await expect(riwayat).toBeVisible();
+      const kp = (await panel.boundingBox())!;
+      const kr = (await riwayat.boundingBox())!;
+      if (sejajar) expect(kp.x, "panel di kanan riwayat").toBeGreaterThan(kr.x + kr.width / 2);
+      else expect(kp.y > kr.y || kp.y + kp.height < kr.y, "panel bertumpuk, tidak bersisian").toBe(true);
+      const lebarHalaman = await page.evaluate(() => document.documentElement.scrollWidth);
+      expect(lebarHalaman, "tanpa gulir ke samping").toBeLessThanOrEqual(lebar);
+      await page.unrouteAll({ behavior: "ignoreErrors" });
+    });
+  }
+});
+
+test.describe("Mesin Kasir: riwayat berhalaman", () => {
+  test("Muat hari sebelumnya meminta halaman berikutnya dengan filter yang sama dan menambah barisnya", async ({ page }) => {
+    await login(page);
+    const POLA = /\/api\/sesikasir\?/i;
+    const riwayat = (halaman: string) => (r: { request(): { method(): string }; url(): string }) =>
+      r.request().method() === "GET" &&
+      POLA.test(r.url()) &&
+      new globalThis.URL(r.url()).searchParams.get("page") === halaman &&
+      new globalThis.URL(r.url()).searchParams.has("status");
+    const tPertama = page.waitForResponse(riwayat("1"));
+    await page.goto(URL, { waitUntil: "commit" });
+    const pertama = await tPertama;
+    const isi = (await pertama.json()) as { data: unknown[]; pagination: { totalPages: number } };
+    test.skip(isi.pagination.totalPages < 2, "riwayat tujuh hari terakhir belum lebih dari satu halaman");
+    const tombol = page.getByRole("button", { name: "Muat hari sebelumnya" });
+    await expect(tombol).toBeVisible({ timeout: 20_000 });
+    const tKedua = page.waitForResponse(riwayat("2"));
+    await tombol.click();
+    const kedua = await tKedua;
+    expect(kedua.status()).toBe(200);
+    const q1 = new globalThis.URL(pertama.url()).searchParams;
+    const q2 = new globalThis.URL(kedua.url()).searchParams;
+    for (const k of ["dari", "sampai", "limit", "status"]) expect(q2.get(k), `${k} sama`).toBe(q1.get(k));
+    const isiKedua = (await kedua.json()) as { data: { id: string }[] };
+    expect(isiKedua.data.length).toBeGreaterThan(0);
+    await expect(page.locator(`a[href$="/${isiKedua.data[0].id}"]`).first(), "baris halaman kedua tampil").toBeVisible();
+  });
+});

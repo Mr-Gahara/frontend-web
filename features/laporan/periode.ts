@@ -105,3 +105,9 @@ export function teksPertumbuhan(persen: number | null): string {
   if (persen === 0) return "0%";
   return `${persen > 0 ? "↑" : "↓"} ${Math.abs(persen).toFixed(2)}%`;
 }
+
+/** Kelas badge pertumbuhan halaman laba rugi: naik sage, turun rose, tanpa perubahan atau tanpa pembanding netral. */
+export function kelasPertumbuhan(persen: number | null): string {
+  if (persen === null || persen === 0) return "text-kecil text-navy/60 font-bold";
+  return persen > 0 ? "text-kecil text-sage font-bold" : "text-kecil text-rose-500 font-bold";
+}

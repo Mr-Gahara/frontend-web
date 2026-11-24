@@ -1,4 +1,5 @@
-import { expect, test, type Page, type Response } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { expect, test, type Download, type Page, type Response } from "@playwright/test";
 import { bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { bukaPanelFilter, terapkanPanelFilter } from "../../helpers/filter-uji";
 import { tanpaLuberWadah } from "../../helpers/tata-letak-uji";
@@ -14,28 +15,82 @@ import { keTanggalLokal } from "../../../lib/waktu";
  * periode daftar opname dan adjustment (B356) serta unduh laba rugi.
  */
 
-type Daftar = { nama: string; url: string; pola: RegExp; tanggal: readonly string[]; tanpaBulan?: boolean };
+type Daftar = {
+  nama: string;
+  url: string;
+  pola: RegExp;
+  tanggal: readonly string[];
+  tanpaBulan?: boolean;
+  /** Baris TOTAL berisi jumlah baris di kolom kedua (totalBaris backend, AR39). */
+  totalJumlahBaris?: boolean;
+};
+
+/** CSV backend: sel berkoma atau berkutip dibungkus kutip ganda, kutip di dalam digandakan. */
+function bacaCsv(teks: string): string[][] {
+  const baris: string[][] = [];
+  let sel = "";
+  let kini: string[] = [];
+  let dalamKutip = false;
+  const tutupSel = () => {
+    kini.push(sel);
+    sel = "";
+  };
+  for (let i = 0; i < teks.length; i++) {
+    const c = teks[i];
+    if (dalamKutip) {
+      if (c === '"' && teks[i + 1] === '"') {
+        sel += '"';
+        i++;
+      } else if (c === '"') dalamKutip = false;
+      else sel += c;
+    } else if (c === '"') dalamKutip = true;
+    else if (c === ",") tutupSel();
+    else if (c === "\n") {
+      tutupSel();
+      baris.push(kini);
+      kini = [];
+    } else sel += c;
+  }
+  if (sel !== "" || kini.length > 0) {
+    tutupSel();
+    baris.push(kini);
+  }
+  return baris;
+}
 
 const DAFTAR: Daftar[] = [
   { nama: "daftar penjualan", url: "/dashboard/outlet/penjualan", pola: /\/api\/penjualan(\?|$)/i, tanggal: ["startDate", "endDate"] },
   { nama: "mutasi kas", url: "/dashboard/outlet/keuangan/mutasiArusKas", pola: /\/api\/akunkas\/mutasi(\?|$)/i, tanggal: ["dari", "sampai"] },
   { nama: "pengeluaran", url: "/dashboard/outlet/pengeluaran", pola: /\/api\/bebanoperasional(\?|$)/i, tanggal: ["dari", "sampai"] },
   { nama: "belanja stok", url: "/dashboard/outlet/keuangan/belanjaStok", pola: /\/api\/pembelianstok(\?|$)/i, tanggal: ["dari", "sampai"] },
-  { nama: "jurnal stok", url: "/dashboard/outlet/inventaris/jurnalStok", pola: /\/api\/jurnalstok(\?|$)/i, tanggal: ["dari", "sampai"] },
-  { nama: "stock opname", url: "/dashboard/outlet/inventaris/stockOpname", pola: /\/api\/stockopname(\?|$)/i, tanggal: ["dari", "sampai"] },
+  { nama: "jurnal stok", url: "/dashboard/outlet/inventaris/jurnalStok", pola: /\/api\/jurnalstok(\?|$)/i, tanggal: ["dari", "sampai"], totalJumlahBaris: true },
+  { nama: "stock opname", url: "/dashboard/outlet/inventaris/stockOpname", pola: /\/api\/stockopname(\?|$)/i, tanggal: ["dari", "sampai"], totalJumlahBaris: true },
   {
     nama: "stock adjustment",
     url: "/dashboard/outlet/inventaris/stockAdjustment",
     pola: /\/api\/stockopname\/adjustments(\?|$)/i,
     tanggal: ["dari", "sampai"],
+    totalJumlahBaris: true,
   },
-  { nama: "stok saat ini", url: "/dashboard/outlet/inventaris/stok", pola: /\/api\/inventory(\?|$)/i, tanggal: [], tanpaBulan: true },
-  { nama: "stok gudang saat ini", url: "/dashboard/gudang/inventaris", pola: /\/api\/inventory(\?|$)/i, tanggal: [], tanpaBulan: true },
+  { nama: "stok saat ini", url: "/dashboard/outlet/inventaris/stok", pola: /\/api\/inventory(\?|$)/i, tanggal: [], tanpaBulan: true, totalJumlahBaris: true },
+  {
+    nama: "stok gudang saat ini",
+    url: "/dashboard/gudang/inventaris",
+    pola: /\/api\/inventory(\?|$)/i,
+    tanggal: [],
+    tanpaBulan: true,
+    totalJumlahBaris: true,
+  },
 ];
 
 const query = (r: Response) => new URL(r.url()).searchParams;
 
-async function unduhLewatDialog(page: Page, d: Daftar, format: "CSV" | "Excel", geser = 0): Promise<Response> {
+async function unduhLewatDialog(
+  page: Page,
+  d: Daftar,
+  format: "CSV" | "Excel",
+  geser = 0,
+): Promise<Response & { berkas: Download }> {
   await page.getByRole("button", { name: "Unduh", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: `Unduh ${d.nama}` });
   await expect(dialog).toBeVisible();
@@ -52,9 +107,9 @@ async function unduhLewatDialog(page: Page, d: Daftar, format: "CSV" | "Excel", 
   const tBerkas = page.waitForEvent("download");
   await dialog.getByRole("button", { name: "Unduh", exact: true }).click();
   const res = await tRes;
-  await tBerkas;
+  const berkas = await tBerkas;
   await expect(dialog).toBeHidden();
-  return res;
+  return Object.assign(res, { berkas });
 }
 
 test.describe("ekspor daftar per bulan (P85)", () => {
@@ -74,6 +129,18 @@ test.describe("ekspor daftar per bulan (P85)", () => {
       for (const k of ["page", "limit", ...d.tanggal]) expect(q.has(k), `${d.nama} tanpa ${k}`).toBe(false);
       if (d.tanpaBulan) expect(q.has("bulan")).toBe(false);
       else expect(q.get("bulan")).toBe(keBulan(new Date()));
+
+      // Isi berkas yang diunduh: judul kolom, baris data selebar judul, lalu TOTAL.
+      const isi = bacaCsv(readFileSync(await res.berkas.path(), "utf8"));
+      expect(isi.length, `${d.nama}: judul dan TOTAL`).toBeGreaterThanOrEqual(2);
+      const [judul, ...sisa] = isi;
+      const total = sisa[sisa.length - 1];
+      const data = sisa.slice(0, -1);
+      expect(judul.every((k) => k.trim() !== ""), `${d.nama}: judul kolom terisi`).toBe(true);
+      expect(total[0], `${d.nama}: baris terakhir TOTAL`).toBe("TOTAL");
+      expect(total.length, `${d.nama}: TOTAL selebar judul`).toBe(judul.length);
+      for (const [i, b] of data.entries()) expect(b.length, `${d.nama}: lebar baris ${i + 1}`).toBe(judul.length);
+      if (d.totalJumlahBaris) expect(Number(total[1]), `${d.nama}: TOTAL menghitung baris`).toBe(data.length);
 
       if (!d.tanpaBulan) {
         // Bulan lalu dalam Excel.

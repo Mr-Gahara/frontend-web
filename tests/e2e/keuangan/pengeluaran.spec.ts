@@ -1,7 +1,7 @@
 import { expect, test, type Request } from "@playwright/test";
 import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { unik } from "../../helpers/reservasi-uji";
-import { daftarAkun, pilihAkun, saldoAkun, type AkunKasUji } from "../../helpers/akun-kas-uji";
+import { akunUjiTetap, daftarAkun, pilihAkun, saldoAkun, type AkunKasUji } from "../../helpers/akun-kas-uji";
 import { KATEGORI_FIXTURE, pastikanKategoriFixture } from "../../helpers/beban-uji";
 import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../helpers/filter-uji";
 
@@ -177,6 +177,68 @@ test.describe("pengeluaran", () => {
     const waktu = new Date(kiriman.tanggal).getTime();
     expect(waktu, "waktu simpan sesudah tengah malam").toBeGreaterThanOrEqual(tengahMalam.getTime());
     expect(waktu, "waktu simpan, bukan tanggal kemarin").toBeLessThan(tengahMalam.getTime() + 5 * 60_000);
+  });
+
+  test("penolakan backend 409 tampil dan tidak ada beban tercatat: saldo berubah dan akun dinonaktifkan sesudah form dibuka", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const auth = await bukaDenganAuth(page, URL_PENGELUARAN);
+    await pastikanKategoriFixture(page, auth);
+    const NAMA = "E2E Beban Ditolak Tetap";
+    const akun = await akunUjiTetap(page, auth, NAMA);
+    const semua = await daftarAkun(page, auth);
+    const lawan = semua.find((a) => a.status === "aktif" && a.saldo >= 2 && !a.namaAkun.startsWith("E2E"));
+    test.skip(!lawan, "tidak ada akun kas aktif bersaldo untuk mengisi akun uji");
+    const pindah = async (dari: string, ke: string) => {
+      const r = await api(page, auth, "POST", "/jurnaltransfer", {
+        kasSumberID: dari,
+        kasTujuanID: ke,
+        jumlah: 1,
+        keterangan: "E2E beban ditolak " + unik(),
+      });
+      expect(r.status, `pindah dana uji: ${r.pesan}`).toBe(201);
+    };
+    let posts = 0;
+    page.on("request", (r) => {
+      if (r.method() === "POST" && POLA_DAFTAR.test(r.url())) posts += 1;
+    });
+    const isiForm = async (keterangan: string) => {
+      await page.goto(URL_CATAT);
+      await pilihAkun(page, "Akun Kas", NAMA);
+      await pilihAkun(page, "Kategori", KATEGORI_FIXTURE);
+      await page.getByLabel("Jumlah (Rp)").fill("1");
+      await page.getByLabel("Keterangan", { exact: true }).fill(keterangan);
+    };
+    const simpanDitolak = async (pesan: string) => {
+      const t = page.waitForResponse((r) => r.request().method() === "POST" && POLA_DAFTAR.test(r.url()));
+      await page.getByRole("button", { name: "Simpan Beban" }).click();
+      expect((await t).status(), pesan).toBe(409);
+      await expect(page.getByText(pesan).first()).toBeVisible();
+      await expect(page, "tetap di form").toHaveURL(new RegExp(URL_CATAT + "$"));
+    };
+    try {
+      await test.step("saldo berkurang sesudah form dibuka", async () => {
+        await pindah((lawan as AkunKasUji).id, akun.id);
+        await isiForm("E2E beban saldo kurang " + unik());
+        await pindah(akun.id, (lawan as AkunKasUji).id);
+        await simpanDitolak("Saldo akun kas tidak mencukupi (saldo Rp 0).");
+      });
+      await test.step("akun dinonaktifkan sesudah form dibuka", async () => {
+        await pindah((lawan as AkunKasUji).id, akun.id);
+        await isiForm("E2E beban akun nonaktif " + unik());
+        await pindah(akun.id, (lawan as AkunKasUji).id);
+        const tutup = await api(page, auth, "PUT", "/akunkas/" + akun.id, { status: "non-aktif" });
+        expect(tutup.status, `nonaktifkan akun uji: ${tutup.pesan}`).toBe(200);
+        await simpanDitolak("Akun kas sudah nonaktif.");
+      });
+      expect(posts, "dua POST, keduanya ditolak").toBe(2);
+      const beban = await api<{ akunKas?: { id?: string } }[]>(page, auth, "GET", "/bebanoperasional?page=1&limit=50");
+      expect(beban.data.filter((b) => b.akunKas?.id === akun.id), "tidak ada beban dari akun uji").toEqual([]);
+    } finally {
+      const pulih = await api(page, auth, "PUT", "/akunkas/" + akun.id, { status: "aktif" });
+      expect.soft(pulih.status, `aktifkan kembali akun uji: ${pulih.pesan}`).toBe(200);
+    }
   });
 
   test("form menahan isian kosong dan jumlah di atas saldo, tanpa permintaan", async ({ page }) => {

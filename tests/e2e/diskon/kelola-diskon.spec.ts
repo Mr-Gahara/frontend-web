@@ -178,7 +178,7 @@ test.describe("Kelola diskon", () => {
     await expect(dialog).toBeHidden();
   });
 
-  test("batas diskon aktif: tambah membuka form yang terkunci Non-Aktif (PD2a, NZ5a)", async ({ page }) => {
+  test("batas diskon aktif: tambah membuka form yang terkunci Non-Aktif, dan Aktifkan di menu baris terkunci (PD2a, NZ5a)", async ({ page }) => {
     await page.route(POLA_DISKON, async (route) => {
       if (route.request().method() !== "GET") {
         await route.continue();
@@ -188,19 +188,27 @@ test.describe("Kelola diskon", () => {
       const body = await asli.json();
       const contoh = Array.isArray(body.data) ? body.data[0] : undefined;
       const data = contoh
-        ? Array.from({ length: 50 }, (_, i) => ({
-            ...contoh,
-            id: i.toString(16).padStart(24, "0"),
-            namaDiskon: "Simulasi Aktif " + i,
-            status: "Aktif",
-          }))
+        ? [
+            ...Array.from({ length: 50 }, (_, i) => ({
+              ...contoh,
+              id: i.toString(16).padStart(24, "0"),
+              namaDiskon: "Simulasi Aktif " + i,
+              status: "Aktif",
+            })),
+            { ...contoh, id: "ff".padStart(24, "0"), namaDiskon: "Simulasi Non-Aktif", status: "Non-Aktif" },
+          ]
         : body.data;
       // simulasi: lima puluh diskon aktif tidak dapat dibuat di data uji tanpa menumpuk diskon aktif permanen
       await route.fulfill({ status: asli.status(), json: { ...body, data } });
     });
     await bukaDiskon(page);
-    await expect(page.getByText("50 total data")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("51 total data")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/sudah punya 50 diskon aktif/)).toBeVisible();
+    await page.getByPlaceholder("Cari nama diskon...").fill("Simulasi Non-Aktif");
+    await page.locator("tbody tr").filter({ hasText: "Simulasi Non-Aktif" }).getByRole("button", { name: "Buka menu" }).click();
+    await expect(page.getByRole("menuitem", { name: "Aktifkan" }), "Aktifkan terkunci saat batas").toBeDisabled();
+    await page.keyboard.press("Escape");
+    await page.getByPlaceholder("Cari nama diskon...").fill("");
     await page.getByRole("button", { name: "Tambah Diskon" }).click();
     const dialog = dialogForm(page);
     await expect(dialog.getByText(/hanya dapat disimpan Non-Aktif/)).toBeVisible();

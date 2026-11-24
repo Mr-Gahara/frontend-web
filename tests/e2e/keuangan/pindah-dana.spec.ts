@@ -25,7 +25,109 @@ const POLA_MUTASI = /\/api\/akunkas\/mutasi(\?|$)/i;
 test.describe("pindah dana", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
+  })
+  test("penolakan backend 409: akun tujuan dinonaktifkan sesudah form dibuka, dan pembatalan yang menguras saldo tujuan", async ({
+    page,
+  }) => {
+    test.setTimeout(150_000);
+    let auth = await bukaDenganAuth(page, URL_AKUN);
+    const lawan = (await daftarAkun(page, auth)).find(
+      (a) => a.status === "aktif" && a.saldo >= 1 && !a.namaAkun.startsWith("E2E"),
+    );
+    test.skip(!lawan, "tidak ada akun kas aktif bersaldo untuk mengisi akun uji");
+    const SUMBER = "E2E Pindah Sumber Tetap";
+    const TUJUAN = "E2E Pindah Tujuan Ditolak Tetap";
+    const sumber = await akunUjiTetap(page, auth, SUMBER);
+    const tujuan = await akunUjiTetap(page, auth, TUJUAN);
+    const isi = await api(page, auth, "POST", "/jurnaltransfer", {
+      kasSumberID: (lawan as AkunKasUji).id,
+      kasTujuanID: sumber.id,
+      jumlah: 1,
+      keterangan: "E2E isi sumber ditolak " + unik(),
+    });
+    expect(isi.status, `isi akun sumber: ${isi.pesan}`).toBe(201);
+
+    const isiForm = async (keterangan: string) => {
+      await page.goto(URL_PINDAH);
+      await expect(page.getByRole("heading", { name: "Pindah Dana", exact: true })).toBeVisible({ timeout: 15_000 });
+      await pilihAkun(page, "Akun Sumber", SUMBER);
+      await pilihAkun(page, "Akun Tujuan", TUJUAN);
+      await page.getByLabel("Jumlah (Rp)").fill("1");
+      await page.getByLabel("Keterangan", { exact: true }).fill(keterangan);
+    };
+    try {
+      await test.step("saldo sumber berkurang sesudah form dibuka", async () => {
+        await isiForm("E2E saldo sumber kurang " + unik());
+        const kuras = await api(page, auth, "POST", "/jurnaltransfer", {
+          kasSumberID: sumber.id,
+          kasTujuanID: (lawan as AkunKasUji).id,
+          jumlah: 1,
+          keterangan: "E2E kuras sumber " + unik(),
+        });
+        expect(kuras.status, `kuras sumber: ${kuras.pesan}`).toBe(201);
+        const t = page.waitForResponse((r) => POLA_TRANSFER.test(r.url()) && r.request().method() === "POST");
+        await page.getByRole("button", { name: "Pindahkan Dana" }).click();
+        expect((await t).status()).toBe(409);
+        await expect(page.getByText("Saldo akun kas sumber tidak mencukupi (saldo Rp 0).").first()).toBeVisible();
+        const isiLagi = await api(page, auth, "POST", "/jurnaltransfer", {
+          kasSumberID: (lawan as AkunKasUji).id,
+          kasTujuanID: sumber.id,
+          jumlah: 1,
+          keterangan: "E2E isi ulang sumber " + unik(),
+        });
+        expect(isiLagi.status, `isi ulang sumber: ${isiLagi.pesan}`).toBe(201);
+      });
+
+      await test.step("akun tujuan dinonaktifkan sesudah form dibuka", async () => {
+        await isiForm("E2E tujuan nonaktif " + unik());
+        const tutup = await api(page, auth, "PUT", "/akunkas/" + tujuan.id, { status: "non-aktif" });
+        expect(tutup.status, `nonaktifkan tujuan: ${tutup.pesan}`).toBe(200);
+        const t = page.waitForResponse((r) => POLA_TRANSFER.test(r.url()) && r.request().method() === "POST");
+        await page.getByRole("button", { name: "Pindahkan Dana" }).click();
+        expect((await t).status()).toBe(409);
+        await expect(page.getByText("Akun kas tujuan sudah nonaktif.").first()).toBeVisible();
+        expect(await saldoAkun(page, auth, sumber.id), "saldo sumber tidak berubah").toBe(1);
+        const buka = await api(page, auth, "PUT", "/akunkas/" + tujuan.id, { status: "aktif" });
+        expect(buka.status, `aktifkan tujuan: ${buka.pesan}`).toBe(200);
+      });
+
+      await test.step("pembatalan ditolak karena saldo tujuan sudah terpakai", async () => {
+        const keterangan = "E2E batal ditolak " + unik();
+        await isiForm(keterangan);
+        const t = page.waitForResponse((r) => POLA_TRANSFER.test(r.url()) && r.request().method() === "POST");
+        await page.getByRole("button", { name: "Pindahkan Dana" }).click();
+        expect((await t).status(), "transfer sumber ke tujuan").toBe(201);
+        const keluar = await api(page, auth, "POST", "/jurnaltransfer", {
+          kasSumberID: tujuan.id,
+          kasTujuanID: (lawan as AkunKasUji).id,
+          jumlah: 1,
+          keterangan: "E2E saldo tujuan terpakai " + unik(),
+        });
+        expect(keluar.status, `pakai saldo tujuan: ${keluar.pesan}`).toBe(201);
+        auth = await bukaDenganAuth(page, URL_PINDAH);
+        const baris = page.getByRole("row").filter({ hasText: keterangan });
+        await baris.getByRole("button", { name: "Aksi transfer" }).click();
+        await page.getByRole("menuitem", { name: "Batalkan transfer" }).click();
+        const dialog = page.getByRole("dialog");
+        await dialog.getByLabel(/Alasan pembatalan/).fill("E2E batal ditolak");
+        const tBatal = page.waitForResponse((r) => POLA_TRANSFER_ID.test(r.url()) && r.request().method() === "PUT");
+        await dialog.getByRole("button", { name: "Batalkan Transfer" }).click();
+        expect((await tBatal).status(), "VOID ditolak").toBe(409);
+        // Pesan 409 pembatalan disusun web, menyebut kedua kemungkinan.
+        await expect(
+          dialog.getByText("Saldo akun kas tujuan tidak cukup untuk membatalkan transfer ini, atau akunnya sudah nonaktif."),
+        ).toBeVisible();
+        await expect(dialog, "dialog bertahan saat gagal").toBeVisible();
+        await page.keyboard.press("Escape");
+        await expect(dialog).toBeHidden();
+        await expect(baris, "transfer tetap Aktif").toContainText("Aktif");
+      });
+    } finally {
+      const buka = await api(page, auth, "PUT", "/akunkas/" + tujuan.id, { status: "aktif" });
+      expect.soft(buka.status, `aktifkan tujuan: ${buka.pesan}`).toBe(200);
+    }
   });
+;
 
   test("pindah lewat UI lalu batalkan: payload persis, saldo berpindah dan pulih (DN1a, DN2a, DN3a)", async ({ page }) => {
     let auth = await bukaDenganAuth(page, URL_AKUN);
@@ -189,6 +291,80 @@ test.describe("pindah dana", () => {
     await pil.getByRole("button", { name: "Atur ulang semua" }).click();
     await expect(pil).toBeHidden();
     await tampilTotal(totalAwal);
+  });
+
+  test("riwayat: periode hari ini hanya memuat transfer hari ini, dan setiap baris respons tampil di tabel", async ({ page }) => {
+    const auth = await bukaDenganAuth(page, URL_AKUN);
+    const lawan = (await daftarAkun(page, auth)).find(
+      (a) => a.status === "aktif" && a.saldo >= 1 && !a.namaAkun.startsWith("E2E"),
+    );
+    test.skip(!lawan, "tidak ada akun kas aktif bersaldo");
+    // Satu transfer hari ini sebagai isi periode yang pasti ada.
+    const akun = await akunUjiTetap(page, auth, "E2E Pindah Riwayat Tetap");
+    const keterangan = "E2E riwayat periode " + unik();
+    const buat = await api(page, auth, "POST", "/jurnaltransfer", {
+      kasSumberID: (lawan as AkunKasUji).id,
+      kasTujuanID: akun.id,
+      jumlah: 1,
+      keterangan,
+    });
+    expect(buat.status, `transfer hari ini: ${buat.pesan}`).toBe(201);
+
+    const kini = new Date();
+    const hariIni = `${kini.getFullYear()}-${String(kini.getMonth() + 1).padStart(2, "0")}-${String(kini.getDate()).padStart(2, "0")}`;
+    const dataDay = `${kini.getMonth() + 1}/${kini.getDate()}/${kini.getFullYear()}`;
+    await page.goto(URL_PINDAH);
+    await expect(page.getByRole("heading", { name: "Pindah Dana", exact: true })).toBeVisible({ timeout: 15_000 });
+    const panel = await bukaPanelFilter(page);
+    await panel.getByRole("button", { name: /^Transfer sampai, / }).click();
+    await page.getByRole("grid").locator(`button[data-day="${dataDay}"]`).click();
+    await panel.getByRole("button", { name: /^Transfer dari, / }).click();
+    await page.getByRole("grid").locator(`button[data-day="${dataDay}"]`).click();
+    const tPeriode = page.waitForResponse(
+      (r) =>
+        r.request().method() === "GET" &&
+        POLA_TRANSFER.test(r.url()) &&
+        new URL(r.url()).searchParams.get("dari") === hariIni &&
+        new URL(r.url()).searchParams.get("sampai") === hariIni,
+    );
+    await terapkanPanelFilter(panel);
+    const res = await tPeriode;
+    expect(res.status()).toBe(200);
+    const isi = (await res.json()) as { data: { tanggal: string; keterangan?: string }[] };
+    expect(isi.data.length, "transfer hari ini ada di periode").toBeGreaterThan(0);
+    for (const t of isi.data) {
+      const d = new Date(t.tanggal);
+      const lokal = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      expect(lokal, `tanggal transfer ${t.keterangan ?? ""}`).toBe(hariIni);
+    }
+    await expect(page.locator("tbody tr")).toHaveCount(isi.data.length, { timeout: 15_000 });
+    await expect(page.getByRole("row").filter({ hasText: keterangan })).toHaveCount(1);
+  });
+
+  test("kurang dari dua akun kas aktif: form diganti keterangan, riwayat tetap tampil", async ({ page }) => {
+    const POLA_AKUN = /\/api\/akunkas(\?|$)/i;
+    await page.route(POLA_AKUN, async (route) => {
+      if (route.request().method() !== "GET") return route.continue();
+      const asli = await route.fetch();
+      const body = await asli.json();
+      const aktif = (body.data ?? []).filter((a: { status?: string }) => a.status === "aktif");
+      const lain = (body.data ?? []).filter((a: { status?: string }) => a.status !== "aktif");
+      // simulasi: tenant uji selalu punya beberapa akun aktif, dan akun Kas Kecil dipakai metode Tunai sehingga tidak dapat dinonaktifkan; daftar akun nyata disaring menjadi satu akun aktif
+      await route.fulfill({ response: asli, json: { ...body, data: [...aktif.slice(0, 1), ...lain] } });
+    });
+    try {
+      const tRiwayat = page.waitForResponse((r) => r.request().method() === "GET" && POLA_TRANSFER.test(r.url()));
+      await page.goto(URL_PINDAH);
+      expect((await tRiwayat).status()).toBe(200);
+      await expect(page.getByText("Butuh dua akun kas aktif")).toBeVisible({ timeout: 15_000 });
+      await expect(
+        page.getByText("Pindah Dana memerlukan sedikitnya dua akun kas aktif: satu sumber dan satu tujuan."),
+      ).toBeVisible();
+      await expect(page.getByRole("button", { name: "Pindahkan Dana" })).toHaveCount(0);
+      await expect(page.locator("tbody tr").first(), "riwayat tetap tampil").toBeVisible();
+    } finally {
+      await page.unroute(POLA_AKUN);
+    }
   });
 
   test("form menahan isian kosong dan jumlah di atas saldo, tanpa permintaan", async ({ page }) => {

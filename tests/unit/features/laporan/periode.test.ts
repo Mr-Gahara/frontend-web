@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  kelasPertumbuhan,
   jumlahkan,
   persentasePertumbuhan,
   rentangBulanIni,
@@ -141,5 +142,14 @@ describe("teksPertumbuhan", () => {
 
   it("tanpa pembanding menjadi tanda hubung", () => {
     expect(teksPertumbuhan(null)).toBe("-");
+  });
+});
+
+describe("kelasPertumbuhan (warna badge KU5a)", () => {
+  it("naik sage, turun rose, dan nol atau tanpa pembanding netral", () => {
+    expect(kelasPertumbuhan(12.5)).toContain("text-sage");
+    expect(kelasPertumbuhan(-3)).toContain("text-rose-500");
+    expect(kelasPertumbuhan(0)).toContain("text-navy/60");
+    expect(kelasPertumbuhan(null)).toContain("text-navy/60");
   });
 });

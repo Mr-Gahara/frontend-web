@@ -193,6 +193,47 @@ test.describe("E2E — Kelola pajak", () => {
     expect(sesudah.some((p) => p.namaPajak === nama), "tidak ada pajak tersimpan").toBe(false);
   });
 
+  test("pajak per transaksi aktif yang berhasil dibuat menonaktifkan pajak per transaksi lain, lalu dipulihkan (PO7a)", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const auth = await bukaDenganAuth(page, URL_PAJAK);
+    const semua = wajib(await api<PajakItem[]>(page, auth, "GET", "/pajak"), "GET /pajak");
+    const aktifLama = semua.filter((p) => !p.tipePajak && p.statusPajak);
+    expect(aktifLama.length, "tenant uji punya pajak per transaksi aktif").toBeGreaterThan(0);
+    const nama = "E2E PJK Transaksi " + unik();
+    let id: string | undefined;
+    try {
+      await page.getByRole("button", { name: "Tambah Pajak" }).click();
+      const dialog = page.getByRole("dialog", { name: "Tambah Pajak" });
+      await isiFormPajak(dialog, { nama, tarif: "5", tipe: "Per Transaksi" });
+      await expect(dialog.getByText(/akan menonaktifkan/)).toBeVisible();
+      const tJawab = page.waitForResponse(cocok("POST", POLA_BUAT));
+      await dialog.getByRole("button", { name: "Simpan" }).click();
+      const jawab = await tJawab;
+      expect(jawab.status()).toBe(201);
+      id = (normalizeId(((await jawab.json()) as { data: PajakItem }).data) as PajakItem).id;
+      await expect(dialog).toBeHidden();
+
+      const sesudah = wajib(await api<PajakItem[]>(page, auth, "GET", "/pajak"), "GET /pajak");
+      const aktifSesudah = sesudah.filter((p) => !p.tipePajak && p.statusPajak).map((p) => p.id);
+      expect(aktifSesudah, "hanya pajak baru yang aktif").toEqual([id]);
+      await cari(page, aktifLama[0].namaPajak);
+      await expect(barisPajak(page, aktifLama[0].namaPajak), "pajak lama tampil Non-Aktif").toContainText("Non-Aktif");
+    } finally {
+      await hapusPajakUji(page, auth, id);
+      for (const p of aktifLama) {
+        const pulih = await api(page, auth, "PUT", "/pajak/" + p.id, { statusPajak: true, tipePajak: false });
+        expect.soft(pulih.status, `aktifkan kembali ${p.namaPajak}: ${pulih.pesan}`).toBe(200);
+      }
+      const akhir = wajib(await api<PajakItem[]>(page, auth, "GET", "/pajak"), "GET /pajak");
+      expect(
+        akhir.filter((p) => !p.tipePajak && p.statusPajak).map((p) => p.id).sort(),
+        "pajak per transaksi aktif pulih",
+      ).toEqual(aktifLama.map((p) => p.id).sort());
+    }
+  });
+
   test("pajak per produk: data terpasang benar, pajak nonaktif tidak ditawarkan, dan ganti lewat konfirmasi (PO6a)", async ({
     page,
   }) => {

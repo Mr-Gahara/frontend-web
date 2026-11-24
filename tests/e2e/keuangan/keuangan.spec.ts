@@ -1,7 +1,7 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
 import { JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { cocok, pantauPermintaan, unik } from "../../helpers/reservasi-uji";
-import { persentasePertumbuhan, teksPertumbuhan } from "../../../features/laporan/periode";
+import { kelasPertumbuhan, persentasePertumbuhan, teksPertumbuhan } from "../../../features/laporan/periode";
 import { keTanggalLokal } from "../../../lib/waktu";
 import { formatRupiah } from "../../../lib/format";
 
@@ -194,6 +194,112 @@ test.describe("E2E — Keuangan", () => {
     }
   });
 
+  test("batas 10 akun kas aktif: buat dan aktifkan kembali ditolak 409 dengan pesan backend (temuan batas akun kas)", async ({
+    page,
+  }) => {
+    test.setTimeout(150_000);
+    const auth = await bukaDenganAuth(page, URL_AKUN);
+    const PESAN =
+      "Toko ini sudah punya 10 akun kas aktif (batas maksimal). Nonaktifkan akun kas yang tidak dipakai terlebih dahulu.";
+    // Akun pengisi bernama tetap dibuat sekali (akun kas tidak dapat dihapus),
+    // diaktifkan sampai toko punya 10 akun aktif, lalu dinonaktifkan lagi.
+    const pengisi = Array.from({ length: 10 }, (_, i) => `E2E Batas Akun Tetap ${i + 1}`);
+    const daftar = async () => ((await api<AkunKasUji[]>(page, auth, "GET", "/akunkas")).data ?? []);
+    const diaktifkan: string[] = [];
+    const CADANGAN = "E2E Batas Akun Cadangan Tetap";
+    try {
+      // Akun cadangan non-aktif untuk jalur aktifkan kembali, dibuat selagi
+      // toko belum mencapai batas.
+      if (!(await daftar()).some((a) => a.namaAkun === CADANGAN)) {
+        const buat = await api<{ id?: string }>(page, auth, "POST", "/akunkas", {
+          tipeAkun: "Kas Fisik",
+          namaAkun: CADANGAN,
+          nomorAkun: "E2E-BATAS-CADANGAN",
+          keterangan: "E2E akun cadangan batas",
+          saldo: 0,
+          status: "aktif",
+        });
+        expect(buat.status, `buat akun cadangan: ${buat.pesan}`).toBeLessThan(300);
+      }
+      const cad = (await daftar()).find((a) => a.namaAkun === CADANGAN) as AkunKasUji;
+      if (cad.status === "aktif") {
+        const tutup = await api(page, auth, "PUT", "/akunkas/" + cad.id, { status: "non-aktif" });
+        expect(tutup.status, `nonaktifkan akun cadangan: ${tutup.pesan}`).toBe(200);
+      }
+      let semua = await daftar();
+      for (const nama of pengisi) {
+        if (semua.filter((a) => a.status === "aktif").length >= 10) break;
+        const ada = semua.find((a) => a.namaAkun === nama);
+        if (ada && ada.status === "aktif") continue;
+        const r = ada
+          ? await api(page, auth, "PUT", "/akunkas/" + ada.id, { status: "aktif" })
+          : await api(page, auth, "POST", "/akunkas", {
+              tipeAkun: "Kas Fisik",
+              namaAkun: nama,
+              nomorAkun: "E2E-BATAS-" + nama.split(" ").pop(),
+              keterangan: "E2E akun pengisi batas",
+              saldo: 0,
+              status: "aktif",
+            });
+        expect(r.status, `aktifkan pengisi ${nama}: ${r.pesan}`).toBeLessThan(300);
+        semua = await daftar();
+        diaktifkan.push(nama);
+      }
+      expect(semua.filter((a) => a.status === "aktif").length, "toko punya 10 akun aktif").toBe(10);
+      const cadangan = semua.find((a) => a.namaAkun === CADANGAN) as AkunKasUji;
+
+      await page.goto(URL_BUAT_AKUN);
+      await isiFormAkunValid(page, "E2E Keuangan Batas " + unik(), null);
+      const tBuat = page.waitForResponse(cocok("POST", POLA_AKUN));
+      await page.getByRole("button", { name: "Simpan Akun Kas" }).click();
+      expect((await tBuat).status(), "akun kas ke-11 ditolak").toBe(409);
+      await expect(page.getByText(PESAN).first()).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(URL_BUAT_AKUN + "$"));
+
+      {
+        await page.goto(URL_AKUN);
+        await page.getByRole("button", { name: /^Akun non-aktif \(\d+\)$/ }).click();
+        const baris = page.locator("#daftar-akun-non-aktif").getByRole("listitem").filter({ hasText: cadangan.namaAkun });
+        await baris.getByRole("button", { name: `Aktifkan kembali ${cadangan.namaAkun}`, exact: true }).click();
+        const dialog = page.getByRole("dialog");
+        const tAktif = page.waitForResponse(cocok("PUT", /\/api\/akunkas\/[a-f0-9]{24}$/i));
+        await dialog.getByRole("button", { name: "Aktifkan Kembali", exact: true }).click();
+        expect((await tAktif).status(), "aktifkan akun ke-11 ditolak").toBe(409);
+        await expect(dialog.getByText(PESAN)).toBeVisible();
+        await expect(dialog, "dialog bertahan saat gagal").toBeVisible();
+      }
+      const akhir = await daftar();
+      expect(akhir.filter((a) => a.status === "aktif").length, "tetap 10 akun aktif").toBe(10);
+    } finally {
+      for (const a of await daftar()) {
+        if (pengisi.includes(a.namaAkun) && a.status === "aktif") {
+          const tutup = await api(page, auth, "PUT", "/akunkas/" + a.id, { status: "non-aktif" });
+          expect.soft(tutup.status, `nonaktifkan pengisi ${a.namaAkun}: ${tutup.pesan}`).toBe(200);
+        }
+      }
+    }
+  });
+
+  test("seluruh akun kas non-aktif: keterangan tampil menggantikan kartu, dan akun ada di bagian lipat", async ({ page }) => {
+    await page.route(POLA_AKUN, async (route) => {
+      if (route.request().method() !== "GET") return route.continue();
+      const asli = await route.fetch();
+      const body = await asli.json();
+      // simulasi: Kas Kecil (Laci) dipakai metode Tunai sehingga tidak dapat dinonaktifkan; status akun nyata diubah menjadi non-aktif di respons
+      const data = (body.data ?? []).map((a: Record<string, unknown>) => ({ ...a, status: "non-aktif" }));
+      await route.fulfill({ response: asli, json: { ...body, data } });
+    });
+    try {
+      await page.goto(URL_AKUN);
+      await expect(page.getByText("Belum ada akun kas aktif")).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(/Seluruh akun kas berstatus non-aktif/)).toBeVisible();
+      await expect(page.getByText("Saldo Saat Ini")).toHaveCount(0);
+      await expect(page.getByRole("button", { name: /^Akun non-aktif \(\d+\)$/ })).toBeVisible();
+    } finally {
+      await page.unroute(POLA_AKUN);
+    }
+  });
+
   test("buat akun kas gagal: pesan tampil dan halaman tetap", async ({ page }) => {
     await page.goto(URL_BUAT_AKUN);
     await isiFormAkunValid(page, "E2E Keuangan Gagal " + unik());
@@ -206,11 +312,22 @@ test.describe("E2E — Keuangan", () => {
     await page.unroute(POLA_AKUN);
   });
 
-  test("laba rugi: periode harian dan mingguan mengirim rentang tanggal dan menampilkan total laba bersih", async ({
+  test("laba rugi: periode harian, mingguan, dan bulanan menampilkan total laba bersih dari respons", async ({
     page,
   }) => {
-    await page.goto(URL_LABA_RUGI);
+    // Kartu ringkasan layout dan halaman meminta periode bulanan dengan query
+    // yang sama pada saat yang sama, sehingga isi keduanya sama; respons mana
+    // pun yang tertangkap lebih dulu menjadi pembanding.
+    await page.goto(URL_LABA_RUGI, { waitUntil: "commit" });
+    const tBulanan = page.waitForResponse(responsLabaRugi("bulanan", true));
+    const resBulanan = await tBulanan;
+    expect(resBulanan.status(), "GET laba rugi bulanan").toBe(200);
+    const totalBulanan = jumlah(daftarDari<BarisLabaRugi>(await resBulanan.json()), (x) => x.totalLabaBersih);
     await expect(page.getByText("Laba Bulan Ini")).toBeVisible();
+    await expect(
+      page.locator("div").filter({ hasText: "vs periode sebelumnya" }).filter({ hasText: rupiah(totalBulanan) }).first(),
+      "total bulanan",
+    ).toBeVisible();
     for (const [tombol, periode, label] of [
       ["Harian", "harian", "Laba Hari Ini"],
       ["Mingguan", "mingguan", "Laba Minggu Ini"],
@@ -312,11 +429,11 @@ test.describe("E2E — Keuangan", () => {
     expect(resLalu.status(), "GET laba rugi pembanding").toBe(200);
     const totalKini = jumlah(daftarDari<BarisLabaRugi>(await resKini.json()), (x) => x.totalLabaBersih);
     const totalLalu = jumlah(daftarDari<BarisLabaRugi>(await resLalu.json()), (x) => x.totalLabaBersih);
-    const harapan = teksPertumbuhan(persentasePertumbuhan(totalKini, totalLalu));
-    await expect(
-      page.getByText("vs periode sebelumnya").locator("xpath=preceding-sibling::span[1]"),
-      "badge pertumbuhan",
-    ).toHaveText(harapan);
+    const persen = persentasePertumbuhan(totalKini, totalLalu);
+    const badge = page.getByText("vs periode sebelumnya").locator("xpath=preceding-sibling::span[1]");
+    await expect(badge, "badge pertumbuhan").toHaveText(teksPertumbuhan(persen));
+    // Warna mengikuti arah pertumbuhan dari kedua respons nyata.
+    await expect(badge, "warna badge").toHaveClass(kelasPertumbuhan(persen));
   });
 
   // Mutasi arus kas diuji di tests/e2e/keuangan/mutasi-kas.spec.ts (keputusan MK1a).

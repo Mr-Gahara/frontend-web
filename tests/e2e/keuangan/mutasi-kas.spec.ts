@@ -1,6 +1,7 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
 import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../helpers/filter-uji";
-import { BASIS, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { BASIS, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { pastikanKategoriFixture } from "../../helpers/beban-uji";
 import {
   batalkanPenjualanUji,
   bayarLewatApi,
@@ -229,6 +230,95 @@ test.describe("Mutasi arus kas", () => {
     }
   });
 
+  test("jenis saldo awal, beban, pembalik beban, dan pembatalan transfer keluar tampil dengan label dan arahnya", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await login(page);
+    const auth = await bukaDenganAuth(page, URL_MUTASI);
+    const idKategori = await pastikanKategoriFixture(page, auth);
+    const lawan = (await daftarAkun(page, auth)).find((a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E"));
+    test.skip(!lawan, "tidak ada akun kas aktif bukan uji sebagai lawan transfer");
+    // Data milik modul akun kas, beban, dan Pindah Dana disiapkan lewat API;
+    // halaman mutasi hanya membaca (keputusan rancangan butir 23). Satu akun
+    // uji bersaldo awal dibuat per run, lalu dikosongkan dan dinonaktifkan.
+    const nama = "E2E Mutasi Jenis " + unik();
+    const buat = await api<{ id: string }>(page, auth, "POST", "/akunkas", {
+      tipeAkun: "Kas Fisik",
+      namaAkun: nama,
+      nomorAkun: "E2E-" + unik(),
+      keterangan: "E2E jenis mutasi",
+      saldo: 2,
+      status: "aktif",
+    });
+    expect(buat.status, `buat akun bersaldo awal: ${buat.pesan}`).toBeLessThan(300);
+    const id = buat.data.id;
+    try {
+      const beban = await api<{ id: string }>(page, auth, "POST", "/bebanoperasional", {
+        akunKasID: id,
+        kategoriBebanID: idKategori,
+        jumlah: 1,
+        tanggal: new Date().toISOString(),
+        keterangan: "E2E beban jenis mutasi",
+      });
+      expect(beban.status, `catat beban: ${beban.pesan}`).toBe(201);
+      const voidBeban = await api(page, auth, "PUT", "/bebanoperasional/" + beban.data.id, {
+        status: "VOID",
+        alasanVoid: "E2E pembalik beban",
+      });
+      expect(voidBeban.status, `batalkan beban: ${voidBeban.pesan}`).toBe(200);
+      const tf = await api<{ id: string }>(page, auth, "POST", "/jurnaltransfer", {
+        kasSumberID: id,
+        kasTujuanID: lawan!.id,
+        jumlah: 1,
+        keterangan: "E2E transfer keluar jenis mutasi",
+      });
+      expect(tf.status, `transfer keluar: ${tf.pesan}`).toBe(201);
+      const voidTf = await api(page, auth, "PUT", "/jurnaltransfer/" + tf.data.id, { status: "VOID" });
+      expect(voidTf.status, `batalkan transfer: ${voidTf.pesan}`).toBe(200);
+
+      // Daftar akun panel dimuat sebelum akun uji dibuat; muat ulang halaman.
+      await page.reload();
+      await expect(page.getByRole("heading", { name: "Laporan Mutasi Kas" })).toBeVisible({ timeout: 15_000 });
+      const tMutasi = page.waitForResponse(responsMutasi((q) => q.get("akunKasID") === id));
+      const panel = await bukaPanelFilter(page);
+      await pemilih(page, "Akun kas").click();
+      await page.getByRole("option", { name: nama, exact: true }).click();
+      await terapkanPanelFilter(panel);
+      const respons = (await (await tMutasi).json()) as ResponsMutasi;
+      expect(respons.data.map((b) => b.jenis).sort()).toEqual(
+        ["BEBAN", "PEMBALIK_BEBAN", "SALDO_AWAL", "TRANSFER_KELUAR", "VOID_TRANSFER_KELUAR"].sort(),
+      );
+      await expect(barisTabel(page)).toHaveCount(5, { timeout: 15_000 });
+      const harapan: [string, string, number][] = [
+        ["Saldo awal", "Uang masuk", 2],
+        ["Beban", "Uang keluar", 1],
+        ["Pembalik beban", "Uang masuk", 1],
+        ["Transfer keluar", "Uang keluar", 1],
+        ["Pembatalan transfer keluar", "Uang masuk", 1],
+      ];
+      for (const [label, arah, nilai] of harapan) {
+        // Label persis: "Beban" juga bagian dari "Pembalik beban".
+        const baris = barisTabel(page).filter({ has: page.getByText(label, { exact: true }) });
+        await expect(baris, label).toHaveCount(1);
+        await expect(baris, `${label}: arah dan nilai`).toContainText(`${arah === "Uang masuk" ? "+" : "-"} ${rupiah(nilai)}`);
+      }
+    } finally {
+      const sisa = (await daftarAkun(page, auth)).find((a) => a.id === id);
+      if (sisa && sisa.saldo > 0) {
+        const kosong = await api(page, auth, "POST", "/jurnaltransfer", {
+          kasSumberID: id,
+          kasTujuanID: lawan!.id,
+          jumlah: sisa.saldo,
+          keterangan: "E2E pengosongan akun jenis mutasi",
+        });
+        expect.soft(kosong.status, `kosongkan akun uji: ${kosong.pesan}`).toBe(201);
+      }
+      const tutup = await api(page, auth, "PUT", "/akunkas/" + id, { status: "non-aktif" });
+      expect.soft(tutup.status, `nonaktifkan akun uji: ${tutup.pesan}`).toBe(200);
+    }
+  });
+
   test("ringkasan gabungan tanpa akun terpilih, lalu ringkasan akun saat satu akun dipilih (NZ1a)", async ({ page }) => {
     const tGabungan = page.waitForResponse(
       (r) => r.request().method() === "GET" && POLA_RINGKASAN_GABUNGAN.test(r.url()),
@@ -357,8 +447,10 @@ test.describe("Mutasi arus kas", () => {
           hargaBeli: 1,
         });
         ids.push(id);
+        // Penunggu dipasang sesudah goto commit: halaman mutasi sudah terbuka,
+        // sehingga respons sebelumnya ikut tertangkap (Urutan debug kegagalan e2e).
+        await page.goto(URL_MUTASI, { waitUntil: "commit" });
         const tMutasi = page.waitForResponse((r) => r.request().method() === "GET" && POLA_MUTASI.test(r.url()));
-        await page.goto(URL_MUTASI);
         const data = ((await (await tMutasi).json()) as { data: { jenis: string; referensi: { id?: string } }[] }).data;
         const indeks = data.findIndex((m) => m.jenis === "PEMBELIAN" && m.referensi.id === id);
         expect(indeks, `mutasi PEMBELIAN ${tipe} ada di halaman pertama`).toBeGreaterThanOrEqual(0);
