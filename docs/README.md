@@ -54,7 +54,7 @@ Inti selalu dikirim. Tabel ini menyebut tambahannya.
 | Modul atau halaman | `modul/<modul>.md`, `referensi/arsitektur.md`, `referensi/utang-pengujian.md`, dan baris kontrak modul itu dari `kontrak/endpoint.md`, `kontrak/payload.md`, dan `kontrak/izin-halaman.md` (lewat `grep`) |
 | Fase UI/UX | `modul/ui-ux.md` dan dokumen modul halaman yang disentuh |
 | Penyesuaian backend | `kontrak/temuan.md`, `referensi/keputusan-penyesuaian-backend.md`, dan dokumen modul yang terdampak |
-| Laporan untuk tim backend | `kontrak/temuan.md` |
+| Laporan untuk tim backend | `referensi/laporan-untuk-backend.md` (laporan lengkap), `kontrak/temuan.md` (tabel ringkas), `referensi/rencana-struk-tutup-kasir.md`, dan `referensi/rencana-struk-dapur.md` |
 | Menelusuri kegagalan e2e | `referensi/playwright.md` |
 | Perubahan besar atau memakai helper | `referensi/helper-dan-shell.md` dan `referensi/disiplin-perubahan.md` |
 | Pembaruan dokumentasi | Dokumen yang akan diubah |

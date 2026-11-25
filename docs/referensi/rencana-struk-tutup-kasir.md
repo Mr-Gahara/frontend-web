@@ -263,11 +263,15 @@ keputusan terbuka 24 November 2026:
       dalam periode dan outlet struk; cara mengaitkannya dirancang
       bersama backend.
 
+12. **Periode struk toko tanpa shift**: dari mesin kasir pertama dibuka
+    sampai mesin kasir terakhir ditutup, saat tidak ada lagi mesin kasir
+    yang buka di outlet itu. Toko yang buka melewati tengah malam tetap
+    satu struk, karena periode mengikuti kegiatan kasir, bukan jam
+    operasional maupun hari kalender.
+
 ### Masih terbuka
 
-- **Batas periode toko tanpa shift** (dari keputusan 2): ditentukan dari
-  sesi kasir pertama dibuka sampai sesi terakhir ditutup pada hari itu,
-  atau dari jam operasional toko. Dirancang bersama backend.
+Tidak ada.
 
 ## Kriteria selesai MVP (usulan)
 

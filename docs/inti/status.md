@@ -61,9 +61,8 @@ satu-satunya daftar pekerjaan terbuka.
    - Nomor WhatsApp admin halaman Langganan (LG1a, `NOMOR_WA_ADMIN`
      kosong di `features/langganan/data.ts`).
    - Struk laporan tutup kasir (MVP;
-     `referensi/rencana-struk-tutup-kasir.md`): seluruh keputusan diambil
-     25 November 2026; tersisa batas periode toko tanpa shift (dirancang
-     bersama backend).
+     `referensi/rencana-struk-tutup-kasir.md`): seluruh keputusan,
+     termasuk periode toko tanpa shift, diambil 25 November 2026.
    - Tujuh keputusan terbuka struk dapur (pasca-MVP;
      `referensi/rencana-struk-dapur.md`).
    - Enam tipe aset uji bukti butir 77 dihapus atau tetap
