@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import ExcelJS from "exceljs";
 import { expect, test, type Download, type Page, type Response } from "@playwright/test";
 import { bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { bukaPanelFilter, terapkanPanelFilter } from "../../helpers/filter-uji";
@@ -23,6 +24,12 @@ type Daftar = {
   tanpaBulan?: boolean;
   /** Baris TOTAL berisi jumlah baris di kolom kedua (totalBaris backend, AR39). */
   totalJumlahBaris?: boolean;
+  /**
+   * Status (kolom "Status") yang ikut dijumlah TOTAL: penjualan hanya yang
+   * tersimpan, sama dengan laba rugi (penjualanController.js baris 17);
+   * pengeluaran tanpa beban VOID (bebanOperasionalController.js baris 17).
+   */
+  statusDijumlah?: (status: string) => boolean;
 };
 
 /** CSV backend: sel berkoma atau berkutip dibungkus kutip ganda, kutip di dalam digandakan. */
@@ -58,10 +65,62 @@ function bacaCsv(teks: string): string[][] {
   return baris;
 }
 
+/** Lembar pertama berkas Excel backend sebagai baris sel mentah (angka tetap angka); sel kosong di ujung tidak disimpan. */
+async function bacaXlsx(path: string): Promise<unknown[][]> {
+  const buku = new ExcelJS.Workbook();
+  await buku.xlsx.readFile(path);
+  const lembar = buku.worksheets[0];
+  const baris: unknown[][] = [];
+  lembar.eachRow({ includeEmpty: false }, (r) => {
+    baris.push((r.values as unknown[]).slice(1).map((v) => (v === undefined ? null : v)));
+  });
+  return baris;
+}
+
+/**
+ * Isi Excel: judul kolom sama dengan CSV, setiap baris tidak lebih lebar
+ * dari judul, lalu TOTAL. TOTAL menghitung baris (totalJumlahBaris), atau
+ * setiap sel angka di TOTAL sama dengan jumlah kolomnya.
+ */
+async function periksaXlsx(d: Daftar, berkas: Download, judulCsv: string[]) {
+  const isi = await bacaXlsx(await berkas.path());
+  expect(isi.length, `${d.nama} xlsx: judul dan TOTAL`).toBeGreaterThanOrEqual(2);
+  const [judul, ...sisa] = isi;
+  const total = sisa[sisa.length - 1];
+  const data = sisa.slice(0, -1);
+  expect(judul.map(String), `${d.nama} xlsx: judul sama dengan CSV`).toEqual(judulCsv);
+  expect(total[0], `${d.nama} xlsx: baris terakhir TOTAL`).toBe("TOTAL");
+  for (const [i, b] of data.entries()) expect(b.length, `${d.nama} xlsx: lebar baris ${i + 1}`).toBeLessThanOrEqual(judul.length);
+  if (d.totalJumlahBaris) {
+    expect(total[1], `${d.nama} xlsx: TOTAL menghitung baris`).toBe(data.length);
+    return;
+  }
+  const kolomStatus = judul.indexOf("Status");
+  const dijumlah = data.filter((b) => !d.statusDijumlah || d.statusDijumlah(String(b[kolomStatus])));
+  if (d.statusDijumlah) expect(kolomStatus, `${d.nama} xlsx: kolom Status`).toBeGreaterThan(0);
+  for (const [k, nilai] of total.entries()) {
+    if (k === 0 || typeof nilai !== "number") continue;
+    const jumlah = dijumlah.reduce<number>((a, b) => a + (typeof b[k] === "number" ? (b[k] as number) : 0), 0);
+    expect(jumlah, `${d.nama} xlsx: TOTAL kolom ${String(judul[k])}`).toBeCloseTo(nilai, 2);
+  }
+}
+
 const DAFTAR: Daftar[] = [
-  { nama: "daftar penjualan", url: "/dashboard/outlet/penjualan", pola: /\/api\/penjualan(\?|$)/i, tanggal: ["startDate", "endDate"] },
+  {
+    nama: "daftar penjualan",
+    url: "/dashboard/outlet/penjualan",
+    pola: /\/api\/penjualan(\?|$)/i,
+    tanggal: ["startDate", "endDate"],
+    statusDijumlah: (s) => ["UNPAID", "PARTIAL", "PAID"].includes(s),
+  },
   { nama: "mutasi kas", url: "/dashboard/outlet/keuangan/mutasiArusKas", pola: /\/api\/akunkas\/mutasi(\?|$)/i, tanggal: ["dari", "sampai"] },
-  { nama: "pengeluaran", url: "/dashboard/outlet/pengeluaran", pola: /\/api\/bebanoperasional(\?|$)/i, tanggal: ["dari", "sampai"] },
+  {
+    nama: "pengeluaran",
+    url: "/dashboard/outlet/pengeluaran",
+    pola: /\/api\/bebanoperasional(\?|$)/i,
+    tanggal: ["dari", "sampai"],
+    statusDijumlah: (s) => s !== "VOID",
+  },
   { nama: "belanja stok", url: "/dashboard/outlet/keuangan/belanjaStok", pola: /\/api\/pembelianstok(\?|$)/i, tanggal: ["dari", "sampai"] },
   { nama: "jurnal stok", url: "/dashboard/outlet/inventaris/jurnalStok", pola: /\/api\/jurnalstok(\?|$)/i, tanggal: ["dari", "sampai"], totalJumlahBaris: true },
   { nama: "stock opname", url: "/dashboard/outlet/inventaris/stockOpname", pola: /\/api\/stockopname(\?|$)/i, tanggal: ["dari", "sampai"], totalJumlahBaris: true },
@@ -142,13 +201,13 @@ test.describe("ekspor daftar per bulan (P85)", () => {
       for (const [i, b] of data.entries()) expect(b.length, `${d.nama}: lebar baris ${i + 1}`).toBe(judul.length);
       if (d.totalJumlahBaris) expect(Number(total[1]), `${d.nama}: TOTAL menghitung baris`).toBe(data.length);
 
-      if (!d.tanpaBulan) {
-        // Bulan lalu dalam Excel.
-        const lalu = await unduhLewatDialog(page, d, "Excel", 1);
-        expect(lalu.status(), `${d.nama} xlsx bulan lalu`).toBe(200);
-        expect(lalu.headers()["content-type"]).toMatch(/spreadsheetml/);
-        expect(query(lalu).get("bulan")).toBe(keBulan(geserBulan(new Date(), -1)));
-      }
+      // Excel: bulan lalu untuk daftar berbulan, sekarang untuk stok saat ini;
+      // isinya dibaca exceljs (pemilik proyek, 25 November 2026).
+      const excel = await unduhLewatDialog(page, d, "Excel", d.tanpaBulan ? 0 : 1);
+      expect(excel.status(), `${d.nama} xlsx`).toBe(200);
+      expect(excel.headers()["content-type"]).toMatch(/spreadsheetml/);
+      if (!d.tanpaBulan) expect(query(excel).get("bulan")).toBe(keBulan(geserBulan(new Date(), -1)));
+      await periksaXlsx(d, excel.berkas, judul);
     });
   }
 
@@ -164,7 +223,14 @@ test.describe("ekspor daftar per bulan (P85)", () => {
     // Periode bawaan laman Bulanan (useState di ringkasanLabaRugi/page.tsx).
     expect(query(res).get("periode")).toBe("bulanan");
     expect(res.headers()["content-type"]).toMatch(/spreadsheetml/);
-    expect((await tBerkas).suggestedFilename()).toMatch(/\.xlsx$/);
+    const berkas = await tBerkas;
+    expect(berkas.suggestedFilename()).toMatch(/\.xlsx$/);
+    // Isi: satu baris per tanggal periode, lalu TOTAL yang menjumlah setiap kolom.
+    await periksaXlsx(
+      { nama: "laba rugi", url: "", pola, tanggal: [] },
+      berkas,
+      ["Tanggal", "Penjualan Kotor", "Penjualan Sewa", "Diskon", "Pajak", "Omzet", "HPP", "Laba Kotor", "Beban", "Laba Bersih"],
+    );
   });
 
   for (const d of DAFTAR.filter((x) => x.nama === "stock opname" || x.nama === "stock adjustment")) {

@@ -60,17 +60,8 @@ satu-satunya daftar pekerjaan terbuka.
 3. **Menunggu keputusan pemilik proyek:**
    - Nomor WhatsApp admin halaman Langganan (LG1a, `NOMOR_WA_ADMIN`
      kosong di `features/langganan/data.ts`).
-   - Struk laporan tutup kasir (MVP;
-     `referensi/rencana-struk-tutup-kasir.md`): seluruh keputusan,
-     termasuk periode toko tanpa shift, diambil 25 November 2026.
    - Tujuh keputusan terbuka struk dapur (pasca-MVP;
      `referensi/rencana-struk-dapur.md`).
-   - Pustaka pembaca xlsx untuk menguji isi Excel ekspor
-     (`referensi/utang-pengujian.md`).
-   - Baris laporan untuk tim backend di tabel Dokumen yang dikirim per
-     jenis pekerjaan `README.md` (bagian Tetap): kini hanya menyebut
-     `kontrak/temuan.md`, padahal laporan lengkap di
-     `referensi/laporan-untuk-backend.md`.
 4. **Menunggu backend** (`referensi/laporan-untuk-backend.md`): butir 190
    sampai 194, data struk laporan tutup kasir (modal awal opsional,
    penjualan dan pembayaran seluruh metode terhubung ke sesi kasir,

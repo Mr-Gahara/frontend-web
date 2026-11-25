@@ -60,11 +60,12 @@ keputusan baru.
 
 ## Menunggu keputusan pemilik proyek
 
-- **Isi berkas Excel ekspor tidak dibaca**, dan batas 10.000 baris (400)
-  tidak dapat dibuat deterministik dari web. Isi CSV setiap daftar teruji
-  sejak 24 November 2026 (`unduh/ekspor-daftar`): judul kolom, lebar setiap
-  baris, dan baris TOTAL, termasuk TOTAL yang menghitung baris. Membaca
-  isi Excel butuh pustaka pembaca xlsx sebagai dependency pengembangan.
+Tidak ada. Isi berkas Excel ekspor dibaca sejak 25 November 2026 lewat
+`exceljs` (dependency pengembangan, keputusan pemilik proyek):
+`unduh/ekspor-daftar` memeriksa judul kolom yang sama dengan CSV, lebar
+setiap baris, baris TOTAL, dan TOTAL yang menjumlah setiap kolom angka
+menurut status yang dihitung backend (penjualan tersimpan, pengeluaran
+tanpa VOID), termasuk laba rugi dan stok saat ini.
 
 ## Menunggu backend
 
@@ -89,6 +90,9 @@ yang disengaja tidak ditandai `test.fixme`.
   ulang sesudahnya menunggu backend butir 190.
 
 ## Tidak dapat dibuktikan dengan data atau lingkungan sekarang
+
+- **Batas 10.000 baris ekspor (400)** tidak dapat dibuat deterministik
+  dari web.
 
 Batas cakupan yang diterima: MVP satu outlet, data yang hanya dibuat
 aplikasi, keadaan yang hanya dapat dibuat lewat simulasi bertanda,
