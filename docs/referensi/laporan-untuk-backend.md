@@ -130,11 +130,15 @@ yang harus diperbaiki backend.
 Bukan bug, tetapi data yang dibutuhkan rilis MVP. Rinciannya di
 `referensi/rencana-struk-tutup-kasir.md`:
 
-- `nominal` buka kasir opsional dengan bawaan 0, beserta keputusan arti
-  modal kosong (sekarang memicu mutasi selisih laci).
+- `nominal` buka kasir opsional dengan bawaan 0. Laci yang dikosongkan
+  saat buka dicatat sebagai pindah dana dari laci ke akun kas lain yang
+  dipilih, bukan mutasi selisih kas keluar seperti sekarang (keputusan 9,
+  25 November 2026).
 - Penjualan dan pembayaran seluruh metode terhubung ke sesi kasir
   (`sesiKasirID`); sekarang hanya pembayaran tunai.
-- Endpoint laporan tutup kasir per sesi, dihitung backend.
+- Endpoint laporan tutup kasir per shift atau per hari toko, menggabungkan
+  seluruh mesin kasir dan seluruh kasir di periode itu, dihitung backend
+  dan dipotret saat tutup (keputusan 2, 3, dan 5, 25 November 2026).
 
 ## Laporan 25 November 2026 (pemberitahuan lonceng)
 

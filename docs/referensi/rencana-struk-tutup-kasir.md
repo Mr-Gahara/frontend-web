@@ -102,11 +102,12 @@ saat buka, bilangan bulat minimal 0), tetapi **wajib diisi**:
 `nominal` saat buka menjadi opsional dengan bawaan 0. Ini satu-satunya
 isian baru dari sisi pengguna.
 
-**Jebakan yang harus diputuskan lebih dulu** (keputusan terbuka nomor
-9): `nominalBuka` sekarang adalah hitungan uang laci, bukan modal
-terpisah. Saat buka, backend menghitung `selisih = nominal − saldo akun
-laci`; bila tidak 0, catatan wajib diisi dan saldo akun laci dikoreksi
-lewat mutasi `SELISIH_KAS_MASUK` atau `SELISIH_KAS_KELUAR`
+**Jebakan, sudah diputuskan** (keputusan 9, 25 November 2026: laci yang
+dikosongkan dicatat sebagai pindah dana ke akun kas lain): `nominalBuka`
+sekarang adalah hitungan uang laci, bukan modal terpisah. Saat buka,
+backend menghitung `selisih = nominal − saldo akun laci`; bila tidak 0,
+catatan wajib diisi dan saldo akun laci dikoreksi lewat mutasi
+`SELISIH_KAS_MASUK` atau `SELISIH_KAS_KELUAR`
 (`services/sesiKasirService.js` baris 102 sampai 135). Akun laci membawa
 saldo dari sesi sebelumnya, sehingga isian kosong yang disimpan 0 pada
 laci berisi Rp1.050.000 tercatat sebagai selisih kas keluar Rp1.050.000
@@ -119,7 +120,7 @@ dan saldo laci menjadi 0, padahal uangnya masih ada.
 | Nama toko, alamat, logo | `tenant.namaToko`, `tenant.alamat`, `tenant.logoUrl` | Ada |
 | Nama dan alamat outlet | `location.nama`, `location.alamat` (lokasi sesi, `sesiKasir.locationID`) | Ada |
 | Telepon toko | Tidak ada field telepon di tenant | Belum ada; perlu diputuskan apakah ikut |
-| Nama kasir | `sesiKasir.dibukaOleh` dan `ditutupOleh` (nama ter-populate) | Ada; kasir lain yang melayani di tengah sesi belum terbaca (lihat Keputusan terbuka) |
+| Nama kasir | `sesiKasir.dibukaOleh` dan `ditutupOleh` (nama ter-populate) | Ada; kasir lain di periode struk belum terbaca, padahal seluruhnya dicantumkan (keputusan 3, 25 November 2026) |
 | Waktu buka dan tutup | `sesiKasir.dibukaPada`, `ditutupPada` | Ada |
 | Modal awal | `sesiKasir.nominalBuka` | Ada, tetapi wajib diisi, dan nilainya sekaligus hitungan laci yang memicu mutasi selisih (lihat Modal awal) |
 | Nominal per metode pembayaran | Pembayaran tunai ke laci membawa `sesiKasirID`; pembayaran non-tunai menyimpan `sesiKasirID` null (`models/pembayaranModel.js` baris 21) | **Belum ada** untuk non-tunai |
@@ -153,19 +154,19 @@ akurat dan faktual.
 
 **Laporan (usulan):**
 
-- Satu endpoint laporan tutup kasir per sesi, misalnya
-  `GET /sesikasir/:id/laporan`, berisi seluruh isi struk dalam bentuk
-  data siap tampil: informasi toko dan outlet, kasir, waktu, modal awal,
-  nominal per metode (nama metode dari salinan di pembayaran, seperti
+- Satu endpoint laporan tutup kasir per shift atau per hari toko
+  (keputusan 2, 25 November 2026; usulan awal per sesi kasir), yang
+  menggabungkan seluruh sesi kasir di outlet dalam periode itu, berisi
+  seluruh isi struk dalam bentuk data siap tampil: informasi toko dan
+  outlet, kasir, waktu, modal awal, nominal per metode (nama metode dari salinan di pembayaran, seperti
   struk pelanggan), total penerimaan, saldo akhir, jumlah transaksi
   selesai dan belum terbayar, total sistem, tunai aktual, selisih, dan
   daftar produk terjual beserta totalnya.
 - Angka dihitung backend, bukan aplikasi atau web, agar mobile dan web
   menampilkan angka yang sama.
-- Disarankan dipotret saat sesi ditutup (disimpan bersama sesi), agar
-  cetak ulang esok hari memberi angka yang sama walau ada pembayaran
-  yang di-VOID kemudian. Bila tidak dipotret, aturan VOID sesudah tutup
-  harus diputuskan (Keputusan terbuka).
+- Dipotret saat tutup dan disimpan, agar cetak ulang esok hari memberi
+  angka yang sama walau ada pembayaran yang di-VOID kemudian (keputusan 5,
+  25 November 2026).
 - Izin baca mengikuti detail sesi kasir dan pembatasan lokasi kerja
   (P46).
 
@@ -193,46 +194,70 @@ web (`ditutupDari: "web"`, Mesin Kasir). Peran web (usulan):
    endpoint laporan yang sama, dengan section yang sama dengan struk.
 2. **Cetak dari browser** untuk sesi yang ditutup dari web, atau saat
    Owner butuh salinan: halaman cetak selebar struk (80 mm) lewat
-   `window.print`, tanpa driver printer khusus. Opsional, bila
-   diputuskan.
+   `window.print`, tanpa driver printer khusus. Ikut MVP (keputusan
+   25 November 2026).
 3. **Unduh** laporan sesi (PDF atau Excel) mengikuti keputusan rancangan
-   butir 37 (berkas dibangun backend). Opsional, bila diputuskan.
+   butir 37 (berkas dibangun backend). Ikut MVP (keputusan 25 November
+   2026).
 4. **Spec e2e** dengan respons nyata: sesi dibuka dari aplikasi uji
    (`bukaKasirLewatAplikasi`), transaksi tunai dan non-tunai, ditutup,
    lalu angka laporan di web dibandingkan dengan respons backend.
 
 Tidak ada pekerjaan web sebelum backend menyediakan endpoint laporan.
 
-## Keputusan terbuka
+## Keputusan 25 November 2026
 
-1. **Saldo akhir** (section 4): saldo sistem saat tutup, tunai aktual,
-   atau modal awal ditambah penerimaan tunai?
-2. **Total penerimaan** di section 2 dan section 3 bernilai sama; apakah
-   section 3 memang pengulangan agar mudah dibaca, atau berisi angka
-   lain (misalnya penerimaan bersih sesudah VOID)?
-3. **Nama kasir** bila beberapa kasir melayani dalam satu sesi: pembuka,
-   penutup, atau seluruh kasir yang mencatat penjualan?
-4. **Transaksi belum terbayar**: penjualan di sesi itu yang belum lunas
-   saat tutup, termasuk yang lunas sebagian?
-5. **VOID sesudah tutup**: laporan dipotret saat tutup, atau dihitung
-   ulang setiap dibaca?
-6. **Telepon toko** di section 1: perlu field baru di tenant?
-7. **Penjualan menu**: dihitung dari seluruh penjualan selesai di sesi,
-   atau termasuk yang belum terbayar?
-8. Peran web nomor 2 dan 3 (cetak dari browser, unduh) ikut MVP atau
-   tidak.
-9. **Arti modal awal kosong**: "laci memang kosong" (selisih terhadap
-   saldo laci dicatat, seperti sekarang), atau "tidak dihitung" (modal
-   dicatat 0 tanpa menyentuh saldo laci dan tanpa mutasi selisih)? Bila
-   yang kedua, modal awal perlu dipisah dari hitungan laci saat buka.
+Diputuskan pemilik proyek (25 November 2026), menjawab delapan dari
+sembilan keputusan terbuka 24 November 2026:
+
+1. **Saldo akhir** (section 4): omzet yang diperoleh kasir dari penjualan
+   **lunas** dalam periode struk; penjualan belum terbayar dan VOID tidak
+   dihitung.
+2. **Satu struk per shift atau per hari toko**: toko bershift mendapat
+   satu struk per shift, toko tanpa shift satu struk dari toko buka sampai
+   toko tutup. Struk menggabungkan seluruh mesin kasir di outlet selama
+   periode itu: Budi di mesin A dan Aryo di mesin B pada shift pagi tetap
+   satu struk. Ini mengubah usulan "satu laporan untuk setiap sesi kasir"
+   di Tujuan dan Bagian backend: laporan dihitung per periode shift atau
+   hari toko dari seluruh sesi kasir di dalamnya.
+3. **Nama kasir**: seluruh kasir yang bertugas dalam periode struk
+   dicantumkan, dan isi struk adalah gabungan transaksi mereka.
+4. **Transaksi belum terbayar** (section 5): hanya penjualan yang belum
+   dibayar sama sekali (UNPAID); lunas sebagian tidak termasuk, karena
+   umumnya hanya terjadi pada invoice, bukan POS.
+5. **VOID sesudah tutup**: laporan dipotret saat tutup dan disimpan, agar
+   cetak ulang memberi angka yang sama.
+6. **Telepon toko**: tidak perlu; section 1 tanpa telepon.
+7. **Penjualan menu** (section 8 dan 9): ikut menghitung penjualan yang
+   belum terbayar.
+8. **Cetak dari browser dan unduh ikut MVP** (peran web nomor 2 dan 3).
+9. **Modal awal kosong berarti laci memang dikosongkan saat buka.** Toko
+   mengosongkan laci agar isinya murni hasil penjualan hari itu; uang
+   hari-hari sebelumnya disimpan di akun kas lain, dan pengeluaran hari
+   itu diambil dari akun lain itu, sehingga arus kas masuk kasir hari itu
+   tidak terganggu. Uang yang dikeluarkan dari laci saat dikosongkan
+   dicatat sebagai **pindah dana dari laci ke akun kas lain** yang
+   dipilih, bukan mutasi selisih kas keluar seperti backend `1718030`.
+
+### Masih terbuka
+
+- **Section 3**: menurut keputusan 24 November 2026 berupa satu baris
+  "Total penerimaan" yang tulisan dan angkanya sama dengan baris terakhir
+  section 2. Pemilik proyek menyatakan section 3 seharusnya angka lain
+  yang umumnya sama tetapi tidak selalu; nama baris dan isinya belum
+  ditetapkan.
+- **Batas periode toko tanpa shift** (dari keputusan 2): ditentukan dari
+  sesi kasir pertama dibuka sampai sesi terakhir ditutup pada hari itu,
+  atau dari jam operasional toko. Dirancang bersama backend.
 
 ## Kriteria selesai MVP (usulan)
 
 - Kasir dapat membuka kasir tanpa mengisi modal awal, dan tersimpan 0.
 - Penjualan dan pembayaran seluruh metode dari perangkat bersesi
   terhubung ke sesi kasirnya.
-- Struk laporan tutup kasir tercetak di aplikasi dengan sembilan section
-  dan pemisah seperti di atas, dengan angka dari backend.
+- Struk laporan tutup kasir per shift atau per hari toko tercetak di
+  aplikasi dengan section dan pemisah seperti di atas, dengan angka dari
+  backend, dan dapat dicetak dari browser serta diunduh di web.
 - Web menampilkan laporan yang sama di rincian sesi Mesin Kasir.
 - Pengujian backend, mobile, dan web membuktikan angka laporan sama
   dengan transaksi sesi, termasuk non-tunai, belum terbayar, dan VOID.
