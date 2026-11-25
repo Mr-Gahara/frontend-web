@@ -261,5 +261,18 @@ export const queryKeys = {
     semua: kunci(["notifikasi"] as const),
     ringkasanOutlet: () => ["notifikasi", "ringkasanOutlet"] as const,
     produk: () => ["produk", "lonceng"] as const,
+    stokKritisGudang: (locationID: string) => ["notifikasi", "stokKritisGudang", locationID] as const,
+    opnameMenunggu: (tipeLokasi: string) => ["notifikasi", "opnameMenunggu", tipeLokasi] as const,
+    // Di bawah akar domainnya, agar tutup kasir dan aksi booking ikut memperbaruinya.
+    sesiKasirBuka: () => ["sesiKasir", "lonceng"] as const,
+    booking: (tanggal: string) => ["sesiBooking", "lonceng", tanggal] as const,
+    izinCuti: () => ["izinCuti", "lonceng"] as const,
+    monitoring: (tanggal: string, lokasiId: string) => ["absensi", "lonceng", tanggal, lokasiId] as const,
+    jadwal: (startDate: string, endDate: string, lokasiId: string) =>
+      ["jadwalShift", "lonceng", startDate, endDate, lokasiId] as const,
+    pengajuanDiputuskan: () => ["pengajuanStok", "lonceng"] as const,
+    penjualan: (statusPenjualan: string) => ["penjualan", "lonceng", statusPenjualan] as const,
+    membership: () => ["membership", "lonceng"] as const,
+    diskon: () => ["diskon", "lonceng"] as const,
   },
 } as const;

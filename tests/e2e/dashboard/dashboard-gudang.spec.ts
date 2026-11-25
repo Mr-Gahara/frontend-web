@@ -1,5 +1,6 @@
 import { test, expect, type Page, type Response } from "@playwright/test";
 import { BASIS, bukaDenganAuth, login, pengajuanUjiDisetujui } from "../../helpers/transfer-uji";
+import { dariLonceng } from "../../helpers/lonceng-uji";
 
 /*
  * Dashboard gudang (desain B). Setiap angka dibandingkan dengan respons
@@ -26,7 +27,9 @@ const POLA_RINGKASAN = /\/api\/dashboard\/gudang(\?|$)/i;
 const POLA_INVENTORY = /\/api\/inventory\?/i;
 const POLA_JURNAL = /\/api\/jurnalstok(\?|$)/i;
 
-const dapatGet = (pola: RegExp) => (r: Response) => r.request().method() === "GET" && pola.test(r.url());
+// Permintaan lonceng topbar ke endpoint yang sama tidak dihitung (LN7a).
+const dapatGet = (pola: RegExp) => (r: Response) =>
+  r.request().method() === "GET" && pola.test(r.url()) && !dariLonceng(r.url());
 const angka = (n: number) => new Intl.NumberFormat("id-ID").format(n);
 
 async function isi<T>(r: Response): Promise<T> {
@@ -44,7 +47,7 @@ async function totalHalaman(r: Response): Promise<number | undefined> {
 async function bukaDashboard(page: Page) {
   const permintaanPengajuan: string[] = [];
   page.on("request", (r) => {
-    if (r.method() === "GET" && POLA_PENGAJUAN.test(r.url())) permintaanPengajuan.push(r.url());
+    if (r.method() === "GET" && POLA_PENGAJUAN.test(r.url()) && !dariLonceng(r.url())) permintaanPengajuan.push(r.url());
   });
   const tunggu = Promise.all(
     [POLA_RINGKASAN, POLA_INVENTORY, POLA_JURNAL].map((p) => page.waitForResponse(dapatGet(p))),

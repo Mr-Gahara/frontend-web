@@ -8,6 +8,7 @@ import {
   unik,
 } from "../../helpers/reservasi-uji";
 import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../helpers/filter-uji";
+import { dariLonceng } from "../../helpers/lonceng-uji";
 import { IZIN } from "../../../lib/auth/permissions";
 import {
   PENGGUNA_KASIR_OUTLET,
@@ -227,7 +228,7 @@ test.describe("Mesin Kasir: pengguna baca-saja", () => {
       if (r.method() === "GET" && /\/api\/sesikasir\/perangkat(-toko)?(\?|$)/i.test(r.url())) mintaMesin += 1;
     });
     const tKasirBuka = page.waitForResponse(
-      (r) => r.request().method() === "GET" && /\/api\/sesikasir\?/i.test(r.url()),
+      (r) => r.request().method() === "GET" && /\/api\/sesikasir\?/i.test(r.url()) && !dariLonceng(r.url()),
     );
     await page.goto(URL, { waitUntil: "commit" });
     const kasirBuka = await tKasirBuka;
@@ -258,7 +259,7 @@ test.describe("Mesin Kasir: kelola tanpa sebagian izin baca (MK11a)", () => {
       if (r.method() === "GET" && /\/api\/sesikasir\/perangkat(-toko)?(\?|$)/i.test(r.url())) mintaMesin += 1;
     });
     const tKasirBuka = page.waitForResponse(
-      (r) => r.request().method() === "GET" && /\/api\/sesikasir\?/i.test(r.url()),
+      (r) => r.request().method() === "GET" && /\/api\/sesikasir\?/i.test(r.url()) && !dariLonceng(r.url()),
     );
     await page.goto(URL, { waitUntil: "commit" });
     expect((await tKasirBuka).status(), "sesi kasir tetap dibaca").toBe(200);
@@ -474,7 +475,8 @@ test.describe("Mesin Kasir: riwayat berhalaman", () => {
       r.request().method() === "GET" &&
       POLA.test(r.url()) &&
       new globalThis.URL(r.url()).searchParams.get("page") === halaman &&
-      new globalThis.URL(r.url()).searchParams.has("status");
+      new globalThis.URL(r.url()).searchParams.has("status") &&
+      !dariLonceng(r.url());
     const tPertama = page.waitForResponse(riwayat("1"));
     await page.goto(URL, { waitUntil: "commit" });
     const pertama = await tPertama;

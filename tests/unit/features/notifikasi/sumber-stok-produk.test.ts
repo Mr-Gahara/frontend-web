@@ -118,7 +118,7 @@ describe("pemberitahuanProdukMinimum (LN1a tingkat sedang)", () => {
     const p = pemberitahuanProdukMinimum(2, akses());
     expect(p?.tingkat).toBe("tindakan");
     expect(p?.isi).toBe("2 produk mencapai stok minimum.");
-    expect(p?.tautan).toEqual([{ href: URL_PRODUK, label: "Lihat produk" }]);
+    expect(p?.tautan).toEqual([{ href: `${URL_PRODUK}?tab=stok-kritis`, label: "Lihat produk" }]);
     expect(pemberitahuanProdukMinimum(0, akses())).toBeNull();
     expect(pemberitahuanProdukMinimum(undefined, akses())).toBeNull();
   });

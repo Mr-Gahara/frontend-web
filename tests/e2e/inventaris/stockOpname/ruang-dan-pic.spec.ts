@@ -1,5 +1,6 @@
 import { test, expect, type Response } from "@playwright/test";
 import { login, BASIS } from "../../../helpers/transfer-uji";
+import { dariLonceng } from "../../../helpers/lonceng-uji";
 
 /*
  * Penjaga ruang di detail stock opname dan nama PIC di form buat, terhadap
@@ -17,7 +18,7 @@ type OpnameMentah = {
 };
 
 const daftarOpname = (r: Response) =>
-  r.request().method() === "GET" && /\/api\/stockopname(\?|$)/i.test(r.url());
+  r.request().method() === "GET" && /\/api\/stockopname(\?|$)/i.test(r.url()) && !dariLonceng(r.url());
 
 /** Membuka daftar sebuah ruang dan mengembalikan dokumen bertipe lokasi itu. */
 async function dokumenBertipe(

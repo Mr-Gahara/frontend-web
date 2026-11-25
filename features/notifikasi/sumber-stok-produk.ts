@@ -1,3 +1,4 @@
+import { denganTabKritis } from "@/features/inventaris/tab-stok";
 import type { Produk } from "@/types/produk";
 import { bolehTautan, fiturAktif, type AksesTautan } from "./akses";
 import type { Pemberitahuan, TautanPemberitahuan } from "./jenis";
@@ -103,6 +104,7 @@ export function pemberitahuanProdukMinimum(jumlah: number | null | undefined, ak
     tingkat: "tindakan",
     judul: "Stok produk menipis",
     isi: `${jumlah} produk mencapai stok minimum.`,
-    tautan: bolehTautan(akses, URL_PRODUK) ? [{ href: URL_PRODUK, label: "Lihat produk" }] : [],
+    // Langsung tab Stok Kritis daftar Produk (LN16a).
+    tautan: bolehTautan(akses, URL_PRODUK) ? [{ href: denganTabKritis(URL_PRODUK), label: "Lihat produk" }] : [],
   };
 }

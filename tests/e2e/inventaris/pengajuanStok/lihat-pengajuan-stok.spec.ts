@@ -3,6 +3,7 @@ import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../../hel
 import { masukTanpaIzinLintas } from "../../../helpers/terkunci-uji";
 import { LABEL_ARAH_PENGAJUAN } from "../../../../features/pengajuan-stok/tampilan";
 import { masuk } from "../../../helpers/masuk-uji";
+import { dariLonceng } from "../../../helpers/lonceng-uji";
 
 type LokasiMentah = { id?: string; _id?: string; nama: string; tipe: string };
 
@@ -38,6 +39,7 @@ type Kueri = Record<string, string | null>;
 function daftarPengajuan(harap: Kueri) {
   return (r: Response) => {
     if (r.request().method() !== "GET" || !/\/api\/pengajuanstok(\?|$)/i.test(r.url())) return false;
+    if (dariLonceng(r.url())) return false;
     const q = new URL(r.url()).searchParams;
     return Object.entries(harap).every(([k, v]) => q.get(k) === v);
   };

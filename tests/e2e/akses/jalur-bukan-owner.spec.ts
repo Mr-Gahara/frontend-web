@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { dariLonceng } from "../../helpers/lonceng-uji";
 import { daftarAkun, pilihAkun, type AkunKasUji } from "../../helpers/akun-kas-uji";
 import { KATEGORI_FIXTURE, pastikanKategoriFixture } from "../../helpers/beban-uji";
 import {
@@ -102,7 +103,7 @@ test("tanpa read-location: Status Staf tidak dipasang, absensi dan lokasi Profil
   await expect(page.getByText("Anda tidak memiliki izin melihat lokasi outlet.")).toBeVisible({ timeout: 15_000 });
 
   const tDaftar = page.waitForResponse(
-    (r) => r.request().method() === "GET" && /\/api\/penjualan\?/i.test(r.url()),
+    (r) => r.request().method() === "GET" && /\/api\/penjualan\?/i.test(r.url()) && !dariLonceng(r.url()),
   );
   await page.goto("/dashboard/outlet/penjualan");
   const daftar = await tDaftar;

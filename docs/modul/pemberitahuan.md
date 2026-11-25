@@ -114,6 +114,34 @@ LN3a:
   judul, kalimat, dan tautan aksi yang sama (tautan hanya bagi pemegang
   izin); halaman tetap dapat dipakai.
 
+### Rincian penerapan inventaris dan gudang (25 November 2026)
+
+Diputuskan pemilik proyek lewat dialog saat menerapkan sumber inventaris
+dan gudang LN4a:
+
+- **LN16a: tab Stok Kritis lewat URL di tiga halaman.** Stok outlet,
+  Inventaris gudang, dan daftar Produk membaca `?tab=stok-kritis`
+  (`features/inventaris/tab-stok.ts`, `lib/tab-url.ts`), sehingga ketiga
+  pemberitahuan stok minimum membuka daftar yang langsung tersaring.
+- **LN17a: pengguna gudang saja memakai ringkasan gudang.** Pemegang izin
+  dashboard outlet memakai ringkasan outlet (lengkap per arah); yang
+  hanya memegang izin dashboard gudang memakai `GET /dashboard/gudang`:
+  menunggu persetujuan dan siap surat jalan per arah tampil, tetapi
+  pengembalian yang menunggu diterima di gudang belum, karena
+  `transfer.sedangDikirim` gudang menggabungkan kedua arah. Dilaporkan ke
+  backend.
+
+### Rincian penerapan penjualan (25 November 2026)
+
+- **LN18a: saringan URL penjualan memakai isian Status yang sudah ada.**
+  `?status=belum-bayar` dan `?status=sebagian` mengisi isian Status panel
+  filter (statusPenjualan UNPAID dan PARTIAL, sama dengan belum lunas dan
+  lunas sebagian, tanpa Draft), menggantikan nama parameter
+  `?statusBayar=` di LN9a, karena panel tidak punya isian status bayar dan
+  backend hanya menerima satu nilai per saringan. Kartu lonceng menyebut
+  kedua jumlah dan punya dua tautan, "Belum bayar" dan "Sebagian"
+  (pemilik proyek, 25 November 2026).
+
 ## Catatan
 
 - Lonceng ada di setiap halaman dashboard, sehingga setiap sumber hanya
@@ -130,6 +158,38 @@ LN3a:
   `GET /dashboard/outlet` (`produk.stokKritis`), sehingga lonceng sudah
   memakai ringkasan itu sejak tahap 1. Membuka panel menyegarkan setiap
   sumber yang sudah pernah dimuat.
+- Tahap 2 (25 November 2026): sumber inventaris dan gudang
+  (`sumber-inventaris.ts`). Setiap kartu hanya tampil bila ada yang
+  perlu dikerjakan dan pengguna memegang izin aksinya (setujui pengajuan,
+  buat surat jalan, terima surat jalan, tinjau opname). Stok gudang
+  minimum dihitung dari `GET /inventory?locationID=<gudang>&stokKritis=true`,
+  bukan dari ringkasan gudang, karena `inventory.stokKritis` ringkasan
+  gudang dihitung se-tenant bagi Owner (`types/dashboardGudang.ts`).
+  Opname menunggu ditinjau dari `GET /stockopname?status=SUBMITTED` per
+  `tipeLokasi`. Daftar opname dan penerimaan belum punya tab URL, sehingga
+  tautannya ke halaman daftar.
+- Tahap 3 sampai 5 (25 November 2026): `sumber-operasional.ts` (kasir
+  lupa ditutup dari sesi BUKA yang dibuka sebelum hari ini; setup fitur
+  dari `fiturPerluSetup`, sama dengan banner dashboard; booking hari ini
+  yang lewat jam dan belum lunas, paling banyak tiga tautan detail
+  penjualan), `sumber-staf.ts` (izin cuti berstatus diajukan tanpa
+  tautan; kehadiran dari monitoring absensi dicocokkan dengan jadwal shift
+  hari ini, karena monitoring juga memuat staf tanpa jadwal; jadwal
+  minggu depan Senin sampai Minggu, dicek Kamis sampai Minggu; pengajuan
+  milik pengguna yang diputuskan dalam 24 jam, dari 20 pengajuan terbaru),
+  dan `sumber-penjualan.ts` (jumlah UNPAID dan PARTIAL lewat `limit=1`;
+  membership Aktif yang kedaluwarsa dalam 7 hari; diskon Aktif yang
+  berakhir dalam 3 hari atau sudah lewat). Tautan kehadiran ke
+  `/dashboard/outlet#status-staf` (jangkar di panel Status Staf).
+- Kunci cache sumber lonceng berada di bawah akar domainnya
+  (`queryKeys.notifikasi`), sehingga invalidasi setelah aksi modul ikut
+  memperbarui lonceng, tetapi terpisah dari kunci halaman, agar lonceng
+  tidak mengisi cache halaman daftar.
+- Permintaan lonceng ke endpoint daftar dikenali spec lewat
+  `tests/helpers/lonceng-uji.ts` (`dariLonceng`), dan penunggu daftar yang
+  tidak bersyarat query memakainya (LN7a). Penanda query `lonceng=1`
+  ditolak backend di `/sesikasir`, `/sesibooking`, dan `/izincuti`
+  (parameter tidak dikenal), sehingga tidak dipakai.
 - Pesan stok di diskon per produk tampil di bagian Produk Tertentu
   (cakupan Item), dan di pajak per produk di atas pemilih produk.
 
@@ -137,6 +197,11 @@ LN3a:
 
 - Pengerjaan bertahap per kelompok sumber; daftar yang belum selesai ada
   di `inti/status.md` (Mulai di sini).
+- Sumber yang datanya hanya dibuat aplikasi atau bergantung hari (kasir
+  lupa ditutup, kehadiran, jadwal minggu depan, izin cuti diajukan, hasil
+  pengajuan dalam 24 jam, booking lewat jam) hanya teruji di unit test;
+  e2e lonceng membuktikan jumlah lencana sama dengan kartu dan urutan per
+  tingkat terhadap data nyata (`referensi/utang-pengujian.md`).
 - Akun uji utama tidak punya pemberitahuan per 25 November 2026, sehingga
   skenario data nyata `dashboard/lonceng-pemberitahuan` hanya membuktikan
   keadaan kosong; keadaan berisi dibuktikan akun klien sekali pakai tanpa

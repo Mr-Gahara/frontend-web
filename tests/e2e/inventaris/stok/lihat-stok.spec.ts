@@ -1,6 +1,7 @@
 import { test, expect, Locator, Page, Response } from "@playwright/test";
 import { masukTanpaIzinLintas } from "../../../helpers/terkunci-uji";
 import { masuk } from "../../../helpers/masuk-uji";
+import { dariLonceng } from "../../../helpers/lonceng-uji";
 
 const URL_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/stok";
 const URL_GUDANG = "http://localhost:3000/dashboard/gudang/inventaris";
@@ -31,6 +32,8 @@ function getInventory(syarat?: (url: URL) => boolean) {
   return (r: Response) => {
     if (r.request().method() !== "GET") return false;
     if (!/\/api\/inventory(\?|$)/.test(r.url())) return false;
+    // Hitungan stok kritis lonceng topbar (limit=1) bukan daftar halaman (LN7a).
+    if (dariLonceng(r.url())) return false;
     return syarat ? syarat(new URL(r.url())) : true;
   };
 }
@@ -205,7 +208,7 @@ test.describe("Stok outlet", () => {
     await page.goto(URL_OUTLET, { waitUntil: "commit" });
     const pAktif = tunggu<LokasiMentah | null>(page, getLokasiAktif);
     const tInventory = page.waitForRequest(
-      (r) => r.method() === "GET" && /\/api\/inventory(\?|$)/.test(r.url()),
+      (r) => r.method() === "GET" && /\/api\/inventory(\?|$)/.test(r.url()) && !dariLonceng(r.url()),
     );
     const aktif = await pAktif;
     const idAktif = aktif?.id ?? aktif?._id;
@@ -453,4 +456,32 @@ test.describe("Inventaris gudang", () => {
     await expect(page.getByRole("alert").filter({ hasText: "Gagal memuat stok gudang." })).toBeVisible();
     await expect(page.locator("table")).toHaveCount(0);
   });
+});
+test.describe("Tab Stok Kritis dari URL (LN16a)", () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+  });
+
+  for (const { nama, url, lokasi } of [
+    { nama: "stok outlet", url: URL_OUTLET, lokasi: false },
+    { nama: "inventaris gudang", url: URL_GUDANG, lokasi: true },
+  ]) {
+    test(`${nama}: ?tab=stok-kritis membuka tab Stok Kritis yang disaring server, dan Semua menghapusnya dari URL`, async ({
+      page,
+    }) => {
+      await page.goto(url + "?tab=stok-kritis", { waitUntil: "commit" });
+      const kritis = await tungguHalaman(
+        page,
+        getInventory((u) => u.searchParams.get("stokKritis") === "true" && u.searchParams.has("locationID") === lokasi),
+      );
+      expect(kritis.data.every((i) => i.isStokKritis), "server hanya mengirim stok kritis").toBe(true);
+      // Tab aktif berlatar rose (kelas tab Stok Kritis yang terpilih).
+      await expect(page.getByRole("button", { name: "Stok Kritis" })).toHaveClass(/bg-rose-500/);
+
+      const tSemua = tungguHalaman(page, getInventory((u) => !u.searchParams.has("stokKritis")));
+      await page.getByRole("button", { name: /^Semua/ }).click();
+      await tSemua;
+      await expect(page).toHaveURL(url);
+    });
+  }
 });

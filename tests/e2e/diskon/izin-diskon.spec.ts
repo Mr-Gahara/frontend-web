@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { IZIN } from "../../../lib/auth/permissions";
 import { BASIS, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { dariLonceng } from "../../helpers/lonceng-uji";
 import { unik } from "../../helpers/reservasi-uji";
 import { masukBacaSaja, masukSebagai } from "../../helpers/terkunci-uji";
 
@@ -105,7 +106,9 @@ test("tanpa read-produk: pemilih produk diganti keterangan, daftar produk tidak 
 test("baca-saja (aksiDiskon): daftar tampil tanpa Tambah Diskon dan tanpa menu aksi baris", async ({ page }) => {
   await login(page);
   await masukBacaSaja(page);
-  const tDaftar = page.waitForResponse((r) => r.request().method() === "GET" && /\/api\/diskon(\?|$)/i.test(r.url()));
+  const tDaftar = page.waitForResponse(
+    (r) => r.request().method() === "GET" && /\/api\/diskon(\?|$)/i.test(r.url()) && !dariLonceng(r.url()),
+  );
   await bukaHalaman(page);
   expect((await tDaftar).status()).toBe(200);
   await expect(page.locator("tbody tr").first()).toBeVisible({ timeout: 15_000 });

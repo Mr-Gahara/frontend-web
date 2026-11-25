@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, Suspense } from "react";
+import { useTabUrl } from "@/hooks/use-tab-url";
+import { SLUG_TAB_STOK, TAB_STOK } from "@/features/inventaris/tab-stok";
 import { KotakCari } from "@/components/filter/bilah-filter";
 import { useRouter } from "next/navigation";
 import { useHalamanProduk, useHapusProduk, useInvalidasiProduk } from "@/features/produk/hooks";
@@ -35,13 +37,15 @@ import {
 import { formatRupiah } from "@/lib/format";
 import { AlertTriangle, MoreHorizontal, Plus, Package, Infinity } from "lucide-react";
 
-export default function ProdukPage() {
+function IsiProdukPage() {
   // 1. PROTEKSI HALAMAN
 
   const router = useRouter();
 
   const [deleteTarget, setDeleteTarget] = useState<Produk | null>(null);
-  const [tabKritis, setTabKritis] = useState(false);
+  const [tabStok, setTabStok] = useTabUrl(SLUG_TAB_STOK, TAB_STOK, "ALL");
+  const tabKritis = tabStok === "CRITICAL";
+  const setTabKritis = (kritis: boolean) => setTabStok(kritis ? "CRITICAL" : "ALL");
   const [cari, setCari] = useState("");
   const cariTertunda = useDebounce(cari, 400);
   const [halaman, setHalaman] = useState(1);
@@ -362,5 +366,14 @@ export default function ProdukPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+/** useSearchParams (?tab=, LN16a) membutuhkan batas Suspense agar halaman tetap dapat dirender statis. */
+export default function ProdukPage() {
+  return (
+    <Suspense fallback={null}>
+      <IsiProdukPage />
+    </Suspense>
   );
 }

@@ -218,6 +218,16 @@ skip bersyarat data, dan catatan proses.
   Angka terukur terakhir ada di
   `inti/pengujian.md` (Baseline).
 
+- **Sumber lonceng yang datanya dibuat aplikasi atau bergantung hari
+  hanya teruji di unit test** (`tests/unit/features/notifikasi`): kasir
+  lupa ditutup (sesi dibuka aplikasi kemarin), kehadiran (absen dibuat
+  aplikasi), jadwal minggu depan (hanya Kamis sampai Minggu), izin cuti
+  diajukan (dibuat aplikasi), hasil pengajuan dalam 24 jam, dan booking
+  lewat jam belum lunas. E2E `dashboard/lonceng-pemberitahuan`
+  membuktikan jumlah lencana sama dengan kartu dan urutan per tingkat
+  terhadap data nyata, serta pemicu stok LN1a lewat akun klien sekali
+  pakai.
+
 ## Data uji yang menetap dan data per run
 
 - **Terima penerimaan yang berhasil** diuji sungguhan lewat UI sejak

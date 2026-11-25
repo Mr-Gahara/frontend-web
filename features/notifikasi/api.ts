@@ -1,6 +1,11 @@
-import { apiData } from "@/lib/api/client";
+import { api, apiData } from "@/lib/api/client";
 import { EP } from "@/lib/api/endpoints";
 import type { Produk } from "@/types/produk";
+import type { SesiBookingResponse } from "@/types/sesiBooking";
+import type { SesiKasir } from "@/types/sesiKasir";
+import type { PengajuanStok } from "@/types/pengajuanStok";
+import type { Diskon } from "@/types/diskon";
+import type { Membership } from "@/types/membership";
 
 /** Hitungan per status untuk satu arah (permintaan ke outlet, pengembalian dari outlet). */
 type HitunganArah<K extends string> = Record<K, number>;
@@ -23,8 +28,41 @@ export interface RingkasanOutlet {
   produk: { stokKritis: number };
 }
 
+/** Jumlah baris sebuah daftar berhalaman: satu baris diminta, angkanya dari pagination.total. */
+async function hitung(endpoint: string, params: Record<string, string>): Promise<number> {
+  const hasil = await api.get<unknown[]>(endpoint, { ...params, page: "1", limit: "1" });
+  return hasil.pagination?.total ?? hasil.data.length;
+}
+
 export const notifikasiApi = {
   ringkasanOutlet: () => apiData.get<RingkasanOutlet>(EP.dashboardOutlet),
   /** Seluruh produk tanpa paginasi: satu-satunya respons yang mengisi stok terhitung produk beresep (LN8a). */
   produk: () => apiData.get<Produk[]>(EP.produk.list),
+  /** Stock opname menunggu ditinjau di satu tipe lokasi (status SUBMITTED). */
+  opnameMenunggu: (tipeLokasi: "Outlet" | "Gudang") =>
+    hitung(EP.stockOpname.list, { status: "SUBMITTED", tipeLokasi }),
+  /** Bahan di gudang yang mencapai stok minimum (stokKritis disaring server). */
+  stokKritisLokasi: (locationID: string) => hitung(EP.inventory.list, { locationID, stokKritis: "true" }),
+  /** Sesi kasir yang masih terbuka, terbaru lebih dulu (paginasi wajib backend). */
+  sesiKasirBuka: async () => (await api.get<SesiKasir[]>(EP.sesiKasir.list, { status: "BUKA", page: "1", limit: "20" })).data,
+  /** Booking yang dimulai pada tanggal lokal YYYY-MM-DD. */
+  bookingHari: (tanggal: string) => apiData.get<SesiBookingResponse[]>(EP.sesiBooking.list, { tanggal }),
+  /**
+   * Pengajuan yang sudah diputuskan, 20 terbaru menurut createdAt (urutan
+   * backend). Backend membuang status di luar hak pengguna (statusTerlihat).
+   */
+  pengajuanDiputuskan: async () =>
+    (
+      await api.get<PengajuanStok[]>(EP.pengajuanStok.list, {
+        status: "APPROVED,PENDING,COMPLETED,REJECTED",
+        page: "1",
+        limit: "20",
+      })
+    ).data,
+  /** Jumlah penjualan berstatus UNPAID atau PARTIAL (filter statusPenjualan backend). */
+  penjualanBerstatus: (statusPenjualan: "UNPAID" | "PARTIAL") => hitung(EP.penjualan.list, { statusPenjualan }),
+  /** Membership berstatus Aktif (tanpa paginasi: seluruhnya). */
+  membershipAktif: () => apiData.get<Membership[]>(EP.membership.list, { status: "Aktif" }),
+  /** Diskon berstatus Aktif. */
+  diskonAktif: () => apiData.get<Diskon[]>(EP.diskon.list, { status: "Aktif" }),
 };

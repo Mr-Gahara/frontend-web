@@ -236,6 +236,31 @@ test.describe("E2E — Daftar penjualan per halaman", () => {
     await expect(page.getByRole("button", { name: "Filter lainnya", exact: true })).toBeVisible();
   });
 
+  test("?status= dari tautan lonceng: daftar tersaring server, pil dan panel Status terisi, tautan lain mengganti saringan (LN9a, LN18a)", async ({
+    page,
+  }) => {
+    for (const [slug, status, label] of [
+      ["belum-bayar", "UNPAID", "Belum Bayar"],
+      ["sebagian", "PARTIAL", "Sebagian"],
+    ] as const) {
+      const tDaftar = tungguDaftar(page, 1, 10);
+      if (slug === "belum-bayar") await page.goto(`${URL_DAFTAR}?status=${slug}`, { waitUntil: "commit" });
+      // Pindah di halaman yang sama (komponen tidak dipasang ulang), seperti tautan lonceng kedua.
+      else await page.evaluate((u) => window.history.pushState(null, "", u), `${URL_DAFTAR}?status=${slug}`);
+      const r = await tDaftar;
+      expect(new URL(r.url()).searchParams.get("statusPenjualan"), slug).toBe(status);
+      const isi = (await r.json()) as { data: { statusPenjualan?: string }[] };
+      expect(isi.data.every((p) => p.statusPenjualan === status), "seluruh baris berstatus " + status).toBe(true);
+      const pil = page.getByRole("group", { name: "Filter aktif" });
+      await expect(pil.getByRole("button", { name: `Hapus filter Status: ${label}` })).toBeVisible();
+    }
+
+    // Nilai yang tidak dikenali diabaikan: daftar tanpa saringan status.
+    const tPolos = tungguDaftar(page, 1, 10);
+    await page.goto(`${URL_DAFTAR}?status=lunas`, { waitUntil: "commit" });
+    expect(new URL((await tPolos).url()).searchParams.has("statusPenjualan")).toBe(false);
+  });
+
   test("kotak cari nomor referensi berlaku tanpa panel dan kembali ke halaman 1 (FL1a)", async ({ page }) => {
     const awal = await bukaDaftar(page);
     expect(awal.pagination.total, "data uji perlu lebih dari 10 penjualan").toBeGreaterThan(10);

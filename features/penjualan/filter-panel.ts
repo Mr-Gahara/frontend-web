@@ -12,14 +12,34 @@ export type FilterPanelPenjualan = Pick<
   "statusPenjualan" | "jenisTransaksi" | "jenisPenjualan" | "startDate" | "endDate"
 >;
 
+/**
+ * Status dari URL (?status=), agar pemberitahuan "penjualan belum lunas" di
+ * lonceng membuka daftar yang langsung tersaring dan isian Status panel ikut
+ * terisi (LN9a, LN18a). Hanya kedua status belum lunas; nilai lain diabaikan.
+ */
+export const PARAM_STATUS_URL = "status";
+export const SLUG_STATUS_URL: Partial<Record<NonNullable<FilterPanelPenjualan["statusPenjualan"]>, string>> = {
+  UNPAID: "belum-bayar",
+  PARTIAL: "sebagian",
+};
+
+/** Filter awal dari nilai ?status=; tanpa nilai yang dikenali, filter kosong. */
+export function filterDariUrl(nilai: string | null): FilterPanelPenjualan {
+  const status = (Object.keys(SLUG_STATUS_URL) as (keyof typeof SLUG_STATUS_URL)[]).find(
+    (s) => SLUG_STATUS_URL[s] === nilai,
+  );
+  return status ? { ...FILTER_KOSONG_DASAR, statusPenjualan: status } : FILTER_KOSONG_DASAR;
+}
+
 /** Tanpa periode bawaan: daftar penjualan memuat semua tanggal. */
-export const FILTER_KOSONG: FilterPanelPenjualan = {
+const FILTER_KOSONG_DASAR: FilterPanelPenjualan = {
   statusPenjualan: undefined,
   jenisTransaksi: undefined,
   jenisPenjualan: undefined,
   startDate: "",
   endDate: "",
 };
+export const FILTER_KOSONG: FilterPanelPenjualan = FILTER_KOSONG_DASAR;
 
 export const OPSI_TIPE_TRANSAKSI: { nilai: JenisTransaksi; label: string }[] = [
   { nilai: "POS", label: "POS Kasir" },

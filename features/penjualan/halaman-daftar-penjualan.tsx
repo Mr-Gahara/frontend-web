@@ -8,8 +8,8 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 import { dariTanggalLokal, keTanggalLokal } from "@/lib/waktu";
 
-import { useState, useMemo, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useMemo, type ReactNode } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { pesanError } from "@/lib/api/error";
 import { DialogUnduhBulan } from "@/components/unduh/dialog-unduh-bulan";
 import { EP } from "@/lib/api/endpoints";
@@ -29,6 +29,8 @@ import { DialogVoidPenjualan } from "./dialog-void-penjualan";
 import { TAMPILAN_STATUS_PENJUALAN, URUTAN_STATUS_PENJUALAN } from "./tampilan";
 import {
   FILTER_KOSONG,
+  PARAM_STATUS_URL,
+  filterDariUrl,
   OPSI_METODE_PENJUALAN,
   OPSI_TIPE_TRANSAKSI,
   jumlahFilterAktif,
@@ -97,7 +99,7 @@ interface PropsHalamanDaftarPenjualan {
   pemilihLokasi?: ReactNode;
 }
 
-export default function HalamanDaftarPenjualan({
+function IsiDaftarPenjualan({
   lingkup,
   penghalang,
   pemilihLokasi,
@@ -106,10 +108,19 @@ export default function HalamanDaftarPenjualan({
   const { permissions } = useSession();
 
   const hariIni = useTanggalHariIni();
-  const [appliedFilters, setAppliedFilters] = useState<FilterPanelPenjualan>(FILTER_KOSONG);
+  // Filter awal dari ?status= (LN9a, LN18a). Tautan lonceng ke halaman yang
+  // sedang terbuka mengganti filter, disesuaikan saat render seperti lingkup.
+  const statusUrl = useSearchParams().get(PARAM_STATUS_URL);
+  const [appliedFilters, setAppliedFilters] = useState<FilterPanelPenjualan>(() => filterDariUrl(statusUrl));
   const [cari, setCari] = useState("");
   const cariTertunda = useDebounce(cari, 400);
   const [halaman, setHalaman] = useState(1);
+  const [statusUrlTerakhir, setStatusUrlTerakhir] = useState(statusUrl);
+  if (statusUrlTerakhir !== statusUrl) {
+    setStatusUrlTerakhir(statusUrl);
+    setAppliedFilters(filterDariUrl(statusUrl));
+    setHalaman(1);
+  }
   const [ukuranHalaman, setUkuranHalaman] = useState<UkuranHalaman>(UKURAN_HALAMAN_BAWAAN);
   // Urutan per kolom diterapkan server (keputusan PB14a, backend yoga).
   const [urutan, setUrutan] = useState<SortingState>([]);
@@ -522,5 +533,14 @@ export default function HalamanDaftarPenjualan({
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+/** useSearchParams (?status=, LN9a) membutuhkan batas Suspense agar halaman tetap dapat dirender statis. */
+export default function HalamanDaftarPenjualan(props: PropsHalamanDaftarPenjualan) {
+  return (
+    <Suspense fallback={null}>
+      <IsiDaftarPenjualan {...props} />
+    </Suspense>
   );
 }

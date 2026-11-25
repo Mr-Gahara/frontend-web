@@ -105,6 +105,8 @@ export function PanelStaf({ hari, denganIzinCuti }: { hari: Date; denganIzinCuti
 
   return (
     <section
+      // Jangkar tautan "Lihat status staf" lonceng (LN4a).
+      id="status-staf"
       aria-label="Status Staf"
       className="bg-krem border border-navy/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-navy shadow-sm flex flex-col gap-3 sm:gap-4"
     >

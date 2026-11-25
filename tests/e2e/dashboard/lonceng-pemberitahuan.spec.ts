@@ -29,7 +29,7 @@ for (const { nama, lebar } of [
   { nama: "desktop", lebar: 1280 },
   { nama: "HP", lebar: 390 },
 ]) {
-  test(`lonceng ${nama}: lencana dan kartu sesuai data nyata stok produk, produk minimum, dan langganan, panel di dalam layar`, async ({
+  test(`lonceng ${nama}: lencana sama dengan jumlah kartu, kartu stok produk, produk minimum, dan langganan sesuai data nyata, urut per tingkat, panel di dalam layar`, async ({
     page,
   }) => {
     await page.setViewportSize({ width: lebar, height: 800 });
@@ -43,25 +43,27 @@ for (const { nama, lebar } of [
     for (const r of [langganan, produk, ringkasan]) expect(r.status, r.pesan).toBe(200);
 
     const pengingat = pengingatLangganan(langganan.data, new Date());
-    const harapan: string[] = [];
-    if (pemicuStokProduk(produk.data)) harapan.push("stok-produk");
-    if (pengingat) harapan.push("langganan");
-    if (ringkasan.data.produk.stokKritis > 0) harapan.push("produk-minimum");
+    // Tiga sumber dihitung dari respons nyata; sumber lain (inventaris,
+    // operasional, staf, penjualan) diuji per sumber di unit test, dan di
+    // sini cukup terhitung sama antara lencana dan kartu.
+    const harapan: Record<string, boolean> = {
+      "stok-produk": pemicuStokProduk(produk.data) !== null,
+      langganan: pengingat !== null,
+      "produk-minimum": ringkasan.data.produk.stokKritis > 0,
+    };
 
     await expect(lonceng(page)).toBeEnabled();
-    await expect(lonceng(page)).toHaveAccessibleName(
-      harapan.length ? `Pemberitahuan, ${harapan.length} baru` : "Pemberitahuan",
-      { timeout: 15_000 },
-    );
-    const lencana = page.getByTestId("lencana-pemberitahuan");
-    await expect(lencana).toHaveCount(harapan.length ? 1 : 0);
-    if (harapan.length) await expect(lencana).toHaveText(harapan.length > 9 ? "9+" : String(harapan.length));
-
+    // Tunggu seluruh sumber termuat: nama lonceng berhenti berubah.
+    await page.waitForLoadState("networkidle");
     await lonceng(page).click();
     await expect(panel(page)).toBeVisible();
-    if (harapan.length === 0) await expect(panel(page)).toContainText("Belum ada pemberitahuan.");
-    await expect(panel(page).locator("article[data-pemberitahuan]")).toHaveCount(harapan.length);
-    for (const id of harapan) await expect(kartu(page, id)).toBeVisible();
+    const jumlah = await panel(page).locator("article[data-pemberitahuan]").count();
+    await expect(lonceng(page)).toHaveAccessibleName(jumlah ? `Pemberitahuan, ${jumlah} baru` : "Pemberitahuan");
+    const lencana = page.getByTestId("lencana-pemberitahuan");
+    await expect(lencana).toHaveCount(jumlah ? 1 : 0);
+    if (jumlah) await expect(lencana).toHaveText(jumlah > 9 ? "9+" : String(jumlah));
+    else await expect(panel(page)).toContainText("Belum ada pemberitahuan.");
+    for (const [id, ada] of Object.entries(harapan)) await expect(kartu(page, id)).toHaveCount(ada ? 1 : 0);
     if (pengingat) {
       await expect(kartu(page, "langganan")).toContainText(pengingat.judul);
       await expect(kartu(page, "langganan")).toContainText(pengingat.isi);
@@ -70,11 +72,21 @@ for (const { nama, lebar } of [
         URL_LANGGANAN,
       );
     }
-    if (harapan.includes("produk-minimum")) {
+    if (harapan["produk-minimum"]) {
       await expect(kartu(page, "produk-minimum")).toContainText(
         `${ringkasan.data.produk.stokKritis} produk mencapai stok minimum.`,
       );
+      await expect(kartu(page, "produk-minimum").getByRole("link", { name: "Lihat produk" })).toHaveAttribute(
+        "href",
+        "/dashboard/outlet/inventaris/produk?tab=stok-kritis",
+      );
     }
+    // Urutan per tingkat (LN11a): penting, perlu tindakan, lalu info.
+    const tingkat = await panel(page).locator("article[data-pemberitahuan]").evaluateAll((el) =>
+      el.map((e) => e.getAttribute("data-tingkat")),
+    );
+    const urutan = { penting: 0, tindakan: 1, info: 2 } as Record<string, number>;
+    expect(tingkat.map((t) => urutan[t ?? ""])).toEqual([...tingkat.map((t) => urutan[t ?? ""])].sort());
 
     const kotak = await panel(page).boundingBox();
     expect(kotak, "panel tampil").toBeTruthy();

@@ -1,5 +1,6 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
 import { BASIS, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { dariLonceng } from "../../helpers/lonceng-uji";
 import { NAMA_STAF_IZIN, siapkanIzinHari, type IzinMentah } from "../../helpers/izin-cuti-uji";
 import { jadwalkanStafMonitoring } from "../../helpers/staf-monitoring-uji";
 import { awalHari } from "../../../features/akun-kas/mutasi";
@@ -21,8 +22,9 @@ const rupiah = (nilai: number) => formatRupiah(nilai).replace(/\u00a0/g, " ");
 
 const param = (r: Response, nama: string) => new URL(r.url()).searchParams.get(nama);
 
+// Permintaan lonceng topbar ke endpoint yang sama tidak dihitung (LN7a).
 const get = (r: Response, pola: RegExp) =>
-  r.request().method() === "GET" && pola.test(new URL(r.url()).pathname);
+  r.request().method() === "GET" && pola.test(new URL(r.url()).pathname) && !dariLonceng(r.url());
 
 const isi = async <T>(r: Response): Promise<T> => ((await r.json()) as { data: T }).data;
 

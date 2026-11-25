@@ -136,6 +136,26 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
     await tanpaLuberWadah(page, "data produk 390 px");
   });
 
+  test("?tab=stok-kritis membuka tab Stok Kritis yang disaring server, dan Semua Produk menghapusnya dari URL (LN16a)", async ({
+    page,
+  }) => {
+    await login(page);
+    await page.goto("/dashboard/outlet/inventaris/produk?tab=stok-kritis", { waitUntil: "commit" });
+    const r = await page.waitForResponse(
+      (x) => x.request().method() === "GET" && /\/api\/produk\?/.test(x.url()) && new URL(x.url()).searchParams.get("stokKritis") === "true",
+    );
+    const isi = (await r.json()) as { data: { isStokKritis?: boolean }[] };
+    expect(isi.data.every((p) => p.isStokKritis === true), "server hanya mengirim produk kritis").toBe(true);
+    await expect(page.getByRole("button", { name: "Stok Kritis" })).toHaveClass(/bg-rose-500/);
+
+    const tSemua = page.waitForResponse(
+      (x) => x.request().method() === "GET" && /\/api\/produk\?/.test(x.url()) && !new URL(x.url()).searchParams.has("stokKritis"),
+    );
+    await page.getByRole("button", { name: "Semua Produk" }).click();
+    await tSemua;
+    await expect(page).toHaveURL(/\/dashboard\/outlet\/inventaris\/produk$/);
+  });
+
   // ----------------------------------------------------------
   // [1] HAPPY PATH: Tambah produk sederhana (tanpa resep)
   // ----------------------------------------------------------

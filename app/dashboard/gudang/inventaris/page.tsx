@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
+import { useTabUrl } from "@/hooks/use-tab-url";
+import { SLUG_TAB_STOK, TAB_STOK } from "@/features/inventaris/tab-stok";
 import { KotakCari } from "@/components/filter/bilah-filter";
 import { DialogUnduhBulan } from "@/components/unduh/dialog-unduh-bulan";
 import { EP } from "@/lib/api/endpoints";
@@ -53,12 +55,12 @@ import {
   Save,
 } from "lucide-react";
 
-export default function GudangInventoryPage() {
+function IsiGudangInventoryPage() {
 
   // --- Filter States ---
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
-  const [filterTab, setFilterTab] = useState<"ALL" | "CRITICAL">("ALL");
+  const [filterTab, setFilterTab] = useTabUrl(SLUG_TAB_STOK, TAB_STOK, "ALL");
   const [halaman, setHalaman] = useState(1);
   const [ukuran, setUkuran] = useState<number>(PILIHAN_UKURAN_STOK[0]);
 
@@ -547,5 +549,14 @@ export default function GudangInventoryPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+/** useSearchParams (?tab=, LN16a) membutuhkan batas Suspense agar halaman tetap dapat dirender statis. */
+export default function GudangInventoryPage() {
+  return (
+    <Suspense fallback={null}>
+      <IsiGudangInventoryPage />
+    </Suspense>
   );
 }

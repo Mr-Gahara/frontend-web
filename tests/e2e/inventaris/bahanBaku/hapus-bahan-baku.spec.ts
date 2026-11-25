@@ -1,5 +1,6 @@
 import { test, expect, Page } from "@playwright/test";
 import { masuk } from "../../../helpers/masuk-uji";
+import { dariLonceng } from "../../../helpers/lonceng-uji";
 import { BAHAN_FIXTURE } from "../../../helpers/pembelian-uji";
 
 const URL_BAHAN_BAKU = "http://localhost:3000/dashboard/outlet/inventaris/bahanBaku";
@@ -15,7 +16,7 @@ test.describe("Hapus bahan baku", () => {
 
   test("gagal hapus: dialog tetap terbuka dan pesan gagal tampil", async ({ page }) => {
     const tunggu = page.waitForResponse(
-      (r) => r.request().method() === "GET" && /\/api\/inventory(\?|$)/.test(r.url()),
+      (r) => r.request().method() === "GET" && /\/api\/inventory(\?|$)/.test(r.url()) && !dariLonceng(r.url()),
     );
     await page.goto(URL_BAHAN_BAKU);
     const daftar = (await (await tunggu).json()).data as unknown[];

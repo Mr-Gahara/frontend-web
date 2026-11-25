@@ -1,5 +1,6 @@
 import { test, expect, Page, Response } from "@playwright/test";
 import { masuk } from "../../../helpers/masuk-uji";
+import { dariLonceng } from "../../../helpers/lonceng-uji";
 import { bukaPanelFilter, pilihanPanel, terapkanPanelFilter } from "../../../helpers/filter-uji";
 
 const URL_OUTLET = "http://localhost:3000/dashboard/outlet/inventaris/stockOpname";
@@ -26,6 +27,8 @@ function getOpname(syarat?: (url: URL) => boolean) {
   return (r: Response) => {
     if (r.request().method() !== "GET") return false;
     if (!/\/api\/stockopname(\?|$)/.test(r.url())) return false;
+    // Hitungan opname menunggu ditinjau milik lonceng topbar (limit=1) bukan daftar (LN7a).
+    if (dariLonceng(r.url())) return false;
     return syarat ? syarat(new URL(r.url())) : true;
   };
 }

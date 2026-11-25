@@ -179,6 +179,21 @@ Modul auth dan perangkat (Ridho).
 - **Penanganan sementara di frontend:** tidak ada; sumber ini belum
   tampil sampai endpointnya tersedia.
 
+### Kebutuhan: surat jalan dikirim per arah di ringkasan gudang
+
+Modul dashboard dan transfer stok (Yoga).
+
+- **Bukti:** `services/dashboardGudangService.js` `getSummary` mengirim
+  `transfer.sedangDikirim` sebagai satu angka untuk kedua arah, sedangkan
+  `getOutletSummary` sudah memisahkannya (`transfer.perArah`).
+- **Kenapa penting:** pengguna yang hanya memegang
+  `read-dashboard-gudang` tidak dapat diberi tahu pengembalian yang
+  menunggu diterima di gudang (`modul/pemberitahuan.md`, LN17a).
+- **Saran:** tambahkan `transfer.perArah` di `GET /dashboard/gudang`
+  dengan bentuk yang sama dengan ringkasan outlet.
+- **Penanganan sementara di frontend:** pemberitahuan penerimaan
+  pengembalian hanya tampil bagi pemegang izin dashboard outlet.
+
 ## Prioritas seluruh laporan terbuka
 
 | Prioritas | Butir | Pemilik | Dampak |
@@ -191,3 +206,4 @@ Modul auth dan perangkat (Ridho).
 | 6 | 194 | Ridho | Rekap berisi baris serba nol, tidak pernah kosong |
 | 7 | Produk dapat dijual di ringkasan | Yoga | Lonceng memuat seluruh produk setiap 5 menit |
 | 8 | Perangkat menunggu izin se-toko | Ridho | Pemberitahuan perangkat belum dapat tampil |
+| 9 | Surat jalan dikirim per arah di ringkasan gudang | Yoga | Penerimaan pengembalian belum diberitahukan ke pengguna gudang saja |

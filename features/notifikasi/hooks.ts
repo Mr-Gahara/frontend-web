@@ -3,17 +3,38 @@
 import { useMemo } from "react";
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { useJamBerjalan } from "@/hooks/use-jam-berjalan";
-import { IZIN } from "@/lib/auth/permissions";
+import { IZIN, bolehBukaHalaman } from "@/lib/auth/permissions";
 import { useSession } from "@/lib/auth/useSession";
 import { queryKeys } from "@/lib/queryKeys";
 import { ringkasLangganan } from "@/features/langganan/data";
 import { useLanggananToko } from "@/features/langganan/hooks";
 import { pengingatLangganan } from "@/features/langganan/pengingat";
 import { useStatusSetup } from "@/features/setup/hooks";
-import type { AksesTautan } from "./akses";
+import { fiturPerluSetup } from "@/features/setup/status";
+import { keTanggalLokal } from "@/lib/waktu";
+import { dashboardGudangApi } from "@/features/dashboard-gudang/api";
+import { lokasiApi } from "@/features/inventaris/api";
+import { useLokasiRuang } from "@/features/inventaris/hooks";
+import { absensiApi } from "@/features/absensi/api";
+import { izinCutiApi } from "@/features/izin-cuti/api";
+import { jadwalApi } from "@/features/jadwal/api";
+import { bolehTinjauOpname } from "@/features/stock-opname/izin";
+import { fiturAktif, type AksesTautan } from "./akses";
 import { notifikasiApi } from "./api";
 import { urutkanPemberitahuan, type Pemberitahuan } from "./jenis";
+import { IZIN_MUAT, pemberitahuanInventaris, type DataInventaris } from "./sumber-inventaris";
 import { pemberitahuanLangganan } from "./sumber-langganan";
+import { pemberitahuanDiskonBerakhir, pemberitahuanMembershipBerakhir, pemberitahuanPenjualanBelumLunas } from "./sumber-penjualan";
+import {
+  URL_GENERATE_JADWAL,
+  pemberitahuanHasilPengajuan,
+  pemberitahuanIzinCuti,
+  pemberitahuanJadwalMingguDepan,
+  pemberitahuanKehadiran,
+  rentangMingguDepan,
+  waktunyaCekJadwal,
+} from "./sumber-staf";
+import { pemberitahuanBookingBelumLunas, pemberitahuanKasirLupa, pemberitahuanSetupFitur } from "./sumber-operasional";
 import { pemberitahuanProdukMinimum, pemberitahuanStokProduk, pemicuStokProduk } from "./sumber-stok-produk";
 
 /** Berkala tiap 5 menit selama tab aktif (LN6a). */
@@ -76,6 +97,196 @@ function useRingkasanOutletLonceng() {
   });
 }
 
+/**
+ * Sumber inventaris dan gudang (LN4a). Ringkasan outlet bagi pemegang izin
+ * dashboard outlet; ringkasan gudang hanya bagi yang tidak memegangnya
+ * (LN17a). Backend menolak ringkasan gudang selama fitur gudang belum
+ * aktif (butuhFitur WMS wajibSetup), sehingga ikut menunggu setupnya.
+ */
+function useInventarisLonceng(akses: AksesTautan) {
+  const { sudahMasuk, permissions } = useSession();
+  const punya = (i: string) => permissions.includes(i);
+  const gudangAktif = sudahMasuk && fiturAktif(akses, "wms");
+  const ringkasanOutlet = useRingkasanOutletLonceng();
+  const ringkasanGudang = useQuery({
+    // Kunci dashboard gudang, agar aksi pengajuan dan surat jalan ikut memperbaruinya.
+    queryKey: queryKeys.transferStok.ringkasanGudang(),
+    queryFn: dashboardGudangApi.ringkasan,
+    enabled: gudangAktif && !punya(IZIN.dashboardOutlet) && punya(IZIN.dashboardGudang),
+    ...OPSI_SEGAR,
+  });
+  const lokasiGudang = useQuery({
+    // Kunci yang sama dengan useLokasiBertipe; tidak ada spec yang menunggu /location.
+    queryKey: queryKeys.lokasi.daftar(),
+    queryFn: lokasiApi.daftar,
+    enabled: gudangAktif && punya(IZIN.location),
+    select: (daftar) => daftar.find((l) => l.tipe === "Gudang")?.id ?? null,
+  });
+  const idGudang = lokasiGudang.data ?? null;
+  const stokGudang = useQuery({
+    queryKey: queryKeys.notifikasi.stokKritisGudang(idGudang ?? ""),
+    queryFn: () => notifikasiApi.stokKritisLokasi(idGudang!),
+    enabled: gudangAktif && !!idGudang && IZIN_MUAT.inventory.some(punya),
+    ...OPSI_SEGAR,
+  });
+  const bolehOpname = sudahMasuk && punya(IZIN_MUAT.opname) && bolehTinjauOpname(permissions);
+  const opnameOutlet = useQuery({
+    queryKey: queryKeys.notifikasi.opnameMenunggu("Outlet"),
+    queryFn: () => notifikasiApi.opnameMenunggu("Outlet"),
+    enabled: bolehOpname,
+    ...OPSI_SEGAR,
+  });
+  const opnameGudang = useQuery({
+    queryKey: queryKeys.notifikasi.opnameMenunggu("Gudang"),
+    queryFn: () => notifikasiApi.opnameMenunggu("Gudang"),
+    enabled: bolehOpname && gudangAktif,
+    ...OPSI_SEGAR,
+  });
+
+  const data = useMemo<DataInventaris>(
+    () => ({
+      ringkasanOutlet: ringkasanOutlet.data ?? null,
+      ringkasanGudang: ringkasanGudang.data ?? null,
+      stokKritisGudang: stokGudang.data ?? null,
+      opnameMenunggu: { outlet: opnameOutlet.data ?? null, gudang: opnameGudang.data ?? null },
+    }),
+    [ringkasanOutlet.data, ringkasanGudang.data, stokGudang.data, opnameOutlet.data, opnameGudang.data],
+  );
+  const sumber: UseQueryResult<unknown>[] = [ringkasanOutlet, ringkasanGudang, stokGudang, opnameOutlet, opnameGudang];
+  return { data, sumber };
+}
+
+/** Sumber operasional (LN4a): kasir lupa ditutup, setup fitur, dan booking lewat jam belum lunas. */
+function useOperasionalLonceng(akses: AksesTautan) {
+  const { adaTokenAkun, sudahMasuk, permissions } = useSession();
+  const kini = useJamBerjalan(60_000);
+  const tanggal = keTanggalLokal(kini);
+  const status = useStatusSetup(adaTokenAkun && sudahMasuk);
+  const sesiKasir = useQuery({
+    queryKey: queryKeys.notifikasi.sesiKasirBuka(),
+    queryFn: notifikasiApi.sesiKasirBuka,
+    enabled: sudahMasuk && permissions.includes(IZIN.sesiKasir),
+    ...OPSI_SEGAR,
+  });
+  const booking = useQuery({
+    queryKey: queryKeys.notifikasi.booking(tanggal),
+    queryFn: () => notifikasiApi.bookingHari(tanggal),
+    enabled: sudahMasuk && permissions.includes(IZIN.booking) && fiturAktif(akses, "sesi-booking"),
+    ...OPSI_SEGAR,
+  });
+  const daftar = useMemo(
+    () => [
+      pemberitahuanKasirLupa(sesiKasir.data ?? null, kini, akses),
+      pemberitahuanSetupFitur(status.data ? fiturPerluSetup(status.data, permissions) : []),
+      pemberitahuanBookingBelumLunas(booking.data ?? null, kini, akses),
+    ],
+    [sesiKasir.data, booking.data, status.data, permissions, kini, akses],
+  );
+  const sumber: UseQueryResult<unknown>[] = [sesiKasir, booking, status];
+  return { daftar, sumber };
+}
+
+/** Sumber staf (LN4a): izin dan cuti diajukan, kehadiran hari ini, jadwal minggu depan, hasil pengajuan saya. */
+function useStafLonceng(akses: AksesTautan) {
+  const { sudahMasuk, permissions, pengguna } = useSession();
+  const punya = (i: string) => permissions.includes(i);
+  const kini = useJamBerjalan(60_000);
+  const hariIni = keTanggalLokal(kini);
+  const mingguDepan = rentangMingguDepan(kini);
+  const bolehKehadiran = sudahMasuk && punya(IZIN.absensi) && punya(IZIN.jadwalShift);
+  const bolehJadwalDepan = sudahMasuk && waktunyaCekJadwal(kini) && bolehBukaHalaman(URL_GENERATE_JADWAL, [...permissions]);
+  // Lokasi outlet (/location/current) menuntut read-location; tanpa izin itu
+  // kedua sumber yang menyaring per outlet tidak dimuat.
+  const outlet = useLokasiRuang("outlet", { aktif: (bolehKehadiran || bolehJadwalDepan) && punya(IZIN.location) });
+  const idOutlet = outlet.lokasiId ?? "";
+
+  const izinCuti = useQuery({
+    queryKey: queryKeys.notifikasi.izinCuti(),
+    queryFn: () => izinCutiApi.daftar({ status: "diajukan" }),
+    enabled: sudahMasuk && punya(IZIN.izinCuti),
+    ...OPSI_SEGAR,
+  });
+  const monitoring = useQuery({
+    queryKey: queryKeys.notifikasi.monitoring(hariIni, idOutlet),
+    queryFn: () => absensiApi.monitoring(hariIni, idOutlet),
+    enabled: bolehKehadiran && !!idOutlet,
+    ...OPSI_SEGAR,
+  });
+  const jadwalHariIni = useQuery({
+    queryKey: queryKeys.notifikasi.jadwal(hariIni, hariIni, idOutlet),
+    queryFn: () => jadwalApi.daftar({ startDate: hariIni, endDate: hariIni, locationID: idOutlet }),
+    enabled: bolehKehadiran && !!idOutlet,
+    ...OPSI_SEGAR,
+  });
+  const jadwalDepan = useQuery({
+    queryKey: queryKeys.notifikasi.jadwal(mingguDepan.startDate, mingguDepan.endDate, idOutlet),
+    queryFn: () => jadwalApi.daftar({ ...mingguDepan, locationID: idOutlet }),
+    enabled: bolehJadwalDepan && !!idOutlet,
+    ...OPSI_SEGAR,
+  });
+  const pengajuan = useQuery({
+    queryKey: queryKeys.notifikasi.pengajuanDiputuskan(),
+    queryFn: notifikasiApi.pengajuanDiputuskan,
+    enabled: sudahMasuk && punya(IZIN.pengajuanStok) && fiturAktif(akses, "wms"),
+    ...OPSI_SEGAR,
+  });
+
+  const idSaya = pengguna?.id ?? null;
+  const daftar = useMemo(
+    () => [
+      pemberitahuanIzinCuti(izinCuti.data ?? null),
+      pemberitahuanKehadiran(monitoring.data?.daftar ?? null, jadwalHariIni.data ?? null, kini, akses),
+      pemberitahuanJadwalMingguDepan(jadwalDepan.data ?? null, kini, akses),
+      pemberitahuanHasilPengajuan(pengajuan.data ?? null, idSaya, kini, akses),
+    ],
+    [izinCuti.data, monitoring.data, jadwalHariIni.data, jadwalDepan.data, pengajuan.data, idSaya, kini, akses],
+  );
+  const sumber: UseQueryResult<unknown>[] = [izinCuti, monitoring, jadwalHariIni, jadwalDepan, pengajuan];
+  return { daftar, sumber };
+}
+
+/** Sumber penjualan dan pelanggan (LN4a): penjualan belum lunas, membership dan diskon berakhir. */
+function usePenjualanLonceng(akses: AksesTautan) {
+  const { sudahMasuk, permissions } = useSession();
+  const kini = useJamBerjalan(60_000);
+  const bolehPenjualan = sudahMasuk && permissions.includes(IZIN.penjualan);
+  const belumBayar = useQuery({
+    queryKey: queryKeys.notifikasi.penjualan("UNPAID"),
+    queryFn: () => notifikasiApi.penjualanBerstatus("UNPAID"),
+    enabled: bolehPenjualan,
+    ...OPSI_SEGAR,
+  });
+  const sebagian = useQuery({
+    queryKey: queryKeys.notifikasi.penjualan("PARTIAL"),
+    queryFn: () => notifikasiApi.penjualanBerstatus("PARTIAL"),
+    enabled: bolehPenjualan,
+    ...OPSI_SEGAR,
+  });
+  const membership = useQuery({
+    queryKey: queryKeys.notifikasi.membership(),
+    queryFn: notifikasiApi.membershipAktif,
+    enabled: sudahMasuk && permissions.includes(IZIN.membership),
+    ...OPSI_SEGAR,
+  });
+  // GET /diskon tidak memeriksa izin (diskonRoute.js), sehingga dimuat bagi semua pengguna toko.
+  const diskon = useQuery({
+    queryKey: queryKeys.notifikasi.diskon(),
+    queryFn: notifikasiApi.diskonAktif,
+    enabled: sudahMasuk,
+    ...OPSI_SEGAR,
+  });
+  const daftar = useMemo(
+    () => [
+      pemberitahuanPenjualanBelumLunas({ belumBayar: belumBayar.data ?? null, sebagian: sebagian.data ?? null }, akses),
+      pemberitahuanMembershipBerakhir(membership.data ?? null, kini, akses),
+      pemberitahuanDiskonBerakhir(diskon.data ?? null, kini, akses),
+    ],
+    [belumBayar.data, sebagian.data, membership.data, diskon.data, kini, akses],
+  );
+  const sumber: UseQueryResult<unknown>[] = [belumBayar, sebagian, membership, diskon];
+  return { daftar, sumber };
+}
+
 function useLanggananLonceng() {
   const { sudahMasuk, permissions } = useSession();
   const kini = useJamBerjalan(60_000);
@@ -96,20 +307,28 @@ function useLanggananLonceng() {
 export function usePemberitahuan() {
   const akses = useAksesTautan();
   const produk = useProdukLonceng();
-  const ringkasanOutlet = useRingkasanOutletLonceng();
   const langganan = useLanggananLonceng();
+  const inventaris = useInventarisLonceng(akses);
+  const dataInventaris = inventaris.data;
+  const operasional = useOperasionalLonceng(akses);
+  const staf = useStafLonceng(akses);
+  const penjualan = usePenjualanLonceng(akses);
 
   const daftar = useMemo<Pemberitahuan[]>(() => {
     const semua = [
       pemberitahuanStokProduk(produk.data ? pemicuStokProduk(produk.data) : null, akses),
       pemberitahuanLangganan(langganan.pengingat, akses),
-      pemberitahuanProdukMinimum(ringkasanOutlet.data?.produk.stokKritis, akses),
+      pemberitahuanProdukMinimum(dataInventaris.ringkasanOutlet?.produk.stokKritis, akses),
+      ...pemberitahuanInventaris(dataInventaris, akses),
+      ...operasional.daftar,
+      ...staf.daftar,
+      ...penjualan.daftar,
     ];
     return urutkanPemberitahuan(semua.filter((p): p is Pemberitahuan => p !== null));
-  }, [produk.data, langganan.pengingat, ringkasanOutlet.data, akses]);
+  }, [produk.data, langganan.pengingat, akses, dataInventaris, operasional.daftar, staf.daftar, penjualan.daftar]);
 
   // Hanya sumber yang aktif (pernah dimuat) yang disegarkan.
-  const sumber: UseQueryResult<unknown>[] = [produk, ringkasanOutlet, langganan.query];
+  const sumber: UseQueryResult<unknown>[] = [produk, langganan.query, ...inventaris.sumber, ...operasional.sumber, ...staf.sumber, ...penjualan.sumber];
   const segarkan = () => {
     for (const q of sumber) if (q.isFetched) void q.refetch();
   };

@@ -50,8 +50,8 @@ daftar di bawah adalah satu-satunya daftar pekerjaan terbuka.
 
 **Daftar pekerjaan terbuka:**
 
-1. **Sedang dikerjakan, atas urutan pemilik proyek:** pemberitahuan
-   dan lonceng (bagian di bawah, keputusan di `modul/pemberitahuan.md`).
+1. **Pemberitahuan dan lonceng selesai di web** (bagian di bawah); sisa:
+   tiga kebutuhan backend dan suite e2e penuh yang menunggu izin.
 2. **Utang pengujian yang dapat dikerjakan sekarang, tanpa backend:**
    `referensi/utang-pengujian.md`, bagian Dapat dikerjakan sekarang
    (sepuluh butir: bentrok booking Selesai, `hapusLewatApi`, spec lama
@@ -79,9 +79,11 @@ daftar di bawah adalah satu-satunya daftar pekerjaan terbuka.
      `kontrak/temuan.md`, padahal laporan lengkap di
      `referensi/laporan-untuk-backend.md`.
 4. **Menunggu backend** (`referensi/laporan-untuk-backend.md`): butir 190
-   sampai 194, dan data struk laporan tutup kasir (modal awal opsional,
+   sampai 194, data struk laporan tutup kasir (modal awal opsional,
    penjualan dan pembayaran seluruh metode terhubung ke sesi kasir,
-   endpoint laporan). Langkah pertama setiap sesi memeriksa apakah
+   endpoint laporan), dan tiga kebutuhan lonceng (produk dapat dijual di
+   ringkasan, perangkat menunggu izin se-toko, surat jalan per arah di
+   ringkasan gudang). Langkah pertama setiap sesi memeriksa apakah
    cabang backend maju; bila maju, buktikan perbaikannya lewat spec
    merah terkait. Backend dijalankan dengan env inline
    (`inti/pengujian.md`, Menjalankan layanan uji), dan kodenya tidak
@@ -100,14 +102,18 @@ Riwayat keadaan sebelum 24 November 2026 ada di
 `arsip/catatan-putaran.md` (Status yang selesai, dipindah 20 dan
 24 November 2026).
 
-### Sedang dikerjakan: pemberitahuan dan lonceng (25 November 2026)
+### Pemberitahuan dan lonceng (25 November 2026)
 
-Keputusan LN1a sampai LN12a di `modul/pemberitahuan.md`. Dikerjakan
-per kelompok sumber, satu commit per kelompok: mesin lonceng beserta
-stok produk dan langganan (LN1a sampai LN3a), inventaris dan gudang,
-operasional, staf, lalu penjualan dan pelanggan (LN9a dan LN10a).
-Perangkat menunggu izin dan hitungan produk yang dapat dijual menunggu
-backend (LN8a).
+Keputusan LN1a sampai LN18a di `modul/pemberitahuan.md`. Seluruh sumber
+LN4a terpasang (tahap 1 sampai 5), kecuali perangkat menunggu izin, yang
+menunggu backend (LN8a). Yang masih terbuka:
+
+- Laporan backend 25 November 2026 (`referensi/laporan-untuk-backend.md`):
+  hitungan produk yang dapat dijual di ringkasan dashboard (lalu lonceng
+  pindah dari daftar produk lengkap), daftar perangkat menunggu izin
+  se-toko, dan surat jalan dikirim per arah di ringkasan gudang (LN17a).
+- Suite e2e penuh sesudah lonceng belum dijalankan (menunggu izin pemilik
+  proyek); spec terdampak per berkas sudah dijalankan.
 
 ### MVP: struk laporan tutup kasir (dicatat 24 November 2026)
 

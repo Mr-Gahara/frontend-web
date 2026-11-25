@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { normalizeId } from "@/lib/api/normalize";
 import { BASIS, JAWAB_GAGAL, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { dariLonceng } from "../../helpers/lonceng-uji";
 import { NAMA_DISKON_GLOBAL, NAMA_DISKON_ITEM, siapkanDiskonUji } from "../../helpers/reservasi-uji";
 import {
   NAMA_BAHAN,
@@ -564,7 +565,9 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
 
   test("daftar per halaman: permintaan membawa page dan limit, dan Next membuka halaman kedua", async ({ page }) => {
     const pola = /\/api\/penjualan(\?|$)/i;
-    const tAwal = page.waitForResponse((r) => r.request().method() === "GET" && pola.test(r.url()));
+    const tAwal = page.waitForResponse(
+      (r) => r.request().method() === "GET" && pola.test(r.url()) && !dariLonceng(r.url()),
+    );
     await page.goto(DAFTAR, { waitUntil: "commit" });
     const res = await tAwal;
     const url = new URL(res.url());
