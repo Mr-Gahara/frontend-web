@@ -142,7 +142,8 @@ Bukan bug, tetapi data yang dibutuhkan rilis MVP. Rinciannya di
 - "Total penerimaan kasir" dari transaksi POS realtime, dan "Total
   penerimaan" yang menambahkan pembayaran invoice (penjualan dan sesi
   booking) dalam periode dan outlet struk, termasuk yang dicatat tanpa
-  sesi kasir (keputusan 10).
+  sesi kasir (keputusan 10), dengan baris "Total penerimaan invoice"
+  tersendiri di bawah "Total penerimaan kasir" (keputusan 11).
 
 ## Laporan 25 November 2026 (pemberitahuan lonceng)
 

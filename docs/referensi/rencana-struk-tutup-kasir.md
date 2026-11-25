@@ -36,8 +36,9 @@ section 6 dan section 7 yang dipisah **dua** baris garis putus-putus.
    dipakai di sesi itu, dan total penerimaan kasir (jumlah penerimaan
    seluruh metode pembayaran di sesi itu; diperjelas keputusan 10,
    25 November 2026: transaksi POS realtime).
+   Tepat di bawahnya baris "Total penerimaan invoice" (keputusan 11).
 3. Tanpa judul: nominal total penerimaan (keputusan 10: total penerimaan
-   kasir ditambah penerimaan invoice).
+   kasir ditambah total penerimaan invoice).
 4. Tanpa judul: nominal saldo akhir.
 5. Tanpa judul: jumlah transaksi selesai dan jumlah transaksi belum
    terbayar.
@@ -65,8 +66,9 @@ Modal awal              200.000
 Tunai                 1.250.000
 QRIS                    430.000
 Total penerimaan kasir 1.680.000
+Total penerimaan invoice 250.000
 --------------------------------
-Total penerimaan      1.680.000
+Total penerimaan      1.930.000
 --------------------------------
 Saldo akhir           1.450.000
 --------------------------------
@@ -251,6 +253,11 @@ keputusan terbuka 24 November 2026:
       invoice penjualan maupun invoice sesi booking bila fitur itu
       dipakai. Sama dengan section 2 bila tidak ada pembayaran invoice
       dalam periode struk.
+    - **Keputusan 11** (pemilik proyek, 25 November 2026): tepat di bawah
+      "Total penerimaan kasir" di section 2 ditambah baris **"Total
+      penerimaan invoice"**, agar asal angka section 3 tidak ambigu:
+      Total penerimaan = Total penerimaan kasir + Total penerimaan
+      invoice. Baris ini tampil walau nilainya 0.
     - Akibatnya, laporan juga menghitung pembayaran invoice yang tidak
       lewat mesin kasir (misalnya dicatat dari web, tanpa sesi kasir)
       dalam periode dan outlet struk; cara mengaitkannya dirancang
