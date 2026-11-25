@@ -29,9 +29,12 @@ const widget = (page: Page) =>
 test("widget menampilkan staf outlet yang sedang bekerja dan yang sudah absen, per lokasi (keputusan AB5a, B183)", async ({
   page,
 }) => {
+  // Penunggu dipasang sesudah dokumen ter-commit: halaman sebelumnya (dan
+  // lonceng topbar) meminta endpoint yang sama, dan respons yang tertangkap
+  // dari sana terbuang saat navigasi (inti/pengujian.md, pola baris 124).
+  await page.goto(URL_PENGGUNA, { waitUntil: "commit" });
   const tungguLokasi = page.waitForResponse(cocok("GET", /\/api\/location\/current$/i));
   const tungguMonitoring = page.waitForResponse(cocok("GET", POLA_MONITORING));
-  await page.goto(URL_PENGGUNA);
   const [resLokasi, resMonitoring] = await Promise.all([tungguLokasi, tungguMonitoring]);
   expect(resMonitoring.status(), "GET /absensi/monitoring").toBe(200);
   const lokasi = (await resLokasi.json()).data as { id?: string; _id?: string };

@@ -27,7 +27,9 @@ test.describe("bayangan kartu baris", () => {
   test("lebar meja: setiap sel berbayangan bawah, baris tanpa filter", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await bukaDenganAuth(page, URL_DAFTAR);
-    const baris = page.locator("tbody tr").first();
+    // Baris data, bukan baris "Memuat data..." yang juga ber-td dan diganti
+    // begitu daftar termuat (suite penuh 25 November 2026).
+    const baris = page.locator("tbody tr").filter({ hasText: /INV\// }).first();
     await expect(baris.locator("td").first()).toBeVisible({ timeout: 15_000 });
     const gaya = await baris.evaluate((tr) => ({
       filter: getComputedStyle(tr).filter,
@@ -44,7 +46,7 @@ test.describe("bayangan kartu baris", () => {
   test("HP 390 px (mode kartu): kartu berbayangan, sel di dalamnya tidak", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await bukaDenganAuth(page, URL_DAFTAR);
-    const kartu = page.locator("tbody tr").first();
+    const kartu = page.locator("tbody tr").filter({ hasText: /INV\// }).first();
     await expect(kartu.locator("td").first()).toBeVisible({ timeout: 15_000 });
     const gaya = await kartu.evaluate((tr) => ({
       tampil: getComputedStyle(tr).display,
