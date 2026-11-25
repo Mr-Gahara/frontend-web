@@ -18,12 +18,16 @@ Hanya menyentuh frontend dan data uji; tidak menunggu backend maupun
 keputusan baru.
 
 - **Spec yang ditulis sebelum keputusan rancangan butir 23 masih
-  menyiapkan sebagian data uji lewat API**, misalnya fixture metode
-  pembayaran di spec kelola dan booking uji di spec reservasi;
-  disesuaikan saat spec itu disentuh.
-- **Syarat 44 entri baru `IZIN_HALAMAN` diturunkan dari nama hook dan
-  kontrak, bukan dari trace per halaman.** Yang terbukti: pemilik seluruh
-  izin membuka setiap rute terpetakan (unit), dan spec terdampak lolos.
+  menyiapkan sebagian data uji lewat API.** Diaudit menyeluruh atas
+  keputusan pemilik proyek 25 November 2026, per modul. Sudah lewat UI:
+  tarif uji (form Buat Tarif), pola roster uji (dialog), dan jadwal uji
+  (`buatJadwalLewatKalender`: Tambah Manual, atau Tambah Split Shift untuk
+  shift kedua). Pemanggilan API yang tetap sah menurut butir 23:
+  pembersihan, data milik halaman lain, bukti penolakan backend, keadaan
+  bersamaan, dan keadaan yang tidak dapat dibuat lewat UI.
+- **Rute ber-`[id]` di `akses/syarat-rute` ditelusuri dengan id uji yang
+  tidak ada**, sehingga bagian halaman yang baru dipasang sesudah detail
+  termuat (misalnya form Ubah Produk) tidak ikut tertelusuri.
 
 ## Menunggu keputusan pemilik proyek
 

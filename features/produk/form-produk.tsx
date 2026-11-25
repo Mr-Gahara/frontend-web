@@ -143,6 +143,10 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
   // itu backend memakai outlet tenant.
   const { permissions } = useSession();
   const { lokasiId } = useLokasiAktif({ aktif: permissions.includes(IZIN.location) });
+  // Buat Produk tanpa read-bahan: bagian resep tidak tampil dan bahan tidak
+  // diminta, sehingga produk berstok langsung tetap dapat dibuat (pemilik
+  // proyek, 25 November 2026; trace akses/syarat-rute). Mode ubah tetap.
+  const tampilResep = mode === "edit" || permissions.includes(IZIN.bahan);
 
   const [openCombobox, setOpenCombobox] = useState(false);
 
@@ -205,7 +209,7 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
     data: bahanBakuList = [],
     isLoading: isLoadingBahanBaku,
     error: bahanBakuError,
-  } = useDaftarBahanBaku();
+  } = useDaftarBahanBaku(tampilResep);
   const simpanMutation = useSimpanProduk();
 
   useEffect(() => {
@@ -643,19 +647,21 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
         </div>
 
         {/* SECTION: RESEP BAHAN BAKU (USE FIELD ARRAY) */}
-        <BagianResepProduk
-          teks={teks}
-          fields={fields}
-          append={append}
-          remove={remove}
-          control={control}
-          register={register}
-          setValue={setValue}
-          errors={errors}
-          bahanBakuList={bahanBakuList}
-          isLoadingBahanBaku={isLoadingBahanBaku}
-          resepTerisi={resepTerisi}
-        />
+        {tampilResep && (
+          <BagianResepProduk
+            teks={teks}
+            fields={fields}
+            append={append}
+            remove={remove}
+            control={control}
+            register={register}
+            setValue={setValue}
+            errors={errors}
+            bahanBakuList={bahanBakuList}
+            isLoadingBahanBaku={isLoadingBahanBaku}
+            resepTerisi={resepTerisi}
+          />
+        )}
 
         {/* Aksi Tombol */}
         {/* FIX 2: flex-col-reverse untuk responsivitas Mobile */}

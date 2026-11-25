@@ -171,24 +171,69 @@ export async function bersihkanHari(page: Page, auth: Auth, fx: FixtureJadwal, d
   }
 }
 
-export async function buatJadwalApi(
+/**
+ * Jadwal uji dibuat lewat kalender jadwal (keputusan rancangan butir 23;
+ * audit spec lama 25 November 2026), bukan POST langsung: ruang dibaca dari
+ * lokasi shift, jadwal baru lewat Tambah Manual, dan shift kedua di hari
+ * yang sudah berjadwal di ruang itu lewat Tambah Split Shift. Halaman semula dibuka lagi sesudahnya.
+ */
+export async function buatJadwalLewatKalender(
   page: Page,
   auth: Auth,
   fx: FixtureJadwal,
   tanggal: string,
   shiftId: string,
 ): Promise<string> {
-  const res = await api<{ ditolak: number }>(page, auth, "POST", "/jadwalshift", {
-    penggunaId: fx.penggunaId,
-    tanggal,
-    isLibur: false,
-    shiftIds: [shiftId],
-    catatan: CATATAN_UJI,
-  });
-  expect(res.status, `POST /jadwalshift: ${res.pesan}`).toBe(201);
-  expect(res.data.ditolak, `jadwal uji ${tanggal} ditolak backend`).toBe(0);
+  const shift = await api<{ namaShift: string; locationID: string | null }>(page, auth, "GET", "/shift/" + shiftId);
+  expect(shift.status, `GET /shift: ${shift.pesan}`).toBe(200);
+  const ruang: Ruang = shift.data.locationID === (await idLokasiRuang(page, auth, "outlet")) ? "outlet" : "gudang";
+  const [tahun, bulanKe, hari] = tanggal.split("-").map(Number);
+  const kini = new Date();
+  const b: BulanUji = { tahun, bulan: bulanKe - 1, selisih: (tahun - kini.getFullYear()) * 12 + bulanKe - 1 - kini.getMonth() };
+  // Hanya jadwal di lokasi shift itu: jadwal ruang lain tampil "Lokasi lain"
+  // di kalender ini dan tidak membuka dialog ubah (B184).
+  const diLokasi = await api<JadwalMentah[]>(
+    page,
+    auth,
+    "GET",
+    `/jadwalshift?startDate=${tanggal}&endDate=${tanggal}&penggunaID=${fx.penggunaId}&locationID=${shift.data.locationID}`,
+  );
+  const sudahAda = (diLokasi.data ?? []).some((j) => j.karyawan?.id === fx.penggunaId);
+  const kembali = page.url();
+  await page.goto(ruang === "outlet" ? URL_JADWAL_OUTLET : URL_JADWAL_GUDANG);
+  const dialog = page.getByRole("dialog");
+  if (sudahAda) {
+    // Shift kedua di hari yang sama: sel berjadwal, lalu Tambah Split Shift.
+    await keBulanUji(page, b);
+    await itemSel(page, hari).click();
+    await expect(dialog).toContainText("Ubah Jadwal");
+    await dialog.getByRole("button", { name: "Tambah Split Shift" }).click();
+  } else {
+    // Jadwal baru lewat Tambah Manual: juga berlaku di hari yang berjadwal di
+    // lokasi lain, yang selnya di kalender ini hanya bertanda "Lokasi lain".
+    await page.getByRole("button", { name: "Tambah Manual" }).click();
+    await expect(dialog).toContainText("Kelola Jadwal");
+    await dialog.getByText("Pilih karyawan...").click();
+    await page.getByRole("option", { name: NAMA_PENGGUNA, exact: true }).click();
+    await dialog.getByRole("button", { name: "Pilih tanggal..." }).click();
+    await pilihTanggalKalender(page, b.selisih, hari);
+  }
+  await pilihShift(page, shift.data.namaShift);
+  // Catatan uji sama dengan helper API sebelumnya (dibaca skenario form ubah, JD4).
+  const catatan = dialog.getByPlaceholder("Contoh: Menggantikan shift Andi...");
+  if (!sudahAda && (await catatan.count()) > 0) await catatan.fill(CATATAN_UJI);
+  const tunggu = page.waitForResponse(cocok("POST", POLA_BUAT_JADWAL));
+  await dialog.getByRole("button", { name: sudahAda ? "Simpan Perubahan" : "Simpan Jadwal" }).click();
+  const res = await tunggu;
+  const body = await res.json().catch(() => ({}));
+  expect(res.status(), `POST /jadwalshift lewat kalender: ${JSON.stringify(body).slice(0, 200)}`).toBe(201);
+  expect(body.data?.ditolak, `jadwal uji ${tanggal} ditolak backend`).toBe(0);
+  await expect(dialog).toHaveCount(0);
   const dibuat = (await jadwalRentang(page, auth, fx, tanggal, tanggal)).find((j) => j.shift?.id === shiftId);
   expect(dibuat, `jadwal uji ${tanggal} terbaca ulang lewat API`).toBeTruthy();
+  // Selalu dibuka ulang: kalender kembali ke bulan berjalan, sama dengan
+  // keadaan sebelum helper dipanggil.
+  if (kembali.startsWith("http")) await page.goto(kembali);
   return String(dibuat?.id);
 }
 

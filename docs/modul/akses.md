@@ -174,6 +174,31 @@ Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend 
   "Salah satu: A, atau B". Atas permintaan pemilik proyek, nama izin tidak
   ditampilkan teknis.
 
+### Trace syarat rute (25 November 2026)
+
+Spec `akses/syarat-rute` membuka setiap rute `IZIN_HALAMAN` (statis dan
+ber-`[id]` dengan id uji) sebagai peran uji yang memegang tepat izin
+syaratnya ditambah izin dashboard ruangnya, lalu menolak setiap respons
+403. Halaman Akun Toko dikecualikan karena gerbangnya juga memeriksa level
+Owner (OA7). Temuannya diputuskan pemilik proyek:
+
+- **SR1a: kartu ringkasan Keuangan mengikuti izin datanya.** Kartu laba
+  rugi hanya bagi `read-laporan` dan kartu saldo akun kas hanya bagi
+  `read-akunkas`, tanpa permintaan bila izinnya tidak ada; tanpa keduanya
+  baris kartu tidak tampil. Sebelumnya layout Keuangan meminta keduanya di
+  setiap halaman Keuangan, termasuk Mesin Kasir dan Belanja Stok.
+- **SR2a: syarat yang ditambahkan.** Buat Penjualan mensyaratkan
+  `read-pajak` atau `akses-pos` (pajak menentukan total); Buat Bahan Baku
+  dan Penerimaan Stok gudang mensyaratkan `read-location`, sama dengan
+  Penerimaan Barang outlet.
+- **SR3a: resep Buat Produk mengikuti `read-bahan`.** Tanpa izin itu
+  bagian resep tidak tampil dan bahan tidak diminta, sehingga produk
+  berstok langsung tetap dapat dibuat. Mode ubah tidak berubah.
+- **SR4a: Profil Toko tanpa outlet mengarah ke Setup.** Teksnya "Tenant ini
+  belum memiliki Outlet. Lengkapi langkah Lokasi outlet di Setup lebih
+  dulu." dengan tautan "Lengkapi setup" ke `/setup`, menggantikan arahan
+  lewat aplikasi Tachyon POS (setup ada di web sejak SA1a).
+
 ## Catatan
 
 ### Catatan dari form role

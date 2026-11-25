@@ -44,6 +44,28 @@ async function bukaTambahPola(page: Page) {
   await expect(page.getByRole("dialog")).toBeVisible();
 }
 
+/**
+ * Pola uji dibuat lewat dialog Buat Pola Roster (keputusan rancangan butir 23;
+ * audit spec lama 25 November 2026), dengan shift hari pertama bila disebut.
+ * Id diambil dari respons POST untuk dibersihkan di finally.
+ */
+async function buatPolaLewatDialog(page: Page, namaPola: string, shiftHariPertama?: string): Promise<string> {
+  await bukaTambahPola(page);
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Nama Pola Roster").fill(namaPola);
+  if (shiftHariPertama) {
+    await dialog.getByRole("combobox").nth(0).click();
+    await page.getByRole("option", { name: new RegExp(shiftHariPertama) }).click();
+  }
+  const tunggu = page.waitForResponse((r) => r.request().method() === "POST" && /\/api\/polaroster$/i.test(r.url()));
+  await dialog.getByRole("button", { name: /simpan pola roster/i }).click();
+  const res = await tunggu;
+  const body = await res.json().catch(() => ({}));
+  expect(res.status(), `buat pola uji lewat dialog: ${JSON.stringify(body).slice(0, 160)}`).toBe(201);
+  await expect(dialog).toBeHidden({ timeout: 10_000 });
+  return String(body.data?.id ?? body.data?._id ?? "");
+}
+
 // ============================================================
 // TEST SUITE
 // ============================================================
@@ -386,13 +408,9 @@ test.describe("E2E - Pola Roster setelah migrasi features/pola-roster", () => {
       locationID,
     });
     expect(shift.status, `POST /shift: ${shift.pesan}`).toBe(201);
-    const pola = await api<{ id: string }>(page, auth, "POST", "/polaroster", {
-      namaPola,
-      siklusHari: 1,
-      detailSiklus: [{ hariKe: 1, isLibur: false, shiftID: shift.data.id }],
-      locationID,
-    });
-    expect(pola.status, `POST /polaroster: ${pola.pesan}`).toBe(201);
+    // Shift milik halaman Master Shift (API); pola dibuat lewat dialog halaman ini.
+    await page.reload();
+    const idPola = await buatPolaLewatDialog(page, namaPola, namaShift);
     try {
       const nonaktif = await api<unknown>(page, auth, "DELETE", `/shift/${shift.data.id}`);
       expect(nonaktif.status, `DELETE /shift: ${nonaktif.pesan}`).toBe(200);
@@ -400,7 +418,7 @@ test.describe("E2E - Pola Roster setelah migrasi features/pola-roster", () => {
       const baris = await cariPola(page, namaPola);
       await expect(baris).toContainText(`${namaShift} (nonaktif)`, { timeout: 15_000 });
     } finally {
-      const hapus = await api<unknown>(page, auth, "DELETE", `/polaroster/${pola.data.id}`);
+      const hapus = await api<unknown>(page, auth, "DELETE", `/polaroster/${idPola}`);
       expect.soft(hapus.status, `DELETE /polaroster: ${hapus.pesan}`).toBe(200);
     }
   });
@@ -408,15 +426,8 @@ test.describe("E2E - Pola Roster setelah migrasi features/pola-roster", () => {
   test("nama pola ganda ditolak dengan pesan, dan dialog tetap terbuka", async ({ page }) => {
     const auth = await bukaDenganAuth(page, URL_POLA);
     const namaPola = `Pola Ganda ${Date.now()}`;
-    const pola = await api<{ id: string }>(page, auth, "POST", "/polaroster", {
-      namaPola,
-      siklusHari: 1,
-      detailSiklus: [{ hariKe: 1, isLibur: true }],
-      locationID: await idLokasiRuang(page, auth),
-    });
-    expect(pola.status, `POST /polaroster: ${pola.pesan}`).toBe(201);
+    const idPola = await buatPolaLewatDialog(page, namaPola);
     try {
-      await page.reload();
       await page.getByRole("button", { name: /buat pola roster/i }).click();
       const dialog = page.getByRole("dialog");
       await dialog.getByLabel("Nama Pola Roster").fill(namaPola);
@@ -432,7 +443,7 @@ test.describe("E2E - Pola Roster setelah migrasi features/pola-roster", () => {
       await expect(page.getByText("Gagal Menyimpan")).toBeVisible();
       await expect(dialog).toBeVisible();
     } finally {
-      const hapus = await api<unknown>(page, auth, "DELETE", `/polaroster/${pola.data.id}`);
+      const hapus = await api<unknown>(page, auth, "DELETE", `/polaroster/${idPola}`);
       expect.soft(hapus.status, `DELETE /polaroster: ${hapus.pesan}`).toBe(200);
     }
   });

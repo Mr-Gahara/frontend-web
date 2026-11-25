@@ -275,7 +275,7 @@ test.describe("Profil Toko: pengguna baca-saja", () => {
 test.describe("toko tanpa outlet (akun klien sekali pakai)", () => {
   test.skip(!kredensialAdmin(), ALASAN_TANPA_ADMIN);
 
-  test("kartu lokasi menampilkan keterangan Outlet Belum Didaftarkan tanpa form lokasi, kartu profil tetap tampil", async ({
+  test("kartu lokasi menampilkan Outlet Belum Didaftarkan dengan tautan ke Setup, tanpa form lokasi, dan kartu profil tetap tampil", async ({
     page,
   }) => {
     // Wizard berhenti sesudah Owner, sebelum langkah lokasi outlet.
@@ -291,6 +291,9 @@ test.describe("toko tanpa outlet (akun klien sekali pakai)", () => {
       const lokasi = await tLokasi;
       expect(lokasi.status(), "outlet tenant dibaca walau belum ada").toBeLessThan(500);
       await expect(page.getByText("Outlet Belum Didaftarkan")).toBeVisible({ timeout: 15_000 });
+      // Setup outlet lewat wizard web, bukan aplikasi (pemilik proyek, 25 November 2026).
+      await expect(page.getByText("Lengkapi langkah Lokasi outlet di Setup lebih dulu.")).toBeVisible();
+      await expect(page.getByRole("link", { name: "Lengkapi setup" })).toHaveAttribute("href", "/setup");
       await expect(page.getByRole("button", { name: "Simpan Lokasi Outlet" })).toHaveCount(0);
       await expect(namaToko(page)).toHaveValue("Kopi Senja E2E");
     } finally {

@@ -1,13 +1,13 @@
 import { test, expect, type Page } from "@playwright/test";
-import { api, bukaDenganAuth, JAWAB_GAGAL, login } from "../../../helpers/transfer-uji";
+import { bukaDenganAuth, JAWAB_GAGAL, login } from "../../../helpers/transfer-uji";
 import { cocok, tanggalLokal } from "../../../helpers/reservasi-uji";
 import {
   barisKaryawan,
-  CATATAN_UJI,
   bersihkanHari,
   idLokasiRuang,
+  itemSel,
   bulanUji,
-  buatJadwalApi,
+  buatJadwalLewatKalender,
   JAM_PAGI,
   keBulanUji,
   NAMA_SHIFT_PAGI,
@@ -18,6 +18,9 @@ import {
   URL_JADWAL_GUDANG,
   URL_JADWAL_OUTLET,
 } from "../../../helpers/jadwal-uji";
+
+// Jadwal uji dibuat lewat kalender (buatJadwalLewatKalender), lebih lama dari POST langsung.
+test.describe.configure({ timeout: 120_000 });
 
 /*
  * Spec pembanding jadwal outlet dan gudang terhadap kode lama (keputusan
@@ -59,7 +62,7 @@ for (const ruang of ["outlet", "gudang"] as const) {
       const tgl = tanggalUji(b, HARI_UJI);
       await bersihkanHari(page, auth, fx, tgl, tgl);
       try {
-        await buatJadwalApi(page, auth, fx, tgl, fx.shiftPagi);
+        await buatJadwalLewatKalender(page, auth, fx, tgl, fx.shiftPagi);
         await keBulanUji(page, b);
         const sel = selHari(page, HARI_UJI);
         await expect(sel).toContainText(NAMA_SHIFT_PAGI);
@@ -86,7 +89,7 @@ for (const ruang of ["outlet", "gudang"] as const) {
       const tgl = tanggalUji(b, hari);
       await bersihkanHari(page, auth, fxLain, tgl, tgl);
       try {
-        await buatJadwalApi(page, auth, fxLain, tgl, fxLain.shiftPagi);
+        await buatJadwalLewatKalender(page, auth, fxLain, tgl, fxLain.shiftPagi);
         await keBulanUji(page, b);
         const sel = selHari(page, hari);
         await expect(sel).toContainText("Lokasi lain", { timeout: 15_000 });
@@ -152,16 +155,22 @@ test("jadwal libur tampil LIBUR, berbeda dari hari tanpa jadwal (keputusan JD5a)
   const tgl = tanggalUji(b, hari);
   await bersihkanHari(page, auth, fx, tgl, tgl);
   try {
-    const res = await api<{ ditolak: number }>(page, auth, "POST", "/jadwalshift", {
-      penggunaId: fx.penggunaId,
-      tanggal: tgl,
-      isLibur: true,
-      shiftIds: [],
-      catatan: CATATAN_UJI,
-    });
-    expect(res.status, `POST /jadwalshift libur: ${res.pesan}`).toBe(201);
-    expect(res.data.ditolak).toBe(0);
+    // Libur dibuat lewat dialog Kelola Jadwal (keputusan rancangan butir 23).
     await keBulanUji(page, b);
+    await itemSel(page, hari).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Kelola Jadwal");
+    await dialog.getByText("Libur / Off", { exact: true }).click();
+    const tunggu = page.waitForResponse(
+      (r) => r.request().method() === "POST" && /\/api\/jadwalshift$/i.test(r.url()),
+    );
+    await dialog.getByRole("button", { name: "Simpan Jadwal" }).click();
+    const res = await tunggu;
+    const body = await res.json().catch(() => ({}));
+    expect(res.status(), `POST /jadwalshift libur: ${JSON.stringify(body).slice(0, 160)}`).toBe(201);
+    expect(res.request().postDataJSON()).toMatchObject({ penggunaId: fx.penggunaId, tanggal: tgl, isLibur: true });
+    expect(body.data?.ditolak).toBe(0);
+    await expect(dialog).toHaveCount(0);
     await expect(selHari(page, hari)).toContainText("LIBUR");
     await expect(selHari(page, hari + 1)).not.toContainText("LIBUR");
   } finally {

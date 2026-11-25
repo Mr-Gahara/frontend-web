@@ -60,10 +60,12 @@ describe("bolehBukaRute", () => {
     expect(bolehBukaRute(rute, [IZIN.bahan, IZIN.ubahBahan])).toBe(true);
   });
 
-  it("buat penjualan menerima read-produk atau akses-pos, ditambah izin buat", () => {
+  it("buat penjualan menerima read-produk atau akses-pos, ditambah izin buat dan pajak (read-pajak atau akses-pos)", () => {
     const rute = `${OUTLET}/penjualan/buatPenjualan`;
     expect(bolehBukaRute(rute, [IZIN.aksesPos, IZIN.pelanggan, IZIN.buatPenjualan])).toBe(true);
-    expect(bolehBukaRute(rute, [IZIN.produk, IZIN.pelanggan, IZIN.buatPenjualan])).toBe(true);
+    expect(bolehBukaRute(rute, [IZIN.produk, IZIN.pajak, IZIN.pelanggan, IZIN.buatPenjualan])).toBe(true);
+    // Tanpa pajak total tidak dapat dihitung (trace akses/syarat-rute, 25 November 2026).
+    expect(bolehBukaRute(rute, [IZIN.produk, IZIN.pelanggan, IZIN.buatPenjualan])).toBe(false);
     expect(bolehBukaRute(rute, [IZIN.pelanggan, IZIN.buatPenjualan])).toBe(false);
     expect(bolehBukaRute(rute, [IZIN.aksesPos, IZIN.buatPenjualan])).toBe(false);
     const reservasi = `${OUTLET}/reservasi/buatReservasi`;

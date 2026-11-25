@@ -1,6 +1,8 @@
+import type { ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
 
-export default function PesanLokasi({ judul, isi }: { judul: string; isi: string }) {
+/** children: aksi opsional di bawah pesan, misalnya tautan ke langkah yang belum selesai. */
+export default function PesanLokasi({ judul, isi, children }: { judul: string; isi: string; children?: ReactNode }) {
   return (
     <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 shadow-sm flex flex-col items-center text-center gap-4 py-12">
       <AlertTriangle className="w-12 h-12 text-rose-500" />
@@ -8,6 +10,7 @@ export default function PesanLokasi({ judul, isi }: { judul: string; isi: string
         <h2 className="text-subjudul font-bold text-rose-700">{judul}</h2>
         <p className="text-isi font-medium text-rose-600/80 mt-1 max-w-md mx-auto">{isi}</p>
       </div>
+      {children}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -315,10 +316,16 @@ export function HalamanProfilToko() {
     isiLokasi = <Memuat teks="Memuat lokasi outlet..." />;
   } else if (!outlet.lokasi) {
     isiLokasi = (
+      // Setup outlet ada di wizard web sejak 1 November 2026 (SA1a); teks lama
+      // menyuruh lewat aplikasi (pemilik proyek, 25 November 2026).
       <PesanLokasi
         judul="Outlet Belum Didaftarkan"
-        isi="Tenant ini belum memiliki Outlet. Daftarkan Outlet lewat aplikasi Tachyon POS lebih dulu."
-      />
+        isi="Tenant ini belum memiliki Outlet. Lengkapi langkah Lokasi outlet di Setup lebih dulu."
+      >
+        <Button asChild>
+          <Link href="/setup">Lengkapi setup</Link>
+        </Button>
+      </PesanLokasi>
     );
   } else {
     isiLokasi = (

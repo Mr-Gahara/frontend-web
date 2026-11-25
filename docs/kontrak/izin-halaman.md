@@ -100,7 +100,7 @@ Baris lain mencerminkan keadaan saat kontrak dibangkitkan.
 | `/dashboard/gudang/pengajuanStok` | `read-pengajuan-stok` | `/pengajuanstok` | `read-pengajuan-stok` | Sejalan |
 | `/dashboard/gudang/transferStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
 | `/dashboard/gudang/pengirimanStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
-| `/dashboard/gudang/penerimaanStok` | `read-transfer-stok` | `/transferstok` | `read-transfer-stok` | Sejalan |
+| `/dashboard/gudang/penerimaanStok` | `read-location`, `read-transfer-stok` | `/transferstok`, `/location`, `/location/current` | `read-transfer-stok`, `read-location` | Sejalan sejak 25 November 2026 (trace `akses/syarat-rute`) |
 | `/dashboard/gudang/pembelianStok` | `read-pembelian-stok` atau `read-pembelian-stok-gudang`, `read-location` (diselaraskan dengan `IZIN_HALAMAN` 20 November 2026, KT1a) | `/pembelianstok`, `/location`; `/akunkas` dan `/bahanbaku` hanya bagi pemegang izin bacanya | `read-pembelian-stok` atau `read-pembelian-stok-gudang` (B116), `read-location` | Sejalan (`0db77ed`) |
 | `/dashboard/gudang/jadwal` | `read-location`, `read-pengguna`, `read-jadwal-shift`, `read-shift` | `/location`, `/pengguna`, `/shift`, `/jadwalshift` | `read-location`, `read-pengguna`, `read-shift`; `/jadwalshift` tanpa `read-jadwal-shift` hanya jadwal sendiri (B140) | Sejalan sejak `90537c7` (B139, B140), aksi seperti outlet |
 | `/dashboard/gudang/jadwal/generate` | `read-location`, `read-pengguna`, `read-shift`, `read-pola-roster`, `create-jadwal-shift` | `/location`, `/pengguna`, `/shift`, `/polaroster`, `/jadwalshift/bulk` | `read-location`, `read-pengguna`, `read-shift`, `read-pola-roster`, `create-jadwal-shift` | Sejalan sejak `90537c7`; halaman dibuat di `19227f8` (keputusan J5b dan JD13c) |
@@ -129,7 +129,7 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/gudang/pembelianStok/catatPembelian` | `read-bahan`, `read-akunkas`, `read-location`, `create-pembelian-stok` atau `create-pembelian-stok-gudang` (diselaraskan dengan `IZIN_HALAMAN` 20 November 2026, KT1a) | `/bahanbaku`, `/akunkas`, `/location` | Form (`09c931e`) |
 | `/dashboard/outlet/inventaris/pengirimanBarang/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; aksi hanya di ruang pengirim (AR11a) |
 | `/dashboard/outlet/inventaris/pengirimanBarang/[id]/edit` | `read-transfer-stok`, `create-transfer-stok` | `/transferstok/:id` | Form; `PUT /transferstok/:id` menuntut `create-transfer-stok` |
-| `/dashboard/outlet/inventaris/bahanBaku/buatBahanBaku` | `create-bahan` | `/location/current` (opsional) | Form; `locationID` opsional di payload |
+| `/dashboard/outlet/inventaris/bahanBaku/buatBahanBaku` | `read-location`, `create-bahan` | `/location/current` | Form; lokasi stok awal, wajib sejak 25 November 2026 (trace `akses/syarat-rute`) |
 | `/dashboard/outlet/inventaris/bahanBaku/[id]/edit` | `read-bahan`, `update-bahan` | `/bahanbaku/:id` | Form |
 | `/dashboard/outlet/inventaris/penerimaanBarang/[id]` | `read-transfer-stok` | `/transferstok/:id` | Detail; terima mengikuti `receive-transfer-stok` |
 | `/dashboard/outlet/inventaris/pembelianStok/[id]` | `read-pembelian-stok` atau `read-pembelian-stok-outlet` (diselaraskan dengan `IZIN_HALAMAN` 20 November 2026, KT1a) | `/pembelianstok/:id`, `/location` | Detail; Ubah Info dan Hapus mengikuti `update-` dan `delete-pembelian-stok` beserta varian per ruang (`1e4f042`, B116) |
@@ -158,7 +158,7 @@ Ditambahkan 6 Oktober 2026 (`bc388c6`). Gate diturunkan dari hook data yang dipa
 | `/dashboard/outlet/pengaturan/roles/buatRole/kostum` | `read-role`, `create-role` | `/role`, `/permission` | Form |
 | `/dashboard/outlet/pengaturan/roles/[id]/edit` | `read-role`, `update-role` | `/role/:id`, `/role`, `/permission` | Form |
 | `/dashboard/outlet/pengaturan/toko` | - | `/tenant/:id`, `/location/current` | Izin per bagian di dalam halaman (PO14a) |
-| `/dashboard/outlet/penjualan/buatPenjualan` | `read-produk` atau `akses-pos`, `read-pelanggan`, `create-penjualan` | `/produk`, `/pelanggan`, `/diskon`; `/pajak` dan `/location/current` opsional | Form |
+| `/dashboard/outlet/penjualan/buatPenjualan` | `read-produk` atau `akses-pos`, `read-pelanggan`, `create-penjualan`, `read-pajak` atau `akses-pos` | `/produk`, `/pelanggan`, `/diskon`, `/pajak`; `/location/current` opsional | Form; pajak wajib sejak 25 November 2026 karena menentukan total (trace `akses/syarat-rute`) |
 | `/dashboard/outlet/penjualan/[id]` | `read-penjualan` | `/penjualan/:id` | Detail; aksi mengikuti `aksiPenjualan`. Booking dimuat lewat `/sesibooking/:id` bagi pemegang `read-booking` (`729c16a`) |
 | `/dashboard/outlet/penjualan/[id]/pembayaran` | `read-penjualan`, `create-pembayaran` | `/penjualan/:id`, `/metodepembayaran` | Form |
 | `/dashboard/outlet/reservasi/buatReservasi` | `read-booking`, `read-pelanggan`, `create-booking` | `/sesibooking`, `/aset`, `/pelanggan`, `/diskon` | Form |

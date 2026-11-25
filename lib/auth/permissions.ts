@@ -218,7 +218,14 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   // Outlet
   "/dashboard/outlet": [],
   "/dashboard/outlet/penjualan": [IZIN.penjualan],
-  "/dashboard/outlet/penjualan/buatPenjualan": [[IZIN.produk, IZIN.aksesPos], IZIN.pelanggan, IZIN.buatPenjualan],
+  // Pajak transaksi menentukan total (GET /pajak menerima read-pajak atau
+  // akses-pos); dibuktikan trace akses/syarat-rute (25 November 2026).
+  "/dashboard/outlet/penjualan/buatPenjualan": [
+    [IZIN.produk, IZIN.aksesPos],
+    IZIN.pelanggan,
+    IZIN.buatPenjualan,
+    [IZIN.pajak, IZIN.aksesPos],
+  ],
   "/dashboard/outlet/penjualan/[id]": [IZIN.penjualan],
   "/dashboard/outlet/penjualan/[id]/pembayaran": [IZIN.penjualan, IZIN.buatPembayaran],
   "/dashboard/outlet/pengeluaran": [IZIN.bebanOperasional],
@@ -291,7 +298,8 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   "/dashboard/outlet/inventaris/produk/[id]/edit": [IZIN.produk, IZIN.kategori, IZIN.ubahProduk],
   "/dashboard/outlet/inventaris/kategori": [IZIN.kategori],
   "/dashboard/outlet/inventaris/bahanBaku": [IZIN.location, [IZIN.inventory, IZIN.inventoryOutlet]],
-  "/dashboard/outlet/inventaris/bahanBaku/buatBahanBaku": [IZIN.buatBahan],
+  // Lokasi outlet menentukan lokasi stok awal (trace akses/syarat-rute).
+  "/dashboard/outlet/inventaris/bahanBaku/buatBahanBaku": [IZIN.location, IZIN.buatBahan],
   "/dashboard/outlet/inventaris/bahanBaku/[id]/edit": [IZIN.bahan, IZIN.ubahBahan],
   "/dashboard/outlet/inventaris/stok": [IZIN.location, [IZIN.inventory, IZIN.inventoryOutlet]],
   "/dashboard/outlet/inventaris/stockOpname": [IZIN.stockOpname, IZIN.location],
@@ -364,7 +372,8 @@ export const IZIN_HALAMAN: Record<string, readonly SyaratIzin[]> = {
   ],
   "/dashboard/gudang/transferStok/[id]/edit": [IZIN.transferStok, IZIN.buatTransferStok],
   "/dashboard/gudang/pengirimanStok": [IZIN.transferStok],
-  "/dashboard/gudang/penerimaanStok": [IZIN.transferStok],
+  // Sama dengan Penerimaan Barang outlet: pemilih lokasi (trace akses/syarat-rute).
+  "/dashboard/gudang/penerimaanStok": [IZIN.location, IZIN.transferStok],
   "/dashboard/gudang/penerimaanStok/[id]": [IZIN.transferStok],
   "/dashboard/gudang/jadwal": [IZIN.location, IZIN.pengguna, IZIN.jadwalShift, IZIN.shift],
   "/dashboard/gudang/jadwal/generate": [

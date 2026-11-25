@@ -4,7 +4,7 @@ import { cocok } from "../../../helpers/reservasi-uji";
 import {
   bersihkanHari,
   bulanUji,
-  buatJadwalApi,
+  buatJadwalLewatKalender,
   CATATAN_UJI,
   itemSel,
   jadwalRentang,
@@ -23,6 +23,9 @@ import {
   URL_JADWAL_GUDANG,
   URL_JADWAL_OUTLET,
 } from "../../../helpers/jadwal-uji";
+
+// Jadwal uji dibuat lewat kalender (buatJadwalLewatKalender), lebih lama dari POST langsung.
+test.describe.configure({ timeout: 120_000 });
 
 /*
  * Spec pembanding kelola jadwal manual di ruang outlet terhadap kode lama
@@ -118,7 +121,7 @@ test("ubah jadwal menjadi libur lewat klik item jadwal", async ({ page }) => {
   const tgl = tanggalUji(b, hari);
   await bersihkanHari(page, auth, fx, tgl, tgl);
   try {
-    const id = await buatJadwalApi(page, auth, fx, tgl, fx.shiftPagi);
+    const id = await buatJadwalLewatKalender(page, auth, fx, tgl, fx.shiftPagi);
     await keBulanUji(page, b);
     await itemSel(page, hari).click();
     const dialog = page.getByRole("dialog");
@@ -146,8 +149,8 @@ test("split shift diubah menjadi libur: satu PUT, sisanya dihapus backend (B165)
   const tgl = tanggalUji(b, hari);
   await bersihkanHari(page, auth, fx, tgl, tgl);
   try {
-    await buatJadwalApi(page, auth, fx, tgl, fx.shiftPagi);
-    await buatJadwalApi(page, auth, fx, tgl, shiftMalam);
+    await buatJadwalLewatKalender(page, auth, fx, tgl, fx.shiftPagi);
+    await buatJadwalLewatKalender(page, auth, fx, tgl, shiftMalam);
     await page.reload();
     await keBulanUji(page, b);
     const hapus: string[] = [];
@@ -179,7 +182,7 @@ test("hapus jadwal lewat dialog ubah setelah konfirmasi", async ({ page }) => {
   const tgl = tanggalUji(b, hari);
   await bersihkanHari(page, auth, fx, tgl, tgl);
   try {
-    const id = await buatJadwalApi(page, auth, fx, tgl, fx.shiftPagi);
+    const id = await buatJadwalLewatKalender(page, auth, fx, tgl, fx.shiftPagi);
     await keBulanUji(page, b);
     await itemSel(page, hari).click();
     const dialog = page.getByRole("dialog");
@@ -210,8 +213,8 @@ test("berjadwal di lokasi lain: Libur dinonaktifkan dengan keterangan, lewat sel
   const tgl = tanggalUji(b, hari);
   await bersihkanHari(page, auth, fx, tgl, tgl);
   try {
-    await buatJadwalApi(page, auth, fx, tgl, fx.shiftPagi);
-    await buatJadwalApi(page, auth, fxGudang, tgl, malamGudang);
+    await buatJadwalLewatKalender(page, auth, fx, tgl, fx.shiftPagi);
+    await buatJadwalLewatKalender(page, auth, fxGudang, tgl, malamGudang);
     await keBulanUji(page, b);
     await expect(selHari(page, hari)).toContainText("Lokasi lain", { timeout: 15_000 });
     await itemSel(page, hari).click();
@@ -261,8 +264,8 @@ test("Tambah Manual di bulan yang tidak tampil: Libur nonaktif selama memuat, la
   let lepas: () => void = () => {};
   const tahan = new Promise<void>((r) => (lepas = r));
   try {
-    await buatJadwalApi(page, auth, fx, tgl, fx.shiftPagi);
-    await buatJadwalApi(page, auth, fxGudang, tgl, malamGudang);
+    await buatJadwalLewatKalender(page, auth, fx, tgl, fx.shiftPagi);
+    await buatJadwalLewatKalender(page, auth, fxGudang, tgl, malamGudang);
     await page.route(/\/api\/jadwalshift\?/i, async (route) => {
       if (polaHari(tgl)(route.request())) await tahan;
       await route.continue();
@@ -331,7 +334,7 @@ test("jadwal yang ditolak backend ditampilkan dan dialog bertahan (keputusan J2a
   const tgl = tanggalUji(b, hari);
   await bersihkanHari(page, auth, fx, tgl, tgl);
   try {
-    await buatJadwalApi(page, auth, fx, tgl, fx.shiftPagi);
+    await buatJadwalLewatKalender(page, auth, fx, tgl, fx.shiftPagi);
     await page.reload();
     await keBulanUji(page, b);
     await itemSel(page, hari).click();
@@ -366,7 +369,7 @@ test("form ubah memuat catatan tersimpan dan mengirimnya kembali (keputusan JD4)
   const tgl = tanggalUji(b, hari);
   await bersihkanHari(page, auth, fx, tgl, tgl);
   try {
-    const id = await buatJadwalApi(page, auth, fx, tgl, fx.shiftPagi);
+    const id = await buatJadwalLewatKalender(page, auth, fx, tgl, fx.shiftPagi);
     await page.reload();
     await keBulanUji(page, b);
     await itemSel(page, hari).click();

@@ -10,10 +10,11 @@ import { queryKeys } from "@/lib/queryKeys";
  * di dalam kunci, sehingga periode berjalan dan pembandingnya (KU5a) tidak
  * saling menimpa. Halaman lama menempelkan rentang di luar objek filter.
  */
-export function useLabaRugi(rentang: RentangLaporan) {
+export function useLabaRugi(rentang: RentangLaporan, opsi: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.laporan.labaRugi(rentang),
     queryFn: () => laporanApi.labaRugi(rentang),
+    enabled: opsi.enabled ?? true,
   });
 }
 /** Arus kas (B291). Seluruh query, termasuk akun kas dan kelompok, menjadi kunci cache. */

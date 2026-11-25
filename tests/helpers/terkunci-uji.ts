@@ -298,9 +298,20 @@ async function pastikanPengguna(page: Page, auth: () => string, peranUji: PeranU
  * uji, lalu login ulang sebagai pengguna itu di halaman yang sama.
  */
 export async function masukSebagai(page: Page, peranUji: PeranUji) {
+  await siapkanPeranDanPengguna(page, peranUji);
+  await gantiKePenggunaUji(page, peranUji);
+}
+
+/** Dari halaman yang sudah login sebagai Ridho: memastikan peran dan pengguna uji; mengembalikan id peran. */
+export async function siapkanPeranDanPengguna(page: Page, peranUji: PeranUji): Promise<string> {
   const auth = await bukaDenganAuth(page, BASIS + "/dashboard");
   const idPeran = await pastikanPeran(page, auth, peranUji);
   await pastikanPengguna(page, auth, peranUji, idPeran);
+  return idPeran;
+}
+
+/** Login ulang sebagai pengguna uji yang sudah disiapkan, di halaman yang sama. */
+export async function gantiKePenggunaUji(page: Page, peranUji: PeranUji) {
   // Cookie sesi Ridho dibuang dulu: tanpa itu /login memulihkan sesi Ridho
   // (refreshtoken lalu pin-refresh) bersamaan dengan login akun di bawah, dan
   // bila pin-refresh selesai belakangan, login pengguna mengalihkan ke

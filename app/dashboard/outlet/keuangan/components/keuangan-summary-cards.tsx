@@ -6,6 +6,8 @@ import { useDaftarAkunKas } from "@/features/akun-kas/hooks";
 import { useLabaRugi } from "@/features/laporan/hooks";
 import { jumlahkan, rentangBulanIni, type KolomNilaiLaporan } from "@/features/laporan/periode";
 import { formatRupiah } from "@/lib/format";
+import { IZIN } from "@/lib/auth/permissions";
+import { useSession } from "@/lib/auth/useSession";
 import { useTanggalHariIni } from "@/hooks/use-hari-ini";
 
 type SummaryCard = {
@@ -77,8 +79,15 @@ export function KeuanganSummaryCards() {
   // keuangan dapat terbuka melewati tengah malam (useTanggalHariIni).
   const hariIni = useTanggalHariIni();
   const rentang = useMemo(() => rentangBulanIni(hariIni), [hariIni]);
-  const laporan = useLabaRugi(rentang);
-  const akunKas = useDaftarAkunKas();
+  // Setiap kartu mengikuti izin endpoint datanya (pemilik proyek,
+  // 25 November 2026): laba rugi read-laporan, saldo akun kas read-akunkas.
+  // Layout ini membungkus halaman Keuangan yang syaratnya lain, misalnya
+  // Mesin Kasir, sehingga tanpa penyaring ini permintaannya dijawab 403.
+  const { permissions } = useSession();
+  const boleh = { laporan: permissions.includes(IZIN.laporan), kas: permissions.includes(IZIN.akunKas) };
+  const laporan = useLabaRugi(rentang, { enabled: boleh.laporan });
+  const akunKas = useDaftarAkunKas({ enabled: boleh.kas });
+  const kartu = SUMMARY_CARDS.filter((c) => boleh[c.source]);
 
   const nilaiKartu = (card: SummaryCard): number | null => {
     if (card.source === "kas") {
@@ -89,9 +98,10 @@ export function KeuanganSummaryCards() {
     return jumlahkan(laporan.data ?? [], card.dataKey);
   };
 
+  if (kartu.length === 0) return null;
   return (
     <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-4 w-full">
-      {SUMMARY_CARDS.map((card) => (
+      {kartu.map((card) => (
         <SummaryCardItem key={card.title} card={card} nilai={nilaiKartu(card)} />
       ))}
     </div>

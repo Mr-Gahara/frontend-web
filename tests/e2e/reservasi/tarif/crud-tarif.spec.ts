@@ -13,8 +13,10 @@ import {
 
 /*
  * Spec tarif terhadap backend sungguhan (keputusan rancangan butir 21,
- * keputusan R1a). Tarif dan tipe aset uji dibuat lewat API dengan nama unik
- * dan dihapus di finally (tarif dulu, baru tipe aset). Hapus tarif lewat API
+ * keputusan R1a). Tarif uji dibuat lewat form Buat Tarif (keputusan rancangan
+ * butir 23, sejak 25 November 2026) dan tipe aset uji, milik halaman lain,
+ * lewat API, masing-masing bernama unik dan dihapus di finally (tarif dulu,
+ * baru tipe aset). Hapus tarif lewat API
  * tidak diperiksa statusnya, karena backend menghapus datanya lalu menjawab
  * 500 (tarifService.delete memakai payload yang tidak terdefinisi).
  */
@@ -56,11 +58,48 @@ const POLA_NONAKTIF = /non ?aktif|tidak aktif/i;
 const namaTarifUji = (label: string) => "E2E Tarif " + label + " " + unik();
 const namaTipeUji = () => "E2E Tipe Tarif " + unik();
 
+const NAMA_HARI = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+
+/**
+ * Tarif uji dibuat lewat form Buat Tarif (keputusan rancangan butir 23;
+ * audit spec lama 25 November 2026), bukan POST langsung. Form mulai dengan
+ * ketujuh hari dan status aktif; hari yang tidak dipakai dan status nonaktif
+ * diklik lepas. Tipe aset dipilih menurut namanya, dibaca dari GET /tipeaset.
+ */
 async function buatTarif(page: Page, auth: Auth, data: TarifBaru) {
-  const r = await api<TarifMentah>(page, auth, "POST", "/tarif", data);
-  expect(r.status, "buat tarif uji: " + r.pesan).toBeLessThan(300);
-  expect(r.data?.id, "respons buat tarif harus membawa id").toBeTruthy();
-  return r.data;
+  const namaTipe = new Map<string, string>();
+  if (data.tipeAsetID?.length) {
+    const tipe = await api<{ id?: string; _id?: string; namaTipeAset: string }[]>(page, auth, "GET", "/tipeaset");
+    for (const t of tipe.data ?? []) namaTipe.set(t.id ?? t._id ?? "", t.namaTipeAset);
+  }
+  const kembali = page.url();
+  await page.goto(URL_BUAT);
+  await expect(page.getByRole("heading", { name: "Buat Tarif Baru" })).toBeVisible({ timeout: 15_000 });
+  await page.locator('input[name="namaTarif"]').fill(data.namaTarif);
+  await page.locator('input[name="prioritas"]').fill(String(data.prioritas ?? 1));
+  if (data.isActive === false) await page.getByText("Aktifkan Tarif Ini", { exact: true }).click();
+  await page.getByRole("combobox", { name: "Basis Perhitungan" }).click();
+  await page.getByRole("option", { name: data.basisPerhitungan === "per sesi" ? "Per Sesi" : "Per Jam", exact: true }).click();
+  await page.getByLabel("Harga (Rp)").fill(String(data.harga));
+  await page.locator('input[name="durasiMinimum"]').fill(String(data.durasiMinimum));
+  const hari = data.hariAktif ?? [0, 1, 2, 3, 4, 5, 6];
+  for (const [i, label] of NAMA_HARI.entries()) if (!hari.includes(i)) await page.getByText(label, { exact: true }).click();
+  const [jm, mm] = (data.jamMulai ?? "00:00").split(":");
+  const [js, ms] = (data.jamSelesai ?? "23:59").split(":");
+  await page.getByRole("textbox", { name: "Jam Mulai (jam)" }).fill(jm);
+  await page.getByRole("textbox", { name: "Jam Mulai (menit)" }).fill(mm);
+  await page.getByRole("textbox", { name: "Jam Selesai (jam)" }).fill(js);
+  await page.getByRole("textbox", { name: "Jam Selesai (menit)" }).fill(ms);
+  for (const id of data.tipeAsetID ?? []) await page.getByText(namaTipe.get(id) ?? id, { exact: true }).click();
+  const tKirim = page.waitForResponse(cocok("POST", POLA_DAFTAR));
+  await page.getByRole("button", { name: /simpan tarif/i }).click();
+  const res = await tKirim;
+  const body = await res.json().catch(() => ({}));
+  expect(res.status(), "buat tarif uji lewat form: " + JSON.stringify(body).slice(0, 160)).toBeLessThan(300);
+  expect(body.data?.id, "respons buat tarif harus membawa id").toBeTruthy();
+  await page.waitForURL("**/reservasi/tarif");
+  if (kembali.startsWith("http") && !kembali.endsWith("/reservasi/tarif")) await page.goto(kembali);
+  return body.data as TarifMentah;
 }
 
 const bacaTarif = (page: Page, auth: Auth, id: string) =>

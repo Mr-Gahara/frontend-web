@@ -2141,6 +2141,15 @@ pembelian (`keuangan/belanja-stok`).
   periode; periksa data uji lebih dulu (dipindah dari `modul/keuangan.md`,
   24 November 2026).
 
+Dilunasi 25 November 2026 (`akses/syarat-rute`): setiap rute
+`IZIN_HALAMAN` dibuka sebagai peran uji yang memegang tepat izin syaratnya;
+temuan SR1a sampai SR4a (`modul/akses.md`) diperbaiki lalu seluruh rute
+terbuka tanpa 403.
+
+- **Syarat 44 entri baru `IZIN_HALAMAN` diturunkan dari nama hook dan
+  kontrak, bukan dari trace per halaman.** Yang terbukti: pemilik seluruh
+  izin membuka setiap rute terpetakan (unit), dan spec terdampak lolos.
+
 ## Kejadian sesekali yang tidak berulang
 
 - **Master Shift tampil sebagai kartu di 1280 px, sekali** (20 November
