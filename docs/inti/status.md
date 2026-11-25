@@ -50,13 +50,9 @@ satu-satunya daftar pekerjaan terbuka.
 
 1. **Pemberitahuan dan lonceng selesai di web** (bagian di bawah); sisa:
    tiga kebutuhan backend dan suite e2e penuh yang menunggu izin.
-2. **Utang pengujian yang dapat dikerjakan sekarang, tanpa backend:**
-   `referensi/utang-pengujian.md`, bagian Dapat dikerjakan sekarang
-   (sepuluh butir: bentrok booking Selesai, `hapusLewatApi`, spec lama
-   yang masih menyiapkan data lewat API, Profil Toko tanpa outlet,
-   `sedangBerlaku` diskon, pesan titipan PIN, gerbang rute ber-`[id]`,
-   syarat 44 entri `IZIN_HALAMAN`, halaman daftar akun admin, dan
-   ringkasan Belanja Stok).
+2. **Utang pengujian yang dapat dikerjakan sekarang:** tidak ada; seluruh
+   butir dilunasi 25 November 2026 (`referensi/utang-pengujian.md`), dengan
+   temuan SR1a sampai SR5a (`modul/akses.md`) dan audit spec lama.
 3. **Menunggu keputusan pemilik proyek:**
    - Nomor WhatsApp admin halaman Langganan (LG1a, `NOMOR_WA_ADMIN`
      kosong di `features/langganan/data.ts`).

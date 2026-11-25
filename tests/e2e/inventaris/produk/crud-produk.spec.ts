@@ -1,5 +1,7 @@
 import { test, expect, Page } from "@playwright/test";
-import { bukaDenganAuth } from "../../../helpers/transfer-uji";
+import { BASIS, api, bukaDenganAuth } from "../../../helpers/transfer-uji";
+import { siapkanFixture } from "../../../helpers/penjualan-uji";
+import { masukSebagai, type PeranUji } from "../../../helpers/terkunci-uji";
 import { masuk } from "../../../helpers/masuk-uji";
 import { tanpaLuberWadah } from "../../../helpers/tata-letak-uji";
 
@@ -1056,5 +1058,45 @@ test.describe("E2E - Manajemen Produk (CRUD + Business Logic)", () => {
         page.getByRole("heading", { name: /data produk/i }),
       ).toBeVisible();
     });
+  });
+});
+
+test.describe("Ubah Produk tanpa read-bahan (SR5a)", () => {
+  const PERAN_UBAH_TANPA_BAHAN: PeranUji = {
+    nama: "E2E Ubah Produk Tanpa Bahan",
+    pin: "864254",
+    deskripsi: "Peran uji e2e: ubah produk tanpa izin baca bahan baku",
+    izin: (n) => ["read-produk", "read-kategori", "update-produk", "read-dashboard-outlet"].includes(n),
+  };
+
+  test("bagian resep tidak tampil, bahan tidak diminta, dan menyimpan mengirim resep yang sudah ada apa adanya", async ({
+    page,
+  }) => {
+    await login(page);
+    const auth = await bukaDenganAuth(page, BASIS + "/dashboard/outlet");
+    const fx = await siapkanFixture(page, auth, 20);
+    const asal = await api<{ resep: { bahanBakuID: string; jumlah: number; satuan: string }[] }>(
+      page, auth, "GET", "/produk/" + fx.produkId,
+    );
+    expect(asal.data.resep.length, "produk uji beresep").toBeGreaterThan(0);
+
+    await masukSebagai(page, PERAN_UBAH_TANPA_BAHAN);
+    let mintaBahan = 0;
+    page.on("request", (r) => {
+      if (r.method() === "GET" && /\/api\/bahanbaku(\?|$)/.test(r.url())) mintaBahan += 1;
+    });
+    await page.goto("/dashboard/outlet/inventaris/produk/" + fx.produkId + "/edit");
+    await expect(page.locator('input[name="namaProduk"]')).toHaveValue(/E2E Penjualan Produk/, { timeout: 15_000 });
+    // Penanda bagian resep (bagian-resep-produk.tsx): tombol Tambah Bahan.
+    await expect(page.getByRole("button", { name: "Tambah Bahan" })).toHaveCount(0);
+    const tPut = page.waitForResponse((r) => r.request().method() === "PUT" && /\/api\/produk\/[a-f0-9]{24}$/.test(r.url()));
+    await page.getByRole("button", { name: /simpan/i }).last().click();
+    const put = await tPut;
+    expect(put.status(), "simpan ubah produk").toBe(200);
+    expect(
+      (put.request().postDataJSON().resep ?? []).map((r: { bahanBakuID: string; jumlah: number }) => [r.bahanBakuID, r.jumlah]),
+      "resep lama dikirim apa adanya",
+    ).toEqual(asal.data.resep.map((r) => [r.bahanBakuID, r.jumlah]));
+    expect(mintaBahan, "GET /bahanbaku tidak dikirim").toBe(0);
   });
 });

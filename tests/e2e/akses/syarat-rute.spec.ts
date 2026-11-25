@@ -33,12 +33,46 @@ const DIKECUALIKAN: Record<string, string> = {
   "/dashboard/outlet/pengaturan/akun": "level Owner",
 };
 
-/** Id yang sah bentuknya tetapi tidak ada: rute ber-[id] cukup memuat halamannya. */
+/**
+ * Sumber id nyata per rute ber-[id], dibaca sebagai Owner sebelum berpindah
+ * pengguna, agar bagian halaman yang baru dipasang sesudah detail termuat
+ * (misalnya form ubah) ikut tertelusuri. Tanpa data, id uji yang tidak ada.
+ */
 const ID_UJI = "6a0000000000000000000000";
+const SUMBER_ID: Record<string, string> = {
+  "/dashboard/outlet/penjualan/[id]": "/penjualan?page=1&limit=1",
+  "/dashboard/outlet/penjualan/[id]/pembayaran": "/penjualan?page=1&limit=1&statusPenjualan=UNPAID",
+  "/dashboard/outlet/keuangan/akunkas/[id]/ubah": "/akunkas",
+  "/dashboard/outlet/keuangan/mesinKasir/[id]": "/sesikasir?page=1&limit=1&status=TUTUP",
+  "/dashboard/outlet/reservasi/aset/[id]/edit": "/aset",
+  "/dashboard/outlet/reservasi/tarif/[id]/edit": "/tarif",
+  "/dashboard/outlet/reservasi/tipeAset/[id]/edit": "/tipeaset",
+  "/dashboard/outlet/pengaturan/metodePembayaran/[id]": "/metodepembayaran",
+  "/dashboard/outlet/pengaturan/roles/[id]/edit": "/role",
+  "/dashboard/outlet/inventaris/produk/[id]/edit": "/produk?page=1&limit=1",
+  "/dashboard/outlet/inventaris/bahanBaku/[id]/edit": "/bahanbaku",
+  "/dashboard/outlet/inventaris/stockOpname/[id]": "/stockopname?page=1&limit=1&tipeLokasi=Outlet",
+  "/dashboard/outlet/inventaris/stockAdjustment/[id]": "/stockopname/adjustments?page=1&limit=1&tipeLokasi=Outlet",
+  "/dashboard/outlet/inventaris/pengajuanStok/[id]": "/pengajuanstok?page=1&limit=1",
+  "/dashboard/outlet/inventaris/pengajuanStok/[id]/edit": "/pengajuanstok?page=1&limit=1&status=DRAFT",
+  "/dashboard/outlet/inventaris/penerimaanBarang/[id]": "/transferstok?page=1&limit=1",
+  "/dashboard/outlet/inventaris/pengirimanBarang/[id]": "/transferstok?page=1&limit=1",
+  "/dashboard/outlet/inventaris/pengirimanBarang/[id]/edit": "/transferstok?page=1&limit=1&status=PENDING",
+  "/dashboard/outlet/inventaris/pembelianStok/[id]": "/pembelianstok?page=1&limit=1",
+  "/dashboard/gudang/stockOpname/[id]": "/stockopname?page=1&limit=1&tipeLokasi=Gudang",
+  "/dashboard/gudang/stockAdjustment/[id]": "/stockopname/adjustments?page=1&limit=1&tipeLokasi=Gudang",
+  "/dashboard/gudang/pengajuanStok/[id]": "/pengajuanstok?page=1&limit=1",
+  "/dashboard/gudang/transferStok/[id]": "/transferstok?page=1&limit=1",
+  "/dashboard/gudang/transferStok/[id]/edit": "/transferstok?page=1&limit=1&status=PENDING",
+  "/dashboard/gudang/pembelianStok/[id]": "/pembelianstok?page=1&limit=1",
+  "/dashboard/gudang/penerimaanStok/[id]": "/transferstok?page=1&limit=1",
+};
 
 const RUTE = Object.keys(IZIN_HALAMAN).filter(
   (r) => r.startsWith("/dashboard/") && IZIN_HALAMAN[r].length > 0 && !(r in DIKECUALIKAN),
 );
+
+const BERID_TERDAFTAR = Object.keys(IZIN_HALAMAN).filter((r) => r.includes("[id]") && !(r in DIKECUALIKAN));
 
 /** Izin minimum sebuah rute: setiap syarat, alternatif pertama bila berupa pilihan, ditambah dashboard ruangnya. */
 function izinMinimum(rute: string): string[] {
@@ -64,6 +98,15 @@ test("setiap rute statis dan ber-[id] terbuka tanpa 403 bagi pemegang tepat izin
   const roleOwner = (peran.data ?? []).find((r) => /^owner$/i.test(r.namaRole ?? ""));
   const idIzin = new Map((roleOwner?.permissions ?? []).map((p) => [p.nama ?? "", idDari(p)]));
 
+  const idNyata = new Map<string, string>();
+  for (const [pola, sumber] of Object.entries(SUMBER_ID)) {
+    const r = await api<{ _id?: string; id?: string; namaRole?: string }[]>(page, owner, "GET", sumber);
+    const pertama = (r.data ?? []).find((x) => !/^owner$/i.test(x.namaRole ?? ""));
+    if (r.status === 200 && pertama) idNyata.set(pola, idDari(pertama));
+  }
+  const tanpaData = BERID_TERDAFTAR.filter((p) => !idNyata.has(p));
+  test.info().annotations.push({ type: "id uji", description: tanpaData.join(", ") || "-" });
+
   await gantiKePenggunaUji(page, PERAN_SYARAT);
   const cek = await api(page, owner, "GET", "/role");
   expect(cek.status, "token Owner tetap sah sesudah berpindah pengguna: " + cek.pesan).toBe(200);
@@ -86,7 +129,7 @@ test("setiap rute statis dan ber-[id] terbuka tanpa 403 bagi pemegang tepat izin
     };
     // Pencatat dipasang sesudah dokumen baru ter-commit, agar respons susulan
     // halaman sebelumnya tidak terhitung milik rute ini.
-    const alamat = rute.replace("[id]", ID_UJI);
+    const alamat = rute.replace("[id]", idNyata.get(rute) ?? ID_UJI);
     await page.goto(alamat, { waitUntil: "commit" });
     page.on("response", catat);
     await page.waitForLoadState("networkidle");

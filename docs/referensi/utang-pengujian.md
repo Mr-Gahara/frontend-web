@@ -17,17 +17,8 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 Hanya menyentuh frontend dan data uji; tidak menunggu backend maupun
 keputusan baru.
 
-- **Spec yang ditulis sebelum keputusan rancangan butir 23 masih
-  menyiapkan sebagian data uji lewat API.** Diaudit menyeluruh atas
-  keputusan pemilik proyek 25 November 2026, per modul. Sudah lewat UI:
-  tarif uji (form Buat Tarif), pola roster uji (dialog), dan jadwal uji
-  (`buatJadwalLewatKalender`: Tambah Manual, atau Tambah Split Shift untuk
-  shift kedua). Pemanggilan API yang tetap sah menurut butir 23:
-  pembersihan, data milik halaman lain, bukti penolakan backend, keadaan
-  bersamaan, dan keadaan yang tidak dapat dibuat lewat UI.
-- **Rute ber-`[id]` di `akses/syarat-rute` ditelusuri dengan id uji yang
-  tidak ada**, sehingga bagian halaman yang baru dipasang sesudah detail
-  termuat (misalnya form Ubah Produk) tidak ikut tertelusuri.
+Tidak ada. Seluruh butir dilunasi 25 November 2026
+(`arsip/riwayat-pengujian.md`).
 
 ## Menunggu keputusan pemilik proyek
 
@@ -61,6 +52,11 @@ yang disengaja tidak ditandai `test.fixme`.
   ulang sesudahnya menunggu backend butir 190.
 
 ## Tidak dapat dibuktikan dengan data atau lingkungan sekarang
+
+- **Tiga rute ubah di `akses/syarat-rute` memakai id uji yang tidak ada**
+  (Ubah Pengajuan DRAFT, revisi surat jalan PENDING di outlet dan gudang),
+  selama data uji tidak punya dokumen berstatus itu; form yang dipasang
+  sesudah detail termuat di ketiganya belum tertelusuri.
 
 - **Batas 10.000 baris ekspor (400)** tidak dapat dibuat deterministik
   dari web.

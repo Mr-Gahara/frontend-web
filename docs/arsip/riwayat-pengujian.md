@@ -2150,6 +2150,30 @@ terbuka tanpa 403.
   kontrak, bukan dari trace per halaman.** Yang terbukti: pemilik seluruh
   izin membuka setiap rute terpetakan (unit), dan spec terdampak lolos.
 
+Dilunasi 25 November 2026 lewat audit seluruh spec atas keputusan pemilik
+proyek (88 pemanggilan API tulis di spec, ditambah helper). Diubah ke UI,
+karena data subjek dibuat lewat halaman yang diuji (keputusan rancangan
+butir 23): tarif uji di `reservasi/tarif` (form Buat Tarif), tipe aset dan
+aset uji di spec CRUD-nya (`buatTipeAsetLewatForm`, `buatAsetLewatForm`),
+pola roster uji (dialog), jadwal uji (`buatJadwalLewatKalender`), dan libur
+di `jadwal/lihat-jadwal`. Tetap lewat API karena sah menurut butir 23:
+pembersihan di `finally`, data milik halaman lain (misalnya tipe aset di
+spec aset dan tarif, booking dan pembayaran di spec daftar reservasi, mesin
+dan metode di form pembayaran), bukti penolakan backend, keadaan bersamaan
+("diubah di luar"), keadaan yang tidak dapat dibuat lewat UI (booking
+lampau, diskon berakhir per detik, saldo terkuras), prasyarat batas (10
+metode atau akun aktif), dan fixture tetap yang dibuat sekali bila belum
+ada.
+
+- **Spec yang ditulis sebelum keputusan rancangan butir 23 masih
+  menyiapkan sebagian data uji lewat API.** Diaudit menyeluruh atas
+  keputusan pemilik proyek 25 November 2026, per modul. Sudah lewat UI:
+  tarif uji (form Buat Tarif), pola roster uji (dialog), dan jadwal uji
+  (`buatJadwalLewatKalender`: Tambah Manual, atau Tambah Split Shift untuk
+  shift kedua). Pemanggilan API yang tetap sah menurut butir 23:
+  pembersihan, data milik halaman lain, bukti penolakan backend, keadaan
+  bersamaan, dan keadaan yang tidak dapat dibuat lewat UI.
+
 ## Kejadian sesekali yang tidak berulang
 
 - **Master Shift tampil sebagai kartu di 1280 px, sekali** (20 November

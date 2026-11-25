@@ -1,5 +1,5 @@
 import { expect, type Page, type Request, type Response } from "@playwright/test";
-import { api, type Auth } from "./transfer-uji";
+import { api, BASIS, type Auth } from "./transfer-uji";
 import { normalizeId } from "@/lib/api/normalize";
 
 /*
@@ -74,6 +74,56 @@ export async function buatAset(
   expect(r.status, "buat aset uji: " + r.pesan).toBeLessThan(300);
   expect(r.data?.id, "respons buat aset harus membawa id").toBeTruthy();
   return r.data;
+}
+
+/**
+ * Tipe aset uji lewat form Buat Tipe Aset, untuk spec yang menguji halaman
+ * tipe aset sendiri (keputusan rancangan butir 23; audit 25 November 2026).
+ * Spec halaman lain tetap memakai buatTipeAset (API). Halaman semula dibuka
+ * lagi sesudahnya.
+ */
+export async function buatTipeAsetLewatForm(page: Page, _auth: Auth, nama: string, deskripsi?: string) {
+  const kembali = page.url();
+  await page.goto(BASIS + "/dashboard/outlet/reservasi/tipeAset/buatTipeAset");
+  await page.getByPlaceholder(/meja billiard vip/i).fill(nama);
+  if (deskripsi) await page.getByPlaceholder(/catatan atau keterangan/i).fill(deskripsi);
+  const tKirim = page.waitForResponse(cocok("POST", /\/api\/tipeaset(\?|$)/i));
+  await page.getByRole("button", { name: /simpan kategori aset/i }).click();
+  const res = await tKirim;
+  const body = await res.json().catch(() => ({}));
+  expect(res.status(), "buat tipe aset uji lewat form: " + JSON.stringify(body).slice(0, 160)).toBeLessThan(300);
+  expect(body.data?.id, "respons buat tipe aset harus membawa id").toBeTruthy();
+  await page.waitForURL("**/reservasi/tipeAset");
+  if (kembali.startsWith("http")) await page.goto(kembali);
+  return body.data as TipeAsetMentah;
+}
+
+/** Aset uji lewat form Buat Aset, untuk spec halaman aset sendiri (sama dengan buatTipeAsetLewatForm). */
+export async function buatAsetLewatForm(
+  page: Page,
+  auth: Auth,
+  data: { namaAset: string; tipeAsetID: string; status?: "tersedia" | "perbaikan" },
+) {
+  const tipe = await api<TipeAsetMentah>(page, auth, "GET", "/tipeaset/" + data.tipeAsetID);
+  expect(tipe.status, "baca tipe aset uji: " + tipe.pesan).toBe(200);
+  const kembali = page.url();
+  await page.goto(BASIS + "/dashboard/outlet/reservasi/aset/buatAset");
+  await page.getByPlaceholder(/meja billiard 01/i).fill(data.namaAset);
+  await page.getByRole("combobox").filter({ hasText: "Pilih kategori aset" }).click();
+  await page.getByRole("option", { name: tipe.data.namaTipeAset }).click();
+  if (data.status === "perbaikan") {
+    await page.getByRole("combobox").filter({ hasText: /tersedia \(siap|pilih status/i }).click();
+    await page.getByRole("option", { name: /dalam perbaikan/i }).click();
+  }
+  const tKirim = page.waitForResponse(cocok("POST", /\/api\/aset(\?|$)/i));
+  await page.getByRole("button", { name: /simpan aset baru/i }).click();
+  const res = await tKirim;
+  const body = await res.json().catch(() => ({}));
+  expect(res.status(), "buat aset uji lewat form: " + JSON.stringify(body).slice(0, 160)).toBeLessThan(300);
+  expect(body.data?.id, "respons buat aset harus membawa id").toBeTruthy();
+  await page.waitForURL("**/reservasi/aset");
+  if (kembali.startsWith("http")) await page.goto(kembali);
+  return body.data as AsetMentah;
 }
 
 /** Menghapus data uji lewat API; status tidak diperiksa karena dipakai di finally. */

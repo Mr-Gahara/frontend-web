@@ -143,10 +143,11 @@ export function FormProduk({ mode, produk }: PropsFormProduk) {
   // itu backend memakai outlet tenant.
   const { permissions } = useSession();
   const { lokasiId } = useLokasiAktif({ aktif: permissions.includes(IZIN.location) });
-  // Buat Produk tanpa read-bahan: bagian resep tidak tampil dan bahan tidak
-  // diminta, sehingga produk berstok langsung tetap dapat dibuat (pemilik
-  // proyek, 25 November 2026; trace akses/syarat-rute). Mode ubah tetap.
-  const tampilResep = mode === "edit" || permissions.includes(IZIN.bahan);
+  // Tanpa read-bahan bagian resep tidak tampil dan bahan tidak diminta, di
+  // Buat dan Ubah Produk (pemilik proyek, 25 November 2026, SR3a dan SR5a;
+  // trace akses/syarat-rute). Resep yang sudah ada tetap di nilai form,
+  // sehingga ubah produk mengirimnya apa adanya (payload.ts).
+  const tampilResep = permissions.includes(IZIN.bahan);
 
   const [openCombobox, setOpenCombobox] = useState(false);
 

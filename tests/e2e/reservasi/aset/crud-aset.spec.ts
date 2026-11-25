@@ -7,7 +7,7 @@ import {
   pantauPermintaan,
   tahanLaluTeruskan,
   buatTipeAset,
-  buatAset,
+  buatAsetLewatForm,
   hapusLewatApi,
   NAMA_ASET_BOOKING,
   batalkanBooking,
@@ -79,8 +79,8 @@ test.describe("E2E — Aset › Halaman Daftar", () => {
     let b: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      a = await buatAset(page, auth, { namaAset: namaTersedia, tipeAsetID: tipe.id });
-      b = await buatAset(page, auth, {
+      a = await buatAsetLewatForm(page, auth, { namaAset: namaTersedia, tipeAsetID: tipe.id });
+      b = await buatAsetLewatForm(page, auth, {
         namaAset: namaPerbaikan,
         tipeAsetID: tipe.id,
         status: "perbaikan",
@@ -108,7 +108,7 @@ test.describe("E2E — Aset › Halaman Daftar", () => {
     let aset: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await bukaDaftar(page);
       const permintaan = pantauPermintaan(page, "GET", POLA_DAFTAR);
       await page.getByPlaceholder(/cari nama aset/i).fill(nama);
@@ -132,7 +132,7 @@ test.describe("E2E — Aset › Halaman Daftar", () => {
     let terhapus = false;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await bukaDaftar(page);
       await tahanLaluTeruskan(page, "DELETE", POLA_SATU);
       await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
@@ -271,7 +271,7 @@ test.describe("E2E — Aset › Halaman Edit", () => {
     let aset: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await page.goto(urlEdit(aset.id));
       await expect(page.getByPlaceholder(/meja billiard 01/i)).toHaveValue(nama, { timeout: 10_000 });
       await expect(page.getByRole("combobox").filter({ hasText: tipe.namaTipeAset })).toBeVisible();
@@ -292,7 +292,7 @@ test.describe("E2E — Aset › Halaman Edit", () => {
     let aset: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await page.goto(urlEdit(aset.id));
       const input = page.getByPlaceholder(/meja billiard 01/i);
       await expect(input).toHaveValue(nama, { timeout: 10_000 });
@@ -325,7 +325,7 @@ test.describe("E2E — Aset › Daftar: keadaan, navigasi, dan hapus", () => {
     let aset: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await tahanLaluTeruskan(page, "GET", POLA_DAFTAR);
       await page.goto(URL_DAFTAR);
       await expect(page.getByText("Memuat data...")).toBeVisible();
@@ -354,7 +354,7 @@ test.describe("E2E — Aset › Daftar: keadaan, navigasi, dan hapus", () => {
     let aset: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await bukaDaftar(page);
       const cari = page.getByPlaceholder(/cari nama aset/i);
       await test.step("huruf besar", async () => {
@@ -382,7 +382,7 @@ test.describe("E2E — Aset › Daftar: keadaan, navigasi, dan hapus", () => {
     let aset: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await bukaDaftar(page);
       await page.getByRole("button", { name: /tambah/i }).click();
       await page.waitForURL("**/aset/buatAset");
@@ -403,7 +403,7 @@ test.describe("E2E — Aset › Daftar: keadaan, navigasi, dan hapus", () => {
     let aset: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await bukaDaftar(page);
       const permintaan = pantauPermintaan(page, "DELETE", POLA_SATU);
       await (await cariBaris(page, nama)).getByRole("button", { name: "Buka menu" }).click();
@@ -429,7 +429,7 @@ test.describe("E2E — Aset › Daftar: keadaan, navigasi, dan hapus", () => {
     let aset: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await bukaDaftar(page);
       await page.route(POLA_SATU, (route) =>
         route.request().method() === "DELETE" ? route.fulfill(JAWAB_GAGAL) : route.continue(),
@@ -553,7 +553,7 @@ test.describe("E2E — Aset › Edit: guard, navigasi, validasi, dan gagal", () 
     let aset: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       const permintaan = pantauPermintaan(page, "PUT", POLA_SATU);
       await page.goto(urlEdit(aset.id));
       await expect(page.getByPlaceholder(/meja billiard 01/i)).toHaveValue(nama, { timeout: 10_000 });
@@ -578,7 +578,7 @@ test.describe("E2E — Aset › Edit: guard, navigasi, validasi, dan gagal", () 
     let aset: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       const permintaan = pantauPermintaan(page, "PUT", POLA_SATU);
       await page.goto(urlEdit(aset.id));
       const input = page.getByPlaceholder(/meja billiard 01/i);
@@ -605,7 +605,7 @@ test.describe("E2E — Aset › Edit: guard, navigasi, validasi, dan gagal", () 
     try {
       tipeA = await buatTipeAset(page, auth, namaTipeUji());
       tipeB = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipeA.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipeA.id });
       await page.goto(urlEdit(aset.id));
       await expect(page.getByPlaceholder(/meja billiard 01/i)).toHaveValue(nama, { timeout: 10_000 });
       await page.getByRole("combobox").filter({ hasText: tipeA.namaTipeAset }).click();
@@ -647,7 +647,7 @@ test.describe("E2E — Aset › Edit: guard, navigasi, validasi, dan gagal", () 
     let aset: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await page.goto(urlEdit(aset.id));
       await expect(page.getByPlaceholder(/meja billiard 01/i)).toHaveValue(nama, { timeout: 10_000 });
       await page
@@ -671,7 +671,7 @@ test.describe("E2E — Aset › Edit: guard, navigasi, validasi, dan gagal", () 
     let aset: AsetMentah | undefined;
     try {
       tipe = await buatTipeAset(page, auth, namaTipeUji());
-      aset = await buatAset(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
+      aset = await buatAsetLewatForm(page, auth, { namaAset: nama, tipeAsetID: tipe.id });
       await page.goto(urlEdit(aset.id));
       const input = page.getByPlaceholder(/meja billiard 01/i);
       await expect(input).toHaveValue(nama, { timeout: 10_000 });

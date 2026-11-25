@@ -198,6 +198,16 @@ Owner (OA7). Temuannya diputuskan pemilik proyek:
   belum memiliki Outlet. Lengkapi langkah Lokasi outlet di Setup lebih
   dulu." dengan tautan "Lengkapi setup" ke `/setup`, menggantikan arahan
   lewat aplikasi Tachyon POS (setup ada di web sejak SA1a).
+- **SR5a: resep Ubah Produk juga mengikuti `read-bahan`.** Ditemukan saat
+  trace memakai id nyata untuk rute ber-`[id]`. Tanpa izin itu bagian resep
+  tidak tampil dan bahan tidak diminta; resep yang sudah ada tetap di nilai
+  form, sehingga menyimpan mengirimnya apa adanya (dibuktikan
+  `inventaris/produk/crud-produk`, SR5a).
+
+Rute ber-`[id]` ditelusuri dengan id nyata yang dibaca sebagai Owner dari
+endpoint daftarnya; tiga rute ubah (pengajuan DRAFT, surat jalan PENDING di
+outlet dan gudang) memakai id uji yang tidak ada selama data uji tidak
+punya dokumen berstatus itu.
 
 ## Catatan
 
