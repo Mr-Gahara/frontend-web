@@ -98,6 +98,7 @@ Setiap dokumen berisi kelompok Keputusan (keputusan produk), Catatan
 | `modul/setup-akun.md` | Plan, pendaftaran, verifikasi email, lupa password, wizard setup, dan halaman langganan |
 | `modul/panel-admin.md` | Panel admin: akun klien dan langganan |
 | `modul/akses.md` | Gerbang rute, `useAuthGuard`, dan form role |
+| `modul/pemberitahuan.md` | Lonceng topbar dan seluruh sumber pemberitahuan toko |
 | `modul/ui-ux.md` | Dashboard outlet, token warna, tabel seragam, dan komponen tanggal dan waktu |
 
 Semua dokumen modul berlabel **Jarang**: bertambah saat modulnya dikerjakan.

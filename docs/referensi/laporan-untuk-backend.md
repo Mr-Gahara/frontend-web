@@ -136,7 +136,50 @@ Bukan bug, tetapi data yang dibutuhkan rilis MVP. Rinciannya di
   (`sesiKasirID`); sekarang hanya pembayaran tunai.
 - Endpoint laporan tutup kasir per sesi, dihitung backend.
 
-### Prioritas
+## Laporan 25 November 2026 (pemberitahuan lonceng)
+
+Diperiksa terhadap backend `ridho` lokal `1718030`. Bukan bug, tetapi
+data yang dibutuhkan lonceng pemberitahuan web (`modul/pemberitahuan.md`,
+LN8a). Backend tidak punya sistem notifikasi, sehingga web membentuk
+pemberitahuan dari endpoint yang ada.
+
+### Kebutuhan: hitungan produk yang dapat dijual di ringkasan dashboard
+
+Modul produk dan dashboard (Yoga).
+
+- **Bukti:** `services/dashboardGudangService.js` `getOutletSummary`
+  hanya menghitung `produk.stokKritis` untuk produk berstok langsung
+  (`"resep.0": { $exists: false }`). Stok terhitung produk beresep hanya
+  diisi `#isiStokTerkini` di `services/produkService.js` `getAll`.
+- **Kenapa penting:** pemicu LN1a ("tidak ada satu pun produk yang dapat
+  dijual", termasuk produk beresep berstok terhitung 0) hanya dapat
+  dihitung web dari `GET /produk` tanpa paginasi, yang dimuat lonceng di
+  setiap halaman dashboard dan berkala tiap 5 menit.
+- **Saran:** tambahkan di `GET /dashboard/outlet` jumlah produk
+  (`produk.total`) dan jumlah produk yang dapat dijual (`produk.dapatDijual`:
+  unlimited, atau stok, termasuk stok terhitung resep, di atas 0).
+- **Penanganan sementara di frontend:** lonceng memuat seluruh produk
+  dengan kunci cache sendiri dan menghitungnya; pindah ke ringkasan
+  begitu field itu ada.
+
+### Kebutuhan: daftar perangkat menunggu persetujuan se-toko
+
+Modul auth dan perangkat (Ridho).
+
+- **Bukti:** `routes/deviceRoute.js` hanya punya `GET /device/:userId`
+  (per pengguna, `read-pengguna`) dan SSE `GET /device/events` untuk
+  sesi aplikasi; tidak ada daftar atau hitungan perangkat berstatus
+  PENDING untuk seluruh toko.
+- **Kenapa penting:** pemberitahuan "perangkat menunggu izin" (LN4a)
+  tidak dapat dibentuk tanpa memanggil endpoint per pengguna satu per
+  satu.
+- **Saran:** `GET /device?status=PENDING` (atau hitungannya) per toko,
+  dengan izin yang sama dengan persetujuan (`update-pengguna`), memuat
+  pengguna pemilik perangkat.
+- **Penanganan sementara di frontend:** tidak ada; sumber ini belum
+  tampil sampai endpointnya tersedia.
+
+## Prioritas seluruh laporan terbuka
 
 | Prioritas | Butir | Pemilik | Dampak |
 |---|---|---|---|
@@ -146,3 +189,5 @@ Bukan bug, tetapi data yang dibutuhkan rilis MVP. Rinciannya di
 | 4 | 191 | Ridho | Role General Manajer tidak dapat dibuat |
 | 5 | 190 | Ridho | Ganti pengguna hanya bertahan di tab yang sama |
 | 6 | 194 | Ridho | Rekap berisi baris serba nol, tidak pernah kosong |
+| 7 | Produk dapat dijual di ringkasan | Yoga | Lonceng memuat seluruh produk setiap 5 menit |
+| 8 | Perangkat menunggu izin se-toko | Ridho | Pemberitahuan perangkat belum dapat tampil |

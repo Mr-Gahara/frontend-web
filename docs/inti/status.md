@@ -50,9 +50,8 @@ daftar di bawah adalah satu-satunya daftar pekerjaan terbuka.
 
 **Daftar pekerjaan terbuka:**
 
-1. **Berikutnya, atas urutan pemilik proyek:** fitur pemberitahuan stok
-   dan lonceng (bagian di bawah). Diawali dialog daftar sumber
-   pemberitahuan lain untuk lonceng.
+1. **Sedang dikerjakan, atas urutan pemilik proyek:** pemberitahuan
+   dan lonceng (bagian di bawah, keputusan di `modul/pemberitahuan.md`).
 2. **Utang pengujian yang dapat dikerjakan sekarang, tanpa backend:**
    `referensi/utang-pengujian.md`, bagian Dapat dikerjakan sekarang
    (sepuluh butir: bentrok booking Selesai, `hapusLewatApi`, spec lama
@@ -68,7 +67,6 @@ daftar di bawah adalah satu-satunya daftar pekerjaan terbuka.
      kosong.
    - Tujuh keputusan terbuka struk dapur (pasca-MVP;
      `referensi/rencana-struk-dapur.md`).
-   - Sumber pemberitahuan lonceng selain stok (bagian di bawah).
    - Enam tipe aset uji bukti butir 77 dihapus atau tetap
      (`modul/pengaturan-outlet.md`); butir 77 tidak tereproduksi dalam
      570 kali uji ulang 18 November 2026.
@@ -102,30 +100,14 @@ Riwayat keadaan sebelum 24 November 2026 ada di
 `arsip/catatan-putaran.md` (Status yang selesai, dipindah 20 dan
 24 November 2026).
 
-### Berikutnya: pemberitahuan stok dan lonceng (dicatat 24 November 2026)
+### Sedang dikerjakan: pemberitahuan dan lonceng (25 November 2026)
 
-Diminta pemilik proyek 24 November 2026 saat utang pengujian kelompok
-inventaris dan gudang, dan diputuskan lewat dialog; belum dikerjakan:
-
-1. **Pemicu**: peringatan bila toko tidak punya produk sama sekali, atau
-   tidak ada satu pun produk yang dapat dijual (setiap produk berstok
-   yang bukan unlimited stoknya 0, termasuk produk beresep yang stok
-   terhitungnya 0). Ditambah pemberitahuan tingkat sedang untuk produk
-   yang stoknya mencapai batas minimum.
-2. **Isi**: menurut jenis produk (tanpa produk: Buat Produk; berstok
-   langsung: isi stok lewat Ubah Produk; beresep: Pembelian Stok, dan
-   Pengajuan ke Gudang bila plan punya gudang), dengan tautan hanya bagi
-   pemegang izinnya. Harus pintar dan dinamis, karena web tidak dapat
-   menentukan cara pengguna mengisi ulang stok.
-3. **Bentuk**: pemberitahuan di lonceng topbar, dan panel lonceng terbuka
-   sendiri setiap halaman dashboard toko dibuka atau dimuat ulang selama
-   kondisinya berlaku; ditambah banner di dashboard outlet dan pesan di
-   Buat Penjualan, pajak per produk, dan diskon per produk. Toko yang
-   setupnya selesai tidak dikembalikan ke wizard (backend menyimpan
-   tanggal setup inti selesai).
-4. **Lingkup lonceng**: diberdayakan dengan baik dan benar untuk
-   pemberitahuan lain juga, bukan hanya produk; daftar sumbernya belum
-   diputuskan.
+Keputusan LN1a sampai LN12a di `modul/pemberitahuan.md`. Dikerjakan
+per kelompok sumber, satu commit per kelompok: mesin lonceng beserta
+stok produk dan langganan (LN1a sampai LN3a), inventaris dan gudang,
+operasional, staf, lalu penjualan dan pelanggan (LN9a dan LN10a).
+Perangkat menunggu izin dan hitungan produk yang dapat dijual menunggu
+backend (LN8a).
 
 ### MVP: struk laporan tutup kasir (dicatat 24 November 2026)
 
