@@ -283,9 +283,6 @@ nonaktifkan (keputusan PO2a).
 
 ### Utang kecil dari modul Pengaturan outlet
 
-- Enam tipe aset uji tertinggal sebagai bukti butir 77
-  (`kontrak/temuan.md`), dan dihapus lewat API setelah laporan backend
-  diterima.
 - Pajak per aset (`assetID` di `POST /produkpajak`) belum dipakai web;
   ditinjau bersama modul reservasi bila dibutuhkan.
 - `pajakList` di tipe `Produk` tetap ada tetapi tidak dipakai tampilan,

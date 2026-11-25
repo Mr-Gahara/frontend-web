@@ -65,9 +65,6 @@ satu-satunya daftar pekerjaan terbuka.
      termasuk periode toko tanpa shift, diambil 25 November 2026.
    - Tujuh keputusan terbuka struk dapur (pasca-MVP;
      `referensi/rencana-struk-dapur.md`).
-   - Enam tipe aset uji bukti butir 77 dihapus atau tetap
-     (`modul/pengaturan-outlet.md`); butir 77 tidak tereproduksi dalam
-     570 kali uji ulang 18 November 2026.
    - Dua tabel kalender jadwal yang masih `<table>` manual
      (`modul/ui-ux.md`).
    - Pustaka pembaca xlsx untuk menguji isi Excel ekspor
@@ -150,8 +147,10 @@ backend menerima catatan per item.
   `~/.cache/frontend-web/alat/` (bawaan tinjau, `--hapus` untuk
   menerapkan), dengan cadangan di `~/Documents/cadangan-db/`. Data bukti
   temuan tidak disentuh: transfer Rp1,5 butir 126 beserta akun E2E-nya,
-  tipe aset butir 77, bahan uji butir 143, surat jalan rusak, dan data
-  butir 142.
+  bahan uji butir 143, surat jalan rusak, dan data butir 142. Keenam tipe
+  aset uji bukti butir 77 dihapus lewat API 25 November 2026 saat butir
+  itu ditutup (cadangan
+  `db_produk-sebelum-hapus-tipeaset77-2026-11-25.gz`).
 
 ## Utang kecil yang tertunda
 
