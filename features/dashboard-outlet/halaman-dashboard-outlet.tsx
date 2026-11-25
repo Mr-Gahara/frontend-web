@@ -9,6 +9,7 @@ import { PanelGrafik } from "./panel-grafik";
 import { PanelStaf } from "./panel-staf";
 import { PanelVenue, PanelVenueBooking } from "./panel-venue";
 import { BannerSetupFitur } from "./banner-setup";
+import { PesanStokProduk } from "@/features/notifikasi/pesan-stok-produk";
 import { useSession } from "@/lib/auth/useSession";
 import { planMencakup } from "@/lib/auth/fitur-plan";
 
@@ -31,6 +32,7 @@ export function HalamanDashboardOutlet() {
   return (
     <div className="p-3 sm:p-6 flex flex-col gap-3 sm:gap-6 w-full">
       <BannerSetupFitur />
+      <PesanStokProduk />
       {(panel.laporan || panel.transaksi) && (
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-4">
           {panel.laporan && (

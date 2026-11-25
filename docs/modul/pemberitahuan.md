@@ -98,6 +98,22 @@ pemegang izin endpoint serta plan fiturnya.
   maksimal 70% tinggi layar. Kartu langganan tetap dengan bilah masa
   berlaku.
 
+### Rincian penerapan stok (25 November 2026)
+
+Diputuskan pemilik proyek lewat dialog saat menerapkan LN1a sampai
+LN3a:
+
+- **LN13a: panel terbuka sendiri hanya di beranda dashboard outlet**
+  (`/dashboard/outlet`), setiap dibuka atau dimuat ulang selama pemicu
+  LN1a berlaku; di halaman lain lencana rose tetap terlihat. Ditunda bila
+  tur panduan dashboard belum pernah tampil, agar tidak bertumpuk.
+- **LN14a: satu produk berstok langsung ke Ubah Produk, lebih dari satu
+  ke daftar Produk** ("Lihat produk"). Kartu menyebut jumlah dan sampai
+  tiga nama produk.
+- **LN15a: pesan halaman sama dengan kartu lonceng**: kotak rose berisi
+  judul, kalimat, dan tautan aksi yang sama (tautan hanya bagi pemegang
+  izin); halaman tetap dapat dipakai.
+
 ## Catatan
 
 - Lonceng ada di setiap halaman dashboard, sehingga setiap sumber hanya
@@ -109,7 +125,19 @@ pemegang izin endpoint serta plan fiturnya.
   `storageState`, seperti tur sorotan (keputusan rancangan butir 32);
   hanya spec lonceng yang menyalakannya.
 
+- Tahap 1 (25 November 2026): mesin lonceng, langganan, LN1a sampai
+  LN3a, dan LN13a sampai LN15a. Produk minimum dibaca dari
+  `GET /dashboard/outlet` (`produk.stokKritis`), sehingga lonceng sudah
+  memakai ringkasan itu sejak tahap 1. Membuka panel menyegarkan setiap
+  sumber yang sudah pernah dimuat.
+- Pesan stok di diskon per produk tampil di bagian Produk Tertentu
+  (cakupan Item), dan di pajak per produk di atas pemilih produk.
+
 ## Utang terbuka
 
 - Pengerjaan bertahap per kelompok sumber; daftar yang belum selesai ada
   di `inti/status.md` (Mulai di sini).
+- Akun uji utama tidak punya pemberitahuan per 25 November 2026, sehingga
+  skenario data nyata `dashboard/lonceng-pemberitahuan` hanya membuktikan
+  keadaan kosong; keadaan berisi dibuktikan akun klien sekali pakai tanpa
+  produk dan unit test per sumber.

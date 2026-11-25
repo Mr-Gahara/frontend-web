@@ -45,6 +45,14 @@ function baca(simpan: Penyimpanan | null, kunci: string): string | null {
   }
 }
 
+/**
+ * Layar yang tampil sendiri (tur, panel lonceng LN3a) dimatikan lewat
+ * saklar ini; hanya e2e yang mengisinya (playwright.config.ts).
+ */
+export function otomatisDimatikan(simpan: Penyimpanan | null): boolean {
+  return baca(simpan, SAKLAR_OTOMATIS) === NILAI_SAKLAR_MATI;
+}
+
 /** Tur dengan kunci ini sudah pernah selesai atau dilewati di perangkat ini. */
 export function sudahDilihat(simpan: Penyimpanan | null, kunci: string): boolean {
   return baca(simpan, AWALAN_KUNCI + kunci) === NILAI_DILIHAT;

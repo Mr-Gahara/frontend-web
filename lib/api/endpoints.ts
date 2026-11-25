@@ -199,6 +199,8 @@ export const EP = {
   },
   /** Ringkasan dashboard gudang (dashboardRoute.js, read-dashboard-gudang). */
   dashboardGudang: "/dashboard/gudang",
+  /** Ringkasan dashboard outlet (dashboardRoute.js, read-dashboard-outlet); dibaca lonceng (LN7a). */
+  dashboardOutlet: "/dashboard/outlet",
 
   shift: {
     list: "/shift",

@@ -1,5 +1,6 @@
 "use client";
 
+import { PesanStokProduk } from "@/features/notifikasi/pesan-stok-produk";
 import { useState, useCallback, useMemo, useRef } from "react";
 import { useSession } from "@/lib/auth/useSession";
 import { useRouter } from "next/navigation";
@@ -251,6 +252,8 @@ export default function HalamanBuatPenjualan() {
           </p>
         </div>
       </div>
+
+      <PesanStokProduk />
 
       <form
         onSubmit={handleSubmit}

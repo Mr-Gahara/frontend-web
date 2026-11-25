@@ -1,5 +1,6 @@
 "use client";
 
+import { PesanStokProduk } from "@/features/notifikasi/pesan-stok-produk";
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
@@ -161,6 +162,7 @@ export function TabPajakProduk({ daftarPajak }: { daftarPajak: readonly Pajak[] 
 
   return (
     <div className="rounded-2xl border border-navy/10 bg-krem p-6 shadow-sm space-y-6">
+      <PesanStokProduk />
       <div className="space-y-2">
         <label htmlFor="pajak-produk" className={kelasLabel}>
           Pilih Produk

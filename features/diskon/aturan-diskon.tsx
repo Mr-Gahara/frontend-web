@@ -1,5 +1,6 @@
 "use client";
 
+import { PesanStokProduk } from "@/features/notifikasi/pesan-stok-produk";
 import { useState } from "react";
 import {
   Controller,
@@ -338,6 +339,7 @@ export function IsianAturanDiskon({ register, control, errors, diskon }: Props) 
         {cakupan === "Item" && (
           <div className="space-y-2">
             <span className={KELAS_LABEL}>Produk Tertentu</span>
+            <PesanStokProduk />
             <Controller
               control={control}
               name="produkIDs"

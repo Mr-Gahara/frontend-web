@@ -251,4 +251,15 @@ export const queryKeys = {
     semua: kunci(["permissions"] as const),
     daftar: () => ["permissions", "daftar"] as const,
   },
+  /**
+   * Sumber lonceng pemberitahuan (modul/pemberitahuan.md, LN7a). Kunci
+   * sendiri, agar lonceng di topbar tidak mengisi cache halaman daftar;
+   * produk berada di bawah akar produk, sehingga invalidasi setelah simpan
+   * produk ikut memperbarui pemicu LN1a.
+   */
+  notifikasi: {
+    semua: kunci(["notifikasi"] as const),
+    ringkasanOutlet: () => ["notifikasi", "ringkasanOutlet"] as const,
+    produk: () => ["produk", "lonceng"] as const,
+  },
 } as const;
