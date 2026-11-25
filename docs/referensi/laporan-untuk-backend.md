@@ -139,6 +139,10 @@ Bukan bug, tetapi data yang dibutuhkan rilis MVP. Rinciannya di
 - Endpoint laporan tutup kasir per shift atau per hari toko, menggabungkan
   seluruh mesin kasir dan seluruh kasir di periode itu, dihitung backend
   dan dipotret saat tutup (keputusan 2, 3, dan 5, 25 November 2026).
+- "Total penerimaan kasir" dari transaksi POS realtime, dan "Total
+  penerimaan" yang menambahkan pembayaran invoice (penjualan dan sesi
+  booking) dalam periode dan outlet struk, termasuk yang dicatat tanpa
+  sesi kasir (keputusan 10).
 
 ## Laporan 25 November 2026 (pemberitahuan lonceng)
 

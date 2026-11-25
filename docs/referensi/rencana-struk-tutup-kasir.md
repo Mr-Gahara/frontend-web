@@ -34,8 +34,10 @@ section 6 dan section 7 yang dipisah **dua** baris garis putus-putus.
    kasir yang bertugas di sesi itu, waktu kasir buka, waktu kasir tutup,
    jumlah modal awal, nominal masuk untuk setiap metode pembayaran yang
    dipakai di sesi itu, dan total penerimaan kasir (jumlah penerimaan
-   seluruh metode pembayaran di sesi itu).
-3. Tanpa judul: nominal total penerimaan.
+   seluruh metode pembayaran di sesi itu; diperjelas keputusan 10,
+   25 November 2026: transaksi POS realtime).
+3. Tanpa judul: nominal total penerimaan (keputusan 10: total penerimaan
+   kasir ditambah penerimaan invoice).
 4. Tanpa judul: nominal saldo akhir.
 5. Tanpa judul: jumlah transaksi selesai dan jumlah transaksi belum
    terbayar.
@@ -62,7 +64,7 @@ Tutup           24/11/2026 16.05
 Modal awal              200.000
 Tunai                 1.250.000
 QRIS                    430.000
-Total penerimaan      1.680.000
+Total penerimaan kasir 1.680.000
 --------------------------------
 Total penerimaan      1.680.000
 --------------------------------
@@ -208,8 +210,8 @@ Tidak ada pekerjaan web sebelum backend menyediakan endpoint laporan.
 
 ## Keputusan 25 November 2026
 
-Diputuskan pemilik proyek (25 November 2026), menjawab delapan dari
-sembilan keputusan terbuka 24 November 2026:
+Diputuskan pemilik proyek (25 November 2026), menjawab kesembilan
+keputusan terbuka 24 November 2026:
 
 1. **Saldo akhir** (section 4): omzet yang diperoleh kasir dari penjualan
    **lunas** dalam periode struk; penjualan belum terbayar dan VOID tidak
@@ -240,13 +242,22 @@ sembilan keputusan terbuka 24 November 2026:
    dicatat sebagai **pindah dana dari laci ke akun kas lain** yang
    dipilih, bukan mutasi selisih kas keluar seperti backend `1718030`.
 
+10. **Section 2 dan 3** (koreksi pemilik proyek, 25 November 2026):
+    - Baris terakhir section 2 bertulisan **"Total penerimaan kasir"**:
+      uang masuk dari transaksi POS realtime (tipe transaksi POS),
+      penjualan maupun booking bila fitur Sesi Booking dipakai.
+    - Section 3 bertulisan **"Total penerimaan"**: total penerimaan kasir
+      ditambah penerimaan dari invoice (tipe transaksi Invoice), baik
+      invoice penjualan maupun invoice sesi booking bila fitur itu
+      dipakai. Sama dengan section 2 bila tidak ada pembayaran invoice
+      dalam periode struk.
+    - Akibatnya, laporan juga menghitung pembayaran invoice yang tidak
+      lewat mesin kasir (misalnya dicatat dari web, tanpa sesi kasir)
+      dalam periode dan outlet struk; cara mengaitkannya dirancang
+      bersama backend.
+
 ### Masih terbuka
 
-- **Section 3**: menurut keputusan 24 November 2026 berupa satu baris
-  "Total penerimaan" yang tulisan dan angkanya sama dengan baris terakhir
-  section 2. Pemilik proyek menyatakan section 3 seharusnya angka lain
-  yang umumnya sama tetapi tidak selalu; nama baris dan isinya belum
-  ditetapkan.
 - **Batas periode toko tanpa shift** (dari keputusan 2): ditentukan dari
   sesi kasir pertama dibuka sampai sesi terakhir ditutup pada hari itu,
   atau dari jam operasional toko. Dirancang bersama backend.
