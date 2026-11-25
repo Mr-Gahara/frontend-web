@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { AlertTriangle, Clock, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Pemberitahuan, TingkatPemberitahuan } from "./jenis";
+import { NAMA_TINGKAT, type Pemberitahuan, type TingkatPemberitahuan } from "./jenis";
 
 /** Warna per tingkat LN11a: penting rose, perlu tindakan karamel, info navy. */
 export const GAYA_TINGKAT: Record<TingkatPemberitahuan, { kartu: string; ikon: string; bilah: string }> = {
@@ -14,11 +14,6 @@ export const GAYA_TINGKAT: Record<TingkatPemberitahuan, { kartu: string; ikon: s
 
 const IKON: Record<TingkatPemberitahuan, typeof Info> = { penting: AlertTriangle, tindakan: Clock, info: Info };
 
-const NAMA_TINGKAT: Record<TingkatPemberitahuan, string> = {
-  penting: "Penting",
-  tindakan: "Perlu tindakan",
-  info: "Info",
-};
 
 /**
  * Satu pemberitahuan: ikon tingkat, judul, kalimat, bilah (langganan), dan

@@ -45,6 +45,31 @@ export function teksLencana(jumlah: number): string {
   return jumlah > 9 ? "9+" : String(jumlah);
 }
 
+/** Kartu paling banyak di panel lonceng, kecuali kartu penting (LN19a). */
+export const BATAS_PANEL = 5;
+
+/**
+ * Isi panel lonceng (LN19a): seluruh kartu penting selalu tampil, lalu
+ * kartu berikutnya menurut urutan tingkat sampai total BATAS_PANEL; sisanya
+ * dibentangkan di panel yang sama lewat Lihat semua.
+ */
+export function ringkasPanel(
+  daftar: readonly Pemberitahuan[],
+  batas = BATAS_PANEL,
+): { tampil: Pemberitahuan[]; tersembunyi: number } {
+  const urut = urutkanPemberitahuan(daftar);
+  const penting = urut.filter((p) => p.tingkat === "penting").length;
+  const tampil = urut.slice(0, Math.max(penting, batas));
+  return { tampil, tersembunyi: urut.length - tampil.length };
+}
+
+/** Nama tingkat untuk pembaca layar di kartu. */
+export const NAMA_TINGKAT: Record<TingkatPemberitahuan, string> = {
+  penting: "Penting",
+  tindakan: "Perlu tindakan",
+  info: "Info",
+};
+
 /** Nama aksesibel tombol lonceng. */
 export function namaLonceng(jumlah: number): string {
   return jumlah > 0 ? `Pemberitahuan, ${jumlah} baru` : "Pemberitahuan";

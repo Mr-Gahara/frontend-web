@@ -227,6 +227,11 @@ skip bersyarat data, dan catatan proses.
   membuktikan jumlah lencana sama dengan kartu dan urutan per tingkat
   terhadap data nyata, serta pemicu stok LN1a lewat akun klien sekali
   pakai.
+- **Lihat semua di panel lonceng (LN19a) hanya teruji di test integrasi**
+  (`tests/integration/components/notifikasi`), karena akun uji per
+  25 November 2026 punya tepat lima pemberitahuan; spec
+  `dashboard/lonceng-pemberitahuan` membentangkan panel bila tombolnya
+  ada.
 
 ## Data uji yang menetap dan data per run
 

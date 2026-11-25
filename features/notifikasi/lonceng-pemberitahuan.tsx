@@ -8,7 +8,7 @@ import { otomatisDimatikan, penyimpananLokal, sudahDilihat } from "@/lib/panduan
 import { useSession } from "@/lib/auth/useSession";
 import { cn } from "@/lib/utils";
 import { usePemberitahuan } from "./hooks";
-import { namaLonceng, teksLencana, tingkatTertinggi, type TingkatPemberitahuan } from "./jenis";
+import { namaLonceng, ringkasPanel, teksLencana, tingkatTertinggi, type TingkatPemberitahuan } from "./jenis";
 import { KartuPemberitahuan } from "./kartu-pemberitahuan";
 
 /** Beranda ruang outlet: satu-satunya halaman yang membuka panel sendiri (LN13a). */
@@ -35,7 +35,8 @@ export function bolehBukaSendiri(m: { pathname: string; adaPemicuStok: boolean; 
 /**
  * Lonceng topbar sebagai pusat pemberitahuan toko (modul/pemberitahuan.md).
  * Lencana angka (9+) berwarna tingkat tertinggi; panel berisi kartu per
- * tingkat yang bergulir maksimal 70% tinggi layar (LN12a). Membuka panel
+ * tingkat yang bergulir maksimal 70% tinggi layar (LN12a): seluruh kartu
+ * penting lalu sampai lima kartu; Lihat semua membentangkan sisanya (LN19a). Membuka panel
  * menyegarkan seluruh sumber (LN6a). Di HP panel selebar layar dikurangi tepi.
  */
 export function LoncengPemberitahuan() {
@@ -44,6 +45,10 @@ export function LoncengPemberitahuan() {
   const { daftar, segarkan } = usePemberitahuan();
   const [buka, setBuka] = useState(false);
   const jumlah = daftar.length;
+  const panel = { ...ringkasPanel(daftar), semua: daftar };
+  // Lihat semua membentangkan sisa kartu di panel yang sama (LN19a); panel
+  // yang ditutup kembali ringkas.
+  const [semua, setSemua] = useState(false);
   const tingkat = tingkatTertinggi(daftar);
   const adaPemicuStok = daftar.some((p) => p.id === "stok-produk");
 
@@ -66,6 +71,7 @@ export function LoncengPemberitahuan() {
 
   const ubahBuka = (b: boolean) => {
     setBuka(b);
+    if (!b) setSemua(false);
     if (b) segarkan();
   };
 
@@ -104,11 +110,22 @@ export function LoncengPemberitahuan() {
           {jumlah > 0 && <span className="text-kecil font-semibold text-navy/70">{jumlah}</span>}
         </div>
         {jumlah > 0 ? (
-          <div className="-mr-2 flex max-h-[70vh] flex-col gap-2.5 overflow-y-auto pr-2">
-            {daftar.map((p) => (
-              <KartuPemberitahuan key={p.id} pemberitahuan={p} onBukaTautan={() => setBuka(false)} />
-            ))}
-          </div>
+          <>
+            <div className="-mr-2 flex max-h-[70vh] flex-col gap-2.5 overflow-y-auto pr-2">
+              {(semua ? panel.semua : panel.tampil).map((p) => (
+                <KartuPemberitahuan key={p.id} pemberitahuan={p} onBukaTautan={() => ubahBuka(false)} />
+              ))}
+            </div>
+            {!semua && panel.tersembunyi > 0 && (
+              <button
+                type="button"
+                onClick={() => setSemua(true)}
+                className="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg border border-navy/15 bg-transparent text-isi font-semibold text-navy hover:bg-navy/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karamel"
+              >
+                Lihat semua ({panel.tersembunyi} lainnya)
+              </button>
+            )}
+          </>
         ) : (
           <p className="text-kecil text-navy/70">Belum ada pemberitahuan.</p>
         )}

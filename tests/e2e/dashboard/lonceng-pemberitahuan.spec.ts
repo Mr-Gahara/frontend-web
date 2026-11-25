@@ -57,7 +57,21 @@ for (const { nama, lebar } of [
     await page.waitForLoadState("networkidle");
     await lonceng(page).click();
     await expect(panel(page)).toBeVisible();
-    const jumlah = await panel(page).locator("article[data-pemberitahuan]").count();
+    // Panel ringkas: seluruh kartu penting lalu sampai lima kartu; Lihat
+    // semua membentangkan sisanya di panel yang sama (LN19a).
+    const kartuPanel = panel(page).locator("article[data-pemberitahuan]");
+    const lihatSemua = panel(page).getByRole("button", { name: /^Lihat semua/ });
+    if ((await lihatSemua.count()) > 0) {
+      const ringkas = await kartuPanel.count();
+      expect(ringkas, "panel ringkas memuat paling sedikit lima kartu").toBeGreaterThanOrEqual(5);
+      const sisa = Number((await lihatSemua.textContent())?.match(/\((\d+) lainnya\)/)?.[1]);
+      await lihatSemua.click();
+      await expect(kartuPanel).toHaveCount(ringkas + sisa);
+      await expect(lihatSemua).toHaveCount(0);
+    } else {
+      expect(await kartuPanel.count(), "tanpa Lihat semua bila lima kartu atau kurang").toBeLessThanOrEqual(5);
+    }
+    const jumlah = await kartuPanel.count();
     await expect(lonceng(page)).toHaveAccessibleName(jumlah ? `Pemberitahuan, ${jumlah} baru` : "Pemberitahuan");
     const lencana = page.getByTestId("lencana-pemberitahuan");
     await expect(lencana).toHaveCount(jumlah ? 1 : 0);

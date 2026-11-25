@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { namaLonceng, teksLencana, tingkatTertinggi, urutkanPemberitahuan, type Pemberitahuan } from "@/features/notifikasi/jenis";
+import { namaLonceng, ringkasPanel, teksLencana, tingkatTertinggi, urutkanPemberitahuan, type Pemberitahuan } from "@/features/notifikasi/jenis";
 import { bolehBukaSendiri } from "@/features/notifikasi/lonceng-pemberitahuan";
 import { pemberitahuanLangganan, URL_LANGGANAN } from "@/features/notifikasi/sumber-langganan";
 import { AWALAN_KUNCI, SAKLAR_OTOMATIS } from "@/lib/panduan";
@@ -20,6 +20,24 @@ describe("urutan dan lencana (LN11a, LN12a)", () => {
     expect(teksLencana(12)).toBe("9+");
     expect(namaLonceng(0)).toBe("Pemberitahuan");
     expect(namaLonceng(4)).toBe("Pemberitahuan, 4 baru");
+  });
+});
+
+describe("ringkasPanel (LN19a)", () => {
+  const banyak = (n: number, t: Pemberitahuan["tingkat"], awalan: string) =>
+    Array.from({ length: n }, (_, i) => p(`${awalan}${i}`, t));
+
+  it("lima teratas menurut tingkat; sisanya dihitung untuk Lihat semua", () => {
+    const hasil = ringkasPanel([...banyak(6, "info", "i"), ...banyak(3, "tindakan", "t"), p("p0", "penting")]);
+    expect(hasil.tampil.map((x) => x.id)).toEqual(["p0", "t0", "t1", "t2", "i0"]);
+    expect(hasil.tersembunyi).toBe(5);
+  });
+
+  it("seluruh kartu penting selalu tampil walau lebih dari lima; lima atau kurang tanpa sisa", () => {
+    const hasil = ringkasPanel([...banyak(7, "penting", "p"), ...banyak(2, "info", "i")]);
+    expect(hasil.tampil).toHaveLength(7);
+    expect(hasil.tersembunyi).toBe(2);
+    expect(ringkasPanel(banyak(5, "info", "i")).tersembunyi).toBe(0);
   });
 });
 

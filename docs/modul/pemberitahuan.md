@@ -142,6 +142,19 @@ dan gudang LN4a:
   kedua jumlah dan punya dua tautan, "Belum bayar" dan "Sebagian"
   (pemilik proyek, 25 November 2026).
 
+### Panel ringkas (25 November 2026)
+
+- **LN19a: panel menampilkan yang terpenting dulu, sisanya dibentangkan di
+  panel.** Seluruh kartu penting selalu tampil, lalu kartu berikutnya
+  menurut urutan tingkat sampai total lima (`ringkasPanel`, `BATAS_PANEL`).
+  Bila ada sisa, tombol "Lihat semua (N lainnya)" membentangkan sisa kartu
+  di panel yang sama, yang tetap bergulir paling tinggi 70% layar (LN12a).
+  Pemilik proyek sempat memilih halaman Pemberitahuan tersendiri, melihat
+  kanvas tiga arahnya, lalu membatalkannya dan memilih bentangan di panel
+  (pemilik proyek, 25 November 2026). Panel yang ditutup, termasuk lewat
+  tautan kartu, kembali ringkas saat dibuka lagi; ini rincian penerapan,
+  bukan bagian teks opsi.
+
 ## Catatan
 
 - Lonceng ada di setiap halaman dashboard, sehingga setiap sumber hanya
