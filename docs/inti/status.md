@@ -36,17 +36,15 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (keadaan akhir 24 November 2026)
+### Mulai di sini (keadaan akhir 25 November 2026)
 
-**Keadaan:** web `main` bersih dan ter-push; backend `ridho` lokal
-`1718030` (tidak maju sejak 22 November 2026). Vitest 1246 lolos dari 147
-berkas. Suite e2e penuh 24 November 2026 malam: 807 lolos, 4 gagal, dan
-2 dilewati dari 813; tiga yang gagal adalah merah yang disengaja (butir
-191, 192, dan 193), dan yang keempat sudah diperbaiki (`inti/pengujian.md`,
-Baseline). Seluruh utang pengujian yang dapat dibuktikan dengan data dan
-lingkungan sekarang sudah dikerjakan per kelompok pada 24 November 2026,
-lalu dokumentasi dibersihkan: butir yang selesai dipindah ke arsip, dan
-daftar di bawah adalah satu-satunya daftar pekerjaan terbuka.
+**Keadaan:** web `main` bersih dan ter-push (`07bf2a9`); backend `ridho`
+lokal `1718030` (tidak maju sejak 22 November 2026). Vitest 1287 lolos
+dari 154 berkas. Suite e2e penuh terakhir 24 November 2026 malam: 807
+lolos, 4 gagal, dan 2 dilewati dari 813 (`inti/pengujian.md`, Baseline);
+sesudahnya lonceng pemberitahuan dikerjakan 25 November 2026 dan hanya
+spec terdampak per berkas yang dijalankan. Daftar di bawah adalah
+satu-satunya daftar pekerjaan terbuka.
 
 **Daftar pekerjaan terbuka:**
 
@@ -104,7 +102,7 @@ Riwayat keadaan sebelum 24 November 2026 ada di
 
 ### Pemberitahuan dan lonceng (25 November 2026)
 
-Keputusan LN1a sampai LN18a di `modul/pemberitahuan.md`. Seluruh sumber
+Keputusan LN1a sampai LN19a di `modul/pemberitahuan.md`. Seluruh sumber
 LN4a terpasang (tahap 1 sampai 5), kecuali perangkat menunggu izin, yang
 menunggu backend (LN8a). Yang masih terbuka:
 
