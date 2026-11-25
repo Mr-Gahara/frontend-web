@@ -158,10 +158,11 @@ akurat dan faktual.
   (keputusan 2, 25 November 2026; usulan awal per sesi kasir), yang
   menggabungkan seluruh sesi kasir di outlet dalam periode itu, berisi
   seluruh isi struk dalam bentuk data siap tampil: informasi toko dan
-  outlet, kasir, waktu, modal awal, nominal per metode (nama metode dari salinan di pembayaran, seperti
-  struk pelanggan), total penerimaan, saldo akhir, jumlah transaksi
-  selesai dan belum terbayar, total sistem, tunai aktual, selisih, dan
-  daftar produk terjual beserta totalnya.
+  outlet, kasir, waktu, modal awal, nominal per metode (nama metode dari
+  salinan di pembayaran, seperti struk pelanggan), total penerimaan,
+  saldo akhir, jumlah transaksi selesai dan belum terbayar, total
+  sistem, tunai aktual, selisih, dan daftar produk terjual beserta
+  totalnya.
 - Angka dihitung backend, bukan aplikasi atau web, agar mobile dan web
   menampilkan angka yang sama.
 - Dipotret saat tutup dan disimpan, agar cetak ulang esok hari memberi
