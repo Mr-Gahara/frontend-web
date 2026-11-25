@@ -38,13 +38,47 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ### Mulai di sini (keadaan akhir 25 November 2026)
 
-**Keadaan:** web `main` bersih dan ter-push (`07bf2a9`); backend `ridho`
-lokal `1718030` (tidak maju sejak 22 November 2026). Vitest 1287 lolos
-dari 154 berkas. Suite e2e penuh terakhir 24 November 2026 malam: 807
-lolos, 4 gagal, dan 2 dilewati dari 813 (`inti/pengujian.md`, Baseline);
-sesudahnya lonceng pemberitahuan dikerjakan 25 November 2026 dan hanya
-spec terdampak per berkas yang dijalankan. Daftar di bawah adalah
-satu-satunya daftar pekerjaan terbuka.
+**Keadaan:** web `main` bersih dan ter-push; backend `ridho` lokal
+`1718030` (tidak maju sejak 22 November 2026). Vitest 1287 lolos dari 154
+berkas. Suite e2e penuh 25 November 2026 (`eb4eb4c`, 16.55 sampai 17.51
+WIB): 815 lolos, 9 gagal, 1 dilewati dari 825.
+
+**Putaran berjalan: utang pengujian sampai suite penuh hijau, 85% selesai.**
+
+Sudah selesai (85%):
+
+1. Sepuluh utang pengujian dilunasi, termasuk audit seluruh spec lama
+   (data subjek lewat UI) dan trace syarat 91 rute (`akses/syarat-rute`)
+   beserta perbaikan SR1a sampai SR5a (`modul/akses.md`).
+2. Suite e2e penuh dijalankan. Dari 9 kegagalan: 3 merah disengaja
+   (butir 191, 192, 193), 1 sekali jalan (`auth/sidebar-pengguna`, lolos
+   diulang), dan 4 diperbaiki di sisi spec lalu dibuktikan per berkas
+   (`tampilan/bayangan-baris` 2, `pengguna/absensi-widget`,
+   `auth/gerbang-rute`; commit sesudah `eb4eb4c`).
+
+Sisa (15%), berurutan:
+
+1. **Terapkan LN20a** (diputuskan pemilik proyek 25 November 2026, belum
+   ada kodenya): sumber lonceng mengikuti lokasi kerja staf. Staf
+   berlokasi kerja Gudang hanya memuat sumber gudang dan tingkat toko (stok
+   dan opname gudang, pengajuan, surat jalan, izin cuti, langganan, setup,
+   hasil pengajuan saya); sumber outlet (stok produk dan bahan outlet,
+   ringkasan outlet, penjualan, booking, sesi kasir, kehadiran dan jadwal
+   outlet, membership, diskon, opname outlet) tidak dimuat. Staf berlokasi
+   kerja Outlet tidak memuat sumber gudang. Owner, pemegang
+   `akses-lintas-outlet`, dan staf tanpa lokasi kerja tidak berubah. Ruang
+   kerja dibaca dari `useRuangLokasiKerja` (`features/pengguna/hooks-profil.ts`,
+   sama dengan gerbang ruang LK3a); penyaringnya di
+   `features/notifikasi/hooks.ts` (setiap `enabled`). Bukti masalah: trace
+   `auth/ruang-lokasi-kerja` mencatat lonceng meminta 11 permintaan outlet
+   di ruang outlet yang ditolak, dan `GET /absensi/monitoring` outlet
+   dijawab 403 empat kali.
+2. Unit test penyaring itu, catat LN20a di `modul/pemberitahuan.md`.
+3. Jalankan spec terdampak per berkas: `auth/ruang-lokasi-kerja`,
+   `dashboard/lonceng-pemberitahuan`, `akses/syarat-rute`. Suite penuh
+   tidak diulang (`inti/cara-kerja.md`, langkah 5).
+4. Perbarui Baseline `inti/pengujian.md` dengan suite 25 November 2026,
+   lalu commit dan push.
 
 **Daftar pekerjaan terbuka:**
 
