@@ -65,8 +65,6 @@ satu-satunya daftar pekerjaan terbuka.
      termasuk periode toko tanpa shift, diambil 25 November 2026.
    - Tujuh keputusan terbuka struk dapur (pasca-MVP;
      `referensi/rencana-struk-dapur.md`).
-   - Dua tabel kalender jadwal yang masih `<table>` manual
-     (`modul/ui-ux.md`).
    - Pustaka pembaca xlsx untuk menguji isi Excel ekspor
      (`referensi/utang-pengujian.md`).
    - Baris laporan untuk tim backend di tabel Dokumen yang dikirim per

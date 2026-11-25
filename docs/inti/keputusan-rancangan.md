@@ -266,7 +266,12 @@ sama (submodul pengajuan stok, di bawah).
     `DataTable` (pemilik proyek, 6 November 2026; `modul/keuangan.md`,
     MK2), dan kartu Stok Keluar detail penjualan berupa daftar bergrid
     dengan judul kelompok produk, bukan `Table` (pemilik proyek,
-    12 November 2026; `modul/penjualan.md`, VD4a). `DataTable` tampil
+    12 November 2026; `modul/penjualan.md`, VD4a). Kedua kalender jadwal
+    (`features/jadwal/grid-jadwal.tsx` dan `features/jadwal/langkah-dua.tsx`)
+    tetap `<table>` sendiri: bentuknya kalender ber-grid dengan kepala
+    dan kolom nama yang menempel pada wadah gulir luar, sedangkan `Table`
+    memasang wadah gulirnya sendiri dan gaya kartu per sel (pemilik
+    proyek, 25 November 2026). `DataTable` tampil
     sebagai kartu di HP dan di lebar mana pun bila tabelnya tidak muat di
     wadah; kelas tampilan kartu di sel memakai varian `kartu:` dan
     `tabel:`, bukan `max-sm:` dan `sm:` (pemilik proyek, 17 November 2026;

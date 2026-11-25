@@ -1022,11 +1022,6 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
 
 ### Utang kecil dari fase UI/UX 11 Oktober 2026
 
-- Dua berkas masih memakai `<table>` yang ditulis sendiri, keduanya
-  kalender jadwal: `features/jadwal/grid-jadwal.tsx` dan
-  `features/jadwal/langkah-dua.tsx` (diperiksa 24 November 2026). Seluruh
-  tabel daftar sudah memakai `DataTable`. Diseragamkan atau dibiarkan
-  karena bentuknya kalender menunggu keputusan pemilik proyek.
 - `DataTable` punya test integrasi untuk pemilih ukuran klien sejak
   `4677447`. Teks kaki lainnya, nama tombol halaman, dan label sel di HP
   masih hanya terbukti lewat spec e2e halaman pemakainya.
