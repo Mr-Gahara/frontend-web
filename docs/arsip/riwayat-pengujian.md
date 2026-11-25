@@ -2093,6 +2093,54 @@ perubahan teks: dua butir yang sudah lunas tetapi masih tercatat di
   tab. Diganti tujuan pasti (KB1a, `modul/ui-ux.md`) dan dibuktikan
   `tampilan/tombol-kembali`. Lunas.
 
+Dilunasi 25 November 2026 dan dipindah dari
+`referensi/utang-pengujian.md` tanpa perubahan teks: booking Selesai tidak
+dihitung bentrok (`reservasi/buat/buat-reservasi`, booking berbayar tiga
+jam lalu terbaca Selesai); `hapusLewatApi` membedakan route yang tidak ada
+(404 "Not Found" dari `app.js` backend) dari data yang sudah terhapus;
+kartu lokasi Profil Toko tanpa outlet (`pengaturan/profil-toko`, akun
+klien sekali pakai); diskon yang berakhir selagi Buat Penjualan terbuka
+ditolak backend saat disimpan dan pesannya tampil
+(`penjualan/alur-penjualan`); pesan titipan PIN tampil sekali dan tidak
+muncul lagi saat dimuat ulang (`profil/kelola-profil`); seluruh 26 rute
+ber-`[id]` lewat pengguna baca-saja dengan id uji (`akses/gerbang-baca-saja`);
+perpindahan halaman daftar akun admin, yang ternyata sudah teruji sejak
+`7ea8427` (`admin/akun-klien`); dan ringkasan Belanja Stok untuk sebelas
+pembelian (`keuangan/belanja-stok`).
+
+- **Bentrok yang tidak menghitung booking Selesai** (keputusan R6a) hanya
+  teruji di unit test `bookingBentrok`, karena membuat booking Selesai di
+  e2e berarti membuat booking di masa lalu.
+- **`hapusLewatApi` menerima 404 sebagai sudah terhapus**, padahal route
+  yang dihapus backend juga menjawab 404. Route hapus yang hilang tidak
+  terdeteksi helper ini; yang menangkapnya adalah audit endpoint
+  (`referensi/helper-dan-shell.md`, Helper penggantian).
+- **Kartu lokasi Profil Toko untuk tenant tanpa outlet belum teruji**,
+  karena tenant uji punya outlet; dapat dibuktikan dengan akun klien
+  sekali pakai yang wizard-nya berhenti sebelum langkah lokasi. Tanpa
+  `read-location` teruji e2e sejak 20 November 2026 lewat "E2E Tanpa
+  Lokasi", dan kartu profil tanpa `update-tenant` serta kartu lokasi tanpa
+  `update-location` sejak `cbfa23b` lewat pengguna baca-saja.
+- **`sedangBerlaku` pilihan diskon kasir dapat tertinggal sampai lima menit
+  di cache**, dan itu tidak diuji. Pilihan diskon di buat reservasi dan
+  buat penjualan teruji e2e (`diskon/pilihan-kasir`, 24 November 2026).
+- **Pesan titipan setelah PIN berubah hilang bila halaman dimuat ulang**,
+  karena hanya hidup di memori; itu tidak diuji.
+- **Sisi tertolak gerbang rute ber-`[id]` teruji e2e hanya di ubah akun
+  kas** (`keuangan/ubah-akun-kas`, pengguna baca-saja); rute ber-`[id]`
+  lain hanya di unit test (`gerbang-rute.test.ts`). Seluruh rute statis
+  `IZIN_HALAMAN` teruji e2e sejak 24 November 2026
+  (`akses/gerbang-baca-saja`).
+- **Perpindahan halaman daftar akun admin belum teruji e2e**: skenarionya
+  dilewati selama data uji berisi tidak lebih dari 10 akun; dapat
+  dibuktikan dengan akun klien sekali pakai yang dihapus lagi lewat API
+  admin (dipindah dari `modul/panel-admin.md`, 24 November 2026).
+- **Ringkasan Belanja Stok untuk periode lebih dari satu halaman hanya
+  teruji di unit test**: kartu ringkasan dibaca dari endpoint ringkasan,
+  terpisah dari daftar berhalaman. Butuh lebih dari 10 pembelian dalam
+  periode; periksa data uji lebih dulu (dipindah dari `modul/keuangan.md`,
+  24 November 2026).
+
 ## Kejadian sesekali yang tidak berulang
 
 - **Master Shift tampil sebagai kartu di 1280 px, sekali** (20 November

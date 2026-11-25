@@ -17,46 +17,13 @@ kejadian sesekali yang tidak berulang ada di `arsip/riwayat-pengujian.md`.
 Hanya menyentuh frontend dan data uji; tidak menunggu backend maupun
 keputusan baru.
 
-- **Bentrok yang tidak menghitung booking Selesai** (keputusan R6a) hanya
-  teruji di unit test `bookingBentrok`, karena membuat booking Selesai di
-  e2e berarti membuat booking di masa lalu.
-- **`hapusLewatApi` menerima 404 sebagai sudah terhapus**, padahal route
-  yang dihapus backend juga menjawab 404. Route hapus yang hilang tidak
-  terdeteksi helper ini; yang menangkapnya adalah audit endpoint
-  (`referensi/helper-dan-shell.md`, Helper penggantian).
 - **Spec yang ditulis sebelum keputusan rancangan butir 23 masih
   menyiapkan sebagian data uji lewat API**, misalnya fixture metode
   pembayaran di spec kelola dan booking uji di spec reservasi;
   disesuaikan saat spec itu disentuh.
-- **Kartu lokasi Profil Toko untuk tenant tanpa outlet belum teruji**,
-  karena tenant uji punya outlet; dapat dibuktikan dengan akun klien
-  sekali pakai yang wizard-nya berhenti sebelum langkah lokasi. Tanpa
-  `read-location` teruji e2e sejak 20 November 2026 lewat "E2E Tanpa
-  Lokasi", dan kartu profil tanpa `update-tenant` serta kartu lokasi tanpa
-  `update-location` sejak `cbfa23b` lewat pengguna baca-saja.
-- **`sedangBerlaku` pilihan diskon kasir dapat tertinggal sampai lima menit
-  di cache**, dan itu tidak diuji. Pilihan diskon di buat reservasi dan
-  buat penjualan teruji e2e (`diskon/pilihan-kasir`, 24 November 2026).
-- **Pesan titipan setelah PIN berubah hilang bila halaman dimuat ulang**,
-  karena hanya hidup di memori; itu tidak diuji.
-- **Sisi tertolak gerbang rute ber-`[id]` teruji e2e hanya di ubah akun
-  kas** (`keuangan/ubah-akun-kas`, pengguna baca-saja); rute ber-`[id]`
-  lain hanya di unit test (`gerbang-rute.test.ts`). Seluruh rute statis
-  `IZIN_HALAMAN` teruji e2e sejak 24 November 2026
-  (`akses/gerbang-baca-saja`).
 - **Syarat 44 entri baru `IZIN_HALAMAN` diturunkan dari nama hook dan
   kontrak, bukan dari trace per halaman.** Yang terbukti: pemilik seluruh
   izin membuka setiap rute terpetakan (unit), dan spec terdampak lolos.
-- **Perpindahan halaman daftar akun admin belum teruji e2e**: skenarionya
-  dilewati selama data uji berisi tidak lebih dari 10 akun; dapat
-  dibuktikan dengan akun klien sekali pakai yang dihapus lagi lewat API
-  admin (dipindah dari `modul/panel-admin.md`, 24 November 2026).
-
-- **Ringkasan Belanja Stok untuk periode lebih dari satu halaman hanya
-  teruji di unit test**: kartu ringkasan dibaca dari endpoint ringkasan,
-  terpisah dari daftar berhalaman. Butuh lebih dari 10 pembelian dalam
-  periode; periksa data uji lebih dulu (dipindah dari `modul/keuangan.md`,
-  24 November 2026).
 
 ## Menunggu keputusan pemilik proyek
 

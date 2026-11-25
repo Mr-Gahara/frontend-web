@@ -1,7 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import { format } from "date-fns";
 import { id as localeID } from "date-fns/locale";
-import { JAWAB_GAGAL, bukaDenganAuth, login } from "../../../helpers/transfer-uji";
+import { JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../../helpers/transfer-uji";
+import { normalizeId } from "@/lib/api/normalize";
 import { tanpaLuberWadah } from "../../../helpers/tata-letak-uji";
 import {
   NAMA_ASET_BOOKING,
@@ -151,6 +152,55 @@ test.describe("E2E — Reservasi › Buat reservasi", () => {
       await aturWaktu(page, mulai, 1);
       await expect(page.getByText(/Aset ini sedang dipesan dari/)).toBeVisible();
       await expect(page.getByRole("button", { name: "Waktu Terpakai" })).toBeDisabled();
+    } finally {
+      await batalkanBooking(page, auth, penjualanId);
+    }
+  });
+
+  test("booking berbayar yang jamnya sudah lewat (Selesai) tidak dihitung bentrok (R6a)", async ({ page }) => {
+    // Booking hari ini yang jam selesainya lewat dibaca backend sebagai Selesai
+    // (denganStatusEfektif); bookingBentrok hanya menghitung Aktif yang dibayar.
+    const jam = 3_600_000;
+    const lalu = new Date(Date.now() - 3 * jam);
+    lalu.setMinutes(0, 0, 0);
+    test.skip(lalu.getDate() !== new Date().getDate(), "butuh slot tiga jam lalu yang masih hari ini (lewat 03.00)");
+    const auth = await bukaDenganAuth(page, URL_DAFTAR);
+    const fx = await siapkanFixtureBuatReservasi(page, auth);
+    await bersihkanSisaBooking(page, auth, fx);
+    let penjualanId: string | undefined;
+    try {
+      // buatBooking hanya mencari booking Aktif, sedangkan yang lampau dibaca Selesai.
+      const buat = await api<unknown>(page, auth, "POST", "/sesibooking", {
+        dataPelanggan: fx.pelangganId,
+        items: [{ dataAset: fx.asetId, waktuMulai: lalu.toISOString(), waktuSelesai: new Date(lalu.getTime() + jam).toISOString() }],
+      });
+      expect(buat.status, "buat booking lampau: " + buat.pesan).toBeLessThan(300);
+      type Ringkas = { id: string; waktuMulai: string; dataAset?: { id: string }; dataPenjualan?: { id: string } };
+      const semua = await api<unknown[]>(page, auth, "GET", "/sesibooking");
+      const b = (normalizeId(semua.data ?? []) as unknown as Ringkas[]).find(
+        (x) => x.dataAset?.id === fx.asetId && new Date(x.waktuMulai).getTime() === lalu.getTime(),
+      );
+      expect(b?.dataPenjualan?.id, "booking lampau terbaca beserta penjualannya").toBeTruthy();
+      penjualanId = b!.dataPenjualan!.id;
+      const metode = await metodeUji(page, auth);
+      await bayarLewatApi(page, auth, penjualanId, metode.id, 1, "DP e2e bentrok Selesai");
+      const tDaftar = page.waitForResponse(
+        (r) => r.request().method() === "GET" && /\/api\/sesibooking\?/.test(r.url()) && new URL(r.url()).searchParams.has("tanggal"),
+      );
+      await bukaBuat(page);
+      const daftar = (await (await tDaftar).json()) as { data: { _id?: string; id?: string; status: string; sudahDibayar: boolean }[] };
+      const dibaca = daftar.data.find((x) => (x._id ?? x.id) === b!.id);
+      expect(dibaca, "booking lampau termuat di daftar hari ini").toMatchObject({ status: "Selesai", sudahDibayar: true });
+
+      await pilihPelanggan(page);
+      await pilihAsetUji(page);
+      // Tanggal sudah hari ini; cukup jam dan durasi yang sama dengan booking lampau.
+      await page.getByRole("textbox", { name: "Jam Mulai Fasilitas #1 (jam)" }).fill(String(lalu.getHours()).padStart(2, "0"));
+      await page.getByRole("textbox", { name: "Jam Mulai Fasilitas #1 (menit)" }).fill("00");
+      await page.getByRole("button", { name: "1 jam", exact: true }).click();
+      await expect(page.getByRole("button", { name: "Proses & Buat Tagihan" })).toBeVisible();
+      await expect(page.getByText(/Aset ini sedang dipesan dari/)).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "Waktu Terpakai" })).toHaveCount(0);
     } finally {
       await batalkanBooking(page, auth, penjualanId);
     }

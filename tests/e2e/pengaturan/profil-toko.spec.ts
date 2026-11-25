@@ -2,6 +2,8 @@ import { test, expect, type Page } from "@playwright/test";
 import { BASIS, JAWAB_GAGAL, api, bukaDenganAuth, login, type Auth } from "../../helpers/transfer-uji";
 import { unik } from "../../helpers/reservasi-uji";
 import { masukBacaSaja } from "../../helpers/terkunci-uji";
+import { ALASAN_TANPA_ADMIN, hapusAkunKlienUji, kredensialAdmin, wajibAdmin } from "../../helpers/admin-uji";
+import { akunBaru, isiTokoDanOwner } from "../../helpers/setup-uji";
 
 /*
  * Spec Profil Toko (keputusan PO12a sampai PO16a). Profil tenant dan lokasi
@@ -267,5 +269,32 @@ test.describe("Profil Toko: pengguna baca-saja", () => {
     await expect(page.getByRole("button", { name: "Simpan Profil Toko" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Simpan Lokasi Outlet" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Deteksi Otomatis" })).toHaveCount(0);
+  });
+});
+
+test.describe("toko tanpa outlet (akun klien sekali pakai)", () => {
+  test.skip(!kredensialAdmin(), ALASAN_TANPA_ADMIN);
+
+  test("kartu lokasi menampilkan keterangan Outlet Belum Didaftarkan tanpa form lokasi, kartu profil tetap tampil", async ({
+    page,
+  }) => {
+    // Wizard berhenti sesudah Owner, sebelum langkah lokasi outlet.
+    await page.goto("/login");
+    await page.evaluate(() => localStorage.setItem("tachyon.panduan.otomatis", "mati"));
+    const { id } = await akunBaru(page, "profil-tanpa-outlet");
+    try {
+      await isiTokoDanOwner(page);
+      const tLokasi = page.waitForResponse(
+        (r) => r.request().method() === "GET" && /\/api\/location\/current(\?|$)/.test(r.url()),
+      );
+      await page.goto(URL_PROFIL, { waitUntil: "commit" });
+      const lokasi = await tLokasi;
+      expect(lokasi.status(), "outlet tenant dibaca walau belum ada").toBeLessThan(500);
+      await expect(page.getByText("Outlet Belum Didaftarkan")).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByRole("button", { name: "Simpan Lokasi Outlet" })).toHaveCount(0);
+      await expect(namaToko(page)).toHaveValue("Kopi Senja E2E");
+    } finally {
+      await hapusAkunKlienUji(id, wajibAdmin());
+    }
   });
 });

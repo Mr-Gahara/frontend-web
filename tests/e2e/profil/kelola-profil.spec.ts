@@ -179,7 +179,7 @@ test.describe("Kelola profil pengguna", () => {
     }
   });
 
-  test("setelah PIN berubah: pesan tampil, kembali ke login PIN, dan PIN baru dipakai masuk", async ({
+  test("setelah PIN berubah: pesan tampil sekali (tidak muncul lagi saat dimuat ulang), kembali ke login PIN, dan PIN baru dipakai masuk", async ({
     page,
     browser,
   }) => {
@@ -199,7 +199,14 @@ test.describe("Kelola profil pengguna", () => {
       });
 
       await hal.waitForURL("**/login/pengguna");
-      await expect(hal.getByText("Silakan login kembali dengan PIN baru Anda.")).toBeVisible();
+      const pesan = hal.getByText("Silakan login kembali dengan PIN baru Anda.");
+      await expect(pesan).toBeVisible();
+      // Pesan titipan sekali pakai di memori (lib/auth/pesan-login.ts):
+      // memuat ulang halaman login tidak menampilkannya lagi.
+      await hal.reload();
+      await expect(hal.getByRole("button", { name: /masuk/i }).first()).toBeVisible({ timeout: 15_000 });
+      await hal.waitForTimeout(1_500);
+      await expect(pesan).toHaveCount(0);
       await isiLoginPengguna(hal, NAMA_PROFIL, PIN_PROFIL_BARU);
       await hal.waitForURL("**/dashboard");
     } finally {

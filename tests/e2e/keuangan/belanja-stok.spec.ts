@@ -161,6 +161,62 @@ test.describe("Keuangan: Belanja Stok", () => {
     }
   });
 
+  test("periode lebih dari satu halaman: kartu ringkasan menghitung seluruh pembelian, bukan halaman yang tampil", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    const auth = await bukaDenganAuth(page, BASIS + URL_BELANJA);
+    const outlet = await lokasiBertipe(page, auth, "Outlet");
+    const bahanID = await idBahanFixture(page, auth);
+    const akun = (await daftarAkun(page, auth)).find(
+      (a) => a.status === "aktif" && !a.namaAkun.startsWith("E2E") && a.saldo >= 11,
+    );
+    test.skip(!akun, "tidak ada akun kas aktif bersaldo minimal Rp 11");
+    // Sebelas pembelian Rp1 dengan satu supplier unik: daftar 10 per halaman,
+    // sehingga halaman pertama hanya menjumlah Rp10, sedangkan ringkasan Rp11.
+    const supplier = "E2E Belanja Halaman " + unik();
+    const ids: string[] = [];
+    try {
+      for (let i = 0; i < 11; i++) {
+        ids.push(
+          await buatPembelianUji(page, auth, {
+            akunKasID: akun!.id,
+            supplier,
+            locationID: outlet.id,
+            bahanBakuID: bahanID,
+            jumlah: 1,
+            hargaBeli: 1,
+          }),
+        );
+      }
+      await page.reload();
+      const tRingkasan = page.waitForResponse(
+        (r) => r.request().method() === "GET" && POLA_RINGKASAN.test(r.url()) && query(r.url()).get("supplier") === supplier,
+      );
+      const tDaftar = page.waitForResponse(
+        (r) =>
+          r.request().method() === "GET" &&
+          POLA_DAFTAR.test(r.url()) &&
+          [...query(r.url()).values()].includes(supplier) &&
+          query(r.url()).get("page") === "1",
+      );
+      await page.getByRole("searchbox", { name: "Cari supplier" }).fill(supplier);
+      expect((await tRingkasan).status()).toBe(200);
+      const daftar = (await (await tDaftar).json()) as { data: { totalBiaya: number }[]; pagination: { total: number } };
+      expect(daftar.pagination.total, "sebelas pembelian di periode").toBe(11);
+      expect(daftar.data, "halaman pertama sepuluh baris").toHaveLength(10);
+      expect(daftar.data.reduce((a, p) => a + p.totalBiaya, 0), "halaman pertama hanya Rp10").toBe(10);
+
+      const ringkasan = page.getByRole("region", { name: "Ringkasan belanja stok" });
+      const total = ringkasan.getByRole("region", { name: "Total belanja stok" });
+      await expect(total).toContainText(rupiah(11));
+      await expect(total).toContainText("11 pembelian");
+      await expect(page.getByRole("row").filter({ hasText: supplier })).toHaveCount(10);
+    } finally {
+      for (const id of ids) await hapusPembelianUji(page, auth, id);
+    }
+  });
+
   test("Catat pembelian (Pro dengan gudang): menu Ke outlet dan Ke gudang membuka form catat ruangnya", async ({
     page,
   }) => {

@@ -83,11 +83,21 @@ export async function buatAset(
  * asli test. Sebelumnya jawaban dibuang, sehingga pembersihan yang gagal tidak
  * pernah terlihat (akun kas uji tertinggal sejak backend 465b438).
  */
+/**
+ * Hapus data uji lewat API. 404 diterima hanya bila datanya memang sudah
+ * tidak ada; route yang tidak ada dijawab 404 "Not Found" oleh penangkap
+ * akhir backend (app.js), sehingga route hapus yang dibuang backend tetap
+ * terdeteksi sebagai gagal (utang pengujian, 25 November 2026).
+ */
 export async function hapusLewatApi(page: Page, auth: Auth, path: string, id: string | undefined) {
   if (!id) return;
   const res = await api(page, auth, "DELETE", path + "/" + id);
+  expect.soft(routeTidakAda(res), `route DELETE ${path}/:id tidak ada di backend`).toBe(false);
   expect.soft([200, 204, 404], `hapus data uji ${path}/${id}: ${res.status} ${res.pesan}`).toContain(res.status);
 }
+
+/** 404 dari penangkap akhir backend (route tidak terdaftar), bukan dari data yang tidak ditemukan. */
+export const routeTidakAda = (res: { status: number; pesan: string }) => res.status === 404 && res.pesan === "Not Found";
 
 /*
  * Fixture booking (keputusan R2b dan R2c). Tipe aset, tarif, aset, dan

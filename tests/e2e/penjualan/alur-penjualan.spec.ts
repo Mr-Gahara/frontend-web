@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { normalizeId } from "@/lib/api/normalize";
-import { BASIS, JAWAB_GAGAL, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { BASIS, JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { dariLonceng } from "../../helpers/lonceng-uji";
 import { NAMA_DISKON_GLOBAL, NAMA_DISKON_ITEM, siapkanDiskonUji } from "../../helpers/reservasi-uji";
 import {
@@ -467,6 +467,57 @@ test.describe("Alur penjualan: stok, finalisasi, pembayaran, void, dan hapus", (
     } finally {
       await page.unroute(pola);
       await hapusDraft(page, auth, penjualan.id);
+    }
+  });
+
+  test("diskon yang berakhir selagi halaman terbuka: masih ditawarkan dari cache, tetapi backend menolak saat disimpan dan pesannya tampil", async ({
+    page,
+  }) => {
+    // sedangBerlaku dihitung backend saat daftar dimuat, sehingga pilihan
+    // kasir dapat tertinggal selama cache segar (features/diskon/filter.ts);
+    // jaring pengamannya penolakan backend saat disimpan. Masa berakhir dalam
+    // hitungan detik tidak dapat diatur lewat form diskon (tanggal saja),
+    // sehingga diskonnya disiapkan lewat API (keputusan rancangan butir 23).
+    test.setTimeout(150_000);
+    const auth = await bukaDenganAuth(page, DAFTAR);
+    await siapkanFixture(page, auth, 20);
+    const nama = "E2E Diskon Berakhir " + Date.now().toString(36);
+    const berakhir = new Date(Date.now() + 40_000);
+    const buat = await api<{ id?: string; _id?: string }>(page, auth, "POST", "/diskon", {
+      namaDiskon: nama,
+      cakupan: "Global",
+      tipe: "nominal",
+      nilai: 500,
+      bisaDigabung: true,
+      status: "Aktif",
+      tanggalMulai: new Date(Date.now() - 3_600_000).toISOString(),
+      tanggalBerakhir: berakhir.toISOString(),
+    });
+    expect(buat.status, "POST /diskon: " + buat.pesan).toBe(201);
+    const idDiskon = buat.data.id ?? buat.data._id ?? "";
+    let idPenjualan = "";
+    try {
+      await isiIsianPenjualan(page, 1);
+      await pilihDiskon(page, "Diskon Global", nama);
+      // Tunggu sampai masa berlaku lewat; halaman tidak dimuat ulang.
+      await page.waitForTimeout(Math.max(0, berakhir.getTime() - Date.now()) + 3_000);
+      await page.getByLabel(/keterangan/i).press("Enter");
+      await expect(page.getByRole("alertdialog")).toBeVisible();
+      const tunggu = page.waitForResponse(
+        (r) => r.request().method() === "POST" && /\/api\/penjualan(\?|$)/i.test(r.url()),
+      );
+      await page.getByRole("button", { name: /ya, lanjutkan/i }).click();
+      const res = await tunggu;
+      const body = await res.json().catch(() => ({}));
+      idPenjualan = normalizeId((body.data ?? {}) as { id?: string }).id ?? "";
+      expect(res.status(), `POST /penjualan dengan diskon kedaluwarsa: ${JSON.stringify(body).slice(0, 200)}`).toBeGreaterThanOrEqual(400);
+      expect(res.status()).toBeLessThan(500);
+      await expect(page.getByText(String(body.message ?? "")).first(), "pesan backend tampil").toBeVisible();
+      await expect(page).toHaveURL(/buatPenjualan/);
+    } finally {
+      if (idPenjualan) await hapusDraft(page, auth, idPenjualan);
+      const r = await api(page, auth, "PUT", "/diskon/" + idDiskon, { status: "Non-Aktif" });
+      expect.soft(r.status, "diskon uji dinonaktifkan: " + r.pesan).toBe(200);
     }
   });
 
