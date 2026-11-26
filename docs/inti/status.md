@@ -137,7 +137,7 @@ backend menerima catatan per item.
 - `db:setup-toko-lama` jangan dijalankan ulang di basis data lokal
   sesudah spec membuat akun pendaftar, karena akun itu ikut ditandai
   selesai setup inti.
-- Data uji dibersihkan 18, 20, dan 24 November 2026 lewat skrip bermode
+- Data uji dibersihkan 18, 20, 24, dan 26 November 2026 lewat skrip bermode
   tinjau `bersih-akunkas.js` dan `bersih-data-uji.js` di
   `~/.cache/frontend-web/alat/` (bawaan tinjau, `--hapus` untuk
   menerapkan), dengan cadangan di `~/Documents/cadangan-db/`. Data bukti
@@ -146,6 +146,14 @@ backend menerima catatan per item.
   aset uji bukti butir 77 dihapus lewat API 25 November 2026 saat butir
   itu ditutup (cadangan
   `db_produk-sebelum-hapus-tipeaset77-2026-11-25.gz`).
+- Pembersihan 26 November 2026 (cadangan
+  `db_produk-sebelum-bersih-2026-11-26.gz`, dibuat lewat `docker exec
+  tachyon-mongo mongodump` karena `mongodump` tidak terpasang di host)
+  menghapus 11 akun kas, 18 metode pembayaran, 61 diskon, 91 shift, dan 65
+  pelanggan uji. Tidak disentuh: fixture "E2E Kategori Beban" (RG7a), 69
+  beban VOID, dan 995 penjualan booking VOID (181 pembayaran terhubung),
+  karena keduanya riwayat keuangan yang saling terkait dan tidak ada skrip
+  yang aman untuk menghapusnya.
 
 ## Utang kecil yang tertunda
 
