@@ -509,6 +509,11 @@ bersyarat).
   utama), lalu dihapus. Akun klien dari `akunBaru` dan `isiTokoDanOwner`
   (Basic, tanpa lokasi outlet) terbukti dapat membuka halaman Pengaturan
   dan `/lupa-pin` (13 November 2026).
+- Data yang disaring backend menurut kegiatan (rekap absensi sejak B379)
+  dapat kosong di bulan berjalan. Pilih bulan dari respons nyata lewat API
+  (bulan berstaf atau kosong terbaru), lalu buka lewat kontrol halaman,
+  bukan `test.skip` atas bulan berjalan (`bulanBerdata` dan `mundurKe` di
+  `tests/e2e/jadwal/rekap-absensi.spec.ts`, PW04).
 - Menjalankan satu folder tanpa spec ber-OTP: sebut berkasnya saja, tanpa
   argumen folder. Argumen folder memilih seluruh isinya walau berkas lain
   ikut disebut, sehingga `daftar`, `verifikasi-lupa-password`, dan

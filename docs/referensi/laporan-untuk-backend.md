@@ -28,25 +28,6 @@ membuktikannya lewat paket PW02 sampai PW13 (`referensi/antrean-web.md`).
 
 Diperiksa terhadap backend `ridho` lokal `1718030`.
 
-### Butir 194: Rekap Absensi memuat staf tanpa kegiatan
-
-Modul SDM (Ridho). Dicatat atas keputusan pemilik proyek sebagai temuan
-yang harus diperbaiki backend.
-
-- **Bukti:** `GET /absensi/rekap?bulan=2019-01&locationID=<outlet>`
-  memuat "E2E Kasir Outlet" dengan seluruh angka 0, termasuk bulan
-  sebelum toko ada.
-- **Penyebab:** `services/absensi/rekapAbsensiService.js` baris 22
-  sampai 23 dan 109 (AR40) selalu memasukkan staf yang berlokasi kerja
-  di lokasi itu.
-- **Kenapa penting:** rekap tidak pernah kosong dan berisi baris serba
-  nol; total staf di ringkasan ikut menghitung staf tanpa kegiatan.
-- **Saran:** muat hanya staf yang punya jadwal, absen, atau izin pada
-  bulan itu.
-- **Penanganan sementara di frontend:** teks keadaan kosong menyebut
-  staf berlokasi kerja (RK2a), dan keadaan kosong diuji lewat simulasi
-  bertanda. Bila backend memperbaiki, teks itu dikembalikan.
-
 ### Kebutuhan fitur MVP: struk laporan tutup kasir
 
 Bukan bug, tetapi data yang dibutuhkan rilis MVP. Rinciannya di
@@ -164,7 +145,6 @@ Modul dashboard dan transfer stok (Yoga).
 | Prioritas | Butir | Pemilik | Dampak |
 |---|---|---|---|
 | 2 | Struk tutup kasir | Ridho dan Nizar | Wajib MVP; data per sesi belum tersedia |
-| 6 | 194 | Ridho | Rekap berisi baris serba nol, tidak pernah kosong |
 | 7 | Produk dapat dijual di ringkasan | Yoga | Lonceng memuat seluruh produk setiap 5 menit |
 | 8 | Perangkat menunggu izin se-toko | Ridho | Pemberitahuan perangkat belum dapat tampil |
 | 9 | Surat jalan dikirim per arah di ringkasan gudang | Yoga | Penerimaan pengembalian belum diberitahukan ke pengguna gudang saja |

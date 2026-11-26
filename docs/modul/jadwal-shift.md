@@ -272,7 +272,11 @@ Diputuskan pemilik proyek 23 November 2026 (`referensi/keputusan-penyesuaian-bac
   dipilih." Keadaan kosong diuji lewat simulasi bertanda, karena data uji
   selalu punya staf berlokasi kerja. Perilaku backend tetap dicatat
   sebagai temuan yang harus diperbaiki backend (`kontrak/temuan.md`
-  butir 194; `2090dd8`).
+  butir 194; `2090dd8`). Berakhir 26 November 2026: backend `6478d29`
+  (B379) hanya memuat staf berkegiatan, sehingga teksnya dikembalikan
+  menjadi "Staf tampil di sini bila punya jadwal kerja, absen, atau izin
+  cuti pada bulan yang dipilih." dan keadaan kosong diuji tanpa simulasi
+  (PW04, `12ded07`).
 
 ## Catatan
 

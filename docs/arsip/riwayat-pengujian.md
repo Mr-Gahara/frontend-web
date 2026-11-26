@@ -9,6 +9,10 @@ kejadian sesekali yang tidak berulang.
 
 ## Utang yang dilunasi 26 November 2026
 
+- **Keadaan kosong Rekap Absensi hanya teruji lewat simulasi** (butir
+  194, RK2a). Sesudah backend `6478d29` (B379) diuji dari bulan kosong
+  terbaru di respons nyata, dibuka lewat Bulan sebelumnya; tabel, daftar
+  HP, dan luberan memakai bulan berstaf terbaru (PW04, `12ded07`).
 - **Tiga skenario merah disengaja menunggu backend** (butir 191, 192,
   193): template General Manajer di `akses/template-role`, revisi surat
   jalan per kemasan di `inventaris/bahanBaku/konversi-satuan`, dan label

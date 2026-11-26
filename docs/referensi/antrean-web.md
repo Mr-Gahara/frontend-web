@@ -35,7 +35,7 @@ tetap `AR`, `B`, dan `P`.
 | PW01 | Langkah sesudah tarik backend `6478d29` dan dokumen sinkron | Sekarang | Selesai | `db12e2a` |
 | PW02 | Bukti tiga merah disengaja: butir 191, 192 (bersama 189), 193 | Sekarang | Selesai | `09d507e` |
 | PW03 | Butir 190: Ganti pengguna bertahan setelah dimuat ulang | Sekarang | Selesai | `569c3f9` |
-| PW04 | Butir 194: Rekap Absensi boleh kosong, RK2a dikembalikan | Sekarang | Belum | |
+| PW04 | Butir 194: Rekap Absensi boleh kosong, RK2a dikembalikan | Sekarang | Selesai | `12ded07` |
 | PW05 | Butir 195: booking tanpa pajak per aset | Sekarang | Belum | |
 | PW06 | Lonceng LN17a: pengembalian menunggu diterima di gudang | Sekarang | Belum | |
 | PW07 | Lonceng LN1a dan LN8a: produk dapat dijual dari ringkasan | Keputusan | Belum | |
@@ -88,19 +88,12 @@ sedangkan PIN salah tidak (`lib/apiClient.ts`, unit test
 
 ### PW04: butir 194, Rekap Absensi boleh kosong
 
-Backend B379: rekap per lokasi hanya memuat staf berkegiatan bulan itu,
-dan `ringkasan.totalStaf` mengikutinya.
-
-- RK2a (`modul/jadwal-shift.md`) sudah menetapkan teks keadaan kosong
-  dikembalikan bila backend memperbaiki; tidak perlu keputusan baru.
-  Kodenya di `features/absensi/halaman-rekap-absensi.tsx`.
-- Keadaan kosong diuji dari data nyata (bulan tanpa kegiatan, misalnya
-  2019-01), menggantikan simulasi bertanda di
-  `tests/e2e/jadwal/rekap-absensi.spec.ts`; unit test
-  `tests/unit/features/absensi/rekap.test.ts` disesuaikan bila teksnya
-  diuji di sana.
-- Utang "Keadaan kosong Rekap Absensi hanya teruji lewat simulasi"
-  dipindah ke arsip.
+Selesai 26 November 2026 (`12ded07`). Teks keadaan kosong dikembalikan
+(RK2a); skenario AR40 diganti perilaku B379 (Januari 2019 tanpa staf,
+`totalStaf` 0); keadaan kosong diuji dari bulan kosong nyata tanpa
+simulasi. Karena bulan berjalan kini dapat kosong, tabel, daftar HP, dan
+luberan memakai bulan berstaf terbaru dalam 12 bulan, dibuka lewat Bulan
+sebelumnya. Butir 194 dipindah ke `arsip/laporan-backend.md`.
 
 ### PW05: butir 195, booking tanpa pajak per aset
 

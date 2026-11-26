@@ -453,3 +453,26 @@ Modul RBAC (Ridho).
 - **Dibuktikan:** 26 November 2026 (PW02) terhadap backend `6478d29`
   (B377: role dari template General Manajer (133 izin) dibuat): spec
   `akses/template-role` lolos tanpa diubah, dua kali berturut-turut.
+
+### Butir 194 (laporan 24 November 2026): Rekap Absensi memuat staf tanpa kegiatan
+
+Modul SDM (Ridho). Dicatat atas keputusan pemilik proyek sebagai temuan
+yang harus diperbaiki backend.
+
+- **Bukti:** `GET /absensi/rekap?bulan=2019-01&locationID=<outlet>`
+  memuat "E2E Kasir Outlet" dengan seluruh angka 0, termasuk bulan
+  sebelum toko ada.
+- **Penyebab:** `services/absensi/rekapAbsensiService.js` baris 22
+  sampai 23 dan 109 (AR40) selalu memasukkan staf yang berlokasi kerja
+  di lokasi itu.
+- **Kenapa penting:** rekap tidak pernah kosong dan berisi baris serba
+  nol; total staf di ringkasan ikut menghitung staf tanpa kegiatan.
+- **Saran:** muat hanya staf yang punya jadwal, absen, atau izin pada
+  bulan itu.
+- **Penanganan sementara di frontend:** teks keadaan kosong menyebut
+  staf berlokasi kerja (RK2a), dan keadaan kosong diuji lewat simulasi
+  bertanda. Bila backend memperbaiki, teks itu dikembalikan.
+- **Dibuktikan:** 26 November 2026 (PW04, `12ded07`) terhadap backend
+  `6478d29` (B379): Januari 2019 tanpa staf dan `totalStaf` 0 di
+  `jadwal/rekap-absensi`; teks keadaan kosong dikembalikan (RK2a) dan
+  diuji dari bulan kosong nyata, tanpa simulasi.

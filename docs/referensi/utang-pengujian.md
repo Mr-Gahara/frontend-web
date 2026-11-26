@@ -133,9 +133,6 @@ skip bersyarat data, dan catatan proses.
   Akun uji Pro tanpa batas waktu dengan satu catatan riwayat, sehingga
   Muat riwayat lainnya halaman Langganan hanya teruji di unit test
   (Muat Berikutnya panel admin teruji e2e).
-- **Keadaan kosong Rekap Absensi hanya teruji lewat simulasi**
-  bertanda, karena backend memuat staf berlokasi kerja setiap bulan
-  (butir 194, RK2a).
 - **Spec mutasi arus kas bergantung pada data bulan berjalan**: empat
   skenarionya dilewati bersyarat bila belum ada mutasi, belum sampai dua
   halaman, atau belum ada pembatalan pembayaran pada bulan itu, sehingga
