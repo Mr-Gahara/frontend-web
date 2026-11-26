@@ -377,3 +377,79 @@ Modul auth (Ridho).
   `6478d29` (B378): skenario muat ulang, `/dashboard`, dan tab baru sesudah
   Ganti pengguna di `auth/sidebar-pengguna` tetap di "Siapa yang
   bertugas?" tanpa login email.
+
+### Butir 192 (laporan 24 November 2026): revisi surat jalan per kemasan menyimpan jumlah yang salah
+
+Modul transfer stok (Yoga).
+
+- **Bukti:** `PUT /transferstok/:id` dengan
+  `items[{bahanBakuID, qtyKirim: 1, satuan: "kaleng"}]` untuk bahan
+  "E2E Bahan Kaleng" (ml, kaleng = 290) dijawab 200, lalu
+  `GET /transferstok/:id` membaca `qtyKirim` 1, bukan 290. Spec
+  `inventaris/bahanBaku/konversi-satuan` skenario "surat jalan per
+  kemasan: revisi 1 kaleng tersimpan 290 ml (B365)".
+- **Penyebab:** `validators/transferStokValidator.js` baris 141 sampai
+  145 mengizinkan `satuan` di item, tetapi menyusun ulang
+  `updates.items` hanya dengan `bahanBakuID`, `qtyKirim`, dan
+  `catatanItem`. `services/transferStok/itemKiriman.js` baris 52 lalu
+  memakai satuan item pengajuan (satuan dasar) karena `item.satuan`
+  kosong.
+- **Kenapa penting:** jumlah kirim tersimpan salah tanpa galat; gudang
+  mengirim 1 kaleng, surat jalan mencatat 1 ml, dan stok berpindah
+  menurut angka yang salah. Bertentangan dengan B365 di
+  `docs/pengembangan/klien.md` ("satuan opsional ... di POST dan PUT
+  draf").
+- **Saran:** teruskan `satuan` di `updates.items` hasil validasi edit
+  draf, sama dengan jalur `POST`.
+- **Penanganan sementara di frontend:** tidak ada (pemilik proyek:
+  lapor saja). Spec revisi dibiarkan merah sampai backend memperbaiki.
+- **Dibuktikan:** 26 November 2026 (PW02) terhadap backend `6478d29`
+  (B369: revisi 1 kaleng tersimpan 290 ml): spec
+  `inventaris/bahanBaku/konversi-satuan` lolos tanpa diubah, dua kali
+  berturut-turut.
+
+### Butir 193 (laporan 24 November 2026): status booking mentah di detail penjualan
+
+Modul penjualan dan booking (Nizar).
+
+- **Bukti:** booking 19.14 sampai 20.14 yang dibayar Rp1 tampil "Aktif"
+  di bagian Sesi Booking detail penjualan pada pukul 22.14, sedangkan
+  `GET /sesibooking` membacanya "Selesai". Spec
+  `reservasi/daftar/tandai-selesai` skenario "Tandai Selesai tidak
+  tampil untuk booking yang belum dibayar, maupun yang jamnya sudah
+  lewat".
+- **Penyebab:** `services/penjualan/bacaPenjualan.js` baris 193 sampai
+  197 membaca `SesiBooking` dengan `.lean()` tanpa `denganStatusEfektif`
+  (`services/sesiBooking/sesiBookingConstants.js` baris 124 dan 191),
+  padahal booking yang jam selesainya lewat dianggap Selesai saat dibaca.
+- **Kenapa penting:** satu booking tampil berbeda di dua tempat; kasir
+  dapat mengira aset masih dipakai.
+- **Saran:** terapkan `denganStatusEfektif` pada `sesiBooking[]` detail
+  penjualan (B347).
+- **Penanganan sementara di frontend:** tidak ada (pemilik proyek:
+  lapor saja). Tombol Tandai Selesai sudah tersembunyi oleh aturan web;
+  yang merah hanya label status.
+- **Dibuktikan:** 26 November 2026 (PW02) terhadap backend `6478d29`
+  (B370: booking lewat jam terbaca Selesai di detail penjualan): spec
+  `reservasi/daftar/tandai-selesai` lolos tanpa diubah, dua kali
+  berturut-turut.
+
+### Butir 191 (laporan 24 November 2026): template General Manajer ditolak batas 120 izin
+
+Modul RBAC (Ridho).
+
+- **Bukti:** membuat role berizin template General Manajer dijawab 400
+  "permissions maksimal 120 item". Spec `akses/template-role` skenario
+  General Manajer.
+- **Penyebab:** `validators/roleValidator.js` baris 85 membatasi 120
+  izin per role, sedangkan template web berisi 133 izin dan seed kini
+  163 izin. Template Manajer (116 izin) sudah dekat batas.
+- **Kenapa penting:** role General Manajer tidak dapat dibuat sama
+  sekali dari template yang ditawarkan web.
+- **Saran:** naikkan batas mengikuti jumlah izin seed (batas tetap
+  berguna untuk melindungi dari array membengkak).
+- **Penanganan sementara di frontend:** tidak ada (TR1a). Spec General
+  Manajer dibiarkan merah.
+- **Dibuktikan:** 26 November 2026 (PW02) terhadap backend `6478d29`
+  (B377: role dari template General Manajer (133 izin) dibuat): spec
+  `akses/template-role` lolos tanpa diubah, dua kali berturut-turut.

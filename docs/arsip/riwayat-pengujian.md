@@ -9,6 +9,13 @@ kejadian sesekali yang tidak berulang.
 
 ## Utang yang dilunasi 26 November 2026
 
+- **Tiga skenario merah disengaja menunggu backend** (butir 191, 192,
+  193): template General Manajer di `akses/template-role`, revisi surat
+  jalan per kemasan di `inventaris/bahanBaku/konversi-satuan`, dan label
+  status booking lewat jam di `reservasi/daftar/tandai-selesai`. Lolos
+  tanpa diubah terhadap backend `6478d29` (B377, B369, B370), dua kali
+  berturut-turut, 14 dari 14 (PW02). Setiap run spec Tandai Selesai tetap
+  meninggalkan tiga penjualan booking VOID.
 - **Ganti pengguna dari popup profil hanya teruji di tab yang sama**
   (butir 190, PU3a). Dilunasi sesudah backend `6478d29` (B378) lewat
   skenario muat ulang, `/dashboard`, dan tab baru di

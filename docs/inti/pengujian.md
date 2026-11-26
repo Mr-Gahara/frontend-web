@@ -182,7 +182,10 @@ kegagalan itu: template General Manajer di `akses/template-role`
 `inventaris/bahanBaku/konversi-satuan` (butir 192), dan label status
 booking lewat jam di `reservasi/daftar/tandai-selesai` (butir 193).
 Begitu backend memperbaikinya, skenario itu harus lolos tanpa diubah
-(`referensi/laporan-untuk-backend.md`).
+(`referensi/laporan-untuk-backend.md`). Berakhir 26 November 2026:
+backend `6478d29` (B369, B370, B377) memperbaiki ketiganya, dan ketiga
+spec lolos tanpa diubah, dua kali berturut-turut, 14 dari 14 (PW02).
+Suite penuh berikutnya tidak mengharapkan kegagalan.
 
 Cara membuktikan sebuah fixme: lepas sementara, jalankan dua kali,
 kembalikan berkasnya dengan `git checkout`, lalu lepas dan commit per test

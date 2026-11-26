@@ -33,7 +33,7 @@ tetap `AR`, `B`, dan `P`.
 | Kode | Judul | Kelompok | Status | Commit |
 |---|---|---|---|---|
 | PW01 | Langkah sesudah tarik backend `6478d29` dan dokumen sinkron | Sekarang | Selesai | `db12e2a` |
-| PW02 | Bukti tiga merah disengaja: butir 191, 192 (bersama 189), 193 | Sekarang | Belum | |
+| PW02 | Bukti tiga merah disengaja: butir 191, 192 (bersama 189), 193 | Sekarang | Selesai | |
 | PW03 | Butir 190: Ganti pengguna bertahan setelah dimuat ulang | Sekarang | Selesai | `569c3f9` |
 | PW04 | Butir 194: Rekap Absensi boleh kosong, RK2a dikembalikan | Sekarang | Belum | |
 | PW05 | Butir 195: booking tanpa pajak per aset | Sekarang | Belum | |
@@ -67,23 +67,12 @@ dan rencana struk tutup kasir memuat data laporan per periode. Butir 139,
 
 ### PW02: bukti tiga merah disengaja
 
-Backend: B377 (batas izin role mengikuti seed, 163), B369 (revisi surat
-jalan meneruskan `satuan`), dan B370 (status efektif booking di detail
-penjualan).
-
-- Jalankan per berkas, tanpa mengubah spec: `akses/template-role`,
-  `inventaris/bahanBaku/konversi-satuan`, dan
-  `reservasi/daftar/tandai-selesai`. Ketiganya harus lolos apa adanya
-  (`inti/pengujian.md`, Test yang ditandai fixme).
-- Bila lolos: baseline tidak lagi mengharapkan kegagalan; bagian merah
-  disengaja di `inti/pengujian.md` dan Menunggu backend di
-  `referensi/utang-pengujian.md` diperbarui; butir 191, 192, 193 di
-  `referensi/laporan-untuk-backend.md` dipindah ke
-  `arsip/laporan-backend.md` dengan alat pemindah; butir 189 ditutup
-  bersama 192 (B359 sampai B366 terbukti; B367 tidak dipakai web).
-- Bila ada yang tetap merah: telusuri trace lebih dulu, lalu laporan baru.
-- Tidak ada batas 120 izin di kode web (`features/role`, diperiksa
-  26 November 2026), sehingga 191 tidak menyisakan kode.
+Selesai 26 November 2026. Spec `akses/template-role`,
+`inventaris/bahanBaku/konversi-satuan`, dan `reservasi/daftar/tandai-selesai`
+lolos tanpa diubah terhadap backend `6478d29` (B377, B369, B370), dua kali
+berturut-turut, 14 dari 14. Butir 191, 192, 193 dipindah ke
+`arsip/laporan-backend.md` dan Tertutup di `kontrak/temuan.md`; butir 189
+ditutup bersama 192. Suite penuh berikutnya tidak mengharapkan kegagalan.
 
 ### PW03: butir 190, Ganti pengguna bertahan setelah dimuat ulang
 

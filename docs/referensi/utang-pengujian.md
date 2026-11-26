@@ -31,23 +31,9 @@ tanpa VOID), termasuk laba rugi dan stok saat ini.
 
 ## Menunggu backend
 
-Laporan lengkapnya di `referensi/laporan-untuk-backend.md`; spec merah
-yang disengaja tidak ditandai `test.fixme`.
-
-- **Status booking lewat jam di detail penjualan menunggu backend**
-  (butir 193): skenario Tandai Selesai varian di
-  `reservasi/daftar/tandai-selesai` merah pada label status, sedangkan
-  tombolnya sudah teruji tersembunyi. Setiap run spec itu meninggalkan
-  tiga penjualan booking VOID.
-- **Role dari template General Manajer belum dapat dibuat** (butir 191,
-  TR1a): spec `akses/template-role` membuktikan Supervisor dan Manajer
-  membuka stock opname, adjustment, pembelian stok, dan rekap absensi,
-  serta Kasir ditolak; skenario General Manajer merah sampai backend
-  menaikkan batas 120 izin per role.
-- **Revisi surat jalan per kemasan menunggu backend** (butir 192):
-  skenario revisi B365 di `inventaris/bahanBaku/konversi-satuan` merah,
-  karena 1 kaleng tersimpan 1 ml (pemilik proyek: lapor saja, spec
-  merah). Terima per kemasan teruji e2e sejak 24 November 2026.
+Tidak ada. Ketiga skenario merah disengaja (butir 191, 192, 193) lolos
+sesudah backend `6478d29` (PW02, 26 November 2026;
+`arsip/riwayat-pengujian.md`).
 
 ## Tidak dapat dibuktikan dengan data atau lingkungan sekarang
 

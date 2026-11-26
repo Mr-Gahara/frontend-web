@@ -146,7 +146,9 @@ Diputuskan pemilik proyek pada 21 Oktober 2026 (`ffd3994`, `4088d9e`):
 - **TR1a: batas 120 izin per role dinaikkan di backend** (pemilik
   proyek, 24 November 2026; `kontrak/temuan.md` butir 191). Template
   General Manajer (133 izin) tetap utuh, dan spec `akses/template-role`
-  untuk General Manajer tetap merah sampai backend berubah.
+  untuk General Manajer tetap merah sampai backend berubah. Backend
+  `6478d29` (B377) menyamakan batas dengan jumlah izin seed (163); spec
+  itu lolos 26 November 2026 (PW02).
 
 ### Utang pengujian akses 24 November 2026
 
