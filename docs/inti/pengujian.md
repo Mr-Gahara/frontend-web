@@ -12,27 +12,23 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
-**Suite penuh 24 November 2026** (web `13a3e93`, backend `ridho` lokal
-`1718030`, pukul 22.37 sampai 23.24 WIB, reporter `line,json`, charger
-tersambung, `systemd-inhibit`, sesudah seluruh kelompok utang
-pengujian): vitest 1246 lolos dari 147 berkas, dan e2e 807 lolos, 4
-gagal, dan 2 dilewati dari 813, sesuai harapan hitungan. Termasuk spec
-ber-OTP. Tiga yang gagal adalah merah yang disengaja: template General
-Manajer (butir 191), revisi surat jalan per kemasan (butir 192), dan
-status booking lewat jam di detail penjualan (butir 193). Yang dilewati:
-halaman berikutnya stock adjustment (data 10 atau kurang) dan Muat hari
-sebelumnya Mesin Kasir (riwayat belum dua halaman). Kegagalan keempat,
-kartu pengajuan dashboard gudang, berasal dari skenario baru yang
-membuka dashboard dua kali, sehingga penunggu menangkap respons halaman
-yang sudah dibuang; diperbaiki di `7b779f5` dan lolos 10 dari 10 dengan
-`--repeat-each 2`. Sesudahnya `bersih-akunkas.js` diterapkan (AU1a;
-cadangan
-`~/Documents/cadangan-db/db_produk-sebelum-bersih-2026-11-24.gz`): 27
-akun kas E2E non-aktif, 14 jurnal transfer Rp1, dan 42 baris mutasinya
-dihapus; saldo "Kas Kecil (Laci)" bergeser sebesar efek transfer uji
-(Rp1.056.005 menjadi Rp1.055.999) dengan rantai saldo berjalan
-konsisten, dan bukti butir 126 tidak disentuh. Harapan suite penuh
-berikutnya 813.
+**Suite penuh 25 November 2026** (web `eb4eb4c`, backend `ridho` lokal
+`1718030`, pukul 16.55 sampai 17.51 WIB, sesudah sepuluh utang pengujian
+25 November 2026 dan lonceng tahap 1 sampai 5): vitest 1287 lolos dari
+154 berkas, dan e2e 815 lolos, 9 gagal, dan 1 dilewati dari 825. Termasuk
+spec ber-OTP. Dari sembilan yang gagal: tiga merah disengaja (butir 191,
+192, 193); satu sekali jalan (`auth/sidebar-pengguna`, lolos diulang);
+empat terganggu permintaan lonceng dan diperbaiki di sisi spec
+(`tampilan/bayangan-baris` dua, `pengguna/absensi-widget`,
+`auth/gerbang-rute`; `06bdab3`, ketiga spec 7 lolos); dan satu
+`auth/ruang-lokasi-kerja`, karena lonceng meminta sumber outlet di ruang
+gudang. Yang terakhir diselesaikan LN20a (26 November 2026,
+`modul/pemberitahuan.md`): vitest 1296 lolos dari 155 berkas, dan per
+berkas `auth/ruang-lokasi-kerja` 5 lolos (test LN20a baru merah 11
+permintaan outlet terhadap kode lama), `dashboard/lonceng-pemberitahuan`
+dan `akses/syarat-rute` 4 lolos. Suite penuh tidak diulang
+(`inti/cara-kerja.md`, langkah 5). Harapan suite penuh berikutnya 826,
+dengan tiga merah disengaja.
 
 Baseline 16 dan 17 November 2026, dari penyesuaian backend `4a19be8`
 sampai suite penuh per penyesuaian backend `3570bd4`, dan baseline
@@ -41,7 +37,8 @@ penyesuaian backend `ridho` `b5b367a` (21 Oktober 2026), dipindah ke
 `arsip/riwayat-pengujian.md` (Riwayat baseline) pada 14, 17, dan
 20 November 2026. Baseline 18 sampai 24 November 2026, dari pembuktian
 kontrak sampai utang pengujian per kelompok, dipindah ke arsip yang sama
-pada 24 November 2026; yang tersisa di atas hanya suite penuh terbaru.
+pada 24 November 2026, dan suite penuh 24 November 2026 pada
+26 November 2026; yang tersisa di atas hanya suite penuh terbaru.
 
 ## Kredensial uji
 

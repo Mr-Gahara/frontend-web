@@ -154,6 +154,27 @@ dan gudang LN4a:
   (pemilik proyek, 25 November 2026). Panel yang ditutup, termasuk lewat
   tautan kartu, kembali ringkas saat dibuka lagi; ini rincian penerapan,
   bukan bagian teks opsi.
+- **LN20a: sumber lonceng mengikuti lokasi kerja staf** (pemilik proyek,
+  25 November 2026; diterapkan 26 November 2026). Staf berlokasi kerja
+  Gudang hanya memuat sumber gudang dan tingkat toko (stok dan opname
+  gudang, pengajuan, surat jalan, izin cuti, langganan, setup, hasil
+  pengajuan saya); sumber outlet (stok produk dan bahan outlet, ringkasan
+  outlet, penjualan, booking, sesi kasir, kehadiran dan jadwal outlet,
+  membership, diskon, opname outlet) tidak dimuat. Staf berlokasi kerja
+  Outlet tidak memuat sumber gudang (ringkasan gudang, lokasi dan stok
+  gudang, opname gudang). Owner, pemegang `akses-lintas-outlet`, dan staf
+  tanpa lokasi kerja tidak berubah. Penerapan: `features/notifikasi/ruang.ts`
+  (`muatRuang`, `ringkasanDimuat`) dipasang di setiap `enabled`
+  `features/notifikasi/hooks.ts`, membaca `useRuangLokasiKerja` (sama dengan
+  gerbang ruang LK3a). Sumber outlet dan gudang menunggu detail diri
+  (`siap`); sumber toko tidak menunggu. Staf gudang yang memegang izin
+  dashboard outlet beralih ke ringkasan gudang (perluasan LN17a), sehingga
+  pengajuan dan surat jalan tetap terbaca, dengan batas LN17a yang sama:
+  pengembalian yang menunggu diterima di gudang belum tampil. Bukti:
+  sebelumnya lonceng di ruang gudang meminta 11 sumber outlet dan
+  `GET /absensi/monitoring` dijawab 403; kini
+  `auth/ruang-lokasi-kerja.spec.ts` (test LN20a) menegaskan tidak ada
+  permintaan sumber outlet maupun 403, dan unit `tests/unit/features/notifikasi/ruang.test.ts`.
 
 ## Catatan
 

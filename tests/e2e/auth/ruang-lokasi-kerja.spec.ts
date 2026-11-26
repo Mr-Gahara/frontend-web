@@ -36,6 +36,30 @@ test.describe("Ruang mengikuti lokasi kerja", () => {
     expect(permintaanOutlet, "halaman ruang outlet tidak dipasang").toEqual([]);
   });
 
+  test("lonceng di ruang gudang tidak memuat sumber outlet dan tidak menerima 403 (LN20a)", async ({ page }) => {
+    // Sumber outlet lonceng (modul/pemberitahuan.md, LN20a); halaman inventaris gudang sendiri tidak memintanya.
+    const SUMBER_OUTLET =
+      /\/api\/(produk|dashboard\/outlet|penjualan|sesikasir|sesibooking|membership|diskon|absensi\/monitoring|jadwalshift)(\?|$)|\/api\/stockopname\?.*tipeLokasi=Outlet/i;
+    const permintaanOutlet: string[] = [];
+    const ditolak: string[] = [];
+    page.on("request", (r) => {
+      if (SUMBER_OUTLET.test(r.url())) permintaanOutlet.push(r.url());
+    });
+    page.on("response", (r) => {
+      if (/\/api\//.test(r.url()) && r.status() === 403) ditolak.push(`${r.request().method()} ${r.url()}`);
+    });
+    // Staf gudang pemegang izin dashboard outlet beralih ke ringkasan gudang.
+    const tRingkasanGudang = page.waitForResponse(
+      (r) => r.request().method() === "GET" && /\/api\/dashboard\/gudang(\?|$)/.test(r.url()),
+    );
+    await page.goto(BASIS + "/dashboard/gudang/inventaris");
+    await expect(page.getByText("Gudang Ops.")).toBeVisible({ timeout: 15_000 });
+    expect((await tRingkasanGudang).status()).toBe(200);
+    await page.waitForLoadState("networkidle");
+    expect(permintaanOutlet, "lonceng tidak meminta sumber outlet").toEqual([]);
+    expect(ditolak, "tidak ada permintaan yang ditolak").toEqual([]);
+  });
+
   test("halaman ruang gudang tetap terbuka", async ({ page }) => {
     await page.goto(BASIS + "/dashboard/gudang/inventaris");
     await expect(page.getByText("Gudang Ops.")).toBeVisible({ timeout: 15_000 });

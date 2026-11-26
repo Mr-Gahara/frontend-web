@@ -19,6 +19,31 @@ Dipindah dari `inti/pengujian.md` pada 24 November 2026 saat
 bersih-bersih dokumentasi: baseline 18 sampai 24 November 2026, terbaru
 lebih dulu.
 
+Suite penuh 24 November 2026 dipindah dari `inti/pengujian.md` pada
+26 November 2026, digantikan suite penuh 25 November 2026.
+
+**Suite penuh 24 November 2026** (web `13a3e93`, backend `ridho` lokal
+`1718030`, pukul 22.37 sampai 23.24 WIB, reporter `line,json`, charger
+tersambung, `systemd-inhibit`, sesudah seluruh kelompok utang
+pengujian): vitest 1246 lolos dari 147 berkas, dan e2e 807 lolos, 4
+gagal, dan 2 dilewati dari 813, sesuai harapan hitungan. Termasuk spec
+ber-OTP. Tiga yang gagal adalah merah yang disengaja: template General
+Manajer (butir 191), revisi surat jalan per kemasan (butir 192), dan
+status booking lewat jam di detail penjualan (butir 193). Yang dilewati:
+halaman berikutnya stock adjustment (data 10 atau kurang) dan Muat hari
+sebelumnya Mesin Kasir (riwayat belum dua halaman). Kegagalan keempat,
+kartu pengajuan dashboard gudang, berasal dari skenario baru yang
+membuka dashboard dua kali, sehingga penunggu menangkap respons halaman
+yang sudah dibuang; diperbaiki di `7b779f5` dan lolos 10 dari 10 dengan
+`--repeat-each 2`. Sesudahnya `bersih-akunkas.js` diterapkan (AU1a;
+cadangan
+`~/Documents/cadangan-db/db_produk-sebelum-bersih-2026-11-24.gz`): 27
+akun kas E2E non-aktif, 14 jurnal transfer Rp1, dan 42 baris mutasinya
+dihapus; saldo "Kas Kecil (Laci)" bergeser sebesar efek transfer uji
+(Rp1.056.005 menjadi Rp1.055.999) dengan rantai saldo berjalan
+konsisten, dan bukti butir 126 tidak disentuh. Harapan suite penuh
+berikutnya 813.
+
 **Baseline per utang pengujian kelompok reservasi, jadwal, dan tampilan**
 (24 November 2026, `2090dd8`, backend `ridho` lokal `1718030`): vitest
 1246 lolos dari 147 berkas (unit baru `tombolPanduanGudangTampil`).
