@@ -63,8 +63,10 @@ disengaja yang gagal.
    butir dilunasi 25 November 2026 (`referensi/utang-pengujian.md`), dengan
    temuan SR1a sampai SR5a (`modul/akses.md`) dan audit spec lama.
 3. **Menunggu keputusan pemilik proyek:**
-   - Nomor WhatsApp admin halaman Langganan (LG1a, `NOMOR_WA_ADMIN`
-     kosong di `features/langganan/data.ts`).
+   - Nomor WhatsApp admin halaman Langganan ditunda (LG1a, 26 November
+     2026; `NOMOR_WA_ADMIN` kosong di `features/langganan/data.ts`).
+   - Pajak per aset (`modul/pengaturan-outlet.md`), ditinjau bila
+     reservasi membutuhkannya.
    - Tujuh keputusan terbuka struk dapur (pasca-MVP;
      `referensi/rencana-struk-dapur.md`).
 4. **Menunggu backend** (`referensi/laporan-untuk-backend.md`): butir 190
@@ -85,7 +87,8 @@ disengaja yang gagal.
    Kirim Barang, beban per lokasi, cakupan penjualan; bagian Utang kecil
    di bawah), aplikasi kasir rilis (tombol Buka aplikasi,
    `modul/setup-akun.md`), VPS siap (Persiapan produksi di bawah), dan
-   pasca-MVP (foto profil, struk dapur).
+   pasca-MVP (struk dapur). Foto profil tidak dipakai (PF9a, 26 November
+   2026).
 
 Riwayat keadaan sebelum 24 November 2026 ada di
 `arsip/catatan-putaran.md` (Status yang selesai, dipindah 20 dan

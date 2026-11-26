@@ -52,7 +52,9 @@ dan PA3a serta PA12a sampai PA14a di `c824f18`.
   `/admin/akun/[id]/ubah`.
 - **PA13a: ubah dan hapus hanya untuk akun klien.** Akun admin baca-saja,
   sehingga admin tidak dapat mengunci dirinya sendiri atau admin lain dari
-  web.
+  web. Disengaja, bukan utang (pemilik proyek, 26 November 2026): password
+  akun admin diganti developer (pemilik proyek dan tim) lewat `.env`
+  backend atau langsung di basis data, tidak lewat web.
 - **PA14a: tombol Hapus Akun selalu tampil untuk akun klien**, nonaktif
   dengan keterangan selama akunnya aktif, karena backend hanya menghapus
   akun non-aktif.
@@ -232,7 +234,5 @@ dengan suite e2e penuh dijalankan sekali di akhir modul (keputusan PF6a):
 
 ### Utang kecil dari modul panel admin
 
-- Akun admin baca-saja di panel (PA13a): tidak ada jalur web untuk
-  mengubah atau mengganti password akun admin, termasuk miliknya sendiri.
 - Daftar toko (`GET /tenant`) dan kelola permission platform di luar
   cakupan putaran ini (PA2a).

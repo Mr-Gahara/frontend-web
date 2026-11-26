@@ -84,7 +84,8 @@ Diputuskan pemilik proyek pada 3 November 2026.
 
 - **LG1a: kontak admin lewat WhatsApp.** Nomornya belum ditetapkan;
   selama `NOMOR_WA_ADMIN` kosong, halaman menampilkan teks tanpa tautan,
-  bukan tautan palsu.
+  bukan tautan palsu. Penetapan nomornya ditunda (pemilik proyek,
+  26 November 2026).
 - **LG2a: hanya Owner, di menu Pengaturan.** Backend belum punya
   permission langganan, sehingga kartu dan halamannya dibatasi lewat role
   (`bolehLihatLangganan`), sebagai pengecualian dari gerbang berbasis
@@ -609,8 +610,9 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
 
 ## Utang terbuka
 
-- Nomor WhatsApp admin belum ditetapkan (LG1a); `NOMOR_WA_ADMIN` di
-  `features/langganan/data.ts` masih kosong.
+- Nomor WhatsApp admin ditunda (LG1a; pemilik proyek, 26 November 2026);
+  `NOMOR_WA_ADMIN` di `features/langganan/data.ts` tetap kosong sampai
+  nomornya diberikan.
 - Ajis diminta mendaftar layar aplikasi yang menyentuh pembuatan toko,
   pendaftaran Owner, dan `requireSetup`.
 - Domain alamat uji ber-OTP perlu dicocokkan dengan validator email

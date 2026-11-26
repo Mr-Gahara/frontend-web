@@ -46,8 +46,9 @@ rancangan butir 17, 21, dan 23.
   depan. Nomor yang dikosongkan dikirim sebagai null, dan format akhirnya
   diputuskan backend.
 - **PF9a: avatar memakai inisial nama**, di halaman profil dan kaki
-  sidebar; gambar contoh dari luar dibuang. Unggah foto profil bukan
-  kebutuhan MVP dan ditinjau setelah rilis.
+  sidebar; gambar contoh dari luar dibuang. Unggah foto profil tidak
+  dipakai (pemilik proyek, 26 November 2026; sebelumnya ditinjau setelah
+  rilis), sehingga inisial menjadi avatar tetap.
 - **Login tahap kedua dinamai "pengguna", bukan "pin"**, di nama berkas,
   komponen, skema, hook, dan tipe. Kata PIN hanya dipakai untuk isian PIN
   itu sendiri.
@@ -164,8 +165,6 @@ empat commit, dengan suite e2e penuh dijalankan sekali di akhir modul
 
 ### Utang kecil dari modul Profil, login, dan sidebar
 
-- Unggah foto profil belum ada; avatar memakai inisial (PF9a). Bukan
-  kebutuhan MVP, dan ditinjau setelah rilis.
 - Ganti pengguna (PU2a): sampai backend butir 190 diperbaiki, muat ulang
   atau tab baru sebelum pengguna berikutnya masuk meminta login email lagi
   (PU3a).
