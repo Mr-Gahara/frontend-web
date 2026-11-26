@@ -18,6 +18,7 @@ import {
   siapkanFixtureBuatReservasi,
 } from "../../../helpers/reservasi-uji";
 import { bayarLewatApi, metodeUji } from "../../../helpers/penjualan-uji";
+import { wajib } from "../../../helpers/pajak-uji";
 
 /*
  * Spec pembanding buat reservasi, ditulis dan dijalankan terhadap kode lama
@@ -170,15 +171,22 @@ test.describe("E2E — Reservasi › Buat reservasi", () => {
     let penjualanId: string | undefined;
     try {
       // buatBooking hanya mencari booking Aktif, sedangkan yang lampau dibaca Selesai.
-      const buat = await api<unknown>(page, auth, "POST", "/sesibooking", {
+      const buat = await api<{ penjualanID?: string }>(page, auth, "POST", "/sesibooking", {
         dataPelanggan: fx.pelangganId,
         items: [{ dataAset: fx.asetId, waktuMulai: lalu.toISOString(), waktuSelesai: new Date(lalu.getTime() + jam).toISOString() }],
       });
       expect(buat.status, "buat booking lampau: " + buat.pesan).toBeLessThan(300);
+      const penjualanBaru = buat.data?.penjualanID;
+      expect(penjualanBaru, "respons membawa penjualanID").toBeTruthy();
       type Ringkas = { id: string; waktuMulai: string; dataAset?: { id: string }; dataPenjualan?: { id: string } };
       const semua = await api<unknown[]>(page, auth, "GET", "/sesibooking");
+      // Dicari lewat penjualan milik run ini: booking VOID dari run sebelumnya
+      // dalam jam yang sama punya aset dan jam mulai yang sama.
       const b = (normalizeId(semua.data ?? []) as unknown as Ringkas[]).find(
-        (x) => x.dataAset?.id === fx.asetId && new Date(x.waktuMulai).getTime() === lalu.getTime(),
+        (x) =>
+          x.dataPenjualan?.id === penjualanBaru &&
+          x.dataAset?.id === fx.asetId &&
+          new Date(x.waktuMulai).getTime() === lalu.getTime(),
       );
       expect(b?.dataPenjualan?.id, "booking lampau terbaca beserta penjualannya").toBeTruthy();
       penjualanId = b!.dataPenjualan!.id;
@@ -264,6 +272,32 @@ test.describe("E2E — Reservasi › Buat reservasi", () => {
       });
       expect(penjualanId, "respons membawa penjualanID").toBeTruthy();
       await page.waitForURL(`**/dashboard/outlet/penjualan/${penjualanId}`);
+
+      // Tidak ada pajak per aset (PO19a, backend P89, B384, butir 195): baris
+      // booking tanpa pajak per item, sedangkan pajak per transaksi aktif tetap
+      // dikenakan pada penjualannya. Tenant uji punya pajak per transaksi aktif
+      // (spec pengaturan/kelola-pajak).
+      const pajak = wajib(
+        await api<{ tipePajak: boolean; statusPajak: boolean }[]>(page, auth, "GET", "/pajak"),
+        "GET /pajak",
+      );
+      const transaksiAktif = pajak.filter((p) => !p.tipePajak && p.statusPajak);
+      expect(transaksiAktif.length, "tenant uji punya pajak per transaksi aktif").toBeGreaterThan(0);
+      const detail = wajib(
+        await api<{
+          itemPenjualan: { rincianPajak: unknown[]; jumlahPajak: number; total: number; totalharga: number }[];
+          pajakTransaksi: unknown[];
+          jumlahPajakTransaksi: number;
+        }>(page, auth, "GET", `/penjualan/${penjualanId}`),
+        "GET /penjualan/:id",
+      );
+      expect(detail.itemPenjualan.length).toBeGreaterThan(0);
+      for (const item of detail.itemPenjualan) {
+        expect(item.rincianPajak, "baris booking tanpa pajak per item").toEqual([]);
+        expect(item.jumlahPajak).toBe(0);
+        expect(item.totalharga).toBe(item.total);
+      }
+      expect(detail.pajakTransaksi.length, "pajak per transaksi tetap dikenakan").toBe(transaksiAktif.length);
     } finally {
       await batalkanBooking(page, auth, penjualanId);
     }

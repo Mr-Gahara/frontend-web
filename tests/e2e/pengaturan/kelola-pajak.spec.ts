@@ -1,5 +1,5 @@
 import { expect, test, type Page, type Request } from "@playwright/test";
-import { JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
+import { BASIS, JAWAB_GAGAL, api, bukaDenganAuth, login } from "../../helpers/transfer-uji";
 import { cocok, unik } from "../../helpers/reservasi-uji";
 import { normalizeId } from "../../../lib/api/normalize";
 import {
@@ -393,6 +393,31 @@ test.describe("E2E — Kelola pajak", () => {
     } finally {
       for (const x of [id.a, id.b]) await hapusPajakUji(page, auth, x);
     }
+  });
+
+  test("relasi pajak ke aset ditolak, dan aset tidak punya relasi pajak (PO19a, B383, butir 195)", async ({ page }) => {
+    // Web tidak punya isian pajak per aset; jalur API-nya dibuktikan tertutup
+    // karena aplikasi atau klien lain dapat memanggilnya. Permintaan yang
+    // ditolak tidak membuat data.
+    const auth = await bukaDenganAuth(page, URL_PAJAK);
+    const semua = wajib(await api<PajakItem[]>(page, auth, "GET", "/pajak"), "GET /pajak");
+    // Validator menolak assetID sebelum pajaknya diperiksa; pajak per produk
+    // dipakai bila ada agar payload selain assetID sah.
+    const pajakID = (semua.find((p) => p.tipePajak) ?? semua[0])?.id ?? "0".repeat(24);
+    const aset = wajib(await api<{ id?: string; _id?: string }[]>(page, auth, "GET", "/aset"), "GET /aset");
+    expect(aset.length, "tenant uji punya aset").toBeGreaterThan(0);
+    const asetId = normalizeId(aset[0]).id as string;
+
+    const pasang = await page.request.post(`${BASIS}/api/produkpajak`, {
+      data: { pajakID, assetID: asetId },
+      headers: { Authorization: auth() },
+    });
+    expect(pasang.status()).toBe(400);
+    const galat = (await pasang.json()) as { errors?: unknown[] };
+    expect(JSON.stringify(galat.errors ?? []), "rincian menyebut assetID").toContain("Field tidak dikenal: assetID");
+    const relasi = await api<unknown[]>(page, auth, "GET", "/produkpajak/" + asetId);
+    expect(relasi.status).toBe(200);
+    expect(relasi.data, "aset tanpa relasi pajak").toEqual([]);
   });
 
   test("daftar pajak yang gagal dimuat menampilkan pesan dan dapat dicoba lagi", async ({ page }) => {
