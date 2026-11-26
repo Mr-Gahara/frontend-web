@@ -38,45 +38,34 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ### Mulai di sini (keadaan akhir 26 November 2026)
 
-**Keadaan:** web `main` bersih dan ter-push; backend `ridho` lokal
-`1718030` (tidak maju sejak 22 November 2026; diperiksa 26 November
-2026). Vitest 1308 lolos dari 155 berkas (1302 saat suite penuh, ditambah
-enam test integrasi `DataTable` sesudahnya). Suite e2e penuh terakhir
-26 November 2026 (`fb186f2`): 822 lolos, 3 gagal, 1 dilewati dari 826;
-ketiga yang gagal adalah merah disengaja butir 191, 192, 193 (Baseline
-`inti/pengujian.md`).
+**Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
+dari `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
+B384): seluruh laporan web 24 sampai 26 November 2026 dikerjakan
+backend, dan Ridho menyatakan pekerjaan backend MVP selesai; yang
+tersisa di sisi web adalah pembuktian baris `Menunggu verifikasi` di
+`docs/pengembangan/klien.md` backend dan tampilan struk tutup kasir.
+Langkah sesudah tarik belum dijalankan (PW01). Vitest 1308 lolos dari
+155 berkas. Suite e2e penuh terakhir 26 November 2026 (`fb186f2`,
+backend `1718030`): 822 lolos, 3 gagal (merah disengaja butir 191, 192,
+193), 1 dilewati dari 826 (Baseline `inti/pengujian.md`).
 
-**Putaran utang pengujian sampai suite penuh hijau selesai
-(26 November 2026).** Penutupnya LN20a: sumber lonceng mengikuti lokasi
-kerja staf (`modul/pemberitahuan.md`), dibuktikan per berkas
-`auth/ruang-lokasi-kerja`, `dashboard/lonceng-pemberitahuan`, dan
-`akses/syarat-rute`. LN21a menyusul 26 November 2026: lonceng mengikuti
-ruang yang dapat dimasuki (izin dashboard ruang dan lokasi kerja), sumber
-dan kartu disaring per ruang; ketiga spec itu lolos per berkas (9 dari 9),
-lalu suite penuh 26 November 2026 sesuai harapan: hanya tiga merah
-disengaja yang gagal.
+**Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
+`PW01` sampai `PW14`, satu paket per sesi lewat
+`/lanjut-frontend-web <kode>`. Ringkasnya:
 
-**Daftar pekerjaan terbuka:**
-
-1. **Pemberitahuan dan lonceng selesai di web** (bagian di bawah); sisa:
-   tiga kebutuhan backend.
-2. **Utang pengujian yang dapat dikerjakan sekarang:** tidak ada; seluruh
-   butir dilunasi 25 November 2026 (`referensi/utang-pengujian.md`), dengan
-   temuan SR1a sampai SR5a (`modul/akses.md`) dan audit spec lama. Sisa
-   utang kecil dilunasi 26 November 2026: teks kaki dan tombol halaman
-   `DataTable`, dan domain uji ber-OTP terhadap validator `register`
-   (`arsip/riwayat-pengujian.md`).
-3. **Menunggu keputusan pemilik proyek:** hanya tujuh keputusan terbuka
-   struk dapur (pasca-MVP; `referensi/rencana-struk-dapur.md`).
-4. **Menunggu backend** (`referensi/laporan-untuk-backend.md`): butir 190
-   sampai 195 (195: hapus jalur pajak per aset, PO19a), data struk laporan
-   tutup kasir (modal awal opsional, penjualan dan pembayaran seluruh
-   metode terhubung ke sesi kasir,
-   endpoint laporan), dan tiga kebutuhan lonceng (produk dapat dijual di
-   ringkasan, perangkat menunggu izin se-toko, surat jalan per arah di
-   ringkasan gudang). Langkah pertama setiap sesi memeriksa apakah
-   cabang backend maju; bila maju, buktikan perbaikannya lewat spec
-   merah terkait. Backend dijalankan dengan env inline
+1. **Sekarang:** PW01 langkah sesudah tarik dan dokumen sinkron
+   (prasyarat), PW02 bukti merah disengaja 191, 192, 193, PW03 Ganti
+   pengguna (190), PW04 Rekap Absensi kosong (194), PW05 booking tanpa
+   pajak aset (195), PW06 lonceng pengembalian di gudang, dan PW11 sampai
+   PW13 cetak, unduh, dan e2e struk tutup kasir sesudah PW10.
+2. **Diawali dialog keputusan:** PW07 lonceng produk dari ringkasan,
+   PW08 lonceng perangkat menunggu izin, PW09 data sesi kasir tahap 1 dan
+   Pindah Dana buka kasir, dan PW10 letak serta tampilan laporan periode
+   struk tutup kasir (wajib MVP).
+3. **Menunggu izin pemilik proyek:** PW14 suite e2e penuh.
+4. **Menunggu backend:** tidak ada. Langkah pertama setiap sesi tetap
+   memeriksa apakah cabang backend maju; bila maju, petakan paket baru
+   di `referensi/antrean-web.md`. Backend dijalankan dengan env inline
    (`inti/pengujian.md`, Menjalankan layanan uji), dan kodenya tidak
    diubah dari sisi frontend:
 
@@ -99,15 +88,11 @@ Riwayat keadaan sebelum 24 November 2026 ada di
 ### Pemberitahuan dan lonceng (25 November 2026)
 
 Keputusan LN1a sampai LN21a di `modul/pemberitahuan.md`. Seluruh sumber
-LN4a terpasang (tahap 1 sampai 5), kecuali perangkat menunggu izin, yang
-menunggu backend (LN8a). Yang masih terbuka:
-
-- Laporan backend 25 November 2026 (`referensi/laporan-untuk-backend.md`):
-  hitungan produk yang dapat dijual di ringkasan dashboard (lalu lonceng
-  pindah dari daftar produk lengkap), daftar perangkat menunggu izin
-  se-toko, dan surat jalan dikirim per arah di ringkasan gudang (LN17a).
-- Suite e2e penuh sesudah lonceng (LN20a, LN21a) dijalankan 26 November
-  2026: hanya tiga merah disengaja yang gagal.
+LN4a terpasang (tahap 1 sampai 5), kecuali perangkat menunggu izin.
+Ketiga kebutuhan backend selesai di `6478d29` (B380 sampai B382); web
+menyesuaikan lewat PW06 sampai PW08 (`referensi/antrean-web.md`). Suite
+e2e penuh sesudah lonceng (LN20a, LN21a) dijalankan 26 November 2026:
+hanya tiga merah disengaja yang gagal.
 
 ### MVP: struk laporan tutup kasir (dicatat 24 November 2026)
 
@@ -121,8 +106,12 @@ sesi kasir, sehingga nominal per metode, jumlah transaksi, dan produk
 terjual per sesi belum dapat disajikan. Rencana lengkap, peta data per
 isi struk, dan sembilan keputusan terbuka (termasuk arti modal kosong,
 karena nominal buka sekarang memicu mutasi selisih laci) di
-`referensi/rencana-struk-tutup-kasir.md`. Web menunggu endpoint laporan
-dari backend.
+`referensi/rencana-struk-tutup-kasir.md`. Backend menyelesaikannya di
+`6478d29`: modal opsional dan laci dikosongkan sebagai pindah dana
+(B371), penjualan dan pembayaran seluruh metode bersesi (B373, B374),
+dan laporan per periode (gabungan sesi di outlet, per shift atau hari
+toko) di `GET /sesikasir/periode/:id` beserta unduhannya (B375, B376).
+Pekerjaan web: PW09 sampai PW13 (`referensi/antrean-web.md`).
 
 ### Pasca-MVP: struk dapur (dicatat 24 November 2026)
 

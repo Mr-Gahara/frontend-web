@@ -116,6 +116,7 @@ Semua dokumen modul berlabel **Jarang**: bertambah saat modulnya dikerjakan.
 | `referensi/laporan-untuk-backend.md` | Laporan lengkap temuan backend yang masih terbuka: bukti, penyebab, kenapa penting, saran, penanganan sementara, dan prioritas | **Sering**: bertambah setiap ada temuan backend; yang dibuktikan diperbaiki dipindah ke arsip |
 | `referensi/rencana-struk-tutup-kasir.md` | Rencana struk laporan tutup kasir (wajib MVP): susunan struk, modal awal, peta data, serta bagian backend, mobile, dan web | **Jarang**: bagian backend dan mobile dipindah ke backend lalu dihapus |
 | `referensi/rencana-struk-dapur.md` | Rencana fitur struk dapur pasca-MVP: tujuan, alur, data, serta bagian backend, mobile, dan web | **Jarang**: bagian backend dan mobile dipindah ke backend lalu dihapus |
+| `referensi/antrean-web.md` | Antrean paket pekerjaan web berkode `PWnn` (dibaca `/lanjut-frontend-web`): rincian tiap paket, perubahan backend tanpa pekerjaan web, dan yang ditunda | **Sering**: status paket setiap paket selesai |
 
 ### Kontrak
 

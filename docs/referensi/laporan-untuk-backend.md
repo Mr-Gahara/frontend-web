@@ -18,6 +18,12 @@ Butir diurutkan menurut kepentingan dan ditutup tabel prioritas. Sejak
 16 November 2026 Ridho memimpin seluruh pekerjaan backend; pemilik modul
 tetap disebut agar jelas modulnya.
 
+**Keadaan 26 November 2026:** seluruh butir dan kebutuhan di bawah
+dikerjakan backend `6478d29` (AR46 sampai AR51, B369 sampai B384) dan
+berstatus `Menunggu verifikasi` di `docs/pengembangan/klien.md` backend.
+Setiap butir dipindah ke `arsip/laporan-backend.md` sesudah web
+membuktikannya lewat paket PW02 sampai PW13 (`referensi/antrean-web.md`).
+
 ## Laporan 24 November 2026 (utang pengujian)
 
 Diperiksa terhadap backend `ridho` lokal `1718030`.
