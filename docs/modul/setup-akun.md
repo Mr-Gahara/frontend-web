@@ -615,9 +615,6 @@ Diperbarui dari `nizar` `4759208` pada 4 November 2026:
   nomornya diberikan.
 - Ajis diminta mendaftar layar aplikasi yang menyentuh pembuatan toko,
   pendaftaran Owner, dan `requireSetup`.
-- Domain alamat uji ber-OTP perlu dicocokkan dengan validator email
-  `register`, karena buat akun klien oleh admin menolak domain disposable
-  (`kontrak/payload.md`).
 - Tombol "Buka aplikasi" di halaman setup selesai belum ada, karena
   aplikasi kasir belum rilis. Wajib ada saat aplikasi rilis: tombol
   membuka aplikasi lewat deep link, dan bila aplikasi belum terpasang

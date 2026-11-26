@@ -7,6 +7,25 @@ Lapis arsip: kirim hanya bila riwayatnya dibutuhkan. Dibuat 25 Oktober 2026 dari
 Riwayat baseline, riwayat pelepasan fixme, utang pengujian yang lunas, dan
 kejadian sesekali yang tidak berulang.
 
+## Utang yang dilunasi 26 November 2026
+
+- **Teks kaki dan nama tombol halaman `DataTable` hanya terbukti lewat
+  spec e2e pemakainya** (`modul/ui-ux.md`, sejak 11 Oktober 2026).
+  Dilunasi dengan enam test integrasi di
+  `tests/integration/components/data-table/data-table.test.tsx`: Previous
+  dan Next di ujung halaman klien, keadaan kosong dan memuat, pencarian,
+  angka dan aksi paginasi server, serta tombol mati selama server sibuk
+  dan jumlah halaman 0 tampil sebagai 1. Dua mutasi sementara pada
+  `components/ui/data-table.tsx` (penjaga `sibuk` dan `Math.max(1, …)`)
+  membuat test merah, lalu dipulihkan. Label sel di HP sudah teruji sejak
+  `2bcb1ce`.
+- **Domain alamat uji ber-OTP terhadap validator email `register`**
+  (`modul/setup-akun.md`). Diperiksa terhadap `validateRegister` backend
+  `ridho` lokal `1718030`: seluruh domain spec (`contoh.test`,
+  `kopisenja.id`, `tachyon-uji.com`, `uji.test`, dan lainnya) diterima;
+  hanya `mailinator.com` yang ditolak, dan itu memang skenario penolakan
+  di `admin/akun-klien`. Tidak ada perubahan kode.
+
 ## Riwayat baseline
 
 Dipindah dari `referensi/playwright.md` (Perintah verifikasi yang biasa dipakai) pada 25 Oktober 2026.

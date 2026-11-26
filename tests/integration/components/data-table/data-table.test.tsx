@@ -101,3 +101,92 @@ describe("DataTable, kartu HP dan tabel rincian", () => {
     expect(screen.queryByRole("button", { name: "Next" })).not.toBeInTheDocument();
   });
 });
+
+describe("DataTable, teks kaki dan tombol halaman", () => {
+  const sebelumnya = () => screen.getByRole("button", { name: "Previous" });
+  const berikutnya = () => screen.getByRole("button", { name: "Next" });
+
+  it("klien: Previous mati di halaman pertama, Next mati di halaman terakhir, dan keduanya berpindah satu halaman", async () => {
+    const user = userEvent.setup();
+    render(<DataTable columns={kolom} data={data} />);
+    expect(sebelumnya()).toBeDisabled();
+    expect(berikutnya()).toBeEnabled();
+
+    for (let i = 0; i < 4; i++) await user.click(berikutnya());
+    expect(screen.getByText("Halaman 5 dari 5")).toBeInTheDocument();
+    expect(barisTubuh()).toHaveLength(5);
+    expect(barisTubuh()[0]).toHaveTextContent("Baris 41");
+    expect(berikutnya()).toBeDisabled();
+    expect(sebelumnya()).toBeEnabled();
+
+    await user.click(sebelumnya());
+    expect(screen.getByText("Halaman 4 dari 5")).toBeInTheDocument();
+    expect(barisTubuh()[0]).toHaveTextContent("Baris 31");
+  });
+
+  it("tanpa data: 0 total data, Halaman 1 dari 1, kedua tombol mati, dan pesan kosong dari pemakai", () => {
+    render(<DataTable columns={kolom} data={[]} emptyMessage="Belum ada pajak." />);
+    expect(screen.getByText("0 total data")).toBeInTheDocument();
+    expect(screen.getByText("Halaman 1 dari 1")).toBeInTheDocument();
+    expect(screen.getByText("Belum ada pajak.")).toBeInTheDocument();
+    expect(sebelumnya()).toBeDisabled();
+    expect(berikutnya()).toBeDisabled();
+  });
+
+  it("memuat: teks Memuat data... menggantikan baris dan pesan kosong", () => {
+    render(<DataTable columns={kolom} data={[]} loading emptyMessage="Belum ada pajak." />);
+    expect(screen.getByText("Memuat data...")).toBeInTheDocument();
+    expect(screen.queryByText("Belum ada pajak.")).not.toBeInTheDocument();
+  });
+
+  it("pencarian: total data dan jumlah halaman mengikuti baris yang tersaring", async () => {
+    const user = userEvent.setup();
+    render(<DataTable columns={kolom} data={data} searchKey="nama" searchPlaceholder="Cari nama..." />);
+    await user.type(screen.getByRole("searchbox", { name: "Cari nama" }), "Baris 1");
+    // Baris 1, 10 sampai 19: sebelas baris.
+    expect(screen.getByText("11 total data")).toBeInTheDocument();
+    expect(screen.getByText("Halaman 1 dari 2")).toBeInTheDocument();
+  });
+
+  it("server: angka kaki dari pemakai, baris tidak dipotong, dan tombol meminta halaman sebelah", async () => {
+    const user = userEvent.setup();
+    const diminta: number[] = [];
+    render(
+      <DataTable
+        columns={kolom}
+        data={data.slice(0, 20)}
+        paginasiServer={{ halaman: 2, jumlahHalaman: 3, total: 45, ukuran: 20, onGantiHalaman: (h) => diminta.push(h) }}
+      />,
+    );
+    expect(screen.getByText("45 total data")).toBeInTheDocument();
+    expect(screen.getByText("Halaman 2 dari 3")).toBeInTheDocument();
+    expect(barisTubuh()).toHaveLength(20);
+
+    await user.click(sebelumnya());
+    await user.click(berikutnya());
+    expect(diminta).toEqual([1, 3]);
+  });
+
+  it("server: kedua tombol mati selama sibuk, dan jumlah halaman 0 tampil sebagai 1", () => {
+    const { rerender } = render(
+      <DataTable
+        columns={kolom}
+        data={data.slice(0, 10)}
+        paginasiServer={{ halaman: 2, jumlahHalaman: 3, total: 45, ukuran: 10, sibuk: true, onGantiHalaman: () => {} }}
+      />,
+    );
+    expect(sebelumnya()).toBeDisabled();
+    expect(berikutnya()).toBeDisabled();
+
+    rerender(
+      <DataTable
+        columns={kolom}
+        data={[]}
+        paginasiServer={{ halaman: 1, jumlahHalaman: 0, total: 0, ukuran: 10, onGantiHalaman: () => {} }}
+      />,
+    );
+    expect(screen.getByText("Halaman 1 dari 1")).toBeInTheDocument();
+    expect(sebelumnya()).toBeDisabled();
+    expect(berikutnya()).toBeDisabled();
+  });
+});

@@ -1020,8 +1020,9 @@ sebelum diterapkan (`arsip/pelajaran.md`, Pelajaran dari fase UI/UX).
 
 ## Utang terbuka
 
-### Utang kecil dari fase UI/UX 11 Oktober 2026
-
-- `DataTable` punya test integrasi untuk pemilih ukuran klien sejak
-  `4677447`. Teks kaki lainnya, nama tombol halaman, dan label sel di HP
-  masih hanya terbukti lewat spec e2e halaman pemakainya.
+Tidak ada utang terbuka per 26 November 2026. Teks kaki dan tombol halaman
+`DataTable` (klien dan server: total data, Halaman N dari M, Previous dan
+Next mati di ujung dan selama server sibuk, keadaan kosong, memuat, dan
+pencarian) teruji integrasi sejak 26 November 2026, dan label sel di HP
+sejak `2bcb1ce` (`tests/integration/components/data-table/data-table.test.tsx`;
+`arsip/riwayat-pengujian.md`).
