@@ -560,7 +560,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Aturan: validateProdukPajakPayload (validators/produkPajakValidator.js) di route dan controller: tepat satu di antara `produkID` dan `assetID` berupa ObjectId yang sah, dan `pajakID` wajib ObjectId. Dikoreksi 1 Oktober 2026 terhadap backend `465b438`
 - Wajib dari klien: `pajakID`, serta salah satu dari `produkID` atau `assetID`
 - Aturan service (`produkPajakService.assignPajak`): relasi di-upsert per `{ produkID, tenantID }`, sehingga memasang pajak lain menggantikan relasi lama, termasuk relasi ke pajak nonaktif yang tidak terlihat di `GET` (butir 93); nama pajak disalin ke relasi. Pajak dicari tanpa `tenantID`, tipe dan statusnya tidak diperiksa, dan setiap galat dijawab 500 "Gagal mengatur pajak produk." (butir 80). Relasi tidak memperbarui `pajakList` produk (butir 88)
-- Web mengirim `{ produkID, pajakID }` untuk pajak per produk yang aktif saja (keputusan PO6a, `e0aaeca`)
+- Web mengirim `{ produkID, pajakID }` untuk pajak per produk yang aktif saja (keputusan PO6a, `e0aaeca`), dan tidak pernah mengirim `assetID`: aset tidak punya pajak khusus (PO19a, 26 November 2026); penghapusan jalur `assetID` dilaporkan ke backend (`temuan.md` butir 195)
 - Respons 201 dengan `data` dokumen relasi
 - Dibaca controller dari body: seluruh body, dengan `tenantID` dari sesi
 - Diisi server: `tenantID`

@@ -40,7 +40,8 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 **Keadaan:** web `main` bersih dan ter-push; backend `ridho` lokal
 `1718030` (tidak maju sejak 22 November 2026; diperiksa 26 November
-2026). Vitest 1302 lolos dari 155 berkas. Suite e2e penuh terakhir
+2026). Vitest 1308 lolos dari 155 berkas (1302 saat suite penuh, ditambah
+enam test integrasi `DataTable` sesudahnya). Suite e2e penuh terakhir
 26 November 2026 (`fb186f2`): 822 lolos, 3 gagal, 1 dilewati dari 826;
 ketiga yang gagal adalah merah disengaja butir 191, 192, 193 (Baseline
 `inti/pengujian.md`).
@@ -61,15 +62,16 @@ disengaja yang gagal.
    tiga kebutuhan backend.
 2. **Utang pengujian yang dapat dikerjakan sekarang:** tidak ada; seluruh
    butir dilunasi 25 November 2026 (`referensi/utang-pengujian.md`), dengan
-   temuan SR1a sampai SR5a (`modul/akses.md`) dan audit spec lama.
-3. **Menunggu keputusan pemilik proyek:**
-   - Nomor WhatsApp admin halaman Langganan ditunda (LG1a, 26 November
-     2026; `NOMOR_WA_ADMIN` kosong di `features/langganan/data.ts`).
-   - Tujuh keputusan terbuka struk dapur (pasca-MVP;
-     `referensi/rencana-struk-dapur.md`).
+   temuan SR1a sampai SR5a (`modul/akses.md`) dan audit spec lama. Sisa
+   utang kecil dilunasi 26 November 2026: teks kaki dan tombol halaman
+   `DataTable`, dan domain uji ber-OTP terhadap validator `register`
+   (`arsip/riwayat-pengujian.md`).
+3. **Menunggu keputusan pemilik proyek:** hanya tujuh keputusan terbuka
+   struk dapur (pasca-MVP; `referensi/rencana-struk-dapur.md`).
 4. **Menunggu backend** (`referensi/laporan-untuk-backend.md`): butir 190
-   sampai 195 (195: hapus jalur pajak per aset, PO19a), data struk laporan tutup kasir (modal awal opsional,
-   penjualan dan pembayaran seluruh metode terhubung ke sesi kasir,
+   sampai 195 (195: hapus jalur pajak per aset, PO19a), data struk laporan
+   tutup kasir (modal awal opsional, penjualan dan pembayaran seluruh
+   metode terhubung ke sesi kasir,
    endpoint laporan), dan tiga kebutuhan lonceng (produk dapat dijual di
    ringkasan, perangkat menunggu izin se-toko, surat jalan per arah di
    ringkasan gudang). Langkah pertama setiap sesi memeriksa apakah
@@ -85,8 +87,10 @@ disengaja yang gagal.
    Kirim Barang, beban per lokasi, cakupan penjualan; bagian Utang kecil
    di bawah), aplikasi kasir rilis (tombol Buka aplikasi,
    `modul/setup-akun.md`), VPS siap (Persiapan produksi di bawah), dan
-   pasca-MVP (struk dapur). Foto profil tidak dipakai (PF9a, 26 November
-   2026).
+   pasca-MVP (struk dapur). Nomor WhatsApp admin halaman Langganan ditunda
+   (LG1a, 26 November 2026; `NOMOR_WA_ADMIN` kosong di
+   `features/langganan/data.ts`). Foto profil tidak dipakai (PF9a,
+   26 November 2026).
 
 Riwayat keadaan sebelum 24 November 2026 ada di
 `arsip/catatan-putaran.md` (Status yang selesai, dipindah 20 dan

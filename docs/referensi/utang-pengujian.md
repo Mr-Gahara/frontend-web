@@ -166,9 +166,11 @@ skip bersyarat data, dan catatan proses.
   ulang khusus. Urutan server (`urutanServer`, `a4304ce`) juga hanya
   dipakai dan teruji di daftar penjualan. Sejak `93490bb` `DataTable`
   menampilkan kartu per baris dan susunan kartu di HP. Label kartu HP,
-  `lebarBungkus`, dan prop `rincian` punya test integrasi sejak `2bcb1ce`
-  (`tests/integration/components/data-table/data-table.test.tsx`); susunan
-  HP dilihat lewat tangkapan, bukan spec.
+  `lebarBungkus`, dan prop `rincian` punya test integrasi sejak `2bcb1ce`,
+  serta teks kaki dan tombol halaman mode klien maupun server sejak
+  26 November 2026, termasuk angka dan aksi paginasi server tanpa daftar
+  penjualan (`tests/integration/components/data-table/data-table.test.tsx`);
+  susunan HP dilihat lewat tangkapan, bukan spec.
 - **Password salah pada akun uji menambah hitungan pembatas login**, dan
   login sukses tidak menguranginya. Spec login gagal lebih awal bila sisa
   kuota di header `RateLimit` di bawah 3; menjalankan spec auth berulang
@@ -206,6 +208,12 @@ skip bersyarat data, dan catatan proses.
 
 ## Data uji yang menetap dan data per run
 
+Pembersihan terakhir 26 November 2026 lewat `bersih-data-uji.js`
+(cadangan `db_produk-sebelum-bersih-2026-11-26.gz`): 11 akun kas, 18
+metode, 61 diskon, 91 shift, dan 65 pelanggan uji yang tidak dirujuk
+dokumen lain (`inti/status.md`, Catatan data development). Angka per
+tanggal di butir di bawah adalah pembersihan sebelumnya.
+
 - **Terima penerimaan yang berhasil** diuji sungguhan lewat UI sejak
   `6e314ae` (keputusan PB12a), termasuk jumlah 0. Setiap run menambah stok
   outlet secara permanen, dan surat jalan DITERIMA tidak dapat dibatalkan.
@@ -224,7 +232,11 @@ skip bersyarat data, dan catatan proses.
 - **Booking uji dibersihkan lewat API**: pembayaran PAID-nya dibatalkan,
   lalu penjualannya di-void (PB8a), walau web kini punya jalur void untuk
   penjualan booking yang belum dibayar (PB2a). Setiap run spec daftar
-  reservasi meninggalkan penjualan booking VOID dan booking VOID.
+  reservasi meninggalkan penjualan booking VOID dan booking VOID. Per
+  26 November 2026 tenant uji punya 995 penjualan booking VOID dengan 181
+  pembayaran terhubung; tidak dibersihkan, karena riwayat keuangan yang
+  saling terkait dan belum ada skrip yang aman (`inti/status.md`, Catatan
+  data development).
 - **Akun kas uji menumpuk sebagai non-aktif**, satu per run spec
   keuangan, lima per run spec ubah akun kas (`1bc76f4`), dua per run
   spec Pindah Dana (`e53c016`), dan satu per run spec tutup akun

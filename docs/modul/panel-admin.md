@@ -197,7 +197,9 @@ dengan suite e2e penuh dijalankan sekali di akhir modul (keputusan PF6a):
   Oktober 2026) dilewati (PA5a, PA6a, `inti/pengujian.md`).
 - Password akun admin di basis data development diganti lewat model
   backend pada 2 Oktober 2026, karena password lamanya tidak diketahui dan
-  tidak ada jalur API untuk itu tanpa login admin.
+  tidak ada jalur API untuk itu tanpa login admin. Cara ini kini menjadi
+  jalur resmi (PA13a, 26 November 2026): password admin diganti developer
+  lewat `.env` backend atau basis data, tidak lewat web.
 - Temuan backend baru: butir 113 sampai 122, dilaporkan 3 Oktober 2026
   (`arsip/laporan-backend.md`). Kontrak akun admin ditambahkan ke
   `kontrak/endpoint.md` dan `kontrak/payload.md`.
