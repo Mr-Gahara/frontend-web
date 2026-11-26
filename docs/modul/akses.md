@@ -334,7 +334,6 @@ backend `yoga` `fc29433`; `origin/yoga` tidak maju sejak itu.
 
 ## Utang terbuka
 
-### Utang kecil dari gerbang rute
-
-- Syarat 44 entri baru diturunkan dari nama hook dan kontrak, bukan dari
-  trace per halaman (`referensi/utang-pengujian.md`).
+Tidak ada utang terbuka per 26 November 2026. Syarat 44 entri baru
+`IZIN_HALAMAN` dibuktikan lewat trace nyata `akses/syarat-rute` dan
+dilunasi 25 November 2026 (`arsip/riwayat-pengujian.md`).
