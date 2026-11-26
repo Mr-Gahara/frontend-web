@@ -12,23 +12,16 @@ riwayat baseline dan utang yang lunas di `arsip/riwayat-pengujian.md`.
 
 ## Baseline
 
-**Suite penuh 25 November 2026** (web `eb4eb4c`, backend `ridho` lokal
-`1718030`, pukul 16.55 sampai 17.51 WIB, sesudah sepuluh utang pengujian
-25 November 2026 dan lonceng tahap 1 sampai 5): vitest 1287 lolos dari
-154 berkas, dan e2e 815 lolos, 9 gagal, dan 1 dilewati dari 825. Termasuk
-spec ber-OTP. Dari sembilan yang gagal: tiga merah disengaja (butir 191,
-192, 193); satu sekali jalan (`auth/sidebar-pengguna`, lolos diulang);
-empat terganggu permintaan lonceng dan diperbaiki di sisi spec
-(`tampilan/bayangan-baris` dua, `pengguna/absensi-widget`,
-`auth/gerbang-rute`; `06bdab3`, ketiga spec 7 lolos); dan satu
-`auth/ruang-lokasi-kerja`, karena lonceng meminta sumber outlet di ruang
-gudang. Yang terakhir diselesaikan LN20a (26 November 2026,
-`modul/pemberitahuan.md`): vitest 1296 lolos dari 155 berkas, dan per
-berkas `auth/ruang-lokasi-kerja` 5 lolos (test LN20a baru merah 11
-permintaan outlet terhadap kode lama), `dashboard/lonceng-pemberitahuan`
-dan `akses/syarat-rute` 4 lolos. Suite penuh tidak diulang
-(`inti/cara-kerja.md`, langkah 5). Harapan suite penuh berikutnya 826,
-dengan tiga merah disengaja.
+**Suite penuh 26 November 2026** (web `fb186f2`, backend `ridho` lokal
+`1718030`, pukul 11.55 sampai 12.47 WIB, sesudah LN20a dan LN21a): vitest
+1302 lolos dari 155 berkas, dan e2e 822 lolos, 3 gagal, dan 1 dilewati
+dari 826. Termasuk spec ber-OTP. Ketiga yang gagal adalah merah disengaja
+yang menunggu backend: template General Manajer di `akses/template-role`
+(butir 191, "permissions maksimal 120 item"), revisi surat jalan per
+kemasan di `inventaris/bahanBaku/konversi-satuan` (butir 192, 1 kaleng
+tersimpan 1, bukan 290 ml), dan booking lewat jam yang masih terbaca
+Aktif di `reservasi/daftar/tandai-selesai` (butir 193). Tidak ada
+kegagalan lain; harapan 826 tercapai.
 
 Baseline 16 dan 17 November 2026, dari penyesuaian backend `4a19be8`
 sampai suite penuh per penyesuaian backend `3570bd4`, dan baseline
@@ -37,7 +30,7 @@ penyesuaian backend `ridho` `b5b367a` (21 Oktober 2026), dipindah ke
 `arsip/riwayat-pengujian.md` (Riwayat baseline) pada 14, 17, dan
 20 November 2026. Baseline 18 sampai 24 November 2026, dari pembuktian
 kontrak sampai utang pengujian per kelompok, dipindah ke arsip yang sama
-pada 24 November 2026, dan suite penuh 24 November 2026 pada
+pada 24 November 2026, dan suite penuh 24 dan 25 November 2026 pada
 26 November 2026; yang tersisa di atas hanya suite penuh terbaru.
 
 ## Kredensial uji

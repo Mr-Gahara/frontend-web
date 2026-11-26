@@ -41,9 +41,9 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 **Keadaan:** web `main` bersih dan ter-push; backend `ridho` lokal
 `1718030` (tidak maju sejak 22 November 2026; diperiksa 26 November
 2026). Vitest 1302 lolos dari 155 berkas. Suite e2e penuh terakhir
-25 November 2026 (`eb4eb4c`): 815 lolos, 9 gagal, 1 dilewati dari 825;
-seluruh kegagalan selain tiga merah disengaja sudah dibereskan
-(Baseline `inti/pengujian.md`).
+26 November 2026 (`fb186f2`): 822 lolos, 3 gagal, 1 dilewati dari 826;
+ketiga yang gagal adalah merah disengaja butir 191, 192, 193 (Baseline
+`inti/pengujian.md`).
 
 **Putaran utang pengujian sampai suite penuh hijau selesai
 (26 November 2026).** Penutupnya LN20a: sumber lonceng mengikuti lokasi
@@ -51,15 +51,14 @@ kerja staf (`modul/pemberitahuan.md`), dibuktikan per berkas
 `auth/ruang-lokasi-kerja`, `dashboard/lonceng-pemberitahuan`, dan
 `akses/syarat-rute`. LN21a menyusul 26 November 2026: lonceng mengikuti
 ruang yang dapat dimasuki (izin dashboard ruang dan lokasi kerja), sumber
-dan kartu disaring per ruang; ketiga spec itu lolos per berkas (9 dari 9).
-Harapan suite penuh berikutnya 826, dengan tiga
-merah disengaja (butir 191, 192, 193); suite penuh menunggu izin pemilik
-proyek.
+dan kartu disaring per ruang; ketiga spec itu lolos per berkas (9 dari 9),
+lalu suite penuh 26 November 2026 sesuai harapan: hanya tiga merah
+disengaja yang gagal.
 
 **Daftar pekerjaan terbuka:**
 
 1. **Pemberitahuan dan lonceng selesai di web** (bagian di bawah); sisa:
-   tiga kebutuhan backend dan suite e2e penuh yang menunggu izin.
+   tiga kebutuhan backend.
 2. **Utang pengujian yang dapat dikerjakan sekarang:** tidak ada; seluruh
    butir dilunasi 25 November 2026 (`referensi/utang-pengujian.md`), dengan
    temuan SR1a sampai SR5a (`modul/akses.md`) dan audit spec lama.
@@ -102,8 +101,8 @@ menunggu backend (LN8a). Yang masih terbuka:
   hitungan produk yang dapat dijual di ringkasan dashboard (lalu lonceng
   pindah dari daftar produk lengkap), daftar perangkat menunggu izin
   se-toko, dan surat jalan dikirim per arah di ringkasan gudang (LN17a).
-- Suite e2e penuh sesudah lonceng belum dijalankan (menunggu izin pemilik
-  proyek); spec terdampak per berkas sudah dijalankan.
+- Suite e2e penuh sesudah lonceng (LN20a, LN21a) dijalankan 26 November
+  2026: hanya tiga merah disengaja yang gagal.
 
 ### MVP: struk laporan tutup kasir (dicatat 24 November 2026)
 

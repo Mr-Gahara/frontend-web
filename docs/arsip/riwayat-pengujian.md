@@ -20,7 +20,27 @@ bersih-bersih dokumentasi: baseline 18 sampai 24 November 2026, terbaru
 lebih dulu.
 
 Suite penuh 24 November 2026 dipindah dari `inti/pengujian.md` pada
-26 November 2026, digantikan suite penuh 25 November 2026.
+26 November 2026, digantikan suite penuh 25 November 2026; suite penuh
+25 November 2026 dipindah pada hari yang sama, digantikan suite penuh
+26 November 2026.
+
+**Suite penuh 25 November 2026** (web `eb4eb4c`, backend `ridho` lokal
+`1718030`, pukul 16.55 sampai 17.51 WIB, sesudah sepuluh utang pengujian
+25 November 2026 dan lonceng tahap 1 sampai 5): vitest 1287 lolos dari
+154 berkas, dan e2e 815 lolos, 9 gagal, dan 1 dilewati dari 825. Termasuk
+spec ber-OTP. Dari sembilan yang gagal: tiga merah disengaja (butir 191,
+192, 193); satu sekali jalan (`auth/sidebar-pengguna`, lolos diulang);
+empat terganggu permintaan lonceng dan diperbaiki di sisi spec
+(`tampilan/bayangan-baris` dua, `pengguna/absensi-widget`,
+`auth/gerbang-rute`; `06bdab3`, ketiga spec 7 lolos); dan satu
+`auth/ruang-lokasi-kerja`, karena lonceng meminta sumber outlet di ruang
+gudang. Yang terakhir diselesaikan LN20a (26 November 2026,
+`modul/pemberitahuan.md`): vitest 1296 lolos dari 155 berkas, dan per
+berkas `auth/ruang-lokasi-kerja` 5 lolos (test LN20a baru merah 11
+permintaan outlet terhadap kode lama), `dashboard/lonceng-pemberitahuan`
+dan `akses/syarat-rute` 4 lolos. Suite penuh tidak diulang
+(`inti/cara-kerja.md`, langkah 5). Harapan suite penuh berikutnya 826,
+dengan tiga merah disengaja.
 
 **Suite penuh 24 November 2026** (web `13a3e93`, backend `ridho` lokal
 `1718030`, pukul 22.37 sampai 23.24 WIB, reporter `line,json`, charger
