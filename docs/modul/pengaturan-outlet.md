@@ -200,6 +200,14 @@ Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend 
   jalur itu, dan data development tidak punya relasi per aset
   (26 November 2026). Penghapusan jalurnya dilaporkan ke backend
   (`kontrak/temuan.md` butir 195). Pajak per produk tidak berubah.
+  Contoh pemilik proyek: sewa meja biliar Rp100.000 dengan pajak global
+  10% dibayar Rp110.000; sewa meja ditambah makanan yang totalnya
+  Rp100.000 juga dibayar Rp110.000. Di backend `1718030` booking selalu
+  menjadi penjualan tersendiri (`jenisPenjualan: "booking"`, hanya baris
+  booking), sehingga contoh kedua tercatat sebagai dua penjualan: booking
+  dan makanan, masing-masing dikenai pajak global dari totalnya. Jumlah
+  pajaknya sama (Rp10.000), dengan kemungkinan selisih pembulatan Rp1
+  karena pajak dibulatkan per penjualan.
 
 ## Catatan
 
