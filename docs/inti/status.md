@@ -45,21 +45,22 @@ backend, dan Ridho menyatakan pekerjaan backend MVP selesai; yang
 tersisa di sisi web adalah pembuktian baris `Menunggu verifikasi` di
 `docs/pengembangan/klien.md` backend dan tampilan struk tutup kasir.
 Langkah sesudah tarik selesai (PW01: permission selaras, migrasi
-`hapusPajakAset.js` diterapkan, index baru terbentuk). PW02 sampai PW05
+`hapusPajakAset.js` diterapkan, index baru terbentuk). PW02 sampai PW06
 selesai: ketiga merah disengaja lolos tanpa diubah, Ganti pengguna
 bertahan dimuat ulang (`569c3f9`), Rekap Absensi boleh kosong
-(`12ded07`), dan booking tanpa pajak per aset dibuktikan (`c214786`).
-Vitest 1312 lolos dari 156 berkas. Suite e2e penuh terakhir 26 November
-2026 (`fb186f2`, backend `1718030`): 822 lolos, 3 gagal (merah disengaja
-butir 191, 192, 193, kini lolos), 1 dilewati dari 826 (Baseline
-`inti/pengujian.md`); suite berikutnya tidak mengharapkan kegagalan.
+(`12ded07`), booking tanpa pajak per aset dibuktikan (`c214786`), dan
+lonceng pengembalian bagi pengguna gudang saja (`efb5596`). Vitest kini
+1314 lolos. Suite e2e penuh terakhir 26 November 2026 (`fb186f2`,
+backend `1718030`): 822 lolos, 3 gagal (merah disengaja butir 191, 192,
+193, kini lolos), 1 dilewati dari 826 (Baseline `inti/pengujian.md`);
+suite berikutnya tidak mengharapkan kegagalan.
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
 `PW01` sampai `PW14`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
-1. **Sekarang:** PW06 lonceng pengembalian di gudang, dan PW11 sampai
-   PW13 cetak, unduh, dan e2e struk tutup kasir sesudah PW10.
+1. **Sekarang:** PW11 sampai PW13 cetak, unduh, dan e2e struk tutup
+   kasir sesudah PW10.
 2. **Diawali dialog keputusan:** PW07 lonceng produk dari ringkasan,
    PW08 lonceng perangkat menunggu izin, PW09 data sesi kasir tahap 1 dan
    Pindah Dana buka kasir, dan PW10 letak serta tampilan laporan periode
@@ -92,7 +93,7 @@ Riwayat keadaan sebelum 24 November 2026 ada di
 Keputusan LN1a sampai LN21a di `modul/pemberitahuan.md`. Seluruh sumber
 LN4a terpasang (tahap 1 sampai 5), kecuali perangkat menunggu izin.
 Ketiga kebutuhan backend selesai di `6478d29` (B380 sampai B382); web
-menyesuaikan lewat PW06 sampai PW08 (`referensi/antrean-web.md`). Suite
+menyesuaikan lewat PW06 (selesai) sampai PW08 (`referensi/antrean-web.md`). Suite
 e2e penuh sesudah lonceng (LN20a, LN21a) dijalankan 26 November 2026:
 hanya tiga merah disengaja yang gagal.
 

@@ -37,7 +37,7 @@ tetap `AR`, `B`, dan `P`.
 | PW03 | Butir 190: Ganti pengguna bertahan setelah dimuat ulang | Sekarang | Selesai | `569c3f9` |
 | PW04 | Butir 194: Rekap Absensi boleh kosong, RK2a dikembalikan | Sekarang | Selesai | `12ded07` |
 | PW05 | Butir 195: booking tanpa pajak per aset | Sekarang | Selesai | `c214786` |
-| PW06 | Lonceng LN17a: pengembalian menunggu diterima di gudang | Sekarang | Belum | |
+| PW06 | Lonceng LN17a: pengembalian menunggu diterima di gudang | Sekarang | Selesai | `efb5596` |
 | PW07 | Lonceng LN1a dan LN8a: produk dapat dijual dari ringkasan | Keputusan | Belum | |
 | PW08 | Lonceng: perangkat menunggu izin | Keputusan | Belum | |
 | PW09 | Mesin Kasir: data sesi tahap 1 dan Pindah Dana buka kasir | Keputusan | Belum | |
@@ -108,17 +108,12 @@ yang sama memilih booking VOID run sebelumnya. Butir 195 dipindah ke
 
 ### PW06: lonceng LN17a, pengembalian di ringkasan gudang
 
-Backend B382: `GET /dashboard/gudang` menambah
-`transfer.perArah.{permintaan,pengembalian}` berisi
-`{ suratJalanPending, sedangDikirim }`.
-
-- `features/notifikasi/sumber-inventaris.ts` dan tipe di
-  `features/notifikasi/api.ts`: pengguna yang hanya memegang izin
-  dashboard gudang memakai `g.transfer.perArah.pengembalian.sedangDikirim`.
-  Batas LN17a sudah diputuskan; ini pelaksanaannya.
-- Unit test sumber, dan e2e `dashboard/lonceng-pemberitahuan` bila
-  datanya dapat disiapkan; kebutuhan lonceng ini dipindah ke arsip
-  laporan.
+Selesai 26 November 2026 (`efb5596`). Tipe ringkasan gudang menambah
+`transfer.perArah`, dan kartu pengembalian menunggu diterima di gudang
+memakai ringkasan gudang per arah bagi pengguna gudang saja; penerimaan
+di outlet tetap dari ringkasan outlet (LN21a). Bukti unit test saja, atas
+pilihan pemilik proyek (data tanpa surat jalan DIKIRIM; dicatat di utang
+pengujian). Kebutuhan lonceng ini dipindah ke `arsip/laporan-backend.md`.
 
 ### PW07: lonceng LN1a dan LN8a dari ringkasan dashboard
 

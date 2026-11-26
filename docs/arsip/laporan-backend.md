@@ -512,3 +512,24 @@ Modul pajak dan booking (Yoga untuk pajak, Nizar untuk booking).
   (`pengaturan/kelola-pajak`); baris booking yang dibuat lewat UI tanpa
   pajak per item, sedangkan pajak per transaksi tetap dikenakan
   (`reservasi/buat/buat-reservasi`).
+
+### Kebutuhan: surat jalan dikirim per arah di ringkasan gudang (laporan 25 November 2026)
+
+Modul dashboard dan transfer stok (Yoga).
+
+- **Bukti:** `services/dashboardGudangService.js` `getSummary` mengirim
+  `transfer.sedangDikirim` sebagai satu angka untuk kedua arah, sedangkan
+  `getOutletSummary` sudah memisahkannya (`transfer.perArah`).
+- **Kenapa penting:** pengguna yang hanya memegang
+  `read-dashboard-gudang` tidak dapat diberi tahu pengembalian yang
+  menunggu diterima di gudang (`modul/pemberitahuan.md`, LN17a).
+- **Saran:** tambahkan `transfer.perArah` di `GET /dashboard/gudang`
+  dengan bentuk yang sama dengan ringkasan outlet.
+- **Penanganan sementara di frontend:** pemberitahuan penerimaan
+  pengembalian hanya tampil bagi pemegang izin dashboard outlet.
+- **Dibuktikan:** 26 November 2026 (PW06, `efb5596`) terhadap backend
+  `6478d29` (B382): lonceng pengguna gudang saja membaca
+  `transfer.perArah.pengembalian.sedangDikirim` dari ringkasan gudang;
+  teruji di unit test, karena data development tidak punya surat jalan
+  pengembalian yang sedang dikirim (pilihan pemilik proyek, 26 November
+  2026).

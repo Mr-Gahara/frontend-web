@@ -181,6 +181,14 @@ skip bersyarat data, dan catatan proses.
   membuktikan jumlah lencana sama dengan kartu dan urutan per tingkat
   terhadap data nyata, serta pemicu stok LN1a lewat akun klien sekali
   pakai.
+- **Pengembalian menunggu diterima di gudang bagi pengguna gudang saja
+  (LN17a, B382) hanya teruji di unit test**
+  (`tests/unit/features/notifikasi/sumber-inventaris.test.ts`), atas
+  pilihan pemilik proyek 26 November 2026 (PW06): data development tidak
+  punya surat jalan berstatus DIKIRIM (466 DITERIMA, 308 BATAL), dan peran
+  uji "E2E Lokasi Gudang" hanya memegang izin baca. Pembuktian e2e butuh
+  peran uji gudang berizin terima dan surat jalan pengembalian yang
+  dikirim lewat UI (stok outlet berpindah ke gudang setiap run).
 - **Lihat semua di panel lonceng (LN19a) hanya teruji di test integrasi**
   (`tests/integration/components/notifikasi`), karena akun uji per
   25 November 2026 punya tepat lima pemberitahuan; spec

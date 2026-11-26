@@ -129,7 +129,13 @@ dan gudang LN4a:
   menunggu persetujuan dan siap surat jalan per arah tampil, tetapi
   pengembalian yang menunggu diterima di gudang belum, karena
   `transfer.sedangDikirim` gudang menggabungkan kedua arah. Dilaporkan ke
-  backend.
+  backend. Sejak 26 November 2026 (backend `6478d29`, B382; PW06,
+  `efb5596`) ringkasan gudang mengirim `transfer.perArah`, sehingga
+  pengembalian yang menunggu diterima di gudang tampil bagi pemegang izin
+  terima; penerimaan di outlet tetap hanya dari ringkasan outlet (LN21a).
+  Buktinya unit test saja, atas pilihan pemilik proyek 26 November 2026:
+  data development tidak punya surat jalan pengembalian yang sedang
+  dikirim, dan peran uji gudang saja tidak memegang izin terima.
 
 ### Rincian penerapan penjualan (25 November 2026)
 
@@ -170,7 +176,8 @@ dan gudang LN4a:
   (`siap`); sumber toko tidak menunggu. Staf gudang yang memegang izin
   dashboard outlet beralih ke ringkasan gudang (perluasan LN17a), sehingga
   pengajuan dan surat jalan tetap terbaca, dengan batas LN17a yang sama:
-  pengembalian yang menunggu diterima di gudang belum tampil. Bukti:
+  pengembalian yang menunggu diterima di gudang belum tampil (berakhir
+  dengan B382, PW06). Bukti:
   sebelumnya lonceng di ruang gudang meminta 11 sumber outlet dan
   `GET /absensi/monitoring` dijawab 403; kini
   `auth/ruang-lokasi-kerja.spec.ts` (test LN20a) menegaskan tidak ada
