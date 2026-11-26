@@ -33,7 +33,7 @@ tetap `AR`, `B`, dan `P`.
 | Kode | Judul | Kelompok | Status | Commit |
 |---|---|---|---|---|
 | PW01 | Langkah sesudah tarik backend `6478d29` dan dokumen sinkron | Sekarang | Selesai | `db12e2a` |
-| PW02 | Bukti tiga merah disengaja: butir 191, 192 (bersama 189), 193 | Sekarang | Selesai | |
+| PW02 | Bukti tiga merah disengaja: butir 191, 192 (bersama 189), 193 | Sekarang | Selesai | `09d507e` |
 | PW03 | Butir 190: Ganti pengguna bertahan setelah dimuat ulang | Sekarang | Selesai | `569c3f9` |
 | PW04 | Butir 194: Rekap Absensi boleh kosong, RK2a dikembalikan | Sekarang | Belum | |
 | PW05 | Butir 195: booking tanpa pajak per aset | Sekarang | Belum | |
