@@ -847,7 +847,7 @@ Setiap operasi POST, PUT, dan PATCH yang dipanggil frontend. "Aturan" menunjukka
 - Nilai sah: `validTypes`: web, app
 - Mengubah diri sendiri diloloskan tanpa `update-pengguna`. Controller lalu membuang `roleID`, `status`, dan `aksesType`, serta `pin` bagi selain Owner
 - Aturan service (`penggunaCrudService.update`): PIN sendiri hanya berubah lewat `pinLama` dan `pinBaru`; PIN lama yang tidak cocok dijawab 401 (`temuan.md` butir 111), dan `pin` langsung untuk diri sendiri ditolak 400. Perubahan PIN, status, atau `aksesType` menaikkan `tokenVersion` dan memutus sesi web serta aplikasi
-- Web mengubah profil sendiri lewat `payloadPerbaruiProfil` (`features/pengguna/schema-profil.ts`, `091be4e`): hanya field yang berubah, `nomorHp` null untuk nomor yang dikosongkan, dan pasangan `pinLama` serta `pinBaru`
+- Web mengubah profil sendiri lewat `payloadDataDiri` (hanya field yang berubah, `nomorHp` null untuk nomor yang dikosongkan) dan `payloadGantiPin` (pasangan `pinLama` serta `pinBaru`) di `features/pengguna/schema-profil.ts` (PU1a, `36c3ad7`; sebelumnya satu `payloadPerbaruiProfil`, `091be4e`)
 - Respons 200 dengan `data` berbentuk `GET /pengguna/:id` dan `message` "Data pengguna berhasil diperbarui."
 - Diisi server: -
 - `locationID` (lokasi kerja, P46): null berarti tanpa batasan, selain itu harus ObjectId (LK1a) (dicatat 20 November 2026 dari validator backend `2790fc7`, KT1a)

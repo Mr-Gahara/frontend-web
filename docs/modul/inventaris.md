@@ -249,7 +249,8 @@ PENDING, `781c861`, dan tab di URL, `a68a75f`):
   tanpa surat jalan) dan outlet "DISETUJUI" (APPROVED dan PENDING)
   menggantikan tab "APPROVED". Backend hanya menerima satu status per
   permintaan, sehingga tab gabungan meminta tanpa status lalu disaring
-  di klien (`statusServerTab` dan `cocokTab` di `filter.ts`).
+  di klien (`statusServerTab` dan `cocokTab` di `filter.ts`; sejak `ebf782b`
+  daftar berhalaman di server lewat `paramHalamanPengajuan`).
   Sejak `a972956` keduanya berlabel "Perlu Surat Jalan" dan "Disetujui"
   (Label tab dan status pengajuan stok serta surat jalan).
   Sejak `7f1de56` tab gudang Perlu Surat Jalan hanya memuat pengajuan

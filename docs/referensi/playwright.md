@@ -670,7 +670,8 @@ bersyarat).
 - `tests/e2e/inventaris/pengajuanStok/lihat-pengajuan-stok.spec.ts`: path API
   dicocokkan tanpa membedakan huruf besar kecil agar berlaku sebelum dan
   sesudah migrasi, harapan dihitung per ruang dengan aturan yang sama
-  dengan tampilan (`diOutlet` dan `diGudang` lewat `arahBenar`), payload buat
+  dengan tampilan (`diOutlet` dan `diGudang` lewat `arahBenar`, dibuang di
+  `ebf782b` saat daftar pindah ke halaman server), payload buat
   diperiksa lewat `page.route` yang menjawab gagal sehingga tidak ada data
   tersimpan, dan label tab diambil dari
   kode. Sejak `20e332f` baris dibuka lewat menu titik tiga, dan jumlah
@@ -840,7 +841,8 @@ bersyarat).
   `finally` (`tests/helpers/jadwal-uji.ts`).
 - `tests/e2e/jadwal/shift/crud-shift.spec.ts` (sejak `f99b7cf`): skenario
   yang menunggu pemisahan per ruang ditulis lengkap sebagai `test.fixme`
-  bersyarat pada `shiftTerpisahPerRuang()`, keterangan yang hanya berlaku
+  bersyarat pada `shiftTerpisahPerRuang()` (dibuang di `7f6d623`),
+  keterangan yang hanya berlaku
   selama konstanta null memakai `test.skip` bersyarat, dan penolakan
   validasi browser dibuktikan lewat `validity.valid` beserta penghitung
   permintaan. Sejak `2177ac3` baris uji dicari lewat `cariShift` (TB14a),

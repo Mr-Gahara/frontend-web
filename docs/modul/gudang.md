@@ -80,7 +80,8 @@ Diputuskan pemilik proyek pada 19 Oktober 2026.
   ikut menghitung pengajuan yang sudah punya surat jalan
   (`kontrak/temuan.md` butir 149), sehingga angkanya tidak akan sama
   dengan isi tab tujuannya. `hitungAntreanPengajuan` memakai
-  `saringPengajuan` dan `cocokTab` yang sama dengan daftar gudang.
+  `saringPengajuan` dan `cocokTab` yang sama dengan daftar gudang (ketiganya
+  sudah dibuang: `74b6af4` dan `ebf782b`).
   Dibalik di `74b6af4` setelah B101 terbukti (pemilik proyek, 21 Oktober
   2026): kartu memakai `pengajuan` dari ringkasan yang sama dengan kartu
   surat jalan (`antreanDariRingkasan`), satu permintaan untuk kedua
@@ -158,7 +159,8 @@ Geist (`cdc8c47`), dan tab di `?tab=` (`a68a75f`).
   hardcoded.
 - Stok kritis memakai `isStokKritis` dari backend, tidak dihitung ulang,
   untuk lokasi Gudang pertama (MVP satu gudang); jurnal disaring ke
-  lokasi bertipe Gudang lewat `saringJurnal`. Sejak `081d5dc` jurnal
+  lokasi bertipe Gudang lewat `saringJurnal` (dibuang di `b03c276`).
+  Sejak `081d5dc` jurnal
   diminta lima baris dari lokasi Gudang pertama, dan
   `jurnalTerbaruGudang` tinggal penjaga tipe lokasi dan urutan.
 - Tes: 14 unit di `tests/unit/features/dashboard-gudang/`, dan 4

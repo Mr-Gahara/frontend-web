@@ -174,7 +174,8 @@ dan gudang LN4a:
   sebelumnya lonceng di ruang gudang meminta 11 sumber outlet dan
   `GET /absensi/monitoring` dijawab 403; kini
   `auth/ruang-lokasi-kerja.spec.ts` (test LN20a) menegaskan tidak ada
-  permintaan sumber outlet maupun 403, dan unit `tests/unit/features/notifikasi/ruang.test.ts`.
+  permintaan sumber outlet maupun 403, dan unit
+  `tests/unit/features/notifikasi/ruang.test.ts`.
 - **LN21a: lonceng mengikuti ruang yang dapat dimasuki** (pemilik proyek,
   26 November 2026: "notifikasi outlet tidak akan muncul untuk staff gudang
   atau yang ga punya izin akses ke outlet, begitu juga sebaliknya").

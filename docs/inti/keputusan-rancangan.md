@@ -113,7 +113,8 @@ sama (submodul pengajuan stok, di bawah).
 11. **Data yang terbukti salah dari backend tidak ditampilkan sebagai nilai.**
     Tampilkan `-` beserta keterangan singkat, dan kendalikan penanganan
     sementara apa pun dengan satu konstanta (misalnya
-    `SERVER_TERIMA_HITUNGAN_KOSONG` di `features/stock-opname/payload.ts`)
+    `SERVER_TERIMA_HITUNGAN_KOSONG` di `features/stock-opname/payload.ts`,
+    dibuang di `d6f8ba0` begitu backend memperbaikinya)
     yang komentarnya menyebut penyebab, konsekuensi, dan syarat pembaliknya,
     agar pembersihannya cukup satu perubahan. Angka palsu seperti koreksi 0
     pada audit trail lebih menyesatkan daripada kolom kosong. Pola ini
