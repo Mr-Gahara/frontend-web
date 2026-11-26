@@ -208,6 +208,8 @@ Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend 
   dan makanan, masing-masing dikenai pajak global dari totalnya. Jumlah
   pajaknya sama (Rp10.000), dengan kemungkinan selisih pembulatan Rp1
   karena pajak dibulatkan per penjualan.
+  Dua tagihan itu diterima apa adanya, tanpa perubahan backend (pemilik
+  proyek, 26 November 2026: "gapapa sih asal hasilnya sama").
 
 ## Catatan
 
