@@ -348,3 +348,32 @@ tidak ada di validator, envelope tidak seragam, identitas tidak seragam,
 33 endpoint tanpa `checkPermission`, 17 permission tanpa route, nama permission
 pengiriman stok tidak sejalan, permission jadwal belum ada, allowlist tidak
 universal, dan konfirmasi kebijakan sesi web tunggal.
+
+## Butir yang dibuktikan diperbaiki
+
+Dipindah dari `referensi/laporan-untuk-backend.md` sesudah web membuktikan
+perbaikannya (paket `referensi/antrean-web.md`). Isi laporan tidak diubah;
+baris Dibuktikan ditambahkan di bawah setiap butir.
+
+### Butir 190 (laporan 24 November 2026): logout pengguna web ikut mengeluarkan akun toko
+
+Modul auth (Ridho).
+
+- **Bukti:** sesudah Ganti pengguna di popup profil, memuat ulang
+  `/dashboard` berakhir di `/login`, bukan `/login/pengguna`. Spec
+  `auth/sidebar-pengguna`.
+- **Penyebab:** `controllers/penggunaController.js` `logout` baris 446
+  sampai 450 memanggil `res.clearCookie("refreshToken", { path:
+  "/api/akun/auth" })` dengan komentar "clear cookie akun sekalian", di
+  jalur web dan di `catch`.
+- **Kenapa penting:** Ganti pengguna hanya bertahan di tab yang sama;
+  muat ulang atau tab baru sebelum pengguna berikutnya masuk meminta
+  login email toko lagi.
+- **Saran:** jalur web `pin-logout` hanya mengakhiri sesi pengguna dan
+  tidak menghapus cookie akun.
+- **Penanganan sementara di frontend:** tidak ada (PU3a); Ganti pengguna
+  dirilis apa adanya.
+- **Dibuktikan:** 26 November 2026 (PW03, `569c3f9`) terhadap backend
+  `6478d29` (B378): skenario muat ulang, `/dashboard`, dan tab baru sesudah
+  Ganti pengguna di `auth/sidebar-pengguna` tetap di "Siapa yang
+  bertugas?" tanpa login email.

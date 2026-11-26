@@ -9,6 +9,12 @@ kejadian sesekali yang tidak berulang.
 
 ## Utang yang dilunasi 26 November 2026
 
+- **Ganti pengguna dari popup profil hanya teruji di tab yang sama**
+  (butir 190, PU3a). Dilunasi sesudah backend `6478d29` (B378) lewat
+  skenario muat ulang, `/dashboard`, dan tab baru di
+  `auth/sidebar-pengguna` (PW03, `569c3f9`). Skenario itu menemukan bug web
+  `pin-login` sesudah tab lain memutar sesi akun, yang diperbaiki di commit
+  yang sama.
 - **Teks kaki dan nama tombol halaman `DataTable` hanya terbukti lewat
   spec e2e pemakainya** (`modul/ui-ux.md`, sejak 11 Oktober 2026).
   Dilunasi dengan enam test integrasi di

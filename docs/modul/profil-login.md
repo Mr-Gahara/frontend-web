@@ -99,7 +99,9 @@ profil di 1280, 768, dan 390 px serta popup terbuka di desktop dan HP).
   baru sebelum pengguna berikutnya masuk meminta login email lagi.
   Dicatat untuk backend (cakupan Ridho, auth dan sesi); opsi lain:
   menyembunyikan menu sampai backend beres, atau menerimanya tanpa
-  laporan.
+  laporan. Berakhir 26 November 2026: backend `6478d29` (B378) hanya
+  menghapus cookie pengguna, dibuktikan di `auth/sidebar-pengguna` (PW03,
+  `569c3f9`).
 - Diterapkan tanpa ditanyakan: pesan PIN baru kosong menjadi "PIN baru
   wajib diisi", karena form PIN kini berdiri sendiri.
 
@@ -165,6 +167,5 @@ empat commit, dengan suite e2e penuh dijalankan sekali di akhir modul
 
 ### Utang kecil dari modul Profil, login, dan sidebar
 
-- Ganti pengguna (PU2a): sampai backend butir 190 diperbaiki, muat ulang
-  atau tab baru sebelum pengguna berikutnya masuk meminta login email lagi
-  (PU3a).
+- Tidak ada untuk Ganti pengguna: butir 190 diperbaiki backend `6478d29`
+  (B378) dan dibuktikan 26 November 2026 (PU3a, PW03).

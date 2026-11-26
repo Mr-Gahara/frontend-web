@@ -35,7 +35,7 @@ tetap `AR`, `B`, dan `P`.
 |---|---|---|---|---|
 | PW01 | Langkah sesudah tarik backend `6478d29` dan dokumen sinkron | Sekarang | Belum | |
 | PW02 | Bukti tiga merah disengaja: butir 191, 192 (bersama 189), 193 | Sekarang | Belum | |
-| PW03 | Butir 190: Ganti pengguna bertahan setelah dimuat ulang | Sekarang | Belum | |
+| PW03 | Butir 190: Ganti pengguna bertahan setelah dimuat ulang | Sekarang | Selesai | `569c3f9` |
 | PW04 | Butir 194: Rekap Absensi boleh kosong, RK2a dikembalikan | Sekarang | Belum | |
 | PW05 | Butir 195: booking tanpa pajak per aset | Sekarang | Belum | |
 | PW06 | Lonceng LN17a: pengembalian menunggu diterima di gudang | Sekarang | Belum | |
@@ -103,16 +103,15 @@ penjualan).
 
 ### PW03: butir 190, Ganti pengguna bertahan setelah dimuat ulang
 
-Backend B378: `pin-logout` hanya menghapus cookie pengguna (path `/`).
-
-- Utang pengujian "Ganti pengguna dari popup profil teruji di tab yang
-  sama": tambahkan skenario muat ulang `/dashboard` sesudah Ganti
-  pengguna yang berakhir di `/login/pengguna`, di spec
-  `auth/sidebar-pengguna`.
-- Tinjau komentar `useKeluar` di `features/auth/hooks.ts`: Keluar penuh
-  tetap memanggil logout akun (B378 menyatakan perilaku itu tetap benar).
-- Laporan butir 190 dipindah ke arsip sesudah terbukti; PU3a di modulnya
-  diberi catatan penutup.
+Selesai 26 November 2026 (`569c3f9`). Skenario muat ulang, `/dashboard`,
+dan tab baru sesudah Ganti pengguna di `auth/sidebar-pengguna` lolos
+terhadap backend B378. Skenario itu menemukan bug web: `pin-login`
+dikecualikan dari percobaan ulang 401, sehingga sesudah tab lain memutar
+`tokenVersion` akun, PIN benar ditolak "Sesi telah berakhir atau
+dihentikan". Kini penolakan sesi akun disegarkan sekali lalu diulang,
+sedangkan PIN salah tidak (`lib/apiClient.ts`, unit test
+`tests/unit/lib/api-client-pin-login.test.ts`). Butir 190 dipindah ke
+`arsip/laporan-backend.md`.
 
 ### PW04: butir 194, Rekap Absensi boleh kosong
 
@@ -188,6 +187,10 @@ perangkat menunggu se-toko milik pengguna berlevel di bawah peminta
 (P39), dengan `pengguna { id, nama, status, level }`.
 
 - Tingkat sudah diputuskan: Perlu tindakan (LN11a).
+- `determineTokenKey` di `lib/apiClient.ts` memilih token pengguna lewat
+  pola `/device/` (bergaris miring); `GET /device?status=pending` tanpa
+  garis miring akan memakai token akun. Panggil dengan `tokenType`
+  `pengguna` eksplisit atau perluas polanya (dicatat saat PW03).
 - Keputusan yang perlu diajukan: web tidak punya halaman perangkat
   (tidak ada pemanggil `/device` di `features`), sehingga tautan kartu
   belum ada tujuannya: tanpa tautan seperti izin cuti, ke Kelola

@@ -48,8 +48,6 @@ yang disengaja tidak ditandai `test.fixme`.
   skenario revisi B365 di `inventaris/bahanBaku/konversi-satuan` merah,
   karena 1 kaleng tersimpan 1 ml (pemilik proyek: lapor saja, spec
   merah). Terima per kemasan teruji e2e sejak 24 November 2026.
-- **Ganti pengguna dari popup profil teruji di tab yang sama**; muat
-  ulang sesudahnya menunggu backend butir 190.
 
 ## Tidak dapat dibuktikan dengan data atau lingkungan sekarang
 

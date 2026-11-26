@@ -152,6 +152,7 @@ Pola kegagalan yang berulang:
 | Helper pengajuan uji dijawab 409 "sudah di-submit" | Pengajuan PENDING (sesudah surat jalannya batal) tidak dapat di-submit; backend hanya menerima submit dari DRAFT. Pakai yang APPROVED atau buat baru (`pengajuanUjiDisetujui`, 24 November 2026) |
 | Opsi baru tidak ada di Select panel filter padahal data sudah dibuat lewat API | Daftar pilihan dimuat saat halaman dibuka dan masih segar di cache (`staleTime` 5 menit). Muat ulang halaman sesudah menyiapkan data, lalu buka panel (`mutasi-kas`, 24 November 2026) |
 | Baris tabel tidak ditemukan sesudah dialog gagal | Dialog modal membuat isi halaman tidak terjangkau peran; tutup dialog lebih dulu, lalu periksa baris (`pindah-dana`, 24 November 2026) |
+| `pin-login` ditolak 401 "Sesi telah berakhir atau dihentikan" dengan PIN benar, sesudah spec membuka tab baru atau memuat ulang | Setiap `refreshtoken` akun memutar `tokenVersion` (`middleware/authAkun.js` backend), sehingga token akun yang tersimpan di tab lain langsung ditolak. Sejak PW03 `lib/apiClient.ts` menyegarkan sekali lalu mengulang `pin-login` untuk penolakan sesi akun; bila gejalanya kembali, periksa pesan 401 di trace lebih dulu (PIN salah juga 401, tetapi tidak diulang) |
 | Dua tombol berdampingan `flex-1` berbeda lebar 2 px sesudah tautan menjadi item flex | Basis flex 0 tidak dapat lebih kecil dari border, sehingga tautan berborder 1 px melebar dari tautan `border-none`. Beri border yang sama, berwarna latar (`border-navy`, BT1a) |
 
 Contoh nyata: pada modul role, penghapusan tidak pernah terkirim karena

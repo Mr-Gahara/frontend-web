@@ -44,8 +44,9 @@ B384): seluruh laporan web 24 sampai 26 November 2026 dikerjakan
 backend, dan Ridho menyatakan pekerjaan backend MVP selesai; yang
 tersisa di sisi web adalah pembuktian baris `Menunggu verifikasi` di
 `docs/pengembangan/klien.md` backend dan tampilan struk tutup kasir.
-Langkah sesudah tarik belum dijalankan (PW01). Vitest 1308 lolos dari
-155 berkas. Suite e2e penuh terakhir 26 November 2026 (`fb186f2`,
+Langkah sesudah tarik belum dijalankan (PW01); backend sudah menjalankan
+kode `6478d29`. PW03 selesai (`569c3f9`). Vitest 1312 lolos dari 156
+berkas. Suite e2e penuh terakhir 26 November 2026 (`fb186f2`,
 backend `1718030`): 822 lolos, 3 gagal (merah disengaja butir 191, 192,
 193), 1 dilewati dari 826 (Baseline `inti/pengujian.md`).
 
@@ -54,10 +55,10 @@ backend `1718030`): 822 lolos, 3 gagal (merah disengaja butir 191, 192,
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
 1. **Sekarang:** PW01 langkah sesudah tarik dan dokumen sinkron
-   (prasyarat), PW02 bukti merah disengaja 191, 192, 193, PW03 Ganti
-   pengguna (190), PW04 Rekap Absensi kosong (194), PW05 booking tanpa
-   pajak aset (195), PW06 lonceng pengembalian di gudang, dan PW11 sampai
-   PW13 cetak, unduh, dan e2e struk tutup kasir sesudah PW10.
+   (prasyarat), PW02 bukti merah disengaja 191, 192, 193, PW04 Rekap
+   Absensi kosong (194), PW05 booking tanpa pajak aset (195), PW06
+   lonceng pengembalian di gudang, dan PW11 sampai PW13 cetak, unduh,
+   dan e2e struk tutup kasir sesudah PW10.
 2. **Diawali dialog keputusan:** PW07 lonceng produk dari ringkasan,
    PW08 lonceng perangkat menunggu izin, PW09 data sesi kasir tahap 1 dan
    Pindah Dana buka kasir, dan PW10 letak serta tampilan laporan periode

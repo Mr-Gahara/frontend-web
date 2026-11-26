@@ -93,25 +93,6 @@ Modul RBAC (Ridho).
 - **Penanganan sementara di frontend:** tidak ada (TR1a). Spec General
   Manajer dibiarkan merah.
 
-### Butir 190: logout pengguna web ikut mengeluarkan akun toko
-
-Modul auth (Ridho).
-
-- **Bukti:** sesudah Ganti pengguna di popup profil, memuat ulang
-  `/dashboard` berakhir di `/login`, bukan `/login/pengguna`. Spec
-  `auth/sidebar-pengguna`.
-- **Penyebab:** `controllers/penggunaController.js` `logout` baris 446
-  sampai 450 memanggil `res.clearCookie("refreshToken", { path:
-  "/api/akun/auth" })` dengan komentar "clear cookie akun sekalian", di
-  jalur web dan di `catch`.
-- **Kenapa penting:** Ganti pengguna hanya bertahan di tab yang sama;
-  muat ulang atau tab baru sebelum pengguna berikutnya masuk meminta
-  login email toko lagi.
-- **Saran:** jalur web `pin-logout` hanya mengakhiri sesi pengguna dan
-  tidak menghapus cookie akun.
-- **Penanganan sementara di frontend:** tidak ada (PU3a); Ganti pengguna
-  dirilis apa adanya.
-
 ### Butir 194: Rekap Absensi memuat staf tanpa kegiatan
 
 Modul SDM (Ridho). Dicatat atas keputusan pemilik proyek sebagai temuan
@@ -251,7 +232,6 @@ Modul dashboard dan transfer stok (Yoga).
 | 2 | Struk tutup kasir | Ridho dan Nizar | Wajib MVP; data per sesi belum tersedia |
 | 3 | 193 | Nizar | Status booking berbeda di dua tempat |
 | 4 | 191 | Ridho | Role General Manajer tidak dapat dibuat |
-| 5 | 190 | Ridho | Ganti pengguna hanya bertahan di tab yang sama |
 | 6 | 194 | Ridho | Rekap berisi baris serba nol, tidak pernah kosong |
 | 7 | Produk dapat dijual di ringkasan | Yoga | Lonceng memuat seluruh produk setiap 5 menit |
 | 8 | Perangkat menunggu izin se-toko | Ridho | Pemberitahuan perangkat belum dapat tampil |

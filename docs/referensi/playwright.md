@@ -509,6 +509,15 @@ bersyarat).
   utama), lalu dihapus. Akun klien dari `akunBaru` dan `isiTokoDanOwner`
   (Basic, tanpa lokasi outlet) terbukti dapat membuka halaman Pengaturan
   dan `/lupa-pin` (13 November 2026).
+- Menjalankan satu folder tanpa spec ber-OTP: sebut berkasnya saja, tanpa
+  argumen folder. Argumen folder memilih seluruh isinya walau berkas lain
+  ikut disebut, sehingga `daftar`, `verifikasi-lupa-password`, dan
+  `reset-pin-owner` ikut berjalan (PW03, 26 November 2026: 2 kirim dan 2
+  periksa kode terpakai walau Mailpit mati). Contoh:
+
+  ```bash
+  npx playwright test $(ls tests/e2e/auth/*.spec.ts | grep -vE 'daftar|verifikasi-lupa|reset-pin-owner')
+  ```
 - Pemeriksaan "tidak ada" disempitkan ke bagian yang diuji. Locator
   gambar selebar halaman di spec profil mengenai avatar di sidebar, bukan
   halaman profil (`091be4e`).
