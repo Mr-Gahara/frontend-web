@@ -145,6 +145,40 @@ Bukan bug, tetapi data yang dibutuhkan rilis MVP. Rinciannya di
   sesi kasir (keputusan 10), dengan baris "Total penerimaan invoice"
   tersendiri di bawah "Total penerimaan kasir" (keputusan 11).
 
+## Laporan 26 November 2026 (pajak aset)
+
+Diperiksa terhadap backend `ridho` lokal `1718030`.
+
+### Butir 195: relasi pajak per aset harus dihapus
+
+Modul pajak dan booking (Yoga untuk pajak, Nizar untuk booking).
+
+- **Keputusan:** tidak ada pajak per aset (pemilik proyek,
+  26 November 2026; `modul/pengaturan-outlet.md`, PO19a). Sesi booking
+  hanya dikenai pajak global (per transaksi), sama dengan penjualan
+  produk. Pajak per produk tetap.
+- **Bukti:** `validators/produkPajakValidator.js` (`FIELD_BUAT` memuat
+  `assetID`, baris 3, 25 sampai 37) dan `services/produkPajakService.js`
+  (baris 39 sampai 66, `getPajakByAsset` baris 133) masih menerima dan
+  menyimpan relasi pajak ke aset. `services/pajakService.js`
+  `hitungPajakProdukBanyak` (baris 121 sampai 140) mencocokkan id dengan
+  `produkID` maupun `assetID`, dan
+  `services/sesiBooking/sesiBookingHelperService.js` baris 477 memanggilnya
+  dengan id aset, sehingga relasi per aset ikut menambah pajak baris
+  booking. Pajak per transaksi sudah diterapkan pada booking (baris 519).
+  Data development tidak punya relasi per aset (26 November 2026).
+- **Kenapa penting:** jalur yang tidak dipakai web tetap dapat diisi lewat
+  API atau aplikasi, dan booking lalu dikenai pajak ganda (per aset dan
+  global) tanpa tampil di pengaturan pajak web.
+- **Saran:** tolak `assetID` di `POST /produkpajak`, buang
+  `getPajakByAsset` dan pencocokan `assetID` di `hitungPajakProdukBanyak`,
+  hentikan pajak per item pada baris booking, lalu hapus field dan indeks
+  `assetID` di `models/produkPajakModel.js` sesudah memastikan basis data
+  produksi tidak punya relasi per aset. Aplikasi (Ajis) perlu dipastikan
+  tidak memakai jalur itu.
+- **Penanganan sementara di frontend:** tidak perlu; web tidak pernah
+  mengirim `assetID`.
+
 ## Laporan 25 November 2026 (pemberitahuan lonceng)
 
 Diperiksa terhadap backend `ridho` lokal `1718030`. Bukan bug, tetapi
@@ -216,3 +250,4 @@ Modul dashboard dan transfer stok (Yoga).
 | 7 | Produk dapat dijual di ringkasan | Yoga | Lonceng memuat seluruh produk setiap 5 menit |
 | 8 | Perangkat menunggu izin se-toko | Ridho | Pemberitahuan perangkat belum dapat tampil |
 | 9 | Surat jalan dikirim per arah di ringkasan gudang | Yoga | Penerimaan pengembalian belum diberitahukan ke pengguna gudang saja |
+| 10 | 195 | Yoga dan Nizar | Jalur pajak per aset masih terbuka; belum ada datanya |

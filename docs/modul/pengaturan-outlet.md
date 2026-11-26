@@ -186,6 +186,21 @@ Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend 
   nama akun dari data metode dan tidak dapat diganti, isian lain tetap
   dapat disimpan, dan `GET /akunkas` tidak diminta.
 
+### Pajak aset, 26 November 2026
+
+- **PO19a: tidak ada pajak per aset.** Pemilik proyek, 26 November 2026:
+  "pajak per aset itu harusnya ga ada ... universal aja pakai pajak global
+  yang bisa dipakai di produk juga". Aset tidak punya pajak khusus; sesi
+  booking dikenai pajak global (per transaksi), sama dengan penjualan
+  produk. Diperiksa terhadap backend `ridho` lokal `1718030`: pajak per
+  transaksi sudah berlaku pada penjualan booking
+  (`services/sesiBooking/sesiBookingHelperService.js` baris 519), tetapi
+  relasi pajak per aset masih diterima `POST /produkpajak` (`assetID`) dan
+  ikut dihitung di baris booking (baris 477). Web tidak pernah memakai
+  jalur itu, dan data development tidak punya relasi per aset
+  (26 November 2026). Penghapusan jalurnya dilaporkan ke backend
+  (`kontrak/temuan.md` butir 195). Pajak per produk tidak berubah.
+
 ## Catatan
 
 ### Catatan dari submodul profil outlet
@@ -283,8 +298,6 @@ nonaktifkan (keputusan PO2a).
 
 ### Utang kecil dari modul Pengaturan outlet
 
-- Pajak per aset (`assetID` di `POST /produkpajak`) belum dipakai web;
-  ditinjau bersama modul reservasi bila dibutuhkan.
 - `pajakList` di tipe `Produk` tetap ada tetapi tidak dipakai tampilan,
   karena tidak mencerminkan relasi pajak (`kontrak/temuan.md` butir 88).
   Sejak backend `yoga` `e9bd1ae` dibaca dari relasi; tab tetap memakai

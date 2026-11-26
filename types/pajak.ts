@@ -54,7 +54,6 @@ export interface ProdukPajakRequest {
 export interface RelasiPajakProduk {
   id: string;
   produkID?: string;
-  assetID?: string;
   pajak: {
     id: string;
     nama: string;

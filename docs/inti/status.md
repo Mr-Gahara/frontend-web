@@ -65,12 +65,10 @@ disengaja yang gagal.
 3. **Menunggu keputusan pemilik proyek:**
    - Nomor WhatsApp admin halaman Langganan ditunda (LG1a, 26 November
      2026; `NOMOR_WA_ADMIN` kosong di `features/langganan/data.ts`).
-   - Pajak per aset (`modul/pengaturan-outlet.md`), ditinjau bila
-     reservasi membutuhkannya.
    - Tujuh keputusan terbuka struk dapur (pasca-MVP;
      `referensi/rencana-struk-dapur.md`).
 4. **Menunggu backend** (`referensi/laporan-untuk-backend.md`): butir 190
-   sampai 194, data struk laporan tutup kasir (modal awal opsional,
+   sampai 195 (195: hapus jalur pajak per aset, PO19a), data struk laporan tutup kasir (modal awal opsional,
    penjualan dan pembayaran seluruh metode terhubung ke sesi kasir,
    endpoint laporan), dan tiga kebutuhan lonceng (produk dapat dijual di
    ringkasan, perangkat menunggu izin se-toko, surat jalan per arah di
