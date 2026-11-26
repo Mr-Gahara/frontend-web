@@ -27,6 +27,41 @@ async function bacaRekap(page: Page, auth: () => string, bulan: string, location
   return ((await res.json()) as { data: RekapAbsensiResponse }).data;
 }
 
+/*
+ * Sejak backend B379 (butir 194) rekap per lokasi hanya memuat staf yang
+ * berjadwal, absen, atau izin disetujui pada bulan itu, sehingga bulan
+ * berjalan boleh kosong. Skenario tabel dan daftar memilih bulan terbaru
+ * yang berisi staf, dan keadaan kosong memilih bulan terbaru tanpa staf,
+ * keduanya dari respons nyata, lalu membukanya lewat tombol Bulan sebelumnya.
+ */
+async function cariBulan(
+  page: Page,
+  auth: () => string,
+  locationID: string,
+  cocok: (r: RekapAbsensiResponse) => boolean,
+  batas: number,
+): Promise<{ mundur: number; bulan: string; rekap: RekapAbsensiResponse } | null> {
+  for (let mundur = 0; mundur <= batas; mundur++) {
+    const bulan = keBulan(geserBulan(new Date(), -mundur));
+    const rekap = await bacaRekap(page, auth, bulan, locationID);
+    if (cocok(rekap)) return { mundur, bulan, rekap };
+  }
+  return null;
+}
+const bulanBerdata = (page: Page, auth: () => string, locationID: string) =>
+  cariBulan(page, auth, locationID, (r) => r.data.length > 0, 12);
+const bulanKosong = (page: Page, auth: () => string, locationID: string) =>
+  cariBulan(page, auth, locationID, (r) => r.data.length === 0, 36);
+
+async function mundurKe(page: Page, tujuan: { mundur: number; bulan: string }) {
+  if (tujuan.mundur === 0) return;
+  const t = tungguRekap(page, tujuan.bulan);
+  for (let i = 0; i < tujuan.mundur; i++) {
+    await page.getByRole("button", { name: "Bulan sebelumnya" }).click();
+  }
+  expect((await t).status()).toBe(200);
+}
+
 test.describe("Rekap Absensi", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
@@ -49,17 +84,22 @@ test.describe("Rekap Absensi", () => {
     const ringkasan = page.getByRole("region", { name: "Ringkasan rekap" });
     await expect(ringkasan).toContainText(formatAngka(rekap.ringkasan.totalStaf));
     await expect(ringkasan).toContainText(`dari ${formatAngka(rekap.ringkasan.shiftDijadwalkan ?? 0)} shift terjadwal`);
-    test.skip(rekap.data.length === 0, "Belum ada staf dengan jadwal atau absen bulan ini");
+
+    const berdata = await bulanBerdata(page, auth, locationID!);
+    test.skip(!berdata, "Tidak ada staf berkegiatan dalam 12 bulan terakhir");
+    await mundurKe(page, berdata!);
+    const isi = berdata!.rekap;
+    await expect(ringkasan).toContainText(formatAngka(isi.ringkasan.totalStaf));
 
     // Desktop: tabel tujuh kolom, satu baris per staf, ditambah TOTAL di kaki.
     const tabel = page.getByRole("table");
     await expect(tabel.getByRole("columnheader")).toHaveCount(7);
-    for (const s of rekap.data.slice(0, 5)) {
+    for (const s of isi.data.slice(0, 5)) {
       const baris = tabel.getByRole("row").filter({ hasText: s.nama });
       await expect(baris.first()).toContainText(`${s.hariHadir} dari ${s.shiftDijadwalkan} shift`);
       await expect(baris.first()).toContainText(`${s.shiftTidakHadir} shift`);
     }
-    await expect(tabel.getByRole("row").filter({ hasText: `TOTAL · ${rekap.ringkasan.totalStaf} staf` })).toBeVisible();
+    await expect(tabel.getByRole("row").filter({ hasText: `TOTAL · ${isi.ringkasan.totalStaf} staf` })).toBeVisible();
     await expect(page.getByRole("list", { name: "Rekap per staf" })).toBeHidden();
   });
 
@@ -84,32 +124,27 @@ test.describe("Rekap Absensi", () => {
     });
   }
 
-  test("staf berlokasi kerja di outlet tampil walau bulan itu tanpa jadwal, absen, maupun izin (AR40)", async ({ page }) => {
+  test("bulan tanpa jadwal, absen, maupun izin tidak memuat staf berlokasi kerja (B379, butir 194)", async ({ page }) => {
     const t0 = tungguRekap(page, keBulan(new Date()));
     const auth = await bukaDenganAuth(page, URL_HALAMAN);
     const locationID = query(await t0).get("locationID")!;
-    // Bulan jauh sebelum toko uji punya jadwal: hanya staf berlokasi kerja
-    // outlet ini yang dimuat backend, seluruhnya tanpa kegiatan.
+    // Bulan jauh sebelum toko uji punya kegiatan: staf berlokasi kerja di
+    // outlet ini (E2E Kasir Outlet) tidak lagi dimuat, dan ringkasan ikut 0.
     const rekap = await bacaRekap(page, auth, "2019-01", locationID);
-    expect(rekap.data.length, "staf berlokasi kerja outlet dimuat").toBeGreaterThan(0);
-    expect(rekap.data.every((s) => s.shiftDijadwalkan === 0 && s.hariHadir === 0)).toBe(true);
+    expect(rekap.data).toEqual([]);
+    expect(rekap.ringkasan.totalStaf).toBe(0);
   });
 
   test("bulan tanpa staf menampilkan keadaan kosong beserta syarat staf tampil", async ({ page }) => {
-    await page.goto(BASIS + URL_HALAMAN, { waitUntil: "commit" });
-    await page.route(POLA, async (route) => {
-      if (new URL(route.request().url()).searchParams.has("format")) return route.continue();
-      const asli = await route.fetch();
-      const body = (await asli.json()) as { data: RekapAbsensiResponse };
-      // simulasi: data uji selalu punya staf berlokasi kerja outlet (E2E Kasir Outlet), yang dimuat backend setiap bulan (AR40), sehingga bulan tanpa staf tidak dapat dibuat; ringkasan asli dipertahankan, daftar staf dikosongkan
-      await route.fulfill({ response: asli, json: { ...body, data: { ...body.data, data: [] } } });
-    });
-    await page.reload({ waitUntil: "commit" });
+    const t0 = tungguRekap(page, keBulan(new Date()));
+    const auth = await bukaDenganAuth(page, URL_HALAMAN);
+    const locationID = query(await t0).get("locationID")!;
+    const kosong = await bulanKosong(page, auth, locationID);
+    expect(kosong, "bulan tanpa staf dalam 36 bulan terakhir").not.toBeNull();
+    await mundurKe(page, kosong!);
     await expect(page.getByText("Belum ada data bulan ini")).toBeVisible({ timeout: 20_000 });
     await expect(
-      page.getByText(
-        "Staf tampil di sini bila berlokasi kerja di outlet ini, atau punya jadwal kerja, absen, atau izin cuti pada bulan yang dipilih.",
-      ),
+      page.getByText("Staf tampil di sini bila punya jadwal kerja, absen, atau izin cuti pada bulan yang dipilih."),
     ).toBeVisible();
     await expect(page.getByRole("table")).toHaveCount(0);
   });
@@ -153,8 +188,10 @@ test.describe("Rekap Absensi", () => {
     const t = tungguRekap(page, bulan);
     const auth = await bukaDenganAuth(page, URL_HALAMAN);
     const res = await t;
-    const rekap = await bacaRekap(page, auth, bulan, query(res).get("locationID")!);
-    test.skip(rekap.data.length === 0, "Belum ada staf dengan jadwal atau absen bulan ini");
+    const berdata = await bulanBerdata(page, auth, query(res).get("locationID")!);
+    test.skip(!berdata, "Tidak ada staf berkegiatan dalam 12 bulan terakhir");
+    await mundurKe(page, berdata!);
+    const rekap = berdata!.rekap;
 
     await expect(page.getByRole("table")).toBeHidden();
     const daftar = page.getByRole("list", { name: "Rekap per staf" });
@@ -175,8 +212,9 @@ test.describe("Rekap Absensi", () => {
     test(`tanpa luberan di ${lebar} px`, async ({ page }) => {
       await page.setViewportSize({ width: lebar, height: 900 });
       const t = tungguRekap(page, keBulan(new Date()));
-      await bukaDenganAuth(page, URL_HALAMAN);
-      await t;
+      const auth = await bukaDenganAuth(page, URL_HALAMAN);
+      const berdata = await bulanBerdata(page, auth, query(await t).get("locationID")!);
+      if (berdata) await mundurKe(page, berdata);
       await expect(page.getByRole("region", { name: "Ringkasan rekap" })).toBeVisible();
       await tanpaLuberWadah(page, `rekap absensi ${lebar} px`);
     });
