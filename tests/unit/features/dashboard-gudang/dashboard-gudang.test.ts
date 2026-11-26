@@ -56,7 +56,14 @@ describe("antreanDariRingkasan", () => {
           siapDibuatSuratJalan: 5,
           siapDibuatSuratJalanPerArah: { permintaan: 2, pengembalian: 3 },
         },
-        transfer: { suratJalanPending: 1, sedangDikirim: 4 },
+        transfer: {
+          suratJalanPending: 1,
+          sedangDikirim: 4,
+          perArah: {
+            permintaan: { suratJalanPending: 1, sedangDikirim: 1 },
+            pengembalian: { suratJalanPending: 0, sedangDikirim: 3 },
+          },
+        },
         inventory: { stokKritis: 7 },
         jurnalTerbaru: [],
       }),

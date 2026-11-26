@@ -17,7 +17,15 @@ export interface RingkasanDashboardGudang {
     /** B111: permintaan (surat jalan dibuat gudang) dan pengembalian (dibuat outlet). */
     siapDibuatSuratJalanPerArah: { permintaan: number; pengembalian: number };
   };
-  transfer: { suratJalanPending: number; sedangDikirim: number };
+  transfer: {
+    suratJalanPending: number;
+    sedangDikirim: number;
+    /**
+     * B382 (backend 6478d29): dipecah menurut tipe lokasi asal, sebentuk dengan
+     * ringkasan outlet; jumlah kedua arah sama dengan totalnya.
+     */
+    perArah: Record<"permintaan" | "pengembalian", { suratJalanPending: number; sedangDikirim: number }>;
+  };
   inventory: { stokKritis: number };
   jurnalTerbaru: unknown[];
 }

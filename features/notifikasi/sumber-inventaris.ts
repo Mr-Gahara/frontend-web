@@ -24,7 +24,7 @@ const denganTab = (path: string, slug: string | undefined) => (slug ? `${path}?t
 export interface DataInventaris {
   /** GET /dashboard/outlet; sumber utama hitungan per arah (LN7a). */
   ringkasanOutlet: RingkasanOutlet | null;
-  /** GET /dashboard/gudang; hanya bagi pengguna tanpa izin dashboard outlet (LN17a). */
+  /** GET /dashboard/gudang; hanya bagi pengguna tanpa izin dashboard outlet (LN17a, B382). */
   ringkasanGudang: RingkasanDashboardGudang | null;
   /** Bahan di lokasi Gudang yang mencapai stok minimum. */
   stokKritisGudang: number | null;
@@ -134,9 +134,10 @@ export function pemberitahuanInventaris(data: DataInventaris, akses: AksesTautan
       );
     }
 
-    // Per arah hanya dari ringkasan outlet; ringkasan gudang menggabungkan
-    // kedua arah, sehingga penerimaan pengembalian belum tampil bagi pengguna
-    // gudang saja (LN17a, dilaporkan ke backend).
+    // Penerimaan di outlet hanya dari ringkasan outlet: pengguna gudang saja
+    // tidak masuk ruang outlet (LN21a). Penerimaan pengembalian di gudang
+    // memakai ringkasan gudang per arah bagi pengguna gudang saja (LN17a,
+    // backend B382).
     const bolehTerima = bolehTerimaSuratJalan(izin);
     const keOutlet = o?.transfer.perArah.permintaan.sedangDikirim ?? 0;
     if (keOutlet > 0 && bolehTerima) {
@@ -151,7 +152,8 @@ export function pemberitahuanInventaris(data: DataInventaris, akses: AksesTautan
         ),
       );
     }
-    const keGudang = o?.transfer.perArah.pengembalian.sedangDikirim ?? 0;
+    const keGudang =
+      o?.transfer.perArah.pengembalian.sedangDikirim ?? g?.transfer.perArah.pengembalian.sedangDikirim ?? 0;
     if (keGudang > 0 && bolehTerima) {
       hasil.push(
         kartu(

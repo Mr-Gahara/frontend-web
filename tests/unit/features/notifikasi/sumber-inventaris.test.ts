@@ -95,14 +95,36 @@ describe("pemberitahuanInventaris (LN4a)", () => {
     expect(id(d, akses({ fiturSiap: { wms: false } }))).toEqual(["bahan-minimum"]);
   });
 
-  it("pengguna gudang saja (LN17a): ringkasan gudang tanpa penerimaan per arah", () => {
-    const g: RingkasanDashboardGudang = {
-      pengajuan: { menungguApproval: 2, siapDibuatSuratJalan: 1, siapDibuatSuratJalanPerArah: { permintaan: 1, pengembalian: 0 } },
-      transfer: { suratJalanPending: 0, sedangDikirim: 4 },
-      inventory: { stokKritis: 9 },
-      jurnalTerbaru: [],
-    };
-    expect(id({ ...kosong, ringkasanGudang: g })).toEqual(["pengajuan-menunggu", "surat-jalan-permintaan"]);
+  const ringkasanGudang = (kirimP: number, kirimK: number): RingkasanDashboardGudang => ({
+    pengajuan: { menungguApproval: 2, siapDibuatSuratJalan: 1, siapDibuatSuratJalanPerArah: { permintaan: 1, pengembalian: 0 } },
+    transfer: {
+      suratJalanPending: 0,
+      sedangDikirim: kirimP + kirimK,
+      perArah: {
+        permintaan: { suratJalanPending: 0, sedangDikirim: kirimP },
+        pengembalian: { suratJalanPending: 0, sedangDikirim: kirimK },
+      },
+    },
+    inventory: { stokKritis: 9 },
+    jurnalTerbaru: [],
+  });
+
+  it("pengguna gudang saja (LN17a, B382): pengembalian menunggu diterima di gudang dari ringkasan gudang per arah", () => {
+    const daftar = pemberitahuanInventaris({ ...kosong, ringkasanGudang: ringkasanGudang(3, 4) }, akses());
+    expect(daftar.map((k) => k.id)).toEqual(["pengajuan-menunggu", "surat-jalan-permintaan", "terima-gudang"]);
+    const terima = daftar.find((k) => k.id === "terima-gudang")!;
+    expect(terima.isi).toBe("4 surat jalan pengembalian dikirim dan menunggu diterima di gudang.");
+    expect(terima.tautan.map((t) => t.href)).toEqual(["/dashboard/gudang/penerimaanStok"]);
+  });
+
+  it("pengguna gudang saja: permintaan ke outlet tidak diberitahukan, karena diterima di ruang outlet (LN21a)", () => {
+    expect(id({ ...kosong, ringkasanGudang: ringkasanGudang(3, 0) })).toEqual(["pengajuan-menunggu", "surat-jalan-permintaan"]);
+  });
+
+  it("pengguna gudang saja tanpa izin terima: pengembalian tidak diberitahukan", () => {
+    const tanpaTerima = akses({ permissions: SEMUA_IZIN.filter((i) => i !== "receive-transfer-stok") });
+    const daftar = pemberitahuanInventaris({ ...kosong, ringkasanGudang: ringkasanGudang(0, 4) }, tanpaTerima);
+    expect(daftar.map((k) => k.id)).not.toContain("terima-gudang");
   });
 
   it("stok gudang minimum dan opname per ruang; opname gudang hanya bila gudang aktif", () => {
