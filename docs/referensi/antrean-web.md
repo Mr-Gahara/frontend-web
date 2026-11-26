@@ -26,14 +26,13 @@ tetap `AR`, `B`, dan `P`.
   commit kode (atau dokumen bila paketnya dokumen saja), dan bagian
   rincinya diringkas menjadi satu kalimat hasil. Paket yang memunculkan
   pekerjaan baru menambah baris di akhir kelompoknya.
-- PW01 adalah prasyarat seluruh paket lain: backend lokal harus
-  menjalankan kode dan basis data `6478d29`.
+- PW01 (selesai) menyiapkan backend lokal: kode dan basis data `6478d29`.
 
 ## Antrean
 
 | Kode | Judul | Kelompok | Status | Commit |
 |---|---|---|---|---|
-| PW01 | Langkah sesudah tarik backend `6478d29` dan dokumen sinkron | Sekarang | Belum | |
+| PW01 | Langkah sesudah tarik backend `6478d29` dan dokumen sinkron | Sekarang | Selesai | |
 | PW02 | Bukti tiga merah disengaja: butir 191, 192 (bersama 189), 193 | Sekarang | Belum | |
 | PW03 | Butir 190: Ganti pengguna bertahan setelah dimuat ulang | Sekarang | Selesai | `569c3f9` |
 | PW04 | Butir 194: Rekap Absensi boleh kosong, RK2a dikembalikan | Sekarang | Belum | |
@@ -58,28 +57,13 @@ PW10.
 
 ### PW01: langkah sesudah tarik backend `6478d29`
 
-`ridho` lokal sudah sama dengan `origin/ridho` (`6478d29`), dan `nizar`
-serta `yoga` tidak punya commit di luarnya; tidak ada yang digabung.
-
-- Penyelarasan permission langkah 1 (`inti/backend.md`): seed tidak
-  berubah sejak `1718030`, tinjauan tetap dijalankan.
-- `migrations/hapusPajakAset.js` mode laporan lebih dulu (RUNBOOK backend
-  7.1), lalu `--terapkan` bila laporannya menyebut relasi aset atau index
-  lama `assetID_1` dan `tenantID_1_assetID_1`.
-- Nyalakan ulang backend dengan env inline (`inti/pengujian.md`,
-  Menjalankan layanan uji). Index `PeriodeKasir` dan index parsial
-  `Penjualan.sesiKasirID` dibentuk Mongoose saat menyala; periksa lewat
-  `getIndexes()`.
-- Dokumen: paragraf 26 November 2026 di `inti/backend.md` (Pemilik modul
-  backend), entri `6478d29` di `referensi/keputusan-penyesuaian-backend.md`,
-  dan status butir 139, 186, 187 di `kontrak/temuan.md` serta arsip
-  laporan (ditutup backend AR45 dari bukti e2e web 23 November 2026).
-- Bagian Backend dan Mobile di `referensi/rencana-struk-tutup-kasir.md`
-  dan `referensi/rencana-struk-dapur.md` dihapus, karena sudah dipindah ke
-  `docs/pengembangan/rencana/` backend; bagian Web tetap, dengan rujukan
-  ke berkas backend. Peta data dan Bagian web struk tutup kasir
-  diselaraskan dengan bentuk periode (lihat PW10).
-- Tanpa perubahan kode; gerbang `npm run docs:periksa`.
+Selesai 26 November 2026. Permission selaras (163 nama, Owner 160, seed
+tidak berubah); `hapusPajakAset.js` diterapkan sesudah cadangan
+`produkpajaks` (1 field `assetID` dan 2 index lama dibuang); index model
+baru terbentuk. Bagian Backend dan Mobile kedua rencana struk dihapus,
+dan rencana struk tutup kasir memuat data laporan per periode. Butir 139,
+186, 187 sudah Tertutup sejak 23 November 2026. Rincian di
+`referensi/keputusan-penyesuaian-backend.md` (`6478d29`).
 
 ### PW02: bukti tiga merah disengaja
 

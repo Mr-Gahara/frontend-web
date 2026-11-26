@@ -306,6 +306,14 @@ tidak mengubah daftar nama izin, model hanya menambah field opsional, dan
 tidak ada skrip migrasi wajib, sehingga cukup menyalakan ulang backend.
 Web menyesuaikan diri 23 November 2026
 (`referensi/keputusan-penyesuaian-backend.md`).
+Pada 26 November 2026 `ridho` remote maju 15 commit di atas `1718030`
+ke `6478d29` (AR45 sampai AR51, B369 sampai B384), dan `ridho` lokal
+sudah sama dengannya; `nizar` dan `yoga` tidak punya commit di luarnya.
+Seed tidak berubah (tinjauan langkah 1: 163 nama, Owner 160); migrasi
+baru `hapusPajakAset.js` dijalankan mode laporan, lalu diterapkan untuk
+membuang satu field `assetID` dan dua index lama; index model baru
+dibentuk saat backend menyala. Pekerjaan web dipetakan ke paket PW
+(`referensi/antrean-web.md`, `referensi/keputusan-penyesuaian-backend.md`).
 
 Sejak 16 November 2026 Ridho, sebagai pemimpin tim backend, mengambil
 alih seluruh pekerjaan backend di modul siapa pun sampai backend siap

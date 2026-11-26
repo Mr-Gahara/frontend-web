@@ -113,61 +113,16 @@ sampai 3.
 - Mengubah catatan sesudah terkirim diperlakukan seperti batal lalu
   tambahan, agar dapur menerima versi terbaru.
 
-## Bagian backend
+## Bagian backend dan mobile
 
-Dipindah ke dokumentasi backend saat dikerjakan, lalu dihapus dari sini.
-
-**Data:**
-
-- `catatan` opsional per item penjualan (string, dipangkas, batas
-  panjang), diterima di buat penjualan dan di tambah item, dan
-  dikembalikan di detail penjualan serta daftar bila dibutuhkan struk.
-- Penanda per item untuk struk dapur, misalnya `dikirimKeDapurPada`
-  (null bila belum) dan `dibatalkanPada` bila item dibatalkan sesudah
-  terkirim. Ini yang membuat cetak tambahan dan cetak ulang tidak
-  menggandakan pesanan.
-- Stasiun: daftar stasiun per tenant atau lokasi (nama, urutan), dan
-  pemetaan dari kategori produk (usulan; alternatifnya per produk) ke
-  stasiun. Produk tanpa stasiun tidak masuk struk dapur.
-- Opsional: nomor meja atau nama pemesan di penjualan dine-in.
-
-**Endpoint (usulan, nama ditetapkan tim backend):**
-
-- Buat penjualan dan tambah item menerima `items[].catatan`.
-- `GET` struk dapur sebuah penjualan: item yang belum terkirim,
-  dikelompokkan per stasiun, siap dicetak aplikasi.
-- `POST` tandai terkirim untuk item-item itu, idempoten (kunci
-  idempotensi seperti buat penjualan, keputusan rancangan butir 20).
-- `GET` riwayat kirim ke dapur per penjualan, untuk cetak ulang.
-- CRUD stasiun dan pemetaan kategori, dengan izin baru (usulan
-  `read-stasiun-dapur` dan `update-stasiun-dapur`).
-
-**Aturan yang dijaga backend:**
-
-- Item yang sudah terkirim tidak dikirim lagi kecuali cetak ulang
-  eksplisit.
-- VOID dan pembatalan item sesudah terkirim mengembalikan daftar item
-  untuk struk pembatalan.
-- Pembatasan lokasi kerja dan izin mengikuti penjualan (B283 dan
-  seterusnya).
-
-## Bagian mobile
-
-Dipindah ke dokumentasi backend atau mobile saat dikerjakan, lalu
-dihapus dari sini.
-
-- Isian catatan per menu di layar POS, opsional, dengan saran cepat
-  (usulan, diatur toko) seperti "tanpa es" dan "pedas".
-- Pencetakan struk dapur ke printer termal (ESC/POS) lewat Bluetooth
-  atau LAN, satu printer per stasiun, diatur di perangkat.
-- Cetak otomatis saat pesanan disimpan, cetak tambahan, struk
-  pembatalan, dan cetak ulang.
-- Perilaku saat printer tidak terhubung: pesanan tetap tersimpan, item
-  belum ditandai terkirim, dan aplikasi menawarkan cetak ulang.
+Dipindah ke backend `docs/pengembangan/rencana/struk-dapur.md` (AR45,
+26 November 2026) dan dihapus dari sini. Backend mencatatnya sebagai
+AR52 `Perlu diputuskan`, menunggu tujuh keputusan terbuka di bawah, yang
+diajukan sesudah MVP rilis.
 
 ## Bagian web
 
-Bagian ini tetap di frontend sesudah bagian lain dipindah.
+Bagian ini tetap di frontend; bagian backend dan mobile sudah dipindah.
 
 Web tidak mencetak struk dapur. Pencetakan ke printer termal dari
 browser tidak andal, dan printer dapur ada di dekat perangkat kasir.

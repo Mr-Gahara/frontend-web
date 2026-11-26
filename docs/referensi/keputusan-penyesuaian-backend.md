@@ -1147,3 +1147,36 @@ pembuktian web (AR31).
   `inventaris/stockOpname/draft-stok-opname`; B368 lewat pengajuan baru
   yang dibuat 201. B365 (surat jalan per kemasan) hanya teruji di unit
   test (`referensi/utang-pengujian.md`).
+
+## Penyesuaian backend `ridho` `6478d29`
+
+Langkah sesudah tarik dikerjakan 26 November 2026 (PW01,
+`referensi/antrean-web.md`). Backend `ridho` maju 15 commit di atas
+`1718030` ke `6478d29` (26 November 2026, AR45 sampai AR51, B369 sampai
+B384), mengerjakan seluruh laporan web 24 sampai 26 November 2026;
+`nizar` dan `yoga` tidak punya commit di luarnya, sehingga tidak ada yang
+digabung. Pemetaan per label B ke paket web ada di antrean.
+
+- **Permission**: seed tidak berubah sejak `1718030`. Tinjauan langkah 1
+  (`inti/backend.md`): 163 nama di seed dan di basis data, tidak ada nama
+  di luar seed atau yang belum ada, dan kelima role Owner memegang 160
+  izin (tanpa tiga izin platform). Langkah 2 sampai 5 tidak dijalankan.
+- **Migrasi `hapusPajakAset.js`** (RUNBOOK backend 7.1, P89): mode laporan
+  menyebut 0 relasi aset, 1 relasi produk yang masih membawa field
+  `assetID`, dan index lama `assetID_1` serta `tenantID_1_assetID_1`.
+  Koleksi `produkpajaks` dicadangkan lebih dulu
+  (`db_produk-produkpajaks-sebelum-hapusPajakAset-2026-11-26.gz` di
+  `~/Documents/cadangan-db/`, lewat `docker exec tachyon-mongo
+  mongodump`), lalu `--terapkan` membuang field itu dan kedua index;
+  laporan ulang bersih.
+- **Index**: backend sudah dinyalakan ulang dengan kode `6478d29` (sesi
+  PW03), dan `getIndexes()` memuat seluruh index baru yang dideklarasikan
+  model: empat di `periodekasirs`, `sesiKasirID_1_statusPenjualan_1` di
+  penjualan, dan `periodeKasirID_1` di sesi kasir. `npm run db:indeks`
+  tidak diperlukan, karena skripnya tidak berubah.
+- **Dokumen**: bagian Backend dan Mobile kedua rencana struk dihapus
+  karena sudah dipindah ke `docs/pengembangan/rencana/` backend;
+  rencana struk tutup kasir kini memuat data laporan per periode
+  (`referensi/rencana-struk-tutup-kasir.md`). Butir 139, 186, dan 187 yang
+  ditutup backend (AR45) sudah tercatat Tertutup di `kontrak/temuan.md`
+  sejak pembuktian 23 November 2026.
