@@ -200,6 +200,9 @@ Diputuskan pemilik proyek 23 November 2026, dari daftar bug dan temuan frontend 
   jalur itu, dan data development tidak punya relasi per aset
   (26 November 2026). Penghapusan jalurnya dilaporkan ke backend
   (`kontrak/temuan.md` butir 195). Pajak per produk tidak berubah.
+  Ditutup backend `6478d29` (B383, B384) dan dibuktikan 26 November 2026
+  (PW05, `c214786`): `assetID` ditolak 400, dan baris booking hanya
+  dikenai pajak per transaksi.
   Contoh pemilik proyek: sewa meja biliar Rp100.000 dengan pajak global
   10% dibayar Rp110.000; sewa meja ditambah makanan yang totalnya
   Rp100.000 juga dibayar Rp110.000. Di backend `1718030` booking selalu

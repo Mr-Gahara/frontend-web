@@ -514,6 +514,13 @@ bersyarat).
   (bulan berstaf atau kosong terbaru), lalu buka lewat kontrol halaman,
   bukan `test.skip` atas bulan berjalan (`bulanBerdata` dan `mundurKe` di
   `tests/e2e/jadwal/rekap-absensi.spec.ts`, PW04).
+- Data yang dibuat skenario dikenali lewat id dari respons pembuatnya,
+  bukan lewat atribut yang dapat sama dengan sisa run sebelumnya (aset dan
+  jam mulai booking): run kedua R6a dalam jam yang sama memilih booking VOID
+  run pertama (PW05).
+- Galat validasi backend sering berpesan umum di `message` ("Payload ...
+  tidak valid."), dengan rincian di `errors`; helper `api()` hanya membawa
+  `message`, jadi baca respons mentah untuk memeriksa rinciannya (PW05).
 - Menjalankan satu folder tanpa spec ber-OTP: sebut berkasnya saja, tanpa
   argumen folder. Argumen folder memilih seluruh isinya walau berkas lain
   ikut disebut, sehingga `daftar`, `verifikasi-lupa-password`, dan

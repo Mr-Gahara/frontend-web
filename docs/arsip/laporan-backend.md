@@ -476,3 +476,39 @@ yang harus diperbaiki backend.
   `6478d29` (B379): Januari 2019 tanpa staf dan `totalStaf` 0 di
   `jadwal/rekap-absensi`; teks keadaan kosong dikembalikan (RK2a) dan
   diuji dari bulan kosong nyata, tanpa simulasi.
+
+### Butir 195 (laporan 26 November 2026): relasi pajak per aset harus dihapus
+
+Modul pajak dan booking (Yoga untuk pajak, Nizar untuk booking).
+
+- **Keputusan:** tidak ada pajak per aset (pemilik proyek,
+  26 November 2026; `modul/pengaturan-outlet.md`, PO19a). Sesi booking
+  hanya dikenai pajak global (per transaksi), sama dengan penjualan
+  produk. Pajak per produk tetap.
+- **Bukti:** `validators/produkPajakValidator.js` (`FIELD_BUAT` memuat
+  `assetID`, baris 3, 25 sampai 37) dan `services/produkPajakService.js`
+  (baris 39 sampai 66, `getPajakByAsset` baris 133) masih menerima dan
+  menyimpan relasi pajak ke aset. `services/pajakService.js`
+  `hitungPajakProdukBanyak` (baris 121 sampai 140) mencocokkan id dengan
+  `produkID` maupun `assetID`, dan
+  `services/sesiBooking/sesiBookingHelperService.js` baris 477 memanggilnya
+  dengan id aset, sehingga relasi per aset ikut menambah pajak baris
+  booking. Pajak per transaksi sudah diterapkan pada booking (baris 519).
+  Data development tidak punya relasi per aset (26 November 2026).
+- **Kenapa penting:** jalur yang tidak dipakai web tetap dapat diisi lewat
+  API atau aplikasi, dan booking lalu dikenai pajak ganda (per aset dan
+  global) tanpa tampil di pengaturan pajak web.
+- **Saran:** tolak `assetID` di `POST /produkpajak`, buang
+  `getPajakByAsset` dan pencocokan `assetID` di `hitungPajakProdukBanyak`,
+  hentikan pajak per item pada baris booking, lalu hapus field dan indeks
+  `assetID` di `models/produkPajakModel.js` sesudah memastikan basis data
+  produksi tidak punya relasi per aset. Aplikasi (Ajis) perlu dipastikan
+  tidak memakai jalur itu.
+- **Penanganan sementara di frontend:** tidak perlu; web tidak pernah
+  mengirim `assetID`.
+- **Dibuktikan:** 26 November 2026 (PW05, `c214786`) terhadap backend
+  `6478d29` (B383, B384): `POST /produkpajak` dengan `assetID` dijawab
+  400 "Field tidak dikenal: assetID" dan aset tanpa relasi pajak
+  (`pengaturan/kelola-pajak`); baris booking yang dibuat lewat UI tanpa
+  pajak per item, sedangkan pajak per transaksi tetap dikenakan
+  (`reservasi/buat/buat-reservasi`).

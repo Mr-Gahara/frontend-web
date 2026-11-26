@@ -36,7 +36,7 @@ tetap `AR`, `B`, dan `P`.
 | PW02 | Bukti tiga merah disengaja: butir 191, 192 (bersama 189), 193 | Sekarang | Selesai | `09d507e` |
 | PW03 | Butir 190: Ganti pengguna bertahan setelah dimuat ulang | Sekarang | Selesai | `569c3f9` |
 | PW04 | Butir 194: Rekap Absensi boleh kosong, RK2a dikembalikan | Sekarang | Selesai | `12ded07` |
-| PW05 | Butir 195: booking tanpa pajak per aset | Sekarang | Belum | |
+| PW05 | Butir 195: booking tanpa pajak per aset | Sekarang | Selesai | `c214786` |
 | PW06 | Lonceng LN17a: pengembalian menunggu diterima di gudang | Sekarang | Belum | |
 | PW07 | Lonceng LN1a dan LN8a: produk dapat dijual dari ringkasan | Keputusan | Belum | |
 | PW08 | Lonceng: perangkat menunggu izin | Keputusan | Belum | |
@@ -97,19 +97,14 @@ sebelumnya. Butir 194 dipindah ke `arsip/laporan-backend.md`.
 
 ### PW05: butir 195, booking tanpa pajak per aset
 
-Backend B383 dan B384 (P89): `POST /produkpajak` menolak `assetID`, dan
-baris booking selalu `rincianPajak: []`.
-
-- Web tidak pernah mengirim `assetID` (grep `features` 26 November
-  2026), sehingga tidak ada kode yang dibuang.
-- Periksa pemakaian `GET /produkpajak/:targetID` di `features/pajak`
-  dan `tests/helpers/pajak-uji.ts` terhadap respons yang kini hanya
-  relasi produk.
-- Bukti: booking dengan pajak transaksi aktif hanya dikenai pajak
-  transaksi (spec reservasi yang sudah ada, atau skenario baru bila
-  belum ada yang memeriksa baris booking).
-- Butir 195 dipindah ke arsip; PO19a (`modul/pengaturan-outlet.md`) diberi
-  catatan penutup.
+Selesai 26 November 2026 (`c214786`). Skenario berhasil buat-reservasi
+membaca detail penjualan booking: baris booking tanpa pajak per item dan
+pajak per transaksi aktif tetap dikenakan; skenario baru kelola-pajak
+membuktikan `assetID` ditolak 400 dan aset tanpa relasi pajak (B383).
+Tidak ada kode web yang berubah. Ditemukan dan diperbaiki: R6a mencari
+booking lampau menurut aset dan jam saja, sehingga run kedua dalam jam
+yang sama memilih booking VOID run sebelumnya. Butir 195 dipindah ke
+`arsip/laporan-backend.md`.
 
 ### PW06: lonceng LN17a, pengembalian di ringkasan gudang
 
