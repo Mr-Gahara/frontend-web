@@ -6,6 +6,7 @@ import { useSession } from "@/lib/auth/useSession";
 import { IZIN, bolehBukaHalaman } from "@/lib/auth/permissions";
 import { useDaftarLokasi } from "@/features/inventaris/hooks";
 import { useRuangLokasiKerja } from "@/features/pengguna/hooks-profil";
+import { aksesRuang } from "@/features/pengguna/lokasi-kerja";
 import { bolehMenurutPlan, planMencakup } from "@/lib/auth/fitur-plan";
 import { useLogoToko, useTenant } from "@/features/tenant/hooks";
 import { useUrlObjek } from "@/hooks/use-url-objek";
@@ -123,10 +124,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   // Ruang di luar lokasi kerja tidak ditawarkan (LK3a).
   const { ruang: ruangKerja } = useRuangLokasiKerja();
-  const canAccessOutlet =
-    permissions.includes(IZIN.dashboardOutlet) && ruangKerja !== "gudang";
-  const canAccessGudang =
-    permissions.includes(IZIN.dashboardGudang) && ruangKerja !== "outlet";
+  const { outlet: canAccessOutlet, gudang: canAccessGudang } = aksesRuang(permissions, ruangKerja);
   const canCreateLocation =
     permissions.includes(IZIN.buatLocation);
   // Ruang Gudang tetap ditawarkan saat lokasi tidak dapat dibaca (tanpa

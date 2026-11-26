@@ -1,3 +1,4 @@
+import { IZIN } from "@/lib/auth/permissions";
 import type { Lokasi } from "@/types/location";
 import type { Role } from "@/types/role";
 
@@ -82,4 +83,19 @@ export function ruangDariPath(pathname: string): RuangKerja | null {
 export function ruangDitolak(pathname: string, ruang: RuangKerja | null): boolean {
   const ruangPath = ruangDariPath(pathname);
   return ruang !== null && ruangPath !== null && ruangPath !== ruang;
+}
+
+/**
+ * Ruang yang dapat dimasuki pengguna: izin dashboard ruang itu dan lokasi
+ * kerja yang tidak menutupnya (LK3a). Satu pintu bagi pemilih ruang sidebar
+ * dan lonceng (LN21a).
+ */
+export function aksesRuang(
+  permissions: readonly string[],
+  ruang: RuangKerja | null,
+): { outlet: boolean; gudang: boolean } {
+  return {
+    outlet: permissions.includes(IZIN.dashboardOutlet) && ruang !== "gudang",
+    gudang: permissions.includes(IZIN.dashboardGudang) && ruang !== "outlet",
+  };
 }

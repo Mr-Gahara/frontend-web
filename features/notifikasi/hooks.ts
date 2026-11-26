@@ -16,13 +16,14 @@ import { dashboardGudangApi } from "@/features/dashboard-gudang/api";
 import { lokasiApi } from "@/features/inventaris/api";
 import { useLokasiRuang } from "@/features/inventaris/hooks";
 import { useRuangLokasiKerja } from "@/features/pengguna/hooks-profil";
+import { aksesRuang } from "@/features/pengguna/lokasi-kerja";
 import { absensiApi } from "@/features/absensi/api";
 import { izinCutiApi } from "@/features/izin-cuti/api";
 import { jadwalApi } from "@/features/jadwal/api";
 import { bolehTinjauOpname } from "@/features/stock-opname/izin";
 import { fiturAktif, type AksesTautan } from "./akses";
 import { notifikasiApi } from "./api";
-import { muatRuang, ringkasanDimuat, type RuangSumber } from "./ruang";
+import { muatRuang, ringkasanDimuat, saringKartuRuang, type AksesRuangSesi, type RuangSumber } from "./ruang";
 import { urutkanPemberitahuan, type Pemberitahuan } from "./jenis";
 import { IZIN_MUAT, pemberitahuanInventaris, type DataInventaris } from "./sumber-inventaris";
 import { pemberitahuanLangganan } from "./sumber-langganan";
@@ -55,13 +56,20 @@ const OPSI_SEGAR = {
 } as const;
 
 /**
- * Penyaring ruang LN20a: sumber outlet dan gudang hanya dimuat bila ruangnya
- * terbuka bagi lokasi kerja pengguna (useRuangLokasiKerja, sama dengan
- * gerbang ruang LK3a).
+ * Ruang yang dapat dimasuki pengguna sesi (LN20a, LN21a): izin dashboard
+ * ruang dan lokasi kerja (useRuangLokasiKerja, sama dengan gerbang LK3a dan
+ * pemilih ruang sidebar).
  */
-function useMuatRuang(): (sumber: RuangSumber) => boolean {
+function useAksesRuangLonceng(): AksesRuangSesi {
+  const { permissions } = useSession();
   const { ruang, siap } = useRuangLokasiKerja();
-  return useCallback((sumber: RuangSumber) => muatRuang({ ruang, siap }, sumber), [ruang, siap]);
+  return useMemo(() => ({ ...aksesRuang(permissions, ruang), siap }), [permissions, ruang, siap]);
+}
+
+/** Penyaring sumber: sumber outlet dan gudang hanya dimuat bila ruangnya dapat dimasuki. */
+function useMuatRuang(): (sumber: RuangSumber) => boolean {
+  const akses = useAksesRuangLonceng();
+  return useCallback((sumber: RuangSumber) => muatRuang(akses, sumber), [akses]);
 }
 
 /** Akses tautan dari sesi dan status setup fitur. */
@@ -85,9 +93,12 @@ export function useAksesTautan(): AksesTautan & { siap: boolean } {
 /** Seluruh produk untuk pemicu LN1a; hanya bagi pembaca produk (read-produk atau akses-pos). */
 export function useProdukLonceng() {
   const { sudahMasuk, permissions } = useSession();
-  const muat = useMuatRuang();
+  // Juga sumber pesan halaman LN3a, yang terbuka tanpa izin dashboard outlet;
+  // karena itu hanya lokasi kerja yang menyaring (LN20a), dan kartunya
+  // disaring di usePemberitahuan (LN21a).
+  const { ruang, siap } = useRuangLokasiKerja();
   const boleh =
-    sudahMasuk && muat("outlet") && (permissions.includes(IZIN.produk) || permissions.includes(IZIN.aksesPos));
+    sudahMasuk && siap && ruang !== "gudang" && (permissions.includes(IZIN.produk) || permissions.includes(IZIN.aksesPos));
   return useQuery({ queryKey: queryKeys.notifikasi.produk(), queryFn: notifikasiApi.produk, enabled: boleh, ...OPSI_SEGAR });
 }
 
@@ -122,10 +133,7 @@ function useInventarisLonceng(akses: AksesTautan) {
   const muat = useMuatRuang();
   const punya = (i: string) => permissions.includes(i);
   const gudangAktif = sudahMasuk && fiturAktif(akses, "wms") && muat("gudang");
-  const ringkasan = ringkasanDimuat(
-    { dashboardOutlet: sudahMasuk && punya(IZIN.dashboardOutlet), dashboardGudang: punya(IZIN.dashboardGudang) },
-    muat,
-  );
+  const ringkasan = ringkasanDimuat((r) => sudahMasuk && muat(r));
   const ringkasanOutlet = useRingkasanOutletLonceng(ringkasan.outlet);
   const ringkasanGudang = useQuery({
     // Kunci dashboard gudang, agar aksi pengajuan dan surat jalan ikut memperbaruinya.
@@ -250,7 +258,8 @@ function useStafLonceng(akses: AksesTautan) {
   const pengajuan = useQuery({
     queryKey: queryKeys.notifikasi.pengajuanDiputuskan(),
     queryFn: notifikasiApi.pengajuanDiputuskan,
-    enabled: sudahMasuk && punya(IZIN.pengajuanStok) && fiturAktif(akses, "wms"),
+    // Hasil pengajuan saya dibuka di ruang outlet (LN21a).
+    enabled: ruangOutlet && punya(IZIN.pengajuanStok) && fiturAktif(akses, "wms"),
     ...OPSI_SEGAR,
   });
 
@@ -316,7 +325,9 @@ function usePenjualanLonceng(akses: AksesTautan) {
 function useLanggananLonceng() {
   const { sudahMasuk, permissions } = useSession();
   const kini = useJamBerjalan(60_000);
-  const langganan = useLanggananToko(sudahMasuk && permissions.includes(IZIN.langganan));
+  // Halaman Langganan berada di ruang outlet (LN21a).
+  const muat = useMuatRuang();
+  const langganan = useLanggananToko(sudahMasuk && muat("outlet") && permissions.includes(IZIN.langganan));
   const pengingat = useMemo(() => {
     if (!langganan.data) return null;
     // Bilah masa berlaku memakai aksesMulaiPada (B333), tanpa memuat riwayat.
@@ -332,6 +343,7 @@ function useLanggananLonceng() {
  */
 export function usePemberitahuan() {
   const akses = useAksesTautan();
+  const aksesRuangSesi = useAksesRuangLonceng();
   const produk = useProdukLonceng();
   const langganan = useLanggananLonceng();
   const inventaris = useInventarisLonceng(akses);
@@ -350,8 +362,9 @@ export function usePemberitahuan() {
       ...staf.daftar,
       ...penjualan.daftar,
     ];
-    return urutkanPemberitahuan(semua.filter((p): p is Pemberitahuan => p !== null));
-  }, [produk.data, langganan.pengingat, akses, dataInventaris, operasional.daftar, staf.daftar, penjualan.daftar]);
+    const ada = semua.filter((p): p is Pemberitahuan => p !== null);
+    return urutkanPemberitahuan(saringKartuRuang(ada, aksesRuangSesi));
+  }, [produk.data, langganan.pengingat, akses, aksesRuangSesi, dataInventaris, operasional.daftar, staf.daftar, penjualan.daftar]);
 
   // Hanya sumber yang aktif (pernah dimuat) yang disegarkan.
   const sumber: UseQueryResult<unknown>[] = [produk, langganan.query, ...inventaris.sumber, ...operasional.sumber, ...staf.sumber, ...penjualan.sumber];

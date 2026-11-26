@@ -36,10 +36,11 @@ test.describe("Ruang mengikuti lokasi kerja", () => {
     expect(permintaanOutlet, "halaman ruang outlet tidak dipasang").toEqual([]);
   });
 
-  test("lonceng di ruang gudang tidak memuat sumber outlet dan tidak menerima 403 (LN20a)", async ({ page }) => {
-    // Sumber outlet lonceng (modul/pemberitahuan.md, LN20a); halaman inventaris gudang sendiri tidak memintanya.
+  test("lonceng di ruang gudang tidak memuat sumber outlet dan tidak menerima 403 (LN20a, LN21a)", async ({ page }) => {
+    // Sumber outlet lonceng (modul/pemberitahuan.md, LN20a), ditambah langganan
+    // dan hasil pengajuan saya (LN21a); halaman inventaris gudang sendiri tidak memintanya.
     const SUMBER_OUTLET =
-      /\/api\/(produk|dashboard\/outlet|penjualan|sesikasir|sesibooking|membership|diskon|absensi\/monitoring|jadwalshift)(\?|$)|\/api\/stockopname\?.*tipeLokasi=Outlet/i;
+      /\/api\/(produk|dashboard\/outlet|penjualan|sesikasir|sesibooking|membership|diskon|absensi\/monitoring|jadwalshift|akun\/langganan)(\?|$)|\/api\/stockopname\?.*tipeLokasi=Outlet|\/api\/pengajuanstok\?status=APPROVED/i;
     const permintaanOutlet: string[] = [];
     const ditolak: string[] = [];
     page.on("request", (r) => {

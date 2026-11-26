@@ -40,7 +40,7 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 **Keadaan:** web `main` bersih dan ter-push; backend `ridho` lokal
 `1718030` (tidak maju sejak 22 November 2026; diperiksa 26 November
-2026). Vitest 1296 lolos dari 155 berkas. Suite e2e penuh terakhir
+2026). Vitest 1302 lolos dari 155 berkas. Suite e2e penuh terakhir
 25 November 2026 (`eb4eb4c`): 815 lolos, 9 gagal, 1 dilewati dari 825;
 seluruh kegagalan selain tiga merah disengaja sudah dibereskan
 (Baseline `inti/pengujian.md`).
@@ -49,7 +49,10 @@ seluruh kegagalan selain tiga merah disengaja sudah dibereskan
 (26 November 2026).** Penutupnya LN20a: sumber lonceng mengikuti lokasi
 kerja staf (`modul/pemberitahuan.md`), dibuktikan per berkas
 `auth/ruang-lokasi-kerja`, `dashboard/lonceng-pemberitahuan`, dan
-`akses/syarat-rute`. Harapan suite penuh berikutnya 826, dengan tiga
+`akses/syarat-rute`. LN21a menyusul 26 November 2026: lonceng mengikuti
+ruang yang dapat dimasuki (izin dashboard ruang dan lokasi kerja), sumber
+dan kartu disaring per ruang; ketiga spec itu lolos per berkas (9 dari 9).
+Harapan suite penuh berikutnya 826, dengan tiga
 merah disengaja (butir 191, 192, 193); suite penuh menunggu izin pemilik
 proyek.
 
@@ -91,7 +94,7 @@ Riwayat keadaan sebelum 24 November 2026 ada di
 
 ### Pemberitahuan dan lonceng (25 November 2026)
 
-Keputusan LN1a sampai LN20a di `modul/pemberitahuan.md`. Seluruh sumber
+Keputusan LN1a sampai LN21a di `modul/pemberitahuan.md`. Seluruh sumber
 LN4a terpasang (tahap 1 sampai 5), kecuali perangkat menunggu izin, yang
 menunggu backend (LN8a). Yang masih terbuka:
 

@@ -175,6 +175,27 @@ dan gudang LN4a:
   `GET /absensi/monitoring` dijawab 403; kini
   `auth/ruang-lokasi-kerja.spec.ts` (test LN20a) menegaskan tidak ada
   permintaan sumber outlet maupun 403, dan unit `tests/unit/features/notifikasi/ruang.test.ts`.
+- **LN21a: lonceng mengikuti ruang yang dapat dimasuki** (pemilik proyek,
+  26 November 2026: "notifikasi outlet tidak akan muncul untuk staff gudang
+  atau yang ga punya izin akses ke outlet, begitu juga sebaliknya").
+  Perluasan LN20a: akses ruang kini izin dashboard ruang ditambah lokasi
+  kerja, satu pintu `aksesRuang` (`features/pengguna/lokasi-kerja.ts`) yang
+  juga dipakai pemilih ruang sidebar. Dua lapis penyaring:
+  1. Sumber outlet dan gudang dimuat hanya bila ruangnya dapat dimasuki
+     (`muatRuang`); langganan dan hasil pengajuan saya kini tergolong
+     sumber outlet, karena halaman tindakannya berada di ruang outlet.
+     Pengecualian: daftar produk tetap disaring lokasi kerja saja, karena
+     juga dipakai pesan halaman LN3a yang terbuka tanpa izin dashboard
+     outlet.
+  2. Setiap kartu disaring menurut ruang tujuannya (`RUANG_KARTU`,
+     `saringKartuRuang` di `features/notifikasi/ruang.ts`), termasuk kartu
+     gudang yang datang dari ringkasan outlet. Kartu yang belum tercantum
+     disembunyikan; unit test memastikan setiap id kartu di berkas
+     `sumber-*` tercantum. Kartu tingkat toko (izin cuti, setup fitur)
+     tetap tampil bagi siapa pun yang memenuhi syaratnya.
+  Bukti: `tests/unit/features/notifikasi/ruang.test.ts` dan
+  `auth/ruang-lokasi-kerja.spec.ts` (test LN20a, LN21a: lonceng di ruang
+  gudang tidak meminta `akun/langganan` maupun pengajuan disetujui).
 
 ## Catatan
 
