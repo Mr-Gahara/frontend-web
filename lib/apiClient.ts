@@ -164,6 +164,22 @@ async function tryRefreshToken(): Promise<string | null> {
 }
 
 /**
+ * Penolakan 401 middleware sesi akun backend (`middleware/authAkun.js`): token
+ * kedaluwarsa atau versinya diputar ("Sesi ..."), atau token akun tidak ada.
+ * Keduanya dapat dipulihkan lewat cookie refresh, berbeda dari PIN salah.
+ */
+async function ditolakSesiAkun(res: Response): Promise<boolean> {
+  try {
+    const isi = (await res.clone().json()) as { message?: unknown };
+    return (
+      typeof isi.message === "string" && /^Sesi\b|token akun tidak ditemukan/i.test(isi.message)
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Core request wrapper
  */
 async function request<T>(
@@ -216,6 +232,21 @@ async function request<T>(
     !endpoint.includes("/auth/refreshtoken") &&
     !endpoint.includes("/akun/auth/login") &&
     !endpoint.includes("/pengguna/pin-login")
+  ) {
+    const newToken = await refreshTerkoordinasi("akun", tryRefreshToken);
+    if (newToken) return request<T>(endpoint, options, false, explicitTokenType, bacaSebagai);
+    throw new ApiError(401, "Sesi akun telah berakhir.");
+  }
+
+  // pin-login memakai token akun. Tab lain yang menyegarkan sesi akun memutar
+  // tokenVersion, sehingga token akun tab ini ditolak middleware akun
+  // (`ditolakSesiAkun`). Segarkan sekali lalu ulangi. "Nama atau PIN salah"
+  // juga 401, tetapi tidak diulang agar tidak menambah hitungan percobaan gagal.
+  if (
+    res.status === 401 &&
+    retry &&
+    endpoint.includes("/pengguna/pin-login") &&
+    (await ditolakSesiAkun(res))
   ) {
     const newToken = await refreshTerkoordinasi("akun", tryRefreshToken);
     if (newToken) return request<T>(endpoint, options, false, explicitTokenType, bacaSebagai);

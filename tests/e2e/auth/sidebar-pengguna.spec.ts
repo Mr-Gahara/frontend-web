@@ -153,6 +153,43 @@ test.describe("Kaki sidebar", () => {
     await page.waitForURL("**/dashboard");
   });
 
+  test("ganti pengguna lalu muat ulang, buka dashboard, dan tab baru: akun toko tetap masuk (butir 190)", async ({
+    page,
+  }) => {
+    await login(page);
+    const pemicu = page.getByRole("button", { name: /Ridho/ });
+    await expect(pemicu).toBeVisible({ timeout: 15_000 });
+    await pemicu.click();
+    const tPengguna = page.waitForResponse((r) => POLA_LOGOUT_PENGGUNA.test(r.url()));
+    await page.getByRole("menuitem", { name: /Ganti pengguna/ }).click();
+    expect((await tPengguna).status(), "pin-logout").toBeLessThan(400);
+    await page.waitForURL("**/login/pengguna");
+
+    // Backend B378: pin-logout tidak lagi menghapus cookie akun (path /api/akun/auth),
+    // sehingga sesi akun pulih dari cookie dan halaman tidak jatuh ke login email.
+    const judul = page.getByRole("heading", { name: "Siapa yang bertugas?" });
+    await page.reload();
+    await expect(judul).toBeVisible({ timeout: 15_000 });
+    await expect(page).toHaveURL(/\/login\/pengguna/);
+
+    await page.goto(BASIS + "/dashboard");
+    await page.waitForURL(/\/login\/pengguna/, { timeout: 15_000 });
+    await expect(judul).toBeVisible();
+
+    const tabBaru = await page.context().newPage();
+    try {
+      await tabBaru.goto(BASIS + "/dashboard");
+      await tabBaru.waitForURL(/\/login\/pengguna/, { timeout: 15_000 });
+      await expect(tabBaru.getByRole("heading", { name: "Siapa yang bertugas?" })).toBeVisible();
+    } finally {
+      await tabBaru.close();
+    }
+
+    // Pengguna berikutnya masuk dari keadaan pulih itu tanpa login akun ulang.
+    await isiLoginPengguna(page, PENGGUNA_UJI.nama, PENGGUNA_UJI.pin);
+    await page.waitForURL("**/dashboard");
+  });
+
   test("ganti pengguna yang gagal: pesan tampil dan tetap di halaman (PU2a)", async ({ page }) => {
     await login(page);
     const pemicu = page.getByRole("button", { name: /Ridho/ });

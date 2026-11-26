@@ -64,20 +64,21 @@ export function useLogoutAkun() {
 }
 
 /**
- * Logout penuh: sesi pengguna, lalu akun. Logout akun tetap dijalankan
- * walau logout pengguna gagal, agar cookie refresh akun tidak tertinggal
- * berlaku. Pengakhiran sesi lokal dan pengalihan diurus pemanggilnya.
- */
-/**
  * Ganti pengguna (keputusan PU2a): hanya sesi pengguna yang diakhiri lewat
- * pin-logout, akun toko tetap masuk. Bila permintaannya gagal, halaman tidak
- * berpindah, karena cookie refresh pengguna masih berlaku di backend
- * (utang modul profil-login).
+ * pin-logout, akun toko tetap masuk, juga setelah dimuat ulang atau di tab
+ * baru (backend B378). Bila permintaannya gagal, halaman tidak berpindah,
+ * karena cookie refresh pengguna masih berlaku di backend.
  */
 export function useGantiPengguna() {
   return useMutation({ mutationFn: () => authApi.logoutPengguna() });
 }
 
+/**
+ * Logout penuh: sesi pengguna, lalu akun. Logout akun tetap dijalankan
+ * walau logout pengguna gagal, karena pin-logout tidak menghapus cookie
+ * akun (B378) dan cookie refresh akun tidak boleh tertinggal berlaku.
+ * Pengakhiran sesi lokal dan pengalihan diurus pemanggilnya.
+ */
 export function useKeluar() {
   return useMutation({
     mutationFn: async () => {
