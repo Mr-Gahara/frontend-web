@@ -82,13 +82,14 @@ gagal maupun dilewati, termasuk spec ber-OTP (Baseline
 `inti/pengujian.md`).
 
 **Antrean pekerjaan:** `referensi/antrean-web.md`, paket kecil berkode
-`PW01` sampai `PW21`, satu paket per sesi lewat
+`PW01` sampai `PW22`, satu paket per sesi lewat
 `/lanjut-frontend-web <kode>`. Ringkasnya:
 
 1. **Sekarang:** tidak ada; PW01 sampai PW14 dan PW16 sampai PW21
    selesai.
 2. **Diawali dialog keputusan:** tidak ada.
-3. **Menunggu izin pemilik proyek:** tidak ada.
+3. **Menunggu izin pemilik proyek:** PW22, suite e2e penuh penutup
+   putaran PW17 sampai PW21.
 4. **Menunggu backend:** PW15, Batalkan Pindah Dana buka kasir
    disembunyikan begitu respons jurnal transfer membawa penanda asalnya
    (butir 196, `referensi/laporan-untuk-backend.md`). Langkah pertama
