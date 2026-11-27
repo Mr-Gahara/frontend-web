@@ -400,6 +400,14 @@ tanggal di butir di bawah adalah pembersihan sebelumnya.
   uji yang dihapus dari `produk/crud-produk`. Entri inventory gudang
   "E2E Bahan Kaleng" dan pengguna uji "E2E Pengaju Gudang" serta "E2E
   Penyetuju Gudang" (berlokasi kerja Gudang) menetap.
+- **Data per run skenario laci dikosongkan saat buka kasir**
+  (`keuangan/mesin-kasir`, PW09, 27 November 2026): satu sesi kasir
+  tertutup, satu Pindah Dana buka kasir Aktif dari laci uji ke "E2E Tujuan
+  Laci Tetap" (tidak dapat di-VOID), dan satu transfer pengosongan akun
+  tujuan ke akun aktif bukan uji. Akun tujuan menetap non-aktif dan
+  dipakai ulang lewat `akunUjiTetap`, karena batas 10 akun kas aktif.
+  Bila laci uji sudah kosong, skenario memindah Rp1 dengan catatan
+  selisih.
 - **Data per run spec kelompok reservasi, jadwal, dan tampilan**
   (24 November 2026): dua penjualan booking VOID dari
   `reservasi/daftar/lihat-reservasi` (Digunakan dan TL1a, termasuk satu

@@ -40,16 +40,18 @@ tetap `AR`, `B`, dan `P`.
 | PW06 | Lonceng LN17a: pengembalian menunggu diterima di gudang | Sekarang | Selesai | `efb5596` |
 | PW07 | Lonceng LN1a dan LN8a: produk dapat dijual dari ringkasan | Keputusan | Belum | |
 | PW08 | Lonceng: perangkat menunggu izin | Keputusan | Belum | |
-| PW09 | Mesin Kasir: data sesi tahap 1 dan Pindah Dana buka kasir | Keputusan | Belum | |
+| PW09 | Mesin Kasir: data sesi tahap 1 dan Pindah Dana buka kasir | Keputusan | Selesai | `b232cad` |
 | PW10 | Struk tutup kasir: daftar dan laporan periode | Keputusan | Belum | |
 | PW11 | Struk tutup kasir: cetak dari browser 80 mm | Sekarang | Belum | |
 | PW12 | Struk tutup kasir: unduh PDF dan Excel | Sekarang | Belum | |
 | PW13 | Struk tutup kasir: e2e alur nyata | Sekarang | Belum | |
 | PW14 | Suite e2e penuh penutup putaran | Menunggu izin | Belum | |
+| PW15 | Pindah Dana buka kasir tanpa Batalkan (butir 196) | Menunggu backend | Belum | |
 
 Kelompok: **Sekarang** dapat langsung dikerjakan; **Keputusan** dapat
 dikerjakan sekarang tetapi dimulai dengan dialog keputusan;
-**Menunggu izin** hanya atas izin pemilik proyek. Urutan yang disarankan
+**Menunggu izin** hanya atas izin pemilik proyek; **Menunggu backend**
+dimulai begitu backend menyediakan yang dibutuhkan. Urutan yang disarankan
 mengikuti tabel; PW10 sampai PW13 berurutan, dan PW11 serta PW12 butuh
 PW10.
 
@@ -158,31 +160,15 @@ perangkat menunggu se-toko milik pengguna berlevel di bawah peminta
 
 ### PW09: Mesin Kasir, data sesi tahap 1
 
-Backend B371, B372, B374, B376 (P88). Web bukan mesin kasir dan tidak
-memanggil `POST /sesikasir/buka` (hanya helper uji), sehingga B372
-(`GET /sesikasir/akun-tujuan`) tidak dipakai web.
-
-- Tipe sesi di `features/sesi-kasir/api.ts`: `periodeKasirID`,
-  `pindahDanaBuka { jurnalTransferID, akunKasTujuan, jumlah }`, dan
-  `periode` di respons tutup.
-- `features/sesi-kasir/rincian-sesi.tsx` menampilkan modal awal
-  (`nominalBuka`, kini boleh 0) dan, bila laci dikosongkan, pindah dana
-  saat buka; tanpa itu selisih buka tampak menyesatkan
-  (`saldoSistemBuka + selisihBuka − pindahDanaBuka.jumlah = nominalBuka`).
-- `ringkasan.tunaiMasuk` dan `jumlahPembayaran` kini hanya pembayaran ke
-  laci (B374); periksa label di rincian.
-- Helper `bukaKasirLewatAplikasi` menerima modal kosong dan `pindahDana`,
-  untuk skenario rincian di `keuangan/mesin-kasir`.
-
-Keputusan yang perlu diajukan:
-
-- Pindah Dana dari buka kasir tidak dapat di-VOID (409, `de0bf66`), tetapi
-  respons `jurnalTransfer` tidak punya penanda asalnya (diperiksa
-  `mappers/jurnalTransferMapper.js` backend 26 November 2026), sehingga
-  tombol Batalkan di `features/jurnal-transfer/halaman-pindah-dana.tsx`
-  tetap tampil dan ditolak. Pilihan: tampilkan pesan 409 apa adanya,
-  minta penanda ke backend (laporan baru), atau cocokkan dengan
-  `pindahDanaBuka` sesi kasir di web.
+Selesai 27 November 2026 (`b232cad`). Tipe sesi memuat `periodeKasirID`,
+`pindahDanaBuka`, dan respons tutup ber-`periode` (`HasilTutupKasir`,
+untuk PW10). Kartu "Saat kasir dibuka" di rincian sesi lima baris bila
+laci dikosongkan (MK18a); Batalkan Pindah Dana buka kasir tetap tampil
+dengan pesan 409 backend apa adanya, dan penanda asalnya dilaporkan
+(MK19a, butir 196, PW15). Ringkasan sesi tidak ditampilkan web, sehingga
+B374 tidak mengubah label. Helper `bukaKasirLewatAplikasi` menerima modal
+kosong, `pindahDana`, dan catatan; skenario baru `keuangan/mesin-kasir`
+membuktikan keduanya terhadap respons nyata.
 
 ### PW10: struk tutup kasir, daftar dan laporan periode
 
@@ -238,6 +224,15 @@ Hanya setelah pemilik proyek mengizinkan, dengan charger tersambung dan
 layanan uji lengkap (Mailpit, env inline). Spec ber-OTP hanya di sini.
 Harapan: tanpa merah disengaja bila PW02 lolos. Baseline baru di
 `inti/pengujian.md`.
+
+### PW15: Pindah Dana buka kasir tanpa Batalkan
+
+Menunggu backend (butir 196, `referensi/laporan-untuk-backend.md`):
+respons jurnal transfer membawa penanda asal buka kasir. Sesudahnya menu
+Batalkan di `features/jurnal-transfer/halaman-pindah-dana.tsx`
+disembunyikan untuk jurnal itu (aturan di `features/jurnal-transfer/izin.ts`
+atau fungsi murni), skenario 409 di `keuangan/mesin-kasir` diganti
+pemeriksaan tanpa Batalkan, dan MK19a diperbarui.
 
 ## Perubahan backend tanpa pekerjaan web
 

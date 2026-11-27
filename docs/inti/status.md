@@ -36,7 +36,7 @@ CV24a), dan spasi pembungkus halaman diseragamkan 18 November 2026
 
 ## Pekerjaan berikutnya
 
-### Mulai di sini (keadaan akhir 26 November 2026)
+### Mulai di sini (keadaan akhir 27 November 2026)
 
 **Keadaan:** web `main` bersih dan ter-push. Backend `ridho` lokal maju
 dari `1718030` ke `6478d29` (15 commit, AR45 sampai AR51, B369 sampai
@@ -49,8 +49,11 @@ Langkah sesudah tarik selesai (PW01: permission selaras, migrasi
 selesai: ketiga merah disengaja lolos tanpa diubah, Ganti pengguna
 bertahan dimuat ulang (`569c3f9`), Rekap Absensi boleh kosong
 (`12ded07`), booking tanpa pajak per aset dibuktikan (`c214786`), dan
-lonceng pengembalian bagi pengguna gudang saja (`efb5596`). Vitest kini
-1314 lolos. Suite e2e penuh terakhir 26 November 2026 (`fb186f2`,
+lonceng pengembalian bagi pengguna gudang saja (`efb5596`). PW09 selesai
+27 November 2026 (`b232cad`): rincian sesi menampilkan isi laci yang
+dipindah saat buka kasir (MK18a), dan penanda asal Pindah Dana buka kasir
+dilaporkan ke backend (butir 196, MK19a). Vitest kini 1318 lolos. Suite
+e2e penuh terakhir 26 November 2026 (`fb186f2`,
 backend `1718030`): 822 lolos, 3 gagal (merah disengaja butir 191, 192,
 193, kini lolos), 1 dilewati dari 826 (Baseline `inti/pengujian.md`);
 suite berikutnya tidak mengharapkan kegagalan.
@@ -62,11 +65,13 @@ suite berikutnya tidak mengharapkan kegagalan.
 1. **Sekarang:** PW11 sampai PW13 cetak, unduh, dan e2e struk tutup
    kasir sesudah PW10.
 2. **Diawali dialog keputusan:** PW07 lonceng produk dari ringkasan,
-   PW08 lonceng perangkat menunggu izin, PW09 data sesi kasir tahap 1 dan
-   Pindah Dana buka kasir, dan PW10 letak serta tampilan laporan periode
-   struk tutup kasir (wajib MVP).
+   PW08 lonceng perangkat menunggu izin, dan PW10 letak serta tampilan
+   laporan periode struk tutup kasir (wajib MVP).
 3. **Menunggu izin pemilik proyek:** PW14 suite e2e penuh.
-4. **Menunggu backend:** tidak ada. Langkah pertama setiap sesi tetap
+4. **Menunggu backend:** PW15, Batalkan Pindah Dana buka kasir
+   disembunyikan begitu respons jurnal transfer membawa penanda asalnya
+   (butir 196, `referensi/laporan-untuk-backend.md`). Langkah pertama
+   setiap sesi tetap
    memeriksa apakah cabang backend maju; bila maju, petakan paket baru
    di `referensi/antrean-web.md`. Backend dijalankan dengan env inline
    (`inti/pengujian.md`, Menjalankan layanan uji), dan kodenya tidak

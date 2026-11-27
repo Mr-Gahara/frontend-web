@@ -491,6 +491,32 @@ setelah backend menerapkannya.
   kas lain (misalnya "Kas Kantor"). Web perlu menampilkan pesan itu di
   pembayaran penjualan setelah backend menerapkannya.
 
+### Pindah dana saat buka kasir
+
+Diputuskan pemilik proyek 27 November 2026 (PW09, `b232cad`), sesudah
+backend B371: kasir di aplikasi boleh membuka kasir tanpa modal dan
+memindah isi laci ke akun kas lain. Web tetap tidak membuka kasir; yang
+berubah hanya tampilan pantau.
+
+- **MK18a: kartu "Saat kasir dibuka" lima baris bila laci dikosongkan**:
+  Uang di laci menurut sistem, Uang yang dihitung kasir (modal +
+  dipindah), "Dipindah ke <akun>" tanpa tautan, Modal awal di laci (Rp0
+  bila kosong), lalu Selisih, sehingga selisih = dihitung − sistem
+  terbaca langsung (`barisHitunganBuka`). Tanpa pindah dana kartu tetap
+  tiga baris. Sebelumnya laci Rp500.000 yang dipindah seluruhnya tampil
+  "dihitung Rp0, Pas".
+- **MK19a: Batalkan Pindah Dana buka kasir tetap tampil, dengan pesan 409
+  backend apa adanya** ("Pindah dana dari buka kasir tidak dapat
+  dibatalkan. Catat Pindah Dana balik bila perlu dikoreksi.", `de0bf66`),
+  sampai respons jurnal transfer membawa penanda asal; kebutuhannya di
+  `referensi/laporan-untuk-backend.md` (`kontrak/temuan.md` butir 196),
+  dan penyembunyian tombolnya paket PW15 (`referensi/antrean-web.md`).
+  Mencocokkan lewat keterangan "Laci dikosongkan saat buka kasir" ditolak,
+  karena keterangan dapat diubah.
+- Ringkasan sesi (`tunaiMasuk`, `jumlahPembayaran`) tidak ditampilkan
+  web, sehingga perubahan B374 (hanya pembayaran ke laci) tidak mengubah
+  label apa pun.
+
 ### Sub-menu Keuangan dan Laporan
 
 Diputuskan pemilik proyek pada 12 November 2026 (`arsip/catatan-putaran.md`,

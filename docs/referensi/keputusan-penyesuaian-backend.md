@@ -1180,3 +1180,8 @@ digabung. Pemetaan per label B ke paket web ada di antrean.
   (`referensi/rencana-struk-tutup-kasir.md`). Butir 139, 186, dan 187 yang
   ditutup backend (AR45) sudah tercatat Tertutup di `kontrak/temuan.md`
   sejak pembuktian 23 November 2026.
+- **Pindah dana saat buka kasir** (B371, PW09, 27 November 2026,
+  `b232cad`): rincian sesi menampilkan isi laci yang dipindah (MK18a), dan
+  Batalkan Pindah Dana buka kasir tetap tampil dengan pesan 409 backend
+  apa adanya sampai respons jurnal transfer membawa penanda asal (MK19a,
+  `kontrak/temuan.md` butir 196); keduanya di `modul/keuangan.md`.

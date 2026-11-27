@@ -23,6 +23,8 @@ dikerjakan backend `6478d29` (AR46 sampai AR51, B369 sampai B384) dan
 berstatus `Menunggu verifikasi` di `docs/pengembangan/klien.md` backend.
 Setiap butir dipindah ke `arsip/laporan-backend.md` sesudah web
 membuktikannya lewat paket PW02 sampai PW13 (`referensi/antrean-web.md`).
+Butir 196 (27 November 2026) adalah laporan baru sesudahnya, belum
+diserahkan ke backend.
 
 ## Laporan 24 November 2026 (utang pengujian)
 
@@ -91,6 +93,37 @@ Modul auth dan perangkat (Ridho).
 - **Penanganan sementara di frontend:** tidak ada; sumber ini belum
   tampil sampai endpointnya tersedia.
 
+## Laporan 27 November 2026 (Mesin Kasir)
+
+Diperiksa terhadap backend `ridho` lokal `6478d29`.
+
+### Butir 196: penanda asal Pindah Dana buka kasir di jurnal transfer
+
+Modul akun kas dan jurnal transfer (Nizar), dikerjakan Ridho.
+
+- **Bukti:** `mappers/jurnalTransferMapper.js` `mapJurnalTransferResponse`
+  mengirim `tanggal`, `kasSumber`, `kasTujuan`, `jumlah`, `keterangan`,
+  `status`, `catatan`, dan `dicatatOleh`, tanpa penanda asal. Penolakan
+  VOID di `services/jurnalTransferService.js` (`de0bf66`) mengenali
+  jurnal buka kasir lewat
+  `SesiKasir.exists({ "pindahDanaBuka.jurnalTransferID": id })`,
+  dan `GET /sesikasir` tidak menerima filter per jurnal. Keterangan
+  "Laci dikosongkan saat buka kasir" dapat diubah lewat `PUT`, sehingga
+  bukan penanda. Dibuktikan e2e 27 November 2026
+  (`keuangan/mesin-kasir`, PW09): Batalkan di halaman Pindah Dana dijawab
+  409 dan transfer tetap Aktif.
+- **Penyebab:** asal jurnal hanya tersimpan di dokumen sesi kasir.
+- **Kenapa penting:** halaman Pindah Dana menawarkan Batalkan untuk
+  setiap transfer Aktif kepada pemegang `update-jurnal-transfer`; untuk
+  jurnal buka kasir tombol itu selalu berakhir 409.
+- **Saran:** respons `GET /jurnaltransfer` dan `GET /jurnaltransfer/:id`
+  membawa penanda, misalnya `sesiKasirID` atau `asal: "buka-kasir"`
+  (bisa juga `bolehVoid: false`), tanpa memaksakan bentuknya.
+- **Penanganan sementara di frontend:** tidak ada kode khusus; dialog
+  batal menampilkan pesan 409 backend apa adanya (MK19a,
+  `modul/keuangan.md`). Begitu penandanya ada, Batalkan disembunyikan
+  untuk jurnal itu (PW15, `referensi/antrean-web.md`).
+
 ## Prioritas seluruh laporan terbuka
 
 | Prioritas | Butir | Pemilik | Dampak |
@@ -98,3 +131,4 @@ Modul auth dan perangkat (Ridho).
 | 2 | Struk tutup kasir | Ridho dan Nizar | Wajib MVP; data per sesi belum tersedia |
 | 7 | Produk dapat dijual di ringkasan | Yoga | Lonceng memuat seluruh produk setiap 5 menit |
 | 8 | Perangkat menunggu izin se-toko | Ridho | Pemberitahuan perangkat belum dapat tampil |
+| 9 | Butir 196: penanda asal Pindah Dana buka kasir | Ridho (modul Nizar) | Batalkan tampil lalu ditolak 409 |

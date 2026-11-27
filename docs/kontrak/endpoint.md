@@ -149,7 +149,7 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | GET | `/jurnaltransfer` | authPengguna | `read-jurnal-transfer` | `{ data, pagination }` | `id` | `features/jurnal-transfer/api.ts` (query `page`, `limit`, `akunKasID`, `status`, serta `dari` dan `sampai` sejak `8072214`) |
 | GET | `/jurnaltransfer/:id` | authPengguna | `read-jurnal-transfer` | `{ data }` | `id` | `features/jurnal-transfer/api.ts` (rincian transfer dari tautan mutasi kas, `modul/keuangan.md` DN5a; Dicatat 20 November 2026 (KT1a)) |
 | POST | `/jurnaltransfer` | authPengguna | `create-jurnal-transfer` | - | - | `features/jurnal-transfer/api.ts` |
-| PUT | `/jurnaltransfer/:id` | authPengguna | `update-jurnal-transfer` | - | - | `features/jurnal-transfer/api.ts` (pembatalan lewat `status: "VOID"`) |
+| PUT | `/jurnaltransfer/:id` | authPengguna | `update-jurnal-transfer` | - | - | `features/jurnal-transfer/api.ts` (pembatalan lewat `status: "VOID"`; 409 untuk Pindah Dana buka kasir, `de0bf66`, pesan tampil apa adanya, MK19a) |
 
 #### `/jurnalstok`
 
@@ -350,8 +350,8 @@ Seluruh path di bagian 3 sampai 5 dan Lampiran A ditulis relatif terhadap `/api`
 | Method | Path backend | Auth | Permission | Envelope | ID | Dipakai di |
 |---|---|---|---|---|---|---|
 | GET | `/sesikasir` | authPengguna | `read-sesi-kasir` | `{ data, pagination }` | `id` | `features/sesi-kasir/api.ts` (query `status`, `installationId`, `dari`, `sampai`, `page`, `limit`; selalu berhalaman, bawaan 20 baris, maksimal 100; parameter lain 400) |
-| GET | `/sesikasir/:id` | authPengguna | `read-sesi-kasir` | `{ data }` | `id` | `features/sesi-kasir/api.ts` (dengan `ringkasan` tunai selama sesi) |
-| POST | `/sesikasir/:id/tutup` | authPengguna | `kelola-perangkat-kasir` | `{ data, message }` | `id` | `features/sesi-kasir/api.ts` (`{ nominal, catatan? }`; hitung buta, respons tanpa angka; 400 catatan wajib bila selisih tanpa catatan; 10 per menit per pengguna) |
+| GET | `/sesikasir/:id` | authPengguna | `read-sesi-kasir` | `{ data }` | `id` | `features/sesi-kasir/api.ts` (dengan `ringkasan` tunai selama sesi; `periodeKasirID` B376, `pindahDanaBuka { jurnalTransferID, akunKasTujuanID, akunKasTujuan, jumlah }` atau null B371; dibaca rincian sesi, MK18a) |
+| POST | `/sesikasir/:id/tutup` | authPengguna | `kelola-perangkat-kasir` | `{ data, message }` | `id` | `features/sesi-kasir/api.ts` (`{ nominal, catatan? }`; hitung buta, respons tanpa angka, ditambah `periode { id, status }` atau null (B376, tipe `HasilTutupKasir`); 400 catatan wajib bila selisih tanpa catatan; 10 per menit per pengguna) |
 | GET | `/sesikasir/perangkat` | authPengguna | `kelola-perangkat-kasir` | `{ data }` | `id` | `features/sesi-kasir/api.ts` |
 | GET | `/sesikasir/perangkat-toko` | authPengguna | `kelola-perangkat-kasir` | `{ data }` | `installationId` | `features/sesi-kasir/api.ts` (pilihan perangkat se-toko, `modul/keuangan.md` MK3b, menggantikan `GET /device/:userId`; Dicatat 20 November 2026 (KT1a)) |
 | POST | `/sesikasir/perangkat` | authPengguna | `kelola-perangkat-kasir` | `{ data, message }` | `id` | `features/sesi-kasir/api.ts` (upsert per `installationId`: `{ installationId, akunKasID, namaPerangkat }`; 404 perangkat bukan milik toko, 409 sesi terbuka atau laci dipakai mesin lain) |
